@@ -14,7 +14,11 @@ import 'product_stock_ui.dart';
 /// Uses a text query (works on web and mobile) against `GET /products?search=`.
 /// The search is submitted explicitly to avoid a request per keystroke.
 class ProductLookupScreen extends ConsumerStatefulWidget {
-  const ProductLookupScreen({super.key});
+  const ProductLookupScreen({super.key, this.initialQuery});
+
+  /// Pre-fills the search box and runs a search immediately — used when a scan
+  /// from elsewhere in the app routes here.
+  final String? initialQuery;
 
   @override
   ConsumerState<ProductLookupScreen> createState() =>
@@ -27,6 +31,16 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
   /// The query currently driving the results provider. Starts empty (recent
   /// products) and only changes when the user submits.
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialQuery?.trim() ?? '';
+    if (initial.isNotEmpty) {
+      _controller.text = initial;
+      _query = initial;
+    }
+  }
 
   @override
   void dispose() {
