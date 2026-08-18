@@ -1,0 +1,67 @@
+name: wms_mobile
+description: WMS mobile client (inspection + attachment upload first) for the InventorOS-based backend.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # State management
+  flutter_riverpod: ^2.5.1
+  # HTTP
+  dio: ^5.7.0
+  # Secure token storage (Web falls back to an encrypted IndexedDB store)
+  flutter_secure_storage: ^9.2.2
+  # Offline queue (SQLite)
+  drift: ^2.20.0
+  drift_flutter: ^0.2.0
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  # Connectivity detection for offline-queue flushing
+  connectivity_plus: ^6.0.5
+  # Barcode scanning (Code128/Code39/EAN13/QR)
+  mobile_scanner: ^5.2.3
+  # Camera / file picking for attachments
+  image_picker: ^1.1.2
+  file_picker: ^8.1.2
+  # Routing
+  go_router: ^14.2.7
+  # Value equality
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  drift_dev: ^2.20.0
+  mocktail: ^1.0.4
+  # Referenced directly in offline tests to override the sqlite3 loader on
+  # hosts that ship only the versioned libsqlite3.so.0.
+  sqlite3: ^2.4.0
+
+flutter:
+  uses-material-design: true
+
+  # Bundled offline-first fonts (ui-ux-pro-max "Dashboard Data" pairing):
+  # Fira Sans for UI/labels, Fira Code (monospace) for codes/barcodes/quantities.
+  fonts:
+    - family: Fira Sans
+      fonts:
+        - asset: assets/fonts/FiraSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/FiraSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/FiraSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/FiraSans-Bold.ttf
+          weight: 700
+    - family: Fira Code
+      fonts:
+        - asset: assets/fonts/FiraCode-VF.ttf
+          weight: 400
+        - asset: assets/fonts/FiraCode-VF.ttf
+          weight: 600
