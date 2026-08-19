@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -49,20 +50,12 @@ class _TrackingSearchScreenState extends ConsumerState<TrackingSearchScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: TextField(
+            child: ScanField(
               controller: _controller,
               autofocus: true,
-              textInputAction: TextInputAction.search,
+              clearOnSubmit: false,
+              hintText: 'Scan or type barcode, SKU, or name',
               onSubmitted: (_) => _submit(),
-              decoration: InputDecoration(
-                hintText: 'Scan or type barcode, SKU, or name',
-                prefixIcon: const Icon(Icons.qr_code_scanner_outlined),
-                suffixIcon: IconButton(
-                  tooltip: 'Search',
-                  icon: const Icon(Icons.search),
-                  onPressed: _submit,
-                ),
-              ),
             ),
           ),
           Expanded(

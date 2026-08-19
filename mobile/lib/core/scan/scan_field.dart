@@ -14,6 +14,7 @@ class ScanField extends StatefulWidget {
     super.key,
     required this.onSubmitted,
     this.controller,
+    this.focusNode,
     this.hintText = 'Scan or type a barcode',
     this.autofocus = false,
     this.clearOnSubmit = true,
@@ -26,6 +27,10 @@ class ScanField extends StatefulWidget {
 
   /// Optional external controller. When omitted an internal one is used.
   final TextEditingController? controller;
+
+  /// Optional external focus node. Lets callers re-focus the field after an
+  /// async flow (e.g. a quantity dialog) so scan-after-scan keeps working.
+  final FocusNode? focusNode;
 
   final String hintText;
   final bool autofocus;
@@ -46,12 +51,12 @@ class ScanField extends StatefulWidget {
 class _ScanFieldState extends State<ScanField> {
   late final TextEditingController _controller =
       widget.controller ?? TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
 
   @override
   void dispose() {
     if (widget.controller == null) _controller.dispose();
-    _focusNode.dispose();
+    if (widget.focusNode == null) _focusNode.dispose();
     super.dispose();
   }
 
