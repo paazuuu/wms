@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_spacing.dart';
+import '../ui/responsive.dart';
 
 /// A barcode-first text input tuned for warehouse work.
 ///
@@ -17,6 +18,7 @@ class ScanField extends StatefulWidget {
     this.focusNode,
     this.hintText = 'Scan or type a barcode',
     this.autofocus = false,
+    this.autofocusOnWide = false,
     this.clearOnSubmit = true,
     this.trailing,
     this.dense = false,
@@ -33,7 +35,13 @@ class ScanField extends StatefulWidget {
   final FocusNode? focusNode;
 
   final String hintText;
+
+  /// Focus the field on first build, unconditionally.
   final bool autofocus;
+
+  /// Focus the field on first build only on a wide (PC) layout. Keeps handheld
+  /// filtering tap-free on desktop without popping a keyboard on phones.
+  final bool autofocusOnWide;
 
   /// Clear the text and keep focus after a submit, ready for the next scan.
   final bool clearOnSubmit;
@@ -73,10 +81,12 @@ class _ScanFieldState extends State<ScanField> {
 
   @override
   Widget build(BuildContext context) {
+    final autofocus =
+        widget.autofocus || (widget.autofocusOnWide && isWideLayout(context));
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
-      autofocus: widget.autofocus,
+      autofocus: autofocus,
       textInputAction: TextInputAction.search,
       onSubmitted: (_) => _submit(),
       style: const TextStyle(fontFamily: AppFonts.mono, letterSpacing: 0.5),

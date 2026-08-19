@@ -7,6 +7,7 @@ import '../../../app.dart';
 import '../../../core/scan/hardware_scanner.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../inspection/presentation/barcode_scan_screen.dart';
 import '../../products/presentation/product_lookup_screen.dart';
@@ -26,8 +27,6 @@ import 'dashboard_overview_screen.dart';
 /// scanner works anywhere — no need to click into a field first.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
-
-  static const double _sidebarBreakpoint = 900;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -115,8 +114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wide =
-        MediaQuery.sizeOf(context).width >= HomeScreen._sidebarBreakpoint;
+    final wide = isWideLayout(context);
     final user = ref.watch(authControllerProvider).user;
 
     final body = wide

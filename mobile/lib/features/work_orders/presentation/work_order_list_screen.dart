@@ -52,7 +52,7 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: ScanField(
               controller: _controller,
-              autofocus: true,
+              autofocusOnWide: true,
               clearOnSubmit: false,
               hintText: 'Scan or search by WO number, product, or SKU',
               onSubmitted: (_) => _submit(),

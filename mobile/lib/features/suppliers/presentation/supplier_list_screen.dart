@@ -50,7 +50,7 @@ class _SupplierListScreenState extends ConsumerState<SupplierListScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: ScanField(
               controller: _controller,
-              autofocus: true,
+              autofocusOnWide: true,
               clearOnSubmit: false,
               hintText: 'Scan or search by name, code, contact or email',
               onSubmitted: (_) => _submit(),
