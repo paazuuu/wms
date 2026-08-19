@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+    show kIsWeb, defaultTargetPlatform, TargetPlatform, ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,14 +46,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     key: _contentNav,
     observers: [_observer],
     onGenerateRoute: (_) => MaterialPageRoute(
-      builder: (_) {
-        final user = ref.read(authControllerProvider).user;
-        return DashboardOverviewScreen(
-          onOpen: _open,
-          userName: user?.name,
-          userEmail: user?.email,
-        );
-      },
+      builder: (_) => Consumer(
+        builder: (context, ref, _) {
+          final user = ref.watch(authControllerProvider).user;
+          return DashboardOverviewScreen(
+            onOpen: _open,
+            userName: user?.name,
+            userEmail: user?.email,
+          );
+        },
+      ),
     ),
   );
 
