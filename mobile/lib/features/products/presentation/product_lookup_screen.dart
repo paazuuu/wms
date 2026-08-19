@@ -70,7 +70,7 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: ScanField(
               controller: _controller,
-              autofocus: true,
+              autofocusOnWide: true,
               clearOnSubmit: false,
               hintText: 'Scan or type barcode, SKU, or name',
               onSubmitted: (_) => _submit(),

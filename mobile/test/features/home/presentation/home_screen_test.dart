@@ -66,6 +66,10 @@ void main() {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
+    // The Picking card can sit below the fold on the small test viewport;
+    // scroll it into view before tapping.
+    await tester.ensureVisible(find.text('Picking'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Picking'));
     await tester.pumpAndSettle();
 

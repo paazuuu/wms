@@ -92,6 +92,7 @@ class _InspectionDetailScreenState
                   Expanded(
                     child: ScanField(
                       focusNode: _scanFocus,
+                      autofocusOnWide: true,
                       hintText: _fastQtyOne
                           ? 'Scan to record (qty 1)'
                           : 'Scan item barcode to record',
