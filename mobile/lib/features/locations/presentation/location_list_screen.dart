@@ -50,6 +50,7 @@ class _LocationListScreenState extends ConsumerState<LocationListScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: ScanField(
               controller: _controller,
+              autofocus: true,
               clearOnSubmit: false,
               hintText: 'Scan or search by name or code',
               onSubmitted: (_) => _submit(),

@@ -51,6 +51,7 @@ class _SalesOrderListScreenState extends ConsumerState<SalesOrderListScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: ScanField(
               controller: _controller,
+              autofocus: true,
               clearOnSubmit: false,
               hintText: 'Scan or search by order #, customer or email',
               onSubmitted: (_) => _submit(),
