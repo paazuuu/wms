@@ -73,12 +73,20 @@ class _HardwareScannerState extends State<HardwareScanner> {
     return false;
   }
 
-  /// True when the current primary focus sits on (or contains) an [EditableText]
-  /// — i.e. the user is typing into a real text field.
+  /// True when the current primary focus belongs to an [EditableText] — i.e.
+  /// the user is typing into a real text field, so the scanner should leave the
+  /// keystrokes alone.
+  ///
+  /// A focused text field's focus node sits on a `Focus` widget *inside*
+  /// [EditableText], so the editable can be the ancestor, the node's own widget,
+  /// or (defensively) a descendant — check all three.
   bool _isEditableFocused() {
     final context = FocusManager.instance.primaryFocus?.context;
     if (context == null) return false;
     if (context.widget is EditableText) return true;
+    if (context.findAncestorWidgetOfExactType<EditableText>() != null) {
+      return true;
+    }
     var found = false;
     void visit(Element element) {
       if (found) return;
