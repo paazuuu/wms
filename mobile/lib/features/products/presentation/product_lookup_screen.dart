@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -14,7 +15,11 @@ import 'product_stock_ui.dart';
 /// Uses a text query (works on web and mobile) against `GET /products?search=`.
 /// The search is submitted explicitly to avoid a request per keystroke.
 class ProductLookupScreen extends ConsumerStatefulWidget {
-  const ProductLookupScreen({super.key});
+  const ProductLookupScreen({super.key, this.initialQuery});
+
+  /// Pre-fills the search box and runs a search immediately — used when a scan
+  /// from elsewhere in the app routes here.
+  final String? initialQuery;
 
   @override
   ConsumerState<ProductLookupScreen> createState() =>
@@ -27,6 +32,16 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
   /// The query currently driving the results provider. Starts empty (recent
   /// products) and only changes when the user submits.
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialQuery?.trim() ?? '';
+    if (initial.isNotEmpty) {
+      _controller.text = initial;
+      _query = initial;
+    }
+  }
 
   @override
   void dispose() {
@@ -53,20 +68,12 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: TextField(
+            child: ScanField(
               controller: _controller,
               autofocus: true,
-              textInputAction: TextInputAction.search,
+              clearOnSubmit: false,
+              hintText: 'Scan or type barcode, SKU, or name',
               onSubmitted: (_) => _submit(),
-              decoration: InputDecoration(
-                hintText: 'Scan or type barcode, SKU, or name',
-                prefixIcon: const Icon(Icons.qr_code_scanner_outlined),
-                suffixIcon: IconButton(
-                  tooltip: 'Search',
-                  icon: const Icon(Icons.search),
-                  onPressed: _submit,
-                ),
-              ),
             ),
           ),
           Expanded(

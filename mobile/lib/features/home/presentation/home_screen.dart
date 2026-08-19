@@ -1,210 +1,488 @@
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app.dart';
+import '../../../core/scan/hardware_scanner.dart';
+import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/ui/status_pill.dart';
+import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../inspection/presentation/barcode_scan_screen.dart';
+import '../../products/presentation/product_lookup_screen.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 import 'coming_soon_screen.dart';
+import 'dashboard_overview_screen.dart';
 
-/// The app's home hub: a branded greeting plus a grouped grid of every
-/// warehouse capability. Ready features open their live screen; the rest open a
-/// [ComingSoonScreen] so the whole menu is explorable from day one.
-class HomeScreen extends ConsumerWidget {
+/// The authenticated app shell.
+///
+/// A desktop-first, shadcn-dashboard-style layout: a persistent left sidebar of
+/// grouped capabilities, a top bar with an always-available scan box, and a
+/// content region that swaps feature screens in place. Below 900px the sidebar
+/// folds into a drawer so the same shell serves handheld/tablet field use.
+///
+/// A [HardwareScanner] wraps the whole shell so a keyboard-wedge barcode
+/// scanner works anywhere — no need to click into a field first.
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final GlobalKey<NavigatorState> _contentNav = GlobalKey<NavigatorState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ValueNotifier<String> _selected = ValueNotifier<String>('dashboard');
+
+  late final _ContentObserver _observer =
+      _ContentObserver((atRoot) {
+    if (atRoot) _selected.value = 'dashboard';
+  });
+
+  late final Widget _content = Navigator(
+    key: _contentNav,
+    observers: [_observer],
+    onGenerateRoute: (_) => MaterialPageRoute(
+      builder: (_) {
+        final user = ref.read(authControllerProvider).user;
+        return DashboardOverviewScreen(
+          onOpen: _open,
+          userName: user?.name,
+          userEmail: user?.email,
+        );
+      },
+    ),
+  );
+
+  bool get _cameraSupported =>
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
+  @override
+  void dispose() {
+    _selected.dispose();
+    super.dispose();
+  }
+
+  /// Open a catalog feature in the content area.
+  void _open(FeatureEntry entry) {
+    _select(
+      entry.id,
+      (ctx) =>
+          entry.isReady ? entry.builder!(ctx) : ComingSoonScreen(feature: entry),
+    );
+  }
+
+  /// Reset the content navigator to the dashboard, then (unless [id] is the
+  /// dashboard) push [builder]. Selection is set last so the sidebar highlight
+  /// survives the observer firing during [NavigatorState.popUntil].
+  void _select(String id, WidgetBuilder builder) {
+    final nav = _contentNav.currentState;
+    nav?.popUntil((route) => route.isFirst);
+    if (id != 'dashboard') {
+      nav?.push(MaterialPageRoute(builder: builder));
+    }
+    _selected.value = id;
+    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+      _scaffoldKey.currentState?.closeDrawer();
+    }
+  }
+
+  /// Route a scan from the top bar / hardware scanner to Product Lookup.
+  void _handleScan(String code) {
+    final value = code.trim();
+    if (value.isEmpty) return;
+    _select(
+      'product_lookup',
+      (_) => ProductLookupScreen(initialQuery: value),
+    );
+  }
+
+  Future<void> _openCameraScan() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
+    );
+    if (!mounted) return;
+    if (code != null && code.isNotEmpty) _handleScan(code);
+  }
+
+  void _logout() => ref.read(authControllerProvider.notifier).logout();
+
+  @override
+  Widget build(BuildContext context) {
+    final wide = isWideLayout(context);
     final user = ref.watch(authControllerProvider).user;
-    final groups = buildFeatureCatalog();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('WMS'),
-        actions: [
-          IconButton(
-            tooltip: 'Sign out',
-            icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authControllerProvider.notifier).logout(),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          _GreetingCard(name: user?.name, email: user?.email),
-          const SizedBox(height: AppSpacing.xl),
-          for (final group in groups) ...[
-            _GroupHeader(title: group.title),
-            const SizedBox(height: AppSpacing.md),
-            _FeatureGrid(entries: group.entries),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _GreetingCard extends StatelessWidget {
-  const _GreetingCard({this.name, this.email});
-
-  final String? name;
-  final String? email;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final displayName = (name != null && name!.trim().isNotEmpty)
-        ? name!.trim()
-        : 'Operator';
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
-          children: [
-            const BrandMark(size: 48),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back',
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    displayName,
-                    style: theme.textTheme.titleLarge,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (email != null && email!.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      email!,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.onSurfaceVariant),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GroupHeader extends StatelessWidget {
-  const _GroupHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Text(
-      title,
-      style: theme.textTheme.titleSmall
-          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-    );
-  }
-}
-
-class _FeatureGrid extends StatelessWidget {
-  const _FeatureGrid({required this.entries});
-
-  final List<FeatureEntry> entries;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 260,
-        mainAxisExtent: 134,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-      ),
-      itemCount: entries.length,
-      itemBuilder: (context, index) => _FeatureCard(entry: entries[index]),
-    );
-  }
-}
-
-class _FeatureCard extends StatelessWidget {
-  const _FeatureCard({required this.entry});
-
-  final FeatureEntry entry;
-
-  void _open(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) =>
-            entry.isReady ? entry.builder!(ctx) : ComingSoonScreen(feature: entry),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final tone = entry.isReady ? StatusTone.info : StatusTone.neutral;
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _open(context),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final body = wide
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  StatusAvatar(tone: tone, icon: entry.icon),
-                  const Spacer(),
-                  if (entry.isReady)
-                    Icon(Icons.chevron_right, color: scheme.onSurfaceVariant)
-                  else
-                    const StatusPill(
-                      tone: StatusTone.neutral,
-                      label: 'Soon',
-                      dense: true,
-                    ),
-                ],
+              SizedBox(
+                width: 268,
+                child: _Sidebar(
+                  selected: _selected,
+                  onOpen: _open,
+                  onDashboard: () => _select('dashboard', (_) => const SizedBox()),
+                  onLogout: _logout,
+                  userName: user?.name,
+                  userEmail: user?.email,
+                ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                entry.label,
-                style: theme.textTheme.titleSmall,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              const VerticalDivider(width: 1),
+              Expanded(child: _mainColumn(wide: true)),
+            ],
+          )
+        : _mainColumn(wide: false);
+
+    return HardwareScanner(
+      onScan: _handleScan,
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: wide
+            ? null
+            : Drawer(
+                child: _Sidebar(
+                  selected: _selected,
+                  onOpen: _open,
+                  onDashboard: () =>
+                      _select('dashboard', (_) => const SizedBox()),
+                  onLogout: _logout,
+                  userName: user?.name,
+                  userEmail: user?.email,
+                ),
               ),
-              const SizedBox(height: 2),
-              Expanded(
-                child: Text(
-                  entry.description,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
-                  maxLines: 2,
+        body: SafeArea(child: body),
+      ),
+    );
+  }
+
+  Widget _mainColumn({required bool wide}) {
+    return Column(
+      children: [
+        _TopBar(
+          wide: wide,
+          selected: _selected,
+          scanController: null,
+          onScan: _handleScan,
+          onMenu: wide
+              ? null
+              : () => _scaffoldKey.currentState?.openDrawer(),
+          onCamera: _cameraSupported ? _openCameraScan : null,
+        ),
+        Expanded(child: _content),
+      ],
+    );
+  }
+}
+
+/// Maps a selected feature id to its display title for the top bar.
+String _titleForId(String id) {
+  if (id == 'dashboard') return 'Dashboard';
+  for (final group in buildFeatureCatalog()) {
+    for (final entry in group.entries) {
+      if (entry.id == id) return entry.label;
+    }
+  }
+  return 'Dashboard';
+}
+
+/// Observes the content navigator and reports when it returns to its first
+/// (dashboard) route so the sidebar highlight can follow in-content back nav.
+class _ContentObserver extends NavigatorObserver {
+  _ContentObserver(this.onAtRoot);
+
+  final void Function(bool atRoot) onAtRoot;
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    onAtRoot(previousRoute?.isFirst ?? true);
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route.isFirst) onAtRoot(true);
+  }
+}
+
+/// The top bar: menu (narrow) / page title (wide) + a persistent scan box.
+class _TopBar extends StatelessWidget {
+  const _TopBar({
+    required this.wide,
+    required this.selected,
+    required this.scanController,
+    required this.onScan,
+    required this.onMenu,
+    required this.onCamera,
+  });
+
+  final bool wide;
+  final ValueListenable<String> selected;
+  final TextEditingController? scanController;
+  final ValueChanged<String> onScan;
+  final VoidCallback? onMenu;
+  final Future<void> Function()? onCamera;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: Row(
+        children: [
+          if (onMenu != null) ...[
+            IconButton(
+              tooltip: 'Menu',
+              icon: const Icon(Icons.menu),
+              onPressed: onMenu,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+          if (!wide) ...[
+            const BrandMark(size: 32),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          if (wide)
+            Expanded(
+              child: ValueListenableBuilder<String>(
+                valueListenable: selected,
+                builder: (context, id, _) => Text(
+                  _titleForId(id),
+                  style: theme.textTheme.titleLarge,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
+            ),
+          Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ScanField(
+                  controller: scanController,
+                  dense: true,
+                  hintText: 'Scan or search a barcode / SKU',
+                  onSubmitted: onScan,
+                  trailing: onCamera != null
+                      ? [
+                          IconButton(
+                            tooltip: 'Scan with camera',
+                            icon: const Icon(Icons.photo_camera_outlined),
+                            onPressed: () => onCamera!(),
+                          ),
+                        ]
+                      : null,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The grouped navigation sidebar (shadcn-style: brand, sections, footer).
+class _Sidebar extends StatelessWidget {
+  const _Sidebar({
+    required this.selected,
+    required this.onOpen,
+    required this.onDashboard,
+    required this.onLogout,
+    this.userName,
+    this.userEmail,
+  });
+
+  final ValueListenable<String> selected;
+  final void Function(FeatureEntry entry) onOpen;
+  final VoidCallback onDashboard;
+  final VoidCallback onLogout;
+  final String? userName;
+  final String? userEmail;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final groups = buildFeatureCatalog();
+
+    return Container(
+      color: scheme.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+            child: Row(
+              children: [
+                const BrandMark(size: 36),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('WMS', style: theme.textTheme.titleMedium),
+                      Text(
+                        'Warehouse',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ValueListenableBuilder<String>(
+              valueListenable: selected,
+              builder: (context, currentId, _) {
+                return ListView(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+                  children: [
+                    _SidebarItem(
+                      icon: Icons.dashboard_outlined,
+                      label: 'Dashboard',
+                      selected: currentId == 'dashboard',
+                      onTap: onDashboard,
+                    ),
+                    for (final group in groups) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                            AppSpacing.md, AppSpacing.md, AppSpacing.xs),
+                        child: Text(
+                          group.title.toUpperCase(),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      for (final entry in group.entries)
+                        _SidebarItem(
+                          icon: entry.icon,
+                          label: entry.label,
+                          selected: currentId == entry.id,
+                          onTap: () => onOpen(entry),
+                        ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: scheme.surfaceContainerHigh,
+                  child: Icon(Icons.person_outline,
+                      size: 20, color: scheme.onSurfaceVariant),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        (userName != null && userName!.trim().isNotEmpty)
+                            ? userName!.trim()
+                            : 'Operator',
+                        style: theme.textTheme.titleSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (userEmail != null && userEmail!.isNotEmpty)
+                        Text(
+                          userEmail!,
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Sign out',
+                  icon: const Icon(Icons.logout),
+                  onPressed: onLogout,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SidebarItem extends StatelessWidget {
+  const _SidebarItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final fg = selected ? scheme.primary : scheme.onSurface;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Material(
+        color: selected ? scheme.primaryContainer : Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md, vertical: AppSpacing.md),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: fg),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: fg,
+                      fontWeight:
+                          selected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

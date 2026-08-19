@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_result.dart';
 import '../../../core/offline/offline_providers.dart';
+import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -30,12 +31,26 @@ class _InspectionDetailScreenState
     extends ConsumerState<InspectionDetailScreen> {
   bool _busy = false;
 
+  /// Fast mode: record each scan with quantity 1 and skip the quantity dialog,
+  /// so a handheld scanner can rattle through items hands-free. Turn it off to
+  /// confirm a quantity per item.
+  bool _fastQtyOne = true;
+  final FocusNode _scanFocus = FocusNode();
+
   int get _id => widget.inspectionId;
+
+  @override
+  void dispose() {
+    _scanFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(inspectionDetailProvider(_id));
     final code = detail.valueOrNull?.code ?? 'Inspection';
+    final pending =
+        detail.valueOrNull?.status == InspectionStatus.pending;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,49 +64,116 @@ class _InspectionDetailScreenState
           const SizedBox(width: AppSpacing.xs),
         ],
       ),
-      floatingActionButton: detail.hasValue
+      floatingActionButton: detail.hasValue && pending
           ? FloatingActionButton.extended(
-              onPressed: _busy ? null : _scanAndRecord,
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Scan'),
+              onPressed: _busy ? null : _scanWithCamera,
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: const Text('Camera'),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: Stack(
+      body: Column(
         children: [
-          detail.when(
-            data: (inspection) => _DetailBody(
-              inspection: inspection,
-              onComplete: _busy ? null : _complete,
-            ),
-            loading: () => const LoadingView(message: 'Loading inspection…'),
-            error: (error, _) => ErrorStateView(
-              message: '$error',
-              onRetry: () => ref.invalidate(inspectionDetailProvider(_id)),
-            ),
-          ),
-          if (_busy)
-            const Positioned.fill(
-              child: ColoredBox(
-                color: Color(0x66020617),
-                child: LoadingView(message: 'Working…'),
+          // Inline scan box: a handheld scanner (or manual entry) records an
+          // item and immediately re-focuses for the next scan — no camera trip.
+          if (detail.hasValue && pending)
+            Container(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md,
+                  AppSpacing.lg, AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ScanField(
+                      focusNode: _scanFocus,
+                      hintText: _fastQtyOne
+                          ? 'Scan to record (qty 1)'
+                          : 'Scan item barcode to record',
+                      onSubmitted: (barcode) {
+                        if (!_busy) {
+                          _recordScanned(barcode,
+                              quantity: _fastQtyOne ? 1 : null);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Tooltip(
+                    message: _fastQtyOne
+                        ? 'Fast mode: records quantity 1 per scan'
+                        : 'Prompt for a quantity on each scan',
+                    child: FilterChip(
+                      showCheckmark: false,
+                      avatar: Icon(
+                        _fastQtyOne ? Icons.bolt : Icons.tune,
+                        size: 18,
+                      ),
+                      label: const Text('Qty 1'),
+                      selected: _fastQtyOne,
+                      onSelected: (value) =>
+                          setState(() => _fastQtyOne = value),
+                    ),
+                  ),
+                ],
               ),
             ),
+          Expanded(
+            child: Stack(
+              children: [
+                detail.when(
+                  data: (inspection) => _DetailBody(
+                    inspection: inspection,
+                    onComplete: _busy ? null : _complete,
+                  ),
+                  loading: () =>
+                      const LoadingView(message: 'Loading inspection…'),
+                  error: (error, _) => ErrorStateView(
+                    message: '$error',
+                    onRetry: () =>
+                        ref.invalidate(inspectionDetailProvider(_id)),
+                  ),
+                ),
+                if (_busy)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Color(0x66020617),
+                      child: LoadingView(message: 'Working…'),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Future<void> _scanAndRecord() async {
+  /// Open the camera scanner, then record the decoded barcode.
+  Future<void> _scanWithCamera() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
     );
     if (code == null || !mounted) return;
+    await _recordScanned(code, quantity: _fastQtyOne ? 1 : null);
+  }
 
-    final quantity = await _promptQuantity(code);
-    if (quantity == null || !mounted) return;
+  /// Record one inspected item and return focus to the inline scan box so the
+  /// next scan is captured immediately. When [quantity] is null the operator is
+  /// prompted for it; otherwise it is recorded straight away (fast mode).
+  Future<void> _recordScanned(String code, {int? quantity}) async {
+    final qty = quantity ?? await _promptQuantity(code);
+    if (qty == null || !mounted) {
+      if (mounted) _scanFocus.requestFocus();
+      return;
+    }
 
-    final payload = {'scanned_barcode': code, 'actual_quantity': quantity};
+    final payload = {'scanned_barcode': code, 'actual_quantity': qty};
     final repository = ref.read(inspectionRepositoryProvider);
     setState(() => _busy = true);
     final result = await repository.recordItem(_id, payload);
@@ -115,6 +197,9 @@ class _InspectionDetailScreenState
         }
       },
     );
+
+    // Ready for the next scan without touching the screen.
+    if (mounted) _scanFocus.requestFocus();
   }
 
   Future<int?> _promptQuantity(String code) {
