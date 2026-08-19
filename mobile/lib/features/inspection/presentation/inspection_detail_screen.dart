@@ -30,6 +30,11 @@ class InspectionDetailScreen extends ConsumerStatefulWidget {
 class _InspectionDetailScreenState
     extends ConsumerState<InspectionDetailScreen> {
   bool _busy = false;
+
+  /// Fast mode: record each scan with quantity 1 and skip the quantity dialog,
+  /// so a handheld scanner can rattle through items hands-free. Turn it off to
+  /// confirm a quantity per item.
+  bool _fastQtyOne = true;
   final FocusNode _scanFocus = FocusNode();
 
   int get _id => widget.inspectionId;
@@ -82,12 +87,40 @@ class _InspectionDetailScreenState
                       color: Theme.of(context).colorScheme.outlineVariant),
                 ),
               ),
-              child: ScanField(
-                focusNode: _scanFocus,
-                hintText: 'Scan item barcode to record',
-                onSubmitted: (barcode) {
-                  if (!_busy) _recordScanned(barcode);
-                },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ScanField(
+                      focusNode: _scanFocus,
+                      hintText: _fastQtyOne
+                          ? 'Scan to record (qty 1)'
+                          : 'Scan item barcode to record',
+                      onSubmitted: (barcode) {
+                        if (!_busy) {
+                          _recordScanned(barcode,
+                              quantity: _fastQtyOne ? 1 : null);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Tooltip(
+                    message: _fastQtyOne
+                        ? 'Fast mode: records quantity 1 per scan'
+                        : 'Prompt for a quantity on each scan',
+                    child: FilterChip(
+                      showCheckmark: false,
+                      avatar: Icon(
+                        _fastQtyOne ? Icons.bolt : Icons.tune,
+                        size: 18,
+                      ),
+                      label: const Text('Qty 1'),
+                      selected: _fastQtyOne,
+                      onSelected: (value) =>
+                          setState(() => _fastQtyOne = value),
+                    ),
+                  ),
+                ],
               ),
             ),
           Expanded(
@@ -127,19 +160,20 @@ class _InspectionDetailScreenState
       MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
     );
     if (code == null || !mounted) return;
-    await _recordScanned(code);
+    await _recordScanned(code, quantity: _fastQtyOne ? 1 : null);
   }
 
-  /// Prompt for the actual quantity and record one inspected item, then return
-  /// focus to the inline scan box so the next scan is captured immediately.
-  Future<void> _recordScanned(String code) async {
-    final quantity = await _promptQuantity(code);
-    if (quantity == null || !mounted) {
+  /// Record one inspected item and return focus to the inline scan box so the
+  /// next scan is captured immediately. When [quantity] is null the operator is
+  /// prompted for it; otherwise it is recorded straight away (fast mode).
+  Future<void> _recordScanned(String code, {int? quantity}) async {
+    final qty = quantity ?? await _promptQuantity(code);
+    if (qty == null || !mounted) {
       if (mounted) _scanFocus.requestFocus();
       return;
     }
 
-    final payload = {'scanned_barcode': code, 'actual_quantity': quantity};
+    final payload = {'scanned_barcode': code, 'actual_quantity': qty};
     final repository = ref.read(inspectionRepositoryProvider);
     setState(() => _busy = true);
     final result = await repository.recordItem(_id, payload);
