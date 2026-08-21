@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/scan/scan_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -44,9 +45,10 @@ class _PurchaseOrderListScreenState
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(purchaseOrderSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Purchase Orders')),
+      appBar: AppBar(title: Text(l10n.featPurchaseOrders)),
       body: Column(
         children: [
           Padding(
@@ -55,7 +57,7 @@ class _PurchaseOrderListScreenState
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or search by PO number or supplier',
+              hintText: l10n.hintPurchaseOrders,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -68,9 +70,9 @@ class _PurchaseOrderListScreenState
                     ? EmptyStateView(
                         icon: Icons.receipt_long_outlined,
                         title: _query.isEmpty
-                            ? 'No purchase orders yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different PO number or supplier.',
+                            ? l10n.emptyPurchaseOrders
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentPo,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -81,8 +83,7 @@ class _PurchaseOrderListScreenState
                         itemBuilder: (context, index) =>
                             _PurchaseOrderCard(order: items[index]),
                       ),
-                loading: () =>
-                    const LoadingView(message: 'Loading purchase orders…'),
+                loading: () => LoadingView(message: l10n.loading),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () =>
@@ -106,10 +107,11 @@ class _PurchaseOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final status = ReceivingStatusUi.of(order);
     final supplier = order.supplierName?.trim().isNotEmpty == true
         ? order.supplierName!
-        : 'No supplier';
+        : l10n.noSupplier;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -159,8 +161,7 @@ class _PurchaseOrderCard extends StatelessWidget {
                         if (order.itemsCount != null)
                           StatusPill(
                             tone: StatusTone.neutral,
-                            label:
-                                '${order.itemsCount} ${order.itemsCount == 1 ? 'line' : 'lines'}',
+                            label: l10n.lineCount(order.itemsCount!),
                             icon: Icons.list_alt_outlined,
                             dense: true,
                           ),

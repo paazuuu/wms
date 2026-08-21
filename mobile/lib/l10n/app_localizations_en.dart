@@ -224,4 +224,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get findProductToTrace => 'Find a product to trace.';
+
+  @override
+  String get loading => 'Loading…';
+
+  @override
+  String get emptyLocations => 'No locations yet.';
+
+  @override
+  String get emptyWarehouses => 'No warehouses yet.';
+
+  @override
+  String get emptySuppliers => 'No suppliers yet.';
+
+  @override
+  String get emptySalesOrders => 'No sales orders yet.';
+
+  @override
+  String get emptyPurchaseOrders => 'No purchase orders yet.';
+
+  @override
+  String get emptyWorkOrders => 'No work orders yet.';
+
+  @override
+  String get tryDifferentNameCode => 'Try a different name or code.';
+
+  @override
+  String get tryDifferentOrder => 'Try a different order number or customer.';
+
+  @override
+  String get tryDifferentPo => 'Try a different PO number or supplier.';
+
+  @override
+  String get tryDifferentWo => 'Try a different WO number, product, or SKU.';
+
+  @override
+  String get hintLocations => 'Scan or search by name or code';
+
+  @override
+  String get hintWarehouses => 'Scan or search by name, code or city';
+
+  @override
+  String get hintSuppliers => 'Scan or search by name, code, contact or email';
+
+  @override
+  String get hintSalesOrders => 'Scan or search by order #, customer or email';
+
+  @override
+  String get hintPurchaseOrders => 'Scan or search by PO number or supplier';
+
+  @override
+  String get hintWorkOrders => 'Scan or search by WO number, product, or SKU';
+
+  @override
+  String get warehouseDefault => 'Default';
+
+  @override
+  String get noCustomer => 'No customer';
+
+  @override
+  String get noSupplier => 'No supplier';
+
+  @override
+  String get noProduct => 'No product';
+
+  @override
+  String qtyLabel(int quantity) {
+    return 'Qty $quantity';
+  }
+
+  @override
+  String lineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines',
+      one: '$count line',
+    );
+    return '$_temp0';
+  }
 }

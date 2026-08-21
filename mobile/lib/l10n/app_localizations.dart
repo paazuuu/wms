@@ -525,6 +525,144 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'追跡する商品を検索。'**
   String get findProductToTrace;
+
+  /// No description provided for @loading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込み中…'**
+  String get loading;
+
+  /// No description provided for @emptyLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーションがまだありません。'**
+  String get emptyLocations;
+
+  /// No description provided for @emptyWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫がまだありません。'**
+  String get emptyWarehouses;
+
+  /// No description provided for @emptySuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先がまだありません。'**
+  String get emptySuppliers;
+
+  /// No description provided for @emptySalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注がまだありません。'**
+  String get emptySalesOrders;
+
+  /// No description provided for @emptyPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注がまだありません。'**
+  String get emptyPurchaseOrders;
+
+  /// No description provided for @emptyWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示がまだありません。'**
+  String get emptyWorkOrders;
+
+  /// No description provided for @tryDifferentNameCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の名称またはコードをお試しください。'**
+  String get tryDifferentNameCode;
+
+  /// No description provided for @tryDifferentOrder.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の受注番号または顧客をお試しください。'**
+  String get tryDifferentOrder;
+
+  /// No description provided for @tryDifferentPo.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の発注番号または仕入先をお試しください。'**
+  String get tryDifferentPo;
+
+  /// No description provided for @tryDifferentWo.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の作業指示番号・商品・SKUをお試しください。'**
+  String get tryDifferentWo;
+
+  /// No description provided for @hintLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称・コードをスキャンまたは検索'**
+  String get hintLocations;
+
+  /// No description provided for @hintWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称・コード・都市をスキャンまたは検索'**
+  String get hintWarehouses;
+
+  /// No description provided for @hintSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称・コード・担当者・メールをスキャンまたは検索'**
+  String get hintSuppliers;
+
+  /// No description provided for @hintSalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注番号・顧客・メールをスキャンまたは検索'**
+  String get hintSalesOrders;
+
+  /// No description provided for @hintPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注番号・仕入先をスキャンまたは検索'**
+  String get hintPurchaseOrders;
+
+  /// No description provided for @hintWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示番号・商品・SKUをスキャンまたは検索'**
+  String get hintWorkOrders;
+
+  /// No description provided for @warehouseDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'既定'**
+  String get warehouseDefault;
+
+  /// No description provided for @noCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客なし'**
+  String get noCustomer;
+
+  /// No description provided for @noSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先なし'**
+  String get noSupplier;
+
+  /// No description provided for @noProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品なし'**
+  String get noProduct;
+
+  /// No description provided for @qtyLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量 {quantity}'**
+  String qtyLabel(int quantity);
+
+  /// No description provided for @lineCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}件の明細}}'**
+  String lineCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/scan/scan_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -42,9 +43,10 @@ class _SalesOrderListScreenState extends ConsumerState<SalesOrderListScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(salesOrderSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sales Orders')),
+      appBar: AppBar(title: Text(l10n.featSalesOrders)),
       body: Column(
         children: [
           Padding(
@@ -53,7 +55,7 @@ class _SalesOrderListScreenState extends ConsumerState<SalesOrderListScreen> {
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or search by order #, customer or email',
+              hintText: l10n.hintSalesOrders,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -66,9 +68,9 @@ class _SalesOrderListScreenState extends ConsumerState<SalesOrderListScreen> {
                     ? EmptyStateView(
                         icon: Icons.list_alt_outlined,
                         title: _query.isEmpty
-                            ? 'No sales orders yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different order number or customer.',
+                            ? l10n.emptySalesOrders
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentOrder,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -79,7 +81,7 @@ class _SalesOrderListScreenState extends ConsumerState<SalesOrderListScreen> {
                         itemBuilder: (context, index) =>
                             _SalesOrderCard(order: items[index]),
                       ),
-                loading: () => const LoadingView(message: 'Loading orders…'),
+                loading: () => LoadingView(message: l10n.loading),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () =>
@@ -103,10 +105,11 @@ class _SalesOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final status = SalesOrderStatusUi.of(order);
     final customer = order.customerName?.trim().isNotEmpty == true
         ? order.customerName!
-        : 'No customer';
+        : l10n.noCustomer;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -156,8 +159,7 @@ class _SalesOrderCard extends StatelessWidget {
                         if (order.itemsCount != null)
                           StatusPill(
                             tone: StatusTone.neutral,
-                            label:
-                                '${order.itemsCount} ${order.itemsCount == 1 ? 'line' : 'lines'}',
+                            label: l10n.lineCount(order.itemsCount!),
                             icon: Icons.list_alt_outlined,
                             dense: true,
                           ),

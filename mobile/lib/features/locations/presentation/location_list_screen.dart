@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/scan/scan_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -41,9 +42,10 @@ class _LocationListScreenState extends ConsumerState<LocationListScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(locationSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Locations')),
+      appBar: AppBar(title: Text(l10n.featLocations)),
       body: Column(
         children: [
           Padding(
@@ -52,7 +54,7 @@ class _LocationListScreenState extends ConsumerState<LocationListScreen> {
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or search by name or code',
+              hintText: l10n.hintLocations,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -65,9 +67,9 @@ class _LocationListScreenState extends ConsumerState<LocationListScreen> {
                     ? EmptyStateView(
                         icon: Icons.wrong_location_outlined,
                         title: _query.isEmpty
-                            ? 'No locations yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different name or code.',
+                            ? l10n.emptyLocations
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentNameCode,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -78,7 +80,7 @@ class _LocationListScreenState extends ConsumerState<LocationListScreen> {
                         itemBuilder: (context, index) =>
                             _LocationCard(location: items[index]),
                       ),
-                loading: () => const LoadingView(message: 'Loading locations…'),
+                loading: () => LoadingView(message: l10n.loading),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () => ref.invalidate(locationSearchProvider(_query)),
