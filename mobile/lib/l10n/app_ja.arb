@@ -53,5 +53,25 @@
   "featReports": "帳票",
   "featReportsDesc": "保存済みレポートとエクスポート",
   "comingSoon": "近日対応",
-  "comingSoonBody": "このサーバーAPIは準備済みです。モバイル画面が次の予定です。"
+  "comingSoonBody": "このサーバーAPIは準備済みです。モバイル画面が次の予定です。",
+  "signIn": "サインイン",
+  "signInSubtitle": "検品を始めるにはサインイン",
+  "email": "メールアドレス",
+  "password": "パスワード",
+  "emailRequired": "メールアドレスを入力してください",
+  "passwordRequired": "パスワードを入力してください",
+  "show": "表示",
+  "hide": "非表示",
+  "searching": "検索中…",
+  "scanTypeHint": "バーコード・SKU・名称をスキャンまたは入力",
+  "scanTypeMessage": "バーコード・SKU・名称をスキャンまたは入力してください。",
+  "noMatchesFor": "「{query}」に一致する結果がありません。",
+  "@noMatchesFor": {
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "tryDifferentScan": "別のバーコード・SKU・名称をお試しください。",
+  "inStock": "在庫",
+  "productLookupEmpty": "商品がまだありません。",
+  "findProductToAdjust": "調整する商品を検索。",
+  "findProductToTrace": "追跡する商品を検索。"
 }

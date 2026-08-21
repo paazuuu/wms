@@ -423,6 +423,108 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'このサーバーAPIは準備済みです。モバイル画面が次の予定です。'**
   String get comingSoonBody;
+
+  /// No description provided for @signIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'サインイン'**
+  String get signIn;
+
+  /// No description provided for @signInSubtitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を始めるにはサインイン'**
+  String get signInSubtitle;
+
+  /// No description provided for @email.
+  ///
+  /// In ja, this message translates to:
+  /// **'メールアドレス'**
+  String get email;
+
+  /// No description provided for @password.
+  ///
+  /// In ja, this message translates to:
+  /// **'パスワード'**
+  String get password;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'メールアドレスを入力してください'**
+  String get emailRequired;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'パスワードを入力してください'**
+  String get passwordRequired;
+
+  /// No description provided for @show.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示'**
+  String get show;
+
+  /// No description provided for @hide.
+  ///
+  /// In ja, this message translates to:
+  /// **'非表示'**
+  String get hide;
+
+  /// No description provided for @searching.
+  ///
+  /// In ja, this message translates to:
+  /// **'検索中…'**
+  String get searching;
+
+  /// No description provided for @scanTypeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'バーコード・SKU・名称をスキャンまたは入力'**
+  String get scanTypeHint;
+
+  /// No description provided for @scanTypeMessage.
+  ///
+  /// In ja, this message translates to:
+  /// **'バーコード・SKU・名称をスキャンまたは入力してください。'**
+  String get scanTypeMessage;
+
+  /// No description provided for @noMatchesFor.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{query}」に一致する結果がありません。'**
+  String noMatchesFor(String query);
+
+  /// No description provided for @tryDifferentScan.
+  ///
+  /// In ja, this message translates to:
+  /// **'別のバーコード・SKU・名称をお試しください。'**
+  String get tryDifferentScan;
+
+  /// No description provided for @inStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get inStock;
+
+  /// No description provided for @productLookupEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品がまだありません。'**
+  String get productLookupEmpty;
+
+  /// No description provided for @findProductToAdjust.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整する商品を検索。'**
+  String get findProductToAdjust;
+
+  /// No description provided for @findProductToTrace.
+  ///
+  /// In ja, this message translates to:
+  /// **'追跡する商品を検索。'**
+  String get findProductToTrace;
 }
 
 class _AppLocalizationsDelegate

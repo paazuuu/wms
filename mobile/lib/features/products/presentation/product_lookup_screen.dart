@@ -5,6 +5,7 @@ import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
 import 'product_detail_screen.dart';
@@ -61,9 +62,10 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(productSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product Lookup')),
+      appBar: AppBar(title: Text(l10n.featProductLookup)),
       body: Column(
         children: [
           Padding(
@@ -72,7 +74,7 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or type barcode, SKU, or name',
+              hintText: l10n.scanTypeHint,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -85,9 +87,9 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
                     ? EmptyStateView(
                         icon: Icons.search_off,
                         title: _query.isEmpty
-                            ? 'No products yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different barcode, SKU, or name.',
+                            ? l10n.productLookupEmpty
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentScan,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -98,7 +100,7 @@ class _ProductLookupScreenState extends ConsumerState<ProductLookupScreen> {
                         itemBuilder: (context, index) =>
                             _ProductCard(product: items[index]),
                       ),
-                loading: () => const LoadingView(message: 'Searching…'),
+                loading: () => LoadingView(message: l10n.searching),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () => ref.invalidate(productSearchProvider(_query)),
@@ -170,7 +172,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'in stock',
+                    AppLocalizations.of(context).inStock,
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),

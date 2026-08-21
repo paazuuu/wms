@@ -53,5 +53,25 @@
   "featReports": "Reports",
   "featReportsDesc": "Saved reports & exports",
   "comingSoon": "Coming soon",
-  "comingSoonBody": "The server API for this is ready — the mobile screen is next on the roadmap."
+  "comingSoonBody": "The server API for this is ready — the mobile screen is next on the roadmap.",
+  "signIn": "Sign in",
+  "signInSubtitle": "Sign in to start inspecting",
+  "email": "Email",
+  "password": "Password",
+  "emailRequired": "Email is required",
+  "passwordRequired": "Password is required",
+  "show": "Show",
+  "hide": "Hide",
+  "searching": "Searching…",
+  "scanTypeHint": "Scan or type barcode, SKU, or name",
+  "scanTypeMessage": "Scan or type a barcode, SKU, or name.",
+  "noMatchesFor": "No matches for \"{query}\".",
+  "@noMatchesFor": {
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "tryDifferentScan": "Try a different barcode, SKU, or name.",
+  "inStock": "in stock",
+  "productLookupEmpty": "No products yet.",
+  "findProductToAdjust": "Find a product to adjust.",
+  "findProductToTrace": "Find a product to trace."
 }

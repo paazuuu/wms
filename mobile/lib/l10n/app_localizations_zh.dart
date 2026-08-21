@@ -24,7 +24,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backToMenu => '返回菜单';
 
   @override
-  String get somethingWentWrong => '出现问题';
+  String get somethingWentWrong => '发生错误';
 
   @override
   String get language => '语言';
@@ -42,25 +42,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageChinese => '中文';
 
   @override
-  String get navDashboard => '仪表板';
+  String get navDashboard => '仪表盘';
 
   @override
-  String get brandSubtitle => '仓库';
+  String get brandSubtitle => '仓储管理';
 
   @override
   String get welcomeBack => '欢迎回来';
 
   @override
-  String get operatorName => '操作员';
+  String get operatorName => '作业员';
 
   @override
-  String get scannerReady => '扫描就绪';
+  String get scannerReady => '扫描枪就绪';
 
   @override
   String get readyToScanTitle => '准备扫描';
 
   @override
-  String get readyToScanBody => '在任何界面使用手持扫描枪，或点按以按条码、SKU 或名称搜索。';
+  String get readyToScanBody => '可在任意界面使用手持扫描枪，或点击以按条码、SKU 或名称搜索。';
 
   @override
   String get topbarScanHint => '扫描或搜索条码 / SKU';
@@ -69,7 +69,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu => '菜单';
 
   @override
-  String get cameraScan => '用相机扫描';
+  String get cameraScan => '使用相机扫描';
 
   @override
   String get groupFieldOperations => '现场作业';
@@ -81,22 +81,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get groupManagement => '管理';
 
   @override
-  String get featInspection => '检验';
+  String get featInspection => '验货';
 
   @override
-  String get featInspectionDesc => '条码与数量核对、NG 记录';
+  String get featInspectionDesc => '条码与数量核对、不良记录';
 
   @override
   String get featReceiving => '收货';
 
   @override
-  String get featReceivingDesc => '收货采购单，自动开始检验';
+  String get featReceivingDesc => '对采购单收货，并自动开始验货';
 
   @override
   String get featStockAdjustment => '库存调整';
 
   @override
-  String get featStockAdjustmentDesc => '扫描并附原因增减';
+  String get featStockAdjustmentDesc => '扫描增减并注明原因';
 
   @override
   String get featStockCount => '盘点';
@@ -108,7 +108,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPicking => '拣货';
 
   @override
-  String get featPickingDesc => '扫描完成销售订单';
+  String get featPickingDesc => '扫描拣货，完成销售订单';
 
   @override
   String get featProductLookup => '商品查询';
@@ -144,7 +144,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featSuppliers => '供应商';
 
   @override
-  String get featSuppliersDesc => '供应商目录';
+  String get featSuppliersDesc => '供应商名录';
 
   @override
   String get featWarehouses => '仓库';
@@ -168,5 +168,58 @@ class AppLocalizationsZh extends AppLocalizations {
   String get comingSoon => '敬请期待';
 
   @override
-  String get comingSoonBody => '服务器 API 已就绪——移动端界面即将推出。';
+  String get comingSoonBody => '该功能的服务器 API 已就绪，移动端界面即将推出。';
+
+  @override
+  String get signIn => '登录';
+
+  @override
+  String get signInSubtitle => '登录以开始验货';
+
+  @override
+  String get email => '邮箱';
+
+  @override
+  String get password => '密码';
+
+  @override
+  String get emailRequired => '请输入邮箱';
+
+  @override
+  String get passwordRequired => '请输入密码';
+
+  @override
+  String get show => '显示';
+
+  @override
+  String get hide => '隐藏';
+
+  @override
+  String get searching => '搜索中…';
+
+  @override
+  String get scanTypeHint => '扫描或输入条码、SKU 或名称';
+
+  @override
+  String get scanTypeMessage => '请扫描或输入条码、SKU 或名称。';
+
+  @override
+  String noMatchesFor(String query) {
+    return '未找到与“$query”匹配的结果。';
+  }
+
+  @override
+  String get tryDifferentScan => '请尝试其他条码、SKU 或名称。';
+
+  @override
+  String get inStock => '库存';
+
+  @override
+  String get productLookupEmpty => '暂无商品。';
+
+  @override
+  String get findProductToAdjust => '查找要调整的商品。';
+
+  @override
+  String get findProductToTrace => '查找要追溯的商品。';
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app.dart';
+import '../../../core/l10n/language_menu.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -39,10 +41,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final state = ref.watch(authControllerProvider);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
+        child: Stack(
+          children: [
+            const Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.sm),
+                child: LanguageMenuButton(),
+              ),
+            ),
+            Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: ConstrainedBox(
@@ -54,13 +66,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Center(child: BrandMark(size: 64)),
                   const SizedBox(height: AppSpacing.xl),
                   Text(
-                    'WMS Inspection',
+                    l10n.appTitle,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineSmall,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Sign in to start inspecting',
+                    l10n.signInSubtitle,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: scheme.onSurfaceVariant),
@@ -76,12 +88,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           autofillHints: const [AutofillHints.username],
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.alternate_email),
+                          decoration: InputDecoration(
+                            labelText: l10n.email,
+                            prefixIcon: const Icon(Icons.alternate_email),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Email is required'
+                              ? l10n.emailRequired
                               : null,
                         ),
                         const SizedBox(height: AppSpacing.lg),
@@ -92,10 +104,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           autofillHints: const [AutofillHints.password],
                           onFieldSubmitted: (_) => _submit(),
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: l10n.password,
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
-                              tooltip: _obscure ? 'Show' : 'Hide',
+                              tooltip: _obscure ? l10n.show : l10n.hide,
                               icon: Icon(_obscure
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined),
@@ -104,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           validator: (v) => (v == null || v.isEmpty)
-                              ? 'Password is required'
+                              ? l10n.passwordRequired
                               : null,
                         ),
                         if (state.error != null) ...[
@@ -121,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   child: CircularProgressIndicator(
                                       strokeWidth: 2.5),
                                 )
-                              : const Text('Sign in'),
+                              : Text(l10n.signIn),
                         ),
                       ],
                     ),
@@ -130,6 +142,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
+        ),
+          ],
         ),
       ),
     );

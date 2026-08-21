@@ -171,4 +171,57 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get comingSoonBody =>
       'The server API for this is ready — the mobile screen is next on the roadmap.';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get signInSubtitle => 'Sign in to start inspecting';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get show => 'Show';
+
+  @override
+  String get hide => 'Hide';
+
+  @override
+  String get searching => 'Searching…';
+
+  @override
+  String get scanTypeHint => 'Scan or type barcode, SKU, or name';
+
+  @override
+  String get scanTypeMessage => 'Scan or type a barcode, SKU, or name.';
+
+  @override
+  String noMatchesFor(String query) {
+    return 'No matches for \"$query\".';
+  }
+
+  @override
+  String get tryDifferentScan => 'Try a different barcode, SKU, or name.';
+
+  @override
+  String get inStock => 'in stock';
+
+  @override
+  String get productLookupEmpty => 'No products yet.';
+
+  @override
+  String get findProductToAdjust => 'Find a product to adjust.';
+
+  @override
+  String get findProductToTrace => 'Find a product to trace.';
 }

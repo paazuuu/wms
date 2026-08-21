@@ -5,6 +5,7 @@ import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../products/application/product_providers.dart';
 import '../../products/domain/product.dart';
 import '../../products/presentation/product_stock_ui.dart';
@@ -44,9 +45,10 @@ class _StockAdjustmentSearchScreenState
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(productSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Stock Adjustment')),
+      appBar: AppBar(title: Text(l10n.featStockAdjustment)),
       body: Column(
         children: [
           Padding(
@@ -55,7 +57,7 @@ class _StockAdjustmentSearchScreenState
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or type barcode, SKU, or name',
+              hintText: l10n.scanTypeHint,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -68,9 +70,9 @@ class _StockAdjustmentSearchScreenState
                     ? EmptyStateView(
                         icon: Icons.search_off,
                         title: _query.isEmpty
-                            ? 'Find a product to adjust.'
-                            : 'No matches for "$_query".',
-                        message: 'Scan or type a barcode, SKU, or name.',
+                            ? l10n.findProductToAdjust
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.scanTypeMessage,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -81,7 +83,7 @@ class _StockAdjustmentSearchScreenState
                         itemBuilder: (context, index) =>
                             _AdjustCandidateCard(product: items[index]),
                       ),
-                loading: () => const LoadingView(message: 'Searching…'),
+                loading: () => LoadingView(message: l10n.searching),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () => ref.invalidate(productSearchProvider(_query)),

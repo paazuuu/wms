@@ -6,6 +6,7 @@ import 'package:wms_mobile/features/products/application/product_providers.dart'
 import 'package:wms_mobile/features/products/data/product_repository.dart';
 import 'package:wms_mobile/features/products/domain/product.dart';
 import 'package:wms_mobile/features/products/presentation/product_lookup_screen.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// In-memory fake so the widget renders without a network.
 class _FakeProductRepository implements ProductRepository {
@@ -57,7 +58,12 @@ Widget _wrap(ProductRepository repo) => ProviderScope(
       overrides: [
         productRepositoryProvider.overrideWithValue(repo),
       ],
-      child: const MaterialApp(home: ProductLookupScreen()),
+      child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: ProductLookupScreen(),
+      ),
     );
 
 void main() {

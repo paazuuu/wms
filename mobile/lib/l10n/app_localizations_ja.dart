@@ -169,4 +169,57 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get comingSoonBody => 'このサーバーAPIは準備済みです。モバイル画面が次の予定です。';
+
+  @override
+  String get signIn => 'サインイン';
+
+  @override
+  String get signInSubtitle => '検品を始めるにはサインイン';
+
+  @override
+  String get email => 'メールアドレス';
+
+  @override
+  String get password => 'パスワード';
+
+  @override
+  String get emailRequired => 'メールアドレスを入力してください';
+
+  @override
+  String get passwordRequired => 'パスワードを入力してください';
+
+  @override
+  String get show => '表示';
+
+  @override
+  String get hide => '非表示';
+
+  @override
+  String get searching => '検索中…';
+
+  @override
+  String get scanTypeHint => 'バーコード・SKU・名称をスキャンまたは入力';
+
+  @override
+  String get scanTypeMessage => 'バーコード・SKU・名称をスキャンまたは入力してください。';
+
+  @override
+  String noMatchesFor(String query) {
+    return '「$query」に一致する結果がありません。';
+  }
+
+  @override
+  String get tryDifferentScan => '別のバーコード・SKU・名称をお試しください。';
+
+  @override
+  String get inStock => '在庫';
+
+  @override
+  String get productLookupEmpty => '商品がまだありません。';
+
+  @override
+  String get findProductToAdjust => '調整する商品を検索。';
+
+  @override
+  String get findProductToTrace => '追跡する商品を検索。';
 }
