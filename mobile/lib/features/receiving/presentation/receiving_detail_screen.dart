@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -132,7 +133,7 @@ class _ReceiveFormState extends ConsumerState<_ReceiveForm> {
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    final status = ReceivingStatusUi.of(order);
+    final status = ReceivingStatusUi.of(AppLocalizations.of(context), order);
     final lines = _lines;
 
     if (lines.isEmpty) {

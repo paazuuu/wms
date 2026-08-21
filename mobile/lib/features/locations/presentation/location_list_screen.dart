@@ -103,7 +103,7 @@ class _LocationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = LocationStatusUi.of(location);
+    final status = LocationStatusUi.of(AppLocalizations.of(context), location);
     final count = location.productsCount;
 
     return Card(

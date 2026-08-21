@@ -663,6 +663,144 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{count, plural, other{{count}件の明細}}'**
   String lineCount(int count);
+
+  /// No description provided for @statusActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get statusActive;
+
+  /// No description provided for @statusInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効'**
+  String get statusInactive;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'キャンセル'**
+  String get statusCancelled;
+
+  /// No description provided for @statusDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get statusDraft;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get statusCompleted;
+
+  /// No description provided for @statusInProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中'**
+  String get statusInProgress;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get statusPending;
+
+  /// No description provided for @salesProcessing.
+  ///
+  /// In ja, this message translates to:
+  /// **'処理中'**
+  String get salesProcessing;
+
+  /// No description provided for @salesShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済み'**
+  String get salesShipped;
+
+  /// No description provided for @salesDelivered.
+  ///
+  /// In ja, this message translates to:
+  /// **'配達済み'**
+  String get salesDelivered;
+
+  /// No description provided for @poSent.
+  ///
+  /// In ja, this message translates to:
+  /// **'送信済み'**
+  String get poSent;
+
+  /// No description provided for @poPartiallyReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'一部入荷'**
+  String get poPartiallyReceived;
+
+  /// No description provided for @poReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済み'**
+  String get poReceived;
+
+  /// No description provided for @stockIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫あり'**
+  String get stockIn;
+
+  /// No description provided for @stockLow.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫僅少'**
+  String get stockLow;
+
+  /// No description provided for @stockOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫切れ'**
+  String get stockOut;
+
+  /// No description provided for @inspectionPassed.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格'**
+  String get inspectionPassed;
+
+  /// No description provided for @inspectionFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'不合格'**
+  String get inspectionFailed;
+
+  /// No description provided for @matchOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'OK'**
+  String get matchOk;
+
+  /// No description provided for @matchNg.
+  ///
+  /// In ja, this message translates to:
+  /// **'NG'**
+  String get matchNg;
+
+  /// No description provided for @typeReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get typeReceiving;
+
+  /// No description provided for @typeShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get typeShipping;
+
+  /// No description provided for @typeOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get typeOther;
 }
 
 class _AppLocalizationsDelegate

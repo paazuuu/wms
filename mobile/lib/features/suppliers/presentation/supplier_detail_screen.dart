@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -41,7 +42,7 @@ class _SupplierBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = SupplierStatusUi.of(supplier);
+    final status = SupplierStatusUi.of(AppLocalizations.of(context), supplier);
     final count = supplier.productsCount;
 
     return ListView(

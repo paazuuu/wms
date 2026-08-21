@@ -106,7 +106,7 @@ class _SalesOrderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final status = SalesOrderStatusUi.of(order);
+    final status = SalesOrderStatusUi.of(AppLocalizations.of(context), order);
     final customer = order.customerName?.trim().isNotEmpty == true
         ? order.customerName!
         : l10n.noCustomer;

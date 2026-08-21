@@ -102,5 +102,28 @@
   "lineCount": "{count, plural, other{{count}件の明細}}",
   "@lineCount": {
     "placeholders": { "count": { "type": "int" } }
-  }
+  },
+  "statusActive": "有効",
+  "statusInactive": "無効",
+  "statusCancelled": "キャンセル",
+  "statusDraft": "下書き",
+  "statusCompleted": "完了",
+  "statusInProgress": "進行中",
+  "statusPending": "保留",
+  "salesProcessing": "処理中",
+  "salesShipped": "出荷済み",
+  "salesDelivered": "配達済み",
+  "poSent": "送信済み",
+  "poPartiallyReceived": "一部入荷",
+  "poReceived": "入荷済み",
+  "stockIn": "在庫あり",
+  "stockLow": "在庫僅少",
+  "stockOut": "在庫切れ",
+  "inspectionPassed": "合格",
+  "inspectionFailed": "不合格",
+  "matchOk": "OK",
+  "matchNg": "NG",
+  "typeReceiving": "入荷",
+  "typeShipping": "出荷",
+  "typeOther": "その他"
 }

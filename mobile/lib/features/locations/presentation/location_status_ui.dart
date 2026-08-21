@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/location.dart';
 
 /// Single mapping from a location's active state to a [StatusTone] + icon, so
@@ -12,8 +13,9 @@ class LocationStatusUi {
   final IconData icon;
   final String label;
 
-  static LocationStatusUi of(Location location) => location.isActive
-      ? const LocationStatusUi(StatusTone.success, Icons.place, 'Active')
-      : const LocationStatusUi(
-          StatusTone.neutral, Icons.location_off_outlined, 'Inactive');
+  static LocationStatusUi of(AppLocalizations l10n, Location location) =>
+      location.isActive
+          ? LocationStatusUi(StatusTone.success, Icons.place, l10n.statusActive)
+          : LocationStatusUi(StatusTone.neutral, Icons.location_off_outlined,
+              l10n.statusInactive);
 }

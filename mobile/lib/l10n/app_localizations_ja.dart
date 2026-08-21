@@ -300,4 +300,73 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get statusActive => '有効';
+
+  @override
+  String get statusInactive => '無効';
+
+  @override
+  String get statusCancelled => 'キャンセル';
+
+  @override
+  String get statusDraft => '下書き';
+
+  @override
+  String get statusCompleted => '完了';
+
+  @override
+  String get statusInProgress => '進行中';
+
+  @override
+  String get statusPending => '保留';
+
+  @override
+  String get salesProcessing => '処理中';
+
+  @override
+  String get salesShipped => '出荷済み';
+
+  @override
+  String get salesDelivered => '配達済み';
+
+  @override
+  String get poSent => '送信済み';
+
+  @override
+  String get poPartiallyReceived => '一部入荷';
+
+  @override
+  String get poReceived => '入荷済み';
+
+  @override
+  String get stockIn => '在庫あり';
+
+  @override
+  String get stockLow => '在庫僅少';
+
+  @override
+  String get stockOut => '在庫切れ';
+
+  @override
+  String get inspectionPassed => '合格';
+
+  @override
+  String get inspectionFailed => '不合格';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => '入荷';
+
+  @override
+  String get typeShipping => '出荷';
+
+  @override
+  String get typeOther => 'その他';
 }

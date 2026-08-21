@@ -300,4 +300,73 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get statusActive => '启用';
+
+  @override
+  String get statusInactive => '停用';
+
+  @override
+  String get statusCancelled => '已取消';
+
+  @override
+  String get statusDraft => '草稿';
+
+  @override
+  String get statusCompleted => '已完成';
+
+  @override
+  String get statusInProgress => '进行中';
+
+  @override
+  String get statusPending => '待处理';
+
+  @override
+  String get salesProcessing => '处理中';
+
+  @override
+  String get salesShipped => '已发货';
+
+  @override
+  String get salesDelivered => '已送达';
+
+  @override
+  String get poSent => '已发送';
+
+  @override
+  String get poPartiallyReceived => '部分收货';
+
+  @override
+  String get poReceived => '已收货';
+
+  @override
+  String get stockIn => '有库存';
+
+  @override
+  String get stockLow => '库存不足';
+
+  @override
+  String get stockOut => '无库存';
+
+  @override
+  String get inspectionPassed => '合格';
+
+  @override
+  String get inspectionFailed => '不合格';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => '收货';
+
+  @override
+  String get typeShipping => '出货';
+
+  @override
+  String get typeOther => '其他';
 }

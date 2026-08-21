@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -57,7 +58,7 @@ class _StockAuditCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = StockAuditStatusUi.of(audit);
+    final status = StockAuditStatusUi.of(AppLocalizations.of(context), audit);
     final subtitle = audit.name?.trim().isNotEmpty == true
         ? audit.name!
         : (audit.locationName ?? 'All locations');

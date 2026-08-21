@@ -107,7 +107,7 @@ class _WorkOrderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final status = WorkOrderStatusUi.of(order);
+    final status = WorkOrderStatusUi.of(AppLocalizations.of(context), order);
     final product = order.productName.trim().isNotEmpty
         ? order.productName
         : l10n.noProduct;

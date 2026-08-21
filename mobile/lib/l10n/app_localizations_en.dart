@@ -303,4 +303,73 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get statusActive => 'Active';
+
+  @override
+  String get statusInactive => 'Inactive';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusDraft => 'Draft';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusInProgress => 'In progress';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get salesProcessing => 'Processing';
+
+  @override
+  String get salesShipped => 'Shipped';
+
+  @override
+  String get salesDelivered => 'Delivered';
+
+  @override
+  String get poSent => 'Sent';
+
+  @override
+  String get poPartiallyReceived => 'Partially received';
+
+  @override
+  String get poReceived => 'Received';
+
+  @override
+  String get stockIn => 'In stock';
+
+  @override
+  String get stockLow => 'Low stock';
+
+  @override
+  String get stockOut => 'Out of stock';
+
+  @override
+  String get inspectionPassed => 'Passed';
+
+  @override
+  String get inspectionFailed => 'Failed';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => 'Receiving';
+
+  @override
+  String get typeShipping => 'Shipping';
+
+  @override
+  String get typeOther => 'Other';
 }

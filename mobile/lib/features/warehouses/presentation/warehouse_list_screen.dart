@@ -106,7 +106,7 @@ class _WarehouseCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final status = WarehouseStatusUi.of(warehouse);
+    final status = WarehouseStatusUi.of(AppLocalizations.of(context), warehouse);
     final count = warehouse.locationsCount;
     final subtitle = warehouse.city?.trim().isNotEmpty == true
         ? warehouse.city!

@@ -108,7 +108,7 @@ class _PurchaseOrderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final status = ReceivingStatusUi.of(order);
+    final status = ReceivingStatusUi.of(AppLocalizations.of(context), order);
     final supplier = order.supplierName?.trim().isNotEmpty == true
         ? order.supplierName!
         : l10n.noSupplier;

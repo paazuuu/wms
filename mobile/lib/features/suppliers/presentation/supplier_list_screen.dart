@@ -103,7 +103,7 @@ class _SupplierCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = SupplierStatusUi.of(supplier);
+    final status = SupplierStatusUi.of(AppLocalizations.of(context), supplier);
     final count = supplier.productsCount;
     final subtitle = supplier.contactName?.trim().isNotEmpty == true
         ? supplier.contactName!

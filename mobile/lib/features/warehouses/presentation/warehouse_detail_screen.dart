@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -41,7 +42,7 @@ class _WarehouseBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = WarehouseStatusUi.of(warehouse);
+    final status = WarehouseStatusUi.of(AppLocalizations.of(context), warehouse);
     final locations = warehouse.locationsCount;
     final users = warehouse.usersCount;
     final address = warehouse.fullAddress;
