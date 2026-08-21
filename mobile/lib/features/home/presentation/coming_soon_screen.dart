@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/feature_entry.dart';
 
 /// Generic placeholder for a feature whose backend API exists but whose mobile
@@ -16,9 +17,10 @@ class ComingSoonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(feature.label)),
+      appBar: AppBar(title: Text(feature.label(l10n))),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -38,28 +40,27 @@ class ComingSoonScreen extends StatelessWidget {
                       size: 34, color: scheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const StatusPill(
+                StatusPill(
                   tone: StatusTone.info,
-                  label: 'Coming soon',
+                  label: l10n.comingSoon,
                   icon: Icons.schedule,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  feature.label,
+                  feature.label(l10n),
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  feature.description,
+                  feature.description(l10n),
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'The server API for this is ready — the mobile screen '
-                  'is next on the roadmap.',
+                  l10n.comingSoonBody,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
@@ -68,7 +69,7 @@ class ComingSoonScreen extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () => Navigator.of(context).maybePop(),
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back to menu'),
+                  label: Text(l10n.backToMenu),
                 ),
               ],
             ),

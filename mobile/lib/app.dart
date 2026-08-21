@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/l10n/locale_controller.dart';
 import 'core/theme/app_spacing.dart';
 import 'core/theme/app_theme.dart';
 import 'core/offline/offline_providers.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'l10n/app_localizations.dart';
 
 class WmsApp extends ConsumerWidget {
   const WmsApp({super.key});
@@ -21,9 +23,14 @@ class WmsApp extends ConsumerWidget {
       ref.watch(offlineSyncServiceProvider);
     }
 
+    final locale = ref.watch(localeControllerProvider);
+
     return MaterialApp(
-      title: 'WMS Mobile',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,

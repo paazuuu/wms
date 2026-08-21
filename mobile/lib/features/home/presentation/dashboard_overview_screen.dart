@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 
@@ -37,6 +38,7 @@ class DashboardOverviewScreen extends StatelessWidget {
     }
 
     final lookup = entryById('product_lookup');
+    final l10n = AppLocalizations.of(context);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -48,7 +50,7 @@ class DashboardOverviewScreen extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         for (final group in groups) ...[
-          _SectionLabel(group.title),
+          _SectionLabel(group.title(l10n)),
           const SizedBox(height: AppSpacing.md),
           _FeatureGrid(entries: group.entries, onOpen: onOpen),
           const SizedBox(height: AppSpacing.xl),
@@ -69,6 +71,7 @@ class _ScanHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Card(
       clipBehavior: Clip.antiAlias,
       color: scheme.primaryContainer,
@@ -87,14 +90,13 @@ class _ScanHeroCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Ready to scan',
+                      l10n.readyToScanTitle,
                       style: theme.textTheme.titleMedium
                           ?.copyWith(color: scheme.onPrimaryContainer),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Fire a handheld scanner anywhere, or tap to search by '
-                      'barcode, SKU or name.',
+                      l10n.readyToScanBody,
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: scheme.onPrimaryContainer),
                     ),
@@ -121,9 +123,10 @@ class _GreetingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final displayName = (name != null && name!.trim().isNotEmpty)
         ? name!.trim()
-        : 'Operator';
+        : l10n.operatorName;
 
     return Card(
       child: Padding(
@@ -137,7 +140,7 @@ class _GreetingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome back',
+                    l10n.welcomeBack,
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
@@ -161,9 +164,9 @@ class _GreetingCard extends StatelessWidget {
                 ],
               ),
             ),
-            const StatusPill(
+            StatusPill(
               tone: StatusTone.success,
-              label: 'Scanner ready',
+              label: l10n.scannerReady,
               icon: Icons.qr_code_scanner_outlined,
               dense: true,
             ),
@@ -226,6 +229,7 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final tone = entry.isReady ? StatusTone.info : StatusTone.neutral;
 
     return Card(
@@ -244,16 +248,16 @@ class _FeatureCard extends StatelessWidget {
                   if (entry.isReady)
                     Icon(Icons.chevron_right, color: scheme.onSurfaceVariant)
                   else
-                    const StatusPill(
+                    StatusPill(
                       tone: StatusTone.neutral,
-                      label: 'Soon',
+                      label: l10n.comingSoon,
                       dense: true,
                     ),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                entry.label,
+                entry.label(l10n),
                 style: theme.textTheme.titleSmall,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -261,7 +265,7 @@ class _FeatureCard extends StatelessWidget {
               const SizedBox(height: 2),
               Expanded(
                 child: Text(
-                  entry.description,
+                  entry.description(l10n),
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
                   maxLines: 2,

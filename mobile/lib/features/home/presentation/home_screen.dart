@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app.dart';
+import '../../../core/l10n/language_menu.dart';
 import '../../../core/scan/hardware_scanner.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -11,6 +12,7 @@ import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../inspection/presentation/barcode_scan_screen.dart';
 import '../../products/presentation/product_lookup_screen.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 import 'coming_soon_screen.dart';
@@ -181,15 +183,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// Maps a selected feature id to its display title for the top bar.
-String _titleForId(String id) {
-  if (id == 'dashboard') return 'Dashboard';
+/// Maps a selected feature id to its localized display title for the top bar.
+String _titleForId(AppLocalizations l10n, String id) {
+  if (id == 'dashboard') return l10n.navDashboard;
   for (final group in buildFeatureCatalog()) {
     for (final entry in group.entries) {
-      if (entry.id == id) return entry.label;
+      if (entry.id == id) return entry.label(l10n);
     }
   }
-  return 'Dashboard';
+  return l10n.navDashboard;
 }
 
 /// Observes the content navigator and reports when it returns to its first
@@ -232,6 +234,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       height: 72,
@@ -244,7 +247,7 @@ class _TopBar extends StatelessWidget {
         children: [
           if (onMenu != null) ...[
             IconButton(
-              tooltip: 'Menu',
+              tooltip: l10n.menu,
               icon: const Icon(Icons.menu),
               onPressed: onMenu,
             ),
@@ -259,7 +262,7 @@ class _TopBar extends StatelessWidget {
               child: ValueListenableBuilder<String>(
                 valueListenable: selected,
                 builder: (context, id, _) => Text(
-                  _titleForId(id),
+                  _titleForId(l10n, id),
                   style: theme.textTheme.titleLarge,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -274,12 +277,12 @@ class _TopBar extends StatelessWidget {
                 child: ScanField(
                   controller: scanController,
                   dense: true,
-                  hintText: 'Scan or search a barcode / SKU',
+                  hintText: l10n.topbarScanHint,
                   onSubmitted: onScan,
                   trailing: onCamera != null
                       ? [
                           IconButton(
-                            tooltip: 'Scan with camera',
+                            tooltip: l10n.cameraScan,
                             icon: const Icon(Icons.photo_camera_outlined),
                             onPressed: () => onCamera!(),
                           ),
@@ -289,6 +292,8 @@ class _TopBar extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: AppSpacing.xs),
+          const LanguageMenuButton(),
         ],
       ),
     );
@@ -317,6 +322,7 @@ class _Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final groups = buildFeatureCatalog();
 
     return Container(
@@ -335,9 +341,9 @@ class _Sidebar extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('WMS', style: theme.textTheme.titleMedium),
+                      Text(l10n.appTitle, style: theme.textTheme.titleMedium),
                       Text(
-                        'Warehouse',
+                        l10n.brandSubtitle,
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
@@ -358,7 +364,7 @@ class _Sidebar extends StatelessWidget {
                   children: [
                     _SidebarItem(
                       icon: Icons.dashboard_outlined,
-                      label: 'Dashboard',
+                      label: l10n.navDashboard,
                       selected: currentId == 'dashboard',
                       onTap: onDashboard,
                     ),
@@ -367,7 +373,7 @@ class _Sidebar extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(AppSpacing.md,
                             AppSpacing.md, AppSpacing.md, AppSpacing.xs),
                         child: Text(
-                          group.title.toUpperCase(),
+                          group.title(l10n).toUpperCase(),
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                             letterSpacing: 0.8,
@@ -378,7 +384,7 @@ class _Sidebar extends StatelessWidget {
                       for (final entry in group.entries)
                         _SidebarItem(
                           icon: entry.icon,
-                          label: entry.label,
+                          label: entry.label(l10n),
                           selected: currentId == entry.id,
                           onTap: () => onOpen(entry),
                         ),
@@ -407,7 +413,7 @@ class _Sidebar extends StatelessWidget {
                       Text(
                         (userName != null && userName!.trim().isNotEmpty)
                             ? userName!.trim()
-                            : 'Operator',
+                            : l10n.operatorName,
                         style: theme.textTheme.titleSmall,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -423,8 +429,9 @@ class _Sidebar extends StatelessWidget {
                     ],
                   ),
                 ),
+                const LanguageMenuButton(),
                 IconButton(
-                  tooltip: 'Sign out',
+                  tooltip: l10n.signOut,
                   icon: const Icon(Icons.logout),
                   onPressed: onLogout,
                 ),

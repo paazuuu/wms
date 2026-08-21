@@ -11,6 +11,7 @@ import 'package:wms_mobile/features/picking/presentation/picking_list_screen.dar
 import 'package:wms_mobile/features/sales_orders/application/sales_order_providers.dart';
 import 'package:wms_mobile/features/sales_orders/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales_orders/domain/sales_order.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// Offline fake so the auth controller lands "authenticated" without a network.
 class _FakeAuthRepository implements AuthRepository {
@@ -46,7 +47,12 @@ Widget _wrap() => ProviderScope(
         salesOrderRepositoryProvider
             .overrideWithValue(_EmptySalesOrderRepository()),
       ],
-      child: const MaterialApp(home: HomeScreen()),
+      child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: HomeScreen(),
+      ),
     );
 
 void main() {
