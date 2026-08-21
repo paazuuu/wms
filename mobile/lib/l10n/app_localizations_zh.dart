@@ -222,4 +222,151 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get findProductToTrace => '查找要追溯的商品。';
+
+  @override
+  String get loading => '加载中…';
+
+  @override
+  String get emptyLocations => '暂无库位。';
+
+  @override
+  String get emptyWarehouses => '暂无仓库。';
+
+  @override
+  String get emptySuppliers => '暂无供应商。';
+
+  @override
+  String get emptySalesOrders => '暂无销售订单。';
+
+  @override
+  String get emptyPurchaseOrders => '暂无采购单。';
+
+  @override
+  String get emptyWorkOrders => '暂无工单。';
+
+  @override
+  String get tryDifferentNameCode => '请尝试其他名称或代码。';
+
+  @override
+  String get tryDifferentOrder => '请尝试其他订单号或客户。';
+
+  @override
+  String get tryDifferentPo => '请尝试其他采购单号或供应商。';
+
+  @override
+  String get tryDifferentWo => '请尝试其他工单号、商品或 SKU。';
+
+  @override
+  String get hintLocations => '扫描或按名称、代码搜索';
+
+  @override
+  String get hintWarehouses => '扫描或按名称、代码或城市搜索';
+
+  @override
+  String get hintSuppliers => '扫描或按名称、代码、联系人或邮箱搜索';
+
+  @override
+  String get hintSalesOrders => '扫描或按订单号、客户或邮箱搜索';
+
+  @override
+  String get hintPurchaseOrders => '扫描或按采购单号或供应商搜索';
+
+  @override
+  String get hintWorkOrders => '扫描或按工单号、商品或 SKU 搜索';
+
+  @override
+  String get warehouseDefault => '默认';
+
+  @override
+  String get noCustomer => '无客户';
+
+  @override
+  String get noSupplier => '无供应商';
+
+  @override
+  String get noProduct => '无商品';
+
+  @override
+  String qtyLabel(int quantity) {
+    return '数量 $quantity';
+  }
+
+  @override
+  String lineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusActive => '启用';
+
+  @override
+  String get statusInactive => '停用';
+
+  @override
+  String get statusCancelled => '已取消';
+
+  @override
+  String get statusDraft => '草稿';
+
+  @override
+  String get statusCompleted => '已完成';
+
+  @override
+  String get statusInProgress => '进行中';
+
+  @override
+  String get statusPending => '待处理';
+
+  @override
+  String get salesProcessing => '处理中';
+
+  @override
+  String get salesShipped => '已发货';
+
+  @override
+  String get salesDelivered => '已送达';
+
+  @override
+  String get poSent => '已发送';
+
+  @override
+  String get poPartiallyReceived => '部分收货';
+
+  @override
+  String get poReceived => '已收货';
+
+  @override
+  String get stockIn => '有库存';
+
+  @override
+  String get stockLow => '库存不足';
+
+  @override
+  String get stockOut => '无库存';
+
+  @override
+  String get inspectionPassed => '合格';
+
+  @override
+  String get inspectionFailed => '不合格';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => '收货';
+
+  @override
+  String get typeShipping => '出货';
+
+  @override
+  String get typeOther => '其他';
 }

@@ -106,7 +106,7 @@ class _AdjustCandidateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final stock = ProductStockUi.of(product);
+    final stock = ProductStockUi.of(AppLocalizations.of(context), product);
 
     return Card(
       clipBehavior: Clip.antiAlias,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/product.dart';
 
 /// Single mapping from a product's stock state to a [StatusTone] + label + icon,
@@ -12,16 +13,16 @@ class ProductStockUi {
   final String label;
   final IconData icon;
 
-  factory ProductStockUi.of(Product product) {
+  factory ProductStockUi.of(AppLocalizations l10n, Product product) {
     if (product.isOutOfStock || product.displayStock <= 0) {
-      return const ProductStockUi._(
-          StatusTone.danger, 'Out of stock', Icons.remove_shopping_cart_outlined);
+      return ProductStockUi._(StatusTone.danger, l10n.stockOut,
+          Icons.remove_shopping_cart_outlined);
     }
     if (product.isLowStock) {
-      return const ProductStockUi._(
-          StatusTone.warning, 'Low stock', Icons.trending_down);
+      return ProductStockUi._(
+          StatusTone.warning, l10n.stockLow, Icons.trending_down);
     }
-    return const ProductStockUi._(
-        StatusTone.success, 'In stock', Icons.inventory_2_outlined);
+    return ProductStockUi._(
+        StatusTone.success, l10n.stockIn, Icons.inventory_2_outlined);
   }
 }

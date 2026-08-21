@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/inspection/application/inspection_providers.dart';
@@ -7,7 +8,12 @@ import 'package:wms_mobile/features/inspection/presentation/inspection_list_scre
 
 Widget _wrap(List<Override> overrides) => ProviderScope(
       overrides: overrides,
-      child: const MaterialApp(home: InspectionListScreen()),
+      child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: InspectionListScreen(),
+      ),
     );
 
 void main() {

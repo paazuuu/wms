@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -41,7 +42,7 @@ class _ProductBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final stock = ProductStockUi.of(product);
+    final stock = ProductStockUi.of(AppLocalizations.of(context), product);
     final currency = product.currency ?? '';
 
     return ListView(
