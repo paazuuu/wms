@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Localization (Japanese / Chinese / English, generated via gen_l10n)
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
   # State management
   flutter_riverpod: ^2.5.1
   # HTTP
@@ -45,6 +49,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Generate AppLocalizations from lib/l10n/*.arb (see l10n.yaml)
+  generate: true
 
   # Bundled offline-first fonts (ui-ux-pro-max "Dashboard Data" pairing):
   # Fira Sans for UI/labels, Fira Code (monospace) for codes/barcodes/quantities.

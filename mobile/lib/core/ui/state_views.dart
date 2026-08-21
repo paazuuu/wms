@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_spacing.dart';
 
 /// Centered loading indicator with an optional caption. Async operations must
@@ -92,6 +93,7 @@ class ErrorStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.xl),
       children: [
@@ -99,7 +101,7 @@ class ErrorStateView extends StatelessWidget {
         Icon(Icons.error_outline, size: 56, color: scheme.error),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Something went wrong',
+          l10n.somethingWentWrong,
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
@@ -117,7 +119,7 @@ class ErrorStateView extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(l10n.retry),
           ),
         ),
       ],
