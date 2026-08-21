@@ -18,12 +18,13 @@ class SupplierDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final supplier = ref.watch(supplierDetailProvider(supplierId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Supplier')),
+      appBar: AppBar(title: Text(l10n.featSuppliers)),
       body: supplier.when(
         data: (s) => _SupplierBody(supplier: s),
-        loading: () => const LoadingView(message: 'Loading supplier…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(supplierDetailProvider(supplierId)),
@@ -42,7 +43,8 @@ class _SupplierBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = SupplierStatusUi.of(AppLocalizations.of(context), supplier);
+    final l10n = AppLocalizations.of(context);
+    final status = SupplierStatusUi.of(l10n, supplier);
     final count = supplier.productsCount;
 
     return ListView(
@@ -92,7 +94,7 @@ class _SupplierBody extends StatelessWidget {
                     if (count != null)
                       StatusPill(
                         tone: StatusTone.info,
-                        label: '$count ${count == 1 ? 'product' : 'products'}',
+                        label: l10n.productCount(count),
                         icon: Icons.inventory_2_outlined,
                       ),
                   ],
@@ -108,13 +110,14 @@ class _SupplierBody extends StatelessWidget {
             child: Column(
               children: [
                 _InfoRow(
-                  label: 'Contact',
+                  label: l10n.fieldContact,
                   value: supplier.contactName ?? '—',
                 ),
-                _InfoRow(label: 'Email', value: supplier.email ?? '—'),
-                _InfoRow(label: 'Phone', value: supplier.phone ?? '—'),
-                _InfoRow(label: 'Website', value: supplier.website ?? '—'),
-                _InfoRow(label: 'Address', value: supplier.fullAddress ?? '—'),
+                _InfoRow(label: l10n.email, value: supplier.email ?? '—'),
+                _InfoRow(label: l10n.fieldPhone, value: supplier.phone ?? '—'),
+                _InfoRow(label: l10n.fieldWebsite, value: supplier.website ?? '—'),
+                _InfoRow(
+                    label: l10n.fieldAddress, value: supplier.fullAddress ?? '—'),
               ],
             ),
           ),
@@ -126,17 +129,19 @@ class _SupplierBody extends StatelessWidget {
             child: Column(
               children: [
                 _InfoRow(
-                  label: 'Payment terms',
+                  label: l10n.fieldPaymentTerms,
                   value: supplier.paymentTerms ?? '—',
                 ),
-                _InfoRow(label: 'Currency', value: supplier.currency ?? '—'),
+                _InfoRow(label: l10n.fieldCurrency, value: supplier.currency ?? '—'),
                 _InfoRow(
-                  label: 'Products',
+                  label: l10n.fieldProducts,
                   value: count != null ? '$count' : '—',
                 ),
                 _InfoRow(
-                  label: 'Status',
-                  value: supplier.isActive ? 'Active' : 'Inactive',
+                  label: l10n.fieldStatus,
+                  value: supplier.isActive
+                      ? l10n.statusActive
+                      : l10n.statusInactive,
                 ),
               ],
             ),
@@ -151,7 +156,7 @@ class _SupplierBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Notes',
+                    l10n.fieldNotes,
                     style: theme.textTheme.titleSmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),

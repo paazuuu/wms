@@ -149,7 +149,7 @@ class _SupplierCard extends StatelessWidget {
               if (count != null)
                 StatusPill(
                   tone: StatusTone.info,
-                  label: '$count ${count == 1 ? 'product' : 'products'}',
+                  label: AppLocalizations.of(context).productCount(count),
                   icon: Icons.inventory_2_outlined,
                   dense: true,
                 ),

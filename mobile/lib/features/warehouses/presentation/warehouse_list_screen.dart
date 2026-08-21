@@ -167,7 +167,7 @@ class _WarehouseCard extends StatelessWidget {
               if (count != null)
                 StatusPill(
                   tone: StatusTone.neutral,
-                  label: '$count ${count == 1 ? 'bin' : 'bins'}',
+                  label: l10n.binCount(count),
                   icon: Icons.place_outlined,
                   dense: true,
                 ),

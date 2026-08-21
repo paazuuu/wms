@@ -18,12 +18,13 @@ class WarehouseDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final warehouse = ref.watch(warehouseDetailProvider(warehouseId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Warehouse')),
+      appBar: AppBar(title: Text(l10n.featWarehouses)),
       body: warehouse.when(
         data: (w) => _WarehouseBody(warehouse: w),
-        loading: () => const LoadingView(message: 'Loading warehouse…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(warehouseDetailProvider(warehouseId)),
@@ -42,7 +43,8 @@ class _WarehouseBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = WarehouseStatusUi.of(AppLocalizations.of(context), warehouse);
+    final l10n = AppLocalizations.of(context);
+    final status = WarehouseStatusUi.of(l10n, warehouse);
     final locations = warehouse.locationsCount;
     final users = warehouse.usersCount;
     final address = warehouse.fullAddress;
@@ -92,9 +94,9 @@ class _WarehouseBody extends StatelessWidget {
                       icon: status.icon,
                     ),
                     if (warehouse.isDefault)
-                      const StatusPill(
+                      StatusPill(
                         tone: StatusTone.info,
-                        label: 'Default',
+                        label: l10n.warehouseDefault,
                         icon: Icons.star_outline,
                       ),
                   ],
@@ -110,12 +112,13 @@ class _WarehouseBody extends StatelessWidget {
             child: Column(
               children: [
                 _InfoRow(
-                  label: 'Address',
+                  label: l10n.fieldAddress,
                   value: address.isEmpty ? '—' : address,
                 ),
-                _InfoRow(label: 'Phone', value: warehouse.phone ?? '—'),
-                _InfoRow(label: 'Email', value: warehouse.email ?? '—'),
-                _InfoRow(label: 'Manager', value: warehouse.managerName ?? '—'),
+                _InfoRow(label: l10n.fieldPhone, value: warehouse.phone ?? '—'),
+                _InfoRow(label: l10n.email, value: warehouse.email ?? '—'),
+                _InfoRow(
+                    label: l10n.fieldManager, value: warehouse.managerName ?? '—'),
               ],
             ),
           ),
@@ -127,19 +130,21 @@ class _WarehouseBody extends StatelessWidget {
             child: Column(
               children: [
                 _InfoRow(
-                  label: 'Locations',
+                  label: l10n.fieldLocations,
                   value: locations != null ? '$locations' : '—',
                 ),
                 _InfoRow(
-                  label: 'Users',
+                  label: l10n.fieldUsers,
                   value: users != null ? '$users' : '—',
                 ),
-                _InfoRow(label: 'Timezone', value: warehouse.timezone ?? '—'),
-                _InfoRow(label: 'Currency', value: warehouse.currency ?? '—'),
-                _InfoRow(label: 'Priority', value: '${warehouse.priority}'),
+                _InfoRow(label: l10n.fieldTimezone, value: warehouse.timezone ?? '—'),
+                _InfoRow(label: l10n.fieldCurrency, value: warehouse.currency ?? '—'),
+                _InfoRow(label: l10n.fieldPriority, value: '${warehouse.priority}'),
                 _InfoRow(
-                  label: 'Status',
-                  value: warehouse.isActive ? 'Active' : 'Inactive',
+                  label: l10n.fieldStatus,
+                  value: warehouse.isActive
+                      ? l10n.statusActive
+                      : l10n.statusInactive,
                 ),
               ],
             ),
@@ -155,7 +160,7 @@ class _WarehouseBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Description',
+                    l10n.fieldDescription,
                     style: theme.textTheme.titleSmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),

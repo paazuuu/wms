@@ -369,4 +369,124 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get typeOther => '其他';
+
+  @override
+  String get titleProduct => '商品';
+
+  @override
+  String get fieldDescription => '描述';
+
+  @override
+  String get fieldPhone => '电话';
+
+  @override
+  String get fieldAddress => '地址';
+
+  @override
+  String get fieldStatus => '状态';
+
+  @override
+  String get fieldCurrency => '币种';
+
+  @override
+  String get fieldCategory => '类别';
+
+  @override
+  String get fieldBarcode => '条码';
+
+  @override
+  String get fieldSku => 'SKU';
+
+  @override
+  String get fieldPrice => '价格';
+
+  @override
+  String get fieldSellingPrice => '售价';
+
+  @override
+  String get fieldMinStock => '最低库存';
+
+  @override
+  String get fieldOnHand => '现有库存';
+
+  @override
+  String get fieldLocation => '库位';
+
+  @override
+  String get fieldHasVariants => '有变体';
+
+  @override
+  String get fieldManager => '负责人';
+
+  @override
+  String get fieldTimezone => '时区';
+
+  @override
+  String get fieldPriority => '优先级';
+
+  @override
+  String get fieldUsers => '用户';
+
+  @override
+  String get fieldLocations => '库位';
+
+  @override
+  String get fieldContact => '联系人';
+
+  @override
+  String get fieldWebsite => '网站';
+
+  @override
+  String get fieldPaymentTerms => '付款条件';
+
+  @override
+  String get fieldNotes => '备注';
+
+  @override
+  String get fieldProducts => '商品';
+
+  @override
+  String get fieldAisle => '通道';
+
+  @override
+  String get fieldShelf => '货架';
+
+  @override
+  String get fieldBin => '货位';
+
+  @override
+  String get fieldCode => '代码';
+
+  @override
+  String get fieldFullLocation => '完整库位';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个商品',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String binCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个货位',
+    );
+    return '$_temp0';
+  }
 }

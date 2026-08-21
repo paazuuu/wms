@@ -145,7 +145,7 @@ class _LocationCard extends StatelessWidget {
               if (count != null)
                 StatusPill(
                   tone: StatusTone.info,
-                  label: '$count ${count == 1 ? 'item' : 'items'}',
+                  label: AppLocalizations.of(context).itemCount(count),
                   icon: Icons.inventory_2_outlined,
                   dense: true,
                 ),

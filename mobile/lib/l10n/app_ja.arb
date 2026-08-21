@@ -125,5 +125,47 @@
   "matchNg": "NG",
   "typeReceiving": "入荷",
   "typeShipping": "出荷",
-  "typeOther": "その他"
+  "typeOther": "その他",
+  "titleProduct": "商品",
+  "fieldDescription": "説明",
+  "fieldPhone": "電話",
+  "fieldAddress": "住所",
+  "fieldStatus": "ステータス",
+  "fieldCurrency": "通貨",
+  "fieldCategory": "カテゴリ",
+  "fieldBarcode": "バーコード",
+  "fieldSku": "SKU",
+  "fieldPrice": "価格",
+  "fieldSellingPrice": "販売価格",
+  "fieldMinStock": "最小在庫",
+  "fieldOnHand": "在庫数",
+  "fieldLocation": "ロケーション",
+  "fieldHasVariants": "バリエーションあり",
+  "fieldManager": "管理者",
+  "fieldTimezone": "タイムゾーン",
+  "fieldPriority": "優先度",
+  "fieldUsers": "ユーザー",
+  "fieldLocations": "ロケーション",
+  "fieldContact": "担当者",
+  "fieldWebsite": "ウェブサイト",
+  "fieldPaymentTerms": "支払条件",
+  "fieldNotes": "備考",
+  "fieldProducts": "商品",
+  "fieldAisle": "通路",
+  "fieldShelf": "棚",
+  "fieldBin": "ビン",
+  "fieldCode": "コード",
+  "fieldFullLocation": "フルロケーション",
+  "itemCount": "{count, plural, other{{count}点}}",
+  "@itemCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "productCount": "{count, plural, other{{count}品目}}",
+  "@productCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "binCount": "{count, plural, other{{count}ロケーション}}",
+  "@binCount": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

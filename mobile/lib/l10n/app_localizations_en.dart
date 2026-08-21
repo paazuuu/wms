@@ -372,4 +372,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get typeOther => 'Other';
+
+  @override
+  String get titleProduct => 'Product';
+
+  @override
+  String get fieldDescription => 'Description';
+
+  @override
+  String get fieldPhone => 'Phone';
+
+  @override
+  String get fieldAddress => 'Address';
+
+  @override
+  String get fieldStatus => 'Status';
+
+  @override
+  String get fieldCurrency => 'Currency';
+
+  @override
+  String get fieldCategory => 'Category';
+
+  @override
+  String get fieldBarcode => 'Barcode';
+
+  @override
+  String get fieldSku => 'SKU';
+
+  @override
+  String get fieldPrice => 'Price';
+
+  @override
+  String get fieldSellingPrice => 'Selling price';
+
+  @override
+  String get fieldMinStock => 'Min stock';
+
+  @override
+  String get fieldOnHand => 'On hand';
+
+  @override
+  String get fieldLocation => 'Location';
+
+  @override
+  String get fieldHasVariants => 'Has variants';
+
+  @override
+  String get fieldManager => 'Manager';
+
+  @override
+  String get fieldTimezone => 'Timezone';
+
+  @override
+  String get fieldPriority => 'Priority';
+
+  @override
+  String get fieldUsers => 'Users';
+
+  @override
+  String get fieldLocations => 'Locations';
+
+  @override
+  String get fieldContact => 'Contact';
+
+  @override
+  String get fieldWebsite => 'Website';
+
+  @override
+  String get fieldPaymentTerms => 'Payment terms';
+
+  @override
+  String get fieldNotes => 'Notes';
+
+  @override
+  String get fieldProducts => 'Products';
+
+  @override
+  String get fieldAisle => 'Aisle';
+
+  @override
+  String get fieldShelf => 'Shelf';
+
+  @override
+  String get fieldBin => 'Bin';
+
+  @override
+  String get fieldCode => 'Code';
+
+  @override
+  String get fieldFullLocation => 'Full location';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '$count product',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String binCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bins',
+      one: '$count bin',
+    );
+    return '$_temp0';
+  }
 }
