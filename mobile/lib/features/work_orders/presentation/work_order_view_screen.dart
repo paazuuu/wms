@@ -20,12 +20,13 @@ class WorkOrderViewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(workOrderDetailProvider(workOrderId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Work Order')),
+      appBar: AppBar(title: Text(l10n.featWorkOrders)),
       body: order.when(
         data: (o) => _WorkOrderBody(order: o),
-        loading: () => const LoadingView(message: 'Loading work order…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(workOrderDetailProvider(workOrderId)),
@@ -44,7 +45,8 @@ class _WorkOrderBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = WorkOrderStatusUi.of(AppLocalizations.of(context), order);
+    final l10n = AppLocalizations.of(context);
+    final status = WorkOrderStatusUi.of(l10n, order);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -88,7 +90,7 @@ class _WorkOrderBody extends StatelessWidget {
                 Text(
                   order.productName.isNotEmpty
                       ? order.productName
-                      : 'Assembly product',
+                      : l10n.fieldAssemblyProduct,
                   style: theme.textTheme.titleMedium,
                 ),
                 if (order.sku.isNotEmpty) ...[
@@ -104,24 +106,25 @@ class _WorkOrderBody extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
-                    _Stat(label: 'Target', value: '${order.quantity}'),
+                    _Stat(label: l10n.fieldTarget, value: '${order.quantity}'),
                     _Stat(
-                        label: 'Produced',
+                        label: l10n.fieldProduced,
                         value: order.quantityProduced != null
                             ? '${order.quantityProduced}'
                             : '—'),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                _InfoRow(label: 'Started', value: order.startedAt ?? '—'),
-                _InfoRow(label: 'Completed', value: order.completedAt ?? '—'),
+                _InfoRow(label: l10n.fieldStarted, value: order.startedAt ?? '—'),
+                _InfoRow(
+                    label: l10n.statusCompleted, value: order.completedAt ?? '—'),
               ],
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Components',
+          l10n.fieldComponents,
           style: theme.textTheme.titleSmall
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
@@ -130,7 +133,7 @@ class _WorkOrderBody extends StatelessWidget {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text('No components.',
+              child: Text(l10n.noComponents,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: scheme.onSurfaceVariant)),
             ),
@@ -148,7 +151,7 @@ class _WorkOrderBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Notes',
+                  Text(l10n.fieldNotes,
                       style: theme.textTheme.titleSmall
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),
@@ -172,6 +175,7 @@ class _ComponentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final done = item.quantityRemaining <= 0;
 
     return Card(
@@ -189,7 +193,7 @@ class _ComponentCard extends StatelessWidget {
                       Text(
                         item.productName.isNotEmpty
                             ? item.productName
-                            : 'Product #${item.productId}',
+                            : l10n.productNumber(item.productId),
                         style: theme.textTheme.titleSmall,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -210,8 +214,9 @@ class _ComponentCard extends StatelessWidget {
                 StatusPill(
                   tone: done ? StatusTone.success : StatusTone.warning,
                   label: done
-                      ? 'Consumed'
-                      : '${formatQuantity(item.quantityRemaining)} left',
+                      ? l10n.fieldConsumed
+                      : l10n.remainingAmount(
+                          formatQuantity(item.quantityRemaining)),
                   icon: done
                       ? Icons.check_circle_outline
                       : Icons.hourglass_bottom,
@@ -223,13 +228,13 @@ class _ComponentCard extends StatelessWidget {
             Row(
               children: [
                 _Stat(
-                    label: 'Required',
+                    label: l10n.fieldRequired,
                     value: formatQuantity(item.quantityRequired)),
                 _Stat(
-                    label: 'Consumed',
+                    label: l10n.fieldConsumed,
                     value: formatQuantity(item.quantityConsumed)),
                 _Stat(
-                    label: 'On hand',
+                    label: l10n.fieldOnHand,
                     value: item.stock != null ? '${item.stock}' : '—'),
               ],
             ),

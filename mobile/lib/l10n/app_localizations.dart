@@ -999,6 +999,216 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{count, plural, other{{count}ロケーション}}'**
   String binCount(int count);
+
+  /// No description provided for @fieldCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客'**
+  String get fieldCustomer;
+
+  /// No description provided for @lineItems.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細'**
+  String get lineItems;
+
+  /// No description provided for @noLineItems.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細がありません。'**
+  String get noLineItems;
+
+  /// No description provided for @fieldOrderDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'注文日'**
+  String get fieldOrderDate;
+
+  /// No description provided for @fieldSubtotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'小計'**
+  String get fieldSubtotal;
+
+  /// No description provided for @fieldTax.
+  ///
+  /// In ja, this message translates to:
+  /// **'税'**
+  String get fieldTax;
+
+  /// No description provided for @fieldShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'送料'**
+  String get fieldShipping;
+
+  /// No description provided for @fieldTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get fieldTotal;
+
+  /// No description provided for @fieldSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get fieldSupplier;
+
+  /// No description provided for @fieldExpected.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定'**
+  String get fieldExpected;
+
+  /// No description provided for @fieldOrdered.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get fieldOrdered;
+
+  /// No description provided for @fieldReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get fieldReceived;
+
+  /// No description provided for @fieldRemaining.
+  ///
+  /// In ja, this message translates to:
+  /// **'残'**
+  String get fieldRemaining;
+
+  /// No description provided for @actionComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get actionComplete;
+
+  /// No description provided for @fieldAssemblyProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'組立製品'**
+  String get fieldAssemblyProduct;
+
+  /// No description provided for @fieldComponents.
+  ///
+  /// In ja, this message translates to:
+  /// **'部品'**
+  String get fieldComponents;
+
+  /// No description provided for @noComponents.
+  ///
+  /// In ja, this message translates to:
+  /// **'部品がありません。'**
+  String get noComponents;
+
+  /// No description provided for @fieldConsumed.
+  ///
+  /// In ja, this message translates to:
+  /// **'消費'**
+  String get fieldConsumed;
+
+  /// No description provided for @fieldProduced.
+  ///
+  /// In ja, this message translates to:
+  /// **'生産'**
+  String get fieldProduced;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'必要'**
+  String get fieldRequired;
+
+  /// No description provided for @fieldTarget.
+  ///
+  /// In ja, this message translates to:
+  /// **'目標'**
+  String get fieldTarget;
+
+  /// No description provided for @fieldStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'開始'**
+  String get fieldStarted;
+
+  /// No description provided for @productNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品 #{id}'**
+  String productNumber(int id);
+
+  /// No description provided for @fieldCountedLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'カウント済み明細'**
+  String get fieldCountedLines;
+
+  /// No description provided for @noCountedLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'カウント済み明細がありません。'**
+  String get noCountedLines;
+
+  /// No description provided for @fieldCounted.
+  ///
+  /// In ja, this message translates to:
+  /// **'カウント'**
+  String get fieldCounted;
+
+  /// No description provided for @fieldUncounted.
+  ///
+  /// In ja, this message translates to:
+  /// **'未カウント'**
+  String get fieldUncounted;
+
+  /// No description provided for @fieldDiscrepancy.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異'**
+  String get fieldDiscrepancy;
+
+  /// No description provided for @fieldMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致'**
+  String get fieldMatch;
+
+  /// No description provided for @fieldSystem.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム'**
+  String get fieldSystem;
+
+  /// No description provided for @fieldName.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称'**
+  String get fieldName;
+
+  /// No description provided for @fieldType.
+  ///
+  /// In ja, this message translates to:
+  /// **'種別'**
+  String get fieldType;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get filterAll;
+
+  /// No description provided for @remainingLeft.
+  ///
+  /// In ja, this message translates to:
+  /// **'残り {count}'**
+  String remainingLeft(int count);
+
+  /// No description provided for @remainingAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'残り {amount}'**
+  String remainingAmount(String amount);
 }
 
 class _AppLocalizationsDelegate

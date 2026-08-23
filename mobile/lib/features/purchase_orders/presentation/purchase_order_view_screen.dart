@@ -21,12 +21,13 @@ class PurchaseOrderViewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(purchaseOrderDetailProvider(purchaseOrderId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Purchase Order')),
+      appBar: AppBar(title: Text(l10n.featPurchaseOrders)),
       body: order.when(
         data: (o) => _PurchaseOrderBody(order: o),
-        loading: () => const LoadingView(message: 'Loading purchase order…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () =>
@@ -53,7 +54,8 @@ class _PurchaseOrderBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = ReceivingStatusUi.of(AppLocalizations.of(context), order);
+    final l10n = AppLocalizations.of(context);
+    final status = ReceivingStatusUi.of(l10n, order);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -93,18 +95,18 @@ class _PurchaseOrderBody extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                _InfoRow(label: 'Supplier', value: order.supplierName ?? '—'),
-                _InfoRow(label: 'Order date', value: order.orderDate ?? '—'),
-                _InfoRow(label: 'Expected', value: order.expectedDate ?? '—'),
-                _InfoRow(label: 'Received', value: order.receivedDate ?? '—'),
-                _InfoRow(label: 'Total', value: _displayTotal),
+                _InfoRow(label: l10n.fieldSupplier, value: order.supplierName ?? '—'),
+                _InfoRow(label: l10n.fieldOrderDate, value: order.orderDate ?? '—'),
+                _InfoRow(label: l10n.fieldExpected, value: order.expectedDate ?? '—'),
+                _InfoRow(label: l10n.fieldReceived, value: order.receivedDate ?? '—'),
+                _InfoRow(label: l10n.fieldTotal, value: _displayTotal),
               ],
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Line items',
+          l10n.lineItems,
           style: theme.textTheme.titleSmall
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
@@ -113,7 +115,7 @@ class _PurchaseOrderBody extends StatelessWidget {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text('No line items.',
+              child: Text(l10n.noLineItems,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: scheme.onSurfaceVariant)),
             ),
@@ -131,7 +133,7 @@ class _PurchaseOrderBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Notes',
+                  Text(l10n.fieldNotes,
                       style: theme.textTheme.titleSmall
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),
@@ -155,6 +157,7 @@ class _LineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final done = item.remainingQuantity <= 0;
 
     return Card(
@@ -190,7 +193,9 @@ class _LineCard extends StatelessWidget {
                 ),
                 StatusPill(
                   tone: done ? StatusTone.success : StatusTone.warning,
-                  label: done ? 'Complete' : '${item.remainingQuantity} left',
+                  label: done
+                      ? l10n.actionComplete
+                      : l10n.remainingLeft(item.remainingQuantity),
                   icon: done
                       ? Icons.check_circle_outline
                       : Icons.hourglass_bottom,
@@ -201,9 +206,11 @@ class _LineCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                _Stat(label: 'Ordered', value: '${item.quantityOrdered}'),
-                _Stat(label: 'Received', value: '${item.quantityReceived}'),
-                _Stat(label: 'Remaining', value: '${item.remainingQuantity}'),
+                _Stat(label: l10n.fieldOrdered, value: '${item.quantityOrdered}'),
+                _Stat(label: l10n.fieldReceived, value: '${item.quantityReceived}'),
+                _Stat(
+                    label: l10n.fieldRemaining,
+                    value: '${item.remainingQuantity}'),
               ],
             ),
           ],

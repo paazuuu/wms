@@ -489,4 +489,115 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get fieldCustomer => '客户';
+
+  @override
+  String get lineItems => '明细';
+
+  @override
+  String get noLineItems => '无明细。';
+
+  @override
+  String get fieldOrderDate => '下单日期';
+
+  @override
+  String get fieldSubtotal => '小计';
+
+  @override
+  String get fieldTax => '税费';
+
+  @override
+  String get fieldShipping => '运费';
+
+  @override
+  String get fieldTotal => '合计';
+
+  @override
+  String get fieldSupplier => '供应商';
+
+  @override
+  String get fieldExpected => '预期';
+
+  @override
+  String get fieldOrdered => '已订购';
+
+  @override
+  String get fieldReceived => '已收货';
+
+  @override
+  String get fieldRemaining => '剩余';
+
+  @override
+  String get actionComplete => '完成';
+
+  @override
+  String get fieldAssemblyProduct => '组装产品';
+
+  @override
+  String get fieldComponents => '组件';
+
+  @override
+  String get noComponents => '无组件。';
+
+  @override
+  String get fieldConsumed => '已消耗';
+
+  @override
+  String get fieldProduced => '已生产';
+
+  @override
+  String get fieldRequired => '所需';
+
+  @override
+  String get fieldTarget => '目标';
+
+  @override
+  String get fieldStarted => '开始';
+
+  @override
+  String productNumber(int id) {
+    return '商品 #$id';
+  }
+
+  @override
+  String get fieldCountedLines => '已盘点明细';
+
+  @override
+  String get noCountedLines => '无已盘点明细。';
+
+  @override
+  String get fieldCounted => '已盘点';
+
+  @override
+  String get fieldUncounted => '未盘点';
+
+  @override
+  String get fieldDiscrepancy => '差异';
+
+  @override
+  String get fieldMatch => '一致';
+
+  @override
+  String get fieldSystem => '系统';
+
+  @override
+  String get fieldName => '名称';
+
+  @override
+  String get fieldType => '类型';
+
+  @override
+  String get filterAll => '全部';
+
+  @override
+  String remainingLeft(int count) {
+    return '剩余 $count';
+  }
+
+  @override
+  String remainingAmount(String amount) {
+    return '剩余 $amount';
+  }
 }

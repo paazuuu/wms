@@ -20,12 +20,13 @@ class StockAuditViewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final audit = ref.watch(stockAuditDetailProvider(stockAuditId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Stock Count')),
+      appBar: AppBar(title: Text(l10n.featStockCount)),
       body: audit.when(
         data: (a) => _StockAuditBody(audit: a),
-        loading: () => const LoadingView(message: 'Loading stock count…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(stockAuditDetailProvider(stockAuditId)),
@@ -44,7 +45,8 @@ class _StockAuditBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = StockAuditStatusUi.of(AppLocalizations.of(context), audit);
+    final l10n = AppLocalizations.of(context);
+    final status = StockAuditStatusUi.of(l10n, audit);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -84,18 +86,22 @@ class _StockAuditBody extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                _InfoRow(label: 'Name', value: audit.name ?? '—'),
-                _InfoRow(label: 'Type', value: audit.auditType ?? '—'),
-                _InfoRow(label: 'Location', value: audit.locationName ?? 'All'),
-                _InfoRow(label: 'Started', value: audit.startedAt ?? '—'),
-                _InfoRow(label: 'Completed', value: audit.completedAt ?? '—'),
+                _InfoRow(label: l10n.fieldName, value: audit.name ?? '—'),
+                _InfoRow(label: l10n.fieldType, value: audit.auditType ?? '—'),
+                _InfoRow(
+                    label: l10n.fieldLocation,
+                    value: audit.locationName ?? l10n.filterAll),
+                _InfoRow(label: l10n.fieldStarted, value: audit.startedAt ?? '—'),
+                _InfoRow(
+                    label: l10n.statusCompleted,
+                    value: audit.completedAt ?? '—'),
               ],
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Counted lines',
+          l10n.fieldCountedLines,
           style: theme.textTheme.titleSmall
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
@@ -104,7 +110,7 @@ class _StockAuditBody extends StatelessWidget {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text('No counted lines.',
+              child: Text(l10n.noCountedLines,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: scheme.onSurfaceVariant)),
             ),
@@ -122,7 +128,7 @@ class _StockAuditBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Notes',
+                  Text(l10n.fieldNotes,
                       style: theme.textTheme.titleSmall
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),
@@ -146,8 +152,9 @@ class _LineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final diff = item.effectiveDiscrepancy;
-    final (tone, label, icon) = _discrepancyBadge(item);
+    final (tone, label, icon) = _discrepancyBadge(l10n, item);
 
     return Card(
       child: Padding(
@@ -164,7 +171,7 @@ class _LineCard extends StatelessWidget {
                       Text(
                         item.productName.isNotEmpty
                             ? item.productName
-                            : 'Product #${item.productId}',
+                            : l10n.productNumber(item.productId),
                         style: theme.textTheme.titleSmall,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -188,12 +195,12 @@ class _LineCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                _Stat(label: 'System', value: '${item.systemQuantity}'),
+                _Stat(label: l10n.fieldSystem, value: '${item.systemQuantity}'),
                 _Stat(
-                    label: 'Counted',
+                    label: l10n.fieldCounted,
                     value: item.isCounted ? '${item.countedQuantity}' : '—'),
                 _Stat(
-                    label: 'Discrepancy',
+                    label: l10n.fieldDiscrepancy,
                     value: diff > 0 ? '+$diff' : '$diff'),
               ],
             ),
@@ -203,13 +210,14 @@ class _LineCard extends StatelessWidget {
     );
   }
 
-  (StatusTone, String, IconData) _discrepancyBadge(StockAuditItem item) {
+  (StatusTone, String, IconData) _discrepancyBadge(
+      AppLocalizations l10n, StockAuditItem item) {
     if (!item.isCounted) {
-      return (StatusTone.neutral, 'Uncounted', Icons.hourglass_bottom);
+      return (StatusTone.neutral, l10n.fieldUncounted, Icons.hourglass_bottom);
     }
     final diff = item.effectiveDiscrepancy;
     if (diff == 0) {
-      return (StatusTone.success, 'Match', Icons.check_circle_outline);
+      return (StatusTone.success, l10n.fieldMatch, Icons.check_circle_outline);
     }
     return (StatusTone.warning, diff > 0 ? '+$diff' : '$diff',
         Icons.warning_amber_outlined);

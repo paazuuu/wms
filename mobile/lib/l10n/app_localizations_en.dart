@@ -495,4 +495,115 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get fieldCustomer => 'Customer';
+
+  @override
+  String get lineItems => 'Line items';
+
+  @override
+  String get noLineItems => 'No line items.';
+
+  @override
+  String get fieldOrderDate => 'Order date';
+
+  @override
+  String get fieldSubtotal => 'Subtotal';
+
+  @override
+  String get fieldTax => 'Tax';
+
+  @override
+  String get fieldShipping => 'Shipping';
+
+  @override
+  String get fieldTotal => 'Total';
+
+  @override
+  String get fieldSupplier => 'Supplier';
+
+  @override
+  String get fieldExpected => 'Expected';
+
+  @override
+  String get fieldOrdered => 'Ordered';
+
+  @override
+  String get fieldReceived => 'Received';
+
+  @override
+  String get fieldRemaining => 'Remaining';
+
+  @override
+  String get actionComplete => 'Complete';
+
+  @override
+  String get fieldAssemblyProduct => 'Assembly product';
+
+  @override
+  String get fieldComponents => 'Components';
+
+  @override
+  String get noComponents => 'No components.';
+
+  @override
+  String get fieldConsumed => 'Consumed';
+
+  @override
+  String get fieldProduced => 'Produced';
+
+  @override
+  String get fieldRequired => 'Required';
+
+  @override
+  String get fieldTarget => 'Target';
+
+  @override
+  String get fieldStarted => 'Started';
+
+  @override
+  String productNumber(int id) {
+    return 'Product #$id';
+  }
+
+  @override
+  String get fieldCountedLines => 'Counted lines';
+
+  @override
+  String get noCountedLines => 'No counted lines.';
+
+  @override
+  String get fieldCounted => 'Counted';
+
+  @override
+  String get fieldUncounted => 'Uncounted';
+
+  @override
+  String get fieldDiscrepancy => 'Discrepancy';
+
+  @override
+  String get fieldMatch => 'Match';
+
+  @override
+  String get fieldSystem => 'System';
+
+  @override
+  String get fieldName => 'Name';
+
+  @override
+  String get fieldType => 'Type';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String remainingLeft(int count) {
+    return '$count left';
+  }
+
+  @override
+  String remainingAmount(String amount) {
+    return '$amount left';
+  }
 }

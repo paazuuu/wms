@@ -167,5 +167,49 @@
   "binCount": "{count, plural, other{{count}ロケーション}}",
   "@binCount": {
     "placeholders": { "count": { "type": "int" } }
+  },
+  "fieldCustomer": "顧客",
+  "lineItems": "明細",
+  "noLineItems": "明細がありません。",
+  "fieldOrderDate": "注文日",
+  "fieldSubtotal": "小計",
+  "fieldTax": "税",
+  "fieldShipping": "送料",
+  "fieldTotal": "合計",
+  "fieldSupplier": "仕入先",
+  "fieldExpected": "予定",
+  "fieldOrdered": "発注",
+  "fieldReceived": "入荷",
+  "fieldRemaining": "残",
+  "actionComplete": "完了",
+  "fieldAssemblyProduct": "組立製品",
+  "fieldComponents": "部品",
+  "noComponents": "部品がありません。",
+  "fieldConsumed": "消費",
+  "fieldProduced": "生産",
+  "fieldRequired": "必要",
+  "fieldTarget": "目標",
+  "fieldStarted": "開始",
+  "productNumber": "商品 #{id}",
+  "@productNumber": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "fieldCountedLines": "カウント済み明細",
+  "noCountedLines": "カウント済み明細がありません。",
+  "fieldCounted": "カウント",
+  "fieldUncounted": "未カウント",
+  "fieldDiscrepancy": "差異",
+  "fieldMatch": "一致",
+  "fieldSystem": "システム",
+  "fieldName": "名称",
+  "fieldType": "種別",
+  "filterAll": "すべて",
+  "remainingLeft": "残り {count}",
+  "@remainingLeft": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "remainingAmount": "残り {amount}",
+  "@remainingAmount": {
+    "placeholders": { "amount": { "type": "String" } }
   }
 }
