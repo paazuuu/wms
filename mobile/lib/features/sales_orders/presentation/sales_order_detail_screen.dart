@@ -19,12 +19,13 @@ class SalesOrderDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(salesOrderDetailProvider(orderId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sales Order')),
+      appBar: AppBar(title: Text(l10n.featSalesOrders)),
       body: order.when(
         data: (o) => _SalesOrderBody(order: o),
-        loading: () => const LoadingView(message: 'Loading order…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(salesOrderDetailProvider(orderId)),
@@ -50,7 +51,8 @@ class _SalesOrderBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = SalesOrderStatusUi.of(AppLocalizations.of(context), order);
+    final l10n = AppLocalizations.of(context);
+    final status = SalesOrderStatusUi.of(l10n, order);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -102,17 +104,18 @@ class _SalesOrderBody extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                _InfoRow(label: 'Customer', value: order.customerName ?? '—'),
-                _InfoRow(label: 'Email', value: order.customerEmail ?? '—'),
-                _InfoRow(label: 'Address', value: order.customerAddress ?? '—'),
-                _InfoRow(label: 'Order date', value: order.orderDate ?? '—'),
+                _InfoRow(label: l10n.fieldCustomer, value: order.customerName ?? '—'),
+                _InfoRow(label: l10n.email, value: order.customerEmail ?? '—'),
+                _InfoRow(
+                    label: l10n.fieldAddress, value: order.customerAddress ?? '—'),
+                _InfoRow(label: l10n.fieldOrderDate, value: order.orderDate ?? '—'),
               ],
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Line items',
+          l10n.lineItems,
           style: theme.textTheme.titleSmall
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
@@ -121,7 +124,7 @@ class _SalesOrderBody extends StatelessWidget {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text('No line items.',
+              child: Text(l10n.noLineItems,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: scheme.onSurfaceVariant)),
             ),
@@ -137,11 +140,14 @@ class _SalesOrderBody extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                _InfoRow(label: 'Subtotal', value: _money(order.subtotal)),
-                _InfoRow(label: 'Tax', value: _money(order.tax)),
-                _InfoRow(label: 'Shipping', value: _money(order.shipping)),
+                _InfoRow(label: l10n.fieldSubtotal, value: _money(order.subtotal)),
+                _InfoRow(label: l10n.fieldTax, value: _money(order.tax)),
+                _InfoRow(label: l10n.fieldShipping, value: _money(order.shipping)),
                 const Divider(height: AppSpacing.xl),
-                _InfoRow(label: 'Total', value: _money(order.total), bold: true),
+                _InfoRow(
+                    label: l10n.fieldTotal,
+                    value: _money(order.total),
+                    bold: true),
               ],
             ),
           ),
@@ -154,7 +160,7 @@ class _SalesOrderBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Notes',
+                  Text(l10n.fieldNotes,
                       style: theme.textTheme.titleSmall
                           ?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(height: AppSpacing.sm),

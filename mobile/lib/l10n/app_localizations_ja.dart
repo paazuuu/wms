@@ -489,4 +489,115 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get fieldCustomer => '顧客';
+
+  @override
+  String get lineItems => '明細';
+
+  @override
+  String get noLineItems => '明細がありません。';
+
+  @override
+  String get fieldOrderDate => '注文日';
+
+  @override
+  String get fieldSubtotal => '小計';
+
+  @override
+  String get fieldTax => '税';
+
+  @override
+  String get fieldShipping => '送料';
+
+  @override
+  String get fieldTotal => '合計';
+
+  @override
+  String get fieldSupplier => '仕入先';
+
+  @override
+  String get fieldExpected => '予定';
+
+  @override
+  String get fieldOrdered => '発注';
+
+  @override
+  String get fieldReceived => '入荷';
+
+  @override
+  String get fieldRemaining => '残';
+
+  @override
+  String get actionComplete => '完了';
+
+  @override
+  String get fieldAssemblyProduct => '組立製品';
+
+  @override
+  String get fieldComponents => '部品';
+
+  @override
+  String get noComponents => '部品がありません。';
+
+  @override
+  String get fieldConsumed => '消費';
+
+  @override
+  String get fieldProduced => '生産';
+
+  @override
+  String get fieldRequired => '必要';
+
+  @override
+  String get fieldTarget => '目標';
+
+  @override
+  String get fieldStarted => '開始';
+
+  @override
+  String productNumber(int id) {
+    return '商品 #$id';
+  }
+
+  @override
+  String get fieldCountedLines => 'カウント済み明細';
+
+  @override
+  String get noCountedLines => 'カウント済み明細がありません。';
+
+  @override
+  String get fieldCounted => 'カウント';
+
+  @override
+  String get fieldUncounted => '未カウント';
+
+  @override
+  String get fieldDiscrepancy => '差異';
+
+  @override
+  String get fieldMatch => '一致';
+
+  @override
+  String get fieldSystem => 'システム';
+
+  @override
+  String get fieldName => '名称';
+
+  @override
+  String get fieldType => '種別';
+
+  @override
+  String get filterAll => 'すべて';
+
+  @override
+  String remainingLeft(int count) {
+    return '残り $count';
+  }
+
+  @override
+  String remainingAmount(String amount) {
+    return '残り $amount';
+  }
 }
