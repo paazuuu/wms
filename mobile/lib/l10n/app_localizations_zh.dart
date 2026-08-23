@@ -222,4 +222,271 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get findProductToTrace => '查找要追溯的商品。';
+
+  @override
+  String get loading => '加载中…';
+
+  @override
+  String get emptyLocations => '暂无库位。';
+
+  @override
+  String get emptyWarehouses => '暂无仓库。';
+
+  @override
+  String get emptySuppliers => '暂无供应商。';
+
+  @override
+  String get emptySalesOrders => '暂无销售订单。';
+
+  @override
+  String get emptyPurchaseOrders => '暂无采购单。';
+
+  @override
+  String get emptyWorkOrders => '暂无工单。';
+
+  @override
+  String get tryDifferentNameCode => '请尝试其他名称或代码。';
+
+  @override
+  String get tryDifferentOrder => '请尝试其他订单号或客户。';
+
+  @override
+  String get tryDifferentPo => '请尝试其他采购单号或供应商。';
+
+  @override
+  String get tryDifferentWo => '请尝试其他工单号、商品或 SKU。';
+
+  @override
+  String get hintLocations => '扫描或按名称、代码搜索';
+
+  @override
+  String get hintWarehouses => '扫描或按名称、代码或城市搜索';
+
+  @override
+  String get hintSuppliers => '扫描或按名称、代码、联系人或邮箱搜索';
+
+  @override
+  String get hintSalesOrders => '扫描或按订单号、客户或邮箱搜索';
+
+  @override
+  String get hintPurchaseOrders => '扫描或按采购单号或供应商搜索';
+
+  @override
+  String get hintWorkOrders => '扫描或按工单号、商品或 SKU 搜索';
+
+  @override
+  String get warehouseDefault => '默认';
+
+  @override
+  String get noCustomer => '无客户';
+
+  @override
+  String get noSupplier => '无供应商';
+
+  @override
+  String get noProduct => '无商品';
+
+  @override
+  String qtyLabel(int quantity) {
+    return '数量 $quantity';
+  }
+
+  @override
+  String lineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusActive => '启用';
+
+  @override
+  String get statusInactive => '停用';
+
+  @override
+  String get statusCancelled => '已取消';
+
+  @override
+  String get statusDraft => '草稿';
+
+  @override
+  String get statusCompleted => '已完成';
+
+  @override
+  String get statusInProgress => '进行中';
+
+  @override
+  String get statusPending => '待处理';
+
+  @override
+  String get salesProcessing => '处理中';
+
+  @override
+  String get salesShipped => '已发货';
+
+  @override
+  String get salesDelivered => '已送达';
+
+  @override
+  String get poSent => '已发送';
+
+  @override
+  String get poPartiallyReceived => '部分收货';
+
+  @override
+  String get poReceived => '已收货';
+
+  @override
+  String get stockIn => '有库存';
+
+  @override
+  String get stockLow => '库存不足';
+
+  @override
+  String get stockOut => '无库存';
+
+  @override
+  String get inspectionPassed => '合格';
+
+  @override
+  String get inspectionFailed => '不合格';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => '收货';
+
+  @override
+  String get typeShipping => '出货';
+
+  @override
+  String get typeOther => '其他';
+
+  @override
+  String get titleProduct => '商品';
+
+  @override
+  String get fieldDescription => '描述';
+
+  @override
+  String get fieldPhone => '电话';
+
+  @override
+  String get fieldAddress => '地址';
+
+  @override
+  String get fieldStatus => '状态';
+
+  @override
+  String get fieldCurrency => '币种';
+
+  @override
+  String get fieldCategory => '类别';
+
+  @override
+  String get fieldBarcode => '条码';
+
+  @override
+  String get fieldSku => 'SKU';
+
+  @override
+  String get fieldPrice => '价格';
+
+  @override
+  String get fieldSellingPrice => '售价';
+
+  @override
+  String get fieldMinStock => '最低库存';
+
+  @override
+  String get fieldOnHand => '现有库存';
+
+  @override
+  String get fieldLocation => '库位';
+
+  @override
+  String get fieldHasVariants => '有变体';
+
+  @override
+  String get fieldManager => '负责人';
+
+  @override
+  String get fieldTimezone => '时区';
+
+  @override
+  String get fieldPriority => '优先级';
+
+  @override
+  String get fieldUsers => '用户';
+
+  @override
+  String get fieldLocations => '库位';
+
+  @override
+  String get fieldContact => '联系人';
+
+  @override
+  String get fieldWebsite => '网站';
+
+  @override
+  String get fieldPaymentTerms => '付款条件';
+
+  @override
+  String get fieldNotes => '备注';
+
+  @override
+  String get fieldProducts => '商品';
+
+  @override
+  String get fieldAisle => '通道';
+
+  @override
+  String get fieldShelf => '货架';
+
+  @override
+  String get fieldBin => '货位';
+
+  @override
+  String get fieldCode => '代码';
+
+  @override
+  String get fieldFullLocation => '完整库位';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个商品',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String binCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个货位',
+    );
+    return '$_temp0';
+  }
 }

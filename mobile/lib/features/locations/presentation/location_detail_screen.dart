@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -18,12 +19,13 @@ class LocationDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final location = ref.watch(locationDetailProvider(locationId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Location')),
+      appBar: AppBar(title: Text(l10n.featLocations)),
       body: location.when(
         data: (l) => _LocationBody(location: l),
-        loading: () => const LoadingView(message: 'Loading location…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(locationDetailProvider(locationId)),
@@ -42,7 +44,8 @@ class _LocationBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = LocationStatusUi.of(location);
+    final l10n = AppLocalizations.of(context);
+    final status = LocationStatusUi.of(l10n, location);
     final count = location.productsCount;
 
     return ListView(
@@ -92,7 +95,7 @@ class _LocationBody extends StatelessWidget {
                     if (count != null)
                       StatusPill(
                         tone: StatusTone.info,
-                        label: '$count ${count == 1 ? 'item' : 'items'}',
+                        label: l10n.itemCount(count),
                         icon: Icons.inventory_2_outlined,
                       ),
                   ],
@@ -107,22 +110,25 @@ class _LocationBody extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               children: [
-                _InfoRow(label: 'Code', value: location.code ?? '—', mono: true),
-                _InfoRow(label: 'Aisle', value: location.aisle ?? '—'),
-                _InfoRow(label: 'Shelf', value: location.shelf ?? '—'),
-                _InfoRow(label: 'Bin', value: location.bin ?? '—'),
                 _InfoRow(
-                  label: 'Full location',
+                    label: l10n.fieldCode, value: location.code ?? '—', mono: true),
+                _InfoRow(label: l10n.fieldAisle, value: location.aisle ?? '—'),
+                _InfoRow(label: l10n.fieldShelf, value: location.shelf ?? '—'),
+                _InfoRow(label: l10n.fieldBin, value: location.bin ?? '—'),
+                _InfoRow(
+                  label: l10n.fieldFullLocation,
                   value: location.fullLocation ?? '—',
                   mono: true,
                 ),
                 _InfoRow(
-                  label: 'Products',
+                  label: l10n.fieldProducts,
                   value: count != null ? '$count' : '—',
                 ),
                 _InfoRow(
-                  label: 'Status',
-                  value: location.isActive ? 'Active' : 'Inactive',
+                  label: l10n.fieldStatus,
+                  value: location.isActive
+                      ? l10n.statusActive
+                      : l10n.statusInactive,
                 ),
               ],
             ),
@@ -138,7 +144,7 @@ class _LocationBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Description',
+                    l10n.fieldDescription,
                     style: theme.textTheme.titleSmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),

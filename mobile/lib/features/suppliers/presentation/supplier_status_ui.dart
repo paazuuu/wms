@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/supplier.dart';
 
 /// Single mapping from a supplier's active state to a [StatusTone] + icon, so
@@ -12,9 +13,10 @@ class SupplierStatusUi {
   final IconData icon;
   final String label;
 
-  static SupplierStatusUi of(Supplier supplier) => supplier.isActive
-      ? const SupplierStatusUi(
-          StatusTone.success, Icons.local_shipping, 'Active')
-      : const SupplierStatusUi(
-          StatusTone.neutral, Icons.block_outlined, 'Inactive');
+  static SupplierStatusUi of(AppLocalizations l10n, Supplier supplier) =>
+      supplier.isActive
+          ? SupplierStatusUi(
+              StatusTone.success, Icons.local_shipping, l10n.statusActive)
+          : SupplierStatusUi(
+              StatusTone.neutral, Icons.block_outlined, l10n.statusInactive);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/purchase_order.dart';
 
 /// Single mapping from a purchase order's status to a [StatusTone] + label +
@@ -12,8 +13,8 @@ class ReceivingStatusUi {
   final IconData icon;
   final String label;
 
-  static ReceivingStatusUi of(PurchaseOrder order) {
-    final fallback = _byStatus(order.status);
+  static ReceivingStatusUi of(AppLocalizations l10n, PurchaseOrder order) {
+    final fallback = _byStatus(l10n, order.status);
     // Prefer the backend-provided label when present; keep the derived tone/icon.
     final label = order.statusLabel?.trim();
     if (label != null && label.isNotEmpty) {
@@ -22,17 +23,18 @@ class ReceivingStatusUi {
     return fallback;
   }
 
-  static ReceivingStatusUi _byStatus(PurchaseOrderStatus status) =>
+  static ReceivingStatusUi _byStatus(
+          AppLocalizations l10n, PurchaseOrderStatus status) =>
       switch (status) {
-        PurchaseOrderStatus.draft => const ReceivingStatusUi(
-            StatusTone.neutral, Icons.edit_note, 'Draft'),
-        PurchaseOrderStatus.sent => const ReceivingStatusUi(
-            StatusTone.info, Icons.outbox_outlined, 'Sent'),
-        PurchaseOrderStatus.partial => const ReceivingStatusUi(
-            StatusTone.warning, Icons.incomplete_circle, 'Partially received'),
-        PurchaseOrderStatus.received => const ReceivingStatusUi(
-            StatusTone.success, Icons.check_circle, 'Received'),
-        PurchaseOrderStatus.cancelled => const ReceivingStatusUi(
-            StatusTone.danger, Icons.cancel, 'Cancelled'),
+        PurchaseOrderStatus.draft =>
+          ReceivingStatusUi(StatusTone.neutral, Icons.edit_note, l10n.statusDraft),
+        PurchaseOrderStatus.sent => ReceivingStatusUi(
+            StatusTone.info, Icons.outbox_outlined, l10n.poSent),
+        PurchaseOrderStatus.partial => ReceivingStatusUi(StatusTone.warning,
+            Icons.incomplete_circle, l10n.poPartiallyReceived),
+        PurchaseOrderStatus.received => ReceivingStatusUi(
+            StatusTone.success, Icons.check_circle, l10n.poReceived),
+        PurchaseOrderStatus.cancelled => ReceivingStatusUi(
+            StatusTone.danger, Icons.cancel, l10n.statusCancelled),
       };
 }

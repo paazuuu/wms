@@ -224,4 +224,275 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get findProductToTrace => 'Find a product to trace.';
+
+  @override
+  String get loading => 'Loading…';
+
+  @override
+  String get emptyLocations => 'No locations yet.';
+
+  @override
+  String get emptyWarehouses => 'No warehouses yet.';
+
+  @override
+  String get emptySuppliers => 'No suppliers yet.';
+
+  @override
+  String get emptySalesOrders => 'No sales orders yet.';
+
+  @override
+  String get emptyPurchaseOrders => 'No purchase orders yet.';
+
+  @override
+  String get emptyWorkOrders => 'No work orders yet.';
+
+  @override
+  String get tryDifferentNameCode => 'Try a different name or code.';
+
+  @override
+  String get tryDifferentOrder => 'Try a different order number or customer.';
+
+  @override
+  String get tryDifferentPo => 'Try a different PO number or supplier.';
+
+  @override
+  String get tryDifferentWo => 'Try a different WO number, product, or SKU.';
+
+  @override
+  String get hintLocations => 'Scan or search by name or code';
+
+  @override
+  String get hintWarehouses => 'Scan or search by name, code or city';
+
+  @override
+  String get hintSuppliers => 'Scan or search by name, code, contact or email';
+
+  @override
+  String get hintSalesOrders => 'Scan or search by order #, customer or email';
+
+  @override
+  String get hintPurchaseOrders => 'Scan or search by PO number or supplier';
+
+  @override
+  String get hintWorkOrders => 'Scan or search by WO number, product, or SKU';
+
+  @override
+  String get warehouseDefault => 'Default';
+
+  @override
+  String get noCustomer => 'No customer';
+
+  @override
+  String get noSupplier => 'No supplier';
+
+  @override
+  String get noProduct => 'No product';
+
+  @override
+  String qtyLabel(int quantity) {
+    return 'Qty $quantity';
+  }
+
+  @override
+  String lineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines',
+      one: '$count line',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusActive => 'Active';
+
+  @override
+  String get statusInactive => 'Inactive';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusDraft => 'Draft';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusInProgress => 'In progress';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get salesProcessing => 'Processing';
+
+  @override
+  String get salesShipped => 'Shipped';
+
+  @override
+  String get salesDelivered => 'Delivered';
+
+  @override
+  String get poSent => 'Sent';
+
+  @override
+  String get poPartiallyReceived => 'Partially received';
+
+  @override
+  String get poReceived => 'Received';
+
+  @override
+  String get stockIn => 'In stock';
+
+  @override
+  String get stockLow => 'Low stock';
+
+  @override
+  String get stockOut => 'Out of stock';
+
+  @override
+  String get inspectionPassed => 'Passed';
+
+  @override
+  String get inspectionFailed => 'Failed';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => 'Receiving';
+
+  @override
+  String get typeShipping => 'Shipping';
+
+  @override
+  String get typeOther => 'Other';
+
+  @override
+  String get titleProduct => 'Product';
+
+  @override
+  String get fieldDescription => 'Description';
+
+  @override
+  String get fieldPhone => 'Phone';
+
+  @override
+  String get fieldAddress => 'Address';
+
+  @override
+  String get fieldStatus => 'Status';
+
+  @override
+  String get fieldCurrency => 'Currency';
+
+  @override
+  String get fieldCategory => 'Category';
+
+  @override
+  String get fieldBarcode => 'Barcode';
+
+  @override
+  String get fieldSku => 'SKU';
+
+  @override
+  String get fieldPrice => 'Price';
+
+  @override
+  String get fieldSellingPrice => 'Selling price';
+
+  @override
+  String get fieldMinStock => 'Min stock';
+
+  @override
+  String get fieldOnHand => 'On hand';
+
+  @override
+  String get fieldLocation => 'Location';
+
+  @override
+  String get fieldHasVariants => 'Has variants';
+
+  @override
+  String get fieldManager => 'Manager';
+
+  @override
+  String get fieldTimezone => 'Timezone';
+
+  @override
+  String get fieldPriority => 'Priority';
+
+  @override
+  String get fieldUsers => 'Users';
+
+  @override
+  String get fieldLocations => 'Locations';
+
+  @override
+  String get fieldContact => 'Contact';
+
+  @override
+  String get fieldWebsite => 'Website';
+
+  @override
+  String get fieldPaymentTerms => 'Payment terms';
+
+  @override
+  String get fieldNotes => 'Notes';
+
+  @override
+  String get fieldProducts => 'Products';
+
+  @override
+  String get fieldAisle => 'Aisle';
+
+  @override
+  String get fieldShelf => 'Shelf';
+
+  @override
+  String get fieldBin => 'Bin';
+
+  @override
+  String get fieldCode => 'Code';
+
+  @override
+  String get fieldFullLocation => 'Full location';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '$count product',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String binCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bins',
+      one: '$count bin',
+    );
+    return '$_temp0';
+  }
 }

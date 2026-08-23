@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/inspection.dart';
 import '../domain/inspection_item.dart';
 
@@ -12,13 +13,14 @@ class InspectionStatusUi {
   final IconData icon;
   final String label;
 
-  static InspectionStatusUi of(InspectionStatus status) => switch (status) {
-        InspectionStatus.passed =>
-          const InspectionStatusUi(StatusTone.success, Icons.check_circle, 'Passed'),
-        InspectionStatus.failed =>
-          const InspectionStatusUi(StatusTone.danger, Icons.cancel, 'Failed'),
-        InspectionStatus.pending => const InspectionStatusUi(
-            StatusTone.warning, Icons.hourglass_bottom, 'Pending'),
+  static InspectionStatusUi of(AppLocalizations l10n, InspectionStatus status) =>
+      switch (status) {
+        InspectionStatus.passed => InspectionStatusUi(
+            StatusTone.success, Icons.check_circle, l10n.inspectionPassed),
+        InspectionStatus.failed => InspectionStatusUi(
+            StatusTone.danger, Icons.cancel, l10n.inspectionFailed),
+        InspectionStatus.pending => InspectionStatusUi(
+            StatusTone.warning, Icons.hourglass_bottom, l10n.statusPending),
       };
 }
 
@@ -29,19 +31,22 @@ class MatchResultUi {
   final IconData icon;
   final String label;
 
-  static MatchResultUi of(MatchResult result) => switch (result) {
+  static MatchResultUi of(AppLocalizations l10n, MatchResult result) =>
+      switch (result) {
         MatchResult.ok =>
-          const MatchResultUi(StatusTone.success, Icons.check_circle, 'OK'),
+          MatchResultUi(StatusTone.success, Icons.check_circle, l10n.matchOk),
         MatchResult.ng =>
-          const MatchResultUi(StatusTone.danger, Icons.report, 'NG'),
-        MatchResult.pending => const MatchResultUi(
-            StatusTone.warning, Icons.hourglass_bottom, 'PENDING'),
+          MatchResultUi(StatusTone.danger, Icons.report, l10n.matchNg),
+        MatchResult.pending => MatchResultUi(
+            StatusTone.warning, Icons.hourglass_bottom, l10n.statusPending),
       };
 }
 
-/// Human label for the inspection type code.
-String inspectionTypeLabel(String type) => switch (type) {
-      'receiving' => 'Receiving',
-      'shipping' => 'Shipping',
-      _ => type.isEmpty ? 'Other' : '${type[0].toUpperCase()}${type.substring(1)}',
+/// Localized label for the inspection type code.
+String inspectionTypeLabel(AppLocalizations l10n, String type) => switch (type) {
+      'receiving' => l10n.typeReceiving,
+      'shipping' => l10n.typeShipping,
+      _ => type.isEmpty
+          ? l10n.typeOther
+          : '${type[0].toUpperCase()}${type.substring(1)}',
     };

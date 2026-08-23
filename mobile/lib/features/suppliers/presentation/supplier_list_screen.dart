@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/scan/scan_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -41,9 +42,10 @@ class _SupplierListScreenState extends ConsumerState<SupplierListScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(supplierSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Suppliers')),
+      appBar: AppBar(title: Text(l10n.featSuppliers)),
       body: Column(
         children: [
           Padding(
@@ -52,7 +54,7 @@ class _SupplierListScreenState extends ConsumerState<SupplierListScreen> {
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or search by name, code, contact or email',
+              hintText: l10n.hintSuppliers,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -65,9 +67,9 @@ class _SupplierListScreenState extends ConsumerState<SupplierListScreen> {
                     ? EmptyStateView(
                         icon: Icons.local_shipping_outlined,
                         title: _query.isEmpty
-                            ? 'No suppliers yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different name or code.',
+                            ? l10n.emptySuppliers
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentNameCode,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -78,7 +80,7 @@ class _SupplierListScreenState extends ConsumerState<SupplierListScreen> {
                         itemBuilder: (context, index) =>
                             _SupplierCard(supplier: items[index]),
                       ),
-                loading: () => const LoadingView(message: 'Loading suppliers…'),
+                loading: () => LoadingView(message: l10n.loading),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () => ref.invalidate(supplierSearchProvider(_query)),
@@ -101,7 +103,7 @@ class _SupplierCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = SupplierStatusUi.of(supplier);
+    final status = SupplierStatusUi.of(AppLocalizations.of(context), supplier);
     final count = supplier.productsCount;
     final subtitle = supplier.contactName?.trim().isNotEmpty == true
         ? supplier.contactName!
@@ -147,7 +149,7 @@ class _SupplierCard extends StatelessWidget {
               if (count != null)
                 StatusPill(
                   tone: StatusTone.info,
-                  label: '$count ${count == 1 ? 'product' : 'products'}',
+                  label: AppLocalizations.of(context).productCount(count),
                   icon: Icons.inventory_2_outlined,
                   dense: true,
                 ),

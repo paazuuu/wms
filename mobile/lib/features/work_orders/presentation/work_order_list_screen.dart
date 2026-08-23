@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/scan/scan_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -43,9 +44,10 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(workOrderSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Work Orders')),
+      appBar: AppBar(title: Text(l10n.featWorkOrders)),
       body: Column(
         children: [
           Padding(
@@ -54,7 +56,7 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or search by WO number, product, or SKU',
+              hintText: l10n.hintWorkOrders,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -67,9 +69,9 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
                     ? EmptyStateView(
                         icon: Icons.precision_manufacturing_outlined,
                         title: _query.isEmpty
-                            ? 'No work orders yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different WO number, product, or SKU.',
+                            ? l10n.emptyWorkOrders
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentWo,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -80,8 +82,7 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
                         itemBuilder: (context, index) =>
                             _WorkOrderCard(order: items[index]),
                       ),
-                loading: () =>
-                    const LoadingView(message: 'Loading work orders…'),
+                loading: () => LoadingView(message: l10n.loading),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () =>
@@ -105,10 +106,11 @@ class _WorkOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = WorkOrderStatusUi.of(order);
+    final l10n = AppLocalizations.of(context);
+    final status = WorkOrderStatusUi.of(AppLocalizations.of(context), order);
     final product = order.productName.trim().isNotEmpty
         ? order.productName
-        : 'No product';
+        : l10n.noProduct;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -157,7 +159,7 @@ class _WorkOrderCard extends StatelessWidget {
                         ),
                         StatusPill(
                           tone: StatusTone.neutral,
-                          label: 'Qty ${order.quantity}',
+                          label: l10n.qtyLabel(order.quantity),
                           icon: Icons.numbers_outlined,
                           dense: true,
                         ),

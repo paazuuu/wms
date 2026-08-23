@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -52,7 +53,7 @@ class _PurchaseOrderBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = ReceivingStatusUi.of(order);
+    final status = ReceivingStatusUi.of(AppLocalizations.of(context), order);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),

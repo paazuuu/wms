@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -17,12 +18,13 @@ class ProductDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final product = ref.watch(productDetailProvider(productId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product')),
+      appBar: AppBar(title: Text(l10n.titleProduct)),
       body: product.when(
         data: (p) => _ProductBody(product: p),
-        loading: () => const LoadingView(message: 'Loading product…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(productDetailProvider(productId)),
@@ -41,7 +43,8 @@ class _ProductBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final stock = ProductStockUi.of(product);
+    final l10n = AppLocalizations.of(context);
+    final stock = ProductStockUi.of(l10n, product);
     final currency = product.currency ?? '';
 
     return ListView(
@@ -76,15 +79,15 @@ class _ProductBody extends StatelessWidget {
                       icon: stock.icon,
                     ),
                     if (!product.isActive)
-                      const StatusPill(
+                      StatusPill(
                         tone: StatusTone.neutral,
-                        label: 'Inactive',
+                        label: l10n.statusInactive,
                         icon: Icons.pause_circle_outline,
                       ),
                     if (product.hasVariants)
-                      const StatusPill(
+                      StatusPill(
                         tone: StatusTone.info,
-                        label: 'Has variants',
+                        label: l10n.fieldHasVariants,
                         icon: Icons.account_tree_outlined,
                       ),
                   ],
@@ -100,38 +103,38 @@ class _ProductBody extends StatelessWidget {
             child: Column(
               children: [
                 _InfoRow(
-                  label: 'SKU',
+                  label: l10n.fieldSku,
                   value: product.sku,
                   mono: true,
                 ),
                 _InfoRow(
-                  label: 'Barcode',
+                  label: l10n.fieldBarcode,
                   value: product.barcode ?? '—',
                   mono: true,
                 ),
                 _InfoRow(
-                  label: 'On hand',
+                  label: l10n.fieldOnHand,
                   value: '${product.displayStock}',
                 ),
                 if (product.minStock != null)
                   _InfoRow(
-                    label: 'Min stock',
+                    label: l10n.fieldMinStock,
                     value: '${product.minStock}',
                   ),
                 if (product.price != null)
                   _InfoRow(
-                    label: 'Price',
+                    label: l10n.fieldPrice,
                     value: '$currency ${product.price}'.trim(),
                   ),
                 if (product.sellingPrice != null)
                   _InfoRow(
-                    label: 'Selling price',
+                    label: l10n.fieldSellingPrice,
                     value: '$currency ${product.sellingPrice}'.trim(),
                   ),
                 if (product.categoryName != null)
-                  _InfoRow(label: 'Category', value: product.categoryName!),
+                  _InfoRow(label: l10n.fieldCategory, value: product.categoryName!),
                 if (product.locationName != null)
-                  _InfoRow(label: 'Location', value: product.locationName!),
+                  _InfoRow(label: l10n.fieldLocation, value: product.locationName!),
               ],
             ),
           ),
@@ -146,7 +149,7 @@ class _ProductBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Description',
+                    l10n.fieldDescription,
                     style: theme.textTheme.titleSmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),

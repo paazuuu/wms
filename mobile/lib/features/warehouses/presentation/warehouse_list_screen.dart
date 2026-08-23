@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/scan/scan_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -42,9 +43,10 @@ class _WarehouseListScreenState extends ConsumerState<WarehouseListScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(warehouseSearchProvider(_query));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Warehouses')),
+      appBar: AppBar(title: Text(l10n.featWarehouses)),
       body: Column(
         children: [
           Padding(
@@ -53,7 +55,7 @@ class _WarehouseListScreenState extends ConsumerState<WarehouseListScreen> {
               controller: _controller,
               autofocusOnWide: true,
               clearOnSubmit: false,
-              hintText: 'Scan or search by name, code or city',
+              hintText: l10n.hintWarehouses,
               onSubmitted: (_) => _submit(),
             ),
           ),
@@ -66,9 +68,9 @@ class _WarehouseListScreenState extends ConsumerState<WarehouseListScreen> {
                     ? EmptyStateView(
                         icon: Icons.warehouse_outlined,
                         title: _query.isEmpty
-                            ? 'No warehouses yet.'
-                            : 'No matches for "$_query".',
-                        message: 'Try a different name or code.',
+                            ? l10n.emptyWarehouses
+                            : l10n.noMatchesFor(_query),
+                        message: l10n.tryDifferentNameCode,
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
@@ -79,8 +81,7 @@ class _WarehouseListScreenState extends ConsumerState<WarehouseListScreen> {
                         itemBuilder: (context, index) =>
                             _WarehouseCard(warehouse: items[index]),
                       ),
-                loading: () =>
-                    const LoadingView(message: 'Loading warehouses…'),
+                loading: () => LoadingView(message: l10n.loading),
                 error: (error, _) => ErrorStateView(
                   message: '$error',
                   onRetry: () =>
@@ -104,7 +105,8 @@ class _WarehouseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = WarehouseStatusUi.of(warehouse);
+    final l10n = AppLocalizations.of(context);
+    final status = WarehouseStatusUi.of(AppLocalizations.of(context), warehouse);
     final count = warehouse.locationsCount;
     final subtitle = warehouse.city?.trim().isNotEmpty == true
         ? warehouse.city!
@@ -140,9 +142,9 @@ class _WarehouseCard extends StatelessWidget {
                         ),
                         if (warehouse.isDefault) ...[
                           const SizedBox(width: AppSpacing.sm),
-                          const StatusPill(
+                          StatusPill(
                             tone: StatusTone.info,
-                            label: 'Default',
+                            label: l10n.warehouseDefault,
                             icon: Icons.star_outline,
                             dense: true,
                           ),
@@ -165,7 +167,7 @@ class _WarehouseCard extends StatelessWidget {
               if (count != null)
                 StatusPill(
                   tone: StatusTone.neutral,
-                  label: '$count ${count == 1 ? 'bin' : 'bins'}',
+                  label: l10n.binCount(count),
                   icon: Icons.place_outlined,
                   dense: true,
                 ),

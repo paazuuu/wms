@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -67,7 +68,7 @@ class _InspectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ui = InspectionStatusUi.of(inspection.status);
+    final ui = InspectionStatusUi.of(AppLocalizations.of(context), inspection.status);
     final count = inspection.itemsCount ?? 0;
 
     return Card(
@@ -95,7 +96,7 @@ class _InspectionCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${inspectionTypeLabel(inspection.type)} · $count items',
+                      '${inspectionTypeLabel(AppLocalizations.of(context), inspection.type)} · $count items',
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: scheme.onSurfaceVariant),
                     ),

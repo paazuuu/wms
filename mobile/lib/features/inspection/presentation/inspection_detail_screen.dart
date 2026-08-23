@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -456,7 +457,7 @@ class _HeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ui = InspectionStatusUi.of(inspection.status);
+    final ui = InspectionStatusUi.of(AppLocalizations.of(context), inspection.status);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -474,7 +475,7 @@ class _HeaderCard extends StatelessWidget {
                       Text(inspection.code, style: theme.textTheme.titleLarge),
                       const SizedBox(height: 2),
                       Text(
-                        inspectionTypeLabel(inspection.type),
+                        inspectionTypeLabel(AppLocalizations.of(context), inspection.type),
                         style: theme.textTheme.bodyMedium
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
@@ -585,7 +586,7 @@ class _ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ui = MatchResultUi.of(item.matchResult);
+    final ui = MatchResultUi.of(AppLocalizations.of(context), item.matchResult);
     final barcode =
         item.scannedBarcode ?? item.expectedBarcode ?? 'Item ${item.id}';
 

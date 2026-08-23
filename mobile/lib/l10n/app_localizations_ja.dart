@@ -222,4 +222,271 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get findProductToTrace => '追跡する商品を検索。';
+
+  @override
+  String get loading => '読み込み中…';
+
+  @override
+  String get emptyLocations => 'ロケーションがまだありません。';
+
+  @override
+  String get emptyWarehouses => '倉庫がまだありません。';
+
+  @override
+  String get emptySuppliers => '仕入先がまだありません。';
+
+  @override
+  String get emptySalesOrders => '受注がまだありません。';
+
+  @override
+  String get emptyPurchaseOrders => '発注がまだありません。';
+
+  @override
+  String get emptyWorkOrders => '作業指示がまだありません。';
+
+  @override
+  String get tryDifferentNameCode => '別の名称またはコードをお試しください。';
+
+  @override
+  String get tryDifferentOrder => '別の受注番号または顧客をお試しください。';
+
+  @override
+  String get tryDifferentPo => '別の発注番号または仕入先をお試しください。';
+
+  @override
+  String get tryDifferentWo => '別の作業指示番号・商品・SKUをお試しください。';
+
+  @override
+  String get hintLocations => '名称・コードをスキャンまたは検索';
+
+  @override
+  String get hintWarehouses => '名称・コード・都市をスキャンまたは検索';
+
+  @override
+  String get hintSuppliers => '名称・コード・担当者・メールをスキャンまたは検索';
+
+  @override
+  String get hintSalesOrders => '受注番号・顧客・メールをスキャンまたは検索';
+
+  @override
+  String get hintPurchaseOrders => '発注番号・仕入先をスキャンまたは検索';
+
+  @override
+  String get hintWorkOrders => '作業指示番号・商品・SKUをスキャンまたは検索';
+
+  @override
+  String get warehouseDefault => '既定';
+
+  @override
+  String get noCustomer => '顧客なし';
+
+  @override
+  String get noSupplier => '仕入先なし';
+
+  @override
+  String get noProduct => '商品なし';
+
+  @override
+  String qtyLabel(int quantity) {
+    return '数量 $quantity';
+  }
+
+  @override
+  String lineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の明細',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statusActive => '有効';
+
+  @override
+  String get statusInactive => '無効';
+
+  @override
+  String get statusCancelled => 'キャンセル';
+
+  @override
+  String get statusDraft => '下書き';
+
+  @override
+  String get statusCompleted => '完了';
+
+  @override
+  String get statusInProgress => '進行中';
+
+  @override
+  String get statusPending => '保留';
+
+  @override
+  String get salesProcessing => '処理中';
+
+  @override
+  String get salesShipped => '出荷済み';
+
+  @override
+  String get salesDelivered => '配達済み';
+
+  @override
+  String get poSent => '送信済み';
+
+  @override
+  String get poPartiallyReceived => '一部入荷';
+
+  @override
+  String get poReceived => '入荷済み';
+
+  @override
+  String get stockIn => '在庫あり';
+
+  @override
+  String get stockLow => '在庫僅少';
+
+  @override
+  String get stockOut => '在庫切れ';
+
+  @override
+  String get inspectionPassed => '合格';
+
+  @override
+  String get inspectionFailed => '不合格';
+
+  @override
+  String get matchOk => 'OK';
+
+  @override
+  String get matchNg => 'NG';
+
+  @override
+  String get typeReceiving => '入荷';
+
+  @override
+  String get typeShipping => '出荷';
+
+  @override
+  String get typeOther => 'その他';
+
+  @override
+  String get titleProduct => '商品';
+
+  @override
+  String get fieldDescription => '説明';
+
+  @override
+  String get fieldPhone => '電話';
+
+  @override
+  String get fieldAddress => '住所';
+
+  @override
+  String get fieldStatus => 'ステータス';
+
+  @override
+  String get fieldCurrency => '通貨';
+
+  @override
+  String get fieldCategory => 'カテゴリ';
+
+  @override
+  String get fieldBarcode => 'バーコード';
+
+  @override
+  String get fieldSku => 'SKU';
+
+  @override
+  String get fieldPrice => '価格';
+
+  @override
+  String get fieldSellingPrice => '販売価格';
+
+  @override
+  String get fieldMinStock => '最小在庫';
+
+  @override
+  String get fieldOnHand => '在庫数';
+
+  @override
+  String get fieldLocation => 'ロケーション';
+
+  @override
+  String get fieldHasVariants => 'バリエーションあり';
+
+  @override
+  String get fieldManager => '管理者';
+
+  @override
+  String get fieldTimezone => 'タイムゾーン';
+
+  @override
+  String get fieldPriority => '優先度';
+
+  @override
+  String get fieldUsers => 'ユーザー';
+
+  @override
+  String get fieldLocations => 'ロケーション';
+
+  @override
+  String get fieldContact => '担当者';
+
+  @override
+  String get fieldWebsite => 'ウェブサイト';
+
+  @override
+  String get fieldPaymentTerms => '支払条件';
+
+  @override
+  String get fieldNotes => '備考';
+
+  @override
+  String get fieldProducts => '商品';
+
+  @override
+  String get fieldAisle => '通路';
+
+  @override
+  String get fieldShelf => '棚';
+
+  @override
+  String get fieldBin => 'ビン';
+
+  @override
+  String get fieldCode => 'コード';
+
+  @override
+  String get fieldFullLocation => 'フルロケーション';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count点',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String productCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count品目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String binCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countロケーション',
+    );
+    return '$_temp0';
+  }
 }

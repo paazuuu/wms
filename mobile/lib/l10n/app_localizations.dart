@@ -525,6 +525,480 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'追跡する商品を検索。'**
   String get findProductToTrace;
+
+  /// No description provided for @loading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込み中…'**
+  String get loading;
+
+  /// No description provided for @emptyLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーションがまだありません。'**
+  String get emptyLocations;
+
+  /// No description provided for @emptyWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫がまだありません。'**
+  String get emptyWarehouses;
+
+  /// No description provided for @emptySuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先がまだありません。'**
+  String get emptySuppliers;
+
+  /// No description provided for @emptySalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注がまだありません。'**
+  String get emptySalesOrders;
+
+  /// No description provided for @emptyPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注がまだありません。'**
+  String get emptyPurchaseOrders;
+
+  /// No description provided for @emptyWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示がまだありません。'**
+  String get emptyWorkOrders;
+
+  /// No description provided for @tryDifferentNameCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の名称またはコードをお試しください。'**
+  String get tryDifferentNameCode;
+
+  /// No description provided for @tryDifferentOrder.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の受注番号または顧客をお試しください。'**
+  String get tryDifferentOrder;
+
+  /// No description provided for @tryDifferentPo.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の発注番号または仕入先をお試しください。'**
+  String get tryDifferentPo;
+
+  /// No description provided for @tryDifferentWo.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の作業指示番号・商品・SKUをお試しください。'**
+  String get tryDifferentWo;
+
+  /// No description provided for @hintLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称・コードをスキャンまたは検索'**
+  String get hintLocations;
+
+  /// No description provided for @hintWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称・コード・都市をスキャンまたは検索'**
+  String get hintWarehouses;
+
+  /// No description provided for @hintSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称・コード・担当者・メールをスキャンまたは検索'**
+  String get hintSuppliers;
+
+  /// No description provided for @hintSalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注番号・顧客・メールをスキャンまたは検索'**
+  String get hintSalesOrders;
+
+  /// No description provided for @hintPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注番号・仕入先をスキャンまたは検索'**
+  String get hintPurchaseOrders;
+
+  /// No description provided for @hintWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示番号・商品・SKUをスキャンまたは検索'**
+  String get hintWorkOrders;
+
+  /// No description provided for @warehouseDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'既定'**
+  String get warehouseDefault;
+
+  /// No description provided for @noCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客なし'**
+  String get noCustomer;
+
+  /// No description provided for @noSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先なし'**
+  String get noSupplier;
+
+  /// No description provided for @noProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品なし'**
+  String get noProduct;
+
+  /// No description provided for @qtyLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量 {quantity}'**
+  String qtyLabel(int quantity);
+
+  /// No description provided for @lineCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}件の明細}}'**
+  String lineCount(int count);
+
+  /// No description provided for @statusActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get statusActive;
+
+  /// No description provided for @statusInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効'**
+  String get statusInactive;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'キャンセル'**
+  String get statusCancelled;
+
+  /// No description provided for @statusDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get statusDraft;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get statusCompleted;
+
+  /// No description provided for @statusInProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中'**
+  String get statusInProgress;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get statusPending;
+
+  /// No description provided for @salesProcessing.
+  ///
+  /// In ja, this message translates to:
+  /// **'処理中'**
+  String get salesProcessing;
+
+  /// No description provided for @salesShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済み'**
+  String get salesShipped;
+
+  /// No description provided for @salesDelivered.
+  ///
+  /// In ja, this message translates to:
+  /// **'配達済み'**
+  String get salesDelivered;
+
+  /// No description provided for @poSent.
+  ///
+  /// In ja, this message translates to:
+  /// **'送信済み'**
+  String get poSent;
+
+  /// No description provided for @poPartiallyReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'一部入荷'**
+  String get poPartiallyReceived;
+
+  /// No description provided for @poReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済み'**
+  String get poReceived;
+
+  /// No description provided for @stockIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫あり'**
+  String get stockIn;
+
+  /// No description provided for @stockLow.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫僅少'**
+  String get stockLow;
+
+  /// No description provided for @stockOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫切れ'**
+  String get stockOut;
+
+  /// No description provided for @inspectionPassed.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格'**
+  String get inspectionPassed;
+
+  /// No description provided for @inspectionFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'不合格'**
+  String get inspectionFailed;
+
+  /// No description provided for @matchOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'OK'**
+  String get matchOk;
+
+  /// No description provided for @matchNg.
+  ///
+  /// In ja, this message translates to:
+  /// **'NG'**
+  String get matchNg;
+
+  /// No description provided for @typeReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get typeReceiving;
+
+  /// No description provided for @typeShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get typeShipping;
+
+  /// No description provided for @typeOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get typeOther;
+
+  /// No description provided for @titleProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get titleProduct;
+
+  /// No description provided for @fieldDescription.
+  ///
+  /// In ja, this message translates to:
+  /// **'説明'**
+  String get fieldDescription;
+
+  /// No description provided for @fieldPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話'**
+  String get fieldPhone;
+
+  /// No description provided for @fieldAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所'**
+  String get fieldAddress;
+
+  /// No description provided for @fieldStatus.
+  ///
+  /// In ja, this message translates to:
+  /// **'ステータス'**
+  String get fieldStatus;
+
+  /// No description provided for @fieldCurrency.
+  ///
+  /// In ja, this message translates to:
+  /// **'通貨'**
+  String get fieldCurrency;
+
+  /// No description provided for @fieldCategory.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリ'**
+  String get fieldCategory;
+
+  /// No description provided for @fieldBarcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'バーコード'**
+  String get fieldBarcode;
+
+  /// No description provided for @fieldSku.
+  ///
+  /// In ja, this message translates to:
+  /// **'SKU'**
+  String get fieldSku;
+
+  /// No description provided for @fieldPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格'**
+  String get fieldPrice;
+
+  /// No description provided for @fieldSellingPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売価格'**
+  String get fieldSellingPrice;
+
+  /// No description provided for @fieldMinStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'最小在庫'**
+  String get fieldMinStock;
+
+  /// No description provided for @fieldOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫数'**
+  String get fieldOnHand;
+
+  /// No description provided for @fieldLocation.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーション'**
+  String get fieldLocation;
+
+  /// No description provided for @fieldHasVariants.
+  ///
+  /// In ja, this message translates to:
+  /// **'バリエーションあり'**
+  String get fieldHasVariants;
+
+  /// No description provided for @fieldManager.
+  ///
+  /// In ja, this message translates to:
+  /// **'管理者'**
+  String get fieldManager;
+
+  /// No description provided for @fieldTimezone.
+  ///
+  /// In ja, this message translates to:
+  /// **'タイムゾーン'**
+  String get fieldTimezone;
+
+  /// No description provided for @fieldPriority.
+  ///
+  /// In ja, this message translates to:
+  /// **'優先度'**
+  String get fieldPriority;
+
+  /// No description provided for @fieldUsers.
+  ///
+  /// In ja, this message translates to:
+  /// **'ユーザー'**
+  String get fieldUsers;
+
+  /// No description provided for @fieldLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーション'**
+  String get fieldLocations;
+
+  /// No description provided for @fieldContact.
+  ///
+  /// In ja, this message translates to:
+  /// **'担当者'**
+  String get fieldContact;
+
+  /// No description provided for @fieldWebsite.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェブサイト'**
+  String get fieldWebsite;
+
+  /// No description provided for @fieldPaymentTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'支払条件'**
+  String get fieldPaymentTerms;
+
+  /// No description provided for @fieldNotes.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get fieldNotes;
+
+  /// No description provided for @fieldProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get fieldProducts;
+
+  /// No description provided for @fieldAisle.
+  ///
+  /// In ja, this message translates to:
+  /// **'通路'**
+  String get fieldAisle;
+
+  /// No description provided for @fieldShelf.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚'**
+  String get fieldShelf;
+
+  /// No description provided for @fieldBin.
+  ///
+  /// In ja, this message translates to:
+  /// **'ビン'**
+  String get fieldBin;
+
+  /// No description provided for @fieldCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'コード'**
+  String get fieldCode;
+
+  /// No description provided for @fieldFullLocation.
+  ///
+  /// In ja, this message translates to:
+  /// **'フルロケーション'**
+  String get fieldFullLocation;
+
+  /// No description provided for @itemCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}点}}'**
+  String itemCount(int count);
+
+  /// No description provided for @productCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}品目}}'**
+  String productCount(int count);
+
+  /// No description provided for @binCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}ロケーション}}'**
+  String binCount(int count);
 }
 
 class _AppLocalizationsDelegate
