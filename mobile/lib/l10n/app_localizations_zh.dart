@@ -600,4 +600,107 @@ class AppLocalizationsZh extends AppLocalizations {
   String remainingAmount(String amount) {
     return '剩余 $amount';
   }
+
+  @override
+  String get unknownSupplier => '未知供应商';
+
+  @override
+  String get receivingEmpty => '无待收货项。';
+
+  @override
+  String get receivingEmptyBody => '已发送或部分收货的采购单将显示在此处。';
+
+  @override
+  String get receivingDone => '无剩余待收货。';
+
+  @override
+  String get fieldQtyToReceive => '收货数量';
+
+  @override
+  String get receiveStock => '收货入库';
+
+  @override
+  String get actionReceive => '收货';
+
+  @override
+  String get receivingInProgress => '收货中…';
+
+  @override
+  String get emptyInspections => '暂无验货。';
+
+  @override
+  String get inspectionsEmptyBody => '下拉刷新，或从采购收货开始一项。';
+
+  @override
+  String get pickingEmpty => '无待拣货项。';
+
+  @override
+  String get noLinesToPick => '无可拣货明细。';
+
+  @override
+  String get orderNoLineItems => '此订单无明细。';
+
+  @override
+  String get unnamedProduct => '未命名商品';
+
+  @override
+  String get pickListTitle => '拣货单';
+
+  @override
+  String get customReport => '自定义报表';
+
+  @override
+  String get emptyReports => '暂无已保存报表。';
+
+  @override
+  String get reportsEmptyBody => '在后台保存的报表将显示在此处。';
+
+  @override
+  String get reportShared => '已共享';
+
+  @override
+  String columnCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 列',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allLocations => '全部库位';
+
+  @override
+  String get emptyStockCounts => '暂无盘点。';
+
+  @override
+  String get pickingEmptyBody => '等待履约的销售订单将显示在此处。';
+
+  @override
+  String get stockCountsEmptyBody => '在后台创建的循环盘点将显示在此处。';
+
+  @override
+  String get receivingDoneBody => '此采购单的所有明细均已收货。';
+
+  @override
+  String receiveInvalidQty(String product) {
+    return '请为“$product”输入有效数量。';
+  }
+
+  @override
+  String receiveExceedsRemaining(String product, int remaining) {
+    return '$product：收货不能超过剩余 $remaining。';
+  }
+
+  @override
+  String get receiveEnterAtLeastOne => '请至少在一行输入收货数量。';
+
+  @override
+  String get receiveSuccess => '已收货。已自动开始验货。';
+
+  @override
+  String pickedProgress(int picked, int total) {
+    return '$picked / $total 已拣';
+  }
 }

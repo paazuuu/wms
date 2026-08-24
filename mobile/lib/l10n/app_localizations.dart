@@ -1209,6 +1209,186 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'残り {amount}'**
   String remainingAmount(String amount);
+
+  /// No description provided for @unknownSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先不明'**
+  String get unknownSupplier;
+
+  /// No description provided for @receivingEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷対象がありません。'**
+  String get receivingEmpty;
+
+  /// No description provided for @receivingEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'送信済みまたは一部入荷の発注がここに表示されます。'**
+  String get receivingEmptyBody;
+
+  /// No description provided for @receivingDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'残りの入荷はありません。'**
+  String get receivingDone;
+
+  /// No description provided for @fieldQtyToReceive.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷数量'**
+  String get fieldQtyToReceive;
+
+  /// No description provided for @receiveStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷登録'**
+  String get receiveStock;
+
+  /// No description provided for @actionReceive.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get actionReceive;
+
+  /// No description provided for @receivingInProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷処理中…'**
+  String get receivingInProgress;
+
+  /// No description provided for @emptyInspections.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品がまだありません。'**
+  String get emptyInspections;
+
+  /// No description provided for @inspectionsEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'下に引いて更新するか、入荷受入から開始してください。'**
+  String get inspectionsEmptyBody;
+
+  /// No description provided for @pickingEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング対象がありません。'**
+  String get pickingEmpty;
+
+  /// No description provided for @noLinesToPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキングする明細がありません。'**
+  String get noLinesToPick;
+
+  /// No description provided for @orderNoLineItems.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受注に明細はありません。'**
+  String get orderNoLineItems;
+
+  /// No description provided for @unnamedProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称未設定の商品'**
+  String get unnamedProduct;
+
+  /// No description provided for @pickListTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキングリスト'**
+  String get pickListTitle;
+
+  /// No description provided for @customReport.
+  ///
+  /// In ja, this message translates to:
+  /// **'カスタムレポート'**
+  String get customReport;
+
+  /// No description provided for @emptyReports.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存済みレポートがまだありません。'**
+  String get emptyReports;
+
+  /// No description provided for @reportsEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'バックオフィスで保存したレポートがここに表示されます。'**
+  String get reportsEmptyBody;
+
+  /// No description provided for @reportShared.
+  ///
+  /// In ja, this message translates to:
+  /// **'共有'**
+  String get reportShared;
+
+  /// No description provided for @columnCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}列}}'**
+  String columnCount(int count);
+
+  /// No description provided for @allLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'全ロケーション'**
+  String get allLocations;
+
+  /// No description provided for @emptyStockCounts.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸がまだありません。'**
+  String get emptyStockCounts;
+
+  /// No description provided for @pickingEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷待ちの受注がここに表示されます。'**
+  String get pickingEmptyBody;
+
+  /// No description provided for @stockCountsEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'バックオフィスで作成した循環棚卸がここに表示されます。'**
+  String get stockCountsEmptyBody;
+
+  /// No description provided for @receivingDoneBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注のすべての明細が入荷済みです。'**
+  String get receivingDoneBody;
+
+  /// No description provided for @receiveInvalidQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{product}」の数量を正しく入力してください。'**
+  String receiveInvalidQty(String product);
+
+  /// No description provided for @receiveExceedsRemaining.
+  ///
+  /// In ja, this message translates to:
+  /// **'{product}：残り {remaining} を超えて入荷できません。'**
+  String receiveExceedsRemaining(String product, int remaining);
+
+  /// No description provided for @receiveEnterAtLeastOne.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷する数量を1行以上入力してください。'**
+  String get receiveEnterAtLeastOne;
+
+  /// No description provided for @receiveSuccess.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷しました。検品が自動的に開始されました。'**
+  String get receiveSuccess;
+
+  /// No description provided for @pickedProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{picked} / {total} ピック済み'**
+  String pickedProgress(int picked, int total);
 }
 
 class _AppLocalizationsDelegate

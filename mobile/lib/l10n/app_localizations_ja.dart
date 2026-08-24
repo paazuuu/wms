@@ -600,4 +600,107 @@ class AppLocalizationsJa extends AppLocalizations {
   String remainingAmount(String amount) {
     return '残り $amount';
   }
+
+  @override
+  String get unknownSupplier => '仕入先不明';
+
+  @override
+  String get receivingEmpty => '入荷対象がありません。';
+
+  @override
+  String get receivingEmptyBody => '送信済みまたは一部入荷の発注がここに表示されます。';
+
+  @override
+  String get receivingDone => '残りの入荷はありません。';
+
+  @override
+  String get fieldQtyToReceive => '入荷数量';
+
+  @override
+  String get receiveStock => '入荷登録';
+
+  @override
+  String get actionReceive => '入荷';
+
+  @override
+  String get receivingInProgress => '入荷処理中…';
+
+  @override
+  String get emptyInspections => '検品がまだありません。';
+
+  @override
+  String get inspectionsEmptyBody => '下に引いて更新するか、入荷受入から開始してください。';
+
+  @override
+  String get pickingEmpty => 'ピッキング対象がありません。';
+
+  @override
+  String get noLinesToPick => 'ピッキングする明細がありません。';
+
+  @override
+  String get orderNoLineItems => 'この受注に明細はありません。';
+
+  @override
+  String get unnamedProduct => '名称未設定の商品';
+
+  @override
+  String get pickListTitle => 'ピッキングリスト';
+
+  @override
+  String get customReport => 'カスタムレポート';
+
+  @override
+  String get emptyReports => '保存済みレポートがまだありません。';
+
+  @override
+  String get reportsEmptyBody => 'バックオフィスで保存したレポートがここに表示されます。';
+
+  @override
+  String get reportShared => '共有';
+
+  @override
+  String columnCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count列',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allLocations => '全ロケーション';
+
+  @override
+  String get emptyStockCounts => '棚卸がまだありません。';
+
+  @override
+  String get pickingEmptyBody => '出荷待ちの受注がここに表示されます。';
+
+  @override
+  String get stockCountsEmptyBody => 'バックオフィスで作成した循環棚卸がここに表示されます。';
+
+  @override
+  String get receivingDoneBody => 'この発注のすべての明細が入荷済みです。';
+
+  @override
+  String receiveInvalidQty(String product) {
+    return '「$product」の数量を正しく入力してください。';
+  }
+
+  @override
+  String receiveExceedsRemaining(String product, int remaining) {
+    return '$product：残り $remaining を超えて入荷できません。';
+  }
+
+  @override
+  String get receiveEnterAtLeastOne => '入荷する数量を1行以上入力してください。';
+
+  @override
+  String get receiveSuccess => '入荷しました。検品が自動的に開始されました。';
+
+  @override
+  String pickedProgress(int picked, int total) {
+    return '$picked / $total ピック済み';
+  }
 }

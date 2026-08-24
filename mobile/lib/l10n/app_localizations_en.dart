@@ -606,4 +606,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String remainingAmount(String amount) {
     return '$amount left';
   }
+
+  @override
+  String get unknownSupplier => 'Unknown supplier';
+
+  @override
+  String get receivingEmpty => 'Nothing to receive.';
+
+  @override
+  String get receivingEmptyBody =>
+      'Purchase orders that are sent or partially received will appear here.';
+
+  @override
+  String get receivingDone => 'Nothing left to receive.';
+
+  @override
+  String get fieldQtyToReceive => 'Quantity to receive';
+
+  @override
+  String get receiveStock => 'Receive stock';
+
+  @override
+  String get actionReceive => 'Receive';
+
+  @override
+  String get receivingInProgress => 'Receiving…';
+
+  @override
+  String get emptyInspections => 'No inspections yet.';
+
+  @override
+  String get inspectionsEmptyBody =>
+      'Pull down to refresh, or start one from a purchase order receipt.';
+
+  @override
+  String get pickingEmpty => 'Nothing to pick.';
+
+  @override
+  String get noLinesToPick => 'No lines to pick.';
+
+  @override
+  String get orderNoLineItems => 'This order has no line items.';
+
+  @override
+  String get unnamedProduct => 'Unnamed product';
+
+  @override
+  String get pickListTitle => 'Pick List';
+
+  @override
+  String get customReport => 'Custom report';
+
+  @override
+  String get emptyReports => 'No saved reports yet.';
+
+  @override
+  String get reportsEmptyBody =>
+      'Reports saved on the back office appear here.';
+
+  @override
+  String get reportShared => 'Shared';
+
+  @override
+  String columnCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count columns',
+      one: '$count column',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allLocations => 'All locations';
+
+  @override
+  String get emptyStockCounts => 'No stock counts yet.';
+
+  @override
+  String get pickingEmptyBody =>
+      'Open sales orders awaiting fulfilment appear here.';
+
+  @override
+  String get stockCountsEmptyBody =>
+      'Cycle counts created on the back office appear here.';
+
+  @override
+  String get receivingDoneBody =>
+      'Every line on this purchase order is fully received.';
+
+  @override
+  String receiveInvalidQty(String product) {
+    return 'Enter a valid quantity for $product.';
+  }
+
+  @override
+  String receiveExceedsRemaining(String product, int remaining) {
+    return '$product: cannot receive more than $remaining remaining.';
+  }
+
+  @override
+  String get receiveEnterAtLeastOne =>
+      'Enter a quantity on at least one line to receive.';
+
+  @override
+  String get receiveSuccess =>
+      'Stock received. An inspection was started automatically.';
+
+  @override
+  String pickedProgress(int picked, int total) {
+    return '$picked / $total picked';
+  }
 }

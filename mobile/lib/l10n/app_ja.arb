@@ -211,5 +211,47 @@
   "remainingAmount": "残り {amount}",
   "@remainingAmount": {
     "placeholders": { "amount": { "type": "String" } }
+  },
+  "unknownSupplier": "仕入先不明",
+  "receivingEmpty": "入荷対象がありません。",
+  "receivingEmptyBody": "送信済みまたは一部入荷の発注がここに表示されます。",
+  "receivingDone": "残りの入荷はありません。",
+  "fieldQtyToReceive": "入荷数量",
+  "receiveStock": "入荷登録",
+  "actionReceive": "入荷",
+  "receivingInProgress": "入荷処理中…",
+  "emptyInspections": "検品がまだありません。",
+  "inspectionsEmptyBody": "下に引いて更新するか、入荷受入から開始してください。",
+  "pickingEmpty": "ピッキング対象がありません。",
+  "noLinesToPick": "ピッキングする明細がありません。",
+  "orderNoLineItems": "この受注に明細はありません。",
+  "unnamedProduct": "名称未設定の商品",
+  "pickListTitle": "ピッキングリスト",
+  "customReport": "カスタムレポート",
+  "emptyReports": "保存済みレポートがまだありません。",
+  "reportsEmptyBody": "バックオフィスで保存したレポートがここに表示されます。",
+  "reportShared": "共有",
+  "columnCount": "{count, plural, other{{count}列}}",
+  "@columnCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "allLocations": "全ロケーション",
+  "emptyStockCounts": "棚卸がまだありません。",
+  "pickingEmptyBody": "出荷待ちの受注がここに表示されます。",
+  "stockCountsEmptyBody": "バックオフィスで作成した循環棚卸がここに表示されます。",
+  "receivingDoneBody": "この発注のすべての明細が入荷済みです。",
+  "receiveInvalidQty": "「{product}」の数量を正しく入力してください。",
+  "@receiveInvalidQty": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "receiveExceedsRemaining": "{product}：残り {remaining} を超えて入荷できません。",
+  "@receiveExceedsRemaining": {
+    "placeholders": { "product": { "type": "String" }, "remaining": { "type": "int" } }
+  },
+  "receiveEnterAtLeastOne": "入荷する数量を1行以上入力してください。",
+  "receiveSuccess": "入荷しました。検品が自動的に開始されました。",
+  "pickedProgress": "{picked} / {total} ピック済み",
+  "@pickedProgress": {
+    "placeholders": { "picked": { "type": "int" }, "total": { "type": "int" } }
   }
 }
