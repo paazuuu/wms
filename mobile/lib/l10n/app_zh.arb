@@ -217,5 +217,49 @@
   "receiveExceedsRemaining": "{product}：收货不能超过剩余 {remaining}。",
   "receiveEnterAtLeastOne": "请至少在一行输入收货数量。",
   "receiveSuccess": "已收货。已自动开始验货。",
-  "pickedProgress": "{picked} / {total} 已拣"
+  "pickedProgress": "{picked} / {total} 已拣",
+  "attachFiles": "添加附件",
+  "cameraLabel": "相机",
+  "scanToRecord": "扫描商品条码以记录",
+  "scanToRecordQty1": "扫描以记录（数量 1）",
+  "fastModeOnTooltip": "快速模式：每次扫描按数量 1 记录",
+  "fastModeOffTooltip": "每次扫描时输入数量",
+  "fastQtyOneLabel": "数量 1",
+  "actualQuantity": "实际数量",
+  "scannedCode": "已扫描：{code}",
+  "@scannedCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "quantity": "数量",
+  "actionCancel": "取消",
+  "actionRecord": "记录",
+  "itemRecorded": "已记录该项",
+  "offlineItemQueued": "离线 — 该项已加入同步队列",
+  "filesUploaded": "{count, plural, other{已上传 {count} 个文件}}",
+  "@filesUploaded": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "offlineFilesQueued": "离线 — {count} 个文件已加入同步队列",
+  "@offlineFilesQueued": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "completeInspectionQ": "完成验货？",
+  "completeInspectionBody": "将此验货标记为完成。完成后仍可查看。",
+  "inspectionCompleted": "验货已完成",
+  "offlineCompletionQueued": "离线 — 完成操作已加入同步队列",
+  "sectionItems": "项目",
+  "sectionAttachments": "附件",
+  "noItemsYet": "尚无项目。点击扫描以记录一项。",
+  "noAttachments": "暂无附件。使用回形针添加照片或文件。",
+  "completeInspection": "完成验货",
+  "completedOn": "完成于 {date}",
+  "@completedOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "actualLabel": "实际",
+  "itemNumber": "项目 {id}",
+  "@itemNumber": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "working": "处理中…"
 }

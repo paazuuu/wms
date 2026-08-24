@@ -718,4 +718,115 @@ class AppLocalizationsEn extends AppLocalizations {
   String pickedProgress(int picked, int total) {
     return '$picked / $total picked';
   }
+
+  @override
+  String get attachFiles => 'Attach files';
+
+  @override
+  String get cameraLabel => 'Camera';
+
+  @override
+  String get scanToRecord => 'Scan item barcode to record';
+
+  @override
+  String get scanToRecordQty1 => 'Scan to record (qty 1)';
+
+  @override
+  String get fastModeOnTooltip => 'Fast mode: records quantity 1 per scan';
+
+  @override
+  String get fastModeOffTooltip => 'Prompt for a quantity on each scan';
+
+  @override
+  String get fastQtyOneLabel => 'Qty 1';
+
+  @override
+  String get actualQuantity => 'Actual quantity';
+
+  @override
+  String scannedCode(String code) {
+    return 'Scanned: $code';
+  }
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get actionCancel => 'Cancel';
+
+  @override
+  String get actionRecord => 'Record';
+
+  @override
+  String get itemRecorded => 'Item recorded';
+
+  @override
+  String get offlineItemQueued => 'Offline — item queued for sync';
+
+  @override
+  String filesUploaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files uploaded',
+      one: '$count file uploaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String offlineFilesQueued(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files',
+      one: '$count file',
+    );
+    return 'Offline — $_temp0 queued for sync';
+  }
+
+  @override
+  String get completeInspectionQ => 'Complete inspection?';
+
+  @override
+  String get completeInspectionBody =>
+      'Mark this inspection as complete. You can still view it afterward.';
+
+  @override
+  String get inspectionCompleted => 'Inspection completed';
+
+  @override
+  String get offlineCompletionQueued => 'Offline — completion queued for sync';
+
+  @override
+  String get sectionItems => 'Items';
+
+  @override
+  String get sectionAttachments => 'Attachments';
+
+  @override
+  String get noItemsYet => 'No items yet. Tap Scan to record one.';
+
+  @override
+  String get noAttachments =>
+      'No attachments. Use the paperclip to add photos or files.';
+
+  @override
+  String get completeInspection => 'Complete inspection';
+
+  @override
+  String completedOn(String date) {
+    return 'Completed $date';
+  }
+
+  @override
+  String get actualLabel => 'Actual';
+
+  @override
+  String itemNumber(int id) {
+    return 'Item $id';
+  }
+
+  @override
+  String get working => 'Working…';
 }

@@ -703,4 +703,106 @@ class AppLocalizationsJa extends AppLocalizations {
   String pickedProgress(int picked, int total) {
     return '$picked / $total ピック済み';
   }
+
+  @override
+  String get attachFiles => '添付';
+
+  @override
+  String get cameraLabel => 'カメラ';
+
+  @override
+  String get scanToRecord => 'スキャンして記録';
+
+  @override
+  String get scanToRecordQty1 => 'スキャンして記録（数量1）';
+
+  @override
+  String get fastModeOnTooltip => '高速モード：スキャンごとに数量1で記録';
+
+  @override
+  String get fastModeOffTooltip => 'スキャンごとに数量を入力';
+
+  @override
+  String get fastQtyOneLabel => '数量1';
+
+  @override
+  String get actualQuantity => '実数量';
+
+  @override
+  String scannedCode(String code) {
+    return '読取: $code';
+  }
+
+  @override
+  String get quantity => '数量';
+
+  @override
+  String get actionCancel => 'キャンセル';
+
+  @override
+  String get actionRecord => '記録';
+
+  @override
+  String get itemRecorded => '項目を記録しました';
+
+  @override
+  String get offlineItemQueued => 'オフライン — 項目を同期待ちに追加しました';
+
+  @override
+  String filesUploaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のファイルをアップロードしました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String offlineFilesQueued(int count) {
+    return 'オフライン — $count件のファイルを同期待ちに追加しました';
+  }
+
+  @override
+  String get completeInspectionQ => '検品を完了しますか？';
+
+  @override
+  String get completeInspectionBody => 'この検品を完了にします。完了後も閲覧できます。';
+
+  @override
+  String get inspectionCompleted => '検品を完了しました';
+
+  @override
+  String get offlineCompletionQueued => 'オフライン — 完了を同期待ちに追加しました';
+
+  @override
+  String get sectionItems => '項目';
+
+  @override
+  String get sectionAttachments => '添付ファイル';
+
+  @override
+  String get noItemsYet => '項目がまだありません。スキャンで記録してください。';
+
+  @override
+  String get noAttachments => '添付はありません。クリップから写真やファイルを追加できます。';
+
+  @override
+  String get completeInspection => '検品を完了';
+
+  @override
+  String completedOn(String date) {
+    return '完了 $date';
+  }
+
+  @override
+  String get actualLabel => '実績';
+
+  @override
+  String itemNumber(int id) {
+    return '項目 $id';
+  }
+
+  @override
+  String get working => '処理中…';
 }

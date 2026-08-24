@@ -703,4 +703,106 @@ class AppLocalizationsZh extends AppLocalizations {
   String pickedProgress(int picked, int total) {
     return '$picked / $total 已拣';
   }
+
+  @override
+  String get attachFiles => '添加附件';
+
+  @override
+  String get cameraLabel => '相机';
+
+  @override
+  String get scanToRecord => '扫描商品条码以记录';
+
+  @override
+  String get scanToRecordQty1 => '扫描以记录（数量 1）';
+
+  @override
+  String get fastModeOnTooltip => '快速模式：每次扫描按数量 1 记录';
+
+  @override
+  String get fastModeOffTooltip => '每次扫描时输入数量';
+
+  @override
+  String get fastQtyOneLabel => '数量 1';
+
+  @override
+  String get actualQuantity => '实际数量';
+
+  @override
+  String scannedCode(String code) {
+    return '已扫描：$code';
+  }
+
+  @override
+  String get quantity => '数量';
+
+  @override
+  String get actionCancel => '取消';
+
+  @override
+  String get actionRecord => '记录';
+
+  @override
+  String get itemRecorded => '已记录该项';
+
+  @override
+  String get offlineItemQueued => '离线 — 该项已加入同步队列';
+
+  @override
+  String filesUploaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已上传 $count 个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String offlineFilesQueued(int count) {
+    return '离线 — $count 个文件已加入同步队列';
+  }
+
+  @override
+  String get completeInspectionQ => '完成验货？';
+
+  @override
+  String get completeInspectionBody => '将此验货标记为完成。完成后仍可查看。';
+
+  @override
+  String get inspectionCompleted => '验货已完成';
+
+  @override
+  String get offlineCompletionQueued => '离线 — 完成操作已加入同步队列';
+
+  @override
+  String get sectionItems => '项目';
+
+  @override
+  String get sectionAttachments => '附件';
+
+  @override
+  String get noItemsYet => '尚无项目。点击扫描以记录一项。';
+
+  @override
+  String get noAttachments => '暂无附件。使用回形针添加照片或文件。';
+
+  @override
+  String get completeInspection => '完成验货';
+
+  @override
+  String completedOn(String date) {
+    return '完成于 $date';
+  }
+
+  @override
+  String get actualLabel => '实际';
+
+  @override
+  String itemNumber(int id) {
+    return '项目 $id';
+  }
+
+  @override
+  String get working => '处理中…';
 }

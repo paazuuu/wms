@@ -217,5 +217,49 @@
   "receiveExceedsRemaining": "{product}: cannot receive more than {remaining} remaining.",
   "receiveEnterAtLeastOne": "Enter a quantity on at least one line to receive.",
   "receiveSuccess": "Stock received. An inspection was started automatically.",
-  "pickedProgress": "{picked} / {total} picked"
+  "pickedProgress": "{picked} / {total} picked",
+  "attachFiles": "Attach files",
+  "cameraLabel": "Camera",
+  "scanToRecord": "Scan item barcode to record",
+  "scanToRecordQty1": "Scan to record (qty 1)",
+  "fastModeOnTooltip": "Fast mode: records quantity 1 per scan",
+  "fastModeOffTooltip": "Prompt for a quantity on each scan",
+  "fastQtyOneLabel": "Qty 1",
+  "actualQuantity": "Actual quantity",
+  "scannedCode": "Scanned: {code}",
+  "@scannedCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "quantity": "Quantity",
+  "actionCancel": "Cancel",
+  "actionRecord": "Record",
+  "itemRecorded": "Item recorded",
+  "offlineItemQueued": "Offline — item queued for sync",
+  "filesUploaded": "{count, plural, =1{{count} file uploaded} other{{count} files uploaded}}",
+  "@filesUploaded": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "offlineFilesQueued": "Offline — {count, plural, =1{{count} file} other{{count} files}} queued for sync",
+  "@offlineFilesQueued": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "completeInspectionQ": "Complete inspection?",
+  "completeInspectionBody": "Mark this inspection as complete. You can still view it afterward.",
+  "inspectionCompleted": "Inspection completed",
+  "offlineCompletionQueued": "Offline — completion queued for sync",
+  "sectionItems": "Items",
+  "sectionAttachments": "Attachments",
+  "noItemsYet": "No items yet. Tap Scan to record one.",
+  "noAttachments": "No attachments. Use the paperclip to add photos or files.",
+  "completeInspection": "Complete inspection",
+  "completedOn": "Completed {date}",
+  "@completedOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "actualLabel": "Actual",
+  "itemNumber": "Item {id}",
+  "@itemNumber": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "working": "Working…"
 }

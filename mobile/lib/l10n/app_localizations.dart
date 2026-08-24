@@ -1389,6 +1389,180 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{picked} / {total} ピック済み'**
   String pickedProgress(int picked, int total);
+
+  /// No description provided for @attachFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付'**
+  String get attachFiles;
+
+  /// No description provided for @cameraLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'カメラ'**
+  String get cameraLabel;
+
+  /// No description provided for @scanToRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンして記録'**
+  String get scanToRecord;
+
+  /// No description provided for @scanToRecordQty1.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンして記録（数量1）'**
+  String get scanToRecordQty1;
+
+  /// No description provided for @fastModeOnTooltip.
+  ///
+  /// In ja, this message translates to:
+  /// **'高速モード：スキャンごとに数量1で記録'**
+  String get fastModeOnTooltip;
+
+  /// No description provided for @fastModeOffTooltip.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンごとに数量を入力'**
+  String get fastModeOffTooltip;
+
+  /// No description provided for @fastQtyOneLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量1'**
+  String get fastQtyOneLabel;
+
+  /// No description provided for @actualQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'実数量'**
+  String get actualQuantity;
+
+  /// No description provided for @scannedCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'読取: {code}'**
+  String scannedCode(String code);
+
+  /// No description provided for @quantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get quantity;
+
+  /// No description provided for @actionCancel.
+  ///
+  /// In ja, this message translates to:
+  /// **'キャンセル'**
+  String get actionCancel;
+
+  /// No description provided for @actionRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録'**
+  String get actionRecord;
+
+  /// No description provided for @itemRecorded.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目を記録しました'**
+  String get itemRecorded;
+
+  /// No description provided for @offlineItemQueued.
+  ///
+  /// In ja, this message translates to:
+  /// **'オフライン — 項目を同期待ちに追加しました'**
+  String get offlineItemQueued;
+
+  /// No description provided for @filesUploaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count}件のファイルをアップロードしました}}'**
+  String filesUploaded(int count);
+
+  /// No description provided for @offlineFilesQueued.
+  ///
+  /// In ja, this message translates to:
+  /// **'オフライン — {count}件のファイルを同期待ちに追加しました'**
+  String offlineFilesQueued(int count);
+
+  /// No description provided for @completeInspectionQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を完了しますか？'**
+  String get completeInspectionQ;
+
+  /// No description provided for @completeInspectionBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この検品を完了にします。完了後も閲覧できます。'**
+  String get completeInspectionBody;
+
+  /// No description provided for @inspectionCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を完了しました'**
+  String get inspectionCompleted;
+
+  /// No description provided for @offlineCompletionQueued.
+  ///
+  /// In ja, this message translates to:
+  /// **'オフライン — 完了を同期待ちに追加しました'**
+  String get offlineCompletionQueued;
+
+  /// No description provided for @sectionItems.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目'**
+  String get sectionItems;
+
+  /// No description provided for @sectionAttachments.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付ファイル'**
+  String get sectionAttachments;
+
+  /// No description provided for @noItemsYet.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目がまだありません。スキャンで記録してください。'**
+  String get noItemsYet;
+
+  /// No description provided for @noAttachments.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付はありません。クリップから写真やファイルを追加できます。'**
+  String get noAttachments;
+
+  /// No description provided for @completeInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を完了'**
+  String get completeInspection;
+
+  /// No description provided for @completedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了 {date}'**
+  String completedOn(String date);
+
+  /// No description provided for @actualLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'実績'**
+  String get actualLabel;
+
+  /// No description provided for @itemNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目 {id}'**
+  String itemNumber(int id);
+
+  /// No description provided for @working.
+  ///
+  /// In ja, this message translates to:
+  /// **'処理中…'**
+  String get working;
 }
 
 class _AppLocalizationsDelegate

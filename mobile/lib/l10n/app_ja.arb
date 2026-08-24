@@ -253,5 +253,49 @@
   "pickedProgress": "{picked} / {total} ピック済み",
   "@pickedProgress": {
     "placeholders": { "picked": { "type": "int" }, "total": { "type": "int" } }
-  }
+  },
+  "attachFiles": "添付",
+  "cameraLabel": "カメラ",
+  "scanToRecord": "スキャンして記録",
+  "scanToRecordQty1": "スキャンして記録（数量1）",
+  "fastModeOnTooltip": "高速モード：スキャンごとに数量1で記録",
+  "fastModeOffTooltip": "スキャンごとに数量を入力",
+  "fastQtyOneLabel": "数量1",
+  "actualQuantity": "実数量",
+  "scannedCode": "読取: {code}",
+  "@scannedCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "quantity": "数量",
+  "actionCancel": "キャンセル",
+  "actionRecord": "記録",
+  "itemRecorded": "項目を記録しました",
+  "offlineItemQueued": "オフライン — 項目を同期待ちに追加しました",
+  "filesUploaded": "{count, plural, other{{count}件のファイルをアップロードしました}}",
+  "@filesUploaded": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "offlineFilesQueued": "オフライン — {count}件のファイルを同期待ちに追加しました",
+  "@offlineFilesQueued": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "completeInspectionQ": "検品を完了しますか？",
+  "completeInspectionBody": "この検品を完了にします。完了後も閲覧できます。",
+  "inspectionCompleted": "検品を完了しました",
+  "offlineCompletionQueued": "オフライン — 完了を同期待ちに追加しました",
+  "sectionItems": "項目",
+  "sectionAttachments": "添付ファイル",
+  "noItemsYet": "項目がまだありません。スキャンで記録してください。",
+  "noAttachments": "添付はありません。クリップから写真やファイルを追加できます。",
+  "completeInspection": "検品を完了",
+  "completedOn": "完了 {date}",
+  "@completedOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "actualLabel": "実績",
+  "itemNumber": "項目 {id}",
+  "@itemNumber": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "working": "処理中…"
 }
