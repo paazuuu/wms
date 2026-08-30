@@ -8,6 +8,7 @@ import 'package:wms_mobile/features/tracking/data/tracking_repository.dart';
 import 'package:wms_mobile/features/tracking/domain/product_batch.dart';
 import 'package:wms_mobile/features/tracking/domain/product_serial.dart';
 import 'package:wms_mobile/features/tracking/presentation/tracking_detail_screen.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// In-memory fake so the tracing detail renders without a network.
 class _FakeTrackingRepository implements TrackingRepository {
@@ -31,7 +32,12 @@ Widget _wrap(TrackingRepository repo) => ProviderScope(
       overrides: [
         trackingRepositoryProvider.overrideWithValue(repo),
       ],
-      child: const MaterialApp(home: TrackingDetailScreen(product: _product)),
+      child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: TrackingDetailScreen(product: _product),
+      ),
     );
 
 void main() {

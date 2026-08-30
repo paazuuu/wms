@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -21,11 +22,12 @@ class TrackingDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final batches = ref.watch(productBatchesProvider(product.id));
     final serials = ref.watch(productSerialsProvider(product.id));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lots & Serials')),
+      appBar: AppBar(title: Text(l10n.featLotsSerials)),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(productBatchesProvider(product.id));
@@ -56,12 +58,13 @@ class TrackingDetailScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const _SectionHeader(
-                label: 'Batches', icon: Icons.inventory_2_outlined),
+            _SectionHeader(
+                label: l10n.sectionBatches,
+                icon: Icons.inventory_2_outlined),
             const SizedBox(height: AppSpacing.sm),
             batches.when(
               data: (items) => items.isEmpty
-                  ? const _SectionEmpty(message: 'No batches for this product.')
+                  ? _SectionEmpty(message: l10n.noBatches)
                   : Column(
                       children: items
                           .map((b) => Padding(
@@ -71,7 +74,7 @@ class TrackingDetailScreen extends ConsumerWidget {
                               ))
                           .toList(),
                     ),
-              loading: () => const LoadingView(message: 'Loading batches…'),
+              loading: () => LoadingView(message: l10n.loadingBatches),
               error: (error, _) => ErrorStateView(
                 message: '$error',
                 onRetry: () =>
@@ -79,11 +82,11 @@ class TrackingDetailScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const _SectionHeader(label: 'Serials', icon: Icons.tag_outlined),
+            _SectionHeader(label: l10n.sectionSerials, icon: Icons.tag_outlined),
             const SizedBox(height: AppSpacing.sm),
             serials.when(
               data: (items) => items.isEmpty
-                  ? const _SectionEmpty(message: 'No serials for this product.')
+                  ? _SectionEmpty(message: l10n.noSerials)
                   : Column(
                       children: items
                           .map((s) => Padding(
@@ -93,7 +96,7 @@ class TrackingDetailScreen extends ConsumerWidget {
                               ))
                           .toList(),
                     ),
-              loading: () => const LoadingView(message: 'Loading serials…'),
+              loading: () => LoadingView(message: l10n.loadingSerials),
               error: (error, _) => ErrorStateView(
                 message: '$error',
                 onRetry: () =>
@@ -162,6 +165,7 @@ class _BatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -184,7 +188,7 @@ class _BatchCard extends StatelessWidget {
                   tone: batch.isExpired
                       ? StatusTone.danger
                       : StatusTone.success,
-                  label: batch.isExpired ? 'Expired' : 'Valid',
+                  label: batch.isExpired ? l10n.batchExpired : l10n.batchValid,
                   icon: batch.isExpired
                       ? Icons.error_outline
                       : Icons.check_circle_outline,
@@ -195,8 +199,8 @@ class _BatchCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                _Stat(label: 'Quantity', value: '${batch.quantity}'),
-                _Stat(label: 'Expiry', value: batch.expiryDate ?? '—'),
+                _Stat(label: l10n.quantity, value: '${batch.quantity}'),
+                _Stat(label: l10n.fieldExpiry, value: batch.expiryDate ?? '—'),
               ],
             ),
             if (batch.notes != null && batch.notes!.trim().isNotEmpty) ...[

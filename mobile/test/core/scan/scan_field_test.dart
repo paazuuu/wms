@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/scan/scan_field.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 
 Widget _host({required Widget child, Size size = const Size(1200, 800)}) {
   return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: MediaQuery(
       data: MediaQueryData(size: size),
       child: Scaffold(body: child),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
@@ -9,6 +10,22 @@ import '../../products/application/product_providers.dart';
 import '../../products/domain/product.dart';
 import '../application/stock_adjustment_providers.dart';
 import '../domain/adjustment_type.dart';
+
+/// Localized label for a stock-adjustment reason category.
+String adjustmentTypeLabel(AppLocalizations l10n, AdjustmentType type) {
+  switch (type) {
+    case AdjustmentType.manual:
+      return l10n.adjustTypeManual;
+    case AdjustmentType.count:
+      return l10n.adjustTypeCount;
+    case AdjustmentType.damage:
+      return l10n.adjustTypeDamage;
+    case AdjustmentType.returned:
+      return l10n.adjustTypeReturn;
+    case AdjustmentType.transfer:
+      return l10n.adjustTypeTransfer;
+  }
+}
 
 /// Step two of a stock adjustment: choose add vs. remove, a quantity, a reason
 /// category, and optional notes, then book it against the selected product.
@@ -66,14 +83,15 @@ class _StockAdjustmentFormScreenState
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     final signed = _signedQuantity;
     if (signed == null) {
-      _notify('Enter a quantity greater than zero.');
+      _notify(l10n.enterQtyPositive);
       return;
     }
     final current = widget.product.displayStock;
     if (!_isAdd && current + signed < 0) {
-      _notify('Cannot remove ${-signed}; only $current on hand.');
+      _notify(l10n.cannotRemoveOnly(-signed, current));
       return;
     }
 
@@ -92,7 +110,7 @@ class _StockAdjustmentFormScreenState
     switch (result) {
       case ApiSuccess(:final data):
         ref.invalidate(productDetailProvider(widget.product.id));
-        _notify('Stock updated — now ${data.quantityAfter} on hand.');
+        _notify(AppLocalizations.of(context).stockUpdatedTo(data.quantityAfter));
         Navigator.of(context).pop();
       case ApiFailure(:final message):
         _notify(message);
@@ -110,13 +128,14 @@ class _StockAdjustmentFormScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final product = widget.product;
     final current = product.displayStock;
     final signed = _signedQuantity;
     final resulting = signed == null ? null : current + signed;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Adjust Stock')),
+      appBar: AppBar(title: Text(l10n.featStockAdjustment)),
       body: Column(
         children: [
           Expanded(
@@ -126,16 +145,16 @@ class _StockAdjustmentFormScreenState
                 _ProductHeader(product: product),
                 const SizedBox(height: AppSpacing.lg),
                 SegmentedButton<bool>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: true,
-                      label: Text('Add'),
-                      icon: Icon(Icons.add),
+                      label: Text(l10n.adjustAdd),
+                      icon: const Icon(Icons.add),
                     ),
                     ButtonSegment(
                       value: false,
-                      label: Text('Remove'),
-                      icon: Icon(Icons.remove),
+                      label: Text(l10n.adjustRemove),
+                      icon: const Icon(Icons.remove),
                     ),
                   ],
                   selected: {_isAdd},
@@ -146,21 +165,22 @@ class _StockAdjustmentFormScreenState
                   controller: _quantityController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Quantity',
-                    prefixIcon: Icon(Icons.numbers),
+                  decoration: InputDecoration(
+                    labelText: l10n.quantity,
+                    prefixIcon: const Icon(Icons.numbers),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 DropdownButtonFormField<AdjustmentType>(
                   initialValue: _type,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason type',
-                    prefixIcon: Icon(Icons.category_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.reasonType,
+                    prefixIcon: const Icon(Icons.category_outlined),
                   ),
                   items: [
                     for (final t in AdjustmentType.values)
-                      DropdownMenuItem(value: t, child: Text(t.label)),
+                      DropdownMenuItem(
+                          value: t, child: Text(adjustmentTypeLabel(l10n, t))),
                   ],
                   onChanged: (t) =>
                       setState(() => _type = t ?? AdjustmentType.manual),
@@ -169,9 +189,9 @@ class _StockAdjustmentFormScreenState
                 TextField(
                   controller: _reasonController,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason (optional)',
-                    prefixIcon: Icon(Icons.notes_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.reasonOptional,
+                    prefixIcon: const Icon(Icons.notes_outlined),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -179,10 +199,10 @@ class _StockAdjustmentFormScreenState
                   controller: _notesController,
                   textCapitalization: TextCapitalization.sentences,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
+                  decoration: InputDecoration(
+                    labelText: l10n.notesOptional,
                     alignLabelWithHint: true,
-                    prefixIcon: Icon(Icons.sticky_note_2_outlined),
+                    prefixIcon: const Icon(Icons.sticky_note_2_outlined),
                   ),
                 ),
               ],
@@ -199,7 +219,7 @@ class _StockAdjustmentFormScreenState
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('On hand after',
+                        Text(l10n.onHandAfter,
                             style: theme.textTheme.bodyMedium),
                         Text(
                           '$current → $resulting',
@@ -226,10 +246,10 @@ class _StockAdjustmentFormScreenState
                           : Icon(_isAdd ? Icons.add : Icons.remove),
                       label: Text(
                         _submitting
-                            ? 'Saving…'
+                            ? l10n.saving
                             : _isAdd
-                                ? 'Add stock'
-                                : 'Remove stock',
+                                ? l10n.addStock
+                                : l10n.removeStock,
                       ),
                     ),
                   ),
@@ -271,7 +291,8 @@ class _ProductHeader extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             StatusPill(
               tone: StatusTone.neutral,
-              label: '${product.displayStock} on hand',
+              label: AppLocalizations.of(context)
+                  .onHandCount(product.displayStock),
               icon: Icons.inventory_2_outlined,
             ),
           ],

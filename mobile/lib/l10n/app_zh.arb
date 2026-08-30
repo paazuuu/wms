@@ -261,5 +261,54 @@
   "@itemNumber": {
     "placeholders": { "id": { "type": "int" } }
   },
-  "working": "处理中…"
+  "working": "处理中…",
+  "adjustAdd": "增加",
+  "adjustRemove": "减少",
+  "reasonType": "原因类型",
+  "reasonOptional": "原因（可选）",
+  "notesOptional": "备注（可选）",
+  "onHandAfter": "调整后库存",
+  "saving": "保存中…",
+  "addStock": "增加库存",
+  "removeStock": "减少库存",
+  "onHandCount": "现有库存 {count}",
+  "@onHandCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "enterQtyPositive": "请输入大于零的数量。",
+  "cannotRemoveOnly": "无法减少 {qty}；现有库存仅 {current}。",
+  "@cannotRemoveOnly": {
+    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+  },
+  "stockUpdatedTo": "库存已更新 — 现有 {count}。",
+  "@stockUpdatedTo": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "adjustTypeManual": "手动",
+  "adjustTypeCount": "盘点",
+  "adjustTypeDamage": "破损",
+  "adjustTypeReturn": "退货",
+  "adjustTypeTransfer": "移库",
+  "sectionBatches": "批次",
+  "sectionSerials": "序列号",
+  "noBatches": "此商品暂无批次。",
+  "noSerials": "此商品暂无序列号。",
+  "loadingBatches": "加载批次中…",
+  "loadingSerials": "加载序列号中…",
+  "batchExpired": "已过期",
+  "batchValid": "有效",
+  "fieldExpiry": "有效期",
+  "report": "报表",
+  "runningReport": "运行报表中…",
+  "noData": "暂无数据。",
+  "reportNoRows": "此报表未返回任何行。",
+  "rowCount": "{count, plural, other{{count} 行}}",
+  "@rowCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "scanBarcode": "扫描条码",
+  "torchOn": "打开手电",
+  "torchOff": "关闭手电",
+  "alignBarcode": "将条码对准框内",
+  "scanOrTypeBarcode": "扫描或输入条码"
 }

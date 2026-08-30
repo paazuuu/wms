@@ -297,5 +297,54 @@
   "@itemNumber": {
     "placeholders": { "id": { "type": "int" } }
   },
-  "working": "処理中…"
+  "working": "処理中…",
+  "adjustAdd": "追加",
+  "adjustRemove": "減少",
+  "reasonType": "理由区分",
+  "reasonOptional": "理由（任意）",
+  "notesOptional": "メモ（任意）",
+  "onHandAfter": "調整後の在庫",
+  "saving": "保存中…",
+  "addStock": "在庫を追加",
+  "removeStock": "在庫を減らす",
+  "onHandCount": "在庫 {count}",
+  "@onHandCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "enterQtyPositive": "0より大きい数量を入力してください。",
+  "cannotRemoveOnly": "{qty} を減らせません。在庫は {current} のみです。",
+  "@cannotRemoveOnly": {
+    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+  },
+  "stockUpdatedTo": "在庫を更新しました — 現在 {count}。",
+  "@stockUpdatedTo": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "adjustTypeManual": "手動",
+  "adjustTypeCount": "棚卸",
+  "adjustTypeDamage": "破損",
+  "adjustTypeReturn": "返品",
+  "adjustTypeTransfer": "移動",
+  "sectionBatches": "バッチ",
+  "sectionSerials": "シリアル",
+  "noBatches": "この商品のバッチはありません。",
+  "noSerials": "この商品のシリアルはありません。",
+  "loadingBatches": "バッチを読み込み中…",
+  "loadingSerials": "シリアルを読み込み中…",
+  "batchExpired": "期限切れ",
+  "batchValid": "有効",
+  "fieldExpiry": "有効期限",
+  "report": "レポート",
+  "runningReport": "レポートを実行中…",
+  "noData": "データがありません。",
+  "reportNoRows": "このレポートに行がありません。",
+  "rowCount": "{count, plural, other{{count} 行}}",
+  "@rowCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "scanBarcode": "バーコードをスキャン",
+  "torchOn": "ライトを点灯",
+  "torchOff": "ライトを消灯",
+  "alignBarcode": "枠内にバーコードを合わせてください",
+  "scanOrTypeBarcode": "スキャンまたはバーコードを入力"
 }

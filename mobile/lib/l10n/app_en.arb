@@ -261,5 +261,54 @@
   "@itemNumber": {
     "placeholders": { "id": { "type": "int" } }
   },
-  "working": "Working…"
+  "working": "Working…",
+  "adjustAdd": "Add",
+  "adjustRemove": "Remove",
+  "reasonType": "Reason type",
+  "reasonOptional": "Reason (optional)",
+  "notesOptional": "Notes (optional)",
+  "onHandAfter": "On hand after",
+  "saving": "Saving…",
+  "addStock": "Add stock",
+  "removeStock": "Remove stock",
+  "onHandCount": "{count} on hand",
+  "@onHandCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "enterQtyPositive": "Enter a quantity greater than zero.",
+  "cannotRemoveOnly": "Cannot remove {qty}; only {current} on hand.",
+  "@cannotRemoveOnly": {
+    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+  },
+  "stockUpdatedTo": "Stock updated — now {count} on hand.",
+  "@stockUpdatedTo": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "adjustTypeManual": "Manual",
+  "adjustTypeCount": "Count",
+  "adjustTypeDamage": "Damage",
+  "adjustTypeReturn": "Return",
+  "adjustTypeTransfer": "Transfer",
+  "sectionBatches": "Batches",
+  "sectionSerials": "Serials",
+  "noBatches": "No batches for this product.",
+  "noSerials": "No serials for this product.",
+  "loadingBatches": "Loading batches…",
+  "loadingSerials": "Loading serials…",
+  "batchExpired": "Expired",
+  "batchValid": "Valid",
+  "fieldExpiry": "Expiry",
+  "report": "Report",
+  "runningReport": "Running report…",
+  "noData": "No data.",
+  "reportNoRows": "This report returned no rows.",
+  "rowCount": "{count, plural, =1{{count} row} other{{count} rows}}",
+  "@rowCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "scanBarcode": "Scan barcode",
+  "torchOn": "Torch on",
+  "torchOff": "Torch off",
+  "alignBarcode": "Align the barcode within the frame",
+  "scanOrTypeBarcode": "Scan or type a barcode"
 }

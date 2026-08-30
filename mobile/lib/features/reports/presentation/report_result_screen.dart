@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../application/report_providers.dart';
@@ -15,13 +16,14 @@ class ReportResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final result = ref.watch(reportResultProvider(reportId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Report')),
+      appBar: AppBar(title: Text(l10n.report)),
       body: result.when(
         data: (r) => _ReportBody(result: r),
-        loading: () => const LoadingView(message: 'Running report…'),
+        loading: () => LoadingView(message: l10n.runningReport),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () => ref.invalidate(reportResultProvider(reportId)),
@@ -40,6 +42,7 @@ class _ReportBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +55,7 @@ class _ReportBody extends StatelessWidget {
               Text(result.name, style: theme.textTheme.titleLarge),
               const SizedBox(height: 4),
               Text(
-                '${result.total} ${result.total == 1 ? 'row' : 'rows'}',
+                l10n.rowCount(result.total),
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(color: scheme.onSurfaceVariant),
               ),
@@ -62,10 +65,10 @@ class _ReportBody extends StatelessWidget {
         const Divider(height: 1),
         Expanded(
           child: result.columns.isEmpty || result.rows.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.table_chart_outlined,
-                  title: 'No data.',
-                  message: 'This report returned no rows.',
+                  title: l10n.noData,
+                  message: l10n.reportNoRows,
                 )
               : _ReportTable(result: result),
         ),

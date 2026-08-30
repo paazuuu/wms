@@ -805,4 +805,128 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get working => '处理中…';
+
+  @override
+  String get adjustAdd => '增加';
+
+  @override
+  String get adjustRemove => '减少';
+
+  @override
+  String get reasonType => '原因类型';
+
+  @override
+  String get reasonOptional => '原因（可选）';
+
+  @override
+  String get notesOptional => '备注（可选）';
+
+  @override
+  String get onHandAfter => '调整后库存';
+
+  @override
+  String get saving => '保存中…';
+
+  @override
+  String get addStock => '增加库存';
+
+  @override
+  String get removeStock => '减少库存';
+
+  @override
+  String onHandCount(int count) {
+    return '现有库存 $count';
+  }
+
+  @override
+  String get enterQtyPositive => '请输入大于零的数量。';
+
+  @override
+  String cannotRemoveOnly(int qty, int current) {
+    return '无法减少 $qty；现有库存仅 $current。';
+  }
+
+  @override
+  String stockUpdatedTo(int count) {
+    return '库存已更新 — 现有 $count。';
+  }
+
+  @override
+  String get adjustTypeManual => '手动';
+
+  @override
+  String get adjustTypeCount => '盘点';
+
+  @override
+  String get adjustTypeDamage => '破损';
+
+  @override
+  String get adjustTypeReturn => '退货';
+
+  @override
+  String get adjustTypeTransfer => '移库';
+
+  @override
+  String get sectionBatches => '批次';
+
+  @override
+  String get sectionSerials => '序列号';
+
+  @override
+  String get noBatches => '此商品暂无批次。';
+
+  @override
+  String get noSerials => '此商品暂无序列号。';
+
+  @override
+  String get loadingBatches => '加载批次中…';
+
+  @override
+  String get loadingSerials => '加载序列号中…';
+
+  @override
+  String get batchExpired => '已过期';
+
+  @override
+  String get batchValid => '有效';
+
+  @override
+  String get fieldExpiry => '有效期';
+
+  @override
+  String get report => '报表';
+
+  @override
+  String get runningReport => '运行报表中…';
+
+  @override
+  String get noData => '暂无数据。';
+
+  @override
+  String get reportNoRows => '此报表未返回任何行。';
+
+  @override
+  String rowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanBarcode => '扫描条码';
+
+  @override
+  String get torchOn => '打开手电';
+
+  @override
+  String get torchOff => '关闭手电';
+
+  @override
+  String get alignBarcode => '将条码对准框内';
+
+  @override
+  String get scanOrTypeBarcode => '扫描或输入条码';
 }

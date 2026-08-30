@@ -1563,6 +1563,228 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'処理中…'**
   String get working;
+
+  /// No description provided for @adjustAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加'**
+  String get adjustAdd;
+
+  /// No description provided for @adjustRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'減少'**
+  String get adjustRemove;
+
+  /// No description provided for @reasonType.
+  ///
+  /// In ja, this message translates to:
+  /// **'理由区分'**
+  String get reasonType;
+
+  /// No description provided for @reasonOptional.
+  ///
+  /// In ja, this message translates to:
+  /// **'理由（任意）'**
+  String get reasonOptional;
+
+  /// No description provided for @notesOptional.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get notesOptional;
+
+  /// No description provided for @onHandAfter.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整後の在庫'**
+  String get onHandAfter;
+
+  /// No description provided for @saving.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存中…'**
+  String get saving;
+
+  /// No description provided for @addStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を追加'**
+  String get addStock;
+
+  /// No description provided for @removeStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を減らす'**
+  String get removeStock;
+
+  /// No description provided for @onHandCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {count}'**
+  String onHandCount(int count);
+
+  /// No description provided for @enterQtyPositive.
+  ///
+  /// In ja, this message translates to:
+  /// **'0より大きい数量を入力してください。'**
+  String get enterQtyPositive;
+
+  /// No description provided for @cannotRemoveOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'{qty} を減らせません。在庫は {current} のみです。'**
+  String cannotRemoveOnly(int qty, int current);
+
+  /// No description provided for @stockUpdatedTo.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を更新しました — 現在 {count}。'**
+  String stockUpdatedTo(int count);
+
+  /// No description provided for @adjustTypeManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動'**
+  String get adjustTypeManual;
+
+  /// No description provided for @adjustTypeCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸'**
+  String get adjustTypeCount;
+
+  /// No description provided for @adjustTypeDamage.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損'**
+  String get adjustTypeDamage;
+
+  /// No description provided for @adjustTypeReturn.
+  ///
+  /// In ja, this message translates to:
+  /// **'返品'**
+  String get adjustTypeReturn;
+
+  /// No description provided for @adjustTypeTransfer.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動'**
+  String get adjustTypeTransfer;
+
+  /// No description provided for @sectionBatches.
+  ///
+  /// In ja, this message translates to:
+  /// **'バッチ'**
+  String get sectionBatches;
+
+  /// No description provided for @sectionSerials.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル'**
+  String get sectionSerials;
+
+  /// No description provided for @noBatches.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品のバッチはありません。'**
+  String get noBatches;
+
+  /// No description provided for @noSerials.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品のシリアルはありません。'**
+  String get noSerials;
+
+  /// No description provided for @loadingBatches.
+  ///
+  /// In ja, this message translates to:
+  /// **'バッチを読み込み中…'**
+  String get loadingBatches;
+
+  /// No description provided for @loadingSerials.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアルを読み込み中…'**
+  String get loadingSerials;
+
+  /// No description provided for @batchExpired.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限切れ'**
+  String get batchExpired;
+
+  /// No description provided for @batchValid.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get batchValid;
+
+  /// No description provided for @fieldExpiry.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効期限'**
+  String get fieldExpiry;
+
+  /// No description provided for @report.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポート'**
+  String get report;
+
+  /// No description provided for @runningReport.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポートを実行中…'**
+  String get runningReport;
+
+  /// No description provided for @noData.
+  ///
+  /// In ja, this message translates to:
+  /// **'データがありません。'**
+  String get noData;
+
+  /// No description provided for @reportNoRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'このレポートに行がありません。'**
+  String get reportNoRows;
+
+  /// No description provided for @rowCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{{count} 行}}'**
+  String rowCount(int count);
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'バーコードをスキャン'**
+  String get scanBarcode;
+
+  /// No description provided for @torchOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライトを点灯'**
+  String get torchOn;
+
+  /// No description provided for @torchOff.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライトを消灯'**
+  String get torchOff;
+
+  /// No description provided for @alignBarcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'枠内にバーコードを合わせてください'**
+  String get alignBarcode;
+
+  /// No description provided for @scanOrTypeBarcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンまたはバーコードを入力'**
+  String get scanOrTypeBarcode;
 }
 
 class _AppLocalizationsDelegate

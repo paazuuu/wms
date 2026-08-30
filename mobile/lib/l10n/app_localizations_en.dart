@@ -829,4 +829,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get working => 'Working…';
+
+  @override
+  String get adjustAdd => 'Add';
+
+  @override
+  String get adjustRemove => 'Remove';
+
+  @override
+  String get reasonType => 'Reason type';
+
+  @override
+  String get reasonOptional => 'Reason (optional)';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get onHandAfter => 'On hand after';
+
+  @override
+  String get saving => 'Saving…';
+
+  @override
+  String get addStock => 'Add stock';
+
+  @override
+  String get removeStock => 'Remove stock';
+
+  @override
+  String onHandCount(int count) {
+    return '$count on hand';
+  }
+
+  @override
+  String get enterQtyPositive => 'Enter a quantity greater than zero.';
+
+  @override
+  String cannotRemoveOnly(int qty, int current) {
+    return 'Cannot remove $qty; only $current on hand.';
+  }
+
+  @override
+  String stockUpdatedTo(int count) {
+    return 'Stock updated — now $count on hand.';
+  }
+
+  @override
+  String get adjustTypeManual => 'Manual';
+
+  @override
+  String get adjustTypeCount => 'Count';
+
+  @override
+  String get adjustTypeDamage => 'Damage';
+
+  @override
+  String get adjustTypeReturn => 'Return';
+
+  @override
+  String get adjustTypeTransfer => 'Transfer';
+
+  @override
+  String get sectionBatches => 'Batches';
+
+  @override
+  String get sectionSerials => 'Serials';
+
+  @override
+  String get noBatches => 'No batches for this product.';
+
+  @override
+  String get noSerials => 'No serials for this product.';
+
+  @override
+  String get loadingBatches => 'Loading batches…';
+
+  @override
+  String get loadingSerials => 'Loading serials…';
+
+  @override
+  String get batchExpired => 'Expired';
+
+  @override
+  String get batchValid => 'Valid';
+
+  @override
+  String get fieldExpiry => 'Expiry';
+
+  @override
+  String get report => 'Report';
+
+  @override
+  String get runningReport => 'Running report…';
+
+  @override
+  String get noData => 'No data.';
+
+  @override
+  String get reportNoRows => 'This report returned no rows.';
+
+  @override
+  String rowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows',
+      one: '$count row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanBarcode => 'Scan barcode';
+
+  @override
+  String get torchOn => 'Torch on';
+
+  @override
+  String get torchOff => 'Torch off';
+
+  @override
+  String get alignBarcode => 'Align the barcode within the frame';
+
+  @override
+  String get scanOrTypeBarcode => 'Scan or type a barcode';
 }

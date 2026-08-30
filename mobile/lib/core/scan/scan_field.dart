@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_spacing.dart';
 import '../ui/responsive.dart';
 
@@ -16,7 +17,7 @@ class ScanField extends StatefulWidget {
     required this.onSubmitted,
     this.controller,
     this.focusNode,
-    this.hintText = 'Scan or type a barcode',
+    this.hintText,
     this.autofocus = false,
     this.autofocusOnWide = false,
     this.clearOnSubmit = true,
@@ -34,7 +35,8 @@ class ScanField extends StatefulWidget {
   /// async flow (e.g. a quantity dialog) so scan-after-scan keeps working.
   final FocusNode? focusNode;
 
-  final String hintText;
+  /// Placeholder text. Falls back to a localized default when omitted.
+  final String? hintText;
 
   /// Focus the field on first build, unconditionally.
   final bool autofocus;
@@ -81,6 +83,7 @@ class _ScanFieldState extends State<ScanField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final autofocus =
         widget.autofocus || (widget.autofocusOnWide && isWideLayout(context));
     return TextField(
@@ -96,7 +99,7 @@ class _ScanFieldState extends State<ScanField> {
       ],
       decoration: InputDecoration(
         isDense: widget.dense,
-        hintText: widget.hintText,
+        hintText: widget.hintText ?? l10n.scanOrTypeBarcode,
         prefixIcon: const Icon(Icons.qr_code_scanner_outlined),
         contentPadding: widget.dense
             ? const EdgeInsets.symmetric(
@@ -107,7 +110,7 @@ class _ScanFieldState extends State<ScanField> {
           children: [
             ...?widget.trailing,
             IconButton(
-              tooltip: 'Search',
+              tooltip: l10n.search,
               icon: const Icon(Icons.search),
               onPressed: _submit,
             ),

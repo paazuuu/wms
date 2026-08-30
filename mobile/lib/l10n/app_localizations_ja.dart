@@ -805,4 +805,128 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get working => '処理中…';
+
+  @override
+  String get adjustAdd => '追加';
+
+  @override
+  String get adjustRemove => '減少';
+
+  @override
+  String get reasonType => '理由区分';
+
+  @override
+  String get reasonOptional => '理由（任意）';
+
+  @override
+  String get notesOptional => 'メモ（任意）';
+
+  @override
+  String get onHandAfter => '調整後の在庫';
+
+  @override
+  String get saving => '保存中…';
+
+  @override
+  String get addStock => '在庫を追加';
+
+  @override
+  String get removeStock => '在庫を減らす';
+
+  @override
+  String onHandCount(int count) {
+    return '在庫 $count';
+  }
+
+  @override
+  String get enterQtyPositive => '0より大きい数量を入力してください。';
+
+  @override
+  String cannotRemoveOnly(int qty, int current) {
+    return '$qty を減らせません。在庫は $current のみです。';
+  }
+
+  @override
+  String stockUpdatedTo(int count) {
+    return '在庫を更新しました — 現在 $count。';
+  }
+
+  @override
+  String get adjustTypeManual => '手動';
+
+  @override
+  String get adjustTypeCount => '棚卸';
+
+  @override
+  String get adjustTypeDamage => '破損';
+
+  @override
+  String get adjustTypeReturn => '返品';
+
+  @override
+  String get adjustTypeTransfer => '移動';
+
+  @override
+  String get sectionBatches => 'バッチ';
+
+  @override
+  String get sectionSerials => 'シリアル';
+
+  @override
+  String get noBatches => 'この商品のバッチはありません。';
+
+  @override
+  String get noSerials => 'この商品のシリアルはありません。';
+
+  @override
+  String get loadingBatches => 'バッチを読み込み中…';
+
+  @override
+  String get loadingSerials => 'シリアルを読み込み中…';
+
+  @override
+  String get batchExpired => '期限切れ';
+
+  @override
+  String get batchValid => '有効';
+
+  @override
+  String get fieldExpiry => '有効期限';
+
+  @override
+  String get report => 'レポート';
+
+  @override
+  String get runningReport => 'レポートを実行中…';
+
+  @override
+  String get noData => 'データがありません。';
+
+  @override
+  String get reportNoRows => 'このレポートに行がありません。';
+
+  @override
+  String rowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanBarcode => 'バーコードをスキャン';
+
+  @override
+  String get torchOn => 'ライトを点灯';
+
+  @override
+  String get torchOff => 'ライトを消灯';
+
+  @override
+  String get alignBarcode => '枠内にバーコードを合わせてください';
+
+  @override
+  String get scanOrTypeBarcode => 'スキャンまたはバーコードを入力';
 }
