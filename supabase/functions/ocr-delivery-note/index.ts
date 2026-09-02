@@ -53,7 +53,7 @@ async function readWithGemini(bytes: Uint8Array, mime: string) {
   }
   const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.0-flash";
   const endpoint =
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const payload = {
     contents: [{
       role: "user",
@@ -68,9 +68,14 @@ async function readWithGemini(bytes: Uint8Array, mime: string) {
       temperature: 0,
     },
   };
+  // Send the key as a header (works with both the legacy AIza… keys and the
+  // newer AQ.… format) rather than a ?key= query parameter.
   const res = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
