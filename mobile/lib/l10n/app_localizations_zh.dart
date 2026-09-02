@@ -929,4 +929,126 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanOrTypeBarcode => '扫描或输入条码';
+
+  @override
+  String get featDelivery => '到货核对';
+
+  @override
+  String get featDeliveryDesc => '核对到货单与Excel计划，显示过不足';
+
+  @override
+  String get deliveryStatusOpen => '待核对';
+
+  @override
+  String get deliveryStatusReconciling => '核对中';
+
+  @override
+  String get deliveryStatusCompleted => '已核对';
+
+  @override
+  String get reconPending => '待确认';
+
+  @override
+  String get reconMatched => '一致';
+
+  @override
+  String get reconShortfall => '不足';
+
+  @override
+  String get reconOver => '超量';
+
+  @override
+  String get reconUnexpected => '计划外';
+
+  @override
+  String get deliveryPlansTitle => '到货核对';
+
+  @override
+  String get deliveryPlansEmpty => '暂无到货计划。';
+
+  @override
+  String get deliveryPlansEmptyBody => '在后台从Excel导入的到货计划将显示在此处。';
+
+  @override
+  String get deliveryPlansHint => '扫描或按单号/供应商搜索';
+
+  @override
+  String get deliveryNoMatches => '无匹配的到货计划。';
+
+  @override
+  String get deliverySearchTip => '请尝试其他单号或供应商。';
+
+  @override
+  String plannedLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '计划明细 $count 项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryNumberLabel => '单号';
+
+  @override
+  String get deliveryDateLabel => '到货日';
+
+  @override
+  String get scanDeliveryHint => '扫描商品JAN';
+
+  @override
+  String get ocrAssist => '拍摄到货单（OCR）';
+
+  @override
+  String get ocrScanning => '解析到货单中…';
+
+  @override
+  String ocrFound(int count) {
+    return '从到货单检测到 $count 个JAN';
+  }
+
+  @override
+  String get ocrNoneFound => '未能从到货单识别JAN。';
+
+  @override
+  String get ocrUnavailable => '此设备无法使用OCR。';
+
+  @override
+  String get reconSummaryTitle => '核对情况';
+
+  @override
+  String get deliveryPlanned => '计划';
+
+  @override
+  String get diffLabel => '差';
+
+  @override
+  String get completeReconcile => '完成核对';
+
+  @override
+  String get reconcileConfirmQ => '完成本次核对？';
+
+  @override
+  String get reconcileConfirmBody => '提交当前计数并结束本次核对。';
+
+  @override
+  String get reconcileConfirmDiscrepancy => '存在差异（不足・超量・计划外）。仍要完成吗？';
+
+  @override
+  String get reconcileDone => '核对已完成';
+
+  @override
+  String get reconcileEmptyCounts => '尚无计数。扫描以开始。';
+
+  @override
+  String get unexpectedItem => '计划外商品';
+
+  @override
+  String enterQuantityFor(String code) {
+    return '$code 的数量';
+  }
+
+  @override
+  String get noteImageAttached => '已附加到货单';
 }

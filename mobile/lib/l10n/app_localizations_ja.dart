@@ -929,4 +929,126 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scanOrTypeBarcode => 'スキャンまたはバーコードを入力';
+
+  @override
+  String get featDelivery => '納品照合';
+
+  @override
+  String get featDeliveryDesc => '納品書とExcel予定を照合し過不足を可視化';
+
+  @override
+  String get deliveryStatusOpen => '未照合';
+
+  @override
+  String get deliveryStatusReconciling => '照合中';
+
+  @override
+  String get deliveryStatusCompleted => '照合済み';
+
+  @override
+  String get reconPending => '未確認';
+
+  @override
+  String get reconMatched => '一致';
+
+  @override
+  String get reconShortfall => '不足';
+
+  @override
+  String get reconOver => '過剰';
+
+  @override
+  String get reconUnexpected => '想定外';
+
+  @override
+  String get deliveryPlansTitle => '納品照合';
+
+  @override
+  String get deliveryPlansEmpty => '納品予定がありません。';
+
+  @override
+  String get deliveryPlansEmptyBody => 'バックオフィスで取り込んだ納品予定（Excel）がここに表示されます。';
+
+  @override
+  String get deliveryPlansHint => 'スキャンまたは伝票番号・仕入先で検索';
+
+  @override
+  String get deliveryNoMatches => '一致する納品予定がありません。';
+
+  @override
+  String get deliverySearchTip => '別の伝票番号または仕入先をお試しください。';
+
+  @override
+  String plannedLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '予定明細 $count 件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryNumberLabel => '伝票番号';
+
+  @override
+  String get deliveryDateLabel => '納品日';
+
+  @override
+  String get scanDeliveryHint => '品物のJANをスキャン';
+
+  @override
+  String get ocrAssist => '納品書を撮影（OCR補助）';
+
+  @override
+  String get ocrScanning => '納品書を解析中…';
+
+  @override
+  String ocrFound(int count) {
+    return '納品書から $count 件のJANを検出しました';
+  }
+
+  @override
+  String get ocrNoneFound => '納品書からJANを検出できませんでした。';
+
+  @override
+  String get ocrUnavailable => 'この端末ではOCRを利用できません。';
+
+  @override
+  String get reconSummaryTitle => '照合状況';
+
+  @override
+  String get deliveryPlanned => '予定';
+
+  @override
+  String get diffLabel => '差';
+
+  @override
+  String get completeReconcile => '照合を完了';
+
+  @override
+  String get reconcileConfirmQ => '照合を完了しますか？';
+
+  @override
+  String get reconcileConfirmBody => '現在の計数結果を送信して照合を完了します。';
+
+  @override
+  String get reconcileConfirmDiscrepancy => '差異があります（不足・過剰・想定外）。このまま完了しますか？';
+
+  @override
+  String get reconcileDone => '照合を完了しました';
+
+  @override
+  String get reconcileEmptyCounts => 'まだ計数がありません。スキャンして開始してください。';
+
+  @override
+  String get unexpectedItem => '想定外の品目';
+
+  @override
+  String enterQuantityFor(String code) {
+    return '$code の数量';
+  }
+
+  @override
+  String get noteImageAttached => '納品書を添付しました';
 }

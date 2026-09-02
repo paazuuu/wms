@@ -310,5 +310,51 @@
   "torchOn": "Torch on",
   "torchOff": "Torch off",
   "alignBarcode": "Align the barcode within the frame",
-  "scanOrTypeBarcode": "Scan or type a barcode"
+  "scanOrTypeBarcode": "Scan or type a barcode",
+  "featDelivery": "Delivery Check",
+  "featDeliveryDesc": "Reconcile the delivery note against the Excel plan",
+  "deliveryStatusOpen": "Not checked",
+  "deliveryStatusReconciling": "Reconciling",
+  "deliveryStatusCompleted": "Reconciled",
+  "reconPending": "Pending",
+  "reconMatched": "Matched",
+  "reconShortfall": "Short",
+  "reconOver": "Over",
+  "reconUnexpected": "Unexpected",
+  "deliveryPlansTitle": "Delivery Check",
+  "deliveryPlansEmpty": "No delivery plans.",
+  "deliveryPlansEmptyBody": "Delivery plans imported from Excel on the back office appear here.",
+  "deliveryPlansHint": "Scan or search by voucher no. or supplier",
+  "deliveryNoMatches": "No matching delivery plans.",
+  "deliverySearchTip": "Try a different voucher number or supplier.",
+  "plannedLines": "{count, plural, =1{{count} planned line} other{{count} planned lines}}",
+  "@plannedLines": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "deliveryNumberLabel": "Voucher no.",
+  "deliveryDateLabel": "Delivery date",
+  "scanDeliveryHint": "Scan the item JAN",
+  "ocrAssist": "Scan note (OCR)",
+  "ocrScanning": "Reading the note…",
+  "ocrFound": "Detected {count} JAN code(s) on the note",
+  "@ocrFound": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "ocrNoneFound": "No JAN codes were found on the note.",
+  "ocrUnavailable": "OCR is not available on this device.",
+  "reconSummaryTitle": "Reconciliation",
+  "deliveryPlanned": "Planned",
+  "diffLabel": "Diff",
+  "completeReconcile": "Complete check",
+  "reconcileConfirmQ": "Complete this reconciliation?",
+  "reconcileConfirmBody": "Submit the current counts and close this reconciliation.",
+  "reconcileConfirmDiscrepancy": "There are discrepancies (short, over or unexpected). Complete anyway?",
+  "reconcileDone": "Reconciliation completed",
+  "reconcileEmptyCounts": "Nothing counted yet. Scan to start.",
+  "unexpectedItem": "Unexpected item",
+  "enterQuantityFor": "Quantity for {code}",
+  "@enterQuantityFor": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "noteImageAttached": "Delivery note attached"
 }

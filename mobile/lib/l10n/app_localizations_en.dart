@@ -954,4 +954,131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanOrTypeBarcode => 'Scan or type a barcode';
+
+  @override
+  String get featDelivery => 'Delivery Check';
+
+  @override
+  String get featDeliveryDesc =>
+      'Reconcile the delivery note against the Excel plan';
+
+  @override
+  String get deliveryStatusOpen => 'Not checked';
+
+  @override
+  String get deliveryStatusReconciling => 'Reconciling';
+
+  @override
+  String get deliveryStatusCompleted => 'Reconciled';
+
+  @override
+  String get reconPending => 'Pending';
+
+  @override
+  String get reconMatched => 'Matched';
+
+  @override
+  String get reconShortfall => 'Short';
+
+  @override
+  String get reconOver => 'Over';
+
+  @override
+  String get reconUnexpected => 'Unexpected';
+
+  @override
+  String get deliveryPlansTitle => 'Delivery Check';
+
+  @override
+  String get deliveryPlansEmpty => 'No delivery plans.';
+
+  @override
+  String get deliveryPlansEmptyBody =>
+      'Delivery plans imported from Excel on the back office appear here.';
+
+  @override
+  String get deliveryPlansHint => 'Scan or search by voucher no. or supplier';
+
+  @override
+  String get deliveryNoMatches => 'No matching delivery plans.';
+
+  @override
+  String get deliverySearchTip => 'Try a different voucher number or supplier.';
+
+  @override
+  String plannedLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count planned lines',
+      one: '$count planned line',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryNumberLabel => 'Voucher no.';
+
+  @override
+  String get deliveryDateLabel => 'Delivery date';
+
+  @override
+  String get scanDeliveryHint => 'Scan the item JAN';
+
+  @override
+  String get ocrAssist => 'Scan note (OCR)';
+
+  @override
+  String get ocrScanning => 'Reading the note…';
+
+  @override
+  String ocrFound(int count) {
+    return 'Detected $count JAN code(s) on the note';
+  }
+
+  @override
+  String get ocrNoneFound => 'No JAN codes were found on the note.';
+
+  @override
+  String get ocrUnavailable => 'OCR is not available on this device.';
+
+  @override
+  String get reconSummaryTitle => 'Reconciliation';
+
+  @override
+  String get deliveryPlanned => 'Planned';
+
+  @override
+  String get diffLabel => 'Diff';
+
+  @override
+  String get completeReconcile => 'Complete check';
+
+  @override
+  String get reconcileConfirmQ => 'Complete this reconciliation?';
+
+  @override
+  String get reconcileConfirmBody =>
+      'Submit the current counts and close this reconciliation.';
+
+  @override
+  String get reconcileConfirmDiscrepancy =>
+      'There are discrepancies (short, over or unexpected). Complete anyway?';
+
+  @override
+  String get reconcileDone => 'Reconciliation completed';
+
+  @override
+  String get reconcileEmptyCounts => 'Nothing counted yet. Scan to start.';
+
+  @override
+  String get unexpectedItem => 'Unexpected item';
+
+  @override
+  String enterQuantityFor(String code) {
+    return 'Quantity for $code';
+  }
+
+  @override
+  String get noteImageAttached => 'Delivery note attached';
 }

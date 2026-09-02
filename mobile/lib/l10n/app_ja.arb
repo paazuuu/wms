@@ -346,5 +346,51 @@
   "torchOn": "ライトを点灯",
   "torchOff": "ライトを消灯",
   "alignBarcode": "枠内にバーコードを合わせてください",
-  "scanOrTypeBarcode": "スキャンまたはバーコードを入力"
+  "scanOrTypeBarcode": "スキャンまたはバーコードを入力",
+  "featDelivery": "納品照合",
+  "featDeliveryDesc": "納品書とExcel予定を照合し過不足を可視化",
+  "deliveryStatusOpen": "未照合",
+  "deliveryStatusReconciling": "照合中",
+  "deliveryStatusCompleted": "照合済み",
+  "reconPending": "未確認",
+  "reconMatched": "一致",
+  "reconShortfall": "不足",
+  "reconOver": "過剰",
+  "reconUnexpected": "想定外",
+  "deliveryPlansTitle": "納品照合",
+  "deliveryPlansEmpty": "納品予定がありません。",
+  "deliveryPlansEmptyBody": "バックオフィスで取り込んだ納品予定（Excel）がここに表示されます。",
+  "deliveryPlansHint": "スキャンまたは伝票番号・仕入先で検索",
+  "deliveryNoMatches": "一致する納品予定がありません。",
+  "deliverySearchTip": "別の伝票番号または仕入先をお試しください。",
+  "plannedLines": "{count, plural, other{予定明細 {count} 件}}",
+  "@plannedLines": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "deliveryNumberLabel": "伝票番号",
+  "deliveryDateLabel": "納品日",
+  "scanDeliveryHint": "品物のJANをスキャン",
+  "ocrAssist": "納品書を撮影（OCR補助）",
+  "ocrScanning": "納品書を解析中…",
+  "ocrFound": "納品書から {count} 件のJANを検出しました",
+  "@ocrFound": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "ocrNoneFound": "納品書からJANを検出できませんでした。",
+  "ocrUnavailable": "この端末ではOCRを利用できません。",
+  "reconSummaryTitle": "照合状況",
+  "deliveryPlanned": "予定",
+  "diffLabel": "差",
+  "completeReconcile": "照合を完了",
+  "reconcileConfirmQ": "照合を完了しますか？",
+  "reconcileConfirmBody": "現在の計数結果を送信して照合を完了します。",
+  "reconcileConfirmDiscrepancy": "差異があります（不足・過剰・想定外）。このまま完了しますか？",
+  "reconcileDone": "照合を完了しました",
+  "reconcileEmptyCounts": "まだ計数がありません。スキャンして開始してください。",
+  "unexpectedItem": "想定外の品目",
+  "enterQuantityFor": "{code} の数量",
+  "@enterQuantityFor": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "noteImageAttached": "納品書を添付しました"
 }

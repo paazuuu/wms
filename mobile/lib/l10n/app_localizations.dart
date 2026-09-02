@@ -1785,6 +1785,228 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'スキャンまたはバーコードを入力'**
   String get scanOrTypeBarcode;
+
+  /// No description provided for @featDelivery.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品照合'**
+  String get featDelivery;
+
+  /// No description provided for @featDeliveryDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書とExcel予定を照合し過不足を可視化'**
+  String get featDeliveryDesc;
+
+  /// No description provided for @deliveryStatusOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'未照合'**
+  String get deliveryStatusOpen;
+
+  /// No description provided for @deliveryStatusReconciling.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合中'**
+  String get deliveryStatusReconciling;
+
+  /// No description provided for @deliveryStatusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合済み'**
+  String get deliveryStatusCompleted;
+
+  /// No description provided for @reconPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'未確認'**
+  String get reconPending;
+
+  /// No description provided for @reconMatched.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致'**
+  String get reconMatched;
+
+  /// No description provided for @reconShortfall.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足'**
+  String get reconShortfall;
+
+  /// No description provided for @reconOver.
+  ///
+  /// In ja, this message translates to:
+  /// **'過剰'**
+  String get reconOver;
+
+  /// No description provided for @reconUnexpected.
+  ///
+  /// In ja, this message translates to:
+  /// **'想定外'**
+  String get reconUnexpected;
+
+  /// No description provided for @deliveryPlansTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品照合'**
+  String get deliveryPlansTitle;
+
+  /// No description provided for @deliveryPlansEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品予定がありません。'**
+  String get deliveryPlansEmpty;
+
+  /// No description provided for @deliveryPlansEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'バックオフィスで取り込んだ納品予定（Excel）がここに表示されます。'**
+  String get deliveryPlansEmptyBody;
+
+  /// No description provided for @deliveryPlansHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンまたは伝票番号・仕入先で検索'**
+  String get deliveryPlansHint;
+
+  /// No description provided for @deliveryNoMatches.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致する納品予定がありません。'**
+  String get deliveryNoMatches;
+
+  /// No description provided for @deliverySearchTip.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の伝票番号または仕入先をお試しください。'**
+  String get deliverySearchTip;
+
+  /// No description provided for @plannedLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count, plural, other{予定明細 {count} 件}}'**
+  String plannedLines(int count);
+
+  /// No description provided for @deliveryNumberLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'伝票番号'**
+  String get deliveryNumberLabel;
+
+  /// No description provided for @deliveryDateLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品日'**
+  String get deliveryDateLabel;
+
+  /// No description provided for @scanDeliveryHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'品物のJANをスキャン'**
+  String get scanDeliveryHint;
+
+  /// No description provided for @ocrAssist.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を撮影（OCR補助）'**
+  String get ocrAssist;
+
+  /// No description provided for @ocrScanning.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を解析中…'**
+  String get ocrScanning;
+
+  /// No description provided for @ocrFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書から {count} 件のJANを検出しました'**
+  String ocrFound(int count);
+
+  /// No description provided for @ocrNoneFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書からJANを検出できませんでした。'**
+  String get ocrNoneFound;
+
+  /// No description provided for @ocrUnavailable.
+  ///
+  /// In ja, this message translates to:
+  /// **'この端末ではOCRを利用できません。'**
+  String get ocrUnavailable;
+
+  /// No description provided for @reconSummaryTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合状況'**
+  String get reconSummaryTitle;
+
+  /// No description provided for @deliveryPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定'**
+  String get deliveryPlanned;
+
+  /// No description provided for @diffLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'差'**
+  String get diffLabel;
+
+  /// No description provided for @completeReconcile.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合を完了'**
+  String get completeReconcile;
+
+  /// No description provided for @reconcileConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合を完了しますか？'**
+  String get reconcileConfirmQ;
+
+  /// No description provided for @reconcileConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の計数結果を送信して照合を完了します。'**
+  String get reconcileConfirmBody;
+
+  /// No description provided for @reconcileConfirmDiscrepancy.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異があります（不足・過剰・想定外）。このまま完了しますか？'**
+  String get reconcileConfirmDiscrepancy;
+
+  /// No description provided for @reconcileDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合を完了しました'**
+  String get reconcileDone;
+
+  /// No description provided for @reconcileEmptyCounts.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ計数がありません。スキャンして開始してください。'**
+  String get reconcileEmptyCounts;
+
+  /// No description provided for @unexpectedItem.
+  ///
+  /// In ja, this message translates to:
+  /// **'想定外の品目'**
+  String get unexpectedItem;
+
+  /// No description provided for @enterQuantityFor.
+  ///
+  /// In ja, this message translates to:
+  /// **'{code} の数量'**
+  String enterQuantityFor(String code);
+
+  /// No description provided for @noteImageAttached.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を添付しました'**
+  String get noteImageAttached;
 }
 
 class _AppLocalizationsDelegate

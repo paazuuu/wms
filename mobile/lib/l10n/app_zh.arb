@@ -310,5 +310,51 @@
   "torchOn": "打开手电",
   "torchOff": "关闭手电",
   "alignBarcode": "将条码对准框内",
-  "scanOrTypeBarcode": "扫描或输入条码"
+  "scanOrTypeBarcode": "扫描或输入条码",
+  "featDelivery": "到货核对",
+  "featDeliveryDesc": "核对到货单与Excel计划，显示过不足",
+  "deliveryStatusOpen": "待核对",
+  "deliveryStatusReconciling": "核对中",
+  "deliveryStatusCompleted": "已核对",
+  "reconPending": "待确认",
+  "reconMatched": "一致",
+  "reconShortfall": "不足",
+  "reconOver": "超量",
+  "reconUnexpected": "计划外",
+  "deliveryPlansTitle": "到货核对",
+  "deliveryPlansEmpty": "暂无到货计划。",
+  "deliveryPlansEmptyBody": "在后台从Excel导入的到货计划将显示在此处。",
+  "deliveryPlansHint": "扫描或按单号/供应商搜索",
+  "deliveryNoMatches": "无匹配的到货计划。",
+  "deliverySearchTip": "请尝试其他单号或供应商。",
+  "plannedLines": "{count, plural, other{计划明细 {count} 项}}",
+  "@plannedLines": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "deliveryNumberLabel": "单号",
+  "deliveryDateLabel": "到货日",
+  "scanDeliveryHint": "扫描商品JAN",
+  "ocrAssist": "拍摄到货单（OCR）",
+  "ocrScanning": "解析到货单中…",
+  "ocrFound": "从到货单检测到 {count} 个JAN",
+  "@ocrFound": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "ocrNoneFound": "未能从到货单识别JAN。",
+  "ocrUnavailable": "此设备无法使用OCR。",
+  "reconSummaryTitle": "核对情况",
+  "deliveryPlanned": "计划",
+  "diffLabel": "差",
+  "completeReconcile": "完成核对",
+  "reconcileConfirmQ": "完成本次核对？",
+  "reconcileConfirmBody": "提交当前计数并结束本次核对。",
+  "reconcileConfirmDiscrepancy": "存在差异（不足・超量・计划外）。仍要完成吗？",
+  "reconcileDone": "核对已完成",
+  "reconcileEmptyCounts": "尚无计数。扫描以开始。",
+  "unexpectedItem": "计划外商品",
+  "enterQuantityFor": "{code} 的数量",
+  "@enterQuantityFor": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "noteImageAttached": "已附加到货单"
 }
