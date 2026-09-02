@@ -1,0 +1,7 @@
+# Never commit real Edge Function secrets — set them in the Supabase dashboard
+# or via `supabase secrets set`. Only .env.example (placeholders) is tracked.
+.env
+functions/.env
+functions/**/.env
+.branches/
+.temp/
