@@ -21,7 +21,7 @@ class RemoteDeliveryNoteScanner implements DeliveryNoteScanner {
     form.files.add(MapEntry('image', await MultipartFile.fromFile(imagePath)));
     form.fields.add(MapEntry('provider', provider.wire));
 
-    final response = await _dio.post('/ocr/delivery-note', data: form);
+    final response = await _dio.post('/ocr-delivery-note', data: form);
     final data = response.data;
     if (data is Map<String, dynamic>) return parseVisionOcrResponse(data);
     return const [];

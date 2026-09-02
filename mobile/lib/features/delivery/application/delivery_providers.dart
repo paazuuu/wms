@@ -1,6 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers.dart';
+import '../../../core/config/app_config.dart';
 import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
 import '../data/mlkit_delivery_note_scanner.dart';
@@ -8,15 +9,32 @@ import '../data/remote_delivery_note_scanner.dart';
 import '../domain/delivery_plan.dart';
 import 'reconciliation_controller.dart';
 
+/// Dedicated Dio for the delivery feature, pointed at the Supabase Edge
+/// Functions that back it (schema + reconcile RPC + OCR). Separate from the
+/// app's main API client so the other features are unaffected. The anon key
+/// authorizes the gateway; data is guarded server-side.
+final deliveryDioProvider = Provider<Dio>((ref) {
+  return Dio(BaseOptions(
+    baseUrl: AppConfig.functionsBaseUrl,
+    connectTimeout: AppConfig.connectTimeout,
+    receiveTimeout: AppConfig.receiveTimeout,
+    headers: {
+      'Accept': 'application/json',
+      'apikey': AppConfig.supabaseAnonKey,
+      'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
+    },
+  ));
+});
+
 final deliveryRepositoryProvider = Provider<DeliveryRepository>((ref) {
-  return DeliveryRepositoryImpl(ref.watch(dioProvider));
+  return DeliveryRepositoryImpl(ref.watch(deliveryDioProvider));
 });
 
 /// Delivery-note OCR assist: cloud vision (Gemini, via the backend) first, with
 /// the on-device engine as an offline fallback.
 final deliveryNoteScannerProvider = Provider<DeliveryNoteScanner>((ref) {
   final scanner = FallbackDeliveryNoteScanner(
-    primary: RemoteDeliveryNoteScanner(ref.watch(dioProvider)),
+    primary: RemoteDeliveryNoteScanner(ref.watch(deliveryDioProvider)),
     fallback: MlKitDeliveryNoteScanner(),
   );
   ref.onDispose(scanner.dispose);

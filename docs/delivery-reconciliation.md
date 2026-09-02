@@ -167,7 +167,7 @@ plan に無い JAN         → unexpected （想定外）
 - モバイル実装: `RemoteDeliveryNoteScanner`（優先）＋ `MlKitDeliveryNoteScanner`（オフライン時フォールバック）。
   レスポンス解析は `parseVisionOcrResponse`（純粋関数・テスト済み）。
 
-### POST `/ocr/delivery-note`
+### POST `/ocr-delivery-note`
 `multipart/form-data`。
 | フィールド | 説明 |
 |---|---|
@@ -227,3 +227,52 @@ GEMINI_MODEL=gemini-2.x-flash
 
 > セキュリティ: Geminiキーはサーバ環境変数に保持。画像は照合用途以外に保存しない
 > （必要なら `note_reference` として自社Storage/R2に限定保存）。
+
+---
+
+## 6. Supabase 実装状況とセットアップ
+
+対象プロジェクト: **Waraku WMS** (`vjunicsfobglmncjucbb`, region ap-northeast-1 / 東京)。
+モバイルは Supabase Edge Functions を叩く（`AppConfig.functionsBaseUrl =
+{SUPABASE_URL}/functions/v1`）。納品機能だけ専用Dio（`deliveryDioProvider`）で接続し、
+他機能の既存API接続には影響しない。
+
+### 適用済み（このセッションで実施）
+- ✅ スキーマ4テーブル + RLS（`supabase/migrations/0001_*.sql`）
+- ✅ 照合RPC `reconcile_delivery_plan`（`0002_*.sql`）— DB上で動作検証済み
+  （一致 / 不足 / 未入荷→不足 / 想定外 を正しく判定）
+- ✅ Edge Function `delivery-plans`（一覧・詳細・reconcile）デプロイ済み
+- ✅ Edge Function `ocr-delivery-note`（Gemini）デプロイ済み
+- ✅ 動作確認用サンプル納品予定（伝票 `0901`）投入済み
+- ✅ モバイルの接続先を Supabase Functions + anon キーに設定
+
+### 要対応チェックリスト（あなた側の作業）
+1. **Gemini APIキーを登録**（OCRを有効化）
+   ```
+   supabase secrets set GEMINI_API_KEY=xxxxx
+   # 任意: supabase secrets set GEMINI_MODEL=gemini-2.x-flash
+   ```
+   Google AI Studio でキー発行。未設定だとOCRは500を返す（スキャンは動作）。
+2. **納品書画像の保存先**（証跡を残す場合）
+   Storage バケット `delivery-notes` を作成し、アップロード後の参照キーを
+   `reconcile` の `note_reference` に渡す。不要なら画像は保存しない運用でよい。
+3. **認証の本番対応（重要）**
+   現状はEdge Functionが service role でDBアクセスし、anonキー所持で呼べる
+   （社内アプリ向けMVP）。本番は **Supabase Auth（メール/パスワード等）** に移行し、
+   ユーザーJWTで呼ぶ→RLSで保護、service roleショートカットを外す。
+4. **Excel取り込み（PC・バックオフィス）**
+   予定データ投入UIは別途必要。service role で `delivery_plans` / `_lines` に
+   INSERTするインポータ（社内Web or スクリプト）。列対応は §2 の表を参照。
+5. **セキュリティ advisor の既存warning**
+   `public.rls_auto_enable`（今回の機能とは無関係の既存関数）が
+   SECURITY DEFINER で anon/authenticated から実行可能と警告あり。要否を確認し、
+   不要なら EXECUTE 権限を剥奪 or SECURITY INVOKER 化。
+
+### モバイルのビルド設定
+既定で本プロジェクトに接続する（`AppConfig` にURL/anonキーを既定値として埋め込み済み。
+anonキーは公開可能キー）。上書きする場合:
+```
+flutter run \
+  --dart-define=SUPABASE_URL=https://vjunicsfobglmncjucbb.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=<anon key>
+```
