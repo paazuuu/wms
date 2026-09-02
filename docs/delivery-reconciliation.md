@@ -154,3 +154,76 @@ actual == planned      → matched    （一致）
 actual > planned       → over       （過剰）
 plan に無い JAN         → unexpected （想定外）
 ```
+
+---
+
+## 5. 納品書OCR（AIビジョン）
+
+印刷された紙の納品書はJANが表の中に埋まっているため、クラウドのAIビジョンで
+明細（JAN・品名・数量）を読み取る。**APIキーはサーバ側に置き、モバイルは画像を
+アップロードして結果を受け取るだけ**（配布アプリにキーを埋め込まない）。
+
+- **優先プロバイダ = Gemini**。`Qwen` は枠だけ確保（未実装スロット）。
+- モバイル実装: `RemoteDeliveryNoteScanner`（優先）＋ `MlKitDeliveryNoteScanner`（オフライン時フォールバック）。
+  レスポンス解析は `parseVisionOcrResponse`（純粋関数・テスト済み）。
+
+### POST `/ocr/delivery-note`
+`multipart/form-data`。
+| フィールド | 説明 |
+|---|---|
+| `image` | 納品書の写真（file） |
+| `provider` | `gemini`（既定）/ `qwen`（予約） |
+| `plan_id` | 任意。照合中の予定ID（ログ/紐付け用） |
+
+レスポンス:
+```json
+{ "data": {
+  "provider": "gemini",
+  "lines": [
+    { "jan_code": "4902505632037", "product_name": "パイロット サインペン BP05", "quantity": 100 },
+    { "jan_code": "4901480241418", "product_name": "ホッチキス HSM-500TM-D", "quantity": 20 }
+  ]
+} }
+```
+- `jan_code` は JAN-8 または チェックデジット有効な EAN-13 のみ採用（クライアント側でも再検証）。
+- `quantity` は best-effort。読めない場合は省略可（クライアントは予定数量で補完）。
+
+### サーバ実装（プロバイダ選択）
+```
+provider == "gemini":   # 優先・実装対象
+    Gemini の vision 対応モデル（例 gemini-2.x-flash 系。モデルIDと料金は
+    Google公式で要確認）を generateContent で呼ぶ。
+    - 入力: 画像(inline_data) + 下記プロンプト
+    - 出力: responseMimeType=application/json + responseSchema で JSON を強制
+provider == "qwen":     # 枠のみ。未実装
+    501 Not Implemented を返すか、config で無効化。将来 DashScope 等で実装。
+```
+
+推奨プロンプト（要旨）:
+> この日本の納品書の明細を抽出し、各行を {jan_code, product_name, quantity} の
+> JSON配列で返す。JANコードは13桁(または8桁)の数字のみ。数量が不明な行は quantity を省略。
+> 表以外の文字（住所・電話・登録番号）はJANとして扱わない。
+
+Gemini `responseSchema`（JSON Schema）例:
+```json
+{ "type": "object", "properties": { "lines": { "type": "array", "items": {
+  "type": "object",
+  "properties": {
+    "jan_code": { "type": "string" },
+    "product_name": { "type": "string" },
+    "quantity": { "type": "integer" }
+  },
+  "required": ["jan_code"]
+} } }, "required": ["lines"] }
+```
+
+環境変数（サーバ側）:
+```
+OCR_PROVIDER_DEFAULT=gemini
+GEMINI_API_KEY=***          # サーバのみ。クライアントに出さない
+GEMINI_MODEL=gemini-2.x-flash
+# QWEN_API_KEY=***          # 将来
+```
+
+> セキュリティ: Geminiキーはサーバ環境変数に保持。画像は照合用途以外に保存しない
+> （必要なら `note_reference` として自社Storage/R2に限定保存）。

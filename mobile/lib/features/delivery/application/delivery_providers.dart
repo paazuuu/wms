@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers.dart';
 import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
+import '../data/mlkit_delivery_note_scanner.dart';
+import '../data/remote_delivery_note_scanner.dart';
 import '../domain/delivery_plan.dart';
 import 'reconciliation_controller.dart';
 
@@ -10,9 +12,13 @@ final deliveryRepositoryProvider = Provider<DeliveryRepository>((ref) {
   return DeliveryRepositoryImpl(ref.watch(dioProvider));
 });
 
-/// On-device OCR engine for the delivery-note assist.
+/// Delivery-note OCR assist: cloud vision (Gemini, via the backend) first, with
+/// the on-device engine as an offline fallback.
 final deliveryNoteScannerProvider = Provider<DeliveryNoteScanner>((ref) {
-  final scanner = MlKitDeliveryNoteScanner();
+  final scanner = FallbackDeliveryNoteScanner(
+    primary: RemoteDeliveryNoteScanner(ref.watch(dioProvider)),
+    fallback: MlKitDeliveryNoteScanner(),
+  );
   ref.onDispose(scanner.dispose);
   return scanner;
 });
