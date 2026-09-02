@@ -51,7 +51,7 @@ async function readWithGemini(bytes: Uint8Array, mime: string) {
   if (!apiKey) {
     return { error: "GEMINI_API_KEY is not set on the server.", status: 500 };
   }
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.0-flash";
+  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const payload = {
