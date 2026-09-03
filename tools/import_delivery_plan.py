@@ -11,8 +11,11 @@ Supported inputs:
              columns are found by header text (handles differing layouts).
   * .pdf   — text (born-digital) PDFs are parsed directly: on each row the JAN
              token is found and the first integer after it is the quantity.
-             Scanned/image PDFs have no text layer -> use the app's photo OCR
-             (or convert the PDF to an image and use ocr-delivery-note).
+             Scanned/image PDFs (no text layer) are sent automatically to the
+             deployed ocr-delivery-note Edge Function, where Gemini extracts the
+             rows — no local API key needed.
+  * images (.jpg/.png/.webp/.heic) — sent to the same Gemini OCR function.
+  * --ocr  — force the Gemini OCR path for any input.
 
 Every JAN is passed through normalize_jan (mirror of the app's jan.dart), so the
 database always stores one canonical form regardless of hyphens, full-width
@@ -30,6 +33,15 @@ import argparse
 import os
 import re
 import sys
+
+# Defaults for the Waraku WMS project; override with env vars.
+DEFAULT_SUPABASE_URL = "https://vjunicsfobglmncjucbb.supabase.co"
+DEFAULT_ANON = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+    "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqdW5pY3Nmb2JnbG1uY2p1Y2JiIiwicm9sZSI6"
+    "ImFub24iLCJpYXQiOjE3ODgzNjMzNDYsImV4cCI6MjEwMzkzOTM0Nn0."
+    "lYwz_yl0zi9FvJ37XSGFUpEziiG36bsd_ra8iO5iZ1M"
+)
 
 QTY_KEYS = ["発注数量", "数量", "発注数", "数"]
 MAKER_KEYS = ["メーカー", "maker", "ﾒｰｶｰ"]
@@ -151,14 +163,51 @@ def parse_xlsx(path):
 _INT_RE = re.compile(r"^\d[\d,]*$")
 
 
+def ocr_via_function(path):
+    """Send a scanned PDF or image to the deployed ocr-delivery-note Edge
+    Function (Gemini runs server-side) and return canonical records."""
+    import mimetypes
+    import requests
+    base = (os.environ.get("SUPABASE_URL") or DEFAULT_SUPABASE_URL).rstrip("/")
+    anon = os.environ.get("SUPABASE_ANON_KEY") or DEFAULT_ANON
+    mime = mimetypes.guess_type(path)[0] or "application/octet-stream"
+    with open(path, "rb") as fh:
+        resp = requests.post(
+            f"{base}/functions/v1/ocr-delivery-note",
+            headers={"apikey": anon, "Authorization": f"Bearer {anon}"},
+            files={"image": (os.path.basename(path), fh, mime)},
+            data={"provider": "gemini"},
+            timeout=180,
+        )
+    if resp.status_code != 200:
+        raise SystemExit(f"OCR failed ({resp.status_code}): {resp.text}")
+    lines = (resp.json().get("data") or {}).get("lines") or []
+    records = []
+    for ln in lines:
+        jan = normalize_jan(ln.get("jan_code"))
+        if not is_jan(jan):
+            continue
+        records.append({
+            "jan": jan,
+            "qty": _to_int(ln.get("quantity")) or 0,
+            "product_code": "",
+            "product_name": ln.get("product_name") or "",
+            "unit": None,
+            "amount": None,
+        })
+    if not records:
+        raise SystemExit("OCR returned no usable JAN rows.")
+    return records, {"source": "gemini-ocr", "rows": len(records)}
+
+
 def parse_pdf(path):
     from pypdf import PdfReader
     reader = PdfReader(path)
     text = "\n".join((pg.extract_text() or "") for pg in reader.pages)
     if not text.strip():
-        raise SystemExit(
-            "This PDF has no text layer (scanned image). Use the app's photo "
-            "OCR, or convert the page to an image and post it to ocr-delivery-note.")
+        # Scanned/image PDF: no text layer -> read it with Gemini OCR.
+        print("No text layer detected; sending the PDF to Gemini OCR…")
+        return ocr_via_function(path)
 
     records = []
     for line in text.splitlines():
@@ -194,10 +243,14 @@ def main():
     ap.add_argument("--supplier", default=None)
     ap.add_argument("--delivery-date", default=None, help="YYYY-MM-DD, display only")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--ocr", action="store_true",
+                    help="Force Gemini OCR (for scanned files or to override).")
     args = ap.parse_args()
 
     ext = os.path.splitext(args.path)[1].lower()
-    if ext in (".xlsx", ".xlsm"):
+    if args.ocr or ext in (".jpg", ".jpeg", ".png", ".webp", ".heic"):
+        records, detected = ocr_via_function(args.path)
+    elif ext in (".xlsx", ".xlsm"):
         records, detected = parse_xlsx(args.path)
     elif ext == ".pdf":
         records, detected = parse_pdf(args.path)
