@@ -69,17 +69,28 @@ async function readWithGemini(bytes: Uint8Array, mime: string) {
     },
   };
   // Send the key as a header (works with both the legacy AIza… keys and the
-  // newer AQ.… format) rather than a ?key= query parameter.
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    return { error: `Gemini error ${res.status}: ${await res.text()}`, status: 502 };
+  // newer AQ.… format) rather than a ?key= query parameter. Retry a few times
+  // on transient overload (503 / 429), which Gemini can return during demand
+  // spikes, so a busy moment doesn't surface as a user-facing failure.
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (res.status !== 503 && res.status !== 429) break;
+    if (attempt < 3) {
+      await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+    }
+  }
+  if (!res || !res.ok) {
+    const detail = res ? `${res.status}: ${await res.text()}` : "no response";
+    const status = res && (res.status === 503 || res.status === 429) ? 503 : 502;
+    return { error: `Gemini error ${detail}`, status };
   }
   const body = await res.json();
   const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
