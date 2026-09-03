@@ -86,4 +86,16 @@ void main() {
     expect(result.lines.map((l) => l.janCode),
         ['4902505632037', '4901480241418']);
   });
+
+  test('a differently-formatted counted JAN still matches the plan', () {
+    // Plan stores a clean 13-digit code; the count arrives hyphenated + with a
+    // full-width digit. Canonical matching must treat them as the same item.
+    final result = buildReconciliation(_plan(), {
+      '４902-505-632037': _c('４902-505-632037', 100),
+    });
+    final pen =
+        result.lines.firstWhere((l) => l.planLine?.janCode == '4902505632037');
+    expect(pen.status, ReconLineStatus.matched);
+    expect(result.unexpectedCount, 0);
+  });
 }

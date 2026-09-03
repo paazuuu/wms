@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'delivery_plan.dart';
 import 'delivery_plan_line.dart';
+import 'jan.dart';
 
 /// Where an actual count came from, so the UI can show how each line was
 /// confirmed and the submission can record provenance.
@@ -138,10 +139,16 @@ ReconciliationResult buildReconciliation(
 ) {
   final lines = <ReconLine>[];
   final plannedJans = <String>{};
+  // Match on the canonical JAN so formatting differences (hyphens, full-width
+  // digits, a dropped leading zero) never cause a false "unexpected".
+  final normCounts = <String, CountedItem>{
+    for (final e in counts.entries) normalizeJan(e.key): e.value,
+  };
 
   for (final planLine in plan.lines) {
-    plannedJans.add(planLine.janCode);
-    final counted = counts[planLine.janCode];
+    final nj = normalizeJan(planLine.janCode);
+    plannedJans.add(nj);
+    final counted = normCounts[nj];
     final actual = counted?.quantity ?? 0;
     lines.add(ReconLine(
       planLine: planLine,
@@ -153,10 +160,10 @@ ReconciliationResult buildReconciliation(
     ));
   }
 
-  for (final entry in counts.entries) {
+  for (final entry in normCounts.entries) {
     if (plannedJans.contains(entry.key)) continue;
     lines.add(ReconLine(
-      janCode: entry.key,
+      janCode: entry.value.janCode,
       plannedQuantity: 0,
       actualQuantity: entry.value.quantity,
       source: entry.value.source,
