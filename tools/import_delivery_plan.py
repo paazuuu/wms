@@ -1,42 +1,45 @@
 #!/usr/bin/env python3
-"""Import a supplier's advance delivery Excel into Supabase as a delivery plan.
+"""Ingest a supplier's advance delivery file (Excel or PDF) into Supabase as a
+delivery plan, converting every format to one canonical shape before saving.
 
-Suppliers format these sheets very differently — the JAN can sit in any column,
-the header row may be anywhere, and codes come hyphenated, full-width, or stored
-as numbers. This importer therefore:
+Suppliers send these very differently, so the pipeline is:
+  file (.xlsx / .pdf)  ->  extract needed fields  ->  normalize  ->  aggregate
+  by JAN  ->  write delivery_plans + delivery_plan_lines.
 
-  * finds the JAN column automatically (the column with the most values that
-    normalize to a valid 13/8-digit code),
-  * finds the header row and the 数量 / メーカー / 品番 / 単価 / 金額 columns by
-    their header text,
-  * normalizes every JAN to one canonical form (see normalize_jan), matching the
-    app's mobile/lib/features/delivery/domain/jan.dart,
-  * aggregates rows that share a JAN.
+Supported inputs:
+  * .xlsx  — JAN column is auto-detected; 数量 / メーカー / 品番 / 単価 / 金額
+             columns are found by header text (handles differing layouts).
+  * .pdf   — text (born-digital) PDFs are parsed directly: on each row the JAN
+             token is found and the first integer after it is the quantity.
+             Scanned/image PDFs have no text layer -> use the app's photo OCR
+             (or convert the PDF to an image and use ocr-delivery-note).
+
+Every JAN is passed through normalize_jan (mirror of the app's jan.dart), so the
+database always stores one canonical form regardless of hyphens, full-width
+digits, Excel's ".0", or a dropped leading zero.
 
 Usage:
     export SUPABASE_URL=https://<ref>.supabase.co
     export SUPABASE_SERVICE_ROLE_KEY=<service_role key>   # secret! back office only
     python3 tools/import_delivery_plan.py plan.xlsx \
-        --delivery-number 20260901-事前 --supplier "事前予定(Excel)"
-    # add --dry-run to just print what was detected, without writing.
+        --delivery-number 20260901-事前 --supplier "事前予定" [--dry-run]
 
-Requires: openpyxl, requests  (pip install openpyxl requests)
+Requires: openpyxl (for .xlsx), pypdf (for .pdf), requests (to write).
 """
 import argparse
 import os
+import re
 import sys
-
-import openpyxl
 
 QTY_KEYS = ["発注数量", "数量", "発注数", "数"]
 MAKER_KEYS = ["メーカー", "maker", "ﾒｰｶｰ"]
-PNUM_KEYS = ["品番", "商品コード", "品名"]
+PNUM_KEYS = ["品番", "項目", "商品コード", "品名"]
 UNIT_KEYS = ["単価", "定価"]
 AMOUNT_KEYS = ["金額", "調達合計金額"]
 
 
 def normalize_jan(value):
-    """Canonical JAN — mirror of jan.dart's normalizeJan."""
+    """Canonical JAN — mirror of mobile/lib/.../jan.dart normalizeJan."""
     if value is None:
         return ""
     s = "".join(
@@ -63,13 +66,35 @@ def _to_int(v):
         return None
 
 
-def detect_and_parse(path):
+def _aggregate(records):
+    """records: list of dicts {jan, qty, product_code, product_name, unit, amount}."""
+    agg, order = {}, []
+    for r in records:
+        jan = r["jan"]
+        if jan not in agg:
+            agg[jan] = {
+                "jan_code": jan,
+                "product_code": r.get("product_code") or "",
+                "product_name": (r.get("product_name") or "").strip(),
+                "planned_quantity": 0,
+                "unit_price": r.get("unit"),
+                "amount": 0,
+            }
+            order.append(jan)
+        agg[jan]["planned_quantity"] += r.get("qty") or 0
+        if r.get("amount"):
+            agg[jan]["amount"] += r["amount"]
+    return [agg[j] for j in order]
+
+
+# ---------------------------------------------------------------- xlsx --------
+def parse_xlsx(path):
+    import openpyxl
     wb = openpyxl.load_workbook(path, data_only=True)
     ws = wb.worksheets[0]
     rows = [list(r) for r in ws.iter_rows(values_only=True)]
     ncol = max((len(r) for r in rows), default=0)
 
-    # JAN column = the one with the most valid JAN-looking values.
     jan_col, best = None, 0
     for c in range(ncol):
         cnt = sum(1 for r in rows if c < len(r) and is_jan(normalize_jan(r[c])))
@@ -85,9 +110,6 @@ def detect_and_parse(path):
                     return ri, c
         return None, None
 
-    # Anchor on the 数量 header, then read the other headers from that same row
-    # so stray cells elsewhere (e.g. a "繰り越し金額" total) aren't mistaken for
-    # the line columns.
     header_row, qty_col = find_cell(QTY_KEYS)
 
     def find_col(keys):
@@ -95,8 +117,7 @@ def detect_and_parse(path):
             for c, val in enumerate(rows[header_row]):
                 if isinstance(val, str) and any(k in val for k in keys):
                     return c
-        _, c = find_cell(keys)
-        return c
+        return find_cell(keys)[1]
 
     maker_col = find_col(MAKER_KEYS)
     pnum_col = find_col(PNUM_KEYS)
@@ -106,47 +127,85 @@ def detect_and_parse(path):
     def cell(r, c):
         return r[c] if (c is not None and c < len(r)) else None
 
-    agg, order = {}, []
+    records = []
     for r in rows:
         jan = normalize_jan(cell(r, jan_col))
         if not is_jan(jan):
             continue
-        qty = _to_int(cell(r, qty_col)) or 0
         maker = cell(r, maker_col) or ""
         pnum = cell(r, pnum_col) or ""
-        if jan not in agg:
-            agg[jan] = {
-                "jan_code": jan,
-                "product_code": str(pnum),
-                "product_name": f"{maker} {pnum}".strip(),
-                "planned_quantity": 0,
-                "unit_price": _to_int(cell(r, unit_col)),
-                "amount": 0,
-            }
-            order.append(jan)
-        agg[jan]["planned_quantity"] += qty
-        amt = _to_int(cell(r, amount_col))
-        if amt:
-            agg[jan]["amount"] += amt
-
-    detected = {
-        "jan_col": jan_col, "qty_col": qty_col, "maker_col": maker_col,
-        "pnum_col": pnum_col, "unit_col": unit_col, "amount_col": amount_col,
-    }
-    return [agg[j] for j in order], detected
+        records.append({
+            "jan": jan,
+            "qty": _to_int(cell(r, qty_col)) or 0,
+            "product_code": str(pnum),
+            "product_name": f"{maker} {pnum}".strip(),
+            "unit": _to_int(cell(r, unit_col)),
+            "amount": _to_int(cell(r, amount_col)),
+        })
+    detected = {"jan_col": jan_col, "qty_col": qty_col, "maker_col": maker_col,
+                "pnum_col": pnum_col, "unit_col": unit_col, "amount_col": amount_col}
+    return records, detected
 
 
+# ----------------------------------------------------------------- pdf --------
+_INT_RE = re.compile(r"^\d[\d,]*$")
+
+
+def parse_pdf(path):
+    from pypdf import PdfReader
+    reader = PdfReader(path)
+    text = "\n".join((pg.extract_text() or "") for pg in reader.pages)
+    if not text.strip():
+        raise SystemExit(
+            "This PDF has no text layer (scanned image). Use the app's photo "
+            "OCR, or convert the page to an image and post it to ocr-delivery-note.")
+
+    records = []
+    for line in text.splitlines():
+        tokens = line.split()
+        jan_idx = next((i for i, t in enumerate(tokens)
+                        if is_jan(normalize_jan(t))), None)
+        if jan_idx is None:
+            continue
+        jan = normalize_jan(tokens[jan_idx])
+        # Quantity = first plain integer after the JAN (prices usually carry ¥).
+        qty = 0
+        for t in tokens[jan_idx + 1:]:
+            m = _INT_RE.match(t.replace("¥", "").replace("￥", ""))
+            if t.startswith("¥") or t.startswith("￥"):
+                continue
+            if m:
+                qty = int(m.group(0).replace(",", ""))
+                break
+        name = " ".join(tokens[:jan_idx]).strip()
+        code = tokens[jan_idx - 1] if jan_idx >= 1 else ""
+        records.append({"jan": jan, "qty": qty, "product_code": code,
+                        "product_name": name, "unit": None, "amount": None})
+    if not records:
+        raise SystemExit("No JAN rows found in the PDF text.")
+    return records, {"source": "pdf-text", "rows": len(records)}
+
+
+# ----------------------------------------------------------------- main -------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("xlsx")
+    ap.add_argument("path", help="Excel (.xlsx) or PDF (.pdf) file")
     ap.add_argument("--delivery-number", required=True)
     ap.add_argument("--supplier", default=None)
     ap.add_argument("--delivery-date", default=None, help="YYYY-MM-DD, display only")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    lines, detected = detect_and_parse(args.xlsx)
-    print(f"Detected columns (0-based): {detected}")
+    ext = os.path.splitext(args.path)[1].lower()
+    if ext in (".xlsx", ".xlsm"):
+        records, detected = parse_xlsx(args.path)
+    elif ext == ".pdf":
+        records, detected = parse_pdf(args.path)
+    else:
+        sys.exit(f"Unsupported file type: {ext}")
+
+    lines = _aggregate(records)
+    print(f"Source: {detected}")
     print(f"Parsed {len(lines)} unique JAN lines, "
           f"{sum(l['planned_quantity'] for l in lines)} units total.")
     for l in lines[:5]:
@@ -163,18 +222,10 @@ def main():
         sys.exit("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars.")
 
     rest = f"{url.rstrip('/')}/rest/v1"
-    headers = {
-        "apikey": key,
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-        "Prefer": "return=representation",
-    }
-    plan = {
-        "delivery_number": args.delivery_number,
-        "supplier_name": args.supplier,
-        "delivery_date": args.delivery_date,
-        "status": "open",
-    }
+    headers = {"apikey": key, "Authorization": f"Bearer {key}",
+               "Content-Type": "application/json", "Prefer": "return=representation"}
+    plan = {"delivery_number": args.delivery_number, "supplier_name": args.supplier,
+            "delivery_date": args.delivery_date, "status": "open"}
     r = requests.post(f"{rest}/delivery_plans", json=plan, headers=headers, timeout=30)
     r.raise_for_status()
     plan_id = r.json()[0]["id"]
