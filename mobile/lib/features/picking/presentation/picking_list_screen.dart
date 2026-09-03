@@ -18,17 +18,18 @@ class PickingListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final results = ref.watch(pickListsProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Picking')),
+      appBar: AppBar(title: Text(l10n.featPicking)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(pickListsProvider),
         child: results.when(
           data: (items) => items.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.shopping_cart_checkout_outlined,
-                  title: 'Nothing to pick.',
-                  message: 'Open sales orders awaiting fulfilment appear here.',
+                  title: l10n.pickingEmpty,
+                  message: l10n.pickingEmptyBody,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -38,7 +39,7 @@ class PickingListScreen extends ConsumerWidget {
                   itemBuilder: (context, index) =>
                       _PickListCard(order: items[index]),
                 ),
-          loading: () => const LoadingView(message: 'Loading pick lists…'),
+          loading: () => LoadingView(message: l10n.loading),
           error: (error, _) => ErrorStateView(
             message: '$error',
             onRetry: () => ref.invalidate(pickListsProvider),
@@ -58,10 +59,11 @@ class _PickListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = SalesOrderStatusUi.of(AppLocalizations.of(context), order);
+    final l10n = AppLocalizations.of(context);
+    final status = SalesOrderStatusUi.of(l10n, order);
     final customer = order.customerName?.trim().isNotEmpty == true
         ? order.customerName!
-        : 'No customer';
+        : l10n.noCustomer;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -114,8 +116,7 @@ class _PickListCard extends StatelessWidget {
                         if (order.itemsCount != null)
                           StatusPill(
                             tone: StatusTone.neutral,
-                            label:
-                                '${order.itemsCount} ${order.itemsCount == 1 ? 'line' : 'lines'}',
+                            label: l10n.lineCount(order.itemsCount!),
                             icon: Icons.list_alt_outlined,
                             dense: true,
                           ),

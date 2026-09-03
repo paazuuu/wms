@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +6,7 @@ import '../../../app.dart';
 import '../../../core/l10n/language_menu.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -135,6 +137,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 )
                               : Text(l10n.signIn),
                         ),
+                        // Debug-only shortcut so the Supabase-backed delivery
+                        // reconciliation (+ OCR) can be tested without the main
+                        // API backend. Stripped from release builds.
+                        if (kDebugMode) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          OutlinedButton.icon(
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const DeliveryPlanListScreen(),
+                              ),
+                            ),
+                            icon: const Icon(Icons.rule_folder_outlined),
+                            label: const Text('DEMO: 納品照合を開く（ログイン不要）'),
+                          ),
+                        ],
                       ],
                     ),
                   ),

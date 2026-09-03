@@ -600,4 +600,455 @@ class AppLocalizationsJa extends AppLocalizations {
   String remainingAmount(String amount) {
     return '残り $amount';
   }
+
+  @override
+  String get unknownSupplier => '仕入先不明';
+
+  @override
+  String get receivingEmpty => '入荷対象がありません。';
+
+  @override
+  String get receivingEmptyBody => '送信済みまたは一部入荷の発注がここに表示されます。';
+
+  @override
+  String get receivingDone => '残りの入荷はありません。';
+
+  @override
+  String get fieldQtyToReceive => '入荷数量';
+
+  @override
+  String get receiveStock => '入荷登録';
+
+  @override
+  String get actionReceive => '入荷';
+
+  @override
+  String get receivingInProgress => '入荷処理中…';
+
+  @override
+  String get emptyInspections => '検品がまだありません。';
+
+  @override
+  String get inspectionsEmptyBody => '下に引いて更新するか、入荷受入から開始してください。';
+
+  @override
+  String get pickingEmpty => 'ピッキング対象がありません。';
+
+  @override
+  String get noLinesToPick => 'ピッキングする明細がありません。';
+
+  @override
+  String get orderNoLineItems => 'この受注に明細はありません。';
+
+  @override
+  String get unnamedProduct => '名称未設定の商品';
+
+  @override
+  String get pickListTitle => 'ピッキングリスト';
+
+  @override
+  String get customReport => 'カスタムレポート';
+
+  @override
+  String get emptyReports => '保存済みレポートがまだありません。';
+
+  @override
+  String get reportsEmptyBody => 'バックオフィスで保存したレポートがここに表示されます。';
+
+  @override
+  String get reportShared => '共有';
+
+  @override
+  String columnCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count列',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allLocations => '全ロケーション';
+
+  @override
+  String get emptyStockCounts => '棚卸がまだありません。';
+
+  @override
+  String get pickingEmptyBody => '出荷待ちの受注がここに表示されます。';
+
+  @override
+  String get stockCountsEmptyBody => 'バックオフィスで作成した循環棚卸がここに表示されます。';
+
+  @override
+  String get receivingDoneBody => 'この発注のすべての明細が入荷済みです。';
+
+  @override
+  String receiveInvalidQty(String product) {
+    return '「$product」の数量を正しく入力してください。';
+  }
+
+  @override
+  String receiveExceedsRemaining(String product, int remaining) {
+    return '$product：残り $remaining を超えて入荷できません。';
+  }
+
+  @override
+  String get receiveEnterAtLeastOne => '入荷する数量を1行以上入力してください。';
+
+  @override
+  String get receiveSuccess => '入荷しました。検品が自動的に開始されました。';
+
+  @override
+  String pickedProgress(int picked, int total) {
+    return '$picked / $total ピック済み';
+  }
+
+  @override
+  String get attachFiles => '添付';
+
+  @override
+  String get cameraLabel => 'カメラ';
+
+  @override
+  String get scanToRecord => 'スキャンして記録';
+
+  @override
+  String get scanToRecordQty1 => 'スキャンして記録（数量1）';
+
+  @override
+  String get fastModeOnTooltip => '高速モード：スキャンごとに数量1で記録';
+
+  @override
+  String get fastModeOffTooltip => 'スキャンごとに数量を入力';
+
+  @override
+  String get fastQtyOneLabel => '数量1';
+
+  @override
+  String get actualQuantity => '実数量';
+
+  @override
+  String scannedCode(String code) {
+    return '読取: $code';
+  }
+
+  @override
+  String get quantity => '数量';
+
+  @override
+  String get actionCancel => 'キャンセル';
+
+  @override
+  String get actionRecord => '記録';
+
+  @override
+  String get itemRecorded => '項目を記録しました';
+
+  @override
+  String get offlineItemQueued => 'オフライン — 項目を同期待ちに追加しました';
+
+  @override
+  String filesUploaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のファイルをアップロードしました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String offlineFilesQueued(int count) {
+    return 'オフライン — $count件のファイルを同期待ちに追加しました';
+  }
+
+  @override
+  String get completeInspectionQ => '検品を完了しますか？';
+
+  @override
+  String get completeInspectionBody => 'この検品を完了にします。完了後も閲覧できます。';
+
+  @override
+  String get inspectionCompleted => '検品を完了しました';
+
+  @override
+  String get offlineCompletionQueued => 'オフライン — 完了を同期待ちに追加しました';
+
+  @override
+  String get sectionItems => '項目';
+
+  @override
+  String get sectionAttachments => '添付ファイル';
+
+  @override
+  String get noItemsYet => '項目がまだありません。スキャンで記録してください。';
+
+  @override
+  String get noAttachments => '添付はありません。クリップから写真やファイルを追加できます。';
+
+  @override
+  String get completeInspection => '検品を完了';
+
+  @override
+  String completedOn(String date) {
+    return '完了 $date';
+  }
+
+  @override
+  String get actualLabel => '実績';
+
+  @override
+  String itemNumber(int id) {
+    return '項目 $id';
+  }
+
+  @override
+  String get working => '処理中…';
+
+  @override
+  String get adjustAdd => '追加';
+
+  @override
+  String get adjustRemove => '減少';
+
+  @override
+  String get reasonType => '理由区分';
+
+  @override
+  String get reasonOptional => '理由（任意）';
+
+  @override
+  String get notesOptional => 'メモ（任意）';
+
+  @override
+  String get onHandAfter => '調整後の在庫';
+
+  @override
+  String get saving => '保存中…';
+
+  @override
+  String get addStock => '在庫を追加';
+
+  @override
+  String get removeStock => '在庫を減らす';
+
+  @override
+  String onHandCount(int count) {
+    return '在庫 $count';
+  }
+
+  @override
+  String get enterQtyPositive => '0より大きい数量を入力してください。';
+
+  @override
+  String cannotRemoveOnly(int qty, int current) {
+    return '$qty を減らせません。在庫は $current のみです。';
+  }
+
+  @override
+  String stockUpdatedTo(int count) {
+    return '在庫を更新しました — 現在 $count。';
+  }
+
+  @override
+  String get adjustTypeManual => '手動';
+
+  @override
+  String get adjustTypeCount => '棚卸';
+
+  @override
+  String get adjustTypeDamage => '破損';
+
+  @override
+  String get adjustTypeReturn => '返品';
+
+  @override
+  String get adjustTypeTransfer => '移動';
+
+  @override
+  String get sectionBatches => 'バッチ';
+
+  @override
+  String get sectionSerials => 'シリアル';
+
+  @override
+  String get noBatches => 'この商品のバッチはありません。';
+
+  @override
+  String get noSerials => 'この商品のシリアルはありません。';
+
+  @override
+  String get loadingBatches => 'バッチを読み込み中…';
+
+  @override
+  String get loadingSerials => 'シリアルを読み込み中…';
+
+  @override
+  String get batchExpired => '期限切れ';
+
+  @override
+  String get batchValid => '有効';
+
+  @override
+  String get fieldExpiry => '有効期限';
+
+  @override
+  String get report => 'レポート';
+
+  @override
+  String get runningReport => 'レポートを実行中…';
+
+  @override
+  String get noData => 'データがありません。';
+
+  @override
+  String get reportNoRows => 'このレポートに行がありません。';
+
+  @override
+  String rowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanBarcode => 'バーコードをスキャン';
+
+  @override
+  String get torchOn => 'ライトを点灯';
+
+  @override
+  String get torchOff => 'ライトを消灯';
+
+  @override
+  String get alignBarcode => '枠内にバーコードを合わせてください';
+
+  @override
+  String get scanOrTypeBarcode => 'スキャンまたはバーコードを入力';
+
+  @override
+  String get featDelivery => '納品照合';
+
+  @override
+  String get featDeliveryDesc => '納品書とExcel予定を照合し過不足を可視化';
+
+  @override
+  String get deliveryStatusOpen => '未照合';
+
+  @override
+  String get deliveryStatusReconciling => '照合中';
+
+  @override
+  String get deliveryStatusCompleted => '照合済み';
+
+  @override
+  String get reconPending => '未確認';
+
+  @override
+  String get reconMatched => '一致';
+
+  @override
+  String get reconShortfall => '不足';
+
+  @override
+  String get reconOver => '過剰';
+
+  @override
+  String get reconUnexpected => '想定外';
+
+  @override
+  String get deliveryPlansTitle => '納品照合';
+
+  @override
+  String get deliveryPlansEmpty => '納品予定がありません。';
+
+  @override
+  String get deliveryPlansEmptyBody => 'バックオフィスで取り込んだ納品予定（Excel）がここに表示されます。';
+
+  @override
+  String get deliveryPlansHint => 'スキャンまたは伝票番号・仕入先で検索';
+
+  @override
+  String get deliveryNoMatches => '一致する納品予定がありません。';
+
+  @override
+  String get deliverySearchTip => '別の伝票番号または仕入先をお試しください。';
+
+  @override
+  String plannedLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '予定明細 $count 件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryNumberLabel => '伝票番号';
+
+  @override
+  String get deliveryDateLabel => '納品日';
+
+  @override
+  String get scanDeliveryHint => '品物のJANをスキャン';
+
+  @override
+  String get ocrAssist => '納品書を撮影（OCR補助）';
+
+  @override
+  String get ocrScanning => '納品書を解析中…';
+
+  @override
+  String ocrFound(int count) {
+    return '納品書から $count 件のJANを検出しました';
+  }
+
+  @override
+  String get ocrNoneFound => '納品書からJANを検出できませんでした。';
+
+  @override
+  String get ocrUnavailable => 'この端末ではOCRを利用できません。';
+
+  @override
+  String get reconSummaryTitle => '照合状況';
+
+  @override
+  String get deliveryPlanned => '予定';
+
+  @override
+  String get diffLabel => '差';
+
+  @override
+  String get completeReconcile => '照合を完了';
+
+  @override
+  String get reconcileConfirmQ => '照合を完了しますか？';
+
+  @override
+  String get reconcileConfirmBody => '現在の計数結果を送信して照合を完了します。';
+
+  @override
+  String get reconcileConfirmDiscrepancy => '差異があります（不足・過剰・想定外）。このまま完了しますか？';
+
+  @override
+  String get reconcileDone => '照合を完了しました';
+
+  @override
+  String get reconcileEmptyCounts => 'まだ計数がありません。スキャンして開始してください。';
+
+  @override
+  String get unexpectedItem => '想定外の品目';
+
+  @override
+  String enterQuantityFor(String code) {
+    return '$code の数量';
+  }
+
+  @override
+  String get noteImageAttached => '納品書を添付しました';
 }

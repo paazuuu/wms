@@ -18,17 +18,18 @@ class StockCountListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final results = ref.watch(stockAuditListProvider(''));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Stock Count')),
+      appBar: AppBar(title: Text(l10n.featStockCount)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(stockAuditListProvider('')),
         child: results.when(
           data: (items) => items.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.checklist_outlined,
-                  title: 'No stock counts yet.',
-                  message: 'Cycle counts created on the back office appear here.',
+                  title: l10n.emptyStockCounts,
+                  message: l10n.stockCountsEmptyBody,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -38,7 +39,7 @@ class StockCountListScreen extends ConsumerWidget {
                   itemBuilder: (context, index) =>
                       _StockAuditCard(audit: items[index]),
                 ),
-          loading: () => const LoadingView(message: 'Loading stock counts…'),
+          loading: () => LoadingView(message: l10n.loading),
           error: (error, _) => ErrorStateView(
             message: '$error',
             onRetry: () => ref.invalidate(stockAuditListProvider('')),
@@ -58,10 +59,11 @@ class _StockAuditCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = StockAuditStatusUi.of(AppLocalizations.of(context), audit);
+    final l10n = AppLocalizations.of(context);
+    final status = StockAuditStatusUi.of(l10n, audit);
     final subtitle = audit.name?.trim().isNotEmpty == true
         ? audit.name!
-        : (audit.locationName ?? 'All locations');
+        : (audit.locationName ?? l10n.allLocations);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -111,8 +113,7 @@ class _StockAuditCard extends StatelessWidget {
                         if (audit.itemsCount != null)
                           StatusPill(
                             tone: StatusTone.neutral,
-                            label:
-                                '${audit.itemsCount} ${audit.itemsCount == 1 ? 'line' : 'lines'}',
+                            label: l10n.lineCount(audit.itemsCount!),
                             icon: Icons.list_alt_outlined,
                             dense: true,
                           ),

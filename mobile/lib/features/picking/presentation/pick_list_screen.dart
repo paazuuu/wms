@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -36,16 +37,17 @@ class _PickListScreenState extends ConsumerState<PickListScreen> {
   @override
   Widget build(BuildContext context) {
     final result = ref.watch(salesOrderDetailProvider(widget.orderId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pick List')),
+      appBar: AppBar(title: Text(l10n.pickListTitle)),
       body: result.when(
         data: (order) => _PickListBody(
           order: order,
           picked: _picked,
           onToggle: _toggle,
         ),
-        loading: () => const LoadingView(message: 'Loading pick list…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () =>
@@ -71,6 +73,7 @@ class _PickListBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final items = order.items;
     final pickedCount = items.where((i) => picked.contains(i.id)).length;
     final allPicked = items.isNotEmpty && pickedCount == items.length;
@@ -92,14 +95,14 @@ class _PickListBody extends StatelessWidget {
               Text(
                 order.customerName?.trim().isNotEmpty == true
                     ? order.customerName!
-                    : 'No customer',
+                    : l10n.noCustomer,
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(color: scheme.onSurfaceVariant),
               ),
               const SizedBox(height: AppSpacing.sm),
               StatusPill(
                 tone: allPicked ? StatusTone.success : StatusTone.info,
-                label: '$pickedCount / ${items.length} picked',
+                label: l10n.pickedProgress(pickedCount, items.length),
                 icon: allPicked
                     ? Icons.check_circle_outline
                     : Icons.checklist_outlined,
@@ -111,10 +114,10 @@ class _PickListBody extends StatelessWidget {
         const Divider(height: 1),
         Expanded(
           child: items.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.inventory_2_outlined,
-                  title: 'No lines to pick.',
-                  message: 'This order has no line items.',
+                  title: l10n.noLinesToPick,
+                  message: l10n.orderNoLineItems,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -151,6 +154,7 @@ class _PickLineTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -169,7 +173,7 @@ class _PickLineTile extends StatelessWidget {
                     Text(
                       item.productName.isNotEmpty
                           ? item.productName
-                          : 'Unnamed product',
+                          : l10n.unnamedProduct,
                       style: theme.textTheme.titleSmall?.copyWith(
                         decoration:
                             picked ? TextDecoration.lineThrough : null,
@@ -194,7 +198,7 @@ class _PickLineTile extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               StatusPill(
                 tone: StatusTone.neutral,
-                label: 'Qty ${item.quantity}',
+                label: l10n.qtyLabel(item.quantity),
                 icon: Icons.numbers_outlined,
                 dense: true,
               ),

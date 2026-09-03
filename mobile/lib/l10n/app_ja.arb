@@ -211,5 +211,186 @@
   "remainingAmount": "残り {amount}",
   "@remainingAmount": {
     "placeholders": { "amount": { "type": "String" } }
-  }
+  },
+  "unknownSupplier": "仕入先不明",
+  "receivingEmpty": "入荷対象がありません。",
+  "receivingEmptyBody": "送信済みまたは一部入荷の発注がここに表示されます。",
+  "receivingDone": "残りの入荷はありません。",
+  "fieldQtyToReceive": "入荷数量",
+  "receiveStock": "入荷登録",
+  "actionReceive": "入荷",
+  "receivingInProgress": "入荷処理中…",
+  "emptyInspections": "検品がまだありません。",
+  "inspectionsEmptyBody": "下に引いて更新するか、入荷受入から開始してください。",
+  "pickingEmpty": "ピッキング対象がありません。",
+  "noLinesToPick": "ピッキングする明細がありません。",
+  "orderNoLineItems": "この受注に明細はありません。",
+  "unnamedProduct": "名称未設定の商品",
+  "pickListTitle": "ピッキングリスト",
+  "customReport": "カスタムレポート",
+  "emptyReports": "保存済みレポートがまだありません。",
+  "reportsEmptyBody": "バックオフィスで保存したレポートがここに表示されます。",
+  "reportShared": "共有",
+  "columnCount": "{count, plural, other{{count}列}}",
+  "@columnCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "allLocations": "全ロケーション",
+  "emptyStockCounts": "棚卸がまだありません。",
+  "pickingEmptyBody": "出荷待ちの受注がここに表示されます。",
+  "stockCountsEmptyBody": "バックオフィスで作成した循環棚卸がここに表示されます。",
+  "receivingDoneBody": "この発注のすべての明細が入荷済みです。",
+  "receiveInvalidQty": "「{product}」の数量を正しく入力してください。",
+  "@receiveInvalidQty": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "receiveExceedsRemaining": "{product}：残り {remaining} を超えて入荷できません。",
+  "@receiveExceedsRemaining": {
+    "placeholders": { "product": { "type": "String" }, "remaining": { "type": "int" } }
+  },
+  "receiveEnterAtLeastOne": "入荷する数量を1行以上入力してください。",
+  "receiveSuccess": "入荷しました。検品が自動的に開始されました。",
+  "pickedProgress": "{picked} / {total} ピック済み",
+  "@pickedProgress": {
+    "placeholders": { "picked": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "attachFiles": "添付",
+  "cameraLabel": "カメラ",
+  "scanToRecord": "スキャンして記録",
+  "scanToRecordQty1": "スキャンして記録（数量1）",
+  "fastModeOnTooltip": "高速モード：スキャンごとに数量1で記録",
+  "fastModeOffTooltip": "スキャンごとに数量を入力",
+  "fastQtyOneLabel": "数量1",
+  "actualQuantity": "実数量",
+  "scannedCode": "読取: {code}",
+  "@scannedCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "quantity": "数量",
+  "actionCancel": "キャンセル",
+  "actionRecord": "記録",
+  "itemRecorded": "項目を記録しました",
+  "offlineItemQueued": "オフライン — 項目を同期待ちに追加しました",
+  "filesUploaded": "{count, plural, other{{count}件のファイルをアップロードしました}}",
+  "@filesUploaded": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "offlineFilesQueued": "オフライン — {count}件のファイルを同期待ちに追加しました",
+  "@offlineFilesQueued": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "completeInspectionQ": "検品を完了しますか？",
+  "completeInspectionBody": "この検品を完了にします。完了後も閲覧できます。",
+  "inspectionCompleted": "検品を完了しました",
+  "offlineCompletionQueued": "オフライン — 完了を同期待ちに追加しました",
+  "sectionItems": "項目",
+  "sectionAttachments": "添付ファイル",
+  "noItemsYet": "項目がまだありません。スキャンで記録してください。",
+  "noAttachments": "添付はありません。クリップから写真やファイルを追加できます。",
+  "completeInspection": "検品を完了",
+  "completedOn": "完了 {date}",
+  "@completedOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "actualLabel": "実績",
+  "itemNumber": "項目 {id}",
+  "@itemNumber": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "working": "処理中…",
+  "adjustAdd": "追加",
+  "adjustRemove": "減少",
+  "reasonType": "理由区分",
+  "reasonOptional": "理由（任意）",
+  "notesOptional": "メモ（任意）",
+  "onHandAfter": "調整後の在庫",
+  "saving": "保存中…",
+  "addStock": "在庫を追加",
+  "removeStock": "在庫を減らす",
+  "onHandCount": "在庫 {count}",
+  "@onHandCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "enterQtyPositive": "0より大きい数量を入力してください。",
+  "cannotRemoveOnly": "{qty} を減らせません。在庫は {current} のみです。",
+  "@cannotRemoveOnly": {
+    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+  },
+  "stockUpdatedTo": "在庫を更新しました — 現在 {count}。",
+  "@stockUpdatedTo": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "adjustTypeManual": "手動",
+  "adjustTypeCount": "棚卸",
+  "adjustTypeDamage": "破損",
+  "adjustTypeReturn": "返品",
+  "adjustTypeTransfer": "移動",
+  "sectionBatches": "バッチ",
+  "sectionSerials": "シリアル",
+  "noBatches": "この商品のバッチはありません。",
+  "noSerials": "この商品のシリアルはありません。",
+  "loadingBatches": "バッチを読み込み中…",
+  "loadingSerials": "シリアルを読み込み中…",
+  "batchExpired": "期限切れ",
+  "batchValid": "有効",
+  "fieldExpiry": "有効期限",
+  "report": "レポート",
+  "runningReport": "レポートを実行中…",
+  "noData": "データがありません。",
+  "reportNoRows": "このレポートに行がありません。",
+  "rowCount": "{count, plural, other{{count} 行}}",
+  "@rowCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "scanBarcode": "バーコードをスキャン",
+  "torchOn": "ライトを点灯",
+  "torchOff": "ライトを消灯",
+  "alignBarcode": "枠内にバーコードを合わせてください",
+  "scanOrTypeBarcode": "スキャンまたはバーコードを入力",
+  "featDelivery": "納品照合",
+  "featDeliveryDesc": "納品書とExcel予定を照合し過不足を可視化",
+  "deliveryStatusOpen": "未照合",
+  "deliveryStatusReconciling": "照合中",
+  "deliveryStatusCompleted": "照合済み",
+  "reconPending": "未確認",
+  "reconMatched": "一致",
+  "reconShortfall": "不足",
+  "reconOver": "過剰",
+  "reconUnexpected": "想定外",
+  "deliveryPlansTitle": "納品照合",
+  "deliveryPlansEmpty": "納品予定がありません。",
+  "deliveryPlansEmptyBody": "バックオフィスで取り込んだ納品予定（Excel）がここに表示されます。",
+  "deliveryPlansHint": "スキャンまたは伝票番号・仕入先で検索",
+  "deliveryNoMatches": "一致する納品予定がありません。",
+  "deliverySearchTip": "別の伝票番号または仕入先をお試しください。",
+  "plannedLines": "{count, plural, other{予定明細 {count} 件}}",
+  "@plannedLines": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "deliveryNumberLabel": "伝票番号",
+  "deliveryDateLabel": "納品日",
+  "scanDeliveryHint": "品物のJANをスキャン",
+  "ocrAssist": "納品書を撮影（OCR補助）",
+  "ocrScanning": "納品書を解析中…",
+  "ocrFound": "納品書から {count} 件のJANを検出しました",
+  "@ocrFound": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "ocrNoneFound": "納品書からJANを検出できませんでした。",
+  "ocrUnavailable": "この端末ではOCRを利用できません。",
+  "reconSummaryTitle": "照合状況",
+  "deliveryPlanned": "予定",
+  "diffLabel": "差",
+  "completeReconcile": "照合を完了",
+  "reconcileConfirmQ": "照合を完了しますか？",
+  "reconcileConfirmBody": "現在の計数結果を送信して照合を完了します。",
+  "reconcileConfirmDiscrepancy": "差異があります（不足・過剰・想定外）。このまま完了しますか？",
+  "reconcileDone": "照合を完了しました",
+  "reconcileEmptyCounts": "まだ計数がありません。スキャンして開始してください。",
+  "unexpectedItem": "想定外の品目",
+  "enterQuantityFor": "{code} の数量",
+  "@enterQuantityFor": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "noteImageAttached": "納品書を添付しました"
 }

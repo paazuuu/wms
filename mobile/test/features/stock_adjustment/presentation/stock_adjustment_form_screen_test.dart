@@ -8,6 +8,7 @@ import 'package:wms_mobile/features/stock_adjustment/data/stock_adjustment_repos
 import 'package:wms_mobile/features/stock_adjustment/domain/adjustment_type.dart';
 import 'package:wms_mobile/features/stock_adjustment/domain/stock_adjustment.dart';
 import 'package:wms_mobile/features/stock_adjustment/presentation/stock_adjustment_form_screen.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// Captures the last create() call so the test can assert the signed quantity
 /// and type sent to the API.
@@ -50,6 +51,9 @@ Widget _wrap(StockAdjustmentRepository repo) => ProviderScope(
         stockAdjustmentRepositoryProvider.overrideWithValue(repo),
       ],
       child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: StockAdjustmentFormScreen(product: _product),
       ),
     );
@@ -61,6 +65,9 @@ Widget _wrapPushed(StockAdjustmentRepository repo) => ProviderScope(
         stockAdjustmentRepositoryProvider.overrideWithValue(repo),
       ],
       child: MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => Scaffold(
             body: Center(

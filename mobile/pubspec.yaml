@@ -28,6 +28,8 @@ dependencies:
   connectivity_plus: ^6.0.5
   # Barcode scanning (Code128/Code39/EAN13/QR)
   mobile_scanner: ^5.2.3
+  # On-device OCR for delivery-note assist (Japanese script supported)
+  google_mlkit_text_recognition: ^0.13.0
   # Camera / file picking for attachments
   image_picker: ^1.1.2
   file_picker: ^8.1.2

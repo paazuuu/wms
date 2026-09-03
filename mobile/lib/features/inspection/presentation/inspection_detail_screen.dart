@@ -48,8 +48,9 @@ class _InspectionDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final detail = ref.watch(inspectionDetailProvider(_id));
-    final code = detail.valueOrNull?.code ?? 'Inspection';
+    final code = detail.valueOrNull?.code ?? l10n.featInspection;
     final pending =
         detail.valueOrNull?.status == InspectionStatus.pending;
 
@@ -58,7 +59,7 @@ class _InspectionDetailScreenState
         title: Text(code),
         actions: [
           IconButton(
-            tooltip: 'Attach files',
+            tooltip: l10n.attachFiles,
             icon: const Icon(Icons.attach_file),
             onPressed: _busy ? null : _pickAndUpload,
           ),
@@ -69,7 +70,7 @@ class _InspectionDetailScreenState
           ? FloatingActionButton.extended(
               onPressed: _busy ? null : _scanWithCamera,
               icon: const Icon(Icons.photo_camera_outlined),
-              label: const Text('Camera'),
+              label: Text(l10n.cameraLabel),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -95,8 +96,8 @@ class _InspectionDetailScreenState
                       focusNode: _scanFocus,
                       autofocusOnWide: true,
                       hintText: _fastQtyOne
-                          ? 'Scan to record (qty 1)'
-                          : 'Scan item barcode to record',
+                          ? l10n.scanToRecordQty1
+                          : l10n.scanToRecord,
                       onSubmitted: (barcode) {
                         if (!_busy) {
                           _recordScanned(barcode,
@@ -108,15 +109,15 @@ class _InspectionDetailScreenState
                   const SizedBox(width: AppSpacing.md),
                   Tooltip(
                     message: _fastQtyOne
-                        ? 'Fast mode: records quantity 1 per scan'
-                        : 'Prompt for a quantity on each scan',
+                        ? l10n.fastModeOnTooltip
+                        : l10n.fastModeOffTooltip,
                     child: FilterChip(
                       showCheckmark: false,
                       avatar: Icon(
                         _fastQtyOne ? Icons.bolt : Icons.tune,
                         size: 18,
                       ),
-                      label: const Text('Qty 1'),
+                      label: Text(l10n.fastQtyOneLabel),
                       selected: _fastQtyOne,
                       onSelected: (value) =>
                           setState(() => _fastQtyOne = value),
@@ -133,8 +134,7 @@ class _InspectionDetailScreenState
                     inspection: inspection,
                     onComplete: _busy ? null : _complete,
                   ),
-                  loading: () =>
-                      const LoadingView(message: 'Loading inspection…'),
+                  loading: () => LoadingView(message: l10n.loading),
                   error: (error, _) => ErrorStateView(
                     message: '$error',
                     onRetry: () =>
@@ -142,10 +142,10 @@ class _InspectionDetailScreenState
                   ),
                 ),
                 if (_busy)
-                  const Positioned.fill(
+                  Positioned.fill(
                     child: ColoredBox(
-                      color: Color(0x66020617),
-                      child: LoadingView(message: 'Working…'),
+                      color: const Color(0x66020617),
+                      child: LoadingView(message: l10n.working),
                     ),
                   ),
               ],
@@ -182,18 +182,19 @@ class _InspectionDetailScreenState
     if (!mounted) return;
     setState(() => _busy = false);
 
+    final l10n = AppLocalizations.of(context);
     await result.when(
       success: (_) async {
         await HapticFeedback.mediumImpact();
         ref.invalidate(inspectionDetailProvider(_id));
-        _snack('Item recorded', tone: StatusTone.success);
+        _snack(l10n.itemRecorded, tone: StatusTone.success);
       },
       failure: (f) async {
         if (_isOffline(f)) {
           await ref
               .read(offlineSyncServiceProvider)
               .enqueueRecordItem(_id, payload);
-          _snack('Offline — item queued for sync', tone: StatusTone.warning);
+          _snack(l10n.offlineItemQueued, tone: StatusTone.warning);
         } else {
           _snack(f.message, tone: StatusTone.danger);
         }
@@ -205,17 +206,18 @@ class _InspectionDetailScreenState
   }
 
   Future<int?> _promptQuantity(String code) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: '1');
     return showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Actual quantity'),
+        title: Text(l10n.actualQuantity),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Scanned: $code',
+              l10n.scannedCode(code),
               style: const TextStyle(fontFamily: 'Fira Code', fontSize: 13),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -223,19 +225,19 @@ class _InspectionDetailScreenState
               controller: controller,
               keyboardType: TextInputType.number,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Quantity'),
+              decoration: InputDecoration(labelText: l10n.quantity),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.pop(context, int.tryParse(controller.text) ?? 0),
-            child: const Text('Record'),
+            child: Text(l10n.actionRecord),
           ),
         ],
       ),
@@ -271,11 +273,12 @@ class _InspectionDetailScreenState
     if (!mounted) return;
     setState(() => _busy = false);
 
+    final l10n = AppLocalizations.of(context);
     await result.when(
       success: (uploaded) async {
         await HapticFeedback.mediumImpact();
         ref.invalidate(inspectionDetailProvider(_id));
-        _snack('${uploaded.length} file(s) uploaded', tone: StatusTone.success);
+        _snack(l10n.filesUploaded(uploaded.length), tone: StatusTone.success);
       },
       failure: (f) async {
         if (_isOffline(f) && paths.isNotEmpty) {
@@ -284,7 +287,7 @@ class _InspectionDetailScreenState
             await sync.enqueueAttachment(_id,
                 filePath: path, kind: 'inspection');
           }
-          _snack('Offline — ${paths.length} file(s) queued for sync',
+          _snack(l10n.offlineFilesQueued(paths.length),
               tone: StatusTone.warning);
         } else {
           _snack(f.message, tone: StatusTone.danger);
@@ -294,20 +297,20 @@ class _InspectionDetailScreenState
   }
 
   Future<void> _complete() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Complete inspection?'),
-        content: const Text(
-            'Mark this inspection as complete. You can still view it afterward.'),
+        title: Text(l10n.completeInspectionQ),
+        content: Text(l10n.completeInspectionBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Complete'),
+            child: Text(l10n.actionComplete),
           ),
         ],
       ),
@@ -324,13 +327,12 @@ class _InspectionDetailScreenState
       success: (_) async {
         await HapticFeedback.mediumImpact();
         ref.invalidate(inspectionDetailProvider(_id));
-        _snack('Inspection completed', tone: StatusTone.success);
+        _snack(l10n.inspectionCompleted, tone: StatusTone.success);
       },
       failure: (f) async {
         if (_isOffline(f)) {
           await ref.read(offlineSyncServiceProvider).enqueueComplete(_id);
-          _snack('Offline — completion queued for sync',
-              tone: StatusTone.warning);
+          _snack(l10n.offlineCompletionQueued, tone: StatusTone.warning);
         } else {
           _snack(f.message, tone: StatusTone.danger);
         }
@@ -376,6 +378,7 @@ class _DetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final done = inspection.status != InspectionStatus.pending;
 
     return ListView(
@@ -389,14 +392,14 @@ class _DetailBody extends StatelessWidget {
         ],
         const SizedBox(height: AppSpacing.xl),
         _SectionHeader(
-          title: 'Items',
+          title: l10n.sectionItems,
           trailing: '${inspection.items.length}',
         ),
         const SizedBox(height: AppSpacing.md),
         if (inspection.items.isEmpty)
-          const _EmptyHint(
+          _EmptyHint(
             icon: Icons.qr_code_scanner,
-            text: 'No items yet. Tap Scan to record one.',
+            text: l10n.noItemsYet,
           )
         else
           ...inspection.items.map((item) => Padding(
@@ -405,14 +408,14 @@ class _DetailBody extends StatelessWidget {
               )),
         const SizedBox(height: AppSpacing.xl),
         _SectionHeader(
-          title: 'Attachments',
+          title: l10n.sectionAttachments,
           trailing: '${inspection.attachments.length}',
         ),
         const SizedBox(height: AppSpacing.md),
         if (inspection.attachments.isEmpty)
-          const _EmptyHint(
+          _EmptyHint(
             icon: Icons.attach_file,
-            text: 'No attachments. Use the paperclip to add photos or files.',
+            text: l10n.noAttachments,
           )
         else
           ...inspection.attachments.map((a) => Padding(
@@ -424,7 +427,7 @@ class _DetailBody extends StatelessWidget {
           FilledButton.icon(
             onPressed: onComplete,
             icon: const Icon(Icons.done_all),
-            label: const Text('Complete inspection'),
+            label: Text(l10n.completeInspection),
           )
         else
           Container(
@@ -437,7 +440,7 @@ class _DetailBody extends StatelessWidget {
               children: [
                 Icon(Icons.verified, color: scheme.onSurfaceVariant, size: 20),
                 const SizedBox(width: AppSpacing.sm),
-                Text('Inspection completed',
+                Text(l10n.inspectionCompleted,
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: scheme.onSurfaceVariant)),
               ],
@@ -495,7 +498,8 @@ class _HeaderCard extends StatelessWidget {
                       size: 16, color: scheme.onSurfaceVariant),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
-                    'Completed ${_formatDate(inspection.completedAt!)}',
+                    AppLocalizations.of(context)
+                        .completedOn(_formatDate(inspection.completedAt!)),
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
@@ -586,9 +590,10 @@ class _ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ui = MatchResultUi.of(AppLocalizations.of(context), item.matchResult);
+    final l10n = AppLocalizations.of(context);
+    final ui = MatchResultUi.of(l10n, item.matchResult);
     final barcode =
-        item.scannedBarcode ?? item.expectedBarcode ?? 'Item ${item.id}';
+        item.scannedBarcode ?? item.expectedBarcode ?? l10n.itemNumber(item.id);
 
     return Card(
       child: Padding(
@@ -615,10 +620,11 @@ class _ItemCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                _QtyChip(label: 'Expected', value: item.expectedQuantity),
+                _QtyChip(
+                    label: l10n.fieldExpected, value: item.expectedQuantity),
                 const SizedBox(width: AppSpacing.sm),
                 _QtyChip(
-                  label: 'Actual',
+                  label: l10n.actualLabel,
                   value: item.actualQuantity,
                   tone: item.actualQuantity == item.expectedQuantity
                       ? StatusTone.neutral

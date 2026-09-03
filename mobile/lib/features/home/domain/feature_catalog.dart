@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../inspection/presentation/inspection_list_screen.dart';
 import '../../locations/presentation/location_list_screen.dart';
 import '../../picking/presentation/picking_list_screen.dart';
@@ -36,6 +37,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.move_to_inbox_outlined,
             status: FeatureStatus.ready,
             builder: _receiving,
+          ),
+          FeatureEntry(
+            id: 'delivery',
+            icon: Icons.rule_folder_outlined,
+            status: FeatureStatus.ready,
+            builder: _delivery,
           ),
           FeatureEntry(
             id: 'stock_adjustment',
@@ -131,6 +138,9 @@ Widget _productLookup(BuildContext _) => const ProductLookupScreen();
 
 /// Top-level (const-referenceable) builder for the Receiving feature.
 Widget _receiving(BuildContext _) => const ReceivingListScreen();
+
+/// Top-level (const-referenceable) builder for the Delivery Check feature.
+Widget _delivery(BuildContext _) => const DeliveryPlanListScreen();
 
 /// Top-level (const-referenceable) builder for the Stock Adjustment feature.
 Widget _stockAdjustment(BuildContext _) =>

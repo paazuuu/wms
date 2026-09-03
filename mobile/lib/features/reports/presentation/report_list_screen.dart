@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -16,17 +17,18 @@ class ReportListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final results = ref.watch(reportListProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(title: Text(l10n.featReports)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(reportListProvider),
         child: results.when(
           data: (items) => items.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.assessment_outlined,
-                  title: 'No saved reports yet.',
-                  message: 'Reports saved on the back office appear here.',
+                  title: l10n.emptyReports,
+                  message: l10n.reportsEmptyBody,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -36,7 +38,7 @@ class ReportListScreen extends ConsumerWidget {
                   itemBuilder: (context, index) =>
                       _ReportCard(report: items[index]),
                 ),
-          loading: () => const LoadingView(message: 'Loading reports…'),
+          loading: () => LoadingView(message: l10n.loading),
           error: (error, _) => ErrorStateView(
             message: '$error',
             onRetry: () => ref.invalidate(reportListProvider),
@@ -56,9 +58,10 @@ class _ReportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final subtitle = report.description?.trim().isNotEmpty == true
         ? report.description!
-        : (report.dataSource ?? 'Custom report');
+        : (report.dataSource ?? l10n.customReport);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -101,15 +104,14 @@ class _ReportCard extends StatelessWidget {
                       children: [
                         StatusPill(
                           tone: StatusTone.neutral,
-                          label:
-                              '${report.columnsCount} ${report.columnsCount == 1 ? 'column' : 'columns'}',
+                          label: l10n.columnCount(report.columnsCount),
                           icon: Icons.view_column_outlined,
                           dense: true,
                         ),
                         if (report.isShared)
-                          const StatusPill(
+                          StatusPill(
                             tone: StatusTone.info,
-                            label: 'Shared',
+                            label: l10n.reportShared,
                             icon: Icons.groups_outlined,
                             dense: true,
                           ),

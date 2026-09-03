@@ -1,0 +1,175 @@
+import 'package:equatable/equatable.dart';
+
+import 'delivery_plan.dart';
+import 'delivery_plan_line.dart';
+
+/// Where an actual count came from, so the UI can show how each line was
+/// confirmed and the submission can record provenance.
+enum CountSource {
+  /// A barcode scanned with the handheld or camera.
+  scan('scan'),
+
+  /// Suggested by on-device OCR of the delivery note, then accepted.
+  ocr('ocr'),
+
+  /// Typed by the operator.
+  manual('manual');
+
+  const CountSource(this.wire);
+
+  final String wire;
+}
+
+/// A counted quantity for one JAN during a reconciliation session.
+class CountedItem extends Equatable {
+  const CountedItem({
+    required this.janCode,
+    required this.quantity,
+    required this.source,
+  });
+
+  final String janCode;
+  final int quantity;
+  final CountSource source;
+
+  CountedItem copyWith({int? quantity, CountSource? source}) => CountedItem(
+        janCode: janCode,
+        quantity: quantity ?? this.quantity,
+        source: source ?? this.source,
+      );
+
+  @override
+  List<Object?> get props => [janCode, quantity, source];
+}
+
+/// Outcome of comparing one JAN's planned vs. actual quantity.
+enum ReconLineStatus {
+  /// Expected, nothing counted yet.
+  pending,
+
+  /// Counted exactly the planned quantity.
+  matched,
+
+  /// Counted fewer than planned (partial / short delivery).
+  shortfall,
+
+  /// Counted more than planned.
+  over,
+
+  /// Counted but not on the plan at all (想定外).
+  unexpected,
+}
+
+/// One row of the reconciliation view: a planned line, an unexpected arrival,
+/// or a planned line still awaiting a count.
+class ReconLine extends Equatable {
+  const ReconLine({
+    required this.janCode,
+    required this.plannedQuantity,
+    required this.actualQuantity,
+    required this.status,
+    this.planLine,
+    this.source,
+  });
+
+  /// The matching plan line, or null when this arrival was unexpected.
+  final DeliveryPlanLine? planLine;
+  final String janCode;
+  final int plannedQuantity;
+  final int actualQuantity;
+  final ReconLineStatus status;
+  final CountSource? source;
+
+  int get difference => actualQuantity - plannedQuantity;
+
+  String get productName => planLine?.productName ?? '';
+
+  @override
+  List<Object?> get props =>
+      [janCode, plannedQuantity, actualQuantity, status];
+}
+
+/// A fully computed comparison of a plan against the counted items.
+class ReconciliationResult extends Equatable {
+  const ReconciliationResult({required this.lines});
+
+  /// Plan lines first (in plan order), then any unexpected arrivals.
+  final List<ReconLine> lines;
+
+  int get matchedCount =>
+      lines.where((l) => l.status == ReconLineStatus.matched).length;
+  int get shortfallCount =>
+      lines.where((l) => l.status == ReconLineStatus.shortfall).length;
+  int get overCount =>
+      lines.where((l) => l.status == ReconLineStatus.over).length;
+  int get unexpectedCount =>
+      lines.where((l) => l.status == ReconLineStatus.unexpected).length;
+  int get pendingCount =>
+      lines.where((l) => l.status == ReconLineStatus.pending).length;
+
+  /// Number of planned lines that have been resolved (anything but pending).
+  int get resolvedPlannedCount =>
+      lines.where((l) => l.planLine != null).length - pendingCount;
+
+  int get plannedLineCount => lines.where((l) => l.planLine != null).length;
+
+  /// True when every planned line matches and nothing unexpected arrived.
+  bool get isClean =>
+      pendingCount == 0 &&
+      shortfallCount == 0 &&
+      overCount == 0 &&
+      unexpectedCount == 0;
+
+  /// True when nothing at all remains outstanding or discrepant — the "ready to
+  /// complete without warnings" state.
+  bool get hasDiscrepancies =>
+      shortfallCount > 0 || overCount > 0 || unexpectedCount > 0;
+
+  @override
+  List<Object?> get props => [lines];
+}
+
+/// Pure comparison: given an expected [plan] and the [counts] gathered so far
+/// (keyed by JAN), produce the per-line statuses and totals. Plan order is
+/// preserved; unexpected arrivals are appended in insertion order.
+ReconciliationResult buildReconciliation(
+  DeliveryPlan plan,
+  Map<String, CountedItem> counts,
+) {
+  final lines = <ReconLine>[];
+  final plannedJans = <String>{};
+
+  for (final planLine in plan.lines) {
+    plannedJans.add(planLine.janCode);
+    final counted = counts[planLine.janCode];
+    final actual = counted?.quantity ?? 0;
+    lines.add(ReconLine(
+      planLine: planLine,
+      janCode: planLine.janCode,
+      plannedQuantity: planLine.plannedQuantity,
+      actualQuantity: actual,
+      source: counted?.source,
+      status: _statusFor(planLine.plannedQuantity, actual),
+    ));
+  }
+
+  for (final entry in counts.entries) {
+    if (plannedJans.contains(entry.key)) continue;
+    lines.add(ReconLine(
+      janCode: entry.key,
+      plannedQuantity: 0,
+      actualQuantity: entry.value.quantity,
+      source: entry.value.source,
+      status: ReconLineStatus.unexpected,
+    ));
+  }
+
+  return ReconciliationResult(lines: lines);
+}
+
+ReconLineStatus _statusFor(int planned, int actual) {
+  if (actual == 0) return ReconLineStatus.pending;
+  if (actual == planned) return ReconLineStatus.matched;
+  if (actual < planned) return ReconLineStatus.shortfall;
+  return ReconLineStatus.over;
+}

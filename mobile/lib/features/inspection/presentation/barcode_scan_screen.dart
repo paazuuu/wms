@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Full-screen barcode scanner. Pops with the first decoded value.
 /// Supports Code128 / Code39 / EAN-13 (JAN) / QR out of the box.
 class BarcodeScanScreen extends StatefulWidget {
@@ -48,6 +50,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -55,11 +58,11 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text('Scan barcode',
-            style: TextStyle(color: Colors.white)),
+        title: Text(l10n.scanBarcode,
+            style: const TextStyle(color: Colors.white)),
         actions: [
           IconButton(
-            tooltip: _torchOn ? 'Torch off' : 'Torch on',
+            tooltip: _torchOn ? l10n.torchOff : l10n.torchOn,
             icon: Icon(_torchOn ? Icons.flash_on : Icons.flash_off),
             onPressed: _toggleTorch,
           ),
@@ -72,21 +75,22 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
           MobileScanner(controller: _controller, onDetect: _onDetect),
           // Dim + reticle overlay to guide aiming.
           const _ScannerOverlay(),
-          const Positioned(
+          Positioned(
             left: 0,
             right: 0,
             bottom: 48,
             child: Column(
               children: [
-                Icon(Icons.qr_code_scanner, color: Colors.white70, size: 28),
-                SizedBox(height: 8),
+                const Icon(Icons.qr_code_scanner,
+                    color: Colors.white70, size: 28),
+                const SizedBox(height: 8),
                 Text(
-                  'Align the barcode within the frame',
+                  l10n.alignBarcode,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 15),
+                  style: const TextStyle(color: Colors.white, fontSize: 15),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Code128 · Code39 · JAN(EAN-13) · QR',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white54, fontSize: 12),

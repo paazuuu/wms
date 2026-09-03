@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wms_mobile/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
@@ -43,7 +44,12 @@ Widget _wrap() => ProviderScope(
         salesOrderRepositoryProvider
             .overrideWithValue(_FakeSalesOrderRepository(_order)),
       ],
-      child: const MaterialApp(home: PickListScreen(orderId: 7)),
+      child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PickListScreen(orderId: 7),
+      ),
     );
 
 void main() {

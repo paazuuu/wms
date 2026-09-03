@@ -17,13 +17,14 @@ class InspectionListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inspections = ref.watch(inspectionListProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inspections'),
+        title: Text(l10n.featInspection),
         actions: [
           IconButton(
-            tooltip: 'Sign out',
+            tooltip: l10n.signOut,
             icon: const Icon(Icons.logout),
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
           ),
@@ -34,11 +35,10 @@ class InspectionListScreen extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(inspectionListProvider),
         child: inspections.when(
           data: (items) => items.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.inventory_2_outlined,
-                  title: 'No inspections yet.',
-                  message: 'Pull down to refresh, or start one from a '
-                      'purchase order receipt.',
+                  title: l10n.emptyInspections,
+                  message: l10n.inspectionsEmptyBody,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -48,7 +48,7 @@ class InspectionListScreen extends ConsumerWidget {
                   itemBuilder: (context, index) =>
                       _InspectionCard(inspection: items[index]),
                 ),
-          loading: () => const LoadingView(message: 'Loading inspections…'),
+          loading: () => LoadingView(message: l10n.loading),
           error: (error, _) => ErrorStateView(
             message: '$error',
             onRetry: () => ref.invalidate(inspectionListProvider),
@@ -68,7 +68,8 @@ class _InspectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ui = InspectionStatusUi.of(AppLocalizations.of(context), inspection.status);
+    final l10n = AppLocalizations.of(context);
+    final ui = InspectionStatusUi.of(l10n, inspection.status);
     final count = inspection.itemsCount ?? 0;
 
     return Card(
@@ -96,7 +97,7 @@ class _InspectionCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${inspectionTypeLabel(AppLocalizations.of(context), inspection.type)} · $count items',
+                      '${inspectionTypeLabel(l10n, inspection.type)} · ${l10n.itemCount(count)}',
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: scheme.onSurfaceVariant),
                     ),

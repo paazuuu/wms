@@ -606,4 +606,479 @@ class AppLocalizationsEn extends AppLocalizations {
   String remainingAmount(String amount) {
     return '$amount left';
   }
+
+  @override
+  String get unknownSupplier => 'Unknown supplier';
+
+  @override
+  String get receivingEmpty => 'Nothing to receive.';
+
+  @override
+  String get receivingEmptyBody =>
+      'Purchase orders that are sent or partially received will appear here.';
+
+  @override
+  String get receivingDone => 'Nothing left to receive.';
+
+  @override
+  String get fieldQtyToReceive => 'Quantity to receive';
+
+  @override
+  String get receiveStock => 'Receive stock';
+
+  @override
+  String get actionReceive => 'Receive';
+
+  @override
+  String get receivingInProgress => 'Receiving…';
+
+  @override
+  String get emptyInspections => 'No inspections yet.';
+
+  @override
+  String get inspectionsEmptyBody =>
+      'Pull down to refresh, or start one from a purchase order receipt.';
+
+  @override
+  String get pickingEmpty => 'Nothing to pick.';
+
+  @override
+  String get noLinesToPick => 'No lines to pick.';
+
+  @override
+  String get orderNoLineItems => 'This order has no line items.';
+
+  @override
+  String get unnamedProduct => 'Unnamed product';
+
+  @override
+  String get pickListTitle => 'Pick List';
+
+  @override
+  String get customReport => 'Custom report';
+
+  @override
+  String get emptyReports => 'No saved reports yet.';
+
+  @override
+  String get reportsEmptyBody =>
+      'Reports saved on the back office appear here.';
+
+  @override
+  String get reportShared => 'Shared';
+
+  @override
+  String columnCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count columns',
+      one: '$count column',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allLocations => 'All locations';
+
+  @override
+  String get emptyStockCounts => 'No stock counts yet.';
+
+  @override
+  String get pickingEmptyBody =>
+      'Open sales orders awaiting fulfilment appear here.';
+
+  @override
+  String get stockCountsEmptyBody =>
+      'Cycle counts created on the back office appear here.';
+
+  @override
+  String get receivingDoneBody =>
+      'Every line on this purchase order is fully received.';
+
+  @override
+  String receiveInvalidQty(String product) {
+    return 'Enter a valid quantity for $product.';
+  }
+
+  @override
+  String receiveExceedsRemaining(String product, int remaining) {
+    return '$product: cannot receive more than $remaining remaining.';
+  }
+
+  @override
+  String get receiveEnterAtLeastOne =>
+      'Enter a quantity on at least one line to receive.';
+
+  @override
+  String get receiveSuccess =>
+      'Stock received. An inspection was started automatically.';
+
+  @override
+  String pickedProgress(int picked, int total) {
+    return '$picked / $total picked';
+  }
+
+  @override
+  String get attachFiles => 'Attach files';
+
+  @override
+  String get cameraLabel => 'Camera';
+
+  @override
+  String get scanToRecord => 'Scan item barcode to record';
+
+  @override
+  String get scanToRecordQty1 => 'Scan to record (qty 1)';
+
+  @override
+  String get fastModeOnTooltip => 'Fast mode: records quantity 1 per scan';
+
+  @override
+  String get fastModeOffTooltip => 'Prompt for a quantity on each scan';
+
+  @override
+  String get fastQtyOneLabel => 'Qty 1';
+
+  @override
+  String get actualQuantity => 'Actual quantity';
+
+  @override
+  String scannedCode(String code) {
+    return 'Scanned: $code';
+  }
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get actionCancel => 'Cancel';
+
+  @override
+  String get actionRecord => 'Record';
+
+  @override
+  String get itemRecorded => 'Item recorded';
+
+  @override
+  String get offlineItemQueued => 'Offline — item queued for sync';
+
+  @override
+  String filesUploaded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files uploaded',
+      one: '$count file uploaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String offlineFilesQueued(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files',
+      one: '$count file',
+    );
+    return 'Offline — $_temp0 queued for sync';
+  }
+
+  @override
+  String get completeInspectionQ => 'Complete inspection?';
+
+  @override
+  String get completeInspectionBody =>
+      'Mark this inspection as complete. You can still view it afterward.';
+
+  @override
+  String get inspectionCompleted => 'Inspection completed';
+
+  @override
+  String get offlineCompletionQueued => 'Offline — completion queued for sync';
+
+  @override
+  String get sectionItems => 'Items';
+
+  @override
+  String get sectionAttachments => 'Attachments';
+
+  @override
+  String get noItemsYet => 'No items yet. Tap Scan to record one.';
+
+  @override
+  String get noAttachments =>
+      'No attachments. Use the paperclip to add photos or files.';
+
+  @override
+  String get completeInspection => 'Complete inspection';
+
+  @override
+  String completedOn(String date) {
+    return 'Completed $date';
+  }
+
+  @override
+  String get actualLabel => 'Actual';
+
+  @override
+  String itemNumber(int id) {
+    return 'Item $id';
+  }
+
+  @override
+  String get working => 'Working…';
+
+  @override
+  String get adjustAdd => 'Add';
+
+  @override
+  String get adjustRemove => 'Remove';
+
+  @override
+  String get reasonType => 'Reason type';
+
+  @override
+  String get reasonOptional => 'Reason (optional)';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get onHandAfter => 'On hand after';
+
+  @override
+  String get saving => 'Saving…';
+
+  @override
+  String get addStock => 'Add stock';
+
+  @override
+  String get removeStock => 'Remove stock';
+
+  @override
+  String onHandCount(int count) {
+    return '$count on hand';
+  }
+
+  @override
+  String get enterQtyPositive => 'Enter a quantity greater than zero.';
+
+  @override
+  String cannotRemoveOnly(int qty, int current) {
+    return 'Cannot remove $qty; only $current on hand.';
+  }
+
+  @override
+  String stockUpdatedTo(int count) {
+    return 'Stock updated — now $count on hand.';
+  }
+
+  @override
+  String get adjustTypeManual => 'Manual';
+
+  @override
+  String get adjustTypeCount => 'Count';
+
+  @override
+  String get adjustTypeDamage => 'Damage';
+
+  @override
+  String get adjustTypeReturn => 'Return';
+
+  @override
+  String get adjustTypeTransfer => 'Transfer';
+
+  @override
+  String get sectionBatches => 'Batches';
+
+  @override
+  String get sectionSerials => 'Serials';
+
+  @override
+  String get noBatches => 'No batches for this product.';
+
+  @override
+  String get noSerials => 'No serials for this product.';
+
+  @override
+  String get loadingBatches => 'Loading batches…';
+
+  @override
+  String get loadingSerials => 'Loading serials…';
+
+  @override
+  String get batchExpired => 'Expired';
+
+  @override
+  String get batchValid => 'Valid';
+
+  @override
+  String get fieldExpiry => 'Expiry';
+
+  @override
+  String get report => 'Report';
+
+  @override
+  String get runningReport => 'Running report…';
+
+  @override
+  String get noData => 'No data.';
+
+  @override
+  String get reportNoRows => 'This report returned no rows.';
+
+  @override
+  String rowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows',
+      one: '$count row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanBarcode => 'Scan barcode';
+
+  @override
+  String get torchOn => 'Torch on';
+
+  @override
+  String get torchOff => 'Torch off';
+
+  @override
+  String get alignBarcode => 'Align the barcode within the frame';
+
+  @override
+  String get scanOrTypeBarcode => 'Scan or type a barcode';
+
+  @override
+  String get featDelivery => 'Delivery Check';
+
+  @override
+  String get featDeliveryDesc =>
+      'Reconcile the delivery note against the Excel plan';
+
+  @override
+  String get deliveryStatusOpen => 'Not checked';
+
+  @override
+  String get deliveryStatusReconciling => 'Reconciling';
+
+  @override
+  String get deliveryStatusCompleted => 'Reconciled';
+
+  @override
+  String get reconPending => 'Pending';
+
+  @override
+  String get reconMatched => 'Matched';
+
+  @override
+  String get reconShortfall => 'Short';
+
+  @override
+  String get reconOver => 'Over';
+
+  @override
+  String get reconUnexpected => 'Unexpected';
+
+  @override
+  String get deliveryPlansTitle => 'Delivery Check';
+
+  @override
+  String get deliveryPlansEmpty => 'No delivery plans.';
+
+  @override
+  String get deliveryPlansEmptyBody =>
+      'Delivery plans imported from Excel on the back office appear here.';
+
+  @override
+  String get deliveryPlansHint => 'Scan or search by voucher no. or supplier';
+
+  @override
+  String get deliveryNoMatches => 'No matching delivery plans.';
+
+  @override
+  String get deliverySearchTip => 'Try a different voucher number or supplier.';
+
+  @override
+  String plannedLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count planned lines',
+      one: '$count planned line',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deliveryNumberLabel => 'Voucher no.';
+
+  @override
+  String get deliveryDateLabel => 'Delivery date';
+
+  @override
+  String get scanDeliveryHint => 'Scan the item JAN';
+
+  @override
+  String get ocrAssist => 'Scan note (OCR)';
+
+  @override
+  String get ocrScanning => 'Reading the note…';
+
+  @override
+  String ocrFound(int count) {
+    return 'Detected $count JAN code(s) on the note';
+  }
+
+  @override
+  String get ocrNoneFound => 'No JAN codes were found on the note.';
+
+  @override
+  String get ocrUnavailable => 'OCR is not available on this device.';
+
+  @override
+  String get reconSummaryTitle => 'Reconciliation';
+
+  @override
+  String get deliveryPlanned => 'Planned';
+
+  @override
+  String get diffLabel => 'Diff';
+
+  @override
+  String get completeReconcile => 'Complete check';
+
+  @override
+  String get reconcileConfirmQ => 'Complete this reconciliation?';
+
+  @override
+  String get reconcileConfirmBody =>
+      'Submit the current counts and close this reconciliation.';
+
+  @override
+  String get reconcileConfirmDiscrepancy =>
+      'There are discrepancies (short, over or unexpected). Complete anyway?';
+
+  @override
+  String get reconcileDone => 'Reconciliation completed';
+
+  @override
+  String get reconcileEmptyCounts => 'Nothing counted yet. Scan to start.';
+
+  @override
+  String get unexpectedItem => 'Unexpected item';
+
+  @override
+  String enterQuantityFor(String code) {
+    return 'Quantity for $code';
+  }
+
+  @override
+  String get noteImageAttached => 'Delivery note attached';
 }

@@ -24,12 +24,13 @@ class ReceivingDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(purchaseOrderDetailProvider(purchaseOrderId));
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Receive')),
+      appBar: AppBar(title: Text(l10n.actionReceive)),
       body: order.when(
         data: (po) => _ReceiveForm(order: po),
-        loading: () => const LoadingView(message: 'Loading purchase order…'),
+        loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
           onRetry: () =>
@@ -77,18 +78,19 @@ class _ReceiveFormState extends ConsumerState<_ReceiveForm> {
   /// Collects valid receive lines, or returns null after showing a message when
   /// a quantity is invalid (non-numeric or exceeds what's remaining).
   List<ReceiveLine>? _collectLines() {
+    final l10n = AppLocalizations.of(context);
     final lines = <ReceiveLine>[];
     for (final item in _lines) {
       final raw = _controllers[item.id]!.text.trim();
       if (raw.isEmpty) continue;
       final qty = int.tryParse(raw);
       if (qty == null || qty < 0) {
-        _notify('Enter a valid quantity for ${item.productName}.');
+        _notify(l10n.receiveInvalidQty(item.productName));
         return null;
       }
       if (qty > item.remainingQuantity) {
-        _notify('${item.productName}: cannot receive more than '
-            '${item.remainingQuantity} remaining.');
+        _notify(l10n.receiveExceedsRemaining(
+            item.productName, item.remainingQuantity));
         return null;
       }
       if (qty > 0) {
@@ -99,10 +101,11 @@ class _ReceiveFormState extends ConsumerState<_ReceiveForm> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     final lines = _collectLines();
     if (lines == null) return;
     if (lines.isEmpty) {
-      _notify('Enter a quantity on at least one line to receive.');
+      _notify(l10n.receiveEnterAtLeastOne);
       return;
     }
 
@@ -116,7 +119,7 @@ class _ReceiveFormState extends ConsumerState<_ReceiveForm> {
       case ApiSuccess():
         ref.invalidate(receivablePurchaseOrdersProvider);
         ref.invalidate(purchaseOrderDetailProvider(widget.order.id));
-        _notify('Stock received. An inspection was started automatically.');
+        _notify(AppLocalizations.of(context).receiveSuccess);
         Navigator.of(context).pop();
       case ApiFailure(:final message):
         _notify(message);
@@ -133,14 +136,15 @@ class _ReceiveFormState extends ConsumerState<_ReceiveForm> {
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    final status = ReceivingStatusUi.of(AppLocalizations.of(context), order);
+    final l10n = AppLocalizations.of(context);
+    final status = ReceivingStatusUi.of(l10n, order);
     final lines = _lines;
 
     if (lines.isEmpty) {
-      return const EmptyStateView(
+      return EmptyStateView(
         icon: Icons.inventory_2_outlined,
-        title: 'Nothing left to receive.',
-        message: 'Every line on this purchase order is fully received.',
+        title: l10n.receivingDone,
+        message: l10n.receivingDoneBody,
       );
     }
 
@@ -174,7 +178,8 @@ class _ReceiveFormState extends ConsumerState<_ReceiveForm> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.check),
-                label: Text(_submitting ? 'Receiving…' : 'Receive stock'),
+                label: Text(
+                    _submitting ? l10n.receivingInProgress : l10n.receiveStock),
               ),
             ),
           ),
@@ -194,6 +199,7 @@ class _HeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -215,7 +221,7 @@ class _HeaderCard extends StatelessWidget {
                             ?.copyWith(fontFamily: 'FiraCode'),
                       ),
                       Text(
-                        order.supplierName ?? 'Unknown supplier',
+                        order.supplierName ?? l10n.unknownSupplier,
                         style: theme.textTheme.bodyMedium
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
@@ -243,6 +249,7 @@ class _LineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -269,19 +276,19 @@ class _LineCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _QtyStat(
-                    label: 'Ordered',
+                    label: l10n.fieldOrdered,
                     value: '${item.quantityOrdered}',
                   ),
                 ),
                 Expanded(
                   child: _QtyStat(
-                    label: 'Received',
+                    label: l10n.fieldReceived,
                     value: '${item.quantityReceived}',
                   ),
                 ),
                 Expanded(
                   child: _QtyStat(
-                    label: 'Remaining',
+                    label: l10n.fieldRemaining,
                     value: '${item.remainingQuantity}',
                     emphasize: true,
                   ),
@@ -293,9 +300,9 @@ class _LineCard extends StatelessWidget {
               controller: controller,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                labelText: 'Quantity to receive',
-                prefixIcon: Icon(Icons.add_box_outlined),
+              decoration: InputDecoration(
+                labelText: l10n.fieldQtyToReceive,
+                prefixIcon: const Icon(Icons.add_box_outlined),
               ),
             ),
           ],

@@ -18,19 +18,19 @@ class ReceivingListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(receivablePurchaseOrdersProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Receiving')),
+      appBar: AppBar(title: Text(l10n.featReceiving)),
       body: RefreshIndicator(
         onRefresh: () async =>
             ref.invalidate(receivablePurchaseOrdersProvider),
         child: orders.when(
           data: (items) => items.isEmpty
-              ? const EmptyStateView(
+              ? EmptyStateView(
                   icon: Icons.inbox_outlined,
-                  title: 'Nothing to receive.',
-                  message: 'Purchase orders that are sent or partially '
-                      'received will appear here.',
+                  title: l10n.receivingEmpty,
+                  message: l10n.receivingEmptyBody,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -40,7 +40,7 @@ class ReceivingListScreen extends ConsumerWidget {
                   itemBuilder: (context, index) =>
                       _PurchaseOrderCard(order: items[index]),
                 ),
-          loading: () => const LoadingView(message: 'Loading purchase orders…'),
+          loading: () => LoadingView(message: l10n.loading),
           error: (error, _) => ErrorStateView(
             message: '$error',
             onRetry: () => ref.invalidate(receivablePurchaseOrdersProvider),
@@ -60,7 +60,8 @@ class _PurchaseOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final status = ReceivingStatusUi.of(AppLocalizations.of(context), order);
+    final l10n = AppLocalizations.of(context);
+    final status = ReceivingStatusUi.of(l10n, order);
     final itemCount = order.itemsCount ?? order.items.length;
 
     return Card(
@@ -90,7 +91,7 @@ class _PurchaseOrderCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      order.supplierName ?? 'Unknown supplier',
+                      order.supplierName ?? l10n.unknownSupplier,
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: scheme.onSurfaceVariant),
                       maxLines: 1,
@@ -109,7 +110,7 @@ class _PurchaseOrderCard extends StatelessWidget {
                         ),
                         StatusPill(
                           tone: StatusTone.neutral,
-                          label: '$itemCount ${itemCount == 1 ? 'line' : 'lines'}',
+                          label: l10n.lineCount(itemCount),
                           icon: Icons.list_alt_outlined,
                           dense: true,
                         ),
