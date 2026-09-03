@@ -356,5 +356,19 @@
   "@enterQuantityFor": {
     "placeholders": { "code": { "type": "String" } }
   },
-  "noteImageAttached": "Delivery note attached"
+  "noteImageAttached": "Delivery note attached",
+  "planImportTitle": "Import plan",
+  "planImportHint": "Pick an Excel / PDF / image to upload — it is parsed and registered as a plan automatically.",
+  "pickFile": "Choose file",
+  "planImportSelected": "Selected: {name}",
+  "@planImportSelected": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "planImportAction": "Import",
+  "planImporting": "Importing…",
+  "planImportChooseFirst": "Choose a file and enter a voucher number.",
+  "planImportedSummary": "Imported {count} items, {total} units total",
+  "@planImportedSummary": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  }
 }

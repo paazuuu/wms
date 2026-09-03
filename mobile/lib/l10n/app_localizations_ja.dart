@@ -1051,4 +1051,32 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noteImageAttached => '納品書を添付しました';
+
+  @override
+  String get planImportTitle => '予定を取り込む';
+
+  @override
+  String get planImportHint => 'Excel / PDF / 画像を選んでアップロードすると、自動で予定に登録します。';
+
+  @override
+  String get pickFile => 'ファイルを選択';
+
+  @override
+  String planImportSelected(String name) {
+    return '選択: $name';
+  }
+
+  @override
+  String get planImportAction => '取り込む';
+
+  @override
+  String get planImporting => '取り込み中…';
+
+  @override
+  String get planImportChooseFirst => 'ファイルを選び、伝票番号を入力してください。';
+
+  @override
+  String planImportedSummary(int count, int total) {
+    return '$count 品目・合計 $total 本を取り込みました';
+  }
 }

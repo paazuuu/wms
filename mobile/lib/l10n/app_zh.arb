@@ -356,5 +356,19 @@
   "@enterQuantityFor": {
     "placeholders": { "code": { "type": "String" } }
   },
-  "noteImageAttached": "已附加到货单"
+  "noteImageAttached": "已附加到货单",
+  "planImportTitle": "导入计划",
+  "planImportHint": "选择 Excel / PDF / 图片上传，系统会自动解析并登记为计划。",
+  "pickFile": "选择文件",
+  "planImportSelected": "已选择：{name}",
+  "@planImportSelected": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "planImportAction": "导入",
+  "planImporting": "导入中…",
+  "planImportChooseFirst": "请选择文件并输入单号。",
+  "planImportedSummary": "已导入 {count} 项，共 {total} 件",
+  "@planImportedSummary": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  }
 }

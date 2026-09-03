@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/delivery/application/reconciliation_controller.dart';
@@ -17,6 +18,15 @@ class _FakeRepo implements DeliveryRepository {
   @override
   Future<ApiResult<DeliveryPlan>> show(int id) async =>
       ApiSuccess(_plan());
+
+  @override
+  Future<ApiResult<PlanImportResult>> importPlan({
+    required MultipartFile file,
+    required String deliveryNumber,
+    String? supplier,
+  }) async =>
+      const ApiSuccess(
+          PlanImportResult(planId: 1, lineCount: 0, totalQuantity: 0));
 
   @override
   Future<ApiResult<DeliveryPlan>> reconcile(

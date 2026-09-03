@@ -1081,4 +1081,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noteImageAttached => 'Delivery note attached';
+
+  @override
+  String get planImportTitle => 'Import plan';
+
+  @override
+  String get planImportHint =>
+      'Pick an Excel / PDF / image to upload — it is parsed and registered as a plan automatically.';
+
+  @override
+  String get pickFile => 'Choose file';
+
+  @override
+  String planImportSelected(String name) {
+    return 'Selected: $name';
+  }
+
+  @override
+  String get planImportAction => 'Import';
+
+  @override
+  String get planImporting => 'Importing…';
+
+  @override
+  String get planImportChooseFirst =>
+      'Choose a file and enter a voucher number.';
+
+  @override
+  String planImportedSummary(int count, int total) {
+    return 'Imported $count items, $total units total';
+  }
 }

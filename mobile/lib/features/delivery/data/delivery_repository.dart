@@ -28,6 +28,32 @@ class ReconcileEntry {
       };
 }
 
+/// Summary returned after importing a plan from an uploaded file.
+class PlanImportResult {
+  const PlanImportResult({
+    required this.planId,
+    required this.lineCount,
+    required this.totalQuantity,
+    this.source = '',
+  });
+
+  final int planId;
+  final int lineCount;
+  final int totalQuantity;
+  final String source;
+
+  factory PlanImportResult.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) =>
+        v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+    return PlanImportResult(
+      planId: asInt(json['plan_id']),
+      lineCount: asInt(json['line_count']),
+      totalQuantity: asInt(json['total_quantity']),
+      source: json['source'] as String? ?? '',
+    );
+  }
+}
+
 /// Data access for the delivery-plan reconciliation flow.
 ///
 /// Delivery plans are imported from the supplier's Excel on the back office, so
@@ -42,6 +68,14 @@ abstract class DeliveryRepository {
     required List<ReconcileEntry> entries,
     String? noteReference,
     bool complete = true,
+  });
+
+  /// Upload a supplier's Excel/PDF/image; the backend parses it, normalizes,
+  /// and creates a delivery plan. Returns a summary of what was imported.
+  Future<ApiResult<PlanImportResult>> importPlan({
+    required MultipartFile file,
+    required String deliveryNumber,
+    String? supplier,
   });
 }
 
@@ -96,6 +130,31 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
           DeliveryPlan.fromJson(response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<DeliveryPlan>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<PlanImportResult>> importPlan({
+    required MultipartFile file,
+    required String deliveryNumber,
+    String? supplier,
+  }) async {
+    try {
+      final form = FormData();
+      form.files.add(MapEntry('file', file));
+      form.fields.add(MapEntry('delivery_number', deliveryNumber));
+      if (supplier != null && supplier.trim().isNotEmpty) {
+        form.fields.add(MapEntry('supplier', supplier.trim()));
+      }
+      final response = await _dio.post(
+        '/import-plan',
+        data: form,
+        options: Options(receiveTimeout: const Duration(seconds: 180)),
+      );
+      return ApiSuccess(PlanImportResult.fromJson(
+          response.data['data'] as Map<String, dynamic>));
+    } on DioException catch (e) {
+      return mapDioError<PlanImportResult>(e);
     }
   }
 }

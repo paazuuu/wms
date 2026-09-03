@@ -392,5 +392,19 @@
   "@enterQuantityFor": {
     "placeholders": { "code": { "type": "String" } }
   },
-  "noteImageAttached": "納品書を添付しました"
+  "noteImageAttached": "納品書を添付しました",
+  "planImportTitle": "予定を取り込む",
+  "planImportHint": "Excel / PDF / 画像を選んでアップロードすると、自動で予定に登録します。",
+  "pickFile": "ファイルを選択",
+  "planImportSelected": "選択: {name}",
+  "@planImportSelected": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "planImportAction": "取り込む",
+  "planImporting": "取り込み中…",
+  "planImportChooseFirst": "ファイルを選び、伝票番号を入力してください。",
+  "planImportedSummary": "{count} 品目・合計 {total} 本を取り込みました",
+  "@planImportedSummary": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  }
 }

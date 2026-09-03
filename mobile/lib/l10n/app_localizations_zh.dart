@@ -1051,4 +1051,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noteImageAttached => '已附加到货单';
+
+  @override
+  String get planImportTitle => '导入计划';
+
+  @override
+  String get planImportHint => '选择 Excel / PDF / 图片上传，系统会自动解析并登记为计划。';
+
+  @override
+  String get pickFile => '选择文件';
+
+  @override
+  String planImportSelected(String name) {
+    return '已选择：$name';
+  }
+
+  @override
+  String get planImportAction => '导入';
+
+  @override
+  String get planImporting => '导入中…';
+
+  @override
+  String get planImportChooseFirst => '请选择文件并输入单号。';
+
+  @override
+  String planImportedSummary(int count, int total) {
+    return '已导入 $count 项，共 $total 件';
+  }
 }

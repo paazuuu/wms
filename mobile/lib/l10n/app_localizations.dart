@@ -2007,6 +2007,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'納品書を添付しました'**
   String get noteImageAttached;
+
+  /// No description provided for @planImportTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定を取り込む'**
+  String get planImportTitle;
+
+  /// No description provided for @planImportHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excel / PDF / 画像を選んでアップロードすると、自動で予定に登録します。'**
+  String get planImportHint;
+
+  /// No description provided for @pickFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選択'**
+  String get pickFile;
+
+  /// No description provided for @planImportSelected.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択: {name}'**
+  String planImportSelected(String name);
+
+  /// No description provided for @planImportAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込む'**
+  String get planImportAction;
+
+  /// No description provided for @planImporting.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込み中…'**
+  String get planImporting;
+
+  /// No description provided for @planImportChooseFirst.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選び、伝票番号を入力してください。'**
+  String get planImportChooseFirst;
+
+  /// No description provided for @planImportedSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 品目・合計 {total} 本を取り込みました'**
+  String planImportedSummary(int count, int total);
 }
 
 class _AppLocalizationsDelegate

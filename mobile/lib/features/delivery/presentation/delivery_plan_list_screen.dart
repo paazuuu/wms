@@ -9,6 +9,7 @@ import '../../../core/ui/status_pill.dart';
 import '../application/delivery_providers.dart';
 import '../domain/delivery_plan.dart';
 import 'delivery_status_ui.dart';
+import 'plan_import_screen.dart';
 import 'reconciliation_screen.dart';
 
 /// Lists delivery plans imported from suppliers' Excel that still need a
@@ -40,7 +41,19 @@ class _DeliveryPlanListScreenState
     final plans = ref.watch(deliveryPlansProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.deliveryPlansTitle)),
+      appBar: AppBar(
+        title: Text(l10n.deliveryPlansTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.planImportTitle,
+            icon: const Icon(Icons.upload_file_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PlanImportScreen()),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
