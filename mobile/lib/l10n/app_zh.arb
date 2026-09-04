@@ -370,5 +370,11 @@
   "planImportedSummary": "已导入 {count} 项，共 {total} 件",
   "@planImportedSummary": {
     "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
-  }
+  },
+  "referenceNoLabel": "整理号",
+  "orderDateLabel": "订单日",
+  "companyCode": "公司代码",
+  "totalStockTitle": "总库存（按JAN）",
+  "stockEmpty": "暂无库存。",
+  "stockEmptyBody": "完成核对后，各JAN的总库存会在此汇总。"
 }

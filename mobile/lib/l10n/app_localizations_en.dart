@@ -1111,4 +1111,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String planImportedSummary(int count, int total) {
     return 'Imported $count items, $total units total';
   }
+
+  @override
+  String get referenceNoLabel => 'Ref. no.';
+
+  @override
+  String get orderDateLabel => 'Order date';
+
+  @override
+  String get companyCode => 'Company code';
+
+  @override
+  String get totalStockTitle => 'Total stock (by JAN)';
+
+  @override
+  String get stockEmpty => 'No stock yet.';
+
+  @override
+  String get stockEmptyBody =>
+      'Completed reconciliations accumulate per-JAN stock here.';
 }

@@ -24,6 +24,7 @@ class _FakeRepo implements DeliveryRepository {
     required MultipartFile file,
     required String deliveryNumber,
     String? supplier,
+    String? supplierCode,
   }) async =>
       const ApiSuccess(
           PlanImportResult(planId: 1, lineCount: 0, totalQuantity: 0));

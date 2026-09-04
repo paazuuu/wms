@@ -76,6 +76,7 @@ abstract class DeliveryRepository {
     required MultipartFile file,
     required String deliveryNumber,
     String? supplier,
+    String? supplierCode,
   });
 }
 
@@ -138,6 +139,7 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     required MultipartFile file,
     required String deliveryNumber,
     String? supplier,
+    String? supplierCode,
   }) async {
     try {
       final form = FormData();
@@ -145,6 +147,9 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       form.fields.add(MapEntry('delivery_number', deliveryNumber));
       if (supplier != null && supplier.trim().isNotEmpty) {
         form.fields.add(MapEntry('supplier', supplier.trim()));
+      }
+      if (supplierCode != null && supplierCode.trim().isNotEmpty) {
+        form.fields.add(MapEntry('supplier_code', supplierCode.trim()));
       }
       final response = await _dio.post(
         '/import-plan',

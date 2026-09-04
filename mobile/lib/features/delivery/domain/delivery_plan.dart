@@ -17,6 +17,8 @@ class DeliveryPlan extends Equatable {
     this.customerCode,
     this.deliveryDate,
     this.registrationNumber,
+    this.referenceNo,
+    this.orderDate,
     this.status = DeliveryPlanStatus.open,
     this.lines = const [],
     int? lineCount,
@@ -38,6 +40,12 @@ class DeliveryPlan extends Equatable {
 
   /// Japanese invoice registration number (登録番号), e.g. "T3122001027817".
   final String? registrationNumber;
+
+  /// Per-company reference number (整理番号) assigned at import, e.g. "ABC-00001".
+  final String? referenceNo;
+
+  /// Order date (注文日) carried for traceability, as a display string.
+  final String? orderDate;
 
   final DeliveryPlanStatus status;
 
@@ -64,6 +72,8 @@ class DeliveryPlan extends Equatable {
       customerCode: json['customer_code']?.toString(),
       deliveryDate: json['delivery_date']?.toString(),
       registrationNumber: json['registration_number'] as String?,
+      referenceNo: json['reference_no'] as String?,
+      orderDate: json['order_date']?.toString(),
       status: DeliveryPlanStatus.fromWire(json['status'] as String?),
       lines: rawLines
           .map((e) => DeliveryPlanLine.fromJson(e as Map<String, dynamic>))

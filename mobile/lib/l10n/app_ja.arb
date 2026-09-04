@@ -406,5 +406,11 @@
   "planImportedSummary": "{count} 品目・合計 {total} 本を取り込みました",
   "@planImportedSummary": {
     "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
-  }
+  },
+  "referenceNoLabel": "整理番号",
+  "orderDateLabel": "注文日",
+  "companyCode": "会社コード",
+  "totalStockTitle": "総在庫（JAN別）",
+  "stockEmpty": "在庫がまだありません。",
+  "stockEmptyBody": "照合を完了すると、JANごとの総在庫がここに集計されます。"
 }

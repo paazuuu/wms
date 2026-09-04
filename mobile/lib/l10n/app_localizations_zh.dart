@@ -1079,4 +1079,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String planImportedSummary(int count, int total) {
     return '已导入 $count 项，共 $total 件';
   }
+
+  @override
+  String get referenceNoLabel => '整理号';
+
+  @override
+  String get orderDateLabel => '订单日';
+
+  @override
+  String get companyCode => '公司代码';
+
+  @override
+  String get totalStockTitle => '总库存（按JAN）';
+
+  @override
+  String get stockEmpty => '暂无库存。';
+
+  @override
+  String get stockEmptyBody => '完成核对后，各JAN的总库存会在此汇总。';
 }

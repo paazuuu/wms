@@ -1,17 +1,9 @@
 // Upload-a-file plan importer for the WMS back office.
 // POST /import-plan  (multipart/form-data)
-//   file            : .xlsx | .pdf | image
-//   delivery_number : required label for the plan
-//   supplier        : optional
-//   delivery_date   : optional (YYYY-MM-DD, display only)
-//   dry_run         : "1" to parse and return a preview without writing
+//   file / delivery_number / supplier? / supplier_code? / delivery_date? / dry_run?
 //
-// Every source is converted to one canonical shape before saving:
-//   file -> extract rows -> normalizeJan -> aggregate by JAN -> insert
-//     * .xlsx  parsed with SheetJS; JAN column auto-detected, 数量/メーカー/
-//              品番/単価/金額 found by header text.
-//     * .pdf / image  read by Gemini (same model as ocr-delivery-note).
-// Uses the service role internally, so the client never needs that key.
+// Converts each source to one canonical shape, resolves the supplier (company),
+// assigns a per-company reference number, and stores order dates for traceability.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import * as XLSX from "npm:xlsx@0.18.5";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
@@ -22,7 +14,6 @@ const cors = {
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -35,7 +26,6 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-// ---- canonical JAN (mirror of mobile jan.dart / tools importer) -------------
 function normalizeJan(value: unknown): string {
   if (value === null || value === undefined) return "";
   let s = "";
@@ -56,6 +46,11 @@ function toInt(v: unknown): number | null {
   const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? Math.round(n) : null;
 }
+function dateStr(v: unknown): string | null {
+  if (v === null || v === undefined || v === "") return null;
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  return String(v).trim();
+}
 
 type Rec = {
   jan: string;
@@ -64,6 +59,7 @@ type Rec = {
   product_name: string;
   unit: number | null;
   amount: number | null;
+  order_date: string | null;
 };
 
 const QTY_KEYS = ["発注数量", "数量", "発注数", "数"];
@@ -71,14 +67,13 @@ const MAKER_KEYS = ["メーカー", "maker", "ﾒｰｶｰ"];
 const PNUM_KEYS = ["品番", "項目", "商品コード", "品名"];
 const UNIT_KEYS = ["単価", "定価"];
 const AMOUNT_KEYS = ["金額", "調達合計金額"];
+const DATE_KEYS = ["注文日", "発注日", "日付", "作成日", "納品日"];
 
 function parseXlsx(bytes: Uint8Array): Rec[] {
-  const wb = XLSX.read(bytes, { type: "array" });
+  const wb = XLSX.read(bytes, { type: "array", cellDates: true });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, {
-    header: 1,
-    raw: true,
-    defval: null,
+    header: 1, raw: true, defval: null,
   }) as unknown[][];
   const ncol = rows.reduce((m, r) => Math.max(m, r.length), 0);
 
@@ -95,9 +90,7 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
       const r = rows[ri];
       for (let c = 0; c < r.length; c++) {
         const v = r[c];
-        if (typeof v === "string" && keys.some((k) => v.includes(k))) {
-          return [ri, c];
-        }
+        if (typeof v === "string" && keys.some((k) => v.includes(k))) return [ri, c];
       }
     }
     return [-1, -1];
@@ -117,6 +110,7 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
   const pnumCol = findCol(PNUM_KEYS);
   const unitCol = findCol(UNIT_KEYS);
   const amountCol = findCol(AMOUNT_KEYS);
+  const dateCol = findCol(DATE_KEYS);
   const cell = (r: unknown[], c: number) => (c >= 0 && c < r.length ? r[c] : null);
 
   const out: Rec[] = [];
@@ -132,6 +126,7 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
       product_name: `${maker} ${pnum}`.trim(),
       unit: toInt(cell(r, unitCol)),
       amount: toInt(cell(r, amountCol)),
+      order_date: dateStr(cell(r, dateCol)),
     });
   }
   return out;
@@ -204,12 +199,9 @@ async function parseWithGemini(bytes: Uint8Array, mime: string): Promise<Rec[]> 
     const jan = normalizeJan(ln.jan_code);
     if (!isJan(jan)) continue;
     out.push({
-      jan,
-      qty: toInt(ln.quantity) ?? 0,
-      product_code: "",
-      product_name: String(ln.product_name ?? ""),
-      unit: null,
-      amount: null,
+      jan, qty: toInt(ln.quantity) ?? 0, product_code: "",
+      product_name: String(ln.product_name ?? ""), unit: null, amount: null,
+      order_date: null,
     });
   }
   return out;
@@ -221,12 +213,9 @@ function aggregate(records: Rec[]) {
     let m = map.get(r.jan);
     if (!m) {
       m = {
-        jan_code: r.jan,
-        product_code: r.product_code,
-        product_name: r.product_name,
-        planned_quantity: 0,
-        unit_price: r.unit,
-        amount: 0,
+        jan_code: r.jan, product_code: r.product_code,
+        product_name: r.product_name, planned_quantity: 0,
+        unit_price: r.unit, amount: 0, order_date: r.order_date,
       };
       map.set(r.jan, m);
     }
@@ -234,6 +223,25 @@ function aggregate(records: Rec[]) {
     if (r.amount) m.amount = (m.amount as number) + r.amount;
   }
   return [...map.values()];
+}
+
+// Find or create the supplier (company); returns its id or null.
+async function resolveSupplier(name: string | null, code: string | null) {
+  if (!name && !code) return null;
+  if (code) {
+    const { data } = await supabase.from("delivery_suppliers")
+      .select("id").eq("code", code).maybeSingle();
+    if (data) return data.id as number;
+  }
+  if (name) {
+    const { data } = await supabase.from("delivery_suppliers")
+      .select("id").eq("name", name).maybeSingle();
+    if (data) return data.id as number;
+  }
+  const { data, error } = await supabase.from("delivery_suppliers")
+    .insert({ name: name ?? code, code: code }).select("id").single();
+  if (error) throw new Error(error.message);
+  return data.id as number;
 }
 
 Deno.serve(async (req) => {
@@ -245,6 +253,7 @@ Deno.serve(async (req) => {
     const file = form.get("file");
     const deliveryNumber = String(form.get("delivery_number") ?? "").trim();
     const supplier = (form.get("supplier") as string) || null;
+    const supplierCode = (form.get("supplier_code") as string) || null;
     const deliveryDate = (form.get("delivery_date") as string) || null;
     const dryRun = String(form.get("dry_run") ?? "") === "1";
     if (!(file instanceof File)) return json({ message: "file is required" }, 400);
@@ -266,10 +275,18 @@ Deno.serve(async (req) => {
     const lines = aggregate(records);
     const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
     if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
+    const orderDate = (lines.find((l) => l.order_date)?.order_date as string) ?? null;
 
     if (dryRun) {
       return json({ data: { source, dry_run: true, line_count: lines.length,
-        total_quantity: totalQty, sample: lines.slice(0, 5) } });
+        total_quantity: totalQty, order_date: orderDate, sample: lines.slice(0, 5) } });
+    }
+
+    const supplierId = await resolveSupplier(supplier, supplierCode);
+    let referenceNo: string | null = null;
+    if (supplierId) {
+      const { data: ref } = await supabase.rpc("assign_reference", { p_supplier_id: supplierId });
+      referenceNo = (ref as string) ?? null;
     }
 
     const { data: plan, error: e1 } = await supabase
@@ -277,7 +294,11 @@ Deno.serve(async (req) => {
       .insert({
         delivery_number: deliveryNumber,
         supplier_name: supplier,
+        supplier_id: supplierId,
+        reference_no: referenceNo,
+        order_date: orderDate ?? deliveryDate,
         delivery_date: deliveryDate,
+        doc_type: "plan",
         status: "open",
       })
       .select("id")
@@ -289,7 +310,7 @@ Deno.serve(async (req) => {
     if (e2) return json({ message: e2.message }, 400);
 
     return json({ data: { source, plan_id: plan.id, delivery_number: deliveryNumber,
-      line_count: lines.length, total_quantity: totalQty } });
+      reference_no: referenceNo, line_count: lines.length, total_quantity: totalQty } });
   } catch (e) {
     return json({ message: String(e) }, 500);
   }

@@ -1079,4 +1079,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String planImportedSummary(int count, int total) {
     return '$count 品目・合計 $total 本を取り込みました';
   }
+
+  @override
+  String get referenceNoLabel => '整理番号';
+
+  @override
+  String get orderDateLabel => '注文日';
+
+  @override
+  String get companyCode => '会社コード';
+
+  @override
+  String get totalStockTitle => '総在庫（JAN別）';
+
+  @override
+  String get stockEmpty => '在庫がまだありません。';
+
+  @override
+  String get stockEmptyBody => '照合を完了すると、JANごとの総在庫がここに集計されます。';
 }

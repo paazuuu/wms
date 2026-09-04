@@ -370,5 +370,11 @@
   "planImportedSummary": "Imported {count} items, {total} units total",
   "@planImportedSummary": {
     "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
-  }
+  },
+  "referenceNoLabel": "Ref. no.",
+  "orderDateLabel": "Order date",
+  "companyCode": "Company code",
+  "totalStockTitle": "Total stock (by JAN)",
+  "stockEmpty": "No stock yet.",
+  "stockEmptyBody": "Completed reconciliations accumulate per-JAN stock here."
 }

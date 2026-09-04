@@ -11,6 +11,7 @@ import '../domain/delivery_plan.dart';
 import 'delivery_status_ui.dart';
 import 'plan_import_screen.dart';
 import 'reconciliation_screen.dart';
+import 'stock_list_screen.dart';
 
 /// Lists delivery plans imported from suppliers' Excel that still need a
 /// physical check. A scan/search box at the top filters by voucher number or
@@ -44,6 +45,13 @@ class _DeliveryPlanListScreenState
       appBar: AppBar(
         title: Text(l10n.deliveryPlansTitle),
         actions: [
+          IconButton(
+            tooltip: l10n.totalStockTitle,
+            icon: const Icon(Icons.inventory_2_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StockListScreen()),
+            ),
+          ),
           IconButton(
             tooltip: l10n.planImportTitle,
             icon: const Icon(Icons.upload_file_outlined),
@@ -179,6 +187,15 @@ class _DeliveryPlanCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (plan.referenceNo != null &&
+                        plan.referenceNo!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '${l10n.referenceNoLabel}: ${plan.referenceNo}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                            fontFamily: 'FiraCode', color: scheme.primary),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       spacing: AppSpacing.sm,

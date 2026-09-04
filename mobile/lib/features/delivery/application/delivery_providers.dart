@@ -6,7 +6,9 @@ import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
 import '../data/mlkit_delivery_note_scanner.dart';
 import '../data/remote_delivery_note_scanner.dart';
+import '../data/stock_repository.dart';
 import '../domain/delivery_plan.dart';
+import '../domain/stock_item.dart';
 import 'reconciliation_controller.dart';
 
 /// Dedicated Dio for the delivery feature, pointed at the Supabase Edge
@@ -28,6 +30,34 @@ final deliveryDioProvider = Provider<Dio>((ref) {
 
 final deliveryRepositoryProvider = Provider<DeliveryRepository>((ref) {
   return DeliveryRepositoryImpl(ref.watch(deliveryDioProvider));
+});
+
+/// Dio for Supabase PostgREST (`/rest/v1`), used to read the stock table.
+final restDioProvider = Provider<Dio>((ref) {
+  return Dio(BaseOptions(
+    baseUrl: '${AppConfig.supabaseUrl}/rest/v1',
+    connectTimeout: AppConfig.connectTimeout,
+    receiveTimeout: AppConfig.receiveTimeout,
+    headers: {
+      'Accept': 'application/json',
+      'apikey': AppConfig.supabaseAnonKey,
+      'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
+    },
+  ));
+});
+
+final stockRepositoryProvider = Provider<StockRepository>((ref) {
+  return StockRepositoryImpl(ref.watch(restDioProvider));
+});
+
+/// Per-JAN total on-hand stock, highest first.
+final stockListProvider =
+    FutureProvider.autoDispose<List<StockItem>>((ref) async {
+  final result = await ref.watch(stockRepositoryProvider).list();
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
 });
 
 /// Delivery-note OCR assist: cloud vision (Gemini, via the backend) first, with

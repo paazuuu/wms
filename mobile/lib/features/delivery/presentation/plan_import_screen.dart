@@ -22,6 +22,7 @@ class PlanImportScreen extends ConsumerStatefulWidget {
 class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
   final _numberController = TextEditingController();
   final _supplierController = TextEditingController();
+  final _codeController = TextEditingController();
   PlatformFile? _file;
   bool _busy = false;
 
@@ -29,6 +30,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
   void dispose() {
     _numberController.dispose();
     _supplierController.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
@@ -61,6 +63,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           file: MultipartFile.fromBytes(bytes, filename: file.name),
           deliveryNumber: number,
           supplier: _supplierController.text,
+          supplierCode: _codeController.text,
         );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -143,6 +146,16 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             decoration: InputDecoration(
               labelText: l10n.fieldSupplier,
               prefixIcon: const Icon(Icons.local_shipping_outlined),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          TextField(
+            controller: _codeController,
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              labelText: l10n.companyCode,
+              helperText: 'ABC → ABC-00001',
+              prefixIcon: const Icon(Icons.tag_outlined),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

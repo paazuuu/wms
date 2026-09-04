@@ -2055,6 +2055,42 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{count} 品目・合計 {total} 本を取り込みました'**
   String planImportedSummary(int count, int total);
+
+  /// No description provided for @referenceNoLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'整理番号'**
+  String get referenceNoLabel;
+
+  /// No description provided for @orderDateLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'注文日'**
+  String get orderDateLabel;
+
+  /// No description provided for @companyCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社コード'**
+  String get companyCode;
+
+  /// No description provided for @totalStockTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'総在庫（JAN別）'**
+  String get totalStockTitle;
+
+  /// No description provided for @stockEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫がまだありません。'**
+  String get stockEmpty;
+
+  /// No description provided for @stockEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合を完了すると、JANごとの総在庫がここに集計されます。'**
+  String get stockEmptyBody;
 }
 
 class _AppLocalizationsDelegate
