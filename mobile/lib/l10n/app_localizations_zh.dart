@@ -1081,6 +1081,51 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get planReadAction => '读取送货单';
+
+  @override
+  String get planReading => '读取中…';
+
+  @override
+  String get planReviewTitle => '核对抬头';
+
+  @override
+  String get planReviewHint => '已从送货单自动读取。登记前可在此修改错误或空白的字段。';
+
+  @override
+  String get planCommitAction => '登记';
+
+  @override
+  String get planRegistering => '登记中…';
+
+  @override
+  String planPreviewCount(int count, int total) {
+    return '$count 项 · $total 件';
+  }
+
+  @override
+  String get fieldRegistrationNumber => '登记号（T…）';
+
+  @override
+  String get fieldCustomerCode => '客户代码';
+
+  @override
+  String get fieldDocNumber => '送货单号';
+
+  @override
+  String get fieldDocDate => '日期';
+
+  @override
+  String get headerUnreadHint => '无法读取，请手动输入';
+
+  @override
+  String get planNeedsReviewBadge => '待确认';
+
+  @override
+  String get planUnidentifiedNote =>
+      '未能读取公司名称，已归入“UNKNOWN”识别号序列。输入供应商即可重新归属到正确公司。';
+
+  @override
   String get referenceNoLabel => '整理号';
 
   @override

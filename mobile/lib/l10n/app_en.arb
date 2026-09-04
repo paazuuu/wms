@@ -371,6 +371,23 @@
   "@planImportedSummary": {
     "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
   },
+  "planReadAction": "Read note",
+  "planReading": "Reading…",
+  "planReviewTitle": "Check the header",
+  "planReviewHint": "Fields were auto-read from the note. Anything wrong or blank can be edited here before you register it.",
+  "planCommitAction": "Register",
+  "planRegistering": "Registering…",
+  "planPreviewCount": "{count} items · {total} units",
+  "@planPreviewCount": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "fieldRegistrationNumber": "Registration no. (T…)",
+  "fieldCustomerCode": "Customer code",
+  "fieldDocNumber": "Delivery-note no.",
+  "fieldDocDate": "Date",
+  "headerUnreadHint": "Could not read — please enter",
+  "planNeedsReviewBadge": "Needs check",
+  "planUnidentifiedNote": "The company could not be read, so this was filed under the “UNKNOWN” series. Enter the supplier to reassign it.",
   "referenceNoLabel": "Ref. no.",
   "orderDateLabel": "Order date",
   "companyCode": "Company code",

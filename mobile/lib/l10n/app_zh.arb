@@ -371,6 +371,23 @@
   "@planImportedSummary": {
     "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
   },
+  "planReadAction": "读取送货单",
+  "planReading": "读取中…",
+  "planReviewTitle": "核对抬头",
+  "planReviewHint": "已从送货单自动读取。登记前可在此修改错误或空白的字段。",
+  "planCommitAction": "登记",
+  "planRegistering": "登记中…",
+  "planPreviewCount": "{count} 项 · {total} 件",
+  "@planPreviewCount": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "fieldRegistrationNumber": "登记号（T…）",
+  "fieldCustomerCode": "客户代码",
+  "fieldDocNumber": "送货单号",
+  "fieldDocDate": "日期",
+  "headerUnreadHint": "无法读取，请手动输入",
+  "planNeedsReviewBadge": "待确认",
+  "planUnidentifiedNote": "未能读取公司名称，已归入“UNKNOWN”识别号序列。输入供应商即可重新归属到正确公司。",
   "referenceNoLabel": "整理号",
   "orderDateLabel": "订单日",
   "companyCode": "公司代码",

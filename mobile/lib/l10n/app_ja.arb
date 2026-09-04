@@ -407,6 +407,23 @@
   "@planImportedSummary": {
     "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
   },
+  "planReadAction": "読み取る",
+  "planReading": "読取中…",
+  "planReviewTitle": "ヘッダーの確認",
+  "planReviewHint": "納品書から自動で読み取りました。間違い・空欄は登録前にここで修正できます。",
+  "planCommitAction": "登録する",
+  "planRegistering": "登録中…",
+  "planPreviewCount": "{count} 品目・{total} 本",
+  "@planPreviewCount": {
+    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "fieldRegistrationNumber": "登録番号（T…）",
+  "fieldCustomerCode": "お客様コード",
+  "fieldDocNumber": "納品書番号",
+  "fieldDocDate": "日付",
+  "headerUnreadHint": "読み取れませんでした。入力してください",
+  "planNeedsReviewBadge": "要確認",
+  "planUnidentifiedNote": "会社名を読み取れなかったため「UNKNOWN」枠の識別番号を採番しました。仕入先を入力すると正しい会社に付け替えられます。",
   "referenceNoLabel": "整理番号",
   "orderDateLabel": "注文日",
   "companyCode": "会社コード",

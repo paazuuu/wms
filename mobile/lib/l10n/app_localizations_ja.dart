@@ -1081,6 +1081,51 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get planReadAction => '読み取る';
+
+  @override
+  String get planReading => '読取中…';
+
+  @override
+  String get planReviewTitle => 'ヘッダーの確認';
+
+  @override
+  String get planReviewHint => '納品書から自動で読み取りました。間違い・空欄は登録前にここで修正できます。';
+
+  @override
+  String get planCommitAction => '登録する';
+
+  @override
+  String get planRegistering => '登録中…';
+
+  @override
+  String planPreviewCount(int count, int total) {
+    return '$count 品目・$total 本';
+  }
+
+  @override
+  String get fieldRegistrationNumber => '登録番号（T…）';
+
+  @override
+  String get fieldCustomerCode => 'お客様コード';
+
+  @override
+  String get fieldDocNumber => '納品書番号';
+
+  @override
+  String get fieldDocDate => '日付';
+
+  @override
+  String get headerUnreadHint => '読み取れませんでした。入力してください';
+
+  @override
+  String get planNeedsReviewBadge => '要確認';
+
+  @override
+  String get planUnidentifiedNote =>
+      '会社名を読み取れなかったため「UNKNOWN」枠の識別番号を採番しました。仕入先を入力すると正しい会社に付け替えられます。';
+
+  @override
   String get referenceNoLabel => '整理番号';
 
   @override

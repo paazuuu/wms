@@ -1,9 +1,20 @@
 // Upload-a-file plan importer for the WMS back office.
-// POST /import-plan  (multipart/form-data)
-//   file / delivery_number / supplier? / supplier_code? / delivery_date? / dry_run?
 //
-// Converts each source to one canonical shape, resolves the supplier (company),
-// assigns a per-company reference number, and stores order dates for traceability.
+// Two-step, so the auto-read header can be reviewed and corrected before it is
+// saved:
+//   1. PREVIEW  POST multipart/form-data with dry_run=1
+//        file / delivery_number? / supplier? / supplier_code? / delivery_date?
+//      → parses the file (SheetJS for Excel, Gemini for PDF/image), auto-reads
+//        the delivery-note header, and returns { header, lines, ... } WITHOUT
+//        writing anything.
+//   2. COMMIT   POST application/json with the (possibly edited) header + lines
+//        → resolves the supplier, assigns a per-company reference, and stores
+//          the plan. A single-step multipart POST without dry_run still works
+//          (parse + save in one shot) for callers that don't need review.
+//
+// Whatever the company could not be read from, the plan is routed to a distinct
+// "UNKNOWN" reference series and flagged needs_review so it stands out and can
+// be reassigned by hand.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import * as XLSX from "npm:xlsx@0.18.5";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
@@ -26,6 +37,8 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const UNKNOWN_CODE = "UNKNOWN";
+
 function normalizeJan(value: unknown): string {
   if (value === null || value === undefined) return "";
   let s = "";
@@ -46,11 +59,48 @@ function toInt(v: unknown): number | null {
   const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? Math.round(n) : null;
 }
+function toNum(v: unknown): number | null {
+  const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(n) && String(v ?? "").trim() !== "" ? n : null;
+}
 function dateStr(v: unknown): string | null {
   if (v === null || v === undefined || v === "") return null;
   if (v instanceof Date) return v.toISOString().slice(0, 10);
   return String(v).trim();
 }
+function str(v: unknown): string | null {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  return s === "" ? null : s;
+}
+// A 登録番号 is a T followed by 13 digits; normalize spacing/full-width so the
+// same company always resolves to the same key.
+function normalizeRegNo(v: unknown): string | null {
+  const s = str(v);
+  if (!s) return null;
+  let out = "";
+  for (const ch of s) {
+    const c = ch.codePointAt(0)!;
+    if (c >= 0xff10 && c <= 0xff19) out += String.fromCharCode(c - 0xff10 + 0x30);
+    else if (c === 0xff34 || ch === "t") out += "T";
+    else out += ch;
+  }
+  const m = out.replace(/[\s-]/g, "").match(/T?\d{13}/);
+  if (m) return m[0].startsWith("T") ? m[0] : "T" + m[0];
+  return out; // keep whatever was read so it can still be shown/edited
+}
+
+type Header = {
+  supplier_name: string | null;
+  registration_number: string | null;
+  customer_code: string | null;
+  doc_number: string | null;
+  doc_date: string | null;
+};
+const emptyHeader = (): Header => ({
+  supplier_name: null, registration_number: null,
+  customer_code: null, doc_number: null, doc_date: null,
+});
 
 type Rec = {
   jan: string;
@@ -73,12 +123,7 @@ const AMOUNT_KEYS = ["金額", "調達合計金額"];
 const TAX_KEYS = ["税率", "消費税率"];
 const DATE_KEYS = ["注文日", "発注日", "日付", "作成日", "納品日"];
 
-function toNum(v: unknown): number | null {
-  const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) && String(v ?? "").trim() !== "" ? n : null;
-}
-
-function parseXlsx(bytes: Uint8Array): Rec[] {
+function parseXlsx(bytes: Uint8Array): { records: Rec[]; header: Header } {
   const wb = XLSX.read(bytes, { type: "array", cellDates: true });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, {
@@ -143,19 +188,34 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
       order_date: dateStr(cell(r, dateCol)),
     });
   }
-  return out;
+  // Excel plans carry no printed note header; leave it for the operator to fill.
+  return { records: out, header: emptyHeader() };
 }
 
 const PROMPT =
-  "この画像/PDFは日本の物流の納品書または注文明細です。明細表を抽出し、各行を " +
-  "{jan_code, product_name, spec, quantity, unit_price, amount, tax_rate} のJSONで" +
-  "返してください。jan_code は商品のバーコード数字（13桁または8桁）で半角数字のみ・" +
-  "ハイフンや空白なし。spec は規格/仕様の列、unit_price は単価、amount は金額、" +
-  "tax_rate は税率(%)の数値。読めない項目は省略。住所・電話・登録番号(Tで始まる番号)・" +
-  "合計金額はJANとして扱わない。数量が読めない行は quantity を省略。";
+  "この画像/PDFは日本の物流の納品書または注文明細です。次の2つを返してください。\n" +
+  "1) header: 書類の相手先(仕入先/発行元)の情報。" +
+  "{supplier_name: 会社名, registration_number: インボイス登録番号(Tで始まる13桁), " +
+  "customer_code: お客様コード/得意先コード, doc_number: 伝票番号/納品書番号, " +
+  "doc_date: 日付(YYYY-MM-DD)}。読めない項目は省略。\n" +
+  "2) lines: 明細表。各行を {jan_code, product_name, spec, quantity, unit_price, " +
+  "amount, tax_rate}。jan_code は商品のバーコード数字(13桁または8桁)で半角数字のみ・" +
+  "ハイフンや空白なし。spec は規格/仕様、unit_price は単価、amount は金額、" +
+  "tax_rate は税率(%)の数値。読めない項目は省略。住所・電話・登録番号・合計金額は" +
+  "JANとして扱わない。数量が読めない行は quantity を省略。";
 const SCHEMA = {
   type: "object",
   properties: {
+    header: {
+      type: "object",
+      properties: {
+        supplier_name: { type: "string" },
+        registration_number: { type: "string" },
+        customer_code: { type: "string" },
+        doc_number: { type: "string" },
+        doc_date: { type: "string" },
+      },
+    },
     lines: {
       type: "array",
       items: {
@@ -176,7 +236,10 @@ const SCHEMA = {
   required: ["lines"],
 };
 
-async function parseWithGemini(bytes: Uint8Array, mime: string): Promise<Rec[]> {
+async function parseWithGemini(
+  bytes: Uint8Array,
+  mime: string,
+): Promise<{ records: Rec[]; header: Header }> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set on the server.");
   const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
@@ -211,8 +274,18 @@ async function parseWithGemini(bytes: Uint8Array, mime: string): Promise<Rec[]> 
   }
   const body = await res.json();
   const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-  let parsed: { lines?: unknown[] } = {};
+  let parsed: { lines?: unknown[]; header?: Record<string, unknown> } = {};
   try { parsed = JSON.parse(text); } catch (_) { parsed = {}; }
+
+  const h = parsed.header ?? {};
+  const header: Header = {
+    supplier_name: str(h.supplier_name),
+    registration_number: normalizeRegNo(h.registration_number),
+    customer_code: str(h.customer_code),
+    doc_number: str(h.doc_number),
+    doc_date: str(h.doc_date),
+  };
+
   const lines = Array.isArray(parsed.lines) ? parsed.lines : [];
   const out: Rec[] = [];
   for (const ln of lines as Record<string, unknown>[]) {
@@ -226,7 +299,7 @@ async function parseWithGemini(bytes: Uint8Array, mime: string): Promise<Rec[]> 
       tax_rate: toNum(ln.tax_rate), order_date: null,
     });
   }
-  return out;
+  return { records: out, header };
 }
 
 function aggregate(records: Rec[]) {
@@ -250,23 +323,115 @@ function aggregate(records: Rec[]) {
   return [...map.values()];
 }
 
-// Find or create the supplier (company); returns its id or null.
-async function resolveSupplier(name: string | null, code: string | null) {
-  if (!name && !code) return null;
-  if (code) {
+// Find or create the supplier (company). Matches by 登録番号, then code, then
+// name. When nothing identifies the company, routes to the shared UNKNOWN
+// bucket so the delivery still gets a distinct, traceable reference series.
+async function resolveSupplier(
+  name: string | null,
+  code: string | null,
+  regNo: string | null,
+): Promise<{ id: number; unidentified: boolean }> {
+  if (regNo) {
+    const { data } = await supabase.from("delivery_suppliers")
+      .select("id").eq("registration_number", regNo).maybeSingle();
+    if (data) return { id: data.id as number, unidentified: false };
+  }
+  if (code && code !== UNKNOWN_CODE) {
     const { data } = await supabase.from("delivery_suppliers")
       .select("id").eq("code", code).maybeSingle();
-    if (data) return data.id as number;
+    if (data) return { id: data.id as number, unidentified: false };
   }
   if (name) {
     const { data } = await supabase.from("delivery_suppliers")
       .select("id").eq("name", name).maybeSingle();
-    if (data) return data.id as number;
+    if (data) return { id: data.id as number, unidentified: false };
   }
-  const { data, error } = await supabase.from("delivery_suppliers")
-    .insert({ name: name ?? code, code: code }).select("id").single();
+  if (name || code || regNo) {
+    const { data, error } = await supabase.from("delivery_suppliers")
+      .insert({ name: name ?? code ?? regNo, code, registration_number: regNo })
+      .select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: data.id as number, unidentified: false };
+  }
+  // Nothing identifies this company → the UNKNOWN bucket.
+  const { data } = await supabase.from("delivery_suppliers")
+    .select("id").eq("code", UNKNOWN_CODE).maybeSingle();
+  if (data) return { id: data.id as number, unidentified: true };
+  const { data: created, error } = await supabase.from("delivery_suppliers")
+    .insert({ code: UNKNOWN_CODE, name: "未確認（要手動確認）" })
+    .select("id").single();
   if (error) throw new Error(error.message);
-  return data.id as number;
+  return { id: created.id as number, unidentified: true };
+}
+
+// Turn one aggregated line back into a plan-line row.
+function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
+  return {
+    jan_code: normalizeJan(l.jan_code),
+    product_code: str(l.product_code) ?? "",
+    product_name: str(l.product_name) ?? "",
+    spec: str(l.spec),
+    planned_quantity: toInt(l.planned_quantity) ?? 0,
+    unit_price: toInt(l.unit_price),
+    amount: toInt(l.amount),
+    tax_rate: toNum(l.tax_rate),
+    order_date: str(l.order_date),
+  };
+}
+
+// Save a plan + its lines. Shared by the multipart one-shot and the JSON commit.
+async function commit(input: {
+  deliveryNumber: string;
+  supplier: string | null;
+  supplierCode: string | null;
+  registrationNumber: string | null;
+  customerCode: string | null;
+  docNumber: string | null;
+  deliveryDate: string | null;
+  orderDate: string | null;
+  lines: Record<string, unknown>[];
+  source: string;
+}): Promise<Response> {
+  const lines = input.lines.map(toLineRow).filter((l) => isJan(l.jan_code as string));
+  if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
+  const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
+
+  const { id: supplierId, unidentified } = await resolveSupplier(
+    input.supplier, input.supplierCode, input.registrationNumber,
+  );
+  const { data: ref } = await supabase.rpc("assign_reference", { p_supplier_id: supplierId });
+  const referenceNo = (ref as string) ?? null;
+
+  const { data: plan, error: e1 } = await supabase
+    .from("delivery_plans")
+    .insert({
+      delivery_number: input.deliveryNumber,
+      supplier_name: input.supplier,
+      supplier_code: input.supplierCode,
+      supplier_id: supplierId,
+      registration_number: input.registrationNumber,
+      customer_code: input.customerCode,
+      doc_number: input.docNumber,
+      reference_no: referenceNo,
+      order_date: input.orderDate ?? input.deliveryDate,
+      delivery_date: input.deliveryDate,
+      doc_type: "plan",
+      needs_review: unidentified,
+      status: "open",
+    })
+    .select("id")
+    .single();
+  if (e1) return json({ message: e1.message }, 400);
+
+  const withId = lines.map((l) => ({ ...l, delivery_plan_id: plan.id }));
+  const { error: e2 } = await supabase.from("delivery_plan_lines").insert(withId);
+  if (e2) return json({ message: e2.message }, 400);
+
+  return json({ data: {
+    source: input.source, plan_id: plan.id, delivery_number: input.deliveryNumber,
+    reference_no: referenceNo, needs_review: unidentified,
+    line_count: lines.length, total_quantity: totalQty,
+  } });
 }
 
 Deno.serve(async (req) => {
@@ -274,26 +439,49 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ message: "Not found" }, 404);
 
   try {
+    const ctype = req.headers.get("content-type") ?? "";
+
+    // COMMIT: the reviewed/edited header + lines come back as JSON.
+    if (ctype.includes("application/json")) {
+      const b = await req.json();
+      const deliveryNumber = String(b.delivery_number ?? "").trim();
+      if (!deliveryNumber) return json({ message: "delivery_number is required" }, 400);
+      const lines = Array.isArray(b.lines) ? b.lines : [];
+      return await commit({
+        deliveryNumber,
+        supplier: str(b.supplier),
+        supplierCode: str(b.supplier_code),
+        registrationNumber: normalizeRegNo(b.registration_number),
+        customerCode: str(b.customer_code),
+        docNumber: str(b.doc_number),
+        deliveryDate: str(b.delivery_date),
+        orderDate: str(b.order_date),
+        lines,
+        source: str(b.source) ?? "review",
+      });
+    }
+
+    // PREVIEW / one-shot: a file is uploaded and parsed here.
     const form = await req.formData();
     const file = form.get("file");
     const deliveryNumber = String(form.get("delivery_number") ?? "").trim();
-    const supplier = (form.get("supplier") as string) || null;
-    const supplierCode = (form.get("supplier_code") as string) || null;
-    const deliveryDate = (form.get("delivery_date") as string) || null;
+    const supplier = str(form.get("supplier"));
+    const supplierCode = str(form.get("supplier_code"));
+    const deliveryDate = str(form.get("delivery_date"));
     const dryRun = String(form.get("dry_run") ?? "") === "1";
     if (!(file instanceof File)) return json({ message: "file is required" }, 400);
-    if (!deliveryNumber) return json({ message: "delivery_number is required" }, 400);
 
     const name = file.name.toLowerCase();
     const bytes = new Uint8Array(await file.arrayBuffer());
     let records: Rec[];
+    let header: Header;
     let source: string;
     if (name.endsWith(".xlsx") || name.endsWith(".xlsm")) {
-      records = parseXlsx(bytes);
+      ({ records, header } = parseXlsx(bytes));
       source = "xlsx";
     } else {
       const mime = file.type || (name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
-      records = await parseWithGemini(bytes, mime);
+      ({ records, header } = await parseWithGemini(bytes, mime));
       source = "gemini";
     }
 
@@ -302,40 +490,42 @@ Deno.serve(async (req) => {
     if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
     const orderDate = (lines.find((l) => l.order_date)?.order_date as string) ?? null;
 
+    // Operator-supplied form fields win over what was auto-read.
+    const mergedHeader: Header = {
+      supplier_name: supplier ?? header.supplier_name,
+      registration_number: header.registration_number,
+      customer_code: header.customer_code,
+      doc_number: header.doc_number ?? (deliveryNumber || null),
+      doc_date: header.doc_date ?? deliveryDate,
+    };
+
     if (dryRun) {
-      return json({ data: { source, dry_run: true, line_count: lines.length,
-        total_quantity: totalQty, order_date: orderDate, sample: lines.slice(0, 5) } });
+      return json({ data: {
+        source, dry_run: true,
+        header: mergedHeader,
+        supplier_code: supplierCode,
+        delivery_number: deliveryNumber || header.doc_number || "",
+        order_date: orderDate,
+        line_count: lines.length, total_quantity: totalQty,
+        lines,
+      } });
     }
 
-    const supplierId = await resolveSupplier(supplier, supplierCode);
-    let referenceNo: string | null = null;
-    if (supplierId) {
-      const { data: ref } = await supabase.rpc("assign_reference", { p_supplier_id: supplierId });
-      referenceNo = (ref as string) ?? null;
-    }
-
-    const { data: plan, error: e1 } = await supabase
-      .from("delivery_plans")
-      .insert({
-        delivery_number: deliveryNumber,
-        supplier_name: supplier,
-        supplier_id: supplierId,
-        reference_no: referenceNo,
-        order_date: orderDate ?? deliveryDate,
-        delivery_date: deliveryDate,
-        doc_type: "plan",
-        status: "open",
-      })
-      .select("id")
-      .single();
-    if (e1) return json({ message: e1.message }, 400);
-
-    const withId = lines.map((l) => ({ ...l, delivery_plan_id: plan.id }));
-    const { error: e2 } = await supabase.from("delivery_plan_lines").insert(withId);
-    if (e2) return json({ message: e2.message }, 400);
-
-    return json({ data: { source, plan_id: plan.id, delivery_number: deliveryNumber,
-      reference_no: referenceNo, line_count: lines.length, total_quantity: totalQty } });
+    // One-shot save (no review): needs a delivery number now.
+    const num = deliveryNumber || mergedHeader.doc_number;
+    if (!num) return json({ message: "delivery_number is required" }, 400);
+    return await commit({
+      deliveryNumber: num,
+      supplier: mergedHeader.supplier_name,
+      supplierCode,
+      registrationNumber: mergedHeader.registration_number,
+      customerCode: mergedHeader.customer_code,
+      docNumber: mergedHeader.doc_number,
+      deliveryDate,
+      orderDate,
+      lines,
+      source,
+    });
   } catch (e) {
     return json({ message: String(e) }, 500);
   }

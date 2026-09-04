@@ -2056,6 +2056,90 @@ abstract class AppLocalizations {
   /// **'{count} 品目・合計 {total} 本を取り込みました'**
   String planImportedSummary(int count, int total);
 
+  /// No description provided for @planReadAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取る'**
+  String get planReadAction;
+
+  /// No description provided for @planReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読取中…'**
+  String get planReading;
+
+  /// No description provided for @planReviewTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ヘッダーの確認'**
+  String get planReviewTitle;
+
+  /// No description provided for @planReviewHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書から自動で読み取りました。間違い・空欄は登録前にここで修正できます。'**
+  String get planReviewHint;
+
+  /// No description provided for @planCommitAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録する'**
+  String get planCommitAction;
+
+  /// No description provided for @planRegistering.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録中…'**
+  String get planRegistering;
+
+  /// No description provided for @planPreviewCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 品目・{total} 本'**
+  String planPreviewCount(int count, int total);
+
+  /// No description provided for @fieldRegistrationNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号（T…）'**
+  String get fieldRegistrationNumber;
+
+  /// No description provided for @fieldCustomerCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'お客様コード'**
+  String get fieldCustomerCode;
+
+  /// No description provided for @fieldDocNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書番号'**
+  String get fieldDocNumber;
+
+  /// No description provided for @fieldDocDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付'**
+  String get fieldDocDate;
+
+  /// No description provided for @headerUnreadHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取れませんでした。入力してください'**
+  String get headerUnreadHint;
+
+  /// No description provided for @planNeedsReviewBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認'**
+  String get planNeedsReviewBadge;
+
+  /// No description provided for @planUnidentifiedNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名を読み取れなかったため「UNKNOWN」枠の識別番号を採番しました。仕入先を入力すると正しい会社に付け替えられます。'**
+  String get planUnidentifiedNote;
+
   /// No description provided for @referenceNoLabel.
   ///
   /// In ja, this message translates to:

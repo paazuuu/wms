@@ -213,6 +213,13 @@ class _DeliveryPlanCard extends StatelessWidget {
                           icon: Icons.list_alt_outlined,
                           dense: true,
                         ),
+                        if (plan.needsReview)
+                          StatusPill(
+                            tone: StatusTone.warning,
+                            label: l10n.planNeedsReviewBadge,
+                            icon: Icons.help_outline,
+                            dense: true,
+                          ),
                       ],
                     ),
                   ],

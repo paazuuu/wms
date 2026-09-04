@@ -19,6 +19,7 @@ class DeliveryPlan extends Equatable {
     this.registrationNumber,
     this.referenceNo,
     this.orderDate,
+    this.needsReview = false,
     this.status = DeliveryPlanStatus.open,
     this.lines = const [],
     int? lineCount,
@@ -47,6 +48,10 @@ class DeliveryPlan extends Equatable {
   /// Order date (注文日) carried for traceability, as a display string.
   final String? orderDate;
 
+  /// The company could not be read at import, so this plan is in the UNKNOWN
+  /// reference series and wants a manual supplier assignment.
+  final bool needsReview;
+
   final DeliveryPlanStatus status;
 
   final List<DeliveryPlanLine> lines;
@@ -74,6 +79,7 @@ class DeliveryPlan extends Equatable {
       registrationNumber: json['registration_number'] as String?,
       referenceNo: json['reference_no'] as String?,
       orderDate: json['order_date']?.toString(),
+      needsReview: json['needs_review'] == true,
       status: DeliveryPlanStatus.fromWire(json['status'] as String?),
       lines: rawLines
           .map((e) => DeliveryPlanLine.fromJson(e as Map<String, dynamic>))

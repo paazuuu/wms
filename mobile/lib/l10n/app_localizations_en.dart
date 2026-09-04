@@ -1113,6 +1113,52 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get planReadAction => 'Read note';
+
+  @override
+  String get planReading => 'Reading…';
+
+  @override
+  String get planReviewTitle => 'Check the header';
+
+  @override
+  String get planReviewHint =>
+      'Fields were auto-read from the note. Anything wrong or blank can be edited here before you register it.';
+
+  @override
+  String get planCommitAction => 'Register';
+
+  @override
+  String get planRegistering => 'Registering…';
+
+  @override
+  String planPreviewCount(int count, int total) {
+    return '$count items · $total units';
+  }
+
+  @override
+  String get fieldRegistrationNumber => 'Registration no. (T…)';
+
+  @override
+  String get fieldCustomerCode => 'Customer code';
+
+  @override
+  String get fieldDocNumber => 'Delivery-note no.';
+
+  @override
+  String get fieldDocDate => 'Date';
+
+  @override
+  String get headerUnreadHint => 'Could not read — please enter';
+
+  @override
+  String get planNeedsReviewBadge => 'Needs check';
+
+  @override
+  String get planUnidentifiedNote =>
+      'The company could not be read, so this was filed under the “UNKNOWN” series. Enter the supplier to reassign it.';
+
+  @override
   String get referenceNoLabel => 'Ref. no.';
 
   @override

@@ -20,12 +20,17 @@ class _FakeRepo implements DeliveryRepository {
       ApiSuccess(_plan());
 
   @override
-  Future<ApiResult<PlanImportResult>> importPlan({
+  Future<ApiResult<ImportPreview>> previewPlan({
     required MultipartFile file,
-    required String deliveryNumber,
+    String? deliveryNumber,
     String? supplier,
     String? supplierCode,
   }) async =>
+      const ApiSuccess(ImportPreview(
+          source: 'test', lineCount: 0, totalQuantity: 0, lines: []));
+
+  @override
+  Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit) async =>
       const ApiSuccess(
           PlanImportResult(planId: 1, lineCount: 0, totalQuantity: 0));
 
