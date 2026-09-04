@@ -57,17 +57,26 @@ type Rec = {
   qty: number;
   product_code: string;
   product_name: string;
+  spec: string | null;
   unit: number | null;
   amount: number | null;
+  tax_rate: number | null;
   order_date: string | null;
 };
 
 const QTY_KEYS = ["発注数量", "数量", "発注数", "数"];
 const MAKER_KEYS = ["メーカー", "maker", "ﾒｰｶｰ"];
 const PNUM_KEYS = ["品番", "項目", "商品コード", "品名"];
+const SPEC_KEYS = ["規格", "仕様"];
 const UNIT_KEYS = ["単価", "定価"];
 const AMOUNT_KEYS = ["金額", "調達合計金額"];
+const TAX_KEYS = ["税率", "消費税率"];
 const DATE_KEYS = ["注文日", "発注日", "日付", "作成日", "納品日"];
+
+function toNum(v: unknown): number | null {
+  const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(n) && String(v ?? "").trim() !== "" ? n : null;
+}
 
 function parseXlsx(bytes: Uint8Array): Rec[] {
   const wb = XLSX.read(bytes, { type: "array", cellDates: true });
@@ -108,8 +117,10 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
   };
   const makerCol = findCol(MAKER_KEYS);
   const pnumCol = findCol(PNUM_KEYS);
+  const specCol = findCol(SPEC_KEYS);
   const unitCol = findCol(UNIT_KEYS);
   const amountCol = findCol(AMOUNT_KEYS);
+  const taxCol = findCol(TAX_KEYS);
   const dateCol = findCol(DATE_KEYS);
   const cell = (r: unknown[], c: number) => (c >= 0 && c < r.length ? r[c] : null);
 
@@ -119,13 +130,16 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
     if (!isJan(jan)) continue;
     const maker = cell(r, makerCol) ?? "";
     const pnum = cell(r, pnumCol) ?? "";
+    const spec = cell(r, specCol);
     out.push({
       jan,
       qty: toInt(cell(r, qtyCol)) ?? 0,
       product_code: String(pnum),
       product_name: `${maker} ${pnum}`.trim(),
+      spec: spec == null ? null : String(spec).trim() || null,
       unit: toInt(cell(r, unitCol)),
       amount: toInt(cell(r, amountCol)),
+      tax_rate: toNum(cell(r, taxCol)),
       order_date: dateStr(cell(r, dateCol)),
     });
   }
@@ -134,9 +148,11 @@ function parseXlsx(bytes: Uint8Array): Rec[] {
 
 const PROMPT =
   "この画像/PDFは日本の物流の納品書または注文明細です。明細表を抽出し、各行を " +
-  "{jan_code, product_name, quantity} のJSONで返してください。jan_code は商品の" +
-  "バーコード数字（13桁または8桁）で半角数字のみ・ハイフンや空白なし。住所・電話・" +
-  "登録番号(Tで始まる番号)・合計金額はJANとして扱わない。数量が読めない行は quantity を省略。";
+  "{jan_code, product_name, spec, quantity, unit_price, amount, tax_rate} のJSONで" +
+  "返してください。jan_code は商品のバーコード数字（13桁または8桁）で半角数字のみ・" +
+  "ハイフンや空白なし。spec は規格/仕様の列、unit_price は単価、amount は金額、" +
+  "tax_rate は税率(%)の数値。読めない項目は省略。住所・電話・登録番号(Tで始まる番号)・" +
+  "合計金額はJANとして扱わない。数量が読めない行は quantity を省略。";
 const SCHEMA = {
   type: "object",
   properties: {
@@ -147,7 +163,11 @@ const SCHEMA = {
         properties: {
           jan_code: { type: "string" },
           product_name: { type: "string" },
+          spec: { type: "string" },
           quantity: { type: "integer" },
+          unit_price: { type: "number" },
+          amount: { type: "number" },
+          tax_rate: { type: "number" },
         },
         required: ["jan_code"],
       },
@@ -200,8 +220,10 @@ async function parseWithGemini(bytes: Uint8Array, mime: string): Promise<Rec[]> 
     if (!isJan(jan)) continue;
     out.push({
       jan, qty: toInt(ln.quantity) ?? 0, product_code: "",
-      product_name: String(ln.product_name ?? ""), unit: null, amount: null,
-      order_date: null,
+      product_name: String(ln.product_name ?? ""),
+      spec: ln.spec == null ? null : String(ln.spec).trim() || null,
+      unit: toInt(ln.unit_price), amount: toInt(ln.amount),
+      tax_rate: toNum(ln.tax_rate), order_date: null,
     });
   }
   return out;
@@ -214,13 +236,16 @@ function aggregate(records: Rec[]) {
     if (!m) {
       m = {
         jan_code: r.jan, product_code: r.product_code,
-        product_name: r.product_name, planned_quantity: 0,
-        unit_price: r.unit, amount: 0, order_date: r.order_date,
+        product_name: r.product_name, spec: r.spec, planned_quantity: 0,
+        unit_price: r.unit, amount: 0, tax_rate: r.tax_rate,
+        order_date: r.order_date,
       };
       map.set(r.jan, m);
     }
     m.planned_quantity = (m.planned_quantity as number) + (r.qty || 0);
     if (r.amount) m.amount = (m.amount as number) + r.amount;
+    if (m.spec == null && r.spec != null) m.spec = r.spec;
+    if (m.tax_rate == null && r.tax_rate != null) m.tax_rate = r.tax_rate;
   }
   return [...map.values()];
 }

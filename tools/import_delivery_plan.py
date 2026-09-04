@@ -46,8 +46,10 @@ DEFAULT_ANON = (
 QTY_KEYS = ["発注数量", "数量", "発注数", "数"]
 MAKER_KEYS = ["メーカー", "maker", "ﾒｰｶｰ"]
 PNUM_KEYS = ["品番", "項目", "商品コード", "品名"]
+SPEC_KEYS = ["規格", "仕様"]
 UNIT_KEYS = ["単価", "定価"]
 AMOUNT_KEYS = ["金額", "調達合計金額"]
+TAX_KEYS = ["税率", "消費税率"]
 
 
 def normalize_jan(value):
@@ -78,6 +80,13 @@ def _to_int(v):
         return None
 
 
+def _to_num(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def _aggregate(records):
     """records: list of dicts {jan, qty, product_code, product_name, unit, amount}."""
     agg, order = {}, []
@@ -88,14 +97,20 @@ def _aggregate(records):
                 "jan_code": jan,
                 "product_code": r.get("product_code") or "",
                 "product_name": (r.get("product_name") or "").strip(),
+                "spec": r.get("spec"),
                 "planned_quantity": 0,
                 "unit_price": r.get("unit"),
                 "amount": 0,
+                "tax_rate": r.get("tax_rate"),
             }
             order.append(jan)
         agg[jan]["planned_quantity"] += r.get("qty") or 0
         if r.get("amount"):
             agg[jan]["amount"] += r["amount"]
+        if agg[jan]["spec"] is None and r.get("spec") is not None:
+            agg[jan]["spec"] = r.get("spec")
+        if agg[jan]["tax_rate"] is None and r.get("tax_rate") is not None:
+            agg[jan]["tax_rate"] = r.get("tax_rate")
     return [agg[j] for j in order]
 
 
@@ -133,8 +148,10 @@ def parse_xlsx(path):
 
     maker_col = find_col(MAKER_KEYS)
     pnum_col = find_col(PNUM_KEYS)
+    spec_col = find_col(SPEC_KEYS)
     unit_col = find_col(UNIT_KEYS)
     amount_col = find_col(AMOUNT_KEYS)
+    tax_col = find_col(TAX_KEYS)
 
     def cell(r, c):
         return r[c] if (c is not None and c < len(r)) else None
@@ -146,13 +163,16 @@ def parse_xlsx(path):
             continue
         maker = cell(r, maker_col) or ""
         pnum = cell(r, pnum_col) or ""
+        spec = cell(r, spec_col)
         records.append({
             "jan": jan,
             "qty": _to_int(cell(r, qty_col)) or 0,
             "product_code": str(pnum),
             "product_name": f"{maker} {pnum}".strip(),
+            "spec": (str(spec).strip() or None) if spec is not None else None,
             "unit": _to_int(cell(r, unit_col)),
             "amount": _to_int(cell(r, amount_col)),
+            "tax_rate": _to_num(cell(r, tax_col)),
         })
     detected = {"jan_col": jan_col, "qty_col": qty_col, "maker_col": maker_col,
                 "pnum_col": pnum_col, "unit_col": unit_col, "amount_col": amount_col}
