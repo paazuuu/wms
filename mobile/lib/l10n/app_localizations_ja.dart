@@ -943,6 +943,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deliveryStatusReconciling => '照合中';
 
   @override
+  String get deliveryStatusPartial => '部分納品';
+
+  @override
   String get deliveryStatusCompleted => '照合済み';
 
   @override
@@ -1024,6 +1027,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get diffLabel => '差';
 
   @override
+  String get reconReceivedPrev => '既納';
+
+  @override
+  String get reconThisTime => '今回';
+
+  @override
+  String get reconRemaining => '残';
+
+  @override
   String get completeReconcile => '照合を完了';
 
   @override
@@ -1034,6 +1046,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reconcileConfirmDiscrepancy => '差異があります（不足・過剰・想定外）。このまま完了しますか？';
+
+  @override
+  String get reconcilePartialQ => '未納の品目が残っています';
+
+  @override
+  String reconcilePartialBody(int count) {
+    return '未納が $count 本残っています。部分納品として保存し残りを未納リストに残しますか？　それとも完了にして残りを欠品として扱いますか？';
+  }
+
+  @override
+  String get reconcileKeepOpen => '部分納品として保存';
+
+  @override
+  String get reconcileFinalizeShort => '完了にする（残りは欠品）';
+
+  @override
+  String get reconcilePartialSaved => '部分納品として保存しました（未納を継続保持）';
 
   @override
   String get reconcileDone => '照合を完了しました';

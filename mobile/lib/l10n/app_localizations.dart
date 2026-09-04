@@ -1810,6 +1810,12 @@ abstract class AppLocalizations {
   /// **'照合中'**
   String get deliveryStatusReconciling;
 
+  /// No description provided for @deliveryStatusPartial.
+  ///
+  /// In ja, this message translates to:
+  /// **'部分納品'**
+  String get deliveryStatusPartial;
+
   /// No description provided for @deliveryStatusCompleted.
   ///
   /// In ja, this message translates to:
@@ -1954,6 +1960,24 @@ abstract class AppLocalizations {
   /// **'差'**
   String get diffLabel;
 
+  /// No description provided for @reconReceivedPrev.
+  ///
+  /// In ja, this message translates to:
+  /// **'既納'**
+  String get reconReceivedPrev;
+
+  /// No description provided for @reconThisTime.
+  ///
+  /// In ja, this message translates to:
+  /// **'今回'**
+  String get reconThisTime;
+
+  /// No description provided for @reconRemaining.
+  ///
+  /// In ja, this message translates to:
+  /// **'残'**
+  String get reconRemaining;
+
   /// No description provided for @completeReconcile.
   ///
   /// In ja, this message translates to:
@@ -1977,6 +2001,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'差異があります（不足・過剰・想定外）。このまま完了しますか？'**
   String get reconcileConfirmDiscrepancy;
+
+  /// No description provided for @reconcilePartialQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'未納の品目が残っています'**
+  String get reconcilePartialQ;
+
+  /// No description provided for @reconcilePartialBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'未納が {count} 本残っています。部分納品として保存し残りを未納リストに残しますか？　それとも完了にして残りを欠品として扱いますか？'**
+  String reconcilePartialBody(int count);
+
+  /// No description provided for @reconcileKeepOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'部分納品として保存'**
+  String get reconcileKeepOpen;
+
+  /// No description provided for @reconcileFinalizeShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了にする（残りは欠品）'**
+  String get reconcileFinalizeShort;
+
+  /// No description provided for @reconcilePartialSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'部分納品として保存しました（未納を継続保持）'**
+  String get reconcilePartialSaved;
 
   /// No description provided for @reconcileDone.
   ///

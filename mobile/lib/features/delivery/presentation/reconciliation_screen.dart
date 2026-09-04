@@ -14,6 +14,10 @@ import '../domain/delivery_plan.dart';
 import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
 
+/// How the operator chose to close a reconciliation that still has outstanding
+/// items.
+enum _FinishChoice { cancel, partial, finalize }
+
 /// Reconciles one delivery plan against what physically arrived. Loads the plan
 /// (with its expected lines), then hands off to [_ReconcileView] for the live
 /// scan/OCR session.
@@ -154,34 +158,65 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
       _snack(l10n.reconcileEmptyCounts, tone: StatusTone.warning);
       return;
     }
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.reconcileConfirmQ),
-        content: Text(result.hasDiscrepancies
-            ? l10n.reconcileConfirmDiscrepancy
-            : l10n.reconcileConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionComplete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
 
-    final apiResult = await _controller.submit();
+    // Split delivery: when something is still outstanding, let the operator keep
+    // the plan open (carry the remainder) or finalize it short.
+    final _FinishChoice? choice;
+    if (result.hasOutstanding) {
+      choice = await showDialog<_FinishChoice>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.reconcilePartialQ),
+          content: Text(l10n.reconcilePartialBody(result.outstandingTotal)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, _FinishChoice.cancel),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, _FinishChoice.finalize),
+              child: Text(l10n.reconcileFinalizeShort),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, _FinishChoice.partial),
+              child: Text(l10n.reconcileKeepOpen),
+            ),
+          ],
+        ),
+      );
+    } else {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.reconcileConfirmQ),
+          content: Text(result.hasDiscrepancies
+              ? l10n.reconcileConfirmDiscrepancy
+              : l10n.reconcileConfirmBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.actionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.actionComplete),
+            ),
+          ],
+        ),
+      );
+      choice = ok == true ? _FinishChoice.finalize : _FinishChoice.cancel;
+    }
+    if (choice == null || choice == _FinishChoice.cancel || !mounted) return;
+
+    final keepOpen = choice == _FinishChoice.partial;
+    final apiResult = await _controller.submit(complete: !keepOpen);
     if (!mounted) return;
     apiResult.when(
       success: (_) {
         ref.invalidate(deliveryPlansProvider);
         ref.invalidate(deliveryPlanDetailProvider(_plan.id));
-        _snack(l10n.reconcileDone, tone: StatusTone.success);
+        _snack(keepOpen ? l10n.reconcilePartialSaved : l10n.reconcileDone,
+            tone: StatusTone.success);
         Navigator.of(context).pop();
       },
       failure: (f) => _snack(f.message, tone: StatusTone.danger),
@@ -446,9 +481,12 @@ class _ReconLineCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
-                  _QtyStat(label: l10n.deliveryPlanned, value: line.plannedQuantity),
-                  _QtyStat(label: l10n.actualLabel, value: line.actualQuantity),
-                  _DiffStat(label: l10n.diffLabel, value: line.difference),
+                  _QtyStat(
+                      label: l10n.deliveryPlanned, value: line.plannedQuantity),
+                  _QtyStat(
+                      label: l10n.reconReceivedPrev, value: line.alreadyReceived),
+                  _QtyStat(label: l10n.reconThisTime, value: line.actualQuantity),
+                  _RemainStat(label: l10n.reconRemaining, value: line.remaining),
                 ],
               ),
             ],
@@ -488,8 +526,9 @@ class _QtyStat extends StatelessWidget {
   }
 }
 
-class _DiffStat extends StatelessWidget {
-  const _DiffStat({required this.label, required this.value});
+/// Outstanding (未納) units for a line: emphasized when anything remains.
+class _RemainStat extends StatelessWidget {
+  const _RemainStat({required this.label, required this.value});
 
   final String label;
   final int value;
@@ -498,10 +537,7 @@ class _DiffStat extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final color = value == 0
-        ? scheme.onSurfaceVariant
-        : (value > 0 ? scheme.error : scheme.tertiary);
-    final text = value > 0 ? '+$value' : '$value';
+    final color = value > 0 ? scheme.error : scheme.onSurfaceVariant;
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +547,7 @@ class _DiffStat extends StatelessWidget {
                   ?.copyWith(color: scheme.onSurfaceVariant)),
           const SizedBox(height: 2),
           Text(
-            text,
+            '$value',
             style: theme.textTheme.titleMedium?.copyWith(
                 fontFamily: 'FiraCode',
                 fontWeight: FontWeight.w700,

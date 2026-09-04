@@ -943,6 +943,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deliveryStatusReconciling => '核对中';
 
   @override
+  String get deliveryStatusPartial => '部分送货';
+
+  @override
   String get deliveryStatusCompleted => '已核对';
 
   @override
@@ -1024,6 +1027,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diffLabel => '差';
 
   @override
+  String get reconReceivedPrev => '已收';
+
+  @override
+  String get reconThisTime => '本次';
+
+  @override
+  String get reconRemaining => '余';
+
+  @override
   String get completeReconcile => '完成核对';
 
   @override
@@ -1034,6 +1046,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reconcileConfirmDiscrepancy => '存在差异（不足・超量・计划外）。仍要完成吗？';
+
+  @override
+  String get reconcilePartialQ => '仍有未送达的项目';
+
+  @override
+  String reconcilePartialBody(int count) {
+    return '还有 $count 件未送达。要存为部分送货并把其余保留在未送达清单中，还是现在标记完成并把其余视为缺货？';
+  }
+
+  @override
+  String get reconcileKeepOpen => '存为部分送货';
+
+  @override
+  String get reconcileFinalizeShort => '标记完成（其余缺货）';
+
+  @override
+  String get reconcilePartialSaved => '已存为部分送货（保留未送达项目）';
 
   @override
   String get reconcileDone => '核对已完成';

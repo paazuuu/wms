@@ -7,6 +7,10 @@ enum DeliveryPlanStatus {
   /// A reconciliation session is in progress.
   reconciling('reconciling'),
 
+  /// Partially delivered: some received, some still outstanding (未納). Kept
+  /// open so the remainder can be received on a later delivery.
+  partial('partial'),
+
   /// Reconciliation submitted and closed.
   completed('completed');
 
@@ -17,6 +21,7 @@ enum DeliveryPlanStatus {
 
   static DeliveryPlanStatus fromWire(String? value) => switch (value) {
         'reconciling' => DeliveryPlanStatus.reconciling,
+        'partial' => DeliveryPlanStatus.partial,
         'completed' => DeliveryPlanStatus.completed,
         _ => DeliveryPlanStatus.open,
       };

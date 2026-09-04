@@ -69,6 +69,7 @@ class ReconLine extends Equatable {
     required this.plannedQuantity,
     required this.actualQuantity,
     required this.status,
+    this.alreadyReceived = 0,
     this.planLine,
     this.source,
   });
@@ -77,17 +78,29 @@ class ReconLine extends Equatable {
   final DeliveryPlanLine? planLine;
   final String janCode;
   final int plannedQuantity;
+
+  /// Received before this session, from earlier (split) deliveries.
+  final int alreadyReceived;
+
+  /// Counted in THIS session.
   final int actualQuantity;
   final ReconLineStatus status;
   final CountSource? source;
 
-  int get difference => actualQuantity - plannedQuantity;
+  /// Cumulative received including this session.
+  int get receivedTotal => alreadyReceived + actualQuantity;
+
+  /// Still outstanding (未納) after this session, never negative.
+  int get remaining =>
+      (plannedQuantity - receivedTotal).clamp(0, plannedQuantity);
+
+  int get difference => receivedTotal - plannedQuantity;
 
   String get productName => planLine?.productName ?? '';
 
   @override
   List<Object?> get props =>
-      [janCode, plannedQuantity, actualQuantity, status];
+      [janCode, plannedQuantity, alreadyReceived, actualQuantity, status];
 }
 
 /// A fully computed comparison of a plan against the counted items.
@@ -113,6 +126,14 @@ class ReconciliationResult extends Equatable {
       lines.where((l) => l.planLine != null).length - pendingCount;
 
   int get plannedLineCount => lines.where((l) => l.planLine != null).length;
+
+  /// Total still outstanding (未納) across the plan after this session — the
+  /// number of units that would carry over to a future delivery.
+  int get outstandingTotal => lines.fold(0, (sum, l) => sum + l.remaining);
+
+  /// True when at least one planned line is still short after this session, so
+  /// the plan could be kept open as a partial delivery.
+  bool get hasOutstanding => outstandingTotal > 0;
 
   /// True when every planned line matches and nothing unexpected arrived.
   bool get isClean =>
@@ -154,9 +175,11 @@ ReconciliationResult buildReconciliation(
       planLine: planLine,
       janCode: planLine.janCode,
       plannedQuantity: planLine.plannedQuantity,
+      alreadyReceived: planLine.receivedQuantity,
       actualQuantity: actual,
       source: counted?.source,
-      status: _statusFor(planLine.plannedQuantity, actual),
+      status: _statusFor(
+          planLine.plannedQuantity, planLine.receivedQuantity + actual),
     ));
   }
 
@@ -174,9 +197,11 @@ ReconciliationResult buildReconciliation(
   return ReconciliationResult(lines: lines);
 }
 
-ReconLineStatus _statusFor(int planned, int actual) {
-  if (actual == 0) return ReconLineStatus.pending;
-  if (actual == planned) return ReconLineStatus.matched;
-  if (actual < planned) return ReconLineStatus.shortfall;
+/// Status of a planned line from its cumulative received quantity (earlier
+/// deliveries plus this session).
+ReconLineStatus _statusFor(int planned, int received) {
+  if (received == 0) return ReconLineStatus.pending;
+  if (received == planned) return ReconLineStatus.matched;
+  if (received < planned) return ReconLineStatus.shortfall;
   return ReconLineStatus.over;
 }

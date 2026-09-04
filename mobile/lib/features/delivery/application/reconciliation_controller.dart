@@ -71,15 +71,21 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
   void removeJan(String janCode) => _remove(normalizeJan(janCode));
 
   /// Seed counts from OCR of the delivery note. Planned JANs are pre-filled to
-  /// their planned quantity (a safe, reviewable default); JANs not on the plan
-  /// surface as unexpected using the hint, or one unit. Existing counts win.
+  /// the quantity still outstanding (so a partly-delivered line seeds only its
+  /// remainder); JANs not on the plan surface as unexpected using the hint, or
+  /// one unit. Existing counts win.
   void applyOcr(List<OcrLine> ocrLines) {
     final next = Map<String, CountedItem>.from(state.counts);
     for (final ocr in ocrLines) {
       final code = normalizeJan(ocr.janCode);
       if (code.isEmpty || next.containsKey(code)) continue;
-      final planned = _planLines[code]?.plannedQuantity;
-      final quantity = ocr.quantityHint ?? planned ?? 1;
+      final line = _planLines[code];
+      final outstanding = line == null
+          ? null
+          : (line.outstandingQuantity > 0
+              ? line.outstandingQuantity
+              : line.plannedQuantity);
+      final quantity = ocr.quantityHint ?? outstanding ?? 1;
       next[code] = CountedItem(
         janCode: code,
         quantity: quantity,

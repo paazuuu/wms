@@ -969,6 +969,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryStatusReconciling => 'Reconciling';
 
   @override
+  String get deliveryStatusPartial => 'Partial';
+
+  @override
   String get deliveryStatusCompleted => 'Reconciled';
 
   @override
@@ -1052,6 +1055,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diffLabel => 'Diff';
 
   @override
+  String get reconReceivedPrev => 'Received';
+
+  @override
+  String get reconThisTime => 'This time';
+
+  @override
+  String get reconRemaining => 'Left';
+
+  @override
   String get completeReconcile => 'Complete check';
 
   @override
@@ -1064,6 +1076,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reconcileConfirmDiscrepancy =>
       'There are discrepancies (short, over or unexpected). Complete anyway?';
+
+  @override
+  String get reconcilePartialQ => 'Some items are still outstanding';
+
+  @override
+  String reconcilePartialBody(int count) {
+    return '$count unit(s) are still outstanding. Save as a partial delivery and keep the rest on the outstanding list, or finalize now and treat the rest as short?';
+  }
+
+  @override
+  String get reconcileKeepOpen => 'Save as partial';
+
+  @override
+  String get reconcileFinalizeShort => 'Finalize (rest short)';
+
+  @override
+  String get reconcilePartialSaved =>
+      'Saved as partial — the outstanding items are kept';
 
   @override
   String get reconcileDone => 'Reconciliation completed';

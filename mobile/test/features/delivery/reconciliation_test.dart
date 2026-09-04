@@ -87,6 +87,72 @@ void main() {
         ['4902505632037', '4901480241418']);
   });
 
+  group('split delivery (cumulative received)', () {
+    DeliveryPlan partlyReceived() => const DeliveryPlan(
+          id: 1,
+          deliveryNumber: '0901',
+          lines: [
+            // 60 of 100 already arrived on an earlier delivery.
+            DeliveryPlanLine(
+                id: 10,
+                janCode: '4902505632037',
+                productName: 'Pen',
+                plannedQuantity: 100,
+                receivedQuantity: 60),
+            DeliveryPlanLine(
+                id: 11,
+                janCode: '4901480241418',
+                productName: 'Stapler',
+                plannedQuantity: 20,
+                receivedQuantity: 20),
+          ],
+        );
+
+    test('a fully-received line reads matched even with nothing counted now',
+        () {
+      final result = buildReconciliation(partlyReceived(), const {});
+      final stapler =
+          result.lines.firstWhere((l) => l.janCode == '4901480241418');
+      expect(stapler.status, ReconLineStatus.matched);
+      expect(stapler.remaining, 0);
+    });
+
+    test('a partly-received line is short until the remainder arrives', () {
+      final result = buildReconciliation(partlyReceived(), const {});
+      final pen =
+          result.lines.firstWhere((l) => l.janCode == '4902505632037');
+      expect(pen.status, ReconLineStatus.shortfall);
+      expect(pen.alreadyReceived, 60);
+      expect(pen.remaining, 40);
+      expect(result.outstandingTotal, 40);
+      expect(result.hasOutstanding, isTrue);
+    });
+
+    test('counting the remainder clears the outstanding amount', () {
+      final result = buildReconciliation(partlyReceived(), {
+        '4902505632037': _c('4902505632037', 40),
+      });
+      final pen =
+          result.lines.firstWhere((l) => l.janCode == '4902505632037');
+      expect(pen.receivedTotal, 100);
+      expect(pen.status, ReconLineStatus.matched);
+      expect(pen.remaining, 0);
+      expect(result.outstandingTotal, 0);
+      expect(result.hasOutstanding, isFalse);
+    });
+
+    test('over-receiving the remainder is flagged over', () {
+      final result = buildReconciliation(partlyReceived(), {
+        '4902505632037': _c('4902505632037', 50),
+      });
+      final pen =
+          result.lines.firstWhere((l) => l.janCode == '4902505632037');
+      expect(pen.receivedTotal, 110);
+      expect(pen.status, ReconLineStatus.over);
+      expect(pen.remaining, 0);
+    });
+  });
+
   test('a differently-formatted counted JAN still matches the plan', () {
     // Plan stores a clean 13-digit code; the count arrives hyphenated + with a
     // full-width digit. Canonical matching must treat them as the same item.

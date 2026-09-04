@@ -8,6 +8,7 @@ class DeliveryPlanLine extends Equatable {
     required this.id,
     required this.janCode,
     required this.plannedQuantity,
+    this.receivedQuantity = 0,
     this.productCode,
     this.productName = '',
     this.spec,
@@ -23,6 +24,15 @@ class DeliveryPlanLine extends Equatable {
 
   /// Expected quantity from the supplier's Excel.
   final int plannedQuantity;
+
+  /// Quantity received so far across every (split) delivery. Persisted on the
+  /// plan line so the outstanding amount survives between sessions.
+  final int receivedQuantity;
+
+  /// Still outstanding (未納): planned minus what has already been received,
+  /// never negative.
+  int get outstandingQuantity =>
+      (plannedQuantity - receivedQuantity).clamp(0, plannedQuantity);
 
   /// Supplier's own product number (商品番号), if provided.
   final String? productCode;
@@ -47,6 +57,7 @@ class DeliveryPlanLine extends Equatable {
       id: _asInt(json['id']) ?? 0,
       janCode: (json['jan_code'] ?? json['jan'] ?? '').toString(),
       plannedQuantity: _asInt(json['planned_quantity']) ?? 0,
+      receivedQuantity: _asInt(json['received_quantity']) ?? 0,
       productCode: json['product_code']?.toString(),
       productName: json['product_name'] as String? ?? '',
       spec: json['spec'] as String?,
