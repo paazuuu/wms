@@ -8,6 +8,7 @@ import '../data/mlkit_delivery_note_scanner.dart';
 import '../data/remote_delivery_note_scanner.dart';
 import '../data/stock_repository.dart';
 import '../domain/delivery_plan.dart';
+import '../domain/receipt.dart';
 import '../domain/stock_item.dart';
 import 'reconciliation_controller.dart';
 
@@ -71,25 +72,44 @@ final deliveryNoteScannerProvider = Provider<DeliveryNoteScanner>((ref) {
   return scanner;
 });
 
-/// Delivery plans awaiting a physical check: freshly imported (`open`) plus any
-/// already mid-reconciliation, newest first.
+/// Whether the plan list also shows already-reconciled plans (for corrections).
+final showCompletedPlansProvider = StateProvider<bool>((_) => false);
+
+/// Delivery plans awaiting a physical check: freshly imported (`open`), any
+/// mid-reconciliation, and partly-delivered (`partial`, i.e. still carrying an
+/// outstanding 未納 list), newest first. Completed plans are included only when
+/// [showCompletedPlansProvider] is on, so a mistaken receipt can be corrected.
 final deliveryPlansProvider =
     FutureProvider.autoDispose<List<DeliveryPlan>>((ref) async {
   final repository = ref.watch(deliveryRepositoryProvider);
-  final open = await repository.list(status: 'open');
-  final reconciling = await repository.list(status: 'reconciling');
+  final includeCompleted = ref.watch(showCompletedPlansProvider);
+  final statuses = [
+    'open',
+    'reconciling',
+    'partial',
+    if (includeCompleted) 'completed',
+  ];
 
   final plans = <DeliveryPlan>[];
-  open.when(
-    success: plans.addAll,
-    failure: (f) => throw Exception(f.message),
-  );
-  reconciling.when(
-    success: plans.addAll,
-    failure: (f) => throw Exception(f.message),
-  );
+  for (final status in statuses) {
+    final result = await repository.list(status: status);
+    result.when(
+      success: plans.addAll,
+      failure: (f) => throw Exception(f.message),
+    );
+  }
   plans.sort((a, b) => b.id.compareTo(a.id));
   return plans;
+});
+
+/// The receipts (reconciliations) recorded against one plan, newest first.
+final planReceiptsProvider = FutureProvider.autoDispose
+    .family<List<Receipt>, int>((ref, planId) async {
+  final result = await ref.watch(deliveryRepositoryProvider).receipts(planId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
 });
 
 /// A single delivery plan with its expected lines, for reconciliation.

@@ -1084,6 +1084,12 @@ abstract class AppLocalizations {
   /// **'完了'**
   String get actionComplete;
 
+  /// No description provided for @actionContinue.
+  ///
+  /// In ja, this message translates to:
+  /// **'続ける'**
+  String get actionContinue;
+
   /// No description provided for @fieldAssemblyProduct.
   ///
   /// In ja, this message translates to:
@@ -2031,6 +2037,90 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'部分納品として保存しました（未納を継続保持）'**
   String get reconcilePartialSaved;
+
+  /// No description provided for @reconNoteReference.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get reconNoteReference;
+
+  /// No description provided for @reconAlreadyDoneQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この予定は照合済みです'**
+  String get reconAlreadyDoneQ;
+
+  /// No description provided for @reconAlreadyDoneBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加で取り込むと在庫にもう一度加算されます。間違いを直す場合は、受領履歴から該当の受領を取り消してください。'**
+  String get reconAlreadyDoneBody;
+
+  /// No description provided for @doubleScanWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'{code} が予定数を超えました（二重スキャン？）'**
+  String doubleScanWarning(String code);
+
+  /// No description provided for @receiptHistoryTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領履歴／訂正'**
+  String get receiptHistoryTitle;
+
+  /// No description provided for @receiptEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領履歴はまだありません。'**
+  String get receiptEmpty;
+
+  /// No description provided for @receiptEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この予定を照合するたびに、受領がここに記録され、取り消せます。'**
+  String get receiptEmptyBody;
+
+  /// No description provided for @receiptCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領を取消'**
+  String get receiptCancelAction;
+
+  /// No description provided for @receiptCancelledBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消済み'**
+  String get receiptCancelledBadge;
+
+  /// No description provided for @receiptCancelQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受領を取り消しますか？'**
+  String get receiptCancelQ;
+
+  /// No description provided for @receiptCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受領で加算した数量と在庫を差し戻します。'**
+  String get receiptCancelBody;
+
+  /// No description provided for @receiptCancelledDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領を取り消しました'**
+  String get receiptCancelledDone;
+
+  /// No description provided for @showCompletedPlans.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合済みも表示'**
+  String get showCompletedPlans;
+
+  /// No description provided for @hideCompletedPlans.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合済みを隠す'**
+  String get hideCompletedPlans;
 
   /// No description provided for @reconcileDone.
   ///

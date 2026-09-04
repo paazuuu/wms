@@ -6,6 +6,7 @@ import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan_line.dart';
 import 'package:wms_mobile/features/delivery/domain/ocr_line.dart';
+import 'package:wms_mobile/features/delivery/domain/receipt.dart';
 import 'package:wms_mobile/features/delivery/domain/reconciliation.dart';
 
 class _FakeRepo implements DeliveryRepository {
@@ -33,6 +34,15 @@ class _FakeRepo implements DeliveryRepository {
   Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit) async =>
       const ApiSuccess(
           PlanImportResult(planId: 1, lineCount: 0, totalQuantity: 0));
+
+  @override
+  Future<ApiResult<List<Receipt>>> receipts(int planId) async =>
+      const ApiSuccess([]);
+
+  @override
+  Future<ApiResult<DeliveryPlan>> cancelReceipt(
+          int planId, int receiptId) async =>
+      ApiSuccess(_plan());
 
   @override
   Future<ApiResult<DeliveryPlan>> reconcile(

@@ -40,11 +40,22 @@ class _DeliveryPlanListScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final plans = ref.watch(deliveryPlansProvider);
+    final showCompleted = ref.watch(showCompletedPlansProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.deliveryPlansTitle),
         actions: [
+          IconButton(
+            tooltip:
+                showCompleted ? l10n.hideCompletedPlans : l10n.showCompletedPlans,
+            isSelected: showCompleted,
+            icon: const Icon(Icons.history_toggle_off),
+            selectedIcon: const Icon(Icons.manage_history),
+            onPressed: () => ref
+                .read(showCompletedPlansProvider.notifier)
+                .update((v) => !v),
+          ),
           IconButton(
             tooltip: l10n.totalStockTitle,
             icon: const Icon(Icons.inventory_2_outlined),

@@ -533,6 +533,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionComplete => '完成';
 
   @override
+  String get actionContinue => '继续';
+
+  @override
   String get fieldAssemblyProduct => '组装产品';
 
   @override
@@ -1063,6 +1066,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reconcilePartialSaved => '已存为部分送货（保留未送达项目）';
+
+  @override
+  String get reconNoteReference => '备注';
+
+  @override
+  String get reconAlreadyDoneQ => '该计划已核对';
+
+  @override
+  String get reconAlreadyDoneBody => '再次录入会重复加入库存。如需更正，请在收货记录中取消对应的收货。';
+
+  @override
+  String doubleScanWarning(String code) {
+    return '$code 已超过计划数量（重复扫描？）';
+  }
+
+  @override
+  String get receiptHistoryTitle => '收货记录／更正';
+
+  @override
+  String get receiptEmpty => '暂无收货记录。';
+
+  @override
+  String get receiptEmptyBody => '每次核对该计划都会在此记录收货，并可取消。';
+
+  @override
+  String get receiptCancelAction => '取消收货';
+
+  @override
+  String get receiptCancelledBadge => '已取消';
+
+  @override
+  String get receiptCancelQ => '要取消这次收货吗？';
+
+  @override
+  String get receiptCancelBody => '将回退这次收货加入的数量和库存。';
+
+  @override
+  String get receiptCancelledDone => '已取消收货';
+
+  @override
+  String get showCompletedPlans => '显示已核对';
+
+  @override
+  String get hideCompletedPlans => '隐藏已核对';
 
   @override
   String get reconcileDone => '核对已完成';

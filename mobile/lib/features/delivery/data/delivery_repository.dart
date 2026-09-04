@@ -4,6 +4,7 @@ import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/reconciliation.dart';
+import '../domain/receipt.dart';
 
 /// One counted line submitted at the end of a reconciliation session.
 class ReconcileEntry {
@@ -201,6 +202,13 @@ abstract class DeliveryRepository {
 
   /// Save the plan with the reviewed (possibly edited) header and lines.
   Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit);
+
+  /// The receipts recorded against a plan, newest first.
+  Future<ApiResult<List<Receipt>>> receipts(int planId);
+
+  /// Void a receipt: reverse its received quantities and stock, and recompute
+  /// the plan status. Returns the updated plan.
+  Future<ApiResult<DeliveryPlan>> cancelReceipt(int planId, int receiptId);
 }
 
 class DeliveryRepositoryImpl implements DeliveryRepository {
@@ -304,6 +312,32 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
           response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<PlanImportResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<Receipt>>> receipts(int planId) async {
+    try {
+      final response = await _dio.get('/delivery-plans/$planId/receipts');
+      final data = (response.data['data'] as List<dynamic>)
+          .map((e) => Receipt.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return ApiSuccess(data);
+    } on DioException catch (e) {
+      return mapDioError<List<Receipt>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<DeliveryPlan>> cancelReceipt(
+      int planId, int receiptId) async {
+    try {
+      final response = await _dio
+          .post('/delivery-plans/$planId/receipts/$receiptId/cancel');
+      return ApiSuccess(
+          DeliveryPlan.fromJson(response.data['data'] as Map<String, dynamic>));
+    } on DioException catch (e) {
+      return mapDioError<DeliveryPlan>(e);
     }
   }
 }

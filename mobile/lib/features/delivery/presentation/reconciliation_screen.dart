@@ -11,8 +11,11 @@ import '../../../core/ui/status_pill.dart';
 import '../application/delivery_providers.dart';
 import '../application/reconciliation_controller.dart';
 import '../domain/delivery_plan.dart';
+import '../domain/delivery_plan_status.dart';
+import '../domain/jan.dart';
 import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
+import 'receipt_history_screen.dart';
 
 /// How the operator chose to close a reconciliation that still has outstanding
 /// items.
@@ -34,6 +37,17 @@ class ReconciliationScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(detail.valueOrNull?.deliveryNumber ?? l10n.featDelivery),
+        actions: [
+          IconButton(
+            tooltip: l10n.receiptHistoryTitle,
+            icon: const Icon(Icons.history),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (_) => ReceiptHistoryScreen(planId: planId)),
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: detail.when(
         data: (plan) => _ReconcileView(plan: plan),
@@ -66,9 +80,65 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
       ref.read(reconciliationControllerProvider(_plan).notifier);
 
   @override
+  void initState() {
+    super.initState();
+    // Re-checking an already-completed plan re-adds to stock: warn once so the
+    // operator uses the receipt history to correct instead of double-importing.
+    if (_plan.status == DeliveryPlanStatus.completed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _warnAlreadyReconciled();
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _scanFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _warnAlreadyReconciled() async {
+    final l10n = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.reconAlreadyDoneQ),
+        content: Text(l10n.reconAlreadyDoneBody),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ReceiptHistoryScreen(planId: _plan.id)));
+            },
+            child: Text(l10n.receiptHistoryTitle),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.actionContinue),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Record a scan and, if it pushes a planned line past its planned quantity,
+  /// warn about a possible double scan — while still keeping the count so a
+  /// genuine over-delivery can be recorded.
+  void _recordScan(String code) {
+    _controller.recordScan(code);
+    final norm = normalizeJan(code);
+    final result = ref.read(reconciliationControllerProvider(_plan)).result;
+    final matches = result.lines
+        .where((l) => normalizeJan(l.janCode) == norm && l.planLine != null)
+        .toList();
+    if (matches.isEmpty) return;
+    final line = matches.first;
+    if (line.receivedTotal > line.plannedQuantity) {
+      final l10n = AppLocalizations.of(context);
+      HapticFeedback.heavyImpact();
+      _snack(l10n.doubleScanWarning(line.janCode), tone: StatusTone.warning);
+    }
   }
 
   Future<void> _runOcr() async {
@@ -270,7 +340,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   focusNode: _scanFocus,
                   autofocusOnWide: true,
                   hintText: l10n.scanDeliveryHint,
-                  onSubmitted: _controller.recordScan,
+                  onSubmitted: _recordScan,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

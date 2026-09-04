@@ -533,6 +533,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionComplete => '完了';
 
   @override
+  String get actionContinue => '続ける';
+
+  @override
   String get fieldAssemblyProduct => '組立製品';
 
   @override
@@ -1063,6 +1066,51 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reconcilePartialSaved => '部分納品として保存しました（未納を継続保持）';
+
+  @override
+  String get reconNoteReference => '備考';
+
+  @override
+  String get reconAlreadyDoneQ => 'この予定は照合済みです';
+
+  @override
+  String get reconAlreadyDoneBody =>
+      '追加で取り込むと在庫にもう一度加算されます。間違いを直す場合は、受領履歴から該当の受領を取り消してください。';
+
+  @override
+  String doubleScanWarning(String code) {
+    return '$code が予定数を超えました（二重スキャン？）';
+  }
+
+  @override
+  String get receiptHistoryTitle => '受領履歴／訂正';
+
+  @override
+  String get receiptEmpty => '受領履歴はまだありません。';
+
+  @override
+  String get receiptEmptyBody => 'この予定を照合するたびに、受領がここに記録され、取り消せます。';
+
+  @override
+  String get receiptCancelAction => '受領を取消';
+
+  @override
+  String get receiptCancelledBadge => '取消済み';
+
+  @override
+  String get receiptCancelQ => 'この受領を取り消しますか？';
+
+  @override
+  String get receiptCancelBody => 'この受領で加算した数量と在庫を差し戻します。';
+
+  @override
+  String get receiptCancelledDone => '受領を取り消しました';
+
+  @override
+  String get showCompletedPlans => '照合済みも表示';
+
+  @override
+  String get hideCompletedPlans => '照合済みを隠す';
 
   @override
   String get reconcileDone => '照合を完了しました';

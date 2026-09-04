@@ -539,6 +539,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionComplete => 'Complete';
 
   @override
+  String get actionContinue => 'Continue';
+
+  @override
   String get fieldAssemblyProduct => 'Assembly product';
 
   @override
@@ -1094,6 +1097,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reconcilePartialSaved =>
       'Saved as partial — the outstanding items are kept';
+
+  @override
+  String get reconNoteReference => 'Note';
+
+  @override
+  String get reconAlreadyDoneQ => 'This plan is already reconciled';
+
+  @override
+  String get reconAlreadyDoneBody =>
+      'Recording another receipt will add to stock again. To fix a mistake, cancel the receipt from the history instead.';
+
+  @override
+  String doubleScanWarning(String code) {
+    return '$code exceeds the planned quantity — double scan?';
+  }
+
+  @override
+  String get receiptHistoryTitle => 'Receipts / correct';
+
+  @override
+  String get receiptEmpty => 'No receipts yet.';
+
+  @override
+  String get receiptEmptyBody =>
+      'Each time this plan is reconciled, the receipt is recorded here and can be cancelled.';
+
+  @override
+  String get receiptCancelAction => 'Cancel receipt';
+
+  @override
+  String get receiptCancelledBadge => 'Cancelled';
+
+  @override
+  String get receiptCancelQ => 'Cancel this receipt?';
+
+  @override
+  String get receiptCancelBody =>
+      'The quantities and stock this receipt added will be reversed.';
+
+  @override
+  String get receiptCancelledDone => 'Receipt cancelled';
+
+  @override
+  String get showCompletedPlans => 'Show reconciled';
+
+  @override
+  String get hideCompletedPlans => 'Hide reconciled';
 
   @override
   String get reconcileDone => 'Reconciliation completed';
