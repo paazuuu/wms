@@ -431,7 +431,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fieldLocations => '库位';
 
   @override
-  String get fieldContact => '联系人';
+  String get fieldContact => '负责人';
 
   @override
   String get fieldWebsite => '网站';
@@ -1341,6 +1341,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get printMenu => '打印/PDF';
+
+  @override
+  String get senderSettingsTitle => '寄件人（本公司）设置';
+
+  @override
+  String get senderSettingsHint => '保存为默认寄件人。每次打印时可选择包含哪些项目。';
+
+  @override
+  String get senderPickTitle => '本次打印的寄件人';
+
+  @override
+  String get senderInclude => '打印寄件人信息';
+
+  @override
+  String get senderNoneSet => '尚未设置寄件人。';
+
+  @override
+  String get senderOpenSettings => '设置寄件人';
+
+  @override
+  String get senderSaved => '已保存寄件人信息';
+
+  @override
+  String get fieldCompanyName => '公司名称';
+
+  @override
+  String get fieldPostalCode => '邮编';
+
+  @override
+  String get fieldFax => '传真';
+
+  @override
+  String get fieldNote => '备注';
 
   @override
   String get deleteCartonQ => '删除这个纸箱吗？';

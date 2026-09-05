@@ -2554,6 +2554,72 @@ abstract class AppLocalizations {
   /// **'印刷/PDF'**
   String get printMenu;
 
+  /// No description provided for @senderSettingsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'差出人（自社）設定'**
+  String get senderSettingsTitle;
+
+  /// No description provided for @senderSettingsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'差出人のデフォルトとして保存します。印刷時にどの項目を載せるか毎回選べます。'**
+  String get senderSettingsHint;
+
+  /// No description provided for @senderPickTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この印刷の差出人'**
+  String get senderPickTitle;
+
+  /// No description provided for @senderInclude.
+  ///
+  /// In ja, this message translates to:
+  /// **'差出人を印刷する'**
+  String get senderInclude;
+
+  /// No description provided for @senderNoneSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'差出人が未設定です。'**
+  String get senderNoneSet;
+
+  /// No description provided for @senderOpenSettings.
+  ///
+  /// In ja, this message translates to:
+  /// **'差出人を設定'**
+  String get senderOpenSettings;
+
+  /// No description provided for @senderSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'差出人情報を保存しました'**
+  String get senderSaved;
+
+  /// No description provided for @fieldCompanyName.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名'**
+  String get fieldCompanyName;
+
+  /// No description provided for @fieldPostalCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'郵便番号'**
+  String get fieldPostalCode;
+
+  /// No description provided for @fieldFax.
+  ///
+  /// In ja, this message translates to:
+  /// **'FAX'**
+  String get fieldFax;
+
+  /// No description provided for @fieldNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get fieldNote;
+
   /// No description provided for @deleteCartonQ.
   ///
   /// In ja, this message translates to:

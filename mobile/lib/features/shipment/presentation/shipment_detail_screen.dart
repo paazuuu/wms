@@ -8,12 +8,15 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../delivery/domain/stock_item.dart';
+import '../application/sender_profile_controller.dart';
 import '../application/shipment_providers.dart';
 import '../data/shipment_print.dart';
 import '../domain/carton.dart';
+import '../domain/sender_profile.dart';
 import '../domain/shipment.dart';
 import '../domain/shipment_status.dart';
 import 'carton_edit_screen.dart';
+import 'sender_picker.dart';
 import 'shipment_status_ui.dart';
 
 /// One shipment: the overall list, the cartons it is split into, printing, and
@@ -164,6 +167,15 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     }
   }
 
+  /// Ask which sender fields to include, then print. Aborts if cancelled.
+  Future<void> _printWith(
+      Future<void> Function(List<SenderLine> sender) build) async {
+    final profile = ref.read(senderProfileControllerProvider);
+    final sender = await showSenderPicker(context, profile);
+    if (sender == null || !mounted) return;
+    await _print(() => build(sender));
+  }
+
   void _snack(String message, {StatusTone tone = StatusTone.neutral}) {
     if (!mounted) return;
     final scheme = Theme.of(context).colorScheme;
@@ -202,11 +214,13 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                 final s = detail.value!;
                 switch (v) {
                   case 'list':
-                    _print(() => _printer.printOverall(s));
+                    _printWith((snd) => _printer.printOverall(s, sender: snd));
                   case 'slip':
-                    _print(() => _printer.printDeliverySlip(s));
+                    _printWith(
+                        (snd) => _printer.printDeliverySlip(s, sender: snd));
                   case 'cartons':
-                    _print(() => _printer.printAllCartons(s));
+                    _printWith(
+                        (snd) => _printer.printAllCartons(s, sender: snd));
                 }
               },
               itemBuilder: (context) => [
@@ -284,7 +298,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
             if (s.cartons.isNotEmpty)
               TextButton.icon(
                 onPressed: () =>
-                    _print(() => _printer.printAllCartons(s)),
+                    _printWith((snd) => _printer.printAllCartons(s, sender: snd)),
                 icon: const Icon(Icons.print_outlined, size: 18),
                 label: Text(l10n.printAllCartons),
               ),
@@ -303,7 +317,8 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                       _refresh();
                     },
               onDelete: shipped ? null : () => _deleteCarton(c),
-              onPrint: () => _print(() => _printer.printCarton(s, c)),
+              onPrint: () =>
+                  _printWith((snd) => _printer.printCarton(s, c, sender: snd)),
             )),
         const SizedBox(height: AppSpacing.sm),
         if (!shipped)

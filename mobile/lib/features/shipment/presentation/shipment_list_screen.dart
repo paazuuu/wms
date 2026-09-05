@@ -9,6 +9,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../delivery/presentation/plan_import_screen.dart';
 import '../application/shipment_providers.dart';
 import '../domain/shipment.dart';
+import 'sender_picker.dart';
 import 'shipment_detail_screen.dart';
 import 'shipment_status_ui.dart';
 
@@ -59,6 +60,11 @@ class _ShipmentListScreenState extends ConsumerState<ShipmentListScreen> {
             selectedIcon: const Icon(Icons.manage_history),
             onPressed: () =>
                 ref.read(showShippedProvider.notifier).update((v) => !v),
+          ),
+          IconButton(
+            tooltip: l10n.senderSettingsTitle,
+            icon: const Icon(Icons.business_outlined),
+            onPressed: () => openSenderSettings(context),
           ),
           IconButton(
             tooltip: l10n.shipmentImportTitle,

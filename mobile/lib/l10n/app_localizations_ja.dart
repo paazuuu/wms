@@ -1344,6 +1344,39 @@ class AppLocalizationsJa extends AppLocalizations {
   String get printMenu => '印刷/PDF';
 
   @override
+  String get senderSettingsTitle => '差出人（自社）設定';
+
+  @override
+  String get senderSettingsHint => '差出人のデフォルトとして保存します。印刷時にどの項目を載せるか毎回選べます。';
+
+  @override
+  String get senderPickTitle => 'この印刷の差出人';
+
+  @override
+  String get senderInclude => '差出人を印刷する';
+
+  @override
+  String get senderNoneSet => '差出人が未設定です。';
+
+  @override
+  String get senderOpenSettings => '差出人を設定';
+
+  @override
+  String get senderSaved => '差出人情報を保存しました';
+
+  @override
+  String get fieldCompanyName => '会社名';
+
+  @override
+  String get fieldPostalCode => '郵便番号';
+
+  @override
+  String get fieldFax => 'FAX';
+
+  @override
+  String get fieldNote => '備考';
+
+  @override
   String get deleteCartonQ => 'この段ボールを削除しますか？';
 
   @override

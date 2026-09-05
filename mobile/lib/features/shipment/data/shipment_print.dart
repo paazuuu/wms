@@ -2,6 +2,7 @@ import 'package:barcode/barcode.dart';
 import 'package:printing/printing.dart';
 
 import '../domain/carton.dart';
+import '../domain/sender_profile.dart';
 import '../domain/shipment.dart';
 
 /// Builds print-ready HTML for a shipment and hands it to the system print /
@@ -61,9 +62,24 @@ class ShipmentPrinter {
   .to b { font-size: 17px; border-bottom: 1px solid #111; padding: 0 24px 2px 4px; }
   .kv { font-size: 12px; color: #333; }
   .kv div { margin-bottom: 2px; }
+  .sender { font-size: 12px; color: #222; text-align: right; margin: 4px 0 12px; }
+  .sender .co { font-size: 14px; font-weight: bold; }
+  .sender.inline { margin: 0; }
 </style><title>$title</title></head><body>$body</body></html>''';
 
-  String _headerBlock(Shipment s, String heading) {
+  /// The sender (差出人) block: company name bold, then the chosen lines.
+  String _senderBlock(List<SenderLine> sender, {bool inline = false}) {
+    if (sender.isEmpty) return '';
+    final rows = sender
+        .map((l) => l.key == 'company'
+            ? '<div class="co">${_esc(l.text)}</div>'
+            : '<div>${_esc(l.text)}</div>')
+        .join();
+    return '<div class="sender${inline ? ' inline' : ''}">$rows</div>';
+  }
+
+  String _headerBlock(Shipment s, String heading,
+      [List<SenderLine> sender = const []]) {
     final m = <String>[];
     void add(String label, String? value) {
       if (value != null && value.trim().isNotEmpty) {
@@ -76,7 +92,8 @@ class ShipmentPrinter {
     add('得意先', s.customerName);
     add('お客様コード', s.customerCode);
     add('日付', s.shipDate);
-    return '<h1>${_esc(heading)}</h1><div class="meta">${m.join()}</div>';
+    return '<h1>${_esc(heading)}</h1>${_senderBlock(sender)}'
+        '<div class="meta">${m.join()}</div>';
   }
 
   /// A plain (text) item table — used for the overall list.
@@ -112,10 +129,10 @@ class ShipmentPrinter {
   }
 
   /// The whole shipment as one list.
-  String overallHtml(Shipment s) {
+  String overallHtml(Shipment s, {List<SenderLine> sender = const []}) {
     final rows = s.lines.map((l) =>
         [l.janCode, l.productName, l.spec ?? '', '${l.quantity}']);
-    final body = _headerBlock(s, '出庫リスト') + _rows(rows, s.totalUnits);
+    final body = _headerBlock(s, '出庫リスト', sender) + _rows(rows, s.totalUnits);
     return _shell('出庫リスト ${s.shipmentNumber}', body);
   }
 
@@ -131,14 +148,14 @@ class ShipmentPrinter {
   }
 
   /// One carton's contents, with JAN barcodes.
-  String cartonHtml(Shipment s, Carton c) {
-    final body = _headerBlock(s, '内容リスト') + _cartonSection(s, c);
+  String cartonHtml(Shipment s, Carton c, {List<SenderLine> sender = const []}) {
+    final body = _headerBlock(s, '内容リスト', sender) + _cartonSection(s, c);
     return _shell('段ボール${c.cartonNo} ${s.shipmentNumber}', body);
   }
 
   /// Every carton, one section per box (page-break between them), with barcodes.
-  String allCartonsHtml(Shipment s) {
-    final body = _headerBlock(s, '段ボール別 内容リスト') +
+  String allCartonsHtml(Shipment s, {List<SenderLine> sender = const []}) {
+    final body = _headerBlock(s, '段ボール別 内容リスト', sender) +
         s.cartons.map((c) => _cartonSection(s, c)).join();
     return _shell('段ボール一覧 ${s.shipmentNumber}', body);
   }
@@ -146,7 +163,7 @@ class ShipmentPrinter {
   /// A formal delivery slip (送り状 / 納品書) for the whole shipment: recipient
   /// block, document metadata, the itemized list with unit price / amount when
   /// present, and totals.
-  String deliverySlipHtml(Shipment s) {
+  String deliverySlipHtml(Shipment s, {List<SenderLine> sender = const []}) {
     final hasMoney = s.lines.any((l) => l.unitPrice != null || l.amount != null);
     String money(int? v) => v == null ? '' : '¥${_esc(v)}';
     var amountTotal = 0;
@@ -194,6 +211,7 @@ class ShipmentPrinter {
   <div>
     <div class="slip-title">送&nbsp;り&nbsp;状</div>
     <div class="kv">${kv.join()}</div>
+    ${_senderBlock(sender, inline: true)}
   </div>
 </div>
 <table>
@@ -209,8 +227,15 @@ class ShipmentPrinter {
           // ignore: deprecated_member_use
           Printing.convertHtml(format: format, html: html));
 
-  Future<void> printOverall(Shipment s) => _printHtml(overallHtml(s));
-  Future<void> printCarton(Shipment s, Carton c) => _printHtml(cartonHtml(s, c));
-  Future<void> printAllCartons(Shipment s) => _printHtml(allCartonsHtml(s));
-  Future<void> printDeliverySlip(Shipment s) => _printHtml(deliverySlipHtml(s));
+  Future<void> printOverall(Shipment s, {List<SenderLine> sender = const []}) =>
+      _printHtml(overallHtml(s, sender: sender));
+  Future<void> printCarton(Shipment s, Carton c,
+          {List<SenderLine> sender = const []}) =>
+      _printHtml(cartonHtml(s, c, sender: sender));
+  Future<void> printAllCartons(Shipment s,
+          {List<SenderLine> sender = const []}) =>
+      _printHtml(allCartonsHtml(s, sender: sender));
+  Future<void> printDeliverySlip(Shipment s,
+          {List<SenderLine> sender = const []}) =>
+      _printHtml(deliverySlipHtml(s, sender: sender));
 }

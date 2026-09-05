@@ -1391,6 +1391,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get printMenu => 'Print / PDF';
 
   @override
+  String get senderSettingsTitle => 'Sender (your company)';
+
+  @override
+  String get senderSettingsHint =>
+      'Saved as the default sender. You can pick which fields to include each time you print.';
+
+  @override
+  String get senderPickTitle => 'Sender on this print';
+
+  @override
+  String get senderInclude => 'Print the sender block';
+
+  @override
+  String get senderNoneSet => 'No sender saved yet.';
+
+  @override
+  String get senderOpenSettings => 'Set up sender';
+
+  @override
+  String get senderSaved => 'Sender saved';
+
+  @override
+  String get fieldCompanyName => 'Company name';
+
+  @override
+  String get fieldPostalCode => 'Postal code';
+
+  @override
+  String get fieldFax => 'Fax';
+
+  @override
+  String get fieldNote => 'Note';
+
+  @override
   String get deleteCartonQ => 'Delete this carton?';
 
   @override
