@@ -1215,6 +1215,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get totalStockTitle => '総在庫（JAN別）';
 
   @override
+  String get sortMenu => '並び替え';
+
+  @override
+  String get sortByStock => '在庫数順';
+
+  @override
+  String get sortByName => '品名順';
+
+  @override
+  String get sortByJan => 'JAN順';
+
+  @override
+  String get stockOnHandUnit => '在庫';
+
+  @override
   String get stockEmpty => '在庫がまだありません。';
 
   @override

@@ -1251,6 +1251,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalStockTitle => 'Total stock (by JAN)';
 
   @override
+  String get sortMenu => 'Sort';
+
+  @override
+  String get sortByStock => 'By stock';
+
+  @override
+  String get sortByName => 'By name';
+
+  @override
+  String get sortByJan => 'By JAN';
+
+  @override
+  String get stockOnHandUnit => 'on hand';
+
+  @override
   String get stockEmpty => 'No stock yet.';
 
   @override

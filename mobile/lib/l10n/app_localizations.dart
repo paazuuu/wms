@@ -2308,6 +2308,36 @@ abstract class AppLocalizations {
   /// **'総在庫（JAN別）'**
   String get totalStockTitle;
 
+  /// No description provided for @sortMenu.
+  ///
+  /// In ja, this message translates to:
+  /// **'並び替え'**
+  String get sortMenu;
+
+  /// No description provided for @sortByStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫数順'**
+  String get sortByStock;
+
+  /// No description provided for @sortByName.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名順'**
+  String get sortByName;
+
+  /// No description provided for @sortByJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN順'**
+  String get sortByJan;
+
+  /// No description provided for @stockOnHandUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get stockOnHandUnit;
+
   /// No description provided for @stockEmpty.
   ///
   /// In ja, this message translates to:

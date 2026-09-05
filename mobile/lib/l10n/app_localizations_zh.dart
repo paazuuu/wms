@@ -1214,6 +1214,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get totalStockTitle => '总库存（按JAN）';
 
   @override
+  String get sortMenu => '排序';
+
+  @override
+  String get sortByStock => '按库存';
+
+  @override
+  String get sortByName => '按品名';
+
+  @override
+  String get sortByJan => '按JAN';
+
+  @override
+  String get stockOnHandUnit => '库存';
+
+  @override
   String get stockEmpty => '暂无库存。';
 
   @override

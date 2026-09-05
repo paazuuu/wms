@@ -5,7 +5,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
-import '../../../core/ui/status_pill.dart';
 import '../application/delivery_providers.dart';
 import '../domain/jan.dart';
 import '../domain/stock_item.dart';
@@ -19,8 +18,11 @@ class StockListScreen extends ConsumerStatefulWidget {
   ConsumerState<StockListScreen> createState() => _StockListScreenState();
 }
 
+enum _StockSort { onHand, name, jan }
+
 class _StockListScreenState extends ConsumerState<StockListScreen> {
   String _query = '';
+  _StockSort _sort = _StockSort.onHand;
 
   bool _matches(StockItem s) {
     final q = _query.trim();
@@ -30,13 +32,45 @@ class _StockListScreenState extends ConsumerState<StockListScreen> {
     return s.productName.toLowerCase().contains(q.toLowerCase());
   }
 
+  List<StockItem> _sorted(List<StockItem> items) {
+    final list = [...items];
+    switch (_sort) {
+      case _StockSort.onHand:
+        list.sort((a, b) => b.onHand.compareTo(a.onHand));
+      case _StockSort.name:
+        list.sort((a, b) => (a.productName.isEmpty ? a.janCode : a.productName)
+            .compareTo(b.productName.isEmpty ? b.janCode : b.productName));
+      case _StockSort.jan:
+        list.sort((a, b) => a.janCode.compareTo(b.janCode));
+    }
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final stock = ref.watch(stockListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.totalStockTitle)),
+      appBar: AppBar(
+        title: Text(l10n.totalStockTitle),
+        actions: [
+          PopupMenuButton<_StockSort>(
+            tooltip: l10n.sortMenu,
+            icon: const Icon(Icons.sort),
+            initialValue: _sort,
+            onSelected: (v) => setState(() => _sort = v),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                  value: _StockSort.onHand, child: Text(l10n.sortByStock)),
+              PopupMenuItem(
+                  value: _StockSort.name, child: Text(l10n.sortByName)),
+              PopupMenuItem(value: _StockSort.jan, child: Text(l10n.sortByJan)),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -54,7 +88,7 @@ class _StockListScreenState extends ConsumerState<StockListScreen> {
               onRefresh: () async => ref.invalidate(stockListProvider),
               child: stock.when(
                 data: (items) {
-                  final filtered = items.where(_matches).toList();
+                  final filtered = _sorted(items.where(_matches).toList());
                   if (items.isEmpty) {
                     return _ScrollableEmpty(
                       title: l10n.stockEmpty,
@@ -67,12 +101,23 @@ class _StockListScreenState extends ConsumerState<StockListScreen> {
                       message: l10n.deliverySearchTip,
                     );
                   }
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, i) => _StockCard(item: filtered[i]),
+                  final totalUnits =
+                      filtered.fold<int>(0, (s, it) => s + it.onHand);
+                  return Column(
+                    children: [
+                      _SummaryStrip(
+                          skuCount: filtered.length, totalUnits: totalUnits),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: AppSpacing.sm),
+                          itemBuilder: (context, i) =>
+                              _StockCard(item: filtered[i]),
+                        ),
+                      ),
+                    ],
                   );
                 },
                 loading: () => LoadingView(message: l10n.loading),
@@ -82,6 +127,40 @@ class _StockListScreenState extends ConsumerState<StockListScreen> {
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A compact totals strip: number of SKUs and total units in view.
+class _SummaryStrip extends StatelessWidget {
+  const _SummaryStrip({required this.skuCount, required this.totalUnits});
+
+  final int skuCount;
+  final int totalUnits;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      color: scheme.surfaceContainerLow,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+      child: Row(
+        children: [
+          Icon(Icons.inventory_2_outlined,
+              size: 16, color: scheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            l10n.planPreviewCount(skuCount, totalUnits),
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -116,9 +195,13 @@ class _StockCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final zero = item.onHand <= 0;
+    final hasName = item.productName.isNotEmpty;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         child: Row(
           children: [
             Expanded(
@@ -126,25 +209,43 @@ class _StockCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.productName.isNotEmpty ? item.productName : item.janCode,
-                    style: theme.textTheme.titleSmall,
+                    hasName ? item.productName : item.janCode,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                        color: zero ? scheme.onSurfaceVariant : null),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.janCode,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: 'FiraCode', color: scheme.onSurfaceVariant),
-                  ),
+                  if (hasName) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      item.janCode,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          fontFamily: 'FiraCode',
+                          color: scheme.onSurfaceVariant),
+                    ),
+                  ],
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            StatusPill(
-              tone: item.onHand > 0 ? StatusTone.success : StatusTone.neutral,
-              label: '${item.onHand}',
-              icon: Icons.inventory_2_outlined,
+            const SizedBox(width: AppSpacing.md),
+            // Prominent, right-aligned quantity so a shelf count reads fast.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${item.onHand}',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontFamily: 'FiraCode',
+                    fontWeight: FontWeight.w700,
+                    color: zero ? scheme.onSurfaceVariant : scheme.onSurface,
+                  ),
+                ),
+                Text(
+                  l10n.stockOnHandUnit,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
             ),
           ],
         ),
