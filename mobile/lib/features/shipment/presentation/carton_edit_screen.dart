@@ -104,6 +104,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final overpacked = widget.shipment.lines.any((l) => _remaining(l) < 0);
+    final total = _qty.values.fold(0, (a, b) => a + b);
 
     return Scaffold(
       appBar: AppBar(
@@ -135,18 +136,41 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
               )),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: FilledButton.icon(
-            onPressed: _busy ? null : _save,
-            icon: _busy
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.check),
-            label: Text(l10n.actionSave),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border:
+              Border(top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                StatusPill(
+                  tone: StatusTone.neutral,
+                  label: '${l10n.packThisCarton} $total',
+                  icon: Icons.inventory_2_outlined,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: SizedBox(
+                    height: AppSpacing.minTouch,
+                    child: FilledButton.icon(
+                      onPressed: _busy ? null : _save,
+                      icon: _busy
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.check),
+                      label: Text(l10n.actionSave),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

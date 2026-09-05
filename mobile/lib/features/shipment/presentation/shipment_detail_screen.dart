@@ -241,113 +241,270 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
           onRetry: () => ref.invalidate(shipmentDetailProvider(_id)),
         ),
       ),
+      bottomNavigationBar: detail.valueOrNull == null
+          ? null
+          : _bottomBar(context, l10n, detail.value!),
+    );
+  }
+
+  Widget _bottomBar(BuildContext context, AppLocalizations l10n, Shipment s) {
+    final scheme = Theme.of(context).colorScheme;
+    final shipped = s.status == ShipmentStatus.shipped;
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: SizedBox(
+            height: AppSpacing.minTouch,
+            child: shipped
+                ? OutlinedButton.icon(
+                    onPressed: _busy ? null : _cancelShip,
+                    icon: Icon(Icons.undo, color: scheme.error),
+                    label: Text(l10n.shipCancelAction,
+                        style: TextStyle(color: scheme.error)),
+                  )
+                : FilledButton.icon(
+                    onPressed: _busy ? null : () => _confirmShip(s),
+                    icon: _busy
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.local_shipping_outlined),
+                    label: Text(l10n.shipConfirmAction),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _body(BuildContext context, AppLocalizations l10n, Shipment s) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final ui = ShipmentStatusUi.of(l10n, s.status);
     final packed = s.packedByJan;
     final packedTotal = packed.values.fold(0, (a, b) => a + b);
     final shipped = s.status == ShipmentStatus.shipped;
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
       children: [
-        // Header summary.
-        Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
-          StatusPill(tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
-          StatusPill(
-            tone: StatusTone.neutral,
-            label: l10n.packProgress(packedTotal, s.totalUnits),
-            icon: Icons.inventory_2_outlined,
-            dense: true,
-          ),
-        ]),
-        if (s.customerName != null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(s.customerName!, style: theme.textTheme.titleMedium),
-        ],
-        if (s.referenceNo != null && s.referenceNo!.isNotEmpty)
-          Text('${l10n.referenceNoLabel}: ${s.referenceNo}',
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(fontFamily: 'FiraCode', color: scheme.primary)),
+        _HeaderCard(shipment: s, packedTotal: packedTotal),
 
         const SizedBox(height: AppSpacing.lg),
-        Text(l10n.shipmentLinesSection,
-            style: theme.textTheme.titleSmall
-                ?.copyWith(color: scheme.onSurfaceVariant)),
+        _SectionHeader(
+          label: l10n.shipmentLinesSection,
+          trailing: l10n.planPreviewCount(s.lineCount, s.totalUnits),
+        ),
         const SizedBox(height: AppSpacing.sm),
-        ...s.lines.map((l) => _LineRow(
-              name: l.productName,
-              jan: l.janCode,
-              spec: l.spec,
-              quantity: l.quantity,
-              packed: packed[l.janCode] ?? 0,
-            )),
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+            child: Column(
+              children: [
+                for (var i = 0; i < s.lines.length; i++) ...[
+                  if (i > 0) const Divider(height: 1),
+                  _LineRow(
+                    name: s.lines[i].productName,
+                    jan: s.lines[i].janCode,
+                    spec: s.lines[i].spec,
+                    quantity: s.lines[i].quantity,
+                    packed: packed[s.lines[i].janCode] ?? 0,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
 
         const SizedBox(height: AppSpacing.lg),
-        Row(
-          children: [
-            Expanded(
-              child: Text(l10n.cartonsSection,
-                  style: theme.textTheme.titleSmall
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
-            ),
-            if (s.cartons.isNotEmpty)
-              TextButton.icon(
-                onPressed: () =>
-                    _printWith((snd) => _printer.printAllCartons(s, sender: snd)),
-                icon: const Icon(Icons.print_outlined, size: 18),
-                label: Text(l10n.printAllCartons),
-              ),
-          ],
+        _SectionHeader(
+          label: l10n.cartonsSection,
+          trailing:
+              s.cartons.isEmpty ? null : l10n.cartonCountLabel(s.cartons.length),
+          action: s.cartons.isEmpty
+              ? null
+              : TextButton.icon(
+                  onPressed: () => _printWith(
+                      (snd) => _printer.printAllCartons(s, sender: snd)),
+                  icon: const Icon(Icons.print_outlined, size: 18),
+                  label: Text(l10n.printAllCartons),
+                ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        ...s.cartons.map((c) => _CartonCard(
-              carton: c,
-              onEdit: shipped
-                  ? null
-                  : () async {
-                      await Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) =>
-                            CartonEditScreen(shipment: s, carton: c),
-                      ));
-                      _refresh();
-                    },
-              onDelete: shipped ? null : () => _deleteCarton(c),
-              onPrint: () =>
-                  _printWith((snd) => _printer.printCarton(s, c, sender: snd)),
-            )),
-        const SizedBox(height: AppSpacing.sm),
-        if (!shipped)
+        if (s.cartons.isEmpty && !shipped)
+          _EmptyCartons(onAdd: _busy ? null : _addCarton)
+        else
+          ...s.cartons.map((c) => _CartonCard(
+                carton: c,
+                onEdit: shipped
+                    ? null
+                    : () async {
+                        await Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) =>
+                              CartonEditScreen(shipment: s, carton: c),
+                        ));
+                        _refresh();
+                      },
+                onDelete: shipped ? null : () => _deleteCarton(c),
+                onPrint: () =>
+                    _printWith((snd) => _printer.printCarton(s, c, sender: snd)),
+              )),
+        if (s.cartons.isNotEmpty && !shipped) ...[
+          const SizedBox(height: AppSpacing.xs),
           OutlinedButton.icon(
             onPressed: _busy ? null : _addCarton,
             icon: const Icon(Icons.add_box_outlined),
             label: Text(l10n.addCarton),
           ),
-
-        const SizedBox(height: AppSpacing.xl),
-        if (shipped)
-          OutlinedButton.icon(
-            onPressed: _busy ? null : _cancelShip,
-            icon: Icon(Icons.undo, color: scheme.error),
-            label: Text(l10n.shipCancelAction,
-                style: TextStyle(color: scheme.error)),
-          )
-        else
-          FilledButton.icon(
-            onPressed: _busy ? null : () => _confirmShip(s),
-            icon: _busy
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.local_shipping_outlined),
-            label: Text(l10n.shipConfirmAction),
-          ),
+        ],
       ],
+    );
+  }
+}
+
+/// Summary header: customer + reference + status, with a packing progress bar.
+class _HeaderCard extends StatelessWidget {
+  const _HeaderCard({required this.shipment, required this.packedTotal});
+
+  final Shipment shipment;
+  final int packedTotal;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final ui = ShipmentStatusUi.of(l10n, shipment.status);
+    final total = shipment.totalUnits;
+    final ratio = total == 0 ? 0.0 : (packedTotal / total).clamp(0.0, 1.0);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                StatusAvatar(tone: ui.tone, icon: ui.icon),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(shipment.customerName ?? l10n.unknownSupplier,
+                          style: theme.textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                      if (shipment.referenceNo != null &&
+                          shipment.referenceNo!.isNotEmpty)
+                        Text('${l10n.referenceNoLabel}: ${shipment.referenceNo}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                                fontFamily: 'FiraCode', color: scheme.primary)),
+                    ],
+                  ),
+                ),
+                StatusPill(
+                    tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: ratio,
+                      minHeight: 8,
+                      backgroundColor: scheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Text(l10n.packProgress(packedTotal, total),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        fontFamily: 'FiraCode',
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurfaceVariant)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A section heading with an optional trailing count and an optional action.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label, this.trailing, this.action});
+
+  final String label;
+  final String? trailing;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Row(
+      children: [
+        Text(label,
+            style: theme.textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.w700)),
+        if (trailing != null) ...[
+          const SizedBox(width: AppSpacing.sm),
+          Text(trailing!,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant)),
+        ],
+        const Spacer(),
+        if (action != null) action!,
+      ],
+    );
+  }
+}
+
+/// Dashed-look placeholder inviting the operator to add the first carton.
+class _EmptyCartons extends StatelessWidget {
+  const _EmptyCartons({required this.onAdd});
+
+  final VoidCallback? onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onAdd,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(color: scheme.outlineVariant),
+          color: scheme.surfaceContainerLow,
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.add_box_outlined, color: scheme.primary, size: 28),
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.addCarton,
+                style: TextStyle(
+                    color: scheme.primary, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
     );
   }
 }

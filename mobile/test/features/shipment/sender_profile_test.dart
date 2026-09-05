@@ -1,3 +1,5 @@
+// Test fixtures are plain JSON-shaped literals.
+// ignore_for_file: prefer_const_literals_to_create_immutables
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_print.dart';
 import 'package:wms_mobile/features/shipment/domain/sender_profile.dart';
