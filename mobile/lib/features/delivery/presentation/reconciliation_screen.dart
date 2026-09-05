@@ -367,7 +367,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
               ? EmptyStateView(
                   icon: Icons.qr_code_scanner,
                   title: l10n.reconcileEmptyCounts,
-                  message: l10n.deliveryPlansEmptyBody,
+                  message: l10n.scanDeliveryHint,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -380,24 +380,32 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   ),
                 ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed:
-                    state.submitting ? null : () => _complete(result),
-                icon: state.submitting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.done_all),
-                label: Text(
-                    state.submitting ? l10n.working : l10n.completeReconcile),
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+                top: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppSpacing.minTouch,
+                child: FilledButton.icon(
+                  onPressed: state.submitting ? null : () => _complete(result),
+                  icon: state.submitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.done_all),
+                  label: Text(
+                      state.submitting ? l10n.working : l10n.completeReconcile),
+                ),
               ),
             ),
           ),
@@ -445,29 +453,61 @@ class _SummaryBar extends StatelessWidget {
             count: result.pendingCount),
     ];
 
+    // Units received (capped at planned) vs planned, across planned lines.
+    var planned = 0, received = 0;
+    for (final l in result.lines) {
+      if (l.planLine == null) continue;
+      planned += l.plannedQuantity;
+      received += l.receivedTotal.clamp(0, l.plannedQuantity);
+    }
+    final ratio = planned == 0 ? 0.0 : (received / planned).clamp(0.0, 1.0);
+
     return Container(
       width: double.infinity,
       color: scheme.surfaceContainerLow,
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.reconSummaryTitle,
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurfaceVariant),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Wrap(
-              alignment: WrapAlignment.end,
+          if (planned > 0) ...[
+            Row(
+              children: [
+                Text(
+                  l10n.reconSummaryTitle,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurfaceVariant),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: ratio,
+                      minHeight: 6,
+                      backgroundColor: scheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text('$received/$planned',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'FiraCode',
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurfaceVariant)),
+              ],
+            ),
+            if (chips.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+          ],
+          if (chips.isNotEmpty)
+            Wrap(
               spacing: AppSpacing.xs,
               runSpacing: AppSpacing.xs,
               children: chips,
             ),
-          ),
         ],
       ),
     );
