@@ -1400,6 +1400,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get senderSaved => '差出人情報を保存しました';
 
   @override
+  String get senderPreview => '印刷プレビュー';
+
+  @override
   String get fieldCompanyName => '会社名';
 
   @override

@@ -52,10 +52,10 @@ class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
-    final l10n = AppLocalizations.of(context);
+  /// The profile as currently typed, preserving the saved default toggles.
+  SenderProfile _draft() {
     final current = ref.read(senderProfileControllerProvider);
-    final profile = SenderProfile(
+    return SenderProfile(
       companyName: _c['company']!.text.trim(),
       postalCode: _c['postal']!.text.trim(),
       address: _c['address']!.text.trim(),
@@ -66,6 +66,11 @@ class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
       note: _c['note']!.text.trim(),
       disabled: current.disabled,
     );
+  }
+
+  Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
+    final profile = _draft();
     await ref.read(senderProfileControllerProvider.notifier).save(profile);
     if (!mounted) return;
     await HapticFeedback.selectionClick();
@@ -108,6 +113,7 @@ class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
           for (final k in SenderProfile.fieldKeys) ...[
             TextField(
               controller: _c[k],
+              onChanged: (_) => setState(() {}),
               textCapitalization: k == 'regno'
                   ? TextCapitalization.characters
                   : TextCapitalization.none,
@@ -122,18 +128,87 @@ class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
           ],
+          _PreviewCard(profile: _draft()),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: FilledButton.icon(
-            onPressed: _save,
-            icon: const Icon(Icons.check),
-            label: Text(l10n.actionSave),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+              top: BorderSide(color: theme.colorScheme.outlineVariant)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: SizedBox(
+              width: double.infinity,
+              height: AppSpacing.minTouch,
+              child: FilledButton.icon(
+                onPressed: _save,
+                icon: const Icon(Icons.check),
+                label: Text(l10n.actionSave),
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A live preview of the sender block as it will print (default-enabled fields).
+class _PreviewCard extends StatelessWidget {
+  const _PreviewCard({required this.profile});
+
+  final SenderProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final lines = profile.lines();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.print_outlined, size: 16, color: scheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.sm),
+            Text(l10n.senderPreview,
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: profile.isEmpty
+                ? Text(l10n.senderNoneSet,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (final line in lines)
+                        Text(
+                          line.text,
+                          textAlign: TextAlign.right,
+                          style: line.key == 'company'
+                              ? theme.textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700)
+                              : theme.textTheme.bodySmall
+                                  ?.copyWith(color: scheme.onSurface),
+                        ),
+                    ],
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

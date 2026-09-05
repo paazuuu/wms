@@ -146,6 +146,11 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
     final scheme = theme.colorScheme;
     final cancelled = _r.isCancelled;
 
+    final meta = [
+      l10n.planPreviewCount(_r.lineCount, _r.totalUnits),
+      _stamp(_r.createdAt),
+    ].where((s) => s.isNotEmpty).join('  ·  ');
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -154,15 +159,39 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                StatusAvatar(
+                  tone: cancelled ? StatusTone.neutral : StatusTone.success,
+                  icon: cancelled ? Icons.block : Icons.inventory_2_outlined,
+                ),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Text(
-                    _r.referenceNo ?? '#${_r.id}',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                        fontFamily: 'FiraCode',
-                        decoration:
-                            cancelled ? TextDecoration.lineThrough : null,
-                        color: cancelled ? scheme.onSurfaceVariant : null),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _r.referenceNo ?? '#${_r.id}',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                            fontFamily: 'FiraCode',
+                            decoration:
+                                cancelled ? TextDecoration.lineThrough : null,
+                            color: cancelled ? scheme.onSurfaceVariant : null),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(meta,
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant)),
+                      if (_r.noteReference != null &&
+                          _r.noteReference!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text('${l10n.reconNoteReference}: ${_r.noteReference}',
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ],
+                    ],
                   ),
                 ),
                 if (cancelled)
@@ -174,22 +203,6 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.planPreviewCount(_r.lineCount, _r.totalUnits),
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-            ),
-            if (_r.noteReference != null && _r.noteReference!.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              Text('${l10n.reconNoteReference}: ${_r.noteReference}',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
-            ],
-            const SizedBox(height: 2),
-            Text(_stamp(_r.createdAt),
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: scheme.onSurfaceVariant)),
             if (!cancelled) ...[
               const SizedBox(height: AppSpacing.sm),
               Align(

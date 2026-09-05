@@ -485,6 +485,7 @@
   "senderNoneSet": "No sender saved yet.",
   "senderOpenSettings": "Set up sender",
   "senderSaved": "Sender saved",
+  "senderPreview": "Print preview",
   "fieldCompanyName": "Company name",
   "fieldPostalCode": "Postal code",
   "fieldAddress": "Address",

@@ -1399,6 +1399,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get senderSaved => '已保存寄件人信息';
 
   @override
+  String get senderPreview => '打印预览';
+
+  @override
   String get fieldCompanyName => '公司名称';
 
   @override

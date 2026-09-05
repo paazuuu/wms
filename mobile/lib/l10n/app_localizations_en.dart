@@ -1448,6 +1448,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get senderSaved => 'Sender saved';
 
   @override
+  String get senderPreview => 'Print preview';
+
+  @override
   String get fieldCompanyName => 'Company name';
 
   @override

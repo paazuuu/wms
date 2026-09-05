@@ -2662,6 +2662,12 @@ abstract class AppLocalizations {
   /// **'差出人情報を保存しました'**
   String get senderSaved;
 
+  /// No description provided for @senderPreview.
+  ///
+  /// In ja, this message translates to:
+  /// **'印刷プレビュー'**
+  String get senderPreview;
+
   /// No description provided for @fieldCompanyName.
   ///
   /// In ja, this message translates to:

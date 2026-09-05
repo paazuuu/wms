@@ -485,6 +485,7 @@
   "senderNoneSet": "尚未设置寄件人。",
   "senderOpenSettings": "设置寄件人",
   "senderSaved": "已保存寄件人信息",
+  "senderPreview": "打印预览",
   "fieldCompanyName": "公司名称",
   "fieldPostalCode": "邮编",
   "fieldAddress": "地址",

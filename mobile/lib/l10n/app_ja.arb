@@ -521,6 +521,7 @@
   "senderNoneSet": "差出人が未設定です。",
   "senderOpenSettings": "差出人を設定",
   "senderSaved": "差出人情報を保存しました",
+  "senderPreview": "印刷プレビュー",
   "fieldCompanyName": "会社名",
   "fieldPostalCode": "郵便番号",
   "fieldAddress": "住所",
