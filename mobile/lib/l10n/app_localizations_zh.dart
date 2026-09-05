@@ -1218,4 +1218,130 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get stockEmptyBody => '完成核对后，各JAN的总库存会在此汇总。';
+
+  @override
+  String get featShipment => '出库';
+
+  @override
+  String get featShipmentDesc => '导入出库清单，分装到纸箱并扣减库存';
+
+  @override
+  String get shipmentListTitle => '出库';
+
+  @override
+  String get shipmentImportTitle => '导入出库清单';
+
+  @override
+  String get shipmentEmpty => '暂无出库。';
+
+  @override
+  String get shipmentEmptyBody => '导入客户的 Excel / PDF 以开始出库。';
+
+  @override
+  String get shipmentSearchHint => '按出库号或客户搜索';
+
+  @override
+  String get shipmentStatusOpen => '待装箱';
+
+  @override
+  String get shipmentStatusPacking => '装箱中';
+
+  @override
+  String get shipmentStatusShipped => '已出库';
+
+  @override
+  String get shipmentStatusCancelled => '已取消';
+
+  @override
+  String get shipmentNumberLabel => '出库号';
+
+  @override
+  String cartonCountLabel(int count) {
+    return '$count 箱';
+  }
+
+  @override
+  String get shipmentLinesSection => '出库清单';
+
+  @override
+  String get cartonsSection => '纸箱';
+
+  @override
+  String packProgress(int packed, int total) {
+    return '已装 $packed / $total';
+  }
+
+  @override
+  String get addCarton => '添加纸箱';
+
+  @override
+  String cartonNoLabel(int no) {
+    return '纸箱 #$no';
+  }
+
+  @override
+  String get cartonLabelHint => '标签（可选）例: A-1';
+
+  @override
+  String get cartonEditTitle => '纸箱内容';
+
+  @override
+  String get cartonEmpty => '该纸箱还未装入任何物品。';
+
+  @override
+  String get packRemaining => '未装箱';
+
+  @override
+  String get packThisCarton => '本箱';
+
+  @override
+  String get overpackWarning => '装箱数量超过出库数量。';
+
+  @override
+  String get shipConfirmAction => '确认出库';
+
+  @override
+  String get shipConfirmQ => '确认这次出库吗？';
+
+  @override
+  String get shipConfirmBody => '将从库存中扣除数量并确认出库。';
+
+  @override
+  String get shipShortWarning => '部分物品超过现有库存。库存不会降到零以下。仍要确认吗？';
+
+  @override
+  String get shipDone => '出库已确认';
+
+  @override
+  String get shipCancelAction => '撤销出库';
+
+  @override
+  String get shipCancelQ => '撤销这次出库吗？';
+
+  @override
+  String get shipCancelBody => '将把扣除的数量加回库存，并把出库重置为未确认。';
+
+  @override
+  String get shipCancelledDone => '出库已重置为未确认';
+
+  @override
+  String get shipAlreadyDone => '已出库';
+
+  @override
+  String get printOverall => '打印/PDF 清单';
+
+  @override
+  String get printAllCartons => '打印/PDF 纸箱';
+
+  @override
+  String get printThisCarton => '打印/PDF';
+
+  @override
+  String get deleteCartonQ => '删除这个纸箱吗？';
+
+  @override
+  String get actionSave => '保存';
+
+  @override
+  String get actionDelete => '删除';
 }

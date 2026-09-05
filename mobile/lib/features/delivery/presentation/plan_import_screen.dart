@@ -10,6 +10,9 @@ import '../../../core/ui/status_pill.dart';
 import '../application/delivery_providers.dart';
 import '../data/delivery_repository.dart';
 
+/// Whether the upload creates an inbound delivery plan or an outbound shipment.
+enum ImportTarget { plan, shipment }
+
 /// Back-office upload in two steps:
 ///   1. Pick a supplier's Excel / PDF / image and READ it — the backend parses
 ///      the lines and auto-reads the note header (company, registration number,
@@ -18,9 +21,18 @@ import '../data/delivery_repository.dart';
 ///      be read for is flagged — then register the plan.
 ///
 /// When the company can't be read it is filed under a distinct "UNKNOWN"
-/// reference series and flagged for manual assignment.
+/// reference series and flagged for manual assignment. The same flow imports an
+/// outbound shipment list when [target] is [ImportTarget.shipment]; the caller
+/// passes [onImported] to refresh its own list.
 class PlanImportScreen extends ConsumerStatefulWidget {
-  const PlanImportScreen({super.key});
+  const PlanImportScreen({
+    super.key,
+    this.target = ImportTarget.plan,
+    this.onImported,
+  });
+
+  final ImportTarget target;
+  final VoidCallback? onImported;
 
   @override
   ConsumerState<PlanImportScreen> createState() => _PlanImportScreenState();
@@ -124,6 +136,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             orderDate: preview.orderDate,
             source: preview.source,
             lines: preview.lines,
+            target: widget.target == ImportTarget.shipment ? 'shipment' : 'plan',
           ),
         );
     if (!mounted) return;
@@ -133,7 +146,11 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
       success: (summary) async {
         await HapticFeedback.mediumImpact();
         if (!mounted) return;
-        ref.invalidate(deliveryPlansProvider);
+        if (widget.onImported != null) {
+          widget.onImported!();
+        } else {
+          ref.invalidate(deliveryPlansProvider);
+        }
         _snack(
           summary.needsReview
               ? l10n.planUnidentifiedNote

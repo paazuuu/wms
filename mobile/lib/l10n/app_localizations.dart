@@ -2319,6 +2319,246 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'照合を完了すると、JANごとの総在庫がここに集計されます。'**
   String get stockEmptyBody;
+
+  /// No description provided for @featShipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get featShipment;
+
+  /// No description provided for @featShipmentDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リストを取り込み、段ボールに小分けして在庫を引く'**
+  String get featShipmentDesc;
+
+  /// No description provided for @shipmentListTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get shipmentListTitle;
+
+  /// No description provided for @shipmentImportTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リストを取り込む'**
+  String get shipmentImportTitle;
+
+  /// No description provided for @shipmentEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫はありません。'**
+  String get shipmentEmpty;
+
+  /// No description provided for @shipmentEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'得意先のExcel / PDF を取り込んで出庫を始めます。'**
+  String get shipmentEmptyBody;
+
+  /// No description provided for @shipmentSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫番号・得意先で検索'**
+  String get shipmentSearchHint;
+
+  /// No description provided for @shipmentStatusOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包待ち'**
+  String get shipmentStatusOpen;
+
+  /// No description provided for @shipmentStatusPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包中'**
+  String get shipmentStatusPacking;
+
+  /// No description provided for @shipmentStatusShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み'**
+  String get shipmentStatusShipped;
+
+  /// No description provided for @shipmentStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get shipmentStatusCancelled;
+
+  /// No description provided for @shipmentNumberLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫番号'**
+  String get shipmentNumberLabel;
+
+  /// No description provided for @cartonCountLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 箱'**
+  String cartonCountLabel(int count);
+
+  /// No description provided for @shipmentLinesSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リスト'**
+  String get shipmentLinesSection;
+
+  /// No description provided for @cartonsSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'段ボール'**
+  String get cartonsSection;
+
+  /// No description provided for @packProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包 {packed} / {total}'**
+  String packProgress(int packed, int total);
+
+  /// No description provided for @addCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'段ボールを追加'**
+  String get addCarton;
+
+  /// No description provided for @cartonNoLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'段ボール #{no}'**
+  String cartonNoLabel(int no);
+
+  /// No description provided for @cartonLabelHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ラベル（任意）例: A-1'**
+  String get cartonLabelHint;
+
+  /// No description provided for @cartonEditTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'段ボールの中身'**
+  String get cartonEditTitle;
+
+  /// No description provided for @cartonEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この段ボールにはまだ何も入っていません。'**
+  String get cartonEmpty;
+
+  /// No description provided for @packRemaining.
+  ///
+  /// In ja, this message translates to:
+  /// **'未梱包'**
+  String get packRemaining;
+
+  /// No description provided for @packThisCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'この箱'**
+  String get packThisCarton;
+
+  /// No description provided for @overpackWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包数が出庫数を超えています。'**
+  String get overpackWarning;
+
+  /// No description provided for @shipConfirmAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫確定'**
+  String get shipConfirmAction;
+
+  /// No description provided for @shipConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定しますか？'**
+  String get shipConfirmQ;
+
+  /// No description provided for @shipConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫から数量を引いて出庫を確定します。'**
+  String get shipConfirmBody;
+
+  /// No description provided for @shipShortWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が不足している品目があります。在庫はマイナスにはなりません。確定しますか？'**
+  String get shipShortWarning;
+
+  /// No description provided for @shipDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定しました'**
+  String get shipDone;
+
+  /// No description provided for @shipCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を取消'**
+  String get shipCancelAction;
+
+  /// No description provided for @shipCancelQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫を取り消しますか？'**
+  String get shipCancelQ;
+
+  /// No description provided for @shipCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'引いた数量を在庫に戻し、出庫を未確定に戻します。'**
+  String get shipCancelBody;
+
+  /// No description provided for @shipCancelledDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を未確定に戻しました'**
+  String get shipCancelledDone;
+
+  /// No description provided for @shipAlreadyDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み'**
+  String get shipAlreadyDone;
+
+  /// No description provided for @printOverall.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リストを印刷/PDF'**
+  String get printOverall;
+
+  /// No description provided for @printAllCartons.
+  ///
+  /// In ja, this message translates to:
+  /// **'段ボール別を印刷/PDF'**
+  String get printAllCartons;
+
+  /// No description provided for @printThisCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'印刷/PDF'**
+  String get printThisCarton;
+
+  /// No description provided for @deleteCartonQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この段ボールを削除しますか？'**
+  String get deleteCartonQ;
+
+  /// No description provided for @actionSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get actionSave;
+
+  /// No description provided for @actionDelete.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get actionDelete;
 }
 
 class _AppLocalizationsDelegate

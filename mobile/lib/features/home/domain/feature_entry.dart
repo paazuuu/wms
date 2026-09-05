@@ -43,6 +43,8 @@ class FeatureEntry {
         return l10n.featReceiving;
       case 'delivery':
         return l10n.featDelivery;
+      case 'shipment':
+        return l10n.featShipment;
       case 'stock_adjustment':
         return l10n.featStockAdjustment;
       case 'stock_count':
@@ -81,6 +83,8 @@ class FeatureEntry {
         return l10n.featReceivingDesc;
       case 'delivery':
         return l10n.featDeliveryDesc;
+      case 'shipment':
+        return l10n.featShipmentDesc;
       case 'stock_adjustment':
         return l10n.featStockAdjustmentDesc;
       case 'stock_count':

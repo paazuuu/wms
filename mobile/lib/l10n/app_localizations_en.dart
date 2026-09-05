@@ -1256,4 +1256,140 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get stockEmptyBody =>
       'Completed reconciliations accumulate per-JAN stock here.';
+
+  @override
+  String get featShipment => 'Shipping';
+
+  @override
+  String get featShipmentDesc =>
+      'Import a shipping list, pack into cartons, deduct stock';
+
+  @override
+  String get shipmentListTitle => 'Shipping';
+
+  @override
+  String get shipmentImportTitle => 'Import shipping list';
+
+  @override
+  String get shipmentEmpty => 'No shipments.';
+
+  @override
+  String get shipmentEmptyBody =>
+      'Import a customer\'s Excel / PDF to start a shipment.';
+
+  @override
+  String get shipmentSearchHint => 'Search by shipment no. or customer';
+
+  @override
+  String get shipmentStatusOpen => 'To pack';
+
+  @override
+  String get shipmentStatusPacking => 'Packing';
+
+  @override
+  String get shipmentStatusShipped => 'Shipped';
+
+  @override
+  String get shipmentStatusCancelled => 'Cancelled';
+
+  @override
+  String get shipmentNumberLabel => 'Shipment no.';
+
+  @override
+  String cartonCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartons',
+      one: '$count carton',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shipmentLinesSection => 'Shipment list';
+
+  @override
+  String get cartonsSection => 'Cartons';
+
+  @override
+  String packProgress(int packed, int total) {
+    return 'Packed $packed / $total';
+  }
+
+  @override
+  String get addCarton => 'Add carton';
+
+  @override
+  String cartonNoLabel(int no) {
+    return 'Carton #$no';
+  }
+
+  @override
+  String get cartonLabelHint => 'Label (optional), e.g. A-1';
+
+  @override
+  String get cartonEditTitle => 'Carton contents';
+
+  @override
+  String get cartonEmpty => 'Nothing packed in this carton yet.';
+
+  @override
+  String get packRemaining => 'Unpacked';
+
+  @override
+  String get packThisCarton => 'This carton';
+
+  @override
+  String get overpackWarning => 'Packed more than the shipment quantity.';
+
+  @override
+  String get shipConfirmAction => 'Confirm shipment';
+
+  @override
+  String get shipConfirmQ => 'Confirm this shipment?';
+
+  @override
+  String get shipConfirmBody => 'The quantities will be deducted from stock.';
+
+  @override
+  String get shipShortWarning =>
+      'Some items exceed stock on hand. Stock will not go below zero. Confirm anyway?';
+
+  @override
+  String get shipDone => 'Shipment confirmed';
+
+  @override
+  String get shipCancelAction => 'Undo shipment';
+
+  @override
+  String get shipCancelQ => 'Undo this shipment?';
+
+  @override
+  String get shipCancelBody =>
+      'The deducted quantities will be added back to stock and the shipment reopened.';
+
+  @override
+  String get shipCancelledDone => 'Shipment reopened';
+
+  @override
+  String get shipAlreadyDone => 'Already shipped';
+
+  @override
+  String get printOverall => 'Print / PDF list';
+
+  @override
+  String get printAllCartons => 'Print / PDF cartons';
+
+  @override
+  String get printThisCarton => 'Print / PDF';
+
+  @override
+  String get deleteCartonQ => 'Delete this carton?';
+
+  @override
+  String get actionSave => 'Save';
+
+  @override
+  String get actionDelete => 'Delete';
 }

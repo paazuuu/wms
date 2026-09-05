@@ -1219,4 +1219,130 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stockEmptyBody => '照合を完了すると、JANごとの総在庫がここに集計されます。';
+
+  @override
+  String get featShipment => '出庫';
+
+  @override
+  String get featShipmentDesc => '出庫リストを取り込み、段ボールに小分けして在庫を引く';
+
+  @override
+  String get shipmentListTitle => '出庫';
+
+  @override
+  String get shipmentImportTitle => '出庫リストを取り込む';
+
+  @override
+  String get shipmentEmpty => '出庫はありません。';
+
+  @override
+  String get shipmentEmptyBody => '得意先のExcel / PDF を取り込んで出庫を始めます。';
+
+  @override
+  String get shipmentSearchHint => '出庫番号・得意先で検索';
+
+  @override
+  String get shipmentStatusOpen => '梱包待ち';
+
+  @override
+  String get shipmentStatusPacking => '梱包中';
+
+  @override
+  String get shipmentStatusShipped => '出庫済み';
+
+  @override
+  String get shipmentStatusCancelled => '取消';
+
+  @override
+  String get shipmentNumberLabel => '出庫番号';
+
+  @override
+  String cartonCountLabel(int count) {
+    return '$count 箱';
+  }
+
+  @override
+  String get shipmentLinesSection => '出庫リスト';
+
+  @override
+  String get cartonsSection => '段ボール';
+
+  @override
+  String packProgress(int packed, int total) {
+    return '梱包 $packed / $total';
+  }
+
+  @override
+  String get addCarton => '段ボールを追加';
+
+  @override
+  String cartonNoLabel(int no) {
+    return '段ボール #$no';
+  }
+
+  @override
+  String get cartonLabelHint => 'ラベル（任意）例: A-1';
+
+  @override
+  String get cartonEditTitle => '段ボールの中身';
+
+  @override
+  String get cartonEmpty => 'この段ボールにはまだ何も入っていません。';
+
+  @override
+  String get packRemaining => '未梱包';
+
+  @override
+  String get packThisCarton => 'この箱';
+
+  @override
+  String get overpackWarning => '梱包数が出庫数を超えています。';
+
+  @override
+  String get shipConfirmAction => '出庫確定';
+
+  @override
+  String get shipConfirmQ => '出庫を確定しますか？';
+
+  @override
+  String get shipConfirmBody => '在庫から数量を引いて出庫を確定します。';
+
+  @override
+  String get shipShortWarning => '在庫が不足している品目があります。在庫はマイナスにはなりません。確定しますか？';
+
+  @override
+  String get shipDone => '出庫を確定しました';
+
+  @override
+  String get shipCancelAction => '出庫を取消';
+
+  @override
+  String get shipCancelQ => 'この出庫を取り消しますか？';
+
+  @override
+  String get shipCancelBody => '引いた数量を在庫に戻し、出庫を未確定に戻します。';
+
+  @override
+  String get shipCancelledDone => '出庫を未確定に戻しました';
+
+  @override
+  String get shipAlreadyDone => '出庫済み';
+
+  @override
+  String get printOverall => '出庫リストを印刷/PDF';
+
+  @override
+  String get printAllCartons => '段ボール別を印刷/PDF';
+
+  @override
+  String get printThisCarton => '印刷/PDF';
+
+  @override
+  String get deleteCartonQ => 'この段ボールを削除しますか？';
+
+  @override
+  String get actionSave => '保存';
+
+  @override
+  String get actionDelete => '削除';
 }

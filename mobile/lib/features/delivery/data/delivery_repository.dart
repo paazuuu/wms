@@ -142,6 +142,7 @@ class PlanCommit {
     this.docNumber,
     this.orderDate,
     this.source,
+    this.target = 'plan',
   });
 
   final String deliveryNumber;
@@ -153,6 +154,9 @@ class PlanCommit {
   final String? docNumber;
   final String? orderDate;
   final String? source;
+
+  /// "plan" (inbound) or "shipment" (outbound) — picks the destination tables.
+  final String target;
 
   Map<String, dynamic> toJson() {
     String? clean(String? v) {
@@ -170,6 +174,7 @@ class PlanCommit {
       if (clean(docNumber) != null) 'doc_number': clean(docNumber),
       if (clean(orderDate) != null) 'order_date': clean(orderDate),
       if (clean(source) != null) 'source': clean(source),
+      'target': target,
       'lines': lines,
     };
   }

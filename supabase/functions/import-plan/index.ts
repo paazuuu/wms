@@ -380,6 +380,7 @@ function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
 }
 
 // Save a plan + its lines. Shared by the multipart one-shot and the JSON commit.
+// target "plan" (inbound delivery) or "shipment" (outbound) picks the tables.
 async function commit(input: {
   deliveryNumber: string;
   supplier: string | null;
@@ -391,6 +392,7 @@ async function commit(input: {
   orderDate: string | null;
   lines: Record<string, unknown>[];
   source: string;
+  target: string;
 }): Promise<Response> {
   const lines = input.lines.map(toLineRow).filter((l) => isJan(l.jan_code as string));
   if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
@@ -401,6 +403,48 @@ async function commit(input: {
   );
   const { data: ref } = await supabase.rpc("assign_reference", { p_supplier_id: supplierId });
   const referenceNo = (ref as string) ?? null;
+
+  if (input.target === "shipment") {
+    const { data: plan, error: e1 } = await supabase
+      .from("shipment_plans")
+      .insert({
+        shipment_number: input.deliveryNumber,
+        party_id: supplierId,
+        customer_name: input.supplier,
+        customer_code: input.customerCode,
+        registration_number: input.registrationNumber,
+        reference_no: referenceNo,
+        doc_number: input.docNumber,
+        order_date: input.orderDate,
+        ship_date: input.deliveryDate,
+        needs_review: unidentified,
+        status: "open",
+      })
+      .select("id")
+      .single();
+    if (e1) return json({ message: e1.message }, 400);
+
+    const withId = lines.map((l) => ({
+      shipment_plan_id: plan.id,
+      jan_code: l.jan_code,
+      product_code: l.product_code,
+      product_name: l.product_name,
+      spec: l.spec,
+      quantity: l.planned_quantity,
+      unit_price: l.unit_price,
+      amount: l.amount,
+      tax_rate: l.tax_rate,
+      order_date: l.order_date,
+    }));
+    const { error: e2 } = await supabase.from("shipment_lines").insert(withId);
+    if (e2) return json({ message: e2.message }, 400);
+
+    return json({ data: {
+      source: input.source, plan_id: plan.id, target: "shipment",
+      delivery_number: input.deliveryNumber, reference_no: referenceNo,
+      needs_review: unidentified, line_count: lines.length, total_quantity: totalQty,
+    } });
+  }
 
   const { data: plan, error: e1 } = await supabase
     .from("delivery_plans")
@@ -428,7 +472,8 @@ async function commit(input: {
   if (e2) return json({ message: e2.message }, 400);
 
   return json({ data: {
-    source: input.source, plan_id: plan.id, delivery_number: input.deliveryNumber,
+    source: input.source, plan_id: plan.id, target: "plan",
+    delivery_number: input.deliveryNumber,
     reference_no: referenceNo, needs_review: unidentified,
     line_count: lines.length, total_quantity: totalQty,
   } });
@@ -458,6 +503,7 @@ Deno.serve(async (req) => {
         orderDate: str(b.order_date),
         lines,
         source: str(b.source) ?? "review",
+        target: str(b.target) === "shipment" ? "shipment" : "plan",
       });
     }
 
@@ -468,6 +514,7 @@ Deno.serve(async (req) => {
     const supplier = str(form.get("supplier"));
     const supplierCode = str(form.get("supplier_code"));
     const deliveryDate = str(form.get("delivery_date"));
+    const target = str(form.get("target")) === "shipment" ? "shipment" : "plan";
     const dryRun = String(form.get("dry_run") ?? "") === "1";
     if (!(file instanceof File)) return json({ message: "file is required" }, 400);
 
@@ -525,6 +572,7 @@ Deno.serve(async (req) => {
       orderDate,
       lines,
       source,
+      target,
     });
   } catch (e) {
     return json({ message: String(e) }, 500);
