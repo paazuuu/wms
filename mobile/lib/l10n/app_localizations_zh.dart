@@ -33,6 +33,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageTooltip => '选择语言';
 
   @override
+  String get textSizeMenu => '文字大小';
+
+  @override
+  String get textSizeNormal => '标准';
+
+  @override
+  String get textSizeLarge => '大';
+
+  @override
+  String get textSizeXLarge => '特大';
+
+  @override
+  String get textSizeXXLarge => '最大';
+
+  @override
   String get languageJapanese => '日本語';
 
   @override

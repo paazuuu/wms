@@ -33,6 +33,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageTooltip => 'Select language';
 
   @override
+  String get textSizeMenu => 'Text size';
+
+  @override
+  String get textSizeNormal => 'Normal';
+
+  @override
+  String get textSizeLarge => 'Large';
+
+  @override
+  String get textSizeXLarge => 'Extra large';
+
+  @override
+  String get textSizeXXLarge => 'Max';
+
+  @override
   String get languageJapanese => '日本語';
 
   @override

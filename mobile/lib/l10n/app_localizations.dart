@@ -148,6 +148,36 @@ abstract class AppLocalizations {
   /// **'言語を選択'**
   String get languageTooltip;
 
+  /// No description provided for @textSizeMenu.
+  ///
+  /// In ja, this message translates to:
+  /// **'文字サイズ'**
+  String get textSizeMenu;
+
+  /// No description provided for @textSizeNormal.
+  ///
+  /// In ja, this message translates to:
+  /// **'標準'**
+  String get textSizeNormal;
+
+  /// No description provided for @textSizeLarge.
+  ///
+  /// In ja, this message translates to:
+  /// **'大'**
+  String get textSizeLarge;
+
+  /// No description provided for @textSizeXLarge.
+  ///
+  /// In ja, this message translates to:
+  /// **'特大'**
+  String get textSizeXLarge;
+
+  /// No description provided for @textSizeXXLarge.
+  ///
+  /// In ja, this message translates to:
+  /// **'最大'**
+  String get textSizeXXLarge;
+
   /// No description provided for @languageJapanese.
   ///
   /// In ja, this message translates to:

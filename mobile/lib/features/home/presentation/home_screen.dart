@@ -8,6 +8,7 @@ import '../../../core/l10n/language_menu.dart';
 import '../../../core/scan/hardware_scanner.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/text_scale_menu.dart';
 import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../inspection/presentation/barcode_scan_screen.dart';
@@ -293,6 +294,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
+          const TextScaleMenuButton(),
           const LanguageMenuButton(),
         ],
       ),
@@ -429,6 +431,7 @@ class _Sidebar extends StatelessWidget {
                     ],
                   ),
                 ),
+                const TextScaleMenuButton(),
                 const LanguageMenuButton(),
                 IconButton(
                   tooltip: l10n.signOut,

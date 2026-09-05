@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/theme/app_spacing.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/text_scale_controller.dart';
 import 'core/offline/offline_providers.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
@@ -24,6 +25,7 @@ class WmsApp extends ConsumerWidget {
     }
 
     final locale = ref.watch(localeControllerProvider);
+    final textScale = ref.watch(textScaleControllerProvider);
 
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -34,6 +36,21 @@ class WmsApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
+      // Apply the operator's text-size choice on top of the OS setting so the
+      // whole app scales consistently for on-site readability.
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        // At "normal" respect the OS accessibility scale; once the operator
+        // picks a larger app size, apply it explicitly.
+        return MediaQuery(
+          data: media.copyWith(
+            textScaler: textScale == 1.0
+                ? media.textScaler
+                : TextScaler.linear(textScale),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: switch (auth.status) {
         AuthStatus.unknown => const _SplashScreen(),
         AuthStatus.authenticated => const HomeScreen(),
