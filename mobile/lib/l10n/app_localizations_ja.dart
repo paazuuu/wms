@@ -1164,6 +1164,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planReading => '読取中…';
 
   @override
+  String get importFormatsHint => 'Excel / PDF / 画像 に対応';
+
+  @override
+  String get importChooseFile => 'ファイルを選ぶ';
+
+  @override
+  String get changeFile => '変更';
+
+  @override
+  String get importHeaderSection => 'ヘッダー情報';
+
+  @override
+  String get importLinesPreview => '明細プレビュー';
+
+  @override
+  String importMoreLines(int count) {
+    return '他 $count 件';
+  }
+
+  @override
   String get planReviewTitle => 'ヘッダーの確認';
 
   @override

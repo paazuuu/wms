@@ -195,6 +195,74 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         title: Text(reviewing ? l10n.planReviewTitle : l10n.planImportTitle),
       ),
       body: reviewing ? _buildReview(context, l10n) : _buildPick(context, l10n),
+      bottomNavigationBar:
+          reviewing ? _reviewBar(context, l10n) : _pickBar(context, l10n),
+    );
+  }
+
+  Widget _barShell(BuildContext context, Widget child) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(padding: const EdgeInsets.all(AppSpacing.lg), child: child),
+      ),
+    );
+  }
+
+  Widget _pickBar(BuildContext context, AppLocalizations l10n) {
+    return _barShell(
+      context,
+      SizedBox(
+        width: double.infinity,
+        height: AppSpacing.minTouch,
+        child: FilledButton.icon(
+          onPressed: (_busy || _file == null) ? null : _read,
+          icon: _busy
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.document_scanner_outlined),
+          label: Text(_busy ? l10n.planReading : l10n.planReadAction),
+        ),
+      ),
+    );
+  }
+
+  Widget _reviewBar(BuildContext context, AppLocalizations l10n) {
+    return _barShell(
+      context,
+      Row(
+        children: [
+          OutlinedButton.icon(
+            onPressed: _busy ? null : () => setState(() => _preview = null),
+            icon: const Icon(Icons.arrow_back, size: 18),
+            label: Text(l10n.changeFile),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: SizedBox(
+              height: AppSpacing.minTouch,
+              child: FilledButton.icon(
+                onPressed: _busy ? null : _register,
+                icon: _busy
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.cloud_upload_outlined),
+                label:
+                    Text(_busy ? l10n.planRegistering : l10n.planCommitAction),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -208,30 +276,58 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: scheme.onSurfaceVariant)),
         const SizedBox(height: AppSpacing.lg),
-        OutlinedButton.icon(
-          onPressed: _busy ? null : _pick,
-          icon: const Icon(Icons.upload_file_outlined),
-          label: Text(l10n.pickFile),
-        ),
-        if (_file != null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            l10n.planImportSelected(_file!.name),
-            style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'FiraCode', color: scheme.onSurfaceVariant),
+        InkWell(
+          onTap: _busy ? null : _pick,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(
+                  color: _file == null ? scheme.outlineVariant : scheme.primary),
+              color: scheme.surfaceContainerLow,
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  _file == null
+                      ? Icons.upload_file_outlined
+                      : Icons.description_outlined,
+                  size: 40,
+                  color: _file == null ? scheme.onSurfaceVariant : scheme.primary,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                if (_file == null) ...[
+                  Text(l10n.importChooseFile,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(color: scheme.primary)),
+                  const SizedBox(height: 2),
+                  Text(l10n.importFormatsHint,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant)),
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg),
+                    child: Text(
+                      _file!.name,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                          fontFamily: 'FiraCode',
+                          fontWeight: FontWeight.w600),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(l10n.changeFile,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.primary)),
+                ],
+              ],
+            ),
           ),
-        ],
-        const SizedBox(height: AppSpacing.xl),
-        FilledButton.icon(
-          onPressed: _busy ? null : _read,
-          icon: _busy
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.document_scanner_outlined),
-          label: Text(_busy ? l10n.planReading : l10n.planReadAction),
         ),
       ],
     );
@@ -263,11 +359,14 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             ),
           ]),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
+
+        _SectionLabel(l10n.importHeaderSection),
+        const SizedBox(height: AppSpacing.sm),
         Text(l10n.planReviewHint,
             style: theme.textTheme.bodySmall
                 ?.copyWith(color: scheme.onSurfaceVariant)),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.md),
         _field(l10n, _numberController, l10n.deliveryNumberLabel, Icons.tag,
             wasRead: preview.deliveryNumber != null),
         _field(l10n, _supplierController, l10n.fieldSupplier,
@@ -284,24 +383,13 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             wasRead: preview.docNumber != null),
         _field(l10n, _codeController, l10n.companyCode, Icons.tag_outlined,
             helper: 'ABC → ABC-00001', caps: true, wasRead: false),
-        const SizedBox(height: AppSpacing.xl),
-        FilledButton.icon(
-          onPressed: _busy ? null : _register,
-          icon: _busy
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.cloud_upload_outlined),
-          label: Text(_busy ? l10n.planRegistering : l10n.planCommitAction),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        TextButton.icon(
-          onPressed: _busy ? null : () => setState(() => _preview = null),
-          icon: const Icon(Icons.arrow_back, size: 18),
-          label: Text(l10n.pickFile),
-        ),
+
+        if (preview.lines.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _SectionLabel(l10n.importLinesPreview),
+          const SizedBox(height: AppSpacing.sm),
+          _LinesPreview(lines: preview.lines),
+        ],
       ],
     );
   }
@@ -331,6 +419,102 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           suffixIcon: wasRead
               ? null
               : const Icon(Icons.edit_note, size: 20),
+        ),
+      ),
+    );
+  }
+}
+
+/// A small bold section label used to group the review form.
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: Theme.of(context)
+            .textTheme
+            .titleSmall
+            ?.copyWith(fontWeight: FontWeight.w700));
+  }
+}
+
+/// A read-only preview of the first parsed lines so the operator can sanity
+/// check what was extracted before registering.
+class _LinesPreview extends StatelessWidget {
+  const _LinesPreview({required this.lines});
+
+  final List<Map<String, dynamic>> lines;
+
+  int _int(dynamic v) =>
+      v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    const maxRows = 6;
+    final shown = lines.take(maxRows).toList();
+    final rest = lines.length - shown.length;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+        child: Column(
+          children: [
+            for (var i = 0; i < shown.length; i++) ...[
+              if (i > 0) const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (shown[i]['product_name'] as String?)
+                                        ?.isNotEmpty ==
+                                    true
+                                ? shown[i]['product_name'] as String
+                                : '${shown[i]['jan_code']}',
+                            style: theme.textTheme.bodyMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '${shown[i]['jan_code']}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                                fontFamily: 'FiraCode',
+                                color: scheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text('×${_int(shown[i]['planned_quantity'])}',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                            fontFamily: 'FiraCode',
+                            fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ),
+            ],
+            if (rest > 0) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Text(l10n.importMoreLines(rest),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+              ),
+            ],
+          ],
         ),
       ),
     );

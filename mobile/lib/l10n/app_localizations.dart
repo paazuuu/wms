@@ -2212,6 +2212,42 @@ abstract class AppLocalizations {
   /// **'読取中…'**
   String get planReading;
 
+  /// No description provided for @importFormatsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excel / PDF / 画像 に対応'**
+  String get importFormatsHint;
+
+  /// No description provided for @importChooseFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選ぶ'**
+  String get importChooseFile;
+
+  /// No description provided for @changeFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更'**
+  String get changeFile;
+
+  /// No description provided for @importHeaderSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'ヘッダー情報'**
+  String get importHeaderSection;
+
+  /// No description provided for @importLinesPreview.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細プレビュー'**
+  String get importLinesPreview;
+
+  /// No description provided for @importMoreLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'他 {count} 件'**
+  String importMoreLines(int count);
+
   /// No description provided for @planReviewTitle.
   ///
   /// In ja, this message translates to:

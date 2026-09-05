@@ -1199,6 +1199,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planReading => 'Reading…';
 
   @override
+  String get importFormatsHint => 'Excel / PDF / image';
+
+  @override
+  String get importChooseFile => 'Choose a file';
+
+  @override
+  String get changeFile => 'Change';
+
+  @override
+  String get importHeaderSection => 'Header';
+
+  @override
+  String get importLinesPreview => 'Line preview';
+
+  @override
+  String importMoreLines(int count) {
+    return '+$count more';
+  }
+
+  @override
   String get planReviewTitle => 'Check the header';
 
   @override

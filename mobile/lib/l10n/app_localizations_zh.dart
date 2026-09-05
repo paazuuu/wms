@@ -1163,6 +1163,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planReading => '读取中…';
 
   @override
+  String get importFormatsHint => '支持 Excel / PDF / 图片';
+
+  @override
+  String get importChooseFile => '选择文件';
+
+  @override
+  String get changeFile => '更改';
+
+  @override
+  String get importHeaderSection => '抬头信息';
+
+  @override
+  String get importLinesPreview => '明细预览';
+
+  @override
+  String importMoreLines(int count) {
+    return '还有 $count 项';
+  }
+
+  @override
   String get planReviewTitle => '核对抬头';
 
   @override
