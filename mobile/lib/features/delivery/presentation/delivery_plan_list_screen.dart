@@ -8,6 +8,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../application/delivery_providers.dart';
 import '../domain/delivery_plan.dart';
+import '../domain/delivery_plan_status.dart';
 import 'delivery_status_ui.dart';
 import 'plan_import_screen.dart';
 import 'reconciliation_screen.dart';
@@ -28,12 +29,25 @@ class _DeliveryPlanListScreenState
     extends ConsumerState<DeliveryPlanListScreen> {
   String _query = '';
 
-  bool _matches(DeliveryPlan plan) {
+  /// null = all statuses; otherwise only this status.
+  DeliveryPlanStatus? _statusFilter;
+
+  /// Show only plans that still need a manual company check.
+  bool _reviewOnly = false;
+
+  bool _matchesSearch(DeliveryPlan plan) {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return true;
     return plan.deliveryNumber.toLowerCase().contains(q) ||
         (plan.supplierName?.toLowerCase().contains(q) ?? false) ||
         (plan.supplierCode?.toLowerCase().contains(q) ?? false);
+  }
+
+  bool _matches(DeliveryPlan plan) {
+    if (!_matchesSearch(plan)) return false;
+    if (_reviewOnly && !plan.needsReview) return false;
+    if (_statusFilter != null && plan.status != _statusFilter) return false;
+    return true;
   }
 
   @override
@@ -85,6 +99,20 @@ class _DeliveryPlanListScreenState
               onSubmitted: (value) => setState(() => _query = value),
             ),
           ),
+          if ((plans.valueOrNull?.length ?? 0) > 0)
+            _FilterBar(
+              items: plans.value!,
+              statusFilter: _statusFilter,
+              reviewOnly: _reviewOnly,
+              onStatus: (s) => setState(() {
+                _statusFilter = s;
+                _reviewOnly = false;
+              }),
+              onReview: () => setState(() {
+                _reviewOnly = !_reviewOnly;
+                _statusFilter = null;
+              }),
+            ),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(deliveryPlansProvider),
@@ -122,6 +150,79 @@ class _DeliveryPlanListScreenState
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Horizontal status filter for the plan list. Only shows chips for statuses
+/// actually present in [items], plus a "needs check" chip when any plan is
+/// flagged, so it stays uncluttered.
+class _FilterBar extends StatelessWidget {
+  const _FilterBar({
+    required this.items,
+    required this.statusFilter,
+    required this.reviewOnly,
+    required this.onStatus,
+    required this.onReview,
+  });
+
+  final List<DeliveryPlan> items;
+  final DeliveryPlanStatus? statusFilter;
+  final bool reviewOnly;
+  final ValueChanged<DeliveryPlanStatus?> onStatus;
+  final VoidCallback onReview;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    // Preserve a sensible order and only show statuses that occur.
+    const order = [
+      DeliveryPlanStatus.open,
+      DeliveryPlanStatus.reconciling,
+      DeliveryPlanStatus.partial,
+      DeliveryPlanStatus.completed,
+    ];
+    final present = order.where((s) => items.any((p) => p.status == s)).toList();
+    final hasReview = items.any((p) => p.needsReview);
+
+    String label(DeliveryPlanStatus s) => switch (s) {
+          DeliveryPlanStatus.open => l10n.deliveryStatusOpen,
+          DeliveryPlanStatus.reconciling => l10n.deliveryStatusReconciling,
+          DeliveryPlanStatus.partial => l10n.deliveryStatusPartial,
+          DeliveryPlanStatus.completed => l10n.deliveryStatusCompleted,
+        };
+
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        children: [
+          ChoiceChip(
+            label: Text(l10n.filterAll),
+            selected: statusFilter == null && !reviewOnly,
+            onSelected: (_) => onStatus(null),
+          ),
+          for (final s in present) ...[
+            const SizedBox(width: AppSpacing.sm),
+            ChoiceChip(
+              label: Text(label(s)),
+              selected: statusFilter == s && !reviewOnly,
+              onSelected: (_) => onStatus(s),
+            ),
+          ],
+          if (hasReview) ...[
+            const SizedBox(width: AppSpacing.sm),
+            FilterChip(
+              avatar: Icon(Icons.help_outline,
+                  size: 16, color: Theme.of(context).colorScheme.error),
+              label: Text(l10n.planNeedsReviewBadge),
+              selected: reviewOnly,
+              onSelected: (_) => onReview(),
+            ),
+          ],
         ],
       ),
     );
