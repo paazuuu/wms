@@ -464,6 +464,8 @@
   "printOverall": "Print / PDF list",
   "printAllCartons": "Print / PDF cartons",
   "printThisCarton": "Print / PDF",
+  "printDeliverySlip": "Print / PDF delivery slip",
+  "printMenu": "Print / PDF",
   "deleteCartonQ": "Delete this carton?",
   "actionSave": "Save",
   "actionDelete": "Delete"

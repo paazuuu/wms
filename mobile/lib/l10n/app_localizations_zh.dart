@@ -1337,6 +1337,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get printThisCarton => '打印/PDF';
 
   @override
+  String get printDeliverySlip => '打印/PDF 送货单';
+
+  @override
+  String get printMenu => '打印/PDF';
+
+  @override
   String get deleteCartonQ => '删除这个纸箱吗？';
 
   @override

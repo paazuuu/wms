@@ -1385,6 +1385,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get printThisCarton => 'Print / PDF';
 
   @override
+  String get printDeliverySlip => 'Print / PDF delivery slip';
+
+  @override
+  String get printMenu => 'Print / PDF';
+
+  @override
   String get deleteCartonQ => 'Delete this carton?';
 
   @override

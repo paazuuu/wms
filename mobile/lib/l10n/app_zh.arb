@@ -464,6 +464,8 @@
   "printOverall": "打印/PDF 清单",
   "printAllCartons": "打印/PDF 纸箱",
   "printThisCarton": "打印/PDF",
+  "printDeliverySlip": "打印/PDF 送货单",
+  "printMenu": "打印/PDF",
   "deleteCartonQ": "删除这个纸箱吗？",
   "actionSave": "保存",
   "actionDelete": "删除"

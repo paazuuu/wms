@@ -195,10 +195,27 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         title: Text(detail.valueOrNull?.shipmentNumber ?? l10n.featShipment),
         actions: [
           if (detail.valueOrNull != null)
-            IconButton(
-              tooltip: l10n.printOverall,
+            PopupMenuButton<String>(
+              tooltip: l10n.printMenu,
               icon: const Icon(Icons.print_outlined),
-              onPressed: () => _print(() => _printer.printOverall(detail.value!)),
+              onSelected: (v) {
+                final s = detail.value!;
+                switch (v) {
+                  case 'list':
+                    _print(() => _printer.printOverall(s));
+                  case 'slip':
+                    _print(() => _printer.printDeliverySlip(s));
+                  case 'cartons':
+                    _print(() => _printer.printAllCartons(s));
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(value: 'list', child: Text(l10n.printOverall)),
+                PopupMenuItem(value: 'slip', child: Text(l10n.printDeliverySlip)),
+                if (detail.value!.cartons.isNotEmpty)
+                  PopupMenuItem(
+                      value: 'cartons', child: Text(l10n.printAllCartons)),
+              ],
             ),
         ],
       ),

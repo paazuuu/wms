@@ -1338,6 +1338,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get printThisCarton => '印刷/PDF';
 
   @override
+  String get printDeliverySlip => '送り状を印刷/PDF';
+
+  @override
+  String get printMenu => '印刷/PDF';
+
+  @override
   String get deleteCartonQ => 'この段ボールを削除しますか？';
 
   @override

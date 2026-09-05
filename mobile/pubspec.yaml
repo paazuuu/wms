@@ -38,6 +38,7 @@ dependencies:
   # Value equality
   equatable: ^2.0.5
   printing: ^5.15.0
+  barcode: ^2.2.9
 
 dev_dependencies:
   flutter_test:

@@ -500,6 +500,8 @@
   "printOverall": "出庫リストを印刷/PDF",
   "printAllCartons": "段ボール別を印刷/PDF",
   "printThisCarton": "印刷/PDF",
+  "printDeliverySlip": "送り状を印刷/PDF",
+  "printMenu": "印刷/PDF",
   "deleteCartonQ": "この段ボールを削除しますか？",
   "actionSave": "保存",
   "actionDelete": "削除"

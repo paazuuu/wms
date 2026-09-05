@@ -2542,6 +2542,18 @@ abstract class AppLocalizations {
   /// **'印刷/PDF'**
   String get printThisCarton;
 
+  /// No description provided for @printDeliverySlip.
+  ///
+  /// In ja, this message translates to:
+  /// **'送り状を印刷/PDF'**
+  String get printDeliverySlip;
+
+  /// No description provided for @printMenu.
+  ///
+  /// In ja, this message translates to:
+  /// **'印刷/PDF'**
+  String get printMenu;
+
   /// No description provided for @deleteCartonQ.
   ///
   /// In ja, this message translates to:
