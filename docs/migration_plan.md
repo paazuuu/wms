@@ -17,17 +17,19 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-### 0010 — Tenancy & warehouse (Steps 1)
+> Status: **0010, 0011, 0012 applied.** 0013 onward is still planned.
+
+### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
 - Seed default company + default warehouse (is_default = true).
 - Add nullable `warehouse_id` to `stock_levels`, `delivery_plans`,
   `shipment_plans`; backfill to the default warehouse; keep old queries working.
 
-### 0011 — Warehouse picker/context support (Step 2)
+### 0011 — Warehouse picker/context support (Step 2) ✅
 - Views/RPCs to list warehouses with per-warehouse KPI rollups (extends
   `dashboard_metrics` to accept a `warehouse_id`, defaulting to all/default).
 
-### 0012 — Identity, roles, scope (Step 3)
+### 0012 — Identity, roles, scope (Step 3) ✅ (guards transitional — see permission_model.md)
 - Adopt Supabase Auth. `app_users` (link to auth.uid), `roles`, `user_roles`,
   `user_warehouses`. RLS policies keyed on company/warehouse membership.
 - SECURITY DEFINER RPCs re-check role + scope; record actor id everywhere.

@@ -52,6 +52,26 @@ async function overview(): Promise<Response> {
   return json({ data });
 }
 
+/**
+ * Append an audit entry (spec §33). Best-effort: an audit failure must never
+ * fail the operation the operator just completed, but it is logged server-side.
+ */
+async function audit(
+  eventType: string,
+  entityId: number,
+  warehouseId: number | null,
+  details: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await supabase.rpc("log_audit", {
+    p_event_type: eventType,
+    p_entity_type: "warehouse",
+    p_entity_id: String(entityId),
+    p_warehouse_id: warehouseId,
+    p_details: details,
+  });
+  if (error) console.error("audit failed", eventType, entityId, error.message);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
@@ -134,9 +154,21 @@ Deno.serve(async (req) => {
         const { error: bErr } = await supabase.from("bins").insert(rows);
         // Bin seeding is best-effort: the warehouse itself is already created,
         // and bins can be added later from the warehouse screen.
-        if (bErr) return json({ data: created, warning: bErr.message }, 201);
+        if (bErr) {
+          await audit("warehouse.created", created.id, created.id, {
+            code, name, bins_seeded: false,
+          });
+          return json({ data: created, warning: bErr.message }, 201);
+        }
+        await audit("warehouse.created", created.id, created.id, {
+          code, name, bins_seeded: rows.map((r) => r.code),
+        });
+        return json({ data: created }, 201);
       }
 
+      await audit("warehouse.created", created.id, created.id, {
+        code, name, bins_seeded: false,
+      });
       return json({ data: created }, 201);
     }
 
@@ -169,6 +201,9 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (error) return json({ message: error.message }, 400);
       if (!data) return json({ message: "warehouse not found" }, 404);
+      // Record which fields changed, not the whole row.
+      const changed = Object.keys(patch).filter((k) => k !== "updated_at");
+      await audit("warehouse.updated", id, id, { changed, values: patch });
       return json({ data });
     }
 

@@ -57,10 +57,31 @@ Every stock movement already carries user + reason + reference; the audit log
 captures the higher-level sensitive events with typed JSON details so "who did
 what, when, and why" is always answerable.
 
-## 6. Current gap → path
+## 6. Implementation status
 
-Today the Supabase path is anon/login-free (no roles, no scope). Introducing
-Supabase Auth + a `users`/`user_warehouses`/`roles` layer is spec Step 3 and a
-prerequisite for real operations. Until then, actions run as a single implicit
-operator; the audit log should still record that operator id so history is not
-lost when auth arrives.
+**Landed (migration 0012):** `permissions` (21), `roles` (11, per §21),
+`role_permissions` (admins hold everything; each operational role an explicit
+set), `app_users`, `user_roles`, `user_warehouses`, and the append-only
+`audit_log` with its indexes. Guard functions `has_permission(text)`,
+`can_access_warehouse(bigint)`, `log_audit(...)` and `my_access()` are in place;
+RLS makes the catalogues read-only, restricts a user to their own
+user/role/warehouse rows, and gates `audit_log` reads behind `audit.view`.
+`log_audit` is deliberately **not** granted to anon/authenticated, so audit rows
+can only be written by the service role or other SECURITY DEFINER functions —
+the log cannot be forged from a client.
+
+Audit logging is wired into the `warehouses` edge function
+(`warehouse.created`, `warehouse.updated`, recording which fields changed).
+
+**Transitional gate — read this before trusting the guards.** The app is still
+login-free (anon key), so `auth.uid()` is null and both `has_permission` and
+`can_access_warehouse` currently return **true**, matching how the app behaves
+today. Nothing is enforced yet; the guards start denying the moment sign-in is
+switched on, and an unknown user then holds no permissions and no warehouses.
+
+**Remaining for Step 3:** enable Supabase Auth sign-in, insert `app_users` rows
+with roles + `user_warehouses`, replace the `TODO(Step 3)` comments in the
+`warehouses` edge function with real `has_permission` / `can_access_warehouse`
+checks, and add the same checks to the reconcile/ship RPCs. That last part needs
+one product decision first: **who creates accounts and how** (admin-invites vs
+self-signup), since it changes the login UX.
