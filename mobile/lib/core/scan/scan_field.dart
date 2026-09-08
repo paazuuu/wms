@@ -63,6 +63,28 @@ class _ScanFieldState extends State<ScanField> {
       widget.controller ?? TextEditingController();
   late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
 
+  bool _autofocusScheduled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Focus after the first frame rather than via TextField.autofocus. Doing it
+    // during the route's entry transition makes Flutter web try to place the
+    // caret before layout ("Cannot hit test a render box with no size"), which
+    // spams assertions and freezes the screen. A post-frame request runs after
+    // the box has a size, so it is safe on every platform.
+    if (!_autofocusScheduled) {
+      final want = widget.autofocus ||
+          (widget.autofocusOnWide && isWideLayout(context));
+      if (want) {
+        _autofocusScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _focusNode.requestFocus();
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     if (widget.controller == null) _controller.dispose();
@@ -84,12 +106,12 @@ class _ScanFieldState extends State<ScanField> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final autofocus =
-        widget.autofocus || (widget.autofocusOnWide && isWideLayout(context));
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
-      autofocus: autofocus,
+      // Focus is requested post-frame in didChangeDependencies, not here, to
+      // avoid a web hit-test assertion during route transitions.
+      autofocus: false,
       textInputAction: TextInputAction.search,
       onSubmitted: (_) => _submit(),
       style: const TextStyle(fontFamily: AppFonts.mono, letterSpacing: 0.5),
