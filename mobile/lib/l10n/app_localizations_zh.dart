@@ -1436,4 +1436,58 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get actionDelete => '删除';
+
+  @override
+  String get dashOverview => '概况';
+
+  @override
+  String get dashInboundToday => '今日入库';
+
+  @override
+  String get dashOutboundToday => '今日出库';
+
+  @override
+  String get dashOutstanding => '未交';
+
+  @override
+  String get dashTotalStock => '总库存';
+
+  @override
+  String get dashLowStock => '库存预警';
+
+  @override
+  String get dashTrendTitle => '出入库趋势（14天）';
+
+  @override
+  String get dashInbound => '入库';
+
+  @override
+  String get dashOutbound => '出库';
+
+  @override
+  String get dashOutstandingListTitle => '未交清单';
+
+  @override
+  String get dashLowStockListTitle => '库存预警';
+
+  @override
+  String get dashNoOutstanding => '没有未交';
+
+  @override
+  String get dashNoAlerts => '没有库存预警';
+
+  @override
+  String dashCount(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String dashSkuCount(int count) {
+    return '$count 个SKU';
+  }
+
+  @override
+  String dashThreshold(int count) {
+    return '阈值 $count';
+  }
 }

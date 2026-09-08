@@ -500,5 +500,30 @@
   "fieldNote": "备注",
   "deleteCartonQ": "删除这个纸箱吗？",
   "actionSave": "保存",
-  "actionDelete": "删除"
+  "actionDelete": "删除",
+  "dashOverview": "概况",
+  "dashInboundToday": "今日入库",
+  "dashOutboundToday": "今日出库",
+  "dashOutstanding": "未交",
+  "dashTotalStock": "总库存",
+  "dashLowStock": "库存预警",
+  "dashTrendTitle": "出入库趋势（14天）",
+  "dashInbound": "入库",
+  "dashOutbound": "出库",
+  "dashOutstandingListTitle": "未交清单",
+  "dashLowStockListTitle": "库存预警",
+  "dashNoOutstanding": "没有未交",
+  "dashNoAlerts": "没有库存预警",
+  "dashCount": "{count} 件",
+  "@dashCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashSkuCount": "{count} 个SKU",
+  "@dashSkuCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashThreshold": "阈值 {count}",
+  "@dashThreshold": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

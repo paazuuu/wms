@@ -1485,4 +1485,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actionDelete => 'Delete';
+
+  @override
+  String get dashOverview => 'Overview';
+
+  @override
+  String get dashInboundToday => 'Received today';
+
+  @override
+  String get dashOutboundToday => 'Shipped today';
+
+  @override
+  String get dashOutstanding => 'Outstanding';
+
+  @override
+  String get dashTotalStock => 'Total stock';
+
+  @override
+  String get dashLowStock => 'Low stock';
+
+  @override
+  String get dashTrendTitle => 'Inbound / outbound (14 days)';
+
+  @override
+  String get dashInbound => 'In';
+
+  @override
+  String get dashOutbound => 'Out';
+
+  @override
+  String get dashOutstandingListTitle => 'Outstanding list';
+
+  @override
+  String get dashLowStockListTitle => 'Stock alerts';
+
+  @override
+  String get dashNoOutstanding => 'Nothing outstanding';
+
+  @override
+  String get dashNoAlerts => 'No stock alerts';
+
+  @override
+  String dashCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String dashSkuCount(int count) {
+    return '$count SKUs';
+  }
+
+  @override
+  String dashThreshold(int count) {
+    return 'Threshold $count';
+  }
 }

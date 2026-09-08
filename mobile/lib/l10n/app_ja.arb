@@ -536,5 +536,30 @@
   "fieldNote": "備考",
   "deleteCartonQ": "この段ボールを削除しますか？",
   "actionSave": "保存",
-  "actionDelete": "削除"
+  "actionDelete": "削除",
+  "dashOverview": "概況",
+  "dashInboundToday": "本日の入庫",
+  "dashOutboundToday": "本日の出庫",
+  "dashOutstanding": "未納",
+  "dashTotalStock": "総在庫",
+  "dashLowStock": "要注意在庫",
+  "dashTrendTitle": "入出庫の推移（14日）",
+  "dashInbound": "入庫",
+  "dashOutbound": "出庫",
+  "dashOutstandingListTitle": "未納リスト",
+  "dashLowStockListTitle": "在庫アラート",
+  "dashNoOutstanding": "未納はありません",
+  "dashNoAlerts": "在庫アラートはありません",
+  "dashCount": "{count}件",
+  "@dashCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashSkuCount": "{count} SKU",
+  "@dashSkuCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashThreshold": "しきい値 {count}",
+  "@dashThreshold": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

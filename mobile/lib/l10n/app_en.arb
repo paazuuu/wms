@@ -500,5 +500,30 @@
   "fieldNote": "Note",
   "deleteCartonQ": "Delete this carton?",
   "actionSave": "Save",
-  "actionDelete": "Delete"
+  "actionDelete": "Delete",
+  "dashOverview": "Overview",
+  "dashInboundToday": "Received today",
+  "dashOutboundToday": "Shipped today",
+  "dashOutstanding": "Outstanding",
+  "dashTotalStock": "Total stock",
+  "dashLowStock": "Low stock",
+  "dashTrendTitle": "Inbound / outbound (14 days)",
+  "dashInbound": "In",
+  "dashOutbound": "Out",
+  "dashOutstandingListTitle": "Outstanding list",
+  "dashLowStockListTitle": "Stock alerts",
+  "dashNoOutstanding": "Nothing outstanding",
+  "dashNoAlerts": "No stock alerts",
+  "dashCount": "{count} entries",
+  "@dashCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashSkuCount": "{count} SKUs",
+  "@dashSkuCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashThreshold": "Threshold {count}",
+  "@dashThreshold": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

@@ -8,6 +8,8 @@ import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/receipt.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
+import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
+import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
@@ -77,6 +79,16 @@ class FakeDeliveryRepository implements DeliveryRepository {
   @override
   Future<ApiResult<DeliveryPlan>> cancelReceipt(int planId, int receiptId) async =>
       ApiSuccess(plans.first);
+}
+
+class FakeDashboardRepository implements DashboardRepository {
+  FakeDashboardRepository(this.value);
+  final DashboardMetrics value;
+
+  @override
+  Future<ApiResult<DashboardMetrics>> metrics(
+          {int days = 14, int lowThreshold = 10}) async =>
+      ApiSuccess(value);
 }
 
 class FakeStockRepository implements StockRepository {

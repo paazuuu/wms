@@ -2739,6 +2739,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'削除'**
   String get actionDelete;
+
+  /// No description provided for @dashOverview.
+  ///
+  /// In ja, this message translates to:
+  /// **'概況'**
+  String get dashOverview;
+
+  /// No description provided for @dashInboundToday.
+  ///
+  /// In ja, this message translates to:
+  /// **'本日の入庫'**
+  String get dashInboundToday;
+
+  /// No description provided for @dashOutboundToday.
+  ///
+  /// In ja, this message translates to:
+  /// **'本日の出庫'**
+  String get dashOutboundToday;
+
+  /// No description provided for @dashOutstanding.
+  ///
+  /// In ja, this message translates to:
+  /// **'未納'**
+  String get dashOutstanding;
+
+  /// No description provided for @dashTotalStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'総在庫'**
+  String get dashTotalStock;
+
+  /// No description provided for @dashLowStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'要注意在庫'**
+  String get dashLowStock;
+
+  /// No description provided for @dashTrendTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'入出庫の推移（14日）'**
+  String get dashTrendTitle;
+
+  /// No description provided for @dashInbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫'**
+  String get dashInbound;
+
+  /// No description provided for @dashOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get dashOutbound;
+
+  /// No description provided for @dashOutstandingListTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'未納リスト'**
+  String get dashOutstandingListTitle;
+
+  /// No description provided for @dashLowStockListTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫アラート'**
+  String get dashLowStockListTitle;
+
+  /// No description provided for @dashNoOutstanding.
+  ///
+  /// In ja, this message translates to:
+  /// **'未納はありません'**
+  String get dashNoOutstanding;
+
+  /// No description provided for @dashNoAlerts.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫アラートはありません'**
+  String get dashNoAlerts;
+
+  /// No description provided for @dashCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件'**
+  String dashCount(int count);
+
+  /// No description provided for @dashSkuCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} SKU'**
+  String dashSkuCount(int count);
+
+  /// No description provided for @dashThreshold.
+  ///
+  /// In ja, this message translates to:
+  /// **'しきい値 {count}'**
+  String dashThreshold(int count);
 }
 
 class _AppLocalizationsDelegate

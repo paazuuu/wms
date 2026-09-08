@@ -6,6 +6,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
+import 'dashboard_widgets.dart';
 
 /// The content-area landing page inside the app shell: a branded greeting,
 /// a "ready to scan" banner, and the full capability menu grouped by area.
@@ -38,6 +39,7 @@ class DashboardOverviewScreen extends StatelessWidget {
     }
 
     final lookup = entryById('product_lookup');
+    final delivery = entryById('delivery');
     final l10n = AppLocalizations.of(context);
 
     return ListView(
@@ -47,6 +49,12 @@ class DashboardOverviewScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         _ScanHeroCard(
           onTap: lookup == null ? null : () => onOpen(lookup),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        _SectionLabel(l10n.dashOverview),
+        const SizedBox(height: AppSpacing.md),
+        DashboardMetricsSection(
+          onOpenOutstanding: delivery == null ? null : () => onOpen(delivery),
         ),
         const SizedBox(height: AppSpacing.xl),
         for (final group in groups) ...[

@@ -1437,4 +1437,58 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get actionDelete => '削除';
+
+  @override
+  String get dashOverview => '概況';
+
+  @override
+  String get dashInboundToday => '本日の入庫';
+
+  @override
+  String get dashOutboundToday => '本日の出庫';
+
+  @override
+  String get dashOutstanding => '未納';
+
+  @override
+  String get dashTotalStock => '総在庫';
+
+  @override
+  String get dashLowStock => '要注意在庫';
+
+  @override
+  String get dashTrendTitle => '入出庫の推移（14日）';
+
+  @override
+  String get dashInbound => '入庫';
+
+  @override
+  String get dashOutbound => '出庫';
+
+  @override
+  String get dashOutstandingListTitle => '未納リスト';
+
+  @override
+  String get dashLowStockListTitle => '在庫アラート';
+
+  @override
+  String get dashNoOutstanding => '未納はありません';
+
+  @override
+  String get dashNoAlerts => '在庫アラートはありません';
+
+  @override
+  String dashCount(int count) {
+    return '$count件';
+  }
+
+  @override
+  String dashSkuCount(int count) {
+    return '$count SKU';
+  }
+
+  @override
+  String dashThreshold(int count) {
+    return 'しきい値 $count';
+  }
 }
