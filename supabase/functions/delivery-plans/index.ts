@@ -1,8 +1,10 @@
 // Delivery plans API for the WMS mobile client.
 // Routes (function is mounted at /functions/v1/delivery-plans):
-//   GET  /delivery-plans                 list (?status=&search=)
-//   GET  /delivery-plans/:id             one plan with its expected lines
-//   POST /delivery-plans/:id/reconcile   record a reconciliation
+//   GET  /delivery-plans                          list (?status=&search=)
+//   GET  /delivery-plans/:id                      one plan with its expected lines
+//   POST /delivery-plans/:id/reconcile            record a reconciliation
+//   GET  /delivery-plans/:id/receipts             list this plan's receipts
+//   POST /delivery-plans/:id/receipts/:rid/cancel void a receipt (correction)
 //
 // Uses the service role internally. verify_jwt=true means the caller must send
 // a valid Supabase JWT (the app's anon key qualifies). For production, move to
@@ -71,6 +73,52 @@ Deno.serve(async (req) => {
         .eq("id", id)
         .single();
       if (error) return json({ message: error.message }, 404);
+      return json({ data });
+    }
+
+    // GET /delivery-plans/:id/receipts
+    if (req.method === "GET" && rest.length === 2 && rest[1] === "receipts") {
+      const id = Number(rest[0]);
+      const { data, error } = await supabase
+        .from("delivery_reconciliations")
+        .select(
+          "id, reference_no, note_reference, status, created_at, lines:reconciliation_lines(actual_quantity)")
+        .eq("delivery_plan_id", id)
+        .order("id", { ascending: false });
+      if (error) return json({ message: error.message }, 400);
+      const receipts = (data ?? []).map((r: Record<string, unknown>) => {
+        const lines = (r.lines as { actual_quantity: number | null }[]) ?? [];
+        const totalUnits = lines.reduce((s, l) => s + (l.actual_quantity ?? 0), 0);
+        return {
+          id: r.id,
+          reference_no: r.reference_no,
+          note_reference: r.note_reference,
+          status: r.status,
+          created_at: r.created_at,
+          total_units: totalUnits,
+          line_count: lines.filter((l) => (l.actual_quantity ?? 0) > 0).length,
+        };
+      });
+      return json({ data: receipts });
+    }
+
+    // POST /delivery-plans/:id/receipts/:rid/cancel
+    if (
+      req.method === "POST" && rest.length === 4 &&
+      rest[1] === "receipts" && rest[3] === "cancel"
+    ) {
+      const id = Number(rest[0]);
+      const rid = Number(rest[2]);
+      const { error: rpcError } = await supabase.rpc("cancel_reconciliation", {
+        p_recon_id: rid,
+      });
+      if (rpcError) return json({ message: rpcError.message }, 400);
+      const { data, error } = await supabase
+        .from("delivery_plans")
+        .select("*, lines:delivery_plan_lines(*)")
+        .eq("id", id)
+        .single();
+      if (error) return json({ message: error.message }, 400);
       return json({ data });
     }
 

@@ -22,6 +22,10 @@ class DeliveryPlanStatusUi {
             StatusTone.warning,
             Icons.fact_check_outlined,
             l10n.deliveryStatusReconciling),
+        DeliveryPlanStatus.partial => DeliveryPlanStatusUi(
+            StatusTone.warning,
+            Icons.incomplete_circle,
+            l10n.deliveryStatusPartial),
         DeliveryPlanStatus.completed => DeliveryPlanStatusUi(
             StatusTone.success, Icons.check_circle, l10n.deliveryStatusCompleted),
       };

@@ -260,9 +260,19 @@ GEMINI_MODEL=gemini-2.x-flash
    現状はEdge Functionが service role でDBアクセスし、anonキー所持で呼べる
    （社内アプリ向けMVP）。本番は **Supabase Auth（メール/パスワード等）** に移行し、
    ユーザーJWTで呼ぶ→RLSで保護、service roleショートカットを外す。
-4. **Excel取り込み（PC・バックオフィス）**
-   予定データ投入UIは別途必要。service role で `delivery_plans` / `_lines` に
-   INSERTするインポータ（社内Web or スクリプト）。列対応は §2 の表を参照。
+4. **予定データ取り込み（PC・バックオフィス）** — `tools/import_delivery_plan.py`
+   Excel/PDFを **統一フォーマットに変換してからDB保存**する取込ツール。
+   - `.xlsx`：JAN列を自動特定、数量/メーカー/品番/単価/金額は見出しで検出（業者ごとの
+     レイアウト差を吸収）。
+   - `.pdf`（テキスト）：各行のJANトークンを見つけ、直後の整数を数量として抽出。
+   - スキャンPDF（文字レイヤー無し）：`ocr-delivery-note` にPDF/画像をPOSTしてGeminiで抽出。
+   - JANは全箇所で `normalize_jan`（`jan.dart` と同一ルール）で正規化してから保存。
+   ```
+   export SUPABASE_URL=https://vjunicsfobglmncjucbb.supabase.co
+   export SUPABASE_SERVICE_ROLE_KEY=<Secret keyのsb_secret_…>
+   python3 tools/import_delivery_plan.py 予定.xlsx --delivery-number 20260901 \
+       --supplier "○○" --dry-run   # 検出確認 → 問題なければ --dry-run を外す
+   ```
 5. **セキュリティ advisor の既存warning**
    `public.rls_auto_enable`（今回の機能とは無関係の既存関数）が
    SECURITY DEFINER で anon/authenticated から実行可能と警告あり。要否を確認し、

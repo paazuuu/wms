@@ -33,6 +33,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageTooltip => 'Select language';
 
   @override
+  String get textSizeMenu => 'Text size';
+
+  @override
+  String get textSizeNormal => 'Normal';
+
+  @override
+  String get textSizeLarge => 'Large';
+
+  @override
+  String get textSizeXLarge => 'Extra large';
+
+  @override
+  String get textSizeXXLarge => 'Max';
+
+  @override
   String get languageJapanese => '日本語';
 
   @override
@@ -539,6 +554,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionComplete => 'Complete';
 
   @override
+  String get actionContinue => 'Continue';
+
+  @override
   String get fieldAssemblyProduct => 'Assembly product';
 
   @override
@@ -969,6 +987,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryStatusReconciling => 'Reconciling';
 
   @override
+  String get deliveryStatusPartial => 'Partial';
+
+  @override
   String get deliveryStatusCompleted => 'Reconciled';
 
   @override
@@ -1052,6 +1073,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diffLabel => 'Diff';
 
   @override
+  String get reconReceivedPrev => 'Received';
+
+  @override
+  String get reconThisTime => 'This time';
+
+  @override
+  String get reconRemaining => 'Left';
+
+  @override
   String get completeReconcile => 'Complete check';
 
   @override
@@ -1064,6 +1094,71 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reconcileConfirmDiscrepancy =>
       'There are discrepancies (short, over or unexpected). Complete anyway?';
+
+  @override
+  String get reconcilePartialQ => 'Some items are still outstanding';
+
+  @override
+  String reconcilePartialBody(int count) {
+    return '$count unit(s) are still outstanding. Save as a partial delivery and keep the rest on the outstanding list, or finalize now and treat the rest as short?';
+  }
+
+  @override
+  String get reconcileKeepOpen => 'Save as partial';
+
+  @override
+  String get reconcileFinalizeShort => 'Finalize (rest short)';
+
+  @override
+  String get reconcilePartialSaved =>
+      'Saved as partial — the outstanding items are kept';
+
+  @override
+  String get reconNoteReference => 'Note';
+
+  @override
+  String get reconAlreadyDoneQ => 'This plan is already reconciled';
+
+  @override
+  String get reconAlreadyDoneBody =>
+      'Recording another receipt will add to stock again. To fix a mistake, cancel the receipt from the history instead.';
+
+  @override
+  String doubleScanWarning(String code) {
+    return '$code exceeds the planned quantity — double scan?';
+  }
+
+  @override
+  String get receiptHistoryTitle => 'Receipts / correct';
+
+  @override
+  String get receiptEmpty => 'No receipts yet.';
+
+  @override
+  String get receiptEmptyBody =>
+      'Each time this plan is reconciled, the receipt is recorded here and can be cancelled.';
+
+  @override
+  String get receiptCancelAction => 'Cancel receipt';
+
+  @override
+  String get receiptCancelledBadge => 'Cancelled';
+
+  @override
+  String get receiptCancelQ => 'Cancel this receipt?';
+
+  @override
+  String get receiptCancelBody =>
+      'The quantities and stock this receipt added will be reversed.';
+
+  @override
+  String get receiptCancelledDone => 'Receipt cancelled';
+
+  @override
+  String get showCompletedPlans => 'Show reconciled';
+
+  @override
+  String get hideCompletedPlans => 'Hide reconciled';
 
   @override
   String get reconcileDone => 'Reconciliation completed';
@@ -1081,4 +1176,313 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noteImageAttached => 'Delivery note attached';
+
+  @override
+  String get planImportTitle => 'Import plan';
+
+  @override
+  String get planImportHint =>
+      'Pick an Excel / PDF / image to upload — it is parsed and registered as a plan automatically.';
+
+  @override
+  String get pickFile => 'Choose file';
+
+  @override
+  String planImportSelected(String name) {
+    return 'Selected: $name';
+  }
+
+  @override
+  String get planImportAction => 'Import';
+
+  @override
+  String get planImporting => 'Importing…';
+
+  @override
+  String get planImportChooseFirst =>
+      'Choose a file and enter a voucher number.';
+
+  @override
+  String planImportedSummary(int count, int total) {
+    return 'Imported $count items, $total units total';
+  }
+
+  @override
+  String get planReadAction => 'Read note';
+
+  @override
+  String get planReading => 'Reading…';
+
+  @override
+  String get importFormatsHint => 'Excel / PDF / image';
+
+  @override
+  String get importChooseFile => 'Choose a file';
+
+  @override
+  String get changeFile => 'Change';
+
+  @override
+  String get importHeaderSection => 'Header';
+
+  @override
+  String get importLinesPreview => 'Line preview';
+
+  @override
+  String importMoreLines(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get planReviewTitle => 'Check the header';
+
+  @override
+  String get planReviewHint =>
+      'Fields were auto-read from the note. Anything wrong or blank can be edited here before you register it.';
+
+  @override
+  String get planCommitAction => 'Register';
+
+  @override
+  String get planRegistering => 'Registering…';
+
+  @override
+  String planPreviewCount(int count, int total) {
+    return '$count items · $total units';
+  }
+
+  @override
+  String get fieldRegistrationNumber => 'Registration no. (T…)';
+
+  @override
+  String get fieldCustomerCode => 'Customer code';
+
+  @override
+  String get fieldDocNumber => 'Delivery-note no.';
+
+  @override
+  String get fieldDocDate => 'Date';
+
+  @override
+  String get headerUnreadHint => 'Could not read — please enter';
+
+  @override
+  String get planNeedsReviewBadge => 'Needs check';
+
+  @override
+  String get planUnidentifiedNote =>
+      'The company could not be read, so this was filed under the “UNKNOWN” series. Enter the supplier to reassign it.';
+
+  @override
+  String get referenceNoLabel => 'Ref. no.';
+
+  @override
+  String get orderDateLabel => 'Order date';
+
+  @override
+  String get companyCode => 'Company code';
+
+  @override
+  String get totalStockTitle => 'Total stock (by JAN)';
+
+  @override
+  String get sortMenu => 'Sort';
+
+  @override
+  String get sortByStock => 'By stock';
+
+  @override
+  String get sortByName => 'By name';
+
+  @override
+  String get sortByJan => 'By JAN';
+
+  @override
+  String get stockOnHandUnit => 'on hand';
+
+  @override
+  String get stockEmpty => 'No stock yet.';
+
+  @override
+  String get stockEmptyBody =>
+      'Completed reconciliations accumulate per-JAN stock here.';
+
+  @override
+  String get featShipment => 'Shipping';
+
+  @override
+  String get featShipmentDesc =>
+      'Import a shipping list, pack into cartons, deduct stock';
+
+  @override
+  String get shipmentListTitle => 'Shipping';
+
+  @override
+  String get shipmentImportTitle => 'Import shipping list';
+
+  @override
+  String get shipmentEmpty => 'No shipments.';
+
+  @override
+  String get shipmentEmptyBody =>
+      'Import a customer\'s Excel / PDF to start a shipment.';
+
+  @override
+  String get shipmentSearchHint => 'Search by shipment no. or customer';
+
+  @override
+  String get shipmentStatusOpen => 'To pack';
+
+  @override
+  String get shipmentStatusPacking => 'Packing';
+
+  @override
+  String get shipmentStatusShipped => 'Shipped';
+
+  @override
+  String get shipmentStatusCancelled => 'Cancelled';
+
+  @override
+  String get shipmentNumberLabel => 'Shipment no.';
+
+  @override
+  String cartonCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartons',
+      one: '$count carton',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shipmentLinesSection => 'Shipment list';
+
+  @override
+  String get cartonsSection => 'Cartons';
+
+  @override
+  String packProgress(int packed, int total) {
+    return 'Packed $packed / $total';
+  }
+
+  @override
+  String get addCarton => 'Add carton';
+
+  @override
+  String cartonNoLabel(int no) {
+    return 'Carton #$no';
+  }
+
+  @override
+  String get cartonLabelHint => 'Label (optional), e.g. A-1';
+
+  @override
+  String get cartonEditTitle => 'Carton contents';
+
+  @override
+  String get cartonEmpty => 'Nothing packed in this carton yet.';
+
+  @override
+  String get packRemaining => 'Unpacked';
+
+  @override
+  String get packThisCarton => 'This carton';
+
+  @override
+  String get overpackWarning => 'Packed more than the shipment quantity.';
+
+  @override
+  String get shipConfirmAction => 'Confirm shipment';
+
+  @override
+  String get shipConfirmQ => 'Confirm this shipment?';
+
+  @override
+  String get shipConfirmBody => 'The quantities will be deducted from stock.';
+
+  @override
+  String get shipShortWarning =>
+      'Some items exceed stock on hand. Stock will not go below zero. Confirm anyway?';
+
+  @override
+  String get shipDone => 'Shipment confirmed';
+
+  @override
+  String get shipCancelAction => 'Undo shipment';
+
+  @override
+  String get shipCancelQ => 'Undo this shipment?';
+
+  @override
+  String get shipCancelBody =>
+      'The deducted quantities will be added back to stock and the shipment reopened.';
+
+  @override
+  String get shipCancelledDone => 'Shipment reopened';
+
+  @override
+  String get shipAlreadyDone => 'Already shipped';
+
+  @override
+  String get printOverall => 'Print / PDF list';
+
+  @override
+  String get printAllCartons => 'Print / PDF cartons';
+
+  @override
+  String get printThisCarton => 'Print / PDF';
+
+  @override
+  String get printDeliverySlip => 'Print / PDF delivery slip';
+
+  @override
+  String get printMenu => 'Print / PDF';
+
+  @override
+  String get senderSettingsTitle => 'Sender (your company)';
+
+  @override
+  String get senderSettingsHint =>
+      'Saved as the default sender. You can pick which fields to include each time you print.';
+
+  @override
+  String get senderPickTitle => 'Sender on this print';
+
+  @override
+  String get senderInclude => 'Print the sender block';
+
+  @override
+  String get senderNoneSet => 'No sender saved yet.';
+
+  @override
+  String get senderOpenSettings => 'Set up sender';
+
+  @override
+  String get senderSaved => 'Sender saved';
+
+  @override
+  String get senderPreview => 'Print preview';
+
+  @override
+  String get fieldCompanyName => 'Company name';
+
+  @override
+  String get fieldPostalCode => 'Postal code';
+
+  @override
+  String get fieldFax => 'Fax';
+
+  @override
+  String get fieldNote => 'Note';
+
+  @override
+  String get deleteCartonQ => 'Delete this carton?';
+
+  @override
+  String get actionSave => 'Save';
+
+  @override
+  String get actionDelete => 'Delete';
 }

@@ -4,6 +4,7 @@ import '../../../core/api/api_result.dart';
 import '../data/delivery_repository.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/delivery_plan_line.dart';
+import '../domain/jan.dart';
 import '../domain/ocr_line.dart';
 import '../domain/reconciliation.dart';
 
@@ -38,7 +39,9 @@ class ReconciliationState {
 /// JANs that have no count yet, so a scanned quantity is never overwritten.
 class ReconciliationController extends StateNotifier<ReconciliationState> {
   ReconciliationController(this._repository, DeliveryPlan plan)
-      : _planLines = {for (final l in plan.lines) l.janCode: l},
+      : _planLines = {
+          for (final l in plan.lines) normalizeJan(l.janCode): l,
+        },
         super(ReconciliationState(plan: plan));
 
   final DeliveryRepository _repository;
@@ -46,7 +49,7 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
 
   /// Count one more unit of [janCode] from a scan.
   void recordScan(String janCode) {
-    final code = janCode.trim();
+    final code = normalizeJan(janCode);
     if (code.isEmpty) return;
     final current = state.counts[code]?.quantity ?? 0;
     _put(code, current + 1, CountSource.scan);
@@ -55,7 +58,7 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
   /// Set an explicit quantity for [janCode]. Zero (or less) clears the count.
   void setQuantity(String janCode, int quantity,
       {CountSource source = CountSource.manual}) {
-    final code = janCode.trim();
+    final code = normalizeJan(janCode);
     if (code.isEmpty) return;
     if (quantity <= 0) {
       _remove(code);
@@ -65,19 +68,26 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
   }
 
   /// Remove a counted JAN entirely (e.g. an unexpected line keyed in error).
-  void removeJan(String janCode) => _remove(janCode.trim());
+  void removeJan(String janCode) => _remove(normalizeJan(janCode));
 
   /// Seed counts from OCR of the delivery note. Planned JANs are pre-filled to
-  /// their planned quantity (a safe, reviewable default); JANs not on the plan
-  /// surface as unexpected using the hint, or one unit. Existing counts win.
+  /// the quantity still outstanding (so a partly-delivered line seeds only its
+  /// remainder); JANs not on the plan surface as unexpected using the hint, or
+  /// one unit. Existing counts win.
   void applyOcr(List<OcrLine> ocrLines) {
     final next = Map<String, CountedItem>.from(state.counts);
     for (final ocr in ocrLines) {
-      if (next.containsKey(ocr.janCode)) continue;
-      final planned = _planLines[ocr.janCode]?.plannedQuantity;
-      final quantity = ocr.quantityHint ?? planned ?? 1;
-      next[ocr.janCode] = CountedItem(
-        janCode: ocr.janCode,
+      final code = normalizeJan(ocr.janCode);
+      if (code.isEmpty || next.containsKey(code)) continue;
+      final line = _planLines[code];
+      final outstanding = line == null
+          ? null
+          : (line.outstandingQuantity > 0
+              ? line.outstandingQuantity
+              : line.plannedQuantity);
+      final quantity = ocr.quantityHint ?? outstanding ?? 1;
+      next[code] = CountedItem(
+        janCode: code,
         quantity: quantity,
         source: CountSource.ocr,
       );

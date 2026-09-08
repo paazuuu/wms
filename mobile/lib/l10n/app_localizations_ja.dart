@@ -33,6 +33,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageTooltip => '言語を選択';
 
   @override
+  String get textSizeMenu => '文字サイズ';
+
+  @override
+  String get textSizeNormal => '標準';
+
+  @override
+  String get textSizeLarge => '大';
+
+  @override
+  String get textSizeXLarge => '特大';
+
+  @override
+  String get textSizeXXLarge => '最大';
+
+  @override
   String get languageJapanese => '日本語';
 
   @override
@@ -533,6 +548,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionComplete => '完了';
 
   @override
+  String get actionContinue => '続ける';
+
+  @override
   String get fieldAssemblyProduct => '組立製品';
 
   @override
@@ -943,6 +961,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deliveryStatusReconciling => '照合中';
 
   @override
+  String get deliveryStatusPartial => '部分納品';
+
+  @override
   String get deliveryStatusCompleted => '照合済み';
 
   @override
@@ -1024,6 +1045,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get diffLabel => '差';
 
   @override
+  String get reconReceivedPrev => '既納';
+
+  @override
+  String get reconThisTime => '今回';
+
+  @override
+  String get reconRemaining => '残';
+
+  @override
   String get completeReconcile => '照合を完了';
 
   @override
@@ -1034,6 +1064,68 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reconcileConfirmDiscrepancy => '差異があります（不足・過剰・想定外）。このまま完了しますか？';
+
+  @override
+  String get reconcilePartialQ => '未納の品目が残っています';
+
+  @override
+  String reconcilePartialBody(int count) {
+    return '未納が $count 本残っています。部分納品として保存し残りを未納リストに残しますか？　それとも完了にして残りを欠品として扱いますか？';
+  }
+
+  @override
+  String get reconcileKeepOpen => '部分納品として保存';
+
+  @override
+  String get reconcileFinalizeShort => '完了にする（残りは欠品）';
+
+  @override
+  String get reconcilePartialSaved => '部分納品として保存しました（未納を継続保持）';
+
+  @override
+  String get reconNoteReference => '備考';
+
+  @override
+  String get reconAlreadyDoneQ => 'この予定は照合済みです';
+
+  @override
+  String get reconAlreadyDoneBody =>
+      '追加で取り込むと在庫にもう一度加算されます。間違いを直す場合は、受領履歴から該当の受領を取り消してください。';
+
+  @override
+  String doubleScanWarning(String code) {
+    return '$code が予定数を超えました（二重スキャン？）';
+  }
+
+  @override
+  String get receiptHistoryTitle => '受領履歴／訂正';
+
+  @override
+  String get receiptEmpty => '受領履歴はまだありません。';
+
+  @override
+  String get receiptEmptyBody => 'この予定を照合するたびに、受領がここに記録され、取り消せます。';
+
+  @override
+  String get receiptCancelAction => '受領を取消';
+
+  @override
+  String get receiptCancelledBadge => '取消済み';
+
+  @override
+  String get receiptCancelQ => 'この受領を取り消しますか？';
+
+  @override
+  String get receiptCancelBody => 'この受領で加算した数量と在庫を差し戻します。';
+
+  @override
+  String get receiptCancelledDone => '受領を取り消しました';
+
+  @override
+  String get showCompletedPlans => '照合済みも表示';
+
+  @override
+  String get hideCompletedPlans => '照合済みを隠す';
 
   @override
   String get reconcileDone => '照合を完了しました';
@@ -1051,4 +1143,298 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noteImageAttached => '納品書を添付しました';
+
+  @override
+  String get planImportTitle => '予定を取り込む';
+
+  @override
+  String get planImportHint => 'Excel / PDF / 画像を選んでアップロードすると、自動で予定に登録します。';
+
+  @override
+  String get pickFile => 'ファイルを選択';
+
+  @override
+  String planImportSelected(String name) {
+    return '選択: $name';
+  }
+
+  @override
+  String get planImportAction => '取り込む';
+
+  @override
+  String get planImporting => '取り込み中…';
+
+  @override
+  String get planImportChooseFirst => 'ファイルを選び、伝票番号を入力してください。';
+
+  @override
+  String planImportedSummary(int count, int total) {
+    return '$count 品目・合計 $total 本を取り込みました';
+  }
+
+  @override
+  String get planReadAction => '読み取る';
+
+  @override
+  String get planReading => '読取中…';
+
+  @override
+  String get importFormatsHint => 'Excel / PDF / 画像 に対応';
+
+  @override
+  String get importChooseFile => 'ファイルを選ぶ';
+
+  @override
+  String get changeFile => '変更';
+
+  @override
+  String get importHeaderSection => 'ヘッダー情報';
+
+  @override
+  String get importLinesPreview => '明細プレビュー';
+
+  @override
+  String importMoreLines(int count) {
+    return '他 $count 件';
+  }
+
+  @override
+  String get planReviewTitle => 'ヘッダーの確認';
+
+  @override
+  String get planReviewHint => '納品書から自動で読み取りました。間違い・空欄は登録前にここで修正できます。';
+
+  @override
+  String get planCommitAction => '登録する';
+
+  @override
+  String get planRegistering => '登録中…';
+
+  @override
+  String planPreviewCount(int count, int total) {
+    return '$count 品目・$total 本';
+  }
+
+  @override
+  String get fieldRegistrationNumber => '登録番号（T…）';
+
+  @override
+  String get fieldCustomerCode => 'お客様コード';
+
+  @override
+  String get fieldDocNumber => '納品書番号';
+
+  @override
+  String get fieldDocDate => '日付';
+
+  @override
+  String get headerUnreadHint => '読み取れませんでした。入力してください';
+
+  @override
+  String get planNeedsReviewBadge => '要確認';
+
+  @override
+  String get planUnidentifiedNote =>
+      '会社名を読み取れなかったため「UNKNOWN」枠の識別番号を採番しました。仕入先を入力すると正しい会社に付け替えられます。';
+
+  @override
+  String get referenceNoLabel => '整理番号';
+
+  @override
+  String get orderDateLabel => '注文日';
+
+  @override
+  String get companyCode => '会社コード';
+
+  @override
+  String get totalStockTitle => '総在庫（JAN別）';
+
+  @override
+  String get sortMenu => '並び替え';
+
+  @override
+  String get sortByStock => '在庫数順';
+
+  @override
+  String get sortByName => '品名順';
+
+  @override
+  String get sortByJan => 'JAN順';
+
+  @override
+  String get stockOnHandUnit => '在庫';
+
+  @override
+  String get stockEmpty => '在庫がまだありません。';
+
+  @override
+  String get stockEmptyBody => '照合を完了すると、JANごとの総在庫がここに集計されます。';
+
+  @override
+  String get featShipment => '出庫';
+
+  @override
+  String get featShipmentDesc => '出庫リストを取り込み、段ボールに小分けして在庫を引く';
+
+  @override
+  String get shipmentListTitle => '出庫';
+
+  @override
+  String get shipmentImportTitle => '出庫リストを取り込む';
+
+  @override
+  String get shipmentEmpty => '出庫はありません。';
+
+  @override
+  String get shipmentEmptyBody => '得意先のExcel / PDF を取り込んで出庫を始めます。';
+
+  @override
+  String get shipmentSearchHint => '出庫番号・得意先で検索';
+
+  @override
+  String get shipmentStatusOpen => '梱包待ち';
+
+  @override
+  String get shipmentStatusPacking => '梱包中';
+
+  @override
+  String get shipmentStatusShipped => '出庫済み';
+
+  @override
+  String get shipmentStatusCancelled => '取消';
+
+  @override
+  String get shipmentNumberLabel => '出庫番号';
+
+  @override
+  String cartonCountLabel(int count) {
+    return '$count 箱';
+  }
+
+  @override
+  String get shipmentLinesSection => '出庫リスト';
+
+  @override
+  String get cartonsSection => '段ボール';
+
+  @override
+  String packProgress(int packed, int total) {
+    return '梱包 $packed / $total';
+  }
+
+  @override
+  String get addCarton => '段ボールを追加';
+
+  @override
+  String cartonNoLabel(int no) {
+    return '段ボール #$no';
+  }
+
+  @override
+  String get cartonLabelHint => 'ラベル（任意）例: A-1';
+
+  @override
+  String get cartonEditTitle => '段ボールの中身';
+
+  @override
+  String get cartonEmpty => 'この段ボールにはまだ何も入っていません。';
+
+  @override
+  String get packRemaining => '未梱包';
+
+  @override
+  String get packThisCarton => 'この箱';
+
+  @override
+  String get overpackWarning => '梱包数が出庫数を超えています。';
+
+  @override
+  String get shipConfirmAction => '出庫確定';
+
+  @override
+  String get shipConfirmQ => '出庫を確定しますか？';
+
+  @override
+  String get shipConfirmBody => '在庫から数量を引いて出庫を確定します。';
+
+  @override
+  String get shipShortWarning => '在庫が不足している品目があります。在庫はマイナスにはなりません。確定しますか？';
+
+  @override
+  String get shipDone => '出庫を確定しました';
+
+  @override
+  String get shipCancelAction => '出庫を取消';
+
+  @override
+  String get shipCancelQ => 'この出庫を取り消しますか？';
+
+  @override
+  String get shipCancelBody => '引いた数量を在庫に戻し、出庫を未確定に戻します。';
+
+  @override
+  String get shipCancelledDone => '出庫を未確定に戻しました';
+
+  @override
+  String get shipAlreadyDone => '出庫済み';
+
+  @override
+  String get printOverall => '出庫リストを印刷/PDF';
+
+  @override
+  String get printAllCartons => '段ボール別を印刷/PDF';
+
+  @override
+  String get printThisCarton => '印刷/PDF';
+
+  @override
+  String get printDeliverySlip => '送り状を印刷/PDF';
+
+  @override
+  String get printMenu => '印刷/PDF';
+
+  @override
+  String get senderSettingsTitle => '差出人（自社）設定';
+
+  @override
+  String get senderSettingsHint => '差出人のデフォルトとして保存します。印刷時にどの項目を載せるか毎回選べます。';
+
+  @override
+  String get senderPickTitle => 'この印刷の差出人';
+
+  @override
+  String get senderInclude => '差出人を印刷する';
+
+  @override
+  String get senderNoneSet => '差出人が未設定です。';
+
+  @override
+  String get senderOpenSettings => '差出人を設定';
+
+  @override
+  String get senderSaved => '差出人情報を保存しました';
+
+  @override
+  String get senderPreview => '印刷プレビュー';
+
+  @override
+  String get fieldCompanyName => '会社名';
+
+  @override
+  String get fieldPostalCode => '郵便番号';
+
+  @override
+  String get fieldFax => 'FAX';
+
+  @override
+  String get fieldNote => '備考';
+
+  @override
+  String get deleteCartonQ => 'この段ボールを削除しますか？';
+
+  @override
+  String get actionSave => '保存';
+
+  @override
+  String get actionDelete => '削除';
 }

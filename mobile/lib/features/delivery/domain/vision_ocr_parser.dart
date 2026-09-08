@@ -1,4 +1,5 @@
 import 'delivery_note_parser.dart' show isValidEan13;
+import 'jan.dart';
 import 'ocr_line.dart';
 
 /// Parses the structured JSON returned by the backend's cloud vision OCR
@@ -18,7 +19,8 @@ List<OcrLine> parseVisionOcrResponse(Map<String, dynamic> json) {
   final seen = <String>{};
   for (final entry in rawLines) {
     if (entry is! Map) continue;
-    final jan = (entry['jan_code'] ?? entry['jan'] ?? '').toString().trim();
+    final jan =
+        normalizeJan((entry['jan_code'] ?? entry['jan'] ?? '').toString());
     if (!isAcceptableJan(jan)) continue;
     if (!seen.add(jan)) continue;
     final name = (entry['product_name'] ?? '').toString().trim();

@@ -11,8 +11,15 @@ import '../../../core/ui/status_pill.dart';
 import '../application/delivery_providers.dart';
 import '../application/reconciliation_controller.dart';
 import '../domain/delivery_plan.dart';
+import '../domain/delivery_plan_status.dart';
+import '../domain/jan.dart';
 import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
+import 'receipt_history_screen.dart';
+
+/// How the operator chose to close a reconciliation that still has outstanding
+/// items.
+enum _FinishChoice { cancel, partial, finalize }
 
 /// Reconciles one delivery plan against what physically arrived. Loads the plan
 /// (with its expected lines), then hands off to [_ReconcileView] for the live
@@ -30,6 +37,17 @@ class ReconciliationScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(detail.valueOrNull?.deliveryNumber ?? l10n.featDelivery),
+        actions: [
+          IconButton(
+            tooltip: l10n.receiptHistoryTitle,
+            icon: const Icon(Icons.history),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (_) => ReceiptHistoryScreen(planId: planId)),
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: detail.when(
         data: (plan) => _ReconcileView(plan: plan),
@@ -62,9 +80,65 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
       ref.read(reconciliationControllerProvider(_plan).notifier);
 
   @override
+  void initState() {
+    super.initState();
+    // Re-checking an already-completed plan re-adds to stock: warn once so the
+    // operator uses the receipt history to correct instead of double-importing.
+    if (_plan.status == DeliveryPlanStatus.completed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _warnAlreadyReconciled();
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _scanFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _warnAlreadyReconciled() async {
+    final l10n = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.reconAlreadyDoneQ),
+        content: Text(l10n.reconAlreadyDoneBody),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ReceiptHistoryScreen(planId: _plan.id)));
+            },
+            child: Text(l10n.receiptHistoryTitle),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.actionContinue),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Record a scan and, if it pushes a planned line past its planned quantity,
+  /// warn about a possible double scan — while still keeping the count so a
+  /// genuine over-delivery can be recorded.
+  void _recordScan(String code) {
+    _controller.recordScan(code);
+    final norm = normalizeJan(code);
+    final result = ref.read(reconciliationControllerProvider(_plan)).result;
+    final matches = result.lines
+        .where((l) => normalizeJan(l.janCode) == norm && l.planLine != null)
+        .toList();
+    if (matches.isEmpty) return;
+    final line = matches.first;
+    if (line.receivedTotal > line.plannedQuantity) {
+      final l10n = AppLocalizations.of(context);
+      HapticFeedback.heavyImpact();
+      _snack(l10n.doubleScanWarning(line.janCode), tone: StatusTone.warning);
+    }
   }
 
   Future<void> _runOcr() async {
@@ -154,34 +228,65 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
       _snack(l10n.reconcileEmptyCounts, tone: StatusTone.warning);
       return;
     }
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.reconcileConfirmQ),
-        content: Text(result.hasDiscrepancies
-            ? l10n.reconcileConfirmDiscrepancy
-            : l10n.reconcileConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionComplete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
 
-    final apiResult = await _controller.submit();
+    // Split delivery: when something is still outstanding, let the operator keep
+    // the plan open (carry the remainder) or finalize it short.
+    final _FinishChoice? choice;
+    if (result.hasOutstanding) {
+      choice = await showDialog<_FinishChoice>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.reconcilePartialQ),
+          content: Text(l10n.reconcilePartialBody(result.outstandingTotal)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, _FinishChoice.cancel),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, _FinishChoice.finalize),
+              child: Text(l10n.reconcileFinalizeShort),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, _FinishChoice.partial),
+              child: Text(l10n.reconcileKeepOpen),
+            ),
+          ],
+        ),
+      );
+    } else {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.reconcileConfirmQ),
+          content: Text(result.hasDiscrepancies
+              ? l10n.reconcileConfirmDiscrepancy
+              : l10n.reconcileConfirmBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.actionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.actionComplete),
+            ),
+          ],
+        ),
+      );
+      choice = ok == true ? _FinishChoice.finalize : _FinishChoice.cancel;
+    }
+    if (choice == null || choice == _FinishChoice.cancel || !mounted) return;
+
+    final keepOpen = choice == _FinishChoice.partial;
+    final apiResult = await _controller.submit(complete: !keepOpen);
     if (!mounted) return;
     apiResult.when(
       success: (_) {
         ref.invalidate(deliveryPlansProvider);
         ref.invalidate(deliveryPlanDetailProvider(_plan.id));
-        _snack(l10n.reconcileDone, tone: StatusTone.success);
+        _snack(keepOpen ? l10n.reconcilePartialSaved : l10n.reconcileDone,
+            tone: StatusTone.success);
         Navigator.of(context).pop();
       },
       failure: (f) => _snack(f.message, tone: StatusTone.danger),
@@ -235,7 +340,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   focusNode: _scanFocus,
                   autofocusOnWide: true,
                   hintText: l10n.scanDeliveryHint,
-                  onSubmitted: _controller.recordScan,
+                  onSubmitted: _recordScan,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -262,7 +367,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
               ? EmptyStateView(
                   icon: Icons.qr_code_scanner,
                   title: l10n.reconcileEmptyCounts,
-                  message: l10n.deliveryPlansEmptyBody,
+                  message: l10n.scanDeliveryHint,
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -275,24 +380,32 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   ),
                 ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed:
-                    state.submitting ? null : () => _complete(result),
-                icon: state.submitting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.done_all),
-                label: Text(
-                    state.submitting ? l10n.working : l10n.completeReconcile),
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+                top: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppSpacing.minTouch,
+                child: FilledButton.icon(
+                  onPressed: state.submitting ? null : () => _complete(result),
+                  icon: state.submitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.done_all),
+                  label: Text(
+                      state.submitting ? l10n.working : l10n.completeReconcile),
+                ),
               ),
             ),
           ),
@@ -340,29 +453,61 @@ class _SummaryBar extends StatelessWidget {
             count: result.pendingCount),
     ];
 
+    // Units received (capped at planned) vs planned, across planned lines.
+    var planned = 0, received = 0;
+    for (final l in result.lines) {
+      if (l.planLine == null) continue;
+      planned += l.plannedQuantity;
+      received += l.receivedTotal.clamp(0, l.plannedQuantity);
+    }
+    final ratio = planned == 0 ? 0.0 : (received / planned).clamp(0.0, 1.0);
+
     return Container(
       width: double.infinity,
       color: scheme.surfaceContainerLow,
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.reconSummaryTitle,
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: scheme.onSurfaceVariant),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Wrap(
-              alignment: WrapAlignment.end,
+          if (planned > 0) ...[
+            Row(
+              children: [
+                Text(
+                  l10n.reconSummaryTitle,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurfaceVariant),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: ratio,
+                      minHeight: 6,
+                      backgroundColor: scheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text('$received/$planned',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'FiraCode',
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurfaceVariant)),
+              ],
+            ),
+            if (chips.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+          ],
+          if (chips.isNotEmpty)
+            Wrap(
               spacing: AppSpacing.xs,
               runSpacing: AppSpacing.xs,
               children: chips,
             ),
-          ),
         ],
       ),
     );
@@ -446,9 +591,12 @@ class _ReconLineCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
-                  _QtyStat(label: l10n.deliveryPlanned, value: line.plannedQuantity),
-                  _QtyStat(label: l10n.actualLabel, value: line.actualQuantity),
-                  _DiffStat(label: l10n.diffLabel, value: line.difference),
+                  _QtyStat(
+                      label: l10n.deliveryPlanned, value: line.plannedQuantity),
+                  _QtyStat(
+                      label: l10n.reconReceivedPrev, value: line.alreadyReceived),
+                  _QtyStat(label: l10n.reconThisTime, value: line.actualQuantity),
+                  _RemainStat(label: l10n.reconRemaining, value: line.remaining),
                 ],
               ),
             ],
@@ -488,8 +636,9 @@ class _QtyStat extends StatelessWidget {
   }
 }
 
-class _DiffStat extends StatelessWidget {
-  const _DiffStat({required this.label, required this.value});
+/// Outstanding (未納) units for a line: emphasized when anything remains.
+class _RemainStat extends StatelessWidget {
+  const _RemainStat({required this.label, required this.value});
 
   final String label;
   final int value;
@@ -498,10 +647,7 @@ class _DiffStat extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final color = value == 0
-        ? scheme.onSurfaceVariant
-        : (value > 0 ? scheme.error : scheme.tertiary);
-    final text = value > 0 ? '+$value' : '$value';
+    final color = value > 0 ? scheme.error : scheme.onSurfaceVariant;
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +657,7 @@ class _DiffStat extends StatelessWidget {
                   ?.copyWith(color: scheme.onSurfaceVariant)),
           const SizedBox(height: 2),
           Text(
-            text,
+            '$value',
             style: theme.textTheme.titleMedium?.copyWith(
                 fontFamily: 'FiraCode',
                 fontWeight: FontWeight.w700,

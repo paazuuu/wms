@@ -33,6 +33,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageTooltip => '选择语言';
 
   @override
+  String get textSizeMenu => '文字大小';
+
+  @override
+  String get textSizeNormal => '标准';
+
+  @override
+  String get textSizeLarge => '大';
+
+  @override
+  String get textSizeXLarge => '特大';
+
+  @override
+  String get textSizeXXLarge => '最大';
+
+  @override
   String get languageJapanese => '日本語';
 
   @override
@@ -431,7 +446,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fieldLocations => '库位';
 
   @override
-  String get fieldContact => '联系人';
+  String get fieldContact => '负责人';
 
   @override
   String get fieldWebsite => '网站';
@@ -531,6 +546,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get actionComplete => '完成';
+
+  @override
+  String get actionContinue => '继续';
 
   @override
   String get fieldAssemblyProduct => '组装产品';
@@ -943,6 +961,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deliveryStatusReconciling => '核对中';
 
   @override
+  String get deliveryStatusPartial => '部分送货';
+
+  @override
   String get deliveryStatusCompleted => '已核对';
 
   @override
@@ -1024,6 +1045,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diffLabel => '差';
 
   @override
+  String get reconReceivedPrev => '已收';
+
+  @override
+  String get reconThisTime => '本次';
+
+  @override
+  String get reconRemaining => '余';
+
+  @override
   String get completeReconcile => '完成核对';
 
   @override
@@ -1034,6 +1064,67 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reconcileConfirmDiscrepancy => '存在差异（不足・超量・计划外）。仍要完成吗？';
+
+  @override
+  String get reconcilePartialQ => '仍有未送达的项目';
+
+  @override
+  String reconcilePartialBody(int count) {
+    return '还有 $count 件未送达。要存为部分送货并把其余保留在未送达清单中，还是现在标记完成并把其余视为缺货？';
+  }
+
+  @override
+  String get reconcileKeepOpen => '存为部分送货';
+
+  @override
+  String get reconcileFinalizeShort => '标记完成（其余缺货）';
+
+  @override
+  String get reconcilePartialSaved => '已存为部分送货（保留未送达项目）';
+
+  @override
+  String get reconNoteReference => '备注';
+
+  @override
+  String get reconAlreadyDoneQ => '该计划已核对';
+
+  @override
+  String get reconAlreadyDoneBody => '再次录入会重复加入库存。如需更正，请在收货记录中取消对应的收货。';
+
+  @override
+  String doubleScanWarning(String code) {
+    return '$code 已超过计划数量（重复扫描？）';
+  }
+
+  @override
+  String get receiptHistoryTitle => '收货记录／更正';
+
+  @override
+  String get receiptEmpty => '暂无收货记录。';
+
+  @override
+  String get receiptEmptyBody => '每次核对该计划都会在此记录收货，并可取消。';
+
+  @override
+  String get receiptCancelAction => '取消收货';
+
+  @override
+  String get receiptCancelledBadge => '已取消';
+
+  @override
+  String get receiptCancelQ => '要取消这次收货吗？';
+
+  @override
+  String get receiptCancelBody => '将回退这次收货加入的数量和库存。';
+
+  @override
+  String get receiptCancelledDone => '已取消收货';
+
+  @override
+  String get showCompletedPlans => '显示已核对';
+
+  @override
+  String get hideCompletedPlans => '隐藏已核对';
 
   @override
   String get reconcileDone => '核对已完成';
@@ -1051,4 +1142,298 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noteImageAttached => '已附加到货单';
+
+  @override
+  String get planImportTitle => '导入计划';
+
+  @override
+  String get planImportHint => '选择 Excel / PDF / 图片上传，系统会自动解析并登记为计划。';
+
+  @override
+  String get pickFile => '选择文件';
+
+  @override
+  String planImportSelected(String name) {
+    return '已选择：$name';
+  }
+
+  @override
+  String get planImportAction => '导入';
+
+  @override
+  String get planImporting => '导入中…';
+
+  @override
+  String get planImportChooseFirst => '请选择文件并输入单号。';
+
+  @override
+  String planImportedSummary(int count, int total) {
+    return '已导入 $count 项，共 $total 件';
+  }
+
+  @override
+  String get planReadAction => '读取送货单';
+
+  @override
+  String get planReading => '读取中…';
+
+  @override
+  String get importFormatsHint => '支持 Excel / PDF / 图片';
+
+  @override
+  String get importChooseFile => '选择文件';
+
+  @override
+  String get changeFile => '更改';
+
+  @override
+  String get importHeaderSection => '抬头信息';
+
+  @override
+  String get importLinesPreview => '明细预览';
+
+  @override
+  String importMoreLines(int count) {
+    return '还有 $count 项';
+  }
+
+  @override
+  String get planReviewTitle => '核对抬头';
+
+  @override
+  String get planReviewHint => '已从送货单自动读取。登记前可在此修改错误或空白的字段。';
+
+  @override
+  String get planCommitAction => '登记';
+
+  @override
+  String get planRegistering => '登记中…';
+
+  @override
+  String planPreviewCount(int count, int total) {
+    return '$count 项 · $total 件';
+  }
+
+  @override
+  String get fieldRegistrationNumber => '登记号（T…）';
+
+  @override
+  String get fieldCustomerCode => '客户代码';
+
+  @override
+  String get fieldDocNumber => '送货单号';
+
+  @override
+  String get fieldDocDate => '日期';
+
+  @override
+  String get headerUnreadHint => '无法读取，请手动输入';
+
+  @override
+  String get planNeedsReviewBadge => '待确认';
+
+  @override
+  String get planUnidentifiedNote =>
+      '未能读取公司名称，已归入“UNKNOWN”识别号序列。输入供应商即可重新归属到正确公司。';
+
+  @override
+  String get referenceNoLabel => '整理号';
+
+  @override
+  String get orderDateLabel => '订单日';
+
+  @override
+  String get companyCode => '公司代码';
+
+  @override
+  String get totalStockTitle => '总库存（按JAN）';
+
+  @override
+  String get sortMenu => '排序';
+
+  @override
+  String get sortByStock => '按库存';
+
+  @override
+  String get sortByName => '按品名';
+
+  @override
+  String get sortByJan => '按JAN';
+
+  @override
+  String get stockOnHandUnit => '库存';
+
+  @override
+  String get stockEmpty => '暂无库存。';
+
+  @override
+  String get stockEmptyBody => '完成核对后，各JAN的总库存会在此汇总。';
+
+  @override
+  String get featShipment => '出库';
+
+  @override
+  String get featShipmentDesc => '导入出库清单，分装到纸箱并扣减库存';
+
+  @override
+  String get shipmentListTitle => '出库';
+
+  @override
+  String get shipmentImportTitle => '导入出库清单';
+
+  @override
+  String get shipmentEmpty => '暂无出库。';
+
+  @override
+  String get shipmentEmptyBody => '导入客户的 Excel / PDF 以开始出库。';
+
+  @override
+  String get shipmentSearchHint => '按出库号或客户搜索';
+
+  @override
+  String get shipmentStatusOpen => '待装箱';
+
+  @override
+  String get shipmentStatusPacking => '装箱中';
+
+  @override
+  String get shipmentStatusShipped => '已出库';
+
+  @override
+  String get shipmentStatusCancelled => '已取消';
+
+  @override
+  String get shipmentNumberLabel => '出库号';
+
+  @override
+  String cartonCountLabel(int count) {
+    return '$count 箱';
+  }
+
+  @override
+  String get shipmentLinesSection => '出库清单';
+
+  @override
+  String get cartonsSection => '纸箱';
+
+  @override
+  String packProgress(int packed, int total) {
+    return '已装 $packed / $total';
+  }
+
+  @override
+  String get addCarton => '添加纸箱';
+
+  @override
+  String cartonNoLabel(int no) {
+    return '纸箱 #$no';
+  }
+
+  @override
+  String get cartonLabelHint => '标签（可选）例: A-1';
+
+  @override
+  String get cartonEditTitle => '纸箱内容';
+
+  @override
+  String get cartonEmpty => '该纸箱还未装入任何物品。';
+
+  @override
+  String get packRemaining => '未装箱';
+
+  @override
+  String get packThisCarton => '本箱';
+
+  @override
+  String get overpackWarning => '装箱数量超过出库数量。';
+
+  @override
+  String get shipConfirmAction => '确认出库';
+
+  @override
+  String get shipConfirmQ => '确认这次出库吗？';
+
+  @override
+  String get shipConfirmBody => '将从库存中扣除数量并确认出库。';
+
+  @override
+  String get shipShortWarning => '部分物品超过现有库存。库存不会降到零以下。仍要确认吗？';
+
+  @override
+  String get shipDone => '出库已确认';
+
+  @override
+  String get shipCancelAction => '撤销出库';
+
+  @override
+  String get shipCancelQ => '撤销这次出库吗？';
+
+  @override
+  String get shipCancelBody => '将把扣除的数量加回库存，并把出库重置为未确认。';
+
+  @override
+  String get shipCancelledDone => '出库已重置为未确认';
+
+  @override
+  String get shipAlreadyDone => '已出库';
+
+  @override
+  String get printOverall => '打印/PDF 清单';
+
+  @override
+  String get printAllCartons => '打印/PDF 纸箱';
+
+  @override
+  String get printThisCarton => '打印/PDF';
+
+  @override
+  String get printDeliverySlip => '打印/PDF 送货单';
+
+  @override
+  String get printMenu => '打印/PDF';
+
+  @override
+  String get senderSettingsTitle => '寄件人（本公司）设置';
+
+  @override
+  String get senderSettingsHint => '保存为默认寄件人。每次打印时可选择包含哪些项目。';
+
+  @override
+  String get senderPickTitle => '本次打印的寄件人';
+
+  @override
+  String get senderInclude => '打印寄件人信息';
+
+  @override
+  String get senderNoneSet => '尚未设置寄件人。';
+
+  @override
+  String get senderOpenSettings => '设置寄件人';
+
+  @override
+  String get senderSaved => '已保存寄件人信息';
+
+  @override
+  String get senderPreview => '打印预览';
+
+  @override
+  String get fieldCompanyName => '公司名称';
+
+  @override
+  String get fieldPostalCode => '邮编';
+
+  @override
+  String get fieldFax => '传真';
+
+  @override
+  String get fieldNote => '备注';
+
+  @override
+  String get deleteCartonQ => '删除这个纸箱吗？';
+
+  @override
+  String get actionSave => '保存';
+
+  @override
+  String get actionDelete => '删除';
 }
