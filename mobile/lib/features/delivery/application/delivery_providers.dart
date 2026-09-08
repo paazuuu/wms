@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_config.dart';
 import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
-import '../data/mlkit_delivery_note_scanner.dart';
+import '../data/on_device_scanner.dart';
 import '../data/remote_delivery_note_scanner.dart';
 import '../data/stock_repository.dart';
 import '../domain/delivery_plan.dart';
