@@ -1539,4 +1539,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashThreshold(int count) {
     return 'Threshold $count';
   }
+
+  @override
+  String get whAllWarehouses => 'All warehouses';
+
+  @override
+  String get whSwitch => 'Switch warehouse';
+
+  @override
+  String get whAdd => 'Add warehouse';
+
+  @override
+  String get whAddTitle => 'Add warehouse';
+
+  @override
+  String get whManage => 'Manage warehouses';
+
+  @override
+  String get whOverviewTitle => 'Warehouses';
+
+  @override
+  String get whTotals => 'Total';
+
+  @override
+  String get whFieldCode => 'Warehouse code';
+
+  @override
+  String get whFieldName => 'Warehouse name';
+
+  @override
+  String get whFieldAddress => 'Address';
+
+  @override
+  String get whFieldPhone => 'Phone';
+
+  @override
+  String get whFieldTimezone => 'Timezone';
+
+  @override
+  String get whFieldActive => 'Active';
+
+  @override
+  String get whFieldDefaultBins => 'Create starter bins';
+
+  @override
+  String get whFieldDefaultBinsHelp =>
+      'Creates staging, QC hold, shipping and a pickable bin.';
+
+  @override
+  String get whFieldReceivingBin => 'Default receiving area';
+
+  @override
+  String get whFieldShippingBin => 'Default shipping area';
+
+  @override
+  String get whCodeRequired => 'Enter a warehouse code';
+
+  @override
+  String get whNameRequired => 'Enter a warehouse name';
+
+  @override
+  String whCreated(String name) {
+    return 'Added warehouse “$name”';
+  }
+
+  @override
+  String get whInactive => 'Inactive';
+
+  @override
+  String get whStatInbound => 'Inbound';
+
+  @override
+  String get whStatOutbound => 'Outbound';
+
+  @override
+  String get whStatSku => 'SKU';
+
+  @override
+  String get whStatOnHand => 'On hand';
+
+  @override
+  String get whNoWarehouses => 'No warehouses yet';
+
+  @override
+  String get whBinsTitle => 'Bins';
+
+  @override
+  String get whBinStaging => 'Staging';
+
+  @override
+  String get whBinPickable => 'Pickable';
+
+  @override
+  String get whBinPickableStaging => 'Pickable staging';
+
+  @override
+  String get whBinQcHold => 'QC hold';
+
+  @override
+  String get whBinShipping => 'Shipping';
+
+  @override
+  String get whBinReturns => 'Returns';
+
+  @override
+  String get whBinDamaged => 'Damaged';
+
+  @override
+  String get whBinVirtual => 'Virtual';
 }

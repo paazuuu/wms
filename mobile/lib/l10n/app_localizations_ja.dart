@@ -1491,4 +1491,111 @@ class AppLocalizationsJa extends AppLocalizations {
   String dashThreshold(int count) {
     return 'しきい値 $count';
   }
+
+  @override
+  String get whAllWarehouses => 'すべての倉庫';
+
+  @override
+  String get whSwitch => '倉庫を切替';
+
+  @override
+  String get whAdd => '倉庫を追加';
+
+  @override
+  String get whAddTitle => '倉庫を追加';
+
+  @override
+  String get whManage => '倉庫を管理';
+
+  @override
+  String get whOverviewTitle => '倉庫一覧';
+
+  @override
+  String get whTotals => '合計';
+
+  @override
+  String get whFieldCode => '倉庫コード';
+
+  @override
+  String get whFieldName => '倉庫名';
+
+  @override
+  String get whFieldAddress => '住所';
+
+  @override
+  String get whFieldPhone => '電話';
+
+  @override
+  String get whFieldTimezone => 'タイムゾーン';
+
+  @override
+  String get whFieldActive => '有効';
+
+  @override
+  String get whFieldDefaultBins => '初期の棚を作成する';
+
+  @override
+  String get whFieldDefaultBinsHelp => '入荷仮置・検品保留・出荷・通常棚の4つを自動作成します。';
+
+  @override
+  String get whFieldReceivingBin => 'デフォルト入荷エリア';
+
+  @override
+  String get whFieldShippingBin => 'デフォルト出荷エリア';
+
+  @override
+  String get whCodeRequired => '倉庫コードを入力してください';
+
+  @override
+  String get whNameRequired => '倉庫名を入力してください';
+
+  @override
+  String whCreated(String name) {
+    return '倉庫「$name」を追加しました';
+  }
+
+  @override
+  String get whInactive => '無効';
+
+  @override
+  String get whStatInbound => '入荷待ち';
+
+  @override
+  String get whStatOutbound => '出荷待ち';
+
+  @override
+  String get whStatSku => 'SKU';
+
+  @override
+  String get whStatOnHand => '在庫';
+
+  @override
+  String get whNoWarehouses => '倉庫がまだありません';
+
+  @override
+  String get whBinsTitle => '棚（ロケーション）';
+
+  @override
+  String get whBinStaging => '入荷仮置';
+
+  @override
+  String get whBinPickable => '通常棚';
+
+  @override
+  String get whBinPickableStaging => '仮置(引当可)';
+
+  @override
+  String get whBinQcHold => '検品保留';
+
+  @override
+  String get whBinShipping => '出荷';
+
+  @override
+  String get whBinReturns => '返品';
+
+  @override
+  String get whBinDamaged => '破損';
+
+  @override
+  String get whBinVirtual => '仮想';
 }

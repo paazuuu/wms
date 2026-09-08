@@ -2835,6 +2835,216 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'しきい値 {count}'**
   String dashThreshold(int count);
+
+  /// No description provided for @whAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての倉庫'**
+  String get whAllWarehouses;
+
+  /// No description provided for @whSwitch.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を切替'**
+  String get whSwitch;
+
+  /// No description provided for @whAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を追加'**
+  String get whAdd;
+
+  /// No description provided for @whAddTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を追加'**
+  String get whAddTitle;
+
+  /// No description provided for @whManage.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を管理'**
+  String get whManage;
+
+  /// No description provided for @whOverviewTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫一覧'**
+  String get whOverviewTitle;
+
+  /// No description provided for @whTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get whTotals;
+
+  /// No description provided for @whFieldCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫コード'**
+  String get whFieldCode;
+
+  /// No description provided for @whFieldName.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫名'**
+  String get whFieldName;
+
+  /// No description provided for @whFieldAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所'**
+  String get whFieldAddress;
+
+  /// No description provided for @whFieldPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話'**
+  String get whFieldPhone;
+
+  /// No description provided for @whFieldTimezone.
+  ///
+  /// In ja, this message translates to:
+  /// **'タイムゾーン'**
+  String get whFieldTimezone;
+
+  /// No description provided for @whFieldActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get whFieldActive;
+
+  /// No description provided for @whFieldDefaultBins.
+  ///
+  /// In ja, this message translates to:
+  /// **'初期の棚を作成する'**
+  String get whFieldDefaultBins;
+
+  /// No description provided for @whFieldDefaultBinsHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷仮置・検品保留・出荷・通常棚の4つを自動作成します。'**
+  String get whFieldDefaultBinsHelp;
+
+  /// No description provided for @whFieldReceivingBin.
+  ///
+  /// In ja, this message translates to:
+  /// **'デフォルト入荷エリア'**
+  String get whFieldReceivingBin;
+
+  /// No description provided for @whFieldShippingBin.
+  ///
+  /// In ja, this message translates to:
+  /// **'デフォルト出荷エリア'**
+  String get whFieldShippingBin;
+
+  /// No description provided for @whCodeRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫コードを入力してください'**
+  String get whCodeRequired;
+
+  /// No description provided for @whNameRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫名を入力してください'**
+  String get whNameRequired;
+
+  /// No description provided for @whCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫「{name}」を追加しました'**
+  String whCreated(String name);
+
+  /// No description provided for @whInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効'**
+  String get whInactive;
+
+  /// No description provided for @whStatInbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷待ち'**
+  String get whStatInbound;
+
+  /// No description provided for @whStatOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷待ち'**
+  String get whStatOutbound;
+
+  /// No description provided for @whStatSku.
+  ///
+  /// In ja, this message translates to:
+  /// **'SKU'**
+  String get whStatSku;
+
+  /// No description provided for @whStatOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get whStatOnHand;
+
+  /// No description provided for @whNoWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫がまだありません'**
+  String get whNoWarehouses;
+
+  /// No description provided for @whBinsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚（ロケーション）'**
+  String get whBinsTitle;
+
+  /// No description provided for @whBinStaging.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷仮置'**
+  String get whBinStaging;
+
+  /// No description provided for @whBinPickable.
+  ///
+  /// In ja, this message translates to:
+  /// **'通常棚'**
+  String get whBinPickable;
+
+  /// No description provided for @whBinPickableStaging.
+  ///
+  /// In ja, this message translates to:
+  /// **'仮置(引当可)'**
+  String get whBinPickableStaging;
+
+  /// No description provided for @whBinQcHold.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品保留'**
+  String get whBinQcHold;
+
+  /// No description provided for @whBinShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get whBinShipping;
+
+  /// No description provided for @whBinReturns.
+  ///
+  /// In ja, this message translates to:
+  /// **'返品'**
+  String get whBinReturns;
+
+  /// No description provided for @whBinDamaged.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損'**
+  String get whBinDamaged;
+
+  /// No description provided for @whBinVirtual.
+  ///
+  /// In ja, this message translates to:
+  /// **'仮想'**
+  String get whBinVirtual;
 }
 
 class _AppLocalizationsDelegate

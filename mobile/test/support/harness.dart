@@ -11,6 +11,8 @@ import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
+import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
@@ -25,6 +27,28 @@ Future<void> pumpApp(
   await tester.pumpWidget(
     ProviderScope(
       overrides: overrides,
+      child: MaterialApp(
+        locale: const Locale('ja'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: child,
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Like [pumpApp] but driven by a caller-owned [container], so a test can read
+/// and write provider state around the pump (e.g. assert that tapping the
+/// warehouse picker actually changed the active warehouse).
+Future<void> pumpAppWith(
+  WidgetTester tester,
+  ProviderContainer container,
+  Widget child,
+) async {
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
       child: MaterialApp(
         locale: const Locale('ja'),
         supportedLocales: AppLocalizations.supportedLocales,
@@ -85,10 +109,57 @@ class FakeDashboardRepository implements DashboardRepository {
   FakeDashboardRepository(this.value);
   final DashboardMetrics value;
 
+  /// The warehouse id the last call was scoped to (null = all warehouses).
+  int? lastWarehouseId;
+
   @override
   Future<ApiResult<DashboardMetrics>> metrics(
-          {int days = 14, int lowThreshold = 10}) async =>
-      ApiSuccess(value);
+      {int days = 14, int lowThreshold = 10, int? warehouseId}) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(value);
+  }
+}
+
+/// Warehouse stub. [overviewValue] is returned as-is; [created] records what the
+/// add-warehouse wizard submitted.
+class FakeWarehouseRepository implements WarehouseRepository {
+  FakeWarehouseRepository(this.overviewValue, {this.binsByWarehouse = const {}});
+
+  final WarehouseOverview overviewValue;
+  final Map<int, List<Bin>> binsByWarehouse;
+  final List<NewWarehouse> created = [];
+
+  @override
+  Future<ApiResult<WarehouseOverview>> overview() async =>
+      ApiSuccess(overviewValue);
+
+  @override
+  Future<ApiResult<Warehouse>> create(NewWarehouse warehouse) async {
+    created.add(warehouse);
+    return ApiSuccess(Warehouse(
+      id: 999,
+      code: warehouse.code,
+      name: warehouse.name,
+      status: warehouse.isActive ? 'active' : 'inactive',
+      timezone: warehouse.timezone,
+    ));
+  }
+
+  @override
+  Future<ApiResult<Warehouse>> update(
+    int id, {
+    String? name,
+    String? address,
+    String? phone,
+    String? timezone,
+    bool? isActive,
+  }) async =>
+      ApiSuccess(overviewValue.byId(id) ??
+          Warehouse(id: id, code: 'X', name: name ?? 'X'));
+
+  @override
+  Future<ApiResult<List<Bin>>> bins(int warehouseId) async =>
+      ApiSuccess(binsByWarehouse[warehouseId] ?? const []);
 }
 
 class FakeStockRepository implements StockRepository {

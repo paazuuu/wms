@@ -13,6 +13,7 @@ import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../inspection/presentation/barcode_scan_screen.dart';
 import '../../products/presentation/product_lookup_screen.dart';
+import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
@@ -293,6 +294,8 @@ class _TopBar extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
+          const WarehousePicker(),
           const SizedBox(width: AppSpacing.xs),
           const TextScaleMenuButton(),
           const LanguageMenuButton(),

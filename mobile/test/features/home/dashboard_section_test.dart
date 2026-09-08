@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/home/application/dashboard_providers.dart';
+import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/home/presentation/dashboard_widgets.dart';
 
@@ -36,6 +38,29 @@ DashboardMetrics _metrics() => DashboardMetrics(
     );
 
 void main() {
+  testWidgets('dashboard scopes its query to the active warehouse',
+      (tester) async {
+    final repo = FakeDashboardRepository(_metrics());
+    final container = ProviderContainer(overrides: [
+      dashboardRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(
+      tester,
+      container,
+      const Scaffold(
+        body: SingleChildScrollView(child: DashboardMetricsSection()),
+      ),
+    );
+    // No warehouse chosen => company-wide figures.
+    expect(repo.lastWarehouseId, isNull);
+
+    container.read(activeWarehouseIdProvider.notifier).state = 2;
+    await tester.pumpAndSettle();
+    expect(repo.lastWarehouseId, 2);
+  });
+
   testWidgets('dashboard section shows KPI values, chart and watch lists',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 1600));

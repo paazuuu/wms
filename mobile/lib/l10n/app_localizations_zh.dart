@@ -1490,4 +1490,111 @@ class AppLocalizationsZh extends AppLocalizations {
   String dashThreshold(int count) {
     return '阈值 $count';
   }
+
+  @override
+  String get whAllWarehouses => '全部仓库';
+
+  @override
+  String get whSwitch => '切换仓库';
+
+  @override
+  String get whAdd => '添加仓库';
+
+  @override
+  String get whAddTitle => '添加仓库';
+
+  @override
+  String get whManage => '仓库管理';
+
+  @override
+  String get whOverviewTitle => '仓库列表';
+
+  @override
+  String get whTotals => '合计';
+
+  @override
+  String get whFieldCode => '仓库编码';
+
+  @override
+  String get whFieldName => '仓库名称';
+
+  @override
+  String get whFieldAddress => '地址';
+
+  @override
+  String get whFieldPhone => '电话';
+
+  @override
+  String get whFieldTimezone => '时区';
+
+  @override
+  String get whFieldActive => '启用';
+
+  @override
+  String get whFieldDefaultBins => '创建初始库位';
+
+  @override
+  String get whFieldDefaultBinsHelp => '自动创建暂存、质检暂留、出货和普通库位4个。';
+
+  @override
+  String get whFieldReceivingBin => '默认收货区';
+
+  @override
+  String get whFieldShippingBin => '默认发货区';
+
+  @override
+  String get whCodeRequired => '请输入仓库编码';
+
+  @override
+  String get whNameRequired => '请输入仓库名称';
+
+  @override
+  String whCreated(String name) {
+    return '已添加仓库「$name」';
+  }
+
+  @override
+  String get whInactive => '停用';
+
+  @override
+  String get whStatInbound => '待入库';
+
+  @override
+  String get whStatOutbound => '待出库';
+
+  @override
+  String get whStatSku => 'SKU';
+
+  @override
+  String get whStatOnHand => '库存';
+
+  @override
+  String get whNoWarehouses => '还没有仓库';
+
+  @override
+  String get whBinsTitle => '库位';
+
+  @override
+  String get whBinStaging => '暂存';
+
+  @override
+  String get whBinPickable => '普通库位';
+
+  @override
+  String get whBinPickableStaging => '暂存(可拣)';
+
+  @override
+  String get whBinQcHold => '质检暂留';
+
+  @override
+  String get whBinShipping => '出货';
+
+  @override
+  String get whBinReturns => '退货';
+
+  @override
+  String get whBinDamaged => '破损';
+
+  @override
+  String get whBinVirtual => '虚拟';
 }
