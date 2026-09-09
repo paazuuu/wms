@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0017 applied.** 0018 onward is still planned.
+> Status: **0010–0018 applied.** 0019 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -114,13 +114,43 @@ update inside a transaction._
   one, falls back to the sole warehouse when there is exactly one, and returns
   null otherwise — the UI then asks rather than guessing a building.
 
-### 0018 — Picking / packing / shipping (Steps 7–9)
-- `pick_lists`/`pick_tasks`, allocation, pack sessions, shipping completion.
-- Extend current shipment model with allocate/pick/pack states; keep cartons + JAN
-  print + 送り状 + sender profile intact.
-- Deferred behind cycle count on purpose: the current outbound flow already ships
-  with carton splitting, JAN labels and 送り状, so staged picking adds process
-  before it adds value for this operator.
+### 0018 — Picking (Step 7) ✅ · Packing/Shipping (Steps 8–9) unchanged
+- `pick_lists`/`pick_tasks`: opening a list snapshots the shipment plan's lines
+  into tasks; recording a pick never round-trips through the order, so a short
+  or over pick is its own status (`SHORT`/`OVER`, a generated `variance`
+  column) rather than being corrected to plan (spec §10).
+- Completing a list refuses while any task is untouched — not picking a line
+  is not the same as picking it as zero (spec §40) — then moves the shipment
+  plan to `packing`, which is exactly the status the existing carton-splitting
+  UI already understands. A plan that skips picking entirely (the pre-existing
+  flow) still ships fine; picking is additive, not a new gate.
+- `bin_id` on a task is accepted only where the warehouse actually uses
+  locations (0016) and the bin belongs to it — picking works with or without
+  locations, same as the rest of the ledger.
+- `ship_plan`/`cancel_shipment` are rewritten to prefer a completed pick
+  list's picked quantities over the order lines, and `cancel_shipment` now
+  reverses the ledger's own net (`shipped_net`, reading `stock_movements`)
+  instead of recomputing from the order lines — so a plan whose lines changed
+  after shipping still reverses the exact amount that actually left.
+- `stock_availability`: on-hand minus everything reserved by an *open* pick
+  list, so a picker's promise reflects what has not already been claimed.
+- Edge function `picking` (lists, tasks, availability), service role only.
+  `stock_ops`-style grant discipline: every mutating RPC is revoked from
+  PUBLIC/anon/authenticated and granted only to service_role (Postgres grants
+  EXECUTE to PUBLIC by default, so this has to be explicit every time).
+- Flutter client `features/picking_ops`: a pick-list index (start one by
+  choosing an open shipment) and a detail screen — each task shows
+  planned/picked/variance, tapping one opens quantity + (when the warehouse
+  uses locations) a bin dropdown, and the sticky complete action explains a
+  pending-task refusal instead of letting the tap silently fail. The home
+  menu's ピッキング now opens this instead of the old sales-order checklist
+  (`features/picking`, which had no backend of its own — it just filtered
+  sales orders client-side with nothing persisted). That module stays in the
+  tree unreferenced, same treatment as 0017's stock_adjustment/stock_count.
+- Packing and shipping themselves are untouched: cartons, JAN print, 送り状
+  and the sender profile still work exactly as before. Packing UI is Step 8
+  and shipping-detail polish is Step 9; both are already served by the
+  existing shipment screens, so nothing new was required there for this pass.
 
 ### 0019 — Inter-warehouse transfer (Step 11)
 - `transfer_orders` + state machine; TRANSFER_OUT/IN movements; no self-approval.

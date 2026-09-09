@@ -920,5 +920,41 @@
   },
   "cntStatusCounting": "実査中",
   "cntStatusCompleted": "確定済み",
-  "cntStatusCancelled": "中止"
+  "cntStatusCancelled": "中止",
+  "pickListsTitle": "ピッキング",
+  "pickStart": "ピッキング開始",
+  "pickChooseShipment": "出荷を選択",
+  "pickNoShipments": "ピッキング対象の出荷がありません",
+  "pickStatusPicking": "ピック中",
+  "pickStatusPicked": "ピック完了",
+  "pickStatusCancelled": "中止",
+  "pickTaskPending": "未ピック",
+  "pickTaskPicked": "完了",
+  "pickTaskShort": "不足",
+  "pickTaskOver": "超過",
+  "pickPlanned": "予定",
+  "pickPickedQty": "ピック数",
+  "pickVariance": "差異",
+  "pickBin": "ロケーション",
+  "pickBinNone": "未指定",
+  "pickRecord": "ピック数を記録",
+  "pickComplete": "ピッキング完了",
+  "pickCompleteQ": "ピッキングを完了しますか？",
+  "pickCompleteBody": "梱包工程に進みます。出荷はこのあと別に確定します。",
+  "pickCancelAction": "ピッキングを中止",
+  "pickCancelQ": "このピッキングを中止しますか？",
+  "pickCancelBody": "記録した数量は破棄されます。在庫は変わりません。",
+  "pickCancelled": "ピッキングを中止しました",
+  "pickCompleted": "ピッキングを完了しました（{short}件不足・{over}件超過）",
+  "@pickCompleted": {
+    "placeholders": {
+      "short": {
+        "type": "int"
+      },
+      "over": {
+        "type": "int"
+      }
+    }
+  },
+  "pickCompleteBlocked": "未ピックの明細があるため完了できません"
 }

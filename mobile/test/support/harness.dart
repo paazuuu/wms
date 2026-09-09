@@ -13,6 +13,8 @@ import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
+import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
+import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
 import 'package:wms_mobile/features/stock_ops/data/stock_ops_repository.dart';
 import 'package:wms_mobile/features/stock_ops/domain/stock_ops.dart';
@@ -485,5 +487,128 @@ class FakeStockOpsRepository implements StockOpsRepository {
       lines: c.lines,
     );
     return ApiSuccess(_count!);
+  }
+}
+
+/// In-memory stand-in for the picking backend. Mirrors the two server rules
+/// the UI depends on: picked/planned derives PICKED/SHORT/OVER per task, and
+/// completing a list refuses while any task is still untouched.
+class FakePickingRepository implements PickingRepository {
+  FakePickingRepository({required PickList list, bool started = true})
+      : _list = list,
+        _started = started;
+
+  PickList _list;
+
+  /// False until [start] is called: [lists] returns nothing until then, so a
+  /// test can assert the index screen was empty before starting a pick.
+  bool _started;
+
+  /// Set when complete() was rejected because tasks were still pending.
+  bool refusedIncomplete = false;
+
+  /// The last quantity/bin recordPick() was called with.
+  int? lastRecordedQuantity;
+  int? lastRecordedBinId;
+
+  PickTaskStatus _statusFor(int planned, int? picked) {
+    if (picked == null) return PickTaskStatus.pending;
+    if (picked == planned) return PickTaskStatus.picked;
+    return picked < planned ? PickTaskStatus.short : PickTaskStatus.over;
+  }
+
+  @override
+  Future<ApiResult<List<PickList>>> lists({int? warehouseId, String? status}) async =>
+      ApiSuccess(!_started || (status != null && _list.status.wire != status)
+          ? const []
+          : [_list]);
+
+  @override
+  Future<ApiResult<PickList>> show(int id) async => ApiSuccess(_list);
+
+  @override
+  Future<ApiResult<PickList>> start(int shipmentPlanId, {String? note}) async {
+    _started = true;
+    return ApiSuccess(_list);
+  }
+
+  @override
+  Future<ApiResult<PickList>> recordPick(
+    int taskId, {
+    required int quantity,
+    int? binId,
+    String? note,
+  }) async {
+    lastRecordedQuantity = quantity;
+    lastRecordedBinId = binId;
+    _list = PickList(
+      id: _list.id,
+      shipmentPlanId: _list.shipmentPlanId,
+      shipmentNumber: _list.shipmentNumber,
+      customerName: _list.customerName,
+      warehouseId: _list.warehouseId,
+      usesLocations: _list.usesLocations,
+      status: _list.status,
+      tasks: [
+        for (final t in _list.tasks)
+          if (t.id == taskId)
+            PickTask(
+              id: t.id,
+              janCode: t.janCode,
+              productName: t.productName,
+              plannedQuantity: t.plannedQuantity,
+              pickedQuantity: quantity,
+              variance: quantity - t.plannedQuantity,
+              status: _statusFor(t.plannedQuantity, quantity),
+              binId: binId,
+              binCode: binId == null ? null : t.binCode,
+            )
+          else
+            t,
+      ],
+    );
+    return ApiSuccess(_list);
+  }
+
+  @override
+  Future<ApiResult<CompletedPickList>> complete(int pickListId) async {
+    if (_list.pendingTasks > 0) {
+      refusedIncomplete = true;
+      return const ApiFailure(
+          message: 'pick list still has unpicked line(s)', statusCode: 422);
+    }
+    _list = PickList(
+      id: _list.id,
+      shipmentPlanId: _list.shipmentPlanId,
+      shipmentNumber: _list.shipmentNumber,
+      customerName: _list.customerName,
+      warehouseId: _list.warehouseId,
+      usesLocations: _list.usesLocations,
+      status: PickListStatus.picked,
+      tasks: _list.tasks,
+    );
+    final short = _list.tasks.where((t) => t.status == PickTaskStatus.short).length;
+    final over = _list.tasks.where((t) => t.status == PickTaskStatus.over).length;
+    return ApiSuccess(CompletedPickList(
+      _list,
+      PickSummary(
+        tasks: _list.tasks.length,
+        pickedUnits: _list.tasks.fold(0, (s, t) => s + (t.pickedQuantity ?? 0)),
+        plannedUnits: _list.tasks.fold(0, (s, t) => s + t.plannedQuantity),
+        shortLines: short,
+        overLines: over,
+      ),
+    ));
+  }
+
+  @override
+  Future<ApiResult<PickList>> cancel(int pickListId) async {
+    _list = PickList(
+      id: _list.id,
+      shipmentPlanId: _list.shipmentPlanId,
+      status: PickListStatus.cancelled,
+      tasks: _list.tasks,
+    );
+    return ApiSuccess(_list);
   }
 }

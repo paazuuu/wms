@@ -1886,4 +1886,84 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cntStatusCancelled => '中止';
+
+  @override
+  String get pickListsTitle => 'ピッキング';
+
+  @override
+  String get pickStart => 'ピッキング開始';
+
+  @override
+  String get pickChooseShipment => '出荷を選択';
+
+  @override
+  String get pickNoShipments => 'ピッキング対象の出荷がありません';
+
+  @override
+  String get pickStatusPicking => 'ピック中';
+
+  @override
+  String get pickStatusPicked => 'ピック完了';
+
+  @override
+  String get pickStatusCancelled => '中止';
+
+  @override
+  String get pickTaskPending => '未ピック';
+
+  @override
+  String get pickTaskPicked => '完了';
+
+  @override
+  String get pickTaskShort => '不足';
+
+  @override
+  String get pickTaskOver => '超過';
+
+  @override
+  String get pickPlanned => '予定';
+
+  @override
+  String get pickPickedQty => 'ピック数';
+
+  @override
+  String get pickVariance => '差異';
+
+  @override
+  String get pickBin => 'ロケーション';
+
+  @override
+  String get pickBinNone => '未指定';
+
+  @override
+  String get pickRecord => 'ピック数を記録';
+
+  @override
+  String get pickComplete => 'ピッキング完了';
+
+  @override
+  String get pickCompleteQ => 'ピッキングを完了しますか？';
+
+  @override
+  String get pickCompleteBody => '梱包工程に進みます。出荷はこのあと別に確定します。';
+
+  @override
+  String get pickCancelAction => 'ピッキングを中止';
+
+  @override
+  String get pickCancelQ => 'このピッキングを中止しますか？';
+
+  @override
+  String get pickCancelBody => '記録した数量は破棄されます。在庫は変わりません。';
+
+  @override
+  String get pickCancelled => 'ピッキングを中止しました';
+
+  @override
+  String pickCompleted(int short, int over) {
+    return 'ピッキングを完了しました（$short件不足・$over件超過）';
+  }
+
+  @override
+  String get pickCompleteBlocked => '未ピックの明細があるため完了できません';
 }

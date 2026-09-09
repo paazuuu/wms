@@ -4,7 +4,7 @@ import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../locations/presentation/location_list_screen.dart';
-import '../../picking/presentation/picking_list_screen.dart';
+import '../../picking_ops/presentation/pick_list_index_screen.dart';
 import '../../products/presentation/product_lookup_screen.dart';
 import '../../purchase_orders/presentation/purchase_order_list_screen.dart';
 import '../../receiving/presentation/receiving_list_screen.dart';
@@ -185,4 +185,4 @@ Widget _workOrders(BuildContext _) => const WorkOrderListScreen();
 Widget _reports(BuildContext _) => const ReportListScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
-Widget _picking(BuildContext _) => const PickingListScreen();
+Widget _picking(BuildContext _) => const PickListIndexScreen();

@@ -830,5 +830,41 @@
   },
   "cntStatusCounting": "Counting",
   "cntStatusCompleted": "Completed",
-  "cntStatusCancelled": "Cancelled"
+  "cntStatusCancelled": "Cancelled",
+  "pickListsTitle": "Picking",
+  "pickStart": "Start picking",
+  "pickChooseShipment": "Choose a shipment",
+  "pickNoShipments": "No shipments are waiting to be picked",
+  "pickStatusPicking": "Picking",
+  "pickStatusPicked": "Picked",
+  "pickStatusCancelled": "Cancelled",
+  "pickTaskPending": "Pending",
+  "pickTaskPicked": "Done",
+  "pickTaskShort": "Short",
+  "pickTaskOver": "Over",
+  "pickPlanned": "Planned",
+  "pickPickedQty": "Picked",
+  "pickVariance": "Variance",
+  "pickBin": "Location",
+  "pickBinNone": "None",
+  "pickRecord": "Record pick",
+  "pickComplete": "Complete picking",
+  "pickCompleteQ": "Complete this pick list?",
+  "pickCompleteBody": "The order moves on to packing. Shipping is confirmed separately afterward.",
+  "pickCancelAction": "Cancel picking",
+  "pickCancelQ": "Cancel this pick list?",
+  "pickCancelBody": "Recorded quantities are discarded. Stock is left unchanged.",
+  "pickCancelled": "Picking cancelled",
+  "pickCompleted": "Picking completed ({short} short, {over} over)",
+  "@pickCompleted": {
+    "placeholders": {
+      "short": {
+        "type": "int"
+      },
+      "over": {
+        "type": "int"
+      }
+    }
+  },
+  "pickCompleteBlocked": "Cannot complete: some lines are still unpicked"
 }

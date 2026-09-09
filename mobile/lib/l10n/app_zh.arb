@@ -830,5 +830,41 @@
   },
   "cntStatusCounting": "盘点中",
   "cntStatusCompleted": "已确认",
-  "cntStatusCancelled": "已中止"
+  "cntStatusCancelled": "已中止",
+  "pickListsTitle": "拣货",
+  "pickStart": "开始拣货",
+  "pickChooseShipment": "选择出库单",
+  "pickNoShipments": "没有待拣货的出库单",
+  "pickStatusPicking": "拣货中",
+  "pickStatusPicked": "已拣货",
+  "pickStatusCancelled": "已中止",
+  "pickTaskPending": "未拣货",
+  "pickTaskPicked": "已完成",
+  "pickTaskShort": "不足",
+  "pickTaskOver": "超出",
+  "pickPlanned": "计划",
+  "pickPickedQty": "拣货数",
+  "pickVariance": "差异",
+  "pickBin": "库位",
+  "pickBinNone": "未指定",
+  "pickRecord": "记录拣货数",
+  "pickComplete": "完成拣货",
+  "pickCompleteQ": "要完成本次拣货吗？",
+  "pickCompleteBody": "订单将进入打包阶段，出库需另行确认。",
+  "pickCancelAction": "中止拣货",
+  "pickCancelQ": "要中止本次拣货吗？",
+  "pickCancelBody": "已记录的数量将被丢弃，库存保持不变。",
+  "pickCancelled": "已中止拣货",
+  "pickCompleted": "拣货已完成（不足{short}件・超出{over}件）",
+  "@pickCompleted": {
+    "placeholders": {
+      "short": {
+        "type": "int"
+      },
+      "over": {
+        "type": "int"
+      }
+    }
+  },
+  "pickCompleteBlocked": "存在未拣货的明细，无法完成"
 }

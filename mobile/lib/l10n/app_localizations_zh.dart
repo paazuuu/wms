@@ -1884,4 +1884,84 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cntStatusCancelled => '已中止';
+
+  @override
+  String get pickListsTitle => '拣货';
+
+  @override
+  String get pickStart => '开始拣货';
+
+  @override
+  String get pickChooseShipment => '选择出库单';
+
+  @override
+  String get pickNoShipments => '没有待拣货的出库单';
+
+  @override
+  String get pickStatusPicking => '拣货中';
+
+  @override
+  String get pickStatusPicked => '已拣货';
+
+  @override
+  String get pickStatusCancelled => '已中止';
+
+  @override
+  String get pickTaskPending => '未拣货';
+
+  @override
+  String get pickTaskPicked => '已完成';
+
+  @override
+  String get pickTaskShort => '不足';
+
+  @override
+  String get pickTaskOver => '超出';
+
+  @override
+  String get pickPlanned => '计划';
+
+  @override
+  String get pickPickedQty => '拣货数';
+
+  @override
+  String get pickVariance => '差异';
+
+  @override
+  String get pickBin => '库位';
+
+  @override
+  String get pickBinNone => '未指定';
+
+  @override
+  String get pickRecord => '记录拣货数';
+
+  @override
+  String get pickComplete => '完成拣货';
+
+  @override
+  String get pickCompleteQ => '要完成本次拣货吗？';
+
+  @override
+  String get pickCompleteBody => '订单将进入打包阶段，出库需另行确认。';
+
+  @override
+  String get pickCancelAction => '中止拣货';
+
+  @override
+  String get pickCancelQ => '要中止本次拣货吗？';
+
+  @override
+  String get pickCancelBody => '已记录的数量将被丢弃，库存保持不变。';
+
+  @override
+  String get pickCancelled => '已中止拣货';
+
+  @override
+  String pickCompleted(int short, int over) {
+    return '拣货已完成（不足$short件・超出$over件）';
+  }
+
+  @override
+  String get pickCompleteBlocked => '存在未拣货的明细，无法完成';
 }

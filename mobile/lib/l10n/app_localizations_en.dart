@@ -1942,4 +1942,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cntStatusCancelled => 'Cancelled';
+
+  @override
+  String get pickListsTitle => 'Picking';
+
+  @override
+  String get pickStart => 'Start picking';
+
+  @override
+  String get pickChooseShipment => 'Choose a shipment';
+
+  @override
+  String get pickNoShipments => 'No shipments are waiting to be picked';
+
+  @override
+  String get pickStatusPicking => 'Picking';
+
+  @override
+  String get pickStatusPicked => 'Picked';
+
+  @override
+  String get pickStatusCancelled => 'Cancelled';
+
+  @override
+  String get pickTaskPending => 'Pending';
+
+  @override
+  String get pickTaskPicked => 'Done';
+
+  @override
+  String get pickTaskShort => 'Short';
+
+  @override
+  String get pickTaskOver => 'Over';
+
+  @override
+  String get pickPlanned => 'Planned';
+
+  @override
+  String get pickPickedQty => 'Picked';
+
+  @override
+  String get pickVariance => 'Variance';
+
+  @override
+  String get pickBin => 'Location';
+
+  @override
+  String get pickBinNone => 'None';
+
+  @override
+  String get pickRecord => 'Record pick';
+
+  @override
+  String get pickComplete => 'Complete picking';
+
+  @override
+  String get pickCompleteQ => 'Complete this pick list?';
+
+  @override
+  String get pickCompleteBody =>
+      'The order moves on to packing. Shipping is confirmed separately afterward.';
+
+  @override
+  String get pickCancelAction => 'Cancel picking';
+
+  @override
+  String get pickCancelQ => 'Cancel this pick list?';
+
+  @override
+  String get pickCancelBody =>
+      'Recorded quantities are discarded. Stock is left unchanged.';
+
+  @override
+  String get pickCancelled => 'Picking cancelled';
+
+  @override
+  String pickCompleted(int short, int over) {
+    return 'Picking completed ($short short, $over over)';
+  }
+
+  @override
+  String get pickCompleteBlocked =>
+      'Cannot complete: some lines are still unpicked';
 }

@@ -3591,6 +3591,162 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'中止'**
   String get cntStatusCancelled;
+
+  /// No description provided for @pickListsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング'**
+  String get pickListsTitle;
+
+  /// No description provided for @pickStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング開始'**
+  String get pickStart;
+
+  /// No description provided for @pickChooseShipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を選択'**
+  String get pickChooseShipment;
+
+  /// No description provided for @pickNoShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング対象の出荷がありません'**
+  String get pickNoShipments;
+
+  /// No description provided for @pickStatusPicking.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック中'**
+  String get pickStatusPicking;
+
+  /// No description provided for @pickStatusPicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック完了'**
+  String get pickStatusPicked;
+
+  /// No description provided for @pickStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'中止'**
+  String get pickStatusCancelled;
+
+  /// No description provided for @pickTaskPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'未ピック'**
+  String get pickTaskPending;
+
+  /// No description provided for @pickTaskPicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get pickTaskPicked;
+
+  /// No description provided for @pickTaskShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足'**
+  String get pickTaskShort;
+
+  /// No description provided for @pickTaskOver.
+  ///
+  /// In ja, this message translates to:
+  /// **'超過'**
+  String get pickTaskOver;
+
+  /// No description provided for @pickPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定'**
+  String get pickPlanned;
+
+  /// No description provided for @pickPickedQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック数'**
+  String get pickPickedQty;
+
+  /// No description provided for @pickVariance.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異'**
+  String get pickVariance;
+
+  /// No description provided for @pickBin.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーション'**
+  String get pickBin;
+
+  /// No description provided for @pickBinNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'未指定'**
+  String get pickBinNone;
+
+  /// No description provided for @pickRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック数を記録'**
+  String get pickRecord;
+
+  /// No description provided for @pickComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング完了'**
+  String get pickComplete;
+
+  /// No description provided for @pickCompleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキングを完了しますか？'**
+  String get pickCompleteQ;
+
+  /// No description provided for @pickCompleteBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包工程に進みます。出荷はこのあと別に確定します。'**
+  String get pickCompleteBody;
+
+  /// No description provided for @pickCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキングを中止'**
+  String get pickCancelAction;
+
+  /// No description provided for @pickCancelQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'このピッキングを中止しますか？'**
+  String get pickCancelQ;
+
+  /// No description provided for @pickCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録した数量は破棄されます。在庫は変わりません。'**
+  String get pickCancelBody;
+
+  /// No description provided for @pickCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキングを中止しました'**
+  String get pickCancelled;
+
+  /// No description provided for @pickCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキングを完了しました（{short}件不足・{over}件超過）'**
+  String pickCompleted(int short, int over);
+
+  /// No description provided for @pickCompleteBlocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'未ピックの明細があるため完了できません'**
+  String get pickCompleteBlocked;
 }
 
 class _AppLocalizationsDelegate

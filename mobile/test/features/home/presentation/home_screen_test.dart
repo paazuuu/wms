@@ -7,11 +7,13 @@ import 'package:wms_mobile/features/auth/data/auth_repository.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/home/presentation/coming_soon_screen.dart';
 import 'package:wms_mobile/features/home/presentation/home_screen.dart';
-import 'package:wms_mobile/features/picking/presentation/picking_list_screen.dart';
-import 'package:wms_mobile/features/sales_orders/application/sales_order_providers.dart';
-import 'package:wms_mobile/features/sales_orders/data/sales_order_repository.dart';
-import 'package:wms_mobile/features/sales_orders/domain/sales_order.dart';
+import 'package:wms_mobile/features/picking_ops/application/picking_ops_providers.dart';
+import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
+import 'package:wms_mobile/features/picking_ops/presentation/pick_list_index_screen.dart';
+import 'package:wms_mobile/features/shipment/application/shipment_providers.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
+
+import '../../../support/harness.dart';
 
 /// Offline fake so the auth controller lands "authenticated" without a network.
 class _FakeAuthRepository implements AuthRepository {
@@ -29,23 +31,18 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> logout() async {}
 }
 
-/// Empty fake so navigating into the live Picking screen renders without a
-/// network (it reuses the sales-order repository).
-class _EmptySalesOrderRepository implements SalesOrderRepository {
-  @override
-  Future<ApiResult<List<SalesOrder>>> list({String? search, String? status}) async =>
-      const ApiSuccess([]);
-
-  @override
-  Future<ApiResult<SalesOrder>> show(int id) async =>
-      const ApiFailure(message: 'unused');
-}
-
 Widget _wrap() => ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
-        salesOrderRepositoryProvider
-            .overrideWithValue(_EmptySalesOrderRepository()),
+        // Empty fakes so navigating into the live Picking screen renders
+        // without a network.
+        shipmentRepositoryProvider.overrideWithValue(FakeShipmentRepository([])),
+        pickingRepositoryProvider.overrideWithValue(
+          FakePickingRepository(
+            list: const PickList(id: 0, shipmentPlanId: 0),
+            started: false,
+          ),
+        ),
       ],
       child: const MaterialApp(
         locale: Locale('en'),
@@ -79,7 +76,7 @@ void main() {
     await tester.tap(find.text('Picking'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(PickingListScreen), findsOneWidget);
+    expect(find.byType(PickListIndexScreen), findsOneWidget);
     expect(find.byType(ComingSoonScreen), findsNothing);
     expect(find.text('Nothing to pick.'), findsOneWidget);
   });
