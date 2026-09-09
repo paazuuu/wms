@@ -1642,4 +1642,97 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mvTransferOut => '调拨出库';
+
+  @override
+  String get qcTitle => '验货';
+
+  @override
+  String get qcListEmpty => '还没有验货记录';
+
+  @override
+  String get qcListEmptyBody => '可从收货履历开始验货。';
+
+  @override
+  String get qcStart => '开始验货';
+
+  @override
+  String get qcComplete => '确认验货';
+
+  @override
+  String get qcResultPending => '未验';
+
+  @override
+  String get qcResultPass => '合格';
+
+  @override
+  String get qcResultFail => '不合格';
+
+  @override
+  String get qcResultPartial => '部分合格';
+
+  @override
+  String get qcResultHold => '暂留';
+
+  @override
+  String get qcPassed => '合格数';
+
+  @override
+  String get qcFailed => '不良数';
+
+  @override
+  String get qcExpected => '预定';
+
+  @override
+  String get qcActual => '实数';
+
+  @override
+  String get qcDiscrepancy => '差异';
+
+  @override
+  String get qcLot => '批次';
+
+  @override
+  String get qcSerial => '序列号';
+
+  @override
+  String get qcExpiry => '有效期 (YYYY-MM-DD)';
+
+  @override
+  String get qcPackaging => '外包装';
+
+  @override
+  String get qcCondition => '商品状态';
+
+  @override
+  String get qcLabelOk => '标签一致';
+
+  @override
+  String get qcNote => '备注';
+
+  @override
+  String get qcHold => '设为暂留';
+
+  @override
+  String get qcRecord => '记录';
+
+  @override
+  String qcUnchecked(int count) {
+    return '未验 $count 条';
+  }
+
+  @override
+  String get qcCompleteBlocked => '仍有未验明细，无法确认';
+
+  @override
+  String qcCompleted(String status) {
+    return '验货已确认（$status）';
+  }
+
+  @override
+  String qcFailedUnits(int count) {
+    return '不良 $count';
+  }
+
+  @override
+  String get qcSplitHint => '请输入合格数与不良数（合计即为实数）。';
 }

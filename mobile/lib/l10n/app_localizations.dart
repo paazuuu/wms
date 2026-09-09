@@ -3135,6 +3135,180 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'移動出庫'**
   String get mvTransferOut;
+
+  /// No description provided for @qcTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get qcTitle;
+
+  /// No description provided for @qcListEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品はまだありません'**
+  String get qcListEmpty;
+
+  /// No description provided for @qcListEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領履歴から検品を開始できます。'**
+  String get qcListEmptyBody;
+
+  /// No description provided for @qcStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を開始'**
+  String get qcStart;
+
+  /// No description provided for @qcComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を確定'**
+  String get qcComplete;
+
+  /// No description provided for @qcResultPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品'**
+  String get qcResultPending;
+
+  /// No description provided for @qcResultPass.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格'**
+  String get qcResultPass;
+
+  /// No description provided for @qcResultFail.
+  ///
+  /// In ja, this message translates to:
+  /// **'不合格'**
+  String get qcResultFail;
+
+  /// No description provided for @qcResultPartial.
+  ///
+  /// In ja, this message translates to:
+  /// **'一部合格'**
+  String get qcResultPartial;
+
+  /// No description provided for @qcResultHold.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get qcResultHold;
+
+  /// No description provided for @qcPassed.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格数'**
+  String get qcPassed;
+
+  /// No description provided for @qcFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'不良数'**
+  String get qcFailed;
+
+  /// No description provided for @qcExpected.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定'**
+  String get qcExpected;
+
+  /// No description provided for @qcActual.
+  ///
+  /// In ja, this message translates to:
+  /// **'実数'**
+  String get qcActual;
+
+  /// No description provided for @qcDiscrepancy.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異'**
+  String get qcDiscrepancy;
+
+  /// No description provided for @qcLot.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット'**
+  String get qcLot;
+
+  /// No description provided for @qcSerial.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル'**
+  String get qcSerial;
+
+  /// No description provided for @qcExpiry.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限 (YYYY-MM-DD)'**
+  String get qcExpiry;
+
+  /// No description provided for @qcPackaging.
+  ///
+  /// In ja, this message translates to:
+  /// **'外装'**
+  String get qcPackaging;
+
+  /// No description provided for @qcCondition.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品状態'**
+  String get qcCondition;
+
+  /// No description provided for @qcLabelOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'ラベル一致'**
+  String get qcLabelOk;
+
+  /// No description provided for @qcNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get qcNote;
+
+  /// No description provided for @qcHold.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留にする'**
+  String get qcHold;
+
+  /// No description provided for @qcRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録'**
+  String get qcRecord;
+
+  /// No description provided for @qcUnchecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品 {count} 件'**
+  String qcUnchecked(int count);
+
+  /// No description provided for @qcCompleteBlocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品の明細があるため確定できません'**
+  String get qcCompleteBlocked;
+
+  /// No description provided for @qcCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を確定しました（{status}）'**
+  String qcCompleted(String status);
+
+  /// No description provided for @qcFailedUnits.
+  ///
+  /// In ja, this message translates to:
+  /// **'不良 {count}'**
+  String qcFailedUnits(int count);
+
+  /// No description provided for @qcSplitHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格数と不良数を入力してください（合計が実数になります）'**
+  String get qcSplitHint;
 }
 
 class _AppLocalizationsDelegate

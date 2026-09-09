@@ -1692,4 +1692,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mvTransferOut => 'Transfer out';
+
+  @override
+  String get qcTitle => 'Inspection';
+
+  @override
+  String get qcListEmpty => 'No inspections yet';
+
+  @override
+  String get qcListEmptyBody =>
+      'Start one from a receipt in the receipt history.';
+
+  @override
+  String get qcStart => 'Start inspection';
+
+  @override
+  String get qcComplete => 'Complete inspection';
+
+  @override
+  String get qcResultPending => 'Unchecked';
+
+  @override
+  String get qcResultPass => 'Pass';
+
+  @override
+  String get qcResultFail => 'Fail';
+
+  @override
+  String get qcResultPartial => 'Partial';
+
+  @override
+  String get qcResultHold => 'Hold';
+
+  @override
+  String get qcPassed => 'Passed';
+
+  @override
+  String get qcFailed => 'Failed';
+
+  @override
+  String get qcExpected => 'Expected';
+
+  @override
+  String get qcActual => 'Actual';
+
+  @override
+  String get qcDiscrepancy => 'Discrepancy';
+
+  @override
+  String get qcLot => 'Lot';
+
+  @override
+  String get qcSerial => 'Serial';
+
+  @override
+  String get qcExpiry => 'Expiry (YYYY-MM-DD)';
+
+  @override
+  String get qcPackaging => 'Packaging';
+
+  @override
+  String get qcCondition => 'Condition';
+
+  @override
+  String get qcLabelOk => 'Label matches';
+
+  @override
+  String get qcNote => 'Note';
+
+  @override
+  String get qcHold => 'Put on hold';
+
+  @override
+  String get qcRecord => 'Record';
+
+  @override
+  String qcUnchecked(int count) {
+    return '$count unchecked';
+  }
+
+  @override
+  String get qcCompleteBlocked => 'Cannot complete while lines are unchecked';
+
+  @override
+  String qcCompleted(String status) {
+    return 'Inspection completed ($status)';
+  }
+
+  @override
+  String qcFailedUnits(int count) {
+    return '$count failed';
+  }
+
+  @override
+  String get qcSplitHint =>
+      'Enter passed and failed counts (they add up to the actual).';
 }

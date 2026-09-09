@@ -11,6 +11,8 @@ import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
 import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
+import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
+import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
@@ -161,6 +163,98 @@ class FakeWarehouseRepository implements WarehouseRepository {
   @override
   Future<ApiResult<List<Bin>>> bins(int warehouseId) async =>
       ApiSuccess(binsByWarehouse[warehouseId] ?? const []);
+}
+
+/// Inspection stub. Mirrors the server's derivation of an item result from the
+/// pass/fail split and its refusal to close while items are unchecked, so a
+/// screen test exercises the same rules the backend enforces.
+class FakeInspectionRepository implements InspectionRepository {
+  FakeInspectionRepository(this.inspection);
+  Inspection inspection;
+
+  /// Set when complete() was rejected because lines were still unchecked.
+  bool refusedIncomplete = false;
+
+  @override
+  Future<ApiResult<List<Inspection>>> list(
+          {String? status, int? warehouseId}) async =>
+      ApiSuccess(status == null || inspection.status.wire == status
+          ? [inspection]
+          : const []);
+
+  @override
+  Future<ApiResult<Inspection>> show(int id) async => ApiSuccess(inspection);
+
+  @override
+  Future<ApiResult<Inspection>> start(int reconciliationId) async =>
+      ApiSuccess(inspection);
+
+  @override
+  Future<ApiResult<Inspection>> saveItem(
+      int inspectionId, int itemId, InspectionFinding finding) async {
+    final result = finding.hold
+        ? QcResult.hold
+        : finding.passedQuantity == 0 && finding.failedQuantity == 0
+            ? QcResult.pending
+            : finding.failedQuantity == 0
+                ? QcResult.pass
+                : finding.passedQuantity == 0
+                    ? QcResult.fail
+                    : QcResult.partial;
+    inspection = Inspection(
+      id: inspection.id,
+      status: inspection.status,
+      deliveryNumber: inspection.deliveryNumber,
+      supplierName: inspection.supplierName,
+      items: [
+        for (final it in inspection.items)
+          if (it.id == itemId)
+            InspectionItem(
+              id: it.id,
+              janCode: it.janCode,
+              productName: it.productName,
+              expectedQuantity: it.expectedQuantity,
+              actualQuantity:
+                  finding.passedQuantity + finding.failedQuantity,
+              passedQuantity: finding.passedQuantity,
+              failedQuantity: finding.failedQuantity,
+              discrepancy: finding.passedQuantity +
+                  finding.failedQuantity -
+                  it.expectedQuantity,
+              result: result,
+            )
+          else
+            it,
+      ],
+    );
+    return ApiSuccess(inspection);
+  }
+
+  @override
+  Future<ApiResult<Inspection>> complete(int inspectionId,
+      {String? note}) async {
+    if (inspection.uncheckedCount > 0) {
+      refusedIncomplete = true;
+      return const ApiFailure(
+          message: 'inspection still has unchecked item(s)', statusCode: 422);
+    }
+    final results = inspection.items.map((i) => i.result).toSet();
+    final status = results.contains(QcResult.hold)
+        ? QcResult.hold
+        : results.length == 1 && results.first == QcResult.pass
+            ? QcResult.pass
+            : results.length == 1 && results.first == QcResult.fail
+                ? QcResult.fail
+                : QcResult.partial;
+    inspection = Inspection(
+      id: inspection.id,
+      status: status,
+      deliveryNumber: inspection.deliveryNumber,
+      supplierName: inspection.supplierName,
+      items: inspection.items,
+    );
+    return ApiSuccess(inspection);
+  }
 }
 
 class FakeStockRepository implements StockRepository {

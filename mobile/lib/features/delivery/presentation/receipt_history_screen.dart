@@ -6,6 +6,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../qc/application/inspection_providers.dart';
+import '../../qc/presentation/inspection_detail_screen.dart';
 import '../application/delivery_providers.dart';
 import '../domain/receipt.dart';
 
@@ -70,6 +72,32 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
   bool _busy = false;
 
   Receipt get _r => widget.receipt;
+
+  /// Open the QC pass for this receipt and go straight to it. The backend keeps
+  /// one inspection per receipt, so tapping again reopens the same one.
+  Future<void> _startInspection() async {
+    setState(() => _busy = true);
+    final result =
+        await ref.read(inspectionRepositoryProvider).start(_r.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (inspection) {
+        ref.invalidate(inspectionListProvider);
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => InspectionDetailScreen(inspectionId: inspection.id),
+        ));
+      },
+      failure: (f) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Text(f.message),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+      },
+    );
+  }
 
   Future<void> _cancel() async {
     final l10n = AppLocalizations.of(context);
@@ -205,20 +233,30 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
             ),
             if (!cancelled) ...[
               const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton.icon(
-                  onPressed: _busy ? null : _cancel,
-                  icon: _busy
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(Icons.undo, color: scheme.error),
-                  label: Text(l10n.receiptCancelAction,
-                      style: TextStyle(color: scheme.error)),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // QC follows receiving (spec §9). Starting is idempotent
+                  // server-side, so this both opens and re-opens the inspection.
+                  TextButton.icon(
+                    onPressed: _busy ? null : _startInspection,
+                    icon: const Icon(Icons.fact_check_outlined, size: 18),
+                    label: Text(l10n.qcStart),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : _cancel,
+                    icon: _busy
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(Icons.undo, color: scheme.error),
+                    label: Text(l10n.receiptCancelAction,
+                        style: TextStyle(color: scheme.error)),
+                  ),
+                ],
               ),
             ],
           ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
-import '../../inspection/presentation/inspection_list_screen.dart';
+import '../../qc/presentation/inspection_list_screen.dart';
 import '../../locations/presentation/location_list_screen.dart';
 import '../../picking/presentation/picking_list_screen.dart';
 import '../../products/presentation/product_lookup_screen.dart';
@@ -138,7 +138,9 @@ List<FeatureGroup> buildFeatureCatalog() => const [
     ];
 
 /// Top-level (const-referenceable) builder for the Inspection feature.
-Widget _inspectionList(BuildContext _) => const InspectionListScreen();
+/// Points at the Supabase-backed inbound inspection (検品), not the legacy
+/// InventorOS screen, so the entry actually works against the live backend.
+Widget _inspectionList(BuildContext _) => const QcInspectionListScreen();
 
 /// Top-level (const-referenceable) builder for the Product Lookup feature.
 Widget _productLookup(BuildContext _) => const ProductLookupScreen();

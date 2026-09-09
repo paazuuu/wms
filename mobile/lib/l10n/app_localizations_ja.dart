@@ -1643,4 +1643,97 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mvTransferOut => '移動出庫';
+
+  @override
+  String get qcTitle => '検品';
+
+  @override
+  String get qcListEmpty => '検品はまだありません';
+
+  @override
+  String get qcListEmptyBody => '受領履歴から検品を開始できます。';
+
+  @override
+  String get qcStart => '検品を開始';
+
+  @override
+  String get qcComplete => '検品を確定';
+
+  @override
+  String get qcResultPending => '未検品';
+
+  @override
+  String get qcResultPass => '合格';
+
+  @override
+  String get qcResultFail => '不合格';
+
+  @override
+  String get qcResultPartial => '一部合格';
+
+  @override
+  String get qcResultHold => '保留';
+
+  @override
+  String get qcPassed => '合格数';
+
+  @override
+  String get qcFailed => '不良数';
+
+  @override
+  String get qcExpected => '予定';
+
+  @override
+  String get qcActual => '実数';
+
+  @override
+  String get qcDiscrepancy => '差異';
+
+  @override
+  String get qcLot => 'ロット';
+
+  @override
+  String get qcSerial => 'シリアル';
+
+  @override
+  String get qcExpiry => '期限 (YYYY-MM-DD)';
+
+  @override
+  String get qcPackaging => '外装';
+
+  @override
+  String get qcCondition => '商品状態';
+
+  @override
+  String get qcLabelOk => 'ラベル一致';
+
+  @override
+  String get qcNote => '備考';
+
+  @override
+  String get qcHold => '保留にする';
+
+  @override
+  String get qcRecord => '記録';
+
+  @override
+  String qcUnchecked(int count) {
+    return '未検品 $count 件';
+  }
+
+  @override
+  String get qcCompleteBlocked => '未検品の明細があるため確定できません';
+
+  @override
+  String qcCompleted(String status) {
+    return '検品を確定しました（$status）';
+  }
+
+  @override
+  String qcFailedUnits(int count) {
+    return '不良 $count';
+  }
+
+  @override
+  String get qcSplitHint => '合格数と不良数を入力してください（合計が実数になります）';
 }
