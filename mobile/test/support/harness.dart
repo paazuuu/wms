@@ -15,6 +15,8 @@ import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
+import 'package:wms_mobile/features/audit/data/audit_repository.dart';
+import 'package:wms_mobile/features/audit/domain/audit_entry.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
 import 'package:wms_mobile/features/transfers/data/transfer_repository.dart';
 import 'package:wms_mobile/features/transfers/domain/transfer_order.dart';
@@ -767,4 +769,32 @@ class FakeTransferRepository implements TransferRepository {
       ),
     ));
   }
+}
+
+/// Audit trail stub. [entries] are filtered by event type for list(), the
+/// same way the real RPC filters server-side.
+class FakeAuditRepository implements AuditRepository {
+  FakeAuditRepository(this.entries, {this.types = const []});
+  final List<AuditEntry> entries;
+  final List<String> types;
+
+  /// The warehouse the last list() call was scoped to (null = all warehouses).
+  int? lastWarehouseId;
+
+  @override
+  Future<ApiResult<List<AuditEntry>>> list({
+    int? warehouseId,
+    String? entityType,
+    String? eventType,
+    DateTime? since,
+    int limit = 100,
+  }) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(eventType == null
+        ? entries
+        : entries.where((e) => e.eventType == eventType).toList());
+  }
+
+  @override
+  Future<ApiResult<List<String>>> eventTypes() async => ApiSuccess(types);
 }

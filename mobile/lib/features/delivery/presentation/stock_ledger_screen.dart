@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/export/csv_export.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -41,6 +42,56 @@ class StockLedgerScreen extends ConsumerWidget {
   final String janCode;
   final String productName;
 
+  Future<void> _export(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final moves = ref.read(stockLedgerProvider(janCode)).valueOrNull ?? const [];
+    final fmt = DateFormat('yyyy-MM-dd HH:mm:ss');
+    try {
+      final path = await exportCsv(
+        fileName: 'stock_ledger_$janCode.csv',
+        headers: const [
+          'id',
+          'created_at',
+          'warehouse_name',
+          'movement_type',
+          'quantity',
+          'quantity_before',
+          'quantity_after',
+          'reference_type',
+          'reference_id',
+          'note',
+        ],
+        rows: [
+          for (final m in moves)
+            [
+              m.id,
+              m.createdAt == null ? '' : fmt.format(m.createdAt!),
+              m.warehouseName,
+              m.movementType,
+              m.quantity,
+              m.quantityBefore,
+              m.quantityAfter,
+              m.referenceType ?? '',
+              m.referenceId ?? '',
+              m.note ?? '',
+            ],
+        ],
+      );
+      if (!context.mounted || path == null) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.auditExported)));
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(l10n.auditExportFailed),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -63,6 +114,14 @@ class StockLedgerScreen extends ConsumerWidget {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: l10n.csvExportTitle,
+            icon: const Icon(Icons.file_download_outlined),
+            onPressed: () => _export(context, ref),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
       ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),

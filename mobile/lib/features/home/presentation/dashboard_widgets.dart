@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/export/csv_export.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
@@ -395,6 +396,31 @@ class _LowStockCard extends StatelessWidget {
 
   final List<LowStockBrief> items;
 
+  Future<void> _export(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final path = await exportCsv(
+        fileName: 'low_stock.csv',
+        headers: const ['jan_code', 'product_name', 'on_hand'],
+        rows: [
+          for (final it in items) [it.janCode, it.productName ?? '', it.onHand],
+        ],
+      );
+      if (!context.mounted || path == null) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.auditExported)));
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(l10n.auditExportFailed),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -404,6 +430,7 @@ class _LowStockCard extends StatelessWidget {
       icon: Icons.warning_amber_outlined,
       tone: StatusTone.danger,
       emptyLabel: l10n.dashNoAlerts,
+      onExport: items.isEmpty ? null : () => _export(context),
       children: [
         for (final it in items)
           _WatchRow(
@@ -427,6 +454,7 @@ class _WatchCard extends StatelessWidget {
     required this.emptyLabel,
     required this.children,
     this.onOpen,
+    this.onExport,
   });
 
   final String title;
@@ -435,6 +463,10 @@ class _WatchCard extends StatelessWidget {
   final String emptyLabel;
   final List<Widget> children;
   final VoidCallback? onOpen;
+
+  /// When set, a small download action next to the title exports the list as
+  /// CSV (spec workstream: stock alerts + CSV export).
+  final VoidCallback? onExport;
 
   @override
   Widget build(BuildContext context) {
@@ -453,6 +485,13 @@ class _WatchCard extends StatelessWidget {
                 Expanded(
                     child:
                         Text(title, style: theme.textTheme.titleSmall)),
+                if (onExport != null)
+                  IconButton(
+                    tooltip: AppLocalizations.of(context).auditExport,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: onExport,
+                    icon: const Icon(Icons.file_download_outlined, size: 18),
+                  ),
                 if (onOpen != null && children.isNotEmpty)
                   IconButton(
                     visualDensity: VisualDensity.compact,

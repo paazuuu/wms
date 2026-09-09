@@ -2212,4 +2212,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featTransferDesc => 'Move stock between warehouses';
+
+  @override
+  String get auditTitle => 'Audit log';
+
+  @override
+  String get auditEmpty => 'No audit entries yet';
+
+  @override
+  String get auditEmptyBody =>
+      'Approvals, rejections and cancellations are recorded here.';
+
+  @override
+  String get auditExport => 'Export CSV';
+
+  @override
+  String get auditExported => 'Saved the CSV';
+
+  @override
+  String get auditExportFailed => 'Could not export the CSV';
+
+  @override
+  String get auditEntity => 'Entity';
+
+  @override
+  String get auditActor => 'Actor';
+
+  @override
+  String get auditActorSystem => 'System';
+
+  @override
+  String get csvExportTitle => 'Export CSV';
+
+  @override
+  String get featAuditLog => 'Audit log';
+
+  @override
+  String get featAuditLogDesc => 'Review operation history, export as CSV';
 }

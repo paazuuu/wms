@@ -2147,4 +2147,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featTransferDesc => '在仓库之间调拨库存';
+
+  @override
+  String get auditTitle => '审计日志';
+
+  @override
+  String get auditEmpty => '暂无审计记录';
+
+  @override
+  String get auditEmptyBody => '批准、驳回、中止等操作会记录在这里。';
+
+  @override
+  String get auditExport => '导出CSV';
+
+  @override
+  String get auditExported => '已保存CSV';
+
+  @override
+  String get auditExportFailed => 'CSV导出失败';
+
+  @override
+  String get auditEntity => '对象';
+
+  @override
+  String get auditActor => '操作人';
+
+  @override
+  String get auditActorSystem => '系统';
+
+  @override
+  String get csvExportTitle => '导出CSV';
+
+  @override
+  String get featAuditLog => '审计日志';
+
+  @override
+  String get featAuditLogDesc => '查看操作历史并导出CSV';
 }

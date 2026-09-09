@@ -71,6 +71,8 @@ class FeatureEntry {
         return l10n.featWorkOrders;
       case 'reports':
         return l10n.featReports;
+      case 'audit_log':
+        return l10n.featAuditLog;
       default:
         return id;
     }
@@ -113,6 +115,8 @@ class FeatureEntry {
         return l10n.featWorkOrdersDesc;
       case 'reports':
         return l10n.featReportsDesc;
+      case 'audit_log':
+        return l10n.featAuditLogDesc;
       default:
         return '';
     }

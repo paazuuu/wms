@@ -971,5 +971,17 @@
   "transferPlanned": "Planned",
   "transferLineProductName": "Product name (optional)",
   "featTransfer": "Transfers",
-  "featTransferDesc": "Move stock between warehouses"
+  "featTransferDesc": "Move stock between warehouses",
+  "auditTitle": "Audit log",
+  "auditEmpty": "No audit entries yet",
+  "auditEmptyBody": "Approvals, rejections and cancellations are recorded here.",
+  "auditExport": "Export CSV",
+  "auditExported": "Saved the CSV",
+  "auditExportFailed": "Could not export the CSV",
+  "auditEntity": "Entity",
+  "auditActor": "Actor",
+  "auditActorSystem": "System",
+  "csvExportTitle": "Export CSV",
+  "featAuditLog": "Audit log",
+  "featAuditLogDesc": "Review operation history, export as CSV"
 }

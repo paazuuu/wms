@@ -4089,6 +4089,78 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'倉庫間で在庫を移動'**
   String get featTransferDesc;
+
+  /// No description provided for @auditTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'監査ログ'**
+  String get auditTitle;
+
+  /// No description provided for @auditEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'監査ログはまだありません'**
+  String get auditEmpty;
+
+  /// No description provided for @auditEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認・却下・取消などの操作がここに記録されます。'**
+  String get auditEmptyBody;
+
+  /// No description provided for @auditExport.
+  ///
+  /// In ja, this message translates to:
+  /// **'CSVを書き出す'**
+  String get auditExport;
+
+  /// No description provided for @auditExported.
+  ///
+  /// In ja, this message translates to:
+  /// **'CSVを保存しました'**
+  String get auditExported;
+
+  /// No description provided for @auditExportFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'CSVの書き出しに失敗しました'**
+  String get auditExportFailed;
+
+  /// No description provided for @auditEntity.
+  ///
+  /// In ja, this message translates to:
+  /// **'対象'**
+  String get auditEntity;
+
+  /// No description provided for @auditActor.
+  ///
+  /// In ja, this message translates to:
+  /// **'実行者'**
+  String get auditActor;
+
+  /// No description provided for @auditActorSystem.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム'**
+  String get auditActorSystem;
+
+  /// No description provided for @csvExportTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'CSVエクスポート'**
+  String get csvExportTitle;
+
+  /// No description provided for @featAuditLog.
+  ///
+  /// In ja, this message translates to:
+  /// **'監査ログ'**
+  String get featAuditLog;
+
+  /// No description provided for @featAuditLogDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'操作履歴をCSVで確認'**
+  String get featAuditLogDesc;
 }
 
 class _AppLocalizationsDelegate

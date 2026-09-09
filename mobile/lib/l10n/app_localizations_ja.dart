@@ -2149,4 +2149,40 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featTransferDesc => '倉庫間で在庫を移動';
+
+  @override
+  String get auditTitle => '監査ログ';
+
+  @override
+  String get auditEmpty => '監査ログはまだありません';
+
+  @override
+  String get auditEmptyBody => '承認・却下・取消などの操作がここに記録されます。';
+
+  @override
+  String get auditExport => 'CSVを書き出す';
+
+  @override
+  String get auditExported => 'CSVを保存しました';
+
+  @override
+  String get auditExportFailed => 'CSVの書き出しに失敗しました';
+
+  @override
+  String get auditEntity => '対象';
+
+  @override
+  String get auditActor => '実行者';
+
+  @override
+  String get auditActorSystem => 'システム';
+
+  @override
+  String get csvExportTitle => 'CSVエクスポート';
+
+  @override
+  String get featAuditLog => '監査ログ';
+
+  @override
+  String get featAuditLogDesc => '操作履歴をCSVで確認';
 }

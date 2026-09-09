@@ -971,5 +971,17 @@
   "transferPlanned": "计划",
   "transferLineProductName": "商品名称（可选）",
   "featTransfer": "仓库间调拨",
-  "featTransferDesc": "在仓库之间调拨库存"
+  "featTransferDesc": "在仓库之间调拨库存",
+  "auditTitle": "审计日志",
+  "auditEmpty": "暂无审计记录",
+  "auditEmptyBody": "批准、驳回、中止等操作会记录在这里。",
+  "auditExport": "导出CSV",
+  "auditExported": "已保存CSV",
+  "auditExportFailed": "CSV导出失败",
+  "auditEntity": "对象",
+  "auditActor": "操作人",
+  "auditActorSystem": "系统",
+  "csvExportTitle": "导出CSV",
+  "featAuditLog": "审计日志",
+  "featAuditLogDesc": "查看操作历史并导出CSV"
 }

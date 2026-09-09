@@ -1061,5 +1061,17 @@
   "transferPlanned": "予定",
   "transferLineProductName": "商品名（任意）",
   "featTransfer": "倉庫間移動",
-  "featTransferDesc": "倉庫間で在庫を移動"
+  "featTransferDesc": "倉庫間で在庫を移動",
+  "auditTitle": "監査ログ",
+  "auditEmpty": "監査ログはまだありません",
+  "auditEmptyBody": "承認・却下・取消などの操作がここに記録されます。",
+  "auditExport": "CSVを書き出す",
+  "auditExported": "CSVを保存しました",
+  "auditExportFailed": "CSVの書き出しに失敗しました",
+  "auditEntity": "対象",
+  "auditActor": "実行者",
+  "auditActorSystem": "システム",
+  "csvExportTitle": "CSVエクスポート",
+  "featAuditLog": "監査ログ",
+  "featAuditLogDesc": "操作履歴をCSVで確認"
 }

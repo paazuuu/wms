@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0019 applied.** 0020 onward is still planned.
+> Status: **0010–0020 applied.** 0021 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -189,8 +189,32 @@ update inside a transaction._
   letting the tap fail silently, matching 0018's pick-list detail screen.
   Home menu gets a new 倉庫間移動 entry (`field_operations` group).
 
-### 0020 — Stock ledger views / audit surfacing (Step 12)
-- Ledger read views ("why did stock change"), audit query RPCs.
+### 0020 — Audit trail surfacing (Step 12) ✅
+- The stock ledger already answered "why did this JAN's quantity change"
+  (`stock_ledger`, since 0013/0014 — callable with `jan_code=null` for a
+  whole warehouse). What was missing was "who did what" beyond stock:
+  approvals, rejections, cancellations, count/inspection completions — all
+  already written to `audit_log` by `log_audit` since 0012, nothing ever
+  read it back.
+- `audit_log` has RLS restricted to `authenticated` only (0012), which the
+  still-login-free app never satisfies as `anon` — direct REST reads return
+  nothing. `audit_log_query` and `audit_event_types` are SECURITY DEFINER
+  RPCs that read through that gate deliberately, the same pattern
+  `stock_count_lines`' masking already established: RLS stays closed, the
+  RPC is the only way in. Granted broadly (anon/authenticated/service_role),
+  same visibility posture as `stock_ledger` — this is a read surface, not a
+  mutation.
+- Edge function `audit-log`: the query plus a distinct-event-types endpoint,
+  so a filter chip row never offers a choice nothing has actually logged.
+- CSV export (the other half of the "stock alerts + CSV" workstream picked
+  at the start of this pass, not yet delivered): `core/export/csv_export.dart`
+  builds an RFC 4180 CSV (quotes only where needed, doubles embedded quotes,
+  UTF-8 BOM so Excel on Windows doesn't mis-guess Japanese text) and hands it
+  to `file_picker`'s `saveFile` — already a dependency for plan import, so no
+  new native permissions. Wired into three places: the new Audit Log screen,
+  the per-JAN Stock Ledger screen, and the dashboard's low-stock watch card.
+- Flutter client `features/audit`: a list with event-type filter chips and a
+  CSV export action. New 監査ログ entry on the home menu (`management` group).
 
 ### 0021 — Seed / demo (Step 13)
 - Demo company (Demo Trading Co.), 神戸/大阪 warehouses, zones A/B/C, bins
