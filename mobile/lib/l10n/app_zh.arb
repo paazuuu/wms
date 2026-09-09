@@ -72,7 +72,11 @@
   "scanTypeMessage": "请扫描或输入条码、SKU 或名称。",
   "noMatchesFor": "未找到与“{query}”匹配的结果。",
   "@noMatchesFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "tryDifferentScan": "请尝试其他条码、SKU 或名称。",
   "inStock": "库存",
@@ -145,7 +149,7 @@
   "fieldPriority": "优先级",
   "fieldUsers": "用户",
   "fieldLocations": "库位",
-  "fieldContact": "联系人",
+  "fieldContact": "负责人",
   "fieldWebsite": "网站",
   "fieldPaymentTerms": "付款条件",
   "fieldNotes": "备注",
@@ -234,7 +238,11 @@
   "actualQuantity": "实际数量",
   "scannedCode": "已扫描：{code}",
   "@scannedCode": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "quantity": "数量",
   "actionCancel": "取消",
@@ -243,11 +251,19 @@
   "offlineItemQueued": "离线 — 该项已加入同步队列",
   "filesUploaded": "{count, plural, other{已上传 {count} 个文件}}",
   "@filesUploaded": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "offlineFilesQueued": "离线 — {count} 个文件已加入同步队列",
   "@offlineFilesQueued": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "completeInspectionQ": "完成验货？",
   "completeInspectionBody": "将此验货标记为完成。完成后仍可查看。",
@@ -260,12 +276,20 @@
   "completeInspection": "完成验货",
   "completedOn": "完成于 {date}",
   "@completedOn": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "actualLabel": "实际",
   "itemNumber": "项目 {id}",
   "@itemNumber": {
-    "placeholders": { "id": { "type": "int" } }
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "working": "处理中…",
   "adjustAdd": "增加",
@@ -279,16 +303,31 @@
   "removeStock": "减少库存",
   "onHandCount": "现有库存 {count}",
   "@onHandCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "enterQtyPositive": "请输入大于零的数量。",
   "cannotRemoveOnly": "无法减少 {qty}；现有库存仅 {current}。",
   "@cannotRemoveOnly": {
-    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
   },
   "stockUpdatedTo": "库存已更新 — 现有 {count}。",
   "@stockUpdatedTo": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "adjustTypeManual": "手动",
   "adjustTypeCount": "盘点",
@@ -310,7 +349,11 @@
   "reportNoRows": "此报表未返回任何行。",
   "rowCount": "{count, plural, other{{count} 行}}",
   "@rowCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "scanBarcode": "扫描条码",
   "torchOn": "打开手电",
@@ -336,7 +379,11 @@
   "deliverySearchTip": "请尝试其他单号或供应商。",
   "plannedLines": "{count, plural, other{计划明细 {count} 项}}",
   "@plannedLines": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "deliveryNumberLabel": "单号",
   "deliveryDateLabel": "到货日",
@@ -345,7 +392,11 @@
   "ocrScanning": "解析到货单中…",
   "ocrFound": "从到货单检测到 {count} 个JAN",
   "@ocrFound": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "ocrNoneFound": "未能从到货单识别JAN。",
   "ocrUnavailable": "此设备无法使用OCR。",
@@ -362,7 +413,11 @@
   "reconcilePartialQ": "仍有未送达的项目",
   "reconcilePartialBody": "还有 {count} 件未送达。要存为部分送货并把其余保留在未送达清单中，还是现在标记完成并把其余视为缺货？",
   "@reconcilePartialBody": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "reconcileKeepOpen": "存为部分送货",
   "reconcileFinalizeShort": "标记完成（其余缺货）",
@@ -372,7 +427,11 @@
   "reconAlreadyDoneBody": "再次录入会重复加入库存。如需更正，请在收货记录中取消对应的收货。",
   "doubleScanWarning": "{code} 已超过计划数量（重复扫描？）",
   "@doubleScanWarning": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "receiptHistoryTitle": "收货记录／更正",
   "receiptEmpty": "暂无收货记录。",
@@ -389,7 +448,11 @@
   "unexpectedItem": "计划外商品",
   "enterQuantityFor": "{code} 的数量",
   "@enterQuantityFor": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "noteImageAttached": "已附加到货单",
   "planImportTitle": "导入计划",
@@ -397,14 +460,25 @@
   "pickFile": "选择文件",
   "planImportSelected": "已选择：{name}",
   "@planImportSelected": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "planImportAction": "导入",
   "planImporting": "导入中…",
   "planImportChooseFirst": "请选择文件并输入单号。",
   "planImportedSummary": "已导入 {count} 项，共 {total} 件",
   "@planImportedSummary": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "planReadAction": "读取送货单",
   "planReading": "读取中…",
@@ -414,14 +488,27 @@
   "importHeaderSection": "抬头信息",
   "importLinesPreview": "明细预览",
   "importMoreLines": "还有 {count} 项",
-  "@importMoreLines": { "placeholders": { "count": { "type": "int" } } },
+  "@importMoreLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "planReviewTitle": "核对抬头",
   "planReviewHint": "已从送货单自动读取。登记前可在此修改错误或空白的字段。",
   "planCommitAction": "登记",
   "planRegistering": "登记中…",
   "planPreviewCount": "{count} 项 · {total} 件",
   "@planPreviewCount": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "fieldRegistrationNumber": "登记号（T…）",
   "fieldCustomerCode": "客户代码",
@@ -454,14 +541,35 @@
   "shipmentStatusCancelled": "已取消",
   "shipmentNumberLabel": "出库号",
   "cartonCountLabel": "{count} 箱",
-  "@cartonCountLabel": { "placeholders": { "count": { "type": "int" } } },
+  "@cartonCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "shipmentLinesSection": "出库清单",
   "cartonsSection": "纸箱",
   "packProgress": "已装 {packed} / {total}",
-  "@packProgress": { "placeholders": { "packed": { "type": "int" }, "total": { "type": "int" } } },
+  "@packProgress": {
+    "placeholders": {
+      "packed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "addCarton": "添加纸箱",
   "cartonNoLabel": "纸箱 #{no}",
-  "@cartonNoLabel": { "placeholders": { "no": { "type": "int" } } },
+  "@cartonNoLabel": {
+    "placeholders": {
+      "no": {
+        "type": "int"
+      }
+    }
+  },
   "cartonLabelHint": "标签（可选）例: A-1",
   "cartonEditTitle": "纸箱内容",
   "cartonEmpty": "该纸箱还未装入任何物品。",
@@ -493,10 +601,7 @@
   "senderPreview": "打印预览",
   "fieldCompanyName": "公司名称",
   "fieldPostalCode": "邮编",
-  "fieldAddress": "地址",
-  "fieldPhone": "电话",
   "fieldFax": "传真",
-  "fieldContact": "负责人",
   "fieldNote": "备注",
   "deleteCartonQ": "删除这个纸箱吗？",
   "actionSave": "保存",
@@ -516,15 +621,27 @@
   "dashNoAlerts": "没有库存预警",
   "dashCount": "{count} 件",
   "@dashCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashSkuCount": "{count} 个SKU",
   "@dashSkuCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashThreshold": "阈值 {count}",
   "@dashThreshold": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "whAllWarehouses": "全部仓库",
   "whSwitch": "切换仓库",
@@ -547,7 +664,11 @@
   "whNameRequired": "请输入仓库名称",
   "whCreated": "已添加仓库「{name}」",
   "@whCreated": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "whInactive": "停用",
   "whStatInbound": "待入库",
@@ -604,15 +725,110 @@
   "qcHold": "设为暂留",
   "qcRecord": "记录",
   "qcUnchecked": "未验 {count} 条",
-  "@qcUnchecked": {"placeholders": {"count": {"type": "int"}}},
+  "@qcUnchecked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "qcCompleteBlocked": "仍有未验明细，无法确认",
   "qcCompleted": "验货已确认（{status}）",
-  "@qcCompleted": {"placeholders": {"status": {"type": "String"}}},
+  "@qcCompleted": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "qcFailedUnits": "不良 {count}",
-  "@qcFailedUnits": {"placeholders": {"count": {"type": "int"}}},
+  "@qcFailedUnits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "qcSplitHint": "请输入合格数与不良数（合计即为实数）。",
   "whFieldUsesLocations": "按库位管理",
   "whFieldUsesLocationsHelp": "关闭时按仓库整体管理库存。仅在需要按货架管理时开启（之后可更改）。",
   "whLocationsOn": "库位管理",
-  "whPutaway": "上架"
+  "whPutaway": "上架",
+  "adjTitle": "库存调整",
+  "adjNew": "调整库存",
+  "adjEmpty": "还没有调整记录",
+  "adjEmptyBody": "可按破损、丢失、找到等原因修正库存。",
+  "adjJan": "JAN编码",
+  "adjQuantity": "数量",
+  "adjReason": "原因",
+  "adjNote": "备注",
+  "adjApply": "确认调整",
+  "adjDone": "库存已调整（{delta}）",
+  "@adjDone": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "adjNeedsWarehouse": "请先选择仓库",
+  "adjJanRequired": "请输入JAN编码",
+  "adjDeltaRequired": "请输入1以上的数量",
+  "reasonDamage": "破损",
+  "reasonLoss": "丢失",
+  "reasonFound": "找到",
+  "reasonCorrection": "录入更正",
+  "reasonReturn": "退货入库",
+  "reasonOther": "其他",
+  "cntTitle": "盘点",
+  "cntEmpty": "还没有盘点记录",
+  "cntEmptyBody": "开始盘点时会冻结当前库存作为对照。",
+  "cntStart": "开始盘点",
+  "cntBlind": "盲盘",
+  "cntBlindHelp": "盘点完成前不显示理论库存，避免先入为主。",
+  "cntSystem": "理论",
+  "cntCounted": "实盘",
+  "cntVariance": "差异",
+  "cntHidden": "确认前不显示",
+  "cntRecord": "输入实盘数",
+  "cntComplete": "确认盘点",
+  "cntCancel": "中止盘点",
+  "cntCompleteQ": "要确定本次盘点吗？",
+  "cntCompleteBody": "仅对存在差异的行修正库存，并记录为盘点变动。",
+  "cntCancelQ": "要中止本次盘点吗？",
+  "cntCancelBody": "已盘点的数值将被丢弃，库存保持不变。",
+  "cntCancelled": "已中止盘点",
+  "cntProgress": "已盘 {counted}/{total}",
+  "@cntProgress": {
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cntCompleted": "盘点已确认（调整{lines}行，净变动 {net}）",
+  "@cntCompleted": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "cntUncountedWarn": "未盘的 {count} 行保持原样（不视为0）",
+  "@cntUncountedWarn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cntStatusCounting": "盘点中",
+  "cntStatusCompleted": "已确认",
+  "cntStatusCancelled": "已中止"
 }

@@ -103,7 +103,7 @@ class _TotalsCard extends StatelessWidget {
                 Text(
                   nf.format(totals.warehouseCount),
                   style: theme.textTheme.titleSmall
-                      ?.copyWith(fontFamily: 'FiraCode'),
+                      ?.copyWith(fontFamily: AppFonts.mono),
                 ),
               ],
             ),
@@ -184,7 +184,7 @@ class _WarehouseCard extends ConsumerWidget {
                         Text(
                           warehouse.code,
                           style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: 'FiraCode',
+                              fontFamily: AppFonts.mono,
                               color: scheme.onSurfaceVariant),
                         ),
                       ],
@@ -281,7 +281,7 @@ class _Stat extends StatelessWidget {
         Text(
           value,
           style: theme.textTheme.titleMedium
-              ?.copyWith(fontFamily: 'FiraCode', fontWeight: FontWeight.w600),
+              ?.copyWith(fontFamily: AppFonts.mono, fontWeight: FontWeight.w600),
         ),
       ],
     );

@@ -74,7 +74,7 @@ class _PurchaseOrderBody extends StatelessWidget {
                       child: Text(
                         order.poNumber,
                         style: theme.textTheme.titleLarge
-                            ?.copyWith(fontFamily: 'FiraCode'),
+                            ?.copyWith(fontFamily: AppFonts.mono),
                       ),
                     ),
                   ],
@@ -184,7 +184,7 @@ class _LineCard extends StatelessWidget {
                           item.sku,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontFamily: 'FiraCode',
+                            fontFamily: AppFonts.mono,
                           ),
                         ),
                       ],
@@ -243,7 +243,7 @@ class _Stat extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.titleMedium
-                ?.copyWith(fontFamily: 'FiraCode'),
+                ?.copyWith(fontFamily: AppFonts.mono),
           ),
         ],
       ),

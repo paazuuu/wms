@@ -72,7 +72,11 @@
   "scanTypeMessage": "バーコード・SKU・名称をスキャンまたは入力してください。",
   "noMatchesFor": "「{query}」に一致する結果がありません。",
   "@noMatchesFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "tryDifferentScan": "別のバーコード・SKU・名称をお試しください。",
   "inStock": "在庫",
@@ -102,11 +106,19 @@
   "noProduct": "商品なし",
   "qtyLabel": "数量 {quantity}",
   "@qtyLabel": {
-    "placeholders": { "quantity": { "type": "int" } }
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      }
+    }
   },
   "lineCount": "{count, plural, other{{count}件の明細}}",
   "@lineCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "statusActive": "有効",
   "statusInactive": "無効",
@@ -163,15 +175,27 @@
   "fieldFullLocation": "フルロケーション",
   "itemCount": "{count, plural, other{{count}点}}",
   "@itemCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "productCount": "{count, plural, other{{count}品目}}",
   "@productCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "binCount": "{count, plural, other{{count}ロケーション}}",
   "@binCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "fieldCustomer": "顧客",
   "lineItems": "明細",
@@ -198,7 +222,11 @@
   "fieldStarted": "開始",
   "productNumber": "商品 #{id}",
   "@productNumber": {
-    "placeholders": { "id": { "type": "int" } }
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "fieldCountedLines": "カウント済み明細",
   "noCountedLines": "カウント済み明細がありません。",
@@ -212,11 +240,19 @@
   "filterAll": "すべて",
   "remainingLeft": "残り {count}",
   "@remainingLeft": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "remainingAmount": "残り {amount}",
   "@remainingAmount": {
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "unknownSupplier": "仕入先不明",
   "receivingEmpty": "入荷対象がありません。",
@@ -239,7 +275,11 @@
   "reportShared": "共有",
   "columnCount": "{count, plural, other{{count}列}}",
   "@columnCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "allLocations": "全ロケーション",
   "emptyStockCounts": "棚卸がまだありません。",
@@ -248,17 +288,35 @@
   "receivingDoneBody": "この発注のすべての明細が入荷済みです。",
   "receiveInvalidQty": "「{product}」の数量を正しく入力してください。",
   "@receiveInvalidQty": {
-    "placeholders": { "product": { "type": "String" } }
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
   },
   "receiveExceedsRemaining": "{product}：残り {remaining} を超えて入荷できません。",
   "@receiveExceedsRemaining": {
-    "placeholders": { "product": { "type": "String" }, "remaining": { "type": "int" } }
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
   },
   "receiveEnterAtLeastOne": "入荷する数量を1行以上入力してください。",
   "receiveSuccess": "入荷しました。検品が自動的に開始されました。",
   "pickedProgress": "{picked} / {total} ピック済み",
   "@pickedProgress": {
-    "placeholders": { "picked": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "picked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "attachFiles": "添付",
   "cameraLabel": "カメラ",
@@ -270,7 +328,11 @@
   "actualQuantity": "実数量",
   "scannedCode": "読取: {code}",
   "@scannedCode": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "quantity": "数量",
   "actionCancel": "キャンセル",
@@ -279,11 +341,19 @@
   "offlineItemQueued": "オフライン — 項目を同期待ちに追加しました",
   "filesUploaded": "{count, plural, other{{count}件のファイルをアップロードしました}}",
   "@filesUploaded": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "offlineFilesQueued": "オフライン — {count}件のファイルを同期待ちに追加しました",
   "@offlineFilesQueued": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "completeInspectionQ": "検品を完了しますか？",
   "completeInspectionBody": "この検品を完了にします。完了後も閲覧できます。",
@@ -296,12 +366,20 @@
   "completeInspection": "検品を完了",
   "completedOn": "完了 {date}",
   "@completedOn": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "actualLabel": "実績",
   "itemNumber": "項目 {id}",
   "@itemNumber": {
-    "placeholders": { "id": { "type": "int" } }
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "working": "処理中…",
   "adjustAdd": "追加",
@@ -315,16 +393,31 @@
   "removeStock": "在庫を減らす",
   "onHandCount": "在庫 {count}",
   "@onHandCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "enterQtyPositive": "0より大きい数量を入力してください。",
   "cannotRemoveOnly": "{qty} を減らせません。在庫は {current} のみです。",
   "@cannotRemoveOnly": {
-    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
   },
   "stockUpdatedTo": "在庫を更新しました — 現在 {count}。",
   "@stockUpdatedTo": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "adjustTypeManual": "手動",
   "adjustTypeCount": "棚卸",
@@ -346,7 +439,11 @@
   "reportNoRows": "このレポートに行がありません。",
   "rowCount": "{count, plural, other{{count} 行}}",
   "@rowCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "scanBarcode": "バーコードをスキャン",
   "torchOn": "ライトを点灯",
@@ -372,7 +469,11 @@
   "deliverySearchTip": "別の伝票番号または仕入先をお試しください。",
   "plannedLines": "{count, plural, other{予定明細 {count} 件}}",
   "@plannedLines": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "deliveryNumberLabel": "伝票番号",
   "deliveryDateLabel": "納品日",
@@ -381,7 +482,11 @@
   "ocrScanning": "納品書を解析中…",
   "ocrFound": "納品書から {count} 件のJANを検出しました",
   "@ocrFound": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "ocrNoneFound": "納品書からJANを検出できませんでした。",
   "ocrUnavailable": "この端末ではOCRを利用できません。",
@@ -398,7 +503,11 @@
   "reconcilePartialQ": "未納の品目が残っています",
   "reconcilePartialBody": "未納が {count} 本残っています。部分納品として保存し残りを未納リストに残しますか？　それとも完了にして残りを欠品として扱いますか？",
   "@reconcilePartialBody": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "reconcileKeepOpen": "部分納品として保存",
   "reconcileFinalizeShort": "完了にする（残りは欠品）",
@@ -408,7 +517,11 @@
   "reconAlreadyDoneBody": "追加で取り込むと在庫にもう一度加算されます。間違いを直す場合は、受領履歴から該当の受領を取り消してください。",
   "doubleScanWarning": "{code} が予定数を超えました（二重スキャン？）",
   "@doubleScanWarning": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "receiptHistoryTitle": "受領履歴／訂正",
   "receiptEmpty": "受領履歴はまだありません。",
@@ -425,7 +538,11 @@
   "unexpectedItem": "想定外の品目",
   "enterQuantityFor": "{code} の数量",
   "@enterQuantityFor": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "noteImageAttached": "納品書を添付しました",
   "planImportTitle": "予定を取り込む",
@@ -433,14 +550,25 @@
   "pickFile": "ファイルを選択",
   "planImportSelected": "選択: {name}",
   "@planImportSelected": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "planImportAction": "取り込む",
   "planImporting": "取り込み中…",
   "planImportChooseFirst": "ファイルを選び、伝票番号を入力してください。",
   "planImportedSummary": "{count} 品目・合計 {total} 本を取り込みました",
   "@planImportedSummary": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "planReadAction": "読み取る",
   "planReading": "読取中…",
@@ -450,14 +578,27 @@
   "importHeaderSection": "ヘッダー情報",
   "importLinesPreview": "明細プレビュー",
   "importMoreLines": "他 {count} 件",
-  "@importMoreLines": { "placeholders": { "count": { "type": "int" } } },
+  "@importMoreLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "planReviewTitle": "ヘッダーの確認",
   "planReviewHint": "納品書から自動で読み取りました。間違い・空欄は登録前にここで修正できます。",
   "planCommitAction": "登録する",
   "planRegistering": "登録中…",
   "planPreviewCount": "{count} 品目・{total} 本",
   "@planPreviewCount": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "fieldRegistrationNumber": "登録番号（T…）",
   "fieldCustomerCode": "お客様コード",
@@ -490,14 +631,35 @@
   "shipmentStatusCancelled": "取消",
   "shipmentNumberLabel": "出庫番号",
   "cartonCountLabel": "{count} 箱",
-  "@cartonCountLabel": { "placeholders": { "count": { "type": "int" } } },
+  "@cartonCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "shipmentLinesSection": "出庫リスト",
   "cartonsSection": "段ボール",
   "packProgress": "梱包 {packed} / {total}",
-  "@packProgress": { "placeholders": { "packed": { "type": "int" }, "total": { "type": "int" } } },
+  "@packProgress": {
+    "placeholders": {
+      "packed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "addCarton": "段ボールを追加",
   "cartonNoLabel": "段ボール #{no}",
-  "@cartonNoLabel": { "placeholders": { "no": { "type": "int" } } },
+  "@cartonNoLabel": {
+    "placeholders": {
+      "no": {
+        "type": "int"
+      }
+    }
+  },
   "cartonLabelHint": "ラベル（任意）例: A-1",
   "cartonEditTitle": "段ボールの中身",
   "cartonEmpty": "この段ボールにはまだ何も入っていません。",
@@ -529,10 +691,7 @@
   "senderPreview": "印刷プレビュー",
   "fieldCompanyName": "会社名",
   "fieldPostalCode": "郵便番号",
-  "fieldAddress": "住所",
-  "fieldPhone": "電話",
   "fieldFax": "FAX",
-  "fieldContact": "担当者",
   "fieldNote": "備考",
   "deleteCartonQ": "この段ボールを削除しますか？",
   "actionSave": "保存",
@@ -552,15 +711,27 @@
   "dashNoAlerts": "在庫アラートはありません",
   "dashCount": "{count}件",
   "@dashCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashSkuCount": "{count} SKU",
   "@dashSkuCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashThreshold": "しきい値 {count}",
   "@dashThreshold": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "whAllWarehouses": "すべての倉庫",
   "whSwitch": "倉庫を切替",
@@ -583,7 +754,11 @@
   "whNameRequired": "倉庫名を入力してください",
   "whCreated": "倉庫「{name}」を追加しました",
   "@whCreated": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "whInactive": "無効",
   "whStatInbound": "入荷待ち",
@@ -640,15 +815,110 @@
   "qcHold": "保留にする",
   "qcRecord": "記録",
   "qcUnchecked": "未検品 {count} 件",
-  "@qcUnchecked": {"placeholders": {"count": {"type": "int"}}},
+  "@qcUnchecked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "qcCompleteBlocked": "未検品の明細があるため確定できません",
   "qcCompleted": "検品を確定しました（{status}）",
-  "@qcCompleted": {"placeholders": {"status": {"type": "String"}}},
+  "@qcCompleted": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "qcFailedUnits": "不良 {count}",
-  "@qcFailedUnits": {"placeholders": {"count": {"type": "int"}}},
+  "@qcFailedUnits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "qcSplitHint": "合格数と不良数を入力してください（合計が実数になります）",
   "whFieldUsesLocations": "棚（ロケーション）で管理する",
   "whFieldUsesLocationsHelp": "オフのままなら在庫は倉庫単位で管理します。棚番で管理する場合だけオンにしてください（後から変更できます）。",
   "whLocationsOn": "棚管理",
-  "whPutaway": "棚入れ"
+  "whPutaway": "棚入れ",
+  "adjTitle": "在庫調整",
+  "adjNew": "在庫を調整",
+  "adjEmpty": "調整履歴はまだありません",
+  "adjEmptyBody": "破損・紛失・発見などの理由を付けて在庫を補正できます。",
+  "adjJan": "JANコード",
+  "adjQuantity": "数量",
+  "adjReason": "理由",
+  "adjNote": "備考",
+  "adjApply": "調整を確定",
+  "adjDone": "在庫を調整しました（{delta}）",
+  "@adjDone": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "adjNeedsWarehouse": "先に倉庫を選んでください",
+  "adjJanRequired": "JANコードを入力してください",
+  "adjDeltaRequired": "1以上の数量を入力してください",
+  "reasonDamage": "破損",
+  "reasonLoss": "紛失",
+  "reasonFound": "発見",
+  "reasonCorrection": "入力訂正",
+  "reasonReturn": "返品戻し",
+  "reasonOther": "その他",
+  "cntTitle": "棚卸",
+  "cntEmpty": "棚卸はまだありません",
+  "cntEmptyBody": "実地棚卸を開始すると、現在の在庫が控えられます。",
+  "cntStart": "棚卸を開始",
+  "cntBlind": "ブラインド棚卸",
+  "cntBlindHelp": "数え終わるまで理論在庫を表示しません。先入観なく数えられます。",
+  "cntSystem": "理論",
+  "cntCounted": "実査",
+  "cntVariance": "差異",
+  "cntHidden": "確定まで非表示",
+  "cntRecord": "実査数を入力",
+  "cntComplete": "棚卸を確定",
+  "cntCancel": "棚卸を中止",
+  "cntCompleteQ": "棚卸を確定しますか？",
+  "cntCompleteBody": "差異のある行だけ在庫を補正し、棚卸として記録します。",
+  "cntCancelQ": "この棚卸を中止しますか？",
+  "cntCancelBody": "実査した数値は破棄され、在庫は変わりません。",
+  "cntCancelled": "棚卸を中止しました",
+  "cntProgress": "{counted}/{total} 実査済み",
+  "@cntProgress": {
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cntCompleted": "棚卸を確定しました（{lines}行を補正・純増減 {net}）",
+  "@cntCompleted": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "cntUncountedWarn": "未実査 {count} 行はそのまま残ります（0とはみなしません）",
+  "@cntUncountedWarn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cntStatusCounting": "実査中",
+  "cntStatusCompleted": "確定済み",
+  "cntStatusCancelled": "中止"
 }

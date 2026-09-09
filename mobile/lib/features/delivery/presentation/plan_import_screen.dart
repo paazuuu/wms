@@ -314,7 +314,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
                       _file!.name,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                          fontFamily: 'FiraCode',
+                          fontFamily: AppFonts.mono,
                           fontWeight: FontWeight.w600),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -490,7 +490,7 @@ class _LinesPreview extends StatelessWidget {
                           Text(
                             '${shown[i]['jan_code']}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                                fontFamily: 'FiraCode',
+                                fontFamily: AppFonts.mono,
                                 color: scheme.onSurfaceVariant),
                           ),
                         ],
@@ -499,7 +499,7 @@ class _LinesPreview extends StatelessWidget {
                     const SizedBox(width: AppSpacing.sm),
                     Text('×${_int(shown[i]['planned_quantity'])}',
                         style: theme.textTheme.titleSmall?.copyWith(
-                            fontFamily: 'FiraCode',
+                            fontFamily: AppFonts.mono,
                             fontWeight: FontWeight.w700)),
                   ],
                 ),

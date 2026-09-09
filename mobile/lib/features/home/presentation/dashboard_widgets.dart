@@ -193,7 +193,7 @@ class _KpiTile extends StatelessWidget {
               Text(
                 value,
                 style: theme.textTheme.titleLarge?.copyWith(
-                    fontFamily: 'FiraCode', fontWeight: FontWeight.w700),
+                    fontFamily: AppFonts.mono, fontWeight: FontWeight.w700),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -517,7 +517,7 @@ class _WatchRow extends StatelessWidget {
                 if (subtitle.isNotEmpty)
                   Text(subtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
-                          fontFamily: 'FiraCode',
+                          fontFamily: AppFonts.mono,
                           color: scheme.onSurfaceVariant),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),

@@ -213,7 +213,7 @@ class _PackRow extends StatelessWidget {
                 Text(
                   '${line.janCode}  ·  ${l10n.packRemaining}: $remaining / ${line.quantity}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'FiraCode',
+                    fontFamily: AppFonts.mono,
                     color: over ? scheme.error : scheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
@@ -231,7 +231,7 @@ class _PackRow extends StatelessWidget {
             child: Text('$value',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium
-                    ?.copyWith(fontFamily: 'FiraCode')),
+                    ?.copyWith(fontFamily: AppFonts.mono)),
           ),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),

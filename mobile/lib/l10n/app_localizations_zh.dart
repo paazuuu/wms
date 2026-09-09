@@ -1747,4 +1747,141 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get whPutaway => '上架';
+
+  @override
+  String get adjTitle => '库存调整';
+
+  @override
+  String get adjNew => '调整库存';
+
+  @override
+  String get adjEmpty => '还没有调整记录';
+
+  @override
+  String get adjEmptyBody => '可按破损、丢失、找到等原因修正库存。';
+
+  @override
+  String get adjJan => 'JAN编码';
+
+  @override
+  String get adjQuantity => '数量';
+
+  @override
+  String get adjReason => '原因';
+
+  @override
+  String get adjNote => '备注';
+
+  @override
+  String get adjApply => '确认调整';
+
+  @override
+  String adjDone(String delta) {
+    return '库存已调整（$delta）';
+  }
+
+  @override
+  String get adjNeedsWarehouse => '请先选择仓库';
+
+  @override
+  String get adjJanRequired => '请输入JAN编码';
+
+  @override
+  String get adjDeltaRequired => '请输入1以上的数量';
+
+  @override
+  String get reasonDamage => '破损';
+
+  @override
+  String get reasonLoss => '丢失';
+
+  @override
+  String get reasonFound => '找到';
+
+  @override
+  String get reasonCorrection => '录入更正';
+
+  @override
+  String get reasonReturn => '退货入库';
+
+  @override
+  String get reasonOther => '其他';
+
+  @override
+  String get cntTitle => '盘点';
+
+  @override
+  String get cntEmpty => '还没有盘点记录';
+
+  @override
+  String get cntEmptyBody => '开始盘点时会冻结当前库存作为对照。';
+
+  @override
+  String get cntStart => '开始盘点';
+
+  @override
+  String get cntBlind => '盲盘';
+
+  @override
+  String get cntBlindHelp => '盘点完成前不显示理论库存，避免先入为主。';
+
+  @override
+  String get cntSystem => '理论';
+
+  @override
+  String get cntCounted => '实盘';
+
+  @override
+  String get cntVariance => '差异';
+
+  @override
+  String get cntHidden => '确认前不显示';
+
+  @override
+  String get cntRecord => '输入实盘数';
+
+  @override
+  String get cntComplete => '确认盘点';
+
+  @override
+  String get cntCancel => '中止盘点';
+
+  @override
+  String get cntCompleteQ => '要确定本次盘点吗？';
+
+  @override
+  String get cntCompleteBody => '仅对存在差异的行修正库存，并记录为盘点变动。';
+
+  @override
+  String get cntCancelQ => '要中止本次盘点吗？';
+
+  @override
+  String get cntCancelBody => '已盘点的数值将被丢弃，库存保持不变。';
+
+  @override
+  String get cntCancelled => '已中止盘点';
+
+  @override
+  String cntProgress(int counted, int total) {
+    return '已盘 $counted/$total';
+  }
+
+  @override
+  String cntCompleted(int lines, String net) {
+    return '盘点已确认（调整$lines行，净变动 $net）';
+  }
+
+  @override
+  String cntUncountedWarn(int count) {
+    return '未盘的 $count 行保持原样（不视为0）';
+  }
+
+  @override
+  String get cntStatusCounting => '盘点中';
+
+  @override
+  String get cntStatusCompleted => '已确认';
+
+  @override
+  String get cntStatusCancelled => '已中止';
 }

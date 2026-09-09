@@ -132,7 +132,7 @@ class _SalesOrderCard extends StatelessWidget {
                     Text(
                       order.orderNumber,
                       style: theme.textTheme.titleMedium
-                          ?.copyWith(fontFamily: 'FiraCode'),
+                          ?.copyWith(fontFamily: AppFonts.mono),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -175,7 +175,7 @@ class _SalesOrderCard extends StatelessWidget {
                   Text(
                     order.displayTotal,
                     style: theme.textTheme.titleSmall
-                        ?.copyWith(fontFamily: 'FiraCode'),
+                        ?.copyWith(fontFamily: AppFonts.mono),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),

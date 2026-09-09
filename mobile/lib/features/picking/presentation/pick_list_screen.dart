@@ -89,7 +89,7 @@ class _PickListBody extends StatelessWidget {
               Text(
                 order.orderNumber,
                 style:
-                    theme.textTheme.titleLarge?.copyWith(fontFamily: 'FiraCode'),
+                    theme.textTheme.titleLarge?.copyWith(fontFamily: AppFonts.mono),
               ),
               const SizedBox(height: 2),
               Text(
@@ -187,7 +187,7 @@ class _PickLineTile extends StatelessWidget {
                       Text(
                         item.sku!,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontFamily: 'FiraCode',
+                          fontFamily: AppFonts.mono,
                           color: scheme.onSurfaceVariant,
                         ),
                       ),

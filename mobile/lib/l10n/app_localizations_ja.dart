@@ -1749,4 +1749,141 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get whPutaway => '棚入れ';
+
+  @override
+  String get adjTitle => '在庫調整';
+
+  @override
+  String get adjNew => '在庫を調整';
+
+  @override
+  String get adjEmpty => '調整履歴はまだありません';
+
+  @override
+  String get adjEmptyBody => '破損・紛失・発見などの理由を付けて在庫を補正できます。';
+
+  @override
+  String get adjJan => 'JANコード';
+
+  @override
+  String get adjQuantity => '数量';
+
+  @override
+  String get adjReason => '理由';
+
+  @override
+  String get adjNote => '備考';
+
+  @override
+  String get adjApply => '調整を確定';
+
+  @override
+  String adjDone(String delta) {
+    return '在庫を調整しました（$delta）';
+  }
+
+  @override
+  String get adjNeedsWarehouse => '先に倉庫を選んでください';
+
+  @override
+  String get adjJanRequired => 'JANコードを入力してください';
+
+  @override
+  String get adjDeltaRequired => '1以上の数量を入力してください';
+
+  @override
+  String get reasonDamage => '破損';
+
+  @override
+  String get reasonLoss => '紛失';
+
+  @override
+  String get reasonFound => '発見';
+
+  @override
+  String get reasonCorrection => '入力訂正';
+
+  @override
+  String get reasonReturn => '返品戻し';
+
+  @override
+  String get reasonOther => 'その他';
+
+  @override
+  String get cntTitle => '棚卸';
+
+  @override
+  String get cntEmpty => '棚卸はまだありません';
+
+  @override
+  String get cntEmptyBody => '実地棚卸を開始すると、現在の在庫が控えられます。';
+
+  @override
+  String get cntStart => '棚卸を開始';
+
+  @override
+  String get cntBlind => 'ブラインド棚卸';
+
+  @override
+  String get cntBlindHelp => '数え終わるまで理論在庫を表示しません。先入観なく数えられます。';
+
+  @override
+  String get cntSystem => '理論';
+
+  @override
+  String get cntCounted => '実査';
+
+  @override
+  String get cntVariance => '差異';
+
+  @override
+  String get cntHidden => '確定まで非表示';
+
+  @override
+  String get cntRecord => '実査数を入力';
+
+  @override
+  String get cntComplete => '棚卸を確定';
+
+  @override
+  String get cntCancel => '棚卸を中止';
+
+  @override
+  String get cntCompleteQ => '棚卸を確定しますか？';
+
+  @override
+  String get cntCompleteBody => '差異のある行だけ在庫を補正し、棚卸として記録します。';
+
+  @override
+  String get cntCancelQ => 'この棚卸を中止しますか？';
+
+  @override
+  String get cntCancelBody => '実査した数値は破棄され、在庫は変わりません。';
+
+  @override
+  String get cntCancelled => '棚卸を中止しました';
+
+  @override
+  String cntProgress(int counted, int total) {
+    return '$counted/$total 実査済み';
+  }
+
+  @override
+  String cntCompleted(int lines, String net) {
+    return '棚卸を確定しました（$lines行を補正・純増減 $net）';
+  }
+
+  @override
+  String cntUncountedWarn(int count) {
+    return '未実査 $count 行はそのまま残ります（0とはみなしません）';
+  }
+
+  @override
+  String get cntStatusCounting => '実査中';
+
+  @override
+  String get cntStatusCompleted => '確定済み';
+
+  @override
+  String get cntStatusCancelled => '中止';
 }

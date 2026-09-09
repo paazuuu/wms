@@ -218,7 +218,7 @@ class _HeaderCard extends StatelessWidget {
                       Text(
                         order.poNumber,
                         style: theme.textTheme.titleLarge
-                            ?.copyWith(fontFamily: 'FiraCode'),
+                            ?.copyWith(fontFamily: AppFonts.mono),
                       ),
                       Text(
                         order.supplierName ?? l10n.unknownSupplier,
@@ -268,7 +268,7 @@ class _LineCard extends StatelessWidget {
               item.sku,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontFamily: 'FiraCode',
+                fontFamily: AppFonts.mono,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -339,7 +339,7 @@ class _QtyStat extends StatelessWidget {
         Text(
           value,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontFamily: 'FiraCode',
+            fontFamily: AppFonts.mono,
             fontWeight: FontWeight.w600,
             color: emphasize ? scheme.primary : null,
           ),

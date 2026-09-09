@@ -10,8 +10,8 @@ import '../../purchase_orders/presentation/purchase_order_list_screen.dart';
 import '../../receiving/presentation/receiving_list_screen.dart';
 import '../../reports/presentation/report_list_screen.dart';
 import '../../sales_orders/presentation/sales_order_list_screen.dart';
-import '../../stock_adjustment/presentation/stock_adjustment_search_screen.dart';
-import '../../stock_count/presentation/stock_count_list_screen.dart';
+import '../../stock_ops/presentation/stock_adjustment_screen.dart';
+import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../suppliers/presentation/supplier_list_screen.dart';
 import '../../tracking/presentation/tracking_search_screen.dart';
 import '../../warehouses/presentation/warehouse_list_screen.dart';
@@ -155,11 +155,10 @@ Widget _delivery(BuildContext _) => const DeliveryPlanListScreen();
 Widget _shipment(BuildContext _) => const ShipmentListScreen();
 
 /// Top-level (const-referenceable) builder for the Stock Adjustment feature.
-Widget _stockAdjustment(BuildContext _) =>
-    const StockAdjustmentSearchScreen();
+Widget _stockAdjustment(BuildContext _) => const StockAdjustmentScreen();
 
 /// Top-level (const-referenceable) builder for the Stock Count feature.
-Widget _stockCount(BuildContext _) => const StockCountListScreen();
+Widget _stockCount(BuildContext _) => const StockCountScreen();
 
 /// Top-level (const-referenceable) builder for the Locations feature.
 Widget _locations(BuildContext _) => const LocationListScreen();

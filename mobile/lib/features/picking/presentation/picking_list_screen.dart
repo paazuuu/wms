@@ -89,7 +89,7 @@ class _PickListCard extends StatelessWidget {
                     Text(
                       order.orderNumber,
                       style: theme.textTheme.titleMedium
-                          ?.copyWith(fontFamily: 'FiraCode'),
+                          ?.copyWith(fontFamily: AppFonts.mono),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

@@ -72,7 +72,11 @@
   "scanTypeMessage": "Scan or type a barcode, SKU, or name.",
   "noMatchesFor": "No matches for \"{query}\".",
   "@noMatchesFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "tryDifferentScan": "Try a different barcode, SKU, or name.",
   "inStock": "in stock",
@@ -234,7 +238,11 @@
   "actualQuantity": "Actual quantity",
   "scannedCode": "Scanned: {code}",
   "@scannedCode": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "quantity": "Quantity",
   "actionCancel": "Cancel",
@@ -243,11 +251,19 @@
   "offlineItemQueued": "Offline — item queued for sync",
   "filesUploaded": "{count, plural, =1{{count} file uploaded} other{{count} files uploaded}}",
   "@filesUploaded": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "offlineFilesQueued": "Offline — {count, plural, =1{{count} file} other{{count} files}} queued for sync",
   "@offlineFilesQueued": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "completeInspectionQ": "Complete inspection?",
   "completeInspectionBody": "Mark this inspection as complete. You can still view it afterward.",
@@ -260,12 +276,20 @@
   "completeInspection": "Complete inspection",
   "completedOn": "Completed {date}",
   "@completedOn": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "actualLabel": "Actual",
   "itemNumber": "Item {id}",
   "@itemNumber": {
-    "placeholders": { "id": { "type": "int" } }
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "working": "Working…",
   "adjustAdd": "Add",
@@ -279,16 +303,31 @@
   "removeStock": "Remove stock",
   "onHandCount": "{count} on hand",
   "@onHandCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "enterQtyPositive": "Enter a quantity greater than zero.",
   "cannotRemoveOnly": "Cannot remove {qty}; only {current} on hand.",
   "@cannotRemoveOnly": {
-    "placeholders": { "qty": { "type": "int" }, "current": { "type": "int" } }
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      }
+    }
   },
   "stockUpdatedTo": "Stock updated — now {count} on hand.",
   "@stockUpdatedTo": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "adjustTypeManual": "Manual",
   "adjustTypeCount": "Count",
@@ -310,7 +349,11 @@
   "reportNoRows": "This report returned no rows.",
   "rowCount": "{count, plural, =1{{count} row} other{{count} rows}}",
   "@rowCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "scanBarcode": "Scan barcode",
   "torchOn": "Torch on",
@@ -336,7 +379,11 @@
   "deliverySearchTip": "Try a different voucher number or supplier.",
   "plannedLines": "{count, plural, =1{{count} planned line} other{{count} planned lines}}",
   "@plannedLines": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "deliveryNumberLabel": "Voucher no.",
   "deliveryDateLabel": "Delivery date",
@@ -345,7 +392,11 @@
   "ocrScanning": "Reading the note…",
   "ocrFound": "Detected {count} JAN code(s) on the note",
   "@ocrFound": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "ocrNoneFound": "No JAN codes were found on the note.",
   "ocrUnavailable": "OCR is not available on this device.",
@@ -362,7 +413,11 @@
   "reconcilePartialQ": "Some items are still outstanding",
   "reconcilePartialBody": "{count} unit(s) are still outstanding. Save as a partial delivery and keep the rest on the outstanding list, or finalize now and treat the rest as short?",
   "@reconcilePartialBody": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "reconcileKeepOpen": "Save as partial",
   "reconcileFinalizeShort": "Finalize (rest short)",
@@ -372,7 +427,11 @@
   "reconAlreadyDoneBody": "Recording another receipt will add to stock again. To fix a mistake, cancel the receipt from the history instead.",
   "doubleScanWarning": "{code} exceeds the planned quantity — double scan?",
   "@doubleScanWarning": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "receiptHistoryTitle": "Receipts / correct",
   "receiptEmpty": "No receipts yet.",
@@ -389,7 +448,11 @@
   "unexpectedItem": "Unexpected item",
   "enterQuantityFor": "Quantity for {code}",
   "@enterQuantityFor": {
-    "placeholders": { "code": { "type": "String" } }
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "noteImageAttached": "Delivery note attached",
   "planImportTitle": "Import plan",
@@ -397,14 +460,25 @@
   "pickFile": "Choose file",
   "planImportSelected": "Selected: {name}",
   "@planImportSelected": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "planImportAction": "Import",
   "planImporting": "Importing…",
   "planImportChooseFirst": "Choose a file and enter a voucher number.",
   "planImportedSummary": "Imported {count} items, {total} units total",
   "@planImportedSummary": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "planReadAction": "Read note",
   "planReading": "Reading…",
@@ -414,14 +488,27 @@
   "importHeaderSection": "Header",
   "importLinesPreview": "Line preview",
   "importMoreLines": "+{count} more",
-  "@importMoreLines": { "placeholders": { "count": { "type": "int" } } },
+  "@importMoreLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "planReviewTitle": "Check the header",
   "planReviewHint": "Fields were auto-read from the note. Anything wrong or blank can be edited here before you register it.",
   "planCommitAction": "Register",
   "planRegistering": "Registering…",
   "planPreviewCount": "{count} items · {total} units",
   "@planPreviewCount": {
-    "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "fieldRegistrationNumber": "Registration no. (T…)",
   "fieldCustomerCode": "Customer code",
@@ -454,14 +541,35 @@
   "shipmentStatusCancelled": "Cancelled",
   "shipmentNumberLabel": "Shipment no.",
   "cartonCountLabel": "{count, plural, =1{{count} carton} other{{count} cartons}}",
-  "@cartonCountLabel": { "placeholders": { "count": { "type": "int" } } },
+  "@cartonCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "shipmentLinesSection": "Shipment list",
   "cartonsSection": "Cartons",
   "packProgress": "Packed {packed} / {total}",
-  "@packProgress": { "placeholders": { "packed": { "type": "int" }, "total": { "type": "int" } } },
+  "@packProgress": {
+    "placeholders": {
+      "packed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "addCarton": "Add carton",
   "cartonNoLabel": "Carton #{no}",
-  "@cartonNoLabel": { "placeholders": { "no": { "type": "int" } } },
+  "@cartonNoLabel": {
+    "placeholders": {
+      "no": {
+        "type": "int"
+      }
+    }
+  },
   "cartonLabelHint": "Label (optional), e.g. A-1",
   "cartonEditTitle": "Carton contents",
   "cartonEmpty": "Nothing packed in this carton yet.",
@@ -493,10 +601,7 @@
   "senderPreview": "Print preview",
   "fieldCompanyName": "Company name",
   "fieldPostalCode": "Postal code",
-  "fieldAddress": "Address",
-  "fieldPhone": "Phone",
   "fieldFax": "Fax",
-  "fieldContact": "Contact",
   "fieldNote": "Note",
   "deleteCartonQ": "Delete this carton?",
   "actionSave": "Save",
@@ -516,15 +621,27 @@
   "dashNoAlerts": "No stock alerts",
   "dashCount": "{count} entries",
   "@dashCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashSkuCount": "{count} SKUs",
   "@dashSkuCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashThreshold": "Threshold {count}",
   "@dashThreshold": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "whAllWarehouses": "All warehouses",
   "whSwitch": "Switch warehouse",
@@ -547,7 +664,11 @@
   "whNameRequired": "Enter a warehouse name",
   "whCreated": "Added warehouse “{name}”",
   "@whCreated": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "whInactive": "Inactive",
   "whStatInbound": "Inbound",
@@ -604,15 +725,110 @@
   "qcHold": "Put on hold",
   "qcRecord": "Record",
   "qcUnchecked": "{count} unchecked",
-  "@qcUnchecked": {"placeholders": {"count": {"type": "int"}}},
+  "@qcUnchecked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "qcCompleteBlocked": "Cannot complete while lines are unchecked",
   "qcCompleted": "Inspection completed ({status})",
-  "@qcCompleted": {"placeholders": {"status": {"type": "String"}}},
+  "@qcCompleted": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "qcFailedUnits": "{count} failed",
-  "@qcFailedUnits": {"placeholders": {"count": {"type": "int"}}},
+  "@qcFailedUnits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "qcSplitHint": "Enter passed and failed counts (they add up to the actual).",
   "whFieldUsesLocations": "Manage stock by location",
   "whFieldUsesLocationsHelp": "Leave off to keep one balance per warehouse. Turn on only if you track stock by shelf — you can change this later.",
   "whLocationsOn": "Locations",
-  "whPutaway": "Put-away"
+  "whPutaway": "Put-away",
+  "adjTitle": "Stock adjustment",
+  "adjNew": "Adjust stock",
+  "adjEmpty": "No adjustments yet",
+  "adjEmptyBody": "Correct stock with a reason: damage, loss, found and so on.",
+  "adjJan": "JAN code",
+  "adjQuantity": "Quantity",
+  "adjReason": "Reason",
+  "adjNote": "Note",
+  "adjApply": "Apply adjustment",
+  "adjDone": "Stock adjusted ({delta})",
+  "@adjDone": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "adjNeedsWarehouse": "Choose a warehouse first",
+  "adjJanRequired": "Enter a JAN code",
+  "adjDeltaRequired": "Enter a quantity of 1 or more",
+  "reasonDamage": "Damage",
+  "reasonLoss": "Loss",
+  "reasonFound": "Found",
+  "reasonCorrection": "Correction",
+  "reasonReturn": "Return",
+  "reasonOther": "Other",
+  "cntTitle": "Stock count",
+  "cntEmpty": "No counts yet",
+  "cntEmptyBody": "Starting a count freezes the current balance into its lines.",
+  "cntStart": "Start count",
+  "cntBlind": "Blind count",
+  "cntBlindHelp": "Hides the system quantity until the count is completed, so nobody anchors on it.",
+  "cntSystem": "System",
+  "cntCounted": "Counted",
+  "cntVariance": "Variance",
+  "cntHidden": "Hidden until completed",
+  "cntRecord": "Enter counted quantity",
+  "cntComplete": "Complete count",
+  "cntCancel": "Cancel count",
+  "cntCompleteQ": "Complete this count?",
+  "cntCompleteBody": "Only lines with a variance are corrected, and each correction is recorded as a count movement.",
+  "cntCancelQ": "Cancel this count?",
+  "cntCancelBody": "Counted figures are discarded and stock is left unchanged.",
+  "cntCancelled": "Count cancelled",
+  "cntProgress": "{counted}/{total} counted",
+  "@cntProgress": {
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cntCompleted": "Count completed ({lines} lines adjusted, net {net})",
+  "@cntCompleted": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "cntUncountedWarn": "{count} uncounted lines are left as they are (not treated as zero)",
+  "@cntUncountedWarn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cntStatusCounting": "Counting",
+  "cntStatusCompleted": "Completed",
+  "cntStatusCancelled": "Cancelled"
 }

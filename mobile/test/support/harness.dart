@@ -14,6 +14,8 @@ import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
+import 'package:wms_mobile/features/stock_ops/data/stock_ops_repository.dart';
+import 'package:wms_mobile/features/stock_ops/domain/stock_ops.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
@@ -314,4 +316,174 @@ class FakeShipmentRepository implements ShipmentRepository {
   Future<ApiResult<Shipment>> updateCarton(int id, int cartonId,
           {String? label, required List<CartonItem> items}) async =>
       show(id);
+}
+
+/// In-memory stand-in for the stock-ops backend. It mirrors the server's two
+/// rules that the UI actually depends on: a blind session withholds system
+/// quantities while it is open, and completing one leaves uncounted lines alone
+/// instead of treating them as zero.
+class FakeStockOpsRepository implements StockOpsRepository {
+  FakeStockOpsRepository({
+    this.adjustmentLog = const [],
+    StockCount? count,
+  }) : _count = count;
+
+  final List<StockAdjustment> adjustmentLog;
+  StockCount? _count;
+
+  /// The warehouse the last write was scoped to.
+  int? lastWarehouseId;
+
+  /// The warehouse the last read was scoped to (null = all warehouses).
+  int? lastListWarehouseId;
+
+  /// The last adjustment posted, signed as the UI built it.
+  int? lastDelta;
+
+  /// The reason the last adjustment carried.
+  AdjustReason? lastReason;
+
+  StockCount get session => _count!;
+
+  StockCount _masked(StockCount c) {
+    final hide = c.isBlind && c.isOpen;
+    if (!hide) return c;
+    return StockCount(
+      id: c.id,
+      status: c.status,
+      warehouseId: c.warehouseId,
+      warehouseName: c.warehouseName,
+      isBlind: c.isBlind,
+      hideSystem: true,
+      note: c.note,
+      lines: [
+        for (final l in c.lines)
+          StockCountLine(
+            id: l.id,
+            janCode: l.janCode,
+            productName: l.productName,
+            countedQuantity: l.countedQuantity,
+          ),
+      ],
+    );
+  }
+
+  @override
+  Future<ApiResult<List<StockAdjustment>>> adjustments(
+      {int? warehouseId}) async {
+    lastListWarehouseId = warehouseId;
+    return ApiSuccess(adjustmentLog);
+  }
+
+  @override
+  Future<ApiResult<StockAdjustment>> adjust({
+    required int warehouseId,
+    required String janCode,
+    required int delta,
+    required AdjustReason reason,
+    String? note,
+    String? productName,
+  }) async {
+    lastWarehouseId = warehouseId;
+    lastDelta = delta;
+    lastReason = reason;
+    return ApiSuccess(StockAdjustment(
+      id: 1,
+      janCode: janCode,
+      quantityDelta: delta,
+      reason: reason,
+      note: note,
+    ));
+  }
+
+  @override
+  Future<ApiResult<List<StockCount>>> counts(
+      {int? warehouseId, String? status}) async {
+    lastListWarehouseId = warehouseId;
+    return ApiSuccess(_count == null ? const [] : [_masked(_count!)]);
+  }
+
+  @override
+  Future<ApiResult<StockCount>> count(int id) async =>
+      ApiSuccess(_masked(_count!));
+
+  @override
+  Future<ApiResult<StockCount>> startCount({
+    required int warehouseId,
+    bool blind = true,
+    String? note,
+  }) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(_masked(_count!));
+  }
+
+  @override
+  Future<ApiResult<StockCount>> recordLine(
+      int countId, int lineId, int counted) async {
+    final c = _count!;
+    _count = StockCount(
+      id: c.id,
+      status: c.status,
+      warehouseId: c.warehouseId,
+      warehouseName: c.warehouseName,
+      isBlind: c.isBlind,
+      note: c.note,
+      lines: [
+        for (final l in c.lines)
+          if (l.id == lineId)
+            StockCountLine(
+              id: l.id,
+              janCode: l.janCode,
+              productName: l.productName,
+              systemQuantity: l.systemQuantity,
+              countedQuantity: counted,
+              variance: l.systemQuantity == null
+                  ? null
+                  : counted - l.systemQuantity!,
+            )
+          else
+            l,
+      ],
+    );
+    return ApiSuccess(_masked(_count!));
+  }
+
+  @override
+  Future<ApiResult<CompletedCount>> completeCount(int countId,
+      {String? note}) async {
+    final c = _count!;
+    // Uncounted lines keep their frozen quantity: not counted is not zero.
+    final counted = c.lines.where((l) => l.isCounted).toList();
+    _count = StockCount(
+      id: c.id,
+      status: CountStatus.completed,
+      warehouseId: c.warehouseId,
+      warehouseName: c.warehouseName,
+      isBlind: c.isBlind,
+      note: c.note,
+      lines: c.lines,
+    );
+    final adjusted = counted.where((l) => (l.variance ?? 0) != 0).toList();
+    return ApiSuccess(CompletedCount(
+      _count!,
+      CountSummary(
+        adjustedLines: adjusted.length,
+        netChange: adjusted.fold(0, (s, l) => s + (l.variance ?? 0)),
+        uncountedLines: c.lines.length - counted.length,
+      ),
+    ));
+  }
+
+  @override
+  Future<ApiResult<StockCount>> cancelCount(int countId) async {
+    final c = _count!;
+    _count = StockCount(
+      id: c.id,
+      status: CountStatus.cancelled,
+      warehouseId: c.warehouseId,
+      isBlind: c.isBlind,
+      lines: c.lines,
+    );
+    return ApiSuccess(_count!);
+  }
 }

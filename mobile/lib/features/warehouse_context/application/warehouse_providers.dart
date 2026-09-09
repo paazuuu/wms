@@ -29,6 +29,19 @@ final warehouseOverviewProvider =
 /// at which point the picker sets this explicitly.
 final activeWarehouseIdProvider = StateProvider<int?>((_) => null);
 
+/// The warehouse a *write* should target.
+///
+/// Reads happily span every warehouse, but a stock movement has to land in
+/// exactly one, so "all warehouses" (null) only resolves when there is a single
+/// warehouse to fall back on. With two or more the caller must ask the user —
+/// guessing would post stock into the wrong building.
+final writeWarehouseIdProvider = Provider<int?>((ref) {
+  final active = ref.watch(activeWarehouseIdProvider);
+  if (active != null) return active;
+  final list = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses;
+  return list != null && list.length == 1 ? list.single.id : null;
+});
+
 /// The active warehouse resolved against the overview, or null for "all".
 final activeWarehouseProvider = Provider<Warehouse?>((ref) {
   final id = ref.watch(activeWarehouseIdProvider);

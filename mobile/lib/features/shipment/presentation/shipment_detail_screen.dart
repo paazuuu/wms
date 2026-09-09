@@ -408,7 +408,7 @@ class _HeaderCard extends StatelessWidget {
                           shipment.referenceNo!.isNotEmpty)
                         Text('${l10n.referenceNoLabel}: ${shipment.referenceNo}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                                fontFamily: 'FiraCode', color: scheme.primary)),
+                                fontFamily: AppFonts.mono, color: scheme.primary)),
                     ],
                   ),
                 ),
@@ -432,7 +432,7 @@ class _HeaderCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Text(l10n.packProgress(packedTotal, total),
                     style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: 'FiraCode',
+                        fontFamily: AppFonts.mono,
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurfaceVariant)),
               ],
@@ -545,7 +545,7 @@ class _LineRow extends StatelessWidget {
                 Text(
                   spec == null || spec!.isEmpty ? jan : '$jan · $spec',
                   style: theme.textTheme.bodySmall?.copyWith(
-                      fontFamily: 'FiraCode', color: scheme.onSurfaceVariant),
+                      fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -555,7 +555,7 @@ class _LineRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Text('$packed/$quantity',
               style: theme.textTheme.titleSmall?.copyWith(
-                  fontFamily: 'FiraCode',
+                  fontFamily: AppFonts.mono,
                   color: done ? scheme.tertiary : scheme.onSurface)),
         ],
       ),

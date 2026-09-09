@@ -65,7 +65,7 @@ class _WorkOrderBody extends StatelessWidget {
                       child: Text(
                         order.workOrderNumber,
                         style: theme.textTheme.titleLarge
-                            ?.copyWith(fontFamily: 'FiraCode'),
+                            ?.copyWith(fontFamily: AppFonts.mono),
                       ),
                     ),
                   ],
@@ -99,7 +99,7 @@ class _WorkOrderBody extends StatelessWidget {
                     order.sku,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
-                      fontFamily: 'FiraCode',
+                      fontFamily: AppFonts.mono,
                     ),
                   ),
                 ],
@@ -204,7 +204,7 @@ class _ComponentCard extends StatelessWidget {
                           item.sku,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontFamily: 'FiraCode',
+                            fontFamily: AppFonts.mono,
                           ),
                         ),
                       ],
@@ -268,7 +268,7 @@ class _Stat extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.titleMedium
-                ?.copyWith(fontFamily: 'FiraCode'),
+                ?.copyWith(fontFamily: AppFonts.mono),
           ),
         ],
       ),

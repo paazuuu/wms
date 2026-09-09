@@ -230,7 +230,7 @@ class _StockCard extends StatelessWidget {
                     Text(
                       item.janCode,
                       style: theme.textTheme.bodySmall?.copyWith(
-                          fontFamily: 'FiraCode',
+                          fontFamily: AppFonts.mono,
                           color: scheme.onSurfaceVariant),
                     ),
                   ],
@@ -245,7 +245,7 @@ class _StockCard extends StatelessWidget {
                 Text(
                   '${item.onHand}',
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontFamily: 'FiraCode',
+                    fontFamily: AppFonts.mono,
                     fontWeight: FontWeight.w700,
                     color: zero ? scheme.onSurfaceVariant : scheme.onSurface,
                   ),

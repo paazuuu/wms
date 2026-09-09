@@ -495,7 +495,7 @@ class _SummaryBar extends StatelessWidget {
                 Text('$received/$planned',
                     style: TextStyle(
                         fontSize: 12,
-                        fontFamily: 'FiraCode',
+                        fontFamily: AppFonts.mono,
                         fontWeight: FontWeight.w700,
                         color: scheme.onSurfaceVariant)),
               ],
@@ -576,7 +576,7 @@ class _ReconLineCard extends StatelessWidget {
                         Text(
                           line.janCode,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'FiraCode',
+                            fontFamily: AppFonts.mono,
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -628,7 +628,7 @@ class _QtyStat extends StatelessWidget {
           Text(
             '$value',
             style: theme.textTheme.titleMedium
-                ?.copyWith(fontFamily: 'FiraCode', fontWeight: FontWeight.w600),
+                ?.copyWith(fontFamily: AppFonts.mono, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -659,7 +659,7 @@ class _RemainStat extends StatelessWidget {
           Text(
             '$value',
             style: theme.textTheme.titleMedium?.copyWith(
-                fontFamily: 'FiraCode',
+                fontFamily: AppFonts.mono,
                 fontWeight: FontWeight.w700,
                 color: color),
           ),

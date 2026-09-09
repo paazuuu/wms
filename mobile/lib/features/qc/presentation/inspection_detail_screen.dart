@@ -238,7 +238,7 @@ class _ItemCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(item.janCode,
                             style: theme.textTheme.bodySmall?.copyWith(
-                                fontFamily: 'FiraCode',
+                                fontFamily: AppFonts.mono,
                                 color: scheme.onSurfaceVariant)),
                       ],
                     ),
@@ -317,7 +317,7 @@ class _Stat extends StatelessWidget {
           const SizedBox(height: 2),
           Text(text,
               style: theme.textTheme.titleMedium?.copyWith(
-                  fontFamily: 'FiraCode',
+                  fontFamily: AppFonts.mono,
                   fontWeight: FontWeight.w600,
                   color: color)),
         ],

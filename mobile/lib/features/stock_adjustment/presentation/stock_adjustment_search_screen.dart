@@ -137,7 +137,7 @@ class _AdjustCandidateCard extends StatelessWidget {
                       product.sku,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontFamily: 'FiraCode',
+                        fontFamily: AppFonts.mono,
                       ),
                     ),
                   ],

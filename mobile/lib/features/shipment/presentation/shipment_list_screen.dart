@@ -177,7 +177,7 @@ class _ShipmentCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text('${l10n.referenceNoLabel}: ${shipment.referenceNo}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: 'FiraCode', color: scheme.primary)),
+                              fontFamily: AppFonts.mono, color: scheme.primary)),
                     ],
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(

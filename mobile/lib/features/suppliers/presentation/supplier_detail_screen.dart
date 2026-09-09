@@ -73,7 +73,7 @@ class _SupplierBody extends StatelessWidget {
                             supplier.displayCode,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: scheme.onSurfaceVariant,
-                              fontFamily: 'FiraCode',
+                              fontFamily: AppFonts.mono,
                             ),
                           ),
                         ],

@@ -224,7 +224,7 @@ class _StockAdjustmentFormScreenState
                         Text(
                           '$current → $resulting',
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontFamily: 'FiraCode',
+                            fontFamily: AppFonts.mono,
                             fontWeight: FontWeight.w600,
                             color: _isAdd ? scheme.primary : scheme.error,
                           ),
@@ -285,7 +285,7 @@ class _ProductHeader extends StatelessWidget {
               product.sku,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontFamily: 'FiraCode',
+                fontFamily: AppFonts.mono,
               ),
             ),
             const SizedBox(height: AppSpacing.md),

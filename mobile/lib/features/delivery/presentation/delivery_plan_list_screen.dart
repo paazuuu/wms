@@ -287,7 +287,7 @@ class _DeliveryPlanCard extends StatelessWidget {
                     Text(
                       plan.deliveryNumber,
                       style: theme.textTheme.titleMedium
-                          ?.copyWith(fontFamily: 'FiraCode'),
+                          ?.copyWith(fontFamily: AppFonts.mono),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -305,7 +305,7 @@ class _DeliveryPlanCard extends StatelessWidget {
                       Text(
                         '${l10n.referenceNoLabel}: ${plan.referenceNo}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: 'FiraCode', color: scheme.primary),
+                            fontFamily: AppFonts.mono, color: scheme.primary),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.sm),

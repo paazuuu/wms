@@ -49,7 +49,7 @@ class TrackingDetailScreen extends ConsumerWidget {
                         product.sku,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
-                          fontFamily: 'FiraCode',
+                          fontFamily: AppFonts.mono,
                         ),
                       ),
                     ],
@@ -179,7 +179,7 @@ class _BatchCard extends StatelessWidget {
                   child: Text(
                     batch.displayNumber,
                     style: theme.textTheme.titleSmall
-                        ?.copyWith(fontFamily: 'FiraCode'),
+                        ?.copyWith(fontFamily: AppFonts.mono),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -240,7 +240,7 @@ class _SerialCard extends StatelessWidget {
               child: Text(
                 serial.displayNumber,
                 style: theme.textTheme.titleSmall
-                    ?.copyWith(fontFamily: 'FiraCode'),
+                    ?.copyWith(fontFamily: AppFonts.mono),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -282,7 +282,7 @@ class _Stat extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.titleMedium
-                ?.copyWith(fontFamily: 'FiraCode'),
+                ?.copyWith(fontFamily: AppFonts.mono),
           ),
         ],
       ),

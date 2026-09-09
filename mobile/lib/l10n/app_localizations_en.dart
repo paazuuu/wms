@@ -1800,4 +1800,146 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whPutaway => 'Put-away';
+
+  @override
+  String get adjTitle => 'Stock adjustment';
+
+  @override
+  String get adjNew => 'Adjust stock';
+
+  @override
+  String get adjEmpty => 'No adjustments yet';
+
+  @override
+  String get adjEmptyBody =>
+      'Correct stock with a reason: damage, loss, found and so on.';
+
+  @override
+  String get adjJan => 'JAN code';
+
+  @override
+  String get adjQuantity => 'Quantity';
+
+  @override
+  String get adjReason => 'Reason';
+
+  @override
+  String get adjNote => 'Note';
+
+  @override
+  String get adjApply => 'Apply adjustment';
+
+  @override
+  String adjDone(String delta) {
+    return 'Stock adjusted ($delta)';
+  }
+
+  @override
+  String get adjNeedsWarehouse => 'Choose a warehouse first';
+
+  @override
+  String get adjJanRequired => 'Enter a JAN code';
+
+  @override
+  String get adjDeltaRequired => 'Enter a quantity of 1 or more';
+
+  @override
+  String get reasonDamage => 'Damage';
+
+  @override
+  String get reasonLoss => 'Loss';
+
+  @override
+  String get reasonFound => 'Found';
+
+  @override
+  String get reasonCorrection => 'Correction';
+
+  @override
+  String get reasonReturn => 'Return';
+
+  @override
+  String get reasonOther => 'Other';
+
+  @override
+  String get cntTitle => 'Stock count';
+
+  @override
+  String get cntEmpty => 'No counts yet';
+
+  @override
+  String get cntEmptyBody =>
+      'Starting a count freezes the current balance into its lines.';
+
+  @override
+  String get cntStart => 'Start count';
+
+  @override
+  String get cntBlind => 'Blind count';
+
+  @override
+  String get cntBlindHelp =>
+      'Hides the system quantity until the count is completed, so nobody anchors on it.';
+
+  @override
+  String get cntSystem => 'System';
+
+  @override
+  String get cntCounted => 'Counted';
+
+  @override
+  String get cntVariance => 'Variance';
+
+  @override
+  String get cntHidden => 'Hidden until completed';
+
+  @override
+  String get cntRecord => 'Enter counted quantity';
+
+  @override
+  String get cntComplete => 'Complete count';
+
+  @override
+  String get cntCancel => 'Cancel count';
+
+  @override
+  String get cntCompleteQ => 'Complete this count?';
+
+  @override
+  String get cntCompleteBody =>
+      'Only lines with a variance are corrected, and each correction is recorded as a count movement.';
+
+  @override
+  String get cntCancelQ => 'Cancel this count?';
+
+  @override
+  String get cntCancelBody =>
+      'Counted figures are discarded and stock is left unchanged.';
+
+  @override
+  String get cntCancelled => 'Count cancelled';
+
+  @override
+  String cntProgress(int counted, int total) {
+    return '$counted/$total counted';
+  }
+
+  @override
+  String cntCompleted(int lines, String net) {
+    return 'Count completed ($lines lines adjusted, net $net)';
+  }
+
+  @override
+  String cntUncountedWarn(int count) {
+    return '$count uncounted lines are left as they are (not treated as zero)';
+  }
+
+  @override
+  String get cntStatusCounting => 'Counting';
+
+  @override
+  String get cntStatusCompleted => 'Completed';
+
+  @override
+  String get cntStatusCancelled => 'Cancelled';
 }

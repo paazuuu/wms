@@ -120,7 +120,7 @@ class _MovementCard extends StatelessWidget {
                 Text(
                   signed,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontFamily: 'FiraCode',
+                    fontFamily: AppFonts.mono,
                     fontWeight: FontWeight.w700,
                     color: move.isIncrease ? scheme.primary : scheme.error,
                   ),
@@ -133,7 +133,7 @@ class _MovementCard extends StatelessWidget {
                 Text(
                   '${nf.format(move.quantityBefore)} → ${nf.format(move.quantityAfter)}',
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontFamily: 'FiraCode'),
+                      ?.copyWith(fontFamily: AppFonts.mono),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -168,7 +168,7 @@ class _MovementCard extends StatelessWidget {
                   Text(
                     '${move.referenceType} #${move.referenceId}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: 'FiraCode', color: scheme.onSurfaceVariant),
+                        fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
                   ),
               ],
             ),

@@ -193,7 +193,7 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               style: theme.textTheme.bodyMedium?.copyWith(
-                fontFamily: mono ? 'FiraCode' : null,
+                fontFamily: mono ? AppFonts.mono : null,
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -100,6 +100,19 @@ update inside a transaction._
   still holds and each correction lands in the audit log.
 - Edge function `stock-ops` (adjustments + count sessions), service role only.
 - Works with or without locations, since both are per-warehouse.
+- Flutter client `features/stock_ops`: an adjustment screen (direction toggle +
+  magnitude + reason chips — a single signed field invites a missing minus, and
+  a missing minus doubles stock) and the count list/detail pair. The detail
+  screen honours `hide_system`: while a blind session is open it prints
+  「確定まで非表示」 instead of a number, and the confirm dialog spells out how
+  many uncounted lines will be left alone.
+- The home menu's 在庫調整 and 棚卸 now open these Supabase screens. The older
+  `features/stock_adjustment` and `features/stock_count` modules stay in the
+  tree unreferenced: they are InventorOS clients and belong to the Connector
+  work (0022+), not to this step.
+- A write needs one warehouse. `writeWarehouseIdProvider` resolves the active
+  one, falls back to the sole warehouse when there is exactly one, and returns
+  null otherwise — the UI then asks rather than guessing a building.
 
 ### 0018 — Picking / packing / shipping (Steps 7–9)
 - `pick_lists`/`pick_tasks`, allocation, pack sessions, shipping completion.

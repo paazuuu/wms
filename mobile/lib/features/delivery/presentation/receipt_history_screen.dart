@@ -201,7 +201,7 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
                       Text(
                         _r.referenceNo ?? '#${_r.id}',
                         style: theme.textTheme.titleSmall?.copyWith(
-                            fontFamily: 'FiraCode',
+                            fontFamily: AppFonts.mono,
                             decoration:
                                 cancelled ? TextDecoration.lineThrough : null,
                             color: cancelled ? scheme.onSurfaceVariant : null),

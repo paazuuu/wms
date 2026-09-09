@@ -3333,6 +3333,264 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'棚入れ'**
   String get whPutaway;
+
+  /// No description provided for @adjTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫調整'**
+  String get adjTitle;
+
+  /// No description provided for @adjNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を調整'**
+  String get adjNew;
+
+  /// No description provided for @adjEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整履歴はまだありません'**
+  String get adjEmpty;
+
+  /// No description provided for @adjEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損・紛失・発見などの理由を付けて在庫を補正できます。'**
+  String get adjEmptyBody;
+
+  /// No description provided for @adjJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get adjJan;
+
+  /// No description provided for @adjQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get adjQuantity;
+
+  /// No description provided for @adjReason.
+  ///
+  /// In ja, this message translates to:
+  /// **'理由'**
+  String get adjReason;
+
+  /// No description provided for @adjNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get adjNote;
+
+  /// No description provided for @adjApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整を確定'**
+  String get adjApply;
+
+  /// No description provided for @adjDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を調整しました（{delta}）'**
+  String adjDone(String delta);
+
+  /// No description provided for @adjNeedsWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'先に倉庫を選んでください'**
+  String get adjNeedsWarehouse;
+
+  /// No description provided for @adjJanRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードを入力してください'**
+  String get adjJanRequired;
+
+  /// No description provided for @adjDeltaRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'1以上の数量を入力してください'**
+  String get adjDeltaRequired;
+
+  /// No description provided for @reasonDamage.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損'**
+  String get reasonDamage;
+
+  /// No description provided for @reasonLoss.
+  ///
+  /// In ja, this message translates to:
+  /// **'紛失'**
+  String get reasonLoss;
+
+  /// No description provided for @reasonFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'発見'**
+  String get reasonFound;
+
+  /// No description provided for @reasonCorrection.
+  ///
+  /// In ja, this message translates to:
+  /// **'入力訂正'**
+  String get reasonCorrection;
+
+  /// No description provided for @reasonReturn.
+  ///
+  /// In ja, this message translates to:
+  /// **'返品戻し'**
+  String get reasonReturn;
+
+  /// No description provided for @reasonOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get reasonOther;
+
+  /// No description provided for @cntTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸'**
+  String get cntTitle;
+
+  /// No description provided for @cntEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸はまだありません'**
+  String get cntEmpty;
+
+  /// No description provided for @cntEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'実地棚卸を開始すると、現在の在庫が控えられます。'**
+  String get cntEmptyBody;
+
+  /// No description provided for @cntStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を開始'**
+  String get cntStart;
+
+  /// No description provided for @cntBlind.
+  ///
+  /// In ja, this message translates to:
+  /// **'ブラインド棚卸'**
+  String get cntBlind;
+
+  /// No description provided for @cntBlindHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'数え終わるまで理論在庫を表示しません。先入観なく数えられます。'**
+  String get cntBlindHelp;
+
+  /// No description provided for @cntSystem.
+  ///
+  /// In ja, this message translates to:
+  /// **'理論'**
+  String get cntSystem;
+
+  /// No description provided for @cntCounted.
+  ///
+  /// In ja, this message translates to:
+  /// **'実査'**
+  String get cntCounted;
+
+  /// No description provided for @cntVariance.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異'**
+  String get cntVariance;
+
+  /// No description provided for @cntHidden.
+  ///
+  /// In ja, this message translates to:
+  /// **'確定まで非表示'**
+  String get cntHidden;
+
+  /// No description provided for @cntRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'実査数を入力'**
+  String get cntRecord;
+
+  /// No description provided for @cntComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を確定'**
+  String get cntComplete;
+
+  /// No description provided for @cntCancel.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を中止'**
+  String get cntCancel;
+
+  /// No description provided for @cntCompleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を確定しますか？'**
+  String get cntCompleteQ;
+
+  /// No description provided for @cntCompleteBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異のある行だけ在庫を補正し、棚卸として記録します。'**
+  String get cntCompleteBody;
+
+  /// No description provided for @cntCancelQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この棚卸を中止しますか？'**
+  String get cntCancelQ;
+
+  /// No description provided for @cntCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'実査した数値は破棄され、在庫は変わりません。'**
+  String get cntCancelBody;
+
+  /// No description provided for @cntCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を中止しました'**
+  String get cntCancelled;
+
+  /// No description provided for @cntProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{counted}/{total} 実査済み'**
+  String cntProgress(int counted, int total);
+
+  /// No description provided for @cntCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を確定しました（{lines}行を補正・純増減 {net}）'**
+  String cntCompleted(int lines, String net);
+
+  /// No description provided for @cntUncountedWarn.
+  ///
+  /// In ja, this message translates to:
+  /// **'未実査 {count} 行はそのまま残ります（0とはみなしません）'**
+  String cntUncountedWarn(int count);
+
+  /// No description provided for @cntStatusCounting.
+  ///
+  /// In ja, this message translates to:
+  /// **'実査中'**
+  String get cntStatusCounting;
+
+  /// No description provided for @cntStatusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'確定済み'**
+  String get cntStatusCompleted;
+
+  /// No description provided for @cntStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'中止'**
+  String get cntStatusCancelled;
 }
 
 class _AppLocalizationsDelegate
