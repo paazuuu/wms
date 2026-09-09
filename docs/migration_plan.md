@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0016 applied.** 0017 onward is still planned.
+> Status: **0010–0017 applied.** 0018 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -82,13 +82,32 @@ update inside a transaction._
   WAREHOUSE, so existing callers see exactly what they saw before.
 - Wizard: locations off by default, bin seeding only offered once it is on.
 
-### 0017 — Picking / packing / shipping (Steps 7–9)
+### 0017 — Cycle count + adjustment (Step 10) ✅
+- `stock_adjustments`: reason-coded corrections (DAMAGE/LOSS/FOUND/CORRECTION/
+  RETURN/OTHER). The movement carries the arithmetic, this table carries *why*.
+- `stock_counts` / `stock_count_lines`: a session freezes the current balance
+  into its lines, so a later receipt cannot rewrite what the counter measured
+  against. `variance` is a generated column.
+- Blind counting (spec §40): while the session is open, `stock_count_detail`
+  withholds the system quantity and the variance, so the counter cannot anchor
+  on them. Both appear once the count is completed. `stock_count_lines` has RLS
+  on with **no** read policy, so the masking cannot be bypassed by reading the
+  table directly — the RPC is the only way in.
+- `complete_stock_count` posts one COUNT movement per non-zero variance and
+  leaves uncounted lines alone: not counting something is not the same as
+  counting it as zero.
+- Everything posts through `apply_stock_movement`, so before + quantity = after
+  still holds and each correction lands in the audit log.
+- Edge function `stock-ops` (adjustments + count sessions), service role only.
+- Works with or without locations, since both are per-warehouse.
+
+### 0018 — Picking / packing / shipping (Steps 7–9)
 - `pick_lists`/`pick_tasks`, allocation, pack sessions, shipping completion.
 - Extend current shipment model with allocate/pick/pack states; keep cartons + JAN
   print + 送り状 + sender profile intact.
-
-### 0018 — Cycle count + adjustment (Step 10)
-- Count sessions, variance, approval → ADJUST movements; blind-count option.
+- Deferred behind cycle count on purpose: the current outbound flow already ships
+  with carton splitting, JAN labels and 送り状, so staged picking adds process
+  before it adds value for this operator.
 
 ### 0019 — Inter-warehouse transfer (Step 11)
 - `transfer_orders` + state machine; TRANSFER_OUT/IN movements; no self-approval.
