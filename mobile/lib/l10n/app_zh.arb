@@ -866,5 +866,110 @@
       }
     }
   },
-  "pickCompleteBlocked": "存在未拣货的明细，无法完成"
+  "pickCompleteBlocked": "存在未拣货的明细，无法完成",
+  "transferTitle": "仓库间调拨",
+  "transferNew": "新建调拨",
+  "transferEmpty": "暂无调拨",
+  "transferEmptyBody": "仓库间的调拨会显示在这里。",
+  "transferSource": "调出仓库",
+  "transferDestination": "调入仓库",
+  "transferNeedsTwoWarehouses": "至少需要两个仓库",
+  "transferLinesTitle": "调拨商品",
+  "transferAddLine": "添加商品",
+  "transferLineJan": "JAN编码",
+  "transferLineQuantity": "数量",
+  "transferLineRequired": "请至少添加一件商品",
+  "transferNote": "备注",
+  "transferCreate": "创建调拨",
+  "transferCreated": "已创建调拨 {number}",
+  "@transferCreated": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "transferStatusDraft": "草稿",
+  "transferStatusPendingApproval": "待审批",
+  "transferStatusApproved": "已审批",
+  "transferStatusPicking": "拣货中",
+  "transferStatusInTransit": "运输中",
+  "transferStatusReceiving": "接收中",
+  "transferStatusCompleted": "已完成",
+  "transferStatusRejected": "已驳回",
+  "transferStatusCancelled": "已中止",
+  "transferSubmit": "提交审批",
+  "transferSubmitted": "已提交审批",
+  "transferApprove": "批准",
+  "transferApproveQ": "要批准此次调拨吗？",
+  "transferApproved": "调拨已批准",
+  "transferReject": "驳回",
+  "transferRejectQ": "要驳回此次调拨吗？",
+  "transferRejected": "调拨已驳回",
+  "transferCancelAction": "中止调拨",
+  "transferCancelQ": "要中止此次调拨吗？",
+  "transferCancelBody": "库存尚未变动，中止不会影响库存。",
+  "transferCancelled": "调拨已中止",
+  "transferStartPicking": "开始拣货",
+  "transferPickQty": "拣货数",
+  "transferPickProgress": "{picked} / {total} 已拣货",
+  "@transferPickProgress": {
+    "placeholders": {
+      "picked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "transferCompletePicking": "确认出库",
+  "transferCompletePickingQ": "要确认出库吗？",
+  "transferCompletePickingBody": "将从{source}扣减已拣数量，并切换为运输中。",
+  "@transferCompletePickingBody": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "transferPickIncomplete": "存在未拣货的明细，无法确认出库",
+  "transferStartReceiving": "开始接收",
+  "transferReceiveQty": "接收数",
+  "transferReceiveProgress": "{received} / {total} 已接收",
+  "@transferReceiveProgress": {
+    "placeholders": {
+      "received": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "transferCompleteReceiving": "确认接收",
+  "transferCompleteReceivingQ": "要确认接收吗？",
+  "transferCompleteReceivingBody": "将把接收数量加到{destination}，并完成本次调拨。",
+  "@transferCompleteReceivingBody": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReceiveIncomplete": "存在未接收的明细，无法确认接收",
+  "transferCompleted": "调拨已完成（{loss}行存在数量差异）",
+  "@transferCompleted": {
+    "placeholders": {
+      "loss": {
+        "type": "int"
+      }
+    }
+  },
+  "transferRequested": "申请人",
+  "transferApprovedBy": "批准人",
+  "transferPlanned": "计划",
+  "transferLineProductName": "商品名称（可选）",
+  "featTransfer": "仓库间调拨",
+  "featTransferDesc": "在仓库之间调拨库存"
 }

@@ -866,5 +866,110 @@
       }
     }
   },
-  "pickCompleteBlocked": "Cannot complete: some lines are still unpicked"
+  "pickCompleteBlocked": "Cannot complete: some lines are still unpicked",
+  "transferTitle": "Transfers",
+  "transferNew": "New transfer",
+  "transferEmpty": "No transfers yet",
+  "transferEmptyBody": "Transfers between warehouses will appear here.",
+  "transferSource": "From",
+  "transferDestination": "To",
+  "transferNeedsTwoWarehouses": "At least two warehouses are needed",
+  "transferLinesTitle": "Items to move",
+  "transferAddLine": "Add item",
+  "transferLineJan": "JAN code",
+  "transferLineQuantity": "Quantity",
+  "transferLineRequired": "Add at least one item",
+  "transferNote": "Note",
+  "transferCreate": "Create transfer",
+  "transferCreated": "Created transfer {number}",
+  "@transferCreated": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "transferStatusDraft": "Draft",
+  "transferStatusPendingApproval": "Pending approval",
+  "transferStatusApproved": "Approved",
+  "transferStatusPicking": "Picking",
+  "transferStatusInTransit": "In transit",
+  "transferStatusReceiving": "Receiving",
+  "transferStatusCompleted": "Completed",
+  "transferStatusRejected": "Rejected",
+  "transferStatusCancelled": "Cancelled",
+  "transferSubmit": "Submit for approval",
+  "transferSubmitted": "Submitted for approval",
+  "transferApprove": "Approve",
+  "transferApproveQ": "Approve this transfer?",
+  "transferApproved": "Transfer approved",
+  "transferReject": "Reject",
+  "transferRejectQ": "Reject this transfer?",
+  "transferRejected": "Transfer rejected",
+  "transferCancelAction": "Cancel transfer",
+  "transferCancelQ": "Cancel this transfer?",
+  "transferCancelBody": "No stock has moved yet, so cancelling changes nothing.",
+  "transferCancelled": "Transfer cancelled",
+  "transferStartPicking": "Start picking",
+  "transferPickQty": "Picked",
+  "transferPickProgress": "{picked} / {total} picked",
+  "@transferPickProgress": {
+    "placeholders": {
+      "picked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "transferCompletePicking": "Confirm shipment",
+  "transferCompletePickingQ": "Confirm shipment?",
+  "transferCompletePickingBody": "Deducts the picked quantities from {source} and switches to in-transit.",
+  "@transferCompletePickingBody": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "transferPickIncomplete": "Cannot confirm shipment: some lines are still unpicked",
+  "transferStartReceiving": "Start receiving",
+  "transferReceiveQty": "Received",
+  "transferReceiveProgress": "{received} / {total} received",
+  "@transferReceiveProgress": {
+    "placeholders": {
+      "received": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "transferCompleteReceiving": "Confirm receipt",
+  "transferCompleteReceivingQ": "Confirm receipt?",
+  "transferCompleteReceivingBody": "Adds the received quantities to {destination} and completes the transfer.",
+  "@transferCompleteReceivingBody": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReceiveIncomplete": "Cannot confirm receipt: some lines are still unreceived",
+  "transferCompleted": "Transfer completed ({loss} line(s) with a quantity variance)",
+  "@transferCompleted": {
+    "placeholders": {
+      "loss": {
+        "type": "int"
+      }
+    }
+  },
+  "transferRequested": "Requested by",
+  "transferApprovedBy": "Approved by",
+  "transferPlanned": "Planned",
+  "transferLineProductName": "Product name (optional)",
+  "featTransfer": "Transfers",
+  "featTransferDesc": "Move stock between warehouses"
 }

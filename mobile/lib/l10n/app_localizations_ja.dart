@@ -1966,4 +1966,187 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pickCompleteBlocked => '未ピックの明細があるため完了できません';
+
+  @override
+  String get transferTitle => '倉庫間移動';
+
+  @override
+  String get transferNew => '移動を作成';
+
+  @override
+  String get transferEmpty => '移動はまだありません';
+
+  @override
+  String get transferEmptyBody => '倉庫間で在庫を移動すると、ここに表示されます。';
+
+  @override
+  String get transferSource => '移動元';
+
+  @override
+  String get transferDestination => '移動先';
+
+  @override
+  String get transferNeedsTwoWarehouses => '倉庫が2つ以上必要です';
+
+  @override
+  String get transferLinesTitle => '移動する商品';
+
+  @override
+  String get transferAddLine => '商品を追加';
+
+  @override
+  String get transferLineJan => 'JANコード';
+
+  @override
+  String get transferLineQuantity => '数量';
+
+  @override
+  String get transferLineRequired => '1件以上の商品を追加してください';
+
+  @override
+  String get transferNote => '備考';
+
+  @override
+  String get transferCreate => '移動を作成';
+
+  @override
+  String transferCreated(String number) {
+    return '移動 $number を作成しました';
+  }
+
+  @override
+  String get transferStatusDraft => '下書き';
+
+  @override
+  String get transferStatusPendingApproval => '承認待ち';
+
+  @override
+  String get transferStatusApproved => '承認済み';
+
+  @override
+  String get transferStatusPicking => 'ピック中';
+
+  @override
+  String get transferStatusInTransit => '輸送中';
+
+  @override
+  String get transferStatusReceiving => '受入中';
+
+  @override
+  String get transferStatusCompleted => '完了';
+
+  @override
+  String get transferStatusRejected => '却下';
+
+  @override
+  String get transferStatusCancelled => '中止';
+
+  @override
+  String get transferSubmit => '承認を申請';
+
+  @override
+  String get transferSubmitted => '承認を申請しました';
+
+  @override
+  String get transferApprove => '承認する';
+
+  @override
+  String get transferApproveQ => 'この移動を承認しますか？';
+
+  @override
+  String get transferApproved => '移動を承認しました';
+
+  @override
+  String get transferReject => '却下する';
+
+  @override
+  String get transferRejectQ => 'この移動を却下しますか？';
+
+  @override
+  String get transferRejected => '移動を却下しました';
+
+  @override
+  String get transferCancelAction => '移動を中止';
+
+  @override
+  String get transferCancelQ => 'この移動を中止しますか？';
+
+  @override
+  String get transferCancelBody => '在庫はまだ動いていないため、中止しても在庫は変わりません。';
+
+  @override
+  String get transferCancelled => '移動を中止しました';
+
+  @override
+  String get transferStartPicking => 'ピッキング開始';
+
+  @override
+  String get transferPickQty => 'ピック数';
+
+  @override
+  String transferPickProgress(int picked, int total) {
+    return '$picked / $total ピック済み';
+  }
+
+  @override
+  String get transferCompletePicking => '出庫を確定';
+
+  @override
+  String get transferCompletePickingQ => '出庫を確定しますか？';
+
+  @override
+  String transferCompletePickingBody(String source) {
+    return '$source の在庫からピック数を引き、輸送中に切り替えます。';
+  }
+
+  @override
+  String get transferPickIncomplete => '未ピックの明細があるため出庫を確定できません';
+
+  @override
+  String get transferStartReceiving => '受入を開始';
+
+  @override
+  String get transferReceiveQty => '受入数';
+
+  @override
+  String transferReceiveProgress(int received, int total) {
+    return '$received / $total 受入済み';
+  }
+
+  @override
+  String get transferCompleteReceiving => '受入を確定';
+
+  @override
+  String get transferCompleteReceivingQ => '受入を確定しますか？';
+
+  @override
+  String transferCompleteReceivingBody(String destination) {
+    return '$destination に受入数を加算し、移動を完了します。';
+  }
+
+  @override
+  String get transferReceiveIncomplete => '未受入の明細があるため受入を確定できません';
+
+  @override
+  String transferCompleted(int loss) {
+    return '移動が完了しました（$loss件で数量差異）';
+  }
+
+  @override
+  String get transferRequested => '申請者';
+
+  @override
+  String get transferApprovedBy => '承認者';
+
+  @override
+  String get transferPlanned => '予定';
+
+  @override
+  String get transferLineProductName => '商品名（任意）';
+
+  @override
+  String get featTransfer => '倉庫間移動';
+
+  @override
+  String get featTransferDesc => '倉庫間で在庫を移動';
 }

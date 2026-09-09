@@ -2025,4 +2025,191 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pickCompleteBlocked =>
       'Cannot complete: some lines are still unpicked';
+
+  @override
+  String get transferTitle => 'Transfers';
+
+  @override
+  String get transferNew => 'New transfer';
+
+  @override
+  String get transferEmpty => 'No transfers yet';
+
+  @override
+  String get transferEmptyBody =>
+      'Transfers between warehouses will appear here.';
+
+  @override
+  String get transferSource => 'From';
+
+  @override
+  String get transferDestination => 'To';
+
+  @override
+  String get transferNeedsTwoWarehouses => 'At least two warehouses are needed';
+
+  @override
+  String get transferLinesTitle => 'Items to move';
+
+  @override
+  String get transferAddLine => 'Add item';
+
+  @override
+  String get transferLineJan => 'JAN code';
+
+  @override
+  String get transferLineQuantity => 'Quantity';
+
+  @override
+  String get transferLineRequired => 'Add at least one item';
+
+  @override
+  String get transferNote => 'Note';
+
+  @override
+  String get transferCreate => 'Create transfer';
+
+  @override
+  String transferCreated(String number) {
+    return 'Created transfer $number';
+  }
+
+  @override
+  String get transferStatusDraft => 'Draft';
+
+  @override
+  String get transferStatusPendingApproval => 'Pending approval';
+
+  @override
+  String get transferStatusApproved => 'Approved';
+
+  @override
+  String get transferStatusPicking => 'Picking';
+
+  @override
+  String get transferStatusInTransit => 'In transit';
+
+  @override
+  String get transferStatusReceiving => 'Receiving';
+
+  @override
+  String get transferStatusCompleted => 'Completed';
+
+  @override
+  String get transferStatusRejected => 'Rejected';
+
+  @override
+  String get transferStatusCancelled => 'Cancelled';
+
+  @override
+  String get transferSubmit => 'Submit for approval';
+
+  @override
+  String get transferSubmitted => 'Submitted for approval';
+
+  @override
+  String get transferApprove => 'Approve';
+
+  @override
+  String get transferApproveQ => 'Approve this transfer?';
+
+  @override
+  String get transferApproved => 'Transfer approved';
+
+  @override
+  String get transferReject => 'Reject';
+
+  @override
+  String get transferRejectQ => 'Reject this transfer?';
+
+  @override
+  String get transferRejected => 'Transfer rejected';
+
+  @override
+  String get transferCancelAction => 'Cancel transfer';
+
+  @override
+  String get transferCancelQ => 'Cancel this transfer?';
+
+  @override
+  String get transferCancelBody =>
+      'No stock has moved yet, so cancelling changes nothing.';
+
+  @override
+  String get transferCancelled => 'Transfer cancelled';
+
+  @override
+  String get transferStartPicking => 'Start picking';
+
+  @override
+  String get transferPickQty => 'Picked';
+
+  @override
+  String transferPickProgress(int picked, int total) {
+    return '$picked / $total picked';
+  }
+
+  @override
+  String get transferCompletePicking => 'Confirm shipment';
+
+  @override
+  String get transferCompletePickingQ => 'Confirm shipment?';
+
+  @override
+  String transferCompletePickingBody(String source) {
+    return 'Deducts the picked quantities from $source and switches to in-transit.';
+  }
+
+  @override
+  String get transferPickIncomplete =>
+      'Cannot confirm shipment: some lines are still unpicked';
+
+  @override
+  String get transferStartReceiving => 'Start receiving';
+
+  @override
+  String get transferReceiveQty => 'Received';
+
+  @override
+  String transferReceiveProgress(int received, int total) {
+    return '$received / $total received';
+  }
+
+  @override
+  String get transferCompleteReceiving => 'Confirm receipt';
+
+  @override
+  String get transferCompleteReceivingQ => 'Confirm receipt?';
+
+  @override
+  String transferCompleteReceivingBody(String destination) {
+    return 'Adds the received quantities to $destination and completes the transfer.';
+  }
+
+  @override
+  String get transferReceiveIncomplete =>
+      'Cannot confirm receipt: some lines are still unreceived';
+
+  @override
+  String transferCompleted(int loss) {
+    return 'Transfer completed ($loss line(s) with a quantity variance)';
+  }
+
+  @override
+  String get transferRequested => 'Requested by';
+
+  @override
+  String get transferApprovedBy => 'Approved by';
+
+  @override
+  String get transferPlanned => 'Planned';
+
+  @override
+  String get transferLineProductName => 'Product name (optional)';
+
+  @override
+  String get featTransfer => 'Transfers';
+
+  @override
+  String get featTransferDesc => 'Move stock between warehouses';
 }

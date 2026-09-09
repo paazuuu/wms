@@ -16,6 +16,8 @@ import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
+import 'package:wms_mobile/features/transfers/data/transfer_repository.dart';
+import 'package:wms_mobile/features/transfers/domain/transfer_order.dart';
 import 'package:wms_mobile/features/stock_ops/data/stock_ops_repository.dart';
 import 'package:wms_mobile/features/stock_ops/domain/stock_ops.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
@@ -610,5 +612,159 @@ class FakePickingRepository implements PickingRepository {
       tasks: _list.tasks,
     );
     return ApiSuccess(_list);
+  }
+}
+
+/// In-memory stand-in for the transfer backend. Mirrors the server's state
+/// machine (spec §16) closely enough for a screen test: wrong-state calls are
+/// refused with the same shape as a real RPC error, completing picking or
+/// receiving refuses while any line is untouched, and stock only ever moves
+/// (conceptually — this fake just tracks it) at those two completions.
+class FakeTransferRepository implements TransferRepository {
+  FakeTransferRepository({required TransferOrder order}) : _order = order;
+
+  TransferOrder _order;
+
+  /// Set whenever an action was rejected for being called in the wrong state.
+  String? lastRefusal;
+
+  TransferOrder _copyWith({
+    TransferStatus? status,
+    List<TransferLine>? lines,
+  }) =>
+      TransferOrder(
+        id: _order.id,
+        transferNumber: _order.transferNumber,
+        sourceWarehouseId: _order.sourceWarehouseId,
+        sourceWarehouseName: _order.sourceWarehouseName,
+        destinationWarehouseId: _order.destinationWarehouseId,
+        destinationWarehouseName: _order.destinationWarehouseName,
+        status: status ?? _order.status,
+        note: _order.note,
+        lines: lines ?? _order.lines,
+      );
+
+  ApiResult<TransferOrder> _transition(TransferStatus from, TransferStatus to) {
+    if (_order.status != from) {
+      lastRefusal = 'transfer is ${_order.status.wire}';
+      return ApiFailure(message: lastRefusal!, statusCode: 400);
+    }
+    _order = _copyWith(status: to);
+    return ApiSuccess(_order);
+  }
+
+  @override
+  Future<ApiResult<List<TransferOrder>>> list({int? warehouseId, String? status}) async =>
+      ApiSuccess(status == null || _order.status.wire == status ? [_order] : const []);
+
+  @override
+  Future<ApiResult<TransferOrder>> show(int id) async => ApiSuccess(_order);
+
+  @override
+  Future<ApiResult<TransferOrder>> create({
+    required int sourceWarehouseId,
+    required int destinationWarehouseId,
+    required List<TransferLineDraft> lines,
+    String? note,
+  }) async =>
+      ApiSuccess(_order);
+
+  @override
+  Future<ApiResult<TransferOrder>> submit(int id) async =>
+      _transition(TransferStatus.draft, TransferStatus.pendingApproval);
+
+  @override
+  Future<ApiResult<TransferOrder>> approve(int id) async =>
+      _transition(TransferStatus.pendingApproval, TransferStatus.approved);
+
+  @override
+  Future<ApiResult<TransferOrder>> reject(int id, {String? reason}) async =>
+      _transition(TransferStatus.pendingApproval, TransferStatus.rejected);
+
+  @override
+  Future<ApiResult<TransferOrder>> cancel(int id) async {
+    if (!_order.status.isCancellable) {
+      lastRefusal = 'transfer is ${_order.status.wire}';
+      return ApiFailure(message: lastRefusal!, statusCode: 400);
+    }
+    _order = _copyWith(status: TransferStatus.cancelled);
+    return ApiSuccess(_order);
+  }
+
+  @override
+  Future<ApiResult<TransferOrder>> startPicking(int id) async =>
+      _transition(TransferStatus.approved, TransferStatus.picking);
+
+  @override
+  Future<ApiResult<TransferOrder>> recordPick(int lineId, int quantity) async {
+    _order = _copyWith(lines: [
+      for (final l in _order.lines)
+        if (l.id == lineId)
+          TransferLine(
+            id: l.id,
+            janCode: l.janCode,
+            productName: l.productName,
+            requestedQuantity: l.requestedQuantity,
+            pickedQuantity: quantity,
+            pickVariance: quantity - l.requestedQuantity,
+          )
+        else
+          l,
+    ]);
+    return ApiSuccess(_order);
+  }
+
+  @override
+  Future<ApiResult<TransferOrder>> completePicking(int id) async {
+    if (_order.unpickedLines > 0) {
+      lastRefusal = 'transfer still has unpicked line(s)';
+      return ApiFailure(message: lastRefusal!, statusCode: 400);
+    }
+    return _transition(TransferStatus.picking, TransferStatus.inTransit);
+  }
+
+  @override
+  Future<ApiResult<TransferOrder>> startReceiving(int id) async =>
+      _transition(TransferStatus.inTransit, TransferStatus.receiving);
+
+  @override
+  Future<ApiResult<TransferOrder>> recordReceipt(int lineId, int quantity) async {
+    _order = _copyWith(lines: [
+      for (final l in _order.lines)
+        if (l.id == lineId)
+          TransferLine(
+            id: l.id,
+            janCode: l.janCode,
+            productName: l.productName,
+            requestedQuantity: l.requestedQuantity,
+            pickedQuantity: l.pickedQuantity,
+            pickVariance: l.pickVariance,
+            receivedQuantity: quantity,
+            receiveVariance: quantity - (l.pickedQuantity ?? 0),
+          )
+        else
+          l,
+    ]);
+    return ApiSuccess(_order);
+  }
+
+  @override
+  Future<ApiResult<CompletedTransfer>> completeReceiving(int id) async {
+    if (_order.unreceivedLines > 0) {
+      lastRefusal = 'transfer still has unreceived line(s)';
+      return const ApiFailure(
+          message: 'transfer still has unreceived line(s)', statusCode: 400);
+    }
+    _order = _copyWith(status: TransferStatus.completed);
+    final loss = _order.lines.where((l) => (l.receiveVariance ?? 0) < 0).length;
+    return ApiSuccess(CompletedTransfer(
+      _order,
+      TransferReceiveSummary(
+        lines: _order.lines.length,
+        pickedUnits: _order.lines.fold(0, (s, l) => s + (l.pickedQuantity ?? 0)),
+        receivedUnits: _order.lines.fold(0, (s, l) => s + (l.receivedQuantity ?? 0)),
+        lossLines: loss,
+      ),
+    ));
   }
 }

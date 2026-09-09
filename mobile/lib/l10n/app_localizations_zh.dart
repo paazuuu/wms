@@ -1964,4 +1964,187 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pickCompleteBlocked => '存在未拣货的明细，无法完成';
+
+  @override
+  String get transferTitle => '仓库间调拨';
+
+  @override
+  String get transferNew => '新建调拨';
+
+  @override
+  String get transferEmpty => '暂无调拨';
+
+  @override
+  String get transferEmptyBody => '仓库间的调拨会显示在这里。';
+
+  @override
+  String get transferSource => '调出仓库';
+
+  @override
+  String get transferDestination => '调入仓库';
+
+  @override
+  String get transferNeedsTwoWarehouses => '至少需要两个仓库';
+
+  @override
+  String get transferLinesTitle => '调拨商品';
+
+  @override
+  String get transferAddLine => '添加商品';
+
+  @override
+  String get transferLineJan => 'JAN编码';
+
+  @override
+  String get transferLineQuantity => '数量';
+
+  @override
+  String get transferLineRequired => '请至少添加一件商品';
+
+  @override
+  String get transferNote => '备注';
+
+  @override
+  String get transferCreate => '创建调拨';
+
+  @override
+  String transferCreated(String number) {
+    return '已创建调拨 $number';
+  }
+
+  @override
+  String get transferStatusDraft => '草稿';
+
+  @override
+  String get transferStatusPendingApproval => '待审批';
+
+  @override
+  String get transferStatusApproved => '已审批';
+
+  @override
+  String get transferStatusPicking => '拣货中';
+
+  @override
+  String get transferStatusInTransit => '运输中';
+
+  @override
+  String get transferStatusReceiving => '接收中';
+
+  @override
+  String get transferStatusCompleted => '已完成';
+
+  @override
+  String get transferStatusRejected => '已驳回';
+
+  @override
+  String get transferStatusCancelled => '已中止';
+
+  @override
+  String get transferSubmit => '提交审批';
+
+  @override
+  String get transferSubmitted => '已提交审批';
+
+  @override
+  String get transferApprove => '批准';
+
+  @override
+  String get transferApproveQ => '要批准此次调拨吗？';
+
+  @override
+  String get transferApproved => '调拨已批准';
+
+  @override
+  String get transferReject => '驳回';
+
+  @override
+  String get transferRejectQ => '要驳回此次调拨吗？';
+
+  @override
+  String get transferRejected => '调拨已驳回';
+
+  @override
+  String get transferCancelAction => '中止调拨';
+
+  @override
+  String get transferCancelQ => '要中止此次调拨吗？';
+
+  @override
+  String get transferCancelBody => '库存尚未变动，中止不会影响库存。';
+
+  @override
+  String get transferCancelled => '调拨已中止';
+
+  @override
+  String get transferStartPicking => '开始拣货';
+
+  @override
+  String get transferPickQty => '拣货数';
+
+  @override
+  String transferPickProgress(int picked, int total) {
+    return '$picked / $total 已拣货';
+  }
+
+  @override
+  String get transferCompletePicking => '确认出库';
+
+  @override
+  String get transferCompletePickingQ => '要确认出库吗？';
+
+  @override
+  String transferCompletePickingBody(String source) {
+    return '将从$source扣减已拣数量，并切换为运输中。';
+  }
+
+  @override
+  String get transferPickIncomplete => '存在未拣货的明细，无法确认出库';
+
+  @override
+  String get transferStartReceiving => '开始接收';
+
+  @override
+  String get transferReceiveQty => '接收数';
+
+  @override
+  String transferReceiveProgress(int received, int total) {
+    return '$received / $total 已接收';
+  }
+
+  @override
+  String get transferCompleteReceiving => '确认接收';
+
+  @override
+  String get transferCompleteReceivingQ => '要确认接收吗？';
+
+  @override
+  String transferCompleteReceivingBody(String destination) {
+    return '将把接收数量加到$destination，并完成本次调拨。';
+  }
+
+  @override
+  String get transferReceiveIncomplete => '存在未接收的明细，无法确认接收';
+
+  @override
+  String transferCompleted(int loss) {
+    return '调拨已完成（$loss行存在数量差异）';
+  }
+
+  @override
+  String get transferRequested => '申请人';
+
+  @override
+  String get transferApprovedBy => '批准人';
+
+  @override
+  String get transferPlanned => '计划';
+
+  @override
+  String get transferLineProductName => '商品名称（可选）';
+
+  @override
+  String get featTransfer => '仓库间调拨';
+
+  @override
+  String get featTransferDesc => '在仓库之间调拨库存';
 }

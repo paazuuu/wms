@@ -14,6 +14,7 @@ import '../../stock_ops/presentation/stock_adjustment_screen.dart';
 import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../suppliers/presentation/supplier_list_screen.dart';
 import '../../tracking/presentation/tracking_search_screen.dart';
+import '../../transfers/presentation/transfer_list_screen.dart';
 import '../../warehouses/presentation/warehouse_list_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
 import 'feature_entry.dart';
@@ -68,6 +69,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.shopping_cart_checkout_outlined,
             status: FeatureStatus.ready,
             builder: _picking,
+          ),
+          FeatureEntry(
+            id: 'transfer',
+            icon: Icons.compare_arrows,
+            status: FeatureStatus.ready,
+            builder: _transfer,
           ),
         ],
       ),
@@ -186,3 +193,6 @@ Widget _reports(BuildContext _) => const ReportListScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
 Widget _picking(BuildContext _) => const PickListIndexScreen();
+
+/// Top-level (const-referenceable) builder for the Transfer feature.
+Widget _transfer(BuildContext _) => const TransferListScreen();

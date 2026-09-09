@@ -3747,6 +3747,348 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'未ピックの明細があるため完了できません'**
   String get pickCompleteBlocked;
+
+  /// No description provided for @transferTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動'**
+  String get transferTitle;
+
+  /// No description provided for @transferNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動を作成'**
+  String get transferNew;
+
+  /// No description provided for @transferEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動はまだありません'**
+  String get transferEmpty;
+
+  /// No description provided for @transferEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間で在庫を移動すると、ここに表示されます。'**
+  String get transferEmptyBody;
+
+  /// No description provided for @transferSource.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動元'**
+  String get transferSource;
+
+  /// No description provided for @transferDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動先'**
+  String get transferDestination;
+
+  /// No description provided for @transferNeedsTwoWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫が2つ以上必要です'**
+  String get transferNeedsTwoWarehouses;
+
+  /// No description provided for @transferLinesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動する商品'**
+  String get transferLinesTitle;
+
+  /// No description provided for @transferAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を追加'**
+  String get transferAddLine;
+
+  /// No description provided for @transferLineJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get transferLineJan;
+
+  /// No description provided for @transferLineQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get transferLineQuantity;
+
+  /// No description provided for @transferLineRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'1件以上の商品を追加してください'**
+  String get transferLineRequired;
+
+  /// No description provided for @transferNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get transferNote;
+
+  /// No description provided for @transferCreate.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動を作成'**
+  String get transferCreate;
+
+  /// No description provided for @transferCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動 {number} を作成しました'**
+  String transferCreated(String number);
+
+  /// No description provided for @transferStatusDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get transferStatusDraft;
+
+  /// No description provided for @transferStatusPendingApproval.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認待ち'**
+  String get transferStatusPendingApproval;
+
+  /// No description provided for @transferStatusApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認済み'**
+  String get transferStatusApproved;
+
+  /// No description provided for @transferStatusPicking.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック中'**
+  String get transferStatusPicking;
+
+  /// No description provided for @transferStatusInTransit.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送中'**
+  String get transferStatusInTransit;
+
+  /// No description provided for @transferStatusReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入中'**
+  String get transferStatusReceiving;
+
+  /// No description provided for @transferStatusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get transferStatusCompleted;
+
+  /// No description provided for @transferStatusRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下'**
+  String get transferStatusRejected;
+
+  /// No description provided for @transferStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'中止'**
+  String get transferStatusCancelled;
+
+  /// No description provided for @transferSubmit.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認を申請'**
+  String get transferSubmit;
+
+  /// No description provided for @transferSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認を申請しました'**
+  String get transferSubmitted;
+
+  /// No description provided for @transferApprove.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認する'**
+  String get transferApprove;
+
+  /// No description provided for @transferApproveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この移動を承認しますか？'**
+  String get transferApproveQ;
+
+  /// No description provided for @transferApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動を承認しました'**
+  String get transferApproved;
+
+  /// No description provided for @transferReject.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下する'**
+  String get transferReject;
+
+  /// No description provided for @transferRejectQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この移動を却下しますか？'**
+  String get transferRejectQ;
+
+  /// No description provided for @transferRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動を却下しました'**
+  String get transferRejected;
+
+  /// No description provided for @transferCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動を中止'**
+  String get transferCancelAction;
+
+  /// No description provided for @transferCancelQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この移動を中止しますか？'**
+  String get transferCancelQ;
+
+  /// No description provided for @transferCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫はまだ動いていないため、中止しても在庫は変わりません。'**
+  String get transferCancelBody;
+
+  /// No description provided for @transferCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動を中止しました'**
+  String get transferCancelled;
+
+  /// No description provided for @transferStartPicking.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング開始'**
+  String get transferStartPicking;
+
+  /// No description provided for @transferPickQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック数'**
+  String get transferPickQty;
+
+  /// No description provided for @transferPickProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{picked} / {total} ピック済み'**
+  String transferPickProgress(int picked, int total);
+
+  /// No description provided for @transferCompletePicking.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定'**
+  String get transferCompletePicking;
+
+  /// No description provided for @transferCompletePickingQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定しますか？'**
+  String get transferCompletePickingQ;
+
+  /// No description provided for @transferCompletePickingBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{source} の在庫からピック数を引き、輸送中に切り替えます。'**
+  String transferCompletePickingBody(String source);
+
+  /// No description provided for @transferPickIncomplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'未ピックの明細があるため出庫を確定できません'**
+  String get transferPickIncomplete;
+
+  /// No description provided for @transferStartReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入を開始'**
+  String get transferStartReceiving;
+
+  /// No description provided for @transferReceiveQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入数'**
+  String get transferReceiveQty;
+
+  /// No description provided for @transferReceiveProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{received} / {total} 受入済み'**
+  String transferReceiveProgress(int received, int total);
+
+  /// No description provided for @transferCompleteReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入を確定'**
+  String get transferCompleteReceiving;
+
+  /// No description provided for @transferCompleteReceivingQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入を確定しますか？'**
+  String get transferCompleteReceivingQ;
+
+  /// No description provided for @transferCompleteReceivingBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{destination} に受入数を加算し、移動を完了します。'**
+  String transferCompleteReceivingBody(String destination);
+
+  /// No description provided for @transferReceiveIncomplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'未受入の明細があるため受入を確定できません'**
+  String get transferReceiveIncomplete;
+
+  /// No description provided for @transferCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動が完了しました（{loss}件で数量差異）'**
+  String transferCompleted(int loss);
+
+  /// No description provided for @transferRequested.
+  ///
+  /// In ja, this message translates to:
+  /// **'申請者'**
+  String get transferRequested;
+
+  /// No description provided for @transferApprovedBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認者'**
+  String get transferApprovedBy;
+
+  /// No description provided for @transferPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定'**
+  String get transferPlanned;
+
+  /// No description provided for @transferLineProductName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名（任意）'**
+  String get transferLineProductName;
+
+  /// No description provided for @featTransfer.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動'**
+  String get featTransfer;
+
+  /// No description provided for @featTransferDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間で在庫を移動'**
+  String get featTransferDesc;
 }
 
 class _AppLocalizationsDelegate

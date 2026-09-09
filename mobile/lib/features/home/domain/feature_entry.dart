@@ -51,6 +51,8 @@ class FeatureEntry {
         return l10n.featStockCount;
       case 'picking':
         return l10n.featPicking;
+      case 'transfer':
+        return l10n.featTransfer;
       case 'product_lookup':
         return l10n.featProductLookup;
       case 'locations':
@@ -91,6 +93,8 @@ class FeatureEntry {
         return l10n.featStockCountDesc;
       case 'picking':
         return l10n.featPickingDesc;
+      case 'transfer':
+        return l10n.featTransferDesc;
       case 'product_lookup':
         return l10n.featProductLookupDesc;
       case 'locations':

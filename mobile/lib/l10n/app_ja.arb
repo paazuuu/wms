@@ -956,5 +956,110 @@
       }
     }
   },
-  "pickCompleteBlocked": "未ピックの明細があるため完了できません"
+  "pickCompleteBlocked": "未ピックの明細があるため完了できません",
+  "transferTitle": "倉庫間移動",
+  "transferNew": "移動を作成",
+  "transferEmpty": "移動はまだありません",
+  "transferEmptyBody": "倉庫間で在庫を移動すると、ここに表示されます。",
+  "transferSource": "移動元",
+  "transferDestination": "移動先",
+  "transferNeedsTwoWarehouses": "倉庫が2つ以上必要です",
+  "transferLinesTitle": "移動する商品",
+  "transferAddLine": "商品を追加",
+  "transferLineJan": "JANコード",
+  "transferLineQuantity": "数量",
+  "transferLineRequired": "1件以上の商品を追加してください",
+  "transferNote": "備考",
+  "transferCreate": "移動を作成",
+  "transferCreated": "移動 {number} を作成しました",
+  "@transferCreated": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "transferStatusDraft": "下書き",
+  "transferStatusPendingApproval": "承認待ち",
+  "transferStatusApproved": "承認済み",
+  "transferStatusPicking": "ピック中",
+  "transferStatusInTransit": "輸送中",
+  "transferStatusReceiving": "受入中",
+  "transferStatusCompleted": "完了",
+  "transferStatusRejected": "却下",
+  "transferStatusCancelled": "中止",
+  "transferSubmit": "承認を申請",
+  "transferSubmitted": "承認を申請しました",
+  "transferApprove": "承認する",
+  "transferApproveQ": "この移動を承認しますか？",
+  "transferApproved": "移動を承認しました",
+  "transferReject": "却下する",
+  "transferRejectQ": "この移動を却下しますか？",
+  "transferRejected": "移動を却下しました",
+  "transferCancelAction": "移動を中止",
+  "transferCancelQ": "この移動を中止しますか？",
+  "transferCancelBody": "在庫はまだ動いていないため、中止しても在庫は変わりません。",
+  "transferCancelled": "移動を中止しました",
+  "transferStartPicking": "ピッキング開始",
+  "transferPickQty": "ピック数",
+  "transferPickProgress": "{picked} / {total} ピック済み",
+  "@transferPickProgress": {
+    "placeholders": {
+      "picked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "transferCompletePicking": "出庫を確定",
+  "transferCompletePickingQ": "出庫を確定しますか？",
+  "transferCompletePickingBody": "{source} の在庫からピック数を引き、輸送中に切り替えます。",
+  "@transferCompletePickingBody": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "transferPickIncomplete": "未ピックの明細があるため出庫を確定できません",
+  "transferStartReceiving": "受入を開始",
+  "transferReceiveQty": "受入数",
+  "transferReceiveProgress": "{received} / {total} 受入済み",
+  "@transferReceiveProgress": {
+    "placeholders": {
+      "received": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "transferCompleteReceiving": "受入を確定",
+  "transferCompleteReceivingQ": "受入を確定しますか？",
+  "transferCompleteReceivingBody": "{destination} に受入数を加算し、移動を完了します。",
+  "@transferCompleteReceivingBody": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReceiveIncomplete": "未受入の明細があるため受入を確定できません",
+  "transferCompleted": "移動が完了しました（{loss}件で数量差異）",
+  "@transferCompleted": {
+    "placeholders": {
+      "loss": {
+        "type": "int"
+      }
+    }
+  },
+  "transferRequested": "申請者",
+  "transferApprovedBy": "承認者",
+  "transferPlanned": "予定",
+  "transferLineProductName": "商品名（任意）",
+  "featTransfer": "倉庫間移動",
+  "featTransferDesc": "倉庫間で在庫を移動"
 }

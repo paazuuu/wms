@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0018 applied.** 0019 onward is still planned.
+> Status: **0010–0019 applied.** 0020 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -152,8 +152,42 @@ update inside a transaction._
   and shipping-detail polish is Step 9; both are already served by the
   existing shipment screens, so nothing new was required there for this pass.
 
-### 0019 — Inter-warehouse transfer (Step 11)
-- `transfer_orders` + state machine; TRANSFER_OUT/IN movements; no self-approval.
+### 0019 — Inter-warehouse transfer (Step 11) ✅
+- `transfer_orders`/`transfer_order_lines`, following the spec's state
+  machine verbatim: DRAFT → PENDING_APPROVAL → APPROVED → PICKING →
+  IN_TRANSIT → RECEIVING → COMPLETED, with REJECTED off PENDING_APPROVAL and
+  CANCELLED off anything before stock has actually left (DRAFT/
+  PENDING_APPROVAL/APPROVED/PICKING).
+- Picking a line and receiving one both use the nullable-quantity +
+  generated-variance shape already established by pick_tasks (0018),
+  inspection items (0015) and count lines (0017): a short pick or a transit
+  loss is its own recorded number, never silently corrected to plan
+  (spec §10). `receive_variance` catches transit loss specifically.
+- Stock moves exactly twice: `TRANSFER_OUT` at the source when picking
+  completes, `TRANSFER_IN` at the destination when receiving completes —
+  both movement types were already anticipated in `stock_movements`' check
+  constraint back in 0013.
+- Self-approval is refused once both requester and approver are known
+  (spec §16 "自己承認禁止"): `requested_by`/`approved_by` are captured from
+  `auth.uid()` inside the RPCs, never taken as a parameter. Inactive today —
+  same transitional gate as 0012's `has_permission`, since the app still has
+  no sign-in — and starts enforcing the moment auth ships.
+- Edge function `transfers`, service role only, same grant discipline as
+  every ledger-touching function before it (PUBLIC's default EXECUTE grant
+  revoked, service_role only).
+- Verified live via an aborted transaction: created a throwaway second
+  warehouse and a transfer, refused a same-warehouse transfer and an
+  out-of-order pick, ran it through a **short pick** (30 requested → 27
+  picked) and a **transit loss** (27 shipped → 25 received) to COMPLETED,
+  confirmed the source/destination stock levels matched exactly, then let
+  the deliberate exception roll all of it back — nothing persisted.
+- Flutter client `features/transfers`: a list (create by choosing source +
+  destination + line items) and a detail screen that drives the state
+  machine one step at a time, with the primary action changing per status
+  and a cancel/reject action alongside it while applicable. Completing
+  picking or receiving explains a not-all-lines-touched refusal instead of
+  letting the tap fail silently, matching 0018's pick-list detail screen.
+  Home menu gets a new 倉庫間移動 entry (`field_operations` group).
 
 ### 0020 — Stock ledger views / audit surfacing (Step 12)
 - Ledger read views ("why did stock change"), audit query RPCs.
