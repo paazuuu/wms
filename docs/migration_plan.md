@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0014 applied.** 0015 onward is still planned.
+> Status: **0010–0015 applied.** 0016 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -51,10 +51,20 @@ update inside a transaction._
   grants EXECUTE to PUBLIC by default, so anon could previously call
   `reconcile_delivery_plan` and fabricate stock) and granted to service_role.
 
-### 0015 — Receiving + inspection (Steps 4–5)
-- Generalize `delivery_plans/lines` ↔ `purchase_orders/lines`;
-  `delivery_reconciliations` ↔ `receipts`. `inspections` / `inspection_items`
-  (PASS/FAIL/PARTIAL/HOLD; store discrepancy). Reuse existing delivery UI.
+### 0015 — Receiving + inspection (Steps 4–5) ✅
+- `inspections` / `inspection_items` hanging off a receipt, with
+  PASS/FAIL/PARTIAL/HOLD and a **stored** discrepancy (generated column, never
+  corrected away — spec §10) and a pass/fail split per line so 47 pass / 3 fail
+  is expressible (§38 Scenario B).
+- start_inspection (idempotent) / save_inspection_item / complete_inspection
+  (refuses to close while lines are unchecked) / inspection_detail.
+- `inspections` edge function + Flutter list & detail screens; the home menu's
+  検品 entry now points here instead of the dead InventorOS screen.
+- Renaming `delivery_plans`→`purchase_orders` and `delivery_reconciliations`→
+  `receipts` was deliberately NOT done: the existing names already carry the
+  same meaning, and renaming live tables the whole app reads would be churn
+  with no behavioural gain. Generalisation can happen if a second inbound
+  document type ever appears.
 
 ### 0016 — Put-away (Step 6)
 - Staging → suggested bin → scan bin/item → confirm; movements STAGING→PICKABLE.
