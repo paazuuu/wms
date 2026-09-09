@@ -8,6 +8,7 @@ import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/receipt.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
+import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
 import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
@@ -163,11 +164,26 @@ class FakeWarehouseRepository implements WarehouseRepository {
 }
 
 class FakeStockRepository implements StockRepository {
-  FakeStockRepository(this.items);
+  FakeStockRepository(this.items, {this.movements = const []});
   final List<StockItem> items;
+  final List<StockMovement> movements;
+
+  /// The warehouse the last list() call was scoped to (null = all warehouses).
+  int? lastWarehouseId;
 
   @override
-  Future<ApiResult<List<StockItem>>> list() async => ApiSuccess(items);
+  Future<ApiResult<List<StockItem>>> list({int? warehouseId}) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(items);
+  }
+
+  @override
+  Future<ApiResult<List<StockMovement>>> ledger(
+    String janCode, {
+    int? warehouseId,
+    int limit = 100,
+  }) async =>
+      ApiSuccess(movements.where((m) => m.janCode == janCode).toList());
 }
 
 class FakeShipmentRepository implements ShipmentRepository {

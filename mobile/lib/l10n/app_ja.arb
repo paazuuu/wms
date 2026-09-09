@@ -599,5 +599,20 @@
   "whBinShipping": "出荷",
   "whBinReturns": "返品",
   "whBinDamaged": "破損",
-  "whBinVirtual": "仮想"
+  "whBinVirtual": "仮想",
+  "ledgerTitle": "在庫履歴",
+  "ledgerSubtitle": "この商品の在庫が動いた理由",
+  "ledgerEmpty": "まだ在庫の動きがありません",
+  "ledgerBeforeAfter": "変更前 → 変更後",
+  "mvOpening": "期首",
+  "mvReceipt": "入庫",
+  "mvReceiptCancel": "入庫取消",
+  "mvPutaway": "棚入れ",
+  "mvPick": "ピッキング",
+  "mvShip": "出庫",
+  "mvShipCancel": "出庫取消",
+  "mvAdjust": "在庫調整",
+  "mvCount": "棚卸",
+  "mvTransferIn": "移動入庫",
+  "mvTransferOut": "移動出庫"
 }

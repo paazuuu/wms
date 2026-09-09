@@ -1598,4 +1598,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get whBinVirtual => '仮想';
+
+  @override
+  String get ledgerTitle => '在庫履歴';
+
+  @override
+  String get ledgerSubtitle => 'この商品の在庫が動いた理由';
+
+  @override
+  String get ledgerEmpty => 'まだ在庫の動きがありません';
+
+  @override
+  String get ledgerBeforeAfter => '変更前 → 変更後';
+
+  @override
+  String get mvOpening => '期首';
+
+  @override
+  String get mvReceipt => '入庫';
+
+  @override
+  String get mvReceiptCancel => '入庫取消';
+
+  @override
+  String get mvPutaway => '棚入れ';
+
+  @override
+  String get mvPick => 'ピッキング';
+
+  @override
+  String get mvShip => '出庫';
+
+  @override
+  String get mvShipCancel => '出庫取消';
+
+  @override
+  String get mvAdjust => '在庫調整';
+
+  @override
+  String get mvCount => '棚卸';
+
+  @override
+  String get mvTransferIn => '移動入庫';
+
+  @override
+  String get mvTransferOut => '移動出庫';
 }

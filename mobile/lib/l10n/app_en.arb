@@ -563,5 +563,20 @@
   "whBinShipping": "Shipping",
   "whBinReturns": "Returns",
   "whBinDamaged": "Damaged",
-  "whBinVirtual": "Virtual"
+  "whBinVirtual": "Virtual",
+  "ledgerTitle": "Stock history",
+  "ledgerSubtitle": "Why this item's stock changed",
+  "ledgerEmpty": "No stock movements yet",
+  "ledgerBeforeAfter": "before → after",
+  "mvOpening": "Opening",
+  "mvReceipt": "Received",
+  "mvReceiptCancel": "Receipt cancelled",
+  "mvPutaway": "Put-away",
+  "mvPick": "Picked",
+  "mvShip": "Shipped",
+  "mvShipCancel": "Shipment cancelled",
+  "mvAdjust": "Adjustment",
+  "mvCount": "Cycle count",
+  "mvTransferIn": "Transfer in",
+  "mvTransferOut": "Transfer out"
 }

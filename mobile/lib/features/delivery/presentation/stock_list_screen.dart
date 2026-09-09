@@ -8,6 +8,7 @@ import '../../../core/ui/state_views.dart';
 import '../application/delivery_providers.dart';
 import '../domain/jan.dart';
 import '../domain/stock_item.dart';
+import 'stock_ledger_screen.dart';
 
 /// The "総在庫" column: per-JAN total on-hand, accumulated from every completed
 /// reconciliation. A scan/search box filters by JAN or product name.
@@ -199,7 +200,16 @@ class _StockCard extends StatelessWidget {
     final zero = item.onHand <= 0;
     final hasName = item.productName.isNotEmpty;
     return Card(
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        // Tapping opens the ledger: why this quantity is what it is (spec §18).
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => StockLedgerScreen(
+            janCode: item.janCode,
+            productName: item.productName,
+          ),
+        )),
+        child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         child: Row(
@@ -247,7 +257,10 @@ class _StockCard extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(width: AppSpacing.xs),
+            Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
           ],
+        ),
         ),
       ),
     );

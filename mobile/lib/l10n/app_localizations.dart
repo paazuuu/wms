@@ -3045,6 +3045,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'仮想'**
   String get whBinVirtual;
+
+  /// No description provided for @ledgerTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫履歴'**
+  String get ledgerTitle;
+
+  /// No description provided for @ledgerSubtitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品の在庫が動いた理由'**
+  String get ledgerSubtitle;
+
+  /// No description provided for @ledgerEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ在庫の動きがありません'**
+  String get ledgerEmpty;
+
+  /// No description provided for @ledgerBeforeAfter.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更前 → 変更後'**
+  String get ledgerBeforeAfter;
+
+  /// No description provided for @mvOpening.
+  ///
+  /// In ja, this message translates to:
+  /// **'期首'**
+  String get mvOpening;
+
+  /// No description provided for @mvReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫'**
+  String get mvReceipt;
+
+  /// No description provided for @mvReceiptCancel.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫取消'**
+  String get mvReceiptCancel;
+
+  /// No description provided for @mvPutaway.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ'**
+  String get mvPutaway;
+
+  /// No description provided for @mvPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング'**
+  String get mvPick;
+
+  /// No description provided for @mvShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get mvShip;
+
+  /// No description provided for @mvShipCancel.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫取消'**
+  String get mvShipCancel;
+
+  /// No description provided for @mvAdjust.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫調整'**
+  String get mvAdjust;
+
+  /// No description provided for @mvCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸'**
+  String get mvCount;
+
+  /// No description provided for @mvTransferIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動入庫'**
+  String get mvTransferIn;
+
+  /// No description provided for @mvTransferOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動出庫'**
+  String get mvTransferOut;
 }
 
 class _AppLocalizationsDelegate

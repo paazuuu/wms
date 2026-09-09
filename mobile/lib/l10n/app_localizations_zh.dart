@@ -1597,4 +1597,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get whBinVirtual => '虚拟';
+
+  @override
+  String get ledgerTitle => '库存履历';
+
+  @override
+  String get ledgerSubtitle => '该商品库存变动的原因';
+
+  @override
+  String get ledgerEmpty => '暂无库存变动';
+
+  @override
+  String get ledgerBeforeAfter => '变更前 → 变更后';
+
+  @override
+  String get mvOpening => '期初';
+
+  @override
+  String get mvReceipt => '入库';
+
+  @override
+  String get mvReceiptCancel => '入库取消';
+
+  @override
+  String get mvPutaway => '上架';
+
+  @override
+  String get mvPick => '拣货';
+
+  @override
+  String get mvShip => '出库';
+
+  @override
+  String get mvShipCancel => '出库取消';
+
+  @override
+  String get mvAdjust => '库存调整';
+
+  @override
+  String get mvCount => '盘点';
+
+  @override
+  String get mvTransferIn => '调拨入库';
+
+  @override
+  String get mvTransferOut => '调拨出库';
 }

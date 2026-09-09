@@ -1647,4 +1647,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whBinVirtual => 'Virtual';
+
+  @override
+  String get ledgerTitle => 'Stock history';
+
+  @override
+  String get ledgerSubtitle => 'Why this item\'s stock changed';
+
+  @override
+  String get ledgerEmpty => 'No stock movements yet';
+
+  @override
+  String get ledgerBeforeAfter => 'before → after';
+
+  @override
+  String get mvOpening => 'Opening';
+
+  @override
+  String get mvReceipt => 'Received';
+
+  @override
+  String get mvReceiptCancel => 'Receipt cancelled';
+
+  @override
+  String get mvPutaway => 'Put-away';
+
+  @override
+  String get mvPick => 'Picked';
+
+  @override
+  String get mvShip => 'Shipped';
+
+  @override
+  String get mvShipCancel => 'Shipment cancelled';
+
+  @override
+  String get mvAdjust => 'Adjustment';
+
+  @override
+  String get mvCount => 'Cycle count';
+
+  @override
+  String get mvTransferIn => 'Transfer in';
+
+  @override
+  String get mvTransferOut => 'Transfer out';
 }

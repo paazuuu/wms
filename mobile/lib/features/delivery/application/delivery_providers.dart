@@ -7,9 +7,11 @@ import '../data/delivery_repository.dart';
 import '../data/on_device_scanner.dart';
 import '../data/remote_delivery_note_scanner.dart';
 import '../data/stock_repository.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/receipt.dart';
 import '../domain/stock_item.dart';
+import '../domain/stock_movement.dart';
 import 'reconciliation_controller.dart';
 
 /// Dedicated Dio for the delivery feature, pointed at the Supabase Edge
@@ -51,10 +53,26 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
   return StockRepositoryImpl(ref.watch(restDioProvider));
 });
 
-/// Per-JAN total on-hand stock, highest first.
+/// Per-JAN on-hand stock for the active warehouse, highest first. A null active
+/// warehouse means the company-wide view.
 final stockListProvider =
     FutureProvider.autoDispose<List<StockItem>>((ref) async {
-  final result = await ref.watch(stockRepositoryProvider).list();
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
+  final result =
+      await ref.watch(stockRepositoryProvider).list(warehouseId: warehouseId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// The stock ledger for one JAN in the active warehouse — why it changed.
+final stockLedgerProvider = FutureProvider.autoDispose
+    .family<List<StockMovement>, String>((ref, janCode) async {
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
+  final result = await ref
+      .watch(stockRepositoryProvider)
+      .ledger(janCode, warehouseId: warehouseId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),
