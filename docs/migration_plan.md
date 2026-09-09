@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0015 applied.** 0016 onward is still planned.
+> Status: **0010–0016 applied.** 0017 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -66,8 +66,21 @@ update inside a transaction._
   with no behavioural gain. Generalisation can happen if a second inbound
   document type ever appears.
 
-### 0016 — Put-away (Step 6)
-- Staging → suggested bin → scan bin/item → confirm; movements STAGING→PICKABLE.
+### 0016 — Locations & put-away, opt-in (Step 6) ✅
+- `warehouses.uses_locations` (**default false**) is the switch. The operator
+  does not use shelf locations, so nothing is created by default and the system
+  behaves exactly as before; the capability is designed in for when they adopt
+  it. Spec §7 (don't force the hierarchy) and §49 (auto-creation is a toggle).
+- The four bins 0010 seeded were removed for warehouses that have not opted in,
+  guarded on the ledger so a bin that was ever used is never dropped.
+- `bin_stock` per-bin balances + `apply_bin_movement` (the bin analogue of
+  apply_stock_movement) + `putaway()`, which refuses when locations are off,
+  when bins span warehouses, or when the source does not hold enough.
+- `stock_movements.balance_scope` says whether a row's before/after describe the
+  warehouse or a bin balance; a put-away redistributes stock, so the warehouse
+  total is untouched. `stock_ledger` gained a scope filter defaulting to
+  WAREHOUSE, so existing callers see exactly what they saw before.
+- Wizard: locations off by default, bin seeding only offered once it is on.
 
 ### 0017 — Picking / packing / shipping (Steps 7–9)
 - `pick_lists`/`pick_tasks`, allocation, pack sessions, shipping completion.

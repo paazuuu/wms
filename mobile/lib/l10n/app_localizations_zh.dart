@@ -1735,4 +1735,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qcSplitHint => '请输入合格数与不良数（合计即为实数）。';
+
+  @override
+  String get whFieldUsesLocations => '按库位管理';
+
+  @override
+  String get whFieldUsesLocationsHelp => '关闭时按仓库整体管理库存。仅在需要按货架管理时开启（之后可更改）。';
+
+  @override
+  String get whLocationsOn => '库位管理';
+
+  @override
+  String get whPutaway => '上架';
 }

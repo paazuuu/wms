@@ -144,6 +144,7 @@ class FakeWarehouseRepository implements WarehouseRepository {
       code: warehouse.code,
       name: warehouse.name,
       status: warehouse.isActive ? 'active' : 'inactive',
+      usesLocations: warehouse.usesLocations,
       timezone: warehouse.timezone,
     ));
   }
@@ -156,6 +157,7 @@ class FakeWarehouseRepository implements WarehouseRepository {
     String? phone,
     String? timezone,
     bool? isActive,
+    bool? usesLocations,
   }) async =>
       ApiSuccess(overviewValue.byId(id) ??
           Warehouse(id: id, code: 'X', name: name ?? 'X'));

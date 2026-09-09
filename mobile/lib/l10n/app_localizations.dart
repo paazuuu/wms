@@ -3309,6 +3309,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'合格数と不良数を入力してください（合計が実数になります）'**
   String get qcSplitHint;
+
+  /// No description provided for @whFieldUsesLocations.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚（ロケーション）で管理する'**
+  String get whFieldUsesLocations;
+
+  /// No description provided for @whFieldUsesLocationsHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'オフのままなら在庫は倉庫単位で管理します。棚番で管理する場合だけオンにしてください（後から変更できます）。'**
+  String get whFieldUsesLocationsHelp;
+
+  /// No description provided for @whLocationsOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚管理'**
+  String get whLocationsOn;
+
+  /// No description provided for @whPutaway.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ'**
+  String get whPutaway;
 }
 
 class _AppLocalizationsDelegate

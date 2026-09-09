@@ -190,6 +190,14 @@ class _WarehouseCard extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (warehouse.usesLocations) ...[
+                    StatusPill(
+                        tone: StatusTone.info,
+                        label: l10n.whLocationsOn,
+                        icon: Icons.shelves,
+                        dense: true),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
                   if (!warehouse.isActive)
                     StatusPill(
                         tone: StatusTone.neutral,

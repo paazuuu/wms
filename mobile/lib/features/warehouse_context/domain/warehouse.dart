@@ -12,6 +12,7 @@ class Warehouse extends Equatable {
     required this.name,
     this.status = 'active',
     this.isDefault = false,
+    this.usesLocations = false,
     this.timezone = 'Asia/Tokyo',
     this.skuCount = 0,
     this.onHand = 0,
@@ -29,6 +30,10 @@ class Warehouse extends Equatable {
 
   /// The company's default warehouse — preselected as the active context.
   final bool isDefault;
+
+  /// Opt-in shelf locations (spec §7, §49). While false the warehouse keeps a
+  /// single balance and bins / put-away stay inactive — the default.
+  final bool usesLocations;
 
   final String timezone;
 
@@ -52,6 +57,7 @@ class Warehouse extends Equatable {
         name: json['name'] as String? ?? '',
         status: json['status'] as String? ?? 'active',
         isDefault: json['is_default'] == true,
+        usesLocations: json['uses_locations'] == true,
         timezone: json['timezone'] as String? ?? 'Asia/Tokyo',
         skuCount: _asInt(json['sku_count']),
         onHand: _asInt(json['on_hand']),
@@ -60,8 +66,10 @@ class Warehouse extends Equatable {
       );
 
   @override
-  List<Object?> get props =>
-      [id, code, name, status, isDefault, timezone, skuCount, onHand, inboundOpen, outboundOpen];
+  List<Object?> get props => [
+        id, code, name, status, isDefault, usesLocations, timezone,
+        skuCount, onHand, inboundOpen, outboundOpen
+      ];
 }
 
 /// Company-wide totals across every warehouse (the admin "all" row, spec §50).
@@ -173,7 +181,8 @@ class NewWarehouse {
     this.phone,
     this.timezone = 'Asia/Tokyo',
     this.isActive = true,
-    this.createDefaultBins = true,
+    this.usesLocations = false,
+    this.createDefaultBins = false,
     this.receivingBin,
     this.shippingBin,
   });
@@ -185,8 +194,13 @@ class NewWarehouse {
   final String timezone;
   final bool isActive;
 
+  /// Manage stock by shelf location. Off by default (spec §7: do not force the
+  /// hierarchy); turning it on is what makes bins and put-away meaningful.
+  final bool usesLocations;
+
   /// Seed STAGING / QC_HOLD / SHIPPING / PICKABLE bins for the new warehouse.
-  /// Optional by design — auto-creation is a toggle, not forced (spec §49).
+  /// Only offered once [usesLocations] is on — auto-creation is a toggle, never
+  /// a default (spec §49).
   final bool createDefaultBins;
 
   /// Default receiving (staging) and shipping bin codes for the wizard.
@@ -200,7 +214,8 @@ class NewWarehouse {
         if (phone != null && phone!.isNotEmpty) 'phone': phone,
         'timezone': timezone,
         'is_active': isActive,
-        'create_default_bins': createDefaultBins,
+        'uses_locations': usesLocations,
+        'create_default_bins': usesLocations && createDefaultBins,
         if (receivingBin != null && receivingBin!.isNotEmpty)
           'receiving_bin': receivingBin,
         if (shippingBin != null && shippingBin!.isNotEmpty)

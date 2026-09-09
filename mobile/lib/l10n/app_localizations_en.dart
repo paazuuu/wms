@@ -1787,4 +1787,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get qcSplitHint =>
       'Enter passed and failed counts (they add up to the actual).';
+
+  @override
+  String get whFieldUsesLocations => 'Manage stock by location';
+
+  @override
+  String get whFieldUsesLocationsHelp =>
+      'Leave off to keep one balance per warehouse. Turn on only if you track stock by shelf — you can change this later.';
+
+  @override
+  String get whLocationsOn => 'Locations';
+
+  @override
+  String get whPutaway => 'Put-away';
 }

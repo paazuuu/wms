@@ -29,7 +29,10 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
 
   String _timezone = 'Asia/Tokyo';
   bool _isActive = true;
-  bool _defaultBins = true;
+  // Locations are opt-in (spec §7): a warehouse keeps a single balance unless
+  // the operator says it is managed by shelf. Bins only matter once it is on.
+  bool _usesLocations = false;
+  bool _defaultBins = false;
   bool _saving = false;
 
   static const _timezones = <String>[
@@ -64,9 +67,12 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
             phone: _phone.text.trim(),
             timezone: _timezone,
             isActive: _isActive,
-            createDefaultBins: _defaultBins,
-            receivingBin: _defaultBins ? _receivingBin.text.trim() : null,
-            shippingBin: _defaultBins ? _shippingBin.text.trim() : null,
+            usesLocations: _usesLocations,
+            createDefaultBins: _usesLocations && _defaultBins,
+            receivingBin:
+                _usesLocations && _defaultBins ? _receivingBin.text.trim() : null,
+            shippingBin:
+                _usesLocations && _defaultBins ? _shippingBin.text.trim() : null,
           ),
         );
     if (!mounted) return;
@@ -171,13 +177,24 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
             ),
             const Divider(),
             SwitchListTile(
-              value: _defaultBins,
-              onChanged: (v) => setState(() => _defaultBins = v),
-              title: Text(l10n.whFieldDefaultBins),
-              subtitle: Text(l10n.whFieldDefaultBinsHelp),
+              value: _usesLocations,
+              onChanged: (v) => setState(() {
+                _usesLocations = v;
+                if (!v) _defaultBins = false;
+              }),
+              title: Text(l10n.whFieldUsesLocations),
+              subtitle: Text(l10n.whFieldUsesLocationsHelp),
               contentPadding: EdgeInsets.zero,
             ),
-            if (_defaultBins) ...[
+            if (_usesLocations)
+              SwitchListTile(
+                value: _defaultBins,
+                onChanged: (v) => setState(() => _defaultBins = v),
+                title: Text(l10n.whFieldDefaultBins),
+                subtitle: Text(l10n.whFieldDefaultBinsHelp),
+                contentPadding: EdgeInsets.zero,
+              ),
+            if (_usesLocations && _defaultBins) ...[
               const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _receivingBin,

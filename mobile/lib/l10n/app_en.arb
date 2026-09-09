@@ -610,5 +610,9 @@
   "@qcCompleted": {"placeholders": {"status": {"type": "String"}}},
   "qcFailedUnits": "{count} failed",
   "@qcFailedUnits": {"placeholders": {"count": {"type": "int"}}},
-  "qcSplitHint": "Enter passed and failed counts (they add up to the actual)."
+  "qcSplitHint": "Enter passed and failed counts (they add up to the actual).",
+  "whFieldUsesLocations": "Manage stock by location",
+  "whFieldUsesLocationsHelp": "Leave off to keep one balance per warehouse. Turn on only if you track stock by shelf — you can change this later.",
+  "whLocationsOn": "Locations",
+  "whPutaway": "Put-away"
 }

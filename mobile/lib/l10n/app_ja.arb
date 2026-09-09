@@ -646,5 +646,9 @@
   "@qcCompleted": {"placeholders": {"status": {"type": "String"}}},
   "qcFailedUnits": "不良 {count}",
   "@qcFailedUnits": {"placeholders": {"count": {"type": "int"}}},
-  "qcSplitHint": "合格数と不良数を入力してください（合計が実数になります）"
+  "qcSplitHint": "合格数と不良数を入力してください（合計が実数になります）",
+  "whFieldUsesLocations": "棚（ロケーション）で管理する",
+  "whFieldUsesLocationsHelp": "オフのままなら在庫は倉庫単位で管理します。棚番で管理する場合だけオンにしてください（後から変更できます）。",
+  "whLocationsOn": "棚管理",
+  "whPutaway": "棚入れ"
 }

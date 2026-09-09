@@ -130,6 +130,8 @@ Deno.serve(async (req) => {
           phone: str(body.phone),
           timezone: str(body.timezone) ?? "Asia/Tokyo",
           status: body.is_active === false ? "inactive" : "active",
+          // Locations are opt-in: absent means a plain per-warehouse balance.
+          uses_locations: body.uses_locations === true,
         })
         .select("*")
         .single();
@@ -142,8 +144,9 @@ Deno.serve(async (req) => {
         return json({ message }, status);
       }
 
-      // Optional starter bins so the staged flows have somewhere to land.
-      if (body.create_default_bins !== false) {
+      // Starter bins only on an explicit opt-in, and only for a warehouse that
+      // actually manages stock by location. Never a default (spec §7, §49).
+      if (body.uses_locations === true && body.create_default_bins === true) {
         const receiving = str(body.receiving_bin)?.toUpperCase() ?? "STAGE-01";
         const shipping = str(body.shipping_bin)?.toUpperCase() ?? "SHIP-01";
         const rows = defaultBins(receiving, shipping).map((b) => ({
@@ -191,6 +194,9 @@ Deno.serve(async (req) => {
       if ("timezone" in body) patch.timezone = str(body.timezone) ?? "Asia/Tokyo";
       if ("is_active" in body) {
         patch.status = body.is_active === false ? "inactive" : "active";
+      }
+      if ("uses_locations" in body) {
+        patch.uses_locations = body.uses_locations === true;
       }
 
       const { data, error } = await supabase

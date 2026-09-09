@@ -18,6 +18,7 @@ abstract class WarehouseRepository {
     String? phone,
     String? timezone,
     bool? isActive,
+    bool? usesLocations,
   });
   Future<ApiResult<List<Bin>>> bins(int warehouseId);
 }
@@ -59,6 +60,7 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
     String? phone,
     String? timezone,
     bool? isActive,
+    bool? usesLocations,
   }) async {
     try {
       final response = await _dio.patch('/warehouses/$id', data: {
@@ -67,6 +69,7 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
         if (phone != null) 'phone': phone,
         if (timezone != null) 'timezone': timezone,
         if (isActive != null) 'is_active': isActive,
+        if (usesLocations != null) 'uses_locations': usesLocations,
       });
       final data = (response.data as Map)['data'];
       return ApiSuccess(Warehouse.fromJson((data as Map).cast<String, dynamic>()));

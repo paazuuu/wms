@@ -1736,4 +1736,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qcSplitHint => '合格数と不良数を入力してください（合計が実数になります）';
+
+  @override
+  String get whFieldUsesLocations => '棚（ロケーション）で管理する';
+
+  @override
+  String get whFieldUsesLocationsHelp =>
+      'オフのままなら在庫は倉庫単位で管理します。棚番で管理する場合だけオンにしてください（後から変更できます）。';
+
+  @override
+  String get whLocationsOn => '棚管理';
+
+  @override
+  String get whPutaway => '棚入れ';
 }

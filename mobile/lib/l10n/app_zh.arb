@@ -610,5 +610,9 @@
   "@qcCompleted": {"placeholders": {"status": {"type": "String"}}},
   "qcFailedUnits": "不良 {count}",
   "@qcFailedUnits": {"placeholders": {"count": {"type": "int"}}},
-  "qcSplitHint": "请输入合格数与不良数（合计即为实数）。"
+  "qcSplitHint": "请输入合格数与不良数（合计即为实数）。",
+  "whFieldUsesLocations": "按库位管理",
+  "whFieldUsesLocationsHelp": "关闭时按仓库整体管理库存。仅在需要按货架管理时开启（之后可更改）。",
+  "whLocationsOn": "库位管理",
+  "whPutaway": "上架"
 }
