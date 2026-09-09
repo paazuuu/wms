@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010, 0011, 0012 applied.** 0013 onward is still planned.
+> Status: **0010–0014 applied.** 0015 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -35,41 +35,51 @@ update inside a transaction._
 - SECURITY DEFINER RPCs re-check role + scope; record actor id everywhere.
 - `audit_log` table introduced here (used by all later steps).
 
-### 0013 — Inventory ledger (precondition for ops)
-- `stock_movements` ledger + `inventory` snapshot (warehouse/bin/product).
-- Migrate `stock_levels` → `inventory` (default warehouse) without data loss;
-  keep `stock_levels` as a compatibility view during transition.
-- Rewrite reconcile/ship RPCs to emit movements, then update the snapshot.
+### 0013/0014 — Inventory ledger (precondition for ops) ✅
+- `stock_movements` ledger (signed delta + before/after + reference + actor).
+- `stock_levels` kept as the snapshot but **re-keyed to (warehouse_id, jan_code)**
+  — the old jan_code-only key made per-warehouse stock impossible. Renaming it to
+  `inventory` was dropped as churn: the table already is the snapshot, and not
+  touching a table the whole app reads and writes kept the blast radius small.
+  A bin-level balance table arrives with put-away, when it is actually needed.
+- `apply_stock_movement` is the single place stock moves: locks the row, computes
+  the effective delta, appends the movement, updates the snapshot.
+- reconcile/cancel/ship/cancel_shipment rewritten to go through it, each also
+  writing an `audit_log` entry.
+- `stock_ledger()` answers "why did stock change" (spec §18).
+- Hardening: mutating routines revoked from PUBLIC/anon/authenticated (Postgres
+  grants EXECUTE to PUBLIC by default, so anon could previously call
+  `reconcile_delivery_plan` and fabricate stock) and granted to service_role.
 
-### 0014 — Receiving + inspection (Steps 4–5)
+### 0015 — Receiving + inspection (Steps 4–5)
 - Generalize `delivery_plans/lines` ↔ `purchase_orders/lines`;
   `delivery_reconciliations` ↔ `receipts`. `inspections` / `inspection_items`
   (PASS/FAIL/PARTIAL/HOLD; store discrepancy). Reuse existing delivery UI.
 
-### 0015 — Put-away (Step 6)
+### 0016 — Put-away (Step 6)
 - Staging → suggested bin → scan bin/item → confirm; movements STAGING→PICKABLE.
 
-### 0016 — Picking / packing / shipping (Steps 7–9)
+### 0017 — Picking / packing / shipping (Steps 7–9)
 - `pick_lists`/`pick_tasks`, allocation, pack sessions, shipping completion.
 - Extend current shipment model with allocate/pick/pack states; keep cartons + JAN
   print + 送り状 + sender profile intact.
 
-### 0017 — Cycle count + adjustment (Step 10)
+### 0018 — Cycle count + adjustment (Step 10)
 - Count sessions, variance, approval → ADJUST movements; blind-count option.
 
-### 0018 — Inter-warehouse transfer (Step 11)
+### 0019 — Inter-warehouse transfer (Step 11)
 - `transfer_orders` + state machine; TRANSFER_OUT/IN movements; no self-approval.
 
-### 0019 — Stock ledger views / audit surfacing (Step 12)
+### 0020 — Stock ledger views / audit surfacing (Step 12)
 - Ledger read views ("why did stock change"), audit query RPCs.
 
-### 0020 — Seed / demo (Step 13)
+### 0021 — Seed / demo (Step 13)
 - Demo company (Demo Trading Co.), 神戸/大阪 warehouses, zones A/B/C, bins
   (A-01-01…, QC-01, STAGE-01, SHIP-01), demo users per role, 20–50 products,
   5 POs, 10–20 SOs, inspections (PASS/FAIL/PARTIAL), a 神戸→大阪 transfer, so the
   app is populated on first run (fixes "looks empty"). Demo scenarios A–D (§38).
 
-### 0021+ — AI + connectors (Steps 15–17)
+### 0022+ — AI + connectors (Steps 15–17)
 - `ai_analysis` + provider abstraction; re-point Gemini OCR through it.
 - Connector/adapter tables for external systems; InventorOS becomes one connector.
 
