@@ -2192,4 +2192,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get taskShippingWait => '待出库';
+
+  @override
+  String get searchTitle => '搜索';
+
+  @override
+  String get searchHint => '按JAN、单据编号或往来单位名称搜索';
+
+  @override
+  String get searchNoQuery => '可跨入库、出库、调拨和商品进行搜索。';
+
+  @override
+  String get searchEmpty => '没有匹配结果';
+
+  @override
+  String get searchEmptyBody => '请尝试其他关键词。';
+
+  @override
+  String get searchKindStock => '商品';
+
+  @override
+  String get searchKindDelivery => '入库';
+
+  @override
+  String get searchKindShipment => '出库';
+
+  @override
+  String get searchKindPickList => '拣货';
+
+  @override
+  String get searchKindTransfer => '调拨';
 }

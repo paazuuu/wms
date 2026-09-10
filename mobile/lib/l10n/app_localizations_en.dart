@@ -2258,4 +2258,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskShippingWait => 'To ship';
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get searchHint => 'Search by JAN, document number, or party name';
+
+  @override
+  String get searchNoQuery =>
+      'Search across deliveries, shipments, transfers and products.';
+
+  @override
+  String get searchEmpty => 'No matches';
+
+  @override
+  String get searchEmptyBody => 'Try a different keyword.';
+
+  @override
+  String get searchKindStock => 'Product';
+
+  @override
+  String get searchKindDelivery => 'Delivery';
+
+  @override
+  String get searchKindShipment => 'Shipment';
+
+  @override
+  String get searchKindPickList => 'Picking';
+
+  @override
+  String get searchKindTransfer => 'Transfer';
 }

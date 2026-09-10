@@ -13,6 +13,7 @@ import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../inspection/presentation/barcode_scan_screen.dart';
 import '../../products/presentation/product_lookup_screen.dart';
+import '../../search/presentation/global_search_screen.dart';
 import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/feature_catalog.dart';
@@ -116,6 +117,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (code != null && code.isNotEmpty) _handleScan(code);
   }
 
+  /// Opens cross-entity search (spec §23) as its own full-screen route, kept
+  /// separate from the top bar's scan box — that field is tuned for one fast
+  /// job (JAN → Product Lookup) and shouldn't be slowed down by also trying
+  /// to be a general search.
+  void _openGlobalSearch() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+    );
+  }
+
   void _logout() => ref.read(authControllerProvider.notifier).logout();
 
   @override
@@ -178,6 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ? null
               : () => _scaffoldKey.currentState?.openDrawer(),
           onCamera: _cameraSupported ? _openCameraScan : null,
+          onSearch: _openGlobalSearch,
         ),
         Expanded(child: _content),
       ],
@@ -223,6 +235,7 @@ class _TopBar extends StatelessWidget {
     required this.onScan,
     required this.onMenu,
     required this.onCamera,
+    required this.onSearch,
   });
 
   final bool wide;
@@ -231,6 +244,7 @@ class _TopBar extends StatelessWidget {
   final ValueChanged<String> onScan;
   final VoidCallback? onMenu;
   final Future<void> Function()? onCamera;
+  final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -295,6 +309,12 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
+          IconButton(
+            tooltip: l10n.searchTitle,
+            icon: const Icon(Icons.search),
+            onPressed: onSearch,
+          ),
+          const SizedBox(width: AppSpacing.xs),
           const WarehousePicker(),
           const SizedBox(width: AppSpacing.xs),
           const TextScaleMenuButton(),

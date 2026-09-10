@@ -17,6 +17,8 @@ import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
 import 'package:wms_mobile/features/audit/data/audit_repository.dart';
 import 'package:wms_mobile/features/audit/domain/audit_entry.dart';
+import 'package:wms_mobile/features/search/data/search_repository.dart';
+import 'package:wms_mobile/features/search/domain/search_result.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_repository.dart';
 import 'package:wms_mobile/features/transfers/data/transfer_repository.dart';
 import 'package:wms_mobile/features/transfers/domain/transfer_order.dart';
@@ -797,4 +799,25 @@ class FakeAuditRepository implements AuditRepository {
 
   @override
   Future<ApiResult<List<String>>> eventTypes() async => ApiSuccess(types);
+}
+
+/// Search stub. Returns [results] for any non-empty query, records the
+/// warehouse the last call was scoped to.
+class FakeSearchRepository implements SearchRepository {
+  FakeSearchRepository(this.results);
+  final List<SearchResult> results;
+
+  int? lastWarehouseId;
+  String? lastQuery;
+
+  @override
+  Future<ApiResult<List<SearchResult>>> search(
+    String query, {
+    int? warehouseId,
+    int limit = 8,
+  }) async {
+    lastQuery = query;
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(results);
+  }
 }

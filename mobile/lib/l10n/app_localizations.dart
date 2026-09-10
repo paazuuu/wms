@@ -4179,6 +4179,66 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷待ち'**
   String get taskShippingWait;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'検索'**
+  String get searchTitle;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN・伝票番号・取引先名で検索'**
+  String get searchHint;
+
+  /// No description provided for @searchNoQuery.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・出荷・移動の番号や商品名で横断検索できます。'**
+  String get searchNoQuery;
+
+  /// No description provided for @searchEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致する結果がありません'**
+  String get searchEmpty;
+
+  /// No description provided for @searchEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'別のキーワードでお試しください。'**
+  String get searchEmptyBody;
+
+  /// No description provided for @searchKindStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get searchKindStock;
+
+  /// No description provided for @searchKindDelivery.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get searchKindDelivery;
+
+  /// No description provided for @searchKindShipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get searchKindShipment;
+
+  /// No description provided for @searchKindPickList.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング'**
+  String get searchKindPickList;
+
+  /// No description provided for @searchKindTransfer.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動'**
+  String get searchKindTransfer;
 }
 
 class _AppLocalizationsDelegate

@@ -2194,4 +2194,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get taskShippingWait => '出荷待ち';
+
+  @override
+  String get searchTitle => '検索';
+
+  @override
+  String get searchHint => 'JAN・伝票番号・取引先名で検索';
+
+  @override
+  String get searchNoQuery => '入荷・出荷・移動の番号や商品名で横断検索できます。';
+
+  @override
+  String get searchEmpty => '一致する結果がありません';
+
+  @override
+  String get searchEmptyBody => '別のキーワードでお試しください。';
+
+  @override
+  String get searchKindStock => '商品';
+
+  @override
+  String get searchKindDelivery => '入荷予定';
+
+  @override
+  String get searchKindShipment => '出荷';
+
+  @override
+  String get searchKindPickList => 'ピッキング';
+
+  @override
+  String get searchKindTransfer => '倉庫間移動';
 }

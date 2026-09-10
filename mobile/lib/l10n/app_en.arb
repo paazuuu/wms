@@ -986,5 +986,15 @@
   "featAuditLogDesc": "Review operation history, export as CSV",
   "dashTodayTasks": "Today's work",
   "taskPackingWait": "To pack",
-  "taskShippingWait": "To ship"
+  "taskShippingWait": "To ship",
+  "searchTitle": "Search",
+  "searchHint": "Search by JAN, document number, or party name",
+  "searchNoQuery": "Search across deliveries, shipments, transfers and products.",
+  "searchEmpty": "No matches",
+  "searchEmptyBody": "Try a different keyword.",
+  "searchKindStock": "Product",
+  "searchKindDelivery": "Delivery",
+  "searchKindShipment": "Shipment",
+  "searchKindPickList": "Picking",
+  "searchKindTransfer": "Transfer"
 }

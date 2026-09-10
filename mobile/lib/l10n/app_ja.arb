@@ -1076,5 +1076,15 @@
   "featAuditLogDesc": "操作履歴をCSVで確認",
   "dashTodayTasks": "今日の作業",
   "taskPackingWait": "梱包待ち",
-  "taskShippingWait": "出荷待ち"
+  "taskShippingWait": "出荷待ち",
+  "searchTitle": "検索",
+  "searchHint": "JAN・伝票番号・取引先名で検索",
+  "searchNoQuery": "入荷・出荷・移動の番号や商品名で横断検索できます。",
+  "searchEmpty": "一致する結果がありません",
+  "searchEmptyBody": "別のキーワードでお試しください。",
+  "searchKindStock": "商品",
+  "searchKindDelivery": "入荷予定",
+  "searchKindShipment": "出荷",
+  "searchKindPickList": "ピッキング",
+  "searchKindTransfer": "倉庫間移動"
 }

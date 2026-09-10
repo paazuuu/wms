@@ -17,8 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0021 applied.** Step 13 (seed/demo) deliberately skipped —
-> see below. 0022 onward is still planned.
+> Status: **0010–0022 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below. 0023 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -244,7 +244,29 @@ update inside a transaction._
   tables with a detail drawer, activity timelines) is unstarted — this pass
   only closed the "dashboard doesn't know about half the app" gap.
 
-### 0022+ — AI + connectors (Steps 15–17)
+### 0022 — Global search (Step 14, continued) ✅
+- §23's "Global search over items/bins/POs/SOs/customers" — of those, only
+  items (stock_levels), inbound plans (delivery_plans, this app's stand-in
+  for a PO) and outbound plans (shipment_plans, its SO stand-in) actually
+  live in Supabase; suppliers/customers/PO/SO themselves are still
+  InventorOS records (a future Connector) and aren't searchable from here.
+  Picking and transfer are included too, since both now have their own
+  numbers worth finding directly.
+- `global_search(p_query, p_warehouse_id, p_limit)`: one UNION ALL across
+  stock/delivery/shipment/pick_list/transfer, each capped at `p_limit`
+  independently so one category can't crowd out the others. Read-only,
+  called directly over PostgREST like `dashboard_metrics`/`stock_ledger` —
+  no edge function needed for a read anon is already granted.
+- Verified live (read-only call, real data): searching "0901" correctly
+  found the matching delivery plan.
+- Flutter: `features/search` — a full-screen search reachable from a new
+  icon in the top bar, kept deliberately separate from the top bar's
+  existing scan box (that field is tuned for one fast job, JAN → Product
+  Lookup, and mixing in general search would slow it down). Each result
+  opens the real detail screen for its kind (ledger / reconciliation /
+  shipment / pick list / transfer detail) rather than a generic viewer.
+
+### 0023+ — AI + connectors (Steps 15–17)
 - `ai_analysis` + provider abstraction; re-point Gemini OCR through it.
 - Connector/adapter tables for external systems; InventorOS becomes one connector.
 

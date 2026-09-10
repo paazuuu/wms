@@ -986,5 +986,15 @@
   "featAuditLogDesc": "查看操作历史并导出CSV",
   "dashTodayTasks": "今日工作",
   "taskPackingWait": "待打包",
-  "taskShippingWait": "待出库"
+  "taskShippingWait": "待出库",
+  "searchTitle": "搜索",
+  "searchHint": "按JAN、单据编号或往来单位名称搜索",
+  "searchNoQuery": "可跨入库、出库、调拨和商品进行搜索。",
+  "searchEmpty": "没有匹配结果",
+  "searchEmptyBody": "请尝试其他关键词。",
+  "searchKindStock": "商品",
+  "searchKindDelivery": "入库",
+  "searchKindShipment": "出库",
+  "searchKindPickList": "拣货",
+  "searchKindTransfer": "调拨"
 }
