@@ -983,5 +983,8 @@
   "auditActorSystem": "系统",
   "csvExportTitle": "导出CSV",
   "featAuditLog": "审计日志",
-  "featAuditLogDesc": "查看操作历史并导出CSV"
+  "featAuditLogDesc": "查看操作历史并导出CSV",
+  "dashTodayTasks": "今日工作",
+  "taskPackingWait": "待打包",
+  "taskShippingWait": "待出库"
 }

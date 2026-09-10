@@ -2185,4 +2185,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featAuditLogDesc => '操作履歴をCSVで確認';
+
+  @override
+  String get dashTodayTasks => '今日の作業';
+
+  @override
+  String get taskPackingWait => '梱包待ち';
+
+  @override
+  String get taskShippingWait => '出荷待ち';
 }

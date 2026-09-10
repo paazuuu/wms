@@ -1073,5 +1073,8 @@
   "auditActorSystem": "システム",
   "csvExportTitle": "CSVエクスポート",
   "featAuditLog": "監査ログ",
-  "featAuditLogDesc": "操作履歴をCSVで確認"
+  "featAuditLogDesc": "操作履歴をCSVで確認",
+  "dashTodayTasks": "今日の作業",
+  "taskPackingWait": "梱包待ち",
+  "taskShippingWait": "出荷待ち"
 }

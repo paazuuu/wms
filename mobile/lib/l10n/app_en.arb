@@ -983,5 +983,8 @@
   "auditActorSystem": "System",
   "csvExportTitle": "Export CSV",
   "featAuditLog": "Audit log",
-  "featAuditLogDesc": "Review operation history, export as CSV"
+  "featAuditLogDesc": "Review operation history, export as CSV",
+  "dashTodayTasks": "Today's work",
+  "taskPackingWait": "To pack",
+  "taskShippingWait": "To ship"
 }

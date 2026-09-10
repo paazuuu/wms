@@ -83,6 +83,12 @@ class DashboardMetrics extends Equatable {
     required this.totalOnHand,
     required this.lowStockCount,
     required this.lowThreshold,
+    this.pendingInspectionCount = 0,
+    this.openPickingCount = 0,
+    this.packingWaitCount = 0,
+    this.shippingWaitCount = 0,
+    this.openCountCount = 0,
+    this.openTransferCount = 0,
     required this.trend,
     required this.outstandingList,
     required this.lowStockList,
@@ -99,6 +105,25 @@ class DashboardMetrics extends Equatable {
   final int totalOnHand;
   final int lowStockCount;
   final int lowThreshold;
+
+  /// 検品待ち: inbound lots not yet fully inspected.
+  final int pendingInspectionCount;
+
+  /// ピッキング: pick lists currently being worked.
+  final int openPickingCount;
+
+  /// 梱包待ち: shipments not yet started into cartons.
+  final int packingWaitCount;
+
+  /// 出荷待ち: shipments packed, ready to confirm.
+  final int shippingWaitCount;
+
+  /// 棚卸: cycle counts still being counted.
+  final int openCountCount;
+
+  /// 倉庫間移動: transfers in flight, either direction.
+  final int openTransferCount;
+
   final List<TrendPoint> trend;
   final List<OutstandingPlanBrief> outstandingList;
   final List<LowStockBrief> lowStockList;
@@ -122,6 +147,12 @@ class DashboardMetrics extends Equatable {
       totalOnHand: _asInt(json['total_on_hand']),
       lowStockCount: _asInt(json['low_stock_count']),
       lowThreshold: _asInt(json['low_threshold']),
+      pendingInspectionCount: _asInt(json['pending_inspection_count']),
+      openPickingCount: _asInt(json['open_picking_count']),
+      packingWaitCount: _asInt(json['packing_wait_count']),
+      shippingWaitCount: _asInt(json['shipping_wait_count']),
+      openCountCount: _asInt(json['open_count_count']),
+      openTransferCount: _asInt(json['open_transfer_count']),
       trend: parseList('trend', TrendPoint.fromJson),
       outstandingList:
           parseList('outstanding_list', OutstandingPlanBrief.fromJson),
@@ -140,6 +171,12 @@ class DashboardMetrics extends Equatable {
         totalOnHand,
         lowStockCount,
         lowThreshold,
+        pendingInspectionCount,
+        openPickingCount,
+        packingWaitCount,
+        shippingWaitCount,
+        openCountCount,
+        openTransferCount,
         trend,
         outstandingList,
         lowStockList,

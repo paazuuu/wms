@@ -2183,4 +2183,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featAuditLogDesc => '查看操作历史并导出CSV';
+
+  @override
+  String get dashTodayTasks => '今日工作';
+
+  @override
+  String get taskPackingWait => '待打包';
+
+  @override
+  String get taskShippingWait => '待出库';
 }

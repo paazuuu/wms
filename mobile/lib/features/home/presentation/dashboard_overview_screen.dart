@@ -51,6 +51,15 @@ class DashboardOverviewScreen extends StatelessWidget {
           onTap: lookup == null ? null : () => onOpen(lookup),
         ),
         const SizedBox(height: AppSpacing.xl),
+        _SectionLabel(l10n.dashTodayTasks),
+        const SizedBox(height: AppSpacing.md),
+        TodayTasksRow(
+          onOpenFeature: (id) {
+            final entry = entryById(id);
+            if (entry != null) onOpen(entry);
+          },
+        ),
+        const SizedBox(height: AppSpacing.xl),
         _SectionLabel(l10n.dashOverview),
         const SizedBox(height: AppSpacing.md),
         DashboardMetricsSection(

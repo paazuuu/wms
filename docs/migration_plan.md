@@ -17,7 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0020 applied.** 0021 onward is still planned.
+> Status: **0010–0021 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below. 0022 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -216,11 +217,32 @@ update inside a transaction._
 - Flutter client `features/audit`: a list with event-type filter chips and a
   CSV export action. New 監査ログ entry on the home menu (`management` group).
 
-### 0021 — Seed / demo (Step 13)
-- Demo company (Demo Trading Co.), 神戸/大阪 warehouses, zones A/B/C, bins
-  (A-01-01…, QC-01, STAGE-01, SHIP-01), demo users per role, 20–50 products,
-  5 POs, 10–20 SOs, inspections (PASS/FAIL/PARTIAL), a 神戸→大阪 transfer, so the
-  app is populated on first run (fixes "looks empty"). Demo scenarios A–D (§38).
+### Step 13 (seed / demo) — deliberately skipped
+- Populating "Demo Trading Co." (神戸/大阪 warehouses, demo users, POs/SOs,
+  inspections, a sample transfer) means writing fictitious company/product/
+  order records into this **live** Supabase project — the one holding the
+  operator's real delivery plans and stock. Asked explicitly; the answer was
+  to skip it rather than mix demo rows into production data. If a real demo
+  is wanted later, it belongs in a separate project (or branch), not here —
+  the migrations up to this point apply cleanly to a fresh project with no
+  seed step required.
+
+### 0021 — Dashboard task counts (Step 14, partial) ✅
+- §23's admin dashboard sketch lists six "today" counts — 入荷予定・検品待ち・
+  棚入れ待ち・ピッキング・梱包待ち・出荷待ち — but `dashboard_metrics` had
+  never been extended as each flow landed, so inspection/picking/transfer/
+  count activity was invisible on the dashboard even though the backends
+  existed. Added the missing counts as more keys on the same jsonb response
+  (`pending_inspection_count`, `open_picking_count`, `packing_wait_count`,
+  `shipping_wait_count`, `open_count_count`, `open_transfer_count`) — no
+  signature change, so none of the overload-ambiguity risk 0011/0016 hit.
+- Flutter: `TodayTasksRow` — the §24 mobile task-first strip
+  ("📥入荷12 📦棚入れ8 🛒ピッキング23…") — now sits above the KPI section on
+  the dashboard, each tile a live count that opens its feature. Shown even at
+  zero, so "nothing pending" is a visible state rather than an absent one.
+- The rest of Step 14 (a management-surface pass: global search, filterable
+  tables with a detail drawer, activity timelines) is unstarted — this pass
+  only closed the "dashboard doesn't know about half the app" gap.
 
 ### 0022+ — AI + connectors (Steps 15–17)
 - `ai_analysis` + provider abstraction; re-point Gemini OCR through it.

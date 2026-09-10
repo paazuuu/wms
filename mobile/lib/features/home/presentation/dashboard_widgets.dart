@@ -570,3 +570,146 @@ class _WatchRow extends StatelessWidget {
     );
   }
 }
+
+/// A single task tile in [TodayTasksRow]: an icon, a live count, and a label.
+class TaskTile {
+  const TaskTile({
+    required this.featureId,
+    required this.icon,
+    required this.label,
+    required this.count,
+  });
+
+  /// Feature catalog id this tile opens when tapped.
+  final String featureId;
+  final IconData icon;
+  final String label;
+  final int count;
+}
+
+/// The mobile task-first strip (spec §24): "今日の作業" as a row of tappable
+/// counts — 検品待ち・ピッキング・梱包待ち・出荷待ち・棚卸・倉庫間移動 — each
+/// backed by a real count from [DashboardMetrics] rather than a static menu
+/// entry, so an operator sees what actually needs doing before opening
+/// anything. Shown even at zero so "nothing pending" is a visible state, not
+/// an absence.
+class TodayTasksRow extends ConsumerWidget {
+  const TodayTasksRow({super.key, required this.onOpenFeature});
+
+  /// Called with a feature-catalog id (e.g. 'picking') when a tile is tapped.
+  final void Function(String featureId) onOpenFeature;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final async = ref.watch(dashboardMetricsProvider);
+    final metrics = async.valueOrNull;
+    if (metrics == null) return const SizedBox.shrink();
+
+    final tasks = [
+      TaskTile(
+        featureId: 'inspection',
+        icon: Icons.fact_check_outlined,
+        label: l10n.featInspection,
+        count: metrics.pendingInspectionCount,
+      ),
+      TaskTile(
+        featureId: 'picking',
+        icon: Icons.shopping_cart_checkout_outlined,
+        label: l10n.featPicking,
+        count: metrics.openPickingCount,
+      ),
+      TaskTile(
+        featureId: 'shipment',
+        icon: Icons.inventory_2_outlined,
+        label: l10n.taskPackingWait,
+        count: metrics.packingWaitCount,
+      ),
+      TaskTile(
+        featureId: 'shipment',
+        icon: Icons.local_shipping_outlined,
+        label: l10n.taskShippingWait,
+        count: metrics.shippingWaitCount,
+      ),
+      TaskTile(
+        featureId: 'stock_count',
+        icon: Icons.checklist_outlined,
+        label: l10n.featStockCount,
+        count: metrics.openCountCount,
+      ),
+      TaskTile(
+        featureId: 'transfer',
+        icon: Icons.compare_arrows,
+        label: l10n.featTransfer,
+        count: metrics.openTransferCount,
+      ),
+    ];
+
+    return SizedBox(
+      height: 92,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: tasks.length,
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
+        itemBuilder: (context, i) => _TaskChip(
+          task: tasks[i],
+          onTap: () => onOpenFeature(tasks[i].featureId),
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskChip extends StatelessWidget {
+  const _TaskChip({required this.task, required this.onTap});
+
+  final TaskTile task;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final active = task.count > 0;
+    final style = active
+        ? (fg: AppColors.warning, bg: AppColors.warningBg)
+        : (fg: scheme.onSurfaceVariant, bg: scheme.surfaceContainerHigh);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: 108,
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Icon(task.icon, size: 18, color: style.fg),
+                  const Spacer(),
+                  Text(
+                    '${task.count}',
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w700, color: style.fg),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                task.label,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

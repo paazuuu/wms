@@ -4161,6 +4161,24 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'操作履歴をCSVで確認'**
   String get featAuditLogDesc;
+
+  /// No description provided for @dashTodayTasks.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日の作業'**
+  String get dashTodayTasks;
+
+  /// No description provided for @taskPackingWait.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包待ち'**
+  String get taskPackingWait;
+
+  /// No description provided for @taskShippingWait.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷待ち'**
+  String get taskShippingWait;
 }
 
 class _AppLocalizationsDelegate

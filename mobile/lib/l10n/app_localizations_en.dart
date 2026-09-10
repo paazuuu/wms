@@ -2249,4 +2249,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featAuditLogDesc => 'Review operation history, export as CSV';
+
+  @override
+  String get dashTodayTasks => 'Today\'s work';
+
+  @override
+  String get taskPackingWait => 'To pack';
+
+  @override
+  String get taskShippingWait => 'To ship';
 }
