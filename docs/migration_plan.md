@@ -17,8 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0023 applied.** Step 13 (seed/demo) deliberately skipped —
-> see below. 0024 onward is still planned.
+> Status: **0010–0024 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below. 0025 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -291,7 +291,48 @@ update inside a transaction._
   fixed it. The widget test that exercises real data is what caught this;
   `flutter analyze` had nothing to say about it.
 
-### 0024+ — AI + connectors (Steps 15–17)
+### 0024 — Real sign-in: Supabase Auth replaces InventorOS login ✅
+- The login screen actually pointed at a dead InventorOS (Laravel Sanctum)
+  backend the whole time — a separate identity system that never populated
+  `auth.uid()`, so every RBAC/self-approval check built since 0010 (`has_permission`,
+  `assign_user_role`, etc.) stayed in its "transitional gate" (`auth.uid() is
+  null` → allow everything) no matter who was "logged in" in the app. Confirmed
+  with the user that login had never really worked, and that Supabase Auth
+  should replace it outright rather than run alongside it.
+- `bootstrap_first_admin()`: SECURITY DEFINER RPC, solves the chicken-and-egg
+  problem of "the first user needs a role but assigning roles requires an
+  existing admin" — it assigns `system_admin` to `auth.uid()` exactly once
+  (`if not exists (select 1 from public.user_roles)`), a no-op for every sign-in
+  after the first. `assign_user_role` / `revoke_user_role` (both gated on
+  `user.manage`) and `my_roles()` (the caller's own roles) round out the surface
+  an admin needs to manage teammates after their first sign-in. Grants verified
+  live via `has_function_privilege`: `anon` denied on all four, `authenticated`
+  allowed.
+- No self-service sign-up (asked explicitly — small internal team, the admin
+  creates each account by hand in the Supabase dashboard).
+- Flutter: `SupabaseSessionStorage` (secure-storage-backed access/refresh/expiry),
+  `SupabaseAuthInterceptor` + `SupabaseTokenRefresher` attached to every
+  Supabase-facing Dio client (`deliveryDioProvider`, `restDioProvider`, the new
+  `authDioProvider`) — one shared refresher so a near-expiry token is refreshed
+  once, not once per client racing the same (rotatable) refresh token.
+  `AuthRepository`/`AuthUser` rewritten against GoTrue (`id` is now the real
+  `uuid` string `auth.uid()` resolves to, not an InventorOS integer). Removed
+  the `kDebugMode` "skip login" shortcut on the login screen now that signing
+  in actually works.
+- Caught during implementation, not in review: the real keychain/keystore
+  plugin has no test-harness backend, so any screen test that reached a
+  Supabase Dio client through the new interceptor would hang forever on the
+  session read. Fixed by extracting `SecureKeyValueStore` (an interface
+  `SupabaseSessionStorage` depends on instead of `FlutterSecureStorage`
+  directly) and giving the test harness's `pumpApp`/`pumpAppWith` a default
+  in-memory fake — also added a bounded timeout around every real read/write/
+  clear so a genuinely unreachable keyring degrades to "signed out" instead of
+  hanging a real device.
+- Not yet built: an in-app screen for `assign_user_role`/`revoke_user_role` —
+  an admin manages teammates' roles via the RPCs directly (e.g. through the
+  Supabase dashboard's SQL editor) until that lands.
+
+### 0025+ — AI + connectors (Steps 15–17)
 - `ai_analysis` + provider abstraction; re-point Gemini OCR through it.
 - Connector/adapter tables for external systems; InventorOS becomes one connector.
 

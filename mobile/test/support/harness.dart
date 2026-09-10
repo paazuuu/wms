@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
+import 'package:wms_mobile/core/providers.dart';
+import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
@@ -30,6 +32,32 @@ import 'package:wms_mobile/features/shipment/domain/carton.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 
+/// In-memory stand-in for the platform keychain/keystore. The real plugin has
+/// no test-harness implementation and its platform channel simply never
+/// replies outside a running app, which would otherwise hang every screen
+/// test that touches a Supabase-backed Dio client (all of them go through
+/// [SupabaseAuthInterceptor], which reads the stored session on every
+/// request).
+class _FakeSecureKeyValueStore implements SecureKeyValueStore {
+  final Map<String, String> _values = {};
+
+  @override
+  Future<String?> read(String key) async => _values[key];
+
+  @override
+  Future<void> write(String key, String value) async => _values[key] = value;
+
+  @override
+  Future<void> delete(String key) async => _values.remove(key);
+}
+
+/// Default overrides applied by [pumpApp]/[pumpAppWith] so no test needs to
+/// know about the Supabase auth session store to avoid the hang above.
+List<Override> _defaultOverrides() => [
+      supabaseSessionStorageProvider
+          .overrideWithValue(SupabaseSessionStorage(_FakeSecureKeyValueStore())),
+    ];
+
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
 /// given [overrides], then settles. Locale is fixed to Japanese.
 Future<void> pumpApp(
@@ -39,7 +67,7 @@ Future<void> pumpApp(
 }) async {
   await tester.pumpWidget(
     ProviderScope(
-      overrides: overrides,
+      overrides: [..._defaultOverrides(), ...overrides],
       child: MaterialApp(
         locale: const Locale('ja'),
         supportedLocales: AppLocalizations.supportedLocales,
@@ -54,6 +82,9 @@ Future<void> pumpApp(
 /// Like [pumpApp] but driven by a caller-owned [container], so a test can read
 /// and write provider state around the pump (e.g. assert that tapping the
 /// warehouse picker actually changed the active warehouse).
+///
+/// The caller owns [container], so it must apply [_defaultOverrides] itself
+/// when constructing it (see e.g. how other tests build their container).
 Future<void> pumpAppWith(
   WidgetTester tester,
   ProviderContainer container,

@@ -18,7 +18,7 @@ import '../../../support/harness.dart';
 /// Offline fake so the auth controller lands "authenticated" without a network.
 class _FakeAuthRepository implements AuthRepository {
   static const _user =
-      AuthUser(id: 1, name: 'Test Operator', email: 'e2e@test.com');
+      AuthUser(id: '1', name: 'Test Operator', email: 'e2e@test.com');
 
   @override
   Future<ApiResult<AuthUser>> currentUser() async => const ApiSuccess(_user);

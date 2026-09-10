@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/supabase_auth_interceptor.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/providers.dart';
 import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
 import '../data/on_device_scanner.dart';
@@ -16,10 +18,12 @@ import 'reconciliation_controller.dart';
 
 /// Dedicated Dio for the delivery feature, pointed at the Supabase Edge
 /// Functions that back it (schema + reconcile RPC + OCR). Separate from the
-/// app's main API client so the other features are unaffected. The anon key
-/// authorizes the gateway; data is guarded server-side.
+/// app's main API client so the other features are unaffected. Carries the
+/// anon key as a baseline (for the gateway) and, once someone's signed in,
+/// the real access token via [SupabaseAuthInterceptor] — that's what lets
+/// `auth.uid()` resolve server-side instead of staying null.
 final deliveryDioProvider = Provider<Dio>((ref) {
-  return Dio(BaseOptions(
+  final dio = Dio(BaseOptions(
     baseUrl: AppConfig.functionsBaseUrl,
     connectTimeout: AppConfig.connectTimeout,
     receiveTimeout: AppConfig.receiveTimeout,
@@ -29,15 +33,22 @@ final deliveryDioProvider = Provider<Dio>((ref) {
       'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
     },
   ));
+  SupabaseAuthInterceptor(
+    storage: ref.watch(supabaseSessionStorageProvider),
+    refresher: ref.watch(supabaseTokenRefresherProvider),
+  ).attachTo(dio);
+  return dio;
 });
 
 final deliveryRepositoryProvider = Provider<DeliveryRepository>((ref) {
   return DeliveryRepositoryImpl(ref.watch(deliveryDioProvider));
 });
 
-/// Dio for Supabase PostgREST (`/rest/v1`), used to read the stock table.
+/// Dio for Supabase PostgREST (`/rest/v1`), used to read the stock table and
+/// (since 0024) the auth-bootstrap RPCs. Same auth wiring as
+/// [deliveryDioProvider] — see its doc comment.
 final restDioProvider = Provider<Dio>((ref) {
-  return Dio(BaseOptions(
+  final dio = Dio(BaseOptions(
     baseUrl: '${AppConfig.supabaseUrl}/rest/v1',
     connectTimeout: AppConfig.connectTimeout,
     receiveTimeout: AppConfig.receiveTimeout,
@@ -47,6 +58,11 @@ final restDioProvider = Provider<Dio>((ref) {
       'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
     },
   ));
+  SupabaseAuthInterceptor(
+    storage: ref.watch(supabaseSessionStorageProvider),
+    refresher: ref.watch(supabaseTokenRefresherProvider),
+  ).attachTo(dio);
+  return dio;
 });
 
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
