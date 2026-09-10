@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../audit/presentation/entity_audit_timeline.dart';
 import '../application/transfer_providers.dart';
 import '../domain/transfer_order.dart';
 import 'transfer_status_ui.dart';
@@ -337,18 +338,27 @@ class _BodyState extends ConsumerState<_Body> {
               ? EmptyStateView(icon: Icons.compare_arrows, title: l10n.transferEmpty)
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: _order.lines.length,
+                  // One extra row at the end for the activity timeline.
+                  itemCount: _order.lines.length + 1,
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) => _LineCard(
-                    line: _order.lines[i],
-                    onPick: isPicking && !_busy
-                        ? () => _recordPick(_order.lines[i])
-                        : null,
-                    onReceive: isReceiving && !_busy
-                        ? () => _recordReceipt(_order.lines[i])
-                        : null,
-                  ),
+                  itemBuilder: (context, i) {
+                    if (i == _order.lines.length) {
+                      return EntityAuditTimeline(
+                        entityType: 'transfer_order',
+                        entityId: '${_order.id}',
+                      );
+                    }
+                    return _LineCard(
+                      line: _order.lines[i],
+                      onPick: isPicking && !_busy
+                          ? () => _recordPick(_order.lines[i])
+                          : null,
+                      onReceive: isReceiving && !_busy
+                          ? () => _recordReceipt(_order.lines[i])
+                          : null,
+                    );
+                  },
                 ),
         ),
         if (primary != null || _order.status.isCancellable)

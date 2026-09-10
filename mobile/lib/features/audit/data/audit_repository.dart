@@ -17,12 +17,26 @@ abstract class AuditRepository {
   });
 
   Future<ApiResult<List<String>>> eventTypes();
+
+  /// Everything logged against one specific record — the §40 "where is this
+  /// job / what happened to it" timeline for a document's own detail screen.
+  Future<ApiResult<List<AuditEntry>>> forEntity(
+    String entityType,
+    String entityId, {
+    int limit = 50,
+  });
 }
 
 class AuditRepositoryImpl implements AuditRepository {
-  AuditRepositoryImpl(this._dio);
+  AuditRepositoryImpl(this._dio, this._restDio);
 
+  /// The `audit-log` edge function's Dio (service-role reads, list/filter).
   final Dio _dio;
+
+  /// PostgREST directly — `audit_log_for_entity` is already granted to anon,
+  /// same pattern as `dashboard_metrics`/`stock_ledger`/`global_search`; no
+  /// edge function needed for a plain read.
+  final Dio _restDio;
 
   @override
   Future<ApiResult<List<AuditEntry>>> list({
@@ -58,6 +72,31 @@ class AuditRepositoryImpl implements AuditRepository {
       return ApiSuccess(rows.map((e) => e.toString()).toList());
     } on DioException catch (e) {
       return mapDioError<List<String>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<AuditEntry>>> forEntity(
+    String entityType,
+    String entityId, {
+    int limit = 50,
+  }) async {
+    try {
+      final response = await _restDio.post('/rpc/audit_log_for_entity', data: {
+        'p_entity_type': entityType,
+        'p_entity_id': entityId,
+        'p_limit': limit,
+      });
+      final data = response.data;
+      final rows = data is List
+          ? (data.length == 1 && data.first is List ? data.first as List : data)
+          : const [];
+      return ApiSuccess(rows
+          .whereType<Map>()
+          .map((e) => AuditEntry.fromJson(e.cast<String, dynamic>()))
+          .toList());
+    } on DioException catch (e) {
+      return mapDioError<List<AuditEntry>>(e);
     }
   }
 }

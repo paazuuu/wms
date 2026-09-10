@@ -17,8 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0022 applied.** Step 13 (seed/demo) deliberately skipped —
-> see below. 0023 onward is still planned.
+> Status: **0010–0023 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below. 0024 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -266,7 +266,32 @@ update inside a transaction._
   opens the real detail screen for its kind (ledger / reconciliation /
   shipment / pick list / transfer detail) rather than a generic viewer.
 
-### 0023+ — AI + connectors (Steps 15–17)
+### 0023 — Per-document activity timeline (Step 14, continued) ✅
+- §40: "state machines... are surfaced so an operator sees where a job is."
+  `audit_log_query` (0020) could filter by entity_type/event_type but had no
+  entity_id filter, so nothing could show "everything that happened to
+  *this* transfer" on the transfer's own screen — only the company-wide
+  Audit Log list existed.
+- `audit_log_for_entity(p_entity_type, p_entity_id, p_limit)`: a separate
+  function rather than adding a parameter to the already-shipped
+  `audit_log_query` — that RPC is called from the Audit Log screen and
+  adding an unrelated filter to it wasn't worth the signature risk for a
+  different use case. Read-only, called directly over PostgREST.
+- Verified live (aborted transaction): logged three entries across two
+  entity ids, confirmed the filtered read returned only the two that
+  actually belonged to the entity asked for.
+- Flutter: `EntityAuditTimeline`, a compact "what happened to this record"
+  card — embedded at the bottom of Transfer Detail and Pick List Detail's
+  line list. Renders nothing while loading or on a record with no history,
+  so it never displaces the screen's primary content.
+- Caught during testing, not in the review: the timeline's connector line
+  used `Expanded` inside a `Column` with no bounded height, which crashes
+  on real layout (`RenderFlex children have non-zero flex but incoming
+  height constraints are unbounded`) — wrapping the row in `IntrinsicHeight`
+  fixed it. The widget test that exercises real data is what caught this;
+  `flutter analyze` had nothing to say about it.
+
+### 0024+ — AI + connectors (Steps 15–17)
 - `ai_analysis` + provider abstraction; re-point Gemini OCR through it.
 - Connector/adapter tables for external systems; InventorOS becomes one connector.
 

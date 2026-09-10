@@ -6,7 +6,8 @@ import '../data/audit_repository.dart';
 import '../domain/audit_entry.dart';
 
 final auditRepositoryProvider = Provider<AuditRepository>((ref) {
-  return AuditRepositoryImpl(ref.watch(deliveryDioProvider));
+  return AuditRepositoryImpl(
+      ref.watch(deliveryDioProvider), ref.watch(restDioProvider));
 });
 
 /// The event type filter chip row; null means "every event".
@@ -28,6 +29,20 @@ final auditListProvider = FutureProvider.autoDispose<List<AuditEntry>>((ref) asy
   final result = await ref
       .watch(auditRepositoryProvider)
       .list(warehouseId: warehouseId, eventType: eventType, limit: 200);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// Everything logged against one specific record (spec §40's per-document
+/// timeline). Keyed by (entityType, entityId).
+final entityAuditProvider = FutureProvider.autoDispose
+    .family<List<AuditEntry>, (String, String)>((ref, key) async {
+  final (entityType, entityId) = key;
+  final result = await ref
+      .watch(auditRepositoryProvider)
+      .forEntity(entityType, entityId, limit: 50);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

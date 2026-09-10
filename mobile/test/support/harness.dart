@@ -799,6 +799,16 @@ class FakeAuditRepository implements AuditRepository {
 
   @override
   Future<ApiResult<List<String>>> eventTypes() async => ApiSuccess(types);
+
+  @override
+  Future<ApiResult<List<AuditEntry>>> forEntity(
+    String entityType,
+    String entityId, {
+    int limit = 50,
+  }) async =>
+      ApiSuccess(entries
+          .where((e) => e.entityType == entityType && e.entityId == entityId)
+          .toList());
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

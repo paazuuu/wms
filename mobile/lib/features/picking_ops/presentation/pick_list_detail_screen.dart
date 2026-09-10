@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../audit/presentation/entity_audit_timeline.dart';
 import '../../stock_ops/presentation/stock_ops_ui.dart' show signed;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
@@ -218,15 +219,24 @@ class _BodyState extends ConsumerState<_Body> {
                   title: l10n.noLinesToPick)
               : ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: _list.tasks.length,
+                  // One extra row at the end for the activity timeline.
+                  itemCount: _list.tasks.length + 1,
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) => _TaskCard(
-                    task: _list.tasks[i],
-                    onTap: _list.isOpen && !_busy
-                        ? () => _record(_list.tasks[i])
-                        : null,
-                  ),
+                  itemBuilder: (context, i) {
+                    if (i == _list.tasks.length) {
+                      return EntityAuditTimeline(
+                        entityType: 'pick_list',
+                        entityId: '${_list.id}',
+                      );
+                    }
+                    return _TaskCard(
+                      task: _list.tasks[i],
+                      onTap: _list.isOpen && !_busy
+                          ? () => _record(_list.tasks[i])
+                          : null,
+                    );
+                  },
                 ),
         ),
         if (_list.isOpen)
