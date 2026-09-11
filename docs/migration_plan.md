@@ -17,8 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0024 applied.** Step 13 (seed/demo) deliberately skipped —
-> see below. 0025 onward is still planned.
+> Status: **0010–0025 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below. 0026 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -332,7 +332,28 @@ update inside a transaction._
   an admin manages teammates' roles via the RPCs directly (e.g. through the
   Supabase dashboard's SQL editor) until that lands.
 
-### 0025+ — AI + connectors (Steps 15–17)
+### 0025 — Admin: list users with their roles (Step 3, completing 0024) ✅
+- 0024 gave an admin `assign_user_role`/`revoke_user_role` but nothing to see
+  *who* to assign roles to: `app_users` and `user_roles` both carry a single
+  RLS policy ("read own row only"), so even an admin querying them directly
+  saw just themselves. `list_app_users()`: SECURITY DEFINER, same
+  `user.manage` gate as the writes, returns every user who has ever signed
+  in (has an `app_users` row) with their current roles as a nested jsonb
+  array. Grants verified live: `anon` denied, `authenticated` allowed.
+- Flutter: `features/admin` — `UserManagementScreen`, reachable from the
+  Management group. Lists users, an "add role" bottom sheet excludes roles
+  already held, removing a role asks for confirmation first. No client-side
+  admin check gates the screen itself — consistent with how every other
+  feature in this app works (the server's `has_permission` call is the real
+  boundary; a non-admin just sees the RPC's own permission error here,
+  the same way an unpermitted action anywhere else in the app surfaces).
+- 6 widget tests (roster render, no-roles state, empty state, permission-
+  denied state, add role, remove role). Caught while writing the "remove
+  role" test, not in review: Material 3's default `InputChip` delete
+  affordance renders `Icons.clear`, not the pre-M3 `Icons.cancel` — found by
+  dumping the screen's actual `Icon` widgets rather than guessing.
+
+### 0026+ — AI + connectors (Steps 15–17)
 - `ai_analysis` + provider abstraction; re-point Gemini OCR through it.
 - Connector/adapter tables for external systems; InventorOS becomes one connector.
 

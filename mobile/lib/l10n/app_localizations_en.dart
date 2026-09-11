@@ -2251,6 +2251,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featAuditLogDesc => 'Review operation history, export as CSV';
 
   @override
+  String get featUserManagement => 'User management';
+
+  @override
+  String get featUserManagementDesc =>
+      'Assign roles to teammates who have signed in';
+
+  @override
   String get dashTodayTasks => 'Today\'s work';
 
   @override
@@ -2289,4 +2296,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchKindTransfer => 'Transfer';
+
+  @override
+  String get userMgmtTitle => 'User Management';
+
+  @override
+  String get userMgmtEmpty => 'No users yet';
+
+  @override
+  String get userMgmtEmptyBody =>
+      'Users appear here once they sign in for the first time.';
+
+  @override
+  String get userMgmtAddRole => 'Add role';
+
+  @override
+  String get userMgmtNoRoles => 'No role assigned';
+
+  @override
+  String get userMgmtAllRolesHeld => 'This user already holds every role.';
+
+  @override
+  String get userMgmtRemoveRoleTitle => 'Remove role?';
+
+  @override
+  String userMgmtRemoveRoleBody(String role, String name) {
+    return 'Remove $role from $name?';
+  }
+
+  @override
+  String get userMgmtRemoveRoleAction => 'Remove';
 }

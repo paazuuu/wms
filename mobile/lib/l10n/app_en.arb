@@ -984,6 +984,8 @@
   "csvExportTitle": "Export CSV",
   "featAuditLog": "Audit log",
   "featAuditLogDesc": "Review operation history, export as CSV",
+  "featUserManagement": "User management",
+  "featUserManagementDesc": "Assign roles to teammates who have signed in",
   "dashTodayTasks": "Today's work",
   "taskPackingWait": "To pack",
   "taskShippingWait": "To ship",
@@ -996,5 +998,24 @@
   "searchKindDelivery": "Delivery",
   "searchKindShipment": "Shipment",
   "searchKindPickList": "Picking",
-  "searchKindTransfer": "Transfer"
+  "searchKindTransfer": "Transfer",
+  "userMgmtTitle": "User Management",
+  "userMgmtEmpty": "No users yet",
+  "userMgmtEmptyBody": "Users appear here once they sign in for the first time.",
+  "userMgmtAddRole": "Add role",
+  "userMgmtNoRoles": "No role assigned",
+  "userMgmtAllRolesHeld": "This user already holds every role.",
+  "userMgmtRemoveRoleTitle": "Remove role?",
+  "userMgmtRemoveRoleBody": "Remove {role} from {name}?",
+  "@userMgmtRemoveRoleBody": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userMgmtRemoveRoleAction": "Remove"
 }

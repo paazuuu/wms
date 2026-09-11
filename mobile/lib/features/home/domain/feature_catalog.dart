@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../admin/presentation/user_management_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
@@ -147,6 +148,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _auditLog,
           ),
+          FeatureEntry(
+            id: 'user_management',
+            icon: Icons.manage_accounts_outlined,
+            status: FeatureStatus.ready,
+            builder: _userManagement,
+          ),
         ],
       ),
     ];
@@ -200,6 +207,9 @@ Widget _reports(BuildContext _) => const ReportListScreen();
 
 /// Top-level (const-referenceable) builder for the Audit Log feature.
 Widget _auditLog(BuildContext _) => const AuditLogScreen();
+
+/// Top-level (const-referenceable) builder for the User Management feature.
+Widget _userManagement(BuildContext _) => const UserManagementScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
 Widget _picking(BuildContext _) => const PickListIndexScreen();

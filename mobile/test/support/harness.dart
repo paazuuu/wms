@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/providers.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
+import 'package:wms_mobile/features/admin/data/admin_repository.dart';
+import 'package:wms_mobile/features/admin/domain/app_user_summary.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
@@ -840,6 +842,71 @@ class FakeAuditRepository implements AuditRepository {
       ApiSuccess(entries
           .where((e) => e.entityType == entityType && e.entityId == entityId)
           .toList());
+}
+
+/// Admin stub. [users] is the roster `list_app_users` would return; [roles]
+/// is the role catalog. Assign/revoke mutate an in-memory copy of [users] so
+/// a screen test can assert the change stuck without a real backend.
+class FakeAdminRepository implements AdminRepository {
+  FakeAdminRepository(List<AppUserSummary> users, {this.roles = const []})
+      : _users = List.of(users);
+
+  List<AppUserSummary> _users;
+  final List<RoleOption> roles;
+
+  /// Set to make [listUsers] fail, so a test can exercise the permission-
+  /// denied path a non-admin actually hits (the RPC itself is the real gate).
+  String? failListUsersWith;
+
+  @override
+  Future<ApiResult<List<AppUserSummary>>> listUsers() async {
+    if (failListUsersWith != null) {
+      return ApiFailure(message: failListUsersWith!, statusCode: 403);
+    }
+    return ApiSuccess(_users);
+  }
+
+  @override
+  Future<ApiResult<List<RoleOption>>> listRoles() async => ApiSuccess(roles);
+
+  @override
+  Future<ApiResult<bool>> assignRole(String userId, String roleCode) async {
+    final role = roles.firstWhere((r) => r.code == roleCode);
+    _users = [
+      for (final u in _users)
+        if (u.id == userId)
+          AppUserSummary(
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            status: u.status,
+            createdAt: u.createdAt,
+            roles: [...u.roles, UserRoleTag(code: role.code, name: role.name)],
+          )
+        else
+          u,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> revokeRole(String userId, String roleCode) async {
+    _users = [
+      for (final u in _users)
+        if (u.id == userId)
+          AppUserSummary(
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            status: u.status,
+            createdAt: u.createdAt,
+            roles: u.roles.where((r) => r.code != roleCode).toList(),
+          )
+        else
+          u,
+    ];
+    return const ApiSuccess(true);
+  }
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

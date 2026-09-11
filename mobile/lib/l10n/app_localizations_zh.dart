@@ -2185,6 +2185,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featAuditLogDesc => '查看操作历史并导出CSV';
 
   @override
+  String get featUserManagement => '用户管理';
+
+  @override
+  String get featUserManagementDesc => '为已登录的成员分配角色';
+
+  @override
   String get dashTodayTasks => '今日工作';
 
   @override
@@ -2222,4 +2228,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get searchKindTransfer => '调拨';
+
+  @override
+  String get userMgmtTitle => '用户管理';
+
+  @override
+  String get userMgmtEmpty => '暂无用户';
+
+  @override
+  String get userMgmtEmptyBody => '成员首次登录后将显示在此处。';
+
+  @override
+  String get userMgmtAddRole => '添加角色';
+
+  @override
+  String get userMgmtNoRoles => '尚未分配角色';
+
+  @override
+  String get userMgmtAllRolesHeld => '该用户已拥有所有角色。';
+
+  @override
+  String get userMgmtRemoveRoleTitle => '移除角色？';
+
+  @override
+  String userMgmtRemoveRoleBody(String role, String name) {
+    return '确定要从 $name 移除 $role 吗？';
+  }
+
+  @override
+  String get userMgmtRemoveRoleAction => '移除';
 }

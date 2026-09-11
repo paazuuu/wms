@@ -1074,6 +1074,8 @@
   "csvExportTitle": "CSVエクスポート",
   "featAuditLog": "監査ログ",
   "featAuditLogDesc": "操作履歴をCSVで確認",
+  "featUserManagement": "ユーザー管理",
+  "featUserManagementDesc": "サインイン済みのメンバーに権限ロールを割り当て",
   "dashTodayTasks": "今日の作業",
   "taskPackingWait": "梱包待ち",
   "taskShippingWait": "出荷待ち",
@@ -1086,5 +1088,24 @@
   "searchKindDelivery": "入荷予定",
   "searchKindShipment": "出荷",
   "searchKindPickList": "ピッキング",
-  "searchKindTransfer": "倉庫間移動"
+  "searchKindTransfer": "倉庫間移動",
+  "userMgmtTitle": "ユーザー管理",
+  "userMgmtEmpty": "ユーザーがまだいません",
+  "userMgmtEmptyBody": "メンバーが初めてサインインすると、ここに表示されます。",
+  "userMgmtAddRole": "ロールを追加",
+  "userMgmtNoRoles": "ロール未割り当て",
+  "userMgmtAllRolesHeld": "このユーザーはすべてのロールを持っています。",
+  "userMgmtRemoveRoleTitle": "ロールを削除しますか？",
+  "userMgmtRemoveRoleBody": "{name} から {role} を削除しますか？",
+  "@userMgmtRemoveRoleBody": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userMgmtRemoveRoleAction": "削除"
 }

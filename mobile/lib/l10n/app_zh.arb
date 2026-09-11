@@ -984,6 +984,8 @@
   "csvExportTitle": "导出CSV",
   "featAuditLog": "审计日志",
   "featAuditLogDesc": "查看操作历史并导出CSV",
+  "featUserManagement": "用户管理",
+  "featUserManagementDesc": "为已登录的成员分配角色",
   "dashTodayTasks": "今日工作",
   "taskPackingWait": "待打包",
   "taskShippingWait": "待出库",
@@ -996,5 +998,24 @@
   "searchKindDelivery": "入库",
   "searchKindShipment": "出库",
   "searchKindPickList": "拣货",
-  "searchKindTransfer": "调拨"
+  "searchKindTransfer": "调拨",
+  "userMgmtTitle": "用户管理",
+  "userMgmtEmpty": "暂无用户",
+  "userMgmtEmptyBody": "成员首次登录后将显示在此处。",
+  "userMgmtAddRole": "添加角色",
+  "userMgmtNoRoles": "尚未分配角色",
+  "userMgmtAllRolesHeld": "该用户已拥有所有角色。",
+  "userMgmtRemoveRoleTitle": "移除角色？",
+  "userMgmtRemoveRoleBody": "确定要从 {name} 移除 {role} 吗？",
+  "@userMgmtRemoveRoleBody": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userMgmtRemoveRoleAction": "移除"
 }

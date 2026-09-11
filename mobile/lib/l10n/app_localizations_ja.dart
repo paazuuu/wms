@@ -2187,6 +2187,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featAuditLogDesc => '操作履歴をCSVで確認';
 
   @override
+  String get featUserManagement => 'ユーザー管理';
+
+  @override
+  String get featUserManagementDesc => 'サインイン済みのメンバーに権限ロールを割り当て';
+
+  @override
   String get dashTodayTasks => '今日の作業';
 
   @override
@@ -2224,4 +2230,33 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get searchKindTransfer => '倉庫間移動';
+
+  @override
+  String get userMgmtTitle => 'ユーザー管理';
+
+  @override
+  String get userMgmtEmpty => 'ユーザーがまだいません';
+
+  @override
+  String get userMgmtEmptyBody => 'メンバーが初めてサインインすると、ここに表示されます。';
+
+  @override
+  String get userMgmtAddRole => 'ロールを追加';
+
+  @override
+  String get userMgmtNoRoles => 'ロール未割り当て';
+
+  @override
+  String get userMgmtAllRolesHeld => 'このユーザーはすべてのロールを持っています。';
+
+  @override
+  String get userMgmtRemoveRoleTitle => 'ロールを削除しますか？';
+
+  @override
+  String userMgmtRemoveRoleBody(String role, String name) {
+    return '$name から $role を削除しますか？';
+  }
+
+  @override
+  String get userMgmtRemoveRoleAction => '削除';
 }

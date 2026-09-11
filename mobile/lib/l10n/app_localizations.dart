@@ -4162,6 +4162,18 @@ abstract class AppLocalizations {
   /// **'操作履歴をCSVで確認'**
   String get featAuditLogDesc;
 
+  /// No description provided for @featUserManagement.
+  ///
+  /// In ja, this message translates to:
+  /// **'ユーザー管理'**
+  String get featUserManagement;
+
+  /// No description provided for @featUserManagementDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'サインイン済みのメンバーに権限ロールを割り当て'**
+  String get featUserManagementDesc;
+
   /// No description provided for @dashTodayTasks.
   ///
   /// In ja, this message translates to:
@@ -4239,6 +4251,60 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'倉庫間移動'**
   String get searchKindTransfer;
+
+  /// No description provided for @userMgmtTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ユーザー管理'**
+  String get userMgmtTitle;
+
+  /// No description provided for @userMgmtEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'ユーザーがまだいません'**
+  String get userMgmtEmpty;
+
+  /// No description provided for @userMgmtEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'メンバーが初めてサインインすると、ここに表示されます。'**
+  String get userMgmtEmptyBody;
+
+  /// No description provided for @userMgmtAddRole.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロールを追加'**
+  String get userMgmtAddRole;
+
+  /// No description provided for @userMgmtNoRoles.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロール未割り当て'**
+  String get userMgmtNoRoles;
+
+  /// No description provided for @userMgmtAllRolesHeld.
+  ///
+  /// In ja, this message translates to:
+  /// **'このユーザーはすべてのロールを持っています。'**
+  String get userMgmtAllRolesHeld;
+
+  /// No description provided for @userMgmtRemoveRoleTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロールを削除しますか？'**
+  String get userMgmtRemoveRoleTitle;
+
+  /// No description provided for @userMgmtRemoveRoleBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} から {role} を削除しますか？'**
+  String userMgmtRemoveRoleBody(String role, String name);
+
+  /// No description provided for @userMgmtRemoveRoleAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get userMgmtRemoveRoleAction;
 }
 
 class _AppLocalizationsDelegate
