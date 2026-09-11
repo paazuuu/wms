@@ -17,8 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0025 applied.** Step 13 (seed/demo) deliberately skipped —
-> see below. 0026 onward is still planned.
+> Status: **0010–0027 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below. 0028 onward is still planned.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -353,8 +353,41 @@ update inside a transaction._
   affordance renders `Icons.clear`, not the pre-M3 `Icons.cancel` — found by
   dumping the screen's actual `Icon` widgets rather than guessing.
 
-### 0026+ — AI + connectors (Steps 15–17)
-- `ai_analysis` + provider abstraction; re-point Gemini OCR through it.
+### 0026/0027 — AI result store + provider abstraction (Steps 15–16) ✅
+- docs/ai_architecture.md §1: AI results never reach WMS data directly — they
+  land in a separate store with a confidence and a PENDING_REVIEW state until
+  a human acts. Before this, the OCR edge function called Gemini and handed
+  the result straight to the client with no record kept of what was asked,
+  what came back, or whether it was ever reviewed.
+- `ai_analysis` table (id, company/warehouse/delivery_plan/inspection scoping,
+  provider, model, task_type, input_hash, output_json, confidence, status
+  `PENDING_REVIEW|CONFIRMED|REJECTED`, reviewed_by/at). `product_id`/
+  `attachment_id` are plain nullable columns, not FKs — neither table exists
+  yet; shaped to fit them later rather than redesigning then. RLS: readable
+  only to `ai.review` holders; every write goes through a function, never a
+  client insert.
+- `find_ai_analysis_reuse`/`record_ai_analysis` (service_role-only — called
+  by the OCR edge function, which holds that key server-side) give idempotent
+  reuse: the same delivery-note photo resubmitted (a retry, a second crop)
+  skips a second Gemini call. `confirm_ai_analysis`/`reject_ai_analysis`
+  (`ai.review`-gated) round out the store even though no screen calls them
+  yet — spec §31's candidate-review UI is separate, larger future work.
+  0027 fixed `record_ai_analysis` to default `company_id` to the single
+  seeded company when the caller (today: always) has no company context.
+- Verified live (aborted transaction): a fresh hash misses reuse, records a
+  row, then the same hash hits reuse and returns the recorded output —
+  confirming the idempotency path end-to-end.
+- `supabase/functions/ocr-delivery-note`: refactored behind an `AIProvider`
+  interface (spec §27) — `GeminiProvider` is the only implementation
+  (`qwen` stays a reserved, not-yet-implemented slot, as before); the
+  handler no longer talks to Gemini's REST shape directly. Every call now
+  hashes the image, checks for reuse, and records the result — the response
+  shape is unchanged (`{ data: { provider, lines } }` plus two new additive
+  fields, `analysis_id`/`reused`, that the existing Flutter parser already
+  ignores), so no mobile client change was needed and today's header/line
+  extraction behavior is preserved exactly, per this step's own scope note.
+
+### 0028+ — Connectors (Step 17)
 - Connector/adapter tables for external systems; InventorOS becomes one connector.
 
 ## Rollout discipline

@@ -79,6 +79,15 @@ scope- and permission-checked like any other action.
 
 ## 8. Migration note
 
-Current Gemini OCR is used ad hoc inside edge functions with no result table.
-Step 15–16 introduces `ai_analysis` + the provider interface and re-points the
-existing OCR through them, preserving today's header/line extraction behavior.
+Done (0026/0027, see `migration_plan.md`): `ai_analysis` + the `AIProvider`
+interface exist, and `ocr-delivery-note` is re-pointed through both —
+`GeminiProvider` is the only implementation, every call is recorded with a
+PENDING_REVIEW result and reuses an identical prior input by hash, and
+today's header/line extraction behavior is unchanged from the client's
+perspective.
+
+Still open: `confirm_ai_analysis`/`reject_ai_analysis` exist but no screen
+calls them — the `[確定] [要確認] [NG]` review UI (§5) and the other modules
+under §2 (product identification, image inspection, damage detection,
+inventory assistant) are unbuilt. Anthropic/OpenAI/LocalModel providers are
+placeholders in the interface's design, not implemented.
