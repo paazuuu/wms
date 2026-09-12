@@ -414,6 +414,39 @@ update inside a transaction._
   with zero references anywhere in the app — dead code, not part of this
   step's scope but found and cleaned up alongside it.
 
+### Post-0028 — InventorOS removed entirely (no new migration; client-only)
+- Investigating Step 17 surfaced that InventorOS was never actually
+  reachable in this deployment (`apiBaseUrl` defaults to unreachable
+  `http://localhost/api/v1`) and nobody runs it — confirmed with the user,
+  who decided not to stand it up and to remove the dependency rather than
+  leave broken menu entries in the app.
+- Deleted entirely: 11 InventorOS-routed feature folders (inspection,
+  locations, products, purchase_orders, receiving, reports, sales_orders,
+  stock_adjustment, stock_count, suppliers, tracking, warehouses,
+  work_orders — `stock_adjustment`/`stock_count` were already fully
+  orphaned duplicates of the Supabase `stock_ops` screens, unreachable from
+  any menu) and their tests, plus the offline-mutation-queue subsystem
+  (`core/offline/*`) — it existed solely to retry the old InventorOS
+  inspection screen's mutations and had no other consumer.
+- Preserved: `barcode_scan_screen.dart` (a plain camera-scanner widget with
+  no backend coupling, still used by the home screen's camera-scan button)
+  moved to `core/scan/`.
+- Fixed two call sites the deletions broke that weren't reachable only
+  through the feature menu: the home screen's top-bar scan box routed any
+  scanned JAN straight to the deleted product-lookup screen — repointed to
+  `StockLedgerScreen` (Supabase, already exists) since this app has no
+  product-master table to look up against. The dashboard's "ready to scan"
+  hero card opened the same deleted screen — repointed to
+  `GlobalSearchScreen`.
+- Removed now-unused dependencies (`drift`, `drift_flutter`, `sqlite3`,
+  `sqlite3_flutter_libs`, `path_provider`, `path`, `connectivity_plus`,
+  `build_runner`, `drift_dev`, `mocktail`) and 241 orphaned localization
+  keys (computed by diffing every `l10n.*` key actually referenced in code
+  against every key defined in the ARB files, not by guessing which ones
+  belonged to the deleted screens).
+- `flutter analyze`: clean. `flutter test`: 134/134 passing (down from 226 —
+  the removed screens' own tests went with them).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

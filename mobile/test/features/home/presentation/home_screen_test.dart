@@ -60,7 +60,7 @@ void main() {
     expect(find.text('Test Operator'), findsOneWidget);
     expect(find.text('Field Operations'), findsOneWidget);
     expect(find.text('Inspection'), findsOneWidget);
-    expect(find.text('Receiving'), findsOneWidget);
+    expect(find.text('Shipping'), findsOneWidget);
     // Every catalog feature is now built, so no "Soon" badges remain.
     expect(find.text('Soon'), findsNothing);
   });

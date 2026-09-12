@@ -6,7 +6,6 @@
   "signOut": "Sign out",
   "backToMenu": "Back to menu",
   "somethingWentWrong": "Something went wrong",
-  "language": "Language",
   "languageTooltip": "Select language",
   "textSizeMenu": "Text size",
   "textSizeNormal": "Normal",
@@ -27,36 +26,15 @@
   "menu": "Menu",
   "cameraScan": "Scan with camera",
   "groupFieldOperations": "Field Operations",
-  "groupLookup": "Lookup",
   "groupManagement": "Management",
   "featInspection": "Inspection",
   "featInspectionDesc": "Barcode & quantity checks, NG records",
-  "featReceiving": "Receiving",
-  "featReceivingDesc": "Receive POs, auto-start inspection",
   "featStockAdjustment": "Stock Adjustment",
   "featStockAdjustmentDesc": "Scan to add or remove with a reason",
   "featStockCount": "Stock Count",
   "featStockCountDesc": "Cycle count by location",
   "featPicking": "Picking",
   "featPickingDesc": "Fulfil sales orders by scan",
-  "featProductLookup": "Product Lookup",
-  "featProductLookupDesc": "Scan a barcode to view product & stock",
-  "featLocations": "Locations",
-  "featLocationsDesc": "Bins, zones and transfers",
-  "featLotsSerials": "Lots & Serials",
-  "featLotsSerialsDesc": "Batch and serial tracking",
-  "featPurchaseOrders": "Purchase Orders",
-  "featPurchaseOrdersDesc": "Create and manage POs",
-  "featSalesOrders": "Sales Orders",
-  "featSalesOrdersDesc": "View and edit orders",
-  "featSuppliers": "Suppliers",
-  "featSuppliersDesc": "Supplier directory",
-  "featWarehouses": "Warehouses",
-  "featWarehousesDesc": "Warehouse master data",
-  "featWorkOrders": "Work Orders",
-  "featWorkOrdersDesc": "Assembly & kitting",
-  "featReports": "Reports",
-  "featReportsDesc": "Saved reports & exports",
   "comingSoon": "Coming soon",
   "comingSoonBody": "The server API for this is ready — the mobile screen is next on the roadmap.",
   "signIn": "Sign in",
@@ -67,294 +45,27 @@
   "passwordRequired": "Password is required",
   "show": "Show",
   "hide": "Hide",
-  "searching": "Searching…",
-  "scanTypeHint": "Scan or type barcode, SKU, or name",
-  "scanTypeMessage": "Scan or type a barcode, SKU, or name.",
-  "noMatchesFor": "No matches for \"{query}\".",
-  "@noMatchesFor": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
-  "tryDifferentScan": "Try a different barcode, SKU, or name.",
-  "inStock": "in stock",
-  "productLookupEmpty": "No products yet.",
-  "findProductToAdjust": "Find a product to adjust.",
-  "findProductToTrace": "Find a product to trace.",
   "loading": "Loading…",
-  "emptyLocations": "No locations yet.",
-  "emptyWarehouses": "No warehouses yet.",
-  "emptySuppliers": "No suppliers yet.",
-  "emptySalesOrders": "No sales orders yet.",
-  "emptyPurchaseOrders": "No purchase orders yet.",
-  "emptyWorkOrders": "No work orders yet.",
-  "tryDifferentNameCode": "Try a different name or code.",
-  "tryDifferentOrder": "Try a different order number or customer.",
-  "tryDifferentPo": "Try a different PO number or supplier.",
-  "tryDifferentWo": "Try a different WO number, product, or SKU.",
-  "hintLocations": "Scan or search by name or code",
-  "hintWarehouses": "Scan or search by name, code or city",
-  "hintSuppliers": "Scan or search by name, code, contact or email",
-  "hintSalesOrders": "Scan or search by order #, customer or email",
-  "hintPurchaseOrders": "Scan or search by PO number or supplier",
-  "hintWorkOrders": "Scan or search by WO number, product, or SKU",
-  "warehouseDefault": "Default",
-  "noCustomer": "No customer",
-  "noSupplier": "No supplier",
-  "noProduct": "No product",
-  "qtyLabel": "Qty {quantity}",
   "lineCount": "{count, plural, =1{{count} line} other{{count} lines}}",
-  "statusActive": "Active",
-  "statusInactive": "Inactive",
-  "statusCancelled": "Cancelled",
-  "statusDraft": "Draft",
-  "statusCompleted": "Completed",
-  "statusInProgress": "In progress",
-  "statusPending": "Pending",
-  "salesProcessing": "Processing",
-  "salesShipped": "Shipped",
-  "salesDelivered": "Delivered",
-  "poSent": "Sent",
-  "poPartiallyReceived": "Partially received",
-  "poReceived": "Received",
-  "stockIn": "In stock",
-  "stockLow": "Low stock",
-  "stockOut": "Out of stock",
-  "inspectionPassed": "Passed",
-  "inspectionFailed": "Failed",
-  "matchOk": "OK",
-  "matchNg": "NG",
-  "typeReceiving": "Receiving",
-  "typeShipping": "Shipping",
-  "typeOther": "Other",
-  "titleProduct": "Product",
-  "fieldDescription": "Description",
   "fieldPhone": "Phone",
   "fieldAddress": "Address",
-  "fieldStatus": "Status",
-  "fieldCurrency": "Currency",
-  "fieldCategory": "Category",
-  "fieldBarcode": "Barcode",
-  "fieldSku": "SKU",
-  "fieldPrice": "Price",
-  "fieldSellingPrice": "Selling price",
-  "fieldMinStock": "Min stock",
-  "fieldOnHand": "On hand",
-  "fieldLocation": "Location",
-  "fieldHasVariants": "Has variants",
-  "fieldManager": "Manager",
-  "fieldTimezone": "Timezone",
-  "fieldPriority": "Priority",
-  "fieldUsers": "Users",
-  "fieldLocations": "Locations",
   "fieldContact": "Contact",
-  "fieldWebsite": "Website",
-  "fieldPaymentTerms": "Payment terms",
-  "fieldNotes": "Notes",
-  "fieldProducts": "Products",
-  "fieldAisle": "Aisle",
-  "fieldShelf": "Shelf",
-  "fieldBin": "Bin",
-  "fieldCode": "Code",
-  "fieldFullLocation": "Full location",
-  "itemCount": "{count, plural, =1{{count} item} other{{count} items}}",
-  "productCount": "{count, plural, =1{{count} product} other{{count} products}}",
-  "binCount": "{count, plural, =1{{count} bin} other{{count} bins}}",
-  "fieldCustomer": "Customer",
-  "lineItems": "Line items",
-  "noLineItems": "No line items.",
-  "fieldOrderDate": "Order date",
-  "fieldSubtotal": "Subtotal",
-  "fieldTax": "Tax",
-  "fieldShipping": "Shipping",
-  "fieldTotal": "Total",
   "fieldSupplier": "Supplier",
-  "fieldExpected": "Expected",
-  "fieldOrdered": "Ordered",
-  "fieldReceived": "Received",
-  "fieldRemaining": "Remaining",
   "actionComplete": "Complete",
   "actionContinue": "Continue",
-  "fieldAssemblyProduct": "Assembly product",
-  "fieldComponents": "Components",
-  "noComponents": "No components.",
-  "fieldConsumed": "Consumed",
-  "fieldProduced": "Produced",
-  "fieldRequired": "Required",
-  "fieldTarget": "Target",
-  "fieldStarted": "Started",
-  "productNumber": "Product #{id}",
-  "fieldCountedLines": "Counted lines",
-  "noCountedLines": "No counted lines.",
-  "fieldCounted": "Counted",
-  "fieldUncounted": "Uncounted",
-  "fieldDiscrepancy": "Discrepancy",
-  "fieldMatch": "Match",
-  "fieldSystem": "System",
-  "fieldName": "Name",
-  "fieldType": "Type",
   "filterAll": "All",
-  "remainingLeft": "{count} left",
-  "remainingAmount": "{amount} left",
   "unknownSupplier": "Unknown supplier",
-  "receivingEmpty": "Nothing to receive.",
-  "receivingEmptyBody": "Purchase orders that are sent or partially received will appear here.",
-  "receivingDone": "Nothing left to receive.",
-  "fieldQtyToReceive": "Quantity to receive",
-  "receiveStock": "Receive stock",
-  "actionReceive": "Receive",
-  "receivingInProgress": "Receiving…",
-  "emptyInspections": "No inspections yet.",
-  "inspectionsEmptyBody": "Pull down to refresh, or start one from a purchase order receipt.",
   "pickingEmpty": "Nothing to pick.",
   "noLinesToPick": "No lines to pick.",
-  "orderNoLineItems": "This order has no line items.",
   "unnamedProduct": "Unnamed product",
-  "pickListTitle": "Pick List",
-  "customReport": "Custom report",
-  "emptyReports": "No saved reports yet.",
-  "reportsEmptyBody": "Reports saved on the back office appear here.",
-  "reportShared": "Shared",
-  "columnCount": "{count, plural, =1{{count} column} other{{count} columns}}",
-  "allLocations": "All locations",
-  "emptyStockCounts": "No stock counts yet.",
   "pickingEmptyBody": "Open sales orders awaiting fulfilment appear here.",
-  "stockCountsEmptyBody": "Cycle counts created on the back office appear here.",
-  "receivingDoneBody": "Every line on this purchase order is fully received.",
-  "receiveInvalidQty": "Enter a valid quantity for {product}.",
-  "receiveExceedsRemaining": "{product}: cannot receive more than {remaining} remaining.",
-  "receiveEnterAtLeastOne": "Enter a quantity on at least one line to receive.",
-  "receiveSuccess": "Stock received. An inspection was started automatically.",
   "pickedProgress": "{picked} / {total} picked",
-  "attachFiles": "Attach files",
-  "cameraLabel": "Camera",
-  "scanToRecord": "Scan item barcode to record",
-  "scanToRecordQty1": "Scan to record (qty 1)",
-  "fastModeOnTooltip": "Fast mode: records quantity 1 per scan",
-  "fastModeOffTooltip": "Prompt for a quantity on each scan",
-  "fastQtyOneLabel": "Qty 1",
-  "actualQuantity": "Actual quantity",
-  "scannedCode": "Scanned: {code}",
-  "@scannedCode": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
   "quantity": "Quantity",
   "actionCancel": "Cancel",
   "actionRecord": "Record",
-  "itemRecorded": "Item recorded",
-  "offlineItemQueued": "Offline — item queued for sync",
-  "filesUploaded": "{count, plural, =1{{count} file uploaded} other{{count} files uploaded}}",
-  "@filesUploaded": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "offlineFilesQueued": "Offline — {count, plural, =1{{count} file} other{{count} files}} queued for sync",
-  "@offlineFilesQueued": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "completeInspectionQ": "Complete inspection?",
-  "completeInspectionBody": "Mark this inspection as complete. You can still view it afterward.",
-  "inspectionCompleted": "Inspection completed",
-  "offlineCompletionQueued": "Offline — completion queued for sync",
-  "sectionItems": "Items",
-  "sectionAttachments": "Attachments",
-  "noItemsYet": "No items yet. Tap Scan to record one.",
-  "noAttachments": "No attachments. Use the paperclip to add photos or files.",
-  "completeInspection": "Complete inspection",
-  "completedOn": "Completed {date}",
-  "@completedOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "actualLabel": "Actual",
-  "itemNumber": "Item {id}",
-  "@itemNumber": {
-    "placeholders": {
-      "id": {
-        "type": "int"
-      }
-    }
-  },
   "working": "Working…",
   "adjustAdd": "Add",
   "adjustRemove": "Remove",
-  "reasonType": "Reason type",
-  "reasonOptional": "Reason (optional)",
-  "notesOptional": "Notes (optional)",
-  "onHandAfter": "On hand after",
-  "saving": "Saving…",
-  "addStock": "Add stock",
-  "removeStock": "Remove stock",
-  "onHandCount": "{count} on hand",
-  "@onHandCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "enterQtyPositive": "Enter a quantity greater than zero.",
-  "cannotRemoveOnly": "Cannot remove {qty}; only {current} on hand.",
-  "@cannotRemoveOnly": {
-    "placeholders": {
-      "qty": {
-        "type": "int"
-      },
-      "current": {
-        "type": "int"
-      }
-    }
-  },
-  "stockUpdatedTo": "Stock updated — now {count} on hand.",
-  "@stockUpdatedTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "adjustTypeManual": "Manual",
-  "adjustTypeCount": "Count",
-  "adjustTypeDamage": "Damage",
-  "adjustTypeReturn": "Return",
-  "adjustTypeTransfer": "Transfer",
-  "sectionBatches": "Batches",
-  "sectionSerials": "Serials",
-  "noBatches": "No batches for this product.",
-  "noSerials": "No serials for this product.",
-  "loadingBatches": "Loading batches…",
-  "loadingSerials": "Loading serials…",
-  "batchExpired": "Expired",
-  "batchValid": "Valid",
-  "fieldExpiry": "Expiry",
-  "report": "Report",
-  "runningReport": "Running report…",
-  "noData": "No data.",
-  "reportNoRows": "This report returned no rows.",
-  "rowCount": "{count, plural, =1{{count} row} other{{count} rows}}",
-  "@rowCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "scanBarcode": "Scan barcode",
   "torchOn": "Torch on",
   "torchOff": "Torch off",
@@ -386,10 +97,8 @@
     }
   },
   "deliveryNumberLabel": "Voucher no.",
-  "deliveryDateLabel": "Delivery date",
   "scanDeliveryHint": "Scan the item JAN",
   "ocrAssist": "Scan note (OCR)",
-  "ocrScanning": "Reading the note…",
   "ocrFound": "Detected {count} JAN code(s) on the note",
   "@ocrFound": {
     "placeholders": {
@@ -402,7 +111,6 @@
   "ocrUnavailable": "OCR is not available on this device.",
   "reconSummaryTitle": "Reconciliation",
   "deliveryPlanned": "Planned",
-  "diffLabel": "Diff",
   "reconReceivedPrev": "Received",
   "reconThisTime": "This time",
   "reconRemaining": "Left",
@@ -454,20 +162,8 @@
       }
     }
   },
-  "noteImageAttached": "Delivery note attached",
   "planImportTitle": "Import plan",
   "planImportHint": "Pick an Excel / PDF / image to upload — it is parsed and registered as a plan automatically.",
-  "pickFile": "Choose file",
-  "planImportSelected": "Selected: {name}",
-  "@planImportSelected": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "planImportAction": "Import",
-  "planImporting": "Importing…",
   "planImportChooseFirst": "Choose a file and enter a voucher number.",
   "planImportedSummary": "Imported {count} items, {total} units total",
   "@planImportedSummary": {
@@ -513,12 +209,10 @@
   "fieldRegistrationNumber": "Registration no. (T…)",
   "fieldCustomerCode": "Customer code",
   "fieldDocNumber": "Delivery-note no.",
-  "fieldDocDate": "Date",
   "headerUnreadHint": "Could not read — please enter",
   "planNeedsReviewBadge": "Needs check",
   "planUnidentifiedNote": "The company could not be read, so this was filed under the “UNKNOWN” series. Enter the supplier to reassign it.",
   "referenceNoLabel": "Ref. no.",
-  "orderDateLabel": "Order date",
   "companyCode": "Company code",
   "totalStockTitle": "Total stock (by JAN)",
   "sortMenu": "Sort",
@@ -539,7 +233,6 @@
   "shipmentStatusPacking": "Packing",
   "shipmentStatusShipped": "Shipped",
   "shipmentStatusCancelled": "Cancelled",
-  "shipmentNumberLabel": "Shipment no.",
   "cartonCountLabel": "{count, plural, =1{{count} carton} other{{count} cartons}}",
   "@cartonCountLabel": {
     "placeholders": {
@@ -572,7 +265,6 @@
   },
   "cartonLabelHint": "Label (optional), e.g. A-1",
   "cartonEditTitle": "Carton contents",
-  "cartonEmpty": "Nothing packed in this carton yet.",
   "packRemaining": "Unpacked",
   "packThisCarton": "This carton",
   "overpackWarning": "Packed more than the shipment quantity.",
@@ -585,7 +277,6 @@
   "shipCancelQ": "Undo this shipment?",
   "shipCancelBody": "The deducted quantities will be added back to stock and the shipment reopened.",
   "shipCancelledDone": "Shipment reopened",
-  "shipAlreadyDone": "Already shipped",
   "printOverall": "Print / PDF list",
   "printAllCartons": "Print / PDF cartons",
   "printThisCarton": "Print / PDF",
@@ -596,7 +287,6 @@
   "senderPickTitle": "Sender on this print",
   "senderInclude": "Print the sender block",
   "senderNoneSet": "No sender saved yet.",
-  "senderOpenSettings": "Set up sender",
   "senderSaved": "Sender saved",
   "senderPreview": "Print preview",
   "fieldCompanyName": "Company name",
@@ -716,11 +406,6 @@
   "qcActual": "Actual",
   "qcDiscrepancy": "Discrepancy",
   "qcLot": "Lot",
-  "qcSerial": "Serial",
-  "qcExpiry": "Expiry (YYYY-MM-DD)",
-  "qcPackaging": "Packaging",
-  "qcCondition": "Condition",
-  "qcLabelOk": "Label matches",
   "qcNote": "Note",
   "qcHold": "Put on hold",
   "qcRecord": "Record",
@@ -753,7 +438,6 @@
   "whFieldUsesLocations": "Manage stock by location",
   "whFieldUsesLocationsHelp": "Leave off to keep one balance per warehouse. Turn on only if you track stock by shelf — you can change this later.",
   "whLocationsOn": "Locations",
-  "whPutaway": "Put-away",
   "adjTitle": "Stock adjustment",
   "adjNew": "Adjust stock",
   "adjEmpty": "No adjustments yet",
@@ -907,7 +591,6 @@
   "transferRejectQ": "Reject this transfer?",
   "transferRejected": "Transfer rejected",
   "transferCancelAction": "Cancel transfer",
-  "transferCancelQ": "Cancel this transfer?",
   "transferCancelBody": "No stock has moved yet, so cancelling changes nothing.",
   "transferCancelled": "Transfer cancelled",
   "transferStartPicking": "Start picking",
@@ -924,7 +607,6 @@
     }
   },
   "transferCompletePicking": "Confirm shipment",
-  "transferCompletePickingQ": "Confirm shipment?",
   "transferCompletePickingBody": "Deducts the picked quantities from {source} and switches to in-transit.",
   "@transferCompletePickingBody": {
     "placeholders": {
@@ -948,7 +630,6 @@
     }
   },
   "transferCompleteReceiving": "Confirm receipt",
-  "transferCompleteReceivingQ": "Confirm receipt?",
   "transferCompleteReceivingBody": "Adds the received quantities to {destination} and completes the transfer.",
   "@transferCompleteReceivingBody": {
     "placeholders": {
@@ -966,8 +647,6 @@
       }
     }
   },
-  "transferRequested": "Requested by",
-  "transferApprovedBy": "Approved by",
   "transferPlanned": "Planned",
   "transferLineProductName": "Product name (optional)",
   "featTransfer": "Transfers",

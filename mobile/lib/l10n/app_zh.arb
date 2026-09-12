@@ -6,7 +6,6 @@
   "signOut": "退出登录",
   "backToMenu": "返回菜单",
   "somethingWentWrong": "发生错误",
-  "language": "语言",
   "languageTooltip": "选择语言",
   "textSizeMenu": "文字大小",
   "textSizeNormal": "标准",
@@ -27,36 +26,15 @@
   "menu": "菜单",
   "cameraScan": "使用相机扫描",
   "groupFieldOperations": "现场作业",
-  "groupLookup": "查询",
   "groupManagement": "管理",
   "featInspection": "验货",
   "featInspectionDesc": "条码与数量核对、不良记录",
-  "featReceiving": "收货",
-  "featReceivingDesc": "对采购单收货，并自动开始验货",
   "featStockAdjustment": "库存调整",
   "featStockAdjustmentDesc": "扫描增减并注明原因",
   "featStockCount": "盘点",
   "featStockCountDesc": "按库位循环盘点",
   "featPicking": "拣货",
   "featPickingDesc": "扫描拣货，完成销售订单",
-  "featProductLookup": "商品查询",
-  "featProductLookupDesc": "扫描条码查看商品与库存",
-  "featLocations": "库位",
-  "featLocationsDesc": "货位、区域与移库",
-  "featLotsSerials": "批次与序列号",
-  "featLotsSerialsDesc": "批次与序列号追踪",
-  "featPurchaseOrders": "采购单",
-  "featPurchaseOrdersDesc": "创建与管理采购单",
-  "featSalesOrders": "销售订单",
-  "featSalesOrdersDesc": "查看与编辑订单",
-  "featSuppliers": "供应商",
-  "featSuppliersDesc": "供应商名录",
-  "featWarehouses": "仓库",
-  "featWarehousesDesc": "仓库主数据",
-  "featWorkOrders": "工单",
-  "featWorkOrdersDesc": "组装与配套",
-  "featReports": "报表",
-  "featReportsDesc": "已保存报表与导出",
   "comingSoon": "敬请期待",
   "comingSoonBody": "该功能的服务器 API 已就绪，移动端界面即将推出。",
   "signIn": "登录",
@@ -67,294 +45,27 @@
   "passwordRequired": "请输入密码",
   "show": "显示",
   "hide": "隐藏",
-  "searching": "搜索中…",
-  "scanTypeHint": "扫描或输入条码、SKU 或名称",
-  "scanTypeMessage": "请扫描或输入条码、SKU 或名称。",
-  "noMatchesFor": "未找到与“{query}”匹配的结果。",
-  "@noMatchesFor": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
-  "tryDifferentScan": "请尝试其他条码、SKU 或名称。",
-  "inStock": "库存",
-  "productLookupEmpty": "暂无商品。",
-  "findProductToAdjust": "查找要调整的商品。",
-  "findProductToTrace": "查找要追溯的商品。",
   "loading": "加载中…",
-  "emptyLocations": "暂无库位。",
-  "emptyWarehouses": "暂无仓库。",
-  "emptySuppliers": "暂无供应商。",
-  "emptySalesOrders": "暂无销售订单。",
-  "emptyPurchaseOrders": "暂无采购单。",
-  "emptyWorkOrders": "暂无工单。",
-  "tryDifferentNameCode": "请尝试其他名称或代码。",
-  "tryDifferentOrder": "请尝试其他订单号或客户。",
-  "tryDifferentPo": "请尝试其他采购单号或供应商。",
-  "tryDifferentWo": "请尝试其他工单号、商品或 SKU。",
-  "hintLocations": "扫描或按名称、代码搜索",
-  "hintWarehouses": "扫描或按名称、代码或城市搜索",
-  "hintSuppliers": "扫描或按名称、代码、联系人或邮箱搜索",
-  "hintSalesOrders": "扫描或按订单号、客户或邮箱搜索",
-  "hintPurchaseOrders": "扫描或按采购单号或供应商搜索",
-  "hintWorkOrders": "扫描或按工单号、商品或 SKU 搜索",
-  "warehouseDefault": "默认",
-  "noCustomer": "无客户",
-  "noSupplier": "无供应商",
-  "noProduct": "无商品",
-  "qtyLabel": "数量 {quantity}",
   "lineCount": "{count, plural, other{{count} 行}}",
-  "statusActive": "启用",
-  "statusInactive": "停用",
-  "statusCancelled": "已取消",
-  "statusDraft": "草稿",
-  "statusCompleted": "已完成",
-  "statusInProgress": "进行中",
-  "statusPending": "待处理",
-  "salesProcessing": "处理中",
-  "salesShipped": "已发货",
-  "salesDelivered": "已送达",
-  "poSent": "已发送",
-  "poPartiallyReceived": "部分收货",
-  "poReceived": "已收货",
-  "stockIn": "有库存",
-  "stockLow": "库存不足",
-  "stockOut": "无库存",
-  "inspectionPassed": "合格",
-  "inspectionFailed": "不合格",
-  "matchOk": "OK",
-  "matchNg": "NG",
-  "typeReceiving": "收货",
-  "typeShipping": "出货",
-  "typeOther": "其他",
-  "titleProduct": "商品",
-  "fieldDescription": "描述",
   "fieldPhone": "电话",
   "fieldAddress": "地址",
-  "fieldStatus": "状态",
-  "fieldCurrency": "币种",
-  "fieldCategory": "类别",
-  "fieldBarcode": "条码",
-  "fieldSku": "SKU",
-  "fieldPrice": "价格",
-  "fieldSellingPrice": "售价",
-  "fieldMinStock": "最低库存",
-  "fieldOnHand": "现有库存",
-  "fieldLocation": "库位",
-  "fieldHasVariants": "有变体",
-  "fieldManager": "负责人",
-  "fieldTimezone": "时区",
-  "fieldPriority": "优先级",
-  "fieldUsers": "用户",
-  "fieldLocations": "库位",
   "fieldContact": "负责人",
-  "fieldWebsite": "网站",
-  "fieldPaymentTerms": "付款条件",
-  "fieldNotes": "备注",
-  "fieldProducts": "商品",
-  "fieldAisle": "通道",
-  "fieldShelf": "货架",
-  "fieldBin": "货位",
-  "fieldCode": "代码",
-  "fieldFullLocation": "完整库位",
-  "itemCount": "{count, plural, other{{count} 件}}",
-  "productCount": "{count, plural, other{{count} 个商品}}",
-  "binCount": "{count, plural, other{{count} 个货位}}",
-  "fieldCustomer": "客户",
-  "lineItems": "明细",
-  "noLineItems": "无明细。",
-  "fieldOrderDate": "下单日期",
-  "fieldSubtotal": "小计",
-  "fieldTax": "税费",
-  "fieldShipping": "运费",
-  "fieldTotal": "合计",
   "fieldSupplier": "供应商",
-  "fieldExpected": "预期",
-  "fieldOrdered": "已订购",
-  "fieldReceived": "已收货",
-  "fieldRemaining": "剩余",
   "actionComplete": "完成",
   "actionContinue": "继续",
-  "fieldAssemblyProduct": "组装产品",
-  "fieldComponents": "组件",
-  "noComponents": "无组件。",
-  "fieldConsumed": "已消耗",
-  "fieldProduced": "已生产",
-  "fieldRequired": "所需",
-  "fieldTarget": "目标",
-  "fieldStarted": "开始",
-  "productNumber": "商品 #{id}",
-  "fieldCountedLines": "已盘点明细",
-  "noCountedLines": "无已盘点明细。",
-  "fieldCounted": "已盘点",
-  "fieldUncounted": "未盘点",
-  "fieldDiscrepancy": "差异",
-  "fieldMatch": "一致",
-  "fieldSystem": "系统",
-  "fieldName": "名称",
-  "fieldType": "类型",
   "filterAll": "全部",
-  "remainingLeft": "剩余 {count}",
-  "remainingAmount": "剩余 {amount}",
   "unknownSupplier": "未知供应商",
-  "receivingEmpty": "无待收货项。",
-  "receivingEmptyBody": "已发送或部分收货的采购单将显示在此处。",
-  "receivingDone": "无剩余待收货。",
-  "fieldQtyToReceive": "收货数量",
-  "receiveStock": "收货入库",
-  "actionReceive": "收货",
-  "receivingInProgress": "收货中…",
-  "emptyInspections": "暂无验货。",
-  "inspectionsEmptyBody": "下拉刷新，或从采购收货开始一项。",
   "pickingEmpty": "无待拣货项。",
   "noLinesToPick": "无可拣货明细。",
-  "orderNoLineItems": "此订单无明细。",
   "unnamedProduct": "未命名商品",
-  "pickListTitle": "拣货单",
-  "customReport": "自定义报表",
-  "emptyReports": "暂无已保存报表。",
-  "reportsEmptyBody": "在后台保存的报表将显示在此处。",
-  "reportShared": "已共享",
-  "columnCount": "{count, plural, other{{count} 列}}",
-  "allLocations": "全部库位",
-  "emptyStockCounts": "暂无盘点。",
   "pickingEmptyBody": "等待履约的销售订单将显示在此处。",
-  "stockCountsEmptyBody": "在后台创建的循环盘点将显示在此处。",
-  "receivingDoneBody": "此采购单的所有明细均已收货。",
-  "receiveInvalidQty": "请为“{product}”输入有效数量。",
-  "receiveExceedsRemaining": "{product}：收货不能超过剩余 {remaining}。",
-  "receiveEnterAtLeastOne": "请至少在一行输入收货数量。",
-  "receiveSuccess": "已收货。已自动开始验货。",
   "pickedProgress": "{picked} / {total} 已拣",
-  "attachFiles": "添加附件",
-  "cameraLabel": "相机",
-  "scanToRecord": "扫描商品条码以记录",
-  "scanToRecordQty1": "扫描以记录（数量 1）",
-  "fastModeOnTooltip": "快速模式：每次扫描按数量 1 记录",
-  "fastModeOffTooltip": "每次扫描时输入数量",
-  "fastQtyOneLabel": "数量 1",
-  "actualQuantity": "实际数量",
-  "scannedCode": "已扫描：{code}",
-  "@scannedCode": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
   "quantity": "数量",
   "actionCancel": "取消",
   "actionRecord": "记录",
-  "itemRecorded": "已记录该项",
-  "offlineItemQueued": "离线 — 该项已加入同步队列",
-  "filesUploaded": "{count, plural, other{已上传 {count} 个文件}}",
-  "@filesUploaded": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "offlineFilesQueued": "离线 — {count} 个文件已加入同步队列",
-  "@offlineFilesQueued": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "completeInspectionQ": "完成验货？",
-  "completeInspectionBody": "将此验货标记为完成。完成后仍可查看。",
-  "inspectionCompleted": "验货已完成",
-  "offlineCompletionQueued": "离线 — 完成操作已加入同步队列",
-  "sectionItems": "项目",
-  "sectionAttachments": "附件",
-  "noItemsYet": "尚无项目。点击扫描以记录一项。",
-  "noAttachments": "暂无附件。使用回形针添加照片或文件。",
-  "completeInspection": "完成验货",
-  "completedOn": "完成于 {date}",
-  "@completedOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "actualLabel": "实际",
-  "itemNumber": "项目 {id}",
-  "@itemNumber": {
-    "placeholders": {
-      "id": {
-        "type": "int"
-      }
-    }
-  },
   "working": "处理中…",
   "adjustAdd": "增加",
   "adjustRemove": "减少",
-  "reasonType": "原因类型",
-  "reasonOptional": "原因（可选）",
-  "notesOptional": "备注（可选）",
-  "onHandAfter": "调整后库存",
-  "saving": "保存中…",
-  "addStock": "增加库存",
-  "removeStock": "减少库存",
-  "onHandCount": "现有库存 {count}",
-  "@onHandCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "enterQtyPositive": "请输入大于零的数量。",
-  "cannotRemoveOnly": "无法减少 {qty}；现有库存仅 {current}。",
-  "@cannotRemoveOnly": {
-    "placeholders": {
-      "qty": {
-        "type": "int"
-      },
-      "current": {
-        "type": "int"
-      }
-    }
-  },
-  "stockUpdatedTo": "库存已更新 — 现有 {count}。",
-  "@stockUpdatedTo": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "adjustTypeManual": "手动",
-  "adjustTypeCount": "盘点",
-  "adjustTypeDamage": "破损",
-  "adjustTypeReturn": "退货",
-  "adjustTypeTransfer": "移库",
-  "sectionBatches": "批次",
-  "sectionSerials": "序列号",
-  "noBatches": "此商品暂无批次。",
-  "noSerials": "此商品暂无序列号。",
-  "loadingBatches": "加载批次中…",
-  "loadingSerials": "加载序列号中…",
-  "batchExpired": "已过期",
-  "batchValid": "有效",
-  "fieldExpiry": "有效期",
-  "report": "报表",
-  "runningReport": "运行报表中…",
-  "noData": "暂无数据。",
-  "reportNoRows": "此报表未返回任何行。",
-  "rowCount": "{count, plural, other{{count} 行}}",
-  "@rowCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "scanBarcode": "扫描条码",
   "torchOn": "打开手电",
   "torchOff": "关闭手电",
@@ -386,10 +97,8 @@
     }
   },
   "deliveryNumberLabel": "单号",
-  "deliveryDateLabel": "到货日",
   "scanDeliveryHint": "扫描商品JAN",
   "ocrAssist": "拍摄到货单（OCR）",
-  "ocrScanning": "解析到货单中…",
   "ocrFound": "从到货单检测到 {count} 个JAN",
   "@ocrFound": {
     "placeholders": {
@@ -402,7 +111,6 @@
   "ocrUnavailable": "此设备无法使用OCR。",
   "reconSummaryTitle": "核对情况",
   "deliveryPlanned": "计划",
-  "diffLabel": "差",
   "reconReceivedPrev": "已收",
   "reconThisTime": "本次",
   "reconRemaining": "余",
@@ -454,20 +162,8 @@
       }
     }
   },
-  "noteImageAttached": "已附加到货单",
   "planImportTitle": "导入计划",
   "planImportHint": "选择 Excel / PDF / 图片上传，系统会自动解析并登记为计划。",
-  "pickFile": "选择文件",
-  "planImportSelected": "已选择：{name}",
-  "@planImportSelected": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "planImportAction": "导入",
-  "planImporting": "导入中…",
   "planImportChooseFirst": "请选择文件并输入单号。",
   "planImportedSummary": "已导入 {count} 项，共 {total} 件",
   "@planImportedSummary": {
@@ -513,12 +209,10 @@
   "fieldRegistrationNumber": "登记号（T…）",
   "fieldCustomerCode": "客户代码",
   "fieldDocNumber": "送货单号",
-  "fieldDocDate": "日期",
   "headerUnreadHint": "无法读取，请手动输入",
   "planNeedsReviewBadge": "待确认",
   "planUnidentifiedNote": "未能读取公司名称，已归入“UNKNOWN”识别号序列。输入供应商即可重新归属到正确公司。",
   "referenceNoLabel": "整理号",
-  "orderDateLabel": "订单日",
   "companyCode": "公司代码",
   "totalStockTitle": "总库存（按JAN）",
   "sortMenu": "排序",
@@ -539,7 +233,6 @@
   "shipmentStatusPacking": "装箱中",
   "shipmentStatusShipped": "已出库",
   "shipmentStatusCancelled": "已取消",
-  "shipmentNumberLabel": "出库号",
   "cartonCountLabel": "{count} 箱",
   "@cartonCountLabel": {
     "placeholders": {
@@ -572,7 +265,6 @@
   },
   "cartonLabelHint": "标签（可选）例: A-1",
   "cartonEditTitle": "纸箱内容",
-  "cartonEmpty": "该纸箱还未装入任何物品。",
   "packRemaining": "未装箱",
   "packThisCarton": "本箱",
   "overpackWarning": "装箱数量超过出库数量。",
@@ -585,7 +277,6 @@
   "shipCancelQ": "撤销这次出库吗？",
   "shipCancelBody": "将把扣除的数量加回库存，并把出库重置为未确认。",
   "shipCancelledDone": "出库已重置为未确认",
-  "shipAlreadyDone": "已出库",
   "printOverall": "打印/PDF 清单",
   "printAllCartons": "打印/PDF 纸箱",
   "printThisCarton": "打印/PDF",
@@ -596,7 +287,6 @@
   "senderPickTitle": "本次打印的寄件人",
   "senderInclude": "打印寄件人信息",
   "senderNoneSet": "尚未设置寄件人。",
-  "senderOpenSettings": "设置寄件人",
   "senderSaved": "已保存寄件人信息",
   "senderPreview": "打印预览",
   "fieldCompanyName": "公司名称",
@@ -716,11 +406,6 @@
   "qcActual": "实数",
   "qcDiscrepancy": "差异",
   "qcLot": "批次",
-  "qcSerial": "序列号",
-  "qcExpiry": "有效期 (YYYY-MM-DD)",
-  "qcPackaging": "外包装",
-  "qcCondition": "商品状态",
-  "qcLabelOk": "标签一致",
   "qcNote": "备注",
   "qcHold": "设为暂留",
   "qcRecord": "记录",
@@ -753,7 +438,6 @@
   "whFieldUsesLocations": "按库位管理",
   "whFieldUsesLocationsHelp": "关闭时按仓库整体管理库存。仅在需要按货架管理时开启（之后可更改）。",
   "whLocationsOn": "库位管理",
-  "whPutaway": "上架",
   "adjTitle": "库存调整",
   "adjNew": "调整库存",
   "adjEmpty": "还没有调整记录",
@@ -907,7 +591,6 @@
   "transferRejectQ": "要驳回此次调拨吗？",
   "transferRejected": "调拨已驳回",
   "transferCancelAction": "中止调拨",
-  "transferCancelQ": "要中止此次调拨吗？",
   "transferCancelBody": "库存尚未变动，中止不会影响库存。",
   "transferCancelled": "调拨已中止",
   "transferStartPicking": "开始拣货",
@@ -924,7 +607,6 @@
     }
   },
   "transferCompletePicking": "确认出库",
-  "transferCompletePickingQ": "要确认出库吗？",
   "transferCompletePickingBody": "将从{source}扣减已拣数量，并切换为运输中。",
   "@transferCompletePickingBody": {
     "placeholders": {
@@ -948,7 +630,6 @@
     }
   },
   "transferCompleteReceiving": "确认接收",
-  "transferCompleteReceivingQ": "要确认接收吗？",
   "transferCompleteReceivingBody": "将把接收数量加到{destination}，并完成本次调拨。",
   "@transferCompleteReceivingBody": {
     "placeholders": {
@@ -966,8 +647,6 @@
       }
     }
   },
-  "transferRequested": "申请人",
-  "transferApprovedBy": "批准人",
   "transferPlanned": "计划",
   "transferLineProductName": "商品名称（可选）",
   "featTransfer": "仓库间调拨",

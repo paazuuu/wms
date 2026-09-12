@@ -27,9 +27,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get somethingWentWrong => '发生错误';
 
   @override
-  String get language => '语言';
-
-  @override
   String get languageTooltip => '选择语言';
 
   @override
@@ -90,9 +87,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get groupFieldOperations => '现场作业';
 
   @override
-  String get groupLookup => '查询';
-
-  @override
   String get groupManagement => '管理';
 
   @override
@@ -100,12 +94,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featInspectionDesc => '条码与数量核对、不良记录';
-
-  @override
-  String get featReceiving => '收货';
-
-  @override
-  String get featReceivingDesc => '对采购单收货，并自动开始验货';
 
   @override
   String get featStockAdjustment => '库存调整';
@@ -124,60 +112,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featPickingDesc => '扫描拣货，完成销售订单';
-
-  @override
-  String get featProductLookup => '商品查询';
-
-  @override
-  String get featProductLookupDesc => '扫描条码查看商品与库存';
-
-  @override
-  String get featLocations => '库位';
-
-  @override
-  String get featLocationsDesc => '货位、区域与移库';
-
-  @override
-  String get featLotsSerials => '批次与序列号';
-
-  @override
-  String get featLotsSerialsDesc => '批次与序列号追踪';
-
-  @override
-  String get featPurchaseOrders => '采购单';
-
-  @override
-  String get featPurchaseOrdersDesc => '创建与管理采购单';
-
-  @override
-  String get featSalesOrders => '销售订单';
-
-  @override
-  String get featSalesOrdersDesc => '查看与编辑订单';
-
-  @override
-  String get featSuppliers => '供应商';
-
-  @override
-  String get featSuppliersDesc => '供应商名录';
-
-  @override
-  String get featWarehouses => '仓库';
-
-  @override
-  String get featWarehousesDesc => '仓库主数据';
-
-  @override
-  String get featWorkOrders => '工单';
-
-  @override
-  String get featWorkOrdersDesc => '组装与配套';
-
-  @override
-  String get featReports => '报表';
-
-  @override
-  String get featReportsDesc => '已保存报表与导出';
 
   @override
   String get comingSoon => '敬请期待';
@@ -210,101 +144,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hide => '隐藏';
 
   @override
-  String get searching => '搜索中…';
-
-  @override
-  String get scanTypeHint => '扫描或输入条码、SKU 或名称';
-
-  @override
-  String get scanTypeMessage => '请扫描或输入条码、SKU 或名称。';
-
-  @override
-  String noMatchesFor(String query) {
-    return '未找到与“$query”匹配的结果。';
-  }
-
-  @override
-  String get tryDifferentScan => '请尝试其他条码、SKU 或名称。';
-
-  @override
-  String get inStock => '库存';
-
-  @override
-  String get productLookupEmpty => '暂无商品。';
-
-  @override
-  String get findProductToAdjust => '查找要调整的商品。';
-
-  @override
-  String get findProductToTrace => '查找要追溯的商品。';
-
-  @override
   String get loading => '加载中…';
-
-  @override
-  String get emptyLocations => '暂无库位。';
-
-  @override
-  String get emptyWarehouses => '暂无仓库。';
-
-  @override
-  String get emptySuppliers => '暂无供应商。';
-
-  @override
-  String get emptySalesOrders => '暂无销售订单。';
-
-  @override
-  String get emptyPurchaseOrders => '暂无采购单。';
-
-  @override
-  String get emptyWorkOrders => '暂无工单。';
-
-  @override
-  String get tryDifferentNameCode => '请尝试其他名称或代码。';
-
-  @override
-  String get tryDifferentOrder => '请尝试其他订单号或客户。';
-
-  @override
-  String get tryDifferentPo => '请尝试其他采购单号或供应商。';
-
-  @override
-  String get tryDifferentWo => '请尝试其他工单号、商品或 SKU。';
-
-  @override
-  String get hintLocations => '扫描或按名称、代码搜索';
-
-  @override
-  String get hintWarehouses => '扫描或按名称、代码或城市搜索';
-
-  @override
-  String get hintSuppliers => '扫描或按名称、代码、联系人或邮箱搜索';
-
-  @override
-  String get hintSalesOrders => '扫描或按订单号、客户或邮箱搜索';
-
-  @override
-  String get hintPurchaseOrders => '扫描或按采购单号或供应商搜索';
-
-  @override
-  String get hintWorkOrders => '扫描或按工单号、商品或 SKU 搜索';
-
-  @override
-  String get warehouseDefault => '默认';
-
-  @override
-  String get noCustomer => '无客户';
-
-  @override
-  String get noSupplier => '无供应商';
-
-  @override
-  String get noProduct => '无商品';
-
-  @override
-  String qtyLabel(int quantity) {
-    return '数量 $quantity';
-  }
 
   @override
   String lineCount(int count) {
@@ -317,232 +157,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get statusActive => '启用';
-
-  @override
-  String get statusInactive => '停用';
-
-  @override
-  String get statusCancelled => '已取消';
-
-  @override
-  String get statusDraft => '草稿';
-
-  @override
-  String get statusCompleted => '已完成';
-
-  @override
-  String get statusInProgress => '进行中';
-
-  @override
-  String get statusPending => '待处理';
-
-  @override
-  String get salesProcessing => '处理中';
-
-  @override
-  String get salesShipped => '已发货';
-
-  @override
-  String get salesDelivered => '已送达';
-
-  @override
-  String get poSent => '已发送';
-
-  @override
-  String get poPartiallyReceived => '部分收货';
-
-  @override
-  String get poReceived => '已收货';
-
-  @override
-  String get stockIn => '有库存';
-
-  @override
-  String get stockLow => '库存不足';
-
-  @override
-  String get stockOut => '无库存';
-
-  @override
-  String get inspectionPassed => '合格';
-
-  @override
-  String get inspectionFailed => '不合格';
-
-  @override
-  String get matchOk => 'OK';
-
-  @override
-  String get matchNg => 'NG';
-
-  @override
-  String get typeReceiving => '收货';
-
-  @override
-  String get typeShipping => '出货';
-
-  @override
-  String get typeOther => '其他';
-
-  @override
-  String get titleProduct => '商品';
-
-  @override
-  String get fieldDescription => '描述';
-
-  @override
   String get fieldPhone => '电话';
 
   @override
   String get fieldAddress => '地址';
 
   @override
-  String get fieldStatus => '状态';
-
-  @override
-  String get fieldCurrency => '币种';
-
-  @override
-  String get fieldCategory => '类别';
-
-  @override
-  String get fieldBarcode => '条码';
-
-  @override
-  String get fieldSku => 'SKU';
-
-  @override
-  String get fieldPrice => '价格';
-
-  @override
-  String get fieldSellingPrice => '售价';
-
-  @override
-  String get fieldMinStock => '最低库存';
-
-  @override
-  String get fieldOnHand => '现有库存';
-
-  @override
-  String get fieldLocation => '库位';
-
-  @override
-  String get fieldHasVariants => '有变体';
-
-  @override
-  String get fieldManager => '负责人';
-
-  @override
-  String get fieldTimezone => '时区';
-
-  @override
-  String get fieldPriority => '优先级';
-
-  @override
-  String get fieldUsers => '用户';
-
-  @override
-  String get fieldLocations => '库位';
-
-  @override
   String get fieldContact => '负责人';
 
   @override
-  String get fieldWebsite => '网站';
-
-  @override
-  String get fieldPaymentTerms => '付款条件';
-
-  @override
-  String get fieldNotes => '备注';
-
-  @override
-  String get fieldProducts => '商品';
-
-  @override
-  String get fieldAisle => '通道';
-
-  @override
-  String get fieldShelf => '货架';
-
-  @override
-  String get fieldBin => '货位';
-
-  @override
-  String get fieldCode => '代码';
-
-  @override
-  String get fieldFullLocation => '完整库位';
-
-  @override
-  String itemCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 件',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String productCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 个商品',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String binCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 个货位',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get fieldCustomer => '客户';
-
-  @override
-  String get lineItems => '明细';
-
-  @override
-  String get noLineItems => '无明细。';
-
-  @override
-  String get fieldOrderDate => '下单日期';
-
-  @override
-  String get fieldSubtotal => '小计';
-
-  @override
-  String get fieldTax => '税费';
-
-  @override
-  String get fieldShipping => '运费';
-
-  @override
-  String get fieldTotal => '合计';
-
-  @override
   String get fieldSupplier => '供应商';
-
-  @override
-  String get fieldExpected => '预期';
-
-  @override
-  String get fieldOrdered => '已订购';
-
-  @override
-  String get fieldReceived => '已收货';
-
-  @override
-  String get fieldRemaining => '剩余';
 
   @override
   String get actionComplete => '完成';
@@ -551,103 +175,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionContinue => '继续';
 
   @override
-  String get fieldAssemblyProduct => '组装产品';
-
-  @override
-  String get fieldComponents => '组件';
-
-  @override
-  String get noComponents => '无组件。';
-
-  @override
-  String get fieldConsumed => '已消耗';
-
-  @override
-  String get fieldProduced => '已生产';
-
-  @override
-  String get fieldRequired => '所需';
-
-  @override
-  String get fieldTarget => '目标';
-
-  @override
-  String get fieldStarted => '开始';
-
-  @override
-  String productNumber(int id) {
-    return '商品 #$id';
-  }
-
-  @override
-  String get fieldCountedLines => '已盘点明细';
-
-  @override
-  String get noCountedLines => '无已盘点明细。';
-
-  @override
-  String get fieldCounted => '已盘点';
-
-  @override
-  String get fieldUncounted => '未盘点';
-
-  @override
-  String get fieldDiscrepancy => '差异';
-
-  @override
-  String get fieldMatch => '一致';
-
-  @override
-  String get fieldSystem => '系统';
-
-  @override
-  String get fieldName => '名称';
-
-  @override
-  String get fieldType => '类型';
-
-  @override
   String get filterAll => '全部';
 
   @override
-  String remainingLeft(int count) {
-    return '剩余 $count';
-  }
-
-  @override
-  String remainingAmount(String amount) {
-    return '剩余 $amount';
-  }
-
-  @override
   String get unknownSupplier => '未知供应商';
-
-  @override
-  String get receivingEmpty => '无待收货项。';
-
-  @override
-  String get receivingEmptyBody => '已发送或部分收货的采购单将显示在此处。';
-
-  @override
-  String get receivingDone => '无剩余待收货。';
-
-  @override
-  String get fieldQtyToReceive => '收货数量';
-
-  @override
-  String get receiveStock => '收货入库';
-
-  @override
-  String get actionReceive => '收货';
-
-  @override
-  String get receivingInProgress => '收货中…';
-
-  @override
-  String get emptyInspections => '暂无验货。';
-
-  @override
-  String get inspectionsEmptyBody => '下拉刷新，或从采购收货开始一项。';
 
   @override
   String get pickingEmpty => '无待拣货项。';
@@ -656,99 +187,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noLinesToPick => '无可拣货明细。';
 
   @override
-  String get orderNoLineItems => '此订单无明细。';
-
-  @override
   String get unnamedProduct => '未命名商品';
-
-  @override
-  String get pickListTitle => '拣货单';
-
-  @override
-  String get customReport => '自定义报表';
-
-  @override
-  String get emptyReports => '暂无已保存报表。';
-
-  @override
-  String get reportsEmptyBody => '在后台保存的报表将显示在此处。';
-
-  @override
-  String get reportShared => '已共享';
-
-  @override
-  String columnCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 列',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get allLocations => '全部库位';
-
-  @override
-  String get emptyStockCounts => '暂无盘点。';
 
   @override
   String get pickingEmptyBody => '等待履约的销售订单将显示在此处。';
 
   @override
-  String get stockCountsEmptyBody => '在后台创建的循环盘点将显示在此处。';
-
-  @override
-  String get receivingDoneBody => '此采购单的所有明细均已收货。';
-
-  @override
-  String receiveInvalidQty(String product) {
-    return '请为“$product”输入有效数量。';
-  }
-
-  @override
-  String receiveExceedsRemaining(String product, int remaining) {
-    return '$product：收货不能超过剩余 $remaining。';
-  }
-
-  @override
-  String get receiveEnterAtLeastOne => '请至少在一行输入收货数量。';
-
-  @override
-  String get receiveSuccess => '已收货。已自动开始验货。';
-
-  @override
   String pickedProgress(int picked, int total) {
     return '$picked / $total 已拣';
-  }
-
-  @override
-  String get attachFiles => '添加附件';
-
-  @override
-  String get cameraLabel => '相机';
-
-  @override
-  String get scanToRecord => '扫描商品条码以记录';
-
-  @override
-  String get scanToRecordQty1 => '扫描以记录（数量 1）';
-
-  @override
-  String get fastModeOnTooltip => '快速模式：每次扫描按数量 1 记录';
-
-  @override
-  String get fastModeOffTooltip => '每次扫描时输入数量';
-
-  @override
-  String get fastQtyOneLabel => '数量 1';
-
-  @override
-  String get actualQuantity => '实际数量';
-
-  @override
-  String scannedCode(String code) {
-    return '已扫描：$code';
   }
 
   @override
@@ -761,67 +207,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionRecord => '记录';
 
   @override
-  String get itemRecorded => '已记录该项';
-
-  @override
-  String get offlineItemQueued => '离线 — 该项已加入同步队列';
-
-  @override
-  String filesUploaded(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '已上传 $count 个文件',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String offlineFilesQueued(int count) {
-    return '离线 — $count 个文件已加入同步队列';
-  }
-
-  @override
-  String get completeInspectionQ => '完成验货？';
-
-  @override
-  String get completeInspectionBody => '将此验货标记为完成。完成后仍可查看。';
-
-  @override
-  String get inspectionCompleted => '验货已完成';
-
-  @override
-  String get offlineCompletionQueued => '离线 — 完成操作已加入同步队列';
-
-  @override
-  String get sectionItems => '项目';
-
-  @override
-  String get sectionAttachments => '附件';
-
-  @override
-  String get noItemsYet => '尚无项目。点击扫描以记录一项。';
-
-  @override
-  String get noAttachments => '暂无附件。使用回形针添加照片或文件。';
-
-  @override
-  String get completeInspection => '完成验货';
-
-  @override
-  String completedOn(String date) {
-    return '完成于 $date';
-  }
-
-  @override
-  String get actualLabel => '实际';
-
-  @override
-  String itemNumber(int id) {
-    return '项目 $id';
-  }
-
-  @override
   String get working => '处理中…';
 
   @override
@@ -829,109 +214,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get adjustRemove => '减少';
-
-  @override
-  String get reasonType => '原因类型';
-
-  @override
-  String get reasonOptional => '原因（可选）';
-
-  @override
-  String get notesOptional => '备注（可选）';
-
-  @override
-  String get onHandAfter => '调整后库存';
-
-  @override
-  String get saving => '保存中…';
-
-  @override
-  String get addStock => '增加库存';
-
-  @override
-  String get removeStock => '减少库存';
-
-  @override
-  String onHandCount(int count) {
-    return '现有库存 $count';
-  }
-
-  @override
-  String get enterQtyPositive => '请输入大于零的数量。';
-
-  @override
-  String cannotRemoveOnly(int qty, int current) {
-    return '无法减少 $qty；现有库存仅 $current。';
-  }
-
-  @override
-  String stockUpdatedTo(int count) {
-    return '库存已更新 — 现有 $count。';
-  }
-
-  @override
-  String get adjustTypeManual => '手动';
-
-  @override
-  String get adjustTypeCount => '盘点';
-
-  @override
-  String get adjustTypeDamage => '破损';
-
-  @override
-  String get adjustTypeReturn => '退货';
-
-  @override
-  String get adjustTypeTransfer => '移库';
-
-  @override
-  String get sectionBatches => '批次';
-
-  @override
-  String get sectionSerials => '序列号';
-
-  @override
-  String get noBatches => '此商品暂无批次。';
-
-  @override
-  String get noSerials => '此商品暂无序列号。';
-
-  @override
-  String get loadingBatches => '加载批次中…';
-
-  @override
-  String get loadingSerials => '加载序列号中…';
-
-  @override
-  String get batchExpired => '已过期';
-
-  @override
-  String get batchValid => '有效';
-
-  @override
-  String get fieldExpiry => '有效期';
-
-  @override
-  String get report => '报表';
-
-  @override
-  String get runningReport => '运行报表中…';
-
-  @override
-  String get noData => '暂无数据。';
-
-  @override
-  String get reportNoRows => '此报表未返回任何行。';
-
-  @override
-  String rowCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 行',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get scanBarcode => '扫描条码';
@@ -1013,16 +295,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deliveryNumberLabel => '单号';
 
   @override
-  String get deliveryDateLabel => '到货日';
-
-  @override
   String get scanDeliveryHint => '扫描商品JAN';
 
   @override
   String get ocrAssist => '拍摄到货单（OCR）';
-
-  @override
-  String get ocrScanning => '解析到货单中…';
 
   @override
   String ocrFound(int count) {
@@ -1040,9 +316,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deliveryPlanned => '计划';
-
-  @override
-  String get diffLabel => '差';
 
   @override
   String get reconReceivedPrev => '已收';
@@ -1141,27 +414,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get noteImageAttached => '已附加到货单';
-
-  @override
   String get planImportTitle => '导入计划';
 
   @override
   String get planImportHint => '选择 Excel / PDF / 图片上传，系统会自动解析并登记为计划。';
-
-  @override
-  String get pickFile => '选择文件';
-
-  @override
-  String planImportSelected(String name) {
-    return '已选择：$name';
-  }
-
-  @override
-  String get planImportAction => '导入';
-
-  @override
-  String get planImporting => '导入中…';
 
   @override
   String get planImportChooseFirst => '请选择文件并输入单号。';
@@ -1224,9 +480,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fieldDocNumber => '送货单号';
 
   @override
-  String get fieldDocDate => '日期';
-
-  @override
   String get headerUnreadHint => '无法读取，请手动输入';
 
   @override
@@ -1238,9 +491,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get referenceNoLabel => '整理号';
-
-  @override
-  String get orderDateLabel => '订单日';
 
   @override
   String get companyCode => '公司代码';
@@ -1303,9 +553,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shipmentStatusCancelled => '已取消';
 
   @override
-  String get shipmentNumberLabel => '出库号';
-
-  @override
   String cartonCountLabel(int count) {
     return '$count 箱';
   }
@@ -1334,9 +581,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cartonEditTitle => '纸箱内容';
-
-  @override
-  String get cartonEmpty => '该纸箱还未装入任何物品。';
 
   @override
   String get packRemaining => '未装箱';
@@ -1375,9 +619,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shipCancelledDone => '出库已重置为未确认';
 
   @override
-  String get shipAlreadyDone => '已出库';
-
-  @override
   String get printOverall => '打印/PDF 清单';
 
   @override
@@ -1406,9 +647,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get senderNoneSet => '尚未设置寄件人。';
-
-  @override
-  String get senderOpenSettings => '设置寄件人';
 
   @override
   String get senderSaved => '已保存寄件人信息';
@@ -1692,21 +930,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qcLot => '批次';
 
   @override
-  String get qcSerial => '序列号';
-
-  @override
-  String get qcExpiry => '有效期 (YYYY-MM-DD)';
-
-  @override
-  String get qcPackaging => '外包装';
-
-  @override
-  String get qcCondition => '商品状态';
-
-  @override
-  String get qcLabelOk => '标签一致';
-
-  @override
   String get qcNote => '备注';
 
   @override
@@ -1744,9 +967,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get whLocationsOn => '库位管理';
-
-  @override
-  String get whPutaway => '上架';
 
   @override
   String get adjTitle => '库存调整';
@@ -2067,9 +1287,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transferCancelAction => '中止调拨';
 
   @override
-  String get transferCancelQ => '要中止此次调拨吗？';
-
-  @override
   String get transferCancelBody => '库存尚未变动，中止不会影响库存。';
 
   @override
@@ -2088,9 +1305,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get transferCompletePicking => '确认出库';
-
-  @override
-  String get transferCompletePickingQ => '要确认出库吗？';
 
   @override
   String transferCompletePickingBody(String source) {
@@ -2115,9 +1329,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transferCompleteReceiving => '确认接收';
 
   @override
-  String get transferCompleteReceivingQ => '要确认接收吗？';
-
-  @override
   String transferCompleteReceivingBody(String destination) {
     return '将把接收数量加到$destination，并完成本次调拨。';
   }
@@ -2129,12 +1340,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String transferCompleted(int loss) {
     return '调拨已完成（$loss行存在数量差异）';
   }
-
-  @override
-  String get transferRequested => '申请人';
-
-  @override
-  String get transferApprovedBy => '批准人';
 
   @override
   String get transferPlanned => '计划';

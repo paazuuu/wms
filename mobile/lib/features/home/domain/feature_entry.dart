@@ -11,11 +11,10 @@ enum FeatureStatus {
   comingSoon,
 }
 
-/// A single warehouse capability shown on the home dashboard.
-///
-/// Each entry maps 1:1 to an InventorOS backend capability. Label and
-/// description are resolved from [AppLocalizations] by [id] so the whole menu
-/// localizes with the app language.
+/// A single warehouse capability shown on the home dashboard, backed by this
+/// app's own Supabase project. Label and description are resolved from
+/// [AppLocalizations] by [id] so the whole menu localizes with the app
+/// language.
 @immutable
 class FeatureEntry {
   const FeatureEntry({
@@ -39,8 +38,6 @@ class FeatureEntry {
     switch (id) {
       case 'inspection':
         return l10n.featInspection;
-      case 'receiving':
-        return l10n.featReceiving;
       case 'delivery':
         return l10n.featDelivery;
       case 'shipment':
@@ -53,24 +50,6 @@ class FeatureEntry {
         return l10n.featPicking;
       case 'transfer':
         return l10n.featTransfer;
-      case 'product_lookup':
-        return l10n.featProductLookup;
-      case 'locations':
-        return l10n.featLocations;
-      case 'lots_serials':
-        return l10n.featLotsSerials;
-      case 'purchase_orders':
-        return l10n.featPurchaseOrders;
-      case 'sales_orders':
-        return l10n.featSalesOrders;
-      case 'suppliers':
-        return l10n.featSuppliers;
-      case 'warehouses':
-        return l10n.featWarehouses;
-      case 'work_orders':
-        return l10n.featWorkOrders;
-      case 'reports':
-        return l10n.featReports;
       case 'audit_log':
         return l10n.featAuditLog;
       case 'user_management':
@@ -87,8 +66,6 @@ class FeatureEntry {
     switch (id) {
       case 'inspection':
         return l10n.featInspectionDesc;
-      case 'receiving':
-        return l10n.featReceivingDesc;
       case 'delivery':
         return l10n.featDeliveryDesc;
       case 'shipment':
@@ -101,24 +78,6 @@ class FeatureEntry {
         return l10n.featPickingDesc;
       case 'transfer':
         return l10n.featTransferDesc;
-      case 'product_lookup':
-        return l10n.featProductLookupDesc;
-      case 'locations':
-        return l10n.featLocationsDesc;
-      case 'lots_serials':
-        return l10n.featLotsSerialsDesc;
-      case 'purchase_orders':
-        return l10n.featPurchaseOrdersDesc;
-      case 'sales_orders':
-        return l10n.featSalesOrdersDesc;
-      case 'suppliers':
-        return l10n.featSuppliersDesc;
-      case 'warehouses':
-        return l10n.featWarehousesDesc;
-      case 'work_orders':
-        return l10n.featWorkOrdersDesc;
-      case 'reports':
-        return l10n.featReportsDesc;
       case 'audit_log':
         return l10n.featAuditLogDesc;
       case 'user_management':
@@ -144,8 +103,6 @@ class FeatureGroup {
     switch (id) {
       case 'field_operations':
         return l10n.groupFieldOperations;
-      case 'lookup':
-        return l10n.groupLookup;
       case 'management':
         return l10n.groupManagement;
       default:

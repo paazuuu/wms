@@ -3,6 +3,15 @@
 _Phase 0 investigation output. Snapshot of `paazuuu/wms` as it exists today,
 before the spec-driven evolution (`WMS_改善統合仕様書_Claude_Code.md`)._
 
+> **Historical snapshot — no longer the current state.** Everything below
+> describing InventorOS-routed screens (inspection, receiving, picking,
+> products, purchase_orders, sales_orders, suppliers, locations, warehouses,
+> work_orders, reports, stock_adjustment, stock_count, tracking, and the
+> InventorOS Sanctum login) was removed from the app: that backend was never
+> actually reachable, and the decision was made not to stand it up. See
+> `migration_plan.md`'s status line for what the app is today — Supabase only,
+> real Supabase Auth sign-in, no InventorOS dependency anywhere.
+
 ## 1. High-level shape
 
 The system is a **hybrid of two independent backends** behind one Flutter app:

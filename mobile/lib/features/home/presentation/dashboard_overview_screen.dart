@@ -4,6 +4,7 @@ import '../../../app.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../search/presentation/global_search_screen.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 import 'dashboard_widgets.dart';
@@ -38,7 +39,6 @@ class DashboardOverviewScreen extends StatelessWidget {
       return null;
     }
 
-    final lookup = entryById('product_lookup');
     final delivery = entryById('delivery');
     final l10n = AppLocalizations.of(context);
 
@@ -48,7 +48,9 @@ class DashboardOverviewScreen extends StatelessWidget {
         _GreetingCard(name: userName, email: userEmail),
         const SizedBox(height: AppSpacing.lg),
         _ScanHeroCard(
-          onTap: lookup == null ? null : () => onOpen(lookup),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
+          ),
         ),
         const SizedBox(height: AppSpacing.xl),
         _SectionLabel(l10n.dashTodayTasks),
@@ -82,7 +84,7 @@ class DashboardOverviewScreen extends StatelessWidget {
 }
 
 /// A prominent banner reminding operators that scanning works anywhere; tapping
-/// it opens Product Lookup for a manual search.
+/// it opens cross-entity search for a manual (non-scan) lookup.
 class _ScanHeroCard extends StatelessWidget {
   const _ScanHeroCard({this.onTap});
 

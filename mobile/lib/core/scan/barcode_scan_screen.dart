@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Full-screen barcode scanner. Pops with the first decoded value.
 /// Supports Code128 / Code39 / EAN-13 (JAN) / QR out of the box.

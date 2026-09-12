@@ -11,8 +11,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/text_scale_menu.dart';
 import '../../../core/ui/responsive.dart';
 import '../../auth/application/auth_controller.dart';
-import '../../inspection/presentation/barcode_scan_screen.dart';
-import '../../products/presentation/product_lookup_screen.dart';
+import '../../../core/scan/barcode_scan_screen.dart';
+import '../../delivery/presentation/stock_ledger_screen.dart';
 import '../../search/presentation/global_search_screen.dart';
 import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../../../l10n/app_localizations.dart';
@@ -99,13 +99,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  /// Route a scan from the top bar / hardware scanner to Product Lookup.
+  /// Route a scan from the top bar / hardware scanner to the stock ledger for
+  /// that JAN — on-hand quantity plus why it changed. This used to open a
+  /// full product-master lookup against InventorOS; that backend was never
+  /// reachable and this app has no product-master table of its own, so the
+  /// ledger (already scan-driven everywhere else) is the real destination.
   void _handleScan(String code) {
     final value = code.trim();
     if (value.isEmpty) return;
     _select(
-      'product_lookup',
-      (_) => ProductLookupScreen(initialQuery: value),
+      'stock_lookup',
+      (_) => StockLedgerScreen(janCode: value),
     );
   }
 
@@ -200,6 +204,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 /// Maps a selected feature id to its localized display title for the top bar.
 String _titleForId(AppLocalizations l10n, String id) {
   if (id == 'dashboard') return l10n.navDashboard;
+  // Reached only via a scan, not the feature menu — not a catalog entry.
+  if (id == 'stock_lookup') return l10n.searchKindStock;
   for (final group in buildFeatureCatalog()) {
     for (final entry in group.entries) {
       if (entry.id == id) return entry.label(l10n);

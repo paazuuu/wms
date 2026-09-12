@@ -5,7 +5,6 @@ import 'core/l10n/locale_controller.dart';
 import 'core/theme/app_spacing.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_controller.dart';
-import 'core/offline/offline_providers.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/home/presentation/home_screen.dart';
@@ -17,13 +16,6 @@ class WmsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
-
-    // Boot the offline-queue drainer once the user is authenticated so
-    // mutations queued in a previous (offline) session are replayed.
-    if (auth.status == AuthStatus.authenticated) {
-      ref.watch(offlineSyncServiceProvider);
-    }
-
     final locale = ref.watch(localeControllerProvider);
     final textScale = ref.watch(textScaleControllerProvider);
 
