@@ -69,9 +69,13 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 **People & access**
 - [x] 11 roles, 22 permissions, audit-logged role/permission checks
 - [x] Real sign-in (Supabase Auth) — code-complete, `flutter analyze` clean
-- [ ] **Auth has zero automated tests** — no test file anywhere covers
-      `SupabaseSessionStorage`, `SupabaseAuthInterceptor`,
-      `SupabaseTokenRefresher`, `AuthRepository`, or `AuthController`
+- [x] Auth test coverage — 41 tests added covering `SupabaseSession`,
+      `SupabaseSessionStorage` (including keychain-failure resilience),
+      `SupabaseTokenRefresher` (refresh-coalescing race), a full fake-Dio-adapter
+      suite for `SupabaseAuthInterceptor` (header injection, proactive refresh,
+      401-retry-once, anon-key fallback) and `AuthRepositoryImpl` (login/
+      currentUser/logout against a fake GoTrue+PostgREST transport), and
+      `AuthController`'s state machine against a fake repository
 - [ ] **Nobody has actually signed in yet** — `app_users`, `user_roles`, and
       `user_warehouses` all have 0 rows in the live database. The flow has
       never been exercised by a real device/person, only by widget tests
@@ -144,8 +148,6 @@ Consolidated, in one place, as asked:
 - Dedicated put-away task/queue distinct from receiving
 
 **Implemented but not tested:**
-- The entire auth stack (session storage, interceptor, token refresher,
-  repository, controller) — zero test files
 - `shipment_print.dart` (PDF/label generation) — not covered by any test
   (printing output is inherently hard to assert on in a widget test)
 
