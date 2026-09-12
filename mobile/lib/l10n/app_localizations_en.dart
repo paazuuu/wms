@@ -2258,6 +2258,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Assign roles to teammates who have signed in';
 
   @override
+  String get featConnectors => 'Connectors';
+
+  @override
+  String get featConnectorsDesc =>
+      'External systems registered for future integration';
+
+  @override
   String get dashTodayTasks => 'Today\'s work';
 
   @override
@@ -2326,4 +2333,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userMgmtRemoveRoleAction => 'Remove';
+
+  @override
+  String get connectorsTitle => 'Connectors';
+
+  @override
+  String get connectorsEmpty => 'No connectors registered';
+
+  @override
+  String get connectorsEmptyBody =>
+      'External systems will appear here once registered.';
+
+  @override
+  String get connectorNoAdapterYet =>
+      'No adapter implemented yet — this only registers the connection, nothing syncs.';
+
+  @override
+  String get connectorEnabled => 'Enabled';
+
+  @override
+  String get connectorDisabled => 'Disabled';
+
+  @override
+  String get connectorNeverRun => 'Never run';
 }

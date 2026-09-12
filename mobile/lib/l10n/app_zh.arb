@@ -986,6 +986,8 @@
   "featAuditLogDesc": "查看操作历史并导出CSV",
   "featUserManagement": "用户管理",
   "featUserManagementDesc": "为已登录的成员分配角色",
+  "featConnectors": "连接器",
+  "featConnectorsDesc": "为未来集成而注册的外部系统",
   "dashTodayTasks": "今日工作",
   "taskPackingWait": "待打包",
   "taskShippingWait": "待出库",
@@ -1017,5 +1019,12 @@
       }
     }
   },
-  "userMgmtRemoveRoleAction": "移除"
+  "userMgmtRemoveRoleAction": "移除",
+  "connectorsTitle": "连接器",
+  "connectorsEmpty": "尚未注册任何连接器",
+  "connectorsEmptyBody": "注册的外部系统将显示在此处。",
+  "connectorNoAdapterYet": "尚未实现同步逻辑——此处仅注册连接信息，不会进行任何同步。",
+  "connectorEnabled": "已启用",
+  "connectorDisabled": "已停用",
+  "connectorNeverRun": "尚无运行记录"
 }

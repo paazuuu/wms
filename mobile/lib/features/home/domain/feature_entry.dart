@@ -75,6 +75,8 @@ class FeatureEntry {
         return l10n.featAuditLog;
       case 'user_management':
         return l10n.featUserManagement;
+      case 'connectors':
+        return l10n.featConnectors;
       default:
         return id;
     }
@@ -121,6 +123,8 @@ class FeatureEntry {
         return l10n.featAuditLogDesc;
       case 'user_management':
         return l10n.featUserManagementDesc;
+      case 'connectors':
+        return l10n.featConnectorsDesc;
       default:
         return '';
     }

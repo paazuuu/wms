@@ -986,6 +986,8 @@
   "featAuditLogDesc": "Review operation history, export as CSV",
   "featUserManagement": "User management",
   "featUserManagementDesc": "Assign roles to teammates who have signed in",
+  "featConnectors": "Connectors",
+  "featConnectorsDesc": "External systems registered for future integration",
   "dashTodayTasks": "Today's work",
   "taskPackingWait": "To pack",
   "taskShippingWait": "To ship",
@@ -1017,5 +1019,12 @@
       }
     }
   },
-  "userMgmtRemoveRoleAction": "Remove"
+  "userMgmtRemoveRoleAction": "Remove",
+  "connectorsTitle": "Connectors",
+  "connectorsEmpty": "No connectors registered",
+  "connectorsEmptyBody": "External systems will appear here once registered.",
+  "connectorNoAdapterYet": "No adapter implemented yet — this only registers the connection, nothing syncs.",
+  "connectorEnabled": "Enabled",
+  "connectorDisabled": "Disabled",
+  "connectorNeverRun": "Never run"
 }

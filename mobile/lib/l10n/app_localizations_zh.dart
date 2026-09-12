@@ -2191,6 +2191,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featUserManagementDesc => '为已登录的成员分配角色';
 
   @override
+  String get featConnectors => '连接器';
+
+  @override
+  String get featConnectorsDesc => '为未来集成而注册的外部系统';
+
+  @override
   String get dashTodayTasks => '今日工作';
 
   @override
@@ -2257,4 +2263,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get userMgmtRemoveRoleAction => '移除';
+
+  @override
+  String get connectorsTitle => '连接器';
+
+  @override
+  String get connectorsEmpty => '尚未注册任何连接器';
+
+  @override
+  String get connectorsEmptyBody => '注册的外部系统将显示在此处。';
+
+  @override
+  String get connectorNoAdapterYet => '尚未实现同步逻辑——此处仅注册连接信息，不会进行任何同步。';
+
+  @override
+  String get connectorEnabled => '已启用';
+
+  @override
+  String get connectorDisabled => '已停用';
+
+  @override
+  String get connectorNeverRun => '尚无运行记录';
 }

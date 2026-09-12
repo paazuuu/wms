@@ -4174,6 +4174,18 @@ abstract class AppLocalizations {
   /// **'サインイン済みのメンバーに権限ロールを割り当て'**
   String get featUserManagementDesc;
 
+  /// No description provided for @featConnectors.
+  ///
+  /// In ja, this message translates to:
+  /// **'コネクタ'**
+  String get featConnectors;
+
+  /// No description provided for @featConnectorsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'将来の外部連携のために登録された外部システム'**
+  String get featConnectorsDesc;
+
   /// No description provided for @dashTodayTasks.
   ///
   /// In ja, this message translates to:
@@ -4305,6 +4317,48 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'削除'**
   String get userMgmtRemoveRoleAction;
+
+  /// No description provided for @connectorsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'コネクタ'**
+  String get connectorsTitle;
+
+  /// No description provided for @connectorsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録されたコネクタがありません'**
+  String get connectorsEmpty;
+
+  /// No description provided for @connectorsEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録された外部システムがここに表示されます。'**
+  String get connectorsEmptyBody;
+
+  /// No description provided for @connectorNoAdapterYet.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ連携処理は実装されていません。この登録だけでは同期は行われません。'**
+  String get connectorNoAdapterYet;
+
+  /// No description provided for @connectorEnabled.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get connectorEnabled;
+
+  /// No description provided for @connectorDisabled.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効'**
+  String get connectorDisabled;
+
+  /// No description provided for @connectorNeverRun.
+  ///
+  /// In ja, this message translates to:
+  /// **'実行履歴なし'**
+  String get connectorNeverRun;
 }
 
 class _AppLocalizationsDelegate

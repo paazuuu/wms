@@ -7,6 +7,8 @@ import 'package:wms_mobile/core/providers.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
 import 'package:wms_mobile/features/admin/data/admin_repository.dart';
 import 'package:wms_mobile/features/admin/domain/app_user_summary.dart';
+import 'package:wms_mobile/features/connectors/data/connector_repository.dart';
+import 'package:wms_mobile/features/connectors/domain/connector.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
@@ -904,6 +906,37 @@ class FakeAdminRepository implements AdminRepository {
           )
         else
           u,
+    ];
+    return const ApiSuccess(true);
+  }
+}
+
+/// Connector registry stub. [connectors] is what `list_connectors` would
+/// return; toggling mutates an in-memory copy so a screen test can assert
+/// the switch stuck.
+class FakeConnectorRepository implements ConnectorRepository {
+  FakeConnectorRepository(List<Connector> connectors) : _connectors = List.of(connectors);
+
+  List<Connector> _connectors;
+
+  @override
+  Future<ApiResult<List<Connector>>> list() async => ApiSuccess(_connectors);
+
+  @override
+  Future<ApiResult<bool>> setEnabled(String code, bool enabled) async {
+    _connectors = [
+      for (final c in _connectors)
+        if (c.code == code)
+          Connector(
+            code: c.code,
+            name: c.name,
+            kind: c.kind,
+            enabled: enabled,
+            note: c.note,
+            lastRun: c.lastRun,
+          )
+        else
+          c,
     ];
     return const ApiSuccess(true);
   }

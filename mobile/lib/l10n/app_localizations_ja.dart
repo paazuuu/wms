@@ -2193,6 +2193,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featUserManagementDesc => 'サインイン済みのメンバーに権限ロールを割り当て';
 
   @override
+  String get featConnectors => 'コネクタ';
+
+  @override
+  String get featConnectorsDesc => '将来の外部連携のために登録された外部システム';
+
+  @override
   String get dashTodayTasks => '今日の作業';
 
   @override
@@ -2259,4 +2265,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get userMgmtRemoveRoleAction => '削除';
+
+  @override
+  String get connectorsTitle => 'コネクタ';
+
+  @override
+  String get connectorsEmpty => '登録されたコネクタがありません';
+
+  @override
+  String get connectorsEmptyBody => '登録された外部システムがここに表示されます。';
+
+  @override
+  String get connectorNoAdapterYet => 'まだ連携処理は実装されていません。この登録だけでは同期は行われません。';
+
+  @override
+  String get connectorEnabled => '有効';
+
+  @override
+  String get connectorDisabled => '無効';
+
+  @override
+  String get connectorNeverRun => '実行履歴なし';
 }

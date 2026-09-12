@@ -17,8 +17,8 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0027 applied.** Step 13 (seed/demo) deliberately skipped —
-> see below. 0028 onward is still planned.
+> Status: **0010–0028 applied.** Step 13 (seed/demo) deliberately skipped —
+> see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
 - `companies`, `warehouses`, `zones`, `bins` (+ bin_type enum/check).
@@ -387,8 +387,32 @@ update inside a transaction._
   ignores), so no mobile client change was needed and today's header/line
   extraction behavior is preserved exactly, per this step's own scope note.
 
-### 0028+ — Connectors (Step 17)
-- Connector/adapter tables for external systems; InventorOS becomes one connector.
+### 0028 — Connector/adapter skeleton (Step 17) ✅
+- architecture_target.md §4: external systems (Shopify, carriers, freee,
+  InventorOS…) belong behind adapters, never embedded in core logic. Asked
+  for explicitly as a **skeleton only** — no adapter talks to an external
+  system yet.
+- `connectors` (registry: code, name, kind, config, enabled) and
+  `connector_runs` (per-sync history: direction, status, summary, error) —
+  the same registry-plus-run-log shape `ai_analysis` already established for
+  AI calls. RLS: readable only to a new `connector.manage` permission (22nd
+  permission, company_admin/system_admin only — same restriction as
+  `user.manage`). `list_connectors()`/`set_connector_enabled()` are the only
+  writes; both gated and audit-logged.
+- Seeded one row: `inventoros` (kind `wms`), registered and disabled, config
+  noting it isn't currently reachable and has no adapter — literally the
+  position architecture_target.md describes for it ("can later become one
+  Connector among others, not the core"), not a working sync.
+- Verified live: grants (`anon` denied, `authenticated` allowed),
+  `list_connectors()` returns the seeded row with `last_run: null`.
+- Flutter: `features/connectors` — a read-only-plus-toggle list screen
+  (Management group). Each card states plainly that no adapter is
+  implemented yet, so enabling a connector here is understood as registering
+  intent, never mistaken for triggering a sync.
+- Also removed while investigating this: `features/picking` (application +
+  presentation), a fully orphaned InventorOS-era duplicate of `picking_ops`
+  with zero references anywhere in the app — dead code, not part of this
+  step's scope but found and cleaned up alongside it.
 
 ## Rollout discipline
 
