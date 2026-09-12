@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0028 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0029 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -446,6 +446,22 @@ update inside a transaction._
   belonged to the deleted screens).
 - `flutter analyze`: clean. `flutter test`: 134/134 passing (down from 226 —
   the removed screens' own tests went with them).
+
+### 0029 — Per-user warehouse scope management (spec §22) ✅
+- `can_access_warehouse()` (0012) has checked `user_warehouses` since real
+  sign-in went live, but nothing ever wrote to that table — no admin could
+  actually restrict a non-admin user to specific warehouses.
+- `assign_user_warehouse`/`revoke_user_warehouse`, same `user.manage` gate
+  and audit logging as `assign_user_role`/`revoke_user_role`. `list_app_users`
+  extended (additively — a new jsonb key, not a signature change) to include
+  each user's `warehouse_ids`.
+- Verified live (aborted transaction): assigned a warehouse to a fresh test
+  user, confirmed `list_app_users()` returned it in `warehouse_ids`.
+- Flutter: `UserManagementScreen` gained a warehouse-access section per user
+  card (add via picker, remove via chip + confirm), reusing the same
+  `warehouseOverviewProvider` the top-bar picker already uses. 4 new widget
+  tests.
+- `flutter analyze`: clean. `flutter test`: 179/179 passing.
 
 ## Rollout discipline
 

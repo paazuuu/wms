@@ -2872,6 +2872,48 @@ abstract class AppLocalizations {
   /// **'削除'**
   String get userMgmtRemoveRoleAction;
 
+  /// No description provided for @userMgmtWarehousesLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫アクセス'**
+  String get userMgmtWarehousesLabel;
+
+  /// No description provided for @userMgmtAddWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を追加'**
+  String get userMgmtAddWarehouse;
+
+  /// No description provided for @userMgmtNoWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫が割り当てられていません（管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）'**
+  String get userMgmtNoWarehouses;
+
+  /// No description provided for @userMgmtAllWarehousesHeld.
+  ///
+  /// In ja, this message translates to:
+  /// **'このユーザーはすべての倉庫にアクセスできます。'**
+  String get userMgmtAllWarehousesHeld;
+
+  /// No description provided for @userMgmtRemoveWarehouseTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫アクセスを削除しますか？'**
+  String get userMgmtRemoveWarehouseTitle;
+
+  /// No description provided for @userMgmtRemoveWarehouseBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} から {warehouse} を削除しますか？'**
+  String userMgmtRemoveWarehouseBody(String warehouse, String name);
+
+  /// No description provided for @userMgmtRemoveWarehouseAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get userMgmtRemoveWarehouseAction;
+
   /// No description provided for @connectorsTitle.
   ///
   /// In ja, this message translates to:

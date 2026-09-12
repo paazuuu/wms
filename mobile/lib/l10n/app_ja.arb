@@ -716,6 +716,23 @@
     }
   },
   "userMgmtRemoveRoleAction": "削除",
+  "userMgmtWarehousesLabel": "倉庫アクセス",
+  "userMgmtAddWarehouse": "倉庫を追加",
+  "userMgmtNoWarehouses": "倉庫が割り当てられていません（管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）",
+  "userMgmtAllWarehousesHeld": "このユーザーはすべての倉庫にアクセスできます。",
+  "userMgmtRemoveWarehouseTitle": "倉庫アクセスを削除しますか？",
+  "userMgmtRemoveWarehouseBody": "{name} から {warehouse} を削除しますか？",
+  "@userMgmtRemoveWarehouseBody": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userMgmtRemoveWarehouseAction": "削除",
   "connectorsTitle": "コネクタ",
   "connectorsEmpty": "登録されたコネクタがありません",
   "connectorsEmptyBody": "登録された外部システムがここに表示されます。",

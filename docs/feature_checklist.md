@@ -81,9 +81,10 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       never been exercised by a real device/person, only by widget tests
       against fakes and direct SQL checks
 - [x] Admin UI to assign/revoke roles (`UserManagementScreen`)
-- [ ] Per-user warehouse scope (`user_warehouses`) — ❌ `can_access_warehouse`
-      checks this table, but **no screen writes to it** — there is no way to
-      restrict a user to specific warehouses today, only to assign roles
+- [x] Per-user warehouse scope (`user_warehouses`, 0029) — admin UI to
+      assign/revoke a user's warehouse access, same screen as roles.
+      `can_access_warehouse` still lets system_admin/company_admin through
+      regardless of this table; it only restricts everyone else
 
 **Audit & AI**
 - [x] Append-only audit log, company-wide viewer, CSV export, per-entity
@@ -144,7 +145,6 @@ Consolidated, in one place, as asked:
 - AI human-review screen (confirm/reject a PENDING_REVIEW result)
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)
 - Any real connector adapter (the registry exists; nothing syncs)
-- Per-user warehouse-scope management UI (`user_warehouses` has no screen)
 - Dedicated put-away task/queue distinct from receiving
 
 **Implemented but not tested:**

@@ -1470,6 +1470,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userMgmtRemoveRoleAction => '移除';
 
   @override
+  String get userMgmtWarehousesLabel => '仓库权限';
+
+  @override
+  String get userMgmtAddWarehouse => '添加仓库';
+
+  @override
+  String get userMgmtNoWarehouses => '未分配仓库（管理员可访问所有仓库，其他角色则无法访问任何仓库）';
+
+  @override
+  String get userMgmtAllWarehousesHeld => '该用户已拥有所有仓库的权限。';
+
+  @override
+  String get userMgmtRemoveWarehouseTitle => '移除仓库权限？';
+
+  @override
+  String userMgmtRemoveWarehouseBody(String warehouse, String name) {
+    return '确定要从 $name 移除 $warehouse 吗？';
+  }
+
+  @override
+  String get userMgmtRemoveWarehouseAction => '移除';
+
+  @override
   String get connectorsTitle => '连接器';
 
   @override

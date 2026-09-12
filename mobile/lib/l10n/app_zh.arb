@@ -699,6 +699,23 @@
     }
   },
   "userMgmtRemoveRoleAction": "移除",
+  "userMgmtWarehousesLabel": "仓库权限",
+  "userMgmtAddWarehouse": "添加仓库",
+  "userMgmtNoWarehouses": "未分配仓库（管理员可访问所有仓库，其他角色则无法访问任何仓库）",
+  "userMgmtAllWarehousesHeld": "该用户已拥有所有仓库的权限。",
+  "userMgmtRemoveWarehouseTitle": "移除仓库权限？",
+  "userMgmtRemoveWarehouseBody": "确定要从 {name} 移除 {warehouse} 吗？",
+  "@userMgmtRemoveWarehouseBody": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userMgmtRemoveWarehouseAction": "移除",
   "connectorsTitle": "连接器",
   "connectorsEmpty": "尚未注册任何连接器",
   "connectorsEmptyBody": "注册的外部系统将显示在此处。",

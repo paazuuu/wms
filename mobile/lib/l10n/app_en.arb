@@ -699,6 +699,23 @@
     }
   },
   "userMgmtRemoveRoleAction": "Remove",
+  "userMgmtWarehousesLabel": "Warehouse access",
+  "userMgmtAddWarehouse": "Add warehouse",
+  "userMgmtNoWarehouses": "No warehouse assigned (admins still see every warehouse; anyone else sees none)",
+  "userMgmtAllWarehousesHeld": "This user already has every warehouse.",
+  "userMgmtRemoveWarehouseTitle": "Remove warehouse access?",
+  "userMgmtRemoveWarehouseBody": "Remove {warehouse} from {name}?",
+  "@userMgmtRemoveWarehouseBody": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "userMgmtRemoveWarehouseAction": "Remove",
   "connectorsTitle": "Connectors",
   "connectorsEmpty": "No connectors registered",
   "connectorsEmptyBody": "External systems will appear here once registered.",

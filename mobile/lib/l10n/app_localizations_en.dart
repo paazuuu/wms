@@ -1519,6 +1519,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userMgmtRemoveRoleAction => 'Remove';
 
   @override
+  String get userMgmtWarehousesLabel => 'Warehouse access';
+
+  @override
+  String get userMgmtAddWarehouse => 'Add warehouse';
+
+  @override
+  String get userMgmtNoWarehouses =>
+      'No warehouse assigned (admins still see every warehouse; anyone else sees none)';
+
+  @override
+  String get userMgmtAllWarehousesHeld =>
+      'This user already has every warehouse.';
+
+  @override
+  String get userMgmtRemoveWarehouseTitle => 'Remove warehouse access?';
+
+  @override
+  String userMgmtRemoveWarehouseBody(String warehouse, String name) {
+    return 'Remove $warehouse from $name?';
+  }
+
+  @override
+  String get userMgmtRemoveWarehouseAction => 'Remove';
+
+  @override
   String get connectorsTitle => 'Connectors';
 
   @override

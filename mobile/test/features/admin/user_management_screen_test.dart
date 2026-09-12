@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/admin/application/admin_providers.dart';
 import 'package:wms_mobile/features/admin/domain/app_user_summary.dart';
 import 'package:wms_mobile/features/admin/presentation/user_management_screen.dart';
+import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
 import '../../support/harness.dart';
 
@@ -150,5 +152,152 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('ロール未割り当て'), findsOneWidget);
+  });
+
+  const warehouseCatalog = [
+    Warehouse(id: 1, code: 'MAIN', name: '神戸倉庫'),
+    Warehouse(id: 2, code: 'SUB', name: '大阪倉庫'),
+  ];
+
+  testWidgets('shows the warehouses a user is scoped to by name', (tester) async {
+    final repo = FakeAdminRepository(
+      [
+        AppUserSummary(
+          id: 'u1',
+          name: 'Yamada',
+          email: 'yamada@example.com',
+          status: 'active',
+          createdAt: DateTime(2026, 1, 1),
+          warehouseIds: const [1],
+        ),
+      ],
+      roles: roleCatalog,
+    );
+
+    await pumpApp(
+      tester,
+      const UserManagementScreen(),
+      overrides: [
+        adminRepositoryProvider.overrideWithValue(repo),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+          const WarehouseOverview(
+            warehouses: warehouseCatalog,
+            totals: WarehouseTotals(),
+          ),
+        )),
+      ],
+    );
+
+    expect(find.text('神戸倉庫'), findsOneWidget);
+    expect(find.text('大阪倉庫'), findsNothing);
+  });
+
+  testWidgets('a user with no warehouse says so rather than showing nothing',
+      (tester) async {
+    final repo = FakeAdminRepository(
+      [
+        AppUserSummary(
+          id: 'u1',
+          name: 'Yamada',
+          email: 'yamada@example.com',
+          status: 'active',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+      roles: roleCatalog,
+    );
+
+    await pumpApp(
+      tester,
+      const UserManagementScreen(),
+      overrides: [
+        adminRepositoryProvider.overrideWithValue(repo),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+          const WarehouseOverview(
+            warehouses: warehouseCatalog,
+            totals: WarehouseTotals(),
+          ),
+        )),
+      ],
+    );
+
+    expect(find.textContaining('倉庫が割り当てられていません'), findsOneWidget);
+  });
+
+  testWidgets('adding a warehouse from the picker attaches it to the user',
+      (tester) async {
+    final repo = FakeAdminRepository(
+      [
+        AppUserSummary(
+          id: 'u1',
+          name: 'Yamada',
+          email: 'yamada@example.com',
+          status: 'active',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+      roles: roleCatalog,
+    );
+
+    await pumpApp(
+      tester,
+      const UserManagementScreen(),
+      overrides: [
+        adminRepositoryProvider.overrideWithValue(repo),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+          const WarehouseOverview(
+            warehouses: warehouseCatalog,
+            totals: WarehouseTotals(),
+          ),
+        )),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.add_business_outlined));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('神戸倉庫'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('神戸倉庫'), findsOneWidget);
+  });
+
+  testWidgets('removing a warehouse detaches it after confirming', (tester) async {
+    final repo = FakeAdminRepository(
+      [
+        AppUserSummary(
+          id: 'u1',
+          name: 'Yamada',
+          email: 'yamada@example.com',
+          status: 'active',
+          createdAt: DateTime(2026, 1, 1),
+          warehouseIds: const [1],
+        ),
+      ],
+      roles: roleCatalog,
+    );
+
+    await pumpApp(
+      tester,
+      const UserManagementScreen(),
+      overrides: [
+        adminRepositoryProvider.overrideWithValue(repo),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+          const WarehouseOverview(
+            warehouses: warehouseCatalog,
+            totals: WarehouseTotals(),
+          ),
+        )),
+      ],
+    );
+
+    expect(find.text('神戸倉庫'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.clear));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('倉庫が割り当てられていません'), findsOneWidget);
   });
 }

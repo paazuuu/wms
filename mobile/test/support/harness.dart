@@ -30,6 +30,7 @@ import 'package:wms_mobile/features/transfers/data/transfer_repository.dart';
 import 'package:wms_mobile/features/transfers/domain/transfer_order.dart';
 import 'package:wms_mobile/features/stock_ops/data/stock_ops_repository.dart';
 import 'package:wms_mobile/features/stock_ops/domain/stock_ops.dart';
+import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
@@ -56,10 +57,17 @@ class _FakeSecureKeyValueStore implements SecureKeyValueStore {
 }
 
 /// Default overrides applied by [pumpApp]/[pumpAppWith] so no test needs to
-/// know about the Supabase auth session store to avoid the hang above.
+/// know about the Supabase auth session store to avoid the hang above, or
+/// stub the warehouse overview just to keep an unrelated screen (e.g. admin
+/// user management, which resolves warehouse names for its scope chips)
+/// from reaching a real Dio client. A test that cares about warehouse data
+/// overrides `warehouseRepositoryProvider` itself, which wins over this.
 List<Override> _defaultOverrides() => [
       supabaseSessionStorageProvider
           .overrideWithValue(SupabaseSessionStorage(_FakeSecureKeyValueStore())),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+        const WarehouseOverview(warehouses: [], totals: WarehouseTotals()),
+      )),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -884,6 +892,7 @@ class FakeAdminRepository implements AdminRepository {
             status: u.status,
             createdAt: u.createdAt,
             roles: [...u.roles, UserRoleTag(code: role.code, name: role.name)],
+            warehouseIds: u.warehouseIds,
           )
         else
           u,
@@ -903,6 +912,47 @@ class FakeAdminRepository implements AdminRepository {
             status: u.status,
             createdAt: u.createdAt,
             roles: u.roles.where((r) => r.code != roleCode).toList(),
+            warehouseIds: u.warehouseIds,
+          )
+        else
+          u,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> assignWarehouse(String userId, int warehouseId) async {
+    _users = [
+      for (final u in _users)
+        if (u.id == userId)
+          AppUserSummary(
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            status: u.status,
+            createdAt: u.createdAt,
+            roles: u.roles,
+            warehouseIds: [...u.warehouseIds, warehouseId],
+          )
+        else
+          u,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> revokeWarehouse(String userId, int warehouseId) async {
+    _users = [
+      for (final u in _users)
+        if (u.id == userId)
+          AppUserSummary(
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            status: u.status,
+            createdAt: u.createdAt,
+            roles: u.roles,
+            warehouseIds: u.warehouseIds.where((id) => id != warehouseId).toList(),
           )
         else
           u,

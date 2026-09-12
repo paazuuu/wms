@@ -18,6 +18,10 @@ abstract class AdminRepository {
   Future<ApiResult<bool>> assignRole(String userId, String roleCode);
 
   Future<ApiResult<bool>> revokeRole(String userId, String roleCode);
+
+  Future<ApiResult<bool>> assignWarehouse(String userId, int warehouseId);
+
+  Future<ApiResult<bool>> revokeWarehouse(String userId, int warehouseId);
 }
 
 class AdminRepositoryImpl implements AdminRepository {
@@ -84,6 +88,32 @@ class AdminRepositoryImpl implements AdminRepository {
       final response = await _dio.post('/rpc/revoke_user_role', data: {
         'p_user_id': userId,
         'p_role_code': roleCode,
+      });
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> assignWarehouse(String userId, int warehouseId) async {
+    try {
+      final response = await _dio.post('/rpc/assign_user_warehouse', data: {
+        'p_user_id': userId,
+        'p_warehouse_id': warehouseId,
+      });
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> revokeWarehouse(String userId, int warehouseId) async {
+    try {
+      final response = await _dio.post('/rpc/revoke_user_warehouse', data: {
+        'p_user_id': userId,
+        'p_warehouse_id': warehouseId,
       });
       return ApiSuccess(response.data == true);
     } on DioException catch (e) {

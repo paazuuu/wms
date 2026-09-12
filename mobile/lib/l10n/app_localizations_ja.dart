@@ -1472,6 +1472,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get userMgmtRemoveRoleAction => '削除';
 
   @override
+  String get userMgmtWarehousesLabel => '倉庫アクセス';
+
+  @override
+  String get userMgmtAddWarehouse => '倉庫を追加';
+
+  @override
+  String get userMgmtNoWarehouses =>
+      '倉庫が割り当てられていません（管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）';
+
+  @override
+  String get userMgmtAllWarehousesHeld => 'このユーザーはすべての倉庫にアクセスできます。';
+
+  @override
+  String get userMgmtRemoveWarehouseTitle => '倉庫アクセスを削除しますか？';
+
+  @override
+  String userMgmtRemoveWarehouseBody(String warehouse, String name) {
+    return '$name から $warehouse を削除しますか？';
+  }
+
+  @override
+  String get userMgmtRemoveWarehouseAction => '削除';
+
+  @override
   String get connectorsTitle => 'コネクタ';
 
   @override
