@@ -1,121 +1,114 @@
 # Architecture — Current State
 
-_Phase 0 investigation output. Snapshot of `paazuuu/wms` as it exists today,
-before the spec-driven evolution (`WMS_改善統合仕様書_Claude_Code.md`)._
-
-> **Historical snapshot — no longer the current state.** Everything below
-> describing InventorOS-routed screens (inspection, receiving, picking,
-> products, purchase_orders, sales_orders, suppliers, locations, warehouses,
-> work_orders, reports, stock_adjustment, stock_count, tracking, and the
-> InventorOS Sanctum login) was removed from the app: that backend was never
-> actually reachable, and the decision was made not to stand it up. See
-> `migration_plan.md`'s status line for what the app is today — Supabase only,
-> real Supabase Auth sign-in, no InventorOS dependency anywhere.
+_Supersedes `architecture_phase0_snapshot.md`. Verified against the live
+Supabase project (`vjunicsfobglmncjucbb`), the Flutter codebase, and the test
+suite — see `feature_checklist.md` for the feature-by-feature detail this
+document summarizes._
 
 ## 1. High-level shape
 
-The system is a **hybrid of two independent backends** behind one Flutter app:
+One backend, one auth system, one client:
 
 ```
 Flutter app (mobile / web)
-   ├── InventorOS API      (Laravel, EXTERNAL, apiBaseUrl = http://localhost/api/v1)
-   │     products, categories, locations, orders, purchase-orders,
-   │     stock-adjustments, stock-audits, suppliers, warehouses,
-   │     work-orders, reports, barcode lookup, inspection*, attachments*
-   │     multi-tenant via organization_id; auth via Sanctum + permissions
    │
-   └── Supabase             (Postgres + Edge Functions, project vjunicsfobglmncjucbb)
-         delivery reconciliation, outbound shipment, stock_levels,
-         suppliers (delivery_suppliers), dashboard metrics
-         auth: anon key (login-free); logic guarded server-side in functions/RPCs
+   ├── Supabase Auth (GoTrue)     real sign-in, admin-created accounts only
+   │
+   └── Supabase (Postgres + Edge Functions, project vjunicsfobglmncjucbb)
+         tenancy · warehouses/zones/bins · roles/permissions/audit ·
+         receiving → inspection (QC) · picking → packing → shipping ·
+         stock ledger · adjustments · cycle counts · inter-warehouse
+         transfers · dashboard · global search · ai_analysis (OCR) ·
+         connector registry (skeleton)
 ```
 
-The two backends do **not** share data. The delivery/shipment/stock features
-(the ones actively used and demoed) live entirely in Supabase; everything else
-on the home menu targets the InventorOS API.
+InventorOS (a separate Laravel app this project once called for ~10 screens)
+was removed entirely: it was never actually reachable in this deployment, and
+the decision was made not to stand it up rather than keep broken menu entries
+and a dependency on it. See `migration_plan.md`'s "Post-0028" entry for the
+removal itself, and `feature_checklist.md` for what that leaves as a real gap
+(no product master, no purchase/sales orders, no supplier/customer CRM, no
+work orders, no custom report builder — none of that has a Supabase
+equivalent today).
 
 ## 2. Repository layout
 
-- `mobile/` — Flutter app (Riverpod, gen_l10n ja/en/zh, Dio, drift offline queue).
-- `supabase/migrations/` — `0001`–`0009` SQL migrations (delivery, reconcile RPC,
-  traceability/suppliers/stock, header auto-read, split delivery, cancel,
-  shipments, dashboard_metrics).
+- `mobile/` — Flutter app (Riverpod, gen_l10n ja/en/zh, Dio).
+- `supabase/migrations/` — `0001`–`0028`, sequential and additive (see
+  `migration_plan.md` for what each one did).
 - `supabase/functions/` — `delivery-plans`, `import-plan`, `ocr-delivery-note`,
-  `shipments` (Deno edge functions).
-- `backend/` — empty in this repo. InventorOS (github.com/Inventoros/Inventoros,
-  Laravel 13/PHP 8.2/MySQL, MIT) is an **external** app the mobile client calls;
-  earlier sessions cloned it here transiently and added an inspection +
-  polymorphic attachments domain (see `findings.md`, `progress.md`).
-- `docs/` — `delivery-reconciliation.md` (+ these Phase 0 docs).
-- Root planning docs: `findings.md`, `progress.md`, `task_plan.md`,
-  `WMS_開発仕様書_Phase1-3.md`, `WMS_改善統合仕様書_Claude_Code.md` (the new spec).
+  `shipments`, `warehouses`, `inspections`, `picking`, `transfers`,
+  `stock-ops`, `audit-log` (Deno edge functions, all `verify_jwt: true`).
+- `docs/` — this file, `feature_checklist.md`, `migration_plan.md`, plus the
+  design docs (`architecture_target.md`, `domain_model.md`,
+  `permission_model.md`, `workflow_model.md`, `ai_architecture.md`,
+  `ui_ux_plan.md`) and the Phase 0 historical snapshot.
 
 ## 3. Flutter feature modules (`mobile/lib/features/`)
 
-| Module | Screens | Backend | Working today? |
-|---|---|---|---|
-| delivery | plan list, import, reconciliation, receipt history, stock list | Supabase | ✅ |
-| shipment | list, detail, carton edit, sender settings | Supabase | ✅ |
-| home | dashboard overview (+live KPI section), coming-soon shell | Supabase (metrics) | ✅ |
-| inspection | list, detail, barcode scan | InventorOS | only if InventorOS runs |
-| receiving | list, detail | InventorOS | only if InventorOS runs |
-| picking | list, pick list | InventorOS | only if InventorOS runs |
-| products | lookup, detail | InventorOS | only if InventorOS runs |
-| purchase_orders | list, view | InventorOS | only if InventorOS runs |
-| sales_orders | list, detail | InventorOS | only if InventorOS runs |
-| suppliers | list, detail | InventorOS | only if InventorOS runs |
-| locations | list, detail | InventorOS | only if InventorOS runs |
-| warehouses | list, detail | InventorOS | only if InventorOS runs |
-| work_orders | list, view | InventorOS | only if InventorOS runs |
-| reports | list, result | InventorOS | only if InventorOS runs |
-| stock_adjustment | search, form | InventorOS | only if InventorOS runs |
-| stock_count | list, audit view | InventorOS | only if InventorOS runs |
-| tracking | search, detail (lots/serials) | InventorOS | only if InventorOS runs |
-| auth | login | InventorOS (Sanctum) | InventorOS only |
+Every module below is Supabase-backed; none call an external system.
 
-`feature_catalog.dart` marks all 16 menu entries `ready`; the comment says each
-maps to a live InventorOS endpoint. In practice, with no InventorOS backend
-reachable, only delivery/shipment/stock/dashboard light up — which is why the
-app "feels empty."
+| Module | What it does | Tested? |
+|---|---|---|
+| auth | Real sign-in (Supabase Auth), session/token refresh | ❌ no tests (see `feature_checklist.md`) |
+| home | Dashboard, feature menu, task-first mobile strip | ✅ |
+| delivery | Plan list, import (+ OCR assist), reconciliation, receipts, stock list | ✅ |
+| shipment | List, detail, carton edit + JAN/送り状 printing, sender settings | ✅ (printing itself untested) |
+| qc | Inbound inspection (pass/fail/hold/partial) | ✅ |
+| picking_ops | Pick lists, short/over detection | ✅ |
+| stock_ops | Adjustments (reason-coded), cycle counts (blind supported) | ✅ |
+| transfers | Inter-warehouse transfer state machine | ✅ |
+| warehouse_context | Warehouse picker, overview, add-warehouse wizard | ✅ |
+| audit | Audit log viewer, CSV export, per-entity activity timeline | ✅ |
+| search | Cross-entity search (stock/delivery/shipment/pick list/transfer) | ✅ |
+| admin | Assign/revoke teammate roles | ✅ |
+| connectors | Registry list + enable toggle (skeleton, no adapters) | ✅ |
 
-## 4. Supabase data model (public schema)
+## 4. Supabase data model (public schema highlights)
 
-- `delivery_plans` / `delivery_plan_lines` — expected inbound (納品予定) + lines
-  with `planned_quantity`, `received_quantity`, header auto-read fields.
-- `delivery_reconciliations` / `reconciliation_lines` — receipt events + counted
-  lines; `reconcile_delivery_plan` RPC accumulates split deliveries.
-- `delivery_suppliers` — supplier master for the delivery flow.
-- `stock_levels` — **snapshot only**: `(jan_code, on_hand, product_name, updated_at)`.
-  No movement ledger; quantity is mutated in place by the reconcile/ship RPCs.
-- `shipment_plans` / `shipment_lines` / `shipment_cartons` / `shipment_carton_items`
-  — outbound (出庫) with carton subdivision; `ship_plan` / `cancel_shipment` RPCs.
-- `dashboard_metrics(p_days, p_low_threshold)` RPC — aggregated home KPIs.
-- RLS is enabled on all tables; edge functions use the service role, the app
-  reads stock via PostgREST with the anon key.
+- Tenancy: `companies` → `warehouses` → `zones`/`bins`.
+- Access: `app_users`, `roles`, `permissions`, `role_permissions`,
+  `user_roles`, `user_warehouses` (this last one has no UI writing to it yet
+  — see gap list below), `audit_log` (append-only).
+- Delivery/shipment: `delivery_plans`/`delivery_plan_lines`,
+  `delivery_reconciliations`/`reconciliation_lines`, `delivery_suppliers`,
+  `shipment_plans`/`shipment_lines`/`shipment_cartons`/`shipment_carton_items`.
+- Inventory: `stock_levels` (snapshot), `stock_movements` (ledger),
+  `bin_stock`, `stock_adjustments`, `stock_counts`/`stock_count_lines`.
+- Operations: `inspections`/`inspection_items`, `pick_lists`/`pick_tasks`,
+  `transfer_orders`/`transfer_order_lines`.
+- AI: `ai_analysis` (PENDING_REVIEW/CONFIRMED/REJECTED, idempotent by input
+  hash) — no `products`, `attachments`, `purchase_orders`, `sales_orders`,
+  `customers`, or `work_orders` tables exist.
+- Connectors: `connectors` (registry, one seeded row: `inventoros`, disabled),
+  `connector_runs` (empty — nothing has ever run).
+- Storage: no bucket has been created; there is no image/attachment upload
+  anywhere in the app today.
+- RLS is enabled on every table; every write goes through a SECURITY DEFINER
+  RPC or an edge function running as service role — nothing is written
+  directly from a client's own privileges.
 
-## 5. Cross-cutting current capabilities
+## 5. Cross-cutting capabilities
 
-- **i18n**: gen_l10n, ja (template) / en / zh; keys resolved by id.
-- **Theming**: `AppTheme.light()/dark()`, `ThemeMode.system` (dark mode works).
-- **Scanning**: `HardwareScanner` (keyboard-wedge) + camera (`mobile_scanner`) +
-  manual `ScanField`. On-device OCR (ML Kit) guarded off web via conditional import.
-- **Offline**: drift-backed `OfflineSyncService` (queue + flush on connectivity).
-- **OCR**: Gemini via `import-plan` / `ocr-delivery-note` edge functions
-  (header + line extraction), used ad hoc — no AI-result table.
-- **Text scaling** option + **widget tests** (169 passing) for key screens.
+- **i18n**: gen_l10n, ja (template) / en / zh.
+- **Theming**: light/dark via `ThemeMode.system`, plus a text-scale setting.
+- **Scanning**: hardware keyboard-wedge scanner, camera scan
+  (`mobile_scanner`), on-device OCR fallback (ML Kit) when the cloud OCR call
+  fails, manual `ScanField` entry.
+- **AI/OCR**: Gemini behind an `AIProvider` interface, results recorded in
+  `ai_analysis`. No human-review screen for those results yet (the RPCs
+  exist; nothing calls them).
+- **Auth**: real Supabase Auth sign-in, admin-created accounts only (no
+  public sign-up), first sign-in auto-promotes to System Admin.
+- **Offline support**: none. The InventorOS-era offline mutation queue was
+  removed along with InventorOS itself (it only ever served that dead
+  screen); no Supabase-backed feature has an offline queue today.
 
-## 6. What is NOT present today (gaps vs spec)
+## 6. Known gaps
 
-- No **company/tenant** concept in Supabase (InventorOS has `organization_id`).
-- No **multi-warehouse** in the Supabase model or the Flutter shell; no top-level
-  warehouse picker / add-warehouse; stock is one implicit warehouse.
-- No **zones/bins/bin-types** (STAGING/QC_HOLD/PICKABLE/…).
-- No **stock_movements / stock ledger**; stock is a mutable snapshot.
-- No **roles/permissions/warehouse-scope** on the Supabase path (anon, login-free).
-- No **audit log** table.
-- No **AI-result store** separate from WMS data; no provider abstraction.
-- Inbound/outbound are single-step (reconcile / ship) rather than the spec's
-  staged flows (receiving→inspection→put-away, allocate→pick→pack→ship).
-- No **inter-warehouse transfer**.
-
-See `architecture_target.md` for where these go and `migration_plan.md` for how.
+See `feature_checklist.md` §3 for the full, itemized list. The short version:
+no product master, no purchase/sales orders, no supplier/customer CRM beyond
+delivery-scoped suppliers, no work orders, no custom report builder, no image
+storage, no AI human-review UI, no working connector adapter, no per-user
+warehouse-scope management screen, and the entire auth stack has zero
+automated test coverage.
