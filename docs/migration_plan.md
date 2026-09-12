@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0029 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0030 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -462,6 +462,22 @@ update inside a transaction._
   `warehouseOverviewProvider` the top-bar picker already uses. 4 new widget
   tests.
 - `flutter analyze`: clean. `flutter test`: 179/179 passing.
+
+### 0030 — AI human-review screen (spec §31, completing 0026) ✅
+- `confirm_ai_analysis`/`reject_ai_analysis` (0026) let an `ai.review` holder
+  act on one result, but nothing let them see which results were waiting —
+  same gap pattern as 0025/0029 for users, this time for AI results.
+- `list_ai_analysis(p_status, p_limit)`: `ai.review`-gated, defaults to
+  `PENDING_REVIEW`, newest first.
+- Verified live (aborted transaction): recorded an analysis, listed it as
+  pending, confirmed it, and confirmed the status flipped to CONFIRMED.
+- Flutter: `features/ai_review` — a list screen showing each result's
+  provider/model/extracted lines with confirm/reject actions (reject prompts
+  for an optional reason). A flat confirm/reject per result, not spec §5's
+  per-field `[確定][要確認][NG]` UI — that needs candidate-level structure
+  nothing produces yet, since OCR is still the only task type. 4 new widget
+  tests.
+- `flutter analyze`: clean. `flutter test`: 183/183 passing.
 
 ## Rollout discipline
 

@@ -86,8 +86,13 @@ PENDING_REVIEW result and reuses an identical prior input by hash, and
 today's header/line extraction behavior is unchanged from the client's
 perspective.
 
-Still open: `confirm_ai_analysis`/`reject_ai_analysis` exist but no screen
-calls them — the `[確定] [要確認] [NG]` review UI (§5) and the other modules
-under §2 (product identification, image inspection, damage detection,
-inventory assistant) are unbuilt. Anthropic/OpenAI/LocalModel providers are
-placeholders in the interface's design, not implemented.
+Also done (0030): a review screen (`AiReviewListScreen`) lists PENDING_REVIEW
+results and calls `confirm_ai_analysis`/`reject_ai_analysis` — a flat
+confirm/reject per result, not §5's per-field `[確定] [要確認] [NG]` UI (that
+needs candidate-level structure — product match %, quantity, damage, etc. —
+which nothing produces yet, since OCR is still the only task type).
+
+Still open: the other modules under §2 (product identification, image
+inspection, damage detection, inventory assistant) are unbuilt.
+Anthropic/OpenAI/LocalModel providers are placeholders in the interface's
+design, not implemented.

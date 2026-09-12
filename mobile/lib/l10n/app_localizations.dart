@@ -2740,6 +2740,18 @@ abstract class AppLocalizations {
   /// **'将来の外部連携のために登録された外部システム'**
   String get featConnectorsDesc;
 
+  /// No description provided for @featAiReview.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIレビュー'**
+  String get featAiReview;
+
+  /// No description provided for @featAiReviewDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの抽出結果を反映前に承認・却下'**
+  String get featAiReviewDesc;
+
   /// No description provided for @dashTodayTasks.
   ///
   /// In ja, this message translates to:
@@ -2955,6 +2967,66 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'実行履歴なし'**
   String get connectorNeverRun;
+
+  /// No description provided for @aiReviewTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIレビュー'**
+  String get aiReviewTitle;
+
+  /// No description provided for @aiReviewEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'レビュー待ちはありません'**
+  String get aiReviewEmpty;
+
+  /// No description provided for @aiReviewEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが抽出した結果は、承認または却下されるまでここに表示されます。'**
+  String get aiReviewEmptyBody;
+
+  /// No description provided for @aiReviewLinesCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 件の明細を抽出'**
+  String aiReviewLinesCount(int count);
+
+  /// No description provided for @aiReviewConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認'**
+  String get aiReviewConfirm;
+
+  /// No description provided for @aiReviewReject.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下'**
+  String get aiReviewReject;
+
+  /// No description provided for @aiReviewRejectTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この結果を却下しますか？'**
+  String get aiReviewRejectTitle;
+
+  /// No description provided for @aiReviewRejectHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'理由（任意）'**
+  String get aiReviewRejectHint;
+
+  /// No description provided for @aiReviewConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認しました'**
+  String get aiReviewConfirmed;
+
+  /// No description provided for @aiReviewRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下しました'**
+  String get aiReviewRejected;
 }
 
 class _AppLocalizationsDelegate

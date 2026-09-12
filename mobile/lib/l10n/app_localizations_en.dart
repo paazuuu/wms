@@ -1449,6 +1449,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'External systems registered for future integration';
 
   @override
+  String get featAiReview => 'AI review';
+
+  @override
+  String get featAiReviewDesc =>
+      'Confirm or reject AI-extracted results before they count';
+
+  @override
   String get dashTodayTasks => 'Today\'s work';
 
   @override
@@ -1565,4 +1572,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectorNeverRun => 'Never run';
+
+  @override
+  String get aiReviewTitle => 'AI Review';
+
+  @override
+  String get aiReviewEmpty => 'Nothing waiting for review';
+
+  @override
+  String get aiReviewEmptyBody =>
+      'AI-extracted results appear here until a person confirms or rejects them.';
+
+  @override
+  String aiReviewLinesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines extracted',
+      one: '$count line extracted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get aiReviewConfirm => 'Confirm';
+
+  @override
+  String get aiReviewReject => 'Reject';
+
+  @override
+  String get aiReviewRejectTitle => 'Reject this result?';
+
+  @override
+  String get aiReviewRejectHint => 'Reason (optional)';
+
+  @override
+  String get aiReviewConfirmed => 'Confirmed';
+
+  @override
+  String get aiReviewRejected => 'Rejected';
 }

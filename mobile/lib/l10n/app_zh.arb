@@ -667,6 +667,8 @@
   "featUserManagementDesc": "为已登录的成员分配角色",
   "featConnectors": "连接器",
   "featConnectorsDesc": "为未来集成而注册的外部系统",
+  "featAiReview": "AI 审核",
+  "featAiReviewDesc": "在生效前确认或拒绝 AI 提取的结果",
   "dashTodayTasks": "今日工作",
   "taskPackingWait": "待打包",
   "taskShippingWait": "待出库",
@@ -722,5 +724,22 @@
   "connectorNoAdapterYet": "尚未实现同步逻辑——此处仅注册连接信息，不会进行任何同步。",
   "connectorEnabled": "已启用",
   "connectorDisabled": "已停用",
-  "connectorNeverRun": "尚无运行记录"
+  "connectorNeverRun": "尚无运行记录",
+  "aiReviewTitle": "AI 审核",
+  "aiReviewEmpty": "暂无待审核结果",
+  "aiReviewEmptyBody": "AI 提取的结果会显示在此处，直到有人确认或拒绝。",
+  "aiReviewLinesCount": "提取了 {count} 行",
+  "@aiReviewLinesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiReviewConfirm": "确认",
+  "aiReviewReject": "拒绝",
+  "aiReviewRejectTitle": "拒绝该结果？",
+  "aiReviewRejectHint": "原因（可选）",
+  "aiReviewConfirmed": "已确认",
+  "aiReviewRejected": "已拒绝"
 }

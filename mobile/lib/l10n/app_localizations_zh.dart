@@ -1402,6 +1402,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featConnectorsDesc => '为未来集成而注册的外部系统';
 
   @override
+  String get featAiReview => 'AI 审核';
+
+  @override
+  String get featAiReviewDesc => '在生效前确认或拒绝 AI 提取的结果';
+
+  @override
   String get dashTodayTasks => '今日工作';
 
   @override
@@ -1512,4 +1518,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connectorNeverRun => '尚无运行记录';
+
+  @override
+  String get aiReviewTitle => 'AI 审核';
+
+  @override
+  String get aiReviewEmpty => '暂无待审核结果';
+
+  @override
+  String get aiReviewEmptyBody => 'AI 提取的结果会显示在此处，直到有人确认或拒绝。';
+
+  @override
+  String aiReviewLinesCount(int count) {
+    return '提取了 $count 行';
+  }
+
+  @override
+  String get aiReviewConfirm => '确认';
+
+  @override
+  String get aiReviewReject => '拒绝';
+
+  @override
+  String get aiReviewRejectTitle => '拒绝该结果？';
+
+  @override
+  String get aiReviewRejectHint => '原因（可选）';
+
+  @override
+  String get aiReviewConfirmed => '已确认';
+
+  @override
+  String get aiReviewRejected => '已拒绝';
 }

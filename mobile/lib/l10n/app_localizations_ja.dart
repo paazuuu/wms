@@ -1404,6 +1404,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featConnectorsDesc => '将来の外部連携のために登録された外部システム';
 
   @override
+  String get featAiReview => 'AIレビュー';
+
+  @override
+  String get featAiReviewDesc => 'AIの抽出結果を反映前に承認・却下';
+
+  @override
   String get dashTodayTasks => '今日の作業';
 
   @override
@@ -1515,4 +1521,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get connectorNeverRun => '実行履歴なし';
+
+  @override
+  String get aiReviewTitle => 'AIレビュー';
+
+  @override
+  String get aiReviewEmpty => 'レビュー待ちはありません';
+
+  @override
+  String get aiReviewEmptyBody => 'AIが抽出した結果は、承認または却下されるまでここに表示されます。';
+
+  @override
+  String aiReviewLinesCount(int count) {
+    return '$count 件の明細を抽出';
+  }
+
+  @override
+  String get aiReviewConfirm => '承認';
+
+  @override
+  String get aiReviewReject => '却下';
+
+  @override
+  String get aiReviewRejectTitle => 'この結果を却下しますか？';
+
+  @override
+  String get aiReviewRejectHint => '理由（任意）';
+
+  @override
+  String get aiReviewConfirmed => '承認しました';
+
+  @override
+  String get aiReviewRejected => '却下しました';
 }

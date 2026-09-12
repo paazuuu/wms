@@ -7,6 +7,8 @@ import 'package:wms_mobile/core/providers.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
 import 'package:wms_mobile/features/admin/data/admin_repository.dart';
 import 'package:wms_mobile/features/admin/domain/app_user_summary.dart';
+import 'package:wms_mobile/features/ai_review/data/ai_review_repository.dart';
+import 'package:wms_mobile/features/ai_review/domain/ai_analysis_entry.dart';
 import 'package:wms_mobile/features/connectors/data/connector_repository.dart';
 import 'package:wms_mobile/features/connectors/domain/connector.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
@@ -988,6 +990,38 @@ class FakeConnectorRepository implements ConnectorRepository {
         else
           c,
     ];
+    return const ApiSuccess(true);
+  }
+}
+
+/// AI-review stub. [entries] is what `list_ai_analysis` would return for the
+/// requested status; confirm/reject remove the entry from the in-memory list
+/// (mirroring the real PENDING_REVIEW-only listing) so a screen test can
+/// assert it disappears.
+class FakeAiReviewRepository implements AiReviewRepository {
+  FakeAiReviewRepository(List<AiAnalysisEntry> entries) : _entries = List.of(entries);
+
+  List<AiAnalysisEntry> _entries;
+
+  /// The id + reason the last reject() call was made with.
+  int? lastRejectedId;
+  String? lastRejectReason;
+
+  @override
+  Future<ApiResult<List<AiAnalysisEntry>>> list({String status = 'PENDING_REVIEW'}) async =>
+      ApiSuccess(_entries.where((e) => e.status == status).toList());
+
+  @override
+  Future<ApiResult<bool>> confirm(int id) async {
+    _entries = _entries.where((e) => e.id != id).toList();
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> reject(int id, {String? reason}) async {
+    lastRejectedId = id;
+    lastRejectReason = reason;
+    _entries = _entries.where((e) => e.id != id).toList();
     return const ApiSuccess(true);
   }
 }

@@ -667,6 +667,8 @@
   "featUserManagementDesc": "Assign roles to teammates who have signed in",
   "featConnectors": "Connectors",
   "featConnectorsDesc": "External systems registered for future integration",
+  "featAiReview": "AI review",
+  "featAiReviewDesc": "Confirm or reject AI-extracted results before they count",
   "dashTodayTasks": "Today's work",
   "taskPackingWait": "To pack",
   "taskShippingWait": "To ship",
@@ -722,5 +724,22 @@
   "connectorNoAdapterYet": "No adapter implemented yet — this only registers the connection, nothing syncs.",
   "connectorEnabled": "Enabled",
   "connectorDisabled": "Disabled",
-  "connectorNeverRun": "Never run"
+  "connectorNeverRun": "Never run",
+  "aiReviewTitle": "AI Review",
+  "aiReviewEmpty": "Nothing waiting for review",
+  "aiReviewEmptyBody": "AI-extracted results appear here until a person confirms or rejects them.",
+  "aiReviewLinesCount": "{count, plural, =1{{count} line extracted} other{{count} lines extracted}}",
+  "@aiReviewLinesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiReviewConfirm": "Confirm",
+  "aiReviewReject": "Reject",
+  "aiReviewRejectTitle": "Reject this result?",
+  "aiReviewRejectHint": "Reason (optional)",
+  "aiReviewConfirmed": "Confirmed",
+  "aiReviewRejected": "Rejected"
 }

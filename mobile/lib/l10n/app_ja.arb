@@ -684,6 +684,8 @@
   "featUserManagementDesc": "サインイン済みのメンバーに権限ロールを割り当て",
   "featConnectors": "コネクタ",
   "featConnectorsDesc": "将来の外部連携のために登録された外部システム",
+  "featAiReview": "AIレビュー",
+  "featAiReviewDesc": "AIの抽出結果を反映前に承認・却下",
   "dashTodayTasks": "今日の作業",
   "taskPackingWait": "梱包待ち",
   "taskShippingWait": "出荷待ち",
@@ -739,5 +741,22 @@
   "connectorNoAdapterYet": "まだ連携処理は実装されていません。この登録だけでは同期は行われません。",
   "connectorEnabled": "有効",
   "connectorDisabled": "無効",
-  "connectorNeverRun": "実行履歴なし"
+  "connectorNeverRun": "実行履歴なし",
+  "aiReviewTitle": "AIレビュー",
+  "aiReviewEmpty": "レビュー待ちはありません",
+  "aiReviewEmptyBody": "AIが抽出した結果は、承認または却下されるまでここに表示されます。",
+  "aiReviewLinesCount": "{count} 件の明細を抽出",
+  "@aiReviewLinesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiReviewConfirm": "承認",
+  "aiReviewReject": "却下",
+  "aiReviewRejectTitle": "この結果を却下しますか？",
+  "aiReviewRejectHint": "理由（任意）",
+  "aiReviewConfirmed": "承認しました",
+  "aiReviewRejected": "却下しました"
 }

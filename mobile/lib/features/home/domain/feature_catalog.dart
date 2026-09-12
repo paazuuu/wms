@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../admin/presentation/user_management_screen.dart';
+import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
@@ -90,6 +91,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _connectors,
           ),
+          FeatureEntry(
+            id: 'ai_review',
+            icon: Icons.fact_check_outlined,
+            status: FeatureStatus.ready,
+            builder: _aiReview,
+          ),
         ],
       ),
     ];
@@ -119,6 +126,9 @@ Widget _userManagement(BuildContext _) => const UserManagementScreen();
 
 /// Top-level (const-referenceable) builder for the Connectors feature.
 Widget _connectors(BuildContext _) => const ConnectorListScreen();
+
+/// Top-level (const-referenceable) builder for the AI Review feature.
+Widget _aiReview(BuildContext _) => const AiReviewListScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
 Widget _picking(BuildContext _) => const PickListIndexScreen();

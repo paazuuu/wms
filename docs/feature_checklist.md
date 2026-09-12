@@ -93,8 +93,10 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       idempotent reuse by input hash)
 - [x] Gemini OCR for delivery-note extraction, behind an `AIProvider`
       interface (`qwen` is a reserved, unimplemented slot)
-- [ ] Human review UI for AI results — ❌ `confirm_ai_analysis`/
-      `reject_ai_analysis` exist as RPCs only; no screen calls them
+- [x] Human review UI for AI results (`AiReviewListScreen`, 0030) — lists
+      PENDING_REVIEW `ai_analysis` rows, confirm/reject with an optional
+      rejection reason. Only OCR (`ocr_delivery_note`) produces analyses
+      today, so it's the only shape the screen renders
 - [ ] AI beyond OCR (product-photo identification, damage detection,
       inventory assistant — spec §27's other modules) — ❌ not started
 
@@ -142,7 +144,6 @@ Consolidated, in one place, as asked:
 - Custom report builder
 - Two-factor authentication, webhooks, GraphQL API
 - Image/attachment storage (no Storage bucket exists)
-- AI human-review screen (confirm/reject a PENDING_REVIEW result)
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)
 - Any real connector adapter (the registry exists; nothing syncs)
 - Dedicated put-away task/queue distinct from receiving
