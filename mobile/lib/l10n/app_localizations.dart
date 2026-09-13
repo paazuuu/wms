@@ -4815,6 +4815,48 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'作業指示を開始'**
   String get auditEventWorkOrderStarted;
+
+  /// No description provided for @dashNotificationsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知'**
+  String get dashNotificationsTitle;
+
+  /// No description provided for @dashNotificationsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応が必要な通知はありません'**
+  String get dashNotificationsEmpty;
+
+  /// No description provided for @notifCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 件'**
+  String notifCount(int count);
+
+  /// No description provided for @notifFailedInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品NG'**
+  String get notifFailedInspection;
+
+  /// No description provided for @notifOutstandingPlans.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷待ち'**
+  String get notifOutstandingPlans;
+
+  /// No description provided for @notifPutawayPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ待ち'**
+  String get notifPutawayPending;
+
+  /// No description provided for @notifOpenPicking.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピック待ち'**
+  String get notifOpenPicking;
 }
 
 class _AppLocalizationsDelegate

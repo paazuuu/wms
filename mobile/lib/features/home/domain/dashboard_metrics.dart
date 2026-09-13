@@ -84,6 +84,7 @@ class DashboardMetrics extends Equatable {
     required this.lowStockCount,
     required this.lowThreshold,
     this.pendingInspectionCount = 0,
+    this.failedInspectionCount = 0,
     this.openPickingCount = 0,
     this.packingWaitCount = 0,
     this.shippingWaitCount = 0,
@@ -110,6 +111,10 @@ class DashboardMetrics extends Equatable {
 
   /// 検品待ち: inbound lots not yet fully inspected.
   final int pendingInspectionCount;
+
+  /// 検品NG (0041, §30): inspections that came back FAIL — a problem to act
+  /// on, distinct from [pendingInspectionCount]'s "not inspected yet".
+  final int failedInspectionCount;
 
   /// ピッキング: pick lists currently being worked.
   final int openPickingCount;
@@ -157,6 +162,7 @@ class DashboardMetrics extends Equatable {
       lowStockCount: _asInt(json['low_stock_count']),
       lowThreshold: _asInt(json['low_threshold']),
       pendingInspectionCount: _asInt(json['pending_inspection_count']),
+      failedInspectionCount: _asInt(json['failed_inspection_count']),
       openPickingCount: _asInt(json['open_picking_count']),
       packingWaitCount: _asInt(json['packing_wait_count']),
       shippingWaitCount: _asInt(json['shipping_wait_count']),
@@ -183,6 +189,7 @@ class DashboardMetrics extends Equatable {
         lowStockCount,
         lowThreshold,
         pendingInspectionCount,
+        failedInspectionCount,
         openPickingCount,
         packingWaitCount,
         shippingWaitCount,

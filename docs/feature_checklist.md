@@ -193,6 +193,24 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       as future work; today everything goes through the system print / PDF
       dialog
 
+**Dashboard alerts (UI spec §30)**
+- [x] A colour-coded alert list — 🔴検品NG／🟠入荷待ち／🟡棚入れ待ち／🔵ピック待ち —
+      each row opening straight into the relevant work ("クリックで該当業務へ
+      直接移動"). Three of the four counts already existed in
+      `dashboard_metrics`; the missing one, 検品NG (inspections that came
+      back FAIL — a problem, not a queue), was added in 0041
+- [x] Deliberately narrower than the always-visible task-count strip
+      (`TodayTasksRow`, which the mockup's own Japanese heading also calls
+      "今日の作業" — reused here it would have put two differently-shaped
+      sections under one label, so this one is titled 通知 instead): only
+      rows with something to report appear, and an all-clear state reads as
+      an explicit "nothing needs attention" line rather than either a list
+      of zeros or the section silently vanishing
+- [x] Same permission gating as the rest of the menu (§37) — a row's tap
+      resolves through the same `entryById` that hides anything the signed-
+      in user cannot open, so a notification can't open a screen its own
+      catalog entry would have been hidden for
+
 **Audit trail readability (UI spec §29)**
 - [x] "誰が・いつ・何をした" — until now the audit trail's "who" was a bare
       `auth.uid()` uuid and its "what" was the raw `event_type` code

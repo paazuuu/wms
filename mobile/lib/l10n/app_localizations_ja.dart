@@ -2491,4 +2491,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get auditEventWorkOrderStarted => '作業指示を開始';
+
+  @override
+  String get dashNotificationsTitle => '通知';
+
+  @override
+  String get dashNotificationsEmpty => '対応が必要な通知はありません';
+
+  @override
+  String notifCount(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String get notifFailedInspection => '検品NG';
+
+  @override
+  String get notifOutstandingPlans => '入荷待ち';
+
+  @override
+  String get notifPutawayPending => '棚入れ待ち';
+
+  @override
+  String get notifOpenPicking => 'ピック待ち';
 }

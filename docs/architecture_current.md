@@ -3,7 +3,7 @@
 _Supersedes `architecture_phase0_snapshot.md`. Verified against the live
 Supabase project (`vjunicsfobglmncjucbb`), the Flutter codebase, and the test
 suite — see `feature_checklist.md` for the feature-by-feature detail this
-document summarizes. Migrations `0010`–`0040` applied._
+document summarizes. Migrations `0010`–`0041` applied._
 
 ## 1. High-level shape
 
@@ -31,13 +31,13 @@ the decision was made not to stand it up rather than keep broken menu entries
 and a dependency on it. See `migration_plan.md`'s "Post-0028" entry for the
 removal itself. Every gap that removal left (product master, purchase/sales
 orders, supplier/customer CRM, work orders, image storage, custom reports) has
-since been rebuilt natively on Supabase (0031–0040) — see §6 below for what
+since been rebuilt natively on Supabase (0031–0041) — see §6 below for what
 still has no equivalent.
 
 ## 2. Repository layout
 
 - `mobile/` — Flutter app (Riverpod, gen_l10n ja/en/zh, Dio).
-- `supabase/migrations/` — `0001`–`0040`, sequential and additive (see
+- `supabase/migrations/` — `0001`–`0041`, sequential and additive (see
   `migration_plan.md` for what each one did).
 - `supabase/functions/` — `delivery-plans`, `import-plan`, `ocr-delivery-note`,
   `shipments`, `warehouses`, `inspections`, `picking`, `transfers`,
@@ -122,6 +122,12 @@ Every module below is Supabase-backed; none call an external system.
   actor-less entry (bootstrap, cron work) stays null. `AuditEventLabels`
   (client-side) maps all 55 `log_audit(...)` event codes to a human phrase
   per language, falling back to a humanized raw code for anything unmapped.
+- Dashboard notifications: `dashboard_metrics` (0041) gained
+  `failed_inspection_count` (inspections with `status = 'FAIL'`) — the one
+  number §30's colour-coded alert row needed that wasn't already computed.
+  `dashboardNotifications()` (client-side) builds the row from that plus
+  three counts the RPC already returned, filtering to only what actually
+  needs attention.
 - Connectors: `connectors` (registry, one seeded row: `inventoros`, disabled),
   `connector_runs` (empty — nothing has ever run).
 - RLS is enabled on every table; every write goes through a SECURITY DEFINER
@@ -131,7 +137,7 @@ Every module below is Supabase-backed; none call an external system.
 ## 5. Cross-cutting capabilities
 
 - **i18n**: gen_l10n, ja (template) / en / zh — every feature added through
-  0040 ships all three languages.
+  0041 ships all three languages.
 - **Theming**: light/dark via `ThemeMode.system`, plus a text-scale setting.
 - **Scanning**: one shared surface, `BarcodeScanScreen` (UI spec §11) —
   camera (`mobile_scanner`), torch, success/error sound and vibration

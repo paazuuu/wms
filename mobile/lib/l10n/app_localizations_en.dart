@@ -2561,4 +2561,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auditEventWorkOrderStarted => 'Work order started';
+
+  @override
+  String get dashNotificationsTitle => 'Notifications';
+
+  @override
+  String get dashNotificationsEmpty => 'Nothing needs attention right now';
+
+  @override
+  String notifCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String get notifFailedInspection => 'Failed inspections';
+
+  @override
+  String get notifOutstandingPlans => 'Inbound outstanding';
+
+  @override
+  String get notifPutawayPending => 'Awaiting put-away';
+
+  @override
+  String get notifOpenPicking => 'Open picking';
 }

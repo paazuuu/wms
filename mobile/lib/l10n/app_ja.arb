@@ -1208,5 +1208,19 @@
   "auditEventWorkOrderCancelled": "作業指示を中止",
   "auditEventWorkOrderCompleted": "作業指示を完了",
   "auditEventWorkOrderCreated": "作業指示を作成",
-  "auditEventWorkOrderStarted": "作業指示を開始"
+  "auditEventWorkOrderStarted": "作業指示を開始",
+  "dashNotificationsTitle": "通知",
+  "dashNotificationsEmpty": "対応が必要な通知はありません",
+  "notifCount": "{count} 件",
+  "@notifCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifFailedInspection": "検品NG",
+  "notifOutstandingPlans": "入荷待ち",
+  "notifPutawayPending": "棚入れ待ち",
+  "notifOpenPicking": "ピック待ち"
 }

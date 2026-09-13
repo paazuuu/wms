@@ -11,6 +11,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/dashboard_providers.dart';
 import '../domain/dashboard_metrics.dart';
+import '../domain/dashboard_notification.dart';
 
 /// The live figures block at the top of the home dashboard: KPI tiles, a
 /// 14-day inbound/outbound trend chart, and the outstanding / low-stock watch
@@ -724,6 +725,102 @@ class _TaskChip extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// §30's alert list: only what actually needs attention right now, colour-
+/// coded by urgency, each row opening straight into the relevant work
+/// ("クリックで該当業務へ直接移動"). See [dashboardNotifications] for why this
+/// is a filtered subset rather than a repeat of [TodayTasksRow]'s full count
+/// strip, and why it is titled 通知 rather than reusing that strip's own
+/// 今日の作業 heading.
+class DashboardNotificationsPanel extends ConsumerWidget {
+  const DashboardNotificationsPanel({super.key, required this.onOpenFeature});
+
+  /// Called with a feature-catalog id (e.g. 'inspection') when a row is
+  /// tapped.
+  final void Function(String featureId) onOpenFeature;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final async = ref.watch(dashboardMetricsProvider);
+    final metrics = async.valueOrNull;
+    if (metrics == null) return const SizedBox.shrink();
+
+    final alerts = dashboardNotifications(l10n, metrics);
+
+    if (alerts.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              const Icon(Icons.check_circle_outline,
+                  size: 18, color: AppColors.success),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  l10n.dashNotificationsEmpty,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var i = 0; i < alerts.length; i++) ...[
+            if (i > 0) const Divider(height: 1),
+            _NotificationRow(
+              alert: alerts[i],
+              onTap: () => onOpenFeature(alerts[i].featureId),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _NotificationRow extends StatelessWidget {
+  const _NotificationRow({required this.alert, required this.onTap});
+
+  final DashboardNotification alert;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            StatusPill(
+                tone: alert.tone, icon: alert.icon, label: l10n.notifCount(alert.count)),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(alert.label, style: theme.textTheme.bodyMedium),
+            ),
+            Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
+          ],
         ),
       ),
     );

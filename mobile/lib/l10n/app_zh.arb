@@ -1053,5 +1053,19 @@
   "auditEventWorkOrderCancelled": "工单已取消",
   "auditEventWorkOrderCompleted": "工单已完成",
   "auditEventWorkOrderCreated": "已创建工单",
-  "auditEventWorkOrderStarted": "工单已开始"
+  "auditEventWorkOrderStarted": "工单已开始",
+  "dashNotificationsTitle": "通知",
+  "dashNotificationsEmpty": "目前没有需要处理的通知",
+  "notifCount": "{count} 件",
+  "@notifCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifFailedInspection": "检验不合格",
+  "notifOutstandingPlans": "待入库",
+  "notifPutawayPending": "待上架",
+  "notifOpenPicking": "拣货中"
 }

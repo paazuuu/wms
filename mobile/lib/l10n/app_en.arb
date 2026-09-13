@@ -1053,5 +1053,19 @@
   "auditEventWorkOrderCancelled": "Work order cancelled",
   "auditEventWorkOrderCompleted": "Work order completed",
   "auditEventWorkOrderCreated": "Work order created",
-  "auditEventWorkOrderStarted": "Work order started"
+  "auditEventWorkOrderStarted": "Work order started",
+  "dashNotificationsTitle": "Notifications",
+  "dashNotificationsEmpty": "Nothing needs attention right now",
+  "notifCount": "{count}",
+  "@notifCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifFailedInspection": "Failed inspections",
+  "notifOutstandingPlans": "Inbound outstanding",
+  "notifPutawayPending": "Awaiting put-away",
+  "notifOpenPicking": "Open picking"
 }

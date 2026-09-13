@@ -2487,4 +2487,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get auditEventWorkOrderStarted => '工单已开始';
+
+  @override
+  String get dashNotificationsTitle => '通知';
+
+  @override
+  String get dashNotificationsEmpty => '目前没有需要处理的通知';
+
+  @override
+  String notifCount(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String get notifFailedInspection => '检验不合格';
+
+  @override
+  String get notifOutstandingPlans => '待入库';
+
+  @override
+  String get notifPutawayPending => '待上架';
+
+  @override
+  String get notifOpenPicking => '拣货中';
 }

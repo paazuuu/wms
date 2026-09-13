@@ -76,6 +76,11 @@ Widget _wrap({List<String> permissions = _allPermissions}) => ProviderScope(
 
 void main() {
   testWidgets('renders greeting and grouped feature menu', (tester) async {
+    // The dashboard grew a §30 notifications section on top of the feature
+    // grid; a tall surface keeps everything in the initial layout instead of
+    // needing a manual scroll for every assertion below the fold.
+    await tester.binding.setSurfaceSize(const Size(900, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
@@ -88,6 +93,8 @@ void main() {
   });
 
   testWidgets('tapping a ready feature opens its live screen', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
@@ -105,6 +112,8 @@ void main() {
 
   testWidgets('hides menu entries and whole groups the user cannot open (§37)',
       (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     // Picking only — everything in "management" and the rest of "field
     // operations" is gated on something else.
     await tester.pumpWidget(_wrap(permissions: const ['pick.confirm']));

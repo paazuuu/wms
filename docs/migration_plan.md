@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0040 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0041 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -806,6 +806,39 @@ the SQL predicate, not by calling the endpoint.
   as a small monospace caption on the full Audit Log screen for anyone
   cross-referencing it against something else.
 - `flutter analyze`: clean. `flutter test`: 291 → 300 passing.
+
+### 0041 — Notifications: the one missing dashboard metric (UI spec §30) ✅
+- §30's alert row (🔴検品NG／🟠入荷待ち／🟡棚入れ待ち／🔵ピック待ち, click-through
+  to the relevant work) needed only one new number: `failed_inspection_count`
+  (inspections with `status = 'FAIL'`). The other three already existed —
+  `outstanding_plan_count`, `putaway_pending_count`, `open_picking_count` —
+  so this migration is `create or replace function dashboard_metrics(...)`
+  with one new CTE and one new key in the returned jsonb, otherwise a
+  byte-for-byte copy of the live definition (fetched from the database
+  before editing, not reconstructed from memory, to guarantee nothing else
+  moved).
+- Kept separate from `pending_inspection_count` on purpose: FAIL is a
+  problem to act on, PENDING is a queue to work through, and folding a
+  failure into an ordinary backlog number would hide it.
+- Signature unchanged, so the existing grants needed no change — confirmed
+  identical before and after (`anon`/`authenticated`/`service_role`, all
+  true).
+- Verified live: an aborted transaction called `dashboard_metrics` before
+  and after inserting one FAIL inspection with no delivery plan / inspector
+  (both nullable) — `failed_inspection_count` went 0 → 1 and
+  `pending_inspection_count` was unaffected by it. Rolled back, 0 leftover
+  rows.
+- Flutter: `DashboardMetrics.failedInspectionCount`; `dashboardNotifications()`
+  builds §30's list from the metrics already on hand, filtering out any row
+  with nothing to report rather than repeating [TodayTasksRow]'s full count
+  strip a second time — an all-clear state is shown as an explicit "nothing
+  needs attention" line. `DashboardNotificationsPanel` renders it between
+  the today's-tasks strip and the KPI section, sharing the same permission-
+  filtered `entryById` lookup as every other dashboard shortcut, so a
+  notification cannot open a screen its own menu entry would have hidden
+  (§37). Titled 通知 rather than reusing the mockup's own "今日の作業" label,
+  which the existing task-count strip already carries.
+- `flutter analyze`: clean. `flutter test`: 300 → 308 passing.
 
 ### Client-only change: permission-aware menu (UI spec §37, no migration)
 
