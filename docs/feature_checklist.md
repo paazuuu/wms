@@ -52,7 +52,16 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 **Outbound**
 - [x] Pick list → picking (short/over detection) → packing (cartons) →
       shipping, all Supabase-backed
-- [ ] Sales orders — ❌ removed with InventorOS, no Supabase equivalent
+- [x] Sales orders (0034) — the outbound counterpart to purchase orders: the
+      same self-contained lifecycle (draft → submit → approve/reject →
+      cancel/complete), `sales_order.view`/`.manage`/`.approve`-gated,
+      self-approval refused. Distinct from a shipment plan (an already-
+      committed shipment feeding picking/packing/shipping); completing a
+      sales order is a bookkeeping close, not a shipping event — it does not
+      move stock. `customer_id` reuses `delivery_suppliers` (already a
+      generic trading-partner reference via `shipment_plans.party_id`).
+      Verified live via grants and an aborted-transaction round trip
+      covering every transition, reject, and the wrong-state refusals
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**
@@ -152,7 +161,6 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 Consolidated, in one place, as asked:
 
 **Not implemented at all:**
-- Sales orders
 - Customer management
 - Returns / RMA
 - Work orders / kitting / assembly

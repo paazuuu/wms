@@ -1479,6 +1479,131 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create, approve and manage orders to suppliers';
 
   @override
+  String get featSalesOrders => 'Sales orders';
+
+  @override
+  String get featSalesOrdersDesc =>
+      'Create, approve and manage orders from customers';
+
+  @override
+  String get soTitle => 'Sales orders';
+
+  @override
+  String get soNew => 'New sales order';
+
+  @override
+  String get soEmpty => 'No sales orders yet';
+
+  @override
+  String get soEmptyBody => 'Create one with the button below.';
+
+  @override
+  String get soNeedsWarehouse => 'No warehouse exists';
+
+  @override
+  String get soCustomerName => 'Customer name';
+
+  @override
+  String get soWarehouse => 'Source warehouse';
+
+  @override
+  String get soRequestedShipDate => 'Requested ship date';
+
+  @override
+  String get soLinesTitle => 'Lines';
+
+  @override
+  String get soAddLine => 'Add line';
+
+  @override
+  String get soNote => 'Note';
+
+  @override
+  String get soCustomerRequired => 'Enter a customer name';
+
+  @override
+  String get soLineRequired => 'Add at least one line';
+
+  @override
+  String get soCreate => 'Create';
+
+  @override
+  String get soLineJan => 'JAN code';
+
+  @override
+  String get soLineProductName => 'Product name';
+
+  @override
+  String get soLineQuantity => 'Quantity';
+
+  @override
+  String get soLineUnitPrice => 'Unit price';
+
+  @override
+  String get soTotalAmount => 'Amount';
+
+  @override
+  String get soSubmit => 'Submit';
+
+  @override
+  String get soSubmitted => 'Sales order submitted';
+
+  @override
+  String get soApprove => 'Approve';
+
+  @override
+  String get soApproveQ => 'Approve this sales order?';
+
+  @override
+  String get soApproved => 'Sales order approved';
+
+  @override
+  String get soReject => 'Reject';
+
+  @override
+  String get soRejectQ => 'Reject this sales order?';
+
+  @override
+  String get soRejected => 'Sales order rejected';
+
+  @override
+  String get soCancelAction => 'Cancel order';
+
+  @override
+  String get soCancelBody => 'Cancel this sales order?';
+
+  @override
+  String get soCancelled => 'Sales order cancelled';
+
+  @override
+  String get soComplete => 'Mark complete';
+
+  @override
+  String get soCompleteQ =>
+      'Mark this sales order complete? Stock does not move.';
+
+  @override
+  String get soCompleted => 'Sales order completed';
+
+  @override
+  String get soStatusDraft => 'Draft';
+
+  @override
+  String get soStatusSubmitted => 'Submitted';
+
+  @override
+  String get soStatusApproved => 'Approved';
+
+  @override
+  String get soStatusRejected => 'Rejected';
+
+  @override
+  String get soStatusCancelled => 'Cancelled';
+
+  @override
+  String get soStatusCompleted => 'Completed';
+
+  @override
   String get poTitle => 'Purchase orders';
 
   @override

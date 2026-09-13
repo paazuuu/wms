@@ -1431,6 +1431,129 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featPurchaseOrdersDesc => '仕入先への発注を作成・承認・管理';
 
   @override
+  String get featSalesOrders => '受注';
+
+  @override
+  String get featSalesOrdersDesc => '顧客からの受注を作成・承認・管理';
+
+  @override
+  String get soTitle => '受注';
+
+  @override
+  String get soNew => '受注を作成';
+
+  @override
+  String get soEmpty => '受注がまだありません';
+
+  @override
+  String get soEmptyBody => '右下のボタンから受注を作成できます。';
+
+  @override
+  String get soNeedsWarehouse => '倉庫がありません';
+
+  @override
+  String get soCustomerName => '顧客名';
+
+  @override
+  String get soWarehouse => '出庫倉庫';
+
+  @override
+  String get soRequestedShipDate => '出荷希望日';
+
+  @override
+  String get soLinesTitle => '明細';
+
+  @override
+  String get soAddLine => '明細を追加';
+
+  @override
+  String get soNote => '備考';
+
+  @override
+  String get soCustomerRequired => '顧客名を入力してください';
+
+  @override
+  String get soLineRequired => '明細を1件以上追加してください';
+
+  @override
+  String get soCreate => '作成';
+
+  @override
+  String get soLineJan => 'JANコード';
+
+  @override
+  String get soLineProductName => '商品名';
+
+  @override
+  String get soLineQuantity => '数量';
+
+  @override
+  String get soLineUnitPrice => '単価';
+
+  @override
+  String get soTotalAmount => '金額';
+
+  @override
+  String get soSubmit => '提出';
+
+  @override
+  String get soSubmitted => '受注を提出しました';
+
+  @override
+  String get soApprove => '承認';
+
+  @override
+  String get soApproveQ => 'この受注を承認しますか？';
+
+  @override
+  String get soApproved => '受注を承認しました';
+
+  @override
+  String get soReject => '却下';
+
+  @override
+  String get soRejectQ => 'この受注を却下しますか？';
+
+  @override
+  String get soRejected => '受注を却下しました';
+
+  @override
+  String get soCancelAction => '受注を取消';
+
+  @override
+  String get soCancelBody => 'この受注を取り消しますか？';
+
+  @override
+  String get soCancelled => '受注を取り消しました';
+
+  @override
+  String get soComplete => '完了にする';
+
+  @override
+  String get soCompleteQ => 'この受注を完了にしますか？在庫は移動しません。';
+
+  @override
+  String get soCompleted => '受注を完了にしました';
+
+  @override
+  String get soStatusDraft => '下書き';
+
+  @override
+  String get soStatusSubmitted => '提出済み';
+
+  @override
+  String get soStatusApproved => '承認済み';
+
+  @override
+  String get soStatusRejected => '却下';
+
+  @override
+  String get soStatusCancelled => '取消';
+
+  @override
+  String get soStatusCompleted => '完了';
+
+  @override
   String get poTitle => '発注';
 
   @override

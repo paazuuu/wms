@@ -1429,6 +1429,129 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPurchaseOrdersDesc => '创建、审批并管理对供应商的订单';
 
   @override
+  String get featSalesOrders => '销售订单';
+
+  @override
+  String get featSalesOrdersDesc => '创建、审批并管理来自客户的订单';
+
+  @override
+  String get soTitle => '销售订单';
+
+  @override
+  String get soNew => '新建销售订单';
+
+  @override
+  String get soEmpty => '暂无销售订单';
+
+  @override
+  String get soEmptyBody => '点击下方按钮创建一个。';
+
+  @override
+  String get soNeedsWarehouse => '尚无仓库';
+
+  @override
+  String get soCustomerName => '客户名称';
+
+  @override
+  String get soWarehouse => '出库仓库';
+
+  @override
+  String get soRequestedShipDate => '期望发货日';
+
+  @override
+  String get soLinesTitle => '明细';
+
+  @override
+  String get soAddLine => '添加明细';
+
+  @override
+  String get soNote => '备注';
+
+  @override
+  String get soCustomerRequired => '请输入客户名称';
+
+  @override
+  String get soLineRequired => '请至少添加一条明细';
+
+  @override
+  String get soCreate => '创建';
+
+  @override
+  String get soLineJan => 'JAN 码';
+
+  @override
+  String get soLineProductName => '商品名';
+
+  @override
+  String get soLineQuantity => '数量';
+
+  @override
+  String get soLineUnitPrice => '单价';
+
+  @override
+  String get soTotalAmount => '金额';
+
+  @override
+  String get soSubmit => '提交';
+
+  @override
+  String get soSubmitted => '销售订单已提交';
+
+  @override
+  String get soApprove => '批准';
+
+  @override
+  String get soApproveQ => '批准此销售订单？';
+
+  @override
+  String get soApproved => '销售订单已批准';
+
+  @override
+  String get soReject => '驳回';
+
+  @override
+  String get soRejectQ => '驳回此销售订单？';
+
+  @override
+  String get soRejected => '销售订单已驳回';
+
+  @override
+  String get soCancelAction => '取消订单';
+
+  @override
+  String get soCancelBody => '取消此销售订单？';
+
+  @override
+  String get soCancelled => '销售订单已取消';
+
+  @override
+  String get soComplete => '标记完成';
+
+  @override
+  String get soCompleteQ => '将此销售订单标记为完成？库存不会变动。';
+
+  @override
+  String get soCompleted => '销售订单已完成';
+
+  @override
+  String get soStatusDraft => '草稿';
+
+  @override
+  String get soStatusSubmitted => '已提交';
+
+  @override
+  String get soStatusApproved => '已批准';
+
+  @override
+  String get soStatusRejected => '已驳回';
+
+  @override
+  String get soStatusCancelled => '已取消';
+
+  @override
+  String get soStatusCompleted => '已完成';
+
+  @override
   String get poTitle => '采购订单';
 
   @override

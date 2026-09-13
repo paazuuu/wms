@@ -2794,6 +2794,252 @@ abstract class AppLocalizations {
   /// **'仕入先への発注を作成・承認・管理'**
   String get featPurchaseOrdersDesc;
 
+  /// No description provided for @featSalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get featSalesOrders;
+
+  /// No description provided for @featSalesOrdersDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客からの受注を作成・承認・管理'**
+  String get featSalesOrdersDesc;
+
+  /// No description provided for @soTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get soTitle;
+
+  /// No description provided for @soNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を作成'**
+  String get soNew;
+
+  /// No description provided for @soEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注がまだありません'**
+  String get soEmpty;
+
+  /// No description provided for @soEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'右下のボタンから受注を作成できます。'**
+  String get soEmptyBody;
+
+  /// No description provided for @soNeedsWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫がありません'**
+  String get soNeedsWarehouse;
+
+  /// No description provided for @soCustomerName.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客名'**
+  String get soCustomerName;
+
+  /// No description provided for @soWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫倉庫'**
+  String get soWarehouse;
+
+  /// No description provided for @soRequestedShipDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷希望日'**
+  String get soRequestedShipDate;
+
+  /// No description provided for @soLinesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細'**
+  String get soLinesTitle;
+
+  /// No description provided for @soAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細を追加'**
+  String get soAddLine;
+
+  /// No description provided for @soNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get soNote;
+
+  /// No description provided for @soCustomerRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客名を入力してください'**
+  String get soCustomerRequired;
+
+  /// No description provided for @soLineRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細を1件以上追加してください'**
+  String get soLineRequired;
+
+  /// No description provided for @soCreate.
+  ///
+  /// In ja, this message translates to:
+  /// **'作成'**
+  String get soCreate;
+
+  /// No description provided for @soLineJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get soLineJan;
+
+  /// No description provided for @soLineProductName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get soLineProductName;
+
+  /// No description provided for @soLineQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get soLineQuantity;
+
+  /// No description provided for @soLineUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get soLineUnitPrice;
+
+  /// No description provided for @soTotalAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額'**
+  String get soTotalAmount;
+
+  /// No description provided for @soSubmit.
+  ///
+  /// In ja, this message translates to:
+  /// **'提出'**
+  String get soSubmit;
+
+  /// No description provided for @soSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を提出しました'**
+  String get soSubmitted;
+
+  /// No description provided for @soApprove.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認'**
+  String get soApprove;
+
+  /// No description provided for @soApproveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受注を承認しますか？'**
+  String get soApproveQ;
+
+  /// No description provided for @soApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を承認しました'**
+  String get soApproved;
+
+  /// No description provided for @soReject.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下'**
+  String get soReject;
+
+  /// No description provided for @soRejectQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受注を却下しますか？'**
+  String get soRejectQ;
+
+  /// No description provided for @soRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を却下しました'**
+  String get soRejected;
+
+  /// No description provided for @soCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を取消'**
+  String get soCancelAction;
+
+  /// No description provided for @soCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受注を取り消しますか？'**
+  String get soCancelBody;
+
+  /// No description provided for @soCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を取り消しました'**
+  String get soCancelled;
+
+  /// No description provided for @soComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了にする'**
+  String get soComplete;
+
+  /// No description provided for @soCompleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受注を完了にしますか？在庫は移動しません。'**
+  String get soCompleteQ;
+
+  /// No description provided for @soCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を完了にしました'**
+  String get soCompleted;
+
+  /// No description provided for @soStatusDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get soStatusDraft;
+
+  /// No description provided for @soStatusSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'提出済み'**
+  String get soStatusSubmitted;
+
+  /// No description provided for @soStatusApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認済み'**
+  String get soStatusApproved;
+
+  /// No description provided for @soStatusRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下'**
+  String get soStatusRejected;
+
+  /// No description provided for @soStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get soStatusCancelled;
+
+  /// No description provided for @soStatusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get soStatusCompleted;
+
   /// No description provided for @poTitle.
   ///
   /// In ja, this message translates to:

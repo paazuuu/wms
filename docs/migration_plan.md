@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0033 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0034 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -562,6 +562,34 @@ update inside a transaction._
   menu. 4 screen tests + 3 repository tests plus a `FakePurchaseOrderRepository`
   added to the shared harness.
 - `flutter analyze`: clean. `flutter test`: 200/200 passing.
+
+### 0034 — Sales orders (checklist item 7) ✅
+- The outbound counterpart to 0033. `shipment_plans` is a related but
+  distinct concept — an already-committed shipment feeding picking/packing/
+  shipping; a sales order is the earlier-stage document, what a customer
+  ordered before fulfillment starts. Same self-contained shape as purchase
+  orders: draft → submit → approve/reject → cancel/complete, never moves
+  stock, not wired into shipment_plans/picking.
+- `sales_orders`/`sales_order_lines` (RLS: read on `sales_order.view`, no
+  direct writes); three new permissions (`sales_order.view`/`.manage`/
+  `.approve`); `create_sales_order`, `submit_sales_order`,
+  `approve_sales_order` (self-approval refused, same guard as
+  `approve_purchase_order`), `reject_sales_order`, `cancel_sales_order`,
+  `complete_sales_order`, `sales_order_detail`, `sales_order_index`.
+  `customer_id` reuses `delivery_suppliers` rather than a new table —
+  `shipment_plans.party_id` already references it as a generic trading-
+  partner master for the outbound side.
+- Verified live: grants (`anon` refused, `authenticated` allowed) for all 8
+  RPCs; an aborted transaction drove a full create → list → detail → submit
+  → (re-submit refused) → approve → complete lifecycle plus a second
+  order's reject path and a cancel-after-complete refusal — rolled back
+  (0 leftover rows in both tables).
+- Flutter: `features/sales` — mirrors `features/purchasing`'s shape exactly
+  (`SalesOrder`/`SalesOrderLine` domain models, `SalesOrderRepository`, a
+  list screen with a create bottom sheet, a detail screen driving the state
+  machine), added to the home menu. 4 screen tests + 3 repository tests
+  plus a `FakeSalesOrderRepository` added to the shared harness.
+- `flutter analyze`: clean. `flutter test`: 207/207 passing.
 
 ## Rollout discipline
 
