@@ -1038,6 +1038,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adjApply => 'Apply adjustment';
 
   @override
+  String get adjConfirmQ => 'Apply this adjustment?';
+
+  @override
+  String get adjConfirmIrreversible => 'This cannot be undone.';
+
+  @override
+  String get adjConfirmAction => 'Adjust';
+
+  @override
   String adjDone(String delta) {
     return 'Stock adjusted ($delta)';
   }
@@ -1989,6 +1998,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productInactive => 'Inactive';
+
+  @override
+  String get productDeactivateQ => 'Deactivate this product?';
+
+  @override
+  String get productDeactivateBody =>
+      'Once inactive, it can no longer be selected for receiving, shipping, or other operations.';
+
+  @override
+  String get productDeactivateAction => 'Deactivate';
 
   @override
   String get productNewTitle => 'New product';

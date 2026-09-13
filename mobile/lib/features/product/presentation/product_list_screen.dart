@@ -39,6 +39,30 @@ class ProductListScreen extends ConsumerWidget {
 
   Future<void> _toggleStatus(
       BuildContext context, WidgetRef ref, Product product) async {
+    final l10n = AppLocalizations.of(context);
+    // Reactivating is harmless and needs no dialog; deactivating hides the
+    // product from receiving/shipping, so confirm before that one (§36).
+    if (product.isActive) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.productDeactivateQ),
+          content: Text(l10n.productDeactivateBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.actionCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.productDeactivateAction),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !context.mounted) return;
+    }
+
     final nextStatus = product.isActive ? 'inactive' : 'active';
     final result = await ref
         .read(productRepositoryProvider)

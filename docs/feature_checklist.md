@@ -257,6 +257,38 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       and doing it well means changing the warehouse picker's own list
       query, not just gating a menu entry
 
+**Confirmation on dangerous operations (UI spec §36)**
+
+Audited against the spec's own list of 8 operations that must ask before
+acting ("ただし確認ダイアログを乱用しない" — but don't overuse them elsewhere):
+
+- [x] 出荷確定 (ship confirm) — `ShipmentDetailScreen._confirmShip`, already
+      warns separately when a line would go short
+- [x] 在庫調整 (stock adjustment) — was missing: `_newAdjustment` applied the
+      bottom sheet's draft straight to the ledger with no confirmation step.
+      Added a confirm dialog between the sheet and the write, showing the JAN
+      and signed delta and stating the write can't be undone
+- [x] 棚卸確定 (stock count complete) — `StockCountDetailScreen._complete`,
+      already surfaces an uncounted-lines warning inside the same dialog
+- [x] Transfer完了 (`completeReceiving`, the step that actually moves stock) —
+      `TransferDetailScreen`, via its shared `_confirm` helper
+- [x] POキャンセル / SOキャンセル — `PurchaseOrderDetailScreen` /
+      `SalesOrderDetailScreen`, both via the same `_confirm` helper pattern
+- [x] 商品無効化 (product deactivation) — was missing: `_toggleStatus` wrote
+      `status = 'inactive'` directly on tap. Added a confirm dialog, but only
+      on the active→inactive transition; reactivating stays a single tap
+      since it undoes nothing and isn't destructive (the spec's "don't
+      overuse" side)
+- [ ] 倉庫削除 (warehouse delete) — no such operation exists anywhere in the
+      app (no screen, no repository method, no RPC). Nothing to confirm;
+      not built speculatively just to have something to gate (§53)
+
+Every other `showDialog` call already in the app (bottom-sheet-style forms,
+quantity entry, filters, the autopack box-size prompt, the sender picker) is
+a data-entry or picker dialog, not a destructive action, and was left alone
+— adding a confirmation there would be exactly the overuse the spec warns
+against.
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

@@ -450,6 +450,9 @@
   "adjReason": "原因",
   "adjNote": "备注",
   "adjApply": "确认调整",
+  "adjConfirmQ": "确认执行此次调整？",
+  "adjConfirmIrreversible": "此操作无法撤销。",
+  "adjConfirmAction": "调整",
   "adjDone": "库存已调整（{delta}）",
   "@adjDone": {
     "placeholders": {
@@ -857,6 +860,9 @@
   "productsEmptyBody": "点击右下角的 + 添加商品。",
   "productActive": "启用",
   "productInactive": "停用",
+  "productDeactivateQ": "停用此商品？",
+  "productDeactivateBody": "停用后，将无法在入库、出库等操作中选择此商品。",
+  "productDeactivateAction": "停用",
   "productNewTitle": "新增商品",
   "productEditTitle": "编辑商品",
   "productJanCode": "JAN 码",

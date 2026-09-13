@@ -467,6 +467,9 @@
   "adjReason": "理由",
   "adjNote": "備考",
   "adjApply": "調整を確定",
+  "adjConfirmQ": "在庫を調整しますか？",
+  "adjConfirmIrreversible": "この操作は取り消せません。",
+  "adjConfirmAction": "調整する",
   "adjDone": "在庫を調整しました（{delta}）",
   "@adjDone": {
     "placeholders": {
@@ -874,6 +877,9 @@
   "productsEmptyBody": "右下の＋から商品を登録できます。",
   "productActive": "有効",
   "productInactive": "無効",
+  "productDeactivateQ": "この商品を無効にしますか？",
+  "productDeactivateBody": "無効にすると、入荷・出荷などの操作でこの商品を選べなくなります。",
+  "productDeactivateAction": "無効にする",
   "productNewTitle": "商品を登録",
   "productEditTitle": "商品を編集",
   "productJanCode": "JANコード",

@@ -1005,6 +1005,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adjApply => '确认调整';
 
   @override
+  String get adjConfirmQ => '确认执行此次调整？';
+
+  @override
+  String get adjConfirmIrreversible => '此操作无法撤销。';
+
+  @override
+  String get adjConfirmAction => '调整';
+
+  @override
   String adjDone(String delta) {
     return '库存已调整（$delta）';
   }
@@ -1932,6 +1941,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productInactive => '停用';
+
+  @override
+  String get productDeactivateQ => '停用此商品？';
+
+  @override
+  String get productDeactivateBody => '停用后，将无法在入库、出库等操作中选择此商品。';
+
+  @override
+  String get productDeactivateAction => '停用';
 
   @override
   String get productNewTitle => '新增商品';

@@ -54,6 +54,34 @@ class _StockAdjustmentScreenState extends ConsumerState<StockAdjustmentScreen> {
     );
     if (draft == null || !mounted) return;
 
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.adjConfirmQ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${draft.janCode}　${signed(draft.delta)}',
+                style: const TextStyle(fontFamily: AppFonts.mono)),
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.adjConfirmIrreversible),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.adjConfirmAction),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+
     setState(() => _busy = true);
     final result = await ref.read(stockOpsRepositoryProvider).adjust(
           warehouseId: warehouseId,

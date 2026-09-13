@@ -874,6 +874,32 @@ in `feature_checklist.md` instead of built speculatively.
 
 `flutter analyze`: clean. `flutter test`: 278 → 291 passing.
 
+### Client-only change: confirm dangerous operations (UI spec §36, no migration)
+
+No schema change. Audited every `showDialog` call in the app against the
+spec's own list of 8 operations that must ask before acting, plus its other
+side ("don't overuse confirmation dialogs" — every non-destructive dialog,
+picker, and form sheet was left exactly as it was). 6 of the 8 already had a
+real confirmation (出荷確定, 棚卸確定, Transfer完了, POキャンセル, SOキャンセル, and
+implicitly the shared `_confirm` helpers behind them); 倉庫削除 doesn't exist
+as a feature anywhere in the app, so there's nothing to gate. Two real gaps:
+
+- 在庫調整 (`StockAdjustmentScreen._newAdjustment`) applied the adjustment
+  form's draft straight to the ledger on submit. Added a confirm dialog
+  between the form and the write, showing the JAN and signed delta and
+  stating the change can't be undone.
+- 商品無効化 (`ProductListScreen._toggleStatus`) flipped `status` on a single
+  tap of the status pill either direction. Added a confirm dialog, but only
+  when going active → inactive; reactivating stays a single tap since it
+  isn't destructive — matching the spec's "don't overuse" side rather than
+  gating both directions symmetrically.
+
+Existing tests for both screens updated to tap through the new dialog; added
+a cancel-path test for each (confirming nothing is written when the dialog
+is dismissed) and a no-dialog-on-reactivate test for products.
+
+`flutter analyze`: clean. `flutter test`: 308 → 311 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

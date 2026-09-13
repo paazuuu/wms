@@ -30,10 +30,42 @@ void main() {
     await tester.enterText(find.byType(TextField).at(1), '5');
     await tester.tap(find.widgetWithText(FilledButton, '調整を確定'));
     await tester.pumpAndSettle();
+    // A confirmation dialog gates the actual write (§36 — irreversible).
+    expect(repo.lastDelta, isNull);
+    await tester.tap(find.widgetWithText(FilledButton, '調整する'));
+    await tester.pumpAndSettle();
 
     expect(repo.lastDelta, -5);
     expect(repo.lastWarehouseId, 3);
     expect(find.text('在庫を調整しました（-5）'), findsOneWidget);
+  });
+
+  testWidgets('cancelling the confirmation dialog posts nothing',
+      (tester) async {
+    final repo = FakeStockOpsRepository();
+
+    await pumpApp(
+      tester,
+      const StockAdjustmentScreen(),
+      overrides: [
+        stockOpsRepositoryProvider.overrideWithValue(repo),
+        writeWarehouseIdProvider.overrideWithValue(3),
+      ],
+    );
+
+    await tester.tap(find.text('在庫を調整'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '4901234567894');
+    await tester.enterText(find.byType(TextField).at(1), '5');
+    await tester.tap(find.widgetWithText(FilledButton, '調整を確定'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('在庫を調整しますか？'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastDelta, isNull);
   });
 
   testWidgets('the chosen reason travels with the adjustment', (tester) async {
@@ -58,6 +90,8 @@ void main() {
     await tester.tap(find.text('紛失'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, '調整を確定'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '調整する'));
     await tester.pumpAndSettle();
 
     expect(repo.lastReason, AdjustReason.loss);
@@ -84,6 +118,8 @@ void main() {
     await tester.tap(find.text('追加'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, '調整を確定'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '調整する'));
     await tester.pumpAndSettle();
 
     expect(repo.lastDelta, 5);

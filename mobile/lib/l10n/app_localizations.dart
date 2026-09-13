@@ -1990,6 +1990,24 @@ abstract class AppLocalizations {
   /// **'調整を確定'**
   String get adjApply;
 
+  /// No description provided for @adjConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を調整しますか？'**
+  String get adjConfirmQ;
+
+  /// No description provided for @adjConfirmIrreversible.
+  ///
+  /// In ja, this message translates to:
+  /// **'この操作は取り消せません。'**
+  String get adjConfirmIrreversible;
+
+  /// No description provided for @adjConfirmAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整する'**
+  String get adjConfirmAction;
+
   /// No description provided for @adjDone.
   ///
   /// In ja, this message translates to:
@@ -3795,6 +3813,24 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'無効'**
   String get productInactive;
+
+  /// No description provided for @productDeactivateQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品を無効にしますか？'**
+  String get productDeactivateQ;
+
+  /// No description provided for @productDeactivateBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効にすると、入荷・出荷などの操作でこの商品を選べなくなります。'**
+  String get productDeactivateBody;
+
+  /// No description provided for @productDeactivateAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効にする'**
+  String get productDeactivateAction;
 
   /// No description provided for @productNewTitle.
   ///

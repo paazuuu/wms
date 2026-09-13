@@ -1007,6 +1007,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get adjApply => '調整を確定';
 
   @override
+  String get adjConfirmQ => '在庫を調整しますか？';
+
+  @override
+  String get adjConfirmIrreversible => 'この操作は取り消せません。';
+
+  @override
+  String get adjConfirmAction => '調整する';
+
+  @override
   String adjDone(String delta) {
     return '在庫を調整しました（$delta）';
   }
@@ -1934,6 +1943,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get productInactive => '無効';
+
+  @override
+  String get productDeactivateQ => 'この商品を無効にしますか？';
+
+  @override
+  String get productDeactivateBody => '無効にすると、入荷・出荷などの操作でこの商品を選べなくなります。';
+
+  @override
+  String get productDeactivateAction => '無効にする';
 
   @override
   String get productNewTitle => '商品を登録';

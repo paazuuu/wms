@@ -450,6 +450,9 @@
   "adjReason": "Reason",
   "adjNote": "Note",
   "adjApply": "Apply adjustment",
+  "adjConfirmQ": "Apply this adjustment?",
+  "adjConfirmIrreversible": "This cannot be undone.",
+  "adjConfirmAction": "Adjust",
   "adjDone": "Stock adjusted ({delta})",
   "@adjDone": {
     "placeholders": {
@@ -857,6 +860,9 @@
   "productsEmptyBody": "Add one with the + button.",
   "productActive": "Active",
   "productInactive": "Inactive",
+  "productDeactivateQ": "Deactivate this product?",
+  "productDeactivateBody": "Once inactive, it can no longer be selected for receiving, shipping, or other operations.",
+  "productDeactivateAction": "Deactivate",
   "productNewTitle": "New product",
   "productEditTitle": "Edit product",
   "productJanCode": "JAN code",

@@ -74,7 +74,7 @@ void main() {
   });
 
   testWidgets(
-      'tapping the status pill deactivates a product (shown once inactive ones are visible)',
+      'deactivating a product asks for confirmation first (§36)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     final repo = FakeProductRepository(products: const [
@@ -91,6 +91,53 @@ void main() {
     await tester.tap(find.text('有効'));
     await tester.pumpAndSettle();
 
+    expect(find.text('この商品を無効にしますか？'), findsOneWidget);
+    // Not yet applied — still shown as active behind the dialog.
+    expect(find.text('有効'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, '無効にする'));
+    await tester.pumpAndSettle();
+
     expect(find.text('無効'), findsOneWidget);
+  });
+
+  testWidgets(
+      'cancelling the confirmation leaves the product active',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('有効'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('有効'), findsOneWidget);
+    expect(find.text('無効'), findsNothing);
+  });
+
+  testWidgets(
+      'reactivating an inactive product needs no confirmation',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン', status: 'inactive'),
+    ]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.visibility_off_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('無効'), findsOneWidget);
+    await tester.tap(find.text('無効'));
+    await tester.pumpAndSettle();
+
+    // No dialog appears — reactivating is harmless (§36's "don't overuse
+    // confirmations" side).
+    expect(find.text('この商品を無効にしますか？'), findsNothing);
+    expect(find.text('有効'), findsOneWidget);
   });
 }
