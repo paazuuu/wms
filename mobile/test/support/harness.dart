@@ -37,6 +37,9 @@ import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
 import 'package:wms_mobile/features/purchasing/data/purchase_order_repository.dart';
 import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
+import 'package:wms_mobile/features/reports/application/report_providers.dart';
+import 'package:wms_mobile/features/reports/data/report_repository.dart';
+import 'package:wms_mobile/features/reports/domain/report.dart';
 import 'package:wms_mobile/features/sales/application/sales_order_providers.dart';
 import 'package:wms_mobile/features/sales/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
@@ -98,6 +101,7 @@ List<Override> _defaultOverrides() => [
       tradingPartnerRepositoryProvider
           .overrideWithValue(FakeTradingPartnerRepository()),
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
+      reportRepositoryProvider.overrideWithValue(FakeReportRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1650,6 +1654,55 @@ class FakeWorkOrderRepository implements WorkOrderRepository {
   @override
   Future<ApiResult<bool>> complete(int id) async =>
       _transition(id, WorkOrderStatus.inProgress, WorkOrderStatus.completed);
+}
+
+/// Report builder stub. [rowsBySource] supplies the canned rows `run()`
+/// returns per source; save/delete mutate an in-memory list of saved
+/// definitions so a screen test can assert the change stuck.
+class FakeReportRepository implements ReportRepository {
+  FakeReportRepository({
+    this.rowsBySource = const {},
+    List<ReportDefinition> savedDefinitions = const [],
+  }) : _saved = List.of(savedDefinitions);
+
+  final Map<ReportSource, List<Map<String, dynamic>>> rowsBySource;
+  List<ReportDefinition> _saved;
+
+  /// The filters the last run() call was made with.
+  Map<String, dynamic>? lastFilters;
+
+  @override
+  Future<ApiResult<ReportResult>> run(
+    ReportSource source, {
+    Map<String, dynamic> filters = const {},
+    int limit = 500,
+  }) async {
+    lastFilters = filters;
+    return ApiSuccess(ReportResult(source: source, rows: rowsBySource[source] ?? const []));
+  }
+
+  @override
+  Future<ApiResult<List<ReportDefinition>>> listSaved() async => ApiSuccess(_saved);
+
+  @override
+  Future<ApiResult<int>> save({
+    required String name,
+    required ReportSource source,
+    Map<String, dynamic> filters = const {},
+  }) async {
+    final id = _saved.length + 1;
+    _saved = [
+      ..._saved,
+      ReportDefinition(id: id, name: name, source: source, filters: filters),
+    ];
+    return ApiSuccess(id);
+  }
+
+  @override
+  Future<ApiResult<bool>> delete(int id) async {
+    _saved = _saved.where((d) => d.id != id).toList();
+    return const ApiSuccess(true);
+  }
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

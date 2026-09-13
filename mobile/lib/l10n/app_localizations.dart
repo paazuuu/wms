@@ -2830,6 +2830,162 @@ abstract class AppLocalizations {
   /// **'部材を消費して完成品を作るキッティング・組立作業'**
   String get featWorkOrdersDesc;
 
+  /// No description provided for @featReports.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポート作成'**
+  String get featReports;
+
+  /// No description provided for @featReportsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'データを選んで絞り込み、レポートとして保存'**
+  String get featReportsDesc;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポート作成'**
+  String get reportTitle;
+
+  /// No description provided for @reportSource.
+  ///
+  /// In ja, this message translates to:
+  /// **'データソース'**
+  String get reportSource;
+
+  /// No description provided for @reportSourceStockMovements.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫履歴'**
+  String get reportSourceStockMovements;
+
+  /// No description provided for @reportSourcePurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get reportSourcePurchaseOrders;
+
+  /// No description provided for @reportSourceSalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get reportSourceSalesOrders;
+
+  /// No description provided for @reportSourceWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示'**
+  String get reportSourceWorkOrders;
+
+  /// No description provided for @reportSourceAuditLog.
+  ///
+  /// In ja, this message translates to:
+  /// **'監査ログ'**
+  String get reportSourceAuditLog;
+
+  /// No description provided for @reportSourceProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ'**
+  String get reportSourceProducts;
+
+  /// No description provided for @reportWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get reportWarehouse;
+
+  /// No description provided for @reportAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての倉庫'**
+  String get reportAllWarehouses;
+
+  /// No description provided for @reportFilterStatus.
+  ///
+  /// In ja, this message translates to:
+  /// **'ステータス（任意）'**
+  String get reportFilterStatus;
+
+  /// No description provided for @reportFilterJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード（任意）'**
+  String get reportFilterJan;
+
+  /// No description provided for @reportFilterCategory.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリ（任意）'**
+  String get reportFilterCategory;
+
+  /// No description provided for @reportDateFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'開始日'**
+  String get reportDateFrom;
+
+  /// No description provided for @reportDateTo.
+  ///
+  /// In ja, this message translates to:
+  /// **'終了日'**
+  String get reportDateTo;
+
+  /// No description provided for @reportRun.
+  ///
+  /// In ja, this message translates to:
+  /// **'実行'**
+  String get reportRun;
+
+  /// No description provided for @reportSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get reportSave;
+
+  /// No description provided for @reportSaveTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポートを保存'**
+  String get reportSaveTitle;
+
+  /// No description provided for @reportName.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポート名'**
+  String get reportName;
+
+  /// No description provided for @reportSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポートを保存しました'**
+  String get reportSaved;
+
+  /// No description provided for @reportEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'該当するデータがありません'**
+  String get reportEmpty;
+
+  /// No description provided for @reportRowCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 件'**
+  String reportRowCount(int count);
+
+  /// No description provided for @reportSavedTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存済みレポート'**
+  String get reportSavedTitle;
+
+  /// No description provided for @reportSavedEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存済みのレポートはまだありません'**
+  String get reportSavedEmpty;
+
   /// No description provided for @woTitle.
   ///
   /// In ja, this message translates to:

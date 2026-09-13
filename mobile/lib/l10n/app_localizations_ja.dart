@@ -1449,6 +1449,86 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featWorkOrdersDesc => '部材を消費して完成品を作るキッティング・組立作業';
 
   @override
+  String get featReports => 'レポート作成';
+
+  @override
+  String get featReportsDesc => 'データを選んで絞り込み、レポートとして保存';
+
+  @override
+  String get reportTitle => 'レポート作成';
+
+  @override
+  String get reportSource => 'データソース';
+
+  @override
+  String get reportSourceStockMovements => '在庫履歴';
+
+  @override
+  String get reportSourcePurchaseOrders => '発注';
+
+  @override
+  String get reportSourceSalesOrders => '受注';
+
+  @override
+  String get reportSourceWorkOrders => '作業指示';
+
+  @override
+  String get reportSourceAuditLog => '監査ログ';
+
+  @override
+  String get reportSourceProducts => '商品マスタ';
+
+  @override
+  String get reportWarehouse => '倉庫';
+
+  @override
+  String get reportAllWarehouses => 'すべての倉庫';
+
+  @override
+  String get reportFilterStatus => 'ステータス（任意）';
+
+  @override
+  String get reportFilterJan => 'JANコード（任意）';
+
+  @override
+  String get reportFilterCategory => 'カテゴリ（任意）';
+
+  @override
+  String get reportDateFrom => '開始日';
+
+  @override
+  String get reportDateTo => '終了日';
+
+  @override
+  String get reportRun => '実行';
+
+  @override
+  String get reportSave => '保存';
+
+  @override
+  String get reportSaveTitle => 'レポートを保存';
+
+  @override
+  String get reportName => 'レポート名';
+
+  @override
+  String get reportSaved => 'レポートを保存しました';
+
+  @override
+  String get reportEmpty => '該当するデータがありません';
+
+  @override
+  String reportRowCount(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String get reportSavedTitle => '保存済みレポート';
+
+  @override
+  String get reportSavedEmpty => '保存済みのレポートはまだありません';
+
+  @override
   String get woTitle => '作業指示';
 
   @override

@@ -163,9 +163,19 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 - [x] Live dashboard (KPIs, today's-tasks counts)
 - [x] Global cross-entity search
 - [x] Audit log CSV export
-- [ ] Custom/saved report builder — ❌ removed with InventorOS, no Supabase
-      equivalent (the dashboard's fixed metrics are the only "reporting"
-      that exists)
+- [x] Custom/saved report builder (0037) — `report.view` has existed since
+      0012 (one of the original 22 permissions) but nothing ever
+      implemented it until now. A fixed set of six safe, server-defined
+      data sources (stock ledger, purchase/sales/work orders, audit log,
+      product master) — never arbitrary user SQL — each with a small
+      structured filter set (warehouse, status, JAN, category, date range).
+      `report.manage`-gated save/delete lets a chosen source+filters
+      combination be named and reused. A `ReportBuilderScreen` (pick
+      source → filter → run → generic results table → optionally save)
+      added to the home menu. Verified live via grants and an
+      aborted-transaction round trip covering every source, a
+      non-matching filter (empty array, not an error), an unknown-source
+      rejection, and the full saved-definition CRUD cycle
 
 **Other InventorOS-only features never rebuilt on Supabase**
 - [ ] Two-factor authentication — ❌
@@ -181,7 +191,8 @@ Consolidated, in one place, as asked:
 
 **Not implemented at all:**
 - Returns / RMA
-- Custom report builder
+- Custom report sources beyond the six built (0037): put-away task tracking,
+  inspections, transfers, shipments
 - Two-factor authentication, webhooks, GraphQL API
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)
 - Any real connector adapter (the registry exists; nothing syncs)

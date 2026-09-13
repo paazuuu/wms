@@ -1500,6 +1500,87 @@ class AppLocalizationsEn extends AppLocalizations {
       'Kitting/assembly: consume components, produce a finished item';
 
   @override
+  String get featReports => 'Report builder';
+
+  @override
+  String get featReportsDesc =>
+      'Pick a data source, filter it, save it for reuse';
+
+  @override
+  String get reportTitle => 'Report builder';
+
+  @override
+  String get reportSource => 'Data source';
+
+  @override
+  String get reportSourceStockMovements => 'Stock ledger';
+
+  @override
+  String get reportSourcePurchaseOrders => 'Purchase orders';
+
+  @override
+  String get reportSourceSalesOrders => 'Sales orders';
+
+  @override
+  String get reportSourceWorkOrders => 'Work orders';
+
+  @override
+  String get reportSourceAuditLog => 'Audit log';
+
+  @override
+  String get reportSourceProducts => 'Product master';
+
+  @override
+  String get reportWarehouse => 'Warehouse';
+
+  @override
+  String get reportAllWarehouses => 'All warehouses';
+
+  @override
+  String get reportFilterStatus => 'Status (optional)';
+
+  @override
+  String get reportFilterJan => 'JAN code (optional)';
+
+  @override
+  String get reportFilterCategory => 'Category (optional)';
+
+  @override
+  String get reportDateFrom => 'From';
+
+  @override
+  String get reportDateTo => 'To';
+
+  @override
+  String get reportRun => 'Run';
+
+  @override
+  String get reportSave => 'Save';
+
+  @override
+  String get reportSaveTitle => 'Save report';
+
+  @override
+  String get reportName => 'Report name';
+
+  @override
+  String get reportSaved => 'Report saved';
+
+  @override
+  String get reportEmpty => 'No matching data';
+
+  @override
+  String reportRowCount(int count) {
+    return '$count rows';
+  }
+
+  @override
+  String get reportSavedTitle => 'Saved reports';
+
+  @override
+  String get reportSavedEmpty => 'No saved reports yet';
+
+  @override
   String get woTitle => 'Work orders';
 
   @override

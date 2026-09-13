@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0036 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0037 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -652,6 +652,42 @@ update inside a transaction._
   state machine), added to the home menu. 3 repository tests + 4 screen
   tests plus a `FakeWorkOrderRepository` added to the shared harness.
 - `flutter analyze`: clean. `flutter test`: 222/222 passing.
+
+### 0037 — Custom/saved report builder (checklist item 10, final item) ✅
+- `report.view` has existed since 0012 (one of the original 22 permissions,
+  already granted to company_admin/system_admin/warehouse_manager/viewer)
+  but nothing ever implemented it — the actual gap the checklist called
+  out, not a missing permission.
+- `report_definitions` (RLS: read on `report.view`, no direct writes); one
+  new permission (`report.manage`); `run_report(p_source, p_filters,
+  p_limit)` — a fixed set of six safe, server-defined sources
+  (`stock_movements`, `purchase_orders`, `sales_orders`, `work_orders`,
+  `audit_log`, `products`), never arbitrary user SQL, each with a small
+  structured filter set read defensively from the jsonb (missing/wrong-
+  typed keys are just treated as unset); `save_report_definition`,
+  `list_report_definitions`, `delete_report_definition` for the
+  "custom/saved" half of the ask.
+- Verified live: grants (`anon` refused, `authenticated` allowed) for all 4
+  RPCs; an aborted transaction seeded one real stock movement and
+  confirmed `run_report` finds it with a matching filter and returns an
+  empty array (not an error) for a non-matching one, confirmed all six
+  sources run without error, confirmed an unknown source is rejected, and
+  ran the full saved-definition CRUD cycle — rolled back (0 leftover rows).
+- Flutter: `features/reports` — `ReportSource`/`ReportResult`/
+  `ReportDefinition` domain models, `ReportRepository`, a
+  `ReportBuilderScreen` (source picker, a generic filter panel, a generic
+  results `DataTable`, save/load/delete for saved definitions) added to
+  the home menu. 3 repository tests + 3 screen tests plus a
+  `FakeReportRepository` added to the shared harness.
+- `flutter analyze`: clean. `flutter test`: 228/228 passing.
+
+This closes the user's 10-item completion-pass plan (product master →
+purchase orders → sales orders → supplier/customer CRM → work orders →
+report builder, following image/attachment storage). Remaining gaps are
+documented in `feature_checklist.md` §3 and were explicitly deprioritized
+earlier in the pass (2FA/webhooks/GraphQL, further AI modules, real
+connector adapters) or are new, smaller items surfaced along the way
+(returns/RMA, additional report sources).
 
 ## Rollout discipline
 

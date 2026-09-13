@@ -1447,6 +1447,86 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featWorkOrdersDesc => '组装/套装：消耗部件，产出成品';
 
   @override
+  String get featReports => '报表生成器';
+
+  @override
+  String get featReportsDesc => '选择数据源、筛选并保存以便复用';
+
+  @override
+  String get reportTitle => '报表生成器';
+
+  @override
+  String get reportSource => '数据源';
+
+  @override
+  String get reportSourceStockMovements => '库存流水';
+
+  @override
+  String get reportSourcePurchaseOrders => '采购订单';
+
+  @override
+  String get reportSourceSalesOrders => '销售订单';
+
+  @override
+  String get reportSourceWorkOrders => '工单';
+
+  @override
+  String get reportSourceAuditLog => '审计日志';
+
+  @override
+  String get reportSourceProducts => '商品主数据';
+
+  @override
+  String get reportWarehouse => '仓库';
+
+  @override
+  String get reportAllWarehouses => '所有仓库';
+
+  @override
+  String get reportFilterStatus => '状态（可选）';
+
+  @override
+  String get reportFilterJan => 'JAN 码（可选）';
+
+  @override
+  String get reportFilterCategory => '分类（可选）';
+
+  @override
+  String get reportDateFrom => '起始日期';
+
+  @override
+  String get reportDateTo => '结束日期';
+
+  @override
+  String get reportRun => '运行';
+
+  @override
+  String get reportSave => '保存';
+
+  @override
+  String get reportSaveTitle => '保存报表';
+
+  @override
+  String get reportName => '报表名称';
+
+  @override
+  String get reportSaved => '报表已保存';
+
+  @override
+  String get reportEmpty => '没有匹配的数据';
+
+  @override
+  String reportRowCount(int count) {
+    return '$count 行';
+  }
+
+  @override
+  String get reportSavedTitle => '已保存的报表';
+
+  @override
+  String get reportSavedEmpty => '暂无已保存的报表';
+
+  @override
   String get woTitle => '工单';
 
   @override
