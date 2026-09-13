@@ -1417,6 +1417,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featAiReviewDesc => '在生效前确认或拒绝 AI 提取的结果';
 
   @override
+  String get featProducts => '商品主数据';
+
+  @override
+  String get featProductsDesc => '按 JAN 码管理商品名称、分类与价格';
+
+  @override
+  String get productsTitle => '商品主数据';
+
+  @override
+  String get productsShowInactive => '显示已停用商品';
+
+  @override
+  String get productsSearchHint => '按商品名或 JAN 码搜索';
+
+  @override
+  String get productsEmpty => '暂无商品';
+
+  @override
+  String get productsEmptyBody => '点击右下角的 + 添加商品。';
+
+  @override
+  String get productActive => '启用';
+
+  @override
+  String get productInactive => '停用';
+
+  @override
+  String get productNewTitle => '新增商品';
+
+  @override
+  String get productEditTitle => '编辑商品';
+
+  @override
+  String get productJanCode => 'JAN 码';
+
+  @override
+  String get productName => '商品名';
+
+  @override
+  String get productCategory => '分类';
+
+  @override
+  String get productPrice => '价格';
+
+  @override
+  String get productSave => '保存';
+
+  @override
+  String get productValidationRequired => '请输入 JAN 码和商品名';
+
+  @override
   String get dashTodayTasks => '今日工作';
 
   @override

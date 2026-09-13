@@ -58,6 +58,8 @@ class FeatureEntry {
         return l10n.featConnectors;
       case 'ai_review':
         return l10n.featAiReview;
+      case 'products':
+        return l10n.featProducts;
       default:
         return id;
     }
@@ -88,6 +90,8 @@ class FeatureEntry {
         return l10n.featConnectorsDesc;
       case 'ai_review':
         return l10n.featAiReviewDesc;
+      case 'products':
+        return l10n.featProductsDesc;
       default:
         return '';
     }

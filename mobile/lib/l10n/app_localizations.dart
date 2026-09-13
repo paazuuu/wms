@@ -2770,6 +2770,108 @@ abstract class AppLocalizations {
   /// **'AIの抽出結果を反映前に承認・却下'**
   String get featAiReviewDesc;
 
+  /// No description provided for @featProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ'**
+  String get featProducts;
+
+  /// No description provided for @featProductsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードに紐づく商品名・カテゴリ・価格を管理'**
+  String get featProductsDesc;
+
+  /// No description provided for @productsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ'**
+  String get productsTitle;
+
+  /// No description provided for @productsShowInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効な商品も表示'**
+  String get productsShowInactive;
+
+  /// No description provided for @productsSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名またはJANコードで検索'**
+  String get productsSearchHint;
+
+  /// No description provided for @productsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品がまだありません'**
+  String get productsEmpty;
+
+  /// No description provided for @productsEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'右下の＋から商品を登録できます。'**
+  String get productsEmptyBody;
+
+  /// No description provided for @productActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get productActive;
+
+  /// No description provided for @productInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効'**
+  String get productInactive;
+
+  /// No description provided for @productNewTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を登録'**
+  String get productNewTitle;
+
+  /// No description provided for @productEditTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を編集'**
+  String get productEditTitle;
+
+  /// No description provided for @productJanCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get productJanCode;
+
+  /// No description provided for @productName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get productName;
+
+  /// No description provided for @productCategory.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリ'**
+  String get productCategory;
+
+  /// No description provided for @productPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格'**
+  String get productPrice;
+
+  /// No description provided for @productSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get productSave;
+
+  /// No description provided for @productValidationRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードと商品名を入力してください'**
+  String get productValidationRequired;
+
   /// No description provided for @dashTodayTasks.
   ///
   /// In ja, this message translates to:

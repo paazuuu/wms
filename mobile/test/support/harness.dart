@@ -28,6 +28,9 @@ import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
+import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/data/product_repository.dart';
+import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/audit/data/audit_repository.dart';
 import 'package:wms_mobile/features/audit/domain/audit_entry.dart';
 import 'package:wms_mobile/features/search/data/search_repository.dart';
@@ -76,6 +79,7 @@ List<Override> _defaultOverrides() => [
         const WarehouseOverview(warehouses: [], totals: WarehouseTotals()),
       )),
       attachmentRepositoryProvider.overrideWithValue(FakeAttachmentRepository()),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1079,6 +1083,93 @@ class FakeAttachmentRepository implements AttachmentRepository {
   @override
   Future<ApiResult<String>> signedUrl(String storagePath) async =>
       ApiSuccess('https://example.test/$storagePath');
+}
+
+/// Product master stub. [products] is what `list_products` would return;
+/// create/update/setStatus mutate an in-memory copy so a screen test can
+/// assert the change stuck.
+class FakeProductRepository implements ProductRepository {
+  FakeProductRepository({List<Product> products = const []})
+      : _products = List.of(products);
+
+  List<Product> _products;
+
+  /// Set to make create() fail (e.g. duplicate JAN), mirroring the real RPC.
+  String? failCreateWith;
+
+  @override
+  Future<ApiResult<List<Product>>> list(
+      {String? search, String? status = 'active'}) async {
+    return ApiSuccess(_products.where((p) {
+      final statusOk = status == null || p.status == status;
+      final searchOk = search == null ||
+          search.isEmpty ||
+          p.name.contains(search) ||
+          p.janCode.contains(search);
+      return statusOk && searchOk;
+    }).toList());
+  }
+
+  @override
+  Future<ApiResult<int>> create({
+    required String janCode,
+    required String name,
+    String? category,
+    double? price,
+  }) async {
+    if (failCreateWith != null) {
+      return ApiFailure(message: failCreateWith!, statusCode: 400);
+    }
+    final id = _products.length + 1;
+    _products = [
+      ..._products,
+      Product(id: id, janCode: janCode, name: name, category: category, price: price),
+    ];
+    return ApiSuccess(id);
+  }
+
+  @override
+  Future<ApiResult<bool>> update({
+    required int id,
+    required String name,
+    String? category,
+    double? price,
+  }) async {
+    _products = [
+      for (final p in _products)
+        if (p.id == id)
+          Product(
+            id: p.id,
+            janCode: p.janCode,
+            name: name,
+            category: category,
+            price: price,
+            status: p.status,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> setStatus(int id, String status) async {
+    _products = [
+      for (final p in _products)
+        if (p.id == id)
+          Product(
+            id: p.id,
+            janCode: p.janCode,
+            name: p.name,
+            category: p.category,
+            price: p.price,
+            status: status,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

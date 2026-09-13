@@ -1465,6 +1465,58 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm or reject AI-extracted results before they count';
 
   @override
+  String get featProducts => 'Product master';
+
+  @override
+  String get featProductsDesc =>
+      'Name, category and price against each JAN code';
+
+  @override
+  String get productsTitle => 'Product master';
+
+  @override
+  String get productsShowInactive => 'Show inactive products';
+
+  @override
+  String get productsSearchHint => 'Search by name or JAN code';
+
+  @override
+  String get productsEmpty => 'No products yet';
+
+  @override
+  String get productsEmptyBody => 'Add one with the + button.';
+
+  @override
+  String get productActive => 'Active';
+
+  @override
+  String get productInactive => 'Inactive';
+
+  @override
+  String get productNewTitle => 'New product';
+
+  @override
+  String get productEditTitle => 'Edit product';
+
+  @override
+  String get productJanCode => 'JAN code';
+
+  @override
+  String get productName => 'Name';
+
+  @override
+  String get productCategory => 'Category';
+
+  @override
+  String get productPrice => 'Price';
+
+  @override
+  String get productSave => 'Save';
+
+  @override
+  String get productValidationRequired => 'Enter a JAN code and a name';
+
+  @override
   String get dashTodayTasks => 'Today\'s work';
 
   @override

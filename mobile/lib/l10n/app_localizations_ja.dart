@@ -1419,6 +1419,57 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featAiReviewDesc => 'AIの抽出結果を反映前に承認・却下';
 
   @override
+  String get featProducts => '商品マスタ';
+
+  @override
+  String get featProductsDesc => 'JANコードに紐づく商品名・カテゴリ・価格を管理';
+
+  @override
+  String get productsTitle => '商品マスタ';
+
+  @override
+  String get productsShowInactive => '無効な商品も表示';
+
+  @override
+  String get productsSearchHint => '商品名またはJANコードで検索';
+
+  @override
+  String get productsEmpty => '商品がまだありません';
+
+  @override
+  String get productsEmptyBody => '右下の＋から商品を登録できます。';
+
+  @override
+  String get productActive => '有効';
+
+  @override
+  String get productInactive => '無効';
+
+  @override
+  String get productNewTitle => '商品を登録';
+
+  @override
+  String get productEditTitle => '商品を編集';
+
+  @override
+  String get productJanCode => 'JANコード';
+
+  @override
+  String get productName => '商品名';
+
+  @override
+  String get productCategory => 'カテゴリ';
+
+  @override
+  String get productPrice => '価格';
+
+  @override
+  String get productSave => '保存';
+
+  @override
+  String get productValidationRequired => 'JANコードと商品名を入力してください';
+
+  @override
   String get dashTodayTasks => '今日の作業';
 
   @override

@@ -56,10 +56,15 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 - [x] Stock ledger (movement history per JAN, derived on-hand)
 
 **Master data**
-- [ ] Product master (name, category, price, barcode) — ❌ no `products` table
-      exists in Supabase at all. The former "product lookup" screen was
-      InventorOS-only and was removed; scanning a JAN now opens the stock
-      ledger (quantity + movement history), not a product record
+- [x] Product master (name, category, price, barcode) (0032) — a `products`
+      table keyed by `jan_code` (the same barcode already used throughout
+      stock/receiving/picking, not a new identifier), RLS-gated on
+      `product.view`/`product.manage`. A `ProductListScreen` (search, add,
+      edit, activate/deactivate) added to the home menu. Verified live via
+      grants and an aborted-transaction round trip (create/list/update/
+      deactivate + duplicate-JAN rejection). This is separate master data,
+      not wired into `stock_levels`/`stock_movements`/`bin_stock` — those
+      keep their own denormalized `product_name`, unchanged
 - [ ] Full supplier management (CRUD, contacts, terms) — ⚠️ only
       `delivery_suppliers`, a narrow list scoped to delivery reconciliation —
       not a general supplier master
@@ -140,7 +145,6 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 Consolidated, in one place, as asked:
 
 **Not implemented at all:**
-- Product master / product catalog
 - Purchase orders, sales orders
 - Customer management
 - Returns / RMA

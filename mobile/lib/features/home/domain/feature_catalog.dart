@@ -8,6 +8,7 @@ import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
+import '../../product/presentation/product_list_screen.dart';
 import '../../stock_ops/presentation/stock_adjustment_screen.dart';
 import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../transfers/presentation/transfer_list_screen.dart';
@@ -97,6 +98,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _aiReview,
           ),
+          FeatureEntry(
+            id: 'products',
+            icon: Icons.inventory_2_outlined,
+            status: FeatureStatus.ready,
+            builder: _products,
+          ),
         ],
       ),
     ];
@@ -129,6 +136,9 @@ Widget _connectors(BuildContext _) => const ConnectorListScreen();
 
 /// Top-level (const-referenceable) builder for the AI Review feature.
 Widget _aiReview(BuildContext _) => const AiReviewListScreen();
+
+/// Top-level (const-referenceable) builder for the Product Master feature.
+Widget _products(BuildContext _) => const ProductListScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
 Widget _picking(BuildContext _) => const PickListIndexScreen();

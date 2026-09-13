@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0031 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0032 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -506,6 +506,32 @@ update inside a transaction._
   upload/signedUrl) plus a `FakeAttachmentRepository` added to the shared
   harness so no unrelated screen test reaches a real Storage/PostgREST call.
 - `flutter analyze`: clean. `flutter test`: 186/186 passing.
+
+### 0032 — Product master (spec §19, checklist item 5) ✅
+- No `products` table had ever existed: every JAN is a bare text column
+  repeated across `stock_levels`/`stock_movements`/`bin_stock`/
+  `inspection_items`, each with its own denormalized `product_name`.
+  Deliberately narrow master data (name, category, price — the JAN itself is
+  the barcode already used everywhere) keyed by `jan_code`, not a new
+  `product_id` foreign key threaded through the existing stock tables — a
+  much larger, riskier migration for a want that's really "look up and price
+  a JAN".
+- `products` (RLS: read on `product.view`, no direct insert/update/delete —
+  writes only via the RPCs below); two new permissions, `product.view`
+  (mirrors `inventory.view`'s role set) and `product.manage` (mirrors
+  `inventory.adjust`'s); `list_products(p_search, p_status)`,
+  `create_product`, `update_product`, `set_product_status` (soft
+  activate/deactivate, matching "inactivate, never hard-delete").
+- Verified live: grants (`anon`/`public` refused, `authenticated` allowed)
+  for all four RPCs; an aborted transaction created a product, listed it by
+  search, updated it, deactivated it, and confirmed a duplicate `jan_code`
+  is rejected — then rolled back (0 leftover rows).
+- Flutter: `features/product` — `Product` domain model, `ProductRepository`,
+  a `ProductListScreen` (search, show/hide inactive, add/edit via a bottom
+  sheet, tap the status pill to activate/deactivate) added to the home menu.
+  4 screen tests + 3 repository tests (`FakeHttpClientAdapter`-based) plus a
+  `FakeProductRepository` added to the shared harness.
+- `flutter analyze`: clean. `flutter test`: 193/193 passing.
 
 ## Rollout discipline
 
