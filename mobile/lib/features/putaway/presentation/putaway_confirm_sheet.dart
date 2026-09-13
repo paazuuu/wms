@@ -95,7 +95,11 @@ class _PutawayConfirmSheetState extends ConsumerState<PutawayConfirmSheet> {
 
   Future<void> _scanWithCamera() async {
     final code = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
+      MaterialPageRoute(
+        builder: (_) => BarcodeScanScreen(
+          title: AppLocalizations.of(context).putawayScanLocation,
+        ),
+      ),
     );
     if (!mounted || code == null || code.isEmpty) return;
     await _resolveLocation(code);

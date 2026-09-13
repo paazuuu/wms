@@ -2271,4 +2271,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String putawayConfirmed(int quantity, String bin, int pendingAfter) {
     return 'Put $quantity into $bin ($pendingAfter left)';
   }
+
+  @override
+  String get actionOk => 'OK';
+
+  @override
+  String scanWrongItem(String expected) {
+    return 'Different item (expected $expected)';
+  }
+
+  @override
+  String scanExpecting(String expected) {
+    return 'Expecting $expected — line it up in the frame';
+  }
+
+  @override
+  String get scanNothingYet => 'Nothing scanned yet';
+
+  @override
+  String scanAcceptedCount(int count) {
+    return '$count scanned';
+  }
+
+  @override
+  String get scanResultOk => 'OK';
+
+  @override
+  String get scanResultDuplicate => 'Duplicate (ignored)';
+
+  @override
+  String get scanResultNg => 'NG';
+
+  @override
+  String get scanManualEntry => 'Type it in';
+
+  @override
+  String get scanManualEntryHint => 'JAN / barcode';
+
+  @override
+  String get scanDone => 'Done';
+
+  @override
+  String get pickScanToConfirm => 'Scan this item\'s JAN to confirm a quantity';
+
+  @override
+  String get pickScanned => 'Scan confirmed';
+
+  @override
+  String get pickScanAction => 'Scan';
 }

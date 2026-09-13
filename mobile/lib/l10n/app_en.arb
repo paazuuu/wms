@@ -964,5 +964,19 @@
   "putawayQuantityRequired": "Enter a quantity of 1 or more",
   "putawayQuantityTooLarge": "Only {max} awaits put-away",
   "putawayConfirm": "Confirm put-away",
-  "putawayConfirmed": "Put {quantity} into {bin} ({pendingAfter} left)"
+  "putawayConfirmed": "Put {quantity} into {bin} ({pendingAfter} left)",
+  "actionOk": "OK",
+  "scanWrongItem": "Different item (expected {expected})",
+  "scanExpecting": "Expecting {expected} — line it up in the frame",
+  "scanNothingYet": "Nothing scanned yet",
+  "scanAcceptedCount": "{count} scanned",
+  "scanResultOk": "OK",
+  "scanResultDuplicate": "Duplicate (ignored)",
+  "scanResultNg": "NG",
+  "scanManualEntry": "Type it in",
+  "scanManualEntryHint": "JAN / barcode",
+  "scanDone": "Done",
+  "pickScanToConfirm": "Scan this item's JAN to confirm a quantity",
+  "pickScanned": "Scan confirmed",
+  "pickScanAction": "Scan"
 }

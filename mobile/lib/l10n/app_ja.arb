@@ -1046,5 +1046,40 @@
         "type": "int"
       }
     }
-  }
+  },
+  "actionOk": "OK",
+  "scanWrongItem": "別の商品です（対象: {expected}）",
+  "@scanWrongItem": {
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "scanExpecting": "対象: {expected} を枠内に合わせてください",
+  "@scanExpecting": {
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "scanNothingYet": "まだ読み取りがありません",
+  "scanAcceptedCount": "{count} 件読み取り",
+  "@scanAcceptedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanResultOk": "OK",
+  "scanResultDuplicate": "重複（無視しました）",
+  "scanResultNg": "NG",
+  "scanManualEntry": "手動入力",
+  "scanManualEntryHint": "JAN / バーコード",
+  "scanDone": "完了",
+  "pickScanToConfirm": "数量を確定するには対象のJANをスキャンしてください",
+  "pickScanned": "スキャン確認済み",
+  "pickScanAction": "スキャン"
 }

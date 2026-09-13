@@ -4281,6 +4281,90 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{bin} に {quantity} 入れました（残 {pendingAfter}）'**
   String putawayConfirmed(int quantity, String bin, int pendingAfter);
+
+  /// No description provided for @actionOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'OK'**
+  String get actionOk;
+
+  /// No description provided for @scanWrongItem.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の商品です（対象: {expected}）'**
+  String scanWrongItem(String expected);
+
+  /// No description provided for @scanExpecting.
+  ///
+  /// In ja, this message translates to:
+  /// **'対象: {expected} を枠内に合わせてください'**
+  String scanExpecting(String expected);
+
+  /// No description provided for @scanNothingYet.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ読み取りがありません'**
+  String get scanNothingYet;
+
+  /// No description provided for @scanAcceptedCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 件読み取り'**
+  String scanAcceptedCount(int count);
+
+  /// No description provided for @scanResultOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'OK'**
+  String get scanResultOk;
+
+  /// No description provided for @scanResultDuplicate.
+  ///
+  /// In ja, this message translates to:
+  /// **'重複（無視しました）'**
+  String get scanResultDuplicate;
+
+  /// No description provided for @scanResultNg.
+  ///
+  /// In ja, this message translates to:
+  /// **'NG'**
+  String get scanResultNg;
+
+  /// No description provided for @scanManualEntry.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動入力'**
+  String get scanManualEntry;
+
+  /// No description provided for @scanManualEntryHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN / バーコード'**
+  String get scanManualEntryHint;
+
+  /// No description provided for @scanDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get scanDone;
+
+  /// No description provided for @pickScanToConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を確定するには対象のJANをスキャンしてください'**
+  String get pickScanToConfirm;
+
+  /// No description provided for @pickScanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャン確認済み'**
+  String get pickScanned;
+
+  /// No description provided for @pickScanAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャン'**
+  String get pickScanAction;
 }
 
 class _AppLocalizationsDelegate

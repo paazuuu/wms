@@ -122,9 +122,17 @@ Every module below is Supabase-backed; none call an external system.
 - **i18n**: gen_l10n, ja (template) / en / zh — every feature added through
   0038 ships all three languages.
 - **Theming**: light/dark via `ThemeMode.system`, plus a text-scale setting.
-- **Scanning**: hardware keyboard-wedge scanner, camera scan
-  (`mobile_scanner`), on-device OCR fallback (ML Kit) when the cloud OCR call
-  fails, manual `ScanField` entry.
+- **Scanning**: one shared surface, `BarcodeScanScreen` (UI spec §11) —
+  camera (`mobile_scanner`), torch, success/error sound and vibration
+  (Flutter's own platform sounds, no bundled audio), a manual-entry fallback
+  for a damaged label, single-shot *or* continuous mode, caller-supplied
+  validation (`expectedCode`/`validate`), duplicate suppression with a
+  per-use window, and a visible scan history. Plus the keyboard-wedge
+  hardware scanner (`ScanBuffer`/`HardwareScanner`), inline `ScanField`
+  entry, and an on-device OCR fallback (ML Kit) when the cloud OCR call
+  fails. Duplicate timing and history live in framework-free `ScanSession`
+  so they are unit-testable; the camera is injectable (`cameraBuilder`) so
+  the whole pipeline is covered by widget tests.
 - **AI/OCR**: Gemini behind an `AIProvider` interface, results recorded in
   `ai_analysis` and reviewed (confirm/reject) via `AiReviewListScreen` (0030).
 - **Auth**: real Supabase Auth sign-in, admin-created accounts only (no

@@ -2202,4 +2202,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String putawayConfirmed(int quantity, String bin, int pendingAfter) {
     return '$bin に $quantity 入れました（残 $pendingAfter）';
   }
+
+  @override
+  String get actionOk => 'OK';
+
+  @override
+  String scanWrongItem(String expected) {
+    return '別の商品です（対象: $expected）';
+  }
+
+  @override
+  String scanExpecting(String expected) {
+    return '対象: $expected を枠内に合わせてください';
+  }
+
+  @override
+  String get scanNothingYet => 'まだ読み取りがありません';
+
+  @override
+  String scanAcceptedCount(int count) {
+    return '$count 件読み取り';
+  }
+
+  @override
+  String get scanResultOk => 'OK';
+
+  @override
+  String get scanResultDuplicate => '重複（無視しました）';
+
+  @override
+  String get scanResultNg => 'NG';
+
+  @override
+  String get scanManualEntry => '手動入力';
+
+  @override
+  String get scanManualEntryHint => 'JAN / バーコード';
+
+  @override
+  String get scanDone => '完了';
+
+  @override
+  String get pickScanToConfirm => '数量を確定するには対象のJANをスキャンしてください';
+
+  @override
+  String get pickScanned => 'スキャン確認済み';
+
+  @override
+  String get pickScanAction => 'スキャン';
 }

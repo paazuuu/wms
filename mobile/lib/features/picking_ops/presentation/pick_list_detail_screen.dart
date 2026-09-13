@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/scan/barcode_scan_screen.dart';
+import '../../../core/scan/scan_feedback.dart';
+import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -436,6 +439,13 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
       text: (widget.task.pickedQuantity ?? widget.task.plannedQuantity).toString());
   int? _binId;
 
+  /// §16's gate: a quantity is only confirmable once the operator has scanned
+  /// the JAN this task is for. Picking the wrong SKU is the expensive mistake
+  /// in outbound work — it ships to a customer — and a scan is the only check
+  /// that catches it before it leaves the building.
+  bool _scanConfirmed = false;
+  String? _scanError;
+
   @override
   void initState() {
     super.initState();
@@ -448,7 +458,46 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
     super.dispose();
   }
 
+  /// Accepts a code from any source — wedge scanner, camera, or the scanner's
+  /// own manual-entry fallback — and holds the gate shut unless it matches.
+  void _verify(String code) {
+    final matches = code.trim() == widget.task.janCode.trim();
+    if (matches) {
+      const ScanFeedback().success();
+      setState(() {
+        _scanConfirmed = true;
+        _scanError = null;
+      });
+      return;
+    }
+    const ScanFeedback().error();
+    setState(() => _scanError =
+        AppLocalizations.of(context).scanWrongItem(widget.task.janCode));
+  }
+
+  Future<void> _scanWithCamera() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => BarcodeScanScreen(
+          title: widget.task.productName.isNotEmpty
+              ? widget.task.productName
+              : widget.task.janCode,
+          expectedCode: widget.task.janCode,
+        ),
+      ),
+    );
+    if (code == null || !mounted) return;
+    _verify(code);
+  }
+
+  /// §16's [+1] / [+5] — a picker counting into a cart taps rather than types.
+  void _bump(int by) {
+    final current = int.tryParse(_quantity.text.trim()) ?? 0;
+    _quantity.text = '${current + by}';
+  }
+
   void _submit() {
+    if (!_scanConfirmed) return;
     final value = int.tryParse(_quantity.text.trim());
     if (value == null || value < 0) return;
     Navigator.pop(context, _PickDraft(value, _binId));
@@ -458,50 +507,113 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final task = widget.task;
     final title = task.productName.isNotEmpty ? task.productName : task.janCode;
 
     return AlertDialog(
       title: Text(title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('${task.janCode} · ${l10n.pickPlanned} ${task.plannedQuantity}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                  fontFamily: AppFonts.mono,
-                  color: theme.colorScheme.onSurfaceVariant)),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _quantity,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(labelText: l10n.pickPickedQty),
-            style: const TextStyle(fontFamily: AppFonts.mono),
-            onSubmitted: (_) => _submit(),
-          ),
-          if (widget.bins.isNotEmpty) ...[
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${task.janCode} · ${l10n.pickPlanned} ${task.plannedQuantity}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                    fontFamily: AppFonts.mono,
+                    color: scheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.lg),
-            DropdownButtonFormField<int?>(
-              initialValue: _binId,
-              decoration: InputDecoration(labelText: l10n.pickBin),
-              items: [
-                DropdownMenuItem(value: null, child: Text(l10n.pickBinNone)),
-                for (final bin in widget.bins)
-                  DropdownMenuItem(value: bin.id, child: Text(bin.code)),
+            if (!_scanConfirmed) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ScanField(
+                      autofocusOnWide: true,
+                      hintText: l10n.pickScanToConfirm,
+                      onSubmitted: _verify,
+                      dense: true,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  IconButton(
+                    tooltip: l10n.pickScanAction,
+                    icon: const Icon(Icons.photo_camera_outlined),
+                    onPressed: _scanWithCamera,
+                  ),
+                ],
+              ),
+              if (_scanError != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    Icon(Icons.error_outline, size: 16, color: scheme.error),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(_scanError!,
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: scheme.error)),
+                    ),
+                  ],
+                ),
               ],
-              onChanged: (v) => setState(() => _binId = v),
+            ] else
+              Row(
+                children: [
+                  Icon(Icons.check_circle, size: 18, color: scheme.primary),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(l10n.pickScanned,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.primary)),
+                ],
+              ),
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              controller: _quantity,
+              enabled: _scanConfirmed,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(labelText: l10n.pickPickedQty),
+              style: const TextStyle(fontFamily: AppFonts.mono),
+              onSubmitted: (_) => _submit(),
             ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                for (final by in const [1, 5])
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.sm),
+                    child: OutlinedButton(
+                      onPressed: _scanConfirmed ? () => _bump(by) : null,
+                      child: Text('+$by'),
+                    ),
+                  ),
+              ],
+            ),
+            if (widget.bins.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.lg),
+              DropdownButtonFormField<int?>(
+                initialValue: _binId,
+                decoration: InputDecoration(labelText: l10n.pickBin),
+                items: [
+                  DropdownMenuItem(value: null, child: Text(l10n.pickBinNone)),
+                  for (final bin in widget.bins)
+                    DropdownMenuItem(value: bin.id, child: Text(bin.code)),
+                ],
+                onChanged: (v) => setState(() => _binId = v),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.actionCancel),
         ),
-        FilledButton(onPressed: _submit, child: Text(l10n.pickRecord)),
+        FilledButton(
+          onPressed: _scanConfirmed ? _submit : null,
+          child: Text(l10n.pickRecord),
+        ),
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
@@ -139,6 +140,24 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
       HapticFeedback.heavyImpact();
       _snack(l10n.doubleScanWarning(line.janCode), tone: StatusTone.warning);
     }
+  }
+
+  /// Count with the camera instead of a wedge scanner. Stays open for the whole
+  /// carton; the shortened duplicate window keeps the camera's own repeat
+  /// detections out while still counting each deliberate rescan of the same JAN
+  /// — in receiving, one scan is one piece.
+  Future<void> _scanWithCamera() async {
+    await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => BarcodeScanScreen(
+          title: _plan.deliveryNumber,
+          continuous: true,
+          duplicateWindow: const Duration(milliseconds: 1200),
+          onScan: _recordScan,
+        ),
+      ),
+    );
+    if (mounted) _scanFocus.requestFocus();
   }
 
   Future<void> _runOcr() async {
@@ -342,6 +361,14 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   hintText: l10n.scanDeliveryHint,
                   onSubmitted: _recordScan,
                 ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              // §11's shared scanner, in continuous mode: one scan per piece,
+              // so the operator never leaves the camera between items.
+              IconButton(
+                tooltip: l10n.scanBarcode,
+                icon: const Icon(Icons.photo_camera_outlined),
+                onPressed: _scanWithCamera,
               ),
               const SizedBox(width: AppSpacing.sm),
               Tooltip(

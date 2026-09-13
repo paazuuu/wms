@@ -964,5 +964,19 @@
   "putawayQuantityRequired": "请输入 1 以上的数量",
   "putawayQuantityTooLarge": "待上架数量最多为 {max}",
   "putawayConfirm": "确认上架",
-  "putawayConfirmed": "已将 {quantity} 放入 {bin}（剩余 {pendingAfter}）"
+  "putawayConfirmed": "已将 {quantity} 放入 {bin}（剩余 {pendingAfter}）",
+  "actionOk": "确定",
+  "scanWrongItem": "商品不符（应为 {expected}）",
+  "scanExpecting": "目标：请将 {expected} 对准取景框",
+  "scanNothingYet": "尚未扫描",
+  "scanAcceptedCount": "已扫描 {count} 件",
+  "scanResultOk": "OK",
+  "scanResultDuplicate": "重复（已忽略）",
+  "scanResultNg": "NG",
+  "scanManualEntry": "手动输入",
+  "scanManualEntryHint": "JAN / 条码",
+  "scanDone": "完成",
+  "pickScanToConfirm": "请扫描该商品的 JAN 后再确定数量",
+  "pickScanned": "扫描已确认",
+  "pickScanAction": "扫描"
 }

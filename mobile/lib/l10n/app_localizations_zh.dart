@@ -2198,4 +2198,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String putawayConfirmed(int quantity, String bin, int pendingAfter) {
     return '已将 $quantity 放入 $bin（剩余 $pendingAfter）';
   }
+
+  @override
+  String get actionOk => '确定';
+
+  @override
+  String scanWrongItem(String expected) {
+    return '商品不符（应为 $expected）';
+  }
+
+  @override
+  String scanExpecting(String expected) {
+    return '目标：请将 $expected 对准取景框';
+  }
+
+  @override
+  String get scanNothingYet => '尚未扫描';
+
+  @override
+  String scanAcceptedCount(int count) {
+    return '已扫描 $count 件';
+  }
+
+  @override
+  String get scanResultOk => 'OK';
+
+  @override
+  String get scanResultDuplicate => '重复（已忽略）';
+
+  @override
+  String get scanResultNg => 'NG';
+
+  @override
+  String get scanManualEntry => '手动输入';
+
+  @override
+  String get scanManualEntryHint => 'JAN / 条码';
+
+  @override
+  String get scanDone => '完成';
+
+  @override
+  String get pickScanToConfirm => '请扫描该商品的 JAN 后再确定数量';
+
+  @override
+  String get pickScanned => '扫描已确认';
+
+  @override
+  String get pickScanAction => '扫描';
 }

@@ -169,6 +169,20 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       InventorOS, or otherwise) — ❌ none implemented; the skeleton is
       deliberately unwired per your explicit choice
 
+**Scanning & operator UX (UI spec §11/§16)**
+- [x] One shared scanning component — camera, torch, success/error sound,
+      vibration, manual-entry fallback, continuous scan, duplicate
+      suppression, scan history and a visible result, all in
+      `BarcodeScanScreen`. Adopted by QC receiving (continuous, with a
+      shortened duplicate window because one scan is one piece there),
+      picking, and put-away
+- [x] Barcode-gated quantity confirm in picking (§16) — a pick quantity
+      cannot be recorded until the task's own JAN is scanned; a wrong JAN
+      sounds the error tone and keeps the gate shut. Typing the code via the
+      scanner's manual fallback is not a way around it (it is validated the
+      same way), so a damaged label still does not stop the job
+- [x] +1 / +5 quick quantity buttons in the pick dialog (§16)
+
 **Reporting**
 - [x] Live dashboard (KPIs, today's-tasks counts)
 - [x] Global cross-entity search
