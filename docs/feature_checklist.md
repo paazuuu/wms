@@ -393,6 +393,61 @@ Audited against the spec's 5 bullets:
       who wants to review what they just did before moving on), needs a
       workflow-by-workflow judgment call rather than one shared fix
 
+**Inter-warehouse Transfer state visibility (UI spec §22)**
+- [x] "現在状態をUIで明確に表示" — already satisfied, same pattern as every
+      other document lifecycle in the app (PO/SO/work orders): a
+      `StatusPill` (label + icon + colour) for the current
+      `TransferStatus`, all 9 states (draft/pending/approved/picking/
+      in-transit/receiving/completed/rejected/cancelled) individually
+      mapped, plus the source→destination warehouse row and a live
+      "X/Y picked" or "X/Y received" progress line while those two states
+      are active. Not turned into a dedicated multi-step stepper: that
+      would be a one-off pattern used nowhere else in the app, and a
+      single clearly-labelled current-state badge already answers "where
+      is this transfer right now"
+
+**Stock count (UI spec §23)**
+- [x] Location → 商品 → 理論数量 → 実数量 → 差異 flow, blind counting (実数量だけ
+      入力, system quantity withheld while a blind count is open), and a
+      variance list on completion — all already built and tested (§17).
+- [x] **承認権限を分離する (separate the approval permission)** — audited
+      and found genuinely unenforced: `count.perform`/`count.approve` have
+      existed as distinct permissions since migration 0012, but the
+      `stock-ops` edge function that backs every stock-count mutation
+      never checked either of them — it ran entirely on the service-role
+      client with `// TODO(auth): require count.perform/count.approve for
+      the caller.` comments left in place. In practice this meant **any
+      signed-in user, regardless of role, could start, record, complete
+      (posting real variance adjustments to the ledger), or cancel any
+      cycle count in the company.** The same file also had an unenforced
+      `// TODO(auth): require inventory.adjust` on stock adjustments.
+      Fixed by having the edge function validate the caller's own JWT
+      (`supabase.auth.getUser()`) and then call `has_permission()` under
+      that identity — `count.perform` gates start/record/cancel,
+      `count.approve` gates complete (the step that actually moves stock),
+      `inventory.adjust` gates the adjustment endpoint. Deployed as
+      `stock-ops` v3.
+  - Caught a real footgun while building this: `has_permission()` itself
+    treats a null `auth.uid()` as "allow" (intended for trusted
+    server-side/service-role callers with no user context, e.g. an RPC
+    invoked from another RPC), which would have let an unauthenticated or
+    malformed-token caller through unchecked if `has_permission()` were
+    called naively. The fix calls `auth.getUser()` first to confirm a real
+    signed-in user before trusting the permission check at all.
+  - Not independently verified against the live deployed function: this
+    session's outbound network is proxied and does not reach
+    `*.supabase.co` directly, so the fix is verified by code review
+    (`auth.getUser()` is supabase-js's documented per-request JWT
+    validation) and by confirming the Flutter client already attaches a
+    real bearer token to every `stock-ops` request (`dio_client.dart`),
+    not by an end-to-end HTTP call.
+  - The client's error message for this case ("not permitted: ... required")
+    is the same shape the RPC-based checks elsewhere in the app already
+    raise, so it's covered by §34's `humanizeApiErrorMessage()` — wired
+    into the three `_snack(...)` call sites in the stock-ops screens that
+    previously showed `f.message` raw, since this fix is what makes that
+    error newly reachable there.
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

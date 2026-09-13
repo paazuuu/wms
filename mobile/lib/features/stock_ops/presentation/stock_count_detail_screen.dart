@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -69,6 +70,7 @@ class _BodyState extends ConsumerState<_Body> {
   }
 
   Future<void> _record(StockCountLine line) async {
+    final l10n = AppLocalizations.of(context);
     final counted = await showDialog<int>(
       context: context,
       builder: (_) => _CountLineDialog(line: line, hideSystem: _count.hideSystem),
@@ -83,7 +85,8 @@ class _BodyState extends ConsumerState<_Body> {
     setState(() => _busy = false);
     result.when(
       success: (_) => _refresh(),
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) =>
+          _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -136,7 +139,8 @@ class _BodyState extends ConsumerState<_Body> {
           signed(completed.summary.netChange),
         ));
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) =>
+          _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -171,7 +175,8 @@ class _BodyState extends ConsumerState<_Body> {
         _refresh();
         _snack(l10n.cntCancelled);
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) =>
+          _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

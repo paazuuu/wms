@@ -11,7 +11,11 @@
 //   POST  /stock-ops/counts/:id/complete            {note?}
 //   POST  /stock-ops/counts/:id/cancel
 //
-// Service role internally; verify_jwt=true (the app's anon key qualifies).
+// Data access runs as service role; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// requirePermission) — the same rule every RPC called directly over
+// PostgREST elsewhere in the app already follows.
 // Both corrections post through the ledger, so nothing here can move stock
 // without leaving a movement and an audit entry.
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -29,10 +33,47 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+// The client above runs as service role, so auth.uid() is null inside any
+// RPC it calls — has_permission() would always fail closed. This one instead
+// carries the caller's own JWT, so has_permission() resolves against the
+// actual signed-in user, the same as every RPC called directly over
+// PostgREST elsewhere in the app.
+function callerClient(req: Request) {
+  const authHeader = req.headers.get("Authorization") ?? "";
+  return createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: authHeader } },
+  });
+}
+
+async function requirePermission(
+  req: Request,
+  permission: string,
+): Promise<Response | null> {
+  const denied = json({ message: `not permitted: ${permission} required` }, 403);
+  const client = callerClient(req);
+
+  // has_permission() treats a null auth.uid() as "allow" — it's meant for
+  // SECURITY DEFINER calls made from trusted server-side code with no user
+  // context at all, not for a caller who simply sent no (or an invalid)
+  // token. So a real signed-in user must be confirmed first; only then does
+  // has_permission()'s result mean anything.
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError || !userData?.user) return denied;
+
+  const { data, error } = await client.rpc("has_permission", {
+    p_permission: permission,
+  });
+  if (error || data !== true) {
+    // Same shape as a `raise exception 'not permitted: ... required'` from a
+    // Postgres RPC, so the client's existing humanizer handles it the same
+    // way regardless of which layer the check ran in.
+    return denied;
+  }
+  return null;
+}
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -78,7 +119,8 @@ Deno.serve(async (req) => {
 
     // POST /stock-ops/adjustments
     if (req.method === "POST" && rest[0] === "adjustments" && rest.length === 1) {
-      // TODO(auth): require inventory.adjust for the caller.
+      const denied = await requirePermission(req, "inventory.adjust");
+      if (denied) return denied;
       const body = await req.json().catch(() => ({}));
       const reason = str(body.reason)?.toUpperCase() ?? "OTHER";
       if (!REASONS.has(reason)) {
@@ -129,7 +171,8 @@ Deno.serve(async (req) => {
 
     // POST /stock-ops/counts
     if (req.method === "POST" && rest[0] === "counts" && rest.length === 1) {
-      // TODO(auth): require count.perform for the caller.
+      const denied = await requirePermission(req, "count.perform");
+      if (denied) return denied;
       const body = await req.json().catch(() => ({}));
       const wh = Number(body.warehouse_id);
       if (!Number.isFinite(wh)) {
@@ -161,6 +204,8 @@ Deno.serve(async (req) => {
       if (!Number.isFinite(id) || !Number.isFinite(lineId)) {
         return json({ message: "bad id" }, 400);
       }
+      const denied = await requirePermission(req, "count.perform");
+      if (denied) return denied;
       const body = await req.json().catch(() => ({}));
       const counted = Number(body.counted);
       if (!Number.isFinite(counted)) {
@@ -179,9 +224,10 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest[0] === "counts" && rest.length === 3 &&
       rest[2] === "complete"
     ) {
-      // TODO(auth): require count.approve for the caller.
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
+      const denied = await requirePermission(req, "count.approve");
+      if (denied) return denied;
       const body = await req.json().catch(() => ({}));
       const { data, error } = await supabase.rpc("complete_stock_count", {
         p_count_id: id,
@@ -202,6 +248,8 @@ Deno.serve(async (req) => {
     ) {
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
+      const denied = await requirePermission(req, "count.perform");
+      if (denied) return denied;
       const { error } = await supabase.rpc("cancel_stock_count", {
         p_count_id: id,
       });

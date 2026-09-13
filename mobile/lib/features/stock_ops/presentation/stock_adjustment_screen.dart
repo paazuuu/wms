@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
@@ -98,7 +99,8 @@ class _StockAdjustmentScreenState extends ConsumerState<StockAdjustmentScreen> {
         ref.invalidate(adjustmentListProvider);
         _snack(l10n.adjDone(signed(adjustment.quantityDelta)));
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) =>
+          _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

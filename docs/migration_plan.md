@@ -962,6 +962,54 @@ test needed for the font-size change itself.
 
 `flutter analyze`: clean. `flutter test`: 317 → 320 passing.
 
+### Edge function fix: enforce permissions in `stock-ops` (UI spec §22/§23, no schema migration)
+
+While auditing §22 (Transfer state visibility — already fine, same
+`StatusPill`-per-status pattern used everywhere else in the app) and §23
+(stock count), found a real, live security gap while checking §23's
+"承認権限を分離する" (separate the approval permission): the `stock-ops` edge
+function backing every stock-count and stock-adjustment mutation ran
+entirely as service role with no permission check at all — three
+`// TODO(auth): require ... for the caller.` comments were left in the code
+where the checks should have been. Concretely, before this fix, any
+signed-in user — regardless of role or permissions — could start, record,
+complete (posting real variance adjustments to the ledger), or cancel any
+company's cycle count, and could post arbitrary stock adjustments.
+
+This is architecturally different from the client-only fixes elsewhere in
+this file: `stock-ops` predates the app's has_permission()-in-every-RPC
+convention and is one of the handful of edge functions (not a PostgREST
+RPC) still running purely on the service-role client, which has no user
+JWT context at all (`auth.uid()` is null there). Fixed by having the edge
+function build a second, per-request client carrying the caller's own
+`Authorization` header, calling `has_permission()` under that identity:
+`count.perform` now gates start/record/cancel, `count.approve` gates
+complete (the one action that actually moves stock), and `inventory.adjust`
+gates the adjustment endpoint.
+
+One subtlety caught before deploying: `has_permission()` itself resolves to
+`true` when `auth.uid()` is null — by design, for SECURITY DEFINER calls
+made from trusted server-side code with no user at all, not for "nobody
+sent a valid token." Calling it naively from the edge function would have
+reproduced the exact bug being fixed (a missing/garbage Authorization
+header would silently pass). The fix calls `client.auth.getUser()` first to
+confirm a genuine signed-in user before trusting `has_permission()`'s
+answer at all.
+
+Deployed as `stock-ops` v3. Not independently verified via a live HTTP call
+— this session's network proxy doesn't reach `*.supabase.co` directly — so
+correctness rests on code review (`auth.getUser()` is supabase-js's
+documented pattern for this) and on confirming the Flutter client already
+attaches a real bearer token to every `stock-ops` request today
+(`dio_client.dart`'s interceptor), so no legitimate call breaks.
+
+The resulting `not permitted: <code> required` message is the same shape
+already handled by §34's `humanizeApiErrorMessage()`; wired it into the
+stock-ops screens' three `_snack(f.message, ...)` call sites (previously
+raw), since this fix is what makes that error newly reachable from them.
+
+`flutter analyze`: clean. `flutter test`: 320 → 322 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

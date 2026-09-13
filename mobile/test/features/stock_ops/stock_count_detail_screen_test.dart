@@ -80,6 +80,28 @@ void main() {
     expect(find.textContaining('未実査 1 行'), findsOneWidget);
   });
 
+  testWidgets(
+      'a permission-denied line record shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    final repo = FakeStockOpsRepository(count: _openCount(blind: false))
+      ..failWith = 'not permitted: count.perform required';
+
+    await pumpApp(
+      tester,
+      const StockCountDetailScreen(countId: 7),
+      overrides: [stockOpsRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    await tester.tap(find.text('ボールペン'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '38');
+    await tester.tap(find.text('実査数を入力'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('count.perform'), findsNothing);
+  });
+
   testWidgets('an uncounted line is not treated as zero', (tester) async {
     final repo = FakeStockOpsRepository(count: _openCount(blind: false));
 

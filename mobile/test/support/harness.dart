@@ -476,6 +476,11 @@ class FakeStockOpsRepository implements StockOpsRepository {
   /// The reason the last adjustment carried.
   AdjustReason? lastReason;
 
+  /// When set, every mutating call (adjust/startCount/recordLine/
+  /// completeCount/cancelCount) fails with this message instead of
+  /// succeeding — e.g. to simulate a permission-denied RPC response.
+  String? failWith;
+
   StockCount get session => _count!;
 
   StockCount _masked(StockCount c) {
@@ -517,6 +522,7 @@ class FakeStockOpsRepository implements StockOpsRepository {
     String? note,
     String? productName,
   }) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     lastWarehouseId = warehouseId;
     lastDelta = delta;
     lastReason = reason;
@@ -553,6 +559,7 @@ class FakeStockOpsRepository implements StockOpsRepository {
   @override
   Future<ApiResult<StockCount>> recordLine(
       int countId, int lineId, int counted) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     final c = _count!;
     _count = StockCount(
       id: c.id,
@@ -584,6 +591,7 @@ class FakeStockOpsRepository implements StockOpsRepository {
   @override
   Future<ApiResult<CompletedCount>> completeCount(int countId,
       {String? note}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     final c = _count!;
     // Uncounted lines keep their frozen quantity: not counted is not zero.
     final counted = c.lines.where((l) => l.isCounted).toList();
