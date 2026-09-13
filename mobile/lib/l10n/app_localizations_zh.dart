@@ -1435,6 +1435,72 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featSalesOrdersDesc => '创建、审批并管理来自客户的订单';
 
   @override
+  String get featPartners => '往来单位';
+
+  @override
+  String get featPartnersDesc => '管理供应商与客户的联系方式及交易条件';
+
+  @override
+  String get partnersTitle => '往来单位';
+
+  @override
+  String get partnersSearchHint => '按名称或编码搜索';
+
+  @override
+  String get partnersEmpty => '暂无往来单位';
+
+  @override
+  String get partnersEmptyBody => '点击右下角的 + 添加。';
+
+  @override
+  String get partnerKindAll => '全部';
+
+  @override
+  String get partnerKindSupplier => '供应商';
+
+  @override
+  String get partnerKindCustomer => '客户';
+
+  @override
+  String get partnerKindBoth => '供应商/客户';
+
+  @override
+  String get partnerNewTitle => '新增往来单位';
+
+  @override
+  String get partnerEditTitle => '编辑往来单位';
+
+  @override
+  String get partnerName => '名称';
+
+  @override
+  String get partnerCode => '编码';
+
+  @override
+  String get partnerContactName => '联系人';
+
+  @override
+  String get partnerPhone => '电话';
+
+  @override
+  String get partnerEmail => '邮箱';
+
+  @override
+  String get partnerAddress => '地址';
+
+  @override
+  String get partnerPaymentTerms => '交易条件';
+
+  @override
+  String get partnerNotes => '备注';
+
+  @override
+  String get partnerSave => '保存';
+
+  @override
+  String get partnerValidationRequired => '请输入名称';
+
+  @override
   String get soTitle => '销售订单';
 
   @override

@@ -2806,6 +2806,138 @@ abstract class AppLocalizations {
   /// **'顧客からの受注を作成・承認・管理'**
   String get featSalesOrdersDesc;
 
+  /// No description provided for @featPartners.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先'**
+  String get featPartners;
+
+  /// No description provided for @featPartnersDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先・顧客の連絡先や取引条件を管理'**
+  String get featPartnersDesc;
+
+  /// No description provided for @partnersTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先'**
+  String get partnersTitle;
+
+  /// No description provided for @partnersSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先名またはコードで検索'**
+  String get partnersSearchHint;
+
+  /// No description provided for @partnersEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先がまだありません'**
+  String get partnersEmpty;
+
+  /// No description provided for @partnersEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'右下の＋から取引先を登録できます。'**
+  String get partnersEmptyBody;
+
+  /// No description provided for @partnerKindAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get partnerKindAll;
+
+  /// No description provided for @partnerKindSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get partnerKindSupplier;
+
+  /// No description provided for @partnerKindCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客'**
+  String get partnerKindCustomer;
+
+  /// No description provided for @partnerKindBoth.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先/顧客'**
+  String get partnerKindBoth;
+
+  /// No description provided for @partnerNewTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先を登録'**
+  String get partnerNewTitle;
+
+  /// No description provided for @partnerEditTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先を編集'**
+  String get partnerEditTitle;
+
+  /// No description provided for @partnerName.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先名'**
+  String get partnerName;
+
+  /// No description provided for @partnerCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'コード'**
+  String get partnerCode;
+
+  /// No description provided for @partnerContactName.
+  ///
+  /// In ja, this message translates to:
+  /// **'担当者名'**
+  String get partnerContactName;
+
+  /// No description provided for @partnerPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話番号'**
+  String get partnerPhone;
+
+  /// No description provided for @partnerEmail.
+  ///
+  /// In ja, this message translates to:
+  /// **'メールアドレス'**
+  String get partnerEmail;
+
+  /// No description provided for @partnerAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所'**
+  String get partnerAddress;
+
+  /// No description provided for @partnerPaymentTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引条件'**
+  String get partnerPaymentTerms;
+
+  /// No description provided for @partnerNotes.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get partnerNotes;
+
+  /// No description provided for @partnerSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get partnerSave;
+
+  /// No description provided for @partnerValidationRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先名を入力してください'**
+  String get partnerValidationRequired;
+
   /// No description provided for @soTitle.
   ///
   /// In ja, this message translates to:

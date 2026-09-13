@@ -81,10 +81,18 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       deactivate + duplicate-JAN rejection). This is separate master data,
       not wired into `stock_levels`/`stock_movements`/`bin_stock` — those
       keep their own denormalized `product_name`, unchanged
-- [ ] Full supplier management (CRUD, contacts, terms) — ⚠️ only
-      `delivery_suppliers`, a narrow list scoped to delivery reconciliation —
-      not a general supplier master
-- [ ] Customer management — ❌ no `customers` table
+- [x] Full supplier/customer management (CRUD, contacts, terms) (0035) —
+      `delivery_suppliers` extended in place into a general trading-partner
+      directory (`kind`: supplier/customer/both, plus contact/phone/email/
+      address/payment terms/notes), rather than a second `customers` table
+      forking the two existing FKs (`delivery_plans.supplier_id`,
+      `shipment_plans.party_id`) apart. `partner.view`/`.manage`-gated CRUD
+      RPCs; the pre-existing open read policy on the table is untouched, so
+      delivery-note import and shipment lookups keep working unchanged. A
+      `TradingPartnerListScreen` (search, kind filter, add/edit,
+      activate/deactivate) added to the home menu. Verified live via grants
+      and an aborted-transaction round trip (create/list-by-kind/update/
+      deactivate, including the "both" kind matching either filter)
 - [ ] Work orders / assembly / kitting — ❌ removed with InventorOS
 
 **People & access**
@@ -161,7 +169,6 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 Consolidated, in one place, as asked:
 
 **Not implemented at all:**
-- Customer management
 - Returns / RMA
 - Work orders / kitting / assembly
 - Custom report builder

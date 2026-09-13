@@ -1437,6 +1437,72 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featSalesOrdersDesc => '顧客からの受注を作成・承認・管理';
 
   @override
+  String get featPartners => '取引先';
+
+  @override
+  String get featPartnersDesc => '仕入先・顧客の連絡先や取引条件を管理';
+
+  @override
+  String get partnersTitle => '取引先';
+
+  @override
+  String get partnersSearchHint => '取引先名またはコードで検索';
+
+  @override
+  String get partnersEmpty => '取引先がまだありません';
+
+  @override
+  String get partnersEmptyBody => '右下の＋から取引先を登録できます。';
+
+  @override
+  String get partnerKindAll => 'すべて';
+
+  @override
+  String get partnerKindSupplier => '仕入先';
+
+  @override
+  String get partnerKindCustomer => '顧客';
+
+  @override
+  String get partnerKindBoth => '仕入先/顧客';
+
+  @override
+  String get partnerNewTitle => '取引先を登録';
+
+  @override
+  String get partnerEditTitle => '取引先を編集';
+
+  @override
+  String get partnerName => '取引先名';
+
+  @override
+  String get partnerCode => 'コード';
+
+  @override
+  String get partnerContactName => '担当者名';
+
+  @override
+  String get partnerPhone => '電話番号';
+
+  @override
+  String get partnerEmail => 'メールアドレス';
+
+  @override
+  String get partnerAddress => '住所';
+
+  @override
+  String get partnerPaymentTerms => '取引条件';
+
+  @override
+  String get partnerNotes => '備考';
+
+  @override
+  String get partnerSave => '保存';
+
+  @override
+  String get partnerValidationRequired => '取引先名を入力してください';
+
+  @override
   String get soTitle => '受注';
 
   @override

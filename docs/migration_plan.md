@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0034 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0035 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -590,6 +590,37 @@ update inside a transaction._
   machine), added to the home menu. 4 screen tests + 3 repository tests
   plus a `FakeSalesOrderRepository` added to the shared harness.
 - `flutter analyze`: clean. `flutter test`: 207/207 passing.
+
+### 0035 — Supplier/customer CRM (checklist item 8) ✅
+- "Full supplier management" and "customer management" were two separate
+  checklist gaps, but this project already has one table serving both
+  roles: `delivery_suppliers` is referenced by `delivery_plans.supplier_id`
+  (inbound) *and* `shipment_plans.party_id` (outbound) — a generic trading-
+  partner reference in practice. domain_model.md §2 already called for
+  reconciling it into a general supplier master while keeping delivery
+  references working — this does exactly that, additively (new columns
+  only), instead of a second `customers` table forking the two FKs apart.
+- Added columns: `kind` (supplier/customer/both — a company can be either),
+  `contact_name`, `phone`, `email`, `address`, `payment_terms`, `notes`,
+  `status`, `updated_at`. Two new permissions (`partner.view`/`.manage`);
+  `list_trading_partners` (filters by kind — `both` matches either filter —
+  search, status), `create_trading_partner`, `update_trading_partner`,
+  `set_trading_partner_status`. The pre-existing `using (true)` read policy
+  (0003) is untouched — delivery-note import and shipment lookups keep
+  reading unconditionally; the new CRUD surface gates itself inside the
+  RPCs instead.
+- Verified live: grants (`anon` refused, `authenticated` allowed) for all 4
+  RPCs; an aborted transaction created a partner, confirmed `kind='both'`
+  matches both a supplier-scoped and a customer-scoped list, updated it to
+  `kind='customer'` and confirmed a supplier-scoped list no longer finds it,
+  then deactivated it — rolled back (0 leftover rows).
+- Flutter: `features/partners` — `TradingPartner`/`PartnerKind` domain
+  model, `TradingPartnerRepository`, a `TradingPartnerListScreen` (search,
+  kind filter chips, add/edit via a form sheet, tap the status pill to
+  activate/deactivate) added to the home menu. 3 repository tests + 8
+  screen tests plus a `FakeTradingPartnerRepository` added to the shared
+  harness.
+- `flutter analyze`: clean. `flutter test`: 215/215 passing.
 
 ## Rollout discipline
 

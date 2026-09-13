@@ -28,6 +28,9 @@ import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
+import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
+import 'package:wms_mobile/features/partners/data/trading_partner_repository.dart';
+import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
@@ -89,6 +92,8 @@ List<Override> _defaultOverrides() => [
       purchaseOrderRepositoryProvider
           .overrideWithValue(FakePurchaseOrderRepository()),
       salesOrderRepositoryProvider.overrideWithValue(FakeSalesOrderRepository()),
+      tradingPartnerRepositoryProvider
+          .overrideWithValue(FakeTradingPartnerRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1413,6 +1418,128 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
   @override
   Future<ApiResult<bool>> complete(int id) async =>
       _transition(id, SalesOrderStatus.approved, SalesOrderStatus.completed);
+}
+
+/// Trading partner stub. [partners] is what `list_trading_partners` would
+/// return; create/update/setStatus mutate an in-memory copy so a screen test
+/// can assert the change stuck.
+class FakeTradingPartnerRepository implements TradingPartnerRepository {
+  FakeTradingPartnerRepository({List<TradingPartner> partners = const []})
+      : _partners = List.of(partners);
+
+  List<TradingPartner> _partners;
+
+  /// Set to make create() fail (e.g. duplicate code), mirroring the real RPC.
+  String? failCreateWith;
+
+  @override
+  Future<ApiResult<List<TradingPartner>>> list({
+    PartnerKind? kind,
+    String? search,
+    String? status = 'active',
+  }) async {
+    return ApiSuccess(_partners.where((p) {
+      final statusOk = status == null || p.status == status;
+      final kindOk = kind == null || p.kind == kind || p.kind == PartnerKind.both;
+      final searchOk = search == null ||
+          search.isEmpty ||
+          p.name.contains(search) ||
+          (p.code ?? '').contains(search);
+      return statusOk && kindOk && searchOk;
+    }).toList());
+  }
+
+  @override
+  Future<ApiResult<int>> create({
+    required String name,
+    PartnerKind kind = PartnerKind.supplier,
+    String? code,
+    String? contactName,
+    String? phone,
+    String? email,
+    String? address,
+    String? paymentTerms,
+    String? notes,
+  }) async {
+    if (failCreateWith != null) {
+      return ApiFailure(message: failCreateWith!, statusCode: 400);
+    }
+    final id = _partners.length + 1;
+    _partners = [
+      ..._partners,
+      TradingPartner(
+        id: id,
+        name: name,
+        kind: kind,
+        code: code,
+        contactName: contactName,
+        phone: phone,
+        email: email,
+        address: address,
+        paymentTerms: paymentTerms,
+        notes: notes,
+      ),
+    ];
+    return ApiSuccess(id);
+  }
+
+  @override
+  Future<ApiResult<bool>> update({
+    required int id,
+    required String name,
+    PartnerKind kind = PartnerKind.supplier,
+    String? contactName,
+    String? phone,
+    String? email,
+    String? address,
+    String? paymentTerms,
+    String? notes,
+  }) async {
+    _partners = [
+      for (final p in _partners)
+        if (p.id == id)
+          TradingPartner(
+            id: p.id,
+            name: name,
+            kind: kind,
+            code: p.code,
+            contactName: contactName,
+            phone: phone,
+            email: email,
+            address: address,
+            paymentTerms: paymentTerms,
+            notes: notes,
+            status: p.status,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> setStatus(int id, String status) async {
+    _partners = [
+      for (final p in _partners)
+        if (p.id == id)
+          TradingPartner(
+            id: p.id,
+            name: p.name,
+            kind: p.kind,
+            code: p.code,
+            contactName: p.contactName,
+            phone: p.phone,
+            email: p.email,
+            address: p.address,
+            paymentTerms: p.paymentTerms,
+            notes: p.notes,
+            status: status,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

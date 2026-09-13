@@ -1486,6 +1486,73 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create, approve and manage orders from customers';
 
   @override
+  String get featPartners => 'Trading partners';
+
+  @override
+  String get featPartnersDesc =>
+      'Contacts and terms for suppliers and customers';
+
+  @override
+  String get partnersTitle => 'Trading partners';
+
+  @override
+  String get partnersSearchHint => 'Search by name or code';
+
+  @override
+  String get partnersEmpty => 'No trading partners yet';
+
+  @override
+  String get partnersEmptyBody => 'Add one with the + button.';
+
+  @override
+  String get partnerKindAll => 'All';
+
+  @override
+  String get partnerKindSupplier => 'Supplier';
+
+  @override
+  String get partnerKindCustomer => 'Customer';
+
+  @override
+  String get partnerKindBoth => 'Supplier/Customer';
+
+  @override
+  String get partnerNewTitle => 'New trading partner';
+
+  @override
+  String get partnerEditTitle => 'Edit trading partner';
+
+  @override
+  String get partnerName => 'Name';
+
+  @override
+  String get partnerCode => 'Code';
+
+  @override
+  String get partnerContactName => 'Contact name';
+
+  @override
+  String get partnerPhone => 'Phone';
+
+  @override
+  String get partnerEmail => 'Email';
+
+  @override
+  String get partnerAddress => 'Address';
+
+  @override
+  String get partnerPaymentTerms => 'Payment terms';
+
+  @override
+  String get partnerNotes => 'Notes';
+
+  @override
+  String get partnerSave => 'Save';
+
+  @override
+  String get partnerValidationRequired => 'Enter a name';
+
+  @override
   String get soTitle => 'Sales orders';
 
   @override
