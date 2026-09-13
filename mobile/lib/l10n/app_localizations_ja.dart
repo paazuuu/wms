@@ -27,6 +27,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get somethingWentWrong => '問題が発生しました';
 
   @override
+  String get errorPermissionDenied => 'この操作を行う権限がありません。';
+
+  @override
   String get languageTooltip => '言語を選択';
 
   @override

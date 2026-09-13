@@ -77,7 +77,8 @@ void main() {
     expect(find.text('ユーザーがまだいません'), findsOneWidget);
   });
 
-  testWidgets('a non-admin sees the permission error, not an empty screen',
+  testWidgets(
+      'a non-admin sees a friendly permission error, not raw RPC text (§34)',
       (tester) async {
     final repo = FakeAdminRepository(const [], roles: roleCatalog)
       ..failListUsersWith = 'not permitted: user.manage required';
@@ -88,7 +89,8 @@ void main() {
       overrides: [adminRepositoryProvider.overrideWithValue(repo)],
     );
 
-    expect(find.textContaining('user.manage'), findsOneWidget);
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('user.manage'), findsNothing);
   });
 
   testWidgets('adding a role from the picker attaches it to the user',

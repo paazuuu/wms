@@ -27,6 +27,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get somethingWentWrong => 'Something went wrong';
 
   @override
+  String get errorPermissionDenied => 'You don\'t have permission to do that.';
+
+  @override
   String get languageTooltip => 'Select language';
 
   @override

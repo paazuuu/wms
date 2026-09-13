@@ -289,6 +289,66 @@ a data-entry or picker dialog, not a destructive action, and was left alone
 — adding a confirmation there would be exactly the overuse the spec warns
 against.
 
+**Loading / error / empty consistency (UI spec §33, §34)**
+
+Audited every screen backed by `AsyncValue.when(...)` (33 presentation files)
+and every list-rendering screen, checking for silent gaps — a spinner that
+never resolves into a message, a blank screen instead of an empty state, an
+error swallowed with no retry. Result: already consistent, no changes
+needed.
+
+- [x] Every full-screen async load routes `loading`/`error`/`data` through
+      the shared `LoadingView`/`ErrorStateView` (`core/ui/state_views.dart`)
+      — one exception, `DashboardMetricsSection`, which intentionally uses a
+      compact inline spinner and a small retry card instead, because it's one
+      section of a taller scrollable page, not the whole screen; the rest of
+      the dashboard (the feature menu) stays usable while it loads or fails
+- [x] Every list screen shows an explicit `EmptyStateView` (icon + title +
+      guidance) rather than an empty `ListView` — verified across all 30
+      list-rendering screens; the two screens with two `EmptyStateView` calls
+      (`GlobalSearchScreen`, `PickListIndexScreen`, `PutawayQueueScreen`) each
+      distinguish a genuinely different state (no query yet vs. no results;
+      not started vs. nothing to do), not a duplicate
+- [x] The dashboard's embedded watch lists (outstanding plans, low stock,
+      §30's notification row) use a smaller inline "all clear" pattern
+      instead of the full-page `EmptyStateView` — appropriate since they're
+      cards within a larger page, not the page itself, but still an explicit
+      message rather than the section silently vanishing
+- [x] `TodayTasksRow`'s horizontal chip strip is fixed-length by design
+      (always the same 8 tiles, showing 0 rather than omitting a tile), so it
+      was never a candidate for an empty state — noted here only to record
+      that its lack of one was checked, not missed
+- [x] **Permission denied** (§34's own explicit example — "悪い:
+      `PostgrestException`") was a real gap: every `has_permission()` guard
+      across the RPCs raises the exact same shape,
+      `not permitted: <code> required`, and it was reaching `ErrorStateView`
+      verbatim — provable because an existing test
+      (`user_management_screen_test.dart`) had baked in that raw text as its
+      expected output. Reachable in practice, not just in theory: most
+      `FeatureEntry`s gate their menu entry on a "view OR manage" pair (§37),
+      so a view-only user routinely opens a screen whose write actions need
+      the stronger permission, and the RPC's own check is the first place
+      that becomes visible. `humanizeApiErrorMessage()` (`core/api/
+      api_error_text.dart`) recognises the pattern and swaps in a localized
+      "この操作を行う権限がありません。"; wired into `ErrorStateView` itself so
+      every one of the ~30 screens using it is covered by one change, no
+      per-screen edits. The test that had the wrong expectation baked in was
+      corrected to assert the friendly text instead
+- [ ] The write-side equivalent — `_snack(f.message, ...)` after a failed
+      action — is not yet covered. Each screen builds its own SnackBar
+      locally rather than through a shared helper, so applying the same
+      humanizer there means touching ~20 files individually rather than one;
+      left as a follow-up rather than done partially or rushed. A raw
+      `not permitted: ...` string can still appear in a SnackBar after a
+      failed write today
+- [ ] "Connection warning" as its own distinct state (§34 lists it alongside
+      Loading/Empty/Error/Retry/Permission denied) doesn't exist separately
+      — a dropped connection surfaces through the same generic
+      `ErrorStateView`/SnackBar path as any other failure, with `Retry`
+      already in place. Not built speculatively: no distinct offline-banner
+      UI exists to hang it off, and the app has no offline mode (see
+      `architecture_current.md` §5)
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

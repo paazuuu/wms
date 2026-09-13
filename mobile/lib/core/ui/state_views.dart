@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../api/api_error_text.dart';
 import '../theme/app_spacing.dart';
 
 /// Centered loading indicator with an optional caption. Async operations must
@@ -110,7 +111,7 @@ class ErrorStateView extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          message,
+          humanizeApiErrorMessage(l10n, message),
           textAlign: TextAlign.center,
           style: TextStyle(color: scheme.onSurfaceVariant),
         ),

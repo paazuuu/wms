@@ -900,6 +900,39 @@ is dismissed) and a no-dialog-on-reactivate test for products.
 
 `flutter analyze`: clean. `flutter test`: 308 → 311 passing.
 
+### Client-only change: no more raw RPC text on screen (UI spec §34, no migration)
+
+No schema change. While auditing §33/§34 (empty/loading/error consistency)
+found that every screen already routes async loads through the shared
+`LoadingView`/`ErrorStateView`, one real gap turned up in what those screens
+render: every `has_permission()` guard across the RPC layer raises the exact
+same shape, `raise exception 'not permitted: <code> required'`, and that raw
+Postgres text was reaching `ErrorStateView` verbatim — exactly the "悪い:
+`PostgrestException`" example the spec itself calls out. Not a theoretical
+gap either: most `FeatureEntry`s gate their menu on a "view OR manage" pair
+(§37), so a view-only user regularly opens a screen whose write action needs
+the stronger permission, and the RPC's own check is the first place that
+becomes visible — confirmed by an existing test
+(`user_management_screen_test.dart`) that had baked in the raw
+`not permitted: user.manage required` text as its expected output.
+
+Added `humanizeApiErrorMessage()` (`core/api/api_error_text.dart`): matches
+that one consistent RPC error shape and swaps in a localized "この操作を行う
+権限がありません。", passing anything else through unchanged rather than
+guessing at a translation for messages it doesn't recognise. Wired into
+`ErrorStateView` itself (one file) rather than each of the ~30 screens that
+use it, so every one of them picked up the fix at once. The test with the
+stale expectation was corrected to assert the friendly text instead.
+
+Deliberately not done in this pass: the write-side equivalent, where a
+failed action's message reaches a SnackBar via each screen's own local
+`_snack(f.message, ...)` — there's no shared helper behind those calls the
+way `ErrorStateView` is shared for reads, so covering it means ~20
+individual screen edits rather than one. Noted in `feature_checklist.md`
+rather than done partially.
+
+`flutter analyze`: clean. `flutter test`: 311 → 317 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

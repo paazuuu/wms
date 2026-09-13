@@ -136,6 +136,12 @@ abstract class AppLocalizations {
   /// **'問題が発生しました'**
   String get somethingWentWrong;
 
+  /// No description provided for @errorPermissionDenied.
+  ///
+  /// In ja, this message translates to:
+  /// **'この操作を行う権限がありません。'**
+  String get errorPermissionDenied;
+
   /// No description provided for @languageTooltip.
   ///
   /// In ja, this message translates to:

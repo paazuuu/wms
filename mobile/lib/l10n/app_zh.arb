@@ -6,6 +6,7 @@
   "signOut": "退出登录",
   "backToMenu": "返回菜单",
   "somethingWentWrong": "发生错误",
+  "errorPermissionDenied": "您没有执行此操作的权限。",
   "languageTooltip": "选择语言",
   "textSizeMenu": "文字大小",
   "textSizeNormal": "标准",

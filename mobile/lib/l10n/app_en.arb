@@ -6,6 +6,7 @@
   "signOut": "Sign out",
   "backToMenu": "Back to menu",
   "somethingWentWrong": "Something went wrong",
+  "errorPermissionDenied": "You don't have permission to do that.",
   "languageTooltip": "Select language",
   "textSizeMenu": "Text size",
   "textSizeNormal": "Normal",

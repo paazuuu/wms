@@ -6,6 +6,7 @@
   "signOut": "サインアウト",
   "backToMenu": "メニューに戻る",
   "somethingWentWrong": "問題が発生しました",
+  "errorPermissionDenied": "この操作を行う権限がありません。",
   "languageTooltip": "言語を選択",
   "textSizeMenu": "文字サイズ",
   "textSizeNormal": "標準",

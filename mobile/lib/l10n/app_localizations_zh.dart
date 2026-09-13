@@ -27,6 +27,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get somethingWentWrong => '发生错误';
 
   @override
+  String get errorPermissionDenied => '您没有执行此操作的权限。';
+
+  @override
   String get languageTooltip => '选择语言';
 
   @override
