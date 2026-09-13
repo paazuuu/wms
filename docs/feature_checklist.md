@@ -349,6 +349,50 @@ needed.
       UI exists to hang it off, and the app has no offline mode (see
       `architecture_current.md` §5)
 
+**Form UX (UI spec §35)**
+
+Audited against the spec's 5 bullets:
+
+- [x] 必須項目を最初に (required fields first) — already true everywhere: every
+      form in the app is short (4-6 fields) with required fields ordered
+      ahead of optional ones (e.g. the product form: JAN/name, then the
+      optional category/price)
+- [x] 詳細設定は折りたたみ (advanced settings collapsed) — no form has enough
+      fields to need progressive disclosure; adding a collapsible section
+      where nothing is actually advanced would be complexity for its own
+      sake, not a fix
+- [x] バーコード入力はスキャナー優先 (scanner before manual keying) — was a real
+      gap: the product form's and stock adjustment form's JAN fields were
+      plain numeric `TextField`s with no scan affordance, unlike every
+      barcode-driven list/search screen in the app (which already pair a
+      `ScanField` with a camera button). Added a scan icon
+      (`Icons.qr_code_scanner_outlined`) next to both JAN fields that pushes
+      the shared `BarcodeScanScreen` and fills the field with the result —
+      hidden on the product form when editing, since the JAN is fixed once
+      created
+- [x] 数量入力は大きな数字UI (large-number UI for quantity entry) — was a real
+      gap: the transfer pick/receive quantity dialog and the stock count
+      line dialog both used an ordinary-sized, left-aligned text field for
+      the one number each dialog exists to collect. Both now render the
+      count centered in `textTheme.displaySmall`, like a number pad's
+      display. Left the stock adjustment form's quantity field at normal
+      size on purpose — there it's one field among several in a longer form
+      (JAN, direction, reason, note), not a single-purpose "how much"
+      dialog, and blowing it up would look inconsistent with the rest of
+      that form rather than clearer
+- [ ] 保存成功後は次の業務へ自然に遷移 (after a successful save, transition
+      naturally to the next task) — a real, currently-open gap, found while
+      auditing but not fixed here: e.g. completing an inspection
+      (`InspectionDetailScreen._complete`) just refreshes the same screen
+      and shows a snackbar; the operator has to navigate back and find
+      put-away themselves rather than being carried into it. Deliberately
+      not fixed in this pass — unlike the two gaps above, this isn't a
+      mechanical UI change: deciding what "the next task" is for each save
+      (inspection → put-away? picking → packing? every order-approval
+      screen?), and whether auto-navigating away is ever unwanted (a user
+      who wants to review what they just did before moving on), needs a
+      workflow-by-workflow judgment call rather than one shared fix
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

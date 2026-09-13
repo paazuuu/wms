@@ -462,8 +462,13 @@ class _CountLineDialogState extends State<_CountLineDialog> {
             autofocus: true,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            textAlign: TextAlign.center,
             decoration: InputDecoration(labelText: l10n.cntCounted),
-            style: const TextStyle(fontFamily: AppFonts.mono),
+            // Large-number UI (§35): the counted quantity is the one thing
+            // this dialog exists for, so it reads like a number pad's
+            // display rather than an ordinary line of text.
+            style: theme.textTheme.displaySmall
+                ?.copyWith(fontFamily: AppFonts.mono, fontWeight: FontWeight.w600),
             onSubmitted: (_) => _submit(),
           ),
           if (widget.hideSystem) ...[

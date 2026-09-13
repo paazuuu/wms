@@ -74,6 +74,38 @@ void main() {
   });
 
   testWidgets(
+      "a new product's JAN field offers a scan button, not just the keyboard (§35)",
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeProductRepository();
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.qr_code_scanner_outlined), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      "an existing product's fixed JAN offers no scan button to replace it",
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('ボールペン'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.qr_code_scanner_outlined), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
       'deactivating a product asks for confirmation first (§36)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -244,6 +245,16 @@ class _AdjustSheetState extends State<_AdjustSheet> {
   AdjustReason _reason = AdjustReason.damage;
   String? _error;
 
+  // Barcode input before manual keying (§35): the operator is standing next
+  // to the item being corrected, not reading a JAN off a screen elsewhere.
+  Future<void> _scanJan() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
+    );
+    if (!mounted || code == null || code.isEmpty) return;
+    setState(() => _jan.text = code);
+  }
+
   @override
   void dispose() {
     _jan.dispose();
@@ -298,7 +309,14 @@ class _AdjustSheetState extends State<_AdjustSheet> {
               controller: _jan,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(labelText: l10n.adjJan),
+              decoration: InputDecoration(
+                labelText: l10n.adjJan,
+                suffixIcon: IconButton(
+                  tooltip: l10n.scanBarcode,
+                  icon: const Icon(Icons.qr_code_scanner_outlined),
+                  onPressed: _scanJan,
+                ),
+              ),
               style: const TextStyle(fontFamily: AppFonts.mono),
             ),
             const SizedBox(height: AppSpacing.lg),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -263,6 +264,16 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
 
   bool get _isEdit => widget.product != null;
 
+  // Barcode input before manual keying (§35): a new product's JAN is almost
+  // always read straight off the item in hand, not typed digit by digit.
+  Future<void> _scanJan() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
+    );
+    if (!mounted || code == null || code.isEmpty) return;
+    setState(() => _jan.text = code);
+  }
+
   @override
   void dispose() {
     _jan.dispose();
@@ -341,7 +352,16 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
               controller: _jan,
               readOnly: _isEdit,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.productJanCode),
+              decoration: InputDecoration(
+                labelText: l10n.productJanCode,
+                suffixIcon: _isEdit
+                    ? null
+                    : IconButton(
+                        tooltip: l10n.scanBarcode,
+                        icon: const Icon(Icons.qr_code_scanner_outlined),
+                        onPressed: _scanJan,
+                      ),
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(

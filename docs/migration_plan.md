@@ -933,6 +933,35 @@ rather than done partially.
 
 `flutter analyze`: clean. `flutter test`: 311 → 317 passing.
 
+### Client-only change: Form UX (UI spec §35, no migration)
+
+No schema change. Audited the spec's 5 Form UX bullets. Two were already
+true everywhere (required fields first; nothing complex enough to warrant a
+collapsible "advanced" section) and one is a real but non-mechanical gap
+left open (post-save transition to the next task — see
+`feature_checklist.md` for why it needs a workflow-by-workflow decision
+rather than one shared fix). Two were real, fixable gaps:
+
+- Barcode input before manual keying: the product form and stock adjustment
+  form both had a plain numeric `TextField` for JAN, unlike every other
+  barcode-driven screen in the app. Added a scan icon that pushes the shared
+  `BarcodeScanScreen` and fills the field with the result, matching the
+  existing `ScanField` + camera-button pattern used elsewhere — hidden on
+  the product form once editing (the JAN is fixed after creation).
+- Large-number UI for quantity entry: the transfer pick/receive dialog and
+  the stock count line dialog both rendered their one number in ordinary
+  body text. Both now use `textTheme.displaySmall`, centered — a number
+  pad's display, not a line of text. The stock adjustment form's quantity
+  field was left alone on purpose: it's one field among several there, not
+  a single-purpose dialog, so enlarging it would look inconsistent with the
+  rest of that form.
+
+Existing tests for both forms updated/added to assert the scan button's
+presence (and its absence once a product's JAN is fixed); no behavioral
+test needed for the font-size change itself.
+
+`flutter analyze`: clean. `flutter test`: 317 → 320 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
