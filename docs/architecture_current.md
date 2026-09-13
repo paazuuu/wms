@@ -3,7 +3,7 @@
 _Supersedes `architecture_phase0_snapshot.md`. Verified against the live
 Supabase project (`vjunicsfobglmncjucbb`), the Flutter codebase, and the test
 suite — see `feature_checklist.md` for the feature-by-feature detail this
-document summarizes. Migrations `0010`–`0038` applied._
+document summarizes. Migrations `0010`–`0039` applied._
 
 ## 1. High-level shape
 
@@ -31,13 +31,13 @@ the decision was made not to stand it up rather than keep broken menu entries
 and a dependency on it. See `migration_plan.md`'s "Post-0028" entry for the
 removal itself. Every gap that removal left (product master, purchase/sales
 orders, supplier/customer CRM, work orders, image storage, custom reports) has
-since been rebuilt natively on Supabase (0031–0038) — see §6 below for what
+since been rebuilt natively on Supabase (0031–0039) — see §6 below for what
 still has no equivalent.
 
 ## 2. Repository layout
 
 - `mobile/` — Flutter app (Riverpod, gen_l10n ja/en/zh, Dio).
-- `supabase/migrations/` — `0001`–`0038`, sequential and additive (see
+- `supabase/migrations/` — `0001`–`0039`, sequential and additive (see
   `migration_plan.md` for what each one did).
 - `supabase/functions/` — `delivery-plans`, `import-plan`, `ocr-delivery-note`,
   `shipments`, `warehouses`, `inspections`, `picking`, `transfers`,
@@ -106,6 +106,11 @@ Every module below is Supabase-backed; none call an external system.
   only file-upload capability in the app.
 - Reporting: `report_definitions` (0037) — saved source+filters combinations
   for the report builder.
+- Packing: cartons carry `weight_kg`/`carrier`/`tracking_number` on
+  `shipment_plans` (0039); `autopack_shipment` splits a shipment into cartons
+  server-side and `set_shipment_logistics` records the shipping details.
+  Labels are rendered client-side from `LabelTemplate` (§20 variables) as
+  print-ready HTML with inline SVG QR/barcodes — no print server.
 - Put-away: `putaway_confirmations` (0038) — an idempotency ledger only. The
   queue itself is derived (`stock_levels.on_hand` minus that JAN's `bin_stock`
   per warehouse), so it cannot drift out of step with the balances it reports
@@ -120,7 +125,7 @@ Every module below is Supabase-backed; none call an external system.
 ## 5. Cross-cutting capabilities
 
 - **i18n**: gen_l10n, ja (template) / en / zh — every feature added through
-  0038 ships all three languages.
+  0039 ships all three languages.
 - **Theming**: light/dark via `ThemeMode.system`, plus a text-scale setting.
 - **Scanning**: one shared surface, `BarcodeScanScreen` (UI spec §11) —
   camera (`mobile_scanner`), torch, success/error sound and vibration

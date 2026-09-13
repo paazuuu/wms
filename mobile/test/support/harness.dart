@@ -399,6 +399,38 @@ class FakeShipmentRepository implements ShipmentRepository {
   Future<ApiResult<Shipment>> show(int id) async =>
       ApiSuccess(shipments.firstWhere((s) => s.id == id));
 
+  /// The last autopack request, as (unitsPerCarton, resulting carton count).
+  int? lastUnitsPerCarton;
+
+  /// The last logistics values written.
+  (double?, String?, String?)? lastLogistics;
+
+  @override
+  Future<ApiResult<AutopackResult>> autopack(int id,
+      {required int unitsPerCarton}) async {
+    lastUnitsPerCarton = unitsPerCarton;
+    final shipment = shipments.firstWhere((s) => s.id == id);
+    final total = shipment.totalUnits;
+    // Same arithmetic the server does, so a screen test sees a real box count.
+    final boxes = unitsPerCarton <= 0 ? 0 : (total + unitsPerCarton - 1) ~/ unitsPerCarton;
+    return ApiSuccess(AutopackResult(
+      cartonCount: boxes,
+      unitsPerCarton: unitsPerCarton,
+      totalUnits: total,
+    ));
+  }
+
+  @override
+  Future<ApiResult<bool>> setLogistics(
+    int id, {
+    double? weightKg,
+    String? carrier,
+    String? trackingNumber,
+  }) async {
+    lastLogistics = (weightKg, carrier, trackingNumber);
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<Shipment>> ship(int id) async => show(id);
 

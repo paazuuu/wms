@@ -2249,4 +2249,77 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get taskInboundPlanned => '预计入库';
+
+  @override
+  String get actionEdit => '编辑';
+
+  @override
+  String get autopackAction => '自动计算箱数';
+
+  @override
+  String autopackTotal(int total) {
+    return '总数量 $total';
+  }
+
+  @override
+  String get autopackPerCarton => '每箱数量';
+
+  @override
+  String get autopackHint => '输入每箱可装的数量，系统会算出所需箱数。';
+
+  @override
+  String autopackBoxes(int boxes) {
+    return '箱数 $boxes';
+  }
+
+  @override
+  String autopackEven(int per) {
+    return '每箱 $per 个';
+  }
+
+  @override
+  String autopackSplit(int full, int per, int last) {
+    return '$full 箱 × $per 个 ＋ 最后一箱 $last 个';
+  }
+
+  @override
+  String get autopackConfirm => '按此箱数创建';
+
+  @override
+  String autopackDone(int boxes, int per) {
+    return '已创建 $boxes 箱（每箱 $per 个）';
+  }
+
+  @override
+  String get printCartonLabels => '打印全部箱标签';
+
+  @override
+  String get printThisLabel => '箱标签';
+
+  @override
+  String get shipLogisticsSection => '配送信息';
+
+  @override
+  String get shipLogisticsUnset => '未填写';
+
+  @override
+  String get shipWeight => '重量';
+
+  @override
+  String shipWeightKg(double kg) {
+    final intl.NumberFormat kgNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String kgString = kgNumberFormat.format(kg);
+
+    return '$kgString kg';
+  }
+
+  @override
+  String get shipWeightInvalid => '请输入 0 以上的重量';
+
+  @override
+  String get shipCarrier => '配送公司';
+
+  @override
+  String get shipTracking => '运单号';
 }

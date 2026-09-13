@@ -4371,6 +4371,120 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'入荷予定'**
   String get taskInboundPlanned;
+
+  /// No description provided for @actionEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'編集'**
+  String get actionEdit;
+
+  /// No description provided for @autopackAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱数を自動計算'**
+  String get autopackAction;
+
+  /// No description provided for @autopackTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'総数量 {total}'**
+  String autopackTotal(int total);
+
+  /// No description provided for @autopackPerCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'1箱あたりの数量'**
+  String get autopackPerCarton;
+
+  /// No description provided for @autopackHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'1箱に入る数量を入力すると、必要な箱数を計算します。'**
+  String get autopackHint;
+
+  /// No description provided for @autopackBoxes.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱数 {boxes}'**
+  String autopackBoxes(int boxes);
+
+  /// No description provided for @autopackEven.
+  ///
+  /// In ja, this message translates to:
+  /// **'全箱 {per} 個'**
+  String autopackEven(int per);
+
+  /// No description provided for @autopackSplit.
+  ///
+  /// In ja, this message translates to:
+  /// **'{full} 箱 × {per} 個 ＋ 最終箱 {last} 個'**
+  String autopackSplit(int full, int per, int last);
+
+  /// No description provided for @autopackConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'この箱数で作成'**
+  String get autopackConfirm;
+
+  /// No description provided for @autopackDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{boxes} 箱を作成しました（1箱 {per} 個）'**
+  String autopackDone(int boxes, int per);
+
+  /// No description provided for @printCartonLabels.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱ラベルを印刷（全箱）'**
+  String get printCartonLabels;
+
+  /// No description provided for @printThisLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱ラベル'**
+  String get printThisLabel;
+
+  /// No description provided for @shipLogisticsSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'配送情報'**
+  String get shipLogisticsSection;
+
+  /// No description provided for @shipLogisticsUnset.
+  ///
+  /// In ja, this message translates to:
+  /// **'未入力'**
+  String get shipLogisticsUnset;
+
+  /// No description provided for @shipWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量'**
+  String get shipWeight;
+
+  /// No description provided for @shipWeightKg.
+  ///
+  /// In ja, this message translates to:
+  /// **'{kg} kg'**
+  String shipWeightKg(double kg);
+
+  /// No description provided for @shipWeightInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量は0以上の数値で入力してください'**
+  String get shipWeightInvalid;
+
+  /// No description provided for @shipCarrier.
+  ///
+  /// In ja, this message translates to:
+  /// **'配送会社'**
+  String get shipCarrier;
+
+  /// No description provided for @shipTracking.
+  ///
+  /// In ja, this message translates to:
+  /// **'送り状番号'**
+  String get shipTracking;
 }
 
 class _AppLocalizationsDelegate

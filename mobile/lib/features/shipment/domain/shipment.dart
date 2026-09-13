@@ -19,6 +19,9 @@ class Shipment extends Equatable {
     this.shipDate,
     this.needsReview = false,
     this.status = ShipmentStatus.open,
+    this.weightKg,
+    this.carrier,
+    this.trackingNumber,
     this.lines = const [],
     this.cartons = const [],
     int? lineCount,
@@ -37,6 +40,12 @@ class Shipment extends Equatable {
   final String? shipDate;
   final bool needsReview;
   final ShipmentStatus status;
+
+  /// §21's shipping desk fields (0039). Null means "not filled in yet", which
+  /// the UI shows as such rather than as a zero or a blank.
+  final double? weightKg;
+  final String? carrier;
+  final String? trackingNumber;
   final List<ShipmentLine> lines;
   final List<Carton> cartons;
   final int? _lineCount;
@@ -88,6 +97,13 @@ class Shipment extends Equatable {
       shipDate: json['ship_date']?.toString(),
       needsReview: json['needs_review'] == true,
       status: ShipmentStatus.fromWire(json['status'] as String?),
+      weightKg: switch (json['weight_kg']) {
+        final num n => n.toDouble(),
+        final String t => double.tryParse(t),
+        _ => null,
+      },
+      carrier: json['carrier'] as String?,
+      trackingNumber: json['tracking_number'] as String?,
       lines: (rawLines..sort((a, b) => (asInt(a['id']) ?? 0).compareTo(asInt(b['id']) ?? 0)))
           .map((e) => ShipmentLine.fromJson(e as Map<String, dynamic>))
           .toList(),

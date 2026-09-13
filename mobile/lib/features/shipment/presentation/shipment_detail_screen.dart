@@ -8,6 +8,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../delivery/domain/stock_item.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/sender_profile_controller.dart';
 import '../application/shipment_providers.dart';
 import '../data/shipment_print.dart';
@@ -127,6 +128,56 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     );
   }
 
+  /// §18 — ask for the box size, show the resulting box count, then let the
+  /// server do the division.
+  Future<void> _autopack(Shipment s) async {
+    final l10n = AppLocalizations.of(context);
+    final units = await showDialog<int>(
+      context: context,
+      builder: (_) => _AutopackDialog(totalUnits: s.totalUnits),
+    );
+    if (units == null || !mounted) return;
+
+    setState(() => _busy = true);
+    final result = await ref
+        .read(shipmentRepositoryProvider)
+        .autopack(s.id, unitsPerCarton: units);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (r) {
+        _refresh();
+        _snack(l10n.autopackDone(r.cartonCount, r.unitsPerCarton),
+            tone: StatusTone.success);
+      },
+      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+    );
+  }
+
+  /// §21 — the shipping desk's weight / carrier / tracking number.
+  Future<void> _editLogistics(Shipment s) async {
+    final draft = await showModalBottomSheet<_LogisticsDraft>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _LogisticsSheet(shipment: s),
+    );
+    if (draft == null || !mounted) return;
+
+    setState(() => _busy = true);
+    final result = await ref.read(shipmentRepositoryProvider).setLogistics(
+          s.id,
+          weightKg: draft.weightKg,
+          carrier: draft.carrier,
+          trackingNumber: draft.trackingNumber,
+        );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) => _refresh(),
+      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+    );
+  }
+
   Future<void> _cancelShip() async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
@@ -221,14 +272,22 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                   case 'cartons':
                     _printWith(
                         (snd) => _printer.printAllCartons(s, sender: snd));
+                  case 'labels':
+                    _printWith((snd) => _printer.printAllCartonLabels(s,
+                        sender: snd,
+                        warehouseName:
+                            ref.read(activeWarehouseProvider)?.name));
                 }
               },
               itemBuilder: (context) => [
                 PopupMenuItem(value: 'list', child: Text(l10n.printOverall)),
                 PopupMenuItem(value: 'slip', child: Text(l10n.printDeliverySlip)),
-                if (detail.value!.cartons.isNotEmpty)
+                if (detail.value!.cartons.isNotEmpty) ...[
                   PopupMenuItem(
                       value: 'cartons', child: Text(l10n.printAllCartons)),
+                  PopupMenuItem(
+                      value: 'labels', child: Text(l10n.printCartonLabels)),
+                ],
               ],
             ),
         ],
@@ -339,7 +398,10 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         ),
         const SizedBox(height: AppSpacing.xs),
         if (s.cartons.isEmpty && !shipped)
-          _EmptyCartons(onAdd: _busy ? null : _addCarton)
+          _EmptyCartons(
+            onAdd: _busy ? null : _addCarton,
+            onAutopack: _busy || s.totalUnits <= 0 ? null : () => _autopack(s),
+          )
         else
           ...s.cartons.map((c) => _CartonCard(
                 carton: c,
@@ -355,6 +417,12 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                 onDelete: shipped ? null : () => _deleteCarton(c),
                 onPrint: () =>
                     _printWith((snd) => _printer.printCarton(s, c, sender: snd)),
+                onPrintLabel: () => _printWith((snd) => _printer.printCartonLabel(
+                      s,
+                      c,
+                      sender: snd,
+                      warehouseName: ref.read(activeWarehouseProvider)?.name,
+                    )),
               )),
         if (s.cartons.isNotEmpty && !shipped) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -364,6 +432,21 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
             label: Text(l10n.addCarton),
           ),
         ],
+
+        // §21's shipping block: what is going out, how heavy, with whom.
+        const SizedBox(height: AppSpacing.lg),
+        _SectionHeader(
+          label: l10n.shipLogisticsSection,
+          action: shipped
+              ? null
+              : TextButton.icon(
+                  onPressed: _busy ? null : () => _editLogistics(s),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: Text(l10n.actionEdit),
+                ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _LogisticsCard(shipment: s),
       ],
     );
   }
@@ -476,9 +559,13 @@ class _SectionHeader extends StatelessWidget {
 
 /// Dashed-look placeholder inviting the operator to add the first carton.
 class _EmptyCartons extends StatelessWidget {
-  const _EmptyCartons({required this.onAdd});
+  const _EmptyCartons({required this.onAdd, this.onAutopack});
 
   final VoidCallback? onAdd;
+
+  /// §18's 箱数自動計算 — offered beside the manual "add a carton" because for
+  /// anything but a two-item order it is the way a packer actually starts.
+  final VoidCallback? onAutopack;
 
   @override
   Widget build(BuildContext context) {
@@ -502,6 +589,14 @@ class _EmptyCartons extends StatelessWidget {
             Text(l10n.addCarton,
                 style: TextStyle(
                     color: scheme.primary, fontWeight: FontWeight.w600)),
+            if (onAutopack != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              FilledButton.tonalIcon(
+                onPressed: onAutopack,
+                icon: const Icon(Icons.auto_awesome_motion_outlined, size: 18),
+                label: Text(l10n.autopackAction),
+              ),
+            ],
           ],
         ),
       ),
@@ -569,12 +664,18 @@ class _CartonCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onPrint,
+    required this.onPrintLabel,
   });
 
   final Carton carton;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+
+  /// The contents list for this box.
   final VoidCallback onPrint;
+
+  /// The box's own label (§17/§19), QR included.
+  final VoidCallback onPrintLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +725,11 @@ class _CartonCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton.icon(
+                    onPressed: onPrintLabel,
+                    icon: const Icon(Icons.label_outline, size: 18),
+                    label: Text(l10n.printThisLabel),
+                  ),
+                  TextButton.icon(
                     onPressed: onPrint,
                     icon: const Icon(Icons.print_outlined, size: 18),
                     label: Text(l10n.printThisCarton),
@@ -638,6 +744,323 @@ class _CartonCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// §18's dialog: type the box size, see the box count before committing.
+class _AutopackDialog extends StatefulWidget {
+  const _AutopackDialog({required this.totalUnits});
+
+  final int totalUnits;
+
+  @override
+  State<_AutopackDialog> createState() => _AutopackDialogState();
+}
+
+class _AutopackDialogState extends State<_AutopackDialog> {
+  final TextEditingController _units = TextEditingController();
+
+  @override
+  void dispose() {
+    _units.dispose();
+    super.dispose();
+  }
+
+  int? get _perCarton {
+    final v = int.tryParse(_units.text.trim());
+    return v == null || v <= 0 ? null : v;
+  }
+
+  /// Ceiling division — the remainder still needs a box.
+  int? get _boxes {
+    final per = _perCarton;
+    if (per == null) return null;
+    return (widget.totalUnits + per - 1) ~/ per;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final per = _perCarton;
+    final boxes = _boxes;
+    final remainder =
+        per == null ? null : widget.totalUnits - (boxes! - 1) * per;
+
+    return AlertDialog(
+      title: Text(l10n.autopackAction),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.autopackTotal(widget.totalUnits),
+              style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant)),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _units,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: const TextStyle(fontFamily: AppFonts.mono),
+            decoration: InputDecoration(
+              labelText: l10n.autopackPerCarton,
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // The計算 the spec says not to make the operator do, shown before
+          // anything is created.
+          if (boxes == null)
+            Text(l10n.autopackHint,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant))
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.autopackBoxes(boxes),
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(
+                    boxes == 1 || remainder == per
+                        ? l10n.autopackEven(per!)
+                        : l10n.autopackSplit(boxes - 1, per!, remainder!),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        fontFamily: AppFonts.mono,
+                        color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          onPressed: per == null ? null : () => Navigator.pop(context, per),
+          child: Text(l10n.autopackConfirm),
+        ),
+      ],
+    );
+  }
+}
+
+class _LogisticsDraft {
+  const _LogisticsDraft(this.weightKg, this.carrier, this.trackingNumber);
+  final double? weightKg;
+  final String? carrier;
+  final String? trackingNumber;
+}
+
+/// §21's readout. Unset fields say so rather than showing 0 kg or a blank line —
+/// "not weighed yet" and "weighs nothing" are different facts.
+class _LogisticsCard extends StatelessWidget {
+  const _LogisticsCard({required this.shipment});
+
+  final Shipment shipment;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    Widget row(IconData icon, String label, String? value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: AppSpacing.sm),
+              Text(label,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant)),
+              const Spacer(),
+              Text(
+                value ?? l10n.shipLogisticsUnset,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontFamily: value == null ? null : AppFonts.mono,
+                  fontWeight: value == null ? FontWeight.w400 : FontWeight.w600,
+                  color: value == null ? scheme.onSurfaceVariant : scheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        );
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        child: Column(
+          children: [
+            row(Icons.scale_outlined, l10n.shipWeight,
+                shipment.weightKg == null
+                    ? null
+                    : l10n.shipWeightKg(shipment.weightKg!)),
+            const Divider(height: 1),
+            row(Icons.local_shipping_outlined, l10n.shipCarrier,
+                shipment.carrier),
+            const Divider(height: 1),
+            row(Icons.receipt_long_outlined, l10n.shipTracking,
+                shipment.trackingNumber),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Edit sheet for §21's three fields. The carrier is a free-text field with
+/// suggestions rather than a closed list: a warehouse that ships with a local
+/// carrier must not be forced to pick the wrong one.
+class _LogisticsSheet extends StatefulWidget {
+  const _LogisticsSheet({required this.shipment});
+
+  final Shipment shipment;
+
+  @override
+  State<_LogisticsSheet> createState() => _LogisticsSheetState();
+}
+
+class _LogisticsSheetState extends State<_LogisticsSheet> {
+  late final TextEditingController _weight = TextEditingController(
+      text: widget.shipment.weightKg == null
+          ? ''
+          : _trimZeros(widget.shipment.weightKg!));
+  late final TextEditingController _carrier =
+      TextEditingController(text: widget.shipment.carrier ?? '');
+  late final TextEditingController _tracking =
+      TextEditingController(text: widget.shipment.trackingNumber ?? '');
+  String? _error;
+
+  static String _trimZeros(double v) =>
+      v == v.roundToDouble() ? '${v.round()}' : '$v';
+
+  static const _carriers = ['ヤマト運輸', '佐川急便', '日本郵便', '西濃運輸', '福山通運'];
+
+  @override
+  void dispose() {
+    _weight.dispose();
+    _carrier.dispose();
+    _tracking.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final l10n = AppLocalizations.of(context);
+    final raw = _weight.text.trim();
+    double? weight;
+    if (raw.isNotEmpty) {
+      weight = double.tryParse(raw);
+      if (weight == null || weight < 0) {
+        setState(() => _error = l10n.shipWeightInvalid);
+        return;
+      }
+    }
+    Navigator.pop(
+      context,
+      _LogisticsDraft(
+        weight,
+        _carrier.text.trim().isEmpty ? null : _carrier.text.trim(),
+        _tracking.text.trim().isEmpty ? null : _tracking.text.trim(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.shipLogisticsSection, style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              controller: _weight,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              style: const TextStyle(fontFamily: AppFonts.mono),
+              decoration: InputDecoration(
+                labelText: l10n.shipWeight,
+                suffixText: 'kg',
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _carrier,
+              decoration: InputDecoration(
+                labelText: l10n.shipCarrier,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.xs,
+              children: [
+                for (final c in _carriers)
+                  ActionChip(
+                    label: Text(c),
+                    onPressed: () => setState(() => _carrier.text = c),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _tracking,
+              style: const TextStyle(fontFamily: AppFonts.mono),
+              decoration: InputDecoration(
+                labelText: l10n.shipTracking,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(_error!,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.error)),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              height: AppSpacing.minTouch,
+              child: FilledButton(
+                onPressed: _submit,
+                child: Text(l10n.actionSave),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -31,12 +31,62 @@ abstract class ShipmentRepository {
     String? label,
     required List<CartonItem> items,
   });
+
+  /// §18 — split the shipment into cartons of at most [unitsPerCarton] pieces,
+  /// server-side, so nobody divides by hand. Refused when cartons already
+  /// exist; returns how many boxes were made.
+  Future<ApiResult<AutopackResult>> autopack(int id,
+      {required int unitsPerCarton});
+
+  /// §21 — the shipping desk's weight / carrier / tracking. A null clears the
+  /// field rather than leaving the old value behind.
+  Future<ApiResult<bool>> setLogistics(
+    int id, {
+    double? weightKg,
+    String? carrier,
+    String? trackingNumber,
+  });
+}
+
+/// What `autopack_shipment` reports back.
+class AutopackResult {
+  const AutopackResult({
+    required this.cartonCount,
+    required this.unitsPerCarton,
+    required this.totalUnits,
+  });
+
+  final int cartonCount;
+  final int unitsPerCarton;
+  final int totalUnits;
+
+  factory AutopackResult.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) =>
+        v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+    return AutopackResult(
+      cartonCount: asInt(json['carton_count']),
+      unitsPerCarton: asInt(json['units_per_carton']),
+      totalUnits: asInt(json['total_units']),
+    );
+  }
 }
 
 class ShipmentRepositoryImpl implements ShipmentRepository {
-  ShipmentRepositoryImpl(this._dio);
+  /// [_dio] reaches the `shipments` edge function; [_rest] reaches PostgREST for
+  /// the two 0039 RPCs, which are plain database functions rather than routes on
+  /// that function. Callers that never pack can pass only the first.
+  ShipmentRepositoryImpl(this._dio, [Dio? rest]) : _rest = rest;
 
   final Dio _dio;
+  final Dio? _rest;
+
+  Dio get _rpc {
+    final rest = _rest;
+    if (rest == null) {
+      throw StateError('ShipmentRepositoryImpl needs a REST Dio for RPC calls');
+    }
+    return rest;
+  }
 
   @override
   Future<ApiResult<List<Shipment>>> list(
@@ -116,6 +166,43 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
           Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<Shipment>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<AutopackResult>> autopack(int id,
+      {required int unitsPerCarton}) async {
+    try {
+      final response = await _rpc.post('/rpc/autopack_shipment', data: {
+        'p_plan_id': id,
+        'p_units_per_carton': unitsPerCarton,
+      });
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(
+          AutopackResult.fromJson((json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<AutopackResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setLogistics(
+    int id, {
+    double? weightKg,
+    String? carrier,
+    String? trackingNumber,
+  }) async {
+    try {
+      await _rpc.post('/rpc/set_shipment_logistics', data: {
+        'p_plan_id': id,
+        'p_weight_kg': weightKg,
+        'p_carrier': carrier,
+        'p_tracking_number': trackingNumber,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 }

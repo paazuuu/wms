@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0038 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0039 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -731,6 +731,36 @@ connector adapters) or are new, smaller items surfaced along the way
   受入/検品 and to the today's-tasks strip as 棚入れ待ち. 7 repository tests +
   7 screen tests plus a `FakePutawayRepository` added to the shared harness.
 - `flutter analyze`: clean. `flutter test`: 242/242 passing.
+
+### 0039 — Packing: auto carton split + shipping logistics (UI spec §17–§21) ✅
+- `pack.complete` has existed since 0012 (warehouse_manager, packer) with
+  nothing implementing it — the third dormant permission activated in this
+  pass, after `report.view` (0037) and `putaway.confirm` (0038).
+- `shipment_plans` gained `weight_kg` / `carrier` / `tracking_number` for
+  §21's shipping block; `set_shipment_logistics(...)` writes them and a null
+  clears a field, so a mistyped tracking number can be taken back out.
+- `autopack_shipment(p_plan_id, p_units_per_carton)` is §18's 箱数自動計算:
+  it fills cartons sequentially (a box takes what fits of the current line,
+  the next line continues in the same box), moves the order to `packing`,
+  and refuses to merge into cartons that already exist — silently re-packing
+  a half-packed shipment is the sort of quiet data change §48 warns about.
+- Neither RPC moves stock: cartons record *how* the picked quantity is boxed,
+  and `ship_plan` (0008/0014) stays the only thing that deducts it.
+- Verified live: grants (`anon` refused after an explicit revoke — Supabase's
+  default privileges grant execute to `anon` on every new function and
+  "revoke from public" does not remove that, so the revoke has to name
+  `anon`); an aborted transaction confirmed the spec's own example (237 @ 24
+  → 10 boxes, 24 in the first, 21 in the last), status moving to `packing`,
+  a mixed-SKU order boxing as [A6][A4+B2][B3], and refusals for a re-pack,
+  a zero box size and a negative weight — rolled back, 0 leftover rows.
+- Flutter: `LabelTemplate` (§20's `{{variable}}` substitution, framework-free
+  and unit-tested) + the 標準箱ラベル; `ShipmentPrinter.cartonLabelHtml` /
+  `allCartonLabelsHtml` render §17's per-carton label with the box's own QR
+  (`SHP:<no>|BOX:n/total`, so a dock scan works with no network) and a JAN
+  barcode; an autopack dialog that shows the resulting box count *before*
+  creating anything; a 配送情報 card + edit sheet for weight/carrier/tracking.
+  10 label tests + 4 screen tests.
+- `flutter analyze`: clean. `flutter test`: 278/278 passing.
 
 ### Edge-function changes (no migration)
 

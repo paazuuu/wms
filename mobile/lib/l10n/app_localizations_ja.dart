@@ -2253,4 +2253,77 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get taskInboundPlanned => '入荷予定';
+
+  @override
+  String get actionEdit => '編集';
+
+  @override
+  String get autopackAction => '箱数を自動計算';
+
+  @override
+  String autopackTotal(int total) {
+    return '総数量 $total';
+  }
+
+  @override
+  String get autopackPerCarton => '1箱あたりの数量';
+
+  @override
+  String get autopackHint => '1箱に入る数量を入力すると、必要な箱数を計算します。';
+
+  @override
+  String autopackBoxes(int boxes) {
+    return '箱数 $boxes';
+  }
+
+  @override
+  String autopackEven(int per) {
+    return '全箱 $per 個';
+  }
+
+  @override
+  String autopackSplit(int full, int per, int last) {
+    return '$full 箱 × $per 個 ＋ 最終箱 $last 個';
+  }
+
+  @override
+  String get autopackConfirm => 'この箱数で作成';
+
+  @override
+  String autopackDone(int boxes, int per) {
+    return '$boxes 箱を作成しました（1箱 $per 個）';
+  }
+
+  @override
+  String get printCartonLabels => '箱ラベルを印刷（全箱）';
+
+  @override
+  String get printThisLabel => '箱ラベル';
+
+  @override
+  String get shipLogisticsSection => '配送情報';
+
+  @override
+  String get shipLogisticsUnset => '未入力';
+
+  @override
+  String get shipWeight => '重量';
+
+  @override
+  String shipWeightKg(double kg) {
+    final intl.NumberFormat kgNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String kgString = kgNumberFormat.format(kg);
+
+    return '$kgString kg';
+  }
+
+  @override
+  String get shipWeightInvalid => '重量は0以上の数値で入力してください';
+
+  @override
+  String get shipCarrier => '配送会社';
+
+  @override
+  String get shipTracking => '送り状番号';
 }

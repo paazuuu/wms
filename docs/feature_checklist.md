@@ -169,6 +169,30 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       InventorOS, or otherwise) — ❌ none implemented; the skeleton is
       deliberately unwired per your explicit choice
 
+**Packing / labels / shipping (UI spec §17–§21)**
+- [x] 箱数自動計算 (§18) — enter the units per carton and the box count is
+      computed and shown before anything is created, then `autopack_shipment`
+      does the division server-side. Fills sequentially, so a mixed order
+      packs as [A6][A4+B2][B3] rather than wasting a box per SKU. Refuses to
+      merge into existing cartons
+- [x] Per-carton label with its own QR (§17/§19) — `SHP:<no>|BOX:n/total`,
+      readable at the dock with no network, plus a JAN barcode when the box
+      holds a single SKU. A mixed box prints "N 品目" instead of naming one
+      item and lying about the rest
+- [x] Label templates (§20) — `{{variable}}` substitution over the variable
+      set the spec lists, with rows dropped when all their variables are
+      empty (no `ロット` label with nothing after it). Print preview is the
+      system print dialog, which every print path already goes through
+- [x] Shipping details (§21) — weight / carrier / tracking on the shipment,
+      `pack.complete`-gated, with unset fields shown as 未入力 rather than as
+      a zero. 出荷確定 already required a confirmation dialog
+- [ ] Label templates beyond the carton label (商品/入荷/棚/パレット) — named in
+      §20; deliberately not defined until a flow prints them, since an unused
+      template is the fake completeness §53 forbids
+- [ ] Direct printer integrations (Zebra/SATO/Brother/TSC) — §19 lists these
+      as future work; today everything goes through the system print / PDF
+      dialog
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

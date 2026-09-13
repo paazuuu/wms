@@ -2,6 +2,7 @@ import 'package:barcode/barcode.dart';
 import 'package:printing/printing.dart';
 
 import '../domain/carton.dart';
+import '../domain/label_template.dart';
 import '../domain/sender_profile.dart';
 import '../domain/shipment.dart';
 
@@ -222,6 +223,123 @@ class ShipmentPrinter {
     return _shell('送り状 ${s.shipmentNumber}', body);
   }
 
+  /// The variable set §20 defines, filled in for one carton of one shipment.
+  ///
+  /// `product_name`/`jan`/`lot` describe the carton's contents: a single-SKU box
+  /// names the item, a mixed box says how many kinds are inside rather than
+  /// picking one arbitrarily and printing a label that lies about the rest.
+  Map<String, String?> cartonLabelValues(
+    Shipment s,
+    Carton c, {
+    List<SenderLine> sender = const [],
+    String? warehouseName,
+  }) {
+    final janCodes = {for (final it in c.items) it.janCode}.toList();
+    final single = janCodes.length == 1 ? c.items.first : null;
+    final company = sender
+        .where((l) => l.key == 'company')
+        .map((l) => l.text)
+        .firstOrNull;
+    return {
+      'company': company,
+      'customer': s.customerName,
+      'shipment_no': s.shipmentNumber,
+      'carton_no': '${c.cartonNo}',
+      'carton_total': '${s.cartonCount}',
+      'product_name': single?.productName ??
+          (janCodes.isEmpty ? null : '${janCodes.length} 品目'),
+      'jan': single?.janCode,
+      'sku': single?.spec,
+      'lot': null, // Lot tracking is not modelled yet; the row drops out.
+      'quantity': '${c.totalUnits}',
+      'warehouse': warehouseName,
+    };
+  }
+
+  /// One carton label per §17/§19: the template's text rows, a JAN barcode when
+  /// the box holds a single SKU, and the carton's own QR so the box can be
+  /// identified by scan at the dock.
+  String cartonLabelHtml(
+    Shipment s,
+    Carton c, {
+    LabelTemplate template = LabelTemplates.carton,
+    List<SenderLine> sender = const [],
+    String? warehouseName,
+  }) {
+    final values =
+        cartonLabelValues(s, c, sender: sender, warehouseName: warehouseName);
+    final rows = template.render(values);
+    final code = template.renderCode(values);
+    final qr = template.renderQr(values);
+
+    final body = '''
+<div class="label">
+  <div class="label-text">
+    ${rows.map((r) => '<div class="lr">${_esc(r)}</div>').join()}
+  </div>
+  <div class="label-codes">
+    ${qr == null ? '' : '<div class="qr">${_qrSvg(qr)}</div>'}
+    ${code == null ? '' : '<div class="bc1">${_barcodeSvg(code)}<div class="jan">${_esc(code)}</div></div>'}
+  </div>
+</div>''';
+    return _labelShell('ラベル ${s.shipmentNumber} #${c.cartonNo}', body);
+  }
+
+  /// Every carton's label, one per page.
+  String allCartonLabelsHtml(
+    Shipment s, {
+    LabelTemplate template = LabelTemplates.carton,
+    List<SenderLine> sender = const [],
+    String? warehouseName,
+  }) {
+    final body = s.cartons
+        .map((c) => cartonLabelHtml(s, c,
+            template: template, sender: sender, warehouseName: warehouseName))
+        .map(_labelBodyOf)
+        .join();
+    return _labelShell('箱ラベル ${s.shipmentNumber}', body);
+  }
+
+  /// A QR as inline SVG. Empty string when the payload cannot be encoded.
+  String _qrSvg(String payload) {
+    try {
+      return Barcode.qrCode()
+          .toSvg(payload, width: 110, height: 110, drawText: false);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Labels get their own page shell: big type, one label per page, and no
+  /// document chrome — it is going on a box, not into a folder.
+  String _labelShell(String title, String body) => '''
+<!doctype html><html><head><meta charset="utf-8"><style>
+  * { font-family: sans-serif; }
+  body { margin: 0; color: #000; }
+  .label { page-break-after: always; box-sizing: border-box; width: 100%;
+    padding: 14px 16px; display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 12px; border-bottom: 1px dashed #bbb; }
+  .label:last-child { page-break-after: auto; }
+  .label-text { flex: 1; min-width: 0; }
+  .lr { font-size: 16px; line-height: 1.45; word-break: break-word; }
+  .lr:first-child { font-size: 13px; color: #333; }
+  .lr:nth-child(4) { font-size: 26px; font-weight: bold; letter-spacing: 1px; }
+  .label-codes { text-align: center; }
+  .qr svg { width: 110px; height: 110px; }
+  .bc1 { margin-top: 8px; }
+  .bc1 svg { width: 132px; height: 34px; }
+  .jan { font-family: monospace; font-size: 11px; }
+</style><title>$title</title></head><body>$body</body></html>''';
+
+  /// Pulls the `<div class="label">…</div>` out of a rendered single label so
+  /// several can share one page shell.
+  String _labelBodyOf(String html) {
+    final start = html.indexOf('<body>');
+    final end = html.lastIndexOf('</body>');
+    if (start < 0 || end < 0) return html;
+    return html.substring(start + '<body>'.length, end);
+  }
+
   Future<void> _printHtml(String html) => Printing.layoutPdf(
       onLayout: (format) =>
           // ignore: deprecated_member_use
@@ -238,4 +356,21 @@ class ShipmentPrinter {
   Future<void> printDeliverySlip(Shipment s,
           {List<SenderLine> sender = const []}) =>
       _printHtml(deliverySlipHtml(s, sender: sender));
+
+  /// §19's flow ends at a print job, and the system print dialog is the preview
+  /// step the spec makes mandatory (印刷前プレビューを必須にする) — it shows the
+  /// rendered pages before anything reaches a printer.
+  Future<void> printCartonLabel(Shipment s, Carton c,
+          {LabelTemplate template = LabelTemplates.carton,
+          List<SenderLine> sender = const [],
+          String? warehouseName}) =>
+      _printHtml(cartonLabelHtml(s, c,
+          template: template, sender: sender, warehouseName: warehouseName));
+
+  Future<void> printAllCartonLabels(Shipment s,
+          {LabelTemplate template = LabelTemplates.carton,
+          List<SenderLine> sender = const [],
+          String? warehouseName}) =>
+      _printHtml(allCartonLabelsHtml(s,
+          template: template, sender: sender, warehouseName: warehouseName));
 }

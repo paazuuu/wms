@@ -2322,4 +2322,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskInboundPlanned => 'Inbound due';
+
+  @override
+  String get actionEdit => 'Edit';
+
+  @override
+  String get autopackAction => 'Calculate cartons';
+
+  @override
+  String autopackTotal(int total) {
+    return '$total units in total';
+  }
+
+  @override
+  String get autopackPerCarton => 'Units per carton';
+
+  @override
+  String get autopackHint =>
+      'Enter how many fit in one carton and the box count is worked out for you.';
+
+  @override
+  String autopackBoxes(int boxes) {
+    return '$boxes cartons';
+  }
+
+  @override
+  String autopackEven(int per) {
+    return '$per per carton';
+  }
+
+  @override
+  String autopackSplit(int full, int per, int last) {
+    return '$full × $per plus $last in the last carton';
+  }
+
+  @override
+  String get autopackConfirm => 'Create these cartons';
+
+  @override
+  String autopackDone(int boxes, int per) {
+    return 'Created $boxes cartons ($per each)';
+  }
+
+  @override
+  String get printCartonLabels => 'Print every carton label';
+
+  @override
+  String get printThisLabel => 'Label';
+
+  @override
+  String get shipLogisticsSection => 'Shipping details';
+
+  @override
+  String get shipLogisticsUnset => 'Not set';
+
+  @override
+  String get shipWeight => 'Weight';
+
+  @override
+  String shipWeightKg(double kg) {
+    final intl.NumberFormat kgNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String kgString = kgNumberFormat.format(kg);
+
+    return '$kgString kg';
+  }
+
+  @override
+  String get shipWeightInvalid => 'Enter a weight of 0 or more';
+
+  @override
+  String get shipCarrier => 'Carrier';
+
+  @override
+  String get shipTracking => 'Tracking number';
 }

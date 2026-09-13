@@ -1082,5 +1082,76 @@
   "pickScanToConfirm": "数量を確定するには対象のJANをスキャンしてください",
   "pickScanned": "スキャン確認済み",
   "pickScanAction": "スキャン",
-  "taskInboundPlanned": "入荷予定"
+  "taskInboundPlanned": "入荷予定",
+  "actionEdit": "編集",
+  "autopackAction": "箱数を自動計算",
+  "autopackTotal": "総数量 {total}",
+  "@autopackTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "autopackPerCarton": "1箱あたりの数量",
+  "autopackHint": "1箱に入る数量を入力すると、必要な箱数を計算します。",
+  "autopackBoxes": "箱数 {boxes}",
+  "@autopackBoxes": {
+    "placeholders": {
+      "boxes": {
+        "type": "int"
+      }
+    }
+  },
+  "autopackEven": "全箱 {per} 個",
+  "@autopackEven": {
+    "placeholders": {
+      "per": {
+        "type": "int"
+      }
+    }
+  },
+  "autopackSplit": "{full} 箱 × {per} 個 ＋ 最終箱 {last} 個",
+  "@autopackSplit": {
+    "placeholders": {
+      "full": {
+        "type": "int"
+      },
+      "per": {
+        "type": "int"
+      },
+      "last": {
+        "type": "int"
+      }
+    }
+  },
+  "autopackConfirm": "この箱数で作成",
+  "autopackDone": "{boxes} 箱を作成しました（1箱 {per} 個）",
+  "@autopackDone": {
+    "placeholders": {
+      "boxes": {
+        "type": "int"
+      },
+      "per": {
+        "type": "int"
+      }
+    }
+  },
+  "printCartonLabels": "箱ラベルを印刷（全箱）",
+  "printThisLabel": "箱ラベル",
+  "shipLogisticsSection": "配送情報",
+  "shipLogisticsUnset": "未入力",
+  "shipWeight": "重量",
+  "shipWeightKg": "{kg} kg",
+  "@shipWeightKg": {
+    "placeholders": {
+      "kg": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "shipWeightInvalid": "重量は0以上の数値で入力してください",
+  "shipCarrier": "配送会社",
+  "shipTracking": "送り状番号"
 }

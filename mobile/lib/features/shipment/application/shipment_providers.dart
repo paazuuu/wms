@@ -8,7 +8,10 @@ import '../domain/shipment.dart';
 /// Reuses the delivery feature's Dio (Supabase Edge Functions base + anon key);
 /// the shipments function lives under the same functions/v1 gateway.
 final shipmentRepositoryProvider = Provider<ShipmentRepository>((ref) {
-  return ShipmentRepositoryImpl(ref.watch(deliveryDioProvider));
+  // Two clients: the edge function for the shipment routes, PostgREST for the
+  // 0039 packing/logistics RPCs.
+  return ShipmentRepositoryImpl(
+      ref.watch(deliveryDioProvider), ref.watch(restDioProvider));
 });
 
 /// Also show already-shipped shipments (for reprints / corrections).
