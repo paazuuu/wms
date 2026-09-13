@@ -2782,6 +2782,252 @@ abstract class AppLocalizations {
   /// **'JANコードに紐づく商品名・カテゴリ・価格を管理'**
   String get featProductsDesc;
 
+  /// No description provided for @featPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get featPurchaseOrders;
+
+  /// No description provided for @featPurchaseOrdersDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先への発注を作成・承認・管理'**
+  String get featPurchaseOrdersDesc;
+
+  /// No description provided for @poTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get poTitle;
+
+  /// No description provided for @poNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を作成'**
+  String get poNew;
+
+  /// No description provided for @poEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注がまだありません'**
+  String get poEmpty;
+
+  /// No description provided for @poEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'右下のボタンから発注を作成できます。'**
+  String get poEmptyBody;
+
+  /// No description provided for @poNeedsWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫がありません'**
+  String get poNeedsWarehouse;
+
+  /// No description provided for @poSupplierName.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先名'**
+  String get poSupplierName;
+
+  /// No description provided for @poWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫倉庫'**
+  String get poWarehouse;
+
+  /// No description provided for @poExpectedDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'納期予定'**
+  String get poExpectedDate;
+
+  /// No description provided for @poLinesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細'**
+  String get poLinesTitle;
+
+  /// No description provided for @poAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細を追加'**
+  String get poAddLine;
+
+  /// No description provided for @poNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get poNote;
+
+  /// No description provided for @poSupplierRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先名を入力してください'**
+  String get poSupplierRequired;
+
+  /// No description provided for @poLineRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細を1件以上追加してください'**
+  String get poLineRequired;
+
+  /// No description provided for @poCreate.
+  ///
+  /// In ja, this message translates to:
+  /// **'作成'**
+  String get poCreate;
+
+  /// No description provided for @poLineJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get poLineJan;
+
+  /// No description provided for @poLineProductName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get poLineProductName;
+
+  /// No description provided for @poLineQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get poLineQuantity;
+
+  /// No description provided for @poLineUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get poLineUnitPrice;
+
+  /// No description provided for @poTotalAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額'**
+  String get poTotalAmount;
+
+  /// No description provided for @poSubmit.
+  ///
+  /// In ja, this message translates to:
+  /// **'提出'**
+  String get poSubmit;
+
+  /// No description provided for @poSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を提出しました'**
+  String get poSubmitted;
+
+  /// No description provided for @poApprove.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認'**
+  String get poApprove;
+
+  /// No description provided for @poApproveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注を承認しますか？'**
+  String get poApproveQ;
+
+  /// No description provided for @poApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を承認しました'**
+  String get poApproved;
+
+  /// No description provided for @poReject.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下'**
+  String get poReject;
+
+  /// No description provided for @poRejectQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注を却下しますか？'**
+  String get poRejectQ;
+
+  /// No description provided for @poRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を却下しました'**
+  String get poRejected;
+
+  /// No description provided for @poCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を取消'**
+  String get poCancelAction;
+
+  /// No description provided for @poCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注を取り消しますか？'**
+  String get poCancelBody;
+
+  /// No description provided for @poCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を取り消しました'**
+  String get poCancelled;
+
+  /// No description provided for @poComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了にする'**
+  String get poComplete;
+
+  /// No description provided for @poCompleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注を完了にしますか？在庫は移動しません。'**
+  String get poCompleteQ;
+
+  /// No description provided for @poCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を完了にしました'**
+  String get poCompleted;
+
+  /// No description provided for @poStatusDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get poStatusDraft;
+
+  /// No description provided for @poStatusSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'提出済み'**
+  String get poStatusSubmitted;
+
+  /// No description provided for @poStatusApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認済み'**
+  String get poStatusApproved;
+
+  /// No description provided for @poStatusRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'却下'**
+  String get poStatusRejected;
+
+  /// No description provided for @poStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get poStatusCancelled;
+
+  /// No description provided for @poStatusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get poStatusCompleted;
+
   /// No description provided for @productsTitle.
   ///
   /// In ja, this message translates to:

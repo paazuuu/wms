@@ -1472,6 +1472,131 @@ class AppLocalizationsEn extends AppLocalizations {
       'Name, category and price against each JAN code';
 
   @override
+  String get featPurchaseOrders => 'Purchase orders';
+
+  @override
+  String get featPurchaseOrdersDesc =>
+      'Create, approve and manage orders to suppliers';
+
+  @override
+  String get poTitle => 'Purchase orders';
+
+  @override
+  String get poNew => 'New purchase order';
+
+  @override
+  String get poEmpty => 'No purchase orders yet';
+
+  @override
+  String get poEmptyBody => 'Create one with the button below.';
+
+  @override
+  String get poNeedsWarehouse => 'No warehouse exists';
+
+  @override
+  String get poSupplierName => 'Supplier name';
+
+  @override
+  String get poWarehouse => 'Destination warehouse';
+
+  @override
+  String get poExpectedDate => 'Expected date';
+
+  @override
+  String get poLinesTitle => 'Lines';
+
+  @override
+  String get poAddLine => 'Add line';
+
+  @override
+  String get poNote => 'Note';
+
+  @override
+  String get poSupplierRequired => 'Enter a supplier name';
+
+  @override
+  String get poLineRequired => 'Add at least one line';
+
+  @override
+  String get poCreate => 'Create';
+
+  @override
+  String get poLineJan => 'JAN code';
+
+  @override
+  String get poLineProductName => 'Product name';
+
+  @override
+  String get poLineQuantity => 'Quantity';
+
+  @override
+  String get poLineUnitPrice => 'Unit price';
+
+  @override
+  String get poTotalAmount => 'Amount';
+
+  @override
+  String get poSubmit => 'Submit';
+
+  @override
+  String get poSubmitted => 'Purchase order submitted';
+
+  @override
+  String get poApprove => 'Approve';
+
+  @override
+  String get poApproveQ => 'Approve this purchase order?';
+
+  @override
+  String get poApproved => 'Purchase order approved';
+
+  @override
+  String get poReject => 'Reject';
+
+  @override
+  String get poRejectQ => 'Reject this purchase order?';
+
+  @override
+  String get poRejected => 'Purchase order rejected';
+
+  @override
+  String get poCancelAction => 'Cancel order';
+
+  @override
+  String get poCancelBody => 'Cancel this purchase order?';
+
+  @override
+  String get poCancelled => 'Purchase order cancelled';
+
+  @override
+  String get poComplete => 'Mark complete';
+
+  @override
+  String get poCompleteQ =>
+      'Mark this purchase order complete? Stock does not move.';
+
+  @override
+  String get poCompleted => 'Purchase order completed';
+
+  @override
+  String get poStatusDraft => 'Draft';
+
+  @override
+  String get poStatusSubmitted => 'Submitted';
+
+  @override
+  String get poStatusApproved => 'Approved';
+
+  @override
+  String get poStatusRejected => 'Rejected';
+
+  @override
+  String get poStatusCancelled => 'Cancelled';
+
+  @override
+  String get poStatusCompleted => 'Completed';
+
+  @override
   String get productsTitle => 'Product master';
 
   @override

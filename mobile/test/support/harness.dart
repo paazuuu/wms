@@ -31,6 +31,9 @@ import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
+import 'package:wms_mobile/features/purchasing/data/purchase_order_repository.dart';
+import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
 import 'package:wms_mobile/features/audit/data/audit_repository.dart';
 import 'package:wms_mobile/features/audit/domain/audit_entry.dart';
 import 'package:wms_mobile/features/search/data/search_repository.dart';
@@ -80,6 +83,8 @@ List<Override> _defaultOverrides() => [
       )),
       attachmentRepositoryProvider.overrideWithValue(FakeAttachmentRepository()),
       productRepositoryProvider.overrideWithValue(FakeProductRepository()),
+      purchaseOrderRepositoryProvider
+          .overrideWithValue(FakePurchaseOrderRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1170,6 +1175,123 @@ class FakeProductRepository implements ProductRepository {
     ];
     return const ApiSuccess(true);
   }
+}
+
+/// Purchase order stub. Mirrors the real RPCs' state-machine transitions
+/// (DRAFT -> SUBMITTED -> APPROVED -> COMPLETED, or REJECTED/CANCELLED) so a
+/// screen test exercises the same rules the backend enforces.
+class FakePurchaseOrderRepository implements PurchaseOrderRepository {
+  FakePurchaseOrderRepository({List<PurchaseOrder> orders = const []})
+      : _orders = List.of(orders);
+
+  List<PurchaseOrder> _orders;
+
+  PurchaseOrder _copyWith(PurchaseOrder o, {PurchaseOrderStatus? status}) => PurchaseOrder(
+        id: o.id,
+        status: status ?? o.status,
+        poNumber: o.poNumber,
+        supplierId: o.supplierId,
+        supplierName: o.supplierName,
+        warehouseId: o.warehouseId,
+        warehouseName: o.warehouseName,
+        orderDate: o.orderDate,
+        expectedDate: o.expectedDate,
+        note: o.note,
+        createdAt: o.createdAt,
+        lines: o.lines,
+        lineCount: o.lineCount,
+        totalAmount: o.totalAmount,
+      );
+
+  ApiResult<bool> _transition(int id, PurchaseOrderStatus from, PurchaseOrderStatus to) {
+    final order = _orders.firstWhere((o) => o.id == id);
+    if (order.status != from) {
+      return ApiFailure(message: 'purchase order is ${order.status.wire}', statusCode: 400);
+    }
+    _orders = [
+      for (final o in _orders) if (o.id == id) _copyWith(o, status: to) else o,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<PurchaseOrder>>> list({int? warehouseId, String? status}) async =>
+      ApiSuccess(_orders
+          .where((o) =>
+              (warehouseId == null || o.warehouseId == warehouseId) &&
+              (status == null || o.status.wire == status))
+          .toList());
+
+  @override
+  Future<ApiResult<PurchaseOrder>> show(int id) async =>
+      ApiSuccess(_orders.firstWhere((o) => o.id == id));
+
+  @override
+  Future<ApiResult<int>> create({
+    required String supplierName,
+    required int warehouseId,
+    required List<PurchaseOrderLineDraft> lines,
+    int? supplierId,
+    DateTime? expectedDate,
+    String? note,
+  }) async {
+    final id = _orders.isEmpty
+        ? 1
+        : _orders.map((o) => o.id).reduce((a, b) => a > b ? a : b) + 1;
+    final order = PurchaseOrder(
+      id: id,
+      status: PurchaseOrderStatus.draft,
+      poNumber: 'PO-${id.toString().padLeft(6, '0')}',
+      supplierId: supplierId,
+      supplierName: supplierName,
+      warehouseId: warehouseId,
+      expectedDate: expectedDate,
+      note: note,
+      createdAt: DateTime.now(),
+      lines: [
+        for (var i = 0; i < lines.length; i++)
+          PurchaseOrderLine(
+            id: i + 1,
+            janCode: lines[i].janCode,
+            productName: lines[i].productName,
+            quantity: lines[i].quantity,
+            unitPrice: lines[i].unitPrice,
+          ),
+      ],
+    );
+    _orders = [..._orders, order];
+    return ApiSuccess(id);
+  }
+
+  @override
+  Future<ApiResult<bool>> submit(int id) async =>
+      _transition(id, PurchaseOrderStatus.draft, PurchaseOrderStatus.submitted);
+
+  @override
+  Future<ApiResult<bool>> approve(int id) async =>
+      _transition(id, PurchaseOrderStatus.submitted, PurchaseOrderStatus.approved);
+
+  @override
+  Future<ApiResult<bool>> reject(int id, {String? reason}) async =>
+      _transition(id, PurchaseOrderStatus.submitted, PurchaseOrderStatus.rejected);
+
+  @override
+  Future<ApiResult<bool>> cancel(int id) async {
+    final order = _orders.firstWhere((o) => o.id == id);
+    if (![
+      PurchaseOrderStatus.draft,
+      PurchaseOrderStatus.submitted,
+      PurchaseOrderStatus.approved,
+    ].contains(order.status)) {
+      return ApiFailure(
+          message: 'purchase order is ${order.status.wire}', statusCode: 400);
+    }
+    return _transition(id, order.status, PurchaseOrderStatus.cancelled);
+  }
+
+  @override
+  Future<ApiResult<bool>> complete(int id) async =>
+      _transition(id, PurchaseOrderStatus.approved, PurchaseOrderStatus.completed);
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

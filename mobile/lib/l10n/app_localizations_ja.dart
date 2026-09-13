@@ -1425,6 +1425,129 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featProductsDesc => 'JANコードに紐づく商品名・カテゴリ・価格を管理';
 
   @override
+  String get featPurchaseOrders => '発注';
+
+  @override
+  String get featPurchaseOrdersDesc => '仕入先への発注を作成・承認・管理';
+
+  @override
+  String get poTitle => '発注';
+
+  @override
+  String get poNew => '発注を作成';
+
+  @override
+  String get poEmpty => '発注がまだありません';
+
+  @override
+  String get poEmptyBody => '右下のボタンから発注を作成できます。';
+
+  @override
+  String get poNeedsWarehouse => '倉庫がありません';
+
+  @override
+  String get poSupplierName => '仕入先名';
+
+  @override
+  String get poWarehouse => '入庫倉庫';
+
+  @override
+  String get poExpectedDate => '納期予定';
+
+  @override
+  String get poLinesTitle => '明細';
+
+  @override
+  String get poAddLine => '明細を追加';
+
+  @override
+  String get poNote => '備考';
+
+  @override
+  String get poSupplierRequired => '仕入先名を入力してください';
+
+  @override
+  String get poLineRequired => '明細を1件以上追加してください';
+
+  @override
+  String get poCreate => '作成';
+
+  @override
+  String get poLineJan => 'JANコード';
+
+  @override
+  String get poLineProductName => '商品名';
+
+  @override
+  String get poLineQuantity => '数量';
+
+  @override
+  String get poLineUnitPrice => '単価';
+
+  @override
+  String get poTotalAmount => '金額';
+
+  @override
+  String get poSubmit => '提出';
+
+  @override
+  String get poSubmitted => '発注を提出しました';
+
+  @override
+  String get poApprove => '承認';
+
+  @override
+  String get poApproveQ => 'この発注を承認しますか？';
+
+  @override
+  String get poApproved => '発注を承認しました';
+
+  @override
+  String get poReject => '却下';
+
+  @override
+  String get poRejectQ => 'この発注を却下しますか？';
+
+  @override
+  String get poRejected => '発注を却下しました';
+
+  @override
+  String get poCancelAction => '発注を取消';
+
+  @override
+  String get poCancelBody => 'この発注を取り消しますか？';
+
+  @override
+  String get poCancelled => '発注を取り消しました';
+
+  @override
+  String get poComplete => '完了にする';
+
+  @override
+  String get poCompleteQ => 'この発注を完了にしますか？在庫は移動しません。';
+
+  @override
+  String get poCompleted => '発注を完了にしました';
+
+  @override
+  String get poStatusDraft => '下書き';
+
+  @override
+  String get poStatusSubmitted => '提出済み';
+
+  @override
+  String get poStatusApproved => '承認済み';
+
+  @override
+  String get poStatusRejected => '却下';
+
+  @override
+  String get poStatusCancelled => '取消';
+
+  @override
+  String get poStatusCompleted => '完了';
+
+  @override
   String get productsTitle => '商品マスタ';
 
   @override

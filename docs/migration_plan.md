@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0032 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0033 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -532,6 +532,36 @@ update inside a transaction._
   4 screen tests + 3 repository tests (`FakeHttpClientAdapter`-based) plus a
   `FakeProductRepository` added to the shared harness.
 - `flutter analyze`: clean. `flutter test`: 193/193 passing.
+
+### 0033 — Purchase orders (checklist item 6) ✅
+- "Purchase orders" were removed with InventorOS and never rebuilt.
+  `delivery_plans` is a related but distinct concept — an already-shipped
+  delivery used for QC reconciliation; a purchase order is the earlier-stage
+  document, what was ordered before it ships. Deliberately self-contained:
+  draft → submit → approve/reject → cancel/complete, never moves stock,
+  not wired into delivery_plans/reconciliation — "complete" is a bookkeeping
+  close, not a receiving event.
+- `purchase_orders`/`purchase_order_lines` (RLS: read on `purchase_order.view`,
+  no direct writes); three new permissions (`purchase_order.view`/`.manage`/
+  `.approve`); `create_purchase_order` (order + lines in one call, like
+  `create_transfer_order`), `submit_purchase_order`, `approve_purchase_order`
+  (self-approval refused once both requester and approver are known — same
+  guard as `approve_transfer_order`), `reject_purchase_order`,
+  `cancel_purchase_order`, `complete_purchase_order`, `purchase_order_detail`,
+  `purchase_order_index`. Grants go directly to `authenticated` with
+  `has_permission()` checks inside — the pattern every RPC since 0024 uses,
+  not 0019's now-superseded service_role-only grants.
+- Verified live: grants (`anon` refused, `authenticated` allowed) for all 8
+  RPCs; two aborted transactions — one drove a full create → list → detail →
+  submit → (re-submit refused) → approve → complete lifecycle, the other
+  covered reject and cancel-from-draft — both rolled back (0 leftover rows).
+- Flutter: `features/purchasing` — `PurchaseOrder`/`PurchaseOrderLine` domain
+  models, `PurchaseOrderRepository`, a list screen (create via a bottom sheet
+  with dynamic lines, mirroring `TransferListScreen`'s shape) and a detail
+  screen driving the state machine one step at a time, added to the home
+  menu. 4 screen tests + 3 repository tests plus a `FakePurchaseOrderRepository`
+  added to the shared harness.
+- `flutter analyze`: clean. `flutter test`: 200/200 passing.
 
 ## Rollout discipline
 

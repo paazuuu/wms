@@ -37,7 +37,14 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 
 **Inbound**
 - [x] Receiving confirmation → QC inspection (pass/fail/hold/partial) → stock
-- [ ] Purchase orders — ❌ removed with InventorOS, no Supabase equivalent
+- [x] Purchase orders (0033) — a self-contained order lifecycle (draft →
+      submit → approve/reject → cancel/complete), `purchase_order.view`/
+      `.manage`/`.approve`-gated, self-approval refused. Distinct from a
+      delivery plan (an already-shipped delivery used for QC reconciliation);
+      completing a PO is a bookkeeping close, not a receiving event — it does
+      not move stock and is not wired into delivery_plans/reconciliation.
+      Verified live via grants and an aborted-transaction round trip covering
+      every transition plus the wrong-state refusals
 - [ ] Formal put-away task/confirmation step — ⚠️ locations exist and are
       optional per warehouse, but there is no dedicated put-away screen/queue
       distinct from receiving
@@ -145,7 +152,7 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 Consolidated, in one place, as asked:
 
 **Not implemented at all:**
-- Purchase orders, sales orders
+- Sales orders
 - Customer management
 - Returns / RMA
 - Work orders / kitting / assembly

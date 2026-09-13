@@ -1423,6 +1423,129 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featProductsDesc => '按 JAN 码管理商品名称、分类与价格';
 
   @override
+  String get featPurchaseOrders => '采购订单';
+
+  @override
+  String get featPurchaseOrdersDesc => '创建、审批并管理对供应商的订单';
+
+  @override
+  String get poTitle => '采购订单';
+
+  @override
+  String get poNew => '新建采购订单';
+
+  @override
+  String get poEmpty => '暂无采购订单';
+
+  @override
+  String get poEmptyBody => '点击下方按钮创建一个。';
+
+  @override
+  String get poNeedsWarehouse => '尚无仓库';
+
+  @override
+  String get poSupplierName => '供应商名称';
+
+  @override
+  String get poWarehouse => '入库仓库';
+
+  @override
+  String get poExpectedDate => '预计到货日';
+
+  @override
+  String get poLinesTitle => '明细';
+
+  @override
+  String get poAddLine => '添加明细';
+
+  @override
+  String get poNote => '备注';
+
+  @override
+  String get poSupplierRequired => '请输入供应商名称';
+
+  @override
+  String get poLineRequired => '请至少添加一条明细';
+
+  @override
+  String get poCreate => '创建';
+
+  @override
+  String get poLineJan => 'JAN 码';
+
+  @override
+  String get poLineProductName => '商品名';
+
+  @override
+  String get poLineQuantity => '数量';
+
+  @override
+  String get poLineUnitPrice => '单价';
+
+  @override
+  String get poTotalAmount => '金额';
+
+  @override
+  String get poSubmit => '提交';
+
+  @override
+  String get poSubmitted => '采购订单已提交';
+
+  @override
+  String get poApprove => '批准';
+
+  @override
+  String get poApproveQ => '批准此采购订单？';
+
+  @override
+  String get poApproved => '采购订单已批准';
+
+  @override
+  String get poReject => '驳回';
+
+  @override
+  String get poRejectQ => '驳回此采购订单？';
+
+  @override
+  String get poRejected => '采购订单已驳回';
+
+  @override
+  String get poCancelAction => '取消订单';
+
+  @override
+  String get poCancelBody => '取消此采购订单？';
+
+  @override
+  String get poCancelled => '采购订单已取消';
+
+  @override
+  String get poComplete => '标记完成';
+
+  @override
+  String get poCompleteQ => '将此采购订单标记为完成？库存不会变动。';
+
+  @override
+  String get poCompleted => '采购订单已完成';
+
+  @override
+  String get poStatusDraft => '草稿';
+
+  @override
+  String get poStatusSubmitted => '已提交';
+
+  @override
+  String get poStatusApproved => '已批准';
+
+  @override
+  String get poStatusRejected => '已驳回';
+
+  @override
+  String get poStatusCancelled => '已取消';
+
+  @override
+  String get poStatusCompleted => '已完成';
+
+  @override
   String get productsTitle => '商品主数据';
 
   @override
