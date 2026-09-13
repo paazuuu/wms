@@ -10,6 +10,7 @@ import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
 import '../../partners/presentation/trading_partner_list_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
+import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../reports/presentation/report_builder_screen.dart';
 import '../../sales/presentation/sales_order_list_screen.dart';
@@ -43,6 +44,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.rule_folder_outlined,
             status: FeatureStatus.ready,
             builder: _delivery,
+          ),
+          // Sits directly after 受入/検品 because that is the order the work
+          // happens in: stock lands in the warehouse, then someone says which
+          // shelf it went to (UI spec §13/§55).
+          FeatureEntry(
+            id: 'putaway',
+            icon: Icons.move_to_inbox_outlined,
+            status: FeatureStatus.ready,
+            builder: _putaway,
           ),
           FeatureEntry(
             id: 'shipment',
@@ -180,6 +190,9 @@ Widget _partners(BuildContext _) => const TradingPartnerListScreen();
 
 /// Top-level (const-referenceable) builder for the Report Builder feature.
 Widget _reports(BuildContext _) => const ReportBuilderScreen();
+
+/// Top-level (const-referenceable) builder for the Put-away feature.
+Widget _putaway(BuildContext _) => const PutawayQueueScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
 Widget _picking(BuildContext _) => const PickListIndexScreen();

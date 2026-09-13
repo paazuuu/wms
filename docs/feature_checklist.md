@@ -45,9 +45,19 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       not move stock and is not wired into delivery_plans/reconciliation.
       Verified live via grants and an aborted-transaction round trip covering
       every transition plus the wrong-state refusals
-- [ ] Formal put-away task/confirmation step — ⚠️ locations exist and are
-      optional per warehouse, but there is no dedicated put-away screen/queue
-      distinct from receiving
+- [x] Formal put-away task/confirmation step (0038) — `putaway.confirm` has
+      existed since 0012 with nothing implementing it. The queue is
+      **derived** (`stock_levels.on_hand` minus the sum of that JAN's
+      `bin_stock` per warehouse), so anything that raises warehouse stock
+      shows up as put-away work automatically and no work table can drift.
+      A dedicated `PutawayQueueScreen` + confirm sheet: scan the shelf →
+      see what it already holds → confirm the quantity. `confirm_putaway`
+      moves stock only via `apply_bin_movement` (BIN-scoped), so the
+      warehouse total never changes — only where the stock sits — and a
+      repeated idempotency key replays instead of double-posting. Verified
+      live via grants and an aborted-transaction round trip covering the
+      queue, bin lookup, a partial confirm, the idempotent replay,
+      over-put-away refusal and the dashboard counters
 
 **Outbound**
 - [x] Pick list → picking (short/over detection) → packing (cartons) →
@@ -191,12 +201,11 @@ Consolidated, in one place, as asked:
 
 **Not implemented at all:**
 - Returns / RMA
-- Custom report sources beyond the six built (0037): put-away task tracking,
-  inspections, transfers, shipments
+- Custom report sources beyond the six built (0037): inspections, transfers,
+  shipments
 - Two-factor authentication, webhooks, GraphQL API
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)
 - Any real connector adapter (the registry exists; nothing syncs)
-- Dedicated put-away task/queue distinct from receiving
 
 **Implemented but not tested:**
 - `shipment_print.dart` (PDF/label generation) — not covered by any test

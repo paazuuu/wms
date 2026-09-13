@@ -2103,4 +2103,103 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiReviewRejected => '却下しました';
+
+  @override
+  String get featPutaway => '棚入れ';
+
+  @override
+  String get featPutawayDesc => '入荷済みの在庫をロケーションに割り当てる';
+
+  @override
+  String get putawayTitle => '棚入れ';
+
+  @override
+  String get putawayNeedsWarehouse => '倉庫を選択してください';
+
+  @override
+  String get putawayNeedsWarehouseBody =>
+      '棚入れは1つの倉庫の中で行う作業です。上部の倉庫切替から対象倉庫を選んでください。';
+
+  @override
+  String get putawayLocationsOff => 'この倉庫はロケーション管理なし';
+
+  @override
+  String get putawayLocationsOffBody =>
+      'ロケーション（棚）を使わない倉庫では棚入れ作業はありません。倉庫設定でロケーション管理を有効にすると、この一覧に作業が表示されます。';
+
+  @override
+  String get putawayEmpty => '棚入れ待ちはありません';
+
+  @override
+  String get putawayEmptyBody => '入荷した在庫はすべてロケーションに割り当て済みです。';
+
+  @override
+  String putawayPendingCount(int count) {
+    return '$count 品目';
+  }
+
+  @override
+  String get putawayQueueHint => '入荷済みでロケーション未割り当ての在庫です。タップして棚をスキャンしてください。';
+
+  @override
+  String get putawayPendingLabel => '棚入れ待ち';
+
+  @override
+  String get putawayNoSuggestion => '推奨ロケーションなし';
+
+  @override
+  String putawaySuggested(String code) {
+    return '推奨: $code';
+  }
+
+  @override
+  String putawayAlreadyBinned(int binned, int total) {
+    return 'うち $binned / $total は棚入れ済み';
+  }
+
+  @override
+  String get putawayScanLocation => 'ロケーションをスキャン';
+
+  @override
+  String get putawayScanLocationHint => '棚のバーコードをスキャン';
+
+  @override
+  String putawayBinNotFound(String code) {
+    return 'この倉庫に「$code」というロケーションはありません';
+  }
+
+  @override
+  String putawayBinInactive(String code) {
+    return '$code は使用停止中のロケーションです';
+  }
+
+  @override
+  String get putawayBinCurrent => '現在の在庫';
+
+  @override
+  String get putawayBinEmpty => '空です';
+
+  @override
+  String get putawayThisTime => '今回入れる数量';
+
+  @override
+  String putawayOfPending(int pending) {
+    return '/ 残 $pending';
+  }
+
+  @override
+  String get putawayQuantityRequired => '数量を1以上で入力してください';
+
+  @override
+  String putawayQuantityTooLarge(int max) {
+    return '棚入れ待ちは $max までです';
+  }
+
+  @override
+  String get putawayConfirm => '棚入れを確定';
+
+  @override
+  String putawayConfirmed(int quantity, String bin, int pendingAfter) {
+    return '$bin に $quantity 入れました（残 $pendingAfter）';
+  }
 }

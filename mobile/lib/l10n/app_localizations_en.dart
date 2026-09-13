@@ -2170,4 +2170,105 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiReviewRejected => 'Rejected';
+
+  @override
+  String get featPutaway => 'Put-away';
+
+  @override
+  String get featPutawayDesc => 'Assign received stock to shelf locations';
+
+  @override
+  String get putawayTitle => 'Put-away';
+
+  @override
+  String get putawayNeedsWarehouse => 'Pick a warehouse first';
+
+  @override
+  String get putawayNeedsWarehouseBody =>
+      'Put-away happens inside a single warehouse. Choose one with the warehouse switcher above.';
+
+  @override
+  String get putawayLocationsOff => 'This warehouse does not use locations';
+
+  @override
+  String get putawayLocationsOffBody =>
+      'There is no put-away step without shelves. Enable location management in the warehouse settings and work will show up here.';
+
+  @override
+  String get putawayEmpty => 'Nothing awaits put-away';
+
+  @override
+  String get putawayEmptyBody =>
+      'Every received item is already assigned to a location.';
+
+  @override
+  String putawayPendingCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get putawayQueueHint =>
+      'Received stock with no location yet. Tap an item and scan the shelf.';
+
+  @override
+  String get putawayPendingLabel => 'to put away';
+
+  @override
+  String get putawayNoSuggestion => 'No suggested location';
+
+  @override
+  String putawaySuggested(String code) {
+    return 'Suggested: $code';
+  }
+
+  @override
+  String putawayAlreadyBinned(int binned, int total) {
+    return '$binned of $total already shelved';
+  }
+
+  @override
+  String get putawayScanLocation => 'Scan the location';
+
+  @override
+  String get putawayScanLocationHint => 'Scan the shelf barcode';
+
+  @override
+  String putawayBinNotFound(String code) {
+    return 'No location \"$code\" in this warehouse';
+  }
+
+  @override
+  String putawayBinInactive(String code) {
+    return '$code is an inactive location';
+  }
+
+  @override
+  String get putawayBinCurrent => 'Currently on this shelf';
+
+  @override
+  String get putawayBinEmpty => 'Empty';
+
+  @override
+  String get putawayThisTime => 'Quantity going in';
+
+  @override
+  String putawayOfPending(int pending) {
+    return '/ $pending left';
+  }
+
+  @override
+  String get putawayQuantityRequired => 'Enter a quantity of 1 or more';
+
+  @override
+  String putawayQuantityTooLarge(int max) {
+    return 'Only $max awaits put-away';
+  }
+
+  @override
+  String get putawayConfirm => 'Confirm put-away';
+
+  @override
+  String putawayConfirmed(int quantity, String bin, int pendingAfter) {
+    return 'Put $quantity into $bin ($pendingAfter left)';
+  }
 }

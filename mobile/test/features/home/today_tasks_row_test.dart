@@ -24,6 +24,7 @@ const _metrics = DashboardMetrics(
   shippingWaitCount: 1,
   openCountCount: 0,
   openTransferCount: 5,
+  putawayPendingCount: 6,
   trend: [],
   outstandingList: [],
   lowStockList: [],
@@ -31,6 +32,10 @@ const _metrics = DashboardMetrics(
 
 void main() {
   testWidgets('shows a live count per task, including zero', (tester) async {
+    // Wide enough that every tile of the horizontal strip is laid out; the
+    // ListView builds lazily, so a narrow surface would hide the last ones.
+    await tester.binding.setSurfaceSize(const Size(1200, 400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(
       tester,
       Scaffold(
@@ -42,6 +47,7 @@ void main() {
     );
 
     expect(find.text('4'), findsOneWidget); // 検品待ち
+    expect(find.text('6'), findsOneWidget); // 棚入れ待ち
     expect(find.text('3'), findsOneWidget); // ピッキング
     expect(find.text('2'), findsOneWidget); // 梱包待ち
     expect(find.text('1'), findsOneWidget); // 出荷待ち

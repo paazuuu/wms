@@ -3,7 +3,7 @@
 _Supersedes `architecture_phase0_snapshot.md`. Verified against the live
 Supabase project (`vjunicsfobglmncjucbb`), the Flutter codebase, and the test
 suite — see `feature_checklist.md` for the feature-by-feature detail this
-document summarizes. Migrations `0010`–`0037` applied._
+document summarizes. Migrations `0010`–`0038` applied._
 
 ## 1. High-level shape
 
@@ -31,13 +31,13 @@ the decision was made not to stand it up rather than keep broken menu entries
 and a dependency on it. See `migration_plan.md`'s "Post-0028" entry for the
 removal itself. Every gap that removal left (product master, purchase/sales
 orders, supplier/customer CRM, work orders, image storage, custom reports) has
-since been rebuilt natively on Supabase (0031–0037) — see §6 below for what
+since been rebuilt natively on Supabase (0031–0038) — see §6 below for what
 still has no equivalent.
 
 ## 2. Repository layout
 
 - `mobile/` — Flutter app (Riverpod, gen_l10n ja/en/zh, Dio).
-- `supabase/migrations/` — `0001`–`0037`, sequential and additive (see
+- `supabase/migrations/` — `0001`–`0038`, sequential and additive (see
   `migration_plan.md` for what each one did).
 - `supabase/functions/` — `delivery-plans`, `import-plan`, `ocr-delivery-note`,
   `shipments`, `warehouses`, `inspections`, `picking`, `transfers`,
@@ -106,6 +106,11 @@ Every module below is Supabase-backed; none call an external system.
   only file-upload capability in the app.
 - Reporting: `report_definitions` (0037) — saved source+filters combinations
   for the report builder.
+- Put-away: `putaway_confirmations` (0038) — an idempotency ledger only. The
+  queue itself is derived (`stock_levels.on_hand` minus that JAN's `bin_stock`
+  per warehouse), so it cannot drift out of step with the balances it reports
+  on, and `confirm_putaway` moves stock only via BIN-scoped
+  `apply_bin_movement`, leaving the warehouse total untouched.
 - Connectors: `connectors` (registry, one seeded row: `inventoros`, disabled),
   `connector_runs` (empty — nothing has ever run).
 - RLS is enabled on every table; every write goes through a SECURITY DEFINER
@@ -115,7 +120,7 @@ Every module below is Supabase-backed; none call an external system.
 ## 5. Cross-cutting capabilities
 
 - **i18n**: gen_l10n, ja (template) / en / zh — every feature added through
-  0037 ships all three languages.
+  0038 ships all three languages.
 - **Theming**: light/dark via `ThemeMode.system`, plus a text-scale setting.
 - **Scanning**: hardware keyboard-wedge scanner, camera scan
   (`mobile_scanner`), on-device OCR fallback (ML Kit) when the cloud OCR call
@@ -136,8 +141,7 @@ Every module below is Supabase-backed; none call an external system.
 ## 6. Known gaps
 
 See `feature_checklist.md` §3 for the full, itemized list. The short version:
-no returns/RMA, no dedicated put-away task/queue distinct from receiving, no
-report sources beyond the six built (0037), no 2FA/webhooks/GraphQL, no AI
+no returns/RMA, no report sources beyond the six built (0037), no 2FA/webhooks/GraphQL, no AI
 module beyond OCR (photo ID, damage detection, inventory assistant), no
 working connector adapter (the registry exists; nothing syncs), and nobody
 has actually signed in on a real device yet — `app_users`/`user_roles`/

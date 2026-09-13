@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0037 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0038 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -688,6 +688,49 @@ documented in `feature_checklist.md` §3 and were explicitly deprioritized
 earlier in the pass (2FA/webhooks/GraphQL, further AI modules, real
 connector adapters) or are new, smaller items surfaced along the way
 (returns/RMA, additional report sources).
+
+### 0038 — Put-away queue & confirmation (UI spec §13) ✅
+- The gap `feature_checklist.md` had flagged since 0016: locations and a
+  `putaway()` RPC existed, but nothing told an operator *what* still needed
+  shelving. 0016's `putaway()` is bin→bin, `service_role`-only and does no
+  permission check, so it cannot serve the real receiving→shelf flow; 0038
+  adds alongside it rather than rewriting it (spec §53 forbids rewriting an
+  applied migration).
+- `putaway.confirm` has existed since 0012 (one of the original 22
+  permissions) with nothing implementing it — the same dormant-permission
+  pattern as `report.view` in 0037.
+- `putaway_confirmations` (an idempotency ledger, unique on
+  `idempotency_key` where not null); `putaway_queue(p_warehouse_id)` —
+  **derived**, not a work table: per JAN it is `stock_levels.on_hand` minus
+  the sum of that JAN's `bin_stock`, so anything that raises warehouse stock
+  (receiving, an adjustment, a transfer-in) appears automatically and
+  nothing can drift out of sync. Returns `'[]'` when the warehouse does not
+  use locations. `bin_by_code(p_warehouse_id, p_code)` resolves a scanned
+  shelf label (case/whitespace-insensitive, returns null for an unknown
+  code, includes what the bin currently holds). `confirm_putaway(...)` is
+  `putaway.confirm`-gated, replays a known idempotency key instead of
+  double-posting, refuses more than is pending, and moves stock only via
+  `apply_bin_movement(..., 'PUTAWAY', ...)` — BIN-scoped, so the warehouse
+  total is never touched, only *where* the stock sits (§48).
+- `dashboard_metrics` gained `putaway_pending_count` / `putaway_pending_units`.
+- Verified live: grants (`anon` refused, `authenticated` allowed) for all 3
+  RPCs; an 8-part aborted transaction confirmed the queue shows the pending
+  quantity with a suggested bin, `bin_by_code` resolves `'  pa-test-a '` and
+  returns null for an unknown code, a partial confirm gives the right
+  `pending_after`/`bin_on_hand` with the warehouse total unchanged, a
+  repeated idempotency key sets `replayed: true` without double-posting,
+  over-put-away is refused, finishing the remainder clears the queue entry,
+  and the dashboard counters track the queue — rolled back (0 leftover rows).
+- Flutter: `features/putaway` — `PutawayTask`/`BinLocation`/`BinStockLine`/
+  `PutawayResult` domain models, `PutawayRepository`, a `PutawayQueueScreen`
+  (pending quantity big and monospaced, suggested bin, and two distinct
+  empty states so "locations are off" never reads as "all done") and a
+  `PutawayConfirmSheet` (scan the shelf → see what is already on it →
+  confirm how many go in, with the idempotency key generated once per
+  resolved bin so a double tap replays). Added to the home menu right after
+  受入/検品 and to the today's-tasks strip as 棚入れ待ち. 7 repository tests +
+  7 screen tests plus a `FakePutawayRepository` added to the shared harness.
+- `flutter analyze`: clean. `flutter test`: 242/242 passing.
 
 ## Rollout discipline
 

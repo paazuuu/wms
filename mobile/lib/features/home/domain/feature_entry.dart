@@ -70,6 +70,8 @@ class FeatureEntry {
         return l10n.featWorkOrders;
       case 'reports':
         return l10n.featReports;
+      case 'putaway':
+        return l10n.featPutaway;
       default:
         return id;
     }
@@ -112,6 +114,8 @@ class FeatureEntry {
         return l10n.featWorkOrdersDesc;
       case 'reports':
         return l10n.featReportsDesc;
+      case 'putaway':
+        return l10n.featPutawayDesc;
       default:
         return '';
     }

@@ -588,7 +588,7 @@ class TaskTile {
 }
 
 /// The mobile task-first strip (spec §24): "今日の作業" as a row of tappable
-/// counts — 検品待ち・ピッキング・梱包待ち・出荷待ち・棚卸・倉庫間移動 — each
+/// counts — 検品待ち・棚入れ待ち・ピッキング・梱包待ち・出荷待ち・棚卸・倉庫間移動 — each
 /// backed by a real count from [DashboardMetrics] rather than a static menu
 /// entry, so an operator sees what actually needs doing before opening
 /// anything. Shown even at zero so "nothing pending" is a visible state, not
@@ -618,6 +618,14 @@ class TodayTasksRow extends ConsumerWidget {
         icon: Icons.shopping_cart_checkout_outlined,
         label: l10n.featPicking,
         count: metrics.openPickingCount,
+      ),
+      // Right after 検品 because put-away is the next physical step: the goods
+      // are in the building but not yet on a shelf (§13).
+      TaskTile(
+        featureId: 'putaway',
+        icon: Icons.move_to_inbox_outlined,
+        label: l10n.featPutaway,
+        count: metrics.putawayPendingCount,
       ),
       TaskTile(
         featureId: 'shipment',

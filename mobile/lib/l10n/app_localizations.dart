@@ -4119,6 +4119,168 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'却下しました'**
   String get aiReviewRejected;
+
+  /// No description provided for @featPutaway.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ'**
+  String get featPutaway;
+
+  /// No description provided for @featPutawayDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済みの在庫をロケーションに割り当てる'**
+  String get featPutawayDesc;
+
+  /// No description provided for @putawayTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ'**
+  String get putawayTitle;
+
+  /// No description provided for @putawayNeedsWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選択してください'**
+  String get putawayNeedsWarehouse;
+
+  /// No description provided for @putawayNeedsWarehouseBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れは1つの倉庫の中で行う作業です。上部の倉庫切替から対象倉庫を選んでください。'**
+  String get putawayNeedsWarehouseBody;
+
+  /// No description provided for @putawayLocationsOff.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫はロケーション管理なし'**
+  String get putawayLocationsOff;
+
+  /// No description provided for @putawayLocationsOffBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーション（棚）を使わない倉庫では棚入れ作業はありません。倉庫設定でロケーション管理を有効にすると、この一覧に作業が表示されます。'**
+  String get putawayLocationsOffBody;
+
+  /// No description provided for @putawayEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ待ちはありません'**
+  String get putawayEmpty;
+
+  /// No description provided for @putawayEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷した在庫はすべてロケーションに割り当て済みです。'**
+  String get putawayEmptyBody;
+
+  /// No description provided for @putawayPendingCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 品目'**
+  String putawayPendingCount(int count);
+
+  /// No description provided for @putawayQueueHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済みでロケーション未割り当ての在庫です。タップして棚をスキャンしてください。'**
+  String get putawayQueueHint;
+
+  /// No description provided for @putawayPendingLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ待ち'**
+  String get putawayPendingLabel;
+
+  /// No description provided for @putawayNoSuggestion.
+  ///
+  /// In ja, this message translates to:
+  /// **'推奨ロケーションなし'**
+  String get putawayNoSuggestion;
+
+  /// No description provided for @putawaySuggested.
+  ///
+  /// In ja, this message translates to:
+  /// **'推奨: {code}'**
+  String putawaySuggested(String code);
+
+  /// No description provided for @putawayAlreadyBinned.
+  ///
+  /// In ja, this message translates to:
+  /// **'うち {binned} / {total} は棚入れ済み'**
+  String putawayAlreadyBinned(int binned, int total);
+
+  /// No description provided for @putawayScanLocation.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーションをスキャン'**
+  String get putawayScanLocation;
+
+  /// No description provided for @putawayScanLocationHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚のバーコードをスキャン'**
+  String get putawayScanLocationHint;
+
+  /// No description provided for @putawayBinNotFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫に「{code}」というロケーションはありません'**
+  String putawayBinNotFound(String code);
+
+  /// No description provided for @putawayBinInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'{code} は使用停止中のロケーションです'**
+  String putawayBinInactive(String code);
+
+  /// No description provided for @putawayBinCurrent.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の在庫'**
+  String get putawayBinCurrent;
+
+  /// No description provided for @putawayBinEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'空です'**
+  String get putawayBinEmpty;
+
+  /// No description provided for @putawayThisTime.
+  ///
+  /// In ja, this message translates to:
+  /// **'今回入れる数量'**
+  String get putawayThisTime;
+
+  /// No description provided for @putawayOfPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'/ 残 {pending}'**
+  String putawayOfPending(int pending);
+
+  /// No description provided for @putawayQuantityRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を1以上で入力してください'**
+  String get putawayQuantityRequired;
+
+  /// No description provided for @putawayQuantityTooLarge.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ待ちは {max} までです'**
+  String putawayQuantityTooLarge(int max);
+
+  /// No description provided for @putawayConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れを確定'**
+  String get putawayConfirm;
+
+  /// No description provided for @putawayConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'{bin} に {quantity} 入れました（残 {pendingAfter}）'**
+  String putawayConfirmed(int quantity, String bin, int pendingAfter);
 }
 
 class _AppLocalizationsDelegate

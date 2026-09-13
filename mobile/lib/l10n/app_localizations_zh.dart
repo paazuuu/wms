@@ -2100,4 +2100,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiReviewRejected => '已拒绝';
+
+  @override
+  String get featPutaway => '上架';
+
+  @override
+  String get featPutawayDesc => '将已收货的库存分配到货位';
+
+  @override
+  String get putawayTitle => '上架';
+
+  @override
+  String get putawayNeedsWarehouse => '请先选择仓库';
+
+  @override
+  String get putawayNeedsWarehouseBody => '上架作业只在单个仓库内进行。请在上方的仓库切换中选择目标仓库。';
+
+  @override
+  String get putawayLocationsOff => '该仓库未启用货位管理';
+
+  @override
+  String get putawayLocationsOffBody =>
+      '不使用货位的仓库没有上架作业。在仓库设置中启用货位管理后，作业会出现在这里。';
+
+  @override
+  String get putawayEmpty => '没有待上架的库存';
+
+  @override
+  String get putawayEmptyBody => '所有已收货的商品都已分配到货位。';
+
+  @override
+  String putawayPendingCount(int count) {
+    return '$count 个商品';
+  }
+
+  @override
+  String get putawayQueueHint => '已收货但尚未分配货位的库存。点击后扫描货位条码。';
+
+  @override
+  String get putawayPendingLabel => '待上架';
+
+  @override
+  String get putawayNoSuggestion => '无推荐货位';
+
+  @override
+  String putawaySuggested(String code) {
+    return '推荐：$code';
+  }
+
+  @override
+  String putawayAlreadyBinned(int binned, int total) {
+    return '其中 $binned / $total 已上架';
+  }
+
+  @override
+  String get putawayScanLocation => '扫描货位';
+
+  @override
+  String get putawayScanLocationHint => '扫描货架条码';
+
+  @override
+  String putawayBinNotFound(String code) {
+    return '该仓库没有名为「$code」的货位';
+  }
+
+  @override
+  String putawayBinInactive(String code) {
+    return '$code 是已停用的货位';
+  }
+
+  @override
+  String get putawayBinCurrent => '该货位当前库存';
+
+  @override
+  String get putawayBinEmpty => '空';
+
+  @override
+  String get putawayThisTime => '本次上架数量';
+
+  @override
+  String putawayOfPending(int pending) {
+    return '/ 剩余 $pending';
+  }
+
+  @override
+  String get putawayQuantityRequired => '请输入 1 以上的数量';
+
+  @override
+  String putawayQuantityTooLarge(int max) {
+    return '待上架数量最多为 $max';
+  }
+
+  @override
+  String get putawayConfirm => '确认上架';
+
+  @override
+  String putawayConfirmed(int quantity, String bin, int pendingAfter) {
+    return '已将 $quantity 放入 $bin（剩余 $pendingAfter）';
+  }
 }

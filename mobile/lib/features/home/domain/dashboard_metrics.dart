@@ -89,6 +89,8 @@ class DashboardMetrics extends Equatable {
     this.shippingWaitCount = 0,
     this.openCountCount = 0,
     this.openTransferCount = 0,
+    this.putawayPendingCount = 0,
+    this.putawayPendingUnits = 0,
     required this.trend,
     required this.outstandingList,
     required this.lowStockList,
@@ -124,6 +126,13 @@ class DashboardMetrics extends Equatable {
   /// 倉庫間移動: transfers in flight, either direction.
   final int openTransferCount;
 
+  /// 棚入れ待ち: JANs whose warehouse balance is not yet fully assigned to a
+  /// bin (0038). Always 0 for a warehouse that does not use locations.
+  final int putawayPendingCount;
+
+  /// Units behind [putawayPendingCount] — the pieces still to be shelved.
+  final int putawayPendingUnits;
+
   final List<TrendPoint> trend;
   final List<OutstandingPlanBrief> outstandingList;
   final List<LowStockBrief> lowStockList;
@@ -153,6 +162,8 @@ class DashboardMetrics extends Equatable {
       shippingWaitCount: _asInt(json['shipping_wait_count']),
       openCountCount: _asInt(json['open_count_count']),
       openTransferCount: _asInt(json['open_transfer_count']),
+      putawayPendingCount: _asInt(json['putaway_pending_count']),
+      putawayPendingUnits: _asInt(json['putaway_pending_units']),
       trend: parseList('trend', TrendPoint.fromJson),
       outstandingList:
           parseList('outstanding_list', OutstandingPlanBrief.fromJson),
@@ -177,6 +188,8 @@ class DashboardMetrics extends Equatable {
         shippingWaitCount,
         openCountCount,
         openTransferCount,
+        putawayPendingCount,
+        putawayPendingUnits,
         trend,
         outstandingList,
         lowStockList,

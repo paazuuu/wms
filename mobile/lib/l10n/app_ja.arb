@@ -954,5 +954,97 @@
   "aiReviewRejectTitle": "この結果を却下しますか？",
   "aiReviewRejectHint": "理由（任意）",
   "aiReviewConfirmed": "承認しました",
-  "aiReviewRejected": "却下しました"
+  "aiReviewRejected": "却下しました",
+  "featPutaway": "棚入れ",
+  "featPutawayDesc": "入荷済みの在庫をロケーションに割り当てる",
+  "putawayTitle": "棚入れ",
+  "putawayNeedsWarehouse": "倉庫を選択してください",
+  "putawayNeedsWarehouseBody": "棚入れは1つの倉庫の中で行う作業です。上部の倉庫切替から対象倉庫を選んでください。",
+  "putawayLocationsOff": "この倉庫はロケーション管理なし",
+  "putawayLocationsOffBody": "ロケーション（棚）を使わない倉庫では棚入れ作業はありません。倉庫設定でロケーション管理を有効にすると、この一覧に作業が表示されます。",
+  "putawayEmpty": "棚入れ待ちはありません",
+  "putawayEmptyBody": "入荷した在庫はすべてロケーションに割り当て済みです。",
+  "putawayPendingCount": "{count} 品目",
+  "@putawayPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "putawayQueueHint": "入荷済みでロケーション未割り当ての在庫です。タップして棚をスキャンしてください。",
+  "putawayPendingLabel": "棚入れ待ち",
+  "putawayNoSuggestion": "推奨ロケーションなし",
+  "putawaySuggested": "推奨: {code}",
+  "@putawaySuggested": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "putawayAlreadyBinned": "うち {binned} / {total} は棚入れ済み",
+  "@putawayAlreadyBinned": {
+    "placeholders": {
+      "binned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "putawayScanLocation": "ロケーションをスキャン",
+  "putawayScanLocationHint": "棚のバーコードをスキャン",
+  "putawayBinNotFound": "この倉庫に「{code}」というロケーションはありません",
+  "@putawayBinNotFound": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "putawayBinInactive": "{code} は使用停止中のロケーションです",
+  "@putawayBinInactive": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "putawayBinCurrent": "現在の在庫",
+  "putawayBinEmpty": "空です",
+  "putawayThisTime": "今回入れる数量",
+  "putawayOfPending": "/ 残 {pending}",
+  "@putawayOfPending": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "putawayQuantityRequired": "数量を1以上で入力してください",
+  "putawayQuantityTooLarge": "棚入れ待ちは {max} までです",
+  "@putawayQuantityTooLarge": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "putawayConfirm": "棚入れを確定",
+  "putawayConfirmed": "{bin} に {quantity} 入れました（残 {pendingAfter}）",
+  "@putawayConfirmed": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "bin": {
+        "type": "String"
+      },
+      "pendingAfter": {
+        "type": "int"
+      }
+    }
+  }
 }

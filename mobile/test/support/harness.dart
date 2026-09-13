@@ -37,6 +37,9 @@ import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
 import 'package:wms_mobile/features/purchasing/data/purchase_order_repository.dart';
 import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
+import 'package:wms_mobile/features/putaway/application/putaway_providers.dart';
+import 'package:wms_mobile/features/putaway/data/putaway_repository.dart';
+import 'package:wms_mobile/features/putaway/domain/putaway_task.dart';
 import 'package:wms_mobile/features/reports/application/report_providers.dart';
 import 'package:wms_mobile/features/reports/data/report_repository.dart';
 import 'package:wms_mobile/features/reports/domain/report.dart';
@@ -102,6 +105,7 @@ List<Override> _defaultOverrides() => [
           .overrideWithValue(FakeTradingPartnerRepository()),
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
       reportRepositoryProvider.overrideWithValue(FakeReportRepository()),
+      putawayRepositoryProvider.overrideWithValue(FakePutawayRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1654,6 +1658,87 @@ class FakeWorkOrderRepository implements WorkOrderRepository {
   @override
   Future<ApiResult<bool>> complete(int id) async =>
       _transition(id, WorkOrderStatus.inProgress, WorkOrderStatus.completed);
+}
+
+/// Put-away stub (0038). [tasks] is the queue, [bins] the codes a scan can
+/// resolve (keyed uppercase, as `bin_by_code` matches). `confirm` mirrors the
+/// server: it lowers the task's pending quantity, refuses more than is
+/// pending, and replays a repeated idempotency key instead of posting twice.
+class FakePutawayRepository implements PutawayRepository {
+  FakePutawayRepository({
+    List<PutawayTask> tasks = const [],
+    this.bins = const {},
+  }) : _tasks = List.of(tasks);
+
+  List<PutawayTask> _tasks;
+  final Map<String, BinLocation> bins;
+
+  /// Every confirm that actually posted, oldest first.
+  final List<PutawayResult> confirmed = [];
+  final Map<String, PutawayResult> _byKey = {};
+
+  @override
+  Future<ApiResult<List<PutawayTask>>> queue(int warehouseId) async =>
+      ApiSuccess(_tasks);
+
+  @override
+  Future<ApiResult<BinLocation?>> binByCode(int warehouseId, String code) async =>
+      ApiSuccess(bins[code.trim().toUpperCase()]);
+
+  @override
+  Future<ApiResult<PutawayResult>> confirm({
+    required int warehouseId,
+    required String janCode,
+    required int binId,
+    required int quantity,
+    required String idempotencyKey,
+    String? note,
+  }) async {
+    final replay = _byKey[idempotencyKey];
+    if (replay != null) {
+      return ApiSuccess(PutawayResult(
+        janCode: replay.janCode,
+        quantity: replay.quantity,
+        binCode: replay.binCode,
+        binOnHand: replay.binOnHand,
+        pendingAfter: replay.pendingAfter,
+        replayed: true,
+      ));
+    }
+    final task = _tasks.firstWhere((t) => t.janCode == janCode);
+    if (quantity > task.pendingQuantity) {
+      return const ApiFailure(message: 'awaits put-away');
+    }
+    final pendingAfter = task.pendingQuantity - quantity;
+    _tasks = [
+      for (final t in _tasks)
+        if (t.janCode != janCode)
+          t
+        else if (pendingAfter > 0)
+          PutawayTask(
+            janCode: t.janCode,
+            productName: t.productName,
+            pendingQuantity: pendingAfter,
+            warehouseOnHand: t.warehouseOnHand,
+            binnedQuantity: t.binnedQuantity + quantity,
+            suggestedBinId: t.suggestedBinId,
+            suggestedBinCode: t.suggestedBinCode,
+          ),
+    ];
+    final result = PutawayResult(
+      janCode: janCode,
+      quantity: quantity,
+      binCode: bins.values
+              .firstWhere((b) => b.binId == binId,
+                  orElse: () => const BinLocation(binId: 0, binCode: ''))
+              .binCode,
+      binOnHand: quantity,
+      pendingAfter: pendingAfter,
+    );
+    _byKey[idempotencyKey] = result;
+    confirmed.add(result);
+    return ApiSuccess(result);
+  }
 }
 
 /// Report builder stub. [rowsBySource] supplies the canned rows `run()`
