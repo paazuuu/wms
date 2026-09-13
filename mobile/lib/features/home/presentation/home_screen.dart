@@ -56,6 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final user = ref.watch(authControllerProvider).user;
           return DashboardOverviewScreen(
             onOpen: _open,
+            permissions: user?.permissions ?? const [],
             userName: user?.name,
             userEmail: user?.email,
           );
@@ -149,6 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onOpen: _open,
                   onDashboard: () => _select('dashboard', (_) => const SizedBox()),
                   onLogout: _logout,
+                  permissions: user?.permissions ?? const [],
                   userName: user?.name,
                   userEmail: user?.email,
                 ),
@@ -172,6 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onDashboard: () =>
                       _select('dashboard', (_) => const SizedBox()),
                   onLogout: _logout,
+                  permissions: user?.permissions ?? const [],
                   userName: user?.name,
                   userEmail: user?.email,
                 ),
@@ -338,6 +341,7 @@ class _Sidebar extends StatelessWidget {
     required this.onOpen,
     required this.onDashboard,
     required this.onLogout,
+    required this.permissions,
     this.userName,
     this.userEmail,
   });
@@ -346,6 +350,10 @@ class _Sidebar extends StatelessWidget {
   final void Function(FeatureEntry entry) onOpen;
   final VoidCallback onDashboard;
   final VoidCallback onLogout;
+
+  /// The signed-in user's permission codes (UI spec §37) — a group with
+  /// nothing this user may open is skipped entirely rather than shown empty.
+  final List<String> permissions;
   final String? userName;
   final String? userEmail;
 
@@ -399,27 +407,31 @@ class _Sidebar extends StatelessWidget {
                       selected: currentId == 'dashboard',
                       onTap: onDashboard,
                     ),
-                    for (final group in groups) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(AppSpacing.md,
-                            AppSpacing.md, AppSpacing.md, AppSpacing.xs),
-                        child: Text(
-                          group.title(l10n).toUpperCase(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            letterSpacing: 0.8,
-                            fontWeight: FontWeight.w700,
+                    for (final group in groups) ...() {
+                      final visible = group.visibleEntries(permissions);
+                      if (visible.isEmpty) return const <Widget>[];
+                      return <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                              AppSpacing.md, AppSpacing.md, AppSpacing.xs),
+                          child: Text(
+                            group.title(l10n).toUpperCase(),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                              letterSpacing: 0.8,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                      for (final entry in group.entries)
-                        _SidebarItem(
-                          icon: entry.icon,
-                          label: entry.label(l10n),
-                          selected: currentId == entry.id,
-                          onTap: () => onOpen(entry),
-                        ),
-                    ],
+                        for (final entry in visible)
+                          _SidebarItem(
+                            icon: entry.icon,
+                            label: entry.label(l10n),
+                            selected: currentId == entry.id,
+                            onTap: () => onOpen(entry),
+                          ),
+                      ];
+                    }(),
                   ],
                 );
               },

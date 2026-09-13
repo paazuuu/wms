@@ -17,6 +17,7 @@ class DashboardOverviewScreen extends StatelessWidget {
   const DashboardOverviewScreen({
     super.key,
     required this.onOpen,
+    required this.permissions,
     this.userName,
     this.userEmail,
   });
@@ -24,16 +25,23 @@ class DashboardOverviewScreen extends StatelessWidget {
   /// Opens a feature in the shell's content area.
   final void Function(FeatureEntry entry) onOpen;
 
+  /// The signed-in user's permission codes (UI spec §37) — decides which
+  /// menu tiles and shortcuts this screen offers at all.
+  final List<String> permissions;
+
   final String? userName;
   final String? userEmail;
 
   @override
   Widget build(BuildContext context) {
     final groups = buildFeatureCatalog();
+    // Only resolves to an entry this user may actually open — the same rule
+    // the menu itself uses, so a today's-task tile or a shortcut never opens
+    // a screen its own entry would have been hidden for.
     FeatureEntry? entryById(String id) {
       for (final g in groups) {
         for (final e in g.entries) {
-          if (e.id == id) return e;
+          if (e.id == id && e.visibleFor(permissions)) return e;
         }
       }
       return null;
@@ -68,16 +76,17 @@ class DashboardOverviewScreen extends StatelessWidget {
           onOpenOutstanding: delivery == null ? null : () => onOpen(delivery),
         ),
         const SizedBox(height: AppSpacing.xl),
-        for (final group in groups) ...[
-          _SectionLabel(group.title(l10n)),
-          const SizedBox(height: AppSpacing.md),
-          _FeatureGrid(
-            entries: group.entries,
-            onOpen: onOpen,
-            tone: _toneForGroup(group.id),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-        ],
+        for (final group in groups)
+          if (group.visibleEntries(permissions) case final visible when visible.isNotEmpty) ...[
+            _SectionLabel(group.title(l10n)),
+            const SizedBox(height: AppSpacing.md),
+            _FeatureGrid(
+              entries: visible,
+              onOpen: onOpen,
+              tone: _toneForGroup(group.id),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
       ],
     );
   }

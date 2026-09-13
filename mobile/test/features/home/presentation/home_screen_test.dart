@@ -16,24 +16,46 @@ import 'package:wms_mobile/l10n/app_localizations.dart';
 import '../../../support/harness.dart';
 
 /// Offline fake so the auth controller lands "authenticated" without a network.
+/// Every permission the catalog gates on, so this fixture exercises the whole
+/// menu — a limited user is covered separately below.
+const _allPermissions = [
+  'ai.review', 'audit.view', 'connector.manage', 'count.approve',
+  'count.perform', 'inspection.confirm', 'inspection.view', 'inventory.adjust',
+  'pack.complete', 'partner.manage', 'partner.view', 'pick.confirm',
+  'product.manage', 'product.view', 'purchase_order.approve',
+  'purchase_order.manage', 'purchase_order.view', 'putaway.confirm',
+  'receiving.confirm', 'receiving.view', 'report.manage', 'report.view',
+  'sales_order.approve', 'sales_order.manage', 'sales_order.view',
+  'ship.complete', 'transfer.approve', 'transfer.create', 'transfer.receive',
+  'user.manage', 'work_order.manage', 'work_order.view',
+];
+
 class _FakeAuthRepository implements AuthRepository {
-  static const _user =
-      AuthUser(id: '1', name: 'Test Operator', email: 'e2e@test.com');
+  const _FakeAuthRepository({this.permissions = _allPermissions});
+
+  final List<String> permissions;
+
+  AuthUser get _user => AuthUser(
+      id: '1',
+      name: 'Test Operator',
+      email: 'e2e@test.com',
+      permissions: permissions);
 
   @override
-  Future<ApiResult<AuthUser>> currentUser() async => const ApiSuccess(_user);
+  Future<ApiResult<AuthUser>> currentUser() async => ApiSuccess(_user);
 
   @override
   Future<ApiResult<AuthUser>> login(String email, String password) async =>
-      const ApiSuccess(_user);
+      ApiSuccess(_user);
 
   @override
   Future<void> logout() async {}
 }
 
-Widget _wrap() => ProviderScope(
+Widget _wrap({List<String> permissions = _allPermissions}) => ProviderScope(
       overrides: [
-        authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+        authRepositoryProvider
+            .overrideWithValue(_FakeAuthRepository(permissions: permissions)),
         // Empty fakes so navigating into the live Picking screen renders
         // without a network.
         shipmentRepositoryProvider.overrideWithValue(FakeShipmentRepository([])),
@@ -79,5 +101,20 @@ void main() {
     expect(find.byType(PickListIndexScreen), findsOneWidget);
     expect(find.byType(ComingSoonScreen), findsNothing);
     expect(find.text('Nothing to pick.'), findsOneWidget);
+  });
+
+  testWidgets('hides menu entries and whole groups the user cannot open (§37)',
+      (tester) async {
+    // Picking only — everything in "management" and the rest of "field
+    // operations" is gated on something else.
+    await tester.pumpWidget(_wrap(permissions: const ['pick.confirm']));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Picking'), findsOneWidget);
+    expect(find.text('Inspection'), findsNothing);
+    expect(find.text('Shipping'), findsNothing);
+    // The whole "management" group has nothing this user may open.
+    expect(find.text('Management'), findsNothing);
+    expect(find.text('Reports'), findsNothing);
   });
 }

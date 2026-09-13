@@ -144,6 +144,14 @@ Every module below is Supabase-backed; none call an external system.
   public sign-up), first sign-in auto-promotes to System Admin. Full test
   coverage added (session storage, token refresh/coalescing, auth
   interceptor, repository, controller state machine — 41 tests).
+- **Permission-aware UI** (UI spec §37): login/`currentUser` call `my_access()`
+  (existed since 0012, unused by the client until now) instead of the
+  roles-only `my_roles()`, so `AuthUser` carries both roles and permission
+  codes from one round trip. Every `FeatureEntry` in the catalog declares the
+  permissions that unlock it; the sidebar, dashboard menu, and today's-tasks/
+  outstanding shortcuts all hide what the signed-in user cannot open, and a
+  whole group hides when nothing in it is open to them. A UI convenience
+  only — every RPC and RLS policy still re-checks `has_permission()` itself.
 - **Files**: photo attachments on inspections via a private Storage bucket +
   signed URLs (0031) — the only upload surface today; other entities could
   reuse the same polymorphic table without a schema change.

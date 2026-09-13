@@ -22,6 +22,7 @@ class FeatureEntry {
     required this.icon,
     this.status = FeatureStatus.comingSoon,
     this.builder,
+    this.requiredAnyOf = const [],
   });
 
   final String id;
@@ -31,7 +32,20 @@ class FeatureEntry {
   /// Navigation target when the feature is [FeatureStatus.ready].
   final WidgetBuilder? builder;
 
+  /// Permission codes gating this entry (UI spec §37): held if the signed-in
+  /// user has *any* one of them, matching how the same screen's own actions
+  /// are usually a view/manage pair. Empty means every signed-in user may
+  /// open it — the menu doesn't hide a screen it never restricted.
+  final List<String> requiredAnyOf;
+
   bool get isReady => status == FeatureStatus.ready && builder != null;
+
+  /// Whether [permissions] unlock this entry. Server-side RLS/RPC checks are
+  /// the actual boundary (§37) — this only decides what the menu *offers*, so
+  /// tapping a hidden entry was never the only thing standing between an
+  /// operator and data they shouldn't see.
+  bool visibleFor(Iterable<String> permissions) =>
+      requiredAnyOf.isEmpty || requiredAnyOf.any(permissions.contains);
 
   /// Localized menu label for this feature.
   String label(AppLocalizations l10n) {
@@ -129,6 +143,12 @@ class FeatureGroup {
 
   final String id;
   final List<FeatureEntry> entries;
+
+  /// Entries in this group [permissions] unlock. A group that comes back
+  /// empty (every entry gated on something this user lacks) is meant to be
+  /// dropped entirely by the caller, not shown as an empty heading.
+  List<FeatureEntry> visibleEntries(Iterable<String> permissions) =>
+      entries.where((e) => e.visibleFor(permissions)).toList();
 
   /// Localized group heading.
   String title(AppLocalizations l10n) {

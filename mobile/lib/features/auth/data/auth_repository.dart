@@ -47,7 +47,7 @@ class AuthRepositoryImpl implements AuthRepository {
   /// GoTrue (`/auth/v1`) — sign-in, refresh, sign-out, current user.
   final Dio _authDio;
 
-  /// PostgREST, used only to call `bootstrap_first_admin`/`my_roles` right
+  /// PostgREST, used only to call `bootstrap_first_admin`/`my_access` right
   /// after a session is established. Must be the *same* Dio the app's other
   /// Supabase calls use, so its auth interceptor picks up the session this
   /// login just wrote before these calls fire.
@@ -55,27 +55,30 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final SupabaseSessionStorage _sessionStorage;
 
-  Future<List<String>> _bootstrapAndFetchRoles() async {
+  /// Roles and permissions in one round trip (`my_access()`, 0012) rather than
+  /// a roles-only call — the UI needs both to decide what to offer (spec §37)
+  /// and a second RPC just for permissions would be a second failure point for
+  /// no benefit.
+  Future<(List<String>, List<String>)> _bootstrapAndFetchAccess() async {
     try {
       await _restDio.post('/rpc/bootstrap_first_admin');
     } on DioException {
-      // Non-fatal: if this fails, my_roles() below simply comes back empty
+      // Non-fatal: if this fails, my_access() below simply comes back empty
       // and the user sees "no role assigned yet" rather than being blocked
       // from signing in at all.
     }
     try {
-      final response = await _restDio.post('/rpc/my_roles');
+      final response = await _restDio.post('/rpc/my_access');
       final data = response.data;
-      final rows = data is List
-          ? (data.length == 1 && data.first is List ? data.first as List : data)
-          : const [];
-      return rows
-          .whereType<Map>()
-          .map((e) => e['code'] as String? ?? '')
-          .where((c) => c.isNotEmpty)
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      if (json is! Map) return (const <String>[], const <String>[]);
+      List<String> stringList(dynamic v) => (v as List? ?? const [])
+          .map((e) => e?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
           .toList();
+      return (stringList(json['roles']), stringList(json['permissions']));
     } on DioException {
-      return const [];
+      return (const <String>[], const <String>[]);
     }
   }
 
@@ -91,8 +94,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _sessionStorage.write(SupabaseSession.fromGoTrue(body));
 
       final userJson = (body['user'] as Map).cast<String, dynamic>();
-      final roles = await _bootstrapAndFetchRoles();
-      return ApiSuccess(AuthUser.fromGoTrue(userJson, roles: roles));
+      final (roles, permissions) = await _bootstrapAndFetchAccess();
+      return ApiSuccess(
+          AuthUser.fromGoTrue(userJson, roles: roles, permissions: permissions));
     } on DioException catch (e) {
       return _mapAuthError<AuthUser>(e);
     }
@@ -110,8 +114,9 @@ class AuthRepositoryImpl implements AuthRepository {
       // both validates it and confirms the account still exists.
       final response = await _authDio.get('/user');
       final userJson = (response.data as Map).cast<String, dynamic>();
-      final roles = await _bootstrapAndFetchRoles();
-      return ApiSuccess(AuthUser.fromGoTrue(userJson, roles: roles));
+      final (roles, permissions) = await _bootstrapAndFetchAccess();
+      return ApiSuccess(
+          AuthUser.fromGoTrue(userJson, roles: roles, permissions: permissions));
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         await _sessionStorage.clear();

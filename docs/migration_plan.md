@@ -777,6 +777,40 @@ the function could not be made from this environment — the network policy
 denies the project host — so that part is verified by the deployed source and
 the SQL predicate, not by calling the endpoint.
 
+### Client-only change: permission-aware menu (UI spec §37, no migration)
+
+No schema change — `my_access()` (roles + permissions + warehouse_ids, one
+round trip) has existed since 0012 and was already granted to
+`anon`/`authenticated`; the client simply never called it, using the
+roles-only `my_roles()` in login/`currentUser` instead. Switched the client
+to `my_access()`, added `permissions` to `AuthUser`, and gated every
+`FeatureEntry` in the catalog on the permission(s) that unlock it (any-of, so
+a view/manage pair on the same screen both work). The sidebar, dashboard
+feature grid, and the today's-tasks/outstanding shortcuts now hide anything
+the signed-in user holds nothing for, and a whole group hides when every
+entry in it does — previously every screen was listed for every signed-in
+user regardless of role, discoverable as a restriction only via a server
+refusal or an RLS-emptied screen.
+
+Verified: `my_access()` still returns the expected shape and grants are
+unchanged (checked live — no session context in a SQL-editor call correctly
+comes back `authenticated: false` with empty arrays, matching an
+unauthenticated caller). A test (`feature_entry_test.dart`) asserts every
+catalog entry declares a non-empty `requiredAnyOf`, so a newly added feature
+that forgets to gate itself fails the suite rather than silently shipping
+unrestricted. This is a UI convenience only: every RPC and RLS policy still
+re-checks `has_permission()` itself, unchanged.
+
+Deliberately not done in this pass: surfacing per-warehouse scope
+(`user_warehouses`) the same way — RLS already enforces it on every table,
+but the warehouse picker still lists every warehouse the company has rather
+than just the ones this user is scoped to. No real user has a restricted
+`user_warehouses` row yet to make the gap visible, and fixing it properly
+means changing the picker's own list query, not gating a menu entry — noted
+in `feature_checklist.md` instead of built speculatively.
+
+`flutter analyze`: clean. `flutter test`: 278 → 291 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

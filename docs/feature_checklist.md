@@ -193,6 +193,32 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       as future work; today everything goes through the system print / PDF
       dialog
 
+**Permission-aware UI (UI spec §37)**
+- [x] The home menu, sidebar, dashboard feature grid, and today's-tasks/
+      outstanding shortcuts now hide anything the signed-in user holds no
+      permission for, instead of listing every screen for every user and
+      letting a tap land on an RLS-filtered blank view or a server refusal
+      with no explanation. A whole section (e.g. "Management") disappears
+      when nothing in it is open to that user, rather than showing an empty
+      heading
+- [x] Backed by `my_access()` (existed since 0012, previously unused by the
+      client — login/currentUser called the roles-only `my_roles()` instead)
+      — one round trip for roles *and* permissions, folded into `AuthUser`.
+      An admin role is granted every permission explicitly at the database,
+      so there is no separate "is admin" client-side bypass to keep in sync
+- [x] This is a UI convenience only, not the security boundary: every RPC and
+      RLS policy still re-checks `has_permission()` itself regardless of what
+      the menu decided to show, exactly as the spec asks ("UIだけでなくSupabase
+      RLS/RPC側でも権限を検証する")
+- [ ] Per-warehouse scope (`user_warehouses`) is enforced server-side by RLS
+      on every table already, but nothing client-side surfaces "you can act
+      in these warehouses" the way permissions now do — the warehouse picker
+      still lists every warehouse the *company* has, not just the ones this
+      user is scoped to. Deliberately left out of this pass: no real user
+      has signed in with a restricted `user_warehouses` row yet to notice,
+      and doing it well means changing the warehouse picker's own list
+      query, not just gating a menu entry
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

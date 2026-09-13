@@ -40,10 +40,11 @@ void main() {
     if (options.path == '/rpc/bootstrap_first_admin') {
       return jsonResponseBody(true, 200);
     }
-    if (options.path == '/rpc/my_roles') {
-      return jsonResponseBody([
-        {'code': 'picker', 'name': 'Picker'},
-      ], 200);
+    if (options.path == '/rpc/my_access') {
+      return jsonResponseBody({
+        'roles': ['picker'],
+        'permissions': ['pick.confirm'],
+      }, 200);
     }
     throw StateError('unexpected rest call: ${options.path}');
   }
@@ -83,6 +84,7 @@ void main() {
           expect(user.email, 'a@example.com');
           expect(user.name, 'Ada');
           expect(user.roles, ['picker']);
+          expect(user.permissions, ['pick.confirm']);
         },
         failure: (f) => fail('expected success, got ${f.message}'),
       );
@@ -114,7 +116,8 @@ void main() {
       );
     });
 
-    test('my_roles failing leaves the user signed in with no roles', () async {
+    test('my_access failing leaves the user signed in with no roles or permissions',
+        () async {
       setAuthHandler((_) => jsonResponseBody({
             'access_token': 'access-1',
             'refresh_token': 'refresh-1',
@@ -122,7 +125,7 @@ void main() {
             'user': {'id': 'u1', 'email': 'a@example.com'},
           }, 200));
       setRestHandler((options) {
-        if (options.path == '/rpc/my_roles') {
+        if (options.path == '/rpc/my_access') {
           return jsonResponseBody({'message': 'boom'}, 500);
         }
         return defaultRestHandler(options);
@@ -131,12 +134,15 @@ void main() {
       final result = await repository.login('a@example.com', 'secret');
 
       result.when(
-        success: (user) => expect(user.roles, isEmpty),
+        success: (user) {
+          expect(user.roles, isEmpty);
+          expect(user.permissions, isEmpty);
+        },
         failure: (f) => fail('expected success, got ${f.message}'),
       );
     });
 
-    test('my_roles wrapped in an extra list layer is unwrapped', () async {
+    test('my_access wrapped in an extra list layer is unwrapped', () async {
       setAuthHandler((_) => jsonResponseBody({
             'access_token': 'access-1',
             'refresh_token': 'refresh-1',
@@ -144,11 +150,12 @@ void main() {
             'user': {'id': 'u1', 'email': 'a@example.com'},
           }, 200));
       setRestHandler((options) {
-        if (options.path == '/rpc/my_roles') {
+        if (options.path == '/rpc/my_access') {
           return jsonResponseBody([
-            [
-              {'code': 'system_admin', 'name': 'System Admin'},
-            ],
+            {
+              'roles': ['system_admin'],
+              'permissions': ['warehouse.manage', 'user.manage'],
+            },
           ], 200);
         }
         return defaultRestHandler(options);
@@ -157,7 +164,10 @@ void main() {
       final result = await repository.login('a@example.com', 'secret');
 
       result.when(
-        success: (user) => expect(user.roles, ['system_admin']),
+        success: (user) {
+          expect(user.roles, ['system_admin']);
+          expect(user.permissions, ['warehouse.manage', 'user.manage']);
+        },
         failure: (f) => fail('expected success, got ${f.message}'),
       );
     });
@@ -208,7 +218,7 @@ void main() {
       );
     });
 
-    test('validates the stored session against /user and refetches roles',
+    test('validates the stored session against /user and refetches roles/permissions',
         () async {
       await sessionStorage.write(SupabaseSession(
         accessToken: 'access-1',
@@ -226,6 +236,7 @@ void main() {
         success: (user) {
           expect(user.id, 'u1');
           expect(user.roles, ['picker']);
+          expect(user.permissions, ['pick.confirm']);
         },
         failure: (f) => fail('expected success, got ${f.message}'),
       );
