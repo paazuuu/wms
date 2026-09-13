@@ -435,6 +435,9 @@
     }
   },
   "qcSplitHint": "Enter passed and failed counts (they add up to the actual).",
+  "qcAttachmentsEmpty": "No photos yet",
+  "qcAttachmentCamera": "Take a photo",
+  "qcAttachmentGallery": "Choose from gallery",
   "whFieldUsesLocations": "Manage stock by location",
   "whFieldUsesLocationsHelp": "Leave off to keep one balance per warehouse. Turn on only if you track stock by shelf — you can change this later.",
   "whLocationsOn": "Locations",

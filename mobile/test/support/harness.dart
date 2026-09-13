@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +21,10 @@ import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
 import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
+import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
+import 'package:wms_mobile/features/qc/data/attachment_repository.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
+import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
@@ -70,6 +75,7 @@ List<Override> _defaultOverrides() => [
       warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
         const WarehouseOverview(warehouses: [], totals: WarehouseTotals()),
       )),
+      attachmentRepositoryProvider.overrideWithValue(FakeAttachmentRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1024,6 +1030,55 @@ class FakeAiReviewRepository implements AiReviewRepository {
     _entries = _entries.where((e) => e.id != id).toList();
     return const ApiSuccess(true);
   }
+}
+
+/// Attachment stub. [attachments] is what a `GET /attachments` filter would
+/// return for one entity; upload() appends in-memory rather than touching
+/// Storage, so a screen test can assert the thumbnail strip updates.
+class FakeAttachmentRepository implements AttachmentRepository {
+  FakeAttachmentRepository({List<Attachment> attachments = const []})
+      : _attachments = List.of(attachments);
+
+  List<Attachment> _attachments;
+
+  /// The arguments of the last upload() call, for assertions.
+  String? lastUploadEntityType;
+  String? lastUploadEntityId;
+  String? lastUploadFileName;
+
+  @override
+  Future<ApiResult<List<Attachment>>> list(
+          String entityType, String entityId) async =>
+      ApiSuccess(_attachments
+          .where((a) => a.entityType == entityType && a.entityId == entityId)
+          .toList());
+
+  @override
+  Future<ApiResult<Attachment>> upload({
+    required String entityType,
+    required String entityId,
+    required Uint8List bytes,
+    required String fileName,
+    required String contentType,
+  }) async {
+    lastUploadEntityType = entityType;
+    lastUploadEntityId = entityId;
+    lastUploadFileName = fileName;
+    final attachment = Attachment(
+      id: _attachments.length + 1,
+      entityType: entityType,
+      entityId: entityId,
+      storagePath: '$entityType/$entityId/$fileName',
+      contentType: contentType,
+      createdAt: DateTime.now(),
+    );
+    _attachments = [..._attachments, attachment];
+    return ApiSuccess(attachment);
+  }
+
+  @override
+  Future<ApiResult<String>> signedUrl(String storagePath) async =>
+      ApiSuccess('https://example.test/$storagePath');
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

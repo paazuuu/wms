@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
 import 'package:wms_mobile/features/qc/application/inspection_providers.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/qc/presentation/inspection_detail_screen.dart';
@@ -33,6 +34,7 @@ Future<ProviderContainer> _pump(
     WidgetTester tester, FakeInspectionRepository repo) async {
   final container = ProviderContainer(overrides: [
     inspectionRepositoryProvider.overrideWithValue(repo),
+    attachmentRepositoryProvider.overrideWithValue(FakeAttachmentRepository()),
   ]);
   addTearDown(container.dispose);
   await pumpAppWith(

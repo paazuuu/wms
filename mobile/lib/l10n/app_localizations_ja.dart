@@ -961,6 +961,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get qcSplitHint => '合格数と不良数を入力してください（合計が実数になります）';
 
   @override
+  String get qcAttachmentsEmpty => '写真はまだありません';
+
+  @override
+  String get qcAttachmentCamera => 'カメラで撮影';
+
+  @override
+  String get qcAttachmentGallery => 'ギャラリーから選択';
+
+  @override
   String get whFieldUsesLocations => '棚（ロケーション）で管理する';
 
   @override

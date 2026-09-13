@@ -1900,6 +1900,24 @@ abstract class AppLocalizations {
   /// **'合格数と不良数を入力してください（合計が実数になります）'**
   String get qcSplitHint;
 
+  /// No description provided for @qcAttachmentsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真はまだありません'**
+  String get qcAttachmentsEmpty;
+
+  /// No description provided for @qcAttachmentCamera.
+  ///
+  /// In ja, this message translates to:
+  /// **'カメラで撮影'**
+  String get qcAttachmentCamera;
+
+  /// No description provided for @qcAttachmentGallery.
+  ///
+  /// In ja, this message translates to:
+  /// **'ギャラリーから選択'**
+  String get qcAttachmentGallery;
+
   /// No description provided for @whFieldUsesLocations.
   ///
   /// In ja, this message translates to:

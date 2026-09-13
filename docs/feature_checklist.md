@@ -101,12 +101,16 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       inventory assistant — spec §27's other modules) — ❌ not started
 
 **Files & attachments**
-- [ ] Image/attachment storage — ❌ **no Supabase Storage bucket has ever been
-      created** (`storage.buckets` is empty in the live project). The OCR flow
-      only ever sends image bytes transiently to the edge function; nothing is
-      kept. The old InventorOS-era `attachment.dart` domain model was deleted
-      along with the rest of `features/inspection/` and had never worked
-      (InventorOS was unreachable)
+- [x] Image/attachment storage (0031) — a private `inspection-attachments`
+      Storage bucket + a polymorphic `attachments` table (RLS: read gated on
+      `inspection.view`, no direct insert policy — every write goes through
+      `record_attachment`, gated on `inspection.confirm`), wired to
+      inspections first. `InspectionDetailScreen` gets a photo strip: add via
+      camera or gallery while the inspection is open, thumbnails render off a
+      time-limited signed URL (the bucket is private). Verified live via
+      grants (`anon`/`public` refused, `authenticated` allowed) and an
+      aborted-transaction round trip. Entity-keyed (`entity_type`/`entity_id`,
+      no FK) so other entities can attach files later without a redesign
 
 **Connectors**
 - [x] Registry + run-log schema, `connector.manage` permission, read/enable
@@ -143,7 +147,6 @@ Consolidated, in one place, as asked:
 - Work orders / kitting / assembly
 - Custom report builder
 - Two-factor authentication, webhooks, GraphQL API
-- Image/attachment storage (no Storage bucket exists)
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)
 - Any real connector adapter (the registry exists; nothing syncs)
 - Dedicated put-away task/queue distinct from receiving

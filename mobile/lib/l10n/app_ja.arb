@@ -452,6 +452,9 @@
     }
   },
   "qcSplitHint": "合格数と不良数を入力してください（合計が実数になります）",
+  "qcAttachmentsEmpty": "写真はまだありません",
+  "qcAttachmentCamera": "カメラで撮影",
+  "qcAttachmentGallery": "ギャラリーから選択",
   "whFieldUsesLocations": "棚（ロケーション）で管理する",
   "whFieldUsesLocationsHelp": "オフのままなら在庫は倉庫単位で管理します。棚番で管理する場合だけオンにしてください（後から変更できます）。",
   "whLocationsOn": "棚管理",

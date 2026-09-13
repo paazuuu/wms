@@ -69,6 +69,28 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
   return StockRepositoryImpl(ref.watch(restDioProvider));
 });
 
+/// Dio for Supabase Storage (`/storage/v1`) — attachment upload and signed
+/// download URLs (0031). Same auth wiring as [deliveryDioProvider]: the RLS
+/// policies on `storage.objects` are permission-gated, so this needs the
+/// real signed-in user's token, not just the anon key.
+final storageDioProvider = Provider<Dio>((ref) {
+  final dio = Dio(BaseOptions(
+    baseUrl: AppConfig.storageBaseUrl,
+    connectTimeout: AppConfig.connectTimeout,
+    receiveTimeout: AppConfig.receiveTimeout,
+    headers: {
+      'Accept': 'application/json',
+      'apikey': AppConfig.supabaseAnonKey,
+      'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
+    },
+  ));
+  SupabaseAuthInterceptor(
+    storage: ref.watch(supabaseSessionStorageProvider),
+    refresher: ref.watch(supabaseTokenRefresherProvider),
+  ).attachTo(dio);
+  return dio;
+});
+
 /// Per-JAN on-hand stock for the active warehouse, highest first. A null active
 /// warehouse means the company-wide view.
 final stockListProvider =

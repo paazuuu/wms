@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/attachment_providers.dart';
 import '../application/inspection_providers.dart';
+import '../domain/attachment.dart';
 import '../domain/inspection.dart';
 import 'qc_result_ui.dart';
 
@@ -86,6 +89,48 @@ class _BodyState extends ConsumerState<_Body> {
     );
   }
 
+  Future<void> _addPhoto() async {
+    final l10n = AppLocalizations.of(context);
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(children: [
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined),
+            title: Text(l10n.qcAttachmentCamera),
+            onTap: () => Navigator.pop(ctx, ImageSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library_outlined),
+            title: Text(l10n.qcAttachmentGallery),
+            onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+          ),
+        ]),
+      ),
+    );
+    if (source == null || !mounted) return;
+
+    final file = await ImagePicker().pickImage(source: source, imageQuality: 85);
+    if (file == null || !mounted) return;
+
+    setState(() => _busy = true);
+    final bytes = await file.readAsBytes();
+    final result = await ref.read(attachmentRepositoryProvider).upload(
+          entityType: 'inspection',
+          entityId: '${_inspection.id}',
+          bytes: bytes,
+          fileName: file.name,
+          contentType: attachmentContentTypeForFileName(file.name),
+        );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) => ref.invalidate(attachmentListProvider(
+          (entityType: 'inspection', entityId: '${_inspection.id}'))),
+      failure: (f) => _snack(f.message, danger: true),
+    );
+  }
+
   Future<void> _editItem(InspectionItem item) async {
     final finding = await showModalBottomSheet<InspectionFinding>(
       context: context,
@@ -150,6 +195,12 @@ class _BodyState extends ConsumerState<_Body> {
                 ),
             ],
           ),
+        ),
+        _AttachmentsRow(
+          entityId: _inspection.id,
+          canAdd: _inspection.isOpen,
+          busy: _busy,
+          onAddPhoto: _addPhoto,
         ),
         Expanded(
           child: _inspection.items.isEmpty
@@ -443,4 +494,140 @@ class _FindingSheetState extends State<_FindingSheet> {
       ),
     );
   }
+}
+
+/// Photo evidence recorded against the inspection (spec §32, 0031) — a
+/// horizontal strip of thumbnails with an add button when the inspection is
+/// still open (adding requires `inspection.confirm`, same as recording a
+/// finding).
+class _AttachmentsRow extends ConsumerWidget {
+  const _AttachmentsRow({
+    required this.entityId,
+    required this.canAdd,
+    required this.busy,
+    required this.onAddPhoto,
+  });
+
+  final int entityId;
+  final bool canAdd;
+  final bool busy;
+  final VoidCallback onAddPhoto;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final async = ref.watch(
+        attachmentListProvider((entityType: 'inspection', entityId: '$entityId')));
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border:
+            Border(bottom: BorderSide(color: theme.colorScheme.outlineVariant)),
+      ),
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          children: [
+            if (canAdd) ...[
+              _AddPhotoButton(busy: busy, onTap: onAddPhoto),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Expanded(
+              child: async.when(
+                loading: () => const Center(
+                    child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (attachments) => attachments.isEmpty
+                    ? Text(l10n.qcAttachmentsEmpty,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant))
+                    : ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: attachments.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppSpacing.sm),
+                        itemBuilder: (context, i) =>
+                            _AttachmentThumbnail(attachment: attachments[i]),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddPhotoButton extends StatelessWidget {
+  const _AddPhotoButton({required this.busy, required this.onTap});
+
+  final bool busy;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: busy ? null : onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: theme.colorScheme.outline),
+        ),
+        child: busy
+            ? const Center(
+                child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2)))
+            : Icon(Icons.add_a_photo_outlined,
+                color: theme.colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
+}
+
+class _AttachmentThumbnail extends ConsumerWidget {
+  const _AttachmentThumbnail({required this.attachment});
+
+  final Attachment attachment;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final async = ref.watch(attachmentSignedUrlProvider(attachment));
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        width: 64,
+        height: 64,
+        child: async.when(
+          loading: () => Container(color: theme.colorScheme.surfaceContainerHigh),
+          error: (_, __) => _brokenThumb(theme),
+          data: (url) => Image.network(
+            url,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _brokenThumb(theme),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _brokenThumb(ThemeData theme) => Container(
+        color: theme.colorScheme.surfaceContainerHigh,
+        child: Icon(Icons.broken_image_outlined,
+            color: theme.colorScheme.onSurfaceVariant),
+      );
 }

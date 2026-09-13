@@ -991,6 +991,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter passed and failed counts (they add up to the actual).';
 
   @override
+  String get qcAttachmentsEmpty => 'No photos yet';
+
+  @override
+  String get qcAttachmentCamera => 'Take a photo';
+
+  @override
+  String get qcAttachmentGallery => 'Choose from gallery';
+
+  @override
   String get whFieldUsesLocations => 'Manage stock by location';
 
   @override

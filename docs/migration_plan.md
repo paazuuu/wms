@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0030 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0031 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -478,6 +478,34 @@ update inside a transaction._
   nothing produces yet, since OCR is still the only task type. 4 new widget
   tests.
 - `flutter analyze`: clean. `flutter test`: 183/183 passing.
+
+### 0031 — Image/attachment storage (spec §32) ✅
+- Nothing in this app had ever stored a file: `storage.buckets` was empty in
+  the live project, and the OCR flow only ever sends image bytes transiently
+  to an edge function. First real attachment capability.
+- A private `inspection-attachments` Storage bucket; a polymorphic
+  `attachments` table (`entity_type`/`entity_id`, not an FK — matches
+  `domain_model.md`'s own "attachments (→ any)" reference, so other entities
+  can attach files later without a redesign) with RLS (read gated on
+  `inspection.view`, no insert/update/delete policy — every write goes
+  through `record_attachment`); `record_attachment(p_entity_type, p_entity_id,
+  p_storage_path, p_content_type)`, gated on `inspection.confirm`, audit-logs
+  `attachment.uploaded`; two `storage.objects` RLS policies (insert gated on
+  `inspection.confirm`, select on `inspection.view`) scoped to the bucket.
+- Verified live: `has_function_privilege` confirmed `anon`/`public` refused,
+  `authenticated` allowed; an aborted transaction called `record_attachment`,
+  confirmed the row's `entity_type`/`entity_id`/`storage_path`/`content_type`/
+  `company_id`, then rolled back (0 leftover rows).
+- Flutter: `features/qc` gained an `Attachment` domain model, an
+  `AttachmentRepository` (upload bytes straight to Storage via a new
+  `storageDioProvider`, then `record_attachment` via `restDioProvider`; list
+  via a PostgREST filter; a signed URL per file since the bucket is private).
+  `InspectionDetailScreen` gained a photo strip: add via camera or gallery
+  while the inspection is open, thumbnails render off a time-limited signed
+  URL. 3 new repository tests (`FakeHttpClientAdapter`-based, covering list/
+  upload/signedUrl) plus a `FakeAttachmentRepository` added to the shared
+  harness so no unrelated screen test reaches a real Storage/PostgREST call.
+- `flutter analyze`: clean. `flutter test`: 186/186 passing.
 
 ## Rollout discipline
 

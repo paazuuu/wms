@@ -960,6 +960,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qcSplitHint => '请输入合格数与不良数（合计即为实数）。';
 
   @override
+  String get qcAttachmentsEmpty => '暂无照片';
+
+  @override
+  String get qcAttachmentCamera => '拍照';
+
+  @override
+  String get qcAttachmentGallery => '从相册选择';
+
+  @override
   String get whFieldUsesLocations => '按库位管理';
 
   @override

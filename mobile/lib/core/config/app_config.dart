@@ -32,6 +32,12 @@ class AppConfig {
   /// Base URL for Supabase Auth (GoTrue) — sign-in, refresh, sign-out.
   static String get authBaseUrl => '$supabaseUrl/auth/v1';
 
+  /// Base URL for Supabase Storage — attachment upload/download.
+  static String get storageBaseUrl => '$supabaseUrl/storage/v1';
+
+  /// Bucket holding inspection photo attachments (0031).
+  static const String attachmentsBucket = 'inspection-attachments';
+
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }
