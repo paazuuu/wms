@@ -2326,4 +2326,169 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shipTracking => '送り状番号';
+
+  @override
+  String get auditEventAiAnalysisCompleted => 'AI解析完了';
+
+  @override
+  String get auditEventAiConfirmed => 'AI結果を承認';
+
+  @override
+  String get auditEventAiRejected => 'AI結果を却下';
+
+  @override
+  String get auditEventAttachmentUploaded => '写真を添付';
+
+  @override
+  String get auditEventCountCancelled => '棚卸を中止';
+
+  @override
+  String get auditEventCountCompleted => '棚卸を確定';
+
+  @override
+  String get auditEventCountStarted => '棚卸を開始';
+
+  @override
+  String get auditEventInspectionConfirmed => '検品確定';
+
+  @override
+  String get auditEventInspectionStarted => '検品開始';
+
+  @override
+  String get auditEventInventoryAdjusted => '在庫調整';
+
+  @override
+  String get auditEventPartnerCreated => '取引先を登録';
+
+  @override
+  String get auditEventPartnerUpdated => '取引先を更新';
+
+  @override
+  String get auditEventPickListCancelled => 'ピッキング中止';
+
+  @override
+  String get auditEventPickListCompleted => 'ピッキング完了';
+
+  @override
+  String get auditEventPickListStarted => 'ピッキング開始';
+
+  @override
+  String get auditEventProductCreated => '商品を登録';
+
+  @override
+  String get auditEventProductUpdated => '商品を更新';
+
+  @override
+  String get auditEventPurchaseOrderApproved => '発注を承認';
+
+  @override
+  String get auditEventPurchaseOrderCancelled => '発注をキャンセル';
+
+  @override
+  String get auditEventPurchaseOrderCompleted => '発注を完了';
+
+  @override
+  String get auditEventPurchaseOrderCreated => '発注を作成';
+
+  @override
+  String get auditEventPurchaseOrderRejected => '発注を却下';
+
+  @override
+  String get auditEventPurchaseOrderSubmitted => '発注を申請';
+
+  @override
+  String get auditEventPutawayConfirmed => '棚入れ確定';
+
+  @override
+  String get auditEventReceivingCancelled => '入荷取消';
+
+  @override
+  String get auditEventReceivingConfirmed => '入荷確定';
+
+  @override
+  String get auditEventReportDeleted => 'レポートを削除';
+
+  @override
+  String get auditEventReportSaved => 'レポートを保存';
+
+  @override
+  String get auditEventSalesOrderApproved => '受注を承認';
+
+  @override
+  String get auditEventSalesOrderCancelled => '受注をキャンセル';
+
+  @override
+  String get auditEventSalesOrderCompleted => '受注を完了';
+
+  @override
+  String get auditEventSalesOrderCreated => '受注を作成';
+
+  @override
+  String get auditEventSalesOrderRejected => '受注を却下';
+
+  @override
+  String get auditEventSalesOrderSubmitted => '受注を申請';
+
+  @override
+  String get auditEventShipmentAutopacked => '箱を自動作成';
+
+  @override
+  String get auditEventShipmentCancelled => '出荷を取消';
+
+  @override
+  String get auditEventShipmentCompleted => '出荷確定';
+
+  @override
+  String get auditEventShipmentLogisticsSet => '配送情報を設定';
+
+  @override
+  String get auditEventTransferApproved => '倉庫間移動を承認';
+
+  @override
+  String get auditEventTransferCancelled => '倉庫間移動を中止';
+
+  @override
+  String get auditEventTransferCreated => '倉庫間移動を作成';
+
+  @override
+  String get auditEventTransferPickingStarted => '移動ピッキング開始';
+
+  @override
+  String get auditEventTransferReceived => '倉庫間移動を受領';
+
+  @override
+  String get auditEventTransferReceivingStarted => '移動受入開始';
+
+  @override
+  String get auditEventTransferRejected => '倉庫間移動を却下';
+
+  @override
+  String get auditEventTransferShipped => '倉庫間移動を出庫';
+
+  @override
+  String get auditEventTransferSubmitted => '倉庫間移動を申請';
+
+  @override
+  String get auditEventUserRoleAssigned => 'ロールを付与';
+
+  @override
+  String get auditEventUserRoleRevoked => 'ロールを削除';
+
+  @override
+  String get auditEventUserWarehouseAssigned => '倉庫アクセスを付与';
+
+  @override
+  String get auditEventUserWarehouseRevoked => '倉庫アクセスを削除';
+
+  @override
+  String get auditEventWorkOrderCancelled => '作業指示を中止';
+
+  @override
+  String get auditEventWorkOrderCompleted => '作業指示を完了';
+
+  @override
+  String get auditEventWorkOrderCreated => '作業指示を作成';
+
+  @override
+  String get auditEventWorkOrderStarted => '作業指示を開始';
 }

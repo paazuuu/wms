@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/audit_providers.dart';
+import 'audit_event_labels.dart';
 
 /// A compact "what happened to this record" timeline (spec §40) for a
 /// document's own detail screen — the same events the Audit Log screen shows
@@ -82,17 +83,40 @@ class EntityAuditTimeline extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // §29: "何をした" in words an operator reads at a
+                            // glance, not the raw event code a machine wrote.
                             Text(
-                              entries[i].eventType,
-                              style: theme.textTheme.bodyMedium
-                                  ?.copyWith(fontFamily: AppFonts.mono),
+                              AuditEventLabels.of(l10n, entries[i].eventType),
+                              style: theme.textTheme.bodyMedium,
                             ),
-                            if (entries[i].createdAt != null)
-                              Text(
-                                fmt.format(entries[i].createdAt!),
-                                style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: scheme.onSurfaceVariant),
-                              ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                // §29: "誰が" — a resolved name/email, or
+                                // "system" for an entry logged with no actor.
+                                Flexible(
+                                  child: Text(
+                                    entries[i].actorDisplay ??
+                                        l10n.auditActorSystem,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                        color: scheme.onSurfaceVariant),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (entries[i].createdAt != null) ...[
+                                  Text(' · ',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                              color: scheme.onSurfaceVariant)),
+                                  Text(
+                                    fmt.format(entries[i].createdAt!),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                        color: scheme.onSurfaceVariant),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ],
                         ),
                       ),

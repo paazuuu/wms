@@ -79,7 +79,7 @@ void main() {
         find.descendant(of: cards, matching: find.text('transfer.created')),
         findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilterChip, 'transfer.approved'));
+    await tester.tap(find.widgetWithText(FilterChip, '倉庫間移動を承認'));
     await tester.pumpAndSettle();
 
     expect(

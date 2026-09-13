@@ -4485,6 +4485,336 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'送り状番号'**
   String get shipTracking;
+
+  /// No description provided for @auditEventAiAnalysisCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI解析完了'**
+  String get auditEventAiAnalysisCompleted;
+
+  /// No description provided for @auditEventAiConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI結果を承認'**
+  String get auditEventAiConfirmed;
+
+  /// No description provided for @auditEventAiRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI結果を却下'**
+  String get auditEventAiRejected;
+
+  /// No description provided for @auditEventAttachmentUploaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真を添付'**
+  String get auditEventAttachmentUploaded;
+
+  /// No description provided for @auditEventCountCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を中止'**
+  String get auditEventCountCancelled;
+
+  /// No description provided for @auditEventCountCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を確定'**
+  String get auditEventCountCompleted;
+
+  /// No description provided for @auditEventCountStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸を開始'**
+  String get auditEventCountStarted;
+
+  /// No description provided for @auditEventInspectionConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品確定'**
+  String get auditEventInspectionConfirmed;
+
+  /// No description provided for @auditEventInspectionStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品開始'**
+  String get auditEventInspectionStarted;
+
+  /// No description provided for @auditEventInventoryAdjusted.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫調整'**
+  String get auditEventInventoryAdjusted;
+
+  /// No description provided for @auditEventPartnerCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先を登録'**
+  String get auditEventPartnerCreated;
+
+  /// No description provided for @auditEventPartnerUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先を更新'**
+  String get auditEventPartnerUpdated;
+
+  /// No description provided for @auditEventPickListCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング中止'**
+  String get auditEventPickListCancelled;
+
+  /// No description provided for @auditEventPickListCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング完了'**
+  String get auditEventPickListCompleted;
+
+  /// No description provided for @auditEventPickListStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング開始'**
+  String get auditEventPickListStarted;
+
+  /// No description provided for @auditEventProductCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を登録'**
+  String get auditEventProductCreated;
+
+  /// No description provided for @auditEventProductUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を更新'**
+  String get auditEventProductUpdated;
+
+  /// No description provided for @auditEventPurchaseOrderApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を承認'**
+  String get auditEventPurchaseOrderApproved;
+
+  /// No description provided for @auditEventPurchaseOrderCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注をキャンセル'**
+  String get auditEventPurchaseOrderCancelled;
+
+  /// No description provided for @auditEventPurchaseOrderCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を完了'**
+  String get auditEventPurchaseOrderCompleted;
+
+  /// No description provided for @auditEventPurchaseOrderCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を作成'**
+  String get auditEventPurchaseOrderCreated;
+
+  /// No description provided for @auditEventPurchaseOrderRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を却下'**
+  String get auditEventPurchaseOrderRejected;
+
+  /// No description provided for @auditEventPurchaseOrderSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を申請'**
+  String get auditEventPurchaseOrderSubmitted;
+
+  /// No description provided for @auditEventPutawayConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ確定'**
+  String get auditEventPutawayConfirmed;
+
+  /// No description provided for @auditEventReceivingCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷取消'**
+  String get auditEventReceivingCancelled;
+
+  /// No description provided for @auditEventReceivingConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷確定'**
+  String get auditEventReceivingConfirmed;
+
+  /// No description provided for @auditEventReportDeleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポートを削除'**
+  String get auditEventReportDeleted;
+
+  /// No description provided for @auditEventReportSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'レポートを保存'**
+  String get auditEventReportSaved;
+
+  /// No description provided for @auditEventSalesOrderApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を承認'**
+  String get auditEventSalesOrderApproved;
+
+  /// No description provided for @auditEventSalesOrderCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注をキャンセル'**
+  String get auditEventSalesOrderCancelled;
+
+  /// No description provided for @auditEventSalesOrderCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を完了'**
+  String get auditEventSalesOrderCompleted;
+
+  /// No description provided for @auditEventSalesOrderCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を作成'**
+  String get auditEventSalesOrderCreated;
+
+  /// No description provided for @auditEventSalesOrderRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を却下'**
+  String get auditEventSalesOrderRejected;
+
+  /// No description provided for @auditEventSalesOrderSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を申請'**
+  String get auditEventSalesOrderSubmitted;
+
+  /// No description provided for @auditEventShipmentAutopacked.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱を自動作成'**
+  String get auditEventShipmentAutopacked;
+
+  /// No description provided for @auditEventShipmentCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を取消'**
+  String get auditEventShipmentCancelled;
+
+  /// No description provided for @auditEventShipmentCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷確定'**
+  String get auditEventShipmentCompleted;
+
+  /// No description provided for @auditEventShipmentLogisticsSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'配送情報を設定'**
+  String get auditEventShipmentLogisticsSet;
+
+  /// No description provided for @auditEventTransferApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を承認'**
+  String get auditEventTransferApproved;
+
+  /// No description provided for @auditEventTransferCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を中止'**
+  String get auditEventTransferCancelled;
+
+  /// No description provided for @auditEventTransferCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を作成'**
+  String get auditEventTransferCreated;
+
+  /// No description provided for @auditEventTransferPickingStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動ピッキング開始'**
+  String get auditEventTransferPickingStarted;
+
+  /// No description provided for @auditEventTransferReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を受領'**
+  String get auditEventTransferReceived;
+
+  /// No description provided for @auditEventTransferReceivingStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動受入開始'**
+  String get auditEventTransferReceivingStarted;
+
+  /// No description provided for @auditEventTransferRejected.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を却下'**
+  String get auditEventTransferRejected;
+
+  /// No description provided for @auditEventTransferShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を出庫'**
+  String get auditEventTransferShipped;
+
+  /// No description provided for @auditEventTransferSubmitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動を申請'**
+  String get auditEventTransferSubmitted;
+
+  /// No description provided for @auditEventUserRoleAssigned.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロールを付与'**
+  String get auditEventUserRoleAssigned;
+
+  /// No description provided for @auditEventUserRoleRevoked.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロールを削除'**
+  String get auditEventUserRoleRevoked;
+
+  /// No description provided for @auditEventUserWarehouseAssigned.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫アクセスを付与'**
+  String get auditEventUserWarehouseAssigned;
+
+  /// No description provided for @auditEventUserWarehouseRevoked.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫アクセスを削除'**
+  String get auditEventUserWarehouseRevoked;
+
+  /// No description provided for @auditEventWorkOrderCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を中止'**
+  String get auditEventWorkOrderCancelled;
+
+  /// No description provided for @auditEventWorkOrderCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を完了'**
+  String get auditEventWorkOrderCompleted;
+
+  /// No description provided for @auditEventWorkOrderCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を作成'**
+  String get auditEventWorkOrderCreated;
+
+  /// No description provided for @auditEventWorkOrderStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を開始'**
+  String get auditEventWorkOrderStarted;
 }
 
 class _AppLocalizationsDelegate

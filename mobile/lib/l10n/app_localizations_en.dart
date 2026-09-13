@@ -2396,4 +2396,169 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shipTracking => 'Tracking number';
+
+  @override
+  String get auditEventAiAnalysisCompleted => 'AI analysis completed';
+
+  @override
+  String get auditEventAiConfirmed => 'AI result confirmed';
+
+  @override
+  String get auditEventAiRejected => 'AI result rejected';
+
+  @override
+  String get auditEventAttachmentUploaded => 'Photo attached';
+
+  @override
+  String get auditEventCountCancelled => 'Cycle count cancelled';
+
+  @override
+  String get auditEventCountCompleted => 'Cycle count completed';
+
+  @override
+  String get auditEventCountStarted => 'Cycle count started';
+
+  @override
+  String get auditEventInspectionConfirmed => 'Inspection confirmed';
+
+  @override
+  String get auditEventInspectionStarted => 'Inspection started';
+
+  @override
+  String get auditEventInventoryAdjusted => 'Stock adjusted';
+
+  @override
+  String get auditEventPartnerCreated => 'Partner created';
+
+  @override
+  String get auditEventPartnerUpdated => 'Partner updated';
+
+  @override
+  String get auditEventPickListCancelled => 'Picking cancelled';
+
+  @override
+  String get auditEventPickListCompleted => 'Picking completed';
+
+  @override
+  String get auditEventPickListStarted => 'Picking started';
+
+  @override
+  String get auditEventProductCreated => 'Product created';
+
+  @override
+  String get auditEventProductUpdated => 'Product updated';
+
+  @override
+  String get auditEventPurchaseOrderApproved => 'Purchase order approved';
+
+  @override
+  String get auditEventPurchaseOrderCancelled => 'Purchase order cancelled';
+
+  @override
+  String get auditEventPurchaseOrderCompleted => 'Purchase order completed';
+
+  @override
+  String get auditEventPurchaseOrderCreated => 'Purchase order created';
+
+  @override
+  String get auditEventPurchaseOrderRejected => 'Purchase order rejected';
+
+  @override
+  String get auditEventPurchaseOrderSubmitted => 'Purchase order submitted';
+
+  @override
+  String get auditEventPutawayConfirmed => 'Put-away confirmed';
+
+  @override
+  String get auditEventReceivingCancelled => 'Receipt cancelled';
+
+  @override
+  String get auditEventReceivingConfirmed => 'Receipt confirmed';
+
+  @override
+  String get auditEventReportDeleted => 'Report deleted';
+
+  @override
+  String get auditEventReportSaved => 'Report saved';
+
+  @override
+  String get auditEventSalesOrderApproved => 'Sales order approved';
+
+  @override
+  String get auditEventSalesOrderCancelled => 'Sales order cancelled';
+
+  @override
+  String get auditEventSalesOrderCompleted => 'Sales order completed';
+
+  @override
+  String get auditEventSalesOrderCreated => 'Sales order created';
+
+  @override
+  String get auditEventSalesOrderRejected => 'Sales order rejected';
+
+  @override
+  String get auditEventSalesOrderSubmitted => 'Sales order submitted';
+
+  @override
+  String get auditEventShipmentAutopacked => 'Cartons auto-packed';
+
+  @override
+  String get auditEventShipmentCancelled => 'Shipment cancelled';
+
+  @override
+  String get auditEventShipmentCompleted => 'Shipment completed';
+
+  @override
+  String get auditEventShipmentLogisticsSet => 'Shipping details set';
+
+  @override
+  String get auditEventTransferApproved => 'Transfer approved';
+
+  @override
+  String get auditEventTransferCancelled => 'Transfer cancelled';
+
+  @override
+  String get auditEventTransferCreated => 'Transfer created';
+
+  @override
+  String get auditEventTransferPickingStarted => 'Transfer picking started';
+
+  @override
+  String get auditEventTransferReceived => 'Transfer received';
+
+  @override
+  String get auditEventTransferReceivingStarted => 'Transfer receiving started';
+
+  @override
+  String get auditEventTransferRejected => 'Transfer rejected';
+
+  @override
+  String get auditEventTransferShipped => 'Transfer shipped';
+
+  @override
+  String get auditEventTransferSubmitted => 'Transfer submitted';
+
+  @override
+  String get auditEventUserRoleAssigned => 'Role assigned';
+
+  @override
+  String get auditEventUserRoleRevoked => 'Role revoked';
+
+  @override
+  String get auditEventUserWarehouseAssigned => 'Warehouse access granted';
+
+  @override
+  String get auditEventUserWarehouseRevoked => 'Warehouse access revoked';
+
+  @override
+  String get auditEventWorkOrderCancelled => 'Work order cancelled';
+
+  @override
+  String get auditEventWorkOrderCompleted => 'Work order completed';
+
+  @override
+  String get auditEventWorkOrderCreated => 'Work order created';
+
+  @override
+  String get auditEventWorkOrderStarted => 'Work order started';
 }

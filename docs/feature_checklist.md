@@ -193,6 +193,26 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       as future work; today everything goes through the system print / PDF
       dialog
 
+**Audit trail readability (UI spec §29)**
+- [x] "誰が・いつ・何をした" — until now the audit trail's "who" was a bare
+      `auth.uid()` uuid and its "what" was the raw `event_type` code
+      (`purchase_order.approved`). `audit_log_query`/`audit_log_for_entity`
+      (0040) now resolve the actor through `app_users` (mirrors
+      `auth.users`, existed since 0012 — no new table), returning
+      `actor_name`/`actor_email` alongside the uuid; a genuinely actor-less
+      entry (bootstrap, a cron job) stays null rather than resolving to a
+      false name
+- [x] Every one of the 55 `log_audit(...)` event codes in the schema is
+      mapped to a human phrase in three languages (`AuditEventLabels`) — the
+      per-record timeline, the full Audit Log screen, and its filter chips
+      all show the phrase; the raw code stays visible as a small monospace
+      caption for anyone cross-referencing a ticket. An event code the map
+      doesn't recognise still renders (humanized fallback), so a future
+      migration that adds one without updating this list degrades instead
+      of breaking
+- [x] CSV export gained `actor_name`/`actor_email` columns alongside the
+      existing `actor_user_id`
+
 **Permission-aware UI (UI spec §37)**
 - [x] The home menu, sidebar, dashboard feature grid, and today's-tasks/
       outstanding shortcuts now hide anything the signed-in user holds no

@@ -15,6 +15,8 @@ class AuditEntry extends Equatable {
     this.warehouseId,
     this.warehouseName,
     this.actorUserId,
+    this.actorName,
+    this.actorEmail,
     this.details = const {},
     this.createdAt,
   });
@@ -26,8 +28,20 @@ class AuditEntry extends Equatable {
   final int? warehouseId;
   final String? warehouseName;
   final String? actorUserId;
+
+  /// From `app_users` (0040), resolved server-side by both read RPCs. Null
+  /// for an entry logged with no actor (bootstrap, a cron-driven job) — that
+  /// is a real "nobody did this" fact, distinct from a name we simply
+  /// couldn't resolve, so the UI shows "system" only when both this and
+  /// [actorEmail] are null.
+  final String? actorName;
+  final String? actorEmail;
   final Map<String, dynamic> details;
   final DateTime? createdAt;
+
+  /// The best available label for "who" (§29) — name, then email, then null
+  /// when the entry genuinely has no actor.
+  String? get actorDisplay => actorName ?? actorEmail;
 
   factory AuditEntry.fromJson(Map<String, dynamic> json) => AuditEntry(
         id: _asInt(json['id']),
@@ -37,6 +51,8 @@ class AuditEntry extends Equatable {
         warehouseId: json['warehouse_id'] == null ? null : _asInt(json['warehouse_id']),
         warehouseName: json['warehouse_name'] as String?,
         actorUserId: json['actor_user_id'] as String?,
+        actorName: json['actor_name'] as String?,
+        actorEmail: json['actor_email'] as String?,
         details: (json['details'] as Map?)?.cast<String, dynamic>() ?? const {},
         createdAt: DateTime.tryParse('${json['created_at']}')?.toLocal(),
       );

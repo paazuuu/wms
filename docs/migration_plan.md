@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0039 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0040 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -776,6 +776,36 @@ each handler now applies was checked against live data (no filter → 2 plans,
 the function could not be made from this environment — the network policy
 denies the project host — so that part is verified by the deployed source and
 the SQL predicate, not by calling the endpoint.
+
+### 0040 — Audit trail: resolve the actor's name (UI spec §29) ✅
+- `audit_log.actor_user_id` has been a bare uuid since 0012; both read RPCs
+  (`audit_log_query` 0020, `audit_log_for_entity` 0023) selected it but
+  nothing ever resolved it, so every screen's "who" was really a uuid.
+  `app_users` (0012) already mirrors `auth.users`' name/email for exactly
+  this — `create or replace` on both functions adds a left join, returning
+  `actor_name`/`actor_email` alongside the existing `actor_user_id`. A null
+  actor (bootstrap, a cron-driven job) stays null.
+- Signatures unchanged, so the existing `anon`/`authenticated`/`service_role`
+  grants (this app is still login-free, per 0020's own note) needed no
+  change — re-stated in the migration for clarity, not because anything
+  actually changed.
+- Verified live: grants confirmed unchanged; an aborted transaction seeded
+  an `app_users` row and two `audit_log` rows (one with that actor, one with
+  none), called both RPCs, and confirmed the actor's row resolves to its
+  name while the actor-less row's `actor_name` stays null — rolled back,
+  0 leftover rows in either table.
+- Flutter: `AuditEntry` gained `actorName`/`actorEmail`/`actorDisplay` (name,
+  then email, then null — never a fabricated one for a genuinely actor-less
+  entry). `AuditEventLabels` maps all 55 `log_audit(...)` event codes in the
+  schema to a human phrase per language, with an unrecognised code falling
+  back to a humanized version of the raw string rather than disappearing or
+  crashing — a regression test asserts every currently-known code resolves
+  to a real phrase, not the fallback. `EntityAuditTimeline` and
+  `AuditLogScreen` (headline, filter chips, CSV export) all switched from
+  the raw code/uuid to the humanized label/resolved name; the raw code stays
+  as a small monospace caption on the full Audit Log screen for anyone
+  cross-referencing it against something else.
+- `flutter analyze`: clean. `flutter test`: 291 → 300 passing.
 
 ### Client-only change: permission-aware menu (UI spec §37, no migration)
 

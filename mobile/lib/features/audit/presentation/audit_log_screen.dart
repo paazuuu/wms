@@ -8,6 +8,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/audit_providers.dart';
 import '../domain/audit_entry.dart';
+import 'audit_event_labels.dart';
 
 /// The audit trail (spec §33): every approval, rejection, cancellation and
 /// completion any mutating RPC has logged, newest first. Filterable by event
@@ -30,6 +31,8 @@ class AuditLogScreen extends ConsumerWidget {
           'entity_id',
           'warehouse_name',
           'actor_user_id',
+          'actor_name',
+          'actor_email',
           'details',
         ],
         rows: [
@@ -42,6 +45,8 @@ class AuditLogScreen extends ConsumerWidget {
               e.entityId ?? '',
               e.warehouseName ?? '',
               e.actorUserId ?? '',
+              e.actorName ?? '',
+              e.actorEmail ?? '',
               e.details.isEmpty ? '' : e.details.toString(),
             ],
         ],
@@ -97,7 +102,9 @@ class AuditLogScreen extends ConsumerWidget {
                       child: Center(
                         child: FilterChip(
                           selected: active == t,
-                          label: Text(t ?? l10n.filterAll),
+                          label: Text(t == null
+                              ? l10n.filterAll
+                              : AuditEventLabels.of(l10n, t)),
                           onSelected: (_) => ref
                               .read(auditEventTypeFilterProvider.notifier)
                               .state = t,
@@ -162,11 +169,11 @@ class _AuditCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                // §29's "何をした" as a phrase, not the raw event code.
                 Expanded(
                   child: Text(
-                    entry.eventType,
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontFamily: AppFonts.mono),
+                    AuditEventLabels.of(l10n, entry.eventType),
+                    style: theme.textTheme.titleSmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -179,6 +186,15 @@ class _AuditCard extends StatelessWidget {
                   ),
               ],
             ),
+            // The raw code, kept in small monospace for whoever is
+            // cross-referencing this against a report or a support ticket —
+            // humanizing the headline doesn't mean throwing the code away.
+            const SizedBox(height: 2),
+            Text(
+              entry.eventType,
+              style: theme.textTheme.labelSmall?.copyWith(
+                  fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
+            ),
             if (entry.entityType != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -189,8 +205,10 @@ class _AuditCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 4),
+            // §29's "誰が" — a resolved name/email (0040), or "system" for an
+            // entry logged with no actor (bootstrap, a cron-driven job).
             Text(
-              '${l10n.auditActor}: ${entry.actorUserId ?? l10n.auditActorSystem}',
+              '${l10n.auditActor}: ${entry.actorDisplay ?? l10n.auditActorSystem}',
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: scheme.onSurfaceVariant),
             ),

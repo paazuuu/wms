@@ -2322,4 +2322,169 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shipTracking => '运单号';
+
+  @override
+  String get auditEventAiAnalysisCompleted => 'AI 分析完成';
+
+  @override
+  String get auditEventAiConfirmed => '已确认 AI 结果';
+
+  @override
+  String get auditEventAiRejected => '已拒绝 AI 结果';
+
+  @override
+  String get auditEventAttachmentUploaded => '已上传附件';
+
+  @override
+  String get auditEventCountCancelled => '盘点已取消';
+
+  @override
+  String get auditEventCountCompleted => '盘点已完成';
+
+  @override
+  String get auditEventCountStarted => '盘点已开始';
+
+  @override
+  String get auditEventInspectionConfirmed => '已确认检验';
+
+  @override
+  String get auditEventInspectionStarted => '检验已开始';
+
+  @override
+  String get auditEventInventoryAdjusted => '库存已调整';
+
+  @override
+  String get auditEventPartnerCreated => '已创建往来单位';
+
+  @override
+  String get auditEventPartnerUpdated => '已更新往来单位';
+
+  @override
+  String get auditEventPickListCancelled => '拣货已取消';
+
+  @override
+  String get auditEventPickListCompleted => '拣货已完成';
+
+  @override
+  String get auditEventPickListStarted => '拣货已开始';
+
+  @override
+  String get auditEventProductCreated => '已创建商品';
+
+  @override
+  String get auditEventProductUpdated => '已更新商品';
+
+  @override
+  String get auditEventPurchaseOrderApproved => '采购单已批准';
+
+  @override
+  String get auditEventPurchaseOrderCancelled => '采购单已取消';
+
+  @override
+  String get auditEventPurchaseOrderCompleted => '采购单已完成';
+
+  @override
+  String get auditEventPurchaseOrderCreated => '已创建采购单';
+
+  @override
+  String get auditEventPurchaseOrderRejected => '采购单已拒绝';
+
+  @override
+  String get auditEventPurchaseOrderSubmitted => '采购单已提交';
+
+  @override
+  String get auditEventPutawayConfirmed => '已确认上架';
+
+  @override
+  String get auditEventReceivingCancelled => '收货已取消';
+
+  @override
+  String get auditEventReceivingConfirmed => '收货已确认';
+
+  @override
+  String get auditEventReportDeleted => '报表已删除';
+
+  @override
+  String get auditEventReportSaved => '报表已保存';
+
+  @override
+  String get auditEventSalesOrderApproved => '销售单已批准';
+
+  @override
+  String get auditEventSalesOrderCancelled => '销售单已取消';
+
+  @override
+  String get auditEventSalesOrderCompleted => '销售单已完成';
+
+  @override
+  String get auditEventSalesOrderCreated => '已创建销售单';
+
+  @override
+  String get auditEventSalesOrderRejected => '销售单已拒绝';
+
+  @override
+  String get auditEventSalesOrderSubmitted => '销售单已提交';
+
+  @override
+  String get auditEventShipmentAutopacked => '已自动装箱';
+
+  @override
+  String get auditEventShipmentCancelled => '发货已取消';
+
+  @override
+  String get auditEventShipmentCompleted => '发货已完成';
+
+  @override
+  String get auditEventShipmentLogisticsSet => '已设置配送信息';
+
+  @override
+  String get auditEventTransferApproved => '调拨已批准';
+
+  @override
+  String get auditEventTransferCancelled => '调拨已取消';
+
+  @override
+  String get auditEventTransferCreated => '已创建调拨';
+
+  @override
+  String get auditEventTransferPickingStarted => '调拨拣货已开始';
+
+  @override
+  String get auditEventTransferReceived => '调拨已接收';
+
+  @override
+  String get auditEventTransferReceivingStarted => '调拨收货已开始';
+
+  @override
+  String get auditEventTransferRejected => '调拨已拒绝';
+
+  @override
+  String get auditEventTransferShipped => '调拨已发出';
+
+  @override
+  String get auditEventTransferSubmitted => '调拨已提交';
+
+  @override
+  String get auditEventUserRoleAssigned => '已分配角色';
+
+  @override
+  String get auditEventUserRoleRevoked => '已撤销角色';
+
+  @override
+  String get auditEventUserWarehouseAssigned => '已授予仓库权限';
+
+  @override
+  String get auditEventUserWarehouseRevoked => '已撤销仓库权限';
+
+  @override
+  String get auditEventWorkOrderCancelled => '工单已取消';
+
+  @override
+  String get auditEventWorkOrderCompleted => '工单已完成';
+
+  @override
+  String get auditEventWorkOrderCreated => '已创建工单';
+
+  @override
+  String get auditEventWorkOrderStarted => '工单已开始';
 }
