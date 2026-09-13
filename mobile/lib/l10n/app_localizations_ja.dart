@@ -1443,6 +1443,104 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featPartnersDesc => '仕入先・顧客の連絡先や取引条件を管理';
 
   @override
+  String get featWorkOrders => '作業指示';
+
+  @override
+  String get featWorkOrdersDesc => '部材を消費して完成品を作るキッティング・組立作業';
+
+  @override
+  String get woTitle => '作業指示';
+
+  @override
+  String get woNew => '作業指示を作成';
+
+  @override
+  String get woEmpty => '作業指示がまだありません';
+
+  @override
+  String get woEmptyBody => '右下のボタンから作業指示を作成できます。';
+
+  @override
+  String get woNeedsWarehouse => '倉庫がありません';
+
+  @override
+  String get woWarehouse => '作業倉庫';
+
+  @override
+  String get woOutputTitle => '完成品';
+
+  @override
+  String get woOutputQuantity => '完成数量';
+
+  @override
+  String get woOutputRequired => '完成品のJANコードと数量を入力してください';
+
+  @override
+  String get woComponentsTitle => '部材';
+
+  @override
+  String get woAddComponent => '部材を追加';
+
+  @override
+  String get woComponentRequired => '部材を1件以上追加してください';
+
+  @override
+  String get woComponentQuantity => '必要数量';
+
+  @override
+  String woComponentCount(int count) {
+    return '$count 部材';
+  }
+
+  @override
+  String get woNote => '備考';
+
+  @override
+  String get woCreate => '作成';
+
+  @override
+  String get woLineJan => 'JANコード';
+
+  @override
+  String get woLineProductName => '商品名';
+
+  @override
+  String get woStart => '作業開始';
+
+  @override
+  String get woStarted => '作業を開始しました';
+
+  @override
+  String get woComplete => '完了にする';
+
+  @override
+  String get woCompleteQ => 'この作業指示を完了にしますか？部材の在庫が消費され、完成品の在庫が増加します。';
+
+  @override
+  String get woCompleted => '作業指示を完了しました';
+
+  @override
+  String get woCancelAction => '作業指示を取消';
+
+  @override
+  String get woCancelBody => 'この作業指示を取り消しますか？';
+
+  @override
+  String get woCancelled => '作業指示を取り消しました';
+
+  @override
+  String get woStatusDraft => '下書き';
+
+  @override
+  String get woStatusInProgress => '作業中';
+
+  @override
+  String get woStatusCompleted => '完了';
+
+  @override
+  String get woStatusCancelled => '取消';
+
+  @override
   String get partnersTitle => '取引先';
 
   @override

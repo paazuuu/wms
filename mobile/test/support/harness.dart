@@ -40,6 +40,9 @@ import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
 import 'package:wms_mobile/features/sales/application/sales_order_providers.dart';
 import 'package:wms_mobile/features/sales/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
+import 'package:wms_mobile/features/work_orders/application/work_order_providers.dart';
+import 'package:wms_mobile/features/work_orders/data/work_order_repository.dart';
+import 'package:wms_mobile/features/work_orders/domain/work_order.dart';
 import 'package:wms_mobile/features/audit/data/audit_repository.dart';
 import 'package:wms_mobile/features/audit/domain/audit_entry.dart';
 import 'package:wms_mobile/features/search/data/search_repository.dart';
@@ -94,6 +97,7 @@ List<Override> _defaultOverrides() => [
       salesOrderRepositoryProvider.overrideWithValue(FakeSalesOrderRepository()),
       tradingPartnerRepositoryProvider
           .overrideWithValue(FakeTradingPartnerRepository()),
+      workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1540,6 +1544,112 @@ class FakeTradingPartnerRepository implements TradingPartnerRepository {
     ];
     return const ApiSuccess(true);
   }
+}
+
+/// Work order stub. Mirrors the real RPCs' state-machine transitions
+/// (DRAFT -> IN_PROGRESS -> COMPLETED, or CANCELLED) so a screen test
+/// exercises the same rules the backend enforces. Unlike purchase/sales
+/// order fakes, this doesn't need to simulate stock movement — the screen
+/// only cares that complete() succeeds and flips the status.
+class FakeWorkOrderRepository implements WorkOrderRepository {
+  FakeWorkOrderRepository({List<WorkOrder> orders = const []})
+      : _orders = List.of(orders);
+
+  List<WorkOrder> _orders;
+
+  WorkOrder _copyWith(WorkOrder o, {WorkOrderStatus? status}) => WorkOrder(
+        id: o.id,
+        status: status ?? o.status,
+        woNumber: o.woNumber,
+        warehouseId: o.warehouseId,
+        warehouseName: o.warehouseName,
+        outputJanCode: o.outputJanCode,
+        outputProductName: o.outputProductName,
+        outputQuantity: o.outputQuantity,
+        note: o.note,
+        startedAt: o.startedAt,
+        completedAt: o.completedAt,
+        createdAt: o.createdAt,
+        components: o.components,
+        componentCount: o.componentCount,
+      );
+
+  ApiResult<bool> _transition(int id, WorkOrderStatus from, WorkOrderStatus to) {
+    final order = _orders.firstWhere((o) => o.id == id);
+    if (order.status != from) {
+      return ApiFailure(message: 'work order is ${order.status.wire}', statusCode: 400);
+    }
+    _orders = [
+      for (final o in _orders) if (o.id == id) _copyWith(o, status: to) else o,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<WorkOrder>>> list({int? warehouseId, String? status}) async =>
+      ApiSuccess(_orders
+          .where((o) =>
+              (warehouseId == null || o.warehouseId == warehouseId) &&
+              (status == null || o.status.wire == status))
+          .toList());
+
+  @override
+  Future<ApiResult<WorkOrder>> show(int id) async =>
+      ApiSuccess(_orders.firstWhere((o) => o.id == id));
+
+  @override
+  Future<ApiResult<int>> create({
+    required int warehouseId,
+    required String outputJanCode,
+    required int outputQuantity,
+    required List<WorkOrderComponentDraft> components,
+    String? outputProductName,
+    String? note,
+  }) async {
+    final id = _orders.isEmpty
+        ? 1
+        : _orders.map((o) => o.id).reduce((a, b) => a > b ? a : b) + 1;
+    final order = WorkOrder(
+      id: id,
+      status: WorkOrderStatus.draft,
+      woNumber: 'WO-${id.toString().padLeft(6, '0')}',
+      warehouseId: warehouseId,
+      outputJanCode: outputJanCode,
+      outputProductName: outputProductName ?? '',
+      outputQuantity: outputQuantity,
+      note: note,
+      createdAt: DateTime.now(),
+      components: [
+        for (var i = 0; i < components.length; i++)
+          WorkOrderComponent(
+            id: i + 1,
+            janCode: components[i].janCode,
+            productName: components[i].productName,
+            quantityRequired: components[i].quantityRequired,
+          ),
+      ],
+    );
+    _orders = [..._orders, order];
+    return ApiSuccess(id);
+  }
+
+  @override
+  Future<ApiResult<bool>> start(int id) async =>
+      _transition(id, WorkOrderStatus.draft, WorkOrderStatus.inProgress);
+
+  @override
+  Future<ApiResult<bool>> cancel(int id) async {
+    final order = _orders.firstWhere((o) => o.id == id);
+    if (![WorkOrderStatus.draft, WorkOrderStatus.inProgress].contains(order.status)) {
+      return ApiFailure(
+          message: 'work order is ${order.status.wire}', statusCode: 400);
+    }
+    return _transition(id, order.status, WorkOrderStatus.cancelled);
+  }
+
+  @override
+  Future<ApiResult<bool>> complete(int id) async =>
+      _transition(id, WorkOrderStatus.inProgress, WorkOrderStatus.completed);
 }
 
 /// Search stub. Returns [results] for any non-empty query, records the

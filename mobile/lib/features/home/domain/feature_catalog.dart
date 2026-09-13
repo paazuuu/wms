@@ -15,6 +15,7 @@ import '../../sales/presentation/sales_order_list_screen.dart';
 import '../../stock_ops/presentation/stock_adjustment_screen.dart';
 import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../transfers/presentation/transfer_list_screen.dart';
+import '../../work_orders/presentation/work_order_list_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -83,6 +84,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.point_of_sale_outlined,
             status: FeatureStatus.ready,
             builder: _salesOrders,
+          ),
+          FeatureEntry(
+            id: 'work_orders',
+            icon: Icons.precision_manufacturing_outlined,
+            status: FeatureStatus.ready,
+            builder: _workOrders,
           ),
         ],
       ),
@@ -175,3 +182,6 @@ Widget _purchaseOrders(BuildContext _) => const PurchaseOrderListScreen();
 
 /// Top-level (const-referenceable) builder for the Sales Orders feature.
 Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();
+
+/// Top-level (const-referenceable) builder for the Work Orders feature.
+Widget _workOrders(BuildContext _) => const WorkOrderListScreen();

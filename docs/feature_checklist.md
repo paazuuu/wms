@@ -93,7 +93,18 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       activate/deactivate) added to the home menu. Verified live via grants
       and an aborted-transaction round trip (create/list-by-kind/update/
       deactivate, including the "both" kind matching either filter)
-- [ ] Work orders / assembly / kitting — ❌ removed with InventorOS
+- [x] Work orders / assembly / kitting (0036) — scoped to assembly/kitting
+      (many components consumed → one output produced), inside one
+      warehouse. Unlike purchase/sales orders, completing one DOES move
+      stock: two new `stock_movements` types (`WORK_ORDER_CONSUME`/
+      `WORK_ORDER_PRODUCE`) post through the existing `apply_stock_movement`,
+      so a kitted item's history is traceable the same way a pick or
+      adjustment already is. draft → start → complete (or cancel before
+      anything moved), `work_order.view`/`.manage`-gated. Disassembly (one
+      input → many components) would reuse this same shape and is a natural
+      follow-up. Verified live via grants and an aborted-transaction round
+      trip that seeded known stock levels and confirmed the exact before/
+      after quantities and ledger entries on completion
 
 **People & access**
 - [x] 11 roles, 22 permissions, audit-logged role/permission checks
@@ -170,7 +181,6 @@ Consolidated, in one place, as asked:
 
 **Not implemented at all:**
 - Returns / RMA
-- Work orders / kitting / assembly
 - Custom report builder
 - Two-factor authentication, webhooks, GraphQL API
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)

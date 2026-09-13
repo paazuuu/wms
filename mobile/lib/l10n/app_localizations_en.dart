@@ -1493,6 +1493,106 @@ class AppLocalizationsEn extends AppLocalizations {
       'Contacts and terms for suppliers and customers';
 
   @override
+  String get featWorkOrders => 'Work orders';
+
+  @override
+  String get featWorkOrdersDesc =>
+      'Kitting/assembly: consume components, produce a finished item';
+
+  @override
+  String get woTitle => 'Work orders';
+
+  @override
+  String get woNew => 'New work order';
+
+  @override
+  String get woEmpty => 'No work orders yet';
+
+  @override
+  String get woEmptyBody => 'Create one with the button below.';
+
+  @override
+  String get woNeedsWarehouse => 'No warehouse exists';
+
+  @override
+  String get woWarehouse => 'Warehouse';
+
+  @override
+  String get woOutputTitle => 'Output';
+
+  @override
+  String get woOutputQuantity => 'Output quantity';
+
+  @override
+  String get woOutputRequired => 'Enter the output JAN code and quantity';
+
+  @override
+  String get woComponentsTitle => 'Components';
+
+  @override
+  String get woAddComponent => 'Add component';
+
+  @override
+  String get woComponentRequired => 'Add at least one component';
+
+  @override
+  String get woComponentQuantity => 'Required quantity';
+
+  @override
+  String woComponentCount(int count) {
+    return '$count components';
+  }
+
+  @override
+  String get woNote => 'Note';
+
+  @override
+  String get woCreate => 'Create';
+
+  @override
+  String get woLineJan => 'JAN code';
+
+  @override
+  String get woLineProductName => 'Product name';
+
+  @override
+  String get woStart => 'Start';
+
+  @override
+  String get woStarted => 'Work order started';
+
+  @override
+  String get woComplete => 'Mark complete';
+
+  @override
+  String get woCompleteQ =>
+      'Complete this work order? Component stock will be consumed and output stock will increase.';
+
+  @override
+  String get woCompleted => 'Work order completed';
+
+  @override
+  String get woCancelAction => 'Cancel work order';
+
+  @override
+  String get woCancelBody => 'Cancel this work order?';
+
+  @override
+  String get woCancelled => 'Work order cancelled';
+
+  @override
+  String get woStatusDraft => 'Draft';
+
+  @override
+  String get woStatusInProgress => 'In progress';
+
+  @override
+  String get woStatusCompleted => 'Completed';
+
+  @override
+  String get woStatusCancelled => 'Cancelled';
+
+  @override
   String get partnersTitle => 'Trading partners';
 
   @override

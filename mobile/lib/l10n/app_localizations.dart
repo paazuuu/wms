@@ -2818,6 +2818,198 @@ abstract class AppLocalizations {
   /// **'仕入先・顧客の連絡先や取引条件を管理'**
   String get featPartnersDesc;
 
+  /// No description provided for @featWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示'**
+  String get featWorkOrders;
+
+  /// No description provided for @featWorkOrdersDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'部材を消費して完成品を作るキッティング・組立作業'**
+  String get featWorkOrdersDesc;
+
+  /// No description provided for @woTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示'**
+  String get woTitle;
+
+  /// No description provided for @woNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を作成'**
+  String get woNew;
+
+  /// No description provided for @woEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示がまだありません'**
+  String get woEmpty;
+
+  /// No description provided for @woEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'右下のボタンから作業指示を作成できます。'**
+  String get woEmptyBody;
+
+  /// No description provided for @woNeedsWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫がありません'**
+  String get woNeedsWarehouse;
+
+  /// No description provided for @woWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業倉庫'**
+  String get woWarehouse;
+
+  /// No description provided for @woOutputTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'完成品'**
+  String get woOutputTitle;
+
+  /// No description provided for @woOutputQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'完成数量'**
+  String get woOutputQuantity;
+
+  /// No description provided for @woOutputRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'完成品のJANコードと数量を入力してください'**
+  String get woOutputRequired;
+
+  /// No description provided for @woComponentsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'部材'**
+  String get woComponentsTitle;
+
+  /// No description provided for @woAddComponent.
+  ///
+  /// In ja, this message translates to:
+  /// **'部材を追加'**
+  String get woAddComponent;
+
+  /// No description provided for @woComponentRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'部材を1件以上追加してください'**
+  String get woComponentRequired;
+
+  /// No description provided for @woComponentQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'必要数量'**
+  String get woComponentQuantity;
+
+  /// No description provided for @woComponentCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 部材'**
+  String woComponentCount(int count);
+
+  /// No description provided for @woNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get woNote;
+
+  /// No description provided for @woCreate.
+  ///
+  /// In ja, this message translates to:
+  /// **'作成'**
+  String get woCreate;
+
+  /// No description provided for @woLineJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get woLineJan;
+
+  /// No description provided for @woLineProductName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get woLineProductName;
+
+  /// No description provided for @woStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業開始'**
+  String get woStart;
+
+  /// No description provided for @woStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業を開始しました'**
+  String get woStarted;
+
+  /// No description provided for @woComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了にする'**
+  String get woComplete;
+
+  /// No description provided for @woCompleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この作業指示を完了にしますか？部材の在庫が消費され、完成品の在庫が増加します。'**
+  String get woCompleteQ;
+
+  /// No description provided for @woCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を完了しました'**
+  String get woCompleted;
+
+  /// No description provided for @woCancelAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を取消'**
+  String get woCancelAction;
+
+  /// No description provided for @woCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この作業指示を取り消しますか？'**
+  String get woCancelBody;
+
+  /// No description provided for @woCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示を取り消しました'**
+  String get woCancelled;
+
+  /// No description provided for @woStatusDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get woStatusDraft;
+
+  /// No description provided for @woStatusInProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業中'**
+  String get woStatusInProgress;
+
+  /// No description provided for @woStatusCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get woStatusCompleted;
+
+  /// No description provided for @woStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get woStatusCancelled;
+
   /// No description provided for @partnersTitle.
   ///
   /// In ja, this message translates to:

@@ -1441,6 +1441,104 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPartnersDesc => '管理供应商与客户的联系方式及交易条件';
 
   @override
+  String get featWorkOrders => '工单';
+
+  @override
+  String get featWorkOrdersDesc => '组装/套装：消耗部件，产出成品';
+
+  @override
+  String get woTitle => '工单';
+
+  @override
+  String get woNew => '新建工单';
+
+  @override
+  String get woEmpty => '暂无工单';
+
+  @override
+  String get woEmptyBody => '点击下方按钮创建一个。';
+
+  @override
+  String get woNeedsWarehouse => '尚无仓库';
+
+  @override
+  String get woWarehouse => '作业仓库';
+
+  @override
+  String get woOutputTitle => '成品';
+
+  @override
+  String get woOutputQuantity => '成品数量';
+
+  @override
+  String get woOutputRequired => '请输入成品的 JAN 码和数量';
+
+  @override
+  String get woComponentsTitle => '部件';
+
+  @override
+  String get woAddComponent => '添加部件';
+
+  @override
+  String get woComponentRequired => '请至少添加一个部件';
+
+  @override
+  String get woComponentQuantity => '所需数量';
+
+  @override
+  String woComponentCount(int count) {
+    return '$count 个部件';
+  }
+
+  @override
+  String get woNote => '备注';
+
+  @override
+  String get woCreate => '创建';
+
+  @override
+  String get woLineJan => 'JAN 码';
+
+  @override
+  String get woLineProductName => '商品名';
+
+  @override
+  String get woStart => '开始作业';
+
+  @override
+  String get woStarted => '工单已开始';
+
+  @override
+  String get woComplete => '标记完成';
+
+  @override
+  String get woCompleteQ => '完成此工单？部件库存将被消耗，成品库存将增加。';
+
+  @override
+  String get woCompleted => '工单已完成';
+
+  @override
+  String get woCancelAction => '取消工单';
+
+  @override
+  String get woCancelBody => '取消此工单？';
+
+  @override
+  String get woCancelled => '工单已取消';
+
+  @override
+  String get woStatusDraft => '草稿';
+
+  @override
+  String get woStatusInProgress => '作业中';
+
+  @override
+  String get woStatusCompleted => '已完成';
+
+  @override
+  String get woStatusCancelled => '已取消';
+
+  @override
   String get partnersTitle => '往来单位';
 
   @override

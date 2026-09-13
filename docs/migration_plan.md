@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0035 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0036 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -621,6 +621,37 @@ update inside a transaction._
   screen tests plus a `FakeTradingPartnerRepository` added to the shared
   harness.
 - `flutter analyze`: clean. `flutter test`: 215/215 passing.
+
+### 0036 — Work orders / kitting / assembly (checklist item 9) ✅
+- Unlike purchase/sales orders (0033/0034), which are deliberately external
+  documents that never move stock, a work order IS a stock-moving
+  operation — the internal counterpart: consume a set of component JANs,
+  produce one output JAN, inside one warehouse. Scoped to assembly/kitting
+  only (many components → one output); disassembly would reuse this same
+  shape and is a natural follow-up.
+- Extended `stock_movements`' movement_type check constraint with
+  `WORK_ORDER_CONSUME`/`WORK_ORDER_PRODUCE` (additive, same pattern 0019
+  used for `TRANSFER_IN`/`TRANSFER_OUT`). `work_orders`/
+  `work_order_components` (RLS: read on `work_order.view`, no direct
+  writes); two new permissions (`work_order.view`/`.manage`);
+  `create_work_order` (order + components in one call), `start_work_order`,
+  `cancel_work_order`, `complete_work_order` (the only step that moves
+  stock — posts through the existing `apply_stock_movement` for every
+  component and the output, same function every other ledger-writing RPC
+  already uses), `work_order_detail`, `work_order_index`.
+- Verified live: grants (`anon` refused, `authenticated` allowed) for all 6
+  RPCs; an aborted transaction seeded known stock levels, created →
+  started → completed a work order, and confirmed the exact before/after
+  on-hand quantities (component −20, output +5) plus the corresponding
+  `WORK_ORDER_CONSUME`/`WORK_ORDER_PRODUCE` ledger rows, then confirmed
+  starting an already-completed order is refused — rolled back (0 leftover
+  rows across orders, components, stock levels and movements).
+- Flutter: `features/work_orders` — mirrors `features/purchasing`'s shape
+  (`WorkOrder`/`WorkOrderComponent` domain models, `WorkOrderRepository`, a
+  list screen with a create bottom sheet, a detail screen driving the
+  state machine), added to the home menu. 3 repository tests + 4 screen
+  tests plus a `FakeWorkOrderRepository` added to the shared harness.
+- `flutter analyze`: clean. `flutter test`: 222/222 passing.
 
 ## Rollout discipline
 
