@@ -13,7 +13,8 @@ class _FakeRepo implements DeliveryRepository {
   List<ReconcileEntry>? lastEntries;
 
   @override
-  Future<ApiResult<List<DeliveryPlan>>> list({String? status, String? search}) async =>
+  Future<ApiResult<List<DeliveryPlan>>> list(
+          {String? status, String? search, int? warehouseId}) async =>
       const ApiSuccess([]);
 
   @override

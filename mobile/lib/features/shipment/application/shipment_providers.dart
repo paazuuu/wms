@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../delivery/application/delivery_providers.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/shipment_repository.dart';
 import '../domain/shipment.dart';
 
@@ -15,15 +16,20 @@ final showShippedProvider = StateProvider<bool>((_) => false);
 
 /// Shipments still to pack/ship (open, packing) — plus shipped ones when the
 /// toggle is on — newest first.
+///
+/// Scoped to the current warehouse (UI spec §4: switching warehouse switches
+/// Shipping too). A null scope is the deliberate "all warehouses" view, not a
+/// missing filter.
 final shipmentsListProvider =
     FutureProvider.autoDispose<List<Shipment>>((ref) async {
   final repo = ref.watch(shipmentRepositoryProvider);
   final includeShipped = ref.watch(showShippedProvider);
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
   final statuses = ['open', 'packing', if (includeShipped) 'shipped'];
 
   final all = <Shipment>[];
   for (final status in statuses) {
-    final result = await repo.list(status: status);
+    final result = await repo.list(status: status, warehouseId: warehouseId);
     result.when(
       success: all.addAll,
       failure: (f) => throw Exception(f.message),

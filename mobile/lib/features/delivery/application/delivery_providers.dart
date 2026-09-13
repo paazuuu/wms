@@ -135,10 +135,14 @@ final showCompletedPlansProvider = StateProvider<bool>((_) => false);
 /// mid-reconciliation, and partly-delivered (`partial`, i.e. still carrying an
 /// outstanding 未納 list), newest first. Completed plans are included only when
 /// [showCompletedPlansProvider] is on, so a mistaken receipt can be corrected.
+///
+/// Scoped to the current warehouse (UI spec §4: switching warehouse switches
+/// Receiving too). A null scope is the deliberate "all warehouses" view.
 final deliveryPlansProvider =
     FutureProvider.autoDispose<List<DeliveryPlan>>((ref) async {
   final repository = ref.watch(deliveryRepositoryProvider);
   final includeCompleted = ref.watch(showCompletedPlansProvider);
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
   final statuses = [
     'open',
     'reconciling',
@@ -148,7 +152,8 @@ final deliveryPlansProvider =
 
   final plans = <DeliveryPlan>[];
   for (final status in statuses) {
-    final result = await repository.list(status: status);
+    final result =
+        await repository.list(status: status, warehouseId: warehouseId);
     result.when(
       success: plans.addAll,
       failure: (f) => throw Exception(f.message),

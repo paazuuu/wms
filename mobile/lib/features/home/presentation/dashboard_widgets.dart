@@ -607,6 +607,14 @@ class TodayTasksRow extends ConsumerWidget {
     if (metrics == null) return const SizedBox.shrink();
 
     final tasks = [
+      // §3's 入荷予定: inbound plans still carrying an outstanding quantity —
+      // work that is coming in, ahead of the 検品 it will turn into.
+      TaskTile(
+        featureId: 'delivery',
+        icon: Icons.local_shipping_outlined,
+        label: l10n.taskInboundPlanned,
+        count: metrics.outstandingPlanCount,
+      ),
       TaskTile(
         featureId: 'inspection',
         icon: Icons.fact_check_outlined,

@@ -169,6 +169,20 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       InventorOS, or otherwise) — ❌ none implemented; the skeleton is
       deliberately unwired per your explicit choice
 
+**Warehouse context (UI spec §4)**
+- [x] Switching the current warehouse switches every warehouse-scoped feature
+      with it. Receiving and Shipping were the two that still ignored it —
+      their list endpoints (`delivery-plans`, `shipments` edge functions) now
+      take an optional `warehouse_id`, and the providers pass the active
+      scope. A null scope stays the deliberate "all warehouses" view, and an
+      older client that sends nothing still gets every warehouse, so the
+      change is backward compatible
+- [x] Fixed along the way: `Shipment.fromJson` sorted the `lines`/`cartons`
+      fallback in place, which is a const empty list whenever the key is
+      absent — i.e. on every row the *list* endpoint returns. Parsing a
+      shipment list threw "Cannot modify an unmodifiable list"; only detail
+      fixtures (which always carry both keys) were covered before
+
 **Scanning & operator UX (UI spec §11/§16)**
 - [x] One shared scanning component — camera, torch, success/error sound,
       vibration, manual-entry fallback, continuous scan, duplicate
@@ -184,7 +198,10 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 - [x] +1 / +5 quick quantity buttons in the pick dialog (§16)
 
 **Reporting**
-- [x] Live dashboard (KPIs, today's-tasks counts)
+- [x] Live dashboard (KPIs, today's-tasks counts) — the today's-tasks strip
+      now carries §3's full row: 入荷予定・検品待ち・棚入れ待ち・ピッキング・
+      梱包待ち・出荷待ち・棚卸・倉庫間移動, each a real count that opens its
+      own screen
 - [x] Global cross-entity search
 - [x] Audit log CSV export
 - [x] Custom/saved report builder (0037) — `report.view` has existed since

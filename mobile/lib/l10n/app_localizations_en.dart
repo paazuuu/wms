@@ -2319,4 +2319,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickScanAction => 'Scan';
+
+  @override
+  String get taskInboundPlanned => 'Inbound due';
 }

@@ -978,5 +978,6 @@
   "scanDone": "完成",
   "pickScanToConfirm": "请扫描该商品的 JAN 后再确定数量",
   "pickScanned": "扫描已确认",
-  "pickScanAction": "扫描"
+  "pickScanAction": "扫描",
+  "taskInboundPlanned": "预计入库"
 }

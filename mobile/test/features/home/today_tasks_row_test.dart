@@ -12,7 +12,7 @@ const _metrics = DashboardMetrics(
   inboundTodayEvents: 0,
   outboundTodayUnits: 0,
   outboundTodayEvents: 0,
-  outstandingPlanCount: 0,
+  outstandingPlanCount: 7,
   outstandingUnits: 0,
   totalSkus: 0,
   totalOnHand: 0,
@@ -46,6 +46,7 @@ void main() {
       ],
     );
 
+    expect(find.text('7'), findsOneWidget); // 入荷予定
     expect(find.text('4'), findsOneWidget); // 検品待ち
     expect(find.text('6'), findsOneWidget); // 棚入れ待ち
     expect(find.text('3'), findsOneWidget); // ピッキング
@@ -73,5 +74,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tapped, 'picking');
+
+    await tester.tap(find.text('入荷予定'));
+    await tester.pumpAndSettle();
+
+    expect(tapped, 'delivery');
   });
 }

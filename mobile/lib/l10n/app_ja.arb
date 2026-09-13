@@ -1081,5 +1081,6 @@
   "scanDone": "完了",
   "pickScanToConfirm": "数量を確定するには対象のJANをスキャンしてください",
   "pickScanned": "スキャン確認済み",
-  "pickScanAction": "スキャン"
+  "pickScanAction": "スキャン",
+  "taskInboundPlanned": "入荷予定"
 }

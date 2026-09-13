@@ -159,11 +159,17 @@ class FakeDeliveryRepository implements DeliveryRepository {
   FakeDeliveryRepository(this.plans);
   final List<DeliveryPlan> plans;
 
+  /// The warehouse the last list() call was scoped to.
+  int? lastWarehouseId;
+
   @override
-  Future<ApiResult<List<DeliveryPlan>>> list({String? status, String? search}) async =>
-      ApiSuccess(status == null
-          ? plans
-          : plans.where((p) => p.status.wire == status).toList());
+  Future<ApiResult<List<DeliveryPlan>>> list(
+      {String? status, String? search, int? warehouseId}) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(status == null
+        ? plans
+        : plans.where((p) => p.status.wire == status).toList());
+  }
 
   @override
   Future<ApiResult<DeliveryPlan>> show(int id) async =>
@@ -377,11 +383,17 @@ class FakeShipmentRepository implements ShipmentRepository {
   FakeShipmentRepository(this.shipments);
   final List<Shipment> shipments;
 
+  /// The warehouse the last list() call was scoped to.
+  int? lastWarehouseId;
+
   @override
-  Future<ApiResult<List<Shipment>>> list({String? status, String? search}) async =>
-      ApiSuccess(status == null
-          ? shipments
-          : shipments.where((s) => s.status.wire == status).toList());
+  Future<ApiResult<List<Shipment>>> list(
+      {String? status, String? search, int? warehouseId}) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(status == null
+        ? shipments
+        : shipments.where((s) => s.status.wire == status).toList());
+  }
 
   @override
   Future<ApiResult<Shipment>> show(int id) async =>

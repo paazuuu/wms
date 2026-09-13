@@ -2246,4 +2246,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pickScanAction => '扫描';
+
+  @override
+  String get taskInboundPlanned => '预计入库';
 }

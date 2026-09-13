@@ -1,6 +1,6 @@
 // Delivery plans API for the WMS mobile client.
 // Routes (function is mounted at /functions/v1/delivery-plans):
-//   GET  /delivery-plans                          list (?status=&search=)
+//   GET  /delivery-plans                          list (?status=&search=&warehouse_id=)
 //   GET  /delivery-plans/:id                      one plan with its expected lines
 //   POST /delivery-plans/:id/reconcile            record a reconciliation
 //   GET  /delivery-plans/:id/receipts             list this plan's receipts
@@ -49,12 +49,19 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && rest.length === 0) {
       const status = url.searchParams.get("status");
       const search = url.searchParams.get("search");
+      // Optional warehouse scope (UI spec §4: switching the current warehouse
+      // switches Receiving too). Omitted = every warehouse, which is what the
+      // "all warehouses" scope and every older client sends.
+      const warehouseId = Number(url.searchParams.get("warehouse_id"));
       let q = supabase
         .from("delivery_plans")
         .select("*, line_count:delivery_plan_lines(count)")
         .order("id", { ascending: false })
         .limit(50);
       if (status) q = q.eq("status", status);
+      if (Number.isFinite(warehouseId) && warehouseId > 0) {
+        q = q.eq("warehouse_id", warehouseId);
+      }
       if (search && search.trim()) {
         const s = search.trim();
         q = q.or(`delivery_number.ilike.%${s}%,supplier_name.ilike.%${s}%,supplier_code.ilike.%${s}%`);

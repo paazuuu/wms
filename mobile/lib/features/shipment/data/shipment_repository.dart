@@ -9,7 +9,10 @@ import '../domain/shipment.dart';
 /// the shared import-plan function (target=shipment); this repository reads
 /// them, manages cartons, and confirms/cancels the shipment.
 abstract class ShipmentRepository {
-  Future<ApiResult<List<Shipment>>> list({String? status, String? search});
+  /// Shipments, newest first. [warehouseId] scopes them to one warehouse
+  /// (UI spec §4); null means every warehouse the caller can see.
+  Future<ApiResult<List<Shipment>>> list(
+      {String? status, String? search, int? warehouseId});
   Future<ApiResult<Shipment>> show(int id);
 
   /// Confirm the shipment: deduct stock and mark it shipped.
@@ -36,11 +39,13 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   final Dio _dio;
 
   @override
-  Future<ApiResult<List<Shipment>>> list({String? status, String? search}) async {
+  Future<ApiResult<List<Shipment>>> list(
+      {String? status, String? search, int? warehouseId}) async {
     try {
       final response = await _dio.get('/shipments', queryParameters: {
         if (status != null) 'status': status,
         if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (warehouseId != null) 'warehouse_id': warehouseId,
       });
       final data = (response.data['data'] as List<dynamic>)
           .map((e) => Shipment.fromJson(e as Map<String, dynamic>))

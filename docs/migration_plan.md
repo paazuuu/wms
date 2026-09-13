@@ -732,6 +732,21 @@ connector adapters) or are new, smaller items surfaced along the way
   7 screen tests plus a `FakePutawayRepository` added to the shared harness.
 - `flutter analyze`: clean. `flutter test`: 242/242 passing.
 
+### Edge-function changes (no migration)
+
+Two list endpoints gained an optional `warehouse_id` query parameter so the
+current-warehouse context reaches Receiving and Shipping (UI spec §4):
+`delivery-plans` (now v4) and `shipments` (now v2), both redeployed with
+`verify_jwt` unchanged. The parameter is optional and ignored when absent, so
+the "all warehouses" scope and any older client keep the previous behaviour.
+
+Verified: the deploys returned ACTIVE with bumped versions, and the predicate
+each handler now applies was checked against live data (no filter → 2 plans,
+`warehouse_id=1` → 2, an unknown warehouse → 0). An HTTP round-trip against
+the function could not be made from this environment — the network policy
+denies the project host — so that part is verified by the deployed source and
+the SQL predicate, not by calling the endpoint.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

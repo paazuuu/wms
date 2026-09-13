@@ -2250,4 +2250,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pickScanAction => 'スキャン';
+
+  @override
+  String get taskInboundPlanned => '入荷予定';
 }

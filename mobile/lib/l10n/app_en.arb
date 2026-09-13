@@ -978,5 +978,6 @@
   "scanDone": "Done",
   "pickScanToConfirm": "Scan this item's JAN to confirm a quantity",
   "pickScanned": "Scan confirmed",
-  "pickScanAction": "Scan"
+  "pickScanAction": "Scan",
+  "taskInboundPlanned": "Inbound due"
 }

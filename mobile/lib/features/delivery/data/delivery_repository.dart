@@ -187,7 +187,10 @@ class PlanCommit {
 /// it never creates a plan. The shared backend is what lets one person import
 /// the Excel and another do the physical check.
 abstract class DeliveryRepository {
-  Future<ApiResult<List<DeliveryPlan>>> list({String? status, String? search});
+  /// Inbound plans, newest first. [warehouseId] scopes them to one warehouse
+  /// (UI spec §4); null means every warehouse the caller can see.
+  Future<ApiResult<List<DeliveryPlan>>> list(
+      {String? status, String? search, int? warehouseId});
   Future<ApiResult<DeliveryPlan>> show(int id);
   Future<ApiResult<DeliveryPlan>> reconcile(
     int id, {
@@ -223,11 +226,12 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
 
   @override
   Future<ApiResult<List<DeliveryPlan>>> list(
-      {String? status, String? search}) async {
+      {String? status, String? search, int? warehouseId}) async {
     try {
       final response = await _dio.get('/delivery-plans', queryParameters: {
         if (status != null) 'status': status,
         if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (warehouseId != null) 'warehouse_id': warehouseId,
         'per_page': 50,
       });
       final data = (response.data['data'] as List<dynamic>)

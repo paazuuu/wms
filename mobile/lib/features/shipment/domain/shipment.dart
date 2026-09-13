@@ -66,8 +66,12 @@ class Shipment extends Equatable {
       return int.tryParse('$v');
     }
 
-    final rawLines = json['lines'] as List<dynamic>? ?? const [];
-    final rawCartons = json['cartons'] as List<dynamic>? ?? const [];
+    // Copied, not aliased: both are sorted below, and the list endpoint omits
+    // `lines`/`cartons` entirely (it returns counts instead), so the fallback
+    // has to be a mutable list or sorting it throws.
+    final rawLines = List<dynamic>.of(json['lines'] as List<dynamic>? ?? const []);
+    final rawCartons =
+        List<dynamic>.of(json['cartons'] as List<dynamic>? ?? const []);
     final cartons = rawCartons
         .map((e) => Carton.fromJson(e as Map<String, dynamic>))
         .toList()

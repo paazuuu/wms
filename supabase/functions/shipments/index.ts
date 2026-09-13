@@ -1,6 +1,6 @@
 // Outbound / shipping API for the WMS mobile client.
 // Routes (function is mounted at /functions/v1/shipments):
-//   GET    /shipments                       list (?status=&search=)
+//   GET    /shipments                       list (?status=&search=&warehouse_id=)
 //   GET    /shipments/:id                   one shipment + lines + cartons(+items)
 //   POST   /shipments/:id/ship              confirm: deduct stock, mark shipped
 //   POST   /shipments/:id/cancel            undo: restore stock, back to open
@@ -63,12 +63,19 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && rest.length === 0) {
       const status = url.searchParams.get("status");
       const search = url.searchParams.get("search");
+      // Optional warehouse scope (UI spec §4: switching the current warehouse
+      // switches Shipping too). Omitted = every warehouse, which is what the
+      // "all warehouses" scope and every older client sends.
+      const warehouseId = Number(url.searchParams.get("warehouse_id"));
       let q = supabase
         .from("shipment_plans")
         .select("*, line_count:shipment_lines(count), carton_count:shipment_cartons(count)")
         .order("id", { ascending: false })
         .limit(50);
       if (status) q = q.eq("status", status);
+      if (Number.isFinite(warehouseId) && warehouseId > 0) {
+        q = q.eq("warehouse_id", warehouseId);
+      }
       if (search && search.trim()) {
         const s = search.trim();
         q = q.or(`shipment_number.ilike.%${s}%,customer_name.ilike.%${s}%,customer_code.ilike.%${s}%`);

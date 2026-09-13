@@ -4365,6 +4365,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'スキャン'**
   String get pickScanAction;
+
+  /// No description provided for @taskInboundPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get taskInboundPlanned;
 }
 
 class _AppLocalizationsDelegate
