@@ -61,17 +61,39 @@ the current top source of "half the app is dead."
 
 ## 5. Target domain (summary; details in the model docs)
 
+Status as of `migration_plan.md` 0037 — see `feature_checklist.md` for the
+verified, per-feature detail:
+
 - Tenancy: `companies` → `warehouses` → `zones`/`bins`; `users` with roles and a
-  per-user `allowed_warehouses` scope. (`warehouse_model.md`, `permission_model.md`)
-- Master data: `products` with multilingual names, categories, UOM; suppliers;
-  customers. (`domain_model.md`)
-- Inbound: PO → expected receipt → receiving → inspection (QC) → staging →
-  put-away → available. (`workflow_model.md`)
-- Outbound: SO → allocation → pick list → picking → packing → shipping.
-- Inventory: `inventory` snapshot + `stock_movements` + derived ledger; adjustments,
-  cycle count, inter-warehouse transfer. (`domain_model.md`, `workflow_model.md`)
-- Audit: `audit_log` for every sensitive operation. (`permission_model.md`)
-- AI: `ai_analysis` results with confidence + human review. (`ai_architecture.md`)
+  per-user `allowed_warehouses` scope. ✅ done, including the per-user scope
+  admin UI (0029). (`warehouse_model.md`, `permission_model.md`)
+- Master data: `products` (name/category/price against a JAN, 0032); a
+  general supplier/customer directory (`delivery_suppliers` extended with a
+  `kind` column, 0035) rather than separate `suppliers`/`customers` tables —
+  ✅ done. Multilingual product names/UOM are not built (single `name` column
+  only).
+  (`domain_model.md`)
+- Inbound: purchase orders (0033, a self-contained order document, ✅) →
+  receiving → inspection (QC, ✅) → attachments (photo evidence, 0031, ✅) →
+  staging → put-away (⚠️ locations exist but no dedicated put-away
+  task/queue). A PO is not yet wired to pre-fill a delivery plan/receipt —
+  receiving still starts from an imported delivery note independently.
+  (`workflow_model.md`)
+- Outbound: sales orders (0034, same self-contained shape, ✅) → allocation →
+  pick list → picking → packing → shipping — ✅ through picking/packing/
+  shipping; a sales order is likewise not yet wired to pre-fill a shipment
+  plan.
+- Inventory: `stock_levels` snapshot + `stock_movements` ledger; adjustments,
+  cycle count, inter-warehouse transfer — ✅ done. Work orders (kitting/
+  assembly, 0036) add two more ledger movement types
+  (`WORK_ORDER_CONSUME`/`WORK_ORDER_PRODUCE`). (`domain_model.md`,
+  `workflow_model.md`)
+- Audit: `audit_log` for every sensitive operation — ✅ done, plus a
+  custom/saved report builder (0037) that can query it alongside five other
+  sources. (`permission_model.md`)
+- AI: `ai_analysis` results with confidence + human review — ✅ done for OCR
+  (`AiReviewListScreen`, 0030); the other §27 modules (photo ID, damage
+  detection, inventory assistant) remain unbuilt. (`ai_architecture.md`)
 
 ## 6. UI target (spec §4, §23, §24, §39, §52)
 
@@ -85,5 +107,10 @@ the current top source of "half the app is dead."
 ## 7. Non-negotiables carried from current state
 
 Keep: delivery reconciliation (incl. split accumulation), shipment cartons + JAN
-printing + 送り状, sender profile, dashboard KPIs, offline queue, scanner service,
-ja/en/zh i18n, dark mode, text scaling, the existing test suite.
+printing + 送り状, sender profile, dashboard KPIs, scanner service, ja/en/zh
+i18n, dark mode, text scaling, the growing test suite.
+
+Note: the InventorOS-era offline mutation queue was deliberately **removed**
+(along with InventorOS itself) rather than kept — it only ever served dead,
+unreachable screens. No Supabase-backed feature has an offline queue today;
+re-adding one would be new work, not preserved legacy.
