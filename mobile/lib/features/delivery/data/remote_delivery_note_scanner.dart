@@ -16,10 +16,13 @@ class RemoteDeliveryNoteScanner implements DeliveryNoteScanner {
   final OcrProvider provider;
 
   @override
-  Future<List<OcrLine>> scan(String imagePath) async {
+  Future<List<OcrLine>> scan(String imagePath, {int? deliveryPlanId}) async {
     final form = FormData();
     form.files.add(MapEntry('image', await MultipartFile.fromFile(imagePath)));
     form.fields.add(MapEntry('provider', provider.wire));
+    if (deliveryPlanId != null) {
+      form.fields.add(MapEntry('plan_id', '$deliveryPlanId'));
+    }
 
     final response = await _dio.post('/ocr-delivery-note', data: form);
     final data = response.data;
@@ -41,11 +44,11 @@ class FallbackDeliveryNoteScanner implements DeliveryNoteScanner {
   final DeliveryNoteScanner fallback;
 
   @override
-  Future<List<OcrLine>> scan(String imagePath) async {
+  Future<List<OcrLine>> scan(String imagePath, {int? deliveryPlanId}) async {
     try {
-      return await primary.scan(imagePath);
+      return await primary.scan(imagePath, deliveryPlanId: deliveryPlanId);
     } on DioException {
-      return fallback.scan(imagePath);
+      return fallback.scan(imagePath, deliveryPlanId: deliveryPlanId);
     }
   }
 

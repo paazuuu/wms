@@ -934,11 +934,53 @@ abstract class AppLocalizations {
   /// **'明細プレビュー'**
   String get importLinesPreview;
 
-  /// No description provided for @importMoreLines.
+  /// No description provided for @importLinesEmpty.
   ///
   /// In ja, this message translates to:
-  /// **'他 {count} 件'**
-  String importMoreLines(int count);
+  /// **'明細はまだありません。「行を追加」から入力できます。'**
+  String get importLinesEmpty;
+
+  /// No description provided for @importAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'行を追加'**
+  String get importAddLine;
+
+  /// No description provided for @importEditLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細を編集'**
+  String get importEditLine;
+
+  /// No description provided for @importLineJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get importLineJan;
+
+  /// No description provided for @importLineProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get importLineProduct;
+
+  /// No description provided for @importLineQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get importLineQuantity;
+
+  /// No description provided for @importSplitLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'行を分割'**
+  String get importSplitLine;
+
+  /// No description provided for @importMergeDuplicates.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じJANをまとめる'**
+  String get importMergeDuplicates;
 
   /// No description provided for @planReviewTitle.
   ///

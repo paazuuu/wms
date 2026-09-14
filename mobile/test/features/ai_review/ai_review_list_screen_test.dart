@@ -62,6 +62,45 @@ void main() {
   });
 
   testWidgets(
+      'shows the delivery number when this call was tied to a plan (§31)',
+      (tester) async {
+    final repo = FakeAiReviewRepository([
+      AiAnalysisEntry(
+        id: 1,
+        taskType: 'ocr_delivery_note',
+        provider: 'gemini',
+        status: 'PENDING_REVIEW',
+        createdAt: DateTime(2026, 1, 1, 12, 30),
+        deliveryNumber: 'ABC-123',
+        lines: const [
+          AiOcrLine(janCode: '4901234567894', productName: 'ボールペン', quantity: 10),
+        ],
+      ),
+    ]);
+
+    await pumpApp(
+      tester,
+      const AiReviewListScreen(),
+      overrides: [aiReviewRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.textContaining('ABC-123'), findsOneWidget);
+  });
+
+  testWidgets('a standalone call with no linked plan shows no delivery number',
+      (tester) async {
+    final repo = FakeAiReviewRepository([pendingEntry()]);
+
+    await pumpApp(
+      tester,
+      const AiReviewListScreen(),
+      overrides: [aiReviewRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.textContaining('伝票番号'), findsNothing);
+  });
+
+  testWidgets(
       'a result the provider gave no confidence for shows none, not a guess',
       (tester) async {
     final repo = FakeAiReviewRepository([pendingEntry()]);

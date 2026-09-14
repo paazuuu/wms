@@ -16,7 +16,7 @@ class MlKitDeliveryNoteScanner implements DeliveryNoteScanner {
   final TextRecognizer _recognizer;
 
   @override
-  Future<List<OcrLine>> scan(String imagePath) async {
+  Future<List<OcrLine>> scan(String imagePath, {int? deliveryPlanId}) async {
     final input = InputImage.fromFilePath(imagePath);
     final recognized = await _recognizer.processImage(input);
     final textLines = <String>[

@@ -452,9 +452,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importLinesPreview => '明细预览';
 
   @override
-  String importMoreLines(int count) {
-    return '还有 $count 项';
-  }
+  String get importLinesEmpty => '暂无明细，可通过“添加明细”输入。';
+
+  @override
+  String get importAddLine => '添加明细';
+
+  @override
+  String get importEditLine => '编辑明细';
+
+  @override
+  String get importLineJan => 'JAN 码';
+
+  @override
+  String get importLineProduct => '商品名称';
+
+  @override
+  String get importLineQuantity => '数量';
+
+  @override
+  String get importSplitLine => '拆分该行';
+
+  @override
+  String get importMergeDuplicates => '合并相同 JAN';
 
   @override
   String get planReviewTitle => '核对抬头';

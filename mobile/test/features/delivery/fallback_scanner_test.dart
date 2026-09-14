@@ -10,10 +10,12 @@ class _StubScanner implements DeliveryNoteScanner {
   final List<OcrLine> _result;
   final bool throwNetwork;
   int calls = 0;
+  int? lastDeliveryPlanId;
 
   @override
-  Future<List<OcrLine>> scan(String imagePath) async {
+  Future<List<OcrLine>> scan(String imagePath, {int? deliveryPlanId}) async {
     calls++;
+    lastDeliveryPlanId = deliveryPlanId;
     if (throwNetwork) {
       throw DioException.connectionError(
         requestOptions: RequestOptions(path: '/ocr/delivery-note'),
@@ -50,5 +52,18 @@ void main() {
     expect(result.single.janCode, '4901480241418');
     expect(primary.calls, 1);
     expect(fallback.calls, 1);
+  });
+
+  test('forwards deliveryPlanId to whichever scanner actually runs',
+      () async {
+    final primary = _StubScanner(const [], throwNetwork: true);
+    final fallback = _StubScanner(const []);
+    final scanner =
+        FallbackDeliveryNoteScanner(primary: primary, fallback: fallback);
+
+    await scanner.scan('/tmp/note.jpg', deliveryPlanId: 42);
+
+    expect(primary.lastDeliveryPlanId, 42);
+    expect(fallback.lastDeliveryPlanId, 42);
   });
 }

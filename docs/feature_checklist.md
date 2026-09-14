@@ -479,25 +479,33 @@ AI call trustworthy," decoupled from the write path on purpose).
       (delivery number, supplier, registration number, customer code, doc
       number) is a normal editable `TextField`, pre-filled from the OCR
       read and flagged when unread, before `[登録]` commits anything.
-- [ ] **Line items in `PlanImportScreen` are read-only** — the `_LinesPreview`
-      list (JAN/product/quantity) is explicitly "a read-only preview... so
-      the operator can sanity check" (the code's own comment), with no way
-      to fix a misread line short of abandoning the whole import and
-      re-entering it elsewhere. Unlike the review screen's flat-confirm
-      decision above, this one isn't backed by a documented rationale —
-      it reads like a genuine gap, not a considered scope cut. Not fixed in
-      this pass: making lines editable needs a small per-row edit UI plus
-      wiring the edited values through to `commitPlan()` (which already
-      accepts `lines` verbatim, so the write path is ready) — real work,
-      left for its own pass rather than rushed alongside the confidence fix
-- [ ] **納品書番号 in the *review* screen** (`AiReviewListScreen`, not the
-      import screen, which already has it) doesn't exist: `ai_analysis`
-      carries `delivery_plan_id` but no delivery-note-number text of its
-      own, and OCR's own extraction schema only ever asked for line items,
-      never a header. Would need a schema/prompt change (OCR side) or a
-      join to `delivery_plans` (linked-record side) — either is more than
-      a UI fix, and no row has ever been linked via `delivery_plan_id` in
-      practice, so there's nothing to surface yet either way
+- [x] **Line items in `PlanImportScreen` were read-only** — fixed. Every row
+      is now tap-to-edit (JAN, product name, quantity — the JAN field also
+      gained a scan button per §35), deletable, and there's an "行を追加" for
+      one OCR missed entirely. Added the two operations the spec's own
+      wording invited ("分解と結合表記も可能です"): a per-row 分割 (split) that
+      roughly halves a line's quantity into a second row — the operator
+      then fine-tunes either half using the same edit dialog, so split
+      doesn't need its own quantity prompt — and a bulk 同じJANをまとめる
+      (merge) that sums every group of duplicate JANs into one row,
+      surfaced only when a duplicate actually exists. `_lines`, not the
+      original `ImportPreview.lines`, is what `commitPlan()` now sends, so
+      every edit actually reaches the write.
+- [x] **納品書番号 on the *review* screen** (`AiReviewListScreen`) was
+      missing because nothing ever populated `ai_analysis.delivery_plan_id`
+      for an `ocr-delivery-note` call, even though the caller
+      (`ReconciliationScreen`) already had the plan's id in scope the whole
+      time — it just wasn't threaded through. Fixed the whole path: the
+      scanner interface gained an optional `deliveryPlanId` parameter (all
+      4 implementations updated), `RemoteDeliveryNoteScanner` forwards it as
+      `plan_id` in the multipart form (a field name the edge function's own
+      doc comment already anticipated), `ocr-delivery-note` reads it and
+      passes it to `record_ai_analysis` (deployed as v9), and
+      `list_ai_analysis` (0042) now left-joins `delivery_plans` to return
+      `delivery_number` alongside it — verified live via an aborted
+      transaction. `AiReviewListScreen` shows it at the top of the card
+      when present; a standalone OCR call (no plan yet) still shows
+      nothing, not a guess.
 - [ ] Future items the spec itself lists as future (商品画像認識・破損検知・
       商品自動登録候補・棚入れ候補・在庫分析) remain unbuilt, matching
       `ai_architecture.md` §8's "still open" list — not started here,

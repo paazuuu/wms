@@ -9,7 +9,8 @@ class MlKitDeliveryNoteScanner implements DeliveryNoteScanner {
   MlKitDeliveryNoteScanner();
 
   @override
-  Future<List<OcrLine>> scan(String imagePath) async => const [];
+  Future<List<OcrLine>> scan(String imagePath, {int? deliveryPlanId}) async =>
+      const [];
 
   @override
   Future<void> dispose() async {}

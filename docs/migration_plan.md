@@ -17,7 +17,7 @@ update inside a transaction._
 
 ## Step-by-step (aligned to spec §46)
 
-> Status: **0010–0041 applied.** Step 13 (seed/demo) deliberately skipped —
+> Status: **0010–0042 applied.** Step 13 (seed/demo) deliberately skipped —
 > see below.
 
 ### 0010 — Tenancy & warehouse (Steps 1) ✅
@@ -1040,19 +1040,60 @@ things already correctly built:
   `ocr-delivery-note` v8. `AiReviewListScreen` now renders "信頼度 NN%" per
   result when present, in the error colour under 60%.
 
-Left open, documented in `feature_checklist.md` rather than rushed:
-`PlanImportScreen`'s line-item preview is read-only with no documented
-reason (unlike the review screen's flat-confirm decision, which *is*
-documented) — a real gap, but editable-lines UI plus wiring through
-`commitPlan()` (which already accepts `lines` verbatim) is its own pass.
-納品書番号 on the review screen specifically would need either an OCR schema
-change or a `delivery_plan_id` join, and no row has ever actually carried
-that link in practice. The spec's own "future" list (product-photo ID,
-damage detection, auto-registration, put-away suggestions, inventory
+Left open at the time, later closed (see 0042 below): `PlanImportScreen`'s
+line-item preview was read-only with no documented reason, and 納品書番号 on
+the review screen didn't exist. The spec's own "future" list (product-photo
+ID, damage detection, auto-registration, put-away suggestions, inventory
 analysis) stays unbuilt, matching `ai_architecture.md`'s own "still open"
-section.
+section — not attempted here either.
 
 `flutter analyze`: clean. `flutter test`: 322 → 324 passing.
+
+### 0042 — `list_ai_analysis` joins delivery_plans (UI spec §31, closing both deferred gaps)
+
+Went back for the two gaps deliberately left open above, at the user's
+request ("見送った項目を何とか解決して").
+
+**納品書番号 on the review screen.** Root cause: `ai_analysis.delivery_plan_id`
+existed since 0026 but nothing had ever populated it for an
+`ocr-delivery-note` call — not a schema gap, a wiring gap. Its only real
+caller, `ReconciliationScreen._runOcr`, already had `_plan.id` in scope the
+whole time. Threaded it through the whole path: `DeliveryNoteScanner.scan()`
+gained an optional `deliveryPlanId` parameter (all four implementations —
+remote, fallback, ML Kit native, ML Kit web stub — updated to match, only
+the remote one actually uses it), `RemoteDeliveryNoteScanner` sends it as
+`plan_id` in the multipart form (a field name the edge function's own doc
+comment had anticipated since it was first written), and
+`ocr-delivery-note` reads it and passes it to `record_ai_analysis` — a
+`create or replace` of the same function, no signature change, deployed as
+v9. `list_ai_analysis` (this migration) left-joins `delivery_plans` on that
+id and adds `delivery_plan_id`/`delivery_number` to the returned jsonb —
+fetched the live definition first, changed only the join and two new keys,
+verified live in an aborted transaction (inserted a linked plan +
+analysis row, confirmed the joined `delivery_number` came back, rolled
+back, 0 leftover rows), confirmed `anon`/`authenticated`/`service_role`
+grants unchanged. `AiAnalysisEntry` gained `deliveryNumber`;
+`AiReviewListScreen` shows it at the top of the card when present, nothing
+when the call was standalone (before any plan existed, say).
+
+**Line items in `PlanImportScreen` were read-only.** Fixed by lifting
+`ImportPreview.lines` into mutable state (`_lines`) the moment a read
+succeeds, making `_LinesPreview` interactive (tap a row to edit JAN/product/
+quantity in a dialog — reusing §35's scan-button and large-number-quantity
+patterns — plus a delete icon per row and an "add line" button), and
+sending `_lines` instead of the original preview on commit. Also added the
+two operations the user's own follow-up explicitly permitted ("分解と結合表記
+も可能です"): 分割 (split) halves a line's quantity into a second row with
+the same JAN, letting the operator fine-tune either half afterward through
+the same edit dialog rather than prompting for an exact split amount up
+front; 結合 (merge, surfaced as "同じJANをまとめる") sums every group of
+duplicate JANs into one row, shown only when a duplicate actually exists.
+`FilePicker`'s platform channel can't be driven from a widget test, so
+`PlanImportScreen` gained an injectable `pickFile` parameter — the same
+seam `BarcodeScanScreen` already uses for its camera — enabling the first
+test file this screen has ever had.
+
+`flutter analyze`: clean. `flutter test`: 324 → 334 passing.
 
 ## Rollout discipline
 

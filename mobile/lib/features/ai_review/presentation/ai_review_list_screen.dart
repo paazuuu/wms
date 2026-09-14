@@ -151,6 +151,16 @@ class _AnalysisCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // The delivery plan this call was read for, when it was tied to
+            // one (spec §31's 納品書番号) — absent for a standalone OCR call.
+            if (entry.deliveryNumber != null) ...[
+              Text(
+                '${l10n.deliveryNumberLabel} ${entry.deliveryNumber}',
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 2),
+            ],
             Row(
               children: [
                 Expanded(

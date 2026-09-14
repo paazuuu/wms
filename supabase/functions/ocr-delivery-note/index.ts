@@ -199,6 +199,16 @@ Deno.serve(async (req) => {
     if (!(image instanceof File)) {
       return json({ message: "image file is required" }, 400);
     }
+    // Optional — links the recorded call back to the plan it was read for
+    // (spec §31's 納品書番号 on the AI review screen). Never required: OCR
+    // works standalone too (e.g. before a plan exists yet).
+    const planIdRaw = form.get("plan_id");
+    const planId = planIdRaw != null && `${planIdRaw}`.trim() !== ""
+      ? Number(planIdRaw)
+      : null;
+    const deliveryPlanId = planId != null && Number.isFinite(planId)
+      ? planId
+      : null;
 
     const bytes = new Uint8Array(await image.arrayBuffer());
     const mime = image.type || "image/jpeg";
@@ -231,7 +241,7 @@ Deno.serve(async (req) => {
       {
         p_company_id: null,
         p_warehouse_id: null,
-        p_delivery_plan_id: null,
+        p_delivery_plan_id: deliveryPlanId,
         p_inspection_id: null,
         p_provider: provider.name,
         p_model: provider.model,

@@ -36,6 +36,7 @@ class AiAnalysisEntry extends Equatable {
     required this.createdAt,
     this.model,
     this.confidence,
+    this.deliveryNumber,
     this.lines = const [],
   });
 
@@ -44,6 +45,11 @@ class AiAnalysisEntry extends Equatable {
   final String provider;
   final String? model;
   final double? confidence;
+
+  /// The linked delivery plan's own number (spec §31), when this call was
+  /// tied to one (0042's `list_ai_analysis` join) — null for a call made
+  /// standalone, e.g. before any plan existed yet.
+  final String? deliveryNumber;
 
   /// PENDING_REVIEW | CONFIRMED | REJECTED
   final String status;
@@ -60,6 +66,7 @@ class AiAnalysisEntry extends Equatable {
       provider: (json['provider'] ?? '').toString(),
       model: json['model'] as String?,
       confidence: confidenceRaw is num ? confidenceRaw.toDouble() : null,
+      deliveryNumber: json['delivery_number'] as String?,
       status: (json['status'] ?? '').toString(),
       createdAt:
           DateTime.tryParse((json['created_at'] ?? '').toString()) ??
@@ -72,6 +79,15 @@ class AiAnalysisEntry extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, taskType, provider, model, confidence, status, createdAt, lines];
+  List<Object?> get props => [
+        id,
+        taskType,
+        provider,
+        model,
+        confidence,
+        deliveryNumber,
+        status,
+        createdAt,
+        lines
+      ];
 }

@@ -201,14 +201,14 @@
   "changeFile": "変更",
   "importHeaderSection": "ヘッダー情報",
   "importLinesPreview": "明細プレビュー",
-  "importMoreLines": "他 {count} 件",
-  "@importMoreLines": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "importLinesEmpty": "明細はまだありません。「行を追加」から入力できます。",
+  "importAddLine": "行を追加",
+  "importEditLine": "明細を編集",
+  "importLineJan": "JANコード",
+  "importLineProduct": "商品名",
+  "importLineQuantity": "数量",
+  "importSplitLine": "行を分割",
+  "importMergeDuplicates": "同じJANをまとめる",
   "planReviewTitle": "ヘッダーの確認",
   "planReviewHint": "納品書から自動で読み取りました。間違い・空欄は登録前にここで修正できます。",
   "planCommitAction": "登録する",

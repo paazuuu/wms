@@ -156,8 +156,19 @@ Future<void> pumpAppWith(
 
 /// Delivery repository stub. [plans] are filtered by status for list().
 class FakeDeliveryRepository implements DeliveryRepository {
-  FakeDeliveryRepository(this.plans);
+  FakeDeliveryRepository(this.plans, {ImportPreview? preview})
+      : preview = preview ??
+            const ImportPreview(
+                source: 't', lineCount: 0, totalQuantity: 0, lines: []);
   final List<DeliveryPlan> plans;
+
+  /// What previewPlan() returns — override the constructor default to test
+  /// the review step with known lines.
+  ImportPreview preview;
+
+  /// The commit the last commitPlan() call actually sent, lines included —
+  /// so a test can assert an edit/split/merge/delete reached the payload.
+  PlanCommit? lastCommit;
 
   /// The warehouse the last list() call was scoped to.
   int? lastWarehouseId;
@@ -188,13 +199,16 @@ class FakeDeliveryRepository implements DeliveryRepository {
           String? deliveryNumber,
           String? supplier,
           String? supplierCode}) async =>
-      const ApiSuccess(
-          ImportPreview(source: 't', lineCount: 0, totalQuantity: 0, lines: []));
+      ApiSuccess(preview);
 
   @override
-  Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit) async =>
-      const ApiSuccess(
-          PlanImportResult(planId: 1, lineCount: 0, totalQuantity: 0));
+  Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit) async {
+    lastCommit = commit;
+    return ApiSuccess(PlanImportResult(
+        planId: 1,
+        lineCount: commit.lines.length,
+        totalQuantity: 0));
+  }
 
   @override
   Future<ApiResult<List<Receipt>>> receipts(int planId) async =>

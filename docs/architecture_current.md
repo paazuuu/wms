@@ -3,7 +3,7 @@
 _Supersedes `architecture_phase0_snapshot.md`. Verified against the live
 Supabase project (`vjunicsfobglmncjucbb`), the Flutter codebase, and the test
 suite — see `feature_checklist.md` for the feature-by-feature detail this
-document summarizes. Migrations `0010`–`0041` applied._
+document summarizes. Migrations `0010`–`0042` applied._
 
 ## 1. High-level shape
 
@@ -37,7 +37,7 @@ still has no equivalent.
 ## 2. Repository layout
 
 - `mobile/` — Flutter app (Riverpod, gen_l10n ja/en/zh, Dio).
-- `supabase/migrations/` — `0001`–`0041`, sequential and additive (see
+- `supabase/migrations/` — `0001`–`0042`, sequential and additive (see
   `migration_plan.md` for what each one did).
 - `supabase/functions/` — `delivery-plans`, `import-plan`, `ocr-delivery-note`,
   `shipments`, `warehouses`, `inspections`, `picking`, `transfers`,
@@ -137,7 +137,7 @@ Every module below is Supabase-backed; none call an external system.
 ## 5. Cross-cutting capabilities
 
 - **i18n**: gen_l10n, ja (template) / en / zh — every feature added through
-  0041 ships all three languages.
+  0042 ships all three languages.
 - **Theming**: light/dark via `ThemeMode.system`, plus a text-scale setting.
 - **Scanning**: one shared surface, `BarcodeScanScreen` (UI spec §11) —
   camera (`mobile_scanner`), torch, success/error sound and vibration

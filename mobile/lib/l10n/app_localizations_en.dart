@@ -467,9 +467,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importLinesPreview => 'Line preview';
 
   @override
-  String importMoreLines(int count) {
-    return '+$count more';
-  }
+  String get importLinesEmpty => 'No lines yet. Use \"Add line\" to enter one.';
+
+  @override
+  String get importAddLine => 'Add line';
+
+  @override
+  String get importEditLine => 'Edit line';
+
+  @override
+  String get importLineJan => 'JAN code';
+
+  @override
+  String get importLineProduct => 'Product name';
+
+  @override
+  String get importLineQuantity => 'Quantity';
+
+  @override
+  String get importSplitLine => 'Split line';
+
+  @override
+  String get importMergeDuplicates => 'Merge duplicate JANs';
 
   @override
   String get planReviewTitle => 'Check the header';

@@ -184,14 +184,14 @@
   "changeFile": "更改",
   "importHeaderSection": "抬头信息",
   "importLinesPreview": "明细预览",
-  "importMoreLines": "还有 {count} 项",
-  "@importMoreLines": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "importLinesEmpty": "暂无明细，可通过“添加明细”输入。",
+  "importAddLine": "添加明细",
+  "importEditLine": "编辑明细",
+  "importLineJan": "JAN 码",
+  "importLineProduct": "商品名称",
+  "importLineQuantity": "数量",
+  "importSplitLine": "拆分该行",
+  "importMergeDuplicates": "合并相同 JAN",
   "planReviewTitle": "核对抬头",
   "planReviewHint": "已从送货单自动读取。登记前可在此修改错误或空白的字段。",
   "planCommitAction": "登记",

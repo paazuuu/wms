@@ -453,9 +453,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importLinesPreview => '明細プレビュー';
 
   @override
-  String importMoreLines(int count) {
-    return '他 $count 件';
-  }
+  String get importLinesEmpty => '明細はまだありません。「行を追加」から入力できます。';
+
+  @override
+  String get importAddLine => '行を追加';
+
+  @override
+  String get importEditLine => '明細を編集';
+
+  @override
+  String get importLineJan => 'JANコード';
+
+  @override
+  String get importLineProduct => '商品名';
+
+  @override
+  String get importLineQuantity => '数量';
+
+  @override
+  String get importSplitLine => '行を分割';
+
+  @override
+  String get importMergeDuplicates => '同じJANをまとめる';
 
   @override
   String get planReviewTitle => 'ヘッダーの確認';

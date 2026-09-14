@@ -178,7 +178,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
     setState(() => _ocrBusy = true);
     try {
       final scanner = ref.read(deliveryNoteScannerProvider);
-      final lines = await scanner.scan(shot.path);
+      final lines = await scanner.scan(shot.path, deliveryPlanId: _plan.id);
       if (!mounted) return;
       if (lines.isEmpty) {
         _snack(l10n.ocrNoneFound, tone: StatusTone.warning);
