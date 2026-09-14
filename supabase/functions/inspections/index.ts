@@ -6,11 +6,16 @@
 //   PATCH /inspections/:id/items/:itemId    record one item's findings
 //   POST  /inspections/:id/complete         {note?} roll up and close
 //
-// Uses the service role internally; verify_jwt=true (the app's anon key
-// qualifies). The tables are read-only to the client, so every mutation lands
-// here. Per-user role/warehouse-scope checks arrive with Step 3's sign-in —
-// the TODOs mark exactly where.
+// Data access runs as service role; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts) — the same rule every RPC called
+// directly over PostgREST elsewhere in the app already follows.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -25,10 +30,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -94,7 +97,9 @@ Deno.serve(async (req) => {
 
     // POST /inspections  {reconciliation_id}
     if (req.method === "POST" && rest.length === 0) {
-      // TODO(auth): require inspection.confirm for the caller.
+      if (!(await callerPermitted(req, supabaseUrl, "inspection.confirm"))) {
+        return json({ message: notPermittedMessage("inspection.confirm") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const reconId = Number(body.reconciliation_id);
       if (!Number.isFinite(reconId)) {
@@ -111,7 +116,9 @@ Deno.serve(async (req) => {
     if (
       req.method === "PATCH" && rest.length === 3 && rest[1] === "items"
     ) {
-      // TODO(auth): require inspection.confirm + warehouse scope.
+      if (!(await callerPermitted(req, supabaseUrl, "inspection.confirm"))) {
+        return json({ message: notPermittedMessage("inspection.confirm") }, 403);
+      }
       const id = Number(rest[0]);
       const itemId = Number(rest[2]);
       if (!Number.isFinite(id) || !Number.isFinite(itemId)) {
@@ -139,7 +146,9 @@ Deno.serve(async (req) => {
     if (
       req.method === "POST" && rest.length === 2 && rest[1] === "complete"
     ) {
-      // TODO(auth): require inspection.confirm + warehouse scope.
+      if (!(await callerPermitted(req, supabaseUrl, "inspection.confirm"))) {
+        return json({ message: notPermittedMessage("inspection.confirm") }, 403);
+      }
       const id = Number(rest[0]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
       const body = await req.json().catch(() => ({}));

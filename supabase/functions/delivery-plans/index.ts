@@ -6,10 +6,16 @@
 //   GET  /delivery-plans/:id/receipts             list this plan's receipts
 //   POST /delivery-plans/:id/receipts/:rid/cancel void a receipt (correction)
 //
-// Uses the service role internally. verify_jwt=true means the caller must send
-// a valid Supabase JWT (the app's anon key qualifies). For production, move to
-// per-user Supabase Auth + RLS and drop the service-role shortcut.
+// Data access runs as service role; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts) — the same rule every RPC called
+// directly over PostgREST elsewhere in the app already follows.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -25,10 +31,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function flattenCount(plan: Record<string, unknown>): Record<string, unknown> {
   const lc = plan["line_count"];
@@ -114,6 +118,9 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest.length === 4 &&
       rest[1] === "receipts" && rest[3] === "cancel"
     ) {
+      if (!(await callerPermitted(req, supabaseUrl, "receiving.confirm"))) {
+        return json({ message: notPermittedMessage("receiving.confirm") }, 403);
+      }
       const id = Number(rest[0]);
       const rid = Number(rest[2]);
       const { error: rpcError } = await supabase.rpc("cancel_reconciliation", {
@@ -131,6 +138,9 @@ Deno.serve(async (req) => {
 
     // POST /delivery-plans/:id/reconcile
     if (req.method === "POST" && rest.length === 2 && rest[1] === "reconcile") {
+      if (!(await callerPermitted(req, supabaseUrl, "receiving.confirm"))) {
+        return json({ message: notPermittedMessage("receiving.confirm") }, 403);
+      }
       const id = Number(rest[0]);
       const body = await req.json().catch(() => ({}));
       const { error: rpcError } = await supabase.rpc("reconcile_delivery_plan", {

@@ -6,11 +6,16 @@
 //   PATCH  /warehouses/:id        update {name?, description?, address?, phone?,
 //                                         timezone?, status?}
 //
-// Uses the service role internally; verify_jwt=true (the app's anon key
-// qualifies). The tables themselves stay read-only to the client, so every
-// warehouse mutation lands here. Per-user role/warehouse-scope checks arrive
-// with Step 3 (migration 0012) — the TODOs below mark exactly where.
+// Data access runs as service role; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts) — the same rule every RPC called
+// directly over PostgREST elsewhere in the app already follows.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -25,10 +30,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -101,7 +104,9 @@ Deno.serve(async (req) => {
 
     // POST /warehouses
     if (req.method === "POST" && rest.length === 0) {
-      // TODO(Step 3): require warehouse.manage permission for the caller.
+      if (!(await callerPermitted(req, supabaseUrl, "warehouse.manage"))) {
+        return json({ message: notPermittedMessage("warehouse.manage") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const code = str(body.code)?.toUpperCase() ?? null;
       const name = str(body.name);
@@ -177,7 +182,9 @@ Deno.serve(async (req) => {
 
     // PATCH /warehouses/:id
     if (req.method === "PATCH" && rest.length === 1) {
-      // TODO(Step 3): require warehouse.manage permission + warehouse scope.
+      if (!(await callerPermitted(req, supabaseUrl, "warehouse.manage"))) {
+        return json({ message: notPermittedMessage("warehouse.manage") }, 403);
+      }
       const id = Number(rest[0]);
       if (!Number.isFinite(id)) return json({ message: "bad warehouse id" }, 400);
       const body = await req.json().catch(() => ({}));

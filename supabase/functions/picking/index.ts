@@ -8,10 +8,17 @@
 //   POST  /picking/lists/:id/cancel                  release without moving stock
 //   GET   /picking/availability?warehouse_id=&jan_code=  on-hand minus open reservations
 //
-// Uses the service role internally; verify_jwt=true. Stock never moves here —
-// picking only records what left the shelf; shipping (the `shipments`
-// function) is what actually debits the ledger.
+// Uses the service role internally; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts). Stock never moves here — picking only
+// records what left the shelf; shipping (the `shipments` function) is what
+// actually debits the ledger.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -26,10 +33,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -72,7 +77,9 @@ Deno.serve(async (req) => {
 
     // POST /picking/lists  → open (or return) the list for one shipment plan
     if (req.method === "POST" && rest[0] === "lists" && rest.length === 1) {
-      // TODO(auth): require picking.perform for the caller.
+      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+        return json({ message: notPermittedMessage("pick.confirm") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const planId = Number(body.shipment_plan_id);
       if (!Number.isFinite(planId)) {
@@ -98,6 +105,9 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest[0] === "lists" && rest.length === 3 &&
       rest[2] === "complete"
     ) {
+      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+        return json({ message: notPermittedMessage("pick.confirm") }, 403);
+      }
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
       const { data, error } = await supabase.rpc("complete_pick_list", {
@@ -115,6 +125,9 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest[0] === "lists" && rest.length === 3 &&
       rest[2] === "cancel"
     ) {
+      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+        return json({ message: notPermittedMessage("pick.confirm") }, 403);
+      }
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
       const { error } = await supabase.rpc("cancel_pick_list", {
@@ -126,6 +139,9 @@ Deno.serve(async (req) => {
 
     // PATCH /picking/tasks/:id  → record what was actually picked
     if (req.method === "PATCH" && rest[0] === "tasks" && rest.length === 2) {
+      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+        return json({ message: notPermittedMessage("pick.confirm") }, 403);
+      }
       const taskId = Number(rest[1]);
       if (!Number.isFinite(taskId)) return json({ message: "bad id" }, 400);
       const body = await req.json().catch(() => ({}));

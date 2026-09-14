@@ -8,9 +8,17 @@
 //   PUT    /shipments/:id/cartons/:cid      replace a carton {label?, items:[…]}
 //   DELETE /shipments/:id/cartons/:cid      delete a carton
 //
-// Uses the service role internally; verify_jwt=true (the app's anon key
-// qualifies). Stock is only ever changed by the ship/cancel RPCs.
+// Data access runs as service role; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts). Stock is only ever changed by the
+// ship/cancel RPCs. ship.complete gates confirming/cancelling the shipment
+// itself; pack.complete gates the carton edits that lead up to it.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -25,10 +33,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const DETAIL =
   "*, lines:shipment_lines(*), cartons:shipment_cartons(*, items:shipment_carton_items(*))";
@@ -99,6 +105,9 @@ Deno.serve(async (req) => {
 
     // POST /shipments/:id/ship
     if (req.method === "POST" && rest.length === 2 && rest[1] === "ship") {
+      if (!(await callerPermitted(req, supabaseUrl, "ship.complete"))) {
+        return json({ message: notPermittedMessage("ship.complete") }, 403);
+      }
       const id = Number(rest[0]);
       const { error } = await supabase.rpc("ship_plan", { p_plan_id: id });
       if (error) return json({ message: error.message }, 400);
@@ -107,6 +116,9 @@ Deno.serve(async (req) => {
 
     // POST /shipments/:id/cancel
     if (req.method === "POST" && rest.length === 2 && rest[1] === "cancel") {
+      if (!(await callerPermitted(req, supabaseUrl, "ship.complete"))) {
+        return json({ message: notPermittedMessage("ship.complete") }, 403);
+      }
       const id = Number(rest[0]);
       const { error } = await supabase.rpc("cancel_shipment", { p_plan_id: id });
       if (error) return json({ message: error.message }, 400);
@@ -115,6 +127,9 @@ Deno.serve(async (req) => {
 
     // POST /shipments/:id/cartons  → create a carton
     if (req.method === "POST" && rest.length === 2 && rest[1] === "cartons") {
+      if (!(await callerPermitted(req, supabaseUrl, "pack.complete"))) {
+        return json({ message: notPermittedMessage("pack.complete") }, 403);
+      }
       const id = Number(rest[0]);
       const body = await req.json().catch(() => ({}));
       const { data: last } = await supabase
@@ -134,6 +149,9 @@ Deno.serve(async (req) => {
 
     // PUT /shipments/:id/cartons/:cid  → replace a carton's label + items
     if (req.method === "PUT" && rest.length === 3 && rest[1] === "cartons") {
+      if (!(await callerPermitted(req, supabaseUrl, "pack.complete"))) {
+        return json({ message: notPermittedMessage("pack.complete") }, 403);
+      }
       const id = Number(rest[0]);
       const cid = Number(rest[2]);
       const body = await req.json().catch(() => ({}));
@@ -162,6 +180,9 @@ Deno.serve(async (req) => {
 
     // DELETE /shipments/:id/cartons/:cid
     if (req.method === "DELETE" && rest.length === 3 && rest[1] === "cartons") {
+      if (!(await callerPermitted(req, supabaseUrl, "pack.complete"))) {
+        return json({ message: notPermittedMessage("pack.complete") }, 403);
+      }
       const id = Number(rest[0]);
       const cid = Number(rest[2]);
       const { error } = await supabase.from("shipment_cartons").delete().eq("id", cid);

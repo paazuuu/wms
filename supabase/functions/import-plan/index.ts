@@ -18,6 +18,10 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import * as XLSX from "npm:xlsx@0.18.5";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -32,10 +36,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const UNKNOWN_CODE = "UNKNOWN";
 
@@ -380,8 +382,10 @@ function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
 }
 
 // Save a plan + its lines. Shared by the multipart one-shot and the JSON commit.
-// target "plan" (inbound delivery) or "shipment" (outbound) picks the tables.
-async function commit(input: {
+// target "plan" (inbound delivery) or "shipment" (outbound) picks the tables
+// and, since they're different halves of the warehouse (receiving vs.
+// shipping), the permission that gates writing one.
+async function commit(req: Request, input: {
   deliveryNumber: string;
   supplier: string | null;
   supplierCode: string | null;
@@ -394,6 +398,10 @@ async function commit(input: {
   source: string;
   target: string;
 }): Promise<Response> {
+  const permission = input.target === "shipment" ? "pack.complete" : "receiving.confirm";
+  if (!(await callerPermitted(req, supabaseUrl, permission))) {
+    return json({ message: notPermittedMessage(permission) }, 403);
+  }
   const lines = input.lines.map(toLineRow).filter((l) => isJan(l.jan_code as string));
   if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
   const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
@@ -492,7 +500,7 @@ Deno.serve(async (req) => {
       const deliveryNumber = String(b.delivery_number ?? "").trim();
       if (!deliveryNumber) return json({ message: "delivery_number is required" }, 400);
       const lines = Array.isArray(b.lines) ? b.lines : [];
-      return await commit({
+      return await commit(req, {
         deliveryNumber,
         supplier: str(b.supplier),
         supplierCode: str(b.supplier_code),
@@ -561,7 +569,7 @@ Deno.serve(async (req) => {
     // One-shot save (no review): needs a delivery number now.
     const num = deliveryNumber || mergedHeader.doc_number;
     if (!num) return json({ message: "delivery_number is required" }, 400);
-    return await commit({
+    return await commit(req, {
       deliveryNumber: num,
       supplier: mergedHeader.supplier_name,
       supplierCode,

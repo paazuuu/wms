@@ -14,10 +14,23 @@
 //   PATCH /transfers/lines/:lineId/receive         {quantity} record what arrived
 //   POST  /transfers/:id/complete-receiving        RECEIVING → COMPLETED, credits the destination
 //
-// Uses the service role internally; verify_jwt=true. Stock moves exactly
-// twice per transfer — TRANSFER_OUT on complete-picking, TRANSFER_IN on
-// complete-receiving — both inside the RPCs, never here.
+// Uses the service role internally; verify_jwt=true only proves the caller
+// is signed in, not that they hold the right permission, so every mutation
+// below re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts). Stock moves exactly twice per transfer —
+// TRANSFER_OUT on complete-picking, TRANSFER_IN on complete-receiving — both
+// inside the RPCs, never here.
+//
+// Permission model: transfer.create covers the requesting/source-side
+// lifecycle (create, submit, cancel, start/complete picking, record a pick —
+// everything the warehouse sending stock does), transfer.approve gates the
+// approve/reject decision, and transfer.receive covers the destination-side
+// lifecycle (start/complete receiving, record a receipt).
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  callerPermitted,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -32,10 +45,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -88,7 +99,9 @@ Deno.serve(async (req) => {
 
     // POST /transfers
     if (req.method === "POST" && rest.length === 0) {
-      // TODO(auth): require transfer.request for the caller.
+      if (!(await callerPermitted(req, supabaseUrl, "transfer.create"))) {
+        return json({ message: notPermittedMessage("transfer.create") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const source = Number(body.source_warehouse_id);
       const destination = Number(body.destination_warehouse_id);
@@ -127,17 +140,23 @@ Deno.serve(async (req) => {
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
       const action = rest[1];
 
-      const rpcByAction: Record<string, string> = {
-        "submit": "submit_transfer_order",
-        "approve": "approve_transfer_order",
-        "cancel": "cancel_transfer_order",
-        "start-picking": "start_transfer_picking",
-        "complete-picking": "complete_transfer_picking",
-        "start-receiving": "start_transfer_receiving",
+      const permissionByAction: Record<string, string> = {
+        "submit": "transfer.create",
+        "approve": "transfer.approve",
+        "reject": "transfer.approve",
+        "cancel": "transfer.create",
+        "start-picking": "transfer.create",
+        "complete-picking": "transfer.create",
+        "start-receiving": "transfer.receive",
+        "complete-receiving": "transfer.receive",
       };
+      const permission = permissionByAction[action];
+      if (!permission) return json({ message: "not found" }, 404);
+      if (!(await callerPermitted(req, supabaseUrl, permission))) {
+        return json({ message: notPermittedMessage(permission) }, 403);
+      }
 
       if (action === "reject") {
-        // TODO(auth): require transfer.approve for the caller.
         const body = await req.json().catch(() => ({}));
         const { error } = await supabase.rpc("reject_transfer_order", {
           p_transfer_id: id,
@@ -159,10 +178,16 @@ Deno.serve(async (req) => {
         return json({ data: refreshed.data, summary: data });
       }
 
+      const rpcByAction: Record<string, string> = {
+        "submit": "submit_transfer_order",
+        "approve": "approve_transfer_order",
+        "cancel": "cancel_transfer_order",
+        "start-picking": "start_transfer_picking",
+        "complete-picking": "complete_transfer_picking",
+        "start-receiving": "start_transfer_receiving",
+      };
       const rpc = rpcByAction[action];
       if (!rpc) return json({ message: "not found" }, 404);
-      // TODO(auth): approve requires transfer.approve; the rest require
-      // transfer.request/perform for the caller's warehouse.
       const { error } = await supabase.rpc(rpc, { p_transfer_id: id });
       if (error) return json({ message: error.message }, 400);
       return await detail(id);
@@ -186,6 +211,10 @@ Deno.serve(async (req) => {
         ? "record_transfer_receipt"
         : null;
       if (!rpc) return json({ message: "not found" }, 404);
+      const permission = action === "pick" ? "transfer.create" : "transfer.receive";
+      if (!(await callerPermitted(req, supabaseUrl, permission))) {
+        return json({ message: notPermittedMessage(permission) }, 403);
+      }
 
       const transferId = await transferIdForLine(lineId);
       if (transferId === null) {
