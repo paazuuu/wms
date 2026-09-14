@@ -85,4 +85,57 @@ void main() {
     expect(find.byType(TransferDetailScreen), findsOneWidget);
     expect(find.text('TR-000009'), findsOneWidget);
   });
+
+  testWidgets(
+      'a permission-denied create shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    final warehouseRepo = FakeWarehouseRepository(const WarehouseOverview(
+      warehouses: [
+        Warehouse(id: 1, code: 'MAIN', name: '神戸倉庫'),
+        Warehouse(id: 2, code: 'SUB', name: '大阪倉庫'),
+      ],
+      totals: WarehouseTotals(),
+    ));
+    const order = TransferOrder(
+      id: 9,
+      transferNumber: 'TR-000009',
+      sourceWarehouseId: 1,
+      sourceWarehouseName: '神戸倉庫',
+      destinationWarehouseId: 2,
+      destinationWarehouseName: '大阪倉庫',
+    );
+    final transferRepo = FakeTransferRepository(order: order)
+      ..failWith = 'not permitted: transfer.create required';
+
+    await pumpApp(
+      tester,
+      const TransferListScreen(),
+      overrides: [
+        warehouseRepositoryProvider.overrideWithValue(warehouseRepo),
+        transferRepositoryProvider.overrideWithValue(transferRepo),
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('移動を作成'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('商品を追加'));
+    await tester.pumpAndSettle();
+
+    final dialogFields =
+        find.descendant(of: find.byType(AlertDialog), matching: find.byType(TextField));
+    await tester.enterText(dialogFields.first, '4901234567894');
+    await tester.enterText(dialogFields.last, '10');
+    await tester.tap(find.widgetWithText(FilledButton, '商品を追加'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '移動を作成'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '移動を作成'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('transfer.create'), findsNothing);
+  });
 }

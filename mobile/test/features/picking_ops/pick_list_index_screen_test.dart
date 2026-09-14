@@ -55,4 +55,50 @@ void main() {
     // The new pick list's own detail screen is now showing.
     expect(find.text('ボールペン'), findsOneWidget);
   });
+
+  testWidgets(
+      'a permission-denied start shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    const shipment = Shipment(
+      id: 9,
+      shipmentNumber: 'SHIP-0009',
+      customerName: 'テスト商店',
+      lines: [],
+    );
+    final list = PickList(
+      id: 5,
+      shipmentPlanId: 9,
+      shipmentNumber: shipment.shipmentNumber,
+      customerName: shipment.customerName,
+      status: PickListStatus.picking,
+      tasks: const [
+        PickTask(
+          id: 21,
+          janCode: '4901234567894',
+          productName: 'ボールペン',
+          plannedQuantity: 20,
+        ),
+      ],
+    );
+    final shipmentRepo = FakeShipmentRepository([shipment]);
+    final pickingRepo = FakePickingRepository(list: list, started: false)
+      ..failWith = 'not permitted: pick.confirm required';
+
+    await pumpApp(
+      tester,
+      const PickListIndexScreen(),
+      overrides: [
+        shipmentRepositoryProvider.overrideWithValue(shipmentRepo),
+        pickingRepositoryProvider.overrideWithValue(pickingRepo),
+      ],
+    );
+
+    await tester.tap(find.text('ピッキング開始'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('テスト商店').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('pick.confirm'), findsNothing);
+  });
 }

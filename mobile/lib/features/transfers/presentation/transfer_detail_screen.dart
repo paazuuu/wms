@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
@@ -98,6 +99,7 @@ class _BodyState extends ConsumerState<_Body> {
     Future<ApiResult<TransferOrder>> Function() action, {
     String? successMessage,
   }) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
     final result = await action();
     if (!mounted) return;
@@ -107,7 +109,7 @@ class _BodyState extends ConsumerState<_Body> {
         _refresh();
         if (successMessage != null) _snack(successMessage);
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -222,7 +224,7 @@ class _BodyState extends ConsumerState<_Body> {
         _refresh();
         _snack(l10n.transferCompleted(completed.summary.lossLines));
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

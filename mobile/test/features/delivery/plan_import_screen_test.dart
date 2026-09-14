@@ -196,4 +196,24 @@ void main() {
     expect(repo.lastCommit!.lines, hasLength(1));
     expect(repo.lastCommit!.lines.single['planned_quantity'], 10);
   });
+
+  testWidgets(
+      'a permission-denied register shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    final repo = FakeDeliveryRepository(
+      const [],
+      preview: _previewWith([
+        {'jan_code': '4901234567894', 'product_name': 'ボールペン', 'planned_quantity': 10},
+      ]),
+    )..failWith = 'not permitted: receiving.confirm required';
+
+    await _openReview(tester, repo);
+
+    await tester.tap(find.text('登録する'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastCommit, isNull);
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('receiving.confirm'), findsNothing);
+  });
 }

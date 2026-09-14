@@ -77,6 +77,46 @@ void main() {
     expect(find.text('出庫確定'), findsOneWidget);
   });
 
+  testWidgets(
+      'a permission-denied ship shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    final repo = FakeShipmentRepository([_shipment()])
+      ..failWith = 'not permitted: ship.complete required';
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 1),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    await tester.tap(find.text('出庫確定'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '出庫確定').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('ship.complete'), findsNothing);
+  });
+
+  testWidgets(
+      'a permission-denied add-carton shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    final repo = FakeShipmentRepository([_shipment()])
+      ..failWith = 'not permitted: pack.complete required';
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 1),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    await tester.tap(find.text('段ボールを追加'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('pack.complete'), findsNothing);
+  });
+
   testWidgets('§18 shows the computed box count before creating anything',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(900, 1600));

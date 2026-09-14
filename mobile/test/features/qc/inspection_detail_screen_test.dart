@@ -30,6 +30,28 @@ Inspection _pending() => Inspection(
       ],
     );
 
+/// Fully checked, so _complete() reaches the repository instead of being
+/// refused locally for unchecked items.
+Inspection _checked() => Inspection(
+      id: 1,
+      status: QcResult.pending,
+      deliveryNumber: '0901',
+      supplierName: '新東光通商株式会社',
+      items: [
+        InspectionItem(
+          id: 10,
+          janCode: '4902505632037',
+          productName: 'ペン',
+          expectedQuantity: 100,
+          actualQuantity: 100,
+          passedQuantity: 100,
+          failedQuantity: 0,
+          discrepancy: 0,
+          result: QcResult.pass,
+        ),
+      ],
+    );
+
 Future<ProviderContainer> _pump(
     WidgetTester tester, FakeInspectionRepository repo) async {
   final container = ProviderContainer(overrides: [
@@ -88,6 +110,23 @@ void main() {
 
     expect(repo.inspection.status, QcResult.partial);
     expect(find.textContaining('検品を確定しました'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'a permission-denied completion shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeInspectionRepository(_checked())
+      ..failWith = 'not permitted: inspection.confirm required';
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('検品を確定'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('inspection.confirm'), findsNothing);
 
     await tester.binding.setSurfaceSize(null);
   });

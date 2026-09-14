@@ -173,6 +173,11 @@ class FakeDeliveryRepository implements DeliveryRepository {
   /// The warehouse the last list() call was scoped to.
   int? lastWarehouseId;
 
+  /// When set, reconcile()/commitPlan()/cancelReceipt() fail with this
+  /// message instead of succeeding — e.g. to simulate a permission-denied
+  /// RPC response (receiving.confirm / pack.complete).
+  String? failWith;
+
   @override
   Future<ApiResult<List<DeliveryPlan>>> list(
       {String? status, String? search, int? warehouseId}) async {
@@ -188,10 +193,12 @@ class FakeDeliveryRepository implements DeliveryRepository {
 
   @override
   Future<ApiResult<DeliveryPlan>> reconcile(int id,
-          {required List<ReconcileEntry> entries,
-          String? noteReference,
-          bool complete = true}) async =>
-      ApiSuccess(plans.first);
+      {required List<ReconcileEntry> entries,
+      String? noteReference,
+      bool complete = true}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return ApiSuccess(plans.first);
+  }
 
   @override
   Future<ApiResult<ImportPreview>> previewPlan(
@@ -203,6 +210,7 @@ class FakeDeliveryRepository implements DeliveryRepository {
 
   @override
   Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     lastCommit = commit;
     return ApiSuccess(PlanImportResult(
         planId: 1,
@@ -215,8 +223,10 @@ class FakeDeliveryRepository implements DeliveryRepository {
       const ApiSuccess([]);
 
   @override
-  Future<ApiResult<DeliveryPlan>> cancelReceipt(int planId, int receiptId) async =>
-      ApiSuccess(plans.first);
+  Future<ApiResult<DeliveryPlan>> cancelReceipt(int planId, int receiptId) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return ApiSuccess(plans.first);
+  }
 }
 
 class FakeDashboardRepository implements DashboardRepository {
@@ -243,12 +253,17 @@ class FakeWarehouseRepository implements WarehouseRepository {
   final Map<int, List<Bin>> binsByWarehouse;
   final List<NewWarehouse> created = [];
 
+  /// When set, create() fails with this message instead of succeeding — e.g.
+  /// to simulate a permission-denied RPC response (warehouse.manage).
+  String? failWith;
+
   @override
   Future<ApiResult<WarehouseOverview>> overview() async =>
       ApiSuccess(overviewValue);
 
   @override
   Future<ApiResult<Warehouse>> create(NewWarehouse warehouse) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     created.add(warehouse);
     return ApiSuccess(Warehouse(
       id: 999,
@@ -287,6 +302,11 @@ class FakeInspectionRepository implements InspectionRepository {
 
   /// Set when complete() was rejected because lines were still unchecked.
   bool refusedIncomplete = false;
+
+  /// When set, saveItem()/complete() fail with this message instead of
+  /// succeeding — e.g. to simulate a permission-denied RPC response
+  /// (inspection.confirm).
+  String? failWith;
 
   @override
   Future<ApiResult<List<Inspection>>> list(
@@ -346,6 +366,7 @@ class FakeInspectionRepository implements InspectionRepository {
   @override
   Future<ApiResult<Inspection>> complete(int inspectionId,
       {String? note}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     if (inspection.uncheckedCount > 0) {
       refusedIncomplete = true;
       return const ApiFailure(
@@ -400,6 +421,10 @@ class FakeShipmentRepository implements ShipmentRepository {
   /// The warehouse the last list() call was scoped to.
   int? lastWarehouseId;
 
+  /// When set, ship() fails with this message instead of succeeding — e.g.
+  /// to simulate a permission-denied RPC response (ship.complete).
+  String? failWith;
+
   @override
   Future<ApiResult<List<Shipment>>> list(
       {String? status, String? search, int? warehouseId}) async {
@@ -446,14 +471,19 @@ class FakeShipmentRepository implements ShipmentRepository {
   }
 
   @override
-  Future<ApiResult<Shipment>> ship(int id) async => show(id);
+  Future<ApiResult<Shipment>> ship(int id) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return show(id);
+  }
 
   @override
   Future<ApiResult<Shipment>> cancel(int id) async => show(id);
 
   @override
-  Future<ApiResult<Shipment>> createCarton(int id, {String? label}) async =>
-      show(id);
+  Future<ApiResult<Shipment>> createCarton(int id, {String? label}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return show(id);
+  }
 
   @override
   Future<ApiResult<Shipment>> deleteCarton(int id, int cartonId) async =>
@@ -461,8 +491,10 @@ class FakeShipmentRepository implements ShipmentRepository {
 
   @override
   Future<ApiResult<Shipment>> updateCarton(int id, int cartonId,
-          {String? label, required List<CartonItem> items}) async =>
-      show(id);
+      {String? label, required List<CartonItem> items}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return show(id);
+  }
 }
 
 /// In-memory stand-in for the stock-ops backend. It mirrors the server's two
@@ -664,6 +696,10 @@ class FakePickingRepository implements PickingRepository {
   int? lastRecordedQuantity;
   int? lastRecordedBinId;
 
+  /// When set, start() fails with this message instead of succeeding — e.g.
+  /// to simulate a permission-denied RPC response (pick.confirm).
+  String? failWith;
+
   PickTaskStatus _statusFor(int planned, int? picked) {
     if (picked == null) return PickTaskStatus.pending;
     if (picked == planned) return PickTaskStatus.picked;
@@ -681,6 +717,7 @@ class FakePickingRepository implements PickingRepository {
 
   @override
   Future<ApiResult<PickList>> start(int shipmentPlanId, {String? note}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     _started = true;
     return ApiSuccess(_list);
   }
@@ -779,6 +816,10 @@ class FakeTransferRepository implements TransferRepository {
   /// Set whenever an action was rejected for being called in the wrong state.
   String? lastRefusal;
 
+  /// When set, create() fails with this message instead of succeeding — e.g.
+  /// to simulate a permission-denied RPC response (transfer.create).
+  String? failWith;
+
   TransferOrder _copyWith({
     TransferStatus? status,
     List<TransferLine>? lines,
@@ -817,8 +858,10 @@ class FakeTransferRepository implements TransferRepository {
     required int destinationWarehouseId,
     required List<TransferLineDraft> lines,
     String? note,
-  }) async =>
-      ApiSuccess(_order);
+  }) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return ApiSuccess(_order);
+  }
 
   @override
   Future<ApiResult<TransferOrder>> submit(int id) async =>

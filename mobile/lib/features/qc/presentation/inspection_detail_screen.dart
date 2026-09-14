@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -85,7 +86,7 @@ class _BodyState extends ConsumerState<_Body> {
         final ui = QcResultUi.of(l10n, updated.status);
         _snack(l10n.qcCompleted(ui.label));
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -127,11 +128,12 @@ class _BodyState extends ConsumerState<_Body> {
     result.when(
       success: (_) => ref.invalidate(attachmentListProvider(
           (entityType: 'inspection', entityId: '${_inspection.id}'))),
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
   Future<void> _editItem(InspectionItem item) async {
+    final l10n = AppLocalizations.of(context);
     final finding = await showModalBottomSheet<InspectionFinding>(
       context: context,
       isScrollControlled: true,
@@ -147,7 +149,7 @@ class _BodyState extends ConsumerState<_Body> {
     setState(() => _busy = false);
     result.when(
       success: (_) => ref.invalidate(inspectionDetailProvider(_inspection.id)),
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

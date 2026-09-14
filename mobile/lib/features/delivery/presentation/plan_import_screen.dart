@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
@@ -139,7 +140,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         });
         HapticFeedback.selectionClick();
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
@@ -190,7 +191,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         );
         Navigator.of(context).pop();
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 

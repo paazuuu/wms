@@ -1095,6 +1095,95 @@ test file this screen has ever had.
 
 `flutter analyze`: clean. `flutter test`: 324 → 334 passing.
 
+### Edge function audit: the same missing-permission-check gap, across every other edge function (no schema migration)
+
+The `stock-ops` fix earlier in this document was one instance of a
+systemic pattern, not an isolated bug: any edge function that predates the
+app's has_permission()-in-every-RPC convention runs purely on the
+service-role client and could have a mutation with no real permission
+check. Audited every function under `supabase/functions` for the same gap
+and found it, in two shapes, in seven more:
+
+- `inspections` — POST start, PATCH item, POST complete: zero checks, no
+  TODO even acknowledging the gap. Any signed-in user could confirm a QC
+  pass/fail on any delivery.
+- `picking` — start/record/complete/cancel: one TODO referenced
+  `picking.perform`, a permission code that **does not exist** in the live
+  `permissions` table; the other three endpoints had zero checks.
+- `transfers` — the full 8-endpoint lifecycle (create through
+  complete-receiving) had TODOs referencing `transfer.request`, which
+  likewise does not exist. Any signed-in user could create, approve/reject,
+  pick, or receive any inter-warehouse transfer.
+- `delivery-plans` — POST reconcile, POST receipt-cancel: zero checks. Any
+  signed-in user could post a receiving reconciliation (which adjusts
+  stock) or void one.
+- `shipments` — POST ship, POST cancel, and all three carton endpoints:
+  zero checks. Any signed-in user could confirm/cancel a shipment
+  (deducting/restoring stock) or edit its cartons.
+- `warehouses` — POST create, PATCH update: TODOs referencing
+  `warehouse.manage` left unimplemented.
+- `import-plan` — the shared `commit()` helper behind both the multipart
+  one-shot save and the reviewed-JSON commit path: zero checks. Any
+  signed-in user could register an inbound delivery or outbound shipment
+  plan.
+
+Every TODO-referenced permission code was checked against the live
+`permissions` table before use rather than trusted verbatim — that's how
+the two nonexistent codes above (`picking.perform`, `transfer.request`)
+were caught before they could be baked into a fix that still wouldn't work.
+
+Fixed all seven the same way as `stock-ops`, this time factored into a
+shared `supabase/functions/_shared/require_permission.ts` (`callerPermitted()`
+builds the per-request client, calls `auth.getUser()` to confirm a genuine
+signed-in user, then trusts `has_permission()` under that identity — the
+same null-`auth.uid()` footgun from the stock-ops fix applies here too, so
+every one of these follows the same "confirm the user first" rule).
+Supabase's `deploy_edge_function` bundles each function independently, so
+the shared file's content had to be included in every deploy call, not
+committed once and assumed shared.
+
+Permission mapping: `inspection.confirm` (inspections); `pick.confirm`
+(picking); `transfer.create`/`transfer.approve`/`transfer.receive`
+(transfers — `create` covers the whole source/requesting-side lifecycle,
+`approve` gates the approve/reject decision, `receive` covers the
+destination side); `receiving.confirm` (delivery-plans, and import-plan's
+delivery-plan target); `ship.complete`/`pack.complete` (shipments —
+`complete` gates ship/cancel, `pack` gates the carton edits leading up to
+it; `pack.complete` also gates import-plan's shipment target);
+`warehouse.manage` (warehouses). Deployed as `inspections` v2, `picking`
+v2, `transfers` v2, `delivery-plans` v5, `shipments` v3, `warehouses` v4,
+`import-plan` v6.
+
+Same verification limitation as `stock-ops`: not exercised over a live
+HTTP call (this session's network proxy doesn't reach `*.supabase.co`
+directly), so correctness rests on code review plus `flutter analyze`/
+`flutter test` passing against the client side.
+
+`humanizeApiErrorMessage()` wired into every screen whose action is newly
+gated by one of these checks and whose SnackBar previously showed
+`f.message` raw: `InspectionDetailScreen`, `PickListDetailScreen`,
+`PickListIndexScreen`, `TransferDetailScreen`, `TransferListScreen`,
+`ReconciliationScreen`, `ReceiptHistoryScreen`, `ShipmentDetailScreen`,
+`CartonEditScreen`, `AddWarehouseScreen`, `PlanImportScreen`. Added one
+permission-denied widget test per newly-fixed function, exercising a
+representative mutation, following the same `failWith`-on-a-fake-repository
+pattern the stock-ops tests already used — extended `test/support/harness.dart`
+with a `failWith` field on `FakeInspectionRepository`, `FakePickingRepository`,
+`FakeTransferRepository`, `FakeDeliveryRepository`, `FakeShipmentRepository`,
+and `FakeWarehouseRepository`.
+
+Found and deliberately not fixed in this round: `audit_log_query`,
+`audit_log_for_entity`, and `audit_event_types` (the RPCs behind the
+`audit-log` edge function, itself a thin read-only proxy) have no
+`has_permission('audit.view')` check in their SQL bodies at all — any
+signed-in user can read the full audit trail regardless of that
+permission. That's a read-side information-disclosure gap, architecturally
+different from everything above (it needs a migration fixing the RPCs, not
+an edge-function-level fix), and is flagged here for follow-up rather than
+folded into this round.
+
+`flutter analyze`: clean. `flutter test`: 334 → 342 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

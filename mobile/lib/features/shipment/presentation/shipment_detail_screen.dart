@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -44,6 +45,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
   }
 
   Future<void> _addCarton() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
     final result =
         await ref.read(shipmentRepositoryProvider).createCarton(_id);
@@ -51,7 +53,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     setState(() => _busy = false);
     result.when(
       success: (_) => _refresh(),
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
@@ -77,7 +79,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     if (!mounted) return;
     result.when(
       success: (_) => _refresh(),
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
@@ -124,7 +126,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         ref.invalidate(stockListProvider);
         _snack(l10n.shipDone, tone: StatusTone.success);
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
@@ -150,12 +152,13 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         _snack(l10n.autopackDone(r.cartonCount, r.unitsPerCarton),
             tone: StatusTone.success);
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
   /// §21 — the shipping desk's weight / carrier / tracking number.
   Future<void> _editLogistics(Shipment s) async {
+    final l10n = AppLocalizations.of(context);
     final draft = await showModalBottomSheet<_LogisticsDraft>(
       context: context,
       isScrollControlled: true,
@@ -174,7 +177,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     setState(() => _busy = false);
     result.when(
       success: (_) => _refresh(),
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
@@ -206,7 +209,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         ref.invalidate(stockListProvider);
         _snack(l10n.shipCancelledDone, tone: StatusTone.success);
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/scan_feedback.dart';
 import '../../../core/scan/scan_field.dart';
@@ -76,6 +77,7 @@ class _BodyState extends ConsumerState<_Body> {
   }
 
   Future<void> _record(PickTask task) async {
+    final l10n = AppLocalizations.of(context);
     final bins = _list.usesLocations && _list.warehouseId != null
         ? await ref.read(warehouseBinsProvider(_list.warehouseId!).future)
         : const <Bin>[];
@@ -97,7 +99,7 @@ class _BodyState extends ConsumerState<_Body> {
     setState(() => _busy = false);
     result.when(
       success: (_) => _refresh(),
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -140,7 +142,7 @@ class _BodyState extends ConsumerState<_Body> {
         _snack(l10n.pickCompleted(
             completed.summary.shortLines, completed.summary.overLines));
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -174,7 +176,7 @@ class _BodyState extends ConsumerState<_Body> {
         _refresh();
         _snack(l10n.pickCancelled);
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -76,6 +77,7 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
   /// Open the QC pass for this receipt and go straight to it. The backend keeps
   /// one inspection per receipt, so tapping again reopens the same one.
   Future<void> _startInspection() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
     final result =
         await ref.read(inspectionRepositoryProvider).start(_r.id);
@@ -92,7 +94,7 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(
-            content: Text(f.message),
+            content: Text(humanizeApiErrorMessage(l10n, f.message)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
       },
@@ -137,7 +139,7 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
         ref.invalidate(stockListProvider);
         _snack(l10n.receiptCancelledDone, tone: StatusTone.success);
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 

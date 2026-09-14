@@ -447,6 +447,78 @@ Audited against the spec's 5 bullets:
     into the three `_snack(...)` call sites in the stock-ops screens that
     previously showed `f.message` raw, since this fix is what makes that
     error newly reachable there.
+- [x] **Same gap audited across every other edge function** — the
+      `stock-ops` fix above was one instance of a systemic pattern: any
+      edge function older than the app's now-universal
+      "every RPC checks `has_permission()`" convention runs on the
+      service-role client and could have a mutation with no permission
+      check at all. Audited every edge function under `supabase/functions`
+      and found the same gap, in two shapes, in seven more of them:
+      - `inspections` — POST start, PATCH item, POST complete: zero checks
+        (no TODO even acknowledged it). Any signed-in user could confirm a
+        QC pass/fail on any delivery.
+      - `picking` — POST start, PATCH record, POST complete, POST cancel:
+        one had a TODO referencing a permission code (`picking.perform`)
+        that **does not exist** in the live `permissions` table; the other
+        three had zero checks.
+      - `transfers` — the whole 8-endpoint lifecycle (create through
+        complete-receiving) had TODOs referencing `transfer.request`,
+        which likewise does not exist. Any signed-in user could create,
+        approve/reject, pick, or receive any inter-warehouse transfer.
+      - `delivery-plans` — POST reconcile, POST receipt-cancel: zero checks.
+        Any signed-in user could post a receiving reconciliation
+        (adjusting stock) or void one.
+      - `shipments` — POST ship, POST cancel, and all three carton
+        endpoints: zero checks. Any signed-in user could confirm/cancel a
+        shipment (deducting/restoring stock) or edit its cartons.
+      - `warehouses` — POST create, PATCH update: TODOs referencing
+        `warehouse.manage` left unimplemented.
+      - `import-plan` — the shared `commit()` helper behind both the
+        multipart one-shot save and the reviewed-JSON commit: zero checks.
+        Any signed-in user could register an inbound delivery or outbound
+        shipment plan.
+
+      Fixed all seven the same way as `stock-ops`, factored into a shared
+      `supabase/functions/_shared/require_permission.ts` (`callerPermitted()`
+      confirms a real signed-in user via `auth.getUser()`, then trusts
+      `has_permission()` under that identity — the same null-`auth.uid()`
+      footgun from the stock-ops fix applies here too, so every fix follows
+      the same "confirm the user first" rule). Every TODO-referenced
+      permission code was checked against the live `permissions` table
+      before use rather than trusted verbatim, which is how the two
+      nonexistent codes above were caught. Permission mapping used:
+      `inspection.confirm` (inspections), `pick.confirm` (picking),
+      `transfer.create`/`transfer.approve`/`transfer.receive` (transfers —
+      create covers the source/requesting side's whole lifecycle, approve
+      gates the approve/reject decision, receive covers the destination
+      side), `receiving.confirm` (delivery-plans, and import-plan's
+      delivery-plan target), `ship.complete`/`pack.complete` (shipments —
+      complete gates ship/cancel, pack gates the carton edits leading up
+      to it; pack.complete also gates import-plan's shipment target),
+      `warehouse.manage` (warehouses). Deployed as `inspections` v2,
+      `picking` v2, `transfers` v2, `delivery-plans` v5, `shipments` v3,
+      `warehouses` v4, `import-plan` v6.
+  - Same verification limitation as the stock-ops fix: not independently
+    exercised over live HTTP (this session's outbound network cannot reach
+    `*.supabase.co` directly), verified by code review and by
+    `flutter analyze`/`flutter test` passing against the client side.
+  - `humanizeApiErrorMessage()` wired into every screen whose action is
+    now gated by one of these checks and whose SnackBar previously showed
+    `f.message` raw: `InspectionDetailScreen`, `PickListDetailScreen`,
+    `PickListIndexScreen`, `TransferDetailScreen`, `TransferListScreen`,
+    `ReconciliationScreen`, `ReceiptHistoryScreen`, `ShipmentDetailScreen`,
+    `CartonEditScreen`, `AddWarehouseScreen`, `PlanImportScreen`. A
+    permission-denied widget test was added for one representative
+    mutation per newly-fixed function, following the same
+    `failWith`-on-a-fake-repository pattern as the stock-ops tests.
+  - Found and deliberately **not** fixed in this round: `audit_log_query`,
+    `audit_log_for_entity`, and `audit_event_types` (the RPCs behind the
+    `audit-log` edge function, which is a thin read-only proxy) have no
+    `has_permission('audit.view')` check in their SQL bodies at all — any
+    signed-in user can read the full audit trail regardless of that
+    permission. This is a read-side information-disclosure gap, distinct
+    in kind from the write-side gaps above, and needs a migration fixing
+    the RPCs rather than an edge-function-level fix. Flagged for follow-up.
 
 **AI UI (UI spec §31)**
 

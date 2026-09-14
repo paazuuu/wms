@@ -8,15 +8,17 @@ import 'package:wms_mobile/features/warehouse_context/presentation/add_warehouse
 
 import '../../support/harness.dart';
 
-Future<FakeWarehouseRepository> _pump(WidgetTester tester) async {
-  final repo = FakeWarehouseRepository(
-      WarehouseOverview(warehouses: const [], totals: WarehouseTotals()));
+Future<FakeWarehouseRepository> _pump(WidgetTester tester,
+    {FakeWarehouseRepository? repo}) async {
+  final r = repo ??
+      FakeWarehouseRepository(
+          WarehouseOverview(warehouses: const [], totals: WarehouseTotals()));
   final container = ProviderContainer(overrides: [
-    warehouseRepositoryProvider.overrideWithValue(repo),
+    warehouseRepositoryProvider.overrideWithValue(r),
   ]);
   addTearDown(container.dispose);
   await pumpAppWith(tester, container, const AddWarehouseScreen());
-  return repo;
+  return r;
 }
 
 void main() {
@@ -70,6 +72,27 @@ void main() {
     expect(submitted.usesLocations, isTrue);
     expect(submitted.toJson()['create_default_bins'], isTrue);
     expect(submitted.toJson()['receiving_bin'], 'STAGE-01');
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'a permission-denied create shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    final repo = FakeWarehouseRepository(
+        WarehouseOverview(warehouses: const [], totals: WarehouseTotals()))
+      ..failWith = 'not permitted: warehouse.manage required';
+    await _pump(tester, repo: repo);
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'メイン倉庫');
+    await tester.enterText(find.byType(TextFormField).at(1), 'MAIN');
+    await tester.tap(find.byType(FilledButton));
+    await tester.pumpAndSettle();
+
+    expect(repo.created, isEmpty);
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('warehouse.manage'), findsNothing);
 
     await tester.binding.setSurfaceSize(null);
   });

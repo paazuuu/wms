@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -308,7 +309,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
             tone: StatusTone.success);
         Navigator.of(context).pop();
       },
-      failure: (f) => _snack(f.message, tone: StatusTone.danger),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 

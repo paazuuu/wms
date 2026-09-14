@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
 import '../application/shipment_providers.dart';
@@ -64,6 +65,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     final items = <CartonItem>[];
     for (final l in widget.shipment.lines) {
       final q = _qty[l.janCode] ?? 0;
@@ -95,7 +97,8 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(
-              content: Text(f.message), backgroundColor: scheme.error));
+              content: Text(humanizeApiErrorMessage(l10n, f.message)),
+              backgroundColor: scheme.error));
       },
     );
   }
