@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -89,7 +90,8 @@ class _PutawayConfirmSheetState extends ConsumerState<PutawayConfirmSheet> {
               '-${bin.binId}-${DateTime.now().microsecondsSinceEpoch}';
         });
       },
-      failure: (f) => setState(() => _error = f.message),
+      failure: (f) =>
+          setState(() => _error = humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -146,7 +148,8 @@ class _PutawayConfirmSheetState extends ConsumerState<PutawayConfirmSheet> {
                 res.quantity, res.binCode, res.pendingAfter)),
           ));
       },
-      failure: (f) => setState(() => _error = f.message),
+      failure: (f) =>
+          setState(() => _error = humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 

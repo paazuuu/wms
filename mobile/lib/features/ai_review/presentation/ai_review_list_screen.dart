@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -43,7 +44,7 @@ class AiReviewListScreen extends ConsumerWidget {
         ref.invalidate(aiReviewPendingListProvider);
         _snack(context, l10n.aiReviewConfirmed);
       },
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -83,7 +84,7 @@ class AiReviewListScreen extends ConsumerWidget {
         ref.invalidate(aiReviewPendingListProvider);
         _snack(context, l10n.aiReviewRejected);
       },
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 

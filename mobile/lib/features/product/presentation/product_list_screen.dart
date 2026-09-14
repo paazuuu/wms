@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
@@ -71,7 +72,7 @@ class ProductListScreen extends ConsumerWidget {
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(productListProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -320,7 +321,9 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _error = errorMessage;
+      _error = errorMessage == null
+          ? null
+          : humanizeApiErrorMessage(l10n, errorMessage!);
     });
     if (errorMessage == null) {
       Navigator.pop(context, true);

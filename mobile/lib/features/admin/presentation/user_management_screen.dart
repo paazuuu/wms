@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -68,7 +69,7 @@ class UserManagementScreen extends ConsumerWidget {
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(adminUsersProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -118,7 +119,7 @@ class UserManagementScreen extends ConsumerWidget {
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(adminUsersProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -150,7 +151,7 @@ class UserManagementScreen extends ConsumerWidget {
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(adminUsersProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -181,7 +182,7 @@ class UserManagementScreen extends ConsumerWidget {
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(adminUsersProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 

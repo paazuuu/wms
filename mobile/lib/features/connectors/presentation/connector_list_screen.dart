@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -27,13 +28,14 @@ class ConnectorListScreen extends ConsumerWidget {
 
   Future<void> _toggle(
       BuildContext context, WidgetRef ref, Connector connector, bool value) async {
+    final l10n = AppLocalizations.of(context);
     final result = await ref
         .read(connectorRepositoryProvider)
         .setEnabled(connector.code, value);
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(connectorListProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 

@@ -74,6 +74,28 @@ void main() {
   });
 
   testWidgets(
+      'a permission-denied save shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeProductRepository()
+      ..failCreateWith = 'not permitted: product.manage required';
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4901234567890');
+    await tester.enterText(find.widgetWithText(TextField, '商品名'), 'テストペン');
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('product.manage'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
       "a new product's JAN field offers a scan button, not just the keyboard (§35)",
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));

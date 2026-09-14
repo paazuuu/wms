@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -79,7 +80,7 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
           builder: (_) => WorkOrderDetailScreen(workOrderId: id),
         ));
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

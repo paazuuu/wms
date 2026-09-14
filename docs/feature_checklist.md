@@ -334,13 +334,27 @@ needed.
       every one of the ~30 screens using it is covered by one change, no
       per-screen edits. The test that had the wrong expectation baked in was
       corrected to assert the friendly text instead
-- [ ] The write-side equivalent — `_snack(f.message, ...)` after a failed
-      action — is not yet covered. Each screen builds its own SnackBar
-      locally rather than through a shared helper, so applying the same
-      humanizer there means touching ~20 files individually rather than one;
-      left as a follow-up rather than done partially or rushed. A raw
-      `not permitted: ...` string can still appear in a SnackBar after a
-      failed write today
+- [x] The write-side equivalent — `_snack(f.message, ...)` after a failed
+      action — is now covered too. Each screen builds its own SnackBar (or,
+      in a few forms, sets an inline `_error` string) locally rather than
+      through a shared helper, so this took three passes across 27 files
+      rather than one central fix: the initial 3 stock-ops screens, 11 more
+      whose write actions gained a real permission check during the
+      edge-function audit above, and a final batch of 13 covering every
+      remaining screen with a write action (purchase/sales/work orders,
+      the report builder, put-away confirm, product master, trading
+      partners, user management, AI review, connectors). Two call shapes
+      needed the same treatment: a `_snack(f.message, ...)` SnackBar, and a
+      `setState(() => _error = f.message)` inline error shown via `Text` in
+      a form sheet (`putaway_confirm_sheet.dart`, and the product/
+      trading-partner add/edit sheets) — both now route through
+      `humanizeApiErrorMessage()` before display. Verified with one
+      permission-denied widget test per file group (following the
+      `failWith`-on-a-fake-repository pattern), not per file — the wiring
+      is identical everywhere, so one proof per call shape plus the
+      existing generic `humanizeApiErrorMessage()` unit tests cover the
+      logic; the remaining files were verified by `flutter analyze` +
+      the full `flutter test` suite staying green
 - [ ] "Connection warning" as its own distinct state (§34 lists it alongside
       Loading/Empty/Error/Retry/Permission denied) doesn't exist separately
       — a dropped connection surfaces through the same generic

@@ -1184,6 +1184,40 @@ folded into this round.
 
 `flutter analyze`: clean. `flutter test`: 334 → 342 passing.
 
+### Client-only change: §34's write-side SnackBar, the deferred half (no migration)
+
+The original §34 fix above deliberately left one thing undone: a failed
+*write* still showed its raw RPC message in a SnackBar, since each screen
+builds its own SnackBar locally rather than through a shared widget the way
+`ErrorStateView` centralizes reads. That gap became load-bearing the moment
+the edge-function audit above turned on real permission checks across seven
+more functions — every one of those screens could now surface a genuine
+`not permitted: ... required` error where none was reachable before.
+
+Closed it in two passes: the 11 screens whose write action gained a new
+permission check in the edge-function audit (done as part of that same
+commit), then a final pass across the 13 remaining screens with a write
+action anywhere in the app that still showed `f.message` raw — purchase
+orders, sales orders, work orders, the report builder, put-away confirm,
+the product master, trading partners, user management, AI review, and the
+connector registry. Two call shapes needed the fix: the common
+`_snack(f.message, ...)` SnackBar, and a `setState(() => _error =
+f.message)` inline error rendered via `Text` in a handful of form sheets
+(`putaway_confirm_sheet.dart`, and the product/trading-partner add/edit
+sheets) — both now go through `humanizeApiErrorMessage()` first. Combined
+with the 3 `stock-ops` screens from the earlier fix, that's 27 files total,
+every write-side failure path in the app.
+
+Added one permission-denied widget test per call shape rather than per
+file — `purchase_order_list_screen_test.dart` for the SnackBar shape,
+`product_list_screen_test.dart` for the inline-`_error` shape — since the
+wiring is identical everywhere and the humanizer's own logic already has
+dedicated unit tests (`api_error_text_test.dart`). `FakePurchaseOrderRepository`
+gained a `failWith` field to support it, matching the pattern already used
+by the fakes from the edge-function audit.
+
+`flutter analyze`: clean. `flutter test`: 342 → 344 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

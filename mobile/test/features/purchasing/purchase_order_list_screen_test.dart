@@ -106,6 +106,35 @@ void main() {
   });
 
   testWidgets(
+      'a permission-denied create shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakePurchaseOrderRepository()
+      ..failWith = 'not permitted: po.manage required';
+    await _pumpList(tester, repo);
+
+    await tester.tap(find.text('発注を作成'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextField, '仕入先名'), 'テスト仕入先');
+    await tester.tap(find.text('明細を追加'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4988601001053');
+    await tester.enterText(find.widgetWithText(TextField, '数量'), '5');
+    await tester.tap(find.widgetWithText(FilledButton, '明細を追加'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, '作成'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('po.manage'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
       'driving a draft through submit -> approve -> complete updates its status',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));

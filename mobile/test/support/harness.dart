@@ -1316,6 +1316,10 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
 
   List<PurchaseOrder> _orders;
 
+  /// When set, create() fails with this message instead of succeeding — e.g.
+  /// to simulate a permission-denied RPC response.
+  String? failWith;
+
   PurchaseOrder _copyWith(PurchaseOrder o, {PurchaseOrderStatus? status}) => PurchaseOrder(
         id: o.id,
         status: status ?? o.status,
@@ -1365,6 +1369,7 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
     DateTime? expectedDate,
     String? note,
   }) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
     final id = _orders.isEmpty
         ? 1
         : _orders.map((o) => o.id).reduce((a, b) => a > b ? a : b) + 1;

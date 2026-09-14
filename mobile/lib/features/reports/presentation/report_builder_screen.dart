@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -59,6 +60,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       };
 
   Future<void> _run() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _running = true);
     final result = await ref
         .read(reportRepositoryProvider)
@@ -67,7 +69,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
     setState(() => _running = false);
     result.when(
       success: (r) => setState(() => _result = r),
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -90,7 +92,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
         ref.invalidate(savedReportListProvider);
         _snack(l10n.reportSaved);
       },
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -110,11 +112,12 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   }
 
   Future<void> _deleteSaved(ReportDefinition def) async {
+    final l10n = AppLocalizations.of(context);
     final result = await ref.read(reportRepositoryProvider).delete(def.id);
     if (!mounted) return;
     result.when(
       success: (_) => ref.invalidate(savedReportListProvider),
-      failure: (f) => _snack(f.message, danger: true),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 

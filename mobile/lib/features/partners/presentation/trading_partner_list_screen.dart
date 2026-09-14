@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -38,6 +39,7 @@ class TradingPartnerListScreen extends ConsumerWidget {
 
   Future<void> _toggleStatus(
       BuildContext context, WidgetRef ref, TradingPartner partner) async {
+    final l10n = AppLocalizations.of(context);
     final nextStatus = partner.isActive ? 'inactive' : 'active';
     final result = await ref
         .read(tradingPartnerRepositoryProvider)
@@ -45,7 +47,7 @@ class TradingPartnerListScreen extends ConsumerWidget {
     if (!context.mounted) return;
     result.when(
       success: (_) => ref.invalidate(tradingPartnerListProvider),
-      failure: (f) => _snackError(context, f.message),
+      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
@@ -337,7 +339,9 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _error = errorMessage;
+      _error = errorMessage == null
+          ? null
+          : humanizeApiErrorMessage(l10n, errorMessage!);
     });
     if (errorMessage == null) {
       Navigator.pop(context, true);
