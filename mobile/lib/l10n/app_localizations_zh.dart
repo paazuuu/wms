@@ -2105,6 +2105,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String aiReviewConfidence(String percent) {
+    return '置信度 $percent%';
+  }
+
+  @override
   String get aiReviewConfirm => '确认';
 
   @override

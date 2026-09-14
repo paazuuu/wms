@@ -173,9 +173,29 @@ class _AnalysisCard extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.aiReviewLinesCount(entry.lines.length),
-              style: theme.textTheme.bodySmall,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.aiReviewLinesCount(entry.lines.length),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+                // The model's own read-quality self-assessment (spec §31's
+                // 信頼度) — absent for a call the provider didn't return one
+                // for, never guessed at client-side.
+                if (entry.confidence != null)
+                  Text(
+                    l10n.aiReviewConfidence(
+                        (entry.confidence! * 100).round().toString()),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: entry.confidence! < 0.6
+                          ? scheme.error
+                          : scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
             ),
             if (entry.lines.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xs),

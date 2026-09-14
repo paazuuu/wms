@@ -4126,6 +4126,12 @@ abstract class AppLocalizations {
   /// **'{count} 件の明細を抽出'**
   String aiReviewLinesCount(int count);
 
+  /// No description provided for @aiReviewConfidence.
+  ///
+  /// In ja, this message translates to:
+  /// **'信頼度 {percent}%'**
+  String aiReviewConfidence(String percent);
+
   /// No description provided for @aiReviewConfirm.
   ///
   /// In ja, this message translates to:

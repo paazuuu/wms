@@ -932,6 +932,14 @@
   "aiReviewEmpty": "暂无待审核结果",
   "aiReviewEmptyBody": "AI 提取的结果会显示在此处，直到有人确认或拒绝。",
   "aiReviewLinesCount": "提取了 {count} 行",
+  "aiReviewConfidence": "置信度 {percent}%",
+  "@aiReviewConfidence": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "@aiReviewLinesCount": {
     "placeholders": {
       "count": {

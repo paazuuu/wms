@@ -949,6 +949,14 @@
   "aiReviewEmpty": "レビュー待ちはありません",
   "aiReviewEmptyBody": "AIが抽出した結果は、承認または却下されるまでここに表示されます。",
   "aiReviewLinesCount": "{count} 件の明細を抽出",
+  "aiReviewConfidence": "信頼度 {percent}%",
+  "@aiReviewConfidence": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "@aiReviewLinesCount": {
     "placeholders": {
       "count": {

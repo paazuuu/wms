@@ -34,6 +34,47 @@ void main() {
     expect(find.textContaining('ボールペン'), findsOneWidget);
   });
 
+  testWidgets(
+      'shows the confidence the model reported for its own read (§31)',
+      (tester) async {
+    final repo = FakeAiReviewRepository([
+      AiAnalysisEntry(
+        id: 1,
+        taskType: 'ocr_delivery_note',
+        provider: 'gemini',
+        model: 'gemini-3.8-flash',
+        confidence: 0.94,
+        status: 'PENDING_REVIEW',
+        createdAt: DateTime(2026, 1, 1, 12, 30),
+        lines: const [
+          AiOcrLine(janCode: '4901234567894', productName: 'ボールペン', quantity: 10),
+        ],
+      ),
+    ]);
+
+    await pumpApp(
+      tester,
+      const AiReviewListScreen(),
+      overrides: [aiReviewRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.text('信頼度 94%'), findsOneWidget);
+  });
+
+  testWidgets(
+      'a result the provider gave no confidence for shows none, not a guess',
+      (tester) async {
+    final repo = FakeAiReviewRepository([pendingEntry()]);
+
+    await pumpApp(
+      tester,
+      const AiReviewListScreen(),
+      overrides: [aiReviewRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.textContaining('信頼度'), findsNothing);
+  });
+
   testWidgets('an empty queue explains itself rather than showing nothing',
       (tester) async {
     final repo = FakeAiReviewRepository(const []);

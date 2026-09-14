@@ -1010,6 +1010,50 @@ raw), since this fix is what makes that error newly reachable from them.
 
 `flutter analyze`: clean. `flutter test`: 320 → 322 passing.
 
+### Edge function fix: real OCR confidence, not a hardcoded null (UI spec §31, no schema migration)
+
+No schema migration — `ai_analysis.confidence` (numeric) has existed since
+0026. Auditing §31 (AI UI) against the spec's mockup — 納品書番号/商品/数量/
+信頼度 with [確認して登録]/[修正]/[却下] — and against `ai_architecture.md`'s
+own design notes turned up one real, two-layer gap and confirmed several
+things already correctly built:
+
+- Already correct: AI never writes WMS data directly. `PlanImportScreen`
+  (the actual point an OCR read becomes a committed delivery plan) presents
+  every header field as an editable, pre-filled `TextField` before
+  `commitPlan()` runs; `AiReviewListScreen`'s confirm/reject only touch the
+  `ai_analysis` row's own status, exactly as its header comment already
+  documented. The flat confirm/reject (vs. the mockup's per-field
+  `[確定][要確認][NG]`) is a deliberate, already-documented scope cut in
+  `ai_architecture.md` §8, not something to build now — per-field
+  candidate structure doesn't exist yet since OCR is the only task type.
+- Real gap: 信頼度 was never shown in `AiReviewListScreen`, and separately,
+  `ocr-delivery-note` hardcoded `p_confidence: null` on every recorded
+  analysis — Gemini was never asked for a confidence score, so even
+  rendering the (already-parsed, already-in-the-domain-model) field would
+  have shown nothing for every row that exists. Fixed both ends: extended
+  `OCR_SCHEMA` and the prompt to ask Gemini for a 0–1 self-assessment of
+  its own read quality alongside the lines, parsed defensively (clamped to
+  [0,1], null if the model omits it or returns something non-numeric —
+  never fabricated), and threaded through to `record_ai_analysis`'s
+  existing `p_confidence` parameter (unchanged signature). Deployed as
+  `ocr-delivery-note` v8. `AiReviewListScreen` now renders "信頼度 NN%" per
+  result when present, in the error colour under 60%.
+
+Left open, documented in `feature_checklist.md` rather than rushed:
+`PlanImportScreen`'s line-item preview is read-only with no documented
+reason (unlike the review screen's flat-confirm decision, which *is*
+documented) — a real gap, but editable-lines UI plus wiring through
+`commitPlan()` (which already accepts `lines` verbatim) is its own pass.
+納品書番号 on the review screen specifically would need either an OCR schema
+change or a `delivery_plan_id` join, and no row has ever actually carried
+that link in practice. The spec's own "future" list (product-photo ID,
+damage detection, auto-registration, put-away suggestions, inventory
+analysis) stays unbuilt, matching `ai_architecture.md`'s own "still open"
+section.
+
+`flutter analyze`: clean. `flutter test`: 322 → 324 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

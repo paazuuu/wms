@@ -932,6 +932,14 @@
   "aiReviewEmpty": "Nothing waiting for review",
   "aiReviewEmptyBody": "AI-extracted results appear here until a person confirms or rejects them.",
   "aiReviewLinesCount": "{count, plural, =1{{count} line extracted} other{{count} lines extracted}}",
+  "aiReviewConfidence": "Confidence {percent}%",
+  "@aiReviewConfidence": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "@aiReviewLinesCount": {
     "placeholders": {
       "count": {

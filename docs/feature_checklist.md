@@ -448,6 +448,61 @@ Audited against the spec's 5 bullets:
     previously showed `f.message` raw, since this fix is what makes that
     error newly reachable there.
 
+**AI UI (UI spec §31)**
+
+"AIはWMS確定データを直接書き換えない" was already true and stays true — confirmed
+by re-reading both places an OCR result reaches a human: `PlanImportScreen`
+edits a normal form before `commitPlan()` writes anything, and
+`AiReviewListScreen`'s confirm/reject only flip the `ai_analysis` row's own
+status (documented in the screen's own header comment: not an undo for
+whatever the import already did with the lines — it's a record of "was this
+AI call trustworthy," decoupled from the write path on purpose).
+
+- [x] **信頼度 (confidence)** was a real gap on two levels. The domain model
+      and `AiReviewListScreen`'s card already had a `confidence` field
+      parsed and ready — but it was never rendered anywhere, so the spec's
+      mockup line ("信頼度 94%") was simply missing. Worse: the field was
+      *always null* in every real row, because `ocr-delivery-note`
+      hardcoded `p_confidence: null` — Gemini was never asked for one.
+      Fixed both: the OCR prompt and response schema now ask Gemini for a
+      0–1 self-assessment of its own read quality, clamped defensively and
+      stored genuinely (not fabricated client-side if the model omits it —
+      stays null and the UI shows nothing for that row, same as before).
+      `AiReviewListScreen` now shows "信頼度 NN%" per result, in the error
+      colour below 60%. Deployed as `ocr-delivery-note` v8.
+- [x] The mockup's third action, [修正] (edit before registering), already
+      exists — just not on `AiReviewListScreen`, which the app's own design
+      note (`ai_architecture.md` §8) explains was deliberately kept to a
+      flat confirm/reject because per-field candidate structure doesn't
+      exist yet (OCR is still the only task type). The actual edit point is
+      `PlanImportScreen`'s review step: every header field it reads
+      (delivery number, supplier, registration number, customer code, doc
+      number) is a normal editable `TextField`, pre-filled from the OCR
+      read and flagged when unread, before `[登録]` commits anything.
+- [ ] **Line items in `PlanImportScreen` are read-only** — the `_LinesPreview`
+      list (JAN/product/quantity) is explicitly "a read-only preview... so
+      the operator can sanity check" (the code's own comment), with no way
+      to fix a misread line short of abandoning the whole import and
+      re-entering it elsewhere. Unlike the review screen's flat-confirm
+      decision above, this one isn't backed by a documented rationale —
+      it reads like a genuine gap, not a considered scope cut. Not fixed in
+      this pass: making lines editable needs a small per-row edit UI plus
+      wiring the edited values through to `commitPlan()` (which already
+      accepts `lines` verbatim, so the write path is ready) — real work,
+      left for its own pass rather than rushed alongside the confidence fix
+- [ ] **納品書番号 in the *review* screen** (`AiReviewListScreen`, not the
+      import screen, which already has it) doesn't exist: `ai_analysis`
+      carries `delivery_plan_id` but no delivery-note-number text of its
+      own, and OCR's own extraction schema only ever asked for line items,
+      never a header. Would need a schema/prompt change (OCR side) or a
+      join to `delivery_plans` (linked-record side) — either is more than
+      a UI fix, and no row has ever been linked via `delivery_plan_id` in
+      practice, so there's nothing to surface yet either way
+- [ ] Future items the spec itself lists as future (商品画像認識・破損検知・
+      商品自動登録候補・棚入れ候補・在庫分析) remain unbuilt, matching
+      `ai_architecture.md` §8's "still open" list — not started here,
+      consistent with not building ahead of a real need (§53)
+
 **Warehouse context (UI spec §4)**
 - [x] Switching the current warehouse switches every warehouse-scoped feature
       with it. Receiving and Shipping were the two that still ignored it —

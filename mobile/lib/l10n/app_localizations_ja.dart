@@ -2108,6 +2108,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String aiReviewConfidence(String percent) {
+    return '信頼度 $percent%';
+  }
+
+  @override
   String get aiReviewConfirm => '承認';
 
   @override

@@ -48,10 +48,17 @@ interface OcrLineRaw {
   quantity?: number;
 }
 
+interface OcrResult {
+  lines: OcrLineRaw[];
+  /** The model's own read-quality self-assessment, 0-1, or null if it didn't
+   * return one — never fabricated client-side (spec §31's 信頼度). */
+  confidence: number | null;
+}
+
 interface AIProvider {
   readonly name: string;
   readonly model: string;
-  extractDeliveryNote(bytes: Uint8Array, mime: string): Promise<OcrLineRaw[]>;
+  extractDeliveryNote(bytes: Uint8Array, mime: string): Promise<OcrResult>;
 }
 
 /** Thrown by a provider on failure; carries the HTTP status to respond with. */
@@ -66,7 +73,9 @@ const OCR_PROMPT =
   "抽出し、各行を {jan_code, product_name, quantity} のJSONで返してください。" +
   "jan_code は商品のバーコード数字（13桁または8桁）で、半角数字のみ・ハイフンや" +
   "空白を含めないこと。住所・電話番号・登録番号(Tで始まる番号)・合計金額などは" +
-  "JANとして扱わないこと。数量が読めない行は quantity を省略。表に無い行は返さないこと。";
+  "JANとして扱わないこと。数量が読めない行は quantity を省略。表に無い行は返さないこと。" +
+  "最後に、この読み取り結果全体への自己評価として confidence を0〜1の数値で" +
+  "返してください（画質が悪い・文字が不鮮明・一部推測が入っている場合は低く）。";
 
 const OCR_SCHEMA = {
   type: "object",
@@ -83,6 +92,7 @@ const OCR_SCHEMA = {
         required: ["jan_code"],
       },
     },
+    confidence: { type: "number" },
   },
   required: ["lines"],
 };
@@ -97,7 +107,7 @@ class GeminiProvider implements AIProvider {
     this.model = model;
   }
 
-  async extractDeliveryNote(bytes: Uint8Array, mime: string): Promise<OcrLineRaw[]> {
+  async extractDeliveryNote(bytes: Uint8Array, mime: string): Promise<OcrResult> {
     const endpoint =
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
     const payload = {
@@ -140,13 +150,18 @@ class GeminiProvider implements AIProvider {
     }
     const body = await res.json();
     const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-    let parsed: { lines?: unknown[] } = {};
+    let parsed: { lines?: unknown[]; confidence?: unknown } = {};
     try {
       parsed = JSON.parse(text);
     } catch (_) {
       parsed = {};
     }
-    return Array.isArray(parsed.lines) ? parsed.lines as OcrLineRaw[] : [];
+    const lines = Array.isArray(parsed.lines) ? parsed.lines as OcrLineRaw[] : [];
+    const confidence = typeof parsed.confidence === "number" &&
+        Number.isFinite(parsed.confidence)
+      ? Math.min(1, Math.max(0, parsed.confidence))
+      : null;
+    return { lines, confidence };
   }
 }
 
@@ -209,7 +224,7 @@ Deno.serve(async (req) => {
     }
 
     const provider = getProvider(providerName);
-    const lines = await provider.extractDeliveryNote(bytes, mime);
+    const { lines, confidence } = await provider.extractDeliveryNote(bytes, mime);
 
     const { data: analysisId, error: recordError } = await supabase.rpc(
       "record_ai_analysis",
@@ -223,7 +238,7 @@ Deno.serve(async (req) => {
         p_task_type: TASK_TYPE,
         p_input_hash: inputHash,
         p_output_json: { lines },
-        p_confidence: null,
+        p_confidence: confidence,
       },
     );
     if (recordError) return json({ message: recordError.message }, 500);
