@@ -1,40 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../search/presentation/global_search_screen.dart';
+import '../../auth/application/auth_controller.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 import 'dashboard_widgets.dart';
 
 /// The content-area landing page inside the app shell: a branded greeting,
 /// a "ready to scan" banner, and the full capability menu grouped by area.
-/// Selecting anything is delegated to the shell via [onOpen] so the sidebar
-/// stays in sync.
-class DashboardOverviewScreen extends StatelessWidget {
-  const DashboardOverviewScreen({
-    super.key,
-    required this.onOpen,
-    required this.permissions,
-    this.userName,
-    this.userEmail,
-  });
-
-  /// Opens a feature in the shell's content area.
-  final void Function(FeatureEntry entry) onOpen;
-
-  /// The signed-in user's permission codes (UI spec §37) — decides which
-  /// menu tiles and shortcuts this screen offers at all.
-  final List<String> permissions;
-
-  final String? userName;
-  final String? userEmail;
+///
+/// Opening anything is a plain [GoRouter] navigation to the feature's own
+/// path, so a tile here and a sidebar entry are the same action and the
+/// sidebar highlight follows from the location rather than being kept in sync
+/// by hand.
+class DashboardOverviewScreen extends ConsumerWidget {
+  const DashboardOverviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authControllerProvider).user;
+    final permissions = user?.permissions ?? const <String>[];
+    final userName = user?.name;
+    final userEmail = user?.email;
     final groups = buildFeatureCatalog();
+    void onOpen(FeatureEntry entry) => context.go(entry.path);
     // Only resolves to an entry this user may actually open — the same rule
     // the menu itself uses, so a today's-task tile or a shortcut never opens
     // a screen its own entry would have been hidden for.
@@ -55,11 +50,7 @@ class DashboardOverviewScreen extends StatelessWidget {
       children: [
         _GreetingCard(name: userName, email: userEmail),
         const SizedBox(height: AppSpacing.lg),
-        _ScanHeroCard(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
-          ),
-        ),
+        _ScanHeroCard(onTap: () => context.go(AppRoutes.search)),
         const SizedBox(height: AppSpacing.xl),
         _SectionLabel(l10n.dashTodayTasks),
         const SizedBox(height: AppSpacing.md),

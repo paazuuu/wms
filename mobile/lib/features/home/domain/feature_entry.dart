@@ -40,6 +40,12 @@ class FeatureEntry {
 
   bool get isReady => status == FeatureStatus.ready && builder != null;
 
+  /// This feature's URL path, derived from [id] so the catalog stays the one
+  /// place a feature is declared: adding an entry gives it a route for free,
+  /// and an id and its URL can never drift apart. Underscores become hyphens
+  /// because `/stock-adjustment` is the conventional shape for a URL segment.
+  String get path => '/${id.replaceAll('_', '-')}';
+
   /// Whether [permissions] unlock this entry. Server-side RLS/RPC checks are
   /// the actual boundary (§37) — this only decides what the menu *offers*, so
   /// tapping a hidden entry was never the only thing standing between an

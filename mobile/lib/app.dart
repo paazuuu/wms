@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/l10n/locale_controller.dart';
-import 'core/theme/app_spacing.dart';
+import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_controller.dart';
-import 'features/auth/application/auth_controller.dart';
-import 'features/auth/presentation/login_screen.dart';
-import 'features/home/presentation/home_screen.dart';
 import 'l10n/app_localizations.dart';
 
 class WmsApp extends ConsumerWidget {
@@ -15,11 +12,11 @@ class WmsApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authControllerProvider);
     final locale = ref.watch(localeControllerProvider);
     final textScale = ref.watch(textScaleControllerProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: ref.watch(goRouterProvider),
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       locale: locale,
@@ -43,39 +40,6 @@ class WmsApp extends ConsumerWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: switch (auth.status) {
-        AuthStatus.unknown => const _SplashScreen(),
-        AuthStatus.authenticated => const HomeScreen(),
-        AuthStatus.unauthenticated => const LoginScreen(),
-      },
-    );
-  }
-}
-
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const BrandMark(size: 72),
-            const SizedBox(height: AppSpacing.xl),
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: scheme.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

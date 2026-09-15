@@ -1,135 +1,78 @@
 import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform, ValueListenable;
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app.dart';
 import '../../../core/l10n/language_menu.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/hardware_scanner.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/text_scale_menu.dart';
 import '../../../core/ui/responsive.dart';
-import '../../auth/application/auth_controller.dart';
-import '../../../core/scan/barcode_scan_screen.dart';
-import '../../delivery/presentation/stock_ledger_screen.dart';
-import '../../search/presentation/global_search_screen.dart';
-import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/application/auth_controller.dart';
+import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
-import 'coming_soon_screen.dart';
-import 'dashboard_overview_screen.dart';
 
 /// The authenticated app shell.
 ///
-/// A desktop-first, shadcn-dashboard-style layout: a persistent left sidebar of
-/// grouped capabilities, a top bar with an always-available scan box, and a
-/// content region that swaps feature screens in place. Below 900px the sidebar
+/// A desktop-first, shadcn-dashboard-style layout: a persistent left sidebar
+/// of grouped capabilities, a top bar with an always-available scan box, and a
+/// content region — [child] — that the router fills. Below 900px the sidebar
 /// folds into a drawer so the same shell serves handheld/tablet field use.
+///
+/// The shell used to own a nested [Navigator] and swap screens itself, holding
+/// the current selection in a [ValueNotifier]. Routing replaced both: the
+/// content is whatever the router built, and the sidebar highlight and top-bar
+/// title are *derived* from the current location. One less piece of state that
+/// could disagree with what is on screen.
 ///
 /// A [HardwareScanner] wraps the whole shell so a keyboard-wedge barcode
 /// scanner works anywhere — no need to click into a field first.
-class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+class AppShell extends ConsumerStatefulWidget {
+  const AppShell({super.key, required this.child});
+
+  final Widget child;
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final GlobalKey<NavigatorState> _contentNav = GlobalKey<NavigatorState>();
+class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ValueNotifier<String> _selected = ValueNotifier<String>('dashboard');
-
-  late final _ContentObserver _observer =
-      _ContentObserver((atRoot) {
-    if (atRoot) _selected.value = 'dashboard';
-  });
-
-  late final Widget _content = Navigator(
-    key: _contentNav,
-    observers: [_observer],
-    onGenerateRoute: (_) => MaterialPageRoute(
-      builder: (_) => Consumer(
-        builder: (context, ref, _) {
-          final user = ref.watch(authControllerProvider).user;
-          return DashboardOverviewScreen(
-            onOpen: _open,
-            permissions: user?.permissions ?? const [],
-            userName: user?.name,
-            userEmail: user?.email,
-          );
-        },
-      ),
-    ),
-  );
 
   bool get _cameraSupported =>
       kIsWeb ||
       defaultTargetPlatform == TargetPlatform.android ||
       defaultTargetPlatform == TargetPlatform.iOS;
 
-  @override
-  void dispose() {
-    _selected.dispose();
-    super.dispose();
-  }
-
-  /// Open a catalog feature in the content area.
-  void _open(FeatureEntry entry) {
-    _select(
-      entry.id,
-      (ctx) =>
-          entry.isReady ? entry.builder!(ctx) : ComingSoonScreen(feature: entry),
-    );
-  }
-
-  /// Reset the content navigator to the dashboard, then (unless [id] is the
-  /// dashboard) push [builder]. Selection is set last so the sidebar highlight
-  /// survives the observer firing during [NavigatorState.popUntil].
-  void _select(String id, WidgetBuilder builder) {
-    final nav = _contentNav.currentState;
-    nav?.popUntil((route) => route.isFirst);
-    if (id != 'dashboard') {
-      nav?.push(MaterialPageRoute(builder: builder));
-    }
-    _selected.value = id;
+  void _go(String location) {
+    context.go(location);
     if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
       _scaffoldKey.currentState?.closeDrawer();
     }
   }
 
   /// Route a scan from the top bar / hardware scanner to the stock ledger for
-  /// that JAN — on-hand quantity plus why it changed. This used to open a
-  /// full product-master lookup against InventorOS; that backend was never
-  /// reachable and this app has no product-master table of its own, so the
-  /// ledger (already scan-driven everywhere else) is the real destination.
+  /// that JAN — on-hand quantity plus why it changed. The code goes into the
+  /// URL, so a scan result is a location an operator can reload or send on.
   void _handleScan(String code) {
     final value = code.trim();
     if (value.isEmpty) return;
-    _select(
-      'stock_lookup',
-      (_) => StockLedgerScreen(janCode: value),
-    );
+    _go(AppRoutes.stock(value));
   }
 
   Future<void> _openCameraScan() async {
-    final code = await Navigator.of(context).push<String>(
+    final code = await Navigator.of(context, rootNavigator: true).push<String>(
       MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
     );
     if (!mounted) return;
     if (code != null && code.isNotEmpty) _handleScan(code);
-  }
-
-  /// Opens cross-entity search (spec §23) as its own full-screen route, kept
-  /// separate from the top bar's scan box — that field is tuned for one fast
-  /// job (JAN → Product Lookup) and shouldn't be slowed down by also trying
-  /// to be a general search.
-  void _openGlobalSearch() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const GlobalSearchScreen()),
-    );
   }
 
   void _logout() => ref.read(authControllerProvider.notifier).logout();
@@ -138,75 +81,77 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final wide = isWideLayout(context);
     final user = ref.watch(authControllerProvider).user;
+    final permissions = user?.permissions ?? const <String>[];
+    final selectedId = _selectedIdFor(GoRouterState.of(context).uri.path);
+
+    Widget sidebar() => _Sidebar(
+          selectedId: selectedId,
+          onOpen: (entry) => _go(entry.path),
+          onDashboard: () => _go(AppRoutes.dashboard),
+          onLogout: _logout,
+          permissions: permissions,
+          userName: user?.name,
+          userEmail: user?.email,
+        );
+
+    final main = Column(
+      children: [
+        _TopBar(
+          wide: wide,
+          selectedId: selectedId,
+          onScan: _handleScan,
+          onMenu: wide ? null : () => _scaffoldKey.currentState?.openDrawer(),
+          onCamera: _cameraSupported ? _openCameraScan : null,
+          onSearch: () => _go(AppRoutes.search),
+        ),
+        Expanded(child: widget.child),
+      ],
+    );
 
     final body = wide
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(
-                width: 268,
-                child: _Sidebar(
-                  selected: _selected,
-                  onOpen: _open,
-                  onDashboard: () => _select('dashboard', (_) => const SizedBox()),
-                  onLogout: _logout,
-                  permissions: user?.permissions ?? const [],
-                  userName: user?.name,
-                  userEmail: user?.email,
-                ),
-              ),
+              SizedBox(width: 268, child: sidebar()),
               const VerticalDivider(width: 1),
-              Expanded(child: _mainColumn(wide: true)),
+              Expanded(child: main),
             ],
           )
-        : _mainColumn(wide: false);
+        : main;
 
     return HardwareScanner(
       onScan: _handleScan,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: wide
-            ? null
-            : Drawer(
-                child: _Sidebar(
-                  selected: _selected,
-                  onOpen: _open,
-                  onDashboard: () =>
-                      _select('dashboard', (_) => const SizedBox()),
-                  onLogout: _logout,
-                  permissions: user?.permissions ?? const [],
-                  userName: user?.name,
-                  userEmail: user?.email,
-                ),
-              ),
+        drawer: wide ? null : Drawer(child: sidebar()),
         body: SafeArea(child: body),
       ),
     );
   }
-
-  Widget _mainColumn({required bool wide}) {
-    return Column(
-      children: [
-        _TopBar(
-          wide: wide,
-          selected: _selected,
-          scanController: null,
-          onScan: _handleScan,
-          onMenu: wide
-              ? null
-              : () => _scaffoldKey.currentState?.openDrawer(),
-          onCamera: _cameraSupported ? _openCameraScan : null,
-          onSearch: _openGlobalSearch,
-        ),
-        Expanded(child: _content),
-      ],
-    );
-  }
 }
 
-/// Maps a selected feature id to its localized display title for the top bar.
+/// Maps a location back to the catalog id the sidebar should highlight.
+///
+/// Derived rather than remembered, so arriving at a screen by clicking the
+/// sidebar, by deep link, or with the browser's back button all highlight the
+/// same entry. A detail screen pushed on top of a list keeps its list's
+/// location, which is what should stay highlighted anyway.
+String _selectedIdFor(String path) {
+  if (path == AppRoutes.dashboard) return 'dashboard';
+  if (path == AppRoutes.search) return 'search';
+  if (path.startsWith('/stock/')) return 'stock_lookup';
+  for (final group in buildFeatureCatalog()) {
+    for (final entry in group.entries) {
+      if (entry.path == path) return entry.id;
+    }
+  }
+  return 'dashboard';
+}
+
+/// Maps a selected id to its localized display title for the top bar.
 String _titleForId(AppLocalizations l10n, String id) {
   if (id == 'dashboard') return l10n.navDashboard;
+  if (id == 'search') return l10n.searchTitle;
   // Reached only via a scan, not the feature menu — not a catalog entry.
   if (id == 'stock_lookup') return l10n.searchKindStock;
   for (final group in buildFeatureCatalog()) {
@@ -217,30 +162,11 @@ String _titleForId(AppLocalizations l10n, String id) {
   return l10n.navDashboard;
 }
 
-/// Observes the content navigator and reports when it returns to its first
-/// (dashboard) route so the sidebar highlight can follow in-content back nav.
-class _ContentObserver extends NavigatorObserver {
-  _ContentObserver(this.onAtRoot);
-
-  final void Function(bool atRoot) onAtRoot;
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onAtRoot(previousRoute?.isFirst ?? true);
-  }
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.isFirst) onAtRoot(true);
-  }
-}
-
 /// The top bar: menu (narrow) / page title (wide) + a persistent scan box.
 class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.wide,
-    required this.selected,
-    required this.scanController,
+    required this.selectedId,
     required this.onScan,
     required this.onMenu,
     required this.onCamera,
@@ -248,8 +174,7 @@ class _TopBar extends StatelessWidget {
   });
 
   final bool wide;
-  final ValueListenable<String> selected;
-  final TextEditingController? scanController;
+  final String selectedId;
   final ValueChanged<String> onScan;
   final VoidCallback? onMenu;
   final Future<void> Function()? onCamera;
@@ -284,14 +209,11 @@ class _TopBar extends StatelessWidget {
           ],
           if (wide)
             Expanded(
-              child: ValueListenableBuilder<String>(
-                valueListenable: selected,
-                builder: (context, id, _) => Text(
-                  _titleForId(l10n, id),
-                  style: theme.textTheme.titleLarge,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              child: Text(
+                _titleForId(l10n, selectedId),
+                style: theme.textTheme.titleLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           Expanded(
@@ -300,7 +222,6 @@ class _TopBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: ScanField(
-                  controller: scanController,
                   dense: true,
                   hintText: l10n.topbarScanHint,
                   onSubmitted: onScan,
@@ -337,7 +258,7 @@ class _TopBar extends StatelessWidget {
 /// The grouped navigation sidebar (shadcn-style: brand, sections, footer).
 class _Sidebar extends StatelessWidget {
   const _Sidebar({
-    required this.selected,
+    required this.selectedId,
     required this.onOpen,
     required this.onDashboard,
     required this.onLogout,
@@ -346,7 +267,7 @@ class _Sidebar extends StatelessWidget {
     this.userEmail,
   });
 
-  final ValueListenable<String> selected;
+  final String selectedId;
   final void Function(FeatureEntry entry) onOpen;
   final VoidCallback onDashboard;
   final VoidCallback onLogout;
@@ -394,47 +315,42 @@ class _Sidebar extends StatelessWidget {
           ),
           const Divider(height: 1),
           Expanded(
-            child: ValueListenableBuilder<String>(
-              valueListenable: selected,
-              builder: (context, currentId, _) {
-                return ListView(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
-                  children: [
-                    _SidebarItem(
-                      icon: Icons.dashboard_outlined,
-                      label: l10n.navDashboard,
-                      selected: currentId == 'dashboard',
-                      onTap: onDashboard,
-                    ),
-                    for (final group in groups) ...() {
-                      final visible = group.visibleEntries(permissions);
-                      if (visible.isEmpty) return const <Widget>[];
-                      return <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(AppSpacing.md,
-                              AppSpacing.md, AppSpacing.md, AppSpacing.xs),
-                          child: Text(
-                            group.title(l10n).toUpperCase(),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                              letterSpacing: 0.8,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+              children: [
+                _SidebarItem(
+                  icon: Icons.dashboard_outlined,
+                  label: l10n.navDashboard,
+                  selected: selectedId == 'dashboard',
+                  onTap: onDashboard,
+                ),
+                for (final group in groups) ...() {
+                  final visible = group.visibleEntries(permissions);
+                  if (visible.isEmpty) return const <Widget>[];
+                  return <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                          AppSpacing.md, AppSpacing.md, AppSpacing.xs),
+                      child: Text(
+                        group.title(l10n).toUpperCase(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          letterSpacing: 0.8,
+                          fontWeight: FontWeight.w700,
                         ),
-                        for (final entry in visible)
-                          _SidebarItem(
-                            icon: entry.icon,
-                            label: entry.label(l10n),
-                            selected: currentId == entry.id,
-                            onTap: () => onOpen(entry),
-                          ),
-                      ];
-                    }(),
-                  ],
-                );
-              },
+                      ),
+                    ),
+                    for (final entry in visible)
+                      _SidebarItem(
+                        icon: entry.icon,
+                        label: entry.label(l10n),
+                        selected: selectedId == entry.id,
+                        onTap: () => onOpen(entry),
+                      ),
+                  ];
+                }(),
+              ],
             ),
           ),
           const Divider(height: 1),
@@ -527,8 +443,7 @@ class _SidebarItem extends StatelessWidget {
                     label,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: fg,
-                      fontWeight:
-                          selected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
