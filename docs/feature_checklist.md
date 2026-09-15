@@ -741,6 +741,28 @@ AI call trustworthy," decoupled from the write path on purpose).
       aborted-transaction round trip covering every source, a
       non-matching filter (empty array, not an error), an unknown-source
       rejection, and the full saved-definition CRUD cycle
+- [x] Report sources for the warehouse day itself (0047) — the original six
+      covered stock, orders, audit and master data but nothing about what was
+      *inspected*, what *moved between warehouses*, or what *shipped*. Three
+      sources added: `inspections` (passed/failed quantity and failed-line
+      count per inspection, with delivery number and inspector — so the
+      report answers "which suppliers keep sending bad stock"), `transfers`
+      (both warehouse ends, the three lifecycle timestamps, and requested vs
+      received quantity so a shortfall in transit shows as a column
+      difference), and `shipments` (line/carton counts with §21's weight,
+      carrier and tracking number). The same migration closed a §37 hole
+      `run_report` still had: being `security definer` it bypassed RLS and had
+      no `accessible_warehouse_ids()` fallback, so a scoped operator could
+      report across every warehouse. Aggregates verified with a rolled-back
+      data test specifically to rule out JOIN-induced row inflation. Two
+      documented judgment calls: `products` stays unscoped (company-wide
+      master data with no warehouse column), and `audit_log` rows with a null
+      `warehouse_id` are excluded for scoped callers (company-level events
+      have no warehouse to test; admins still see everything). The warehouse
+      filter stays inside `p_filters` rather than becoming a positional
+      `p_warehouse_id` — its meaning is source-dependent ("either end" for
+      transfers, nothing for products), and the three-argument signature
+      keeps saved `report_definitions` rows working
 
 **Other InventorOS-only features never rebuilt on Supabase**
 - [ ] Two-factor authentication — ❌
@@ -756,8 +778,6 @@ Consolidated, in one place, as asked:
 
 **Not implemented at all:**
 - Returns / RMA
-- Custom report sources beyond the six built (0037): inspections, transfers,
-  shipments
 - Two-factor authentication, webhooks, GraphQL API
 - Any AI module beyond OCR (photo ID, damage detection, inventory assistant)
 - Any real connector adapter (the registry exists; nothing syncs)

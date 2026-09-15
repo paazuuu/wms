@@ -123,6 +123,9 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
 
   String _sourceLabel(AppLocalizations l10n, ReportSource source) => switch (source) {
         ReportSource.stockMovements => l10n.reportSourceStockMovements,
+        ReportSource.inspections => l10n.reportSourceInspections,
+        ReportSource.transfers => l10n.reportSourceTransfers,
+        ReportSource.shipments => l10n.reportSourceShipments,
         ReportSource.purchaseOrders => l10n.reportSourcePurchaseOrders,
         ReportSource.salesOrders => l10n.reportSourceSalesOrders,
         ReportSource.workOrders => l10n.reportSourceWorkOrders,

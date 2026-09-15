@@ -1506,6 +1506,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportSourceStockMovements => '库存流水';
 
   @override
+  String get reportSourceInspections => '验货';
+
+  @override
+  String get reportSourceTransfers => '仓库间调拨';
+
+  @override
+  String get reportSourceShipments => '出库';
+
+  @override
   String get reportSourcePurchaseOrders => '采购订单';
 
   @override

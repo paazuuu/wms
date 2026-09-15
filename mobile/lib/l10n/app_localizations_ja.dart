@@ -1509,6 +1509,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportSourceStockMovements => '在庫履歴';
 
   @override
+  String get reportSourceInspections => '検品';
+
+  @override
+  String get reportSourceTransfers => '倉庫間移動';
+
+  @override
+  String get reportSourceShipments => '出庫';
+
+  @override
   String get reportSourcePurchaseOrders => '発注';
 
   @override

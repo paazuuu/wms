@@ -7,6 +7,9 @@ int _asInt(dynamic v) =>
 /// never arbitrary user SQL. Each has its own small filter set.
 enum ReportSource {
   stockMovements('stock_movements'),
+  inspections('inspections'),
+  transfers('transfers'),
+  shipments('shipments'),
   purchaseOrders('purchase_orders'),
   salesOrders('sales_orders'),
   workOrders('work_orders'),
@@ -17,6 +20,9 @@ enum ReportSource {
   final String wire;
 
   static ReportSource parse(String? value) => switch (value) {
+        'inspections' => ReportSource.inspections,
+        'transfers' => ReportSource.transfers,
+        'shipments' => ReportSource.shipments,
         'purchase_orders' => ReportSource.purchaseOrders,
         'sales_orders' => ReportSource.salesOrders,
         'work_orders' => ReportSource.workOrders,

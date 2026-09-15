@@ -1561,6 +1561,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSourceStockMovements => 'Stock ledger';
 
   @override
+  String get reportSourceInspections => 'Inspections';
+
+  @override
+  String get reportSourceTransfers => 'Transfers';
+
+  @override
+  String get reportSourceShipments => 'Shipments';
+
+  @override
   String get reportSourcePurchaseOrders => 'Purchase orders';
 
   @override

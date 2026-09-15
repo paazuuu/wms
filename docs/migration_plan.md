@@ -1457,6 +1457,68 @@ and the edge functions' own `warehouse_id` query filters. Also still open:
 the pre-existing `anon` grant on `warehouse_overview()`, which wants a look
 at the sign-in flow rather than a silent revoke.
 
+### 0047 — Inspection / transfer / shipment report sources (UI spec §46 item 10)
+
+`run_report(p_source, p_filters, p_limit)` offered six sources. The custom
+report builder could reach stock movements, the three order kinds, the audit
+log and the product master, but nothing about the middle of the warehouse
+day: what was inspected, what moved between warehouses, what shipped. This
+migration replaces the function, adding three sources and — separately —
+the warehouse-scope fallback 0044-0046 had not yet reached.
+
+**The three sources.**
+
+- `inspections` rolls up `passed_quantity`, `failed_quantity` and
+  `failed_lines` from `inspection_items` per inspection, joining
+  `delivery_plans` for the delivery number and `app_users` for the
+  inspector. A failed-line count is what makes the report answer "which
+  suppliers keep sending bad stock", which a per-item dump does not.
+- `transfers` reports both ends of the move (from/to warehouse names), the
+  three lifecycle timestamps (`approved_at`, `shipped_at`, `received_at`)
+  and the `requested_quantity` / `received_quantity` sums, so a shortfall
+  in transit is visible as a difference between two columns.
+- `shipments` reports line and carton counts alongside §21's `weight_kg`,
+  `carrier` and `tracking_number`.
+
+Each aggregate is computed in a subquery and then joined, not summed across
+a multi-table join — a rolled-back data test confirmed the numbers
+(transfers: 2 lines, requested 15, received 13; shipments: qty 7, carrier
+ヤマト) specifically to rule out JOIN-induced row inflation.
+
+**The scope fallback.** `run_report` is `security definer`, so RLS never
+fires for it, and it had no `accessible_warehouse_ids()` fallback. A scoped
+operator could report across every warehouse. Each source now declares
+`v_scope bigint[] := public.accessible_warehouse_ids()` and filters on
+`v_scope is null or <warehouse> = any(v_scope)`; `transfers` matches
+*either* end, consistent with 0045's `transfer_order_index`.
+
+Two judgment calls, both deliberate:
+
+- `products` stays unscoped. It is company-wide master data with no
+  warehouse column; scoping it would mean inventing a rule ("products that
+  have stock in your warehouses") that no other screen applies.
+- `audit_log` rows with a null `warehouse_id` are *excluded* for scoped
+  callers. Company-level events (a role change, a partner edit) have no
+  warehouse, so there is no way to decide whether a warehouse-scoped
+  operator should see them; excluding is the safe reading, and an admin
+  (null scope) still sees everything.
+
+**Filter shape.** The warehouse filter lives inside `p_filters` as
+`{"warehouse_id": N}` rather than becoming a fourth positional
+`p_warehouse_id` argument. This was raised and decided explicitly: a
+top-level argument reads as *the* scope of the report, but for `transfers`
+it means "either end" and for `products` it means nothing at all, so it
+belongs with the other per-source filters where its meaning is source-
+dependent. Keeping the signature at three arguments also avoids a
+breaking change for the saved `report_definitions` rows.
+
+Client side: `ReportSource` gained the three wire values and
+`report_builder_screen.dart` their labels, with l10n in ja/en/zh. Two tests
+added — the dropdown offers all three and renders inspection rows, and
+every `ReportSource.wire` round-trips through `parse` (a guard against
+adding an enum case and forgetting the `parse` branch, which would silently
+fall back to stock movements).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

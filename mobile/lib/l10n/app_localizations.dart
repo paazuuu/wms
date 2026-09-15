@@ -2950,6 +2950,24 @@ abstract class AppLocalizations {
   /// **'在庫履歴'**
   String get reportSourceStockMovements;
 
+  /// No description provided for @reportSourceInspections.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get reportSourceInspections;
+
+  /// No description provided for @reportSourceTransfers.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動'**
+  String get reportSourceTransfers;
+
+  /// No description provided for @reportSourceShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get reportSourceShipments;
+
   /// No description provided for @reportSourcePurchaseOrders.
   ///
   /// In ja, this message translates to:

@@ -76,4 +76,40 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('offers the inspection, transfer and shipment sources (0047)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeReportRepository(rowsBySource: {
+      ReportSource.inspections: [
+        {'id': 1, 'delivery_number': '0901', 'failed_quantity': 3},
+      ],
+    });
+    await _pump(tester, repo);
+
+    // The three operational areas that had no reporting before are now
+    // pickable, and running one renders its own columns.
+    await tester.tap(find.byType(DropdownButtonFormField<ReportSource>));
+    await tester.pumpAndSettle();
+    expect(find.text('検品').last, findsOneWidget);
+    expect(find.text('倉庫間移動'), findsWidgets);
+    expect(find.text('出庫'), findsWidgets);
+
+    await tester.tap(find.text('検品').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('実行'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('0901'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  test('every wire value round-trips through ReportSource.parse', () {
+    for (final s in ReportSource.values) {
+      expect(ReportSource.parse(s.wire), s, reason: s.wire);
+    }
+  });
+
 }
