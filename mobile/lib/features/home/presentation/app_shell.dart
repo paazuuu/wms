@@ -18,6 +18,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
+import 'breadcrumbs.dart';
 
 /// The authenticated app shell.
 ///
@@ -148,21 +149,10 @@ String _selectedIdFor(String path) {
   return 'dashboard';
 }
 
-/// Maps a selected id to its localized display title for the top bar.
-String _titleForId(AppLocalizations l10n, String id) {
-  if (id == 'dashboard') return l10n.navDashboard;
-  if (id == 'search') return l10n.searchTitle;
-  // Reached only via a scan, not the feature menu — not a catalog entry.
-  if (id == 'stock_lookup') return l10n.searchKindStock;
-  for (final group in buildFeatureCatalog()) {
-    for (final entry in group.entries) {
-      if (entry.id == id) return entry.label(l10n);
-    }
-  }
-  return l10n.navDashboard;
-}
-
-/// The top bar: menu (narrow) / page title (wide) + a persistent scan box.
+/// The top bar: menu (narrow) / breadcrumb trail (wide) + a persistent scan
+/// box. Narrow layouts get no trail on purpose — every feature screen carries
+/// its own [AppBar] title, so a second copy would cost a phone two rows of
+/// vertical space to say the same thing twice.
 class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.wide,
@@ -207,15 +197,7 @@ class _TopBar extends StatelessWidget {
             const BrandMark(size: 32),
             const SizedBox(width: AppSpacing.sm),
           ],
-          if (wide)
-            Expanded(
-              child: Text(
-                _titleForId(l10n, selectedId),
-                style: theme.textTheme.titleLarge,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+          if (wide) Expanded(child: Breadcrumbs(selectedId: selectedId)),
           Expanded(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 460),

@@ -147,7 +147,10 @@ void main() {
     expect(find.text('Shipping'), findsNothing);
     // The whole "management" group has nothing this user may open.
     expect(find.text('Management'), findsNothing);
-    expect(find.text('Reports'), findsNothing);
+    // 'Report builder' is the actual label; the earlier 'Reports' spelling
+    // here matched nothing either way, so this assertion passed vacuously and
+    // proved nothing about group hiding.
+    expect(find.text('Report builder'), findsNothing);
   });
 
   testWidgets('a user with no role at all is told why the menu is empty (§37)',
