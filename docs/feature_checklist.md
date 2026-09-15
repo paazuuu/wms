@@ -764,6 +764,61 @@ AI call trustworthy," decoupled from the write path on purpose).
       transfers, nothing for products), and the three-argument signature
       keeps saved `report_definitions` rows working
 
+**Web-app conventions the shell was missing** — six gaps found by reviewing
+the shell against what a browser-based dashboard is expected to do, then
+closed one per commit. Each was a real "this feels unfinished" rather than a
+missing feature.
+
+- [x] **URL routing.** `go_router` had been in pubspec since early on and was
+      never wired up: the shell held a nested `Navigator` and swapped screens
+      imperatively, so the app had exactly one URL. Browser back did nothing,
+      nothing could be bookmarked or shared, and a reload always dropped the
+      operator back on the dashboard — the expensive one for a system people
+      keep open in a tab all day. Every top-level feature now has a location
+      derived from its catalog id (`FeatureEntry.path`), so the catalog is the
+      single source of truth for both menu and routing table. Scanned codes go
+      in the path too. Sign-in state moved to a single `redirect`, so a session
+      ending *any* way — including a token quietly expiring — lands on login.
+      Deliberately left on Flutter's default hash URLs (`/#/inspection`):
+      path-based URLs need a host rewrite rule, and without it a reload on
+      `/inspection` 404s, breaking the very thing the change delivers.
+      Detail screens still have no URL of their own (a route per entity with
+      typed params) — recorded as follow-up rather than half-built.
+- [x] **Breadcrumbs.** The top bar named the current screen and nothing else,
+      so a screen opened from a dashboard tile gave no sense of where it sat.
+      Now dashboard › section › screen, built by a pure function over the
+      catalog rather than a navigation history, so it is right however the
+      operator arrived. The section step is text, not a link — it groups
+      screens without being one.
+- [x] **Collapsible sidebar.** Was a fixed 268px, a fifth of a 1280px laptop
+      spent permanently on navigation. Collapses to a 76px icon rail with
+      labels in tooltips and section headings as rules; the choice persists per
+      operator. Collapsing trades labels for width, never access.
+- [x] **Menu filter.** Eighteen entries with no way to narrow them. Matches
+      label *and* description, because that is where the words operators
+      actually type live ("approve" finds the order screens, whose labels say
+      neither). The precision cost is documented and tested rather than tuned
+      away.
+- [x] **Tabs.** There was no way to read a purchase order while checking
+      stock. Screens now open as tabs kept mounted in an `IndexedStack`, so
+      switching away costs no scroll position, filter or half-filled form —
+      asserted by a test that scrolls, leaves, returns and compares offsets.
+      Each tab has its own `Navigator`. The strip stays hidden until a second
+      screen is open, so nobody has to learn about tabs to use the app. A scan
+      reuses the stock tab rather than adding one per scan.
+- [x] **Keyboard shortcuts.** Ctrl/Cmd+K (scan box), Ctrl/Cmd+B (sidebar),
+      Ctrl/Cmd+Shift+F (search), Alt+1…9 (tabs), F1 (the list). Chosen around
+      what a browser will not surrender: Ctrl+W and Ctrl+1…9 are the host's,
+      so tab switching uses Alt and closing a tab has no binding at all.
+      Flutter's `CallbackShortcuts` proved unusable here — it resolves through
+      the focus chain, and this shell sits inside the router's navigator, so
+      the first navigation moved focus above it and shortcuts silently died
+      (Alt+1 worked, Alt+2 did nothing; a test caught it). Replaced with
+      `GlobalShortcuts`, a `HardwareKeyboard` handler at the same level the
+      barcode scanner already uses. That surfaced a latent scanner bug too:
+      modified keystrokes reporting a `character` were being fed into the scan
+      buffer, so a shortcut press could end up inside a later barcode.
+
 **Other InventorOS-only features never rebuilt on Supabase**
 - [ ] Two-factor authentication — ❌
 - [ ] Webhooks — ❌
@@ -783,6 +838,9 @@ Consolidated, in one place, as asked:
 - Any real connector adapter (the registry exists; nothing syncs)
 
 **Implemented but not tested:**
+- Browser history integration (`context.go` pushes an entry via
+  `routeInformationUpdated`) — go_router's own behaviour, but it needs a real
+  browser to verify, so no widget test covers it
 - `shipment_print.dart` (PDF/label generation) — not covered by any test
   (printing output is inherently hard to assert on in a widget test)
 
