@@ -114,6 +114,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('ピッキングを完了しました（0件不足・0件超過）'), findsOneWidget);
+    // §35: the hand-off to packing is offered on the success SnackBar, for
+    // this pick list's own shipment — not an automatic push, so a short or
+    // over pick can still be re-read on the screen that shows it.
+    expect(find.widgetWithText(SnackBarAction, '梱包へ'), findsOneWidget);
+    expect(find.byType(PickListDetailScreen), findsOneWidget);
   });
 
   testWidgets('a quantity cannot be recorded before the JAN is scanned',

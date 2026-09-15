@@ -1361,6 +1361,48 @@ Verified by aborted transaction before applying, then live afterwards
 (function bodies carry the checks; grants unchanged). `flutter analyze`:
 clean. `flutter test`: 344 passing, unchanged — no client code changed.
 
+### Client-only change: §35's post-save hand-off, the deferred judgment call (no migration)
+
+The §35 pass left one item open on purpose, and the reason it was left open
+turned out to contain the fix. The objection on file was that deciding "the
+next task" per save is a workflow-by-workflow judgment, and that
+auto-navigating away can be unwanted — an operator may want to re-read what
+they just recorded (a short pick, a QC finding) before moving on.
+
+Resolved by not auto-navigating at all: the success SnackBar these screens
+already showed now carries a `SnackBarAction` for the next step. The next
+task is one tap away, the screen the operator just finished on stays where
+it is, and it collapses into one shared pattern instead of three bespoke
+navigation decisions. `_snack` on each of the three screens gained an
+optional `action` parameter; nothing else about them changed.
+
+The three hand-offs are the ones where the physical work actually continues:
+
+- 検品確定 → 棚入れ (`PutawayQueueScreen`). Goods that just passed QC are
+  precisely what put-away draws from.
+- ピッキング完了 → 梱包 (`ShipmentDetailScreen`), for *that* pick list's own
+  shipment rather than the shipping list — `PickList.shipmentPlanId` is
+  already in scope, so the operator lands on the right record.
+- 照合完了 → 検品 (`ReceiptHistoryScreen`), since QC is per receipt and that
+  screen is where a pass is started. This one captures its `Navigator`
+  before the screen pops, because its own context is gone by the time the
+  action can be tapped, and is offered on a partial save too — a partial
+  reconciliation posts a receipt just the same.
+
+Deliberately given no next step: the purchase/sales/work-order approval
+screens, whose state machines are bookkeeping closes that move no stock and
+start no physical task (their own header comments say as much), so a
+hand-off there would be invented rather than observed. 棚入れ確定 also stays
+as it is — it already pops back to the queue, which is where the operator
+wants to be when more is waiting.
+
+Three l10n keys added across ja/en/zh (`nextStepPutaway`,
+`nextStepPacking`, `nextStepInspection`). Two widget tests assert both
+halves of the design: the action is offered, *and* the screen did not
+navigate away by itself.
+
+`flutter analyze`: clean. `flutter test`: 344 → 345 passing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -2224,6 +2224,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featPutawayDesc => 'Assign received stock to shelf locations';
 
   @override
+  String get nextStepPutaway => 'Put-away';
+
+  @override
+  String get nextStepPacking => 'Packing';
+
+  @override
+  String get nextStepInspection => 'Inspection';
+
+  @override
   String get putawayTitle => 'Put-away';
 
   @override

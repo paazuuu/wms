@@ -11,6 +11,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
+import '../../shipment/presentation/shipment_detail_screen.dart';
 import '../../stock_ops/presentation/stock_ops_ui.dart' show signed;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
@@ -61,13 +62,14 @@ class _BodyState extends ConsumerState<_Body> {
 
   PickList get _list => widget.list;
 
-  void _snack(String message, {bool danger = false}) {
+  void _snack(String message, {bool danger = false, SnackBarAction? action}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         content: Text(message),
         backgroundColor: danger ? Theme.of(context).colorScheme.error : null,
+        action: action,
       ));
   }
 
@@ -139,8 +141,22 @@ class _BodyState extends ConsumerState<_Body> {
     result.when(
       success: (completed) {
         _refresh();
-        _snack(l10n.pickCompleted(
-            completed.summary.shortLines, completed.summary.overLines));
+        // §35: a finished pick is what packing works from, and this list
+        // already knows which shipment it belongs to — so offer that exact
+        // shipment rather than the shipping list. An action, not an
+        // automatic push: a short or over pick is worth re-reading before
+        // moving on, and this screen is where those are shown.
+        _snack(
+          l10n.pickCompleted(
+              completed.summary.shortLines, completed.summary.overLines),
+          action: SnackBarAction(
+            label: l10n.nextStepPacking,
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) =>
+                  ShipmentDetailScreen(shipmentId: _list.shipmentPlanId),
+            )),
+          ),
+        );
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );

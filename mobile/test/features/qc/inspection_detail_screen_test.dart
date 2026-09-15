@@ -115,6 +115,24 @@ void main() {
   });
 
   testWidgets(
+      'completing offers put-away as the next step instead of just refreshing (§35)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeInspectionRepository(_checked());
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('検品を確定'));
+    await tester.pumpAndSettle();
+
+    // The next task is one tap away, but the screen the operator just
+    // finished on is still what's shown — no automatic navigation.
+    expect(find.widgetWithText(SnackBarAction, '棚入れへ'), findsOneWidget);
+    expect(find.byType(InspectionDetailScreen), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
       'a permission-denied completion shows the friendly message, not the raw RPC text (§34)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));

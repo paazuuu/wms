@@ -2153,6 +2153,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPutawayDesc => '将已收货的库存分配到货位';
 
   @override
+  String get nextStepPutaway => '前往上架';
+
+  @override
+  String get nextStepPacking => '前往包装';
+
+  @override
+  String get nextStepInspection => '前往检验';
+
+  @override
   String get putawayTitle => '上架';
 
   @override

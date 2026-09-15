@@ -2156,6 +2156,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featPutawayDesc => '入荷済みの在庫をロケーションに割り当てる';
 
   @override
+  String get nextStepPutaway => '棚入れへ';
+
+  @override
+  String get nextStepPacking => '梱包へ';
+
+  @override
+  String get nextStepInspection => '検品へ';
+
+  @override
   String get putawayTitle => '棚入れ';
 
   @override

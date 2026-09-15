@@ -449,18 +449,34 @@ Audited against the spec's 5 bullets:
       (JAN, direction, reason, note), not a single-purpose "how much"
       dialog, and blowing it up would look inconsistent with the rest of
       that form rather than clearer
-- [ ] 保存成功後は次の業務へ自然に遷移 (after a successful save, transition
-      naturally to the next task) — a real, currently-open gap, found while
-      auditing but not fixed here: e.g. completing an inspection
-      (`InspectionDetailScreen._complete`) just refreshes the same screen
-      and shows a snackbar; the operator has to navigate back and find
-      put-away themselves rather than being carried into it. Deliberately
-      not fixed in this pass — unlike the two gaps above, this isn't a
-      mechanical UI change: deciding what "the next task" is for each save
-      (inspection → put-away? picking → packing? every order-approval
-      screen?), and whether auto-navigating away is ever unwanted (a user
-      who wants to review what they just did before moving on), needs a
-      workflow-by-workflow judgment call rather than one shared fix
+- [x] 保存成功後は次の業務へ自然に遷移 (after a successful save, transition
+      naturally to the next task) — done, and the earlier hesitation turned
+      out to point at the answer. The open question was what "the next task"
+      is per save, plus whether auto-navigating away is ever unwanted (an
+      operator who wants to re-read what they just recorded). Resolved by
+      **not** auto-navigating: the success SnackBar now carries a
+      `SnackBarAction` for the next step, so the next task is one tap away
+      while the screen the operator just finished on stays put. That also
+      made it one shared pattern rather than a per-screen judgment call,
+      using the SnackBars these screens already showed.
+  - Three hand-offs, each one where the physical work genuinely continues:
+    検品確定 → 棚入れ (`PutawayQueueScreen` — goods that just passed QC are
+    exactly what put-away works from); ピッキング完了 → 梱包
+    (`ShipmentDetailScreen` for **that** pick list's own shipment, since
+    `PickList.shipmentPlanId` is already on hand — not the shipping list);
+    照合完了 → 検品 (`ReceiptHistoryScreen`, which is where a QC pass is
+    actually started, since QC is per receipt). The reconciliation one
+    captures its `Navigator` before the screen pops, since its own context
+    is gone by the time the action can be tapped, and is offered for a
+    partial save too — that posts a receipt just the same.
+  - Deliberately **not** given a next step: the PO/SO/work-order approval
+    screens. Those state machines are bookkeeping closes that move no stock
+    and start no physical task (their own header comments say so), so
+    inventing a hand-off would be a guess; and 棚入れ確定 already pops back
+    to the queue, which is the right place when there is more to put away.
+  - Verified by widget test on two of the three (inspection, picking),
+    asserting both that the action is offered and that the screen did *not*
+    navigate away on its own.
 
 **Inter-warehouse Transfer state visibility (UI spec §22)**
 - [x] "現在状態をUIで明確に表示" — already satisfied, same pattern as every

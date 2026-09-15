@@ -8,6 +8,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../application/attachment_providers.dart';
 import '../application/inspection_providers.dart';
 import '../domain/attachment.dart';
@@ -57,13 +58,14 @@ class _BodyState extends ConsumerState<_Body> {
 
   Inspection get _inspection => widget.inspection;
 
-  void _snack(String message, {bool danger = false}) {
+  void _snack(String message, {bool danger = false, SnackBarAction? action}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         content: Text(message),
         backgroundColor: danger ? Theme.of(context).colorScheme.error : null,
+        action: action,
       ));
   }
 
@@ -84,7 +86,20 @@ class _BodyState extends ConsumerState<_Body> {
         ref.invalidate(inspectionDetailProvider(_inspection.id));
         ref.invalidate(inspectionListProvider);
         final ui = QcResultUi.of(l10n, updated.status);
-        _snack(l10n.qcCompleted(ui.label));
+        // §35: goods that just passed QC are what put-away works from, so
+        // offer that next step rather than making the operator navigate back
+        // and find it. An action on the success SnackBar, not an automatic
+        // push: whoever wants to re-read the findings they just recorded
+        // stays where they are.
+        _snack(
+          l10n.qcCompleted(ui.label),
+          action: SnackBarAction(
+            label: l10n.nextStepPutaway,
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const PutawayQueueScreen(),
+            )),
+          ),
+        );
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );

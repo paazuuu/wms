@@ -305,15 +305,32 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
       success: (_) {
         ref.invalidate(deliveryPlansProvider);
         ref.invalidate(deliveryPlanDetailProvider(_plan.id));
-        _snack(keepOpen ? l10n.reconcilePartialSaved : l10n.reconcileDone,
-            tone: StatusTone.success);
-        Navigator.of(context).pop();
+        // §35: a reconciliation posts a receipt, and QC works per receipt —
+        // so offer the receipt history, which is where a QC pass is actually
+        // started, instead of leaving the operator to find it. Captured
+        // before the pop below, since this screen's own context is gone by
+        // the time the action can be tapped. Offered for a partial save too:
+        // that posts a receipt just the same.
+        final navigator = Navigator.of(context);
+        final planId = _plan.id;
+        _snack(
+          keepOpen ? l10n.reconcilePartialSaved : l10n.reconcileDone,
+          tone: StatusTone.success,
+          action: SnackBarAction(
+            label: l10n.nextStepInspection,
+            onPressed: () => navigator.push(MaterialPageRoute(
+              builder: (_) => ReceiptHistoryScreen(planId: planId),
+            )),
+          ),
+        );
+        navigator.pop();
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
   }
 
-  void _snack(String message, {StatusTone tone = StatusTone.neutral}) {
+  void _snack(String message,
+      {StatusTone tone = StatusTone.neutral, SnackBarAction? action}) {
     if (!mounted) return;
     final scheme = Theme.of(context).colorScheme;
     final (icon, bg) = switch (tone) {
@@ -331,6 +348,7 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
           Expanded(child: Text(message)),
         ]),
         backgroundColor: bg,
+        action: action,
       ));
   }
 

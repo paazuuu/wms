@@ -4222,6 +4222,24 @@ abstract class AppLocalizations {
   /// **'入荷済みの在庫をロケーションに割り当てる'**
   String get featPutawayDesc;
 
+  /// No description provided for @nextStepPutaway.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れへ'**
+  String get nextStepPutaway;
+
+  /// No description provided for @nextStepPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包へ'**
+  String get nextStepPacking;
+
+  /// No description provided for @nextStepInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品へ'**
+  String get nextStepInspection;
+
   /// No description provided for @putawayTitle.
   ///
   /// In ja, this message translates to:
