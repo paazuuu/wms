@@ -829,6 +829,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get whStatOnHand => '库存';
 
   @override
+  String get noRoleAssigned => '尚未分配角色权限';
+
+  @override
+  String get noRoleAssignedBody => '您已登录，但账号还没有被分配角色，因此暂时没有可用的功能。请联系管理员为您分配权限。';
+
+  @override
   String get whNoAssignedWarehouse => '尚未为您分配仓库';
 
   @override

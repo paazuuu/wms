@@ -830,6 +830,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get whStatOnHand => '在庫';
 
   @override
+  String get noRoleAssigned => '権限がまだ割り当てられていません';
+
+  @override
+  String get noRoleAssignedBody =>
+      'サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。管理者に権限の割り当てを依頼してください。';
+
+  @override
   String get whNoAssignedWarehouse => '倉庫が割り当てられていません';
 
   @override

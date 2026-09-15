@@ -366,6 +366,8 @@
   "whStatOutbound": "Outbound",
   "whStatSku": "SKU",
   "whStatOnHand": "On hand",
+  "noRoleAssigned": "No role assigned yet",
+  "noRoleAssignedBody": "You are signed in, but no role has been assigned to your account yet, so there is nothing you can open. Ask an administrator to assign you one.",
   "whNoAssignedWarehouse": "No warehouse assigned to you",
   "whNoAssignedWarehouseBody": "Your account is not assigned to any warehouse yet, so there is nothing to view or work in. Ask an administrator to assign you one.",
   "whNoWarehouses": "No warehouses yet",

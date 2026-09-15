@@ -86,6 +86,14 @@ class DashboardOverviewScreen extends StatelessWidget {
           onOpenOutstanding: delivery == null ? null : () => onOpen(delivery),
         ),
         const SizedBox(height: AppSpacing.xl),
+        // §37 hides what this user cannot open, which for someone with no role
+        // at all hides the entire menu — leaving a dashboard and no
+        // explanation. That state is reachable by design: accounts are created
+        // by an admin and only the *first* sign-in self-assigns a role
+        // (bootstrap_first_admin, 0024), so everyone after that lands here
+        // until an admin assigns one. Say so rather than showing an empty app.
+        if (groups.every((g) => g.visibleEntries(permissions).isEmpty))
+          const _NoRoleCard(),
         for (final group in groups)
           if (group.visibleEntries(permissions) case final visible when visible.isNotEmpty) ...[
             _SectionLabel(group.title(l10n)),
@@ -211,6 +219,48 @@ class _GreetingCard extends StatelessWidget {
               label: l10n.scannerReady,
               icon: Icons.qr_code_scanner_outlined,
               dense: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown when §37's permission gating has hidden every menu entry, i.e. the
+/// signed-in account holds no role yet. Deliberately not an error: nothing has
+/// gone wrong, the account is simply waiting on an admin.
+class _NoRoleCard extends StatelessWidget {
+  const _NoRoleCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.badge_outlined, color: scheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.noRoleAssigned, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.noRoleAssignedBody,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

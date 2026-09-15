@@ -1654,6 +1654,18 @@ abstract class AppLocalizations {
   /// **'在庫'**
   String get whStatOnHand;
 
+  /// No description provided for @noRoleAssigned.
+  ///
+  /// In ja, this message translates to:
+  /// **'権限がまだ割り当てられていません'**
+  String get noRoleAssigned;
+
+  /// No description provided for @noRoleAssignedBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。管理者に権限の割り当てを依頼してください。'**
+  String get noRoleAssignedBody;
+
   /// No description provided for @whNoAssignedWarehouse.
   ///
   /// In ja, this message translates to:

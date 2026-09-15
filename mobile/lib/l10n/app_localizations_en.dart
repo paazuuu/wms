@@ -858,6 +858,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whStatOnHand => 'On hand';
 
   @override
+  String get noRoleAssigned => 'No role assigned yet';
+
+  @override
+  String get noRoleAssignedBody =>
+      'You are signed in, but no role has been assigned to your account yet, so there is nothing you can open. Ask an administrator to assign you one.';
+
+  @override
   String get whNoAssignedWarehouse => 'No warehouse assigned to you';
 
   @override

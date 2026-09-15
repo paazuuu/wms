@@ -126,4 +126,19 @@ void main() {
     expect(find.text('Management'), findsNothing);
     expect(find.text('Reports'), findsNothing);
   });
+
+  testWidgets('a user with no role at all is told why the menu is empty (§37)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // Reachable by design: only the first sign-in self-assigns a role
+    // (bootstrap_first_admin), so every later account lands here until an
+    // admin assigns one. Gating alone would leave an app with no menu and no
+    // explanation.
+    await tester.pumpWidget(_wrap(permissions: const []));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No role assigned yet'), findsOneWidget);
+    expect(find.textContaining('Ask an administrator'), findsOneWidget);
+  });
 }

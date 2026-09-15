@@ -383,6 +383,8 @@
   "whStatOutbound": "出荷待ち",
   "whStatSku": "SKU",
   "whStatOnHand": "在庫",
+  "noRoleAssigned": "権限がまだ割り当てられていません",
+  "noRoleAssignedBody": "サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。管理者に権限の割り当てを依頼してください。",
   "whNoAssignedWarehouse": "倉庫が割り当てられていません",
   "whNoAssignedWarehouseBody": "あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。管理者に倉庫の割り当てを依頼してください。",
   "whNoWarehouses": "倉庫がまだありません",
