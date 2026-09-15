@@ -5019,6 +5019,18 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'メニューを展開'**
   String get sidebarExpand;
+
+  /// Sidebar menu filter field: hint text, and the empty-result message.
+  ///
+  /// In ja, this message translates to:
+  /// **'メニューを絞り込む'**
+  String get menuFilter;
+
+  /// Sidebar menu filter field: hint text, and the empty-result message.
+  ///
+  /// In ja, this message translates to:
+  /// **'該当する項目がありません'**
+  String get menuFilterNoMatch;
 }
 
 class _AppLocalizationsDelegate

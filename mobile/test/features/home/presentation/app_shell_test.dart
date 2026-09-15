@@ -321,6 +321,136 @@ void main() {
       expect(_location(app.router), '/picking');
     });
 
+    testWidgets('the menu filter narrows entries and whole groups',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+
+      Finder inSidebar(String text) => find.descendant(
+            of: find.byKey(sidebarKey),
+            matching: find.text(text),
+          );
+
+      expect(inSidebar('Inspection'), findsOneWidget);
+      expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
+      expect(inSidebar('MANAGEMENT'), findsOneWidget);
+
+      await tester.enterText(find.byKey(menuFilterKey), 'inspection');
+      await tester.pumpAndSettle();
+
+      expect(inSidebar('Inspection'), findsOneWidget);
+      expect(inSidebar('Picking'), findsNothing);
+      // A group with no surviving entry disappears with them, rather than
+      // leaving a heading over nothing.
+      expect(inSidebar('MANAGEMENT'), findsNothing);
+      expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
+      // The dashboard entry is filtered too, so this narrows the whole menu
+      // and not everything-but-the-first-item.
+      expect(inSidebar('Dashboard'), findsNothing);
+    });
+
+    testWidgets('matching descriptions costs some precision, by choice',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      Finder inSidebar(String text) => find.descendant(
+            of: find.byKey(sidebarKey),
+            matching: find.text(text),
+          );
+
+      await tester.enterText(find.byKey(menuFilterKey), 'pick');
+      await tester.pumpAndSettle();
+
+      expect(inSidebar('Picking'), findsOneWidget);
+      // Report builder's description opens "Pick a data source...", so it
+      // survives a filter for 'pick'. Documented rather than tuned away: the
+      // same rule is what makes 'approve' find the order screens, and a
+      // near-miss that stays visible is cheaper for an operator than a
+      // relevant entry that vanishes.
+      expect(inSidebar('Report builder'), findsOneWidget);
+    });
+
+    testWidgets('the filter matches descriptions, not just labels',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      // 'approve' appears in no label at all — it is the word an operator
+      // hunting for approvals would actually type, and it lives in the
+      // purchase/sales/work order descriptions.
+      await tester.enterText(find.byKey(menuFilterKey), 'approve');
+      await tester.pumpAndSettle();
+
+      Finder inSidebar(String text) => find.descendant(
+            of: find.byKey(sidebarKey),
+            matching: find.text(text),
+          );
+      expect(inSidebar('Purchase orders'), findsOneWidget);
+      expect(inSidebar('Sales orders'), findsOneWidget);
+      expect(inSidebar('Putaway'), findsNothing);
+    });
+
+    testWidgets('a filter matching nothing says so', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(menuFilterKey), 'zzzzz');
+      await tester.pumpAndSettle();
+
+      // An empty sidebar with no explanation reads as a broken menu.
+      expect(find.text('No matching menu item'), findsOneWidget);
+    });
+
+    testWidgets('collapsing clears an active filter', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(menuFilterKey), 'pick');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Collapse menu'));
+      await tester.pumpAndSettle();
+
+      // Otherwise the rail shows a mysteriously short list, and expanding
+      // restores a filter the operator has forgotten about.
+      expect(find.byTooltip('Inspection'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Expand menu'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+            of: find.byKey(sidebarKey), matching: find.text('Inspection')),
+        findsOneWidget,
+      );
+    });
+
     test('a scanned code is carried in the URL, escaped', () {
       expect(AppRoutes.stock('4901234567894'), '/stock/4901234567894');
       // A code containing a slash must not invent a path segment.

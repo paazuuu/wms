@@ -2668,4 +2668,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sidebarExpand => 'Expand menu';
+
+  @override
+  String get menuFilter => 'Filter menu';
+
+  @override
+  String get menuFilterNoMatch => 'No matching menu item';
 }

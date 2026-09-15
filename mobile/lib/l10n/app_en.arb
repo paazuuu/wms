@@ -1100,5 +1100,13 @@
   "sidebarExpand": "Expand menu",
   "@sidebarExpand": {
     "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  },
+  "menuFilter": "Filter menu",
+  "@menuFilter": {
+    "description": "Sidebar menu filter field: hint text, and the empty-result message."
+  },
+  "menuFilterNoMatch": "No matching menu item",
+  "@menuFilterNoMatch": {
+    "description": "Sidebar menu filter field: hint text, and the empty-result message."
   }
 }

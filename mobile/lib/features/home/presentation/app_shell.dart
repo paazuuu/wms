@@ -280,6 +280,9 @@ const double _railWidth = 76;
 /// nothing about the sidebar.
 const sidebarKey = Key('app-sidebar');
 
+/// The sidebar's menu filter field.
+const menuFilterKey = Key('app-sidebar-filter');
+
 /// The grouped navigation sidebar (shadcn-style: brand, sections, footer).
 ///
 /// When [collapsed] it renders as an icon-only rail: labels move into
@@ -287,7 +290,7 @@ const sidebarKey = Key('app-sidebar');
 /// words is just noise), and the footer stacks vertically. Everything stays
 /// reachable — collapsing trades labels for content width, it does not hide
 /// features.
-class _Sidebar extends StatelessWidget {
+class _Sidebar extends StatefulWidget {
   const _Sidebar({
     required this.selectedId,
     required this.collapsed,
@@ -317,11 +320,57 @@ class _Sidebar extends StatelessWidget {
   final String? userEmail;
 
   @override
+  State<_Sidebar> createState() => _SidebarState();
+}
+
+class _SidebarState extends State<_Sidebar> {
+  final TextEditingController _filter = TextEditingController();
+  String _query = '';
+
+  @override
+  void didUpdateWidget(_Sidebar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Collapsing hides the filter field. Leaving a query active behind it
+    // would mean a rail showing a mysteriously short list, and expanding
+    // again would restore a filter the operator had forgotten about.
+    if (widget.collapsed && !oldWidget.collapsed) _clear();
+  }
+
+  void _clear() {
+    _filter.clear();
+    if (_query.isNotEmpty) setState(() => _query = '');
+  }
+
+  @override
+  void dispose() {
+    _filter.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final groups = buildFeatureCatalog();
+    final selectedId = widget.selectedId;
+    final collapsed = widget.collapsed;
+    final permissions = widget.permissions;
+
+    // Applied to the dashboard entry too, so filtering narrows the whole menu
+    // rather than everything-except-the-first-item.
+    final dashboardMatches = _query.trim().isEmpty ||
+        l10n.navDashboard.toLowerCase().contains(_query.trim().toLowerCase());
+
+    final visibleByGroup = {
+      for (final group in groups)
+        group: group
+            .visibleEntries(permissions)
+            .where((e) => e.matchesQuery(l10n, _query))
+            .toList(),
+    };
+    final nothingMatched = !dashboardMatches &&
+        visibleByGroup.values.every((entries) => entries.isEmpty);
 
     return Container(
       key: sidebarKey,
@@ -331,23 +380,61 @@ class _Sidebar extends StatelessWidget {
         children: [
           _Header(
             collapsed: collapsed,
-            onToggleCollapse: onToggleCollapse,
+            onToggleCollapse: widget.onToggleCollapse,
           ),
           const Divider(height: 1),
+          // No field on the rail: 76px cannot hold a usable text input, and
+          // the icons are few enough there to scan by eye.
+          if (!collapsed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm, AppSpacing.sm, AppSpacing.sm, 0),
+              child: TextField(
+                key: menuFilterKey,
+                controller: _filter,
+                onChanged: (v) => setState(() => _query = v),
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: l10n.menuFilter,
+                  prefixIcon: const Icon(Icons.filter_list, size: 18),
+                  prefixIconConstraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
+                  // Only offered once there is something to clear, so the
+                  // field is not permanently carrying a dead button.
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: _clear,
+                        ),
+                ),
+              ),
+            ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
               children: [
-                _SidebarItem(
-                  icon: Icons.dashboard_outlined,
-                  label: l10n.navDashboard,
-                  selected: selectedId == 'dashboard',
-                  collapsed: collapsed,
-                  onTap: onDashboard,
-                ),
+                if (nothingMatched)
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Text(
+                      l10n.menuFilterNoMatch,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+                if (dashboardMatches)
+                  _SidebarItem(
+                    icon: Icons.dashboard_outlined,
+                    label: l10n.navDashboard,
+                    selected: selectedId == 'dashboard',
+                    collapsed: collapsed,
+                    onTap: widget.onDashboard,
+                  ),
                 for (final group in groups) ...() {
-                  final visible = group.visibleEntries(permissions);
+                  final visible = visibleByGroup[group]!;
                   if (visible.isEmpty) return const <Widget>[];
                   return <Widget>[
                     // A rail has no room for the heading's words, so the
@@ -378,7 +465,7 @@ class _Sidebar extends StatelessWidget {
                         label: entry.label(l10n),
                         selected: selectedId == entry.id,
                         collapsed: collapsed,
-                        onTap: () => onOpen(entry),
+                        onTap: () => widget.onOpen(entry),
                       ),
                   ];
                 }(),
@@ -388,9 +475,9 @@ class _Sidebar extends StatelessWidget {
           const Divider(height: 1),
           _Footer(
             collapsed: collapsed,
-            onLogout: onLogout,
-            userName: userName,
-            userEmail: userEmail,
+            onLogout: widget.onLogout,
+            userName: widget.userName,
+            userEmail: widget.userEmail,
           ),
         ],
       ),

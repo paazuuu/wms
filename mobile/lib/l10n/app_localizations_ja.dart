@@ -2597,4 +2597,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sidebarExpand => 'メニューを展開';
+
+  @override
+  String get menuFilter => 'メニューを絞り込む';
+
+  @override
+  String get menuFilterNoMatch => '該当する項目がありません';
 }

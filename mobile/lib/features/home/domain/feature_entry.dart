@@ -53,6 +53,23 @@ class FeatureEntry {
   bool visibleFor(Iterable<String> permissions) =>
       requiredAnyOf.isEmpty || requiredAnyOf.any(permissions.contains);
 
+  /// Whether this entry should survive a sidebar filter of [query].
+  ///
+  /// Matches the label *and* the one-line description, because the
+  /// description is where the vocabulary an operator actually thinks in tends
+  /// to live: someone hunting for approvals types "approve" and means
+  /// purchase and sales orders, whose labels say neither. Substring rather
+  /// than fuzzy matching, so the result of a keystroke is always predictable.
+  ///
+  /// Lower-casing is a no-op for Japanese and Chinese, which is correct —
+  /// those labels match on the substring alone.
+  bool matchesQuery(AppLocalizations l10n, String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    return label(l10n).toLowerCase().contains(q) ||
+        description(l10n).toLowerCase().contains(q);
+  }
+
   /// Localized menu label for this feature.
   String label(AppLocalizations l10n) {
     switch (id) {

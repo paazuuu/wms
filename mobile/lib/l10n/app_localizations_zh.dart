@@ -2592,4 +2592,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sidebarExpand => '展开菜单';
+
+  @override
+  String get menuFilter => '筛选菜单';
+
+  @override
+  String get menuFilterNoMatch => '没有匹配的菜单项';
 }
