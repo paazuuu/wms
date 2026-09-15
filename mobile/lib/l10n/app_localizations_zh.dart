@@ -2601,4 +2601,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get unknownLocation => '找不到该页面。请从菜单中重新选择。';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get shortcutsTitle => '键盘快捷键';
+
+  @override
+  String get shortcutsHelp => '显示键盘快捷键';
+
+  @override
+  String get shortcutFocusScan => '聚焦扫描框';
+
+  @override
+  String get shortcutToggleSidebar => '折叠或展开菜单';
+
+  @override
+  String get shortcutGlobalSearch => '打开全局搜索';
+
+  @override
+  String get shortcutSwitchTab => '切换到第 N 个标签';
+
+  @override
+  String get shortcutShowHelp => '显示此列表';
 }

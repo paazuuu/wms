@@ -5037,6 +5037,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この画面は見つかりませんでした。メニューから選び直してください。'**
   String get unknownLocation;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'閉じる'**
+  String get close;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーボードショートカット'**
+  String get shortcutsTitle;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーボードショートカットを表示'**
+  String get shortcutsHelp;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャン欄にカーソルを移動'**
+  String get shortcutFocusScan;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'メニューの折りたたみを切り替え'**
+  String get shortcutToggleSidebar;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'横断検索を開く'**
+  String get shortcutGlobalSearch;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'N番目のタブに切り替え'**
+  String get shortcutSwitchTab;
+
+  /// Keyboard shortcut help sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'この一覧を表示'**
+  String get shortcutShowHelp;
 }
 
 class _AppLocalizationsDelegate

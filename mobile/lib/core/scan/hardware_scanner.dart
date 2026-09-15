@@ -52,6 +52,11 @@ class _HardwareScannerState extends State<HardwareScanner> {
     if (event is! KeyDownEvent) return false;
     // Let focused inputs receive the keystrokes directly.
     if (_isEditableFocused()) return false;
+    // A barcode scanner never holds a modifier, so anything that does is a
+    // keyboard shortcut. Ignoring those keeps e.g. Ctrl+B out of the scan
+    // buffer, where on some platforms it arrives with `character` set and
+    // would otherwise be buffered as if it were part of a code.
+    if (_modifierHeld) return false;
 
     final now = DateTime.now();
     if (event.logicalKey == LogicalKeyboardKey.enter ||
@@ -71,6 +76,18 @@ class _HardwareScannerState extends State<HardwareScanner> {
       _buffer.feed(char, now);
     }
     return false;
+  }
+
+  /// True when Ctrl, Meta or Alt is down. Shift is excluded: a scanner does
+  /// send it, for an uppercase character in a code.
+  bool get _modifierHeld {
+    final keys = HardwareKeyboard.instance.logicalKeysPressed;
+    return keys.contains(LogicalKeyboardKey.controlLeft) ||
+        keys.contains(LogicalKeyboardKey.controlRight) ||
+        keys.contains(LogicalKeyboardKey.metaLeft) ||
+        keys.contains(LogicalKeyboardKey.metaRight) ||
+        keys.contains(LogicalKeyboardKey.altLeft) ||
+        keys.contains(LogicalKeyboardKey.altRight);
   }
 
   /// True when the current primary focus belongs to an [EditableText] — i.e.

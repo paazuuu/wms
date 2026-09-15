@@ -1112,5 +1112,37 @@
   "unknownLocation": "找不到该页面。请从菜单中重新选择。",
   "@unknownLocation": {
     "description": "Shown in a tab whose location this build does not serve."
+  },
+  "close": "关闭",
+  "@close": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutsTitle": "键盘快捷键",
+  "@shortcutsTitle": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutsHelp": "显示键盘快捷键",
+  "@shortcutsHelp": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutFocusScan": "聚焦扫描框",
+  "@shortcutFocusScan": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutToggleSidebar": "折叠或展开菜单",
+  "@shortcutToggleSidebar": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutGlobalSearch": "打开全局搜索",
+  "@shortcutGlobalSearch": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutSwitchTab": "切换到第 N 个标签",
+  "@shortcutSwitchTab": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutShowHelp": "显示此列表",
+  "@shortcutShowHelp": {
+    "description": "Keyboard shortcut help sheet."
   }
 }

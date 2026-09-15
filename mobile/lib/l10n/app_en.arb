@@ -1112,5 +1112,37 @@
   "unknownLocation": "That screen could not be found. Pick one from the menu instead.",
   "@unknownLocation": {
     "description": "Shown in a tab whose location this build does not serve."
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutsTitle": "Keyboard shortcuts",
+  "@shortcutsTitle": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutsHelp": "Show keyboard shortcuts",
+  "@shortcutsHelp": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutFocusScan": "Focus the scan box",
+  "@shortcutFocusScan": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutToggleSidebar": "Collapse or expand the menu",
+  "@shortcutToggleSidebar": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutGlobalSearch": "Open cross-entity search",
+  "@shortcutGlobalSearch": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutSwitchTab": "Switch to the Nth tab",
+  "@shortcutSwitchTab": {
+    "description": "Keyboard shortcut help sheet."
+  },
+  "shortcutShowHelp": "Show this list",
+  "@shortcutShowHelp": {
+    "description": "Keyboard shortcut help sheet."
   }
 }

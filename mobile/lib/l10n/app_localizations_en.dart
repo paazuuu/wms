@@ -2678,4 +2678,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unknownLocation =>
       'That screen could not be found. Pick one from the menu instead.';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get shortcutsTitle => 'Keyboard shortcuts';
+
+  @override
+  String get shortcutsHelp => 'Show keyboard shortcuts';
+
+  @override
+  String get shortcutFocusScan => 'Focus the scan box';
+
+  @override
+  String get shortcutToggleSidebar => 'Collapse or expand the menu';
+
+  @override
+  String get shortcutGlobalSearch => 'Open cross-entity search';
+
+  @override
+  String get shortcutSwitchTab => 'Switch to the Nth tab';
+
+  @override
+  String get shortcutShowHelp => 'Show this list';
 }

@@ -2606,4 +2606,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get unknownLocation => 'この画面は見つかりませんでした。メニューから選び直してください。';
+
+  @override
+  String get close => '閉じる';
+
+  @override
+  String get shortcutsTitle => 'キーボードショートカット';
+
+  @override
+  String get shortcutsHelp => 'キーボードショートカットを表示';
+
+  @override
+  String get shortcutFocusScan => 'スキャン欄にカーソルを移動';
+
+  @override
+  String get shortcutToggleSidebar => 'メニューの折りたたみを切り替え';
+
+  @override
+  String get shortcutGlobalSearch => '横断検索を開く';
+
+  @override
+  String get shortcutSwitchTab => 'N番目のタブに切り替え';
+
+  @override
+  String get shortcutShowHelp => 'この一覧を表示';
 }

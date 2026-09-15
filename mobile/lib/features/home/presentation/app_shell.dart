@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +9,7 @@ import '../../../app.dart';
 import '../../../core/l10n/language_menu.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
+import '../../../core/scan/global_shortcuts.dart';
 import '../../../core/scan/hardware_scanner.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -21,6 +23,7 @@ import '../application/tabs_controller.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 import 'breadcrumbs.dart';
+import 'shortcuts_help.dart';
 
 /// The authenticated app shell.
 ///
@@ -51,10 +54,24 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Owned here rather than by the top bar so Ctrl+K can reach it: the
+  /// shortcut lives at the shell, the field it focuses does not.
+  final FocusNode _scanFocus = FocusNode(debugLabel: 'topbar-scan');
+
+  @override
+  void dispose() {
+    _scanFocus.dispose();
+    super.dispose();
+  }
+
   bool get _cameraSupported =>
       kIsWeb ||
       defaultTargetPlatform == TargetPlatform.android ||
       defaultTargetPlatform == TargetPlatform.iOS;
+
+  /// Flutter web reports the host platform here too, so this covers a browser
+  /// on a Mac as well as the desktop build.
+  bool get _isMac => defaultTargetPlatform == TargetPlatform.macOS;
 
   void _go(String location) {
     context.go(location);
@@ -81,6 +98,47 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   void _logout() => ref.read(authControllerProvider.notifier).logout();
+
+  /// Jump to the nth open tab (1-based), ignoring an index past the end
+  /// rather than clamping — Alt+7 with four tabs open means the operator
+  /// mis-hit, and silently landing on the fourth would be worse than nothing.
+  void _selectTabByIndex(int oneBased) {
+    final tabs = ref.read(tabsControllerProvider).locations;
+    if (oneBased < 1 || oneBased > tabs.length) return;
+    _go(tabs[oneBased - 1]);
+  }
+
+  /// The shortcut bindings.
+  ///
+  /// Chosen around what a browser will not let us have: Ctrl+W closes the
+  /// browser tab and Ctrl+1…9 switch browser tabs, so closing a tab has no
+  /// shortcut at all and tab switching uses Alt rather than shipping a
+  /// binding the host swallows. F1 opens the help because it is the one key
+  /// that can never be mistaken for typing.
+  Map<ShortcutActivator, VoidCallback> _bindings() {
+    // Cmd on macOS, Ctrl everywhere else — using Ctrl on a Mac would collide
+    // with text-navigation bindings.
+    SingleActivator mod(LogicalKeyboardKey key, {bool shift = false}) =>
+        SingleActivator(key,
+            control: !_isMac, meta: _isMac, shift: shift);
+
+    return {
+      mod(LogicalKeyboardKey.keyK): () => _scanFocus.requestFocus(),
+      mod(LogicalKeyboardKey.keyB): () {
+        if (isWideLayout(context)) {
+          ref.read(sidebarCollapsedProvider.notifier).toggle();
+        }
+      },
+      mod(LogicalKeyboardKey.keyF, shift: true): () => _go(AppRoutes.search),
+      const SingleActivator(LogicalKeyboardKey.f1): _showShortcutsHelp,
+      for (var i = 1; i <= 9; i++)
+        SingleActivator(_digitKeys[i - 1], alt: true): () =>
+            _selectTabByIndex(i),
+    };
+  }
+
+  void _showShortcutsHelp() =>
+      ShortcutsHelpDialog.show(context, isMac: _isMac);
 
   void _closeTab(String location, String activeLocation) {
     final next = ref
@@ -133,10 +191,14 @@ class _AppShellState extends ConsumerState<AppShell> {
         _TopBar(
           wide: wide,
           selectedId: selectedId,
+          scanFocus: _scanFocus,
           onScan: _handleScan,
           onMenu: wide ? null : () => _scaffoldKey.currentState?.openDrawer(),
           onCamera: _cameraSupported ? _openCameraScan : null,
           onSearch: () => _go(AppRoutes.search),
+          // Only offered where there is a keyboard to press. A shortcut list
+          // on a handheld is a button that teaches nothing.
+          onShortcutsHelp: wide ? _showShortcutsHelp : null,
         ),
         // Hidden while only one thing is open, so the strip costs nothing
         // until the operator actually opens a second screen. Nobody has to
@@ -187,12 +249,15 @@ class _AppShellState extends ConsumerState<AppShell> {
           )
         : main;
 
-    return HardwareScanner(
-      onScan: _handleScan,
-      child: Scaffold(
-        key: _scaffoldKey,
-        drawer: wide ? null : Drawer(child: sidebar(asRail: false)),
-        body: SafeArea(child: body),
+    return GlobalShortcuts(
+      bindings: _bindings(),
+      child: HardwareScanner(
+        onScan: _handleScan,
+        child: Scaffold(
+          key: _scaffoldKey,
+          drawer: wide ? null : Drawer(child: sidebar(asRail: false)),
+          body: SafeArea(child: body),
+        ),
       ),
     );
   }
@@ -425,18 +490,22 @@ class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.wide,
     required this.selectedId,
+    required this.scanFocus,
     required this.onScan,
     required this.onMenu,
     required this.onCamera,
     required this.onSearch,
+    required this.onShortcutsHelp,
   });
 
   final bool wide;
   final String selectedId;
+  final FocusNode scanFocus;
   final ValueChanged<String> onScan;
   final VoidCallback? onMenu;
   final Future<void> Function()? onCamera;
   final VoidCallback onSearch;
+  final VoidCallback? onShortcutsHelp;
 
   @override
   Widget build(BuildContext context) {
@@ -472,6 +541,7 @@ class _TopBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: ScanField(
+                  focusNode: scanFocus,
                   dense: true,
                   hintText: l10n.topbarScanHint,
                   onSubmitted: onScan,
@@ -494,6 +564,12 @@ class _TopBar extends StatelessWidget {
             icon: const Icon(Icons.search),
             onPressed: onSearch,
           ),
+          if (onShortcutsHelp != null)
+            IconButton(
+              tooltip: l10n.shortcutsHelp,
+              icon: const Icon(Icons.keyboard_outlined),
+              onPressed: onShortcutsHelp,
+            ),
           const SizedBox(width: AppSpacing.xs),
           const WarehousePicker(),
           const SizedBox(width: AppSpacing.xs),
@@ -518,6 +594,21 @@ const sidebarKey = Key('app-sidebar');
 
 /// The sidebar's menu filter field.
 const menuFilterKey = Key('app-sidebar-filter');
+
+/// Digit keys 1-9, for the Alt+N tab shortcuts. Listed rather than computed
+/// because [LogicalKeyboardKey] ids are not contiguous in a way worth
+/// relying on.
+const _digitKeys = <LogicalKeyboardKey>[
+  LogicalKeyboardKey.digit1,
+  LogicalKeyboardKey.digit2,
+  LogicalKeyboardKey.digit3,
+  LogicalKeyboardKey.digit4,
+  LogicalKeyboardKey.digit5,
+  LogicalKeyboardKey.digit6,
+  LogicalKeyboardKey.digit7,
+  LogicalKeyboardKey.digit8,
+  LogicalKeyboardKey.digit9,
+];
 
 /// The open-tabs strip. Absent from the tree entirely while only one tab is
 /// open, which is what tests assert against.

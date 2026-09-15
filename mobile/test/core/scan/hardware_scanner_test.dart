@@ -115,4 +115,56 @@ void main() {
 
     expect(scanned, isNull);
   });
+
+  testWidgets('ignores keystrokes held with a modifier', (tester) async {
+    String? scanned;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: HardwareScanner(
+          onScan: (code) => scanned = code,
+          child: const SizedBox.expand(),
+        ),
+      ),
+    ));
+
+    // A scanner never holds Ctrl, so a Ctrl-modified keystroke is a keyboard
+    // shortcut. Before this guard, on platforms where Ctrl+digit still
+    // reports a `character`, shortcut presses were fed into the scan buffer
+    // and could be flushed as part of a later code.
+    await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await _typeDigits('123');
+    await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    await _typeDigits('456');
+    await _pressEnter();
+
+    expect(scanned, '456',
+        reason: 'the Ctrl-held digits must not appear in the code');
+  });
+
+  testWidgets('still captures a code containing shifted characters',
+      (tester) async {
+    String? scanned;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: HardwareScanner(
+          onScan: (code) => scanned = code,
+          child: const SizedBox.expand(),
+        ),
+      ),
+    ));
+
+    // Shift is deliberately not treated as a shortcut modifier: a scanner
+    // does send it, for an uppercase character in a code.
+    await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await simulateKeyDownEvent(LogicalKeyboardKey.keyA, character: 'A');
+    await simulateKeyUpEvent(LogicalKeyboardKey.keyA);
+    await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await _typeDigits('12');
+    await _pressEnter();
+
+    expect(scanned, 'A12');
+  });
 }

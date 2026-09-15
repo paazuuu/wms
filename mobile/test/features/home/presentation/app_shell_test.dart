@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
@@ -7,6 +8,7 @@ import 'package:wms_mobile/features/auth/data/auth_repository.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wms_mobile/core/router/app_router.dart';
+import 'package:wms_mobile/core/scan/scan_field.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/home/presentation/app_shell.dart';
 import 'package:wms_mobile/features/home/presentation/coming_soon_screen.dart';
@@ -550,6 +552,107 @@ void main() {
 
       expect(_location(app.router), AppRoutes.dashboard);
       expect(find.byKey(tabStripKey), findsNothing);
+    });
+
+    testWidgets('Ctrl+B collapses the sidebar and Ctrl+K focuses the scan box',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(find.byKey(sidebarKey)).width, 268);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(find.byKey(sidebarKey)).width, 76);
+
+      // Ctrl+K is the convention for "let me type"; here that means the scan
+      // box, which is the field an operator reaches for most.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+
+      final editable = tester.widget<EditableText>(find
+          .descendant(
+              of: find.byType(ScanField), matching: find.byType(EditableText))
+          .first);
+      expect(editable.focusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('Alt+2 switches to the second tab', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+
+      app.router.go('/picking');
+      await tester.pumpAndSettle();
+      expect(_location(app.router), '/picking');
+
+      // Alt rather than Ctrl because a browser keeps Ctrl+1..9 for its own
+      // tabs and would never pass them through.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+
+      expect(_location(app.router), AppRoutes.dashboard);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit2);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+
+      expect(_location(app.router), '/picking');
+
+      // Past the end is ignored rather than clamped: a mis-hit should do
+      // nothing, not silently land somewhere plausible.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit7);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+
+      expect(_location(app.router), '/picking');
+    });
+
+    testWidgets('F1 and the top-bar button both open the shortcut list',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.f1);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Keyboard shortcuts'), findsOneWidget);
+      expect(find.text('Ctrl + K'), findsOneWidget);
+      expect(find.text('Alt + 1…9'), findsOneWidget);
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(find.text('Keyboard shortcuts'), findsNothing);
+
+      // A shortcut list only reachable *by* a shortcut helps nobody who does
+      // not already know it exists.
+      await tester.tap(find.byTooltip('Show keyboard shortcuts'));
+      await tester.pumpAndSettle();
+      expect(find.text('Keyboard shortcuts'), findsOneWidget);
     });
 
     test('a scanned code is carried in the URL, escaped', () {
