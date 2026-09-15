@@ -294,17 +294,29 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
     exactly the semantics `can_access_warehouse()` was always written to
     have; it just never ran before. Admins must assign warehouses as well as
     a role — the user-management screen already supports both.
-  - [ ] **Batch 2, still open**: the read-side list/index RPCs
-    (`pick_list_index`, `purchase_order_index`, `sales_order_index`,
-    `transfer_order_index`, `work_order_index`, `dashboard_metrics`,
-    `global_search`, `stock_ledger`, `stock_availability`, `bin_by_code`,
-    `bin_stock_overview`, `putaway_queue`, `default_staging_bin`,
-    `warehouse_uses_locations`), the `create_*_order` entry points, and the
-    edge functions' own `warehouse_id` query filters (delivery-plans,
-    shipments, warehouses/bins, picking, transfers, inspections, stock-ops).
-    These leak *reads* across warehouses rather than allowing writes, so
-    they rank below batch 1 but are genuinely unfinished — flagged, not
-    quietly dropped.
+  - **Batch 2 done (0045)**: the list/index reads behind each list screen —
+    `pick_list_index`, `purchase_order_index`, `sales_order_index`,
+    `work_order_index`, `transfer_order_index`, `putaway_queue`. Fixed in
+    the WHERE clause rather than as a guard, for the reason above: the
+    no-filter case now falls back to `accessible_warehouse_ids()` instead of
+    to every warehouse. Reads filter rather than raise (an out-of-scope
+    warehouse yields nothing), except `putaway_queue`, whose warehouse is a
+    required argument — there an out-of-scope request raises rather than
+    being mistaken for "nothing to put away". `transfer_order_index` matches
+    on *either* end, so a user scoped only to the destination still sees
+    what is arriving.
+  - **Batch 3 done (0046)**: `create_purchase_order`,
+    `create_sales_order`, `create_work_order` — the remaining writes that
+    name a warehouse. Each already checked the warehouse exists; the added
+    check asks whether this caller may use it, placed right after the
+    existing `has_permission()` guard.
+  - [ ] Still open, and smaller than what is now covered: the read helpers
+    taking a required warehouse (`dashboard_metrics`, `global_search`,
+    `stock_ledger`, `stock_availability`, `bin_by_code`,
+    `bin_stock_overview`, `default_staging_bin`,
+    `warehouse_uses_locations`), plus the edge functions' own
+    `warehouse_id` query filters (delivery-plans, shipments,
+    warehouses/bins, picking, transfers, inspections, stock-ops).
   - [ ] Separately noticed, not changed here: `warehouse_overview()` is
     granted to `anon`, so a caller with only the anon key can still read the
     warehouse list (scope resolves to unrestricted for a null

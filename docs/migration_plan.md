@@ -1403,6 +1403,60 @@ navigate away by itself.
 
 `flutter analyze`: clean. `flutter test`: 344 → 345 passing.
 
+### 0045 / 0046 — Per-user warehouse scope, batches 2 and 3 (UI spec §37)
+
+0044 covered the stock-moving core and the picker's own feed. These finish
+the surface it flagged as open.
+
+**0045, the list/index reads.** `pick_list_index`, `purchase_order_index`,
+`sales_order_index`, `work_order_index`, `transfer_order_index` and
+`putaway_queue`. These leaked *reads* rather than permitting writes — a
+user restricted to one warehouse could still list every other warehouse's
+picks, orders and transfers.
+
+The fix lives in the WHERE clause, not in a guard, for the reason 0044
+documented: all of these treat `p_warehouse_id IS NULL` as "every
+warehouse", so validating only an explicitly passed id would leave a
+restricted caller free to omit the filter and get everything. The no-filter
+case now falls back to `accessible_warehouse_ids()` instead of to
+everything; unrestricted callers still get null from that helper and so see
+all warehouses exactly as before.
+
+Reads filter rather than raise — an out-of-scope warehouse simply yields
+nothing. That keeps every "all warehouses" call working unchanged, and
+since 0044 narrowed the picker itself the case can only arise from a
+crafted request, where returning nothing beats confirming the record
+exists. `transfer_order_index` matches on *either* end of the transfer, so
+a user scoped to just the destination still sees what is arriving —
+mirroring how 0044 gates the two halves of the lifecycle separately.
+`putaway_queue` is the exception that raises: its warehouse is a required
+argument, so there is no all-warehouses fallback to repair, and an
+out-of-scope request should not be mistaken for "nothing to put away".
+
+**0046, the order-creation writes.** `create_purchase_order`,
+`create_sales_order`, `create_work_order`. Each already checked that the
+warehouse *exists*; the added `can_access_warehouse()` check asks whether
+this caller may use it, placed directly after the existing
+`has_permission()` guard so the two authorization questions — may you do
+this kind of thing, and may you do it here — read together. None of these
+moves stock (completing a work order does, and that already routes through
+0044's `apply_stock_movement`), which is why they sorted after the core.
+
+Verified live: all nine functions carry the check, and each still returns
+correctly against the current data (`pick_list_index`,
+`transfer_order_index`, the three `*_index` order RPCs and
+`warehouse_overview` all execute and return the expected shape). Grants
+untouched throughout — `create or replace function` preserves them.
+No client code changed, so no test count change.
+
+Still open after this, and smaller than what is now covered: the remaining
+read helpers that take a required warehouse (`dashboard_metrics`,
+`global_search`, `stock_ledger`, `stock_availability`, `bin_by_code`,
+`bin_stock_overview`, `default_staging_bin`, `warehouse_uses_locations`)
+and the edge functions' own `warehouse_id` query filters. Also still open:
+the pre-existing `anon` grant on `warehouse_overview()`, which wants a look
+at the sign-in flow rather than a silent revoke.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
