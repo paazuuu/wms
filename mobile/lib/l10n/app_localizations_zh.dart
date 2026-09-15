@@ -2586,4 +2586,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notifOpenPicking => '拣货中';
+
+  @override
+  String get sidebarCollapse => '折叠菜单';
+
+  @override
+  String get sidebarExpand => '展开菜单';
 }

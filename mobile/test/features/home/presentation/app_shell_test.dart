@@ -8,6 +8,7 @@ import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wms_mobile/core/router/app_router.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
+import 'package:wms_mobile/features/home/presentation/app_shell.dart';
 import 'package:wms_mobile/features/home/presentation/coming_soon_screen.dart';
 import 'package:wms_mobile/features/picking_ops/application/picking_ops_providers.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
@@ -248,6 +249,76 @@ void main() {
 
       expect(_location(app.router), '/login');
       expect(find.byType(PickListIndexScreen), findsNothing);
+    });
+
+    testWidgets('the sidebar collapses to an icon rail and back',
+        (tester) async {
+      // The earlier tests run at a logical width below the 900px breakpoint,
+      // so they exercise the drawer layout. Collapsing is wide-layout only,
+      // which needs a view genuinely wider than the breakpoint.
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+
+      // Scoped to the sidebar throughout: the dashboard's own feature grid
+      // renders the same section headings and feature names, so an unscoped
+      // finder would match either and prove nothing.
+      Finder inSidebar(String text) => find.descendant(
+            of: find.byKey(sidebarKey),
+            matching: find.text(text),
+          );
+      double sidebarWidth() =>
+          tester.getSize(find.byKey(sidebarKey)).width;
+
+      // Expanded by default. The sidebar uppercases its section headings,
+      // which is also what distinguishes them from the dashboard's.
+      expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
+      expect(inSidebar('Picking'), findsOneWidget);
+      expect(find.byTooltip('Collapse menu'), findsOneWidget);
+      expect(sidebarWidth(), 268);
+
+      await tester.tap(find.byTooltip('Collapse menu'));
+      await tester.pumpAndSettle();
+
+      // Labels give way to icons, and the section heading to a rule.
+      expect(inSidebar('FIELD OPERATIONS'), findsNothing);
+      expect(inSidebar('Picking'), findsNothing);
+      expect(sidebarWidth(), 76);
+      // But nothing is unreachable: the label is one hover away.
+      expect(find.byTooltip('Picking'), findsOneWidget);
+      expect(find.byTooltip('Expand menu'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Expand menu'));
+      await tester.pumpAndSettle();
+
+      expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
+      expect(sidebarWidth(), 268);
+      expect(find.byTooltip('Collapse menu'), findsOneWidget);
+    });
+
+    testWidgets('a collapsed rail still navigates', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Collapse menu'));
+      await tester.pumpAndSettle();
+
+      // Collapsing trades labels for content width; it must not cost the
+      // operator access to a feature.
+      await tester.tap(find.byTooltip('Picking'));
+      await tester.pumpAndSettle();
+
+      expect(_location(app.router), '/picking');
     });
 
     test('a scanned code is carried in the URL, escaped', () {

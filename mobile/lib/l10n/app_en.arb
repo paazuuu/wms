@@ -1092,5 +1092,13 @@
   "notifFailedInspection": "Failed inspections",
   "notifOutstandingPlans": "Inbound outstanding",
   "notifPutawayPending": "Awaiting put-away",
-  "notifOpenPicking": "Open picking"
+  "notifOpenPicking": "Open picking",
+  "sidebarCollapse": "Collapse menu",
+  "@sidebarCollapse": {
+    "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  },
+  "sidebarExpand": "Expand menu",
+  "@sidebarExpand": {
+    "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  }
 }

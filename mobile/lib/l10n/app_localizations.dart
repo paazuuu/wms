@@ -5007,6 +5007,18 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ピック待ち'**
   String get notifOpenPicking;
+
+  /// Tooltip on the sidebar collapse/expand toggle (wide layout only).
+  ///
+  /// In ja, this message translates to:
+  /// **'メニューを折りたたむ'**
+  String get sidebarCollapse;
+
+  /// Tooltip on the sidebar collapse/expand toggle (wide layout only).
+  ///
+  /// In ja, this message translates to:
+  /// **'メニューを展開'**
+  String get sidebarExpand;
 }
 
 class _AppLocalizationsDelegate

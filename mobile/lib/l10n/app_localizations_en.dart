@@ -2662,4 +2662,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifOpenPicking => 'Open picking';
+
+  @override
+  String get sidebarCollapse => 'Collapse menu';
+
+  @override
+  String get sidebarExpand => 'Expand menu';
 }

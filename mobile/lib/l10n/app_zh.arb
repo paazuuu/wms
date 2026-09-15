@@ -1092,5 +1092,13 @@
   "notifFailedInspection": "检验不合格",
   "notifOutstandingPlans": "待入库",
   "notifPutawayPending": "待上架",
-  "notifOpenPicking": "拣货中"
+  "notifOpenPicking": "拣货中",
+  "sidebarCollapse": "折叠菜单",
+  "@sidebarCollapse": {
+    "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  },
+  "sidebarExpand": "展开菜单",
+  "@sidebarExpand": {
+    "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  }
 }

@@ -2591,4 +2591,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notifOpenPicking => 'ピック待ち';
+
+  @override
+  String get sidebarCollapse => 'メニューを折りたたむ';
+
+  @override
+  String get sidebarExpand => 'メニューを展開';
 }

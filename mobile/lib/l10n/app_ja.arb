@@ -1247,5 +1247,13 @@
   "notifFailedInspection": "検品NG",
   "notifOutstandingPlans": "入荷待ち",
   "notifPutawayPending": "棚入れ待ち",
-  "notifOpenPicking": "ピック待ち"
+  "notifOpenPicking": "ピック待ち",
+  "sidebarCollapse": "メニューを折りたたむ",
+  "@sidebarCollapse": {
+    "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  },
+  "sidebarExpand": "メニューを展開",
+  "@sidebarExpand": {
+    "description": "Tooltip on the sidebar collapse/expand toggle (wide layout only)."
+  }
 }
