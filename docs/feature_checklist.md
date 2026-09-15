@@ -525,14 +525,27 @@ Audited against the spec's 5 bullets:
     permission-denied widget test was added for one representative
     mutation per newly-fixed function, following the same
     `failWith`-on-a-fake-repository pattern as the stock-ops tests.
-  - Found and deliberately **not** fixed in this round: `audit_log_query`,
-    `audit_log_for_entity`, and `audit_event_types` (the RPCs behind the
-    `audit-log` edge function, which is a thin read-only proxy) have no
-    `has_permission('audit.view')` check in their SQL bodies at all — any
-    signed-in user can read the full audit trail regardless of that
-    permission. This is a read-side information-disclosure gap, distinct
-    in kind from the write-side gaps above, and needs a migration fixing
-    the RPCs rather than an edge-function-level fix. Flagged for follow-up.
+  - [x] **Follow-up, now fixed**: `audit_log_query`, `audit_log_for_entity`,
+    and `audit_event_types` (the RPCs behind the `audit-log` edge function,
+    a thin read-only proxy) had no `has_permission('audit.view')` check at
+    all — and were additionally granted to `anon`, meaning any
+    unauthenticated caller with just the anon key, not only any signed-in
+    user, could read the full audit trail. Migration 0043 adds the check
+    (converting the three functions from `sql` to `plpgsql` so they can
+    `raise exception`, matching the idiom `list_ai_analysis` already uses)
+    and revokes the `anon`/`public` grants, matching the grant shape every
+    other read RPC in the app already uses. The `anon` revoke matters on
+    its own: `has_permission()` treats a null `auth.uid()` as "allow" (for
+    trusted server-side calls with no user context), and an anon-key call
+    has a null `auth.uid()` the same way — adding the permission check
+    alone would not have closed that hole, only revoking the grant does.
+    Verified live: `anon` can no longer execute any of the three
+    (`has_function_privilege` false), `authenticated`/`service_role`
+    still can, and each function's live definition now raises
+    `not permitted: audit.view required` for a caller without it — the
+    same message shape `humanizeApiErrorMessage()` already recognizes, and
+    the client already routes every read failure through it via
+    `ErrorStateView`, so no client-side change was needed for this one.
 
 **AI UI (UI spec §31)**
 

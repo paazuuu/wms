@@ -1218,6 +1218,57 @@ by the fakes from the edge-function audit.
 
 `flutter analyze`: clean. `flutter test`: 342 → 344 passing.
 
+### 0043 — Enforce audit.view on the audit-log read RPCs (closing the audit-function follow-up)
+
+The edge-function audit above deliberately left one thing open:
+`audit_log_query`, `audit_log_for_entity`, and `audit_event_types` (the
+RPCs behind the `audit-log` edge function, itself a thin read-only proxy)
+had no `has_permission('audit.view')` check in their bodies at all — a
+read-side gap, architecturally different from the write-side gaps fixed
+there, since these are plain `SECURITY DEFINER` RPCs rather than an edge
+function, so the fix belongs in a migration, not `_shared/require_permission.ts`.
+
+Checking the live grants turned up something worse than "any signed-in
+user": all three were also granted to `anon`. RLS never runs for these
+calls — `SECURITY DEFINER` executes as the function owner, bypassing
+`audit_log`'s own `audit.view`-gated policy from 0012 entirely — so an
+unauthenticated caller with nothing but the anon key could read the full
+audit trail (actor names, emails, every event) today.
+
+Fixed both problems together. Converted all three from `language sql` to
+`language plpgsql` (needed for `raise exception`) and added `if not
+public.has_permission('audit.view') then raise exception 'not permitted:
+audit.view required'; end if;` at the top of each, matching the exact
+idiom `list_ai_analysis` (0030) already established for this shape of
+check. Then `revoke all ... from public, anon` and re-granted to
+`authenticated, service_role` only, matching the grant shape every other
+read RPC in this app already uses.
+
+The `anon` revoke isn't redundant with the permission check — it's the
+part that actually closes the anon hole. `has_permission()` treats a null
+`auth.uid()` as "allow", by design, for trusted server-side calls with no
+user context at all (the same rule documented in
+`supabase/functions/_shared/require_permission.ts`); an anon-key call also
+has a null `auth.uid()`, for the opposite reason (no user ever
+authenticated). Adding the check alone would have let anon straight
+through unchanged. Revoking the grant is what actually stops it, and
+matches how the anon role can't reach `audit_log_query` at all now
+regardless of what the function body does.
+
+Verified live end to end: `has_function_privilege` confirms `anon` can no
+longer execute any of the three while `authenticated`/`service_role`
+still can, and `pg_get_functiondef` confirms the live function bodies
+carry the new check. No client change needed — `ErrorStateView` already
+routes every read failure through `humanizeApiErrorMessage()` (the §34
+fix), which already recognizes this exact `not permitted: ... required`
+shape, and the "Audit" menu entry already gates on `audit.view` (§37's
+existing menu-permission wiring), so a user without the permission now
+sees a menu that was already hidden from them plus, if they somehow
+reached the screen directly, the same friendly permission-denied message
+every other screen shows.
+
+No client code changed, so no test count change.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
