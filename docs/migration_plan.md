@@ -1269,6 +1269,98 @@ every other screen shows.
 
 No client code changed, so no test count change.
 
+### 0044 — Per-user warehouse scope, batch 1: actually enforce it (UI spec §37)
+
+The §37 checklist item asked for one thing ("the warehouse picker still
+lists every warehouse the company has, not just the ones this user is
+scoped to") on the stated basis that the scope was already "enforced
+server-side by RLS on every table." Checking that premise against the live
+database rather than the note found it false, and the correction is the
+whole point of this migration: **`can_access_warehouse()` (0012) had never
+been called from anywhere.** Zero RLS policies reference `user_warehouses`
+or `can_access_warehouse` (`pg_policies`), and zero RPCs or edge functions
+did either (`pg_get_functiondef` across all 26 functions taking a
+`p_warehouse_id`). The table, the helper, the assign/revoke RPCs (0029) and
+the admin UI to drive them all existed; nothing consumed them. A user
+restricted to one warehouse was not restricted at all.
+
+Two things make this not fixable the obvious ways:
+
+- **RLS is the wrong layer here.** Every one of these tables is read and
+  written through `SECURITY DEFINER` RPCs, which run as the function owner
+  and bypass RLS entirely — the same structural gap as the audit-log RPCs in
+  0043. A policy on `stock_levels` would not fire for `adjust_stock`.
+- **A bolt-on guard would not have worked.** Most of these RPCs treat
+  `p_warehouse_id IS NULL` as "every warehouse," a deliberate
+  all-warehouses view, so `if not can_access_warehouse(p_warehouse_id)`
+  leaves a restricted caller free to just omit the filter and get
+  everything. Read paths have to fall back to the caller's scoped set.
+
+Added `accessible_warehouse_ids()`: the caller's warehouse ids, or `null`
+meaning unrestricted (system_admin/company_admin, or a trusted server-side
+caller with no user context — the same null-`auth.uid()` convention
+`has_permission()` uses). A non-null array, possibly empty, is a real
+restriction. Read paths fall back to this instead of to everything.
+
+Batch 1 targets the choke points rather than all 26 call sites, because
+there are only two: **every** warehouse-level stock quantity change in the
+app funnels through `apply_stock_movement`, and every bin-level one through
+`apply_bin_movement`. One check in each reaches adjustments, counts,
+transfers, shipments, receiving and work orders together, because
+`SECURITY DEFINER` does not reset `auth.uid()` across nested calls — the
+original caller's identity is still what gets checked at the bottom of the
+stack. `apply_bin_movement` derives the warehouse from the bin itself rather
+than a parameter, so it cannot be bypassed by misdeclaring which warehouse a
+bin is in. Added explicit checks to the two entry points that route through
+neither (`confirm_putaway`, which only moves stock between unbinned and
+binned within one warehouse, and `start_stock_count`), and rewrote
+`warehouse_overview()` to filter its list and totals to the caller's scope —
+that last one is the RPC the picker reads, so it is what turns the original
+ask into a real restriction instead of a client-side cosmetic filter.
+
+Error message is `not permitted: warehouse.scope required`, deliberately
+shaped to match the `not permitted: <code> required` pattern every
+`has_permission()` guard raises, so §34's existing
+`humanizeApiErrorMessage()` already turns it into the friendly
+permission-denied text with no client change. `warehouse.scope` is not a
+row in `permissions` — it is not an assignable permission, just the same
+error shape so the client buckets it correctly.
+
+Grants deliberately untouched (`create or replace function` preserves
+them): verified live that `apply_stock_movement`, `apply_bin_movement` and
+`start_stock_count` remain service_role-only internal helpers,
+`confirm_putaway`/`warehouse_overview` remain authenticated+service_role,
+and the new `accessible_warehouse_ids()` is authenticated+service_role, not
+anon.
+
+Timing matters here and it is good: `app_users` is **empty** — nobody has
+ever signed in — so switching deny-by-default on cannot lock out a live
+user. The first sign-in is safe by construction, since
+`bootstrap_first_admin()` (0024) makes user #1 `system_admin` and admins
+resolve to unrestricted. From user #2 on, a role alone stops being enough:
+a non-admin with no `user_warehouses` rows now resolves to zero warehouses
+(empty picker; writes refused). That is precisely the semantics
+`can_access_warehouse()` was always written to have — it just never ran —
+so admins now have to assign warehouses as well as a role, which the
+user-management screen already supports.
+
+Still open, deliberately and explicitly rather than quietly: the read-side
+list/index RPCs (`pick_list_index`, the three `*_order_index`,
+`work_order_index`, `dashboard_metrics`, `global_search`, `stock_ledger`,
+`stock_availability`, `bin_by_code`, `bin_stock_overview`, `putaway_queue`,
+`default_staging_bin`, `warehouse_uses_locations`), the `create_*_order`
+entry points, and the edge functions' own `warehouse_id` filters. Those
+leak reads across warehouses rather than permitting writes, which is why
+they sort after batch 1. Also noticed and not changed: `warehouse_overview()`
+is granted to `anon` (so an anon-key caller reads it unrestricted, since a
+null `auth.uid()` resolves to unrestricted) — the same class of stale grant
+0043 fixed, but revoking it could break a pre-login screen, so it wants a
+look at the sign-in flow rather than a silent revoke.
+
+Verified by aborted transaction before applying, then live afterwards
+(function bodies carry the checks; grants unchanged). `flutter analyze`:
+clean. `flutter test`: 344 passing, unchanged — no client code changed.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -248,14 +248,69 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       RLS policy still re-checks `has_permission()` itself regardless of what
       the menu decided to show, exactly as the spec asks ("UIだけでなくSupabase
       RLS/RPC側でも権限を検証する")
-- [ ] Per-warehouse scope (`user_warehouses`) is enforced server-side by RLS
-      on every table already, but nothing client-side surfaces "you can act
-      in these warehouses" the way permissions now do — the warehouse picker
-      still lists every warehouse the *company* has, not just the ones this
-      user is scoped to. Deliberately left out of this pass: no real user
-      has signed in with a restricted `user_warehouses` row yet to notice,
-      and doing it well means changing the warehouse picker's own list
-      query, not just gating a menu entry
+- [~] Per-warehouse scope (`user_warehouses`) — **the note that used to sit
+      here was wrong, and the error mattered.** It claimed the scope was
+      "enforced server-side by RLS on every table already," so that only the
+      client-side picker needed narrowing. Auditing it found the opposite:
+      `can_access_warehouse()` (0012) and the admin UI that assigns scope
+      (0029) both exist, but **nothing ever called the function** — verified
+      against the live database, not just the source: zero RLS policies
+      reference `user_warehouses` or `can_access_warehouse`, and zero RPCs
+      or edge functions did either. A user restricted to one warehouse was
+      not restricted at all; every warehouse-scoped RPC and edge function
+      accepted whatever `warehouse_id` the caller sent. Narrowing only the
+      picker would have made this *look* fixed while leaving the hole open.
+  - RLS alone could not have fixed it even where it applies: these tables are
+    read and written through `SECURITY DEFINER` RPCs, which bypass RLS by
+    running as the function owner — the same structural gap as the audit-log
+    RPCs in 0043. The check has to live inside the functions.
+  - Also subtler than a bolt-on guard: most of these RPCs treat
+    `p_warehouse_id IS NULL` as "every warehouse" (a deliberate
+    all-warehouses view), so `if not can_access_warehouse(p_warehouse_id)`
+    alone does nothing for a restricted caller who simply omits the filter.
+    Read paths have to *fall back to the caller's scoped set* rather than to
+    everything.
+  - **Batch 1 done (0044)**: added `accessible_warehouse_ids()` (the caller's
+    ids, or null meaning unrestricted — admins and trusted server-side
+    callers, same null-`auth.uid()` convention as `has_permission()`), and
+    wired enforcement into the two functions every stock-quantity change in
+    the app funnels through (`apply_stock_movement` for warehouse-level
+    stock, `apply_bin_movement` for bin-level, where the warehouse is derived
+    from the bin rather than trusted from a parameter), so every
+    transfer/pick/ship/receive/count/work-order path inherits the check at
+    once via nested calls (`SECURITY DEFINER` does not reset `auth.uid()`).
+    Plus the entry points that bypass both (`confirm_putaway`,
+    `start_stock_count`) and `warehouse_overview()` itself — the RPC that
+    actually feeds the warehouse picker, which is what delivers the original
+    "narrow the picker" ask as a real restriction rather than a cosmetic one.
+  - Safe to switch on now specifically because `app_users` is **empty** —
+    nobody has ever signed in, so no live user could be newly locked out.
+    The first sign-in stays safe by design: `bootstrap_first_admin()` (0024)
+    makes user #1 `system_admin`, and admins resolve to unrestricted.
+  - Operational consequence worth knowing: from user #2 on, a role alone is
+    no longer enough — a non-admin with **no** `user_warehouses` rows now
+    resolves to *zero* warehouses (empty picker, and writes refused with
+    `not permitted: warehouse.scope required`). That is deny-by-default, and
+    exactly the semantics `can_access_warehouse()` was always written to
+    have; it just never ran before. Admins must assign warehouses as well as
+    a role — the user-management screen already supports both.
+  - [ ] **Batch 2, still open**: the read-side list/index RPCs
+    (`pick_list_index`, `purchase_order_index`, `sales_order_index`,
+    `transfer_order_index`, `work_order_index`, `dashboard_metrics`,
+    `global_search`, `stock_ledger`, `stock_availability`, `bin_by_code`,
+    `bin_stock_overview`, `putaway_queue`, `default_staging_bin`,
+    `warehouse_uses_locations`), the `create_*_order` entry points, and the
+    edge functions' own `warehouse_id` query filters (delivery-plans,
+    shipments, warehouses/bins, picking, transfers, inspections, stock-ops).
+    These leak *reads* across warehouses rather than allowing writes, so
+    they rank below batch 1 but are genuinely unfinished — flagged, not
+    quietly dropped.
+  - [ ] Separately noticed, not changed here: `warehouse_overview()` is
+    granted to `anon`, so a caller with only the anon key can still read the
+    warehouse list (scope resolves to unrestricted for a null
+    `auth.uid()`). Same class of stale grant as the audit-log RPCs in 0043,
+    but revoking it could break a pre-login screen, so it needs a look at
+    the sign-in flow first rather than a silent revoke.
 
 **Confirmation on dangerous operations (UI spec §36)**
 
