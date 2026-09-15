@@ -10,6 +10,7 @@ import 'package:wms_mobile/core/router/app_router.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/home/presentation/app_shell.dart';
 import 'package:wms_mobile/features/home/presentation/coming_soon_screen.dart';
+import 'package:wms_mobile/features/home/presentation/dashboard_overview_screen.dart';
 import 'package:wms_mobile/features/picking_ops/application/picking_ops_providers.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
 import 'package:wms_mobile/features/picking_ops/presentation/pick_list_index_screen.dart';
@@ -449,6 +450,106 @@ void main() {
             of: find.byKey(sidebarKey), matching: find.text('Inspection')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('no tab strip until a second screen is open', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+
+      // Nobody should have to learn about tabs to use the app, so the strip
+      // stays out of the way until it has something to show.
+      expect(find.byKey(tabStripKey), findsNothing);
+
+      app.router.go('/picking');
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(tabStripKey), findsOneWidget);
+      expect(
+        find.descendant(
+            of: find.byKey(tabStripKey), matching: find.text('Picking')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+            of: find.byKey(tabStripKey), matching: find.text('Dashboard')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a tab keeps its scroll position across a switch',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 900);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+
+      // Scoped to the dashboard's own list: the sidebar is also scrollable
+      // and comes first in the tree, so `find.byType(Scrollable).first`
+      // would measure the menu instead.
+      // `.first` because the dashboard also has a horizontal task strip; the
+      // outer vertical list comes first in the tree.
+      Finder dashboardList() => find
+          .descendant(
+            of: find.byType(DashboardOverviewScreen),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      double offset() => tester.state<ScrollableState>(dashboardList()).position.pixels;
+
+      // Scroll the dashboard down, then leave and come back. This is the
+      // whole justification for tabs: switching away must not cost the
+      // operator their place.
+      await tester.drag(dashboardList(), const Offset(0, -400));
+      await tester.pumpAndSettle();
+      final scrolled = offset();
+      expect(scrolled, greaterThan(0));
+
+      app.router.go('/picking');
+      await tester.pumpAndSettle();
+      app.router.go(AppRoutes.dashboard);
+      await tester.pumpAndSettle();
+
+      expect(
+        offset(),
+        scrolled,
+        reason: 'an inactive tab stays mounted, so its scroll survives',
+      );
+    });
+
+    testWidgets('closing the active tab navigates off it', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1200);
+      addTearDown(tester.view.reset);
+
+      final app = _wrap();
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+
+      app.router.go('/picking');
+      await tester.pumpAndSettle();
+      expect(_location(app.router), '/picking');
+
+      // The close button on the active tab. Leaving the URL pointing at a
+      // closed tab would show a screen the strip says is gone.
+      await tester.tap(find.descendant(
+        of: find.byKey(tabStripKey),
+        matching: find.byIcon(Icons.close),
+      ).last);
+      await tester.pumpAndSettle();
+
+      expect(_location(app.router), AppRoutes.dashboard);
+      expect(find.byKey(tabStripKey), findsNothing);
     });
 
     test('a scanned code is carried in the URL, escaped', () {

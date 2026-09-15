@@ -17,6 +17,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../warehouse_context/presentation/warehouse_picker.dart';
 import '../application/sidebar_controller.dart';
+import '../application/tabs_controller.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
 import 'breadcrumbs.dart';
@@ -24,22 +25,24 @@ import 'breadcrumbs.dart';
 /// The authenticated app shell.
 ///
 /// A desktop-first, shadcn-dashboard-style layout: a persistent left sidebar
-/// of grouped capabilities, a top bar with an always-available scan box, and a
-/// content region — [child] — that the router fills. Below 900px the sidebar
-/// folds into a drawer so the same shell serves handheld/tablet field use.
+/// of grouped capabilities, a top bar with an always-available scan box, a
+/// strip of open tabs, and the content region. Below 900px the sidebar folds
+/// into a drawer so the same shell serves handheld/tablet field use.
 ///
 /// The shell used to own a nested [Navigator] and swap screens itself, holding
-/// the current selection in a [ValueNotifier]. Routing replaced both: the
-/// content is whatever the router built, and the sidebar highlight and top-bar
-/// title are *derived* from the current location. One less piece of state that
-/// could disagree with what is on screen.
+/// the current selection in a [ValueNotifier]. Routing replaced both, and the
+/// sidebar highlight, breadcrumb trail and active tab are all now *derived*
+/// from the current location — one source of truth for "where am I" instead
+/// of several that could disagree with the screen.
+///
+/// The shell renders its own content rather than the [ShellRoute] child,
+/// because every open tab has to stay mounted to keep its state and a
+/// ShellRoute hands over exactly one child. See [_TabStack].
 ///
 /// A [HardwareScanner] wraps the whole shell so a keyboard-wedge barcode
 /// scanner works anywhere — no need to click into a field first.
 class AppShell extends ConsumerStatefulWidget {
-  const AppShell({super.key, required this.child});
-
-  final Widget child;
+  const AppShell({super.key});
 
   @override
   ConsumerState<AppShell> createState() => _AppShellState();
@@ -79,12 +82,32 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   void _logout() => ref.read(authControllerProvider.notifier).logout();
 
+  void _closeTab(String location, String activeLocation) {
+    final next = ref
+        .read(tabsControllerProvider.notifier)
+        .close(location, isActive: location == activeLocation);
+    if (next != null) _go(next);
+  }
+
   @override
   Widget build(BuildContext context) {
     final wide = isWideLayout(context);
     final user = ref.watch(authControllerProvider).user;
     final permissions = user?.permissions ?? const <String>[];
-    final selectedId = _selectedIdFor(GoRouterState.of(context).uri.path);
+    final location = GoRouterState.of(context).uri.path;
+    final selectedId = _selectedIdFor(location);
+    final tabs = ref.watch(tabsControllerProvider).locations;
+
+    // The router can reach a location with no tab yet — a deep link, a
+    // pasted URL, browser back onto something since closed. Opening it here
+    // keeps the strip a reflection of where the operator can be rather than
+    // a second thing to keep in sync. Deferred a frame because it mutates
+    // provider state, which must not happen during a build.
+    if (!tabs.contains(location)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(tabsControllerProvider.notifier).open(location);
+      });
+    }
 
     // Collapsing is a wide-layout affordance: in the drawer the sidebar is
     // already overlaid and dismissed by tapping away, so a rail there would
@@ -115,7 +138,19 @@ class _AppShellState extends ConsumerState<AppShell> {
           onCamera: _cameraSupported ? _openCameraScan : null,
           onSearch: () => _go(AppRoutes.search),
         ),
-        Expanded(child: widget.child),
+        // Hidden while only one thing is open, so the strip costs nothing
+        // until the operator actually opens a second screen. Nobody has to
+        // learn about tabs to use the app.
+        if (tabs.length > 1)
+          _TabStrip(
+            tabs: tabs,
+            activeLocation: location,
+            onSelect: _go,
+            onClose: (loc) => _closeTab(loc, location),
+          ),
+        Expanded(
+          child: _TabStack(tabs: tabs, activeLocation: location),
+        ),
       ],
     );
 
@@ -179,6 +214,207 @@ String _selectedIdFor(String path) {
     }
   }
   return 'dashboard';
+}
+
+/// The display label for a location, reusing the breadcrumb trail's own
+/// resolution so a tab and its breadcrumb can never disagree about what a
+/// screen is called.
+String labelForLocation(AppLocalizations l10n, String location) =>
+    crumbsFor(l10n, _selectedIdFor(location)).last.label;
+
+/// The icon for a location, matched to the sidebar entry so a tab is
+/// recognisable by the same glyph the menu used to open it.
+IconData iconForLocation(String location) {
+  if (location == AppRoutes.dashboard) return Icons.dashboard_outlined;
+  if (location == AppRoutes.search) return Icons.search;
+  if (location.startsWith('/stock/')) return Icons.inventory_outlined;
+  for (final group in buildFeatureCatalog()) {
+    for (final entry in group.entries) {
+      if (entry.path == location) return entry.icon;
+    }
+  }
+  return Icons.tab;
+}
+
+/// Keeps every open tab alive.
+///
+/// An [IndexedStack] rather than swapping the content widget, because the
+/// whole point is that switching away and back does not cost the operator
+/// their scroll position, their filters or a half-filled form. Inactive tabs
+/// stay mounted; they are just not painted.
+///
+/// Each tab gets its own [Navigator] so a detail screen pushed from a list
+/// belongs to that tab. Without this, opening an order's detail and switching
+/// tabs would leave the detail sitting over the wrong screen.
+class _TabStack extends StatelessWidget {
+  const _TabStack({required this.tabs, required this.activeLocation});
+
+  final List<String> tabs;
+  final String activeLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    final index = tabs.indexOf(activeLocation);
+
+    return IndexedStack(
+      // A location the strip has not caught up with yet (the tab is opened a
+      // frame later) would otherwise index to -1.
+      index: index < 0 ? 0 : index,
+      sizing: StackFit.expand,
+      children: [
+        for (final location in tabs)
+          // Keyed by location so reordering or closing a tab moves the right
+          // subtree rather than rebuilding its neighbour's state into it.
+          KeyedSubtree(
+            key: ValueKey('tab:$location'),
+            child: Navigator(
+              onGenerateRoute: (_) => MaterialPageRoute(
+                builder: (ctx) =>
+                    screenForLocation(ctx, location) ??
+                    const _UnknownLocation(),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Shown for a location this build does not serve — a URL from a newer
+/// version, or a feature removed since the link was shared. Says so instead
+/// of rendering an empty pane.
+class _UnknownLocation extends StatelessWidget {
+  const _UnknownLocation();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.appTitle)),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Text(l10n.unknownLocation, textAlign: TextAlign.center),
+        ),
+      ),
+    );
+  }
+}
+
+/// The row of open tabs.
+class _TabStrip extends StatelessWidget {
+  const _TabStrip({
+    required this.tabs,
+    required this.activeLocation,
+    required this.onSelect,
+    required this.onClose,
+  });
+
+  final List<String> tabs;
+  final String activeLocation;
+  final ValueChanged<String> onSelect;
+  final ValueChanged<String> onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+
+    return Container(
+      key: tabStripKey,
+      height: 40,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        children: [
+          for (final location in tabs)
+            _Tab(
+              label: labelForLocation(l10n, location),
+              icon: iconForLocation(location),
+              active: location == activeLocation,
+              onTap: () => onSelect(location),
+              // The last tab has no close button: closing it would leave an
+              // empty content area and nothing to click.
+              onClose: tabs.length > 1 ? () => onClose(location) : null,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Tab extends StatelessWidget {
+  const _Tab({
+    required this.label,
+    required this.icon,
+    required this.active,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool active;
+  final VoidCallback onTap;
+  final VoidCallback? onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final fg = active ? scheme.primary : scheme.onSurfaceVariant;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: 2, vertical: AppSpacing.xs),
+      child: Material(
+        color: active ? scheme.surface : Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.sm),
+            child: Row(
+              children: [
+                Icon(icon, size: 16, color: fg),
+                const SizedBox(width: AppSpacing.xs),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 160),
+                  child: Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: fg,
+                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (onClose != null)
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 14),
+                    color: fg,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints(minWidth: 28, minHeight: 28),
+                    onPressed: onClose,
+                  )
+                else
+                  const SizedBox(width: AppSpacing.sm),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// The top bar: menu (narrow) / breadcrumb trail (wide) + a persistent scan
@@ -282,6 +518,10 @@ const sidebarKey = Key('app-sidebar');
 
 /// The sidebar's menu filter field.
 const menuFilterKey = Key('app-sidebar-filter');
+
+/// The open-tabs strip. Absent from the tree entirely while only one tab is
+/// open, which is what tests assert against.
+const tabStripKey = Key('app-tab-strip');
 
 /// The grouped navigation sidebar (shadcn-style: brand, sections, footer).
 ///

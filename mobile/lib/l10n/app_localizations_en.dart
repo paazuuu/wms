@@ -2674,4 +2674,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuFilterNoMatch => 'No matching menu item';
+
+  @override
+  String get unknownLocation =>
+      'That screen could not be found. Pick one from the menu instead.';
 }

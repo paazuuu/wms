@@ -1263,5 +1263,9 @@
   "menuFilterNoMatch": "該当する項目がありません",
   "@menuFilterNoMatch": {
     "description": "Sidebar menu filter field: hint text, and the empty-result message."
+  },
+  "unknownLocation": "この画面は見つかりませんでした。メニューから選び直してください。",
+  "@unknownLocation": {
+    "description": "Shown in a tab whose location this build does not serve."
   }
 }

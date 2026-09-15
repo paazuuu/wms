@@ -2598,4 +2598,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get menuFilterNoMatch => '没有匹配的菜单项';
+
+  @override
+  String get unknownLocation => '找不到该页面。请从菜单中重新选择。';
 }

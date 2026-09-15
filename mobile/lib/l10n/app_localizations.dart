@@ -5031,6 +5031,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'該当する項目がありません'**
   String get menuFilterNoMatch;
+
+  /// Shown in a tab whose location this build does not serve.
+  ///
+  /// In ja, this message translates to:
+  /// **'この画面は見つかりませんでした。メニューから選び直してください。'**
+  String get unknownLocation;
 }
 
 class _AppLocalizationsDelegate

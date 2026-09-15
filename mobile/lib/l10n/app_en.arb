@@ -1108,5 +1108,9 @@
   "menuFilterNoMatch": "No matching menu item",
   "@menuFilterNoMatch": {
     "description": "Sidebar menu filter field: hint text, and the empty-result message."
+  },
+  "unknownLocation": "That screen could not be found. Pick one from the menu instead.",
+  "@unknownLocation": {
+    "description": "Shown in a tab whose location this build does not serve."
   }
 }

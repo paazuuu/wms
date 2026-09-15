@@ -2603,4 +2603,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get menuFilterNoMatch => '該当する項目がありません';
+
+  @override
+  String get unknownLocation => 'この画面は見つかりませんでした。メニューから選び直してください。';
 }

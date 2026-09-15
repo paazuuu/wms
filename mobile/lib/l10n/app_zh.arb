@@ -1108,5 +1108,9 @@
   "menuFilterNoMatch": "没有匹配的菜单项",
   "@menuFilterNoMatch": {
     "description": "Sidebar menu filter field: hint text, and the empty-result message."
+  },
+  "unknownLocation": "找不到该页面。请从菜单中重新选择。",
+  "@unknownLocation": {
+    "description": "Shown in a tab whose location this build does not serve."
   }
 }

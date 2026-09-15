@@ -96,39 +96,79 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Everything below renders inside the persistent shell (sidebar + top
-      // bar). ShellRoute gives the shell its own Navigator, so a detail screen
-      // pushed from a list still appears in the content area with the sidebar
-      // in place, exactly as it did before routing existed.
+      // bar + tab strip). The shell keeps every open tab alive in an
+      // IndexedStack, which a ShellRoute cannot express — it hands over one
+      // child, and an inactive tab has to stay in the tree to keep its state.
+      // So the URL decides which tab is *active* and the shell renders the
+      // stack; these routes exist to resolve locations and to put them in the
+      // browser's history, and build only a marker.
       ShellRoute(
-        builder: (context, state, child) => AppShell(child: child),
+        builder: (context, state, child) => const AppShell(),
         routes: [
           GoRoute(
             path: AppRoutes.dashboard,
-            builder: (_, __) => const DashboardOverviewScreen(),
+            builder: (_, __) => const ShellRouteMarker(),
           ),
           GoRoute(
             path: AppRoutes.search,
-            builder: (_, __) => const GlobalSearchScreen(),
+            builder: (_, __) => const ShellRouteMarker(),
           ),
           GoRoute(
             path: AppRoutes.stockPattern,
-            builder: (_, state) => StockLedgerScreen(
-              janCode: state.pathParameters['jan'] ?? '',
-            ),
+            builder: (_, __) => const ShellRouteMarker(),
           ),
           for (final group in catalog)
             for (final entry in group.entries)
               GoRoute(
                 path: entry.path,
-                builder: (context, _) => entry.isReady
-                    ? entry.builder!(context)
-                    : ComingSoonScreen(feature: entry),
+                builder: (_, __) => const ShellRouteMarker(),
               ),
         ],
       ),
     ],
   );
 });
+
+/// Builds the screen for a shell location.
+///
+/// Lives here, beside the routing table it mirrors, and is the single place a
+/// location becomes a widget. [AppShell] calls it for every open tab, which is
+/// why the shell routes themselves build only a marker: if both built
+/// screens, every tab would be instantiated twice and fire its initial load
+/// twice with it.
+///
+/// Returns null for a location this app does not serve, so the caller decides
+/// what an unknown tab looks like rather than having a fallback screen forced
+/// on it.
+Widget? screenForLocation(BuildContext context, String location) {
+  if (location == AppRoutes.dashboard) return const DashboardOverviewScreen();
+  if (location == AppRoutes.search) return const GlobalSearchScreen();
+  if (location.startsWith('/stock/')) {
+    return StockLedgerScreen(
+      janCode: Uri.decodeComponent(location.substring('/stock/'.length)),
+    );
+  }
+  for (final group in buildFeatureCatalog()) {
+    for (final entry in group.entries) {
+      if (entry.path == location) {
+        return entry.isReady
+            ? entry.builder!(context)
+            : ComingSoonScreen(feature: entry);
+      }
+    }
+  }
+  return null;
+}
+
+/// What a shell route builds. The shell renders the tab stack itself — see
+/// [screenForLocation] — so the route only has to resolve; the widget it
+/// produces is never shown.
+class ShellRouteMarker extends StatelessWidget {
+  const ShellRouteMarker({super.key});
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+}
 
 /// Bridges Riverpod's auth state to [GoRouter.refreshListenable], which wants
 /// a [Listenable]. Notifies only when [AuthState.status] actually changes —
