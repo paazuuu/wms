@@ -1654,6 +1654,18 @@ abstract class AppLocalizations {
   /// **'在庫'**
   String get whStatOnHand;
 
+  /// No description provided for @whNoAssignedWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫が割り当てられていません'**
+  String get whNoAssignedWarehouse;
+
+  /// No description provided for @whNoAssignedWarehouseBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。管理者に倉庫の割り当てを依頼してください。'**
+  String get whNoAssignedWarehouseBody;
+
   /// No description provided for @whNoWarehouses.
   ///
   /// In ja, this message translates to:

@@ -6,7 +6,38 @@ import 'package:wms_mobile/features/warehouse_context/application/warehouse_prov
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/features/warehouse_context/presentation/warehouse_overview_screen.dart';
 
+import 'package:wms_mobile/core/api/api_result.dart';
+import 'package:wms_mobile/features/auth/application/auth_controller.dart';
+import 'package:wms_mobile/features/auth/data/auth_repository.dart';
+import 'package:wms_mobile/features/auth/domain/auth_user.dart';
+
 import '../../support/harness.dart';
+
+/// Signed in, holds a role, but assigned no warehouse — the state migration
+/// 0044 made reachable, where the server filters the warehouse list to the
+/// caller's own and so returns nothing.
+class _ScopedOutAuthRepository implements AuthRepository {
+  const _ScopedOutAuthRepository();
+
+  AuthUser get _user => const AuthUser(
+        id: '1',
+        email: 'picker@test.com',
+        name: 'Picker',
+        roles: ['picker'],
+        permissions: ['inventory.view'],
+        warehouseIds: [],
+      );
+
+  @override
+  Future<ApiResult<AuthUser>> currentUser() async => ApiSuccess(_user);
+
+  @override
+  Future<ApiResult<AuthUser>> login(String email, String password) async =>
+      ApiSuccess(_user);
+
+  @override
+  Future<void> logout() async {}
+}
 
 void main() {
   testWidgets('lists every warehouse with its figures, totals and bins',
@@ -71,5 +102,27 @@ void main() {
     expect(container.read(activeWarehouseIdProvider), 2);
 
     await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'a user with no assigned warehouse is told to ask an admin, not to add one (§37)',
+      (tester) async {
+    final container = ProviderContainer(overrides: [
+      // The server returns an empty list for a scoped-out user, exactly as it
+      // would for a company with no warehouses at all — so the screen has to
+      // tell the two apart from the signed-in user's own scope.
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+        WarehouseOverview(warehouses: const [], totals: WarehouseTotals()),
+      )),
+      authRepositoryProvider.overrideWithValue(_ScopedOutAuthRepository()),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(tester, container, const WarehouseOverviewScreen());
+    await tester.pumpAndSettle();
+
+    expect(find.text('倉庫が割り当てられていません'), findsOneWidget);
+    // Not the "add your first warehouse" advice, which this user cannot act on.
+    expect(find.text('倉庫がまだありません'), findsNothing);
   });
 }

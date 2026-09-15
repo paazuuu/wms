@@ -858,6 +858,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whStatOnHand => 'On hand';
 
   @override
+  String get whNoAssignedWarehouse => 'No warehouse assigned to you';
+
+  @override
+  String get whNoAssignedWarehouseBody =>
+      'Your account is not assigned to any warehouse yet, so there is nothing to view or work in. Ask an administrator to assign you one.';
+
+  @override
   String get whNoWarehouses => 'No warehouses yet';
 
   @override

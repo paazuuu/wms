@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../auth/application/auth_controller.dart';
 import '../application/warehouse_providers.dart';
 import '../domain/warehouse.dart';
 import 'add_warehouse_screen.dart';
@@ -44,6 +45,21 @@ class WarehouseOverviewScreen extends ConsumerWidget {
         ),
         data: (overview) {
           if (overview.warehouses.isEmpty) {
+            // Since 0044 the server filters this list to the caller's own
+            // warehouses, so "empty" now means two different things and
+            // guessing wrong leaves the operator staring at an empty screen
+            // with the wrong advice. A non-admin with no `user_warehouses`
+            // row is not looking at an unconfigured company — they are
+            // looking at someone else's, and what they need is an admin, not
+            // an "add a warehouse" button.
+            final user = ref.watch(authControllerProvider).user;
+            if (user?.hasNoAssignedWarehouse ?? false) {
+              return EmptyStateView(
+                icon: Icons.lock_outline,
+                title: l10n.whNoAssignedWarehouse,
+                message: l10n.whNoAssignedWarehouseBody,
+              );
+            }
             return EmptyStateView(
               icon: Icons.warehouse_outlined,
               title: l10n.whNoWarehouses,

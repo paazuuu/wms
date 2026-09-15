@@ -10,6 +10,7 @@ class AuthUser extends Equatable {
     this.name = '',
     this.roles = const [],
     this.permissions = const [],
+    this.warehouseIds = const [],
   });
 
   final String id;
@@ -34,6 +35,29 @@ class AuthUser extends Equatable {
   /// server-side regardless of what this list says.
   final List<String> permissions;
 
+  /// Warehouse ids this user is scoped to (`user_warehouses`, via
+  /// `my_access()`). Empty means one of two very different things, which
+  /// [isWarehouseUnrestricted] separates: an admin is unrestricted and
+  /// simply has no rows here, while a non-admin with no rows can act in no
+  /// warehouse at all.
+  ///
+  /// Same standing as [permissions]: used to explain the UI, never to decide
+  /// access. Migration 0044's `accessible_warehouse_ids()` is what actually
+  /// enforces this, inside every warehouse-scoped RPC.
+  final List<int> warehouseIds;
+
+  /// True when warehouse scope does not apply to this user — mirrors the
+  /// server's own rule in `accessible_warehouse_ids()`, where these two
+  /// roles resolve to "every warehouse" regardless of `user_warehouses`.
+  bool get isWarehouseUnrestricted =>
+      roles.contains('system_admin') || roles.contains('company_admin');
+
+  /// True when this user has been given a role but no warehouse to use it
+  /// in — the state that would otherwise show up only as silently empty
+  /// screens and a refused write, so the UI says so instead.
+  bool get hasNoAssignedWarehouse =>
+      !isWarehouseUnrestricted && warehouseIds.isEmpty;
+
   bool hasPermission(String code) => permissions.contains(code);
 
   /// True if this user holds at least one of [codes]. An empty [codes] means
@@ -46,6 +70,7 @@ class AuthUser extends Equatable {
     Map<String, dynamic> json, {
     List<String> roles = const [],
     List<String> permissions = const [],
+    List<int> warehouseIds = const [],
   }) {
     final email = json['email'] as String? ?? '';
     final metadata = json['user_metadata'] as Map<String, dynamic>?;
@@ -57,17 +82,24 @@ class AuthUser extends Equatable {
       name: name,
       roles: roles,
       permissions: permissions,
+      warehouseIds: warehouseIds,
     );
   }
 
-  AuthUser copyWith({List<String>? roles, List<String>? permissions}) => AuthUser(
+  AuthUser copyWith({
+    List<String>? roles,
+    List<String>? permissions,
+    List<int>? warehouseIds,
+  }) =>
+      AuthUser(
         id: id,
         email: email,
         name: name,
         roles: roles ?? this.roles,
         permissions: permissions ?? this.permissions,
+        warehouseIds: warehouseIds ?? this.warehouseIds,
       );
 
   @override
-  List<Object?> get props => [id, email, roles, permissions];
+  List<Object?> get props => [id, email, roles, permissions, warehouseIds];
 }

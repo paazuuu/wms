@@ -55,11 +55,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final SupabaseSessionStorage _sessionStorage;
 
-  /// Roles and permissions in one round trip (`my_access()`, 0012) rather than
-  /// a roles-only call — the UI needs both to decide what to offer (spec §37)
-  /// and a second RPC just for permissions would be a second failure point for
-  /// no benefit.
-  Future<(List<String>, List<String>)> _bootstrapAndFetchAccess() async {
+  /// Roles, permissions and warehouse scope in one round trip (`my_access()`,
+  /// 0012) rather than a roles-only call — the UI needs all three to decide
+  /// what to offer (spec §37) and extra RPCs would be extra failure points for
+  /// no benefit. The warehouse ids are what let the UI tell "this company has
+  /// no warehouses" apart from "you have not been assigned one", which since
+  /// 0044 are very different situations.
+  Future<(List<String>, List<String>, List<int>)>
+      _bootstrapAndFetchAccess() async {
     try {
       await _restDio.post('/rpc/bootstrap_first_admin');
     } on DioException {
@@ -71,14 +74,24 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _restDio.post('/rpc/my_access');
       final data = response.data;
       final json = data is List && data.isNotEmpty ? data.first : data;
-      if (json is! Map) return (const <String>[], const <String>[]);
+      if (json is! Map) {
+        return (const <String>[], const <String>[], const <int>[]);
+      }
       List<String> stringList(dynamic v) => (v as List? ?? const [])
           .map((e) => e?.toString() ?? '')
           .where((s) => s.isNotEmpty)
           .toList();
-      return (stringList(json['roles']), stringList(json['permissions']));
+      final warehouseIds = (json['warehouse_ids'] as List? ?? const [])
+          .map((e) => int.tryParse('$e'))
+          .whereType<int>()
+          .toList();
+      return (
+        stringList(json['roles']),
+        stringList(json['permissions']),
+        warehouseIds,
+      );
     } on DioException {
-      return (const <String>[], const <String>[]);
+      return (const <String>[], const <String>[], const <int>[]);
     }
   }
 
@@ -94,9 +107,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _sessionStorage.write(SupabaseSession.fromGoTrue(body));
 
       final userJson = (body['user'] as Map).cast<String, dynamic>();
-      final (roles, permissions) = await _bootstrapAndFetchAccess();
-      return ApiSuccess(
-          AuthUser.fromGoTrue(userJson, roles: roles, permissions: permissions));
+      final (roles, permissions, warehouseIds) = await _bootstrapAndFetchAccess();
+      return ApiSuccess(AuthUser.fromGoTrue(userJson,
+          roles: roles, permissions: permissions, warehouseIds: warehouseIds));
     } on DioException catch (e) {
       return _mapAuthError<AuthUser>(e);
     }
@@ -114,9 +127,9 @@ class AuthRepositoryImpl implements AuthRepository {
       // both validates it and confirms the account still exists.
       final response = await _authDio.get('/user');
       final userJson = (response.data as Map).cast<String, dynamic>();
-      final (roles, permissions) = await _bootstrapAndFetchAccess();
-      return ApiSuccess(
-          AuthUser.fromGoTrue(userJson, roles: roles, permissions: permissions));
+      final (roles, permissions, warehouseIds) = await _bootstrapAndFetchAccess();
+      return ApiSuccess(AuthUser.fromGoTrue(userJson,
+          roles: roles, permissions: permissions, warehouseIds: warehouseIds));
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         await _sessionStorage.clear();

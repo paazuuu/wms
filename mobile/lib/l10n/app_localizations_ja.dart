@@ -830,6 +830,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get whStatOnHand => '在庫';
 
   @override
+  String get whNoAssignedWarehouse => '倉庫が割り当てられていません';
+
+  @override
+  String get whNoAssignedWarehouseBody =>
+      'あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。管理者に倉庫の割り当てを依頼してください。';
+
+  @override
   String get whNoWarehouses => '倉庫がまだありません';
 
   @override

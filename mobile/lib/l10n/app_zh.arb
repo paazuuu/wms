@@ -366,6 +366,8 @@
   "whStatOutbound": "待出库",
   "whStatSku": "SKU",
   "whStatOnHand": "库存",
+  "whNoAssignedWarehouse": "尚未为您分配仓库",
+  "whNoAssignedWarehouseBody": "您的账号还没有被分配到任何仓库，因此无法查看库存或进行作业。请联系管理员为您分配仓库。",
   "whNoWarehouses": "还没有仓库",
   "whBinsTitle": "库位",
   "whBinStaging": "暂存",

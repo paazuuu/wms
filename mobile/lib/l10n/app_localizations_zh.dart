@@ -829,6 +829,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get whStatOnHand => '库存';
 
   @override
+  String get whNoAssignedWarehouse => '尚未为您分配仓库';
+
+  @override
+  String get whNoAssignedWarehouseBody =>
+      '您的账号还没有被分配到任何仓库，因此无法查看库存或进行作业。请联系管理员为您分配仓库。';
+
+  @override
   String get whNoWarehouses => '还没有仓库';
 
   @override

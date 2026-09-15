@@ -366,6 +366,8 @@
   "whStatOutbound": "Outbound",
   "whStatSku": "SKU",
   "whStatOnHand": "On hand",
+  "whNoAssignedWarehouse": "No warehouse assigned to you",
+  "whNoAssignedWarehouseBody": "Your account is not assigned to any warehouse yet, so there is nothing to view or work in. Ask an administrator to assign you one.",
   "whNoWarehouses": "No warehouses yet",
   "whBinsTitle": "Bins",
   "whBinStaging": "Staging",
