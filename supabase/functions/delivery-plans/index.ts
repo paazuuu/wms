@@ -6,19 +6,22 @@
 //   GET  /delivery-plans/:id/receipts             list this plan's receipts
 //   POST /delivery-plans/:id/receipts/:rid/cancel void a receipt (correction)
 //
-// Every query here runs on the CALLER's client, not the service role.
-// verify_jwt=true only proves the caller is signed in, so each mutation still
-// re-checks has_permission() itself; but the client choice is what enforces
-// warehouse scope (UI spec §37). The service role holds `rolbypassrls` and
-// presents a null auth.uid(), so on it 0052's policies do not apply and
-// `can_access_warehouse()` answers "every warehouse" — a scoped operator
-// would see, and could reconcile, every warehouse's deliveries. On the
-// caller's client both bind. See ../_shared/require_permission.ts.
+// Warehouse scope (UI spec §37) is split by direction:
 //
-// Nothing here needs to write past RLS: the two mutations are `security
-// definer` RPCs, which still run as their owner. So this function no longer
-// constructs a service-role client at all.
+//   READS  run on the caller's client, so 0052's `read plans`,
+//          `read plan lines`, `read recons` and `read recon lines` policies
+//          scope them. A plan outside the caller's warehouses is simply not
+//          there.
+//   WRITES run on the service role, because reconcile_delivery_plan and
+//          cancel_reconciliation are granted to `service_role` only and
+//          contain no has_permission() or can_access_warehouse() of their
+//          own. The gate in front of each is the only warehouse check on
+//          these paths.
+//
+// See ../_shared/require_permission.ts for the full rule.
 import {
+  adminClient,
+  callerCanSee,
   callerClient,
   clientPermitted,
   notPermittedMessage,
@@ -39,6 +42,8 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+// Writes only, and only behind a scope gate. See the header.
+const admin = adminClient(supabaseUrl);
 
 function flattenCount(plan: Record<string, unknown>): Record<string, unknown> {
   const lc = plan["line_count"];
@@ -131,7 +136,19 @@ Deno.serve(async (req) => {
       }
       const id = Number(rest[0]);
       const rid = Number(rest[2]);
-      const { error: rpcError } = await supabase.rpc("cancel_reconciliation", {
+      // On the caller's client, so "read recons" (which reaches through to the
+      // plan's warehouse) gates the write. Matching delivery_plan_id also
+      // stops a receipt from one plan being voided through another plan's URL.
+      const { data: recon, error: reconErr } = await supabase
+        .from("delivery_reconciliations")
+        .select("id, delivery_plan_id")
+        .eq("id", rid)
+        .maybeSingle();
+      if (reconErr || !recon) return json({ message: "receipt not found" }, 404);
+      if ((recon as { delivery_plan_id: number }).delivery_plan_id !== id) {
+        return json({ message: "receipt not found" }, 404);
+      }
+      const { error: rpcError } = await admin.rpc("cancel_reconciliation", {
         p_recon_id: rid,
       });
       if (rpcError) return json({ message: rpcError.message }, 400);
@@ -150,8 +167,11 @@ Deno.serve(async (req) => {
         return json({ message: notPermittedMessage("receiving.confirm") }, 403);
       }
       const id = Number(rest[0]);
+      if (!(await callerCanSee(supabase, "delivery_plans", id))) {
+        return json({ message: "delivery plan not found" }, 404);
+      }
       const body = await req.json().catch(() => ({}));
-      const { error: rpcError } = await supabase.rpc("reconcile_delivery_plan", {
+      const { error: rpcError } = await admin.rpc("reconcile_delivery_plan", {
         p_plan_id: id,
         p_complete: body.complete ?? true,
         p_note_reference: body.note_reference ?? null,

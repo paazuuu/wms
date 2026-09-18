@@ -23,18 +23,30 @@
 // approve/reject decision, and transfer.receive covers the destination-side
 // lifecycle (start/complete receiving, record a receipt).
 //
-// Every query here runs on the CALLER's client, not the service role. That
-// client choice is what enforces warehouse scope (UI spec §37): the service
-// role holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's
-// row policies do not apply and `can_access_warehouse()` answers "every
-// warehouse" — a scoped operator could read, and act on, any warehouse's
-// transfer orders. On the caller's client both bind, and each RPC's own
-// has_permission() binds too, so the explicit checks below are defence in
-// depth rather than the only gate. The RPCs are `security definer`, so they
-// still write as their owner. See ../_shared/require_permission.ts.
+// Warehouse scope (UI spec §37) is split by direction:
+//
+//   READS  run on the caller's client, so 0052's `transfer_orders_read` (which
+//          admits a transfer if EITHER end is in scope) and
+//          `transfer_order_lines_read` scope them. `transfer_order_index`
+//          scopes itself too; `transfer_order_detail` does not, so detail()
+//          gates first.
+//   WRITES run on the service role, because the whole *_transfer_order* family
+//          is granted to `service_role` only and none of them contain a
+//          has_permission() or can_access_warehouse() call. The gate in front
+//          of each is the only warehouse check on these paths.
+//
+// Creating a transfer is the one case with two warehouses to check, and both
+// are checked: you may not move stock out of a warehouse you cannot see, nor
+// push it into one.
+//
+// See ../_shared/require_permission.ts for the full rule.
 import {
+  adminClient,
+  callerCanSee,
   callerClient,
+  clientCanAccessWarehouse,
   clientPermitted,
+  notInScopeMessage,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -52,6 +64,8 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+// Writes only, and only behind a scope gate. See the header.
+const admin = adminClient(supabaseUrl);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -65,7 +79,13 @@ function str(v: unknown): string | null {
 // deno-lint-ignore no-explicit-any
 type Client = any;
 
+// The visibility check is what scopes this read, and since every mutation
+// answers with detail(), it doubles as their post-write gate. Out of scope and
+// non-existent both answer 404 on purpose.
 async function detail(supabase: Client, id: number): Promise<Response> {
+  if (!(await callerCanSee(supabase, "transfer_orders", id))) {
+    return json({ message: "transfer not found" }, 404);
+  }
   const { data, error } = await supabase.rpc("transfer_order_detail", {
     p_transfer_id: id,
   });
@@ -124,8 +144,16 @@ Deno.serve(async (req) => {
           422,
         );
       }
+      // Both ends, deliberately: source because stock leaves it, destination
+      // because stock arrives there and would otherwise be a way to push rows
+      // into a warehouse the caller has no business touching.
+      for (const wh of [source, destination]) {
+        if (!(await clientCanAccessWarehouse(supabase, wh))) {
+          return json({ message: notInScopeMessage(wh) }, 403);
+        }
+      }
       const lines = Array.isArray(body.lines) ? body.lines : [];
-      const { data, error } = await supabase.rpc("create_transfer_order", {
+      const { data, error } = await admin.rpc("create_transfer_order", {
         p_source_warehouse_id: source,
         p_destination_warehouse_id: destination,
         p_lines: lines.map((l: Record<string, unknown>) => ({
@@ -168,10 +196,16 @@ Deno.serve(async (req) => {
       if (!(await clientPermitted(supabase, permission))) {
         return json({ message: notPermittedMessage(permission) }, 403);
       }
+      // One gate for all eight actions. `transfer_orders_read` admits a
+      // transfer when EITHER end is in scope, which is what lets the receiving
+      // warehouse act on a transfer it did not raise.
+      if (!(await callerCanSee(supabase, "transfer_orders", id))) {
+        return json({ message: "transfer not found" }, 404);
+      }
 
       if (action === "reject") {
         const body = await req.json().catch(() => ({}));
-        const { error } = await supabase.rpc("reject_transfer_order", {
+        const { error } = await admin.rpc("reject_transfer_order", {
           p_transfer_id: id,
           p_reason: str(body.reason),
         });
@@ -180,7 +214,7 @@ Deno.serve(async (req) => {
       }
 
       if (action === "complete-receiving") {
-        const { data, error } = await supabase.rpc(
+        const { data, error } = await admin.rpc(
           "complete_transfer_receiving",
           { p_transfer_id: id },
         );
@@ -201,7 +235,7 @@ Deno.serve(async (req) => {
       };
       const rpc = rpcByAction[action];
       if (!rpc) return json({ message: "not found" }, 404);
-      const { error } = await supabase.rpc(rpc, { p_transfer_id: id });
+      const { error } = await admin.rpc(rpc, { p_transfer_id: id });
       if (error) return json({ message: error.message }, 400);
       return await detail(supabase, id);
     }
@@ -229,11 +263,13 @@ Deno.serve(async (req) => {
         return json({ message: notPermittedMessage(permission) }, 403);
       }
 
+      // On the caller's client, so `transfer_order_lines_read` (which reaches
+      // through to the transfer's two warehouses) gates the write.
       const transferId = await transferIdForLine(supabase, lineId);
       if (transferId === null) {
         return json({ message: "transfer line not found" }, 404);
       }
-      const { error } = await supabase.rpc(rpc, {
+      const { error } = await admin.rpc(rpc, {
         p_line_id: lineId,
         p_quantity: Math.round(quantity),
       });

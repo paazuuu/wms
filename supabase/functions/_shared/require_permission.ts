@@ -5,11 +5,9 @@
 // service-role client has no user JWT context, so auth.uid() is null inside
 // any RPC it calls — and has_permission() treats a null auth.uid() as "allow"
 // (meant for trusted server-side calls with no user at all, not for "nobody
-// sent a token"). callerPermitted() builds a per-request client carrying the
-// caller's own Authorization header, confirms a real signed-in user via
-// auth.getUser(), and only then trusts has_permission()'s answer — the same
-// rule every RPC called directly over PostgREST elsewhere in the app already
-// follows via its own has_permission() check.
+// sent a token"). So clientPermitted() takes a client carrying the caller's own
+// Authorization header, confirms a real signed-in user via auth.getUser(), and
+// only then trusts has_permission()'s answer.
 //
 // Returns a bare boolean (not a Response) so each function builds its own
 // 403 through its own json() helper — CORS headers differ per function and
@@ -24,19 +22,48 @@
 //     their null-uid branch and answer "every warehouse".
 //
 // So a query issued on the service-role client is unscoped no matter how much
-// scope enforcement exists in the database. Both halves of §37 — 0044-0047's
-// RPC fallbacks and 0052's table policies — key off `auth.uid()`, and both
-// bind the moment the same query is issued on the caller's client instead.
+// scope enforcement exists in the database: 0052/0053's table policies key off
+// `auth.uid()` and bind the moment the same query is issued on the caller's
+// client instead.
 //
-// The rule each function follows:
+// BUT THE MUTATION RPCs ARE NOT A SECOND LINE OF DEFENCE. It is tempting to
+// assume they check for themselves, and they do not. Measured against the live
+// database:
 //
-//   reads            -> caller's client, so policies and RPC scope apply
-//   RPC writes       -> caller's client, so the RPC's own has_permission()
-//                       and can_access_warehouse() bind on a real uid; the
-//                       body still runs as its owner, so it writes past RLS
-//   direct writes    -> service role (there are no INSERT policies for
-//                       `authenticated`), and therefore need an explicit
-//                       scope check written at the call site
+//   * `ship_plan`, `cancel_shipment`, `reconcile_delivery_plan`,
+//     `cancel_reconciliation`, `adjust_stock`, `record_pick`,
+//     `start/complete/cancel_pick_list`, `start/save/complete_inspection`,
+//     `record_count_line`, `complete/cancel_stock_count`, the
+//     `*_transfer_order*` family and `log_audit` contain NO has_permission()
+//     and NO can_access_warehouse() call at all, and
+//   * every one of them is granted to `service_role` only — `authenticated`
+//     has no EXECUTE on them.
+//
+// That combination is deliberate and sound: they are the trusted mutation
+// layer, unreachable from a browser, and the edge function in front of them is
+// the gate. But it has two consequences this file exists to make unmissable:
+//
+//   1. Calling one on the caller's client FAILS with "permission denied for
+//      function …", because that client authenticates as `authenticated`.
+//   2. There is therefore no warehouse check anywhere on a write path unless
+//      the edge function performs it. RLS cannot help: the RPC is SECURITY
+//      DEFINER and runs as its owner.
+//
+// So the rule each function follows is:
+//
+//   reads            -> caller's client, so 0052/0053's policies scope them
+//   permission check -> caller's client (has_permission needs a real uid)
+//   scope check      -> caller's client, EXPLICIT, at the call site, before
+//                       the write — `callerCanSee` is the usual form
+//   writes           -> service role, RPC and direct alike, because the
+//                       mutation RPCs are granted to service_role only
+//
+// The read RPCs are the other way round: the 0051 wrappers are granted to
+// `authenticated` and each opens with has_permission(), so they belong on the
+// caller's client. Note that only `pick_list_index`, `transfer_order_index`
+// and `warehouse_overview` scope their own results; the eleven detail/search
+// wrappers do not, so a caller who reaches one with an id from another
+// warehouse still sees it. Guard those at the call site too.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 export function callerClient(req: Request, supabaseUrl: string) {
@@ -46,17 +73,15 @@ export function callerClient(req: Request, supabaseUrl: string) {
   });
 }
 
-export async function callerPermitted(
-  req: Request,
-  supabaseUrl: string,
-  permission: string,
-): Promise<boolean> {
-  const client = callerClient(req, supabaseUrl);
-  return await clientPermitted(client, permission);
+/** The write client. Every mutation RPC is granted to `service_role` only, so
+ * writes have no alternative — which is exactly why the call site owes an
+ * explicit scope check first. */
+export function adminClient(supabaseUrl: string) {
+  return createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
-/** Same check against a client the caller already built, so a request that
- * needs both a permission check and scoped reads does not construct two. */
+/** The permission check, against the client the request already built — every
+ * function needs both this and scoped reads, so it never constructs two. */
 export async function clientPermitted(
   // deno-lint-ignore no-explicit-any
   client: any,
@@ -76,4 +101,73 @@ export async function clientPermitted(
  * regardless of which layer the check ran in. */
 export function notPermittedMessage(permission: string): string {
   return `not permitted: ${permission} required`;
+}
+
+/** The explicit §37 scope check for the "direct writes" row of the table
+ * above. A write that has to run on the service role gets no help from
+ * 0052's policies and no help from the RPC fallbacks, so the call site asks
+ * this first — on the CALLER's client, because `can_access_warehouse()` reads
+ * `auth.uid()` and answers "every warehouse" without one.
+ *
+ * Fails closed: an error, a missing session or a null answer all read as "no".
+ * Pass the client the request already built, not the service-role one. */
+export async function clientCanAccessWarehouse(
+  // deno-lint-ignore no-explicit-any
+  client: any,
+  warehouseId: number | null,
+): Promise<boolean> {
+  if (warehouseId === null || !Number.isFinite(warehouseId)) return false;
+  const { data, error } = await client.rpc("can_access_warehouse", {
+    p_warehouse_id: warehouseId,
+  });
+  return !error && data === true;
+}
+
+/** The §37 gate for a write, and the usual form of it: can the caller SEE the
+ * row they are about to mutate? Asked on the CALLER's client, where
+ * 0052/0053's policies apply, so one lookup answers both "does this exist" and
+ * "is it in your warehouses" — including for child rows, whose policies reach
+ * through to the parent's warehouse.
+ *
+ * Prefer this over fetching a warehouse_id and calling
+ * clientCanAccessWarehouse: it cannot pick the wrong column, and it stays
+ * correct when a table's scope rule changes, because the rule lives in the
+ * policy rather than being restated here.
+ *
+ * Fails closed — an error or a hidden row both read as "no". Callers answer a
+ * false with 404, not 403: whether the row is missing or merely out of scope
+ * is not something an out-of-scope caller should be able to tell apart. */
+export async function callerCanSee(
+  // deno-lint-ignore no-explicit-any
+  client: any,
+  table: string,
+  id: number,
+): Promise<boolean> {
+  if (!Number.isFinite(id)) return false;
+  const { data, error } = await client
+    .from(table).select("id").eq("id", id).maybeSingle();
+  return !error && !!data;
+}
+
+/** The caller's warehouse scope: an array of ids, or null for "every
+ * warehouse" (admins). Distinguishing those two is the point — null is not
+ * "none", and a failed call must not read as "all", so an error becomes an
+ * empty array. */
+export async function accessibleWarehouseIds(
+  // deno-lint-ignore no-explicit-any
+  client: any,
+): Promise<number[] | null> {
+  const { data, error } = await client.rpc("accessible_warehouse_ids");
+  if (error) return [];
+  if (data === null) return null;
+  return (data as unknown[]).map(Number).filter(Number.isFinite);
+}
+
+/** Message shape for a refused cross-warehouse operation, kept distinct from
+ * the permission message so the UI can tell "you may not do this at all" from
+ * "you may, but not in that warehouse". */
+export function notInScopeMessage(warehouseId: number | null): string {
+  return warehouseId === null
+    ? "not permitted: warehouse scope required"
+    : `not permitted: warehouse ${warehouseId} is outside your scope`;
 }

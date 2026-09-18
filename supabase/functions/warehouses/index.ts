@@ -6,14 +6,36 @@
 //   PATCH  /warehouses/:id        update {name?, description?, address?, phone?,
 //                                         timezone?, status?}
 //
-// Data access runs as service role; verify_jwt=true only proves the caller
-// is signed in, not that they hold the right permission, so every mutation
-// below re-checks has_permission() itself using the caller's own JWT (see
-// ../_shared/require_permission.ts) — the same rule every RPC called
-// directly over PostgREST elsewhere in the app already follows.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// Two clients, and which one a statement uses is the whole security story
+// (UI spec §37):
+//
+//   READS (overview, bins)   -> the caller's client, so 0052's policies on
+//                               `warehouses` and `bins` scope them. On the
+//                               service role they did not: it holds
+//                               `rolbypassrls` and presents a null
+//                               auth.uid(), which makes
+//                               `can_access_warehouse()` answer "every
+//                               warehouse", so a warehouse-1 operator saw
+//                               every warehouse's headline figures and could
+//                               enumerate any warehouse's bins.
+//   WRITES (create, update)  -> the service role, because there are no
+//                               INSERT/UPDATE policies for `authenticated`
+//                               on `warehouses`. So they carry an explicit
+//                               scope check instead: PATCH refuses a
+//                               warehouse outside the caller's scope. POST
+//                               creates a warehouse that does not exist yet,
+//                               so there is nothing to scope it against —
+//                               `warehouse.manage` is the whole gate there.
+//
+// verify_jwt=true only proves the caller is signed in, so every mutation
+// re-checks has_permission() itself using the caller's own JWT (see
+// ../_shared/require_permission.ts).
 import {
-  callerPermitted,
+  adminClient,
+  callerClient,
+  clientCanAccessWarehouse,
+  clientPermitted,
+  notInScopeMessage,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -31,7 +53,9 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+// Writes only. Named `admin` so no read accidentally reaches for it: every
+// read in this function must go through the per-request caller client.
+const admin = adminClient(supabaseUrl);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -49,7 +73,10 @@ function defaultBins(receiving: string, shipping: string) {
   ];
 }
 
-async function overview(): Promise<Response> {
+// On the caller's client, so warehouse_overview()'s own scope fallback binds
+// on a real auth.uid() and the result lists only the caller's warehouses.
+// deno-lint-ignore no-explicit-any
+async function overview(supabase: any): Promise<Response> {
   const { data, error } = await supabase.rpc("warehouse_overview");
   if (error) return json({ message: error.message }, 400);
   return json({ data });
@@ -65,7 +92,9 @@ async function audit(
   warehouseId: number | null,
   details: Record<string, unknown>,
 ): Promise<void> {
-  const { error } = await supabase.rpc("log_audit", {
+  // Deliberately the admin client: the audit trail must record what happened
+  // even when the caller could not have written the row themselves.
+  const { error } = await admin.rpc("log_audit", {
     p_event_type: eventType,
     p_entity_type: "warehouse",
     p_entity_id: String(entityId),
@@ -79,6 +108,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
+    // One caller-scoped client per request. Reads and scope checks use it;
+    // only the two writes reach for `admin`.
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("warehouses");
@@ -86,13 +118,15 @@ Deno.serve(async (req) => {
 
     // GET /warehouses
     if (req.method === "GET" && rest.length === 0) {
-      return await overview();
+      return await overview(supabase);
     }
 
     // GET /warehouses/:id/bins
     if (req.method === "GET" && rest.length === 2 && rest[1] === "bins") {
       const id = Number(rest[0]);
       if (!Number.isFinite(id)) return json({ message: "bad warehouse id" }, 400);
+      // 0052's "read bins" policy does the scoping; a warehouse outside the
+      // caller's scope simply yields no rows rather than an error.
       const { data, error } = await supabase
         .from("bins")
         .select("*")
@@ -104,7 +138,7 @@ Deno.serve(async (req) => {
 
     // POST /warehouses
     if (req.method === "POST" && rest.length === 0) {
-      if (!(await callerPermitted(req, supabaseUrl, "warehouse.manage"))) {
+      if (!(await clientPermitted(supabase, "warehouse.manage"))) {
         return json({ message: notPermittedMessage("warehouse.manage") }, 403);
       }
       const body = await req.json().catch(() => ({}));
@@ -124,7 +158,7 @@ Deno.serve(async (req) => {
       if (cErr) return json({ message: cErr.message }, 400);
       if (!company) return json({ message: "no company configured" }, 409);
 
-      const { data: created, error } = await supabase
+      const { data: created, error } = await admin
         .from("warehouses")
         .insert({
           company_id: company.id,
@@ -159,7 +193,7 @@ Deno.serve(async (req) => {
           code: b.code,
           bin_type: b.bin_type,
         }));
-        const { error: bErr } = await supabase.from("bins").insert(rows);
+        const { error: bErr } = await admin.from("bins").insert(rows);
         // Bin seeding is best-effort: the warehouse itself is already created,
         // and bins can be added later from the warehouse screen.
         if (bErr) {
@@ -182,11 +216,17 @@ Deno.serve(async (req) => {
 
     // PATCH /warehouses/:id
     if (req.method === "PATCH" && rest.length === 1) {
-      if (!(await callerPermitted(req, supabaseUrl, "warehouse.manage"))) {
+      if (!(await clientPermitted(supabase, "warehouse.manage"))) {
         return json({ message: notPermittedMessage("warehouse.manage") }, 403);
       }
       const id = Number(rest[0]);
       if (!Number.isFinite(id)) return json({ message: "bad warehouse id" }, 400);
+      // The update runs as service role (no UPDATE policy for
+      // `authenticated`), so the scope check has to be explicit — otherwise
+      // `warehouse.manage` scoped to one warehouse would rename any of them.
+      if (!(await clientCanAccessWarehouse(supabase, id))) {
+        return json({ message: notInScopeMessage(id) }, 403);
+      }
       const body = await req.json().catch(() => ({}));
 
       const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -206,7 +246,7 @@ Deno.serve(async (req) => {
         patch.uses_locations = body.uses_locations === true;
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await admin
         .from("warehouses")
         .update(patch)
         .eq("id", id)

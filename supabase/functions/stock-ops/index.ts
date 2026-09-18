@@ -11,19 +11,30 @@
 //   POST  /stock-ops/counts/:id/complete            {note?}
 //   POST  /stock-ops/counts/:id/cancel
 //
-// Every query here runs on the CALLER's client, not the service role.
-// verify_jwt=true only proves the caller is signed in, so each mutation still
-// re-checks has_permission() itself (see requirePermission); but the client
-// choice is what enforces warehouse scope (UI spec §37). The service role
-// holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's row
-// policies do not apply and `can_access_warehouse()` answers "every
-// warehouse" — a scoped operator could read, and adjust, any warehouse's
-// stock. On the caller's client both bind, and the RPCs stay `security
-// definer` so they still write as their owner.
+// Warehouse scope (UI spec §37) is split by direction:
+//
+//   READS  run on the caller's client, so 0052's `read adjustments` /
+//          `read counts` and 0053's `read count lines` policies scope them.
+//          `stock_count_detail` does not scope itself, so countDetail() gates
+//          on the caller being able to see the session first.
+//   WRITES run on the service role, because adjust_stock, start_stock_count,
+//          record_count_line and complete/cancel_stock_count are granted to
+//          `service_role` only. adjust_stock in particular has no
+//          has_permission() and no can_access_warehouse() of its own, so the
+//          checks here are the only thing standing between a warehouse-1
+//          operator and warehouse-2's stock.
 //
 // Both corrections post through the ledger, so nothing here can move stock
 // without leaving a movement and an audit entry.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  adminClient,
+  callerCanSee,
+  callerClient,
+  clientCanAccessWarehouse,
+  clientPermitted,
+  notInScopeMessage,
+  notPermittedMessage,
+} from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -39,43 +50,8 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-// Carries the caller's own JWT, so auth.uid() inside any RPC resolves to the
-// actual signed-in user — which is what makes both has_permission() and
-// can_access_warehouse() mean anything. Used for all data access here, not
-// just the permission check.
-function callerClient(req: Request) {
-  const authHeader = req.headers.get("Authorization") ?? "";
-  return createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-    global: { headers: { Authorization: authHeader } },
-  });
-}
-
-async function requirePermission(
-  req: Request,
-  permission: string,
-): Promise<Response | null> {
-  const denied = json({ message: `not permitted: ${permission} required` }, 403);
-  const client = callerClient(req);
-
-  // has_permission() treats a null auth.uid() as "allow" — it's meant for
-  // SECURITY DEFINER calls made from trusted server-side code with no user
-  // context at all, not for a caller who simply sent no (or an invalid)
-  // token. So a real signed-in user must be confirmed first; only then does
-  // has_permission()'s result mean anything.
-  const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError || !userData?.user) return denied;
-
-  const { data, error } = await client.rpc("has_permission", {
-    p_permission: permission,
-  });
-  if (error || data !== true) {
-    // Same shape as a `raise exception 'not permitted: ... required'` from a
-    // Postgres RPC, so the client's existing humanizer handles it the same
-    // way regardless of which layer the check ran in.
-    return denied;
-  }
-  return null;
-}
+// Writes only, and only behind a scope gate. See the header.
+const admin = adminClient(supabaseUrl);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -88,12 +64,19 @@ const REASONS = new Set([
 ]);
 
 // The per-request caller client, threaded into helpers rather than captured
-// from module scope — there is no module-level client any more, because the
-// client has to carry the caller's JWT for warehouse scope to apply.
+// from module scope — there is no module-level caller client, because it has
+// to carry this request's JWT for warehouse scope to apply.
 // deno-lint-ignore no-explicit-any
 type Client = any;
 
+// `stock_count_detail` is SECURITY DEFINER and returns whatever id it is
+// given, so the policy-backed visibility check in front of it is what scopes
+// this read. Every mutation below answers with countDetail(), so it doubles as
+// their post-write gate. Out of scope and non-existent both answer 404.
 async function countDetail(supabase: Client, id: number): Promise<Response> {
+  if (!(await callerCanSee(supabase, "stock_counts", id))) {
+    return json({ message: "stock count not found" }, 404);
+  }
   const { data, error } = await supabase.rpc("stock_count_detail", {
     p_count_id: id,
   });
@@ -106,8 +89,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
-    // One client per request, carrying the caller's Authorization header.
-    const supabase = callerClient(req);
+    // One caller-scoped client per request, carrying the Authorization header.
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("stock-ops");
@@ -129,8 +112,9 @@ Deno.serve(async (req) => {
 
     // POST /stock-ops/adjustments
     if (req.method === "POST" && rest[0] === "adjustments" && rest.length === 1) {
-      const denied = await requirePermission(req, "inventory.adjust");
-      if (denied) return denied;
+      if (!(await clientPermitted(supabase, "inventory.adjust"))) {
+        return json({ message: notPermittedMessage("inventory.adjust") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const reason = str(body.reason)?.toUpperCase() ?? "OTHER";
       if (!REASONS.has(reason)) {
@@ -146,8 +130,12 @@ Deno.serve(async (req) => {
       if (!Number.isFinite(wh)) {
         return json({ message: "warehouse_id is required" }, 422);
       }
+      // adjust_stock moves stock and checks nothing itself. This is the gate.
+      if (!(await clientCanAccessWarehouse(supabase, wh))) {
+        return json({ message: notInScopeMessage(wh) }, 403);
+      }
 
-      const { data, error } = await supabase.rpc("adjust_stock", {
+      const { data, error } = await admin.rpc("adjust_stock", {
         p_warehouse_id: wh,
         p_jan_code: janCode,
         p_delta: Math.round(delta),
@@ -181,14 +169,21 @@ Deno.serve(async (req) => {
 
     // POST /stock-ops/counts
     if (req.method === "POST" && rest[0] === "counts" && rest.length === 1) {
-      const denied = await requirePermission(req, "count.perform");
-      if (denied) return denied;
+      if (!(await clientPermitted(supabase, "count.perform"))) {
+        return json({ message: notPermittedMessage("count.perform") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const wh = Number(body.warehouse_id);
       if (!Number.isFinite(wh)) {
         return json({ message: "warehouse_id is required" }, 422);
       }
-      const { data, error } = await supabase.rpc("start_stock_count", {
+      // start_stock_count does call can_access_warehouse(), but on the service
+      // role that call sees a null auth.uid() and answers "every warehouse",
+      // so it is not a substitute for this.
+      if (!(await clientCanAccessWarehouse(supabase, wh))) {
+        return json({ message: notInScopeMessage(wh) }, 403);
+      }
+      const { data, error } = await admin.rpc("start_stock_count", {
         p_warehouse_id: wh,
         p_blind: body.blind !== false,
         p_note: str(body.note),
@@ -214,14 +209,28 @@ Deno.serve(async (req) => {
       if (!Number.isFinite(id) || !Number.isFinite(lineId)) {
         return json({ message: "bad id" }, 400);
       }
-      const denied = await requirePermission(req, "count.perform");
-      if (denied) return denied;
+      if (!(await clientPermitted(supabase, "count.perform"))) {
+        return json({ message: notPermittedMessage("count.perform") }, 403);
+      }
       const body = await req.json().catch(() => ({}));
       const counted = Number(body.counted);
       if (!Number.isFinite(counted)) {
         return json({ message: "counted must be a number" }, 422);
       }
-      const { error } = await supabase.rpc("record_count_line", {
+      // On the caller's client, so 0053's "read count lines" policy (which
+      // reaches through to the session's warehouse) gates the write. Matching
+      // stock_count_id also stops a line from one session being recorded
+      // through another session's URL.
+      const { data: line, error: lineErr } = await supabase
+        .from("stock_count_lines")
+        .select("id, stock_count_id")
+        .eq("id", lineId)
+        .maybeSingle();
+      if (lineErr || !line) return json({ message: "count line not found" }, 404);
+      if ((line as { stock_count_id: number }).stock_count_id !== id) {
+        return json({ message: "count line not found" }, 404);
+      }
+      const { error } = await admin.rpc("record_count_line", {
         p_line_id: lineId,
         p_counted: Math.round(counted),
       });
@@ -236,10 +245,15 @@ Deno.serve(async (req) => {
     ) {
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
-      const denied = await requirePermission(req, "count.approve");
-      if (denied) return denied;
+      if (!(await clientPermitted(supabase, "count.approve"))) {
+        return json({ message: notPermittedMessage("count.approve") }, 403);
+      }
+      // Completing a count writes adjustments through the ledger, so gate it.
+      if (!(await callerCanSee(supabase, "stock_counts", id))) {
+        return json({ message: "stock count not found" }, 404);
+      }
       const body = await req.json().catch(() => ({}));
-      const { data, error } = await supabase.rpc("complete_stock_count", {
+      const { data, error } = await admin.rpc("complete_stock_count", {
         p_count_id: id,
         p_note: str(body.note),
       });
@@ -258,9 +272,13 @@ Deno.serve(async (req) => {
     ) {
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
-      const denied = await requirePermission(req, "count.perform");
-      if (denied) return denied;
-      const { error } = await supabase.rpc("cancel_stock_count", {
+      if (!(await clientPermitted(supabase, "count.perform"))) {
+        return json({ message: notPermittedMessage("count.perform") }, 403);
+      }
+      if (!(await callerCanSee(supabase, "stock_counts", id))) {
+        return json({ message: "stock count not found" }, 404);
+      }
+      const { error } = await admin.rpc("cancel_stock_count", {
         p_count_id: id,
       });
       if (error) return json({ message: error.message }, 400);

@@ -15,11 +15,34 @@
 // Whatever the company could not be read from, the plan is routed to a distinct
 // "UNKNOWN" reference series and flagged needs_review so it stands out and can
 // be reassigned by hand.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+//
+// Warehouse scope (UI spec §37). An imported plan has to land in a warehouse,
+// and until now it landed in whichever one `fill_default_warehouse()` picked,
+// because nothing here ever set `warehouse_id`. That was both a scope hole and
+// a plain bug: an operator at the Kobe warehouse could upload a Kobe delivery
+// note and watch it appear in Osaka's receiving list.
+//
+// So the warehouse is now resolved and checked before anything is written:
+//
+//   * `warehouse_id` supplied      -> must be one the caller can access,
+//   * omitted, caller sees exactly one -> that one,
+//   * omitted, caller is unscoped (admin) -> left null, so
+//     `fill_default_warehouse()` still decides, as it did before,
+//   * omitted, caller sees several -> 422, because guessing would silently
+//     file a delivery against the wrong warehouse.
+//
+// The writes themselves stay on the service role: there are no INSERT policies
+// for `authenticated` on delivery_plans / shipment_plans or their line tables,
+// which is exactly why the check above has to be explicit.
 import * as XLSX from "npm:xlsx@0.18.5";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
 import {
-  callerPermitted,
+  accessibleWarehouseIds,
+  adminClient,
+  callerClient,
+  clientCanAccessWarehouse,
+  clientPermitted,
+  notInScopeMessage,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -37,7 +60,10 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+// Writes only, and only behind the warehouse resolution below. Suppliers are
+// deliberately global master data, not per-warehouse, so resolveSupplier()
+// uses it too.
+const admin = adminClient(supabaseUrl);
 
 const UNKNOWN_CODE = "UNKNOWN";
 
@@ -334,32 +360,32 @@ async function resolveSupplier(
   regNo: string | null,
 ): Promise<{ id: number; unidentified: boolean }> {
   if (regNo) {
-    const { data } = await supabase.from("delivery_suppliers")
+    const { data } = await admin.from("delivery_suppliers")
       .select("id").eq("registration_number", regNo).maybeSingle();
     if (data) return { id: data.id as number, unidentified: false };
   }
   if (code && code !== UNKNOWN_CODE) {
-    const { data } = await supabase.from("delivery_suppliers")
+    const { data } = await admin.from("delivery_suppliers")
       .select("id").eq("code", code).maybeSingle();
     if (data) return { id: data.id as number, unidentified: false };
   }
   if (name) {
-    const { data } = await supabase.from("delivery_suppliers")
+    const { data } = await admin.from("delivery_suppliers")
       .select("id").eq("name", name).maybeSingle();
     if (data) return { id: data.id as number, unidentified: false };
   }
   if (name || code || regNo) {
-    const { data, error } = await supabase.from("delivery_suppliers")
+    const { data, error } = await admin.from("delivery_suppliers")
       .insert({ name: name ?? code ?? regNo, code, registration_number: regNo })
       .select("id").single();
     if (error) throw new Error(error.message);
     return { id: data.id as number, unidentified: false };
   }
   // Nothing identifies this company → the UNKNOWN bucket.
-  const { data } = await supabase.from("delivery_suppliers")
+  const { data } = await admin.from("delivery_suppliers")
     .select("id").eq("code", UNKNOWN_CODE).maybeSingle();
   if (data) return { id: data.id as number, unidentified: true };
-  const { data: created, error } = await supabase.from("delivery_suppliers")
+  const { data: created, error } = await admin.from("delivery_suppliers")
     .insert({ code: UNKNOWN_CODE, name: "未確認（要手動確認）" })
     .select("id").single();
   if (error) throw new Error(error.message);
@@ -381,11 +407,44 @@ function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
+// deno-lint-ignore no-explicit-any
+type Client = any;
+
+/** Decide which warehouse this import belongs to, and refuse rather than guess.
+ * See the §37 note in the file header for the four cases. Returns either the
+ * resolved id (null meaning "let fill_default_warehouse() decide", which only
+ * an unscoped caller reaches) or the Response to send instead. */
+async function resolveWarehouse(
+  supabase: Client,
+  requested: number | null,
+): Promise<{ warehouseId: number | null } | { error: Response }> {
+  if (requested !== null) {
+    if (!(await clientCanAccessWarehouse(supabase, requested))) {
+      return { error: json({ message: notInScopeMessage(requested) }, 403) };
+    }
+    return { warehouseId: requested };
+  }
+  const scope = await accessibleWarehouseIds(supabase);
+  if (scope === null) return { warehouseId: null }; // unscoped: prior behaviour
+  if (scope.length === 0) {
+    return {
+      error: json({ message: "no warehouse is assigned to your account" }, 403),
+    };
+  }
+  if (scope.length === 1) return { warehouseId: scope[0] };
+  return {
+    error: json({
+      message: "warehouse_id is required when you have access to more than one",
+      warehouse_ids: scope,
+    }, 422),
+  };
+}
+
 // Save a plan + its lines. Shared by the multipart one-shot and the JSON commit.
 // target "plan" (inbound delivery) or "shipment" (outbound) picks the tables
 // and, since they're different halves of the warehouse (receiving vs.
 // shipping), the permission that gates writing one.
-async function commit(req: Request, input: {
+async function commit(supabase: Client, input: {
   deliveryNumber: string;
   supplier: string | null;
   supplierCode: string | null;
@@ -394,14 +453,19 @@ async function commit(req: Request, input: {
   docNumber: string | null;
   deliveryDate: string | null;
   orderDate: string | null;
+  warehouseId: number | null;
   lines: Record<string, unknown>[];
   source: string;
   target: string;
 }): Promise<Response> {
   const permission = input.target === "shipment" ? "pack.complete" : "receiving.confirm";
-  if (!(await callerPermitted(req, supabaseUrl, permission))) {
+  if (!(await clientPermitted(supabase, permission))) {
     return json({ message: notPermittedMessage(permission) }, 403);
   }
+  const resolved = await resolveWarehouse(supabase, input.warehouseId);
+  if ("error" in resolved) return resolved.error;
+  const { warehouseId } = resolved;
+
   const lines = input.lines.map(toLineRow).filter((l) => isJan(l.jan_code as string));
   if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
   const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
@@ -409,13 +473,16 @@ async function commit(req: Request, input: {
   const { id: supplierId, unidentified } = await resolveSupplier(
     input.supplier, input.supplierCode, input.registrationNumber,
   );
-  const { data: ref } = await supabase.rpc("assign_reference", { p_supplier_id: supplierId });
+  const { data: ref } = await admin.rpc("assign_reference", { p_supplier_id: supplierId });
   const referenceNo = (ref as string) ?? null;
 
   if (input.target === "shipment") {
-    const { data: plan, error: e1 } = await supabase
+    const { data: plan, error: e1 } = await admin
       .from("shipment_plans")
       .insert({
+        // Explicit, so `fill_default_warehouse()` no longer gets to choose for
+        // a scoped operator. Null only reaches here for an unscoped caller.
+        warehouse_id: warehouseId,
         shipment_number: input.deliveryNumber,
         party_id: supplierId,
         customer_name: input.supplier,
@@ -444,7 +511,7 @@ async function commit(req: Request, input: {
       tax_rate: l.tax_rate,
       order_date: l.order_date,
     }));
-    const { error: e2 } = await supabase.from("shipment_lines").insert(withId);
+    const { error: e2 } = await admin.from("shipment_lines").insert(withId);
     if (e2) return json({ message: e2.message }, 400);
 
     return json({ data: {
@@ -454,9 +521,10 @@ async function commit(req: Request, input: {
     } });
   }
 
-  const { data: plan, error: e1 } = await supabase
+  const { data: plan, error: e1 } = await admin
     .from("delivery_plans")
     .insert({
+      warehouse_id: warehouseId,
       delivery_number: input.deliveryNumber,
       supplier_name: input.supplier,
       supplier_code: input.supplierCode,
@@ -476,7 +544,7 @@ async function commit(req: Request, input: {
   if (e1) return json({ message: e1.message }, 400);
 
   const withId = lines.map((l) => ({ ...l, delivery_plan_id: plan.id }));
-  const { error: e2 } = await supabase.from("delivery_plan_lines").insert(withId);
+  const { error: e2 } = await admin.from("delivery_plan_lines").insert(withId);
   if (e2) return json({ message: e2.message }, 400);
 
   return json({ data: {
@@ -492,6 +560,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ message: "Not found" }, 404);
 
   try {
+    // Carries the caller's JWT: used for the permission check and for resolving
+    // which warehouse this import may land in. All writes go through `admin`.
+    const supabase = callerClient(req, supabaseUrl);
     const ctype = req.headers.get("content-type") ?? "";
 
     // COMMIT: the reviewed/edited header + lines come back as JSON.
@@ -500,7 +571,8 @@ Deno.serve(async (req) => {
       const deliveryNumber = String(b.delivery_number ?? "").trim();
       if (!deliveryNumber) return json({ message: "delivery_number is required" }, 400);
       const lines = Array.isArray(b.lines) ? b.lines : [];
-      return await commit(req, {
+      const wh = Number(b.warehouse_id);
+      return await commit(supabase, {
         deliveryNumber,
         supplier: str(b.supplier),
         supplierCode: str(b.supplier_code),
@@ -509,6 +581,7 @@ Deno.serve(async (req) => {
         docNumber: str(b.doc_number),
         deliveryDate: str(b.delivery_date),
         orderDate: str(b.order_date),
+        warehouseId: Number.isFinite(wh) && wh > 0 ? wh : null,
         lines,
         source: str(b.source) ?? "review",
         target: str(b.target) === "shipment" ? "shipment" : "plan",
@@ -523,6 +596,8 @@ Deno.serve(async (req) => {
     const supplierCode = str(form.get("supplier_code"));
     const deliveryDate = str(form.get("delivery_date"));
     const target = str(form.get("target")) === "shipment" ? "shipment" : "plan";
+    const formWh = Number(form.get("warehouse_id"));
+    const warehouseId = Number.isFinite(formWh) && formWh > 0 ? formWh : null;
     const dryRun = String(form.get("dry_run") ?? "") === "1";
     if (!(file instanceof File)) return json({ message: "file is required" }, 400);
 
@@ -569,7 +644,7 @@ Deno.serve(async (req) => {
     // One-shot save (no review): needs a delivery number now.
     const num = deliveryNumber || mergedHeader.doc_number;
     if (!num) return json({ message: "delivery_number is required" }, 400);
-    return await commit(req, {
+    return await commit(supabase, {
       deliveryNumber: num,
       supplier: mergedHeader.supplier_name,
       supplierCode,
@@ -578,6 +653,7 @@ Deno.serve(async (req) => {
       docNumber: mergedHeader.doc_number,
       deliveryDate,
       orderDate,
+      warehouseId,
       lines,
       source,
       target,

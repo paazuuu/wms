@@ -7,12 +7,17 @@
 // `audit_log_query` RPC rather than the table directly, so the masking and
 // roll-ups live in one place.
 //
-// Runs on the CALLER's client. Both of these RPCs check `audit.view` (0043)
-// and `audit_log_query` filters by the caller's accessible warehouses (0047),
-// but every one of those checks reads `auth.uid()` — which is null on the
-// service-role client, where `has_permission()` returns true and
-// `accessible_warehouse_ids()` answers "every warehouse". Called as the
-// caller, both bind. See ../_shared/require_permission.ts.
+// Runs on the CALLER's client, which is what makes the `audit.view` check
+// inside both RPCs (0043) mean anything: on the service-role client
+// `auth.uid()` is null and `has_permission()` answers true to everything.
+//
+// Warehouse scope lives in the RPCs, not here — there is no per-row gate an
+// edge function can apply to a list, and both RPCs are SECURITY DEFINER so
+// `audit_log`'s own policy does not apply. 0055 put
+// `can_access_warehouse(a.warehouse_id)` in their WHERE clauses, which also
+// keeps entries with no warehouse (global events) to admins, since
+// `can_access_warehouse(null)` is false for a scoped user and true for an
+// admin. See ../_shared/require_permission.ts.
 import { callerClient } from "../_shared/require_permission.ts";
 
 const cors = {
