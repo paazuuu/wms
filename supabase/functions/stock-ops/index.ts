@@ -20,6 +20,7 @@
 // warehouse" — a scoped operator could read, and adjust, any warehouse's
 // stock. On the caller's client both bind, and the RPCs stay `security
 // definer` so they still write as their owner.
+//
 // Both corrections post through the ledger, so nothing here can move stock
 // without leaving a movement and an audit entry.
 import { createClient } from "jsr:@supabase/supabase-js@2";
