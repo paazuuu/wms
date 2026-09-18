@@ -11,11 +11,15 @@
 //   POST  /stock-ops/counts/:id/complete            {note?}
 //   POST  /stock-ops/counts/:id/cancel
 //
-// Data access runs as service role; verify_jwt=true only proves the caller
-// is signed in, not that they hold the right permission, so every mutation
-// below re-checks has_permission() itself using the caller's own JWT (see
-// requirePermission) — the same rule every RPC called directly over
-// PostgREST elsewhere in the app already follows.
+// Every query here runs on the CALLER's client, not the service role.
+// verify_jwt=true only proves the caller is signed in, so each mutation still
+// re-checks has_permission() itself (see requirePermission); but the client
+// choice is what enforces warehouse scope (UI spec §37). The service role
+// holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's row
+// policies do not apply and `can_access_warehouse()` answers "every
+// warehouse" — a scoped operator could read, and adjust, any warehouse's
+// stock. On the caller's client both bind, and the RPCs stay `security
+// definer` so they still write as their owner.
 // Both corrections post through the ledger, so nothing here can move stock
 // without leaving a movement and an audit entry.
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -34,13 +38,10 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-// The client above runs as service role, so auth.uid() is null inside any
-// RPC it calls — has_permission() would always fail closed. This one instead
-// carries the caller's own JWT, so has_permission() resolves against the
-// actual signed-in user, the same as every RPC called directly over
-// PostgREST elsewhere in the app.
+// Carries the caller's own JWT, so auth.uid() inside any RPC resolves to the
+// actual signed-in user — which is what makes both has_permission() and
+// can_access_warehouse() mean anything. Used for all data access here, not
+// just the permission check.
 function callerClient(req: Request) {
   const authHeader = req.headers.get("Authorization") ?? "";
   return createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
@@ -85,7 +86,13 @@ const REASONS = new Set([
   "DAMAGE", "LOSS", "FOUND", "CORRECTION", "RETURN", "OTHER",
 ]);
 
-async function countDetail(id: number): Promise<Response> {
+// The per-request caller client, threaded into helpers rather than captured
+// from module scope — there is no module-level client any more, because the
+// client has to carry the caller's JWT for warehouse scope to apply.
+// deno-lint-ignore no-explicit-any
+type Client = any;
+
+async function countDetail(supabase: Client, id: number): Promise<Response> {
   const { data, error } = await supabase.rpc("stock_count_detail", {
     p_count_id: id,
   });
@@ -98,6 +105,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
+    // One client per request, carrying the caller's Authorization header.
+    const supabase = callerClient(req);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("stock-ops");
@@ -184,14 +193,14 @@ Deno.serve(async (req) => {
         p_note: str(body.note),
       });
       if (error) return json({ message: error.message }, 400);
-      return await countDetail(Number(data));
+      return await countDetail(supabase, Number(data));
     }
 
     // GET /stock-ops/counts/:id
     if (req.method === "GET" && rest[0] === "counts" && rest.length === 2) {
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
-      return await countDetail(id);
+      return await countDetail(supabase, id);
     }
 
     // PATCH /stock-ops/counts/:id/lines/:lineId
@@ -216,7 +225,7 @@ Deno.serve(async (req) => {
         p_counted: Math.round(counted),
       });
       if (error) return json({ message: error.message }, 400);
-      return await countDetail(id);
+      return await countDetail(supabase, id);
     }
 
     // POST /stock-ops/counts/:id/complete
@@ -254,7 +263,7 @@ Deno.serve(async (req) => {
         p_count_id: id,
       });
       if (error) return json({ message: error.message }, 400);
-      return await countDetail(id);
+      return await countDetail(supabase, id);
     }
 
     return json({ message: "not found" }, 404);

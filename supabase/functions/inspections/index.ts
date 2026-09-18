@@ -6,14 +6,18 @@
 //   PATCH /inspections/:id/items/:itemId    record one item's findings
 //   POST  /inspections/:id/complete         {note?} roll up and close
 //
-// Data access runs as service role; verify_jwt=true only proves the caller
-// is signed in, not that they hold the right permission, so every mutation
-// below re-checks has_permission() itself using the caller's own JWT (see
-// ../_shared/require_permission.ts) — the same rule every RPC called
-// directly over PostgREST elsewhere in the app already follows.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// Every query here runs on the CALLER's client, not the service role. That
+// client choice is what enforces warehouse scope (UI spec §37): the service
+// role holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's
+// row policies do not apply and `can_access_warehouse()` answers "every
+// warehouse" — a scoped operator could read, and act on, any warehouse's
+// inspections. On the caller's client both bind, and each RPC's own
+// has_permission() binds too, so the explicit checks below are defence in
+// depth rather than the only gate. The RPCs are `security definer`, so they
+// still write as their owner. See ../_shared/require_permission.ts.
 import {
-  callerPermitted,
+  callerClient,
+  clientPermitted,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -31,7 +35,6 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -43,7 +46,13 @@ function int(v: unknown): number {
   return Number.isFinite(n) ? Math.max(Math.round(n), 0) : 0;
 }
 
-async function detail(id: number): Promise<Response> {
+// The per-request caller client, threaded into helpers rather than captured
+// from module scope — there is no module-level client any more, because the
+// client has to carry the caller's JWT for warehouse scope to apply.
+// deno-lint-ignore no-explicit-any
+type Client = any;
+
+async function detail(supabase: Client, id: number): Promise<Response> {
   const { data, error } = await supabase.rpc("inspection_detail", {
     p_inspection_id: id,
   });
@@ -56,6 +65,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
+    // One client per request, carrying the caller's Authorization header.
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("inspections");
@@ -92,12 +103,12 @@ Deno.serve(async (req) => {
     if (req.method === "GET" && rest.length === 1) {
       const id = Number(rest[0]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
-      return await detail(id);
+      return await detail(supabase, id);
     }
 
     // POST /inspections  {reconciliation_id}
     if (req.method === "POST" && rest.length === 0) {
-      if (!(await callerPermitted(req, supabaseUrl, "inspection.confirm"))) {
+      if (!(await clientPermitted(supabase, "inspection.confirm"))) {
         return json({ message: notPermittedMessage("inspection.confirm") }, 403);
       }
       const body = await req.json().catch(() => ({}));
@@ -109,14 +120,14 @@ Deno.serve(async (req) => {
         p_reconciliation_id: reconId,
       });
       if (error) return json({ message: error.message }, 400);
-      return await detail(Number(data));
+      return await detail(supabase, Number(data));
     }
 
     // PATCH /inspections/:id/items/:itemId
     if (
       req.method === "PATCH" && rest.length === 3 && rest[1] === "items"
     ) {
-      if (!(await callerPermitted(req, supabaseUrl, "inspection.confirm"))) {
+      if (!(await clientPermitted(supabase, "inspection.confirm"))) {
         return json({ message: notPermittedMessage("inspection.confirm") }, 403);
       }
       const id = Number(rest[0]);
@@ -139,14 +150,14 @@ Deno.serve(async (req) => {
         p_hold: body.hold === true,
       });
       if (error) return json({ message: error.message }, 400);
-      return await detail(id);
+      return await detail(supabase, id);
     }
 
     // POST /inspections/:id/complete
     if (
       req.method === "POST" && rest.length === 2 && rest[1] === "complete"
     ) {
-      if (!(await callerPermitted(req, supabaseUrl, "inspection.confirm"))) {
+      if (!(await clientPermitted(supabase, "inspection.confirm"))) {
         return json({ message: notPermittedMessage("inspection.confirm") }, 403);
       }
       const id = Number(rest[0]);
@@ -162,7 +173,7 @@ Deno.serve(async (req) => {
         const unchecked = error.message.includes("unchecked");
         return json({ message: error.message }, unchecked ? 422 : 400);
       }
-      return await detail(id);
+      return await detail(supabase, id);
     }
 
     return json({ message: "not found" }, 404);

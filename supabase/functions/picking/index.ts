@@ -8,15 +8,21 @@
 //   POST  /picking/lists/:id/cancel                  release without moving stock
 //   GET   /picking/availability?warehouse_id=&jan_code=  on-hand minus open reservations
 //
-// Uses the service role internally; verify_jwt=true only proves the caller
-// is signed in, not that they hold the right permission, so every mutation
-// below re-checks has_permission() itself using the caller's own JWT (see
-// ../_shared/require_permission.ts). Stock never moves here — picking only
-// records what left the shelf; shipping (the `shipments` function) is what
-// actually debits the ledger.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// Stock never moves here — picking only records what left the shelf; shipping
+// (the `shipments` function) is what actually debits the ledger.
+//
+// Every query here runs on the CALLER's client, not the service role. That
+// client choice is what enforces warehouse scope (UI spec §37): the service
+// role holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's
+// row policies do not apply and `can_access_warehouse()` answers "every
+// warehouse" — a scoped operator could read, and act on, any warehouse's
+// pick lists. On the caller's client both bind, and each RPC's own
+// has_permission() binds too, so the explicit checks below are defence in
+// depth rather than the only gate. The RPCs are `security definer`, so they
+// still write as their owner. See ../_shared/require_permission.ts.
 import {
-  callerPermitted,
+  callerClient,
+  clientPermitted,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -34,7 +40,6 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -42,7 +47,13 @@ function str(v: unknown): string | null {
   return s === "" ? null : s;
 }
 
-async function listDetail(id: number): Promise<Response> {
+// The per-request caller client, threaded into helpers rather than captured
+// from module scope — there is no module-level client any more, because the
+// client has to carry the caller's JWT for warehouse scope to apply.
+// deno-lint-ignore no-explicit-any
+type Client = any;
+
+async function listDetail(supabase: Client, id: number): Promise<Response> {
   const { data, error } = await supabase.rpc("pick_list_detail", {
     p_pick_list_id: id,
   });
@@ -57,6 +68,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
+    // One client per request, carrying the caller's Authorization header.
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("picking");
@@ -77,7 +90,7 @@ Deno.serve(async (req) => {
 
     // POST /picking/lists  → open (or return) the list for one shipment plan
     if (req.method === "POST" && rest[0] === "lists" && rest.length === 1) {
-      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+      if (!(await clientPermitted(supabase, "pick.confirm"))) {
         return json({ message: notPermittedMessage("pick.confirm") }, 403);
       }
       const body = await req.json().catch(() => ({}));
@@ -90,14 +103,14 @@ Deno.serve(async (req) => {
         p_note: str(body.note),
       });
       if (error) return json({ message: error.message }, 400);
-      return await listDetail(Number(data));
+      return await listDetail(supabase, Number(data));
     }
 
     // GET /picking/lists/:id
     if (req.method === "GET" && rest[0] === "lists" && rest.length === 2) {
       const id = Number(rest[1]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
-      return await listDetail(id);
+      return await listDetail(supabase, id);
     }
 
     // POST /picking/lists/:id/complete
@@ -105,7 +118,7 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest[0] === "lists" && rest.length === 3 &&
       rest[2] === "complete"
     ) {
-      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+      if (!(await clientPermitted(supabase, "pick.confirm"))) {
         return json({ message: notPermittedMessage("pick.confirm") }, 403);
       }
       const id = Number(rest[1]);
@@ -125,7 +138,7 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest[0] === "lists" && rest.length === 3 &&
       rest[2] === "cancel"
     ) {
-      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+      if (!(await clientPermitted(supabase, "pick.confirm"))) {
         return json({ message: notPermittedMessage("pick.confirm") }, 403);
       }
       const id = Number(rest[1]);
@@ -134,12 +147,12 @@ Deno.serve(async (req) => {
         p_pick_list_id: id,
       });
       if (error) return json({ message: error.message }, 400);
-      return await listDetail(id);
+      return await listDetail(supabase, id);
     }
 
     // PATCH /picking/tasks/:id  → record what was actually picked
     if (req.method === "PATCH" && rest[0] === "tasks" && rest.length === 2) {
-      if (!(await callerPermitted(req, supabaseUrl, "pick.confirm"))) {
+      if (!(await clientPermitted(supabase, "pick.confirm"))) {
         return json({ message: notPermittedMessage("pick.confirm") }, 403);
       }
       const taskId = Number(rest[1]);
@@ -159,7 +172,7 @@ Deno.serve(async (req) => {
         p_note: str(body.note),
       });
       if (error) return json({ message: error.message }, 400);
-      return await listDetail((listId as { pick_list_id: number }).pick_list_id);
+      return await listDetail(supabase, (listId as { pick_list_id: number }).pick_list_id);
     }
 
     // GET /picking/availability

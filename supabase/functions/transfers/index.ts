@@ -26,9 +26,18 @@
 // everything the warehouse sending stock does), transfer.approve gates the
 // approve/reject decision, and transfer.receive covers the destination-side
 // lifecycle (start/complete receiving, record a receipt).
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// Every query here runs on the CALLER's client, not the service role. That
+// client choice is what enforces warehouse scope (UI spec §37): the service
+// role holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's
+// row policies do not apply and `can_access_warehouse()` answers "every
+// warehouse" — a scoped operator could read, and act on, any warehouse's
+// transfer orders. On the caller's client both bind, and each RPC's own
+// has_permission() binds too, so the explicit checks below are defence in
+// depth rather than the only gate. The RPCs are `security definer`, so they
+// still write as their owner. See ../_shared/require_permission.ts.
 import {
-  callerPermitted,
+  callerClient,
+  clientPermitted,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -46,7 +55,6 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null;
@@ -54,7 +62,13 @@ function str(v: unknown): string | null {
   return s === "" ? null : s;
 }
 
-async function detail(id: number): Promise<Response> {
+// The per-request caller client, threaded into helpers rather than captured
+// from module scope — there is no module-level client any more, because the
+// client has to carry the caller's JWT for warehouse scope to apply.
+// deno-lint-ignore no-explicit-any
+type Client = any;
+
+async function detail(supabase: Client, id: number): Promise<Response> {
   const { data, error } = await supabase.rpc("transfer_order_detail", {
     p_transfer_id: id,
   });
@@ -67,7 +81,7 @@ async function detail(id: number): Promise<Response> {
 
 // A pick/receive PATCH addresses a line directly; look up its transfer so the
 // response can hand back the refreshed parent.
-async function transferIdForLine(lineId: number): Promise<number | null> {
+async function transferIdForLine(supabase: Client, lineId: number): Promise<number | null> {
   const { data, error } = await supabase
     .from("transfer_order_lines").select("transfer_order_id").eq("id", lineId)
     .single();
@@ -79,6 +93,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
+    // One client per request, carrying the caller's Authorization header.
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("transfers");
@@ -99,7 +115,7 @@ Deno.serve(async (req) => {
 
     // POST /transfers
     if (req.method === "POST" && rest.length === 0) {
-      if (!(await callerPermitted(req, supabaseUrl, "transfer.create"))) {
+      if (!(await clientPermitted(supabase, "transfer.create"))) {
         return json({ message: notPermittedMessage("transfer.create") }, 403);
       }
       const body = await req.json().catch(() => ({}));
@@ -123,14 +139,14 @@ Deno.serve(async (req) => {
         p_note: str(body.note),
       });
       if (error) return json({ message: error.message }, 400);
-      return await detail(Number(data));
+      return await detail(supabase, Number(data));
     }
 
     // GET /transfers/:id
     if (req.method === "GET" && rest.length === 1) {
       const id = Number(rest[0]);
       if (!Number.isFinite(id)) return json({ message: "bad id" }, 400);
-      return await detail(id);
+      return await detail(supabase, id);
     }
 
     // POST /transfers/:id/submit | approve | reject | cancel | start-picking
@@ -152,7 +168,7 @@ Deno.serve(async (req) => {
       };
       const permission = permissionByAction[action];
       if (!permission) return json({ message: "not found" }, 404);
-      if (!(await callerPermitted(req, supabaseUrl, permission))) {
+      if (!(await clientPermitted(supabase, permission))) {
         return json({ message: notPermittedMessage(permission) }, 403);
       }
 
@@ -163,7 +179,7 @@ Deno.serve(async (req) => {
           p_reason: str(body.reason),
         });
         if (error) return json({ message: error.message }, 400);
-        return await detail(id);
+        return await detail(supabase, id);
       }
 
       if (action === "complete-receiving") {
@@ -190,7 +206,7 @@ Deno.serve(async (req) => {
       if (!rpc) return json({ message: "not found" }, 404);
       const { error } = await supabase.rpc(rpc, { p_transfer_id: id });
       if (error) return json({ message: error.message }, 400);
-      return await detail(id);
+      return await detail(supabase, id);
     }
 
     // PATCH /transfers/lines/:lineId/pick | receive
@@ -212,11 +228,11 @@ Deno.serve(async (req) => {
         : null;
       if (!rpc) return json({ message: "not found" }, 404);
       const permission = action === "pick" ? "transfer.create" : "transfer.receive";
-      if (!(await callerPermitted(req, supabaseUrl, permission))) {
+      if (!(await clientPermitted(supabase, permission))) {
         return json({ message: notPermittedMessage(permission) }, 403);
       }
 
-      const transferId = await transferIdForLine(lineId);
+      const transferId = await transferIdForLine(supabase, lineId);
       if (transferId === null) {
         return json({ message: "transfer line not found" }, 404);
       }
@@ -225,7 +241,7 @@ Deno.serve(async (req) => {
         p_quantity: Math.round(quantity),
       });
       if (error) return json({ message: error.message }, 400);
-      return await detail(transferId);
+      return await detail(supabase, transferId);
     }
 
     return json({ message: "not found" }, 404);

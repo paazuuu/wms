@@ -3,11 +3,17 @@
 //   GET /audit-log?warehouse_id=&entity_type=&event_type=&since=&until=&limit=
 //   GET /audit-log/event-types   distinct event types actually logged so far
 //
-// Read-only; verify_jwt=true. audit_log has RLS restricted to `authenticated`
-// (0012), which the still-login-free app never satisfies as anon — so this
-// reads through the SECURITY DEFINER `audit_log_query` RPC rather than the
-// table directly, same pattern as stock-ops' masked count lines.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// Read-only; verify_jwt=true. Reads through the SECURITY DEFINER
+// `audit_log_query` RPC rather than the table directly, so the masking and
+// roll-ups live in one place.
+//
+// Runs on the CALLER's client. Both of these RPCs check `audit.view` (0043)
+// and `audit_log_query` filters by the caller's accessible warehouses (0047),
+// but every one of those checks reads `auth.uid()` — which is null on the
+// service-role client, where `has_permission()` returns true and
+// `accessible_warehouse_ids()` answers "every warehouse". Called as the
+// caller, both bind. See ../_shared/require_permission.ts.
+import { callerClient } from "../_shared/require_permission.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -22,16 +28,14 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "GET") return json({ message: "not found" }, 404);
 
   try {
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("audit-log");

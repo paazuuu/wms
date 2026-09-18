@@ -6,14 +6,21 @@
 //   GET  /delivery-plans/:id/receipts             list this plan's receipts
 //   POST /delivery-plans/:id/receipts/:rid/cancel void a receipt (correction)
 //
-// Data access runs as service role; verify_jwt=true only proves the caller
-// is signed in, not that they hold the right permission, so every mutation
-// below re-checks has_permission() itself using the caller's own JWT (see
-// ../_shared/require_permission.ts) — the same rule every RPC called
-// directly over PostgREST elsewhere in the app already follows.
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// Every query here runs on the CALLER's client, not the service role.
+// verify_jwt=true only proves the caller is signed in, so each mutation still
+// re-checks has_permission() itself; but the client choice is what enforces
+// warehouse scope (UI spec §37). The service role holds `rolbypassrls` and
+// presents a null auth.uid(), so on it 0052's policies do not apply and
+// `can_access_warehouse()` answers "every warehouse" — a scoped operator
+// would see, and could reconcile, every warehouse's deliveries. On the
+// caller's client both bind. See ../_shared/require_permission.ts.
+//
+// Nothing here needs to write past RLS: the two mutations are `security
+// definer` RPCs, which still run as their owner. So this function no longer
+// constructs a service-role client at all.
 import {
-  callerPermitted,
+  callerClient,
+  clientPermitted,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
 
@@ -32,7 +39,6 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 function flattenCount(plan: Record<string, unknown>): Record<string, unknown> {
   const lc = plan["line_count"];
@@ -44,6 +50,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
+    // One client per request, carrying the caller's Authorization header.
+    const supabase = callerClient(req, supabaseUrl);
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const i = parts.indexOf("delivery-plans");
@@ -118,7 +126,7 @@ Deno.serve(async (req) => {
       req.method === "POST" && rest.length === 4 &&
       rest[1] === "receipts" && rest[3] === "cancel"
     ) {
-      if (!(await callerPermitted(req, supabaseUrl, "receiving.confirm"))) {
+      if (!(await clientPermitted(supabase, "receiving.confirm"))) {
         return json({ message: notPermittedMessage("receiving.confirm") }, 403);
       }
       const id = Number(rest[0]);
@@ -138,7 +146,7 @@ Deno.serve(async (req) => {
 
     // POST /delivery-plans/:id/reconcile
     if (req.method === "POST" && rest.length === 2 && rest[1] === "reconcile") {
-      if (!(await callerPermitted(req, supabaseUrl, "receiving.confirm"))) {
+      if (!(await clientPermitted(supabase, "receiving.confirm"))) {
         return json({ message: notPermittedMessage("receiving.confirm") }, 403);
       }
       const id = Number(rest[0]);
