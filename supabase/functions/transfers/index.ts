@@ -14,18 +14,15 @@
 //   PATCH /transfers/lines/:lineId/receive         {quantity} record what arrived
 //   POST  /transfers/:id/complete-receiving        RECEIVING → COMPLETED, credits the destination
 //
-// Uses the service role internally; verify_jwt=true only proves the caller
-// is signed in, not that they hold the right permission, so every mutation
-// below re-checks has_permission() itself using the caller's own JWT (see
-// ../_shared/require_permission.ts). Stock moves exactly twice per transfer —
-// TRANSFER_OUT on complete-picking, TRANSFER_IN on complete-receiving — both
-// inside the RPCs, never here.
+// Stock moves exactly twice per transfer — TRANSFER_OUT on complete-picking,
+// TRANSFER_IN on complete-receiving — both inside the RPCs, never here.
 //
 // Permission model: transfer.create covers the requesting/source-side
 // lifecycle (create, submit, cancel, start/complete picking, record a pick —
 // everything the warehouse sending stock does), transfer.approve gates the
 // approve/reject decision, and transfer.receive covers the destination-side
 // lifecycle (start/complete receiving, record a receipt).
+//
 // Every query here runs on the CALLER's client, not the service role. That
 // client choice is what enforces warehouse scope (UI spec §37): the service
 // role holds `rolbypassrls` and presents a null auth.uid(), so on it 0052's

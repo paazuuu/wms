@@ -62,8 +62,8 @@ Deno.serve(async (req) => {
       const status = url.searchParams.get("status");
       const search = url.searchParams.get("search");
       // Optional warehouse scope (UI spec §4: switching the current warehouse
-      // switches Receiving too). Omitted = every warehouse, which is what the
-      // "all warehouses" scope and every older client sends.
+      // switches Receiving too). Omitted = every warehouse the caller may see,
+      // which RLS now decides rather than the absence of this filter.
       const warehouseId = Number(url.searchParams.get("warehouse_id"));
       let q = supabase
         .from("delivery_plans")
