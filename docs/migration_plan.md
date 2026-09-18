@@ -1457,6 +1457,11 @@ and the edge functions' own `warehouse_id` query filters. Also still open:
 the pre-existing `anon` grant on `warehouse_overview()`, which wants a look
 at the sign-in flow rather than a silent revoke.
 
+_(Both of those are now closed — the `anon` grants by 0048/0050, and the
+read helpers by 0051's permission checks plus 0052's table-layer scope.
+The edge functions' own `warehouse_id` query filters remain open, and are
+now the last piece of §37.)_
+
 ### 0047 — Inspection / transfer / shipment report sources (UI spec §46 item 10)
 
 `run_report(p_source, p_filters, p_limit)` offered six sources. The custom
@@ -1518,6 +1523,89 @@ added — the dropdown offers all three and renders inspection rows, and
 every `ReportSource.wire` round-trips through `parse` (a guard against
 adding an enum case and forgetting the `parse` branch, which would silently
 fall back to stock movements).
+
+### 0048-0052 — The anon/permission/scope sweep
+
+Five migrations from one thread: setting out to narrow §37's warehouse
+scope, an audit of `pg_proc` and `pg_policies` turned up something larger
+underneath it.
+
+**0048 — revoke public/anon execute on 15 business-data RPCs.** The anon
+key is embedded in the shipped app, so it is public by construction.
+Anyone holding it could read the complete stock ledger, every on-hand and
+reserved quantity, the dashboard KPIs, the search index, every bin's
+contents, and any pick list / transfer / inspection / stock-count detail,
+across every warehouse, without signing in.
+
+A permission check would not have closed it, which is why the fix is a
+revoke. `has_permission()` returns true when `auth.uid()` is null — the
+deliberate branch that lets the service-role edge functions work without a
+user — and an anon request has a null uid too. Worse,
+`accessible_warehouse_ids()` returns null for a null uid, and null means
+"every warehouse", so the entire §37 enforcement of 0044-0047 was a no-op
+for an anon caller; it only ever bound signed-in users. Revoking is what
+made that work load-bearing.
+
+Revoking from `anon` alone would have done nothing: the live ACLs read
+`{=X/postgres, ..., anon=X/postgres, ...}`, and that leading empty grantee
+is a grant to PUBLIC — Postgres's default for a new function. Two
+independent paths, so every statement revokes from `public, anon`.
+
+**0049 — drop anon from 22 permissive table read policies.** 0048 was
+necessary and not sufficient: PostgREST exposes tables directly, and
+`GET /rest/v1/stock_movements` with the anon key returned the whole ledger
+regardless of what the RPC layer allowed. Also reachable unauthenticated
+were `roles`, `permissions` and `role_permissions` — a readable map of the
+authorization model. RLS was enabled throughout (the `rls_auto_enable`
+event trigger does its job); the policies were simply scaffolding that was
+never tightened.
+
+**0050 — the last four anon grants**, including `has_permission` itself,
+which answered `true` to an unauthenticated probe for any permission code.
+`my_access` / `my_roles` are deliberately left, both verified to return
+nothing for a null uid; they are the sign-in bootstrap and sign-in is the
+one flow never yet exercised live.
+
+**0051 — the missing permission checks on 14 read RPCs.** Implemented as a
+rename-plus-wrapper rather than by re-creating each body, so the diff shows
+only the guard: `alter function ... rename` keeps the OID, making the body
+provably byte-identical. That matters most for `dashboard_metrics`, ~200
+lines of aggregate SQL where a mistyped `sum()` would be silent. The
+`_impl` functions are stripped to `{postgres=X}` and are unreachable
+through the API.
+
+Two things the dry run caught. First, `create function` grants EXECUTE to
+PUBLIC by default, so the initial attempt came back `anon: true` on all
+fourteen wrappers — it would have re-opened the hole 0048 had just closed.
+Second, checking callers changed the permission mapping: eight of the
+fourteen are reached only from edge functions on the service-role client,
+where the guard cannot lock anyone out, while the three client-called ones
+sit behind controls every role has (dashboard, search button, scan box)
+and so take `warehouse.view`, held by all 11 roles.
+
+**0052 — warehouse-scope the table read policies.** The `USING (true)`
+that 0049 left behind. RLS is the right instrument here, unlike 0044-0047:
+these are direct reads by `authenticated`, so policies do fire. Reuses
+`can_access_warehouse()` rather than inventing a second predicate. Five
+tables stay unscoped for want of a warehouse dimension — `companies`, the
+three authorization-model tables, and `delivery_suppliers`.
+
+Verified with a three-way rolled-back control on two warehouses and a
+picker assigned to one: unchanged policies 2/2/2/2, scoped policies 1/1/1/1,
+system_admin 2/2/2/2 (warehouses / stock_levels / bins / bin_stock). The
+admin case carries no `user_warehouses` row, so it also exercises the
+unrestricted branch.
+
+Two corrections to the record came out of this work. The project's own
+checklist had claimed per-warehouse scope was "enforced server-side by RLS
+on every table already"; it was not, and `can_access_warehouse()` had never
+been called from anywhere until 0044. And the production database is not
+empty as an earlier status said — `products`, `stock_movements` and
+`stock_levels` are, but 2 delivery plans and 69 delivery plan lines were
+already stored.
+
+Still open, and now the last piece of §37: the edge functions' own
+`warehouse_id` query filters.
 
 ## Rollout discipline
 
