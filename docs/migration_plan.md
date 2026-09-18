@@ -1604,8 +1604,93 @@ empty as an earlier status said — `products`, `stock_movements` and
 `stock_levels` are, but 2 delivery plans and 69 delivery plan lines were
 already stored.
 
-Still open, and now the last piece of §37: the edge functions' own
-`warehouse_id` query filters.
+Still open at that point, and framed as the last piece of §37: the edge
+functions' own `warehouse_id` query filters. Finishing them turned up two
+mistakes in the paragraphs above — see 0053-0055 below.
+
+### 0053-0055 — Finishing §37, and two corrections to the record
+
+**Correction 1: the mutation RPCs check nothing, and are not client-callable.**
+The 0048-0052 write-up said edge functions should run RPC writes on the caller's
+client so "the RPC's own has_permission() and can_access_warehouse() bind on a
+real uid." Both halves were wrong, measured against `pg_proc` on the live
+database:
+
+- `ship_plan`, `cancel_shipment`, `adjust_stock`, `record_pick`, the pick-list /
+  inspection / stock-count / transfer families, `reconcile_delivery_plan`,
+  `cancel_reconciliation` and `log_audit` contain **no** `has_permission()` and
+  **no** `can_access_warehouse()` call at all, and
+- every one of them is granted to `service_role` only. `authenticated` has no
+  EXECUTE, so calling one on the caller's client fails outright with "permission
+  denied for function".
+
+The second point meant the change actually shipped a regression: picking,
+stock-ops, transfers, inspections and delivery-plans writes were failing in
+production until this was fixed. The first means there is **no warehouse check
+anywhere on a write path** unless the edge function performs one — RLS cannot
+help, because the RPC is SECURITY DEFINER and runs as its owner.
+
+The corrected rule now lives in `_shared/require_permission.ts` and is followed
+by all nine functions:
+
+```
+reads            -> caller's client, so 0052/0053's policies scope them
+permission check -> caller's client (has_permission needs a real uid)
+scope check      -> caller's client, EXPLICIT, at the call site, before the write
+writes           -> service role, RPC and direct alike
+```
+
+`callerCanSee(client, table, id)` is the usual gate: one lookup on the caller's
+client answers both "does this row exist" and "is it in my warehouses", because
+the policy already reaches through a child row to its parent's warehouse. It
+answers 404 rather than 403, so it cannot be used to probe for rows in another
+warehouse.
+
+**Correction 2: only 3 of the 14 read wrappers scope themselves.** 0044-0047
+scoped the *index* functions (`pick_list_index`, `transfer_order_index`,
+`warehouse_overview`). The eleven detail/search wrappers — `pick_list_detail`,
+`transfer_order_detail`, `inspection_detail`, `stock_count_detail`,
+`stock_ledger`, `stock_availability`, `dashboard_metrics`, `bin_stock_overview`,
+`global_search`, `default_staging_bin`, `warehouse_uses_locations` — are
+SECURITY DEFINER with no scope predicate, so they return whatever id they are
+given. The edge functions now gate each one; they remain reachable directly over
+PostgREST by any signed-in user, which is the next tranche of work.
+
+**0053** — a scoped SELECT policy for `stock_count_lines`, which had none. It
+did not matter while reads ran as service role; it did the moment they moved to
+the caller's client.
+
+**0054** — the three write policies 0052 missed, because 0052 only touched
+SELECT. `delivery_plans` UPDATE and the `delivery_reconciliations` /
+`reconciliation_lines` INSERTs were `true` for `authenticated`: any signed-in
+user could edit any warehouse's delivery plans and post receipts against them,
+straight over PostgREST with no edge function involved. Nothing in the app
+depended on that — the real paths go through SECURITY DEFINER RPCs, which these
+policies never governed.
+
+**0055** — `audit_log_query` and `audit_event_types` had no warehouse predicate
+at all. Being SECURITY DEFINER, `audit_log`'s own policy never applied to them
+either, so anyone holding `audit.view` read every warehouse's trail, including
+actor names, emails and each operation's `details` payload. Scoped in the body,
+where a list can be filtered row by row. `can_access_warehouse(a.warehouse_id)`
+is exactly the rule wanted because of its branch order: an admin
+short-circuits to true before the null check, so admins keep seeing entries with
+no warehouse (global events such as a role change) while a scoped operator does
+not.
+
+**Edge functions.** All nine now follow the rule above. Beyond the client split:
+`shipments` had run every read as service role (a warehouse-1 packer could list
+and open any warehouse's shipments) and took a carton id on PUT/DELETE with no
+check that it belonged to the plan in the URL; `warehouses` ran overview and
+bins unscoped and let anyone with `warehouse.manage` rename a warehouse outside
+their scope; `import-plan` never set `warehouse_id` at all, so
+`fill_default_warehouse()` filed every import into the default warehouse — a
+plain bug as much as a scope hole, since a Kobe operator's delivery note landed
+in Osaka's receiving list. It now resolves the warehouse from the caller's scope,
+or refuses with a 422 when the caller has access to several and named none.
+
+`supabase/checks/verify_security.sql` asserts all seven invariants read-only; all
+seven pass against the live database.
 
 ## Rollout discipline
 
