@@ -1845,6 +1845,86 @@ and rule out, and `create function` hands out the PUBLIC grant every time. The
 migration makes the whole set uniform, including `fill_default_warehouse` from
 0050, which still carried it. All ten invariants pass.
 
+### 0059 — units of measure (Phase A step 4, §21)
+
+0057 gave `product_barcodes` a `quantity_per_scan`, which is §21's whole feature
+in miniature: scan the case once, get twelve pieces. What it could not say was
+what the twelve were twelve *of*, nor let an operator define a pack size without
+inventing a barcode for it. 0059 adds the vocabulary and the conversions, and
+then makes the conversions authoritative so the two numbers cannot drift.
+
+The split is §21's, and it matters:
+
+- `uoms` — the vocabulary. Global, because 箱 means the same word everywhere.
+  Sixteen rows seeded for a Japanese warehouse: PCS 個, SET, PACK, BOX 箱,
+  CASE ケース, BAG 袋, ROLL 巻, SHEET 枚, DOZEN, PALLET, plus KG/G, L/ML, M/CM.
+  Names in Japanese, because this is the text an operator reads on a picking
+  screen; `code` is the stable key.
+- `product_uoms` — the conversions. **Per product**, because a box of pens and a
+  box of copier paper are not the same number of pieces, and a global
+  "1 BOX = 12" would be wrong for almost everything.
+
+`products.base_uom_id` is NOT NULL and says which unit `on_hand` counts. It is
+backfilled to PCS and a BEFORE INSERT trigger defaults new products the same
+way — every quantity already in this database is a count of pieces, so declaring
+PCS states what was already true rather than changing anything. The base unit
+also gets an explicit factor-1 row in `product_uoms` (an AFTER INSERT trigger),
+so `product_uoms` answers every conversion question on its own and no caller has
+to special-case the base.
+
+**§5, in one trigger.** `quantity_per_scan` and a `product_uoms` factor are the
+same number said two ways, which is exactly the double-count §5 warns about. So
+when a barcode names a unit, `derive_barcode_quantity()` takes the multiplier
+*from* the conversion and ignores what the caller passed; correcting "a case is
+144, not 120" therefore fixes every case barcode at once instead of leaving
+stale multipliers behind. A barcode with no unit keeps its own number, which is
+how a plain JAN (one scan, one piece) still works.
+
+What this deliberately does **not** do:
+
+- **Widen the ledger.** `stock_levels.on_hand`, `stock_movements.quantity` and
+  every line quantity are `integer`. `conversion_factor` is numeric so master
+  data can express a 500 g bag as 0.5, but a barcode whose scan would produce a
+  fractional quantity is *refused* rather than rounded somewhere downstream.
+  Going numeric end-to-end is its own migration with its own risks (rounding,
+  the existing arithmetic, the report SQL) and does not belong in the change
+  that introduces the vocabulary.
+- **Enforce matching `uom_type`.** It looks like an invariant and is not: a
+  product based in KG legitimately comes in a BAG (a COUNT unit) of 5. The
+  factor carries the meaning and is type-agnostic by design.
+- **Create units on demand.** `set_product_uom` rejects a code that is not in
+  `uoms`. A typo would otherwise become a new unit, and a vocabulary nobody
+  curates stops meaning anything.
+
+`set_product_base_uom` refuses once the product has any `stock_movements`: that
+is §37-15 directly — a past transaction must not change meaning because master
+data changed. `remove_product_uom` refuses the base unit, and refuses a unit a
+barcode still uses. `add_product_barcode` was **dropped and recreated** with a
+7th parameter `p_uom_code` rather than gaining a defaulted one, because an added
+default is a second overload PostgREST would have to guess at; nothing calls it
+yet, so there was no call to break.
+
+Reads gain it additively: `list_products` carries `base_uom`, `uoms` and a `uom`
+per barcode; `resolve_barcode` carries `uom` and `base_uom`, so a scanning
+screen gets "one scan = 24 個" without a second round trip. `to_base_quantity()`
+is the function every later step will use, and returns NULL rather than a
+silently wrong number when the product has no conversion for the unit.
+
+Verified with a self-rolling-back block, **26 checks, all OK**: the 16 units
+seed and `list_uoms()` returns them; a new product gets PCS and its factor-1 row
+from the two triggers; `set_product_uom(BOX,12)` then a barcode registered with
+`p_uom_code => 'BOX'` and `p_quantity_per_scan => 1` stores **12**, derived, not
+passed; re-setting BOX to 24 re-derives that barcode to **24**; `to_base` reads
+48 for 2 BOX, 7 for a null unit and NULL for an undefined one; a fractional
+factor on a unit a barcode uses is refused with the integer-ledger message and
+leaves the factor at 24; the base factor is locked at 1; removing the base or an
+in-use unit is refused; a barcode naming a unit with no conversion is refused, as
+is an unknown unit code; the base unit can be changed while there is no history
+and is refused the moment a `stock_movements` row exists; both reads carry the
+new keys; the plain JAN barcode keeps `quantity_per_scan` 1 with a null unit; and
+none of the eight functions is anon-executable. All ten security invariants pass,
+including check 9 against the two new tables.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
