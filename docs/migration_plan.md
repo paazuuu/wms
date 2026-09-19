@@ -2029,6 +2029,90 @@ UNTRACKED line kept its text and got no lot; a typed serial became a
 product, its lot and its base unit, while a product barcode still won; and none
 of the writes is reachable by a client role. All ten security invariants pass.
 
+### 0061 — Stock Status and the Stock Unit (Phase A steps 7-8, §5)
+
+`on_hand = 100` is too weak a sentence. It cannot say that twenty of those
+hundred are quarantined, or that the oldest lot expires on Friday, and so it
+cannot answer the only question an outbound flow asks: how many can ship today.
+§5 wants `available ≠ on_hand`, and attaches the rule that decides the whole
+design — 二重計上しないよう、実装上の正規ソースを決める, pick the canonical
+source so nothing is counted twice.
+
+**Which source is canonical.** `stock_movements` is the ledger and stays the
+record of what happened (§37-4). Two projections of it already exist:
+`stock_levels` (warehouse × JAN), written by `apply_stock_movement`, and
+`bin_stock` (bin × JAN), written by `apply_bin_movement`. They are *not* two
+copies of one number: a WAREHOUSE-scope movement changes what the warehouse
+holds, while a BIN-scope movement (put-away) only moves stock inside it and
+leaves the total alone. `balance_scope` is what keeps them apart, and — verified
+against `pg_proc` — no function writes both for one event.
+
+`stock_units` joins as a **third projection of the same ledger, never as a
+second writer**. One trigger, on WAREHOUSE-scope movements only, keeps it in
+step, so for every warehouse:
+
+```
+sum(stock_units.quantity) == stock_levels.on_hand
+```
+
+That equality is the safety property, and `stock_reconciliation()` checks it on
+demand. Everything else is arranged so it cannot quietly stop holding.
+
+Three deliberate exclusions, each one a double-count avoided:
+
+- **Bins stay out.** `stock_units.bin_id` exists and is always null. Bin
+  granularity would mean modelling put-away as a transfer between parcels, and a
+  put-away that outran its receipt would either drive a parcel negative or break
+  the equality. Bins are step 9's subject; `bin_stock` remains the bin-level
+  answer until then.
+- **RESERVED and ALLOCATED are not statuses**, though §5 lists them beside the
+  others. A reserved unit is still physically on hand and still in its own
+  condition; making RESERVED a bucket would move the quantity out of OK and count
+  the reservation twice — once as a missing unit, once as a claim. They become
+  rows in their own table in step 12, and `stock_available()` subtracts them
+  there, which is why the subtraction belongs in that one function rather than in
+  each caller.
+- **Every status counts toward on-hand**, so there is no `counts_on_hand`
+  column — only `counts_available`. Scrapping is not a status change but a stock
+  movement that reduces the total and leaves a ledger entry, per §37-4. This is
+  what makes a status change always conserve the warehouse total, and therefore
+  what keeps the equality true without a second ledger.
+
+Seven statuses: OK 良品 (the only available one), QC_PENDING 検品待ち, HOLD 保留,
+QUARANTINE 隔離, DAMAGED 破損, EXPIRED 期限切れ, BLOCKED 出荷停止.
+
+`apply_stock_unit_delta()` takes the signed effect from the balance the movement
+recorded (`quantity_after - quantity_before`) rather than from `quantity` plus a
+sign convention per `movement_type`. On the way out it draws from the most
+available, soonest-expiring parcel first — an outbound should consume usable
+stock closest to its date and only reach into held or damaged stock when there
+is nothing else, which in practice means the parcels and the ledger have
+drifted. It returns that shortfall rather than going negative, and
+`stock_reconciliation()` is where it surfaces.
+
+`backfill_stock_units()` brings the parcels to what `stock_levels` says for
+every row that has a product, and reports how many it skipped for want of one.
+It computes the difference and applies only that, so it is safe to re-run — it
+is the function to run after `link_products_by_jan()` links a JAN that had stock
+before its product existed.
+
+Verified with two self-rolling-back blocks against the live schema, **27 checks,
+all OK**: a real receipt through `apply_stock_movement` projected to one OK
+parcel of 100 with `stock_levels` agreeing and reconciliation empty; quarantining
+20 left on_hand at 100 and dropped available to 80, still reconciled; moving
+more than a status holds, and an unknown status, were both refused; shipping 50
+took it all from the available parcel and left the quarantine at 20; shipping 40
+more drew 10 out of quarantine only once nothing else remained, emptied parcels
+were removed, and reconciliation stayed clean throughout; a put-away filled
+`bin_stock` to 30 without touching the 40 on hand (the no-double-count rule,
+proven rather than asserted); a receipt for an unlinked JAN created no parcel and
+was reported as `unlinked jan_code` with its quantity; registering that product
+late, linking the history and running the backfill adjusted exactly one row,
+reconciled, and adjusted nothing on a second run; the breakdown returned the
+per-status parcels with their lots; releasing the quarantine restored
+availability; and none of the new functions is reachable by a client role. All
+ten security invariants pass, including check 9 against both new tables.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
