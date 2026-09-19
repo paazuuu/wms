@@ -163,11 +163,21 @@ export async function accessibleWarehouseIds(
   return (data as unknown[]).map(Number).filter(Number.isFinite);
 }
 
-/** Message shape for a refused cross-warehouse operation, kept distinct from
- * the permission message so the UI can tell "you may not do this at all" from
- * "you may, but not in that warehouse". */
+/** Message for a refused cross-warehouse operation.
+ *
+ * Deliberately the same shape every Postgres guard raises — 0046 and 0056 both
+ * use `not permitted: warehouse.scope required` — because the client matches
+ * exactly `not permitted: <code> required` (see
+ * `mobile/lib/core/api/api_error_text.dart`) to decide it may show its own
+ * translated text. A friendlier-looking message like "warehouse 3 is outside
+ * your scope" misses that regex and reaches the operator as raw English, which
+ * is the §34 problem the humanizer exists to prevent.
+ *
+ * The warehouse id is deliberately not in the message: it would tell a caller
+ * that the warehouse exists. Call sites log it instead. */
 export function notInScopeMessage(warehouseId: number | null): string {
-  return warehouseId === null
-    ? "not permitted: warehouse scope required"
-    : `not permitted: warehouse ${warehouseId} is outside your scope`;
+  if (warehouseId !== null) {
+    console.error("warehouse scope refused", { warehouseId });
+  }
+  return "not permitted: warehouse.scope required";
 }
