@@ -1925,6 +1925,110 @@ new keys; the plain JAN barcode keeps `quantity_per_scan` 1 with a null unit; an
 none of the eight functions is anon-executable. All ten security invariants pass,
 including check 9 against the two new tables.
 
+### 0060 — Lot / Serial / Expiry (Phase A steps 4-6, §4)
+
+Three free-text columns on `inspection_items` — `lot`, `serial`, `expiry` — are
+where this data goes today. They are written once at inspection and never read
+again, because there is nothing to read them *from*: no row says "this lot
+expires on the 31st", so no screen can warn about it and no picker can be told
+to take the older one first.
+
+The three spec steps are one migration because they are one shape: expiry lives
+on the lot, and a serial points at the lot it came in. Splitting them would mean
+a `lots` table with no date column and a `serial_numbers` table with nothing to
+point at.
+
+- `lots` — product, lot code, manufacture/expiry dates, supplier, received_at.
+  Codes are uppercased and trimmed but keep their separators: "A-2024/05" is
+  what an operator reads back off a carton, and unlike a barcode no standard
+  says the punctuation is noise.
+- `serial_numbers` — product, serial, optional lot, status (IN_STOCK / SHIPPED /
+  RETURNED / SCRAPPED / HOLD).
+
+**0057's `tracking_mode` stops being decoration.** It is the whole point of this
+migration, and triggers — not the RPCs — enforce it, so a future caller (a
+receiving flow, an import, another trigger) cannot get it wrong by forgetting to
+ask:
+
+| mode | means |
+| --- | --- |
+| `UNTRACKED` | no lots, no serials. The default, and every existing product. |
+| `LOT` | lots allowed, expiry optional. |
+| `EXPIRY` | lots allowed and **every lot must carry an expiry date** — the food/medical case, where the date is the thing being tracked. |
+| `SERIAL` | serials allowed, lots are not. |
+| `LOT_AND_SERIAL` | both, and **every serial must name its lot**, or the mode claims to track two things while recording one. |
+
+And the §37-15 half, in the other direction: the mode cannot be changed into one
+that contradicts data already recorded under it. Dropping to `UNTRACKED` with
+lots on file would not delete them — it would leave them unreachable and make
+every past inspection that cited one mean something else. Tightening is refused
+just as firmly when the existing rows would not satisfy the stricter mode (lots
+with no date before switching to `EXPIRY`; serials with no lot before switching
+to `LOT_AND_SERIAL`), because the row triggers only ever see rows being written.
+
+**A table nothing writes to is worse than no table: it looks like a feature.**
+So the existing inspection path feeds these. `inspection_items` gains `lot_id`
+and `serial_id` behind *composite* FKs — `(product_id, lot_id) → lots
+(product_id, id)` — so a line cannot cite a lot belonging to a different
+product, and MATCH SIMPLE leaves rows whose `product_id` is still null (0058)
+alone. A trigger then resolves the ids from the text columns the inspection
+screen is already filling in: the same 併走 pattern as 0058, for the same
+reason — the new column becomes correct on live data before any screen changes.
+An UNTRACKED product keeps its text and gets no lot, because a lot the product
+does not track is a row nothing will ever look up.
+
+This is not §30 being bent. §30 says a scan or an AI produces a *candidate* and
+a human confirms domain data — which is why 0058 refuses to invent a product
+from an unknown JAN. A lot is not master data somebody curates; it is an
+observation of what physically arrived, typed by the inspector holding the box.
+Recording it *is* the confirmation.
+
+Two deliberate calls worth stating:
+
+- **A serial is unique company-wide, not per product.** Two manufacturers can
+  legitimately stamp the same serial on different goods, so this refuses
+  something the world allows. But a serial that resolves to two rows is useless
+  at a scan gun, and resolving a bare serial is the entire reason for recording
+  it; a genuine collision is fixed by prefixing one, which is a cheaper problem
+  than an ambiguous scan.
+- **`expiring_lots()` is not warehouse-scoped.** A lot belongs to a product, not
+  to a building, and `lots` carries no warehouse — the same reason
+  `list_products` is not scoped. It becomes a per-warehouse number in step 8,
+  when stock rows start carrying `lot_id` and the question turns from "which
+  lots expire" into "how many of them are in bin A-01".
+
+`resolve_barcode` now answers for a serial too, after the barcode tables have
+had their say (a serial that looks like a product barcode still resolves as the
+product). §26 wants one resolver: a serial label and a product barcode are the
+same physical gesture at the same scan gun, and making the operator pick the
+right screen first is exactly what gets skipped on the floor. `inspection_detail`
+gains `lot_id` / `lot_code` / `lot_expiry_date` / `serial_id` / `serial_status`
+by the same asserted `pg_get_functiondef` transform 0056 used, so a drifted body
+fails the migration instead of being silently missed.
+
+Writes go through `register_lot` / `register_serial` / `set_serial_status`
+(`inventory.adjust` or `product.manage` — a lot is recorded by whoever receives
+the stock, not only by whoever curates the product master). The internal
+`upsert_lot` / `upsert_serial` are granted to **nothing**: only SECURITY DEFINER
+callers reach them, which keeps the tracking-mode rules the single gate rather
+than something a direct PostgREST insert can walk around. Neither table has a
+write policy for the same reason.
+
+Verified with a self-rolling-back block, **32 checks, all OK**: every mode
+accepts what it should and refuses what it should (11 distinct refusals, each
+matched on its own message); a lot code normalizes to `A-2024/05`; re-registering
+it is the same row and a later receipt cannot erase the expiry it already knew;
+an EXPIRY product with no printed code gets `EXP-20261001` derived from the date;
+a serial cannot be claimed by a second product; a lot with serials against it
+cannot be deleted; an inspection line quoting a bare JAN resolved its product
+(0058), then its lot, and the lot learned the expiry from the same line; an
+UNTRACKED line kept its text and got no lot; a typed serial became a
+`serial_numbers` row; all five new keys appear in `inspection_detail`;
+`expiring_lots(4000)` returned the three dated lots soonest-first and
+`expiring_lots(0)` none; `resolve_barcode` answered `kind=serial` with the
+product, its lot and its base unit, while a product barcode still won; and none
+of the writes is reachable by a client role. All ten security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
