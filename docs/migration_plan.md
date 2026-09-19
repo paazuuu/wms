@@ -1772,6 +1772,79 @@ Still keyed on `jan_code`, unchanged by this migration and next in line:
 `stock_levels`, `bin_stock`, `stock_movements`, `pick_tasks`,
 `shipment_carton_items`, `work_order_components`.
 
+### 0058 — Phase A step 3: `product_id` alongside `jan_code` (併走)
+
+0057 built the identity; nothing used it. This puts the column that will
+eventually replace `jan_code` as the join key on all **sixteen** tables that
+carry one — `stock_levels`, `bin_stock`, `stock_movements`,
+`stock_adjustments`, `pick_tasks`, `inspection_items`, `reconciliation_lines`,
+`stock_count_lines`, `transfer_order_lines`, `shipment_lines`,
+`shipment_carton_items`, `delivery_plan_lines`, `purchase_order_lines`,
+`sales_order_lines`, `work_order_components`, `putaway_confirmations`.
+
+This is the run-in-parallel step, **not** the switch-over. `jan_code` keeps its
+name, its type, its place in two primary keys (`stock_levels (warehouse_id,
+jan_code)`, `bin_stock (bin_id, jan_code)`) and every RPC signature. Nothing
+reads `product_id` yet. It was the cheapest possible moment to do this:
+`delivery_plan_lines` holds 69 rows and the other fifteen tables are empty.
+
+**Nullable, and nothing is auto-created.** `products` is empty and today's
+write paths do not need a product to exist — `adjust_stock(p_jan_code,
+p_product_name)` will make a stock level for a JAN nobody registered, carrying a
+free-text name. That is the "stock CRUD" shape §3/§11 move away from, but it is
+how the app works now, so NOT NULL would break every one of those paths. What
+the migration deliberately does *not* do is invent a product when a scan
+presents an unknown JAN: that is how a product table fills with
+"4901234567890 / (unnamed)", and §30's rule — scans and AI produce candidates,
+humans confirm domain data — applies to a barcode as much as to OCR.
+
+Instead the gap is made visible and closable:
+
+- `product_for_jan(text)` resolves through `product_barcodes` **first**, so an
+  EAN, a case code or an internal SKU resolves as readily as the JAN. That is
+  0057 paying off.
+- `fill_product_id()` — a BEFORE INSERT/UPDATE trigger on all sixteen tables,
+  filling the column from `jan_code` only when the caller supplied nothing, so a
+  future caller that knows the product is never second-guessed by a text lookup.
+- `link_products_by_jan()` — re-resolves rows that have no product yet. Safe to
+  re-run; it can only link, never unlink.
+- **A products INSERT fires it for that product's own codes.** This is what
+  makes "register the master data later" a real answer rather than a permanent
+  gap: receive stock today under a bare JAN, register the product next week, and
+  the movements, plan lines and counts link themselves.
+- `unlinked_jan_codes()` — the worklist: codes in use that no product accounts
+  for, with the row counts and which tables they appear in.
+- `product_id_coverage()` — per-table linked/unlinked, and `ready_to_switch`,
+  which is the criterion for when reads may start moving over.
+
+`on delete restrict` on every foreign key, not `cascade` or `set null`: §37-4
+says history is not balanced by deleting it, and quietly detaching a movement
+from its product is a softer version of the same thing.
+
+The sixteen tables are handled by one loop over an explicit list rather than
+sixty-four hand-written statements — a loop cannot apply the treatment to
+fifteen tables and silently skip the sixteenth — and the loop refuses to touch a
+table whose `jan_code` it cannot find.
+
+Verified against **real production rows** with a self-rolling-back block:
+16 columns / 16 FKs / 16 triggers / 16 indexes created; stock written for an
+unregistered JAN left `product_id` null with `products` still empty (nothing
+invented); `unlinked_jan_codes()` listed that code first at 2 rows, correctly
+aggregating the new stock row with the delivery plan line that already existed;
+coverage read 70 rows / 0 linked / not ready; then registering
+`4901427333022` ("くれ竹 LP-F-010S", a real line from the seeded delivery plan)
+**linked both the stock row and the pre-existing plan line by itself**; a write
+quoting a CASE alias resolved to the same product; and deleting a product with
+history was refused by the foreign key. Rolled back to 69 plan lines with 0
+linked.
+
+Two housekeeping items came out of it. verify_security.sql gains **check 10** —
+no trigger function is executable by a client role. Postgres refuses a direct
+call to one, so such a grant is inert, but inert in a way a reviewer has to stop
+and rule out, and `create function` hands out the PUBLIC grant every time. The
+migration makes the whole set uniform, including `fill_default_warehouse` from
+0050, which still carried it. All ten invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

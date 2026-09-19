@@ -36,6 +36,10 @@
 --      thing standing in front of every table — one table created without it
 --      is readable and writable by anyone holding the anon key. Phase A adds
 --      tables steadily, which is exactly when this slips.
+--  10. No trigger function is executable by a client role. Postgres refuses a
+--      direct call to one, so such a grant is inert — but it is inert in a way
+--      a reviewer has to stop and rule out, and `create function` hands out the
+--      PUBLIC grant every time. 0058 made the set uniform.
 with func_acl as (
   select p.oid, p.proname,
          pg_get_function_identity_arguments(p.oid) as args,
@@ -86,6 +90,13 @@ wrappers as (
        select 1 from pg_proc q
          join pg_namespace m on m.oid = q.pronamespace
         where m.nspname = 'public' and q.proname = p.proname || '_impl')
+),
+client_callable_triggers as (
+  select p.proname
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.prorettype = 'trigger'::regtype
+     and (has_function_privilege('anon', p.oid, 'execute')
+          or has_function_privilege('authenticated', p.oid, 'execute'))
 ),
 rls_gaps as (
   select c.relname
@@ -177,4 +188,9 @@ select '9. tables with RLS off or no policy',
        case when count(*) = 0 then 'OK (0)'
             else 'FAIL: ' || string_agg(relname, ', ') end
   from rls_gaps
+union all
+select '10. trigger functions callable by a client role',
+       case when count(*) = 0 then 'OK (0)'
+            else 'FAIL: ' || string_agg(proname, ', ') end
+  from client_callable_triggers
 order by 1;
