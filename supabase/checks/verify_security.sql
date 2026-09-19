@@ -25,6 +25,12 @@
 --      edge functions the single gate in front of them — if one of these ever
 --      became executable by `authenticated`, it would be reachable straight
 --      over PostgREST with no permission and no warehouse check at all.
+--   8. Every read wrapper carries warehouse scope, either in the wrapper
+--      itself (0056, for a warehouse parameter or an id whose row names one)
+--      or in its _impl (0044-0047's index functions, and 0056's four nullable
+--      aggregates where "every warehouse" has to mean "every warehouse I may
+--      see"). A wrapper with a permission check and no scope check is the
+--      exact gap 0056 closed, so this is the check that keeps it closed.
 with func_acl as (
   select p.oid, p.proname,
          pg_get_function_identity_arguments(p.oid) as args,
@@ -58,7 +64,16 @@ impl_reachable as (
      and grantee in ('anon', 'authenticated', 'service_role', '-')
 ),
 wrappers as (
-  select p.proname, p.prosrc like '%has_permission%' as guarded
+  select p.proname,
+         p.prosrc like '%has_permission%' as guarded,
+         -- Scope may live in either half; both are legitimate, and which one
+         -- depends on whether the wrapper can answer the question on its own.
+         (p.prosrc like '%can_access_warehouse%'
+          or exists (
+            select 1 from pg_proc q join pg_namespace m on m.oid = q.pronamespace
+             where m.nspname = 'public' and q.proname = p.proname || '_impl'
+               and (q.prosrc like '%can_access_warehouse%'
+                    or q.prosrc like '%accessible_warehouse_ids%'))) as scoped
     from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public'
@@ -138,4 +153,10 @@ select '7. mutation RPCs reachable by a client role',
        case when count(*) = 0 then 'OK (0)'
             else 'FAIL: ' || string_agg(proname, ', ') end
   from client_reachable_mutations
+union all
+select '8. read wrappers carrying warehouse scope',
+       'total ' || count(*) || ', scoped ' || count(*) filter (where scoped) ||
+       case when count(*) = count(*) filter (where scoped) then ' -> OK'
+            else ' -> FAIL: ' || string_agg(proname, ', ') filter (where not scoped) end
+  from wrappers
 order by 1;
