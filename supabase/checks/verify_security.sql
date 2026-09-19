@@ -31,6 +31,11 @@
 --      aggregates where "every warehouse" has to mean "every warehouse I may
 --      see"). A wrapper with a permission check and no scope check is the
 --      exact gap 0056 closed, so this is the check that keeps it closed.
+--   9. No table has RLS off, or on with no policy. Supabase grants `anon` and
+--      `authenticated` full table privileges by default, so RLS is the only
+--      thing standing in front of every table — one table created without it
+--      is readable and writable by anyone holding the anon key. Phase A adds
+--      tables steadily, which is exactly when this slips.
 with func_acl as (
   select p.oid, p.proname,
          pg_get_function_identity_arguments(p.oid) as args,
@@ -81,6 +86,14 @@ wrappers as (
        select 1 from pg_proc q
          join pg_namespace m on m.oid = q.pronamespace
         where m.nspname = 'public' and q.proname = p.proname || '_impl')
+),
+rls_gaps as (
+  select c.relname
+    from pg_class c join pg_namespace n on n.oid = c.relnamespace
+   where n.nspname = 'public' and c.relkind = 'r'
+     and (not c.relrowsecurity
+          or (select count(*) from pg_policies p
+               where p.schemaname = 'public' and p.tablename = c.relname) = 0)
 ),
 open_write_policies as (
   select tablename, policyname, cmd
@@ -159,4 +172,9 @@ select '8. read wrappers carrying warehouse scope',
        case when count(*) = count(*) filter (where scoped) then ' -> OK'
             else ' -> FAIL: ' || string_agg(proname, ', ') filter (where not scoped) end
   from wrappers
+union all
+select '9. tables with RLS off or no policy',
+       case when count(*) = 0 then 'OK (0)'
+            else 'FAIL: ' || string_agg(relname, ', ') end
+  from rls_gaps
 order by 1;

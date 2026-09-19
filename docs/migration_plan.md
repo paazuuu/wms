@@ -1692,6 +1692,86 @@ or refuses with a 422 when the caller has access to several and named none.
 `supabase/checks/verify_security.sql` asserts all seven invariants read-only; all
 seven pass against the live database.
 
+### 0057 — Phase A steps 1-2: product identity and barcode aliases
+
+The InvenTree-maturation spec's §3 and §37-8 are the same instruction from two
+directions: JAN must stop being the product's key. Today it effectively is.
+`products` has an `id`, but **nothing references it** — `stock_levels`,
+`bin_stock`, `stock_movements`, `pick_tasks`, `shipment_carton_items` and
+`work_order_components` all key on `jan_code` text, and so do the RPC
+signatures (`p_jan_code`) and the Flutter model, whose own doc comment says so.
+
+This migration changes none of that. It is deliberately additive (§2, §38):
+it builds the identity and the alias table the later steps need, and every
+existing column, RPC signature and client call behaves exactly as before.
+Repointing the stock tables at `product_id` is a later step and needs this
+mapping to exist first.
+
+- **`products.sku`** — the internal code §3 asks for. Unique per company *only
+  where assigned*, via a partial index: a product with no code yet is not in
+  conflict with every other product that also has none.
+- **`products.tracking_mode`** — §4's UNTRACKED / LOT / SERIAL /
+  LOT_AND_SERIAL / EXPIRY. Defaults to UNTRACKED, so nothing changes until
+  steps 4-6 give lots and serials somewhere to live.
+- **`product_barcodes`** — many codes per product: JAN, EAN/UPC, an internal
+  SKU, a case code, a QR, a logistics label. `quantity_per_scan` is §21's
+  "scan one case, get twelve".
+- **`normalize_barcode()`** — one definition of two scans being the same code,
+  mirroring `normalizeJan` in the import-plan function: full-width digits
+  folded, separators dropped, alphanumerics upper-cased (CODE128 and internal
+  SKUs are not digits), and a 12-digit UPC-A padded to the EAN-13 form of the
+  same article.
+- **`resolve_barcode()`** — §26's resolver. Returns a tagged object
+  (`{kind: 'product' | 'unknown', ...}`) rather than a product row, so steps
+  4-9 can add `lot`, `serial`, `location` and `carton` kinds without any caller
+  changing the shape it expects. An unregistered code is a normal answer, not
+  an error: the operator scanned something and the screen needs to say "not
+  registered".
+
+Two design points worth keeping:
+
+**Barcode uniqueness is per company, enforced structurally rather than by a
+trigger.** `product_barcodes` carries `company_id` and reaches its product
+through a composite foreign key to `products (company_id, id)`, so the child
+cannot disagree with the parent about which company it belongs to, and
+`unique (company_id, barcode)` then means exactly what it says. There is one
+company today; this costs nothing now and is not a migration later.
+
+**The primary barcode is a trigger, not a line in `create_product`.** Every
+product gets its JAN as a primary alias whatever created it — the RPC, a future
+importer, a seed script. The trigger deliberately *fails* the product insert
+when two JANs normalize to the same code (`4901-234-567890` and
+`４９０１２３４５６７８９０` are the same barcode), because a code that resolves
+to two products is worse than a refused product, and the operator can see why.
+
+`list_products` gains `sku`, `tracking_mode` and a `barcodes` array, and its
+search now matches sku and any registered alias. Additive to the JSON only —
+every existing key keeps its name, and the Dart model ignores keys it does not
+know, so the client keeps working untouched. Existing signatures were left
+alone; the new data is written through new entry points
+(`add_product_barcode`, `remove_product_barcode`, `set_product_identity`).
+
+Verified against the live database with a self-rolling-back test block: the
+normalizer on five input forms; the trigger producing exactly one primary; the
+same product resolving from `4901234567890` and from
+`４９０１－２３４－５６７８９０`; an unregistered code answering `unknown`; a CASE
+alias resolving to the same product with `quantity_per_scan` 12; a duplicate
+barcode refused; removing the primary refused; `tracking_mode` normalised from
+lowercase and a nonsense value refused; `list_products` carrying the new keys
+and finding the product by sku; and the barcodes cascading away with the
+product. Afterwards: 0 products, 0 barcodes, 0 audit rows — the block rolled
+itself back.
+
+verify_security.sql gains **check 9** — no table with RLS off or with RLS on
+but no policy. Supabase grants `anon` and `authenticated` full table privileges
+by default, so RLS is the only thing in front of every table; one table created
+without it is open to anyone holding the anon key. Phase A adds tables steadily,
+which is exactly when that slips. All nine invariants pass.
+
+Still keyed on `jan_code`, unchanged by this migration and next in line:
+`stock_levels`, `bin_stock`, `stock_movements`, `pick_tasks`,
+`shipment_carton_items`, `work_order_components`.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
