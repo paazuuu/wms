@@ -14,9 +14,10 @@
 // Warehouse scope (UI spec §37) is split by direction here:
 //
 //   READS  run on the caller's client, so 0052's `pick_lists_read` /
-//          `pick_tasks_read` policies scope them. `pick_list_index` scopes
-//          itself as well; `pick_list_detail` does NOT, so listDetail() gates
-//          on the caller being able to see the list first.
+//          `pick_tasks_read` policies scope them, and since 0056 both
+//          `pick_list_index` and `pick_list_detail` scope themselves as well.
+//          listDetail() still gates first, so an out-of-scope id answers 404
+//          rather than a null body.
 //   WRITES run on the service role, because start/complete/cancel_pick_list
 //          and record_pick are granted to `service_role` only — an
 //          `authenticated` client gets "permission denied for function". They
@@ -64,11 +65,10 @@ function str(v: unknown): string | null {
 // deno-lint-ignore no-explicit-any
 type Client = any;
 
-// `pick_list_detail` is SECURITY DEFINER and does not scope its own result, so
-// it would happily return another warehouse's list for a guessed id. The
-// policy-backed visibility check in front of it is what scopes this read — and
-// since every mutation below answers with listDetail(), it doubles as their
-// post-write gate. Out of scope and non-existent both answer 404 on purpose.
+// 0056 gave `pick_list_detail` its own scope predicate, so this check is no
+// longer the only thing standing between a guessed id and another warehouse's
+// list. It stays because it turns "scoped out" into a clean 404 here rather
+// than a null body the caller has to interpret.
 async function listDetail(supabase: Client, id: number): Promise<Response> {
   if (!(await callerCanSee(supabase, "pick_lists", id))) {
     return json({ message: "pick list not found" }, 404);
@@ -209,11 +209,10 @@ Deno.serve(async (req) => {
     // GET /picking/availability
     if (req.method === "GET" && rest[0] === "availability" && rest.length === 1) {
       const janCode = url.searchParams.get("jan_code");
-      // `stock_availability` is SECURITY DEFINER and does not scope itself, so
-      // a named warehouse has to be checked here. Omitted means "wherever I
-      // may look", which the RPC's own aggregate then has to answer — see the
-      // note in ../_shared/require_permission.ts about the eleven unscoped
-      // read wrappers.
+      // 0056 put the scope predicate inside `stock_availability` itself, so an
+      // omitted warehouse now means "every warehouse I may see" rather than
+      // every warehouse. This check stays so a NAMED warehouse outside the
+      // caller's scope is refused outright instead of silently returning [].
       const wh = warehouseId ? Number(warehouseId) : null;
       if (wh !== null && !(await clientCanAccessWarehouse(supabase, wh))) {
         return json({ message: notInScopeMessage(wh) }, 403);

@@ -9,8 +9,9 @@
 // Warehouse scope (UI spec §37) is split by direction:
 //
 //   READS  run on the caller's client, so 0052's `read inspections` /
-//          `read inspection items` policies scope them. `inspection_detail`
-//          does not scope itself, so detail() gates first.
+//          `read inspection items` policies scope them, and since 0056
+//          `inspection_detail` scopes itself too. detail() still gates first so
+//          an out-of-scope id answers 404.
 //   WRITES run on the service role, because start_inspection,
 //          save_inspection_item and complete_inspection are granted to
 //          `service_role` only and contain no has_permission() or
@@ -59,9 +60,9 @@ function int(v: unknown): number {
 // deno-lint-ignore no-explicit-any
 type Client = any;
 
-// The visibility check is what scopes this read, and since every mutation
-// answers with detail(), it doubles as their post-write gate. Out of scope and
-// non-existent both answer 404 on purpose.
+// 0056 scoped `inspection_detail` itself; this check remains because it turns
+// "scoped out" into a clean 404 rather than a null body, and because every
+// mutation answers with detail(), making it their post-write gate.
 async function detail(supabase: Client, id: number): Promise<Response> {
   if (!(await callerCanSee(supabase, "inspections", id))) {
     return json({ message: "inspection not found" }, 404);

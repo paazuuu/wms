@@ -27,9 +27,10 @@
 //
 //   READS  run on the caller's client, so 0052's `transfer_orders_read` (which
 //          admits a transfer if EITHER end is in scope) and
-//          `transfer_order_lines_read` scope them. `transfer_order_index`
-//          scopes itself too; `transfer_order_detail` does not, so detail()
-//          gates first.
+//          `transfer_order_lines_read` scope them. Since 0056 both
+//          `transfer_order_index` and `transfer_order_detail` scope themselves
+//          too, the detail one on the same either-end rule; detail() still
+//          gates first so an out-of-scope id answers 404.
 //   WRITES run on the service role, because the whole *_transfer_order* family
 //          is granted to `service_role` only and none of them contain a
 //          has_permission() or can_access_warehouse() call. The gate in front
@@ -79,9 +80,9 @@ function str(v: unknown): string | null {
 // deno-lint-ignore no-explicit-any
 type Client = any;
 
-// The visibility check is what scopes this read, and since every mutation
-// answers with detail(), it doubles as their post-write gate. Out of scope and
-// non-existent both answer 404 on purpose.
+// 0056 scoped `transfer_order_detail` itself; this check remains because it
+// turns "scoped out" into a clean 404 rather than a null body, and because
+// every mutation answers with detail(), making it their post-write gate.
 async function detail(supabase: Client, id: number): Promise<Response> {
   if (!(await callerCanSee(supabase, "transfer_orders", id))) {
     return json({ message: "transfer not found" }, 404);

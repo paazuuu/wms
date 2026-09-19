@@ -14,9 +14,9 @@
 // Warehouse scope (UI spec §37) is split by direction:
 //
 //   READS  run on the caller's client, so 0052's `read adjustments` /
-//          `read counts` and 0053's `read count lines` policies scope them.
-//          `stock_count_detail` does not scope itself, so countDetail() gates
-//          on the caller being able to see the session first.
+//          `read counts` and 0053's `read count lines` policies scope them,
+//          and since 0056 `stock_count_detail` scopes itself too. countDetail()
+//          still gates first so an out-of-scope id answers 404.
 //   WRITES run on the service role, because adjust_stock, start_stock_count,
 //          record_count_line and complete/cancel_stock_count are granted to
 //          `service_role` only. adjust_stock in particular has no
@@ -69,10 +69,10 @@ const REASONS = new Set([
 // deno-lint-ignore no-explicit-any
 type Client = any;
 
-// `stock_count_detail` is SECURITY DEFINER and returns whatever id it is
-// given, so the policy-backed visibility check in front of it is what scopes
-// this read. Every mutation below answers with countDetail(), so it doubles as
-// their post-write gate. Out of scope and non-existent both answer 404.
+// 0056 gave `stock_count_detail` its own scope predicate; this check remains
+// because it turns "scoped out" into a clean 404 rather than a null body, and
+// because every mutation below answers with countDetail(), making it their
+// post-write gate as well.
 async function countDetail(supabase: Client, id: number): Promise<Response> {
   if (!(await callerCanSee(supabase, "stock_counts", id))) {
     return json({ message: "stock count not found" }, 404);

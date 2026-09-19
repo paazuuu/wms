@@ -59,11 +59,11 @@
 //                       mutation RPCs are granted to service_role only
 //
 // The read RPCs are the other way round: the 0051 wrappers are granted to
-// `authenticated` and each opens with has_permission(), so they belong on the
-// caller's client. Note that only `pick_list_index`, `transfer_order_index`
-// and `warehouse_overview` scope their own results; the eleven detail/search
-// wrappers do not, so a caller who reaches one with an id from another
-// warehouse still sees it. Guard those at the call site too.
+// `authenticated` and each opens with has_permission(), and since 0056 all
+// fourteen carry warehouse scope too — seven in the wrapper, the three index
+// functions and the four nullable aggregates in their _impl. So they belong on
+// the caller's client, where that scope binds. The call-site gates here are now
+// defence in depth for reads rather than the only check.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 export function callerClient(req: Request, supabaseUrl: string) {
