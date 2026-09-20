@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../delivery/application/delivery_providers.dart';
+import '../data/location_repository.dart';
 import '../data/warehouse_repository.dart';
+import '../domain/location.dart';
 import '../domain/warehouse.dart';
 
 final warehouseRepositoryProvider = Provider<WarehouseRepository>((ref) {
@@ -53,6 +55,42 @@ final activeWarehouseProvider = Provider<Warehouse?>((ref) {
 final warehouseBinsProvider =
     FutureProvider.autoDispose.family<List<Bin>, int>((ref, warehouseId) async {
   final result = await ref.watch(warehouseRepositoryProvider).bins(warehouseId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// The location tree repository. On the REST Dio, not the edge-function one:
+/// 0062's reads and writes are RPCs, like every other Phase A call.
+final locationRepositoryProvider = Provider<LocationRepository>((ref) {
+  return LocationRepositoryImpl(ref.watch(restDioProvider));
+});
+
+/// Whether the tree also shows nodes that have been switched off. A deactivated
+/// rack hides its whole branch, which is the point — but someone maintaining the
+/// warehouse needs to see it to switch it back on.
+final showInactiveLocationsProvider = StateProvider<bool>((_) => false);
+
+/// The location tree of one warehouse, nested to its full depth.
+final locationTreeProvider = FutureProvider.autoDispose
+    .family<List<Location>, int>((ref, warehouseId) async {
+  final includeInactive = ref.watch(showInactiveLocationsProvider);
+  final result = await ref.watch(locationRepositoryProvider).tree(
+        warehouseId,
+        includeInactive: includeInactive,
+      );
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// The location-type vocabulary with each type's default flags (§8). Global and
+/// effectively static, so it is fetched once per screen.
+final locationTypesProvider =
+    FutureProvider.autoDispose<List<LocationType>>((ref) async {
+  final result = await ref.watch(locationRepositoryProvider).types();
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

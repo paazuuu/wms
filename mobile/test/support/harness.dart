@@ -65,6 +65,8 @@ import 'package:wms_mobile/features/stock_ops/data/stock_ops_repository.dart';
 import 'package:wms_mobile/features/stock_ops/domain/stock_ops.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
+import 'package:wms_mobile/features/warehouse_context/data/location_repository.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/location.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
@@ -2234,4 +2236,101 @@ class FakeInventoryRepository implements InventoryRepository {
     int? warehouseId,
   }) async =>
       ApiSuccess(suggestions);
+}
+
+/// Location tree stub (0062). [roots] is what `location_tree` would return,
+/// nested; [types] is the §8 vocabulary a form chooses from.
+class FakeLocationRepository implements LocationRepository {
+  FakeLocationRepository({
+    this.roots = const [],
+    List<LocationType>? types,
+  }) : typeList = types ??
+            const [
+              LocationType(code: 'STORAGE', name: '保管'),
+              LocationType(
+                  code: 'RECEIVING',
+                  name: '入荷',
+                  defaultPickable: false,
+                  defaultReceivable: true,
+                  defaultVirtual: true),
+            ];
+
+  List<Location> roots;
+  final List<LocationType> typeList;
+
+  /// Whether the last tree() call asked for switched-off nodes too.
+  bool? lastIncludeInactive;
+  int? lastWarehouseId;
+
+  /// What create() was last asked for, so a test can assert the parent travelled
+  /// as a *code* (which is what is printed on the rack) and not as an id.
+  ({int warehouseId, String code, String type, String? parentCode})? lastCreated;
+
+  /// What update() was last asked for; null fields mean "leave alone".
+  ({int id, String? type, bool? isActive, String? parentCode})? lastUpdated;
+
+  /// When set, create() fails with this message — the real RPC refuses a
+  /// duplicate code, a parent in another warehouse and a cycle.
+  String? failCreateWith;
+
+  @override
+  Future<ApiResult<List<Location>>> tree(
+    int warehouseId, {
+    bool includeInactive = false,
+  }) async {
+    lastWarehouseId = warehouseId;
+    lastIncludeInactive = includeInactive;
+    return ApiSuccess(roots);
+  }
+
+  @override
+  Future<ApiResult<List<LocationType>>> types() async => ApiSuccess(typeList);
+
+  @override
+  Future<ApiResult<int>> create({
+    required int warehouseId,
+    required String code,
+    String? name,
+    String locationType = 'STORAGE',
+    String? parentCode,
+    String? barcode,
+    bool? pickable,
+    bool? receivable,
+    bool? shipping,
+    bool? quarantine,
+    bool? isVirtual,
+  }) async {
+    lastCreated = (
+      warehouseId: warehouseId,
+      code: code,
+      type: locationType,
+      parentCode: parentCode,
+    );
+    if (failCreateWith != null) {
+      return ApiFailure(message: failCreateWith!, statusCode: 400);
+    }
+    return const ApiSuccess(99);
+  }
+
+  @override
+  Future<ApiResult<bool>> update({
+    required int locationId,
+    String? name,
+    String? locationType,
+    String? parentCode,
+    String? barcode,
+    bool? isActive,
+    bool? pickable,
+    bool? receivable,
+    bool? shipping,
+    bool? quarantine,
+  }) async {
+    lastUpdated = (
+      id: locationId,
+      type: locationType,
+      isActive: isActive,
+      parentCode: parentCode,
+    );
+    return const ApiSuccess(true);
+  }
 }

@@ -2393,13 +2393,58 @@ colour rather than clamped to zero. A `stock_levels` row whose `product_id` is
 still null (0058's honest case) says so instead of showing four zeroes, and does
 not call the RPC at all.
 
-What has data-layer support but no screen yet, stated plainly rather than implied:
-`expiring_lots`, `product_lots` / `product_serials`, `list_reservations` /
-`over_allocated_stock`, `location_tree` / `create_location`,
-`warehouse_product_settings` / `replenishment_suggestions`, and
-`add_product_barcode` / `set_product_uom` (the repository methods and their tests
-exist; no UI calls them). Those are screens, not plumbing, and each is worth its
-own pass.
+### The screens for the rest of it
+
+The pass above left six reads with a data layer and no UI. All six now have one,
+in three batches, each verified before the next started. `flutter analyze` clean
+throughout; **479 tests passing** (424 at the start of this work).
+
+**Product detail** — `product_lots`, `product_serials`, `add_product_barcode`,
+`remove_product_barcode`, `set_product_uom`, `list_uoms`,
+`warehouse_product_settings`, `set_warehouse_product`,
+`clear_warehouse_product`. The product list was a master with no detail, so nine
+RPCs had nowhere to be called from. Tapping a product now opens it and editing
+became an action on the detail; sections rather than tabs, because an operator
+opening this is checking one thing and scrolling beats guessing which tab holds
+it. The lot and serial sections appear only when `tracking_mode` says they can
+exist — an empty "Lots" card would invite someone to look for a button that is
+not there. Only the units the product actually has a conversion for are offered
+when adding a barcode, because naming any other is refused by the derive trigger.
+The per-warehouse settings follow the active warehouse (§22's point is that the
+answer differs per building) and show the policy beside the live
+on-hand/available, because a reorder point only means something next to what is
+on the shelf.
+
+**期限管理 and 予約・引当** — `expiring_lots`, `list_reservations`,
+`over_allocated_stock`, `release_reservation`. The expiry horizon is a choice
+(7/30/90/180 days) refetched from the server rather than filtered locally,
+because the server owns today's date and a tablet with a wrong clock must not be
+able to hide an expired lot; expired rows stay in the list with their own pill,
+since an expired lot is a decision someone owes. On the reservations screen each
+promise shows what is pinned to parcels, what has shipped, and what still has no
+shelf behind it — that last number matters because no picker can be sent for it —
+and a lapsed reservation shows both facts, ACTIVE *and* lapsed, rather than one
+overwriting the other. Over-allocated parcels lead the screen with the reason
+spelled out: a shipment took the stock first, which is the deliberate trade-off,
+not a defect.
+
+**ロケーション and 補充提案** — `location_tree`, `list_location_types`,
+`create_location`, `update_location`, `replenishment_suggestions`. The tree
+arrives nested from the server and is rendered as nested `ExpansionTile`s, so
+collapsing a zone collapses the zone; a bin shows its quantity and a rack shows
+nothing rather than a zero, because "no stock here" and "not somewhere stock is
+counted" are different answers. Adding under a node pre-fills that node as the
+parent *by code*, which is what is printed on the rack. A location's code is
+read-only once created, since every scan and every parent reference uses it.
+Switching a node off sends only `is_active`, so it cannot accidentally rewrite
+the type or the parent. The replenishment list shows available against the line
+(not on-hand against the line) and names the blocked quantity, which is the
+explanation for a product that has stock and is on the list anyway.
+
+Menu placement follows where the work happens: 期限管理 with the floor tasks,
+補充提案 next to purchase orders (its next step is an order), ロケーション and
+予約・引当 with the management group. Each entry is gated on the permission its
+own RPC checks, and the server remains the real boundary (§37).
 
 ## Rollout discipline
 

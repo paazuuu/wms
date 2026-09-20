@@ -6,6 +6,7 @@ import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
+import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
@@ -14,6 +15,7 @@ import '../../partners/presentation/trading_partner_list_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
+import '../../warehouse_context/presentation/location_tree_screen.dart';
 import '../../reports/presentation/report_builder_screen.dart';
 import '../../sales/presentation/sales_order_list_screen.dart';
 import '../../stock_ops/presentation/stock_adjustment_screen.dart';
@@ -102,6 +104,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['transfer.create', 'transfer.approve', 'transfer.receive'],
           ),
           FeatureEntry(
+            id: 'replenishment',
+            icon: Icons.trending_down_outlined,
+            status: FeatureStatus.ready,
+            builder: _replenishment,
+            requiredAnyOf: ['inventory.view'],
+          ),
+          FeatureEntry(
             id: 'purchase_orders',
             icon: Icons.add_shopping_cart_outlined,
             status: FeatureStatus.ready,
@@ -168,6 +177,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _partners,
             requiredAnyOf: ['partner.view', 'partner.manage'],
+          ),
+          FeatureEntry(
+            id: 'locations',
+            icon: Icons.account_tree_outlined,
+            status: FeatureStatus.ready,
+            builder: _locations,
+            requiredAnyOf: ['warehouse.view', 'warehouse.manage'],
           ),
           FeatureEntry(
             id: 'reservations',
@@ -248,3 +264,9 @@ Widget _expiringLots(BuildContext _) => const ExpiringLotsScreen();
 
 /// Top-level (const-referenceable) builder for the Reservations feature.
 Widget _reservations(BuildContext _) => const ReservationsScreen();
+
+/// Top-level (const-referenceable) builder for the Replenishment feature.
+Widget _replenishment(BuildContext _) => const ReplenishmentScreen();
+
+/// Top-level (const-referenceable) builder for the Locations feature.
+Widget _locations(BuildContext _) => const LocationTreeScreen();
