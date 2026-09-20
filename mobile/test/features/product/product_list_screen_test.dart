@@ -110,10 +110,9 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets(
-      "an existing product's fixed JAN offers no scan button to replace it",
+  testWidgets('tapping a product opens its detail, not the edit form',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
     final repo = FakeProductRepository(products: const [
       Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
     ]);
@@ -122,7 +121,11 @@ void main() {
     await tester.tap(find.text('ボールペン'));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.qr_code_scanner_outlined), findsNothing);
+    // Master-detail: the list opens the product, and editing is an action on
+    // the detail. (The form itself is covered by product_form_sheet_test.)
+    expect(find.text('商品詳細'), findsOneWidget);
+    expect(find.text('バーコード'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'JANコード'), findsNothing);
 
     await tester.binding.setSurfaceSize(null);
   });
@@ -261,82 +264,6 @@ void main() {
     expect(find.text('追跡なし'), findsNothing);
     expect(find.text('コード 1 件'), findsNothing);
     expect(find.textContaining('基本単位'), findsNothing);
-
-    await tester.binding.setSurfaceSize(null);
-  });
-
-  testWidgets('the SKU and tracking mode are saved through set_product_identity',
-      (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1400));
-    final repo = FakeProductRepository(products: const [
-      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
-    ]);
-    await _pump(tester, repo);
-
-    await tester.tap(find.text('ボールペン'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.widgetWithText(TextField, 'SKU'), 'PEN-001');
-    await tester.tap(find.byType(DropdownButtonFormField<TrackingMode>));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('有効期限').last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, '保存'));
-    await tester.pumpAndSettle();
-
-    // 0057 keeps identity on its own RPC, so this must not have gone through
-    // update_product.
-    expect(repo.lastIdentity?.id, 1);
-    expect(repo.lastIdentity?.sku, 'PEN-001');
-    expect(repo.lastIdentity?.trackingMode, TrackingMode.expiry);
-
-    await tester.binding.setSurfaceSize(null);
-  });
-
-  testWidgets('editing only the name sends no identity call', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1400));
-    final repo = FakeProductRepository(products: const [
-      Product(id: 1, janCode: '4902505632037', name: 'ボールペン', sku: 'PEN-001'),
-    ]);
-    await _pump(tester, repo);
-
-    await tester.tap(find.text('ボールペン'));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-        find.widgetWithText(TextField, '商品名'), 'ボールペン（黒）');
-    await tester.tap(find.widgetWithText(FilledButton, '保存'));
-    await tester.pumpAndSettle();
-
-    // Nothing about the identity changed, so `set_product_identity` is not
-    // called — which is what keeps a rename from ever being refused by the
-    // tracking-mode guard (§37-15).
-    expect(repo.lastIdentity, isNull);
-
-    await tester.binding.setSurfaceSize(null);
-  });
-
-  testWidgets('a tracking mode the server refuses is shown, not swallowed',
-      (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1400));
-    final repo = FakeProductRepository(products: const [
-      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
-    ])
-      ..failIdentityWith =
-          'product 1 already has lots recorded; tracking_mode cannot become UNTRACKED';
-    await _pump(tester, repo);
-
-    await tester.tap(find.text('ボールペン'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(DropdownButtonFormField<TrackingMode>));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('シリアル').last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, '保存'));
-    await tester.pumpAndSettle();
-
-    // The sheet stays open with the reason on it (§34: no silent failure).
-    expect(find.textContaining('already has lots recorded'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, '保存'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });

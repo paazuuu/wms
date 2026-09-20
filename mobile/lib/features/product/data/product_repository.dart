@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/product.dart';
+import '../domain/product_lot.dart';
+import '../domain/warehouse_product.dart';
 
 /// The product master (spec §19, 0032) — read via `list_products`, written
 /// only through `create_product`/`update_product`/`set_product_status`
@@ -67,6 +69,45 @@ abstract class ProductRepository {
 
   /// `list_uoms` (0059) — the vocabulary a pack size can be chosen from.
   Future<ApiResult<List<Uom>>> listUoms();
+
+  /// `product_lots` (0060), soonest expiry first.
+  Future<ApiResult<List<ProductLot>>> lots(int productId);
+
+  /// `product_serials` (0060), optionally one status only.
+  Future<ApiResult<List<ProductSerial>>> serials(int productId, {String? status});
+
+  /// `warehouse_product_settings` for one product (0063). Null when this
+  /// warehouse has no special handling for it — which is the common case, and
+  /// not an error.
+  Future<ApiResult<WarehouseProduct?>> warehouseSettings({
+    required int warehouseId,
+    required int productId,
+  });
+
+  /// `set_warehouse_product` (0063). Every field is nullable and null means
+  /// "leave it alone", so one setting can be changed without restating the rest.
+  /// [defaultLocationCode] is a location *code* because that is what is printed
+  /// on the rack, and an empty string clears it.
+  Future<ApiResult<WarehouseProduct?>> setWarehouseProduct({
+    required int warehouseId,
+    required int productId,
+    String? defaultLocationCode,
+    int? minStock,
+    int? maxStock,
+    int? reorderPoint,
+    int? pickPriority,
+    String? putawayRule,
+    int? preferredSupplierId,
+    int? leadTimeDays,
+    String? note,
+  });
+
+  /// `clear_warehouse_product` (0063) — back to no special handling. False when
+  /// there was no row to remove.
+  Future<ApiResult<bool>> clearWarehouseProduct({
+    required int warehouseId,
+    required int productId,
+  });
 }
 
 class ProductRepositoryImpl implements ProductRepository {
@@ -235,16 +276,125 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<ApiResult<List<Uom>>> listUoms() async {
     try {
       final response = await _dio.post('/rpc/list_uoms', data: const {});
-      final data = response.data;
-      final rows = data is List
-          ? (data.length == 1 && data.first is List ? data.first as List : data)
-          : const [];
-      return ApiSuccess(rows
-          .whereType<Map>()
-          .map((e) => Uom.fromJson(e.cast<String, dynamic>()))
+      return ApiSuccess(_rows(response.data)
+          .map((e) => Uom.fromJson(e))
           .toList());
     } on DioException catch (e) {
       return mapDioError<List<Uom>>(e);
+    }
+  }
+
+  /// A jsonb-array-returning RPC comes back as the array itself; some PostgREST
+  /// setups wrap it in a single-element list. Accepting both in one place keeps
+  /// that ambiguity out of every call site.
+  static List<Map<String, dynamic>> _rows(dynamic data) {
+    final list = data is List
+        ? (data.length == 1 && data.first is List ? data.first as List : data)
+        : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList(growable: false);
+  }
+
+  static Map<String, dynamic>? _object(dynamic data) {
+    final row = data is List ? (data.isEmpty ? null : data.first) : data;
+    return row is Map ? row.cast<String, dynamic>() : null;
+  }
+
+  @override
+  Future<ApiResult<List<ProductLot>>> lots(int productId) async {
+    try {
+      final response = await _dio.post('/rpc/product_lots', data: {
+        'p_product_id': productId,
+      });
+      return ApiSuccess(
+          _rows(response.data).map((e) => ProductLot.fromJson(e)).toList());
+    } on DioException catch (e) {
+      return mapDioError<List<ProductLot>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<ProductSerial>>> serials(int productId,
+      {String? status}) async {
+    try {
+      final response = await _dio.post('/rpc/product_serials', data: {
+        'p_product_id': productId,
+        'p_status': status,
+      });
+      return ApiSuccess(
+          _rows(response.data).map((e) => ProductSerial.fromJson(e)).toList());
+    } on DioException catch (e) {
+      return mapDioError<List<ProductSerial>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<WarehouseProduct?>> warehouseSettings({
+    required int warehouseId,
+    required int productId,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/warehouse_product_settings', data: {
+        'p_warehouse_id': warehouseId,
+        'p_product_id': productId,
+      });
+      final row = _object(response.data);
+      return ApiSuccess(row == null ? null : WarehouseProduct.fromJson(row));
+    } on DioException catch (e) {
+      return mapDioError<WarehouseProduct?>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<WarehouseProduct?>> setWarehouseProduct({
+    required int warehouseId,
+    required int productId,
+    String? defaultLocationCode,
+    int? minStock,
+    int? maxStock,
+    int? reorderPoint,
+    int? pickPriority,
+    String? putawayRule,
+    int? preferredSupplierId,
+    int? leadTimeDays,
+    String? note,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/set_warehouse_product', data: {
+        'p_warehouse_id': warehouseId,
+        'p_product_id': productId,
+        'p_default_location_code': defaultLocationCode,
+        'p_min_stock': minStock,
+        'p_max_stock': maxStock,
+        'p_reorder_point': reorderPoint,
+        'p_pick_priority': pickPriority,
+        'p_putaway_rule': putawayRule,
+        'p_preferred_supplier_id': preferredSupplierId,
+        'p_lead_time_days': leadTimeDays,
+        'p_note': note,
+      });
+      final row = _object(response.data);
+      return ApiSuccess(row == null ? null : WarehouseProduct.fromJson(row));
+    } on DioException catch (e) {
+      return mapDioError<WarehouseProduct?>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> clearWarehouseProduct({
+    required int warehouseId,
+    required int productId,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/clear_warehouse_product', data: {
+        'p_warehouse_id': warehouseId,
+        'p_product_id': productId,
+      });
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 }

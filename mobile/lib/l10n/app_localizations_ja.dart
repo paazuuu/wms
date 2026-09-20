@@ -2701,4 +2701,162 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stockPositionNoParcels => '内訳はまだありません';
+
+  @override
+  String get productDetailTitle => '商品詳細';
+
+  @override
+  String get productEdit => '編集';
+
+  @override
+  String get productBarcodesSection => 'バーコード';
+
+  @override
+  String get productBarcodeAdd => 'コードを追加';
+
+  @override
+  String get productBarcodePrimary => '主コード';
+
+  @override
+  String get productBarcodeType => '種別';
+
+  @override
+  String get productBarcodeUnit => '単位（任意）';
+
+  @override
+  String productBarcodeQtyPerScan(String qty) {
+    return '1スキャン = $qty';
+  }
+
+  @override
+  String get productBarcodeRemoveQ => 'このコードを削除しますか？';
+
+  @override
+  String get productBarcodeRemoveBody => 'このコードではスキャンできなくなります。商品自体は残ります。';
+
+  @override
+  String get productBarcodeEmpty => 'コードがまだありません';
+
+  @override
+  String get productUnitsSection => '単位';
+
+  @override
+  String get productUnitAdd => '単位を追加';
+
+  @override
+  String get productUnitFactor => '換算数';
+
+  @override
+  String get productUnitBase => '基本';
+
+  @override
+  String get productLotsSection => 'ロット';
+
+  @override
+  String get productLotsEmpty => 'ロットの記録はまだありません';
+
+  @override
+  String productLotExpiryOn(String date) {
+    return '期限 $date';
+  }
+
+  @override
+  String productLotDaysLeft(int days) {
+    return 'あと$days日';
+  }
+
+  @override
+  String get productLotExpired => '期限切れ';
+
+  @override
+  String productLotSerialCount(int count) {
+    return 'シリアル $count 件';
+  }
+
+  @override
+  String get productSerialsSection => 'シリアル';
+
+  @override
+  String get productSerialsEmpty => 'シリアルの記録はまだありません';
+
+  @override
+  String get productSerialFilterAll => 'すべて';
+
+  @override
+  String get serialInStock => '在庫あり';
+
+  @override
+  String get serialShipped => '出荷済';
+
+  @override
+  String get serialReturned => '返品';
+
+  @override
+  String get serialScrapped => '廃棄';
+
+  @override
+  String get serialHold => '保留';
+
+  @override
+  String get whpSection => 'この倉庫での設定';
+
+  @override
+  String get whpNone => 'この倉庫には専用の設定がありません';
+
+  @override
+  String get whpNoWarehouse => '倉庫を選ぶと設定できます';
+
+  @override
+  String get whpEdit => '設定する';
+
+  @override
+  String get whpDefaultLocation => '既定ロケーション';
+
+  @override
+  String get whpDefaultLocationHint => 'ラックのコード（空欄で解除）';
+
+  @override
+  String get whpMinStock => '最小在庫';
+
+  @override
+  String get whpReorderPoint => '発注点';
+
+  @override
+  String get whpMaxStock => '最大在庫';
+
+  @override
+  String get whpPickPriority => 'ピッキング優先度';
+
+  @override
+  String get whpPutawayRule => '格納ルール';
+
+  @override
+  String get putawayManual => '手動';
+
+  @override
+  String get putawayFixed => '固定ロケーション';
+
+  @override
+  String get putawayConsolidate => '同じ品にまとめる';
+
+  @override
+  String get putawayNearestEmpty => '最も近い空き';
+
+  @override
+  String get whpLeadTime => 'リードタイム（日）';
+
+  @override
+  String get whpSupplier => '優先仕入先';
+
+  @override
+  String get whpClear => 'この倉庫の設定を削除';
+
+  @override
+  String get whpClearQ => 'この倉庫の設定を削除しますか？';
+
+  @override
+  String get whpClearBody => '既定ロケーションと発注点がなくなり、補充提案にも出なくなります。';
+
+  @override
+  String get whpNeedsReorder => '発注点を下回っています';
 }

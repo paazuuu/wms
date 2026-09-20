@@ -1409,5 +1409,225 @@
   "stockPositionNoParcels": "内訳はまだありません",
   "@stockPositionNoParcels": {
       "description": "Stock position: the product has no stock_units rows in this warehouse."
+  },
+  "productDetailTitle": "商品詳細",
+  "@productDetailTitle": {
+      "description": "Product detail screen title."
+  },
+  "productEdit": "編集",
+  "@productEdit": {
+      "description": "Product detail: open the edit sheet."
+  },
+  "productBarcodesSection": "バーコード",
+  "@productBarcodesSection": {
+      "description": "Product detail: the codes that resolve to this product (0057)."
+  },
+  "productBarcodeAdd": "コードを追加",
+  "@productBarcodeAdd": {
+      "description": "Product detail: register another barcode."
+  },
+  "productBarcodePrimary": "主コード",
+  "@productBarcodePrimary": {
+      "description": "Product detail: the one code that cannot be removed."
+  },
+  "productBarcodeType": "種別",
+  "@productBarcodeType": {
+      "description": "Product detail: barcode type (JAN/EAN/CASE/…)."
+  },
+  "productBarcodeUnit": "単位（任意）",
+  "@productBarcodeUnit": {
+      "description": "Product detail: naming a unit makes the conversion authoritative (0059)."
+  },
+  "productBarcodeQtyPerScan": "1スキャン = {qty}",
+  "@productBarcodeQtyPerScan": {
+      "description": "Product detail: how much one scan of this code counts.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "productBarcodeRemoveQ": "このコードを削除しますか？",
+  "@productBarcodeRemoveQ": {
+      "description": "Product detail: confirm removing a barcode."
+  },
+  "productBarcodeRemoveBody": "このコードではスキャンできなくなります。商品自体は残ります。",
+  "@productBarcodeRemoveBody": {
+      "description": "Product detail: what removing a barcode does."
+  },
+  "productBarcodeEmpty": "コードがまだありません",
+  "@productBarcodeEmpty": {
+      "description": "Product detail: empty barcode list."
+  },
+  "productUnitsSection": "単位",
+  "@productUnitsSection": {
+      "description": "Product detail: base unit and pack sizes (0059)."
+  },
+  "productUnitAdd": "単位を追加",
+  "@productUnitAdd": {
+      "description": "Product detail: define a pack size."
+  },
+  "productUnitFactor": "換算数",
+  "@productUnitFactor": {
+      "description": "Product detail: how many base units one of this unit is."
+  },
+  "productUnitBase": "基本",
+  "@productUnitBase": {
+      "description": "Product detail: marks the base unit row."
+  },
+  "productLotsSection": "ロット",
+  "@productLotsSection": {
+      "description": "Product detail: lots recorded against this product (0060)."
+  },
+  "productLotsEmpty": "ロットの記録はまだありません",
+  "@productLotsEmpty": {
+      "description": "Product detail: empty lot list."
+  },
+  "productLotExpiryOn": "期限 {date}",
+  "@productLotExpiryOn": {
+      "description": "Product detail / expiry list: a lot's expiry date.",
+      "placeholders": {
+          "date": {
+              "type": "String"
+          }
+      }
+  },
+  "productLotDaysLeft": "あと{days}日",
+  "@productLotDaysLeft": {
+      "description": "Product detail / expiry list: days until a lot expires.",
+      "placeholders": {
+          "days": {
+              "type": "int"
+          }
+      }
+  },
+  "productLotExpired": "期限切れ",
+  "@productLotExpired": {
+      "description": "Product detail / expiry list: past its date."
+  },
+  "productLotSerialCount": "シリアル {count} 件",
+  "@productLotSerialCount": {
+      "description": "Product detail: how many serials belong to a lot.",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "productSerialsSection": "シリアル",
+  "@productSerialsSection": {
+      "description": "Product detail: serials recorded against this product (0060)."
+  },
+  "productSerialsEmpty": "シリアルの記録はまだありません",
+  "@productSerialsEmpty": {
+      "description": "Product detail: empty serial list."
+  },
+  "productSerialFilterAll": "すべて",
+  "@productSerialFilterAll": {
+      "description": "Product detail: serial status filter, no filter."
+  },
+  "serialInStock": "在庫あり",
+  "@serialInStock": {
+      "description": "Serial status IN_STOCK."
+  },
+  "serialShipped": "出荷済",
+  "@serialShipped": {
+      "description": "Serial status SHIPPED."
+  },
+  "serialReturned": "返品",
+  "@serialReturned": {
+      "description": "Serial status RETURNED."
+  },
+  "serialScrapped": "廃棄",
+  "@serialScrapped": {
+      "description": "Serial status SCRAPPED."
+  },
+  "serialHold": "保留",
+  "@serialHold": {
+      "description": "Serial status HOLD."
+  },
+  "whpSection": "この倉庫での設定",
+  "@whpSection": {
+      "description": "Product detail: warehouse_products, §22's per-warehouse handling."
+  },
+  "whpNone": "この倉庫には専用の設定がありません",
+  "@whpNone": {
+      "description": "Product detail: no warehouse_products row, which is the normal case."
+  },
+  "whpNoWarehouse": "倉庫を選ぶと設定できます",
+  "@whpNoWarehouse": {
+      "description": "Product detail: the settings are per warehouse, and none is active."
+  },
+  "whpEdit": "設定する",
+  "@whpEdit": {
+      "description": "Product detail: open the warehouse settings sheet."
+  },
+  "whpDefaultLocation": "既定ロケーション",
+  "@whpDefaultLocation": {
+      "description": "warehouse_products.default_location_id, named by its code."
+  },
+  "whpDefaultLocationHint": "ラックのコード（空欄で解除）",
+  "@whpDefaultLocationHint": {
+      "description": "warehouse_products: how the default location is entered."
+  },
+  "whpMinStock": "最小在庫",
+  "@whpMinStock": {
+      "description": "warehouse_products.min_stock."
+  },
+  "whpReorderPoint": "発注点",
+  "@whpReorderPoint": {
+      "description": "warehouse_products.reorder_point, compared against available (§31)."
+  },
+  "whpMaxStock": "最大在庫",
+  "@whpMaxStock": {
+      "description": "warehouse_products.max_stock, the level a suggestion orders up to."
+  },
+  "whpPickPriority": "ピッキング優先度",
+  "@whpPickPriority": {
+      "description": "warehouse_products.pick_priority, lower picks first."
+  },
+  "whpPutawayRule": "格納ルール",
+  "@whpPutawayRule": {
+      "description": "warehouse_products.putaway_rule; records the intent, Phase B acts on it."
+  },
+  "putawayManual": "手動",
+  "@putawayManual": {
+      "description": "Put-away rule MANUAL."
+  },
+  "putawayFixed": "固定ロケーション",
+  "@putawayFixed": {
+      "description": "Put-away rule FIXED."
+  },
+  "putawayConsolidate": "同じ品にまとめる",
+  "@putawayConsolidate": {
+      "description": "Put-away rule CONSOLIDATE."
+  },
+  "putawayNearestEmpty": "最も近い空き",
+  "@putawayNearestEmpty": {
+      "description": "Put-away rule NEAREST_EMPTY."
+  },
+  "whpLeadTime": "リードタイム（日）",
+  "@whpLeadTime": {
+      "description": "warehouse_products.lead_time_days."
+  },
+  "whpSupplier": "優先仕入先",
+  "@whpSupplier": {
+      "description": "warehouse_products.preferred_supplier_id."
+  },
+  "whpClear": "この倉庫の設定を削除",
+  "@whpClear": {
+      "description": "Product detail: clear_warehouse_product."
+  },
+  "whpClearQ": "この倉庫の設定を削除しますか？",
+  "@whpClearQ": {
+      "description": "Product detail: confirm clearing warehouse_products."
+  },
+  "whpClearBody": "既定ロケーションと発注点がなくなり、補充提案にも出なくなります。",
+  "@whpClearBody": {
+      "description": "Product detail: what clearing warehouse_products does."
+  },
+  "whpNeedsReorder": "発注点を下回っています",
+  "@whpNeedsReorder": {
+      "description": "Product detail: available < reorder_point."
   }
 }

@@ -2774,4 +2774,164 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stockPositionNoParcels => 'No parcels yet';
+
+  @override
+  String get productDetailTitle => 'Product';
+
+  @override
+  String get productEdit => 'Edit';
+
+  @override
+  String get productBarcodesSection => 'Barcodes';
+
+  @override
+  String get productBarcodeAdd => 'Add a code';
+
+  @override
+  String get productBarcodePrimary => 'Primary';
+
+  @override
+  String get productBarcodeType => 'Type';
+
+  @override
+  String get productBarcodeUnit => 'Unit (optional)';
+
+  @override
+  String productBarcodeQtyPerScan(String qty) {
+    return '1 scan = $qty';
+  }
+
+  @override
+  String get productBarcodeRemoveQ => 'Remove this code?';
+
+  @override
+  String get productBarcodeRemoveBody =>
+      'Scanning this code will no longer find the product. The product itself stays.';
+
+  @override
+  String get productBarcodeEmpty => 'No codes yet';
+
+  @override
+  String get productUnitsSection => 'Units';
+
+  @override
+  String get productUnitAdd => 'Add a unit';
+
+  @override
+  String get productUnitFactor => 'Conversion';
+
+  @override
+  String get productUnitBase => 'Base';
+
+  @override
+  String get productLotsSection => 'Lots';
+
+  @override
+  String get productLotsEmpty => 'No lots recorded yet';
+
+  @override
+  String productLotExpiryOn(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String productLotDaysLeft(int days) {
+    return '$days days left';
+  }
+
+  @override
+  String get productLotExpired => 'Expired';
+
+  @override
+  String productLotSerialCount(int count) {
+    return '$count serials';
+  }
+
+  @override
+  String get productSerialsSection => 'Serial numbers';
+
+  @override
+  String get productSerialsEmpty => 'No serial numbers recorded yet';
+
+  @override
+  String get productSerialFilterAll => 'All';
+
+  @override
+  String get serialInStock => 'In stock';
+
+  @override
+  String get serialShipped => 'Shipped';
+
+  @override
+  String get serialReturned => 'Returned';
+
+  @override
+  String get serialScrapped => 'Scrapped';
+
+  @override
+  String get serialHold => 'Hold';
+
+  @override
+  String get whpSection => 'In this warehouse';
+
+  @override
+  String get whpNone => 'No special handling in this warehouse';
+
+  @override
+  String get whpNoWarehouse => 'Pick a warehouse to set this';
+
+  @override
+  String get whpEdit => 'Set up';
+
+  @override
+  String get whpDefaultLocation => 'Default location';
+
+  @override
+  String get whpDefaultLocationHint => 'The code on the rack (empty to clear)';
+
+  @override
+  String get whpMinStock => 'Min stock';
+
+  @override
+  String get whpReorderPoint => 'Reorder point';
+
+  @override
+  String get whpMaxStock => 'Max stock';
+
+  @override
+  String get whpPickPriority => 'Pick priority';
+
+  @override
+  String get whpPutawayRule => 'Put-away rule';
+
+  @override
+  String get putawayManual => 'Manual';
+
+  @override
+  String get putawayFixed => 'Fixed location';
+
+  @override
+  String get putawayConsolidate => 'Consolidate';
+
+  @override
+  String get putawayNearestEmpty => 'Nearest empty';
+
+  @override
+  String get whpLeadTime => 'Lead time (days)';
+
+  @override
+  String get whpSupplier => 'Preferred supplier';
+
+  @override
+  String get whpClear => 'Remove these settings';
+
+  @override
+  String get whpClearQ => 'Remove this warehouse\'s settings?';
+
+  @override
+  String get whpClearBody =>
+      'The default location and reorder point go, and it drops off the replenishment list.';
+
+  @override
+  String get whpNeedsReorder => 'Below the reorder point';
 }

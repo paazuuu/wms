@@ -35,6 +35,8 @@ import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/product/domain/product_lot.dart';
+import 'package:wms_mobile/features/product/domain/warehouse_product.dart';
 import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
 import 'package:wms_mobile/features/purchasing/data/purchase_order_repository.dart';
 import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
@@ -1429,6 +1431,100 @@ class FakeProductRepository implements ProductRepository {
 
   @override
   Future<ApiResult<List<Uom>>> listUoms() async => ApiSuccess(uomVocabulary);
+
+  /// Lots and serials a test wants the detail screen to show. Keyed by product,
+  /// so one fake can hold a tracked and an untracked product at once.
+  Map<int, List<ProductLot>> lotsByProduct = const {};
+  Map<int, List<ProductSerial>> serialsByProduct = const {};
+
+  /// The status [serials] was last filtered by, so a test can assert the filter
+  /// reached the RPC rather than being applied client-side.
+  String? lastSerialStatus;
+
+  @override
+  Future<ApiResult<List<ProductLot>>> lots(int productId) async =>
+      ApiSuccess(lotsByProduct[productId] ?? const []);
+
+  @override
+  Future<ApiResult<List<ProductSerial>>> serials(int productId,
+      {String? status}) async {
+    lastSerialStatus = status;
+    final all = serialsByProduct[productId] ?? const <ProductSerial>[];
+    return ApiSuccess(
+        status == null ? all : all.where((s) => s.status == status).toList());
+  }
+
+  /// Per-warehouse settings, keyed the way the table is: (warehouse, product).
+  Map<(int, int), WarehouseProduct> warehouseProducts = {};
+
+  /// The arguments of the last setWarehouseProduct() call.
+  ({int warehouseId, int productId, String? locationCode, int? reorderPoint,
+      String? putawayRule})? lastWarehouseProduct;
+
+  /// When set, setWarehouseProduct() fails with this message — the real RPC
+  /// refuses `max < min` and a location from another warehouse.
+  String? failWarehouseProductWith;
+
+  @override
+  Future<ApiResult<WarehouseProduct?>> warehouseSettings({
+    required int warehouseId,
+    required int productId,
+  }) async =>
+      ApiSuccess(warehouseProducts[(warehouseId, productId)]);
+
+  @override
+  Future<ApiResult<WarehouseProduct?>> setWarehouseProduct({
+    required int warehouseId,
+    required int productId,
+    String? defaultLocationCode,
+    int? minStock,
+    int? maxStock,
+    int? reorderPoint,
+    int? pickPriority,
+    String? putawayRule,
+    int? preferredSupplierId,
+    int? leadTimeDays,
+    String? note,
+  }) async {
+    lastWarehouseProduct = (
+      warehouseId: warehouseId,
+      productId: productId,
+      locationCode: defaultLocationCode,
+      reorderPoint: reorderPoint,
+      putawayRule: putawayRule,
+    );
+    if (failWarehouseProductWith != null) {
+      return ApiFailure(message: failWarehouseProductWith!, statusCode: 400);
+    }
+    final current = warehouseProducts[(warehouseId, productId)];
+    final saved = WarehouseProduct(
+      warehouseId: warehouseId,
+      productId: productId,
+      // '' clears, null leaves alone — the RPC's own rule.
+      defaultLocationCode: defaultLocationCode == null
+          ? current?.defaultLocationCode
+          : (defaultLocationCode.isEmpty ? null : defaultLocationCode),
+      minStock: minStock ?? current?.minStock,
+      maxStock: maxStock ?? current?.maxStock,
+      reorderPoint: reorderPoint ?? current?.reorderPoint,
+      pickPriority: pickPriority ?? current?.pickPriority ?? 100,
+      putawayRule: putawayRule ?? current?.putawayRule ?? 'MANUAL',
+      preferredSupplierId: preferredSupplierId ?? current?.preferredSupplierId,
+      leadTimeDays: leadTimeDays ?? current?.leadTimeDays,
+      note: note ?? current?.note,
+      onHand: current?.onHand ?? 0,
+      available: current?.available ?? 0,
+    );
+    warehouseProducts[(warehouseId, productId)] = saved;
+    return ApiSuccess(saved);
+  }
+
+  @override
+  Future<ApiResult<bool>> clearWarehouseProduct({
+    required int warehouseId,
+    required int productId,
+  }) async =>
+      ApiSuccess(warehouseProducts.remove((warehouseId, productId)) != null);
 }
 
 /// Purchase order stub. Mirrors the real RPCs' state-machine transitions

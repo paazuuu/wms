@@ -5211,6 +5211,306 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'内訳はまだありません'**
   String get stockPositionNoParcels;
+
+  /// Product detail screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品詳細'**
+  String get productDetailTitle;
+
+  /// Product detail: open the edit sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'編集'**
+  String get productEdit;
+
+  /// Product detail: the codes that resolve to this product (0057).
+  ///
+  /// In ja, this message translates to:
+  /// **'バーコード'**
+  String get productBarcodesSection;
+
+  /// Product detail: register another barcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'コードを追加'**
+  String get productBarcodeAdd;
+
+  /// Product detail: the one code that cannot be removed.
+  ///
+  /// In ja, this message translates to:
+  /// **'主コード'**
+  String get productBarcodePrimary;
+
+  /// Product detail: barcode type (JAN/EAN/CASE/…).
+  ///
+  /// In ja, this message translates to:
+  /// **'種別'**
+  String get productBarcodeType;
+
+  /// Product detail: naming a unit makes the conversion authoritative (0059).
+  ///
+  /// In ja, this message translates to:
+  /// **'単位（任意）'**
+  String get productBarcodeUnit;
+
+  /// Product detail: how much one scan of this code counts.
+  ///
+  /// In ja, this message translates to:
+  /// **'1スキャン = {qty}'**
+  String productBarcodeQtyPerScan(String qty);
+
+  /// Product detail: confirm removing a barcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'このコードを削除しますか？'**
+  String get productBarcodeRemoveQ;
+
+  /// Product detail: what removing a barcode does.
+  ///
+  /// In ja, this message translates to:
+  /// **'このコードではスキャンできなくなります。商品自体は残ります。'**
+  String get productBarcodeRemoveBody;
+
+  /// Product detail: empty barcode list.
+  ///
+  /// In ja, this message translates to:
+  /// **'コードがまだありません'**
+  String get productBarcodeEmpty;
+
+  /// Product detail: base unit and pack sizes (0059).
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get productUnitsSection;
+
+  /// Product detail: define a pack size.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位を追加'**
+  String get productUnitAdd;
+
+  /// Product detail: how many base units one of this unit is.
+  ///
+  /// In ja, this message translates to:
+  /// **'換算数'**
+  String get productUnitFactor;
+
+  /// Product detail: marks the base unit row.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本'**
+  String get productUnitBase;
+
+  /// Product detail: lots recorded against this product (0060).
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット'**
+  String get productLotsSection;
+
+  /// Product detail: empty lot list.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロットの記録はまだありません'**
+  String get productLotsEmpty;
+
+  /// Product detail / expiry list: a lot's expiry date.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限 {date}'**
+  String productLotExpiryOn(String date);
+
+  /// Product detail / expiry list: days until a lot expires.
+  ///
+  /// In ja, this message translates to:
+  /// **'あと{days}日'**
+  String productLotDaysLeft(int days);
+
+  /// Product detail / expiry list: past its date.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限切れ'**
+  String get productLotExpired;
+
+  /// Product detail: how many serials belong to a lot.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル {count} 件'**
+  String productLotSerialCount(int count);
+
+  /// Product detail: serials recorded against this product (0060).
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル'**
+  String get productSerialsSection;
+
+  /// Product detail: empty serial list.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアルの記録はまだありません'**
+  String get productSerialsEmpty;
+
+  /// Product detail: serial status filter, no filter.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get productSerialFilterAll;
+
+  /// Serial status IN_STOCK.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫あり'**
+  String get serialInStock;
+
+  /// Serial status SHIPPED.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済'**
+  String get serialShipped;
+
+  /// Serial status RETURNED.
+  ///
+  /// In ja, this message translates to:
+  /// **'返品'**
+  String get serialReturned;
+
+  /// Serial status SCRAPPED.
+  ///
+  /// In ja, this message translates to:
+  /// **'廃棄'**
+  String get serialScrapped;
+
+  /// Serial status HOLD.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get serialHold;
+
+  /// Product detail: warehouse_products, §22's per-warehouse handling.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫での設定'**
+  String get whpSection;
+
+  /// Product detail: no warehouse_products row, which is the normal case.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫には専用の設定がありません'**
+  String get whpNone;
+
+  /// Product detail: the settings are per warehouse, and none is active.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選ぶと設定できます'**
+  String get whpNoWarehouse;
+
+  /// Product detail: open the warehouse settings sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'設定する'**
+  String get whpEdit;
+
+  /// warehouse_products.default_location_id, named by its code.
+  ///
+  /// In ja, this message translates to:
+  /// **'既定ロケーション'**
+  String get whpDefaultLocation;
+
+  /// warehouse_products: how the default location is entered.
+  ///
+  /// In ja, this message translates to:
+  /// **'ラックのコード（空欄で解除）'**
+  String get whpDefaultLocationHint;
+
+  /// warehouse_products.min_stock.
+  ///
+  /// In ja, this message translates to:
+  /// **'最小在庫'**
+  String get whpMinStock;
+
+  /// warehouse_products.reorder_point, compared against available (§31).
+  ///
+  /// In ja, this message translates to:
+  /// **'発注点'**
+  String get whpReorderPoint;
+
+  /// warehouse_products.max_stock, the level a suggestion orders up to.
+  ///
+  /// In ja, this message translates to:
+  /// **'最大在庫'**
+  String get whpMaxStock;
+
+  /// warehouse_products.pick_priority, lower picks first.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング優先度'**
+  String get whpPickPriority;
+
+  /// warehouse_products.putaway_rule; records the intent, Phase B acts on it.
+  ///
+  /// In ja, this message translates to:
+  /// **'格納ルール'**
+  String get whpPutawayRule;
+
+  /// Put-away rule MANUAL.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動'**
+  String get putawayManual;
+
+  /// Put-away rule FIXED.
+  ///
+  /// In ja, this message translates to:
+  /// **'固定ロケーション'**
+  String get putawayFixed;
+
+  /// Put-away rule CONSOLIDATE.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ品にまとめる'**
+  String get putawayConsolidate;
+
+  /// Put-away rule NEAREST_EMPTY.
+  ///
+  /// In ja, this message translates to:
+  /// **'最も近い空き'**
+  String get putawayNearestEmpty;
+
+  /// warehouse_products.lead_time_days.
+  ///
+  /// In ja, this message translates to:
+  /// **'リードタイム（日）'**
+  String get whpLeadTime;
+
+  /// warehouse_products.preferred_supplier_id.
+  ///
+  /// In ja, this message translates to:
+  /// **'優先仕入先'**
+  String get whpSupplier;
+
+  /// Product detail: clear_warehouse_product.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫の設定を削除'**
+  String get whpClear;
+
+  /// Product detail: confirm clearing warehouse_products.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫の設定を削除しますか？'**
+  String get whpClearQ;
+
+  /// Product detail: what clearing warehouse_products does.
+  ///
+  /// In ja, this message translates to:
+  /// **'既定ロケーションと発注点がなくなり、補充提案にも出なくなります。'**
+  String get whpClearBody;
+
+  /// Product detail: available < reorder_point.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注点を下回っています'**
+  String get whpNeedsReorder;
 }
 
 class _AppLocalizationsDelegate

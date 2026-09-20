@@ -2696,4 +2696,162 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get stockPositionNoParcels => '暫无明细';
+
+  @override
+  String get productDetailTitle => '商品详情';
+
+  @override
+  String get productEdit => '编辑';
+
+  @override
+  String get productBarcodesSection => '条码';
+
+  @override
+  String get productBarcodeAdd => '添加条码';
+
+  @override
+  String get productBarcodePrimary => '主条码';
+
+  @override
+  String get productBarcodeType => '类型';
+
+  @override
+  String get productBarcodeUnit => '单位（可选）';
+
+  @override
+  String productBarcodeQtyPerScan(String qty) {
+    return '1次扫描 = $qty';
+  }
+
+  @override
+  String get productBarcodeRemoveQ => '要删除该条码吗？';
+
+  @override
+  String get productBarcodeRemoveBody => '将无法再通过该条码扫描到商品。商品本身保留。';
+
+  @override
+  String get productBarcodeEmpty => '暂无条码';
+
+  @override
+  String get productUnitsSection => '单位';
+
+  @override
+  String get productUnitAdd => '添加单位';
+
+  @override
+  String get productUnitFactor => '换算数';
+
+  @override
+  String get productUnitBase => '基本';
+
+  @override
+  String get productLotsSection => '批次';
+
+  @override
+  String get productLotsEmpty => '暂无批次记录';
+
+  @override
+  String productLotExpiryOn(String date) {
+    return '有效期 $date';
+  }
+
+  @override
+  String productLotDaysLeft(int days) {
+    return '剩余$days天';
+  }
+
+  @override
+  String get productLotExpired => '已过期';
+
+  @override
+  String productLotSerialCount(int count) {
+    return '$count 个序列号';
+  }
+
+  @override
+  String get productSerialsSection => '序列号';
+
+  @override
+  String get productSerialsEmpty => '暂无序列号记录';
+
+  @override
+  String get productSerialFilterAll => '全部';
+
+  @override
+  String get serialInStock => '在库';
+
+  @override
+  String get serialShipped => '已发货';
+
+  @override
+  String get serialReturned => '退货';
+
+  @override
+  String get serialScrapped => '废弃';
+
+  @override
+  String get serialHold => '保留';
+
+  @override
+  String get whpSection => '本仓库设置';
+
+  @override
+  String get whpNone => '本仓库没有专用设置';
+
+  @override
+  String get whpNoWarehouse => '选择仓库后可设置';
+
+  @override
+  String get whpEdit => '设置';
+
+  @override
+  String get whpDefaultLocation => '默认库位';
+
+  @override
+  String get whpDefaultLocationHint => '货架编号（留空即清除）';
+
+  @override
+  String get whpMinStock => '最小库存';
+
+  @override
+  String get whpReorderPoint => '补货点';
+
+  @override
+  String get whpMaxStock => '最大库存';
+
+  @override
+  String get whpPickPriority => '拣货优先级';
+
+  @override
+  String get whpPutawayRule => '上架规则';
+
+  @override
+  String get putawayManual => '手动';
+
+  @override
+  String get putawayFixed => '固定库位';
+
+  @override
+  String get putawayConsolidate => '合并到同品';
+
+  @override
+  String get putawayNearestEmpty => '最近的空位';
+
+  @override
+  String get whpLeadTime => '提前期（天）';
+
+  @override
+  String get whpSupplier => '首选供应商';
+
+  @override
+  String get whpClear => '删除本仓库设置';
+
+  @override
+  String get whpClearQ => '要删除本仓库的设置吗？';
+
+  @override
+  String get whpClearBody => '默认库位与补货点将被清除，也不会再出现在补货建议中。';
+
+  @override
+  String get whpNeedsReorder => '低于补货点';
 }
