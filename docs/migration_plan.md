@@ -2188,6 +2188,59 @@ code collides with a zone's is disambiguated rather than rejected; and neither
 `location_subtree` nor `location_code_for` is reachable by a client role. All ten
 security invariants pass.
 
+### 0063 — warehouse products (Phase A step 10, §22 §31)
+
+§22's example is the whole feature: the same product lives at A-01 in Osaka, B-03
+in Kobe and C-10 in Tokyo, and "where does this go" has three different right
+answers. There was nowhere to put any of them, so a put-away decision had to come
+from memory every time, and a reorder point could not exist at all — it would
+have had to mean the same number in every building.
+
+`warehouse_products` is that split: `products` keeps what is true of the goods
+everywhere, this keeps what is true of them *here* — default location, min/max,
+reorder point, pick priority, put-away rule, preferred supplier, lead time. A row
+is optional, and no row means no special settings: seeding one per product ×
+warehouse would fill the table with nulls and make "has anyone thought about this
+product here?" unanswerable.
+
+**The default target points at `locations`, not `bins`** — 0062 made the tree
+canonical for structure, and this also lets the target be a rack or a zone rather
+than only a leaf bin, which is what "put this in aisle 3, anywhere" needs. The
+read hands back `default_bin_id` from `locations.bin_id` beside it, so the
+put-away RPCs that still work in bins need no translation layer. The composite FK
+keeps a warehouse from naming another warehouse's location, and its `ON DELETE
+SET NULL` carries a **column list** — without one, Postgres would null every
+referencing column when a location is deleted, and `warehouse_id` is half the
+primary key, so the delete would fail instead of clearing the setting.
+
+**§31 is where step 7 pays for itself.** A reorder point compared against
+`on_hand` is the wrong comparison: quarantined or damaged stock is on hand and
+cannot cover an order. `replenishment_suggestions()` compares against
+`stock_available()` (0061), so a warehouse holding 100 units of which 90 are
+blocked correctly reads as needing to reorder — which the test proves directly.
+Without step 7 this read would have been confidently wrong. It suggests ordering
+up to `max_stock` rather than to the reorder point, because ordering exactly to
+the line puts the product straight back on the list. The suggestion is a read,
+not a row: computed from current numbers each time, so it cannot go stale and
+nothing has to decide when to invalidate it.
+
+`set_warehouse_product` takes a location *code*, because the person setting this
+up is reading the rack label. Null means "leave this field alone" for every
+field, so one flag can be changed without restating the row — and an empty string
+is how a location is cleared, which a null cannot express.
+
+Verified with a self-rolling-back block, **20 checks, all OK**: no row reads as
+null rather than an invented default; a full set round-trips with the location,
+its bin, the levels, the rule, the supplier and the live stock numbers; a
+one-field call leaves the rest alone and an empty string clears the location; an
+unknown location, an unknown rule and `max < min` are each refused; with no stock
+the product is suggested with shortfall 60 and an order of 200; at 100 on hand it
+drops off the list; **quarantining 90 of those 100 brings it back with on_hand
+100, available 10, shortfall 50 and a suggested 190**; an inactive row is not
+listed; deleting the location clears the setting instead of failing the delete;
+the list form and `clear_warehouse_product` behave, the second clear returning
+false; and nothing is anon-executable. All ten security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
