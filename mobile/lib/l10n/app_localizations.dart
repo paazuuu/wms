@@ -5511,6 +5511,468 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'発注点を下回っています'**
   String get whpNeedsReorder;
+
+  /// Home menu: lots running out of time (§4).
+  ///
+  /// In ja, this message translates to:
+  /// **'期限管理'**
+  String get featExpiringLots;
+
+  /// Home menu description for the expiry watch.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限が近い・切れたロットを一覧'**
+  String get featExpiringLotsDesc;
+
+  /// Home menu: promises against stock (§6).
+  ///
+  /// In ja, this message translates to:
+  /// **'予約・引当'**
+  String get featReservations;
+
+  /// Home menu description for reservations.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注などのために確保した在庫と、その引当先'**
+  String get featReservationsDesc;
+
+  /// Home menu: the location tree (§7/§8).
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーション'**
+  String get featLocations;
+
+  /// Home menu description for locations.
+  ///
+  /// In ja, this message translates to:
+  /// **'ゾーン・通路・ラック・棚の階層と種別'**
+  String get featLocationsDesc;
+
+  /// Home menu: products under their reorder point (§31).
+  ///
+  /// In ja, this message translates to:
+  /// **'補充提案'**
+  String get featReplenishment;
+
+  /// Home menu description for replenishment.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注点を下回った商品と発注数の目安'**
+  String get featReplenishmentDesc;
+
+  /// Expiry screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限管理'**
+  String get expiryTitle;
+
+  /// Expiry screen: how far ahead the list looks.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日以内'**
+  String expiryHorizon(int days);
+
+  /// Expiry screen: empty state.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限が近いロットはありません'**
+  String get expiryEmpty;
+
+  /// Expiry screen: empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間に期限を迎えるロットはありません。期間を広げると先の分も確認できます。'**
+  String get expiryEmptyBody;
+
+  /// Expiry screen: how many rows are already past their date.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限切れ {count} 件'**
+  String expiryExpiredCount(int count);
+
+  /// Expiry screen: how many rows are close to their date.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限間近 {count} 件'**
+  String expirySoonCount(int count);
+
+  /// Reservations screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'予約・引当'**
+  String get reservationsTitle;
+
+  /// Reservations screen: empty state.
+  ///
+  /// In ja, this message translates to:
+  /// **'予約はありません'**
+  String get reservationsEmpty;
+
+  /// Reservations screen: empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注や出荷のために確保された在庫がここに並びます。'**
+  String get reservationsEmptyBody;
+
+  /// Reservation status ACTIVE.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効'**
+  String get reservationStatusActive;
+
+  /// Reservation status FULFILLED.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済'**
+  String get reservationStatusFulfilled;
+
+  /// Reservation status RELEASED.
+  ///
+  /// In ja, this message translates to:
+  /// **'解放済'**
+  String get reservationStatusReleased;
+
+  /// Reservations screen: no status filter.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get reservationStatusAll;
+
+  /// Reservations screen: past expires_at, so it holds nothing.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限切れ'**
+  String get reservationLapsed;
+
+  /// Reservations screen: what the promise is for.
+  ///
+  /// In ja, this message translates to:
+  /// **'{type} {id}'**
+  String reservationFor(String type, String id);
+
+  /// Reservation reference type sales_order.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get refSalesOrder;
+
+  /// Reservation reference type shipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get refShipment;
+
+  /// Reservation reference type transfer.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動'**
+  String get refTransfer;
+
+  /// Reservation reference type work_order.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業指示'**
+  String get refWorkOrder;
+
+  /// Reservation reference type manual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動'**
+  String get refManual;
+
+  /// Reservations screen: the promised quantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'予約 {qty}'**
+  String reservationQuantity(String qty);
+
+  /// Reservations screen: how much is pinned to parcels.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当済 {qty}'**
+  String reservationAllocated(String qty);
+
+  /// Reservations screen: promised but not pinned to any parcel yet.
+  ///
+  /// In ja, this message translates to:
+  /// **'未引当 {qty}'**
+  String reservationUnallocated(String qty);
+
+  /// Reservations screen: how much of the promise has shipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済 {qty}'**
+  String reservationFulfilled(String qty);
+
+  /// Reservations screen: release_reservation.
+  ///
+  /// In ja, this message translates to:
+  /// **'解放'**
+  String get reservationRelease;
+
+  /// Reservations screen: confirm releasing.
+  ///
+  /// In ja, this message translates to:
+  /// **'この予約を解放しますか？'**
+  String get reservationReleaseQ;
+
+  /// Reservations screen: what releasing does.
+  ///
+  /// In ja, this message translates to:
+  /// **'確保していた在庫が引当可能に戻り、引当先も取り消されます。記録は残ります。'**
+  String get reservationReleaseBody;
+
+  /// Reservations screen: which parcels will supply this promise.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当先'**
+  String get reservationAllocationsTitle;
+
+  /// Reservations screen: a reservation with no allocations, which is a valid state.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当先はまだ決まっていません'**
+  String get reservationNoAllocations;
+
+  /// Reservations screen: parcels promised to more than they hold.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当超過'**
+  String get overAllocatedTitle;
+
+  /// Reservations screen: why over-allocation happens (an allocation never blocks a movement).
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が引当より減っています。出荷が先に取ったためで、引当の解放か在庫の補充が必要です。'**
+  String get overAllocatedBody;
+
+  /// Reservations screen: one over-allocated parcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {quantity} / 引当 {allocated}（超過 {over}）'**
+  String overAllocatedRow(String quantity, String allocated, String over);
+
+  /// Location tree screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーション'**
+  String get locationsTitle;
+
+  /// Location tree: empty state.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーションがまだありません'**
+  String get locationsEmpty;
+
+  /// Location tree: empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'ゾーンや棚を登録すると、ここに階層として表示されます。'**
+  String get locationsEmptyBody;
+
+  /// Location tree: the tree is per warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選ぶと表示できます'**
+  String get locationsNoWarehouse;
+
+  /// Location tree: create_location.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロケーションを追加'**
+  String get locationAdd;
+
+  /// Location: its code, unique within the warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'コード'**
+  String get locationCode;
+
+  /// Location: a human name beside the code.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称（任意）'**
+  String get locationName;
+
+  /// Location: its type, which sets the default flags (§8).
+  ///
+  /// In ja, this message translates to:
+  /// **'種別'**
+  String get locationType;
+
+  /// Location: the node above it; empty means directly under the warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'親ロケーション（任意）'**
+  String get locationParent;
+
+  /// Location: what a scan gun reads off the shelf label.
+  ///
+  /// In ja, this message translates to:
+  /// **'ラベルのバーコード（任意）'**
+  String get locationBarcode;
+
+  /// Location tree: include is_active = false nodes.
+  ///
+  /// In ja, this message translates to:
+  /// **'停止中も表示'**
+  String get locationShowInactive;
+
+  /// Location flag pickable.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング可'**
+  String get locationPickable;
+
+  /// Location flag receivable.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷可'**
+  String get locationReceivable;
+
+  /// Location flag shipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get locationShipping;
+
+  /// Location flag quarantine.
+  ///
+  /// In ja, this message translates to:
+  /// **'隔離'**
+  String get locationQuarantine;
+
+  /// Location flag is_virtual.
+  ///
+  /// In ja, this message translates to:
+  /// **'仮想'**
+  String get locationVirtual;
+
+  /// Location: is_active = false.
+  ///
+  /// In ja, this message translates to:
+  /// **'停止中'**
+  String get locationInactive;
+
+  /// Location tree: bin_stock for a node that is a bin.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {qty}'**
+  String locationOnHand(String qty);
+
+  /// Location type STORAGE.
+  ///
+  /// In ja, this message translates to:
+  /// **'保管'**
+  String get locTypeStorage;
+
+  /// Location type PICKING.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング'**
+  String get locTypePicking;
+
+  /// Location type RECEIVING.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get locTypeReceiving;
+
+  /// Location type QC.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get locTypeQc;
+
+  /// Location type PACKING.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包'**
+  String get locTypePacking;
+
+  /// Location type SHIPPING.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get locTypeShipping;
+
+  /// Location type QUARANTINE.
+  ///
+  /// In ja, this message translates to:
+  /// **'隔離'**
+  String get locTypeQuarantine;
+
+  /// Location type DAMAGED.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損'**
+  String get locTypeDamaged;
+
+  /// Location type RETURN.
+  ///
+  /// In ja, this message translates to:
+  /// **'返品'**
+  String get locTypeReturn;
+
+  /// Location type TRANSIT.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動中'**
+  String get locTypeTransit;
+
+  /// Location type VIRTUAL.
+  ///
+  /// In ja, this message translates to:
+  /// **'仮想'**
+  String get locTypeVirtual;
+
+  /// Replenishment screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'補充提案'**
+  String get replenishmentTitle;
+
+  /// Replenishment screen: empty state.
+  ///
+  /// In ja, this message translates to:
+  /// **'補充が必要な商品はありません'**
+  String get replenishmentEmpty;
+
+  /// Replenishment screen: empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注点を設定した商品が、いずれも発注点を上回っています。'**
+  String get replenishmentEmptyBody;
+
+  /// Replenishment screen: suggested_quantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注目安 {qty}'**
+  String replenishmentSuggest(String qty);
+
+  /// Replenishment screen: how far under the reorder point.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注点まで {qty}'**
+  String replenishmentShortfall(String qty);
+
+  /// Replenishment screen: on hand but unusable — why a product with stock is listed.
+  ///
+  /// In ja, this message translates to:
+  /// **'うち出荷不可 {qty}'**
+  String replenishmentBlocked(String qty);
+
+  /// Replenishment screen: lead_time_days.
+  ///
+  /// In ja, this message translates to:
+  /// **'リードタイム {days}日'**
+  String replenishmentLeadTime(int days);
+
+  /// Replenishment screen: the list is per warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選ぶと表示できます'**
+  String get replenishmentNoWarehouse;
 }
 
 class _AppLocalizationsDelegate

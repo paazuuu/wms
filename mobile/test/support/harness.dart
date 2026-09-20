@@ -35,6 +35,8 @@ import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/inventory/data/inventory_repository.dart';
+import 'package:wms_mobile/features/inventory/domain/reservation.dart';
 import 'package:wms_mobile/features/product/domain/product_lot.dart';
 import 'package:wms_mobile/features/product/domain/warehouse_product.dart';
 import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
@@ -2143,4 +2145,93 @@ class FakeSearchRepository implements SearchRepository {
     lastWarehouseId = warehouseId;
     return ApiSuccess(results);
   }
+}
+
+/// Inventory-control stub: the attention lists Phase A made possible (expiry,
+/// reservations, over-allocation, replenishment). Each list is what the test
+/// hands it; [releasedIds] records what a release actually asked for.
+class FakeInventoryRepository implements InventoryRepository {
+  FakeInventoryRepository({
+    this.lots = const [],
+    this.reservationList = const [],
+    this.overAllocatedList = const [],
+    this.suggestions = const [],
+  });
+
+  List<ExpiringLot> lots;
+  List<Reservation> reservationList;
+  List<OverAllocatedStock> overAllocatedList;
+  List<ReplenishmentSuggestion> suggestions;
+
+  /// The horizon the last expiringLots() call asked for.
+  int? lastHorizon;
+
+  /// The status filter the last reservations() call asked for. Distinct from
+  /// "not called": a null *status* means every status.
+  ({int? warehouseId, String? status})? lastReservationQuery;
+
+  final List<int> releasedIds = [];
+
+  /// When set, releaseReservation() fails with this message — the real RPC
+  /// refuses a second release.
+  String? failReleaseWith;
+
+  @override
+  Future<ApiResult<List<ExpiringLot>>> expiringLots({
+    int days = 30,
+    bool includeExpired = true,
+  }) async {
+    lastHorizon = days;
+    return ApiSuccess(lots);
+  }
+
+  @override
+  Future<ApiResult<List<Reservation>>> reservations({
+    int? warehouseId,
+    int? productId,
+    String? status = 'ACTIVE',
+  }) async {
+    lastReservationQuery = (warehouseId: warehouseId, status: status);
+    return ApiSuccess(status == null
+        ? reservationList
+        : reservationList.where((r) => r.status == status).toList());
+  }
+
+  @override
+  Future<ApiResult<List<OverAllocatedStock>>> overAllocated(
+          {int? warehouseId}) async =>
+      ApiSuccess(overAllocatedList);
+
+  @override
+  Future<ApiResult<bool>> releaseReservation(int reservationId,
+      {String? note}) async {
+    releasedIds.add(reservationId);
+    if (failReleaseWith != null) {
+      return ApiFailure(message: failReleaseWith!, statusCode: 400);
+    }
+    reservationList = [
+      for (final r in reservationList)
+        if (r.id == reservationId)
+          Reservation(
+            id: r.id,
+            productId: r.productId,
+            productName: r.productName,
+            warehouseId: r.warehouseId,
+            quantity: r.quantity,
+            status: 'RELEASED',
+            fulfilledQuantity: r.fulfilledQuantity,
+            referenceType: r.referenceType,
+            referenceId: r.referenceId,
+          )
+        else
+          r,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<ReplenishmentSuggestion>>> replenishment({
+    int? warehouseId,
+  }) async =>
+      ApiSuccess(suggestions);
 }

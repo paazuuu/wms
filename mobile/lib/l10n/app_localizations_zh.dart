@@ -2854,4 +2854,263 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get whpNeedsReorder => '低于补货点';
+
+  @override
+  String get featExpiringLots => '有效期管理';
+
+  @override
+  String get featExpiringLotsDesc => '列出临期与过期批次';
+
+  @override
+  String get featReservations => '预留与分配';
+
+  @override
+  String get featReservationsDesc => '为订单预留的库存及其分配来源';
+
+  @override
+  String get featLocations => '库位';
+
+  @override
+  String get featLocationsDesc => '区域·通道·货架·层的层级与类型';
+
+  @override
+  String get featReplenishment => '补货建议';
+
+  @override
+  String get featReplenishmentDesc => '低于补货点的商品与建议订购量';
+
+  @override
+  String get expiryTitle => '有效期管理';
+
+  @override
+  String expiryHorizon(int days) {
+    return '$days天内';
+  }
+
+  @override
+  String get expiryEmpty => '没有临期批次';
+
+  @override
+  String get expiryEmptyBody => '此期间内没有到期批次。放宽期间可查看更久之后的情况。';
+
+  @override
+  String expiryExpiredCount(int count) {
+    return '已过期 $count 件';
+  }
+
+  @override
+  String expirySoonCount(int count) {
+    return '临期 $count 件';
+  }
+
+  @override
+  String get reservationsTitle => '预留与分配';
+
+  @override
+  String get reservationsEmpty => '没有预留';
+
+  @override
+  String get reservationsEmptyBody => '为订单或发货预留的库存会显示在这里。';
+
+  @override
+  String get reservationStatusActive => '有效';
+
+  @override
+  String get reservationStatusFulfilled => '已履行';
+
+  @override
+  String get reservationStatusReleased => '已释放';
+
+  @override
+  String get reservationStatusAll => '全部';
+
+  @override
+  String get reservationLapsed => '已失效';
+
+  @override
+  String reservationFor(String type, String id) {
+    return '$type $id';
+  }
+
+  @override
+  String get refSalesOrder => '销售订单';
+
+  @override
+  String get refShipment => '发货';
+
+  @override
+  String get refTransfer => '调拨';
+
+  @override
+  String get refWorkOrder => '工单';
+
+  @override
+  String get refManual => '手动';
+
+  @override
+  String reservationQuantity(String qty) {
+    return '预留 $qty';
+  }
+
+  @override
+  String reservationAllocated(String qty) {
+    return '已分配 $qty';
+  }
+
+  @override
+  String reservationUnallocated(String qty) {
+    return '未分配 $qty';
+  }
+
+  @override
+  String reservationFulfilled(String qty) {
+    return '已发货 $qty';
+  }
+
+  @override
+  String get reservationRelease => '释放';
+
+  @override
+  String get reservationReleaseQ => '要释放该预留吗？';
+
+  @override
+  String get reservationReleaseBody => '预留的库存将恢复可用，分配也会取消。记录会保留。';
+
+  @override
+  String get reservationAllocationsTitle => '分配来源';
+
+  @override
+  String get reservationNoAllocations => '尚未选择来源';
+
+  @override
+  String get overAllocatedTitle => '分配超额';
+
+  @override
+  String get overAllocatedBody => '库存低于已分配数量：发货先取走了。需要释放分配或补充库存。';
+
+  @override
+  String overAllocatedRow(String quantity, String allocated, String over) {
+    return '库存 $quantity / 已分配 $allocated（超额 $over）';
+  }
+
+  @override
+  String get locationsTitle => '库位';
+
+  @override
+  String get locationsEmpty => '暂无库位';
+
+  @override
+  String get locationsEmptyBody => '登记区域或货架后，将在此显示为层级。';
+
+  @override
+  String get locationsNoWarehouse => '选择仓库后可查看';
+
+  @override
+  String get locationAdd => '添加库位';
+
+  @override
+  String get locationCode => '编号';
+
+  @override
+  String get locationName => '名称（可选）';
+
+  @override
+  String get locationType => '类型';
+
+  @override
+  String get locationParent => '上级库位（可选）';
+
+  @override
+  String get locationBarcode => '标签条码（可选）';
+
+  @override
+  String get locationShowInactive => '显示停用';
+
+  @override
+  String get locationPickable => '可拣货';
+
+  @override
+  String get locationReceivable => '可收货';
+
+  @override
+  String get locationShipping => '发货';
+
+  @override
+  String get locationQuarantine => '隔离';
+
+  @override
+  String get locationVirtual => '虚拟';
+
+  @override
+  String get locationInactive => '停用';
+
+  @override
+  String locationOnHand(String qty) {
+    return '库存 $qty';
+  }
+
+  @override
+  String get locTypeStorage => '存储';
+
+  @override
+  String get locTypePicking => '拣货';
+
+  @override
+  String get locTypeReceiving => '收货';
+
+  @override
+  String get locTypeQc => '质检';
+
+  @override
+  String get locTypePacking => '包装';
+
+  @override
+  String get locTypeShipping => '发货';
+
+  @override
+  String get locTypeQuarantine => '隔离';
+
+  @override
+  String get locTypeDamaged => '破损';
+
+  @override
+  String get locTypeReturn => '退货';
+
+  @override
+  String get locTypeTransit => '在途';
+
+  @override
+  String get locTypeVirtual => '虚拟';
+
+  @override
+  String get replenishmentTitle => '补货建议';
+
+  @override
+  String get replenishmentEmpty => '没有需要补货的商品';
+
+  @override
+  String get replenishmentEmptyBody => '设置了补货点的商品均高于补货点。';
+
+  @override
+  String replenishmentSuggest(String qty) {
+    return '建议订购 $qty';
+  }
+
+  @override
+  String replenishmentShortfall(String qty) {
+    return '距补货点 $qty';
+  }
+
+  @override
+  String replenishmentBlocked(String qty) {
+    return '其中不可发货 $qty';
+  }
+
+  @override
+  String replenishmentLeadTime(int days) {
+    return '提前期 $days 天';
+  }
+
+  @override
+  String get replenishmentNoWarehouse => '选择仓库后可查看';
 }

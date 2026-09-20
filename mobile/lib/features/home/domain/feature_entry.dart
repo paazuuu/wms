@@ -109,6 +109,10 @@ class FeatureEntry {
         return l10n.featReports;
       case 'putaway':
         return l10n.featPutaway;
+      case 'expiring_lots':
+        return l10n.featExpiringLots;
+      case 'reservations':
+        return l10n.featReservations;
       default:
         return id;
     }
@@ -153,6 +157,10 @@ class FeatureEntry {
         return l10n.featReportsDesc;
       case 'putaway':
         return l10n.featPutawayDesc;
+      case 'expiring_lots':
+        return l10n.featExpiringLotsDesc;
+      case 'reservations':
+        return l10n.featReservationsDesc;
       default:
         return '';
     }

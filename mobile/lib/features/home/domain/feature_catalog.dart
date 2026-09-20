@@ -5,6 +5,8 @@ import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
+import '../../inventory/presentation/expiring_lots_screen.dart';
+import '../../inventory/presentation/reservations_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
@@ -70,6 +72,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _stockAdjustment,
             requiredAnyOf: ['inventory.adjust'],
+          ),
+          FeatureEntry(
+            id: 'expiring_lots',
+            icon: Icons.event_busy_outlined,
+            status: FeatureStatus.ready,
+            builder: _expiringLots,
+            requiredAnyOf: ['inventory.view'],
           ),
           FeatureEntry(
             id: 'stock_count',
@@ -161,6 +170,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['partner.view', 'partner.manage'],
           ),
           FeatureEntry(
+            id: 'reservations',
+            icon: Icons.bookmark_border,
+            status: FeatureStatus.ready,
+            builder: _reservations,
+            requiredAnyOf: ['inventory.view'],
+          ),
+          FeatureEntry(
             id: 'reports',
             icon: Icons.table_chart_outlined,
             status: FeatureStatus.ready,
@@ -226,3 +242,9 @@ Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();
 
 /// Top-level (const-referenceable) builder for the Work Orders feature.
 Widget _workOrders(BuildContext _) => const WorkOrderListScreen();
+
+/// Top-level (const-referenceable) builder for the Expiry Watch feature.
+Widget _expiringLots(BuildContext _) => const ExpiringLotsScreen();
+
+/// Top-level (const-referenceable) builder for the Reservations feature.
+Widget _reservations(BuildContext _) => const ReservationsScreen();

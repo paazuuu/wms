@@ -1629,5 +1629,392 @@
   "whpNeedsReorder": "発注点を下回っています",
   "@whpNeedsReorder": {
       "description": "Product detail: available < reorder_point."
+  },
+  "featExpiringLots": "期限管理",
+  "@featExpiringLots": {
+      "description": "Home menu: lots running out of time (§4)."
+  },
+  "featExpiringLotsDesc": "期限が近い・切れたロットを一覧",
+  "@featExpiringLotsDesc": {
+      "description": "Home menu description for the expiry watch."
+  },
+  "featReservations": "予約・引当",
+  "@featReservations": {
+      "description": "Home menu: promises against stock (§6)."
+  },
+  "featReservationsDesc": "受注などのために確保した在庫と、その引当先",
+  "@featReservationsDesc": {
+      "description": "Home menu description for reservations."
+  },
+  "featLocations": "ロケーション",
+  "@featLocations": {
+      "description": "Home menu: the location tree (§7/§8)."
+  },
+  "featLocationsDesc": "ゾーン・通路・ラック・棚の階層と種別",
+  "@featLocationsDesc": {
+      "description": "Home menu description for locations."
+  },
+  "featReplenishment": "補充提案",
+  "@featReplenishment": {
+      "description": "Home menu: products under their reorder point (§31)."
+  },
+  "featReplenishmentDesc": "発注点を下回った商品と発注数の目安",
+  "@featReplenishmentDesc": {
+      "description": "Home menu description for replenishment."
+  },
+  "expiryTitle": "期限管理",
+  "@expiryTitle": {
+      "description": "Expiry screen title."
+  },
+  "expiryHorizon": "{days}日以内",
+  "@expiryHorizon": {
+      "description": "Expiry screen: how far ahead the list looks.",
+      "placeholders": {
+          "days": {
+              "type": "int"
+          }
+      }
+  },
+  "expiryEmpty": "期限が近いロットはありません",
+  "@expiryEmpty": {
+      "description": "Expiry screen: empty state."
+  },
+  "expiryEmptyBody": "この期間に期限を迎えるロットはありません。期間を広げると先の分も確認できます。",
+  "@expiryEmptyBody": {
+      "description": "Expiry screen: empty state body."
+  },
+  "expiryExpiredCount": "期限切れ {count} 件",
+  "@expiryExpiredCount": {
+      "description": "Expiry screen: how many rows are already past their date.",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "expirySoonCount": "期限間近 {count} 件",
+  "@expirySoonCount": {
+      "description": "Expiry screen: how many rows are close to their date.",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "reservationsTitle": "予約・引当",
+  "@reservationsTitle": {
+      "description": "Reservations screen title."
+  },
+  "reservationsEmpty": "予約はありません",
+  "@reservationsEmpty": {
+      "description": "Reservations screen: empty state."
+  },
+  "reservationsEmptyBody": "受注や出荷のために確保された在庫がここに並びます。",
+  "@reservationsEmptyBody": {
+      "description": "Reservations screen: empty state body."
+  },
+  "reservationStatusActive": "有効",
+  "@reservationStatusActive": {
+      "description": "Reservation status ACTIVE."
+  },
+  "reservationStatusFulfilled": "出荷済",
+  "@reservationStatusFulfilled": {
+      "description": "Reservation status FULFILLED."
+  },
+  "reservationStatusReleased": "解放済",
+  "@reservationStatusReleased": {
+      "description": "Reservation status RELEASED."
+  },
+  "reservationStatusAll": "すべて",
+  "@reservationStatusAll": {
+      "description": "Reservations screen: no status filter."
+  },
+  "reservationLapsed": "期限切れ",
+  "@reservationLapsed": {
+      "description": "Reservations screen: past expires_at, so it holds nothing."
+  },
+  "reservationFor": "{type} {id}",
+  "@reservationFor": {
+      "description": "Reservations screen: what the promise is for.",
+      "placeholders": {
+          "type": {
+              "type": "String"
+          },
+          "id": {
+              "type": "String"
+          }
+      }
+  },
+  "refSalesOrder": "受注",
+  "@refSalesOrder": {
+      "description": "Reservation reference type sales_order."
+  },
+  "refShipment": "出荷",
+  "@refShipment": {
+      "description": "Reservation reference type shipment."
+  },
+  "refTransfer": "移動",
+  "@refTransfer": {
+      "description": "Reservation reference type transfer."
+  },
+  "refWorkOrder": "作業指示",
+  "@refWorkOrder": {
+      "description": "Reservation reference type work_order."
+  },
+  "refManual": "手動",
+  "@refManual": {
+      "description": "Reservation reference type manual."
+  },
+  "reservationQuantity": "予約 {qty}",
+  "@reservationQuantity": {
+      "description": "Reservations screen: the promised quantity.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "reservationAllocated": "引当済 {qty}",
+  "@reservationAllocated": {
+      "description": "Reservations screen: how much is pinned to parcels.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "reservationUnallocated": "未引当 {qty}",
+  "@reservationUnallocated": {
+      "description": "Reservations screen: promised but not pinned to any parcel yet.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "reservationFulfilled": "出荷済 {qty}",
+  "@reservationFulfilled": {
+      "description": "Reservations screen: how much of the promise has shipped.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "reservationRelease": "解放",
+  "@reservationRelease": {
+      "description": "Reservations screen: release_reservation."
+  },
+  "reservationReleaseQ": "この予約を解放しますか？",
+  "@reservationReleaseQ": {
+      "description": "Reservations screen: confirm releasing."
+  },
+  "reservationReleaseBody": "確保していた在庫が引当可能に戻り、引当先も取り消されます。記録は残ります。",
+  "@reservationReleaseBody": {
+      "description": "Reservations screen: what releasing does."
+  },
+  "reservationAllocationsTitle": "引当先",
+  "@reservationAllocationsTitle": {
+      "description": "Reservations screen: which parcels will supply this promise."
+  },
+  "reservationNoAllocations": "引当先はまだ決まっていません",
+  "@reservationNoAllocations": {
+      "description": "Reservations screen: a reservation with no allocations, which is a valid state."
+  },
+  "overAllocatedTitle": "引当超過",
+  "@overAllocatedTitle": {
+      "description": "Reservations screen: parcels promised to more than they hold."
+  },
+  "overAllocatedBody": "在庫が引当より減っています。出荷が先に取ったためで、引当の解放か在庫の補充が必要です。",
+  "@overAllocatedBody": {
+      "description": "Reservations screen: why over-allocation happens (an allocation never blocks a movement)."
+  },
+  "overAllocatedRow": "在庫 {quantity} / 引当 {allocated}（超過 {over}）",
+  "@overAllocatedRow": {
+      "description": "Reservations screen: one over-allocated parcel.",
+      "placeholders": {
+          "quantity": {
+              "type": "String"
+          },
+          "allocated": {
+              "type": "String"
+          },
+          "over": {
+              "type": "String"
+          }
+      }
+  },
+  "locationsTitle": "ロケーション",
+  "@locationsTitle": {
+      "description": "Location tree screen title."
+  },
+  "locationsEmpty": "ロケーションがまだありません",
+  "@locationsEmpty": {
+      "description": "Location tree: empty state."
+  },
+  "locationsEmptyBody": "ゾーンや棚を登録すると、ここに階層として表示されます。",
+  "@locationsEmptyBody": {
+      "description": "Location tree: empty state body."
+  },
+  "locationsNoWarehouse": "倉庫を選ぶと表示できます",
+  "@locationsNoWarehouse": {
+      "description": "Location tree: the tree is per warehouse."
+  },
+  "locationAdd": "ロケーションを追加",
+  "@locationAdd": {
+      "description": "Location tree: create_location."
+  },
+  "locationCode": "コード",
+  "@locationCode": {
+      "description": "Location: its code, unique within the warehouse."
+  },
+  "locationName": "名称（任意）",
+  "@locationName": {
+      "description": "Location: a human name beside the code."
+  },
+  "locationType": "種別",
+  "@locationType": {
+      "description": "Location: its type, which sets the default flags (§8)."
+  },
+  "locationParent": "親ロケーション（任意）",
+  "@locationParent": {
+      "description": "Location: the node above it; empty means directly under the warehouse."
+  },
+  "locationBarcode": "ラベルのバーコード（任意）",
+  "@locationBarcode": {
+      "description": "Location: what a scan gun reads off the shelf label."
+  },
+  "locationShowInactive": "停止中も表示",
+  "@locationShowInactive": {
+      "description": "Location tree: include is_active = false nodes."
+  },
+  "locationPickable": "ピッキング可",
+  "@locationPickable": {
+      "description": "Location flag pickable."
+  },
+  "locationReceivable": "入荷可",
+  "@locationReceivable": {
+      "description": "Location flag receivable."
+  },
+  "locationShipping": "出荷",
+  "@locationShipping": {
+      "description": "Location flag shipping."
+  },
+  "locationQuarantine": "隔離",
+  "@locationQuarantine": {
+      "description": "Location flag quarantine."
+  },
+  "locationVirtual": "仮想",
+  "@locationVirtual": {
+      "description": "Location flag is_virtual."
+  },
+  "locationInactive": "停止中",
+  "@locationInactive": {
+      "description": "Location: is_active = false."
+  },
+  "locationOnHand": "在庫 {qty}",
+  "@locationOnHand": {
+      "description": "Location tree: bin_stock for a node that is a bin.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "locTypeStorage": "保管",
+  "@locTypeStorage": {
+      "description": "Location type STORAGE."
+  },
+  "locTypePicking": "ピッキング",
+  "@locTypePicking": {
+      "description": "Location type PICKING."
+  },
+  "locTypeReceiving": "入荷",
+  "@locTypeReceiving": {
+      "description": "Location type RECEIVING."
+  },
+  "locTypeQc": "検品",
+  "@locTypeQc": {
+      "description": "Location type QC."
+  },
+  "locTypePacking": "梱包",
+  "@locTypePacking": {
+      "description": "Location type PACKING."
+  },
+  "locTypeShipping": "出荷",
+  "@locTypeShipping": {
+      "description": "Location type SHIPPING."
+  },
+  "locTypeQuarantine": "隔離",
+  "@locTypeQuarantine": {
+      "description": "Location type QUARANTINE."
+  },
+  "locTypeDamaged": "破損",
+  "@locTypeDamaged": {
+      "description": "Location type DAMAGED."
+  },
+  "locTypeReturn": "返品",
+  "@locTypeReturn": {
+      "description": "Location type RETURN."
+  },
+  "locTypeTransit": "移動中",
+  "@locTypeTransit": {
+      "description": "Location type TRANSIT."
+  },
+  "locTypeVirtual": "仮想",
+  "@locTypeVirtual": {
+      "description": "Location type VIRTUAL."
+  },
+  "replenishmentTitle": "補充提案",
+  "@replenishmentTitle": {
+      "description": "Replenishment screen title."
+  },
+  "replenishmentEmpty": "補充が必要な商品はありません",
+  "@replenishmentEmpty": {
+      "description": "Replenishment screen: empty state."
+  },
+  "replenishmentEmptyBody": "発注点を設定した商品が、いずれも発注点を上回っています。",
+  "@replenishmentEmptyBody": {
+      "description": "Replenishment screen: empty state body."
+  },
+  "replenishmentSuggest": "発注目安 {qty}",
+  "@replenishmentSuggest": {
+      "description": "Replenishment screen: suggested_quantity.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "replenishmentShortfall": "発注点まで {qty}",
+  "@replenishmentShortfall": {
+      "description": "Replenishment screen: how far under the reorder point.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "replenishmentBlocked": "うち出荷不可 {qty}",
+  "@replenishmentBlocked": {
+      "description": "Replenishment screen: on hand but unusable — why a product with stock is listed.",
+      "placeholders": {
+          "qty": {
+              "type": "String"
+          }
+      }
+  },
+  "replenishmentLeadTime": "リードタイム {days}日",
+  "@replenishmentLeadTime": {
+      "description": "Replenishment screen: lead_time_days.",
+      "placeholders": {
+          "days": {
+              "type": "int"
+          }
+      }
+  },
+  "replenishmentNoWarehouse": "倉庫を選ぶと表示できます",
+  "@replenishmentNoWarehouse": {
+      "description": "Replenishment screen: the list is per warehouse."
   }
 }

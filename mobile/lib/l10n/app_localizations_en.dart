@@ -2934,4 +2934,274 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whpNeedsReorder => 'Below the reorder point';
+
+  @override
+  String get featExpiringLots => 'Expiry watch';
+
+  @override
+  String get featExpiringLotsDesc =>
+      'Lots that are expiring or already past their date';
+
+  @override
+  String get featReservations => 'Reservations';
+
+  @override
+  String get featReservationsDesc =>
+      'Stock promised to orders, and which parcels will supply it';
+
+  @override
+  String get featLocations => 'Locations';
+
+  @override
+  String get featLocationsDesc =>
+      'The zone / aisle / rack / shelf tree and what each is for';
+
+  @override
+  String get featReplenishment => 'Replenishment';
+
+  @override
+  String get featReplenishmentDesc =>
+      'Products below their reorder point, and how much to order';
+
+  @override
+  String get expiryTitle => 'Expiry watch';
+
+  @override
+  String expiryHorizon(int days) {
+    return 'Within $days days';
+  }
+
+  @override
+  String get expiryEmpty => 'Nothing is expiring';
+
+  @override
+  String get expiryEmptyBody =>
+      'No lot reaches its date in this window. Widen it to look further ahead.';
+
+  @override
+  String expiryExpiredCount(int count) {
+    return '$count expired';
+  }
+
+  @override
+  String expirySoonCount(int count) {
+    return '$count expiring soon';
+  }
+
+  @override
+  String get reservationsTitle => 'Reservations';
+
+  @override
+  String get reservationsEmpty => 'No reservations';
+
+  @override
+  String get reservationsEmptyBody =>
+      'Stock promised to orders and shipments appears here.';
+
+  @override
+  String get reservationStatusActive => 'Active';
+
+  @override
+  String get reservationStatusFulfilled => 'Fulfilled';
+
+  @override
+  String get reservationStatusReleased => 'Released';
+
+  @override
+  String get reservationStatusAll => 'All';
+
+  @override
+  String get reservationLapsed => 'Lapsed';
+
+  @override
+  String reservationFor(String type, String id) {
+    return '$type $id';
+  }
+
+  @override
+  String get refSalesOrder => 'Sales order';
+
+  @override
+  String get refShipment => 'Shipment';
+
+  @override
+  String get refTransfer => 'Transfer';
+
+  @override
+  String get refWorkOrder => 'Work order';
+
+  @override
+  String get refManual => 'Manual';
+
+  @override
+  String reservationQuantity(String qty) {
+    return 'Reserved $qty';
+  }
+
+  @override
+  String reservationAllocated(String qty) {
+    return 'Allocated $qty';
+  }
+
+  @override
+  String reservationUnallocated(String qty) {
+    return '$qty unallocated';
+  }
+
+  @override
+  String reservationFulfilled(String qty) {
+    return 'Shipped $qty';
+  }
+
+  @override
+  String get reservationRelease => 'Release';
+
+  @override
+  String get reservationReleaseQ => 'Release this reservation?';
+
+  @override
+  String get reservationReleaseBody =>
+      'The held stock becomes available again and its allocations are dropped. The record stays.';
+
+  @override
+  String get reservationAllocationsTitle => 'Allocated from';
+
+  @override
+  String get reservationNoAllocations => 'No parcels chosen yet';
+
+  @override
+  String get overAllocatedTitle => 'Over-allocated';
+
+  @override
+  String get overAllocatedBody =>
+      'Stock fell below what was allocated — a shipment took it first. Release an allocation or replace the stock.';
+
+  @override
+  String overAllocatedRow(String quantity, String allocated, String over) {
+    return '$quantity on hand / $allocated allocated ($over over)';
+  }
+
+  @override
+  String get locationsTitle => 'Locations';
+
+  @override
+  String get locationsEmpty => 'No locations yet';
+
+  @override
+  String get locationsEmptyBody =>
+      'Zones and shelves appear here as a tree once they exist.';
+
+  @override
+  String get locationsNoWarehouse => 'Pick a warehouse to see its locations';
+
+  @override
+  String get locationAdd => 'Add a location';
+
+  @override
+  String get locationCode => 'Code';
+
+  @override
+  String get locationName => 'Name (optional)';
+
+  @override
+  String get locationType => 'Type';
+
+  @override
+  String get locationParent => 'Parent (optional)';
+
+  @override
+  String get locationBarcode => 'Label barcode (optional)';
+
+  @override
+  String get locationShowInactive => 'Show inactive';
+
+  @override
+  String get locationPickable => 'Pickable';
+
+  @override
+  String get locationReceivable => 'Receivable';
+
+  @override
+  String get locationShipping => 'Shipping';
+
+  @override
+  String get locationQuarantine => 'Quarantine';
+
+  @override
+  String get locationVirtual => 'Virtual';
+
+  @override
+  String get locationInactive => 'Inactive';
+
+  @override
+  String locationOnHand(String qty) {
+    return '$qty on hand';
+  }
+
+  @override
+  String get locTypeStorage => 'Storage';
+
+  @override
+  String get locTypePicking => 'Picking';
+
+  @override
+  String get locTypeReceiving => 'Receiving';
+
+  @override
+  String get locTypeQc => 'QC';
+
+  @override
+  String get locTypePacking => 'Packing';
+
+  @override
+  String get locTypeShipping => 'Shipping';
+
+  @override
+  String get locTypeQuarantine => 'Quarantine';
+
+  @override
+  String get locTypeDamaged => 'Damaged';
+
+  @override
+  String get locTypeReturn => 'Return';
+
+  @override
+  String get locTypeTransit => 'Transit';
+
+  @override
+  String get locTypeVirtual => 'Virtual';
+
+  @override
+  String get replenishmentTitle => 'Replenishment';
+
+  @override
+  String get replenishmentEmpty => 'Nothing needs reordering';
+
+  @override
+  String get replenishmentEmptyBody =>
+      'Every product with a reorder point is above it.';
+
+  @override
+  String replenishmentSuggest(String qty) {
+    return 'Order $qty';
+  }
+
+  @override
+  String replenishmentShortfall(String qty) {
+    return '$qty below the line';
+  }
+
+  @override
+  String replenishmentBlocked(String qty) {
+    return '$qty of it blocked';
+  }
+
+  @override
+  String replenishmentLeadTime(int days) {
+    return '$days days lead time';
+  }
+
+  @override
+  String get replenishmentNoWarehouse =>
+      'Pick a warehouse to see its suggestions';
 }

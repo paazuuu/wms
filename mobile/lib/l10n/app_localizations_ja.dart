@@ -2859,4 +2859,263 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get whpNeedsReorder => '発注点を下回っています';
+
+  @override
+  String get featExpiringLots => '期限管理';
+
+  @override
+  String get featExpiringLotsDesc => '期限が近い・切れたロットを一覧';
+
+  @override
+  String get featReservations => '予約・引当';
+
+  @override
+  String get featReservationsDesc => '受注などのために確保した在庫と、その引当先';
+
+  @override
+  String get featLocations => 'ロケーション';
+
+  @override
+  String get featLocationsDesc => 'ゾーン・通路・ラック・棚の階層と種別';
+
+  @override
+  String get featReplenishment => '補充提案';
+
+  @override
+  String get featReplenishmentDesc => '発注点を下回った商品と発注数の目安';
+
+  @override
+  String get expiryTitle => '期限管理';
+
+  @override
+  String expiryHorizon(int days) {
+    return '$days日以内';
+  }
+
+  @override
+  String get expiryEmpty => '期限が近いロットはありません';
+
+  @override
+  String get expiryEmptyBody => 'この期間に期限を迎えるロットはありません。期間を広げると先の分も確認できます。';
+
+  @override
+  String expiryExpiredCount(int count) {
+    return '期限切れ $count 件';
+  }
+
+  @override
+  String expirySoonCount(int count) {
+    return '期限間近 $count 件';
+  }
+
+  @override
+  String get reservationsTitle => '予約・引当';
+
+  @override
+  String get reservationsEmpty => '予約はありません';
+
+  @override
+  String get reservationsEmptyBody => '受注や出荷のために確保された在庫がここに並びます。';
+
+  @override
+  String get reservationStatusActive => '有効';
+
+  @override
+  String get reservationStatusFulfilled => '出荷済';
+
+  @override
+  String get reservationStatusReleased => '解放済';
+
+  @override
+  String get reservationStatusAll => 'すべて';
+
+  @override
+  String get reservationLapsed => '期限切れ';
+
+  @override
+  String reservationFor(String type, String id) {
+    return '$type $id';
+  }
+
+  @override
+  String get refSalesOrder => '受注';
+
+  @override
+  String get refShipment => '出荷';
+
+  @override
+  String get refTransfer => '移動';
+
+  @override
+  String get refWorkOrder => '作業指示';
+
+  @override
+  String get refManual => '手動';
+
+  @override
+  String reservationQuantity(String qty) {
+    return '予約 $qty';
+  }
+
+  @override
+  String reservationAllocated(String qty) {
+    return '引当済 $qty';
+  }
+
+  @override
+  String reservationUnallocated(String qty) {
+    return '未引当 $qty';
+  }
+
+  @override
+  String reservationFulfilled(String qty) {
+    return '出荷済 $qty';
+  }
+
+  @override
+  String get reservationRelease => '解放';
+
+  @override
+  String get reservationReleaseQ => 'この予約を解放しますか？';
+
+  @override
+  String get reservationReleaseBody => '確保していた在庫が引当可能に戻り、引当先も取り消されます。記録は残ります。';
+
+  @override
+  String get reservationAllocationsTitle => '引当先';
+
+  @override
+  String get reservationNoAllocations => '引当先はまだ決まっていません';
+
+  @override
+  String get overAllocatedTitle => '引当超過';
+
+  @override
+  String get overAllocatedBody => '在庫が引当より減っています。出荷が先に取ったためで、引当の解放か在庫の補充が必要です。';
+
+  @override
+  String overAllocatedRow(String quantity, String allocated, String over) {
+    return '在庫 $quantity / 引当 $allocated（超過 $over）';
+  }
+
+  @override
+  String get locationsTitle => 'ロケーション';
+
+  @override
+  String get locationsEmpty => 'ロケーションがまだありません';
+
+  @override
+  String get locationsEmptyBody => 'ゾーンや棚を登録すると、ここに階層として表示されます。';
+
+  @override
+  String get locationsNoWarehouse => '倉庫を選ぶと表示できます';
+
+  @override
+  String get locationAdd => 'ロケーションを追加';
+
+  @override
+  String get locationCode => 'コード';
+
+  @override
+  String get locationName => '名称（任意）';
+
+  @override
+  String get locationType => '種別';
+
+  @override
+  String get locationParent => '親ロケーション（任意）';
+
+  @override
+  String get locationBarcode => 'ラベルのバーコード（任意）';
+
+  @override
+  String get locationShowInactive => '停止中も表示';
+
+  @override
+  String get locationPickable => 'ピッキング可';
+
+  @override
+  String get locationReceivable => '入荷可';
+
+  @override
+  String get locationShipping => '出荷';
+
+  @override
+  String get locationQuarantine => '隔離';
+
+  @override
+  String get locationVirtual => '仮想';
+
+  @override
+  String get locationInactive => '停止中';
+
+  @override
+  String locationOnHand(String qty) {
+    return '在庫 $qty';
+  }
+
+  @override
+  String get locTypeStorage => '保管';
+
+  @override
+  String get locTypePicking => 'ピッキング';
+
+  @override
+  String get locTypeReceiving => '入荷';
+
+  @override
+  String get locTypeQc => '検品';
+
+  @override
+  String get locTypePacking => '梱包';
+
+  @override
+  String get locTypeShipping => '出荷';
+
+  @override
+  String get locTypeQuarantine => '隔離';
+
+  @override
+  String get locTypeDamaged => '破損';
+
+  @override
+  String get locTypeReturn => '返品';
+
+  @override
+  String get locTypeTransit => '移動中';
+
+  @override
+  String get locTypeVirtual => '仮想';
+
+  @override
+  String get replenishmentTitle => '補充提案';
+
+  @override
+  String get replenishmentEmpty => '補充が必要な商品はありません';
+
+  @override
+  String get replenishmentEmptyBody => '発注点を設定した商品が、いずれも発注点を上回っています。';
+
+  @override
+  String replenishmentSuggest(String qty) {
+    return '発注目安 $qty';
+  }
+
+  @override
+  String replenishmentShortfall(String qty) {
+    return '発注点まで $qty';
+  }
+
+  @override
+  String replenishmentBlocked(String qty) {
+    return 'うち出荷不可 $qty';
+  }
+
+  @override
+  String replenishmentLeadTime(int days) {
+    return 'リードタイム $days日';
+  }
+
+  @override
+  String get replenishmentNoWarehouse => '倉庫を選ぶと表示できます';
 }
