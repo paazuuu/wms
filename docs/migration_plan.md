@@ -2241,6 +2241,98 @@ listed; deleting the location clears the setting instead of failing the delete;
 the list form and `clear_warehouse_product` behave, the second clear returning
 false; and nothing is anon-executable. All ten security invariants pass.
 
+### 0064 — reservations and allocations (Phase A steps 11-12, §5 §6)
+
+§6's flow — Sales Order → Reservation → Allocation → Pick → Pack → Ship — with
+the line that decides the design: **Allocationしただけでは在庫を減らさない.**
+
+That is why these are rows and not a status. 0061 already refused to make RESERVED
+a stock status, because a reserved unit is still physically on hand and still in
+its own condition; moving the quantity into a RESERVED bucket would count the
+promise twice, once as a missing unit and once as a claim. So the promise lives
+beside the stock instead of inside it, and this is where 0061's own comment —
+"step 12 subtracts reservations here, so there is one definition of available" —
+comes true.
+
+Two levels, because they answer different questions:
+
+- `stock_reservations` — the promise. 30 of this product, in this warehouse, for
+  this order. Says nothing about which 30.
+- `stock_allocations` — the plan. These particular parcels will supply it, this
+  lot, in this condition. Says nothing about anything having moved.
+
+A reservation with no allocation is a perfectly good state (the promise is made,
+the picker has not been told which shelf). An allocation without a reservation is
+not, which is why it hangs off one.
+
+`stock_available()` is **redefined, not wrapped**, so there stays exactly one
+definition and every existing caller — `warehouse_product_settings`,
+`replenishment_suggestions`, `move_stock_status` — gets the complete answer
+untouched:
+
+```
+available = on-hand in a usable condition  -  reserved
+```
+
+It is deliberately **not floored at zero**: a negative means more has been
+promised than can ship, which is worth seeing rather than rounding away, and
+callers asking "is there enough for N" compare against N and are unaffected.
+
+Four rules the code makes explicit:
+
+- **Neither one moves stock.** No ledger entry, no change to `stock_units`. The
+  quantity moves when a pick and a ship say so, which is the only place §37-4's
+  record of what happened can come from — the test asserts that the movement
+  count does not change.
+- **An allocation never blocks a stock movement.** If a shipment consumes stock
+  someone else had allocated, the shipment wins: it is what physically happened.
+  The allocation becomes over-committed, and `over_allocated_stock()` is the read
+  that says so. Same reason `stock_allocations` cascades when a parcel is deleted:
+  an allocation is a plan against a parcel, and the promise outlives the plan.
+- **Nothing can be promised twice.** A `BEFORE` trigger checks three things no
+  constraint can see — that the parcel is the reservation's own product and
+  warehouse, that a parcel is not allocated beyond what it holds, and that a
+  reservation is not over-supplied. Being a `BEFORE` trigger, it fires before
+  conflict resolution, so `ON CONFLICT DO NOTHING` is not an escape hatch.
+- **Expiry is honoured by the read, not by a job.** A reservation past its
+  `expires_at` stops counting immediately, because `stock_reserved()` looks at the
+  clock. `expire_stale_reservations()` tidies the status afterwards and nothing
+  depends on it having run — a correctness property that needs a cron to hold is
+  not a correctness property.
+
+`allocate_stock()` fills soonest-expiry-first, then from the parcel with least
+left so a part-used lot is finished before another is opened, and **reports a
+shortfall rather than raising on it**: "I could only find 20 of the 30" is an
+answer a picking screen can act on, and rolling the 20 back would help nobody.
+`stock_position()` returns the four numbers §5 asks to keep apart — on_hand,
+reserved, available, allocated — plus the per-status breakdown.
+
+Verified with self-rolling-back blocks, **30 checks, all OK** (two assertions in
+the first run were the test's own mistakes — expecting `ON CONFLICT` to bypass a
+BEFORE trigger, and reading a status in the same `format()` call that changed it,
+where argument evaluation order is undefined — and were re-run correctly):
+reserving 30 of 100 left on_hand at 100, available at 70 and the ledger untouched;
+reserving 80 was refused against *available*, not on-hand; quarantining 50 on top
+took available to 20; auto-allocation named one parcel for all 30 and still moved
+nothing; a second order took the remaining 70 and a direct over-allocating insert
+was refused even with `ON CONFLICT DO NOTHING`, while `allocate_stock` itself
+returned `allocated 0, short 10` instead of tripping it; releasing freed the
+quantity, kept the row as RELEASED and dropped its allocations, and a second
+release was refused; a lapsed reservation held nothing while still reading ACTIVE,
+and `expire_stale_reservations()` then tidied exactly one row and nothing on a
+second run; partial fulfilment left 20 held and the rest closed it as FULFILLED;
+shipping 80 out from under a 40-unit allocation left `over_allocated_stock()`
+reporting quantity 20 / allocated 40 / over 20 with available at −20;
+`stock_position` agreed on all four numbers; and deleting the parcel took the
+plan while the promise stayed ACTIVE. All ten security invariants pass.
+
+**Phase A is complete.** All twelve items of §36's Inventory Core list are in
+place: product internal id and barcodes (0057), UOM (0059), lot / serial / expiry
+(0060), stock status and the stock unit (0061), the location tree (0062),
+warehouse products (0063), and available / reserved / reservation / allocation
+(0064) — with `product_id` running alongside `jan_code` (0058) as the bridge
+between the old shape and the new one.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
