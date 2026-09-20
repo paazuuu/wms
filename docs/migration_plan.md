@@ -2113,6 +2113,81 @@ per-status parcels with their lots; releasing the quarantine restored
 availability; and none of the new functions is reachable by a client role. All
 ten security invariants pass, including check 9 against both new tables.
 
+### 0062 — the location tree (Phase A step 9, §7 §8)
+
+The current shape is exactly two levels deep — Warehouse → Zone → Bin — so a
+warehouse actually laid out as Zone → Aisle → Rack → Shelf → Bin has to flatten
+three of those levels into a bin code and trust everyone to read it the same
+way. §7 asks for a general tree; §8 adds the half that makes it useful, a
+location *type*, so "can this shelf hold ordinary stock?" is a column instead of
+a convention, and RECEIVING / QC / SHIPPING / TRANSIT / DAMAGED become real
+places stock can sit rather than states invented per screen.
+
+**`bins` is not touched.** It is what `bin_stock` keys on and what every put-away
+RPC references, so rewriting those onto a new table would be a large change to
+working code for no gain today. Instead the responsibilities are split and
+written down: `locations` is canonical for **structure**, `bins` stays canonical
+for **bin-level quantity**. Every zone and every bin gets a location row, kept in
+step by triggers, with a back-pointer (`zone_id` / `bin_id`) so the two can
+always be lined up; a rack or a virtual RECEIVING area simply has neither. The
+sync is one-way on purpose — bins and zones are what the running system writes,
+so they lead and the tree follows. When Phase B moves put-away onto locations,
+that migration flips the direction and says so.
+
+`location_types` is a table, not a check constraint, because §8's point is that a
+type's *behaviour* is data: eleven types each carrying the defaults a new
+location of that type starts with (`default_pickable`, `default_receivable`,
+`default_shipping`, `default_quarantine`, `default_virtual`). `create_location`
+takes the flags nullable and falls back to the type's defaults, so "a RECEIVING
+area" is one argument rather than five, while a particular shelf can still be
+marked unpickable without inventing a type for it.
+
+Three things the constraints alone could not do:
+
+- **A cycle.** The composite FK `(warehouse_id, parent_id) → (warehouse_id, id)`
+  keeps a parent in the same warehouse and a check stops a row being its own
+  parent, but A → B → A satisfies both. Walking up on every `parent_id` write is
+  the only way to know, and the 32-level limit doubles as a guard against a tree
+  nested absurdly.
+- **A code collision.** A code is unique within a warehouse so that scanning one,
+  or naming a parent by it, has exactly one answer — which makes a zone and a bin
+  both called "A" possible in principle. This sync must never be the reason a
+  warehouse edit fails, so `location_code_for()` disambiguates (`A#17`) instead
+  of raising. In a sensibly named warehouse it never fires.
+- **Nesting the JSON.** `location_subtree()` recurses rather than using a
+  recursive CTE: a CTE walks *down* a tree easily but has to be turned inside out
+  to build JSON *up* from the leaves, and the inside-out version is exactly the
+  query that silently loses grandchildren — which is what the first draft of this
+  did, and what the test caught.
+
+`resolve_barcode` now also answers for a location, after products and serials,
+because a location barcode is the rarer scan and an overlap should favour the
+goods. Unlike those two it is **warehouse-scoped**: a product is master data any
+operator may look up, but a location belongs to a building, and which buildings
+this operator may see is the §37 rule every other warehouse read follows.
+
+It does not move quantity. `stock_units.bin_id` stays null (0061) and `bin_stock`
+stays the bin-level answer — a tree is what makes put-away suggestion, pick paths
+and zone-level counting possible later, but pretending the quantity moved with it
+would be the double count §5 warns about.
+
+Verified with self-rolling-back blocks, **26 checks, all OK** (three assertions
+in the first run were wrong about the test's own expectations — booleans render
+as `t`/`f`, and roots come back sorted by code so `Z1` is the third, not the
+first — and were re-run correctly rather than left as failures): the eleven types
+seed and list; a zone becomes a location and a bin becomes its child; renaming
+the bin moves its location instead of leaving a stale one; deleting the bin
+cascades the location away; a four-level tree builds through `create_location`
+and comes back nested to full depth with the leaf's type, flags and normalized
+barcode intact; flags default from the type and yield to a caller who names one;
+an unknown type, a missing parent, a duplicate code and a cycle are each refused
+with their own message; deactivating a rack hides its whole branch until
+`include_inactive` asks for it; a shelf resolves by barcode and an aisle by code
+through the one resolver, while nonsense still comes back `unknown`; a bin whose
+code collides with a zone's is disambiguated rather than rejected; and neither
+`location_subtree` nor `location_code_for` is reachable by a client role. All ten
+security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
