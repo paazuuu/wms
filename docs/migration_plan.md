@@ -2446,6 +2446,90 @@ Menu placement follows where the work happens: 期限管理 with the floor tasks
 予約・引当 with the management group. Each entry is gated on the permission its
 own RPC checks, and the server remains the real boundary (§37).
 
+## Phase B — Inbound (§11–§14, §26, §29)
+
+Phase A made the stock model expressive: units of measure, lots, serials,
+statuses, a location tree, per-warehouse settings, reservations. Phase B is the
+inbound half of the floor — §11's boundary chain, which the spec is explicit
+should not be collapsed into one step:
+
+    Purchase Order → Inbound/Delivery → Receiving → QC → Put-away → Available Stock
+
+What was already there: `delivery_plans` / `delivery_plan_lines` play the
+document, and `delivery_reconciliations` / `reconciliation_lines` play Receipt
+and Receipt Line. What was missing is what the rest of Phase B needs:
+
+- **§12's Item level.** A receipt line said "40 of this JAN arrived". It could
+  not say "20 on lot A expiring in March, 20 on lot B expiring in June, into
+  RECV-01" — and §12 asks for exactly that, because lot / serial / expiry /
+  location / quantity is what a parcel *is*.
+- **§13's guarantee.** QC existed as `inspections` / `inspection_items`, but
+  completing an inspection only wrote a status onto a document. Receiving had
+  already made the goods available, so failed goods were shippable. The spec
+  does not leave this to the UI: 「QC FAIL / HOLDの商品が誤って出荷されないことを、
+  Flutter UIだけでなくRPC/DB側でも保証する」.
+
+### 0066 — the ledger records what moved, not only how much
+
+§5 made `stock_movements` the canonical source and `stock_levels`, `bin_stock`
+and `stock_units` three projections of it. But a ledger row carried only a
+quantity, so the projection had to invent the rest: every receipt landed as
+`(bin null, lot null, serial null, status OK)`, and every issue drew from
+whichever parcel sorted first. Phase A could live with that because nothing
+posted a movement that *meant* a particular parcel. Phase B cannot: a parcel
+that arrives on lot A has to be on lot A in stock, and goods held for QC have to
+land as QC_PENDING rather than be moved out of OK afterwards.
+
+So the identity moves onto the ledger row, beside the rest of the movement, and
+the projection stops guessing — it applies what the row says:
+
+- `stock_movements` gains `lot_id`, `serial_id`, `status_id`. The first two use
+  the composite foreign keys Phase A established (`(product_id, lot_id) →
+  lots(product_id, id)`), so a lot can never be attached to the wrong product,
+  and MATCH SIMPLE means a null column still satisfies the constraint — which is
+  what lets them sit on a table whose own `product_id` is nullable.
+- `apply_stock_unit_delta` gains `bin`, `lot`, `serial` and `status` parameters,
+  each defaulting to null. Null means "leave that dimension open": on the way in
+  that is OK and no lot; on the way out it is "any matching parcel, available
+  first" — the behaviour every pre-Phase-B caller already relies on. The
+  three-argument form is dropped rather than kept as a wrapper, because leaving
+  it beside a version whose extra parameters all default would make every
+  three-argument call ambiguous; a three-argument call now resolves to the new
+  function with the identity left open, which is what the old one meant.
+- `apply_stock_movement_detail` is the whole posting path — stock level, ledger
+  row, identity — and `apply_stock_movement` keeps its old signature and
+  delegates, so no existing caller had to change. It takes either handle for the
+  product: a caller holding a `product_id` never has to look a barcode up.
+- `stock_ledger` shows what the ledger now records: lot code, expiry, serial and
+  status code per row.
+
+Two things deliberately left alone. The movement's `bin_id` still does not reach
+`stock_units`: at warehouse scope a received unit has no bin, which is precisely
+what "arrived but not yet put away" means (§14's pending = on_hand − binned), and
+`bin_stock` remains the bin-level projection. And an identity-narrowed issue that
+cannot be satisfied still *reports* the shortfall rather than refusing — turning
+that into a refusal is §13's job, and it lands in 0068.
+
+Proved on the live schema, all of it rolled back afterwards:
+
+| what | result |
+| --- | --- |
+| receipt of 10 naming LOT-A | the unit is on LOT-A, and the ledger row carries the lot |
+| +5 as QC_PENDING on LOT-B | on hand 15, available 10 — held stock is on hand, not available |
+| ship 3 naming LOT-A | LOT-A 7, LOT-B 5 — although LOT-B expires sooner and would otherwise have gone first |
+| §5's invariant after all three | `stock_levels.on_hand` 12 = `sum(stock_units)` 12 |
+| draw 9 from LOT-A when 7 are there | shortfall −2 reported, LOT-B untouched |
+| draw 5 of OK when only QC_PENDING remains | shortfall −5, and the held parcel is still whole |
+| receive a serial twice | refused: `serial SN-… is already in stock` |
+| post another product's lot | refused: `lot 21 does not belong to product …` |
+
+The third and fifth rows are the ones worth keeping: naming a lot redirects the
+draw away from the parcel the default ordering would have taken, and a narrowed
+draw that cannot be satisfied leaves everyone else's stock alone instead of
+quietly eating it.
+
+All ten security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
