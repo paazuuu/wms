@@ -19,6 +19,7 @@ import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/receipt.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
+import 'package:wms_mobile/features/delivery/domain/stock_position.dart';
 import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
@@ -412,6 +413,24 @@ class FakeStockRepository implements StockRepository {
     int limit = 100,
   }) async =>
       ApiSuccess(movements.where((m) => m.janCode == janCode).toList());
+
+  /// Per-product positions a test wants [position] to answer with. A product
+  /// with no entry answers with zeroes, which is what the real RPC does for a
+  /// product that has no stock in this warehouse.
+  Map<int, StockPosition> positions = const {};
+
+  /// The last (productId, warehouseId) [position] was asked for.
+  ({int productId, int? warehouseId})? lastPositionQuery;
+
+  @override
+  Future<ApiResult<StockPosition>> position(
+    int productId, {
+    int? warehouseId,
+  }) async {
+    lastPositionQuery = (productId: productId, warehouseId: warehouseId);
+    return ApiSuccess(positions[productId] ??
+        StockPosition(productId: productId, warehouseId: warehouseId));
+  }
 }
 
 class FakeShipmentRepository implements ShipmentRepository {
@@ -1296,15 +1315,120 @@ class FakeProductRepository implements ProductRepository {
             id: p.id,
             janCode: p.janCode,
             name: p.name,
+            sku: p.sku,
             category: p.category,
             price: p.price,
             status: status,
+            trackingMode: p.trackingMode,
+            baseUom: p.baseUom,
+            uoms: p.uoms,
+            barcodes: p.barcodes,
           )
         else
           p,
     ];
     return const ApiSuccess(true);
   }
+
+  /// The arguments of the last setIdentity() call, so a screen test can assert
+  /// that the SKU and tracking mode went through `set_product_identity` and not
+  /// through `update_product` (0057).
+  ({int id, String? sku, TrackingMode? trackingMode})? lastIdentity;
+
+  /// When set, setIdentity() fails with this message — the real RPC refuses a
+  /// tracking mode that contradicts lots or serials already recorded (§37-15).
+  String? failIdentityWith;
+
+  @override
+  Future<ApiResult<bool>> setIdentity({
+    required int id,
+    String? sku,
+    TrackingMode? trackingMode,
+  }) async {
+    lastIdentity = (id: id, sku: sku, trackingMode: trackingMode);
+    if (failIdentityWith != null) {
+      return ApiFailure(message: failIdentityWith!, statusCode: 400);
+    }
+    _products = [
+      for (final p in _products)
+        if (p.id == id)
+          Product(
+            id: p.id,
+            janCode: p.janCode,
+            name: p.name,
+            // '' clears, null leaves alone — the same rule the RPC follows.
+            sku: sku == null ? p.sku : (sku.isEmpty ? null : sku),
+            category: p.category,
+            price: p.price,
+            status: p.status,
+            trackingMode: trackingMode ?? p.trackingMode,
+            baseUom: p.baseUom,
+            uoms: p.uoms,
+            barcodes: p.barcodes,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  /// Barcodes added through addBarcode(), newest last.
+  final List<({int productId, String barcode, String? uomCode, bool isPrimary})>
+      addedBarcodes = [];
+
+  @override
+  Future<ApiResult<int>> addBarcode({
+    required int productId,
+    required String barcode,
+    String barcodeType = 'JAN',
+    int quantityPerScan = 1,
+    bool isPrimary = false,
+    String? uomCode,
+    String? note,
+  }) async {
+    addedBarcodes.add((
+      productId: productId,
+      barcode: barcode,
+      uomCode: uomCode,
+      isPrimary: isPrimary,
+    ));
+    return ApiSuccess(addedBarcodes.length);
+  }
+
+  final List<int> removedBarcodeIds = [];
+
+  @override
+  Future<ApiResult<bool>> removeBarcode(int barcodeId) async {
+    removedBarcodeIds.add(barcodeId);
+    return const ApiSuccess(true);
+  }
+
+  final List<({int productId, String uomCode, double factor})> setUoms = [];
+
+  @override
+  Future<ApiResult<bool>> setUom({
+    required int productId,
+    required String uomCode,
+    required double conversionFactor,
+  }) async {
+    setUoms.add((
+      productId: productId,
+      uomCode: uomCode,
+      factor: conversionFactor,
+    ));
+    return const ApiSuccess(true);
+  }
+
+  /// The unit vocabulary a pack size is chosen from; the real one is seeded with
+  /// sixteen units (0059).
+  List<Uom> uomVocabulary = const [
+    Uom(code: 'PCS', name: '個'),
+    Uom(code: 'BOX', name: '箱'),
+    Uom(code: 'CASE', name: 'ケース'),
+  ];
+
+  @override
+  Future<ApiResult<List<Uom>>> listUoms() async => ApiSuccess(uomVocabulary);
 }
 
 /// Purchase order stub. Mirrors the real RPCs' state-machine transitions

@@ -4,6 +4,7 @@ import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/stock_item.dart';
 import '../domain/stock_movement.dart';
+import '../domain/stock_position.dart';
 
 /// Reads on-hand stock and its ledger from Supabase (PostgREST).
 ///
@@ -18,6 +19,17 @@ abstract class StockRepository {
     int? warehouseId,
     int limit = 100,
   });
+
+  /// On hand / available / reserved / allocated for one product, plus the
+  /// per-status, per-lot split behind those numbers (`stock_position`, 0064).
+  ///
+  /// Keyed by `product_id`, not by JAN: the numbers live on `stock_units` and
+  /// reservations, which are keyed by the product. A `stock_levels` row whose
+  /// `product_id` is still null has no position to fetch — see [StockItem].
+  Future<ApiResult<StockPosition>> position(
+    int productId, {
+    int? warehouseId,
+  });
 }
 
 class StockRepositoryImpl implements StockRepository {
@@ -31,7 +43,7 @@ class StockRepositoryImpl implements StockRepository {
       final response = await _dio.get(
         '/stock_levels',
         queryParameters: {
-          'select': 'jan_code,product_name,on_hand',
+          'select': 'jan_code,product_name,on_hand,product_id',
           'order': 'on_hand.desc',
           'limit': 500,
           if (warehouseId != null) 'warehouse_id': 'eq.$warehouseId',
@@ -67,6 +79,29 @@ class StockRepositoryImpl implements StockRepository {
           .toList());
     } on DioException catch (e) {
       return mapDioError<List<StockMovement>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<StockPosition>> position(
+    int productId, {
+    int? warehouseId,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/stock_position', data: {
+        'p_product_id': productId,
+        'p_warehouse_id': warehouseId,
+      });
+      final data = response.data;
+      final row = data is List ? (data.isEmpty ? null : data.first) : data;
+      if (row is! Map) {
+        return ApiSuccess(StockPosition(
+            productId: productId, warehouseId: warehouseId));
+      }
+      return ApiSuccess(
+          StockPosition.fromJson(row.cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<StockPosition>(e);
     }
   }
 }

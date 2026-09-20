@@ -14,6 +14,7 @@ import '../domain/delivery_plan.dart';
 import '../domain/receipt.dart';
 import '../domain/stock_item.dart';
 import '../domain/stock_movement.dart';
+import '../domain/stock_position.dart';
 import 'reconciliation_controller.dart';
 
 /// Dedicated Dio for the delivery feature, pointed at the Supabase Edge
@@ -111,6 +112,25 @@ final stockLedgerProvider = FutureProvider.autoDispose
   final result = await ref
       .watch(stockRepositoryProvider)
       .ledger(janCode, warehouseId: warehouseId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// What one product's quantity in the active warehouse actually consists of:
+/// on hand, available, reserved, allocated, and the per-status split behind them
+/// (§5, `stock_position`).
+///
+/// Keyed by `product_id` rather than by JAN, because that is what the stock
+/// units and reservations are keyed by. A `stock_levels` row that has no product
+/// yet (0058) has nothing to ask for, so the screen checks before asking.
+final stockPositionProvider = FutureProvider.autoDispose
+    .family<StockPosition, int>((ref, productId) async {
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
+  final result = await ref
+      .watch(stockRepositoryProvider)
+      .position(productId, warehouseId: warehouseId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

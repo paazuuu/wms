@@ -1144,5 +1144,26 @@
   "shortcutShowHelp": "显示此列表",
   "@shortcutShowHelp": {
     "description": "Keyboard shortcut help sheet."
-  }
+  },
+  "productSku": "SKU",
+  "productSkuHint": "内部编号（可选）",
+  "productTracking": "追踪方式",
+  "trackUntracked": "不追踪",
+  "trackLot": "批次",
+  "trackSerial": "序列号",
+  "trackLotAndSerial": "批次＋序列号",
+  "trackExpiry": "有效期",
+  "productBaseUnit": "基本单位",
+  "productCodeCount": "{count} 个条码",
+  "productPackUnit": "{code} = {factor}{base}",
+  "productScanAlreadyUsed": "该条码已属于「{name}」",
+  "stockPositionTitle": "库存明细",
+  "stockAvailable": "可用",
+  "stockReserved": "已预留",
+  "stockAllocated": "已分配",
+  "stockUnavailable": "不可发货",
+  "stockOverPromised": "预留超过可用库存",
+  "stockNotLinkedToProduct": "该JAN尚未登记到商品主数据",
+  "stockPositionLot": "批次 {code}",
+  "stockPositionNoParcels": "暫无明细"
 }

@@ -2630,4 +2630,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shortcutShowHelp => 'この一覧を表示';
+
+  @override
+  String get productSku => 'SKU';
+
+  @override
+  String get productSkuHint => '社内品番（任意）';
+
+  @override
+  String get productTracking => '追跡区分';
+
+  @override
+  String get trackUntracked => '追跡なし';
+
+  @override
+  String get trackLot => 'ロット';
+
+  @override
+  String get trackSerial => 'シリアル';
+
+  @override
+  String get trackLotAndSerial => 'ロット＋シリアル';
+
+  @override
+  String get trackExpiry => '有効期限';
+
+  @override
+  String get productBaseUnit => '基本単位';
+
+  @override
+  String productCodeCount(int count) {
+    return 'コード $count 件';
+  }
+
+  @override
+  String productPackUnit(String code, String factor, String base) {
+    return '$code = $factor$base';
+  }
+
+  @override
+  String productScanAlreadyUsed(String name) {
+    return 'このコードは「$name」に登録済みです';
+  }
+
+  @override
+  String get stockPositionTitle => '在庫内訳';
+
+  @override
+  String get stockAvailable => '引当可能';
+
+  @override
+  String get stockReserved => '予約済み';
+
+  @override
+  String get stockAllocated => '引当済み';
+
+  @override
+  String get stockUnavailable => '出荷不可';
+
+  @override
+  String get stockOverPromised => '予約が引当可能数を超えています';
+
+  @override
+  String get stockNotLinkedToProduct => 'このJANは商品マスタに未登録です';
+
+  @override
+  String stockPositionLot(String code) {
+    return 'ロット $code';
+  }
+
+  @override
+  String get stockPositionNoParcels => '内訳はまだありません';
 }

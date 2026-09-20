@@ -2333,6 +2333,74 @@ warehouse products (0063), and available / reserved / reservation / allocation
 (0064) — with `product_id` running alongside `jan_code` (0058) as the bridge
 between the old shape and the new one.
 
+### 0065 — a SKU can be cleared
+
+0057 wrote `set_product_identity` with `coalesce(v_sku, sku)` so that passing one
+field left the other alone. The cost was that a SKU could be set and never
+removed: null meant "leave it", and there was no way to say "make it empty".
+0063 had already settled the convention — null leaves a field alone, an empty
+string clears it — so this brings the older function into line with it, and with
+the client, which now offers a SKU field an operator can empty. A field that
+silently refuses to clear reads as a bug, and is one.
+
+The fix is to separate the two cases *before* `nullif(btrim(...), '')` collapses
+them. Verified with a self-rolling-back block, 6 checks, all OK: a SKU is set;
+null leaves it while still changing the tracking mode; `''` clears it;
+whitespace clears it too rather than storing spaces; the §37-15 tracking-mode
+guard still refuses UNTRACKED once lots exist; and the audit entry records which
+of the two happened (`sku_cleared`).
+
+## Client (Flutter) — following Phase A
+
+The database work above added tables and RPCs the client could not see. This pass
+made the client speak the new model, with `flutter analyze` clean and **424 tests
+passing** (389 before, +35 for the new code).
+
+**Product identity (0057, 0059).** `Product` gained `sku`, `trackingMode`,
+`baseUom`, `uoms` and `barcodes`, each as a typed value rather than a loose map,
+and the model's own doc comment was corrected — it claimed the JAN was the key
+and that no `product_id` was wired into the stock tables, which 0058 made false.
+The card now shows the SKU beside the JAN (one is the supplier's, the other is
+this warehouse's, and both get scanned), the base unit, each pack unit with what
+it converts to, the tracking mode when it is not the default, and the code count
+when more than one barcode reaches the product. A product with nothing to say
+shows no chips at all.
+
+The form can now set the SKU and the tracking mode, through
+`set_product_identity` rather than `update_product` — a second call because it is
+a second decision, and the one the server refuses when lots or serials already
+contradict the new mode. A rename therefore never risks that refusal: the
+identity call is only made when the identity actually changed, which a test
+asserts.
+
+**One scan resolver (§26).** `ScanResolution` and `BarcodeResolver` wrap
+`resolve_barcode`, so one call answers for a product barcode, a case code, an
+internal SKU alias, a serial number or a shelf label. `countedQuantity` is the
+number a counting screen adds per scan — 12 for a case code, 1 for a serial, 0
+for a location — so no screen re-derives it. An unrecognised code is a *kind*,
+not an error, and a kind this build does not know degrades to `unknown` rather
+than throwing, which is what lets a later migration add one. The product form
+uses it immediately: scanning a code already registered to another product says
+so at the point of scanning instead of failing at save.
+
+**§5's four numbers (0061, 0064).** `StockPosition` carries on-hand, available,
+reserved and allocated with the per-status, per-lot parcels behind them, and the
+ledger screen now opens with them — the two answer different questions and belong
+together, since a number that looks wrong is explained either by a movement or by
+a hold. `available` is shown as the emphasised figure because it is the one an
+outbound decision is made on, and a negative one is called out in the error
+colour rather than clamped to zero. A `stock_levels` row whose `product_id` is
+still null (0058's honest case) says so instead of showing four zeroes, and does
+not call the RPC at all.
+
+What has data-layer support but no screen yet, stated plainly rather than implied:
+`expiring_lots`, `product_lots` / `product_serials`, `list_reservations` /
+`over_allocated_stock`, `location_tree` / `create_location`,
+`warehouse_product_settings` / `replenishment_suggestions`, and
+`add_product_barcode` / `set_product_uom` (the repository methods and their tests
+exist; no UI calls them). Those are screens, not plumbing, and each is worth its
+own pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

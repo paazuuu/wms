@@ -1299,5 +1299,115 @@
   "shortcutShowHelp": "この一覧を表示",
   "@shortcutShowHelp": {
     "description": "Keyboard shortcut help sheet."
+  },
+  "productSku": "SKU",
+  "@productSku": {
+      "description": "Product master: internal code, separate from the JAN barcode (0057)."
+  },
+  "productSkuHint": "社内品番（任意）",
+  "@productSkuHint": {
+      "description": "Product master: SKU field helper text."
+  },
+  "productTracking": "追跡区分",
+  "@productTracking": {
+      "description": "Product master: what must be recorded about this product (0057/0060)."
+  },
+  "trackUntracked": "追跡なし",
+  "@trackUntracked": {
+      "description": "Tracking mode UNTRACKED."
+  },
+  "trackLot": "ロット",
+  "@trackLot": {
+      "description": "Tracking mode LOT."
+  },
+  "trackSerial": "シリアル",
+  "@trackSerial": {
+      "description": "Tracking mode SERIAL."
+  },
+  "trackLotAndSerial": "ロット＋シリアル",
+  "@trackLotAndSerial": {
+      "description": "Tracking mode LOT_AND_SERIAL."
+  },
+  "trackExpiry": "有効期限",
+  "@trackExpiry": {
+      "description": "Tracking mode EXPIRY: every lot must carry a date."
+  },
+  "productBaseUnit": "基本単位",
+  "@productBaseUnit": {
+      "description": "Product master: the unit on-hand quantities are counted in (0059)."
+  },
+  "productCodeCount": "コード {count} 件",
+  "@productCodeCount": {
+      "description": "Product master: how many barcodes resolve to this product.",
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "productPackUnit": "{code} = {factor}{base}",
+  "@productPackUnit": {
+      "description": "Product master: one pack unit and what it converts to.",
+      "placeholders": {
+          "code": {
+              "type": "String"
+          },
+          "factor": {
+              "type": "String"
+          },
+          "base": {
+              "type": "String"
+          }
+      }
+  },
+  "productScanAlreadyUsed": "このコードは「{name}」に登録済みです",
+  "@productScanAlreadyUsed": {
+      "description": "Product form: resolve_barcode found the scanned code on another product.",
+      "placeholders": {
+          "name": {
+              "type": "String"
+          }
+      }
+  },
+  "stockPositionTitle": "在庫内訳",
+  "@stockPositionTitle": {
+      "description": "Stock: the four numbers §5 keeps apart (0061/0064)."
+  },
+  "stockAvailable": "引当可能",
+  "@stockAvailable": {
+      "description": "Stock position: usable on-hand less what is reserved."
+  },
+  "stockReserved": "予約済み",
+  "@stockReserved": {
+      "description": "Stock position: promised to orders, not yet shipped."
+  },
+  "stockAllocated": "引当済み",
+  "@stockAllocated": {
+      "description": "Stock position: of the reserved quantity, how much is pinned to parcels."
+  },
+  "stockUnavailable": "出荷不可",
+  "@stockUnavailable": {
+      "description": "Stock position: on hand but quarantined, damaged or held."
+  },
+  "stockOverPromised": "予約が引当可能数を超えています",
+  "@stockOverPromised": {
+      "description": "Stock position: available went negative."
+  },
+  "stockNotLinkedToProduct": "このJANは商品マスタに未登録です",
+  "@stockNotLinkedToProduct": {
+      "description": "Stock: stock_levels row whose product_id is still null (0058)."
+  },
+  "stockPositionLot": "ロット {code}",
+  "@stockPositionLot": {
+      "description": "Stock position: which lot a parcel came from.",
+      "placeholders": {
+          "code": {
+              "type": "String"
+          }
+      }
+  },
+  "stockPositionNoParcels": "内訳はまだありません",
+  "@stockPositionNoParcels": {
+      "description": "Stock position: the product has no stock_units rows in this warehouse."
   }
 }

@@ -5085,6 +5085,132 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この一覧を表示'**
   String get shortcutShowHelp;
+
+  /// Product master: internal code, separate from the JAN barcode (0057).
+  ///
+  /// In ja, this message translates to:
+  /// **'SKU'**
+  String get productSku;
+
+  /// Product master: SKU field helper text.
+  ///
+  /// In ja, this message translates to:
+  /// **'社内品番（任意）'**
+  String get productSkuHint;
+
+  /// Product master: what must be recorded about this product (0057/0060).
+  ///
+  /// In ja, this message translates to:
+  /// **'追跡区分'**
+  String get productTracking;
+
+  /// Tracking mode UNTRACKED.
+  ///
+  /// In ja, this message translates to:
+  /// **'追跡なし'**
+  String get trackUntracked;
+
+  /// Tracking mode LOT.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット'**
+  String get trackLot;
+
+  /// Tracking mode SERIAL.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル'**
+  String get trackSerial;
+
+  /// Tracking mode LOT_AND_SERIAL.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット＋シリアル'**
+  String get trackLotAndSerial;
+
+  /// Tracking mode EXPIRY: every lot must carry a date.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効期限'**
+  String get trackExpiry;
+
+  /// Product master: the unit on-hand quantities are counted in (0059).
+  ///
+  /// In ja, this message translates to:
+  /// **'基本単位'**
+  String get productBaseUnit;
+
+  /// Product master: how many barcodes resolve to this product.
+  ///
+  /// In ja, this message translates to:
+  /// **'コード {count} 件'**
+  String productCodeCount(int count);
+
+  /// Product master: one pack unit and what it converts to.
+  ///
+  /// In ja, this message translates to:
+  /// **'{code} = {factor}{base}'**
+  String productPackUnit(String code, String factor, String base);
+
+  /// Product form: resolve_barcode found the scanned code on another product.
+  ///
+  /// In ja, this message translates to:
+  /// **'このコードは「{name}」に登録済みです'**
+  String productScanAlreadyUsed(String name);
+
+  /// Stock: the four numbers §5 keeps apart (0061/0064).
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫内訳'**
+  String get stockPositionTitle;
+
+  /// Stock position: usable on-hand less what is reserved.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当可能'**
+  String get stockAvailable;
+
+  /// Stock position: promised to orders, not yet shipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'予約済み'**
+  String get stockReserved;
+
+  /// Stock position: of the reserved quantity, how much is pinned to parcels.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当済み'**
+  String get stockAllocated;
+
+  /// Stock position: on hand but quarantined, damaged or held.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷不可'**
+  String get stockUnavailable;
+
+  /// Stock position: available went negative.
+  ///
+  /// In ja, this message translates to:
+  /// **'予約が引当可能数を超えています'**
+  String get stockOverPromised;
+
+  /// Stock: stock_levels row whose product_id is still null (0058).
+  ///
+  /// In ja, this message translates to:
+  /// **'このJANは商品マスタに未登録です'**
+  String get stockNotLinkedToProduct;
+
+  /// Stock position: which lot a parcel came from.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット {code}'**
+  String stockPositionLot(String code);
+
+  /// Stock position: the product has no stock_units rows in this warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'内訳はまだありません'**
+  String get stockPositionNoParcels;
 }
 
 class _AppLocalizationsDelegate

@@ -2625,4 +2625,75 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcutShowHelp => '显示此列表';
+
+  @override
+  String get productSku => 'SKU';
+
+  @override
+  String get productSkuHint => '内部编号（可选）';
+
+  @override
+  String get productTracking => '追踪方式';
+
+  @override
+  String get trackUntracked => '不追踪';
+
+  @override
+  String get trackLot => '批次';
+
+  @override
+  String get trackSerial => '序列号';
+
+  @override
+  String get trackLotAndSerial => '批次＋序列号';
+
+  @override
+  String get trackExpiry => '有效期';
+
+  @override
+  String get productBaseUnit => '基本单位';
+
+  @override
+  String productCodeCount(int count) {
+    return '$count 个条码';
+  }
+
+  @override
+  String productPackUnit(String code, String factor, String base) {
+    return '$code = $factor$base';
+  }
+
+  @override
+  String productScanAlreadyUsed(String name) {
+    return '该条码已属于「$name」';
+  }
+
+  @override
+  String get stockPositionTitle => '库存明细';
+
+  @override
+  String get stockAvailable => '可用';
+
+  @override
+  String get stockReserved => '已预留';
+
+  @override
+  String get stockAllocated => '已分配';
+
+  @override
+  String get stockUnavailable => '不可发货';
+
+  @override
+  String get stockOverPromised => '预留超过可用库存';
+
+  @override
+  String get stockNotLinkedToProduct => '该JAN尚未登记到商品主数据';
+
+  @override
+  String stockPositionLot(String code) {
+    return '批次 $code';
+  }
+
+  @override
+  String get stockPositionNoParcels => '暫无明细';
 }

@@ -2702,4 +2702,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcutShowHelp => 'Show this list';
+
+  @override
+  String get productSku => 'SKU';
+
+  @override
+  String get productSkuHint => 'Internal code (optional)';
+
+  @override
+  String get productTracking => 'Tracking';
+
+  @override
+  String get trackUntracked => 'Untracked';
+
+  @override
+  String get trackLot => 'Lot';
+
+  @override
+  String get trackSerial => 'Serial';
+
+  @override
+  String get trackLotAndSerial => 'Lot + serial';
+
+  @override
+  String get trackExpiry => 'Expiry';
+
+  @override
+  String get productBaseUnit => 'Base unit';
+
+  @override
+  String productCodeCount(int count) {
+    return '$count codes';
+  }
+
+  @override
+  String productPackUnit(String code, String factor, String base) {
+    return '$code = $factor $base';
+  }
+
+  @override
+  String productScanAlreadyUsed(String name) {
+    return 'This code already belongs to \"$name\"';
+  }
+
+  @override
+  String get stockPositionTitle => 'Stock position';
+
+  @override
+  String get stockAvailable => 'Available';
+
+  @override
+  String get stockReserved => 'Reserved';
+
+  @override
+  String get stockAllocated => 'Allocated';
+
+  @override
+  String get stockUnavailable => 'Unavailable';
+
+  @override
+  String get stockOverPromised => 'More is promised than can ship';
+
+  @override
+  String get stockNotLinkedToProduct =>
+      'This JAN is not in the product master yet';
+
+  @override
+  String stockPositionLot(String code) {
+    return 'Lot $code';
+  }
+
+  @override
+  String get stockPositionNoParcels => 'No parcels yet';
 }

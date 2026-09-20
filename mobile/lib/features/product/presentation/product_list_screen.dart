@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/scan/barcode_resolver.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
+import '../../../core/scan/scan_resolution.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -11,9 +13,12 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
 
-/// The product master (spec §19, 0032): name, category, price against a JAN
-/// — the same barcode already used throughout stock/receiving/picking, not a
-/// new identifier. Anyone can open this screen; the server is the real gate
+/// The product master (spec §19, 0032), now showing what 0057-0060 added to it:
+/// the internal SKU, the base unit its quantities are counted in, the pack units
+/// defined against it, how many barcodes reach it, and whether a lot or a serial
+/// has to be recorded when it arrives.
+///
+/// Anyone can open this screen; the server is the real gate
 /// (`product.view`/`product.manage`), same pattern as every other screen.
 class ProductListScreen extends ConsumerWidget {
   const ProductListScreen({super.key});
@@ -192,10 +197,30 @@ class _ProductCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text(product.janCode,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            fontFamily: AppFonts.mono,
-                            color: scheme.onSurfaceVariant)),
+                    Row(
+                      children: [
+                        Text(product.janCode,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                                fontFamily: AppFonts.mono,
+                                color: scheme.onSurfaceVariant)),
+                        // The SKU sits beside the JAN rather than replacing it:
+                        // one is what the supplier printed, the other is what
+                        // this warehouse calls it, and both get scanned (0057).
+                        if (product.sku != null) ...[
+                          Text(' · ',
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant)),
+                          Flexible(
+                            child: Text(product.sku!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                    fontFamily: AppFonts.mono,
+                                    color: scheme.onSurfaceVariant),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                        ],
+                      ],
+                    ),
                     if (product.category != null &&
                         product.category!.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -203,6 +228,8 @@ class _ProductCard extends StatelessWidget {
                           style: theme.textTheme.bodySmall
                               ?.copyWith(color: scheme.onSurfaceVariant)),
                     ],
+                    const SizedBox(height: AppSpacing.xs),
+                    _ProductFacts(product: product),
                   ],
                 ),
               ),
@@ -237,6 +264,78 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
+/// Localized name for a tracking mode. `UNTRACKED` is the default and says
+/// nothing an operator needs, so [trackingModeLabel] is only asked for the
+/// others — see [_ProductFacts].
+String trackingModeLabel(AppLocalizations l10n, TrackingMode mode) =>
+    switch (mode) {
+      TrackingMode.untracked => l10n.trackUntracked,
+      TrackingMode.lot => l10n.trackLot,
+      TrackingMode.serial => l10n.trackSerial,
+      TrackingMode.lotAndSerial => l10n.trackLotAndSerial,
+      TrackingMode.expiry => l10n.trackExpiry,
+    };
+
+/// A number the operator will read as "12", not "12.000000".
+String formatFactor(double value) =>
+    value == value.roundToDouble() && value.abs() < 1e15
+        ? value.toStringAsFixed(0)
+        : value.toString();
+
+/// The facts 0057-0060 added, as a wrap of small chips: base unit, each pack
+/// unit and what it converts to, the tracking mode when it is not the default,
+/// and the barcode count when there is more than the one code.
+///
+/// A wrap rather than fixed rows, because a product may have none of these
+/// (nothing is shown at all) or several (the row grows instead of truncating).
+class _ProductFacts extends StatelessWidget {
+  const _ProductFacts({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final base = product.baseUom;
+
+    final facts = <Widget>[];
+
+    Widget chip(String text, {Color? color}) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+          decoration: BoxDecoration(
+            color: (color ?? scheme.surfaceContainerHighest).withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          ),
+          child: Text(text,
+              style: theme.textTheme.labelSmall
+                  ?.copyWith(color: scheme.onSurfaceVariant)),
+        );
+
+    if (base != null) {
+      facts.add(chip('${l10n.productBaseUnit}: ${base.name}'));
+    }
+    for (final uom in product.packUoms) {
+      facts.add(chip(l10n.productPackUnit(
+        uom.code,
+        formatFactor(uom.conversionFactor),
+        base?.name ?? '',
+      )));
+    }
+    if (product.trackingMode != TrackingMode.untracked) {
+      facts.add(chip(trackingModeLabel(l10n, product.trackingMode),
+          color: scheme.tertiaryContainer));
+    }
+    if (product.barcodes.length > 1) {
+      facts.add(chip(l10n.productCodeCount(product.barcodes.length)));
+    }
+
+    if (facts.isEmpty) return const SizedBox.shrink();
+    return Wrap(spacing: AppSpacing.xs, runSpacing: 2, children: facts);
+  }
+}
+
 /// Bottom sheet for creating or editing one product. The JAN code is fixed
 /// once created — `update_product` never touches it — so it's read-only
 /// (shown, not editable) when [product] is non-null.
@@ -260,19 +359,48 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
       text: widget.product?.price == null
           ? ''
           : widget.product!.price!.toStringAsFixed(0));
+  late final TextEditingController _sku =
+      TextEditingController(text: widget.product?.sku ?? '');
+  late TrackingMode _tracking =
+      widget.product?.trackingMode ?? TrackingMode.untracked;
   bool _busy = false;
   String? _error;
+  String? _scanWarning;
 
   bool get _isEdit => widget.product != null;
 
   // Barcode input before manual keying (§35): a new product's JAN is almost
   // always read straight off the item in hand, not typed digit by digit.
+  //
+  // The scan is then resolved through §26's one resolver, so keying a code that
+  // already belongs to something is caught here rather than by a unique-index
+  // error after the operator has filled the rest of the form in.
   Future<void> _scanJan() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
     );
     if (!mounted || code == null || code.isEmpty) return;
-    setState(() => _jan.text = code);
+    setState(() {
+      _jan.text = code;
+      _scanWarning = null;
+    });
+
+    final result = await ref.read(barcodeResolverProvider).resolve(code);
+    if (!mounted) return;
+    result.when(
+      success: (hit) {
+        // Only a product hit matters here. A location or serial label in the JAN
+        // field is a mis-scan the server will reject on its own, and guessing at
+        // what the operator meant would be worse than letting them look.
+        if (hit.kind != ScanKind.product) return;
+        if (hit.productId == widget.product?.id) return;
+        setState(() => _scanWarning = AppLocalizations.of(context)
+            .productScanAlreadyUsed(hit.name ?? hit.janCode ?? code));
+      },
+      // A failed lookup must not block data entry: the create call is still the
+      // authority on whether this code can be used.
+      failure: (_) {},
+    );
   }
 
   @override
@@ -281,6 +409,7 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
     _name.dispose();
     _category.dispose();
     _price.dispose();
+    _sku.dispose();
     super.dispose();
   }
 
@@ -297,9 +426,13 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
 
     final category = _category.text.trim().isEmpty ? null : _category.text.trim();
     final price = double.tryParse(_price.text.trim());
+    // Empty means "clear it", which is why this is sent as '' and not as null —
+    // null tells `set_product_identity` to leave the field alone (0065).
+    final sku = _sku.text.trim();
     final repo = ref.read(productRepositoryProvider);
 
     String? errorMessage;
+    int? productId = widget.product?.id;
     if (_isEdit) {
       final result = await repo.update(
         id: widget.product!.id,
@@ -314,6 +447,23 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
         name: _name.text.trim(),
         category: category,
         price: price,
+      );
+      result.when(
+          success: (id) => productId = id,
+          failure: (f) => errorMessage = f.message);
+    }
+
+    // Identity is a second call because it is a second decision (0057): the SKU
+    // and the tracking mode go through `set_product_identity`, which refuses a
+    // mode that contradicts lots or serials already recorded. Only sent when
+    // something actually changed, so editing a name never risks that refusal.
+    final identityChanged = sku != (widget.product?.sku ?? '') ||
+        _tracking != (widget.product?.trackingMode ?? TrackingMode.untracked);
+    if (errorMessage == null && productId != null && identityChanged) {
+      final result = await repo.setIdentity(
+        id: productId!,
+        sku: sku,
+        trackingMode: _tracking,
       );
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     }
@@ -366,10 +516,52 @@ class _ProductFormSheetState extends ConsumerState<_ProductFormSheet> {
                       ),
               ),
             ),
+            if (_scanWarning != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      size: 16, color: theme.colorScheme.tertiary),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(_scanWarning!,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.tertiary)),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             TextField(
               controller: _name,
               decoration: InputDecoration(labelText: l10n.productName),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              controller: _sku,
+              decoration: InputDecoration(
+                labelText: l10n.productSku,
+                helperText: l10n.productSkuHint,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // What must be recorded when this product arrives. Changing it is
+            // refused by the server once lots or serials exist (§37-15), so the
+            // failure surfaces in the same error line as everything else.
+            DropdownButtonFormField<TrackingMode>(
+              initialValue: _tracking,
+              decoration: InputDecoration(labelText: l10n.productTracking),
+              items: [
+                for (final mode in TrackingMode.values)
+                  DropdownMenuItem(
+                    value: mode,
+                    child: Text(trackingModeLabel(l10n, mode)),
+                  ),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (mode) => setState(
+                      () => _tracking = mode ?? TrackingMode.untracked),
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(

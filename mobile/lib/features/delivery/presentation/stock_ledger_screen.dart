@@ -32,15 +32,25 @@ import '../domain/stock_movement.dart';
 
 /// The stock ledger for one JAN: every movement, newest first, each showing
 /// before → after so "why did stock change" is answerable at a glance (spec §18).
+///
+/// Since 0061/0064 the screen opens with what the quantity currently *consists
+/// of* — available, reserved, and anything held back — above the history of how
+/// it got there. The two answer different questions and belong together: a
+/// number that looks wrong is explained either by a movement or by a hold.
 class StockLedgerScreen extends ConsumerWidget {
   const StockLedgerScreen({
     super.key,
     required this.janCode,
     this.productName = '',
+    this.productId,
   });
 
   final String janCode;
   final String productName;
+
+  /// Null for a JAN the product master does not know yet (0058): there is no
+  /// position to fetch, and the screen says so instead of showing zeroes.
+  final int? productId;
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
@@ -130,24 +140,215 @@ class StockLedgerScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(stockLedgerProvider(janCode)),
         ),
         data: (moves) {
+          // The position is worth showing even with no movements — stock can
+          // have been held or promised without the quantity ever changing.
+          final header = _PositionHeader(productId: productId);
           if (moves.isEmpty) {
-            return EmptyStateView(
-              icon: Icons.history,
-              title: l10n.ledgerEmpty,
-              message: l10n.ledgerSubtitle,
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  ref.invalidate(stockLedgerProvider(janCode)),
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
+                  header,
+                  const SizedBox(height: AppSpacing.lg),
+                  EmptyStateView(
+                    icon: Icons.history,
+                    title: l10n.ledgerEmpty,
+                    message: l10n.ledgerSubtitle,
+                  ),
+                ],
+              ),
             );
           }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(stockLedgerProvider(janCode)),
             child: ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: moves.length,
+              itemCount: moves.length + 1,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, i) => _MovementCard(move: moves[i]),
+              itemBuilder: (context, i) => i == 0
+                  ? header
+                  : _MovementCard(move: moves[i - 1]),
             ),
           );
         },
       ),
+    );
+  }
+}
+
+/// On hand / available / reserved for one product, with the per-status and
+/// per-lot parcels behind them (§5, 0061/0064).
+class _PositionHeader extends ConsumerWidget {
+  const _PositionHeader({required this.productId});
+
+  final int? productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    // A JAN with no product cannot have a position. Saying so is more useful
+    // than four zeroes, because the fix is to register the product — after which
+    // 0058's linking fills the history in by itself.
+    if (productId == null) {
+      return Card(
+        color: scheme.surfaceContainerHighest,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Icon(Icons.link_off, size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(l10n.stockNotLinkedToProduct,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final async = ref.watch(stockPositionProvider(productId!));
+    return async.when(
+      // Quiet while loading and quiet on failure: this is a supplement to the
+      // ledger below it, and an error banner over the history would be louder
+      // than the thing it is reporting.
+      loading: () => const SizedBox(height: AppSpacing.xl),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (position) {
+        final nf = NumberFormat.decimalPattern();
+        final interesting =
+            position.parcels.where((p) => p.quantity != 0).toList();
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.stockPositionTitle,
+                    style: theme.textTheme.labelLarge
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.lg,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    _Figure(
+                        label: l10n.stockOnHandUnit,
+                        value: nf.format(position.onHand)),
+                    _Figure(
+                      label: l10n.stockAvailable,
+                      value: nf.format(position.available),
+                      // The one number an outbound decision is made on, and the
+                      // one that can be negative.
+                      emphasise: true,
+                      tone: position.isOverPromised ? scheme.error : null,
+                    ),
+                    if (position.reserved != 0)
+                      _Figure(
+                          label: l10n.stockReserved,
+                          value: nf.format(position.reserved)),
+                    if (position.allocated != 0)
+                      _Figure(
+                          label: l10n.stockAllocated,
+                          value: nf.format(position.allocated)),
+                    if (position.unavailable != 0)
+                      _Figure(
+                          label: l10n.stockUnavailable,
+                          value: nf.format(position.unavailable)),
+                  ],
+                ),
+                if (position.isOverPromised) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Icon(Icons.warning_amber_outlined,
+                          size: 16, color: scheme.error),
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Text(l10n.stockOverPromised,
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: scheme.error)),
+                      ),
+                    ],
+                  ),
+                ],
+                if (interesting.isNotEmpty) ...[
+                  const Divider(height: AppSpacing.lg),
+                  for (final parcel in interesting)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              parcel.lotCode == null
+                                  ? parcel.statusName
+                                  : '${parcel.statusName} · '
+                                      '${l10n.stockPositionLot(parcel.lotCode!)}',
+                              style: theme.textTheme.bodySmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(nf.format(parcel.quantity),
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(fontFamily: AppFonts.mono)),
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Figure extends StatelessWidget {
+  const _Figure({
+    required this.label,
+    required this.value,
+    this.emphasise = false,
+    this.tone,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasise;
+  final Color? tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label,
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: scheme.onSurfaceVariant)),
+        Text(
+          value,
+          style: (emphasise
+                  ? theme.textTheme.titleLarge
+                  : theme.textTheme.titleMedium)
+              ?.copyWith(
+            fontFamily: AppFonts.mono,
+            fontWeight: emphasise ? FontWeight.w700 : null,
+            color: tone,
+          ),
+        ),
+      ],
     );
   }
 }

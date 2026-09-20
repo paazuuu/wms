@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/delivery/application/delivery_providers.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
+import 'package:wms_mobile/features/delivery/domain/stock_position.dart';
 import 'package:wms_mobile/features/delivery/presentation/stock_ledger_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 
@@ -91,5 +92,117 @@ void main() {
     container.read(activeWarehouseIdProvider.notifier).state = 2;
     await container.read(stockListProvider.future);
     expect(repo.lastWarehouseId, 2);
+  });
+
+  testWidgets('the ledger opens with what the quantity consists of',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    final repo = FakeStockRepository(const [], movements: _movements())
+      ..positions = {
+        7: StockPosition(
+          productId: 7,
+          warehouseId: 1,
+          onHand: 100,
+          reserved: 30,
+          available: 20,
+          allocated: 30,
+          parcels: [
+            StockParcel(status: 'OK', statusName: '良品', quantity: 50),
+            StockParcel(
+              status: 'QUARANTINE',
+              statusName: '隔離',
+              quantity: 50,
+              lotId: 3,
+              lotCode: 'A-2024/05',
+            ),
+          ],
+        ),
+      };
+    final container = ProviderContainer(overrides: [
+      stockRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(
+      tester,
+      container,
+      const StockLedgerScreen(janCode: _jan, productName: 'ペン', productId: 7),
+    );
+    await tester.pumpAndSettle();
+
+    // §5's numbers, each labelled — not one total that means four things.
+    expect(find.text('在庫内訳'), findsOneWidget);
+    expect(find.text('100'), findsOneWidget);
+    expect(find.text('引当可能'), findsOneWidget);
+    expect(find.text('20'), findsOneWidget);
+    expect(find.text('予約済み'), findsOneWidget);
+    expect(find.text('出荷不可'), findsOneWidget);
+
+    // The per-status split behind them, with the lot a held parcel came from.
+    expect(find.text('隔離 · ロット A-2024/05'), findsOneWidget);
+    expect(find.text('良品'), findsOneWidget);
+
+    // The history is still there, below it.
+    expect(find.text('50 → 30'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('over-promised stock is called out, not hidden by a zero',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    final repo = FakeStockRepository(const [], movements: _movements())
+      ..positions = {
+        7: StockPosition(
+          productId: 7,
+          warehouseId: 1,
+          onHand: 20,
+          reserved: 40,
+          available: -20,
+          allocated: 40,
+        ),
+      };
+    final container = ProviderContainer(overrides: [
+      stockRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(
+      tester,
+      container,
+      const StockLedgerScreen(janCode: _jan, productName: 'ペン', productId: 7),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('-20'), findsWidgets);
+    expect(find.text('予約が引当可能数を超えています'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a JAN with no product says so instead of showing zeroes',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    final repo = FakeStockRepository(const [], movements: _movements());
+    final container = ProviderContainer(overrides: [
+      stockRepositoryProvider.overrideWithValue(repo),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(
+      tester,
+      container,
+      // No productId: 0058's case, stock received against a JAN the product
+      // master does not know yet.
+      const StockLedgerScreen(janCode: _jan, productName: 'ペン'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('このJANは商品マスタに未登録です'), findsOneWidget);
+    expect(find.text('在庫内訳'), findsNothing);
+    // Asking for a position would have been meaningless, so it is not asked.
+    expect(repo.lastPositionQuery, isNull);
+
+    await tester.binding.setSurfaceSize(null);
   });
 }

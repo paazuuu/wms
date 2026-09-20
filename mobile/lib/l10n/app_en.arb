@@ -1144,5 +1144,26 @@
   "shortcutShowHelp": "Show this list",
   "@shortcutShowHelp": {
     "description": "Keyboard shortcut help sheet."
-  }
+  },
+  "productSku": "SKU",
+  "productSkuHint": "Internal code (optional)",
+  "productTracking": "Tracking",
+  "trackUntracked": "Untracked",
+  "trackLot": "Lot",
+  "trackSerial": "Serial",
+  "trackLotAndSerial": "Lot + serial",
+  "trackExpiry": "Expiry",
+  "productBaseUnit": "Base unit",
+  "productCodeCount": "{count} codes",
+  "productPackUnit": "{code} = {factor} {base}",
+  "productScanAlreadyUsed": "This code already belongs to \"{name}\"",
+  "stockPositionTitle": "Stock position",
+  "stockAvailable": "Available",
+  "stockReserved": "Reserved",
+  "stockAllocated": "Allocated",
+  "stockUnavailable": "Unavailable",
+  "stockOverPromised": "More is promised than can ship",
+  "stockNotLinkedToProduct": "This JAN is not in the product master yet",
+  "stockPositionLot": "Lot {code}",
+  "stockPositionNoParcels": "No parcels yet"
 }

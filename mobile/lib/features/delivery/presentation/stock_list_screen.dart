@@ -207,6 +207,7 @@ class _StockCard extends StatelessWidget {
           builder: (_) => StockLedgerScreen(
             janCode: item.janCode,
             productName: item.productName,
+            productId: item.productId,
           ),
         )),
         child: Padding(
