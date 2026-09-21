@@ -1008,17 +1008,6 @@
       }
     }
   },
-  "putawayAlreadyBinned": "うち {binned} / {total} は棚入れ済み",
-  "@putawayAlreadyBinned": {
-    "placeholders": {
-      "binned": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "putawayScanLocation": "ロケーションをスキャン",
   "putawayScanLocationHint": "棚のバーコードをスキャン",
   "putawayBinNotFound": "この倉庫に「{code}」というロケーションはありません",
@@ -2316,6 +2305,23 @@
     "placeholders": {
       "qty": {
         "type": "int"
+      }
+    }
+  },
+  "putawayNoSuggestionBody": "この倉庫に置ける棚が見つかりません",
+  "@putawayNoSuggestionBody": {
+    "description": "Put-away queue: a parcel with no bin available at all."
+  },
+  "putawayNoHeldBin": "出荷できない在庫を置ける棚（検品保留・破損など）がありません",
+  "@putawayNoHeldBin": {
+    "description": "Put-away queue: held stock with no bin allowed to hold it."
+  },
+  "putawayLot": "ロット {lot}",
+  "@putawayLot": {
+    "description": "Put-away queue: which lot the parcel is on.",
+    "placeholders": {
+      "lot": {
+        "type": "String"
       }
     }
   }

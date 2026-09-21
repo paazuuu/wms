@@ -4354,12 +4354,6 @@ abstract class AppLocalizations {
   /// **'推奨: {code}'**
   String putawaySuggested(String code);
 
-  /// No description provided for @putawayAlreadyBinned.
-  ///
-  /// In ja, this message translates to:
-  /// **'うち {binned} / {total} は棚入れ済み'**
-  String putawayAlreadyBinned(int binned, int total);
-
   /// No description provided for @putawayScanLocation.
   ///
   /// In ja, this message translates to:
@@ -6303,6 +6297,24 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'うち {qty} 点は検品待ち在庫に無く、在庫は動いていません'**
   String qcEffectNotHeld(int qty);
+
+  /// Put-away queue: a parcel with no bin available at all.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫に置ける棚が見つかりません'**
+  String get putawayNoSuggestionBody;
+
+  /// Put-away queue: held stock with no bin allowed to hold it.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷できない在庫を置ける棚（検品保留・破損など）がありません'**
+  String get putawayNoHeldBin;
+
+  /// Put-away queue: which lot the parcel is on.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット {lot}'**
+  String putawayLot(String lot);
 }
 
 class _AppLocalizationsDelegate

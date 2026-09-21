@@ -2048,6 +2048,11 @@ class FakePutawayRepository implements PutawayRepository {
   final List<PutawayResult> confirmed = [];
   final Map<String, PutawayResult> _byKey = {};
 
+  /// Which parcel the last confirm named (0069). Null status means "the
+  /// shippable ones", which is what the server reads it as.
+  String? lastLotCode;
+  String? lastStatusCode;
+
   @override
   Future<ApiResult<List<PutawayTask>>> queue(int warehouseId) async =>
       ApiSuccess(_tasks);
@@ -2064,7 +2069,11 @@ class FakePutawayRepository implements PutawayRepository {
     required int quantity,
     required String idempotencyKey,
     String? note,
+    String? lotCode,
+    String? statusCode,
   }) async {
+    lastLotCode = lotCode;
+    lastStatusCode = statusCode;
     final replay = _byKey[idempotencyKey];
     if (replay != null) {
       return ApiSuccess(PutawayResult(
@@ -2086,14 +2095,20 @@ class FakePutawayRepository implements PutawayRepository {
         if (t.janCode != janCode)
           t
         else if (pendingAfter > 0)
+          // The parcel shrinks; nothing counts it twice. Since 0069 the queue
+          // has no stored quantity to keep in step (§14).
           PutawayTask(
             janCode: t.janCode,
+            productId: t.productId,
             productName: t.productName,
             pendingQuantity: pendingAfter,
             warehouseOnHand: t.warehouseOnHand,
-            binnedQuantity: t.binnedQuantity + quantity,
-            suggestedBinId: t.suggestedBinId,
-            suggestedBinCode: t.suggestedBinCode,
+            lotId: t.lotId,
+            lotCode: t.lotCode,
+            statusCode: t.statusCode,
+            statusName: t.statusName,
+            countsAvailable: t.countsAvailable,
+            suggestions: t.suggestions,
           ),
     ];
     final result = PutawayResult(

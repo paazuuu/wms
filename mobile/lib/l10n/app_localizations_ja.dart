@@ -2230,11 +2230,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String putawayAlreadyBinned(int binned, int total) {
-    return 'うち $binned / $total は棚入れ済み';
-  }
-
-  @override
   String get putawayScanLocation => 'ロケーションをスキャン';
 
   @override
@@ -3311,5 +3306,16 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String qcEffectNotHeld(int qty) {
     return 'うち $qty 点は検品待ち在庫に無く、在庫は動いていません';
+  }
+
+  @override
+  String get putawayNoSuggestionBody => 'この倉庫に置ける棚が見つかりません';
+
+  @override
+  String get putawayNoHeldBin => '出荷できない在庫を置ける棚（検品保留・破損など）がありません';
+
+  @override
+  String putawayLot(String lot) {
+    return 'ロット $lot';
   }
 }

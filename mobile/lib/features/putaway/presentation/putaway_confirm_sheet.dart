@@ -134,6 +134,11 @@ class _PutawayConfirmSheetState extends ConsumerState<PutawayConfirmSheet> {
           binId: bin.binId,
           quantity: quantity,
           idempotencyKey: key,
+          // Which parcel is in the operator's hands. The queue row already
+          // knows, and naming it is what lets held stock move at all: with no
+          // status the server takes only the shippable parcels (0069).
+          lotCode: widget.task.lotCode,
+          statusCode: widget.task.isHeld ? widget.task.statusCode : null,
         );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -184,9 +189,9 @@ class _PutawayConfirmSheetState extends ConsumerState<PutawayConfirmSheet> {
             const SizedBox(height: AppSpacing.sm),
             ScanField(
               autofocusOnWide: true,
-              hintText: widget.task.suggestedBinCode == null
+              hintText: widget.task.bestSuggestion == null
                   ? l10n.putawayScanLocationHint
-                  : l10n.putawaySuggested(widget.task.suggestedBinCode!),
+                  : l10n.putawaySuggested(widget.task.bestSuggestion!.binCode),
               onSubmitted: _resolveLocation,
               trailing: [
                 IconButton(

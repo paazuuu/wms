@@ -2225,11 +2225,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String putawayAlreadyBinned(int binned, int total) {
-    return '其中 $binned / $total 已上架';
-  }
-
-  @override
   String get putawayScanLocation => '扫描货位';
 
   @override
@@ -3305,5 +3300,16 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String qcEffectNotHeld(int qty) {
     return '其中 $qty 件不在待检验库存中，库存未变动';
+  }
+
+  @override
+  String get putawayNoSuggestionBody => '本仓库没有可放置的货位';
+
+  @override
+  String get putawayNoHeldBin => '没有可存放不可出库库存的货位（待检、破损等）';
+
+  @override
+  String putawayLot(String lot) {
+    return '批次 $lot';
   }
 }

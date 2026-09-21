@@ -194,31 +194,78 @@ class _PutawayTaskCard extends StatelessWidget {
                   ),
                 ],
               ),
+              // Which parcel this is, not just which product. Since 0069 the
+              // queue is parcel-level, and the lot and status are what decide
+              // where it may go.
+              if (task.lotCode != null ||
+                  task.serialNumber != null ||
+                  task.isHeld) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    if (task.lotCode != null)
+                      StatusPill(
+                          tone: StatusTone.neutral,
+                          label: l10n.putawayLot(task.lotCode!),
+                          dense: true),
+                    if (task.serialNumber != null)
+                      StatusPill(
+                          tone: StatusTone.neutral,
+                          label: task.serialNumber!,
+                          dense: true),
+                    // Held stock may only go to a bin that can hold it, and the
+                    // server refuses the rest — so this is a warning before the
+                    // walk, not an error after it.
+                    if (task.isHeld)
+                      StatusPill(
+                          tone: StatusTone.warning,
+                          label: task.statusName ?? task.statusCode,
+                          dense: true),
+                  ],
+                ),
+              ],
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
                   Icon(Icons.place_outlined, size: 16, color: scheme.onSurfaceVariant),
                   const SizedBox(width: 4),
-                  Text(
-                    task.suggestedBinCode == null
-                        ? l10n.putawayNoSuggestion
-                        : l10n.putawaySuggested(task.suggestedBinCode!),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: task.suggestedBinCode == null
-                            ? null
-                            : AppFonts.mono,
-                        color: scheme.onSurfaceVariant),
+                  Expanded(
+                    child: Text(
+                      task.bestSuggestion == null
+                          ? l10n.putawayNoSuggestion
+                          : l10n.putawaySuggested(task.bestSuggestion!.binCode),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          fontFamily: task.bestSuggestion == null
+                              ? null
+                              : AppFonts.mono,
+                          color: scheme.onSurfaceVariant),
+                    ),
                   ),
-                  const Spacer(),
                   Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                 ],
               ),
-              if (task.binnedQuantity > 0) ...[
+              // Why that bin. A suggestion whose logic is invisible is one an
+              // operator taps past (§14).
+              if (task.bestSuggestion?.reason != null) ...[
                 const SizedBox(height: 2),
                 Text(
-                  l10n.putawayAlreadyBinned(task.binnedQuantity, task.warehouseOnHand),
+                  task.bestSuggestion!.reason!,
                   style: theme.textTheme.labelSmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
+              // A parcel with nowhere to go is a floor problem, not an empty
+              // field: usually a warehouse with no bin that may hold held stock.
+              if (task.hasNowhereToGo) ...[
+                const SizedBox(height: 2),
+                Text(
+                  task.isHeld
+                      ? l10n.putawayNoHeldBin
+                      : l10n.putawayNoSuggestionBody,
+                  style: theme.textTheme.labelSmall
+                      ?.copyWith(color: scheme.error),
                 ),
               ],
             ],

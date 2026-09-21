@@ -11,12 +11,20 @@ import '../../support/harness.dart';
 
 const _task = PutawayTask(
   janCode: '4988601001053',
+  productId: 5,
   productName: 'テスト商品',
   pendingQuantity: 30,
   warehouseOnHand: 48,
-  binnedQuantity: 18,
-  suggestedBinId: 7,
-  suggestedBinCode: 'PA-TEST-A',
+  suggestions: [
+    PutawaySuggestion(
+      binId: 7,
+      binCode: 'PA-TEST-A',
+      binType: 'PICKABLE',
+      onHand: 18,
+      score: 100,
+      reason: '同一商品あり',
+    ),
+  ],
 );
 
 const _bin = BinLocation(
@@ -63,8 +71,76 @@ void main() {
     // The pending quantity, not the warehouse balance, is the number shown big.
     expect(find.text('30'), findsOneWidget);
     expect(find.text('推奨: PA-TEST-A'), findsOneWidget);
-    expect(find.text('うち 18 / 48 は棚入れ済み'), findsOneWidget);
+    // §14 wants the reason, not just the bin: a suggestion whose logic is
+    // invisible is one an operator taps past. The binned-so-far figure the old
+    // queue showed is gone with 0069 — the queue is parcel-level now and has no
+    // aggregate to report.
+    expect(find.text('同一商品あり'), findsOneWidget);
     expect(find.text('1 品目'), findsOneWidget);
+  });
+
+  testWidgets('a parcel shows which lot it is, and warns when it cannot ship',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    await _pump(
+      tester,
+      FakePutawayRepository(tasks: [
+        PutawayTask(
+          janCode: '4988601001053',
+          productId: 5,
+          productName: 'テスト商品',
+          pendingQuantity: 40,
+          warehouseOnHand: 40,
+          lotId: 27,
+          lotCode: 'QC-L1',
+          statusCode: 'QC_PENDING',
+          statusName: '検品待ち',
+          countsAvailable: false,
+          suggestions: [
+            PutawaySuggestion(
+              binId: 9,
+              binCode: 'QC-01',
+              binType: 'QC_HOLD',
+              score: 0,
+            ),
+          ],
+        ),
+      ]),
+    );
+
+    expect(find.text('ロット QC-L1'), findsOneWidget);
+    // The status is shown because it decides where the parcel may go — the
+    // server refuses a pickable bin for it (0069).
+    expect(find.text('検品待ち'), findsOneWidget);
+    expect(find.text('推奨: QC-01'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('held stock with nowhere to put it says why', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    await _pump(
+      tester,
+      FakePutawayRepository(tasks: [
+        PutawayTask(
+          janCode: '4988601001053',
+          productName: 'テスト商品',
+          pendingQuantity: 5,
+          statusCode: 'DAMAGED',
+          statusName: '破損',
+          countsAvailable: false,
+        ),
+      ]),
+    );
+
+    // Not an empty field: a warehouse with no bin that may hold damaged stock
+    // is a real floor problem, and naming it is the difference between fixing
+    // it and re-scanning hopefully.
+    expect(
+        find.text('出荷できない在庫を置ける棚（検品保留・破損など）がありません'),
+        findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
   });
 
   testWidgets('an empty queue in a location-managed warehouse reads as done',
@@ -179,6 +255,69 @@ void main() {
 
     expect(find.text('棚入れ待ちは 30 までです'), findsOneWidget);
     expect(repo.confirmed, isEmpty);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('confirming a held parcel names its lot and status', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    final repo = FakePutawayRepository(
+      tasks: [
+        PutawayTask(
+          janCode: '4988601001053',
+          productId: 5,
+          productName: 'テスト商品',
+          pendingQuantity: 40,
+          warehouseOnHand: 40,
+          lotId: 27,
+          lotCode: 'QC-L1',
+          statusCode: 'QC_PENDING',
+          statusName: '検品待ち',
+          countsAvailable: false,
+        ),
+      ],
+      bins: {
+        'QC-01': BinLocation(binId: 9, binCode: 'QC-01', binType: 'QC_HOLD'),
+      },
+    );
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('テスト商品'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'QC-01');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, '40');
+    await tester.pump();
+    await tester.tap(find.text('棚入れを確定'));
+    await tester.pumpAndSettle();
+
+    // Both, because a dock holding good and failed cartons of the same product
+    // has two destinations — and with no status named the server would move the
+    // shippable ones instead (0069).
+    expect(repo.lastLotCode, 'QC-L1');
+    expect(repo.lastStatusCode, 'QC_PENDING');
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a shippable parcel names no status, which means "the shippable ones"',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    final repo = FakePutawayRepository(tasks: [_task], bins: {'PA-TEST-A': _bin});
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('テスト商品'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'PA-TEST-A');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, '30');
+    await tester.pump();
+    await tester.tap(find.text('棚入れを確定'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastStatusCode, isNull);
 
     await tester.binding.setSurfaceSize(null);
   });

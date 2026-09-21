@@ -977,7 +977,6 @@
   "putawayPendingLabel": "待上架",
   "putawayNoSuggestion": "无推荐货位",
   "putawaySuggested": "推荐：{code}",
-  "putawayAlreadyBinned": "其中 {binned} / {total} 已上架",
   "putawayScanLocation": "扫描货位",
   "putawayScanLocationHint": "扫描货架条码",
   "putawayBinNotFound": "该仓库没有名为「{code}」的货位",
@@ -1347,5 +1346,8 @@
   "qcWillHold": "确认后不合格 {qty} 件将转为无法出库的库存",
   "qcEffectReleased": "合格 {qty} 件已可出库",
   "qcEffectHeld": "不合格 {qty} 件已移至 {status}",
-  "qcEffectNotHeld": "其中 {qty} 件不在待检验库存中，库存未变动"
+  "qcEffectNotHeld": "其中 {qty} 件不在待检验库存中，库存未变动",
+  "putawayNoSuggestionBody": "本仓库没有可放置的货位",
+  "putawayNoHeldBin": "没有可存放不可出库库存的货位（待检、破损等）",
+  "putawayLot": "批次 {lot}"
 }

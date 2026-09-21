@@ -2300,11 +2300,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String putawayAlreadyBinned(int binned, int total) {
-    return '$binned of $total already shelved';
-  }
-
-  @override
   String get putawayScanLocation => 'Scan the location';
 
   @override
@@ -3402,5 +3397,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String qcEffectNotHeld(int qty) {
     return '$qty of those were not held, so nothing moved for them';
+  }
+
+  @override
+  String get putawayNoSuggestionBody => 'No bin in this warehouse can take it';
+
+  @override
+  String get putawayNoHeldBin =>
+      'No bin here can hold stock that cannot ship (QC hold, damaged, …)';
+
+  @override
+  String putawayLot(String lot) {
+    return 'Lot $lot';
   }
 }

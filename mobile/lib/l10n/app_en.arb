@@ -977,7 +977,6 @@
   "putawayPendingLabel": "to put away",
   "putawayNoSuggestion": "No suggested location",
   "putawaySuggested": "Suggested: {code}",
-  "putawayAlreadyBinned": "{binned} of {total} already shelved",
   "putawayScanLocation": "Scan the location",
   "putawayScanLocationHint": "Scan the shelf barcode",
   "putawayBinNotFound": "No location \"{code}\" in this warehouse",
@@ -1347,5 +1346,8 @@
   "qcWillHold": "Completing this moves {qty} failed units out of shippable stock",
   "qcEffectReleased": "{qty} units released and now shippable",
   "qcEffectHeld": "{qty} units held as {status}",
-  "qcEffectNotHeld": "{qty} of those were not held, so nothing moved for them"
+  "qcEffectNotHeld": "{qty} of those were not held, so nothing moved for them",
+  "putawayNoSuggestionBody": "No bin in this warehouse can take it",
+  "putawayNoHeldBin": "No bin here can hold stock that cannot ship (QC hold, damaged, …)",
+  "putawayLot": "Lot {lot}"
 }

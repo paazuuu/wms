@@ -22,6 +22,11 @@ abstract class PutawayRepository {
   ///
   /// [idempotencyKey] must be generated once per logical confirm (not per tap)
   /// so a double submit replays the first result instead of posting twice.
+  ///
+  /// [lotCode] and [statusCode] name *which parcel* is in the operator's hands
+  /// (0069). They matter because a dock holding thirty good cartons and ten
+  /// failed ones has two destinations: with no status named the server moves only
+  /// the shippable ones, so held stock has to say so to move at all.
   Future<ApiResult<PutawayResult>> confirm({
     required int warehouseId,
     required String janCode,
@@ -29,6 +34,8 @@ abstract class PutawayRepository {
     required int quantity,
     required String idempotencyKey,
     String? note,
+    String? lotCode,
+    String? statusCode,
   });
 }
 
@@ -83,6 +90,8 @@ class PutawayRepositoryImpl implements PutawayRepository {
     required int quantity,
     required String idempotencyKey,
     String? note,
+    String? lotCode,
+    String? statusCode,
   }) async {
     try {
       final response = await _dio.post('/rpc/confirm_putaway', data: {
@@ -92,6 +101,8 @@ class PutawayRepositoryImpl implements PutawayRepository {
         'p_quantity': quantity,
         'p_idempotency_key': idempotencyKey,
         'p_note': note,
+        'p_lot_code': lotCode,
+        'p_status_code': statusCode,
       });
       final data = response.data;
       final json = data is List && data.isNotEmpty ? data.first : data;
