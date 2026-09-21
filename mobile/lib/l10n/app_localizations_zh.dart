@@ -3237,4 +3237,73 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featExceptionsDesc => '确认并处理入库、检验、上架的不一致';
+
+  @override
+  String get heldStockTitle => '待检验库存';
+
+  @override
+  String get heldStockEmpty => '没有待检验的库存';
+
+  @override
+  String get heldStockEmptyBody => '入库时需要检验的商品会留在这里，直到检验完成。期间无法出库。';
+
+  @override
+  String get heldStockNoWarehouse => '选择仓库后显示';
+
+  @override
+  String get qcEffectTitle => '库存变动';
+
+  @override
+  String get qcEffectNothingMoved => '判定对象不在待检验库存中，因此库存未变动。';
+
+  @override
+  String get featHeldStock => '待检验库存';
+
+  @override
+  String get featHeldStockDesc => '查看检验完成前无法出库的库存';
+
+  @override
+  String heldStockTotal(int units, int parcels) {
+    return '共 $units 件（$parcels 明细）无法出库';
+  }
+
+  @override
+  String heldStockQuantity(int qty) {
+    return '$qty 件';
+  }
+
+  @override
+  String heldStockLot(String lot) {
+    return '批次 $lot';
+  }
+
+  @override
+  String heldStockExpiry(String date) {
+    return '期限 $date';
+  }
+
+  @override
+  String heldStockDays(int days) {
+    return '已 $days 天';
+  }
+
+  @override
+  String qcWillHold(int qty) {
+    return '确认后不合格 $qty 件将转为无法出库的库存';
+  }
+
+  @override
+  String qcEffectReleased(int qty) {
+    return '合格 $qty 件已可出库';
+  }
+
+  @override
+  String qcEffectHeld(int qty, String status) {
+    return '不合格 $qty 件已移至 $status';
+  }
+
+  @override
+  String qcEffectNotHeld(int qty) {
+    return '其中 $qty 件不在待检验库存中，库存未变动';
+  }
 }

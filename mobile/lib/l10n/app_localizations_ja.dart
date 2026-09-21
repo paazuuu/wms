@@ -3243,4 +3243,73 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featExceptionsDesc => '入荷・検品・格納の不一致を確認して対応を記録する';
+
+  @override
+  String get heldStockTitle => '検品待ち在庫';
+
+  @override
+  String get heldStockEmpty => '検品待ちの在庫はありません';
+
+  @override
+  String get heldStockEmptyBody => '入荷時に検品が必要な商品は、検品が終わるまでここに並びます。出荷はできません。';
+
+  @override
+  String get heldStockNoWarehouse => '倉庫を選ぶと表示できます';
+
+  @override
+  String get qcEffectTitle => '在庫への反映';
+
+  @override
+  String get qcEffectNothingMoved => '検品対象が検品待ち在庫になかったため、在庫は動いていません。';
+
+  @override
+  String get featHeldStock => '検品待ち在庫';
+
+  @override
+  String get featHeldStockDesc => '検品が終わるまで出荷できない在庫を確認する';
+
+  @override
+  String heldStockTotal(int units, int parcels) {
+    return '合計 $units 点（$parcels 明細）が出荷できません';
+  }
+
+  @override
+  String heldStockQuantity(int qty) {
+    return '$qty 点';
+  }
+
+  @override
+  String heldStockLot(String lot) {
+    return 'ロット $lot';
+  }
+
+  @override
+  String heldStockExpiry(String date) {
+    return '期限 $date';
+  }
+
+  @override
+  String heldStockDays(int days) {
+    return '$days日経過';
+  }
+
+  @override
+  String qcWillHold(int qty) {
+    return '確定すると不合格 $qty 点は出荷できない在庫に移ります';
+  }
+
+  @override
+  String qcEffectReleased(int qty) {
+    return '合格 $qty 点を出荷可能にしました';
+  }
+
+  @override
+  String qcEffectHeld(int qty, String status) {
+    return '不合格 $qty 点を $status に移しました';
+  }
+
+  @override
+  String qcEffectNotHeld(int qty) {
+    return 'うち $qty 点は検品待ち在庫に無く、在庫は動いていません';
+  }
 }

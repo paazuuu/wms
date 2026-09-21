@@ -28,6 +28,7 @@ import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
 import 'package:wms_mobile/features/qc/data/attachment_repository.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
 import 'package:wms_mobile/features/qc/domain/attachment.dart';
+import 'package:wms_mobile/features/qc/domain/held_stock.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
@@ -306,7 +307,11 @@ class FakeWarehouseRepository implements WarehouseRepository {
 /// pass/fail split and its refusal to close while items are unchecked, so a
 /// screen test exercises the same rules the backend enforces.
 class FakeInspectionRepository implements InspectionRepository {
-  FakeInspectionRepository(this.inspection);
+  /// The inspection is optional because this fake also serves the held-stock
+  /// screen, which has no inspection in play at all.
+  FakeInspectionRepository([Inspection? inspection])
+      : inspection =
+            inspection ?? const Inspection(id: 0, status: QcResult.pending);
   Inspection inspection;
 
   /// Set when complete() was rejected because lines were still unchecked.
@@ -372,9 +377,17 @@ class FakeInspectionRepository implements InspectionRepository {
     return ApiSuccess(inspection);
   }
 
+  /// Overrides the computed effect, for a test that wants to show a specific
+  /// one (a release with nothing held, say).
+  InspectionStockEffect? stockEffect;
+  String? lastFailStatus;
+  List<HeldStock> held = const [];
+  int? lastHeldWarehouseId;
+
   @override
   Future<ApiResult<Inspection>> complete(int inspectionId,
-      {String? note}) async {
+      {String? note, String? failStatus}) async {
+    lastFailStatus = failStatus;
     if (failWith != null) return ApiFailure(message: failWith!);
     if (inspection.uncheckedCount > 0) {
       refusedIncomplete = true;
@@ -389,14 +402,32 @@ class FakeInspectionRepository implements InspectionRepository {
             : results.length == 1 && results.first == QcResult.fail
                 ? QcResult.fail
                 : QcResult.partial;
+    // Mirrors 0068: passed goods are released to OK, failed goods go to
+    // `failStatus` (DAMAGED unless the caller says otherwise). The fake computes
+    // it from the items rather than hard-coding a number, so a test that changes
+    // the findings gets the matching effect.
+    final passed = inspection.items.fold(0, (s, i) => s + i.passedQuantity);
+    final failed = inspection.items.fold(0, (s, i) => s + i.failedQuantity);
     inspection = Inspection(
       id: inspection.id,
       status: status,
       deliveryNumber: inspection.deliveryNumber,
       supplierName: inspection.supplierName,
       items: inspection.items,
+      stockEffect: stockEffect ??
+          InspectionStockEffect(
+            releasedToOk: passed,
+            failedQuantity: failed,
+            failedTo: failed > 0 ? (failStatus ?? 'DAMAGED') : null,
+          ),
     );
     return ApiSuccess(inspection);
+  }
+
+  @override
+  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId}) async {
+    lastHeldWarehouseId = warehouseId;
+    return ApiSuccess(held);
   }
 }
 

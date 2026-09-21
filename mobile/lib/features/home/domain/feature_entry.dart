@@ -113,6 +113,8 @@ class FeatureEntry {
         return l10n.featExpiringLots;
       case 'exceptions':
         return l10n.featExceptions;
+      case 'held_stock':
+        return l10n.featHeldStock;
       case 'reservations':
         return l10n.featReservations;
       case 'locations':
@@ -167,6 +169,8 @@ class FeatureEntry {
         return l10n.featExpiringLotsDesc;
       case 'exceptions':
         return l10n.featExceptionsDesc;
+      case 'held_stock':
+        return l10n.featHeldStockDesc;
       case 'reservations':
         return l10n.featReservationsDesc;
       case 'locations':

@@ -1330,5 +1330,22 @@
   "exceptionOpenCount": "未处理 {count} 件",
   "exceptionBlockerCount": "需处理 {blockers} 件（未处理 {open} 件）",
   "featExceptions": "异常处理",
-  "featExceptionsDesc": "确认并处理入库、检验、上架的不一致"
+  "featExceptionsDesc": "确认并处理入库、检验、上架的不一致",
+  "heldStockTitle": "待检验库存",
+  "heldStockEmpty": "没有待检验的库存",
+  "heldStockEmptyBody": "入库时需要检验的商品会留在这里，直到检验完成。期间无法出库。",
+  "heldStockNoWarehouse": "选择仓库后显示",
+  "qcEffectTitle": "库存变动",
+  "qcEffectNothingMoved": "判定对象不在待检验库存中，因此库存未变动。",
+  "featHeldStock": "待检验库存",
+  "featHeldStockDesc": "查看检验完成前无法出库的库存",
+  "heldStockTotal": "共 {units} 件（{parcels} 明细）无法出库",
+  "heldStockQuantity": "{qty} 件",
+  "heldStockLot": "批次 {lot}",
+  "heldStockExpiry": "期限 {date}",
+  "heldStockDays": "已 {days} 天",
+  "qcWillHold": "确认后不合格 {qty} 件将转为无法出库的库存",
+  "qcEffectReleased": "合格 {qty} 件已可出库",
+  "qcEffectHeld": "不合格 {qty} 件已移至 {status}",
+  "qcEffectNotHeld": "其中 {qty} 件不在待检验库存中，库存未变动"
 }

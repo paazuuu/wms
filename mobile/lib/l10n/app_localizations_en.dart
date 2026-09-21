@@ -3331,4 +3331,76 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get featExceptionsDesc =>
       'Work through discrepancies from receiving, QC and put-away';
+
+  @override
+  String get heldStockTitle => 'Held for QC';
+
+  @override
+  String get heldStockEmpty => 'Nothing is held for QC';
+
+  @override
+  String get heldStockEmptyBody =>
+      'Goods that need inspecting on arrival wait here until QC releases them. They cannot ship.';
+
+  @override
+  String get heldStockNoWarehouse => 'Choose a warehouse to see this';
+
+  @override
+  String get qcEffectTitle => 'What moved';
+
+  @override
+  String get qcEffectNothingMoved =>
+      'Nothing moved: what was judged was not sitting in QC-pending stock.';
+
+  @override
+  String get featHeldStock => 'Held for QC';
+
+  @override
+  String get featHeldStockDesc =>
+      'See the stock that cannot ship until QC releases it';
+
+  @override
+  String heldStockTotal(int units, int parcels) {
+    return '$units units in $parcels parcels cannot ship';
+  }
+
+  @override
+  String heldStockQuantity(int qty) {
+    return '$qty';
+  }
+
+  @override
+  String heldStockLot(String lot) {
+    return 'Lot $lot';
+  }
+
+  @override
+  String heldStockExpiry(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String heldStockDays(int days) {
+    return 'held ${days}d';
+  }
+
+  @override
+  String qcWillHold(int qty) {
+    return 'Completing this moves $qty failed units out of shippable stock';
+  }
+
+  @override
+  String qcEffectReleased(int qty) {
+    return '$qty units released and now shippable';
+  }
+
+  @override
+  String qcEffectHeld(int qty, String status) {
+    return '$qty units held as $status';
+  }
+
+  @override
+  String qcEffectNotHeld(int qty) {
+    return '$qty of those were not held, so nothing moved for them';
+  }
 }

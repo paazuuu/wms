@@ -6,6 +6,7 @@ import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../exceptions/presentation/exception_list_screen.dart';
+import '../../qc/presentation/held_stock_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
@@ -82,6 +83,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _expiringLots,
             requiredAnyOf: ['inventory.view'],
+          ),
+          // Next to QC, because it is the queue QC works from: everything
+          // here is waiting for an inspection to release it.
+          FeatureEntry(
+            id: 'held_stock',
+            icon: Icons.pan_tool_outlined,
+            status: FeatureStatus.ready,
+            builder: _heldStock,
+            requiredAnyOf: ['inspection.view', 'inventory.view'],
           ),
           // Beside the floor tasks, not with the reports: an open blocker is
           // work, and the person who has to clear it is on the dock.
@@ -275,6 +285,7 @@ Widget _expiringLots(BuildContext _) => const ExpiringLotsScreen();
 /// Top-level (const-referenceable) builder for the Reservations feature.
 Widget _reservations(BuildContext _) => const ReservationsScreen();
 Widget _exceptions(BuildContext _) => const ExceptionListScreen();
+Widget _heldStock(BuildContext _) => const HeldStockScreen();
 
 /// Top-level (const-referenceable) builder for the Replenishment feature.
 Widget _replenishment(BuildContext _) => const ReplenishmentScreen();

@@ -63,7 +63,15 @@ type Client = any;
 // 0056 scoped `inspection_detail` itself; this check remains because it turns
 // "scoped out" into a clean 404 rather than a null body, and because every
 // mutation answers with detail(), making it their post-write gate.
-async function detail(supabase: Client, id: number): Promise<Response> {
+async function detail(
+  supabase: Client,
+  id: number,
+  // What a write did to the stock, when the write had a stock effect worth
+  // reporting. Merged into the detail body rather than returned on its own,
+  // because the screen needs both: the inspection as it now stands, and what
+  // closing it actually released or held (0068).
+  extra?: Record<string, unknown>,
+): Promise<Response> {
   if (!(await callerCanSee(supabase, "inspections", id))) {
     return json({ message: "inspection not found" }, 404);
   }
@@ -72,7 +80,7 @@ async function detail(supabase: Client, id: number): Promise<Response> {
   });
   if (error) return json({ message: error.message }, 400);
   if (!data) return json({ message: "inspection not found" }, 404);
-  return json({ data });
+  return json({ data: extra ? { ...data, ...extra } : data });
 }
 
 Deno.serve(async (req) => {
@@ -198,9 +206,12 @@ Deno.serve(async (req) => {
         return json({ message: "inspection not found" }, 404);
       }
       const body = await req.json().catch(() => ({}));
-      const { error } = await admin.rpc("complete_inspection", {
+      const { data: effect, error } = await admin.rpc("complete_inspection", {
         p_inspection_id: id,
         p_note: str(body.note),
+        // Where failed goods go. Defaults to DAMAGED server-side; a workflow
+        // that quarantines instead can say so without a migration.
+        p_fail_status: str(body.fail_status),
       });
       // The RPC refuses to close an inspection that still has unchecked items;
       // surface that as a 422 the UI can show rather than a generic failure.
@@ -208,7 +219,11 @@ Deno.serve(async (req) => {
         const unchecked = error.message.includes("unchecked");
         return json({ message: error.message }, unchecked ? 422 : 400);
       }
-      return await detail(supabase, id);
+      // Since 0068 this returns what moved: how much was released to OK, how
+      // much was held and where, and how much the inspection judged that was
+      // never in QC_PENDING to begin with. "PARTIAL" alone does not tell an
+      // inspector whether the thirty they passed are sellable.
+      return await detail(supabase, id, { stock_effect: effect ?? null });
     }
 
     return json({ message: "not found" }, 404);

@@ -1330,5 +1330,22 @@
   "exceptionOpenCount": "{count} open",
   "exceptionBlockerCount": "{blockers} blocking, {open} open in total",
   "featExceptions": "Exceptions",
-  "featExceptionsDesc": "Work through discrepancies from receiving, QC and put-away"
+  "featExceptionsDesc": "Work through discrepancies from receiving, QC and put-away",
+  "heldStockTitle": "Held for QC",
+  "heldStockEmpty": "Nothing is held for QC",
+  "heldStockEmptyBody": "Goods that need inspecting on arrival wait here until QC releases them. They cannot ship.",
+  "heldStockNoWarehouse": "Choose a warehouse to see this",
+  "qcEffectTitle": "What moved",
+  "qcEffectNothingMoved": "Nothing moved: what was judged was not sitting in QC-pending stock.",
+  "featHeldStock": "Held for QC",
+  "featHeldStockDesc": "See the stock that cannot ship until QC releases it",
+  "heldStockTotal": "{units} units in {parcels} parcels cannot ship",
+  "heldStockQuantity": "{qty}",
+  "heldStockLot": "Lot {lot}",
+  "heldStockExpiry": "Expires {date}",
+  "heldStockDays": "held {days}d",
+  "qcWillHold": "Completing this moves {qty} failed units out of shippable stock",
+  "qcEffectReleased": "{qty} units released and now shippable",
+  "qcEffectHeld": "{qty} units held as {status}",
+  "qcEffectNotHeld": "{qty} of those were not held, so nothing moved for them"
 }

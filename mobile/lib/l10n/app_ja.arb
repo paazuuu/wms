@@ -2199,5 +2199,124 @@
   "featExceptionsDesc": "入荷・検品・格納の不一致を確認して対応を記録する",
   "@featExceptionsDesc": {
     "description": "Menu entry description for the exception queue."
+  },
+  "heldStockTitle": "検品待ち在庫",
+  "@heldStockTitle": {
+    "description": "Title of the held-for-QC stock screen (0068)."
+  },
+  "heldStockEmpty": "検品待ちの在庫はありません",
+  "@heldStockEmpty": {
+    "description": "Held-stock screen: nothing held, which is the good state."
+  },
+  "heldStockEmptyBody": "入荷時に検品が必要な商品は、検品が終わるまでここに並びます。出荷はできません。",
+  "@heldStockEmptyBody": {
+    "description": "Held-stock screen: what appears here and why it matters."
+  },
+  "heldStockNoWarehouse": "倉庫を選ぶと表示できます",
+  "@heldStockNoWarehouse": {
+    "description": "Held-stock screen with no active warehouse."
+  },
+  "qcEffectTitle": "在庫への反映",
+  "@qcEffectTitle": {
+    "description": "Inspection detail: heading for what completing moved."
+  },
+  "qcEffectNothingMoved": "検品対象が検品待ち在庫になかったため、在庫は動いていません。",
+  "@qcEffectNothingMoved": {
+    "description": "Inspection detail: completing moved no stock at all."
+  },
+  "featHeldStock": "検品待ち在庫",
+  "@featHeldStock": {
+    "description": "Menu entry: stock held for QC."
+  },
+  "featHeldStockDesc": "検品が終わるまで出荷できない在庫を確認する",
+  "@featHeldStockDesc": {
+    "description": "Menu entry description for held-for-QC stock."
+  },
+  "heldStockTotal": "合計 {units} 点（{parcels} 明細）が出荷できません",
+  "@heldStockTotal": {
+    "description": "Held-stock screen: the headline total.",
+    "placeholders": {
+      "units": {
+        "type": "int"
+      },
+      "parcels": {
+        "type": "int"
+      }
+    }
+  },
+  "heldStockQuantity": "{qty} 点",
+  "@heldStockQuantity": {
+    "description": "Held-stock card: how much is held.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "heldStockLot": "ロット {lot}",
+  "@heldStockLot": {
+    "description": "Held-stock card: which lot.",
+    "placeholders": {
+      "lot": {
+        "type": "String"
+      }
+    }
+  },
+  "heldStockExpiry": "期限 {date}",
+  "@heldStockExpiry": {
+    "description": "Held-stock card: the expiry date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "heldStockDays": "{days}日経過",
+  "@heldStockDays": {
+    "description": "Held-stock card: how long it has been waiting.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "qcWillHold": "確定すると不合格 {qty} 点は出荷できない在庫に移ります",
+  "@qcWillHold": {
+    "description": "Inspection detail: what completing will do, shown before the operator taps.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "qcEffectReleased": "合格 {qty} 点を出荷可能にしました",
+  "@qcEffectReleased": {
+    "description": "Inspection detail: quantity released to OK.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "qcEffectHeld": "不合格 {qty} 点を {status} に移しました",
+  "@qcEffectHeld": {
+    "description": "Inspection detail: quantity held, and which status it went to.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "qcEffectNotHeld": "うち {qty} 点は検品待ち在庫に無く、在庫は動いていません",
+  "@qcEffectNotHeld": {
+    "description": "Inspection detail: judged quantity that was never in QC_PENDING.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
   }
 }

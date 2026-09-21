@@ -69,6 +69,12 @@ class _BodyState extends ConsumerState<_Body> {
       ));
   }
 
+  /// What completing the inspection did to the stock (§13, 0068). Held in state
+  /// rather than read back, because it is a past event: the ledger has it, this
+  /// document does not. Shown until the operator leaves the screen, because
+  /// "are the 28 I passed sellable now" deserves more than a SnackBar.
+  InspectionStockEffect? _effect;
+
   Future<void> _complete() async {
     final l10n = AppLocalizations.of(context);
     if (_inspection.uncheckedCount > 0) {
@@ -85,6 +91,10 @@ class _BodyState extends ConsumerState<_Body> {
       success: (updated) {
         ref.invalidate(inspectionDetailProvider(_inspection.id));
         ref.invalidate(inspectionListProvider);
+        // The held-stock list changes the moment this closes, so it must not
+        // serve a cached answer next time someone opens it.
+        ref.invalidate(heldStockProvider);
+        setState(() => _effect = updated.stockEffect);
         final ui = QcResultUi.of(l10n, updated.status);
         // §35: goods that just passed QC are what put-away works from, so
         // offer that next step rather than making the operator navigate back
@@ -219,6 +229,14 @@ class _BodyState extends ConsumerState<_Body> {
           busy: _busy,
           onAddPhoto: _addPhoto,
         ),
+        // Before: what closing this will do to the stock. Since 0068 a failure
+        // is not just a note on a document — it moves the goods out of
+        // shippable — so the operator should know that before they tap, not
+        // after.
+        if (_inspection.isOpen && _inspection.failedUnits > 0)
+          _WillHoldBanner(failedUnits: _inspection.failedUnits),
+        // After: what it actually did.
+        if (_effect != null) _StockEffectCard(effect: _effect!),
         Expanded(
           child: _inspection.items.isEmpty
               ? EmptyStateView(
@@ -647,4 +665,92 @@ class _AttachmentThumbnail extends ConsumerWidget {
         child: Icon(Icons.broken_image_outlined,
             color: theme.colorScheme.onSurfaceVariant),
       );
+}
+
+/// Shown on an open inspection that has failures recorded: closing it will move
+/// those goods out of shippable stock (§13).
+class _WillHoldBanner extends StatelessWidget {
+  const _WillHoldBanner({required this.failedUnits});
+
+  final int failedUnits;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      color: scheme.errorContainer,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+      child: Row(
+        children: [
+          Icon(Icons.block, size: 18, color: scheme.onErrorContainer),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.qcWillHold(failedUnits),
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// What completing the inspection released and held. The question this answers
+/// is "can I ship the ones that passed", which a status word cannot.
+class _StockEffectCard extends StatelessWidget {
+  const _StockEffectCard({required this.effect});
+
+  final InspectionStockEffect effect;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      color: scheme.surfaceContainerHighest,
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.swap_horiz, size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(l10n.qcEffectTitle,
+                    style: theme.textTheme.titleSmall),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          if (effect.releasedToOk > 0)
+            Text(l10n.qcEffectReleased(effect.releasedToOk)),
+          if (effect.failedQuantity > 0)
+            Text(l10n.qcEffectHeld(
+                effect.failedQuantity, effect.failedTo ?? 'DAMAGED')),
+          // Not an error, and worth saying plainly: part of what was judged was
+          // never gated, so nothing moved for it.
+          if (effect.hasUnheld)
+            Text(
+              l10n.qcEffectNotHeld(effect.notInQcPending),
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          if (effect.movedNothing)
+            Text(
+              l10n.qcEffectNothingMoved,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+        ],
+      ),
+    );
+  }
 }

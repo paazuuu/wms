@@ -148,4 +148,102 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  group('the QC gate, made visible (§13, 0068)', () {
+    /// Checked with a real failure: 28 pass, 10 fail. The case that moves stock.
+    Inspection partlyFailed() => Inspection(
+          id: 1,
+          status: QcResult.pending,
+          deliveryNumber: '0901',
+          supplierName: '新東光通商株式会社',
+          items: [
+            InspectionItem(
+              id: 10,
+              janCode: '4902505632037',
+              productName: 'ペン',
+              expectedQuantity: 40,
+              actualQuantity: 38,
+              passedQuantity: 28,
+              failedQuantity: 10,
+              discrepancy: -2,
+              result: QcResult.partial,
+            ),
+          ],
+        );
+
+    testWidgets('warns what completing will do before the operator taps it',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1200));
+      final repo = FakeInspectionRepository(partlyFailed());
+      await _pump(tester, repo);
+
+      // Since 0068 a failure is not a note on a document — it moves the goods
+      // out of shippable. The operator learns that before, not after.
+      expect(
+          find.text('確定すると不合格 10 点は出荷できない在庫に移ります'),
+          findsOneWidget);
+
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('reports what actually moved, which a status word cannot',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1200));
+      final repo = FakeInspectionRepository(partlyFailed());
+      await _pump(tester, repo);
+
+      await tester.tap(find.widgetWithText(FilledButton, '検品を確定'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('在庫への反映'), findsOneWidget);
+      // The answer to "are the 28 I passed sellable now".
+      expect(find.text('合格 28 点を出荷可能にしました'), findsOneWidget);
+      expect(find.text('不合格 10 点を DAMAGED に移しました'), findsOneWidget);
+
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('an all-pass inspection reports the release and holds nothing',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1200));
+      final repo = FakeInspectionRepository(_checked());
+      await _pump(tester, repo);
+
+      // Nothing to warn about before: there are no failures.
+      expect(find.textContaining('出荷できない在庫に移ります'), findsNothing);
+
+      await tester.tap(find.widgetWithText(FilledButton, '検品を確定'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('合格 100 点を出荷可能にしました'), findsOneWidget);
+      expect(find.textContaining('に移しました'), findsNothing);
+
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('judging goods that were never held says so instead of lying',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1200));
+      final repo = FakeInspectionRepository(_checked())
+        // What the server returns when the product did not require inspection:
+        // the inspection is valid, and nothing was gated to release.
+        ..stockEffect = InspectionStockEffect(
+          releasedToOk: 0,
+          failedQuantity: 0,
+          notInQcPending: 100,
+        );
+      await _pump(tester, repo);
+
+      await tester.tap(find.widgetWithText(FilledButton, '検品を確定'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('うち 100 点は検品待ち在庫に無く、在庫は動いていません'),
+          findsOneWidget);
+      expect(
+          find.text('検品対象が検品待ち在庫になかったため、在庫は動いていません。'),
+          findsOneWidget);
+
+      await tester.binding.setSurfaceSize(null);
+    });
+  });
 }

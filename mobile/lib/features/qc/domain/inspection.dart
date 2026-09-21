@@ -105,6 +105,7 @@ class Inspection extends Equatable {
     this.completedAt,
     this.items = const [],
     this.itemCount,
+    this.stockEffect,
   });
 
   final int id;
@@ -121,6 +122,12 @@ class Inspection extends Equatable {
 
   /// Set on list rows, where the items themselves are not loaded.
   final int? itemCount;
+
+  /// What closing this inspection did to the stock (0068). Only present on the
+  /// response to completing it — a later read of the same inspection has the
+  /// status but not the movement, because the movement is a past event and lives
+  /// in the ledger, not on this document.
+  final InspectionStockEffect? stockEffect;
 
   bool get isOpen => status == QcResult.pending;
   int get lineCount => items.isNotEmpty ? items.length : (itemCount ?? 0);
@@ -151,10 +158,62 @@ class Inspection extends Equatable {
             const [],
         itemCount:
             json['item_count'] == null ? null : _asInt(json['item_count']),
+        stockEffect: json['stock_effect'] is Map
+            ? InspectionStockEffect.fromJson(
+                (json['stock_effect'] as Map).cast<String, dynamic>())
+            : null,
       );
 
   @override
-  List<Object?> get props => [id, status, items, itemCount];
+  List<Object?> get props => [id, status, items, itemCount, stockEffect];
+}
+
+/// What completing an inspection released and held (§13, 0068).
+///
+/// This is the answer to the question a status cannot answer: "PARTIAL" does not
+/// tell an inspector whether the thirty they passed are sellable now. It says how
+/// much moved to OK, how much was held and where, and how much the inspection
+/// judged that was never in QC_PENDING to be moved.
+class InspectionStockEffect extends Equatable {
+  const InspectionStockEffect({
+    this.releasedToOk = 0,
+    this.failedQuantity = 0,
+    this.failedTo,
+    this.notInQcPending = 0,
+  });
+
+  final int releasedToOk;
+  final int failedQuantity;
+
+  /// Which status the failed goods went to — DAMAGED by default, HOLD for an
+  /// item the inspector put on hold rather than failed.
+  final String? failedTo;
+
+  /// Quantity judged that was not sitting in QC_PENDING. Not an error: goods
+  /// that never needed inspecting can still be inspected, and this says how much
+  /// of what was judged was already available.
+  final int notInQcPending;
+
+  bool get movedNothing =>
+      releasedToOk == 0 && failedQuantity == 0;
+
+  /// Worth telling the operator about: they judged more than was held, so part
+  /// of what they checked was never gated.
+  bool get hasUnheld => notInQcPending > 0;
+
+  factory InspectionStockEffect.fromJson(Map<String, dynamic> json) =>
+      InspectionStockEffect(
+        releasedToOk: _asInt(json['released_to_ok']),
+        failedQuantity: _asInt(json['failed_quantity']),
+        failedTo: (json['failed_to'] as String?)?.trim().isEmpty ?? true
+            ? null
+            : (json['failed_to'] as String).trim(),
+        notInQcPending: _asInt(json['not_in_qc_pending']),
+      );
+
+  @override
+  List<Object?> get props =>
+      [releasedToOk, failedQuantity, failedTo, notInQcPending];
 }
 
 /// What the operator recorded for one line.

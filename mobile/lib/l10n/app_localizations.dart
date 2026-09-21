@@ -6201,6 +6201,108 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'入荷・検品・格納の不一致を確認して対応を記録する'**
   String get featExceptionsDesc;
+
+  /// Title of the held-for-QC stock screen (0068).
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち在庫'**
+  String get heldStockTitle;
+
+  /// Held-stock screen: nothing held, which is the good state.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちの在庫はありません'**
+  String get heldStockEmpty;
+
+  /// Held-stock screen: what appears here and why it matters.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷時に検品が必要な商品は、検品が終わるまでここに並びます。出荷はできません。'**
+  String get heldStockEmptyBody;
+
+  /// Held-stock screen with no active warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選ぶと表示できます'**
+  String get heldStockNoWarehouse;
+
+  /// Inspection detail: heading for what completing moved.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫への反映'**
+  String get qcEffectTitle;
+
+  /// Inspection detail: completing moved no stock at all.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品対象が検品待ち在庫になかったため、在庫は動いていません。'**
+  String get qcEffectNothingMoved;
+
+  /// Menu entry: stock held for QC.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち在庫'**
+  String get featHeldStock;
+
+  /// Menu entry description for held-for-QC stock.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品が終わるまで出荷できない在庫を確認する'**
+  String get featHeldStockDesc;
+
+  /// Held-stock screen: the headline total.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計 {units} 点（{parcels} 明細）が出荷できません'**
+  String heldStockTotal(int units, int parcels);
+
+  /// Held-stock card: how much is held.
+  ///
+  /// In ja, this message translates to:
+  /// **'{qty} 点'**
+  String heldStockQuantity(int qty);
+
+  /// Held-stock card: which lot.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット {lot}'**
+  String heldStockLot(String lot);
+
+  /// Held-stock card: the expiry date.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限 {date}'**
+  String heldStockExpiry(String date);
+
+  /// Held-stock card: how long it has been waiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日経過'**
+  String heldStockDays(int days);
+
+  /// Inspection detail: what completing will do, shown before the operator taps.
+  ///
+  /// In ja, this message translates to:
+  /// **'確定すると不合格 {qty} 点は出荷できない在庫に移ります'**
+  String qcWillHold(int qty);
+
+  /// Inspection detail: quantity released to OK.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格 {qty} 点を出荷可能にしました'**
+  String qcEffectReleased(int qty);
+
+  /// Inspection detail: quantity held, and which status it went to.
+  ///
+  /// In ja, this message translates to:
+  /// **'不合格 {qty} 点を {status} に移しました'**
+  String qcEffectHeld(int qty, String status);
+
+  /// Inspection detail: judged quantity that was never in QC_PENDING.
+  ///
+  /// In ja, this message translates to:
+  /// **'うち {qty} 点は検品待ち在庫に無く、在庫は動いていません'**
+  String qcEffectNotHeld(int qty);
 }
 
 class _AppLocalizationsDelegate
