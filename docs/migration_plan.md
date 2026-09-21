@@ -2713,6 +2713,80 @@ Proved end to end on the live schema, rolled back afterwards:
 
 All ten security invariants pass; 17 guarded wrappers.
 
+### 0069 — §14: put-away off the ledger, with a suggestion worth taking
+
+§14 is mostly a warning about what *not* to build:
+
+> 在庫との二重管理を避けるため、queueの数量を独立した在庫として持たない こと。
+
+and `putaway_tasks` only 「将来必要なら」. The existing `putaway_queue` obeyed the
+letter of that — pending was `stock_levels.on_hand` minus the sum of `bin_stock`,
+so no second quantity was stored. But a subtraction of two aggregates can only
+ever answer "how many", and by Phase B the question has become "which parcel".
+A queue that cannot say "the forty on lot QC-L1 that are still held for
+inspection" cannot route them anywhere sensible.
+
+0066 had already made the answer available: a unit received at warehouse scope
+has `bin_id` null, which *is* "arrived but not yet put away". So the queue stops
+subtracting and simply reads the parcels that have no bin yet — a stronger form
+of §14's rule, not a weaker one. The queue no longer holds a quantity at all,
+derived or otherwise; it is a filter over the stock itself. The corollary is that
+put-away has to actually move the parcel, so `confirm_putaway` now sets the
+unit's `bin_id` as well as writing `bin_stock` (which keeps being written exactly
+as before, so every existing reader still works).
+
+**§13, one step earlier.** `bin_accepts_status` says which bin types may hold
+stock that is not shippable, and `confirm_putaway` refuses the rest: held goods
+in a pickable bin are held goods a picker will eventually pick. And with no
+status named, put-away takes only the *shippable* parcels — held stock has to be
+named to be moved. That is deliberate: a dock holding thirty good cartons and ten
+failed ones has two destinations, not one, and picking the stricter rule for all
+forty would strand the good stock while picking the looser would strand the bad.
+Naming it makes the operator say which pile is in their hands.
+
+**The suggestion.** §14 orders the criteria — 同一商品が存在するBin → 同一Zone →
+空き容量 → 保管条件 → 回転率 — but two of them are constraints rather than
+preferences, and the difference is what makes the feature usable:
+
+- **保管条件 is a hard constraint.** A bin that cannot hold this stock is not a
+  worse answer, it is not an answer, so it is filtered out rather than
+  down-ranked.
+- **空き容量 is a constraint only where a capacity is recorded.** Most bins have
+  none, and a suggestion engine that refuses to suggest anything until someone
+  measures every shelf is one nobody switches on.
+
+The rest are weighted in the spec's order, so a bin already holding this lot (140)
+outranks one holding the product (100), which outranks one merely in the product's
+home zone (50). 回転率 is the product's SHIP/PICK/TRANSFER_OUT count over 30 days:
+a fast mover is nudged toward a PICKABLE bin, a slow one toward staging. Every
+suggestion carries a `reason` string (`同一商品あり / 定位置ゾーン / 空き12`),
+because that is the difference between a suggestion an operator follows and one
+they tap past.
+
+`backfill_stock_unit_bins` brings the two projections into step for stock already
+in bins. It is safe to re-run — it only moves units that have no bin yet, and only
+up to what `bin_stock` already says. On this database it was a no-op: no bins and
+no stock units existed yet, which is also why the model could change without a
+data migration.
+
+Proved on the live schema, rolled back afterwards:
+
+| what | result |
+| --- | --- |
+| receive 30 of a flagged product on lot P-L1 | one queue row: ×30, lot P-L1, QC_PENDING |
+| suggestions for that held parcel | only `T69-QC (QC_HOLD)` — the three pickable bins are filtered out |
+| put it in a PICKABLE bin | refused: `bin T69-PICK-A is a PICKABLE bin and cannot hold this stock (it is held or failed)` |
+| put 30 into the QC bin | moved 30, pending after 0 |
+| the queue afterwards | 0 rows — because the parcel moved, not because a counter was decremented |
+| `bin_stock` vs `stock_units` in that bin | 30 and 30 |
+| the warehouse total | on hand 30, available 0 — put-away relocates, it does not create or release |
+| put away one more | refused: `only 0 … awaits put-away` |
+| ranking for 10 shippable units | `T69-PICK-B 100 [同一商品あり]` then `T69-PICK-A 0` |
+| a capacity-5 bin, parcel of 10 | not offered |
+| the same bin, parcel of 3 | offered |
+
+All ten security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
