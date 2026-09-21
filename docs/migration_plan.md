@@ -2616,6 +2616,103 @@ Proved on the live schema, rolled back afterwards:
 
 All ten security invariants pass; the guarded-wrapper count goes from 14 to 16.
 
+### 0068 — §13: QC is a real gate, and the database is where it holds
+
+The spec does not leave this one to the interface:
+
+> QC FAIL / HOLDの商品が誤って出荷されないことを、Flutter UIだけでなく
+> RPC/DB側でも保証する。
+
+Before this migration QC was a document. `inspections` and `inspection_items`
+recorded what an inspector found, and `complete_inspection` wrote a status onto
+the inspection — and that was all it did. Receiving had already made the goods
+available the moment they were counted, so a carton that failed inspection was
+pickable, shippable and indistinguishable from good stock. Every guard was in
+the UI, which means every guard was advisory.
+
+Three changes make it real, and it has to be all three: holding goods on arrival
+is pointless if nothing releases them, releasing them is pointless if nothing was
+held, and both are pointless if shipping can reach into held stock anyway.
+
+**1. Goods that need inspecting arrive as QC_PENDING.** `products.requires_inspection`,
+with a nullable `warehouse_products.requires_inspection` override, because the
+answer genuinely differs by both: a product may always need checking (regulated
+goods) and a warehouse may check a product the others take on trust (a site with
+no QC bench cannot hold stock it will never inspect). Null at the warehouse level
+means "follow the product". `receiving_status_for()` resolves the two, and
+`record_receipt_item_impl` uses it *as the default only* — a receiver who can see
+the carton is wet knows more than a flag does, so a named status still wins.
+
+Setting the flag gets its own call, `set_inspection_requirement`, rather than
+another optional parameter on `set_warehouse_product`. There, null already means
+"leave this alone", and a three-valued flag whose third value is *also* null
+("follow the product") cannot be expressed that way. In a call whose parameter is
+the whole point, null is unambiguous.
+
+**2. Completing an inspection is what moves the stock.** `complete_inspection`
+now walks the items, and since 0060 each one carries the lot or serial the
+inspector was holding — so the release lands on the parcel that was actually
+checked rather than on whatever sorts first. Passed goes to OK, failed to
+DAMAGED (or `p_fail_status`, or HOLD when the item result is HOLD), and a failed
+serial has its own `serial_numbers.status` set to HOLD too. Its return type
+changes from the old status text to a report of what moved, because "PARTIAL" on
+its own does not tell an inspector whether the thirty they passed are sellable;
+the edge function re-reads the inspection afterwards and never looked at the old
+value, so nothing downstream breaks.
+
+Two judgement calls inside it. An item that records only a result and a count,
+without splitting it, is read as "all of it passed" or "all of it failed" —
+unambiguous, and better than moving nothing. And quantity the inspection judged
+that was *not* sitting in QC_PENDING is reported as `not_in_qc_pending` rather
+than refused: inspecting stock that was never held is a legitimate thing to do,
+and blocking the QC bench over a bookkeeping gap it cannot fix from there would
+be the wrong trade.
+
+**3. Outbound may only draw available stock.** This is the guarantee itself, and
+it lives in `project_stock_movement` rather than in `ship_plan` so that the rule
+is derived from the ledger row: `quantity` negative, no status named,
+`is_outbound_movement(movement_type)`. Every path that posts an outbound movement
+is gated, including one written next year by someone who never read this file.
+`apply_stock_unit_delta` gains `p_available_only`, and when it is set the check
+runs *before* anything is drawn, so a shipment that cannot be satisfied leaves
+the stock exactly as it was rather than half-picked.
+
+Three deliberate exemptions. `ADJUST`, `COUNT` and `RECEIPT_CANCEL` are not
+outbound types: writing off damaged goods, correcting a count and undoing a
+receipt all *need* to reach non-available parcels, and gating them would leave
+held stock impossible to dispose of. And a movement that names a status is exempt
+whatever its type, because naming QUARANTINE means "I am moving the quarantined
+stock on purpose" — that is how disposal works.
+
+`move_stock_status` gets an `_impl` that takes a lot and serial and returns how
+much it managed to move rather than raising. Its two callers want different
+things from a shortfall: an operator moving 50 by hand should be told there are
+not 50; an inspection being closed should move what is there and report the rest.
+
+Reads: `qc_pending_stock` lists what is waiting, newest expiry first, with the
+receipt date beside it so the floor can go from "this is held" to "who sent it"
+in one tap.
+
+Proved end to end on the live schema, rolled back afterwards:
+
+| what | result |
+| --- | --- |
+| receive 40 of a flagged product | on hand 40, **available 0** |
+| receive 10 of an unflagged one | on hand 10, available 10 |
+| `qc_pending_stock` after receiving | the lot ×40 and the serial ×1 |
+| **ship 10 of the held stock** | **refused**: `only 0 of … can be shipped (40 on hand, the rest is held or failed)` |
+| after that refusal | on hand still 40, available still 0 — nothing half-picked |
+| write off 2 by ADJUST | allowed → 38, because disposal is not shipping |
+| complete the inspection (28 pass, 10 fail, 1 serial fail) | released 28, failed 11 to DAMAGED, 10 reported as never held |
+| the parcels afterwards | OK 28 (lot QC-L1) + DAMAGED 10 (lot QC-L1) — the lot survived the status change |
+| the failed serial | its own record reads HOLD, and shipping it is refused |
+| ship the 28 released | fine → on hand 10, available 0 |
+| ship one more | refused — the remaining 10 are the damaged ones |
+| warehouse override on the unflagged product | arrives QC_PENDING here while the product itself still says not required |
+| §5's invariant across all three products | holds |
+
+All ten security invariants pass; 17 guarded wrappers.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
