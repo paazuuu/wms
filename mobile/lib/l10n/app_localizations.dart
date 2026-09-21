@@ -5973,6 +5973,234 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'倉庫を選ぶと表示できます'**
   String get replenishmentNoWarehouse;
+
+  /// Title of the exception queue screen (0071).
+  ///
+  /// In ja, this message translates to:
+  /// **'例外・不一致'**
+  String get exceptionsTitle;
+
+  /// Exception queue: nothing open, which is the good state.
+  ///
+  /// In ja, this message translates to:
+  /// **'未処理の例外はありません'**
+  String get exceptionsEmpty;
+
+  /// Exception queue: what will appear here.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・検品・格納で不一致が出ると、ここに並びます。'**
+  String get exceptionsEmptyBody;
+
+  /// Exception queue with no active warehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選ぶと表示できます'**
+  String get exceptionsNoWarehouse;
+
+  /// Exception queue filter: every stage.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての工程'**
+  String get exceptionsAllCategories;
+
+  /// Exception category: receiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get exceptionCategoryReceiving;
+
+  /// Exception category: QC.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get exceptionCategoryQc;
+
+  /// Exception category: put-away.
+  ///
+  /// In ja, this message translates to:
+  /// **'格納'**
+  String get exceptionCategoryPutaway;
+
+  /// Exception queue toggle: include resolved and cancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応済みも表示'**
+  String get exceptionShowClosed;
+
+  /// Exception severity: blocks work.
+  ///
+  /// In ja, this message translates to:
+  /// **'要対応'**
+  String get exceptionSeverityBlocker;
+
+  /// Exception severity: worth attention.
+  ///
+  /// In ja, this message translates to:
+  /// **'注意'**
+  String get exceptionSeverityWarning;
+
+  /// Exception severity: for information.
+  ///
+  /// In ja, this message translates to:
+  /// **'参考'**
+  String get exceptionSeverityInfo;
+
+  /// Exception action: mark as seen.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認した'**
+  String get exceptionAcknowledge;
+
+  /// Exception state: seen but not yet dealt with.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認済み'**
+  String get exceptionAcknowledged;
+
+  /// Exception action: record what was decided.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応を記録'**
+  String get exceptionResolve;
+
+  /// Exception state: dealt with.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応済み'**
+  String get exceptionResolved;
+
+  /// Exception state: raised in error.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get exceptionCancelled;
+
+  /// Title of the resolve-exception sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応を記録する'**
+  String get exceptionResolveTitle;
+
+  /// Resolve sheet: the decision field.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応'**
+  String get exceptionResolutionLabel;
+
+  /// Resolution: accept the discrepancy as it stands.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入（このまま確定）'**
+  String get exceptionResolutionAccepted;
+
+  /// Resolution: take it up with the supplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先へ連絡'**
+  String get exceptionResolutionSupplierClaim;
+
+  /// Resolution: the goods went back.
+  ///
+  /// In ja, this message translates to:
+  /// **'返送した'**
+  String get exceptionResolutionReturned;
+
+  /// Resolution: the goods were scrapped.
+  ///
+  /// In ja, this message translates to:
+  /// **'廃棄した'**
+  String get exceptionResolutionScrapped;
+
+  /// Resolution: the entry was wrong and was fixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'入力を訂正した'**
+  String get exceptionResolutionCorrected;
+
+  /// Resolution: counted again.
+  ///
+  /// In ja, this message translates to:
+  /// **'再カウントした'**
+  String get exceptionResolutionRecounted;
+
+  /// Resolution: nothing to do.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応不要'**
+  String get exceptionResolutionNoAction;
+
+  /// Resolve sheet: note field when optional.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get exceptionNoteLabel;
+
+  /// Resolve sheet: note field when the server requires one.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（必須）'**
+  String get exceptionNoteRequiredLabel;
+
+  /// Resolve sheet: note hint.
+  ///
+  /// In ja, this message translates to:
+  /// **'何をしたかを書く'**
+  String get exceptionNoteHint;
+
+  /// Resolve sheet: validation when a required note is empty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この対応にはメモが必要です'**
+  String get exceptionNoteRequired;
+
+  /// Resolve sheet: recording a decision does not move stock.
+  ///
+  /// In ja, this message translates to:
+  /// **'ここでは対応の記録だけを残します。在庫を動かす場合は在庫調整から行ってください。'**
+  String get exceptionStockNotMovedHint;
+
+  /// Exception card: how much the discrepancy is about.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量 {qty}'**
+  String exceptionQuantity(int qty);
+
+  /// Exception card: which lot, and when it expires.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット {lot} / 期限 {expiry}'**
+  String exceptionLot(String lot, String expiry);
+
+  /// Exception card: when the exception was raised.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date} 起票'**
+  String exceptionRaisedAt(String date);
+
+  /// Exception summary bar when nothing is blocking.
+  ///
+  /// In ja, this message translates to:
+  /// **'未処理 {count} 件'**
+  String exceptionOpenCount(int count);
+
+  /// Exception summary bar when something is blocking work.
+  ///
+  /// In ja, this message translates to:
+  /// **'要対応 {blockers} 件（未処理 {open} 件）'**
+  String exceptionBlockerCount(int blockers, int open);
+
+  /// Menu entry: the exception queue (0071).
+  ///
+  /// In ja, this message translates to:
+  /// **'例外対応'**
+  String get featExceptions;
+
+  /// Menu entry description for the exception queue.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・検品・格納の不一致を確認して対応を記録する'**
+  String get featExceptionsDesc;
 }
 
 class _AppLocalizationsDelegate

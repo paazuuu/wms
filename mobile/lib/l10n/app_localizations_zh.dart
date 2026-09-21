@@ -3113,4 +3113,128 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get replenishmentNoWarehouse => '选择仓库后可查看';
+
+  @override
+  String get exceptionsTitle => '异常・不一致';
+
+  @override
+  String get exceptionsEmpty => '没有未处理的异常';
+
+  @override
+  String get exceptionsEmptyBody => '入库、检验、上架中发现的不一致会显示在这里。';
+
+  @override
+  String get exceptionsNoWarehouse => '选择仓库后显示';
+
+  @override
+  String get exceptionsAllCategories => '全部工序';
+
+  @override
+  String get exceptionCategoryReceiving => '入库';
+
+  @override
+  String get exceptionCategoryQc => '检验';
+
+  @override
+  String get exceptionCategoryPutaway => '上架';
+
+  @override
+  String get exceptionShowClosed => '同时显示已处理';
+
+  @override
+  String get exceptionSeverityBlocker => '需处理';
+
+  @override
+  String get exceptionSeverityWarning => '注意';
+
+  @override
+  String get exceptionSeverityInfo => '参考';
+
+  @override
+  String get exceptionAcknowledge => '已确认';
+
+  @override
+  String get exceptionAcknowledged => '已确认';
+
+  @override
+  String get exceptionResolve => '记录处理';
+
+  @override
+  String get exceptionResolved => '已处理';
+
+  @override
+  String get exceptionCancelled => '已取消';
+
+  @override
+  String get exceptionResolveTitle => '记录处理结果';
+
+  @override
+  String get exceptionResolutionLabel => '处理';
+
+  @override
+  String get exceptionResolutionAccepted => '按现状受理';
+
+  @override
+  String get exceptionResolutionSupplierClaim => '联系供应商';
+
+  @override
+  String get exceptionResolutionReturned => '已退回';
+
+  @override
+  String get exceptionResolutionScrapped => '已废弃';
+
+  @override
+  String get exceptionResolutionCorrected => '已订正录入';
+
+  @override
+  String get exceptionResolutionRecounted => '已重新盘点';
+
+  @override
+  String get exceptionResolutionNoAction => '无需处理';
+
+  @override
+  String get exceptionNoteLabel => '备注（可选）';
+
+  @override
+  String get exceptionNoteRequiredLabel => '备注（必填）';
+
+  @override
+  String get exceptionNoteHint => '写明做了什么';
+
+  @override
+  String get exceptionNoteRequired => '该处理需要填写备注';
+
+  @override
+  String get exceptionStockNotMovedHint => '这里仅记录处理结果。如需变动库存，请通过库存调整进行。';
+
+  @override
+  String exceptionQuantity(int qty) {
+    return '数量 $qty';
+  }
+
+  @override
+  String exceptionLot(String lot, String expiry) {
+    return '批次 $lot / 期限 $expiry';
+  }
+
+  @override
+  String exceptionRaisedAt(String date) {
+    return '$date 提出';
+  }
+
+  @override
+  String exceptionOpenCount(int count) {
+    return '未处理 $count 件';
+  }
+
+  @override
+  String exceptionBlockerCount(int blockers, int open) {
+    return '需处理 $blockers 件（未处理 $open 件）';
+  }
+
+  @override
+  String get featExceptions => '异常处理';
+
+  @override
+  String get featExceptionsDesc => '确认并处理入库、检验、上架的不一致';
 }

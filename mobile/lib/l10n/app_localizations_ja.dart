@@ -3118,4 +3118,129 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get replenishmentNoWarehouse => '倉庫を選ぶと表示できます';
+
+  @override
+  String get exceptionsTitle => '例外・不一致';
+
+  @override
+  String get exceptionsEmpty => '未処理の例外はありません';
+
+  @override
+  String get exceptionsEmptyBody => '入荷・検品・格納で不一致が出ると、ここに並びます。';
+
+  @override
+  String get exceptionsNoWarehouse => '倉庫を選ぶと表示できます';
+
+  @override
+  String get exceptionsAllCategories => 'すべての工程';
+
+  @override
+  String get exceptionCategoryReceiving => '入荷';
+
+  @override
+  String get exceptionCategoryQc => '検品';
+
+  @override
+  String get exceptionCategoryPutaway => '格納';
+
+  @override
+  String get exceptionShowClosed => '対応済みも表示';
+
+  @override
+  String get exceptionSeverityBlocker => '要対応';
+
+  @override
+  String get exceptionSeverityWarning => '注意';
+
+  @override
+  String get exceptionSeverityInfo => '参考';
+
+  @override
+  String get exceptionAcknowledge => '確認した';
+
+  @override
+  String get exceptionAcknowledged => '確認済み';
+
+  @override
+  String get exceptionResolve => '対応を記録';
+
+  @override
+  String get exceptionResolved => '対応済み';
+
+  @override
+  String get exceptionCancelled => '取消';
+
+  @override
+  String get exceptionResolveTitle => '対応を記録する';
+
+  @override
+  String get exceptionResolutionLabel => '対応';
+
+  @override
+  String get exceptionResolutionAccepted => '受入（このまま確定）';
+
+  @override
+  String get exceptionResolutionSupplierClaim => '仕入先へ連絡';
+
+  @override
+  String get exceptionResolutionReturned => '返送した';
+
+  @override
+  String get exceptionResolutionScrapped => '廃棄した';
+
+  @override
+  String get exceptionResolutionCorrected => '入力を訂正した';
+
+  @override
+  String get exceptionResolutionRecounted => '再カウントした';
+
+  @override
+  String get exceptionResolutionNoAction => '対応不要';
+
+  @override
+  String get exceptionNoteLabel => 'メモ（任意）';
+
+  @override
+  String get exceptionNoteRequiredLabel => 'メモ（必須）';
+
+  @override
+  String get exceptionNoteHint => '何をしたかを書く';
+
+  @override
+  String get exceptionNoteRequired => 'この対応にはメモが必要です';
+
+  @override
+  String get exceptionStockNotMovedHint =>
+      'ここでは対応の記録だけを残します。在庫を動かす場合は在庫調整から行ってください。';
+
+  @override
+  String exceptionQuantity(int qty) {
+    return '数量 $qty';
+  }
+
+  @override
+  String exceptionLot(String lot, String expiry) {
+    return 'ロット $lot / 期限 $expiry';
+  }
+
+  @override
+  String exceptionRaisedAt(String date) {
+    return '$date 起票';
+  }
+
+  @override
+  String exceptionOpenCount(int count) {
+    return '未処理 $count 件';
+  }
+
+  @override
+  String exceptionBlockerCount(int blockers, int open) {
+    return '要対応 $blockers 件（未処理 $open 件）';
+  }
+
+  @override
+  String get featExceptions => '例外対応';
+
+  @override
+  String get featExceptionsDesc => '入荷・検品・格納の不一致を確認して対応を記録する';
 }

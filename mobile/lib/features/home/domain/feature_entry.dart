@@ -111,6 +111,8 @@ class FeatureEntry {
         return l10n.featPutaway;
       case 'expiring_lots':
         return l10n.featExpiringLots;
+      case 'exceptions':
+        return l10n.featExceptions;
       case 'reservations':
         return l10n.featReservations;
       case 'locations':
@@ -163,6 +165,8 @@ class FeatureEntry {
         return l10n.featPutawayDesc;
       case 'expiring_lots':
         return l10n.featExpiringLotsDesc;
+      case 'exceptions':
+        return l10n.featExceptionsDesc;
       case 'reservations':
         return l10n.featReservationsDesc;
       case 'locations':

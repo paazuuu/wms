@@ -5,6 +5,7 @@ import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
+import '../../exceptions/presentation/exception_list_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
@@ -81,6 +82,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _expiringLots,
             requiredAnyOf: ['inventory.view'],
+          ),
+          // Beside the floor tasks, not with the reports: an open blocker is
+          // work, and the person who has to clear it is on the dock.
+          FeatureEntry(
+            id: 'exceptions',
+            icon: Icons.report_problem_outlined,
+            status: FeatureStatus.ready,
+            builder: _exceptions,
+            requiredAnyOf: ['receiving.view', 'inspection.view', 'inventory.view'],
           ),
           FeatureEntry(
             id: 'stock_count',
@@ -264,6 +274,7 @@ Widget _expiringLots(BuildContext _) => const ExpiringLotsScreen();
 
 /// Top-level (const-referenceable) builder for the Reservations feature.
 Widget _reservations(BuildContext _) => const ReservationsScreen();
+Widget _exceptions(BuildContext _) => const ExceptionListScreen();
 
 /// Top-level (const-referenceable) builder for the Replenishment feature.
 Widget _replenishment(BuildContext _) => const ReplenishmentScreen();

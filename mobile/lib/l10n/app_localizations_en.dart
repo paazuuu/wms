@@ -3204,4 +3204,131 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get replenishmentNoWarehouse =>
       'Pick a warehouse to see its suggestions';
+
+  @override
+  String get exceptionsTitle => 'Exceptions';
+
+  @override
+  String get exceptionsEmpty => 'No open exceptions';
+
+  @override
+  String get exceptionsEmptyBody =>
+      'Discrepancies found during receiving, QC or put-away appear here.';
+
+  @override
+  String get exceptionsNoWarehouse => 'Choose a warehouse to see this';
+
+  @override
+  String get exceptionsAllCategories => 'All stages';
+
+  @override
+  String get exceptionCategoryReceiving => 'Receiving';
+
+  @override
+  String get exceptionCategoryQc => 'QC';
+
+  @override
+  String get exceptionCategoryPutaway => 'Put-away';
+
+  @override
+  String get exceptionShowClosed => 'Show closed as well';
+
+  @override
+  String get exceptionSeverityBlocker => 'Blocker';
+
+  @override
+  String get exceptionSeverityWarning => 'Warning';
+
+  @override
+  String get exceptionSeverityInfo => 'Info';
+
+  @override
+  String get exceptionAcknowledge => 'Acknowledge';
+
+  @override
+  String get exceptionAcknowledged => 'Acknowledged';
+
+  @override
+  String get exceptionResolve => 'Record decision';
+
+  @override
+  String get exceptionResolved => 'Resolved';
+
+  @override
+  String get exceptionCancelled => 'Cancelled';
+
+  @override
+  String get exceptionResolveTitle => 'Record what was decided';
+
+  @override
+  String get exceptionResolutionLabel => 'Decision';
+
+  @override
+  String get exceptionResolutionAccepted => 'Accept as received';
+
+  @override
+  String get exceptionResolutionSupplierClaim => 'Raise with the supplier';
+
+  @override
+  String get exceptionResolutionReturned => 'Returned to supplier';
+
+  @override
+  String get exceptionResolutionScrapped => 'Scrapped';
+
+  @override
+  String get exceptionResolutionCorrected => 'Corrected the entry';
+
+  @override
+  String get exceptionResolutionRecounted => 'Recounted';
+
+  @override
+  String get exceptionResolutionNoAction => 'No action needed';
+
+  @override
+  String get exceptionNoteLabel => 'Note (optional)';
+
+  @override
+  String get exceptionNoteRequiredLabel => 'Note (required)';
+
+  @override
+  String get exceptionNoteHint => 'Say what was done';
+
+  @override
+  String get exceptionNoteRequired => 'This decision needs a note';
+
+  @override
+  String get exceptionStockNotMovedHint =>
+      'This records the decision only. Moving stock is a separate adjustment.';
+
+  @override
+  String exceptionQuantity(int qty) {
+    return 'Qty $qty';
+  }
+
+  @override
+  String exceptionLot(String lot, String expiry) {
+    return 'Lot $lot / expires $expiry';
+  }
+
+  @override
+  String exceptionRaisedAt(String date) {
+    return 'Raised $date';
+  }
+
+  @override
+  String exceptionOpenCount(int count) {
+    return '$count open';
+  }
+
+  @override
+  String exceptionBlockerCount(int blockers, int open) {
+    return '$blockers blocking, $open open in total';
+  }
+
+  @override
+  String get featExceptions => 'Exceptions';
+
+  @override
+  String get featExceptionsDesc =>
+      'Work through discrepancies from receiving, QC and put-away';
 }

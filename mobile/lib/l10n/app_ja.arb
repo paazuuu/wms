@@ -1302,719 +1302,902 @@
   },
   "productSku": "SKU",
   "@productSku": {
-      "description": "Product master: internal code, separate from the JAN barcode (0057)."
+    "description": "Product master: internal code, separate from the JAN barcode (0057)."
   },
   "productSkuHint": "社内品番（任意）",
   "@productSkuHint": {
-      "description": "Product master: SKU field helper text."
+    "description": "Product master: SKU field helper text."
   },
   "productTracking": "追跡区分",
   "@productTracking": {
-      "description": "Product master: what must be recorded about this product (0057/0060)."
+    "description": "Product master: what must be recorded about this product (0057/0060)."
   },
   "trackUntracked": "追跡なし",
   "@trackUntracked": {
-      "description": "Tracking mode UNTRACKED."
+    "description": "Tracking mode UNTRACKED."
   },
   "trackLot": "ロット",
   "@trackLot": {
-      "description": "Tracking mode LOT."
+    "description": "Tracking mode LOT."
   },
   "trackSerial": "シリアル",
   "@trackSerial": {
-      "description": "Tracking mode SERIAL."
+    "description": "Tracking mode SERIAL."
   },
   "trackLotAndSerial": "ロット＋シリアル",
   "@trackLotAndSerial": {
-      "description": "Tracking mode LOT_AND_SERIAL."
+    "description": "Tracking mode LOT_AND_SERIAL."
   },
   "trackExpiry": "有効期限",
   "@trackExpiry": {
-      "description": "Tracking mode EXPIRY: every lot must carry a date."
+    "description": "Tracking mode EXPIRY: every lot must carry a date."
   },
   "productBaseUnit": "基本単位",
   "@productBaseUnit": {
-      "description": "Product master: the unit on-hand quantities are counted in (0059)."
+    "description": "Product master: the unit on-hand quantities are counted in (0059)."
   },
   "productCodeCount": "コード {count} 件",
   "@productCodeCount": {
-      "description": "Product master: how many barcodes resolve to this product.",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Product master: how many barcodes resolve to this product.",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "productPackUnit": "{code} = {factor}{base}",
   "@productPackUnit": {
-      "description": "Product master: one pack unit and what it converts to.",
-      "placeholders": {
-          "code": {
-              "type": "String"
-          },
-          "factor": {
-              "type": "String"
-          },
-          "base": {
-              "type": "String"
-          }
+    "description": "Product master: one pack unit and what it converts to.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "factor": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
       }
+    }
   },
   "productScanAlreadyUsed": "このコードは「{name}」に登録済みです",
   "@productScanAlreadyUsed": {
-      "description": "Product form: resolve_barcode found the scanned code on another product.",
-      "placeholders": {
-          "name": {
-              "type": "String"
-          }
+    "description": "Product form: resolve_barcode found the scanned code on another product.",
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
+    }
   },
   "stockPositionTitle": "在庫内訳",
   "@stockPositionTitle": {
-      "description": "Stock: the four numbers §5 keeps apart (0061/0064)."
+    "description": "Stock: the four numbers §5 keeps apart (0061/0064)."
   },
   "stockAvailable": "引当可能",
   "@stockAvailable": {
-      "description": "Stock position: usable on-hand less what is reserved."
+    "description": "Stock position: usable on-hand less what is reserved."
   },
   "stockReserved": "予約済み",
   "@stockReserved": {
-      "description": "Stock position: promised to orders, not yet shipped."
+    "description": "Stock position: promised to orders, not yet shipped."
   },
   "stockAllocated": "引当済み",
   "@stockAllocated": {
-      "description": "Stock position: of the reserved quantity, how much is pinned to parcels."
+    "description": "Stock position: of the reserved quantity, how much is pinned to parcels."
   },
   "stockUnavailable": "出荷不可",
   "@stockUnavailable": {
-      "description": "Stock position: on hand but quarantined, damaged or held."
+    "description": "Stock position: on hand but quarantined, damaged or held."
   },
   "stockOverPromised": "予約が引当可能数を超えています",
   "@stockOverPromised": {
-      "description": "Stock position: available went negative."
+    "description": "Stock position: available went negative."
   },
   "stockNotLinkedToProduct": "このJANは商品マスタに未登録です",
   "@stockNotLinkedToProduct": {
-      "description": "Stock: stock_levels row whose product_id is still null (0058)."
+    "description": "Stock: stock_levels row whose product_id is still null (0058)."
   },
   "stockPositionLot": "ロット {code}",
   "@stockPositionLot": {
-      "description": "Stock position: which lot a parcel came from.",
-      "placeholders": {
-          "code": {
-              "type": "String"
-          }
+    "description": "Stock position: which lot a parcel came from.",
+    "placeholders": {
+      "code": {
+        "type": "String"
       }
+    }
   },
   "stockPositionNoParcels": "内訳はまだありません",
   "@stockPositionNoParcels": {
-      "description": "Stock position: the product has no stock_units rows in this warehouse."
+    "description": "Stock position: the product has no stock_units rows in this warehouse."
   },
   "productDetailTitle": "商品詳細",
   "@productDetailTitle": {
-      "description": "Product detail screen title."
+    "description": "Product detail screen title."
   },
   "productEdit": "編集",
   "@productEdit": {
-      "description": "Product detail: open the edit sheet."
+    "description": "Product detail: open the edit sheet."
   },
   "productBarcodesSection": "バーコード",
   "@productBarcodesSection": {
-      "description": "Product detail: the codes that resolve to this product (0057)."
+    "description": "Product detail: the codes that resolve to this product (0057)."
   },
   "productBarcodeAdd": "コードを追加",
   "@productBarcodeAdd": {
-      "description": "Product detail: register another barcode."
+    "description": "Product detail: register another barcode."
   },
   "productBarcodePrimary": "主コード",
   "@productBarcodePrimary": {
-      "description": "Product detail: the one code that cannot be removed."
+    "description": "Product detail: the one code that cannot be removed."
   },
   "productBarcodeType": "種別",
   "@productBarcodeType": {
-      "description": "Product detail: barcode type (JAN/EAN/CASE/…)."
+    "description": "Product detail: barcode type (JAN/EAN/CASE/…)."
   },
   "productBarcodeUnit": "単位（任意）",
   "@productBarcodeUnit": {
-      "description": "Product detail: naming a unit makes the conversion authoritative (0059)."
+    "description": "Product detail: naming a unit makes the conversion authoritative (0059)."
   },
   "productBarcodeQtyPerScan": "1スキャン = {qty}",
   "@productBarcodeQtyPerScan": {
-      "description": "Product detail: how much one scan of this code counts.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Product detail: how much one scan of this code counts.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "productBarcodeRemoveQ": "このコードを削除しますか？",
   "@productBarcodeRemoveQ": {
-      "description": "Product detail: confirm removing a barcode."
+    "description": "Product detail: confirm removing a barcode."
   },
   "productBarcodeRemoveBody": "このコードではスキャンできなくなります。商品自体は残ります。",
   "@productBarcodeRemoveBody": {
-      "description": "Product detail: what removing a barcode does."
+    "description": "Product detail: what removing a barcode does."
   },
   "productBarcodeEmpty": "コードがまだありません",
   "@productBarcodeEmpty": {
-      "description": "Product detail: empty barcode list."
+    "description": "Product detail: empty barcode list."
   },
   "productUnitsSection": "単位",
   "@productUnitsSection": {
-      "description": "Product detail: base unit and pack sizes (0059)."
+    "description": "Product detail: base unit and pack sizes (0059)."
   },
   "productUnitAdd": "単位を追加",
   "@productUnitAdd": {
-      "description": "Product detail: define a pack size."
+    "description": "Product detail: define a pack size."
   },
   "productUnitFactor": "換算数",
   "@productUnitFactor": {
-      "description": "Product detail: how many base units one of this unit is."
+    "description": "Product detail: how many base units one of this unit is."
   },
   "productUnitBase": "基本",
   "@productUnitBase": {
-      "description": "Product detail: marks the base unit row."
+    "description": "Product detail: marks the base unit row."
   },
   "productLotsSection": "ロット",
   "@productLotsSection": {
-      "description": "Product detail: lots recorded against this product (0060)."
+    "description": "Product detail: lots recorded against this product (0060)."
   },
   "productLotsEmpty": "ロットの記録はまだありません",
   "@productLotsEmpty": {
-      "description": "Product detail: empty lot list."
+    "description": "Product detail: empty lot list."
   },
   "productLotExpiryOn": "期限 {date}",
   "@productLotExpiryOn": {
-      "description": "Product detail / expiry list: a lot's expiry date.",
-      "placeholders": {
-          "date": {
-              "type": "String"
-          }
+    "description": "Product detail / expiry list: a lot's expiry date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
       }
+    }
   },
   "productLotDaysLeft": "あと{days}日",
   "@productLotDaysLeft": {
-      "description": "Product detail / expiry list: days until a lot expires.",
-      "placeholders": {
-          "days": {
-              "type": "int"
-          }
+    "description": "Product detail / expiry list: days until a lot expires.",
+    "placeholders": {
+      "days": {
+        "type": "int"
       }
+    }
   },
   "productLotExpired": "期限切れ",
   "@productLotExpired": {
-      "description": "Product detail / expiry list: past its date."
+    "description": "Product detail / expiry list: past its date."
   },
   "productLotSerialCount": "シリアル {count} 件",
   "@productLotSerialCount": {
-      "description": "Product detail: how many serials belong to a lot.",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Product detail: how many serials belong to a lot.",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "productSerialsSection": "シリアル",
   "@productSerialsSection": {
-      "description": "Product detail: serials recorded against this product (0060)."
+    "description": "Product detail: serials recorded against this product (0060)."
   },
   "productSerialsEmpty": "シリアルの記録はまだありません",
   "@productSerialsEmpty": {
-      "description": "Product detail: empty serial list."
+    "description": "Product detail: empty serial list."
   },
   "productSerialFilterAll": "すべて",
   "@productSerialFilterAll": {
-      "description": "Product detail: serial status filter, no filter."
+    "description": "Product detail: serial status filter, no filter."
   },
   "serialInStock": "在庫あり",
   "@serialInStock": {
-      "description": "Serial status IN_STOCK."
+    "description": "Serial status IN_STOCK."
   },
   "serialShipped": "出荷済",
   "@serialShipped": {
-      "description": "Serial status SHIPPED."
+    "description": "Serial status SHIPPED."
   },
   "serialReturned": "返品",
   "@serialReturned": {
-      "description": "Serial status RETURNED."
+    "description": "Serial status RETURNED."
   },
   "serialScrapped": "廃棄",
   "@serialScrapped": {
-      "description": "Serial status SCRAPPED."
+    "description": "Serial status SCRAPPED."
   },
   "serialHold": "保留",
   "@serialHold": {
-      "description": "Serial status HOLD."
+    "description": "Serial status HOLD."
   },
   "whpSection": "この倉庫での設定",
   "@whpSection": {
-      "description": "Product detail: warehouse_products, §22's per-warehouse handling."
+    "description": "Product detail: warehouse_products, §22's per-warehouse handling."
   },
   "whpNone": "この倉庫には専用の設定がありません",
   "@whpNone": {
-      "description": "Product detail: no warehouse_products row, which is the normal case."
+    "description": "Product detail: no warehouse_products row, which is the normal case."
   },
   "whpNoWarehouse": "倉庫を選ぶと設定できます",
   "@whpNoWarehouse": {
-      "description": "Product detail: the settings are per warehouse, and none is active."
+    "description": "Product detail: the settings are per warehouse, and none is active."
   },
   "whpEdit": "設定する",
   "@whpEdit": {
-      "description": "Product detail: open the warehouse settings sheet."
+    "description": "Product detail: open the warehouse settings sheet."
   },
   "whpDefaultLocation": "既定ロケーション",
   "@whpDefaultLocation": {
-      "description": "warehouse_products.default_location_id, named by its code."
+    "description": "warehouse_products.default_location_id, named by its code."
   },
   "whpDefaultLocationHint": "ラックのコード（空欄で解除）",
   "@whpDefaultLocationHint": {
-      "description": "warehouse_products: how the default location is entered."
+    "description": "warehouse_products: how the default location is entered."
   },
   "whpMinStock": "最小在庫",
   "@whpMinStock": {
-      "description": "warehouse_products.min_stock."
+    "description": "warehouse_products.min_stock."
   },
   "whpReorderPoint": "発注点",
   "@whpReorderPoint": {
-      "description": "warehouse_products.reorder_point, compared against available (§31)."
+    "description": "warehouse_products.reorder_point, compared against available (§31)."
   },
   "whpMaxStock": "最大在庫",
   "@whpMaxStock": {
-      "description": "warehouse_products.max_stock, the level a suggestion orders up to."
+    "description": "warehouse_products.max_stock, the level a suggestion orders up to."
   },
   "whpPickPriority": "ピッキング優先度",
   "@whpPickPriority": {
-      "description": "warehouse_products.pick_priority, lower picks first."
+    "description": "warehouse_products.pick_priority, lower picks first."
   },
   "whpPutawayRule": "格納ルール",
   "@whpPutawayRule": {
-      "description": "warehouse_products.putaway_rule; records the intent, Phase B acts on it."
+    "description": "warehouse_products.putaway_rule; records the intent, Phase B acts on it."
   },
   "putawayManual": "手動",
   "@putawayManual": {
-      "description": "Put-away rule MANUAL."
+    "description": "Put-away rule MANUAL."
   },
   "putawayFixed": "固定ロケーション",
   "@putawayFixed": {
-      "description": "Put-away rule FIXED."
+    "description": "Put-away rule FIXED."
   },
   "putawayConsolidate": "同じ品にまとめる",
   "@putawayConsolidate": {
-      "description": "Put-away rule CONSOLIDATE."
+    "description": "Put-away rule CONSOLIDATE."
   },
   "putawayNearestEmpty": "最も近い空き",
   "@putawayNearestEmpty": {
-      "description": "Put-away rule NEAREST_EMPTY."
+    "description": "Put-away rule NEAREST_EMPTY."
   },
   "whpLeadTime": "リードタイム（日）",
   "@whpLeadTime": {
-      "description": "warehouse_products.lead_time_days."
+    "description": "warehouse_products.lead_time_days."
   },
   "whpSupplier": "優先仕入先",
   "@whpSupplier": {
-      "description": "warehouse_products.preferred_supplier_id."
+    "description": "warehouse_products.preferred_supplier_id."
   },
   "whpClear": "この倉庫の設定を削除",
   "@whpClear": {
-      "description": "Product detail: clear_warehouse_product."
+    "description": "Product detail: clear_warehouse_product."
   },
   "whpClearQ": "この倉庫の設定を削除しますか？",
   "@whpClearQ": {
-      "description": "Product detail: confirm clearing warehouse_products."
+    "description": "Product detail: confirm clearing warehouse_products."
   },
   "whpClearBody": "既定ロケーションと発注点がなくなり、補充提案にも出なくなります。",
   "@whpClearBody": {
-      "description": "Product detail: what clearing warehouse_products does."
+    "description": "Product detail: what clearing warehouse_products does."
   },
   "whpNeedsReorder": "発注点を下回っています",
   "@whpNeedsReorder": {
-      "description": "Product detail: available < reorder_point."
+    "description": "Product detail: available < reorder_point."
   },
   "featExpiringLots": "期限管理",
   "@featExpiringLots": {
-      "description": "Home menu: lots running out of time (§4)."
+    "description": "Home menu: lots running out of time (§4)."
   },
   "featExpiringLotsDesc": "期限が近い・切れたロットを一覧",
   "@featExpiringLotsDesc": {
-      "description": "Home menu description for the expiry watch."
+    "description": "Home menu description for the expiry watch."
   },
   "featReservations": "予約・引当",
   "@featReservations": {
-      "description": "Home menu: promises against stock (§6)."
+    "description": "Home menu: promises against stock (§6)."
   },
   "featReservationsDesc": "受注などのために確保した在庫と、その引当先",
   "@featReservationsDesc": {
-      "description": "Home menu description for reservations."
+    "description": "Home menu description for reservations."
   },
   "featLocations": "ロケーション",
   "@featLocations": {
-      "description": "Home menu: the location tree (§7/§8)."
+    "description": "Home menu: the location tree (§7/§8)."
   },
   "featLocationsDesc": "ゾーン・通路・ラック・棚の階層と種別",
   "@featLocationsDesc": {
-      "description": "Home menu description for locations."
+    "description": "Home menu description for locations."
   },
   "featReplenishment": "補充提案",
   "@featReplenishment": {
-      "description": "Home menu: products under their reorder point (§31)."
+    "description": "Home menu: products under their reorder point (§31)."
   },
   "featReplenishmentDesc": "発注点を下回った商品と発注数の目安",
   "@featReplenishmentDesc": {
-      "description": "Home menu description for replenishment."
+    "description": "Home menu description for replenishment."
   },
   "expiryTitle": "期限管理",
   "@expiryTitle": {
-      "description": "Expiry screen title."
+    "description": "Expiry screen title."
   },
   "expiryHorizon": "{days}日以内",
   "@expiryHorizon": {
-      "description": "Expiry screen: how far ahead the list looks.",
-      "placeholders": {
-          "days": {
-              "type": "int"
-          }
+    "description": "Expiry screen: how far ahead the list looks.",
+    "placeholders": {
+      "days": {
+        "type": "int"
       }
+    }
   },
   "expiryEmpty": "期限が近いロットはありません",
   "@expiryEmpty": {
-      "description": "Expiry screen: empty state."
+    "description": "Expiry screen: empty state."
   },
   "expiryEmptyBody": "この期間に期限を迎えるロットはありません。期間を広げると先の分も確認できます。",
   "@expiryEmptyBody": {
-      "description": "Expiry screen: empty state body."
+    "description": "Expiry screen: empty state body."
   },
   "expiryExpiredCount": "期限切れ {count} 件",
   "@expiryExpiredCount": {
-      "description": "Expiry screen: how many rows are already past their date.",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Expiry screen: how many rows are already past their date.",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "expirySoonCount": "期限間近 {count} 件",
   "@expirySoonCount": {
-      "description": "Expiry screen: how many rows are close to their date.",
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "description": "Expiry screen: how many rows are close to their date.",
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "reservationsTitle": "予約・引当",
   "@reservationsTitle": {
-      "description": "Reservations screen title."
+    "description": "Reservations screen title."
   },
   "reservationsEmpty": "予約はありません",
   "@reservationsEmpty": {
-      "description": "Reservations screen: empty state."
+    "description": "Reservations screen: empty state."
   },
   "reservationsEmptyBody": "受注や出荷のために確保された在庫がここに並びます。",
   "@reservationsEmptyBody": {
-      "description": "Reservations screen: empty state body."
+    "description": "Reservations screen: empty state body."
   },
   "reservationStatusActive": "有効",
   "@reservationStatusActive": {
-      "description": "Reservation status ACTIVE."
+    "description": "Reservation status ACTIVE."
   },
   "reservationStatusFulfilled": "出荷済",
   "@reservationStatusFulfilled": {
-      "description": "Reservation status FULFILLED."
+    "description": "Reservation status FULFILLED."
   },
   "reservationStatusReleased": "解放済",
   "@reservationStatusReleased": {
-      "description": "Reservation status RELEASED."
+    "description": "Reservation status RELEASED."
   },
   "reservationStatusAll": "すべて",
   "@reservationStatusAll": {
-      "description": "Reservations screen: no status filter."
+    "description": "Reservations screen: no status filter."
   },
   "reservationLapsed": "期限切れ",
   "@reservationLapsed": {
-      "description": "Reservations screen: past expires_at, so it holds nothing."
+    "description": "Reservations screen: past expires_at, so it holds nothing."
   },
   "reservationFor": "{type} {id}",
   "@reservationFor": {
-      "description": "Reservations screen: what the promise is for.",
-      "placeholders": {
-          "type": {
-              "type": "String"
-          },
-          "id": {
-              "type": "String"
-          }
+    "description": "Reservations screen: what the promise is for.",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
       }
+    }
   },
   "refSalesOrder": "受注",
   "@refSalesOrder": {
-      "description": "Reservation reference type sales_order."
+    "description": "Reservation reference type sales_order."
   },
   "refShipment": "出荷",
   "@refShipment": {
-      "description": "Reservation reference type shipment."
+    "description": "Reservation reference type shipment."
   },
   "refTransfer": "移動",
   "@refTransfer": {
-      "description": "Reservation reference type transfer."
+    "description": "Reservation reference type transfer."
   },
   "refWorkOrder": "作業指示",
   "@refWorkOrder": {
-      "description": "Reservation reference type work_order."
+    "description": "Reservation reference type work_order."
   },
   "refManual": "手動",
   "@refManual": {
-      "description": "Reservation reference type manual."
+    "description": "Reservation reference type manual."
   },
   "reservationQuantity": "予約 {qty}",
   "@reservationQuantity": {
-      "description": "Reservations screen: the promised quantity.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Reservations screen: the promised quantity.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "reservationAllocated": "引当済 {qty}",
   "@reservationAllocated": {
-      "description": "Reservations screen: how much is pinned to parcels.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Reservations screen: how much is pinned to parcels.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "reservationUnallocated": "未引当 {qty}",
   "@reservationUnallocated": {
-      "description": "Reservations screen: promised but not pinned to any parcel yet.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Reservations screen: promised but not pinned to any parcel yet.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "reservationFulfilled": "出荷済 {qty}",
   "@reservationFulfilled": {
-      "description": "Reservations screen: how much of the promise has shipped.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Reservations screen: how much of the promise has shipped.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "reservationRelease": "解放",
   "@reservationRelease": {
-      "description": "Reservations screen: release_reservation."
+    "description": "Reservations screen: release_reservation."
   },
   "reservationReleaseQ": "この予約を解放しますか？",
   "@reservationReleaseQ": {
-      "description": "Reservations screen: confirm releasing."
+    "description": "Reservations screen: confirm releasing."
   },
   "reservationReleaseBody": "確保していた在庫が引当可能に戻り、引当先も取り消されます。記録は残ります。",
   "@reservationReleaseBody": {
-      "description": "Reservations screen: what releasing does."
+    "description": "Reservations screen: what releasing does."
   },
   "reservationAllocationsTitle": "引当先",
   "@reservationAllocationsTitle": {
-      "description": "Reservations screen: which parcels will supply this promise."
+    "description": "Reservations screen: which parcels will supply this promise."
   },
   "reservationNoAllocations": "引当先はまだ決まっていません",
   "@reservationNoAllocations": {
-      "description": "Reservations screen: a reservation with no allocations, which is a valid state."
+    "description": "Reservations screen: a reservation with no allocations, which is a valid state."
   },
   "overAllocatedTitle": "引当超過",
   "@overAllocatedTitle": {
-      "description": "Reservations screen: parcels promised to more than they hold."
+    "description": "Reservations screen: parcels promised to more than they hold."
   },
   "overAllocatedBody": "在庫が引当より減っています。出荷が先に取ったためで、引当の解放か在庫の補充が必要です。",
   "@overAllocatedBody": {
-      "description": "Reservations screen: why over-allocation happens (an allocation never blocks a movement)."
+    "description": "Reservations screen: why over-allocation happens (an allocation never blocks a movement)."
   },
   "overAllocatedRow": "在庫 {quantity} / 引当 {allocated}（超過 {over}）",
   "@overAllocatedRow": {
-      "description": "Reservations screen: one over-allocated parcel.",
-      "placeholders": {
-          "quantity": {
-              "type": "String"
-          },
-          "allocated": {
-              "type": "String"
-          },
-          "over": {
-              "type": "String"
-          }
+    "description": "Reservations screen: one over-allocated parcel.",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "allocated": {
+        "type": "String"
+      },
+      "over": {
+        "type": "String"
       }
+    }
   },
   "locationsTitle": "ロケーション",
   "@locationsTitle": {
-      "description": "Location tree screen title."
+    "description": "Location tree screen title."
   },
   "locationsEmpty": "ロケーションがまだありません",
   "@locationsEmpty": {
-      "description": "Location tree: empty state."
+    "description": "Location tree: empty state."
   },
   "locationsEmptyBody": "ゾーンや棚を登録すると、ここに階層として表示されます。",
   "@locationsEmptyBody": {
-      "description": "Location tree: empty state body."
+    "description": "Location tree: empty state body."
   },
   "locationsNoWarehouse": "倉庫を選ぶと表示できます",
   "@locationsNoWarehouse": {
-      "description": "Location tree: the tree is per warehouse."
+    "description": "Location tree: the tree is per warehouse."
   },
   "locationAdd": "ロケーションを追加",
   "@locationAdd": {
-      "description": "Location tree: create_location."
+    "description": "Location tree: create_location."
   },
   "locationCode": "コード",
   "@locationCode": {
-      "description": "Location: its code, unique within the warehouse."
+    "description": "Location: its code, unique within the warehouse."
   },
   "locationName": "名称（任意）",
   "@locationName": {
-      "description": "Location: a human name beside the code."
+    "description": "Location: a human name beside the code."
   },
   "locationType": "種別",
   "@locationType": {
-      "description": "Location: its type, which sets the default flags (§8)."
+    "description": "Location: its type, which sets the default flags (§8)."
   },
   "locationParent": "親ロケーション（任意）",
   "@locationParent": {
-      "description": "Location: the node above it; empty means directly under the warehouse."
+    "description": "Location: the node above it; empty means directly under the warehouse."
   },
   "locationBarcode": "ラベルのバーコード（任意）",
   "@locationBarcode": {
-      "description": "Location: what a scan gun reads off the shelf label."
+    "description": "Location: what a scan gun reads off the shelf label."
   },
   "locationShowInactive": "停止中も表示",
   "@locationShowInactive": {
-      "description": "Location tree: include is_active = false nodes."
+    "description": "Location tree: include is_active = false nodes."
   },
   "locationPickable": "ピッキング可",
   "@locationPickable": {
-      "description": "Location flag pickable."
+    "description": "Location flag pickable."
   },
   "locationReceivable": "入荷可",
   "@locationReceivable": {
-      "description": "Location flag receivable."
+    "description": "Location flag receivable."
   },
   "locationShipping": "出荷",
   "@locationShipping": {
-      "description": "Location flag shipping."
+    "description": "Location flag shipping."
   },
   "locationQuarantine": "隔離",
   "@locationQuarantine": {
-      "description": "Location flag quarantine."
+    "description": "Location flag quarantine."
   },
   "locationVirtual": "仮想",
   "@locationVirtual": {
-      "description": "Location flag is_virtual."
+    "description": "Location flag is_virtual."
   },
   "locationInactive": "停止中",
   "@locationInactive": {
-      "description": "Location: is_active = false."
+    "description": "Location: is_active = false."
   },
   "locationOnHand": "在庫 {qty}",
   "@locationOnHand": {
-      "description": "Location tree: bin_stock for a node that is a bin.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Location tree: bin_stock for a node that is a bin.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "locTypeStorage": "保管",
   "@locTypeStorage": {
-      "description": "Location type STORAGE."
+    "description": "Location type STORAGE."
   },
   "locTypePicking": "ピッキング",
   "@locTypePicking": {
-      "description": "Location type PICKING."
+    "description": "Location type PICKING."
   },
   "locTypeReceiving": "入荷",
   "@locTypeReceiving": {
-      "description": "Location type RECEIVING."
+    "description": "Location type RECEIVING."
   },
   "locTypeQc": "検品",
   "@locTypeQc": {
-      "description": "Location type QC."
+    "description": "Location type QC."
   },
   "locTypePacking": "梱包",
   "@locTypePacking": {
-      "description": "Location type PACKING."
+    "description": "Location type PACKING."
   },
   "locTypeShipping": "出荷",
   "@locTypeShipping": {
-      "description": "Location type SHIPPING."
+    "description": "Location type SHIPPING."
   },
   "locTypeQuarantine": "隔離",
   "@locTypeQuarantine": {
-      "description": "Location type QUARANTINE."
+    "description": "Location type QUARANTINE."
   },
   "locTypeDamaged": "破損",
   "@locTypeDamaged": {
-      "description": "Location type DAMAGED."
+    "description": "Location type DAMAGED."
   },
   "locTypeReturn": "返品",
   "@locTypeReturn": {
-      "description": "Location type RETURN."
+    "description": "Location type RETURN."
   },
   "locTypeTransit": "移動中",
   "@locTypeTransit": {
-      "description": "Location type TRANSIT."
+    "description": "Location type TRANSIT."
   },
   "locTypeVirtual": "仮想",
   "@locTypeVirtual": {
-      "description": "Location type VIRTUAL."
+    "description": "Location type VIRTUAL."
   },
   "replenishmentTitle": "補充提案",
   "@replenishmentTitle": {
-      "description": "Replenishment screen title."
+    "description": "Replenishment screen title."
   },
   "replenishmentEmpty": "補充が必要な商品はありません",
   "@replenishmentEmpty": {
-      "description": "Replenishment screen: empty state."
+    "description": "Replenishment screen: empty state."
   },
   "replenishmentEmptyBody": "発注点を設定した商品が、いずれも発注点を上回っています。",
   "@replenishmentEmptyBody": {
-      "description": "Replenishment screen: empty state body."
+    "description": "Replenishment screen: empty state body."
   },
   "replenishmentSuggest": "発注目安 {qty}",
   "@replenishmentSuggest": {
-      "description": "Replenishment screen: suggested_quantity.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Replenishment screen: suggested_quantity.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "replenishmentShortfall": "発注点まで {qty}",
   "@replenishmentShortfall": {
-      "description": "Replenishment screen: how far under the reorder point.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Replenishment screen: how far under the reorder point.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "replenishmentBlocked": "うち出荷不可 {qty}",
   "@replenishmentBlocked": {
-      "description": "Replenishment screen: on hand but unusable — why a product with stock is listed.",
-      "placeholders": {
-          "qty": {
-              "type": "String"
-          }
+    "description": "Replenishment screen: on hand but unusable — why a product with stock is listed.",
+    "placeholders": {
+      "qty": {
+        "type": "String"
       }
+    }
   },
   "replenishmentLeadTime": "リードタイム {days}日",
   "@replenishmentLeadTime": {
-      "description": "Replenishment screen: lead_time_days.",
-      "placeholders": {
-          "days": {
-              "type": "int"
-          }
+    "description": "Replenishment screen: lead_time_days.",
+    "placeholders": {
+      "days": {
+        "type": "int"
       }
+    }
   },
   "replenishmentNoWarehouse": "倉庫を選ぶと表示できます",
   "@replenishmentNoWarehouse": {
-      "description": "Replenishment screen: the list is per warehouse."
+    "description": "Replenishment screen: the list is per warehouse."
+  },
+  "exceptionsTitle": "例外・不一致",
+  "@exceptionsTitle": {
+    "description": "Title of the exception queue screen (0071)."
+  },
+  "exceptionsEmpty": "未処理の例外はありません",
+  "@exceptionsEmpty": {
+    "description": "Exception queue: nothing open, which is the good state."
+  },
+  "exceptionsEmptyBody": "入荷・検品・格納で不一致が出ると、ここに並びます。",
+  "@exceptionsEmptyBody": {
+    "description": "Exception queue: what will appear here."
+  },
+  "exceptionsNoWarehouse": "倉庫を選ぶと表示できます",
+  "@exceptionsNoWarehouse": {
+    "description": "Exception queue with no active warehouse."
+  },
+  "exceptionsAllCategories": "すべての工程",
+  "@exceptionsAllCategories": {
+    "description": "Exception queue filter: every stage."
+  },
+  "exceptionCategoryReceiving": "入荷",
+  "@exceptionCategoryReceiving": {
+    "description": "Exception category: receiving."
+  },
+  "exceptionCategoryQc": "検品",
+  "@exceptionCategoryQc": {
+    "description": "Exception category: QC."
+  },
+  "exceptionCategoryPutaway": "格納",
+  "@exceptionCategoryPutaway": {
+    "description": "Exception category: put-away."
+  },
+  "exceptionShowClosed": "対応済みも表示",
+  "@exceptionShowClosed": {
+    "description": "Exception queue toggle: include resolved and cancelled."
+  },
+  "exceptionSeverityBlocker": "要対応",
+  "@exceptionSeverityBlocker": {
+    "description": "Exception severity: blocks work."
+  },
+  "exceptionSeverityWarning": "注意",
+  "@exceptionSeverityWarning": {
+    "description": "Exception severity: worth attention."
+  },
+  "exceptionSeverityInfo": "参考",
+  "@exceptionSeverityInfo": {
+    "description": "Exception severity: for information."
+  },
+  "exceptionAcknowledge": "確認した",
+  "@exceptionAcknowledge": {
+    "description": "Exception action: mark as seen."
+  },
+  "exceptionAcknowledged": "確認済み",
+  "@exceptionAcknowledged": {
+    "description": "Exception state: seen but not yet dealt with."
+  },
+  "exceptionResolve": "対応を記録",
+  "@exceptionResolve": {
+    "description": "Exception action: record what was decided."
+  },
+  "exceptionResolved": "対応済み",
+  "@exceptionResolved": {
+    "description": "Exception state: dealt with."
+  },
+  "exceptionCancelled": "取消",
+  "@exceptionCancelled": {
+    "description": "Exception state: raised in error."
+  },
+  "exceptionResolveTitle": "対応を記録する",
+  "@exceptionResolveTitle": {
+    "description": "Title of the resolve-exception sheet."
+  },
+  "exceptionResolutionLabel": "対応",
+  "@exceptionResolutionLabel": {
+    "description": "Resolve sheet: the decision field."
+  },
+  "exceptionResolutionAccepted": "受入（このまま確定）",
+  "@exceptionResolutionAccepted": {
+    "description": "Resolution: accept the discrepancy as it stands."
+  },
+  "exceptionResolutionSupplierClaim": "仕入先へ連絡",
+  "@exceptionResolutionSupplierClaim": {
+    "description": "Resolution: take it up with the supplier."
+  },
+  "exceptionResolutionReturned": "返送した",
+  "@exceptionResolutionReturned": {
+    "description": "Resolution: the goods went back."
+  },
+  "exceptionResolutionScrapped": "廃棄した",
+  "@exceptionResolutionScrapped": {
+    "description": "Resolution: the goods were scrapped."
+  },
+  "exceptionResolutionCorrected": "入力を訂正した",
+  "@exceptionResolutionCorrected": {
+    "description": "Resolution: the entry was wrong and was fixed."
+  },
+  "exceptionResolutionRecounted": "再カウントした",
+  "@exceptionResolutionRecounted": {
+    "description": "Resolution: counted again."
+  },
+  "exceptionResolutionNoAction": "対応不要",
+  "@exceptionResolutionNoAction": {
+    "description": "Resolution: nothing to do."
+  },
+  "exceptionNoteLabel": "メモ（任意）",
+  "@exceptionNoteLabel": {
+    "description": "Resolve sheet: note field when optional."
+  },
+  "exceptionNoteRequiredLabel": "メモ（必須）",
+  "@exceptionNoteRequiredLabel": {
+    "description": "Resolve sheet: note field when the server requires one."
+  },
+  "exceptionNoteHint": "何をしたかを書く",
+  "@exceptionNoteHint": {
+    "description": "Resolve sheet: note hint."
+  },
+  "exceptionNoteRequired": "この対応にはメモが必要です",
+  "@exceptionNoteRequired": {
+    "description": "Resolve sheet: validation when a required note is empty."
+  },
+  "exceptionStockNotMovedHint": "ここでは対応の記録だけを残します。在庫を動かす場合は在庫調整から行ってください。",
+  "@exceptionStockNotMovedHint": {
+    "description": "Resolve sheet: recording a decision does not move stock."
+  },
+  "exceptionQuantity": "数量 {qty}",
+  "@exceptionQuantity": {
+    "description": "Exception card: how much the discrepancy is about.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "exceptionLot": "ロット {lot} / 期限 {expiry}",
+  "@exceptionLot": {
+    "description": "Exception card: which lot, and when it expires.",
+    "placeholders": {
+      "lot": {
+        "type": "String"
+      },
+      "expiry": {
+        "type": "String"
+      }
+    }
+  },
+  "exceptionRaisedAt": "{date} 起票",
+  "@exceptionRaisedAt": {
+    "description": "Exception card: when the exception was raised.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exceptionOpenCount": "未処理 {count} 件",
+  "@exceptionOpenCount": {
+    "description": "Exception summary bar when nothing is blocking.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exceptionBlockerCount": "要対応 {blockers} 件（未処理 {open} 件）",
+  "@exceptionBlockerCount": {
+    "description": "Exception summary bar when something is blocking work.",
+    "placeholders": {
+      "blockers": {
+        "type": "int"
+      },
+      "open": {
+        "type": "int"
+      }
+    }
+  },
+  "featExceptions": "例外対応",
+  "@featExceptions": {
+    "description": "Menu entry: the exception queue (0071)."
+  },
+  "featExceptionsDesc": "入荷・検品・格納の不一致を確認して対応を記録する",
+  "@featExceptionsDesc": {
+    "description": "Menu entry description for the exception queue."
   }
 }

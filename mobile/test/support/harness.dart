@@ -14,6 +14,8 @@ import 'package:wms_mobile/features/ai_review/domain/ai_analysis_entry.dart';
 import 'package:wms_mobile/features/connectors/data/connector_repository.dart';
 import 'package:wms_mobile/features/connectors/domain/connector.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
+import 'package:wms_mobile/features/exceptions/data/exception_repository.dart';
+import 'package:wms_mobile/features/exceptions/domain/warehouse_exception.dart';
 import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/receipt.dart';
@@ -2333,4 +2335,89 @@ class FakeLocationRepository implements LocationRepository {
     );
     return const ApiSuccess(true);
   }
+}
+
+/// The exception queue (0071). Records what was asked of it so a test can check
+/// that the *decision* was sent and that nothing pretended to move stock.
+class FakeExceptionRepository implements ExceptionRepository {
+  FakeExceptionRepository({
+    this.exceptions = const [],
+    ExceptionSummary? summaryValue,
+  }) : summaryValue = summaryValue ??
+            ExceptionSummary(
+              open: exceptions.where((e) => e.isOpen).length,
+              blockers: exceptions.where((e) => e.isOpen && e.isBlocker).length,
+            );
+
+  List<WarehouseException> exceptions;
+  ExceptionSummary summaryValue;
+
+  String? lastCategory;
+  bool? lastIncludeClosed;
+  int? lastWarehouseId;
+  int? acknowledgedId;
+  ({int id, ExceptionResolution resolution, String? note})? lastResolution;
+  ({int id, String? reason})? lastCancel;
+  String? failResolveWith;
+
+  @override
+  Future<ApiResult<List<WarehouseException>>> open({
+    int? warehouseId,
+    String? category,
+    bool includeClosed = false,
+    int limit = 100,
+  }) async {
+    lastWarehouseId = warehouseId;
+    lastCategory = category;
+    lastIncludeClosed = includeClosed;
+    final rows = includeClosed
+        ? exceptions
+        : exceptions.where((e) => e.isOpen).toList();
+    return ApiSuccess(category == null
+        ? rows
+        : rows.where((e) => e.category == category).toList());
+  }
+
+  @override
+  Future<ApiResult<ExceptionSummary>> summary({int? warehouseId}) async =>
+      ApiSuccess(summaryValue);
+
+  @override
+  Future<ApiResult<bool>> acknowledge(int exceptionId) async {
+    acknowledgedId = exceptionId;
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> resolve(
+    int exceptionId,
+    ExceptionResolution resolution, {
+    String? note,
+  }) async {
+    if (failResolveWith != null) {
+      return ApiFailure(message: failResolveWith!, statusCode: 400);
+    }
+    lastResolution = (id: exceptionId, resolution: resolution, note: note);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> cancel(int exceptionId, {String? reason}) async {
+    lastCancel = (id: exceptionId, reason: reason);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> raise({
+    required String exceptionType,
+    required int warehouseId,
+    String? note,
+    int? reconciliationId,
+    int? productId,
+    String? janCode,
+    int? quantity,
+    int? receiptItemId,
+    int? inspectionId,
+  }) async =>
+      const ApiSuccess(1);
 }
