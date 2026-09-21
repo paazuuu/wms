@@ -2787,6 +2787,84 @@ Proved on the live schema, rolled back afterwards:
 
 All ten security invariants pass.
 
+### 0070 — §26's one resolver, with a scan context; §29's attachments
+
+§26's complaint is short and specific: 「全画面が独自にJAN判定しない」. There was
+already one resolver, and by 0062 it answered product, serial and location. What
+it could not do is the second half of the section — 「Scan Contextを持たせ、…
+文脈で判定する」 — and that half is where the value is.
+
+A scanner hands over a string. What the string *means* depends on what the
+operator is in the middle of: during picking it is probably a location then a
+product; during QC it is probably a lot on a carton. Worse, some identifiers are
+not globally unique at all — a lot code is unique only within its product — so
+without a context there is no correct answer to give.
+
+`scan_contexts` is the vocabulary: eight steps (入荷 / 検品 / 格納 / ピッキング /
+梱包 / 出荷 / 棚卸 / 検索), each with an ordered `expects` array. The order does
+three jobs:
+
+1. **It resolves ambiguity.** The first kind that matches wins, so the same
+   string is a location during put-away and a product during receiving.
+2. **It enables branches that cannot work without it.** Given a product, a lot
+   code is exact. Without one, the resolver answers only when exactly one lot in
+   the company matches — and when several do it returns
+   `kind: "ambiguous"` with the candidates and the reason, rather than picking
+   one.
+3. **It says whether the scan is what this step wanted.** A resolver that quietly
+   accepts a product where a location was expected is how stock ends up in the
+   wrong bin, and no amount of per-screen JAN-sniffing fixes that.
+
+New branches: lot, receipt (by its reference), delivery (by its note number),
+shipment (by number or tracking number), and task. The task branch reads the
+labels this system prints — `PICK-12`, `QC-3`, `COUNT-4`, `TO-9` — a convention
+this migration establishes rather than one it found, written down because a
+printed task label has to say *something*.
+
+**Carton and pallet are deliberately absent.** §26 lists them; Phase C is where
+they get a table. A branch that resolves nothing is worse than no branch, because
+it reads as though the feature exists.
+
+**§29 — attachments.** The table was already polymorphic, which is the shape §29
+asks for. What it lacked is everything that makes a polymorphic table safe:
+`attachment_targets` as the vocabulary of what may be attached to (the eleven
+§29 lists, plus `receipt_item`) enforced by a foreign key; a `warehouse_id` so
+RLS can scope a row; a `kind` (PHOTO / DELIVERY_NOTE / QC_IMAGE / DAMAGE /
+DOCUMENT / LABEL / OTHER), because a delivery note and a damage photo are not the
+same evidence; and `deleted_at`, because attachments are *withdrawn*, not deleted
+— a photo that settled a claim has to stay findable. `record_attachment` keeps
+returning the id rather than a jsonb envelope, since the client reads it as an
+int.
+
+Proved on the live schema, rolled back afterwards:
+
+| what | result |
+| --- | --- |
+| `T70-DOCK` during 格納 | location, expected, rank 1 |
+| a JAN during 格納 | product, expected, rank 2 |
+| the same JAN during 出荷 | product, expected, rank 3 |
+| `SHARED-LOT` on two products, no product in hand | `ambiguous`, 2 candidates, with the reason |
+| the same code with product B in hand | that product's lot, expiring on its date |
+| the delivery note number | `delivery`, named supplier |
+| the receipt reference `T70SUP-00001` | `receipt`, status completed |
+| `QC-8` during 検品 | `inspection` |
+| the same label during ピッキング | `task` at rank 5 — resolvable, just not what picking wants |
+| `ABC123` | `unknown`, rather than raising on a failed cast |
+| a delivery note attached to the receipt | recorded with kind DELIVERY_NOTE |
+| attaching to `unicorn` | refused: `nothing can be attached to unicorn` |
+| after withdrawal | 0 visible, 1 including withdrawn |
+
+**0070b — a correction its own test caught.** 0070 computed `expected` as "is
+this the *first* kind the context wants", which made a product scan during
+receiving read as unexpected — and receiving very much expects product scans. The
+`expects` array is a priority order for resolving ambiguity, not a list with one
+legal answer. So `expected` became membership and `expected_rank` carries the
+ordering, which is what lets a screen tell "exactly what I asked for" from "fair
+enough, carry on". Both are recorded as separate migrations because that is the
+order the database actually saw them.
+
+All ten security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
