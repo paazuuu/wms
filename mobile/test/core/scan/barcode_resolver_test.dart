@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/scan/barcode_resolver.dart';
+import 'package:wms_mobile/core/scan/scan_context.dart';
 import 'package:wms_mobile/core/scan/scan_resolution.dart';
 
 import '../../support/fake_http_adapter.dart';
@@ -88,6 +89,105 @@ void main() {
           expect(f.statusCode, 403);
           expect(f.message, contains('not permitted'));
         },
+      );
+    });
+  });
+
+  group('BarcodeResolverImpl in a context', () {
+    test('sends the step it is in, and narrows a lot by product', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody({
+          'kind': 'lot',
+          'barcode': 'L-A',
+          'lot_id': 11,
+          'lot_code': 'L-A',
+          'product_id': 7,
+          'context': 'QC',
+          'expected': true,
+          'expected_rank': 1,
+        }, 200);
+      });
+
+      final result = await BarcodeResolverImpl(_dio(adapter)).resolve(
+        'L-A',
+        context: ScanContext.qc,
+        productId: 7,
+        warehouseId: 1,
+      );
+
+      final body = captured.data as Map;
+      expect(body['p_barcode'], 'L-A');
+      expect(body['p_context'], 'QC');
+      // Without this, the same lot code on two products is ambiguous — so the
+      // screen that knows which product it is inspecting has to say so.
+      expect(body['p_product_id'], 7);
+      expect(body['p_warehouse_id'], 1);
+      result.when(
+        success: (r) {
+          expect(r.kind, ScanKind.lot);
+          expect(r.context, ScanContext.qc);
+          expect(r.expected, isTrue);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('with no context the parameters are sent as null, not omitted', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody({'kind': 'unknown', 'barcode': 'X'}, 200);
+      });
+
+      await BarcodeResolverImpl(_dio(adapter)).resolve('X');
+
+      final body = captured.data as Map;
+      // PostgREST fills a named argument's default only when the key is absent
+      // or null, so sending null is the same as not asking — and keeping the
+      // keys present means one request shape for every call site.
+      expect(body.containsKey('p_context'), isTrue);
+      expect(body['p_context'], isNull);
+      expect(body['p_product_id'], isNull);
+    });
+
+    test('the same code in two contexts is two answers', () async {
+      // The server decides, but the client must not collapse them: a cache
+      // keyed on the code alone would serve the put-away answer to receiving.
+      final adapter = FakeHttpClientAdapter((options) {
+        final ctx = (options.data as Map)['p_context'];
+        return jsonResponseBody(
+          ctx == 'PUTAWAY'
+              ? {
+                  'kind': 'location',
+                  'barcode': 'A-01',
+                  'code': 'A-01',
+                  'location_id': 5,
+                  'context': 'PUTAWAY',
+                  'expected': true,
+                }
+              : {
+                  'kind': 'unknown',
+                  'barcode': 'A-01',
+                  'context': 'PACKING',
+                  'expected': false,
+                },
+          200,
+        );
+      });
+      final resolver = BarcodeResolverImpl(_dio(adapter));
+
+      final asPutaway = await resolver.resolve('A-01', context: ScanContext.putaway);
+      final asPacking = await resolver.resolve('A-01', context: ScanContext.packing);
+
+      asPutaway.when(
+        success: (r) => expect(r.kind, ScanKind.location),
+        failure: (f) => fail('expected success, got $f'),
+      );
+      asPacking.when(
+        success: (r) => expect(r.kind, ScanKind.unknown),
+        failure: (f) => fail('expected success, got $f'),
       );
     });
   });

@@ -1,15 +1,29 @@
 import 'package:equatable/equatable.dart';
 
+import 'scan_context.dart';
+
 /// What a scanned code turned out to be (§26, `resolve_barcode`).
 ///
-/// One call answers for all of them, in this order: a product barcode first
-/// (the common case), then a serial number, then a location label. That order
-/// is the server's and matters — a serial that happens to look like a product
-/// barcode still resolves as the product.
+/// One call answers for all of them, and the order it tries them in is the scan
+/// context's, not a constant — during put-away a code is tried as a location
+/// first, during receiving as a receipt. That is why the same string can resolve
+/// two ways, and why the server decides rather than the screen.
+///
+/// [ambiguous] is not a failure: it is the resolver declining to guess. A lot
+/// code identifies a lot only within its product, so scanning one with no
+/// product in hand can match several — and picking one of them silently is how
+/// the wrong lot gets shipped.
 enum ScanKind {
   product('product'),
   serial('serial'),
+  lot('lot'),
   location('location'),
+  receipt('receipt'),
+  delivery('delivery'),
+  shipment('shipment'),
+  task('task'),
+  inspection('inspection'),
+  ambiguous('ambiguous'),
   unknown('unknown');
 
   const ScanKind(this.code);
@@ -77,6 +91,32 @@ class ScanResolution extends Equatable {
     this.receivable,
     this.quarantine,
     this.isVirtual,
+    this.manufactureDate,
+    this.isExpired = false,
+    this.reconciliationId,
+    this.referenceNo,
+    this.deliveryPlanId,
+    this.deliveryNumber,
+    this.supplierName,
+    this.shipmentPlanId,
+    this.shipmentNumber,
+    this.customerName,
+    this.carrier,
+    this.trackingNumber,
+    this.taskType,
+    this.pickListId,
+    this.inspectionId,
+    this.stockCountId,
+    this.transferOrderId,
+    this.transferNumber,
+    this.documentStatus,
+    this.candidates = const [],
+    this.ambiguityReason,
+    this.context,
+    this.expected = false,
+    this.expectedRank,
+    this.contextExpects = const [],
+    this.requiresInspection = false,
   });
 
   final ScanKind kind;
@@ -126,14 +166,78 @@ class ScanResolution extends Equatable {
   final bool? quarantine;
   final bool? isVirtual;
 
+  // Lot specifics.
+  final DateTime? manufactureDate;
+  final bool isExpired;
+
+  // Documents: a receipt, the delivery note behind it, a shipment.
+  final int? reconciliationId;
+  final String? referenceNo;
+  final int? deliveryPlanId;
+  final String? deliveryNumber;
+  final String? supplierName;
+  final int? shipmentPlanId;
+  final String? shipmentNumber;
+  final String? customerName;
+  final String? carrier;
+  final String? trackingNumber;
+
+  // Tasks, from the labels this system prints: PICK-12, QC-3, COUNT-4, TO-9.
+  final String? taskType;
+  final int? pickListId;
+  final int? inspectionId;
+  final int? stockCountId;
+  final int? transferOrderId;
+  final String? transferNumber;
+
+  /// The status of whatever document or task was found. Separate from [status],
+  /// which is the *product's* status, because a scan can carry both.
+  final String? documentStatus;
+
+  /// Set only when [kind] is [ScanKind.ambiguous]: the things the code could
+  /// have meant, for the operator to choose between.
+  final List<ScanCandidate> candidates;
+  final String? ambiguityReason;
+
+  /// The context the scan was made in, echoed back, and whether what was found
+  /// is something this step expects at all.
+  final ScanContext? context;
+
+  /// True when the resolved kind is one the context lists. Note this is
+  /// membership, not first place: receiving expects a product scan as well as a
+  /// receipt. [expectedRank] carries the ordering for screens that want to tell
+  /// "exactly what I asked for" from "fair enough, carry on".
+  final bool expected;
+  final int? expectedRank;
+  final List<ScanKind> contextExpects;
+
+  /// True when goods of this product arrive held for QC (§13). A receiving
+  /// screen shows it before the operator keys a quantity, so the QC_PENDING
+  /// status is not a surprise afterwards.
+  final bool requiresInspection;
+
   bool get isUnknown => kind == ScanKind.unknown;
 
   /// True when the scan identified goods, whichever way round. A receiving or
   /// picking screen asks this rather than comparing the kind twice.
-  bool get isGoods => kind == ScanKind.product || kind == ScanKind.serial;
+  bool get isGoods =>
+      kind == ScanKind.product || kind == ScanKind.serial || kind == ScanKind.lot;
 
-  /// What one scan adds to a count. A serial is one unit; an unknown code adds
-  /// nothing, because nothing has been identified to add.
+  /// True when the scan identified a piece of paperwork rather than goods.
+  bool get isDocument =>
+      kind == ScanKind.receipt ||
+      kind == ScanKind.delivery ||
+      kind == ScanKind.shipment;
+
+  bool get isTask => kind == ScanKind.task || kind == ScanKind.inspection;
+
+  /// The scan resolved, but not to something this step can use. Distinct from
+  /// [isUnknown]: the code is real, it is just the wrong kind of thing to be
+  /// holding right now, which is a different sentence to show an operator.
+  bool get isOutOfContext => !isUnknown && context != null && !expected;
+
+  /// What one scan adds to a count. A serial is one unit; a lot scan identifies
+  /// which lot, not how many of it; an unknown code adds nothing.
   int get countedQuantity => switch (kind) {
         ScanKind.product => quantityPerScan ?? 1,
         ScanKind.serial => 1,
@@ -174,6 +278,41 @@ class ScanResolution extends Equatable {
         receivable: json['receivable'] as bool?,
         quarantine: json['quarantine'] as bool?,
         isVirtual: json['is_virtual'] as bool?,
+        manufactureDate: DateTime.tryParse('${json['manufacture_date']}'),
+        isExpired: json['is_expired'] == true,
+        reconciliationId: _asIntOrNull(json['reconciliation_id']),
+        referenceNo: _asText(json['reference_no']),
+        deliveryPlanId: _asIntOrNull(json['delivery_plan_id']),
+        deliveryNumber: _asText(json['delivery_number']),
+        supplierName: _asText(json['supplier_name']),
+        shipmentPlanId: _asIntOrNull(json['shipment_plan_id']),
+        shipmentNumber: _asText(json['shipment_number']),
+        customerName: _asText(json['customer_name']),
+        carrier: _asText(json['carrier']),
+        trackingNumber: _asText(json['tracking_number']),
+        taskType: _asText(json['task_type']),
+        pickListId: _asIntOrNull(json['pick_list_id']),
+        inspectionId: _asIntOrNull(json['inspection_id']),
+        stockCountId: _asIntOrNull(json['stock_count_id']),
+        transferOrderId: _asIntOrNull(json['transfer_order_id']),
+        transferNumber: _asText(json['transfer_number']),
+        // `status` is the product's on a goods scan and the document's
+        // otherwise, so both read the same key and only one is ever meaningful.
+        documentStatus: _asText(json['status']),
+        candidates: (json['candidates'] as List?)
+                ?.whereType<Map>()
+                .map((c) => ScanCandidate.fromJson(c.cast<String, dynamic>()))
+                .toList() ??
+            const [],
+        ambiguityReason: _asText(json['reason']),
+        context: ScanContext.fromCode(json['context']),
+        expected: json['expected'] == true,
+        expectedRank: _asIntOrNull(json['expected_rank']),
+        contextExpects: (json['context_expects'] as List?)
+                ?.map(ScanKind.fromCode)
+                .toList() ??
+            const [],
+        requiresInspection: json['requires_inspection'] == true,
       );
 
   @override
@@ -198,5 +337,50 @@ class ScanResolution extends Equatable {
         locationType,
         warehouseId,
         binId,
+        reconciliationId,
+        referenceNo,
+        deliveryPlanId,
+        shipmentPlanId,
+        taskType,
+        pickListId,
+        inspectionId,
+        stockCountId,
+        transferOrderId,
+        candidates,
+        context,
+        expected,
+        expectedRank,
+        requiresInspection,
       ];
+}
+
+/// One thing a code could have meant, when it could have meant several.
+class ScanCandidate extends Equatable {
+  const ScanCandidate({
+    this.lotId,
+    this.lotCode,
+    this.productId,
+    this.janCode,
+    this.name,
+    this.expiryDate,
+  });
+
+  final int? lotId;
+  final String? lotCode;
+  final int? productId;
+  final String? janCode;
+  final String? name;
+  final DateTime? expiryDate;
+
+  factory ScanCandidate.fromJson(Map<String, dynamic> json) => ScanCandidate(
+        lotId: _asIntOrNull(json['lot_id']),
+        lotCode: _asText(json['lot_code']),
+        productId: _asIntOrNull(json['product_id']),
+        janCode: _asText(json['jan_code']),
+        name: _asText(json['name']),
+        expiryDate: DateTime.tryParse('${json['expiry_date']}'),
+      );
+
+  @override
+  List<Object?> get props => [lotId, lotCode, productId, janCode, name, expiryDate];
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_resolver.dart';
+import '../../../core/scan/scan_context.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/scan_resolution.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -61,7 +62,11 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       _scanWarning = null;
     });
 
-    final result = await ref.read(barcodeResolverProvider).resolve(code);
+    // A product form is not a floor step: nothing here is the wrong kind of
+    // scan, so the context is `lookup` and everything is fair game (§26).
+    final result = await ref
+        .read(barcodeResolverProvider)
+        .resolve(code, context: ScanContext.lookup);
     if (!mounted) return;
     result.when(
       success: (hit) {
