@@ -2865,6 +2865,101 @@ order the database actually saw them.
 
 All ten security invariants pass.
 
+### 0071 — exception handling: the difference between recorded and dealt with
+
+§36 lists "Exception handling" last in Phase B and §39 puts it in the Inbound
+completion checklist, but no section defines it — so it had to be derived from
+what inbound actually produces when things go wrong. Reading the pipeline built
+in 0066–0070, the pieces were already there:
+
+- receiving computes `shortfall` / `over` / `unexpected` per line, writes the word
+  onto the line, and moves on;
+- QC records FAIL and HOLD, and 0068 makes those move the stock;
+- put-away can find no bin a parcel is allowed into.
+
+Every one of those is a fact that nobody owns. A status on a row tells you what
+happened; it does not tell you who noticed, what was decided, by whom, or whether
+someone is still waiting for the supplier to answer. That gap is what "exception
+handling" names: the difference between a discrepancy that has been *recorded* and
+one that has been *dealt with*.
+
+`exception_types` is the vocabulary (thirteen, across RECEIVING / QC / PUTAWAY /
+STOCK / OTHER), each with a severity and a `requires_resolution` flag — false for
+the ones worth knowing that need no decision, because making the floor close a
+ticket saying "yes, four fewer arrived, and the purchase order already says so"
+is how a queue stops being read. `exceptions` is the record: what, where (receipt,
+line, parcel, inspection, product, lot — nullable individually, because otherwise
+it would be a table per source), how much, who raised it, what was decided.
+
+Two rules shape it.
+
+**An exception never moves stock.** Resolving one may call an existing RPC —
+`move_stock_status`, `adjust_stock` — and that RPC posts to the ledger as usual.
+The exception records the decision; the ledger records the effect. That is the
+same separation §5 draws between a document and a projection, and it is what keeps
+§37-4 (「履歴削除で帳尻を合わせない」) true: a resolved shortfall leaves both the
+original receipt and the correction visible. `resolve_exception` therefore writes
+no movement at all — and the three resolutions that mean someone did something to
+the goods (RETURNED / SCRAPPED / CORRECTED) require a note, because a resolution
+that is only a word is not a resolution.
+
+**Detection is idempotent.** Exceptions are raised at the moment of detection,
+inside the operation that detected them, not by a nightly sweep. So each
+automatically raised exception carries a `source_key` naming exactly what it was
+raised for (`recon:12:line:34:shortfall`), and that key is unique with
+`on conflict do nothing` — §37-12's idempotency rule applied to a derived record
+rather than to a stock mutation. A person raising one gets no source key, because
+the same concern raised twice is two concerns and swallowing the second would lose
+a report.
+
+**Wiring without restating.** `reconcile_delivery_plan` and `complete_inspection`
+are long, and restating either to add one call would leave two copies of a
+function whose behaviour this migration does not change. So the body is read back
+from `pg_get_functiondef` and the call is spliced in at a marker, with an
+assertion that the marker was there — if either function is ever rewritten in a
+way that removes it, this migration fails loudly instead of silently not wiring
+detection up. The same technique 0056 and 0060 used.
+
+One documented guess: EXPIRY_TOO_SOON fires at 30 days. That is the only knob here
+worth moving later, and it is deliberately not a per-product column yet, because
+no such column exists and inventing one to hold a guess is worse than a documented
+default.
+
+Proved on the live schema with one deliberately messy delivery — 30 of 40 arrived,
+part of it with no lot on a lot-tracked product, part on a lot expiring in a week,
+plus three of a JAN nobody has registered:
+
+| what | result |
+| --- | --- |
+| exceptions raised by that one receipt | 5 |
+| | `LOT_MISSING` (BLOCKER) ×10 |
+| | `UNREGISTERED_PRODUCT` (BLOCKER) ×3 |
+| | `UNEXPECTED_ITEM` (BLOCKER) ×3 |
+| | `SHORTFALL` (WARNING) ×10 — 予定 40 に対して 30 |
+| | `EXPIRY_TOO_SOON` (WARNING) ×20 — 残り 7 日 |
+| running detection again | 0 more raised; still 5 |
+| closing an inspection with 4 failed | `QC_FAIL` ×4, carrying the inspector's note |
+| `open_exceptions` order | all four blockers, then the two warnings |
+| `exception_summary` | 6 open, 4 blockers |
+| resolving as SCRAPPED with no note | refused |
+| resolving as ACCEPTED | on hand 30 before, 30 after — the decision moved nothing |
+| cancelling a resolved exception | refused |
+
+All ten security invariants pass; 18 guarded wrappers.
+
+### Phase B (Inbound) — done
+
+All seven items of §36's Phase B list are in the database and exercised against
+it: Receiving (§11/§12, 0066–0067), QC (§13, 0068), Put-away and its suggestion
+(§14, 0069), Barcode flow (§26, 0070/0070b), Attachments (§29, 0070), Exception
+handling (0071). §11's chain is now a chain rather than a single step:
+
+    Purchase Order → Inbound/Delivery → Receiving → QC → Put-away → Available Stock
+
+and each arrow is something the database enforces rather than something the UI is
+trusted to do in order. The Flutter client is the next piece: nothing above is
+reachable from the app yet.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
