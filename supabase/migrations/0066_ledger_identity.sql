@@ -26,7 +26,6 @@
 -- binned), and `bin_stock` remains the bin-level projection. Put-away is what
 -- gives a unit its bin, and that is step 0069.
 
-begin;
 
 -- ---------------------------------------------------------------------------
 -- 1. Identity on the ledger row
@@ -442,4 +441,3 @@ begin
   end loop;
 end $tighten$;
 
-commit;

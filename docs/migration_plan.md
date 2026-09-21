@@ -2530,6 +2530,92 @@ quietly eating it.
 
 All ten security invariants pass.
 
+### 0067 — §12's Item level: what actually came off the pallet
+
+§12 asks for receiving at three levels: Receipt (the delivery), Receipt Line
+(the ordered line it answers) and Receipt Item (the parcel). The first two
+already existed as `delivery_reconciliations` and `reconciliation_lines`. The
+third did not, so a line could only say "40 of this JAN arrived". It could not
+say "20 on lot A expiring in March, 20 on lot B expiring in June, into RECV-01"
+— which is what a pallet actually is, and what every later step needs: QC
+inspects a parcel, put-away moves a parcel, a recall traces a parcel.
+
+The thing to be careful about is §5's rule against counting the same stock
+twice. `receipt_items` is therefore **not** a fourth stock projection. It is a
+document — the record of what the receiver saw and keyed — and each row carries
+`movement_id`, the ledger row it posted. The stock came from the movement; the
+item says where that movement came from. Deleting every receipt item would lose
+the provenance and change no balance.
+
+What the table carries, and why each part is there:
+
+- `lot_id` / `serial_id`, resolved from the **text** the operator keyed. A lot
+  is born when goods bearing it arrive, which is here, so the code goes through
+  `upsert_lot` rather than being looked up and rejected.
+- `expiry`, kept beside `lot_id` on purpose. The lot record may be corrected
+  later; this is the date the receiver read off the carton, which is the number
+  an argument with a supplier turns on.
+- `location_id` / `bin_id`, resolved from the location **code** — what is
+  printed on the rack the operator is standing at.
+- `status_id`, so a parcel can arrive already held for QC. 0068 is what makes
+  that the default for goods that need inspecting; the column is what makes it
+  possible at all.
+- Composite foreign keys throughout — `(product_id, lot_id) → lots`,
+  `(warehouse_id, location_id) → locations`, and a new
+  `bins UNIQUE (warehouse_id, id)` so a parcel's bin is tied to the same
+  warehouse as the parcel by the schema rather than by a check in every
+  function. `ON DELETE SET NULL (location_id)` names the single column, because
+  `warehouse_id` is part of the key and must not be nulled with it.
+- `check (serial_id is null or quantity = 1)` — a serialised unit is one thing,
+  so a parcel that names one is a parcel of one.
+
+Three functions, and one rule about which gate each goes through. The work lives
+in `record_receipt_item_impl`, which checks no permission, because its two
+callers arrive through different gates: an operator adding a parcel by hand
+comes through `record_receipt_item` (`receiving.confirm` + warehouse scope),
+while receiving itself comes through `reconcile_delivery_plan`, which the edge
+function has already gated and which therefore must not re-check inside the
+database.
+
+`reconcile_delivery_plan` gains an optional `items` array per line, and two
+things about it changed:
+
+- **A line with no parcels still gets an item level** — one implicit parcel
+  covering the whole line. Without that, every existing caller's receipts would
+  be invisible to QC, put-away and traceback.
+- **Lines are now created one at a time inside the loop** rather than by a
+  single set-based insert. That is not a style preference: each entry's parcels
+  have to attach to *that* entry's line, and pairing a line row back to the
+  array element it came from afterwards depends on an insert order nothing
+  promises. Creating the line and its parcels together removes the question.
+  Stock is likewise posted per line rather than aggregated by JAN across the
+  delivery, which is what §12's Line level means and what makes a movement's
+  reference specific enough to trace back to.
+
+Reads: `receipt_detail` returns the receipt at all three levels (with an
+`unlinked_items` bucket, so a parcel of an unexpected JAN that belongs to no
+line does not silently vanish from the read), and `lot_provenance` answers the
+traceability question directly — given a lot, which delivery brought it in, from
+which supplier, to which location.
+
+Proved on the live schema, rolled back afterwards:
+
+| what | result |
+| --- | --- |
+| a line of 40 sent as two lots (20 + 15) | 3 parcels totalling 40 — the 5 nobody attributed became its own parcel |
+| each parcel | points at the ledger row it posted, and at its line |
+| §5's invariant | on_hand 40 = sum(stock_units) 40 = sum(parcels) 40 |
+| where the stock landed | L-A 20, L-B 15, unattributed 5 — on the lots it arrived on |
+| the expiry | on the lot and on the parcel, same date; location recorded as T0067-RECV |
+| `receipt_detail` | 1 line, 3 parcels, lots L-A/L-B/(none), status `matched` |
+| `lot_provenance('L-A')` | T0067-PLAN / Test supplier / qty 20 / at T0067-RECV |
+| a later parcel of 6 held for QC | on hand 46, available 40 |
+| parcels adding to 12 against a line of 10 | refused — the disagreement is the operator's to resolve |
+| a parcel of 2 carrying one serial | refused |
+| a line sent with no parcels | one implicit parcel of 2, status OK |
+
+All ten security invariants pass; the guarded-wrapper count goes from 14 to 16.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
