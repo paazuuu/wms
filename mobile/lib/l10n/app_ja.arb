@@ -2510,5 +2510,66 @@
         "type": "int"
       }
     }
+  },
+  "attachmentKindPhoto": "写真",
+  "@attachmentKindPhoto": {
+    "description": "Attachment kind: a plain photo."
+  },
+  "attachmentKindDeliveryNote": "納品書",
+  "@attachmentKindDeliveryNote": {
+    "description": "Attachment kind: the supplier's delivery note."
+  },
+  "attachmentKindQcImage": "検品写真",
+  "@attachmentKindQcImage": {
+    "description": "Attachment kind: a photo taken during QC."
+  },
+  "attachmentKindDamage": "破損写真",
+  "@attachmentKindDamage": {
+    "description": "Attachment kind: evidence of damage."
+  },
+  "attachmentKindDocument": "書類",
+  "@attachmentKindDocument": {
+    "description": "Attachment kind: a document."
+  },
+  "attachmentKindLabel": "ラベル",
+  "@attachmentKindLabel": {
+    "description": "Attachment kind: a label or barcode image."
+  },
+  "attachmentKindOther": "その他",
+  "@attachmentKindOther": {
+    "description": "Attachment kind: anything else."
+  },
+  "attachmentWithdraw": "取り下げ",
+  "@attachmentWithdraw": {
+    "description": "Attachment action: withdraw the file (not delete)."
+  },
+  "attachmentWithdrawQ": "この添付を取り下げますか？",
+  "@attachmentWithdrawQ": {
+    "description": "Attachment withdraw confirmation title."
+  },
+  "attachmentWithdrawBody": "一覧からは外れますが、記録としては残ります。",
+  "@attachmentWithdrawBody": {
+    "description": "Attachment withdraw confirmation body: withdrawn, not deleted (0070)."
+  },
+  "attachmentWithdrawn": "添付を取り下げました",
+  "@attachmentWithdrawn": {
+    "description": "Attachment withdraw success message."
+  },
+  "attachmentWithdrawnBadge": "取り下げ済み",
+  "@attachmentWithdrawnBadge": {
+    "description": "Badge on a withdrawn attachment."
+  },
+  "attachmentSize": "{kb} KB",
+  "@attachmentSize": {
+    "description": "Attachment file size in kilobytes.",
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentNoCaption": "説明なし",
+  "@attachmentNoCaption": {
+    "description": "Shown when an attachment has no caption."
   }
 }

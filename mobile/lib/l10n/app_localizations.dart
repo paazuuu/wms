@@ -6513,6 +6513,90 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫履歴 #{id}'**
   String receiptParcelMovement(int id);
+
+  /// Attachment kind: a plain photo.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真'**
+  String get attachmentKindPhoto;
+
+  /// Attachment kind: the supplier's delivery note.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書'**
+  String get attachmentKindDeliveryNote;
+
+  /// Attachment kind: a photo taken during QC.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品写真'**
+  String get attachmentKindQcImage;
+
+  /// Attachment kind: evidence of damage.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損写真'**
+  String get attachmentKindDamage;
+
+  /// Attachment kind: a document.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類'**
+  String get attachmentKindDocument;
+
+  /// Attachment kind: a label or barcode image.
+  ///
+  /// In ja, this message translates to:
+  /// **'ラベル'**
+  String get attachmentKindLabel;
+
+  /// Attachment kind: anything else.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get attachmentKindOther;
+
+  /// Attachment action: withdraw the file (not delete).
+  ///
+  /// In ja, this message translates to:
+  /// **'取り下げ'**
+  String get attachmentWithdraw;
+
+  /// Attachment withdraw confirmation title.
+  ///
+  /// In ja, this message translates to:
+  /// **'この添付を取り下げますか？'**
+  String get attachmentWithdrawQ;
+
+  /// Attachment withdraw confirmation body: withdrawn, not deleted (0070).
+  ///
+  /// In ja, this message translates to:
+  /// **'一覧からは外れますが、記録としては残ります。'**
+  String get attachmentWithdrawBody;
+
+  /// Attachment withdraw success message.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付を取り下げました'**
+  String get attachmentWithdrawn;
+
+  /// Badge on a withdrawn attachment.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り下げ済み'**
+  String get attachmentWithdrawnBadge;
+
+  /// Attachment file size in kilobytes.
+  ///
+  /// In ja, this message translates to:
+  /// **'{kb} KB'**
+  String attachmentSize(int kb);
+
+  /// Shown when an attachment has no caption.
+  ///
+  /// In ja, this message translates to:
+  /// **'説明なし'**
+  String get attachmentNoCaption;
 }
 
 class _AppLocalizationsDelegate

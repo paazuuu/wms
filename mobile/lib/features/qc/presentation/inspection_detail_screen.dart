@@ -147,6 +147,11 @@ class _BodyState extends ConsumerState<_Body> {
           bytes: bytes,
           fileName: file.name,
           contentType: attachmentContentTypeForFileName(file.name),
+          // A photo taken here is QC evidence, not a loose image: §29 asks for
+          // the kind so a later claim can find the right file, and the building
+          // so RLS can scope it (0070).
+          kind: AttachmentKind.qcImage,
+          warehouseId: _inspection.warehouseId,
         );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -588,8 +593,10 @@ class _AttachmentsRow extends ConsumerWidget {
                         itemCount: attachments.length,
                         separatorBuilder: (_, __) =>
                             const SizedBox(width: AppSpacing.sm),
-                        itemBuilder: (context, i) =>
-                            _AttachmentThumbnail(attachment: attachments[i]),
+                        itemBuilder: (context, i) => _AttachmentThumbnail(
+                          attachment: attachments[i],
+                          canWithdraw: canAdd,
+                        ),
                       ),
               ),
             ),
@@ -632,28 +639,140 @@ class _AddPhotoButton extends StatelessWidget {
   }
 }
 
+/// What a file is, in words (§29's kinds, 0070). A delivery note is not a
+/// damage photo, and a claim against a supplier turns on telling them apart.
+String attachmentKindLabel(AppLocalizations l10n, AttachmentKind kind) =>
+    switch (kind) {
+      AttachmentKind.photo => l10n.attachmentKindPhoto,
+      AttachmentKind.deliveryNote => l10n.attachmentKindDeliveryNote,
+      AttachmentKind.qcImage => l10n.attachmentKindQcImage,
+      AttachmentKind.damage => l10n.attachmentKindDamage,
+      AttachmentKind.document => l10n.attachmentKindDocument,
+      AttachmentKind.label => l10n.attachmentKindLabel,
+      AttachmentKind.other => l10n.attachmentKindOther,
+    };
+
 class _AttachmentThumbnail extends ConsumerWidget {
-  const _AttachmentThumbnail({required this.attachment});
+  const _AttachmentThumbnail({
+    required this.attachment,
+    this.canWithdraw = false,
+  });
 
   final Attachment attachment;
+
+  /// Only while the inspection is still open: withdrawing needs the same
+  /// permission as recording a finding, and the server enforces it anyway.
+  final bool canWithdraw;
+
+  Future<void> _withdraw(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.attachmentWithdrawQ),
+        content: Text(l10n.attachmentWithdrawBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.attachmentWithdraw),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    final result = await ref
+        .read(attachmentRepositoryProvider)
+        .withdraw(attachment.id);
+    if (!context.mounted) return;
+    result.when(
+      success: (_) {
+        ref.invalidate(attachmentListProvider((
+          entityType: attachment.entityType,
+          entityId: attachment.entityId,
+        )));
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.attachmentWithdrawn)));
+      },
+      failure: (f) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(humanizeApiErrorMessage(l10n, f.message)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        )),
+    );
+  }
+
+  void _open(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image_outlined),
+              title: Text(attachmentKindLabel(l10n, attachment.kind)),
+              subtitle: Text([
+                attachment.caption ?? l10n.attachmentNoCaption,
+                if (attachment.byteSize != null)
+                  l10n.attachmentSize((attachment.byteSize! / 1024).ceil()),
+              ].join('  ·  ')),
+              trailing: attachment.isWithdrawn
+                  ? StatusPill(
+                      tone: StatusTone.neutral,
+                      label: l10n.attachmentWithdrawnBadge,
+                      dense: true,
+                    )
+                  : null,
+            ),
+            if (canWithdraw && !attachment.isWithdrawn)
+              ListTile(
+                leading: Icon(Icons.undo,
+                    color: Theme.of(ctx).colorScheme.error),
+                title: Text(l10n.attachmentWithdraw,
+                    style:
+                        TextStyle(color: Theme.of(ctx).colorScheme.error)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _withdraw(context, ref);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final async = ref.watch(attachmentSignedUrlProvider(attachment));
 
-    return ClipRRect(
+    return InkWell(
+      onTap: () => _open(context, ref),
       borderRadius: BorderRadius.circular(8),
-      child: SizedBox(
-        width: 64,
-        height: 64,
-        child: async.when(
-          loading: () => Container(color: theme.colorScheme.surfaceContainerHigh),
-          error: (_, __) => _brokenThumb(theme),
-          data: (url) => Image.network(
-            url,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _brokenThumb(theme),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 64,
+          height: 64,
+          child: async.when(
+            loading: () =>
+                Container(color: theme.colorScheme.surfaceContainerHigh),
+            error: (_, __) => _brokenThumb(theme),
+            data: (url) => Image.network(
+              url,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _brokenThumb(theme),
+            ),
           ),
         ),
       ),

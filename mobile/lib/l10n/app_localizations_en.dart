@@ -3527,4 +3527,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String receiptParcelMovement(int id) {
     return 'ledger #$id';
   }
+
+  @override
+  String get attachmentKindPhoto => 'Photo';
+
+  @override
+  String get attachmentKindDeliveryNote => 'Delivery note';
+
+  @override
+  String get attachmentKindQcImage => 'QC photo';
+
+  @override
+  String get attachmentKindDamage => 'Damage photo';
+
+  @override
+  String get attachmentKindDocument => 'Document';
+
+  @override
+  String get attachmentKindLabel => 'Label';
+
+  @override
+  String get attachmentKindOther => 'Other';
+
+  @override
+  String get attachmentWithdraw => 'Withdraw';
+
+  @override
+  String get attachmentWithdrawQ => 'Withdraw this attachment?';
+
+  @override
+  String get attachmentWithdrawBody =>
+      'It leaves the list but stays on the record.';
+
+  @override
+  String get attachmentWithdrawn => 'Attachment withdrawn';
+
+  @override
+  String get attachmentWithdrawnBadge => 'Withdrawn';
+
+  @override
+  String attachmentSize(int kb) {
+    return '$kb KB';
+  }
+
+  @override
+  String get attachmentNoCaption => 'No caption';
 }

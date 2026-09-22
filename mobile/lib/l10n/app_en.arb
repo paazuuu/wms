@@ -1382,5 +1382,19 @@
   "receiptLinePlannedActual": "{planned} planned / {actual} received",
   "receiptParcelLot": "Lot {lot}",
   "receiptParcelExpiry": "exp {date}",
-  "receiptParcelMovement": "ledger #{id}"
+  "receiptParcelMovement": "ledger #{id}",
+  "attachmentKindPhoto": "Photo",
+  "attachmentKindDeliveryNote": "Delivery note",
+  "attachmentKindQcImage": "QC photo",
+  "attachmentKindDamage": "Damage photo",
+  "attachmentKindDocument": "Document",
+  "attachmentKindLabel": "Label",
+  "attachmentKindOther": "Other",
+  "attachmentWithdraw": "Withdraw",
+  "attachmentWithdrawQ": "Withdraw this attachment?",
+  "attachmentWithdrawBody": "It leaves the list but stays on the record.",
+  "attachmentWithdrawn": "Attachment withdrawn",
+  "attachmentWithdrawnBadge": "Withdrawn",
+  "attachmentSize": "{kb} KB",
+  "attachmentNoCaption": "No caption"
 }

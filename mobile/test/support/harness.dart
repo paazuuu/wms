@@ -1257,9 +1257,10 @@ class FakeAiReviewRepository implements AiReviewRepository {
   }
 }
 
-/// Attachment stub. [attachments] is what a `GET /attachments` filter would
-/// return for one entity; upload() appends in-memory rather than touching
-/// Storage, so a screen test can assert the thumbnail strip updates.
+/// Attachment stub. [attachments] is what `attachments_for` would return for
+/// one entity; upload() appends in-memory rather than touching Storage, so a
+/// screen test can assert the thumbnail strip updates, and withdraw() marks
+/// rather than removes — which is what 0070 does.
 class FakeAttachmentRepository implements AttachmentRepository {
   FakeAttachmentRepository({List<Attachment> attachments = const []})
       : _attachments = List.of(attachments);
@@ -1270,13 +1271,29 @@ class FakeAttachmentRepository implements AttachmentRepository {
   String? lastUploadEntityType;
   String? lastUploadEntityId;
   String? lastUploadFileName;
+  AttachmentKind? lastUploadKind;
+  String? lastUploadCaption;
+  int? lastUploadWarehouseId;
+
+  /// The arguments of the last withdraw() call.
+  int? lastWithdrawnId;
+  String? lastWithdrawReason;
+
+  /// Whether the last list() call asked for withdrawn rows too.
+  bool? lastListIncludedWithdrawn;
 
   @override
   Future<ApiResult<List<Attachment>>> list(
-          String entityType, String entityId) async =>
-      ApiSuccess(_attachments
-          .where((a) => a.entityType == entityType && a.entityId == entityId)
-          .toList());
+    String entityType,
+    String entityId, {
+    bool includeWithdrawn = false,
+  }) async {
+    lastListIncludedWithdrawn = includeWithdrawn;
+    return ApiSuccess(_attachments
+        .where((a) => a.entityType == entityType && a.entityId == entityId)
+        .where((a) => includeWithdrawn || !a.isWithdrawn)
+        .toList());
+  }
 
   @override
   Future<ApiResult<Attachment>> upload({
@@ -1285,10 +1302,16 @@ class FakeAttachmentRepository implements AttachmentRepository {
     required Uint8List bytes,
     required String fileName,
     required String contentType,
+    AttachmentKind kind = AttachmentKind.photo,
+    String? caption,
+    int? warehouseId,
   }) async {
     lastUploadEntityType = entityType;
     lastUploadEntityId = entityId;
     lastUploadFileName = fileName;
+    lastUploadKind = kind;
+    lastUploadCaption = caption;
+    lastUploadWarehouseId = warehouseId;
     final attachment = Attachment(
       id: _attachments.length + 1,
       entityType: entityType,
@@ -1296,9 +1319,39 @@ class FakeAttachmentRepository implements AttachmentRepository {
       storagePath: '$entityType/$entityId/$fileName',
       contentType: contentType,
       createdAt: DateTime.now(),
+      kind: kind,
+      caption: caption,
+      byteSize: bytes.length,
+      warehouseId: warehouseId,
     );
     _attachments = [..._attachments, attachment];
     return ApiSuccess(attachment);
+  }
+
+  @override
+  Future<ApiResult<bool>> withdraw(int attachmentId, {String? reason}) async {
+    lastWithdrawnId = attachmentId;
+    lastWithdrawReason = reason;
+    _attachments = [
+      for (final a in _attachments)
+        if (a.id == attachmentId)
+          Attachment(
+            id: a.id,
+            entityType: a.entityType,
+            entityId: a.entityId,
+            storagePath: a.storagePath,
+            contentType: a.contentType,
+            createdAt: a.createdAt,
+            kind: a.kind,
+            caption: a.caption,
+            byteSize: a.byteSize,
+            warehouseId: a.warehouseId,
+            withdrawnAt: DateTime.now(),
+          )
+        else
+          a,
+    ];
+    return const ApiSuccess(true);
   }
 
   @override

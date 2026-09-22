@@ -1382,5 +1382,19 @@
   "receiptLinePlannedActual": "预定 {planned} / 实收 {actual}",
   "receiptParcelLot": "批次 {lot}",
   "receiptParcelExpiry": "期限 {date}",
-  "receiptParcelMovement": "库存流水 #{id}"
+  "receiptParcelMovement": "库存流水 #{id}",
+  "attachmentKindPhoto": "照片",
+  "attachmentKindDeliveryNote": "送货单",
+  "attachmentKindQcImage": "检验照片",
+  "attachmentKindDamage": "破损照片",
+  "attachmentKindDocument": "文件",
+  "attachmentKindLabel": "标签",
+  "attachmentKindOther": "其他",
+  "attachmentWithdraw": "撤回",
+  "attachmentWithdrawQ": "要撤回此附件吗？",
+  "attachmentWithdrawBody": "将从列表中移除，但记录仍会保留。",
+  "attachmentWithdrawn": "已撤回附件",
+  "attachmentWithdrawnBadge": "已撤回",
+  "attachmentSize": "{kb} KB",
+  "attachmentNoCaption": "无说明"
 }

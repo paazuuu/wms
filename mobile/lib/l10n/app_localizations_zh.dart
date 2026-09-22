@@ -3429,4 +3429,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String receiptParcelMovement(int id) {
     return '库存流水 #$id';
   }
+
+  @override
+  String get attachmentKindPhoto => '照片';
+
+  @override
+  String get attachmentKindDeliveryNote => '送货单';
+
+  @override
+  String get attachmentKindQcImage => '检验照片';
+
+  @override
+  String get attachmentKindDamage => '破损照片';
+
+  @override
+  String get attachmentKindDocument => '文件';
+
+  @override
+  String get attachmentKindLabel => '标签';
+
+  @override
+  String get attachmentKindOther => '其他';
+
+  @override
+  String get attachmentWithdraw => '撤回';
+
+  @override
+  String get attachmentWithdrawQ => '要撤回此附件吗？';
+
+  @override
+  String get attachmentWithdrawBody => '将从列表中移除，但记录仍会保留。';
+
+  @override
+  String get attachmentWithdrawn => '已撤回附件';
+
+  @override
+  String get attachmentWithdrawnBadge => '已撤回';
+
+  @override
+  String attachmentSize(int kb) {
+    return '$kb KB';
+  }
+
+  @override
+  String get attachmentNoCaption => '无说明';
 }

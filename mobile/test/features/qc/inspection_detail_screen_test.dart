@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
 import 'package:wms_mobile/features/qc/application/inspection_providers.dart';
+import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/qc/presentation/inspection_detail_screen.dart';
 
@@ -53,10 +54,14 @@ Inspection _checked() => Inspection(
     );
 
 Future<ProviderContainer> _pump(
-    WidgetTester tester, FakeInspectionRepository repo) async {
+  WidgetTester tester,
+  FakeInspectionRepository repo, {
+  FakeAttachmentRepository? attachments,
+}) async {
   final container = ProviderContainer(overrides: [
     inspectionRepositoryProvider.overrideWithValue(repo),
-    attachmentRepositoryProvider.overrideWithValue(FakeAttachmentRepository()),
+    attachmentRepositoryProvider
+        .overrideWithValue(attachments ?? FakeAttachmentRepository()),
   ]);
   addTearDown(container.dispose);
   await pumpAppWith(
@@ -242,6 +247,100 @@ void main() {
       expect(
           find.text('検品対象が検品待ち在庫になかったため、在庫は動いていません。'),
           findsOneWidget);
+
+      await tester.binding.setSurfaceSize(null);
+    });
+  });
+
+  group('attachments (§29, 0070)', () {
+    Attachment photo({int id = 1, DateTime? withdrawnAt}) => Attachment(
+          id: id,
+          entityType: 'inspection',
+          entityId: '1',
+          storagePath: 'inspection/1/a.jpg',
+          contentType: 'image/jpeg',
+          kind: AttachmentKind.qcImage,
+          caption: '外装の破れ',
+          byteSize: 2048,
+          withdrawnAt: withdrawnAt,
+        );
+
+    testWidgets('a photo says what kind of evidence it is, not just its size',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1000));
+      final files = FakeAttachmentRepository(attachments: [photo()]);
+      await _pump(tester, FakeInspectionRepository(_pending()),
+          attachments: files);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(Image).first, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('検品写真'), findsOneWidget);
+      expect(find.textContaining('外装の破れ'), findsOneWidget);
+      expect(find.textContaining('2 KB'), findsOneWidget);
+
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('a photo is withdrawn, never deleted', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1000));
+      final files = FakeAttachmentRepository(attachments: [photo()]);
+      await _pump(tester, FakeInspectionRepository(_pending()),
+          attachments: files);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(Image).first, warnIfMissed: false);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('取り下げ').last);
+      await tester.pumpAndSettle();
+
+      // Confirmation first: the wording promises the record survives, which is
+      // what 0070 actually does.
+      expect(find.text('この添付を取り下げますか？'), findsOneWidget);
+      expect(find.text('一覧からは外れますが、記録としては残ります。'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, '取り下げ'));
+      await tester.pumpAndSettle();
+
+      expect(files.lastWithdrawnId, 1);
+      expect(find.text('添付を取り下げました'), findsOneWidget);
+      // Gone from the strip, but still there when asked for.
+      final visible = await files.list('inspection', '1');
+      visible.when(
+        success: (rows) => expect(rows, isEmpty),
+        failure: (f) => fail('expected success, got $f'),
+      );
+      final all =
+          await files.list('inspection', '1', includeWithdrawn: true);
+      all.when(
+        success: (rows) => expect(rows.single.isWithdrawn, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
+
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('a completed inspection does not offer to withdraw its evidence',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1000));
+      final files = FakeAttachmentRepository(attachments: [photo()]);
+      await _pump(
+          tester,
+          FakeInspectionRepository(Inspection(
+            id: 1,
+            status: QcResult.pass,
+            completedAt: DateTime(2026, 3, 1),
+            items: _checked().items,
+          )),
+          attachments: files);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(Image).first, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      // The sheet still explains the file; only the action is gone.
+      expect(find.text('検品写真'), findsOneWidget);
+      expect(find.text('取り下げ'), findsNothing);
 
       await tester.binding.setSurfaceSize(null);
     });

@@ -3435,4 +3435,48 @@ class AppLocalizationsJa extends AppLocalizations {
   String receiptParcelMovement(int id) {
     return '在庫履歴 #$id';
   }
+
+  @override
+  String get attachmentKindPhoto => '写真';
+
+  @override
+  String get attachmentKindDeliveryNote => '納品書';
+
+  @override
+  String get attachmentKindQcImage => '検品写真';
+
+  @override
+  String get attachmentKindDamage => '破損写真';
+
+  @override
+  String get attachmentKindDocument => '書類';
+
+  @override
+  String get attachmentKindLabel => 'ラベル';
+
+  @override
+  String get attachmentKindOther => 'その他';
+
+  @override
+  String get attachmentWithdraw => '取り下げ';
+
+  @override
+  String get attachmentWithdrawQ => 'この添付を取り下げますか？';
+
+  @override
+  String get attachmentWithdrawBody => '一覧からは外れますが、記録としては残ります。';
+
+  @override
+  String get attachmentWithdrawn => '添付を取り下げました';
+
+  @override
+  String get attachmentWithdrawnBadge => '取り下げ済み';
+
+  @override
+  String attachmentSize(int kb) {
+    return '$kb KB';
+  }
+
+  @override
+  String get attachmentNoCaption => '説明なし';
 }

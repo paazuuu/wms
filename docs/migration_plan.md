@@ -3113,6 +3113,30 @@ lines need one without another read — and 0071 already raises a LOT_MISSING
 exception for exactly that case the moment the receipt is posted. A guess here
 would be a worse version of a check that already exists.
 
+### §29's attachments, made real
+
+The last gap in Phase B's client surface: `attachment.dart` and
+`attachment_repository.dart` only knew the plain table shape from 0031, not what
+0070 actually built — a `kind` (photo/delivery note/QC image/damage/document/
+label/other), a caption, a byte size, a building, and withdrawal instead of
+deletion.
+
+`list()` now reads through `attachments_for` instead of a raw `GET /attachments`
+filter, because that is where 0070 put the warehouse scoping and the withdrawn
+filter — reading the table directly would have shown withdrawn rows to a client
+that has no way to know they should be hidden. `upload()` sends the kind, caption
+and the byte size the client already has (no reason to make the server ask
+Storage for it). `withdraw()` calls `withdraw_attachment` rather than deleting a
+row, matching 0070's actual guarantee: a photo that settled a claim stays
+findable.
+
+On the inspection screen, a photo taken during QC is now tagged `QC_IMAGE` with
+the building attached, not filed as an undifferentiated blob — §29 asks for the
+kind precisely so a later claim can find the right file among everything attached
+to a receipt. Tapping a thumbnail opens what it is and, while the inspection is
+still open, offers to withdraw it, with the same "withdrawn, not deleted" wording
+the confirmation promises actually being what happens server-side.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
