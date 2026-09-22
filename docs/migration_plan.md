@@ -3137,6 +3137,80 @@ to a receipt. Tapping a thumbnail opens what it is and, while the inspection is
 still open, offers to withdraw it, with the same "withdrawn, not deleted" wording
 the confirmation promises actually being what happens server-side.
 
+## Phase C — Outbound (§6, §15–§17, §36)
+
+Phase A left the outbound half half-built on purpose. 0064's header said so
+outright: `stock_reservations.reference_type` already accepts `'sales_order'`
+and `'shipment'`, and its comment on the loose reference pair reads "the orders
+these point at live in tables Phase C builds". What actually existed was two
+disconnected halves — a complete Reservation/Allocation engine nothing called,
+and a sales order (0034) that was pure bookkeeping, explicitly "not wired into
+shipment_plans/picking".
+
+Worth stating plainly, because it changes what Phase C has to build: the ledger
+side of shipping is already identity-correct. `apply_stock_movement` delegates to
+`apply_stock_movement_detail` (0066), whose insert fires `project_stock_movement`,
+which calls `apply_stock_unit_delta` — and 0068 made that draw FEFO from
+available-status parcels only, with the shortfall check before anything is taken.
+Since the trigger fires on the row and not on the caller, the legacy `ship_plan`
+has been drawing stock correctly, lot by lot, since 0068 was applied. Phase C
+does not need to rewrite shipping to get that; what it needs is everything
+upstream of it.
+
+### 0073 — approving a sales order makes the promise real
+
+The gap this closes: two approved sales orders for the last 10 units on hand
+could both say yes, because "approved" promised nothing to inventory. §6's flow
+starts `Sales Order -> Reservation`, and nothing was performing that arrow.
+
+Approval now reserves, line by line, and the decisions worth recording are all
+about what happens when it cannot:
+
+- **Best-effort, not all-or-nothing.** A line can name a JAN with no product
+  record yet — the same "unlinked" case 0067 tolerates on receiving — or ask for
+  more than is available. Neither blocks approving the order. The commercial
+  question (do we accept this order) and the inventory question (can we back it
+  right now) are different, which is §34's own rule about keeping order and
+  execution apart. Approval returns which lines got a reservation and which did
+  not, with the reason and the numbers, so a shortfall is seen at approval
+  rather than discovered at pick time.
+- **`stock_available` is read per line inside the loop**, so two lines of the
+  same product on one order cannot both be promised the same units. The second
+  one sees what the first just took.
+- **The reservation is inserted here, not through `reserve_stock`.** That RPC
+  re-checks `sales_order.manage` or `inventory.adjust`; an approver holding only
+  `sales_order.approve` — the role this function exists for — would be unable to
+  finish approving. Approving *is* the authorization for the promise. Gating it
+  twice would add no safety, only a trap for the correctly-scoped role.
+- **`approve_sales_order` returns jsonb now, not boolean**, which needed a drop
+  and recreate: a return type is not something `create or replace` can change.
+
+`create_shipment_from_sales_order` turns an approved order into something the
+floor can pick, and **re-keys the reservation from the order to the shipment
+rather than creating a second one**. The promise was made once, at approval;
+becoming a shipment moves where it is filed, not what it is — which the test
+proves by asserting availability is unchanged across the move. A partial unique
+index (`sales_order_id where status <> 'cancelled'`) allows at most one live
+shipment per order, because a second would draw against reservations the first
+already claimed. Every order line becomes a shipment line, including one whose
+JAN never resolved: the shipment is what the customer ordered, and a line nobody
+could reserve still has to be picked or explained.
+
+Cancelling an approved order releases what it reserved, allocations included,
+inlined for the same permission reason as above. A *rejected* order needs no
+such logic and has none — rejection only follows SUBMITTED, which is before any
+reservation exists.
+
+Tested against live data in one rolled-back block: 100 received through the
+ledger, an order for 30 plus a ghost JAN approved with one reservation and
+`unlinked_jan_code` reported, availability 100 -> 70, a second order for 90
+approved while reserving nothing (`insufficient_available`, available 70), the
+shipment created with both lines and the reservation re-keyed to `shipment:12`
+with availability unmoved, a second shipment for the same order refused by the
+index, `sales_order_detail` showing both the shipment and the reservation, and a
+third order approved then cancelled returning availability to 70. All 10
+security invariants still pass (18 guarded wrappers).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
