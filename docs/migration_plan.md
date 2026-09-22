@@ -3278,6 +3278,71 @@ were both refused by name; `pick_list_detail` carried the rule and the parcel;
 removing the last parcel returned the task to unpicked (null, not zero — "not
 picked yet" and "picked zero" are different states); and `on_hand` never moved.
 
+### 0075 — shipping draws on what was picked, and keeps the promise
+
+§6's last two arrows, finally connected:
+
+    Sales Order -> Reservation -> Allocation -> Pick -> Pack -> Ship
+                   ^^^^^^^^^^^ 0073                            ^^^^ here
+
+**A shipment now posts one movement per parcel**, carrying the lot and serial
+`pick_items` recorded. Before this, `ship_plan` posted one JAN-level movement per
+line and 0068's draw order chose a lot for itself — right by default, wrong in
+exactly the case 0074 exists to capture. Quantity a task carries *without* parcel
+detail still posts as before, JAN-level and FEFO-drawn, so a warehouse that never
+scans a lot sees no change at all. `greatest(picked - detailed, 0)` splits the
+two, per task rather than per JAN, so one line scanned and another keyed still add
+up to what left the building.
+
+**Shipping fulfils the reservations filed against it.** It moves no stock — the
+movements above did that, and doing it twice is the double count §5 warns about.
+What it records is that the promise was kept, so availability rises because the
+stock left rather than because the promise was forgotten. How much to fulfil comes
+from the ledger, not the order lines, so a plan edited after shipping cannot
+credit the wrong amount; and what is already fulfilled is re-read on each pass, so
+two reservations for one product on one shipment share it instead of both claiming
+all of it.
+
+`fulfil_reservation` is deliberately not called. It re-checks permission against
+the caller, and `ship_plan` runs as service_role behind the shipments edge
+function, where `auth.uid()` is null and the gate has already been passed — the
+same reason 0073 inlined its own inserts.
+
+**Cancelling reverses parcel by parcel.** This is the part worth pausing on: 0018
+reversed `shipped_net`, which aggregates per JAN, and a reversal with no lot would
+put the quantity back as a *lot-less* parcel. The warehouse total would be right
+and the lot attribution silently wrong — the one thing this migration exists to
+prevent. Grouping the movements by identity and negating each group's net also
+makes cancel idempotent for a plan shipped, cancelled and shipped again. Status is
+not restated (the SHIP row carries none, which is what arms 0068's gate), so stock
+returns as OK — which is what it must have been, since `record_pick_item` only
+accepts a parcel in a shippable condition.
+
+`shipment_parcels` is the read a recall starts from: which lots went to this
+customer, and when. SHIP_CANCEL rows are shown as they are, because a reversal is
+part of the answer rather than noise.
+
+**A known limit, stated rather than hidden.** `apply_stock_movement_detail` does
+not pass `bin_id` down to `apply_stock_unit_delta` (0066: at warehouse scope a
+unit is "in the building", and a receipt has no bin until put-away). So a movement
+records the bin the picker took from, but the parcel the draw lands on is chosen
+by product + lot + status. With one lot split across two bins, `stock_units` can
+attribute the decrement to the wrong bin while warehouse and lot totals stay
+exactly right. Fixing it means letting a negative movement with a bin draw from
+that bin, which would also change transfers and adjustments that name one — a
+separate concern for a separate migration.
+
+Tested end to end against live data in one rolled-back block: 30 of lot A and 70
+of lot B received plus 50 of an untracked product; a sales order for 40 + 20
+approved into two reservations (availability 100 -> 60 and 50 -> 30); a shipment
+created from it; **the picker recorded 40 from lot B, the one FEFO did not
+suggest**, while the other line was keyed as a bare 20 the pre-0074 way; after
+shipping, lot A was untouched at 30 and lot B was 30, the untracked product 30, no
+lot-less parcel existed, `shipment_parcels` returned one row per identity, and
+both reservations read FULFILLED at their full quantity. Cancelling restored lot B
+to exactly 70 (not a nameless pile), the untracked product to 50, and both
+reservations to ACTIVE with nothing fulfilled.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
