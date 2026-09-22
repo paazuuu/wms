@@ -3211,6 +3211,73 @@ index, `sales_order_detail` showing both the shipment and the reservation, and a
 third order approved then cancelled returning availability to 70. All 10
 security invariants still pass (18 guarded wrappers).
 
+### 0074 — §16's picking rule, and §15's pick detail
+
+§15 says a pick task carries `stock/lot/serial` and a `source_bin`. Ours carried
+a JAN and a quantity, so a picker was told "40 of this product" and the ledger
+decided for itself which lot left — FEFO, via 0068's draw order. That is a good
+default and the wrong answer whenever reality differs: if the front carton of the
+soonest-expiring lot is crushed and the picker takes the next one, nothing
+recorded it, and the lot the system believes it shipped is not the lot the
+customer received. For a recall that difference is the entire reason to track
+lots.
+
+**The shape mirrors receiving, deliberately.** Phase B solved this problem
+inbound: a delivery line said "40" and `receipt_items` (0067) recorded which
+parcels those were. Outbound is the same table one door over:
+
+    shipment_line  ->  pick_task    (how much to pick — the order)
+    receipt_items  ->  pick_items   (which parcels it was — the fact)
+
+`pick_items` is optional detail on top of the task's total, exactly as parcels
+are on a receipt. A picker who keys 40 still closes the task; one who scans lots
+gets a traceable pick. `picked_quantity` remains the task total — recomputed as
+the sum of its parcels — so 0018's generated `variance` and `status` columns keep
+working and no existing caller changes.
+
+Three decisions worth keeping:
+
+- **Nothing here moves stock.** 0018 was right that picking is a state of the
+  order; the building's stock is unchanged until it ships. The test asserts
+  `on_hand` is still 100 after a pick. Drawing the ledger against exactly these
+  parcels is 0075's job.
+- **Suggestions are not stored.** `pick_candidates` is a read, the same way
+  `putaway_suggestions` (0069) is. A suggestion written onto the row would invite
+  "was this what the system said or what the picker did", and there is no good
+  answer to that. Reality lives in the row; advice lives in a function.
+- **The parcel knows its own identity better than the caller.** Given a
+  `stock_unit_id`, `record_pick_item` fills lot, serial and bin from it, so a
+  scan of a shelf label cannot disagree with what is on that shelf.
+
+§16's rule takes the same three-part shape as 0068's `requires_inspection`: a
+product default, a nullable per-warehouse override where null means "follow the
+product", and one resolver (`picking_rule_for`). **FEFO is the global default,
+not FIFO** — §16 says food prefers it, and more importantly 0068's
+`apply_stock_unit_delta` already draws expiry-first, so FEFO is the one setting
+where the advice a picker is given matches what the ledger does if nobody names a
+lot.
+
+`pick_candidates` orders by the rule and reports what it cannot cover as `short`
+rather than raising, because "I can only find 30 of the 40" is something a picker
+can act on. It offers only `counts_available` parcels (0068's rule — advice the
+ledger would refuse is not advice) and subtracts existing allocations, so two
+pickers are not sent to the same box. `pick_task_candidates` asks for what is
+still outstanding on the task, so re-opening a part-picked task advises the rest.
+
+`start_pick_list` now fills `product_id` when it seeds tasks, rather than leaning
+on 0058's backfill: a task should know its product from the moment it exists.
+
+Tested against live data with a fixture built so **FEFO and FIFO disagree** — lot
+A expires sooner but arrived later, lot B expires later but arrived first — which
+is the only way to prove a rule is honoured rather than one accidental ordering
+looking right. FEFO led with A (take 40, then 10 of B, short 0), FIFO with B,
+LIFO with A; clearing the warehouse override fell back to the product's MANUAL
+default; `start_pick_list` filled `product_id`; a pick of 30 from the
+later-expiring lot recorded that lot; over-picking one parcel and an unknown lot
+were both refused by name; `pick_list_detail` carried the rule and the parcel;
+removing the last parcel returned the task to unpicked (null, not zero — "not
+picked yet" and "picked zero" are different states); and `on_hand` never moved.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
