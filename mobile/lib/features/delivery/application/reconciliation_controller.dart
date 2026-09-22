@@ -95,9 +95,55 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
     state = state.copyWith(counts: next);
   }
 
+  /// Record one parcel of [janCode] (§12, 0067).
+  ///
+  /// The line's total is raised to cover the parcels if it was lower, because a
+  /// parcel the operator has in their hands is stock that arrived — and the
+  /// server refuses a line whose parcels exceed it. Lowering the total is left to
+  /// the operator: silently dropping a parcel to make the arithmetic work would
+  /// lose a record of something physically present.
+  void addParcel(String janCode, ReceivedParcel parcel) {
+    final code = normalizeJan(janCode);
+    if (code.isEmpty || parcel.quantity <= 0) return;
+    final current = state.counts[code];
+    final parcels = [...?current?.parcels, parcel];
+    final parcelled = parcels.fold(0, (sum, p) => sum + p.quantity);
+    final next = Map<String, CountedItem>.from(state.counts);
+    next[code] = CountedItem(
+      janCode: code,
+      quantity: parcelled > (current?.quantity ?? 0)
+          ? parcelled
+          : current!.quantity,
+      // A parcel is keyed in by hand even when the lot came off a scan, so the
+      // line's provenance becomes manual unless it was already a scan.
+      source: current?.source ?? CountSource.manual,
+      parcels: parcels,
+    );
+    state = state.copyWith(counts: next);
+  }
+
+  /// Drop one parcel. The line's total is left alone: the operator may have
+  /// mis-keyed the lot on a carton that did arrive.
+  void removeParcel(String janCode, int index) {
+    final code = normalizeJan(janCode);
+    final current = state.counts[code];
+    if (current == null || index < 0 || index >= current.parcels.length) return;
+    final parcels = [...current.parcels]..removeAt(index);
+    final next = Map<String, CountedItem>.from(state.counts);
+    next[code] = current.copyWith(parcels: parcels);
+    state = state.copyWith(counts: next);
+  }
+
   void _put(String code, int quantity, CountSource source) {
     final next = Map<String, CountedItem>.from(state.counts);
-    next[code] = CountedItem(janCode: code, quantity: quantity, source: source);
+    // Parcels survive a re-count: scanning two more units of a line whose lots
+    // are already recorded should not throw the lots away.
+    next[code] = CountedItem(
+      janCode: code,
+      quantity: quantity,
+      source: source,
+      parcels: state.counts[code]?.parcels ?? const [],
+    );
     state = state.copyWith(counts: next);
   }
 
@@ -118,6 +164,7 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
           actualQuantity: entry.value.quantity,
           source: entry.value.source,
           lineId: _planLines[entry.key]?.id,
+          parcels: entry.value.parcels,
         ),
     ];
     final result = await _repository.reconcile(

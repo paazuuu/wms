@@ -3318,4 +3318,76 @@ class AppLocalizationsJa extends AppLocalizations {
   String putawayLot(String lot) {
     return 'ロット $lot';
   }
+
+  @override
+  String get parcelAddTitle => 'パーセルを記録';
+
+  @override
+  String get parcelAdd => 'パーセル追加';
+
+  @override
+  String get parcelRemove => 'このパーセルを削除';
+
+  @override
+  String get parcelQuantity => '数量';
+
+  @override
+  String get parcelQuantityRequired => '数量を入力してください';
+
+  @override
+  String get parcelLot => 'ロット番号（任意）';
+
+  @override
+  String get parcelLotHint => '箱に書かれているロット';
+
+  @override
+  String get parcelExpiry => '期限（任意）';
+
+  @override
+  String get parcelExpiryNone => '未入力';
+
+  @override
+  String get parcelSerial => 'シリアル番号（任意）';
+
+  @override
+  String get parcelSerialHelp => 'シリアルを入れる場合は数量1';
+
+  @override
+  String get parcelSerialIsOne => 'シリアルは1点ごとに記録します';
+
+  @override
+  String get parcelLocation => '置いた場所（任意）';
+
+  @override
+  String get parcelLocationHint => '棚やエリアのコード';
+
+  @override
+  String get parcelDamaged => '到着時に破損していた';
+
+  @override
+  String get parcelDamagedHelp => '破損として記録します。出荷はできません。';
+
+  @override
+  String get parcelNote => 'メモ（任意）';
+
+  @override
+  String get parcelNoneYet => 'ロット・シリアル未記録';
+
+  @override
+  String get parcelAllAttributed => '全数記録済み';
+
+  @override
+  String parcelUnattributed(int qty) {
+    return '未記録 $qty';
+  }
+
+  @override
+  String parcelOverLine(int parcelled, int counted) {
+    return 'パーセル合計 $parcelled が計上数 $counted を超えています';
+  }
+
+  @override
+  String parcelLotShort(String lot) {
+    return 'L:$lot';
+  }
 }

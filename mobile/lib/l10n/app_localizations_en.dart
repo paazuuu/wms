@@ -3410,4 +3410,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String putawayLot(String lot) {
     return 'Lot $lot';
   }
+
+  @override
+  String get parcelAddTitle => 'Record a parcel';
+
+  @override
+  String get parcelAdd => 'Add parcel';
+
+  @override
+  String get parcelRemove => 'Remove this parcel';
+
+  @override
+  String get parcelQuantity => 'Quantity';
+
+  @override
+  String get parcelQuantityRequired => 'Enter a quantity';
+
+  @override
+  String get parcelLot => 'Lot (optional)';
+
+  @override
+  String get parcelLotHint => 'The lot printed on the carton';
+
+  @override
+  String get parcelExpiry => 'Expiry (optional)';
+
+  @override
+  String get parcelExpiryNone => 'Not entered';
+
+  @override
+  String get parcelSerial => 'Serial (optional)';
+
+  @override
+  String get parcelSerialHelp => 'A serial is one unit';
+
+  @override
+  String get parcelSerialIsOne => 'A serial is recorded one unit at a time';
+
+  @override
+  String get parcelLocation => 'Location (optional)';
+
+  @override
+  String get parcelLocationHint => 'The code on the rack or area';
+
+  @override
+  String get parcelDamaged => 'Arrived damaged';
+
+  @override
+  String get parcelDamagedHelp => 'Recorded as damaged, and cannot ship.';
+
+  @override
+  String get parcelNote => 'Note (optional)';
+
+  @override
+  String get parcelNoneYet => 'No lot or serial recorded';
+
+  @override
+  String get parcelAllAttributed => 'All attributed';
+
+  @override
+  String parcelUnattributed(int qty) {
+    return '$qty unattributed';
+  }
+
+  @override
+  String parcelOverLine(int parcelled, int counted) {
+    return 'Parcels total $parcelled, more than the $counted counted';
+  }
+
+  @override
+  String parcelLotShort(String lot) {
+    return 'L:$lot';
+  }
 }

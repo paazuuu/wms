@@ -2988,6 +2988,107 @@ names DAMAGED, which is more restrictive, not less.
 
 All ten security invariants pass.
 
+## Client (Flutter) — following Phase B
+
+Phase B's database work is only worth having if the floor can reach it. Five
+pieces, in the order they were built, because each depends on the one before.
+
+### §26's scan contexts
+
+`BarcodeResolver.resolve` takes the step it is being used in, and the resolution
+says whether what came back is something that step expects. `ScanKind` gains lot,
+receipt, delivery, shipment, task, inspection and `ambiguous`; `ScanResolution`
+gains the document, task and lot fields, `expected` / `expectedRank`, and the
+candidate list an ambiguous lot code comes back with.
+
+The distinction worth naming is `isOutOfContext`: "I do not know this code" and
+"this is not what you need right now" are different sentences to show an operator,
+and only the second one can be answered helpfully. `scanResolutionProvider` is
+keyed on the whole request rather than the code, because the same string resolves
+two ways in two contexts and one cache key would serve the put-away answer to
+receiving.
+
+### The exception queue
+
+A work queue, not a report. Blockers first in the server's order, so the two agree
+when the list is long; finished work hidden unless asked for, because a queue that
+keeps its finished work is a list nobody reaches the bottom of.
+
+Three decisions worth keeping:
+
+- The resolve sheet asks for the note the server requires on RETURNED / SCRAPPED /
+  CORRECTED *before* sending, so an operator fixes a form rather than reading a
+  400. And it says, in the sheet, that recording a decision moves no stock —
+  because someone choosing 廃棄した will otherwise assume it did.
+- An exception type the build has never heard of still displays, using the name
+  the server sent. The vocabulary is data (`exception_types`), not a client
+  constant.
+- Filtering by stage and showing closed rows are questions put to the server, not
+  local filters: the work queue and the history are different lists.
+
+### §13's gate, made visible
+
+The gate holds in the database whether or not the UI mentions it — but an operator
+who does not know a failure will move the goods out of shippable stock will be
+surprised by it, and surprise is how workarounds start. So:
+
+- the inspection detail warns, before the tap, what completing will do;
+- afterwards it reports what actually moved — released to OK, held and where, and
+  how much was judged that was never in QC_PENDING. "PARTIAL" alone does not
+  answer "are the 28 I passed sellable now", which is the question being asked;
+- a new screen lists stock held for QC, because held stock is invisible in the
+  numbers people normally read: it counts toward on-hand and not toward available,
+  so a product can say "100 in stock" and ship nothing.
+
+The edge function now returns `complete_inspection`'s report as `stock_effect`
+alongside the inspection, and passes `fail_status` through so a workflow can
+quarantine rather than damage without a migration. The inspection repository holds
+two clients, because it spans two doors: writes go through the edge function (the
+only gate in front of service_role RPCs), while `qc_pending_stock` is an ordinary
+guarded read.
+
+### Parcel-level put-away
+
+0069 changed the queue's shape, so the client had to follow — the old model's
+`binned_quantity` and `suggested_bin_*` fields no longer exist, and reading them
+would have silently shown a zero where a figure used to be. `PutawayTask` is a
+parcel now: lot, expiry, serial, stock status, and the ranked suggestions with the
+server's reason for each. `confirm_putaway` names the lot and, for held stock, the
+status — with no status the server moves only the shippable parcels, so held stock
+has to say so to move at all.
+
+`capacity == null` is kept distinct from zero, because that distinction is exactly
+why §14's capacity criterion is a preference and not a hard rule.
+
+### §12's parcels in receiving
+
+`ReceivedParcel` is the client's Receipt Item: how many, on which lot, expiring
+when, which serial, where it was put. Parcels are optional detail on top of the
+line's total rather than a replacement for it, mirroring the server — so an
+operator who just counts still gets a receipt, and one who records lots gets a
+traceable one. The remainder is shown rather than hidden: it is the part that will
+land as one unattributed parcel.
+
+Two behaviours chosen deliberately in the controller:
+
+- **A parcel raises the line to cover it.** A parcel in the operator's hands is
+  stock that arrived, and the server refuses a line whose parcels exceed it.
+  Lowering the total is left to the operator: silently dropping a parcel to make
+  the arithmetic work would lose a record of something physically present.
+- **Parcels survive a re-count.** Scanning one more carton of a line whose lots
+  are already recorded must not throw the lots away.
+
+The sheet offers exactly one status, DAMAGED, as a checkbox. 0072 refuses a status
+that would make a parcel *less* restricted than its product requires, so a picker
+would mostly offer choices the server rejects; the case that actually happens on a
+dock is "this carton arrived wet".
+
+Deliberately absent: a "this lot-tracked line has no parcels" warning. The plan
+line does not carry the product's tracking mode, so the client cannot tell which
+lines need one without another read — and 0071 already raises a LOT_MISSING
+exception for exactly that case the moment the receipt is posted. A guess here
+would be a worse version of a check that already exists.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

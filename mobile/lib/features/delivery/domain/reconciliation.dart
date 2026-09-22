@@ -21,26 +21,104 @@ enum CountSource {
   final String wire;
 }
 
+/// One parcel of a counted line, as §12's Receipt Item level (0067).
+///
+/// A pallet is not a number. Forty cartons on two lots with two expiry dates is
+/// two parcels, and recording it as "40" throws away the part every later step
+/// needs: QC inspects a parcel, put-away moves a parcel, a recall traces a
+/// parcel.
+///
+/// Parcels are optional detail on top of the line's total, not a replacement for
+/// it — which mirrors the server exactly. `reconcile_delivery_plan` takes
+/// `actual_quantity` plus an optional `items` array and posts whatever the
+/// parcels did not account for as one unspecified parcel. So an operator who just
+/// counts still gets a receipt, and one who records lots gets a traceable one.
+class ReceivedParcel extends Equatable {
+  const ReceivedParcel({
+    required this.quantity,
+    this.lotCode,
+    this.expiry,
+    this.serialNumber,
+    this.locationCode,
+    this.statusCode,
+    this.note,
+  });
+
+  final int quantity;
+  final String? lotCode;
+  final DateTime? expiry;
+  final String? serialNumber;
+
+  /// Where it was put, as the code printed on the rack.
+  final String? locationCode;
+
+  /// Only for a parcel that arrived in a worse state than the product's flag
+  /// implies — DAMAGED for a wet carton. Naming a *better* status is refused by
+  /// the server (0072), so the UI never offers one.
+  final String? statusCode;
+  final String? note;
+
+  /// A serialised parcel is one unit, which the server enforces too.
+  bool get isSerial => serialNumber != null && serialNumber!.isNotEmpty;
+
+  Map<String, dynamic> toJson() => {
+        'quantity': quantity,
+        if (lotCode != null && lotCode!.isNotEmpty) 'lot_code': lotCode,
+        if (expiry != null)
+          'expiry': expiry!.toIso8601String().split('T').first,
+        if (serialNumber != null && serialNumber!.isNotEmpty)
+          'serial_number': serialNumber,
+        if (locationCode != null && locationCode!.isNotEmpty)
+          'location_code': locationCode,
+        if (statusCode != null && statusCode!.isNotEmpty) 'status': statusCode,
+        if (note != null && note!.isNotEmpty) 'note': note,
+      };
+
+  @override
+  List<Object?> get props =>
+      [quantity, lotCode, expiry, serialNumber, locationCode, statusCode, note];
+}
+
 /// A counted quantity for one JAN during a reconciliation session.
 class CountedItem extends Equatable {
   const CountedItem({
     required this.janCode,
     required this.quantity,
     required this.source,
+    this.parcels = const [],
   });
 
   final String janCode;
   final int quantity;
   final CountSource source;
 
-  CountedItem copyWith({int? quantity, CountSource? source}) => CountedItem(
+  /// §12's parcels, when the operator recorded any. Their sum may be less than
+  /// [quantity] — the rest goes in as one unattributed parcel — but never more,
+  /// which the server refuses and [parcelledQuantity] lets the UI check first.
+  final List<ReceivedParcel> parcels;
+
+  int get parcelledQuantity => parcels.fold(0, (sum, p) => sum + p.quantity);
+
+  /// How much of the count nobody has attributed to a lot or serial yet.
+  int get unattributedQuantity => quantity - parcelledQuantity;
+
+  /// The disagreement the server refuses: more in the parcels than on the line.
+  bool get isOverParcelled => parcelledQuantity > quantity;
+
+  CountedItem copyWith({
+    int? quantity,
+    CountSource? source,
+    List<ReceivedParcel>? parcels,
+  }) =>
+      CountedItem(
         janCode: janCode,
         quantity: quantity ?? this.quantity,
         source: source ?? this.source,
+        parcels: parcels ?? this.parcels,
       );
 
   @override
-  List<Object?> get props => [janCode, quantity, source];
+  List<Object?> get props => [janCode, quantity, source, parcels];
 }
 
 /// Outcome of comparing one JAN's planned vs. actual quantity.
@@ -72,6 +150,7 @@ class ReconLine extends Equatable {
     this.alreadyReceived = 0,
     this.planLine,
     this.source,
+    this.parcels = const [],
   });
 
   /// The matching plan line, or null when this arrival was unexpected.
@@ -87,6 +166,20 @@ class ReconLine extends Equatable {
   final ReconLineStatus status;
   final CountSource? source;
 
+  /// §12's parcels recorded for this line, if any (0067).
+  final List<ReceivedParcel> parcels;
+
+  int get parcelledQuantity => parcels.fold(0, (sum, p) => sum + p.quantity);
+
+  /// Counted but not yet attributed to a lot or serial. Shown rather than
+  /// hidden: it is the part of the line that will land as one unspecified parcel,
+  /// and for a lot-tracked product that is a gap someone should close.
+  int get unattributedQuantity => actualQuantity - parcelledQuantity;
+
+  /// The disagreement the server refuses (0067), surfaced before the submit so
+  /// the operator fixes the line rather than reading an error.
+  bool get isOverParcelled => parcelledQuantity > actualQuantity;
+
   /// Cumulative received including this session.
   int get receivedTotal => alreadyReceived + actualQuantity;
 
@@ -100,7 +193,7 @@ class ReconLine extends Equatable {
 
   @override
   List<Object?> get props =>
-      [janCode, plannedQuantity, alreadyReceived, actualQuantity, status];
+      [janCode, plannedQuantity, alreadyReceived, actualQuantity, status, parcels];
 }
 
 /// A fully computed comparison of a plan against the counted items.
@@ -147,6 +240,17 @@ class ReconciliationResult extends Equatable {
   bool get hasDiscrepancies =>
       shortfallCount > 0 || overCount > 0 || unexpectedCount > 0;
 
+  /// True when any line claims more in its parcels than on the line itself. The
+  /// server refuses such a receipt (0067), so the screen can stop the submit and
+  /// point at the line instead.
+  bool get hasOverParcelledLine => lines.any((l) => l.isOverParcelled);
+
+  // Deliberately not here: a "this lot-tracked line has no parcels" warning.
+  // The plan line does not carry the product's tracking mode, so the client
+  // cannot tell which lines need one without another read — and 0071 already
+  // raises a LOT_MISSING exception for exactly this case the moment the receipt
+  // is posted. A guess here would be a worse version of a check that exists.
+
   @override
   List<Object?> get props => [lines];
 }
@@ -178,6 +282,7 @@ ReconciliationResult buildReconciliation(
       alreadyReceived: planLine.receivedQuantity,
       actualQuantity: actual,
       source: counted?.source,
+      parcels: counted?.parcels ?? const [],
       status: _statusFor(
           planLine.plannedQuantity, planLine.receivedQuantity + actual),
     ));
@@ -190,6 +295,7 @@ ReconciliationResult buildReconciliation(
       plannedQuantity: 0,
       actualQuantity: entry.value.quantity,
       source: entry.value.source,
+      parcels: entry.value.parcels,
       status: ReconLineStatus.unexpected,
     ));
   }

@@ -3312,4 +3312,76 @@ class AppLocalizationsZh extends AppLocalizations {
   String putawayLot(String lot) {
     return '批次 $lot';
   }
+
+  @override
+  String get parcelAddTitle => '记录包裹';
+
+  @override
+  String get parcelAdd => '添加包裹';
+
+  @override
+  String get parcelRemove => '删除此包裹';
+
+  @override
+  String get parcelQuantity => '数量';
+
+  @override
+  String get parcelQuantityRequired => '请输入数量';
+
+  @override
+  String get parcelLot => '批次（可选）';
+
+  @override
+  String get parcelLotHint => '纸箱上的批次';
+
+  @override
+  String get parcelExpiry => '期限（可选）';
+
+  @override
+  String get parcelExpiryNone => '未填写';
+
+  @override
+  String get parcelSerial => '序列号（可选）';
+
+  @override
+  String get parcelSerialHelp => '填写序列号时数量为 1';
+
+  @override
+  String get parcelSerialIsOne => '序列号需按 1 件记录';
+
+  @override
+  String get parcelLocation => '存放位置（可选）';
+
+  @override
+  String get parcelLocationHint => '货架或区域代码';
+
+  @override
+  String get parcelDamaged => '到货时已破损';
+
+  @override
+  String get parcelDamagedHelp => '记录为破损，无法出库。';
+
+  @override
+  String get parcelNote => '备注（可选）';
+
+  @override
+  String get parcelNoneYet => '未记录批次或序列号';
+
+  @override
+  String get parcelAllAttributed => '已全部记录';
+
+  @override
+  String parcelUnattributed(int qty) {
+    return '未记录 $qty';
+  }
+
+  @override
+  String parcelOverLine(int parcelled, int counted) {
+    return '包裹合计 $parcelled 超过计数 $counted';
+  }
+
+  @override
+  String parcelLotShort(String lot) {
+    return 'L:$lot';
+  }
 }

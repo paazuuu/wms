@@ -13,6 +13,7 @@ class ReconcileEntry {
     required this.actualQuantity,
     required this.source,
     this.lineId,
+    this.parcels = const [],
   });
 
   /// Plan line id when this JAN was on the plan; null for an unexpected arrival.
@@ -21,11 +22,18 @@ class ReconcileEntry {
   final int actualQuantity;
   final CountSource source;
 
+  /// §12's Receipt Items for this line (0067). Sent only when the operator
+  /// recorded any: an empty array and an absent key mean the same thing to the
+  /// server, and omitting it keeps the payload of a plain count unchanged.
+  final List<ReceivedParcel> parcels;
+
   Map<String, dynamic> toJson() => {
         if (lineId != null) 'line_id': lineId,
         'jan_code': janCode,
         'actual_quantity': actualQuantity,
         'source': source.wire,
+        if (parcels.isNotEmpty)
+          'items': parcels.map((p) => p.toJson()).toList(),
       };
 }
 

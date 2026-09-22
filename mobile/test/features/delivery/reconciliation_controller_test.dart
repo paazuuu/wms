@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
@@ -126,5 +127,121 @@ void main() {
     expect(repo.lastEntries!.length, 1);
     expect(repo.lastEntries!.single.janCode, '4902505632037');
     expect(repo.lastEntries!.single.lineId, 10);
+  });
+
+  group('ReconciliationController parcels', () {
+    // This file's plan has two lines; the parcel tests work on the first.
+    const jan = '4902505632037';
+
+    late _FakeRepo repo;
+    late ReconciliationController controller;
+
+    setUp(() {
+      repo = _FakeRepo();
+      controller = ReconciliationController(repo, _plan());
+    });
+
+    test('a parcel raises the line to cover it', () {
+      controller.addParcel(jan, ReceivedParcel(quantity: 20, lotCode: 'L-A'));
+
+      final counted = controller.state.counts[jan]!;
+      // A parcel in the operator's hands is stock that arrived, so the line
+      // cannot be lower than its parcels — the server refuses that anyway.
+      expect(counted.quantity, 20);
+      expect(counted.parcels, hasLength(1));
+    });
+
+    test('a parcel inside an existing count leaves the count alone', () {
+      controller.setQuantity(jan, 40);
+      controller.addParcel(jan, ReceivedParcel(quantity: 20, lotCode: 'L-A'));
+
+      final counted = controller.state.counts[jan]!;
+      expect(counted.quantity, 40);
+      expect(counted.unattributedQuantity, 20);
+    });
+
+    test('scanning more units keeps the parcels already recorded', () {
+      controller.setQuantity(jan, 20);
+      controller.addParcel(jan, ReceivedParcel(quantity: 20, lotCode: 'L-A'));
+      controller.recordScan(jan);
+
+      final counted = controller.state.counts[jan]!;
+      expect(counted.quantity, 21);
+      // Throwing the lot away because someone scanned one more carton would be
+      // the worst possible trade.
+      expect(counted.parcels, hasLength(1));
+      expect(counted.parcels.single.lotCode, 'L-A');
+    });
+
+    test('removing a parcel leaves the counted total alone', () {
+      controller.setQuantity(jan, 40);
+      controller.addParcel(jan, ReceivedParcel(quantity: 20, lotCode: 'L-A'));
+      controller.removeParcel(jan, 0);
+
+      final counted = controller.state.counts[jan]!;
+      // The lot may have been mis-keyed on a carton that did arrive.
+      expect(counted.quantity, 40);
+      expect(counted.parcels, isEmpty);
+    });
+
+    test('the reconciliation view carries the parcels and the remainder', () {
+      controller.setQuantity(jan, 40);
+      controller.addParcel(jan, ReceivedParcel(quantity: 20, lotCode: 'L-A'));
+      controller.addParcel(jan, ReceivedParcel(quantity: 15, lotCode: 'L-B'));
+
+      final line =
+          controller.state.result.lines.firstWhere((l) => l.janCode == jan);
+      expect(line.parcels, hasLength(2));
+      expect(line.parcelledQuantity, 35);
+      expect(line.unattributedQuantity, 5);
+      expect(controller.state.result.hasOverParcelledLine, isFalse);
+    });
+
+    test('an over-parcelled line is visible to the screen before the submit', () {
+      controller.setQuantity(jan, 10);
+      // Raises the line to 12, so this alone cannot over-parcel…
+      controller.addParcel(jan, ReceivedParcel(quantity: 12));
+      expect(controller.state.result.hasOverParcelledLine, isFalse);
+      // …but lowering the count afterwards can, and that is the state the
+      // server refuses, so the screen has to be able to see it.
+      controller.setQuantity(jan, 5);
+      expect(controller.state.result.hasOverParcelledLine, isTrue);
+    });
+
+    test('submitting sends the parcels as items on their line', () async {
+      controller.setQuantity(jan, 40);
+      controller.addParcel(
+        jan,
+        ReceivedParcel(
+            quantity: 20, lotCode: 'L-A', expiry: DateTime(2026, 12, 20)),
+      );
+
+      await controller.submit(noteReference: 'NOTE-1');
+
+      final entry =
+          repo.lastEntries!.firstWhere((e) => e.janCode == jan);
+      final json = entry.toJson();
+      expect(json['jan_code'], jan);
+      expect(json['actual_quantity'], 40);
+      final items = json['items'] as List;
+      expect(items, hasLength(1));
+      expect((items.single as Map)['lot_code'], 'L-A');
+      expect((items.single as Map)['expiry'], '2026-12-20');
+    });
+
+    test('a plain count sends no items key at all', () async {
+      controller.setQuantity(jan, 40);
+
+      await controller.submit();
+
+      // An empty array and an absent key mean the same thing to the server, and
+      // omitting it keeps a plain count's payload exactly as it was before 0067.
+      expect(
+          repo.lastEntries!
+              .firstWhere((e) => e.janCode == jan)
+              .toJson()
+              .containsKey('items'),
+          isFalse);
+    });
   });
 }

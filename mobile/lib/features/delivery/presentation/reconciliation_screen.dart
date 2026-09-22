@@ -17,6 +17,7 @@ import '../domain/delivery_plan_status.dart';
 import '../domain/jan.dart';
 import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
+import 'parcel_sheet.dart';
 import 'receipt_history_screen.dart';
 
 /// How the operator chose to close a reconciliation that still has outstanding
@@ -97,6 +98,24 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
   void dispose() {
     _scanFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _addParcel(ReconLine line) async {
+    final parcel = await showModalBottomSheet<ReceivedParcel>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => ParcelSheet(
+        janCode: line.janCode,
+        productName: line.productName,
+        // Prefilled with what is still unattributed, because the common case is
+        // "the rest of this line is one lot".
+        remaining: line.unattributedQuantity > 0
+            ? line.unattributedQuantity
+            : line.actualQuantity,
+      ),
+    );
+    if (parcel == null) return;
+    _controller.addParcel(line.janCode, parcel);
   }
 
   Future<void> _warnAlreadyReconciled() async {
@@ -423,6 +442,9 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   itemBuilder: (context, index) => _ReconLineCard(
                     line: result.lines[index],
                     onEdit: () => _editQuantity(result.lines[index]),
+                    onAddParcel: () => _addParcel(result.lines[index]),
+                    onRemoveParcel: (i) => _controller.removeParcel(
+                        result.lines[index].janCode, i),
                   ),
                 ),
         ),
@@ -582,10 +604,17 @@ class _CountChip extends StatelessWidget {
 }
 
 class _ReconLineCard extends StatelessWidget {
-  const _ReconLineCard({required this.line, required this.onEdit});
+  const _ReconLineCard({
+    required this.line,
+    required this.onEdit,
+    required this.onAddParcel,
+    required this.onRemoveParcel,
+  });
 
   final ReconLine line;
   final VoidCallback onEdit;
+  final VoidCallback onAddParcel;
+  final void Function(int index) onRemoveParcel;
 
   @override
   Widget build(BuildContext context) {
@@ -645,9 +674,122 @@ class _ReconLineCard extends StatelessWidget {
                   _RemainStat(label: l10n.reconRemaining, value: line.remaining),
                 ],
               ),
+              // §12's Item level. Only offered once something has been counted:
+              // a parcel of a line nobody has counted yet is a quantity with
+              // extra steps.
+              if (line.actualQuantity > 0) ...[
+                const Divider(height: AppSpacing.lg),
+                for (var i = 0; i < line.parcels.length; i++)
+                  _ParcelRow(
+                    parcel: line.parcels[i],
+                    onRemove: () => onRemoveParcel(i),
+                  ),
+                Row(
+                  children: [
+                    if (line.isOverParcelled)
+                      Expanded(
+                        child: Text(
+                          l10n.parcelOverLine(
+                              line.parcelledQuantity, line.actualQuantity),
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: scheme.error),
+                        ),
+                      )
+                    else if (line.parcels.isEmpty)
+                      Expanded(
+                        child: Text(
+                          l10n.parcelNoneYet,
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        // The remainder is shown rather than hidden: it is the
+                        // part that will land as one unattributed parcel, and
+                        // for a lot-tracked product that is a gap to close now.
+                        child: Text(
+                          line.unattributedQuantity > 0
+                              ? l10n.parcelUnattributed(
+                                  line.unattributedQuantity)
+                              : l10n.parcelAllAttributed,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                              color: line.unattributedQuantity > 0
+                                  ? scheme.onSurfaceVariant
+                                  : scheme.primary),
+                        ),
+                      ),
+                    TextButton.icon(
+                      onPressed: onAddParcel,
+                      icon: const Icon(Icons.add, size: 18),
+                      label: Text(l10n.parcelAdd),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// One recorded parcel on a line: what was keyed, compactly, plus a way to undo
+/// it. Undo removes the parcel and leaves the line's total alone — the operator
+/// may have mis-keyed the lot on a carton that did arrive.
+class _ParcelRow extends StatelessWidget {
+  const _ParcelRow({required this.parcel, required this.onRemove});
+
+  final ReceivedParcel parcel;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final bits = <String>[
+      '${parcel.quantity}',
+      if (parcel.lotCode != null) l10n.parcelLotShort(parcel.lotCode!),
+      if (parcel.expiry != null)
+        '~${parcel.expiry!.year}-${parcel.expiry!.month.toString().padLeft(2, '0')}-${parcel.expiry!.day.toString().padLeft(2, '0')}',
+      if (parcel.serialNumber != null) parcel.serialNumber!,
+      if (parcel.locationCode != null) '→ ${parcel.locationCode}',
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Icon(
+            parcel.statusCode == 'DAMAGED'
+                ? Icons.report_gmailerrorred_outlined
+                : Icons.inventory_2_outlined,
+            size: 16,
+            color: parcel.statusCode == 'DAMAGED'
+                ? scheme.error
+                : scheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              bits.join(' · '),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontFamily: AppFonts.mono,
+                color: parcel.statusCode == 'DAMAGED' ? scheme.error : null,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.parcelRemove,
+            icon: const Icon(Icons.close, size: 16),
+            onPressed: onRemove,
+          ),
+        ],
       ),
     );
   }

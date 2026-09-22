@@ -6315,6 +6315,138 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ロット {lot}'**
   String putawayLot(String lot);
+
+  /// Title of the sheet that records one receiving parcel (§12).
+  ///
+  /// In ja, this message translates to:
+  /// **'パーセルを記録'**
+  String get parcelAddTitle;
+
+  /// Action: add a parcel to a receiving line.
+  ///
+  /// In ja, this message translates to:
+  /// **'パーセル追加'**
+  String get parcelAdd;
+
+  /// Action: remove a recorded parcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'このパーセルを削除'**
+  String get parcelRemove;
+
+  /// Parcel sheet: quantity field.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get parcelQuantity;
+
+  /// Parcel sheet: quantity validation.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を入力してください'**
+  String get parcelQuantityRequired;
+
+  /// Parcel sheet: lot field.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット番号（任意）'**
+  String get parcelLot;
+
+  /// Parcel sheet: lot hint.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱に書かれているロット'**
+  String get parcelLotHint;
+
+  /// Parcel sheet: expiry field.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限（任意）'**
+  String get parcelExpiry;
+
+  /// Parcel sheet: no expiry entered.
+  ///
+  /// In ja, this message translates to:
+  /// **'未入力'**
+  String get parcelExpiryNone;
+
+  /// Parcel sheet: serial field.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル番号（任意）'**
+  String get parcelSerial;
+
+  /// Parcel sheet: a serial means quantity one.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアルを入れる場合は数量1'**
+  String get parcelSerialHelp;
+
+  /// Parcel sheet: validation when a serial carries more than one.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアルは1点ごとに記録します'**
+  String get parcelSerialIsOne;
+
+  /// Parcel sheet: location field.
+  ///
+  /// In ja, this message translates to:
+  /// **'置いた場所（任意）'**
+  String get parcelLocation;
+
+  /// Parcel sheet: location hint.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚やエリアのコード'**
+  String get parcelLocationHint;
+
+  /// Parcel sheet: the carton arrived damaged.
+  ///
+  /// In ja, this message translates to:
+  /// **'到着時に破損していた'**
+  String get parcelDamaged;
+
+  /// Parcel sheet: what recording damage does.
+  ///
+  /// In ja, this message translates to:
+  /// **'破損として記録します。出荷はできません。'**
+  String get parcelDamagedHelp;
+
+  /// Parcel sheet: note field.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get parcelNote;
+
+  /// Receiving line: nothing attributed to a lot or serial yet.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット・シリアル未記録'**
+  String get parcelNoneYet;
+
+  /// Receiving line: every counted unit is on a parcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'全数記録済み'**
+  String get parcelAllAttributed;
+
+  /// Receiving line: how much of the count is not yet on a parcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'未記録 {qty}'**
+  String parcelUnattributed(int qty);
+
+  /// Receiving line: the disagreement the server refuses.
+  ///
+  /// In ja, this message translates to:
+  /// **'パーセル合計 {parcelled} が計上数 {counted} を超えています'**
+  String parcelOverLine(int parcelled, int counted);
+
+  /// Parcel row: compact lot label.
+  ///
+  /// In ja, this message translates to:
+  /// **'L:{lot}'**
+  String parcelLotShort(String lot);
 }
 
 class _AppLocalizationsDelegate

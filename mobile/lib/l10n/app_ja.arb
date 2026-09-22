@@ -2324,5 +2324,111 @@
         "type": "String"
       }
     }
+  },
+  "parcelAddTitle": "パーセルを記録",
+  "@parcelAddTitle": {
+    "description": "Title of the sheet that records one receiving parcel (§12)."
+  },
+  "parcelAdd": "パーセル追加",
+  "@parcelAdd": {
+    "description": "Action: add a parcel to a receiving line."
+  },
+  "parcelRemove": "このパーセルを削除",
+  "@parcelRemove": {
+    "description": "Action: remove a recorded parcel."
+  },
+  "parcelQuantity": "数量",
+  "@parcelQuantity": {
+    "description": "Parcel sheet: quantity field."
+  },
+  "parcelQuantityRequired": "数量を入力してください",
+  "@parcelQuantityRequired": {
+    "description": "Parcel sheet: quantity validation."
+  },
+  "parcelLot": "ロット番号（任意）",
+  "@parcelLot": {
+    "description": "Parcel sheet: lot field."
+  },
+  "parcelLotHint": "箱に書かれているロット",
+  "@parcelLotHint": {
+    "description": "Parcel sheet: lot hint."
+  },
+  "parcelExpiry": "期限（任意）",
+  "@parcelExpiry": {
+    "description": "Parcel sheet: expiry field."
+  },
+  "parcelExpiryNone": "未入力",
+  "@parcelExpiryNone": {
+    "description": "Parcel sheet: no expiry entered."
+  },
+  "parcelSerial": "シリアル番号（任意）",
+  "@parcelSerial": {
+    "description": "Parcel sheet: serial field."
+  },
+  "parcelSerialHelp": "シリアルを入れる場合は数量1",
+  "@parcelSerialHelp": {
+    "description": "Parcel sheet: a serial means quantity one."
+  },
+  "parcelSerialIsOne": "シリアルは1点ごとに記録します",
+  "@parcelSerialIsOne": {
+    "description": "Parcel sheet: validation when a serial carries more than one."
+  },
+  "parcelLocation": "置いた場所（任意）",
+  "@parcelLocation": {
+    "description": "Parcel sheet: location field."
+  },
+  "parcelLocationHint": "棚やエリアのコード",
+  "@parcelLocationHint": {
+    "description": "Parcel sheet: location hint."
+  },
+  "parcelDamaged": "到着時に破損していた",
+  "@parcelDamaged": {
+    "description": "Parcel sheet: the carton arrived damaged."
+  },
+  "parcelDamagedHelp": "破損として記録します。出荷はできません。",
+  "@parcelDamagedHelp": {
+    "description": "Parcel sheet: what recording damage does."
+  },
+  "parcelNote": "メモ（任意）",
+  "@parcelNote": {
+    "description": "Parcel sheet: note field."
+  },
+  "parcelNoneYet": "ロット・シリアル未記録",
+  "@parcelNoneYet": {
+    "description": "Receiving line: nothing attributed to a lot or serial yet."
+  },
+  "parcelAllAttributed": "全数記録済み",
+  "@parcelAllAttributed": {
+    "description": "Receiving line: every counted unit is on a parcel."
+  },
+  "parcelUnattributed": "未記録 {qty}",
+  "@parcelUnattributed": {
+    "description": "Receiving line: how much of the count is not yet on a parcel.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "parcelOverLine": "パーセル合計 {parcelled} が計上数 {counted} を超えています",
+  "@parcelOverLine": {
+    "description": "Receiving line: the disagreement the server refuses.",
+    "placeholders": {
+      "parcelled": {
+        "type": "int"
+      },
+      "counted": {
+        "type": "int"
+      }
+    }
+  },
+  "parcelLotShort": "L:{lot}",
+  "@parcelLotShort": {
+    "description": "Parcel row: compact lot label.",
+    "placeholders": {
+      "lot": {
+        "type": "String"
+      }
+    }
   }
 }
