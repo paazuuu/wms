@@ -2960,6 +2960,34 @@ and each arrow is something the database enforces rather than something the UI i
 trusted to do in order. The Flutter client is the next piece: nothing above is
 reachable from the app yet.
 
+### 0072 — a hole in 0068, found while wiring the receiving client
+
+0068 let a named status override `receiving_status_for()`, on the reasoning that a
+receiver who can see the carton is wet knows more than a flag does. That reasoning
+is right, but "a named status wins" was too broad in one direction.
+
+The receiving path runs through `reconcile_delivery_plan`, and the edge function
+passes its `p_lines` payload through verbatim. So a client could send
+`{"quantity": 40, "status": "OK"}` for a product whose flag says QC_PENDING and
+receive it straight into shippable stock — which is precisely what §13 asks the
+database to prevent. A guarantee a `receiving.confirm` holder can opt out of by
+naming a status is a UI convention with extra steps.
+
+The rule that keeps the useful half and closes the hole: **a named status may only
+make a parcel more restricted, never less.** If the product requires inspection,
+the receiver may name QC_PENDING, HOLD, DAMAGED or QUARANTINE, and is refused if
+they name one that counts as available. Nothing is lost — the wet-carton case
+names DAMAGED, which is more restrictive, not less.
+
+| what | result |
+| --- | --- |
+| a client naming `OK` for goods that must be inspected | refused: `… must be inspected, so it cannot be received as OK — record it as QC_PENDING, or as DAMAGED/HOLD if it arrived bad` |
+| the wet-carton case (4 DAMAGED + 6 default) | accepted — `DAMAGED x4 + QC_PENDING x6`, on hand 10, available 0 |
+| naming `OK` for a product that needs no inspection | fine, available 10 |
+| no status named | the flag still decides: OK |
+
+All ten security invariants pass.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
