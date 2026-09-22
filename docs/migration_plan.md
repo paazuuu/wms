@@ -3343,6 +3343,63 @@ both reservations read FULFILLED at their full quantity. Cancelling restored lot
 to exactly 70 (not a nameless pile), the untracked product to 50, and both
 reservations to ACTIVE with nothing fulfilled.
 
+### 0076 — §17's cartons: weight, dimensions, status and the label
+
+§17 asks "どの商品がどの箱に入ったか" and lists what a carton should carry.
+`shipment_cartons` (0008) had a number and a free-text label; weight, carrier and
+tracking lived on the *plan* (0039). That is fine for a single-box shipment and
+wrong for three, because **a carrier prices each box** — so weight, dimensions,
+type and tracking moved onto the carton. And a carton item with no lot cannot
+answer §17's question at all: a recall needs "lot L-B went to this customer in
+carton 2", not "something went in carton 2".
+
+Decisions worth keeping:
+
+- **Carton status is a lifecycle, and the plan drives its end.** OPEN while being
+  filled, PACKED when the packer closes it, SHIPPED once the plan ships. That
+  last transition is a **trigger on `shipment_plans.status`**, not a line in
+  `ship_plan`, because the plan's status is reached from more than one place (the
+  edge function, `ship_plan`) and a rule that lives on the column cannot be
+  bypassed by whichever path is written next year. Un-shipping returns SHIPPED
+  boxes to PACKED — closed, not re-opened: changing a box's contents is a thing
+  someone says explicitly.
+- **Nothing goes in a box that did not come off a shelf.** `packable_quantity` is
+  what was picked when the shipment went through picking, and what was ordered
+  when it did not. The ceiling is **per product, not per (product, lot)**: 0074
+  deliberately keeps the bare-quantity pick path, so a lot picked without being
+  scanned would otherwise be unpackable. A consequence worth stating: once
+  picking has started, a task with nothing picked yet contributes zero, so
+  packing that product waits for the pick to be recorded.
+- **A lot code alone is not an identity.** `pack_carton_item` refuses a lot code
+  with no JAN and no stock unit, because lot codes are per product — "L-A" names
+  a product's lot, not a product. The test asserts that refusal, which is how the
+  rule got written down: the first draft of the test made exactly that mistake.
+- **A closed box's contents are frozen**; its weight and tracking are not. Those
+  are facts about the box rather than about what is inside it, and correcting a
+  mistyped tracking number should not require reopening anything.
+- **The label is a read.** `carton_label` returns carton n of m, the customer,
+  carrier, tracking (the box's own, falling back to the plan's), measurements and
+  contents with lot codes. A label stored at pack time would be a copy that goes
+  stale the moment a tracking number is corrected.
+
+`autopack_shipment` (0039) split *order lines* into boxes. Once the picker has
+recorded parcels the order lines are the wrong source — they cannot say which lot
+went in which box — so it now fills from `pick_items` when they exist and falls
+back to the lines exactly as before when they do not, the same two-source rule
+`ship_plan` follows. Its result says `from_picked_parcels`, because "why does my
+carton have no lot on it" should not be a mystery from the outside.
+
+Tested against live data in one rolled-back block: 50 picked as 30 of L-A and 20
+of L-B; `packable_quantity` = 50; an empty carton refused a close; a lot code
+without a product refused; 30 of L-A packed leaving 20 unpacked; 25 more refused
+by name with the numbers; a second carton took the remaining 20 and one more unit
+was refused; measurements set and the box closed; a closed box refused an edit,
+reopened, and closed again; the label read 1/2 with TRK-1, 12.5 kg and L-A in its
+contents; `shipment_packing` showed 50/50/0 across two cartons; shipping flipped
+both boxes to SHIPPED and cancelling returned them to PACKED; and autopacking a
+second shipment of 10 at 4 per box produced 3 boxes, `from_picked_parcels` true,
+with lot L-B on every item.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
