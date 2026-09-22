@@ -8,6 +8,7 @@ import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
 import '../data/on_device_scanner.dart';
 import '../data/remote_delivery_note_scanner.dart';
+import '../domain/receipt_detail.dart';
 import '../data/stock_repository.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../domain/delivery_plan.dart';
@@ -42,7 +43,10 @@ final deliveryDioProvider = Provider<Dio>((ref) {
 });
 
 final deliveryRepositoryProvider = Provider<DeliveryRepository>((ref) {
-  return DeliveryRepositoryImpl(ref.watch(deliveryDioProvider));
+  return DeliveryRepositoryImpl(
+    ref.watch(deliveryDioProvider),
+    restDio: ref.watch(restDioProvider),
+  );
 });
 
 /// Dio for Supabase PostgREST (`/rest/v1`), used to read the stock table and
@@ -210,4 +214,32 @@ final reconciliationControllerProvider = StateNotifierProvider.autoDispose
         (ref, plan) {
   return ReconciliationController(
       ref.watch(deliveryRepositoryProvider), plan);
+});
+
+/// One receipt at §12's three levels (0067). Keyed by the reconciliation id, and
+/// autoDispose because a receipt is read once and moved on from.
+final receiptDetailProvider = FutureProvider.autoDispose
+    .family<ReceiptDetail, int>((ref, reconciliationId) async {
+  final result = await ref
+      .watch(deliveryRepositoryProvider)
+      .receiptDetail(reconciliationId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// Which deliveries brought a product's lots in (0067). The family key carries
+/// the optional lot, so "every lot of this product" and "this one lot" are two
+/// cache entries rather than one that keeps being invalidated.
+final lotProvenanceProvider = FutureProvider.autoDispose
+    .family<List<LotProvenance>, ({int productId, String? lotCode})>(
+        (ref, query) async {
+  final result = await ref
+      .watch(deliveryRepositoryProvider)
+      .lotProvenance(query.productId, lotCode: query.lotCode);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
 });

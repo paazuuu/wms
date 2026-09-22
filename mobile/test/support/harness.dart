@@ -19,6 +19,7 @@ import 'package:wms_mobile/features/exceptions/domain/warehouse_exception.dart';
 import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/receipt.dart';
+import 'package:wms_mobile/features/delivery/domain/receipt_detail.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_position.dart';
@@ -187,6 +188,33 @@ class FakeDeliveryRepository implements DeliveryRepository {
   /// message instead of succeeding — e.g. to simulate a permission-denied
   /// RPC response (receiving.confirm / pack.complete).
   String? failWith;
+
+  /// §12's three levels for one receipt (0067). Set [detail] to serve one.
+  ReceiptDetail? detail;
+  int? lastDetailId;
+  List<LotProvenance> provenance = const [];
+  ({int productId, String? lotCode})? lastProvenanceQuery;
+
+  @override
+  Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId) async {
+    lastDetailId = reconciliationId;
+    final d = detail;
+    if (d == null) {
+      return const ApiFailure(message: 'receipt not found', statusCode: 404);
+    }
+    return ApiSuccess(d);
+  }
+
+  @override
+  Future<ApiResult<List<LotProvenance>>> lotProvenance(
+    int productId, {
+    String? lotCode,
+  }) async {
+    lastProvenanceQuery = (productId: productId, lotCode: lotCode);
+    return ApiSuccess(lotCode == null
+        ? provenance
+        : provenance.where((p) => p.lotCode == lotCode).toList());
+  }
 
   @override
   Future<ApiResult<List<DeliveryPlan>>> list(

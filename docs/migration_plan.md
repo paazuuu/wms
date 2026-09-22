@@ -3083,6 +3083,30 @@ that would make a parcel *less* restricted than its product requires, so a picke
 would mostly offer choices the server rejects; the case that actually happens on a
 dock is "this carton arrived wet".
 
+### Reading a receipt back
+
+`ReceiptDetailScreen` is the reason the Item level exists. A week after a
+delivery, "which lot did that bring, and where did it go" is a question somebody
+asks, and before parcels were recorded the only answer was to find whoever was on
+the dock. The screen shows all three of §12's levels, reached by tapping a row in
+the receipt history — a cancelled receipt opens too, because reading what a voided
+receipt said is exactly when someone needs to.
+
+Three details carried deliberately:
+
+- **Each parcel shows the ledger row it posted.** That is §5's argument on screen:
+  the stock came from the movement, and the parcel only records where the movement
+  came from, so nothing is counted twice.
+- **The unattributed remainder is named, not blank.** "5 of something" and "5 we
+  cannot trace" are different facts.
+- **Held units are called out on the receipt that created them** — the figure that
+  explains a receipt whose goods are on hand and unusable.
+
+Parcels belonging to no ordered line get their own section rather than vanishing
+from the read: a carton nobody ordered is exactly the thing you want to see.
+`lot_provenance` is wired in the repository and providers for the traceability
+question ("which delivery brought this lot"), ready for the product detail to use.
+
 Deliberately absent: a "this lot-tracked line has no parcels" warning. The plan
 line does not carry the product's tracking mode, so the client cannot tell which
 lines need one without another read — and 0071 already raises a LOT_MISSING

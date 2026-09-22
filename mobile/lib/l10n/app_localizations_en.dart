@@ -387,7 +387,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiptHistoryTitle => 'Receipts / correct';
 
   @override
-  String get receiptEmpty => 'No receipts yet.';
+  String get receiptEmpty => 'Nothing on this receipt';
 
   @override
   String get receiptEmptyBody =>
@@ -3481,5 +3481,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String parcelLotShort(String lot) {
     return 'L:$lot';
+  }
+
+  @override
+  String get receiptDetailTitle => 'Receipt';
+
+  @override
+  String get receiptLineNoParcels => 'No lot or serial recorded';
+
+  @override
+  String get receiptParcelUnattributed => 'Unattributed';
+
+  @override
+  String get receiptUnlinkedTitle => 'Not on the order';
+
+  @override
+  String get receiptUnlinkedBody => 'Parcels that belong to no ordered line.';
+
+  @override
+  String receiptTotalUnits(int units) {
+    return '$units units';
+  }
+
+  @override
+  String receiptHeldUnits(int units) {
+    return '$units of them cannot ship';
+  }
+
+  @override
+  String receiptLinePlannedActual(int planned, int actual) {
+    return '$planned planned / $actual received';
+  }
+
+  @override
+  String receiptParcelLot(String lot) {
+    return 'Lot $lot';
+  }
+
+  @override
+  String receiptParcelExpiry(String date) {
+    return 'exp $date';
+  }
+
+  @override
+  String receiptParcelMovement(int id) {
+    return 'ledger #$id';
   }
 }

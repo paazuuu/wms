@@ -8,10 +8,22 @@ import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan_line.dart';
 import 'package:wms_mobile/features/delivery/domain/ocr_line.dart';
 import 'package:wms_mobile/features/delivery/domain/receipt.dart';
+import 'package:wms_mobile/features/delivery/domain/receipt_detail.dart';
 import 'package:wms_mobile/features/delivery/domain/reconciliation.dart';
 
 class _FakeRepo implements DeliveryRepository {
   List<ReconcileEntry>? lastEntries;
+
+  @override
+  Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId) async =>
+      const ApiFailure(message: 'not used here', statusCode: 404);
+
+  @override
+  Future<ApiResult<List<LotProvenance>>> lotProvenance(
+    int productId, {
+    String? lotCode,
+  }) async =>
+      const ApiSuccess([]);
 
   @override
   Future<ApiResult<List<DeliveryPlan>>> list(

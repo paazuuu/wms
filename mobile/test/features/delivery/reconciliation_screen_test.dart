@@ -52,4 +52,83 @@ void main() {
     expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
     expect(find.textContaining('receiving.confirm'), findsNothing);
   });
+
+  testWidgets('a counted line offers §12 parcels, and shows what is unattributed',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeDeliveryRepository([_plan()]);
+
+    await pumpApp(
+      tester,
+      const ReconciliationScreen(planId: 1),
+      overrides: [deliveryRepositoryProvider.overrideWithValue(repo)],
+    );
+    await tester.pumpAndSettle();
+
+    // Nothing counted yet: a parcel of a line nobody has counted is a quantity
+    // with extra steps, so it is not offered.
+    expect(find.text('パーセル追加'), findsNothing);
+
+    for (var i = 0; i < 5; i++) {
+      await tester.enterText(find.byType(TextField).first, '4902505632037');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('パーセル追加'), findsOneWidget);
+    expect(find.text('ロット・シリアル未記録'), findsOneWidget);
+
+    // Record three of the five on a lot.
+    await tester.tap(find.text('パーセル追加'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '数量'), '3');
+    await tester.enterText(find.widgetWithText(TextField, 'ロット番号（任意）'), 'L-A');
+    await tester.tap(find.widgetWithText(FilledButton, 'パーセル追加'));
+    await tester.pumpAndSettle();
+
+    // The parcel is listed, and the remainder is stated rather than hidden —
+    // it is the part that will land as one unattributed parcel.
+    expect(find.textContaining('L:L-A'), findsOneWidget);
+    expect(find.text('未記録 2'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('removing a parcel leaves the counted quantity alone',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeDeliveryRepository([_plan()]);
+
+    await pumpApp(
+      tester,
+      const ReconciliationScreen(planId: 1),
+      overrides: [deliveryRepositoryProvider.overrideWithValue(repo)],
+    );
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 5; i++) {
+      await tester.enterText(find.byType(TextField).first, '4902505632037');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('パーセル追加'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '数量'), '5');
+    await tester.tap(find.widgetWithText(FilledButton, 'パーセル追加'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('全数記録済み'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('このパーセルを削除'));
+    await tester.pumpAndSettle();
+
+    // The five are still counted: the operator may have mis-keyed the lot on
+    // cartons that did arrive.
+    expect(find.text('ロット・シリアル未記録'), findsOneWidget);
+    expect(find.text('5'), findsWidgets);
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }

@@ -143,7 +143,7 @@
     }
   },
   "receiptHistoryTitle": "收货记录／更正",
-  "receiptEmpty": "暂无收货记录。",
+  "receiptEmpty": "没有明细",
   "receiptEmptyBody": "每次核对该计划都会在此记录收货，并可取消。",
   "receiptCancelAction": "取消收货",
   "receiptCancelledBadge": "已取消",
@@ -1371,5 +1371,16 @@
   "parcelAllAttributed": "已全部记录",
   "parcelUnattributed": "未记录 {qty}",
   "parcelOverLine": "包裹合计 {parcelled} 超过计数 {counted}",
-  "parcelLotShort": "L:{lot}"
+  "parcelLotShort": "L:{lot}",
+  "receiptDetailTitle": "入库明细",
+  "receiptLineNoParcels": "未记录批次或序列号",
+  "receiptParcelUnattributed": "未记录批次部分",
+  "receiptUnlinkedTitle": "订单外入库",
+  "receiptUnlinkedBody": "未关联到订单明细的包裹。",
+  "receiptTotalUnits": "共 {units} 件",
+  "receiptHeldUnits": "其中 {units} 件无法出库",
+  "receiptLinePlannedActual": "预定 {planned} / 实收 {actual}",
+  "receiptParcelLot": "批次 {lot}",
+  "receiptParcelExpiry": "期限 {date}",
+  "receiptParcelMovement": "库存流水 #{id}"
 }

@@ -11,6 +11,7 @@ import '../../qc/application/inspection_providers.dart';
 import '../../qc/presentation/inspection_detail_screen.dart';
 import '../application/delivery_providers.dart';
 import '../domain/receipt.dart';
+import 'receipt_detail_screen.dart';
 
 /// Receipt history for one plan, with a cancel (訂正／取消) action. Cancelling a
 /// receipt reverses the quantities it added to the plan and to stock, so a
@@ -183,6 +184,12 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      // Tapping opens §12's three levels (0067). A cancelled receipt opens too:
+      // reading what a voided receipt said is exactly when someone needs to.
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ReceiptDetailScreen(reconciliationId: _r.id),
+        )),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -263,6 +270,7 @@ class _ReceiptCardState extends ConsumerState<_ReceiptCard> {
             ],
           ],
         ),
+      ),
       ),
     );
   }

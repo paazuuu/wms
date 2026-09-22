@@ -377,7 +377,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get receiptHistoryTitle => '受領履歴／訂正';
 
   @override
-  String get receiptEmpty => '受領履歴はまだありません。';
+  String get receiptEmpty => '明細がありません';
 
   @override
   String get receiptEmptyBody => 'この予定を照合するたびに、受領がここに記録され、取り消せます。';
@@ -3389,5 +3389,50 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String parcelLotShort(String lot) {
     return 'L:$lot';
+  }
+
+  @override
+  String get receiptDetailTitle => '入荷明細';
+
+  @override
+  String get receiptLineNoParcels => 'ロット・シリアル未記録';
+
+  @override
+  String get receiptParcelUnattributed => 'ロット未記録分';
+
+  @override
+  String get receiptUnlinkedTitle => '予定外の入荷';
+
+  @override
+  String get receiptUnlinkedBody => '発注明細に紐づかないパーセルです。';
+
+  @override
+  String receiptTotalUnits(int units) {
+    return '合計 $units 点';
+  }
+
+  @override
+  String receiptHeldUnits(int units) {
+    return 'うち $units 点は出荷できません';
+  }
+
+  @override
+  String receiptLinePlannedActual(int planned, int actual) {
+    return '予定 $planned / 実績 $actual';
+  }
+
+  @override
+  String receiptParcelLot(String lot) {
+    return 'ロット $lot';
+  }
+
+  @override
+  String receiptParcelExpiry(String date) {
+    return '期限 $date';
+  }
+
+  @override
+  String receiptParcelMovement(int id) {
+    return '在庫履歴 #$id';
   }
 }

@@ -143,7 +143,7 @@
     }
   },
   "receiptHistoryTitle": "Receipts / correct",
-  "receiptEmpty": "No receipts yet.",
+  "receiptEmpty": "Nothing on this receipt",
   "receiptEmptyBody": "Each time this plan is reconciled, the receipt is recorded here and can be cancelled.",
   "receiptCancelAction": "Cancel receipt",
   "receiptCancelledBadge": "Cancelled",
@@ -1371,5 +1371,16 @@
   "parcelAllAttributed": "All attributed",
   "parcelUnattributed": "{qty} unattributed",
   "parcelOverLine": "Parcels total {parcelled}, more than the {counted} counted",
-  "parcelLotShort": "L:{lot}"
+  "parcelLotShort": "L:{lot}",
+  "receiptDetailTitle": "Receipt",
+  "receiptLineNoParcels": "No lot or serial recorded",
+  "receiptParcelUnattributed": "Unattributed",
+  "receiptUnlinkedTitle": "Not on the order",
+  "receiptUnlinkedBody": "Parcels that belong to no ordered line.",
+  "receiptTotalUnits": "{units} units",
+  "receiptHeldUnits": "{units} of them cannot ship",
+  "receiptLinePlannedActual": "{planned} planned / {actual} received",
+  "receiptParcelLot": "Lot {lot}",
+  "receiptParcelExpiry": "exp {date}",
+  "receiptParcelMovement": "ledger #{id}"
 }

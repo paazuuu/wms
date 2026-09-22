@@ -376,7 +376,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get receiptHistoryTitle => '收货记录／更正';
 
   @override
-  String get receiptEmpty => '暂无收货记录。';
+  String get receiptEmpty => '没有明细';
 
   @override
   String get receiptEmptyBody => '每次核对该计划都会在此记录收货，并可取消。';
@@ -3383,5 +3383,50 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String parcelLotShort(String lot) {
     return 'L:$lot';
+  }
+
+  @override
+  String get receiptDetailTitle => '入库明细';
+
+  @override
+  String get receiptLineNoParcels => '未记录批次或序列号';
+
+  @override
+  String get receiptParcelUnattributed => '未记录批次部分';
+
+  @override
+  String get receiptUnlinkedTitle => '订单外入库';
+
+  @override
+  String get receiptUnlinkedBody => '未关联到订单明细的包裹。';
+
+  @override
+  String receiptTotalUnits(int units) {
+    return '共 $units 件';
+  }
+
+  @override
+  String receiptHeldUnits(int units) {
+    return '其中 $units 件无法出库';
+  }
+
+  @override
+  String receiptLinePlannedActual(int planned, int actual) {
+    return '预定 $planned / 实收 $actual';
+  }
+
+  @override
+  String receiptParcelLot(String lot) {
+    return '批次 $lot';
+  }
+
+  @override
+  String receiptParcelExpiry(String date) {
+    return '期限 $date';
+  }
+
+  @override
+  String receiptParcelMovement(int id) {
+    return '库存流水 #$id';
   }
 }

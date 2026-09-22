@@ -790,10 +790,10 @@ abstract class AppLocalizations {
   /// **'受領履歴／訂正'**
   String get receiptHistoryTitle;
 
-  /// No description provided for @receiptEmpty.
+  /// Receipt detail: no lines and no parcels.
   ///
   /// In ja, this message translates to:
-  /// **'受領履歴はまだありません。'**
+  /// **'明細がありません'**
   String get receiptEmpty;
 
   /// No description provided for @receiptEmptyBody.
@@ -6447,6 +6447,72 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'L:{lot}'**
   String parcelLotShort(String lot);
+
+  /// Title of the receipt detail screen (§12, 0067).
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷明細'**
+  String get receiptDetailTitle;
+
+  /// Receipt line: nothing was attributed to a lot or serial.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット・シリアル未記録'**
+  String get receiptLineNoParcels;
+
+  /// Receipt parcel: the remainder with no lot recorded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット未記録分'**
+  String get receiptParcelUnattributed;
+
+  /// Receipt detail: parcels belonging to no ordered line.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get receiptUnlinkedTitle;
+
+  /// Receipt detail: what the unlinked section holds.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注明細に紐づかないパーセルです。'**
+  String get receiptUnlinkedBody;
+
+  /// Receipt detail: total units received.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計 {units} 点'**
+  String receiptTotalUnits(int units);
+
+  /// Receipt detail: how much of the receipt is held (§13).
+  ///
+  /// In ja, this message translates to:
+  /// **'うち {units} 点は出荷できません'**
+  String receiptHeldUnits(int units);
+
+  /// Receipt detail line: planned against received.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定 {planned} / 実績 {actual}'**
+  String receiptLinePlannedActual(int planned, int actual);
+
+  /// Receipt parcel: which lot.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット {lot}'**
+  String receiptParcelLot(String lot);
+
+  /// Receipt parcel: the expiry date.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限 {date}'**
+  String receiptParcelExpiry(String date);
+
+  /// Receipt parcel: the ledger row this parcel posted (§5).
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫履歴 #{id}'**
+  String receiptParcelMovement(int id);
 }
 
 class _AppLocalizationsDelegate

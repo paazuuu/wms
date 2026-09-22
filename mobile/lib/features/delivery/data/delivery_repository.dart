@@ -5,6 +5,7 @@ import '../../../core/api/api_result.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/reconciliation.dart';
 import '../domain/receipt.dart';
+import '../domain/receipt_detail.dart';
 
 /// One counted line submitted at the end of a reconciliation session.
 class ReconcileEntry {
@@ -219,6 +220,18 @@ abstract class DeliveryRepository {
   /// Save the plan with the reviewed (possibly edited) header and lines.
   Future<ApiResult<PlanImportResult>> commitPlan(PlanCommit commit);
 
+  /// One receipt at all three of §12's levels — the delivery, its lines, their
+  /// parcels (`receipt_detail`, 0067). A guarded read, so it goes straight to
+  /// PostgREST rather than through the edge function.
+  Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId);
+
+  /// Which deliveries brought a product's lots in (`lot_provenance`, 0067).
+  /// [lotCode] narrows it to one lot; without it, every lot of the product.
+  Future<ApiResult<List<LotProvenance>>> lotProvenance(
+    int productId, {
+    String? lotCode,
+  });
+
   /// The receipts recorded against a plan, newest first.
   Future<ApiResult<List<Receipt>>> receipts(int planId);
 
@@ -228,7 +241,13 @@ abstract class DeliveryRepository {
 }
 
 class DeliveryRepositoryImpl implements DeliveryRepository {
-  DeliveryRepositoryImpl(this._dio);
+  /// Two clients, because this repository spans two doors: the receiving writes
+  /// go through the edge function (`_dio`), which is the only gate in front of
+  /// RPCs granted to `service_role` alone, while the parcel reads are ordinary
+  /// guarded RPCs (`_restDio`).
+  DeliveryRepositoryImpl(this._dio, {Dio? restDio}) : _restDio = restDio ?? _dio;
+
+  final Dio _restDio;
 
   final Dio _dio;
 
@@ -329,6 +348,46 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
           response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<PlanImportResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId) async {
+    try {
+      final response = await _restDio.post('/rpc/receipt_detail', data: {
+        'p_reconciliation_id': reconciliationId,
+      });
+      final data = response.data;
+      final row = data is List ? (data.isEmpty ? null : data.first) : data;
+      if (row is! Map) {
+        return const ApiFailure(message: 'receipt not found', statusCode: 404);
+      }
+      return ApiSuccess(ReceiptDetail.fromJson(row.cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<ReceiptDetail>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<LotProvenance>>> lotProvenance(
+    int productId, {
+    String? lotCode,
+  }) async {
+    try {
+      final response = await _restDio.post('/rpc/lot_provenance', data: {
+        'p_product_id': productId,
+        'p_lot_code': lotCode,
+      });
+      final data = response.data;
+      final list = data is List
+          ? (data.length == 1 && data.first is List ? data.first as List : data)
+          : const [];
+      return ApiSuccess(list
+          .whereType<Map>()
+          .map((e) => LotProvenance.fromJson(e.cast<String, dynamic>()))
+          .toList(growable: false));
+    } on DioException catch (e) {
+      return mapDioError<List<LotProvenance>>(e);
     }
   }
 
