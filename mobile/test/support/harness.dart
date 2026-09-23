@@ -72,8 +72,15 @@ import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.
 import 'package:wms_mobile/features/warehouse_context/data/location_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/location.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
+import 'package:wms_mobile/core/api/supabase_auth_interceptor.dart';
+import 'package:wms_mobile/features/auth/application/auth_controller.dart';
+import 'package:wms_mobile/features/auth/data/auth_repository.dart';
+import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
+import 'package:wms_mobile/features/wave/application/pick_wave_providers.dart';
+import 'package:wms_mobile/features/wave/data/pick_wave_repository.dart';
+import 'package:wms_mobile/features/wave/domain/pick_wave.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
@@ -117,6 +124,7 @@ List<Override> _defaultOverrides() => [
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
       reportRepositoryProvider.overrideWithValue(FakeReportRepository()),
       putawayRepositoryProvider.overrideWithValue(FakePutawayRepository()),
+      pickWaveRepositoryProvider.overrideWithValue(FakePickWaveRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -2590,4 +2598,148 @@ class FakeExceptionRepository implements ExceptionRepository {
     int? inspectionId,
   }) async =>
       const ApiSuccess(1);
+}
+
+/// A repository that is always signed in as one fixed [user] — for the few
+/// screens (e.g. wave assignment) that compare the caller's own id against a
+/// record's, and have no other way to be told who "the caller" is in a test.
+class _FakeAuthUserRepository implements AuthRepository {
+  _FakeAuthUserRepository(this.user);
+  final AuthUser user;
+
+  @override
+  Future<ApiResult<AuthUser>> login(String email, String password) async =>
+      ApiSuccess(user);
+  @override
+  Future<ApiResult<AuthUser>> currentUser() async => ApiSuccess(user);
+  @override
+  Future<void> logout() async {}
+}
+
+/// A real [AuthController] wired to [_FakeAuthUserRepository], so its own
+/// startup restore (`_restore()`, which every `AuthController` runs on
+/// construction) lands on [user] instead of hitting the network. Override
+/// `authControllerProvider` with this rather than a bare `StateNotifier<
+/// AuthState>`: the provider's type is `StateNotifierProvider<AuthController,
+/// AuthState>`, so only an actual `AuthController` satisfies it.
+AuthController fakeAuthControllerFor(AuthUser user) => AuthController(
+      _FakeAuthUserRepository(user),
+      SupabaseTokenRefresher(
+        storage: SupabaseSessionStorage(_FakeSecureKeyValueStore()),
+        refresh: (_) async => null,
+      ),
+    );
+
+/// §15's wave picking stub. [waves] is what `pick_wave_index` would return;
+/// create()/assign()/complete()/cancel() mutate an in-memory copy so a screen
+/// test can assert the change stuck.
+class FakePickWaveRepository implements PickWaveRepository {
+  FakePickWaveRepository({List<PickWave> waves = const []}) : _waves = List.of(waves);
+
+  List<PickWave> _waves;
+
+  /// What create() reports; a test overrides this to exercise the skipped path.
+  CreatePickWaveResult createResult = const CreatePickWaveResult(
+      waveId: 1, code: 'WV-000001', pickListIds: [], skipped: []);
+  List<int>? lastCreateShipmentPlanIds;
+
+  /// The sheet plan() returns; keyed by nothing — one wave at a time in tests.
+  WavePickPlan? sheet;
+
+  String? lastAssignedUserId;
+  int? lastAssignedWaveId;
+
+  /// What assign() should say the assignee's display name is — the server
+  /// would resolve this from the id; the fake has to be told.
+  String? assignedToNameForAssign;
+
+  PickWave _copyWith(PickWave w, {PickWaveStatus? status, String? assignedTo}) =>
+      PickWave(
+        id: w.id,
+        code: w.code,
+        warehouseId: w.warehouseId,
+        warehouseName: w.warehouseName,
+        status: status ?? w.status,
+        assignedTo: assignedTo,
+        assignedToName: assignedTo == null ? null : assignedToNameForAssign,
+        priority: w.priority,
+        note: w.note,
+        createdAt: w.createdAt,
+        startedAt: w.startedAt,
+        completedAt: w.completedAt,
+        taskCount: w.taskCount,
+        pickedCount: w.pickedCount,
+        listCount: w.listCount,
+        lists: w.lists,
+      );
+
+  @override
+  Future<ApiResult<List<PickWave>>> index({int? warehouseId, String? status}) async =>
+      ApiSuccess(_waves
+          .where((w) =>
+              (warehouseId == null || w.warehouseId == warehouseId) &&
+              (status == null || w.status.wire == status))
+          .toList());
+
+  @override
+  Future<ApiResult<PickWave>> detail(int id) async =>
+      ApiSuccess(_waves.firstWhere((w) => w.id == id));
+
+  @override
+  Future<ApiResult<CreatePickWaveResult>> create({
+    required int warehouseId,
+    required List<int> shipmentPlanIds,
+    String? code,
+    String? assignedTo,
+    int priority = 100,
+    String? note,
+  }) async {
+    lastCreateShipmentPlanIds = shipmentPlanIds;
+    return ApiSuccess(createResult);
+  }
+
+  @override
+  Future<ApiResult<PickWave>> assign(int id, {String? userId}) async {
+    lastAssignedWaveId = id;
+    lastAssignedUserId = userId;
+    _waves = [
+      for (final w in _waves)
+        if (w.id == id)
+          _copyWith(w,
+              status: userId != null && w.status == PickWaveStatus.open
+                  ? PickWaveStatus.picking
+                  : null,
+              assignedTo: userId)
+        else
+          w,
+    ];
+    return ApiSuccess(_waves.firstWhere((w) => w.id == id));
+  }
+
+  @override
+  Future<ApiResult<WaveOutcome>> complete(int id) async {
+    final w = _waves.firstWhere((x) => x.id == id);
+    if (w.pickedCount < w.taskCount) {
+      return ApiFailure(message: 'wave $id still has unpicked line(s)', statusCode: 400);
+    }
+    _waves = [
+      for (final x in _waves)
+        if (x.id == id) _copyWith(x, status: PickWaveStatus.done) else x,
+    ];
+    return ApiSuccess(WaveOutcome(waveId: id, status: 'DONE', count: w.lists.length));
+  }
+
+  @override
+  Future<ApiResult<WaveOutcome>> cancel(int id) async {
+    final w = _waves.firstWhere((x) => x.id == id);
+    _waves = [
+      for (final x in _waves)
+        if (x.id == id) _copyWith(x, status: PickWaveStatus.cancelled) else x,
+    ];
+    return ApiSuccess(WaveOutcome(waveId: id, status: 'CANCELLED', count: w.lists.length));
+  }
+
+  @override
+  Future<ApiResult<WavePickPlan>> plan(int id) async =>
+      ApiSuccess(sheet ?? WavePickPlan(waveId: id));
 }

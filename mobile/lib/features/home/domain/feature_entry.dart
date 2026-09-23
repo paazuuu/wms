@@ -85,6 +85,8 @@ class FeatureEntry {
         return l10n.featStockCount;
       case 'picking':
         return l10n.featPicking;
+      case 'wave':
+        return l10n.featWave;
       case 'transfer':
         return l10n.featTransfer;
       case 'audit_log':
@@ -141,6 +143,8 @@ class FeatureEntry {
         return l10n.featStockCountDesc;
       case 'picking':
         return l10n.featPickingDesc;
+      case 'wave':
+        return l10n.featWaveDesc;
       case 'transfer':
         return l10n.featTransferDesc;
       case 'audit_log':

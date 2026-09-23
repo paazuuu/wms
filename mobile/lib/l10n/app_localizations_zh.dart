@@ -3517,4 +3517,120 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get soOpenShipment => '打开出库单';
+
+  @override
+  String get featWave => '波次拣货';
+
+  @override
+  String get featWaveDesc => '将多个出库单合并为一次巡查';
+
+  @override
+  String get waveListTitle => '波次拣货';
+
+  @override
+  String get waveEmpty => '暂无波次';
+
+  @override
+  String get waveEmptyBody => '可将多个出库单合并，一次巡查完成拣货。';
+
+  @override
+  String get waveCreate => '创建波次';
+
+  @override
+  String get waveChooseShipments => '选择出库单（可多选）';
+
+  @override
+  String get waveNoShipments => '没有可用的出库单';
+
+  @override
+  String get waveSelectAtLeastOne => '请至少选择一个出库单';
+
+  @override
+  String waveCreated(String code, int lists) {
+    return '已创建波次 $code（$lists 个出库单）';
+  }
+
+  @override
+  String waveCreatedWithSkips(String code, int lists, int skipped) {
+    return '已创建波次 $code（$lists 个加入・$skipped 个跳过）';
+  }
+
+  @override
+  String get waveStatusOpen => '未开始';
+
+  @override
+  String get waveStatusPicking => '进行中';
+
+  @override
+  String get waveStatusDone => '已完成';
+
+  @override
+  String get waveStatusCancelled => '已取消';
+
+  @override
+  String waveListsProgress(int picked, int total) {
+    return '$picked / $total 项';
+  }
+
+  @override
+  String get waveUnassigned => '未指派';
+
+  @override
+  String get waveAssignToMe => '由我负责';
+
+  @override
+  String get waveUnassign => '取消指派';
+
+  @override
+  String get waveViewSheet => '查看拣货表';
+
+  @override
+  String get waveSheetTitle => '拣货表';
+
+  @override
+  String get waveSheetEmpty => '没有可拣货的明细';
+
+  @override
+  String waveSheetTotalUnits(int total) {
+    return '合计 $total 件';
+  }
+
+  @override
+  String waveSheetForOrders(int count) {
+    return '对应 $count 个出库单';
+  }
+
+  @override
+  String get waveShortfallTitle => '缺货';
+
+  @override
+  String waveShortfallUnits(int short) {
+    return '缺 $short 件';
+  }
+
+  @override
+  String get waveLists => '包含的出库单';
+
+  @override
+  String get waveComplete => '完成波次';
+
+  @override
+  String get waveCompleteQ => '要完成此波次吗？其中所有出库单都将结单。';
+
+  @override
+  String waveCompleted(int count) {
+    return '波次已完成（$count 项）';
+  }
+
+  @override
+  String get waveIncomplete => '仍有未拣货的明细';
+
+  @override
+  String get waveCancelAction => '取消波次';
+
+  @override
+  String get waveCancelQ => '要取消此波次吗？其出库单将被释放，已记录的拣货将保留。';
+
+  @override
+  String get waveCancelled => '波次已取消';
 }

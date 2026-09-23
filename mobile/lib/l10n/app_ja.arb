@@ -2645,5 +2645,188 @@
   "soOpenShipment": "出荷を開く",
   "@soOpenShipment": {
     "description": "Action: open the shipment this sales order already became."
+  },
+  "featWave": "ウェーブピッキング",
+  "@featWave": {
+    "description": "Home menu label: pick waves (§15, 0077)."
+  },
+  "featWaveDesc": "複数の出荷をまとめて1回の巡回でピッキング",
+  "@featWaveDesc": {
+    "description": "Home menu one-line description for wave picking."
+  },
+  "waveListTitle": "ウェーブピッキング",
+  "@waveListTitle": {
+    "description": "Wave list screen title."
+  },
+  "waveEmpty": "ウェーブがまだありません",
+  "@waveEmpty": {
+    "description": "Wave list empty state title."
+  },
+  "waveEmptyBody": "複数の出荷をまとめて、一度の巡回でピッキングできます。",
+  "@waveEmptyBody": {
+    "description": "Wave list empty state body."
+  },
+  "waveCreate": "ウェーブを作成",
+  "@waveCreate": {
+    "description": "Action: build a new pick wave from several shipments."
+  },
+  "waveChooseShipments": "出荷を選択（複数可）",
+  "@waveChooseShipments": {
+    "description": "Wave creation: pick which shipments to group."
+  },
+  "waveNoShipments": "対象の出荷がありません",
+  "@waveNoShipments": {
+    "description": "No open shipments available to build a wave from."
+  },
+  "waveSelectAtLeastOne": "出荷を1件以上選択してください",
+  "@waveSelectAtLeastOne": {
+    "description": "Wave creation validation: nothing selected."
+  },
+  "waveCreated": "ウェーブ {code} を作成しました（{lists} 件の出荷）",
+  "@waveCreated": {
+    "description": "Wave created successfully.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "lists": {
+        "type": "int"
+      }
+    }
+  },
+  "waveCreatedWithSkips": "ウェーブ {code} を作成しました（{lists} 件・対象外 {skipped} 件）",
+  "@waveCreatedWithSkips": {
+    "description": "Wave created, some shipments could not join.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "lists": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "waveStatusOpen": "未着手",
+  "@waveStatusOpen": {
+    "description": "Wave status: OPEN."
+  },
+  "waveStatusPicking": "作業中",
+  "@waveStatusPicking": {
+    "description": "Wave status: PICKING."
+  },
+  "waveStatusDone": "完了",
+  "@waveStatusDone": {
+    "description": "Wave status: DONE."
+  },
+  "waveStatusCancelled": "取消",
+  "@waveStatusCancelled": {
+    "description": "Wave status: CANCELLED."
+  },
+  "waveListsProgress": "{picked} / {total} 明細",
+  "@waveListsProgress": {
+    "description": "Wave progress: tasks picked over total.",
+    "placeholders": {
+      "picked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "waveUnassigned": "未担当",
+  "@waveUnassigned": {
+    "description": "No one is assigned to this wave yet."
+  },
+  "waveAssignToMe": "自分が担当する",
+  "@waveAssignToMe": {
+    "description": "Action: take this wave."
+  },
+  "waveUnassign": "担当を解除",
+  "@waveUnassign": {
+    "description": "Action: hand the wave back to the pool."
+  },
+  "waveViewSheet": "ピッキング表を見る",
+  "@waveViewSheet": {
+    "description": "Action: open the aggregated pick sheet for this wave."
+  },
+  "waveSheetTitle": "ピッキング表",
+  "@waveSheetTitle": {
+    "description": "The aggregated sheet screen title — one stop per place, not per order."
+  },
+  "waveSheetEmpty": "ピッキング可能な明細がありません",
+  "@waveSheetEmpty": {
+    "description": "Wave sheet empty state."
+  },
+  "waveSheetTotalUnits": "合計 {total} 点",
+  "@waveSheetTotalUnits": {
+    "description": "Total units across the wave's sheet.",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "waveSheetForOrders": "{count} 件の出荷向け",
+  "@waveSheetForOrders": {
+    "description": "How many distinct orders one stop's units are for.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "waveShortfallTitle": "不足分",
+  "@waveShortfallTitle": {
+    "description": "Section heading: what the wave could not cover."
+  },
+  "waveShortfallUnits": "{short} 点不足",
+  "@waveShortfallUnits": {
+    "description": "How many units short one line is.",
+    "placeholders": {
+      "short": {
+        "type": "int"
+      }
+    }
+  },
+  "waveLists": "含まれる出荷",
+  "@waveLists": {
+    "description": "Section heading: the shipments' pick lists this wave groups."
+  },
+  "waveComplete": "ウェーブを完了",
+  "@waveComplete": {
+    "description": "Action: close every list in this wave."
+  },
+  "waveCompleteQ": "このウェーブを完了しますか？含まれる出荷はすべて確定します。",
+  "@waveCompleteQ": {
+    "description": "Confirmation body for completing a wave."
+  },
+  "waveCompleted": "ウェーブを完了しました（{count} 件）",
+  "@waveCompleted": {
+    "description": "Wave completed successfully.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "waveIncomplete": "未ピックの明細が残っています",
+  "@waveIncomplete": {
+    "description": "A wave with unpicked tasks cannot be completed."
+  },
+  "waveCancelAction": "ウェーブを取消",
+  "@waveCancelAction": {
+    "description": "Action: cancel the wave, releasing its shipments."
+  },
+  "waveCancelQ": "このウェーブを取り消しますか？含まれる出荷は解放され、記録済みのピックはそのまま残ります。",
+  "@waveCancelQ": {
+    "description": "Confirmation body for cancelling a wave."
+  },
+  "waveCancelled": "ウェーブを取り消しました",
+  "@waveCancelled": {
+    "description": "Wave cancelled successfully."
   }
 }

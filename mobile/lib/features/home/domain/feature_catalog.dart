@@ -13,6 +13,7 @@ import '../../inventory/presentation/reservations_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
+import '../../wave/presentation/pick_wave_list_screen.dart';
 import '../../partners/presentation/trading_partner_list_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
@@ -114,6 +115,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.shopping_cart_checkout_outlined,
             status: FeatureStatus.ready,
             builder: _picking,
+            requiredAnyOf: ['pick.confirm'],
+          ),
+          FeatureEntry(
+            id: 'wave',
+            icon: Icons.route_outlined,
+            status: FeatureStatus.ready,
+            builder: _wave,
             requiredAnyOf: ['pick.confirm'],
           ),
           FeatureEntry(
@@ -266,6 +274,7 @@ Widget _putaway(BuildContext _) => const PutawayQueueScreen();
 
 /// Top-level (const-referenceable) builder for the Picking feature.
 Widget _picking(BuildContext _) => const PickListIndexScreen();
+Widget _wave(BuildContext _) => const PickWaveListScreen();
 
 /// Top-level (const-referenceable) builder for the Transfer feature.
 Widget _transfer(BuildContext _) => const TransferListScreen();

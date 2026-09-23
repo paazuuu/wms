@@ -6669,6 +6669,210 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷を開く'**
   String get soOpenShipment;
+
+  /// Home menu label: pick waves (§15, 0077).
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブピッキング'**
+  String get featWave;
+
+  /// Home menu one-line description for wave picking.
+  ///
+  /// In ja, this message translates to:
+  /// **'複数の出荷をまとめて1回の巡回でピッキング'**
+  String get featWaveDesc;
+
+  /// Wave list screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブピッキング'**
+  String get waveListTitle;
+
+  /// Wave list empty state title.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブがまだありません'**
+  String get waveEmpty;
+
+  /// Wave list empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'複数の出荷をまとめて、一度の巡回でピッキングできます。'**
+  String get waveEmptyBody;
+
+  /// Action: build a new pick wave from several shipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブを作成'**
+  String get waveCreate;
+
+  /// Wave creation: pick which shipments to group.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を選択（複数可）'**
+  String get waveChooseShipments;
+
+  /// No open shipments available to build a wave from.
+  ///
+  /// In ja, this message translates to:
+  /// **'対象の出荷がありません'**
+  String get waveNoShipments;
+
+  /// Wave creation validation: nothing selected.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を1件以上選択してください'**
+  String get waveSelectAtLeastOne;
+
+  /// Wave created successfully.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブ {code} を作成しました（{lists} 件の出荷）'**
+  String waveCreated(String code, int lists);
+
+  /// Wave created, some shipments could not join.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブ {code} を作成しました（{lists} 件・対象外 {skipped} 件）'**
+  String waveCreatedWithSkips(String code, int lists, int skipped);
+
+  /// Wave status: OPEN.
+  ///
+  /// In ja, this message translates to:
+  /// **'未着手'**
+  String get waveStatusOpen;
+
+  /// Wave status: PICKING.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業中'**
+  String get waveStatusPicking;
+
+  /// Wave status: DONE.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get waveStatusDone;
+
+  /// Wave status: CANCELLED.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get waveStatusCancelled;
+
+  /// Wave progress: tasks picked over total.
+  ///
+  /// In ja, this message translates to:
+  /// **'{picked} / {total} 明細'**
+  String waveListsProgress(int picked, int total);
+
+  /// No one is assigned to this wave yet.
+  ///
+  /// In ja, this message translates to:
+  /// **'未担当'**
+  String get waveUnassigned;
+
+  /// Action: take this wave.
+  ///
+  /// In ja, this message translates to:
+  /// **'自分が担当する'**
+  String get waveAssignToMe;
+
+  /// Action: hand the wave back to the pool.
+  ///
+  /// In ja, this message translates to:
+  /// **'担当を解除'**
+  String get waveUnassign;
+
+  /// Action: open the aggregated pick sheet for this wave.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング表を見る'**
+  String get waveViewSheet;
+
+  /// The aggregated sheet screen title — one stop per place, not per order.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング表'**
+  String get waveSheetTitle;
+
+  /// Wave sheet empty state.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング可能な明細がありません'**
+  String get waveSheetEmpty;
+
+  /// Total units across the wave's sheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計 {total} 点'**
+  String waveSheetTotalUnits(int total);
+
+  /// How many distinct orders one stop's units are for.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count} 件の出荷向け'**
+  String waveSheetForOrders(int count);
+
+  /// Section heading: what the wave could not cover.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足分'**
+  String get waveShortfallTitle;
+
+  /// How many units short one line is.
+  ///
+  /// In ja, this message translates to:
+  /// **'{short} 点不足'**
+  String waveShortfallUnits(int short);
+
+  /// Section heading: the shipments' pick lists this wave groups.
+  ///
+  /// In ja, this message translates to:
+  /// **'含まれる出荷'**
+  String get waveLists;
+
+  /// Action: close every list in this wave.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブを完了'**
+  String get waveComplete;
+
+  /// Confirmation body for completing a wave.
+  ///
+  /// In ja, this message translates to:
+  /// **'このウェーブを完了しますか？含まれる出荷はすべて確定します。'**
+  String get waveCompleteQ;
+
+  /// Wave completed successfully.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブを完了しました（{count} 件）'**
+  String waveCompleted(int count);
+
+  /// A wave with unpicked tasks cannot be completed.
+  ///
+  /// In ja, this message translates to:
+  /// **'未ピックの明細が残っています'**
+  String get waveIncomplete;
+
+  /// Action: cancel the wave, releasing its shipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブを取消'**
+  String get waveCancelAction;
+
+  /// Confirmation body for cancelling a wave.
+  ///
+  /// In ja, this message translates to:
+  /// **'このウェーブを取り消しますか？含まれる出荷は解放され、記録済みのピックはそのまま残ります。'**
+  String get waveCancelQ;
+
+  /// Wave cancelled successfully.
+  ///
+  /// In ja, this message translates to:
+  /// **'ウェーブを取り消しました'**
+  String get waveCancelled;
 }
 
 class _AppLocalizationsDelegate

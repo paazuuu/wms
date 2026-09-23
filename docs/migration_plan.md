@@ -3503,6 +3503,38 @@ one offering both "出荷を開く" and "完了にする". The old lifecycle tes
 approve → complete) now runs submit → approve → **create shipment** → complete,
 which is the flow 0073 actually built.
 
+### §15's wave picking, reachable (0077)
+
+New feature module (`lib/features/wave/`) rather than folded into the existing
+picking feature: a wave groups pick lists but does not change what one is, and
+`record_pick_item`/`complete_pick_list` (picking feature) work on its lists
+completely unchanged — wiring it in as a sibling that links out to the existing
+`PickListDetailScreen` for the actual recording keeps that boundary honest
+instead of duplicating it.
+
+**The sheet (`PickWaveSheetScreen`) is why a wave exists**, so it is built
+first and tested hardest: the fixture asks three shipments for 10 of the same
+parcel each, and asserts the sheet shows **one card reading "30", not three**,
+with `waveSheetForOrders(3)` naming how many orders that card is for. A second
+product split thin across two parcels and a third order's shortfall prove the
+per-parcel claim-tracking and the shortfall list separately — both come
+straight from `wave_pick_plan`'s own aggregation, the client only renders it.
+
+The detail screen exposes the lifecycle 0077 built: assign / hand back (a
+`FilledButton`'s enabled state is the refusal — completing is disabled, not
+hidden, while `pickedCount < taskCount`, so the reason ("未ピックの明細が残っています")
+reads on the button itself rather than in a dialog reached only after tapping
+a dead action), complete, and cancel. Assignment needed "who am I" for the
+first time in this codebase — `authControllerProvider`'s user id compared
+against the wave's `assignedTo` — so `harness.dart` gained
+`fakeAuthControllerFor`, a real `AuthController` backed by a repository that
+always answers with one fixed user, because the provider's type
+(`StateNotifierProvider<AuthController, AuthState>`) accepts nothing looser.
+
+Creating a wave reuses `pickableShipmentsProvider` (already built for starting
+a single pick list) behind a multi-select sheet — no new "which shipments are
+open" query, just a different selection widget over the same list.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

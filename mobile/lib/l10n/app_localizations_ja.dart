@@ -3523,4 +3523,120 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get soOpenShipment => '出荷を開く';
+
+  @override
+  String get featWave => 'ウェーブピッキング';
+
+  @override
+  String get featWaveDesc => '複数の出荷をまとめて1回の巡回でピッキング';
+
+  @override
+  String get waveListTitle => 'ウェーブピッキング';
+
+  @override
+  String get waveEmpty => 'ウェーブがまだありません';
+
+  @override
+  String get waveEmptyBody => '複数の出荷をまとめて、一度の巡回でピッキングできます。';
+
+  @override
+  String get waveCreate => 'ウェーブを作成';
+
+  @override
+  String get waveChooseShipments => '出荷を選択（複数可）';
+
+  @override
+  String get waveNoShipments => '対象の出荷がありません';
+
+  @override
+  String get waveSelectAtLeastOne => '出荷を1件以上選択してください';
+
+  @override
+  String waveCreated(String code, int lists) {
+    return 'ウェーブ $code を作成しました（$lists 件の出荷）';
+  }
+
+  @override
+  String waveCreatedWithSkips(String code, int lists, int skipped) {
+    return 'ウェーブ $code を作成しました（$lists 件・対象外 $skipped 件）';
+  }
+
+  @override
+  String get waveStatusOpen => '未着手';
+
+  @override
+  String get waveStatusPicking => '作業中';
+
+  @override
+  String get waveStatusDone => '完了';
+
+  @override
+  String get waveStatusCancelled => '取消';
+
+  @override
+  String waveListsProgress(int picked, int total) {
+    return '$picked / $total 明細';
+  }
+
+  @override
+  String get waveUnassigned => '未担当';
+
+  @override
+  String get waveAssignToMe => '自分が担当する';
+
+  @override
+  String get waveUnassign => '担当を解除';
+
+  @override
+  String get waveViewSheet => 'ピッキング表を見る';
+
+  @override
+  String get waveSheetTitle => 'ピッキング表';
+
+  @override
+  String get waveSheetEmpty => 'ピッキング可能な明細がありません';
+
+  @override
+  String waveSheetTotalUnits(int total) {
+    return '合計 $total 点';
+  }
+
+  @override
+  String waveSheetForOrders(int count) {
+    return '$count 件の出荷向け';
+  }
+
+  @override
+  String get waveShortfallTitle => '不足分';
+
+  @override
+  String waveShortfallUnits(int short) {
+    return '$short 点不足';
+  }
+
+  @override
+  String get waveLists => '含まれる出荷';
+
+  @override
+  String get waveComplete => 'ウェーブを完了';
+
+  @override
+  String get waveCompleteQ => 'このウェーブを完了しますか？含まれる出荷はすべて確定します。';
+
+  @override
+  String waveCompleted(int count) {
+    return 'ウェーブを完了しました（$count 件）';
+  }
+
+  @override
+  String get waveIncomplete => '未ピックの明細が残っています';
+
+  @override
+  String get waveCancelAction => 'ウェーブを取消';
+
+  @override
+  String get waveCancelQ => 'このウェーブを取り消しますか？含まれる出荷は解放され、記録済みのピックはそのまま残ります。';
+
+  @override
+  String get waveCancelled => 'ウェーブを取り消しました';
 }

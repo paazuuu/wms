@@ -3616,4 +3616,123 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get soOpenShipment => 'Open shipment';
+
+  @override
+  String get featWave => 'Wave picking';
+
+  @override
+  String get featWaveDesc => 'Group several shipments into one walk';
+
+  @override
+  String get waveListTitle => 'Wave picking';
+
+  @override
+  String get waveEmpty => 'No waves yet';
+
+  @override
+  String get waveEmptyBody =>
+      'Group several shipments so they can be picked in one walk.';
+
+  @override
+  String get waveCreate => 'Create wave';
+
+  @override
+  String get waveChooseShipments => 'Choose shipments (multiple)';
+
+  @override
+  String get waveNoShipments => 'No shipments available';
+
+  @override
+  String get waveSelectAtLeastOne => 'Select at least one shipment';
+
+  @override
+  String waveCreated(String code, int lists) {
+    return 'Wave $code created ($lists shipments)';
+  }
+
+  @override
+  String waveCreatedWithSkips(String code, int lists, int skipped) {
+    return 'Wave $code created ($lists joined, $skipped skipped)';
+  }
+
+  @override
+  String get waveStatusOpen => 'Open';
+
+  @override
+  String get waveStatusPicking => 'In progress';
+
+  @override
+  String get waveStatusDone => 'Done';
+
+  @override
+  String get waveStatusCancelled => 'Cancelled';
+
+  @override
+  String waveListsProgress(int picked, int total) {
+    return '$picked / $total lines';
+  }
+
+  @override
+  String get waveUnassigned => 'Unassigned';
+
+  @override
+  String get waveAssignToMe => 'Take this wave';
+
+  @override
+  String get waveUnassign => 'Hand back';
+
+  @override
+  String get waveViewSheet => 'View pick sheet';
+
+  @override
+  String get waveSheetTitle => 'Pick sheet';
+
+  @override
+  String get waveSheetEmpty => 'Nothing pickable';
+
+  @override
+  String waveSheetTotalUnits(int total) {
+    return '$total units total';
+  }
+
+  @override
+  String waveSheetForOrders(int count) {
+    return 'for $count shipments';
+  }
+
+  @override
+  String get waveShortfallTitle => 'Shortfall';
+
+  @override
+  String waveShortfallUnits(int short) {
+    return '$short short';
+  }
+
+  @override
+  String get waveLists => 'Shipments in this wave';
+
+  @override
+  String get waveComplete => 'Complete wave';
+
+  @override
+  String get waveCompleteQ =>
+      'Complete this wave? Every shipment in it will be closed out.';
+
+  @override
+  String waveCompleted(int count) {
+    return 'Wave completed ($count)';
+  }
+
+  @override
+  String get waveIncomplete => 'Some lines are still unpicked';
+
+  @override
+  String get waveCancelAction => 'Cancel wave';
+
+  @override
+  String get waveCancelQ =>
+      'Cancel this wave? Its shipments are released; any picking already recorded stays.';
+
+  @override
+  String get waveCancelled => 'Wave cancelled';
 }
