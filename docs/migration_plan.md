@@ -3400,6 +3400,77 @@ both boxes to SHIPPED and cancelling returned them to PACKED; and autopacking a
 second shipment of 10 at 4 per box produced 3 boxes, `from_picked_parcels` true,
 with lot L-B on every item.
 
+### 0077 — §15's wave, and the walk it exists to save
+
+A wave that is only a folder holding several pick lists satisfies the word and
+none of the point. The substance is `wave_pick_plan`, and the arithmetic it
+exists for:
+
+    Three orders, each wanting 10 of the same product from the same rack.
+    Three pick lists  -> three walks to that rack, 30 units in three trips.
+    One wave          -> one line on the sheet: "R-01-A, lot L-B, take 30",
+                         knowing which of the three tasks each unit is for.
+
+That aggregation is a read, the same choice 0074 made for `pick_candidates` and
+0069 for `putaway_suggestions` — advice lives in a function you can call again;
+what a picker actually took lives in `pick_items`, unchanged by any of this.
+
+**The hard part**: aggregating suggestions across tasks cannot just call
+`pick_candidates` per task and add the results — each call would offer the same
+parcel to every task, telling one picker to take 30 from a box holding 10. So the
+plan walks tasks in priority order carrying a map of what earlier tasks already
+claimed, subtracting as it goes. A task that cannot be covered is reported short
+rather than silently rounded, in its own list next to the sheet — a picker needs
+the stops, a supervisor needs to know the wave cannot be filled before anyone
+walks it.
+
+**A wave does not move stock, reserve anything, or change what a pick list
+means.** Its lists are ordinary pick lists — `record_pick_item` and
+`complete_pick_list` work on them unchanged, and a list can finish on its own
+whether or not its wave does. Cancelling a wave releases its lists (nothing
+moved, nothing to reverse) and leaves any picking already recorded in place,
+because that picking happened.
+
+Tested against live data: 100 units of one product in a single lot (plentiful)
+and only 20 of a second product split across two parcels (scarce, so three
+orders of 10 cannot all be filled) with three shipments each wanting 10 of both.
+The wave built three lists; the sheet aggregated the plentiful product into
+**one stop of 30 naming all three tasks**; the scarce product produced two
+stops summing to exactly 20 with neither parcel over-promised, and the third
+order's 10 came back in `short` rather than silently promised. Assigning
+started the wave; handing it back cleared the person without losing progress;
+an unpicked wave refused to complete; picking everything and completing closed
+every list; cancelling a fresh wave released its list without moving stock; and
+an unknown shipment id in the batch was reported, not fatal.
+
+### 0078 — a hole 0074 opened, found by the invariant check it was meant to catch
+
+0074 rewrote `pick_list_detail` to add each task's parcels and picking rule, by
+replacing the function wholesale. That function was not the reader, though — since
+0051 it had been a **guarded wrapper**: `has_permission('pick.confirm')` plus
+`can_access_warehouse` on the list's own warehouse, delegating to
+`pick_list_detail_impl` for the actual read (0056 added the warehouse half
+specifically because a wrapper with a permission check and no scope check was
+exactly the gap found then). Replacing it with a plain body removed both checks
+while the grant to `authenticated` stayed in place — a read, callable straight
+over PostgREST, that would hand any signed-in user any warehouse's pick list.
+
+`verify_security.sql` caught it on the next run: invariant 3 (guarded wrappers)
+and invariant 8 (warehouse-scoped wrappers) both dropped from 18/18 to 17/18,
+naming `pick_list_detail`. No functional test would have caught this — the
+*behaviour* was right, 0074's own live-data test passed cleanly. Only the *reach*
+was wrong, which is precisely what these ten checks exist to catch instead of a
+behavioural test.
+
+Fixed forward: 0074's enriched body becomes `pick_list_detail_impl`, and the
+wrapper is restored to exactly 0056's shape. Not fixed by editing 0074 itself —
+a migration that has run is history, the same rule §37-4 states for the ledger
+applied here to schema.
+
+**The lesson, stated so it needn't be re-learned**: before replacing a read
+function, check whether a `<name>_impl` sibling exists. If it does, the thing to
+edit is the `_impl`, never the wrapper.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
