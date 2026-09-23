@@ -181,6 +181,65 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     );
   }
 
+  /// §17's per-box facts (0076): weight, dimensions, type and tracking.
+  Future<void> _editCartonMeasurements(Carton c) async {
+    final l10n = AppLocalizations.of(context);
+    final draft = await showModalBottomSheet<_CartonMeasurementsDraft>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _CartonMeasurementsSheet(carton: c),
+    );
+    if (draft == null || !mounted) return;
+
+    setState(() => _busy = true);
+    final result =
+        await ref.read(shipmentRepositoryProvider).setCartonMeasurements(
+              c.id,
+              weightKg: draft.weightKg,
+              lengthCm: draft.lengthCm,
+              widthCm: draft.widthCm,
+              heightCm: draft.heightCm,
+              cartonType: draft.cartonType,
+              trackingNumber: draft.trackingNumber,
+            );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) => _refresh(),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
+    );
+  }
+
+  Future<void> _closeCarton(Carton c) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final result = await ref.read(shipmentRepositoryProvider).closeCarton(c.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) {
+        _refresh();
+        _snack(l10n.cartonClosed, tone: StatusTone.success);
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
+    );
+  }
+
+  Future<void> _reopenCarton(Carton c) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final result = await ref.read(shipmentRepositoryProvider).reopenCarton(c.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) {
+        _refresh();
+        _snack(l10n.cartonReopened, tone: StatusTone.success);
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
+    );
+  }
+
   Future<void> _cancelShip() async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
@@ -408,7 +467,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         else
           ...s.cartons.map((c) => _CartonCard(
                 carton: c,
-                onEdit: shipped
+                onEdit: shipped || !c.isOpen
                     ? null
                     : () async {
                         await Navigator.of(context).push(MaterialPageRoute(
@@ -426,6 +485,14 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                       sender: snd,
                       warehouseName: ref.read(activeWarehouseProvider)?.name,
                     )),
+                onEditMeasurements:
+                    _busy ? null : () => _editCartonMeasurements(c),
+                onClose: _busy || !c.isOpen || c.items.isEmpty
+                    ? null
+                    : () => _closeCarton(c),
+                onReopen: _busy || c.status != CartonStatus.packed
+                    ? null
+                    : () => _reopenCarton(c),
               )),
         if (s.cartons.isNotEmpty && !shipped) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -668,6 +735,9 @@ class _CartonCard extends StatelessWidget {
     required this.onDelete,
     required this.onPrint,
     required this.onPrintLabel,
+    this.onEditMeasurements,
+    this.onClose,
+    this.onReopen,
   });
 
   final Carton carton;
@@ -680,6 +750,17 @@ class _CartonCard extends StatelessWidget {
   /// The box's own label (§17/§19), QR included.
   final VoidCallback onPrintLabel;
 
+  /// §17's weight / dimensions / type / tracking (0076).
+  final VoidCallback? onEditMeasurements;
+
+  /// Closes (§17) or reopens the box — null when the action does not apply
+  /// to this carton's current status.
+  final VoidCallback? onClose;
+  final VoidCallback? onReopen;
+
+  static String _trimZeros(double v) =>
+      v == v.roundToDouble() ? '${v.round()}' : '$v';
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -688,6 +769,7 @@ class _CartonCard extends StatelessWidget {
     final title = carton.label == null || carton.label!.isEmpty
         ? l10n.cartonNoLabel(carton.cartonNo)
         : '${l10n.cartonNoLabel(carton.cartonNo)} · ${carton.label}';
+    final ui = CartonStatusUi.of(l10n, carton.status);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -709,6 +791,8 @@ class _CartonCard extends StatelessWidget {
                       carton.items.length, carton.totalUnits),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: scheme.onSurfaceVariant)),
+                  const SizedBox(width: AppSpacing.sm),
+                  StatusPill(tone: ui.tone, label: ui.label, dense: true),
                 ],
               ),
               if (carton.items.isNotEmpty) ...[
@@ -724,9 +808,61 @@ class _CartonCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
+              if (carton.hasMeasurements) ...[
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: 2,
+                  children: [
+                    if (carton.weightKg != null)
+                      _MetaChip(
+                          icon: Icons.scale_outlined,
+                          text: l10n.shipWeightKg(carton.weightKg!)),
+                    if (carton.lengthCm != null &&
+                        carton.widthCm != null &&
+                        carton.heightCm != null)
+                      _MetaChip(
+                          icon: Icons.straighten_outlined,
+                          text: l10n.cartonDimensionsCm(
+                              _trimZeros(carton.lengthCm!),
+                              _trimZeros(carton.widthCm!),
+                              _trimZeros(carton.heightCm!))),
+                    if (carton.trackingNumber != null)
+                      _MetaChip(
+                          icon: Icons.receipt_long_outlined,
+                          text: carton.trackingNumber!),
+                  ],
+                ),
+              ],
+              if (!carton.isOpen && onReopen != null) ...[
+                const SizedBox(height: 4),
+                Text(l10n.cartonMustReopenToEdit,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+              ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (onEditMeasurements != null)
+                    IconButton(
+                      tooltip: l10n.cartonMeasurementsAction,
+                      icon: const Icon(Icons.scale_outlined, size: 20),
+                      onPressed: onEditMeasurements,
+                    ),
+                  if (carton.status == CartonStatus.open)
+                    IconButton(
+                      tooltip: onClose == null
+                          ? l10n.cartonCloseEmptyHint
+                          : l10n.cartonClose,
+                      icon: const Icon(Icons.lock_outline, size: 20),
+                      onPressed: onClose,
+                    ),
+                  if (onReopen != null)
+                    IconButton(
+                      tooltip: l10n.cartonReopen,
+                      icon: const Icon(Icons.lock_open_outlined, size: 20),
+                      onPressed: onReopen,
+                    ),
                   TextButton.icon(
                     onPressed: onPrintLabel,
                     icon: const Icon(Icons.label_outline, size: 18),
@@ -749,6 +885,29 @@ class _CartonCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 2),
+        Text(text,
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: scheme.onSurfaceVariant, fontFamily: AppFonts.mono)),
+      ],
     );
   }
 }
@@ -1038,6 +1197,199 @@ class _LogisticsSheetState extends State<_LogisticsSheet> {
                     onPressed: () => setState(() => _carrier.text = c),
                   ),
               ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _tracking,
+              style: const TextStyle(fontFamily: AppFonts.mono),
+              decoration: InputDecoration(
+                labelText: l10n.shipTracking,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(_error!,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.error)),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              height: AppSpacing.minTouch,
+              child: FilledButton(
+                onPressed: _submit,
+                child: Text(l10n.actionSave),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CartonMeasurementsDraft {
+  const _CartonMeasurementsDraft({
+    this.weightKg,
+    this.lengthCm,
+    this.widthCm,
+    this.heightCm,
+    this.cartonType,
+    this.trackingNumber,
+  });
+
+  final double? weightKg;
+  final double? lengthCm;
+  final double? widthCm;
+  final double? heightCm;
+  final String? cartonType;
+  final String? trackingNumber;
+}
+
+/// Edit sheet for §17's per-box facts (0076): weight, dimensions, type and
+/// tracking. A blank field clears it — the same convention [_LogisticsSheet]
+/// uses at the plan level.
+class _CartonMeasurementsSheet extends StatefulWidget {
+  const _CartonMeasurementsSheet({required this.carton});
+
+  final Carton carton;
+
+  @override
+  State<_CartonMeasurementsSheet> createState() =>
+      _CartonMeasurementsSheetState();
+}
+
+class _CartonMeasurementsSheetState extends State<_CartonMeasurementsSheet> {
+  static String _num(double? v) =>
+      v == null ? '' : (v == v.roundToDouble() ? '${v.round()}' : '$v');
+
+  late final TextEditingController _weight =
+      TextEditingController(text: _num(widget.carton.weightKg));
+  late final TextEditingController _length =
+      TextEditingController(text: _num(widget.carton.lengthCm));
+  late final TextEditingController _width =
+      TextEditingController(text: _num(widget.carton.widthCm));
+  late final TextEditingController _height =
+      TextEditingController(text: _num(widget.carton.heightCm));
+  late final TextEditingController _type =
+      TextEditingController(text: widget.carton.cartonType ?? '');
+  late final TextEditingController _tracking =
+      TextEditingController(text: widget.carton.trackingNumber ?? '');
+  String? _error;
+
+  @override
+  void dispose() {
+    _weight.dispose();
+    _length.dispose();
+    _width.dispose();
+    _height.dispose();
+    _type.dispose();
+    _tracking.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final l10n = AppLocalizations.of(context);
+    final fields = {
+      _weight.text: 'weight',
+      _length.text: 'length',
+      _width.text: 'width',
+      _height.text: 'height',
+    };
+    final parsed = <String, double?>{};
+    for (final entry in fields.entries) {
+      final raw = entry.key.trim();
+      if (raw.isEmpty) {
+        parsed[entry.value] = null;
+        continue;
+      }
+      final v = double.tryParse(raw);
+      if (v == null || v < 0) {
+        setState(() => _error = l10n.shipWeightInvalid);
+        return;
+      }
+      parsed[entry.value] = v;
+    }
+    Navigator.pop(
+      context,
+      _CartonMeasurementsDraft(
+        weightKg: parsed['weight'],
+        lengthCm: parsed['length'],
+        widthCm: parsed['width'],
+        heightCm: parsed['height'],
+        cartonType: _type.text.trim().isEmpty ? null : _type.text.trim(),
+        trackingNumber:
+            _tracking.text.trim().isEmpty ? null : _tracking.text.trim(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    Widget dimensionField(TextEditingController c, String label) => Expanded(
+          child: TextField(
+            controller: c,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+            ],
+            style: const TextStyle(fontFamily: AppFonts.mono),
+            decoration: InputDecoration(
+              labelText: label,
+              suffixText: 'cm',
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.cartonMeasurementsSection, style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              controller: _weight,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              style: const TextStyle(fontFamily: AppFonts.mono),
+              decoration: InputDecoration(
+                labelText: l10n.shipWeight,
+                suffixText: 'kg',
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                dimensionField(_length, l10n.cartonLength),
+                const SizedBox(width: AppSpacing.sm),
+                dimensionField(_width, l10n.cartonWidth),
+                const SizedBox(width: AppSpacing.sm),
+                dimensionField(_height, l10n.cartonHeight),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _type,
+              decoration: InputDecoration(
+                labelText: l10n.cartonTypeHint,
+                border: const OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             TextField(

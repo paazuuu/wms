@@ -266,6 +266,36 @@
   },
   "cartonLabelHint": "Label (optional), e.g. A-1",
   "cartonEditTitle": "Carton contents",
+  "cartonStatusOpen": "Packing",
+  "cartonStatusPacked": "Packed",
+  "cartonStatusShipped": "Shipped",
+  "cartonStatusCancelled": "Cancelled",
+  "cartonMeasurementsAction": "Edit size / weight",
+  "cartonMeasurementsSection": "Size / weight",
+  "cartonTypeHint": "Type (optional), e.g. size 60",
+  "cartonLength": "Length",
+  "cartonWidth": "Width",
+  "cartonHeight": "Height",
+  "cartonDimensionsCm": "{length} × {width} × {height} cm",
+  "@cartonDimensionsCm": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "width": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      }
+    }
+  },
+  "cartonClose": "Close box",
+  "cartonCloseEmptyHint": "An empty box cannot be closed",
+  "cartonClosed": "Box closed",
+  "cartonReopen": "Reopen box",
+  "cartonReopened": "Box reopened",
+  "cartonMustReopenToEdit": "Reopen the box to edit it",
   "packRemaining": "Unpacked",
   "packThisCarton": "This carton",
   "overpackWarning": "Packed more than the shipment quantity.",

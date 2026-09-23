@@ -46,6 +46,26 @@ abstract class ShipmentRepository {
     String? carrier,
     String? trackingNumber,
   });
+
+  /// §17's per-box facts (0076): what a carrier prices a box on. A null
+  /// clears a field, the same convention [setLogistics] uses at the plan
+  /// level.
+  Future<ApiResult<bool>> setCartonMeasurements(
+    int cartonId, {
+    double? weightKg,
+    double? lengthCm,
+    double? widthCm,
+    double? heightCm,
+    String? cartonType,
+    String? trackingNumber,
+  });
+
+  /// Closes a box once it is packed. Refused while it is empty.
+  Future<ApiResult<bool>> closeCarton(int cartonId);
+
+  /// Reopens a closed box so its contents can change again. Refused once the
+  /// shipment itself has shipped.
+  Future<ApiResult<bool>> reopenCarton(int cartonId);
 }
 
 /// What `autopack_shipment` reports back.
@@ -200,6 +220,52 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
         'p_carrier': carrier,
         'p_tracking_number': trackingNumber,
       });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setCartonMeasurements(
+    int cartonId, {
+    double? weightKg,
+    double? lengthCm,
+    double? widthCm,
+    double? heightCm,
+    String? cartonType,
+    String? trackingNumber,
+  }) async {
+    try {
+      await _rpc.post('/rpc/set_carton_measurements', data: {
+        'p_carton_id': cartonId,
+        'p_weight_kg': weightKg,
+        'p_length_cm': lengthCm,
+        'p_width_cm': widthCm,
+        'p_height_cm': heightCm,
+        'p_carton_type': cartonType,
+        'p_tracking_number': trackingNumber,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> closeCarton(int cartonId) async {
+    try {
+      await _rpc.post('/rpc/close_carton', data: {'p_carton_id': cartonId});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> reopenCarton(int cartonId) async {
+    try {
+      await _rpc.post('/rpc/reopen_carton', data: {'p_carton_id': cartonId});
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);

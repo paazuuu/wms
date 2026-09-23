@@ -3581,6 +3581,47 @@ and restores the full plan as the next prefill; and the advisory reason text
 and lot pre-fill are asserted from a fixture `PickCandidates` before any
 recording happens.
 
+### A carton's own facts and lifecycle, made visible (0076)
+
+The existing carton screens (`ShipmentDetailScreen`, `CartonEditScreen`) predate
+0076 and already cover the everyday packing loop — add a box, fill it, print
+it — through the `shipments` edge function. That function selects `*` on both
+carton tables, so 0076's new columns (`weight_kg`, `length_cm`/`width_cm`/
+`height_cm`, `carton_type`, `tracking_number`, `status`) were already arriving
+in the response; nothing client-side was reading them. Rather than rebuild the
+packing flow around `pack_carton_item`'s per-parcel, lot-aware writes — a
+change of the same shape as 0074's on the picking side, but a materially
+larger one here since `CartonEditScreen`'s whole-carton replace has no
+equivalent to "add one more parcel" — this slice stays scoped to what was
+purely missing: the box's own facts and its status.
+
+`Carton` now parses the 0076 fields, with a `CartonStatus` enum (OPEN/PACKED/
+SHIPPED/CANCELLED) mirroring `PickListStatus`'s shape. `ShipmentRepository`
+gained `setCartonMeasurements`/`closeCarton`/`reopenCarton`, called through the
+same PostgREST Dio `autopack`/`setLogistics` already use — no edge function
+change required. `_CartonCard` shows a status pill, weight/dimensions/tracking
+as chips when set, a "サイズ・重量" sheet (the same edit-sheet shape §21's
+`_LogisticsSheet` already established, reused rather than reinvented) for
+setting them, and lock/unlock icons for close/reopen.
+
+**The client now enforces what the old edge-function path never checked**:
+`onEdit` (which still routes to the old whole-replace `CartonEditScreen`) is
+disabled once a carton is PACKED, with a "編集するには箱を開け直してください"
+hint in its place — matching `pack_carton_item`'s own rule ("reopen it before
+changing what is inside") even though the edit path this client still uses
+does not itself enforce it. Closing is disabled on an empty box (the RPC
+refuses it; the button says why before the tap). Reopening is offered only
+while PACKED — a SHIPPED carton's status came from the plan's own shipping,
+and 0076 refuses to reopen one until the shipment itself is undone.
+
+Tested against the fake repository: an open, non-empty carton can be closed;
+an empty one's close button stays disabled with its tooltip explaining why; a
+packed carton shows its status, blocks the card's own tap from opening the
+edit screen, and offers reopen; the measurements sheet pre-fills every field
+from the carton and round-trips a changed value back through
+`setCartonMeasurements`; clearing a field sends null rather than zero; and an
+invalid dimension is refused client-side before any call is made.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

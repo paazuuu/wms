@@ -630,6 +630,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartonEditTitle => 'Carton contents';
 
   @override
+  String get cartonStatusOpen => 'Packing';
+
+  @override
+  String get cartonStatusPacked => 'Packed';
+
+  @override
+  String get cartonStatusShipped => 'Shipped';
+
+  @override
+  String get cartonStatusCancelled => 'Cancelled';
+
+  @override
+  String get cartonMeasurementsAction => 'Edit size / weight';
+
+  @override
+  String get cartonMeasurementsSection => 'Size / weight';
+
+  @override
+  String get cartonTypeHint => 'Type (optional), e.g. size 60';
+
+  @override
+  String get cartonLength => 'Length';
+
+  @override
+  String get cartonWidth => 'Width';
+
+  @override
+  String get cartonHeight => 'Height';
+
+  @override
+  String cartonDimensionsCm(String length, String width, String height) {
+    return '$length × $width × $height cm';
+  }
+
+  @override
+  String get cartonClose => 'Close box';
+
+  @override
+  String get cartonCloseEmptyHint => 'An empty box cannot be closed';
+
+  @override
+  String get cartonClosed => 'Box closed';
+
+  @override
+  String get cartonReopen => 'Reopen box';
+
+  @override
+  String get cartonReopened => 'Box reopened';
+
+  @override
+  String get cartonMustReopenToEdit => 'Reopen the box to edit it';
+
+  @override
   String get packRemaining => 'Unpacked';
 
   @override

@@ -1222,6 +1222,108 @@ abstract class AppLocalizations {
   /// **'段ボールの中身'**
   String get cartonEditTitle;
 
+  /// No description provided for @cartonStatusOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包中'**
+  String get cartonStatusOpen;
+
+  /// No description provided for @cartonStatusPacked.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包済み'**
+  String get cartonStatusPacked;
+
+  /// No description provided for @cartonStatusShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み'**
+  String get cartonStatusShipped;
+
+  /// No description provided for @cartonStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get cartonStatusCancelled;
+
+  /// No description provided for @cartonMeasurementsAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量を編集'**
+  String get cartonMeasurementsAction;
+
+  /// No description provided for @cartonMeasurementsSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量'**
+  String get cartonMeasurementsSection;
+
+  /// No description provided for @cartonTypeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'種類（任意）例: 60サイズ'**
+  String get cartonTypeHint;
+
+  /// No description provided for @cartonLength.
+  ///
+  /// In ja, this message translates to:
+  /// **'長さ'**
+  String get cartonLength;
+
+  /// No description provided for @cartonWidth.
+  ///
+  /// In ja, this message translates to:
+  /// **'幅'**
+  String get cartonWidth;
+
+  /// No description provided for @cartonHeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'高さ'**
+  String get cartonHeight;
+
+  /// No description provided for @cartonDimensionsCm.
+  ///
+  /// In ja, this message translates to:
+  /// **'{length} × {width} × {height} cm'**
+  String cartonDimensionsCm(String length, String width, String height);
+
+  /// No description provided for @cartonClose.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱を閉じる'**
+  String get cartonClose;
+
+  /// No description provided for @cartonCloseEmptyHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'空の箱は閉じられません'**
+  String get cartonCloseEmptyHint;
+
+  /// No description provided for @cartonClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱を閉じました'**
+  String get cartonClosed;
+
+  /// No description provided for @cartonReopen.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱を開け直す'**
+  String get cartonReopen;
+
+  /// No description provided for @cartonReopened.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱を開け直しました'**
+  String get cartonReopened;
+
+  /// No description provided for @cartonMustReopenToEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'編集するには箱を開け直してください'**
+  String get cartonMustReopenToEdit;
+
   /// No description provided for @packRemaining.
   ///
   /// In ja, this message translates to:

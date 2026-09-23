@@ -283,6 +283,36 @@
   },
   "cartonLabelHint": "ラベル（任意）例: A-1",
   "cartonEditTitle": "段ボールの中身",
+  "cartonStatusOpen": "梱包中",
+  "cartonStatusPacked": "梱包済み",
+  "cartonStatusShipped": "出庫済み",
+  "cartonStatusCancelled": "取消",
+  "cartonMeasurementsAction": "サイズ・重量を編集",
+  "cartonMeasurementsSection": "サイズ・重量",
+  "cartonTypeHint": "種類（任意）例: 60サイズ",
+  "cartonLength": "長さ",
+  "cartonWidth": "幅",
+  "cartonHeight": "高さ",
+  "cartonDimensionsCm": "{length} × {width} × {height} cm",
+  "@cartonDimensionsCm": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "width": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      }
+    }
+  },
+  "cartonClose": "箱を閉じる",
+  "cartonCloseEmptyHint": "空の箱は閉じられません",
+  "cartonClosed": "箱を閉じました",
+  "cartonReopen": "箱を開け直す",
+  "cartonReopened": "箱を開け直しました",
+  "cartonMustReopenToEdit": "編集するには箱を開け直してください",
   "packRemaining": "未梱包",
   "packThisCarton": "この箱",
   "overpackWarning": "梱包数が出庫数を超えています。",

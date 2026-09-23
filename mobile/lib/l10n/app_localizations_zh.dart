@@ -605,6 +605,59 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cartonEditTitle => '纸箱内容';
 
   @override
+  String get cartonStatusOpen => '装箱中';
+
+  @override
+  String get cartonStatusPacked => '已装箱';
+
+  @override
+  String get cartonStatusShipped => '已出库';
+
+  @override
+  String get cartonStatusCancelled => '已取消';
+
+  @override
+  String get cartonMeasurementsAction => '编辑尺寸/重量';
+
+  @override
+  String get cartonMeasurementsSection => '尺寸/重量';
+
+  @override
+  String get cartonTypeHint => '类型（可选）例：60尺寸';
+
+  @override
+  String get cartonLength => '长';
+
+  @override
+  String get cartonWidth => '宽';
+
+  @override
+  String get cartonHeight => '高';
+
+  @override
+  String cartonDimensionsCm(String length, String width, String height) {
+    return '$length × $width × $height cm';
+  }
+
+  @override
+  String get cartonClose => '封箱';
+
+  @override
+  String get cartonCloseEmptyHint => '空箱无法封箱';
+
+  @override
+  String get cartonClosed => '已封箱';
+
+  @override
+  String get cartonReopen => '重新打开';
+
+  @override
+  String get cartonReopened => '已重新打开';
+
+  @override
+  String get cartonMustReopenToEdit => '请先重新打开此箱才能编辑';
+
+  @override
   String get packRemaining => '未装箱';
 
   @override

@@ -266,6 +266,36 @@
   },
   "cartonLabelHint": "标签（可选）例: A-1",
   "cartonEditTitle": "纸箱内容",
+  "cartonStatusOpen": "装箱中",
+  "cartonStatusPacked": "已装箱",
+  "cartonStatusShipped": "已出库",
+  "cartonStatusCancelled": "已取消",
+  "cartonMeasurementsAction": "编辑尺寸/重量",
+  "cartonMeasurementsSection": "尺寸/重量",
+  "cartonTypeHint": "类型（可选）例：60尺寸",
+  "cartonLength": "长",
+  "cartonWidth": "宽",
+  "cartonHeight": "高",
+  "cartonDimensionsCm": "{length} × {width} × {height} cm",
+  "@cartonDimensionsCm": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "width": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      }
+    }
+  },
+  "cartonClose": "封箱",
+  "cartonCloseEmptyHint": "空箱无法封箱",
+  "cartonClosed": "已封箱",
+  "cartonReopen": "重新打开",
+  "cartonReopened": "已重新打开",
+  "cartonMustReopenToEdit": "请先重新打开此箱才能编辑",
   "packRemaining": "未装箱",
   "packThisCarton": "本箱",
   "overpackWarning": "装箱数量超过出库数量。",

@@ -589,6 +589,51 @@ class FakeShipmentRepository implements ShipmentRepository {
     if (failWith != null) return ApiFailure(message: failWith!);
     return show(id);
   }
+
+  /// The last carton measurements written: (cartonId, weightKg, lengthCm,
+  /// widthCm, heightCm, cartonType, trackingNumber).
+  (int, double?, double?, double?, double?, String?, String?)?
+      lastCartonMeasurements;
+
+  int? lastClosedCartonId;
+  int? lastReopenedCartonId;
+
+  @override
+  Future<ApiResult<bool>> setCartonMeasurements(
+    int cartonId, {
+    double? weightKg,
+    double? lengthCm,
+    double? widthCm,
+    double? heightCm,
+    String? cartonType,
+    String? trackingNumber,
+  }) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    lastCartonMeasurements = (
+      cartonId,
+      weightKg,
+      lengthCm,
+      widthCm,
+      heightCm,
+      cartonType,
+      trackingNumber,
+    );
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> closeCarton(int cartonId) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    lastClosedCartonId = cartonId;
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> reopenCarton(int cartonId) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    lastReopenedCartonId = cartonId;
+    return const ApiSuccess(true);
+  }
 }
 
 /// In-memory stand-in for the stock-ops backend. It mirrors the server's two

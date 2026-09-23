@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/shipment/application/shipment_providers.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
+import 'package:wms_mobile/features/shipment/presentation/carton_edit_screen.dart';
 import 'package:wms_mobile/features/shipment/presentation/shipment_detail_screen.dart';
 
 import '../../support/harness.dart';
@@ -55,6 +56,11 @@ Shipment _unpacked() => Shipment.fromJson(<String, dynamic>{
       ],
       'cartons': <dynamic>[],
     });
+
+/// IconButtons in this screen are identified by their tooltip, same as an
+/// operator would find them.
+Finder _iconButton(String tooltip) =>
+    find.byWidgetPredicate((w) => w is IconButton && w.tooltip == tooltip);
 
 void main() {
   testWidgets('shows header, carton and the confirm action', (tester) async {
@@ -226,5 +232,215 @@ void main() {
 
     expect(find.text('重量は0以上の数値で入力してください'), findsOneWidget);
     expect(repo.lastLogistics, isNull);
+  });
+
+  // §17 / 0076 — the box's own lifecycle and per-box facts.
+
+  testWidgets('an open carton with items can be closed', (tester) async {
+    final repo = FakeShipmentRepository([_shipment()]);
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 1),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.text('梱包中'), findsOneWidget);
+
+    await tester.tap(_iconButton('箱を閉じる'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastClosedCartonId, 9);
+  });
+
+  testWidgets("an empty carton's close button stays disabled",
+      (tester) async {
+    final empty = Shipment.fromJson(<String, dynamic>{
+      'id': 3,
+      'shipment_number': 'S-300',
+      'customer_name': 'アクメ商事',
+      'status': 'open',
+      'lines': <dynamic>[],
+      'cartons': <dynamic>[
+        <String, dynamic>{'id': 20, 'carton_no': 1, 'items': <dynamic>[]},
+      ],
+    });
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 3),
+      overrides: [
+        shipmentRepositoryProvider.overrideWithValue(FakeShipmentRepository([empty])),
+      ],
+    );
+
+    final button = tester.widget<IconButton>(
+        _iconButton('空の箱は閉じられません'));
+    expect(button.onPressed, isNull);
+  });
+
+  testWidgets('a packed carton offers reopen and cannot be edited from here',
+      (tester) async {
+    final packed = Shipment.fromJson(<String, dynamic>{
+      'id': 4,
+      'shipment_number': 'S-400',
+      'customer_name': 'アクメ商事',
+      'status': 'packing',
+      'lines': <dynamic>[
+        <String, dynamic>{
+          'id': 1,
+          'jan_code': '4902505632037',
+          'product_name': 'ペン',
+          'quantity': 60,
+        },
+      ],
+      'cartons': <dynamic>[
+        <String, dynamic>{
+          'id': 30,
+          'carton_no': 1,
+          'status': 'PACKED',
+          'items': <dynamic>[
+            <String, dynamic>{
+              'jan_code': '4902505632037',
+              'product_name': 'ペン',
+              'quantity': 60,
+            },
+          ],
+        },
+      ],
+    });
+    final repo = FakeShipmentRepository([packed]);
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 4),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.text('梱包済み'), findsOneWidget);
+    expect(find.text('編集するには箱を開け直してください'), findsOneWidget);
+    // No close button while it is already closed.
+    expect(find.byTooltip('箱を閉じる'), findsNothing);
+
+    await tester.tap(find.text('段ボール #1')); // tapping the (non-editable) card
+    await tester.pumpAndSettle();
+    expect(find.byType(CartonEditScreen), findsNothing);
+
+    await tester.tap(_iconButton('箱を開け直す'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastReopenedCartonId, 30);
+  });
+
+  testWidgets('measurements pre-fill from the carton and round-trip through the sheet',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final measured = Shipment.fromJson(<String, dynamic>{
+      'id': 5,
+      'shipment_number': 'S-500',
+      'customer_name': 'アクメ商事',
+      'status': 'open',
+      'lines': <dynamic>[],
+      'cartons': <dynamic>[
+        <String, dynamic>{
+          'id': 40,
+          'carton_no': 1,
+          'carton_type': '60サイズ',
+          'weight_kg': 1.5,
+          'length_cm': 20,
+          'width_cm': 15,
+          'height_cm': 10,
+          'tracking_number': 'YAMATO-123',
+          'items': <dynamic>[],
+        },
+      ],
+    });
+    final repo = FakeShipmentRepository([measured]);
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 5),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    // The card already shows the deterministic (non-weight) facts.
+    expect(find.text('20 × 15 × 10 cm'), findsOneWidget);
+    expect(find.text('YAMATO-123'), findsOneWidget);
+
+    await tester.tap(_iconButton('サイズ・重量を編集'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextField, '重量').evaluate().isNotEmpty, isTrue);
+    expect(
+        tester
+            .widget<TextField>(find.widgetWithText(TextField, '重量'))
+            .controller!
+            .text,
+        '1.5');
+    expect(
+        tester
+            .widget<TextField>(find.widgetWithText(TextField, '長さ'))
+            .controller!
+            .text,
+        '20');
+    expect(
+        tester
+            .widget<TextField>(find.widgetWithText(TextField, '送り状番号'))
+            .controller!
+            .text,
+        'YAMATO-123');
+
+    await tester.enterText(find.widgetWithText(TextField, '重量'), '2.5');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastCartonMeasurements, (40, 2.5, 20.0, 15.0, 10.0, '60サイズ', 'YAMATO-123'));
+  });
+
+  testWidgets('clearing a measurement field clears it rather than zeroing it',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeShipmentRepository([_shipment()]);
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 1),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    await tester.tap(_iconButton('サイズ・重量を編集'));
+    await tester.pumpAndSettle();
+
+    // Nothing was set yet, so every field starts blank.
+    await tester.enterText(find.widgetWithText(TextField, '重量'), '3');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastCartonMeasurements, (9, 3.0, null, null, null, null, null));
+  });
+
+  testWidgets('an invalid measurement is refused before it reaches the server',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeShipmentRepository([_shipment()]);
+
+    await pumpApp(
+      tester,
+      const ShipmentDetailScreen(shipmentId: 1),
+      overrides: [shipmentRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    await tester.tap(_iconButton('サイズ・重量を編集'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextField, '長さ'), '1.2.3');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('重量は0以上の数値で入力してください'), findsOneWidget);
+    expect(repo.lastCartonMeasurements, isNull);
   });
 }

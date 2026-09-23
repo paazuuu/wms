@@ -606,6 +606,59 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cartonEditTitle => '段ボールの中身';
 
   @override
+  String get cartonStatusOpen => '梱包中';
+
+  @override
+  String get cartonStatusPacked => '梱包済み';
+
+  @override
+  String get cartonStatusShipped => '出庫済み';
+
+  @override
+  String get cartonStatusCancelled => '取消';
+
+  @override
+  String get cartonMeasurementsAction => 'サイズ・重量を編集';
+
+  @override
+  String get cartonMeasurementsSection => 'サイズ・重量';
+
+  @override
+  String get cartonTypeHint => '種類（任意）例: 60サイズ';
+
+  @override
+  String get cartonLength => '長さ';
+
+  @override
+  String get cartonWidth => '幅';
+
+  @override
+  String get cartonHeight => '高さ';
+
+  @override
+  String cartonDimensionsCm(String length, String width, String height) {
+    return '$length × $width × $height cm';
+  }
+
+  @override
+  String get cartonClose => '箱を閉じる';
+
+  @override
+  String get cartonCloseEmptyHint => '空の箱は閉じられません';
+
+  @override
+  String get cartonClosed => '箱を閉じました';
+
+  @override
+  String get cartonReopen => '箱を開け直す';
+
+  @override
+  String get cartonReopened => '箱を開け直しました';
+
+  @override
+  String get cartonMustReopenToEdit => '編集するには箱を開け直してください';
+
+  @override
   String get packRemaining => '未梱包';
 
   @override
