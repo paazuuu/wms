@@ -8,6 +8,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
+import '../../shipment/presentation/shipment_detail_screen.dart';
 import '../application/sales_order_providers.dart';
 import '../domain/sales_order.dart';
 import 'sales_order_status_ui.dart';
@@ -118,8 +119,105 @@ class _BodyState extends ConsumerState<_Body> {
   Future<void> _approve() async {
     final l10n = AppLocalizations.of(context);
     if (!await _confirm(l10n.soApprove, l10n.soApproveQ, l10n.soApprove)) return;
-    await _run(() => ref.read(salesOrderRepositoryProvider).approve(_order.id),
-        successMessage: l10n.soApproved);
+
+    setState(() => _busy = true);
+    final result = await ref.read(salesOrderRepositoryProvider).approve(_order.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (approval) {
+        _refresh();
+        if (!approval.hasSkipped) {
+          _snack(l10n.soApprovedWithReservations(approval.reservedLines));
+          return;
+        }
+        // A shortfall is worth stopping for, not just noting: the approver
+        // sees it now rather than a picker discovering it later.
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Text(l10n.soApprovedWithSkips(
+                approval.reservedLines, approval.skipped.length)),
+            action: SnackBarAction(
+              label: l10n.soApprovalSkipDetail,
+              onPressed: () => _showSkipped(approval.skipped),
+            ),
+          ));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  void _showSkipped(List<SalesOrderApprovalSkip> skipped) {
+    final l10n = AppLocalizations.of(context);
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.soSkippedLinesTitle),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: skipped.length,
+            separatorBuilder: (_, __) => const Divider(height: AppSpacing.lg),
+            itemBuilder: (context, i) {
+              final s = skipped[i];
+              final reason = s.reason == 'insufficient_available'
+                  ? l10n.soSkipInsufficientAvailable(
+                      s.available ?? 0, s.requested ?? 0)
+                  : l10n.soSkipUnlinkedJan;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s.janCode,
+                      style: const TextStyle(fontFamily: AppFonts.mono)),
+                  const SizedBox(height: 2),
+                  Text(reason),
+                ],
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.actionCancel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _createShipment() async {
+    final l10n = AppLocalizations.of(context);
+    if (!await _confirm(
+        l10n.soCreateShipment, l10n.soCreateShipmentQ, l10n.soCreateShipment)) {
+      return;
+    }
+    setState(() => _busy = true);
+    final result =
+        await ref.read(salesOrderRepositoryProvider).createShipment(_order.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (created) {
+        _refresh();
+        _snack(l10n.soShipmentCreated(created.lines));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) =>
+              ShipmentDetailScreen(shipmentId: created.shipmentPlanId),
+        ));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  void _openShipment() {
+    final id = _order.shipmentPlanId;
+    if (id == null) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => ShipmentDetailScreen(shipmentId: id),
+    ));
   }
 
   Future<void> _reject() async {
@@ -158,6 +256,16 @@ class _BodyState extends ConsumerState<_Body> {
           label: Text(l10n.soApprove),
         );
       case SalesOrderStatus.approved:
+        // Approving only reserves stock (0073); turning that into something
+        // the floor can pick is a separate, explicit step. Once it exists,
+        // the primary action goes back to closing the order's own bookkeeping.
+        if (!_order.hasShipment) {
+          return FilledButton.icon(
+            onPressed: _busy ? null : _createShipment,
+            icon: const Icon(Icons.local_shipping_outlined),
+            label: Text(l10n.soCreateShipment),
+          );
+        }
         return FilledButton.icon(
           onPressed: _busy ? null : _complete,
           icon: const Icon(Icons.task_alt),
@@ -212,20 +320,25 @@ class _BodyState extends ConsumerState<_Body> {
         Expanded(
           child: _order.lines.isEmpty
               ? EmptyStateView(icon: Icons.receipt_long_outlined, title: l10n.soEmpty)
-              : ListView.separated(
+              : ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  // One extra row at the end for the activity timeline.
-                  itemCount: _order.lines.length + 1,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) {
-                    if (i == _order.lines.length) {
-                      return EntityAuditTimeline(
-                        entityType: 'sales_order',
-                        entityId: '${_order.id}',
-                      );
-                    }
-                    return _LineCard(line: _order.lines[i]);
-                  },
+                  children: [
+                    if (_order.reservations.isNotEmpty) ...[
+                      _ReservationsCard(
+                        order: _order,
+                        onOpenShipment: _openShipment,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                    for (final line in _order.lines) ...[
+                      _LineCard(line: line),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                    EntityAuditTimeline(
+                      entityType: 'sales_order',
+                      entityId: '${_order.id}',
+                    ),
+                  ],
                 ),
         ),
         if (primary != null || _order.canCancel)
@@ -269,6 +382,71 @@ class _BodyState extends ConsumerState<_Body> {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// §6's promise, made visible: which lines are backed by stock already set
+/// aside, and whether that promise has been kept. Shown once a reservation
+/// exists — before approval there is nothing here to show.
+class _ReservationsCard extends StatelessWidget {
+  const _ReservationsCard({required this.order, required this.onOpenShipment});
+
+  final SalesOrder order;
+  final VoidCallback onOpenShipment;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(l10n.soReservationsTitle,
+                      style: theme.textTheme.titleSmall),
+                ),
+                if (order.hasShipment)
+                  TextButton.icon(
+                    onPressed: onOpenShipment,
+                    icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                    label: Text(l10n.soOpenShipment),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            for (final r in order.reservations)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(r.janCode,
+                          style: const TextStyle(fontFamily: AppFonts.mono)),
+                    ),
+                    Text('${r.fulfilledQuantity} / ${r.quantity}',
+                        style: theme.textTheme.bodySmall),
+                    if (r.isFulfilled) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      StatusPill(
+                        tone: StatusTone.success,
+                        label: l10n.soReservationFulfilled,
+                        dense: true,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -24,10 +24,18 @@ abstract class SalesOrderRepository {
   });
 
   Future<ApiResult<bool>> submit(int id);
-  Future<ApiResult<bool>> approve(int id);
+
+  /// Approves and reserves, best-effort (0073). The result says which lines
+  /// got a reservation and which did not, and why — a shortfall is seen here
+  /// rather than discovered at pick time.
+  Future<ApiResult<SalesOrderApprovalResult>> approve(int id);
   Future<ApiResult<bool>> reject(int id, {String? reason});
   Future<ApiResult<bool>> cancel(int id);
   Future<ApiResult<bool>> complete(int id);
+
+  /// Turns an APPROVED order into a shipment the floor can pick, re-keying its
+  /// reservations from the order to the new shipment (0073).
+  Future<ApiResult<ShipmentFromSalesOrderResult>> createShipment(int id);
 }
 
 class SalesOrderRepositoryImpl implements SalesOrderRepository {
@@ -105,8 +113,18 @@ class SalesOrderRepositoryImpl implements SalesOrderRepository {
   Future<ApiResult<bool>> submit(int id) => _action('/rpc/submit_sales_order', {'p_id': id});
 
   @override
-  Future<ApiResult<bool>> approve(int id) =>
-      _action('/rpc/approve_sales_order', {'p_id': id});
+  Future<ApiResult<SalesOrderApprovalResult>> approve(int id) async {
+    try {
+      final response =
+          await _dio.post('/rpc/approve_sales_order', data: {'p_id': id});
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(SalesOrderApprovalResult.fromJson(
+          (json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<SalesOrderApprovalResult>(e);
+    }
+  }
 
   @override
   Future<ApiResult<bool>> reject(int id, {String? reason}) =>
@@ -119,6 +137,20 @@ class SalesOrderRepositoryImpl implements SalesOrderRepository {
   @override
   Future<ApiResult<bool>> complete(int id) =>
       _action('/rpc/complete_sales_order', {'p_id': id});
+
+  @override
+  Future<ApiResult<ShipmentFromSalesOrderResult>> createShipment(int id) async {
+    try {
+      final response = await _dio.post('/rpc/create_shipment_from_sales_order',
+          data: {'p_sales_order_id': id});
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(ShipmentFromSalesOrderResult.fromJson(
+          (json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<ShipmentFromSalesOrderResult>(e);
+    }
+  }
 
   Future<ApiResult<bool>> _action(String path, Map<String, dynamic> data) async {
     try {

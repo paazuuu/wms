@@ -2571,5 +2571,79 @@
   "attachmentNoCaption": "説明なし",
   "@attachmentNoCaption": {
     "description": "Shown when an attachment has no caption."
+  },
+  "soApprovedWithReservations": "受注を承認しました（引当 {reserved} 件）",
+  "@soApprovedWithReservations": {
+    "description": "Sales order approved, all lines reserved.",
+    "placeholders": {
+      "reserved": {
+        "type": "int"
+      }
+    }
+  },
+  "soApprovedWithSkips": "受注を承認しました（引当 {reserved} 件・未引当 {skipped} 件）",
+  "@soApprovedWithSkips": {
+    "description": "Sales order approved, some lines could not be reserved.",
+    "placeholders": {
+      "reserved": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "soApprovalSkipDetail": "詳細",
+  "@soApprovalSkipDetail": {
+    "description": "Action on the approval snackbar: show which lines were not reserved."
+  },
+  "soSkippedLinesTitle": "引当できなかった明細",
+  "@soSkippedLinesTitle": {
+    "description": "Dialog title listing lines approval could not reserve stock for."
+  },
+  "soSkipUnlinkedJan": "商品が未登録です",
+  "@soSkipUnlinkedJan": {
+    "description": "Approval skip reason: unlinked_jan_code."
+  },
+  "soSkipInsufficientAvailable": "在庫が不足しています（在庫 {available} / 必要 {requested}）",
+  "@soSkipInsufficientAvailable": {
+    "description": "Approval skip reason: insufficient_available.",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "requested": {
+        "type": "int"
+      }
+    }
+  },
+  "soReservationsTitle": "引当状況",
+  "@soReservationsTitle": {
+    "description": "Section heading: the reservations backing this order (§6)."
+  },
+  "soReservationFulfilled": "出荷済み",
+  "@soReservationFulfilled": {
+    "description": "Reservation status: fully shipped."
+  },
+  "soCreateShipment": "出荷を作成",
+  "@soCreateShipment": {
+    "description": "Action: turn an approved sales order into a shipment (0073)."
+  },
+  "soCreateShipmentQ": "この受注から出荷を作成しますか？",
+  "@soCreateShipmentQ": {
+    "description": "Confirmation body for creating a shipment from a sales order."
+  },
+  "soShipmentCreated": "出荷を作成しました（明細 {lines} 件）",
+  "@soShipmentCreated": {
+    "description": "Success message after creating a shipment from a sales order.",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "soOpenShipment": "出荷を開く",
+  "@soOpenShipment": {
+    "description": "Action: open the shipment this sales order already became."
   }
 }

@@ -3473,4 +3473,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get attachmentNoCaption => '无说明';
+
+  @override
+  String soApprovedWithReservations(int reserved) {
+    return '已批准订单（已预留 $reserved 项）';
+  }
+
+  @override
+  String soApprovedWithSkips(int reserved, int skipped) {
+    return '已批准订单（已预留 $reserved 项・未预留 $skipped 项）';
+  }
+
+  @override
+  String get soApprovalSkipDetail => '详情';
+
+  @override
+  String get soSkippedLinesTitle => '未能预留的明细';
+
+  @override
+  String get soSkipUnlinkedJan => '该商品尚未注册';
+
+  @override
+  String soSkipInsufficientAvailable(int available, int requested) {
+    return '库存不足（现有 $available / 需要 $requested）';
+  }
+
+  @override
+  String get soReservationsTitle => '预留情况';
+
+  @override
+  String get soReservationFulfilled => '已出库';
+
+  @override
+  String get soCreateShipment => '创建出库单';
+
+  @override
+  String get soCreateShipmentQ => '要从此订单创建出库单吗？';
+
+  @override
+  String soShipmentCreated(int lines) {
+    return '已创建出库单（$lines 项明细）';
+  }
+
+  @override
+  String get soOpenShipment => '打开出库单';
 }

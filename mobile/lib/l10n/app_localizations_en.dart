@@ -3572,4 +3572,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attachmentNoCaption => 'No caption';
+
+  @override
+  String soApprovedWithReservations(int reserved) {
+    return 'Sales order approved ($reserved reserved)';
+  }
+
+  @override
+  String soApprovedWithSkips(int reserved, int skipped) {
+    return 'Sales order approved ($reserved reserved, $skipped not reserved)';
+  }
+
+  @override
+  String get soApprovalSkipDetail => 'Details';
+
+  @override
+  String get soSkippedLinesTitle => 'Lines not reserved';
+
+  @override
+  String get soSkipUnlinkedJan => 'No product is registered for this JAN';
+
+  @override
+  String soSkipInsufficientAvailable(int available, int requested) {
+    return 'Not enough available ($available of $requested)';
+  }
+
+  @override
+  String get soReservationsTitle => 'Reservations';
+
+  @override
+  String get soReservationFulfilled => 'Shipped';
+
+  @override
+  String get soCreateShipment => 'Create shipment';
+
+  @override
+  String get soCreateShipmentQ => 'Create a shipment from this sales order?';
+
+  @override
+  String soShipmentCreated(int lines) {
+    return 'Shipment created ($lines lines)';
+  }
+
+  @override
+  String get soOpenShipment => 'Open shipment';
 }

@@ -1776,7 +1776,25 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
 
   List<SalesOrder> _orders;
 
-  SalesOrder _copyWith(SalesOrder o, {SalesOrderStatus? status}) => SalesOrder(
+  /// What approve() reports (0073). Defaults to reserving every line cleanly;
+  /// a test overrides this to exercise the shortfall path.
+  SalesOrderApprovalResult approvalResult =
+      const SalesOrderApprovalResult(reservedLines: 1, skipped: []);
+  int? lastApprovedId;
+
+  /// What createShipment() reports; a test overrides shipmentPlanId to assert
+  /// on the id it navigates to.
+  ShipmentFromSalesOrderResult shipmentResult =
+      const ShipmentFromSalesOrderResult(
+          shipmentPlanId: 900, lines: 1, reservationsRelinked: 1);
+  int? lastShipmentCreatedFor;
+
+  SalesOrder _copyWith(
+    SalesOrder o, {
+    SalesOrderStatus? status,
+    int? shipmentPlanId,
+  }) =>
+      SalesOrder(
         id: o.id,
         status: status ?? o.status,
         soNumber: o.soNumber,
@@ -1791,6 +1809,8 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
         lines: o.lines,
         lineCount: o.lineCount,
         totalAmount: o.totalAmount,
+        shipmentPlanId: shipmentPlanId ?? o.shipmentPlanId,
+        reservations: o.reservations,
       );
 
   ApiResult<bool> _transition(int id, SalesOrderStatus from, SalesOrderStatus to) {
@@ -1858,8 +1878,31 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
       _transition(id, SalesOrderStatus.draft, SalesOrderStatus.submitted);
 
   @override
-  Future<ApiResult<bool>> approve(int id) async =>
-      _transition(id, SalesOrderStatus.submitted, SalesOrderStatus.approved);
+  Future<ApiResult<SalesOrderApprovalResult>> approve(int id) async {
+    lastApprovedId = id;
+    final r = _transition(id, SalesOrderStatus.submitted, SalesOrderStatus.approved);
+    return r.when(
+      success: (_) => ApiSuccess(approvalResult),
+      failure: (f) => ApiFailure(message: f.message, statusCode: f.statusCode),
+    );
+  }
+
+  @override
+  Future<ApiResult<ShipmentFromSalesOrderResult>> createShipment(int id) async {
+    lastShipmentCreatedFor = id;
+    final order = _orders.firstWhere((o) => o.id == id);
+    if (order.status != SalesOrderStatus.approved) {
+      return ApiFailure(message: 'sales order is ${order.status.wire}', statusCode: 400);
+    }
+    _orders = [
+      for (final o in _orders)
+        if (o.id == id)
+          _copyWith(o, shipmentPlanId: shipmentResult.shipmentPlanId)
+        else
+          o,
+    ];
+    return ApiSuccess(shipmentResult);
+  }
 
   @override
   Future<ApiResult<bool>> reject(int id, {String? reason}) async =>

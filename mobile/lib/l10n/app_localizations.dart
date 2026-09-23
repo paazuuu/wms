@@ -6597,6 +6597,78 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'説明なし'**
   String get attachmentNoCaption;
+
+  /// Sales order approved, all lines reserved.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を承認しました（引当 {reserved} 件）'**
+  String soApprovedWithReservations(int reserved);
+
+  /// Sales order approved, some lines could not be reserved.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注を承認しました（引当 {reserved} 件・未引当 {skipped} 件）'**
+  String soApprovedWithSkips(int reserved, int skipped);
+
+  /// Action on the approval snackbar: show which lines were not reserved.
+  ///
+  /// In ja, this message translates to:
+  /// **'詳細'**
+  String get soApprovalSkipDetail;
+
+  /// Dialog title listing lines approval could not reserve stock for.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当できなかった明細'**
+  String get soSkippedLinesTitle;
+
+  /// Approval skip reason: unlinked_jan_code.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品が未登録です'**
+  String get soSkipUnlinkedJan;
+
+  /// Approval skip reason: insufficient_available.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が不足しています（在庫 {available} / 必要 {requested}）'**
+  String soSkipInsufficientAvailable(int available, int requested);
+
+  /// Section heading: the reservations backing this order (§6).
+  ///
+  /// In ja, this message translates to:
+  /// **'引当状況'**
+  String get soReservationsTitle;
+
+  /// Reservation status: fully shipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済み'**
+  String get soReservationFulfilled;
+
+  /// Action: turn an approved sales order into a shipment (0073).
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を作成'**
+  String get soCreateShipment;
+
+  /// Confirmation body for creating a shipment from a sales order.
+  ///
+  /// In ja, this message translates to:
+  /// **'この受注から出荷を作成しますか？'**
+  String get soCreateShipmentQ;
+
+  /// Success message after creating a shipment from a sales order.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を作成しました（明細 {lines} 件）'**
+  String soShipmentCreated(int lines);
+
+  /// Action: open the shipment this sales order already became.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を開く'**
+  String get soOpenShipment;
 }
 
 class _AppLocalizationsDelegate

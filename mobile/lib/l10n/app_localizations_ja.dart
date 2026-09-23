@@ -3479,4 +3479,48 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get attachmentNoCaption => '説明なし';
+
+  @override
+  String soApprovedWithReservations(int reserved) {
+    return '受注を承認しました（引当 $reserved 件）';
+  }
+
+  @override
+  String soApprovedWithSkips(int reserved, int skipped) {
+    return '受注を承認しました（引当 $reserved 件・未引当 $skipped 件）';
+  }
+
+  @override
+  String get soApprovalSkipDetail => '詳細';
+
+  @override
+  String get soSkippedLinesTitle => '引当できなかった明細';
+
+  @override
+  String get soSkipUnlinkedJan => '商品が未登録です';
+
+  @override
+  String soSkipInsufficientAvailable(int available, int requested) {
+    return '在庫が不足しています（在庫 $available / 必要 $requested）';
+  }
+
+  @override
+  String get soReservationsTitle => '引当状況';
+
+  @override
+  String get soReservationFulfilled => '出荷済み';
+
+  @override
+  String get soCreateShipment => '出荷を作成';
+
+  @override
+  String get soCreateShipmentQ => 'この受注から出荷を作成しますか？';
+
+  @override
+  String soShipmentCreated(int lines) {
+    return '出荷を作成しました（明細 $lines 件）';
+  }
+
+  @override
+  String get soOpenShipment => '出荷を開く';
 }

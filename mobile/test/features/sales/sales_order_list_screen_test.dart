@@ -5,6 +5,8 @@ import 'package:wms_mobile/features/sales/application/sales_order_providers.dart
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
 import 'package:wms_mobile/features/sales/presentation/sales_order_detail_screen.dart';
 import 'package:wms_mobile/features/sales/presentation/sales_order_list_screen.dart';
+import 'package:wms_mobile/features/shipment/application/shipment_providers.dart';
+import 'package:wms_mobile/features/shipment/domain/shipment.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
@@ -42,14 +44,6 @@ Future<void> _pumpList(WidgetTester tester, FakeSalesOrderRepository repo,
             ),
       )),
     ],
-  );
-}
-
-Future<void> _pumpDetail(WidgetTester tester, FakeSalesOrderRepository repo, int id) async {
-  await pumpApp(
-    tester,
-    SalesOrderDetailScreen(salesOrderId: id),
-    overrides: [salesOrderRepositoryProvider.overrideWithValue(repo)],
   );
 }
 
@@ -105,11 +99,23 @@ void main() {
   });
 
   testWidgets(
-      'driving a draft through submit -> approve -> complete updates its status',
+      'driving a draft through submit -> approve -> ship -> complete updates its status',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1000));
-    final repo = FakeSalesOrderRepository(orders: [_draftOrder()]);
-    await _pumpDetail(tester, repo, 1);
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeSalesOrderRepository(orders: [_draftOrder()])
+      ..approvalResult =
+          const SalesOrderApprovalResult(reservedLines: 1, skipped: [])
+      ..shipmentResult = const ShipmentFromSalesOrderResult(
+          shipmentPlanId: 900, lines: 1, reservationsRelinked: 1);
+    await pumpApp(
+      tester,
+      const SalesOrderDetailScreen(salesOrderId: 1),
+      overrides: [
+        salesOrderRepositoryProvider.overrideWithValue(repo),
+        shipmentRepositoryProvider.overrideWithValue(FakeShipmentRepository(
+            const [Shipment(id: 900, shipmentNumber: 'SHP-000900')])),
+      ],
+    );
 
     expect(find.text('下書き'), findsOneWidget);
     await tester.tap(find.text('提出'));
@@ -127,6 +133,23 @@ void main() {
         of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '承認')));
     await tester.pumpAndSettle();
     expect(find.text('承認済み'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    // Approving only reserves stock; the primary action is now turning that
+    // into something the floor can pick, not closing the order's bookkeeping.
+    expect(find.text('完了にする'), findsNothing);
+    await tester.tap(find.text('出荷を作成'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, '出荷を作成')));
+    await tester.pumpAndSettle();
+
+    // Success navigates straight to the shipment; come back to close the order.
+    expect(find.text('SHP-000900'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 

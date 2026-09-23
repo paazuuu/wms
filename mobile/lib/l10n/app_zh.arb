@@ -1396,5 +1396,17 @@
   "attachmentWithdrawn": "已撤回附件",
   "attachmentWithdrawnBadge": "已撤回",
   "attachmentSize": "{kb} KB",
-  "attachmentNoCaption": "无说明"
+  "attachmentNoCaption": "无说明",
+  "soApprovedWithReservations": "已批准订单（已预留 {reserved} 项）",
+  "soApprovedWithSkips": "已批准订单（已预留 {reserved} 项・未预留 {skipped} 项）",
+  "soApprovalSkipDetail": "详情",
+  "soSkippedLinesTitle": "未能预留的明细",
+  "soSkipUnlinkedJan": "该商品尚未注册",
+  "soSkipInsufficientAvailable": "库存不足（现有 {available} / 需要 {requested}）",
+  "soReservationsTitle": "预留情况",
+  "soReservationFulfilled": "已出库",
+  "soCreateShipment": "创建出库单",
+  "soCreateShipmentQ": "要从此订单创建出库单吗？",
+  "soShipmentCreated": "已创建出库单（{lines} 项明细）",
+  "soOpenShipment": "打开出库单"
 }

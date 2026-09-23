@@ -3471,6 +3471,38 @@ applied here to schema.
 function, check whether a `<name>_impl` sibling exists. If it does, the thing to
 edit is the `_impl`, never the wrapper.
 
+## Client (Flutter) — following Phase C
+
+### Sales order: approval made visible, and the order becomes a shipment
+
+`SalesOrderRepositoryImpl.approve()` posted to `approve_sales_order` and checked
+`response.data == true` — the boolean the RPC returned before 0073. Once 0073
+changed it to return jsonb (reserved lines and why others were skipped), that
+check could never be true again: **every approval on the live app was reporting
+failure to the user, even though the database call succeeded and reserved
+stock.** Nobody had reached this client since 0073 shipped, so nothing had
+caught it. This is the first thing fixed, ahead of anything new: `approve()` now
+returns `SalesOrderApprovalResult`, and the detail screen shows what was
+actually reserved — a clean approval as a plain confirmation, a shortfall as a
+SnackBar with a "詳細" action opening a dialog that names each skipped line and
+why (unlinked JAN vs. insufficient available, with the numbers).
+
+`create_shipment_from_sales_order` is now reachable: an approved order with no
+shipment yet offers "出荷を作成" as its primary action instead of "完了にする" —
+approving only reserves stock (0073), and turning that into something the floor
+can pick is a separate, explicit act. Once a shipment exists, the primary action
+reverts to closing the order's own bookkeeping, and a reservations card (§6,
+made visible) shows each line's `fulfilled / quantity` with a link to open the
+shipment. Completing without ever creating a shipment is still possible — 0073
+places no such requirement — it is simply no longer the thing offered first.
+
+Tested against the fake repository: a clean approval, a shortfall with its
+detail dialog, an approved order with no shipment offering to create one and
+navigating straight to it on success, and an approved order that already has
+one offering both "出荷を開く" and "完了にする". The old lifecycle test (submit →
+approve → complete) now runs submit → approve → **create shipment** → complete,
+which is the flow 0073 actually built.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

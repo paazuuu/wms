@@ -85,11 +85,24 @@ void main() {
       );
     });
 
-    test('approve() posts the id to approve_sales_order', () async {
+    test('approve() reports what 0073 actually reserved', () async {
       late RequestOptions captured;
       final adapter = FakeHttpClientAdapter((options) {
         captured = options;
-        return jsonResponseBody(true, 200);
+        return jsonResponseBody({
+          'sales_order_id': 9,
+          'status': 'APPROVED',
+          'reserved_lines': 1,
+          'skipped': [
+            {
+              'line_id': 4,
+              'jan_code': '4900000000999',
+              'reason': 'insufficient_available',
+              'available': 5,
+              'requested': 10,
+            }
+          ],
+        }, 200);
       });
       final repo = SalesOrderRepositoryImpl(_dio(adapter));
 
@@ -98,7 +111,41 @@ void main() {
       expect(captured.path, '/rpc/approve_sales_order');
       expect((captured.data as Map)['p_id'], 9);
       result.when(
-        success: (ok) => expect(ok, isTrue),
+        success: (approval) {
+          expect(approval.reservedLines, 1);
+          expect(approval.hasSkipped, isTrue);
+          expect(approval.skipped.single.reason, 'insufficient_available');
+          expect(approval.skipped.single.available, 5);
+          expect(approval.skipped.single.requested, 10);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('createShipment() posts the order id and reads the new shipment back',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody({
+          'shipment_plan_id': 42,
+          'sales_order_id': 9,
+          'lines': 2,
+          'reservations_relinked': 1,
+        }, 200);
+      });
+      final repo = SalesOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.createShipment(9);
+
+      expect(captured.path, '/rpc/create_shipment_from_sales_order');
+      expect((captured.data as Map)['p_sales_order_id'], 9);
+      result.when(
+        success: (created) {
+          expect(created.shipmentPlanId, 42);
+          expect(created.lines, 2);
+          expect(created.reservationsRelinked, 1);
+        },
         failure: (f) => fail('expected success, got $f'),
       );
     });

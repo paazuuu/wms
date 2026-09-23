@@ -1396,5 +1396,17 @@
   "attachmentWithdrawn": "Attachment withdrawn",
   "attachmentWithdrawnBadge": "Withdrawn",
   "attachmentSize": "{kb} KB",
-  "attachmentNoCaption": "No caption"
+  "attachmentNoCaption": "No caption",
+  "soApprovedWithReservations": "Sales order approved ({reserved} reserved)",
+  "soApprovedWithSkips": "Sales order approved ({reserved} reserved, {skipped} not reserved)",
+  "soApprovalSkipDetail": "Details",
+  "soSkippedLinesTitle": "Lines not reserved",
+  "soSkipUnlinkedJan": "No product is registered for this JAN",
+  "soSkipInsufficientAvailable": "Not enough available ({available} of {requested})",
+  "soReservationsTitle": "Reservations",
+  "soReservationFulfilled": "Shipped",
+  "soCreateShipment": "Create shipment",
+  "soCreateShipmentQ": "Create a shipment from this sales order?",
+  "soShipmentCreated": "Shipment created ({lines} lines)",
+  "soOpenShipment": "Open shipment"
 }
