@@ -2440,6 +2440,36 @@ abstract class AppLocalizations {
   /// **'未ピックの明細があるため完了できません'**
   String get pickCompleteBlocked;
 
+  /// Pick task item: this parcel has no lot or serial recorded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット未記録'**
+  String get pickItemNoLot;
+
+  /// Pick task item: tooltip on the remove button.
+  ///
+  /// In ja, this message translates to:
+  /// **'この記録を取り消す'**
+  String get pickItemRemove;
+
+  /// Pick task: how much of the picked quantity has no parcel recorded.
+  ///
+  /// In ja, this message translates to:
+  /// **'未記録 {qty}'**
+  String pickItemUnattributed(int qty);
+
+  /// Record-pick dialog: optional lot code field label.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット番号'**
+  String get pickLotCode;
+
+  /// Record-pick dialog: hint that the lot code field is optional.
+  ///
+  /// In ja, this message translates to:
+  /// **'任意'**
+  String get pickLotCodeHint;
+
   /// No description provided for @transferTitle.
   ///
   /// In ja, this message translates to:

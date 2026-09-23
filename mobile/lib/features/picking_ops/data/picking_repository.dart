@@ -30,12 +30,47 @@ abstract class PickingRepository {
 
   Future<ApiResult<CompletedPickList>> complete(int pickListId);
   Future<ApiResult<PickList>> cancel(int pickListId);
+
+  /// §16's advice for one task: which parcels to take, in the product's
+  /// picking-rule order, and what it cannot cover.
+  Future<ApiResult<PickCandidates>> candidatesFor(int taskId);
+
+  /// Records one parcel of what was actually taken (0074) — optional detail
+  /// on top of the task's total. Unlike [recordPick], this *adds* a parcel
+  /// rather than overwriting the task's picked quantity, so calling it twice
+  /// records two parcels, not a corrected total.
+  Future<ApiResult<PickList>> recordPickItem(
+    int taskId, {
+    required int quantity,
+    String? lotCode,
+    String? serialNumber,
+    int? binId,
+    int? stockUnitId,
+    String? note,
+  });
+
+  /// Takes one recorded parcel back. The task's picked quantity is
+  /// recomputed as the sum of what remains.
+  Future<ApiResult<PickList>> removePickItem(int itemId, {required int pickListId});
 }
 
 class PickingRepositoryImpl implements PickingRepository {
-  PickingRepositoryImpl(this._dio);
+  /// [_dio] reaches the `picking` edge function, for the older, list-level
+  /// writes (start/complete/cancel/record_pick) that are service_role-only.
+  /// [_rest] reaches PostgREST for 0074's newer, directly-`authenticated`
+  /// RPCs — the same two-Dio shape `ShipmentRepositoryImpl` uses.
+  PickingRepositoryImpl(this._dio, [Dio? rest]) : _rest = rest;
 
   final Dio _dio;
+  final Dio? _rest;
+
+  Dio get _rpc {
+    final rest = _rest;
+    if (rest == null) {
+      throw StateError('PickingRepositoryImpl needs a REST Dio for RPC calls');
+    }
+    return rest;
+  }
 
   PickList _list(dynamic body) =>
       PickList.fromJson(((body as Map)['data'] as Map).cast<String, dynamic>());
@@ -119,6 +154,64 @@ class PickingRepositoryImpl implements PickingRepository {
     try {
       final response = await _dio.post('/picking/lists/$pickListId/cancel');
       return ApiSuccess(_list(response.data));
+    } on DioException catch (e) {
+      return mapDioError<PickList>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<PickCandidates>> candidatesFor(int taskId) async {
+    try {
+      final response = await _rpc
+          .post('/rpc/pick_task_candidates', data: {'p_task_id': taskId});
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(
+          PickCandidates.fromJson((json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<PickCandidates>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<PickList>> recordPickItem(
+    int taskId, {
+    required int quantity,
+    String? lotCode,
+    String? serialNumber,
+    int? binId,
+    int? stockUnitId,
+    String? note,
+  }) async {
+    try {
+      final response = await _rpc.post('/rpc/record_pick_item', data: {
+        'p_task_id': taskId,
+        'p_quantity': quantity,
+        'p_lot_code': lotCode,
+        'p_serial_number': serialNumber,
+        'p_bin_id': binId,
+        'p_stock_unit_id': stockUnitId,
+        'p_note': note,
+      });
+      final data = response.data;
+      final json = (data is List && data.isNotEmpty ? data.first : data) as Map;
+      final pickListId = json['pick_list_id'] is int
+          ? json['pick_list_id'] as int
+          : int.tryParse('${json['pick_list_id']}');
+      if (pickListId == null) {
+        return const ApiFailure(message: 'record_pick_item did not return a pick_list_id');
+      }
+      return await show(pickListId);
+    } on DioException catch (e) {
+      return mapDioError<PickList>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<PickList>> removePickItem(int itemId, {required int pickListId}) async {
+    try {
+      await _rpc.post('/rpc/remove_pick_item', data: {'p_item_id': itemId});
+      return await show(pickListId);
     } on DioException catch (e) {
       return mapDioError<PickList>(e);
     }

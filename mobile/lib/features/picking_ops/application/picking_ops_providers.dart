@@ -8,7 +8,8 @@ import '../data/picking_repository.dart';
 import '../domain/pick_list.dart';
 
 final pickingRepositoryProvider = Provider<PickingRepository>((ref) {
-  return PickingRepositoryImpl(ref.watch(deliveryDioProvider));
+  return PickingRepositoryImpl(
+      ref.watch(deliveryDioProvider), ref.watch(restDioProvider));
 });
 
 /// Pick lists for the active warehouse, newest first.

@@ -1239,6 +1239,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pickCompleteBlocked => '存在未拣货的明细，无法完成';
 
   @override
+  String get pickItemNoLot => '未记录批次';
+
+  @override
+  String get pickItemRemove => '撤销此记录';
+
+  @override
+  String pickItemUnattributed(int qty) {
+    return '未记录 $qty';
+  }
+
+  @override
+  String get pickLotCode => '批次编号';
+
+  @override
+  String get pickLotCodeHint => '可选';
+
+  @override
   String get transferTitle => '仓库间调拨';
 
   @override

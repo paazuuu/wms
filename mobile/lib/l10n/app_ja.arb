@@ -579,6 +579,31 @@
     }
   },
   "pickCompleteBlocked": "未ピックの明細があるため完了できません",
+  "pickItemNoLot": "ロット未記録",
+  "@pickItemNoLot": {
+    "description": "Pick task item: this parcel has no lot or serial recorded."
+  },
+  "pickItemRemove": "この記録を取り消す",
+  "@pickItemRemove": {
+    "description": "Pick task item: tooltip on the remove button."
+  },
+  "pickItemUnattributed": "未記録 {qty}",
+  "@pickItemUnattributed": {
+    "description": "Pick task: how much of the picked quantity has no parcel recorded.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "pickLotCode": "ロット番号",
+  "@pickLotCode": {
+    "description": "Record-pick dialog: optional lot code field label."
+  },
+  "pickLotCodeHint": "任意",
+  "@pickLotCodeHint": {
+    "description": "Record-pick dialog: hint that the lot code field is optional."
+  },
   "transferTitle": "倉庫間移動",
   "transferNew": "移動を作成",
   "transferEmpty": "移動はまだありません",

@@ -3535,6 +3535,52 @@ Creating a wave reuses `pickableShipmentsProvider` (already built for starting
 a single pick list) behind a multi-select sheet — no new "which shipments are
 open" query, just a different selection widget over the same list.
 
+### §16's picking-rule advice, and §15's parcel recording (0074)
+
+`PickListDetailScreen` recorded a pick by overwriting the task's total —
+`recordPick(taskId, quantity:)` set what the task's picked quantity *was*, so a
+second call after a short pick corrected the figure rather than adding to it.
+0074's `pick_items`/`record_pick_item`/`remove_pick_item` are additive, the
+same shape `receipt_items` already has on the inbound side: each call records
+one more parcel, and the task's total is the sum of what is on it. Wiring
+this in meant changing what "recording a pick" means on this screen, not just
+adding a field.
+
+`recordPickItem` replaces `recordPick` as the call the dialog makes. The
+quantity field now prefills from `task.outstandingQuantity`
+(`plannedQuantity - pickedQuantity`, clamped to zero) rather than the running
+total, so reopening the dialog after a partial pick starts the operator at
+what is still needed, not at the whole plan again. `_TaskCard` renders each
+recorded parcel (`L:{lot}` / `S/N:{serial}` or `pickItemNoLot` when neither
+was given, plus its quantity and a remove button) and, only when the recorded
+sum falls short of the picked total, a `pickItemUnattributed` warning — the
+same "recorded but not yet attributed to a lot" shape `parcelUnattributed`
+already has for receiving.
+
+Before the dialog opens, `PickingRepositoryImpl.candidatesFor(taskId)` asks
+`pick_task_candidates` for §16's advice — which lot to take and why, in the
+product's picking-rule order (FIFO/FEFO/LIFO/MANUAL) — but only when the task
+resolves to a product; an unlinked JAN has nothing to advise on, and the call
+is skipped rather than sent to fail. The dialog shows the top candidate's
+server-composed Japanese `reason` string (e.g. "期限が近い順（FEFO）:
+2027-01-01") next to a lightbulb icon, and pre-fills the lot code field from
+that candidate — a suggestion the operator can overwrite, not a constraint
+the dialog enforces; §16 is advisory, not a scan-time gate the way the JAN
+check is.
+
+`PickingRepositoryImpl` now carries a second Dio for these RPCs (`_rest`/
+`_rpc`, from `restDioProvider`), the same two-Dio shape `ShipmentRepositoryImpl`
+already uses for its own split between the edge-gated writes
+(`start`/`complete`/`cancel`) and the directly-`authenticated` ones 0074 added.
+
+Tested against the fake repository: recording two parcels for one task shows
+both with their own remove button and no unattributed warning once they sum to
+the total; the quantity field's prefill is asserted directly on the second
+pass (outstanding, not the plan); removing a parcel takes it back off the task
+and restores the full plan as the next prefill; and the advisory reason text
+and lot pre-fill are asserted from a fixture `PickCandidates` before any
+recording happens.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

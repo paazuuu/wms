@@ -46,7 +46,9 @@ Future<void> _recordPick(
   await tester.tap(find.text(productName));
   await tester.pumpAndSettle();
   await _scanToConfirm(tester, janCode);
-  await tester.enterText(find.byType(TextField).last, quantity);
+  // Once the scan field is gone, the quantity field is the first of the two
+  // remaining TextFields (quantity, then the optional lot code).
+  await tester.enterText(find.byType(TextField).first, quantity);
   await tester.tap(find.widgetWithText(FilledButton, 'ピック数を記録'));
   await tester.pumpAndSettle();
 }
@@ -65,7 +67,7 @@ void main() {
     await _recordPick(tester,
         productName: 'ボールペン', janCode: '4901234567894', quantity: '17');
 
-    expect(repo.lastRecordedQuantity, 17);
+    expect(repo.lastRecordedItemQuantity, 17);
     expect(find.text('不足'), findsOneWidget);
     expect(find.text('-3'), findsOneWidget);
   });
@@ -142,7 +144,7 @@ void main() {
     // Tapping it anyway changes nothing — the dialog stays open, unrecorded.
     await tester.tap(find.widgetWithText(FilledButton, 'ピック数を記録'));
     await tester.pumpAndSettle();
-    expect(repo.lastRecordedQuantity, isNull);
+    expect(repo.lastRecordedItemQuantity, isNull);
     expect(find.byType(AlertDialog), findsOneWidget);
   });
 
@@ -192,7 +194,7 @@ void main() {
     await tester.tap(find.text('ボールペン'));
     await tester.pumpAndSettle();
     await _scanToConfirm(tester, '4901234567894');
-    await tester.enterText(find.byType(TextField).last, '0');
+    await tester.enterText(find.byType(TextField).first, '0');
     await tester.tap(find.widgetWithText(OutlinedButton, '+5'));
     await tester.pump();
     await tester.tap(find.widgetWithText(OutlinedButton, '+1'));
@@ -200,6 +202,6 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'ピック数を記録'));
     await tester.pumpAndSettle();
 
-    expect(repo.lastRecordedQuantity, 6);
+    expect(repo.lastRecordedItemQuantity, 6);
   });
 }

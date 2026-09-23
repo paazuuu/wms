@@ -1242,6 +1242,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pickCompleteBlocked => '未ピックの明細があるため完了できません';
 
   @override
+  String get pickItemNoLot => 'ロット未記録';
+
+  @override
+  String get pickItemRemove => 'この記録を取り消す';
+
+  @override
+  String pickItemUnattributed(int qty) {
+    return '未記録 $qty';
+  }
+
+  @override
+  String get pickLotCode => 'ロット番号';
+
+  @override
+  String get pickLotCodeHint => '任意';
+
+  @override
   String get transferTitle => '倉庫間移動';
 
   @override

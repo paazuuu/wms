@@ -1280,6 +1280,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cannot complete: some lines are still unpicked';
 
   @override
+  String get pickItemNoLot => 'No lot recorded';
+
+  @override
+  String get pickItemRemove => 'Undo this record';
+
+  @override
+  String pickItemUnattributed(int qty) {
+    return '$qty unattributed';
+  }
+
+  @override
+  String get pickLotCode => 'Lot code';
+
+  @override
+  String get pickLotCodeHint => 'Optional';
+
+  @override
   String get transferTitle => 'Transfers';
 
   @override

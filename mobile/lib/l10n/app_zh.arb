@@ -562,6 +562,31 @@
     }
   },
   "pickCompleteBlocked": "存在未拣货的明细，无法完成",
+  "pickItemNoLot": "未记录批次",
+  "@pickItemNoLot": {
+    "description": "Pick task item: this parcel has no lot or serial recorded."
+  },
+  "pickItemRemove": "撤销此记录",
+  "@pickItemRemove": {
+    "description": "Pick task item: tooltip on the remove button."
+  },
+  "pickItemUnattributed": "未记录 {qty}",
+  "@pickItemUnattributed": {
+    "description": "Pick task: how much of the picked quantity has no parcel recorded.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "pickLotCode": "批次编号",
+  "@pickLotCode": {
+    "description": "Record-pick dialog: optional lot code field label."
+  },
+  "pickLotCodeHint": "可选",
+  "@pickLotCodeHint": {
+    "description": "Record-pick dialog: hint that the lot code field is optional."
+  },
   "transferTitle": "仓库间调拨",
   "transferNew": "新建调拨",
   "transferEmpty": "暂无调拨",

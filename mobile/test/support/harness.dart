@@ -794,6 +794,17 @@ class FakePickingRepository implements PickingRepository {
   /// to simulate a permission-denied RPC response (pick.confirm).
   String? failWith;
 
+  /// Set by a test to control what candidatesFor() advises.
+  PickCandidates? candidatesResult;
+
+  int _nextItemId = 1;
+
+  /// The last call to recordPickItem()/removePickItem().
+  int? lastRecordedItemTaskId;
+  int? lastRecordedItemQuantity;
+  String? lastRecordedItemLotCode;
+  int? lastRemovedItemId;
+
   PickTaskStatus _statusFor(int planned, int? picked) {
     if (picked == null) return PickTaskStatus.pending;
     if (picked == planned) return PickTaskStatus.picked;
@@ -894,6 +905,96 @@ class FakePickingRepository implements PickingRepository {
       tasks: _list.tasks,
     );
     return ApiSuccess(_list);
+  }
+
+  @override
+  Future<ApiResult<PickCandidates>> candidatesFor(int taskId) async =>
+      ApiSuccess(candidatesResult ??
+          const PickCandidates(rule: 'FIFO', requested: 0, short: 0));
+
+  @override
+  Future<ApiResult<PickList>> recordPickItem(
+    int taskId, {
+    required int quantity,
+    String? lotCode,
+    String? serialNumber,
+    int? binId,
+    int? stockUnitId,
+    String? note,
+  }) async {
+    lastRecordedItemTaskId = taskId;
+    lastRecordedItemQuantity = quantity;
+    lastRecordedItemLotCode = lotCode;
+    final item = PickTaskItem(
+      id: _nextItemId++,
+      quantity: quantity,
+      lotCode: lotCode,
+      serialNumber: serialNumber,
+      binId: binId,
+      stockUnitId: stockUnitId,
+      note: note,
+      createdAt: DateTime.now(),
+    );
+    _list = PickList(
+      id: _list.id,
+      shipmentPlanId: _list.shipmentPlanId,
+      shipmentNumber: _list.shipmentNumber,
+      customerName: _list.customerName,
+      warehouseId: _list.warehouseId,
+      usesLocations: _list.usesLocations,
+      status: _list.status,
+      tasks: [
+        for (final t in _list.tasks)
+          if (t.id == taskId)
+            _withItems(t, [...t.items, item], binId: binId ?? t.binId)
+          else
+            t,
+      ],
+    );
+    return ApiSuccess(_list);
+  }
+
+  @override
+  Future<ApiResult<PickList>> removePickItem(int itemId, {required int pickListId}) async {
+    lastRemovedItemId = itemId;
+    _list = PickList(
+      id: _list.id,
+      shipmentPlanId: _list.shipmentPlanId,
+      shipmentNumber: _list.shipmentNumber,
+      customerName: _list.customerName,
+      warehouseId: _list.warehouseId,
+      usesLocations: _list.usesLocations,
+      status: _list.status,
+      tasks: [
+        for (final t in _list.tasks)
+          if (t.items.any((i) => i.id == itemId))
+            _withItems(t, t.items.where((i) => i.id != itemId).toList())
+          else
+            t,
+      ],
+    );
+    return ApiSuccess(_list);
+  }
+
+  PickTask _withItems(PickTask t, List<PickTaskItem> items, {int? binId}) {
+    final pickedQuantity =
+        items.isEmpty ? null : items.fold(0, (s, i) => s + i.quantity);
+    return PickTask(
+      id: t.id,
+      janCode: t.janCode,
+      productId: t.productId,
+      productName: t.productName,
+      plannedQuantity: t.plannedQuantity,
+      pickedQuantity: pickedQuantity,
+      variance: pickedQuantity == null ? null : pickedQuantity - t.plannedQuantity,
+      status: _statusFor(t.plannedQuantity, pickedQuantity),
+      binId: binId ?? t.binId,
+      binCode: t.binCode,
+      note: t.note,
+      pickedAt: t.pickedAt,
+      pickingRule: t.pickingRule,
+      items: items,
+    );
   }
 }
 

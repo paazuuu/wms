@@ -85,18 +85,48 @@ class _BodyState extends ConsumerState<_Body> {
         : const <Bin>[];
     if (!mounted) return;
 
+    // §16's advice, fetched fresh each time: which lot to grab, in the
+    // product's picking rule order. Only asked when the task actually
+    // resolves to a product — an unlinked JAN has nothing to advise on.
+    PickCandidates? candidates;
+    if (task.productId != null) {
+      final result =
+          await ref.read(pickingRepositoryProvider).candidatesFor(task.id);
+      candidates = result.when(success: (c) => c, failure: (_) => null);
+      if (!mounted) return;
+    }
+
     final draft = await showDialog<_PickDraft>(
       context: context,
-      builder: (_) => _RecordPickDialog(task: task, bins: bins),
+      builder: (_) =>
+          _RecordPickDialog(task: task, bins: bins, candidates: candidates),
     );
     if (draft == null || !mounted) return;
 
     setState(() => _busy = true);
-    final result = await ref.read(pickingRepositoryProvider).recordPick(
+    // Adds a parcel (0074) rather than overwriting the task's total, so a
+    // second tap after a short pick records the next parcel, not a
+    // correction — the same shape `record_receipt_item` has on the way in.
+    final result = await ref.read(pickingRepositoryProvider).recordPickItem(
           task.id,
           quantity: draft.quantity,
+          lotCode: draft.lotCode,
           binId: draft.binId,
         );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) => _refresh(),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  Future<void> _removeItem(PickTaskItem item) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final result = await ref
+        .read(pickingRepositoryProvider)
+        .removePickItem(item.id, pickListId: _list.id);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
@@ -256,6 +286,7 @@ class _BodyState extends ConsumerState<_Body> {
                       onTap: _list.isOpen && !_busy
                           ? () => _record(_list.tasks[i])
                           : null,
+                      onRemoveItem: _list.isOpen && !_busy ? _removeItem : null,
                     );
                   },
                 ),
@@ -308,10 +339,11 @@ class _BodyState extends ConsumerState<_Body> {
 }
 
 class _TaskCard extends StatelessWidget {
-  const _TaskCard({required this.task, this.onTap});
+  const _TaskCard({required this.task, this.onTap, this.onRemoveItem});
 
   final PickTask task;
   final VoidCallback? onTap;
+  final ValueChanged<PickTaskItem>? onRemoveItem;
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +415,51 @@ class _TaskCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (task.items.isNotEmpty) ...[
+                const Divider(height: AppSpacing.lg),
+                for (final item in task.items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.inventory_2_outlined,
+                            size: 14, color: scheme.onSurfaceVariant),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Text(
+                            [
+                              if (item.lotCode != null) 'L:${item.lotCode}',
+                              if (item.serialNumber != null) 'S/N:${item.serialNumber}',
+                              if (item.lotCode == null && item.serialNumber == null)
+                                l10n.pickItemNoLot,
+                              '× ${item.quantity}',
+                            ].join('  '),
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (onRemoveItem != null)
+                          IconButton(
+                            tooltip: l10n.pickItemRemove,
+                            iconSize: 16,
+                            visualDensity: VisualDensity.compact,
+                            icon: Icon(Icons.close, color: scheme.error),
+                            onPressed: () => onRemoveItem!(item),
+                          ),
+                      ],
+                    ),
+                  ),
+                if (task.unattributedQuantity > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      l10n.pickItemUnattributed(task.unattributedQuantity),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+                    ),
+                  ),
+              ],
             ],
           ),
         ),
@@ -437,24 +514,34 @@ class _Stat extends StatelessWidget {
 }
 
 class _PickDraft {
-  const _PickDraft(this.quantity, this.binId);
+  const _PickDraft(this.quantity, this.binId, this.lotCode);
   final int quantity;
   final int? binId;
+  final String? lotCode;
 }
 
 class _RecordPickDialog extends StatefulWidget {
-  const _RecordPickDialog({required this.task, required this.bins});
+  const _RecordPickDialog({required this.task, required this.bins, this.candidates});
 
   final PickTask task;
   final List<Bin> bins;
+
+  /// §16's advice — which lot to grab, in the product's picking rule order.
+  /// Null when the task has no linked product, or the read failed; either
+  /// way the dialog still works, just without a suggestion to show.
+  final PickCandidates? candidates;
 
   @override
   State<_RecordPickDialog> createState() => _RecordPickDialogState();
 }
 
 class _RecordPickDialogState extends State<_RecordPickDialog> {
-  late final TextEditingController _quantity = TextEditingController(
-      text: (widget.task.pickedQuantity ?? widget.task.plannedQuantity).toString());
+  // What is still outstanding, not the running total — each parcel this
+  // dialog records is added to the task, not a corrected overall figure.
+  late final TextEditingController _quantity =
+      TextEditingController(text: widget.task.outstandingQuantity.toString());
+  late final TextEditingController _lotCode = TextEditingController(
+      text: widget.candidates?.candidates.firstOrNull?.lotCode ?? '');
   int? _binId;
 
   /// §16's gate: a quantity is only confirmable once the operator has scanned
@@ -473,6 +560,7 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
   @override
   void dispose() {
     _quantity.dispose();
+    _lotCode.dispose();
     super.dispose();
   }
 
@@ -518,7 +606,8 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
     if (!_scanConfirmed) return;
     final value = int.tryParse(_quantity.text.trim());
     if (value == null || value < 0) return;
-    Navigator.pop(context, _PickDraft(value, _binId));
+    final lot = _lotCode.text.trim();
+    Navigator.pop(context, _PickDraft(value, _binId, lot.isEmpty ? null : lot));
   }
 
   @override
@@ -606,6 +695,34 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
                     ),
                   ),
               ],
+            ),
+            if (widget.candidates != null &&
+                widget.candidates!.candidates.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Icon(Icons.lightbulb_outline, size: 16, color: scheme.primary),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      widget.candidates!.candidates.first.reason ??
+                          widget.candidates!.rule,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.primary),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _lotCode,
+              enabled: _scanConfirmed,
+              decoration: InputDecoration(
+                labelText: l10n.pickLotCode,
+                hintText: l10n.pickLotCodeHint,
+              ),
+              style: const TextStyle(fontFamily: AppFonts.mono),
             ),
             if (widget.bins.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.lg),

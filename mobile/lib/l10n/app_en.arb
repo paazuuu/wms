@@ -562,6 +562,31 @@
     }
   },
   "pickCompleteBlocked": "Cannot complete: some lines are still unpicked",
+  "pickItemNoLot": "No lot recorded",
+  "@pickItemNoLot": {
+    "description": "Pick task item: this parcel has no lot or serial recorded."
+  },
+  "pickItemRemove": "Undo this record",
+  "@pickItemRemove": {
+    "description": "Pick task item: tooltip on the remove button."
+  },
+  "pickItemUnattributed": "{qty} unattributed",
+  "@pickItemUnattributed": {
+    "description": "Pick task: how much of the picked quantity has no parcel recorded.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "pickLotCode": "Lot code",
+  "@pickLotCode": {
+    "description": "Record-pick dialog: optional lot code field label."
+  },
+  "pickLotCodeHint": "Optional",
+  "@pickLotCodeHint": {
+    "description": "Record-pick dialog: hint that the lot code field is optional."
+  },
   "transferTitle": "Transfers",
   "transferNew": "New transfer",
   "transferEmpty": "No transfers yet",
