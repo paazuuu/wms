@@ -48,4 +48,80 @@ void main() {
     expect(html.contains('<svg'), isFalse);
     expect(html.contains('出庫リスト'), isTrue);
   });
+
+  test('a carton where every parcel agrees on one lot prints that lot', () {
+    final oneLot = Shipment.fromJson({
+      'id': 2,
+      'shipment_number': 'S-2',
+      'customer_name': 'アクメ商事',
+      'status': 'packing',
+      'lines': [],
+      'cartons': [
+        {
+          'id': 20,
+          'carton_no': 1,
+          'items': [
+            {
+              'jan_code': '4902505632037',
+              'product_name': 'ボールペン',
+              'quantity': 10,
+              'lot_code': 'L-A',
+            },
+            {
+              'jan_code': '4902505632037',
+              'product_name': 'ボールペン',
+              'quantity': 5,
+              'lot_code': 'L-A',
+            },
+          ],
+        },
+      ],
+    });
+
+    final values =
+        printer.cartonLabelValues(oneLot, oneLot.cartons.first);
+    expect(values['lot'], 'L-A');
+
+    final html = printer.cartonLabelHtml(oneLot, oneLot.cartons.first);
+    expect(html.contains('ロット L-A'), isTrue);
+  });
+
+  test('a carton split across two lots of the same JAN prints no lot row',
+      () {
+    final twoLots = Shipment.fromJson({
+      'id': 3,
+      'shipment_number': 'S-3',
+      'customer_name': 'アクメ商事',
+      'status': 'packing',
+      'lines': [],
+      'cartons': [
+        {
+          'id': 30,
+          'carton_no': 1,
+          'items': [
+            {
+              'jan_code': '4902505632037',
+              'product_name': 'ボールペン',
+              'quantity': 10,
+              'lot_code': 'L-A',
+            },
+            {
+              'jan_code': '4902505632037',
+              'product_name': 'ボールペン',
+              'quantity': 5,
+              'lot_code': 'L-B',
+            },
+          ],
+        },
+      ],
+    });
+
+    final values =
+        printer.cartonLabelValues(twoLots, twoLots.cartons.first);
+    expect(values['lot'], isNull);
+
+    // The template's own row is dropped entirely, not printed blank.
+    final html = printer.cartonLabelHtml(twoLots, twoLots.cartons.first);
+    expect(html.contains('ロット'), isFalse);
+  });
 }

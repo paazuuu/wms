@@ -3742,6 +3742,22 @@ and bin — and a SHIP_CANCEL row is shown as it happened, tagged and in red,
 rather than filtered out, because a reversal is part of the recall answer,
 not noise the read should hide.
 
+### A stale comment, found while closing out this phase
+
+Checking every RPC 0073–0079 built against what the client actually calls
+(the same completeness pass this "recall traceability" slice came out of)
+turned up one more: the printed carton label template (`LabelTemplates.carton`)
+has carried a `ロット {{lot}}` row since before this phase, but
+`cartonLabelValues()` fed it a hardcoded `null` with a comment claiming lot
+tracking was not modelled yet. It is now — `CartonItem.lotCode`, wired by the
+carton-packing rewrite above. `cartonLabelValues()` now shows the lot when
+every parcel in the box agrees on one (the same single-vs-ambiguous rule
+`product_name`/`jan` already use for a mixed box), and drops the row —
+`LabelTemplate.render()` already does this for any row whose variables all
+resolve empty — when a box holds two lots of the same JAN rather than naming
+only the first and mislabelling the rest. Two new tests in
+`shipment_print_test.dart` pin both cases down directly.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

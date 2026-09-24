@@ -236,6 +236,14 @@ class ShipmentPrinter {
   }) {
     final janCodes = {for (final it in c.items) it.janCode}.toList();
     final single = janCodes.length == 1 ? c.items.first : null;
+    // Same "single vs. ambiguous" rule as product_name/jan: a box is only
+    // printed with one lot when every parcel in it agrees on that lot — a box
+    // split across two lots of the same JAN gets no lot row rather than one
+    // that names only the first parcel and silently mislabels the rest.
+    final lotCodes = {
+      for (final it in c.items)
+        if (it.lotCode != null) it.lotCode!,
+    };
     final company = sender
         .where((l) => l.key == 'company')
         .map((l) => l.text)
@@ -250,7 +258,7 @@ class ShipmentPrinter {
           (janCodes.isEmpty ? null : '${janCodes.length} 品目'),
       'jan': single?.janCode,
       'sku': single?.spec,
-      'lot': null, // Lot tracking is not modelled yet; the row drops out.
+      'lot': lotCodes.length == 1 ? lotCodes.first : null,
       'quantity': '${c.totalUnits}',
       'warehouse': warehouseName,
     };
