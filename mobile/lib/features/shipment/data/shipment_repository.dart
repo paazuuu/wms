@@ -4,6 +4,7 @@ import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/carton.dart';
 import '../domain/shipment.dart';
+import '../domain/shipment_parcel.dart';
 
 /// Data access for the outbound / shipping flow. Shipments are imported through
 /// the shared import-plan function (target=shipment); this repository reads
@@ -86,6 +87,10 @@ abstract class ShipmentRepository {
 
   /// Takes one packed parcel back out of its carton.
   Future<ApiResult<bool>> removeCartonItem(int itemId);
+
+  /// What left the building on this shipment, parcel by parcel (0075) — the
+  /// read a recall starts from: which lots went to this customer, and when.
+  Future<ApiResult<List<ShipmentParcel>>> parcels(int planId);
 }
 
 /// What `autopack_shipment` reports back.
@@ -333,6 +338,29 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<ShipmentParcel>>> parcels(int planId) async {
+    try {
+      final response = await _rpc
+          .post('/rpc/shipment_parcels', data: {'p_plan_id': planId});
+      // `shipment_parcels` returns a plain (non-setof) jsonb array, so
+      // PostgREST's body *is* that array — not a single-row wrapper around
+      // it. Only unwrap when the response is the row-around-array shape
+      // (one element that is itself a list), the same disambiguation
+      // `lot_provenance` already needs for the same reason.
+      final data = response.data;
+      final rows = data is List
+          ? (data.length == 1 && data.first is List ? data.first as List : data)
+          : const [];
+      return ApiSuccess(rows
+          .whereType<Map>()
+          .map((e) => ShipmentParcel.fromJson(e.cast<String, dynamic>()))
+          .toList());
+    } on DioException catch (e) {
+      return mapDioError<List<ShipmentParcel>>(e);
     }
   }
 }

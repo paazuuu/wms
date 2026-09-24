@@ -2472,6 +2472,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get printThisLabel => '箱ラベル';
 
   @override
+  String get shipmentParcelsAction => '出荷ロット履歴';
+
+  @override
+  String get shipmentParcelsTitle => '出荷ロット履歴';
+
+  @override
+  String get shipmentParcelsEmpty => 'まだ出荷されていません';
+
+  @override
+  String get shipmentParcelsEmptyBody => '出荷を確定すると、実際に出たロット・シリアルがここに表示されます。';
+
+  @override
+  String get shipmentParcelReversalTag => '取消分';
+
+  @override
   String get shipLogisticsSection => '配送情報';
 
   @override

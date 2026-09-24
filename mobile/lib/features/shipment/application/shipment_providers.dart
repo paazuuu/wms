@@ -5,6 +5,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/shipment_repository.dart';
 import '../domain/carton.dart';
 import '../domain/shipment.dart';
+import '../domain/shipment_parcel.dart';
 
 /// Reuses the delivery feature's Dio (Supabase Edge Functions base + anon key);
 /// the shipments function lives under the same functions/v1 gateway.
@@ -59,6 +60,17 @@ final shipmentDetailProvider =
 final shipmentPackingProvider =
     FutureProvider.autoDispose.family<ShipmentPacking, int>((ref, planId) async {
   final result = await ref.watch(shipmentRepositoryProvider).packing(planId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// What left the building on this shipment, parcel by parcel (0075) — the
+/// recall-traceability read.
+final shipmentParcelsProvider =
+    FutureProvider.autoDispose.family<List<ShipmentParcel>, int>((ref, planId) async {
+  final result = await ref.watch(shipmentRepositoryProvider).parcels(planId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

@@ -2467,6 +2467,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get printThisLabel => '箱标签';
 
   @override
+  String get shipmentParcelsAction => '出库批次记录';
+
+  @override
+  String get shipmentParcelsTitle => '出库批次记录';
+
+  @override
+  String get shipmentParcelsEmpty => '尚未出库';
+
+  @override
+  String get shipmentParcelsEmptyBody => '出库确认后，实际发出的批次和序列号会显示在这里。';
+
+  @override
+  String get shipmentParcelReversalTag => '已撤销';
+
+  @override
   String get shipLogisticsSection => '配送信息';
 
   @override

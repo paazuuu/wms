@@ -19,6 +19,7 @@ import '../domain/shipment.dart';
 import '../domain/shipment_status.dart';
 import 'carton_edit_screen.dart';
 import 'sender_picker.dart';
+import 'shipment_parcels_screen.dart';
 import 'shipment_status_ui.dart';
 
 /// One shipment: the overall list, the cartons it is split into, printing, and
@@ -319,7 +320,14 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
       appBar: AppBar(
         title: Text(detail.valueOrNull?.shipmentNumber ?? l10n.featShipment),
         actions: [
-          if (detail.valueOrNull != null)
+          if (detail.valueOrNull != null) ...[
+            IconButton(
+              tooltip: l10n.shipmentParcelsAction,
+              icon: const Icon(Icons.history),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ShipmentParcelsScreen(shipmentId: _id),
+              )),
+            ),
             PopupMenuButton<String>(
               tooltip: l10n.printMenu,
               icon: const Icon(Icons.print_outlined),
@@ -352,6 +360,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                 ],
               ],
             ),
+          ],
         ],
       ),
       body: detail.when(

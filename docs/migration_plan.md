@@ -3708,6 +3708,40 @@ line shows done with no add button; renaming changes the label without
 touching a recorded lot (the exact failure mode 0079 exists to prevent); and
 a closed carton's add/remove controls are disabled, not hidden.
 
+### Recall traceability, reachable (0075)
+
+The last RPC from Phase C with no client anywhere: `shipment_parcels` — "which
+lots and serials went to this customer, and when," the read a recall starts
+from. 0075 built it the same day it built the movements it reads, but nothing
+called it until now.
+
+New `ShipmentParcel` domain type, one repository method
+(`ShipmentRepository.parcels`), one provider (`shipmentParcelsProvider`), and
+a new screen (`ShipmentParcelsScreen`) reached from a history icon on
+`ShipmentDetailScreen`'s app bar — available on any shipment, not gated on
+its status, since the honest answer for one that has not shipped yet is an
+explained empty state rather than a hidden button.
+
+**The response shape needed care.** `shipment_parcels` `returns jsonb`, not
+`setof jsonb` — but the jsonb *value* is itself a `jsonb_agg()` array, so
+PostgREST's body is that array directly, not a single-row wrapper around it.
+The unwrap-if-wrapped pattern every other jsonb-returning RPC in this client
+uses (`data is List && data.isNotEmpty ? data.first : data`) would have taken
+`data.first` here — the *first parcel*, silently dropping the rest, or
+crashing outright once cast back to a list. `lot_provenance` (0067) already
+solved this exact shape on the receiving side; `parcels()` reuses its
+disambiguation rather than repeating the mistake it exists to avoid:
+`data.length == 1 && data.first is List` is the only case that means "wrapped,"
+everything else is the array as it stands. A dedicated repository test pins
+down a bare-array response specifically, not just the shape every other RPC
+test in this codebase happens to use.
+
+Each row renders with its signed quantity (`stock_ops_ui.signed`, the same
+helper picking's variance display uses), lot code and expiry, serial number,
+and bin — and a SHIP_CANCEL row is shown as it happened, tagged and in red,
+rather than filtered out, because a reversal is part of the recall answer,
+not noise the read should hide.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -78,6 +78,7 @@ import 'package:wms_mobile/features/auth/data/auth_repository.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/shipment/domain/carton.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
+import 'package:wms_mobile/features/shipment/domain/shipment_parcel.dart';
 import 'package:wms_mobile/features/wave/application/pick_wave_providers.dart';
 import 'package:wms_mobile/features/wave/data/pick_wave_repository.dart';
 import 'package:wms_mobile/features/wave/domain/pick_wave.dart';
@@ -782,6 +783,16 @@ class FakeShipmentRepository implements ShipmentRepository {
     if (failWith != null) return ApiFailure(message: failWith!);
     lastReopenedCartonId = cartonId;
     return const ApiSuccess(true);
+  }
+
+  /// What parcels() returns — set by a test, empty by default (a shipment
+  /// that has not shipped yet has nothing to show here).
+  List<ShipmentParcel> parcelsFixture = const [];
+
+  @override
+  Future<ApiResult<List<ShipmentParcel>>> parcels(int planId) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    return ApiSuccess(parcelsFixture);
   }
 }
 

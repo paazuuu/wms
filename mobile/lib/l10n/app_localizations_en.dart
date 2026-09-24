@@ -2543,6 +2543,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get printThisLabel => 'Label';
 
   @override
+  String get shipmentParcelsAction => 'Lot history';
+
+  @override
+  String get shipmentParcelsTitle => 'Lot history';
+
+  @override
+  String get shipmentParcelsEmpty => 'Not shipped yet';
+
+  @override
+  String get shipmentParcelsEmptyBody =>
+      'Once shipping is confirmed, the lots and serials that actually left will show up here.';
+
+  @override
+  String get shipmentParcelReversalTag => 'Reversed';
+
+  @override
   String get shipLogisticsSection => 'Shipping details';
 
   @override

@@ -4774,6 +4774,36 @@ abstract class AppLocalizations {
   /// **'箱ラベル'**
   String get printThisLabel;
 
+  /// No description provided for @shipmentParcelsAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷ロット履歴'**
+  String get shipmentParcelsAction;
+
+  /// No description provided for @shipmentParcelsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷ロット履歴'**
+  String get shipmentParcelsTitle;
+
+  /// No description provided for @shipmentParcelsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ出荷されていません'**
+  String get shipmentParcelsEmpty;
+
+  /// No description provided for @shipmentParcelsEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷を確定すると、実際に出たロット・シリアルがここに表示されます。'**
+  String get shipmentParcelsEmptyBody;
+
+  /// No description provided for @shipmentParcelReversalTag.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消分'**
+  String get shipmentParcelReversalTag;
+
   /// No description provided for @shipLogisticsSection.
   ///
   /// In ja, this message translates to:
