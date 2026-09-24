@@ -313,6 +313,22 @@
   "cartonReopen": "箱を開け直す",
   "cartonReopened": "箱を開け直しました",
   "cartonMustReopenToEdit": "編集するには箱を開け直してください",
+  "cartonAddParcel": "追加",
+  "cartonPackQuantity": "梱包数",
+  "cartonUnpackedCount": "残り {qty}",
+  "@cartonUnpackedCount": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "cartonLineDone": "梱包完了",
+  "cartonRenameAction": "名前を変更",
+  "cartonRenameTitle": "段ボールの名前",
+  "cartonSerialNumber": "シリアル番号",
+  "cartonContentsSection": "この箱の中身",
+  "cartonContentsEmpty": "まだ何も入っていません",
   "packRemaining": "未梱包",
   "packThisCarton": "この箱",
   "overpackWarning": "梱包数が出庫数を超えています。",

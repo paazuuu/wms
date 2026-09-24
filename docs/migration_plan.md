@@ -3471,6 +3471,25 @@ applied here to schema.
 function, check whether a `<name>_impl` sibling exists. If it does, the thing to
 edit is the `_impl`, never the wrapper.
 
+### 0079 — a safe way to rename a carton
+
+Found while starting the carton-packing client rewrite (below), not by a user
+report. 0076 gave carton items real identity (`lot_id`/`serial_id`), but the
+only way left to rename a carton's free-text `label` was the `shipments` edge
+function's `PUT .../cartons/:cid` — which replaces the carton's *entire item
+list*, and the payload shape it inserts from has no lot or serial columns at
+all. Once a carton holds identified parcels, calling that route to rename the
+box would silently discard the identity `pack_carton_item` recorded — the
+exact traceability §17 exists for. A rename must not be able to do that.
+
+`set_carton_label(p_carton_id, p_label)` touches the `label` column and
+nothing else, guarded the same way `set_carton_measurements` already is
+(`pack.complete` + warehouse scope, refused once a carton is CANCELLED).
+Direct-`authenticated`, no `_impl` sibling — the same posture 0076's own
+mutation RPCs use, so it does not appear in `verify_security.sql`'s wrapper
+checks (3/8) or its curated edge-gated `mutation_rpcs` list (7); all ten
+invariants held at 18/18 after applying it live.
+
 ## Client (Flutter) — following Phase C
 
 ### Sales order: approval made visible, and the order becomes a shipment
@@ -3621,6 +3640,73 @@ edit screen, and offers reopen; the measurements sheet pre-fills every field
 from the carton and round-trips a changed value back through
 `setCartonMeasurements`; clearing a field sends null rather than zero; and an
 invalid dimension is refused client-side before any call is made.
+
+### The carton-packing rewrite: additive, lot-aware, bounded by what was picked (0076/0079)
+
+The previous slice deliberately left `CartonEditScreen` alone: it declared a
+carton's *final* contents in one call (`updateCarton` — delete every item,
+reinsert whatever quantities the operator typed per JAN), with no lot/serial
+identity and no server-side ceiling beyond the shipment line's ordered
+quantity. That model has no way to represent two lots of the same JAN in one
+box, and it let a packer put in more than was actually picked whenever picking
+ran short. This slice replaces it with the same additive shape 0074 already
+proved out on the picking side: `pack_carton_item` records one parcel at a
+time, `remove_carton_item` takes one back, and the ceiling — `packable_quantity`
+— comes from `pick_items` when picking ran, falling back to the order only
+when it did not.
+
+**Renaming needed its own RPC first.** The only existing way to change a
+carton's free-text `label` was still the old `PUT .../cartons/:cid` — full
+item replace, no lot/serial columns in its payload. Once cartons carry
+identified parcels, that route would silently discard them on every rename.
+0079 (`set_carton_label`) closes this the same way 0076 closed the equivalent
+gap for measurements: a one-column RPC, found and built *while starting this
+client slice*, not by a separate request — the same "found while wiring the
+client, fixed forward with its own migration" pattern 0072 and 0078 both
+followed earlier in Phase B/C.
+
+**The read changed too.** `Shipment.cartons` (from the `shipments` edge
+function) has never joined lot codes or serial numbers — it selects `*` on
+`shipment_carton_items`, which only carries the raw `lot_id`/`serial_id`.
+`carton_detail`/`shipment_packing` (0076) do the join. `CartonEditScreen` now
+reads through a new `shipmentPackingProvider`, which calls `shipment_packing`
+directly rather than trying to enrich the edge function's response — text a
+join produces is not text worth re-deriving client-side.
+
+`ShipmentRepository` gained `packing(planId)`, `packCartonItem(...)`,
+`removeCartonItem(itemId)`, and `setCartonLabel`; `updateCarton` — and
+`CartonItem.toJson()`, which existed only to serialize its payload — are
+deleted outright rather than left dead, since a future caller finding
+`updateCarton` still on the interface would have no way to know it was a
+correctness trap. `Carton`/`CartonItem` gained lot/serial/stock-unit fields,
+populated only when the read joins them (0076's reads do; the edge function's
+`show()` still does not, and callers relying on that path simply see them as
+null — a fact about *which read they used*, not a bug).
+
+The rewritten screen shows each product's global packed/packable/unpacked
+(`_PackableLineCard`, "追加" opens `_PackDialog` prefilled with what is still
+unpacked *for the whole shipment*, not this carton alone — packing more in
+this box reduces the same pool any other box draws from) and this carton's
+own recorded parcels with lot/serial and a remove button
+(`_CartonItemRow`, the same shape `_TaskCard`'s items list already has on the
+picking screen). Renaming got its own small dialog (`_RenameDialog`, a real
+`StatefulWidget` owning its controller — an earlier draft disposed a bare
+`TextEditingController` right after `showDialog` returned, which crashed
+whenever the pop animation still referenced it; the fix is the same shape
+every other edit dialog in this codebase already uses). A closed (PACKED)
+carton disables both "追加" and the remove buttons, with the same
+"編集するには箱を開け直してください" hint `_CartonCard` already shows.
+
+Tested against a stateful fake (`FakeShipmentRepository.packingFixture`,
+mutated by `packCartonItem`/`removeCartonItem`/`setCartonLabel` the way the
+real RPCs would — a shallow "return show(id) unchanged" fake, the convention
+the old carton CRUD used, cannot exercise additive semantics at all): packing
+a parcel shows it with its lot and updates the line's progress; a second
+parcel's dialog prefills from what the *whole shipment* still needs, not this
+box; removing a parcel restores both the carton and the line; a fully packed
+line shows done with no add button; renaming changes the label without
+touching a recorded lot (the exact failure mode 0079 exists to prevent); and
+a closed carton's add/remove controls are disabled, not hidden.
 
 ## Rollout discipline
 

@@ -296,6 +296,22 @@
   "cartonReopen": "Reopen box",
   "cartonReopened": "Box reopened",
   "cartonMustReopenToEdit": "Reopen the box to edit it",
+  "cartonAddParcel": "Add",
+  "cartonPackQuantity": "Quantity",
+  "cartonUnpackedCount": "{qty} left",
+  "@cartonUnpackedCount": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "cartonLineDone": "Fully packed",
+  "cartonRenameAction": "Rename",
+  "cartonRenameTitle": "Carton name",
+  "cartonSerialNumber": "Serial number",
+  "cartonContentsSection": "In this box",
+  "cartonContentsEmpty": "Nothing packed yet",
   "packRemaining": "Unpacked",
   "packThisCarton": "This carton",
   "overpackWarning": "Packed more than the shipment quantity.",

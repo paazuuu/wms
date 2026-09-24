@@ -658,6 +658,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cartonMustReopenToEdit => '请先重新打开此箱才能编辑';
 
   @override
+  String get cartonAddParcel => '添加';
+
+  @override
+  String get cartonPackQuantity => '装箱数量';
+
+  @override
+  String cartonUnpackedCount(int qty) {
+    return '剩余 $qty';
+  }
+
+  @override
+  String get cartonLineDone => '已装完';
+
+  @override
+  String get cartonRenameAction => '重命名';
+
+  @override
+  String get cartonRenameTitle => '纸箱名称';
+
+  @override
+  String get cartonSerialNumber => '序列号';
+
+  @override
+  String get cartonContentsSection => '此箱内容';
+
+  @override
+  String get cartonContentsEmpty => '尚未装入任何物品';
+
+  @override
   String get packRemaining => '未装箱';
 
   @override

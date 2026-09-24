@@ -659,6 +659,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cartonMustReopenToEdit => '編集するには箱を開け直してください';
 
   @override
+  String get cartonAddParcel => '追加';
+
+  @override
+  String get cartonPackQuantity => '梱包数';
+
+  @override
+  String cartonUnpackedCount(int qty) {
+    return '残り $qty';
+  }
+
+  @override
+  String get cartonLineDone => '梱包完了';
+
+  @override
+  String get cartonRenameAction => '名前を変更';
+
+  @override
+  String get cartonRenameTitle => '段ボールの名前';
+
+  @override
+  String get cartonSerialNumber => 'シリアル番号';
+
+  @override
+  String get cartonContentsSection => 'この箱の中身';
+
+  @override
+  String get cartonContentsEmpty => 'まだ何も入っていません';
+
+  @override
   String get packRemaining => '未梱包';
 
   @override

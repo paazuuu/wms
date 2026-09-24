@@ -1324,6 +1324,60 @@ abstract class AppLocalizations {
   /// **'編集するには箱を開け直してください'**
   String get cartonMustReopenToEdit;
 
+  /// No description provided for @cartonAddParcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加'**
+  String get cartonAddParcel;
+
+  /// No description provided for @cartonPackQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包数'**
+  String get cartonPackQuantity;
+
+  /// No description provided for @cartonUnpackedCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'残り {qty}'**
+  String cartonUnpackedCount(int qty);
+
+  /// No description provided for @cartonLineDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包完了'**
+  String get cartonLineDone;
+
+  /// No description provided for @cartonRenameAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前を変更'**
+  String get cartonRenameAction;
+
+  /// No description provided for @cartonRenameTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'段ボールの名前'**
+  String get cartonRenameTitle;
+
+  /// No description provided for @cartonSerialNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル番号'**
+  String get cartonSerialNumber;
+
+  /// No description provided for @cartonContentsSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'この箱の中身'**
+  String get cartonContentsSection;
+
+  /// No description provided for @cartonContentsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ何も入っていません'**
+  String get cartonContentsEmpty;
+
   /// No description provided for @packRemaining.
   ///
   /// In ja, this message translates to:

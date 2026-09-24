@@ -683,6 +683,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartonMustReopenToEdit => 'Reopen the box to edit it';
 
   @override
+  String get cartonAddParcel => 'Add';
+
+  @override
+  String get cartonPackQuantity => 'Quantity';
+
+  @override
+  String cartonUnpackedCount(int qty) {
+    return '$qty left';
+  }
+
+  @override
+  String get cartonLineDone => 'Fully packed';
+
+  @override
+  String get cartonRenameAction => 'Rename';
+
+  @override
+  String get cartonRenameTitle => 'Carton name';
+
+  @override
+  String get cartonSerialNumber => 'Serial number';
+
+  @override
+  String get cartonContentsSection => 'In this box';
+
+  @override
+  String get cartonContentsEmpty => 'Nothing packed yet';
+
+  @override
   String get packRemaining => 'Unpacked';
 
   @override

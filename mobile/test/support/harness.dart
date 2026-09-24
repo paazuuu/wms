@@ -509,8 +509,16 @@ class FakeStockRepository implements StockRepository {
 }
 
 class FakeShipmentRepository implements ShipmentRepository {
-  FakeShipmentRepository(this.shipments);
+  FakeShipmentRepository(this.shipments, {this.packingFixture});
   final List<Shipment> shipments;
+
+  /// The packing state packing()/packCartonItem()/removeCartonItem()/
+  /// setCartonLabel() read and mutate. A test sets it up front; the fake
+  /// keeps it in sync the way the real RPCs would, so a screen test can add
+  /// a parcel and see the result on the next read, the same way
+  /// FakePickingRepository does for pick_items.
+  ShipmentPacking? packingFixture;
+  int _nextCartonItemId = 1000;
 
   /// The warehouse the last list() call was scoped to.
   int? lastWarehouseId;
@@ -583,12 +591,153 @@ class FakeShipmentRepository implements ShipmentRepository {
   Future<ApiResult<Shipment>> deleteCarton(int id, int cartonId) async =>
       show(id);
 
+  int? lastRenamedCartonId;
+  String? lastCartonLabel;
+
   @override
-  Future<ApiResult<Shipment>> updateCarton(int id, int cartonId,
-      {String? label, required List<CartonItem> items}) async {
+  Future<ApiResult<bool>> setCartonLabel(int cartonId, String? label) async {
     if (failWith != null) return ApiFailure(message: failWith!);
-    return show(id);
+    lastRenamedCartonId = cartonId;
+    lastCartonLabel = label;
+    final p = packingFixture;
+    if (p != null) {
+      packingFixture = ShipmentPacking(
+        shipmentPlanId: p.shipmentPlanId,
+        lines: p.lines,
+        cartons: [
+          for (final c in p.cartons)
+            if (c.id == cartonId) _withLabel(c, label) else c,
+        ],
+      );
+    }
+    return const ApiSuccess(true);
   }
+
+  @override
+  Future<ApiResult<ShipmentPacking>> packing(int planId) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    final p = packingFixture;
+    if (p == null) {
+      throw StateError('FakeShipmentRepository.packingFixture was not set');
+    }
+    return ApiSuccess(p);
+  }
+
+  @override
+  Future<ApiResult<bool>> packCartonItem(
+    int cartonId, {
+    required int quantity,
+    required String janCode,
+    String? lotCode,
+    String? serialNumber,
+    int? stockUnitId,
+    String? note,
+  }) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    final p = packingFixture;
+    if (p == null) return const ApiSuccess(true);
+    final productName =
+        p.lines.firstWhere((l) => l.janCode == janCode).productName;
+    final item = CartonItem(
+      id: _nextCartonItemId++,
+      janCode: janCode,
+      productName: productName,
+      quantity: quantity,
+      lotCode: lotCode,
+      serialNumber: serialNumber,
+      stockUnitId: stockUnitId,
+      note: note,
+    );
+    packingFixture = ShipmentPacking(
+      shipmentPlanId: p.shipmentPlanId,
+      lines: [
+        for (final l in p.lines)
+          if (l.janCode == janCode)
+            PackableLine(
+              productId: l.productId,
+              janCode: l.janCode,
+              productName: l.productName,
+              packable: l.packable,
+              packed: l.packed + quantity,
+              unpacked: l.unpacked - quantity,
+            )
+          else
+            l,
+      ],
+      cartons: [
+        for (final c in p.cartons)
+          if (c.id == cartonId) _withItems(c, [...c.items, item]) else c,
+      ],
+    );
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> removeCartonItem(int itemId) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    final p = packingFixture;
+    if (p == null) return const ApiSuccess(true);
+    CartonItem? removed;
+    for (final c in p.cartons) {
+      for (final it in c.items) {
+        if (it.id == itemId) removed = it;
+      }
+    }
+    if (removed == null) return const ApiSuccess(true);
+    final r = removed;
+    packingFixture = ShipmentPacking(
+      shipmentPlanId: p.shipmentPlanId,
+      lines: [
+        for (final l in p.lines)
+          if (l.janCode == r.janCode)
+            PackableLine(
+              productId: l.productId,
+              janCode: l.janCode,
+              productName: l.productName,
+              packable: l.packable,
+              packed: l.packed - r.quantity,
+              unpacked: l.unpacked + r.quantity,
+            )
+          else
+            l,
+      ],
+      cartons: [
+        for (final c in p.cartons)
+          _withItems(c, c.items.where((it) => it.id != itemId).toList()),
+      ],
+    );
+    return const ApiSuccess(true);
+  }
+
+  Carton _withItems(Carton c, List<CartonItem> items) => Carton(
+        id: c.id,
+        cartonNo: c.cartonNo,
+        label: c.label,
+        items: items,
+        status: c.status,
+        cartonType: c.cartonType,
+        weightKg: c.weightKg,
+        lengthCm: c.lengthCm,
+        widthCm: c.widthCm,
+        heightCm: c.heightCm,
+        trackingNumber: c.trackingNumber,
+        note: c.note,
+      );
+
+  Carton _withLabel(Carton c, String? label) => Carton(
+        id: c.id,
+        cartonNo: c.cartonNo,
+        label: label,
+        items: c.items,
+        status: c.status,
+        cartonType: c.cartonType,
+        weightKg: c.weightKg,
+        lengthCm: c.lengthCm,
+        widthCm: c.widthCm,
+        heightCm: c.heightCm,
+        trackingNumber: c.trackingNumber,
+        note: c.note,
+      );
 
   /// The last carton measurements written: (cartonId, weightKg, lengthCm,
   /// widthCm, heightCm, cartonType, trackingNumber).

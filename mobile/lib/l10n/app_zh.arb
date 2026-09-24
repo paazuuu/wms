@@ -296,6 +296,22 @@
   "cartonReopen": "重新打开",
   "cartonReopened": "已重新打开",
   "cartonMustReopenToEdit": "请先重新打开此箱才能编辑",
+  "cartonAddParcel": "添加",
+  "cartonPackQuantity": "装箱数量",
+  "cartonUnpackedCount": "剩余 {qty}",
+  "@cartonUnpackedCount": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "cartonLineDone": "已装完",
+  "cartonRenameAction": "重命名",
+  "cartonRenameTitle": "纸箱名称",
+  "cartonSerialNumber": "序列号",
+  "cartonContentsSection": "此箱内容",
+  "cartonContentsEmpty": "尚未装入任何物品",
   "packRemaining": "未装箱",
   "packThisCarton": "本箱",
   "overpackWarning": "装箱数量超过出库数量。",

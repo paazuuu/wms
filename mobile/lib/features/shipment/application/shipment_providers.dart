@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/shipment_repository.dart';
+import '../domain/carton.dart';
 import '../domain/shipment.dart';
 
 /// Reuses the delivery feature's Dio (Supabase Edge Functions base + anon key);
@@ -46,6 +47,18 @@ final shipmentsListProvider =
 final shipmentDetailProvider =
     FutureProvider.autoDispose.family<Shipment, int>((ref, id) async {
   final result = await ref.watch(shipmentRepositoryProvider).show(id);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// One shipment's packing state (0076): each product's ceiling and every
+/// carton's own, lot/serial-joined detail — what the carton-packing screen
+/// reads, distinct from [shipmentDetailProvider]'s lighter, edge-function view.
+final shipmentPackingProvider =
+    FutureProvider.autoDispose.family<ShipmentPacking, int>((ref, planId) async {
+  final result = await ref.watch(shipmentRepositoryProvider).packing(planId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),
