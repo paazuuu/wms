@@ -2763,6 +2763,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productBaseUnit => '基本单位';
 
   @override
+  String get productRequiresInspection => '到货必须检品';
+
+  @override
+  String get productRequiresInspectionHint =>
+      '开启后，此商品到货时将保留为待检品（QC_PENDING），需完成检品后才能拣货或出库。';
+
+  @override
   String get productPickingRule => '拣货顺序';
 
   @override

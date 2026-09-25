@@ -5350,6 +5350,18 @@ abstract class AppLocalizations {
   /// **'基本単位'**
   String get productBaseUnit;
 
+  /// Product master: this product's goods arrive held for QC (0068, §13).
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷検品を必須にする'**
+  String get productRequiresInspection;
+
+  /// Product master: requires-inspection field helper text.
+  ///
+  /// In ja, this message translates to:
+  /// **'オンにすると、入荷時にこの商品は検品待ち（QC_PENDING）として保留され、検品完了までピッキング・出荷できません。'**
+  String get productRequiresInspectionHint;
+
   /// Product master: the default picking draw order (0074, §16).
   ///
   /// In ja, this message translates to:

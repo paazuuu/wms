@@ -1401,6 +1401,14 @@
   "@productBaseUnit": {
     "description": "Product master: the unit on-hand quantities are counted in (0059)."
   },
+  "productRequiresInspection": "入荷検品を必須にする",
+  "@productRequiresInspection": {
+    "description": "Product master: this product's goods arrive held for QC (0068, §13)."
+  },
+  "productRequiresInspectionHint": "オンにすると、入荷時にこの商品は検品待ち（QC_PENDING）として保留され、検品完了までピッキング・出荷できません。",
+  "@productRequiresInspectionHint": {
+    "description": "Product master: requires-inspection field helper text."
+  },
   "productPickingRule": "ピッキング順序",
   "@productPickingRule": {
     "description": "Product master: the default picking draw order (0074, §16)."

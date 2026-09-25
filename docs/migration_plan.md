@@ -3793,6 +3793,41 @@ the existing identity tests exactly.
 
 With this, every RPC Phase C (0073–0080) built is reachable from the UI.
 
+### 0081 — the same gap, one phase earlier: QC requirement
+
+Asked to keep going after 0080, the obvious next target was the sibling gap
+already named while closing out Phase C: `set_inspection_requirement` (0068,
+§13, Phase B) has never had a client anywhere, on either side — not even a
+read. `list_products` never returned `requires_inspection`, so a settings
+screen could not have shown the current value even if it called the setter
+blindly, the identical shape 0080 found for the picking rule.
+
+**This is narrower than it sounds.** §13's actual safety property — goods that
+need inspecting arrive `QC_PENDING`, and `project_stock_movement` refuses an
+outbound draw against anything but available stock — was never the gap.
+`receiving_status_for` and `resolve_barcode` already read `requires_inspection`
+live during receiving, and that path works correctly with zero client changes
+here. The gap is purely administrative: nobody using the app could turn the
+flag on or off for a product, because there was never a way to see or set it
+outside raw SQL. Wiring it does not touch the gate; it makes the gate
+configurable.
+
+0081 repeats 0080's shape exactly: one field added to `list_products`'s
+existing `jsonb_build_object`, no grant or policy change (18/18 invariants
+held after applying it live). `Product` gained `requiresInspection` (default
+`false`, matching the column); `ProductRepository.setInspectionRequirement`
+sets the product's own default, `p_warehouse_id` left null for the same
+later-override reason `setPickingRule` leaves it. `ProductFormSheet` gained a
+`SwitchListTile` (the same widget `add_warehouse_screen.dart` already uses for
+its own boolean settings) right below the picking-rule dropdown, saved
+through its own call only when changed — a fourth "this is its own decision"
+split, not a special case invented for this field.
+
+Tested the same way as 0080: `product_repository_test.dart` asserts `list()`
+reads `requires_inspection` (and still defaults an older payload to `false`)
+and `set_inspection_requirement`'s call shape; `product_form_sheet_test.dart`
+asserts the flag is saved through its own RPC only when toggled.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -2841,6 +2841,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productBaseUnit => 'Base unit';
 
   @override
+  String get productRequiresInspection => 'Require inspection on arrival';
+
+  @override
+  String get productRequiresInspectionHint =>
+      'When on, goods of this product arrive held for QC (QC_PENDING) and cannot be picked or shipped until inspection is complete.';
+
+  @override
   String get productPickingRule => 'Picking order';
 
   @override

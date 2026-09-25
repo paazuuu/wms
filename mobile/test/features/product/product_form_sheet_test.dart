@@ -168,6 +168,47 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
+  testWidgets(
+      'the QC requirement is saved through its own set_inspection_requirement call',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pumpSheet(tester, repo,
+        product: const Product(
+            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+
+    await tester.tap(find.widgetWithText(SwitchListTile, '入荷検品を必須にする'));
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastInspectionRequirement,
+        (productId: 1, requiresInspection: true));
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('editing only the name sends no QC requirement call',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pumpSheet(tester, repo,
+        product: const Product(
+            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+
+    await tester.enterText(
+        find.widgetWithText(TextField, '商品名'), 'ボールペン（黒）');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastInspectionRequirement, isNull);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets("an existing product's fixed JAN offers no scan button",
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1400));

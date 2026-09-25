@@ -1734,6 +1734,7 @@ class FakeProductRepository implements ProductRepository {
             price: price,
             status: p.status,
             pickingRule: p.pickingRule,
+            requiresInspection: p.requiresInspection,
           )
         else
           p,
@@ -1756,6 +1757,7 @@ class FakeProductRepository implements ProductRepository {
             status: status,
             trackingMode: p.trackingMode,
             pickingRule: p.pickingRule,
+            requiresInspection: p.requiresInspection,
             baseUom: p.baseUom,
             uoms: p.uoms,
             barcodes: p.barcodes,
@@ -1799,6 +1801,7 @@ class FakeProductRepository implements ProductRepository {
             status: p.status,
             trackingMode: trackingMode ?? p.trackingMode,
             pickingRule: p.pickingRule,
+            requiresInspection: p.requiresInspection,
             baseUom: p.baseUom,
             uoms: p.uoms,
             barcodes: p.barcodes,
@@ -1832,6 +1835,41 @@ class FakeProductRepository implements ProductRepository {
             status: p.status,
             trackingMode: p.trackingMode,
             pickingRule: rule,
+            requiresInspection: p.requiresInspection,
+            baseUom: p.baseUom,
+            uoms: p.uoms,
+            barcodes: p.barcodes,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  /// The last setInspectionRequirement() call.
+  ({int productId, bool requiresInspection})? lastInspectionRequirement;
+
+  @override
+  Future<ApiResult<bool>> setInspectionRequirement({
+    required int productId,
+    required bool requiresInspection,
+  }) async {
+    lastInspectionRequirement =
+        (productId: productId, requiresInspection: requiresInspection);
+    _products = [
+      for (final p in _products)
+        if (p.id == productId)
+          Product(
+            id: p.id,
+            janCode: p.janCode,
+            name: p.name,
+            sku: p.sku,
+            category: p.category,
+            price: p.price,
+            status: p.status,
+            trackingMode: p.trackingMode,
+            pickingRule: p.pickingRule,
+            requiresInspection: requiresInspection,
             baseUom: p.baseUom,
             uoms: p.uoms,
             barcodes: p.barcodes,

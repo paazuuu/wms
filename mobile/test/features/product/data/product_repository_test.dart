@@ -103,6 +103,7 @@ void main() {
               'sku': 'PEN-001',
               'tracking_mode': 'LOT',
               'picking_rule': 'FIFO',
+              'requires_inspection': true,
               'status': 'active',
               'base_uom': {'id': 1, 'code': 'PCS', 'name': '個'},
               'uoms': [
@@ -149,6 +150,7 @@ void main() {
           expect(p.sku, 'PEN-001');
           expect(p.trackingMode, TrackingMode.lot);
           expect(p.pickingRule, 'FIFO');
+          expect(p.requiresInspection, isTrue);
           expect(p.trackingMode.tracksLot, isTrue);
           expect(p.trackingMode.tracksSerial, isFalse);
           expect(p.baseUom?.code, 'PCS');
@@ -182,6 +184,7 @@ void main() {
           expect(p.sku, isNull);
           expect(p.trackingMode, TrackingMode.untracked);
           expect(p.pickingRule, 'FEFO');
+          expect(p.requiresInspection, isFalse);
           expect(p.baseUom, isNull);
           expect(p.uoms, isEmpty);
           expect(p.barcodes, isEmpty);
@@ -258,6 +261,37 @@ void main() {
       // default, the same shape identity's own edit does.
       expect(body['p_warehouse_id'], isNull);
       expect(body['p_rule'], 'FIFO');
+      result.when(
+        success: (ok) => expect(ok, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test(
+        'setInspectionRequirement() posts the product\'s own default to set_inspection_requirement',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        // set_inspection_requirement also returns jsonb, not a boolean.
+        return jsonResponseBody({
+          'product_id': 7,
+          'warehouse_id': null,
+          'requires_inspection': true,
+          'receiving_status': 'QC_PENDING',
+        }, 200);
+      });
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.setInspectionRequirement(
+          productId: 7, requiresInspection: true);
+
+      expect(captured.path, '/rpc/set_inspection_requirement');
+      final body = captured.data as Map;
+      expect(body['p_product_id'], 7);
+      expect(body['p_requires_inspection'], isTrue);
+      // No warehouse override from this call — same shape setPickingRule uses.
+      expect(body['p_warehouse_id'], isNull);
       result.when(
         success: (ok) => expect(ok, isTrue),
         failure: (f) => fail('expected success, got $f'),

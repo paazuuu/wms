@@ -41,6 +41,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
   late TrackingMode _tracking =
       widget.product?.trackingMode ?? TrackingMode.untracked;
   late String _pickingRule = widget.product?.pickingRule ?? 'FEFO';
+  late bool _requiresInspection = widget.product?.requiresInspection ?? false;
   bool _busy = false;
   String? _error;
   String? _scanWarning;
@@ -162,6 +163,17 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     }
 
+    // §13's QC gate — likewise its own decision, not folded into `update`.
+    final inspectionChanged =
+        _requiresInspection != (widget.product?.requiresInspection ?? false);
+    if (errorMessage == null && productId != null && inspectionChanged) {
+      final result = await repo.setInspectionRequirement(
+        productId: productId!,
+        requiresInspection: _requiresInspection,
+      );
+      result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+    }
+
     if (!mounted) return;
     setState(() {
       _busy = false;
@@ -276,6 +288,19 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
               onChanged: _busy
                   ? null
                   : (rule) => setState(() => _pickingRule = rule ?? 'FEFO'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // §13's QC gate (0068) — on means goods arrive QC_PENDING rather
+            // than OK. A warehouse can still override it; this sets the
+            // fallback, the same shape the picking rule above has.
+            SwitchListTile(
+              value: _requiresInspection,
+              onChanged: _busy
+                  ? null
+                  : (v) => setState(() => _requiresInspection = v),
+              title: Text(l10n.productRequiresInspection),
+              subtitle: Text(l10n.productRequiresInspectionHint),
+              contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(

@@ -1229,6 +1229,8 @@
   "trackLotAndSerial": "批次＋序列号",
   "trackExpiry": "有效期",
   "productBaseUnit": "基本单位",
+  "productRequiresInspection": "到货必须检品",
+  "productRequiresInspectionHint": "开启后，此商品到货时将保留为待检品（QC_PENDING），需完成检品后才能拣货或出库。",
   "productPickingRule": "拣货顺序",
   "productPickingRuleHint": "库存的默认领用顺序。仓库可单独覆盖此设置。",
   "pickRuleFifo": "先进先出（FIFO）",

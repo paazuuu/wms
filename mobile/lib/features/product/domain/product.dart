@@ -143,6 +143,7 @@ class Product extends Equatable {
     this.status = 'active',
     this.trackingMode = TrackingMode.untracked,
     this.pickingRule = 'FEFO',
+    this.requiresInspection = false,
     this.baseUom,
     this.uoms = const [],
     this.barcodes = const [],
@@ -164,6 +165,12 @@ class Product extends Equatable {
   /// the product's own fallback, which `picking_rule_for` and this reader
   /// agree on defaulting to when nothing is set.
   final String pickingRule;
+
+  /// §13's QC gate (0068): true means goods of this product arrive
+  /// QC_PENDING rather than OK. A warehouse may override it
+  /// (`warehouse_products.requires_inspection`); this is the product's own
+  /// default, which `receiving_status_for` falls back to.
+  final bool requiresInspection;
   final Uom? baseUom;
   final List<ProductUom> uoms;
   final List<ProductBarcode> barcodes;
@@ -200,6 +207,7 @@ class Product extends Equatable {
         status: (json['status'] ?? 'active').toString(),
         trackingMode: TrackingMode.fromCode(json['tracking_mode']),
         pickingRule: (json['picking_rule'] ?? 'FEFO').toString(),
+        requiresInspection: json['requires_inspection'] == true,
         baseUom: json['base_uom'] is Map
             ? Uom.fromJson((json['base_uom'] as Map).cast<String, dynamic>())
             : null,
@@ -220,6 +228,7 @@ class Product extends Equatable {
         status,
         trackingMode,
         pickingRule,
+        requiresInspection,
         baseUom,
         uoms,
         barcodes,

@@ -1229,6 +1229,8 @@
   "trackLotAndSerial": "Lot + serial",
   "trackExpiry": "Expiry",
   "productBaseUnit": "Base unit",
+  "productRequiresInspection": "Require inspection on arrival",
+  "productRequiresInspectionHint": "When on, goods of this product arrive held for QC (QC_PENDING) and cannot be picked or shipped until inspection is complete.",
   "productPickingRule": "Picking order",
   "productPickingRuleHint": "The default order stock is drawn from. A warehouse can override this separately.",
   "pickRuleFifo": "First in, first out (FIFO)",

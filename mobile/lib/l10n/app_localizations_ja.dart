@@ -2768,6 +2768,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productBaseUnit => '基本単位';
 
   @override
+  String get productRequiresInspection => '入荷検品を必須にする';
+
+  @override
+  String get productRequiresInspectionHint =>
+      'オンにすると、入荷時にこの商品は検品待ち（QC_PENDING）として保留され、検品完了までピッキング・出荷できません。';
+
+  @override
   String get productPickingRule => 'ピッキング順序';
 
   @override

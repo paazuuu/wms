@@ -50,6 +50,14 @@ abstract class ProductRepository {
     required String rule,
   });
 
+  /// `set_inspection_requirement` (0068, §13). Sets the product's own
+  /// default, same shape as [setPickingRule] — a warehouse override is a
+  /// later addition, not a gap this call needs to close today.
+  Future<ApiResult<bool>> setInspectionRequirement({
+    required int productId,
+    required bool requiresInspection,
+  });
+
   /// `add_product_barcode` (0057, extended in 0059). Naming a unit makes the
   /// product's own conversion authoritative for how much one scan means, so
   /// `quantityPerScan` is only read when [uomCode] is null.
@@ -231,6 +239,23 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_product_id': productId,
         'p_warehouse_id': null,
         'p_rule': rule,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setInspectionRequirement({
+    required int productId,
+    required bool requiresInspection,
+  }) async {
+    try {
+      await _dio.post('/rpc/set_inspection_requirement', data: {
+        'p_product_id': productId,
+        'p_requires_inspection': requiresInspection,
+        'p_warehouse_id': null,
       });
       return const ApiSuccess(true);
     } on DioException catch (e) {
