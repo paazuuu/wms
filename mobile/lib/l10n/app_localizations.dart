@@ -5560,6 +5560,18 @@ abstract class AppLocalizations {
   /// **'基本'**
   String get productUnitBase;
 
+  /// Product detail: confirm removing a pack size (0059).
+  ///
+  /// In ja, this message translates to:
+  /// **'この単位を削除しますか？'**
+  String get productUnitRemoveQ;
+
+  /// Product detail: pack-size removal confirmation body.
+  ///
+  /// In ja, this message translates to:
+  /// **'このパック単位は選べなくなります。基本単位、またはバーコードが参照している単位は削除できません。'**
+  String get productUnitRemoveBody;
+
   /// Product detail: lots recorded against this product (0060).
   ///
   /// In ja, this message translates to:

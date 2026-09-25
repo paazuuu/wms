@@ -470,6 +470,38 @@ class _UnitsCard extends ConsumerWidget {
   final Product product;
   final _Notify onMessage;
 
+  Future<void> _remove(
+      BuildContext context, WidgetRef ref, ProductUom uom) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.productUnitRemoveQ),
+        content: Text(l10n.productUnitRemoveBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.actionDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final result = await ref
+        .read(productRepositoryProvider)
+        .removeUom(productId: product.id, uomCode: uom.code);
+    if (!context.mounted) return;
+    result.when(
+      success: (_) => ref.invalidate(productListProvider),
+      failure: (f) => onMessage(
+          context, humanizeApiErrorMessage(l10n, f.message), error: true),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -506,13 +538,19 @@ class _UnitsCard extends ConsumerWidget {
                       tone: StatusTone.neutral,
                       label: l10n.productUnitBase,
                       dense: true)
-                else
+                else ...[
                   Text(
                     '${formatFactor(uom.conversionFactor)} ${base?.name ?? ''}',
                     style: theme.textTheme.bodySmall?.copyWith(
                         fontFamily: AppFonts.mono,
                         color: scheme.onSurfaceVariant),
                   ),
+                  IconButton(
+                    tooltip: l10n.actionDelete,
+                    icon: const Icon(Icons.delete_outline, size: 20),
+                    onPressed: () => _remove(context, ref, uom),
+                  ),
+                ],
               ],
             ),
           ),

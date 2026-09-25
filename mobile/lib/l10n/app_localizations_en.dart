@@ -2960,6 +2960,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productUnitBase => 'Base';
 
   @override
+  String get productUnitRemoveQ => 'Remove this unit?';
+
+  @override
+  String get productUnitRemoveBody =>
+      'This pack size will no longer be selectable. The base unit, or a unit still named by a barcode, cannot be removed.';
+
+  @override
   String get productLotsSection => 'Lots';
 
   @override

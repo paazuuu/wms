@@ -86,6 +86,13 @@ abstract class ProductRepository {
   /// `list_uoms` (0059) — the vocabulary a pack size can be chosen from.
   Future<ApiResult<List<Uom>>> listUoms();
 
+  /// `remove_product_uom` (0059) — takes a pack size back off, refused while
+  /// the base unit or a barcode still names it.
+  Future<ApiResult<bool>> removeUom({
+    required int productId,
+    required String uomCode,
+  });
+
   /// `product_lots` (0060), soonest expiry first.
   Future<ApiResult<List<ProductLot>>> lots(int productId);
 
@@ -340,6 +347,22 @@ class ProductRepositoryImpl implements ProductRepository {
           .toList());
     } on DioException catch (e) {
       return mapDioError<List<Uom>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> removeUom({
+    required int productId,
+    required String uomCode,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/remove_product_uom', data: {
+        'p_product_id': productId,
+        'p_uom_code': uomCode,
+      });
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 

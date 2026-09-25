@@ -2879,6 +2879,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productUnitBase => '基本';
 
   @override
+  String get productUnitRemoveQ => '要删除此单位吗？';
+
+  @override
+  String get productUnitRemoveBody => '此包装单位将无法再选择。基本单位或仍被条码引用的单位无法删除。';
+
+  @override
   String get productLotsSection => '批次';
 
   @override

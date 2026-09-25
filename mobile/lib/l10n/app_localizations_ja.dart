@@ -2884,6 +2884,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productUnitBase => '基本';
 
   @override
+  String get productUnitRemoveQ => 'この単位を削除しますか？';
+
+  @override
+  String get productUnitRemoveBody =>
+      'このパック単位は選べなくなります。基本単位、またはバーコードが参照している単位は削除できません。';
+
+  @override
   String get productLotsSection => 'ロット';
 
   @override

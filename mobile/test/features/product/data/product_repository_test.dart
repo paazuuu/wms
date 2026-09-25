@@ -405,5 +405,25 @@ void main() {
         failure: (f) => fail('expected success, got $f'),
       );
     });
+
+    test('removeUom() posts the product/unit to remove_product_uom', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody(true, 200);
+      });
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.removeUom(productId: 7, uomCode: 'BOX');
+
+      expect(captured.path, '/rpc/remove_product_uom');
+      final body = captured.data as Map;
+      expect(body['p_product_id'], 7);
+      expect(body['p_uom_code'], 'BOX');
+      result.when(
+        success: (ok) => expect(ok, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
   });
 }

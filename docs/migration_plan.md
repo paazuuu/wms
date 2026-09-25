@@ -3857,6 +3857,27 @@ changing a serial to HOLD goes through its own RPC and the pill on screen
 updates to match; a permission-denied change shows the friendly message
 (§34) and leaves the on-screen status untouched.
 
+### Removing a pack size — the other half of `_UnitsCard`
+
+Same pass, same shape, no migration: `_UnitsCard` could add a pack size
+(`set_product_uom`, via `_UomSheet`) and correct its factor, but never remove
+one — `remove_product_uom` (0059) had no caller anywhere. A pack size added
+by mistake, or one a product no longer ships in, had no way back out except
+raw SQL.
+
+Adds `ProductRepository.removeUom` and a delete icon on each non-base unit
+row (the base unit itself never gets one — removing it is a different,
+already-separate decision `set_product_base_uom` exists for, not something
+this button should also try to do), with the same confirm-then-call shape
+`_BarcodesCard`'s own barcode removal already uses. The server's own refusals
+carry the reason (a barcode still naming the unit, or the base unit itself)
+straight through to the confirmation's failure path.
+
+Tested against the fake repository: removing a pack size asks first and
+posts the product/unit pair, and a refused removal shows the reason rather
+than swallowing it — plus a repository-level test pinning down the RPC call
+shape itself.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

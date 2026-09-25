@@ -1264,6 +1264,8 @@
   "productUnitAdd": "添加单位",
   "productUnitFactor": "换算数",
   "productUnitBase": "基本",
+  "productUnitRemoveQ": "要删除此单位吗？",
+  "productUnitRemoveBody": "此包装单位将无法再选择。基本单位或仍被条码引用的单位无法删除。",
   "productLotsSection": "批次",
   "productLotsEmpty": "暂无批次记录",
   "productLotExpiryOn": "有效期 {date}",

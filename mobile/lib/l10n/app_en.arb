@@ -1264,6 +1264,8 @@
   "productUnitAdd": "Add a unit",
   "productUnitFactor": "Conversion",
   "productUnitBase": "Base",
+  "productUnitRemoveQ": "Remove this unit?",
+  "productUnitRemoveBody": "This pack size will no longer be selectable. The base unit, or a unit still named by a barcode, cannot be removed.",
   "productLotsSection": "Lots",
   "productLotsEmpty": "No lots recorded yet",
   "productLotExpiryOn": "Expires {date}",

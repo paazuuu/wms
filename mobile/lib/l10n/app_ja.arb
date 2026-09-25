@@ -1572,6 +1572,14 @@
   "@productUnitBase": {
     "description": "Product detail: marks the base unit row."
   },
+  "productUnitRemoveQ": "この単位を削除しますか？",
+  "@productUnitRemoveQ": {
+    "description": "Product detail: confirm removing a pack size (0059)."
+  },
+  "productUnitRemoveBody": "このパック単位は選べなくなります。基本単位、またはバーコードが参照している単位は削除できません。",
+  "@productUnitRemoveBody": {
+    "description": "Product detail: pack-size removal confirmation body."
+  },
   "productLotsSection": "ロット",
   "@productLotsSection": {
     "description": "Product detail: lots recorded against this product (0060)."

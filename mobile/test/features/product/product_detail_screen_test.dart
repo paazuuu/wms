@@ -404,4 +404,43 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('removing a pack size asks first, and never offers it for the base unit',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakeProductRepository(products: const [_lotTracked]);
+    await _pump(tester, repo);
+
+    // Only BOX (the pack size) gets a delete button; PCS is the base unit.
+    // The barcode section has its own delete icon too, so this is the one
+    // after it in the unit list — not `.first`.
+    await tester.tap(find.byIcon(Icons.delete_outline).at(1));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この単位を削除しますか？'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, '削除'));
+    await tester.pumpAndSettle();
+
+    expect(repo.removedUoms.single, (productId: 1, uomCode: 'BOX'));
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a refused unit removal shows the reason, not a swallowed failure',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakeProductRepository(products: const [_lotTracked])
+      ..failRemoveUomWith = 'a barcode still uses unit BOX; remove the barcode first';
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.delete_outline).at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '削除'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('remove the barcode first'), findsOneWidget);
+    expect(repo.removedUoms, isEmpty);
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }

@@ -1938,6 +1938,23 @@ class FakeProductRepository implements ProductRepository {
   @override
   Future<ApiResult<List<Uom>>> listUoms() async => ApiSuccess(uomVocabulary);
 
+  /// The last removeUom() call, and an optional failure to simulate the
+  /// server's refusal (base unit, or a barcode still names it).
+  final List<({int productId, String uomCode})> removedUoms = [];
+  String? failRemoveUomWith;
+
+  @override
+  Future<ApiResult<bool>> removeUom({
+    required int productId,
+    required String uomCode,
+  }) async {
+    if (failRemoveUomWith != null) {
+      return ApiFailure(message: failRemoveUomWith!, statusCode: 400);
+    }
+    removedUoms.add((productId: productId, uomCode: uomCode));
+    return const ApiSuccess(true);
+  }
+
   /// Lots and serials a test wants the detail screen to show. Keyed by product,
   /// so one fake can hold a tracked and an untracked product at once.
   Map<int, List<ProductLot>> lotsByProduct = const {};
