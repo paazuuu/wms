@@ -298,6 +298,29 @@ void main() {
       );
     });
 
+    test('setSerialStatus() posts the serial/status/note to set_serial_status',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody(true, 200);
+      });
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.setSerialStatus(
+          serialId: 5, status: 'HOLD', note: '再検品待ち');
+
+      expect(captured.path, '/rpc/set_serial_status');
+      final body = captured.data as Map;
+      expect(body['p_serial_id'], 5);
+      expect(body['p_status'], 'HOLD');
+      expect(body['p_note'], '再検品待ち');
+      result.when(
+        success: (ok) => expect(ok, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
     test('addBarcode() names the unit, which makes the conversion authoritative',
         () async {
       late RequestOptions captured;

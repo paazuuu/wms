@@ -179,6 +179,60 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
+  testWidgets(
+      'changing a serial to HOLD goes through set_serial_status and the list reflects it',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakeProductRepository(products: const [_serialTracked])
+      ..serialsByProduct = {
+        3: [ProductSerial(id: 1, serialNumber: 'SN-0001', status: 'IN_STOCK')],
+      };
+    await _pump(tester, repo, productId: 3);
+
+    expect(find.text('在庫あり'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('ステータスを変更'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('保留').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastSerialStatusChange,
+        (serialId: 1, status: 'HOLD', note: null));
+    // Not just the RPC call — the list on screen shows the new status too.
+    expect(find.text('保留'), findsOneWidget);
+    expect(find.text('在庫あり'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'a permission-denied status change shows the friendly message, not the raw RPC text (§34)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakeProductRepository(products: const [_serialTracked])
+      ..serialsByProduct = {
+        3: [ProductSerial(id: 1, serialNumber: 'SN-0001', status: 'IN_STOCK')],
+      }
+      ..failSerialStatusWith = 'not permitted: inventory.adjust required';
+    await _pump(tester, repo, productId: 3);
+
+    await tester.tap(find.byTooltip('ステータスを変更'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
+    expect(find.textContaining('inventory.adjust'), findsNothing);
+    // The status on screen never changed.
+    expect(find.text('在庫あり'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets('with no active warehouse the settings section says so',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));

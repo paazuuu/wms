@@ -1643,6 +1643,18 @@
   "@serialHold": {
     "description": "Serial status HOLD."
   },
+  "productSerialChangeStatus": "ステータスを変更",
+  "@productSerialChangeStatus": {
+    "description": "Product detail: tooltip on the serial status edit button (0060)."
+  },
+  "productSerialStatus": "ステータス",
+  "@productSerialStatus": {
+    "description": "Serial status dialog: the dropdown field label."
+  },
+  "productSerialNote": "メモ（任意）",
+  "@productSerialNote": {
+    "description": "Serial status dialog: optional note field label."
+  },
   "whpSection": "この倉庫での設定",
   "@whpSection": {
     "description": "Product detail: warehouse_products, §22's per-warehouse handling."

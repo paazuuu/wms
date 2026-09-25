@@ -3008,6 +3008,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serialHold => 'Hold';
 
   @override
+  String get productSerialChangeStatus => 'Change status';
+
+  @override
+  String get productSerialStatus => 'Status';
+
+  @override
+  String get productSerialNote => 'Note (optional)';
+
+  @override
   String get whpSection => 'In this warehouse';
 
   @override

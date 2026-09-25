@@ -2927,6 +2927,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get serialHold => '保留';
 
   @override
+  String get productSerialChangeStatus => '更改状态';
+
+  @override
+  String get productSerialStatus => '状态';
+
+  @override
+  String get productSerialNote => '备注（可选）';
+
+  @override
   String get whpSection => '本仓库设置';
 
   @override

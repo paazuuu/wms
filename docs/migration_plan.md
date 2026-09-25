@@ -3828,6 +3828,35 @@ reads `requires_inspection` (and still defaults an older payload to `false`)
 and `set_inspection_requirement`'s call shape; `product_form_sheet_test.dart`
 asserts the flag is saved through its own RPC only when toggled.
 
+### Serial status: closing a gap a design comment had actually assumed shut
+
+No migration this time — `product_serials` already returned everything
+needed, and `set_serial_status` already existed and worked. The gap was
+purely on the client, and it was explicit: `_SerialsCard`'s own comment read
+*"Also read-only: a serial is recorded when a unit is received, and its
+status changes when the unit ships."* That is true for IN_STOCK ↔ SHIPPED,
+which the normal receiving/shipping flow does drive on its own. It is not
+true for RETURNED, SCRAPPED or HOLD — `set_serial_status` accepts all five
+states, and nothing in the ordinary flow ever produces those three. A
+damaged unit, a customer return, or a unit pulled for a hold had no path to
+being recorded, because the screen that lists serials was built assuming
+that path would never be needed.
+
+Each serial row gained an edit icon opening `_SerialStatusDialog` (status
+dropdown + optional note), calling the now-added
+`ProductRepository.setSerialStatus`. The dialog is its own `StatefulWidget`
+owning its controller — the same shape `_RenameDialog` (shipment) already
+uses, and for the same reason: a bare `TextEditingController` disposed by the
+caller right after `showDialog` returns can still be referenced by the pop
+transition. The stale comment is rewritten to say what is actually true now.
+
+Tested against the fake repository (`serialsByProduct`, mutated by
+`setSerialStatus` the same way the shipment/carton fakes mutate their own
+state — a shallow fake cannot show the list reflecting the change):
+changing a serial to HOLD goes through its own RPC and the pill on screen
+updates to match; a permission-denied change shows the friendly message
+(§34) and leaves the on-screen status untouched.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

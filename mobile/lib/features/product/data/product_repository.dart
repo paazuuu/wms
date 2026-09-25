@@ -92,6 +92,15 @@ abstract class ProductRepository {
   /// `product_serials` (0060), optionally one status only.
   Future<ApiResult<List<ProductSerial>>> serials(int productId, {String? status});
 
+  /// `set_serial_status` (0060) — the exception path a serial's normal
+  /// IN_STOCK/SHIPPED lifecycle does not cover on its own: recording a
+  /// return, a scrap, or a hold.
+  Future<ApiResult<bool>> setSerialStatus({
+    required int serialId,
+    required String status,
+    String? note,
+  });
+
   /// `warehouse_product_settings` for one product (0063). Null when this
   /// warehouse has no special handling for it — which is the common case, and
   /// not an error.
@@ -377,6 +386,24 @@ class ProductRepositoryImpl implements ProductRepository {
           _rows(response.data).map((e) => ProductSerial.fromJson(e)).toList());
     } on DioException catch (e) {
       return mapDioError<List<ProductSerial>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setSerialStatus({
+    required int serialId,
+    required String status,
+    String? note,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/set_serial_status', data: {
+        'p_serial_id': serialId,
+        'p_status': status,
+        'p_note': note,
+      });
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 

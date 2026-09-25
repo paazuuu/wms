@@ -1960,6 +1960,44 @@ class FakeProductRepository implements ProductRepository {
         status == null ? all : all.where((s) => s.status == status).toList());
   }
 
+  /// The last setSerialStatus() call, so a screen test can assert the change
+  /// went through its own RPC.
+  ({int serialId, String status, String? note})? lastSerialStatusChange;
+
+  /// When set, setSerialStatus() fails with this message instead of succeeding.
+  String? failSerialStatusWith;
+
+  @override
+  Future<ApiResult<bool>> setSerialStatus({
+    required int serialId,
+    required String status,
+    String? note,
+  }) async {
+    lastSerialStatusChange = (serialId: serialId, status: status, note: note);
+    if (failSerialStatusWith != null) {
+      return ApiFailure(message: failSerialStatusWith!, statusCode: 400);
+    }
+    serialsByProduct = {
+      for (final entry in serialsByProduct.entries)
+        entry.key: [
+          for (final s in entry.value)
+            if (s.id == serialId)
+              ProductSerial(
+                id: s.id,
+                serialNumber: s.serialNumber,
+                status: status,
+                lotId: s.lotId,
+                lotCode: s.lotCode,
+                createdAt: s.createdAt,
+                note: note ?? s.note,
+              )
+            else
+              s,
+        ],
+    };
+    return const ApiSuccess(true);
+  }
+
   /// Per-warehouse settings, keyed the way the table is: (warehouse, product).
   Map<(int, int), WarehouseProduct> warehouseProducts = {};
 

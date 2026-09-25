@@ -5644,6 +5644,24 @@ abstract class AppLocalizations {
   /// **'保留'**
   String get serialHold;
 
+  /// Product detail: tooltip on the serial status edit button (0060).
+  ///
+  /// In ja, this message translates to:
+  /// **'ステータスを変更'**
+  String get productSerialChangeStatus;
+
+  /// Serial status dialog: the dropdown field label.
+  ///
+  /// In ja, this message translates to:
+  /// **'ステータス'**
+  String get productSerialStatus;
+
+  /// Serial status dialog: optional note field label.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get productSerialNote;
+
   /// Product detail: warehouse_products, §22's per-warehouse handling.
   ///
   /// In ja, this message translates to:

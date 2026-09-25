@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
+import '../domain/product_lot.dart';
 import '../domain/warehouse_product.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
@@ -725,12 +726,42 @@ class _LotsCard extends ConsumerWidget {
   }
 }
 
-/// Serial numbers with a status filter. Also read-only: a serial is recorded
-/// when a unit is received, and its status changes when the unit ships.
+/// Serial numbers with a status filter. IN_STOCK/SHIPPED follow the normal
+/// receiving/shipping flow on their own; RETURNED, SCRAPPED and HOLD do not —
+/// those are the exception path `set_serial_status` (0060) exists for, and
+/// the edit action below is the only way to reach it.
 class _SerialsCard extends ConsumerWidget {
   const _SerialsCard({required this.productId});
 
   final int productId;
+
+  Future<void> _changeStatus(
+      BuildContext context, WidgetRef ref, ProductSerial serial) async {
+    final l10n = AppLocalizations.of(context);
+    final draft = await showDialog<_SerialStatusDraft>(
+      context: context,
+      builder: (_) => _SerialStatusDialog(serial: serial),
+    );
+    if (draft == null) return;
+
+    final result = await ref.read(productRepositoryProvider).setSerialStatus(
+          serialId: serial.id,
+          status: draft.status,
+          note: draft.note,
+        );
+    if (!context.mounted) return;
+    result.when(
+      success: (_) => ref.invalidate(productSerialsProvider(productId)),
+      failure: (f) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Text(humanizeApiErrorMessage(l10n, f.message)),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -803,12 +834,98 @@ class _SerialsCard extends ConsumerWidget {
                           label: serialStatusLabel(l10n, serial.status),
                           dense: true,
                         ),
+                        IconButton(
+                          tooltip: l10n.productSerialChangeStatus,
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () =>
+                              _changeStatus(context, ref, serial),
+                        ),
                       ],
                     ),
                   ),
               ],
             );
           },
+        ),
+      ],
+    );
+  }
+}
+
+class _SerialStatusDraft {
+  const _SerialStatusDraft(this.status, this.note);
+  final String status;
+  final String? note;
+}
+
+/// Edit dialog for `set_serial_status` (0060). A real `StatefulWidget` owning
+/// its own controller — the same shape `_RenameDialog` (shipment) uses, for
+/// the same reason: a controller the caller disposes right after `showDialog`
+/// returns can still be referenced by the pop transition.
+class _SerialStatusDialog extends StatefulWidget {
+  const _SerialStatusDialog({required this.serial});
+
+  final ProductSerial serial;
+
+  @override
+  State<_SerialStatusDialog> createState() => _SerialStatusDialogState();
+}
+
+class _SerialStatusDialogState extends State<_SerialStatusDialog> {
+  late String _status = widget.serial.status;
+  late final TextEditingController _note =
+      TextEditingController(text: widget.serial.note ?? '');
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(widget.serial.serialNumber),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownButtonFormField<String>(
+            initialValue: _status,
+            decoration: InputDecoration(labelText: l10n.productSerialStatus),
+            items: [
+              for (final status in const [
+                'IN_STOCK',
+                'SHIPPED',
+                'RETURNED',
+                'SCRAPPED',
+                'HOLD'
+              ])
+                DropdownMenuItem(
+                    value: status, child: Text(serialStatusLabel(l10n, status))),
+            ],
+            onChanged: (v) => setState(() => _status = v ?? widget.serial.status),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _note,
+            decoration: InputDecoration(labelText: l10n.productSerialNote),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.actionCancel)),
+        FilledButton(
+          onPressed: () => Navigator.pop(
+            context,
+            _SerialStatusDraft(
+                _status, _note.text.trim().isEmpty ? null : _note.text.trim()),
+          ),
+          child: Text(l10n.actionSave),
         ),
       ],
     );

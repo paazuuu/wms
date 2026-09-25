@@ -2932,6 +2932,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get serialHold => '保留';
 
   @override
+  String get productSerialChangeStatus => 'ステータスを変更';
+
+  @override
+  String get productSerialStatus => 'ステータス';
+
+  @override
+  String get productSerialNote => 'メモ（任意）';
+
+  @override
   String get whpSection => 'この倉庫での設定';
 
   @override
