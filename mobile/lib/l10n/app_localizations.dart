@@ -6568,6 +6568,66 @@ abstract class AppLocalizations {
   /// **'要対応 {blockers} 件（未処理 {open} 件）'**
   String exceptionBlockerCount(int blockers, int open);
 
+  /// Exceptions screen: FAB and sheet action to manually raise a new exception.
+  ///
+  /// In ja, this message translates to:
+  /// **'例外を起票'**
+  String get exceptionRaise;
+
+  /// Raise-exception sheet title.
+  ///
+  /// In ja, this message translates to:
+  /// **'例外を起票する'**
+  String get exceptionRaiseTitle;
+
+  /// Raise-exception sheet: which kind of exception.
+  ///
+  /// In ja, this message translates to:
+  /// **'種類'**
+  String get exceptionRaiseType;
+
+  /// Raise-exception sheet: optional JAN code field.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード（任意）'**
+  String get exceptionRaiseJanCode;
+
+  /// Raise-exception sheet: optional quantity field.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量（任意）'**
+  String get exceptionRaiseQuantity;
+
+  /// Raise-exception sheet: the type vocabulary came back empty.
+  ///
+  /// In ja, this message translates to:
+  /// **'起票できる種類がありません'**
+  String get exceptionRaiseNoTypes;
+
+  /// Action to cancel (withdraw) an exception raised in error, distinct from exceptionCancelled (its resulting status label).
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消す'**
+  String get exceptionCancel;
+
+  /// Cancel-exception confirmation dialog title.
+  ///
+  /// In ja, this message translates to:
+  /// **'この例外を取り消しますか？'**
+  String get exceptionCancelTitle;
+
+  /// Cancel-exception confirmation dialog body.
+  ///
+  /// In ja, this message translates to:
+  /// **'誤って起票した場合に使います。対応の記録は残りません。'**
+  String get exceptionCancelBody;
+
+  /// Cancel-exception dialog: optional reason field.
+  ///
+  /// In ja, this message translates to:
+  /// **'理由（任意）'**
+  String get exceptionCancelReasonLabel;
+
   /// Menu entry: the exception queue (0071).
   ///
   /// In ja, this message translates to:

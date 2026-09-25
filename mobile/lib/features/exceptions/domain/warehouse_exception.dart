@@ -85,6 +85,37 @@ enum ExceptionResolution {
   }
 }
 
+/// One kind of thing that can go wrong, as `list_exception_types` returns it
+/// (0071) — the vocabulary `raise_exception` picks from. The server orders
+/// these by its own `sort_order`, so the list is shown in that order rather
+/// than sorted again client-side.
+class ExceptionType extends Equatable {
+  const ExceptionType({
+    required this.code,
+    required this.name,
+    required this.category,
+    required this.severity,
+    this.requiresResolution = true,
+  });
+
+  final String code;
+  final String name;
+  final String category;
+  final ExceptionSeverity severity;
+  final bool requiresResolution;
+
+  factory ExceptionType.fromJson(Map<String, dynamic> json) => ExceptionType(
+        code: (json['code'] ?? '').toString(),
+        name: _asText(json['name']) ?? (json['code'] ?? '').toString(),
+        category: (json['category'] ?? 'OTHER').toString(),
+        severity: ExceptionSeverity.fromCode(json['severity']),
+        requiresResolution: json['requires_resolution'] != false,
+      );
+
+  @override
+  List<Object?> get props => [code, category, severity];
+}
+
 /// One thing that went wrong, as `open_exceptions` returns it (0071).
 class WarehouseException extends Equatable {
   const WarehouseException({

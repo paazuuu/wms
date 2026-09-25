@@ -3435,6 +3435,36 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get exceptionRaise => '登记异常';
+
+  @override
+  String get exceptionRaiseTitle => '登记一个异常';
+
+  @override
+  String get exceptionRaiseType => '类型';
+
+  @override
+  String get exceptionRaiseJanCode => 'JAN码（可选）';
+
+  @override
+  String get exceptionRaiseQuantity => '数量（可选）';
+
+  @override
+  String get exceptionRaiseNoTypes => '没有可登记的异常类型';
+
+  @override
+  String get exceptionCancel => '撤销';
+
+  @override
+  String get exceptionCancelTitle => '要撤销该异常吗？';
+
+  @override
+  String get exceptionCancelBody => '用于误登记的情况，不会记录处理结果。';
+
+  @override
+  String get exceptionCancelReasonLabel => '原因（可选）';
+
+  @override
   String get featExceptions => '异常处理';
 
   @override

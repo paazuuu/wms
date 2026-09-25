@@ -284,4 +284,91 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets(
+      'raising an exception picks a type, an optional JAN/quantity and a note',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeExceptionRepository(
+      exceptions: [_lotMissing()],
+      types: const [
+        ExceptionType(
+          code: 'DAMAGED',
+          name: '破損',
+          category: 'RECEIVING',
+          severity: ExceptionSeverity.warning,
+        ),
+        ExceptionType(
+          code: 'MISLABELED',
+          name: 'ラベル相違',
+          category: 'RECEIVING',
+          severity: ExceptionSeverity.warning,
+        ),
+      ],
+    );
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('例外を起票'));
+    await tester.pumpAndSettle();
+
+    // The first type is picked by default, so it need not be chosen again.
+    await tester.tap(find.byType(DropdownButtonFormField<ExceptionType>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ラベル相違').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+        find.widgetWithText(TextField, 'JANコード（任意）'), '4900000000012');
+    await tester.enterText(find.widgetWithText(TextField, '数量（任意）'), '3');
+    await tester.enterText(find.widgetWithText(TextField, 'メモ（任意）'), '検品時に発見');
+
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastRaised?.exceptionType, 'MISLABELED');
+    expect(repo.lastRaised?.warehouseId, 1);
+    expect(repo.lastRaised?.janCode, '4900000000012');
+    expect(repo.lastRaised?.quantity, 3);
+    expect(repo.lastRaised?.note, '検品時に発見');
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('with no exception types to raise, the sheet says so',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeExceptionRepository(exceptions: [_lotMissing()]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('例外を起票'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('起票できる種類がありません'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('cancelling an open exception asks first, then withdraws it',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeExceptionRepository(exceptions: [_lotMissing()]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('取り消す').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('この例外を取り消しますか？'), findsOneWidget);
+
+    await tester.enterText(
+        find.widgetWithText(TextField, '理由（任意）'), '誤って起票した');
+    await tester.tap(find.widgetWithText(FilledButton, '取り消す'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastCancel?.id, 1);
+    expect(repo.lastCancel?.reason, '誤って起票した');
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }

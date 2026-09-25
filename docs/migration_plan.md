@@ -3931,11 +3931,54 @@ with nothing in it, because an empty result here is the property holding, not
 an absence of data to load.
 
 No migration: the RPC and its grants were already correct, this is purely a
-client gap, closing the last of the candidates this pass had flagged.
-Tested with a repository test covering both reasons in one response, and
-three widget tests: a drift shows its levels, units and signed diff; an
-unlinked JAN shows its own reason and has nothing to tap into; and no
-discrepancies shows the healthy empty state instead of an empty list.
+client gap. Tested with a repository test covering both reasons in one
+response, and three widget tests: a drift shows its levels, units and signed
+diff; an unlinked JAN shows its own reason and has nothing to tap into; and
+no discrepancies shows the healthy empty state instead of an empty list.
+
+### Raising an exception by hand — the write half of §71 that had no form
+
+Going back through the audit's remaining candidates (the "static vocabulary"
+RPCs set aside earlier as lower priority) turned up something bigger than a
+vocabulary gap: `raise_exception` (0071) — "the operator saw something the
+system did not catch", per its own repository doc comment — had a full
+repository method (`ExceptionRepository.raise`) and had since 0071 shipped,
+but no screen ever called it. The exception queue could show what the system
+detected on its own (receiving mismatches, QC failures) and record a
+decision, but a person who spotted something the system had no rule for —
+water damage on a pallet, a label that does not match the carton — had no way
+to report it at all. `cancel_exception`, the undo for a report raised in
+error, was in the same state: implemented, tested at the repository level,
+never reachable.
+
+Both need `list_exception_types` (also flagged, also unreached) as their
+vocabulary: the type a report is filed under is data (`exception_types`),
+carrying its own name, category, severity and whether it needs a resolution
+— not a set the client should guess and hard-code, for the same reason
+`ScanContext` deliberately *is* a client-side enum right next to it (the
+comment on that one says why: a screen names its own step, an operator never
+picks it from a list). `list_attachment_targets` stays set aside: every
+attachment upload already knows its own entity type from the screen it is
+called on, the same shape that keeps `ScanContext` a constant, so there is no
+form anywhere that would use it.
+
+Adds `ExceptionType`, `ExceptionRepository.listTypes`, an
+`exceptionTypesProvider`, and two pieces of UI on the exception queue: a
+"raise an exception" FAB opening `RaiseExceptionSheet` (type dropdown sourced
+live from the RPC, optional JAN code, optional quantity, a note), and a "取り
+消す" action in each open exception's overflow menu opening
+`_CancelExceptionDialog` (the same owns-its-own-controller shape
+`_RenameDialog` established, so the dialog's pop transition never touches a
+disposed controller) for `cancel_exception`'s reason.
+
+No migration: every RPC and its grants were already correct; this closes the
+gap between three already-built, already-tested repository methods and the
+screen that was supposed to call them. Tested with a repository test for
+`listTypes()`, and three new widget tests: raising sends the chosen type
+(picked from the dropdown, not just the default), the optional fields and
+the note; an empty type vocabulary shows its own message instead of a broken
+dropdown; and cancelling asks first, then sends the id and the reason typed
+in.
 
 ## Rollout discipline
 

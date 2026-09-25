@@ -73,6 +73,42 @@ class ExceptionListScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _raise(
+      BuildContext context, WidgetRef ref, int warehouseId) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => RaiseExceptionSheet(warehouseId: warehouseId),
+    );
+  }
+
+  Future<void> _cancel(
+      BuildContext context, WidgetRef ref, WarehouseException e) async {
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (_) => const _CancelExceptionDialog(),
+    );
+    if (reason == null || !context.mounted) return;
+
+    final l10n = AppLocalizations.of(context);
+    final result = await ref
+        .read(exceptionRepositoryProvider)
+        .cancel(e.id, reason: reason.isEmpty ? null : reason);
+    if (!context.mounted) return;
+    result.when(
+      success: (_) {
+        ref.invalidate(openExceptionsProvider);
+        ref.invalidate(exceptionSummaryProvider);
+      },
+      failure: (f) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(humanizeApiErrorMessage(l10n, f.message)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        )),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -95,6 +131,11 @@ class ExceptionListScreen extends ConsumerWidget {
     final async = ref.watch(openExceptionsProvider);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _raise(context, ref, warehouseId),
+        icon: const Icon(Icons.add),
+        label: Text(l10n.exceptionRaise),
+      ),
       appBar: AppBar(
         title: Text(l10n.exceptionsTitle),
         actions: [
@@ -158,6 +199,7 @@ class ExceptionListScreen extends ConsumerWidget {
                     exception: e,
                     onAcknowledge: () => _acknowledge(context, ref, e),
                     onResolve: () => _resolve(context, ref, e),
+                    onCancel: () => _cancel(context, ref, e),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
@@ -216,11 +258,13 @@ class _ExceptionCard extends StatelessWidget {
     required this.exception,
     required this.onAcknowledge,
     required this.onResolve,
+    required this.onCancel,
   });
 
   final WarehouseException exception;
   final VoidCallback onAcknowledge;
   final VoidCallback onResolve;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +297,16 @@ class _ExceptionCard extends StatelessWidget {
                 if (e.quantity != null)
                   Text(l10n.exceptionQuantity(e.quantity!),
                       style: theme.textTheme.bodyMedium),
+                if (e.status.isOpen)
+                  PopupMenuButton<void>(
+                    icon: const Icon(Icons.more_vert),
+                    itemBuilder: (_) => [
+                      PopupMenuItem<void>(
+                        onTap: onCancel,
+                        child: Text(l10n.exceptionCancel),
+                      ),
+                    ],
+                  ),
               ],
             ),
             if (e.productName != null || e.janCode != null) ...[
@@ -487,6 +541,228 @@ class _ResolveExceptionSheetState extends ConsumerState<ResolveExceptionSheet> {
                 const SizedBox(width: AppSpacing.sm),
                 FilledButton(
                   onPressed: _saving ? null : _save,
+                  child: Text(l10n.actionSave),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Confirms cancelling an exception raised in error, with an optional reason.
+/// Pops the reason (possibly empty) on confirm, or null on cancel — so the
+/// caller can tell "cancel this dialog" from "cancel with no reason given"
+/// apart. Owns its own controller (the same shape `_RenameDialog` uses
+/// elsewhere), so nothing disposes it while the pop transition still needs it.
+class _CancelExceptionDialog extends StatefulWidget {
+  const _CancelExceptionDialog();
+
+  @override
+  State<_CancelExceptionDialog> createState() =>
+      _CancelExceptionDialogState();
+}
+
+class _CancelExceptionDialogState extends State<_CancelExceptionDialog> {
+  final _reason = TextEditingController();
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.exceptionCancelTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l10n.exceptionCancelBody),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _reason,
+            decoration: InputDecoration(
+              labelText: l10n.exceptionCancelReasonLabel,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _reason.text.trim()),
+          child: Text(l10n.exceptionCancel),
+        ),
+      ],
+    );
+  }
+}
+
+/// Manually reporting something the system did not catch on its own
+/// (`raise_exception`, 0071) — a person on the floor, not a detector. The type
+/// list comes from the server (`list_exception_types`) rather than being
+/// guessed client-side, the same reason every other picked-from-a-vocabulary
+/// field in this app reads its options off an RPC instead of a constant.
+class RaiseExceptionSheet extends ConsumerStatefulWidget {
+  const RaiseExceptionSheet({super.key, required this.warehouseId});
+
+  final int warehouseId;
+
+  @override
+  ConsumerState<RaiseExceptionSheet> createState() =>
+      _RaiseExceptionSheetState();
+}
+
+class _RaiseExceptionSheetState extends ConsumerState<RaiseExceptionSheet> {
+  ExceptionType? _type;
+  final _note = TextEditingController();
+  final _janCode = TextEditingController();
+  final _quantity = TextEditingController();
+  String? _error;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _note.dispose();
+    _janCode.dispose();
+    _quantity.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
+    final type = _type;
+    if (type == null) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    final janCode = _janCode.text.trim();
+    final quantity = int.tryParse(_quantity.text.trim());
+    final note = _note.text.trim();
+    final result = await ref.read(exceptionRepositoryProvider).raise(
+          exceptionType: type.code,
+          warehouseId: widget.warehouseId,
+          note: note.isEmpty ? null : note,
+          janCode: janCode.isEmpty ? null : janCode,
+          quantity: quantity,
+        );
+    if (!mounted) return;
+    result.when(
+      success: (_) {
+        ref.invalidate(openExceptionsProvider);
+        ref.invalidate(exceptionSummaryProvider);
+        Navigator.of(context).pop();
+      },
+      failure: (f) => setState(() {
+        _saving = false;
+        _error = humanizeApiErrorMessage(l10n, f.message);
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final types = ref.watch(exceptionTypesProvider);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: AppSpacing.lg + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.exceptionRaiseTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.lg),
+            types.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => Text('$e',
+                  style: TextStyle(color: theme.colorScheme.error)),
+              data: (values) {
+                if (values.isEmpty) {
+                  return Text(l10n.exceptionRaiseNoTypes,
+                      style:
+                          TextStyle(color: theme.colorScheme.onSurfaceVariant));
+                }
+                _type ??= values.first;
+                return DropdownButtonFormField<ExceptionType>(
+                  initialValue: _type,
+                  decoration: InputDecoration(
+                    labelText: l10n.exceptionRaiseType,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: [
+                    for (final t in values)
+                      DropdownMenuItem(value: t, child: Text(t.name)),
+                  ],
+                  onChanged: _saving
+                      ? null
+                      : (v) => setState(() => _type = v ?? _type),
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _janCode,
+              decoration: InputDecoration(
+                labelText: l10n.exceptionRaiseJanCode,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _quantity,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: l10n.exceptionRaiseQuantity,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _note,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: l10n.exceptionNoteLabel,
+                hintText: l10n.exceptionNoteHint,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: _saving ? null : () => Navigator.of(context).pop(),
+                  child: Text(l10n.actionCancel),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                FilledButton(
+                  onPressed:
+                      _saving || _type == null ? null : _save,
                   child: Text(l10n.actionSave),
                 ),
               ],

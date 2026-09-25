@@ -3533,6 +3533,37 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get exceptionRaise => 'Raise exception';
+
+  @override
+  String get exceptionRaiseTitle => 'Raise an exception';
+
+  @override
+  String get exceptionRaiseType => 'Type';
+
+  @override
+  String get exceptionRaiseJanCode => 'JAN code (optional)';
+
+  @override
+  String get exceptionRaiseQuantity => 'Quantity (optional)';
+
+  @override
+  String get exceptionRaiseNoTypes => 'No exception types to raise';
+
+  @override
+  String get exceptionCancel => 'Cancel it';
+
+  @override
+  String get exceptionCancelTitle => 'Cancel this exception?';
+
+  @override
+  String get exceptionCancelBody =>
+      'For one raised by mistake. No resolution is recorded.';
+
+  @override
+  String get exceptionCancelReasonLabel => 'Reason (optional)';
+
+  @override
   String get featExceptions => 'Exceptions';
 
   @override

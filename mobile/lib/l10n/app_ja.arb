@@ -2389,6 +2389,46 @@
       }
     }
   },
+  "exceptionRaise": "例外を起票",
+  "@exceptionRaise": {
+    "description": "Exceptions screen: FAB and sheet action to manually raise a new exception."
+  },
+  "exceptionRaiseTitle": "例外を起票する",
+  "@exceptionRaiseTitle": {
+    "description": "Raise-exception sheet title."
+  },
+  "exceptionRaiseType": "種類",
+  "@exceptionRaiseType": {
+    "description": "Raise-exception sheet: which kind of exception."
+  },
+  "exceptionRaiseJanCode": "JANコード（任意）",
+  "@exceptionRaiseJanCode": {
+    "description": "Raise-exception sheet: optional JAN code field."
+  },
+  "exceptionRaiseQuantity": "数量（任意）",
+  "@exceptionRaiseQuantity": {
+    "description": "Raise-exception sheet: optional quantity field."
+  },
+  "exceptionRaiseNoTypes": "起票できる種類がありません",
+  "@exceptionRaiseNoTypes": {
+    "description": "Raise-exception sheet: the type vocabulary came back empty."
+  },
+  "exceptionCancel": "取り消す",
+  "@exceptionCancel": {
+    "description": "Action to cancel (withdraw) an exception raised in error, distinct from exceptionCancelled (its resulting status label)."
+  },
+  "exceptionCancelTitle": "この例外を取り消しますか？",
+  "@exceptionCancelTitle": {
+    "description": "Cancel-exception confirmation dialog title."
+  },
+  "exceptionCancelBody": "誤って起票した場合に使います。対応の記録は残りません。",
+  "@exceptionCancelBody": {
+    "description": "Cancel-exception confirmation dialog body."
+  },
+  "exceptionCancelReasonLabel": "理由（任意）",
+  "@exceptionCancelReasonLabel": {
+    "description": "Cancel-exception dialog: optional reason field."
+  },
   "featExceptions": "例外対応",
   "@featExceptions": {
     "description": "Menu entry: the exception queue (0071)."

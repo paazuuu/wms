@@ -37,6 +37,17 @@ final openExceptionsProvider =
   );
 });
 
+/// The vocabulary a "raise an exception" form picks from — the server's own
+/// order, names and severities, not a list guessed client-side.
+final exceptionTypesProvider =
+    FutureProvider.autoDispose<List<ExceptionType>>((ref) async {
+  final result = await ref.watch(exceptionRepositoryProvider).listTypes();
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
 /// The counts behind the tile. Kept separate from the list so a dashboard can
 /// show "4 blockers" without loading every row.
 final exceptionSummaryProvider =

@@ -3442,6 +3442,36 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get exceptionRaise => '例外を起票';
+
+  @override
+  String get exceptionRaiseTitle => '例外を起票する';
+
+  @override
+  String get exceptionRaiseType => '種類';
+
+  @override
+  String get exceptionRaiseJanCode => 'JANコード（任意）';
+
+  @override
+  String get exceptionRaiseQuantity => '数量（任意）';
+
+  @override
+  String get exceptionRaiseNoTypes => '起票できる種類がありません';
+
+  @override
+  String get exceptionCancel => '取り消す';
+
+  @override
+  String get exceptionCancelTitle => 'この例外を取り消しますか？';
+
+  @override
+  String get exceptionCancelBody => '誤って起票した場合に使います。対応の記録は残りません。';
+
+  @override
+  String get exceptionCancelReasonLabel => '理由（任意）';
+
+  @override
   String get featExceptions => '例外対応';
 
   @override

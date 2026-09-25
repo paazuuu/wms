@@ -38,6 +38,10 @@ abstract class ExceptionRepository {
   /// `cancel_exception` — raised in error. Refused once resolved.
   Future<ApiResult<bool>> cancel(int exceptionId, {String? reason});
 
+  /// `list_exception_types` — the vocabulary a "raise an exception" form picks
+  /// from, ordered the way the server wants it shown.
+  Future<ApiResult<List<ExceptionType>>> listTypes();
+
   /// `raise_exception` — the operator saw something the system did not catch.
   Future<ApiResult<int>> raise({
     required String exceptionType,
@@ -146,6 +150,17 @@ class ExceptionRepositoryImpl implements ExceptionRepository {
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<ExceptionType>>> listTypes() async {
+    try {
+      final response = await _dio.post('/rpc/list_exception_types');
+      return ApiSuccess(
+          _rows(response.data).map((e) => ExceptionType.fromJson(e)).toList());
+    } on DioException catch (e) {
+      return mapDioError<List<ExceptionType>>(e);
     }
   }
 

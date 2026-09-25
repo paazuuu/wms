@@ -2974,6 +2974,7 @@ class FakeLocationRepository implements LocationRepository {
 class FakeExceptionRepository implements ExceptionRepository {
   FakeExceptionRepository({
     this.exceptions = const [],
+    this.types = const [],
     ExceptionSummary? summaryValue,
   }) : summaryValue = summaryValue ??
             ExceptionSummary(
@@ -2982,6 +2983,7 @@ class FakeExceptionRepository implements ExceptionRepository {
             );
 
   List<WarehouseException> exceptions;
+  List<ExceptionType> types;
   ExceptionSummary summaryValue;
 
   String? lastCategory;
@@ -2991,6 +2993,16 @@ class FakeExceptionRepository implements ExceptionRepository {
   ({int id, ExceptionResolution resolution, String? note})? lastResolution;
   ({int id, String? reason})? lastCancel;
   String? failResolveWith;
+
+  /// What raise() was last asked for.
+  ({
+    String exceptionType,
+    int warehouseId,
+    String? note,
+    String? janCode,
+    int? quantity,
+  })? lastRaised;
+  String? failRaiseWith;
 
   @override
   Future<ApiResult<List<WarehouseException>>> open({
@@ -3040,6 +3052,9 @@ class FakeExceptionRepository implements ExceptionRepository {
   }
 
   @override
+  Future<ApiResult<List<ExceptionType>>> listTypes() async => ApiSuccess(types);
+
+  @override
   Future<ApiResult<int>> raise({
     required String exceptionType,
     required int warehouseId,
@@ -3050,8 +3065,19 @@ class FakeExceptionRepository implements ExceptionRepository {
     int? quantity,
     int? receiptItemId,
     int? inspectionId,
-  }) async =>
-      const ApiSuccess(1);
+  }) async {
+    lastRaised = (
+      exceptionType: exceptionType,
+      warehouseId: warehouseId,
+      note: note,
+      janCode: janCode,
+      quantity: quantity,
+    );
+    if (failRaiseWith != null) {
+      return ApiFailure(message: failRaiseWith!, statusCode: 403);
+    }
+    return const ApiSuccess(1);
+  }
 }
 
 /// A repository that is always signed in as one fixed [user] — for the few

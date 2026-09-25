@@ -257,4 +257,42 @@ void main() {
       );
     });
   });
+
+  group('ExceptionRepositoryImpl.listTypes', () {
+    test('reads the vocabulary a raise form picks from', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody([
+          {
+            'code': 'DAMAGED',
+            'name': '破損',
+            'category': 'RECEIVING',
+            'severity': 'WARNING',
+            'requires_resolution': true,
+          },
+          {
+            'code': 'INFO_ONLY',
+            'name': '参考記録',
+            'category': 'OTHER',
+            'severity': 'INFO',
+            'requires_resolution': false,
+          },
+        ], 200);
+      });
+
+      final result = await ExceptionRepositoryImpl(_dio(adapter)).listTypes();
+
+      expect(captured.path, '/rpc/list_exception_types');
+      result.when(
+        success: (types) {
+          expect(types, hasLength(2));
+          expect(types.first.code, 'DAMAGED');
+          expect(types.first.severity, ExceptionSeverity.warning);
+          expect(types.last.requiresResolution, isFalse);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+  });
 }
