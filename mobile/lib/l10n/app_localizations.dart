@@ -2290,6 +2290,12 @@ abstract class AppLocalizations {
   /// **'返品戻し'**
   String get reasonReturn;
 
+  /// No description provided for @reasonInternalUse.
+  ///
+  /// In ja, this message translates to:
+  /// **'社内消費'**
+  String get reasonInternalUse;
+
   /// No description provided for @reasonOther.
   ///
   /// In ja, this message translates to:

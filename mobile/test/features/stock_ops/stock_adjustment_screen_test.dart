@@ -145,6 +145,37 @@ void main() {
     expect(repo.lastDelta, -2);
   });
 
+  testWidgets('stock consumed internally is its own reason, not OTHER',
+      (tester) async {
+    final repo = FakeStockOpsRepository();
+
+    await pumpApp(
+      tester,
+      const StockAdjustmentScreen(),
+      overrides: [
+        stockOpsRepositoryProvider.overrideWithValue(repo),
+        writeWarehouseIdProvider.overrideWithValue(3),
+      ],
+    );
+
+    await tester.tap(find.text('在庫を調整'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '4901234567894');
+    await tester.enterText(find.byType(TextField).at(1), '3');
+    await tester.ensureVisible(find.text('社内消費'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('社内消費'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '調整を確定'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '調整する'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastReason, AdjustReason.internalUse);
+    expect(repo.lastDelta, -3);
+  });
+
   testWidgets('adding stock posts a positive delta', (tester) async {
     final repo = FakeStockOpsRepository();
 

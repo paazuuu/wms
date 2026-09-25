@@ -520,6 +520,7 @@
   "reasonFound": "Found",
   "reasonCorrection": "Correction",
   "reasonReturn": "Return",
+  "reasonInternalUse": "Internal use",
   "reasonOther": "Other",
   "cntTitle": "Stock count",
   "cntEmpty": "No counts yet",

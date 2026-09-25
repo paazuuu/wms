@@ -1160,6 +1160,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reasonReturn => '退货入库';
 
   @override
+  String get reasonInternalUse => '内部消耗';
+
+  @override
   String get reasonOther => '其他';
 
   @override

@@ -13,6 +13,7 @@ enum AdjustReason {
   found('FOUND'),
   correction('CORRECTION'),
   returned('RETURN'),
+  internalUse('INTERNAL_USE'),
   other('OTHER');
 
   const AdjustReason(this.wire);
@@ -24,6 +25,7 @@ enum AdjustReason {
         'FOUND' => AdjustReason.found,
         'CORRECTION' => AdjustReason.correction,
         'RETURN' => AdjustReason.returned,
+        'INTERNAL_USE' => AdjustReason.internalUse,
         _ => AdjustReason.other,
       };
 }

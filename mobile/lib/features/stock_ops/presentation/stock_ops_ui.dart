@@ -25,6 +25,8 @@ class AdjustReasonUi {
             l10n.reasonCorrection, Icons.edit_outlined, StatusTone.info),
         AdjustReason.returned => AdjustReasonUi(
             l10n.reasonReturn, Icons.undo_outlined, StatusTone.info),
+        AdjustReason.internalUse => AdjustReasonUi(l10n.reasonInternalUse,
+            Icons.store_outlined, StatusTone.neutral),
         AdjustReason.other =>
           AdjustReasonUi(l10n.reasonOther, Icons.more_horiz, StatusTone.neutral),
       };

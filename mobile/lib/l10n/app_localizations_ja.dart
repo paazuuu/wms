@@ -1163,6 +1163,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reasonReturn => '返品戻し';
 
   @override
+  String get reasonInternalUse => '社内消費';
+
+  @override
   String get reasonOther => 'その他';
 
   @override

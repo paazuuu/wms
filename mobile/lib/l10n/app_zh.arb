@@ -520,6 +520,7 @@
   "reasonFound": "找到",
   "reasonCorrection": "录入更正",
   "reasonReturn": "退货入库",
+  "reasonInternalUse": "内部消耗",
   "reasonOther": "其他",
   "cntTitle": "盘点",
   "cntEmpty": "还没有盘点记录",

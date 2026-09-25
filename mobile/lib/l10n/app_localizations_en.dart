@@ -1194,6 +1194,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonReturn => 'Return';
 
   @override
+  String get reasonInternalUse => 'Internal use';
+
+  @override
   String get reasonOther => 'Other';
 
   @override

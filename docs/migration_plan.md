@@ -4084,6 +4084,39 @@ coverage line and each unlinked row render, a code with no recorded name
 reads as "名称不明" rather than a blank, and nothing unlinked shows the
 healthy empty state.
 
+### 0082 — a reason code for stock the company used itself
+
+Asked to make manual stock changes more flexible, then to confirm receiving
+and shipping compute correctly however they are entered. The second half
+turned out to be a verification, not a build: `record_receipt_item` and
+`ship_plan` both post through the same single choke point,
+`apply_stock_movement_detail`, whose insert into `stock_movements` fires the
+`stock_movements_project_units` trigger (0061) that keeps `stock_units` in
+step with `stock_levels.on_hand` — automatically, regardless of which RPC
+triggered it or whether the entry was "manual" or automatic. RLS on both
+tables has no INSERT/UPDATE policy for any client role, so this path is the
+only way in; there is no side door for the two to drift apart on their own.
+The one way they legitimately can (an unlinked JAN, `product_id` null) is
+exactly what `unlinked_jan_codes` and `stock_reconciliation` — both wired to
+screens this pass — already make visible. Confirmed against the live
+database: `select count(*) from stock_units` and the reconciliation query
+both came back clean.
+
+The first half was a real gap: `adjust_stock`'s reason vocabulary
+(`stock_adjustments_reason_check`, 0017) had DAMAGE, LOSS, FOUND,
+CORRECTION, RETURN and OTHER, with nothing for stock the company consumed
+itself — samples, in-house use, staff use. That always fell into OTHER with
+the real reason buried in free text. Adds `'INTERNAL_USE'` to the check
+constraint (migration 0082; the 10 security invariants still hold 10/10
+after — a value addition to an existing constraint touches no grant, policy
+or RLS surface) and `AdjustReason.internalUse` on the client, appearing in
+the stock adjustment screen's reason chips and its history list for free,
+since both already iterate the enum rather than a hard-coded set.
+
+Tested with a widget test: choosing 社内消費 posts `INTERNAL_USE` with the
+sign the quantity field's direction implies, the same shape every other
+reason in that screen already has.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

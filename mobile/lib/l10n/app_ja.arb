@@ -537,6 +537,7 @@
   "reasonFound": "発見",
   "reasonCorrection": "入力訂正",
   "reasonReturn": "返品戻し",
+  "reasonInternalUse": "社内消費",
   "reasonOther": "その他",
   "cntTitle": "棚卸",
   "cntEmpty": "棚卸はまだありません",
