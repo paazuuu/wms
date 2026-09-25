@@ -9,6 +9,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/warehouse_providers.dart';
 import '../domain/location.dart';
+import 'bin_stock_overview_screen.dart';
 
 /// Localized name for a location type (§8, 0062). A type this build does not
 /// know shows as its own code rather than as a blank.
@@ -61,6 +62,13 @@ class LocationTreeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.locationsTitle),
         actions: [
+          IconButton(
+            tooltip: l10n.binStockAction,
+            icon: const Icon(Icons.inventory_2_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => BinStockOverviewScreen(warehouseId: warehouseId),
+            )),
+          ),
           IconButton(
             tooltip: l10n.locationShowInactive,
             icon: Icon(showInactive

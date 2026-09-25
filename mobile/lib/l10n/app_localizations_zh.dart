@@ -3176,6 +3176,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get locationShowInactive => '显示停用';
 
   @override
+  String get binStockAction => '按库位查看库存';
+
+  @override
+  String get binStockTitle => '按库位查看库存';
+
+  @override
+  String get binStockEmpty => '此仓库没有库位';
+
+  @override
+  String get binStockBinEmpty => '空';
+
+  @override
+  String binStockTotalUnits(int qty) {
+    return '共 $qty 件';
+  }
+
+  @override
   String get locationPickable => '可拣货';
 
   @override

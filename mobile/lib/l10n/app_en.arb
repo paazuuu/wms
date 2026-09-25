@@ -1355,6 +1355,18 @@
   "locationParent": "Parent (optional)",
   "locationBarcode": "Label barcode (optional)",
   "locationShowInactive": "Show inactive",
+  "binStockAction": "Stock by bin",
+  "binStockTitle": "Stock by bin",
+  "binStockEmpty": "This warehouse has no locations",
+  "binStockBinEmpty": "Empty",
+  "binStockTotalUnits": "{qty} total",
+  "@binStockTotalUnits": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
   "locationPickable": "Pickable",
   "locationReceivable": "Receivable",
   "locationShipping": "Shipping",

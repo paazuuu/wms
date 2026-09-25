@@ -3182,6 +3182,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get locationShowInactive => '停止中も表示';
 
   @override
+  String get binStockAction => 'ビン別在庫';
+
+  @override
+  String get binStockTitle => 'ビン別在庫';
+
+  @override
+  String get binStockEmpty => 'この倉庫にはロケーションがありません';
+
+  @override
+  String get binStockBinEmpty => '空';
+
+  @override
+  String binStockTotalUnits(int qty) {
+    return '計 $qty 点';
+  }
+
+  @override
   String get locationPickable => 'ピッキング可';
 
   @override

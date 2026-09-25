@@ -3878,6 +3878,34 @@ posts the product/unit pair, and a refused removal shows the reason rather
 than swallowing it — plus a repository-level test pinning down the RPC call
 shape itself.
 
+### Bin stock overview — the last unreachable RPC from this pass
+
+`bin_stock_overview` (0016) has existed since Phase A: given a warehouse, it
+returns every bin that uses the location tree and what is actually sitting in
+each one, product by product. Nothing in the client ever called it. The
+location tree screen's own `on_hand` figure is a per-location rollup — useful
+for "how much is under this rack in total," useless for the question a picker
+or a counter actually asks standing in front of a shelf: "what, specifically,
+is in this bin."
+
+`returns jsonb` here, and the value is itself a `jsonb_agg()` array — the same
+response shape as `shipment_parcels` and `lot_provenance`, so PostgREST hands
+back the bare array directly rather than a single-row wrapper around it. Built
+`BinStock`/`BinStockLine` as the domain pair, a `LocationRepository.binStockOverview`
+method reusing the file's existing `_rows()` disambiguation (already correct
+for this shape, so no repeat of the bug `shipment_parcels` had), a
+`binStockOverviewProvider` family keyed by warehouse id, and a new
+`BinStockOverviewScreen` reachable from an app-bar icon on the location tree
+screen. A bin with nothing in it is tagged "空" rather than shown a "0" that
+would read as a real, counted zero.
+
+No migration: the RPC and its grants were already correct, this is purely a
+client gap. Tested with a repository test pinning down the bare-array
+response shape, and three widget tests: a bin's lines and total render (and
+the total is the sum across lines, not just the first one), an empty bin
+shows the empty tag instead of a count, and a warehouse with no bins at all
+shows the screen's own empty state.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -6106,6 +6106,36 @@ abstract class AppLocalizations {
   /// **'停止中も表示'**
   String get locationShowInactive;
 
+  /// Location tree app bar: opens the bin stock overview (0016).
+  ///
+  /// In ja, this message translates to:
+  /// **'ビン別在庫'**
+  String get binStockAction;
+
+  /// Bin stock overview screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'ビン別在庫'**
+  String get binStockTitle;
+
+  /// Bin stock overview: no bins (warehouse does not use locations, or none exist).
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫にはロケーションがありません'**
+  String get binStockEmpty;
+
+  /// Bin stock overview: a bin with nothing in it.
+  ///
+  /// In ja, this message translates to:
+  /// **'空'**
+  String get binStockBinEmpty;
+
+  /// Bin stock overview: total units in one bin.
+  ///
+  /// In ja, this message translates to:
+  /// **'計 {qty} 点'**
+  String binStockTotalUnits(int qty);
+
   /// Location flag pickable.
   ///
   /// In ja, this message translates to:

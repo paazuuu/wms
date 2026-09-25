@@ -1355,6 +1355,18 @@
   "locationParent": "上级库位（可选）",
   "locationBarcode": "标签条码（可选）",
   "locationShowInactive": "显示停用",
+  "binStockAction": "按库位查看库存",
+  "binStockTitle": "按库位查看库存",
+  "binStockEmpty": "此仓库没有库位",
+  "binStockBinEmpty": "空",
+  "binStockTotalUnits": "共 {qty} 件",
+  "@binStockTotalUnits": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
   "locationPickable": "可拣货",
   "locationReceivable": "可收货",
   "locationShipping": "发货",

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
+import '../domain/bin_stock.dart';
 import '../domain/location.dart';
 
 /// The location tree (§7, §8 — migration 0062).
@@ -20,6 +21,11 @@ abstract class LocationRepository {
 
   /// `list_location_types` — the vocabulary, with each type's default flags.
   Future<ApiResult<List<LocationType>>> types();
+
+  /// `bin_stock_overview` — every bin in a warehouse that uses locations, and
+  /// what is actually sitting in each one. The location tree's own `onHand`
+  /// is a per-location total; this is the breakdown behind it.
+  Future<ApiResult<List<BinStock>>> binStockOverview(int warehouseId);
 
   /// `create_location`. [parentCode] is a code, not an id, because the operator
   /// is reading it off the rack. The flags are nullable: left null they come
@@ -96,6 +102,19 @@ class LocationRepositoryImpl implements LocationRepository {
           _rows(response.data).map((e) => LocationType.fromJson(e)).toList());
     } on DioException catch (e) {
       return mapDioError<List<LocationType>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<BinStock>>> binStockOverview(int warehouseId) async {
+    try {
+      final response = await _dio.post('/rpc/bin_stock_overview', data: {
+        'p_warehouse_id': warehouseId,
+      });
+      return ApiSuccess(
+          _rows(response.data).map((e) => BinStock.fromJson(e)).toList());
+    } on DioException catch (e) {
+      return mapDioError<List<BinStock>>(e);
     }
   }
 

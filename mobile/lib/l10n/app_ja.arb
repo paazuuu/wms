@@ -2005,6 +2005,31 @@
   "@locationShowInactive": {
     "description": "Location tree: include is_active = false nodes."
   },
+  "binStockAction": "ビン別在庫",
+  "@binStockAction": {
+    "description": "Location tree app bar: opens the bin stock overview (0016)."
+  },
+  "binStockTitle": "ビン別在庫",
+  "@binStockTitle": {
+    "description": "Bin stock overview screen title."
+  },
+  "binStockEmpty": "この倉庫にはロケーションがありません",
+  "@binStockEmpty": {
+    "description": "Bin stock overview: no bins (warehouse does not use locations, or none exist)."
+  },
+  "binStockBinEmpty": "空",
+  "@binStockBinEmpty": {
+    "description": "Bin stock overview: a bin with nothing in it."
+  },
+  "binStockTotalUnits": "計 {qty} 点",
+  "@binStockTotalUnits": {
+    "description": "Bin stock overview: total units in one bin.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
   "locationPickable": "ピッキング可",
   "@locationPickable": {
     "description": "Location flag pickable."

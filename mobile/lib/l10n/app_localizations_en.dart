@@ -3268,6 +3268,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationShowInactive => 'Show inactive';
 
   @override
+  String get binStockAction => 'Stock by bin';
+
+  @override
+  String get binStockTitle => 'Stock by bin';
+
+  @override
+  String get binStockEmpty => 'This warehouse has no locations';
+
+  @override
+  String get binStockBinEmpty => 'Empty';
+
+  @override
+  String binStockTotalUnits(int qty) {
+    return '$qty total';
+  }
+
+  @override
   String get locationPickable => 'Pickable';
 
   @override

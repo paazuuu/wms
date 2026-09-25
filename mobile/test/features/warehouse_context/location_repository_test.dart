@@ -246,5 +246,48 @@ void main() {
       expect(body['p_parent_code'], isNull);
       expect(body['p_name'], isNull);
     });
+
+    test('binStockOverview() reads the bare jsonb array bin_stock_overview returns',
+        () async {
+      late RequestOptions captured;
+      // bin_stock_overview `returns jsonb` where the value itself is a
+      // jsonb_agg() array — same shape as shipment_parcels/lot_provenance,
+      // so PostgREST's body is that array directly.
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody([
+          {
+            'bin_id': 11,
+            'bin_code': 'Z1-R-01-S3',
+            'bin_type': 'PICKING',
+            'lines': [
+              {'jan_code': '4900000000001', 'product_name': 'ペン', 'on_hand': 30},
+            ],
+          },
+          {
+            'bin_id': 12,
+            'bin_code': 'Z1-R-01-S4',
+            'bin_type': 'STORAGE',
+            'lines': [],
+          },
+        ], 200);
+      });
+
+      final result =
+          await LocationRepositoryImpl(_dio(adapter)).binStockOverview(1);
+
+      expect(captured.path, '/rpc/bin_stock_overview');
+      expect((captured.data as Map)['p_warehouse_id'], 1);
+      result.when(
+        success: (bins) {
+          expect(bins, hasLength(2));
+          expect(bins[0].binCode, 'Z1-R-01-S3');
+          expect(bins[0].lines.single.productName, 'ペン');
+          expect(bins[0].totalUnits, 30);
+          expect(bins[1].isEmpty, isTrue);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
   });
 }

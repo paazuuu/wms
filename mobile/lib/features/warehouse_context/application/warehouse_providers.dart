@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../data/location_repository.dart';
 import '../data/warehouse_repository.dart';
+import '../domain/bin_stock.dart';
 import '../domain/location.dart';
 import '../domain/warehouse.dart';
 
@@ -91,6 +92,17 @@ final locationTreeProvider = FutureProvider.autoDispose
 final locationTypesProvider =
     FutureProvider.autoDispose<List<LocationType>>((ref) async {
   final result = await ref.watch(locationRepositoryProvider).types();
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// Every bin in one warehouse and what is actually in it right now.
+final binStockOverviewProvider =
+    FutureProvider.autoDispose.family<List<BinStock>, int>((ref, warehouseId) async {
+  final result =
+      await ref.watch(locationRepositoryProvider).binStockOverview(warehouseId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

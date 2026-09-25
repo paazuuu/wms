@@ -70,6 +70,7 @@ import 'package:wms_mobile/features/stock_ops/domain/stock_ops.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/data/location_repository.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/bin_stock.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/location.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/core/api/supabase_auth_interceptor.dart';
@@ -2900,6 +2901,15 @@ class FakeLocationRepository implements LocationRepository {
 
   @override
   Future<ApiResult<List<LocationType>>> types() async => ApiSuccess(typeList);
+
+  /// What bin_stock_overview() would return, keyed by warehouse.
+  List<BinStock> binStock = const [];
+
+  @override
+  Future<ApiResult<List<BinStock>>> binStockOverview(int warehouseId) async {
+    lastWarehouseId = warehouseId;
+    return ApiSuccess(binStock);
+  }
 
   @override
   Future<ApiResult<int>> create({
