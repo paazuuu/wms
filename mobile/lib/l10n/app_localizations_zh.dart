@@ -1566,6 +1566,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featProductsDesc => '按 JAN 码管理商品名称、分类与价格';
 
   @override
+  String get featUnlinkedJan => '未关联的JAN码';
+
+  @override
+  String get featUnlinkedJanDesc => '尚未关联商品的JAN码列表';
+
+  @override
+  String get unlinkedJanTitle => '未关联的JAN码';
+
+  @override
+  String unlinkedJanCoverage(int linked, int rows) {
+    return '已关联 $linked / $rows';
+  }
+
+  @override
+  String get unlinkedJanReady => '所有JAN码均已关联商品';
+
+  @override
+  String get unlinkedJanEmpty => '没有未关联的JAN码';
+
+  @override
+  String get unlinkedJanEmptyBody => '库存、入库、出库等记录均已关联商品。';
+
+  @override
+  String unlinkedJanRows(int qty) {
+    return '$qty 条';
+  }
+
+  @override
+  String get unlinkedJanSeenAsUnknown => '名称不明';
+
+  @override
   String get featPurchaseOrders => '采购订单';
 
   @override

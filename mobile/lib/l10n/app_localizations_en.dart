@@ -1616,6 +1616,39 @@ class AppLocalizationsEn extends AppLocalizations {
       'Name, category and price against each JAN code';
 
   @override
+  String get featUnlinkedJan => 'Unlinked JAN codes';
+
+  @override
+  String get featUnlinkedJanDesc =>
+      'JAN codes in use with no product registered';
+
+  @override
+  String get unlinkedJanTitle => 'Unlinked JAN codes';
+
+  @override
+  String unlinkedJanCoverage(int linked, int rows) {
+    return '$linked / $rows linked';
+  }
+
+  @override
+  String get unlinkedJanReady => 'Every code is linked to a product';
+
+  @override
+  String get unlinkedJanEmpty => 'No unlinked JAN codes';
+
+  @override
+  String get unlinkedJanEmptyBody =>
+      'Stock, receiving, and shipment records are all linked to a product.';
+
+  @override
+  String unlinkedJanRows(int qty) {
+    return '$qty rows';
+  }
+
+  @override
+  String get unlinkedJanSeenAsUnknown => 'Name unknown';
+
+  @override
   String get featPurchaseOrders => 'Purchase orders';
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/product_repository.dart';
+import '../domain/data_quality.dart';
 import '../domain/product.dart';
 import '../domain/product_lot.dart';
 import '../domain/warehouse_product.dart';
@@ -66,6 +67,28 @@ final warehouseProductProvider = FutureProvider.autoDispose
         warehouseId: warehouseId,
         productId: productId,
       );
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// JAN codes in use system-wide that no product accounts for, worst first
+/// (`unlinked_jan_codes`, 0058) — the worklist for registering master data.
+final unlinkedJanCodesProvider =
+    FutureProvider.autoDispose<List<UnlinkedJan>>((ref) async {
+  final result = await ref.watch(productRepositoryProvider).unlinkedJanCodes();
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// How complete `product_id` is next to `jan_code`, system-wide
+/// (`product_id_coverage`, 0058) — [unlinkedJanCodesProvider]'s own summary.
+final productIdCoverageProvider =
+    FutureProvider.autoDispose<ProductIdCoverage>((ref) async {
+  final result = await ref.watch(productRepositoryProvider).productIdCoverage();
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

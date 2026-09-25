@@ -3058,6 +3058,60 @@ abstract class AppLocalizations {
   /// **'JANコードに紐づく商品名・カテゴリ・価格を管理'**
   String get featProductsDesc;
 
+  /// Home menu: unlinked_jan_codes / product_id_coverage (0058) — the registration worklist.
+  ///
+  /// In ja, this message translates to:
+  /// **'未紐付けJANコード'**
+  String get featUnlinkedJan;
+
+  /// Home menu description for the unlinked JAN worklist.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品が登録されていないJANコードの一覧'**
+  String get featUnlinkedJanDesc;
+
+  /// Unlinked JAN screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'未紐付けJANコード'**
+  String get unlinkedJanTitle;
+
+  /// Unlinked JAN screen: the coverage summary line.
+  ///
+  /// In ja, this message translates to:
+  /// **'{linked} / {rows} 件が紐付け済み'**
+  String unlinkedJanCoverage(int linked, int rows);
+
+  /// Unlinked JAN screen: product_id_coverage.ready_to_switch is true.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて商品に紐付いています'**
+  String get unlinkedJanReady;
+
+  /// Unlinked JAN screen: empty state (the healthy state).
+  ///
+  /// In ja, this message translates to:
+  /// **'未紐付けのJANコードはありません'**
+  String get unlinkedJanEmpty;
+
+  /// Unlinked JAN screen: empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫・入荷・出荷などの記録は、すべて商品マスタに紐付いています。'**
+  String get unlinkedJanEmptyBody;
+
+  /// Unlinked JAN screen: total row count for one JAN code.
+  ///
+  /// In ja, this message translates to:
+  /// **'{qty} 件'**
+  String unlinkedJanRows(int qty);
+
+  /// Unlinked JAN screen: no product_name was ever recorded alongside this code.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称不明'**
+  String get unlinkedJanSeenAsUnknown;
+
   /// No description provided for @featPurchaseOrders.
   ///
   /// In ja, this message translates to:

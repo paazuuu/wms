@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
+import '../domain/data_quality.dart';
 import '../domain/product.dart';
 import '../domain/product_lot.dart';
 import '../domain/warehouse_product.dart';
@@ -140,6 +141,16 @@ abstract class ProductRepository {
     required int warehouseId,
     required int productId,
   });
+
+  /// `unlinked_jan_codes` (0058) — codes in use across the system that no
+  /// product accounts for, worst (most rows) first. The worklist for
+  /// registering master data: once a product exists for a code, the history
+  /// already using it links itself.
+  Future<ApiResult<List<UnlinkedJan>>> unlinkedJanCodes({int limit = 200});
+
+  /// `product_id_coverage` (0058) — how complete `product_id` is next to
+  /// `jan_code`, system-wide. [UnlinkedJan]'s own summary line.
+  Future<ApiResult<ProductIdCoverage>> productIdCoverage();
 }
 
 class ProductRepositoryImpl implements ProductRepository {
@@ -495,6 +506,33 @@ class ProductRepositoryImpl implements ProductRepository {
       return ApiSuccess(response.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<UnlinkedJan>>> unlinkedJanCodes({
+    int limit = 200,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/unlinked_jan_codes', data: {
+        'p_limit': limit,
+      });
+      return ApiSuccess(
+          _rows(response.data).map((e) => UnlinkedJan.fromJson(e)).toList());
+    } on DioException catch (e) {
+      return mapDioError<List<UnlinkedJan>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<ProductIdCoverage>> productIdCoverage() async {
+    try {
+      final response = await _dio.post('/rpc/product_id_coverage');
+      final row = _object(response.data);
+      return ApiSuccess(
+          row == null ? const ProductIdCoverage() : ProductIdCoverage.fromJson(row));
+    } on DioException catch (e) {
+      return mapDioError<ProductIdCoverage>(e);
     }
   }
 }

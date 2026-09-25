@@ -1569,6 +1569,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featProductsDesc => 'JANコードに紐づく商品名・カテゴリ・価格を管理';
 
   @override
+  String get featUnlinkedJan => '未紐付けJANコード';
+
+  @override
+  String get featUnlinkedJanDesc => '商品が登録されていないJANコードの一覧';
+
+  @override
+  String get unlinkedJanTitle => '未紐付けJANコード';
+
+  @override
+  String unlinkedJanCoverage(int linked, int rows) {
+    return '$linked / $rows 件が紐付け済み';
+  }
+
+  @override
+  String get unlinkedJanReady => 'すべて商品に紐付いています';
+
+  @override
+  String get unlinkedJanEmpty => '未紐付けのJANコードはありません';
+
+  @override
+  String get unlinkedJanEmptyBody => '在庫・入荷・出荷などの記録は、すべて商品マスタに紐付いています。';
+
+  @override
+  String unlinkedJanRows(int qty) {
+    return '$qty 件';
+  }
+
+  @override
+  String get unlinkedJanSeenAsUnknown => '名称不明';
+
+  @override
   String get featPurchaseOrders => '発注';
 
   @override

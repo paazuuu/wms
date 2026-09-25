@@ -38,6 +38,7 @@ import 'package:wms_mobile/features/partners/data/trading_partner_repository.dar
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
+import 'package:wms_mobile/features/product/domain/data_quality.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/inventory/data/inventory_repository.dart';
 import 'package:wms_mobile/features/inventory/domain/reservation.dart';
@@ -2126,6 +2127,20 @@ class FakeProductRepository implements ProductRepository {
     required int productId,
   }) async =>
       ApiSuccess(warehouseProducts.remove((warehouseId, productId)) != null);
+
+  /// What unlinkedJanCodes() would return.
+  List<UnlinkedJan> unlinkedJans = const [];
+
+  /// What productIdCoverage() would return.
+  ProductIdCoverage coverage = const ProductIdCoverage(readyToSwitch: true);
+
+  @override
+  Future<ApiResult<List<UnlinkedJan>>> unlinkedJanCodes({int limit = 200}) async =>
+      ApiSuccess(unlinkedJans);
+
+  @override
+  Future<ApiResult<ProductIdCoverage>> productIdCoverage() async =>
+      ApiSuccess(coverage);
 }
 
 /// Purchase order stub. Mirrors the real RPCs' state-machine transitions

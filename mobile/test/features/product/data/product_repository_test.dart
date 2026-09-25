@@ -426,4 +426,65 @@ void main() {
       );
     });
   });
+
+  group('ProductRepositoryImpl.unlinkedJanCodes', () {
+    test('reads the worklist, worst first, with its per-table breakdown',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody([
+          {
+            'jan_code': '4900000000099',
+            'seen_as': null,
+            'total_rows': 12,
+            'sources': {'stock_levels': 3, 'delivery_plan_lines': 9},
+          },
+        ], 200);
+      });
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.unlinkedJanCodes(limit: 50);
+
+      expect(captured.path, '/rpc/unlinked_jan_codes');
+      expect((captured.data as Map)['p_limit'], 50);
+      result.when(
+        success: (rows) {
+          final row = rows.single;
+          expect(row.janCode, '4900000000099');
+          expect(row.seenAs, isNull);
+          expect(row.totalRows, 12);
+          expect(row.sources['delivery_plan_lines'], 9);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+  });
+
+  group('ProductRepositoryImpl.productIdCoverage', () {
+    test('reads the switch-over summary', () async {
+      final adapter = FakeHttpClientAdapter((_) => jsonResponseBody({
+            'tables': {
+              'stock_levels': {'rows': 100, 'linked': 98, 'unlinked': 2},
+            },
+            'rows': 100,
+            'linked': 98,
+            'unlinked': 2,
+            'ready_to_switch': false,
+          }, 200));
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.productIdCoverage();
+
+      result.when(
+        success: (c) {
+          expect(c.rows, 100);
+          expect(c.linked, 98);
+          expect(c.unlinked, 2);
+          expect(c.readyToSwitch, isFalse);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+  });
 }

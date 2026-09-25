@@ -770,6 +770,55 @@
   "featAiReviewDesc": "AIの抽出結果を反映前に承認・却下",
   "featProducts": "商品マスタ",
   "featProductsDesc": "JANコードに紐づく商品名・カテゴリ・価格を管理",
+  "featUnlinkedJan": "未紐付けJANコード",
+  "@featUnlinkedJan": {
+    "description": "Home menu: unlinked_jan_codes / product_id_coverage (0058) — the registration worklist."
+  },
+  "featUnlinkedJanDesc": "商品が登録されていないJANコードの一覧",
+  "@featUnlinkedJanDesc": {
+    "description": "Home menu description for the unlinked JAN worklist."
+  },
+  "unlinkedJanTitle": "未紐付けJANコード",
+  "@unlinkedJanTitle": {
+    "description": "Unlinked JAN screen title."
+  },
+  "unlinkedJanCoverage": "{linked} / {rows} 件が紐付け済み",
+  "@unlinkedJanCoverage": {
+    "description": "Unlinked JAN screen: the coverage summary line.",
+    "placeholders": {
+      "linked": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
+  "unlinkedJanReady": "すべて商品に紐付いています",
+  "@unlinkedJanReady": {
+    "description": "Unlinked JAN screen: product_id_coverage.ready_to_switch is true."
+  },
+  "unlinkedJanEmpty": "未紐付けのJANコードはありません",
+  "@unlinkedJanEmpty": {
+    "description": "Unlinked JAN screen: empty state (the healthy state)."
+  },
+  "unlinkedJanEmptyBody": "在庫・入荷・出荷などの記録は、すべて商品マスタに紐付いています。",
+  "@unlinkedJanEmptyBody": {
+    "description": "Unlinked JAN screen: empty state body."
+  },
+  "unlinkedJanRows": "{qty} 件",
+  "@unlinkedJanRows": {
+    "description": "Unlinked JAN screen: total row count for one JAN code.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "unlinkedJanSeenAsUnknown": "名称不明",
+  "@unlinkedJanSeenAsUnknown": {
+    "description": "Unlinked JAN screen: no product_name was ever recorded alongside this code."
+  },
   "featPurchaseOrders": "発注",
   "featPurchaseOrdersDesc": "仕入先への発注を作成・承認・管理",
   "featSalesOrders": "受注",

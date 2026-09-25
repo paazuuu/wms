@@ -17,6 +17,7 @@ import '../../picking_ops/presentation/pick_list_index_screen.dart';
 import '../../wave/presentation/pick_wave_list_screen.dart';
 import '../../partners/presentation/trading_partner_list_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
+import '../../product/presentation/unlinked_jan_screen.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../warehouse_context/presentation/location_tree_screen.dart';
@@ -200,6 +201,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _products,
             requiredAnyOf: ['product.view', 'product.manage'],
           ),
+          // The registration worklist behind that master data: a code the
+          // system has seen but no product yet accounts for.
+          FeatureEntry(
+            id: 'unlinked_jan',
+            icon: Icons.link_off_outlined,
+            status: FeatureStatus.ready,
+            builder: _unlinkedJan,
+            requiredAnyOf: ['product.view', 'inventory.view'],
+          ),
           FeatureEntry(
             id: 'partners',
             icon: Icons.handshake_outlined,
@@ -273,6 +283,9 @@ Widget _aiReview(BuildContext _) => const AiReviewListScreen();
 
 /// Top-level (const-referenceable) builder for the Product Master feature.
 Widget _products(BuildContext _) => const ProductListScreen();
+
+/// Top-level (const-referenceable) builder for the Unlinked JAN Codes feature.
+Widget _unlinkedJan(BuildContext _) => const UnlinkedJanScreen();
 
 /// Top-level (const-referenceable) builder for the Trading Partners feature.
 Widget _partners(BuildContext _) => const TradingPartnerListScreen();

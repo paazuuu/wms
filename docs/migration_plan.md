@@ -4055,6 +4055,35 @@ widget tests: fulfilling sends the prefilled outstanding quantity and the
 button disappears once nothing is left owed; a refused fulfil shows the
 reason rather than swallowing it.
 
+### The registration worklist behind the product master
+
+`unlinked_jan_codes` and `product_id_coverage` (both 0058) are the pair that
+migration built to make its own gap visible: which JAN codes are in use
+across the system — stock levels, receiving lines, shipments, pick tasks,
+inspections, and more — that no product record accounts for, and how close
+the whole switch from code to id is to complete. Both were reachable by
+neither client nor server since the day they shipped; `unlinked_jan_codes`'
+own comment calls it "the worklist for registering master data, and the
+measure of how far the switch-over is from being safe" — a job description
+nothing was doing. The fix on the other side, `link_products_by_jan`, is
+correctly `service_role`-only and already wired to a trigger: registering a
+product automatically links the history that was already using its code.
+What was missing was only ever the visibility half — knowing which code to
+register next.
+
+Adds `UnlinkedJan`/`ProductIdCoverage`, `ProductRepository.unlinkedJanCodes`
+and `.productIdCoverage`, and a new `UnlinkedJanScreen` on the home menu
+beside Products: a coverage summary (a ready banner once every code links,
+otherwise the linked/total count) over a worklist sorted worst first, each
+row showing its best-guess name, its total row count, and which tables it
+turned up in.
+
+No migration needed. Tested with two repository tests (the worklist's
+per-table breakdown, the coverage summary) and three widget tests: the
+coverage line and each unlinked row render, a code with no recorded name
+reads as "名称不明" rather than a blank, and nothing unlinked shows the
+healthy empty state.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
