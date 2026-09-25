@@ -3035,6 +3035,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featReplenishmentDesc => '発注点を下回った商品と発注数の目安';
 
   @override
+  String get featStockReconciliation => '在庫整合性チェック';
+
+  @override
+  String get featStockReconciliationDesc => '在庫水準と実在庫のズレを確認';
+
+  @override
   String get expiryTitle => '期限管理';
 
   @override
@@ -3146,6 +3152,36 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String overAllocatedRow(String quantity, String allocated, String over) {
     return '在庫 $quantity / 引当 $allocated（超過 $over）';
+  }
+
+  @override
+  String get stockReconciliationTitle => '在庫整合性チェック';
+
+  @override
+  String get stockReconciliationEmpty => 'ズレはありません';
+
+  @override
+  String get stockReconciliationEmptyBody => '在庫水準と実在庫は一致しています。';
+
+  @override
+  String get stockReconciliationReasonUnlinked => '商品に紐付いていないJAN';
+
+  @override
+  String get stockReconciliationReasonDrift => '数量のズレ';
+
+  @override
+  String stockReconciliationLevels(int qty) {
+    return '在庫水準 $qty';
+  }
+
+  @override
+  String stockReconciliationUnits(int qty) {
+    return '実在庫 $qty';
+  }
+
+  @override
+  String stockReconciliationDrift(String diff) {
+    return '差分 $diff';
   }
 
   @override

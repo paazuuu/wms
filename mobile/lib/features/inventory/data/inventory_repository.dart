@@ -5,6 +5,7 @@ import '../../../core/api/api_result.dart';
 import '../../product/domain/product_lot.dart';
 import '../../product/domain/warehouse_product.dart';
 import '../domain/reservation.dart';
+import '../domain/stock_discrepancy.dart';
 
 /// The inventory-control reads Phase A made possible: what is running out of
 /// time (§4), what has been promised (§6), where a promise has been
@@ -44,6 +45,13 @@ abstract class InventoryRepository {
 
   /// `replenishment_suggestions` (0063, §31), worst shortfall first.
   Future<ApiResult<List<ReplenishmentSuggestion>>> replenishment({
+    int? warehouseId,
+  });
+
+  /// `stock_reconciliation` (0061) — every place the ledger and the stock
+  /// units it is supposed to summarize disagree. Empty is the healthy state;
+  /// this is a diagnostic, not a routine list.
+  Future<ApiResult<List<StockDiscrepancy>>> stockReconciliation({
     int? warehouseId,
   });
 }
@@ -146,6 +154,22 @@ class InventoryRepositoryImpl implements InventoryRepository {
           .toList());
     } on DioException catch (e) {
       return mapDioError<List<ReplenishmentSuggestion>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<StockDiscrepancy>>> stockReconciliation({
+    int? warehouseId,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/stock_reconciliation', data: {
+        'p_warehouse_id': warehouseId,
+      });
+      return ApiSuccess(_rows(response.data)
+          .map((e) => StockDiscrepancy.fromJson(e))
+          .toList());
+    } on DioException catch (e) {
+      return mapDioError<List<StockDiscrepancy>>(e);
     }
   }
 }

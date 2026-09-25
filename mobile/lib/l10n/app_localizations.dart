@@ -5848,6 +5848,18 @@ abstract class AppLocalizations {
   /// **'発注点を下回った商品と発注数の目安'**
   String get featReplenishmentDesc;
 
+  /// Home menu: where stock_levels and stock_units disagree (0061).
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫整合性チェック'**
+  String get featStockReconciliation;
+
+  /// Home menu description for stock reconciliation.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫水準と実在庫のズレを確認'**
+  String get featStockReconciliationDesc;
+
   /// Expiry screen title.
   ///
   /// In ja, this message translates to:
@@ -6039,6 +6051,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫 {quantity} / 引当 {allocated}（超過 {over}）'**
   String overAllocatedRow(String quantity, String allocated, String over);
+
+  /// Stock reconciliation screen title.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫整合性チェック'**
+  String get stockReconciliationTitle;
+
+  /// Stock reconciliation screen: empty state (the healthy state).
+  ///
+  /// In ja, this message translates to:
+  /// **'ズレはありません'**
+  String get stockReconciliationEmpty;
+
+  /// Stock reconciliation screen: empty state body.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫水準と実在庫は一致しています。'**
+  String get stockReconciliationEmptyBody;
+
+  /// Stock reconciliation reason: a movement recorded against a barcode with no product.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品に紐付いていないJAN'**
+  String get stockReconciliationReasonUnlinked;
+
+  /// Stock reconciliation reason: the ledger and the stock units disagree.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量のズレ'**
+  String get stockReconciliationReasonDrift;
+
+  /// Stock reconciliation row: stock_levels.on_hand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫水準 {qty}'**
+  String stockReconciliationLevels(int qty);
+
+  /// Stock reconciliation row: sum of stock_units.quantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'実在庫 {qty}'**
+  String stockReconciliationUnits(int qty);
+
+  /// Stock reconciliation row: the signed gap between the two.
+  ///
+  /// In ja, this message translates to:
+  /// **'差分 {diff}'**
+  String stockReconciliationDrift(String diff);
 
   /// Location tree screen title.
   ///

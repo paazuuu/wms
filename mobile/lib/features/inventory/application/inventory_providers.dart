@@ -6,6 +6,7 @@ import '../../product/domain/warehouse_product.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/inventory_repository.dart';
 import '../domain/reservation.dart';
+import '../domain/stock_discrepancy.dart';
 
 final inventoryRepositoryProvider = Provider<InventoryRepository>((ref) {
   return InventoryRepositoryImpl(ref.watch(restDioProvider));
@@ -70,6 +71,21 @@ final replenishmentProvider =
   final result = await ref
       .watch(inventoryRepositoryProvider)
       .replenishment(warehouseId: warehouseId);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// Where the ledger and the stock units under it disagree, in the active
+/// warehouse. Empty is healthy — this is a diagnostic an operator checks, not
+/// a list that is normally worth looking at.
+final stockReconciliationProvider =
+    FutureProvider.autoDispose<List<StockDiscrepancy>>((ref) async {
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
+  final result = await ref
+      .watch(inventoryRepositoryProvider)
+      .stockReconciliation(warehouseId: warehouseId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

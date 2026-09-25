@@ -3906,6 +3906,37 @@ the total is the sum across lines, not just the first one), an empty bin
 shows the empty tag instead of a count, and a warehouse with no bins at all
 shows the screen's own empty state.
 
+### Stock reconciliation — the invariant, made checkable from the app
+
+`stock_reconciliation` (0061) is the safety property the migration's own
+comment describes: `stock_levels.on_hand`, the running total every stock
+movement keeps in step, has to agree with what `stock_units` actually sums to
+for the same product and warehouse. The RPC that checks it has existed since
+Phase A. Nothing in the client ever called it, so the only way to see whether
+the invariant was holding was a raw SQL query against the live database —
+exactly the kind of check this whole pass exists to make routine instead.
+
+Built as a sibling to the other inventory-control reads (`expiring_lots`,
+`list_reservations`, `over_allocated_stock`, `replenishment_suggestions`):
+a `StockDiscrepancy` domain class, `InventoryRepository.stockReconciliation`
+on the same repository those already live on, a `stockReconciliationProvider`
+scoped to the active warehouse, and a `StockReconciliationScreen` on the home
+menu's management group, beside Reservations. Each row is one of the RPC's
+own two reasons — `unlinked jan_code` (a movement recorded against a barcode
+that never resolved to a product) or `quantity drift` (the ledger and the
+units disagree for a real product, which taps through to that product) —
+with the ledger's figure, the units' figure and the signed gap between them.
+Empty is the healthy state, shown as its own message rather than a bare list
+with nothing in it, because an empty result here is the property holding, not
+an absence of data to load.
+
+No migration: the RPC and its grants were already correct, this is purely a
+client gap, closing the last of the candidates this pass had flagged.
+Tested with a repository test covering both reasons in one response, and
+three widget tests: a drift shows its levels, units and signed diff; an
+unlinked JAN shows its own reason and has nothing to tap into; and no
+discrepancies shows the healthy empty state instead of an empty list.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

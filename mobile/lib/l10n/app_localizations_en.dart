@@ -3116,6 +3116,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Products below their reorder point, and how much to order';
 
   @override
+  String get featStockReconciliation => 'Stock reconciliation';
+
+  @override
+  String get featStockReconciliationDesc =>
+      'Where stock levels and stock units disagree';
+
+  @override
   String get expiryTitle => 'Expiry watch';
 
   @override
@@ -3231,6 +3238,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String overAllocatedRow(String quantity, String allocated, String over) {
     return '$quantity on hand / $allocated allocated ($over over)';
+  }
+
+  @override
+  String get stockReconciliationTitle => 'Stock reconciliation';
+
+  @override
+  String get stockReconciliationEmpty => 'No discrepancies';
+
+  @override
+  String get stockReconciliationEmptyBody =>
+      'Stock levels and stock units agree.';
+
+  @override
+  String get stockReconciliationReasonUnlinked => 'JAN not linked to a product';
+
+  @override
+  String get stockReconciliationReasonDrift => 'Quantity drift';
+
+  @override
+  String stockReconciliationLevels(int qty) {
+    return 'Stock level $qty';
+  }
+
+  @override
+  String stockReconciliationUnits(int qty) {
+    return 'Stock units $qty';
+  }
+
+  @override
+  String stockReconciliationDrift(String diff) {
+    return 'Diff $diff';
   }
 
   @override

@@ -10,6 +10,7 @@ import '../../qc/presentation/held_stock_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
+import '../../inventory/presentation/stock_reconciliation_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
@@ -220,6 +221,16 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _reservations,
             requiredAnyOf: ['inventory.view'],
           ),
+          // A diagnostic, not a routine list — beside reservations because
+          // both live off the same inventory.view read, not because either
+          // one is normally worth looking at.
+          FeatureEntry(
+            id: 'stock_reconciliation',
+            icon: Icons.fact_check_outlined,
+            status: FeatureStatus.ready,
+            builder: _stockReconciliation,
+            requiredAnyOf: ['inventory.view'],
+          ),
           FeatureEntry(
             id: 'reports',
             icon: Icons.table_chart_outlined,
@@ -293,6 +304,11 @@ Widget _expiringLots(BuildContext _) => const ExpiringLotsScreen();
 
 /// Top-level (const-referenceable) builder for the Reservations feature.
 Widget _reservations(BuildContext _) => const ReservationsScreen();
+
+/// Top-level (const-referenceable) builder for the Stock Reconciliation
+/// feature.
+Widget _stockReconciliation(BuildContext _) =>
+    const StockReconciliationScreen();
 Widget _exceptions(BuildContext _) => const ExceptionListScreen();
 Widget _heldStock(BuildContext _) => const HeldStockScreen();
 

@@ -1779,6 +1779,14 @@
   "@featReplenishmentDesc": {
     "description": "Home menu description for replenishment."
   },
+  "featStockReconciliation": "在庫整合性チェック",
+  "@featStockReconciliation": {
+    "description": "Home menu: where stock_levels and stock_units disagree (0061)."
+  },
+  "featStockReconciliationDesc": "在庫水準と実在庫のズレを確認",
+  "@featStockReconciliationDesc": {
+    "description": "Home menu description for stock reconciliation."
+  },
   "expiryTitle": "期限管理",
   "@expiryTitle": {
     "description": "Expiry screen title."
@@ -1957,6 +1965,53 @@
         "type": "String"
       },
       "over": {
+        "type": "String"
+      }
+    }
+  },
+  "stockReconciliationTitle": "在庫整合性チェック",
+  "@stockReconciliationTitle": {
+    "description": "Stock reconciliation screen title."
+  },
+  "stockReconciliationEmpty": "ズレはありません",
+  "@stockReconciliationEmpty": {
+    "description": "Stock reconciliation screen: empty state (the healthy state)."
+  },
+  "stockReconciliationEmptyBody": "在庫水準と実在庫は一致しています。",
+  "@stockReconciliationEmptyBody": {
+    "description": "Stock reconciliation screen: empty state body."
+  },
+  "stockReconciliationReasonUnlinked": "商品に紐付いていないJAN",
+  "@stockReconciliationReasonUnlinked": {
+    "description": "Stock reconciliation reason: a movement recorded against a barcode with no product."
+  },
+  "stockReconciliationReasonDrift": "数量のズレ",
+  "@stockReconciliationReasonDrift": {
+    "description": "Stock reconciliation reason: the ledger and the stock units disagree."
+  },
+  "stockReconciliationLevels": "在庫水準 {qty}",
+  "@stockReconciliationLevels": {
+    "description": "Stock reconciliation row: stock_levels.on_hand.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "stockReconciliationUnits": "実在庫 {qty}",
+  "@stockReconciliationUnits": {
+    "description": "Stock reconciliation row: sum of stock_units.quantity.",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "stockReconciliationDrift": "差分 {diff}",
+  "@stockReconciliationDrift": {
+    "description": "Stock reconciliation row: the signed gap between the two.",
+    "placeholders": {
+      "diff": {
         "type": "String"
       }
     }

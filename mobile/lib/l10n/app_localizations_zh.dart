@@ -3029,6 +3029,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featReplenishmentDesc => '低于补货点的商品与建议订购量';
 
   @override
+  String get featStockReconciliation => '库存对账';
+
+  @override
+  String get featStockReconciliationDesc => '库存水位与实际库存不一致之处';
+
+  @override
   String get expiryTitle => '有效期管理';
 
   @override
@@ -3140,6 +3146,36 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String overAllocatedRow(String quantity, String allocated, String over) {
     return '库存 $quantity / 已分配 $allocated（超额 $over）';
+  }
+
+  @override
+  String get stockReconciliationTitle => '库存对账';
+
+  @override
+  String get stockReconciliationEmpty => '没有差异';
+
+  @override
+  String get stockReconciliationEmptyBody => '库存水位与实际库存一致。';
+
+  @override
+  String get stockReconciliationReasonUnlinked => '未关联商品的JAN码';
+
+  @override
+  String get stockReconciliationReasonDrift => '数量差异';
+
+  @override
+  String stockReconciliationLevels(int qty) {
+    return '库存水位 $qty';
+  }
+
+  @override
+  String stockReconciliationUnits(int qty) {
+    return '实际库存 $qty';
+  }
+
+  @override
+  String stockReconciliationDrift(String diff) {
+    return '差额 $diff';
   }
 
   @override

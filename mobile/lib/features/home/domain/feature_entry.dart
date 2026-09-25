@@ -119,6 +119,8 @@ class FeatureEntry {
         return l10n.featHeldStock;
       case 'reservations':
         return l10n.featReservations;
+      case 'stock_reconciliation':
+        return l10n.featStockReconciliation;
       case 'locations':
         return l10n.featLocations;
       case 'replenishment':
@@ -177,6 +179,8 @@ class FeatureEntry {
         return l10n.featHeldStockDesc;
       case 'reservations':
         return l10n.featReservationsDesc;
+      case 'stock_reconciliation':
+        return l10n.featStockReconciliationDesc;
       case 'locations':
         return l10n.featLocationsDesc;
       case 'replenishment':

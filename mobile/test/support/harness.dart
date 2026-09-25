@@ -41,6 +41,7 @@ import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/inventory/data/inventory_repository.dart';
 import 'package:wms_mobile/features/inventory/domain/reservation.dart';
+import 'package:wms_mobile/features/inventory/domain/stock_discrepancy.dart';
 import 'package:wms_mobile/features/product/domain/product_lot.dart';
 import 'package:wms_mobile/features/product/domain/warehouse_product.dart';
 import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
@@ -2774,12 +2775,14 @@ class FakeInventoryRepository implements InventoryRepository {
     this.reservationList = const [],
     this.overAllocatedList = const [],
     this.suggestions = const [],
+    this.discrepancies = const [],
   });
 
   List<ExpiringLot> lots;
   List<Reservation> reservationList;
   List<OverAllocatedStock> overAllocatedList;
   List<ReplenishmentSuggestion> suggestions;
+  List<StockDiscrepancy> discrepancies;
 
   /// The horizon the last expiringLots() call asked for.
   int? lastHorizon;
@@ -2852,6 +2855,12 @@ class FakeInventoryRepository implements InventoryRepository {
     int? warehouseId,
   }) async =>
       ApiSuccess(suggestions);
+
+  @override
+  Future<ApiResult<List<StockDiscrepancy>>> stockReconciliation({
+    int? warehouseId,
+  }) async =>
+      ApiSuccess(discrepancies);
 }
 
 /// Location tree stub (0062). [roots] is what `location_tree` would return,

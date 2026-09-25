@@ -282,4 +282,52 @@ void main() {
       );
     });
   });
+
+  group('InventoryRepositoryImpl.stockReconciliation', () {
+    test('reads a quantity drift and an unlinked JAN alike', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody([
+          {
+            'warehouse_id': 1,
+            'jan_code': '4901234567890',
+            'product_id': 7,
+            'stock_levels_on_hand': 100,
+            'stock_units_on_hand': 90,
+            'reason': 'quantity drift',
+          },
+          {
+            'warehouse_id': 1,
+            'jan_code': '4900000000099',
+            'product_id': null,
+            'stock_levels_on_hand': 5,
+            'stock_units_on_hand': 0,
+            'reason': 'unlinked jan_code',
+          },
+        ], 200);
+      });
+
+      final result = await InventoryRepositoryImpl(_dio(adapter))
+          .stockReconciliation(warehouseId: 1);
+
+      expect(captured.path, '/rpc/stock_reconciliation');
+      expect((captured.data as Map)['p_warehouse_id'], 1);
+      result.when(
+        success: (rows) {
+          expect(rows, hasLength(2));
+          final drift = rows[0];
+          expect(drift.productId, 7);
+          expect(drift.isUnlinked, isFalse);
+          // The ledger claims 100, the units only back up 90.
+          expect(drift.drift, 10);
+          final unlinked = rows[1];
+          expect(unlinked.productId, isNull);
+          expect(unlinked.isUnlinked, isTrue);
+          expect(unlinked.reason, 'unlinked jan_code');
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+  });
 }
