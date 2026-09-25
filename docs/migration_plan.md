@@ -4017,6 +4017,44 @@ shape, and two widget tests: adding a parcel sends the line id, the quantity
 and the lot typed into the reused sheet; a refused add (permission denied)
 shows the friendly §34 message rather than the raw RPC text.
 
+### Marking a reservation fulfilled — the write half `release` had no sibling for
+
+`fulfil_reservation` (0064) is the counterpart to `release_reservation`,
+which the reservations screen already calls: one records that a promise was
+dropped, the other that it was kept. Its own comment says when it runs —
+"called when stock has actually left against this promise" — and nothing
+ever called it, client or server. In practice this meant `fulfilled_quantity`
+sat at 0 for the life of every reservation: `Reservation.outstanding`
+(`quantity - fulfilled_quantity`) never shrank, so a reservation kept holding
+its *full* amount against `stock_available()` even after the sales order it
+was for had actually shipped, until someone remembered to release it by
+hand. Not a missing screen so much as a promise the app could make but never
+actually kept up its end of.
+
+Wiring shipment completion to call this automatically would be the complete
+fix, but that reaches into `ship_plan` and the edge-gated shipping RPCs —
+shared business logic well outside a client-side screen, and a decision
+about *when* a sales-order reservation should be considered fulfilled that
+is not this pass's to make unilaterally. Raised with the user, who chose the
+narrower, lower-risk fix: a manual "出荷済みにする" (mark as fulfilled)
+action beside "解放", the same posture `raise_exception`/`cancel_exception`
+took for their own gaps this pass — closes the reachability gap now,
+without touching shipping's own RPCs.
+
+Adds `InventoryRepository.fulfilReservation`, and a `_FulfilDialog` (the
+same owns-its-own-controller shape as `_RenameDialog`) prefilled with what
+is still outstanding — "no quantity means all of it, the common case at
+shipping time," per the RPC's own comment — with a quantity field for a
+partial shipment. The action only appears while something is still owed;
+once outstanding reaches zero there is nothing left to mark.
+
+No migration needed. Tested with three repository tests (the id and
+quantity reach the RPC, a null quantity is sent as null rather than
+defaulted client-side, and a refused fulfil surfaces as a failure) and two
+widget tests: fulfilling sends the prefilled outstanding quantity and the
+button disappears once nothing is left owed; a refused fulfil shows the
+reason rather than swallowing it.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

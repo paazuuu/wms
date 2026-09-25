@@ -80,6 +80,30 @@ class ReservationsScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _fulfil(
+      BuildContext context, WidgetRef ref, Reservation reservation) async {
+    final quantity = await showDialog<int>(
+      context: context,
+      builder: (_) => _FulfilDialog(outstanding: reservation.outstanding),
+    );
+    if (quantity == null || !context.mounted) return;
+
+    final l10n = AppLocalizations.of(context);
+    final result = await ref
+        .read(inventoryRepositoryProvider)
+        .fulfilReservation(reservation.id, quantity: quantity);
+    if (!context.mounted) return;
+    result.when(
+      success: (_) => ref.invalidate(reservationsProvider),
+      failure: (f) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(humanizeApiErrorMessage(l10n, f.message)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        )),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -144,6 +168,7 @@ class ReservationsScreen extends ConsumerWidget {
                   _ReservationCard(
                     reservation: reservation,
                     onRelease: () => _release(context, ref, reservation),
+                    onFulfil: () => _fulfil(context, ref, reservation),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
@@ -157,10 +182,15 @@ class ReservationsScreen extends ConsumerWidget {
 }
 
 class _ReservationCard extends StatelessWidget {
-  const _ReservationCard({required this.reservation, required this.onRelease});
+  const _ReservationCard({
+    required this.reservation,
+    required this.onRelease,
+    required this.onFulfil,
+  });
 
   final Reservation reservation;
   final VoidCallback onRelease;
+  final VoidCallback onFulfil;
 
   @override
   Widget build(BuildContext context) {
@@ -290,12 +320,22 @@ class _ReservationCard extends StatelessWidget {
               ],
               if (reservation.isActive) ...[
                 const SizedBox(height: AppSpacing.xs),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: onRelease,
-                    child: Text(l10n.reservationRelease),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: onRelease,
+                      child: Text(l10n.reservationRelease),
+                    ),
+                    // Only worth offering while something is still owed — a
+                    // reservation already fully fulfilled has nothing left to
+                    // mark.
+                    if (reservation.outstanding > 0)
+                      FilledButton.tonal(
+                        onPressed: onFulfil,
+                        child: Text(l10n.reservationFulfil),
+                      ),
+                  ],
                 ),
               ],
             ],
@@ -367,6 +407,74 @@ class _OverAllocatedCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Confirms recording a reservation as fulfilled, with a quantity — prefilled
+/// with everything still outstanding, since that is the common case at
+/// shipping time (`fulfil_reservation`'s own comment). Pops the quantity on
+/// confirm, or null on cancel. Owns its own controller (the same shape
+/// `_RenameDialog` uses elsewhere), so nothing disposes it while the pop
+/// transition still needs it.
+class _FulfilDialog extends StatefulWidget {
+  const _FulfilDialog({required this.outstanding});
+
+  final int outstanding;
+
+  @override
+  State<_FulfilDialog> createState() => _FulfilDialogState();
+}
+
+class _FulfilDialogState extends State<_FulfilDialog> {
+  late final TextEditingController _quantity =
+      TextEditingController(text: '${widget.outstanding}');
+  String? _error;
+
+  @override
+  void dispose() {
+    _quantity.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.reservationFulfilTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l10n.reservationFulfilBody),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _quantity,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: l10n.reservationFulfilQuantity,
+              border: const OutlineInputBorder(),
+              errorText: _error,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            final quantity = int.tryParse(_quantity.text.trim());
+            if (quantity == null || quantity <= 0) {
+              setState(() => _error = l10n.parcelQuantityRequired);
+              return;
+            }
+            Navigator.pop(context, quantity);
+          },
+          child: Text(l10n.reservationFulfil),
+        ),
+      ],
     );
   }
 }

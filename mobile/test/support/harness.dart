@@ -2888,6 +2888,41 @@ class FakeInventoryRepository implements InventoryRepository {
     return const ApiSuccess(true);
   }
 
+  /// What fulfilReservation() was last asked for.
+  ({int id, int? quantity})? lastFulfil;
+  String? failFulfilWith;
+
+  @override
+  Future<ApiResult<bool>> fulfilReservation(int reservationId,
+      {int? quantity}) async {
+    lastFulfil = (id: reservationId, quantity: quantity);
+    if (failFulfilWith != null) {
+      return ApiFailure(message: failFulfilWith!, statusCode: 400);
+    }
+    reservationList = [
+      for (final r in reservationList)
+        if (r.id == reservationId)
+          Reservation(
+            id: r.id,
+            productId: r.productId,
+            productName: r.productName,
+            warehouseId: r.warehouseId,
+            quantity: r.quantity,
+            status: r.status,
+            fulfilledQuantity:
+                r.fulfilledQuantity + (quantity ?? r.outstanding),
+            allocatedQuantity: r.allocatedQuantity,
+            referenceType: r.referenceType,
+            referenceId: r.referenceId,
+            expiresAt: r.expiresAt,
+            isExpired: r.isExpired,
+          )
+        else
+          r,
+    ];
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<List<ReplenishmentSuggestion>>> replenishment({
     int? warehouseId,

@@ -3223,6 +3223,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'The held stock becomes available again and its allocations are dropped. The record stays.';
 
   @override
+  String get reservationFulfil => 'Mark as fulfilled';
+
+  @override
+  String get reservationFulfilTitle => 'Record it as fulfilled';
+
+  @override
+  String get reservationFulfilBody =>
+      'This moves no stock. The shipment recorded that separately — this only records that the promise was kept.';
+
+  @override
+  String get reservationFulfilQuantity => 'Quantity';
+
+  @override
   String get reservationAllocationsTitle => 'Allocated from';
 
   @override

@@ -3138,6 +3138,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reservationReleaseBody => '確保していた在庫が引当可能に戻り、引当先も取り消されます。記録は残ります。';
 
   @override
+  String get reservationFulfil => '出荷済みにする';
+
+  @override
+  String get reservationFulfilTitle => '出荷済みとして記録する';
+
+  @override
+  String get reservationFulfilBody =>
+      '在庫は動かしません。出荷の記録は別にあり、ここでは約束が果たされたことだけを記録します。';
+
+  @override
+  String get reservationFulfilQuantity => '数量';
+
+  @override
   String get reservationAllocationsTitle => '引当先';
 
   @override

@@ -3132,6 +3132,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reservationReleaseBody => '预留的库存将恢复可用，分配也会取消。记录会保留。';
 
   @override
+  String get reservationFulfil => '标记为已出库';
+
+  @override
+  String get reservationFulfilTitle => '记录为已出库';
+
+  @override
+  String get reservationFulfilBody => '不会移动库存。出库另有记录，这里只记录承诺已经兑现。';
+
+  @override
+  String get reservationFulfilQuantity => '数量';
+
+  @override
   String get reservationAllocationsTitle => '分配来源';
 
   @override

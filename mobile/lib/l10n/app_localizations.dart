@@ -6022,6 +6022,30 @@ abstract class AppLocalizations {
   /// **'確保していた在庫が引当可能に戻り、引当先も取り消されます。記録は残ります。'**
   String get reservationReleaseBody;
 
+  /// Reservations screen: action to record fulfil_reservation.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済みにする'**
+  String get reservationFulfil;
+
+  /// Reservations screen: fulfil dialog title.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済みとして記録する'**
+  String get reservationFulfilTitle;
+
+  /// Reservations screen: fulfil dialog explains it moves no stock, mirroring the exception-resolve sheet's same caveat.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫は動かしません。出荷の記録は別にあり、ここでは約束が果たされたことだけを記録します。'**
+  String get reservationFulfilBody;
+
+  /// Reservations screen: fulfil dialog quantity field, prefilled with what is still outstanding.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get reservationFulfilQuantity;
+
   /// Reservations screen: which parcels will supply this promise.
   ///
   /// In ja, this message translates to:

@@ -43,6 +43,12 @@ abstract class InventoryRepository {
   /// something to point at.
   Future<ApiResult<bool>> releaseReservation(int reservationId, {String? note});
 
+  /// `fulfil_reservation` (0064) — the promise has been kept: stock actually
+  /// left against it (the shipment's own movement, recorded elsewhere; this
+  /// only stops the reservation holding the quantity). Null [quantity] means
+  /// all of what is still outstanding, the common case at shipping time.
+  Future<ApiResult<bool>> fulfilReservation(int reservationId, {int? quantity});
+
   /// `replenishment_suggestions` (0063, §31), worst shortfall first.
   Future<ApiResult<List<ReplenishmentSuggestion>>> replenishment({
     int? warehouseId,
@@ -135,6 +141,20 @@ class InventoryRepositoryImpl implements InventoryRepository {
       });
       // Returns the new position as jsonb; anything non-null is a success, and
       // the caller refetches rather than trusting a parsed echo.
+      return ApiSuccess(response.data != null);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> fulfilReservation(int reservationId,
+      {int? quantity}) async {
+    try {
+      final response = await _dio.post('/rpc/fulfil_reservation', data: {
+        'p_reservation_id': reservationId,
+        'p_quantity': quantity,
+      });
       return ApiSuccess(response.data != null);
     } on DioException catch (e) {
       return mapDioError<bool>(e);

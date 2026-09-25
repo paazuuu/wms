@@ -283,6 +283,58 @@ void main() {
     });
   });
 
+  group('InventoryRepositoryImpl.fulfilReservation', () {
+    test('posts the id and quantity, and treats the returned position as success',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody(
+            {'reservation_id': 3, 'fulfilled_quantity': 20}, 200);
+      });
+
+      final result = await InventoryRepositoryImpl(_dio(adapter))
+          .fulfilReservation(3, quantity: 20);
+
+      expect(captured.path, '/rpc/fulfil_reservation');
+      final body = captured.data as Map;
+      expect(body['p_reservation_id'], 3);
+      expect(body['p_quantity'], 20);
+      result.when(
+        success: (ok) => expect(ok, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('a null quantity is sent as null, meaning "all of it"', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody({'reservation_id': 3}, 200);
+      });
+
+      await InventoryRepositoryImpl(_dio(adapter)).fulfilReservation(3);
+
+      expect((captured.data as Map)['p_quantity'], isNull);
+    });
+
+    test('fulfilling one already fulfilled is a failure the screen can show',
+        () async {
+      final adapter = FakeHttpClientAdapter((_) => jsonResponseBody(
+            {'message': 'reservation 3 is FULFILLED'},
+            400,
+          ));
+
+      final result = await InventoryRepositoryImpl(_dio(adapter))
+          .fulfilReservation(3, quantity: 5);
+
+      result.when(
+        success: (_) => fail('expected failure'),
+        failure: (f) => expect(f.message, contains('FULFILLED')),
+      );
+    });
+  });
+
   group('InventoryRepositoryImpl.stockReconciliation', () {
     test('reads a quantity drift and an unlinked JAN alike', () async {
       late RequestOptions captured;

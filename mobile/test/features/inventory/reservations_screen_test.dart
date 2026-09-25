@@ -149,6 +149,47 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
+  testWidgets(
+      'fulfilling asks for a quantity, prefilled with what is outstanding',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeInventoryRepository(reservationList: [_active()]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.widgetWithText(FilledButton, '出荷済みにする'));
+    await tester.pumpAndSettle();
+
+    // 30 promised, 10 already shipped: 20 is what is left to mark.
+    expect(find.widgetWithText(TextField, '数量'), findsOneWidget);
+    expect(find.text('20'), findsWidgets);
+
+    await tester.tap(find.widgetWithText(FilledButton, '出荷済みにする').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.lastFulfil?.id, 3);
+    expect(repo.lastFulfil?.quantity, 20);
+    // The list refreshes; nothing is left outstanding, so the button is gone.
+    expect(find.widgetWithText(FilledButton, '出荷済みにする'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a refused fulfil is shown, not swallowed', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeInventoryRepository(reservationList: [_active()])
+      ..failFulfilWith = 'reservation 3 is FULFILLED';
+    await _pump(tester, repo);
+
+    await tester.tap(find.widgetWithText(FilledButton, '出荷済みにする'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '出荷済みにする').last);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('FULFILLED'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets('over-allocated parcels come first, with why it happened',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1400));

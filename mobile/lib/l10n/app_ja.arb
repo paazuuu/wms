@@ -1938,6 +1938,22 @@
   "@reservationReleaseBody": {
     "description": "Reservations screen: what releasing does."
   },
+  "reservationFulfil": "出荷済みにする",
+  "@reservationFulfil": {
+    "description": "Reservations screen: action to record fulfil_reservation."
+  },
+  "reservationFulfilTitle": "出荷済みとして記録する",
+  "@reservationFulfilTitle": {
+    "description": "Reservations screen: fulfil dialog title."
+  },
+  "reservationFulfilBody": "在庫は動かしません。出荷の記録は別にあり、ここでは約束が果たされたことだけを記録します。",
+  "@reservationFulfilBody": {
+    "description": "Reservations screen: fulfil dialog explains it moves no stock, mirroring the exception-resolve sheet's same caveat."
+  },
+  "reservationFulfilQuantity": "数量",
+  "@reservationFulfilQuantity": {
+    "description": "Reservations screen: fulfil dialog quantity field, prefilled with what is still outstanding."
+  },
   "reservationAllocationsTitle": "引当先",
   "@reservationAllocationsTitle": {
     "description": "Reservations screen: which parcels will supply this promise."
