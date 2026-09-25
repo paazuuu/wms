@@ -1733,6 +1733,7 @@ class FakeProductRepository implements ProductRepository {
             category: category,
             price: price,
             status: p.status,
+            pickingRule: p.pickingRule,
           )
         else
           p,
@@ -1754,6 +1755,7 @@ class FakeProductRepository implements ProductRepository {
             price: p.price,
             status: status,
             trackingMode: p.trackingMode,
+            pickingRule: p.pickingRule,
             baseUom: p.baseUom,
             uoms: p.uoms,
             barcodes: p.barcodes,
@@ -1796,6 +1798,40 @@ class FakeProductRepository implements ProductRepository {
             price: p.price,
             status: p.status,
             trackingMode: trackingMode ?? p.trackingMode,
+            pickingRule: p.pickingRule,
+            baseUom: p.baseUom,
+            uoms: p.uoms,
+            barcodes: p.barcodes,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  /// The last setPickingRule() call, so a screen test can assert the rule went
+  /// through its own RPC.
+  ({int productId, String rule})? lastPickingRule;
+
+  @override
+  Future<ApiResult<bool>> setPickingRule({
+    required int productId,
+    required String rule,
+  }) async {
+    lastPickingRule = (productId: productId, rule: rule);
+    _products = [
+      for (final p in _products)
+        if (p.id == productId)
+          Product(
+            id: p.id,
+            janCode: p.janCode,
+            name: p.name,
+            sku: p.sku,
+            category: p.category,
+            price: p.price,
+            status: p.status,
+            trackingMode: p.trackingMode,
+            pickingRule: rule,
             baseUom: p.baseUom,
             uoms: p.uoms,
             barcodes: p.barcodes,

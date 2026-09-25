@@ -142,6 +142,7 @@ class Product extends Equatable {
     this.price,
     this.status = 'active',
     this.trackingMode = TrackingMode.untracked,
+    this.pickingRule = 'FEFO',
     this.baseUom,
     this.uoms = const [],
     this.barcodes = const [],
@@ -157,6 +158,12 @@ class Product extends Equatable {
   final double? price;
   final String status;
   final TrackingMode trackingMode;
+
+  /// §16's default draw order for this product (0074): FIFO/FEFO/LIFO/MANUAL.
+  /// A warehouse may override it (`warehouse_products.picking_rule`); this is
+  /// the product's own fallback, which `picking_rule_for` and this reader
+  /// agree on defaulting to when nothing is set.
+  final String pickingRule;
   final Uom? baseUom;
   final List<ProductUom> uoms;
   final List<ProductBarcode> barcodes;
@@ -192,6 +199,7 @@ class Product extends Equatable {
         price: _asDouble(json['price']),
         status: (json['status'] ?? 'active').toString(),
         trackingMode: TrackingMode.fromCode(json['tracking_mode']),
+        pickingRule: (json['picking_rule'] ?? 'FEFO').toString(),
         baseUom: json['base_uom'] is Map
             ? Uom.fromJson((json['base_uom'] as Map).cast<String, dynamic>())
             : null,
@@ -211,6 +219,7 @@ class Product extends Equatable {
         price,
         status,
         trackingMode,
+        pickingRule,
         baseUom,
         uoms,
         barcodes,

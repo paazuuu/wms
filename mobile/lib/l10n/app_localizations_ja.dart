@@ -2768,6 +2768,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productBaseUnit => '基本単位';
 
   @override
+  String get productPickingRule => 'ピッキング順序';
+
+  @override
+  String get productPickingRuleHint => '在庫からどの順で取るかの初期設定です。倉庫ごとの上書きは別途設定できます。';
+
+  @override
+  String get pickRuleFifo => '先入先出（FIFO）';
+
+  @override
+  String get pickRuleFefo => '期限が近い順（FEFO）';
+
+  @override
+  String get pickRuleLifo => '後入先出（LIFO）';
+
+  @override
+  String get pickRuleManual => '都度選択（MANUAL）';
+
+  @override
   String productCodeCount(int count) {
     return 'コード $count 件';
   }

@@ -102,6 +102,7 @@ void main() {
               'name': 'ボールペン',
               'sku': 'PEN-001',
               'tracking_mode': 'LOT',
+              'picking_rule': 'FIFO',
               'status': 'active',
               'base_uom': {'id': 1, 'code': 'PCS', 'name': '個'},
               'uoms': [
@@ -147,6 +148,7 @@ void main() {
           final p = products.single;
           expect(p.sku, 'PEN-001');
           expect(p.trackingMode, TrackingMode.lot);
+          expect(p.pickingRule, 'FIFO');
           expect(p.trackingMode.tracksLot, isTrue);
           expect(p.trackingMode.tracksSerial, isFalse);
           expect(p.baseUom?.code, 'PCS');
@@ -179,6 +181,7 @@ void main() {
           final p = products.single;
           expect(p.sku, isNull);
           expect(p.trackingMode, TrackingMode.untracked);
+          expect(p.pickingRule, 'FEFO');
           expect(p.baseUom, isNull);
           expect(p.uoms, isEmpty);
           expect(p.barcodes, isEmpty);
@@ -227,6 +230,38 @@ void main() {
       final body = captured.data as Map;
       expect(body['p_sku'], isNull);
       expect(body['p_tracking_mode'], 'EXPIRY');
+    });
+
+    test('setPickingRule() posts the product\'s own default to set_picking_rule',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        // set_picking_rule returns jsonb (product_id/warehouse_id/rule/
+        // effective), not a boolean — the client only cares that the call
+        // succeeded, so the body content itself is not asserted here.
+        return jsonResponseBody({
+          'product_id': 7,
+          'warehouse_id': null,
+          'rule': 'FIFO',
+          'effective': 'FIFO',
+        }, 200);
+      });
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.setPickingRule(productId: 7, rule: 'FIFO');
+
+      expect(captured.path, '/rpc/set_picking_rule');
+      final body = captured.data as Map;
+      expect(body['p_product_id'], 7);
+      // No warehouse override from this call — it sets the product's own
+      // default, the same shape identity's own edit does.
+      expect(body['p_warehouse_id'], isNull);
+      expect(body['p_rule'], 'FIFO');
+      result.when(
+        success: (ok) => expect(ok, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
     });
 
     test('addBarcode() names the unit, which makes the conversion authoritative',

@@ -40,3 +40,13 @@ String putawayRuleLabel(AppLocalizations l10n, String rule) => switch (rule) {
       'NEAREST_EMPTY' => l10n.putawayNearestEmpty,
       _ => rule,
     };
+
+/// Localized name for a picking rule (0074, §16) — the draw order
+/// `pick_candidates` advises in, and what an operator sets here in advance.
+String pickingRuleLabel(AppLocalizations l10n, String rule) => switch (rule) {
+      'FIFO' => l10n.pickRuleFifo,
+      'FEFO' => l10n.pickRuleFefo,
+      'LIFO' => l10n.pickRuleLifo,
+      'MANUAL' => l10n.pickRuleManual,
+      _ => rule,
+    };

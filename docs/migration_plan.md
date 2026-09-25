@@ -3758,6 +3758,41 @@ resolve empty — when a box holds two lots of the same JAN rather than naming
 only the first and mislabelling the rest. Two new tests in
 `shipment_print_test.dart` pin both cases down directly.
 
+### 0080 — the last one: a setting with no way to read what it currently is
+
+Cross-checking every RPC 0073–0079 built against what the client calls (the
+same pass that found 0079's and the label's gaps) turned up the last one:
+`set_picking_rule` (0074, §16) has never had any client anywhere — not the
+read side either. `list_products`, the one read the product screens use,
+never learned to return `picking_rule`, so a settings form could not have
+shown the current value even if it called the setter blindly.
+
+0080 adds `'picking_rule', p.picking_rule` to `list_products`'s existing
+`jsonb_build_object` — one field, no grant or policy change, so it touches
+none of `verify_security.sql`'s ten checks (confirmed: 18/18 after applying
+it live). Same shape as 0079: a migration written to unblock the client
+slice it was found while building, not a separate ask.
+
+`Product` gained `pickingRule` (defaulting to `'FEFO'`, same as the column
+and `picking_rule_for`'s own fallback), and `ProductRepository.setPickingRule`
+sets the product's own default — `p_warehouse_id` is always null from this
+call, leaving a per-warehouse override for later, the same gap
+`putawayRule`'s per-warehouse-only setting doesn't have to solve on day one
+either. `ProductFormSheet` gained a `pickingRuleLabel`'d dropdown
+(FIFO/FEFO/LIFO/MANUAL) next to tracking mode, saved through its own call
+only when it actually changed — the same "identity is a second decision"
+shape 0057's SKU/tracking-mode split already established, not a fourth
+special case invented for this field.
+
+Tested at both layers: `product_repository_test.dart` asserts `list()` reads
+`picking_rule` (and still defaults a payload that predates it to `'FEFO'`),
+and `set_picking_rule`'s call shape (`p_warehouse_id` null, no boolean
+response assumed — the RPC returns jsonb); `product_form_sheet_test.dart`
+asserts the rule is saved through its own RPC only when changed, mirroring
+the existing identity tests exactly.
+
+With this, every RPC Phase C (0073–0080) built is reachable from the UI.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

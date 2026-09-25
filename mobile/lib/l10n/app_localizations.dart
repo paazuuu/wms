@@ -5350,6 +5350,42 @@ abstract class AppLocalizations {
   /// **'基本単位'**
   String get productBaseUnit;
 
+  /// Product master: the default picking draw order (0074, §16).
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング順序'**
+  String get productPickingRule;
+
+  /// Product master: picking rule field helper text.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫からどの順で取るかの初期設定です。倉庫ごとの上書きは別途設定できます。'**
+  String get productPickingRuleHint;
+
+  /// Picking rule FIFO.
+  ///
+  /// In ja, this message translates to:
+  /// **'先入先出（FIFO）'**
+  String get pickRuleFifo;
+
+  /// Picking rule FEFO.
+  ///
+  /// In ja, this message translates to:
+  /// **'期限が近い順（FEFO）'**
+  String get pickRuleFefo;
+
+  /// Picking rule LIFO.
+  ///
+  /// In ja, this message translates to:
+  /// **'後入先出（LIFO）'**
+  String get pickRuleLifo;
+
+  /// Picking rule MANUAL: no automatic suggestion.
+  ///
+  /// In ja, this message translates to:
+  /// **'都度選択（MANUAL）'**
+  String get pickRuleManual;
+
   /// Product master: how many barcodes resolve to this product.
   ///
   /// In ja, this message translates to:

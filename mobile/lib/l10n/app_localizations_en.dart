@@ -2841,6 +2841,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productBaseUnit => 'Base unit';
 
   @override
+  String get productPickingRule => 'Picking order';
+
+  @override
+  String get productPickingRuleHint =>
+      'The default order stock is drawn from. A warehouse can override this separately.';
+
+  @override
+  String get pickRuleFifo => 'First in, first out (FIFO)';
+
+  @override
+  String get pickRuleFefo => 'Soonest expiry first (FEFO)';
+
+  @override
+  String get pickRuleLifo => 'Last in, first out (LIFO)';
+
+  @override
+  String get pickRuleManual => 'Chosen each time (MANUAL)';
+
+  @override
   String productCodeCount(int count) {
     return '$count codes';
   }

@@ -2763,6 +2763,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productBaseUnit => '基本单位';
 
   @override
+  String get productPickingRule => '拣货顺序';
+
+  @override
+  String get productPickingRuleHint => '库存的默认领用顺序。仓库可单独覆盖此设置。';
+
+  @override
+  String get pickRuleFifo => '先进先出（FIFO）';
+
+  @override
+  String get pickRuleFefo => '效期优先（FEFO）';
+
+  @override
+  String get pickRuleLifo => '后进先出（LIFO）';
+
+  @override
+  String get pickRuleManual => '每次手动选择（MANUAL）';
+
+  @override
   String productCodeCount(int count) {
     return '$count 个条码';
   }

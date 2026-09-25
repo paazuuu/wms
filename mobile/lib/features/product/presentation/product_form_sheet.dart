@@ -40,6 +40,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       TextEditingController(text: widget.product?.sku ?? '');
   late TrackingMode _tracking =
       widget.product?.trackingMode ?? TrackingMode.untracked;
+  late String _pickingRule = widget.product?.pickingRule ?? 'FEFO';
   bool _busy = false;
   String? _error;
   String? _scanWarning;
@@ -149,6 +150,18 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     }
 
+    // §16's default draw order — its own call for the same reason identity is:
+    // a different decision from the name/price/category `update`/`create` set.
+    final pickingRuleChanged =
+        _pickingRule != (widget.product?.pickingRule ?? 'FEFO');
+    if (errorMessage == null && productId != null && pickingRuleChanged) {
+      final result = await repo.setPickingRule(
+        productId: productId!,
+        rule: _pickingRule,
+      );
+      result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+    }
+
     if (!mounted) return;
     setState(() {
       _busy = false;
@@ -243,6 +256,26 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
                   ? null
                   : (mode) => setState(
                       () => _tracking = mode ?? TrackingMode.untracked),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // §16's default draw order (0074) — a warehouse can still override
+            // it (`warehouse_products.picking_rule`); this sets the fallback.
+            DropdownButtonFormField<String>(
+              initialValue: _pickingRule,
+              decoration: InputDecoration(
+                labelText: l10n.productPickingRule,
+                helperText: l10n.productPickingRuleHint,
+              ),
+              items: [
+                for (final rule in const ['FIFO', 'FEFO', 'LIFO', 'MANUAL'])
+                  DropdownMenuItem(
+                    value: rule,
+                    child: Text(pickingRuleLabel(l10n, rule)),
+                  ),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (rule) => setState(() => _pickingRule = rule ?? 'FEFO'),
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(

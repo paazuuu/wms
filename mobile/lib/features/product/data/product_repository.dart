@@ -42,6 +42,14 @@ abstract class ProductRepository {
     TrackingMode? trackingMode,
   });
 
+  /// `set_picking_rule` (0074, §16). Sets the product's own default —
+  /// [warehouseId] is left for a later per-warehouse override, the same shape
+  /// [setWarehouseProduct]'s `putawayRule` already has for put-away.
+  Future<ApiResult<bool>> setPickingRule({
+    required int productId,
+    required String rule,
+  });
+
   /// `add_product_barcode` (0057, extended in 0059). Naming a unit makes the
   /// product's own conversion authoritative for how much one scan means, so
   /// `quantityPerScan` is only read when [uomCode] is null.
@@ -208,6 +216,23 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_tracking_mode': trackingMode?.code,
       });
       return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setPickingRule({
+    required int productId,
+    required String rule,
+  }) async {
+    try {
+      await _dio.post('/rpc/set_picking_rule', data: {
+        'p_product_id': productId,
+        'p_warehouse_id': null,
+        'p_rule': rule,
+      });
+      return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
     }

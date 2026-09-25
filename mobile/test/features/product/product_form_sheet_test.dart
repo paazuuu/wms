@@ -126,6 +126,48 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
+  testWidgets('the picking rule is saved through its own set_picking_rule call',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pumpSheet(tester, repo,
+        product: const Product(
+            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('先入先出（FIFO）').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastPickingRule, (productId: 1, rule: 'FIFO'));
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('editing only the name sends no picking rule call',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pumpSheet(tester, repo,
+        product: const Product(
+            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+
+    await tester.enterText(
+        find.widgetWithText(TextField, '商品名'), 'ボールペン（黒）');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastPickingRule, isNull);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets("an existing product's fixed JAN offers no scan button",
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1400));

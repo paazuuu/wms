@@ -1401,6 +1401,30 @@
   "@productBaseUnit": {
     "description": "Product master: the unit on-hand quantities are counted in (0059)."
   },
+  "productPickingRule": "ピッキング順序",
+  "@productPickingRule": {
+    "description": "Product master: the default picking draw order (0074, §16)."
+  },
+  "productPickingRuleHint": "在庫からどの順で取るかの初期設定です。倉庫ごとの上書きは別途設定できます。",
+  "@productPickingRuleHint": {
+    "description": "Product master: picking rule field helper text."
+  },
+  "pickRuleFifo": "先入先出（FIFO）",
+  "@pickRuleFifo": {
+    "description": "Picking rule FIFO."
+  },
+  "pickRuleFefo": "期限が近い順（FEFO）",
+  "@pickRuleFefo": {
+    "description": "Picking rule FEFO."
+  },
+  "pickRuleLifo": "後入先出（LIFO）",
+  "@pickRuleLifo": {
+    "description": "Picking rule LIFO."
+  },
+  "pickRuleManual": "都度選択（MANUAL）",
+  "@pickRuleManual": {
+    "description": "Picking rule MANUAL: no automatic suggestion."
+  },
   "productCodeCount": "コード {count} 件",
   "@productCodeCount": {
     "description": "Product master: how many barcodes resolve to this product.",
