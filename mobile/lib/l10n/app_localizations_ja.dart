@@ -3630,6 +3630,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get receiptAddParcelTooltip => 'パーセルを追加';
+
+  @override
   String get receiptDetailTitle => '入荷明細';
 
   @override

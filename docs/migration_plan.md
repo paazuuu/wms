@@ -3980,6 +3980,43 @@ the note; an empty type vocabulary shows its own message instead of a broken
 dropdown; and cancelling asks first, then sends the id and the reason typed
 in.
 
+### Recording a parcel by hand after a receipt already closed
+
+Continuing the audit past the last round's finds, most of the remaining
+"no client caller" list turned out to be false positives worth naming rather
+than acting on: `carton_detail` is already surfaced through
+`shipment_packing`'s own `jsonb_agg` (the same "called from inside another
+RPC's response" shape `putaway_suggestions` has); `carton_label` duplicates,
+deliberately, what the label-printing code already computes from data the
+shipment screen has already loaded — calling it would be a second network
+round trip for a PDF that has to work offline at the point it prints;
+`pick_candidates` is `pick_task_candidates`'s own internal building block;
+`pick_list_detail` is edge-routed, same as `pick_list_index`.
+
+`record_receipt_item` (0067) was not a false positive. Its own migration
+comment says exactly what it is for: "an operator adding a parcel by hand
+comes through `record_receipt_item`", as distinct from the parcels a
+reconciliation submits in bulk through the edge function. The receipt detail
+screen — read-only until now — is where that hand-add belongs: a parcel
+found on the dock after the count was already turned in, or an item
+mis-scanned and only noticed a day later once someone is looking at the
+receipt.
+
+Adds `DeliveryRepository.recordReceiptItem`, going straight to the guarded
+RPC (`receiving.confirm`, checked in the database, not the edge function —
+the same split the migration's own comment describes) rather than through
+the edge function the bulk-reconcile path uses. The UI reuses `ParcelSheet`
+outright — the same form the reconciliation screen already shows for a
+parcel, sharing its `ReceivedParcel` result type — behind a new "＋" button
+on each receipt line, so a warehouse's whole request boils down to filling
+in the same six fields whether the parcel is going into an open
+reconciliation or being added to one that already closed.
+
+No migration needed. Tested with a repository test pinning the RPC call
+shape, and two widget tests: adding a parcel sends the line id, the quantity
+and the lot typed into the reused sheet; a refused add (permission denied)
+shows the friendly §34 message rather than the raw RPC text.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

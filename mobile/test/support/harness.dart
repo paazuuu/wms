@@ -276,6 +276,44 @@ class FakeDeliveryRepository implements DeliveryRepository {
     if (failWith != null) return ApiFailure(message: failWith!);
     return ApiSuccess(plans.first);
   }
+
+  /// What recordReceiptItem() was last asked to add by hand.
+  ({
+    int reconciliationId,
+    String janCode,
+    int quantity,
+    int? lineId,
+    String? lotCode,
+    String? locationCode,
+  })? lastRecordedItem;
+  String? failRecordItemWith;
+
+  @override
+  Future<ApiResult<bool>> recordReceiptItem({
+    required int reconciliationId,
+    required String janCode,
+    required int quantity,
+    int? lineId,
+    String? lotCode,
+    DateTime? expiry,
+    String? serialNumber,
+    String? locationCode,
+    String? statusCode,
+    String? note,
+  }) async {
+    lastRecordedItem = (
+      reconciliationId: reconciliationId,
+      janCode: janCode,
+      quantity: quantity,
+      lineId: lineId,
+      lotCode: lotCode,
+      locationCode: locationCode,
+    );
+    if (failRecordItemWith != null) {
+      return ApiFailure(message: failRecordItemWith!, statusCode: 400);
+    }
+    return const ApiSuccess(true);
+  }
 }
 
 class FakeDashboardRepository implements DashboardRepository {

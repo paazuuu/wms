@@ -1493,6 +1493,7 @@
   "parcelUnattributed": "未记录 {qty}",
   "parcelOverLine": "包裹合计 {parcelled} 超过计数 {counted}",
   "parcelLotShort": "L:{lot}",
+  "receiptAddParcelTooltip": "添加包裹",
   "receiptDetailTitle": "入库明细",
   "receiptLineNoParcels": "未记录批次或序列号",
   "receiptParcelUnattributed": "未记录批次部分",

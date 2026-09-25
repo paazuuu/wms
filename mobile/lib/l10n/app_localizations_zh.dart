@@ -3623,6 +3623,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get receiptAddParcelTooltip => '添加包裹';
+
+  @override
   String get receiptDetailTitle => '入库明细';
 
   @override

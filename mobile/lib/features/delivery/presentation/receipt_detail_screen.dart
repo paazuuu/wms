@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/delivery_providers.dart';
 import '../domain/receipt_detail.dart';
+import '../domain/reconciliation.dart';
+import 'parcel_sheet.dart';
 
 /// One receipt, read back at all three of §12's levels (0067).
 ///
@@ -21,6 +24,44 @@ class ReceiptDetailScreen extends ConsumerWidget {
   const ReceiptDetailScreen({super.key, required this.reconciliationId});
 
   final int reconciliationId;
+
+  Future<void> _addParcel(
+      BuildContext context, WidgetRef ref, ReceiptLine line) async {
+    final parcel = await showModalBottomSheet<ReceivedParcel>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => ParcelSheet(
+        janCode: line.janCode,
+        productName: line.title,
+      ),
+    );
+    if (parcel == null || !context.mounted) return;
+
+    final l10n = AppLocalizations.of(context);
+    final result =
+        await ref.read(deliveryRepositoryProvider).recordReceiptItem(
+              reconciliationId: reconciliationId,
+              janCode: line.janCode,
+              quantity: parcel.quantity,
+              lineId: line.id,
+              lotCode: parcel.lotCode,
+              expiry: parcel.expiry,
+              serialNumber: parcel.serialNumber,
+              locationCode: parcel.locationCode,
+              statusCode: parcel.statusCode,
+              note: parcel.note,
+            );
+    if (!context.mounted) return;
+    result.when(
+      success: (_) => ref.invalidate(receiptDetailProvider(reconciliationId)),
+      failure: (f) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(humanizeApiErrorMessage(l10n, f.message)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        )),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,7 +88,10 @@ class ReceiptDetailScreen extends ConsumerWidget {
               _Header(receipt: receipt),
               const SizedBox(height: AppSpacing.md),
               for (final line in receipt.lines) ...[
-                _LineCard(line: line),
+                _LineCard(
+                  line: line,
+                  onAddParcel: () => _addParcel(context, ref, line),
+                ),
                 const SizedBox(height: AppSpacing.sm),
               ],
               if (receipt.unlinkedItems.isNotEmpty) ...[
@@ -144,9 +188,10 @@ class _Header extends StatelessWidget {
 }
 
 class _LineCard extends StatelessWidget {
-  const _LineCard({required this.line});
+  const _LineCard({required this.line, required this.onAddParcel});
 
   final ReceiptLine line;
+  final VoidCallback onAddParcel;
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +217,12 @@ class _LineCard extends StatelessWidget {
                   l10n.receiptLinePlannedActual(
                       line.plannedQuantity, line.actualQuantity),
                   style: theme.textTheme.bodyMedium,
+                ),
+                IconButton(
+                  tooltip: l10n.receiptAddParcelTooltip,
+                  icon: const Icon(Icons.add_box_outlined),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onAddParcel,
                 ),
               ],
             ),

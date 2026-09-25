@@ -3727,6 +3727,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get receiptAddParcelTooltip => 'Add a parcel';
+
+  @override
   String get receiptDetailTitle => 'Receipt';
 
   @override

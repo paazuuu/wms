@@ -6892,6 +6892,12 @@ abstract class AppLocalizations {
   /// **'L:{lot}'**
   String parcelLotShort(String lot);
 
+  /// Receipt detail screen: tooltip for adding a parcel to an existing line by hand (record_receipt_item).
+  ///
+  /// In ja, this message translates to:
+  /// **'パーセルを追加'**
+  String get receiptAddParcelTooltip;
+
   /// Title of the receipt detail screen (§12, 0067).
   ///
   /// In ja, this message translates to:

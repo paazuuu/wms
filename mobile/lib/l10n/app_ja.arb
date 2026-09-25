@@ -2679,6 +2679,10 @@
       }
     }
   },
+  "receiptAddParcelTooltip": "パーセルを追加",
+  "@receiptAddParcelTooltip": {
+    "description": "Receipt detail screen: tooltip for adding a parcel to an existing line by hand (record_receipt_item)."
+  },
   "receiptDetailTitle": "入荷明細",
   "@receiptDetailTitle": {
     "description": "Title of the receipt detail screen (§12, 0067)."

@@ -238,6 +238,24 @@ abstract class DeliveryRepository {
   /// Void a receipt: reverse its received quantities and stock, and recompute
   /// the plan status. Returns the updated plan.
   Future<ApiResult<DeliveryPlan>> cancelReceipt(int planId, int receiptId);
+
+  /// `record_receipt_item` — one more parcel added to an existing receipt by
+  /// hand, after reconciliation already closed it. A guarded write straight
+  /// to PostgREST (`receiving.confirm`), distinct from the parcels a
+  /// reconciliation submits through the edge function: this is for the
+  /// carton found on the dock after the count was already turned in.
+  Future<ApiResult<bool>> recordReceiptItem({
+    required int reconciliationId,
+    required String janCode,
+    required int quantity,
+    int? lineId,
+    String? lotCode,
+    DateTime? expiry,
+    String? serialNumber,
+    String? locationCode,
+    String? statusCode,
+    String? note,
+  });
 }
 
 class DeliveryRepositoryImpl implements DeliveryRepository {
@@ -414,6 +432,38 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
           DeliveryPlan.fromJson(response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<DeliveryPlan>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> recordReceiptItem({
+    required int reconciliationId,
+    required String janCode,
+    required int quantity,
+    int? lineId,
+    String? lotCode,
+    DateTime? expiry,
+    String? serialNumber,
+    String? locationCode,
+    String? statusCode,
+    String? note,
+  }) async {
+    try {
+      final response = await _restDio.post('/rpc/record_receipt_item', data: {
+        'p_reconciliation_id': reconciliationId,
+        'p_jan_code': janCode,
+        'p_quantity': quantity,
+        'p_line_id': lineId,
+        'p_lot_code': lotCode,
+        'p_expiry': expiry?.toIso8601String().split('T').first,
+        'p_serial_number': serialNumber,
+        'p_location_code': locationCode,
+        'p_status_code': statusCode,
+        'p_note': note,
+      });
+      return ApiSuccess(response.data != null);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 }

@@ -68,6 +68,21 @@ class _FakeRepo implements DeliveryRepository {
     lastEntries = entries;
     return ApiSuccess(_plan());
   }
+
+  @override
+  Future<ApiResult<bool>> recordReceiptItem({
+    required int reconciliationId,
+    required String janCode,
+    required int quantity,
+    int? lineId,
+    String? lotCode,
+    DateTime? expiry,
+    String? serialNumber,
+    String? locationCode,
+    String? statusCode,
+    String? note,
+  }) async =>
+      const ApiSuccess(true);
 }
 
 DeliveryPlan _plan() => const DeliveryPlan(

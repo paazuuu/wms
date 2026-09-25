@@ -183,4 +183,54 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets(
+      'adding a parcel by hand sends the line, the quantity and the lot',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakeDeliveryRepository([])..detail = _receipt();
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.add_box_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('パーセルを記録'), findsOneWidget);
+    // The product the button was on, so the operator knows what they are
+    // recording without needing to remember the JAN.
+    expect(find.text('ボールペン'), findsWidgets);
+
+    await tester.enterText(find.widgetWithText(TextField, '数量'), '4');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'ロット番号（任意）'), 'L-LATE');
+
+    await tester.tap(find.widgetWithText(FilledButton, 'パーセル追加'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastRecordedItem?.reconciliationId, 12);
+    expect(repo.lastRecordedItem?.janCode, '4901234567890');
+    expect(repo.lastRecordedItem?.lineId, 30);
+    expect(repo.lastRecordedItem?.quantity, 4);
+    expect(repo.lastRecordedItem?.lotCode, 'L-LATE');
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a refused add shows the friendly reason, not the raw RPC text',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakeDeliveryRepository([])
+      ..detail = _receipt()
+      ..failRecordItemWith = 'not permitted: receiving.confirm required';
+    await _pump(tester, repo);
+
+    await tester.tap(find.byIcon(Icons.add_box_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'パーセル追加'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('receiving.confirm'), findsNothing);
+    expect(find.byType(SnackBar), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }

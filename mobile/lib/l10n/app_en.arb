@@ -1493,6 +1493,7 @@
   "parcelUnattributed": "{qty} unattributed",
   "parcelOverLine": "Parcels total {parcelled}, more than the {counted} counted",
   "parcelLotShort": "L:{lot}",
+  "receiptAddParcelTooltip": "Add a parcel",
   "receiptDetailTitle": "Receipt",
   "receiptLineNoParcels": "No lot or serial recorded",
   "receiptParcelUnattributed": "Unattributed",
