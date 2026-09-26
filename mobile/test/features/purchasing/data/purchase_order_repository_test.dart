@@ -212,5 +212,65 @@ void main() {
         failure: (f) => fail('expected success, got $f'),
       );
     });
+
+    test('setLineDemands() drops zero links and reads what moved', () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody({
+          'purchase_order_line_id': 3,
+          'links': 1,
+          'linked_units': 1,
+          'released_units': 3,
+          'reserved_units': 1,
+        }, 200);
+      });
+      final repo = PurchaseOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.setLineDemands(
+          3, [(salesOrderLineId: 10, quantity: 0), (salesOrderLineId: 9, quantity: 1)]);
+
+      expect(captured.path, '/rpc/set_purchase_order_line_demands');
+      final body = captured.data as Map;
+      expect(body['p_purchase_order_line_id'], 3);
+      expect(body['p_demands'], [
+        {'sales_order_line_id': 9, 'quantity': 1}
+      ]);
+      result.when(
+        success: (r) {
+          expect(r.releasedUnits, 3);
+          expect(r.reservedUnits, 1);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('linkCandidates() reads each order line with what is linked and filled', () async {
+      final adapter = FakeHttpClientAdapter((_) => jsonResponseBody([
+            {
+              'sales_order_line_id': 9,
+              'sales_order_id': 7,
+              'so_number': 'SO-000007',
+              'ordered': 5,
+              'promised': 4,
+              'backordered': 1,
+              'on_order': 1,
+              'linked': 1,
+              'filled': 1,
+            }
+          ], 200));
+      final repo = PurchaseOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.linkCandidates(3);
+
+      result.when(
+        success: (rows) {
+          expect(rows.single.linked, 1);
+          expect(rows.single.filled, 1);
+          expect(rows.single.backordered, 1);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
   });
 }

@@ -120,20 +120,47 @@ void main() {
         supplierName: '新東光通商株式会社',
         supplierId: 5,
         warehouseId: 1,
-        lines: const [DemandPurchaseLine(janCode: '4988601001053', quantity: 6)],
+        lines: const [
+          DemandPurchaseLine(
+            janCode: '4988601001053',
+            quantity: 6,
+            demands: [DemandLink(salesOrderLineId: 9, quantity: 4)],
+          ),
+        ],
       );
 
       expect(captured.path, '/rpc/create_purchase_order_from_demand');
       final body = captured.data as Map;
       expect(body['p_supplier_name'], '新東光通商株式会社');
       expect(body['p_supplier_id'], 5);
-      expect((body['p_lines'] as List).single['quantity'], 6);
+      final line = (body['p_lines'] as List).single as Map;
+      expect(line['quantity'], 6);
+      expect(line['demands'], [
+        {'sales_order_line_id': 9, 'quantity': 4}
+      ]);
       result.when(
         success: (created) {
           expect(created.purchaseOrderId, 9);
           expect(created.links, 2);
         },
         failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('defaultDemandLinks skips what free stock and other purchases cover', () {
+      const lines = [
+        OpenDemandLine(salesOrderLineId: 1, salesOrderId: 1, ordered: 5, promised: 3, backordered: 2),
+        OpenDemandLine(
+            salesOrderLineId: 2, salesOrderId: 2, ordered: 7, promised: 0, backordered: 7, onOrder: 4),
+        OpenDemandLine(salesOrderLineId: 3, salesOrderId: 3, ordered: 4, promised: 0, backordered: 4),
+      ];
+      expect(
+        defaultDemandLinks(lines: lines, quantity: 6, freeStock: 2),
+        const [DemandLink(salesOrderLineId: 2, quantity: 3), DemandLink(salesOrderLineId: 3, quantity: 3)],
+      );
+      expect(
+        defaultDemandLinks(lines: lines, quantity: 6, freeStock: 0, taken: const {1: 2}),
+        const [DemandLink(salesOrderLineId: 2, quantity: 3), DemandLink(salesOrderLineId: 3, quantity: 3)],
       );
     });
   });

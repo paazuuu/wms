@@ -42,6 +42,14 @@ abstract class PurchaseOrderRepository {
   /// Attaches a delivery plan that arrived in the supplier's own format
   /// (imported, not created from the order) to the order it delivers (0084).
   Future<ApiResult<bool>> linkDeliveryPlan(int purchaseOrderId, int deliveryPlanId);
+
+  /// The sales-order lines one purchase-order line could be for (0086).
+  Future<ApiResult<List<PurchaseLinkCandidate>>> linkCandidates(int purchaseOrderLineId);
+
+  /// Replaces which sales-order lines a purchase-order line is for, and how
+  /// many of it each. Anything left over is bought ahead (0086).
+  Future<ApiResult<PurchaseLinkResult>> setLineDemands(
+      int purchaseOrderLineId, List<({int salesOrderLineId, int quantity})> demands);
 }
 
 class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
@@ -157,6 +165,46 @@ class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
         'p_delivery_plan_id': deliveryPlanId,
         'p_purchase_order_id': purchaseOrderId,
       });
+
+  @override
+  Future<ApiResult<List<PurchaseLinkCandidate>>> linkCandidates(
+      int purchaseOrderLineId) async {
+    try {
+      final response = await _dio.post('/rpc/purchase_line_demand_candidates',
+          data: {'p_purchase_order_line_id': purchaseOrderLineId});
+      final data = response.data;
+      final rows = data is List
+          ? (data.length == 1 && data.first is List ? data.first as List : data)
+          : const [];
+      return ApiSuccess(rows
+          .whereType<Map>()
+          .map((e) => PurchaseLinkCandidate.fromJson(e.cast<String, dynamic>()))
+          .toList());
+    } on DioException catch (e) {
+      return mapDioError<List<PurchaseLinkCandidate>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<PurchaseLinkResult>> setLineDemands(int purchaseOrderLineId,
+      List<({int salesOrderLineId, int quantity})> demands) async {
+    try {
+      final response = await _dio.post('/rpc/set_purchase_order_line_demands', data: {
+        'p_purchase_order_line_id': purchaseOrderLineId,
+        'p_demands': [
+          for (final d in demands)
+            if (d.quantity > 0)
+              {'sales_order_line_id': d.salesOrderLineId, 'quantity': d.quantity},
+        ],
+      });
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(
+          PurchaseLinkResult.fromJson((json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<PurchaseLinkResult>(e);
+    }
+  }
 
   Future<ApiResult<bool>> _action(String path, Map<String, dynamic> data) async {
     try {

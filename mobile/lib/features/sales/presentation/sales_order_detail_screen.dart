@@ -648,7 +648,12 @@ class _LineCard extends StatelessWidget {
                     for (final po in line.purchaseOrders)
                       ActionChip(
                         avatar: const Icon(Icons.add_shopping_cart_outlined, size: 16),
-                        label: Text('${po.poNumber ?? '#${po.purchaseOrderId}'} ×${po.quantity}'),
+                        label: Text([
+                          po.poNumber ?? '#${po.purchaseOrderId}',
+                          if (po.supplierName.isNotEmpty) po.supplierName,
+                          '×${po.quantity}',
+                          if (po.filled > 0) l10n.poDemandFilled(po.filled),
+                        ].join(' ')),
                         onPressed: () => onOpenPurchaseOrder(po.purchaseOrderId),
                       ),
                   ],

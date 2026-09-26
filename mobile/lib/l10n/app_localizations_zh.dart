@@ -4163,4 +4163,140 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reservationManualSubmit => '预留';
+
+  @override
+  String get demandPoNeedSupplier => '请输入供应商';
+
+  @override
+  String demandPoOverLinked(int linked, int quantity) {
+    return '关联 $linked 超过采购数 $quantity';
+  }
+
+  @override
+  String demandPoLineOverLinked(int backordered) {
+    return '超过该订单的欠货 $backordered';
+  }
+
+  @override
+  String demandPoCreateN(int count) {
+    return '创建采购单（$count 家）';
+  }
+
+  @override
+  String demandPoProductHint(int backordered, int toPurchase, int incoming) {
+    return '欠货 $backordered ・需采购 $toPurchase ・在途 $incoming';
+  }
+
+  @override
+  String demandPoProductTotal(int total) {
+    return '该商品采购合计 $total';
+  }
+
+  @override
+  String get demandPoSplitSupplier => '拆分到其他供应商';
+
+  @override
+  String get demandPoRemoveRow => '移除此供应商';
+
+  @override
+  String get demandPoLinksTitle => '本采购用于哪些订单';
+
+  @override
+  String get demandPoAutoLink => '按先后自动分配';
+
+  @override
+  String get demandPoNoWaiting => '没有等待的订单——全部为预购';
+
+  @override
+  String demandPoLineWaiting(int backordered, int onOrder) {
+    return '欠货 $backordered ・采购中 $onOrder';
+  }
+
+  @override
+  String demandPoRowSummary(int linked, int ahead) {
+    return '已关联 $linked ・预购（未关联）$ahead';
+  }
+
+  @override
+  String demandPosCreated(int count) {
+    return '已创建 $count 张采购单';
+  }
+
+  @override
+  String get demandAheadOnly => '仅预购';
+
+  @override
+  String demandIncomingBreakdown(int incoming) {
+    return '在途 $incoming（按供应商）';
+  }
+
+  @override
+  String demandIncomingBreakdownAhead(int incoming, int ahead) {
+    return '在途 $incoming（其中预购 $ahead）';
+  }
+
+  @override
+  String demandIncomingPo(int outstanding) {
+    return '待到 $outstanding';
+  }
+
+  @override
+  String demandIncomingPoAhead(int outstanding, int ahead) {
+    return '待到 $outstanding（预购 $ahead）';
+  }
+
+  @override
+  String get demandIncomingAhead => '预购在途';
+
+  @override
+  String get poLinkEditTitle => '关联销售订单';
+
+  @override
+  String poLinkOverOrdered(int ordered) {
+    return '超过该订单的订购数 $ordered';
+  }
+
+  @override
+  String poLinkSaved(int linked, int reserved, int released) {
+    return '已保存关联（关联 $linked・从到货预留 $reserved・释放 $released）';
+  }
+
+  @override
+  String poLinkLineSummary(int quantity, int received) {
+    return '采购 $quantity ・已到货 $received';
+  }
+
+  @override
+  String get poLinkHint =>
+      '到货会自动预留给已关联的订单。更改关联时，本采购已预留的数量也会随之转移。未关联的数量作为预购库存，留给下一张订单。';
+
+  @override
+  String get poLinkNoCandidates => '没有等待该商品的已批准订单';
+
+  @override
+  String poLinkCandidateStatus(
+      int ordered, int promised, int backordered, int onOrder) {
+    return '订购 $ordered ・已预留 $promised ・欠 $backordered ・采购中 $onOrder';
+  }
+
+  @override
+  String poLinkFilled(int filled) {
+    return '已从本采购到货预留 $filled';
+  }
+
+  @override
+  String get poLinkQuantity => '关联数';
+
+  @override
+  String poLineLinkedAhead(int linked, int ahead) {
+    return '关联订单 $linked ・预购 $ahead';
+  }
+
+  @override
+  String get poLinkEdit => '编辑关联';
+
+  @override
+  String poDemandFilled(int filled) {
+    return '（到货已预留 $filled）';
+  }
 }

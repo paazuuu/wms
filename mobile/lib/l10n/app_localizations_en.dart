@@ -4280,4 +4280,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reservationManualSubmit => 'Reserve';
+
+  @override
+  String get demandPoNeedSupplier => 'Enter a supplier';
+
+  @override
+  String demandPoOverLinked(int linked, int quantity) {
+    return 'Linked $linked is more than the $quantity ordered';
+  }
+
+  @override
+  String demandPoLineOverLinked(int backordered) {
+    return 'More than the $backordered this order is waiting for';
+  }
+
+  @override
+  String demandPoCreateN(int count) {
+    return 'Create purchase orders ($count suppliers)';
+  }
+
+  @override
+  String demandPoProductHint(int backordered, int toPurchase, int incoming) {
+    return 'Backordered $backordered · to buy $toPurchase · incoming $incoming';
+  }
+
+  @override
+  String demandPoProductTotal(int total) {
+    return 'Total for this product $total';
+  }
+
+  @override
+  String get demandPoSplitSupplier => 'Split to another supplier';
+
+  @override
+  String get demandPoRemoveRow => 'Remove this supplier';
+
+  @override
+  String get demandPoLinksTitle => 'Which orders this purchase is for';
+
+  @override
+  String get demandPoAutoLink => 'Split oldest first';
+
+  @override
+  String get demandPoNoWaiting =>
+      'No order is waiting — all of it is bought ahead';
+
+  @override
+  String demandPoLineWaiting(int backordered, int onOrder) {
+    return 'Waiting $backordered · on order $onOrder';
+  }
+
+  @override
+  String demandPoRowSummary(int linked, int ahead) {
+    return 'Linked $linked · bought ahead $ahead';
+  }
+
+  @override
+  String demandPosCreated(int count) {
+    return 'Created $count purchase orders';
+  }
+
+  @override
+  String get demandAheadOnly => 'Bought ahead only';
+
+  @override
+  String demandIncomingBreakdown(int incoming) {
+    return 'Incoming $incoming (by supplier)';
+  }
+
+  @override
+  String demandIncomingBreakdownAhead(int incoming, int ahead) {
+    return 'Incoming $incoming ($ahead bought ahead)';
+  }
+
+  @override
+  String demandIncomingPo(int outstanding) {
+    return '$outstanding to come';
+  }
+
+  @override
+  String demandIncomingPoAhead(int outstanding, int ahead) {
+    return '$outstanding to come ($ahead ahead)';
+  }
+
+  @override
+  String get demandIncomingAhead => 'Bought ahead';
+
+  @override
+  String get poLinkEditTitle => 'Link to sales orders';
+
+  @override
+  String poLinkOverOrdered(int ordered) {
+    return 'More than the $ordered this order asked for';
+  }
+
+  @override
+  String poLinkSaved(int linked, int reserved, int released) {
+    return 'Links saved (linked $linked, reserved from arrivals $reserved, released $released)';
+  }
+
+  @override
+  String poLinkLineSummary(int quantity, int received) {
+    return 'Ordered $quantity · received $received';
+  }
+
+  @override
+  String get poLinkHint =>
+      'Arrived goods are reserved to the linked orders automatically. Changing a link moves what this purchase reserved. Unlinked quantity is bought-ahead stock for whichever order comes next.';
+
+  @override
+  String get poLinkNoCandidates =>
+      'No approved order is waiting for this product';
+
+  @override
+  String poLinkCandidateStatus(
+      int ordered, int promised, int backordered, int onOrder) {
+    return 'Ordered $ordered · reserved $promised · waiting $backordered · on order $onOrder';
+  }
+
+  @override
+  String poLinkFilled(int filled) {
+    return '$filled reserved from this purchase\'s arrivals';
+  }
+
+  @override
+  String get poLinkQuantity => 'Linked';
+
+  @override
+  String poLineLinkedAhead(int linked, int ahead) {
+    return 'Linked to orders $linked · bought ahead $ahead';
+  }
+
+  @override
+  String get poLinkEdit => 'Edit links';
+
+  @override
+  String poDemandFilled(int filled) {
+    return '($filled reserved on arrival)';
+  }
 }

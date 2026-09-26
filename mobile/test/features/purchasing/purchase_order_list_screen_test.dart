@@ -294,4 +294,95 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets(
+      'links are edited after the order exists, and what they leave is bought ahead (0086)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakePurchaseOrderRepository(orders: [
+      const PurchaseOrder(
+        id: 5,
+        status: PurchaseOrderStatus.approved,
+        poNumber: 'PO-000005',
+        supplierName: '新東光通商株式会社',
+        warehouseId: 1,
+        lines: [
+          PurchaseOrderLine(
+            id: 3,
+            janCode: '4988601001053',
+            productName: 'ノート',
+            quantity: 6,
+            planned: 6,
+            received: 6,
+            linked: 3,
+            demands: [
+              PurchaseOrderLineDemand(
+                  salesOrderLineId: 10, salesOrderId: 8, soNumber: 'SO-000008',
+                  customerName: '顧客B', quantity: 3, filled: 3),
+            ],
+          ),
+        ],
+      ),
+    ])
+      ..linkCandidateList = const [
+        PurchaseLinkCandidate(
+            salesOrderLineId: 10, salesOrderId: 8, soNumber: 'SO-000008',
+            customerName: '顧客B', ordered: 3, promised: 3, linked: 3, filled: 3),
+        PurchaseLinkCandidate(
+            salesOrderLineId: 9, salesOrderId: 7, soNumber: 'SO-000007',
+            customerName: '顧客A', ordered: 5, promised: 4, backordered: 1),
+      ]
+      ..linkResult = const PurchaseLinkResult(linkedUnits: 1, reservedUnits: 1, releasedUnits: 3);
+    await _pumpDetail(tester, repo, 5);
+
+    expect(find.text('受注に紐付け 3 ・見込み 3'), findsOneWidget);
+    expect(find.text('SO-000008 顧客B ×3 （入荷分引当 3）'), findsOneWidget);
+
+    await tester.tap(find.text('紐付けを編集'));
+    await tester.pumpAndSettle();
+    expect(find.text('この発注の入荷分から引当済 3'), findsOneWidget);
+
+    // Move the link from B to A.
+    await tester.enterText(find.byKey(const ValueKey('po-link-edit-10')), '');
+    await tester.enterText(find.byKey(const ValueKey('po-link-edit-9')), '1');
+    await tester.pump();
+    expect(find.text('紐付け 1 ・見込み（紐付けなし）5'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastSetDemands!.lineId, 3);
+    expect(repo.lastSetDemands!.demands,
+        [(salesOrderLineId: 10, quantity: 0), (salesOrderLineId: 9, quantity: 1)]);
+    expect(find.text('紐付けを保存しました（紐付け 1・入荷分から引当 1・解除 3）'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a link over the line quantity cannot be saved', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final repo = FakePurchaseOrderRepository(orders: [
+      const PurchaseOrder(
+        id: 6,
+        status: PurchaseOrderStatus.approved,
+        poNumber: 'PO-000006',
+        supplierName: 'X',
+        warehouseId: 1,
+        lines: [PurchaseOrderLine(id: 4, janCode: '4988601001053', quantity: 2)],
+      ),
+    ])
+      ..linkCandidateList = const [
+        PurchaseLinkCandidate(salesOrderLineId: 9, salesOrderId: 7, ordered: 5, backordered: 5),
+      ];
+    await _pumpDetail(tester, repo, 6);
+
+    await tester.tap(find.text('紐付けを編集'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('po-link-edit-9')), '3');
+    await tester.pump();
+
+    expect(find.text('紐付け 3 が発注数 2 を超えています'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, '保存')).onPressed, isNull);
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }

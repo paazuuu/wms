@@ -7822,6 +7822,199 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'引当する'**
   String get reservationManualSubmit;
+
+  /// demandPoNeedSupplier
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先名を入力してください'**
+  String get demandPoNeedSupplier;
+
+  /// demandPoOverLinked
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付け {linked} が発注数 {quantity} を超えています'**
+  String demandPoOverLinked(int linked, int quantity);
+
+  /// demandPoLineOverLinked
+  ///
+  /// In ja, this message translates to:
+  /// **'この注文の受注残 {backordered} を超えています'**
+  String demandPoLineOverLinked(int backordered);
+
+  /// demandPoCreateN
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を作成（{count} 社）'**
+  String demandPoCreateN(int count);
+
+  /// demandPoProductHint
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残 {backordered} ・要発注 {toPurchase} ・入荷予定 {incoming}'**
+  String demandPoProductHint(int backordered, int toPurchase, int incoming);
+
+  /// demandPoProductTotal
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品の発注合計 {total}'**
+  String demandPoProductTotal(int total);
+
+  /// demandPoSplitSupplier
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を分ける'**
+  String get demandPoSplitSupplier;
+
+  /// demandPoRemoveRow
+  ///
+  /// In ja, this message translates to:
+  /// **'この仕入先を外す'**
+  String get demandPoRemoveRow;
+
+  /// demandPoLinksTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注をどの注文に充てるか'**
+  String get demandPoLinksTitle;
+
+  /// demandPoAutoLink
+  ///
+  /// In ja, this message translates to:
+  /// **'古い順に自動で割り振り'**
+  String get demandPoAutoLink;
+
+  /// demandPoNoWaiting
+  ///
+  /// In ja, this message translates to:
+  /// **'待っている注文はありません — すべて見込みになります'**
+  String get demandPoNoWaiting;
+
+  /// demandPoLineWaiting
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残 {backordered} ・発注中 {onOrder}'**
+  String demandPoLineWaiting(int backordered, int onOrder);
+
+  /// demandPoRowSummary
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付け {linked} ・見込み（紐付けなし）{ahead}'**
+  String demandPoRowSummary(int linked, int ahead);
+
+  /// demandPosCreated
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を {count} 件作成しました'**
+  String demandPosCreated(int count);
+
+  /// demandAheadOnly
+  ///
+  /// In ja, this message translates to:
+  /// **'見込みのみ'**
+  String get demandAheadOnly;
+
+  /// demandIncomingBreakdown
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定 {incoming}（仕入先別）'**
+  String demandIncomingBreakdown(int incoming);
+
+  /// demandIncomingBreakdownAhead
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定 {incoming}（うち見込み {ahead}）'**
+  String demandIncomingBreakdownAhead(int incoming, int ahead);
+
+  /// demandIncomingPo
+  ///
+  /// In ja, this message translates to:
+  /// **'残 {outstanding}'**
+  String demandIncomingPo(int outstanding);
+
+  /// demandIncomingPoAhead
+  ///
+  /// In ja, this message translates to:
+  /// **'残 {outstanding}（見込み {ahead}）'**
+  String demandIncomingPoAhead(int outstanding, int ahead);
+
+  /// demandIncomingAhead
+  ///
+  /// In ja, this message translates to:
+  /// **'見込み入荷'**
+  String get demandIncomingAhead;
+
+  /// poLinkEditTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'受注との紐付け'**
+  String get poLinkEditTitle;
+
+  /// poLinkOverOrdered
+  ///
+  /// In ja, this message translates to:
+  /// **'この注文の受注数 {ordered} を超えています'**
+  String poLinkOverOrdered(int ordered);
+
+  /// poLinkSaved
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付けを保存しました（紐付け {linked}・入荷分から引当 {reserved}・解除 {released}）'**
+  String poLinkSaved(int linked, int reserved, int released);
+
+  /// poLinkLineSummary
+  ///
+  /// In ja, this message translates to:
+  /// **'発注 {quantity} ・入荷済 {received}'**
+  String poLinkLineSummary(int quantity, int received);
+
+  /// poLinkHint
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷した分は紐付けた注文へ自動で引当てます。紐付けを変えると、この発注から引当てた分も移ります。紐付けない分は見込み在庫として、次の注文に回ります。'**
+  String get poLinkHint;
+
+  /// poLinkNoCandidates
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品を待っている承認済みの受注はありません'**
+  String get poLinkNoCandidates;
+
+  /// poLinkCandidateStatus
+  ///
+  /// In ja, this message translates to:
+  /// **'受注 {ordered} ・引当 {promised} ・残 {backordered} ・発注中 {onOrder}'**
+  String poLinkCandidateStatus(
+      int ordered, int promised, int backordered, int onOrder);
+
+  /// poLinkFilled
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注の入荷分から引当済 {filled}'**
+  String poLinkFilled(int filled);
+
+  /// poLinkQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付け数'**
+  String get poLinkQuantity;
+
+  /// poLineLinkedAhead
+  ///
+  /// In ja, this message translates to:
+  /// **'受注に紐付け {linked} ・見込み {ahead}'**
+  String poLineLinkedAhead(int linked, int ahead);
+
+  /// poLinkEdit
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付けを編集'**
+  String get poLinkEdit;
+
+  /// poDemandFilled
+  ///
+  /// In ja, this message translates to:
+  /// **'（入荷分引当 {filled}）'**
+  String poDemandFilled(int filled);
 }
 
 class _AppLocalizationsDelegate

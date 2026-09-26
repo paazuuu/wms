@@ -12,6 +12,7 @@ import '../../delivery/presentation/reconciliation_screen.dart';
 import '../../sales/presentation/sales_order_detail_screen.dart';
 import '../application/purchase_order_providers.dart';
 import '../domain/purchase_order.dart';
+import 'purchase_link_editor_page.dart';
 import 'purchase_order_status_ui.dart';
 
 /// One purchase order, driven through its state machine one step at a time:
@@ -167,6 +168,18 @@ class _BodyState extends ConsumerState<_Body> {
         .then((_) => _refresh());
   }
 
+  bool get _canEditLinks => ![
+        PurchaseOrderStatus.rejected,
+        PurchaseOrderStatus.cancelled,
+      ].contains(_order.status);
+
+  Future<void> _editLinks(PurchaseOrderLine line) async {
+    final saved = await Navigator.of(context).push<bool>(MaterialPageRoute(
+      builder: (_) => PurchaseLinkEditorPage(line: line),
+    ));
+    if (saved == true) _refresh();
+  }
+
   void _openSalesOrder(int id) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => SalesOrderDetailScreen(salesOrderId: id),
@@ -295,6 +308,7 @@ class _BodyState extends ConsumerState<_Body> {
                           PurchaseOrderStatus.completed,
                         ].contains(_order.status),
                         onOpenSalesOrder: _openSalesOrder,
+                        onEditLinks: _canEditLinks && !_busy ? () => _editLinks(line) : null,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                     ],
@@ -402,11 +416,13 @@ class _LineCard extends StatelessWidget {
     required this.line,
     required this.tracksReceipt,
     required this.onOpenSalesOrder,
+    required this.onEditLinks,
   });
 
   final PurchaseOrderLine line;
   final bool tracksReceipt;
   final ValueChanged<int> onOpenSalesOrder;
+  final VoidCallback? onEditLinks;
 
   @override
   Widget build(BuildContext context) {
@@ -462,10 +478,26 @@ class _LineCard extends StatelessWidget {
                 ],
               ),
             ],
-            if (line.demands.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(l10n.poLineForOrders, style: theme.textTheme.bodySmall),
-              const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    line.unlinked > 0
+                        ? l10n.poLineLinkedAhead(line.linked, line.unlinked)
+                        : l10n.poLineForOrders,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+                if (onEditLinks != null)
+                  TextButton.icon(
+                    onPressed: onEditLinks,
+                    icon: const Icon(Icons.link, size: 18),
+                    label: Text(l10n.poLinkEdit),
+                  ),
+              ],
+            ),
+            if (line.demands.isNotEmpty)
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.xs,
@@ -477,12 +509,12 @@ class _LineCard extends StatelessWidget {
                         d.soNumber ?? '#${d.salesOrderId}',
                         if (d.customerName.isNotEmpty) d.customerName,
                         '×${d.quantity}',
+                        if (d.filled > 0) l10n.poDemandFilled(d.filled),
                       ].join(' ')),
                       onPressed: () => onOpenSalesOrder(d.salesOrderId),
                     ),
                 ],
               ),
-            ],
           ],
         ),
       ),

@@ -3521,5 +3521,270 @@
   "reservationManualSubmit": "引当する",
   "@reservationManualSubmit": {
     "description": "reservationManualSubmit"
+  },
+  "demandPoNeedSupplier": "仕入先名を入力してください",
+  "@demandPoNeedSupplier": {
+    "description": "demandPoNeedSupplier"
+  },
+  "demandPoOverLinked": "紐付け {linked} が発注数 {quantity} を超えています",
+  "@demandPoOverLinked": {
+    "description": "demandPoOverLinked",
+    "placeholders": {
+      "linked": {
+        "type": "int"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoLineOverLinked": "この注文の受注残 {backordered} を超えています",
+  "@demandPoLineOverLinked": {
+    "description": "demandPoLineOverLinked",
+    "placeholders": {
+      "backordered": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoCreateN": "発注を作成（{count} 社）",
+  "@demandPoCreateN": {
+    "description": "demandPoCreateN",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoProductHint": "受注残 {backordered} ・要発注 {toPurchase} ・入荷予定 {incoming}",
+  "@demandPoProductHint": {
+    "description": "demandPoProductHint",
+    "placeholders": {
+      "backordered": {
+        "type": "int"
+      },
+      "toPurchase": {
+        "type": "int"
+      },
+      "incoming": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoProductTotal": "この商品の発注合計 {total}",
+  "@demandPoProductTotal": {
+    "description": "demandPoProductTotal",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoSplitSupplier": "仕入先を分ける",
+  "@demandPoSplitSupplier": {
+    "description": "demandPoSplitSupplier"
+  },
+  "demandPoRemoveRow": "この仕入先を外す",
+  "@demandPoRemoveRow": {
+    "description": "demandPoRemoveRow"
+  },
+  "demandPoLinksTitle": "この発注をどの注文に充てるか",
+  "@demandPoLinksTitle": {
+    "description": "demandPoLinksTitle"
+  },
+  "demandPoAutoLink": "古い順に自動で割り振り",
+  "@demandPoAutoLink": {
+    "description": "demandPoAutoLink"
+  },
+  "demandPoNoWaiting": "待っている注文はありません — すべて見込みになります",
+  "@demandPoNoWaiting": {
+    "description": "demandPoNoWaiting"
+  },
+  "demandPoLineWaiting": "受注残 {backordered} ・発注中 {onOrder}",
+  "@demandPoLineWaiting": {
+    "description": "demandPoLineWaiting",
+    "placeholders": {
+      "backordered": {
+        "type": "int"
+      },
+      "onOrder": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoRowSummary": "紐付け {linked} ・見込み（紐付けなし）{ahead}",
+  "@demandPoRowSummary": {
+    "description": "demandPoRowSummary",
+    "placeholders": {
+      "linked": {
+        "type": "int"
+      },
+      "ahead": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPosCreated": "発注を {count} 件作成しました",
+  "@demandPosCreated": {
+    "description": "demandPosCreated",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandAheadOnly": "見込みのみ",
+  "@demandAheadOnly": {
+    "description": "demandAheadOnly"
+  },
+  "demandIncomingBreakdown": "入荷予定 {incoming}（仕入先別）",
+  "@demandIncomingBreakdown": {
+    "description": "demandIncomingBreakdown",
+    "placeholders": {
+      "incoming": {
+        "type": "int"
+      }
+    }
+  },
+  "demandIncomingBreakdownAhead": "入荷予定 {incoming}（うち見込み {ahead}）",
+  "@demandIncomingBreakdownAhead": {
+    "description": "demandIncomingBreakdownAhead",
+    "placeholders": {
+      "incoming": {
+        "type": "int"
+      },
+      "ahead": {
+        "type": "int"
+      }
+    }
+  },
+  "demandIncomingPo": "残 {outstanding}",
+  "@demandIncomingPo": {
+    "description": "demandIncomingPo",
+    "placeholders": {
+      "outstanding": {
+        "type": "int"
+      }
+    }
+  },
+  "demandIncomingPoAhead": "残 {outstanding}（見込み {ahead}）",
+  "@demandIncomingPoAhead": {
+    "description": "demandIncomingPoAhead",
+    "placeholders": {
+      "outstanding": {
+        "type": "int"
+      },
+      "ahead": {
+        "type": "int"
+      }
+    }
+  },
+  "demandIncomingAhead": "見込み入荷",
+  "@demandIncomingAhead": {
+    "description": "demandIncomingAhead"
+  },
+  "poLinkEditTitle": "受注との紐付け",
+  "@poLinkEditTitle": {
+    "description": "poLinkEditTitle"
+  },
+  "poLinkOverOrdered": "この注文の受注数 {ordered} を超えています",
+  "@poLinkOverOrdered": {
+    "description": "poLinkOverOrdered",
+    "placeholders": {
+      "ordered": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkSaved": "紐付けを保存しました（紐付け {linked}・入荷分から引当 {reserved}・解除 {released}）",
+  "@poLinkSaved": {
+    "description": "poLinkSaved",
+    "placeholders": {
+      "linked": {
+        "type": "int"
+      },
+      "reserved": {
+        "type": "int"
+      },
+      "released": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkLineSummary": "発注 {quantity} ・入荷済 {received}",
+  "@poLinkLineSummary": {
+    "description": "poLinkLineSummary",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "received": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkHint": "入荷した分は紐付けた注文へ自動で引当てます。紐付けを変えると、この発注から引当てた分も移ります。紐付けない分は見込み在庫として、次の注文に回ります。",
+  "@poLinkHint": {
+    "description": "poLinkHint"
+  },
+  "poLinkNoCandidates": "この商品を待っている承認済みの受注はありません",
+  "@poLinkNoCandidates": {
+    "description": "poLinkNoCandidates"
+  },
+  "poLinkCandidateStatus": "受注 {ordered} ・引当 {promised} ・残 {backordered} ・発注中 {onOrder}",
+  "@poLinkCandidateStatus": {
+    "description": "poLinkCandidateStatus",
+    "placeholders": {
+      "ordered": {
+        "type": "int"
+      },
+      "promised": {
+        "type": "int"
+      },
+      "backordered": {
+        "type": "int"
+      },
+      "onOrder": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkFilled": "この発注の入荷分から引当済 {filled}",
+  "@poLinkFilled": {
+    "description": "poLinkFilled",
+    "placeholders": {
+      "filled": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkQuantity": "紐付け数",
+  "@poLinkQuantity": {
+    "description": "poLinkQuantity"
+  },
+  "poLineLinkedAhead": "受注に紐付け {linked} ・見込み {ahead}",
+  "@poLineLinkedAhead": {
+    "description": "poLineLinkedAhead",
+    "placeholders": {
+      "linked": {
+        "type": "int"
+      },
+      "ahead": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkEdit": "紐付けを編集",
+  "@poLinkEdit": {
+    "description": "poLinkEdit"
+  },
+  "poDemandFilled": "（入荷分引当 {filled}）",
+  "@poDemandFilled": {
+    "description": "poDemandFilled",
+    "placeholders": {
+      "filled": {
+        "type": "int"
+      }
+    }
   }
 }

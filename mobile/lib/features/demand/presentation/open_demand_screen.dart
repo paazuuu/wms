@@ -15,6 +15,7 @@ import '../../sales/presentation/sales_order_detail_screen.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/demand_providers.dart';
 import '../domain/open_demand.dart';
+import 'purchase_from_demand_page.dart';
 
 /// The purchasing worklist for an order-first warehouse (0084): every product
 /// approved sales orders are still waiting for, how much free stock can cover
@@ -118,34 +119,47 @@ class _OpenDemandScreenState extends ConsumerState<OpenDemandScreen> {
     final chosen = items.where((i) => _selected.contains(i.productId)).toList();
     if (chosen.isEmpty) return;
 
-    final draft = await showDialog<_PurchaseDraft>(
-      context: context,
-      builder: (_) => _PurchaseFromDemandDialog(items: chosen),
+    final drafts = await Navigator.of(context).push<List<SupplierPurchaseDraft>>(
+      MaterialPageRoute(builder: (_) => PurchaseFromDemandPage(items: chosen)),
     );
-    if (draft == null || !mounted) return;
+    if (drafts == null || drafts.isEmpty || !mounted) return;
 
     setState(() => _busy = true);
-    final result = await ref.read(demandRepositoryProvider).createPurchaseOrder(
-          supplierName: draft.supplierName,
-          supplierId: draft.supplierId,
-          warehouseId: warehouseId,
-          lines: draft.lines,
-        );
+    final repo = ref.read(demandRepositoryProvider);
+    final created = <int>[];
+    String? error;
+    // One purchase order per supplier; a failure stops the rest so nothing is
+    // half-created silently.
+    for (final draft in drafts) {
+      final result = await repo.createPurchaseOrder(
+        supplierName: draft.supplierName,
+        supplierId: draft.supplierId,
+        warehouseId: warehouseId,
+        lines: draft.lines,
+      );
+      result.when(
+        success: (r) => created.add(r.purchaseOrderId),
+        failure: (f) => error = f.message,
+      );
+      if (error != null) break;
+    }
     if (!mounted) return;
     setState(() => _busy = false);
-    result.when(
-      success: (created) {
-        _selected.clear();
-        _refresh();
-        ref.invalidate(purchaseOrderListProvider);
-        _snack(l10n.demandPoCreated(created.links));
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) =>
-              PurchaseOrderDetailScreen(purchaseOrderId: created.purchaseOrderId),
-        ));
-      },
-      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
-    );
+    if (created.isNotEmpty) {
+      _selected.clear();
+      _refresh();
+      ref.invalidate(purchaseOrderListProvider);
+    }
+    if (error != null) {
+      _snack(humanizeApiErrorMessage(l10n, error!), danger: true);
+      return;
+    }
+    _snack(l10n.demandPosCreated(created.length));
+    if (created.length == 1) {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => PurchaseOrderDetailScreen(purchaseOrderId: created.single),
+      ));
+    }
   }
 
   @override
@@ -273,6 +287,10 @@ class _Summary extends StatelessWidget {
                     value: nf.format(sum((i) => i.incoming)))),
             Expanded(
                 child: _Figure(
+                    label: l10n.demandIncomingAhead,
+                    value: nf.format(sum((i) => i.incomingUnlinked)))),
+            Expanded(
+                child: _Figure(
                     label: l10n.demandToPurchase,
                     value: nf.format(sum((i) => i.toPurchase)),
                     emphasize: sum((i) => i.toPurchase) > 0)),
@@ -307,11 +325,13 @@ class _DemandCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final nf = NumberFormat.decimalPattern();
 
-    final (tone, pill) = item.toPurchase > 0
-        ? (StatusTone.warning, l10n.demandNeedsPurchase(item.toPurchase))
-        : item.canFillNow > 0
-            ? (StatusTone.info, l10n.demandFillable(item.canFillNow))
-            : (StatusTone.success, l10n.demandCovered);
+    final (tone, pill) = item.isAheadOnly
+        ? (StatusTone.neutral, l10n.demandAheadOnly)
+        : item.toPurchase > 0
+            ? (StatusTone.warning, l10n.demandNeedsPurchase(item.toPurchase))
+            : item.canFillNow > 0
+                ? (StatusTone.info, l10n.demandFillable(item.canFillNow))
+                : (StatusTone.success, l10n.demandCovered);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -370,6 +390,34 @@ class _DemandCard extends StatelessWidget {
               ],
             ),
           ),
+          if (item.incomingOrders.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.incomingUnlinked > 0
+                        ? l10n.demandIncomingBreakdownAhead(item.incoming, item.incomingUnlinked)
+                        : l10n.demandIncomingBreakdown(item.incoming),
+                    style: theme.textTheme.labelMedium,
+                  ),
+                  for (final po in item.incomingOrders)
+                    Text(
+                      [
+                        po.poNumber ?? '#${po.purchaseOrderId}',
+                        if (po.supplierName.isNotEmpty) po.supplierName,
+                        po.unlinked > 0
+                            ? l10n.demandIncomingPoAhead(po.outstanding, po.unlinked)
+                            : l10n.demandIncomingPo(po.outstanding),
+                      ].join(' · '),
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                ],
+              ),
+            ),
           if (item.preferredSupplierName != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -388,6 +436,9 @@ class _DemandCard extends StatelessWidget {
                 label: Text(l10n.demandFillNow(item.canFillNow)),
               ),
             ),
+          if (item.lines.isEmpty)
+            const SizedBox(height: AppSpacing.md)
+          else
           Theme(
             data: theme.copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
@@ -522,167 +573,6 @@ class _QuantityDialogState extends State<_QuantityDialog> {
         FilledButton(
           onPressed: _value == null ? null : () => Navigator.pop(context, _value),
           child: Text(l10n.demandLineFill),
-        ),
-      ],
-    );
-  }
-}
-
-class _PurchaseDraft {
-  const _PurchaseDraft({
-    required this.supplierName,
-    required this.lines,
-    this.supplierId,
-  });
-
-  final String supplierName;
-  final int? supplierId;
-  final List<DemandPurchaseLine> lines;
-}
-
-/// One purchase order for several products, each defaulting to what is still
-/// to buy. Ordering less is allowed on purpose: the rest may be supplied from
-/// somewhere else, and the orders it does not cover simply stay waiting.
-class _PurchaseFromDemandDialog extends StatefulWidget {
-  const _PurchaseFromDemandDialog({required this.items});
-
-  final List<OpenDemandItem> items;
-
-  @override
-  State<_PurchaseFromDemandDialog> createState() =>
-      _PurchaseFromDemandDialogState();
-}
-
-class _PurchaseFromDemandDialogState extends State<_PurchaseFromDemandDialog> {
-  late final String? _preferredName;
-  late final int? _preferredId;
-  late final TextEditingController _supplier;
-  late final List<TextEditingController> _qty;
-
-  @override
-  void initState() {
-    super.initState();
-    final ids = widget.items.map((i) => i.preferredSupplierId).toSet();
-    // Prefill only when every chosen product comes from the same supplier.
-    _preferredId = ids.length == 1 ? ids.first : null;
-    _preferredName = _preferredId == null
-        ? null
-        : widget.items.first.preferredSupplierName;
-    _supplier = TextEditingController(text: _preferredName ?? '');
-    _qty = [
-      for (final i in widget.items)
-        TextEditingController(
-            text: '${i.toPurchase > 0 ? i.toPurchase : i.backordered}'),
-    ];
-  }
-
-  @override
-  void dispose() {
-    _supplier.dispose();
-    for (final c in _qty) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  List<DemandPurchaseLine>? get _lines {
-    final lines = <DemandPurchaseLine>[];
-    for (var i = 0; i < widget.items.length; i++) {
-      final q = int.tryParse(_qty[i].text.trim()) ?? 0;
-      if (q < 0) return null;
-      if (q == 0) continue;
-      final item = widget.items[i];
-      lines.add(DemandPurchaseLine(
-          janCode: item.janCode, productName: item.productName, quantity: q));
-    }
-    return lines.isEmpty ? null : lines;
-  }
-
-  bool get _valid => _supplier.text.trim().isNotEmpty && _lines != null;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    return AlertDialog(
-      title: Text(l10n.demandPoTitle),
-      content: SizedBox(
-        width: 480,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _supplier,
-                decoration: InputDecoration(labelText: l10n.poSupplierName),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(l10n.demandPoHint,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-              const SizedBox(height: AppSpacing.md),
-              for (var i = 0; i < widget.items.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(widget.items[i].displayName,
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
-                            Text(
-                              l10n.demandPoLineHint(widget.items[i].backordered,
-                                  widget.items[i].toPurchase),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      SizedBox(
-                        width: 96,
-                        child: TextField(
-                          key: ValueKey('demand-po-qty-${widget.items[i].productId}'),
-                          controller: _qty[i],
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          decoration: InputDecoration(labelText: l10n.demandQuantity),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.actionCancel),
-        ),
-        FilledButton(
-          onPressed: !_valid
-              ? null
-              : () {
-                  final name = _supplier.text.trim();
-                  Navigator.pop(
-                    context,
-                    _PurchaseDraft(
-                      supplierName: name,
-                      // The partner record only when the name was left as it.
-                      supplierId: name == _preferredName ? _preferredId : null,
-                      lines: _lines!,
-                    ),
-                  );
-                },
-          child: Text(l10n.poCreate),
         ),
       ],
     );

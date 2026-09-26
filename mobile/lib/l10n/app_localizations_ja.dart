@@ -4171,4 +4171,140 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reservationManualSubmit => '引当する';
+
+  @override
+  String get demandPoNeedSupplier => '仕入先名を入力してください';
+
+  @override
+  String demandPoOverLinked(int linked, int quantity) {
+    return '紐付け $linked が発注数 $quantity を超えています';
+  }
+
+  @override
+  String demandPoLineOverLinked(int backordered) {
+    return 'この注文の受注残 $backordered を超えています';
+  }
+
+  @override
+  String demandPoCreateN(int count) {
+    return '発注を作成（$count 社）';
+  }
+
+  @override
+  String demandPoProductHint(int backordered, int toPurchase, int incoming) {
+    return '受注残 $backordered ・要発注 $toPurchase ・入荷予定 $incoming';
+  }
+
+  @override
+  String demandPoProductTotal(int total) {
+    return 'この商品の発注合計 $total';
+  }
+
+  @override
+  String get demandPoSplitSupplier => '仕入先を分ける';
+
+  @override
+  String get demandPoRemoveRow => 'この仕入先を外す';
+
+  @override
+  String get demandPoLinksTitle => 'この発注をどの注文に充てるか';
+
+  @override
+  String get demandPoAutoLink => '古い順に自動で割り振り';
+
+  @override
+  String get demandPoNoWaiting => '待っている注文はありません — すべて見込みになります';
+
+  @override
+  String demandPoLineWaiting(int backordered, int onOrder) {
+    return '受注残 $backordered ・発注中 $onOrder';
+  }
+
+  @override
+  String demandPoRowSummary(int linked, int ahead) {
+    return '紐付け $linked ・見込み（紐付けなし）$ahead';
+  }
+
+  @override
+  String demandPosCreated(int count) {
+    return '発注を $count 件作成しました';
+  }
+
+  @override
+  String get demandAheadOnly => '見込みのみ';
+
+  @override
+  String demandIncomingBreakdown(int incoming) {
+    return '入荷予定 $incoming（仕入先別）';
+  }
+
+  @override
+  String demandIncomingBreakdownAhead(int incoming, int ahead) {
+    return '入荷予定 $incoming（うち見込み $ahead）';
+  }
+
+  @override
+  String demandIncomingPo(int outstanding) {
+    return '残 $outstanding';
+  }
+
+  @override
+  String demandIncomingPoAhead(int outstanding, int ahead) {
+    return '残 $outstanding（見込み $ahead）';
+  }
+
+  @override
+  String get demandIncomingAhead => '見込み入荷';
+
+  @override
+  String get poLinkEditTitle => '受注との紐付け';
+
+  @override
+  String poLinkOverOrdered(int ordered) {
+    return 'この注文の受注数 $ordered を超えています';
+  }
+
+  @override
+  String poLinkSaved(int linked, int reserved, int released) {
+    return '紐付けを保存しました（紐付け $linked・入荷分から引当 $reserved・解除 $released）';
+  }
+
+  @override
+  String poLinkLineSummary(int quantity, int received) {
+    return '発注 $quantity ・入荷済 $received';
+  }
+
+  @override
+  String get poLinkHint =>
+      '入荷した分は紐付けた注文へ自動で引当てます。紐付けを変えると、この発注から引当てた分も移ります。紐付けない分は見込み在庫として、次の注文に回ります。';
+
+  @override
+  String get poLinkNoCandidates => 'この商品を待っている承認済みの受注はありません';
+
+  @override
+  String poLinkCandidateStatus(
+      int ordered, int promised, int backordered, int onOrder) {
+    return '受注 $ordered ・引当 $promised ・残 $backordered ・発注中 $onOrder';
+  }
+
+  @override
+  String poLinkFilled(int filled) {
+    return 'この発注の入荷分から引当済 $filled';
+  }
+
+  @override
+  String get poLinkQuantity => '紐付け数';
+
+  @override
+  String poLineLinkedAhead(int linked, int ahead) {
+    return '受注に紐付け $linked ・見込み $ahead';
+  }
+
+  @override
+  String get poLinkEdit => '紐付けを編集';
+
+  @override
+  String poDemandFilled(int filled) {
+    return '（入荷分引当 $filled）';
+  }
 }

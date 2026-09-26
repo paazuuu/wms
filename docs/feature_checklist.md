@@ -101,6 +101,13 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       in several shipments, only what is promised ships, and a short pick
       goes back to backorder. Client: the 受注残・発注 screen, per-line state on
       sales/purchase order detail, 発注に紐付け on reconciliation
+- [x] Purchase earmarks and 見込み (0086): goods that arrive on a purchase go
+      to the orders it was linked to, automatically at receipt; quantity
+      beyond the links is bought ahead (見込み), counted as incoming and
+      free for the next order once landed; links are edited by hand at
+      creation (per supplier, a product may be split across suppliers) and
+      afterwards from the purchase-order detail; incoming is one total per
+      product across every supplier, broken down per purchase order
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**

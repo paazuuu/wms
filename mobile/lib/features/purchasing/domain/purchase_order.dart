@@ -39,6 +39,7 @@ class PurchaseOrderLine extends Equatable {
     this.unitPrice,
     this.planned = 0,
     this.received = 0,
+    this.linked = 0,
     this.demands = const [],
   });
 
@@ -52,6 +53,9 @@ class PurchaseOrderLine extends Equatable {
   final int planned;
   final int received;
 
+  /// How much of [quantity] is linked to sales orders; the rest is 見込み.
+  final int linked;
+
   /// The sales-order lines this was bought for. One purchase line may cover
   /// many orders, and need not cover any of them in full.
   final List<PurchaseOrderLineDemand> demands;
@@ -59,6 +63,9 @@ class PurchaseOrderLine extends Equatable {
   double get amount => (unitPrice ?? 0) * quantity;
 
   int get unplanned => quantity > planned ? quantity - planned : 0;
+
+  /// Bought ahead of any order.
+  int get unlinked => quantity > linked ? quantity - linked : 0;
 
   factory PurchaseOrderLine.fromJson(Map<String, dynamic> json) => PurchaseOrderLine(
         id: _asInt(json['id']),
@@ -68,6 +75,7 @@ class PurchaseOrderLine extends Equatable {
         unitPrice: _asDouble(json['unit_price']),
         planned: _asInt(json['planned']),
         received: _asInt(json['received']),
+        linked: _asInt(json['linked']),
         demands: (json['demands'] as List?)
                 ?.whereType<Map>()
                 .map((e) =>
@@ -78,7 +86,7 @@ class PurchaseOrderLine extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, janCode, quantity, unitPrice, planned, received, demands];
+      [id, janCode, quantity, unitPrice, planned, received, linked, demands];
 }
 
 /// A sales-order line a purchase-order line was raised for (0084).
@@ -89,6 +97,7 @@ class PurchaseOrderLineDemand extends Equatable {
     required this.quantity,
     this.soNumber,
     this.customerName = '',
+    this.filled = 0,
   });
 
   final int salesOrderLineId;
@@ -97,6 +106,9 @@ class PurchaseOrderLineDemand extends Equatable {
   final String customerName;
   final int quantity;
 
+  /// Promised to that order from what this purchase delivered.
+  final int filled;
+
   factory PurchaseOrderLineDemand.fromJson(Map<String, dynamic> json) =>
       PurchaseOrderLineDemand(
         salesOrderLineId: _asInt(json['sales_order_line_id']),
@@ -104,11 +116,12 @@ class PurchaseOrderLineDemand extends Equatable {
         soNumber: json['so_number'] as String?,
         customerName: (json['customer_name'] ?? '').toString(),
         quantity: _asInt(json['quantity']),
+        filled: _asInt(json['filled']),
       );
 
   @override
   List<Object?> get props =>
-      [salesOrderLineId, salesOrderId, soNumber, customerName, quantity];
+      [salesOrderLineId, salesOrderId, soNumber, customerName, quantity, filled];
 }
 
 /// One delivery plan receiving (part of) a purchase order.
@@ -295,4 +308,85 @@ class DeliveryPlanFromPurchaseOrderResult extends Equatable {
 
   @override
   List<Object?> get props => [deliveryPlanId, lines];
+}
+
+/// A sales-order line one purchase-order line could be linked to
+/// (`purchase_line_demand_candidates`, 0086).
+class PurchaseLinkCandidate extends Equatable {
+  const PurchaseLinkCandidate({
+    required this.salesOrderLineId,
+    required this.salesOrderId,
+    required this.ordered,
+    this.soNumber,
+    this.customerName = '',
+    this.status = '',
+    this.promised = 0,
+    this.backordered = 0,
+    this.onOrder = 0,
+    this.linked = 0,
+    this.filled = 0,
+  });
+
+  final int salesOrderLineId;
+  final int salesOrderId;
+  final String? soNumber;
+  final String customerName;
+  final String status;
+  final int ordered;
+  final int promised;
+  final int backordered;
+
+  /// On order across every purchase, this one included.
+  final int onOrder;
+
+  /// Linked to this purchase-order line now.
+  final int linked;
+
+  /// Already promised to it from what this purchase delivered.
+  final int filled;
+
+  factory PurchaseLinkCandidate.fromJson(Map<String, dynamic> json) =>
+      PurchaseLinkCandidate(
+        salesOrderLineId: _asInt(json['sales_order_line_id']),
+        salesOrderId: _asInt(json['sales_order_id']),
+        soNumber: json['so_number'] as String?,
+        customerName: (json['customer_name'] ?? '').toString(),
+        status: (json['status'] ?? '').toString(),
+        ordered: _asInt(json['ordered']),
+        promised: _asInt(json['promised']),
+        backordered: _asInt(json['backordered']),
+        onOrder: _asInt(json['on_order']),
+        linked: _asInt(json['linked']),
+        filled: _asInt(json['filled']),
+      );
+
+  @override
+  List<Object?> get props =>
+      [salesOrderLineId, salesOrderId, ordered, promised, backordered, onOrder, linked, filled];
+}
+
+/// What `set_purchase_order_line_demands` (0086) changed.
+class PurchaseLinkResult extends Equatable {
+  const PurchaseLinkResult({
+    required this.linkedUnits,
+    this.releasedUnits = 0,
+    this.reservedUnits = 0,
+  });
+
+  final int linkedUnits;
+
+  /// Promised from this purchase to orders that lost their link, given back.
+  final int releasedUnits;
+
+  /// Promised to the new links from what already arrived.
+  final int reservedUnits;
+
+  factory PurchaseLinkResult.fromJson(Map<String, dynamic> json) => PurchaseLinkResult(
+        linkedUnits: _asInt(json['linked_units']),
+        releasedUnits: _asInt(json['released_units']),
+        reservedUnits: _asInt(json['reserved_units']),
+      );
+
+  @override
+  List<Object?> get props => [linkedUnits, releasedUnits, reservedUnits];
 }

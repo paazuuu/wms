@@ -112,23 +112,32 @@ class SalesOrderLinePurchase extends Equatable {
     required this.quantity,
     this.poNumber,
     this.status = '',
+    this.supplierName = '',
+    this.filled = 0,
   });
 
   final int purchaseOrderId;
   final String? poNumber;
   final String status;
+  final String supplierName;
   final int quantity;
+
+  /// Promised to this line from what that purchase delivered (0086).
+  final int filled;
 
   factory SalesOrderLinePurchase.fromJson(Map<String, dynamic> json) =>
       SalesOrderLinePurchase(
         purchaseOrderId: _asInt(json['purchase_order_id']),
         poNumber: json['po_number'] as String?,
         status: (json['status'] ?? '').toString(),
+        supplierName: (json['supplier_name'] ?? '').toString(),
         quantity: _asInt(json['quantity']),
+        filled: _asInt(json['filled']),
       );
 
   @override
-  List<Object?> get props => [purchaseOrderId, poNumber, status, quantity];
+  List<Object?> get props =>
+      [purchaseOrderId, poNumber, status, supplierName, quantity, filled];
 }
 
 /// One shipment made from a sales order. An order may ship in several (0084).

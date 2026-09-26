@@ -4294,6 +4294,91 @@ themselves.
 receipt closed therefore still counts as incoming until the plan is
 reconciled again.
 
+### 0086 — a purchase keeps its word, and stock bought ahead of orders is a plan
+
+0084 linked a purchase-order line to the sales-order lines it was bought for,
+but only as a record. Once goods landed they were free stock like any other,
+handed out oldest-approval-first. The user asked why: the link is a decision
+("this purchase is for customer A"), and quantity bought beyond the orders is
+often deliberate, bought ahead of orders that are expected.
+
+**Arrived goods go to the orders their purchase was linked to.**
+
+- `stock_reservations.purchase_order_line_id` records which purchase a
+  promise came from.
+- `allocate_purchase_line` reconciles one purchase-order line's links with
+  what it has delivered. The links share the receipts in the order they were
+  made. Each link is promised up to its share, limited by the order's
+  backorder and free stock. A share that shrank (a receipt was cancelled)
+  takes promises back.
+- It is idempotent and runs:
+  - at commit of any receipt change, through a *deferred* constraint trigger
+    on `delivery_plan_lines.received_quantity`. It is deferred because
+    `reconcile_delivery_plan` bumps the count before it posts the stock
+    movement.
+  - when a delivery plan is linked to the purchase order;
+  - when the links are edited;
+  - at the start of `approve_sales_order` and `fill_backorders`
+    (`honor_purchase_earmarks`), so goods released from inspection later are
+    not handed to someone else first.
+- Quantity is kept, not parcels: stock is one pool per product whichever
+  supplier sent it, so the shipment draws from the same shelf.
+
+**見込み (bought ahead).**
+
+- Whatever a purchase line's links do not add up to counts as incoming
+  against any order, is shown as 見込み, and once landed is free stock. The
+  next order approved takes it first, which is the point of buying ahead.
+- `open_demand` now also lists products that only have purchases on their
+  way. `incoming` sums every supplier. `incoming_unlinked` is the 見込み part,
+  and `incoming_orders` breaks both down per purchase order and supplier.
+
+**Links are edited by hand.**
+
+- `purchase_line_demand_candidates(line)` lists the orders one purchase line
+  could be for.
+- `set_purchase_order_line_demands(line, demands)` replaces its links. They
+  may add up to less than the line (the rest is 見込み) but never to more;
+  confirmed with the user. Each link is capped at the order line's quantity.
+- Promises from this purchase to an order that lost its link are given back,
+  and the arrived goods are promised to the new links.
+- `create_purchase_order_from_demand` takes explicit links (an empty list
+  means all of it is bought ahead) and applies the same cap.
+
+**Client.**
+
+- 発注を作成 from 受注残・発注 opens a full page instead of a dialog. For
+  each product:
+  - one row per supplier; 仕入先を分ける (split to another supplier) adds
+    another;
+  - each row has a quantity and a quantity per waiting order, prefilled by
+    the oldest-first split that the server would use; 古い順に自動で割り振り
+    (split oldest first) re-runs it for that row's quantity without claiming
+    orders another row already covers;
+  - a live summary: 紐付け x ・見込み y (linked x, bought ahead y).
+- Submitting makes one purchase order per supplier.
+- The demand screen shows each product's incoming per purchase order and
+  supplier, with 見込み.
+- The purchase-order detail shows 受注に紐付け x ・見込み y per line (linked
+  to orders x, bought ahead y), chips with what each order already got from
+  the arrivals, and 紐付けを編集 (edit links), which opens the link editor.
+- Sales-order lines show the supplier on each purchase chip.
+
+**Verified live** (aborted transaction, receipts forced through with
+`set constraints all immediate`):
+
+1. Setup: S1 bought 4 linked to order A (5). S2 bought 6, 3 of them linked
+   to order B (3). Demand showed incoming 10, of which 3 見込み: S1 4 / S2 6
+   (3 見込み). To buy: 0.
+2. S2's 6 landed first. B got its 3 and 3 stayed free. A got nothing,
+   although it is the older order.
+3. New order C (2) was approved and took 2 of the bought-ahead 3.
+4. S1's 4 landed and all went to A.
+5. Moving S2's link from B to A released B's 3 and gave A 1.
+6. Cancelling S1's receipt took A's 4 back.
+7. Linking 5 against a line of 4 was refused.
+8. All 10 security invariants hold. The new helpers are service-role only.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

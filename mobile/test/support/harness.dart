@@ -2332,6 +2332,22 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
 
   ({int purchaseOrderId, int deliveryPlanId})? lastLink;
 
+  List<PurchaseLinkCandidate> linkCandidateList = const [];
+  PurchaseLinkResult linkResult = const PurchaseLinkResult(linkedUnits: 0);
+  ({int lineId, List<({int salesOrderLineId, int quantity})> demands})? lastSetDemands;
+
+  @override
+  Future<ApiResult<List<PurchaseLinkCandidate>>> linkCandidates(
+          int purchaseOrderLineId) async =>
+      ApiSuccess(linkCandidateList);
+
+  @override
+  Future<ApiResult<PurchaseLinkResult>> setLineDemands(int purchaseOrderLineId,
+      List<({int salesOrderLineId, int quantity})> demands) async {
+    lastSetDemands = (lineId: purchaseOrderLineId, demands: demands);
+    return ApiSuccess(linkResult);
+  }
+
   @override
   Future<ApiResult<bool>> linkDeliveryPlan(
       int purchaseOrderId, int deliveryPlanId) async {
