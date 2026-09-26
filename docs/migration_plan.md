@@ -4379,6 +4379,88 @@ often deliberate, bought ahead of orders that are expected.
 7. Linking 5 against a line of 4 was refused.
 8. All 10 security invariants hold. The new helpers are service-role only.
 
+### 0087 — warehouses in two countries, each supplier's name, one downstream slip
+
+**Countries and cross-border transfers.**
+
+- `warehouses.country_code` (default JP) and `receives_cross_border` (default
+  off). They are set through `set_warehouse_role` (warehouse.manage and scope)
+  and read by `warehouse_roles`, because the `warehouses` edge function
+  whitelists the fields it writes.
+- Transfers between two warehouses in the same country are unchanged
+  (0019): TRANSFER_OUT when picking completes, TRANSFER_IN when receiving
+  completes.
+- A transfer across a border to a warehouse that has not opted in is an
+  export. `complete_transfer_picking` debits the source as usual, then closes
+  the transfer as the new status **EXPORTED**. Nothing is received or
+  credited anywhere: once goods cross the border, this system no longer holds
+  them, as the user asked. `start_transfer_receiving` already refuses
+  anything that is not IN_TRANSIT.
+- A foreign warehouse that turns `receives_cross_border` on receives
+  cross-border transfers like any other transfer, holds the stock, and can
+  ship to its own customers through the ordinary sales-order/shipment flow.
+  This is the "later, a China warehouse serving individual customers" case,
+  built as a switch.
+- Shipping from the Japan warehouse straight to a customer in China needs
+  nothing new: it is an ordinary shipment, and stock leaves as always.
+- Transfer detail and index expose both countries, `cross_border` and
+  `exports`, plus the destination's address and phone for the slip.
+
+**Supplier names.**
+
+- `supplier_product_names` holds one name and an optional code per supplier
+  per product. A code is unique per supplier. Reads use RLS; writes go
+  through `set_supplier_product_name` / `remove_supplier_product_name`
+  (product.manage or purchase_order.manage).
+- `list_products` search matches supplier names and codes, and each product
+  row carries its `supplier_names`.
+- On a supplier's delivery plan, a line whose JAN does not resolve is matched
+  by that supplier's code, then by name. A BEFORE INSERT trigger is named to
+  run before `fill_product_id`.
+- The purchase-order detail shows the supplier's own name and code beside
+  our product name.
+
+**One downstream slip.** Audit result:
+
+- Every shipment prints the same 送り状 layout (`ShipmentPrinter`), whether
+  it came from a sales order, an import or manual entry.
+- Two gaps:
+  - transfers printed nothing;
+  - item names were whatever each source document said, so the same product
+    could print under different names depending on how the shipment was made.
+- Now:
+  - one `SlipDocument` model feeds one `slipHtml` layout; shipments and
+    transfers (including exports, which print origin and 仕向国) both use it;
+  - `shipment_lines` and `transfer_order_lines` take the product master's
+    name through a trigger once the JAN resolves, with the original text
+    kept in `source_product_name`, and existing rows were backfilled the same
+    way;
+  - supplier names are never printed downstream.
+
+**Client.**
+
+- Each warehouse card shows its country and a 国・役割 (country and role)
+  dialog.
+- Creating a transfer labels warehouses with their country and warns before
+  a cross-border export.
+- The transfer detail explains an export, confirms with an export-specific
+  message, and prints the 送り状.
+- Transfers have the 国外へ出庫済み (exported) status, and the list has an
+  export badge.
+- The product detail has a 仕入先ごとの呼び名 (supplier names) card; the
+  product list shows supplier names.
+
+**Verified live** (aborted transaction, with a temporary CN warehouse):
+
+1. JP→CN with the switch off: status EXPORTED, JP stock 10→6, CN 0.
+   Receiving was refused.
+2. With the switch on: the transfer went IN_TRANSIT, was received, and CN
+   held 3.
+3. A supplier code and a supplier name each found the product in search.
+4. A delivery line with no JAN and the supplier's code matched the product.
+5. A shipment line printed the master name and kept the order's wording.
+6. All 10 security invariants hold.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

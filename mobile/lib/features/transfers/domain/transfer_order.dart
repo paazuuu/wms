@@ -17,6 +17,10 @@ enum TransferStatus {
   inTransit('IN_TRANSIT'),
   receiving('RECEIVING'),
   completed('COMPLETED'),
+
+  /// Crossed a border to a warehouse that does not receive cross-border
+  /// stock: gone from this system the moment it left the source (0087).
+  exported('EXPORTED'),
   rejected('REJECTED'),
   cancelled('CANCELLED');
 
@@ -30,6 +34,7 @@ enum TransferStatus {
         'IN_TRANSIT' => TransferStatus.inTransit,
         'RECEIVING' => TransferStatus.receiving,
         'COMPLETED' => TransferStatus.completed,
+        'EXPORTED' => TransferStatus.exported,
         'REJECTED' => TransferStatus.rejected,
         'CANCELLED' => TransferStatus.cancelled,
         _ => TransferStatus.draft,
@@ -48,6 +53,7 @@ class TransferLine extends Equatable {
     required this.id,
     required this.janCode,
     this.productName = '',
+    this.sourceProductName,
     required this.requestedQuantity,
     this.pickedQuantity,
     this.pickVariance,
@@ -58,6 +64,9 @@ class TransferLine extends Equatable {
   final int id;
   final String janCode;
   final String productName;
+
+  /// What the request called it, when that differs from our product name.
+  final String? sourceProductName;
   final int requestedQuantity;
   final int? pickedQuantity;
   final int? pickVariance;
@@ -71,6 +80,7 @@ class TransferLine extends Equatable {
         id: _asInt(json['id']),
         janCode: (json['jan_code'] ?? '').toString(),
         productName: json['product_name'] as String? ?? '',
+        sourceProductName: json['source_product_name'] as String?,
         requestedQuantity: _asInt(json['requested_quantity']),
         pickedQuantity: _asIntOrNull(json['picked_quantity']),
         pickVariance: _asIntOrNull(json['pick_variance']),
@@ -98,6 +108,13 @@ class TransferOrder extends Equatable {
     this.receivedAt,
     this.lines = const [],
     this.lineCount,
+    this.sourceCountryCode,
+    this.destinationCountryCode,
+    this.destinationAddress,
+    this.destinationPhone,
+    this.crossBorder = false,
+    this.exports = false,
+    this.exportedAt,
   });
 
   final int id;
@@ -113,6 +130,18 @@ class TransferOrder extends Equatable {
   final DateTime? receivedAt;
   final List<TransferLine> lines;
   final int? lineCount;
+  final String? sourceCountryCode;
+  final String? destinationCountryCode;
+  final String? destinationAddress;
+  final String? destinationPhone;
+
+  /// The two warehouses are in different countries.
+  final bool crossBorder;
+
+  /// Crossing the border takes the goods out of this system: the destination
+  /// has not opted in to receiving them (0087).
+  final bool exports;
+  final DateTime? exportedAt;
 
   int get totalLines => lines.isNotEmpty ? lines.length : (lineCount ?? 0);
   int get pickedLines => lines.where((l) => l.isPicked).length;
@@ -138,10 +167,17 @@ class TransferOrder extends Equatable {
                 .toList() ??
             const [],
         lineCount: _asIntOrNull(json['line_count']),
+        sourceCountryCode: json['source_country_code'] as String?,
+        destinationCountryCode: json['destination_country_code'] as String?,
+        destinationAddress: json['destination_address'] as String?,
+        destinationPhone: json['destination_phone'] as String?,
+        crossBorder: json['cross_border'] == true,
+        exports: json['exports'] == true,
+        exportedAt: DateTime.tryParse('${json['exported_at']}')?.toLocal(),
       );
 
   @override
-  List<Object?> get props => [id, status, lines, lineCount];
+  List<Object?> get props => [id, status, lines, lineCount, crossBorder, exports];
 }
 
 /// What completing receiving actually changed.

@@ -3,6 +3,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/shipment/data/shipment_print.dart';
 import 'package:wms_mobile/features/shipment/domain/shipment.dart';
+import 'package:wms_mobile/features/transfers/domain/transfer_order.dart';
 
 void main() {
   const printer = ShipmentPrinter();
@@ -123,5 +124,41 @@ void main() {
     // The template's own row is dropped entirely, not printed blank.
     final html = printer.cartonLabelHtml(twoLots, twoLots.cartons.first);
     expect(html.contains('ロット'), isFalse);
+  });
+
+  test('a transfer prints the same 送り状 as a shipment, with origin and destination country (0087)', () {
+    final transfer = TransferOrder.fromJson({
+      'id': 3,
+      'transfer_number': 'TR-000003',
+      'source_warehouse_id': 1,
+      'source_warehouse_name': '東京倉庫',
+      'destination_warehouse_id': 2,
+      'destination_warehouse_name': '上海倉庫',
+      'destination_country_code': 'CN',
+      'destination_address': '上海市',
+      'cross_border': true,
+      'exports': true,
+      'status': 'EXPORTED',
+      'shipped_at': '2026-09-26T03:00:00Z',
+      'lines': [
+        {'id': 1, 'jan_code': '4902505632037', 'product_name': 'ボールペン', 'requested_quantity': 10, 'picked_quantity': 8},
+        {'id': 2, 'jan_code': '4900000000000', 'product_name': '消しゴム', 'requested_quantity': 5, 'picked_quantity': 0},
+      ],
+    });
+    final html = printer.transferSlipHtml(transfer);
+    final slip = printer.deliverySlipHtml(shipment);
+
+    // One layout: the same title and table head as a shipment's slip.
+    expect(html.contains('送&nbsp;り&nbsp;状'), isTrue);
+    expect(slip.contains('送&nbsp;り&nbsp;状'), isTrue);
+    expect(html.contains('<th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th>'), isTrue);
+    expect(html.contains('上海倉庫'), isTrue);
+    expect(html.contains('上海市'), isTrue);
+    expect(html.contains('出荷元：東京倉庫'), isTrue);
+    expect(html.contains('仕向国：CN'), isTrue);
+    expect(html.contains('出庫番号：TR-000003'), isTrue);
+    // What actually left: 8, and the line nothing was picked for is left off.
+    expect(html.contains('<td class="num">8</td>'), isTrue);
+    expect(html.contains('消しゴム'), isFalse);
   });
 }

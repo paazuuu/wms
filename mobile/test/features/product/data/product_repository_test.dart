@@ -486,5 +486,55 @@ void main() {
         failure: (f) => fail('expected success, got $f'),
       );
     });
+
+    test('supplierNames()/setSupplierName() reach the 0087 RPCs', () async {
+      final calls = <RequestOptions>[];
+      final adapter = FakeHttpClientAdapter((options) {
+        calls.add(options);
+        if (options.path == '/rpc/list_supplier_product_names') {
+          return jsonResponseBody([
+            {'id': 5, 'supplier_id': 1, 'supplier_display_name': '新東光通商', 'product_id': 2,
+             'jan_code': '4909999999999', 'supplier_code': 'SK-100', 'supplier_name': '大'}
+          ], 200);
+        }
+        return jsonResponseBody(5, 200);
+      });
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final list = await repo.supplierNames(supplierId: 1);
+      final set = await repo.setSupplierName(
+          supplierId: 1, productId: 2, supplierName: '大', supplierCode: 'SK-100');
+
+      expect((calls[0].data as Map)['p_supplier_id'], 1);
+      expect((calls[0].data as Map)['p_product_id'], isNull);
+      list.when(
+        success: (rows) {
+          expect(rows.single.supplierCode, 'SK-100');
+          expect(rows.single.janCode, '4909999999999');
+        },
+        failure: (f) => fail('$f'),
+      );
+      expect(calls[1].path, '/rpc/set_supplier_product_name');
+      expect((calls[1].data as Map)['p_supplier_code'], 'SK-100');
+      set.when(success: (id) => expect(id, 5), failure: (f) => fail('$f'));
+    });
+
+    test('a product row carries what each supplier calls it', () async {
+      final adapter = FakeHttpClientAdapter((_) => jsonResponseBody([
+            {'id': 2, 'jan_code': '4909999999999', 'name': '消しゴム',
+             'supplier_names': [
+               {'supplier_id': 1, 'supplier_display_name': '新東光通商',
+                'supplier_code': 'SK-100', 'supplier_name': 'ケシゴム大'}
+             ]}
+          ], 200));
+      final repo = ProductRepositoryImpl(_dio(adapter));
+
+      final result = await repo.list(search: 'SK-100');
+
+      result.when(
+        success: (rows) => expect(rows.single.supplierNames.single.supplierName, 'ケシゴム大'),
+        failure: (f) => fail('$f'),
+      );
+    });
   });
 }

@@ -4307,4 +4307,104 @@ class AppLocalizationsJa extends AppLocalizations {
   String poDemandFilled(int filled) {
     return '（入荷分引当 $filled）';
   }
+
+  @override
+  String get transferStatusExported => '国外へ出庫済み';
+
+  @override
+  String get transferExportBadge => '国外へ出庫';
+
+  @override
+  String transferCrossBorderExport(String country) {
+    return '$countryへの国をまたぐ転送です。出庫した時点で在庫から除外され、受入はありません。';
+  }
+
+  @override
+  String transferCrossBorderReceived(String country) {
+    return '$countryの倉庫は国外からの受入を行う設定です。通常の転送と同じく受入まで行います。';
+  }
+
+  @override
+  String get transferExportNotice => '国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。';
+
+  @override
+  String get transferCrossBorderReceivedNotice =>
+      '国をまたぐ転送：受け入れ先の倉庫が国外からの受入を行う設定のため、受入まで行います。';
+
+  @override
+  String transferCompletePickingExportBody(String warehouse) {
+    return '$warehouseから出庫し、国外へ送った分として在庫から除外します。この転送は受入なしで完了します。';
+  }
+
+  @override
+  String get whRoleEdit => '国・役割';
+
+  @override
+  String get whRoleSaved => '倉庫の国・役割を保存しました';
+
+  @override
+  String get whRoleCountry => '国';
+
+  @override
+  String get whRoleCountryCode => '国コード（2文字）';
+
+  @override
+  String get whRoleReceivesCrossBorder => '国外からの転送を受け入れて在庫を持つ';
+
+  @override
+  String get whRoleReceivesCrossBorderHint =>
+      'オフのとき、他国の倉庫からこの倉庫への転送は出庫時点で在庫から除外されます。この倉庫から個別のお客さんへ出荷する場合はオンにします。';
+
+  @override
+  String get countryJP => '日本';
+
+  @override
+  String get countryCN => '中国';
+
+  @override
+  String get countryOther => 'その他';
+
+  @override
+  String get supplierNamesSection => '仕入先ごとの呼び名';
+
+  @override
+  String get supplierNamesHint =>
+      '仕入先ごとの商品名・品番を登録すると、その呼び名で検索でき、納品書の照合にも使われます。出荷伝票には自社の商品名が印字されます。';
+
+  @override
+  String get supplierNamesEmpty => 'まだ登録がありません';
+
+  @override
+  String get supplierNameAdd => '呼び名を追加';
+
+  @override
+  String get supplierNameEdit => '呼び名を編集';
+
+  @override
+  String get supplierNameSaved => '呼び名を保存しました';
+
+  @override
+  String get supplierNameNoSuppliers => '先に取引先（仕入先）を登録してください';
+
+  @override
+  String get supplierNameSupplier => '仕入先';
+
+  @override
+  String get supplierNameName => '仕入先での商品名';
+
+  @override
+  String get supplierNameCode => '仕入先での品番（任意）';
+
+  @override
+  String get supplierNameNote => 'メモ（任意）';
+
+  @override
+  String supplierNameCodeLabel(String code) {
+    return '品番 $code';
+  }
+
+  @override
+  String poLineSupplierName(String name) {
+    return '仕入先での呼び名：$name';
+  }
 }

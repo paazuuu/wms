@@ -27,6 +27,8 @@ class TransferStatusUi {
             Icons.move_to_inbox_outlined, StatusTone.warning),
         TransferStatus.completed => TransferStatusUi(
             l10n.transferStatusCompleted, Icons.task_alt, StatusTone.success),
+        TransferStatus.exported => TransferStatusUi(
+            l10n.transferStatusExported, Icons.flight_takeoff, StatusTone.success),
         TransferStatus.rejected =>
           TransferStatusUi(l10n.transferStatusRejected, Icons.block, StatusTone.danger),
         TransferStatus.cancelled =>

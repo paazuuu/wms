@@ -156,4 +156,48 @@ void main() {
 
     expect(find.text('中止'), findsOneWidget);
   });
+
+  testWidgets(
+      'a cross-border transfer says the goods leave stock, and closes as exported on shipping (0087)',
+      (tester) async {
+    final repo = FakeTransferRepository(
+      order: const TransferOrder(
+        id: 7,
+        transferNumber: 'TR-000007',
+        sourceWarehouseId: 1,
+        sourceWarehouseName: '東京倉庫',
+        destinationWarehouseId: 2,
+        destinationWarehouseName: '上海倉庫',
+        status: TransferStatus.picking,
+        sourceCountryCode: 'JP',
+        destinationCountryCode: 'CN',
+        crossBorder: true,
+        exports: true,
+        lines: [
+          TransferLine(
+              id: 31, janCode: '4901234567894', productName: 'ボールペン',
+              requestedQuantity: 20, pickedQuantity: 20),
+        ],
+      ),
+    );
+
+    await pumpApp(
+      tester,
+      const TransferDetailScreen(transferId: 7),
+      overrides: [transferRepositoryProvider.overrideWithValue(repo)],
+    );
+
+    expect(find.text('国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, '出庫を確定'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('受入なしで完了します'), findsOneWidget);
+    await tester.tap(find.descendant(
+        of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '出庫を確定')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('国外へ出庫済み'), findsOneWidget);
+    // Nothing is left to do: no receiving step for an export.
+    expect(find.widgetWithText(FilledButton, '受入を開始'), findsNothing);
+  });
 }

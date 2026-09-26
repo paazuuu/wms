@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'supplier_product_name.dart';
+
 int _asInt(dynamic v) =>
     v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
 
@@ -147,6 +149,7 @@ class Product extends Equatable {
     this.baseUom,
     this.uoms = const [],
     this.barcodes = const [],
+    this.supplierNames = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -174,6 +177,9 @@ class Product extends Equatable {
   final Uom? baseUom;
   final List<ProductUom> uoms;
   final List<ProductBarcode> barcodes;
+
+  /// What each supplier calls this product (0087).
+  final List<SupplierProductName> supplierNames;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -213,6 +219,7 @@ class Product extends Equatable {
             : null,
         uoms: _list(json['uoms'], ProductUom.fromJson),
         barcodes: _list(json['barcodes'], ProductBarcode.fromJson),
+        supplierNames: _list(json['supplier_names'], SupplierProductName.fromJson),
         createdAt: DateTime.tryParse('${json['created_at']}')?.toLocal(),
         updatedAt: DateTime.tryParse('${json['updated_at']}')?.toLocal(),
       );

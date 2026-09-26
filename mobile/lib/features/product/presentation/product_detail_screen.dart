@@ -15,6 +15,7 @@ import '../domain/warehouse_product.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
+import 'supplier_names_card.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
 /// units (0059), its lots and serials (0060), and how this warehouse handles it
@@ -73,6 +74,7 @@ class ProductDetailScreen extends ConsumerWidget {
               ref.invalidate(productLotsProvider(productId));
               ref.invalidate(productSerialsProvider(productId));
               ref.invalidate(warehouseProductProvider(productId));
+              ref.invalidate(productSupplierNamesProvider(productId));
             },
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -82,6 +84,8 @@ class ProductDetailScreen extends ConsumerWidget {
                 _BarcodesCard(product: product, onMessage: _snack),
                 const SizedBox(height: AppSpacing.md),
                 _UnitsCard(product: product, onMessage: _snack),
+                const SizedBox(height: AppSpacing.md),
+                SupplierNamesCard(product: product),
                 if (product.trackingMode.tracksLot) ...[
                   const SizedBox(height: AppSpacing.md),
                   _LotsCard(productId: productId),

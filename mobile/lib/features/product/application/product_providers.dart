@@ -6,6 +6,7 @@ import '../data/product_repository.dart';
 import '../domain/data_quality.dart';
 import '../domain/product.dart';
 import '../domain/product_lot.dart';
+import '../domain/supplier_product_name.dart';
 import '../domain/warehouse_product.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
@@ -107,6 +108,25 @@ final productListProvider =
       );
   return result.when(
     success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// What each supplier calls one product (0087).
+final productSupplierNamesProvider = FutureProvider.autoDispose
+    .family<List<SupplierProductName>, int>((ref, productId) async {
+  final result =
+      await ref.watch(productRepositoryProvider).supplierNames(productId: productId);
+  return result.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+/// What one supplier calls each of our products, by JAN (0087).
+final supplierNamesBySupplierProvider = FutureProvider.autoDispose
+    .family<Map<String, SupplierProductName>, int>((ref, supplierId) async {
+  final result =
+      await ref.watch(productRepositoryProvider).supplierNames(supplierId: supplierId);
+  return result.when(
+    success: (rows) => {for (final r in rows) if (r.janCode != null) r.janCode!: r},
     failure: (f) => throw Exception(f.message),
   );
 });

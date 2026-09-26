@@ -4,7 +4,104 @@ import 'package:printing/printing.dart';
 import '../domain/carton.dart';
 import '../domain/label_template.dart';
 import '../domain/sender_profile.dart';
+import '../../transfers/domain/transfer_order.dart';
 import '../domain/shipment.dart';
+
+/// One line of a downstream slip.
+class SlipLine {
+  const SlipLine({
+    required this.janCode,
+    required this.productName,
+    required this.quantity,
+    this.spec,
+    this.unitPrice,
+    this.amount,
+  });
+
+  final String janCode;
+  final String productName;
+  final String? spec;
+  final int quantity;
+  final int? unitPrice;
+  final int? amount;
+}
+
+/// Everything a 送り状 prints, whichever document the goods left on.
+class SlipDocument {
+  const SlipDocument({
+    required this.recipient,
+    required this.number,
+    required this.lines,
+    this.recipientAddress,
+    this.recipientPhone,
+    this.referenceNo,
+    this.customerCode,
+    this.date,
+    this.origin,
+    this.destinationCountry,
+    this.cartonCount = 0,
+  });
+
+  final String recipient;
+  final String? recipientAddress;
+  final String? recipientPhone;
+  final String number;
+  final String? referenceNo;
+  final String? customerCode;
+  final String? date;
+
+  /// The warehouse the goods left from, when that is not obvious (transfers).
+  final String? origin;
+
+  /// Printed when the goods cross a border.
+  final String? destinationCountry;
+  final int cartonCount;
+  final List<SlipLine> lines;
+
+  factory SlipDocument.fromShipment(Shipment s) => SlipDocument(
+        recipient: s.customerName ?? '',
+        number: s.shipmentNumber,
+        referenceNo: s.referenceNo,
+        customerCode: s.customerCode,
+        date: s.shipDate,
+        cartonCount: s.cartonCount,
+        lines: [
+          for (final l in s.lines)
+            SlipLine(
+              janCode: l.janCode,
+              productName: l.productName,
+              spec: l.spec,
+              quantity: l.quantity,
+              unitPrice: l.unitPrice,
+              amount: l.amount,
+            ),
+        ],
+      );
+
+  /// What left counts once picking is done; before that, what was asked for.
+  factory SlipDocument.fromTransfer(TransferOrder t) => SlipDocument(
+        recipient: t.destinationWarehouseName ?? '#${t.destinationWarehouseId}',
+        recipientAddress: t.destinationAddress,
+        recipientPhone: t.destinationPhone,
+        number: t.transferNumber ?? '#${t.id}',
+        date: _date(t.shippedAt ?? t.createdAt),
+        origin: t.sourceWarehouseName ?? '#${t.sourceWarehouseId}',
+        destinationCountry: t.crossBorder ? t.destinationCountryCode : null,
+        lines: [
+          for (final l in t.lines)
+            if ((l.pickedQuantity ?? l.requestedQuantity) > 0)
+              SlipLine(
+                janCode: l.janCode,
+                productName: l.productName,
+                quantity: l.pickedQuantity ?? l.requestedQuantity,
+              ),
+        ],
+      );
+
+  static String? _date(DateTime? d) => d == null
+      ? null
+      : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
 
 /// Builds print-ready HTML for a shipment and hands it to the system print /
 /// "Save as PDF" dialog. HTML (rather than the pdf canvas) is used so Japanese
@@ -164,18 +261,30 @@ class ShipmentPrinter {
   /// A formal delivery slip (送り状 / 納品書) for the whole shipment: recipient
   /// block, document metadata, the itemized list with unit price / amount when
   /// present, and totals.
-  String deliverySlipHtml(Shipment s, {List<SenderLine> sender = const []}) {
-    final hasMoney = s.lines.any((l) => l.unitPrice != null || l.amount != null);
+  String deliverySlipHtml(Shipment s, {List<SenderLine> sender = const []}) =>
+      slipHtml(SlipDocument.fromShipment(s), sender: sender);
+
+  /// The same 送り状 for a transfer to another warehouse, so every document that
+  /// goes out with goods reads the same whatever made it (0087).
+  String transferSlipHtml(TransferOrder t, {List<SenderLine> sender = const []}) =>
+      slipHtml(SlipDocument.fromTransfer(t), sender: sender);
+
+  /// The one downstream slip layout. Everything that sends goods out fills a
+  /// [SlipDocument] and prints through here.
+  String slipHtml(SlipDocument d, {List<SenderLine> sender = const []}) {
+    final hasMoney = d.lines.any((l) => l.unitPrice != null || l.amount != null);
     String money(int? v) => v == null ? '' : '¥${_esc(v)}';
     var amountTotal = 0;
-    for (final l in s.lines) {
+    var units = 0;
+    for (final l in d.lines) {
       amountTotal += l.amount ?? ((l.unitPrice ?? 0) * l.quantity);
+      units += l.quantity;
     }
 
     final headCols = hasMoney
         ? '<th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th>'
         : '<th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th>';
-    final rows = s.lines.map((l) {
+    final rows = d.lines.map((l) {
       final base = '<td class="jan">${_esc(l.janCode)}</td>'
           '<td>${_esc(l.productName)}</td><td>${_esc(l.spec ?? '')}</td>'
           '<td class="num">${l.quantity}</td>';
@@ -186,9 +295,9 @@ class ShipmentPrinter {
       return '<tr>$base$extra</tr>';
     }).join();
     final footer = hasMoney
-        ? '<tr><td colspan="3">合計</td><td class="num">${s.totalUnits}</td>'
+        ? '<tr><td colspan="3">合計</td><td class="num">$units</td>'
             '<td></td><td class="num">¥$amountTotal</td></tr>'
-        : '<tr><td colspan="3">合計</td><td class="num">${s.totalUnits}</td></tr>';
+        : '<tr><td colspan="3">合計</td><td class="num">$units</td></tr>';
 
     final kv = <String>[];
     void add(String label, String? value) {
@@ -197,16 +306,24 @@ class ShipmentPrinter {
       }
     }
 
-    add('発行日', s.shipDate);
-    add('出庫番号', s.shipmentNumber);
-    add('整理番号', s.referenceNo);
-    add('お客様コード', s.customerCode);
-    add('箱数', s.cartonCount > 0 ? '${s.cartonCount}' : null);
+    add('発行日', d.date);
+    add('出庫番号', d.number);
+    add('整理番号', d.referenceNo);
+    add('お客様コード', d.customerCode);
+    add('出荷元', d.origin);
+    add('仕向国', d.destinationCountry);
+    add('箱数', d.cartonCount > 0 ? '${d.cartonCount}' : null);
+
+    final address = [d.recipientAddress, d.recipientPhone]
+        .where((v) => v != null && v.trim().isNotEmpty)
+        .map((v) => '<div class="kv">${_esc(v)}</div>')
+        .join();
 
     final body = '''
 <div class="slip-head">
   <div>
-    <div class="to"><b>${_esc(s.customerName ?? '')}</b> 御中</div>
+    <div class="to"><b>${_esc(d.recipient)}</b> 御中</div>
+    $address
     <div class="kv">下記の通り納品いたします。</div>
   </div>
   <div>
@@ -220,7 +337,7 @@ class ShipmentPrinter {
   <tbody>$rows</tbody>
   <tfoot>$footer</tfoot>
 </table>''';
-    return _shell('送り状 ${s.shipmentNumber}', body);
+    return _shell('送り状 ${d.number}', body);
   }
 
   /// The variable set §20 defines, filled in for one carton of one shipment.
@@ -361,6 +478,10 @@ class ShipmentPrinter {
   Future<void> printAllCartons(Shipment s,
           {List<SenderLine> sender = const []}) =>
       _printHtml(allCartonsHtml(s, sender: sender));
+  Future<void> printTransferSlip(TransferOrder t,
+          {List<SenderLine> sender = const []}) =>
+      _printHtml(transferSlipHtml(t, sender: sender));
+
   Future<void> printDeliverySlip(Shipment s,
           {List<SenderLine> sender = const []}) =>
       _printHtml(deliverySlipHtml(s, sender: sender));

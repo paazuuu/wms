@@ -229,6 +229,21 @@ class _ProductCard extends StatelessWidget {
                         ],
                       ],
                     ),
+                    // What suppliers call it, so a search by a supplier's
+                    // own name shows why this product matched (0087).
+                    if (product.supplierNames.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        product.supplierNames
+                            .map((n) => '${n.supplierDisplayName}: ${n.supplierName}'
+                                '${n.supplierCode == null ? '' : ' (${n.supplierCode})'}')
+                            .join(' / '),
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     if (product.category != null &&
                         product.category!.isNotEmpty) ...[
                       const SizedBox(height: 2),

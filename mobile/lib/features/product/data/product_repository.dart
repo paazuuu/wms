@@ -4,6 +4,7 @@ import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/data_quality.dart';
 import '../domain/product.dart';
+import '../domain/supplier_product_name.dart';
 import '../domain/product_lot.dart';
 import '../domain/warehouse_product.dart';
 
@@ -18,6 +19,21 @@ import '../domain/warehouse_product.dart';
 /// already on file (§37-15).
 abstract class ProductRepository {
   Future<ApiResult<List<Product>>> list({String? search, String? status = 'active'});
+
+  /// What suppliers call products (0087), for one product or one supplier.
+  Future<ApiResult<List<SupplierProductName>>> supplierNames(
+      {int? productId, int? supplierId});
+
+  /// Sets (or replaces) one supplier's name and code for one product.
+  Future<ApiResult<int>> setSupplierName({
+    required int supplierId,
+    required int productId,
+    required String supplierName,
+    String? supplierCode,
+    String? note,
+  });
+
+  Future<ApiResult<bool>> removeSupplierName(int id);
 
   Future<ApiResult<int>> create({
     required String janCode,
@@ -533,6 +549,55 @@ class ProductRepositoryImpl implements ProductRepository {
           row == null ? const ProductIdCoverage() : ProductIdCoverage.fromJson(row));
     } on DioException catch (e) {
       return mapDioError<ProductIdCoverage>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<SupplierProductName>>> supplierNames(
+      {int? productId, int? supplierId}) async {
+    try {
+      final response = await _dio.post('/rpc/list_supplier_product_names', data: {
+        'p_product_id': productId,
+        'p_supplier_id': supplierId,
+      });
+      return ApiSuccess(
+          _rows(response.data).map((e) => SupplierProductName.fromJson(e)).toList());
+    } on DioException catch (e) {
+      return mapDioError<List<SupplierProductName>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> setSupplierName({
+    required int supplierId,
+    required int productId,
+    required String supplierName,
+    String? supplierCode,
+    String? note,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/set_supplier_product_name', data: {
+        'p_supplier_id': supplierId,
+        'p_product_id': productId,
+        'p_supplier_name': supplierName,
+        'p_supplier_code': supplierCode,
+        'p_note': note,
+      });
+      final id = response.data;
+      return ApiSuccess(id is int ? id : int.tryParse('$id') ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> removeSupplierName(int id) async {
+    try {
+      final response =
+          await _dio.post('/rpc/remove_supplier_product_name', data: {'p_id': id});
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 }

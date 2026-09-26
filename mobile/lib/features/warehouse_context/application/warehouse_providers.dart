@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../data/location_repository.dart';
 import '../data/warehouse_repository.dart';
+import '../data/warehouse_role_repository.dart';
+import '../domain/warehouse_role.dart';
 import '../domain/bin_stock.dart';
 import '../domain/location.dart';
 import '../domain/warehouse.dart';
@@ -105,6 +107,20 @@ final binStockOverviewProvider =
       await ref.watch(locationRepositoryProvider).binStockOverview(warehouseId);
   return result.when(
     success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+final warehouseRoleRepositoryProvider = Provider<WarehouseRoleRepository>((ref) {
+  return WarehouseRoleRepositoryImpl(ref.watch(restDioProvider));
+});
+
+/// Every warehouse's country and cross-border role (0087), by id.
+final warehouseRolesProvider =
+    FutureProvider.autoDispose<Map<int, WarehouseRole>>((ref) async {
+  final result = await ref.watch(warehouseRoleRepositoryProvider).list();
+  return result.when(
+    success: (rows) => {for (final r in rows) r.id: r},
     failure: (f) => throw Exception(f.message),
   );
 });

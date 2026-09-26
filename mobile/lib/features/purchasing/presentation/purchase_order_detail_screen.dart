@@ -12,6 +12,8 @@ import '../../delivery/presentation/reconciliation_screen.dart';
 import '../../sales/presentation/sales_order_detail_screen.dart';
 import '../application/purchase_order_providers.dart';
 import '../domain/purchase_order.dart';
+import '../../product/application/product_providers.dart';
+import '../../product/domain/supplier_product_name.dart';
 import 'purchase_link_editor_page.dart';
 import 'purchase_order_status_ui.dart';
 
@@ -168,6 +170,13 @@ class _BodyState extends ConsumerState<_Body> {
         .then((_) => _refresh());
   }
 
+  /// What this order's supplier calls each product, by JAN (0087).
+  Map<String, SupplierProductName> get _supplierNames {
+    final id = _order.supplierId;
+    if (id == null) return const {};
+    return ref.watch(supplierNamesBySupplierProvider(id)).valueOrNull ?? const {};
+  }
+
   bool get _canEditLinks => ![
         PurchaseOrderStatus.rejected,
         PurchaseOrderStatus.cancelled,
@@ -309,6 +318,7 @@ class _BodyState extends ConsumerState<_Body> {
                         ].contains(_order.status),
                         onOpenSalesOrder: _openSalesOrder,
                         onEditLinks: _canEditLinks && !_busy ? () => _editLinks(line) : null,
+                        supplierName: _supplierNames[line.janCode],
                       ),
                       const SizedBox(height: AppSpacing.sm),
                     ],
@@ -417,7 +427,11 @@ class _LineCard extends StatelessWidget {
     required this.tracksReceipt,
     required this.onOpenSalesOrder,
     required this.onEditLinks,
+    this.supplierName,
   });
+
+  /// What the supplier calls this product, shown beside our own name.
+  final SupplierProductName? supplierName;
 
   final PurchaseOrderLine line;
   final bool tracksReceipt;
@@ -443,6 +457,12 @@ class _LineCard extends StatelessWidget {
             Text(line.janCode,
                 style: theme.textTheme.bodySmall
                     ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
+            if (supplierName != null)
+              Text(
+                l10n.poLineSupplierName(supplierName!.supplierName) +
+                    (supplierName!.supplierCode == null ? '' : ' (${supplierName!.supplierCode})'),
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary),
+              ),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [

@@ -58,6 +58,9 @@ import 'package:wms_mobile/features/sales/application/sales_order_providers.dart
 import 'package:wms_mobile/features/sales/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
 import 'package:wms_mobile/features/demand/application/demand_providers.dart';
+import 'package:wms_mobile/features/product/domain/supplier_product_name.dart';
+import 'package:wms_mobile/features/warehouse_context/data/warehouse_role_repository.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse_role.dart';
 import 'package:wms_mobile/features/demand/data/demand_repository.dart';
 import 'package:wms_mobile/features/demand/domain/open_demand.dart';
 import 'package:wms_mobile/features/work_orders/application/work_order_providers.dart';
@@ -127,6 +130,7 @@ List<Override> _defaultOverrides() => [
           .overrideWithValue(FakePurchaseOrderRepository()),
       salesOrderRepositoryProvider.overrideWithValue(FakeSalesOrderRepository()),
       demandRepositoryProvider.overrideWithValue(FakeDemandRepository()),
+      warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository()),
       tradingPartnerRepositoryProvider
           .overrideWithValue(FakeTradingPartnerRepository()),
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
@@ -1279,6 +1283,10 @@ class FakeTransferRepository implements TransferRepository {
         status: status ?? _order.status,
         note: _order.note,
         lines: lines ?? _order.lines,
+        sourceCountryCode: _order.sourceCountryCode,
+        destinationCountryCode: _order.destinationCountryCode,
+        crossBorder: _order.crossBorder,
+        exports: _order.exports,
       );
 
   ApiResult<TransferOrder> _transition(TransferStatus from, TransferStatus to) {
@@ -1359,7 +1367,9 @@ class FakeTransferRepository implements TransferRepository {
       lastRefusal = 'transfer still has unpicked line(s)';
       return ApiFailure(message: lastRefusal!, statusCode: 400);
     }
-    return _transition(TransferStatus.picking, TransferStatus.inTransit);
+    // Like the RPC (0087): an export closes here, with nothing to receive.
+    return _transition(TransferStatus.picking,
+        _order.exports ? TransferStatus.exported : TransferStatus.inTransit);
   }
 
   @override
@@ -1729,6 +1739,38 @@ class FakeProductRepository implements ProductRepository {
 
   /// Set to make create() fail (e.g. duplicate JAN), mirroring the real RPC.
   String? failCreateWith;
+
+  List<SupplierProductName> supplierNameList = [];
+  ({int supplierId, int productId, String name, String? code})? lastSupplierName;
+  final List<int> removedSupplierNameIds = [];
+
+  @override
+  Future<ApiResult<List<SupplierProductName>>> supplierNames(
+          {int? productId, int? supplierId}) async =>
+      ApiSuccess(supplierNameList
+          .where((n) =>
+              (productId == null || n.productId == productId) &&
+              (supplierId == null || n.supplierId == supplierId))
+          .toList());
+
+  @override
+  Future<ApiResult<int>> setSupplierName({
+    required int supplierId,
+    required int productId,
+    required String supplierName,
+    String? supplierCode,
+    String? note,
+  }) async {
+    lastSupplierName =
+        (supplierId: supplierId, productId: productId, name: supplierName, code: supplierCode);
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<bool>> removeSupplierName(int id) async {
+    removedSupplierNameIds.add(id);
+    return const ApiSuccess(true);
+  }
 
   @override
   Future<ApiResult<List<Product>>> list(
@@ -2352,6 +2394,37 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
   Future<ApiResult<bool>> linkDeliveryPlan(
       int purchaseOrderId, int deliveryPlanId) async {
     lastLink = (purchaseOrderId: purchaseOrderId, deliveryPlanId: deliveryPlanId);
+    return const ApiSuccess(true);
+  }
+}
+
+/// Warehouse country/role stub (0087). [roles] is what `warehouse_roles`
+/// returns; [lastSet] records what a save asked for.
+class FakeWarehouseRoleRepository implements WarehouseRoleRepository {
+  FakeWarehouseRoleRepository([this.roles = const []]);
+
+  List<WarehouseRole> roles;
+  ({int id, String country, bool receives})? lastSet;
+
+  @override
+  Future<ApiResult<List<WarehouseRole>>> list() async => ApiSuccess(roles);
+
+  @override
+  Future<ApiResult<bool>> set(int warehouseId,
+      {required String countryCode, required bool receivesCrossBorder}) async {
+    lastSet = (id: warehouseId, country: countryCode, receives: receivesCrossBorder);
+    roles = [
+      for (final r in roles)
+        if (r.id == warehouseId)
+          WarehouseRole(
+              id: r.id,
+              code: r.code,
+              name: r.name,
+              countryCode: countryCode,
+              receivesCrossBorder: receivesCrossBorder)
+        else
+          r,
+    ];
     return const ApiSuccess(true);
   }
 }

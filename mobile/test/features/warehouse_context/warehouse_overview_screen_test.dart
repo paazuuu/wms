@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse_role.dart';
 import 'package:wms_mobile/features/warehouse_context/presentation/warehouse_overview_screen.dart';
 
 import 'package:wms_mobile/core/api/api_result.dart';
@@ -74,6 +75,8 @@ void main() {
           ],
         },
       )),
+    
+      warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository()),
     ]);
     addTearDown(container.dispose);
 
@@ -115,6 +118,7 @@ void main() {
         WarehouseOverview(warehouses: const [], totals: WarehouseTotals()),
       )),
       authRepositoryProvider.overrideWithValue(_ScopedOutAuthRepository()),
+      warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository()),
     ]);
     addTearDown(container.dispose);
 
@@ -124,5 +128,45 @@ void main() {
     expect(find.text('倉庫が割り当てられていません'), findsOneWidget);
     // Not the "add your first warehouse" advice, which this user cannot act on.
     expect(find.text('倉庫がまだありません'), findsNothing);
+  });
+
+  testWidgets(
+      'a warehouse shows its country, and a China warehouse can be set to receive cross-border stock (0087)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final roles = FakeWarehouseRoleRepository([
+      WarehouseRole(id: 1, code: 'KOBE', name: '神戸倉庫', countryCode: 'JP'),
+      WarehouseRole(id: 2, code: 'SH', name: '上海倉庫', countryCode: 'CN'),
+    ]);
+    final container = ProviderContainer(overrides: [
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+        WarehouseOverview(
+          warehouses: [
+            Warehouse(id: 1, code: 'KOBE', name: '神戸倉庫'),
+            Warehouse(id: 2, code: 'SH', name: '上海倉庫'),
+          ],
+          totals: WarehouseTotals(warehouseCount: 2),
+        ),
+      )),
+      warehouseRoleRepositoryProvider.overrideWithValue(roles),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(tester, container, const WarehouseOverviewScreen());
+    await tester.pumpAndSettle();
+
+    expect(find.text('日本'), findsOneWidget);
+    expect(find.text('中国'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('国・役割').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(roles.lastSet, (id: 2, country: 'CN', receives: true));
+
+    await tester.binding.setSurfaceSize(null);
   });
 }

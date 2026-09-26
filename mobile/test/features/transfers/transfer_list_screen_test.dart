@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse_role.dart';
 import 'package:wms_mobile/features/transfers/application/transfer_providers.dart';
 import 'package:wms_mobile/features/transfers/domain/transfer_order.dart';
 import 'package:wms_mobile/features/transfers/presentation/transfer_detail_screen.dart';
@@ -137,5 +138,38 @@ void main() {
 
     expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
     expect(find.textContaining('transfer.create'), findsNothing);
+  });
+
+  testWidgets('choosing a warehouse in another country warns that the goods leave stock (0087)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final warehouseRepo = FakeWarehouseRepository(const WarehouseOverview(
+      warehouses: [
+        Warehouse(id: 1, code: 'TKY', name: '東京倉庫'),
+        Warehouse(id: 2, code: 'SH', name: '上海倉庫'),
+      ],
+      totals: WarehouseTotals(),
+    ));
+    await pumpApp(
+      tester,
+      const TransferListScreen(),
+      overrides: [
+        warehouseRepositoryProvider.overrideWithValue(warehouseRepo),
+        transferRepositoryProvider.overrideWithValue(FakeTransferRepository(
+            order: const TransferOrder(id: 1, sourceWarehouseId: 1, destinationWarehouseId: 2))),
+        warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository(const [
+          WarehouseRole(id: 1, name: '東京倉庫', countryCode: 'JP'),
+          WarehouseRole(id: 2, name: '上海倉庫', countryCode: 'CN'),
+        ])),
+      ],
+    );
+
+    await tester.tap(find.text('移動を作成'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('東京倉庫（日本）'), findsWidgets);
+    expect(find.textContaining('中国への国をまたぐ転送です'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
   });
 }

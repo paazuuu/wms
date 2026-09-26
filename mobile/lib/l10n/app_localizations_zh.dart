@@ -4299,4 +4299,103 @@ class AppLocalizationsZh extends AppLocalizations {
   String poDemandFilled(int filled) {
     return '（到货已预留 $filled）';
   }
+
+  @override
+  String get transferStatusExported => '已出口';
+
+  @override
+  String get transferExportBadge => '出口';
+
+  @override
+  String transferCrossBorderExport(String country) {
+    return '这是跨境调拨至$country。出库即从库存中扣除，不会有入库。';
+  }
+
+  @override
+  String transferCrossBorderReceived(String country) {
+    return '$country的仓库已设置为接收跨境货物，将像普通调拨一样入库。';
+  }
+
+  @override
+  String get transferExportNotice => '跨境调拨：出库即从库存扣除，不会入库。';
+
+  @override
+  String get transferCrossBorderReceivedNotice => '跨境调拨：目的仓库接收跨境货物，因此会入库。';
+
+  @override
+  String transferCompletePickingExportBody(String warehouse) {
+    return '货物从$warehouse出库，并作为出口从库存中扣除。本次调拨无需入库即完成。';
+  }
+
+  @override
+  String get whRoleEdit => '国家与角色';
+
+  @override
+  String get whRoleSaved => '已保存仓库国家与角色';
+
+  @override
+  String get whRoleCountry => '国家';
+
+  @override
+  String get whRoleCountryCode => '国家代码（2位字母）';
+
+  @override
+  String get whRoleReceivesCrossBorder => '接收跨境调拨并持有库存';
+
+  @override
+  String get whRoleReceivesCrossBorderHint =>
+      '关闭时，从其他国家调拨到本仓库的货物在出库时即从库存扣除。若要从本仓库向个别客户发货，请开启。';
+
+  @override
+  String get countryJP => '日本';
+
+  @override
+  String get countryCN => '中国';
+
+  @override
+  String get countryOther => '其他';
+
+  @override
+  String get supplierNamesSection => '各供应商的叫法';
+
+  @override
+  String get supplierNamesHint =>
+      '登记各供应商的商品名和编号后，可按其叫法搜索，也用于核对到货单。发货单据上打印本公司的商品名。';
+
+  @override
+  String get supplierNamesEmpty => '尚未登记';
+
+  @override
+  String get supplierNameAdd => '添加叫法';
+
+  @override
+  String get supplierNameEdit => '编辑叫法';
+
+  @override
+  String get supplierNameSaved => '已保存叫法';
+
+  @override
+  String get supplierNameNoSuppliers => '请先登记供应商';
+
+  @override
+  String get supplierNameSupplier => '供应商';
+
+  @override
+  String get supplierNameName => '供应商的商品名';
+
+  @override
+  String get supplierNameCode => '供应商的编号（可选）';
+
+  @override
+  String get supplierNameNote => '备注（可选）';
+
+  @override
+  String supplierNameCodeLabel(String code) {
+    return '编号 $code';
+  }
+
+  @override
+  String poLineSupplierName(String name) {
+    return '供应商叫法：$name';
+  }
 }

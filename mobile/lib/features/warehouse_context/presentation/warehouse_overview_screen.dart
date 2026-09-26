@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -9,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/warehouse_providers.dart';
 import '../domain/warehouse.dart';
+import '../domain/warehouse_role.dart';
 import 'add_warehouse_screen.dart';
 import 'bin_type_ui.dart';
 
@@ -163,6 +165,7 @@ class _WarehouseCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final nf = NumberFormat.decimalPattern();
     final bins = ref.watch(warehouseBinsProvider(warehouse.id));
+    final role = ref.watch(warehouseRolesProvider).valueOrNull?[warehouse.id];
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -206,6 +209,21 @@ class _WarehouseCard extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (role != null) ...[
+                    StatusPill(
+                      tone: StatusTone.neutral,
+                      label: countryLabel(l10n, role.countryCode),
+                      icon: Icons.public,
+                      dense: true,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    IconButton(
+                      tooltip: l10n.whRoleEdit,
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.tune),
+                      onPressed: () => _editRole(context, ref, role),
+                    ),
+                  ],
                   if (warehouse.usesLocations) ...[
                     StatusPill(
                         tone: StatusTone.info,
@@ -272,6 +290,122 @@ class _WarehouseCard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+Future<void> _editRole(BuildContext context, WidgetRef ref, WarehouseRole role) async {
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  final next = await showDialog<WarehouseRole>(
+    context: context,
+    builder: (_) => WarehouseRoleDialog(role: role),
+  );
+  if (next == null) return;
+  final result = await ref.read(warehouseRoleRepositoryProvider).set(role.id,
+      countryCode: next.countryCode, receivesCrossBorder: next.receivesCrossBorder);
+  result.when(
+    success: (_) {
+      ref.invalidate(warehouseRolesProvider);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.whRoleSaved)));
+    },
+    failure: (f) => messenger.showSnackBar(SnackBar(
+        content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+  );
+}
+
+/// Localized country name for the codes this company uses, the code otherwise.
+String countryLabel(AppLocalizations l10n, String code) => switch (code) {
+      'JP' => l10n.countryJP,
+      'CN' => l10n.countryCN,
+      _ => code,
+    };
+
+/// A warehouse's country, and whether it takes in stock that crosses a border.
+/// Pops the edited role.
+class WarehouseRoleDialog extends StatefulWidget {
+  const WarehouseRoleDialog({super.key, required this.role});
+
+  final WarehouseRole role;
+
+  @override
+  State<WarehouseRoleDialog> createState() => _WarehouseRoleDialogState();
+}
+
+class _WarehouseRoleDialogState extends State<WarehouseRoleDialog> {
+  late String _country = widget.role.countryCode;
+  late bool _receives = widget.role.receivesCrossBorder;
+  late final TextEditingController _other = TextEditingController(
+      text: const ['JP', 'CN'].contains(widget.role.countryCode) ? '' : widget.role.countryCode);
+
+  @override
+  void dispose() {
+    _other.dispose();
+    super.dispose();
+  }
+
+  String get _code =>
+      _country == 'OTHER' ? _other.text.trim().toUpperCase() : _country;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final known = const ['JP', 'CN'].contains(_country);
+    return AlertDialog(
+      title: Text(l10n.whRoleEdit),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownButtonFormField<String>(
+            initialValue: known ? _country : 'OTHER',
+            decoration: InputDecoration(labelText: l10n.whRoleCountry),
+            items: [
+              DropdownMenuItem(value: 'JP', child: Text(l10n.countryJP)),
+              DropdownMenuItem(value: 'CN', child: Text(l10n.countryCN)),
+              DropdownMenuItem(value: 'OTHER', child: Text(l10n.countryOther)),
+            ],
+            onChanged: (v) => setState(() => _country = v ?? _country),
+          ),
+          if (!known)
+            TextField(
+              controller: _other,
+              maxLength: 2,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(labelText: l10n.whRoleCountryCode),
+              onChanged: (_) => setState(() {}),
+            ),
+          const SizedBox(height: AppSpacing.sm),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _receives,
+            onChanged: (v) => setState(() => _receives = v),
+            title: Text(l10n.whRoleReceivesCrossBorder),
+            subtitle: Text(l10n.whRoleReceivesCrossBorderHint),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          onPressed: RegExp(r'^[A-Z]{2}$').hasMatch(_code)
+              ? () => Navigator.pop(
+                    context,
+                    WarehouseRole(
+                      id: widget.role.id,
+                      code: widget.role.code,
+                      name: widget.role.name,
+                      countryCode: _code,
+                      receivesCrossBorder: _receives,
+                    ),
+                  )
+              : null,
+          child: Text(l10n.actionSave),
+        ),
+      ],
     );
   }
 }

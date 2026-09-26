@@ -108,6 +108,15 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       creation (per supplier, a product may be split across suppliers) and
       afterwards from the purchase-order detail; incoming is one total per
       product across every supplier, broken down per purchase order
+- [x] Warehouses by country (0087): a transfer across a border closes as
+      EXPORTED when it ships (stock leaves the system) unless the destination
+      opted in to receiving cross-border stock, which then holds it and can
+      ship to its own customers; country/role set per warehouse
+- [x] Supplier names (0087): each supplier's name and code per product,
+      searchable, used to match supplier delivery notes, shown on purchase
+      orders; never printed downstream
+- [x] One downstream slip (0087): shipments and transfers print the same
+      送り状 layout, with the product master's name
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**

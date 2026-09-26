@@ -9,6 +9,9 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
+import '../../shipment/application/sender_profile_controller.dart';
+import '../../shipment/data/shipment_print.dart';
+import '../../shipment/presentation/sender_picker.dart';
 import '../application/transfer_providers.dart';
 import '../domain/transfer_order.dart';
 import 'transfer_status_ui.dart';
@@ -31,6 +34,20 @@ class TransferDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(async.valueOrNull?.transferNumber ?? l10n.transferTitle),
+        actions: [
+          if (async.valueOrNull case final order?)
+            IconButton(
+              tooltip: l10n.printDeliverySlip,
+              icon: const Icon(Icons.print_outlined),
+              // The same sender choice and the same slip as a shipment's 送り状.
+              onPressed: () async {
+                final profile = ref.read(senderProfileControllerProvider);
+                final sender = await showSenderPicker(context, profile);
+                if (sender == null) return;
+                await const ShipmentPrinter().printTransferSlip(order, sender: sender);
+              },
+            ),
+        ],
       ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
@@ -191,10 +208,12 @@ class _BodyState extends ConsumerState<_Body> {
       _snack(l10n.transferPickIncomplete, danger: true);
       return;
     }
+    final source = _order.sourceWarehouseName ?? '#${_order.sourceWarehouseId}';
     if (!await _confirm(
         l10n.transferCompletePicking,
-        l10n.transferCompletePickingBody(
-            _order.sourceWarehouseName ?? '#${_order.sourceWarehouseId}'),
+        _order.exports
+            ? l10n.transferCompletePickingExportBody(source)
+            : l10n.transferCompletePickingBody(source),
         l10n.transferCompletePicking)) {
       return;
     }
@@ -332,6 +351,23 @@ class _BodyState extends ConsumerState<_Body> {
                   ),
                 ],
               ),
+              if (_order.crossBorder) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Icon(Icons.public, size: 18, color: theme.colorScheme.tertiary),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        _order.exports
+                            ? l10n.transferExportNotice
+                            : l10n.transferCrossBorderReceivedNotice,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

@@ -4418,4 +4418,106 @@ class AppLocalizationsEn extends AppLocalizations {
   String poDemandFilled(int filled) {
     return '($filled reserved on arrival)';
   }
+
+  @override
+  String get transferStatusExported => 'Exported';
+
+  @override
+  String get transferExportBadge => 'Export';
+
+  @override
+  String transferCrossBorderExport(String country) {
+    return 'This crosses into $country. The goods leave stock when they ship and are not received anywhere.';
+  }
+
+  @override
+  String transferCrossBorderReceived(String country) {
+    return 'The warehouse in $country is set to receive cross-border goods, so this is received like any transfer.';
+  }
+
+  @override
+  String get transferExportNotice =>
+      'Cross-border: the goods leave stock when they ship and are not received.';
+
+  @override
+  String get transferCrossBorderReceivedNotice =>
+      'Cross-border: the destination receives cross-border goods, so this is received.';
+
+  @override
+  String transferCompletePickingExportBody(String warehouse) {
+    return 'The goods leave $warehouse and are removed from stock as exported. This transfer closes without receiving.';
+  }
+
+  @override
+  String get whRoleEdit => 'Country and role';
+
+  @override
+  String get whRoleSaved => 'Warehouse role saved';
+
+  @override
+  String get whRoleCountry => 'Country';
+
+  @override
+  String get whRoleCountryCode => 'Country code (2 letters)';
+
+  @override
+  String get whRoleReceivesCrossBorder =>
+      'Receive cross-border transfers and hold the stock';
+
+  @override
+  String get whRoleReceivesCrossBorderHint =>
+      'When off, a transfer here from another country leaves stock at the source. Turn on to ship to customers from this warehouse.';
+
+  @override
+  String get countryJP => 'Japan';
+
+  @override
+  String get countryCN => 'China';
+
+  @override
+  String get countryOther => 'Other';
+
+  @override
+  String get supplierNamesSection => 'Supplier names';
+
+  @override
+  String get supplierNamesHint =>
+      'Record each supplier\'s name and code for this product to search by them and match their delivery notes. Downstream slips print our own name.';
+
+  @override
+  String get supplierNamesEmpty => 'None recorded yet';
+
+  @override
+  String get supplierNameAdd => 'Add supplier name';
+
+  @override
+  String get supplierNameEdit => 'Edit supplier name';
+
+  @override
+  String get supplierNameSaved => 'Supplier name saved';
+
+  @override
+  String get supplierNameNoSuppliers => 'Register a supplier first';
+
+  @override
+  String get supplierNameSupplier => 'Supplier';
+
+  @override
+  String get supplierNameName => 'Supplier\'s product name';
+
+  @override
+  String get supplierNameCode => 'Supplier\'s code (optional)';
+
+  @override
+  String get supplierNameNote => 'Note (optional)';
+
+  @override
+  String supplierNameCodeLabel(String code) {
+    return 'Code $code';
+  }
+
+  @override
+  String poLineSupplierName(String name) {
+    return 'Supplier calls it: $name';
+  }
 }

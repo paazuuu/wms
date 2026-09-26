@@ -9,6 +9,9 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
+import '../../warehouse_context/domain/warehouse_role.dart';
+import '../../warehouse_context/presentation/warehouse_overview_screen.dart'
+    show countryLabel;
 import '../application/transfer_providers.dart';
 import '../data/transfer_repository.dart';
 import '../domain/transfer_order.dart';
@@ -54,10 +57,18 @@ class _TransferListScreenState extends ConsumerState<TransferListScreen> {
       return;
     }
 
+    // Without the roles the sheet still works; it just cannot warn about an
+    // export before one is made.
+    Map<int, WarehouseRole> roles = const {};
+    try {
+      roles = await ref.read(warehouseRolesProvider.future);
+    } catch (_) {}
+    if (!mounted) return;
+
     final draft = await showModalBottomSheet<_TransferDraft>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _CreateTransferSheet(warehouses: overview.warehouses),
+      builder: (_) => _CreateTransferSheet(warehouses: overview.warehouses, roles: roles),
     );
     if (draft == null || !mounted) return;
 
@@ -197,6 +208,14 @@ class _TransferCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   StatusPill(tone: ui.tone, label: ui.label, dense: true),
+                  if (order.exports && order.status != TransferStatus.exported) ...[
+                    const SizedBox(height: 4),
+                    StatusPill(
+                        tone: StatusTone.warning,
+                        label: l10n.transferExportBadge,
+                        icon: Icons.public,
+                        dense: true),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     l10n.lineCount(order.totalLines),
@@ -227,15 +246,20 @@ class _TransferDraft {
 }
 
 class _CreateTransferSheet extends StatefulWidget {
-  const _CreateTransferSheet({required this.warehouses});
+  const _CreateTransferSheet({required this.warehouses, this.roles = const {}});
 
   final List<Warehouse> warehouses;
+
+  /// Country and cross-border role per warehouse, to warn before an export.
+  final Map<int, WarehouseRole> roles;
 
   @override
   State<_CreateTransferSheet> createState() => _CreateTransferSheetState();
 }
 
 class _CreateTransferSheetState extends State<_CreateTransferSheet> {
+  WarehouseRole? _role(int id) => widget.roles[id];
+
   late int _sourceId = widget.warehouses.first.id;
   late int _destinationId =
       widget.warehouses.length > 1 ? widget.warehouses[1].id : widget.warehouses.first.id;
@@ -247,6 +271,22 @@ class _CreateTransferSheetState extends State<_CreateTransferSheet> {
   void dispose() {
     _note.dispose();
     super.dispose();
+  }
+
+  String _label(AppLocalizations l10n, Warehouse w) {
+    final role = _role(w.id);
+    return role == null ? w.name : '${w.name}（${countryLabel(l10n, role.countryCode)}）';
+  }
+
+  /// Said before the transfer is made, because an export cannot be received
+  /// back: what leaves across a border is gone from this system (0087).
+  String? _crossBorderNote(AppLocalizations l10n) {
+    final from = _role(_sourceId);
+    final to = _role(_destinationId);
+    if (from == null || to == null || from.countryCode == to.countryCode) return null;
+    return to.receivesCrossBorder
+        ? l10n.transferCrossBorderReceived(countryLabel(l10n, to.countryCode))
+        : l10n.transferCrossBorderExport(countryLabel(l10n, to.countryCode));
   }
 
   Future<void> _addLine() async {
@@ -307,7 +347,7 @@ class _CreateTransferSheetState extends State<_CreateTransferSheet> {
               decoration: InputDecoration(labelText: l10n.transferSource),
               items: [
                 for (final w in widget.warehouses)
-                  DropdownMenuItem(value: w.id, child: Text(w.name)),
+                  DropdownMenuItem(value: w.id, child: Text(_label(l10n, w))),
               ],
               onChanged: (v) => setState(() => _sourceId = v ?? _sourceId),
             ),
@@ -317,10 +357,26 @@ class _CreateTransferSheetState extends State<_CreateTransferSheet> {
               decoration: InputDecoration(labelText: l10n.transferDestination),
               items: [
                 for (final w in widget.warehouses)
-                  DropdownMenuItem(value: w.id, child: Text(w.name)),
+                  DropdownMenuItem(value: w.id, child: Text(_label(l10n, w))),
               ],
               onChanged: (v) => setState(() => _destinationId = v ?? _destinationId),
             ),
+            if (_crossBorderNote(l10n) case final note?) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Card(
+                color: theme.colorScheme.tertiaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.public),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(child: Text(note)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             Row(
               children: [

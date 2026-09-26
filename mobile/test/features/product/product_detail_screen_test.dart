@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
+import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/domain/supplier_product_name.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/domain/product_lot.dart';
 import 'package:wms_mobile/features/product/domain/warehouse_product.dart';
@@ -56,9 +59,12 @@ Future<ProviderContainer> _pump(
   FakeProductRepository repo, {
   int productId = 1,
   int? warehouseId,
+  List<TradingPartner> partners = const [],
 }) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
+    tradingPartnerRepositoryProvider
+        .overrideWithValue(FakeTradingPartnerRepository(partners: partners)),
   ]);
   addTearDown(container.dispose);
   if (warehouseId != null) {
@@ -440,6 +446,46 @@ void main() {
 
     expect(find.textContaining('remove the barcode first'), findsOneWidget);
     expect(repo.removedUoms, isEmpty);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('each supplier\'s name and code for the product can be recorded (0087)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2400));
+    final repo = FakeProductRepository(products: const [_untracked])
+      ..supplierNameList = [
+        SupplierProductName(
+            id: 5, supplierId: 1, supplierDisplayName: '新東光通商', productId: 2,
+            supplierName: '追跡なし品（大）', supplierCode: 'SK-100'),
+      ];
+    await _pump(tester, repo, productId: 2, partners: [
+      TradingPartner(id: 1, name: '新東光通商', kind: PartnerKind.supplier),
+      TradingPartner(id: 2, name: '別の商会', kind: PartnerKind.both),
+      TradingPartner(id: 3, name: 'お客様', kind: PartnerKind.customer),
+    ]);
+
+    expect(find.text('仕入先ごとの呼び名'), findsOneWidget);
+    expect(find.text('追跡なし品（大）'), findsOneWidget);
+    expect(find.text('新東光通商 · 品番 SK-100'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('呼び名を追加'), 200);
+    await tester.tap(find.text('呼び名を追加'));
+    await tester.pumpAndSettle();
+    // Customers are not suppliers.
+    await tester.tap(find.byType(DropdownButtonFormField<int>));
+    await tester.pumpAndSettle();
+    expect(find.text('お客様'), findsNothing);
+    await tester.tap(find.text('別の商会').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('supplier-name')), 'ケシゴムS');
+    await tester.enterText(find.byKey(const ValueKey('supplier-code')), 'B-7');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastSupplierName, (supplierId: 2, productId: 2, name: 'ケシゴムS', code: 'B-7'));
+    expect(find.text('呼び名を保存しました'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });

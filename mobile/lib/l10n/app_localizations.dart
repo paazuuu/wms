@@ -8015,6 +8015,180 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'（入荷分引当 {filled}）'**
   String poDemandFilled(int filled);
+
+  /// transferStatusExported
+  ///
+  /// In ja, this message translates to:
+  /// **'国外へ出庫済み'**
+  String get transferStatusExported;
+
+  /// transferExportBadge
+  ///
+  /// In ja, this message translates to:
+  /// **'国外へ出庫'**
+  String get transferExportBadge;
+
+  /// transferCrossBorderExport
+  ///
+  /// In ja, this message translates to:
+  /// **'{country}への国をまたぐ転送です。出庫した時点で在庫から除外され、受入はありません。'**
+  String transferCrossBorderExport(String country);
+
+  /// transferCrossBorderReceived
+  ///
+  /// In ja, this message translates to:
+  /// **'{country}の倉庫は国外からの受入を行う設定です。通常の転送と同じく受入まで行います。'**
+  String transferCrossBorderReceived(String country);
+
+  /// transferExportNotice
+  ///
+  /// In ja, this message translates to:
+  /// **'国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。'**
+  String get transferExportNotice;
+
+  /// transferCrossBorderReceivedNotice
+  ///
+  /// In ja, this message translates to:
+  /// **'国をまたぐ転送：受け入れ先の倉庫が国外からの受入を行う設定のため、受入まで行います。'**
+  String get transferCrossBorderReceivedNotice;
+
+  /// transferCompletePickingExportBody
+  ///
+  /// In ja, this message translates to:
+  /// **'{warehouse}から出庫し、国外へ送った分として在庫から除外します。この転送は受入なしで完了します。'**
+  String transferCompletePickingExportBody(String warehouse);
+
+  /// whRoleEdit
+  ///
+  /// In ja, this message translates to:
+  /// **'国・役割'**
+  String get whRoleEdit;
+
+  /// whRoleSaved
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫の国・役割を保存しました'**
+  String get whRoleSaved;
+
+  /// whRoleCountry
+  ///
+  /// In ja, this message translates to:
+  /// **'国'**
+  String get whRoleCountry;
+
+  /// whRoleCountryCode
+  ///
+  /// In ja, this message translates to:
+  /// **'国コード（2文字）'**
+  String get whRoleCountryCode;
+
+  /// whRoleReceivesCrossBorder
+  ///
+  /// In ja, this message translates to:
+  /// **'国外からの転送を受け入れて在庫を持つ'**
+  String get whRoleReceivesCrossBorder;
+
+  /// whRoleReceivesCrossBorderHint
+  ///
+  /// In ja, this message translates to:
+  /// **'オフのとき、他国の倉庫からこの倉庫への転送は出庫時点で在庫から除外されます。この倉庫から個別のお客さんへ出荷する場合はオンにします。'**
+  String get whRoleReceivesCrossBorderHint;
+
+  /// countryJP
+  ///
+  /// In ja, this message translates to:
+  /// **'日本'**
+  String get countryJP;
+
+  /// countryCN
+  ///
+  /// In ja, this message translates to:
+  /// **'中国'**
+  String get countryCN;
+
+  /// countryOther
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get countryOther;
+
+  /// supplierNamesSection
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ごとの呼び名'**
+  String get supplierNamesSection;
+
+  /// supplierNamesHint
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ごとの商品名・品番を登録すると、その呼び名で検索でき、納品書の照合にも使われます。出荷伝票には自社の商品名が印字されます。'**
+  String get supplierNamesHint;
+
+  /// supplierNamesEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ登録がありません'**
+  String get supplierNamesEmpty;
+
+  /// supplierNameAdd
+  ///
+  /// In ja, this message translates to:
+  /// **'呼び名を追加'**
+  String get supplierNameAdd;
+
+  /// supplierNameEdit
+  ///
+  /// In ja, this message translates to:
+  /// **'呼び名を編集'**
+  String get supplierNameEdit;
+
+  /// supplierNameSaved
+  ///
+  /// In ja, this message translates to:
+  /// **'呼び名を保存しました'**
+  String get supplierNameSaved;
+
+  /// supplierNameNoSuppliers
+  ///
+  /// In ja, this message translates to:
+  /// **'先に取引先（仕入先）を登録してください'**
+  String get supplierNameNoSuppliers;
+
+  /// supplierNameSupplier
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get supplierNameSupplier;
+
+  /// supplierNameName
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先での商品名'**
+  String get supplierNameName;
+
+  /// supplierNameCode
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先での品番（任意）'**
+  String get supplierNameCode;
+
+  /// supplierNameNote
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get supplierNameNote;
+
+  /// supplierNameCodeLabel
+  ///
+  /// In ja, this message translates to:
+  /// **'品番 {code}'**
+  String supplierNameCodeLabel(String code);
+
+  /// poLineSupplierName
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先での呼び名：{name}'**
+  String poLineSupplierName(String name);
 }
 
 class _AppLocalizationsDelegate
