@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/delivery/application/delivery_providers.dart';
 import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
 import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
 import 'package:wms_mobile/features/purchasing/presentation/purchase_order_detail_screen.dart';
@@ -45,11 +47,19 @@ Future<void> _pumpList(WidgetTester tester, FakePurchaseOrderRepository repo,
   );
 }
 
-Future<void> _pumpDetail(WidgetTester tester, FakePurchaseOrderRepository repo, int id) async {
+Future<void> _pumpDetail(
+  WidgetTester tester,
+  FakePurchaseOrderRepository repo,
+  int id, {
+  List<Override> extraOverrides = const [],
+}) async {
   await pumpApp(
     tester,
     PurchaseOrderDetailScreen(purchaseOrderId: id),
-    overrides: [purchaseOrderRepositoryProvider.overrideWithValue(repo)],
+    overrides: [
+      purchaseOrderRepositoryProvider.overrideWithValue(repo),
+      ...extraOverrides,
+    ],
   );
 }
 
@@ -135,7 +145,7 @@ void main() {
   });
 
   testWidgets(
-      'driving a draft through submit -> approve -> complete updates its status',
+      'driving a draft through submit -> approve -> create delivery plan updates its status',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     final repo = FakePurchaseOrderRepository(orders: [_draftOrder()]);
@@ -160,12 +170,82 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('完了にする'));
+    // Approving is bookkeeping only (0083): the primary action is creating
+    // the delivery plan that will actually be received, not completing the
+    // order outright. Confirming it navigates to the new plan's own
+    // reconciliation screen, so this is where this order's own screen ends.
+    await tester.tap(find.text('入荷予定を作成'));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '完了にする')));
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, '入荷予定を作成')));
     await tester.pumpAndSettle();
-    expect(find.text('完了'), findsOneWidget);
+    expect(repo.lastDeliveryPlanCreatedFor, 1);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('creating a delivery plan reports how many lines it copied',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakePurchaseOrderRepository(orders: [
+      const PurchaseOrder(
+        id: 2,
+        status: PurchaseOrderStatus.approved,
+        poNumber: 'PO-000002',
+        supplierName: '新東光通商株式会社',
+        warehouseId: 1,
+        warehouseName: '東京倉庫',
+        lines: [
+          PurchaseOrderLine(
+              id: 1, janCode: '4988601001053', productName: 'ノート', quantity: 10),
+        ],
+      ),
+    ])
+      ..deliveryPlanResult =
+          const DeliveryPlanFromPurchaseOrderResult(deliveryPlanId: 55, lines: 1);
+    await _pumpDetail(tester, repo, 2, extraOverrides: [
+      // The successful create navigates straight to ReconciliationScreen for
+      // the new plan; a fake here keeps that a quick, harmless error state
+      // instead of a real network call the test would otherwise wait on.
+      deliveryRepositoryProvider.overrideWithValue(FakeDeliveryRepository([])),
+    ]);
+
+    await tester.tap(find.text('入荷予定を作成'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, '入荷予定を作成')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('入荷予定を作成しました（明細 1 件）'), findsOneWidget);
+    expect(repo.lastDeliveryPlanCreatedFor, 2);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'an order that already has a delivery plan offers to open it, not create another',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakePurchaseOrderRepository(orders: [
+      const PurchaseOrder(
+        id: 3,
+        status: PurchaseOrderStatus.approved,
+        poNumber: 'PO-000003',
+        supplierName: '新東光通商株式会社',
+        warehouseId: 1,
+        deliveryPlanId: 60,
+        lines: [
+          PurchaseOrderLine(id: 1, janCode: '4988601001053', quantity: 10),
+        ],
+      ),
+    ]);
+    await _pumpDetail(tester, repo, 3);
+
+    expect(find.text('入荷予定を作成'), findsNothing);
+    expect(find.text('完了にする'), findsOneWidget);
+    expect(find.byTooltip('入荷予定を開く'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });

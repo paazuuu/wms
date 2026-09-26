@@ -28,6 +28,16 @@ abstract class PurchaseOrderRepository {
   Future<ApiResult<bool>> reject(int id, {String? reason});
   Future<ApiResult<bool>> cancel(int id);
   Future<ApiResult<bool>> complete(int id);
+
+  /// `create_delivery_plan_from_purchase_order` (0083) — the inbound sibling
+  /// of `SalesOrderRepository.createShipment`: copies an APPROVED order's
+  /// lines into a new delivery plan for reconciliation to work from. Moves
+  /// no stock and reserves nothing; a purchase order has nothing incoming yet
+  /// to set aside.
+  Future<ApiResult<DeliveryPlanFromPurchaseOrderResult>> createDeliveryPlan(
+    int id, {
+    String? note,
+  });
 }
 
 class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
@@ -118,6 +128,24 @@ class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
   @override
   Future<ApiResult<bool>> complete(int id) =>
       _action('/rpc/complete_purchase_order', {'p_id': id});
+
+  @override
+  Future<ApiResult<DeliveryPlanFromPurchaseOrderResult>> createDeliveryPlan(
+    int id, {
+    String? note,
+  }) async {
+    try {
+      final response = await _dio.post(
+          '/rpc/create_delivery_plan_from_purchase_order',
+          data: {'p_purchase_order_id': id, 'p_note': note});
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(DeliveryPlanFromPurchaseOrderResult.fromJson(
+          (json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<DeliveryPlanFromPurchaseOrderResult>(e);
+    }
+  }
 
   Future<ApiResult<bool>> _action(String path, Map<String, dynamic> data) async {
     try {

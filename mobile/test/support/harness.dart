@@ -2156,7 +2156,18 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
   /// to simulate a permission-denied RPC response.
   String? failWith;
 
-  PurchaseOrder _copyWith(PurchaseOrder o, {PurchaseOrderStatus? status}) => PurchaseOrder(
+  /// What createDeliveryPlan() reports; a test overrides deliveryPlanId to
+  /// assert on the id it navigates to.
+  DeliveryPlanFromPurchaseOrderResult deliveryPlanResult =
+      const DeliveryPlanFromPurchaseOrderResult(deliveryPlanId: 900, lines: 1);
+  int? lastDeliveryPlanCreatedFor;
+
+  PurchaseOrder _copyWith(
+    PurchaseOrder o, {
+    PurchaseOrderStatus? status,
+    int? deliveryPlanId,
+  }) =>
+      PurchaseOrder(
         id: o.id,
         status: status ?? o.status,
         poNumber: o.poNumber,
@@ -2171,6 +2182,7 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
         lines: o.lines,
         lineCount: o.lineCount,
         totalAmount: o.totalAmount,
+        deliveryPlanId: deliveryPlanId ?? o.deliveryPlanId,
       );
 
   ApiResult<bool> _transition(int id, PurchaseOrderStatus from, PurchaseOrderStatus to) {
@@ -2263,6 +2275,27 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
   @override
   Future<ApiResult<bool>> complete(int id) async =>
       _transition(id, PurchaseOrderStatus.approved, PurchaseOrderStatus.completed);
+
+  @override
+  Future<ApiResult<DeliveryPlanFromPurchaseOrderResult>> createDeliveryPlan(
+    int id, {
+    String? note,
+  }) async {
+    lastDeliveryPlanCreatedFor = id;
+    final order = _orders.firstWhere((o) => o.id == id);
+    if (order.status != PurchaseOrderStatus.approved) {
+      return ApiFailure(
+          message: 'purchase order is ${order.status.wire}', statusCode: 400);
+    }
+    _orders = [
+      for (final o in _orders)
+        if (o.id == id)
+          _copyWith(o, deliveryPlanId: deliveryPlanResult.deliveryPlanId)
+        else
+          o,
+    ];
+    return ApiSuccess(deliveryPlanResult);
+  }
 }
 
 /// Sales order stub. Mirrors the real RPCs' state-machine transitions

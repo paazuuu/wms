@@ -2141,6 +2141,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get poCompleted => 'Purchase order completed';
 
   @override
+  String get poCreateDeliveryPlan => 'Create delivery plan';
+
+  @override
+  String get poCreateDeliveryPlanQ =>
+      'Create a delivery plan from this purchase order?';
+
+  @override
+  String poDeliveryPlanCreated(int lines) {
+    return 'Delivery plan created ($lines lines)';
+  }
+
+  @override
+  String get poOpenDeliveryPlan => 'Open delivery plan';
+
+  @override
   String get poStatusDraft => 'Draft';
 
   @override

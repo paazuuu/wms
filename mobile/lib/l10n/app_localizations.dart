@@ -4072,6 +4072,30 @@ abstract class AppLocalizations {
   /// **'発注を完了にしました'**
   String get poCompleted;
 
+  /// No description provided for @poCreateDeliveryPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定を作成'**
+  String get poCreateDeliveryPlan;
+
+  /// No description provided for @poCreateDeliveryPlanQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注から入荷予定を作成しますか？'**
+  String get poCreateDeliveryPlanQ;
+
+  /// Success message after creating a delivery plan from a purchase order.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定を作成しました（明細 {lines} 件）'**
+  String poDeliveryPlanCreated(int lines);
+
+  /// No description provided for @poOpenDeliveryPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定を開く'**
+  String get poOpenDeliveryPlan;
+
   /// No description provided for @poStatusDraft.
   ///
   /// In ja, this message translates to:

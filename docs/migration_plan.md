@@ -4117,6 +4117,54 @@ Tested with a widget test: choosing 社内消費 posts `INTERNAL_USE` with the
 sign the quantity field's direction implies, the same shape every other
 reason in that screen already has.
 
+### 0083 — the inbound sibling of 0073: a purchase order becomes a delivery plan
+
+Verifying the ledger's correctness (0082's own section) surfaced a second,
+document-level question: does the *business* chain — order placed, goods
+arrive, stock lands — hold together, not just the arithmetic? It does not,
+one-sidedly. 0073 gave sales orders a real downstream link: approving one
+reserves stock, and `create_shipment_from_sales_order` turns it into a
+shipment. Purchase orders (0033) never got the matching wire — its own
+header comment named the gap and left it undone ("pre-filling a delivery
+plan from an approved PO... a natural follow-up, not required for this to
+be useful on its own"). Approving or completing a PO never touched
+`delivery_plans`, so receiving its goods meant re-typing the same lines into
+a second, unrelated document by hand, with nothing on either side to say
+they were the same delivery.
+
+Migration 0083 adds `delivery_plans.purchase_order_id` (a unique index
+enforces at most one plan per order — unconditional, since `delivery_plans`
+has no cancelled state to exclude the way 0073's shipment index does) and
+`create_delivery_plan_from_purchase_order`: copies an APPROVED order's lines
+into a new plan, `purchase_order.manage`-gated and warehouse-scoped like its
+sales-order counterpart. Deliberately narrower than 0073 in one respect: a
+purchase order reserves nothing — there is no stock yet to set aside on the
+way in, only stock still to arrive — so this only copies lines, no stock
+moves and none should. `purchase_order_detail` gains a `delivery_plan_id`
+field, the same shape `sales_order_detail` already has for `shipment_plan_id`.
+
+Client: `PurchaseOrder.deliveryPlanId`/`hasDeliveryPlan`,
+`PurchaseOrderRepository.createDeliveryPlan`, and on the detail screen — the
+same "approving is bookkeeping, turning it into something the floor can act
+on is a separate step" shape 0073's sales-order screen already uses — a
+primary action that reads "入荷予定を作成" while APPROVED with no plan yet,
+becomes "完了にする" once one exists, and an app-bar action to reopen the
+plan (`ReconciliationScreen`) at any time after.
+
+Verified live via an aborted-transaction round trip: create → submit →
+approve → create the plan → read `purchase_order_detail` back as a separate
+statement (the first attempt, reading it in the same statement as the
+write, came back null — a snapshot artifact of mixing a `stable` read with
+the preceding `volatile` writes in one query, not a bug in the RPC; splitting
+into separate statements, as any two real HTTP requests naturally are,
+confirmed the correct value) → the DRAFT-state refusal → the double-create
+refusal (the unique index). The 10 security invariants held 10/10 both
+before and after. Tested client-side with two repository tests and three
+widget tests: creating a plan reports its line count, an order that already
+has one offers to open it rather than create a second, and the state-machine
+walk (draft → submit → approve → create delivery plan) drives the same
+button through each step.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

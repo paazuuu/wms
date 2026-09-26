@@ -993,6 +993,18 @@
   "poComplete": "完了にする",
   "poCompleteQ": "この発注を完了にしますか？在庫は移動しません。",
   "poCompleted": "発注を完了にしました",
+  "poCreateDeliveryPlan": "入荷予定を作成",
+  "poCreateDeliveryPlanQ": "この発注から入荷予定を作成しますか？",
+  "poDeliveryPlanCreated": "入荷予定を作成しました（明細 {lines} 件）",
+  "@poDeliveryPlanCreated": {
+    "description": "Success message after creating a delivery plan from a purchase order.",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "poOpenDeliveryPlan": "入荷予定を開く",
   "poStatusDraft": "下書き",
   "poStatusSubmitted": "提出済み",
   "poStatusApproved": "承認済み",

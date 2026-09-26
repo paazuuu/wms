@@ -102,5 +102,47 @@ void main() {
         failure: (f) => fail('expected success, got $f'),
       );
     });
+
+    test(
+        'createDeliveryPlan() posts the id and note to create_delivery_plan_from_purchase_order',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody(
+            {'delivery_plan_id': 42, 'purchase_order_id': 9, 'lines': 3}, 200);
+      });
+      final repo = PurchaseOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.createDeliveryPlan(9, note: '入荷予定を作成');
+
+      expect(captured.path, '/rpc/create_delivery_plan_from_purchase_order');
+      final body = captured.data as Map;
+      expect(body['p_purchase_order_id'], 9);
+      expect(body['p_note'], '入荷予定を作成');
+      result.when(
+        success: (created) {
+          expect(created.deliveryPlanId, 42);
+          expect(created.lines, 3);
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('a second createDeliveryPlan() call is refused by the unique plan',
+        () async {
+      final adapter = FakeHttpClientAdapter((_) => jsonResponseBody(
+            {'message': 'duplicate key value violates unique constraint'},
+            400,
+          ));
+      final repo = PurchaseOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.createDeliveryPlan(9);
+
+      result.when(
+        success: (_) => fail('expected failure'),
+        failure: (f) => expect(f.message, contains('duplicate key')),
+      );
+    });
   });
 }

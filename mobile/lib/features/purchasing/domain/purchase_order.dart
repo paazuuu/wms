@@ -79,6 +79,7 @@ class PurchaseOrder extends Equatable {
     this.lines = const [],
     this.lineCount,
     this.totalAmount,
+    this.deliveryPlanId,
   });
 
   final int id;
@@ -98,9 +99,17 @@ class PurchaseOrder extends Equatable {
   final int? lineCount;
   final double? totalAmount;
 
+  /// The delivery plan this order became, once
+  /// `create_delivery_plan_from_purchase_order` (0083) has run. Only
+  /// `purchase_order_detail` reads this — same asymmetry `SalesOrder.
+  /// shipmentPlanId` has, since an index row never loads it either.
+  final int? deliveryPlanId;
+
   int get totalLineCount => lines.isNotEmpty ? lines.length : (lineCount ?? 0);
   double get computedTotal =>
       totalAmount ?? lines.fold(0.0, (sum, l) => sum + l.amount);
+
+  bool get hasDeliveryPlan => deliveryPlanId != null;
 
   bool get canSubmit => status == PurchaseOrderStatus.draft;
   bool get canApproveOrReject => status == PurchaseOrderStatus.submitted;
@@ -133,10 +142,14 @@ class PurchaseOrder extends Equatable {
         lineCount:
             json['line_count'] == null ? null : _asInt(json['line_count']),
         totalAmount: _asDouble(json['total_amount']),
+        deliveryPlanId: json['delivery_plan_id'] == null
+            ? null
+            : _asInt(json['delivery_plan_id']),
       );
 
   @override
-  List<Object?> get props => [id, status, poNumber, supplierName, lines, lineCount];
+  List<Object?> get props =>
+      [id, status, poNumber, supplierName, lines, lineCount, deliveryPlanId];
 }
 
 /// One line the caller wants to order — the input shape for
@@ -160,4 +173,25 @@ class PurchaseOrderLineDraft {
         'quantity': quantity,
         if (unitPrice != null) 'unit_price': unitPrice,
       };
+}
+
+/// What `create_delivery_plan_from_purchase_order` (0083) did.
+class DeliveryPlanFromPurchaseOrderResult extends Equatable {
+  const DeliveryPlanFromPurchaseOrderResult({
+    required this.deliveryPlanId,
+    required this.lines,
+  });
+
+  final int deliveryPlanId;
+  final int lines;
+
+  factory DeliveryPlanFromPurchaseOrderResult.fromJson(
+          Map<String, dynamic> json) =>
+      DeliveryPlanFromPurchaseOrderResult(
+        deliveryPlanId: _asInt(json['delivery_plan_id']),
+        lines: _asInt(json['lines']),
+      );
+
+  @override
+  List<Object?> get props => [deliveryPlanId, lines];
 }

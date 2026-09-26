@@ -2084,6 +2084,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get poCompleted => '発注を完了にしました';
 
   @override
+  String get poCreateDeliveryPlan => '入荷予定を作成';
+
+  @override
+  String get poCreateDeliveryPlanQ => 'この発注から入荷予定を作成しますか？';
+
+  @override
+  String poDeliveryPlanCreated(int lines) {
+    return '入荷予定を作成しました（明細 $lines 件）';
+  }
+
+  @override
+  String get poOpenDeliveryPlan => '入荷予定を開く';
+
+  @override
   String get poStatusDraft => '下書き';
 
   @override

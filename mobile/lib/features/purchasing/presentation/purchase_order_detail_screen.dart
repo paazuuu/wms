@@ -8,6 +8,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
+import '../../delivery/presentation/reconciliation_screen.dart';
 import '../application/purchase_order_providers.dart';
 import '../domain/purchase_order.dart';
 import 'purchase_order_status_ui.dart';
@@ -26,9 +27,21 @@ class PurchaseOrderDetailScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(purchaseOrderDetailProvider(purchaseOrderId));
 
+    final deliveryPlanId = async.valueOrNull?.deliveryPlanId;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(async.valueOrNull?.poNumber ?? l10n.poTitle),
+        actions: [
+          if (deliveryPlanId != null)
+            IconButton(
+              tooltip: l10n.poOpenDeliveryPlan,
+              icon: const Icon(Icons.move_to_inbox_outlined),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ReconciliationScreen(planId: deliveryPlanId),
+              )),
+            ),
+        ],
       ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
@@ -143,6 +156,31 @@ class _BodyState extends ConsumerState<_Body> {
         successMessage: l10n.poCompleted);
   }
 
+  Future<void> _createDeliveryPlan() async {
+    final l10n = AppLocalizations.of(context);
+    if (!await _confirm(l10n.poCreateDeliveryPlan, l10n.poCreateDeliveryPlanQ,
+        l10n.poCreateDeliveryPlan)) {
+      return;
+    }
+    setState(() => _busy = true);
+    final result = await ref
+        .read(purchaseOrderRepositoryProvider)
+        .createDeliveryPlan(_order.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (created) {
+        _refresh();
+        _snack(l10n.poDeliveryPlanCreated(created.lines));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) =>
+              ReconciliationScreen(planId: created.deliveryPlanId),
+        ));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
   Widget? _primaryAction(AppLocalizations l10n) {
     switch (_order.status) {
       case PurchaseOrderStatus.draft:
@@ -158,6 +196,17 @@ class _BodyState extends ConsumerState<_Body> {
           label: Text(l10n.poApprove),
         );
       case PurchaseOrderStatus.approved:
+        // Approving is a bookkeeping step only; turning that into something
+        // receiving can reconcile against is a separate, explicit action
+        // (0083). Once a delivery plan exists, the primary action goes back
+        // to closing the order's own bookkeeping.
+        if (!_order.hasDeliveryPlan) {
+          return FilledButton.icon(
+            onPressed: _busy ? null : _createDeliveryPlan,
+            icon: const Icon(Icons.move_to_inbox_outlined),
+            label: Text(l10n.poCreateDeliveryPlan),
+          );
+        }
         return FilledButton.icon(
           onPressed: _busy ? null : _complete,
           icon: const Icon(Icons.task_alt),

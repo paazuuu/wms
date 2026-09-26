@@ -2081,6 +2081,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get poCompleted => '采购订单已完成';
 
   @override
+  String get poCreateDeliveryPlan => '创建入库计划';
+
+  @override
+  String get poCreateDeliveryPlanQ => '要根据此采购订单创建入库计划吗？';
+
+  @override
+  String poDeliveryPlanCreated(int lines) {
+    return '已创建入库计划（$lines 条明细）';
+  }
+
+  @override
+  String get poOpenDeliveryPlan => '打开入库计划';
+
+  @override
   String get poStatusDraft => '草稿';
 
   @override

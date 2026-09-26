@@ -42,9 +42,19 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       `.manage`/`.approve`-gated, self-approval refused. Distinct from a
       delivery plan (an already-shipped delivery used for QC reconciliation);
       completing a PO is a bookkeeping close, not a receiving event — it does
-      not move stock and is not wired into delivery_plans/reconciliation.
-      Verified live via grants and an aborted-transaction round trip covering
-      every transition plus the wrong-state refusals
+      not move stock. Verified live via grants and an aborted-transaction
+      round trip covering every transition plus the wrong-state refusals
+- [x] Purchase Order → Delivery Plan (0083) — the inbound sibling of 0073's
+      Sales Order → Reservation → Shipment wire: an APPROVED purchase order
+      can turn into a delivery plan (`create_delivery_plan_from_purchase_order`),
+      copying its lines across for reconciliation to work from. Deliberately
+      reserves nothing — there is no stock yet to set aside on the way in —
+      so no stock moves here either. At most one delivery plan per order
+      (unique index); `purchase_order_detail` reports the plan it became, the
+      same shape `sales_order_detail` already had for its shipment. Verified
+      live via an aborted-transaction round trip (create → submit → approve →
+      create the plan → read it back via the detail RPC → the wrong-state and
+      double-create refusals) plus the 10 security invariants unchanged
 - [x] Formal put-away task/confirmation step (0038) — `putaway.confirm` has
       existed since 0012 with nothing implementing it. The queue is
       **derived** (`stock_levels.on_hand` minus the sum of that JAN's
@@ -72,6 +82,14 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       generic trading-partner reference via `shipment_plans.party_id`).
       Verified live via grants and an aborted-transaction round trip
       covering every transition, reject, and the wrong-state refusals
+- [x] Sales Order → Reservation → Shipment (0073) — approving a sales order
+      reserves stock per line, best-effort (an unlinked JAN or a shortfall is
+      reported, not blocking); `create_shipment_from_sales_order` turns an
+      APPROVED order into a shipment plan and re-files the reservation under
+      it rather than making a second one. `fulfil_reservation`, the last step
+      of that promise (marking it kept once the goods actually ship), had no
+      caller anywhere until the client-flexibility pass below wired a manual
+      action for it
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**
@@ -826,6 +844,60 @@ missing feature.
 - [ ] Barcode/label printing — ✅ actually **does** exist independently
       (carton/JAN printing via `printing`/`barcode` packages in the shipment
       feature) — not an InventorOS gap
+
+**Client reachability pass (RPCs that existed with no caller anywhere,
+closed out 9/25–9/26)** — an audit comparing every `create or replace
+function` in `supabase/migrations/` against every `/rpc/` call the Flutter
+client actually makes turned up RPCs built, tested at the SQL level, and
+then never wired to a screen. Each of the following got a screen (or an
+action on an existing one), a repository method, tests, and — where the RPC
+needed one — a migration, all re-verified against the live project's 10
+security invariants:
+- [x] `bin_stock_overview` (0016) — a new screen off the location tree: every
+      bin in a warehouse and what is actually in it, not just the
+      per-location rollup the tree already showed
+- [x] `stock_reconciliation` (0061) — a new screen: every place
+      `stock_levels.on_hand` and what `stock_units` sums to disagree,
+      previously checkable only by hand-written SQL
+- [x] `raise_exception` / `cancel_exception` / `list_exception_types` (0071)
+      — the exception queue could show what receiving/QC raised
+      automatically, but an operator had no way to report something the
+      system did not catch, or to withdraw one raised in error
+- [x] `record_receipt_item` (0067) — the receipt detail screen was read-only;
+      a parcel found after a reconciliation already closed had no way in
+      except raw SQL
+- [x] `fulfil_reservation` (0064) — `release_reservation`'s missing sibling;
+      `fulfilled_quantity` sat at 0 for every reservation's whole life until
+      this pass added a manual "mark as fulfilled" action beside release
+- [x] `unlinked_jan_codes` / `product_id_coverage` (0058) — a new screen: the
+      registration worklist those two RPCs were built to be, never reachable
+      before
+- [x] `INTERNAL_USE` adjustment reason (0082) — stock the company consumed
+      itself had no reason code of its own and always fell into OTHER
+- [x] Purchase Order → Delivery Plan (0083) — see the Inbound section above;
+      found while re-verifying end-to-end that a manually entered receipt or
+      shipment computes correctly, which it does (both post through the one
+      `apply_stock_movement_detail` choke point and its `stock_units`-sync
+      trigger) — but purchase orders had no structural link to the delivery
+      plan that receives them, unlike sales orders' link to their shipment
+- Confirmed false positives while auditing (already reachable, some other
+  way, no work needed): `carton_detail` (surfaced through
+  `shipment_packing`'s own response), `carton_label` (deliberately
+  duplicated client-side so label printing needs no network round trip),
+  `pick_candidates` (an internal helper of `pick_task_candidates`),
+  `pick_list_detail`/`pick_list_index`/`transfer_order_index`/
+  `transfer_order_detail`/`stock_count_detail`/`warehouse_overview`/
+  `stock_availability`/`inspection_detail`/`audit_log_query`/
+  `audit_event_types` (all edge-function-routed, not called via `/rpc/`
+  directly), `putaway_suggestions` (embedded in `putaway_queue`'s response)
+- Deliberately still not pursued: `reserve_stock` (manual reservation
+  creation needs a product-picker UI this app does not have yet),
+  `release_allocation` (releasing one allocation without releasing the whole
+  reservation — no operator has asked for it), `set_product_base_uom` (a
+  narrow one-time correction tool, refused once any stock movement exists —
+  not a routine gap), `list_attachment_targets`/`list_scan_contexts` (every
+  caller already knows its own entity type/scan context from the screen it
+  is on, so no form would use the vocabulary read)
 
 ## 3. Everything not implemented, not Supabase-connected, or not tested
 
