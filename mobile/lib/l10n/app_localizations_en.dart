@@ -4437,7 +4437,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferExportNotice =>
-      'Cross-border: the goods leave stock when they ship and are not received.';
+      'Cross-border: the goods leave real stock when they ship and are not received. What was sent is added to the warehouse\'s virtual figure.';
 
   @override
   String get transferCrossBorderReceivedNotice =>
@@ -4520,4 +4520,137 @@ class AppLocalizationsEn extends AppLocalizations {
   String poLineSupplierName(String name) {
     return 'Supplier calls it: $name';
   }
+
+  @override
+  String get featVirtualStock => 'Stock abroad (virtual)';
+
+  @override
+  String get featVirtualStockDesc =>
+      'A rough monthly figure for warehouses abroad, from what was sent and counts typed in';
+
+  @override
+  String get virtualTitle => 'Stock abroad (virtual)';
+
+  @override
+  String get virtualExplain =>
+      'Goods sent abroad have left real stock. This is a virtual figure from what Japan sent and counts typed in; it is never reserved or shipped.';
+
+  @override
+  String get virtualNoWarehouse => 'No warehouse abroad';
+
+  @override
+  String get virtualNoWarehouseBody =>
+      'Set a warehouse\'s country under 国・役割 and it appears here.';
+
+  @override
+  String get virtualWarehouse => 'Warehouse';
+
+  @override
+  String get virtualFromMonth => 'From month';
+
+  @override
+  String get virtualToMonth => 'To month';
+
+  @override
+  String virtualRangeTotal(String from, String to) {
+    return 'Total $from – $to';
+  }
+
+  @override
+  String get virtualByMonth => 'By month';
+
+  @override
+  String get virtualByProduct => 'By product';
+
+  @override
+  String get virtualEmpty => 'Nothing recorded in this range';
+
+  @override
+  String get virtualOpening => 'Opening';
+
+  @override
+  String get virtualArrived => 'From Japan';
+
+  @override
+  String get virtualAdjusted => 'Typed in';
+
+  @override
+  String get virtualCountDiff => 'Count gap';
+
+  @override
+  String get virtualClosing => 'Closing';
+
+  @override
+  String get virtualMonth => 'Month';
+
+  @override
+  String virtualProductLine(int opening, int arrived, int change) {
+    return 'Opening $opening · from Japan +$arrived · change $change';
+  }
+
+  @override
+  String virtualLastCount(String date, int counted) {
+    return 'Last count $date: $counted';
+  }
+
+  @override
+  String get virtualRecord => 'Enter count or change';
+
+  @override
+  String get virtualRecorded => 'Recorded';
+
+  @override
+  String get virtualHistory => 'History';
+
+  @override
+  String virtualBalanceThatDay(int balance) {
+    return 'That day $balance';
+  }
+
+  @override
+  String virtualEntryExport(int quantity, String number) {
+    return 'From Japan +$quantity ($number)';
+  }
+
+  @override
+  String virtualEntryCount(int counted) {
+    return 'Counted $counted';
+  }
+
+  @override
+  String virtualEntryAdjust(String change) {
+    return 'Change $change';
+  }
+
+  @override
+  String get virtualTypeCount => 'Count';
+
+  @override
+  String get virtualTypeAdjust => 'Change';
+
+  @override
+  String get virtualTypeCountHint =>
+      'The number actually there on that day. The figure is counted on from it.';
+
+  @override
+  String get virtualTypeAdjustHint =>
+      'A shipment out or in that you know about.';
+
+  @override
+  String get virtualAdjustOut => 'Out (−)';
+
+  @override
+  String get virtualAdjustIn => 'In (+)';
+
+  @override
+  String get virtualCountedQuantity => 'Counted';
+
+  @override
+  String get virtualAdjustQuantity => 'Quantity';
+
+  @override
+  String get virtualDate => 'Date';
+
+  @override
+  String get virtualNote => 'Note (optional)';
 }

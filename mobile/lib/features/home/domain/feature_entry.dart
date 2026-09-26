@@ -107,6 +107,8 @@ class FeatureEntry {
         return l10n.featSalesOrders;
       case 'demand':
         return l10n.featDemand;
+      case 'virtual_stock':
+        return l10n.featVirtualStock;
       case 'partners':
         return l10n.featPartners;
       case 'work_orders':
@@ -171,6 +173,8 @@ class FeatureEntry {
         return l10n.featSalesOrdersDesc;
       case 'demand':
         return l10n.featDemandDesc;
+      case 'virtual_stock':
+        return l10n.featVirtualStockDesc;
       case 'partners':
         return l10n.featPartnersDesc;
       case 'work_orders':

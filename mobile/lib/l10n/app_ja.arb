@@ -3813,7 +3813,7 @@
       }
     }
   },
-  "transferExportNotice": "国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。",
+  "transferExportNotice": "国をまたぐ転送：出庫した時点で実在庫から除外され、受入はありません。送った数は「国外倉庫の仮想在庫」に計上されます。",
   "@transferExportNotice": {
     "description": "transferExportNotice"
   },
@@ -3927,5 +3927,207 @@
         "type": "String"
       }
     }
+  },
+  "featVirtualStock": "国外倉庫の仮想在庫",
+  "@featVirtualStock": {
+    "description": "featVirtualStock"
+  },
+  "featVirtualStockDesc": "日本から送った数と手入力の実数で、国外倉庫のおおよその在庫を月ごとに見る",
+  "@featVirtualStockDesc": {
+    "description": "featVirtualStockDesc"
+  },
+  "virtualTitle": "国外倉庫の仮想在庫",
+  "@virtualTitle": {
+    "description": "virtualTitle"
+  },
+  "virtualExplain": "国外へ送った商品は実在庫からは除外されています。ここは日本からの出荷と手入力の実数による仮想の数で、引当や出荷には使われません。",
+  "@virtualExplain": {
+    "description": "virtualExplain"
+  },
+  "virtualNoWarehouse": "国外の倉庫がありません",
+  "@virtualNoWarehouse": {
+    "description": "virtualNoWarehouse"
+  },
+  "virtualNoWarehouseBody": "倉庫の「国・役割」で国を設定すると、ここに表示されます。",
+  "@virtualNoWarehouseBody": {
+    "description": "virtualNoWarehouseBody"
+  },
+  "virtualWarehouse": "倉庫",
+  "@virtualWarehouse": {
+    "description": "virtualWarehouse"
+  },
+  "virtualFromMonth": "開始月",
+  "@virtualFromMonth": {
+    "description": "virtualFromMonth"
+  },
+  "virtualToMonth": "終了月",
+  "@virtualToMonth": {
+    "description": "virtualToMonth"
+  },
+  "virtualRangeTotal": "{from} 〜 {to} の合計",
+  "@virtualRangeTotal": {
+    "description": "virtualRangeTotal",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "virtualByMonth": "月別",
+  "@virtualByMonth": {
+    "description": "virtualByMonth"
+  },
+  "virtualByProduct": "商品別",
+  "@virtualByProduct": {
+    "description": "virtualByProduct"
+  },
+  "virtualEmpty": "この期間の記録はありません",
+  "@virtualEmpty": {
+    "description": "virtualEmpty"
+  },
+  "virtualOpening": "期首",
+  "@virtualOpening": {
+    "description": "virtualOpening"
+  },
+  "virtualArrived": "日本から",
+  "@virtualArrived": {
+    "description": "virtualArrived"
+  },
+  "virtualAdjusted": "手動増減",
+  "@virtualAdjusted": {
+    "description": "virtualAdjusted"
+  },
+  "virtualCountDiff": "実数との差",
+  "@virtualCountDiff": {
+    "description": "virtualCountDiff"
+  },
+  "virtualClosing": "期末",
+  "@virtualClosing": {
+    "description": "virtualClosing"
+  },
+  "virtualMonth": "月",
+  "@virtualMonth": {
+    "description": "virtualMonth"
+  },
+  "virtualProductLine": "期首 {opening} ・日本から +{arrived} ・増減 {change}",
+  "@virtualProductLine": {
+    "description": "virtualProductLine",
+    "placeholders": {
+      "opening": {
+        "type": "int"
+      },
+      "arrived": {
+        "type": "int"
+      },
+      "change": {
+        "type": "int"
+      }
+    }
+  },
+  "virtualLastCount": "最終実数 {date}：{counted}",
+  "@virtualLastCount": {
+    "description": "virtualLastCount",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "counted": {
+        "type": "int"
+      }
+    }
+  },
+  "virtualRecord": "実数・増減を入力",
+  "@virtualRecord": {
+    "description": "virtualRecord"
+  },
+  "virtualRecorded": "記録しました",
+  "@virtualRecorded": {
+    "description": "virtualRecorded"
+  },
+  "virtualHistory": "記録の履歴",
+  "@virtualHistory": {
+    "description": "virtualHistory"
+  },
+  "virtualBalanceThatDay": "その日の数 {balance}",
+  "@virtualBalanceThatDay": {
+    "description": "virtualBalanceThatDay",
+    "placeholders": {
+      "balance": {
+        "type": "int"
+      }
+    }
+  },
+  "virtualEntryExport": "日本から +{quantity}（{number}）",
+  "@virtualEntryExport": {
+    "description": "virtualEntryExport",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "virtualEntryCount": "実数 {counted}",
+  "@virtualEntryCount": {
+    "description": "virtualEntryCount",
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      }
+    }
+  },
+  "virtualEntryAdjust": "増減 {change}",
+  "@virtualEntryAdjust": {
+    "description": "virtualEntryAdjust",
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "virtualTypeCount": "実数",
+  "@virtualTypeCount": {
+    "description": "virtualTypeCount"
+  },
+  "virtualTypeAdjust": "増減",
+  "@virtualTypeAdjust": {
+    "description": "virtualTypeAdjust"
+  },
+  "virtualTypeCountHint": "その日に実際にあった数を入力します。以後の数はこの数から計算されます。",
+  "@virtualTypeCountHint": {
+    "description": "virtualTypeCountHint"
+  },
+  "virtualTypeAdjustHint": "分かっている出庫や入庫を入力します。",
+  "@virtualTypeAdjustHint": {
+    "description": "virtualTypeAdjustHint"
+  },
+  "virtualAdjustOut": "出庫（減）",
+  "@virtualAdjustOut": {
+    "description": "virtualAdjustOut"
+  },
+  "virtualAdjustIn": "入庫（増）",
+  "@virtualAdjustIn": {
+    "description": "virtualAdjustIn"
+  },
+  "virtualCountedQuantity": "実数",
+  "@virtualCountedQuantity": {
+    "description": "virtualCountedQuantity"
+  },
+  "virtualAdjustQuantity": "数量",
+  "@virtualAdjustQuantity": {
+    "description": "virtualAdjustQuantity"
+  },
+  "virtualDate": "日付",
+  "@virtualDate": {
+    "description": "virtualDate"
+  },
+  "virtualNote": "メモ（任意）",
+  "@virtualNote": {
+    "description": "virtualNote"
   }
 }

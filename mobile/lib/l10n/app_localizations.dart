@@ -8043,7 +8043,7 @@ abstract class AppLocalizations {
   /// transferExportNotice
   ///
   /// In ja, this message translates to:
-  /// **'国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。'**
+  /// **'国をまたぐ転送：出庫した時点で実在庫から除外され、受入はありません。送った数は「国外倉庫の仮想在庫」に計上されます。'**
   String get transferExportNotice;
 
   /// transferCrossBorderReceivedNotice
@@ -8189,6 +8189,234 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'仕入先での呼び名：{name}'**
   String poLineSupplierName(String name);
+
+  /// featVirtualStock
+  ///
+  /// In ja, this message translates to:
+  /// **'国外倉庫の仮想在庫'**
+  String get featVirtualStock;
+
+  /// featVirtualStockDesc
+  ///
+  /// In ja, this message translates to:
+  /// **'日本から送った数と手入力の実数で、国外倉庫のおおよその在庫を月ごとに見る'**
+  String get featVirtualStockDesc;
+
+  /// virtualTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'国外倉庫の仮想在庫'**
+  String get virtualTitle;
+
+  /// virtualExplain
+  ///
+  /// In ja, this message translates to:
+  /// **'国外へ送った商品は実在庫からは除外されています。ここは日本からの出荷と手入力の実数による仮想の数で、引当や出荷には使われません。'**
+  String get virtualExplain;
+
+  /// virtualNoWarehouse
+  ///
+  /// In ja, this message translates to:
+  /// **'国外の倉庫がありません'**
+  String get virtualNoWarehouse;
+
+  /// virtualNoWarehouseBody
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫の「国・役割」で国を設定すると、ここに表示されます。'**
+  String get virtualNoWarehouseBody;
+
+  /// virtualWarehouse
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get virtualWarehouse;
+
+  /// virtualFromMonth
+  ///
+  /// In ja, this message translates to:
+  /// **'開始月'**
+  String get virtualFromMonth;
+
+  /// virtualToMonth
+  ///
+  /// In ja, this message translates to:
+  /// **'終了月'**
+  String get virtualToMonth;
+
+  /// virtualRangeTotal
+  ///
+  /// In ja, this message translates to:
+  /// **'{from} 〜 {to} の合計'**
+  String virtualRangeTotal(String from, String to);
+
+  /// virtualByMonth
+  ///
+  /// In ja, this message translates to:
+  /// **'月別'**
+  String get virtualByMonth;
+
+  /// virtualByProduct
+  ///
+  /// In ja, this message translates to:
+  /// **'商品別'**
+  String get virtualByProduct;
+
+  /// virtualEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間の記録はありません'**
+  String get virtualEmpty;
+
+  /// virtualOpening
+  ///
+  /// In ja, this message translates to:
+  /// **'期首'**
+  String get virtualOpening;
+
+  /// virtualArrived
+  ///
+  /// In ja, this message translates to:
+  /// **'日本から'**
+  String get virtualArrived;
+
+  /// virtualAdjusted
+  ///
+  /// In ja, this message translates to:
+  /// **'手動増減'**
+  String get virtualAdjusted;
+
+  /// virtualCountDiff
+  ///
+  /// In ja, this message translates to:
+  /// **'実数との差'**
+  String get virtualCountDiff;
+
+  /// virtualClosing
+  ///
+  /// In ja, this message translates to:
+  /// **'期末'**
+  String get virtualClosing;
+
+  /// virtualMonth
+  ///
+  /// In ja, this message translates to:
+  /// **'月'**
+  String get virtualMonth;
+
+  /// virtualProductLine
+  ///
+  /// In ja, this message translates to:
+  /// **'期首 {opening} ・日本から +{arrived} ・増減 {change}'**
+  String virtualProductLine(int opening, int arrived, int change);
+
+  /// virtualLastCount
+  ///
+  /// In ja, this message translates to:
+  /// **'最終実数 {date}：{counted}'**
+  String virtualLastCount(String date, int counted);
+
+  /// virtualRecord
+  ///
+  /// In ja, this message translates to:
+  /// **'実数・増減を入力'**
+  String get virtualRecord;
+
+  /// virtualRecorded
+  ///
+  /// In ja, this message translates to:
+  /// **'記録しました'**
+  String get virtualRecorded;
+
+  /// virtualHistory
+  ///
+  /// In ja, this message translates to:
+  /// **'記録の履歴'**
+  String get virtualHistory;
+
+  /// virtualBalanceThatDay
+  ///
+  /// In ja, this message translates to:
+  /// **'その日の数 {balance}'**
+  String virtualBalanceThatDay(int balance);
+
+  /// virtualEntryExport
+  ///
+  /// In ja, this message translates to:
+  /// **'日本から +{quantity}（{number}）'**
+  String virtualEntryExport(int quantity, String number);
+
+  /// virtualEntryCount
+  ///
+  /// In ja, this message translates to:
+  /// **'実数 {counted}'**
+  String virtualEntryCount(int counted);
+
+  /// virtualEntryAdjust
+  ///
+  /// In ja, this message translates to:
+  /// **'増減 {change}'**
+  String virtualEntryAdjust(String change);
+
+  /// virtualTypeCount
+  ///
+  /// In ja, this message translates to:
+  /// **'実数'**
+  String get virtualTypeCount;
+
+  /// virtualTypeAdjust
+  ///
+  /// In ja, this message translates to:
+  /// **'増減'**
+  String get virtualTypeAdjust;
+
+  /// virtualTypeCountHint
+  ///
+  /// In ja, this message translates to:
+  /// **'その日に実際にあった数を入力します。以後の数はこの数から計算されます。'**
+  String get virtualTypeCountHint;
+
+  /// virtualTypeAdjustHint
+  ///
+  /// In ja, this message translates to:
+  /// **'分かっている出庫や入庫を入力します。'**
+  String get virtualTypeAdjustHint;
+
+  /// virtualAdjustOut
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫（減）'**
+  String get virtualAdjustOut;
+
+  /// virtualAdjustIn
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫（増）'**
+  String get virtualAdjustIn;
+
+  /// virtualCountedQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'実数'**
+  String get virtualCountedQuantity;
+
+  /// virtualAdjustQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get virtualAdjustQuantity;
+
+  /// virtualDate
+  ///
+  /// In ja, this message translates to:
+  /// **'日付'**
+  String get virtualDate;
+
+  /// virtualNote
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get virtualNote;
 }
 
 class _AppLocalizationsDelegate

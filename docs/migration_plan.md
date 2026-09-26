@@ -4461,6 +4461,65 @@ often deliberate, bought ahead of orders that are expected.
 5. A shipment line printed the master name and kept the order's wording.
 6. All 10 security invariants hold.
 
+### 0088 — a virtual count for warehouses abroad
+
+0087 made an export leave this system at the source. Real stock stays
+honest, but "about how much is in the China warehouse now?" had no answer.
+Only a few people know what that warehouse ships out.
+`virtual_stock_entries` is a separate ledger. It is never available,
+reserved, picked or shipped.
+
+**Entry types.**
+
+- `EXPORT_IN`: written by `complete_transfer_picking` when a transfer
+  exports (`record_export_arrival`). There is one entry per transfer and
+  product, dated in the destination's time zone.
+- `COUNT`: "on this day there were N", typed in by hand.
+- `ADJUST`: a known change (+/-), typed in by hand.
+
+Typed-in entries go through `record_virtual_stock` (inventory.adjust and
+scope). They can be deleted; arrivals cannot.
+
+**How the figure is computed.**
+
+- `virtual_balance(wh, product, day)` is the latest count on or before the
+  day, plus every non-count entry after it. A back-dated count lands in the
+  right place.
+- Every date is the warehouse's own day (`warehouse_today`). The server clock
+  is UTC, and a count typed in China at 01:00 must not be "in the future".
+
+**Summaries.**
+
+- `virtual_stock_summary(wh, from, to)` returns totals, one row per month and
+  one row per product: opening, from Japan, typed-in changes, **count gap**,
+  and closing. The count gap is closing minus everything recorded, mostly
+  what left the warehouse unrecorded.
+- `virtual_stock_history` lists one product's entries with the figure on
+  each day.
+- `virtual_stock_warehouses` lists the warehouses that qualify: abroad and
+  not receiving cross-border stock, or already carrying entries.
+
+**Client.** A 国外倉庫の仮想在庫 menu entry opens a screen with:
+
+- a warehouse picker and a start/end month range (last three months by
+  default);
+- the range total, a month table and a per-product list with the last count;
+- a history sheet per product (typed-in entries can be deleted);
+- a dialog to enter an actual count or a known in/out change with a date.
+
+The transfer export notice now says what was sent is added to the virtual
+figure.
+
+**Verified live** (aborted transaction, a temporary CN warehouse): exports
+of 6 (dated last month) and 5 took Japan stock 20→9, real CN stock stayed 0.
+
+| | From Japan | Count | Change | Count gap | Closing |
+|---|---|---|---|---|---|
+| August | 6 | | | 0 | 6 |
+| September | 5 | 7 | −1 | −4 | 6 |
+
+A count dated in the future was refused. The security invariants still hold.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

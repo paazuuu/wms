@@ -117,6 +117,9 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       orders; never printed downstream
 - [x] One downstream slip (0087): shipments and transfers print the same
       送り状 layout, with the product master's name
+- [x] Virtual stock abroad (0088): exports counted into a separate virtual
+      ledger for the destination, plus hand-typed counts and known changes;
+      monthly / range summary with the gap counts close
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**

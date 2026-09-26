@@ -27,6 +27,7 @@ import '../../sales/presentation/sales_order_list_screen.dart';
 import '../../stock_ops/presentation/stock_adjustment_screen.dart';
 import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../transfers/presentation/transfer_list_screen.dart';
+import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
 import 'feature_entry.dart';
 
@@ -139,6 +140,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.trending_down_outlined,
             status: FeatureStatus.ready,
             builder: _replenishment,
+            requiredAnyOf: ['inventory.view'],
+          ),
+          // Beside replenishment: both answer "how much is where", this one
+          // for the warehouses abroad whose stock left the system (0088).
+          FeatureEntry(
+            id: 'virtual_stock',
+            icon: Icons.public,
+            status: FeatureStatus.ready,
+            builder: _virtualStock,
             requiredAnyOf: ['inventory.view'],
           ),
           FeatureEntry(
@@ -320,6 +330,8 @@ Widget _purchaseOrders(BuildContext _) => const PurchaseOrderListScreen();
 Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();
 
 Widget _demand(BuildContext _) => const OpenDemandScreen();
+
+Widget _virtualStock(BuildContext _) => const VirtualStockScreen();
 
 /// Top-level (const-referenceable) builder for the Work Orders feature.
 Widget _workOrders(BuildContext _) => const WorkOrderListScreen();

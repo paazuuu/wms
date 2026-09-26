@@ -4325,7 +4325,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get transferExportNotice => '国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。';
+  String get transferExportNotice =>
+      '国をまたぐ転送：出庫した時点で実在庫から除外され、受入はありません。送った数は「国外倉庫の仮想在庫」に計上されます。';
 
   @override
   String get transferCrossBorderReceivedNotice =>
@@ -4407,4 +4408,133 @@ class AppLocalizationsJa extends AppLocalizations {
   String poLineSupplierName(String name) {
     return '仕入先での呼び名：$name';
   }
+
+  @override
+  String get featVirtualStock => '国外倉庫の仮想在庫';
+
+  @override
+  String get featVirtualStockDesc => '日本から送った数と手入力の実数で、国外倉庫のおおよその在庫を月ごとに見る';
+
+  @override
+  String get virtualTitle => '国外倉庫の仮想在庫';
+
+  @override
+  String get virtualExplain =>
+      '国外へ送った商品は実在庫からは除外されています。ここは日本からの出荷と手入力の実数による仮想の数で、引当や出荷には使われません。';
+
+  @override
+  String get virtualNoWarehouse => '国外の倉庫がありません';
+
+  @override
+  String get virtualNoWarehouseBody => '倉庫の「国・役割」で国を設定すると、ここに表示されます。';
+
+  @override
+  String get virtualWarehouse => '倉庫';
+
+  @override
+  String get virtualFromMonth => '開始月';
+
+  @override
+  String get virtualToMonth => '終了月';
+
+  @override
+  String virtualRangeTotal(String from, String to) {
+    return '$from 〜 $to の合計';
+  }
+
+  @override
+  String get virtualByMonth => '月別';
+
+  @override
+  String get virtualByProduct => '商品別';
+
+  @override
+  String get virtualEmpty => 'この期間の記録はありません';
+
+  @override
+  String get virtualOpening => '期首';
+
+  @override
+  String get virtualArrived => '日本から';
+
+  @override
+  String get virtualAdjusted => '手動増減';
+
+  @override
+  String get virtualCountDiff => '実数との差';
+
+  @override
+  String get virtualClosing => '期末';
+
+  @override
+  String get virtualMonth => '月';
+
+  @override
+  String virtualProductLine(int opening, int arrived, int change) {
+    return '期首 $opening ・日本から +$arrived ・増減 $change';
+  }
+
+  @override
+  String virtualLastCount(String date, int counted) {
+    return '最終実数 $date：$counted';
+  }
+
+  @override
+  String get virtualRecord => '実数・増減を入力';
+
+  @override
+  String get virtualRecorded => '記録しました';
+
+  @override
+  String get virtualHistory => '記録の履歴';
+
+  @override
+  String virtualBalanceThatDay(int balance) {
+    return 'その日の数 $balance';
+  }
+
+  @override
+  String virtualEntryExport(int quantity, String number) {
+    return '日本から +$quantity（$number）';
+  }
+
+  @override
+  String virtualEntryCount(int counted) {
+    return '実数 $counted';
+  }
+
+  @override
+  String virtualEntryAdjust(String change) {
+    return '増減 $change';
+  }
+
+  @override
+  String get virtualTypeCount => '実数';
+
+  @override
+  String get virtualTypeAdjust => '増減';
+
+  @override
+  String get virtualTypeCountHint => 'その日に実際にあった数を入力します。以後の数はこの数から計算されます。';
+
+  @override
+  String get virtualTypeAdjustHint => '分かっている出庫や入庫を入力します。';
+
+  @override
+  String get virtualAdjustOut => '出庫（減）';
+
+  @override
+  String get virtualAdjustIn => '入庫（増）';
+
+  @override
+  String get virtualCountedQuantity => '実数';
+
+  @override
+  String get virtualAdjustQuantity => '数量';
+
+  @override
+  String get virtualDate => '日付';
+
+  @override
+  String get virtualNote => 'メモ（任意）';
 }

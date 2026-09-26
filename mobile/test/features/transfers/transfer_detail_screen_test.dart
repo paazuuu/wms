@@ -187,7 +187,7 @@ void main() {
       overrides: [transferRepositoryProvider.overrideWithValue(repo)],
     );
 
-    expect(find.text('国をまたぐ転送：出庫した時点で在庫から除外され、受入はありません。'), findsOneWidget);
+    expect(find.textContaining('国外倉庫の仮想在庫」に計上されます'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, '出庫を確定'));
     await tester.pumpAndSettle();

@@ -4317,7 +4317,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get transferExportNotice => '跨境调拨：出库即从库存扣除，不会入库。';
+  String get transferExportNotice => '跨境调拨：出库即从实际库存扣除，不会入库。发出的数量计入“海外仓库虚拟库存”。';
 
   @override
   String get transferCrossBorderReceivedNotice => '跨境调拨：目的仓库接收跨境货物，因此会入库。';
@@ -4398,4 +4398,133 @@ class AppLocalizationsZh extends AppLocalizations {
   String poLineSupplierName(String name) {
     return '供应商叫法：$name';
   }
+
+  @override
+  String get featVirtualStock => '海外仓库虚拟库存';
+
+  @override
+  String get featVirtualStockDesc => '按月查看海外仓库的大致库存（依据从日本发出的数量和手动录入的实数）';
+
+  @override
+  String get virtualTitle => '海外仓库虚拟库存';
+
+  @override
+  String get virtualExplain =>
+      '发往海外的商品已从实际库存中扣除。这里是根据日本发货和手动录入实数得出的虚拟数量，不用于预留或发货。';
+
+  @override
+  String get virtualNoWarehouse => '没有海外仓库';
+
+  @override
+  String get virtualNoWarehouseBody => '在仓库的“国家与角色”中设置国家后即会显示在这里。';
+
+  @override
+  String get virtualWarehouse => '仓库';
+
+  @override
+  String get virtualFromMonth => '起始月';
+
+  @override
+  String get virtualToMonth => '结束月';
+
+  @override
+  String virtualRangeTotal(String from, String to) {
+    return '$from 至 $to 合计';
+  }
+
+  @override
+  String get virtualByMonth => '按月';
+
+  @override
+  String get virtualByProduct => '按商品';
+
+  @override
+  String get virtualEmpty => '该期间没有记录';
+
+  @override
+  String get virtualOpening => '期初';
+
+  @override
+  String get virtualArrived => '来自日本';
+
+  @override
+  String get virtualAdjusted => '手动增减';
+
+  @override
+  String get virtualCountDiff => '与实数之差';
+
+  @override
+  String get virtualClosing => '期末';
+
+  @override
+  String get virtualMonth => '月';
+
+  @override
+  String virtualProductLine(int opening, int arrived, int change) {
+    return '期初 $opening ・来自日本 +$arrived ・增减 $change';
+  }
+
+  @override
+  String virtualLastCount(String date, int counted) {
+    return '最近实数 $date：$counted';
+  }
+
+  @override
+  String get virtualRecord => '录入实数或增减';
+
+  @override
+  String get virtualRecorded => '已记录';
+
+  @override
+  String get virtualHistory => '记录历史';
+
+  @override
+  String virtualBalanceThatDay(int balance) {
+    return '当日数量 $balance';
+  }
+
+  @override
+  String virtualEntryExport(int quantity, String number) {
+    return '来自日本 +$quantity（$number）';
+  }
+
+  @override
+  String virtualEntryCount(int counted) {
+    return '实数 $counted';
+  }
+
+  @override
+  String virtualEntryAdjust(String change) {
+    return '增减 $change';
+  }
+
+  @override
+  String get virtualTypeCount => '实数';
+
+  @override
+  String get virtualTypeAdjust => '增减';
+
+  @override
+  String get virtualTypeCountHint => '录入当天实际存在的数量，此后的数量将以此为基础计算。';
+
+  @override
+  String get virtualTypeAdjustHint => '录入已知的出库或入库。';
+
+  @override
+  String get virtualAdjustOut => '出库（减）';
+
+  @override
+  String get virtualAdjustIn => '入库（增）';
+
+  @override
+  String get virtualCountedQuantity => '实数';
+
+  @override
+  String get virtualAdjustQuantity => '数量';
+
+  @override
+  String get virtualDate => '日期';
+
+  @override
+  String get virtualNote => '备注（可选）';
 }

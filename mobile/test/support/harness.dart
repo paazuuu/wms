@@ -58,6 +58,9 @@ import 'package:wms_mobile/features/sales/application/sales_order_providers.dart
 import 'package:wms_mobile/features/sales/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
 import 'package:wms_mobile/features/demand/application/demand_providers.dart';
+import 'package:wms_mobile/features/virtual_stock/application/virtual_stock_providers.dart';
+import 'package:wms_mobile/features/virtual_stock/data/virtual_stock_repository.dart';
+import 'package:wms_mobile/features/virtual_stock/domain/virtual_stock.dart';
 import 'package:wms_mobile/features/product/domain/supplier_product_name.dart';
 import 'package:wms_mobile/features/warehouse_context/data/warehouse_role_repository.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse_role.dart';
@@ -131,6 +134,7 @@ List<Override> _defaultOverrides() => [
       salesOrderRepositoryProvider.overrideWithValue(FakeSalesOrderRepository()),
       demandRepositoryProvider.overrideWithValue(FakeDemandRepository()),
       warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository()),
+      virtualStockRepositoryProvider.overrideWithValue(FakeVirtualStockRepository()),
       tradingPartnerRepositoryProvider
           .overrideWithValue(FakeTradingPartnerRepository()),
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
@@ -2425,6 +2429,57 @@ class FakeWarehouseRoleRepository implements WarehouseRoleRepository {
         else
           r,
     ];
+    return const ApiSuccess(true);
+  }
+}
+
+/// Virtual stock abroad stub (0088). [summaryResult] is what every summary
+/// returns; [recorded] and [lastSummaryKey] record what the screen asked for.
+class FakeVirtualStockRepository implements VirtualStockRepository {
+  FakeVirtualStockRepository({
+    this.warehouseList = const [],
+    this.summaryResult = const VirtualStockSummary(totals: VirtualFigures()),
+    this.historyList = const [],
+  });
+
+  List<VirtualWarehouse> warehouseList;
+  VirtualStockSummary summaryResult;
+  List<VirtualStockEntry> historyList;
+  ({int warehouseId, DateTime from, DateTime to})? lastSummaryKey;
+  final List<({int warehouseId, String jan, VirtualEntryType type, int quantity, String? note})>
+      recorded = [];
+  final List<int> deleted = [];
+
+  @override
+  Future<ApiResult<List<VirtualWarehouse>>> warehouses() async => ApiSuccess(warehouseList);
+
+  @override
+  Future<ApiResult<VirtualStockSummary>> summary(int warehouseId,
+      {required DateTime from, required DateTime to}) async {
+    lastSummaryKey = (warehouseId: warehouseId, from: from, to: to);
+    return ApiSuccess(summaryResult);
+  }
+
+  @override
+  Future<ApiResult<List<VirtualStockEntry>>> history(int warehouseId, int productId) async =>
+      ApiSuccess(historyList);
+
+  @override
+  Future<ApiResult<int>> record({
+    required int warehouseId,
+    required String janCode,
+    required VirtualEntryType type,
+    required int quantity,
+    DateTime? occurredOn,
+    String? note,
+  }) async {
+    recorded.add((warehouseId: warehouseId, jan: janCode, type: type, quantity: quantity, note: note));
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<bool>> delete(int entryId) async {
+    deleted.add(entryId);
     return const ApiSuccess(true);
   }
 }
