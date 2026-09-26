@@ -37,6 +37,9 @@ class PurchaseOrderLine extends Equatable {
     required this.quantity,
     this.productName = '',
     this.unitPrice,
+    this.planned = 0,
+    this.received = 0,
+    this.demands = const [],
   });
 
   final int id;
@@ -45,7 +48,17 @@ class PurchaseOrderLine extends Equatable {
   final int quantity;
   final double? unitPrice;
 
+  /// Already expected on this order's delivery plans (0084: may be several).
+  final int planned;
+  final int received;
+
+  /// The sales-order lines this was bought for. One purchase line may cover
+  /// many orders, and need not cover any of them in full.
+  final List<PurchaseOrderLineDemand> demands;
+
   double get amount => (unitPrice ?? 0) * quantity;
+
+  int get unplanned => quantity > planned ? quantity - planned : 0;
 
   factory PurchaseOrderLine.fromJson(Map<String, dynamic> json) => PurchaseOrderLine(
         id: _asInt(json['id']),
@@ -53,10 +66,76 @@ class PurchaseOrderLine extends Equatable {
         productName: json['product_name'] as String? ?? '',
         quantity: _asInt(json['quantity']),
         unitPrice: _asDouble(json['unit_price']),
+        planned: _asInt(json['planned']),
+        received: _asInt(json['received']),
+        demands: (json['demands'] as List?)
+                ?.whereType<Map>()
+                .map((e) =>
+                    PurchaseOrderLineDemand.fromJson(e.cast<String, dynamic>()))
+                .toList() ??
+            const [],
       );
 
   @override
-  List<Object?> get props => [id, janCode, quantity, unitPrice];
+  List<Object?> get props =>
+      [id, janCode, quantity, unitPrice, planned, received, demands];
+}
+
+/// A sales-order line a purchase-order line was raised for (0084).
+class PurchaseOrderLineDemand extends Equatable {
+  const PurchaseOrderLineDemand({
+    required this.salesOrderLineId,
+    required this.salesOrderId,
+    required this.quantity,
+    this.soNumber,
+    this.customerName = '',
+  });
+
+  final int salesOrderLineId;
+  final int salesOrderId;
+  final String? soNumber;
+  final String customerName;
+  final int quantity;
+
+  factory PurchaseOrderLineDemand.fromJson(Map<String, dynamic> json) =>
+      PurchaseOrderLineDemand(
+        salesOrderLineId: _asInt(json['sales_order_line_id']),
+        salesOrderId: _asInt(json['sales_order_id']),
+        soNumber: json['so_number'] as String?,
+        customerName: (json['customer_name'] ?? '').toString(),
+        quantity: _asInt(json['quantity']),
+      );
+
+  @override
+  List<Object?> get props =>
+      [salesOrderLineId, salesOrderId, soNumber, customerName, quantity];
+}
+
+/// One delivery plan receiving (part of) a purchase order.
+class PurchaseOrderDeliveryPlan extends Equatable {
+  const PurchaseOrderDeliveryPlan({
+    required this.id,
+    this.deliveryNumber,
+    this.status = '',
+  });
+
+  final int id;
+  final String? deliveryNumber;
+
+  /// open / reconciling / partial / completed.
+  final String status;
+
+  bool get isCompleted => status == 'completed';
+
+  factory PurchaseOrderDeliveryPlan.fromJson(Map<String, dynamic> json) =>
+      PurchaseOrderDeliveryPlan(
+        id: _asInt(json['id']),
+        deliveryNumber: json['delivery_number'] as String?,
+        status: (json['status'] ?? '').toString(),
+      );
+
+  @override
+  List<Object?> get props => [id, deliveryNumber, status];
 }
 
 /// One purchase order (spec §46 checklist item 6, 0033) — what was ordered
@@ -80,6 +159,7 @@ class PurchaseOrder extends Equatable {
     this.lineCount,
     this.totalAmount,
     this.deliveryPlanId,
+    this.deliveryPlans = const [],
   });
 
   final int id;
@@ -105,11 +185,18 @@ class PurchaseOrder extends Equatable {
   /// shipmentPlanId` has, since an index row never loads it either.
   final int? deliveryPlanId;
 
+  /// Every delivery plan receiving this order — a supplier may split one order
+  /// over several deliveries, or send its own delivery note to link (0084).
+  final List<PurchaseOrderDeliveryPlan> deliveryPlans;
+
   int get totalLineCount => lines.isNotEmpty ? lines.length : (lineCount ?? 0);
   double get computedTotal =>
       totalAmount ?? lines.fold(0.0, (sum, l) => sum + l.amount);
 
   bool get hasDeliveryPlan => deliveryPlanId != null;
+
+  /// Something ordered that no delivery plan expects yet.
+  bool get hasUnplannedQuantity => lines.any((l) => l.unplanned > 0);
 
   bool get canSubmit => status == PurchaseOrderStatus.draft;
   bool get canApproveOrReject => status == PurchaseOrderStatus.submitted;
@@ -145,11 +232,25 @@ class PurchaseOrder extends Equatable {
         deliveryPlanId: json['delivery_plan_id'] == null
             ? null
             : _asInt(json['delivery_plan_id']),
+        deliveryPlans: (json['delivery_plans'] as List?)
+                ?.whereType<Map>()
+                .map((e) =>
+                    PurchaseOrderDeliveryPlan.fromJson(e.cast<String, dynamic>()))
+                .toList() ??
+            const [],
       );
 
   @override
-  List<Object?> get props =>
-      [id, status, poNumber, supplierName, lines, lineCount, deliveryPlanId];
+  List<Object?> get props => [
+        id,
+        status,
+        poNumber,
+        supplierName,
+        lines,
+        lineCount,
+        deliveryPlanId,
+        deliveryPlans,
+      ];
 }
 
 /// One line the caller wants to order — the input shape for

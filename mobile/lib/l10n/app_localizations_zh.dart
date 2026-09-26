@@ -3933,4 +3933,234 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get waveCancelled => '波次已取消';
+
+  @override
+  String get featDemand => '欠货与采购';
+
+  @override
+  String get featDemandDesc => '用库存满足待发订单，并统一采购缺口';
+
+  @override
+  String get demandTitle => '欠货与采购';
+
+  @override
+  String get demandEmpty => '没有等待中的订单';
+
+  @override
+  String get demandEmptyBody => '已批准但库存不足、未能预留的订单数量会汇总在这里。';
+
+  @override
+  String get demandFillAll => '全部从库存预留';
+
+  @override
+  String get demandFillAllQ => '将按批准时间从早到晚，把空闲库存预留给等待中的订单。是否继续？';
+
+  @override
+  String get demandNothingToFill => '没有可预留的库存';
+
+  @override
+  String demandFilled(int units) {
+    return '已预留 $units 件';
+  }
+
+  @override
+  String demandPoCreated(int links) {
+    return '已创建采购单（关联 $links 个订单明细）';
+  }
+
+  @override
+  String demandCreatePo(int count) {
+    return '创建采购单（$count 个品项）';
+  }
+
+  @override
+  String get demandBackordered => '欠货';
+
+  @override
+  String get demandCanFillNow => '可立即预留';
+
+  @override
+  String get demandIncoming => '在途';
+
+  @override
+  String get demandToPurchase => '需采购';
+
+  @override
+  String get demandAvailable => '空闲库存';
+
+  @override
+  String demandNeedsPurchase(int count) {
+    return '需采购 $count';
+  }
+
+  @override
+  String demandFillable(int count) {
+    return '可预留 $count';
+  }
+
+  @override
+  String get demandCovered => '已安排';
+
+  @override
+  String demandFillNow(int count) {
+    return '从库存预留（$count）';
+  }
+
+  @override
+  String demandWaitingOrders(int count) {
+    return '等待中的订单 $count 个';
+  }
+
+  @override
+  String demandLineStatus(
+      int ordered, int promised, int backordered, int onOrder) {
+    return '订购 $ordered ・已预留 $promised ・欠 $backordered ・采购中 $onOrder';
+  }
+
+  @override
+  String get demandLineFill => '为此订单预留';
+
+  @override
+  String get demandLineFillQuantity => '预留数量';
+
+  @override
+  String demandLineFillMax(int max) {
+    return '最多 $max';
+  }
+
+  @override
+  String get demandPoTitle => '按欠货采购';
+
+  @override
+  String get demandPoHint => '数量默认为需采购数。少订也可以——不足部分可以从其他渠道补足。';
+
+  @override
+  String demandPoLineHint(int backordered, int toPurchase) {
+    return '欠货 $backordered ・需采购 $toPurchase';
+  }
+
+  @override
+  String get demandQuantity => '采购数';
+
+  @override
+  String get demandOrdered => '订购';
+
+  @override
+  String get demandPromised => '已预留';
+
+  @override
+  String get demandShipped => '已发货';
+
+  @override
+  String soSkipPartial(int reserved, int backordered) {
+    return '已预留 $reserved ・欠货 $backordered';
+  }
+
+  @override
+  String soCreateShipmentReadyQ(int units) {
+    return '将把已预留但未发货的 $units 件加入发货。是否继续？';
+  }
+
+  @override
+  String get soShipRemaining => '发出剩余部分';
+
+  @override
+  String get soFillFromStock => '从库存预留';
+
+  @override
+  String get soMoreActions => '更多操作';
+
+  @override
+  String get soReadyToShip => '待发货';
+
+  @override
+  String get soShipments => '发货';
+
+  @override
+  String get soShipmentShipped => '已发货';
+
+  @override
+  String get soShipmentOpen => '进行中';
+
+  @override
+  String get soLineUnlinked => '该 JAN 未登记商品，无法预留';
+
+  @override
+  String soLineOnOrder(int count) {
+    return '采购中 $count';
+  }
+
+  @override
+  String get soFillLine => '为此明细预留';
+
+  @override
+  String get poCreateRemainingDeliveryPlan => '为剩余部分创建到货计划';
+
+  @override
+  String get poDeliveryPlans => '到货计划';
+
+  @override
+  String get poPlanReceived => '已到货';
+
+  @override
+  String get poPlanOpen => '待到货';
+
+  @override
+  String get poLinePlanned => '计划';
+
+  @override
+  String get poLineReceived => '已到货';
+
+  @override
+  String get poLineOutstanding => '未到货';
+
+  @override
+  String get poLineForOrders => '本采购对应的订单';
+
+  @override
+  String get reconOpenPurchaseOrder => '打开采购单';
+
+  @override
+  String get reconLinkPurchaseOrder => '关联采购单';
+
+  @override
+  String get reconNoPurchaseOrderToLink => '没有可关联的采购单';
+
+  @override
+  String reconLinkedPurchaseOrder(String number) {
+    return '已关联到 $number';
+  }
+
+  @override
+  String reservationAllocatedShort(int allocated, int short) {
+    return '已分配 $allocated 件（$short 件未找到库存）';
+  }
+
+  @override
+  String reservationAllocatedDone(int allocated) {
+    return '已分配 $allocated 件';
+  }
+
+  @override
+  String reservationManualNoProduct(String jan) {
+    return '找不到 JAN 为 $jan 的商品';
+  }
+
+  @override
+  String get reservationManualCreated => '已创建预留';
+
+  @override
+  String get reservationManualAdd => '手动预留';
+
+  @override
+  String get reservationReleaseAllocation => '取消分配';
+
+  @override
+  String get reservationAllocate => '分配库存';
+
+  @override
+  String get reservationManualNote => '用途・备注';
+
+  @override
+  String get reservationManualSubmit => '预留';
 }

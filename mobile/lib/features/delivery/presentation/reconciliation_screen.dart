@@ -10,6 +10,9 @@ import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../purchasing/application/purchase_order_providers.dart';
+import '../../purchasing/domain/purchase_order.dart';
+import '../../purchasing/presentation/purchase_order_detail_screen.dart';
 import '../application/delivery_providers.dart';
 import '../application/reconciliation_controller.dart';
 import '../domain/delivery_plan.dart';
@@ -19,6 +22,85 @@ import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
 import 'parcel_sheet.dart';
 import 'receipt_history_screen.dart';
+
+/// Ties this delivery to the purchase order it fills. A plan created from an
+/// order already is; one imported from the supplier's own delivery note is
+/// linked here, so whatever format it came in, receiving it counts against the
+/// order — and against the sales orders that order was bought for (0084).
+class _PurchaseOrderLinkButton extends ConsumerWidget {
+  const _PurchaseOrderLinkButton({required this.plan});
+
+  final DeliveryPlan plan;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final linked = plan.purchaseOrderId;
+    if (linked != null) {
+      return IconButton(
+        tooltip: l10n.reconOpenPurchaseOrder,
+        icon: const Icon(Icons.receipt_long_outlined),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => PurchaseOrderDetailScreen(purchaseOrderId: linked),
+        )),
+      );
+    }
+    return IconButton(
+      tooltip: l10n.reconLinkPurchaseOrder,
+      icon: const Icon(Icons.add_link),
+      onPressed: () => _link(context, ref),
+    );
+  }
+
+  Future<void> _link(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final repo = ref.read(purchaseOrderRepositoryProvider);
+    final candidates = <PurchaseOrder>[];
+    for (final status in const ['APPROVED', 'SUBMITTED']) {
+      final result = await repo.list(warehouseId: plan.warehouseId, status: status);
+      result.when(success: candidates.addAll, failure: (_) {});
+    }
+    if (!context.mounted) return;
+    if (candidates.isEmpty) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.reconNoPurchaseOrderToLink)));
+      return;
+    }
+    final chosen = await showDialog<PurchaseOrder>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(l10n.reconLinkPurchaseOrder),
+        children: [
+          for (final po in candidates)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, po),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(po.poNumber ?? '#${po.id}'),
+                subtitle: Text(po.supplierName),
+                // Pointing at the supplier on the note is the likely match.
+                trailing: po.supplierName == plan.supplierName
+                    ? const Icon(Icons.check_circle_outline)
+                    : null,
+              ),
+            ),
+        ],
+      ),
+    );
+    if (chosen == null) return;
+    final result = await repo.linkDeliveryPlan(chosen.id, plan.id);
+    result.when(
+      success: (_) {
+        ref.invalidate(deliveryPlanDetailProvider(plan.id));
+        ref.invalidate(purchaseOrderDetailProvider(chosen.id));
+        messenger.showSnackBar(SnackBar(
+            content: Text(l10n.reconLinkedPurchaseOrder(chosen.poNumber ?? '#${chosen.id}'))));
+      },
+      failure: (f) => messenger.showSnackBar(SnackBar(
+          content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+    );
+  }
+}
 
 /// How the operator chose to close a reconciliation that still has outstanding
 /// items.
@@ -41,6 +123,8 @@ class ReconciliationScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(detail.valueOrNull?.deliveryNumber ?? l10n.featDelivery),
         actions: [
+          if (detail.valueOrNull != null)
+            _PurchaseOrderLinkButton(plan: detail.value!),
           IconButton(
             tooltip: l10n.receiptHistoryTitle,
             icon: const Icon(Icons.history),

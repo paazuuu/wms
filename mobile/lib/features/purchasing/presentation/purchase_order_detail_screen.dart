@@ -9,6 +9,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
 import '../../delivery/presentation/reconciliation_screen.dart';
+import '../../sales/presentation/sales_order_detail_screen.dart';
 import '../application/purchase_order_providers.dart';
 import '../domain/purchase_order.dart';
 import 'purchase_order_status_ui.dart';
@@ -156,10 +157,26 @@ class _BodyState extends ConsumerState<_Body> {
         successMessage: l10n.poCompleted);
   }
 
+  String _planLabel(AppLocalizations l10n) => _order.hasDeliveryPlan
+      ? l10n.poCreateRemainingDeliveryPlan
+      : l10n.poCreateDeliveryPlan;
+
+  void _openPlan(int id) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => ReconciliationScreen(planId: id)))
+        .then((_) => _refresh());
+  }
+
+  void _openSalesOrder(int id) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => SalesOrderDetailScreen(salesOrderId: id),
+    ));
+  }
+
   Future<void> _createDeliveryPlan() async {
     final l10n = AppLocalizations.of(context);
-    if (!await _confirm(l10n.poCreateDeliveryPlan, l10n.poCreateDeliveryPlanQ,
-        l10n.poCreateDeliveryPlan)) {
+    final label = _planLabel(l10n);
+    if (!await _confirm(label, l10n.poCreateDeliveryPlanQ, label)) {
       return;
     }
     setState(() => _busy = true);
@@ -200,11 +217,13 @@ class _BodyState extends ConsumerState<_Body> {
         // receiving can reconcile against is a separate, explicit action
         // (0083). Once a delivery plan exists, the primary action goes back
         // to closing the order's own bookkeeping.
-        if (!_order.hasDeliveryPlan) {
+        // A supplier may deliver in parts: while anything ordered is on no
+        // plan yet, the next plan is still the next step (0084).
+        if (_order.hasUnplannedQuantity) {
           return FilledButton.icon(
             onPressed: _busy ? null : _createDeliveryPlan,
             icon: const Icon(Icons.move_to_inbox_outlined),
-            label: Text(l10n.poCreateDeliveryPlan),
+            label: Text(_planLabel(l10n)),
           );
         }
         return FilledButton.icon(
@@ -261,20 +280,29 @@ class _BodyState extends ConsumerState<_Body> {
         Expanded(
           child: _order.lines.isEmpty
               ? EmptyStateView(icon: Icons.shopping_cart_outlined, title: l10n.poEmpty)
-              : ListView.separated(
+              : ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  // One extra row at the end for the activity timeline.
-                  itemCount: _order.lines.length + 1,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) {
-                    if (i == _order.lines.length) {
-                      return EntityAuditTimeline(
-                        entityType: 'purchase_order',
-                        entityId: '${_order.id}',
-                      );
-                    }
-                    return _LineCard(line: _order.lines[i]);
-                  },
+                  children: [
+                    if (_order.deliveryPlans.isNotEmpty) ...[
+                      _DeliveryPlansCard(plans: _order.deliveryPlans, onOpen: _openPlan),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                    for (final line in _order.lines) ...[
+                      _LineCard(
+                        line: line,
+                        tracksReceipt: [
+                          PurchaseOrderStatus.approved,
+                          PurchaseOrderStatus.completed,
+                        ].contains(_order.status),
+                        onOpenSalesOrder: _openSalesOrder,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                    EntityAuditTimeline(
+                      entityType: 'purchase_order',
+                      entityId: '${_order.id}',
+                    ),
+                  ],
                 ),
         ),
         if (primary != null || _order.canCancel)
@@ -322,10 +350,63 @@ class _BodyState extends ConsumerState<_Body> {
   }
 }
 
+class _DeliveryPlansCard extends StatelessWidget {
+  const _DeliveryPlansCard({required this.plans, required this.onOpen});
+
+  final List<PurchaseOrderDeliveryPlan> plans;
+  final ValueChanged<int> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.poDeliveryPlans, style: theme.textTheme.titleSmall),
+            for (final p in plans)
+              InkWell(
+                onTap: () => onOpen(p.id),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.move_to_inbox_outlined, size: 18),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(p.deliveryNumber ?? '#${p.id}',
+                            style: const TextStyle(fontFamily: AppFonts.mono)),
+                      ),
+                      StatusPill(
+                        tone: p.isCompleted ? StatusTone.success : StatusTone.info,
+                        label: p.isCompleted ? l10n.poPlanReceived : l10n.poPlanOpen,
+                        dense: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _LineCard extends StatelessWidget {
-  const _LineCard({required this.line});
+  const _LineCard({
+    required this.line,
+    required this.tracksReceipt,
+    required this.onOpenSalesOrder,
+  });
 
   final PurchaseOrderLine line;
+  final bool tracksReceipt;
+  final ValueChanged<int> onOpenSalesOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -366,6 +447,42 @@ class _LineCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (tracksReceipt) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(child: _Stat(label: l10n.poLinePlanned, value: '${line.planned}')),
+                  Expanded(child: _Stat(label: l10n.poLineReceived, value: '${line.received}')),
+                  Expanded(
+                    child: _Stat(
+                      label: l10n.poLineOutstanding,
+                      value: '${line.quantity > line.received ? line.quantity - line.received : 0}',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (line.demands.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.poLineForOrders, style: theme.textTheme.bodySmall),
+              const SizedBox(height: AppSpacing.xs),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (final d in line.demands)
+                    ActionChip(
+                      avatar: const Icon(Icons.point_of_sale_outlined, size: 16),
+                      label: Text([
+                        d.soNumber ?? '#${d.salesOrderId}',
+                        if (d.customerName.isNotEmpty) d.customerName,
+                        '×${d.quantity}',
+                      ].join(' ')),
+                      onPressed: () => onOpenSalesOrder(d.salesOrderId),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

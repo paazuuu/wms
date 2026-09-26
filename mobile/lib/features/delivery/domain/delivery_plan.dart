@@ -22,6 +22,8 @@ class DeliveryPlan extends Equatable {
     this.needsReview = false,
     this.status = DeliveryPlanStatus.open,
     this.lines = const [],
+    this.warehouseId,
+    this.purchaseOrderId,
     int? lineCount,
   }) : _lineCount = lineCount;
 
@@ -56,6 +58,12 @@ class DeliveryPlan extends Equatable {
 
   final List<DeliveryPlanLine> lines;
 
+  final int? warehouseId;
+
+  /// The purchase order this delivery fills, whichever way the plan was made:
+  /// created from the order, or imported and linked to it afterwards (0084).
+  final int? purchaseOrderId;
+
   final int? _lineCount;
 
   /// Number of expected lines. Falls back to the loaded [lines] length so a
@@ -84,6 +92,8 @@ class DeliveryPlan extends Equatable {
       lines: rawLines
           .map((e) => DeliveryPlanLine.fromJson(e as Map<String, dynamic>))
           .toList(),
+      warehouseId: _asInt(json['warehouse_id']),
+      purchaseOrderId: _asInt(json['purchase_order_id']),
       lineCount: _asInt(json['line_count']),
     );
   }
@@ -96,5 +106,6 @@ class DeliveryPlan extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, deliveryNumber, status, lines];
+  List<Object?> get props =>
+      [id, deliveryNumber, status, lines, warehouseId, purchaseOrderId];
 }

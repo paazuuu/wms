@@ -105,6 +105,8 @@ class FeatureEntry {
         return l10n.featPurchaseOrders;
       case 'sales_orders':
         return l10n.featSalesOrders;
+      case 'demand':
+        return l10n.featDemand;
       case 'partners':
         return l10n.featPartners;
       case 'work_orders':
@@ -167,6 +169,8 @@ class FeatureEntry {
         return l10n.featPurchaseOrdersDesc;
       case 'sales_orders':
         return l10n.featSalesOrdersDesc;
+      case 'demand':
+        return l10n.featDemandDesc;
       case 'partners':
         return l10n.featPartnersDesc;
       case 'work_orders':

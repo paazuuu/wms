@@ -7,7 +7,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../product/application/product_providers.dart';
 import '../../product/presentation/product_detail_screen.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/inventory_providers.dart';
 import '../domain/reservation.dart';
 
@@ -80,6 +82,102 @@ class ReservationsScreen extends ConsumerWidget {
     );
   }
 
+  void _error(BuildContext context, String message, {bool fromServer = true}) {
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(fromServer ? humanizeApiErrorMessage(l10n, message) : message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
+  }
+
+  /// Pins the unpinned part of a promise to parcels, soonest expiry first, so
+  /// a picker can be sent to a shelf for it.
+  Future<void> _allocate(
+      BuildContext context, WidgetRef ref, Reservation reservation) async {
+    final l10n = AppLocalizations.of(context);
+    final result = await ref
+        .read(inventoryRepositoryProvider)
+        .allocateStock(reservation.id, quantity: reservation.unallocated);
+    if (!context.mounted) return;
+    result.when(
+      success: (outcome) {
+        ref.invalidate(reservationsProvider);
+        ref.invalidate(overAllocatedProvider);
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Text(outcome.short > 0
+                ? l10n.reservationAllocatedShort(outcome.allocated, outcome.short)
+                : l10n.reservationAllocatedDone(outcome.allocated)),
+          ));
+      },
+      failure: (f) => _error(context, f.message),
+    );
+  }
+
+  Future<void> _releaseAllocation(
+      BuildContext context, WidgetRef ref, StockAllocation allocation) async {
+    final result = await ref
+        .read(inventoryRepositoryProvider)
+        .releaseAllocation(allocation.id);
+    if (!context.mounted) return;
+    result.when(
+      success: (_) {
+        ref.invalidate(reservationsProvider);
+        ref.invalidate(overAllocatedProvider);
+      },
+      failure: (f) => _error(context, f.message),
+    );
+  }
+
+  /// A promise made by hand — stock held back for something that is not a
+  /// sales order in this system, so it is not sold twice.
+  Future<void> _reserveManually(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final warehouseId = ref.read(activeWarehouseIdProvider);
+    if (warehouseId == null) return;
+    final draft = await showDialog<_ManualReserveDraft>(
+      context: context,
+      builder: (_) => const _ManualReserveDialog(),
+    );
+    if (draft == null || !context.mounted) return;
+
+    final found = await ref.read(productRepositoryProvider).list(search: draft.janCode);
+    if (!context.mounted) return;
+    final productId = found.when(
+      success: (rows) {
+        for (final p in rows) {
+          if (p.janCode == draft.janCode) return p.id;
+        }
+        return null;
+      },
+      failure: (_) => null,
+    );
+    if (productId == null) {
+      _error(context, l10n.reservationManualNoProduct(draft.janCode), fromServer: false);
+      return;
+    }
+    final result = await ref.read(inventoryRepositoryProvider).reserveStock(
+          productId: productId,
+          warehouseId: warehouseId,
+          quantity: draft.quantity,
+          note: draft.note,
+        );
+    if (!context.mounted) return;
+    result.when(
+      success: (_) {
+        ref.invalidate(reservationsProvider);
+        ref.invalidate(overAllocatedProvider);
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.reservationManualCreated)));
+      },
+      failure: (f) => _error(context, f.message),
+    );
+  }
+
   Future<void> _fulfil(
       BuildContext context, WidgetRef ref, Reservation reservation) async {
     final quantity = await showDialog<int>(
@@ -136,6 +234,13 @@ class ReservationsScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: ref.watch(activeWarehouseIdProvider) == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => _reserveManually(context, ref),
+              icon: const Icon(Icons.bookmark_add_outlined),
+              label: Text(l10n.reservationManualAdd),
+            ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
         error: (e, _) => ErrorStateView(
@@ -169,6 +274,8 @@ class ReservationsScreen extends ConsumerWidget {
                     reservation: reservation,
                     onRelease: () => _release(context, ref, reservation),
                     onFulfil: () => _fulfil(context, ref, reservation),
+                    onAllocate: () => _allocate(context, ref, reservation),
+                    onReleaseAllocation: (a) => _releaseAllocation(context, ref, a),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
@@ -186,11 +293,15 @@ class _ReservationCard extends StatelessWidget {
     required this.reservation,
     required this.onRelease,
     required this.onFulfil,
+    required this.onAllocate,
+    required this.onReleaseAllocation,
   });
 
   final Reservation reservation;
   final VoidCallback onRelease;
   final VoidCallback onFulfil;
+  final VoidCallback onAllocate;
+  final ValueChanged<StockAllocation> onReleaseAllocation;
 
   @override
   Widget build(BuildContext context) {
@@ -309,6 +420,14 @@ class _ReservationCard extends StatelessWidget {
                         Text(nf.format(allocation.quantity),
                             style: theme.textTheme.bodySmall
                                 ?.copyWith(fontFamily: AppFonts.mono)),
+                        if (reservation.isActive)
+                          IconButton(
+                            tooltip: l10n.reservationReleaseAllocation,
+                            visualDensity: VisualDensity.compact,
+                            iconSize: 18,
+                            onPressed: () => onReleaseAllocation(allocation),
+                            icon: const Icon(Icons.link_off),
+                          ),
                       ],
                     ),
                   ),
@@ -327,6 +446,11 @@ class _ReservationCard extends StatelessWidget {
                       onPressed: onRelease,
                       child: Text(l10n.reservationRelease),
                     ),
+                    if (reservation.unallocated > 0 && !reservation.isExpired)
+                      TextButton(
+                        onPressed: onAllocate,
+                        child: Text(l10n.reservationAllocate),
+                      ),
                     // Only worth offering while something is still owed — a
                     // reservation already fully fulfilled has nothing left to
                     // mark.
@@ -473,6 +597,86 @@ class _FulfilDialogState extends State<_FulfilDialog> {
             Navigator.pop(context, quantity);
           },
           child: Text(l10n.reservationFulfil),
+        ),
+      ],
+    );
+  }
+}
+
+class _ManualReserveDraft {
+  const _ManualReserveDraft({required this.janCode, required this.quantity, this.note});
+
+  final String janCode;
+  final int quantity;
+  final String? note;
+}
+
+class _ManualReserveDialog extends StatefulWidget {
+  const _ManualReserveDialog();
+
+  @override
+  State<_ManualReserveDialog> createState() => _ManualReserveDialogState();
+}
+
+class _ManualReserveDialogState extends State<_ManualReserveDialog> {
+  final _jan = TextEditingController();
+  final _qty = TextEditingController();
+  final _note = TextEditingController();
+
+  @override
+  void dispose() {
+    _jan.dispose();
+    _qty.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  bool get _valid =>
+      _jan.text.trim().isNotEmpty && (int.tryParse(_qty.text.trim()) ?? 0) > 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.reservationManualAdd),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _jan,
+            autofocus: true,
+            decoration: InputDecoration(labelText: l10n.adjJan),
+            onChanged: (_) => setState(() {}),
+          ),
+          TextField(
+            controller: _qty,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: l10n.soLineQuantity),
+            onChanged: (_) => setState(() {}),
+          ),
+          TextField(
+            controller: _note,
+            decoration: InputDecoration(labelText: l10n.reservationManualNote),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          onPressed: !_valid
+              ? null
+              : () => Navigator.pop(
+                    context,
+                    _ManualReserveDraft(
+                      janCode: _jan.text.trim(),
+                      quantity: int.parse(_qty.text.trim()),
+                      note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+                    ),
+                  ),
+          child: Text(l10n.reservationManualSubmit),
         ),
       ],
     );

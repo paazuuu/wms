@@ -49,6 +49,24 @@ abstract class InventoryRepository {
   /// all of what is still outstanding, the common case at shipping time.
   Future<ApiResult<bool>> fulfilReservation(int reservationId, {int? quantity});
 
+  /// `allocate_stock` (0064) — pins a reservation to particular parcels,
+  /// soonest expiry first. Reports what it could not find rather than failing.
+  Future<ApiResult<AllocationOutcome>> allocateStock(int reservationId,
+      {int? quantity});
+
+  /// `release_allocation` (0064) — un-pins one parcel; the promise stays.
+  Future<ApiResult<bool>> releaseAllocation(int allocationId);
+
+  /// `reserve_stock` (0064) — a promise made by hand, for anything that is not
+  /// a sales order (internal use, a sample, a hold for a phone order).
+  Future<ApiResult<int>> reserveStock({
+    required int productId,
+    required int warehouseId,
+    required int quantity,
+    DateTime? expiresAt,
+    String? note,
+  });
+
   /// `replenishment_suggestions` (0063, §31), worst shortfall first.
   Future<ApiResult<List<ReplenishmentSuggestion>>> replenishment({
     int? warehouseId,
@@ -158,6 +176,60 @@ class InventoryRepositoryImpl implements InventoryRepository {
       return ApiSuccess(response.data != null);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<AllocationOutcome>> allocateStock(int reservationId,
+      {int? quantity}) async {
+    try {
+      final response = await _dio.post('/rpc/allocate_stock', data: {
+        'p_reservation_id': reservationId,
+        'p_quantity': quantity,
+      });
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(
+          AllocationOutcome.fromJson((json as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<AllocationOutcome>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> releaseAllocation(int allocationId) async {
+    try {
+      final response = await _dio.post('/rpc/release_allocation',
+          data: {'p_allocation_id': allocationId});
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> reserveStock({
+    required int productId,
+    required int warehouseId,
+    required int quantity,
+    DateTime? expiresAt,
+    String? note,
+  }) async {
+    try {
+      final response = await _dio.post('/rpc/reserve_stock', data: {
+        'p_product_id': productId,
+        'p_warehouse_id': warehouseId,
+        'p_quantity': quantity,
+        'p_reference_type': 'manual',
+        'p_expires_at': expiresAt?.toUtc().toIso8601String(),
+        'p_note': note,
+      });
+      final data = response.data;
+      final json = data is List && data.isNotEmpty ? data.first : data;
+      final id = json is Map ? json['reservation_id'] : null;
+      return ApiSuccess(id is int ? id : int.tryParse('$id') ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
     }
   }
 

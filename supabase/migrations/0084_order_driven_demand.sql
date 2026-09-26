@@ -1,0 +1,1291 @@
+-- 0084 — order-driven demand: many sales orders, fewer purchase orders, one stock.
+--
+-- The warehouse this was built for does not want to hold stock. It takes orders
+-- from downstream first (one sheet or many), then buys from upstream to cover
+-- them. That changes what the pieces 0064/0073/0083 built have to mean:
+--
+--   * At approval time, being short is the NORMAL case, not the exception.
+--     0073's approve_sales_order skipped any line it could not reserve in full
+--     and reported it once, in the approval response — after which the unmet
+--     demand existed nowhere. In an order-first warehouse that is most lines,
+--     so the thing purchasing needs to see ("who is still waiting, for what")
+--     was being thrown away.
+--   * One purchase order line is often bought for several orders at once, and
+--     does not always cover them all — the rest may come from another purchase,
+--     or from stock that turns up elsewhere. So a purchase order is linked to
+--     the sales-order lines it was raised for (for traceability), but stock is
+--     never earmarked by which purchase it arrived on: when goods land they are
+--     pulled into whichever orders are waiting, oldest first unless an operator
+--     picks one.
+--   * A short pick is normal too. What did not leave on a shipment must stop
+--     being held against stock that was not found, and go back to the order
+--     line as backorder, so it can be filled and shipped on a later shipment.
+--
+-- THE MODEL
+--
+--   demand      approved sales-order lines (manual or not — the same table)
+--   promised    reservations linked to a line (0064's engine, unchanged)
+--   backorder   ordered - promised, per line. DERIVED, never stored: there is
+--               no second table to drift away from the orders themselves.
+--   shipped     what reservations on a line have been fulfilled by
+--   on order    purchase-order lines linked to a sales-order line
+--   incoming    what open purchase orders still have to deliver (ordered minus
+--               received on their delivery plans)
+--   to purchase backorder - free stock - incoming, per product
+--
+-- `stock_available` keeps meaning "free to promise": a reservation still only
+-- ever promises stock that exists. Backorder is the part of an order nothing
+-- has been promised to yet, which is exactly the part purchasing works from.
+
+-- ---------------------------------------------------------------------------
+-- 1. A reservation knows which order line it is for
+-- ---------------------------------------------------------------------------
+
+-- 0073 recorded the line only in `note` ('SO line <id>'), and re-keyed the
+-- reference to the shipment afterwards — so after create_shipment, nothing
+-- structural said which order line a promise belonged to.
+alter table public.stock_reservations
+  add column if not exists sales_order_line_id bigint
+    references public.sales_order_lines (id) on delete set null;
+
+create index if not exists stock_reservations_so_line_idx
+  on public.stock_reservations (sales_order_line_id)
+  where sales_order_line_id is not null;
+
+update public.stock_reservations r
+   set sales_order_line_id = l.id
+  from public.sales_order_lines l
+ where r.sales_order_line_id is null
+   and r.note ~ '^SO line [0-9]+$'
+   and l.id = substring(r.note from '^SO line ([0-9]+)$')::bigint;
+
+-- How much of a line is promised: live promises in full, kept promises in
+-- full, and of a dropped or lapsed one only what it actually delivered.
+create or replace function public.sales_order_line_promised(p_line_id bigint)
+returns integer
+language sql stable security definer set search_path = '' as $$
+  select coalesce(sum(case
+           when r.status = 'FULFILLED' then r.quantity
+           when r.status = 'ACTIVE' and (r.expires_at is null or r.expires_at > now())
+             then r.quantity
+           else r.fulfilled_quantity end), 0)::integer
+    from public.stock_reservations r
+   where r.sales_order_line_id = p_line_id;
+$$;
+
+create or replace function public.sales_order_line_shipped(p_line_id bigint)
+returns integer
+language sql stable security definer set search_path = '' as $$
+  select coalesce(sum(r.fulfilled_quantity), 0)::integer
+    from public.stock_reservations r
+   where r.sales_order_line_id = p_line_id;
+$$;
+
+revoke all on function public.sales_order_line_promised(bigint) from public, anon, authenticated;
+revoke all on function public.sales_order_line_shipped(bigint) from public, anon, authenticated;
+grant execute on function public.sales_order_line_promised(bigint) to service_role;
+grant execute on function public.sales_order_line_shipped(bigint) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- 2. Which order lines a purchase order was raised for
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.purchase_order_line_demands (
+  id bigint generated by default as identity primary key,
+  purchase_order_line_id bigint not null
+    references public.purchase_order_lines (id) on delete cascade,
+  sales_order_line_id bigint not null
+    references public.sales_order_lines (id) on delete cascade,
+  quantity integer not null check (quantity > 0),
+  created_at timestamptz not null default now(),
+  constraint purchase_order_line_demands_pair_key
+    unique (purchase_order_line_id, sales_order_line_id)
+);
+
+create index if not exists purchase_order_line_demands_so_line_idx
+  on public.purchase_order_line_demands (sales_order_line_id);
+
+alter table public.purchase_order_line_demands enable row level security;
+
+drop policy if exists "read purchase order demands" on public.purchase_order_line_demands;
+create policy "read purchase order demands" on public.purchase_order_line_demands
+  for select to authenticated
+  using ((public.has_permission('purchase_order.view')
+          or public.has_permission('sales_order.view'))
+         and exists (select 1 from public.purchase_order_lines pl
+                       join public.purchase_orders po on po.id = pl.purchase_order_id
+                      where pl.id = purchase_order_line_demands.purchase_order_line_id
+                        and public.can_access_warehouse(po.warehouse_id)));
+-- No write policy: every write goes through create_purchase_order_from_demand.
+
+-- A purchase order still counts as "on order" until it is closed one way or
+-- the other; DRAFT included, so a draft raised from demand is not ordered twice.
+create or replace function public.sales_order_line_on_order(p_line_id bigint)
+returns integer
+language sql stable security definer set search_path = '' as $$
+  select coalesce(sum(d.quantity), 0)::integer
+    from public.purchase_order_line_demands d
+    join public.purchase_order_lines pl on pl.id = d.purchase_order_line_id
+    join public.purchase_orders po on po.id = pl.purchase_order_id
+   where d.sales_order_line_id = p_line_id
+     and po.status in ('DRAFT', 'SUBMITTED', 'APPROVED');
+$$;
+
+-- What open purchase orders still have to deliver for one product in one
+-- warehouse: ordered, minus what their delivery plans have already received.
+create or replace function public.purchase_incoming(p_product_id bigint, p_warehouse_id bigint)
+returns integer
+language sql stable security definer set search_path = '' as $$
+  select coalesce(sum(greatest(q.ordered - q.received, 0)), 0)::integer
+    from (
+      select po.id, l.jan_code, sum(l.quantity) as ordered,
+             coalesce((select sum(dpl.received_quantity)
+                         from public.delivery_plan_lines dpl
+                         join public.delivery_plans dp on dp.id = dpl.delivery_plan_id
+                        where dp.purchase_order_id = po.id
+                          and dpl.jan_code = l.jan_code), 0) as received
+        from public.purchase_order_lines l
+        join public.purchase_orders po on po.id = l.purchase_order_id
+        join public.products p on p.id = p_product_id
+       where po.warehouse_id = p_warehouse_id
+         and po.status in ('DRAFT', 'SUBMITTED', 'APPROVED')
+         and (l.product_id = p_product_id or l.jan_code = p.jan_code)
+       group by po.id, l.jan_code
+    ) q;
+$$;
+
+revoke all on function public.sales_order_line_on_order(bigint) from public, anon, authenticated;
+revoke all on function public.purchase_incoming(bigint, bigint) from public, anon, authenticated;
+grant execute on function public.sales_order_line_on_order(bigint) to service_role;
+grant execute on function public.purchase_incoming(bigint, bigint) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- 3. Approving reserves what exists and leaves the rest as backorder
+-- ---------------------------------------------------------------------------
+
+create or replace function public.approve_sales_order(p_id bigint)
+returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_status text;
+  v_warehouse_id bigint;
+  v_requested_by uuid;
+  v_approver uuid := auth.uid();
+  r record;
+  v_product_id bigint;
+  v_available integer;
+  v_take integer;
+  v_reserved_lines integer := 0;
+  v_backordered integer := 0;
+  v_skipped jsonb := '[]'::jsonb;
+begin
+  if not public.has_permission('sales_order.approve') then
+    raise exception 'not permitted: sales_order.approve required';
+  end if;
+
+  select status, warehouse_id, requested_by
+    into v_status, v_warehouse_id, v_requested_by
+    from public.sales_orders where id = p_id;
+  if v_status is null then raise exception 'sales order % not found', p_id; end if;
+  if v_status <> 'SUBMITTED' then
+    raise exception 'sales order % is % and cannot be approved', p_id, v_status;
+  end if;
+  if v_requested_by is not null and v_approver is not null and v_requested_by = v_approver then
+    raise exception 'a sales order cannot be approved by the person who requested it';
+  end if;
+
+  update public.sales_orders
+     set status = 'APPROVED', approved_by = v_approver, approved_at = now()
+   where id = p_id;
+
+  for r in
+    select l.id as line_id, l.jan_code, l.quantity, l.product_id
+      from public.sales_order_lines l where l.sales_order_id = p_id
+     order by l.id
+  loop
+    v_product_id := coalesce(r.product_id,
+      (select p.id from public.products p where p.jan_code = r.jan_code));
+
+    if v_product_id is null then
+      v_skipped := v_skipped || jsonb_build_object(
+        'line_id', r.line_id, 'jan_code', r.jan_code, 'reason', 'unlinked_jan_code',
+        'requested', r.quantity, 'reserved', 0, 'backordered', r.quantity);
+      v_backordered := v_backordered + r.quantity;
+      continue;
+    end if;
+
+    -- Reads what earlier lines in this loop already claimed, so two lines of
+    -- one product cannot both be promised the same units.
+    v_available := public.stock_available(v_product_id, v_warehouse_id);
+    v_take := least(r.quantity, greatest(v_available, 0));
+
+    if v_take > 0 then
+      insert into public.stock_reservations (
+        company_id, product_id, warehouse_id, quantity, reference_type, reference_id,
+        note, sales_order_line_id)
+      values (
+        (select company_id from public.products where id = v_product_id),
+        v_product_id, v_warehouse_id, v_take, 'sales_order', p_id::text,
+        'SO line ' || r.line_id, r.line_id);
+      v_reserved_lines := v_reserved_lines + 1;
+    end if;
+
+    if v_take < r.quantity then
+      v_skipped := v_skipped || jsonb_build_object(
+        'line_id', r.line_id, 'jan_code', r.jan_code, 'reason', 'insufficient_available',
+        'available', v_available, 'requested', r.quantity,
+        'reserved', v_take, 'backordered', r.quantity - v_take);
+      v_backordered := v_backordered + (r.quantity - v_take);
+    end if;
+  end loop;
+
+  perform public.log_audit('sales_order.approved', 'sales_order', p_id::text, v_warehouse_id,
+    jsonb_build_object('reserved_lines', v_reserved_lines,
+                       'backordered_units', v_backordered, 'skipped', v_skipped));
+
+  return jsonb_build_object(
+    'sales_order_id', p_id,
+    'status', 'APPROVED',
+    'reserved_lines', v_reserved_lines,
+    'backordered_units', v_backordered,
+    'skipped', v_skipped);
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 4. Filling backorders from stock
+-- ---------------------------------------------------------------------------
+
+-- Pulls free stock into waiting order lines: oldest approval first, or one
+-- chosen line (and optionally only part of what it is waiting for) when an
+-- operator wants a particular customer served first. A new promise is always
+-- filed on the order, never on a shipment already being worked: that shipment's
+-- lines were fixed when it was created, so it would not carry the extra units
+-- and ship_plan would let the promise go. The next shipment for the order picks
+-- it up (create_shipment_from_sales_order re-keys it).
+create or replace function public.fill_backorders(
+  p_warehouse_id bigint,
+  p_product_id bigint default null,
+  p_sales_order_line_id bigint default null,
+  p_quantity integer default null
+) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  r record;
+  v_need integer;
+  v_avail integer;
+  v_take integer;
+  v_left integer := p_quantity;
+  v_units integer := 0;
+  v_filled jsonb := '[]'::jsonb;
+begin
+  if not (public.has_permission('sales_order.manage')
+          or public.has_permission('inventory.adjust')) then
+    raise exception 'not permitted: sales_order.manage required';
+  end if;
+  if p_warehouse_id is null then
+    raise exception 'warehouse is required';
+  end if;
+  if not public.can_access_warehouse(p_warehouse_id) then
+    raise exception 'not permitted: warehouse.scope required';
+  end if;
+  if p_quantity is not null and p_quantity <= 0 then
+    raise exception 'quantity must be greater than zero';
+  end if;
+
+  for r in
+    select l.id as line_id, l.quantity, l.jan_code, o.id as so_id, o.so_number,
+           coalesce(l.product_id,
+             (select p.id from public.products p where p.jan_code = l.jan_code)) as product_id
+      from public.sales_order_lines l
+      join public.sales_orders o on o.id = l.sales_order_id
+     where o.status = 'APPROVED'
+       and o.warehouse_id = p_warehouse_id
+       and (p_sales_order_line_id is null or l.id = p_sales_order_line_id)
+     order by o.approved_at nulls last, o.id, l.id
+  loop
+    exit when v_left is not null and v_left <= 0;
+    continue when r.product_id is null;
+    continue when p_product_id is not null and r.product_id <> p_product_id;
+
+    v_need := r.quantity - public.sales_order_line_promised(r.line_id);
+    continue when v_need <= 0;
+    v_avail := public.stock_available(r.product_id, p_warehouse_id);
+    continue when v_avail <= 0;
+    v_take := least(v_need, v_avail, coalesce(v_left, v_need));
+
+    insert into public.stock_reservations (
+      company_id, product_id, warehouse_id, quantity, reference_type, reference_id,
+      note, sales_order_line_id)
+    values (
+      (select company_id from public.products where id = r.product_id),
+      r.product_id, p_warehouse_id, v_take, 'sales_order', r.so_id::text,
+      'SO line ' || r.line_id, r.line_id);
+
+    v_units := v_units + v_take;
+    if v_left is not null then v_left := v_left - v_take; end if;
+    v_filled := v_filled || jsonb_build_object(
+      'sales_order_line_id', r.line_id, 'sales_order_id', r.so_id,
+      'so_number', r.so_number, 'jan_code', r.jan_code,
+      'reserved', v_take, 'still_backordered', v_need - v_take);
+  end loop;
+
+  if v_units > 0 then
+    perform public.log_audit('sales_order.backorders_filled', 'warehouse',
+      p_warehouse_id::text, p_warehouse_id,
+      jsonb_build_object('reserved_units', v_units, 'filled', v_filled));
+  end if;
+
+  return jsonb_build_object('reserved_units', v_units, 'filled', v_filled);
+end;
+$$;
+
+revoke all on function public.fill_backorders(bigint, bigint, bigint, integer) from public, anon;
+grant execute on function public.fill_backorders(bigint, bigint, bigint, integer)
+  to authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
+-- 5. The purchasing worklist
+-- ---------------------------------------------------------------------------
+
+create or replace function public.open_demand(p_warehouse_id bigint default null)
+returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not (public.has_permission('sales_order.view')
+          or public.has_permission('purchase_order.view')
+          or public.has_permission('inventory.view')) then
+    raise exception 'not permitted: sales_order.view required';
+  end if;
+  if p_warehouse_id is not null and not public.can_access_warehouse(p_warehouse_id) then
+    raise exception 'not permitted: warehouse.scope required';
+  end if;
+
+  return coalesce((
+    select jsonb_agg(row_to_json(t)::jsonb order by t.to_purchase desc, t.backordered desc,
+                                                   t.product_name)
+      from (
+        select g.warehouse_id, w.name as warehouse_name, g.product_id,
+               p.jan_code, p.name as product_name,
+               g.ordered, g.promised, g.shipped, g.backordered,
+               public.stock_available(g.product_id, g.warehouse_id) as available,
+               public.purchase_incoming(g.product_id, g.warehouse_id) as incoming,
+               least(g.backordered,
+                     greatest(public.stock_available(g.product_id, g.warehouse_id), 0))
+                 as can_fill_now,
+               greatest(g.backordered
+                        - greatest(public.stock_available(g.product_id, g.warehouse_id), 0)
+                        - public.purchase_incoming(g.product_id, g.warehouse_id), 0)
+                 as to_purchase,
+               wp.preferred_supplier_id,
+               s.name as preferred_supplier_name,
+               g.lines
+          from (
+            select x.warehouse_id, x.product_id,
+                   sum(x.ordered)::int as ordered,
+                   sum(x.promised)::int as promised,
+                   sum(x.shipped)::int as shipped,
+                   sum(x.backordered)::int as backordered,
+                   jsonb_agg(jsonb_build_object(
+                     'sales_order_line_id', x.line_id,
+                     'sales_order_id', x.so_id,
+                     'so_number', x.so_number,
+                     'customer_name', x.customer_name,
+                     'approved_at', x.approved_at,
+                     'requested_ship_date', x.requested_ship_date,
+                     'ordered', x.ordered,
+                     'promised', x.promised,
+                     'shipped', x.shipped,
+                     'backordered', x.backordered,
+                     'on_order', x.on_order)
+                     order by x.approved_at nulls last, x.so_id, x.line_id) as lines
+              from (
+                select o.warehouse_id, l.id as line_id, o.id as so_id, o.so_number,
+                       o.customer_name, o.approved_at, o.requested_ship_date,
+                       coalesce(l.product_id, (select pp.id from public.products pp
+                                                where pp.jan_code = l.jan_code)) as product_id,
+                       l.quantity as ordered,
+                       public.sales_order_line_promised(l.id) as promised,
+                       public.sales_order_line_shipped(l.id) as shipped,
+                       greatest(l.quantity - public.sales_order_line_promised(l.id), 0)
+                         as backordered,
+                       public.sales_order_line_on_order(l.id) as on_order
+                  from public.sales_order_lines l
+                  join public.sales_orders o on o.id = l.sales_order_id
+                 where o.status = 'APPROVED'
+                   and (p_warehouse_id is null or o.warehouse_id = p_warehouse_id)
+                   and public.can_access_warehouse(o.warehouse_id)
+              ) x
+             where x.product_id is not null and x.backordered > 0
+             group by x.warehouse_id, x.product_id
+          ) g
+          join public.products p on p.id = g.product_id
+          join public.warehouses w on w.id = g.warehouse_id
+          left join public.warehouse_products wp
+                 on wp.product_id = g.product_id and wp.warehouse_id = g.warehouse_id
+                and wp.is_active
+          left join public.delivery_suppliers s on s.id = wp.preferred_supplier_id
+      ) t), '[]'::jsonb);
+end;
+$$;
+
+revoke all on function public.open_demand(bigint) from public, anon;
+grant execute on function public.open_demand(bigint) to authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
+-- 6. A purchase order raised from demand
+-- ---------------------------------------------------------------------------
+
+-- p_lines: [{jan_code, product_name, quantity, unit_price,
+--            demands?: [{sales_order_line_id, quantity}]}]
+-- Without `demands`, a line's quantity is linked across the waiting order lines
+-- for that product oldest first, skipping what other open purchase orders are
+-- already covering. Ordering less than the backorder is allowed and normal; the
+-- links then cover the oldest waiting lines and the rest stay uncovered.
+create or replace function public.create_purchase_order_from_demand(
+  p_supplier_name text,
+  p_warehouse_id bigint,
+  p_lines jsonb,
+  p_supplier_id bigint default null,
+  p_expected_date date default null,
+  p_note text default null
+) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_po_id bigint;
+  v_line jsonb;
+  v_pl record;
+  v_demand jsonb;
+  v_so_line record;
+  v_left integer;
+  v_take integer;
+  v_qty integer;
+  v_links integer := 0;
+  v_product_id bigint;
+begin
+  -- create_purchase_order does the permission, scope, supplier and line checks.
+  if jsonb_typeof(p_lines) is distinct from 'array' then
+    raise exception 'at least one line is required';
+  end if;
+  if (select count(*) from jsonb_array_elements(p_lines) e)
+       <> (select count(distinct e->>'jan_code') from jsonb_array_elements(p_lines) e) then
+    raise exception 'each product may appear only once on a purchase order raised from demand';
+  end if;
+
+  v_po_id := public.create_purchase_order(
+    p_supplier_name, p_warehouse_id, p_lines, p_supplier_id, p_expected_date, p_note);
+
+  for v_pl in
+    select l.id, l.jan_code, l.quantity,
+           coalesce(l.product_id, (select p.id from public.products p
+                                    where p.jan_code = l.jan_code)) as product_id
+      from public.purchase_order_lines l where l.purchase_order_id = v_po_id
+     order by l.id
+  loop
+    select e into v_line from jsonb_array_elements(p_lines) e
+     where e->>'jan_code' = v_pl.jan_code limit 1;
+
+    if v_line ? 'demands' and jsonb_typeof(v_line->'demands') = 'array' then
+      for v_demand in select * from jsonb_array_elements(v_line->'demands') loop
+        v_qty := coalesce((v_demand->>'quantity')::int, 0);
+        continue when v_qty <= 0;
+        select l.id, l.quantity,
+               coalesce(l.product_id, (select p.id from public.products p
+                                        where p.jan_code = l.jan_code)) as product_id,
+               o.status, o.warehouse_id
+          into v_so_line
+          from public.sales_order_lines l
+          join public.sales_orders o on o.id = l.sales_order_id
+         where l.id = (v_demand->>'sales_order_line_id')::bigint;
+        if v_so_line.id is null then
+          raise exception 'sales order line % not found', v_demand->>'sales_order_line_id';
+        end if;
+        if v_so_line.status <> 'APPROVED' or v_so_line.warehouse_id <> p_warehouse_id then
+          raise exception 'sales order line % is not an approved order in this warehouse',
+            v_so_line.id;
+        end if;
+        if v_so_line.product_id is distinct from v_pl.product_id then
+          raise exception 'sales order line % is for a different product than %',
+            v_so_line.id, v_pl.jan_code;
+        end if;
+        insert into public.purchase_order_line_demands
+          (purchase_order_line_id, sales_order_line_id, quantity)
+        values (v_pl.id, v_so_line.id, v_qty);
+        v_links := v_links + 1;
+      end loop;
+      if (select coalesce(sum(d.quantity), 0) from public.purchase_order_line_demands d
+           where d.purchase_order_line_id = v_pl.id) > v_pl.quantity then
+        raise exception 'the orders linked to % add up to more than its quantity %',
+          v_pl.jan_code, v_pl.quantity;
+      end if;
+    elsif v_pl.product_id is not null then
+      v_left := v_pl.quantity;
+      for v_so_line in
+        select l.id,
+               greatest(l.quantity - public.sales_order_line_promised(l.id)
+                        - public.sales_order_line_on_order(l.id), 0) as uncovered
+          from public.sales_order_lines l
+          join public.sales_orders o on o.id = l.sales_order_id
+         where o.status = 'APPROVED' and o.warehouse_id = p_warehouse_id
+           and coalesce(l.product_id, (select p.id from public.products p
+                                        where p.jan_code = l.jan_code)) = v_pl.product_id
+         order by o.approved_at nulls last, o.id, l.id
+      loop
+        exit when v_left <= 0;
+        continue when v_so_line.uncovered <= 0;
+        v_take := least(v_left, v_so_line.uncovered);
+        insert into public.purchase_order_line_demands
+          (purchase_order_line_id, sales_order_line_id, quantity)
+        values (v_pl.id, v_so_line.id, v_take);
+        v_left := v_left - v_take;
+        v_links := v_links + 1;
+      end loop;
+    end if;
+  end loop;
+
+  perform public.log_audit('purchase_order.created_from_demand', 'purchase_order',
+    v_po_id::text, p_warehouse_id, jsonb_build_object('links', v_links));
+
+  return jsonb_build_object(
+    'purchase_order_id', v_po_id,
+    'lines', (select count(*) from public.purchase_order_lines where purchase_order_id = v_po_id),
+    'links', v_links);
+end;
+$$;
+
+revoke all on function public.create_purchase_order_from_demand(text, bigint, jsonb, bigint, date, text)
+  from public, anon;
+grant execute on function public.create_purchase_order_from_demand(text, bigint, jsonb, bigint, date, text)
+  to authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
+-- 7. A purchase order may arrive in more than one delivery
+-- ---------------------------------------------------------------------------
+
+-- 0083 allowed one delivery plan per order. Real suppliers split deliveries,
+-- and a supplier's own delivery note may arrive as an imported plan rather
+-- than one created from the order — so a plan can now be created for what is
+-- still unplanned, and an imported plan can be attached to the order it
+-- delivers, whichever format it came in.
+drop index if exists public.delivery_plans_one_per_po;
+
+create or replace function public.create_delivery_plan_from_purchase_order(
+  p_purchase_order_id bigint,
+  p_note text default null
+) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_po record;
+  v_plan_id bigint;
+  v_line_count integer;
+begin
+  if not public.has_permission('purchase_order.manage') then
+    raise exception 'not permitted: purchase_order.manage required';
+  end if;
+
+  select * into v_po from public.purchase_orders where id = p_purchase_order_id;
+  if v_po.id is null then
+    raise exception 'purchase order % not found', p_purchase_order_id;
+  end if;
+  if not public.can_access_warehouse(v_po.warehouse_id) then
+    raise exception 'not permitted: warehouse.scope required';
+  end if;
+  if v_po.status <> 'APPROVED' then
+    raise exception 'purchase order % is % and must be APPROVED to receive',
+      p_purchase_order_id, v_po.status;
+  end if;
+
+  -- Only what no delivery plan for this order already expects.
+  if not exists (
+    select 1 from (
+      select l.jan_code, sum(l.quantity) as ordered
+        from public.purchase_order_lines l
+       where l.purchase_order_id = p_purchase_order_id group by l.jan_code) q
+     where q.ordered > coalesce((
+       select sum(dpl.planned_quantity) from public.delivery_plan_lines dpl
+         join public.delivery_plans dp on dp.id = dpl.delivery_plan_id
+        where dp.purchase_order_id = p_purchase_order_id
+          and dpl.jan_code = q.jan_code), 0)) then
+    raise exception 'every line of purchase order % is already on a delivery plan',
+      p_purchase_order_id;
+  end if;
+
+  insert into public.delivery_plans (
+    delivery_number, supplier_id, supplier_name, warehouse_id,
+    purchase_order_id, reference_no, order_date, status)
+  values (
+    '', v_po.supplier_id, v_po.supplier_name, v_po.warehouse_id,
+    p_purchase_order_id, v_po.po_number, v_po.order_date::text, 'open')
+  returning id into v_plan_id;
+
+  update public.delivery_plans
+     set delivery_number = 'DP-' || lpad(v_plan_id::text, 6, '0')
+   where id = v_plan_id;
+
+  insert into public.delivery_plan_lines (
+    delivery_plan_id, jan_code, product_name, planned_quantity, unit_price, product_id)
+  select v_plan_id, q.jan_code, q.product_name, q.remaining, q.unit_price, q.product_id
+    from (
+      select l.jan_code, max(l.product_name) as product_name,
+             sum(l.quantity) - coalesce((
+               select sum(dpl.planned_quantity) from public.delivery_plan_lines dpl
+                 join public.delivery_plans dp on dp.id = dpl.delivery_plan_id
+                where dp.purchase_order_id = p_purchase_order_id
+                  and dp.id <> v_plan_id
+                  and dpl.jan_code = l.jan_code), 0) as remaining,
+             round(max(l.unit_price))::int as unit_price,
+             max(l.product_id) as product_id
+        from public.purchase_order_lines l
+       where l.purchase_order_id = p_purchase_order_id
+       group by l.jan_code
+    ) q
+   where q.remaining > 0;
+  get diagnostics v_line_count = row_count;
+
+  perform public.log_audit('delivery_plan.created_from_purchase_order', 'delivery_plan',
+    v_plan_id::text, v_po.warehouse_id,
+    jsonb_build_object('purchase_order_id', p_purchase_order_id, 'lines', v_line_count,
+                       'note', p_note));
+
+  return jsonb_build_object(
+    'delivery_plan_id', v_plan_id,
+    'purchase_order_id', p_purchase_order_id,
+    'lines', v_line_count);
+end;
+$$;
+
+create or replace function public.link_delivery_plan_to_purchase_order(
+  p_delivery_plan_id bigint,
+  p_purchase_order_id bigint
+) returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_plan record;
+  v_po record;
+begin
+  if not (public.has_permission('purchase_order.manage')
+          or public.has_permission('receiving.confirm')) then
+    raise exception 'not permitted: purchase_order.manage required';
+  end if;
+
+  select id, warehouse_id, purchase_order_id into v_plan
+    from public.delivery_plans where id = p_delivery_plan_id;
+  if v_plan.id is null then
+    raise exception 'delivery plan % not found', p_delivery_plan_id;
+  end if;
+  select id, warehouse_id, status into v_po
+    from public.purchase_orders where id = p_purchase_order_id;
+  if v_po.id is null then
+    raise exception 'purchase order % not found', p_purchase_order_id;
+  end if;
+  if not public.can_access_warehouse(v_po.warehouse_id) then
+    raise exception 'not permitted: warehouse.scope required';
+  end if;
+  if v_plan.warehouse_id is not null and v_plan.warehouse_id <> v_po.warehouse_id then
+    raise exception 'delivery plan % is for another warehouse than purchase order %',
+      p_delivery_plan_id, p_purchase_order_id;
+  end if;
+  if v_plan.purchase_order_id is not null
+     and v_plan.purchase_order_id <> p_purchase_order_id then
+    raise exception 'delivery plan % is already linked to purchase order %',
+      p_delivery_plan_id, v_plan.purchase_order_id;
+  end if;
+  if v_po.status not in ('SUBMITTED', 'APPROVED') then
+    raise exception 'purchase order % is % and cannot take a delivery',
+      p_purchase_order_id, v_po.status;
+  end if;
+
+  update public.delivery_plans
+     set purchase_order_id = p_purchase_order_id,
+         warehouse_id = coalesce(warehouse_id, v_po.warehouse_id)
+   where id = p_delivery_plan_id;
+
+  perform public.log_audit('delivery_plan.linked_to_purchase_order', 'delivery_plan',
+    p_delivery_plan_id::text, v_po.warehouse_id,
+    jsonb_build_object('purchase_order_id', p_purchase_order_id));
+  return true;
+end;
+$$;
+
+revoke all on function public.link_delivery_plan_to_purchase_order(bigint, bigint) from public, anon;
+grant execute on function public.link_delivery_plan_to_purchase_order(bigint, bigint)
+  to authenticated, service_role;
+
+-- ---------------------------------------------------------------------------
+-- 8. Shipping keeps what left, and gives back what did not
+-- ---------------------------------------------------------------------------
+
+-- Several shipments per order now: a short ship leaves backorder that ships
+-- later. Still at most one that has not shipped yet.
+drop index if exists public.shipment_plans_one_active_per_so;
+create unique index if not exists shipment_plans_one_open_per_so
+  on public.shipment_plans (sales_order_id)
+  where sales_order_id is not null and status not in ('cancelled', 'shipped');
+
+create or replace function public.ship_plan(p_plan_id bigint)
+returns bigint
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_status    text;
+  v_warehouse bigint;
+  v_picked    bigint;
+  r           record;
+  v_res       record;
+  v_shipped   integer;
+  v_already   integer;
+  v_take      integer;
+  v_so        bigint;
+  v_line      record;
+  v_excess    integer;
+  v_need      integer;
+begin
+  select status, coalesce(warehouse_id, public.default_warehouse_id())
+    into v_status, v_warehouse
+    from public.shipment_plans where id = p_plan_id;
+  if v_status is null then raise exception 'shipment % not found', p_plan_id; end if;
+  if v_status = 'shipped' then return p_plan_id; end if;
+
+  -- A completed pick list is the truth about what is on the cart. Without one
+  -- the order lines still stand in, so plans that never went through picking
+  -- ship exactly as they did before.
+  select id into v_picked from public.pick_lists
+   where shipment_plan_id = p_plan_id and status = 'PICKED'
+   order by id desc limit 1;
+
+  -- 1. Parcels the picker recorded, each with its own identity (0074).
+  if v_picked is not null then
+    for r in
+      select i.product_id,
+             coalesce(p.jan_code, t.jan_code) as jan_code,
+             coalesce(nullif(t.product_name, ''), p.name, '') as product_name,
+             i.lot_id, i.serial_id, i.bin_id,
+             sum(i.quantity)::int as qty
+        from public.pick_items i
+        join public.pick_tasks t on t.id = i.pick_task_id
+        left join public.products p on p.id = i.product_id
+       where t.pick_list_id = v_picked
+       group by i.product_id, coalesce(p.jan_code, t.jan_code),
+                coalesce(nullif(t.product_name, ''), p.name, ''),
+                i.lot_id, i.serial_id, i.bin_id
+       order by 1, 4, 5, 6
+    loop
+      -- No status is passed on purpose: a null status_id is what makes 0068's
+      -- gate apply, so this draws from shippable parcels of that lot only.
+      perform public.apply_stock_movement_detail(
+        p_warehouse_id   => v_warehouse,
+        p_jan_code       => r.jan_code,
+        p_quantity       => -r.qty,
+        p_movement_type  => 'SHIP',
+        p_reference_type => 'shipment_plan',
+        p_reference_id   => p_plan_id::text,
+        p_product_name   => r.product_name,
+        p_bin_id         => r.bin_id,
+        p_lot_id         => r.lot_id,
+        p_serial_id      => r.serial_id,
+        p_product_id     => r.product_id);
+    end loop;
+  end if;
+
+  -- 2. Everything picked or ordered without parcel detail, exactly as before.
+  for r in
+    select q.jan, q.qty, q.pname from (
+      select t.jan_code as jan,
+             sum(greatest(coalesce(t.picked_quantity, 0)
+                          - coalesce(d.detailed, 0), 0))::int as qty,
+             coalesce(max(t.product_name), '') as pname
+        from public.pick_tasks t
+        left join (select pick_task_id, sum(quantity)::int as detailed
+                     from public.pick_items group by pick_task_id) d
+               on d.pick_task_id = t.id
+       where v_picked is not null and t.pick_list_id = v_picked
+       group by t.jan_code
+      union all
+      select l.jan_code,
+             sum(coalesce(l.quantity, 0))::int,
+             coalesce(max(l.product_name), '')
+        from public.shipment_lines l
+       where v_picked is null and l.shipment_plan_id = p_plan_id
+       group by l.jan_code
+    ) q
+    where q.qty > 0
+  loop
+    perform public.apply_stock_movement(
+      v_warehouse, r.jan, -r.qty, 'SHIP',
+      'shipment_plan', p_plan_id::text, r.pname);
+  end loop;
+
+  update public.shipment_plans
+     set status = 'shipped', shipped_at = now()
+   where id = p_plan_id;
+
+  -- 3. §6: the promise has been kept. No stock moves here — the movements above
+  --    did that, and doing it twice is the double count §5 warns about.
+  for v_res in
+    select r2.id, r2.product_id, r2.quantity - r2.fulfilled_quantity as outstanding
+      from public.stock_reservations r2
+     where r2.reference_type = 'shipment'
+       and r2.reference_id = p_plan_id::text
+       and r2.status = 'ACTIVE'
+     order by r2.id
+  loop
+    continue when v_res.outstanding <= 0;
+
+    -- What the ledger says actually left for this product on this shipment.
+    select coalesce(sum(-m.quantity), 0)::int into v_shipped
+      from public.stock_movements m
+     where m.reference_type = 'shipment_plan'
+       and m.reference_id = p_plan_id::text
+       and m.movement_type in ('SHIP', 'SHIP_CANCEL')
+       and m.balance_scope = 'WAREHOUSE'
+       and m.product_id = v_res.product_id;
+
+    -- Re-read each pass, so two reservations for one product share the shipment
+    -- rather than both claiming all of it.
+    select coalesce(sum(r3.fulfilled_quantity), 0)::int into v_already
+      from public.stock_reservations r3
+     where r3.reference_type = 'shipment'
+       and r3.reference_id = p_plan_id::text
+       and r3.product_id = v_res.product_id;
+
+    v_take := least(v_res.outstanding, greatest(v_shipped - v_already, 0));
+    if v_take <= 0 then continue; end if;
+
+    update public.stock_reservations
+       set fulfilled_quantity = fulfilled_quantity + v_take,
+           status = case when fulfilled_quantity + v_take >= quantity
+                         then 'FULFILLED' else status end,
+           updated_at = now()
+     where id = v_res.id;
+
+    -- A fully kept promise has nothing left to plan for (0064's own rule).
+    delete from public.stock_allocations
+     where reservation_id = v_res.id
+       and exists (select 1 from public.stock_reservations x
+                    where x.id = v_res.id and x.status = 'FULFILLED');
+  end loop;
+
+  -- 3b (0084). What did not leave is not promised any more. A short ship is
+  --    normal in an order-first warehouse; the part that was not found goes
+  --    back to its order line as backorder rather than holding stock that is
+  --    not there. cancel_shipment's reversal still works: it turns these back
+  --    into live promises of exactly what was shipped.
+  update public.stock_reservations
+     set quantity = fulfilled_quantity, status = 'FULFILLED', updated_at = now()
+   where reference_type = 'shipment'
+     and reference_id = p_plan_id::text
+     and status = 'ACTIVE'
+     and fulfilled_quantity > 0;
+  update public.stock_reservations
+     set status = 'RELEASED', updated_at = now()
+   where reference_type = 'shipment'
+     and reference_id = p_plan_id::text
+     and status = 'ACTIVE'
+     and fulfilled_quantity = 0;
+  delete from public.stock_allocations a
+   using public.stock_reservations x
+   where x.id = a.reservation_id
+     and x.reference_type = 'shipment'
+     and x.reference_id = p_plan_id::text
+     and x.status in ('FULFILLED', 'RELEASED');
+
+  -- 3c (0084). Units that shipped against an order with no promise behind them
+  --    (picked before anything was reserved) are recorded as kept promises on
+  --    the order's lines, so "how much of this line has shipped" has one answer
+  --    whichever way the goods left.
+  select sales_order_id into v_so from public.shipment_plans where id = p_plan_id;
+  if v_so is not null then
+    for r in
+      select m.product_id, sum(-m.quantity)::int as shipped
+        from public.stock_movements m
+       where m.reference_type = 'shipment_plan'
+         and m.reference_id = p_plan_id::text
+         and m.movement_type in ('SHIP', 'SHIP_CANCEL')
+         and m.balance_scope = 'WAREHOUSE'
+         and m.product_id is not null
+       group by m.product_id
+    loop
+      v_excess := r.shipped - coalesce((
+        select sum(x.fulfilled_quantity) from public.stock_reservations x
+         where x.reference_type = 'shipment'
+           and x.reference_id = p_plan_id::text
+           and x.product_id = r.product_id), 0);
+      continue when v_excess <= 0;
+
+      for v_line in
+        select l.id, l.quantity
+          from public.sales_order_lines l
+         where l.sales_order_id = v_so
+           and coalesce(l.product_id, (select pp.id from public.products pp
+                                        where pp.jan_code = l.jan_code)) = r.product_id
+         order by l.id
+      loop
+        exit when v_excess <= 0;
+        v_need := v_line.quantity - public.sales_order_line_promised(v_line.id);
+        continue when v_need <= 0;
+        v_take := least(v_need, v_excess);
+        insert into public.stock_reservations (
+          company_id, product_id, warehouse_id, quantity, fulfilled_quantity,
+          reference_type, reference_id, status, note, sales_order_line_id)
+        values (
+          (select company_id from public.products where id = r.product_id),
+          r.product_id, v_warehouse, v_take, v_take,
+          'shipment', p_plan_id::text, 'FULFILLED',
+          'SO line ' || v_line.id || ' (shipped without a prior reservation)', v_line.id);
+        v_excess := v_excess - v_take;
+      end loop;
+    end loop;
+  end if;
+
+  perform public.log_audit(
+    'shipment.completed', 'shipment_plan', p_plan_id::text, v_warehouse,
+    jsonb_build_object(
+      'pick_list_id', v_picked,
+      'parcels_posted', (
+        select count(*) from public.pick_items i
+          join public.pick_tasks t on t.id = i.pick_task_id
+         where v_picked is not null and t.pick_list_id = v_picked),
+      'reservations_fulfilled', (
+        select count(*) from public.stock_reservations r4
+         where r4.reference_type = 'shipment'
+           and r4.reference_id = p_plan_id::text
+           and r4.status = 'FULFILLED')));
+
+  return p_plan_id;
+end;
+$$;
+
+-- A shipment from an order carries what is promised and not yet shipped. Being
+-- short at approval is normal here, so a line with nothing promised is not
+-- shipped yet — it is filled from stock first. A later shipment for the same
+-- order carries only what is still owed.
+create or replace function public.create_shipment_from_sales_order(
+  p_sales_order_id bigint,
+  p_note text default null
+) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_so record;
+  v_shipment_id bigint;
+  v_line_count integer := 0;
+  v_relinked integer;
+  v_prior boolean;
+  r record;
+  v_qty integer;
+begin
+  if not public.has_permission('sales_order.manage') then
+    raise exception 'not permitted: sales_order.manage required';
+  end if;
+
+  select * into v_so from public.sales_orders where id = p_sales_order_id;
+  if v_so.id is null then
+    raise exception 'sales order % not found', p_sales_order_id;
+  end if;
+  if not public.can_access_warehouse(v_so.warehouse_id) then
+    raise exception 'not permitted: warehouse.scope required';
+  end if;
+  if v_so.status <> 'APPROVED' then
+    raise exception 'sales order % is % and must be APPROVED to ship', p_sales_order_id, v_so.status;
+  end if;
+  if exists (select 1 from public.shipment_plans
+              where sales_order_id = p_sales_order_id
+                and status not in ('cancelled', 'shipped')) then
+    raise exception 'sales order % already has a shipment that has not shipped yet',
+      p_sales_order_id;
+  end if;
+  v_prior := exists (select 1 from public.shipment_plans
+                      where sales_order_id = p_sales_order_id and status = 'shipped');
+
+  insert into public.shipment_plans (
+    shipment_number, party_id, customer_name, warehouse_id, sales_order_id, order_date)
+  values ('', v_so.customer_id, v_so.customer_name, v_so.warehouse_id, p_sales_order_id,
+          v_so.order_date::text)
+  returning id into v_shipment_id;
+
+  update public.shipment_plans
+     set shipment_number = 'SHP-' || lpad(v_shipment_id::text, 6, '0')
+   where id = v_shipment_id;
+
+  for r in
+    select l.id, l.jan_code, l.product_name, l.quantity, l.unit_price,
+           coalesce(l.product_id, (select p.id from public.products p
+                                    where p.jan_code = l.jan_code)) as product_id
+      from public.sales_order_lines l
+     where l.sales_order_id = p_sales_order_id
+     order by l.id
+  loop
+    if r.product_id is null then
+      -- No product record means nothing can ever be promised; the first
+      -- shipment carries it as ordered, exactly as 0073 did.
+      v_qty := case when v_prior then 0 else r.quantity end;
+    else
+      v_qty := public.sales_order_line_promised(r.id) - public.sales_order_line_shipped(r.id);
+    end if;
+    continue when v_qty <= 0;
+    insert into public.shipment_lines (
+      shipment_plan_id, jan_code, product_name, quantity, unit_price, amount)
+    values (v_shipment_id, r.jan_code, r.product_name, v_qty, r.unit_price,
+            round(v_qty * coalesce(r.unit_price, 0))::int);
+    v_line_count := v_line_count + 1;
+  end loop;
+
+  if v_line_count = 0 then
+    raise exception 'nothing on sales order % is reserved and waiting to ship — fill it from stock first',
+      p_sales_order_id;
+  end if;
+
+  -- The promise moves house: still active, now filed against what will
+  -- actually be picked rather than the order that asked for it.
+  update public.stock_reservations
+     set reference_type = 'shipment', reference_id = v_shipment_id::text, updated_at = now()
+   where status = 'ACTIVE'
+     and reference_type = 'sales_order'
+     and (reference_id = p_sales_order_id::text
+          or sales_order_line_id in (select id from public.sales_order_lines
+                                      where sales_order_id = p_sales_order_id));
+  get diagnostics v_relinked = row_count;
+
+  perform public.log_audit('shipment.created_from_sales_order', 'shipment_plan',
+    v_shipment_id::text, v_so.warehouse_id,
+    jsonb_build_object('sales_order_id', p_sales_order_id, 'lines', v_line_count,
+                       'reservations_relinked', v_relinked, 'follow_up', v_prior,
+                       'note', p_note));
+
+  return jsonb_build_object(
+    'shipment_plan_id', v_shipment_id,
+    'sales_order_id', p_sales_order_id,
+    'lines', v_line_count,
+    'reservations_relinked', v_relinked);
+end;
+$$;
+
+-- Cancelling an order drops every live promise it holds, wherever it is filed.
+create or replace function public.cancel_sales_order(p_id bigint)
+returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_status text;
+  v_warehouse_id bigint;
+begin
+  if not public.has_permission('sales_order.manage') then
+    raise exception 'not permitted: sales_order.manage required';
+  end if;
+
+  select status, warehouse_id into v_status, v_warehouse_id
+    from public.sales_orders where id = p_id;
+  if v_status is null then raise exception 'sales order % not found', p_id; end if;
+  if v_status not in ('DRAFT', 'SUBMITTED', 'APPROVED') then
+    raise exception 'sales order % is % and can no longer be cancelled', p_id, v_status;
+  end if;
+
+  update public.sales_orders set status = 'CANCELLED' where id = p_id;
+
+  delete from public.stock_allocations a
+   using public.stock_reservations r
+   where r.id = a.reservation_id
+     and r.status = 'ACTIVE'
+     and ((r.reference_type = 'sales_order' and r.reference_id = p_id::text)
+          or r.sales_order_line_id in (select id from public.sales_order_lines
+                                        where sales_order_id = p_id));
+  update public.stock_reservations
+     set status = 'RELEASED', updated_at = now()
+   where status = 'ACTIVE'
+     and ((reference_type = 'sales_order' and reference_id = p_id::text)
+          or sales_order_line_id in (select id from public.sales_order_lines
+                                      where sales_order_id = p_id));
+
+  perform public.log_audit('sales_order.cancelled', 'sales_order', p_id::text,
+    v_warehouse_id, jsonb_build_object('was', v_status));
+  return true;
+end;
+$$;
+
+-- Completing closes the order's bookkeeping: promises it still holds that are
+-- not on a shipment (backorder fills nothing will ship) go back to stock.
+create or replace function public.complete_sales_order(p_id bigint)
+returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_status text;
+  v_warehouse_id bigint;
+begin
+  if not public.has_permission('sales_order.manage') then
+    raise exception 'not permitted: sales_order.manage required';
+  end if;
+
+  select status, warehouse_id into v_status, v_warehouse_id
+    from public.sales_orders where id = p_id;
+  if v_status is null then raise exception 'sales order % not found', p_id; end if;
+  if v_status <> 'APPROVED' then
+    raise exception 'sales order % is % and cannot be completed', p_id, v_status;
+  end if;
+
+  update public.sales_orders set status = 'COMPLETED' where id = p_id;
+
+  delete from public.stock_allocations a
+   using public.stock_reservations r
+   where r.id = a.reservation_id
+     and r.status = 'ACTIVE' and r.reference_type = 'sales_order'
+     and (r.reference_id = p_id::text
+          or r.sales_order_line_id in (select id from public.sales_order_lines
+                                        where sales_order_id = p_id));
+  update public.stock_reservations
+     set status = 'RELEASED', updated_at = now()
+   where status = 'ACTIVE' and reference_type = 'sales_order'
+     and (reference_id = p_id::text
+          or sales_order_line_id in (select id from public.sales_order_lines
+                                      where sales_order_id = p_id));
+
+  perform public.log_audit(
+    'sales_order.completed', 'sales_order', p_id::text, v_warehouse_id, '{}'::jsonb);
+  return true;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 9. Reading it: each document shows where it stands against the others
+-- ---------------------------------------------------------------------------
+
+create or replace function public.sales_order_detail(p_id bigint)
+returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not public.has_permission('sales_order.view') then
+    raise exception 'not permitted: sales_order.view required';
+  end if;
+
+  return (
+    select jsonb_build_object(
+      'id', o.id,
+      'so_number', o.so_number,
+      'customer_id', o.customer_id,
+      'customer_name', o.customer_name,
+      'warehouse_id', o.warehouse_id,
+      'warehouse_name', w.name,
+      'status', o.status,
+      'order_date', o.order_date,
+      'requested_ship_date', o.requested_ship_date,
+      'note', o.note,
+      'approved_at', o.approved_at,
+      'created_at', o.created_at,
+      'lines', coalesce((
+        select jsonb_agg(jsonb_build_object(
+                 'id', l.id, 'jan_code', l.jan_code, 'product_name', l.product_name,
+                 'quantity', l.quantity, 'unit_price', l.unit_price,
+                 'product_id', coalesce(l.product_id, (select pp.id from public.products pp
+                                                        where pp.jan_code = l.jan_code)),
+                 'promised', public.sales_order_line_promised(l.id),
+                 'shipped', public.sales_order_line_shipped(l.id),
+                 'backordered', greatest(l.quantity - public.sales_order_line_promised(l.id), 0),
+                 'on_order', public.sales_order_line_on_order(l.id),
+                 'purchase_orders', coalesce((
+                   select jsonb_agg(jsonb_build_object(
+                            'purchase_order_id', po.id, 'po_number', po.po_number,
+                            'status', po.status, 'quantity', d.quantity) order by po.id)
+                     from public.purchase_order_line_demands d
+                     join public.purchase_order_lines pl on pl.id = d.purchase_order_line_id
+                     join public.purchase_orders po on po.id = pl.purchase_order_id
+                    where d.sales_order_line_id = l.id), '[]'::jsonb))
+               order by l.id)
+          from public.sales_order_lines l
+         where l.sales_order_id = o.id), '[]'::jsonb),
+      -- The shipment still to go out if there is one, else the latest.
+      'shipment_plan_id', coalesce(
+        (select sp.id from public.shipment_plans sp
+          where sp.sales_order_id = o.id and sp.status not in ('cancelled', 'shipped')
+          order by sp.id desc limit 1),
+        (select sp.id from public.shipment_plans sp
+          where sp.sales_order_id = o.id and sp.status <> 'cancelled'
+          order by sp.id desc limit 1)),
+      'open_shipment_plan_id', (
+        select sp.id from public.shipment_plans sp
+         where sp.sales_order_id = o.id and sp.status not in ('cancelled', 'shipped')
+         order by sp.id desc limit 1),
+      'shipments', coalesce((
+        select jsonb_agg(jsonb_build_object(
+                 'id', sp.id, 'shipment_number', sp.shipment_number, 'status', sp.status)
+               order by sp.id)
+          from public.shipment_plans sp
+         where sp.sales_order_id = o.id and sp.status <> 'cancelled'), '[]'::jsonb),
+      'reservations', coalesce((
+        select jsonb_agg(jsonb_build_object(
+                 'id', r.id, 'jan_code', p.jan_code, 'quantity', r.quantity,
+                 'fulfilled_quantity', r.fulfilled_quantity, 'status', r.status,
+                 'sales_order_line_id', r.sales_order_line_id)
+               order by r.id)
+          from public.stock_reservations r
+          join public.products p on p.id = r.product_id
+         where r.sales_order_line_id in (select id from public.sales_order_lines
+                                          where sales_order_id = o.id)
+            or (r.reference_type = 'sales_order' and r.reference_id = o.id::text)
+            or (r.reference_type = 'shipment' and r.reference_id in (
+                  select sp.id::text from public.shipment_plans sp
+                   where sp.sales_order_id = o.id))
+        ), '[]'::jsonb))
+    from public.sales_orders o
+    join public.warehouses w on w.id = o.warehouse_id
+   where o.id = p_id);
+end;
+$$;
+
+create or replace function public.purchase_order_detail(p_id bigint)
+returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not public.has_permission('purchase_order.view') then
+    raise exception 'not permitted: purchase_order.view required';
+  end if;
+
+  return (
+    select jsonb_build_object(
+      'id', o.id,
+      'po_number', o.po_number,
+      'supplier_id', o.supplier_id,
+      'supplier_name', o.supplier_name,
+      'warehouse_id', o.warehouse_id,
+      'warehouse_name', w.name,
+      'status', o.status,
+      'order_date', o.order_date,
+      'expected_date', o.expected_date,
+      'note', o.note,
+      'approved_at', o.approved_at,
+      'created_at', o.created_at,
+      'delivery_plan_id', (
+        select dp.id from public.delivery_plans dp
+         where dp.purchase_order_id = o.id
+         order by dp.id desc limit 1),
+      'delivery_plans', coalesce((
+        select jsonb_agg(jsonb_build_object(
+                 'id', dp.id, 'delivery_number', dp.delivery_number,
+                 'status', dp.status, 'created_at', dp.created_at) order by dp.id)
+          from public.delivery_plans dp
+         where dp.purchase_order_id = o.id), '[]'::jsonb),
+      'lines', coalesce((
+        select jsonb_agg(jsonb_build_object(
+                 'id', l.id, 'jan_code', l.jan_code, 'product_name', l.product_name,
+                 'quantity', l.quantity, 'unit_price', l.unit_price,
+                 'planned', coalesce((
+                   select sum(dpl.planned_quantity) from public.delivery_plan_lines dpl
+                     join public.delivery_plans dp on dp.id = dpl.delivery_plan_id
+                    where dp.purchase_order_id = o.id and dpl.jan_code = l.jan_code), 0),
+                 'received', coalesce((
+                   select sum(dpl.received_quantity) from public.delivery_plan_lines dpl
+                     join public.delivery_plans dp on dp.id = dpl.delivery_plan_id
+                    where dp.purchase_order_id = o.id and dpl.jan_code = l.jan_code), 0),
+                 'demands', coalesce((
+                   select jsonb_agg(jsonb_build_object(
+                            'sales_order_line_id', d.sales_order_line_id,
+                            'sales_order_id', so.id, 'so_number', so.so_number,
+                            'customer_name', so.customer_name, 'quantity', d.quantity)
+                          order by so.id)
+                     from public.purchase_order_line_demands d
+                     join public.sales_order_lines sl on sl.id = d.sales_order_line_id
+                     join public.sales_orders so on so.id = sl.sales_order_id
+                    where d.purchase_order_line_id = l.id), '[]'::jsonb))
+               order by l.id)
+          from public.purchase_order_lines l
+         where l.purchase_order_id = o.id), '[]'::jsonb))
+    from public.purchase_orders o
+    join public.warehouses w on w.id = o.warehouse_id
+   where o.id = p_id);
+end;
+$$;

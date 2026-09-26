@@ -225,7 +225,7 @@ void main() {
   });
 
   testWidgets(
-      'an order that already has a delivery plan offers to open it, not create another',
+      'an order whose lines are all on a delivery plan offers to open it, not create another',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     final repo = FakePurchaseOrderRepository(orders: [
@@ -236,8 +236,11 @@ void main() {
         supplierName: '新東光通商株式会社',
         warehouseId: 1,
         deliveryPlanId: 60,
+        deliveryPlans: [
+          PurchaseOrderDeliveryPlan(id: 60, deliveryNumber: 'DP-000060', status: 'open'),
+        ],
         lines: [
-          PurchaseOrderLine(id: 1, janCode: '4988601001053', quantity: 10),
+          PurchaseOrderLine(id: 1, janCode: '4988601001053', quantity: 10, planned: 10),
         ],
       ),
     ]);
@@ -246,6 +249,48 @@ void main() {
     expect(find.text('入荷予定を作成'), findsNothing);
     expect(find.text('完了にする'), findsOneWidget);
     expect(find.byTooltip('入荷予定を開く'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'a split delivery offers a plan for the rest, and shows which orders it was bought for (0084)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    final repo = FakePurchaseOrderRepository(orders: [
+      const PurchaseOrder(
+        id: 4,
+        status: PurchaseOrderStatus.approved,
+        poNumber: 'PO-000004',
+        supplierName: '新東光通商株式会社',
+        warehouseId: 1,
+        deliveryPlanId: 61,
+        deliveryPlans: [
+          PurchaseOrderDeliveryPlan(id: 61, deliveryNumber: 'DP-000061', status: 'completed'),
+        ],
+        lines: [
+          PurchaseOrderLine(
+            id: 1,
+            janCode: '4988601001053',
+            quantity: 10,
+            planned: 6,
+            received: 6,
+            demands: [
+              PurchaseOrderLineDemand(
+                  salesOrderLineId: 9, salesOrderId: 7, soNumber: 'SO-000007', customerName: '顧客A', quantity: 4),
+              PurchaseOrderLineDemand(
+                  salesOrderLineId: 10, salesOrderId: 8, soNumber: 'SO-000008', customerName: '顧客B', quantity: 6),
+            ],
+          ),
+        ],
+      ),
+    ]);
+    await _pumpDetail(tester, repo, 4);
+
+    expect(find.text('残りの入荷予定を作成'), findsOneWidget);
+    expect(find.text('DP-000061'), findsOneWidget);
+    expect(find.text('SO-000007 顧客A ×4'), findsOneWidget);
+    expect(find.text('SO-000008 顧客B ×6'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });

@@ -57,6 +57,9 @@ import 'package:wms_mobile/features/reports/domain/report.dart';
 import 'package:wms_mobile/features/sales/application/sales_order_providers.dart';
 import 'package:wms_mobile/features/sales/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
+import 'package:wms_mobile/features/demand/application/demand_providers.dart';
+import 'package:wms_mobile/features/demand/data/demand_repository.dart';
+import 'package:wms_mobile/features/demand/domain/open_demand.dart';
 import 'package:wms_mobile/features/work_orders/application/work_order_providers.dart';
 import 'package:wms_mobile/features/work_orders/data/work_order_repository.dart';
 import 'package:wms_mobile/features/work_orders/domain/work_order.dart';
@@ -123,6 +126,7 @@ List<Override> _defaultOverrides() => [
       purchaseOrderRepositoryProvider
           .overrideWithValue(FakePurchaseOrderRepository()),
       salesOrderRepositoryProvider.overrideWithValue(FakeSalesOrderRepository()),
+      demandRepositoryProvider.overrideWithValue(FakeDemandRepository()),
       tradingPartnerRepositoryProvider
           .overrideWithValue(FakeTradingPartnerRepository()),
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
@@ -2183,6 +2187,7 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
         lineCount: o.lineCount,
         totalAmount: o.totalAmount,
         deliveryPlanId: deliveryPlanId ?? o.deliveryPlanId,
+        deliveryPlans: o.deliveryPlans,
       );
 
   ApiResult<bool> _transition(int id, PurchaseOrderStatus from, PurchaseOrderStatus to) {
@@ -2287,14 +2292,98 @@ class FakePurchaseOrderRepository implements PurchaseOrderRepository {
       return ApiFailure(
           message: 'purchase order is ${order.status.wire}', statusCode: 400);
     }
+    // Like the RPC (0084), a plan takes everything still unplanned.
     _orders = [
       for (final o in _orders)
         if (o.id == id)
-          _copyWith(o, deliveryPlanId: deliveryPlanResult.deliveryPlanId)
+          PurchaseOrder(
+            id: o.id,
+            status: o.status,
+            poNumber: o.poNumber,
+            supplierId: o.supplierId,
+            supplierName: o.supplierName,
+            warehouseId: o.warehouseId,
+            warehouseName: o.warehouseName,
+            lines: [
+              for (final l in o.lines)
+                PurchaseOrderLine(
+                  id: l.id,
+                  janCode: l.janCode,
+                  productName: l.productName,
+                  quantity: l.quantity,
+                  unitPrice: l.unitPrice,
+                  planned: l.quantity,
+                  received: l.received,
+                  demands: l.demands,
+                ),
+            ],
+            deliveryPlanId: deliveryPlanResult.deliveryPlanId,
+            deliveryPlans: [
+              ...o.deliveryPlans,
+              PurchaseOrderDeliveryPlan(
+                  id: deliveryPlanResult.deliveryPlanId, status: 'open'),
+            ],
+          )
         else
           o,
     ];
     return ApiSuccess(deliveryPlanResult);
+  }
+
+  ({int purchaseOrderId, int deliveryPlanId})? lastLink;
+
+  @override
+  Future<ApiResult<bool>> linkDeliveryPlan(
+      int purchaseOrderId, int deliveryPlanId) async {
+    lastLink = (purchaseOrderId: purchaseOrderId, deliveryPlanId: deliveryPlanId);
+    return const ApiSuccess(true);
+  }
+}
+
+/// Order-first demand stub (0084): [items] is what `open_demand` returns;
+/// [fills] and [purchases] record what the screen asked for.
+class FakeDemandRepository implements DemandRepository {
+  FakeDemandRepository({this.items = const []});
+
+  List<OpenDemandItem> items;
+  BackorderFillResult fillResult = const BackorderFillResult(reservedUnits: 0);
+  PurchaseFromDemandResult purchaseResult =
+      const PurchaseFromDemandResult(purchaseOrderId: 900, lines: 1, links: 1);
+  final List<({int warehouseId, int? productId, int? lineId, int? quantity})> fills = [];
+  final List<({String supplierName, int? supplierId, List<DemandPurchaseLine> lines})>
+      purchases = [];
+
+  @override
+  Future<ApiResult<List<OpenDemandItem>>> openDemand({int? warehouseId}) async =>
+      ApiSuccess(items);
+
+  @override
+  Future<ApiResult<BackorderFillResult>> fillBackorders({
+    required int warehouseId,
+    int? productId,
+    int? salesOrderLineId,
+    int? quantity,
+  }) async {
+    fills.add((
+      warehouseId: warehouseId,
+      productId: productId,
+      lineId: salesOrderLineId,
+      quantity: quantity,
+    ));
+    return ApiSuccess(fillResult);
+  }
+
+  @override
+  Future<ApiResult<PurchaseFromDemandResult>> createPurchaseOrder({
+    required String supplierName,
+    required int warehouseId,
+    required List<DemandPurchaseLine> lines,
+    int? supplierId,
+    DateTime? expectedDate,
+    String? note,
+  }) async {
+    purchases.add((supplierName: supplierName, supplierId: supplierId, lines: lines));
+    return ApiSuccess(purchaseResult);
   }
 }
 
@@ -2324,6 +2413,9 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
     SalesOrder o, {
     SalesOrderStatus? status,
     int? shipmentPlanId,
+    int? openShipmentPlanId,
+    List<SalesOrderShipment>? shipments,
+    List<SalesOrderLine>? lines,
   }) =>
       SalesOrder(
         id: o.id,
@@ -2337,12 +2429,36 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
         requestedShipDate: o.requestedShipDate,
         note: o.note,
         createdAt: o.createdAt,
-        lines: o.lines,
+        lines: lines ?? o.lines,
         lineCount: o.lineCount,
         totalAmount: o.totalAmount,
         shipmentPlanId: shipmentPlanId ?? o.shipmentPlanId,
+        openShipmentPlanId: openShipmentPlanId ?? o.openShipmentPlanId,
+        shipments: shipments ?? o.shipments,
         reservations: o.reservations,
       );
+
+  /// Approval reserves what [approvalResult] says it could and leaves the
+  /// rest as backorder, the way approve_sales_order does since 0084.
+  List<SalesOrderLine> _reserved(List<SalesOrderLine> lines) => [
+        for (final l in lines)
+          () {
+            final skip = approvalResult.skipped.where((s) => s.lineId == l.id);
+            final back = skip.isEmpty
+                ? 0
+                : (skip.first.backordered > 0 ? skip.first.backordered : l.quantity);
+            return SalesOrderLine(
+              id: l.id,
+              janCode: l.janCode,
+              productName: l.productName,
+              quantity: l.quantity,
+              unitPrice: l.unitPrice,
+              productId: l.productId ?? l.id,
+              promised: l.quantity - back,
+              backordered: back,
+            );
+          }(),
+      ];
 
   ApiResult<bool> _transition(int id, SalesOrderStatus from, SalesOrderStatus to) {
     final order = _orders.firstWhere((o) => o.id == id);
@@ -2412,6 +2528,13 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
   Future<ApiResult<SalesOrderApprovalResult>> approve(int id) async {
     lastApprovedId = id;
     final r = _transition(id, SalesOrderStatus.submitted, SalesOrderStatus.approved);
+    _orders = [
+      for (final o in _orders)
+        if (o.id == id && o.status == SalesOrderStatus.approved)
+          _copyWith(o, lines: _reserved(o.lines))
+        else
+          o,
+    ];
     return r.when(
       success: (_) => ApiSuccess(approvalResult),
       failure: (f) => ApiFailure(message: f.message, statusCode: f.statusCode),
@@ -2428,7 +2551,15 @@ class FakeSalesOrderRepository implements SalesOrderRepository {
     _orders = [
       for (final o in _orders)
         if (o.id == id)
-          _copyWith(o, shipmentPlanId: shipmentResult.shipmentPlanId)
+          _copyWith(
+            o,
+            shipmentPlanId: shipmentResult.shipmentPlanId,
+            openShipmentPlanId: shipmentResult.shipmentPlanId,
+            shipments: [
+              ...o.shipments,
+              SalesOrderShipment(id: shipmentResult.shipmentPlanId, status: 'open'),
+            ],
+          )
         else
           o,
     ];
@@ -2969,6 +3100,41 @@ class FakeInventoryRepository implements InventoryRepository {
           r,
     ];
     return const ApiSuccess(true);
+  }
+
+  AllocationOutcome allocationOutcome = const AllocationOutcome(allocated: 0, short: 0);
+  ({int id, int? quantity})? lastAllocate;
+  final List<int> releasedAllocationIds = [];
+  ({int productId, int warehouseId, int quantity, String? note})? lastReserve;
+
+  @override
+  Future<ApiResult<AllocationOutcome>> allocateStock(int reservationId,
+      {int? quantity}) async {
+    lastAllocate = (id: reservationId, quantity: quantity);
+    return ApiSuccess(allocationOutcome);
+  }
+
+  @override
+  Future<ApiResult<bool>> releaseAllocation(int allocationId) async {
+    releasedAllocationIds.add(allocationId);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> reserveStock({
+    required int productId,
+    required int warehouseId,
+    required int quantity,
+    DateTime? expiresAt,
+    String? note,
+  }) async {
+    lastReserve = (
+      productId: productId,
+      warehouseId: warehouseId,
+      quantity: quantity,
+      note: note,
+    );
+    return const ApiSuccess(1);
   }
 
   @override

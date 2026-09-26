@@ -144,5 +144,73 @@ void main() {
         failure: (f) => expect(f.message, contains('duplicate key')),
       );
     });
+
+    test('linkDeliveryPlan() posts both ids to link_delivery_plan_to_purchase_order',
+        () async {
+      late RequestOptions captured;
+      final adapter = FakeHttpClientAdapter((options) {
+        captured = options;
+        return jsonResponseBody(true, 200);
+      });
+      final repo = PurchaseOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.linkDeliveryPlan(9, 42);
+
+      expect(captured.path, '/rpc/link_delivery_plan_to_purchase_order');
+      final body = captured.data as Map;
+      expect(body['p_purchase_order_id'], 9);
+      expect(body['p_delivery_plan_id'], 42);
+      result.when(
+        success: (ok) => expect(ok, isTrue),
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
+
+    test('show() reads per-line receipt progress and the orders it was bought for',
+        () async {
+      final adapter = FakeHttpClientAdapter((_) => jsonResponseBody({
+            'id': 9,
+            'status': 'APPROVED',
+            'po_number': 'PO-000009',
+            'supplier_name': 'X',
+            'warehouse_id': 1,
+            'delivery_plan_id': 30,
+            'delivery_plans': [
+              {'id': 29, 'delivery_number': 'DP-000029', 'status': 'completed'},
+              {'id': 30, 'delivery_number': 'DP-000030', 'status': 'open'},
+            ],
+            'lines': [
+              {
+                'id': 1,
+                'jan_code': '4988601001053',
+                'quantity': 10,
+                'planned': 10,
+                'received': 6,
+                'demands': [
+                  {
+                    'sales_order_line_id': 9,
+                    'sales_order_id': 7,
+                    'so_number': 'SO-000007',
+                    'customer_name': '顧客A',
+                    'quantity': 4,
+                  }
+                ],
+              }
+            ],
+          }, 200));
+      final repo = PurchaseOrderRepositoryImpl(_dio(adapter));
+
+      final result = await repo.show(9);
+
+      result.when(
+        success: (po) {
+          expect(po.deliveryPlans, hasLength(2));
+          expect(po.hasUnplannedQuantity, isFalse);
+          expect(po.lines.single.received, 6);
+          expect(po.lines.single.demands.single.soNumber, 'SO-000007');
+        },
+        failure: (f) => fail('expected success, got $f'),
+      );
+    });
   });
 }

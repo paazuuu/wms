@@ -86,10 +86,21 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       reserves stock per line, best-effort (an unlinked JAN or a shortfall is
       reported, not blocking); `create_shipment_from_sales_order` turns an
       APPROVED order into a shipment plan and re-files the reservation under
-      it rather than making a second one. `fulfil_reservation`, the last step
-      of that promise (marking it kept once the goods actually ship), had no
-      caller anywhere until the client-flexibility pass below wired a manual
-      action for it
+      it rather than making a second one. `ship_plan` (0075) marks the
+      shipment's reservations kept from what actually left; the manual
+      `fulfil_reservation` action added below is for promises that never
+      reach a shipment
+- [x] Order-first demand (0084/0085): approval reserves what exists and
+      leaves the rest as a derived backorder; `open_demand` is the purchasing
+      worklist (backordered / free / incoming / to buy per product);
+      `fill_backorders` promises free stock oldest-first or to a chosen order;
+      `create_purchase_order_from_demand` raises one purchase order for many
+      sales orders and links it to them (`purchase_order_line_demands`);
+      a purchase order may arrive over several delivery plans, and an
+      imported plan can be linked to the order it delivers; an order may ship
+      in several shipments, only what is promised ships, and a short pick
+      goes back to backorder. Client: the 受注残・発注 screen, per-line state on
+      sales/purchase order detail, 発注に紐付け on reconciliation
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**
@@ -866,9 +877,17 @@ security invariants:
 - [x] `record_receipt_item` (0067) — the receipt detail screen was read-only;
       a parcel found after a reconciliation already closed had no way in
       except raw SQL
-- [x] `fulfil_reservation` (0064) — `release_reservation`'s missing sibling;
-      `fulfilled_quantity` sat at 0 for every reservation's whole life until
-      this pass added a manual "mark as fulfilled" action beside release
+- [x] `fulfil_reservation` (0064) — `release_reservation`'s missing sibling,
+      now a manual "mark as fulfilled" action beside release. (Corrected
+      9/26: this first claimed `fulfilled_quantity` always stayed 0, but
+      `ship_plan` (0075) already fulfils shipment reservations inline. The
+      manual action covers manual and order-filed promises only)
+- [x] `allocate_stock` / `release_allocation` / `reserve_stock` (0064) — the
+      reservations screen can now pin a promise to parcels (FEFO), un-pin one
+      parcel, and make a manual reservation by JAN (0084 pass)
+- [x] `open_demand` / `fill_backorders` / `create_purchase_order_from_demand`
+      / `link_delivery_plan_to_purchase_order` (0084) — new, and reachable
+      from day one
 - [x] `unlinked_jan_codes` / `product_id_coverage` (0058) — a new screen: the
       registration worklist those two RPCs were built to be, never reachable
       before
@@ -890,10 +909,7 @@ security invariants:
   `stock_availability`/`inspection_detail`/`audit_log_query`/
   `audit_event_types` (all edge-function-routed, not called via `/rpc/`
   directly), `putaway_suggestions` (embedded in `putaway_queue`'s response)
-- Deliberately still not pursued: `reserve_stock` (manual reservation
-  creation needs a product-picker UI this app does not have yet),
-  `release_allocation` (releasing one allocation without releasing the whole
-  reservation — no operator has asked for it), `set_product_base_uom` (a
+- Deliberately still not pursued: `set_product_base_uom` (a
   narrow one-time correction tool, refused once any stock movement exists —
   not a routine gap), `list_attachment_targets`/`list_scan_contexts` (every
   caller already knows its own entity type/scan context from the screen it

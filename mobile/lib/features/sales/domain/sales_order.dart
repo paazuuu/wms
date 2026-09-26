@@ -38,6 +38,12 @@ class SalesOrderLine extends Equatable {
     required this.quantity,
     this.productName = '',
     this.unitPrice,
+    this.productId,
+    this.promised = 0,
+    this.shipped = 0,
+    this.backordered = 0,
+    this.onOrder = 0,
+    this.purchaseOrders = const [],
   });
 
   final int id;
@@ -46,7 +52,24 @@ class SalesOrderLine extends Equatable {
   final int quantity;
   final double? unitPrice;
 
+  /// Null while the JAN has no product record — nothing can be promised then.
+  final int? productId;
+
+  /// How much stock is set aside for this line, kept promises included (0084).
+  final int promised;
+  final int shipped;
+
+  /// Ordered minus promised: what is still waiting for stock.
+  final int backordered;
+
+  /// What linked purchase orders are still to deliver for this line.
+  final int onOrder;
+  final List<SalesOrderLinePurchase> purchaseOrders;
+
   double get amount => (unitPrice ?? 0) * quantity;
+
+  /// Promised and not yet shipped — what a new shipment would carry.
+  int get readyToShip => (promised - shipped).clamp(0, quantity);
 
   factory SalesOrderLine.fromJson(Map<String, dynamic> json) => SalesOrderLine(
         id: _asInt(json['id']),
@@ -54,10 +77,85 @@ class SalesOrderLine extends Equatable {
         productName: json['product_name'] as String? ?? '',
         quantity: _asInt(json['quantity']),
         unitPrice: _asDouble(json['unit_price']),
+        productId:
+            json['product_id'] == null ? null : _asInt(json['product_id']),
+        promised: _asInt(json['promised']),
+        shipped: _asInt(json['shipped']),
+        backordered: _asInt(json['backordered']),
+        onOrder: _asInt(json['on_order']),
+        purchaseOrders: (json['purchase_orders'] as List?)
+                ?.whereType<Map>()
+                .map((e) =>
+                    SalesOrderLinePurchase.fromJson(e.cast<String, dynamic>()))
+                .toList() ??
+            const [],
       );
 
   @override
-  List<Object?> get props => [id, janCode, quantity, unitPrice];
+  List<Object?> get props => [
+        id,
+        janCode,
+        quantity,
+        unitPrice,
+        promised,
+        shipped,
+        backordered,
+        onOrder,
+        purchaseOrders,
+      ];
+}
+
+/// A purchase order raised (partly) for one sales-order line (0084).
+class SalesOrderLinePurchase extends Equatable {
+  const SalesOrderLinePurchase({
+    required this.purchaseOrderId,
+    required this.quantity,
+    this.poNumber,
+    this.status = '',
+  });
+
+  final int purchaseOrderId;
+  final String? poNumber;
+  final String status;
+  final int quantity;
+
+  factory SalesOrderLinePurchase.fromJson(Map<String, dynamic> json) =>
+      SalesOrderLinePurchase(
+        purchaseOrderId: _asInt(json['purchase_order_id']),
+        poNumber: json['po_number'] as String?,
+        status: (json['status'] ?? '').toString(),
+        quantity: _asInt(json['quantity']),
+      );
+
+  @override
+  List<Object?> get props => [purchaseOrderId, poNumber, status, quantity];
+}
+
+/// One shipment made from a sales order. An order may ship in several (0084).
+class SalesOrderShipment extends Equatable {
+  const SalesOrderShipment({
+    required this.id,
+    this.shipmentNumber,
+    this.status = '',
+  });
+
+  final int id;
+  final String? shipmentNumber;
+
+  /// open / packing / shipped.
+  final String status;
+
+  bool get isShipped => status == 'shipped';
+
+  factory SalesOrderShipment.fromJson(Map<String, dynamic> json) =>
+      SalesOrderShipment(
+        id: _asInt(json['id']),
+        shipmentNumber: json['shipment_number'] as String?,
+        status: (json['status'] ?? '').toString(),
+      );
+
+  @override
+  List<Object?> get props => [id, shipmentNumber, status];
 }
 
 /// One sales order (spec §46 checklist item 7, 0034) — what a customer
@@ -81,6 +179,8 @@ class SalesOrder extends Equatable {
     this.lineCount,
     this.totalAmount,
     this.shipmentPlanId,
+    this.openShipmentPlanId,
+    this.shipments = const [],
     this.reservations = const [],
   });
 
@@ -101,9 +201,12 @@ class SalesOrder extends Equatable {
   final int? lineCount;
   final double? totalAmount;
 
-  /// The live shipment this order became, once `create_shipment_from_sales_order`
-  /// (0073) has been called. Null before that.
+  /// The shipment still to go out if there is one, else the latest (0084).
   final int? shipmentPlanId;
+
+  /// The one shipment that has not shipped yet, if any. At most one exists.
+  final int? openShipmentPlanId;
+  final List<SalesOrderShipment> shipments;
 
   /// §6's promise, wherever it is currently filed — against the order before a
   /// shipment exists, re-keyed to the shipment after (0073).
@@ -113,6 +216,13 @@ class SalesOrder extends Equatable {
   /// pick. Distinct from [canComplete]: completing is the bookkeeping close,
   /// this is whether picking can start.
   bool get hasShipment => shipmentPlanId != null;
+
+  bool get hasOpenShipment => openShipmentPlanId != null;
+
+  int get backorderedUnits => lines.fold(0, (sum, l) => sum + l.backordered);
+  int get readyToShipUnits => lines.fold(0, (sum, l) => sum + l.readyToShip);
+  int get shippedUnits => lines.fold(0, (sum, l) => sum + l.shipped);
+  int get orderedUnits => lines.fold(0, (sum, l) => sum + l.quantity);
 
   int get totalLineCount => lines.isNotEmpty ? lines.length : (lineCount ?? 0);
   double get computedTotal =>
@@ -152,6 +262,15 @@ class SalesOrder extends Equatable {
         shipmentPlanId: json['shipment_plan_id'] == null
             ? null
             : _asInt(json['shipment_plan_id']),
+        openShipmentPlanId: json['open_shipment_plan_id'] == null
+            ? null
+            : _asInt(json['open_shipment_plan_id']),
+        shipments: (json['shipments'] as List?)
+                ?.whereType<Map>()
+                .map((e) =>
+                    SalesOrderShipment.fromJson(e.cast<String, dynamic>()))
+                .toList() ??
+            const [],
         reservations: (json['reservations'] as List?)
                 ?.whereType<Map>()
                 .map((e) =>
@@ -161,8 +280,17 @@ class SalesOrder extends Equatable {
       );
 
   @override
-  List<Object?> get props =>
-      [id, status, soNumber, customerName, lines, lineCount, shipmentPlanId];
+  List<Object?> get props => [
+        id,
+        status,
+        soNumber,
+        customerName,
+        lines,
+        lineCount,
+        shipmentPlanId,
+        openShipmentPlanId,
+        shipments,
+      ];
 }
 
 /// One row of §6's promise (0064/0073) — how much of this order is backed by
@@ -206,16 +334,21 @@ class SalesOrderApprovalResult extends Equatable {
   const SalesOrderApprovalResult({
     required this.reservedLines,
     required this.skipped,
+    this.backorderedUnits = 0,
   });
 
   final int reservedLines;
   final List<SalesOrderApprovalSkip> skipped;
+
+  /// What approval could not promise and left waiting as backorder (0084).
+  final int backorderedUnits;
 
   bool get hasSkipped => skipped.isNotEmpty;
 
   factory SalesOrderApprovalResult.fromJson(Map<String, dynamic> json) =>
       SalesOrderApprovalResult(
         reservedLines: _asInt(json['reserved_lines']),
+        backorderedUnits: _asInt(json['backordered_units']),
         skipped: (json['skipped'] as List?)
                 ?.whereType<Map>()
                 .map((e) =>
@@ -225,7 +358,7 @@ class SalesOrderApprovalResult extends Equatable {
       );
 
   @override
-  List<Object?> get props => [reservedLines, skipped];
+  List<Object?> get props => [reservedLines, skipped, backorderedUnits];
 }
 
 /// One line approval could not reserve stock for, and why. `unlinked_jan_code`
@@ -238,6 +371,8 @@ class SalesOrderApprovalSkip extends Equatable {
     required this.reason,
     this.available,
     this.requested,
+    this.reserved = 0,
+    this.backordered = 0,
   });
 
   final int lineId;
@@ -246,6 +381,10 @@ class SalesOrderApprovalSkip extends Equatable {
   final int? available;
   final int? requested;
 
+  /// Since 0084 a short line is reserved as far as stock allows, not skipped.
+  final int reserved;
+  final int backordered;
+
   factory SalesOrderApprovalSkip.fromJson(Map<String, dynamic> json) =>
       SalesOrderApprovalSkip(
         lineId: _asInt(json['line_id']),
@@ -253,10 +392,13 @@ class SalesOrderApprovalSkip extends Equatable {
         reason: (json['reason'] ?? '').toString(),
         available: json['available'] == null ? null : _asInt(json['available']),
         requested: json['requested'] == null ? null : _asInt(json['requested']),
+        reserved: _asInt(json['reserved']),
+        backordered: _asInt(json['backordered']),
       );
 
   @override
-  List<Object?> get props => [lineId, janCode, reason, available, requested];
+  List<Object?> get props =>
+      [lineId, janCode, reason, available, requested, reserved, backordered];
 }
 
 /// What `create_shipment_from_sales_order` (0073) did.

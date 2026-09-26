@@ -8,6 +8,8 @@ import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
+import '../../demand/application/demand_providers.dart';
+import '../../purchasing/presentation/purchase_order_detail_screen.dart';
 import '../../shipment/presentation/shipment_detail_screen.dart';
 import '../application/sales_order_providers.dart';
 import '../domain/sales_order.dart';
@@ -70,6 +72,7 @@ class _BodyState extends ConsumerState<_Body> {
   void _refresh() {
     ref.invalidate(salesOrderDetailProvider(_order.id));
     ref.invalidate(salesOrderListProvider);
+    ref.invalidate(openDemandProvider);
   }
 
   Future<bool> _confirm(String title, String body, String action) async {
@@ -173,6 +176,11 @@ class _BodyState extends ConsumerState<_Body> {
                       style: const TextStyle(fontFamily: AppFonts.mono)),
                   const SizedBox(height: 2),
                   Text(reason),
+                  // Being short is normal in an order-first warehouse: what
+                  // exists is reserved, the rest waits as backorder (0084).
+                  if (s.backordered > 0)
+                    Text(l10n.soSkipPartial(s.reserved, s.backordered),
+                        style: Theme.of(context).textTheme.bodySmall),
                 ],
               );
             },
@@ -190,8 +198,9 @@ class _BodyState extends ConsumerState<_Body> {
 
   Future<void> _createShipment() async {
     final l10n = AppLocalizations.of(context);
+    final label = _shipLabel(l10n);
     if (!await _confirm(
-        l10n.soCreateShipment, l10n.soCreateShipmentQ, l10n.soCreateShipment)) {
+        label, l10n.soCreateShipmentReadyQ(_order.readyToShipUnits), label)) {
       return;
     }
     setState(() => _busy = true);
@@ -212,12 +221,61 @@ class _BodyState extends ConsumerState<_Body> {
     );
   }
 
-  void _openShipment() {
-    final id = _order.shipmentPlanId;
-    if (id == null) return;
+  String _shipLabel(AppLocalizations l10n) => _order.shipments.any((s) => s.isShipped)
+      ? l10n.soShipRemaining
+      : l10n.soCreateShipment;
+
+  void _openShipment([int? id]) {
+    final target = id ?? _order.openShipmentPlanId ?? _order.shipmentPlanId;
+    if (target == null) return;
+    Navigator.of(context)
+        .push(MaterialPageRoute(
+          builder: (_) => ShipmentDetailScreen(shipmentId: target),
+        ))
+        .then((_) => _refresh());
+  }
+
+  void _openPurchaseOrder(int id) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ShipmentDetailScreen(shipmentId: id),
+      builder: (_) => PurchaseOrderDetailScreen(purchaseOrderId: id),
     ));
+  }
+
+  bool get _canFill => _order.lines.any((l) => l.backordered > 0 && l.productId != null);
+
+  /// Promises free stock to this order's waiting lines (0084). Each line is
+  /// filled on its own so this order is served even when older orders for the
+  /// same product are also waiting — the operator chose this customer.
+  Future<void> _fill([SalesOrderLine? only]) async {
+    final l10n = AppLocalizations.of(context);
+    final warehouseId = _order.warehouseId;
+    if (warehouseId == null) return;
+    final lines = only != null
+        ? [only]
+        : _order.lines.where((l) => l.backordered > 0 && l.productId != null).toList();
+    if (lines.isEmpty) return;
+
+    setState(() => _busy = true);
+    final repo = ref.read(demandRepositoryProvider);
+    var units = 0;
+    String? error;
+    for (final line in lines) {
+      final result = await repo.fillBackorders(
+          warehouseId: warehouseId, salesOrderLineId: line.id);
+      result.when(
+        success: (fill) => units += fill.reservedUnits,
+        failure: (f) => error ??= f.message,
+      );
+      if (error != null) break;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    _refresh();
+    if (error != null) {
+      _snack(humanizeApiErrorMessage(l10n, error!), danger: true);
+    } else {
+      _snack(units == 0 ? l10n.demandNothingToFill : l10n.demandFilled(units));
+    }
   }
 
   Future<void> _reject() async {
@@ -256,14 +314,28 @@ class _BodyState extends ConsumerState<_Body> {
           label: Text(l10n.soApprove),
         );
       case SalesOrderStatus.approved:
-        // Approving only reserves stock (0073); turning that into something
-        // the floor can pick is a separate, explicit step. Once it exists,
-        // the primary action goes back to closing the order's own bookkeeping.
-        if (!_order.hasShipment) {
+        // The next step for an order-first warehouse, in the order the work
+        // happens: a shipment being worked, then what is reserved and waiting
+        // to go out, then what is still waiting for stock, then closing.
+        if (_order.hasOpenShipment) {
+          return FilledButton.icon(
+            onPressed: _busy ? null : () => _openShipment(),
+            icon: const Icon(Icons.local_shipping_outlined),
+            label: Text(l10n.soOpenShipment),
+          );
+        }
+        if (_order.readyToShipUnits > 0) {
           return FilledButton.icon(
             onPressed: _busy ? null : _createShipment,
             icon: const Icon(Icons.local_shipping_outlined),
-            label: Text(l10n.soCreateShipment),
+            label: Text(_shipLabel(l10n)),
+          );
+        }
+        if (_canFill) {
+          return FilledButton.icon(
+            onPressed: _busy ? null : () => _fill(),
+            icon: const Icon(Icons.move_to_inbox_outlined),
+            label: Text(l10n.soFillFromStock),
           );
         }
         return FilledButton.icon(
@@ -276,6 +348,29 @@ class _BodyState extends ConsumerState<_Body> {
     }
   }
 
+  /// Stock is only promised from approval on; before that there is nothing
+  /// to show but what was ordered.
+  bool get _tracksStock => [
+        SalesOrderStatus.approved,
+        SalesOrderStatus.completed,
+      ].contains(_order.status);
+
+  /// Everything the primary button is not, for an approved order: closing it
+  /// with backorder left (the rest is supplied elsewhere), or filling from
+  /// stock while something else is the next step.
+  List<PopupMenuEntry<String>> _menuItems(AppLocalizations l10n) {
+    if (_order.status != SalesOrderStatus.approved) return const [];
+    final primaryIsFill = !_order.hasOpenShipment && _order.readyToShipUnits == 0 && _canFill;
+    final primaryIsComplete =
+        !_order.hasOpenShipment && _order.readyToShipUnits == 0 && !_canFill;
+    return [
+      if (_canFill && !primaryIsFill)
+        PopupMenuItem(value: 'fill', child: Text(l10n.soFillFromStock)),
+      if (!primaryIsComplete)
+        PopupMenuItem(value: 'complete', child: Text(l10n.soComplete)),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -283,6 +378,7 @@ class _BodyState extends ConsumerState<_Body> {
     final scheme = theme.colorScheme;
     final ui = SalesOrderStatusUi.of(l10n, _order.status);
     final primary = _primaryAction(l10n);
+    final menu = _menuItems(l10n);
 
     return Column(
       children: [
@@ -323,15 +419,22 @@ class _BodyState extends ConsumerState<_Body> {
               : ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
-                    if (_order.reservations.isNotEmpty) ...[
-                      _ReservationsCard(
-                        order: _order,
-                        onOpenShipment: _openShipment,
-                      ),
+                    if (_tracksStock) ...[
+                      _ProgressCard(order: _order, onOpenShipment: _openShipment),
                       const SizedBox(height: AppSpacing.sm),
                     ],
                     for (final line in _order.lines) ...[
-                      _LineCard(line: line),
+                      _LineCard(
+                        line: line,
+                        tracksStock: _tracksStock,
+                        onFill: _order.status == SalesOrderStatus.approved &&
+                                line.backordered > 0 &&
+                                line.productId != null &&
+                                !_busy
+                            ? () => _fill(line)
+                            : null,
+                        onOpenPurchaseOrder: _openPurchaseOrder,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                     ],
                     EntityAuditTimeline(
@@ -376,6 +479,13 @@ class _BodyState extends ConsumerState<_Body> {
                         child: SizedBox(height: AppSpacing.minTouch, child: primary),
                       ),
                     ],
+                    if (menu.isNotEmpty)
+                      PopupMenuButton<String>(
+                        tooltip: l10n.soMoreActions,
+                        enabled: !_busy,
+                        onSelected: (v) => v == 'fill' ? _fill() : _complete(),
+                        itemBuilder: (_) => menu,
+                      ),
                   ],
                 ),
               ),
@@ -386,14 +496,13 @@ class _BodyState extends ConsumerState<_Body> {
   }
 }
 
-/// §6's promise, made visible: which lines are backed by stock already set
-/// aside, and whether that promise has been kept. Shown once a reservation
-/// exists — before approval there is nothing here to show.
-class _ReservationsCard extends StatelessWidget {
-  const _ReservationsCard({required this.order, required this.onOpenShipment});
+/// Where the order stands against stock as a whole, and every shipment it
+/// has gone out on — an order may ship in several (0084).
+class _ProgressCard extends StatelessWidget {
+  const _ProgressCard({required this.order, required this.onOpenShipment});
 
   final SalesOrder order;
-  final VoidCallback onOpenShipment;
+  final ValueChanged<int> onOpenShipment;
 
   @override
   Widget build(BuildContext context) {
@@ -410,40 +519,45 @@ class _ReservationsCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(l10n.soReservationsTitle,
-                      style: theme.textTheme.titleSmall),
-                ),
-                if (order.hasShipment)
-                  TextButton.icon(
-                    onPressed: onOpenShipment,
-                    icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                    label: Text(l10n.soOpenShipment),
-                  ),
+                    child: _Stat(label: l10n.demandOrdered, value: '${order.orderedUnits}')),
+                Expanded(
+                    child: _Stat(
+                        label: l10n.soReadyToShip, value: '${order.readyToShipUnits}')),
+                Expanded(
+                    child: _Stat(label: l10n.demandShipped, value: '${order.shippedUnits}')),
+                Expanded(
+                    child: _Stat(
+                        label: l10n.demandBackordered,
+                        value: '${order.backorderedUnits}',
+                        emphasize: order.backorderedUnits > 0)),
               ],
             ),
-            const SizedBox(height: AppSpacing.xs),
-            for (final r in order.reservations)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(r.janCode,
-                          style: const TextStyle(fontFamily: AppFonts.mono)),
+            if (order.shipments.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.soShipments, style: theme.textTheme.titleSmall),
+              for (final s in order.shipments)
+                InkWell(
+                  onTap: () => onOpenShipment(s.id),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.local_shipping_outlined, size: 18),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(s.shipmentNumber ?? '#${s.id}',
+                              style: const TextStyle(fontFamily: AppFonts.mono)),
+                        ),
+                        StatusPill(
+                          tone: s.isShipped ? StatusTone.success : StatusTone.info,
+                          label: s.isShipped ? l10n.soShipmentShipped : l10n.soShipmentOpen,
+                          dense: true,
+                        ),
+                      ],
                     ),
-                    Text('${r.fulfilledQuantity} / ${r.quantity}',
-                        style: theme.textTheme.bodySmall),
-                    if (r.isFulfilled) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      StatusPill(
-                        tone: StatusTone.success,
-                        label: l10n.soReservationFulfilled,
-                        dense: true,
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
+            ],
           ],
         ),
       ),
@@ -452,9 +566,17 @@ class _ReservationsCard extends StatelessWidget {
 }
 
 class _LineCard extends StatelessWidget {
-  const _LineCard({required this.line});
+  const _LineCard({
+    required this.line,
+    required this.tracksStock,
+    required this.onFill,
+    required this.onOpenPurchaseOrder,
+  });
 
   final SalesOrderLine line;
+  final bool tracksStock;
+  final VoidCallback? onFill;
+  final ValueChanged<int> onOpenPurchaseOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -462,6 +584,7 @@ class _LineCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final title = line.productName.isNotEmpty ? line.productName : line.janCode;
+    final price = line.unitPrice == null ? '—' : '¥${line.unitPrice!.toStringAsFixed(0)}';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -476,25 +599,73 @@ class _LineCard extends StatelessWidget {
                 style: theme.textTheme.bodySmall
                     ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: _Stat(label: l10n.soLineQuantity, value: '${line.quantity}'),
-                ),
-                Expanded(
-                  child: _Stat(
-                    label: l10n.soLineUnitPrice,
-                    value: line.unitPrice == null ? '—' : '¥${line.unitPrice!.toStringAsFixed(0)}',
+            if (!tracksStock)
+              Row(
+                children: [
+                  Expanded(
+                    child: _Stat(label: l10n.soLineQuantity, value: '${line.quantity}'),
                   ),
+                  Expanded(child: _Stat(label: l10n.soLineUnitPrice, value: price)),
+                  Expanded(
+                    child: _Stat(
+                      label: l10n.soTotalAmount,
+                      value: '¥${line.amount.toStringAsFixed(0)}',
+                    ),
+                  ),
+                ],
+              )
+            else ...[
+              Row(
+                children: [
+                  Expanded(child: _Stat(label: l10n.demandOrdered, value: '${line.quantity}')),
+                  Expanded(child: _Stat(label: l10n.demandPromised, value: '${line.promised}')),
+                  Expanded(child: _Stat(label: l10n.demandShipped, value: '${line.shipped}')),
+                  Expanded(
+                    child: _Stat(
+                      label: l10n.demandBackordered,
+                      value: '${line.backordered}',
+                      emphasize: line.backordered > 0,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text('${l10n.soLineUnitPrice} $price · ${l10n.soTotalAmount} ¥${line.amount.toStringAsFixed(0)}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              if (line.productId == null && line.backordered > 0) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(l10n.soLineUnlinked,
+                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.error)),
+              ],
+              if (line.purchaseOrders.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(l10n.soLineOnOrder(line.onOrder), style: theme.textTheme.bodySmall),
+                    for (final po in line.purchaseOrders)
+                      ActionChip(
+                        avatar: const Icon(Icons.add_shopping_cart_outlined, size: 16),
+                        label: Text('${po.poNumber ?? '#${po.purchaseOrderId}'} ×${po.quantity}'),
+                        onPressed: () => onOpenPurchaseOrder(po.purchaseOrderId),
+                      ),
+                  ],
                 ),
-                Expanded(
-                  child: _Stat(
-                    label: l10n.soTotalAmount,
-                    value: '¥${line.amount.toStringAsFixed(0)}',
+              ],
+              if (onFill != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: onFill,
+                    icon: const Icon(Icons.move_to_inbox_outlined, size: 18),
+                    label: Text(l10n.soFillLine),
                   ),
                 ),
               ],
-            ),
+            ],
           ],
         ),
       ),
@@ -503,10 +674,11 @@ class _LineCard extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.label, required this.value});
+  const _Stat({required this.label, required this.value, this.emphasize = false});
 
   final String label;
   final String value;
+  final bool emphasize;
 
   @override
   Widget build(BuildContext context) {
@@ -521,8 +693,10 @@ class _Stat extends StatelessWidget {
             overflow: TextOverflow.ellipsis),
         const SizedBox(height: 2),
         Text(value,
-            style: theme.textTheme.titleMedium
-                ?.copyWith(fontFamily: AppFonts.mono, fontWeight: FontWeight.w600)),
+            style: theme.textTheme.titleMedium?.copyWith(
+                fontFamily: AppFonts.mono,
+                fontWeight: FontWeight.w600,
+                color: emphasize ? scheme.error : null)),
       ],
     );
   }

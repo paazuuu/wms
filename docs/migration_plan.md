@@ -4021,25 +4021,21 @@ shows the friendly §34 message rather than the raw RPC text.
 
 `fulfil_reservation` (0064) is the counterpart to `release_reservation`,
 which the reservations screen already calls: one records that a promise was
-dropped, the other that it was kept. Its own comment says when it runs —
-"called when stock has actually left against this promise" — and nothing
-ever called it, client or server. In practice this meant `fulfilled_quantity`
-sat at 0 for the life of every reservation: `Reservation.outstanding`
-(`quantity - fulfilled_quantity`) never shrank, so a reservation kept holding
-its *full* amount against `stock_available()` even after the sales order it
-was for had actually shipped, until someone remembered to release it by
-hand. Not a missing screen so much as a promise the app could make but never
-actually kept up its end of.
+dropped, the other that it was kept. No client called it.
 
-Wiring shipment completion to call this automatically would be the complete
-fix, but that reaches into `ship_plan` and the edge-gated shipping RPCs —
-shared business logic well outside a client-side screen, and a decision
-about *when* a sales-order reservation should be considered fulfilled that
-is not this pass's to make unilaterally. Raised with the user, who chose the
-narrower, lower-risk fix: a manual "出荷済みにする" (mark as fulfilled)
-action beside "解放", the same posture `raise_exception`/`cancel_exception`
-took for their own gaps this pass — closes the reachability gap now,
-without touching shipping's own RPCs.
+**Correction (9/26).** This section first said that nothing, client or
+server, ever marked a reservation fulfilled, so `fulfilled_quantity` sat at 0
+for every reservation. That was wrong. `ship_plan` (0075, step 3) already
+fulfils every reservation filed against the shipment it completes, inline and
+from what the ledger says actually left, and `cancel_shipment` reverses it.
+It does not call `fulfil_reservation` (see the 0075 section for why). What
+was really left without a way to be marked kept were reservations that never
+reach a shipment: manual ones, and sales-order ones still filed on the order.
+The manual action below is for those, not a stand-in for shipping.
+
+The action is "出荷済みにする" (mark as fulfilled), beside "解放", the same
+posture `raise_exception`/`cancel_exception` took for their own gaps this
+pass.
 
 Adds `InventoryRepository.fulfilReservation`, and a `_FulfilDialog` (the
 same owns-its-own-controller shape as `_RenameDialog`) prefilled with what
@@ -4164,6 +4160,139 @@ widget tests: creating a plan reports its line count, an order that already
 has one offers to open it rather than create a second, and the state-machine
 walk (draft → submit → approve → create delivery plan) drives the same
 button through each step.
+
+### 0084 — order-first: many sales orders, fewer purchase orders, one stock
+
+The warehouse this is built for does not want to hold stock. It takes order
+sheets from downstream first (one or many), then buys upstream to cover
+them. A purchase does not always cover every order: the rest may come from
+another source, so a pick can be smaller than the order. One purchase line is
+often bought for several orders at once. Before 0084 the pieces 0064/0073/0083
+built assumed the opposite (stock first, orders second), and it showed in
+three places:
+
+- `approve_sales_order` skipped any line it could not reserve **in full** and
+  reported it once, in the approval response. After that the unmet demand
+  existed nowhere, and in an order-first warehouse that is most lines.
+- A purchase order had no link to the orders it was raised for, and a
+  delivery plan had to be created from exactly one purchase order, once.
+- `create_shipment_from_sales_order` copied the order's full quantity whatever
+  had been promised, only one shipment per order was allowed, and a short
+  ship left the unshipped part held against stock that was not there.
+
+**The model.** Backorder is *derived, never stored*: ordered minus promised,
+per sales-order line, so there is no second table to drift from the orders
+themselves.
+
+- `stock_reservations.sales_order_line_id`: a promise now knows which line it
+  is for, structurally. It used to be only in the note. Backfilled from the
+  note. The column survives the re-key from order to shipment.
+- `sales_order_line_promised` / `_shipped`: what is promised (live promises,
+  kept promises, and what lapsed or dropped ones actually delivered) and what
+  has shipped.
+- `purchase_order_line_demands`: which sales-order lines a purchase-order line
+  was bought for, and how many of it. It exists for traceability only. Stock
+  is never earmarked by which purchase it arrived on: when goods land they are
+  free stock, pulled into whichever orders are waiting (oldest approval first
+  unless an operator picks one). RLS is read-only. Every write goes through
+  `create_purchase_order_from_demand`.
+- `sales_order_line_on_order` (0085: only what has not been received yet) and
+  `purchase_incoming` (open purchase orders minus what their delivery plans
+  have received).
+
+**Behaviour changes.**
+
+- *Approval reserves what exists and leaves the rest as backorder.* Skipped
+  entries now carry `reserved` and `backordered`, and the response adds
+  `backordered_units`.
+- *`fill_backorders(warehouse, product?, line?, quantity?)`* promises free
+  stock to waiting lines, oldest approval first. It can be narrowed to one
+  product, or to one line and a quantity so one customer is served first. It
+  always files the promise on the order, never on a shipment already being
+  worked: that shipment's lines were fixed at creation, and `ship_plan` would
+  let the extra promise go.
+- *`open_demand(warehouse)`* is the purchasing worklist. Per product it gives
+  ordered, promised, shipped, backordered, available, incoming, can-fill-now
+  and to-purchase (backordered − free − incoming), plus the preferred supplier
+  and the waiting lines.
+- *`create_purchase_order_from_demand`* wraps `create_purchase_order`, so the
+  permission, scope and line checks are unchanged. Each line is linked either
+  to explicit `demands`, or FIFO across the waiting lines. Since 0085 the FIFO
+  skips lines that free stock will cover first and lines other open purchases
+  already cover. Ordering less than the backorder is allowed and normal.
+- *Split deliveries.* The one-plan-per-PO index is dropped.
+  `create_delivery_plan_from_purchase_order` copies only what no plan for the
+  order expects yet, and refuses once everything is planned. A supplier's own
+  delivery note, imported rather than created from the order, is attached
+  with `link_delivery_plan_to_purchase_order`. Whatever format the plan came
+  in, its receipts then count against the order.
+- *Shipping keeps what left and gives back what did not.*
+  - The one-shipment-per-order index becomes one *open* (not shipped, not
+    cancelled) shipment per order, so follow-up shipments work.
+  - `create_shipment_from_sales_order` carries promised − shipped per line and
+    refuses with "fill it from stock first" when nothing is promised.
+  - `ship_plan` gains two steps. 3b shrinks a shipment's live promises to what
+    actually left and releases the rest, so a short pick returns to backorder.
+    3c records units shipped without a prior promise as kept promises on the
+    order's lines, so "how much of this line shipped" has one answer.
+  - `cancel_shipment` still reverses it: those promises become live again at
+    what shipped.
+  - `cancel_sales_order` releases every live promise linked by reference or
+    line. `complete_sales_order` releases those still on the order (closing
+    with backorder left, when the rest is supplied elsewhere).
+- *Read side.*
+  - `sales_order_detail` adds per-line product, promised, shipped,
+    backordered, on-order and linked purchase orders, plus every shipment and
+    the open one.
+  - `purchase_order_detail` adds every delivery plan, and per line: planned,
+    received, and the sales orders it was bought for.
+
+**Client.**
+
+- A new home entry, 受注残・発注, sits between the two order menus. It shows
+  per-product demand with a summary row, "在庫から引当" (fill from stock) per
+  product, per order line with a quantity, and for everything at once.
+  Selecting products raises one purchase order for many sales orders: the
+  preferred supplier is prefilled, and quantities start at 要発注 (to buy)
+  and can be lowered.
+- The sales-order detail shows ordered / reserved / shipped / backordered per
+  line, with chips for the purchase orders covering it and a per-line fill
+  action. Its primary action follows the work: open the shipment being
+  worked, else create a shipment (or "残りを出荷", ship the rest), else fill
+  from stock, else complete. Complete and fill stay reachable from a menu.
+- The purchase-order detail lists its delivery plans and, per line, planned,
+  received and outstanding, plus chips for the sales orders it was bought
+  for. "残りの入荷予定を作成" (plan the rest) appears while anything is
+  unplanned.
+- Reconciliation gains "発注に紐付け" (link to purchase order) for an
+  imported plan, or "発注を開く" (open purchase order) once linked.
+- The reservations screen reaches the three 0064 RPCs no client called:
+  - `allocate_stock`, pinning the unpinned part soonest-expiry-first, and
+    reporting what could not be found;
+  - `release_allocation`, per parcel;
+  - `reserve_stock`, a manual promise by JAN.
+
+**Verified live.**
+
+- All 10 security invariants hold.
+- An aborted-transaction round trip, starting from 3 in stock:
+  1. Order A for 5 reserved 3 with 2 backordered. Order B for 7 reserved 0
+     with 7 backordered. Demand showed 9 to buy.
+  2. A purchase for 6 was linked A 2 and B 4, with incoming 6.
+  3. Receiving 4 left incoming at 2. A second plan was refused while
+     everything was planned.
+  4. Filling gave A 2 and B 2.
+  5. Shipments carried 5 and 2. A short pick of 4 left A with 1 backordered.
+     A follow-up shipment for B was refused with nothing promised.
+  6. The last 2 arrived. Filling A and a follow-up shipment carried exactly 1.
+  7. The purchase-order detail showed received 6 against both orders.
+- A second round trip (0085) confirmed that "on order" drops as goods arrive,
+  and that a new purchase from demand skips the lines free stock covers.
+
+**Known limit, unchanged.** The manual `record_receipt_item` does not bump
+`delivery_plan_lines.received_quantity`. A parcel added by hand after a
+receipt closed therefore still counts as incoming until the plan is
+reconciled again.
 
 ## Rollout discipline
 

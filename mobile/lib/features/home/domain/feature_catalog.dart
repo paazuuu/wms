@@ -5,6 +5,7 @@ import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
+import '../../demand/presentation/open_demand_screen.dart';
 import '../../exceptions/presentation/exception_list_screen.dart';
 import '../../qc/presentation/held_stock_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
@@ -153,6 +154,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _salesOrders,
             requiredAnyOf: ['sales_order.view', 'sales_order.manage', 'sales_order.approve'],
+          ),
+          // Between the two kinds of order on purpose: this is where the
+          // orders taken downstream turn into the purchases made upstream.
+          FeatureEntry(
+            id: 'demand',
+            icon: Icons.assignment_late_outlined,
+            status: FeatureStatus.ready,
+            builder: _demand,
+            requiredAnyOf: ['sales_order.view', 'purchase_order.view', 'inventory.view'],
           ),
           FeatureEntry(
             id: 'work_orders',
@@ -308,6 +318,8 @@ Widget _purchaseOrders(BuildContext _) => const PurchaseOrderListScreen();
 
 /// Top-level (const-referenceable) builder for the Sales Orders feature.
 Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();
+
+Widget _demand(BuildContext _) => const OpenDemandScreen();
 
 /// Top-level (const-referenceable) builder for the Work Orders feature.
 Widget _workOrders(BuildContext _) => const WorkOrderListScreen();

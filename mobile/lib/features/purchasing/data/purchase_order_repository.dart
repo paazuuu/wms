@@ -38,6 +38,10 @@ abstract class PurchaseOrderRepository {
     int id, {
     String? note,
   });
+
+  /// Attaches a delivery plan that arrived in the supplier's own format
+  /// (imported, not created from the order) to the order it delivers (0084).
+  Future<ApiResult<bool>> linkDeliveryPlan(int purchaseOrderId, int deliveryPlanId);
 }
 
 class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
@@ -146,6 +150,13 @@ class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
       return mapDioError<DeliveryPlanFromPurchaseOrderResult>(e);
     }
   }
+
+  @override
+  Future<ApiResult<bool>> linkDeliveryPlan(int purchaseOrderId, int deliveryPlanId) =>
+      _action('/rpc/link_delivery_plan_to_purchase_order', {
+        'p_delivery_plan_id': deliveryPlanId,
+        'p_purchase_order_id': purchaseOrderId,
+      });
 
   Future<ApiResult<bool>> _action(String path, Map<String, dynamic> data) async {
     try {

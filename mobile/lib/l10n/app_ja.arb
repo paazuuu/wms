@@ -3158,5 +3158,368 @@
   "waveCancelled": "ウェーブを取り消しました",
   "@waveCancelled": {
     "description": "Wave cancelled successfully."
+  },
+  "featDemand": "受注残・発注",
+  "@featDemand": {
+    "description": "featDemand"
+  },
+  "featDemandDesc": "注文に在庫を引当て、足りない分をまとめて発注",
+  "@featDemandDesc": {
+    "description": "featDemandDesc"
+  },
+  "demandTitle": "受注残・発注",
+  "@demandTitle": {
+    "description": "demandTitle"
+  },
+  "demandEmpty": "待っている注文はありません",
+  "@demandEmpty": {
+    "description": "demandEmpty"
+  },
+  "demandEmptyBody": "承認済みの受注のうち、在庫が足りずに引当できなかった分がここに集まります。",
+  "@demandEmptyBody": {
+    "description": "demandEmptyBody"
+  },
+  "demandFillAll": "在庫からすべて引当",
+  "@demandFillAll": {
+    "description": "demandFillAll"
+  },
+  "demandFillAllQ": "空いている在庫を、承認の古い注文から順に引当てます。よろしいですか？",
+  "@demandFillAllQ": {
+    "description": "demandFillAllQ"
+  },
+  "demandNothingToFill": "引当できる在庫がありません",
+  "@demandNothingToFill": {
+    "description": "demandNothingToFill"
+  },
+  "demandFilled": "{units} 個を引当しました",
+  "@demandFilled": {
+    "description": "demandFilled",
+    "placeholders": {
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoCreated": "発注を作成しました（{links} 件の注文に紐付け）",
+  "@demandPoCreated": {
+    "description": "demandPoCreated",
+    "placeholders": {
+      "links": {
+        "type": "int"
+      }
+    }
+  },
+  "demandCreatePo": "発注を作成（{count} 品目）",
+  "@demandCreatePo": {
+    "description": "demandCreatePo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandBackordered": "受注残",
+  "@demandBackordered": {
+    "description": "demandBackordered"
+  },
+  "demandCanFillNow": "今すぐ引当可",
+  "@demandCanFillNow": {
+    "description": "demandCanFillNow"
+  },
+  "demandIncoming": "入荷予定",
+  "@demandIncoming": {
+    "description": "demandIncoming"
+  },
+  "demandToPurchase": "要発注",
+  "@demandToPurchase": {
+    "description": "demandToPurchase"
+  },
+  "demandAvailable": "空き在庫",
+  "@demandAvailable": {
+    "description": "demandAvailable"
+  },
+  "demandNeedsPurchase": "要発注 {count}",
+  "@demandNeedsPurchase": {
+    "description": "demandNeedsPurchase",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandFillable": "引当可 {count}",
+  "@demandFillable": {
+    "description": "demandFillable",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandCovered": "手配済み",
+  "@demandCovered": {
+    "description": "demandCovered"
+  },
+  "demandFillNow": "在庫から引当（{count}）",
+  "@demandFillNow": {
+    "description": "demandFillNow",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandWaitingOrders": "待っている注文 {count} 件",
+  "@demandWaitingOrders": {
+    "description": "demandWaitingOrders",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "demandLineStatus": "受注 {ordered} ・引当 {promised} ・残 {backordered} ・発注中 {onOrder}",
+  "@demandLineStatus": {
+    "description": "demandLineStatus",
+    "placeholders": {
+      "ordered": {
+        "type": "int"
+      },
+      "promised": {
+        "type": "int"
+      },
+      "backordered": {
+        "type": "int"
+      },
+      "onOrder": {
+        "type": "int"
+      }
+    }
+  },
+  "demandLineFill": "この注文に引当",
+  "@demandLineFill": {
+    "description": "demandLineFill"
+  },
+  "demandLineFillQuantity": "引当数",
+  "@demandLineFillQuantity": {
+    "description": "demandLineFillQuantity"
+  },
+  "demandLineFillMax": "最大 {max}",
+  "@demandLineFillMax": {
+    "description": "demandLineFillMax",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "demandPoTitle": "受注残から発注",
+  "@demandPoTitle": {
+    "description": "demandPoTitle"
+  },
+  "demandPoHint": "数量は要発注数が初期値です。少なく発注しても構いません — 足りない分は別の手配で補えます。",
+  "@demandPoHint": {
+    "description": "demandPoHint"
+  },
+  "demandPoLineHint": "受注残 {backordered} ・要発注 {toPurchase}",
+  "@demandPoLineHint": {
+    "description": "demandPoLineHint",
+    "placeholders": {
+      "backordered": {
+        "type": "int"
+      },
+      "toPurchase": {
+        "type": "int"
+      }
+    }
+  },
+  "demandQuantity": "発注数",
+  "@demandQuantity": {
+    "description": "demandQuantity"
+  },
+  "demandOrdered": "受注",
+  "@demandOrdered": {
+    "description": "demandOrdered"
+  },
+  "demandPromised": "引当済",
+  "@demandPromised": {
+    "description": "demandPromised"
+  },
+  "demandShipped": "出荷済",
+  "@demandShipped": {
+    "description": "demandShipped"
+  },
+  "soSkipPartial": "引当 {reserved} ・受注残 {backordered}",
+  "@soSkipPartial": {
+    "description": "soSkipPartial",
+    "placeholders": {
+      "reserved": {
+        "type": "int"
+      },
+      "backordered": {
+        "type": "int"
+      }
+    }
+  },
+  "soCreateShipmentReadyQ": "引当済みで未出荷の {units} 個を出荷に載せます。よろしいですか？",
+  "@soCreateShipmentReadyQ": {
+    "description": "soCreateShipmentReadyQ",
+    "placeholders": {
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "soShipRemaining": "残りを出荷",
+  "@soShipRemaining": {
+    "description": "soShipRemaining"
+  },
+  "soFillFromStock": "在庫から引当",
+  "@soFillFromStock": {
+    "description": "soFillFromStock"
+  },
+  "soMoreActions": "その他の操作",
+  "@soMoreActions": {
+    "description": "soMoreActions"
+  },
+  "soReadyToShip": "出荷待ち",
+  "@soReadyToShip": {
+    "description": "soReadyToShip"
+  },
+  "soShipments": "出荷",
+  "@soShipments": {
+    "description": "soShipments"
+  },
+  "soShipmentShipped": "出荷済み",
+  "@soShipmentShipped": {
+    "description": "soShipmentShipped"
+  },
+  "soShipmentOpen": "作業中",
+  "@soShipmentOpen": {
+    "description": "soShipmentOpen"
+  },
+  "soLineUnlinked": "商品マスタ未登録のため引当できません",
+  "@soLineUnlinked": {
+    "description": "soLineUnlinked"
+  },
+  "soLineOnOrder": "発注中 {count}",
+  "@soLineOnOrder": {
+    "description": "soLineOnOrder",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "soFillLine": "この明細に引当",
+  "@soFillLine": {
+    "description": "soFillLine"
+  },
+  "poCreateRemainingDeliveryPlan": "残りの入荷予定を作成",
+  "@poCreateRemainingDeliveryPlan": {
+    "description": "poCreateRemainingDeliveryPlan"
+  },
+  "poDeliveryPlans": "入荷予定",
+  "@poDeliveryPlans": {
+    "description": "poDeliveryPlans"
+  },
+  "poPlanReceived": "入荷済み",
+  "@poPlanReceived": {
+    "description": "poPlanReceived"
+  },
+  "poPlanOpen": "入荷待ち",
+  "@poPlanOpen": {
+    "description": "poPlanOpen"
+  },
+  "poLinePlanned": "入荷予定",
+  "@poLinePlanned": {
+    "description": "poLinePlanned"
+  },
+  "poLineReceived": "入荷済",
+  "@poLineReceived": {
+    "description": "poLineReceived"
+  },
+  "poLineOutstanding": "未入荷",
+  "@poLineOutstanding": {
+    "description": "poLineOutstanding"
+  },
+  "poLineForOrders": "この発注の対象の受注",
+  "@poLineForOrders": {
+    "description": "poLineForOrders"
+  },
+  "reconOpenPurchaseOrder": "発注を開く",
+  "@reconOpenPurchaseOrder": {
+    "description": "reconOpenPurchaseOrder"
+  },
+  "reconLinkPurchaseOrder": "発注に紐付け",
+  "@reconLinkPurchaseOrder": {
+    "description": "reconLinkPurchaseOrder"
+  },
+  "reconNoPurchaseOrderToLink": "紐付けできる発注がありません",
+  "@reconNoPurchaseOrderToLink": {
+    "description": "reconNoPurchaseOrderToLink"
+  },
+  "reconLinkedPurchaseOrder": "{number} に紐付けました",
+  "@reconLinkedPurchaseOrder": {
+    "description": "reconLinkedPurchaseOrder",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationAllocatedShort": "{allocated} 個を割当（{short} 個は在庫が見つかりません）",
+  "@reservationAllocatedShort": {
+    "description": "reservationAllocatedShort",
+    "placeholders": {
+      "allocated": {
+        "type": "int"
+      },
+      "short": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationAllocatedDone": "{allocated} 個を割当しました",
+  "@reservationAllocatedDone": {
+    "description": "reservationAllocatedDone",
+    "placeholders": {
+      "allocated": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationManualNoProduct": "JAN {jan} の商品が見つかりません",
+  "@reservationManualNoProduct": {
+    "description": "reservationManualNoProduct",
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationManualCreated": "引当を作成しました",
+  "@reservationManualCreated": {
+    "description": "reservationManualCreated"
+  },
+  "reservationManualAdd": "手動で引当",
+  "@reservationManualAdd": {
+    "description": "reservationManualAdd"
+  },
+  "reservationReleaseAllocation": "割当を外す",
+  "@reservationReleaseAllocation": {
+    "description": "reservationReleaseAllocation"
+  },
+  "reservationAllocate": "ロットを割当",
+  "@reservationAllocate": {
+    "description": "reservationAllocate"
+  },
+  "reservationManualNote": "用途・メモ",
+  "@reservationManualNote": {
+    "description": "reservationManualNote"
+  },
+  "reservationManualSubmit": "引当する",
+  "@reservationManualSubmit": {
+    "description": "reservationManualSubmit"
   }
 }

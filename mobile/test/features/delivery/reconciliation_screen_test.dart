@@ -4,6 +4,8 @@ import 'package:wms_mobile/features/delivery/application/delivery_providers.dart
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan_line.dart';
 import 'package:wms_mobile/features/delivery/presentation/reconciliation_screen.dart';
+import 'package:wms_mobile/features/purchasing/application/purchase_order_providers.dart';
+import 'package:wms_mobile/features/purchasing/domain/purchase_order.dart';
 
 import '../../support/harness.dart';
 
@@ -128,6 +130,39 @@ void main() {
     // cartons that did arrive.
     expect(find.text('ロット・シリアル未記録'), findsOneWidget);
     expect(find.text('5'), findsWidgets);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
+      'an imported plan can be linked to the purchase order it delivers (0084)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final purchases = FakePurchaseOrderRepository(orders: const [
+      PurchaseOrder(
+        id: 9,
+        status: PurchaseOrderStatus.approved,
+        poNumber: 'PO-000009',
+        supplierName: '新東光通商株式会社',
+        warehouseId: 1,
+      ),
+    ]);
+    await pumpApp(
+      tester,
+      const ReconciliationScreen(planId: 1),
+      overrides: [
+        deliveryRepositoryProvider.overrideWithValue(FakeDeliveryRepository([_plan()])),
+        purchaseOrderRepositoryProvider.overrideWithValue(purchases),
+      ],
+    );
+
+    await tester.tap(find.byTooltip('発注に紐付け'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PO-000009'));
+    await tester.pumpAndSettle();
+
+    expect(purchases.lastLink, (purchaseOrderId: 9, deliveryPlanId: 1));
+    expect(find.text('PO-000009 に紐付けました'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });

@@ -153,6 +153,9 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
+    // The shipment is still being worked, so closing the order is in the menu.
+    await tester.tap(find.byTooltip('その他の操作'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('完了にする'));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(

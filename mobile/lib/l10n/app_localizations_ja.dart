@@ -3941,4 +3941,234 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get waveCancelled => 'ウェーブを取り消しました';
+
+  @override
+  String get featDemand => '受注残・発注';
+
+  @override
+  String get featDemandDesc => '注文に在庫を引当て、足りない分をまとめて発注';
+
+  @override
+  String get demandTitle => '受注残・発注';
+
+  @override
+  String get demandEmpty => '待っている注文はありません';
+
+  @override
+  String get demandEmptyBody => '承認済みの受注のうち、在庫が足りずに引当できなかった分がここに集まります。';
+
+  @override
+  String get demandFillAll => '在庫からすべて引当';
+
+  @override
+  String get demandFillAllQ => '空いている在庫を、承認の古い注文から順に引当てます。よろしいですか？';
+
+  @override
+  String get demandNothingToFill => '引当できる在庫がありません';
+
+  @override
+  String demandFilled(int units) {
+    return '$units 個を引当しました';
+  }
+
+  @override
+  String demandPoCreated(int links) {
+    return '発注を作成しました（$links 件の注文に紐付け）';
+  }
+
+  @override
+  String demandCreatePo(int count) {
+    return '発注を作成（$count 品目）';
+  }
+
+  @override
+  String get demandBackordered => '受注残';
+
+  @override
+  String get demandCanFillNow => '今すぐ引当可';
+
+  @override
+  String get demandIncoming => '入荷予定';
+
+  @override
+  String get demandToPurchase => '要発注';
+
+  @override
+  String get demandAvailable => '空き在庫';
+
+  @override
+  String demandNeedsPurchase(int count) {
+    return '要発注 $count';
+  }
+
+  @override
+  String demandFillable(int count) {
+    return '引当可 $count';
+  }
+
+  @override
+  String get demandCovered => '手配済み';
+
+  @override
+  String demandFillNow(int count) {
+    return '在庫から引当（$count）';
+  }
+
+  @override
+  String demandWaitingOrders(int count) {
+    return '待っている注文 $count 件';
+  }
+
+  @override
+  String demandLineStatus(
+      int ordered, int promised, int backordered, int onOrder) {
+    return '受注 $ordered ・引当 $promised ・残 $backordered ・発注中 $onOrder';
+  }
+
+  @override
+  String get demandLineFill => 'この注文に引当';
+
+  @override
+  String get demandLineFillQuantity => '引当数';
+
+  @override
+  String demandLineFillMax(int max) {
+    return '最大 $max';
+  }
+
+  @override
+  String get demandPoTitle => '受注残から発注';
+
+  @override
+  String get demandPoHint => '数量は要発注数が初期値です。少なく発注しても構いません — 足りない分は別の手配で補えます。';
+
+  @override
+  String demandPoLineHint(int backordered, int toPurchase) {
+    return '受注残 $backordered ・要発注 $toPurchase';
+  }
+
+  @override
+  String get demandQuantity => '発注数';
+
+  @override
+  String get demandOrdered => '受注';
+
+  @override
+  String get demandPromised => '引当済';
+
+  @override
+  String get demandShipped => '出荷済';
+
+  @override
+  String soSkipPartial(int reserved, int backordered) {
+    return '引当 $reserved ・受注残 $backordered';
+  }
+
+  @override
+  String soCreateShipmentReadyQ(int units) {
+    return '引当済みで未出荷の $units 個を出荷に載せます。よろしいですか？';
+  }
+
+  @override
+  String get soShipRemaining => '残りを出荷';
+
+  @override
+  String get soFillFromStock => '在庫から引当';
+
+  @override
+  String get soMoreActions => 'その他の操作';
+
+  @override
+  String get soReadyToShip => '出荷待ち';
+
+  @override
+  String get soShipments => '出荷';
+
+  @override
+  String get soShipmentShipped => '出荷済み';
+
+  @override
+  String get soShipmentOpen => '作業中';
+
+  @override
+  String get soLineUnlinked => '商品マスタ未登録のため引当できません';
+
+  @override
+  String soLineOnOrder(int count) {
+    return '発注中 $count';
+  }
+
+  @override
+  String get soFillLine => 'この明細に引当';
+
+  @override
+  String get poCreateRemainingDeliveryPlan => '残りの入荷予定を作成';
+
+  @override
+  String get poDeliveryPlans => '入荷予定';
+
+  @override
+  String get poPlanReceived => '入荷済み';
+
+  @override
+  String get poPlanOpen => '入荷待ち';
+
+  @override
+  String get poLinePlanned => '入荷予定';
+
+  @override
+  String get poLineReceived => '入荷済';
+
+  @override
+  String get poLineOutstanding => '未入荷';
+
+  @override
+  String get poLineForOrders => 'この発注の対象の受注';
+
+  @override
+  String get reconOpenPurchaseOrder => '発注を開く';
+
+  @override
+  String get reconLinkPurchaseOrder => '発注に紐付け';
+
+  @override
+  String get reconNoPurchaseOrderToLink => '紐付けできる発注がありません';
+
+  @override
+  String reconLinkedPurchaseOrder(String number) {
+    return '$number に紐付けました';
+  }
+
+  @override
+  String reservationAllocatedShort(int allocated, int short) {
+    return '$allocated 個を割当（$short 個は在庫が見つかりません）';
+  }
+
+  @override
+  String reservationAllocatedDone(int allocated) {
+    return '$allocated 個を割当しました';
+  }
+
+  @override
+  String reservationManualNoProduct(String jan) {
+    return 'JAN $jan の商品が見つかりません';
+  }
+
+  @override
+  String get reservationManualCreated => '引当を作成しました';
+
+  @override
+  String get reservationManualAdd => '手動で引当';
+
+  @override
+  String get reservationReleaseAllocation => '割当を外す';
+
+  @override
+  String get reservationAllocate => 'ロットを割当';
+
+  @override
+  String get reservationManualNote => '用途・メモ';
+
+  @override
+  String get reservationManualSubmit => '引当する';
 }

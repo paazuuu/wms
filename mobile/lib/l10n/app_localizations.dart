@@ -7431,6 +7431,397 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ウェーブを取り消しました'**
   String get waveCancelled;
+
+  /// featDemand
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残・発注'**
+  String get featDemand;
+
+  /// featDemandDesc
+  ///
+  /// In ja, this message translates to:
+  /// **'注文に在庫を引当て、足りない分をまとめて発注'**
+  String get featDemandDesc;
+
+  /// demandTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残・発注'**
+  String get demandTitle;
+
+  /// demandEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'待っている注文はありません'**
+  String get demandEmpty;
+
+  /// demandEmptyBody
+  ///
+  /// In ja, this message translates to:
+  /// **'承認済みの受注のうち、在庫が足りずに引当できなかった分がここに集まります。'**
+  String get demandEmptyBody;
+
+  /// demandFillAll
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫からすべて引当'**
+  String get demandFillAll;
+
+  /// demandFillAllQ
+  ///
+  /// In ja, this message translates to:
+  /// **'空いている在庫を、承認の古い注文から順に引当てます。よろしいですか？'**
+  String get demandFillAllQ;
+
+  /// demandNothingToFill
+  ///
+  /// In ja, this message translates to:
+  /// **'引当できる在庫がありません'**
+  String get demandNothingToFill;
+
+  /// demandFilled
+  ///
+  /// In ja, this message translates to:
+  /// **'{units} 個を引当しました'**
+  String demandFilled(int units);
+
+  /// demandPoCreated
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を作成しました（{links} 件の注文に紐付け）'**
+  String demandPoCreated(int links);
+
+  /// demandCreatePo
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を作成（{count} 品目）'**
+  String demandCreatePo(int count);
+
+  /// demandBackordered
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残'**
+  String get demandBackordered;
+
+  /// demandCanFillNow
+  ///
+  /// In ja, this message translates to:
+  /// **'今すぐ引当可'**
+  String get demandCanFillNow;
+
+  /// demandIncoming
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get demandIncoming;
+
+  /// demandToPurchase
+  ///
+  /// In ja, this message translates to:
+  /// **'要発注'**
+  String get demandToPurchase;
+
+  /// demandAvailable
+  ///
+  /// In ja, this message translates to:
+  /// **'空き在庫'**
+  String get demandAvailable;
+
+  /// demandNeedsPurchase
+  ///
+  /// In ja, this message translates to:
+  /// **'要発注 {count}'**
+  String demandNeedsPurchase(int count);
+
+  /// demandFillable
+  ///
+  /// In ja, this message translates to:
+  /// **'引当可 {count}'**
+  String demandFillable(int count);
+
+  /// demandCovered
+  ///
+  /// In ja, this message translates to:
+  /// **'手配済み'**
+  String get demandCovered;
+
+  /// demandFillNow
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫から引当（{count}）'**
+  String demandFillNow(int count);
+
+  /// demandWaitingOrders
+  ///
+  /// In ja, this message translates to:
+  /// **'待っている注文 {count} 件'**
+  String demandWaitingOrders(int count);
+
+  /// demandLineStatus
+  ///
+  /// In ja, this message translates to:
+  /// **'受注 {ordered} ・引当 {promised} ・残 {backordered} ・発注中 {onOrder}'**
+  String demandLineStatus(
+      int ordered, int promised, int backordered, int onOrder);
+
+  /// demandLineFill
+  ///
+  /// In ja, this message translates to:
+  /// **'この注文に引当'**
+  String get demandLineFill;
+
+  /// demandLineFillQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'引当数'**
+  String get demandLineFillQuantity;
+
+  /// demandLineFillMax
+  ///
+  /// In ja, this message translates to:
+  /// **'最大 {max}'**
+  String demandLineFillMax(int max);
+
+  /// demandPoTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残から発注'**
+  String get demandPoTitle;
+
+  /// demandPoHint
+  ///
+  /// In ja, this message translates to:
+  /// **'数量は要発注数が初期値です。少なく発注しても構いません — 足りない分は別の手配で補えます。'**
+  String get demandPoHint;
+
+  /// demandPoLineHint
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残 {backordered} ・要発注 {toPurchase}'**
+  String demandPoLineHint(int backordered, int toPurchase);
+
+  /// demandQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'発注数'**
+  String get demandQuantity;
+
+  /// demandOrdered
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get demandOrdered;
+
+  /// demandPromised
+  ///
+  /// In ja, this message translates to:
+  /// **'引当済'**
+  String get demandPromised;
+
+  /// demandShipped
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済'**
+  String get demandShipped;
+
+  /// soSkipPartial
+  ///
+  /// In ja, this message translates to:
+  /// **'引当 {reserved} ・受注残 {backordered}'**
+  String soSkipPartial(int reserved, int backordered);
+
+  /// soCreateShipmentReadyQ
+  ///
+  /// In ja, this message translates to:
+  /// **'引当済みで未出荷の {units} 個を出荷に載せます。よろしいですか？'**
+  String soCreateShipmentReadyQ(int units);
+
+  /// soShipRemaining
+  ///
+  /// In ja, this message translates to:
+  /// **'残りを出荷'**
+  String get soShipRemaining;
+
+  /// soFillFromStock
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫から引当'**
+  String get soFillFromStock;
+
+  /// soMoreActions
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の操作'**
+  String get soMoreActions;
+
+  /// soReadyToShip
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷待ち'**
+  String get soReadyToShip;
+
+  /// soShipments
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get soShipments;
+
+  /// soShipmentShipped
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済み'**
+  String get soShipmentShipped;
+
+  /// soShipmentOpen
+  ///
+  /// In ja, this message translates to:
+  /// **'作業中'**
+  String get soShipmentOpen;
+
+  /// soLineUnlinked
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ未登録のため引当できません'**
+  String get soLineUnlinked;
+
+  /// soLineOnOrder
+  ///
+  /// In ja, this message translates to:
+  /// **'発注中 {count}'**
+  String soLineOnOrder(int count);
+
+  /// soFillLine
+  ///
+  /// In ja, this message translates to:
+  /// **'この明細に引当'**
+  String get soFillLine;
+
+  /// poCreateRemainingDeliveryPlan
+  ///
+  /// In ja, this message translates to:
+  /// **'残りの入荷予定を作成'**
+  String get poCreateRemainingDeliveryPlan;
+
+  /// poDeliveryPlans
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get poDeliveryPlans;
+
+  /// poPlanReceived
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済み'**
+  String get poPlanReceived;
+
+  /// poPlanOpen
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷待ち'**
+  String get poPlanOpen;
+
+  /// poLinePlanned
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get poLinePlanned;
+
+  /// poLineReceived
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済'**
+  String get poLineReceived;
+
+  /// poLineOutstanding
+  ///
+  /// In ja, this message translates to:
+  /// **'未入荷'**
+  String get poLineOutstanding;
+
+  /// poLineForOrders
+  ///
+  /// In ja, this message translates to:
+  /// **'この発注の対象の受注'**
+  String get poLineForOrders;
+
+  /// reconOpenPurchaseOrder
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を開く'**
+  String get reconOpenPurchaseOrder;
+
+  /// reconLinkPurchaseOrder
+  ///
+  /// In ja, this message translates to:
+  /// **'発注に紐付け'**
+  String get reconLinkPurchaseOrder;
+
+  /// reconNoPurchaseOrderToLink
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付けできる発注がありません'**
+  String get reconNoPurchaseOrderToLink;
+
+  /// reconLinkedPurchaseOrder
+  ///
+  /// In ja, this message translates to:
+  /// **'{number} に紐付けました'**
+  String reconLinkedPurchaseOrder(String number);
+
+  /// reservationAllocatedShort
+  ///
+  /// In ja, this message translates to:
+  /// **'{allocated} 個を割当（{short} 個は在庫が見つかりません）'**
+  String reservationAllocatedShort(int allocated, int short);
+
+  /// reservationAllocatedDone
+  ///
+  /// In ja, this message translates to:
+  /// **'{allocated} 個を割当しました'**
+  String reservationAllocatedDone(int allocated);
+
+  /// reservationManualNoProduct
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {jan} の商品が見つかりません'**
+  String reservationManualNoProduct(String jan);
+
+  /// reservationManualCreated
+  ///
+  /// In ja, this message translates to:
+  /// **'引当を作成しました'**
+  String get reservationManualCreated;
+
+  /// reservationManualAdd
+  ///
+  /// In ja, this message translates to:
+  /// **'手動で引当'**
+  String get reservationManualAdd;
+
+  /// reservationReleaseAllocation
+  ///
+  /// In ja, this message translates to:
+  /// **'割当を外す'**
+  String get reservationReleaseAllocation;
+
+  /// reservationAllocate
+  ///
+  /// In ja, this message translates to:
+  /// **'ロットを割当'**
+  String get reservationAllocate;
+
+  /// reservationManualNote
+  ///
+  /// In ja, this message translates to:
+  /// **'用途・メモ'**
+  String get reservationManualNote;
+
+  /// reservationManualSubmit
+  ///
+  /// In ja, this message translates to:
+  /// **'引当する'**
+  String get reservationManualSubmit;
 }
 
 class _AppLocalizationsDelegate

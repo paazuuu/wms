@@ -4045,4 +4045,239 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waveCancelled => 'Wave cancelled';
+
+  @override
+  String get featDemand => 'Backorders & purchasing';
+
+  @override
+  String get featDemandDesc =>
+      'Fill waiting orders from stock and buy what is short';
+
+  @override
+  String get demandTitle => 'Backorders & purchasing';
+
+  @override
+  String get demandEmpty => 'No orders are waiting';
+
+  @override
+  String get demandEmptyBody =>
+      'Approved sales orders that stock could not cover gather here.';
+
+  @override
+  String get demandFillAll => 'Fill all from stock';
+
+  @override
+  String get demandFillAllQ =>
+      'Free stock will be reserved for waiting orders, oldest approval first. Continue?';
+
+  @override
+  String get demandNothingToFill => 'There is no free stock to reserve';
+
+  @override
+  String demandFilled(int units) {
+    return 'Reserved $units units';
+  }
+
+  @override
+  String demandPoCreated(int links) {
+    return 'Purchase order created (linked to $links order lines)';
+  }
+
+  @override
+  String demandCreatePo(int count) {
+    return 'Create purchase order ($count items)';
+  }
+
+  @override
+  String get demandBackordered => 'Backordered';
+
+  @override
+  String get demandCanFillNow => 'Can fill now';
+
+  @override
+  String get demandIncoming => 'Incoming';
+
+  @override
+  String get demandToPurchase => 'To buy';
+
+  @override
+  String get demandAvailable => 'Free stock';
+
+  @override
+  String demandNeedsPurchase(int count) {
+    return 'Buy $count';
+  }
+
+  @override
+  String demandFillable(int count) {
+    return 'Can fill $count';
+  }
+
+  @override
+  String get demandCovered => 'Covered';
+
+  @override
+  String demandFillNow(int count) {
+    return 'Fill from stock ($count)';
+  }
+
+  @override
+  String demandWaitingOrders(int count) {
+    return '$count waiting orders';
+  }
+
+  @override
+  String demandLineStatus(
+      int ordered, int promised, int backordered, int onOrder) {
+    return 'Ordered $ordered · reserved $promised · waiting $backordered · on order $onOrder';
+  }
+
+  @override
+  String get demandLineFill => 'Reserve for this order';
+
+  @override
+  String get demandLineFillQuantity => 'Quantity to reserve';
+
+  @override
+  String demandLineFillMax(int max) {
+    return 'Up to $max';
+  }
+
+  @override
+  String get demandPoTitle => 'Purchase for backorders';
+
+  @override
+  String get demandPoHint =>
+      'Quantities start at what is still to buy. Ordering less is fine — the rest can be supplied from elsewhere.';
+
+  @override
+  String demandPoLineHint(int backordered, int toPurchase) {
+    return 'Backordered $backordered · to buy $toPurchase';
+  }
+
+  @override
+  String get demandQuantity => 'Quantity';
+
+  @override
+  String get demandOrdered => 'Ordered';
+
+  @override
+  String get demandPromised => 'Reserved';
+
+  @override
+  String get demandShipped => 'Shipped';
+
+  @override
+  String soSkipPartial(int reserved, int backordered) {
+    return 'Reserved $reserved · backordered $backordered';
+  }
+
+  @override
+  String soCreateShipmentReadyQ(int units) {
+    return 'The $units reserved units not yet shipped will go on the shipment. Continue?';
+  }
+
+  @override
+  String get soShipRemaining => 'Ship the rest';
+
+  @override
+  String get soFillFromStock => 'Fill from stock';
+
+  @override
+  String get soMoreActions => 'More actions';
+
+  @override
+  String get soReadyToShip => 'Ready to ship';
+
+  @override
+  String get soShipments => 'Shipments';
+
+  @override
+  String get soShipmentShipped => 'Shipped';
+
+  @override
+  String get soShipmentOpen => 'In progress';
+
+  @override
+  String get soLineUnlinked =>
+      'No product record for this JAN, so nothing can be reserved';
+
+  @override
+  String soLineOnOrder(int count) {
+    return 'On order $count';
+  }
+
+  @override
+  String get soFillLine => 'Reserve for this line';
+
+  @override
+  String get poCreateRemainingDeliveryPlan => 'Plan the rest of the delivery';
+
+  @override
+  String get poDeliveryPlans => 'Delivery plans';
+
+  @override
+  String get poPlanReceived => 'Received';
+
+  @override
+  String get poPlanOpen => 'Awaiting';
+
+  @override
+  String get poLinePlanned => 'Planned';
+
+  @override
+  String get poLineReceived => 'Received';
+
+  @override
+  String get poLineOutstanding => 'Outstanding';
+
+  @override
+  String get poLineForOrders => 'Bought for these orders';
+
+  @override
+  String get reconOpenPurchaseOrder => 'Open purchase order';
+
+  @override
+  String get reconLinkPurchaseOrder => 'Link to purchase order';
+
+  @override
+  String get reconNoPurchaseOrderToLink => 'There is no purchase order to link';
+
+  @override
+  String reconLinkedPurchaseOrder(String number) {
+    return 'Linked to $number';
+  }
+
+  @override
+  String reservationAllocatedShort(int allocated, int short) {
+    return 'Allocated $allocated ($short could not be found)';
+  }
+
+  @override
+  String reservationAllocatedDone(int allocated) {
+    return 'Allocated $allocated';
+  }
+
+  @override
+  String reservationManualNoProduct(String jan) {
+    return 'No product with JAN $jan';
+  }
+
+  @override
+  String get reservationManualCreated => 'Reservation created';
+
+  @override
+  String get reservationManualAdd => 'Reserve manually';
+
+  @override
+  String get reservationReleaseAllocation => 'Remove allocation';
+
+  @override
+  String get reservationAllocate => 'Allocate parcels';
+
+  @override
+  String get reservationManualNote => 'Purpose / note';
+
+  @override
+  String get reservationManualSubmit => 'Reserve';
 }

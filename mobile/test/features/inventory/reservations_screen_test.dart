@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/inventory/application/inventory_providers.dart';
 import 'package:wms_mobile/features/inventory/domain/reservation.dart';
 import 'package:wms_mobile/features/inventory/presentation/reservations_screen.dart';
+import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 
 import '../../support/harness.dart';
@@ -36,9 +38,12 @@ Future<ProviderContainer> _pump(
   WidgetTester tester,
   FakeInventoryRepository repo, {
   int? warehouseId = 1,
+  List<Product> products = const [],
 }) async {
   final container = ProviderContainer(overrides: [
     inventoryRepositoryProvider.overrideWithValue(repo),
+    productRepositoryProvider
+        .overrideWithValue(FakeProductRepository(products: products)),
   ]);
   addTearDown(container.dispose);
   if (warehouseId != null) {
@@ -268,6 +273,81 @@ void main() {
     await _pump(tester, repo);
 
     expect(find.text('予約はありません'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('the unpinned part of a promise can be allocated to parcels',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeInventoryRepository(reservationList: [_active()])
+      ..allocationOutcome = const AllocationOutcome(allocated: 6, short: 4);
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('ロットを割当'));
+    await tester.pumpAndSettle();
+
+    // Asks for exactly what is unpinned, and says what could not be found.
+    expect(repo.lastAllocate, (id: 3, quantity: 10));
+    expect(find.text('6 個を割当（4 個は在庫が見つかりません）'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('one parcel can be un-pinned without dropping the promise',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeInventoryRepository(reservationList: [_active()]);
+    await _pump(tester, repo);
+
+    await tester.tap(find.byTooltip('割当を外す'));
+    await tester.pumpAndSettle();
+
+    expect(repo.releasedAllocationIds, [9]);
+    expect(repo.releasedIds, isEmpty);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('stock can be reserved by hand by JAN code', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeInventoryRepository();
+    await _pump(tester, repo, products: const [
+      Product(id: 7, janCode: '4901234567894', name: 'ボールペン'),
+    ]);
+
+    await tester.tap(find.text('手動で引当'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4901234567894');
+    await tester.enterText(find.widgetWithText(TextField, '数量'), '5');
+    await tester.enterText(find.widgetWithText(TextField, '用途・メモ'), '社内使用');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, '引当する'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastReserve,
+        (productId: 7, warehouseId: 1, quantity: 5, note: '社内使用'));
+    expect(find.text('引当を作成しました'), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('an unknown JAN is refused before anything is reserved',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeInventoryRepository();
+    await _pump(tester, repo);
+
+    await tester.tap(find.text('手動で引当'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4900000000000');
+    await tester.enterText(find.widgetWithText(TextField, '数量'), '5');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, '引当する'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastReserve, isNull);
+    expect(find.text('JAN 4900000000000 の商品が見つかりません'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });

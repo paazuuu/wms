@@ -218,3 +218,20 @@ class OverAllocatedStock extends Equatable {
   List<Object?> get props =>
       [stockUnitId, productId, quantity, allocated, over, warehouseId];
 }
+
+/// What `allocate_stock` (0064) pinned, and how much it could not find.
+class AllocationOutcome extends Equatable {
+  const AllocationOutcome({required this.allocated, required this.short});
+
+  final int allocated;
+  final int short;
+
+  factory AllocationOutcome.fromJson(Map<String, dynamic> json) =>
+      AllocationOutcome(
+        allocated: _asInt(json['allocated']),
+        short: _asInt(json['short']),
+      );
+
+  @override
+  List<Object?> get props => [allocated, short];
+}
