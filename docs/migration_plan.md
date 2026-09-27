@@ -4520,6 +4520,57 @@ of 6 (dated last month) and 5 took Japan stock 20→9, real CN stock stayed 0.
 
 A count dated in the future was refused. The security invariants still hold.
 
+### 0089 — dashboard: stock as a stacked bar, and the latest purchase orders
+
+**Stock chart.** `dashboard_stock_chart(limit)` (inventory.view, warehouse
+scope) returns the top products by stock with two breakdowns, so the client
+switches between them without refetching:
+
+- **By warehouse:** each real warehouse's on-hand, plus each warehouse
+  abroad's virtual figure (0088) as its own series.
+- **By state:**
+  - free (clamped at 0, so an over-committed product shows as fully
+    reserved);
+  - reserved;
+  - not usable (held or waiting for QC);
+  - abroad (virtual).
+
+**Recent purchase orders.** `dashboard_recent_purchase_orders(limit)`
+(purchase_order.view, scope) lists the latest orders with:
+
+- the destination warehouse and its country;
+- the expected date;
+- received / ordered units (`purchase_order_line_received`, 0086).
+
+**Client (dashboard).** Two new sections under the overview, each shown only
+to users with the permission:
+
+- 商品在庫の内訳 (stock by product): a horizontal stacked bar drawn with
+  `CustomPainter` (no chart dependency).
+  - Colors come from the documented categorical palette in fixed slot order,
+    by warehouse id, so a warehouse keeps its color. The palette was run
+    through the validator for light and dark: all hard checks pass. The
+    contrast warning in light mode is covered by a label at each bar tip and
+    the table view.
+  - Marks: 2px gaps between segments, bars 14px thick with a 4px rounded
+    end only at the data end, hairline gridlines at 0 / half / max.
+  - Virtual segments are hatched at 45°, so they read as virtual without
+    relying on hue.
+  - A legend, a tooltip per bar with every segment, a table view, and
+    "top N of M products".
+  - A 9th and later series fold into a neutral "Other".
+- 直近の発注 (recent purchase orders): PO number, supplier, status,
+  destination warehouse (country), due date, and an arrival meter (blue on a
+  lighter blue track) with received / ordered. Each opens the purchase order;
+  a link goes to the full list.
+
+**Verified live** (aborted transaction):
+
+- Product A: 30 on hand in JP, 12 reserved by an order, so free 18,
+  reserved 12.
+- Product B: 10 in JP plus a virtual count of 25 in a CN warehouse, total 35.
+  By warehouse it read JP 10 and CN (virtual) 25.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

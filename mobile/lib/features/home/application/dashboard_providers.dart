@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../delivery/application/delivery_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
+import '../data/dashboard_charts_repository.dart';
 import '../data/dashboard_repository.dart';
+import '../domain/dashboard_charts.dart';
 import '../domain/dashboard_metrics.dart';
 
 /// Low-stock threshold used by the dashboard watch list (SKUs at or below this
@@ -33,4 +35,24 @@ final dashboardMetricsProvider =
     success: (data) => data,
     failure: (f) => throw Exception(f.message),
   );
+});
+
+final dashboardChartsRepositoryProvider = Provider<DashboardChartsRepository>((ref) {
+  return DashboardChartsRepositoryImpl(ref.watch(restDioProvider));
+});
+
+/// How many products the stock chart shows.
+const dashboardStockChartLimit = 10;
+
+final dashboardStockChartProvider = FutureProvider.autoDispose<StockChartData>((ref) async {
+  final result = await ref
+      .watch(dashboardChartsRepositoryProvider)
+      .stockChart(limit: dashboardStockChartLimit);
+  return result.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+final dashboardRecentPurchaseOrdersProvider =
+    FutureProvider.autoDispose<List<RecentPurchaseOrder>>((ref) async {
+  final result = await ref.watch(dashboardChartsRepositoryProvider).recentPurchaseOrders();
+  return result.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });

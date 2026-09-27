@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
+import 'dashboard_charts.dart';
 import 'dashboard_widgets.dart';
 
 /// The content-area landing page inside the app shell: a branded greeting,
@@ -77,6 +78,24 @@ class DashboardOverviewScreen extends ConsumerWidget {
           onOpenOutstanding: delivery == null ? null : () => onOpen(delivery),
         ),
         const SizedBox(height: AppSpacing.xl),
+        // 0089: stock per product as a stacked bar, then the latest purchases
+        // with where each is bound — each shown only to who may read it.
+        if (permissions.contains('inventory.view')) ...[
+          _SectionLabel(l10n.chartStockTitle),
+          const SizedBox(height: AppSpacing.md),
+          const StockBreakdownPanel(),
+          const SizedBox(height: AppSpacing.xl),
+        ],
+        if (permissions.contains('purchase_order.view')) ...[
+          _SectionLabel(l10n.recentPoTitle),
+          const SizedBox(height: AppSpacing.md),
+          RecentPurchaseOrdersPanel(
+            onOpenAll: entryById('purchase_orders') == null
+                ? null
+                : () => onOpen(entryById('purchase_orders')!),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+        ],
         // §37 hides what this user cannot open, which for someone with no role
         // at all hides the entire menu — leaving a dashboard and no
         // explanation. That state is reachable by design: accounts are created

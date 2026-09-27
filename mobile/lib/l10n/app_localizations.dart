@@ -8417,6 +8417,132 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'メモ（任意）'**
   String get virtualNote;
+
+  /// chartStockTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'商品在庫の内訳'**
+  String get chartStockTitle;
+
+  /// chartByWarehouse
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫別'**
+  String get chartByWarehouse;
+
+  /// chartByState
+  ///
+  /// In ja, this message translates to:
+  /// **'状態別'**
+  String get chartByState;
+
+  /// chartShowTable
+  ///
+  /// In ja, this message translates to:
+  /// **'表で見る'**
+  String get chartShowTable;
+
+  /// chartShowChart
+  ///
+  /// In ja, this message translates to:
+  /// **'グラフで見る'**
+  String get chartShowChart;
+
+  /// chartEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫のある商品はまだありません'**
+  String get chartEmpty;
+
+  /// chartTopOf
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の多い上位 {shown} 商品（全 {total} 商品）'**
+  String chartTopOf(int shown, int total);
+
+  /// chartFree
+  ///
+  /// In ja, this message translates to:
+  /// **'空き'**
+  String get chartFree;
+
+  /// chartReserved
+  ///
+  /// In ja, this message translates to:
+  /// **'引当済'**
+  String get chartReserved;
+
+  /// chartUnusable
+  ///
+  /// In ja, this message translates to:
+  /// **'使用不可（保留・検品待ち）'**
+  String get chartUnusable;
+
+  /// chartVirtualAbroad
+  ///
+  /// In ja, this message translates to:
+  /// **'国外（仮想）'**
+  String get chartVirtualAbroad;
+
+  /// chartWarehouseVirtual
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}（仮想）'**
+  String chartWarehouseVirtual(String name);
+
+  /// chartOther
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get chartOther;
+
+  /// chartProduct
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get chartProduct;
+
+  /// chartTotal
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get chartTotal;
+
+  /// recentPoTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'直近の発注'**
+  String get recentPoTitle;
+
+  /// recentPoEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'発注はまだありません'**
+  String get recentPoEmpty;
+
+  /// recentPoDestination
+  ///
+  /// In ja, this message translates to:
+  /// **'宛先 {warehouse}{country}'**
+  String recentPoDestination(String warehouse, String country);
+
+  /// recentPoExpected
+  ///
+  /// In ja, this message translates to:
+  /// **'納期 {date}'**
+  String recentPoExpected(String date);
+
+  /// recentPoReceived
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷 {received} / {ordered}'**
+  String recentPoReceived(String received, String ordered);
+
+  /// recentPoOpenAll
+  ///
+  /// In ja, this message translates to:
+  /// **'発注一覧へ'**
+  String get recentPoOpenAll;
 }
 
 class _AppLocalizationsDelegate

@@ -4537,4 +4537,77 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get virtualNote => 'メモ（任意）';
+
+  @override
+  String get chartStockTitle => '商品在庫の内訳';
+
+  @override
+  String get chartByWarehouse => '倉庫別';
+
+  @override
+  String get chartByState => '状態別';
+
+  @override
+  String get chartShowTable => '表で見る';
+
+  @override
+  String get chartShowChart => 'グラフで見る';
+
+  @override
+  String get chartEmpty => '在庫のある商品はまだありません';
+
+  @override
+  String chartTopOf(int shown, int total) {
+    return '在庫の多い上位 $shown 商品（全 $total 商品）';
+  }
+
+  @override
+  String get chartFree => '空き';
+
+  @override
+  String get chartReserved => '引当済';
+
+  @override
+  String get chartUnusable => '使用不可（保留・検品待ち）';
+
+  @override
+  String get chartVirtualAbroad => '国外（仮想）';
+
+  @override
+  String chartWarehouseVirtual(String name) {
+    return '$name（仮想）';
+  }
+
+  @override
+  String get chartOther => 'その他';
+
+  @override
+  String get chartProduct => '商品';
+
+  @override
+  String get chartTotal => '合計';
+
+  @override
+  String get recentPoTitle => '直近の発注';
+
+  @override
+  String get recentPoEmpty => '発注はまだありません';
+
+  @override
+  String recentPoDestination(String warehouse, String country) {
+    return '宛先 $warehouse$country';
+  }
+
+  @override
+  String recentPoExpected(String date) {
+    return '納期 $date';
+  }
+
+  @override
+  String recentPoReceived(String received, String ordered) {
+    return '入荷 $received / $ordered';
+  }
+
+  @override
+  String get recentPoOpenAll => '発注一覧へ';
 }

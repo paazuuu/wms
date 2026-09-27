@@ -58,6 +58,9 @@ import 'package:wms_mobile/features/sales/application/sales_order_providers.dart
 import 'package:wms_mobile/features/sales/data/sales_order_repository.dart';
 import 'package:wms_mobile/features/sales/domain/sales_order.dart';
 import 'package:wms_mobile/features/demand/application/demand_providers.dart';
+import 'package:wms_mobile/features/home/application/dashboard_providers.dart';
+import 'package:wms_mobile/features/home/data/dashboard_charts_repository.dart';
+import 'package:wms_mobile/features/home/domain/dashboard_charts.dart';
 import 'package:wms_mobile/features/virtual_stock/application/virtual_stock_providers.dart';
 import 'package:wms_mobile/features/virtual_stock/data/virtual_stock_repository.dart';
 import 'package:wms_mobile/features/virtual_stock/domain/virtual_stock.dart';
@@ -135,6 +138,7 @@ List<Override> _defaultOverrides() => [
       demandRepositoryProvider.overrideWithValue(FakeDemandRepository()),
       warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository()),
       virtualStockRepositoryProvider.overrideWithValue(FakeVirtualStockRepository()),
+      dashboardChartsRepositoryProvider.overrideWithValue(FakeDashboardChartsRepository()),
       tradingPartnerRepositoryProvider
           .overrideWithValue(FakeTradingPartnerRepository()),
       workOrderRepositoryProvider.overrideWithValue(FakeWorkOrderRepository()),
@@ -2482,6 +2486,24 @@ class FakeVirtualStockRepository implements VirtualStockRepository {
     deleted.add(entryId);
     return const ApiSuccess(true);
   }
+}
+
+/// Dashboard chart stub (0089).
+class FakeDashboardChartsRepository implements DashboardChartsRepository {
+  FakeDashboardChartsRepository({
+    this.chart = const StockChartData(),
+    this.orders = const [],
+  });
+
+  StockChartData chart;
+  List<RecentPurchaseOrder> orders;
+
+  @override
+  Future<ApiResult<StockChartData>> stockChart({int limit = 10}) async => ApiSuccess(chart);
+
+  @override
+  Future<ApiResult<List<RecentPurchaseOrder>>> recentPurchaseOrders({int limit = 8}) async =>
+      ApiSuccess(orders);
 }
 
 /// Order-first demand stub (0084): [items] is what `open_demand` returns;

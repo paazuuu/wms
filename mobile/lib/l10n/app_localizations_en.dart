@@ -4653,4 +4653,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get virtualNote => 'Note (optional)';
+
+  @override
+  String get chartStockTitle => 'Stock by product';
+
+  @override
+  String get chartByWarehouse => 'By warehouse';
+
+  @override
+  String get chartByState => 'By state';
+
+  @override
+  String get chartShowTable => 'Show as table';
+
+  @override
+  String get chartShowChart => 'Show as chart';
+
+  @override
+  String get chartEmpty => 'No product holds stock yet';
+
+  @override
+  String chartTopOf(int shown, int total) {
+    return 'Top $shown of $total products by stock';
+  }
+
+  @override
+  String get chartFree => 'Free';
+
+  @override
+  String get chartReserved => 'Reserved';
+
+  @override
+  String get chartUnusable => 'Not usable (held / QC)';
+
+  @override
+  String get chartVirtualAbroad => 'Abroad (virtual)';
+
+  @override
+  String chartWarehouseVirtual(String name) {
+    return '$name (virtual)';
+  }
+
+  @override
+  String get chartOther => 'Other';
+
+  @override
+  String get chartProduct => 'Product';
+
+  @override
+  String get chartTotal => 'Total';
+
+  @override
+  String get recentPoTitle => 'Recent purchase orders';
+
+  @override
+  String get recentPoEmpty => 'No purchase orders yet';
+
+  @override
+  String recentPoDestination(String warehouse, String country) {
+    return 'To $warehouse$country';
+  }
+
+  @override
+  String recentPoExpected(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String recentPoReceived(String received, String ordered) {
+    return 'Received $received / $ordered';
+  }
+
+  @override
+  String get recentPoOpenAll => 'All purchase orders';
 }

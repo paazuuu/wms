@@ -120,6 +120,10 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
 - [x] Virtual stock abroad (0088): exports counted into a separate virtual
       ledger for the destination, plus hand-typed counts and known changes;
       monthly / range summary with the gap counts close
+- [x] Dashboard charts (0089): stock per product as a stacked bar (by
+      warehouse incl. virtual abroad, or by state), with legend, tooltip and
+      table view; the latest purchase orders with destination warehouse and
+      arrival progress
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**

@@ -4129,5 +4129,123 @@
   "virtualNote": "メモ（任意）",
   "@virtualNote": {
     "description": "virtualNote"
+  },
+  "chartStockTitle": "商品在庫の内訳",
+  "@chartStockTitle": {
+    "description": "chartStockTitle"
+  },
+  "chartByWarehouse": "倉庫別",
+  "@chartByWarehouse": {
+    "description": "chartByWarehouse"
+  },
+  "chartByState": "状態別",
+  "@chartByState": {
+    "description": "chartByState"
+  },
+  "chartShowTable": "表で見る",
+  "@chartShowTable": {
+    "description": "chartShowTable"
+  },
+  "chartShowChart": "グラフで見る",
+  "@chartShowChart": {
+    "description": "chartShowChart"
+  },
+  "chartEmpty": "在庫のある商品はまだありません",
+  "@chartEmpty": {
+    "description": "chartEmpty"
+  },
+  "chartTopOf": "在庫の多い上位 {shown} 商品（全 {total} 商品）",
+  "@chartTopOf": {
+    "description": "chartTopOf",
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "chartFree": "空き",
+  "@chartFree": {
+    "description": "chartFree"
+  },
+  "chartReserved": "引当済",
+  "@chartReserved": {
+    "description": "chartReserved"
+  },
+  "chartUnusable": "使用不可（保留・検品待ち）",
+  "@chartUnusable": {
+    "description": "chartUnusable"
+  },
+  "chartVirtualAbroad": "国外（仮想）",
+  "@chartVirtualAbroad": {
+    "description": "chartVirtualAbroad"
+  },
+  "chartWarehouseVirtual": "{name}（仮想）",
+  "@chartWarehouseVirtual": {
+    "description": "chartWarehouseVirtual",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chartOther": "その他",
+  "@chartOther": {
+    "description": "chartOther"
+  },
+  "chartProduct": "商品",
+  "@chartProduct": {
+    "description": "chartProduct"
+  },
+  "chartTotal": "合計",
+  "@chartTotal": {
+    "description": "chartTotal"
+  },
+  "recentPoTitle": "直近の発注",
+  "@recentPoTitle": {
+    "description": "recentPoTitle"
+  },
+  "recentPoEmpty": "発注はまだありません",
+  "@recentPoEmpty": {
+    "description": "recentPoEmpty"
+  },
+  "recentPoDestination": "宛先 {warehouse}{country}",
+  "@recentPoDestination": {
+    "description": "recentPoDestination",
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      },
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "recentPoExpected": "納期 {date}",
+  "@recentPoExpected": {
+    "description": "recentPoExpected",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recentPoReceived": "入荷 {received} / {ordered}",
+  "@recentPoReceived": {
+    "description": "recentPoReceived",
+    "placeholders": {
+      "received": {
+        "type": "String"
+      },
+      "ordered": {
+        "type": "String"
+      }
+    }
+  },
+  "recentPoOpenAll": "発注一覧へ",
+  "@recentPoOpenAll": {
+    "description": "recentPoOpenAll"
   }
 }

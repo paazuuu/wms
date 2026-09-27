@@ -4527,4 +4527,77 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get virtualNote => '备注（可选）';
+
+  @override
+  String get chartStockTitle => '商品库存构成';
+
+  @override
+  String get chartByWarehouse => '按仓库';
+
+  @override
+  String get chartByState => '按状态';
+
+  @override
+  String get chartShowTable => '以表格查看';
+
+  @override
+  String get chartShowChart => '以图表查看';
+
+  @override
+  String get chartEmpty => '尚无有库存的商品';
+
+  @override
+  String chartTopOf(int shown, int total) {
+    return '库存最多的前 $shown 个商品（共 $total 个）';
+  }
+
+  @override
+  String get chartFree => '空闲';
+
+  @override
+  String get chartReserved => '已预留';
+
+  @override
+  String get chartUnusable => '不可用（冻结・待检）';
+
+  @override
+  String get chartVirtualAbroad => '海外（虚拟）';
+
+  @override
+  String chartWarehouseVirtual(String name) {
+    return '$name（虚拟）';
+  }
+
+  @override
+  String get chartOther => '其他';
+
+  @override
+  String get chartProduct => '商品';
+
+  @override
+  String get chartTotal => '合计';
+
+  @override
+  String get recentPoTitle => '最近的采购单';
+
+  @override
+  String get recentPoEmpty => '尚无采购单';
+
+  @override
+  String recentPoDestination(String warehouse, String country) {
+    return '收货仓库 $warehouse$country';
+  }
+
+  @override
+  String recentPoExpected(String date) {
+    return '交期 $date';
+  }
+
+  @override
+  String recentPoReceived(String received, String ordered) {
+    return '到货 $received / $ordered';
+  }
+
+  @override
+  String get recentPoOpenAll => '查看全部采购单';
 }
