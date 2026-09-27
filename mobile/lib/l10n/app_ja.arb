@@ -7,6 +7,8 @@
   "backToMenu": "メニューに戻る",
   "somethingWentWrong": "問題が発生しました",
   "errorPermissionDenied": "この操作を行う権限がありません。",
+  "errorInspectionCompleted": "この検品はすでに完了しています。画面を開き直して最新の結果を確認してください。",
+  "errorReceiptInspected": "検品が完了した入荷は取り消せません。在庫を直す場合は在庫調整を使ってください。",
   "languageTooltip": "言語を選択",
   "textSizeMenu": "文字サイズ",
   "textSizeNormal": "標準",

@@ -30,6 +30,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get errorPermissionDenied => '您没有执行此操作的权限。';
 
   @override
+  String get errorInspectionCompleted => '该检验已完成。请重新打开查看最新结果。';
+
+  @override
+  String get errorReceiptInspected => '检验已完成的入库无法取消。如需修正库存，请使用库存调整。';
+
+  @override
   String get languageTooltip => '选择语言';
 
   @override

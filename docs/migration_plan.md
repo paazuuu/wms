@@ -4698,6 +4698,44 @@ a 登録する button to 未登録JAN.
 **Verified live:** 2 unregistered JANs of 4 + 2 gave `{jan_count: 2,
 units: 6}`.
 
+### 0095 — an inspection closes once and moves only its own goods
+
+- `complete_inspection` locks the inspection row and refuses one that is no
+  longer PENDING. Before this, a second close ran the stock moves again.
+- `save_inspection_item` refuses changes to a closed inspection.
+- Each item moves at most what its own receipt line put into QC_PENDING (that
+  line's receipt items), so passing more than arrived cannot release another
+  receipt's goods. The excess is reported as `not_in_qc_pending`.
+- Client: both refusals are put into words (`errorInspectionCompleted`).
+
+### 0096 — the QC gate covers a plain count; cancelling takes back exactly what came in
+
+Found while verifying 0095. A plain count sends no parcels, and
+`reconcile_delivery_plan` posted everything the parcels did not cover as OK
+with its own movement. A product that requires inspection, received the
+ordinary way, therefore skipped QC entirely.
+- **Receiving:** the remainder now goes through `record_receipt_item_impl`,
+  so it lands QC_PENDING whenever `receiving_status_for` says so.
+- **Cancelling:** `cancel_reconciliation` reverses each receipt item with its
+  own status, lot, serial and bin. Before, everything came out of OK, which
+  sent OK negative and left the QC stock behind.
+  - A receipt whose inspection is closed cannot be cancelled; correct the
+    stock with an adjustment instead (`errorReceiptInspected`).
+  - An open inspection is deleted with its receipt.
+
+**Verified live** (aborted transaction; a QC-required product, two receipts
+of 5 by plain count):
+- the counts gave QC_PENDING 10 and available 0;
+- inspection 1 passed 8: moved 5, not_in_qc_pending 3, QC left 5, available
+  5;
+- a second close was refused, and cancelling receipt 1 was refused;
+- cancelling receipt 2 (inspection open) gave QC 0, on hand 5, and the
+  inspection was gone.
+
+Regression, a lot-tracked product that needs no QC: 6 received as 2 HOLD
+(lot L1) plus 4 OK; available 4, PO received 6; the cancel took both parcels
+back to 0.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

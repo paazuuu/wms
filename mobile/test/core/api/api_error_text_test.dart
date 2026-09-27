@@ -33,5 +33,22 @@ void main() {
       const raw = 'user 4 has not signed in yet';
       expect(humanizeApiErrorMessage(ja, raw), raw);
     });
+
+    test('a second close of an inspection is explained (0095)', () {
+      expect(humanizeApiErrorMessage(ja, 'inspection 10 is already completed'),
+          'この検品はすでに完了しています。画面を開き直して最新の結果を確認してください。');
+      expect(
+          humanizeApiErrorMessage(
+              ja, 'inspection 10 is already completed and can no longer change'),
+          'この検品はすでに完了しています。画面を開き直して最新の結果を確認してください。');
+    });
+
+    test('cancelling an inspected receipt is explained (0096)', () {
+      expect(
+        humanizeApiErrorMessage(ja,
+            'receipt 31 has a completed inspection, so its goods have already moved on and it cannot be cancelled — correct the stock with an adjustment instead'),
+        '検品が完了した入荷は取り消せません。在庫を直す場合は在庫調整を使ってください。',
+      );
+    });
   });
 }

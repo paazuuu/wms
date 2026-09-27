@@ -142,6 +142,18 @@ abstract class AppLocalizations {
   /// **'この操作を行う権限がありません。'**
   String get errorPermissionDenied;
 
+  /// No description provided for @errorInspectionCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'この検品はすでに完了しています。画面を開き直して最新の結果を確認してください。'**
+  String get errorInspectionCompleted;
+
+  /// No description provided for @errorReceiptInspected.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品が完了した入荷は取り消せません。在庫を直す場合は在庫調整を使ってください。'**
+  String get errorReceiptInspected;
+
   /// No description provided for @languageTooltip.
   ///
   /// In ja, this message translates to:

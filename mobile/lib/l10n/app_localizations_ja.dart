@@ -30,6 +30,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorPermissionDenied => 'この操作を行う権限がありません。';
 
   @override
+  String get errorInspectionCompleted =>
+      'この検品はすでに完了しています。画面を開き直して最新の結果を確認してください。';
+
+  @override
+  String get errorReceiptInspected => '検品が完了した入荷は取り消せません。在庫を直す場合は在庫調整を使ってください。';
+
+  @override
   String get languageTooltip => '言語を選択';
 
   @override

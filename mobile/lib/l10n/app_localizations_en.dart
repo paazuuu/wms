@@ -30,6 +30,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorPermissionDenied => 'You don\'t have permission to do that.';
 
   @override
+  String get errorInspectionCompleted =>
+      'This inspection is already completed. Reopen it to see the latest result.';
+
+  @override
+  String get errorReceiptInspected =>
+      'A receipt whose inspection is completed cannot be cancelled. Use a stock adjustment to correct the stock.';
+
+  @override
   String get languageTooltip => 'Select language';
 
   @override
