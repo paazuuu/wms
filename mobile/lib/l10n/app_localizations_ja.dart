@@ -4995,4 +4995,196 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qcTick => '品と数を確認';
+
+  @override
+  String get partnerCountry => '国';
+
+  @override
+  String get dashViewOverview => '概要';
+
+  @override
+  String get dashViewInspection => '検品';
+
+  @override
+  String get dashViewPurchasing => '発注';
+
+  @override
+  String get dashViewSales => '受注';
+
+  @override
+  String get dashAwaitingInspection => '検品待ち';
+
+  @override
+  String dashAwaitingBody(int inspections, int lines, int units) {
+    return '$inspections件・$lines行・$units個';
+  }
+
+  @override
+  String get dashAwaitingNone => '検品待ちはありません';
+
+  @override
+  String get dashOpenInspections => '検品一覧';
+
+  @override
+  String get dashBulkInspection => '一括検品';
+
+  @override
+  String get dashIncomingTitle => '入荷予定';
+
+  @override
+  String get dashIncomingEmpty => '入荷予定はありません';
+
+  @override
+  String get dashDayToday => '今日';
+
+  @override
+  String get dashDayTomorrow => '明日';
+
+  @override
+  String get dashDayOverdue => '予定日を過ぎたもの';
+
+  @override
+  String get dashDayNone => '日付未定';
+
+  @override
+  String get dashManualBadge => '手動';
+
+  @override
+  String dashPlanSummary(int lines, int units) {
+    return '$lines品目・$units個';
+  }
+
+  @override
+  String dashMoreLines(int count) {
+    return 'ほか$count品目';
+  }
+
+  @override
+  String get dashUnplannedTitle => '出荷表のない発注';
+
+  @override
+  String get dashUnplannedBody => '仕入先から出荷表が届いていない承認済みの発注です。手動で入荷リストを作れます。';
+
+  @override
+  String get dashCreateManualList => '手動で入荷リストを作成';
+
+  @override
+  String get manualListTitle => '入荷リストを手動作成';
+
+  @override
+  String get manualListSupplier => '仕入先名（任意）';
+
+  @override
+  String get manualListExpected => '入荷予定日';
+
+  @override
+  String get manualListNoDate => '未定';
+
+  @override
+  String get manualListScanHint => 'JANをスキャンまたは入力';
+
+  @override
+  String get manualListQuantity => '数量';
+
+  @override
+  String get manualListEmpty => '入荷する商品のJANをスキャンして追加してください';
+
+  @override
+  String get manualListSave => 'リストを作成';
+
+  @override
+  String manualListCreated(String number) {
+    return '入荷リスト $number を作成しました';
+  }
+
+  @override
+  String get manualListNoWarehouse => '倉庫を選択してから作成してください';
+
+  @override
+  String get manualListBadJan => 'JANは数字8桁または13桁です';
+
+  @override
+  String get dashStockUsable => '良品';
+
+  @override
+  String get dashStockQcPending => '検品待ち';
+
+  @override
+  String get dashStockHeld => '保留';
+
+  @override
+  String get dashStockReserved => '引当';
+
+  @override
+  String get dashStockIncoming => '入荷予定';
+
+  @override
+  String get dashStockShortfall => '不足';
+
+  @override
+  String dashStockNext(String date) {
+    return '次回 $date';
+  }
+
+  @override
+  String get dashStockSearch => '商品名・JANで検索';
+
+  @override
+  String get dashStockEmpty => '該当する商品はありません';
+
+  @override
+  String dashStockProducts(int count) {
+    return '$count商品';
+  }
+
+  @override
+  String get dashOpenDemand => '受注残・発注を開く';
+
+  @override
+  String dashSalesUnits(int months) {
+    return '直近$monthsか月の受注数';
+  }
+
+  @override
+  String dashSalesVsLastYear(String pct) {
+    return '前年比 $pct';
+  }
+
+  @override
+  String get dashSalesNoCompare => '前年のデータなし';
+
+  @override
+  String get dashSalesOrders => '受注件数';
+
+  @override
+  String get dashSalesMonthly => '月別の受注数';
+
+  @override
+  String get dashSalesThisYear => '今年';
+
+  @override
+  String get dashSalesLastYear => '前年';
+
+  @override
+  String get dashSalesTop => 'よく注文される商品';
+
+  @override
+  String get dashSalesToPurchase => 'これから発注が必要な商品';
+
+  @override
+  String get dashSalesToPurchaseEmpty => '発注が必要な商品はありません';
+
+  @override
+  String get dashSalesAllCountries => 'すべての国';
+
+  @override
+  String get dashSalesEmpty => 'この期間の受注はありません';
+
+  @override
+  String get dashBackordered => '受注残';
+
+  @override
+  String dashUnitsCount(int count) {
+    return '$count個';
+  }
 }

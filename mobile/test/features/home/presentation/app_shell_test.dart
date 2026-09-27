@@ -113,7 +113,8 @@ void main() {
 
     expect(find.text('Test Operator'), findsOneWidget);
     expect(find.text('Field Operations'), findsOneWidget);
-    expect(find.text('Inspection'), findsOneWidget);
+    // The menu card, not the dashboard's 検品 tab (0102) of the same name.
+    expect(find.widgetWithText(Card, 'Inspection'), findsOneWidget);
     expect(find.text('Shipping'), findsOneWidget);
     // Every catalog feature is now built, so no "Soon" badges remain.
     expect(find.text('Soon'), findsNothing);

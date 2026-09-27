@@ -9173,6 +9173,354 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'品と数を確認'**
   String get qcTick;
+
+  /// Role dashboards (0102): partnerCountry
+  ///
+  /// In ja, this message translates to:
+  /// **'国'**
+  String get partnerCountry;
+
+  /// Role dashboards (0102): dashViewOverview
+  ///
+  /// In ja, this message translates to:
+  /// **'概要'**
+  String get dashViewOverview;
+
+  /// Role dashboards (0102): dashViewInspection
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get dashViewInspection;
+
+  /// Role dashboards (0102): dashViewPurchasing
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get dashViewPurchasing;
+
+  /// Role dashboards (0102): dashViewSales
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get dashViewSales;
+
+  /// Role dashboards (0102): dashAwaitingInspection
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get dashAwaitingInspection;
+
+  /// Role dashboards (0102): dashAwaitingBody
+  ///
+  /// In ja, this message translates to:
+  /// **'{inspections}件・{lines}行・{units}個'**
+  String dashAwaitingBody(int inspections, int lines, int units);
+
+  /// Role dashboards (0102): dashAwaitingNone
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちはありません'**
+  String get dashAwaitingNone;
+
+  /// Role dashboards (0102): dashOpenInspections
+  ///
+  /// In ja, this message translates to:
+  /// **'検品一覧'**
+  String get dashOpenInspections;
+
+  /// Role dashboards (0102): dashBulkInspection
+  ///
+  /// In ja, this message translates to:
+  /// **'一括検品'**
+  String get dashBulkInspection;
+
+  /// Role dashboards (0102): dashIncomingTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get dashIncomingTitle;
+
+  /// Role dashboards (0102): dashIncomingEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定はありません'**
+  String get dashIncomingEmpty;
+
+  /// Role dashboards (0102): dashDayToday
+  ///
+  /// In ja, this message translates to:
+  /// **'今日'**
+  String get dashDayToday;
+
+  /// Role dashboards (0102): dashDayTomorrow
+  ///
+  /// In ja, this message translates to:
+  /// **'明日'**
+  String get dashDayTomorrow;
+
+  /// Role dashboards (0102): dashDayOverdue
+  ///
+  /// In ja, this message translates to:
+  /// **'予定日を過ぎたもの'**
+  String get dashDayOverdue;
+
+  /// Role dashboards (0102): dashDayNone
+  ///
+  /// In ja, this message translates to:
+  /// **'日付未定'**
+  String get dashDayNone;
+
+  /// Role dashboards (0102): dashManualBadge
+  ///
+  /// In ja, this message translates to:
+  /// **'手動'**
+  String get dashManualBadge;
+
+  /// Role dashboards (0102): dashPlanSummary
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}品目・{units}個'**
+  String dashPlanSummary(int lines, int units);
+
+  /// Role dashboards (0102): dashMoreLines
+  ///
+  /// In ja, this message translates to:
+  /// **'ほか{count}品目'**
+  String dashMoreLines(int count);
+
+  /// Role dashboards (0102): dashUnplannedTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷表のない発注'**
+  String get dashUnplannedTitle;
+
+  /// Role dashboards (0102): dashUnplannedBody
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先から出荷表が届いていない承認済みの発注です。手動で入荷リストを作れます。'**
+  String get dashUnplannedBody;
+
+  /// Role dashboards (0102): dashCreateManualList
+  ///
+  /// In ja, this message translates to:
+  /// **'手動で入荷リストを作成'**
+  String get dashCreateManualList;
+
+  /// Role dashboards (0102): manualListTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷リストを手動作成'**
+  String get manualListTitle;
+
+  /// Role dashboards (0102): manualListSupplier
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先名（任意）'**
+  String get manualListSupplier;
+
+  /// Role dashboards (0102): manualListExpected
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定日'**
+  String get manualListExpected;
+
+  /// Role dashboards (0102): manualListNoDate
+  ///
+  /// In ja, this message translates to:
+  /// **'未定'**
+  String get manualListNoDate;
+
+  /// Role dashboards (0102): manualListScanHint
+  ///
+  /// In ja, this message translates to:
+  /// **'JANをスキャンまたは入力'**
+  String get manualListScanHint;
+
+  /// Role dashboards (0102): manualListQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get manualListQuantity;
+
+  /// Role dashboards (0102): manualListEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷する商品のJANをスキャンして追加してください'**
+  String get manualListEmpty;
+
+  /// Role dashboards (0102): manualListSave
+  ///
+  /// In ja, this message translates to:
+  /// **'リストを作成'**
+  String get manualListSave;
+
+  /// Role dashboards (0102): manualListCreated
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷リスト {number} を作成しました'**
+  String manualListCreated(String number);
+
+  /// Role dashboards (0102): manualListNoWarehouse
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選択してから作成してください'**
+  String get manualListNoWarehouse;
+
+  /// Role dashboards (0102): manualListBadJan
+  ///
+  /// In ja, this message translates to:
+  /// **'JANは数字8桁または13桁です'**
+  String get manualListBadJan;
+
+  /// Role dashboards (0102): dashStockUsable
+  ///
+  /// In ja, this message translates to:
+  /// **'良品'**
+  String get dashStockUsable;
+
+  /// Role dashboards (0102): dashStockQcPending
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get dashStockQcPending;
+
+  /// Role dashboards (0102): dashStockHeld
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get dashStockHeld;
+
+  /// Role dashboards (0102): dashStockReserved
+  ///
+  /// In ja, this message translates to:
+  /// **'引当'**
+  String get dashStockReserved;
+
+  /// Role dashboards (0102): dashStockIncoming
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get dashStockIncoming;
+
+  /// Role dashboards (0102): dashStockShortfall
+  ///
+  /// In ja, this message translates to:
+  /// **'不足'**
+  String get dashStockShortfall;
+
+  /// Role dashboards (0102): dashStockNext
+  ///
+  /// In ja, this message translates to:
+  /// **'次回 {date}'**
+  String dashStockNext(String date);
+
+  /// Role dashboards (0102): dashStockSearch
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・JANで検索'**
+  String get dashStockSearch;
+
+  /// Role dashboards (0102): dashStockEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'該当する商品はありません'**
+  String get dashStockEmpty;
+
+  /// Role dashboards (0102): dashStockProducts
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}商品'**
+  String dashStockProducts(int count);
+
+  /// Role dashboards (0102): dashOpenDemand
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残・発注を開く'**
+  String get dashOpenDemand;
+
+  /// Role dashboards (0102): dashSalesUnits
+  ///
+  /// In ja, this message translates to:
+  /// **'直近{months}か月の受注数'**
+  String dashSalesUnits(int months);
+
+  /// Role dashboards (0102): dashSalesVsLastYear
+  ///
+  /// In ja, this message translates to:
+  /// **'前年比 {pct}'**
+  String dashSalesVsLastYear(String pct);
+
+  /// Role dashboards (0102): dashSalesNoCompare
+  ///
+  /// In ja, this message translates to:
+  /// **'前年のデータなし'**
+  String get dashSalesNoCompare;
+
+  /// Role dashboards (0102): dashSalesOrders
+  ///
+  /// In ja, this message translates to:
+  /// **'受注件数'**
+  String get dashSalesOrders;
+
+  /// Role dashboards (0102): dashSalesMonthly
+  ///
+  /// In ja, this message translates to:
+  /// **'月別の受注数'**
+  String get dashSalesMonthly;
+
+  /// Role dashboards (0102): dashSalesThisYear
+  ///
+  /// In ja, this message translates to:
+  /// **'今年'**
+  String get dashSalesThisYear;
+
+  /// Role dashboards (0102): dashSalesLastYear
+  ///
+  /// In ja, this message translates to:
+  /// **'前年'**
+  String get dashSalesLastYear;
+
+  /// Role dashboards (0102): dashSalesTop
+  ///
+  /// In ja, this message translates to:
+  /// **'よく注文される商品'**
+  String get dashSalesTop;
+
+  /// Role dashboards (0102): dashSalesToPurchase
+  ///
+  /// In ja, this message translates to:
+  /// **'これから発注が必要な商品'**
+  String get dashSalesToPurchase;
+
+  /// Role dashboards (0102): dashSalesToPurchaseEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'発注が必要な商品はありません'**
+  String get dashSalesToPurchaseEmpty;
+
+  /// Role dashboards (0102): dashSalesAllCountries
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての国'**
+  String get dashSalesAllCountries;
+
+  /// Role dashboards (0102): dashSalesEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間の受注はありません'**
+  String get dashSalesEmpty;
+
+  /// Role dashboards (0102): dashBackordered
+  ///
+  /// In ja, this message translates to:
+  /// **'受注残'**
+  String get dashBackordered;
+
+  /// Role dashboards (0102): dashUnitsCount
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}個'**
+  String dashUnitsCount(int count);
 }
 
 class _AppLocalizationsDelegate

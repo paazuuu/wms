@@ -10,11 +10,13 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
-import '../../warehouse_context/presentation/warehouse_overview_screen.dart'
-    show countryLabel;
+import '../../warehouse_context/presentation/warehouse_overview_screen.dart' show countryLabel;
 import '../application/dashboard_providers.dart';
+import '../application/role_dashboard_providers.dart';
+import '../domain/role_dashboards.dart';
 import 'dashboard_charts.dart';
 import 'dashboard_widgets.dart';
+import 'role_dashboard_views.dart';
 
 /// The content-area landing page inside the app shell: a branded greeting,
 /// a "ready to scan" banner, and the full capability menu grouped by area.
@@ -23,6 +25,11 @@ import 'dashboard_widgets.dart';
 /// path, so a tile here and a sidebar entry are the same action and the
 /// sidebar highlight follows from the location rather than being kept in sync
 /// by hand.
+///
+/// Each job opens on its own view (0102) — inspection for the floor,
+/// purchasing for the buyers, sales for whoever takes the orders — and the
+/// tabs switch to any other this user may read; a pick by hand is remembered
+/// on the device.
 class DashboardOverviewScreen extends ConsumerWidget {
   const DashboardOverviewScreen({super.key});
 
@@ -47,32 +54,103 @@ class DashboardOverviewScreen extends ConsumerWidget {
     }
 
     final delivery = entryById('delivery');
+    final demand = entryById('demand');
     final l10n = AppLocalizations.of(context);
+
+    final views = [
+      for (final v in DashboardView.values)
+        if (v.visibleFor(permissions)) v,
+    ];
+    var current =
+        ref.watch(dashboardViewProvider) ?? DashboardView.defaultFor(user?.roles ?? const []);
+    if (!views.contains(current)) current = DashboardView.overview;
+
+    void openById(String id) {
+      final entry = entryById(id);
+      if (entry != null) onOpen(entry);
+    }
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.xl),
       children: [
         _GreetingCard(name: userName, email: userEmail),
+        if (views.length > 1) ...[
+          const SizedBox(height: AppSpacing.md),
+          _ViewTabs(
+            views: views,
+            current: current,
+            onPick: (v) => ref.read(dashboardViewProvider.notifier).pick(v),
+          ),
+        ],
         const SizedBox(height: AppSpacing.lg),
+        ...switch (current) {
+          DashboardView.inspection => [
+              _ScanHeroCard(onTap: () => context.go(AppRoutes.search)),
+              const SizedBox(height: AppSpacing.lg),
+              InspectionDashboardView(
+                onOpenFeature: openById,
+                canCreateList: permissions.contains('receiving.confirm') ||
+                    permissions.contains('inspection.confirm'),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+          DashboardView.purchasing => [
+              PurchasingDashboardView(onOpenDemand: demand == null ? null : () => onOpen(demand)),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+          DashboardView.sales => [
+              SalesDashboardView(onOpenDemand: demand == null ? null : () => onOpen(demand)),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+          DashboardView.overview => _overview(context, ref, l10n, permissions,
+              delivery: delivery, openById: openById, onOpen: onOpen, entryById: entryById),
+        },
+        // §37 hides what this user cannot open, which for someone with no role
+        // at all hides the entire menu — leaving a dashboard and no
+        // explanation. That state is reachable by design: accounts are created
+        // by an admin and only the *first* sign-in self-assigns a role
+        // (bootstrap_first_admin, 0024), so everyone after that lands here
+        // until an admin assigns one. Say so rather than showing an empty app.
+        if (groups.every((g) => g.visibleEntries(permissions).isEmpty)) const _NoRoleCard(),
+        for (final group in groups)
+          if (group.visibleEntries(permissions) case final visible when visible.isNotEmpty) ...[
+            _SectionLabel(group.title(l10n)),
+            const SizedBox(height: AppSpacing.md),
+            _FeatureGrid(
+              entries: visible,
+              onOpen: onOpen,
+              tone: _toneForGroup(group.id),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+      ],
+    );
+  }
+
+  List<Widget> _overview(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    List<String> permissions, {
+    required FeatureEntry? delivery,
+    required void Function(String id) openById,
+    required void Function(FeatureEntry entry) onOpen,
+    required FeatureEntry? Function(String id) entryById,
+  }) =>
+      [
         _ScanHeroCard(onTap: () => context.go(AppRoutes.search)),
         const SizedBox(height: AppSpacing.xl),
         _SectionLabel(l10n.dashTodayTasks),
         const SizedBox(height: AppSpacing.md),
         TodayTasksRow(
-          onOpenFeature: (id) {
-            final entry = entryById(id);
-            if (entry != null) onOpen(entry);
-          },
+          onOpenFeature: openById,
         ),
         const SizedBox(height: AppSpacing.xl),
         // §30: what actually needs attention, colour-coded, click-through.
         _SectionLabel(l10n.dashNotificationsTitle),
         const SizedBox(height: AppSpacing.md),
         DashboardNotificationsPanel(
-          onOpenFeature: (id) {
-            final entry = entryById(id);
-            if (entry != null) onOpen(entry);
-          },
+          onOpenFeature: openById,
         ),
         const SizedBox(height: AppSpacing.xl),
         // Which country the figures are for, since they never cross a border.
@@ -103,26 +181,46 @@ class DashboardOverviewScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
         ],
-        // §37 hides what this user cannot open, which for someone with no role
-        // at all hides the entire menu — leaving a dashboard and no
-        // explanation. That state is reachable by design: accounts are created
-        // by an admin and only the *first* sign-in self-assigns a role
-        // (bootstrap_first_admin, 0024), so everyone after that lands here
-        // until an admin assigns one. Say so rather than showing an empty app.
-        if (groups.every((g) => g.visibleEntries(permissions).isEmpty))
-          const _NoRoleCard(),
-        for (final group in groups)
-          if (group.visibleEntries(permissions) case final visible when visible.isNotEmpty) ...[
-            _SectionLabel(group.title(l10n)),
-            const SizedBox(height: AppSpacing.md),
-            _FeatureGrid(
-              entries: visible,
-              onOpen: onOpen,
-              tone: _toneForGroup(group.id),
+      ];
+}
+
+/// The dashboard views this user may switch between, as tabs.
+class _ViewTabs extends StatelessWidget {
+  const _ViewTabs({required this.views, required this.current, required this.onPick});
+
+  final List<DashboardView> views;
+  final DashboardView current;
+  final ValueChanged<DashboardView> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    (String, IconData) look(DashboardView v) => switch (v) {
+          DashboardView.overview => (l10n.dashViewOverview, Icons.space_dashboard_outlined),
+          DashboardView.inspection => (l10n.dashViewInspection, Icons.fact_check_outlined),
+          DashboardView.purchasing => (l10n.dashViewPurchasing, Icons.inventory_2_outlined),
+          DashboardView.sales => (l10n.dashViewSales, Icons.point_of_sale_outlined),
+        };
+    return DefaultTabController(
+      // Rebuilt when the view changes from outside (the remembered pick
+      // arriving after the first frame), so the underline follows.
+      key: ValueKey('dash-tabs-${current.wire}-${views.length}'),
+      length: views.length,
+      initialIndex: views.indexOf(current),
+      child: TabBar(
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        onTap: (i) => onPick(views[i]),
+        tabs: [
+          for (final v in views)
+            Tab(
+              key: ValueKey('dash-tab-${v.wire}'),
+              icon: Icon(look(v).$2),
+              text: look(v).$1,
+              iconMargin: const EdgeInsets.only(bottom: 2),
             ),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-      ],
+        ],
+      ),
     );
   }
 }
@@ -148,8 +246,7 @@ class _ScanHeroCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
-              Icon(Icons.qr_code_scanner_outlined,
-                  size: 32, color: scheme.onPrimaryContainer),
+              Icon(Icons.qr_code_scanner_outlined, size: 32, color: scheme.onPrimaryContainer),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
@@ -158,20 +255,18 @@ class _ScanHeroCard extends StatelessWidget {
                   children: [
                     Text(
                       l10n.readyToScanTitle,
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(color: scheme.onPrimaryContainer),
+                      style:
+                          theme.textTheme.titleMedium?.copyWith(color: scheme.onPrimaryContainer),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       l10n.readyToScanBody,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.onPrimaryContainer),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
                     ),
                   ],
                 ),
               ),
-              if (onTap != null)
-                Icon(Icons.chevron_right, color: scheme.onPrimaryContainer),
+              if (onTap != null) Icon(Icons.chevron_right, color: scheme.onPrimaryContainer),
             ],
           ),
         ),
@@ -191,9 +286,8 @@ class _GreetingCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final displayName = (name != null && name!.trim().isNotEmpty)
-        ? name!.trim()
-        : l10n.operatorName;
+    final displayName =
+        (name != null && name!.trim().isNotEmpty) ? name!.trim() : l10n.operatorName;
 
     return Card(
       child: Padding(
@@ -208,8 +302,7 @@ class _GreetingCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.welcomeBack,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -222,8 +315,7 @@ class _GreetingCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       email!,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -273,8 +365,7 @@ class _NoRoleCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     l10n.noRoleAssignedBody,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: scheme.onSurfaceVariant),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -392,8 +483,7 @@ class _FeatureCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   entry.description(l10n),
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

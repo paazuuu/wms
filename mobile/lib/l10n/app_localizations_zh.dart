@@ -4983,4 +4983,196 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qcTick => '已确认商品和数量';
+
+  @override
+  String get partnerCountry => '国家';
+
+  @override
+  String get dashViewOverview => '概览';
+
+  @override
+  String get dashViewInspection => '验货';
+
+  @override
+  String get dashViewPurchasing => '采购';
+
+  @override
+  String get dashViewSales => '接单';
+
+  @override
+  String get dashAwaitingInspection => '待验货';
+
+  @override
+  String dashAwaitingBody(int inspections, int lines, int units) {
+    return '$inspections单 · $lines行 · $units件';
+  }
+
+  @override
+  String get dashAwaitingNone => '没有待验货';
+
+  @override
+  String get dashOpenInspections => '验货列表';
+
+  @override
+  String get dashBulkInspection => '批量验货';
+
+  @override
+  String get dashIncomingTitle => '待到货';
+
+  @override
+  String get dashIncomingEmpty => '没有待到货';
+
+  @override
+  String get dashDayToday => '今天';
+
+  @override
+  String get dashDayTomorrow => '明天';
+
+  @override
+  String get dashDayOverdue => '已逾期';
+
+  @override
+  String get dashDayNone => '日期未定';
+
+  @override
+  String get dashManualBadge => '手动';
+
+  @override
+  String dashPlanSummary(int lines, int units) {
+    return '$lines种 · $units件';
+  }
+
+  @override
+  String dashMoreLines(int count) {
+    return '另有$count种';
+  }
+
+  @override
+  String get dashUnplannedTitle => '没有发货单的采购单';
+
+  @override
+  String get dashUnplannedBody => '供应商未发来发货单的已批准采购单。可以手动创建到货清单。';
+
+  @override
+  String get dashCreateManualList => '手动创建到货清单';
+
+  @override
+  String get manualListTitle => '手动创建到货清单';
+
+  @override
+  String get manualListSupplier => '供应商（可选）';
+
+  @override
+  String get manualListExpected => '预计到货日';
+
+  @override
+  String get manualListNoDate => '未定';
+
+  @override
+  String get manualListScanHint => '扫描或输入JAN';
+
+  @override
+  String get manualListQuantity => '数量';
+
+  @override
+  String get manualListEmpty => '请扫描要到货商品的JAN';
+
+  @override
+  String get manualListSave => '创建清单';
+
+  @override
+  String manualListCreated(String number) {
+    return '已创建到货清单 $number';
+  }
+
+  @override
+  String get manualListNoWarehouse => '请先选择仓库';
+
+  @override
+  String get manualListBadJan => 'JAN为8位或13位数字';
+
+  @override
+  String get dashStockUsable => '良品';
+
+  @override
+  String get dashStockQcPending => '待验货';
+
+  @override
+  String get dashStockHeld => '冻结';
+
+  @override
+  String get dashStockReserved => '已分配';
+
+  @override
+  String get dashStockIncoming => '在途';
+
+  @override
+  String get dashStockShortfall => '缺口';
+
+  @override
+  String dashStockNext(String date) {
+    return '下次 $date';
+  }
+
+  @override
+  String get dashStockSearch => '按名称或JAN搜索';
+
+  @override
+  String get dashStockEmpty => '没有符合的商品';
+
+  @override
+  String dashStockProducts(int count) {
+    return '$count种商品';
+  }
+
+  @override
+  String get dashOpenDemand => '打开待采购';
+
+  @override
+  String dashSalesUnits(int months) {
+    return '近$months个月接单数';
+  }
+
+  @override
+  String dashSalesVsLastYear(String pct) {
+    return '同比 $pct';
+  }
+
+  @override
+  String get dashSalesNoCompare => '无去年数据';
+
+  @override
+  String get dashSalesOrders => '订单数';
+
+  @override
+  String get dashSalesMonthly => '每月接单数';
+
+  @override
+  String get dashSalesThisYear => '今年';
+
+  @override
+  String get dashSalesLastYear => '去年';
+
+  @override
+  String get dashSalesTop => '热门商品';
+
+  @override
+  String get dashSalesToPurchase => '待采购商品';
+
+  @override
+  String get dashSalesToPurchaseEmpty => '没有需要采购的商品';
+
+  @override
+  String get dashSalesAllCountries => '所有国家';
+
+  @override
+  String get dashSalesEmpty => '此期间没有订单';
+
+  @override
+  String get dashBackordered => '欠货';
+
+  @override
+  String dashUnitsCount(int count) {
+    return '$count件';
+  }
 }

@@ -32,6 +32,14 @@ const _darkSlots = [
 const _otherLight = Color(0xFF9A9994);
 const _otherDark = Color(0xFF6E6D68);
 
+/// Palette slot [i] for a chart drawn elsewhere, so every chart shares one
+/// palette.
+Color chartSlotColor(int i, Brightness b) =>
+    (b == Brightness.dark ? _darkSlots : _lightSlots)[i % _lightSlots.length];
+
+/// The neutral that pairs with a slot for a comparison series.
+Color chartNeutralColor(Brightness b) => b == Brightness.dark ? _otherDark : _otherLight;
+
 enum StockBreakdown { warehouse, state }
 
 /// One stacked series: a warehouse (or its virtual figure), or a stock state.

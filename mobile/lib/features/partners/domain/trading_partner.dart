@@ -38,6 +38,7 @@ class TradingPartner extends Equatable {
     this.paymentTerms,
     this.notes,
     this.status = 'active',
+    this.countryCode = 'JP',
     this.createdAt,
     this.updatedAt,
   });
@@ -53,6 +54,10 @@ class TradingPartner extends Equatable {
   final String? paymentTerms;
   final String? notes;
   final String status;
+
+  /// Which country the partner is in (0102) — "orders from China" are orders
+  /// from customers whose country is CN.
+  final String countryCode;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -62,6 +67,7 @@ class TradingPartner extends Equatable {
         id: _asInt(json['id']),
         name: (json['name'] ?? '').toString(),
         kind: PartnerKind.parse(json['kind'] as String?),
+        countryCode: (json['country_code'] as String?) ?? 'JP',
         code: json['code'] as String?,
         contactName: json['contact_name'] as String?,
         phone: json['phone'] as String?,

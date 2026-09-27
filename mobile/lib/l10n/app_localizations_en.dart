@@ -5116,4 +5116,197 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qcTick => 'Goods and count checked';
+
+  @override
+  String get partnerCountry => 'Country';
+
+  @override
+  String get dashViewOverview => 'Overview';
+
+  @override
+  String get dashViewInspection => 'Inspection';
+
+  @override
+  String get dashViewPurchasing => 'Purchasing';
+
+  @override
+  String get dashViewSales => 'Sales orders';
+
+  @override
+  String get dashAwaitingInspection => 'Awaiting inspection';
+
+  @override
+  String dashAwaitingBody(int inspections, int lines, int units) {
+    return '$inspections inspections · $lines lines · $units units';
+  }
+
+  @override
+  String get dashAwaitingNone => 'Nothing awaiting inspection';
+
+  @override
+  String get dashOpenInspections => 'Inspections';
+
+  @override
+  String get dashBulkInspection => 'Bulk inspection';
+
+  @override
+  String get dashIncomingTitle => 'Incoming';
+
+  @override
+  String get dashIncomingEmpty => 'Nothing is due in';
+
+  @override
+  String get dashDayToday => 'Today';
+
+  @override
+  String get dashDayTomorrow => 'Tomorrow';
+
+  @override
+  String get dashDayOverdue => 'Overdue';
+
+  @override
+  String get dashDayNone => 'No date yet';
+
+  @override
+  String get dashManualBadge => 'Manual';
+
+  @override
+  String dashPlanSummary(int lines, int units) {
+    return '$lines items · $units units';
+  }
+
+  @override
+  String dashMoreLines(int count) {
+    return '$count more';
+  }
+
+  @override
+  String get dashUnplannedTitle => 'Orders with no delivery list';
+
+  @override
+  String get dashUnplannedBody =>
+      'Approved orders the supplier sent no delivery list for. You can write one by hand.';
+
+  @override
+  String get dashCreateManualList => 'Create an inbound list by hand';
+
+  @override
+  String get manualListTitle => 'New inbound list';
+
+  @override
+  String get manualListSupplier => 'Supplier (optional)';
+
+  @override
+  String get manualListExpected => 'Expected on';
+
+  @override
+  String get manualListNoDate => 'Not set';
+
+  @override
+  String get manualListScanHint => 'Scan or type a JAN';
+
+  @override
+  String get manualListQuantity => 'Quantity';
+
+  @override
+  String get manualListEmpty => 'Scan the JAN of each product that is coming';
+
+  @override
+  String get manualListSave => 'Create list';
+
+  @override
+  String manualListCreated(String number) {
+    return 'Inbound list $number created';
+  }
+
+  @override
+  String get manualListNoWarehouse => 'Pick a warehouse first';
+
+  @override
+  String get manualListBadJan => 'A JAN is 8 or 13 digits';
+
+  @override
+  String get dashStockUsable => 'Usable';
+
+  @override
+  String get dashStockQcPending => 'Awaiting QC';
+
+  @override
+  String get dashStockHeld => 'Held';
+
+  @override
+  String get dashStockReserved => 'Reserved';
+
+  @override
+  String get dashStockIncoming => 'Incoming';
+
+  @override
+  String get dashStockShortfall => 'Short';
+
+  @override
+  String dashStockNext(String date) {
+    return 'Next $date';
+  }
+
+  @override
+  String get dashStockSearch => 'Search by name or JAN';
+
+  @override
+  String get dashStockEmpty => 'No products match';
+
+  @override
+  String dashStockProducts(int count) {
+    return '$count products';
+  }
+
+  @override
+  String get dashOpenDemand => 'Open orders to purchase';
+
+  @override
+  String dashSalesUnits(int months) {
+    return 'Units ordered, last $months months';
+  }
+
+  @override
+  String dashSalesVsLastYear(String pct) {
+    return '$pct vs last year';
+  }
+
+  @override
+  String get dashSalesNoCompare => 'Nothing to compare with last year';
+
+  @override
+  String get dashSalesOrders => 'Orders';
+
+  @override
+  String get dashSalesMonthly => 'Units ordered by month';
+
+  @override
+  String get dashSalesThisYear => 'This year';
+
+  @override
+  String get dashSalesLastYear => 'Last year';
+
+  @override
+  String get dashSalesTop => 'Most ordered';
+
+  @override
+  String get dashSalesToPurchase => 'Still to purchase';
+
+  @override
+  String get dashSalesToPurchaseEmpty => 'Nothing left to purchase';
+
+  @override
+  String get dashSalesAllCountries => 'All countries';
+
+  @override
+  String get dashSalesEmpty => 'No orders in this period';
+
+  @override
+  String get dashBackordered => 'Backordered';
+
+  @override
+  String dashUnitsCount(int count) {
+    return '$count units';
+  }
 }

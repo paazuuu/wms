@@ -23,7 +23,10 @@ import 'package:wms_mobile/features/delivery/domain/receipt_detail.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_item.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_movement.dart';
 import 'package:wms_mobile/features/delivery/domain/stock_position.dart';
+import 'package:wms_mobile/features/home/application/role_dashboard_providers.dart';
 import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
+import 'package:wms_mobile/features/home/data/role_dashboard_repository.dart';
+import 'package:wms_mobile/features/home/domain/role_dashboards.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
 import 'package:wms_mobile/features/qc/data/attachment_repository.dart';
@@ -132,8 +135,14 @@ class _FakeSecureKeyValueStore implements SecureKeyValueStore {
 Override fakeScanModeOverride() => scanCountsPieceProvider
     .overrideWith((ref) => ScanCountsPieceController(_FakeSecureKeyValueStore()));
 
+/// The remembered dashboard view (0102) over an in-memory store.
+Override fakeDashboardViewOverride() => dashboardViewProvider
+    .overrideWith((ref) => DashboardViewController(_FakeSecureKeyValueStore()));
+
 List<Override> _defaultOverrides() => [
       fakeScanModeOverride(),
+      fakeDashboardViewOverride(),
+      roleDashboardRepositoryProvider.overrideWithValue(FakeRoleDashboardRepository()),
       supabaseSessionStorageProvider
           .overrideWithValue(SupabaseSessionStorage(_FakeSecureKeyValueStore())),
       warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
@@ -3012,6 +3021,14 @@ class FakeTradingPartnerRepository implements TradingPartnerRepository {
     ];
     return const ApiSuccess(true);
   }
+
+  ({int id, String country})? lastCountry;
+
+  @override
+  Future<ApiResult<bool>> setCountry(int id, String countryCode) async {
+    lastCountry = (id: id, country: countryCode);
+    return const ApiSuccess(true);
+  }
 }
 
 /// Work order stub. Mirrors the real RPCs' state-machine transitions
@@ -3812,4 +3829,54 @@ class FakePickWaveRepository implements PickWaveRepository {
   @override
   Future<ApiResult<WavePickPlan>> plan(int id) async =>
       ApiSuccess(sheet ?? WavePickPlan(waveId: id));
+}
+
+class FakeRoleDashboardRepository implements RoleDashboardRepository {
+  FakeRoleDashboardRepository({
+    this.schedule = const InboundSchedule(),
+    this.stock = const StockOverview(),
+    this.sales = const SalesCycle(),
+  });
+
+  InboundSchedule schedule;
+  StockOverview stock;
+  SalesCycle sales;
+  String? lastStockCountry;
+  String? lastStockSearch;
+  String? lastSalesCountry = 'unset';
+  ({int warehouseId, List<({String janCode, int quantity})> lines, String? supplierName, DateTime? expectedOn})?
+      lastManual;
+
+  @override
+  Future<ApiResult<InboundSchedule>> inboundSchedule({int? warehouseId}) async =>
+      ApiSuccess(schedule);
+
+  @override
+  Future<ApiResult<StockOverview>> stockOverview({String? countryCode, String? search}) async {
+    lastStockCountry = countryCode;
+    lastStockSearch = search;
+    return ApiSuccess(stock);
+  }
+
+  @override
+  Future<ApiResult<SalesCycle>> salesCycle({String? countryCode = 'CN', int months = 12}) async {
+    lastSalesCountry = countryCode;
+    return ApiSuccess(sales);
+  }
+
+  @override
+  Future<ApiResult<String>> createManualInboundList({
+    required int warehouseId,
+    required List<({String janCode, int quantity})> lines,
+    String? supplierName,
+    DateTime? expectedOn,
+  }) async {
+    lastManual = (
+      warehouseId: warehouseId,
+      lines: lines,
+      supplierName: supplierName,
+      expectedOn: expectedOn,
+    );
+    return const ApiSuccess('MN-000001');
+  }
 }

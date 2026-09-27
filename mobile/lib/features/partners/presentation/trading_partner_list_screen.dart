@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../warehouse_context/presentation/warehouse_overview_screen.dart' show countryLabel;
 import '../application/trading_partner_providers.dart';
 import '../domain/trading_partner.dart';
 
@@ -277,6 +278,7 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
   late final TextEditingController _notes =
       TextEditingController(text: widget.partner?.notes ?? '');
   late PartnerKind _kind = widget.partner?.kind ?? PartnerKind.supplier;
+  late String _country = widget.partner?.countryCode ?? 'JP';
   bool _busy = false;
   String? _error;
 
@@ -321,6 +323,10 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
         notes: _notes.text.trim(),
       );
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+      if (errorMessage == null && _country != widget.partner!.countryCode) {
+        final c = await repo.setCountry(widget.partner!.id, _country);
+        c.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+      }
     } else {
       final result = await repo.create(
         name: _name.text.trim(),
@@ -333,7 +339,12 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
         paymentTerms: _paymentTerms.text.trim(),
         notes: _notes.text.trim(),
       );
-      result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+      int? createdId;
+      result.when(success: (id) => createdId = id, failure: (f) => errorMessage = f.message);
+      if (createdId != null && _country != 'JP') {
+        final c = await repo.setCountry(createdId!, _country);
+        c.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+      }
     }
 
     if (!mounted) return;
@@ -384,6 +395,19 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
             TextField(
               controller: _name,
               decoration: InputDecoration(labelText: l10n.partnerName),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // Which country (0102): orders from customers in CN are "orders
+            // from China" on the sales dashboard.
+            DropdownButtonFormField<String>(
+              key: const ValueKey('partner-country'),
+              initialValue: _country,
+              decoration: InputDecoration(labelText: l10n.partnerCountry),
+              items: [
+                for (final c in {'JP', 'CN', _country})
+                  DropdownMenuItem(value: c, child: Text(countryLabel(l10n, c))),
+              ],
+              onChanged: (v) => setState(() => _country = v ?? _country),
             ),
             if (!_isEdit) ...[
               const SizedBox(height: AppSpacing.lg),

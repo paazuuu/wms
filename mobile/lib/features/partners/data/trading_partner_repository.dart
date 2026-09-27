@@ -40,6 +40,9 @@ abstract class TradingPartnerRepository {
   });
 
   Future<ApiResult<bool>> setStatus(int id, String status);
+
+  /// `set_trading_partner_country` (0102).
+  Future<ApiResult<bool>> setCountry(int id, String countryCode);
 }
 
 class TradingPartnerRepositoryImpl implements TradingPartnerRepository {
@@ -146,6 +149,19 @@ class TradingPartnerRepositoryImpl implements TradingPartnerRepository {
         'p_status': status,
       });
       return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setCountry(int id, String countryCode) async {
+    try {
+      await _dio.post('/rpc/set_trading_partner_country', data: {
+        'p_id': id,
+        'p_country_code': countryCode,
+      });
+      return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
     }

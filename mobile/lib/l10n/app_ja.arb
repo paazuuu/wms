@@ -4859,5 +4859,291 @@
   "qcTick": "品と数を確認",
   "@qcTick": {
     "description": "Inspection counting by carton / delivery note (0101): qcTick"
+  },
+  "partnerCountry": "国",
+  "@partnerCountry": {
+    "description": "Role dashboards (0102): partnerCountry"
+  },
+  "dashViewOverview": "概要",
+  "@dashViewOverview": {
+    "description": "Role dashboards (0102): dashViewOverview"
+  },
+  "dashViewInspection": "検品",
+  "@dashViewInspection": {
+    "description": "Role dashboards (0102): dashViewInspection"
+  },
+  "dashViewPurchasing": "発注",
+  "@dashViewPurchasing": {
+    "description": "Role dashboards (0102): dashViewPurchasing"
+  },
+  "dashViewSales": "受注",
+  "@dashViewSales": {
+    "description": "Role dashboards (0102): dashViewSales"
+  },
+  "dashAwaitingInspection": "検品待ち",
+  "@dashAwaitingInspection": {
+    "description": "Role dashboards (0102): dashAwaitingInspection"
+  },
+  "dashAwaitingBody": "{inspections}件・{lines}行・{units}個",
+  "@dashAwaitingBody": {
+    "description": "Role dashboards (0102): dashAwaitingBody",
+    "placeholders": {
+      "inspections": {
+        "type": "int"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "dashAwaitingNone": "検品待ちはありません",
+  "@dashAwaitingNone": {
+    "description": "Role dashboards (0102): dashAwaitingNone"
+  },
+  "dashOpenInspections": "検品一覧",
+  "@dashOpenInspections": {
+    "description": "Role dashboards (0102): dashOpenInspections"
+  },
+  "dashBulkInspection": "一括検品",
+  "@dashBulkInspection": {
+    "description": "Role dashboards (0102): dashBulkInspection"
+  },
+  "dashIncomingTitle": "入荷予定",
+  "@dashIncomingTitle": {
+    "description": "Role dashboards (0102): dashIncomingTitle"
+  },
+  "dashIncomingEmpty": "入荷予定はありません",
+  "@dashIncomingEmpty": {
+    "description": "Role dashboards (0102): dashIncomingEmpty"
+  },
+  "dashDayToday": "今日",
+  "@dashDayToday": {
+    "description": "Role dashboards (0102): dashDayToday"
+  },
+  "dashDayTomorrow": "明日",
+  "@dashDayTomorrow": {
+    "description": "Role dashboards (0102): dashDayTomorrow"
+  },
+  "dashDayOverdue": "予定日を過ぎたもの",
+  "@dashDayOverdue": {
+    "description": "Role dashboards (0102): dashDayOverdue"
+  },
+  "dashDayNone": "日付未定",
+  "@dashDayNone": {
+    "description": "Role dashboards (0102): dashDayNone"
+  },
+  "dashManualBadge": "手動",
+  "@dashManualBadge": {
+    "description": "Role dashboards (0102): dashManualBadge"
+  },
+  "dashPlanSummary": "{lines}品目・{units}個",
+  "@dashPlanSummary": {
+    "description": "Role dashboards (0102): dashPlanSummary",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "dashMoreLines": "ほか{count}品目",
+  "@dashMoreLines": {
+    "description": "Role dashboards (0102): dashMoreLines",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashUnplannedTitle": "出荷表のない発注",
+  "@dashUnplannedTitle": {
+    "description": "Role dashboards (0102): dashUnplannedTitle"
+  },
+  "dashUnplannedBody": "仕入先から出荷表が届いていない承認済みの発注です。手動で入荷リストを作れます。",
+  "@dashUnplannedBody": {
+    "description": "Role dashboards (0102): dashUnplannedBody"
+  },
+  "dashCreateManualList": "手動で入荷リストを作成",
+  "@dashCreateManualList": {
+    "description": "Role dashboards (0102): dashCreateManualList"
+  },
+  "manualListTitle": "入荷リストを手動作成",
+  "@manualListTitle": {
+    "description": "Role dashboards (0102): manualListTitle"
+  },
+  "manualListSupplier": "仕入先名（任意）",
+  "@manualListSupplier": {
+    "description": "Role dashboards (0102): manualListSupplier"
+  },
+  "manualListExpected": "入荷予定日",
+  "@manualListExpected": {
+    "description": "Role dashboards (0102): manualListExpected"
+  },
+  "manualListNoDate": "未定",
+  "@manualListNoDate": {
+    "description": "Role dashboards (0102): manualListNoDate"
+  },
+  "manualListScanHint": "JANをスキャンまたは入力",
+  "@manualListScanHint": {
+    "description": "Role dashboards (0102): manualListScanHint"
+  },
+  "manualListQuantity": "数量",
+  "@manualListQuantity": {
+    "description": "Role dashboards (0102): manualListQuantity"
+  },
+  "manualListEmpty": "入荷する商品のJANをスキャンして追加してください",
+  "@manualListEmpty": {
+    "description": "Role dashboards (0102): manualListEmpty"
+  },
+  "manualListSave": "リストを作成",
+  "@manualListSave": {
+    "description": "Role dashboards (0102): manualListSave"
+  },
+  "manualListCreated": "入荷リスト {number} を作成しました",
+  "@manualListCreated": {
+    "description": "Role dashboards (0102): manualListCreated",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "manualListNoWarehouse": "倉庫を選択してから作成してください",
+  "@manualListNoWarehouse": {
+    "description": "Role dashboards (0102): manualListNoWarehouse"
+  },
+  "manualListBadJan": "JANは数字8桁または13桁です",
+  "@manualListBadJan": {
+    "description": "Role dashboards (0102): manualListBadJan"
+  },
+  "dashStockUsable": "良品",
+  "@dashStockUsable": {
+    "description": "Role dashboards (0102): dashStockUsable"
+  },
+  "dashStockQcPending": "検品待ち",
+  "@dashStockQcPending": {
+    "description": "Role dashboards (0102): dashStockQcPending"
+  },
+  "dashStockHeld": "保留",
+  "@dashStockHeld": {
+    "description": "Role dashboards (0102): dashStockHeld"
+  },
+  "dashStockReserved": "引当",
+  "@dashStockReserved": {
+    "description": "Role dashboards (0102): dashStockReserved"
+  },
+  "dashStockIncoming": "入荷予定",
+  "@dashStockIncoming": {
+    "description": "Role dashboards (0102): dashStockIncoming"
+  },
+  "dashStockShortfall": "不足",
+  "@dashStockShortfall": {
+    "description": "Role dashboards (0102): dashStockShortfall"
+  },
+  "dashStockNext": "次回 {date}",
+  "@dashStockNext": {
+    "description": "Role dashboards (0102): dashStockNext",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashStockSearch": "商品名・JANで検索",
+  "@dashStockSearch": {
+    "description": "Role dashboards (0102): dashStockSearch"
+  },
+  "dashStockEmpty": "該当する商品はありません",
+  "@dashStockEmpty": {
+    "description": "Role dashboards (0102): dashStockEmpty"
+  },
+  "dashStockProducts": "{count}商品",
+  "@dashStockProducts": {
+    "description": "Role dashboards (0102): dashStockProducts",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashOpenDemand": "受注残・発注を開く",
+  "@dashOpenDemand": {
+    "description": "Role dashboards (0102): dashOpenDemand"
+  },
+  "dashSalesUnits": "直近{months}か月の受注数",
+  "@dashSalesUnits": {
+    "description": "Role dashboards (0102): dashSalesUnits",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "dashSalesVsLastYear": "前年比 {pct}",
+  "@dashSalesVsLastYear": {
+    "description": "Role dashboards (0102): dashSalesVsLastYear",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "dashSalesNoCompare": "前年のデータなし",
+  "@dashSalesNoCompare": {
+    "description": "Role dashboards (0102): dashSalesNoCompare"
+  },
+  "dashSalesOrders": "受注件数",
+  "@dashSalesOrders": {
+    "description": "Role dashboards (0102): dashSalesOrders"
+  },
+  "dashSalesMonthly": "月別の受注数",
+  "@dashSalesMonthly": {
+    "description": "Role dashboards (0102): dashSalesMonthly"
+  },
+  "dashSalesThisYear": "今年",
+  "@dashSalesThisYear": {
+    "description": "Role dashboards (0102): dashSalesThisYear"
+  },
+  "dashSalesLastYear": "前年",
+  "@dashSalesLastYear": {
+    "description": "Role dashboards (0102): dashSalesLastYear"
+  },
+  "dashSalesTop": "よく注文される商品",
+  "@dashSalesTop": {
+    "description": "Role dashboards (0102): dashSalesTop"
+  },
+  "dashSalesToPurchase": "これから発注が必要な商品",
+  "@dashSalesToPurchase": {
+    "description": "Role dashboards (0102): dashSalesToPurchase"
+  },
+  "dashSalesToPurchaseEmpty": "発注が必要な商品はありません",
+  "@dashSalesToPurchaseEmpty": {
+    "description": "Role dashboards (0102): dashSalesToPurchaseEmpty"
+  },
+  "dashSalesAllCountries": "すべての国",
+  "@dashSalesAllCountries": {
+    "description": "Role dashboards (0102): dashSalesAllCountries"
+  },
+  "dashSalesEmpty": "この期間の受注はありません",
+  "@dashSalesEmpty": {
+    "description": "Role dashboards (0102): dashSalesEmpty"
+  },
+  "dashBackordered": "受注残",
+  "@dashBackordered": {
+    "description": "Role dashboards (0102): dashBackordered"
+  },
+  "dashUnitsCount": "{count}個",
+  "@dashUnitsCount": {
+    "description": "Role dashboards (0102): dashUnitsCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

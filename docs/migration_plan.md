@@ -4910,6 +4910,60 @@ Changes:
 - ticking C took the note's 90 against 100 received;
 - completing released 990, with `count_short_held` 10 and C HOLD 10.
 
+### 0102 — a dashboard per job, switched by tabs
+
+Each department reads the dashboard for its own work. Any other view the
+user may read is one tab away.
+
+- **Views and defaults:**
+  - admins and warehouse managers open on 概要;
+  - purchasing opens on 発注;
+  - sales opens on 受注;
+  - inspector, receiving and putaway open on 検品.
+  - A tab picked by hand is remembered on the device (`dashboard_view`).
+  - A tab shows only when the user holds a permission its data needs:
+    - 検品: `receiving.view`, `inspection.view` or `inspection.confirm`;
+    - 発注: `inventory.view` or `purchase_order.view`;
+    - 受注: `sales_order.view`.
+- **検品 — what is coming in, and when** (`dashboard_inbound_schedule`):
+  - 検品待ち: inspections, lines and units, linking to 検品一覧 and 一括検品;
+  - open deliveries grouped as 予定日を過ぎたもの, 今日, 明日, by date,
+    then 日付未定, each showing its first lines;
+  - lists written by hand carry 手動;
+  - approved orders with no delivery list (出荷表のない発注).
+- **Inbound list by hand** (`create_manual_delivery_plan`):
+  - For when the supplier sent no shipping list.
+  - Enter the supplier, an optional expected date (future dates allowed),
+    and lines by scanning or typing a JAN (a repeat scan adds one) with
+    quantities.
+  - Creates a plan numbered `MN-xxxxxx`, which the inspection then checks
+    against.
+- **発注 — stock as it stands** (`dashboard_stock_position`), per country:
+  - each product shows 良品, 検品待ち, 保留, 引当 and 入荷予定, with the
+    next expected date;
+  - 不足 means backorders not covered by free stock plus incoming;
+  - search by name or JAN; totals sit on top.
+- **受注 — a year of orders** (`dashboard_sales_cycle`), for CN by default,
+  JP or all:
+  - units over the last 12 months against the same months a year before
+    (前年比);
+  - order count;
+  - a monthly paired bar chart, this year against last;
+  - the most ordered products;
+  - これから発注が必要な商品, linking to 受注残・発注.
+- **Customer country:**
+  - `delivery_suppliers.country_code` (default JP), set in the partner form
+    through `set_trading_partner_country`.
+  - "Orders from China" means orders from customers whose country is CN.
+
+**Verified live** (aborted transaction):
+- a manual list MN-000048 was created; a line without a JAN was skipped;
+- the schedule returned the plans, plus unplanned PO-000029 (5 days out,
+  15 units);
+- the stock position showed backordered 20, incoming 15, shortfall 5;
+- the CN sales cycle totalled 50 against 10 the year before (months 30/0
+  and 20/10), with 5 to purchase.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
