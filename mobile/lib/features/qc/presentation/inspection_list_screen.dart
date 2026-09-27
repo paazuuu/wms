@@ -7,6 +7,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/inspection_providers.dart';
 import '../domain/inspection.dart';
+import 'bulk_inspection_screen.dart';
 import 'inspection_detail_screen.dart';
 import 'qc_result_ui.dart';
 
@@ -41,7 +42,19 @@ class QcInspectionListScreen extends ConsumerWidget {
     final active = ref.watch(inspectionStatusFilterProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.qcTitle)),
+      appBar: AppBar(
+        title: Text(l10n.qcTitle),
+        actions: [
+          IconButton(
+            key: const ValueKey('qc-open-bulk'),
+            tooltip: l10n.bulkQcTitle,
+            icon: const Icon(Icons.done_all),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const BulkInspectionScreen()),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           SizedBox(

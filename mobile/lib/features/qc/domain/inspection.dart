@@ -43,6 +43,7 @@ class InspectionItem extends Equatable {
     this.productCondition,
     this.labelOk,
     this.note,
+    this.finalizedAt,
   });
 
   final int id;
@@ -66,6 +67,12 @@ class InspectionItem extends Equatable {
 
   bool get isChecked => result != QcResult.pending;
 
+  /// Settled on its own (0099): its goods have already moved out of
+  /// inspection and the line can no longer change, even while other lines of
+  /// the same inspection are still open.
+  final DateTime? finalizedAt;
+  bool get isFinal => finalizedAt != null;
+
   factory InspectionItem.fromJson(Map<String, dynamic> json) => InspectionItem(
         id: _asInt(json['id']),
         janCode: (json['jan_code'] ?? '').toString(),
@@ -83,11 +90,12 @@ class InspectionItem extends Equatable {
         productCondition: json['product_condition'] as String?,
         labelOk: json['label_ok'] as bool?,
         note: json['note'] as String?,
+        finalizedAt: DateTime.tryParse('${json['finalized_at']}')?.toLocal(),
       );
 
   @override
   List<Object?> get props =>
-      [id, janCode, passedQuantity, failedQuantity, discrepancy, result];
+      [id, janCode, passedQuantity, failedQuantity, discrepancy, result, finalizedAt];
 }
 
 /// A QC pass over one receipt.
@@ -106,7 +114,11 @@ class Inspection extends Equatable {
     this.items = const [],
     this.itemCount,
     this.stockEffect,
+    this.arrivedOn,
   });
+
+  /// When the goods arrived (the receipt's arrival date, 0099).
+  final DateTime? arrivedOn;
 
   final int id;
   final QcResult status;
@@ -158,6 +170,7 @@ class Inspection extends Equatable {
             const [],
         itemCount:
             json['item_count'] == null ? null : _asInt(json['item_count']),
+        arrivedOn: DateTime.tryParse('${json['arrived_on']}'),
         stockEffect: json['stock_effect'] is Map
             ? InspectionStockEffect.fromJson(
                 (json['stock_effect'] as Map).cast<String, dynamic>())

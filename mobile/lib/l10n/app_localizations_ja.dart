@@ -4750,4 +4750,118 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mvReturnToSupplier => '仕入先返品';
+
+  @override
+  String get bulkQcTitle => '一括検品';
+
+  @override
+  String get bulkQcGroupDate => '入荷日';
+
+  @override
+  String get bulkQcGroupPo => '発注';
+
+  @override
+  String get bulkQcAllDates => 'すべての入荷日';
+
+  @override
+  String get bulkQcAllPos => 'すべての発注';
+
+  @override
+  String get bulkQcNoPo => '発注なし';
+
+  @override
+  String bulkQcProductFilter(String name) {
+    return '商品：$name';
+  }
+
+  @override
+  String get bulkQcScanHint => 'JANを読み込んで商品で絞り込み';
+
+  @override
+  String get bulkQcNoMatch => 'このJANの検品待ちはありません';
+
+  @override
+  String get bulkQcSelectAll => 'すべて選択';
+
+  @override
+  String get bulkQcSelectNone => '選択解除';
+
+  @override
+  String bulkQcSummary(int lines, int units) {
+    return '選択 $lines 行・計 $units 点';
+  }
+
+  @override
+  String get bulkQcPass => '選択した分を良品として検品完了';
+
+  @override
+  String get bulkQcConfirmTitle => '良品として検品完了しますか？';
+
+  @override
+  String bulkQcConfirmBody(int lines, int units) {
+    return '$lines 行・計 $units 点を良品として確定し、すぐに出荷できる在庫にします。選択しなかった行は検品待ちのまま残ります。';
+  }
+
+  @override
+  String bulkQcDone(int lines, int units) {
+    return '$lines 行（$units 点）を良品として確定しました';
+  }
+
+  @override
+  String get bulkQcEmpty => '検品待ちの行はありません';
+
+  @override
+  String get bulkQcEmptyBody => '検品が必要な商品を入荷すると、ここに並びます。';
+
+  @override
+  String bulkQcArrived(String date) {
+    return '入荷 $date';
+  }
+
+  @override
+  String get bulkQcRecordedBadge => '記録あり';
+
+  @override
+  String get qcPassAll => '全数良品';
+
+  @override
+  String qcPassAllDone(int units) {
+    return '$units 点を良品として確定しました';
+  }
+
+  @override
+  String get qcFinalBadge => '確定済';
+
+  @override
+  String get qcScanHint => 'JANを読み込むとその商品の行を検品できます';
+
+  @override
+  String get qcScanNotInInspection => 'この検品に含まれないJANです';
+
+  @override
+  String qcScanPrompt(String name, int units) {
+    return '$name：$units 点';
+  }
+
+  @override
+  String get qcScanRecordEach => '個別に記録';
+
+  @override
+  String receiptArrivedOn(String date) {
+    return '入荷日 $date';
+  }
+
+  @override
+  String get receiptArrivedOnEdit => '入荷日を変更';
+
+  @override
+  String receiptArrivedOnSaved(String date) {
+    return '入荷日を $date にしました';
+  }
+
+  @override
+  String get featBulkInspection => '一括検品';
+
+  @override
+  String get featBulkInspectionDesc => '入荷日・発注・商品で絞り込み、まとめて良品として検品完了';
 }

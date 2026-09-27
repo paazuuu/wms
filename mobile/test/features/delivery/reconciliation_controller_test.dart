@@ -15,6 +15,10 @@ class _FakeRepo implements DeliveryRepository {
   List<ReconcileEntry>? lastEntries;
 
   @override
+  Future<ApiResult<bool>> setReceiptArrivedOn(int reconciliationId, DateTime date) async =>
+      const ApiFailure(message: 'not used here', statusCode: 404);
+
+  @override
   Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId) async =>
       const ApiFailure(message: 'not used here', statusCode: 404);
 

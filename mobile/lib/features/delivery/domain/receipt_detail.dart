@@ -158,11 +158,16 @@ class ReceiptDetail extends Equatable {
     this.noteReference,
     this.status = '',
     this.createdAt,
+    this.arrivedOn,
     this.lines = const [],
     this.unlinkedItems = const [],
   });
 
   final int reconciliationId;
+
+  /// When the goods arrived (0099): today when received, correctable by hand
+  /// when the receipt is recorded later than the delivery.
+  final DateTime? arrivedOn;
   final int? deliveryPlanId;
   final String? deliveryNumber;
   final int? warehouseId;
@@ -198,6 +203,7 @@ class ReceiptDetail extends Equatable {
         noteReference: _asText(json['note_reference']),
         status: (json['status'] ?? '').toString(),
         createdAt: DateTime.tryParse('${json['created_at']}')?.toLocal(),
+        arrivedOn: DateTime.tryParse('${json['arrived_on']}'),
         lines: (json['lines'] as List?)
                 ?.whereType<Map>()
                 .map((e) => ReceiptLine.fromJson(e.cast<String, dynamic>()))
@@ -211,7 +217,7 @@ class ReceiptDetail extends Equatable {
       );
 
   @override
-  List<Object?> get props => [reconciliationId, status, lines, unlinkedItems];
+  List<Object?> get props => [reconciliationId, status, arrivedOn, lines, unlinkedItems];
 }
 
 /// One row of `lot_provenance` (0067): which delivery brought a lot in.

@@ -4739,4 +4739,118 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mvReturnToSupplier => '退回供应商';
+
+  @override
+  String get bulkQcTitle => '批量检验';
+
+  @override
+  String get bulkQcGroupDate => '到货日期';
+
+  @override
+  String get bulkQcGroupPo => '采购单';
+
+  @override
+  String get bulkQcAllDates => '所有到货日期';
+
+  @override
+  String get bulkQcAllPos => '所有采购单';
+
+  @override
+  String get bulkQcNoPo => '无采购单';
+
+  @override
+  String bulkQcProductFilter(String name) {
+    return '商品：$name';
+  }
+
+  @override
+  String get bulkQcScanHint => '扫描JAN按商品筛选';
+
+  @override
+  String get bulkQcNoMatch => '该JAN没有待检商品';
+
+  @override
+  String get bulkQcSelectAll => '全选';
+
+  @override
+  String get bulkQcSelectNone => '取消选择';
+
+  @override
+  String bulkQcSummary(int lines, int units) {
+    return '已选 $lines 行・共 $units 件';
+  }
+
+  @override
+  String get bulkQcPass => '将所选作为良品完成检验';
+
+  @override
+  String get bulkQcConfirmTitle => '作为良品完成检验吗？';
+
+  @override
+  String bulkQcConfirmBody(int lines, int units) {
+    return '将 $lines 行（共 $units 件）确定为良品，立即变为可出库库存。未选择的行仍保持待检。';
+  }
+
+  @override
+  String bulkQcDone(int lines, int units) {
+    return '已将 $lines 行（$units 件）确定为良品';
+  }
+
+  @override
+  String get bulkQcEmpty => '没有待检行';
+
+  @override
+  String get bulkQcEmptyBody => '需要检验的商品入库后会列在这里。';
+
+  @override
+  String bulkQcArrived(String date) {
+    return '到货 $date';
+  }
+
+  @override
+  String get bulkQcRecordedBadge => '已记录';
+
+  @override
+  String get qcPassAll => '全部良品';
+
+  @override
+  String qcPassAllDone(int units) {
+    return '已将 $units 件确定为良品';
+  }
+
+  @override
+  String get qcFinalBadge => '已确定';
+
+  @override
+  String get qcScanHint => '扫描JAN检验对应行';
+
+  @override
+  String get qcScanNotInInspection => '此检验中没有该JAN';
+
+  @override
+  String qcScanPrompt(String name, int units) {
+    return '$name：$units 件';
+  }
+
+  @override
+  String get qcScanRecordEach => '单独记录';
+
+  @override
+  String receiptArrivedOn(String date) {
+    return '到货日期 $date';
+  }
+
+  @override
+  String get receiptArrivedOnEdit => '修改到货日期';
+
+  @override
+  String receiptArrivedOnSaved(String date) {
+    return '到货日期已改为 $date';
+  }
+
+  @override
+  String get featBulkInspection => '批量检验';
+
+  @override
+  String get featBulkInspectionDesc => '按到货日期、采购单或商品筛选，批量作为良品完成检验';
 }

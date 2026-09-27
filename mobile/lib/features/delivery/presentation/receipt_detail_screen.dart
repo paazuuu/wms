@@ -63,6 +63,40 @@ class ReceiptDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// The arrival date is set by hand when the receipt is recorded later than
+  /// the delivery (0099); bulk inspection groups by it.
+  Future<void> _editArrivedOn(
+      BuildContext context, WidgetRef ref, ReceiptDetail receipt) async {
+    final l10n = AppLocalizations.of(context);
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: receipt.arrivedOn ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: now,
+    );
+    if (picked == null || !context.mounted) return;
+    final result = await ref
+        .read(deliveryRepositoryProvider)
+        .setReceiptArrivedOn(receipt.reconciliationId, picked);
+    if (!context.mounted) return;
+    result.when(
+      success: (_) {
+        ref.invalidate(receiptDetailProvider(reconciliationId));
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+              content: Text(l10n.receiptArrivedOnSaved(DateFormat('yyyy-MM-dd').format(picked)))));
+      },
+      failure: (f) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(humanizeApiErrorMessage(l10n, f.message)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        )),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -85,7 +119,10 @@ class ReceiptDetailScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              _Header(receipt: receipt),
+              _Header(
+                receipt: receipt,
+                onEditArrivedOn: () => _editArrivedOn(context, ref, receipt),
+              ),
               const SizedBox(height: AppSpacing.md),
               for (final line in receipt.lines) ...[
                 _LineCard(
@@ -125,9 +162,10 @@ class ReceiptDetailScreen extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.receipt});
+  const _Header({required this.receipt, this.onEditArrivedOn});
 
   final ReceiptDetail receipt;
+  final VoidCallback? onEditArrivedOn;
 
   @override
   Widget build(BuildContext context) {
@@ -174,6 +212,22 @@ class _Header extends StatelessWidget {
                 ],
               ),
             ],
+            if (receipt.arrivedOn != null)
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(l10n.receiptArrivedOn(
+                        DateFormat('yyyy-MM-dd').format(receipt.arrivedOn!))),
+                  ),
+                  if (receipt.status != 'cancelled' && onEditArrivedOn != null)
+                    TextButton.icon(
+                      key: const ValueKey('receipt-arrived-on-edit'),
+                      onPressed: onEditArrivedOn,
+                      icon: const Icon(Icons.event_outlined, size: 18),
+                      label: Text(l10n.receiptArrivedOnEdit),
+                    ),
+                ],
+              ),
             if (receipt.createdAt != null) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(df.format(receipt.createdAt!),

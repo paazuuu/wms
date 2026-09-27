@@ -4788,6 +4788,42 @@ on hand 4, with ledger `ADJUST:10, SCRAP:-4, RETURN_TO_SUPPLIER:-2`. A scrap
 without a reason, a scrap from OK, and a release beyond the bucket were all
 refused.
 
+### 0099 — bulk inspection: by arrival date, by purchase order, by product, and part at a time
+
+The user wants most deliveries passed as good in one go: everything that
+arrived on a date, or everything from one PO, while leaving a few lines open.
+They also want one product passed in full, by scanning it or by hand.
+- **Arrival date:** `delivery_reconciliations.arrived_on` (NOT NULL) defaults
+  to `warehouse_today` through a trigger, with a backfill from `created_at`
+  in the warehouse's time zone. `set_receipt_arrived_on` corrects it; a
+  future date is refused. `receipt_detail` returns it.
+- **Line-level settle:** new column `inspection_items.finalized_at`.
+  - `finalize_inspection_item_impl` holds the per-line stock moves (with
+    0095's cap) and locks the line.
+  - `close_inspection_if_final_impl` closes an inspection once its last line
+    is final.
+  - `complete_inspection` settles only what is left.
+  - `save_inspection_item` refuses a settled line.
+- **Bulk pass:** `pass_inspection_items(ids[])` passes each line in full and
+  settles it, and closes any inspection left with nothing open.
+- **Open lines:** `open_inspection_lines(warehouse)` lists every open line
+  with arrival date, receipt, supplier, PO and product.
+- **Client:**
+  - 一括検品 (menu, and ✓✓ on the inspection list): filter by date or PO, or
+    by scanning a JAN (camera or wedge); everything shown starts selected,
+    with per-line and per-delivery ticks; confirm, then pass.
+  - Inspection detail: 全数良品 on each open line, a 確定済 lock, and a scan
+    field whose JAN offers 全数良品 or 個別に記録.
+  - Receipt detail: the arrival date with 入荷日を変更.
+
+**Verified live** (X 4 + Y 3 on PO-1, X 5 on PO-2):
+- a future arrival date was refused;
+- 3 open lines across 2 dates and 2 POs;
+- passing yesterday's X released 4 with the inspection still open, and
+  editing X afterwards was refused;
+- completing with Y failed 3 gave PARTIAL, with Y DAMAGED 3;
+- passing PO-2 released 5 and closed that inspection PASS; open lines 0.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

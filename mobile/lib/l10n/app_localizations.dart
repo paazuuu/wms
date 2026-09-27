@@ -8777,6 +8777,198 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'仕入先返品'**
   String get mvReturnToSupplier;
+
+  /// Bulk inspection / arrival date (0099): bulkQcTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'一括検品'**
+  String get bulkQcTitle;
+
+  /// Bulk inspection / arrival date (0099): bulkQcGroupDate
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日'**
+  String get bulkQcGroupDate;
+
+  /// Bulk inspection / arrival date (0099): bulkQcGroupPo
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get bulkQcGroupPo;
+
+  /// Bulk inspection / arrival date (0099): bulkQcAllDates
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての入荷日'**
+  String get bulkQcAllDates;
+
+  /// Bulk inspection / arrival date (0099): bulkQcAllPos
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての発注'**
+  String get bulkQcAllPos;
+
+  /// Bulk inspection / arrival date (0099): bulkQcNoPo
+  ///
+  /// In ja, this message translates to:
+  /// **'発注なし'**
+  String get bulkQcNoPo;
+
+  /// Bulk inspection / arrival date (0099): bulkQcProductFilter
+  ///
+  /// In ja, this message translates to:
+  /// **'商品：{name}'**
+  String bulkQcProductFilter(String name);
+
+  /// Bulk inspection / arrival date (0099): bulkQcScanHint
+  ///
+  /// In ja, this message translates to:
+  /// **'JANを読み込んで商品で絞り込み'**
+  String get bulkQcScanHint;
+
+  /// Bulk inspection / arrival date (0099): bulkQcNoMatch
+  ///
+  /// In ja, this message translates to:
+  /// **'このJANの検品待ちはありません'**
+  String get bulkQcNoMatch;
+
+  /// Bulk inspection / arrival date (0099): bulkQcSelectAll
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて選択'**
+  String get bulkQcSelectAll;
+
+  /// Bulk inspection / arrival date (0099): bulkQcSelectNone
+  ///
+  /// In ja, this message translates to:
+  /// **'選択解除'**
+  String get bulkQcSelectNone;
+
+  /// Bulk inspection / arrival date (0099): bulkQcSummary
+  ///
+  /// In ja, this message translates to:
+  /// **'選択 {lines} 行・計 {units} 点'**
+  String bulkQcSummary(int lines, int units);
+
+  /// Bulk inspection / arrival date (0099): bulkQcPass
+  ///
+  /// In ja, this message translates to:
+  /// **'選択した分を良品として検品完了'**
+  String get bulkQcPass;
+
+  /// Bulk inspection / arrival date (0099): bulkQcConfirmTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'良品として検品完了しますか？'**
+  String get bulkQcConfirmTitle;
+
+  /// Bulk inspection / arrival date (0099): bulkQcConfirmBody
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines} 行・計 {units} 点を良品として確定し、すぐに出荷できる在庫にします。選択しなかった行は検品待ちのまま残ります。'**
+  String bulkQcConfirmBody(int lines, int units);
+
+  /// Bulk inspection / arrival date (0099): bulkQcDone
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines} 行（{units} 点）を良品として確定しました'**
+  String bulkQcDone(int lines, int units);
+
+  /// Bulk inspection / arrival date (0099): bulkQcEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちの行はありません'**
+  String get bulkQcEmpty;
+
+  /// Bulk inspection / arrival date (0099): bulkQcEmptyBody
+  ///
+  /// In ja, this message translates to:
+  /// **'検品が必要な商品を入荷すると、ここに並びます。'**
+  String get bulkQcEmptyBody;
+
+  /// Bulk inspection / arrival date (0099): bulkQcArrived
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷 {date}'**
+  String bulkQcArrived(String date);
+
+  /// Bulk inspection / arrival date (0099): bulkQcRecordedBadge
+  ///
+  /// In ja, this message translates to:
+  /// **'記録あり'**
+  String get bulkQcRecordedBadge;
+
+  /// Bulk inspection / arrival date (0099): qcPassAll
+  ///
+  /// In ja, this message translates to:
+  /// **'全数良品'**
+  String get qcPassAll;
+
+  /// Bulk inspection / arrival date (0099): qcPassAllDone
+  ///
+  /// In ja, this message translates to:
+  /// **'{units} 点を良品として確定しました'**
+  String qcPassAllDone(int units);
+
+  /// Bulk inspection / arrival date (0099): qcFinalBadge
+  ///
+  /// In ja, this message translates to:
+  /// **'確定済'**
+  String get qcFinalBadge;
+
+  /// Bulk inspection / arrival date (0099): qcScanHint
+  ///
+  /// In ja, this message translates to:
+  /// **'JANを読み込むとその商品の行を検品できます'**
+  String get qcScanHint;
+
+  /// Bulk inspection / arrival date (0099): qcScanNotInInspection
+  ///
+  /// In ja, this message translates to:
+  /// **'この検品に含まれないJANです'**
+  String get qcScanNotInInspection;
+
+  /// Bulk inspection / arrival date (0099): qcScanPrompt
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}：{units} 点'**
+  String qcScanPrompt(String name, int units);
+
+  /// Bulk inspection / arrival date (0099): qcScanRecordEach
+  ///
+  /// In ja, this message translates to:
+  /// **'個別に記録'**
+  String get qcScanRecordEach;
+
+  /// Bulk inspection / arrival date (0099): receiptArrivedOn
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日 {date}'**
+  String receiptArrivedOn(String date);
+
+  /// Bulk inspection / arrival date (0099): receiptArrivedOnEdit
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日を変更'**
+  String get receiptArrivedOnEdit;
+
+  /// Bulk inspection / arrival date (0099): receiptArrivedOnSaved
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日を {date} にしました'**
+  String receiptArrivedOnSaved(String date);
+
+  /// Home menu: bulk inspection (0099)
+  ///
+  /// In ja, this message translates to:
+  /// **'一括検品'**
+  String get featBulkInspection;
+
+  /// Home menu: bulk inspection description
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日・発注・商品で絞り込み、まとめて良品として検品完了'**
+  String get featBulkInspectionDesc;
 }
 
 class _AppLocalizationsDelegate

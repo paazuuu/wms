@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/inspection_repository.dart';
+import '../domain/bulk_inspection.dart';
 import '../domain/held_stock.dart';
 import '../domain/inspection.dart';
 
@@ -54,6 +55,19 @@ final heldStockProvider =
   final result = await ref
       .watch(inspectionRepositoryProvider)
       .heldStock(warehouseId: warehouseId, status: status);
+  return result.when(
+    success: (data) => data,
+    failure: (f) => throw Exception(f.message),
+  );
+});
+
+/// Every inspection line still to settle in the active warehouse (0099).
+final openInspectionLinesProvider =
+    FutureProvider.autoDispose<List<OpenInspectionLine>>((ref) async {
+  final warehouseId = ref.watch(activeWarehouseIdProvider);
+  final result = await ref
+      .watch(inspectionRepositoryProvider)
+      .openLines(warehouseId: warehouseId);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

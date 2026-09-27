@@ -4450,5 +4450,190 @@
   "mvReturnToSupplier": "仕入先返品",
   "@mvReturnToSupplier": {
     "description": "Held stock / disposition (0098): mvReturnToSupplier"
+  },
+  "bulkQcTitle": "一括検品",
+  "@bulkQcTitle": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcTitle"
+  },
+  "bulkQcGroupDate": "入荷日",
+  "@bulkQcGroupDate": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcGroupDate"
+  },
+  "bulkQcGroupPo": "発注",
+  "@bulkQcGroupPo": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcGroupPo"
+  },
+  "bulkQcAllDates": "すべての入荷日",
+  "@bulkQcAllDates": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcAllDates"
+  },
+  "bulkQcAllPos": "すべての発注",
+  "@bulkQcAllPos": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcAllPos"
+  },
+  "bulkQcNoPo": "発注なし",
+  "@bulkQcNoPo": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcNoPo"
+  },
+  "bulkQcProductFilter": "商品：{name}",
+  "@bulkQcProductFilter": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcProductFilter",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bulkQcScanHint": "JANを読み込んで商品で絞り込み",
+  "@bulkQcScanHint": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcScanHint"
+  },
+  "bulkQcNoMatch": "このJANの検品待ちはありません",
+  "@bulkQcNoMatch": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcNoMatch"
+  },
+  "bulkQcSelectAll": "すべて選択",
+  "@bulkQcSelectAll": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcSelectAll"
+  },
+  "bulkQcSelectNone": "選択解除",
+  "@bulkQcSelectNone": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcSelectNone"
+  },
+  "bulkQcSummary": "選択 {lines} 行・計 {units} 点",
+  "@bulkQcSummary": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcSummary",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkQcPass": "選択した分を良品として検品完了",
+  "@bulkQcPass": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcPass"
+  },
+  "bulkQcConfirmTitle": "良品として検品完了しますか？",
+  "@bulkQcConfirmTitle": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcConfirmTitle"
+  },
+  "bulkQcConfirmBody": "{lines} 行・計 {units} 点を良品として確定し、すぐに出荷できる在庫にします。選択しなかった行は検品待ちのまま残ります。",
+  "@bulkQcConfirmBody": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcConfirmBody",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkQcDone": "{lines} 行（{units} 点）を良品として確定しました",
+  "@bulkQcDone": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcDone",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkQcEmpty": "検品待ちの行はありません",
+  "@bulkQcEmpty": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcEmpty"
+  },
+  "bulkQcEmptyBody": "検品が必要な商品を入荷すると、ここに並びます。",
+  "@bulkQcEmptyBody": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcEmptyBody"
+  },
+  "bulkQcArrived": "入荷 {date}",
+  "@bulkQcArrived": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcArrived",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bulkQcRecordedBadge": "記録あり",
+  "@bulkQcRecordedBadge": {
+    "description": "Bulk inspection / arrival date (0099): bulkQcRecordedBadge"
+  },
+  "qcPassAll": "全数良品",
+  "@qcPassAll": {
+    "description": "Bulk inspection / arrival date (0099): qcPassAll"
+  },
+  "qcPassAllDone": "{units} 点を良品として確定しました",
+  "@qcPassAllDone": {
+    "description": "Bulk inspection / arrival date (0099): qcPassAllDone",
+    "placeholders": {
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "qcFinalBadge": "確定済",
+  "@qcFinalBadge": {
+    "description": "Bulk inspection / arrival date (0099): qcFinalBadge"
+  },
+  "qcScanHint": "JANを読み込むとその商品の行を検品できます",
+  "@qcScanHint": {
+    "description": "Bulk inspection / arrival date (0099): qcScanHint"
+  },
+  "qcScanNotInInspection": "この検品に含まれないJANです",
+  "@qcScanNotInInspection": {
+    "description": "Bulk inspection / arrival date (0099): qcScanNotInInspection"
+  },
+  "qcScanPrompt": "{name}：{units} 点",
+  "@qcScanPrompt": {
+    "description": "Bulk inspection / arrival date (0099): qcScanPrompt",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "qcScanRecordEach": "個別に記録",
+  "@qcScanRecordEach": {
+    "description": "Bulk inspection / arrival date (0099): qcScanRecordEach"
+  },
+  "receiptArrivedOn": "入荷日 {date}",
+  "@receiptArrivedOn": {
+    "description": "Bulk inspection / arrival date (0099): receiptArrivedOn",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptArrivedOnEdit": "入荷日を変更",
+  "@receiptArrivedOnEdit": {
+    "description": "Bulk inspection / arrival date (0099): receiptArrivedOnEdit"
+  },
+  "receiptArrivedOnSaved": "入荷日を {date} にしました",
+  "@receiptArrivedOnSaved": {
+    "description": "Bulk inspection / arrival date (0099): receiptArrivedOnSaved",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "featBulkInspection": "一括検品",
+  "featBulkInspectionDesc": "入荷日・発注・商品で絞り込み、まとめて良品として検品完了",
+  "@featBulkInspection": {
+    "description": "Home menu: bulk inspection (0099)"
+  },
+  "@featBulkInspectionDesc": {
+    "description": "Home menu: bulk inspection description"
   }
 }

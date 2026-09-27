@@ -10,6 +10,11 @@ import 'package:wms_mobile/features/qc/presentation/inspection_detail_screen.dar
 
 import '../../support/harness.dart';
 
+/// Text fields inside the finding sheet, not the scan field behind it (0099).
+Finder _sheetField(int i) => find
+    .descendant(of: find.byType(BottomSheet), matching: find.byType(TextField))
+    .at(i);
+
 /// Spec §38 Scenario B: 50 received against a plan of 100, 47 pass / 3 fail.
 Inspection _pending() => Inspection(
       id: 1,
@@ -101,8 +106,8 @@ void main() {
     await tester.tap(find.text('ペン'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField).at(0), '47');
-    await tester.enterText(find.byType(TextField).at(1), '3');
+    await tester.enterText(_sheetField(0), '47');
+    await tester.enterText(_sheetField(1), '3');
     await tester.tap(find.text('記録'));
     await tester.pumpAndSettle();
 
@@ -343,6 +348,71 @@ void main() {
       expect(find.text('取り下げ'), findsNothing);
 
       await tester.binding.setSurfaceSize(null);
+    });
+  });
+
+  group('settling a line on its own (0099)', () {
+    Inspection twoLines({bool firstFinal = false}) => Inspection(
+          id: 1,
+          status: QcResult.pending,
+          items: [
+            InspectionItem(
+              id: 10, janCode: '4902505632037', productName: 'ペン',
+              expectedQuantity: 5, actualQuantity: 5,
+              passedQuantity: firstFinal ? 5 : 0, failedQuantity: 0, discrepancy: 0,
+              result: firstFinal ? QcResult.pass : QcResult.pending,
+              finalizedAt: firstFinal ? DateTime(2026, 9, 27) : null,
+            ),
+            InspectionItem(
+              id: 11, janCode: '4900000000011', productName: 'ノート',
+              expectedQuantity: 3, actualQuantity: 3,
+              passedQuantity: 0, failedQuantity: 0, discrepancy: 0,
+              result: QcResult.pending,
+            ),
+          ],
+        );
+
+    testWidgets('全数良品 passes just that line', (tester) async {
+      final repo = FakeInspectionRepository(twoLines());
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('qc-pass-all-10')));
+      await tester.pumpAndSettle();
+      expect(repo.lastPassed, [10]);
+      expect(find.text('5 点を良品として確定しました'), findsOneWidget);
+    });
+
+    testWidgets('a settled line is locked and marked', (tester) async {
+      final repo = FakeInspectionRepository(twoLines(firstFinal: true));
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('確定済'), findsOneWidget);
+      expect(find.byKey(const ValueKey('qc-pass-all-10')), findsNothing);
+      expect(find.byKey(const ValueKey('qc-pass-all-11')), findsOneWidget);
+    });
+
+    testWidgets('scanning a JAN offers to pass that product in full', (tester) async {
+      final repo = FakeInspectionRepository(twoLines());
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, '4900000000011');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.text('ノート：3 点'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('qc-scan-pass-all')));
+      await tester.pumpAndSettle();
+      expect(repo.lastPassed, [11]);
+    });
+
+    testWidgets('a JAN not in the inspection is said so', (tester) async {
+      final repo = FakeInspectionRepository(twoLines());
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, '1111');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.text('この検品に含まれないJANです'), findsOneWidget);
+      expect(repo.lastPassed, isNull);
     });
   });
 }

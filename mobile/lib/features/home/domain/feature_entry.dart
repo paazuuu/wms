@@ -109,6 +109,8 @@ class FeatureEntry {
         return l10n.featDemand;
       case 'virtual_stock':
         return l10n.featVirtualStock;
+      case 'bulk_inspection':
+        return l10n.featBulkInspection;
       case 'partners':
         return l10n.featPartners;
       case 'work_orders':
@@ -175,6 +177,8 @@ class FeatureEntry {
         return l10n.featDemandDesc;
       case 'virtual_stock':
         return l10n.featVirtualStockDesc;
+      case 'bulk_inspection':
+        return l10n.featBulkInspectionDesc;
       case 'partners':
         return l10n.featPartnersDesc;
       case 'work_orders':

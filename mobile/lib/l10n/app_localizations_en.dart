@@ -4868,4 +4868,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mvReturnToSupplier => 'Return to supplier';
+
+  @override
+  String get bulkQcTitle => 'Bulk inspection';
+
+  @override
+  String get bulkQcGroupDate => 'Arrival date';
+
+  @override
+  String get bulkQcGroupPo => 'Purchase order';
+
+  @override
+  String get bulkQcAllDates => 'All arrival dates';
+
+  @override
+  String get bulkQcAllPos => 'All purchase orders';
+
+  @override
+  String get bulkQcNoPo => 'No purchase order';
+
+  @override
+  String bulkQcProductFilter(String name) {
+    return 'Product: $name';
+  }
+
+  @override
+  String get bulkQcScanHint => 'Scan a JAN to narrow to one product';
+
+  @override
+  String get bulkQcNoMatch => 'Nothing awaits inspection for this JAN';
+
+  @override
+  String get bulkQcSelectAll => 'Select all';
+
+  @override
+  String get bulkQcSelectNone => 'Clear selection';
+
+  @override
+  String bulkQcSummary(int lines, int units) {
+    return '$lines lines selected · $units units';
+  }
+
+  @override
+  String get bulkQcPass => 'Pass the selection as good';
+
+  @override
+  String get bulkQcConfirmTitle => 'Pass these as good?';
+
+  @override
+  String bulkQcConfirmBody(int lines, int units) {
+    return '$lines lines ($units units) will be settled as good and become shippable at once. Lines you did not select stay waiting for inspection.';
+  }
+
+  @override
+  String bulkQcDone(int lines, int units) {
+    return '$lines lines ($units units) passed as good';
+  }
+
+  @override
+  String get bulkQcEmpty => 'Nothing is waiting for inspection';
+
+  @override
+  String get bulkQcEmptyBody =>
+      'Goods that need inspection are listed here once received.';
+
+  @override
+  String bulkQcArrived(String date) {
+    return 'Arrived $date';
+  }
+
+  @override
+  String get bulkQcRecordedBadge => 'Finding recorded';
+
+  @override
+  String get qcPassAll => 'All good';
+
+  @override
+  String qcPassAllDone(int units) {
+    return '$units passed as good';
+  }
+
+  @override
+  String get qcFinalBadge => 'Settled';
+
+  @override
+  String get qcScanHint => 'Scan a JAN to inspect its line';
+
+  @override
+  String get qcScanNotInInspection => 'This JAN is not in this inspection';
+
+  @override
+  String qcScanPrompt(String name, int units) {
+    return '$name: $units';
+  }
+
+  @override
+  String get qcScanRecordEach => 'Record findings';
+
+  @override
+  String receiptArrivedOn(String date) {
+    return 'Arrived $date';
+  }
+
+  @override
+  String get receiptArrivedOnEdit => 'Change arrival date';
+
+  @override
+  String receiptArrivedOnSaved(String date) {
+    return 'Arrival date set to $date';
+  }
+
+  @override
+  String get featBulkInspection => 'Bulk inspection';
+
+  @override
+  String get featBulkInspectionDesc =>
+      'Narrow by arrival date, PO or product and pass them as good in one go';
 }

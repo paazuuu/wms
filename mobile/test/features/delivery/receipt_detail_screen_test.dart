@@ -233,4 +233,32 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('the arrival date is shown and can be set by hand (0099)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    final base = _receipt();
+    final repo = FakeDeliveryRepository([])
+      ..detail = ReceiptDetail(
+        reconciliationId: base.reconciliationId,
+        deliveryNumber: base.deliveryNumber,
+        status: base.status,
+        arrivedOn: DateTime(2026, 9, 20),
+        lines: base.lines,
+      );
+    await _pump(tester, repo);
+
+    expect(find.text('入荷日 2026-09-20'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('receipt-arrived-on-edit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(repo.lastArrivedOn?.id, 12);
+    expect(repo.lastArrivedOn?.date, DateTime(2026, 9, 20));
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  test('ReceiptDetail reads the arrival date', () {
+    final d = ReceiptDetail.fromJson({'reconciliation_id': 1, 'arrived_on': '2026-09-26'});
+    expect(d.arrivedOn, DateTime(2026, 9, 26));
+  });
 }

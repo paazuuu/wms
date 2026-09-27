@@ -225,6 +225,9 @@ abstract class DeliveryRepository {
   /// PostgREST rather than through the edge function.
   Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId);
 
+  /// `set_receipt_arrived_on` (0099): correct when the goods arrived.
+  Future<ApiResult<bool>> setReceiptArrivedOn(int reconciliationId, DateTime date);
+
   /// Which deliveries brought a product's lots in (`lot_provenance`, 0067).
   /// [lotCode] narrows it to one lot; without it, every lot of the product.
   Future<ApiResult<List<LotProvenance>>> lotProvenance(
@@ -366,6 +369,20 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
           response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<PlanImportResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setReceiptArrivedOn(int reconciliationId, DateTime date) async {
+    try {
+      await _restDio.post('/rpc/set_receipt_arrived_on', data: {
+        'p_reconciliation_id': reconciliationId,
+        'p_arrived_on':
+            '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 

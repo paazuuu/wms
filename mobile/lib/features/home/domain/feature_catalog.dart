@@ -13,6 +13,7 @@ import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
 import '../../inventory/presentation/stock_reconciliation_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
+import '../../qc/presentation/bulk_inspection_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
 import '../../wave/presentation/pick_wave_list_screen.dart';
@@ -50,6 +51,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _inspectionList,
             requiredAnyOf: ['inspection.view', 'inspection.confirm'],
+          ),
+          // Most deliveries are fine: settle them as good in one go (0099).
+          FeatureEntry(
+            id: 'bulk_inspection',
+            icon: Icons.done_all,
+            status: FeatureStatus.ready,
+            builder: _bulkInspection,
+            requiredAnyOf: ['inspection.confirm'],
           ),
           FeatureEntry(
             id: 'delivery',
@@ -276,6 +285,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
 /// Points at the Supabase-backed inbound inspection (検品), not the legacy
 /// InventorOS screen, so the entry actually works against the live backend.
 Widget _inspectionList(BuildContext _) => const QcInspectionListScreen();
+Widget _bulkInspection(BuildContext _) => const BulkInspectionScreen();
 
 /// Top-level (const-referenceable) builder for the Delivery Check feature.
 Widget _delivery(BuildContext _) => const DeliveryPlanListScreen();

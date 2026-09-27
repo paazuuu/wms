@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
+import '../domain/bulk_inspection.dart';
 import '../domain/held_stock.dart';
 import '../domain/inspection.dart';
 
@@ -25,6 +26,14 @@ abstract class InspectionRepository {
   /// narrows it to one status. Read straight off the RPC rather than through
   /// the edge function, because it is a read and scopes itself.
   Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId, String? status});
+
+  /// `open_inspection_lines` (0099): every line still to settle, for the bulk
+  /// screen to group by arrival date, purchase order and product.
+  Future<ApiResult<List<OpenInspectionLine>>> openLines({int? warehouseId});
+
+  /// `pass_inspection_items` (0099): the chosen lines passed in full and
+  /// settled at once — their goods become shippable, the rest stay open.
+  Future<ApiResult<BulkPassResult>> passItems(List<int> itemIds, {String? note});
 
   /// `dispose_held_stock` (0098): one decision on one bucket of held goods.
   Future<ApiResult<DispositionResult>> dispose(
@@ -163,6 +172,40 @@ class InspectionRepositoryImpl implements InspectionRepository {
       return ApiSuccess(DispositionResult.fromJson((map as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
       return mapDioError<DispositionResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<OpenInspectionLine>>> openLines({int? warehouseId}) async {
+    try {
+      final response = await _restDio.post('/rpc/open_inspection_lines', data: {
+        'p_warehouse_id': warehouseId,
+      });
+      final data = response.data;
+      final list = data is List
+          ? (data.length == 1 && data.first is List ? data.first as List : data)
+          : const [];
+      return ApiSuccess(list
+          .whereType<Map>()
+          .map((e) => OpenInspectionLine.fromJson(e.cast<String, dynamic>()))
+          .toList(growable: false));
+    } on DioException catch (e) {
+      return mapDioError<List<OpenInspectionLine>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<BulkPassResult>> passItems(List<int> itemIds, {String? note}) async {
+    try {
+      final response = await _restDio.post('/rpc/pass_inspection_items', data: {
+        'p_item_ids': itemIds,
+        'p_note': (note == null || note.trim().isEmpty) ? null : note.trim(),
+      });
+      final data = response.data;
+      final map = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(BulkPassResult.fromJson((map as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<BulkPassResult>(e);
     }
   }
 }

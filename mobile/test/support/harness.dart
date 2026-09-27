@@ -30,6 +30,7 @@ import 'package:wms_mobile/features/qc/data/attachment_repository.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
 import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/held_stock.dart';
+import 'package:wms_mobile/features/qc/domain/bulk_inspection.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
@@ -222,6 +223,14 @@ class FakeDeliveryRepository implements DeliveryRepository {
   int? lastDetailId;
   List<LotProvenance> provenance = const [];
   ({int productId, String? lotCode})? lastProvenanceQuery;
+
+  ({int id, DateTime date})? lastArrivedOn;
+
+  @override
+  Future<ApiResult<bool>> setReceiptArrivedOn(int reconciliationId, DateTime date) async {
+    lastArrivedOn = (id: reconciliationId, date: date);
+    return const ApiSuccess(true);
+  }
 
   @override
   Future<ApiResult<ReceiptDetail>> receiptDetail(int reconciliationId) async {
@@ -523,6 +532,23 @@ class FakeInspectionRepository implements InspectionRepository {
     lastHeldWarehouseId = warehouseId;
     lastHeldStatus = status;
     return ApiSuccess(status == null ? held : held.where((h) => h.statusCode == status).toList());
+  }
+
+  List<OpenInspectionLine> openLineList = const [];
+  List<int>? lastPassed;
+  BulkPassResult? passResult;
+
+  @override
+  Future<ApiResult<List<OpenInspectionLine>>> openLines({int? warehouseId}) async =>
+      ApiSuccess(openLineList);
+
+  @override
+  Future<ApiResult<BulkPassResult>> passItems(List<int> itemIds, {String? note}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    lastPassed = itemIds;
+    openLineList = [for (final l in openLineList) if (!itemIds.contains(l.itemId)) l];
+    return ApiSuccess(passResult ??
+        BulkPassResult(items: itemIds.length, releasedToOk: itemIds.length));
   }
 
   String? lastHeldStatus;

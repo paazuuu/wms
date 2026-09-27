@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/scan/barcode_scan_screen.dart';
+import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -162,6 +164,93 @@ class _BodyState extends ConsumerState<_Body> {
     );
   }
 
+  /// One line passed in full and settled at once (0099): its goods become
+  /// shippable now, whatever the other lines are still waiting for.
+  Future<void> _passAll(InspectionItem item) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final result =
+        await ref.read(inspectionRepositoryProvider).passItems([item.id]);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) {
+        ref.invalidate(inspectionDetailProvider(_inspection.id));
+        ref.invalidate(inspectionListProvider);
+        ref.invalidate(heldStockProvider);
+        ref.invalidate(openInspectionLinesProvider);
+        _snack(l10n.qcPassAllDone(item.actualQuantity));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  /// A scanned JAN picks its line: pass it all as good, or record findings.
+  Future<void> _onScan(String code) async {
+    final l10n = AppLocalizations.of(context);
+    final jan = code.trim();
+    if (jan.isEmpty || !_inspection.isOpen) return;
+    InspectionItem? item;
+    for (final i in _inspection.items) {
+      if (i.janCode == jan && !i.isFinal) {
+        item = i;
+        break;
+      }
+    }
+    if (item == null) {
+      _snack(l10n.qcScanNotInInspection, danger: true);
+      return;
+    }
+    final line = item;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.qcScanPrompt(
+                    line.productName.isNotEmpty ? line.productName : line.janCode,
+                    line.actualQuantity),
+                style: Theme.of(sheetContext).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton.icon(
+                key: const ValueKey('qc-scan-pass-all'),
+                onPressed: () => Navigator.pop(sheetContext, 'pass'),
+                icon: const Icon(Icons.done_all),
+                label: Text(l10n.qcPassAll),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(sheetContext, 'record'),
+                child: Text(l10n.qcScanRecordEach),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (choice == 'pass') {
+      await _passAll(line);
+    } else if (choice == 'record') {
+      await _editItem(line);
+    }
+  }
+
+  Future<void> _scanWithCamera() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
+    );
+    if (code != null && mounted) await _onScan(code);
+  }
+
   Future<void> _editItem(InspectionItem item) async {
     final l10n = AppLocalizations.of(context);
     final finding = await showModalBottomSheet<InspectionFinding>(
@@ -242,6 +331,28 @@ class _BodyState extends ConsumerState<_Body> {
           _WillHoldBanner(failedUnits: _inspection.failedUnits),
         // After: what it actually did.
         if (_effect != null) _StockEffectCard(effect: _effect!),
+        if (_inspection.isOpen)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ScanField(
+                    hintText: l10n.qcScanHint,
+                    autofocusOnWide: true,
+                    dense: true,
+                    onSubmitted: _onScan,
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.scanBarcode,
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  onPressed: _busy ? null : _scanWithCamera,
+                ),
+              ],
+            ),
+          ),
         Expanded(
           child: _inspection.items.isEmpty
               ? EmptyStateView(
@@ -251,12 +362,15 @@ class _BodyState extends ConsumerState<_Body> {
                   itemCount: _inspection.items.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) => _ItemCard(
-                    item: _inspection.items[i],
-                    onTap: _inspection.isOpen
-                        ? () => _editItem(_inspection.items[i])
-                        : null,
-                  ),
+                  itemBuilder: (context, i) {
+                    final item = _inspection.items[i];
+                    final open = _inspection.isOpen && !item.isFinal;
+                    return _ItemCard(
+                      item: item,
+                      onTap: open ? () => _editItem(item) : null,
+                      onPassAll: open && !_busy ? () => _passAll(item) : null,
+                    );
+                  },
                 ),
         ),
         if (_inspection.isOpen)
@@ -293,10 +407,13 @@ class _BodyState extends ConsumerState<_Body> {
 }
 
 class _ItemCard extends StatelessWidget {
-  const _ItemCard({required this.item, this.onTap});
+  const _ItemCard({required this.item, this.onTap, this.onPassAll});
 
   final InspectionItem item;
   final VoidCallback? onTap;
+
+  /// Pass this line in full and settle it now (0099). Null once settled.
+  final VoidCallback? onPassAll;
 
   @override
   Widget build(BuildContext context) {
@@ -337,6 +454,14 @@ class _ItemCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   StatusPill(
                       tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
+                  if (item.isFinal) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    StatusPill(
+                        tone: StatusTone.neutral,
+                        label: l10n.qcFinalBadge,
+                        icon: Icons.lock_outline,
+                        dense: true),
+                  ],
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -364,6 +489,16 @@ class _ItemCard extends StatelessWidget {
                       showSign: true),
                 ],
               ),
+              if (onPassAll != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    key: ValueKey('qc-pass-all-${item.id}'),
+                    onPressed: onPassAll,
+                    icon: const Icon(Icons.done_all, size: 18),
+                    label: Text(l10n.qcPassAll),
+                  ),
+                ),
             ],
           ),
         ),
