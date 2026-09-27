@@ -44,10 +44,12 @@ final dashboardChartsRepositoryProvider = Provider<DashboardChartsRepository>((r
 /// How many products the stock chart shows.
 const dashboardStockChartLimit = 10;
 
+/// The country the stock chart shows; null is the home country.
+final dashboardChartCountryProvider = StateProvider<String?>((_) => null);
+
 final dashboardStockChartProvider = FutureProvider.autoDispose<StockChartData>((ref) async {
-  final result = await ref
-      .watch(dashboardChartsRepositoryProvider)
-      .stockChart(limit: dashboardStockChartLimit);
+  final result = await ref.watch(dashboardChartsRepositoryProvider).stockChart(
+      limit: dashboardStockChartLimit, countryCode: ref.watch(dashboardChartCountryProvider));
   return result.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });
 

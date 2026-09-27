@@ -10,6 +10,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../domain/feature_catalog.dart';
 import '../domain/feature_entry.dart';
+import '../../warehouse_context/presentation/warehouse_overview_screen.dart'
+    show countryLabel;
+import '../application/dashboard_providers.dart';
 import 'dashboard_charts.dart';
 import 'dashboard_widgets.dart';
 
@@ -72,7 +75,11 @@ class DashboardOverviewScreen extends ConsumerWidget {
           },
         ),
         const SizedBox(height: AppSpacing.xl),
-        _SectionLabel(l10n.dashOverview),
+        // Which country the figures are for, since they never cross a border.
+        _SectionLabel(switch (ref.watch(dashboardMetricsProvider).valueOrNull?.countryCode) {
+          final c? => l10n.dashOverviewCountry(countryLabel(l10n, c)),
+          null => l10n.dashOverview,
+        }),
         const SizedBox(height: AppSpacing.md),
         DashboardMetricsSection(
           onOpenOutstanding: delivery == null ? null : () => onOpen(delivery),

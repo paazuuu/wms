@@ -4610,4 +4610,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recentPoOpenAll => '発注一覧へ';
+
+  @override
+  String whTotalsCountry(String country) {
+    return '合計（$country）';
+  }
+
+  @override
+  String chartTopOfCountry(String country, int shown, int total) {
+    return '$country：在庫の多い上位 $shown 商品（全 $total 商品）';
+  }
+
+  @override
+  String dashOverviewCountry(String country) {
+    return '概要（$country）';
+  }
 }

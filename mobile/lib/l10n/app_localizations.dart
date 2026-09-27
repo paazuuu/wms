@@ -8543,6 +8543,24 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'発注一覧へ'**
   String get recentPoOpenAll;
+
+  /// whTotalsCountry
+  ///
+  /// In ja, this message translates to:
+  /// **'合計（{country}）'**
+  String whTotalsCountry(String country);
+
+  /// chartTopOfCountry
+  ///
+  /// In ja, this message translates to:
+  /// **'{country}：在庫の多い上位 {shown} 商品（全 {total} 商品）'**
+  String chartTopOfCountry(String country, int shown, int total);
+
+  /// dashOverviewCountry
+  ///
+  /// In ja, this message translates to:
+  /// **'概要（{country}）'**
+  String dashOverviewCountry(String country);
 }
 
 class _AppLocalizationsDelegate

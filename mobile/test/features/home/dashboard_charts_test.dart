@@ -17,6 +17,8 @@ final _chart = StockChartData(
     ChartWarehouse(id: 3, name: '上海倉庫', countryCode: 'CN', isVirtual: true),
   ],
   productCount: 14,
+  countryCode: 'JP',
+  countries: ['JP', 'CN'],
   products: [
     ChartProduct(
       productId: 1,
@@ -60,8 +62,22 @@ void main() {
     expect(find.text('上海倉庫（仮想）'), findsOneWidget);
     expect(find.text('ボールペン'), findsOneWidget);
     expect(find.text('55'), findsOneWidget);
-    expect(find.text('在庫の多い上位 2 商品（全 14 商品）'), findsOneWidget);
+    expect(find.text('日本：在庫の多い上位 2 商品（全 14 商品）'), findsOneWidget);
 
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('one country at a time: choosing China asks for China only (0090)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 900));
+    final repo = FakeDashboardChartsRepository(chart: _chart);
+    await _pump(tester, const StockBreakdownPanel(), repo);
+
+    expect(find.widgetWithText(ChoiceChip, '日本'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ChoiceChip, '中国'));
+    await tester.pumpAndSettle();
+
+    expect(repo.lastCountry, 'CN');
     await tester.binding.setSurfaceSize(null);
   });
 

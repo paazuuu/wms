@@ -95,9 +95,14 @@ class DashboardMetrics extends Equatable {
     required this.trend,
     required this.outstandingList,
     required this.lowStockList,
+    this.countryCode,
   });
 
   final String asOf;
+
+  /// The country these figures are for: the selected warehouse's, or the home
+  /// country's when none is selected — never a sum across countries (0090).
+  final String? countryCode;
   final int inboundTodayUnits;
   final int inboundTodayEvents;
   final int outboundTodayUnits;
@@ -151,6 +156,7 @@ class DashboardMetrics extends Equatable {
             const [];
     return DashboardMetrics(
       asOf: json['as_of'] as String? ?? '',
+      countryCode: json['country_code'] as String?,
       inboundTodayUnits: _asInt(json['inbound_today_units']),
       inboundTodayEvents: _asInt(json['inbound_today_events']),
       outboundTodayUnits: _asInt(json['outbound_today_units']),

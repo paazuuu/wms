@@ -4571,6 +4571,35 @@ to users with the permission:
 - Product B: 10 in JP plus a virtual count of 25 in a CN warehouse, total 35.
   By warehouse it read JP 10 and CN (virtual) 25.
 
+### 0090 — stock is totalled within one country, never across a border
+
+After 0087 put warehouses in more than one country, three reads still added
+every warehouse together. The user asked that totals count within a country
+but never across countries.
+
+- **`warehouse_overview`:**
+  - each warehouse carries its `country_code`;
+  - `country_totals` has one total per country, home first (the home country
+    is the default warehouse's, `home_country_code()`);
+  - SKUs are counted distinct within a country;
+  - the legacy `totals` is the home country's alone, so an older client never
+    shows a cross-border sum either.
+- **`dashboard_metrics`:** with no warehouse selected it covers the home
+  country's warehouses only, and reports `country_code`. It was rewritten in
+  place from the live definition, so every per-warehouse filter goes through
+  one `wh_scope`.
+- **`dashboard_stock_chart`:** gains `p_country_code` (default home) and
+  charts one country at a time, returning the list of countries to choose
+  from.
+- **Client:**
+  - one 合計（国）card per country on the warehouse overview;
+  - 概要（国）(overview, country) on the dashboard;
+  - country chips on the stock chart.
+
+**Verified live** (aborted transaction): JP 30 and CN 7 gave country totals
+30 and 7, the home-country total 30, dashboard metrics 30 for JP and 7 for
+the CN warehouse, and the chart offered [JP, CN].
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

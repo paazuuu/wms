@@ -4600,4 +4600,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get recentPoOpenAll => '查看全部采购单';
+
+  @override
+  String whTotalsCountry(String country) {
+    return '合计（$country）';
+  }
+
+  @override
+  String chartTopOfCountry(String country, int shown, int total) {
+    return '$country：库存最多的前 $shown 个商品（共 $total 个）';
+  }
+
+  @override
+  String dashOverviewCountry(String country) {
+    return '概览（$country）';
+  }
 }

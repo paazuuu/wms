@@ -4726,4 +4726,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recentPoOpenAll => 'All purchase orders';
+
+  @override
+  String whTotalsCountry(String country) {
+    return 'Total ($country)';
+  }
+
+  @override
+  String chartTopOfCountry(String country, int shown, int total) {
+    return '$country: top $shown of $total products by stock';
+  }
+
+  @override
+  String dashOverviewCountry(String country) {
+    return 'Overview ($country)';
+  }
 }

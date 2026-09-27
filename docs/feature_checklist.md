@@ -124,6 +124,8 @@ and wired, but with a real gap noted next to it (no test, no UI, unused) ·
       warehouse incl. virtual abroad, or by state), with legend, tooltip and
       table view; the latest purchase orders with destination warehouse and
       arrival progress
+- [x] Totals per country (0090): warehouse overview, dashboard figures and
+      the stock chart add up within one country only, never across a border
 - [ ] Returns / RMA — ❌ never existed on the Supabase side
 
 **Inventory**

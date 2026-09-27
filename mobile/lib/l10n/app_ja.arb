@@ -4247,5 +4247,38 @@
   "recentPoOpenAll": "発注一覧へ",
   "@recentPoOpenAll": {
     "description": "recentPoOpenAll"
+  },
+  "whTotalsCountry": "合計（{country}）",
+  "@whTotalsCountry": {
+    "description": "whTotalsCountry",
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "chartTopOfCountry": "{country}：在庫の多い上位 {shown} 商品（全 {total} 商品）",
+  "@chartTopOfCountry": {
+    "description": "chartTopOfCountry",
+    "placeholders": {
+      "country": {
+        "type": "String"
+      },
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dashOverviewCountry": "概要（{country}）",
+  "@dashOverviewCountry": {
+    "description": "dashOverviewCountry",
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
   }
 }

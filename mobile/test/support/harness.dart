@@ -2498,8 +2498,13 @@ class FakeDashboardChartsRepository implements DashboardChartsRepository {
   StockChartData chart;
   List<RecentPurchaseOrder> orders;
 
+  String? lastCountry;
+
   @override
-  Future<ApiResult<StockChartData>> stockChart({int limit = 10}) async => ApiSuccess(chart);
+  Future<ApiResult<StockChartData>> stockChart({int limit = 10, String? countryCode}) async {
+    lastCountry = countryCode;
+    return ApiSuccess(chart);
+  }
 
   @override
   Future<ApiResult<List<RecentPurchaseOrder>>> recentPurchaseOrders({int limit = 8}) async =>

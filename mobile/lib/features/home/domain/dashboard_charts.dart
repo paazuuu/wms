@@ -87,7 +87,15 @@ class StockChartData extends Equatable {
     this.warehouses = const [],
     this.products = const [],
     this.productCount = 0,
+    this.countryCode = '',
+    this.countries = const [],
   });
+
+  /// The one country charted — never a sum across a border (0090).
+  final String countryCode;
+
+  /// Countries with anything to chart, home first.
+  final List<String> countries;
 
   final List<ChartWarehouse> warehouses;
   final List<ChartProduct> products;
@@ -105,10 +113,12 @@ class StockChartData extends Equatable {
             ChartProduct.fromJson(e.cast<String, dynamic>()),
         ],
         productCount: _asInt(json['product_count']),
+        countryCode: (json['country_code'] ?? '').toString(),
+        countries: [for (final c in (json['countries'] as List? ?? const [])) '$c'],
       );
 
   @override
-  List<Object?> get props => [warehouses, products, productCount];
+  List<Object?> get props => [warehouses, products, productCount, countryCode, countries];
 }
 
 /// One of the latest purchase orders, with where it is bound for.

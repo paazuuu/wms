@@ -10,6 +10,8 @@ import '../../purchasing/domain/purchase_order.dart';
 import '../../purchasing/presentation/purchase_order_detail_screen.dart';
 import '../../purchasing/presentation/purchase_order_status_ui.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../warehouse_context/presentation/warehouse_overview_screen.dart'
+    show countryLabel;
 import '../application/dashboard_providers.dart';
 import '../domain/dashboard_charts.dart';
 
@@ -177,9 +179,15 @@ class _StockBreakdownPanelState extends ConsumerState<StockBreakdownPanel> {
               ),
               data: (data) {
                 if (data.products.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                    child: Text(l10n.chartEmpty, style: theme.textTheme.bodyMedium),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (data.countries.length > 1) _CountryChips(data: data),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        child: Text(l10n.chartEmpty, style: theme.textTheme.bodyMedium),
+                      ),
+                    ],
                   );
                 }
                 final series =
@@ -187,6 +195,12 @@ class _StockBreakdownPanelState extends ConsumerState<StockBreakdownPanel> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // One country at a time: stock is never added up across a
+                    // border (0090).
+                    if (data.countries.length > 1) ...[
+                      _CountryChips(data: data),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
                     _Legend(series: series),
                     const SizedBox(height: AppSpacing.md),
                     if (_table)
@@ -195,7 +209,8 @@ class _StockBreakdownPanelState extends ConsumerState<StockBreakdownPanel> {
                       _StackedBars(products: data.products, series: series),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      l10n.chartTopOf(data.products.length, data.productCount),
+                      l10n.chartTopOfCountry(countryLabel(l10n, data.countryCode),
+                          data.products.length, data.productCount),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
@@ -206,6 +221,28 @@ class _StockBreakdownPanelState extends ConsumerState<StockBreakdownPanel> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CountryChips extends ConsumerWidget {
+  const _CountryChips({required this.data});
+
+  final StockChartData data;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    return Wrap(
+      spacing: AppSpacing.sm,
+      children: [
+        for (final c in data.countries)
+          ChoiceChip(
+            label: Text(countryLabel(l10n, c)),
+            selected: c == data.countryCode,
+            onSelected: (_) => ref.read(dashboardChartCountryProvider.notifier).state = c,
+          ),
+      ],
     );
   }
 }

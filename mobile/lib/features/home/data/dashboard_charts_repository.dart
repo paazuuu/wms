@@ -7,7 +7,8 @@ import '../domain/dashboard_charts.dart';
 /// The dashboard's chart reads (0089), kept apart from [DashboardRepository]
 /// so each panel loads and fails on its own.
 abstract class DashboardChartsRepository {
-  Future<ApiResult<StockChartData>> stockChart({int limit = 10});
+  /// One country at a time; null is the home country.
+  Future<ApiResult<StockChartData>> stockChart({int limit = 10, String? countryCode});
 
   Future<ApiResult<List<RecentPurchaseOrder>>> recentPurchaseOrders({int limit = 8});
 }
@@ -18,10 +19,10 @@ class DashboardChartsRepositoryImpl implements DashboardChartsRepository {
   final Dio _dio;
 
   @override
-  Future<ApiResult<StockChartData>> stockChart({int limit = 10}) async {
+  Future<ApiResult<StockChartData>> stockChart({int limit = 10, String? countryCode}) async {
     try {
-      final response =
-          await _dio.post('/rpc/dashboard_stock_chart', data: {'p_limit': limit});
+      final response = await _dio.post('/rpc/dashboard_stock_chart',
+          data: {'p_limit': limit, 'p_country_code': countryCode});
       final data = response.data;
       final map = data is List ? (data.isNotEmpty ? data.first as Map : const {}) : data as Map;
       return ApiSuccess(StockChartData.fromJson(map.cast<String, dynamic>()));

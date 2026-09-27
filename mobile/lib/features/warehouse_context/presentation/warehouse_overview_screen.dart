@@ -72,8 +72,15 @@ class WarehouseOverviewScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              _TotalsCard(totals: overview.totals),
-              const SizedBox(height: AppSpacing.lg),
+              // One total per country: stock is never added up across a
+              // border (0090).
+              for (final t in overview.countryTotals.isEmpty
+                  ? [overview.totals]
+                  : overview.countryTotals) ...[
+                _TotalsCard(totals: t),
+                const SizedBox(height: AppSpacing.md),
+              ],
+              const SizedBox(height: AppSpacing.sm),
               for (final w in overview.warehouses) ...[
                 _WarehouseCard(
                   warehouse: w,
@@ -116,7 +123,11 @@ class _TotalsCard extends StatelessWidget {
                 Icon(Icons.summarize_outlined,
                     size: 18, color: scheme.onSurfaceVariant),
                 const SizedBox(width: AppSpacing.sm),
-                Text(l10n.whTotals, style: theme.textTheme.titleSmall),
+                Text(
+                    totals.countryCode == null
+                        ? l10n.whTotals
+                        : l10n.whTotalsCountry(countryLabel(l10n, totals.countryCode!)),
+                    style: theme.textTheme.titleSmall),
                 const Spacer(),
                 Text(
                   nf.format(totals.warehouseCount),

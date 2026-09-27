@@ -169,4 +169,36 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('totals are shown per country, never added across a border (0090)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final container = ProviderContainer(overrides: [
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+        WarehouseOverview(
+          warehouses: [
+            Warehouse(id: 1, code: 'TKY', name: '東京倉庫', onHand: 30, countryCode: 'JP'),
+            Warehouse(id: 2, code: 'SH', name: '上海倉庫', onHand: 7, countryCode: 'CN'),
+          ],
+          totals: WarehouseTotals(countryCode: 'JP', warehouseCount: 1, onHand: 30),
+          countryTotals: [
+            WarehouseTotals(countryCode: 'JP', warehouseCount: 1, onHand: 30),
+            WarehouseTotals(countryCode: 'CN', warehouseCount: 1, onHand: 7),
+          ],
+        ),
+      )),
+      warehouseRoleRepositoryProvider.overrideWithValue(FakeWarehouseRoleRepository()),
+    ]);
+    addTearDown(container.dispose);
+
+    await pumpAppWith(tester, container, const WarehouseOverviewScreen());
+    await tester.pumpAndSettle();
+
+    expect(find.text('合計（日本）'), findsOneWidget);
+    expect(find.text('合計（中国）'), findsOneWidget);
+    // No single figure adds the two countries together.
+    expect(find.text('37'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }

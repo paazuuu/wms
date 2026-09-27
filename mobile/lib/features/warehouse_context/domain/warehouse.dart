@@ -14,6 +14,7 @@ class Warehouse extends Equatable {
     this.isDefault = false,
     this.usesLocations = false,
     this.timezone = 'Asia/Tokyo',
+    this.countryCode = 'JP',
     this.skuCount = 0,
     this.onHand = 0,
     this.inboundOpen = 0,
@@ -37,6 +38,10 @@ class Warehouse extends Equatable {
 
   final String timezone;
 
+  /// ISO country the warehouse is in (0087). Stock is only ever added up
+  /// within one country (0090).
+  final String countryCode;
+
   /// SKUs with stock on hand in this warehouse.
   final int skuCount;
 
@@ -59,6 +64,7 @@ class Warehouse extends Equatable {
         isDefault: json['is_default'] == true,
         usesLocations: json['uses_locations'] == true,
         timezone: json['timezone'] as String? ?? 'Asia/Tokyo',
+        countryCode: json['country_code'] as String? ?? 'JP',
         skuCount: _asInt(json['sku_count']),
         onHand: _asInt(json['on_hand']),
         inboundOpen: _asInt(json['inbound_open']),
@@ -67,14 +73,16 @@ class Warehouse extends Equatable {
 
   @override
   List<Object?> get props => [
-        id, code, name, status, isDefault, usesLocations, timezone,
+        id, code, name, status, isDefault, usesLocations, timezone, countryCode,
         skuCount, onHand, inboundOpen, outboundOpen
       ];
 }
 
-/// Company-wide totals across every warehouse (the admin "all" row, spec §50).
+/// Totals over a set of warehouses — since 0090 always within one country;
+/// a border is never summed across.
 class WarehouseTotals extends Equatable {
   const WarehouseTotals({
+    this.countryCode,
     this.warehouseCount = 0,
     this.skuCount = 0,
     this.onHand = 0,
@@ -82,6 +90,8 @@ class WarehouseTotals extends Equatable {
     this.outboundOpen = 0,
   });
 
+  /// The country these totals are for; null on the legacy single total.
+  final String? countryCode;
   final int warehouseCount;
   final int skuCount;
   final int onHand;
@@ -89,6 +99,7 @@ class WarehouseTotals extends Equatable {
   final int outboundOpen;
 
   factory WarehouseTotals.fromJson(Map<String, dynamic> json) => WarehouseTotals(
+        countryCode: json['country_code'] as String?,
         warehouseCount: _asInt(json['warehouse_count']),
         skuCount: _asInt(json['sku_count']),
         onHand: _asInt(json['on_hand']),
@@ -98,15 +109,24 @@ class WarehouseTotals extends Equatable {
 
   @override
   List<Object?> get props =>
-      [warehouseCount, skuCount, onHand, inboundOpen, outboundOpen];
+      [countryCode, warehouseCount, skuCount, onHand, inboundOpen, outboundOpen];
 }
 
 /// The warehouse list plus company totals, as returned by `warehouse_overview`.
 class WarehouseOverview extends Equatable {
-  const WarehouseOverview({required this.warehouses, required this.totals});
+  const WarehouseOverview({
+    required this.warehouses,
+    required this.totals,
+    this.countryTotals = const [],
+  });
 
   final List<Warehouse> warehouses;
+
+  /// The home country's totals (0090 — never a sum across countries).
   final WarehouseTotals totals;
+
+  /// One total per country, home first.
+  final List<WarehouseTotals> countryTotals;
 
   /// True once the company runs more than one warehouse — the point at which the
   /// spec wants a persistent picker and an "all warehouses" view (spec §4.2).
@@ -138,10 +158,15 @@ class WarehouseOverview extends Equatable {
             const [],
         totals: WarehouseTotals.fromJson(
             (json['totals'] as Map?)?.cast<String, dynamic>() ?? const {}),
+        countryTotals: (json['country_totals'] as List?)
+                ?.whereType<Map>()
+                .map((e) => WarehouseTotals.fromJson(e.cast<String, dynamic>()))
+                .toList() ??
+            const [],
       );
 
   @override
-  List<Object?> get props => [warehouses, totals];
+  List<Object?> get props => [warehouses, totals, countryTotals];
 }
 
 /// A storage bin inside a warehouse (spec §7, §8).
