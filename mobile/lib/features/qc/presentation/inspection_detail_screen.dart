@@ -10,6 +10,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../product/application/product_providers.dart';
+import '../../product/domain/product.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../application/attachment_providers.dart';
 import '../application/inspection_providers.dart';
@@ -107,6 +109,13 @@ class _BodyState extends ConsumerState<_Body> {
 
   Future<void> _complete() async {
     final l10n = AppLocalizations.of(context);
+    // Nothing passes under the supplier's writing (0103): every line is ours
+    // first.
+    final unconverted = _inspection.unconvertedCount;
+    if (unconverted > 0) {
+      _snack(l10n.qcUnconvertedBlock(unconverted), danger: true);
+      return;
+    }
     // 0100: goods are good by default, so unchecked lines no longer block —
     // but closing them without a look deserves one confirmation.
     final unchecked = _inspection.uncheckedCount;
@@ -239,15 +248,20 @@ class _BodyState extends ConsumerState<_Body> {
     final l10n = AppLocalizations.of(context);
     final jan = code.trim();
     if (jan.isEmpty || !_inspection.isOpen) return;
+    // Ours or as the supplier wrote it, hyphens and case codes alike (0103).
+    final key = normalizeJan(jan) ?? jan;
+    bool same(InspectionItem i) =>
+        (normalizeJan(i.janCode) ?? i.janCode) == key ||
+        (i.srcJanCode != null && (normalizeJan(i.srcJanCode) ?? i.srcJanCode) == key);
     InspectionItem? item;
     for (final i in _inspection.items) {
-      if (i.janCode == jan && !i.isFinal) {
+      if (same(i) && !i.isFinal) {
         item = i;
         break;
       }
     }
     if (item == null) {
-      if (_inspection.items.any((i) => i.janCode == jan)) {
+      if (_inspection.items.any(same)) {
         _snack(l10n.qcFinalBadge);
         return;
       }
@@ -255,6 +269,11 @@ class _BodyState extends ConsumerState<_Body> {
       return;
     }
     final line = item;
+    // A sampling inspection (0104): a scan is one more piece of the sample.
+    if (_inspection.isSampling) {
+      await _countSample(line, 1);
+      return;
+    }
     // Cartons of hundreds: a scan picks the line and the quantity is typed.
     if (!ref.read(scanCountsPieceProvider)) {
       await _enterCount(line);
@@ -273,6 +292,57 @@ class _BodyState extends ConsumerState<_Body> {
         _snack(c.difference == 0
             ? l10n.qcScanCountMatched(name, c.counted)
             : l10n.qcScanCounted(name, c.counted, c.received));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  /// [pieces] more of the line's sample checked (0104). When the sample is
+  /// done the server accepts the whole line.
+  Future<void> _countSample(InspectionItem item, int pieces) async {
+    final l10n = AppLocalizations.of(context);
+    final name = item.productName.isNotEmpty ? item.productName : item.janCode;
+    setState(() => _busy = true);
+    final result = await ref
+        .read(inspectionRepositoryProvider)
+        .recordCount(item.id, pieces, mode: InspectionCountMode.sample);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (c) {
+        ref.invalidate(inspectionDetailProvider(_inspection.id));
+        final done = (item.sampledQuantity ?? 0) + pieces;
+        final target = item.sampleQuantity ?? 1;
+        _snack(done >= target
+            ? l10n.qcSampleDone(name)
+            : l10n.qcSampleProgress(name, done, target));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  /// Points a line at one of our products (0103) — the supplier's writing
+  /// matched nothing, or matched the wrong thing.
+  Future<void> _convert(InspectionItem item) async {
+    final l10n = AppLocalizations.of(context);
+    final pick = await showModalBottomSheet<({Product product, bool remember})>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _ConvertSheet(item: item),
+    );
+    if (pick == null || !mounted) return;
+    setState(() => _busy = true);
+    final result = await ref
+        .read(inspectionRepositoryProvider)
+        .convertItem(item.id, pick.product.id, remember: pick.remember);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) {
+        ref.invalidate(inspectionDetailProvider(_inspection.id));
+        ref.invalidate(openInspectionLinesProvider);
+        _snack(l10n.qcConverted(pick.product.name));
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
@@ -494,6 +564,37 @@ class _BodyState extends ConsumerState<_Body> {
               ),
             ),
           ),
+        if (_inspection.isSampling || _inspection.unconvertedCount > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  if (_inspection.isSampling)
+                    StatusPill(
+                      key: const ValueKey('qc-sampling'),
+                      tone: StatusTone.info,
+                      icon: Icons.filter_center_focus,
+                      label: l10n.qcSamplingBadge(
+                          _inspection.samplePercent ?? 10, _inspection.sampleMin ?? 1),
+                      dense: true,
+                    ),
+                  if (_inspection.unconvertedCount > 0)
+                    StatusPill(
+                      key: const ValueKey('qc-unconverted-count'),
+                      tone: StatusTone.warning,
+                      icon: Icons.swap_horiz,
+                      label: l10n.qcUnconvertedCount(_inspection.unconvertedCount),
+                      dense: true,
+                    ),
+                ],
+              ),
+            ),
+          ),
         _AttachmentsRow(
           entityId: _inspection.id,
           canAdd: _inspection.isOpen,
@@ -551,7 +652,13 @@ class _BodyState extends ConsumerState<_Body> {
                     return _ItemCard(
                       item: item,
                       onTap: open ? () => _editItem(item) : null,
-                      onPassAll: open && !_busy ? () => _passAll(item) : null,
+                      onConvert: open && !_busy ? () => _convert(item) : null,
+                      onSample: open && !_busy && _inspection.isSampling && !item.sampleDone
+                          ? () => _countSample(item, 1)
+                          : null,
+                      onPassAll: open && !_busy && !item.isUnconverted
+                          ? () => _passAll(item)
+                          : null,
                       onEnterCount: open && !_busy ? () => _enterCount(item) : null,
                       onTick: open && !_busy ? (v) => _tick(item, v) : null,
                       inspectionOpen: _inspection.isOpen,
@@ -600,7 +707,15 @@ class _ItemCard extends StatelessWidget {
     this.onEnterCount,
     this.onTick,
     this.inspectionOpen = true,
+    this.onConvert,
+    this.onSample,
   });
+
+  /// Point the line at one of our products (0103).
+  final VoidCallback? onConvert;
+
+  /// One more piece of the sample checked (0104).
+  final VoidCallback? onSample;
 
   /// Tick (right goods, about the right number) or untick the line (0101).
   final ValueChanged<bool>? onTick;
@@ -655,14 +770,48 @@ class _ItemCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
-                        Text(item.janCode,
+                        // Ours (0103): JAN, 品番, maker.
+                        Text(
+                            [
+                              item.janCode,
+                              if (item.productSku != null) l10n.qcOwnSku(item.productSku!),
+                              if (item.productMaker != null) item.productMaker!,
+                            ].join(' · '),
                             style: theme.textTheme.bodySmall?.copyWith(
                                 fontFamily: AppFonts.mono,
                                 color: scheme.onSurfaceVariant)),
+                        // The supplier's writing, faded, to check against.
+                        if (item.isUnconverted || item.notationDiffers)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              l10n.qcSupplierNotation([
+                                if (item.srcProductName != null) item.srcProductName!,
+                                if (item.srcJanCode != null) 'JAN ${item.srcJanCode}',
+                                if (item.srcProductCode != null)
+                                  l10n.qcOwnSku(item.srcProductCode!),
+                                if (item.srcMaker != null) item.srcMaker!,
+                              ].join(' · ')),
+                              key: ValueKey('qc-src-${item.id}'),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant.withValues(alpha: 0.55)),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                       ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
+                  if (item.isUnconverted) ...[
+                    StatusPill(
+                        key: ValueKey('qc-unconverted-${item.id}'),
+                        tone: StatusTone.warning,
+                        label: l10n.qcUnconverted,
+                        icon: Icons.swap_horiz,
+                        dense: true),
+                    const SizedBox(width: AppSpacing.xs),
+                  ],
                   StatusPill(
                       tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
                   if (item.isFinal) ...[
@@ -735,6 +884,16 @@ class _ItemCard extends StatelessWidget {
                   if (item.isCounted)
                     Text(l10n.qcCountLine(item.countedQuantity!, item.actualQuantity),
                         style: theme.textTheme.bodySmall),
+                  // How far the sample has got (0104).
+                  if (item.sampleQuantity != null)
+                    StatusPill(
+                      key: ValueKey('qc-sample-${item.id}'),
+                      tone: item.sampleDone ? StatusTone.success : StatusTone.info,
+                      icon: Icons.filter_center_focus,
+                      label: l10n.qcSampleState(
+                          item.sampledQuantity ?? 0, item.sampleQuantity!),
+                      dense: true,
+                    ),
                   // What the supplier's delivery note says (0101).
                   if (item.noteQuantity != null)
                     StatusPill(
@@ -748,12 +907,29 @@ class _ItemCard extends StatelessWidget {
                     ),
                 ],
               ),
-              if (onPassAll != null || onEnterCount != null)
+              if (onPassAll != null || onEnterCount != null || onConvert != null ||
+                  onSample != null)
                 Align(
                   alignment: Alignment.centerRight,
                   child: Wrap(
                     spacing: AppSpacing.xs,
                     children: [
+                      if (onConvert != null)
+                        TextButton.icon(
+                          key: ValueKey('qc-convert-${item.id}'),
+                          onPressed: onConvert,
+                          icon: const Icon(Icons.swap_horiz, size: 18),
+                          label: Text(item.isUnconverted
+                              ? l10n.qcConvert
+                              : l10n.qcConvertChange),
+                        ),
+                      if (onSample != null)
+                        TextButton.icon(
+                          key: ValueKey('qc-sample-add-${item.id}'),
+                          onPressed: onSample,
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text(l10n.qcSampleAdd),
+                        ),
                       if (onEnterCount != null)
                         TextButton.icon(
                           key: ValueKey('qc-count-${item.id}'),
@@ -1418,6 +1594,133 @@ class _UnmatchedNoteSheet extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Picks the product of ours a line is booked under (0103). Opens on a search
+/// for how the supplier wrote it; remembering is the default, so the same
+/// writing converts by itself next time.
+class _ConvertSheet extends ConsumerStatefulWidget {
+  const _ConvertSheet({required this.item});
+
+  final InspectionItem item;
+
+  @override
+  ConsumerState<_ConvertSheet> createState() => _ConvertSheetState();
+}
+
+class _ConvertSheetState extends ConsumerState<_ConvertSheet> {
+  late final _search = TextEditingController(
+      text: widget.item.srcProductName ?? widget.item.productName);
+  bool _remember = true;
+  bool _loading = false;
+  String? _error;
+  List<Product> _hits = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _find());
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  Future<void> _find() async {
+    final q = _search.text.trim();
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final r = await ref.read(productRepositoryProvider).list(search: q.isEmpty ? null : q);
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      r.when(success: (rows) => _hits = rows, failure: (f) => _error = f.message);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final item = widget.item;
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+        ),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l10n.qcConvertTitle, style: theme.textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.qcSupplierNotation([
+                  if (item.srcProductName != null) item.srcProductName!,
+                  if (item.srcJanCode != null) 'JAN ${item.srcJanCode}',
+                  if (item.srcProductCode != null) l10n.qcOwnSku(item.srcProductCode!),
+                  if (item.srcMaker != null) item.srcMaker!,
+                ].join(' · ')),
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: 0.7)),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                key: const ValueKey('qc-convert-search'),
+                controller: _search,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.qcConvertSearch,
+                ),
+                onSubmitted: (_) => _find(),
+              ),
+              CheckboxListTile(
+                key: const ValueKey('qc-convert-remember'),
+                contentPadding: EdgeInsets.zero,
+                value: _remember,
+                onChanged: (v) => setState(() => _remember = v ?? true),
+                title: Text(l10n.qcConvertRemember),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              if (_loading) const LinearProgressIndicator(),
+              if (_error != null)
+                Text(humanizeApiErrorMessage(l10n, _error!),
+                    style: TextStyle(color: scheme.error)),
+              Expanded(
+                child: _hits.isEmpty && !_loading
+                    ? Center(child: Text(l10n.qcConvertNone))
+                    : ListView(
+                        children: [
+                          for (final p in _hits)
+                            ListTile(
+                              key: ValueKey('qc-convert-pick-${p.id}'),
+                              title: Text(p.name),
+                              subtitle: Text([
+                                p.janCode,
+                                if (p.sku != null) l10n.qcOwnSku(p.sku!),
+                                if (p.maker != null) p.maker!,
+                              ].join(' · ')),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () => Navigator.pop(
+                                  context, (product: p, remember: _remember)),
+                            ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
 
+import '../../qc/domain/inspection.dart' show WarehouseInspectionMode;
+
+export '../../qc/domain/inspection.dart' show WarehouseInspectionMode;
+
 /// Which country a warehouse is in, and whether it holds stock that arrives
 /// across a border (0087). Without that switch, a transfer to it from another
 /// country leaves this system at the source.
@@ -10,7 +14,17 @@ class WarehouseRole extends Equatable {
     this.code = '',
     this.countryCode = 'JP',
     this.receivesCrossBorder = false,
+    this.inspectionMode = WarehouseInspectionMode.full,
+    this.samplePercent = 10,
+    this.sampleMin = 1,
   });
+
+  /// How goods from suppliers are inspected here (0104): all of them (the
+  /// default, and what a new warehouse gets), on a sample, or not in this
+  /// system at all — receive only, when the warehouse inspects its own way.
+  final WarehouseInspectionMode inspectionMode;
+  final int samplePercent;
+  final int sampleMin;
 
   final int id;
   final String code;
@@ -29,8 +43,16 @@ class WarehouseRole extends Equatable {
         name: (json['name'] ?? '').toString(),
         countryCode: (json['country_code'] ?? 'JP').toString(),
         receivesCrossBorder: json['receives_cross_border'] == true,
+        inspectionMode: WarehouseInspectionMode.parse(json['inspection_mode'] as String?),
+        samplePercent: json['sample_percent'] is num
+            ? (json['sample_percent'] as num).toInt()
+            : int.tryParse('${json['sample_percent']}') ?? 10,
+        sampleMin: json['sample_min'] is num
+            ? (json['sample_min'] as num).toInt()
+            : int.tryParse('${json['sample_min']}') ?? 1,
       );
 
   @override
-  List<Object?> get props => [id, code, name, countryCode, receivesCrossBorder];
+  List<Object?> get props =>
+      [id, code, name, countryCode, receivesCrossBorder, inspectionMode, samplePercent, sampleMin];
 }

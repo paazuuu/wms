@@ -32,7 +32,16 @@ class OpenInspectionLine extends Equatable {
     this.productName,
     this.lot,
     this.checked = false,
+    this.srcJanCode,
+    this.srcProductName,
   });
+
+  /// How the supplier wrote it (0103), shown faded beside ours.
+  final String? srcJanCode;
+  final String? srcProductName;
+
+  /// Not yet matched to one of our products: it cannot pass until converted.
+  bool get isUnconverted => productId == null;
 
   final int itemId;
   final int inspectionId;
@@ -70,6 +79,8 @@ class OpenInspectionLine extends Equatable {
         quantity: _asInt(json['quantity']),
         lot: _asText(json['lot']),
         checked: (json['result'] ?? 'PENDING') != 'PENDING',
+        srcJanCode: _asText(json['src_jan_code']),
+        srcProductName: _asText(json['src_product_name']),
       );
 
   @override
@@ -84,7 +95,11 @@ class BulkPassResult extends Equatable {
     this.notInQcPending = 0,
     this.inspections = 0,
     this.closedInspections = 0,
+    this.unconverted = 0,
   });
+
+  /// Chosen lines skipped because they are not converted yet (0103).
+  final int unconverted;
 
   final int items;
   final int releasedToOk;
@@ -98,6 +113,7 @@ class BulkPassResult extends Equatable {
         notInQcPending: _asInt(json['not_in_qc_pending']),
         inspections: _asInt(json['inspections']),
         closedInspections: _asInt(json['closed_inspections']),
+        unconverted: _asInt(json['unconverted']),
       );
 
   @override

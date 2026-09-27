@@ -14,15 +14,15 @@ List<OpenInspectionLine> _lines() => [
       OpenInspectionLine(
           itemId: 1, inspectionId: 10, reconciliationId: 100, arrivedOn: DateTime(2026, 9, 26),
           supplierName: '新東光', purchaseOrderId: 7, poNumber: 'PO-1',
-          janCode: '4901', productName: 'ペン', quantity: 4),
+          productId: 4901, janCode: '4901', productName: 'ペン', quantity: 4),
       OpenInspectionLine(
           itemId: 2, inspectionId: 10, reconciliationId: 100, arrivedOn: DateTime(2026, 9, 26),
           supplierName: '新東光', purchaseOrderId: 7, poNumber: 'PO-1',
-          janCode: '4902', productName: 'ノート', quantity: 3),
+          productId: 4902, janCode: '4902', productName: 'ノート', quantity: 3),
       OpenInspectionLine(
           itemId: 3, inspectionId: 11, reconciliationId: 101, arrivedOn: DateTime(2026, 9, 27),
           supplierName: '大阪商事', purchaseOrderId: 8, poNumber: 'PO-2',
-          janCode: '4901', productName: 'ペン', quantity: 5),
+          productId: 4901, janCode: '4901', productName: 'ペン', quantity: 5),
     ];
 
 Future<FakeInspectionRepository> _pump(WidgetTester tester) async {

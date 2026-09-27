@@ -38,10 +38,11 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
           : widget.product!.price!.toStringAsFixed(0));
   late final TextEditingController _sku =
       TextEditingController(text: widget.product?.sku ?? '');
+  late final TextEditingController _maker =
+      TextEditingController(text: widget.product?.maker ?? '');
   late TrackingMode _tracking =
       widget.product?.trackingMode ?? TrackingMode.untracked;
   late String _pickingRule = widget.product?.pickingRule ?? 'FEFO';
-  late bool _requiresInspection = widget.product?.requiresInspection ?? false;
   bool _busy = false;
   String? _error;
   String? _scanWarning;
@@ -93,6 +94,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
     _category.dispose();
     _price.dispose();
     _sku.dispose();
+    _maker.dispose();
     super.dispose();
   }
 
@@ -112,6 +114,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
     // Empty means "clear it", which is why this is sent as '' and not as null —
     // null tells `set_product_identity` to leave the field alone (0065).
     final sku = _sku.text.trim();
+    final maker = _maker.text.trim();
     final repo = ref.read(productRepositoryProvider);
 
     String? errorMessage;
@@ -140,13 +143,17 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
     // and the tracking mode go through `set_product_identity`, which refuses a
     // mode that contradicts lots or serials already recorded. Only sent when
     // something actually changed, so editing a name never risks that refusal.
+    final makerChanged = maker != (widget.product?.maker ?? '');
     final identityChanged = sku != (widget.product?.sku ?? '') ||
+        makerChanged ||
         _tracking != (widget.product?.trackingMode ?? TrackingMode.untracked);
     if (errorMessage == null && productId != null && identityChanged) {
       final result = await repo.setIdentity(
         id: productId!,
         sku: sku,
         trackingMode: _tracking,
+        // '' clears it; left out (null) when unchanged (0103).
+        maker: makerChanged ? maker : null,
       );
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     }
@@ -159,17 +166,6 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       final result = await repo.setPickingRule(
         productId: productId!,
         rule: _pickingRule,
-      );
-      result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
-    }
-
-    // §13's QC gate — likewise its own decision, not folded into `update`.
-    final inspectionChanged =
-        _requiresInspection != (widget.product?.requiresInspection ?? false);
-    if (errorMessage == null && productId != null && inspectionChanged) {
-      final result = await repo.setInspectionRequirement(
-        productId: productId!,
-        requiresInspection: _requiresInspection,
       );
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     }
@@ -251,6 +247,13 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
+            // Ours, which what any supplier delivers is converted to (0103).
+            TextField(
+              key: const ValueKey('product-maker'),
+              controller: _maker,
+              decoration: InputDecoration(labelText: l10n.productMaker),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             // What must be recorded when this product arrives. Changing it is
             // refused by the server once lots or serials exist (§37-15), so the
             // failure surfaces in the same error line as everything else.
@@ -290,17 +293,19 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
                   : (rule) => setState(() => _pickingRule = rule ?? 'FEFO'),
             ),
             const SizedBox(height: AppSpacing.lg),
-            // §13's QC gate (0068) — on means goods arrive QC_PENDING rather
-            // than OK. A warehouse can still override it; this sets the
-            // fallback, the same shape the picking rule above has.
-            SwitchListTile(
-              value: _requiresInspection,
-              onChanged: _busy
-                  ? null
-                  : (v) => setState(() => _requiresInspection = v),
-              title: Text(l10n.productRequiresInspection),
-              subtitle: Text(l10n.productRequiresInspectionHint),
-              contentPadding: EdgeInsets.zero,
+            // Whether goods wait for inspection is the warehouse's call now
+            // (0104), not the product's.
+            Row(
+              children: [
+                Icon(Icons.fact_check_outlined,
+                    size: 16, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(l10n.productInspectionByWarehouse,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(

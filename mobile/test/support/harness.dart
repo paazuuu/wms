@@ -481,6 +481,7 @@ class FakeInspectionRepository implements InspectionRepository {
               janCode: it.janCode,
               productName: it.productName,
               expectedQuantity: it.expectedQuantity,
+              productId: it.productId,
               actualQuantity:
                   finding.passedQuantity + finding.failedQuantity,
               passedQuantity: finding.passedQuantity,
@@ -526,6 +527,7 @@ class FakeInspectionRepository implements InspectionRepository {
               productName: it.productName,
               expectedQuantity: it.expectedQuantity,
               actualQuantity: it.actualQuantity,
+              productId: it.productId,
               passedQuantity: it.countedQuantity ?? it.actualQuantity,
               failedQuantity: 0,
               discrepancy: it.discrepancy,
@@ -587,16 +589,29 @@ class FakeInspectionRepository implements InspectionRepository {
       status: inspection.status,
       deliveryNumber: inspection.deliveryNumber,
       supplierName: inspection.supplierName,
+      method: inspection.method,
+      samplePercent: inspection.samplePercent,
+      sampleMin: inspection.sampleMin,
       items: [
         for (final it in inspection.items)
           if (it.id == itemId)
             () {
+              int? sampled = it.sampledQuantity;
+              if (mode == InspectionCountMode.sample) {
+                sampled = (sampled ?? 0) + quantity;
+              }
               final int? counted = switch (mode) {
                 InspectionCountMode.add => (it.countedQuantity ?? 0) + quantity,
                 InspectionCountMode.check => it.noteQuantity ?? it.actualQuantity,
                 InspectionCountMode.clear => null,
                 InspectionCountMode.set => quantity,
+                // The sample done: accepted as a tick would be (0104).
+                InspectionCountMode.sample => it.countedQuantity ??
+                    (sampled! >= (it.sampleQuantity ?? 1)
+                        ? it.noteQuantity ?? it.actualQuantity
+                        : null),
               };
+              if (mode == InspectionCountMode.clear) sampled = null;
               out = InspectionCount(
                   itemId: it.id, counted: counted ?? 0, received: it.actualQuantity);
               return InspectionItem(
@@ -614,6 +629,16 @@ class FakeInspectionRepository implements InspectionRepository {
                 countedQuantity: counted,
                 noteQuantity: it.noteQuantity,
                 noteProductName: it.noteProductName,
+                productId: it.productId,
+                productSku: it.productSku,
+                productMaker: it.productMaker,
+                srcJanCode: it.srcJanCode,
+                srcProductCode: it.srcProductCode,
+                srcProductName: it.srcProductName,
+                srcMaker: it.srcMaker,
+                convertedBy: it.convertedBy,
+                sampleQuantity: it.sampleQuantity,
+                sampledQuantity: sampled,
               );
             }()
           else
@@ -634,6 +659,14 @@ class FakeInspectionRepository implements InspectionRepository {
   Future<ApiResult<bool>> reportWrongItem(int inspectionId, String janCode,
       {int quantity = 1, String? note}) async {
     lastWrongItem = (inspectionId: inspectionId, jan: janCode, quantity: quantity);
+    return const ApiSuccess(true);
+  }
+
+  ({int itemId, int productId, bool remember})? lastConvert;
+
+  @override
+  Future<ApiResult<bool>> convertItem(int itemId, int productId, {bool remember = true}) async {
+    lastConvert = (itemId: itemId, productId: productId, remember: remember);
     return const ApiSuccess(true);
   }
 
@@ -1909,9 +1942,12 @@ class FakeProductRepository implements ProductRepository {
     required String supplierName,
     String? supplierCode,
     String? note,
+    String? supplierJanCode,
+    String? supplierMaker,
   }) async {
     lastSupplierName =
         (supplierId: supplierId, productId: productId, name: supplierName, code: supplierCode);
+    lastSupplierNameExtra = (jan: supplierJanCode, maker: supplierMaker);
     return const ApiSuccess(1);
   }
 
@@ -2008,6 +2044,8 @@ class FakeProductRepository implements ProductRepository {
   /// that the SKU and tracking mode went through `set_product_identity` and not
   /// through `update_product` (0057).
   ({int id, String? sku, TrackingMode? trackingMode})? lastIdentity;
+  String? lastMaker;
+  ({String? jan, String? maker})? lastSupplierNameExtra;
 
   /// When set, setIdentity() fails with this message — the real RPC refuses a
   /// tracking mode that contradicts lots or serials already recorded (§37-15).
@@ -2018,8 +2056,10 @@ class FakeProductRepository implements ProductRepository {
     required int id,
     String? sku,
     TrackingMode? trackingMode,
+    String? maker,
   }) async {
     lastIdentity = (id: id, sku: sku, trackingMode: trackingMode);
+    lastMaker = maker;
     if (failIdentityWith != null) {
       return ApiFailure(message: failIdentityWith!, statusCode: 400);
     }
@@ -2570,7 +2610,34 @@ class FakeWarehouseRoleRepository implements WarehouseRoleRepository {
               code: r.code,
               name: r.name,
               countryCode: countryCode,
-              receivesCrossBorder: receivesCrossBorder)
+              receivesCrossBorder: receivesCrossBorder,
+              inspectionMode: r.inspectionMode,
+              samplePercent: r.samplePercent,
+              sampleMin: r.sampleMin)
+        else
+          r,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  ({int id, WarehouseInspectionMode mode, int? percent, int? min})? lastInspection;
+
+  @override
+  Future<ApiResult<bool>> setInspection(int warehouseId,
+      {required WarehouseInspectionMode mode, int? samplePercent, int? sampleMin}) async {
+    lastInspection = (id: warehouseId, mode: mode, percent: samplePercent, min: sampleMin);
+    roles = [
+      for (final r in roles)
+        if (r.id == warehouseId)
+          WarehouseRole(
+              id: r.id,
+              code: r.code,
+              name: r.name,
+              countryCode: r.countryCode,
+              receivesCrossBorder: r.receivesCrossBorder,
+              inspectionMode: mode,
+              samplePercent: samplePercent ?? r.samplePercent,
+              sampleMin: sampleMin ?? r.sampleMin)
         else
           r,
     ];

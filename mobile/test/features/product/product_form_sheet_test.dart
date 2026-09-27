@@ -35,7 +35,7 @@ void main() {
         product: const Product(
             id: 1, janCode: '4902505632037', name: 'ボールペン'));
 
-    await tester.enterText(find.widgetWithText(TextField, 'SKU'), 'PEN-001');
+    await tester.enterText(find.widgetWithText(TextField, '品番（SKU）'), 'PEN-001');
     await tester.tap(find.byType(DropdownButtonFormField<TrackingMode>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('有効期限').last);
@@ -89,7 +89,7 @@ void main() {
             name: 'ボールペン',
             sku: 'PEN-001'));
 
-    await tester.enterText(find.widgetWithText(TextField, 'SKU'), '');
+    await tester.enterText(find.widgetWithText(TextField, '品番（SKU）'), '');
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
@@ -168,8 +168,7 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets(
-      'the QC requirement is saved through its own set_inspection_requirement call',
+  testWidgets('the maker is saved with the identity, and only when it changed',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1400));
     final repo = FakeProductRepository(products: const [
@@ -179,17 +178,17 @@ void main() {
         product: const Product(
             id: 1, janCode: '4902505632037', name: 'ボールペン'));
 
-    await tester.tap(find.widgetWithText(SwitchListTile, '入荷検品を必須にする'));
+    await tester.enterText(find.byKey(const ValueKey('product-maker')), 'テスト文具');
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
-    expect(repo.lastInspectionRequirement,
-        (productId: 1, requiresInspection: true));
+    expect(repo.lastIdentity?.id, 1);
+    expect(repo.lastMaker, 'テスト文具');
 
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('editing only the name sends no QC requirement call',
+  testWidgets('the form no longer sets inspection per product (the warehouse does)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1400));
     final repo = FakeProductRepository(products: const [
@@ -199,12 +198,14 @@ void main() {
         product: const Product(
             id: 1, janCode: '4902505632037', name: 'ボールペン'));
 
+    expect(find.byType(SwitchListTile), findsNothing);
     await tester.enterText(
         find.widgetWithText(TextField, '商品名'), 'ボールペン（黒）');
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
     expect(repo.lastInspectionRequirement, isNull);
+    expect(repo.lastIdentity, isNull);
 
     await tester.binding.setSurfaceSize(null);
   });

@@ -5413,7 +5413,7 @@ abstract class AppLocalizations {
   /// Product master: internal code, separate from the JAN barcode (0057).
   ///
   /// In ja, this message translates to:
-  /// **'SKU'**
+  /// **'品番（SKU）'**
   String get productSku;
 
   /// Product master: SKU field helper text.
@@ -9521,6 +9521,234 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{count}個'**
   String dashUnitsCount(int count);
+
+  /// Supplier notation / warehouse inspection (0103-0104): productMaker
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get productMaker;
+
+  /// Supplier notation / warehouse inspection (0103-0104): productInspectionByWarehouse
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷検品の要否は倉庫ごとの設定（倉庫画面の「検品方式」）に従います。'**
+  String get productInspectionByWarehouse;
+
+  /// Supplier notation / warehouse inspection (0103-0104): supplierNameJan
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先でのJAN表記（任意）'**
+  String get supplierNameJan;
+
+  /// Supplier notation / warehouse inspection (0103-0104): supplierNameMaker
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先でのメーカー表記（任意）'**
+  String get supplierNameMaker;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcUnconvertedBlock
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品に変換していない行が{count}行あります。各行の「自社商品に変換」から変換してください。'**
+  String qcUnconvertedBlock(int count);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcSampleDone
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}：抜き取りが済み、この行を合格にしました'**
+  String qcSampleDone(String name);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcSampleProgress
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}：抜き取り {done}/{target}'**
+  String qcSampleProgress(String name, int done, int target);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConverted
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」に変換しました'**
+  String qcConverted(String name);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcSamplingBadge
+  ///
+  /// In ja, this message translates to:
+  /// **'抜き取り検品（{percent}%・最低{min}個）'**
+  String qcSamplingBadge(int percent, int min);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcUnconvertedCount
+  ///
+  /// In ja, this message translates to:
+  /// **'未変換 {count}行'**
+  String qcUnconvertedCount(int count);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcOwnSku
+  ///
+  /// In ja, this message translates to:
+  /// **'品番 {code}'**
+  String qcOwnSku(String code);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcSupplierNotation
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先表記：{text}'**
+  String qcSupplierNotation(String text);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcUnconverted
+  ///
+  /// In ja, this message translates to:
+  /// **'未変換'**
+  String get qcUnconverted;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcSampleState
+  ///
+  /// In ja, this message translates to:
+  /// **'抜き取り {done}/{target}'**
+  String qcSampleState(int done, int target);
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConvert
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品に変換'**
+  String get qcConvert;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConvertChange
+  ///
+  /// In ja, this message translates to:
+  /// **'変換先を変更'**
+  String get qcConvertChange;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcSampleAdd
+  ///
+  /// In ja, this message translates to:
+  /// **'抜き取り +1'**
+  String get qcSampleAdd;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConvertTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品に変換'**
+  String get qcConvertTitle;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConvertSearch
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の商品名・JAN・品番・メーカーで検索'**
+  String get qcConvertSearch;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConvertRemember
+  ///
+  /// In ja, this message translates to:
+  /// **'この仕入先の表記を記憶し、次回から自動で変換する'**
+  String get qcConvertRemember;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcConvertNone
+  ///
+  /// In ja, this message translates to:
+  /// **'該当する商品がありません'**
+  String get qcConvertNone;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcErrorUnconverted
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品に変換していない行は合格にできません。先に「自社商品に変換」してください。'**
+  String get qcErrorUnconverted;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcErrorNotSampling
+  ///
+  /// In ja, this message translates to:
+  /// **'この検品は抜き取り検品ではありません'**
+  String get qcErrorNotSampling;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcErrorNoJan
+  ///
+  /// In ja, this message translates to:
+  /// **'変換先の商品にJANが登録されていません'**
+  String get qcErrorNoJan;
+
+  /// Supplier notation / warehouse inspection (0103-0104): qcErrorSerialConvert
+  ///
+  /// In ja, this message translates to:
+  /// **'シリアル管理の行は変換できません。入荷を取り消して受け直してください'**
+  String get qcErrorSerialConvert;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionEdit
+  ///
+  /// In ja, this message translates to:
+  /// **'検品方式'**
+  String get whInspectionEdit;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionFull
+  ///
+  /// In ja, this message translates to:
+  /// **'全数検品'**
+  String get whInspectionFull;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionSampleShort
+  ///
+  /// In ja, this message translates to:
+  /// **'抜き取り {percent}%（最低{min}）'**
+  String whInspectionSampleShort(int percent, int min);
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionNone
+  ///
+  /// In ja, this message translates to:
+  /// **'検品不要（仕入のみ）'**
+  String get whInspectionNone;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionSaved
+  ///
+  /// In ja, this message translates to:
+  /// **'検品方式を保存しました'**
+  String get whInspectionSaved;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の検品方式'**
+  String whInspectionTitle(String name);
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionFullBody
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先からの入荷はすべて検品待ちになり、検品が終わるまで出荷できません。'**
+  String get whInspectionFullBody;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionSample
+  ///
+  /// In ja, this message translates to:
+  /// **'抜き取り検品'**
+  String get whInspectionSample;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionSampleBody
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちになりますが、各行の一部だけを確認します。抜き取り分が済むとその行は合格になります。'**
+  String get whInspectionSampleBody;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionSamplePercent
+  ///
+  /// In ja, this message translates to:
+  /// **'抜き取り率'**
+  String get whInspectionSamplePercent;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionSampleMin
+  ///
+  /// In ja, this message translates to:
+  /// **'最低個数'**
+  String get whInspectionSampleMin;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionNoneBody
+  ///
+  /// In ja, this message translates to:
+  /// **'検品をこのシステムの外（外部に依頼するなど）で行う倉庫向けです。入荷した品はそのまま使える在庫になります。'**
+  String get whInspectionNoneBody;
+
+  /// Supplier notation / warehouse inspection (0103-0104): whInspectionApplies
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先からの入荷に適用されます。倉庫間の移動には影響しません。'**
+  String get whInspectionApplies;
 }
 
 class _AppLocalizationsDelegate

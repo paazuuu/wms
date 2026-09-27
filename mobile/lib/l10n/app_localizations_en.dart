@@ -5309,4 +5309,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashUnitsCount(int count) {
     return '$count units';
   }
+
+  @override
+  String get productMaker => 'Maker';
+
+  @override
+  String get productInspectionByWarehouse =>
+      'Whether arrivals are inspected is set per warehouse (Warehouses → Inspection).';
+
+  @override
+  String get supplierNameJan => 'Supplier\'s JAN (optional)';
+
+  @override
+  String get supplierNameMaker => 'Supplier\'s maker name (optional)';
+
+  @override
+  String qcUnconvertedBlock(int count) {
+    return '$count lines are not converted to your products yet. Use \"Convert to our product\" on each.';
+  }
+
+  @override
+  String qcSampleDone(String name) {
+    return '$name: sample done, the line passed';
+  }
+
+  @override
+  String qcSampleProgress(String name, int done, int target) {
+    return '$name: sample $done/$target';
+  }
+
+  @override
+  String qcConverted(String name) {
+    return 'Converted to \"$name\"';
+  }
+
+  @override
+  String qcSamplingBadge(int percent, int min) {
+    return 'Sampling ($percent%, at least $min)';
+  }
+
+  @override
+  String qcUnconvertedCount(int count) {
+    return '$count not converted';
+  }
+
+  @override
+  String qcOwnSku(String code) {
+    return 'Code $code';
+  }
+
+  @override
+  String qcSupplierNotation(String text) {
+    return 'Supplier wrote: $text';
+  }
+
+  @override
+  String get qcUnconverted => 'Not converted';
+
+  @override
+  String qcSampleState(int done, int target) {
+    return 'Sample $done/$target';
+  }
+
+  @override
+  String get qcConvert => 'Convert to our product';
+
+  @override
+  String get qcConvertChange => 'Change product';
+
+  @override
+  String get qcSampleAdd => 'Sample +1';
+
+  @override
+  String get qcConvertTitle => 'Convert to our product';
+
+  @override
+  String get qcConvertSearch => 'Search our name, JAN, code or maker';
+
+  @override
+  String get qcConvertRemember =>
+      'Remember this supplier\'s writing and convert it automatically next time';
+
+  @override
+  String get qcConvertNone => 'No products match';
+
+  @override
+  String get qcErrorUnconverted =>
+      'A line not converted to one of your products cannot pass. Convert it first.';
+
+  @override
+  String get qcErrorNotSampling => 'This is not a sampling inspection';
+
+  @override
+  String get qcErrorNoJan => 'The chosen product has no JAN';
+
+  @override
+  String get qcErrorSerialConvert =>
+      'A serial-numbered line cannot be converted; cancel the receipt and receive it again';
+
+  @override
+  String get whInspectionEdit => 'Inspection';
+
+  @override
+  String get whInspectionFull => 'Inspect everything';
+
+  @override
+  String whInspectionSampleShort(int percent, int min) {
+    return 'Sample $percent% (min $min)';
+  }
+
+  @override
+  String get whInspectionNone => 'No inspection (receive only)';
+
+  @override
+  String get whInspectionSaved => 'Inspection setting saved';
+
+  @override
+  String whInspectionTitle(String name) {
+    return 'Inspection at $name';
+  }
+
+  @override
+  String get whInspectionFullBody =>
+      'Everything from suppliers waits for inspection and cannot ship until inspected.';
+
+  @override
+  String get whInspectionSample => 'Sampling';
+
+  @override
+  String get whInspectionSampleBody =>
+      'Arrivals wait for inspection, but each line is checked on a sample; once the sample is done the line passes.';
+
+  @override
+  String get whInspectionSamplePercent => 'Sample rate';
+
+  @override
+  String get whInspectionSampleMin => 'At least';
+
+  @override
+  String get whInspectionNoneBody =>
+      'For a warehouse that inspects outside this system (e.g. by another company). Arrivals go straight to usable stock.';
+
+  @override
+  String get whInspectionApplies =>
+      'Applies to arrivals from suppliers, not transfers between warehouses.';
 }

@@ -3,6 +3,11 @@ import 'package:equatable/equatable.dart';
 int _asInt(dynamic v) =>
     v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
 
+String? _text(dynamic v) {
+  final s = v?.toString().trim() ?? '';
+  return s.isEmpty ? null : s;
+}
+
 /// Outcome of an inspection or one of its lines (spec §10).
 enum QcResult {
   pending('PENDING'),
@@ -47,7 +52,53 @@ class InspectionItem extends Equatable {
     this.countedQuantity,
     this.noteQuantity,
     this.noteProductName,
+    this.productId,
+    this.productSku,
+    this.productMaker,
+    this.srcJanCode,
+    this.srcProductCode,
+    this.srcProductName,
+    this.srcMaker,
+    this.convertedBy,
+    this.sampleQuantity,
+    this.sampledQuantity,
   });
+
+  /// Our product (0103). Null while the supplier's writing matched nothing
+  /// we sell — such a line has to be converted before it can pass.
+  final int? productId;
+
+  /// Our 品番 and maker; [janCode] and [productName] are ours too.
+  final String? productSku;
+  final String? productMaker;
+
+  /// How the supplier wrote the line (their list, else what was scanned),
+  /// kept to check against ours.
+  final String? srcJanCode;
+  final String? srcProductCode;
+  final String? srcProductName;
+  final String? srcMaker;
+
+  /// How the line was matched to our product: jan, plan, supplier_jan,
+  /// supplier_code, supplier_name, sku, name or manual.
+  final String? convertedBy;
+
+  bool get isUnconverted => productId == null;
+
+  /// The supplier wrote it differently from us, so both are worth showing.
+  bool get notationDiffers {
+    String n(String? v) => (v ?? '').replaceAll(RegExp(r'[\s\-‐－ー・()（）]'), '').toLowerCase();
+    return (srcJanCode != null && n(srcJanCode) != n(janCode)) ||
+        (srcProductName != null && n(srcProductName) != n(productName)) ||
+        (srcProductCode != null && n(srcProductCode) != n(productSku)) ||
+        (srcMaker != null && n(srcMaker) != n(productMaker));
+  }
+
+  /// Pieces to check on a sampling inspection (0104), and how many have been.
+  final int? sampleQuantity;
+  final int? sampledQuantity;
+  bool get sampleDone =>
+      sampleQuantity != null && (sampledQuantity ?? 0) >= sampleQuantity!;
 
   /// What the supplier's delivery note says for this line (0101).
   final int? noteQuantity;
@@ -114,12 +165,24 @@ class InspectionItem extends Equatable {
         noteQuantity:
             json['note_quantity'] == null ? null : _asInt(json['note_quantity']),
         noteProductName: json['note_product_name'] as String?,
+        productId: json['product_id'] == null ? null : _asInt(json['product_id']),
+        productSku: _text(json['product_sku']),
+        productMaker: _text(json['product_maker']),
+        srcJanCode: _text(json['src_jan_code']),
+        srcProductCode: _text(json['src_product_code']),
+        srcProductName: _text(json['src_product_name']),
+        srcMaker: _text(json['src_maker']),
+        convertedBy: _text(json['converted_by']),
+        sampleQuantity:
+            json['sample_quantity'] == null ? null : _asInt(json['sample_quantity']),
+        sampledQuantity:
+            json['sampled_quantity'] == null ? null : _asInt(json['sampled_quantity']),
       );
 
   @override
   List<Object?> get props =>
       [id, janCode, passedQuantity, failedQuantity, discrepancy, result, finalizedAt,
-       countedQuantity, noteQuantity];
+       countedQuantity, noteQuantity, productId, sampledQuantity];
 }
 
 /// A QC pass over one receipt.
@@ -139,7 +202,21 @@ class Inspection extends Equatable {
     this.itemCount,
     this.stockEffect,
     this.arrivedOn,
+    this.method = InspectionMethod.full,
+    this.samplePercent,
+    this.sampleMin,
   });
+
+  /// Full, or by sample (0104) — from the warehouse's setting when opened.
+  final InspectionMethod method;
+  final int? samplePercent;
+  final int? sampleMin;
+  bool get isSampling => method == InspectionMethod.sample;
+
+  /// Lines still to be matched to one of our products (0103).
+  int get unconvertedCount =>
+      items.where((i) => i.isUnconverted && !i.isFinal && i.result != QcResult.fail &&
+          i.result != QcResult.hold).length;
 
   /// When the goods arrived (the receipt's arrival date, 0099).
   final DateTime? arrivedOn;
@@ -199,6 +276,10 @@ class Inspection extends Equatable {
         itemCount:
             json['item_count'] == null ? null : _asInt(json['item_count']),
         arrivedOn: DateTime.tryParse('${json['arrived_on']}'),
+        method: json['method'] == 'SAMPLE' ? InspectionMethod.sample : InspectionMethod.full,
+        samplePercent:
+            json['sample_percent'] == null ? null : _asInt(json['sample_percent']),
+        sampleMin: json['sample_min'] == null ? null : _asInt(json['sample_min']),
         stockEffect: json['stock_effect'] is Map
             ? InspectionStockEffect.fromJson(
                 (json['stock_effect'] as Map).cast<String, dynamic>())
@@ -340,8 +421,64 @@ enum InspectionCountMode {
   check('check'),
 
   /// The tick or count taken back.
-  clear('clear');
+  clear('clear'),
+
+  /// Pieces of a sampling inspection's sample checked (0104); once the
+  /// sample is complete the line is accepted as a tick would.
+  sample('sample');
 
   const InspectionCountMode(this.wire);
   final String wire;
+}
+
+/// How an inspection is run (0104).
+enum InspectionMethod { full, sample }
+
+/// How a warehouse inspects what arrives from suppliers (0104).
+enum WarehouseInspectionMode {
+  /// Every line waits for inspection.
+  full('FULL'),
+
+  /// Every line waits, and is checked on a sample.
+  sample('SAMPLE'),
+
+  /// Receive only: inspected outside the system, straight to usable stock.
+  none('NONE');
+
+  const WarehouseInspectionMode(this.wire);
+  final String wire;
+
+  static WarehouseInspectionMode parse(String? v) => switch (v) {
+        'SAMPLE' => WarehouseInspectionMode.sample,
+        'NONE' => WarehouseInspectionMode.none,
+        _ => WarehouseInspectionMode.full,
+      };
+}
+
+/// A JAN as the server compares it (0103 `normalize_jan`): digits only (full
+/// width folded), UPC-A with its leading 0, and a case code (GTIN-14) turned
+/// back into the JAN inside it.
+String? normalizeJan(String? raw) {
+  if (raw == null) return null;
+  final buf = StringBuffer();
+  for (final r in raw.runes) {
+    if (r >= 0x30 && r <= 0x39) {
+      buf.writeCharCode(r);
+    } else if (r >= 0xFF10 && r <= 0xFF19) {
+      buf.writeCharCode(r - 0xFF10 + 0x30);
+    }
+  }
+  var d = buf.toString();
+  if (d.isEmpty) return null;
+  if (d.length == 12) return '0$d';
+  if (d.length == 14) {
+    if (d.startsWith('0')) return d.substring(1);
+    d = d.substring(1, 13);
+    var s = 0;
+    for (var i = 0; i < 12; i++) {
+      s += int.parse(d[i]) * ((i + 1) % 2 == 0 ? 3 : 1);
+    }
+    return '$d${(10 - s % 10) % 10}';
+  }
+  return d;
 }

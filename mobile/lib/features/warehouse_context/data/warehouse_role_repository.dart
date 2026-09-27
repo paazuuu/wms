@@ -12,6 +12,10 @@ abstract class WarehouseRoleRepository {
 
   Future<ApiResult<bool>> set(int warehouseId,
       {required String countryCode, required bool receivesCrossBorder});
+
+  /// `set_warehouse_inspection` (0104).
+  Future<ApiResult<bool>> setInspection(int warehouseId,
+      {required WarehouseInspectionMode mode, int? samplePercent, int? sampleMin});
 }
 
 class WarehouseRoleRepositoryImpl implements WarehouseRoleRepository {
@@ -44,6 +48,22 @@ class WarehouseRoleRepositoryImpl implements WarehouseRoleRepository {
         'p_warehouse_id': warehouseId,
         'p_country_code': countryCode,
         'p_receives_cross_border': receivesCrossBorder,
+      });
+      return ApiSuccess(response.data != null);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setInspection(int warehouseId,
+      {required WarehouseInspectionMode mode, int? samplePercent, int? sampleMin}) async {
+    try {
+      final response = await _dio.post('/rpc/set_warehouse_inspection', data: {
+        'p_warehouse_id': warehouseId,
+        'p_mode': mode.wire,
+        'p_sample_percent': samplePercent,
+        'p_sample_min': sampleMin,
       });
       return ApiSuccess(response.data != null);
     } on DioException catch (e) {

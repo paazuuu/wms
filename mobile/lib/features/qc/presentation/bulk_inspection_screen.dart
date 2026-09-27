@@ -146,7 +146,12 @@ class _BulkInspectionScreenState extends ConsumerState<BulkInspectionScreen> {
           }
           if (_jan != null && !all.any((l) => l.janCode == _jan)) _jan = null;
           final visible = _visible(all);
-          final selected = [for (final l in visible) if (!_unticked.contains(l.itemId)) l];
+          // A line not yet converted to ours cannot pass (0103).
+          final selected = [
+            for (final l in visible)
+              if (!_unticked.contains(l.itemId) && !l.isUnconverted) l,
+          ];
+          final selectable = visible.where((l) => !l.isUnconverted).length;
           return Column(
             children: [
               _Filters(
@@ -176,9 +181,9 @@ class _BulkInspectionScreenState extends ConsumerState<BulkInspectionScreen> {
               _PassBar(
                 selected: selected,
                 busy: _busy,
-                allSelected: selected.length == visible.length,
+                allSelected: selected.length == selectable,
                 onSelectAll: () => setState(() {
-                  if (selected.length == visible.length) {
+                  if (selected.length == selectable) {
                     _unticked.addAll(visible.map((l) => l.itemId));
                   } else {
                     _unticked.removeAll(visible.map((l) => l.itemId));
@@ -337,12 +342,17 @@ class _Lines extends StatelessWidget {
         for (final g in groups.values) ...[
           Builder(builder: (context) {
             final first = g.first;
-            final ticked = g.where((l) => !unticked.contains(l.itemId)).length;
-            final value = ticked == g.length ? true : (ticked == 0 ? false : null);
+            final open = g.where((l) => !l.isUnconverted).toList();
+            final ticked = open.where((l) => !unticked.contains(l.itemId)).length;
+            final value = open.isNotEmpty && ticked == open.length
+                ? true
+                : (ticked == 0 ? false : null);
             return CheckboxListTile(
               tristate: true,
               value: value,
-              onChanged: (_) => onToggle(g.map((l) => l.itemId), value != true),
+              onChanged: open.isEmpty
+                  ? null
+                  : (_) => onToggle(open.map((l) => l.itemId), value != true),
               controlAffinity: ListTileControlAffinity.leading,
               title: Text(
                 [
@@ -359,18 +369,36 @@ class _Lines extends StatelessWidget {
           for (final l in g)
             CheckboxListTile(
               key: ValueKey('bulk-qc-line-${l.itemId}'),
-              value: !unticked.contains(l.itemId),
-              onChanged: (v) => onToggle([l.itemId], v ?? false),
+              value: !l.isUnconverted && !unticked.contains(l.itemId),
+              onChanged: l.isUnconverted ? null : (v) => onToggle([l.itemId], v ?? false),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: const EdgeInsets.only(left: AppSpacing.xl, right: AppSpacing.lg),
               title: Text(l.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text([l.janCode, l.lot].whereType<String>().join(' · ')),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text([l.janCode, l.lot].whereType<String>().join(' · ')),
+                  if (l.srcProductName != null && l.srcProductName != l.productName ||
+                      l.srcJanCode != null && l.srcJanCode != l.janCode)
+                    Text(
+                      l10n.qcSupplierNotation([l.srcProductName, l.srcJanCode]
+                          .whereType<String>()
+                          .join(' · ')),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.55)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
               secondary: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(l10n.heldStockQuantity(l.quantity), style: theme.textTheme.titleSmall),
-                  if (l.checked)
+                  if (l.isUnconverted)
+                    StatusPill(tone: StatusTone.warning, label: l10n.qcUnconverted, dense: true)
+                  else if (l.checked)
                     StatusPill(tone: StatusTone.info, label: l10n.bulkQcRecordedBadge, dense: true),
                 ],
               ),

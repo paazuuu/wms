@@ -51,6 +51,11 @@ abstract class InspectionRepository {
   Future<ApiResult<bool>> reportWrongItem(int inspectionId, String janCode,
       {int quantity = 1, String? note});
 
+  /// `convert_inspection_item` (0103): a line the supplier's writing did not
+  /// match is booked under our [productId]; with [remember] the supplier's
+  /// JAN, 品番, name and maker are kept so their next delivery converts itself.
+  Future<ApiResult<bool>> convertItem(int itemId, int productId, {bool remember = true});
+
   /// `dispose_held_stock` (0098): one decision on one bucket of held goods.
   Future<ApiResult<DispositionResult>> dispose(
     HeldStock row,
@@ -268,6 +273,20 @@ class InspectionRepositoryImpl implements InspectionRepository {
         'p_jan_code': janCode,
         'p_quantity': quantity,
         'p_note': (note == null || note.trim().isEmpty) ? null : note.trim(),
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> convertItem(int itemId, int productId, {bool remember = true}) async {
+    try {
+      await _restDio.post('/rpc/convert_inspection_item', data: {
+        'p_item_id': itemId,
+        'p_product_id': productId,
+        'p_remember': remember,
       });
       return const ApiSuccess(true);
     } on DioException catch (e) {

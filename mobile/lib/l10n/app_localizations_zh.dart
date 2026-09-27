@@ -5175,4 +5175,140 @@ class AppLocalizationsZh extends AppLocalizations {
   String dashUnitsCount(int count) {
     return '$count件';
   }
+
+  @override
+  String get productMaker => '制造商';
+
+  @override
+  String get productInspectionByWarehouse => '是否验货按仓库设置（仓库页面的“验货方式”）。';
+
+  @override
+  String get supplierNameJan => '供应商的JAN（可选）';
+
+  @override
+  String get supplierNameMaker => '供应商的制造商写法（可选）';
+
+  @override
+  String qcUnconvertedBlock(int count) {
+    return '有$count行尚未转换为本公司商品，请逐行“转换为本公司商品”。';
+  }
+
+  @override
+  String qcSampleDone(String name) {
+    return '$name：抽检完成，此行已合格';
+  }
+
+  @override
+  String qcSampleProgress(String name, int done, int target) {
+    return '$name：抽检 $done/$target';
+  }
+
+  @override
+  String qcConverted(String name) {
+    return '已转换为“$name”';
+  }
+
+  @override
+  String qcSamplingBadge(int percent, int min) {
+    return '抽检（$percent%，至少$min件）';
+  }
+
+  @override
+  String qcUnconvertedCount(int count) {
+    return '未转换 $count行';
+  }
+
+  @override
+  String qcOwnSku(String code) {
+    return '货号 $code';
+  }
+
+  @override
+  String qcSupplierNotation(String text) {
+    return '供应商写法：$text';
+  }
+
+  @override
+  String get qcUnconverted => '未转换';
+
+  @override
+  String qcSampleState(int done, int target) {
+    return '抽检 $done/$target';
+  }
+
+  @override
+  String get qcConvert => '转换为本公司商品';
+
+  @override
+  String get qcConvertChange => '更改商品';
+
+  @override
+  String get qcSampleAdd => '抽检 +1';
+
+  @override
+  String get qcConvertTitle => '转换为本公司商品';
+
+  @override
+  String get qcConvertSearch => '按本公司名称、JAN、货号、制造商搜索';
+
+  @override
+  String get qcConvertRemember => '记住此供应商的写法，下次自动转换';
+
+  @override
+  String get qcConvertNone => '没有符合的商品';
+
+  @override
+  String get qcErrorUnconverted => '未转换为本公司商品的行不能合格，请先转换。';
+
+  @override
+  String get qcErrorNotSampling => '此验货不是抽检';
+
+  @override
+  String get qcErrorNoJan => '所选商品没有JAN';
+
+  @override
+  String get qcErrorSerialConvert => '序列号管理的行不能转换，请取消入库后重新入库';
+
+  @override
+  String get whInspectionEdit => '验货方式';
+
+  @override
+  String get whInspectionFull => '全数验货';
+
+  @override
+  String whInspectionSampleShort(int percent, int min) {
+    return '抽检 $percent%（至少$min）';
+  }
+
+  @override
+  String get whInspectionNone => '无需验货（仅入库）';
+
+  @override
+  String get whInspectionSaved => '已保存验货方式';
+
+  @override
+  String whInspectionTitle(String name) {
+    return '$name 的验货方式';
+  }
+
+  @override
+  String get whInspectionFullBody => '来自供应商的到货全部待验货，验货完成前不能出货。';
+
+  @override
+  String get whInspectionSample => '抽检';
+
+  @override
+  String get whInspectionSampleBody => '到货待验货，但每行只检查一部分；抽检完成后该行合格。';
+
+  @override
+  String get whInspectionSamplePercent => '抽检比例';
+
+  @override
+  String get whInspectionSampleMin => '最少件数';
+
+  @override
+  String get whInspectionNoneBody => '适用于在本系统之外（如委托外部）验货的仓库。到货直接成为可用库存。';
+
+  @override
+  String get whInspectionApplies => '适用于供应商到货，不影响仓库间调拨。';
 }

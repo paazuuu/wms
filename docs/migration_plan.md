@@ -4964,6 +4964,103 @@ user may read is one tab away.
 - the CN sales cycle totalled 50 against 10 the year before (months 30/0
   and 20/10), with 5 to purchase.
 
+### 0103 — what the supplier wrote becomes what we call it
+
+Suppliers write the same product in their own way. The JAN may have hyphens,
+full-width digits or a case code (GTIN-14). The maker may be spelled
+differently, the name abbreviated, and the supplier may use their own 品番
+(some call it 項目名). Whatever arrives from a supplier is booked under our own
+JAN, maker, name and 品番. What the supplier wrote is kept beside it, shown
+faded, so the inspector can check the two.
+
+- **Our identity:**
+  - `products.maker` is new;
+  - 品番 is `products.sku`, now labelled 品番（SKU） in the app.
+- **Supplier mapping:** `supplier_product_names` also learns the supplier's JAN
+  and maker (`supplier_jan_code`, `supplier_maker`).
+- **Normalizing:**
+  - `normalize_jan` keeps digits only, folds full width, gives UPC-A its
+    leading 0, and turns a case code back into the JAN inside it;
+  - `normalize_product_text` uses NFKC and drops spaces, middle dots, dashes
+    and brackets.
+- **Resolving** (`resolve_supplier_product`), in this order:
+  1. the JAN or a registered barcode;
+  2. the JAN, 品番 or name this supplier is known to use;
+  3. our 品番, when only one product has it;
+  4. our name (and maker), when only one product has it.
+- **Receiving converts:**
+  - the stock lands under our JAN;
+  - the receipt line keeps what was scanned (`src_jan_code`, `converted_by`);
+  - a scan finds its planned line even when the list wrote the JAN
+    differently.
+- **Inspection lines** keep the supplier's JAN, 品番, name and maker (`src_*`)
+  and show ours.
+- **Converting by hand** (`convert_inspection_item(item, product, remember)`):
+  - for a line nothing matched, or one that matched the wrong product;
+  - the stock waiting for inspection moves to our product (movement RELABEL);
+  - with *remember*, the supplier's writing is saved so their next delivery
+    converts by itself.
+- **Nothing unconverted passes:**
+  - finalize refuses the line;
+  - bulk pass skips it and reports `unconverted`;
+  - completing names how many lines are left.
+  - Lines judged FAIL or HOLD are exempt.
+- **Delivery note:** `apply_delivery_note` matches our JAN or the supplier's,
+  their 品番 or ours, and their name or ours.
+- **App changes:**
+  - each line shows ours, with the supplier's writing faded beneath it;
+  - 未変換 lines carry a 自社商品に変換 button (product search, with
+    *remember* on by default);
+  - a scan matches either JAN;
+  - the product form gains メーカー;
+  - the supplier-name dialog gains the supplier's JAN and maker.
+- **Expiry:** out of scope, as asked. Serials are kept.
+
+### 0104 — each warehouse says how supplier arrivals are inspected
+
+`warehouses.inspection_mode` sets how goods from suppliers are inspected:
+
+| Mode | Behaviour |
+|---|---|
+| `FULL` (default, and what every new warehouse gets) | Every arrival from a supplier waits for inspection. |
+| `SAMPLE` | Arrivals wait, but each line is checked on a sample (`sample_percent` of the pieces, at least `sample_min`). Once the sample is done, the whole line is accepted as the delivery note, or else the receipt, says. |
+| `NONE` | Receive only. For a warehouse whose inspection is done outside this system, for example by another company. Arrivals go straight to usable stock. |
+
+- **Scope:** it applies to supplier receipts only. Transfers between warehouses
+  are unaffected.
+- **Exceptions:** a product can still be an exception in one warehouse
+  (`warehouse_products.requires_inspection`). The product-wide flag no longer
+  decides anything, and the product form now says the warehouse decides.
+- **Inspection record:**
+  - `inspections.method` and the day's sample rate are taken when the
+    inspection opens;
+  - each line gets a `sample_quantity`.
+- **Counting the sample:** `record_inspection_count(…, 'sample')` adds sample
+  pieces (a scan is one). When the sample is complete, the line is ticked.
+- **Setting the mode:** `set_warehouse_inspection(warehouse, mode, percent,
+  min)` (warehouse.manage). `warehouse_roles` returns the mode.
+- **App changes:**
+  - each warehouse card shows 検品方式 (全数検品 / 抜き取り n% / 検品不要),
+    with a dialog to change it;
+  - a sampling inspection shows its rate, and 抜き取り x/n on each line;
+  - in a sampling inspection, a scan or 抜き取り +1 counts a sample piece.
+
+**Verified live** (aborted transaction):
+- A plan with three lines:
+  - JAN `4999-0000-01038` converted by JAN;
+  - an unknown JAN with the supplier 品番 `ｍｕｇｉ－１` converted by that
+    supplier code to our 麦茶;
+  - an unknown JAN with no mapping stayed unconverted and landed in QC.
+- Completing was refused ("1 lines not converted").
+- Converting moved 3 units into our product's QC stock (none left under the
+  unregistered JAN). It learned the supplier's JAN `4988888888888`, 品番
+  `X-9`, name and maker.
+- Completing then released 18 units.
+- The supplier's next delivery of that JAN converted by itself.
+- `SAMPLE` 10%, min 2: 50 units gave a sample of 5; 3 sample pieces left the
+  line pending, and 5 passed it with 50 counted.
+- `NONE`: the receipt went straight to OK and no inspection opened.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

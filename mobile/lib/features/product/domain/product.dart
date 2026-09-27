@@ -140,6 +140,7 @@ class Product extends Equatable {
     required this.janCode,
     required this.name,
     this.sku,
+    this.maker,
     this.category,
     this.price,
     this.status = 'active',
@@ -158,6 +159,10 @@ class Product extends Equatable {
   final String janCode;
   final String name;
   final String? sku;
+
+  /// Our maker name (0103). With [janCode], [name] and [sku] (our 品番) it is
+  /// what whatever a supplier delivers is converted to.
+  final String? maker;
   final String? category;
   final double? price;
   final String status;
@@ -208,6 +213,7 @@ class Product extends Equatable {
         janCode: (json['jan_code'] ?? '').toString(),
         name: (json['name'] ?? '').toString(),
         sku: _asText(json['sku']),
+        maker: _asText(json['maker']),
         category: _asText(json['category']),
         price: _asDouble(json['price']),
         status: (json['status'] ?? 'active').toString(),
@@ -230,6 +236,7 @@ class Product extends Equatable {
         janCode,
         name,
         sku,
+        maker,
         category,
         price,
         status,

@@ -31,6 +31,8 @@ abstract class ProductRepository {
     required String supplierName,
     String? supplierCode,
     String? note,
+    String? supplierJanCode,
+    String? supplierMaker,
   });
 
   Future<ApiResult<bool>> removeSupplierName(int id);
@@ -57,6 +59,7 @@ abstract class ProductRepository {
     required int id,
     String? sku,
     TrackingMode? trackingMode,
+    String? maker,
   });
 
   /// `set_picking_rule` (0074, §16). Sets the product's own default —
@@ -259,12 +262,15 @@ class ProductRepositoryImpl implements ProductRepository {
     required int id,
     String? sku,
     TrackingMode? trackingMode,
+    String? maker,
   }) async {
     try {
       final response = await _dio.post('/rpc/set_product_identity', data: {
         'p_id': id,
         'p_sku': sku,
         'p_tracking_mode': trackingMode?.code,
+        // '' clears it, null leaves it (0103).
+        'p_maker': maker,
       });
       return ApiSuccess(response.data == true);
     } on DioException catch (e) {
@@ -574,6 +580,8 @@ class ProductRepositoryImpl implements ProductRepository {
     required String supplierName,
     String? supplierCode,
     String? note,
+    String? supplierJanCode,
+    String? supplierMaker,
   }) async {
     try {
       final response = await _dio.post('/rpc/set_supplier_product_name', data: {
@@ -582,6 +590,8 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_supplier_name': supplierName,
         'p_supplier_code': supplierCode,
         'p_note': note,
+        'p_supplier_jan_code': supplierJanCode,
+        'p_supplier_maker': supplierMaker,
       });
       final id = response.data;
       return ApiSuccess(id is int ? id : int.tryParse('$id') ?? 0);

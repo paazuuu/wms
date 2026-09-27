@@ -25,6 +25,7 @@ Inspection _pending() => Inspection(
       supplierName: '新東光通商株式会社',
       items: [
         InspectionItem(
+          productId: 1,
           id: 10,
           janCode: '4902505632037',
           productName: 'ペン',
@@ -47,6 +48,7 @@ Inspection _checked() => Inspection(
       supplierName: '新東光通商株式会社',
       items: [
         InspectionItem(
+          productId: 1,
           id: 10,
           janCode: '4902505632037',
           productName: 'ペン',
@@ -181,6 +183,7 @@ void main() {
           supplierName: '新東光通商株式会社',
           items: [
             InspectionItem(
+              productId: 1,
               id: 10,
               janCode: '4902505632037',
               productName: 'ペン',
@@ -370,6 +373,7 @@ void main() {
           status: QcResult.pending,
           items: [
             InspectionItem(
+              productId: 1,
               id: 10, janCode: '4902505632037', productName: 'ペン',
               expectedQuantity: 5, actualQuantity: 5,
               passedQuantity: firstFinal ? 5 : 0, failedQuantity: 0, discrepancy: 0,
@@ -377,6 +381,7 @@ void main() {
               finalizedAt: firstFinal ? DateTime(2026, 9, 27) : null,
             ),
             InspectionItem(
+              productId: 1,
               id: 11, janCode: '4900000000011', productName: 'ノート',
               expectedQuantity: 3, actualQuantity: 3,
               passedQuantity: 0, failedQuantity: 0, discrepancy: 0,
@@ -468,6 +473,7 @@ void main() {
           status: QcResult.pending,
           items: [
             InspectionItem(
+              productId: 1,
               id: 20, janCode: '4900000000020', productName: 'ボールペン',
               expectedQuantity: 600, actualQuantity: 600,
               passedQuantity: counted ?? 0, failedQuantity: 0, discrepancy: 0,

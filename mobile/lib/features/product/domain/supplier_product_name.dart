@@ -14,7 +14,14 @@ class SupplierProductName extends Equatable {
     this.productName,
     this.supplierCode,
     this.note,
+    this.supplierJanCode,
+    this.supplierMaker,
   });
+
+  /// The JAN and maker as this supplier writes them (0103), when they differ
+  /// from ours.
+  final String? supplierJanCode;
+  final String? supplierMaker;
 
   /// Null on the summary embedded in a product row.
   final int? id;
@@ -44,6 +51,8 @@ class SupplierProductName extends Equatable {
         supplierCode: json['supplier_code'] as String?,
         supplierName: (json['supplier_name'] ?? '').toString(),
         note: json['note'] as String?,
+        supplierJanCode: json['supplier_jan_code'] as String?,
+        supplierMaker: json['supplier_maker'] as String?,
       );
 
   @override

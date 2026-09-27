@@ -1432,7 +1432,7 @@
   "@shortcutShowHelp": {
     "description": "Keyboard shortcut help sheet."
   },
-  "productSku": "SKU",
+  "productSku": "品番（SKU）",
   "@productSku": {
     "description": "Product master: internal code, separate from the JAN barcode (0057)."
   },
@@ -5145,5 +5145,227 @@
         "type": "int"
       }
     }
+  },
+  "productMaker": "メーカー",
+  "@productMaker": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): productMaker"
+  },
+  "productInspectionByWarehouse": "入荷検品の要否は倉庫ごとの設定（倉庫画面の「検品方式」）に従います。",
+  "@productInspectionByWarehouse": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): productInspectionByWarehouse"
+  },
+  "supplierNameJan": "仕入先でのJAN表記（任意）",
+  "@supplierNameJan": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): supplierNameJan"
+  },
+  "supplierNameMaker": "仕入先でのメーカー表記（任意）",
+  "@supplierNameMaker": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): supplierNameMaker"
+  },
+  "qcUnconvertedBlock": "自社商品に変換していない行が{count}行あります。各行の「自社商品に変換」から変換してください。",
+  "@qcUnconvertedBlock": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcUnconvertedBlock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qcSampleDone": "{name}：抜き取りが済み、この行を合格にしました",
+  "@qcSampleDone": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcSampleDone",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qcSampleProgress": "{name}：抜き取り {done}/{target}",
+  "@qcSampleProgress": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcSampleProgress",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "qcConverted": "「{name}」に変換しました",
+  "@qcConverted": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConverted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qcSamplingBadge": "抜き取り検品（{percent}%・最低{min}個）",
+  "@qcSamplingBadge": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcSamplingBadge",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "qcUnconvertedCount": "未変換 {count}行",
+  "@qcUnconvertedCount": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcUnconvertedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qcOwnSku": "品番 {code}",
+  "@qcOwnSku": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcOwnSku",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "qcSupplierNotation": "仕入先表記：{text}",
+  "@qcSupplierNotation": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcSupplierNotation",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "qcUnconverted": "未変換",
+  "@qcUnconverted": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcUnconverted"
+  },
+  "qcSampleState": "抜き取り {done}/{target}",
+  "@qcSampleState": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcSampleState",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "qcConvert": "自社商品に変換",
+  "@qcConvert": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConvert"
+  },
+  "qcConvertChange": "変換先を変更",
+  "@qcConvertChange": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConvertChange"
+  },
+  "qcSampleAdd": "抜き取り +1",
+  "@qcSampleAdd": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcSampleAdd"
+  },
+  "qcConvertTitle": "自社商品に変換",
+  "@qcConvertTitle": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConvertTitle"
+  },
+  "qcConvertSearch": "自社の商品名・JAN・品番・メーカーで検索",
+  "@qcConvertSearch": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConvertSearch"
+  },
+  "qcConvertRemember": "この仕入先の表記を記憶し、次回から自動で変換する",
+  "@qcConvertRemember": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConvertRemember"
+  },
+  "qcConvertNone": "該当する商品がありません",
+  "@qcConvertNone": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcConvertNone"
+  },
+  "qcErrorUnconverted": "自社商品に変換していない行は合格にできません。先に「自社商品に変換」してください。",
+  "@qcErrorUnconverted": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcErrorUnconverted"
+  },
+  "qcErrorNotSampling": "この検品は抜き取り検品ではありません",
+  "@qcErrorNotSampling": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcErrorNotSampling"
+  },
+  "qcErrorNoJan": "変換先の商品にJANが登録されていません",
+  "@qcErrorNoJan": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcErrorNoJan"
+  },
+  "qcErrorSerialConvert": "シリアル管理の行は変換できません。入荷を取り消して受け直してください",
+  "@qcErrorSerialConvert": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): qcErrorSerialConvert"
+  },
+  "whInspectionEdit": "検品方式",
+  "@whInspectionEdit": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionEdit"
+  },
+  "whInspectionFull": "全数検品",
+  "@whInspectionFull": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionFull"
+  },
+  "whInspectionSampleShort": "抜き取り {percent}%（最低{min}）",
+  "@whInspectionSampleShort": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionSampleShort",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "whInspectionNone": "検品不要（仕入のみ）",
+  "@whInspectionNone": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionNone"
+  },
+  "whInspectionSaved": "検品方式を保存しました",
+  "@whInspectionSaved": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionSaved"
+  },
+  "whInspectionTitle": "{name} の検品方式",
+  "@whInspectionTitle": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionTitle",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "whInspectionFullBody": "仕入先からの入荷はすべて検品待ちになり、検品が終わるまで出荷できません。",
+  "@whInspectionFullBody": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionFullBody"
+  },
+  "whInspectionSample": "抜き取り検品",
+  "@whInspectionSample": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionSample"
+  },
+  "whInspectionSampleBody": "検品待ちになりますが、各行の一部だけを確認します。抜き取り分が済むとその行は合格になります。",
+  "@whInspectionSampleBody": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionSampleBody"
+  },
+  "whInspectionSamplePercent": "抜き取り率",
+  "@whInspectionSamplePercent": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionSamplePercent"
+  },
+  "whInspectionSampleMin": "最低個数",
+  "@whInspectionSampleMin": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionSampleMin"
+  },
+  "whInspectionNoneBody": "検品をこのシステムの外（外部に依頼するなど）で行う倉庫向けです。入荷した品はそのまま使える在庫になります。",
+  "@whInspectionNoneBody": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionNoneBody"
+  },
+  "whInspectionApplies": "仕入先からの入荷に適用されます。倉庫間の移動には影響しません。",
+  "@whInspectionApplies": {
+    "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionApplies"
   }
 }

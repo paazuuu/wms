@@ -52,6 +52,8 @@ class SupplierNamesCard extends ConsumerWidget {
           supplierName: draft.name,
           supplierCode: draft.code,
           note: draft.note,
+          supplierJanCode: draft.jan,
+          supplierMaker: draft.maker,
         );
     if (!context.mounted) return;
     result.when(
@@ -125,6 +127,8 @@ class SupplierNamesCard extends ConsumerWidget {
                           subtitle: Text([
                             n.supplierDisplayName,
                             if (n.supplierCode != null) l10n.supplierNameCodeLabel(n.supplierCode!),
+                            if (n.supplierJanCode != null) 'JAN ${n.supplierJanCode}',
+                            if (n.supplierMaker != null) n.supplierMaker!,
                           ].join(' · ')),
                           onTap: () => _edit(context, ref, n),
                           trailing: IconButton(
@@ -143,12 +147,23 @@ class SupplierNamesCard extends ConsumerWidget {
 }
 
 class _Draft {
-  const _Draft({required this.supplierId, required this.name, this.code, this.note});
+  const _Draft({
+    required this.supplierId,
+    required this.name,
+    this.code,
+    this.note,
+    this.jan,
+    this.maker,
+  });
 
   final int supplierId;
   final String name;
   final String? code;
   final String? note;
+
+  /// The supplier's own JAN and maker for it (0103).
+  final String? jan;
+  final String? maker;
 }
 
 class _SupplierNameDialog extends StatefulWidget {
@@ -167,12 +182,16 @@ class _SupplierNameDialogState extends State<_SupplierNameDialog> {
   late final _name = TextEditingController(text: widget.current?.supplierName ?? '');
   late final _code = TextEditingController(text: widget.current?.supplierCode ?? '');
   late final _note = TextEditingController(text: widget.current?.note ?? '');
+  late final _jan = TextEditingController(text: widget.current?.supplierJanCode ?? '');
+  late final _maker = TextEditingController(text: widget.current?.supplierMaker ?? '');
 
   @override
   void dispose() {
     _name.dispose();
     _code.dispose();
     _note.dispose();
+    _jan.dispose();
+    _maker.dispose();
     super.dispose();
   }
 
@@ -184,7 +203,8 @@ class _SupplierNameDialogState extends State<_SupplierNameDialog> {
     final editing = widget.current != null;
     return AlertDialog(
       title: Text(editing ? l10n.supplierNameEdit : l10n.supplierNameAdd),
-      content: Column(
+      content: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (editing)
@@ -215,10 +235,22 @@ class _SupplierNameDialogState extends State<_SupplierNameDialog> {
             decoration: InputDecoration(labelText: l10n.supplierNameCode),
           ),
           TextField(
+            key: const ValueKey('supplier-jan'),
+            controller: _jan,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: l10n.supplierNameJan),
+          ),
+          TextField(
+            key: const ValueKey('supplier-maker'),
+            controller: _maker,
+            decoration: InputDecoration(labelText: l10n.supplierNameMaker),
+          ),
+          TextField(
             controller: _note,
             decoration: InputDecoration(labelText: l10n.supplierNameNote),
           ),
         ],
+        ),
       ),
       actions: [
         TextButton(
@@ -235,6 +267,8 @@ class _SupplierNameDialogState extends State<_SupplierNameDialog> {
                       name: _name.text.trim(),
                       code: _trim(_code),
                       note: _trim(_note),
+                      jan: _trim(_jan),
+                      maker: _trim(_maker),
                     ),
                   ),
           child: Text(l10n.actionSave),

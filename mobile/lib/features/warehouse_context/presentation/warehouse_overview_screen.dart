@@ -252,6 +252,29 @@ class _WarehouseCard extends ConsumerWidget {
                     Icon(Icons.check_circle, color: scheme.primary),
                 ],
               ),
+              // How what comes from suppliers is inspected here (0104).
+              if (role != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    StatusPill(
+                      key: ValueKey('wh-inspection-${warehouse.id}'),
+                      tone: role.inspectionMode == WarehouseInspectionMode.none
+                          ? StatusTone.warning
+                          : StatusTone.info,
+                      icon: Icons.fact_check_outlined,
+                      label: warehouseInspectionLabel(l10n, role),
+                      dense: true,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    TextButton(
+                      key: ValueKey('wh-inspection-edit-${warehouse.id}'),
+                      onPressed: () => _editInspection(context, ref, role),
+                      child: Text(l10n.whInspectionEdit),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: AppSpacing.md),
               Wrap(
                 spacing: AppSpacing.md,
@@ -323,6 +346,163 @@ Future<void> _editRole(BuildContext context, WidgetRef ref, WarehouseRole role) 
     failure: (f) => messenger.showSnackBar(SnackBar(
         content: Text(humanizeApiErrorMessage(l10n, f.message)))),
   );
+}
+
+/// The warehouse's inspection mode in a few words (0104).
+String warehouseInspectionLabel(AppLocalizations l10n, WarehouseRole role) =>
+    switch (role.inspectionMode) {
+      WarehouseInspectionMode.full => l10n.whInspectionFull,
+      WarehouseInspectionMode.sample =>
+        l10n.whInspectionSampleShort(role.samplePercent, role.sampleMin),
+      WarehouseInspectionMode.none => l10n.whInspectionNone,
+    };
+
+Future<void> _editInspection(BuildContext context, WidgetRef ref, WarehouseRole role) async {
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  final next = await showDialog<WarehouseRole>(
+    context: context,
+    builder: (_) => WarehouseInspectionDialog(role: role),
+  );
+  if (next == null) return;
+  final result = await ref.read(warehouseRoleRepositoryProvider).setInspection(role.id,
+      mode: next.inspectionMode, samplePercent: next.samplePercent, sampleMin: next.sampleMin);
+  result.when(
+    success: (_) {
+      ref.invalidate(warehouseRolesProvider);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.whInspectionSaved)));
+    },
+    failure: (f) => messenger.showSnackBar(SnackBar(
+        content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+  );
+}
+
+/// How goods from suppliers are inspected in one warehouse (0104). Pops the
+/// edited role.
+class WarehouseInspectionDialog extends StatefulWidget {
+  const WarehouseInspectionDialog({super.key, required this.role});
+
+  final WarehouseRole role;
+
+  @override
+  State<WarehouseInspectionDialog> createState() => _WarehouseInspectionDialogState();
+}
+
+class _WarehouseInspectionDialogState extends State<WarehouseInspectionDialog> {
+  late WarehouseInspectionMode _mode = widget.role.inspectionMode;
+  late final _percent = TextEditingController(text: '${widget.role.samplePercent}');
+  late final _min = TextEditingController(text: '${widget.role.sampleMin}');
+
+  @override
+  void dispose() {
+    _percent.dispose();
+    _min.dispose();
+    super.dispose();
+  }
+
+  int? get _percentValue {
+    final v = int.tryParse(_percent.text.trim());
+    return v != null && v >= 1 && v <= 100 ? v : null;
+  }
+
+  int? get _minValue {
+    final v = int.tryParse(_min.text.trim());
+    return v != null && v >= 1 ? v : null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final valid = _mode != WarehouseInspectionMode.sample ||
+        (_percentValue != null && _minValue != null);
+    Widget option(WarehouseInspectionMode mode, String title, String body) =>
+        RadioListTile<WarehouseInspectionMode>(
+          key: ValueKey('wh-inspection-${mode.wire}'),
+          value: mode,
+          contentPadding: EdgeInsets.zero,
+          title: Text(title),
+          subtitle: Text(body),
+        );
+    return AlertDialog(
+      title: Text(l10n.whInspectionTitle(widget.role.name)),
+      content: SingleChildScrollView(
+        child: RadioGroup<WarehouseInspectionMode>(
+          groupValue: _mode,
+          onChanged: (v) => setState(() => _mode = v ?? _mode),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              option(WarehouseInspectionMode.full, l10n.whInspectionFull,
+                  l10n.whInspectionFullBody),
+              option(WarehouseInspectionMode.sample, l10n.whInspectionSample,
+                  l10n.whInspectionSampleBody),
+              if (_mode == WarehouseInspectionMode.sample)
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.xl),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          key: const ValueKey('wh-sample-percent'),
+                          controller: _percent,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                              labelText: l10n.whInspectionSamplePercent, suffixText: '%'),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: TextField(
+                          key: const ValueKey('wh-sample-min'),
+                          controller: _min,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(labelText: l10n.whInspectionSampleMin),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              option(WarehouseInspectionMode.none, l10n.whInspectionNone,
+                  l10n.whInspectionNoneBody),
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.whInspectionApplies,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('wh-inspection-save'),
+          onPressed: valid
+              ? () => Navigator.pop(
+                    context,
+                    WarehouseRole(
+                      id: widget.role.id,
+                      code: widget.role.code,
+                      name: widget.role.name,
+                      countryCode: widget.role.countryCode,
+                      receivesCrossBorder: widget.role.receivesCrossBorder,
+                      inspectionMode: _mode,
+                      samplePercent: _percentValue ?? widget.role.samplePercent,
+                      sampleMin: _minValue ?? widget.role.sampleMin,
+                    ),
+                  )
+              : null,
+          child: Text(l10n.actionSave),
+        ),
+      ],
+    );
+  }
 }
 
 /// Localized country name for the codes this company uses, the code otherwise.
@@ -411,6 +591,9 @@ class _WarehouseRoleDialogState extends State<WarehouseRoleDialog> {
                       name: widget.role.name,
                       countryCode: _code,
                       receivesCrossBorder: _receives,
+                      inspectionMode: widget.role.inspectionMode,
+                      samplePercent: widget.role.samplePercent,
+                      sampleMin: widget.role.sampleMin,
                     ),
                   )
               : null,

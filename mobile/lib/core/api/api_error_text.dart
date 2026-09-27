@@ -28,6 +28,21 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('has a completed inspection')) {
     return l10n.errorReceiptInspected;
   }
+  // 0103/0104: nothing passes under the supplier's writing, and a sample
+  // count only applies to a sampling inspection.
+  if (rawMessage.contains('not converted to your products') ||
+      rawMessage.contains('not converted to one of your products')) {
+    return l10n.qcErrorUnconverted;
+  }
+  if (rawMessage.contains('is not a sampling inspection')) {
+    return l10n.qcErrorNotSampling;
+  }
+  if (rawMessage.contains('has no JAN to book the goods under')) {
+    return l10n.qcErrorNoJan;
+  }
+  if (rawMessage.contains('serial-numbered line cannot be converted')) {
+    return l10n.qcErrorSerialConvert;
+  }
   if (rawMessage.contains('is already completed')) {
     return l10n.errorInspectionCompleted;
   }

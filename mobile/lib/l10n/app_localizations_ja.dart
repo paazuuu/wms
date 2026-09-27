@@ -2806,7 +2806,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcutShowHelp => 'この一覧を表示';
 
   @override
-  String get productSku => 'SKU';
+  String get productSku => '品番（SKU）';
 
   @override
   String get productSkuHint => '社内品番（任意）';
@@ -5187,4 +5187,143 @@ class AppLocalizationsJa extends AppLocalizations {
   String dashUnitsCount(int count) {
     return '$count個';
   }
+
+  @override
+  String get productMaker => 'メーカー';
+
+  @override
+  String get productInspectionByWarehouse =>
+      '入荷検品の要否は倉庫ごとの設定（倉庫画面の「検品方式」）に従います。';
+
+  @override
+  String get supplierNameJan => '仕入先でのJAN表記（任意）';
+
+  @override
+  String get supplierNameMaker => '仕入先でのメーカー表記（任意）';
+
+  @override
+  String qcUnconvertedBlock(int count) {
+    return '自社商品に変換していない行が$count行あります。各行の「自社商品に変換」から変換してください。';
+  }
+
+  @override
+  String qcSampleDone(String name) {
+    return '$name：抜き取りが済み、この行を合格にしました';
+  }
+
+  @override
+  String qcSampleProgress(String name, int done, int target) {
+    return '$name：抜き取り $done/$target';
+  }
+
+  @override
+  String qcConverted(String name) {
+    return '「$name」に変換しました';
+  }
+
+  @override
+  String qcSamplingBadge(int percent, int min) {
+    return '抜き取り検品（$percent%・最低$min個）';
+  }
+
+  @override
+  String qcUnconvertedCount(int count) {
+    return '未変換 $count行';
+  }
+
+  @override
+  String qcOwnSku(String code) {
+    return '品番 $code';
+  }
+
+  @override
+  String qcSupplierNotation(String text) {
+    return '仕入先表記：$text';
+  }
+
+  @override
+  String get qcUnconverted => '未変換';
+
+  @override
+  String qcSampleState(int done, int target) {
+    return '抜き取り $done/$target';
+  }
+
+  @override
+  String get qcConvert => '自社商品に変換';
+
+  @override
+  String get qcConvertChange => '変換先を変更';
+
+  @override
+  String get qcSampleAdd => '抜き取り +1';
+
+  @override
+  String get qcConvertTitle => '自社商品に変換';
+
+  @override
+  String get qcConvertSearch => '自社の商品名・JAN・品番・メーカーで検索';
+
+  @override
+  String get qcConvertRemember => 'この仕入先の表記を記憶し、次回から自動で変換する';
+
+  @override
+  String get qcConvertNone => '該当する商品がありません';
+
+  @override
+  String get qcErrorUnconverted => '自社商品に変換していない行は合格にできません。先に「自社商品に変換」してください。';
+
+  @override
+  String get qcErrorNotSampling => 'この検品は抜き取り検品ではありません';
+
+  @override
+  String get qcErrorNoJan => '変換先の商品にJANが登録されていません';
+
+  @override
+  String get qcErrorSerialConvert => 'シリアル管理の行は変換できません。入荷を取り消して受け直してください';
+
+  @override
+  String get whInspectionEdit => '検品方式';
+
+  @override
+  String get whInspectionFull => '全数検品';
+
+  @override
+  String whInspectionSampleShort(int percent, int min) {
+    return '抜き取り $percent%（最低$min）';
+  }
+
+  @override
+  String get whInspectionNone => '検品不要（仕入のみ）';
+
+  @override
+  String get whInspectionSaved => '検品方式を保存しました';
+
+  @override
+  String whInspectionTitle(String name) {
+    return '$name の検品方式';
+  }
+
+  @override
+  String get whInspectionFullBody => '仕入先からの入荷はすべて検品待ちになり、検品が終わるまで出荷できません。';
+
+  @override
+  String get whInspectionSample => '抜き取り検品';
+
+  @override
+  String get whInspectionSampleBody =>
+      '検品待ちになりますが、各行の一部だけを確認します。抜き取り分が済むとその行は合格になります。';
+
+  @override
+  String get whInspectionSamplePercent => '抜き取り率';
+
+  @override
+  String get whInspectionSampleMin => '最低個数';
+
+  @override
+  String get whInspectionNoneBody =>
+      '検品をこのシステムの外（外部に依頼するなど）で行う倉庫向けです。入荷した品はそのまま使える在庫になります。';
+
+  @override
+  String get whInspectionApplies => '仕入先からの入荷に適用されます。倉庫間の移動には影響しません。';
 }
