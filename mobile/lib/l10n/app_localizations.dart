@@ -6781,19 +6781,19 @@ abstract class AppLocalizations {
   /// Title of the held-for-QC stock screen (0068).
   ///
   /// In ja, this message translates to:
-  /// **'検品待ち在庫'**
+  /// **'出荷できない在庫'**
   String get heldStockTitle;
 
   /// Held-stock screen: nothing held, which is the good state.
   ///
   /// In ja, this message translates to:
-  /// **'検品待ちの在庫はありません'**
+  /// **'出荷できない在庫はありません'**
   String get heldStockEmpty;
 
   /// Held-stock screen: what appears here and why it matters.
   ///
   /// In ja, this message translates to:
-  /// **'入荷時に検品が必要な商品は、検品が終わるまでここに並びます。出荷はできません。'**
+  /// **'検品待ち・保留・隔離・破損などの在庫はここに並びます。出荷はできません。'**
   String get heldStockEmptyBody;
 
   /// Held-stock screen with no active warehouse.
@@ -8633,6 +8633,150 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'概要（{country}）'**
   String dashOverviewCountry(String country);
+
+  /// Held stock / disposition (0098): heldStatusQcPending
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get heldStatusQcPending;
+
+  /// Held stock / disposition (0098): heldStatusHold
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get heldStatusHold;
+
+  /// Held stock / disposition (0098): heldStatusQuarantine
+  ///
+  /// In ja, this message translates to:
+  /// **'隔離'**
+  String get heldStatusQuarantine;
+
+  /// Held stock / disposition (0098): heldStatusDamaged
+  ///
+  /// In ja, this message translates to:
+  /// **'破損'**
+  String get heldStatusDamaged;
+
+  /// Held stock / disposition (0098): heldStatusExpired
+  ///
+  /// In ja, this message translates to:
+  /// **'期限切れ'**
+  String get heldStatusExpired;
+
+  /// Held stock / disposition (0098): heldStatusBlocked
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷停止'**
+  String get heldStatusBlocked;
+
+  /// Held stock / disposition (0098): heldAwaitsInspection
+  ///
+  /// In ja, this message translates to:
+  /// **'検品で合否を決めます'**
+  String get heldAwaitsInspection;
+
+  /// Held stock / disposition (0098): heldDispose
+  ///
+  /// In ja, this message translates to:
+  /// **'処理'**
+  String get heldDispose;
+
+  /// Held stock / disposition (0098): dispTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の処理'**
+  String dispTitle(String name);
+
+  /// Held stock / disposition (0098): dispQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get dispQuantity;
+
+  /// Held stock / disposition (0098): dispMax
+  ///
+  /// In ja, this message translates to:
+  /// **'最大 {qty} 点'**
+  String dispMax(int qty);
+
+  /// Held stock / disposition (0098): dispRelease
+  ///
+  /// In ja, this message translates to:
+  /// **'良品に戻す'**
+  String get dispRelease;
+
+  /// Held stock / disposition (0098): dispHold
+  ///
+  /// In ja, this message translates to:
+  /// **'保留にする'**
+  String get dispHold;
+
+  /// Held stock / disposition (0098): dispQuarantine
+  ///
+  /// In ja, this message translates to:
+  /// **'隔離する'**
+  String get dispQuarantine;
+
+  /// Held stock / disposition (0098): dispDamaged
+  ///
+  /// In ja, this message translates to:
+  /// **'破損にする'**
+  String get dispDamaged;
+
+  /// Held stock / disposition (0098): dispScrap
+  ///
+  /// In ja, this message translates to:
+  /// **'廃棄する'**
+  String get dispScrap;
+
+  /// Held stock / disposition (0098): dispReturn
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先へ返品'**
+  String get dispReturn;
+
+  /// Held stock / disposition (0098): dispReason
+  ///
+  /// In ja, this message translates to:
+  /// **'理由・返品番号など'**
+  String get dispReason;
+
+  /// Held stock / disposition (0098): dispReasonRequired
+  ///
+  /// In ja, this message translates to:
+  /// **'廃棄・返品には理由が必要です'**
+  String get dispReasonRequired;
+
+  /// Held stock / disposition (0098): dispOverMax
+  ///
+  /// In ja, this message translates to:
+  /// **'{qty} 点までです'**
+  String dispOverMax(int qty);
+
+  /// Held stock / disposition (0098): dispConfirm
+  ///
+  /// In ja, this message translates to:
+  /// **'実行'**
+  String get dispConfirm;
+
+  /// Held stock / disposition (0098): dispDone
+  ///
+  /// In ja, this message translates to:
+  /// **'{qty} 点を処理しました'**
+  String dispDone(int qty);
+
+  /// Held stock / disposition (0098): mvScrap
+  ///
+  /// In ja, this message translates to:
+  /// **'廃棄'**
+  String get mvScrap;
+
+  /// Held stock / disposition (0098): mvReturnToSupplier
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先返品'**
+  String get mvReturnToSupplier;
 }
 
 class _AppLocalizationsDelegate

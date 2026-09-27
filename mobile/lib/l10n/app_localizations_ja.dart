@@ -3556,13 +3556,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featExceptionsDesc => '入荷・検品・格納の不一致を確認して対応を記録する';
 
   @override
-  String get heldStockTitle => '検品待ち在庫';
+  String get heldStockTitle => '出荷できない在庫';
 
   @override
-  String get heldStockEmpty => '検品待ちの在庫はありません';
+  String get heldStockEmpty => '出荷できない在庫はありません';
 
   @override
-  String get heldStockEmptyBody => '入荷時に検品が必要な商品は、検品が終わるまでここに並びます。出荷はできません。';
+  String get heldStockEmptyBody => '検品待ち・保留・隔離・破損などの在庫はここに並びます。出荷はできません。';
 
   @override
   String get heldStockNoWarehouse => '倉庫を選ぶと表示できます';
@@ -4670,4 +4670,84 @@ class AppLocalizationsJa extends AppLocalizations {
   String dashOverviewCountry(String country) {
     return '概要（$country）';
   }
+
+  @override
+  String get heldStatusQcPending => '検品待ち';
+
+  @override
+  String get heldStatusHold => '保留';
+
+  @override
+  String get heldStatusQuarantine => '隔離';
+
+  @override
+  String get heldStatusDamaged => '破損';
+
+  @override
+  String get heldStatusExpired => '期限切れ';
+
+  @override
+  String get heldStatusBlocked => '出荷停止';
+
+  @override
+  String get heldAwaitsInspection => '検品で合否を決めます';
+
+  @override
+  String get heldDispose => '処理';
+
+  @override
+  String dispTitle(String name) {
+    return '$name の処理';
+  }
+
+  @override
+  String get dispQuantity => '数量';
+
+  @override
+  String dispMax(int qty) {
+    return '最大 $qty 点';
+  }
+
+  @override
+  String get dispRelease => '良品に戻す';
+
+  @override
+  String get dispHold => '保留にする';
+
+  @override
+  String get dispQuarantine => '隔離する';
+
+  @override
+  String get dispDamaged => '破損にする';
+
+  @override
+  String get dispScrap => '廃棄する';
+
+  @override
+  String get dispReturn => '仕入先へ返品';
+
+  @override
+  String get dispReason => '理由・返品番号など';
+
+  @override
+  String get dispReasonRequired => '廃棄・返品には理由が必要です';
+
+  @override
+  String dispOverMax(int qty) {
+    return '$qty 点までです';
+  }
+
+  @override
+  String get dispConfirm => '実行';
+
+  @override
+  String dispDone(int qty) {
+    return '$qty 点を処理しました';
+  }
+
+  @override
+  String get mvScrap => '廃棄';
+
+  @override
+  String get mvReturnToSupplier => '仕入先返品';
 }

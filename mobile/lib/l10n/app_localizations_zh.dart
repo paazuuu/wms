@@ -3547,13 +3547,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featExceptionsDesc => '确认并处理入库、检验、上架的不一致';
 
   @override
-  String get heldStockTitle => '待检验库存';
+  String get heldStockTitle => '无法出库的库存';
 
   @override
-  String get heldStockEmpty => '没有待检验的库存';
+  String get heldStockEmpty => '没有无法出库的库存';
 
   @override
-  String get heldStockEmptyBody => '入库时需要检验的商品会留在这里，直到检验完成。期间无法出库。';
+  String get heldStockEmptyBody => '待检、保留、隔离、破损等库存会列在这里，无法出库。';
 
   @override
   String get heldStockNoWarehouse => '选择仓库后显示';
@@ -4659,4 +4659,84 @@ class AppLocalizationsZh extends AppLocalizations {
   String dashOverviewCountry(String country) {
     return '概览（$country）';
   }
+
+  @override
+  String get heldStatusQcPending => '待检';
+
+  @override
+  String get heldStatusHold => '保留';
+
+  @override
+  String get heldStatusQuarantine => '隔离';
+
+  @override
+  String get heldStatusDamaged => '破损';
+
+  @override
+  String get heldStatusExpired => '过期';
+
+  @override
+  String get heldStatusBlocked => '停止出库';
+
+  @override
+  String get heldAwaitsInspection => '由检验决定合格与否';
+
+  @override
+  String get heldDispose => '处理';
+
+  @override
+  String dispTitle(String name) {
+    return '处理 $name';
+  }
+
+  @override
+  String get dispQuantity => '数量';
+
+  @override
+  String dispMax(int qty) {
+    return '最多 $qty 件';
+  }
+
+  @override
+  String get dispRelease => '恢复为良品';
+
+  @override
+  String get dispHold => '设为保留';
+
+  @override
+  String get dispQuarantine => '隔离';
+
+  @override
+  String get dispDamaged => '设为破损';
+
+  @override
+  String get dispScrap => '报废';
+
+  @override
+  String get dispReturn => '退回供应商';
+
+  @override
+  String get dispReason => '原因、退货单号等';
+
+  @override
+  String get dispReasonRequired => '报废或退货需要填写原因';
+
+  @override
+  String dispOverMax(int qty) {
+    return '最多 $qty 件';
+  }
+
+  @override
+  String get dispConfirm => '执行';
+
+  @override
+  String dispDone(int qty) {
+    return '已处理 $qty 件';
+  }
+
+  @override
+  String get mvScrap => '报废';
+
+  @override
+  String get mvReturnToSupplier => '退回供应商';
 }

@@ -41,15 +41,19 @@ final inspectionDetailProvider =
   );
 });
 
+/// Which held status the held-stock screen shows; null = every status.
+final heldStatusFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 /// Parcels on hand in the active warehouse that cannot ship until an inspection
 /// releases them (§13). Nearest expiry first, which is the server's order: the
 /// held parcel closest to running out of time is the one to inspect next.
 final heldStockProvider =
     FutureProvider.autoDispose<List<HeldStock>>((ref) async {
   final warehouseId = ref.watch(activeWarehouseIdProvider);
+  final status = ref.watch(heldStatusFilterProvider);
   final result = await ref
       .watch(inspectionRepositoryProvider)
-      .heldStock(warehouseId: warehouseId);
+      .heldStock(warehouseId: warehouseId, status: status);
   return result.when(
     success: (data) => data,
     failure: (f) => throw Exception(f.message),

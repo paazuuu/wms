@@ -3653,14 +3653,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Work through discrepancies from receiving, QC and put-away';
 
   @override
-  String get heldStockTitle => 'Held for QC';
+  String get heldStockTitle => 'Stock that cannot ship';
 
   @override
-  String get heldStockEmpty => 'Nothing is held for QC';
+  String get heldStockEmpty => 'Nothing is held';
 
   @override
   String get heldStockEmptyBody =>
-      'Goods that need inspecting on arrival wait here until QC releases them. They cannot ship.';
+      'Stock awaiting inspection, on hold, quarantined or damaged is listed here. It cannot ship.';
 
   @override
   String get heldStockNoWarehouse => 'Choose a warehouse to see this';
@@ -4787,4 +4787,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashOverviewCountry(String country) {
     return 'Overview ($country)';
   }
+
+  @override
+  String get heldStatusQcPending => 'Awaiting inspection';
+
+  @override
+  String get heldStatusHold => 'On hold';
+
+  @override
+  String get heldStatusQuarantine => 'Quarantined';
+
+  @override
+  String get heldStatusDamaged => 'Damaged';
+
+  @override
+  String get heldStatusExpired => 'Expired';
+
+  @override
+  String get heldStatusBlocked => 'Blocked';
+
+  @override
+  String get heldAwaitsInspection => 'Decided by its inspection';
+
+  @override
+  String get heldDispose => 'Resolve';
+
+  @override
+  String dispTitle(String name) {
+    return 'Resolve $name';
+  }
+
+  @override
+  String get dispQuantity => 'Quantity';
+
+  @override
+  String dispMax(int qty) {
+    return 'Up to $qty';
+  }
+
+  @override
+  String get dispRelease => 'Release as good';
+
+  @override
+  String get dispHold => 'Put on hold';
+
+  @override
+  String get dispQuarantine => 'Quarantine';
+
+  @override
+  String get dispDamaged => 'Mark damaged';
+
+  @override
+  String get dispScrap => 'Write off';
+
+  @override
+  String get dispReturn => 'Return to supplier';
+
+  @override
+  String get dispReason => 'Reason, return number…';
+
+  @override
+  String get dispReasonRequired =>
+      'A reason is required to write off or return';
+
+  @override
+  String dispOverMax(int qty) {
+    return 'No more than $qty';
+  }
+
+  @override
+  String get dispConfirm => 'Apply';
+
+  @override
+  String dispDone(int qty) {
+    return '$qty resolved';
+  }
+
+  @override
+  String get mvScrap => 'Write-off';
+
+  @override
+  String get mvReturnToSupplier => 'Return to supplier';
 }

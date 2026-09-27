@@ -519,9 +519,21 @@ class FakeInspectionRepository implements InspectionRepository {
   }
 
   @override
-  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId}) async {
+  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId, String? status}) async {
     lastHeldWarehouseId = warehouseId;
-    return ApiSuccess(held);
+    lastHeldStatus = status;
+    return ApiSuccess(status == null ? held : held.where((h) => h.statusCode == status).toList());
+  }
+
+  String? lastHeldStatus;
+  ({HeldStock row, HeldDisposition action, int quantity, String? note})? lastDisposition;
+
+  @override
+  Future<ApiResult<DispositionResult>> dispose(HeldStock row, HeldDisposition action,
+      {required int quantity, String? note}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    lastDisposition = (row: row, action: action, quantity: quantity, note: note);
+    return ApiSuccess(DispositionResult(quantity: quantity));
   }
 }
 

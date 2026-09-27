@@ -78,7 +78,7 @@ void main() {
     await _pump(tester, repo);
 
     expect(find.text('ロット NEAR'), findsOneWidget);
-    expect(find.textContaining('期限'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^期限 ')), findsOneWidget);
     // Days held is what turns a list into a priority.
     expect(find.text('4日経過'), findsOneWidget);
 
@@ -118,7 +118,7 @@ void main() {
     final repo = FakeInspectionRepository();
     await _pump(tester, repo);
 
-    expect(find.text('検品待ちの在庫はありません'), findsOneWidget);
+    expect(find.text('出荷できない在庫はありません'), findsOneWidget);
     expect(find.byIcon(Icons.verified_outlined), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
@@ -144,5 +144,87 @@ void main() {
     expect(repo.lastHeldWarehouseId, 3);
 
     await tester.binding.setSurfaceSize(null);
+  });
+
+  group('dealing with held goods (0098)', () {
+    HeldStock damaged() => HeldStock(
+          productId: 11,
+          warehouseId: 1,
+          quantity: 6,
+          janCode: '4903333333333',
+          productName: '割れたコップ',
+          statusCode: 'DAMAGED',
+          statusName: '破損',
+        );
+
+    testWidgets('goods awaiting inspection are left to the inspection', (tester) async {
+      final repo = FakeInspectionRepository()..held = [_fresh()];
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('検品で合否を決めます'), findsOneWidget);
+      expect(find.text('処理'), findsNothing);
+    });
+
+    testWidgets('a damaged parcel can be written off, and only with a reason', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      final repo = FakeInspectionRepository()..held = [damaged()];
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+
+      expect(find.text('破損'), findsWidgets);
+      await tester.tap(find.text('処理'));
+      await tester.pumpAndSettle();
+
+      // Moving it to the status it is already in is not offered.
+      expect(find.byKey(const ValueKey('disp-damaged')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('disp-scrap')));
+      await tester.pumpAndSettle();
+      expect(find.text('廃棄・返品には理由が必要です'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const ValueKey('disp-qty')), '4');
+      await tester.enterText(find.byKey(const ValueKey('disp-note')), '水濡れ');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('disp-apply')));
+      await tester.pumpAndSettle();
+
+      expect(repo.lastDisposition?.action, HeldDisposition.scrap);
+      expect(repo.lastDisposition?.quantity, 4);
+      expect(repo.lastDisposition?.note, '水濡れ');
+      expect(find.text('4 点を処理しました'), findsOneWidget);
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('releasing as good needs no reason, and more than held is refused',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      final repo = FakeInspectionRepository()..held = [damaged()];
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('処理'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const ValueKey('disp-qty')), '7');
+      await tester.pumpAndSettle();
+      expect(find.text('6 点までです'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const ValueKey('disp-qty')), '2');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('disp-apply')));
+      await tester.pumpAndSettle();
+      expect(repo.lastDisposition?.action, HeldDisposition.release);
+      expect(repo.lastDisposition?.quantity, 2);
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    testWidgets('a status chip narrows the list on the server', (tester) async {
+      final repo = FakeInspectionRepository()..held = [_fresh(), damaged()];
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('held-filter-DAMAGED')));
+      await tester.pumpAndSettle();
+      expect(repo.lastHeldStatus, 'DAMAGED');
+      expect(find.text('割れたコップ'), findsOneWidget);
+      expect(find.text('ノート'), findsNothing);
+    });
   });
 }

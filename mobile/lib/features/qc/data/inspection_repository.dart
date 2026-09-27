@@ -20,10 +20,19 @@ abstract class InspectionRepository {
   Future<ApiResult<Inspection>> complete(int inspectionId,
       {String? note, String? failStatus});
 
-  /// `qc_pending_stock` (0068): parcels on hand that cannot ship until an
-  /// inspection releases them. Read straight off the RPC rather than through the
-  /// edge function, because it is a read and 0068 scoped it itself.
-  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId});
+  /// `held_stock` (0098): parcels on hand that cannot ship — waiting for
+  /// inspection, or held / quarantined / damaged / expired / blocked. [status]
+  /// narrows it to one status. Read straight off the RPC rather than through
+  /// the edge function, because it is a read and scopes itself.
+  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId, String? status});
+
+  /// `dispose_held_stock` (0098): one decision on one bucket of held goods.
+  Future<ApiResult<DispositionResult>> dispose(
+    HeldStock row,
+    HeldDisposition action, {
+    required int quantity,
+    String? note,
+  });
 }
 
 class InspectionRepositoryImpl implements InspectionRepository {
@@ -112,10 +121,11 @@ class InspectionRepositoryImpl implements InspectionRepository {
   }
 
   @override
-  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId}) async {
+  Future<ApiResult<List<HeldStock>>> heldStock({int? warehouseId, String? status}) async {
     try {
-      final response = await _restDio.post('/rpc/qc_pending_stock', data: {
+      final response = await _restDio.post('/rpc/held_stock', data: {
         'p_warehouse_id': warehouseId,
+        'p_status': status,
       });
       final data = response.data;
       final list = data is List
@@ -127,6 +137,32 @@ class InspectionRepositoryImpl implements InspectionRepository {
           .toList(growable: false));
     } on DioException catch (e) {
       return mapDioError<List<HeldStock>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<DispositionResult>> dispose(
+    HeldStock row,
+    HeldDisposition action, {
+    required int quantity,
+    String? note,
+  }) async {
+    try {
+      final response = await _restDio.post('/rpc/dispose_held_stock', data: {
+        'p_warehouse_id': row.warehouseId,
+        'p_product_id': row.productId,
+        'p_from_status': row.statusCode,
+        'p_action': action.wire,
+        'p_quantity': quantity,
+        'p_lot_id': row.lotId,
+        'p_serial_id': row.serialId,
+        'p_note': (note == null || note.trim().isEmpty) ? null : note.trim(),
+      });
+      final data = response.data;
+      final map = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(DispositionResult.fromJson((map as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<DispositionResult>(e);
     }
   }
 }

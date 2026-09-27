@@ -26,6 +26,8 @@ import '../domain/stock_movement.dart';
     'COUNT' => (label: l10n.mvCount, tone: StatusTone.neutral),
     'TRANSFER_IN' => (label: l10n.mvTransferIn, tone: StatusTone.success),
     'TRANSFER_OUT' => (label: l10n.mvTransferOut, tone: StatusTone.info),
+    'SCRAP' => (label: l10n.mvScrap, tone: StatusTone.danger),
+    'RETURN_TO_SUPPLIER' => (label: l10n.mvReturnToSupplier, tone: StatusTone.warning),
     _ => (label: type, tone: StatusTone.neutral),
   };
 }

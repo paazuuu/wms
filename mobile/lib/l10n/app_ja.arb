@@ -2520,15 +2520,15 @@
   "@featExceptionsDesc": {
     "description": "Menu entry description for the exception queue."
   },
-  "heldStockTitle": "検品待ち在庫",
+  "heldStockTitle": "出荷できない在庫",
   "@heldStockTitle": {
     "description": "Title of the held-for-QC stock screen (0068)."
   },
-  "heldStockEmpty": "検品待ちの在庫はありません",
+  "heldStockEmpty": "出荷できない在庫はありません",
   "@heldStockEmpty": {
     "description": "Held-stock screen: nothing held, which is the good state."
   },
-  "heldStockEmptyBody": "入荷時に検品が必要な商品は、検品が終わるまでここに並びます。出荷はできません。",
+  "heldStockEmptyBody": "検品待ち・保留・隔離・破損などの在庫はここに並びます。出荷はできません。",
   "@heldStockEmptyBody": {
     "description": "Held-stock screen: what appears here and why it matters."
   },
@@ -4334,5 +4334,121 @@
         "type": "String"
       }
     }
+  },
+  "heldStatusQcPending": "検品待ち",
+  "@heldStatusQcPending": {
+    "description": "Held stock / disposition (0098): heldStatusQcPending"
+  },
+  "heldStatusHold": "保留",
+  "@heldStatusHold": {
+    "description": "Held stock / disposition (0098): heldStatusHold"
+  },
+  "heldStatusQuarantine": "隔離",
+  "@heldStatusQuarantine": {
+    "description": "Held stock / disposition (0098): heldStatusQuarantine"
+  },
+  "heldStatusDamaged": "破損",
+  "@heldStatusDamaged": {
+    "description": "Held stock / disposition (0098): heldStatusDamaged"
+  },
+  "heldStatusExpired": "期限切れ",
+  "@heldStatusExpired": {
+    "description": "Held stock / disposition (0098): heldStatusExpired"
+  },
+  "heldStatusBlocked": "出荷停止",
+  "@heldStatusBlocked": {
+    "description": "Held stock / disposition (0098): heldStatusBlocked"
+  },
+  "heldAwaitsInspection": "検品で合否を決めます",
+  "@heldAwaitsInspection": {
+    "description": "Held stock / disposition (0098): heldAwaitsInspection"
+  },
+  "heldDispose": "処理",
+  "@heldDispose": {
+    "description": "Held stock / disposition (0098): heldDispose"
+  },
+  "dispTitle": "{name} の処理",
+  "@dispTitle": {
+    "description": "Held stock / disposition (0098): dispTitle",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dispQuantity": "数量",
+  "@dispQuantity": {
+    "description": "Held stock / disposition (0098): dispQuantity"
+  },
+  "dispMax": "最大 {qty} 点",
+  "@dispMax": {
+    "description": "Held stock / disposition (0098): dispMax",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "dispRelease": "良品に戻す",
+  "@dispRelease": {
+    "description": "Held stock / disposition (0098): dispRelease"
+  },
+  "dispHold": "保留にする",
+  "@dispHold": {
+    "description": "Held stock / disposition (0098): dispHold"
+  },
+  "dispQuarantine": "隔離する",
+  "@dispQuarantine": {
+    "description": "Held stock / disposition (0098): dispQuarantine"
+  },
+  "dispDamaged": "破損にする",
+  "@dispDamaged": {
+    "description": "Held stock / disposition (0098): dispDamaged"
+  },
+  "dispScrap": "廃棄する",
+  "@dispScrap": {
+    "description": "Held stock / disposition (0098): dispScrap"
+  },
+  "dispReturn": "仕入先へ返品",
+  "@dispReturn": {
+    "description": "Held stock / disposition (0098): dispReturn"
+  },
+  "dispReason": "理由・返品番号など",
+  "@dispReason": {
+    "description": "Held stock / disposition (0098): dispReason"
+  },
+  "dispReasonRequired": "廃棄・返品には理由が必要です",
+  "@dispReasonRequired": {
+    "description": "Held stock / disposition (0098): dispReasonRequired"
+  },
+  "dispOverMax": "{qty} 点までです",
+  "@dispOverMax": {
+    "description": "Held stock / disposition (0098): dispOverMax",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "dispConfirm": "実行",
+  "@dispConfirm": {
+    "description": "Held stock / disposition (0098): dispConfirm"
+  },
+  "dispDone": "{qty} 点を処理しました",
+  "@dispDone": {
+    "description": "Held stock / disposition (0098): dispDone",
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "mvScrap": "廃棄",
+  "@mvScrap": {
+    "description": "Held stock / disposition (0098): mvScrap"
+  },
+  "mvReturnToSupplier": "仕入先返品",
+  "@mvReturnToSupplier": {
+    "description": "Held stock / disposition (0098): mvReturnToSupplier"
   }
 }

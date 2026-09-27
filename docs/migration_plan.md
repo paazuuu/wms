@@ -4761,6 +4761,33 @@ PENDING inspection with only the QC line (3). A late +2 gave that line 5,
 back to PENDING. 検品開始 returned the same inspection. Closing released 5,
 and a parcel after the close was refused.
 
+### 0098 — held and failed stock can be dealt with
+
+Nothing in the app could move HOLD, DAMAGED or QUARANTINE stock on, write it
+off, or send it back. It sat in on-hand forever.
+- **Movement types:** `SCRAP` and `RETURN_TO_SUPPLIER` are added. Neither is
+  outbound (`is_outbound_movement`), so both may draw on held statuses.
+- **`held_stock(warehouse, status?)`** lists every non-available status, or
+  one of them. `qc_pending_stock` stays for older clients.
+- **`dispose_held_stock(...)`:**
+  - `release` moves goods to OK, and they are promised to linked orders
+    (0092);
+  - `hold`, `quarantine` and `damaged` move goods between statuses;
+  - `scrap` and `return` take goods out parcel by parcel (FEFO) and require a
+    reason;
+  - status moves need inspection.confirm or inventory.adjust; scrap and
+    return need inventory.adjust;
+  - shippable stock is refused, as is more than the bucket holds.
+- **Client:** the held-stock screen (now 出荷できない在庫) has status chips, a
+  status pill and a 処理 sheet on every row except QC_PENDING, which says
+  「検品で合否を決めます」. The ledger names SCRAP and RETURN_TO_SUPPLIER.
+
+**Verified live** (10 DAMAGED): releasing 3 gave available 3; quarantining 2,
+then scrapping 4 (水濡れ), gave on hand 6; returning the 2 quarantined gave
+on hand 4, with ledger `ADJUST:10, SCRAP:-4, RETURN_TO_SUPPLIER:-2`. A scrap
+without a reason, a scrap from OK, and a release beyond the bucket were all
+refused.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
