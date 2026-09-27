@@ -902,6 +902,9 @@ security invariants:
 - [x] `record_receipt_item` (0067) — the receipt detail screen was read-only;
       a parcel found after a reconciliation already closed had no way in
       except raw SQL
+      (0092: a parcel added this way now also counts as received on the
+      receipt line, the delivery plan and the purchase order, so incoming
+      and the earmark promises follow it, and a receipt cancel reverses it)
 - [x] `fulfil_reservation` (0064) — `release_reservation`'s missing sibling,
       now a manual "mark as fulfilled" action beside release. (Corrected
       9/26: this first claimed `fulfilled_quantity` always stayed 0, but

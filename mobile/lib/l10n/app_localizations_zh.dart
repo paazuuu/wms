@@ -1669,6 +1669,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportAllWarehouses => '所有仓库';
 
   @override
+  String get reportCountry => '国家';
+
+  @override
+  String get reportAllCountries => '所有国家（每行显示国家）';
+
+  @override
   String get reportFilterStatus => '状态（可选）';
 
   @override
@@ -4288,6 +4294,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get poLinkQuantity => '关联数';
 
   @override
+  String poLinkReleaseWarning(int count) {
+    return '保存后将解除该订单已预留的 $count 个';
+  }
+
+  @override
+  String get poLinkReleaseTitle => '要解除预留吗？';
+
+  @override
+  String get poLinkReleaseBody =>
+      '已到货并预留的商品将从以下订单中移除。移除的数量会转给其他关联订单，若没有则回到可用库存。';
+
+  @override
+  String poLinkReleaseLine(String order, int count) {
+    return '$order：解除 $count 个';
+  }
+
+  @override
+  String get poLinkReleaseConfirm => '解除并保存';
+
+  @override
   String poLineLinkedAhead(int linked, int ahead) {
     return '关联订单 $linked ・预购 $ahead';
   }
@@ -4545,6 +4571,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chartEmpty => '尚无有库存的商品';
+
+  @override
+  String chartUnregisteredNote(int jans, String units) {
+    return '未登记商品的 JAN $jans 个（共 $units 件）未计入图表';
+  }
+
+  @override
+  String get chartUnregisteredAction => '去登记';
 
   @override
   String chartTopOf(int shown, int total) {

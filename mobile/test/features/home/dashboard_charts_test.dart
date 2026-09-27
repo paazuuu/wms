@@ -172,4 +172,40 @@ void main() {
       failure: (f) => fail('$f'),
     );
   });
+
+  testWidgets('stock under unregistered JANs is called out, with the way to register it (0094)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 900));
+    final chart = StockChartData(
+      warehouses: _chart.warehouses,
+      products: _chart.products,
+      productCount: 14,
+      countryCode: 'JP',
+      unregisteredJans: 2,
+      unregisteredUnits: 1200,
+    );
+    await _pump(tester, const StockBreakdownPanel(), FakeDashboardChartsRepository(chart: chart));
+
+    expect(find.text('商品マスタ未登録のJAN 2 件（計 1,200 個）はグラフに含まれていません'),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('chart-unregistered-open')), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('no note when every JAN is registered', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 900));
+    await _pump(tester, const StockBreakdownPanel(), FakeDashboardChartsRepository(chart: _chart));
+    expect(find.byKey(const ValueKey('chart-unregistered-open')), findsNothing);
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  test('StockChartData reads the unregistered figure', () {
+    final d = StockChartData.fromJson({
+      'unregistered': {'jan_count': 3, 'units': 40},
+    });
+    expect(d.unregisteredJans, 3);
+    expect(d.unregisteredUnits, 40);
+    expect(StockChartData.fromJson(const {}).unregisteredJans, 0);
+  });
 }

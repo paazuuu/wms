@@ -347,7 +347,12 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('po-link-edit-9')), '1');
     await tester.pump();
     expect(find.text('紐付け 1 ・見込み（紐付けなし）5'), findsOneWidget);
+    // B loses the 3 already reserved for it, so the save asks first.
+    expect(find.text('保存すると、この注文に引当済みの 3 個が解除されます'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+    expect(find.text('SO-000008 · 顧客B：3 個を解除'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('po-link-release-confirm')));
     await tester.pumpAndSettle();
 
     expect(repo.lastSetDemands!.lineId, 3);

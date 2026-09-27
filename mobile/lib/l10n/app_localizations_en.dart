@@ -1726,6 +1726,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportAllWarehouses => 'All warehouses';
 
   @override
+  String get reportCountry => 'Country';
+
+  @override
+  String get reportAllCountries => 'All countries (each row shows its country)';
+
+  @override
   String get reportFilterStatus => 'Status (optional)';
 
   @override
@@ -4407,6 +4413,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get poLinkQuantity => 'Linked';
 
   @override
+  String poLinkReleaseWarning(int count) {
+    return 'Saving releases $count already reserved for this order';
+  }
+
+  @override
+  String get poLinkReleaseTitle => 'Release reserved stock?';
+
+  @override
+  String get poLinkReleaseBody =>
+      'Goods that already arrived and were reserved will be taken off these orders. They go to the other linked orders, or back to free stock if there are none.';
+
+  @override
+  String poLinkReleaseLine(String order, int count) {
+    return '$order: release $count';
+  }
+
+  @override
+  String get poLinkReleaseConfirm => 'Release and save';
+
+  @override
   String poLineLinkedAhead(int linked, int ahead) {
     return 'Linked to orders $linked · bought ahead $ahead';
   }
@@ -4671,6 +4697,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chartEmpty => 'No product holds stock yet';
+
+  @override
+  String chartUnregisteredNote(int jans, String units) {
+    return '$jans JANs with no product record ($units units) are not in the chart';
+  }
+
+  @override
+  String get chartUnregisteredAction => 'Register';
 
   @override
   String chartTopOf(int shown, int total) {

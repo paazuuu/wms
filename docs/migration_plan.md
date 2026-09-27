@@ -4636,6 +4636,68 @@ and hosts the web client on the company's own VPS (no Cloudflare, no Stripe).
 - a headless Chromium with every non-local host blocked except Supabase,
   whose login screen rendered its Japanese text with no external fetch.
 
+### 0092 — a hand-added parcel counts as received; QC release keeps the earmarks
+
+- **`record_receipt_item`** (a parcel added by hand to an existing receipt):
+  - It posted the stock but told nobody upstream. The receipt line's actual
+    quantity, the delivery plan's `received_quantity` and the purchase
+    order's received figure stayed put. The goods still showed as incoming,
+    the 0086 earmark trigger never fired, and cancelling the receipt left
+    the parcel on the shelf.
+  - The public wrapper now does the bookkeeping `reconcile_delivery_plan`
+    does for its own parcels: the receipt line (created for a JAN the
+    receipt had none for), the plan line, plan and receipt status, and
+    exception detection.
+  - A cancelled receipt refuses parcels.
+  - The impl is unchanged, because reconcile calls it and counts its own
+    parcels.
+- **`move_stock_status_impl`** (inspection completion and manual status
+  moves both go through it) calls `honor_purchase_earmarks` for the product
+  when stock moves from a non-available status to an available one.
+  Released goods therefore go to the orders their purchase was linked to at
+  once, not at the next approval.
+
+**Verified live** (aborted transaction; SO for 5 linked to a PO for 5):
+- a receipt of 0, then +3 by hand: PO received 3, promised 3, plan
+  `partial`;
+- +2 into QC_PENDING: received 5, promised still 3, plan `completed`;
+- QC pass of 2: promised 5;
+- cancelling the receipt: on hand 0, received 0, promised 0;
+- a JAN with no receipt line got a `manual` line linked to its plan line;
+- a cancelled receipt refused a parcel.
+
+### Link editor — cutting a promise asks first
+
+Moving a purchase link after arrival gives the old order's reserved goods to
+the new links (0086, unchanged). The editor now shows 「保存すると、この注文に
+引当済みの n 個が解除されます」 on each order that would lose reserved goods,
+and asks 引当を解除しますか？ before saving, listing each order and count.
+Saving without any such cut does not ask.
+
+### 0093 — reports per country
+
+`run_report` only ever lists rows, never sums them. Every warehouse-bound
+source now:
+- carries `country_code` (`source_country_code` /
+  `destination_country_code` on transfers);
+- takes a `country_code` filter (either end, for transfers).
+
+The report builder shows a 国 picker once warehouses span two countries; it
+narrows the warehouse list and is saved with the report.
+
+**Verified live:** JP 10 plus CN 7 gave all 2, jp 1, CN 1; the CN filter
+with a JP warehouse gave 0.
+
+### 0094 — the stock chart names what it leaves out
+
+Stock under a JAN with no product record is in no bar. The chart now returns
+`unregistered {jan_count, units}` for the charted country. The dashboard
+says 「商品マスタ未登録のJAN n 件（計 x 個）はグラフに含まれていません」 with
+a 登録する button to 未登録JAN.
+
+**Verified live:** 2 unregistered JANs of 4 + 2 gave `{jan_count: 2,
+units: 6}`.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

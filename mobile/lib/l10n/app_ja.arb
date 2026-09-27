@@ -843,6 +843,8 @@
   "reportSourceProducts": "商品マスタ",
   "reportWarehouse": "倉庫",
   "reportAllWarehouses": "すべての倉庫",
+  "reportCountry": "国",
+  "reportAllCountries": "すべての国（行ごとに国を表示）",
   "reportFilterStatus": "ステータス（任意）",
   "reportFilterJan": "JANコード（任意）",
   "reportFilterCategory": "カテゴリ（任意）",
@@ -3762,6 +3764,39 @@
   "@poLinkQuantity": {
     "description": "poLinkQuantity"
   },
+  "poLinkReleaseWarning": "保存すると、この注文に引当済みの {count} 個が解除されます",
+  "@poLinkReleaseWarning": {
+    "description": "Link editor: a link cut below what has already been promised from this purchase's arrivals",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkReleaseTitle": "引当を解除しますか？",
+  "@poLinkReleaseTitle": {
+    "description": "Link editor: confirm dialog title before a save that releases promised stock"
+  },
+  "poLinkReleaseBody": "入荷済みで引当済みの商品を、次の注文から外します。外した分は他の紐付け先に回り、紐付け先がなければ空き在庫に戻ります。",
+  "@poLinkReleaseBody": {
+    "description": "Link editor: confirm dialog body explaining where released stock goes"
+  },
+  "poLinkReleaseLine": "{order}：{count} 個を解除",
+  "@poLinkReleaseLine": {
+    "description": "Link editor: one order in the release confirm dialog",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "poLinkReleaseConfirm": "解除して保存",
+  "@poLinkReleaseConfirm": {
+    "description": "Link editor: confirm button that saves and releases promised stock"
+  },
   "poLineLinkedAhead": "受注に紐付け {linked} ・見込み {ahead}",
   "@poLineLinkedAhead": {
     "description": "poLineLinkedAhead",
@@ -4153,6 +4188,22 @@
   "chartEmpty": "在庫のある商品はまだありません",
   "@chartEmpty": {
     "description": "chartEmpty"
+  },
+  "chartUnregisteredNote": "商品マスタ未登録のJAN {jans} 件（計 {units} 個）はグラフに含まれていません",
+  "@chartUnregisteredNote": {
+    "description": "Dashboard stock chart: stock under JANs with no product record is left out of the bars (0094)",
+    "placeholders": {
+      "jans": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "chartUnregisteredAction": "登録する",
+  "@chartUnregisteredAction": {
+    "description": "Dashboard stock chart: opens the unregistered-JAN list"
   },
   "chartTopOf": "在庫の多い上位 {shown} 商品（全 {total} 商品）",
   "@chartTopOf": {

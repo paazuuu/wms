@@ -3256,6 +3256,18 @@ abstract class AppLocalizations {
   /// **'すべての倉庫'**
   String get reportAllWarehouses;
 
+  /// No description provided for @reportCountry.
+  ///
+  /// In ja, this message translates to:
+  /// **'国'**
+  String get reportCountry;
+
+  /// No description provided for @reportAllCountries.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての国（行ごとに国を表示）'**
+  String get reportAllCountries;
+
   /// No description provided for @reportFilterStatus.
   ///
   /// In ja, this message translates to:
@@ -7998,6 +8010,36 @@ abstract class AppLocalizations {
   /// **'紐付け数'**
   String get poLinkQuantity;
 
+  /// Link editor: a link cut below what has already been promised from this purchase's arrivals
+  ///
+  /// In ja, this message translates to:
+  /// **'保存すると、この注文に引当済みの {count} 個が解除されます'**
+  String poLinkReleaseWarning(int count);
+
+  /// Link editor: confirm dialog title before a save that releases promised stock
+  ///
+  /// In ja, this message translates to:
+  /// **'引当を解除しますか？'**
+  String get poLinkReleaseTitle;
+
+  /// Link editor: confirm dialog body explaining where released stock goes
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済みで引当済みの商品を、次の注文から外します。外した分は他の紐付け先に回り、紐付け先がなければ空き在庫に戻ります。'**
+  String get poLinkReleaseBody;
+
+  /// Link editor: one order in the release confirm dialog
+  ///
+  /// In ja, this message translates to:
+  /// **'{order}：{count} 個を解除'**
+  String poLinkReleaseLine(String order, int count);
+
+  /// Link editor: confirm button that saves and releases promised stock
+  ///
+  /// In ja, this message translates to:
+  /// **'解除して保存'**
+  String get poLinkReleaseConfirm;
+
   /// poLineLinkedAhead
   ///
   /// In ja, this message translates to:
@@ -8453,6 +8495,18 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫のある商品はまだありません'**
   String get chartEmpty;
+
+  /// Dashboard stock chart: stock under JANs with no product record is left out of the bars (0094)
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ未登録のJAN {jans} 件（計 {units} 個）はグラフに含まれていません'**
+  String chartUnregisteredNote(int jans, String units);
+
+  /// Dashboard stock chart: opens the unregistered-JAN list
+  ///
+  /// In ja, this message translates to:
+  /// **'登録する'**
+  String get chartUnregisteredAction;
 
   /// chartTopOf
   ///

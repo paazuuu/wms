@@ -6,13 +6,18 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
+import '../../warehouse_context/presentation/warehouse_overview_screen.dart' show countryLabel;
 import '../application/report_providers.dart';
 import '../domain/report.dart';
 
 /// Custom/saved report builder (spec §46 checklist item 10, 0037) — pick a
 /// fixed data source, filter it, run it, and optionally save the
 /// source+filters combination by name for reuse. Never arbitrary SQL: each
-/// source is one of six the server defines.
+/// source is one of the fixed set the server defines.
+///
+/// With warehouses in more than one country, a country can be picked too
+/// (0093): the warehouse list narrows to it and every row names its country,
+/// so a column summed afterwards is never a cross-border total by accident.
 class ReportBuilderScreen extends ConsumerStatefulWidget {
   const ReportBuilderScreen({super.key});
 
@@ -23,6 +28,7 @@ class ReportBuilderScreen extends ConsumerStatefulWidget {
 class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   ReportSource _source = ReportSource.stockMovements;
   int? _warehouseId;
+  String? _countryCode;
   final _status = TextEditingController();
   final _janCode = TextEditingController();
   final _category = TextEditingController();
@@ -52,6 +58,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
 
   Map<String, dynamic> _filters() => {
         if (_warehouseId != null) 'warehouse_id': _warehouseId,
+        if (_countryCode != null) 'country_code': _countryCode,
         if (_status.text.trim().isNotEmpty) 'status': _status.text.trim(),
         if (_janCode.text.trim().isNotEmpty) 'jan_code': _janCode.text.trim(),
         if (_category.text.trim().isNotEmpty) 'category': _category.text.trim(),
@@ -102,6 +109,8 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       _warehouseId = def.filters['warehouse_id'] == null
           ? null
           : int.tryParse('${def.filters['warehouse_id']}');
+      final country = (def.filters['country_code'] ?? '').toString();
+      _countryCode = country.isEmpty ? null : country;
       _status.text = (def.filters['status'] ?? '').toString();
       _janCode.text = (def.filters['jan_code'] ?? '').toString();
       _category.text = (def.filters['category'] ?? '').toString();
@@ -179,16 +188,49 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
           warehouseAsync.when(
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
-            data: (overview) => DropdownButtonFormField<int?>(
-              initialValue: _warehouseId,
-              decoration: InputDecoration(labelText: l10n.reportWarehouse),
-              items: [
-                DropdownMenuItem(value: null, child: Text(l10n.reportAllWarehouses)),
+            data: (overview) {
+              final countries = {for (final w in overview.warehouses) w.countryCode}.toList();
+              final warehouses = [
                 for (final w in overview.warehouses)
-                  DropdownMenuItem(value: w.id, child: Text(w.name)),
-              ],
-              onChanged: (v) => setState(() => _warehouseId = v),
-            ),
+                  if (_countryCode == null || w.countryCode == _countryCode) w,
+              ];
+              return Column(
+                children: [
+                  if (countries.length > 1) ...[
+                    DropdownButtonFormField<String?>(
+                      key: const ValueKey('report-country'),
+                      initialValue: _countryCode,
+                      decoration: InputDecoration(labelText: l10n.reportCountry),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(l10n.reportAllCountries)),
+                        for (final c in countries)
+                          DropdownMenuItem(value: c, child: Text(countryLabel(l10n, c))),
+                      ],
+                      onChanged: (v) => setState(() {
+                        _countryCode = v;
+                        // A warehouse from another country would match nothing.
+                        final keep = overview.warehouses
+                            .any((w) => w.id == _warehouseId && (v == null || w.countryCode == v));
+                        if (!keep) _warehouseId = null;
+                      }),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                  DropdownButtonFormField<int?>(
+                    // Rebuilt when the country changes so a cleared choice shows.
+                    key: ValueKey('report-warehouse-${_countryCode ?? ''}'),
+                    initialValue: _warehouseId,
+                    decoration: InputDecoration(labelText: l10n.reportWarehouse),
+                    items: [
+                      DropdownMenuItem(value: null, child: Text(l10n.reportAllWarehouses)),
+                      for (final w in warehouses)
+                        DropdownMenuItem(value: w.id, child: Text(w.name)),
+                    ],
+                    onChanged: (v) => setState(() => _warehouseId = v),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.lg),
           TextField(

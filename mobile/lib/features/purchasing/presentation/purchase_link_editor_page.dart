@@ -21,7 +21,9 @@ final _candidatesProvider = FutureProvider.autoDispose
 ///
 /// Moving a link after the goods arrived moves the promise too — the server
 /// gives back what this purchase had promised to an order that lost its link
-/// and promises the arrived goods to the new one. Pops true once saved.
+/// and promises the arrived goods to the new one. Because that takes goods
+/// away from a customer, the editor says so on the order and asks before
+/// saving. Pops true once saved.
 class PurchaseLinkEditorPage extends ConsumerWidget {
   const PurchaseLinkEditorPage({super.key, required this.line});
 
@@ -77,6 +79,52 @@ class _EditorState extends ConsumerState<_Editor> {
   String? _candidateError(AppLocalizations l10n, PurchaseLinkCandidate c) =>
       _of(c.salesOrderLineId) > c.ordered ? l10n.poLinkOverOrdered(c.ordered) : null;
 
+  /// Units this purchase already promised to [c] that the new link would give
+  /// back: the server keeps at most the linked quantity promised.
+  int _releasing(PurchaseLinkCandidate c) {
+    final cut = c.filled - _of(c.salesOrderLineId);
+    return cut > 0 ? cut : 0;
+  }
+
+  String _orderLabel(PurchaseLinkCandidate c) =>
+      [c.soNumber ?? '#${c.salesOrderId}', c.customerName]
+          .where((s) => s.isNotEmpty)
+          .join(' · ');
+
+  Future<bool> _confirmRelease(List<PurchaseLinkCandidate> releasing) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.poLinkReleaseTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.poLinkReleaseBody),
+            const SizedBox(height: AppSpacing.md),
+            for (final c in releasing)
+              Text(l10n.poLinkReleaseLine(_orderLabel(c), _releasing(c)),
+                  style: Theme.of(dialogContext).textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            key: const ValueKey('po-link-release-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.poLinkReleaseConfirm),
+          ),
+        ],
+      ),
+    );
+    return ok ?? false;
+  }
+
   bool get _valid {
     final l10n = AppLocalizations.of(context);
     return _total <= widget.line.quantity &&
@@ -85,6 +133,9 @@ class _EditorState extends ConsumerState<_Editor> {
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
+    final releasing = widget.candidates.where((c) => _releasing(c) > 0).toList();
+    if (releasing.isNotEmpty && !await _confirmRelease(releasing)) return;
+    if (!mounted) return;
     setState(() => _busy = true);
     final result = await ref.read(purchaseOrderRepositoryProvider).setLineDemands(
       widget.line.id,
@@ -149,9 +200,7 @@ class _EditorState extends ConsumerState<_Editor> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                [c.soNumber ?? '#${c.salesOrderId}', c.customerName]
-                                    .where((s) => s.isNotEmpty)
-                                    .join(' · '),
+                                _orderLabel(c),
                                 style: theme.textTheme.titleSmall,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -167,6 +216,11 @@ class _EditorState extends ConsumerState<_Editor> {
                                 Text(l10n.poLinkFilled(c.filled),
                                     style: theme.textTheme.bodySmall
                                         ?.copyWith(color: scheme.primary)),
+                              if (_releasing(c) > 0)
+                                Text(l10n.poLinkReleaseWarning(_releasing(c)),
+                                    key: ValueKey('po-link-releasing-${c.salesOrderLineId}'),
+                                    style: theme.textTheme.bodySmall
+                                        ?.copyWith(color: scheme.error)),
                             ],
                           ),
                         ),

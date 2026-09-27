@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/reports/application/report_providers.dart';
 import 'package:wms_mobile/features/reports/domain/report.dart';
 import 'package:wms_mobile/features/reports/presentation/report_builder_screen.dart';
+import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
 import '../../support/harness.dart';
 
@@ -112,4 +114,54 @@ void main() {
     }
   });
 
+
+  testWidgets('with warehouses in two countries a report can be narrowed to one (0093)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeReportRepository();
+    await pumpApp(
+      tester,
+      const ReportBuilderScreen(),
+      overrides: [
+        reportRepositoryProvider.overrideWithValue(repo),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
+          WarehouseOverview(
+            warehouses: const [
+              Warehouse(id: 1, code: 'TKY', name: '東京倉庫'),
+              Warehouse(id: 2, code: 'SHA', name: '上海倉庫', countryCode: 'CN'),
+            ],
+            totals: const WarehouseTotals(),
+          ),
+        )),
+      ],
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('report-country')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('中国').last);
+    await tester.pumpAndSettle();
+
+    // Only the China warehouse is left to pick.
+    await tester.tap(find.text('すべての倉庫'));
+    await tester.pumpAndSettle();
+    expect(find.text('上海倉庫'), findsWidgets);
+    expect(find.text('東京倉庫'), findsNothing);
+    await tester.tap(find.text('すべての倉庫').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('実行'));
+    await tester.pumpAndSettle();
+    expect(repo.lastFilters?['country_code'], 'CN');
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('a single-country company sees no country picker', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    await _pump(tester, FakeReportRepository());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('report-country')), findsNothing);
+    await tester.binding.setSurfaceSize(null);
+  });
 }

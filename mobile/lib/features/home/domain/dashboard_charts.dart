@@ -89,7 +89,14 @@ class StockChartData extends Equatable {
     this.productCount = 0,
     this.countryCode = '',
     this.countries = const [],
+    this.unregisteredJans = 0,
+    this.unregisteredUnits = 0,
   });
+
+  /// Stock under JANs with no product record yet: not in any bar (0094), so
+  /// the dashboard says how much is left out and where to register it.
+  final int unregisteredJans;
+  final int unregisteredUnits;
 
   /// The one country charted — never a sum across a border (0090).
   final String countryCode;
@@ -115,10 +122,15 @@ class StockChartData extends Equatable {
         productCount: _asInt(json['product_count']),
         countryCode: (json['country_code'] ?? '').toString(),
         countries: [for (final c in (json['countries'] as List? ?? const [])) '$c'],
+        unregisteredJans: _asInt((json['unregistered'] as Map?)?['jan_count']),
+        unregisteredUnits: _asInt((json['unregistered'] as Map?)?['units']),
       );
 
   @override
-  List<Object?> get props => [warehouses, products, productCount, countryCode, countries];
+  List<Object?> get props => [
+        warehouses, products, productCount, countryCode, countries,
+        unregisteredJans, unregisteredUnits,
+      ];
 }
 
 /// One of the latest purchase orders, with where it is bound for.

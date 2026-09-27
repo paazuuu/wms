@@ -1672,6 +1672,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportAllWarehouses => 'すべての倉庫';
 
   @override
+  String get reportCountry => '国';
+
+  @override
+  String get reportAllCountries => 'すべての国（行ごとに国を表示）';
+
+  @override
   String get reportFilterStatus => 'ステータス（任意）';
 
   @override
@@ -4296,6 +4302,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get poLinkQuantity => '紐付け数';
 
   @override
+  String poLinkReleaseWarning(int count) {
+    return '保存すると、この注文に引当済みの $count 個が解除されます';
+  }
+
+  @override
+  String get poLinkReleaseTitle => '引当を解除しますか？';
+
+  @override
+  String get poLinkReleaseBody =>
+      '入荷済みで引当済みの商品を、次の注文から外します。外した分は他の紐付け先に回り、紐付け先がなければ空き在庫に戻ります。';
+
+  @override
+  String poLinkReleaseLine(String order, int count) {
+    return '$order：$count 個を解除';
+  }
+
+  @override
+  String get poLinkReleaseConfirm => '解除して保存';
+
+  @override
   String poLineLinkedAhead(int linked, int ahead) {
     return '受注に紐付け $linked ・見込み $ahead';
   }
@@ -4555,6 +4581,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get chartEmpty => '在庫のある商品はまだありません';
+
+  @override
+  String chartUnregisteredNote(int jans, String units) {
+    return '商品マスタ未登録のJAN $jans 件（計 $units 個）はグラフに含まれていません';
+  }
+
+  @override
+  String get chartUnregisteredAction => '登録する';
 
   @override
   String chartTopOf(int shown, int total) {

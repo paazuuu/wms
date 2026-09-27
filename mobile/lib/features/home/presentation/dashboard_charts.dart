@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../product/presentation/unlinked_jan_screen.dart';
 import '../../purchasing/domain/purchase_order.dart';
 import '../../purchasing/presentation/purchase_order_detail_screen.dart';
 import '../../purchasing/presentation/purchase_order_status_ui.dart';
@@ -187,6 +188,7 @@ class _StockBreakdownPanelState extends ConsumerState<StockBreakdownPanel> {
                         padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                         child: Text(l10n.chartEmpty, style: theme.textTheme.bodyMedium),
                       ),
+                      if (data.unregisteredJans > 0) _UnregisteredNote(data: data),
                     ],
                   );
                 }
@@ -214,12 +216,51 @@ class _StockBreakdownPanelState extends ConsumerState<StockBreakdownPanel> {
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
+                    if (data.unregisteredJans > 0) _UnregisteredNote(data: data),
                   ],
                 );
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Stock the bars leave out because its JAN has no product record (0094),
+/// with the way to fix it.
+class _UnregisteredNote extends StatelessWidget {
+  const _UnregisteredNote({required this.data});
+
+  final StockChartData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final nf = NumberFormat.decimalPattern();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.chartUnregisteredNote(
+                  data.unregisteredJans, nf.format(data.unregisteredUnits)),
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+          TextButton(
+            key: const ValueKey('chart-unregistered-open'),
+            onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const UnlinkedJanScreen())),
+            child: Text(l10n.chartUnregisteredAction),
+          ),
+        ],
       ),
     );
   }
