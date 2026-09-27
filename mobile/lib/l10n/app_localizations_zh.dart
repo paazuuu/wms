@@ -36,6 +36,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get errorReceiptInspected => '检验已完成的入库无法取消。如需修正库存，请使用库存调整。';
 
   @override
+  String get errorInspectionClosedReceiveNew =>
+      '该入库的检验已完成。追加的商品请作为同一到货计划的新入库进行核对。';
+
+  @override
   String get languageTooltip => '选择语言';
 
   @override

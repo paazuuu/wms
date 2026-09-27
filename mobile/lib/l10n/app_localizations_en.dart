@@ -38,6 +38,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A receipt whose inspection is completed cannot be cancelled. Use a stock adjustment to correct the stock.';
 
   @override
+  String get errorInspectionClosedReceiveNew =>
+      'This receipt\'s inspection is already closed. Receive the extra goods as a new receipt for the same delivery.';
+
+  @override
   String get languageTooltip => 'Select language';
 
   @override

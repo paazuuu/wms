@@ -18,9 +18,13 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (_notPermittedPattern.hasMatch(rawMessage)) {
     return l10n.errorPermissionDenied;
   }
-  // 0095/0096: an inspection is closed once, and a receipt whose inspection
-  // closed cannot be cancelled. Both are reached by an ordinary tap (a second
-  // device, a stale screen), so they get words rather than SQL.
+  // 0095–0097: an inspection is closed once, a receipt whose inspection closed
+  // cannot be cancelled, and it takes no more goods for inspection. All are
+  // reached by an ordinary tap (a second device, a stale screen), so they get
+  // words rather than SQL.
+  if (rawMessage.contains('receive these goods as a new receipt')) {
+    return l10n.errorInspectionClosedReceiveNew;
+  }
   if (rawMessage.contains('has a completed inspection')) {
     return l10n.errorReceiptInspected;
   }

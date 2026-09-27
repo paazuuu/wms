@@ -154,6 +154,12 @@ abstract class AppLocalizations {
   /// **'検品が完了した入荷は取り消せません。在庫を直す場合は在庫調整を使ってください。'**
   String get errorReceiptInspected;
 
+  /// No description provided for @errorInspectionClosedReceiveNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'この入荷の検品はすでに完了しています。追加の商品は、同じ入荷予定の新しい入荷として照合してください。'**
+  String get errorInspectionClosedReceiveNew;
+
   /// No description provided for @languageTooltip.
   ///
   /// In ja, this message translates to:

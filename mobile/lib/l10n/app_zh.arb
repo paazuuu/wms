@@ -9,6 +9,7 @@
   "errorPermissionDenied": "您没有执行此操作的权限。",
   "errorInspectionCompleted": "该检验已完成。请重新打开查看最新结果。",
   "errorReceiptInspected": "检验已完成的入库无法取消。如需修正库存，请使用库存调整。",
+  "errorInspectionClosedReceiveNew": "该入库的检验已完成。追加的商品请作为同一到货计划的新入库进行核对。",
   "languageTooltip": "选择语言",
   "textSizeMenu": "文字大小",
   "textSizeNormal": "标准",

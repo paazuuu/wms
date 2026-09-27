@@ -37,6 +37,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorReceiptInspected => '検品が完了した入荷は取り消せません。在庫を直す場合は在庫調整を使ってください。';
 
   @override
+  String get errorInspectionClosedReceiveNew =>
+      'この入荷の検品はすでに完了しています。追加の商品は、同じ入荷予定の新しい入荷として照合してください。';
+
+  @override
   String get languageTooltip => '言語を選択';
 
   @override

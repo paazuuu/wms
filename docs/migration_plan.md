@@ -4736,6 +4736,31 @@ Regression, a lot-tracked product that needs no QC: 6 received as 2 HOLD
 (lot L1) plus 4 OK; available 4, PO received 6; the cancel took both parcels
 back to 0.
 
+### 0097 — goods that land in inspection open their own inspection
+
+An inspection used to exist only once someone pressed 検品開始. QC_PENDING
+goods sat unshippable with nothing in the inspection list. An AFTER INSERT
+trigger on `receipt_items` now handles every path (reconcile, a parcel added
+by hand):
+- **No inspection yet:** a QC_PENDING parcel opens one (PENDING), with a line
+  per receipt line that holds goods awaiting inspection. Lines received
+  straight to OK are left out, so closing never waits on them.
+- **Open inspection:** the parcel adds to its line, or adds a line. A line
+  already judged returns to 未チェック.
+- **Closed inspection:** refused. Its moves are done, so the goods would never
+  be released. Receive them as a new receipt instead
+  (`errorInspectionClosedReceiveNew`).
+
+`record_receipt_item` now makes the receipt line before recording the
+parcel, so the inspection line knows its receipt line (0095's cap depends on
+it). 検品開始 is unchanged: it opens the same inspection, or covers every line
+of a receipt with nothing in QC.
+
+**Verified live:** a receipt of QC item 3 plus ordinary item 3 opened one
+PENDING inspection with only the QC line (3). A late +2 gave that line 5,
+back to PENDING. 検品開始 returned the same inspection. Closing released 5,
+and a parcel after the close was refused.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

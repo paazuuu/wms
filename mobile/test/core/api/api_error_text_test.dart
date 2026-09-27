@@ -43,6 +43,14 @@ void main() {
           'この検品はすでに完了しています。画面を開き直して最新の結果を確認してください。');
     });
 
+    test('a parcel for a receipt whose inspection closed is explained (0097)', () {
+      expect(
+        humanizeApiErrorMessage(ja,
+            'the inspection of receipt 31 is closed; receive these goods as a new receipt for this delivery'),
+        'この入荷の検品はすでに完了しています。追加の商品は、同じ入荷予定の新しい入荷として照合してください。',
+      );
+    });
+
     test('cancelling an inspected receipt is explained (0096)', () {
       expect(
         humanizeApiErrorMessage(ja,
