@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
 import 'package:wms_mobile/features/qc/application/inspection_providers.dart';
+import 'package:wms_mobile/features/qc/application/qc_scan_mode.dart';
+import 'package:wms_mobile/features/qc/domain/delivery_note.dart';
 import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/qc/presentation/inspection_detail_screen.dart';
@@ -64,6 +66,7 @@ Future<ProviderContainer> _pump(
   FakeAttachmentRepository? attachments,
 }) async {
   final container = ProviderContainer(overrides: [
+    fakeScanModeOverride(),
     inspectionRepositoryProvider.overrideWithValue(repo),
     attachmentRepositoryProvider
         .overrideWithValue(attachments ?? FakeAttachmentRepository()),
@@ -401,9 +404,10 @@ void main() {
       expect(find.byKey(const ValueKey('qc-pass-all-11')), findsOneWidget);
     });
 
-    testWidgets('each scan counts one piece, and the line says when it matches', (tester) async {
+    testWidgets('with per-piece scanning on, each scan counts one piece', (tester) async {
       final repo = FakeInspectionRepository(twoLines());
-      await _pump(tester, repo);
+      final container = await _pump(tester, repo);
+      await container.read(scanCountsPieceProvider.notifier).set(true);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('qc-count-state-11')), findsOneWidget);
       expect(find.text('未カウント'), findsNWidgets(2));
@@ -414,7 +418,8 @@ void main() {
         await tester.pumpAndSettle();
       }
       expect(find.text('ノート：2 / 3'), findsOneWidget);
-      expect(find.text('不足 1'), findsOneWidget);
+      // Still open, so it is "to go", not yet a shortage.
+      expect(find.text('残り 1'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField).first, '4900000000011');
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -422,7 +427,10 @@ void main() {
       expect(find.text('ノート の数量が一致しました（3 点）'), findsOneWidget);
       expect(find.text('数量一致'), findsOneWidget);
       expect(find.text('数量一致 1 / 2 行'), findsOneWidget);
-      expect(repo.counts.every((c) => c.add && c.quantity == 1 && c.itemId == 11), isTrue);
+      expect(
+          repo.counts.every((c) =>
+              c.mode == InspectionCountMode.add && c.quantity == 1 && c.itemId == 11),
+          isTrue);
     });
 
     testWidgets('the count can be typed instead', (tester) async {
@@ -434,7 +442,7 @@ void main() {
       await tester.enterText(find.byKey(const ValueKey('qc-count-field')), '6');
       await tester.tap(find.byKey(const ValueKey('qc-count-save')));
       await tester.pumpAndSettle();
-      expect(repo.counts.last, (itemId: 10, quantity: 6, add: false));
+      expect(repo.counts.last, (itemId: 10, quantity: 6, mode: InspectionCountMode.set));
       expect(find.text('過剰 1'), findsOneWidget);
     });
 
@@ -451,6 +459,102 @@ void main() {
       expect(repo.lastWrongItem?.jan, '1111');
       expect(find.text('誤品として記録しました'), findsOneWidget);
       expect(repo.lastPassed, isNull);
+    });
+  });
+
+  group('cartons, the delivery note and carrying on tomorrow (0101)', () {
+    Inspection cartons({int? counted, int? note}) => Inspection(
+          id: 1,
+          status: QcResult.pending,
+          items: [
+            InspectionItem(
+              id: 20, janCode: '4900000000020', productName: 'ボールペン',
+              expectedQuantity: 600, actualQuantity: 600,
+              passedQuantity: counted ?? 0, failedQuantity: 0, discrepancy: 0,
+              result: counted == null ? QcResult.pending : QcResult.pass,
+              countedQuantity: counted, noteQuantity: note,
+            ),
+          ],
+        );
+
+    testWidgets('by default a scan picks the line and asks for the quantity', (tester) async {
+      final repo = FakeInspectionRepository(cartons());
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, '4900000000020');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('qc-count-field')), findsOneWidget);
+      expect(repo.counts, isEmpty);
+    });
+
+    testWidgets('four cartons today, two tomorrow: the count adds up', (tester) async {
+      final repo = FakeInspectionRepository(cartons(counted: 400));
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('残り 200'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('qc-count-20')));
+      await tester.pumpAndSettle();
+      // Something is counted already, so the dialog adds by default.
+      expect(find.text('これまで 400 / 入荷 600'), findsOneWidget);
+      await tester.enterText(find.byKey(const ValueKey('qc-count-field')), '200');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('qc-count-save')));
+      await tester.pumpAndSettle();
+      expect(repo.counts.last, (itemId: 20, quantity: 200, mode: InspectionCountMode.add));
+      expect(find.text('数量一致'), findsOneWidget);
+    });
+
+    testWidgets('a tick checks the line; unticking takes it back', (tester) async {
+      final repo = FakeInspectionRepository(cartons(note: 600));
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('納品書 600'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('qc-tick-20')));
+      await tester.pumpAndSettle();
+      expect(repo.counts.last.mode, InspectionCountMode.check);
+      expect(find.text('数量一致'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('qc-tick-20')));
+      await tester.pumpAndSettle();
+      expect(repo.counts.last.mode, InspectionCountMode.clear);
+      expect(find.text('未カウント'), findsOneWidget);
+    });
+
+    testWidgets('the per-piece setting is in the menu', (tester) async {
+      final repo = FakeInspectionRepository(cartons());
+      final container = await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('qc-settings')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('スキャンで1個ずつ数える'));
+      await tester.pumpAndSettle();
+      expect(container.read(scanCountsPieceProvider), isTrue);
+      expect(find.text('スキャン1回で1個数えます'), findsOneWidget);
+    });
+
+    test('delivery-note lines without a JAN are kept for matching', () {
+      final lines = parseDeliveryNoteLines({
+        'data': {
+          'lines': [
+            {'jan_code': '4900000000020', 'product_name': 'ボールペン', 'quantity': 600},
+            {'jan_code': '', 'product_code': 'NB-A5', 'product_name': 'ノート', 'quantity': '300'},
+            {'jan_code': '', 'product_name': ''},
+          ],
+        },
+      });
+      expect(lines.length, 2);
+      expect(lines[1].productCode, 'NB-A5');
+      expect(lines[1].quantity, 300);
+      expect(lines[1].toJson()['jan_code'], '');
+      final applied = DeliveryNoteApplyResult.fromJson({
+        'matched': [{'item_id': 1}],
+        'unmatched': [{'product_name': '謎の商品', 'quantity': 5}],
+      });
+      expect(applied.matched, 1);
+      expect(applied.unmatched.single.label, '謎の商品');
     });
   });
 }

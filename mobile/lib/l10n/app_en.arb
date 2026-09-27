@@ -1856,5 +1856,21 @@
   "qcCompleteDefaultTitle": "Some lines are unchecked",
   "qcCompleteDefaultBody": "{n} unchecked lines will be completed as good. Counted lines settle at their count.",
   "qcCompleteConfirm": "Complete",
-  "qcEffectCountShort": "{n} that could not be counted went on hold"
+  "qcEffectCountShort": "{n} that could not be counted went on hold",
+  "qcScanPieceMode": "Each scan counts one piece",
+  "qcScanPieceOn": "Each scan now counts one piece",
+  "qcScanPieceOff": "A scan now picks the line to enter its quantity",
+  "qcReadNote": "Read delivery note",
+  "qcNoteApplied": "{matched} delivery-note lines applied",
+  "qcNoteNone": "No lines could be read from the delivery note",
+  "qcNoteUnmatchedTitle": "Delivery-note lines with no match",
+  "qcNoteUnmatchedBody": "These lines match nothing on this delivery. Record any wrong goods as a wrong item.",
+  "qcNoteQuantity": "Note {n}",
+  "qcCountRemaining": "{n} to go",
+  "qcCountModeAdd": "Add",
+  "qcCountModeSet": "Set total",
+  "qcCountSoFar": "So far {counted} / received {received}",
+  "qcCountAddHint": "Counted this time (e.g. one carton)",
+  "qcCountSetHint": "Total counted",
+  "qcTick": "Goods and count checked"
 }

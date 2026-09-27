@@ -4938,4 +4938,61 @@ class AppLocalizationsJa extends AppLocalizations {
   String qcEffectCountShort(int n) {
     return '数えられなかった $n 点を保留に移しました';
   }
+
+  @override
+  String get qcScanPieceMode => 'スキャンで1個ずつ数える';
+
+  @override
+  String get qcScanPieceOn => 'スキャン1回で1個数えます';
+
+  @override
+  String get qcScanPieceOff => 'スキャンで商品を選び、数量を入力します';
+
+  @override
+  String get qcReadNote => '納品書を読み取る';
+
+  @override
+  String qcNoteApplied(int matched) {
+    return '納品書の $matched 行を検品に反映しました';
+  }
+
+  @override
+  String get qcNoteNone => '納品書から明細を読み取れませんでした';
+
+  @override
+  String get qcNoteUnmatchedTitle => '照合できなかった納品書の行';
+
+  @override
+  String get qcNoteUnmatchedBody =>
+      '次の行は今回の入荷の商品と一致しませんでした。品違いなら誤品として記録してください。';
+
+  @override
+  String qcNoteQuantity(int n) {
+    return '納品書 $n';
+  }
+
+  @override
+  String qcCountRemaining(int n) {
+    return '残り $n';
+  }
+
+  @override
+  String get qcCountModeAdd => '追加する';
+
+  @override
+  String get qcCountModeSet => '合計を直す';
+
+  @override
+  String qcCountSoFar(int counted, int received) {
+    return 'これまで $counted / 入荷 $received';
+  }
+
+  @override
+  String get qcCountAddHint => '今回数えた数（箱の入数など）';
+
+  @override
+  String get qcCountSetHint => '数えた合計';
+
+  @override
+  String get qcTick => '品と数を確認';
 }

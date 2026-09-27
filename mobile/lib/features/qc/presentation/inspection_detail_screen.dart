@@ -13,6 +13,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../application/attachment_providers.dart';
 import '../application/inspection_providers.dart';
+import '../application/qc_scan_mode.dart';
+import '../data/delivery_note_reader.dart';
+import '../domain/delivery_note.dart';
 import '../domain/attachment.dart';
 import '../domain/inspection.dart';
 import 'qc_result_ui.dart';
@@ -36,6 +39,28 @@ class InspectionDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(async.valueOrNull?.deliveryNumber ?? l10n.qcTitle),
+        actions: [
+          // Per piece, or pick-and-type (0101); kept on the device.
+          PopupMenuButton<bool>(
+            key: const ValueKey('qc-settings'),
+            icon: const Icon(Icons.tune),
+            onSelected: (v) {
+              ref.read(scanCountsPieceProvider.notifier).set(v);
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(
+                    content: Text(v ? l10n.qcScanPieceOn : l10n.qcScanPieceOff)));
+            },
+            itemBuilder: (_) => [
+              CheckedPopupMenuItem<bool>(
+                key: const ValueKey('qc-scan-mode'),
+                value: !ref.read(scanCountsPieceProvider),
+                checked: ref.read(scanCountsPieceProvider),
+                child: Text(l10n.qcScanPieceMode),
+              ),
+            ],
+          ),
+        ],
       ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
@@ -230,11 +255,16 @@ class _BodyState extends ConsumerState<_Body> {
       return;
     }
     final line = item;
+    // Cartons of hundreds: a scan picks the line and the quantity is typed.
+    if (!ref.read(scanCountsPieceProvider)) {
+      await _enterCount(line);
+      return;
+    }
     final name = line.productName.isNotEmpty ? line.productName : line.janCode;
     setState(() => _busy = true);
     final result = await ref
         .read(inspectionRepositoryProvider)
-        .recordCount(line.id, 1, add: true);
+        .recordCount(line.id, 1, mode: InspectionCountMode.add);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
@@ -281,18 +311,95 @@ class _BodyState extends ConsumerState<_Body> {
   /// Type the count instead of scanning each piece.
   Future<void> _enterCount(InspectionItem item) async {
     final l10n = AppLocalizations.of(context);
-    final value = await showDialog<int>(
+    final entry = await showDialog<({InspectionCountMode mode, int value})>(
       context: context,
       builder: (_) => _CountDialog(item: item),
     );
-    if (value == null || !mounted) return;
+    if (entry == null || !mounted) return;
     setState(() => _busy = true);
-    final result = await ref.read(inspectionRepositoryProvider).recordCount(item.id, value);
+    final result = await ref
+        .read(inspectionRepositoryProvider)
+        .recordCount(item.id, entry.value, mode: entry.mode);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
       success: (_) => ref.invalidate(inspectionDetailProvider(_inspection.id)),
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  /// Ticked: right goods, about the right number (0101). Unticking takes it
+  /// back.
+  Future<void> _tick(InspectionItem item, bool on) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final result = await ref.read(inspectionRepositoryProvider).recordCount(
+        item.id, 0,
+        mode: on ? InspectionCountMode.check : InspectionCountMode.clear);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) => ref.invalidate(inspectionDetailProvider(_inspection.id)),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  /// A photo of the supplier's delivery note, laid against the inspection
+  /// (0101): matched lines show the note's figure; the rest are listed.
+  Future<void> _readDeliveryNote() async {
+    final l10n = AppLocalizations.of(context);
+    final XFile? shot;
+    try {
+      shot = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 90);
+    } on PlatformException {
+      _snack(l10n.ocrUnavailable, danger: true);
+      return;
+    }
+    if (shot == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final lines = await ref
+          .read(deliveryNoteReaderProvider)
+          .read(shot.path, deliveryPlanId: _inspection.deliveryPlanId);
+      if (!mounted) return;
+      if (lines.isEmpty) {
+        _snack(l10n.qcNoteNone, danger: true);
+        return;
+      }
+      await _applyNote(lines);
+    } catch (e) {
+      if (mounted) _snack(humanizeApiErrorMessage(l10n, '$e'), danger: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _applyNote(List<DeliveryNoteLine> lines) async {
+    final l10n = AppLocalizations.of(context);
+    final result =
+        await ref.read(inspectionRepositoryProvider).applyDeliveryNote(_inspection.id, lines);
+    if (!mounted) return;
+    await result.when(
+      success: (r) async {
+        ref.invalidate(inspectionDetailProvider(_inspection.id));
+        _snack(l10n.qcNoteApplied(r.matched));
+        if (r.unmatched.isNotEmpty) {
+          await showModalBottomSheet<void>(
+            context: context,
+            showDragHandle: true,
+            builder: (sheetContext) => _UnmatchedNoteSheet(
+              lines: r.unmatched,
+              onWrongItem: (line) async {
+                Navigator.pop(sheetContext);
+                final jan = line.janCode ?? line.productCode ?? line.productName ?? '';
+                if (jan.isNotEmpty) await _offerWrongItem(jan);
+              },
+            ),
+          );
+        }
+      },
+      failure: (f) async =>
+          _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -420,6 +527,12 @@ class _BodyState extends ConsumerState<_Body> {
                   icon: const Icon(Icons.photo_camera_outlined),
                   onPressed: _busy ? null : _scanWithCamera,
                 ),
+                IconButton(
+                  key: const ValueKey('qc-read-note'),
+                  tooltip: l10n.qcReadNote,
+                  icon: const Icon(Icons.document_scanner_outlined),
+                  onPressed: _busy ? null : _readDeliveryNote,
+                ),
               ],
             ),
           ),
@@ -440,6 +553,8 @@ class _BodyState extends ConsumerState<_Body> {
                       onTap: open ? () => _editItem(item) : null,
                       onPassAll: open && !_busy ? () => _passAll(item) : null,
                       onEnterCount: open && !_busy ? () => _enterCount(item) : null,
+                      onTick: open && !_busy ? (v) => _tick(item, v) : null,
+                      inspectionOpen: _inspection.isOpen,
                     );
                   },
                 ),
@@ -478,7 +593,20 @@ class _BodyState extends ConsumerState<_Body> {
 }
 
 class _ItemCard extends StatelessWidget {
-  const _ItemCard({required this.item, this.onTap, this.onPassAll, this.onEnterCount});
+  const _ItemCard({
+    required this.item,
+    this.onTap,
+    this.onPassAll,
+    this.onEnterCount,
+    this.onTick,
+    this.inspectionOpen = true,
+  });
+
+  /// Tick (right goods, about the right number) or untick the line (0101).
+  final ValueChanged<bool>? onTick;
+
+  /// While open, a short count is "to go", not yet a shortage.
+  final bool inspectionOpen;
 
   final InspectionItem item;
   final VoidCallback? onTap;
@@ -509,6 +637,15 @@ class _ItemCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  if (onTick != null || item.isCounted)
+                    Tooltip(
+                      message: l10n.qcTick,
+                      child: Checkbox(
+                        key: ValueKey('qc-tick-${item.id}'),
+                        value: item.isCounted,
+                        onChanged: onTick == null ? null : (v) => onTick!(v ?? false),
+                      ),
+                    ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,7 +713,9 @@ class _ItemCard extends StatelessWidget {
                         ? StatusTone.neutral
                         : item.countMatches
                             ? StatusTone.success
-                            : StatusTone.danger,
+                            : (inspectionOpen && item.countDifference! < 0)
+                                ? StatusTone.warning
+                                : StatusTone.danger,
                     icon: !item.isCounted
                         ? Icons.pin_outlined
                         : item.countMatches
@@ -587,13 +726,26 @@ class _ItemCard extends StatelessWidget {
                         : item.countMatches
                             ? l10n.qcCountMatch
                             : item.countDifference! < 0
-                                ? l10n.qcCountShort(-item.countDifference!)
+                                ? (inspectionOpen
+                                    ? l10n.qcCountRemaining(-item.countDifference!)
+                                    : l10n.qcCountShort(-item.countDifference!))
                                 : l10n.qcCountOver(item.countDifference!),
                     dense: true,
                   ),
                   if (item.isCounted)
                     Text(l10n.qcCountLine(item.countedQuantity!, item.actualQuantity),
                         style: theme.textTheme.bodySmall),
+                  // What the supplier's delivery note says (0101).
+                  if (item.noteQuantity != null)
+                    StatusPill(
+                      key: ValueKey('qc-note-${item.id}'),
+                      tone: item.noteQuantity == item.actualQuantity
+                          ? StatusTone.neutral
+                          : StatusTone.warning,
+                      icon: Icons.receipt_long_outlined,
+                      label: l10n.qcNoteQuantity(item.noteQuantity!),
+                      dense: true,
+                    ),
                 ],
               ),
               if (onPassAll != null || onEnterCount != null)
@@ -1142,9 +1294,15 @@ class _CountDialog extends StatefulWidget {
   State<_CountDialog> createState() => _CountDialogState();
 }
 
+/// Pops (mode, value). Adding is the default once something has been counted
+/// — the next carton, or tomorrow's share of the same delivery.
 class _CountDialogState extends State<_CountDialog> {
+  late InspectionCountMode _mode =
+      widget.item.isCounted ? InspectionCountMode.add : InspectionCountMode.set;
   late final _controller = TextEditingController(
-      text: '${widget.item.countedQuantity ?? widget.item.actualQuantity}');
+      text: widget.item.isCounted
+          ? ''
+          : '${widget.item.noteQuantity ?? widget.item.actualQuantity}');
 
   @override
   void dispose() {
@@ -1156,17 +1314,47 @@ class _CountDialogState extends State<_CountDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final item = widget.item;
+    final value = int.tryParse(_controller.text.trim());
     return AlertDialog(
       title: Text(l10n.qcEnterCountTitle(
           item.productName.isNotEmpty ? item.productName : item.janCode)),
-      content: TextField(
-        key: const ValueKey('qc-count-field'),
-        controller: _controller,
-        autofocus: true,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
-            helperText: l10n.qcCountLine(item.countedQuantity ?? 0, item.actualQuantity)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.qcCountSoFar(item.countedQuantity ?? 0, item.actualQuantity)),
+          if (item.noteQuantity != null) Text(l10n.qcNoteQuantity(item.noteQuantity!)),
+          const SizedBox(height: AppSpacing.md),
+          SegmentedButton<InspectionCountMode>(
+            segments: [
+              ButtonSegment(
+                  value: InspectionCountMode.add, label: Text(l10n.qcCountModeAdd)),
+              ButtonSegment(
+                  value: InspectionCountMode.set, label: Text(l10n.qcCountModeSet)),
+            ],
+            selected: {_mode},
+            showSelectedIcon: false,
+            onSelectionChanged: (v) => setState(() {
+              _mode = v.first;
+              _controller.text = _mode == InspectionCountMode.set
+                  ? '${item.countedQuantity ?? item.noteQuantity ?? item.actualQuantity}'
+                  : '';
+            }),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            key: const ValueKey('qc-count-field'),
+            controller: _controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+                labelText: _mode == InspectionCountMode.add
+                    ? l10n.qcCountAddHint
+                    : l10n.qcCountSetHint),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -1175,10 +1363,63 @@ class _CountDialogState extends State<_CountDialog> {
         ),
         FilledButton(
           key: const ValueKey('qc-count-save'),
-          onPressed: () => Navigator.pop(context, int.tryParse(_controller.text.trim())),
+          onPressed: value == null
+              ? null
+              : () {
+                  // Read at the tap, not at the last rebuild.
+                  final v = int.tryParse(_controller.text.trim());
+                  if (v != null) Navigator.pop(context, (mode: _mode, value: v));
+                },
           child: Text(l10n.actionSave),
         ),
       ],
+    );
+  }
+}
+
+/// Delivery-note lines no inspection line answered (0101).
+class _UnmatchedNoteSheet extends StatelessWidget {
+  const _UnmatchedNoteSheet({required this.lines, required this.onWrongItem});
+
+  final List<DeliveryNoteLine> lines;
+  final ValueChanged<DeliveryNoteLine> onWrongItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.qcNoteUnmatchedTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.xs),
+            Text(l10n.qcNoteUnmatchedBody, style: theme.textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.sm),
+            for (final line in lines)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(line.label),
+                subtitle: Text([line.janCode, line.productCode]
+                    .whereType<String>()
+                    .join(' · ')),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (line.quantity != null) Text('${line.quantity}'),
+                    TextButton(
+                      onPressed: () => onWrongItem(line),
+                      child: Text(l10n.qcWrongItemRecord),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

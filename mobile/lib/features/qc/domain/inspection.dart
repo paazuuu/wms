@@ -45,7 +45,13 @@ class InspectionItem extends Equatable {
     this.note,
     this.finalizedAt,
     this.countedQuantity,
+    this.noteQuantity,
+    this.noteProductName,
   });
+
+  /// What the supplier's delivery note says for this line (0101).
+  final int? noteQuantity;
+  final String? noteProductName;
 
   final int id;
   final String janCode;
@@ -105,12 +111,15 @@ class InspectionItem extends Equatable {
         countedQuantity: json['counted_quantity'] == null
             ? null
             : _asInt(json['counted_quantity']),
+        noteQuantity:
+            json['note_quantity'] == null ? null : _asInt(json['note_quantity']),
+        noteProductName: json['note_product_name'] as String?,
       );
 
   @override
   List<Object?> get props =>
       [id, janCode, passedQuantity, failedQuantity, discrepancy, result, finalizedAt,
-       countedQuantity];
+       countedQuantity, noteQuantity];
 }
 
 /// A QC pass over one receipt.
@@ -309,10 +318,30 @@ class InspectionCount extends Equatable {
 
   factory InspectionCount.fromJson(Map<String, dynamic> json) => InspectionCount(
         itemId: _asInt(json['item_id']),
-        counted: _asInt(json['counted']),
+        // Null after a 'clear'; reads as nothing counted.
+        counted: json['counted'] == null ? 0 : _asInt(json['counted']),
         received: _asInt(json['received']),
       );
 
   @override
   List<Object?> get props => [itemId, counted, received];
+}
+
+/// How [InspectionRepository.recordCount] changes a line's count (0100/0101).
+enum InspectionCountMode {
+  /// The count is this.
+  set('set'),
+
+  /// Add this to the count so far — a scan, or a carton done today.
+  add('add'),
+
+  /// Ticked: the line is the right goods, about the right number — counted
+  /// as the delivery note says, or as arrived when there is no note.
+  check('check'),
+
+  /// The tick or count taken back.
+  clear('clear');
+
+  const InspectionCountMode(this.wire);
+  final String wire;
 }

@@ -4772,5 +4772,92 @@
         "type": "int"
       }
     }
+  },
+  "qcScanPieceMode": "スキャンで1個ずつ数える",
+  "@qcScanPieceMode": {
+    "description": "Inspection counting by carton / delivery note (0101): qcScanPieceMode"
+  },
+  "qcScanPieceOn": "スキャン1回で1個数えます",
+  "@qcScanPieceOn": {
+    "description": "Inspection counting by carton / delivery note (0101): qcScanPieceOn"
+  },
+  "qcScanPieceOff": "スキャンで商品を選び、数量を入力します",
+  "@qcScanPieceOff": {
+    "description": "Inspection counting by carton / delivery note (0101): qcScanPieceOff"
+  },
+  "qcReadNote": "納品書を読み取る",
+  "@qcReadNote": {
+    "description": "Inspection counting by carton / delivery note (0101): qcReadNote"
+  },
+  "qcNoteApplied": "納品書の {matched} 行を検品に反映しました",
+  "@qcNoteApplied": {
+    "description": "Inspection counting by carton / delivery note (0101): qcNoteApplied",
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      }
+    }
+  },
+  "qcNoteNone": "納品書から明細を読み取れませんでした",
+  "@qcNoteNone": {
+    "description": "Inspection counting by carton / delivery note (0101): qcNoteNone"
+  },
+  "qcNoteUnmatchedTitle": "照合できなかった納品書の行",
+  "@qcNoteUnmatchedTitle": {
+    "description": "Inspection counting by carton / delivery note (0101): qcNoteUnmatchedTitle"
+  },
+  "qcNoteUnmatchedBody": "次の行は今回の入荷の商品と一致しませんでした。品違いなら誤品として記録してください。",
+  "@qcNoteUnmatchedBody": {
+    "description": "Inspection counting by carton / delivery note (0101): qcNoteUnmatchedBody"
+  },
+  "qcNoteQuantity": "納品書 {n}",
+  "@qcNoteQuantity": {
+    "description": "Inspection counting by carton / delivery note (0101): qcNoteQuantity",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCountRemaining": "残り {n}",
+  "@qcCountRemaining": {
+    "description": "Inspection counting by carton / delivery note (0101): qcCountRemaining",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCountModeAdd": "追加する",
+  "@qcCountModeAdd": {
+    "description": "Inspection counting by carton / delivery note (0101): qcCountModeAdd"
+  },
+  "qcCountModeSet": "合計を直す",
+  "@qcCountModeSet": {
+    "description": "Inspection counting by carton / delivery note (0101): qcCountModeSet"
+  },
+  "qcCountSoFar": "これまで {counted} / 入荷 {received}",
+  "@qcCountSoFar": {
+    "description": "Inspection counting by carton / delivery note (0101): qcCountSoFar",
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "received": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCountAddHint": "今回数えた数（箱の入数など）",
+  "@qcCountAddHint": {
+    "description": "Inspection counting by carton / delivery note (0101): qcCountAddHint"
+  },
+  "qcCountSetHint": "数えた合計",
+  "@qcCountSetHint": {
+    "description": "Inspection counting by carton / delivery note (0101): qcCountSetHint"
+  },
+  "qcTick": "品と数を確認",
+  "@qcTick": {
+    "description": "Inspection counting by carton / delivery note (0101): qcTick"
   }
 }

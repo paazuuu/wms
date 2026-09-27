@@ -5058,4 +5058,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String qcEffectCountShort(int n) {
     return '$n that could not be counted went on hold';
   }
+
+  @override
+  String get qcScanPieceMode => 'Each scan counts one piece';
+
+  @override
+  String get qcScanPieceOn => 'Each scan now counts one piece';
+
+  @override
+  String get qcScanPieceOff =>
+      'A scan now picks the line to enter its quantity';
+
+  @override
+  String get qcReadNote => 'Read delivery note';
+
+  @override
+  String qcNoteApplied(int matched) {
+    return '$matched delivery-note lines applied';
+  }
+
+  @override
+  String get qcNoteNone => 'No lines could be read from the delivery note';
+
+  @override
+  String get qcNoteUnmatchedTitle => 'Delivery-note lines with no match';
+
+  @override
+  String get qcNoteUnmatchedBody =>
+      'These lines match nothing on this delivery. Record any wrong goods as a wrong item.';
+
+  @override
+  String qcNoteQuantity(int n) {
+    return 'Note $n';
+  }
+
+  @override
+  String qcCountRemaining(int n) {
+    return '$n to go';
+  }
+
+  @override
+  String get qcCountModeAdd => 'Add';
+
+  @override
+  String get qcCountModeSet => 'Set total';
+
+  @override
+  String qcCountSoFar(int counted, int received) {
+    return 'So far $counted / received $received';
+  }
+
+  @override
+  String get qcCountAddHint => 'Counted this time (e.g. one carton)';
+
+  @override
+  String get qcCountSetHint => 'Total counted';
+
+  @override
+  String get qcTick => 'Goods and count checked';
 }

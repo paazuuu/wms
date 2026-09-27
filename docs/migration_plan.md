@@ -4862,6 +4862,54 @@ otherwise.
 Completing gave PASS, 11 released: A 5, B 4, C 2. B's uncounted 1 went to
 HOLD, and the exceptions were `QC_WRONG_ITEM:2, QC_COUNT_MISMATCH:1`.
 
+### 0101 — delivery note as the checklist; cartons ticked; counts carried over days
+
+Goods usually arrive as cartons of hundreds. The user wants four things.
+- **Scan mode:** per-piece scan counting can be switched on or off; it is
+  off by default.
+- **Delivery-note photo:** the supplier's note is read into the
+  inspection's quantities.
+- **Ticks:** a line is ticked when its goods and approximate quantity are
+  right.
+- **Carry-over:** a count left partway (four of six cartons) carries over to
+  the next day.
+
+Changes:
+- **OCR (`ocr-delivery-note` v10):** also returns `product_code` (品番), and
+  keeps lines without a JAN. The reconciliation parser still keeps JAN lines
+  only.
+- **Note on the inspection line:** new columns
+  `inspection_items.note_quantity` and `note_product_name`.
+  - `apply_delivery_note(inspection, lines)` matches each note line: by
+    JAN, then by the supplier's code or name (`supplier_product_names`,
+    via a new `normalize_product_text` that folds full-width letters and
+    digits, and drops spaces and hyphens), then by product name.
+  - A product listed twice on one photo is summed. A later photo replaces
+    only the lines it names, so a second page does not erase the first.
+  - Unmatched lines are returned.
+- **`record_inspection_count` modes:** `check` (tick: count = the note's
+  figure, or what arrived) and `clear` (untick, back to 未チェック) join
+  `set` and `add` (one carton more, today or tomorrow).
+- **Client:**
+  - ⚙ menu 「スキャンで1個ずつ数える」, stored per device through
+    `SecureKeyValueStore`. Off: a scan opens the line's quantity dialog.
+  - 納品書を読み取る (camera, then OCR, then apply): lines show 納品書 n,
+    and a sheet lists what matched nothing, each with 誤品として記録.
+  - A per-line tick.
+  - The count dialog adds by default once something is counted
+    (これまで x / 入荷 y), or sets the total.
+  - While open, a short count reads 残り n rather than 不足 n.
+- **Found while testing:** the dialog's save captured the value from the
+  last rebuild; it now reads the field at the tap.
+
+**Verified live:**
+- 4 note lines: 3 matched (by JAN, by supplier code `nb-a5` against
+  `NB-A5`, and by name) and 1 unmatched;
+- A 600 counted as +400, then +200 on day 2, came to 600;
+- ticking B took the note's 300; unticking went back to PENDING;
+- ticking C took the note's 90 against 100 received;
+- completing released 990, with `count_short_held` 10 and C HOLD 10.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

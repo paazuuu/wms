@@ -27,10 +27,12 @@ import 'package:wms_mobile/features/home/data/dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
 import 'package:wms_mobile/features/qc/data/attachment_repository.dart';
+import 'package:wms_mobile/features/qc/application/qc_scan_mode.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
 import 'package:wms_mobile/features/qc/domain/attachment.dart';
 import 'package:wms_mobile/features/qc/domain/held_stock.dart';
 import 'package:wms_mobile/features/qc/domain/bulk_inspection.dart';
+import 'package:wms_mobile/features/qc/domain/delivery_note.dart';
 import 'package:wms_mobile/features/qc/domain/inspection.dart';
 import 'package:wms_mobile/features/picking_ops/data/picking_repository.dart';
 import 'package:wms_mobile/features/picking_ops/domain/pick_list.dart';
@@ -125,7 +127,13 @@ class _FakeSecureKeyValueStore implements SecureKeyValueStore {
 /// user management, which resolves warehouse names for its scope chips)
 /// from reaching a real Dio client. A test that cares about warehouse data
 /// overrides `warehouseRepositoryProvider` itself, which wins over this.
+/// The inspection scan-mode setting over an in-memory store (0101), for a
+/// test that builds its own container.
+Override fakeScanModeOverride() => scanCountsPieceProvider
+    .overrideWith((ref) => ScanCountsPieceController(_FakeSecureKeyValueStore()));
+
 List<Override> _defaultOverrides() => [
+      fakeScanModeOverride(),
       supabaseSessionStorageProvider
           .overrideWithValue(SupabaseSessionStorage(_FakeSecureKeyValueStore())),
       warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(
@@ -554,14 +562,16 @@ class FakeInspectionRepository implements InspectionRepository {
     return ApiSuccess(status == null ? held : held.where((h) => h.statusCode == status).toList());
   }
 
-  final List<({int itemId, int quantity, bool add})> counts = [];
+  final List<({int itemId, int quantity, InspectionCountMode mode})> counts = [];
   ({int inspectionId, String jan, int quantity})? lastWrongItem;
+  List<DeliveryNoteLine>? lastNoteLines;
+  DeliveryNoteApplyResult? noteResult;
 
   @override
   Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity,
-      {bool add = false}) async {
+      {InspectionCountMode mode = InspectionCountMode.set}) async {
     if (failWith != null) return ApiFailure(message: failWith!);
-    counts.add((itemId: itemId, quantity: quantity, add: add));
+    counts.add((itemId: itemId, quantity: quantity, mode: mode));
     late InspectionCount out;
     inspection = Inspection(
       id: inspection.id,
@@ -572,19 +582,29 @@ class FakeInspectionRepository implements InspectionRepository {
         for (final it in inspection.items)
           if (it.id == itemId)
             () {
-              final counted = add ? (it.countedQuantity ?? 0) + quantity : quantity;
-              out = InspectionCount(itemId: it.id, counted: counted, received: it.actualQuantity);
+              final int? counted = switch (mode) {
+                InspectionCountMode.add => (it.countedQuantity ?? 0) + quantity,
+                InspectionCountMode.check => it.noteQuantity ?? it.actualQuantity,
+                InspectionCountMode.clear => null,
+                InspectionCountMode.set => quantity,
+              };
+              out = InspectionCount(
+                  itemId: it.id, counted: counted ?? 0, received: it.actualQuantity);
               return InspectionItem(
                 id: it.id,
                 janCode: it.janCode,
                 productName: it.productName,
                 expectedQuantity: it.expectedQuantity,
                 actualQuantity: it.actualQuantity,
-                passedQuantity: counted < it.actualQuantity ? counted : it.actualQuantity,
+                passedQuantity: counted == null
+                    ? 0
+                    : (counted < it.actualQuantity ? counted : it.actualQuantity),
                 failedQuantity: it.failedQuantity,
                 discrepancy: it.discrepancy,
-                result: QcResult.pass,
+                result: counted == null ? QcResult.pending : QcResult.pass,
                 countedQuantity: counted,
+                noteQuantity: it.noteQuantity,
+                noteProductName: it.noteProductName,
               );
             }()
           else
@@ -592,6 +612,13 @@ class FakeInspectionRepository implements InspectionRepository {
       ],
     );
     return ApiSuccess(out);
+  }
+
+  @override
+  Future<ApiResult<DeliveryNoteApplyResult>> applyDeliveryNote(
+      int inspectionId, List<DeliveryNoteLine> lines) async {
+    lastNoteLines = lines;
+    return ApiSuccess(noteResult ?? DeliveryNoteApplyResult(matched: lines.length));
   }
 
   @override

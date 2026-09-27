@@ -1856,5 +1856,21 @@
   "qcCompleteDefaultTitle": "有未检查的行",
   "qcCompleteDefaultBody": "{n} 个未检查的行将作为良品完成。已计数的行按计数确定。",
   "qcCompleteConfirm": "完成",
-  "qcEffectCountShort": "未能计数的 {n} 件已转为保留"
+  "qcEffectCountShort": "未能计数的 {n} 件已转为保留",
+  "qcScanPieceMode": "扫描一次计一件",
+  "qcScanPieceOn": "现在每次扫描计一件",
+  "qcScanPieceOff": "现在扫描选择商品并输入数量",
+  "qcReadNote": "读取送货单",
+  "qcNoteApplied": "已将送货单的 {matched} 行反映到检验",
+  "qcNoteNone": "未能从送货单读取明细",
+  "qcNoteUnmatchedTitle": "未能匹配的送货单行",
+  "qcNoteUnmatchedBody": "以下行与本次入库商品不一致。若为错误商品，请记录为错误商品。",
+  "qcNoteQuantity": "送货单 {n}",
+  "qcCountRemaining": "剩余 {n}",
+  "qcCountModeAdd": "追加",
+  "qcCountModeSet": "修改合计",
+  "qcCountSoFar": "目前 {counted} / 入库 {received}",
+  "qcCountAddHint": "本次计数（如一箱的数量）",
+  "qcCountSetHint": "计数合计",
+  "qcTick": "已确认商品和数量"
 }

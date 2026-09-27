@@ -9077,6 +9077,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'数えられなかった {n} 点を保留に移しました'**
   String qcEffectCountShort(int n);
+
+  /// Inspection counting by carton / delivery note (0101): qcScanPieceMode
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンで1個ずつ数える'**
+  String get qcScanPieceMode;
+
+  /// Inspection counting by carton / delivery note (0101): qcScanPieceOn
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャン1回で1個数えます'**
+  String get qcScanPieceOn;
+
+  /// Inspection counting by carton / delivery note (0101): qcScanPieceOff
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンで商品を選び、数量を入力します'**
+  String get qcScanPieceOff;
+
+  /// Inspection counting by carton / delivery note (0101): qcReadNote
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を読み取る'**
+  String get qcReadNote;
+
+  /// Inspection counting by carton / delivery note (0101): qcNoteApplied
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書の {matched} 行を検品に反映しました'**
+  String qcNoteApplied(int matched);
+
+  /// Inspection counting by carton / delivery note (0101): qcNoteNone
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書から明細を読み取れませんでした'**
+  String get qcNoteNone;
+
+  /// Inspection counting by carton / delivery note (0101): qcNoteUnmatchedTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'照合できなかった納品書の行'**
+  String get qcNoteUnmatchedTitle;
+
+  /// Inspection counting by carton / delivery note (0101): qcNoteUnmatchedBody
+  ///
+  /// In ja, this message translates to:
+  /// **'次の行は今回の入荷の商品と一致しませんでした。品違いなら誤品として記録してください。'**
+  String get qcNoteUnmatchedBody;
+
+  /// Inspection counting by carton / delivery note (0101): qcNoteQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書 {n}'**
+  String qcNoteQuantity(int n);
+
+  /// Inspection counting by carton / delivery note (0101): qcCountRemaining
+  ///
+  /// In ja, this message translates to:
+  /// **'残り {n}'**
+  String qcCountRemaining(int n);
+
+  /// Inspection counting by carton / delivery note (0101): qcCountModeAdd
+  ///
+  /// In ja, this message translates to:
+  /// **'追加する'**
+  String get qcCountModeAdd;
+
+  /// Inspection counting by carton / delivery note (0101): qcCountModeSet
+  ///
+  /// In ja, this message translates to:
+  /// **'合計を直す'**
+  String get qcCountModeSet;
+
+  /// Inspection counting by carton / delivery note (0101): qcCountSoFar
+  ///
+  /// In ja, this message translates to:
+  /// **'これまで {counted} / 入荷 {received}'**
+  String qcCountSoFar(int counted, int received);
+
+  /// Inspection counting by carton / delivery note (0101): qcCountAddHint
+  ///
+  /// In ja, this message translates to:
+  /// **'今回数えた数（箱の入数など）'**
+  String get qcCountAddHint;
+
+  /// Inspection counting by carton / delivery note (0101): qcCountSetHint
+  ///
+  /// In ja, this message translates to:
+  /// **'数えた合計'**
+  String get qcCountSetHint;
+
+  /// Inspection counting by carton / delivery note (0101): qcTick
+  ///
+  /// In ja, this message translates to:
+  /// **'品と数を確認'**
+  String get qcTick;
 }
 
 class _AppLocalizationsDelegate

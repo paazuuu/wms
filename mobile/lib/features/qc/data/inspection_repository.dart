@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/bulk_inspection.dart';
+import '../domain/delivery_note.dart';
 import '../domain/held_stock.dart';
 import '../domain/inspection.dart';
 
@@ -37,7 +38,13 @@ abstract class InspectionRepository {
 
   /// `record_inspection_count` (0100): what the inspector counted for a line.
   /// [add] adds [quantity] to the count so far — one scan, one piece.
-  Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity, {bool add = false});
+  Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity,
+      {InspectionCountMode mode = InspectionCountMode.set});
+
+  /// `apply_delivery_note` (0101): the delivery note's lines laid against the
+  /// inspection — each matched line gets the note's figure.
+  Future<ApiResult<DeliveryNoteApplyResult>> applyDeliveryNote(
+      int inspectionId, List<DeliveryNoteLine> lines);
 
   /// `report_inspection_wrong_item` (0100): a product found in the delivery
   /// that is not on it, recorded as 誤品 for someone to deal with.
@@ -220,18 +227,35 @@ class InspectionRepositoryImpl implements InspectionRepository {
 
   @override
   Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity,
-      {bool add = false}) async {
+      {InspectionCountMode mode = InspectionCountMode.set}) async {
     try {
       final response = await _restDio.post('/rpc/record_inspection_count', data: {
         'p_item_id': itemId,
         'p_quantity': quantity,
-        'p_mode': add ? 'add' : 'set',
+        'p_mode': mode.wire,
       });
       final data = response.data;
       final map = data is List && data.isNotEmpty ? data.first : data;
       return ApiSuccess(InspectionCount.fromJson((map as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
       return mapDioError<InspectionCount>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<DeliveryNoteApplyResult>> applyDeliveryNote(
+      int inspectionId, List<DeliveryNoteLine> lines) async {
+    try {
+      final response = await _restDio.post('/rpc/apply_delivery_note', data: {
+        'p_inspection_id': inspectionId,
+        'p_lines': [for (final l in lines) l.toJson()],
+      });
+      final data = response.data;
+      final map = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(
+          DeliveryNoteApplyResult.fromJson((map as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<DeliveryNoteApplyResult>(e);
     }
   }
 

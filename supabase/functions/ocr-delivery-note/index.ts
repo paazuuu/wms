@@ -1,7 +1,13 @@
 // Delivery-note OCR for the WMS mobile client (spec §27–§30, Steps 15–16).
 // POST /ocr-delivery-note  (multipart/form-data: image, provider?, plan_id?)
-// -> { data: { provider, lines: [{ jan_code, product_name, quantity }],
-//              analysis_id, reused } }
+// -> { data: { provider, lines: [{ jan_code, product_code, product_name,
+//              quantity }], analysis_id, reused } }
+//
+// Many suppliers print their own item code (品番) and name but no JAN, so a
+// line is returned whenever it has any of the three (jan_code may be empty);
+// the inspection's match_delivery_note_lines (0101) resolves product_code and
+// product_name through supplier_product_names. The reconciliation screen's
+// parser still keeps JAN lines only, so its behaviour is unchanged.
 //
 // Every call is recorded in `ai_analysis` (0026/0027) — AI results never
 // reach WMS data directly (docs/ai_architecture.md §1); this endpoint only
@@ -44,6 +50,7 @@ const TASK_TYPE = "ocr_delivery_note";
 
 interface OcrLineRaw {
   jan_code?: string;
+  product_code?: string;
   product_name?: string;
   quantity?: number;
 }
@@ -70,10 +77,14 @@ class AIProviderError extends Error {
 
 const OCR_PROMPT =
   "あなたは日本の物流の納品書を読み取るアシスタントです。この画像の明細表を" +
-  "抽出し、各行を {jan_code, product_name, quantity} のJSONで返してください。" +
+  "抽出し、各行を {jan_code, product_code, product_name, quantity} のJSONで返してください。" +
   "jan_code は商品のバーコード数字（13桁または8桁）で、半角数字のみ・ハイフンや" +
-  "空白を含めないこと。住所・電話番号・登録番号(Tで始まる番号)・合計金額などは" +
-  "JANとして扱わないこと。数量が読めない行は quantity を省略。表に無い行は返さないこと。" +
+  "空白を含めないこと。JANが印字されていない行は jan_code を空文字にすること。" +
+  "product_code は仕入先の品番・商品コード（あれば。無ければ空文字）。" +
+  "product_name は明細に書かれた商品名をそのまま。quantity は納品数量（ケース数ではなく" +
+  "総数が書かれていれば総数、入数×ケース数の表記なら掛けた総数）。" +
+  "住所・電話番号・登録番号(Tで始まる番号)・合計金額などは" +
+  "JANや品番として扱わないこと。数量が読めない行は quantity を省略。表に無い行は返さないこと。" +
   "最後に、この読み取り結果全体への自己評価として confidence を0〜1の数値で" +
   "返してください（画質が悪い・文字が不鮮明・一部推測が入っている場合は低く）。";
 
@@ -86,10 +97,11 @@ const OCR_SCHEMA = {
         type: "object",
         properties: {
           jan_code: { type: "string" },
+          product_code: { type: "string" },
           product_name: { type: "string" },
           quantity: { type: "integer" },
         },
-        required: ["jan_code"],
+        required: ["product_name"],
       },
     },
     confidence: { type: "number" },

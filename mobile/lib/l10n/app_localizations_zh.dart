@@ -4927,4 +4927,60 @@ class AppLocalizationsZh extends AppLocalizations {
   String qcEffectCountShort(int n) {
     return '未能计数的 $n 件已转为保留';
   }
+
+  @override
+  String get qcScanPieceMode => '扫描一次计一件';
+
+  @override
+  String get qcScanPieceOn => '现在每次扫描计一件';
+
+  @override
+  String get qcScanPieceOff => '现在扫描选择商品并输入数量';
+
+  @override
+  String get qcReadNote => '读取送货单';
+
+  @override
+  String qcNoteApplied(int matched) {
+    return '已将送货单的 $matched 行反映到检验';
+  }
+
+  @override
+  String get qcNoteNone => '未能从送货单读取明细';
+
+  @override
+  String get qcNoteUnmatchedTitle => '未能匹配的送货单行';
+
+  @override
+  String get qcNoteUnmatchedBody => '以下行与本次入库商品不一致。若为错误商品，请记录为错误商品。';
+
+  @override
+  String qcNoteQuantity(int n) {
+    return '送货单 $n';
+  }
+
+  @override
+  String qcCountRemaining(int n) {
+    return '剩余 $n';
+  }
+
+  @override
+  String get qcCountModeAdd => '追加';
+
+  @override
+  String get qcCountModeSet => '修改合计';
+
+  @override
+  String qcCountSoFar(int counted, int received) {
+    return '目前 $counted / 入库 $received';
+  }
+
+  @override
+  String get qcCountAddHint => '本次计数（如一箱的数量）';
+
+  @override
+  String get qcCountSetHint => '计数合计';
+
+  @override
+  String get qcTick => '已确认商品和数量';
 }
