@@ -1,0 +1,23 @@
+# WMS Web 版（Flutter のビルド済み静的ファイル）を配信する Caddy 設定。
+# データ・ログイン・API はすべて Supabase 側にあり、この VPS は画面の配信だけを担う。
+# HTTPS 証明書は Caddy が Let's Encrypt から自動で取得・更新する（Cloudflare 不要）。
+
+{$WMS_DOMAIN} {
+	root * /srv/wms
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# 起動ファイルは毎回最新を確認させる。更新を公開した直後でも
+	# 古い画面が残らないようにするため（他のファイルはハッシュ付きで入れ替わる）。
+	@entry path / /index.html /flutter_bootstrap.js /flutter_service_worker.js /version.json /manifest.json
+	header @entry Cache-Control "no-cache"
+
+	try_files {path} /index.html
+	file_server
+}

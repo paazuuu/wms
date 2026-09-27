@@ -17,6 +17,8 @@ _Roles, permissions, warehouse scope, and audit (spec §21, §22, §33, §40, §
 | Shipper | shipping |
 | Inventory Controller | cycle count / adjustments |
 | Viewer | read-only |
+| Purchasing | suppliers, purchase orders (manage + approve), demand links (0091) |
+| Sales | sales orders (manage + approve), backorder filling, customers (0091) |
 
 Roles map to permission sets; a user may hold several. Permissions gate **actions**
 (state transitions, writes), not just screen visibility.

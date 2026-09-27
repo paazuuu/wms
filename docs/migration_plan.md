@@ -4600,6 +4600,42 @@ but never across countries.
 30 and 7, the home-country total 30, dashboard metrics 30 for JP and 7 for
 the CN warehouse, and the chart offered [JP, CN].
 
+### 0091 — roles for the office departments; VPS deployment
+
+The user runs the system department by department, each with its own role,
+and hosts the web client on the company's own VPS (no Cloudflare, no Stripe).
+
+- **Roles:** the 0012 roles cover the warehouse floor and the admins, but not
+  the two office teams the order-first flow is built around. Two roles were
+  added:
+  - `purchasing` — suppliers and their product names, purchase orders
+    (manage and approve), demand links; reads stock, receipts and sales
+    orders. No stock changes.
+  - `sales` — sales orders (manage and approve), backorder filling,
+    customers; reads stock and purchase orders. No stock changes, no
+    purchase orders.
+  The existing self-approval rule on both order types still keeps one person
+  from approving what they raised. Menus already gate on permissions, so no
+  client change was needed.
+- **Deployment (`deploy/`):**
+  - Caddy in Docker Compose serves the Flutter web build over HTTPS, with
+    Let's Encrypt certificates renewed automatically. Supabase stays the
+    backend.
+  - `build_web.sh` builds with `--no-web-resources-cdn`.
+  - `mirror_fallback_fonts.sh` copies the engine's 725 fallback fonts from
+    fonts.gstatic.com into `fonts/fallback/` and points
+    `fontFallbackBaseUrl` there. Without it, Japanese and Chinese text
+    renders as boxes wherever Google is unreachable, which includes China.
+  - `publish_web.sh` rsyncs the build to the VPS.
+
+**Verified:**
+- the live role → permission rows (purchasing 12, sales 10);
+- `caddy validate` on the Caddyfile;
+- serving the build locally: `no-cache` on the entry files,
+  `application/wasm`, gzip, and the SPA fallback;
+- a headless Chromium with every non-local host blocked except Supabase,
+  whose login screen rendered its Japanese text with no external fetch.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

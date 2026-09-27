@@ -4,7 +4,7 @@
 可視化する機能のサーバ側契約。**PCでExcelを取り込む人**と**ハンディで検品する人**が別々に
 作業するため、予定データは共有DBに保存する（モバイルはこのAPIを参照するだけ）。
 
-この契約はDB非依存で書いてある（Supabase / Cloudflare D1 / Neon など任意のRDBで実装可）。
+この契約はDB非依存で書いてある（本システムでは Supabase の Postgres で実装している）。
 モバイルクライアントの実装は `mobile/lib/features/delivery/` を参照。
 
 ---

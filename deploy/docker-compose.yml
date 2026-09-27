@@ -1,0 +1,21 @@
+# VPS 上で `docker compose up -d` するだけで WMS の画面が HTTPS で公開される。
+# site/ に publish_web.sh がビルド済みファイルを置く。
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      WMS_DOMAIN: ${WMS_DOMAIN:?set WMS_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./site:/srv/wms:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

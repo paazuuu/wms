@@ -25,6 +25,11 @@ Flutter app (mobile / web)
          custom/saved report builder
 ```
 
+Hosting: Supabase is managed; the Flutter web build is served from the
+company's own VPS by Caddy (`deploy/`, automatic HTTPS). There is no
+Cloudflare and no payment provider. The build carries its own CanvasKit and
+fallback fonts, so it renders where Google is unreachable.
+
 InventorOS (a separate Laravel app this project once called for ~10 screens)
 was removed entirely: it was never actually reachable in this deployment, and
 the decision was made not to stand it up rather than keep broken menu entries
@@ -46,6 +51,8 @@ still has no equivalent.
   attachments, product master, purchase/sales orders, trading partners, work
   orders, reports) is a Postgres RPC called directly over PostgREST, not a
   new edge function — the edge-function surface hasn't grown since 0028.
+- `deploy/` — VPS hosting for the web build (Caddy + Docker Compose, build
+  and publish scripts; see `deploy/README.md`).
 - `docs/` — this file, `feature_checklist.md`, `migration_plan.md`, plus the
   design docs (`architecture_target.md`, `domain_model.md`,
   `permission_model.md`, `workflow_model.md`, `ai_architecture.md`,
