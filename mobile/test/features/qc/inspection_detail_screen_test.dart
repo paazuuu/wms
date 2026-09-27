@@ -75,7 +75,7 @@ Future<ProviderContainer> _pump(
 }
 
 void main() {
-  testWidgets('shows the stored discrepancy and blocks completing while unchecked',
+  testWidgets('shows the stored discrepancy; unchecked lines complete as good after a confirm (0100)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     final repo = FakeInspectionRepository(_pending());
@@ -87,11 +87,21 @@ void main() {
     expect(find.text('100'), findsOneWidget); // expected
     expect(find.text('50'), findsOneWidget); // actual
 
-    // Completing is refused locally, before any request goes out.
+    // Goods are good by default: completing asks once, then passes the line.
     await tester.tap(find.text('検品を確定'));
     await tester.pumpAndSettle();
-    expect(find.text('未検品の明細があるため確定できません'), findsOneWidget);
-    expect(repo.refusedIncomplete, isFalse);
+    expect(find.text('未チェックの 1 行は良品として完了します。数量を数えた行は、数えた数で確定します。'),
+        findsOneWidget);
+    await tester.tap(find.text('キャンセル'));
+    await tester.pumpAndSettle();
+    expect(repo.inspection.status, QcResult.pending);
+
+    await tester.tap(find.text('検品を確定'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('qc-complete-default-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.inspection.status, QcResult.pass);
+    expect(repo.inspection.items.single.passedQuantity, 50);
 
     await tester.binding.setSurfaceSize(null);
   });
@@ -391,27 +401,55 @@ void main() {
       expect(find.byKey(const ValueKey('qc-pass-all-11')), findsOneWidget);
     });
 
-    testWidgets('scanning a JAN offers to pass that product in full', (tester) async {
+    testWidgets('each scan counts one piece, and the line says when it matches', (tester) async {
       final repo = FakeInspectionRepository(twoLines());
       await _pump(tester, repo);
       await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('qc-count-state-11')), findsOneWidget);
+      expect(find.text('未カウント'), findsNWidgets(2));
+
+      for (var i = 0; i < 2; i++) {
+        await tester.enterText(find.byType(TextField).first, '4900000000011');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+      }
+      expect(find.text('ノート：2 / 3'), findsOneWidget);
+      expect(find.text('不足 1'), findsOneWidget);
+
       await tester.enterText(find.byType(TextField).first, '4900000000011');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
-      expect(find.text('ノート：3 点'), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('qc-scan-pass-all')));
-      await tester.pumpAndSettle();
-      expect(repo.lastPassed, [11]);
+      expect(find.text('ノート の数量が一致しました（3 点）'), findsOneWidget);
+      expect(find.text('数量一致'), findsOneWidget);
+      expect(find.text('数量一致 1 / 2 行'), findsOneWidget);
+      expect(repo.counts.every((c) => c.add && c.quantity == 1 && c.itemId == 11), isTrue);
     });
 
-    testWidgets('a JAN not in the inspection is said so', (tester) async {
+    testWidgets('the count can be typed instead', (tester) async {
+      final repo = FakeInspectionRepository(twoLines());
+      await _pump(tester, repo);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('qc-count-10')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('qc-count-field')), '6');
+      await tester.tap(find.byKey(const ValueKey('qc-count-save')));
+      await tester.pumpAndSettle();
+      expect(repo.counts.last, (itemId: 10, quantity: 6, add: false));
+      expect(find.text('過剰 1'), findsOneWidget);
+    });
+
+    testWidgets('a JAN not on the delivery can be recorded as a wrong item', (tester) async {
       final repo = FakeInspectionRepository(twoLines());
       await _pump(tester, repo);
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, '1111');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
-      expect(find.text('この検品に含まれないJANです'), findsOneWidget);
+      expect(find.text('この入荷にない商品です'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('qc-wrong-item-record')));
+      await tester.pumpAndSettle();
+      expect(repo.lastWrongItem?.jan, '1111');
+      expect(find.text('誤品として記録しました'), findsOneWidget);
       expect(repo.lastPassed, isNull);
     });
   });

@@ -4635,5 +4635,142 @@
   },
   "@featBulkInspectionDesc": {
     "description": "Home menu: bulk inspection description"
+  },
+  "qcCountMatch": "数量一致",
+  "@qcCountMatch": {
+    "description": "Inspection count check (0100): qcCountMatch"
+  },
+  "qcCountShort": "不足 {n}",
+  "@qcCountShort": {
+    "description": "Inspection count check (0100): qcCountShort",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCountOver": "過剰 {n}",
+  "@qcCountOver": {
+    "description": "Inspection count check (0100): qcCountOver",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCountNone": "未カウント",
+  "@qcCountNone": {
+    "description": "Inspection count check (0100): qcCountNone"
+  },
+  "qcCountLine": "検品数 {counted} / 入荷 {received}",
+  "@qcCountLine": {
+    "description": "Inspection count check (0100): qcCountLine",
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "received": {
+        "type": "int"
+      }
+    }
+  },
+  "qcEnterCount": "数量を入力",
+  "@qcEnterCount": {
+    "description": "Inspection count check (0100): qcEnterCount"
+  },
+  "qcEnterCountTitle": "{name} の検品数",
+  "@qcEnterCountTitle": {
+    "description": "Inspection count check (0100): qcEnterCountTitle",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "qcScanCounted": "{name}：{counted} / {received}",
+  "@qcScanCounted": {
+    "description": "Inspection count check (0100): qcScanCounted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "counted": {
+        "type": "int"
+      },
+      "received": {
+        "type": "int"
+      }
+    }
+  },
+  "qcScanCountMatched": "{name} の数量が一致しました（{n} 点）",
+  "@qcScanCountMatched": {
+    "description": "Inspection count check (0100): qcScanCountMatched",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcWrongItemTitle": "この入荷にない商品です",
+  "@qcWrongItemTitle": {
+    "description": "Inspection count check (0100): qcWrongItemTitle"
+  },
+  "qcWrongItemBody": "JAN {jan} は今回の入荷に含まれていません。誤品として記録しますか？",
+  "@qcWrongItemBody": {
+    "description": "Inspection count check (0100): qcWrongItemBody",
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      }
+    }
+  },
+  "qcWrongItemRecord": "誤品として記録",
+  "@qcWrongItemRecord": {
+    "description": "Inspection count check (0100): qcWrongItemRecord"
+  },
+  "qcWrongItemDone": "誤品として記録しました",
+  "@qcWrongItemDone": {
+    "description": "Inspection count check (0100): qcWrongItemDone"
+  },
+  "qcMatchedSummary": "数量一致 {matched} / {total} 行",
+  "@qcMatchedSummary": {
+    "description": "Inspection count check (0100): qcMatchedSummary",
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCompleteDefaultTitle": "未チェックの行があります",
+  "@qcCompleteDefaultTitle": {
+    "description": "Inspection count check (0100): qcCompleteDefaultTitle"
+  },
+  "qcCompleteDefaultBody": "未チェックの {n} 行は良品として完了します。数量を数えた行は、数えた数で確定します。",
+  "@qcCompleteDefaultBody": {
+    "description": "Inspection count check (0100): qcCompleteDefaultBody",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcCompleteConfirm": "完了する",
+  "@qcCompleteConfirm": {
+    "description": "Inspection count check (0100): qcCompleteConfirm"
+  },
+  "qcEffectCountShort": "数えられなかった {n} 点を保留に移しました",
+  "@qcEffectCountShort": {
+    "description": "Inspection count check (0100): qcEffectCountShort",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

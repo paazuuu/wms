@@ -4824,6 +4824,44 @@ They also want one product passed in full, by scanning it or by hand.
 - completing with Y failed 3 gave PARTIAL, with Y DAMAGED 3;
 - passing PO-2 released 5 and closed that inspection PASS; open lines 0.
 
+### 0100 — inspection is a count first; goods are good by default
+
+The user's rule: inspection's main job is to confirm the goods and their
+number match what arrived, and goods count as good unless someone says
+otherwise.
+- **Counted quantity:** new column `inspection_items.counted_quantity`.
+  `record_inspection_count(item, qty, 'set'|'add')` sets it, or adds one
+  piece per scan, and makes the line PASS with the counted goods passed.
+  Recorded failures or holds are kept. `save_inspection_item` records its
+  pass + fail total as the count and no longer overwrites the arrived
+  quantity.
+- **Settling checks the count:**
+  - counted fewer than arrived: the remainder goes to HOLD and a
+    `QC_COUNT_MISMATCH` exception is raised;
+  - counted more: nothing extra is booked, and the same exception is
+    raised.
+  `complete_inspection` reports `count_short_held`.
+- **Good by default:** 完了 no longer refuses unchecked lines. A line nobody
+  judged passes in full, or at its count if it was counted. The client asks
+  once first.
+- **Wrong item:** `report_inspection_wrong_item(inspection, jan, qty)` raises
+  `QC_WRONG_ITEM` (誤品) for a scanned product the delivery did not bring.
+- **Client:** each line shows 数量一致 / 不足 n / 過剰 n / 未カウント with
+  「検品数 x / 入荷 y」. A scan counts one piece, and 数量を入力 lets you type
+  the count. An unknown JAN offers 誤品として記録. The header shows 数量一致
+  m / n 行.
+- **Found while testing:** the typed-count dialog's controller was disposed
+  mid-close. It now lives in its own stateful dialog.
+
+**Verified live** (A 5, B 5, C 2, all QC):
+- scanning A 5 times matched;
+- B counted 4 of 5;
+- C was left untouched;
+- one wrong item was reported.
+
+Completing gave PASS, 11 released: A 5, B 4, C 2. B's uncounted 1 went to
+HOLD, and the exceptions were `QC_WRONG_ITEM:2, QC_COUNT_MISMATCH:1`.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

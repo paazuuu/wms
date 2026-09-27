@@ -35,6 +35,15 @@ abstract class InspectionRepository {
   /// settled at once — their goods become shippable, the rest stay open.
   Future<ApiResult<BulkPassResult>> passItems(List<int> itemIds, {String? note});
 
+  /// `record_inspection_count` (0100): what the inspector counted for a line.
+  /// [add] adds [quantity] to the count so far — one scan, one piece.
+  Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity, {bool add = false});
+
+  /// `report_inspection_wrong_item` (0100): a product found in the delivery
+  /// that is not on it, recorded as 誤品 for someone to deal with.
+  Future<ApiResult<bool>> reportWrongItem(int inspectionId, String janCode,
+      {int quantity = 1, String? note});
+
   /// `dispose_held_stock` (0098): one decision on one bucket of held goods.
   Future<ApiResult<DispositionResult>> dispose(
     HeldStock row,
@@ -206,6 +215,39 @@ class InspectionRepositoryImpl implements InspectionRepository {
       return ApiSuccess(BulkPassResult.fromJson((map as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
       return mapDioError<BulkPassResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity,
+      {bool add = false}) async {
+    try {
+      final response = await _restDio.post('/rpc/record_inspection_count', data: {
+        'p_item_id': itemId,
+        'p_quantity': quantity,
+        'p_mode': add ? 'add' : 'set',
+      });
+      final data = response.data;
+      final map = data is List && data.isNotEmpty ? data.first : data;
+      return ApiSuccess(InspectionCount.fromJson((map as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<InspectionCount>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> reportWrongItem(int inspectionId, String janCode,
+      {int quantity = 1, String? note}) async {
+    try {
+      await _restDio.post('/rpc/report_inspection_wrong_item', data: {
+        'p_inspection_id': inspectionId,
+        'p_jan_code': janCode,
+        'p_quantity': quantity,
+        'p_note': (note == null || note.trim().isEmpty) ? null : note.trim(),
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 }

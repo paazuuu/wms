@@ -8969,6 +8969,114 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'入荷日・発注・商品で絞り込み、まとめて良品として検品完了'**
   String get featBulkInspectionDesc;
+
+  /// Inspection count check (0100): qcCountMatch
+  ///
+  /// In ja, this message translates to:
+  /// **'数量一致'**
+  String get qcCountMatch;
+
+  /// Inspection count check (0100): qcCountShort
+  ///
+  /// In ja, this message translates to:
+  /// **'不足 {n}'**
+  String qcCountShort(int n);
+
+  /// Inspection count check (0100): qcCountOver
+  ///
+  /// In ja, this message translates to:
+  /// **'過剰 {n}'**
+  String qcCountOver(int n);
+
+  /// Inspection count check (0100): qcCountNone
+  ///
+  /// In ja, this message translates to:
+  /// **'未カウント'**
+  String get qcCountNone;
+
+  /// Inspection count check (0100): qcCountLine
+  ///
+  /// In ja, this message translates to:
+  /// **'検品数 {counted} / 入荷 {received}'**
+  String qcCountLine(int counted, int received);
+
+  /// Inspection count check (0100): qcEnterCount
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を入力'**
+  String get qcEnterCount;
+
+  /// Inspection count check (0100): qcEnterCountTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の検品数'**
+  String qcEnterCountTitle(String name);
+
+  /// Inspection count check (0100): qcScanCounted
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}：{counted} / {received}'**
+  String qcScanCounted(String name, int counted, int received);
+
+  /// Inspection count check (0100): qcScanCountMatched
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の数量が一致しました（{n} 点）'**
+  String qcScanCountMatched(String name, int n);
+
+  /// Inspection count check (0100): qcWrongItemTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'この入荷にない商品です'**
+  String get qcWrongItemTitle;
+
+  /// Inspection count check (0100): qcWrongItemBody
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {jan} は今回の入荷に含まれていません。誤品として記録しますか？'**
+  String qcWrongItemBody(String jan);
+
+  /// Inspection count check (0100): qcWrongItemRecord
+  ///
+  /// In ja, this message translates to:
+  /// **'誤品として記録'**
+  String get qcWrongItemRecord;
+
+  /// Inspection count check (0100): qcWrongItemDone
+  ///
+  /// In ja, this message translates to:
+  /// **'誤品として記録しました'**
+  String get qcWrongItemDone;
+
+  /// Inspection count check (0100): qcMatchedSummary
+  ///
+  /// In ja, this message translates to:
+  /// **'数量一致 {matched} / {total} 行'**
+  String qcMatchedSummary(int matched, int total);
+
+  /// Inspection count check (0100): qcCompleteDefaultTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'未チェックの行があります'**
+  String get qcCompleteDefaultTitle;
+
+  /// Inspection count check (0100): qcCompleteDefaultBody
+  ///
+  /// In ja, this message translates to:
+  /// **'未チェックの {n} 行は良品として完了します。数量を数えた行は、数えた数で確定します。'**
+  String qcCompleteDefaultBody(int n);
+
+  /// Inspection count check (0100): qcCompleteConfirm
+  ///
+  /// In ja, this message translates to:
+  /// **'完了する'**
+  String get qcCompleteConfirm;
+
+  /// Inspection count check (0100): qcEffectCountShort
+  ///
+  /// In ja, this message translates to:
+  /// **'数えられなかった {n} 点を保留に移しました'**
+  String qcEffectCountShort(int n);
 }
 
 class _AppLocalizationsDelegate

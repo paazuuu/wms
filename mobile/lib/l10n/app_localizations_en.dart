@@ -4984,4 +4984,78 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get featBulkInspectionDesc =>
       'Narrow by arrival date, PO or product and pass them as good in one go';
+
+  @override
+  String get qcCountMatch => 'Count matches';
+
+  @override
+  String qcCountShort(int n) {
+    return 'Short $n';
+  }
+
+  @override
+  String qcCountOver(int n) {
+    return 'Over $n';
+  }
+
+  @override
+  String get qcCountNone => 'Not counted';
+
+  @override
+  String qcCountLine(int counted, int received) {
+    return 'Counted $counted / received $received';
+  }
+
+  @override
+  String get qcEnterCount => 'Enter count';
+
+  @override
+  String qcEnterCountTitle(String name) {
+    return 'Count for $name';
+  }
+
+  @override
+  String qcScanCounted(String name, int counted, int received) {
+    return '$name: $counted / $received';
+  }
+
+  @override
+  String qcScanCountMatched(String name, int n) {
+    return '$name matches ($n)';
+  }
+
+  @override
+  String get qcWrongItemTitle => 'Not on this delivery';
+
+  @override
+  String qcWrongItemBody(String jan) {
+    return 'JAN $jan is not on this delivery. Record it as a wrong item?';
+  }
+
+  @override
+  String get qcWrongItemRecord => 'Record as wrong item';
+
+  @override
+  String get qcWrongItemDone => 'Recorded as a wrong item';
+
+  @override
+  String qcMatchedSummary(int matched, int total) {
+    return '$matched of $total lines match';
+  }
+
+  @override
+  String get qcCompleteDefaultTitle => 'Some lines are unchecked';
+
+  @override
+  String qcCompleteDefaultBody(int n) {
+    return '$n unchecked lines will be completed as good. Counted lines settle at their count.';
+  }
+
+  @override
+  String get qcCompleteConfirm => 'Complete';
+
+  @override
+  String qcEffectCountShort(int n) {
+    return '$n that could not be counted went on hold';
+  }
 }

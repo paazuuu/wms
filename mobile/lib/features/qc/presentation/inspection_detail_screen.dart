@@ -17,9 +17,12 @@ import '../domain/attachment.dart';
 import '../domain/inspection.dart';
 import 'qc_result_ui.dart';
 
-/// One inspection: each received line with its pass/fail split, then a sticky
-/// action to close it. The backend refuses to close while lines are unchecked
-/// (spec §10), so the button explains that rather than failing silently.
+/// One inspection: each received line with its count and pass/fail split, then
+/// a sticky action to close it.
+///
+/// Since 0100 inspection is first a count — does what was counted (by scanning
+/// piece by piece, or typing it) match what arrived — and goods are good by
+/// default: lines nobody judged close as good after one confirmation.
 class InspectionDetailScreen extends ConsumerWidget {
   const InspectionDetailScreen({super.key, required this.inspectionId});
 
@@ -79,9 +82,29 @@ class _BodyState extends ConsumerState<_Body> {
 
   Future<void> _complete() async {
     final l10n = AppLocalizations.of(context);
-    if (_inspection.uncheckedCount > 0) {
-      _snack(l10n.qcCompleteBlocked, danger: true);
-      return;
+    // 0100: goods are good by default, so unchecked lines no longer block —
+    // but closing them without a look deserves one confirmation.
+    final unchecked = _inspection.uncheckedCount;
+    if (unchecked > 0) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.qcCompleteDefaultTitle),
+          content: Text(l10n.qcCompleteDefaultBody(unchecked)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.actionCancel),
+            ),
+            FilledButton(
+              key: const ValueKey('qc-complete-default-confirm'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.qcCompleteConfirm),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
     }
     setState(() => _busy = true);
     final result = await ref
@@ -185,7 +208,8 @@ class _BodyState extends ConsumerState<_Body> {
     );
   }
 
-  /// A scanned JAN picks its line: pass it all as good, or record findings.
+  /// A scanned JAN counts one piece of its line (0100): inspection is first a
+  /// count. A JAN the delivery did not bring is offered as 誤品.
   Future<void> _onScan(String code) async {
     final l10n = AppLocalizations.of(context);
     final jan = code.trim();
@@ -198,50 +222,78 @@ class _BodyState extends ConsumerState<_Body> {
       }
     }
     if (item == null) {
-      _snack(l10n.qcScanNotInInspection, danger: true);
+      if (_inspection.items.any((i) => i.janCode == jan)) {
+        _snack(l10n.qcFinalBadge);
+        return;
+      }
+      await _offerWrongItem(jan);
       return;
     }
     final line = item;
-    final choice = await showModalBottomSheet<String>(
+    final name = line.productName.isNotEmpty ? line.productName : line.janCode;
+    setState(() => _busy = true);
+    final result = await ref
+        .read(inspectionRepositoryProvider)
+        .recordCount(line.id, 1, add: true);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (c) {
+        ref.invalidate(inspectionDetailProvider(_inspection.id));
+        _snack(c.difference == 0
+            ? l10n.qcScanCountMatched(name, c.counted)
+            : l10n.qcScanCounted(name, c.counted, c.received));
+      },
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  Future<void> _offerWrongItem(String jan) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
       context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.qcScanPrompt(
-                    line.productName.isNotEmpty ? line.productName : line.janCode,
-                    line.actualQuantity),
-                style: Theme.of(sheetContext).textTheme.titleMedium,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton.icon(
-                key: const ValueKey('qc-scan-pass-all'),
-                onPressed: () => Navigator.pop(sheetContext, 'pass'),
-                icon: const Icon(Icons.done_all),
-                label: Text(l10n.qcPassAll),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              OutlinedButton(
-                onPressed: () => Navigator.pop(sheetContext, 'record'),
-                child: Text(l10n.qcScanRecordEach),
-              ),
-            ],
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.qcWrongItemTitle),
+        content: Text(l10n.qcWrongItemBody(jan)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.actionCancel),
           ),
-        ),
+          FilledButton(
+            key: const ValueKey('qc-wrong-item-record'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.qcWrongItemRecord),
+          ),
+        ],
       ),
     );
+    if (ok != true || !mounted) return;
+    final result =
+        await ref.read(inspectionRepositoryProvider).reportWrongItem(_inspection.id, jan);
     if (!mounted) return;
-    if (choice == 'pass') {
-      await _passAll(line);
-    } else if (choice == 'record') {
-      await _editItem(line);
-    }
+    result.when(
+      success: (_) => _snack(l10n.qcWrongItemDone),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
+  }
+
+  /// Type the count instead of scanning each piece.
+  Future<void> _enterCount(InspectionItem item) async {
+    final l10n = AppLocalizations.of(context);
+    final value = await showDialog<int>(
+      context: context,
+      builder: (_) => _CountDialog(item: item),
+    );
+    if (value == null || !mounted) return;
+    setState(() => _busy = true);
+    final result = await ref.read(inspectionRepositoryProvider).recordCount(item.id, value);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    result.when(
+      success: (_) => ref.invalidate(inspectionDetailProvider(_inspection.id)),
+      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+    );
   }
 
   Future<void> _scanWithCamera() async {
@@ -317,6 +369,24 @@ class _BodyState extends ConsumerState<_Body> {
             ],
           ),
         ),
+        // How many lines have been counted and match what arrived (0100).
+        if (_inspection.items.isNotEmpty && _inspection.countedCount > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: StatusPill(
+                tone: _inspection.matchedCount == _inspection.items.length
+                    ? StatusTone.success
+                    : StatusTone.info,
+                icon: Icons.fact_check_outlined,
+                label: l10n.qcMatchedSummary(
+                    _inspection.matchedCount, _inspection.items.length),
+                dense: true,
+              ),
+            ),
+          ),
         _AttachmentsRow(
           entityId: _inspection.id,
           canAdd: _inspection.isOpen,
@@ -369,6 +439,7 @@ class _BodyState extends ConsumerState<_Body> {
                       item: item,
                       onTap: open ? () => _editItem(item) : null,
                       onPassAll: open && !_busy ? () => _passAll(item) : null,
+                      onEnterCount: open && !_busy ? () => _enterCount(item) : null,
                     );
                   },
                 ),
@@ -407,10 +478,13 @@ class _BodyState extends ConsumerState<_Body> {
 }
 
 class _ItemCard extends StatelessWidget {
-  const _ItemCard({required this.item, this.onTap, this.onPassAll});
+  const _ItemCard({required this.item, this.onTap, this.onPassAll, this.onEnterCount});
 
   final InspectionItem item;
   final VoidCallback? onTap;
+
+  /// Type the count for this line (0100).
+  final VoidCallback? onEnterCount;
 
   /// Pass this line in full and settle it now (0099). Null once settled.
   final VoidCallback? onPassAll;
@@ -489,14 +563,60 @@ class _ItemCard extends StatelessWidget {
                       showSign: true),
                 ],
               ),
-              if (onPassAll != null)
+              const SizedBox(height: AppSpacing.sm),
+              // Inspection's first question (0100): is the number right?
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  StatusPill(
+                    key: ValueKey('qc-count-state-${item.id}'),
+                    tone: !item.isCounted
+                        ? StatusTone.neutral
+                        : item.countMatches
+                            ? StatusTone.success
+                            : StatusTone.danger,
+                    icon: !item.isCounted
+                        ? Icons.pin_outlined
+                        : item.countMatches
+                            ? Icons.check_circle_outline
+                            : Icons.error_outline,
+                    label: !item.isCounted
+                        ? l10n.qcCountNone
+                        : item.countMatches
+                            ? l10n.qcCountMatch
+                            : item.countDifference! < 0
+                                ? l10n.qcCountShort(-item.countDifference!)
+                                : l10n.qcCountOver(item.countDifference!),
+                    dense: true,
+                  ),
+                  if (item.isCounted)
+                    Text(l10n.qcCountLine(item.countedQuantity!, item.actualQuantity),
+                        style: theme.textTheme.bodySmall),
+                ],
+              ),
+              if (onPassAll != null || onEnterCount != null)
                 Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    key: ValueKey('qc-pass-all-${item.id}'),
-                    onPressed: onPassAll,
-                    icon: const Icon(Icons.done_all, size: 18),
-                    label: Text(l10n.qcPassAll),
+                  child: Wrap(
+                    spacing: AppSpacing.xs,
+                    children: [
+                      if (onEnterCount != null)
+                        TextButton.icon(
+                          key: ValueKey('qc-count-${item.id}'),
+                          onPressed: onEnterCount,
+                          icon: const Icon(Icons.pin_outlined, size: 18),
+                          label: Text(l10n.qcEnterCount),
+                        ),
+                      if (onPassAll != null)
+                        TextButton.icon(
+                          key: ValueKey('qc-pass-all-${item.id}'),
+                          onPressed: onPassAll,
+                          icon: const Icon(Icons.done_all, size: 18),
+                          label: Text(l10n.qcPassAll),
+                        ),
+                    ],
                   ),
                 ),
             ],
@@ -991,6 +1111,8 @@ class _StockEffectCard extends StatelessWidget {
                 effect.failedQuantity, effect.failedTo ?? 'DAMAGED')),
           // Not an error, and worth saying plainly: part of what was judged was
           // never gated, so nothing moved for it.
+          if (effect.countShortHeld > 0)
+            Text(l10n.qcEffectCountShort(effect.countShortHeld)),
           if (effect.hasUnheld)
             Text(
               l10n.qcEffectNotHeld(effect.notInQcPending),
@@ -1005,6 +1127,58 @@ class _StockEffectCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// The count for one line, typed (0100). Owns its controller, so the field
+/// outlives the dialog's closing animation.
+class _CountDialog extends StatefulWidget {
+  const _CountDialog({required this.item});
+
+  final InspectionItem item;
+
+  @override
+  State<_CountDialog> createState() => _CountDialogState();
+}
+
+class _CountDialogState extends State<_CountDialog> {
+  late final _controller = TextEditingController(
+      text: '${widget.item.countedQuantity ?? widget.item.actualQuantity}');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final item = widget.item;
+    return AlertDialog(
+      title: Text(l10n.qcEnterCountTitle(
+          item.productName.isNotEmpty ? item.productName : item.janCode)),
+      content: TextField(
+        key: const ValueKey('qc-count-field'),
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: InputDecoration(
+            helperText: l10n.qcCountLine(item.countedQuantity ?? 0, item.actualQuantity)),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('qc-count-save'),
+          onPressed: () => Navigator.pop(context, int.tryParse(_controller.text.trim())),
+          child: Text(l10n.actionSave),
+        ),
+      ],
     );
   }
 }

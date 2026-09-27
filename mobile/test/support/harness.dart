@@ -492,11 +492,31 @@ class FakeInspectionRepository implements InspectionRepository {
       {String? note, String? failStatus}) async {
     lastFailStatus = failStatus;
     if (failWith != null) return ApiFailure(message: failWith!);
-    if (inspection.uncheckedCount > 0) {
-      refusedIncomplete = true;
-      return const ApiFailure(
-          message: 'inspection still has unchecked item(s)', statusCode: 422);
-    }
+    // 0100: a line nobody judged is good by default and passes in full.
+    inspection = Inspection(
+      id: inspection.id,
+      status: inspection.status,
+      deliveryNumber: inspection.deliveryNumber,
+      supplierName: inspection.supplierName,
+      items: [
+        for (final it in inspection.items)
+          if (it.isChecked)
+            it
+          else
+            InspectionItem(
+              id: it.id,
+              janCode: it.janCode,
+              productName: it.productName,
+              expectedQuantity: it.expectedQuantity,
+              actualQuantity: it.actualQuantity,
+              passedQuantity: it.countedQuantity ?? it.actualQuantity,
+              failedQuantity: 0,
+              discrepancy: it.discrepancy,
+              result: QcResult.pass,
+              countedQuantity: it.countedQuantity,
+            ),
+      ],
+    );
     final results = inspection.items.map((i) => i.result).toSet();
     final status = results.contains(QcResult.hold)
         ? QcResult.hold
@@ -532,6 +552,53 @@ class FakeInspectionRepository implements InspectionRepository {
     lastHeldWarehouseId = warehouseId;
     lastHeldStatus = status;
     return ApiSuccess(status == null ? held : held.where((h) => h.statusCode == status).toList());
+  }
+
+  final List<({int itemId, int quantity, bool add})> counts = [];
+  ({int inspectionId, String jan, int quantity})? lastWrongItem;
+
+  @override
+  Future<ApiResult<InspectionCount>> recordCount(int itemId, int quantity,
+      {bool add = false}) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    counts.add((itemId: itemId, quantity: quantity, add: add));
+    late InspectionCount out;
+    inspection = Inspection(
+      id: inspection.id,
+      status: inspection.status,
+      deliveryNumber: inspection.deliveryNumber,
+      supplierName: inspection.supplierName,
+      items: [
+        for (final it in inspection.items)
+          if (it.id == itemId)
+            () {
+              final counted = add ? (it.countedQuantity ?? 0) + quantity : quantity;
+              out = InspectionCount(itemId: it.id, counted: counted, received: it.actualQuantity);
+              return InspectionItem(
+                id: it.id,
+                janCode: it.janCode,
+                productName: it.productName,
+                expectedQuantity: it.expectedQuantity,
+                actualQuantity: it.actualQuantity,
+                passedQuantity: counted < it.actualQuantity ? counted : it.actualQuantity,
+                failedQuantity: it.failedQuantity,
+                discrepancy: it.discrepancy,
+                result: QcResult.pass,
+                countedQuantity: counted,
+              );
+            }()
+          else
+            it,
+      ],
+    );
+    return ApiSuccess(out);
+  }
+
+  @override
+  Future<ApiResult<bool>> reportWrongItem(int inspectionId, String janCode,
+      {int quantity = 1, String? note}) async {
+    lastWrongItem = (inspectionId: inspectionId, jan: janCode, quantity: quantity);
+    return const ApiSuccess(true);
   }
 
   List<OpenInspectionLine> openLineList = const [];

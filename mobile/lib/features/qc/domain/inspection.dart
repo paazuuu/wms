@@ -44,6 +44,7 @@ class InspectionItem extends Equatable {
     this.labelOk,
     this.note,
     this.finalizedAt,
+    this.countedQuantity,
   });
 
   final int id;
@@ -73,6 +74,16 @@ class InspectionItem extends Equatable {
   final DateTime? finalizedAt;
   bool get isFinal => finalizedAt != null;
 
+  /// What the inspector counted (0100) — null until counted. Inspection's
+  /// first job is whether this matches what arrived ([actualQuantity]).
+  final int? countedQuantity;
+  bool get isCounted => countedQuantity != null;
+
+  /// counted − arrived: negative is short, positive is over, 0 matches.
+  int? get countDifference =>
+      countedQuantity == null ? null : countedQuantity! - actualQuantity;
+  bool get countMatches => countDifference == 0;
+
   factory InspectionItem.fromJson(Map<String, dynamic> json) => InspectionItem(
         id: _asInt(json['id']),
         janCode: (json['jan_code'] ?? '').toString(),
@@ -91,11 +102,15 @@ class InspectionItem extends Equatable {
         labelOk: json['label_ok'] as bool?,
         note: json['note'] as String?,
         finalizedAt: DateTime.tryParse('${json['finalized_at']}')?.toLocal(),
+        countedQuantity: json['counted_quantity'] == null
+            ? null
+            : _asInt(json['counted_quantity']),
       );
 
   @override
   List<Object?> get props =>
-      [id, janCode, passedQuantity, failedQuantity, discrepancy, result, finalizedAt];
+      [id, janCode, passedQuantity, failedQuantity, discrepancy, result, finalizedAt,
+       countedQuantity];
 }
 
 /// A QC pass over one receipt.
@@ -144,6 +159,10 @@ class Inspection extends Equatable {
   bool get isOpen => status == QcResult.pending;
   int get lineCount => items.isNotEmpty ? items.length : (itemCount ?? 0);
   int get uncheckedCount => items.where((i) => !i.isChecked).length;
+
+  /// Lines whose count has been taken and matches what arrived (0100).
+  int get matchedCount => items.where((i) => i.countMatches).length;
+  int get countedCount => items.where((i) => i.isCounted).length;
   int get failedUnits =>
       items.fold(0, (sum, i) => sum + i.failedQuantity);
 
@@ -193,7 +212,11 @@ class InspectionStockEffect extends Equatable {
     this.failedQuantity = 0,
     this.failedTo,
     this.notInQcPending = 0,
+    this.countShortHeld = 0,
   });
+
+  /// Counted fewer than arrived: the uncounted remainder went to HOLD (0100).
+  final int countShortHeld;
 
   final int releasedToOk;
   final int failedQuantity;
@@ -208,7 +231,7 @@ class InspectionStockEffect extends Equatable {
   final int notInQcPending;
 
   bool get movedNothing =>
-      releasedToOk == 0 && failedQuantity == 0;
+      releasedToOk == 0 && failedQuantity == 0 && countShortHeld == 0;
 
   /// Worth telling the operator about: they judged more than was held, so part
   /// of what they checked was never gated.
@@ -222,11 +245,12 @@ class InspectionStockEffect extends Equatable {
             ? null
             : (json['failed_to'] as String).trim(),
         notInQcPending: _asInt(json['not_in_qc_pending']),
+        countShortHeld: _asInt(json['count_short_held']),
       );
 
   @override
   List<Object?> get props =>
-      [releasedToOk, failedQuantity, failedTo, notInQcPending];
+      [releasedToOk, failedQuantity, failedTo, notInQcPending, countShortHeld];
 }
 
 /// What the operator recorded for one line.
@@ -271,4 +295,24 @@ class InspectionFinding {
         if (note != null && note!.isNotEmpty) 'note': note,
         'hold': hold,
       };
+}
+
+/// A line's count after [InspectionRepository.recordCount] (0100).
+class InspectionCount extends Equatable {
+  const InspectionCount({required this.itemId, required this.counted, required this.received});
+
+  final int itemId;
+  final int counted;
+  final int received;
+
+  int get difference => counted - received;
+
+  factory InspectionCount.fromJson(Map<String, dynamic> json) => InspectionCount(
+        itemId: _asInt(json['item_id']),
+        counted: _asInt(json['counted']),
+        received: _asInt(json['received']),
+      );
+
+  @override
+  List<Object?> get props => [itemId, counted, received];
 }

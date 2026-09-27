@@ -4864,4 +4864,78 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featBulkInspectionDesc => '入荷日・発注・商品で絞り込み、まとめて良品として検品完了';
+
+  @override
+  String get qcCountMatch => '数量一致';
+
+  @override
+  String qcCountShort(int n) {
+    return '不足 $n';
+  }
+
+  @override
+  String qcCountOver(int n) {
+    return '過剰 $n';
+  }
+
+  @override
+  String get qcCountNone => '未カウント';
+
+  @override
+  String qcCountLine(int counted, int received) {
+    return '検品数 $counted / 入荷 $received';
+  }
+
+  @override
+  String get qcEnterCount => '数量を入力';
+
+  @override
+  String qcEnterCountTitle(String name) {
+    return '$name の検品数';
+  }
+
+  @override
+  String qcScanCounted(String name, int counted, int received) {
+    return '$name：$counted / $received';
+  }
+
+  @override
+  String qcScanCountMatched(String name, int n) {
+    return '$name の数量が一致しました（$n 点）';
+  }
+
+  @override
+  String get qcWrongItemTitle => 'この入荷にない商品です';
+
+  @override
+  String qcWrongItemBody(String jan) {
+    return 'JAN $jan は今回の入荷に含まれていません。誤品として記録しますか？';
+  }
+
+  @override
+  String get qcWrongItemRecord => '誤品として記録';
+
+  @override
+  String get qcWrongItemDone => '誤品として記録しました';
+
+  @override
+  String qcMatchedSummary(int matched, int total) {
+    return '数量一致 $matched / $total 行';
+  }
+
+  @override
+  String get qcCompleteDefaultTitle => '未チェックの行があります';
+
+  @override
+  String qcCompleteDefaultBody(int n) {
+    return '未チェックの $n 行は良品として完了します。数量を数えた行は、数えた数で確定します。';
+  }
+
+  @override
+  String get qcCompleteConfirm => '完了する';
+
+  @override
+  String qcEffectCountShort(int n) {
+    return '数えられなかった $n 点を保留に移しました';
+  }
 }

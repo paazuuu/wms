@@ -4853,4 +4853,78 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featBulkInspectionDesc => '按到货日期、采购单或商品筛选，批量作为良品完成检验';
+
+  @override
+  String get qcCountMatch => '数量一致';
+
+  @override
+  String qcCountShort(int n) {
+    return '不足 $n';
+  }
+
+  @override
+  String qcCountOver(int n) {
+    return '过多 $n';
+  }
+
+  @override
+  String get qcCountNone => '未计数';
+
+  @override
+  String qcCountLine(int counted, int received) {
+    return '检验数 $counted / 入库 $received';
+  }
+
+  @override
+  String get qcEnterCount => '输入数量';
+
+  @override
+  String qcEnterCountTitle(String name) {
+    return '$name 的检验数';
+  }
+
+  @override
+  String qcScanCounted(String name, int counted, int received) {
+    return '$name：$counted / $received';
+  }
+
+  @override
+  String qcScanCountMatched(String name, int n) {
+    return '$name 数量一致（$n 件）';
+  }
+
+  @override
+  String get qcWrongItemTitle => '此次入库中没有该商品';
+
+  @override
+  String qcWrongItemBody(String jan) {
+    return 'JAN $jan 不在本次入库中。要记录为错误商品吗？';
+  }
+
+  @override
+  String get qcWrongItemRecord => '记录为错误商品';
+
+  @override
+  String get qcWrongItemDone => '已记录为错误商品';
+
+  @override
+  String qcMatchedSummary(int matched, int total) {
+    return '数量一致 $matched / $total 行';
+  }
+
+  @override
+  String get qcCompleteDefaultTitle => '有未检查的行';
+
+  @override
+  String qcCompleteDefaultBody(int n) {
+    return '$n 个未检查的行将作为良品完成。已计数的行按计数确定。';
+  }
+
+  @override
+  String get qcCompleteConfirm => '完成';
+
+  @override
+  String qcEffectCountShort(int n) {
+    return '未能计数的 $n 件已转为保留';
+  }
 }
