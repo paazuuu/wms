@@ -119,6 +119,22 @@ class FeatureEntry {
         return l10n.featReports;
       case 'notation_training':
         return l10n.featNotationTraining;
+      case 'sc_dashboard':
+        return l10n.featScDashboard;
+      case 'sc_suppliers':
+        return l10n.featScSuppliers;
+      case 'sc_costs':
+        return l10n.featScCosts;
+      case 'sc_routes':
+        return l10n.featScRoutes;
+      case 'sc_simulation':
+        return l10n.featScSimulation;
+      case 'sc_risk':
+        return l10n.featScRisk;
+      case 'sc_bottleneck':
+        return l10n.featScBottleneck;
+      case 'sc_history':
+        return l10n.featScHistory;
       case 'putaway':
         return l10n.featPutaway;
       case 'expiring_lots':
@@ -189,6 +205,22 @@ class FeatureEntry {
         return l10n.featReportsDesc;
       case 'notation_training':
         return l10n.featNotationTrainingDesc;
+      case 'sc_dashboard':
+        return l10n.featScDashboardDesc;
+      case 'sc_suppliers':
+        return l10n.featScSuppliersDesc;
+      case 'sc_costs':
+        return l10n.featScCostsDesc;
+      case 'sc_routes':
+        return l10n.featScRoutesDesc;
+      case 'sc_simulation':
+        return l10n.featScSimulationDesc;
+      case 'sc_risk':
+        return l10n.featScRiskDesc;
+      case 'sc_bottleneck':
+        return l10n.featScBottleneckDesc;
+      case 'sc_history':
+        return l10n.featScHistoryDesc;
       case 'putaway':
         return l10n.featPutawayDesc;
       case 'expiring_lots':
@@ -230,6 +262,8 @@ class FeatureGroup {
     switch (id) {
       case 'field_operations':
         return l10n.groupFieldOperations;
+      case 'supply_chain':
+        return l10n.groupSupplyChain;
       case 'management':
         return l10n.groupManagement;
       default:

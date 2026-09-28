@@ -26,6 +26,14 @@ import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../warehouse_context/presentation/location_tree_screen.dart';
 import '../../reports/presentation/report_builder_screen.dart';
 import '../../sales/presentation/sales_order_list_screen.dart';
+import '../../supply_chain/presentation/sc_bottleneck_screen.dart';
+import '../../supply_chain/presentation/sc_cost_structure_screen.dart';
+import '../../supply_chain/presentation/sc_dashboard_screen.dart';
+import '../../supply_chain/presentation/sc_history_screen.dart';
+import '../../supply_chain/presentation/sc_risk_screen.dart';
+import '../../supply_chain/presentation/sc_routes_screen.dart';
+import '../../supply_chain/presentation/sc_simulation_screen.dart';
+import '../../supply_chain/presentation/sc_supplier_comparison_screen.dart';
 import '../../stock_ops/presentation/stock_adjustment_screen.dart';
 import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../transfers/presentation/transfer_list_screen.dart';
@@ -190,6 +198,70 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _workOrders,
             requiredAnyOf: ['work_order.view', 'work_order.manage'],
+          ),
+        ],
+      ),
+      // Supply chain profit & risk (0107, spec §1): an analysis layer over
+      // the operations above, not a replacement for any of them. What-ifs
+      // never change stock or orders.
+      FeatureGroup(
+        id: 'supply_chain',
+        entries: [
+          FeatureEntry(
+            id: 'sc_dashboard',
+            icon: Icons.stacked_line_chart,
+            status: FeatureStatus.ready,
+            builder: _scDashboard,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_suppliers',
+            icon: Icons.compare_arrows,
+            status: FeatureStatus.ready,
+            builder: _scSuppliers,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_costs',
+            icon: Icons.receipt_long_outlined,
+            status: FeatureStatus.ready,
+            builder: _scCosts,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_routes',
+            icon: Icons.alt_route,
+            status: FeatureStatus.ready,
+            builder: _scRoutes,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_simulation',
+            icon: Icons.science_outlined,
+            status: FeatureStatus.ready,
+            builder: _scSimulation,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_risk',
+            icon: Icons.shield_outlined,
+            status: FeatureStatus.ready,
+            builder: _scRisk,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_bottleneck',
+            icon: Icons.traffic_outlined,
+            status: FeatureStatus.ready,
+            builder: _scBottleneck,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
+          FeatureEntry(
+            id: 'sc_history',
+            icon: Icons.history_edu_outlined,
+            status: FeatureStatus.ready,
+            builder: _scHistory,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
           ),
         ],
       ),
@@ -375,3 +447,13 @@ Widget _replenishment(BuildContext _) => const ReplenishmentScreen();
 
 /// Top-level (const-referenceable) builder for the Locations feature.
 Widget _locations(BuildContext _) => const LocationTreeScreen();
+
+/// The supply chain screens (0107).
+Widget _scDashboard(BuildContext _) => const ScDashboardScreen();
+Widget _scSuppliers(BuildContext _) => const ScSupplierComparisonScreen();
+Widget _scCosts(BuildContext _) => const ScCostStructureScreen();
+Widget _scRoutes(BuildContext _) => const ScRoutesScreen();
+Widget _scSimulation(BuildContext _) => const ScSimulationScreen();
+Widget _scRisk(BuildContext _) => const ScRiskScreen();
+Widget _scBottleneck(BuildContext _) => const ScBottleneckScreen();
+Widget _scHistory(BuildContext _) => const ScHistoryScreen();

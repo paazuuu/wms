@@ -11,6 +11,7 @@ import 'package:wms_mobile/features/product/domain/product_lot.dart';
 import 'package:wms_mobile/features/product/domain/warehouse_product.dart';
 import 'package:wms_mobile/features/product/presentation/product_detail_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
+import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
 
 import '../../support/harness.dart';
 
@@ -65,6 +66,7 @@ Future<ProviderContainer> _pump(
     productRepositoryProvider.overrideWithValue(repo),
     tradingPartnerRepositoryProvider
         .overrideWithValue(FakeTradingPartnerRepository(partners: partners)),
+    scCanViewProvider.overrideWithValue(false),
   ]);
   addTearDown(container.dispose);
   if (warehouseId != null) {

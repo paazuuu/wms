@@ -399,6 +399,7 @@ class _SectionLabel extends StatelessWidget {
 StatusTone _toneForGroup(String id) => switch (id) {
       'field_operations' => StatusTone.info,
       'lookup' => StatusTone.success,
+      'supply_chain' => StatusTone.warning,
       _ => StatusTone.neutral,
     };
 

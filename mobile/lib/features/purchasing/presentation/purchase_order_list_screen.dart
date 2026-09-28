@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../supply_chain/presentation/sc_purchase_check.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../application/purchase_order_providers.dart';
@@ -64,6 +65,14 @@ class _PurchaseOrderListScreenState extends ConsumerState<PurchaseOrderListScree
     if (draft == null || !mounted) return;
 
     setState(() => _busy = true);
+    // §30: a purchase that would thin the margin is shown before it is placed.
+    final go = await scConfirmPurchaseProfit(context, ref,
+        supplierName: draft.supplierName, warehouseId: draft.warehouseId, lines: draft.lines);
+    if (!mounted) return;
+    if (!go) {
+      setState(() => _busy = false);
+      return;
+    }
     final result = await ref.read(purchaseOrderRepositoryProvider).create(
           supplierName: draft.supplierName,
           warehouseId: draft.warehouseId,

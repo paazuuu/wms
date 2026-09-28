@@ -5801,4 +5801,1095 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get importNotVerified =>
       'The AI\'s checking read failed (read once only). Check the lines carefully.';
+
+  @override
+  String get groupSupplyChain => 'Supply chain';
+
+  @override
+  String get featScDashboard => 'Profit dashboard';
+
+  @override
+  String get featScDashboardDesc =>
+      'What is left after every cost from purchase to sale';
+
+  @override
+  String get featScSuppliers => 'Supplier comparison';
+
+  @override
+  String get featScSuppliersDesc =>
+      'Compare by final profit, not the lowest price';
+
+  @override
+  String get featScCosts => 'Cost structure';
+
+  @override
+  String get featScCostsDesc =>
+      'Cost breakdown and the cost, duty and FX rules';
+
+  @override
+  String get featScRoutes => 'Logistics routes';
+
+  @override
+  String get featScRoutesDesc =>
+      'Sea, air, truck and customs legs and their costs';
+
+  @override
+  String get featScSimulation => 'Profit simulation';
+
+  @override
+  String get featScSimulationDesc =>
+      'What if the supplier, rate, freight, duty or FX changes';
+
+  @override
+  String get featScRisk => 'Risk analysis';
+
+  @override
+  String get featScRiskDesc =>
+      'Risk of suppliers, sites and routes, with reasons';
+
+  @override
+  String get featScBottleneck => 'Bottlenecks';
+
+  @override
+  String get featScBottleneckDesc =>
+      'Capacity pressure and what a stoppage costs';
+
+  @override
+  String get featScHistory => 'Scenario history';
+
+  @override
+  String get featScHistoryDesc => 'Saved scenarios and their results';
+
+  @override
+  String get scRevenue => 'Revenue';
+
+  @override
+  String get scPurchase => 'Purchase cost';
+
+  @override
+  String get scFxImpact => 'FX impact';
+
+  @override
+  String get scLogistics => 'Logistics';
+
+  @override
+  String get scCustoms => 'Customs & duty';
+
+  @override
+  String get scWarehouse => 'Warehouse';
+
+  @override
+  String get scLabor => 'Labor';
+
+  @override
+  String get scOther => 'Other costs';
+
+  @override
+  String get scTotalCost => 'Total cost';
+
+  @override
+  String get scProfit => 'Gross profit';
+
+  @override
+  String get scMargin => 'Margin';
+
+  @override
+  String get scLeadTime => 'Avg lead time';
+
+  @override
+  String get scSalesRelated => 'Sales-related costs';
+
+  @override
+  String get scRecoverable => 'Recoverable (not in cost)';
+
+  @override
+  String get scLinePurchase => 'Purchase';
+
+  @override
+  String get scLineFx => 'FX impact';
+
+  @override
+  String get scLineIntlFreight => 'International freight';
+
+  @override
+  String get scLineInsurance => 'Insurance';
+
+  @override
+  String get scLineDuty => 'Duty';
+
+  @override
+  String get scLineImportTax => 'Import tax (not recoverable)';
+
+  @override
+  String get scLineCustomsFee => 'Customs fee';
+
+  @override
+  String get scLinePortFee => 'Port / airport';
+
+  @override
+  String get scLineDomesticFreight => 'Domestic freight';
+
+  @override
+  String get scLineWarehouse => 'Warehouse';
+
+  @override
+  String get scLineReceiving => 'Receiving';
+
+  @override
+  String get scLineInspection => 'Inspection';
+
+  @override
+  String get scLinePacking => 'Packing';
+
+  @override
+  String get scLineLabor => 'Labor';
+
+  @override
+  String get scLineOverhead => 'Overhead';
+
+  @override
+  String get scLineOther => 'Other';
+
+  @override
+  String get scLineRevenue => 'Revenue';
+
+  @override
+  String get scLandedCost => 'Landed cost';
+
+  @override
+  String get scSalesPrice => 'Sales price';
+
+  @override
+  String get scProfitPerUnit => 'Profit / unit';
+
+  @override
+  String get scAnnualProfit => 'Annual profit';
+
+  @override
+  String get scVolume => 'Annual volume';
+
+  @override
+  String scDays(String days) {
+    return '$days d';
+  }
+
+  @override
+  String get scCurrent => 'Current';
+
+  @override
+  String get scSimulated => 'Simulated';
+
+  @override
+  String get scDifference => 'Change vs current';
+
+  @override
+  String get scCurrentValues => 'Current values';
+
+  @override
+  String get scSimulatedValues => 'Simulated values (nothing real changes)';
+
+  @override
+  String get scDrivers => 'What changed it';
+
+  @override
+  String get scNoData => 'No products can be costed yet';
+
+  @override
+  String get scNoDataBody =>
+      'Register each product\'s supply terms (supplier, price, rate) to see its cost and profit. They can also be taken from purchase orders and delivery notes.';
+
+  @override
+  String get scSeed => 'Take terms from purchase history';
+
+  @override
+  String scSeeded(int po, int doc) {
+    return 'Took $po from purchase orders and $doc from delivery notes';
+  }
+
+  @override
+  String get scSnapshot => 'Save snapshot';
+
+  @override
+  String get scSnapshotSaved => 'Current state saved';
+
+  @override
+  String get scAllWarehouses => 'All warehouses';
+
+  @override
+  String get scAlerts => 'Needs attention';
+
+  @override
+  String scAlertBottlenecks(int count) {
+    return '$count over capacity or stopped';
+  }
+
+  @override
+  String scAlertRisks(int count) {
+    return '$count high risks';
+  }
+
+  @override
+  String scAlertNoSupply(int count) {
+    return '$count products without a supplier';
+  }
+
+  @override
+  String scAlertLoss(int count) {
+    return '$count products at a loss';
+  }
+
+  @override
+  String get scProductsTitle => 'Profit by product';
+
+  @override
+  String get scCostBreakdown => 'Cost breakdown';
+
+  @override
+  String get scWaterfall => 'From sales price to profit (per unit)';
+
+  @override
+  String get scChosen => 'Current source';
+
+  @override
+  String get scNoRoute => 'No route';
+
+  @override
+  String get scProduct => 'Product';
+
+  @override
+  String get scChooseProduct => 'Choose a product';
+
+  @override
+  String get scQuantity => 'Quantity per order';
+
+  @override
+  String get scRates => 'Compare rates';
+
+  @override
+  String get scRatesHint => 'e.g. 65,70,75';
+
+  @override
+  String get scDiscountRate => 'Rate';
+
+  @override
+  String get scUnitPrice => 'Unit price';
+
+  @override
+  String get scListPrice => 'List price';
+
+  @override
+  String get scCurrency => 'Currency';
+
+  @override
+  String get scMoq => 'MOQ';
+
+  @override
+  String get scOrderLot => 'Order lot';
+
+  @override
+  String get scLeadTimeDays => 'Lead time (days)';
+
+  @override
+  String get scPaymentTerms => 'Payment terms';
+
+  @override
+  String get scPrimary => 'Primary';
+
+  @override
+  String get scDefaultRoute => 'Default route';
+
+  @override
+  String get scSupplyTerms => 'Supply terms';
+
+  @override
+  String get scAddTerm => 'Add supply term';
+
+  @override
+  String get scSupplier => 'Supplier';
+
+  @override
+  String get scSupplierStats => 'Supplier record';
+
+  @override
+  String scStatLine(int products, int sole, int orders) {
+    return '$products items · $sole sole-sourced · $orders orders';
+  }
+
+  @override
+  String get scLateRate => 'Late rate';
+
+  @override
+  String get scDefectRate => 'Defect rate';
+
+  @override
+  String get scPurchased => 'Purchased';
+
+  @override
+  String get scProfile => 'Product assumptions';
+
+  @override
+  String get scEditProfile => 'Edit assumptions';
+
+  @override
+  String get scAnnualVolume => 'Annual volume';
+
+  @override
+  String get scAnnualVolumeHint => 'Blank: last 12 months shipped';
+
+  @override
+  String get scSalesPriceHint => 'Blank: the product master price';
+
+  @override
+  String get scWeight => 'Weight (kg/unit)';
+
+  @override
+  String get scUnitsPerCarton => 'Units per carton';
+
+  @override
+  String get scStorageDays => 'Storage days';
+
+  @override
+  String get scHsCode => 'HS code';
+
+  @override
+  String get scOriginCountry => 'Origin country';
+
+  @override
+  String get scCostRules => 'Cost rules';
+
+  @override
+  String get scTariffRules => 'Duty & import tax';
+
+  @override
+  String get scFxRates => 'FX rates';
+
+  @override
+  String get scByProduct => 'By product';
+
+  @override
+  String get scAddRule => 'Add rule';
+
+  @override
+  String get scRuleName => 'Name';
+
+  @override
+  String get scCategory => 'Category';
+
+  @override
+  String get scBasis => 'Basis';
+
+  @override
+  String get scAmount => 'Amount / rate';
+
+  @override
+  String get scAmountPercentHint => 'Rates as decimals (3% = 0.03)';
+
+  @override
+  String get scUnitsPerBasis => 'Units per basis';
+
+  @override
+  String get scUnitsPerBasisHint =>
+      'Units per hour, per carton, or the monthly volume to spread over';
+
+  @override
+  String get scExpensed => 'Count as cost (off: recoverable)';
+
+  @override
+  String get scAll => 'All';
+
+  @override
+  String get scCatStorage => 'Storage';
+
+  @override
+  String get scCatReceiving => 'Receiving';
+
+  @override
+  String get scCatInspection => 'Inspection';
+
+  @override
+  String get scCatPacking => 'Packing';
+
+  @override
+  String get scCatPicking => 'Picking';
+
+  @override
+  String get scCatShipping => 'Shipping';
+
+  @override
+  String get scCatLabor => 'Labor';
+
+  @override
+  String get scCatOverhead => 'Overhead';
+
+  @override
+  String get scCatDomesticFreight => 'Domestic freight';
+
+  @override
+  String get scCatSalesRelated => 'Sales-related';
+
+  @override
+  String get scCatOther => 'Other';
+
+  @override
+  String get scBasisPerUnit => 'Per unit';
+
+  @override
+  String get scBasisPerUnitMonth => 'Per unit per month';
+
+  @override
+  String get scBasisPerCarton => 'Per carton';
+
+  @override
+  String get scBasisPerLine => 'Per line';
+
+  @override
+  String get scBasisPerOrder => 'Per order';
+
+  @override
+  String get scBasisPerHour => 'Per hour';
+
+  @override
+  String get scBasisPercentRevenue => 'Rate of revenue';
+
+  @override
+  String get scBasisPercentPurchase => 'Rate of purchase';
+
+  @override
+  String get scBasisFixedMonthly => 'Fixed per month';
+
+  @override
+  String get scTariffRate => 'Duty rate';
+
+  @override
+  String get scImportTaxRate => 'Import tax rate';
+
+  @override
+  String get scImportTaxRecoverable => 'Import tax is recoverable';
+
+  @override
+  String get scOtherRate => 'Other import duty rate';
+
+  @override
+  String get scValuation => 'Valuation';
+
+  @override
+  String get scHsPrefix => 'HS code (prefix)';
+
+  @override
+  String get scDestinationCountry => 'Destination country';
+
+  @override
+  String get scAddTariff => 'Add duty rule';
+
+  @override
+  String get scRateToBase => 'Rate (per unit of currency)';
+
+  @override
+  String get scAddFx => 'Add currency';
+
+  @override
+  String get scRoutesTab => 'Routes';
+
+  @override
+  String get scNodesTab => 'Sites';
+
+  @override
+  String get scAddRoute => 'Add route';
+
+  @override
+  String get scAddNode => 'Add site';
+
+  @override
+  String get scRouteName => 'Route name';
+
+  @override
+  String get scLegs => 'Legs';
+
+  @override
+  String get scAddLeg => 'Add leg';
+
+  @override
+  String get scFrom => 'From';
+
+  @override
+  String get scTo => 'To';
+
+  @override
+  String get scMode => 'Mode';
+
+  @override
+  String get scBaseCost => 'Base cost (per shipment)';
+
+  @override
+  String get scCostPerKg => 'Per kg';
+
+  @override
+  String get scCostPerUnit => 'Per unit';
+
+  @override
+  String get scInsuranceRate => 'Insurance rate';
+
+  @override
+  String get scCapacityKg => 'Capacity (kg/month)';
+
+  @override
+  String get scCapacityUnits => 'Capacity (units/month)';
+
+  @override
+  String get scCustomsClearance => 'Clears import customs here';
+
+  @override
+  String get scCustomsCost => 'Customs fee (per shipment)';
+
+  @override
+  String get scRisk => 'Risk';
+
+  @override
+  String get scApplyRoute => 'Use this route in a scenario';
+
+  @override
+  String get scNoRoutes => 'No routes yet';
+
+  @override
+  String get scNoRoutesBody =>
+      'Register the legs from a supplier to a warehouse (sea, air, truck, customs) to bring freight, duty and lead time into the numbers.';
+
+  @override
+  String get scNodeName => 'Name';
+
+  @override
+  String get scNodeKind => 'Kind';
+
+  @override
+  String get scCountry => 'Country code';
+
+  @override
+  String get scDwellDays => 'Dwell days';
+
+  @override
+  String get scHandlingPerUnit => 'Handling (per unit)';
+
+  @override
+  String get scKindSupplier => 'Supplier';
+
+  @override
+  String get scKindPort => 'Port';
+
+  @override
+  String get scKindAirport => 'Airport';
+
+  @override
+  String get scKindCustoms => 'Customs';
+
+  @override
+  String get scKindWarehouse => 'Warehouse';
+
+  @override
+  String get scKindDc => 'Distribution center';
+
+  @override
+  String get scKindCustomer => 'Customer';
+
+  @override
+  String get scKindHub => 'Hub';
+
+  @override
+  String get scModeSea => 'Sea';
+
+  @override
+  String get scModeAir => 'Air';
+
+  @override
+  String get scModeTruck => 'Truck';
+
+  @override
+  String get scModeRail => 'Rail';
+
+  @override
+  String get scModeCourier => 'Courier';
+
+  @override
+  String get scModeInternal => 'Internal transfer';
+
+  @override
+  String get scRiskLow => 'Low';
+
+  @override
+  String get scRiskMedium => 'Medium';
+
+  @override
+  String get scRiskHigh => 'High';
+
+  @override
+  String get scRiskCritical => 'Critical';
+
+  @override
+  String get scScenario => 'Scenario';
+
+  @override
+  String get scCurrentConditions => 'Current conditions';
+
+  @override
+  String get scScenarioName => 'Scenario name';
+
+  @override
+  String get scSuppliersUsed => 'Suppliers to use';
+
+  @override
+  String get scRouteChoice => 'Logistics';
+
+  @override
+  String get scRouteCurrent => 'Current route';
+
+  @override
+  String get scRouteCheapest => 'Cheapest';
+
+  @override
+  String get scRouteFastest => 'Fastest';
+
+  @override
+  String get scSupplierChoice => 'Which supplier';
+
+  @override
+  String get scChoiceCurrent => 'Current supplier';
+
+  @override
+  String get scChoiceCheapest => 'Most profit';
+
+  @override
+  String get scChoiceFastest => 'Shortest lead time';
+
+  @override
+  String get scChanges => 'What changes (±%)';
+
+  @override
+  String get scChangeHint => 'e.g. +10 is 10% more, -5 is 5% less';
+
+  @override
+  String get scPriceChange => 'Purchase price';
+
+  @override
+  String get scFreightChange => 'Freight (all)';
+
+  @override
+  String get scSeaChange => 'Sea freight';
+
+  @override
+  String get scAirChange => 'Air freight';
+
+  @override
+  String get scTariffChange => 'Duty';
+
+  @override
+  String get scCustomsChange => 'Customs fee';
+
+  @override
+  String get scWarehouseChange => 'Warehouse';
+
+  @override
+  String get scLaborChange => 'Labor';
+
+  @override
+  String get scOverheadChange => 'Overhead';
+
+  @override
+  String get scFxChange => 'FX (foreign currency up)';
+
+  @override
+  String get scSalesPriceChange => 'Sales price';
+
+  @override
+  String get scVolumeChange => 'Sales volume';
+
+  @override
+  String get scRatesBySupplier => 'Rate changes';
+
+  @override
+  String scRateNow(String rate) {
+    return 'now $rate';
+  }
+
+  @override
+  String get scAddSupplier => 'Add a supplier (what-if)';
+
+  @override
+  String get scAddedSupplier => 'Supplier to add';
+
+  @override
+  String get scApplyRiskEvents => 'Apply the registered risks';
+
+  @override
+  String get scRun => 'Run simulation';
+
+  @override
+  String get scSaveScenario => 'Save scenario';
+
+  @override
+  String get scScenarioSaved => 'Scenario saved';
+
+  @override
+  String get scAddToCompare => 'Add to comparison';
+
+  @override
+  String get scCompare => 'Comparison (up to 5)';
+
+  @override
+  String get scRunCompare => 'Compare';
+
+  @override
+  String get scClearCompare => 'Clear';
+
+  @override
+  String get scCompareFull => 'Up to 5 scenarios can be compared';
+
+  @override
+  String scResultTitle(String name) {
+    return 'Scenario: $name';
+  }
+
+  @override
+  String get scProductChanges => 'Changes by product';
+
+  @override
+  String get scNotBest =>
+      'The system does not pick a winner: weigh profit, lead time and risk yourself.';
+
+  @override
+  String get scHighRisks => 'High risks';
+
+  @override
+  String get scOverCapacity => 'Over capacity';
+
+  @override
+  String get scRiskTitle => 'Risks';
+
+  @override
+  String get scRiskRuleNote =>
+      'Risk scores come from explainable rules: set levels, registered risks, capacity, sole sourcing, late and defect rates.';
+
+  @override
+  String get scRiskEvents => 'Registered risks';
+
+  @override
+  String get scAddRiskEvent => 'Register a risk';
+
+  @override
+  String get scRiskEventTitle => 'Title';
+
+  @override
+  String get scRiskKind => 'Kind';
+
+  @override
+  String get scSeverity => 'Severity';
+
+  @override
+  String get scStartsOn => 'Starts';
+
+  @override
+  String get scEndsOn => 'Ends';
+
+  @override
+  String get scPriceMultiplier => 'Price multiplier';
+
+  @override
+  String get scCostMultiplier => 'Cost multiplier';
+
+  @override
+  String get scCapacityMultiplier => 'Capacity multiplier';
+
+  @override
+  String get scDelayDays => 'Delay (days)';
+
+  @override
+  String get scTarget => 'Target';
+
+  @override
+  String scReasonLevel(String level) {
+    return 'Set level: $level';
+  }
+
+  @override
+  String scReasonSole(String count) {
+    return 'Sole source of $count items';
+  }
+
+  @override
+  String scReasonEvent(String kind) {
+    return 'Registered risk: $kind';
+  }
+
+  @override
+  String scReasonLate(String rate) {
+    return 'Late $rate%';
+  }
+
+  @override
+  String scReasonDefect(String rate) {
+    return 'Defects $rate%';
+  }
+
+  @override
+  String get scReasonLoadExceeded => 'Over capacity';
+
+  @override
+  String get scReasonLoadBusy => 'Near capacity';
+
+  @override
+  String get scReasonNoAlt => 'No alternative';
+
+  @override
+  String scReasonLongLead(String days) {
+    return 'Long lead time $days d';
+  }
+
+  @override
+  String get scReasonCrossBorder => 'Crosses a border';
+
+  @override
+  String get scEvSupplierStop => 'Supplier stops';
+
+  @override
+  String get scEvSupplierPrice => 'Supplier price rise';
+
+  @override
+  String get scEvSupplierDelay => 'Supplier delay';
+
+  @override
+  String get scEvRouteStop => 'Route stops';
+
+  @override
+  String get scEvModeStop => 'Transport mode stops';
+
+  @override
+  String get scEvPortStop => 'Port closed';
+
+  @override
+  String get scEvAirportStop => 'Airport closed';
+
+  @override
+  String get scEvCustomsDelay => 'Customs delay';
+
+  @override
+  String get scEvWarehouseCapacity => 'Warehouse capacity short';
+
+  @override
+  String get scEvWarehouseStop => 'Warehouse stops';
+
+  @override
+  String get scEvDomesticStop => 'Domestic delivery stops';
+
+  @override
+  String get scEvStaffShortage => 'Staff shortage';
+
+  @override
+  String get scEvCostSpike => 'Cost spike';
+
+  @override
+  String get scRiskKindSupplier => 'Supplier';
+
+  @override
+  String get scRiskKindNode => 'Site';
+
+  @override
+  String get scRiskKindRoute => 'Route';
+
+  @override
+  String get scNoRisks => 'Nothing to assess yet';
+
+  @override
+  String get scLoadsTitle => 'Capacity and load';
+
+  @override
+  String get scStatusOk => 'OK';
+
+  @override
+  String get scStatusBusy => 'Near capacity';
+
+  @override
+  String get scStatusExceeded => 'Capacity exceeded';
+
+  @override
+  String get scStatusNoCapacity => 'No capacity set';
+
+  @override
+  String get scStatusStopped => 'Stopped';
+
+  @override
+  String get scAlternative => 'Has alternative';
+
+  @override
+  String get scNoAlternative => 'No alternative';
+
+  @override
+  String scPerMonth(String units) {
+    return '$units units/month';
+  }
+
+  @override
+  String scLoadPercent(String percent) {
+    return 'Load $percent';
+  }
+
+  @override
+  String get scDisruptionTitle => 'Disruption simulation';
+
+  @override
+  String get scDisruptionTarget => 'What stops';
+
+  @override
+  String get scDisruptionDays => 'Days';
+
+  @override
+  String get scDisruptionKind => 'Kind';
+
+  @override
+  String get scStop => 'Stop';
+
+  @override
+  String get scDelay => 'Delay';
+
+  @override
+  String get scRunDisruption => 'Work out the impact';
+
+  @override
+  String get scImpact => 'Impact on profit';
+
+  @override
+  String get scExtraCost => 'Extra cost';
+
+  @override
+  String get scLostProfit => 'Lost profit';
+
+  @override
+  String get scLostUnits => 'Units short';
+
+  @override
+  String get scRerouted => 'Rerouted';
+
+  @override
+  String scCoverage(String days) {
+    return '$days days of stock';
+  }
+
+  @override
+  String get scNoAlternativeRoute => 'No alternative route';
+
+  @override
+  String scAlternativeVia(String name) {
+    return 'Via: $name';
+  }
+
+  @override
+  String get scNoLoads => 'No flows yet: register routes and volumes.';
+
+  @override
+  String get scSavedScenarios => 'Saved scenarios';
+
+  @override
+  String get scRunHistory => 'Run history';
+
+  @override
+  String get scRunAgain => 'Run again';
+
+  @override
+  String get scNoScenarios => 'No saved scenarios';
+
+  @override
+  String get scNoRuns => 'No runs yet';
+
+  @override
+  String get scRunKindBaseline => 'Current';
+
+  @override
+  String get scRunKindScenario => 'Scenario';
+
+  @override
+  String get scRunKindCompare => 'Comparison';
+
+  @override
+  String get scRunKindDisruption => 'Disruption';
+
+  @override
+  String get scRunKindProduct => 'Product';
+
+  @override
+  String get scRunKindPurchaseCheck => 'Pre-order check';
+
+  @override
+  String get scProductCard => 'Cost & profit';
+
+  @override
+  String get scOpenComparison => 'Compare suppliers';
+
+  @override
+  String get scNoTerms => 'No supply terms for this product yet';
+
+  @override
+  String get scProfitWarning => 'Profit warning';
+
+  @override
+  String scProfitWarningBody(String before, String after) {
+    return 'On these terms the margin goes from $before to $after.';
+  }
+
+  @override
+  String get scWarnMarginLow => 'Margin below the threshold';
+
+  @override
+  String get scWarnMarginDrop => 'Margin drops sharply';
+
+  @override
+  String get scWarnLoss => 'Sold at a loss';
+
+  @override
+  String get scCauses => 'Causes';
+
+  @override
+  String get scContinueOrder => 'Place the order';
+
+  @override
+  String get scBackToEdit => 'Back';
+
+  @override
+  String get scNoteNoRoute => 'No route (no freight counted)';
+
+  @override
+  String get scNoteNoWeight => 'No weight set';
+
+  @override
+  String get scNoteNoVolume => 'No volume (costed per 1)';
+
+  @override
+  String get scNoteNoPrice => 'No purchase price';
+
+  @override
+  String get scNoteNoFx => 'No FX rate';
+
+  @override
+  String get scNoteNoTariff => 'No duty rule';
+
+  @override
+  String get scNoteFixed => 'Fixed cost not allocated';
+
+  @override
+  String get scHypothetical => 'What-if';
+
+  @override
+  String get scManageOnly => 'Editing needs supply_chain.manage';
+
+  @override
+  String get scRecalculate => 'Recalculate';
+
+  @override
+  String get scBlocked => 'Unavailable';
+
+  @override
+  String get scErrorRouteLegs =>
+      'The legs don\'t join up (each must start where the last ended)';
+
+  @override
+  String get scErrorNameRequired => 'Enter a name';
+
+  @override
+  String get scNoChange => 'No change';
 }

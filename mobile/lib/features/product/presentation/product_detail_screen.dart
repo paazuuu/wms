@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../supply_chain/presentation/sc_product_sheet.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
@@ -86,6 +87,8 @@ class ProductDetailScreen extends ConsumerWidget {
                 _UnitsCard(product: product, onMessage: _snack),
                 const SizedBox(height: AppSpacing.md),
                 SupplierNamesCard(product: product),
+                // Where it comes from and what is left when it sells (§27).
+                ScProductProfitCard(productId: productId),
                 if (product.trackingMode.tracksLot) ...[
                   const SizedBox(height: AppSpacing.md),
                   _LotsCard(productId: productId),

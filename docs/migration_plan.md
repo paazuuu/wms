@@ -5149,6 +5149,53 @@ discarded).
 **Verified live:** training runs recorded their flag counts, and the stats
 summed them per company.
 
+### 0107 — supply chain profit & risk (WMS_SupplyChain_Profit_Risk_統合仕様書)
+
+An analysis layer over the operations, never a replacement for them: nothing
+here changes stock or orders (spec rule 3), and every run is kept (rule 4).
+
+- **Masters:** `supply_chain_nodes` (supplier, port, airport, customs,
+  warehouse, hub; capacity, dwell days, handling, risk level), `routes` and
+  `route_edges` (mode, lead time, base / per-kg / per-unit cost, fuel
+  surcharge, insurance, capacity, customs clearance and fee, risk),
+  `supplier_products` (our product from a supplier: list price, 掛率, unit
+  price, currency, MOQ, lot, lead time, default route, primary),
+  `product_profiles` (sales price, annual volume, weight, carton, storage
+  days, HS code, origin).
+- **Rules, never code (rule 7):** `cost_rules` (storage, receiving,
+  inspection, packing, picking, shipping, labour, overhead, domestic freight,
+  sales-related; per unit, per unit-month, per carton/line/order/hour, % of
+  revenue or purchase, fixed monthly spread over volume; expensed or
+  recoverable), `tariff_rules` (HS prefix × origin × destination: duty,
+  import tax and whether it is recoverable, CIF/FOB), `fx_rates`,
+  `settings` (margin warnings, load thresholds, lot months).
+- **Risk and runs:** `risk_events`, `scenarios`, `scenario_results`.
+- **Access:** `supply_chain.view` (admins, warehouse manager, purchasing,
+  sales) and `supply_chain.manage` (admins, purchasing). Inspectors and floor
+  roles do not see the menu (spec §56).
+- **Existing data:** `sc_seed_from_history` takes supply terms from purchase
+  order lines and from delivery notes read by the document reader (§62);
+  nodes are created for every warehouse and supplier in use.
+- **Engine** (`supply-chain` edge function, `_shared/supply_chain_engine.ts`,
+  Deno-tested): landed cost = purchase + FX + international freight +
+  insurance + duty + import tax + customs + port + domestic freight +
+  warehouse + receiving + inspection + packing + labour + overhead; profit =
+  price − landed − sales-related. Supplier and route choice, scenarios
+  (price, 掛率, freight by mode, duty, customs, warehouse, labour, overhead,
+  FX, sales price, volume, suppliers on/off or added, splits), up to five
+  compared, bottlenecks against capacity, disruption impact (rerouted cost
+  and sales lost before stock or the alternative arrives), rule-based risk
+  with reasons, and the pre-order check (§30).
+- **App:** a サプライチェーン group — 収益ダッシュボード, 仕入先比較 (with the
+  supplier record), 原価構造, 物流ルート, 利益シミュレーション, リスク分析,
+  ボトルネック, シナリオ履歴 — a 原価・利益 card on the product detail, and a
+  profit warning before a purchase order is placed.
+
+**Verified:** the engine's tests reproduce the spec's examples (Osaka port at
+125% load, a 14-day closure rerouted by air, 掛率 65/70/75%, sea vs air, FX
+as its own line); the RPCs were exercised live in a rolled-back transaction
+(legs must join up, terms, FX, tariff and cost rules load into `sc_model`).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

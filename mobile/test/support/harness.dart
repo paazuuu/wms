@@ -106,6 +106,9 @@ import 'package:wms_mobile/features/wave/domain/pick_wave.dart';
 import 'package:wms_mobile/features/notation/application/notation_providers.dart';
 import 'package:wms_mobile/features/notation/data/notation_repository.dart';
 import 'package:wms_mobile/features/notation/domain/notation.dart';
+import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
+import 'package:wms_mobile/features/supply_chain/data/supply_chain_repository.dart';
+import 'package:wms_mobile/features/supply_chain/domain/supply_chain.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
@@ -167,6 +170,9 @@ List<Override> _defaultOverrides() => [
       putawayRepositoryProvider.overrideWithValue(FakePutawayRepository()),
       pickWaveRepositoryProvider.overrideWithValue(FakePickWaveRepository()),
       notationRepositoryProvider.overrideWithValue(FakeNotationRepository()),
+      // The supply chain layer is off unless a test turns it on (0107).
+      scCanViewProvider.overrideWithValue(false),
+      scCanManageProvider.overrideWithValue(false),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -4065,4 +4071,170 @@ class FakeNotationRepository implements NotationRepository {
     aliases = aliases.where((a) => a.id != id).toList();
     return const ApiSuccess(true);
   }
+}
+
+
+/// The supply chain layer (0107), in memory: each read returns what the test
+/// set, each call is recorded.
+class FakeSupplyChainRepository implements SupplyChainRepository {
+  FakeSupplyChainRepository({
+    this.dashboardRun = const ScRun(),
+    this.modelData = const ScModel(),
+    this.comparison,
+    this.productViewData = const ScProductView(),
+    this.multi,
+    this.checks = const [],
+    this.stats = const [],
+    List<ScScenario> scenarioRows = const [],
+    this.resultRows = const [],
+  }) : scenarioRows = List.of(scenarioRows);
+
+  ScRun dashboardRun;
+  ScModel modelData;
+  ScComparison? comparison;
+  ScProductView productViewData;
+  ScMultiComparison? multi;
+  List<ScPurchaseCheck> checks;
+  List<ScSupplierStat> stats;
+  List<ScScenario> scenarioRows;
+  List<ScResultRow> resultRows;
+
+  int dashboardCalls = 0;
+  bool? lastSave;
+  ScScenarioParams? lastRunParams;
+  String? lastRunName;
+  List<(String, ScScenarioParams)>? lastCompare;
+  List<Map<String, dynamic>>? lastDisruptions;
+  List<Map<String, dynamic>>? lastCheckLines;
+  ({int productId, List<double> rates})? lastProduct;
+  ScSupplyTerm? lastTerm;
+  ({int productId, ScProfile profile})? lastProfile;
+  ScCostRule? lastRule;
+  ScTariffRule? lastTariff;
+  (String, double)? lastFx;
+  ScRiskEvent? lastEvent;
+  Map<String, dynamic>? lastNode;
+  ({String name, List<ScEdge> edges})? lastRoute;
+  ({String name, ScScenarioParams params})? lastScenario;
+  final List<(String, int)> archived = [];
+  int seedCalls = 0;
+
+  @override
+  Future<ApiResult<ScRun>> dashboard({int? warehouseId, bool save = false}) async {
+    dashboardCalls++;
+    lastSave = save;
+    return ApiSuccess(dashboardRun);
+  }
+
+  @override
+  Future<ApiResult<ScComparison>> run({int? warehouseId, required ScScenarioParams params, String? name, int? scenarioId}) async {
+    lastRunParams = params;
+    lastRunName = name;
+    return comparison == null ? const ApiFailure(message: 'no comparison') : ApiSuccess(comparison!);
+  }
+
+  @override
+  Future<ApiResult<ScMultiComparison>> compare({int? warehouseId, required List<(String, ScScenarioParams)> scenarios}) async {
+    lastCompare = scenarios;
+    return multi == null ? const ApiFailure(message: 'no comparison') : ApiSuccess(multi!);
+  }
+
+  @override
+  Future<ApiResult<ScProductView>> product({required int productId, int? warehouseId, List<double> rates = const [], ScScenarioParams? params}) async {
+    lastProduct = (productId: productId, rates: rates);
+    return ApiSuccess(productViewData);
+  }
+
+  @override
+  Future<ApiResult<ScComparison>> disruption({int? warehouseId, required List<Map<String, dynamic>> disruptions, String? name}) async {
+    lastDisruptions = disruptions;
+    return comparison == null ? const ApiFailure(message: 'no comparison') : ApiSuccess(comparison!);
+  }
+
+  @override
+  Future<ApiResult<List<ScPurchaseCheck>>> purchaseCheck({int? warehouseId, required List<Map<String, dynamic>> lines}) async {
+    lastCheckLines = lines;
+    return ApiSuccess(checks);
+  }
+
+  @override
+  Future<ApiResult<ScModel>> model({int? warehouseId, List<int>? productIds}) async => ApiSuccess(modelData);
+
+  @override
+  Future<ApiResult<List<ScSupplierStat>>> supplierStats() async => ApiSuccess(stats);
+
+  @override
+  Future<ApiResult<Map<String, dynamic>>> seedFromHistory() async {
+    seedCalls++;
+    return const ApiSuccess({'from_purchase_orders': 2, 'from_documents': 1, 'nodes': 3});
+  }
+
+  @override
+  Future<ApiResult<int>> saveNode(Map<String, dynamic> node) async {
+    lastNode = node;
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<int>> saveRoute({int? id, required String name, required List<ScEdge> edges, String? note}) async {
+    lastRoute = (name: name, edges: edges);
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<int>> saveTerm(ScSupplyTerm term) async {
+    lastTerm = term;
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<int>> saveProfile(int productId, ScProfile profile) async {
+    lastProfile = (productId: productId, profile: profile);
+    return ApiSuccess(productId);
+  }
+
+  @override
+  Future<ApiResult<int>> saveCostRule(ScCostRule rule) async {
+    lastRule = rule;
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<int>> saveTariffRule(ScTariffRule rule) async {
+    lastTariff = rule;
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<bool>> saveFx(String currency, double rate) async {
+    lastFx = (currency, rate);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> saveRiskEvent(ScRiskEvent event) async {
+    lastEvent = event;
+    return const ApiSuccess(1);
+  }
+
+  @override
+  Future<ApiResult<bool>> archive(String kind, int id) async {
+    archived.add((kind, id));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> saveScenario({int? id, required String name, String? description, int? warehouseId, required ScScenarioParams params}) async {
+    lastScenario = (name: name, params: params);
+    return ApiSuccess(id ?? 77);
+  }
+
+  @override
+  Future<ApiResult<List<ScScenario>>> scenarios() async => ApiSuccess(scenarioRows);
+
+  @override
+  Future<ApiResult<List<ScResultRow>>> results({int limit = 50, String? kind}) async => ApiSuccess(resultRows);
+
+  @override
+  Future<ApiResult<Map<String, dynamic>>> result(int id) async => const ApiSuccess({});
 }

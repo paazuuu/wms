@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
+import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
 
 import '../../support/harness.dart';
 
@@ -12,6 +13,7 @@ Future<ProviderContainer> _pump(
     WidgetTester tester, FakeProductRepository repo) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
+    scCanViewProvider.overrideWithValue(false),
   ]);
   addTearDown(container.dispose);
   await pumpAppWith(tester, container, const ProductListScreen());

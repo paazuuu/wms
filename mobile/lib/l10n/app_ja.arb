@@ -5869,5 +5869,503 @@
     }
   },
   "importColumnsRead": "列の読み方",
-  "importNotVerified": "AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。"
+  "importNotVerified": "AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。",
+  "groupSupplyChain": "サプライチェーン",
+  "featScDashboard": "収益ダッシュボード",
+  "featScDashboardDesc": "仕入から販売まで、最終的にいくら残るか",
+  "featScSuppliers": "仕入先比較",
+  "featScSuppliersDesc": "最安値ではなく最終利益で比べる",
+  "featScCosts": "原価構造",
+  "featScCostsDesc": "原価の内訳と、原価・関税・為替のルール",
+  "featScRoutes": "物流ルート",
+  "featScRoutesDesc": "船・航空・トラック・通関の経路と費用",
+  "featScSimulation": "利益シミュレーション",
+  "featScSimulationDesc": "仕入先・掛率・送料・関税・為替などを変えて試算",
+  "featScRisk": "リスク分析",
+  "featScRiskDesc": "仕入先・拠点・ルートのリスクとその理由",
+  "featScBottleneck": "ボトルネック",
+  "featScBottleneckDesc": "容量の逼迫と、止まった時の影響",
+  "featScHistory": "シナリオ履歴",
+  "featScHistoryDesc": "保存したシナリオと実行結果",
+  "scRevenue": "売上",
+  "scPurchase": "仕入原価",
+  "scFxImpact": "為替影響",
+  "scLogistics": "物流費",
+  "scCustoms": "通関・関税",
+  "scWarehouse": "倉庫費",
+  "scLabor": "人件費",
+  "scOther": "その他経費",
+  "scTotalCost": "総原価",
+  "scProfit": "粗利益",
+  "scMargin": "利益率",
+  "scLeadTime": "平均納期",
+  "scSalesRelated": "販売関連費",
+  "scRecoverable": "控除・還付対象（原価外）",
+  "scLinePurchase": "仕入",
+  "scLineFx": "為替影響",
+  "scLineIntlFreight": "国際送料",
+  "scLineInsurance": "保険",
+  "scLineDuty": "関税",
+  "scLineImportTax": "輸入税（控除不可）",
+  "scLineCustomsFee": "通関費",
+  "scLinePortFee": "港湾・空港費",
+  "scLineDomesticFreight": "国内送料",
+  "scLineWarehouse": "倉庫費",
+  "scLineReceiving": "入荷作業",
+  "scLineInspection": "検品",
+  "scLinePacking": "梱包",
+  "scLineLabor": "人件費",
+  "scLineOverhead": "共通経費",
+  "scLineOther": "その他",
+  "scLineRevenue": "売上",
+  "scLandedCost": "最終原価",
+  "scSalesPrice": "販売価格",
+  "scProfitPerUnit": "利益/個",
+  "scAnnualProfit": "年間利益",
+  "scVolume": "年間数量",
+  "scDays": "{days}日",
+  "@scDays": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "scCurrent": "現在",
+  "scSimulated": "シミュレーション",
+  "scDifference": "現在との差",
+  "scCurrentValues": "現在値",
+  "scSimulatedValues": "シミュレーション値（実データは変わりません）",
+  "scDrivers": "変動の原因",
+  "scNoData": "まだ原価を計算できる商品がありません",
+  "scNoDataBody": "商品ごとの仕入条件（仕入先・価格・掛率）を登録すると、原価と利益を計算します。発注や納品書の単価から取り込むこともできます。",
+  "scSeed": "仕入実績から取り込む",
+  "scSeeded": "発注から{po}件、納品書から{doc}件を取り込みました",
+  "@scSeeded": {
+    "placeholders": {
+      "po": {
+        "type": "int"
+      },
+      "doc": {
+        "type": "int"
+      }
+    }
+  },
+  "scSnapshot": "スナップショット保存",
+  "scSnapshotSaved": "現在の状態を保存しました",
+  "scAllWarehouses": "全倉庫",
+  "scAlerts": "要注意",
+  "scAlertBottlenecks": "容量超過・停止 {count}件",
+  "@scAlertBottlenecks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scAlertRisks": "高リスク {count}件",
+  "@scAlertRisks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scAlertNoSupply": "仕入先のない商品 {count}件",
+  "@scAlertNoSupply": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scAlertLoss": "赤字の商品 {count}件",
+  "@scAlertLoss": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scProductsTitle": "商品別の利益",
+  "scCostBreakdown": "原価の内訳",
+  "scWaterfall": "販売価格から利益まで（1個あたり）",
+  "scChosen": "現在の仕入",
+  "scNoRoute": "ルート未登録",
+  "scProduct": "商品",
+  "scChooseProduct": "商品を選んでください",
+  "scQuantity": "1回の発注数量",
+  "scRates": "掛率を比較",
+  "scRatesHint": "例: 65,70,75",
+  "scDiscountRate": "掛率",
+  "scUnitPrice": "仕入単価",
+  "scListPrice": "定価",
+  "scCurrency": "通貨",
+  "scMoq": "MOQ",
+  "scOrderLot": "発注ロット",
+  "scLeadTimeDays": "納期（日）",
+  "scPaymentTerms": "支払条件",
+  "scPrimary": "主要仕入先",
+  "scDefaultRoute": "標準ルート",
+  "scSupplyTerms": "仕入条件",
+  "scAddTerm": "仕入条件を追加",
+  "scSupplier": "仕入先",
+  "scSupplierStats": "仕入先の実績",
+  "scStatLine": "{products}品目・単独供給{sole}・発注{orders}件",
+  "@scStatLine": {
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "sole": {
+        "type": "int"
+      },
+      "orders": {
+        "type": "int"
+      }
+    }
+  },
+  "scLateRate": "遅延率",
+  "scDefectRate": "不良率",
+  "scPurchased": "仕入額",
+  "scProfile": "商品の前提",
+  "scEditProfile": "前提を編集",
+  "scAnnualVolume": "年間販売数量",
+  "scAnnualVolumeHint": "空欄: 過去12か月の出荷数",
+  "scSalesPriceHint": "空欄: 商品マスタの価格",
+  "scWeight": "重量（kg/個）",
+  "scUnitsPerCarton": "入数（個/箱）",
+  "scStorageDays": "保管日数",
+  "scHsCode": "HSコード",
+  "scOriginCountry": "原産国",
+  "scCostRules": "原価ルール",
+  "scTariffRules": "関税・輸入税",
+  "scFxRates": "為替",
+  "scByProduct": "商品別",
+  "scAddRule": "ルールを追加",
+  "scRuleName": "名称",
+  "scCategory": "区分",
+  "scBasis": "単位",
+  "scAmount": "金額・率",
+  "scAmountPercentHint": "率は小数で（3% = 0.03）",
+  "scUnitsPerBasis": "基準数量",
+  "scUnitsPerBasisHint": "時間あたり処理数・箱の入数・月の配賦数量など",
+  "scExpensed": "原価に含める（外すと控除・還付扱い）",
+  "scAll": "すべて",
+  "scCatStorage": "保管",
+  "scCatReceiving": "入荷作業",
+  "scCatInspection": "検品",
+  "scCatPacking": "梱包",
+  "scCatPicking": "ピッキング",
+  "scCatShipping": "出荷作業",
+  "scCatLabor": "人件費",
+  "scCatOverhead": "共通経費",
+  "scCatDomesticFreight": "国内配送",
+  "scCatSalesRelated": "販売関連",
+  "scCatOther": "その他",
+  "scBasisPerUnit": "1個あたり",
+  "scBasisPerUnitMonth": "1個・1か月あたり",
+  "scBasisPerCarton": "1箱あたり",
+  "scBasisPerLine": "1行あたり",
+  "scBasisPerOrder": "1件あたり",
+  "scBasisPerHour": "1時間あたり",
+  "scBasisPercentRevenue": "売上に対する率",
+  "scBasisPercentPurchase": "仕入に対する率",
+  "scBasisFixedMonthly": "月額固定",
+  "scTariffRate": "関税率",
+  "scImportTaxRate": "輸入消費税等の率",
+  "scImportTaxRecoverable": "輸入消費税等は控除・還付される",
+  "scOtherRate": "その他の輸入税率",
+  "scValuation": "課税価格",
+  "scHsPrefix": "HSコード（前方一致）",
+  "scDestinationCountry": "仕向国",
+  "scAddTariff": "関税ルールを追加",
+  "scRateToBase": "換算レート（1単位あたり）",
+  "scAddFx": "通貨を追加",
+  "scRoutesTab": "ルート",
+  "scNodesTab": "拠点",
+  "scAddRoute": "ルートを追加",
+  "scAddNode": "拠点を追加",
+  "scRouteName": "ルート名",
+  "scLegs": "区間",
+  "scAddLeg": "区間を追加",
+  "scFrom": "出発",
+  "scTo": "到着",
+  "scMode": "輸送手段",
+  "scBaseCost": "基本料金（1便）",
+  "scCostPerKg": "kg単価",
+  "scCostPerUnit": "1個あたり",
+  "scInsuranceRate": "保険料率",
+  "scCapacityKg": "容量（kg/月）",
+  "scCapacityUnits": "容量（個/月）",
+  "scCustomsClearance": "この区間で輸入通関",
+  "scCustomsCost": "通関費（1便）",
+  "scRisk": "リスク",
+  "scApplyRoute": "このルートをシナリオに適用",
+  "scNoRoutes": "まだルートがありません",
+  "scNoRoutesBody": "仕入先から倉庫までの区間（船・航空・トラック・通関）を登録すると、送料・関税・納期が計算に入ります。",
+  "scNodeName": "名称",
+  "scNodeKind": "種類",
+  "scCountry": "国コード",
+  "scDwellDays": "滞留日数",
+  "scHandlingPerUnit": "荷役費（1個）",
+  "scKindSupplier": "仕入先",
+  "scKindPort": "港",
+  "scKindAirport": "空港",
+  "scKindCustoms": "通関",
+  "scKindWarehouse": "倉庫",
+  "scKindDc": "配送センター",
+  "scKindCustomer": "顧客",
+  "scKindHub": "中継拠点",
+  "scModeSea": "船便",
+  "scModeAir": "航空便",
+  "scModeTruck": "トラック",
+  "scModeRail": "鉄道",
+  "scModeCourier": "宅配・クーリエ",
+  "scModeInternal": "社内移動",
+  "scRiskLow": "低",
+  "scRiskMedium": "中",
+  "scRiskHigh": "高",
+  "scRiskCritical": "重大",
+  "scScenario": "シナリオ",
+  "scCurrentConditions": "現在条件",
+  "scScenarioName": "シナリオ名",
+  "scSuppliersUsed": "使う仕入先",
+  "scRouteChoice": "物流",
+  "scRouteCurrent": "現在のルート",
+  "scRouteCheapest": "最安",
+  "scRouteFastest": "最速",
+  "scSupplierChoice": "仕入先の選び方",
+  "scChoiceCurrent": "現在の仕入先",
+  "scChoiceCheapest": "利益が最大",
+  "scChoiceFastest": "納期が最短",
+  "scChanges": "変更する条件（±%）",
+  "scChangeHint": "例: +10 は10%上がる、-5 は5%下がる",
+  "scPriceChange": "仕入価格",
+  "scFreightChange": "送料（全体）",
+  "scSeaChange": "海上運賃",
+  "scAirChange": "航空運賃",
+  "scTariffChange": "関税",
+  "scCustomsChange": "通関費",
+  "scWarehouseChange": "倉庫費",
+  "scLaborChange": "人件費",
+  "scOverheadChange": "共通経費",
+  "scFxChange": "為替（外貨高）",
+  "scSalesPriceChange": "販売価格",
+  "scVolumeChange": "販売数量",
+  "scRatesBySupplier": "掛率の変更",
+  "scRateNow": "現在 {rate}",
+  "@scRateNow": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "scAddSupplier": "仕入先を追加（試算）",
+  "scAddedSupplier": "追加する仕入先",
+  "scApplyRiskEvents": "登録済みのリスクを反映",
+  "scRun": "シミュレーション実行",
+  "scSaveScenario": "シナリオを保存",
+  "scScenarioSaved": "シナリオを保存しました",
+  "scAddToCompare": "比較に追加",
+  "scCompare": "比較（最大5件）",
+  "scRunCompare": "比較する",
+  "scClearCompare": "クリア",
+  "scCompareFull": "比較できるのは5件までです",
+  "scResultTitle": "シナリオ: {name}",
+  "@scResultTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scProductChanges": "商品別の変化",
+  "scNotBest": "どれが最良かはシステムでは決めません。利益・納期・リスクを見て判断してください。",
+  "scHighRisks": "高リスク",
+  "scOverCapacity": "容量超過",
+  "scRiskTitle": "リスク一覧",
+  "scRiskRuleNote": "リスク値は設定値・登録リスク・容量・単独供給・遅延率・不良率から計算した説明可能なルールです。",
+  "scRiskEvents": "登録済みのリスク",
+  "scAddRiskEvent": "リスクを登録",
+  "scRiskEventTitle": "内容",
+  "scRiskKind": "種類",
+  "scSeverity": "深刻度",
+  "scStartsOn": "開始日",
+  "scEndsOn": "終了日",
+  "scPriceMultiplier": "価格倍率",
+  "scCostMultiplier": "費用倍率",
+  "scCapacityMultiplier": "容量倍率",
+  "scDelayDays": "遅延日数",
+  "scTarget": "対象",
+  "scReasonLevel": "設定値: {level}",
+  "@scReasonLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "scReasonSole": "単独供給 {count}品目",
+  "@scReasonSole": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "scReasonEvent": "登録リスク: {kind}",
+  "@scReasonEvent": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "scReasonLate": "遅延率 {rate}%",
+  "@scReasonLate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "scReasonDefect": "不良率 {rate}%",
+  "@scReasonDefect": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "scReasonLoadExceeded": "容量超過",
+  "scReasonLoadBusy": "容量逼迫",
+  "scReasonNoAlt": "代替経路なし",
+  "scReasonLongLead": "長い納期 {days}日",
+  "@scReasonLongLead": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "scReasonCrossBorder": "国境をまたぐ",
+  "scEvSupplierStop": "仕入先停止",
+  "scEvSupplierPrice": "仕入先の値上げ",
+  "scEvSupplierDelay": "仕入先の納期遅延",
+  "scEvRouteStop": "ルート停止",
+  "scEvModeStop": "輸送手段の停止",
+  "scEvPortStop": "港湾停止",
+  "scEvAirportStop": "空港停止",
+  "scEvCustomsDelay": "通関遅延",
+  "scEvWarehouseCapacity": "倉庫容量不足",
+  "scEvWarehouseStop": "倉庫停止",
+  "scEvDomesticStop": "国内配送停止",
+  "scEvStaffShortage": "人員不足",
+  "scEvCostSpike": "コスト急増",
+  "scRiskKindSupplier": "仕入先",
+  "scRiskKindNode": "拠点",
+  "scRiskKindRoute": "ルート",
+  "scNoRisks": "リスクの対象がまだありません",
+  "scLoadsTitle": "容量と負荷",
+  "scStatusOk": "余裕",
+  "scStatusBusy": "逼迫",
+  "scStatusExceeded": "容量超過",
+  "scStatusNoCapacity": "容量未設定",
+  "scStatusStopped": "停止",
+  "scAlternative": "代替あり",
+  "scNoAlternative": "代替なし",
+  "scPerMonth": "{units}個/月",
+  "@scPerMonth": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "scLoadPercent": "負荷 {percent}",
+  "@scLoadPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "scDisruptionTitle": "障害シミュレーション",
+  "scDisruptionTarget": "止まるもの",
+  "scDisruptionDays": "日数",
+  "scDisruptionKind": "障害の種類",
+  "scStop": "停止",
+  "scDelay": "遅延",
+  "scRunDisruption": "影響を計算",
+  "scImpact": "利益への影響",
+  "scExtraCost": "追加費用",
+  "scLostProfit": "販売機会損失",
+  "scLostUnits": "欠品数",
+  "scRerouted": "代替輸送",
+  "scCoverage": "在庫で{days}日分",
+  "@scCoverage": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "scNoAlternativeRoute": "代替ルートなし",
+  "scAlternativeVia": "代替: {name}",
+  "@scAlternativeVia": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scNoLoads": "まだ物の流れがありません。ルートと数量を登録してください。",
+  "scSavedScenarios": "保存したシナリオ",
+  "scRunHistory": "実行履歴",
+  "scRunAgain": "もう一度実行",
+  "scNoScenarios": "保存したシナリオはありません",
+  "scNoRuns": "実行履歴はありません",
+  "scRunKindBaseline": "現在",
+  "scRunKindScenario": "シナリオ",
+  "scRunKindCompare": "比較",
+  "scRunKindDisruption": "障害",
+  "scRunKindProduct": "商品",
+  "scRunKindPurchaseCheck": "発注前チェック",
+  "scProductCard": "原価・利益",
+  "scOpenComparison": "仕入先を比較",
+  "scNoTerms": "この商品の仕入条件がまだありません",
+  "scProfitWarning": "利益の警告",
+  "scProfitWarningBody": "今回の条件では利益率が {before} → {after} に変わります。",
+  "@scProfitWarningBody": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "scWarnMarginLow": "利益率が基準を下回ります",
+  "scWarnMarginDrop": "利益率が大きく下がります",
+  "scWarnLoss": "赤字です",
+  "scCauses": "原因",
+  "scContinueOrder": "発注を続ける",
+  "scBackToEdit": "戻る",
+  "scNoteNoRoute": "ルート未登録（物流費なし）",
+  "scNoteNoWeight": "重量未設定",
+  "scNoteNoVolume": "数量なし（1個で計算）",
+  "scNoteNoPrice": "仕入価格なし",
+  "scNoteNoFx": "為替レートなし",
+  "scNoteNoTariff": "関税ルールなし",
+  "scNoteFixed": "固定費を配賦できません",
+  "scHypothetical": "試算用",
+  "scManageOnly": "編集には supply_chain.manage 権限が必要です",
+  "scRecalculate": "再計算",
+  "scBlocked": "使用不可",
+  "scErrorRouteLegs": "区間がつながっていません（次の区間は前の到着地から出発してください）",
+  "scErrorNameRequired": "名称を入力してください",
+  "scNoChange": "変化はありません"
 }

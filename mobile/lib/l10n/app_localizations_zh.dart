@@ -5653,4 +5653,1083 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get importNotVerified => 'AI复核读取失败（仅读取一次）。请仔细核对明细。';
+
+  @override
+  String get groupSupplyChain => '供应链';
+
+  @override
+  String get featScDashboard => '收益仪表板';
+
+  @override
+  String get featScDashboardDesc => '从采购到销售最终剩余多少';
+
+  @override
+  String get featScSuppliers => '供应商比较';
+
+  @override
+  String get featScSuppliersDesc => '按最终利润而非最低价比较';
+
+  @override
+  String get featScCosts => '成本结构';
+
+  @override
+  String get featScCostsDesc => '成本明细及成本、关税、汇率规则';
+
+  @override
+  String get featScRoutes => '物流路线';
+
+  @override
+  String get featScRoutesDesc => '海运、空运、卡车与清关路线及费用';
+
+  @override
+  String get featScSimulation => '利润模拟';
+
+  @override
+  String get featScSimulationDesc => '更改供应商、折扣率、运费、关税、汇率等进行试算';
+
+  @override
+  String get featScRisk => '风险分析';
+
+  @override
+  String get featScRiskDesc => '供应商、据点、路线的风险及原因';
+
+  @override
+  String get featScBottleneck => '瓶颈';
+
+  @override
+  String get featScBottleneckDesc => '容量紧张及停运影响';
+
+  @override
+  String get featScHistory => '情景历史';
+
+  @override
+  String get featScHistoryDesc => '已保存的情景及结果';
+
+  @override
+  String get scRevenue => '销售额';
+
+  @override
+  String get scPurchase => '采购成本';
+
+  @override
+  String get scFxImpact => '汇率影响';
+
+  @override
+  String get scLogistics => '物流费';
+
+  @override
+  String get scCustoms => '清关与关税';
+
+  @override
+  String get scWarehouse => '仓储费';
+
+  @override
+  String get scLabor => '人工费';
+
+  @override
+  String get scOther => '其他费用';
+
+  @override
+  String get scTotalCost => '总成本';
+
+  @override
+  String get scProfit => '毛利';
+
+  @override
+  String get scMargin => '利润率';
+
+  @override
+  String get scLeadTime => '平均交期';
+
+  @override
+  String get scSalesRelated => '销售相关费用';
+
+  @override
+  String get scRecoverable => '可抵扣/退还（不计入成本）';
+
+  @override
+  String get scLinePurchase => '采购';
+
+  @override
+  String get scLineFx => '汇率影响';
+
+  @override
+  String get scLineIntlFreight => '国际运费';
+
+  @override
+  String get scLineInsurance => '保险';
+
+  @override
+  String get scLineDuty => '关税';
+
+  @override
+  String get scLineImportTax => '进口税（不可抵扣）';
+
+  @override
+  String get scLineCustomsFee => '清关费';
+
+  @override
+  String get scLinePortFee => '港口/机场费';
+
+  @override
+  String get scLineDomesticFreight => '国内运费';
+
+  @override
+  String get scLineWarehouse => '仓储费';
+
+  @override
+  String get scLineReceiving => '入库作业';
+
+  @override
+  String get scLineInspection => '检品';
+
+  @override
+  String get scLinePacking => '包装';
+
+  @override
+  String get scLineLabor => '人工费';
+
+  @override
+  String get scLineOverhead => '公共费用';
+
+  @override
+  String get scLineOther => '其他';
+
+  @override
+  String get scLineRevenue => '销售额';
+
+  @override
+  String get scLandedCost => '到岸成本';
+
+  @override
+  String get scSalesPrice => '销售价格';
+
+  @override
+  String get scProfitPerUnit => '单件利润';
+
+  @override
+  String get scAnnualProfit => '年利润';
+
+  @override
+  String get scVolume => '年销量';
+
+  @override
+  String scDays(String days) {
+    return '$days天';
+  }
+
+  @override
+  String get scCurrent => '当前';
+
+  @override
+  String get scSimulated => '模拟';
+
+  @override
+  String get scDifference => '与当前差额';
+
+  @override
+  String get scCurrentValues => '当前值';
+
+  @override
+  String get scSimulatedValues => '模拟值（不会更改实际数据）';
+
+  @override
+  String get scDrivers => '变动原因';
+
+  @override
+  String get scNoData => '暂无可计算成本的商品';
+
+  @override
+  String get scNoDataBody =>
+      '登记每个商品的采购条件（供应商、价格、折扣率）后即可计算成本和利润，也可从采购订单和送货单的单价导入。';
+
+  @override
+  String get scSeed => '从采购记录导入';
+
+  @override
+  String scSeeded(int po, int doc) {
+    return '已从采购订单导入$po条，从送货单导入$doc条';
+  }
+
+  @override
+  String get scSnapshot => '保存快照';
+
+  @override
+  String get scSnapshotSaved => '已保存当前状态';
+
+  @override
+  String get scAllWarehouses => '全部仓库';
+
+  @override
+  String get scAlerts => '需关注';
+
+  @override
+  String scAlertBottlenecks(int count) {
+    return '超出容量/停运 $count处';
+  }
+
+  @override
+  String scAlertRisks(int count) {
+    return '高风险 $count项';
+  }
+
+  @override
+  String scAlertNoSupply(int count) {
+    return '无供应商商品 $count个';
+  }
+
+  @override
+  String scAlertLoss(int count) {
+    return '亏损商品 $count个';
+  }
+
+  @override
+  String get scProductsTitle => '按商品利润';
+
+  @override
+  String get scCostBreakdown => '成本明细';
+
+  @override
+  String get scWaterfall => '从售价到利润（每件）';
+
+  @override
+  String get scChosen => '当前采购来源';
+
+  @override
+  String get scNoRoute => '未登记路线';
+
+  @override
+  String get scProduct => '商品';
+
+  @override
+  String get scChooseProduct => '请选择商品';
+
+  @override
+  String get scQuantity => '每次订货数量';
+
+  @override
+  String get scRates => '比较折扣率';
+
+  @override
+  String get scRatesHint => '例: 65,70,75';
+
+  @override
+  String get scDiscountRate => '折扣率';
+
+  @override
+  String get scUnitPrice => '采购单价';
+
+  @override
+  String get scListPrice => '定价';
+
+  @override
+  String get scCurrency => '货币';
+
+  @override
+  String get scMoq => 'MOQ';
+
+  @override
+  String get scOrderLot => '订货批量';
+
+  @override
+  String get scLeadTimeDays => '交期（天）';
+
+  @override
+  String get scPaymentTerms => '付款条件';
+
+  @override
+  String get scPrimary => '主要供应商';
+
+  @override
+  String get scDefaultRoute => '默认路线';
+
+  @override
+  String get scSupplyTerms => '采购条件';
+
+  @override
+  String get scAddTerm => '添加采购条件';
+
+  @override
+  String get scSupplier => '供应商';
+
+  @override
+  String get scSupplierStats => '供应商实绩';
+
+  @override
+  String scStatLine(int products, int sole, int orders) {
+    return '$products个品目・独家供应$sole・订单$orders笔';
+  }
+
+  @override
+  String get scLateRate => '延误率';
+
+  @override
+  String get scDefectRate => '不良率';
+
+  @override
+  String get scPurchased => '采购额';
+
+  @override
+  String get scProfile => '商品前提';
+
+  @override
+  String get scEditProfile => '编辑前提';
+
+  @override
+  String get scAnnualVolume => '年销量';
+
+  @override
+  String get scAnnualVolumeHint => '留空：过去12个月出货量';
+
+  @override
+  String get scSalesPriceHint => '留空：商品主数据价格';
+
+  @override
+  String get scWeight => '重量（kg/件）';
+
+  @override
+  String get scUnitsPerCarton => '每箱件数';
+
+  @override
+  String get scStorageDays => '保管天数';
+
+  @override
+  String get scHsCode => 'HS编码';
+
+  @override
+  String get scOriginCountry => '原产国';
+
+  @override
+  String get scCostRules => '成本规则';
+
+  @override
+  String get scTariffRules => '关税与进口税';
+
+  @override
+  String get scFxRates => '汇率';
+
+  @override
+  String get scByProduct => '按商品';
+
+  @override
+  String get scAddRule => '添加规则';
+
+  @override
+  String get scRuleName => '名称';
+
+  @override
+  String get scCategory => '类别';
+
+  @override
+  String get scBasis => '计费单位';
+
+  @override
+  String get scAmount => '金额/比率';
+
+  @override
+  String get scAmountPercentHint => '比率用小数（3% = 0.03）';
+
+  @override
+  String get scUnitsPerBasis => '基准数量';
+
+  @override
+  String get scUnitsPerBasisHint => '每小时处理量、每箱件数或月分摊数量';
+
+  @override
+  String get scExpensed => '计入成本（关闭：可抵扣）';
+
+  @override
+  String get scAll => '全部';
+
+  @override
+  String get scCatStorage => '保管';
+
+  @override
+  String get scCatReceiving => '入库作业';
+
+  @override
+  String get scCatInspection => '检品';
+
+  @override
+  String get scCatPacking => '包装';
+
+  @override
+  String get scCatPicking => '拣货';
+
+  @override
+  String get scCatShipping => '出货作业';
+
+  @override
+  String get scCatLabor => '人工费';
+
+  @override
+  String get scCatOverhead => '公共费用';
+
+  @override
+  String get scCatDomesticFreight => '国内配送';
+
+  @override
+  String get scCatSalesRelated => '销售相关';
+
+  @override
+  String get scCatOther => '其他';
+
+  @override
+  String get scBasisPerUnit => '每件';
+
+  @override
+  String get scBasisPerUnitMonth => '每件每月';
+
+  @override
+  String get scBasisPerCarton => '每箱';
+
+  @override
+  String get scBasisPerLine => '每行';
+
+  @override
+  String get scBasisPerOrder => '每单';
+
+  @override
+  String get scBasisPerHour => '每小时';
+
+  @override
+  String get scBasisPercentRevenue => '销售额比率';
+
+  @override
+  String get scBasisPercentPurchase => '采购额比率';
+
+  @override
+  String get scBasisFixedMonthly => '每月固定';
+
+  @override
+  String get scTariffRate => '关税率';
+
+  @override
+  String get scImportTaxRate => '进口税率';
+
+  @override
+  String get scImportTaxRecoverable => '进口税可抵扣/退还';
+
+  @override
+  String get scOtherRate => '其他进口税率';
+
+  @override
+  String get scValuation => '完税价格';
+
+  @override
+  String get scHsPrefix => 'HS编码（前缀匹配）';
+
+  @override
+  String get scDestinationCountry => '目的国';
+
+  @override
+  String get scAddTariff => '添加关税规则';
+
+  @override
+  String get scRateToBase => '换算汇率（每单位货币）';
+
+  @override
+  String get scAddFx => '添加货币';
+
+  @override
+  String get scRoutesTab => '路线';
+
+  @override
+  String get scNodesTab => '据点';
+
+  @override
+  String get scAddRoute => '添加路线';
+
+  @override
+  String get scAddNode => '添加据点';
+
+  @override
+  String get scRouteName => '路线名称';
+
+  @override
+  String get scLegs => '区间';
+
+  @override
+  String get scAddLeg => '添加区间';
+
+  @override
+  String get scFrom => '出发';
+
+  @override
+  String get scTo => '到达';
+
+  @override
+  String get scMode => '运输方式';
+
+  @override
+  String get scBaseCost => '基本费用（每批）';
+
+  @override
+  String get scCostPerKg => '每公斤';
+
+  @override
+  String get scCostPerUnit => '每件';
+
+  @override
+  String get scInsuranceRate => '保险费率';
+
+  @override
+  String get scCapacityKg => '容量（kg/月）';
+
+  @override
+  String get scCapacityUnits => '容量（件/月）';
+
+  @override
+  String get scCustomsClearance => '在此区间办理进口清关';
+
+  @override
+  String get scCustomsCost => '清关费（每批）';
+
+  @override
+  String get scRisk => '风险';
+
+  @override
+  String get scApplyRoute => '将此路线用于情景';
+
+  @override
+  String get scNoRoutes => '暂无路线';
+
+  @override
+  String get scNoRoutesBody => '登记从供应商到仓库的区间（海运、空运、卡车、清关）后，运费、关税和交期将计入计算。';
+
+  @override
+  String get scNodeName => '名称';
+
+  @override
+  String get scNodeKind => '类型';
+
+  @override
+  String get scCountry => '国家代码';
+
+  @override
+  String get scDwellDays => '滞留天数';
+
+  @override
+  String get scHandlingPerUnit => '装卸费（每件）';
+
+  @override
+  String get scKindSupplier => '供应商';
+
+  @override
+  String get scKindPort => '港口';
+
+  @override
+  String get scKindAirport => '机场';
+
+  @override
+  String get scKindCustoms => '海关';
+
+  @override
+  String get scKindWarehouse => '仓库';
+
+  @override
+  String get scKindDc => '配送中心';
+
+  @override
+  String get scKindCustomer => '客户';
+
+  @override
+  String get scKindHub => '中转据点';
+
+  @override
+  String get scModeSea => '海运';
+
+  @override
+  String get scModeAir => '空运';
+
+  @override
+  String get scModeTruck => '卡车';
+
+  @override
+  String get scModeRail => '铁路';
+
+  @override
+  String get scModeCourier => '快递';
+
+  @override
+  String get scModeInternal => '内部调拨';
+
+  @override
+  String get scRiskLow => '低';
+
+  @override
+  String get scRiskMedium => '中';
+
+  @override
+  String get scRiskHigh => '高';
+
+  @override
+  String get scRiskCritical => '严重';
+
+  @override
+  String get scScenario => '情景';
+
+  @override
+  String get scCurrentConditions => '当前条件';
+
+  @override
+  String get scScenarioName => '情景名称';
+
+  @override
+  String get scSuppliersUsed => '使用的供应商';
+
+  @override
+  String get scRouteChoice => '物流';
+
+  @override
+  String get scRouteCurrent => '当前路线';
+
+  @override
+  String get scRouteCheapest => '最便宜';
+
+  @override
+  String get scRouteFastest => '最快';
+
+  @override
+  String get scSupplierChoice => '供应商选择方式';
+
+  @override
+  String get scChoiceCurrent => '当前供应商';
+
+  @override
+  String get scChoiceCheapest => '利润最高';
+
+  @override
+  String get scChoiceFastest => '交期最短';
+
+  @override
+  String get scChanges => '变更条件（±%）';
+
+  @override
+  String get scChangeHint => '例：+10为上涨10%，-5为下降5%';
+
+  @override
+  String get scPriceChange => '采购价格';
+
+  @override
+  String get scFreightChange => '运费（全部）';
+
+  @override
+  String get scSeaChange => '海运运费';
+
+  @override
+  String get scAirChange => '空运运费';
+
+  @override
+  String get scTariffChange => '关税';
+
+  @override
+  String get scCustomsChange => '清关费';
+
+  @override
+  String get scWarehouseChange => '仓储费';
+
+  @override
+  String get scLaborChange => '人工费';
+
+  @override
+  String get scOverheadChange => '公共费用';
+
+  @override
+  String get scFxChange => '汇率（外币升值）';
+
+  @override
+  String get scSalesPriceChange => '销售价格';
+
+  @override
+  String get scVolumeChange => '销量';
+
+  @override
+  String get scRatesBySupplier => '折扣率变更';
+
+  @override
+  String scRateNow(String rate) {
+    return '当前 $rate';
+  }
+
+  @override
+  String get scAddSupplier => '添加供应商（试算）';
+
+  @override
+  String get scAddedSupplier => '要添加的供应商';
+
+  @override
+  String get scApplyRiskEvents => '反映已登记的风险';
+
+  @override
+  String get scRun => '运行模拟';
+
+  @override
+  String get scSaveScenario => '保存情景';
+
+  @override
+  String get scScenarioSaved => '情景已保存';
+
+  @override
+  String get scAddToCompare => '加入比较';
+
+  @override
+  String get scCompare => '比较（最多5个）';
+
+  @override
+  String get scRunCompare => '比较';
+
+  @override
+  String get scClearCompare => '清除';
+
+  @override
+  String get scCompareFull => '最多可比较5个情景';
+
+  @override
+  String scResultTitle(String name) {
+    return '情景：$name';
+  }
+
+  @override
+  String get scProductChanges => '按商品变化';
+
+  @override
+  String get scNotBest => '系统不会决定哪个最好，请综合利润、交期和风险自行判断。';
+
+  @override
+  String get scHighRisks => '高风险';
+
+  @override
+  String get scOverCapacity => '超出容量';
+
+  @override
+  String get scRiskTitle => '风险一览';
+
+  @override
+  String get scRiskRuleNote => '风险值基于可解释的规则计算：设定等级、登记风险、容量、独家供应、延误率和不良率。';
+
+  @override
+  String get scRiskEvents => '已登记的风险';
+
+  @override
+  String get scAddRiskEvent => '登记风险';
+
+  @override
+  String get scRiskEventTitle => '内容';
+
+  @override
+  String get scRiskKind => '类型';
+
+  @override
+  String get scSeverity => '严重程度';
+
+  @override
+  String get scStartsOn => '开始日期';
+
+  @override
+  String get scEndsOn => '结束日期';
+
+  @override
+  String get scPriceMultiplier => '价格倍率';
+
+  @override
+  String get scCostMultiplier => '费用倍率';
+
+  @override
+  String get scCapacityMultiplier => '容量倍率';
+
+  @override
+  String get scDelayDays => '延误天数';
+
+  @override
+  String get scTarget => '对象';
+
+  @override
+  String scReasonLevel(String level) {
+    return '设定等级：$level';
+  }
+
+  @override
+  String scReasonSole(String count) {
+    return '独家供应 $count个品目';
+  }
+
+  @override
+  String scReasonEvent(String kind) {
+    return '登记风险：$kind';
+  }
+
+  @override
+  String scReasonLate(String rate) {
+    return '延误率 $rate%';
+  }
+
+  @override
+  String scReasonDefect(String rate) {
+    return '不良率 $rate%';
+  }
+
+  @override
+  String get scReasonLoadExceeded => '超出容量';
+
+  @override
+  String get scReasonLoadBusy => '容量紧张';
+
+  @override
+  String get scReasonNoAlt => '无替代路径';
+
+  @override
+  String scReasonLongLead(String days) {
+    return '交期较长 $days天';
+  }
+
+  @override
+  String get scReasonCrossBorder => '跨境';
+
+  @override
+  String get scEvSupplierStop => '供应商停供';
+
+  @override
+  String get scEvSupplierPrice => '供应商涨价';
+
+  @override
+  String get scEvSupplierDelay => '供应商延迟交货';
+
+  @override
+  String get scEvRouteStop => '路线停运';
+
+  @override
+  String get scEvModeStop => '运输方式停运';
+
+  @override
+  String get scEvPortStop => '港口停运';
+
+  @override
+  String get scEvAirportStop => '机场停运';
+
+  @override
+  String get scEvCustomsDelay => '清关延误';
+
+  @override
+  String get scEvWarehouseCapacity => '仓库容量不足';
+
+  @override
+  String get scEvWarehouseStop => '仓库停运';
+
+  @override
+  String get scEvDomesticStop => '国内配送停运';
+
+  @override
+  String get scEvStaffShortage => '人手不足';
+
+  @override
+  String get scEvCostSpike => '成本激增';
+
+  @override
+  String get scRiskKindSupplier => '供应商';
+
+  @override
+  String get scRiskKindNode => '据点';
+
+  @override
+  String get scRiskKindRoute => '路线';
+
+  @override
+  String get scNoRisks => '暂无评估对象';
+
+  @override
+  String get scLoadsTitle => '容量与负荷';
+
+  @override
+  String get scStatusOk => '充裕';
+
+  @override
+  String get scStatusBusy => '紧张';
+
+  @override
+  String get scStatusExceeded => '超出容量';
+
+  @override
+  String get scStatusNoCapacity => '未设定容量';
+
+  @override
+  String get scStatusStopped => '停运';
+
+  @override
+  String get scAlternative => '有替代';
+
+  @override
+  String get scNoAlternative => '无替代';
+
+  @override
+  String scPerMonth(String units) {
+    return '$units件/月';
+  }
+
+  @override
+  String scLoadPercent(String percent) {
+    return '负荷 $percent';
+  }
+
+  @override
+  String get scDisruptionTitle => '故障模拟';
+
+  @override
+  String get scDisruptionTarget => '停运对象';
+
+  @override
+  String get scDisruptionDays => '天数';
+
+  @override
+  String get scDisruptionKind => '故障类型';
+
+  @override
+  String get scStop => '停运';
+
+  @override
+  String get scDelay => '延误';
+
+  @override
+  String get scRunDisruption => '计算影响';
+
+  @override
+  String get scImpact => '对利润的影响';
+
+  @override
+  String get scExtraCost => '追加费用';
+
+  @override
+  String get scLostProfit => '销售机会损失';
+
+  @override
+  String get scLostUnits => '缺货数量';
+
+  @override
+  String get scRerouted => '替代运输';
+
+  @override
+  String scCoverage(String days) {
+    return '库存可覆盖$days天';
+  }
+
+  @override
+  String get scNoAlternativeRoute => '无替代路线';
+
+  @override
+  String scAlternativeVia(String name) {
+    return '替代：$name';
+  }
+
+  @override
+  String get scNoLoads => '暂无物流，请登记路线和数量。';
+
+  @override
+  String get scSavedScenarios => '已保存的情景';
+
+  @override
+  String get scRunHistory => '运行历史';
+
+  @override
+  String get scRunAgain => '再次运行';
+
+  @override
+  String get scNoScenarios => '暂无已保存的情景';
+
+  @override
+  String get scNoRuns => '暂无运行记录';
+
+  @override
+  String get scRunKindBaseline => '当前';
+
+  @override
+  String get scRunKindScenario => '情景';
+
+  @override
+  String get scRunKindCompare => '比较';
+
+  @override
+  String get scRunKindDisruption => '故障';
+
+  @override
+  String get scRunKindProduct => '商品';
+
+  @override
+  String get scRunKindPurchaseCheck => '下单前检查';
+
+  @override
+  String get scProductCard => '成本与利润';
+
+  @override
+  String get scOpenComparison => '比较供应商';
+
+  @override
+  String get scNoTerms => '此商品暂无采购条件';
+
+  @override
+  String get scProfitWarning => '利润警告';
+
+  @override
+  String scProfitWarningBody(String before, String after) {
+    return '按本次条件，利润率将从 $before 变为 $after。';
+  }
+
+  @override
+  String get scWarnMarginLow => '利润率低于基准';
+
+  @override
+  String get scWarnMarginDrop => '利润率大幅下降';
+
+  @override
+  String get scWarnLoss => '亏损';
+
+  @override
+  String get scCauses => '原因';
+
+  @override
+  String get scContinueOrder => '继续下单';
+
+  @override
+  String get scBackToEdit => '返回';
+
+  @override
+  String get scNoteNoRoute => '未登记路线（不计物流费）';
+
+  @override
+  String get scNoteNoWeight => '未设定重量';
+
+  @override
+  String get scNoteNoVolume => '无数量（按1件计算）';
+
+  @override
+  String get scNoteNoPrice => '无采购价格';
+
+  @override
+  String get scNoteNoFx => '无汇率';
+
+  @override
+  String get scNoteNoTariff => '无关税规则';
+
+  @override
+  String get scNoteFixed => '固定费用无法分摊';
+
+  @override
+  String get scHypothetical => '试算';
+
+  @override
+  String get scManageOnly => '编辑需要 supply_chain.manage 权限';
+
+  @override
+  String get scRecalculate => '重新计算';
+
+  @override
+  String get scBlocked => '不可用';
+
+  @override
+  String get scErrorRouteLegs => '区间未衔接（每段必须从上一段的到达地出发）';
+
+  @override
+  String get scErrorNameRequired => '请输入名称';
+
+  @override
+  String get scNoChange => '无变化';
 }

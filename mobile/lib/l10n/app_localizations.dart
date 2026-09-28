@@ -10374,6 +10374,2082 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。'**
   String get importNotVerified;
+
+  /// No description provided for @groupSupplyChain.
+  ///
+  /// In ja, this message translates to:
+  /// **'サプライチェーン'**
+  String get groupSupplyChain;
+
+  /// No description provided for @featScDashboard.
+  ///
+  /// In ja, this message translates to:
+  /// **'収益ダッシュボード'**
+  String get featScDashboard;
+
+  /// No description provided for @featScDashboardDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入から販売まで、最終的にいくら残るか'**
+  String get featScDashboardDesc;
+
+  /// No description provided for @featScSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先比較'**
+  String get featScSuppliers;
+
+  /// No description provided for @featScSuppliersDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'最安値ではなく最終利益で比べる'**
+  String get featScSuppliersDesc;
+
+  /// No description provided for @featScCosts.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価構造'**
+  String get featScCosts;
+
+  /// No description provided for @featScCostsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価の内訳と、原価・関税・為替のルール'**
+  String get featScCostsDesc;
+
+  /// No description provided for @featScRoutes.
+  ///
+  /// In ja, this message translates to:
+  /// **'物流ルート'**
+  String get featScRoutes;
+
+  /// No description provided for @featScRoutesDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'船・航空・トラック・通関の経路と費用'**
+  String get featScRoutesDesc;
+
+  /// No description provided for @featScSimulation.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益シミュレーション'**
+  String get featScSimulation;
+
+  /// No description provided for @featScSimulationDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先・掛率・送料・関税・為替などを変えて試算'**
+  String get featScSimulationDesc;
+
+  /// No description provided for @featScRisk.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスク分析'**
+  String get featScRisk;
+
+  /// No description provided for @featScRiskDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先・拠点・ルートのリスクとその理由'**
+  String get featScRiskDesc;
+
+  /// No description provided for @featScBottleneck.
+  ///
+  /// In ja, this message translates to:
+  /// **'ボトルネック'**
+  String get featScBottleneck;
+
+  /// No description provided for @featScBottleneckDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量の逼迫と、止まった時の影響'**
+  String get featScBottleneckDesc;
+
+  /// No description provided for @featScHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオ履歴'**
+  String get featScHistory;
+
+  /// No description provided for @featScHistoryDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存したシナリオと実行結果'**
+  String get featScHistoryDesc;
+
+  /// No description provided for @scRevenue.
+  ///
+  /// In ja, this message translates to:
+  /// **'売上'**
+  String get scRevenue;
+
+  /// No description provided for @scPurchase.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入原価'**
+  String get scPurchase;
+
+  /// No description provided for @scFxImpact.
+  ///
+  /// In ja, this message translates to:
+  /// **'為替影響'**
+  String get scFxImpact;
+
+  /// No description provided for @scLogistics.
+  ///
+  /// In ja, this message translates to:
+  /// **'物流費'**
+  String get scLogistics;
+
+  /// No description provided for @scCustoms.
+  ///
+  /// In ja, this message translates to:
+  /// **'通関・関税'**
+  String get scCustoms;
+
+  /// No description provided for @scWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫費'**
+  String get scWarehouse;
+
+  /// No description provided for @scLabor.
+  ///
+  /// In ja, this message translates to:
+  /// **'人件費'**
+  String get scLabor;
+
+  /// No description provided for @scOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他経費'**
+  String get scOther;
+
+  /// No description provided for @scTotalCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'総原価'**
+  String get scTotalCost;
+
+  /// No description provided for @scProfit.
+  ///
+  /// In ja, this message translates to:
+  /// **'粗利益'**
+  String get scProfit;
+
+  /// No description provided for @scMargin.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益率'**
+  String get scMargin;
+
+  /// No description provided for @scLeadTime.
+  ///
+  /// In ja, this message translates to:
+  /// **'平均納期'**
+  String get scLeadTime;
+
+  /// No description provided for @scSalesRelated.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売関連費'**
+  String get scSalesRelated;
+
+  /// No description provided for @scRecoverable.
+  ///
+  /// In ja, this message translates to:
+  /// **'控除・還付対象（原価外）'**
+  String get scRecoverable;
+
+  /// No description provided for @scLinePurchase.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入'**
+  String get scLinePurchase;
+
+  /// No description provided for @scLineFx.
+  ///
+  /// In ja, this message translates to:
+  /// **'為替影響'**
+  String get scLineFx;
+
+  /// No description provided for @scLineIntlFreight.
+  ///
+  /// In ja, this message translates to:
+  /// **'国際送料'**
+  String get scLineIntlFreight;
+
+  /// No description provided for @scLineInsurance.
+  ///
+  /// In ja, this message translates to:
+  /// **'保険'**
+  String get scLineInsurance;
+
+  /// No description provided for @scLineDuty.
+  ///
+  /// In ja, this message translates to:
+  /// **'関税'**
+  String get scLineDuty;
+
+  /// No description provided for @scLineImportTax.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸入税（控除不可）'**
+  String get scLineImportTax;
+
+  /// No description provided for @scLineCustomsFee.
+  ///
+  /// In ja, this message translates to:
+  /// **'通関費'**
+  String get scLineCustomsFee;
+
+  /// No description provided for @scLinePortFee.
+  ///
+  /// In ja, this message translates to:
+  /// **'港湾・空港費'**
+  String get scLinePortFee;
+
+  /// No description provided for @scLineDomesticFreight.
+  ///
+  /// In ja, this message translates to:
+  /// **'国内送料'**
+  String get scLineDomesticFreight;
+
+  /// No description provided for @scLineWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫費'**
+  String get scLineWarehouse;
+
+  /// No description provided for @scLineReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷作業'**
+  String get scLineReceiving;
+
+  /// No description provided for @scLineInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get scLineInspection;
+
+  /// No description provided for @scLinePacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包'**
+  String get scLinePacking;
+
+  /// No description provided for @scLineLabor.
+  ///
+  /// In ja, this message translates to:
+  /// **'人件費'**
+  String get scLineLabor;
+
+  /// No description provided for @scLineOverhead.
+  ///
+  /// In ja, this message translates to:
+  /// **'共通経費'**
+  String get scLineOverhead;
+
+  /// No description provided for @scLineOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get scLineOther;
+
+  /// No description provided for @scLineRevenue.
+  ///
+  /// In ja, this message translates to:
+  /// **'売上'**
+  String get scLineRevenue;
+
+  /// No description provided for @scLandedCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終原価'**
+  String get scLandedCost;
+
+  /// No description provided for @scSalesPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売価格'**
+  String get scSalesPrice;
+
+  /// No description provided for @scProfitPerUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益/個'**
+  String get scProfitPerUnit;
+
+  /// No description provided for @scAnnualProfit.
+  ///
+  /// In ja, this message translates to:
+  /// **'年間利益'**
+  String get scAnnualProfit;
+
+  /// No description provided for @scVolume.
+  ///
+  /// In ja, this message translates to:
+  /// **'年間数量'**
+  String get scVolume;
+
+  /// No description provided for @scDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日'**
+  String scDays(String days);
+
+  /// No description provided for @scCurrent.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在'**
+  String get scCurrent;
+
+  /// No description provided for @scSimulated.
+  ///
+  /// In ja, this message translates to:
+  /// **'シミュレーション'**
+  String get scSimulated;
+
+  /// No description provided for @scDifference.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在との差'**
+  String get scDifference;
+
+  /// No description provided for @scCurrentValues.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在値'**
+  String get scCurrentValues;
+
+  /// No description provided for @scSimulatedValues.
+  ///
+  /// In ja, this message translates to:
+  /// **'シミュレーション値（実データは変わりません）'**
+  String get scSimulatedValues;
+
+  /// No description provided for @scDrivers.
+  ///
+  /// In ja, this message translates to:
+  /// **'変動の原因'**
+  String get scDrivers;
+
+  /// No description provided for @scNoData.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ原価を計算できる商品がありません'**
+  String get scNoData;
+
+  /// No description provided for @scNoDataBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごとの仕入条件（仕入先・価格・掛率）を登録すると、原価と利益を計算します。発注や納品書の単価から取り込むこともできます。'**
+  String get scNoDataBody;
+
+  /// No description provided for @scSeed.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入実績から取り込む'**
+  String get scSeed;
+
+  /// No description provided for @scSeeded.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注から{po}件、納品書から{doc}件を取り込みました'**
+  String scSeeded(int po, int doc);
+
+  /// No description provided for @scSnapshot.
+  ///
+  /// In ja, this message translates to:
+  /// **'スナップショット保存'**
+  String get scSnapshot;
+
+  /// No description provided for @scSnapshotSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の状態を保存しました'**
+  String get scSnapshotSaved;
+
+  /// No description provided for @scAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'全倉庫'**
+  String get scAllWarehouses;
+
+  /// No description provided for @scAlerts.
+  ///
+  /// In ja, this message translates to:
+  /// **'要注意'**
+  String get scAlerts;
+
+  /// No description provided for @scAlertBottlenecks.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量超過・停止 {count}件'**
+  String scAlertBottlenecks(int count);
+
+  /// No description provided for @scAlertRisks.
+  ///
+  /// In ja, this message translates to:
+  /// **'高リスク {count}件'**
+  String scAlertRisks(int count);
+
+  /// No description provided for @scAlertNoSupply.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先のない商品 {count}件'**
+  String scAlertNoSupply(int count);
+
+  /// No description provided for @scAlertLoss.
+  ///
+  /// In ja, this message translates to:
+  /// **'赤字の商品 {count}件'**
+  String scAlertLoss(int count);
+
+  /// No description provided for @scProductsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品別の利益'**
+  String get scProductsTitle;
+
+  /// No description provided for @scCostBreakdown.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価の内訳'**
+  String get scCostBreakdown;
+
+  /// No description provided for @scWaterfall.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売価格から利益まで（1個あたり）'**
+  String get scWaterfall;
+
+  /// No description provided for @scChosen.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の仕入'**
+  String get scChosen;
+
+  /// No description provided for @scNoRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルート未登録'**
+  String get scNoRoute;
+
+  /// No description provided for @scProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get scProduct;
+
+  /// No description provided for @scChooseProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を選んでください'**
+  String get scChooseProduct;
+
+  /// No description provided for @scQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'1回の発注数量'**
+  String get scQuantity;
+
+  /// No description provided for @scRates.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率を比較'**
+  String get scRates;
+
+  /// No description provided for @scRatesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 65,70,75'**
+  String get scRatesHint;
+
+  /// No description provided for @scDiscountRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率'**
+  String get scDiscountRate;
+
+  /// No description provided for @scUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入単価'**
+  String get scUnitPrice;
+
+  /// No description provided for @scListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価'**
+  String get scListPrice;
+
+  /// No description provided for @scCurrency.
+  ///
+  /// In ja, this message translates to:
+  /// **'通貨'**
+  String get scCurrency;
+
+  /// No description provided for @scMoq.
+  ///
+  /// In ja, this message translates to:
+  /// **'MOQ'**
+  String get scMoq;
+
+  /// No description provided for @scOrderLot.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注ロット'**
+  String get scOrderLot;
+
+  /// No description provided for @scLeadTimeDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'納期（日）'**
+  String get scLeadTimeDays;
+
+  /// No description provided for @scPaymentTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'支払条件'**
+  String get scPaymentTerms;
+
+  /// No description provided for @scPrimary.
+  ///
+  /// In ja, this message translates to:
+  /// **'主要仕入先'**
+  String get scPrimary;
+
+  /// No description provided for @scDefaultRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'標準ルート'**
+  String get scDefaultRoute;
+
+  /// No description provided for @scSupplyTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入条件'**
+  String get scSupplyTerms;
+
+  /// No description provided for @scAddTerm.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入条件を追加'**
+  String get scAddTerm;
+
+  /// No description provided for @scSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get scSupplier;
+
+  /// No description provided for @scSupplierStats.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の実績'**
+  String get scSupplierStats;
+
+  /// No description provided for @scStatLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'{products}品目・単独供給{sole}・発注{orders}件'**
+  String scStatLine(int products, int sole, int orders);
+
+  /// No description provided for @scLateRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'遅延率'**
+  String get scLateRate;
+
+  /// No description provided for @scDefectRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'不良率'**
+  String get scDefectRate;
+
+  /// No description provided for @scPurchased.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入額'**
+  String get scPurchased;
+
+  /// No description provided for @scProfile.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の前提'**
+  String get scProfile;
+
+  /// No description provided for @scEditProfile.
+  ///
+  /// In ja, this message translates to:
+  /// **'前提を編集'**
+  String get scEditProfile;
+
+  /// No description provided for @scAnnualVolume.
+  ///
+  /// In ja, this message translates to:
+  /// **'年間販売数量'**
+  String get scAnnualVolume;
+
+  /// No description provided for @scAnnualVolumeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄: 過去12か月の出荷数'**
+  String get scAnnualVolumeHint;
+
+  /// No description provided for @scSalesPriceHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄: 商品マスタの価格'**
+  String get scSalesPriceHint;
+
+  /// No description provided for @scWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量（kg/個）'**
+  String get scWeight;
+
+  /// No description provided for @scUnitsPerCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'入数（個/箱）'**
+  String get scUnitsPerCarton;
+
+  /// No description provided for @scStorageDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'保管日数'**
+  String get scStorageDays;
+
+  /// No description provided for @scHsCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'HSコード'**
+  String get scHsCode;
+
+  /// No description provided for @scOriginCountry.
+  ///
+  /// In ja, this message translates to:
+  /// **'原産国'**
+  String get scOriginCountry;
+
+  /// No description provided for @scCostRules.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価ルール'**
+  String get scCostRules;
+
+  /// No description provided for @scTariffRules.
+  ///
+  /// In ja, this message translates to:
+  /// **'関税・輸入税'**
+  String get scTariffRules;
+
+  /// No description provided for @scFxRates.
+  ///
+  /// In ja, this message translates to:
+  /// **'為替'**
+  String get scFxRates;
+
+  /// No description provided for @scByProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品別'**
+  String get scByProduct;
+
+  /// No description provided for @scAddRule.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルールを追加'**
+  String get scAddRule;
+
+  /// No description provided for @scRuleName.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称'**
+  String get scRuleName;
+
+  /// No description provided for @scCategory.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分'**
+  String get scCategory;
+
+  /// No description provided for @scBasis.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get scBasis;
+
+  /// No description provided for @scAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額・率'**
+  String get scAmount;
+
+  /// No description provided for @scAmountPercentHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'率は小数で（3% = 0.03）'**
+  String get scAmountPercentHint;
+
+  /// No description provided for @scUnitsPerBasis.
+  ///
+  /// In ja, this message translates to:
+  /// **'基準数量'**
+  String get scUnitsPerBasis;
+
+  /// No description provided for @scUnitsPerBasisHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'時間あたり処理数・箱の入数・月の配賦数量など'**
+  String get scUnitsPerBasisHint;
+
+  /// No description provided for @scExpensed.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価に含める（外すと控除・還付扱い）'**
+  String get scExpensed;
+
+  /// No description provided for @scAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get scAll;
+
+  /// No description provided for @scCatStorage.
+  ///
+  /// In ja, this message translates to:
+  /// **'保管'**
+  String get scCatStorage;
+
+  /// No description provided for @scCatReceiving.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷作業'**
+  String get scCatReceiving;
+
+  /// No description provided for @scCatInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get scCatInspection;
+
+  /// No description provided for @scCatPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包'**
+  String get scCatPacking;
+
+  /// No description provided for @scCatPicking.
+  ///
+  /// In ja, this message translates to:
+  /// **'ピッキング'**
+  String get scCatPicking;
+
+  /// No description provided for @scCatShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷作業'**
+  String get scCatShipping;
+
+  /// No description provided for @scCatLabor.
+  ///
+  /// In ja, this message translates to:
+  /// **'人件費'**
+  String get scCatLabor;
+
+  /// No description provided for @scCatOverhead.
+  ///
+  /// In ja, this message translates to:
+  /// **'共通経費'**
+  String get scCatOverhead;
+
+  /// No description provided for @scCatDomesticFreight.
+  ///
+  /// In ja, this message translates to:
+  /// **'国内配送'**
+  String get scCatDomesticFreight;
+
+  /// No description provided for @scCatSalesRelated.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売関連'**
+  String get scCatSalesRelated;
+
+  /// No description provided for @scCatOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get scCatOther;
+
+  /// No description provided for @scBasisPerUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'1個あたり'**
+  String get scBasisPerUnit;
+
+  /// No description provided for @scBasisPerUnitMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'1個・1か月あたり'**
+  String get scBasisPerUnitMonth;
+
+  /// No description provided for @scBasisPerCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'1箱あたり'**
+  String get scBasisPerCarton;
+
+  /// No description provided for @scBasisPerLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'1行あたり'**
+  String get scBasisPerLine;
+
+  /// No description provided for @scBasisPerOrder.
+  ///
+  /// In ja, this message translates to:
+  /// **'1件あたり'**
+  String get scBasisPerOrder;
+
+  /// No description provided for @scBasisPerHour.
+  ///
+  /// In ja, this message translates to:
+  /// **'1時間あたり'**
+  String get scBasisPerHour;
+
+  /// No description provided for @scBasisPercentRevenue.
+  ///
+  /// In ja, this message translates to:
+  /// **'売上に対する率'**
+  String get scBasisPercentRevenue;
+
+  /// No description provided for @scBasisPercentPurchase.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入に対する率'**
+  String get scBasisPercentPurchase;
+
+  /// No description provided for @scBasisFixedMonthly.
+  ///
+  /// In ja, this message translates to:
+  /// **'月額固定'**
+  String get scBasisFixedMonthly;
+
+  /// No description provided for @scTariffRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'関税率'**
+  String get scTariffRate;
+
+  /// No description provided for @scImportTaxRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸入消費税等の率'**
+  String get scImportTaxRate;
+
+  /// No description provided for @scImportTaxRecoverable.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸入消費税等は控除・還付される'**
+  String get scImportTaxRecoverable;
+
+  /// No description provided for @scOtherRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の輸入税率'**
+  String get scOtherRate;
+
+  /// No description provided for @scValuation.
+  ///
+  /// In ja, this message translates to:
+  /// **'課税価格'**
+  String get scValuation;
+
+  /// No description provided for @scHsPrefix.
+  ///
+  /// In ja, this message translates to:
+  /// **'HSコード（前方一致）'**
+  String get scHsPrefix;
+
+  /// No description provided for @scDestinationCountry.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕向国'**
+  String get scDestinationCountry;
+
+  /// No description provided for @scAddTariff.
+  ///
+  /// In ja, this message translates to:
+  /// **'関税ルールを追加'**
+  String get scAddTariff;
+
+  /// No description provided for @scRateToBase.
+  ///
+  /// In ja, this message translates to:
+  /// **'換算レート（1単位あたり）'**
+  String get scRateToBase;
+
+  /// No description provided for @scAddFx.
+  ///
+  /// In ja, this message translates to:
+  /// **'通貨を追加'**
+  String get scAddFx;
+
+  /// No description provided for @scRoutesTab.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルート'**
+  String get scRoutesTab;
+
+  /// No description provided for @scNodesTab.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点'**
+  String get scNodesTab;
+
+  /// No description provided for @scAddRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルートを追加'**
+  String get scAddRoute;
+
+  /// No description provided for @scAddNode.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点を追加'**
+  String get scAddNode;
+
+  /// No description provided for @scRouteName.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルート名'**
+  String get scRouteName;
+
+  /// No description provided for @scLegs.
+  ///
+  /// In ja, this message translates to:
+  /// **'区間'**
+  String get scLegs;
+
+  /// No description provided for @scAddLeg.
+  ///
+  /// In ja, this message translates to:
+  /// **'区間を追加'**
+  String get scAddLeg;
+
+  /// No description provided for @scFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'出発'**
+  String get scFrom;
+
+  /// No description provided for @scTo.
+  ///
+  /// In ja, this message translates to:
+  /// **'到着'**
+  String get scTo;
+
+  /// No description provided for @scMode.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送手段'**
+  String get scMode;
+
+  /// No description provided for @scBaseCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本料金（1便）'**
+  String get scBaseCost;
+
+  /// No description provided for @scCostPerKg.
+  ///
+  /// In ja, this message translates to:
+  /// **'kg単価'**
+  String get scCostPerKg;
+
+  /// No description provided for @scCostPerUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'1個あたり'**
+  String get scCostPerUnit;
+
+  /// No description provided for @scInsuranceRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'保険料率'**
+  String get scInsuranceRate;
+
+  /// No description provided for @scCapacityKg.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量（kg/月）'**
+  String get scCapacityKg;
+
+  /// No description provided for @scCapacityUnits.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量（個/月）'**
+  String get scCapacityUnits;
+
+  /// No description provided for @scCustomsClearance.
+  ///
+  /// In ja, this message translates to:
+  /// **'この区間で輸入通関'**
+  String get scCustomsClearance;
+
+  /// No description provided for @scCustomsCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'通関費（1便）'**
+  String get scCustomsCost;
+
+  /// No description provided for @scRisk.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスク'**
+  String get scRisk;
+
+  /// No description provided for @scApplyRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'このルートをシナリオに適用'**
+  String get scApplyRoute;
+
+  /// No description provided for @scNoRoutes.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだルートがありません'**
+  String get scNoRoutes;
+
+  /// No description provided for @scNoRoutesBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先から倉庫までの区間（船・航空・トラック・通関）を登録すると、送料・関税・納期が計算に入ります。'**
+  String get scNoRoutesBody;
+
+  /// No description provided for @scNodeName.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称'**
+  String get scNodeName;
+
+  /// No description provided for @scNodeKind.
+  ///
+  /// In ja, this message translates to:
+  /// **'種類'**
+  String get scNodeKind;
+
+  /// No description provided for @scCountry.
+  ///
+  /// In ja, this message translates to:
+  /// **'国コード'**
+  String get scCountry;
+
+  /// No description provided for @scDwellDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'滞留日数'**
+  String get scDwellDays;
+
+  /// No description provided for @scHandlingPerUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'荷役費（1個）'**
+  String get scHandlingPerUnit;
+
+  /// No description provided for @scKindSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get scKindSupplier;
+
+  /// No description provided for @scKindPort.
+  ///
+  /// In ja, this message translates to:
+  /// **'港'**
+  String get scKindPort;
+
+  /// No description provided for @scKindAirport.
+  ///
+  /// In ja, this message translates to:
+  /// **'空港'**
+  String get scKindAirport;
+
+  /// No description provided for @scKindCustoms.
+  ///
+  /// In ja, this message translates to:
+  /// **'通関'**
+  String get scKindCustoms;
+
+  /// No description provided for @scKindWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get scKindWarehouse;
+
+  /// No description provided for @scKindDc.
+  ///
+  /// In ja, this message translates to:
+  /// **'配送センター'**
+  String get scKindDc;
+
+  /// No description provided for @scKindCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'顧客'**
+  String get scKindCustomer;
+
+  /// No description provided for @scKindHub.
+  ///
+  /// In ja, this message translates to:
+  /// **'中継拠点'**
+  String get scKindHub;
+
+  /// No description provided for @scModeSea.
+  ///
+  /// In ja, this message translates to:
+  /// **'船便'**
+  String get scModeSea;
+
+  /// No description provided for @scModeAir.
+  ///
+  /// In ja, this message translates to:
+  /// **'航空便'**
+  String get scModeAir;
+
+  /// No description provided for @scModeTruck.
+  ///
+  /// In ja, this message translates to:
+  /// **'トラック'**
+  String get scModeTruck;
+
+  /// No description provided for @scModeRail.
+  ///
+  /// In ja, this message translates to:
+  /// **'鉄道'**
+  String get scModeRail;
+
+  /// No description provided for @scModeCourier.
+  ///
+  /// In ja, this message translates to:
+  /// **'宅配・クーリエ'**
+  String get scModeCourier;
+
+  /// No description provided for @scModeInternal.
+  ///
+  /// In ja, this message translates to:
+  /// **'社内移動'**
+  String get scModeInternal;
+
+  /// No description provided for @scRiskLow.
+  ///
+  /// In ja, this message translates to:
+  /// **'低'**
+  String get scRiskLow;
+
+  /// No description provided for @scRiskMedium.
+  ///
+  /// In ja, this message translates to:
+  /// **'中'**
+  String get scRiskMedium;
+
+  /// No description provided for @scRiskHigh.
+  ///
+  /// In ja, this message translates to:
+  /// **'高'**
+  String get scRiskHigh;
+
+  /// No description provided for @scRiskCritical.
+  ///
+  /// In ja, this message translates to:
+  /// **'重大'**
+  String get scRiskCritical;
+
+  /// No description provided for @scScenario.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオ'**
+  String get scScenario;
+
+  /// No description provided for @scCurrentConditions.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在条件'**
+  String get scCurrentConditions;
+
+  /// No description provided for @scScenarioName.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオ名'**
+  String get scScenarioName;
+
+  /// No description provided for @scSuppliersUsed.
+  ///
+  /// In ja, this message translates to:
+  /// **'使う仕入先'**
+  String get scSuppliersUsed;
+
+  /// No description provided for @scRouteChoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'物流'**
+  String get scRouteChoice;
+
+  /// No description provided for @scRouteCurrent.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在のルート'**
+  String get scRouteCurrent;
+
+  /// No description provided for @scRouteCheapest.
+  ///
+  /// In ja, this message translates to:
+  /// **'最安'**
+  String get scRouteCheapest;
+
+  /// No description provided for @scRouteFastest.
+  ///
+  /// In ja, this message translates to:
+  /// **'最速'**
+  String get scRouteFastest;
+
+  /// No description provided for @scSupplierChoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の選び方'**
+  String get scSupplierChoice;
+
+  /// No description provided for @scChoiceCurrent.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の仕入先'**
+  String get scChoiceCurrent;
+
+  /// No description provided for @scChoiceCheapest.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益が最大'**
+  String get scChoiceCheapest;
+
+  /// No description provided for @scChoiceFastest.
+  ///
+  /// In ja, this message translates to:
+  /// **'納期が最短'**
+  String get scChoiceFastest;
+
+  /// No description provided for @scChanges.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更する条件（±%）'**
+  String get scChanges;
+
+  /// No description provided for @scChangeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: +10 は10%上がる、-5 は5%下がる'**
+  String get scChangeHint;
+
+  /// No description provided for @scPriceChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入価格'**
+  String get scPriceChange;
+
+  /// No description provided for @scFreightChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'送料（全体）'**
+  String get scFreightChange;
+
+  /// No description provided for @scSeaChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'海上運賃'**
+  String get scSeaChange;
+
+  /// No description provided for @scAirChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'航空運賃'**
+  String get scAirChange;
+
+  /// No description provided for @scTariffChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'関税'**
+  String get scTariffChange;
+
+  /// No description provided for @scCustomsChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'通関費'**
+  String get scCustomsChange;
+
+  /// No description provided for @scWarehouseChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫費'**
+  String get scWarehouseChange;
+
+  /// No description provided for @scLaborChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'人件費'**
+  String get scLaborChange;
+
+  /// No description provided for @scOverheadChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'共通経費'**
+  String get scOverheadChange;
+
+  /// No description provided for @scFxChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'為替（外貨高）'**
+  String get scFxChange;
+
+  /// No description provided for @scSalesPriceChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売価格'**
+  String get scSalesPriceChange;
+
+  /// No description provided for @scVolumeChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売数量'**
+  String get scVolumeChange;
+
+  /// No description provided for @scRatesBySupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率の変更'**
+  String get scRatesBySupplier;
+
+  /// No description provided for @scRateNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在 {rate}'**
+  String scRateNow(String rate);
+
+  /// No description provided for @scAddSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を追加（試算）'**
+  String get scAddSupplier;
+
+  /// No description provided for @scAddedSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加する仕入先'**
+  String get scAddedSupplier;
+
+  /// No description provided for @scApplyRiskEvents.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済みのリスクを反映'**
+  String get scApplyRiskEvents;
+
+  /// No description provided for @scRun.
+  ///
+  /// In ja, this message translates to:
+  /// **'シミュレーション実行'**
+  String get scRun;
+
+  /// No description provided for @scSaveScenario.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオを保存'**
+  String get scSaveScenario;
+
+  /// No description provided for @scScenarioSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオを保存しました'**
+  String get scScenarioSaved;
+
+  /// No description provided for @scAddToCompare.
+  ///
+  /// In ja, this message translates to:
+  /// **'比較に追加'**
+  String get scAddToCompare;
+
+  /// No description provided for @scCompare.
+  ///
+  /// In ja, this message translates to:
+  /// **'比較（最大5件）'**
+  String get scCompare;
+
+  /// No description provided for @scRunCompare.
+  ///
+  /// In ja, this message translates to:
+  /// **'比較する'**
+  String get scRunCompare;
+
+  /// No description provided for @scClearCompare.
+  ///
+  /// In ja, this message translates to:
+  /// **'クリア'**
+  String get scClearCompare;
+
+  /// No description provided for @scCompareFull.
+  ///
+  /// In ja, this message translates to:
+  /// **'比較できるのは5件までです'**
+  String get scCompareFull;
+
+  /// No description provided for @scResultTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオ: {name}'**
+  String scResultTitle(String name);
+
+  /// No description provided for @scProductChanges.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品別の変化'**
+  String get scProductChanges;
+
+  /// No description provided for @scNotBest.
+  ///
+  /// In ja, this message translates to:
+  /// **'どれが最良かはシステムでは決めません。利益・納期・リスクを見て判断してください。'**
+  String get scNotBest;
+
+  /// No description provided for @scHighRisks.
+  ///
+  /// In ja, this message translates to:
+  /// **'高リスク'**
+  String get scHighRisks;
+
+  /// No description provided for @scOverCapacity.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量超過'**
+  String get scOverCapacity;
+
+  /// No description provided for @scRiskTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスク一覧'**
+  String get scRiskTitle;
+
+  /// No description provided for @scRiskRuleNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスク値は設定値・登録リスク・容量・単独供給・遅延率・不良率から計算した説明可能なルールです。'**
+  String get scRiskRuleNote;
+
+  /// No description provided for @scRiskEvents.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済みのリスク'**
+  String get scRiskEvents;
+
+  /// No description provided for @scAddRiskEvent.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスクを登録'**
+  String get scAddRiskEvent;
+
+  /// No description provided for @scRiskEventTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'内容'**
+  String get scRiskEventTitle;
+
+  /// No description provided for @scRiskKind.
+  ///
+  /// In ja, this message translates to:
+  /// **'種類'**
+  String get scRiskKind;
+
+  /// No description provided for @scSeverity.
+  ///
+  /// In ja, this message translates to:
+  /// **'深刻度'**
+  String get scSeverity;
+
+  /// No description provided for @scStartsOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'開始日'**
+  String get scStartsOn;
+
+  /// No description provided for @scEndsOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'終了日'**
+  String get scEndsOn;
+
+  /// No description provided for @scPriceMultiplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格倍率'**
+  String get scPriceMultiplier;
+
+  /// No description provided for @scCostMultiplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'費用倍率'**
+  String get scCostMultiplier;
+
+  /// No description provided for @scCapacityMultiplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量倍率'**
+  String get scCapacityMultiplier;
+
+  /// No description provided for @scDelayDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'遅延日数'**
+  String get scDelayDays;
+
+  /// No description provided for @scTarget.
+  ///
+  /// In ja, this message translates to:
+  /// **'対象'**
+  String get scTarget;
+
+  /// No description provided for @scReasonLevel.
+  ///
+  /// In ja, this message translates to:
+  /// **'設定値: {level}'**
+  String scReasonLevel(String level);
+
+  /// No description provided for @scReasonSole.
+  ///
+  /// In ja, this message translates to:
+  /// **'単独供給 {count}品目'**
+  String scReasonSole(String count);
+
+  /// No description provided for @scReasonEvent.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録リスク: {kind}'**
+  String scReasonEvent(String kind);
+
+  /// No description provided for @scReasonLate.
+  ///
+  /// In ja, this message translates to:
+  /// **'遅延率 {rate}%'**
+  String scReasonLate(String rate);
+
+  /// No description provided for @scReasonDefect.
+  ///
+  /// In ja, this message translates to:
+  /// **'不良率 {rate}%'**
+  String scReasonDefect(String rate);
+
+  /// No description provided for @scReasonLoadExceeded.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量超過'**
+  String get scReasonLoadExceeded;
+
+  /// No description provided for @scReasonLoadBusy.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量逼迫'**
+  String get scReasonLoadBusy;
+
+  /// No description provided for @scReasonNoAlt.
+  ///
+  /// In ja, this message translates to:
+  /// **'代替経路なし'**
+  String get scReasonNoAlt;
+
+  /// No description provided for @scReasonLongLead.
+  ///
+  /// In ja, this message translates to:
+  /// **'長い納期 {days}日'**
+  String scReasonLongLead(String days);
+
+  /// No description provided for @scReasonCrossBorder.
+  ///
+  /// In ja, this message translates to:
+  /// **'国境をまたぐ'**
+  String get scReasonCrossBorder;
+
+  /// No description provided for @scEvSupplierStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先停止'**
+  String get scEvSupplierStop;
+
+  /// No description provided for @scEvSupplierPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の値上げ'**
+  String get scEvSupplierPrice;
+
+  /// No description provided for @scEvSupplierDelay.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の納期遅延'**
+  String get scEvSupplierDelay;
+
+  /// No description provided for @scEvRouteStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルート停止'**
+  String get scEvRouteStop;
+
+  /// No description provided for @scEvModeStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送手段の停止'**
+  String get scEvModeStop;
+
+  /// No description provided for @scEvPortStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'港湾停止'**
+  String get scEvPortStop;
+
+  /// No description provided for @scEvAirportStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'空港停止'**
+  String get scEvAirportStop;
+
+  /// No description provided for @scEvCustomsDelay.
+  ///
+  /// In ja, this message translates to:
+  /// **'通関遅延'**
+  String get scEvCustomsDelay;
+
+  /// No description provided for @scEvWarehouseCapacity.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫容量不足'**
+  String get scEvWarehouseCapacity;
+
+  /// No description provided for @scEvWarehouseStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫停止'**
+  String get scEvWarehouseStop;
+
+  /// No description provided for @scEvDomesticStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'国内配送停止'**
+  String get scEvDomesticStop;
+
+  /// No description provided for @scEvStaffShortage.
+  ///
+  /// In ja, this message translates to:
+  /// **'人員不足'**
+  String get scEvStaffShortage;
+
+  /// No description provided for @scEvCostSpike.
+  ///
+  /// In ja, this message translates to:
+  /// **'コスト急増'**
+  String get scEvCostSpike;
+
+  /// No description provided for @scRiskKindSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get scRiskKindSupplier;
+
+  /// No description provided for @scRiskKindNode.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点'**
+  String get scRiskKindNode;
+
+  /// No description provided for @scRiskKindRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルート'**
+  String get scRiskKindRoute;
+
+  /// No description provided for @scNoRisks.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスクの対象がまだありません'**
+  String get scNoRisks;
+
+  /// No description provided for @scLoadsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量と負荷'**
+  String get scLoadsTitle;
+
+  /// No description provided for @scStatusOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'余裕'**
+  String get scStatusOk;
+
+  /// No description provided for @scStatusBusy.
+  ///
+  /// In ja, this message translates to:
+  /// **'逼迫'**
+  String get scStatusBusy;
+
+  /// No description provided for @scStatusExceeded.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量超過'**
+  String get scStatusExceeded;
+
+  /// No description provided for @scStatusNoCapacity.
+  ///
+  /// In ja, this message translates to:
+  /// **'容量未設定'**
+  String get scStatusNoCapacity;
+
+  /// No description provided for @scStatusStopped.
+  ///
+  /// In ja, this message translates to:
+  /// **'停止'**
+  String get scStatusStopped;
+
+  /// No description provided for @scAlternative.
+  ///
+  /// In ja, this message translates to:
+  /// **'代替あり'**
+  String get scAlternative;
+
+  /// No description provided for @scNoAlternative.
+  ///
+  /// In ja, this message translates to:
+  /// **'代替なし'**
+  String get scNoAlternative;
+
+  /// No description provided for @scPerMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'{units}個/月'**
+  String scPerMonth(String units);
+
+  /// No description provided for @scLoadPercent.
+  ///
+  /// In ja, this message translates to:
+  /// **'負荷 {percent}'**
+  String scLoadPercent(String percent);
+
+  /// No description provided for @scDisruptionTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'障害シミュレーション'**
+  String get scDisruptionTitle;
+
+  /// No description provided for @scDisruptionTarget.
+  ///
+  /// In ja, this message translates to:
+  /// **'止まるもの'**
+  String get scDisruptionTarget;
+
+  /// No description provided for @scDisruptionDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'日数'**
+  String get scDisruptionDays;
+
+  /// No description provided for @scDisruptionKind.
+  ///
+  /// In ja, this message translates to:
+  /// **'障害の種類'**
+  String get scDisruptionKind;
+
+  /// No description provided for @scStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'停止'**
+  String get scStop;
+
+  /// No description provided for @scDelay.
+  ///
+  /// In ja, this message translates to:
+  /// **'遅延'**
+  String get scDelay;
+
+  /// No description provided for @scRunDisruption.
+  ///
+  /// In ja, this message translates to:
+  /// **'影響を計算'**
+  String get scRunDisruption;
+
+  /// No description provided for @scImpact.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益への影響'**
+  String get scImpact;
+
+  /// No description provided for @scExtraCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加費用'**
+  String get scExtraCost;
+
+  /// No description provided for @scLostProfit.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売機会損失'**
+  String get scLostProfit;
+
+  /// No description provided for @scLostUnits.
+  ///
+  /// In ja, this message translates to:
+  /// **'欠品数'**
+  String get scLostUnits;
+
+  /// No description provided for @scRerouted.
+  ///
+  /// In ja, this message translates to:
+  /// **'代替輸送'**
+  String get scRerouted;
+
+  /// No description provided for @scCoverage.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫で{days}日分'**
+  String scCoverage(String days);
+
+  /// No description provided for @scNoAlternativeRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'代替ルートなし'**
+  String get scNoAlternativeRoute;
+
+  /// No description provided for @scAlternativeVia.
+  ///
+  /// In ja, this message translates to:
+  /// **'代替: {name}'**
+  String scAlternativeVia(String name);
+
+  /// No description provided for @scNoLoads.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ物の流れがありません。ルートと数量を登録してください。'**
+  String get scNoLoads;
+
+  /// No description provided for @scSavedScenarios.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存したシナリオ'**
+  String get scSavedScenarios;
+
+  /// No description provided for @scRunHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'実行履歴'**
+  String get scRunHistory;
+
+  /// No description provided for @scRunAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一度実行'**
+  String get scRunAgain;
+
+  /// No description provided for @scNoScenarios.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存したシナリオはありません'**
+  String get scNoScenarios;
+
+  /// No description provided for @scNoRuns.
+  ///
+  /// In ja, this message translates to:
+  /// **'実行履歴はありません'**
+  String get scNoRuns;
+
+  /// No description provided for @scRunKindBaseline.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在'**
+  String get scRunKindBaseline;
+
+  /// No description provided for @scRunKindScenario.
+  ///
+  /// In ja, this message translates to:
+  /// **'シナリオ'**
+  String get scRunKindScenario;
+
+  /// No description provided for @scRunKindCompare.
+  ///
+  /// In ja, this message translates to:
+  /// **'比較'**
+  String get scRunKindCompare;
+
+  /// No description provided for @scRunKindDisruption.
+  ///
+  /// In ja, this message translates to:
+  /// **'障害'**
+  String get scRunKindDisruption;
+
+  /// No description provided for @scRunKindProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get scRunKindProduct;
+
+  /// No description provided for @scRunKindPurchaseCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注前チェック'**
+  String get scRunKindPurchaseCheck;
+
+  /// No description provided for @scProductCard.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価・利益'**
+  String get scProductCard;
+
+  /// No description provided for @scOpenComparison.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を比較'**
+  String get scOpenComparison;
+
+  /// No description provided for @scNoTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品の仕入条件がまだありません'**
+  String get scNoTerms;
+
+  /// No description provided for @scProfitWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益の警告'**
+  String get scProfitWarning;
+
+  /// No description provided for @scProfitWarningBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'今回の条件では利益率が {before} → {after} に変わります。'**
+  String scProfitWarningBody(String before, String after);
+
+  /// No description provided for @scWarnMarginLow.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益率が基準を下回ります'**
+  String get scWarnMarginLow;
+
+  /// No description provided for @scWarnMarginDrop.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益率が大きく下がります'**
+  String get scWarnMarginDrop;
+
+  /// No description provided for @scWarnLoss.
+  ///
+  /// In ja, this message translates to:
+  /// **'赤字です'**
+  String get scWarnLoss;
+
+  /// No description provided for @scCauses.
+  ///
+  /// In ja, this message translates to:
+  /// **'原因'**
+  String get scCauses;
+
+  /// No description provided for @scContinueOrder.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注を続ける'**
+  String get scContinueOrder;
+
+  /// No description provided for @scBackToEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'戻る'**
+  String get scBackToEdit;
+
+  /// No description provided for @scNoteNoRoute.
+  ///
+  /// In ja, this message translates to:
+  /// **'ルート未登録（物流費なし）'**
+  String get scNoteNoRoute;
+
+  /// No description provided for @scNoteNoWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量未設定'**
+  String get scNoteNoWeight;
+
+  /// No description provided for @scNoteNoVolume.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量なし（1個で計算）'**
+  String get scNoteNoVolume;
+
+  /// No description provided for @scNoteNoPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入価格なし'**
+  String get scNoteNoPrice;
+
+  /// No description provided for @scNoteNoFx.
+  ///
+  /// In ja, this message translates to:
+  /// **'為替レートなし'**
+  String get scNoteNoFx;
+
+  /// No description provided for @scNoteNoTariff.
+  ///
+  /// In ja, this message translates to:
+  /// **'関税ルールなし'**
+  String get scNoteNoTariff;
+
+  /// No description provided for @scNoteFixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'固定費を配賦できません'**
+  String get scNoteFixed;
+
+  /// No description provided for @scHypothetical.
+  ///
+  /// In ja, this message translates to:
+  /// **'試算用'**
+  String get scHypothetical;
+
+  /// No description provided for @scManageOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'編集には supply_chain.manage 権限が必要です'**
+  String get scManageOnly;
+
+  /// No description provided for @scRecalculate.
+  ///
+  /// In ja, this message translates to:
+  /// **'再計算'**
+  String get scRecalculate;
+
+  /// No description provided for @scBlocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'使用不可'**
+  String get scBlocked;
+
+  /// No description provided for @scErrorRouteLegs.
+  ///
+  /// In ja, this message translates to:
+  /// **'区間がつながっていません（次の区間は前の到着地から出発してください）'**
+  String get scErrorRouteLegs;
+
+  /// No description provided for @scErrorNameRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'名称を入力してください'**
+  String get scErrorNameRequired;
+
+  /// No description provided for @scNoChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'変化はありません'**
+  String get scNoChange;
 }
 
 class _AppLocalizationsDelegate

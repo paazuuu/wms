@@ -5670,4 +5670,1085 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get importNotVerified => 'AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。';
+
+  @override
+  String get groupSupplyChain => 'サプライチェーン';
+
+  @override
+  String get featScDashboard => '収益ダッシュボード';
+
+  @override
+  String get featScDashboardDesc => '仕入から販売まで、最終的にいくら残るか';
+
+  @override
+  String get featScSuppliers => '仕入先比較';
+
+  @override
+  String get featScSuppliersDesc => '最安値ではなく最終利益で比べる';
+
+  @override
+  String get featScCosts => '原価構造';
+
+  @override
+  String get featScCostsDesc => '原価の内訳と、原価・関税・為替のルール';
+
+  @override
+  String get featScRoutes => '物流ルート';
+
+  @override
+  String get featScRoutesDesc => '船・航空・トラック・通関の経路と費用';
+
+  @override
+  String get featScSimulation => '利益シミュレーション';
+
+  @override
+  String get featScSimulationDesc => '仕入先・掛率・送料・関税・為替などを変えて試算';
+
+  @override
+  String get featScRisk => 'リスク分析';
+
+  @override
+  String get featScRiskDesc => '仕入先・拠点・ルートのリスクとその理由';
+
+  @override
+  String get featScBottleneck => 'ボトルネック';
+
+  @override
+  String get featScBottleneckDesc => '容量の逼迫と、止まった時の影響';
+
+  @override
+  String get featScHistory => 'シナリオ履歴';
+
+  @override
+  String get featScHistoryDesc => '保存したシナリオと実行結果';
+
+  @override
+  String get scRevenue => '売上';
+
+  @override
+  String get scPurchase => '仕入原価';
+
+  @override
+  String get scFxImpact => '為替影響';
+
+  @override
+  String get scLogistics => '物流費';
+
+  @override
+  String get scCustoms => '通関・関税';
+
+  @override
+  String get scWarehouse => '倉庫費';
+
+  @override
+  String get scLabor => '人件費';
+
+  @override
+  String get scOther => 'その他経費';
+
+  @override
+  String get scTotalCost => '総原価';
+
+  @override
+  String get scProfit => '粗利益';
+
+  @override
+  String get scMargin => '利益率';
+
+  @override
+  String get scLeadTime => '平均納期';
+
+  @override
+  String get scSalesRelated => '販売関連費';
+
+  @override
+  String get scRecoverable => '控除・還付対象（原価外）';
+
+  @override
+  String get scLinePurchase => '仕入';
+
+  @override
+  String get scLineFx => '為替影響';
+
+  @override
+  String get scLineIntlFreight => '国際送料';
+
+  @override
+  String get scLineInsurance => '保険';
+
+  @override
+  String get scLineDuty => '関税';
+
+  @override
+  String get scLineImportTax => '輸入税（控除不可）';
+
+  @override
+  String get scLineCustomsFee => '通関費';
+
+  @override
+  String get scLinePortFee => '港湾・空港費';
+
+  @override
+  String get scLineDomesticFreight => '国内送料';
+
+  @override
+  String get scLineWarehouse => '倉庫費';
+
+  @override
+  String get scLineReceiving => '入荷作業';
+
+  @override
+  String get scLineInspection => '検品';
+
+  @override
+  String get scLinePacking => '梱包';
+
+  @override
+  String get scLineLabor => '人件費';
+
+  @override
+  String get scLineOverhead => '共通経費';
+
+  @override
+  String get scLineOther => 'その他';
+
+  @override
+  String get scLineRevenue => '売上';
+
+  @override
+  String get scLandedCost => '最終原価';
+
+  @override
+  String get scSalesPrice => '販売価格';
+
+  @override
+  String get scProfitPerUnit => '利益/個';
+
+  @override
+  String get scAnnualProfit => '年間利益';
+
+  @override
+  String get scVolume => '年間数量';
+
+  @override
+  String scDays(String days) {
+    return '$days日';
+  }
+
+  @override
+  String get scCurrent => '現在';
+
+  @override
+  String get scSimulated => 'シミュレーション';
+
+  @override
+  String get scDifference => '現在との差';
+
+  @override
+  String get scCurrentValues => '現在値';
+
+  @override
+  String get scSimulatedValues => 'シミュレーション値（実データは変わりません）';
+
+  @override
+  String get scDrivers => '変動の原因';
+
+  @override
+  String get scNoData => 'まだ原価を計算できる商品がありません';
+
+  @override
+  String get scNoDataBody =>
+      '商品ごとの仕入条件（仕入先・価格・掛率）を登録すると、原価と利益を計算します。発注や納品書の単価から取り込むこともできます。';
+
+  @override
+  String get scSeed => '仕入実績から取り込む';
+
+  @override
+  String scSeeded(int po, int doc) {
+    return '発注から$po件、納品書から$doc件を取り込みました';
+  }
+
+  @override
+  String get scSnapshot => 'スナップショット保存';
+
+  @override
+  String get scSnapshotSaved => '現在の状態を保存しました';
+
+  @override
+  String get scAllWarehouses => '全倉庫';
+
+  @override
+  String get scAlerts => '要注意';
+
+  @override
+  String scAlertBottlenecks(int count) {
+    return '容量超過・停止 $count件';
+  }
+
+  @override
+  String scAlertRisks(int count) {
+    return '高リスク $count件';
+  }
+
+  @override
+  String scAlertNoSupply(int count) {
+    return '仕入先のない商品 $count件';
+  }
+
+  @override
+  String scAlertLoss(int count) {
+    return '赤字の商品 $count件';
+  }
+
+  @override
+  String get scProductsTitle => '商品別の利益';
+
+  @override
+  String get scCostBreakdown => '原価の内訳';
+
+  @override
+  String get scWaterfall => '販売価格から利益まで（1個あたり）';
+
+  @override
+  String get scChosen => '現在の仕入';
+
+  @override
+  String get scNoRoute => 'ルート未登録';
+
+  @override
+  String get scProduct => '商品';
+
+  @override
+  String get scChooseProduct => '商品を選んでください';
+
+  @override
+  String get scQuantity => '1回の発注数量';
+
+  @override
+  String get scRates => '掛率を比較';
+
+  @override
+  String get scRatesHint => '例: 65,70,75';
+
+  @override
+  String get scDiscountRate => '掛率';
+
+  @override
+  String get scUnitPrice => '仕入単価';
+
+  @override
+  String get scListPrice => '定価';
+
+  @override
+  String get scCurrency => '通貨';
+
+  @override
+  String get scMoq => 'MOQ';
+
+  @override
+  String get scOrderLot => '発注ロット';
+
+  @override
+  String get scLeadTimeDays => '納期（日）';
+
+  @override
+  String get scPaymentTerms => '支払条件';
+
+  @override
+  String get scPrimary => '主要仕入先';
+
+  @override
+  String get scDefaultRoute => '標準ルート';
+
+  @override
+  String get scSupplyTerms => '仕入条件';
+
+  @override
+  String get scAddTerm => '仕入条件を追加';
+
+  @override
+  String get scSupplier => '仕入先';
+
+  @override
+  String get scSupplierStats => '仕入先の実績';
+
+  @override
+  String scStatLine(int products, int sole, int orders) {
+    return '$products品目・単独供給$sole・発注$orders件';
+  }
+
+  @override
+  String get scLateRate => '遅延率';
+
+  @override
+  String get scDefectRate => '不良率';
+
+  @override
+  String get scPurchased => '仕入額';
+
+  @override
+  String get scProfile => '商品の前提';
+
+  @override
+  String get scEditProfile => '前提を編集';
+
+  @override
+  String get scAnnualVolume => '年間販売数量';
+
+  @override
+  String get scAnnualVolumeHint => '空欄: 過去12か月の出荷数';
+
+  @override
+  String get scSalesPriceHint => '空欄: 商品マスタの価格';
+
+  @override
+  String get scWeight => '重量（kg/個）';
+
+  @override
+  String get scUnitsPerCarton => '入数（個/箱）';
+
+  @override
+  String get scStorageDays => '保管日数';
+
+  @override
+  String get scHsCode => 'HSコード';
+
+  @override
+  String get scOriginCountry => '原産国';
+
+  @override
+  String get scCostRules => '原価ルール';
+
+  @override
+  String get scTariffRules => '関税・輸入税';
+
+  @override
+  String get scFxRates => '為替';
+
+  @override
+  String get scByProduct => '商品別';
+
+  @override
+  String get scAddRule => 'ルールを追加';
+
+  @override
+  String get scRuleName => '名称';
+
+  @override
+  String get scCategory => '区分';
+
+  @override
+  String get scBasis => '単位';
+
+  @override
+  String get scAmount => '金額・率';
+
+  @override
+  String get scAmountPercentHint => '率は小数で（3% = 0.03）';
+
+  @override
+  String get scUnitsPerBasis => '基準数量';
+
+  @override
+  String get scUnitsPerBasisHint => '時間あたり処理数・箱の入数・月の配賦数量など';
+
+  @override
+  String get scExpensed => '原価に含める（外すと控除・還付扱い）';
+
+  @override
+  String get scAll => 'すべて';
+
+  @override
+  String get scCatStorage => '保管';
+
+  @override
+  String get scCatReceiving => '入荷作業';
+
+  @override
+  String get scCatInspection => '検品';
+
+  @override
+  String get scCatPacking => '梱包';
+
+  @override
+  String get scCatPicking => 'ピッキング';
+
+  @override
+  String get scCatShipping => '出荷作業';
+
+  @override
+  String get scCatLabor => '人件費';
+
+  @override
+  String get scCatOverhead => '共通経費';
+
+  @override
+  String get scCatDomesticFreight => '国内配送';
+
+  @override
+  String get scCatSalesRelated => '販売関連';
+
+  @override
+  String get scCatOther => 'その他';
+
+  @override
+  String get scBasisPerUnit => '1個あたり';
+
+  @override
+  String get scBasisPerUnitMonth => '1個・1か月あたり';
+
+  @override
+  String get scBasisPerCarton => '1箱あたり';
+
+  @override
+  String get scBasisPerLine => '1行あたり';
+
+  @override
+  String get scBasisPerOrder => '1件あたり';
+
+  @override
+  String get scBasisPerHour => '1時間あたり';
+
+  @override
+  String get scBasisPercentRevenue => '売上に対する率';
+
+  @override
+  String get scBasisPercentPurchase => '仕入に対する率';
+
+  @override
+  String get scBasisFixedMonthly => '月額固定';
+
+  @override
+  String get scTariffRate => '関税率';
+
+  @override
+  String get scImportTaxRate => '輸入消費税等の率';
+
+  @override
+  String get scImportTaxRecoverable => '輸入消費税等は控除・還付される';
+
+  @override
+  String get scOtherRate => 'その他の輸入税率';
+
+  @override
+  String get scValuation => '課税価格';
+
+  @override
+  String get scHsPrefix => 'HSコード（前方一致）';
+
+  @override
+  String get scDestinationCountry => '仕向国';
+
+  @override
+  String get scAddTariff => '関税ルールを追加';
+
+  @override
+  String get scRateToBase => '換算レート（1単位あたり）';
+
+  @override
+  String get scAddFx => '通貨を追加';
+
+  @override
+  String get scRoutesTab => 'ルート';
+
+  @override
+  String get scNodesTab => '拠点';
+
+  @override
+  String get scAddRoute => 'ルートを追加';
+
+  @override
+  String get scAddNode => '拠点を追加';
+
+  @override
+  String get scRouteName => 'ルート名';
+
+  @override
+  String get scLegs => '区間';
+
+  @override
+  String get scAddLeg => '区間を追加';
+
+  @override
+  String get scFrom => '出発';
+
+  @override
+  String get scTo => '到着';
+
+  @override
+  String get scMode => '輸送手段';
+
+  @override
+  String get scBaseCost => '基本料金（1便）';
+
+  @override
+  String get scCostPerKg => 'kg単価';
+
+  @override
+  String get scCostPerUnit => '1個あたり';
+
+  @override
+  String get scInsuranceRate => '保険料率';
+
+  @override
+  String get scCapacityKg => '容量（kg/月）';
+
+  @override
+  String get scCapacityUnits => '容量（個/月）';
+
+  @override
+  String get scCustomsClearance => 'この区間で輸入通関';
+
+  @override
+  String get scCustomsCost => '通関費（1便）';
+
+  @override
+  String get scRisk => 'リスク';
+
+  @override
+  String get scApplyRoute => 'このルートをシナリオに適用';
+
+  @override
+  String get scNoRoutes => 'まだルートがありません';
+
+  @override
+  String get scNoRoutesBody =>
+      '仕入先から倉庫までの区間（船・航空・トラック・通関）を登録すると、送料・関税・納期が計算に入ります。';
+
+  @override
+  String get scNodeName => '名称';
+
+  @override
+  String get scNodeKind => '種類';
+
+  @override
+  String get scCountry => '国コード';
+
+  @override
+  String get scDwellDays => '滞留日数';
+
+  @override
+  String get scHandlingPerUnit => '荷役費（1個）';
+
+  @override
+  String get scKindSupplier => '仕入先';
+
+  @override
+  String get scKindPort => '港';
+
+  @override
+  String get scKindAirport => '空港';
+
+  @override
+  String get scKindCustoms => '通関';
+
+  @override
+  String get scKindWarehouse => '倉庫';
+
+  @override
+  String get scKindDc => '配送センター';
+
+  @override
+  String get scKindCustomer => '顧客';
+
+  @override
+  String get scKindHub => '中継拠点';
+
+  @override
+  String get scModeSea => '船便';
+
+  @override
+  String get scModeAir => '航空便';
+
+  @override
+  String get scModeTruck => 'トラック';
+
+  @override
+  String get scModeRail => '鉄道';
+
+  @override
+  String get scModeCourier => '宅配・クーリエ';
+
+  @override
+  String get scModeInternal => '社内移動';
+
+  @override
+  String get scRiskLow => '低';
+
+  @override
+  String get scRiskMedium => '中';
+
+  @override
+  String get scRiskHigh => '高';
+
+  @override
+  String get scRiskCritical => '重大';
+
+  @override
+  String get scScenario => 'シナリオ';
+
+  @override
+  String get scCurrentConditions => '現在条件';
+
+  @override
+  String get scScenarioName => 'シナリオ名';
+
+  @override
+  String get scSuppliersUsed => '使う仕入先';
+
+  @override
+  String get scRouteChoice => '物流';
+
+  @override
+  String get scRouteCurrent => '現在のルート';
+
+  @override
+  String get scRouteCheapest => '最安';
+
+  @override
+  String get scRouteFastest => '最速';
+
+  @override
+  String get scSupplierChoice => '仕入先の選び方';
+
+  @override
+  String get scChoiceCurrent => '現在の仕入先';
+
+  @override
+  String get scChoiceCheapest => '利益が最大';
+
+  @override
+  String get scChoiceFastest => '納期が最短';
+
+  @override
+  String get scChanges => '変更する条件（±%）';
+
+  @override
+  String get scChangeHint => '例: +10 は10%上がる、-5 は5%下がる';
+
+  @override
+  String get scPriceChange => '仕入価格';
+
+  @override
+  String get scFreightChange => '送料（全体）';
+
+  @override
+  String get scSeaChange => '海上運賃';
+
+  @override
+  String get scAirChange => '航空運賃';
+
+  @override
+  String get scTariffChange => '関税';
+
+  @override
+  String get scCustomsChange => '通関費';
+
+  @override
+  String get scWarehouseChange => '倉庫費';
+
+  @override
+  String get scLaborChange => '人件費';
+
+  @override
+  String get scOverheadChange => '共通経費';
+
+  @override
+  String get scFxChange => '為替（外貨高）';
+
+  @override
+  String get scSalesPriceChange => '販売価格';
+
+  @override
+  String get scVolumeChange => '販売数量';
+
+  @override
+  String get scRatesBySupplier => '掛率の変更';
+
+  @override
+  String scRateNow(String rate) {
+    return '現在 $rate';
+  }
+
+  @override
+  String get scAddSupplier => '仕入先を追加（試算）';
+
+  @override
+  String get scAddedSupplier => '追加する仕入先';
+
+  @override
+  String get scApplyRiskEvents => '登録済みのリスクを反映';
+
+  @override
+  String get scRun => 'シミュレーション実行';
+
+  @override
+  String get scSaveScenario => 'シナリオを保存';
+
+  @override
+  String get scScenarioSaved => 'シナリオを保存しました';
+
+  @override
+  String get scAddToCompare => '比較に追加';
+
+  @override
+  String get scCompare => '比較（最大5件）';
+
+  @override
+  String get scRunCompare => '比較する';
+
+  @override
+  String get scClearCompare => 'クリア';
+
+  @override
+  String get scCompareFull => '比較できるのは5件までです';
+
+  @override
+  String scResultTitle(String name) {
+    return 'シナリオ: $name';
+  }
+
+  @override
+  String get scProductChanges => '商品別の変化';
+
+  @override
+  String get scNotBest => 'どれが最良かはシステムでは決めません。利益・納期・リスクを見て判断してください。';
+
+  @override
+  String get scHighRisks => '高リスク';
+
+  @override
+  String get scOverCapacity => '容量超過';
+
+  @override
+  String get scRiskTitle => 'リスク一覧';
+
+  @override
+  String get scRiskRuleNote =>
+      'リスク値は設定値・登録リスク・容量・単独供給・遅延率・不良率から計算した説明可能なルールです。';
+
+  @override
+  String get scRiskEvents => '登録済みのリスク';
+
+  @override
+  String get scAddRiskEvent => 'リスクを登録';
+
+  @override
+  String get scRiskEventTitle => '内容';
+
+  @override
+  String get scRiskKind => '種類';
+
+  @override
+  String get scSeverity => '深刻度';
+
+  @override
+  String get scStartsOn => '開始日';
+
+  @override
+  String get scEndsOn => '終了日';
+
+  @override
+  String get scPriceMultiplier => '価格倍率';
+
+  @override
+  String get scCostMultiplier => '費用倍率';
+
+  @override
+  String get scCapacityMultiplier => '容量倍率';
+
+  @override
+  String get scDelayDays => '遅延日数';
+
+  @override
+  String get scTarget => '対象';
+
+  @override
+  String scReasonLevel(String level) {
+    return '設定値: $level';
+  }
+
+  @override
+  String scReasonSole(String count) {
+    return '単独供給 $count品目';
+  }
+
+  @override
+  String scReasonEvent(String kind) {
+    return '登録リスク: $kind';
+  }
+
+  @override
+  String scReasonLate(String rate) {
+    return '遅延率 $rate%';
+  }
+
+  @override
+  String scReasonDefect(String rate) {
+    return '不良率 $rate%';
+  }
+
+  @override
+  String get scReasonLoadExceeded => '容量超過';
+
+  @override
+  String get scReasonLoadBusy => '容量逼迫';
+
+  @override
+  String get scReasonNoAlt => '代替経路なし';
+
+  @override
+  String scReasonLongLead(String days) {
+    return '長い納期 $days日';
+  }
+
+  @override
+  String get scReasonCrossBorder => '国境をまたぐ';
+
+  @override
+  String get scEvSupplierStop => '仕入先停止';
+
+  @override
+  String get scEvSupplierPrice => '仕入先の値上げ';
+
+  @override
+  String get scEvSupplierDelay => '仕入先の納期遅延';
+
+  @override
+  String get scEvRouteStop => 'ルート停止';
+
+  @override
+  String get scEvModeStop => '輸送手段の停止';
+
+  @override
+  String get scEvPortStop => '港湾停止';
+
+  @override
+  String get scEvAirportStop => '空港停止';
+
+  @override
+  String get scEvCustomsDelay => '通関遅延';
+
+  @override
+  String get scEvWarehouseCapacity => '倉庫容量不足';
+
+  @override
+  String get scEvWarehouseStop => '倉庫停止';
+
+  @override
+  String get scEvDomesticStop => '国内配送停止';
+
+  @override
+  String get scEvStaffShortage => '人員不足';
+
+  @override
+  String get scEvCostSpike => 'コスト急増';
+
+  @override
+  String get scRiskKindSupplier => '仕入先';
+
+  @override
+  String get scRiskKindNode => '拠点';
+
+  @override
+  String get scRiskKindRoute => 'ルート';
+
+  @override
+  String get scNoRisks => 'リスクの対象がまだありません';
+
+  @override
+  String get scLoadsTitle => '容量と負荷';
+
+  @override
+  String get scStatusOk => '余裕';
+
+  @override
+  String get scStatusBusy => '逼迫';
+
+  @override
+  String get scStatusExceeded => '容量超過';
+
+  @override
+  String get scStatusNoCapacity => '容量未設定';
+
+  @override
+  String get scStatusStopped => '停止';
+
+  @override
+  String get scAlternative => '代替あり';
+
+  @override
+  String get scNoAlternative => '代替なし';
+
+  @override
+  String scPerMonth(String units) {
+    return '$units個/月';
+  }
+
+  @override
+  String scLoadPercent(String percent) {
+    return '負荷 $percent';
+  }
+
+  @override
+  String get scDisruptionTitle => '障害シミュレーション';
+
+  @override
+  String get scDisruptionTarget => '止まるもの';
+
+  @override
+  String get scDisruptionDays => '日数';
+
+  @override
+  String get scDisruptionKind => '障害の種類';
+
+  @override
+  String get scStop => '停止';
+
+  @override
+  String get scDelay => '遅延';
+
+  @override
+  String get scRunDisruption => '影響を計算';
+
+  @override
+  String get scImpact => '利益への影響';
+
+  @override
+  String get scExtraCost => '追加費用';
+
+  @override
+  String get scLostProfit => '販売機会損失';
+
+  @override
+  String get scLostUnits => '欠品数';
+
+  @override
+  String get scRerouted => '代替輸送';
+
+  @override
+  String scCoverage(String days) {
+    return '在庫で$days日分';
+  }
+
+  @override
+  String get scNoAlternativeRoute => '代替ルートなし';
+
+  @override
+  String scAlternativeVia(String name) {
+    return '代替: $name';
+  }
+
+  @override
+  String get scNoLoads => 'まだ物の流れがありません。ルートと数量を登録してください。';
+
+  @override
+  String get scSavedScenarios => '保存したシナリオ';
+
+  @override
+  String get scRunHistory => '実行履歴';
+
+  @override
+  String get scRunAgain => 'もう一度実行';
+
+  @override
+  String get scNoScenarios => '保存したシナリオはありません';
+
+  @override
+  String get scNoRuns => '実行履歴はありません';
+
+  @override
+  String get scRunKindBaseline => '現在';
+
+  @override
+  String get scRunKindScenario => 'シナリオ';
+
+  @override
+  String get scRunKindCompare => '比較';
+
+  @override
+  String get scRunKindDisruption => '障害';
+
+  @override
+  String get scRunKindProduct => '商品';
+
+  @override
+  String get scRunKindPurchaseCheck => '発注前チェック';
+
+  @override
+  String get scProductCard => '原価・利益';
+
+  @override
+  String get scOpenComparison => '仕入先を比較';
+
+  @override
+  String get scNoTerms => 'この商品の仕入条件がまだありません';
+
+  @override
+  String get scProfitWarning => '利益の警告';
+
+  @override
+  String scProfitWarningBody(String before, String after) {
+    return '今回の条件では利益率が $before → $after に変わります。';
+  }
+
+  @override
+  String get scWarnMarginLow => '利益率が基準を下回ります';
+
+  @override
+  String get scWarnMarginDrop => '利益率が大きく下がります';
+
+  @override
+  String get scWarnLoss => '赤字です';
+
+  @override
+  String get scCauses => '原因';
+
+  @override
+  String get scContinueOrder => '発注を続ける';
+
+  @override
+  String get scBackToEdit => '戻る';
+
+  @override
+  String get scNoteNoRoute => 'ルート未登録（物流費なし）';
+
+  @override
+  String get scNoteNoWeight => '重量未設定';
+
+  @override
+  String get scNoteNoVolume => '数量なし（1個で計算）';
+
+  @override
+  String get scNoteNoPrice => '仕入価格なし';
+
+  @override
+  String get scNoteNoFx => '為替レートなし';
+
+  @override
+  String get scNoteNoTariff => '関税ルールなし';
+
+  @override
+  String get scNoteFixed => '固定費を配賦できません';
+
+  @override
+  String get scHypothetical => '試算用';
+
+  @override
+  String get scManageOnly => '編集には supply_chain.manage 権限が必要です';
+
+  @override
+  String get scRecalculate => '再計算';
+
+  @override
+  String get scBlocked => '使用不可';
+
+  @override
+  String get scErrorRouteLegs => '区間がつながっていません（次の区間は前の到着地から出発してください）';
+
+  @override
+  String get scErrorNameRequired => '名称を入力してください';
+
+  @override
+  String get scNoChange => '変化はありません';
 }
