@@ -20,8 +20,8 @@
 // doesn't know or care which vendor answered — Gemini is the only
 // implementation today; `qwen` is a reserved, not-yet-implemented slot.
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { encodeBase64 } from "jsr:@std/encoding/base64";
 import { encodeHex } from "jsr:@std/encoding/hex";
+import { readDocument } from "../_shared/document_reader.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -52,7 +52,11 @@ interface OcrLineRaw {
   jan_code?: string;
   product_code?: string;
   product_name?: string;
+  maker?: string;
   quantity?: number;
+  /** What the second reading disagreed on, or a check that failed (0105). */
+  flags?: string[];
+  alternatives?: Record<string, unknown>;
 }
 
 interface OcrResult {
@@ -75,40 +79,6 @@ class AIProviderError extends Error {
   }
 }
 
-const OCR_PROMPT =
-  "あなたは日本の物流の納品書を読み取るアシスタントです。この画像の明細表を" +
-  "抽出し、各行を {jan_code, product_code, product_name, quantity} のJSONで返してください。" +
-  "jan_code は商品のバーコード数字（13桁または8桁）で、半角数字のみ・ハイフンや" +
-  "空白を含めないこと。JANが印字されていない行は jan_code を空文字にすること。" +
-  "product_code は仕入先の品番・商品コード（あれば。無ければ空文字）。" +
-  "product_name は明細に書かれた商品名をそのまま。quantity は納品数量（ケース数ではなく" +
-  "総数が書かれていれば総数、入数×ケース数の表記なら掛けた総数）。" +
-  "住所・電話番号・登録番号(Tで始まる番号)・合計金額などは" +
-  "JANや品番として扱わないこと。数量が読めない行は quantity を省略。表に無い行は返さないこと。" +
-  "最後に、この読み取り結果全体への自己評価として confidence を0〜1の数値で" +
-  "返してください（画質が悪い・文字が不鮮明・一部推測が入っている場合は低く）。";
-
-const OCR_SCHEMA = {
-  type: "object",
-  properties: {
-    lines: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          jan_code: { type: "string" },
-          product_code: { type: "string" },
-          product_name: { type: "string" },
-          quantity: { type: "integer" },
-        },
-        required: ["product_name"],
-      },
-    },
-    confidence: { type: "number" },
-  },
-  required: ["lines"],
-};
-
 class GeminiProvider implements AIProvider {
   readonly name = "gemini";
   readonly model: string;
@@ -119,61 +89,30 @@ class GeminiProvider implements AIProvider {
     this.model = model;
   }
 
+  // Since 0105 the note is read twice — an extraction, then an independent
+  // check against it — through the shared reader, which also reads the maker,
+  // splits a combined 品名・品番 cell, and flags every disagreement.
   async extractDeliveryNote(bytes: Uint8Array, mime: string): Promise<OcrResult> {
-    const endpoint =
-      `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
-    const payload = {
-      contents: [{
-        role: "user",
-        parts: [
-          { text: OCR_PROMPT },
-          { inline_data: { mime_type: mime, data: encodeBase64(bytes) } },
-        ],
-      }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: OCR_SCHEMA,
-        temperature: 0,
-      },
-    };
-    // Send the key as a header (works with both the legacy AIza… keys and the
-    // newer AQ.… format) rather than a ?key= query parameter. Retry a few
-    // times on transient overload (503 / 429), which Gemini can return during
-    // demand spikes, so a busy moment doesn't surface as a user-facing failure.
-    let res: Response | null = null;
-    for (let attempt = 0; attempt < 4; attempt++) {
-      res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (res.status !== 503 && res.status !== 429) break;
-      if (attempt < 3) {
-        await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
-      }
-    }
-    if (!res || !res.ok) {
-      const detail = res ? `${res.status}: ${await res.text()}` : "no response";
-      const status = res && (res.status === 503 || res.status === 429) ? 503 : 502;
-      throw new AIProviderError(`Gemini error ${detail}`, status);
-    }
-    const body = await res.json();
-    const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-    let parsed: { lines?: unknown[]; confidence?: unknown } = {};
+    if (!this.apiKey) throw new AIProviderError("GEMINI_API_KEY is not set on the server.", 500);
     try {
-      parsed = JSON.parse(text);
-    } catch (_) {
-      parsed = {};
+      const r = await readDocument(bytes, mime);
+      return {
+        lines: r.lines.map((l) => ({
+          jan_code: l.raw_jan_code ?? "",
+          product_code: l.product_code ?? "",
+          product_name: l.product_name ?? "",
+          maker: l.maker ?? "",
+          quantity: l.planned_quantity || undefined,
+          flags: l.flags,
+          alternatives: l.alternatives,
+        })),
+        // Not a score anyone measured: none, rather than a made-up one.
+        confidence: null,
+      };
+    } catch (e) {
+      const msg = String(e);
+      throw new AIProviderError(msg, /\b(503|429)\b/.test(msg) ? 503 : 502);
     }
-    const lines = Array.isArray(parsed.lines) ? parsed.lines as OcrLineRaw[] : [];
-    const confidence = typeof parsed.confidence === "number" &&
-        Number.isFinite(parsed.confidence)
-      ? Math.min(1, Math.max(0, parsed.confidence))
-      : null;
-    return { lines, confidence };
   }
 }
 
@@ -196,7 +135,7 @@ function getProvider(name: string): AIProvider {
 // is recorded via `ai_analysis`, never written to canonical WMS data here.
 
 async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const digest = await crypto.subtle.digest("SHA-256", bytes as Uint8Array<ArrayBuffer>);
   return encodeHex(new Uint8Array(digest));
 }
 

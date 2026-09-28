@@ -1,5 +1,17 @@
 // Upload-a-file plan importer for the WMS back office.
 //
+// Since 0105 a file is read in the trading company's own words and checked
+// twice (see _shared/document_reader.ts): its column headings are mapped
+// through the company's learned headings, everyone's, and the AI; a PDF or
+// photo is read by the AI and then re-read by an independent check; a cell
+// holding both name and 品番 is split by rule and by the AI. Every line is
+// then resolved to our product through the dialect dictionary
+// (`resolve_notation_lines`). On commit the company's writing is kept on the
+// line, our product is linked, and what was confirmed is learned — the
+// dialects (`learn_notation_lines`) and the column headings
+// (`learn_column_aliases`) — so the next file from the same company reads
+// itself.
+//
 // Two-step, so the auto-read header can be reviewed and corrected before it is
 // saved:
 //   1. PREVIEW  POST multipart/form-data with dry_run=1
@@ -34,8 +46,6 @@
 // The writes themselves stay on the service role: there are no INSERT policies
 // for `authenticated` on delivery_plans / shipment_plans or their line tables,
 // which is exactly why the check above has to be explicit.
-import * as XLSX from "npm:xlsx@0.18.5";
-import { encodeBase64 } from "jsr:@std/encoding/base64";
 import {
   accessibleWarehouseIds,
   adminClient,
@@ -45,6 +55,21 @@ import {
   notInScopeMessage,
   notPermittedMessage,
 } from "../_shared/require_permission.ts";
+import {
+  type AliasRow,
+  type Column,
+  type Field,
+  FIELDS,
+  type Header,
+  normalizeJan,
+  normalizeText,
+  readDocument,
+  readSpreadsheet,
+  type ReadLine,
+  str,
+  toInt,
+  toNum,
+} from "../_shared/document_reader.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -60,47 +85,11 @@ function json(body: unknown, status = 200): Response {
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-// Writes only, and only behind the warehouse resolution below. Suppliers are
-// deliberately global master data, not per-warehouse, so resolveSupplier()
-// uses it too.
 const admin = adminClient(supabaseUrl);
 
 const UNKNOWN_CODE = "UNKNOWN";
-
-function normalizeJan(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  let s = "";
-  for (const ch of String(value)) {
-    const c = ch.codePointAt(0)!;
-    if (c >= 0xff10 && c <= 0xff19) s += String.fromCharCode(c - 0xff10 + 0x30);
-    else if (c === 0xff0e) s += ".";
-    else s += ch;
-  }
-  const dot = s.indexOf(".");
-  if (dot >= 0) s = s.slice(0, dot);
-  let digits = s.replace(/\D/g, "");
-  if (digits.length === 12) digits = "0" + digits;
-  return digits;
-}
 const isJan = (d: string) => d.length === 13 || d.length === 8;
-function toInt(v: unknown): number | null {
-  const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? Math.round(n) : null;
-}
-function toNum(v: unknown): number | null {
-  const n = Number(String(v ?? "").replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) && String(v ?? "").trim() !== "" ? n : null;
-}
-function dateStr(v: unknown): string | null {
-  if (v === null || v === undefined || v === "") return null;
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  return String(v).trim();
-}
-function str(v: unknown): string | null {
-  if (v === null || v === undefined) return null;
-  const s = String(v).trim();
-  return s === "" ? null : s;
-}
+
 // A 登録番号 is a T followed by 13 digits; normalize spacing/full-width so the
 // same company always resolves to the same key.
 function normalizeRegNo(v: unknown): string | null {
@@ -115,240 +104,33 @@ function normalizeRegNo(v: unknown): string | null {
   }
   const m = out.replace(/[\s-]/g, "").match(/T?\d{13}/);
   if (m) return m[0].startsWith("T") ? m[0] : "T" + m[0];
-  return out; // keep whatever was read so it can still be shown/edited
+  return out;
 }
 
-type Header = {
-  supplier_name: string | null;
-  registration_number: string | null;
-  customer_code: string | null;
-  doc_number: string | null;
-  doc_date: string | null;
-};
-const emptyHeader = (): Header => ({
-  supplier_name: null, registration_number: null,
-  customer_code: null, doc_number: null, doc_date: null,
-});
+// deno-lint-ignore no-explicit-any
+type Client = any;
 
-type Rec = {
-  jan: string;
-  qty: number;
-  product_code: string;
-  product_name: string;
-  spec: string | null;
-  unit: number | null;
-  amount: number | null;
-  tax_rate: number | null;
-  order_date: string | null;
-};
-
-const QTY_KEYS = ["発注数量", "数量", "発注数", "数"];
-const MAKER_KEYS = ["メーカー", "maker", "ﾒｰｶｰ"];
-const PNUM_KEYS = ["品番", "項目", "商品コード", "品名"];
-const SPEC_KEYS = ["規格", "仕様"];
-const UNIT_KEYS = ["単価", "定価"];
-const AMOUNT_KEYS = ["金額", "調達合計金額"];
-const TAX_KEYS = ["税率", "消費税率"];
-const DATE_KEYS = ["注文日", "発注日", "日付", "作成日", "納品日"];
-
-function parseXlsx(bytes: Uint8Array): { records: Rec[]; header: Header } {
-  const wb = XLSX.read(bytes, { type: "array", cellDates: true });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, {
-    header: 1, raw: true, defval: null,
-  }) as unknown[][];
-  const ncol = rows.reduce((m, r) => Math.max(m, r.length), 0);
-
-  let janCol = -1, best = 0;
-  for (let c = 0; c < ncol; c++) {
-    let cnt = 0;
-    for (const r of rows) if (isJan(normalizeJan(r[c]))) cnt++;
-    if (cnt > best) { best = cnt; janCol = c; }
+/** The company, if it is already known — for reading its file in its own
+ * words before anything is saved. Never creates one. */
+async function findPartner(
+  name: string | null, code: string | null, regNo: string | null,
+): Promise<number | null> {
+  if (regNo) {
+    const { data } = await admin.from("delivery_suppliers")
+      .select("id").eq("registration_number", regNo).maybeSingle();
+    if (data) return data.id as number;
   }
-  if (janCol < 0 || best === 0) throw new Error("Could not find a JAN column.");
-
-  const findCell = (keys: string[]): [number, number] => {
-    for (let ri = 0; ri < rows.length; ri++) {
-      const r = rows[ri];
-      for (let c = 0; c < r.length; c++) {
-        const v = r[c];
-        if (typeof v === "string" && keys.some((k) => v.includes(k))) return [ri, c];
-      }
-    }
-    return [-1, -1];
-  };
-  const [headerRow, qtyCol] = findCell(QTY_KEYS);
-  const findCol = (keys: string[]): number => {
-    if (headerRow >= 0) {
-      const r = rows[headerRow];
-      for (let c = 0; c < r.length; c++) {
-        const v = r[c];
-        if (typeof v === "string" && keys.some((k) => v.includes(k))) return c;
-      }
-    }
-    return findCell(keys)[1];
-  };
-  const makerCol = findCol(MAKER_KEYS);
-  const pnumCol = findCol(PNUM_KEYS);
-  const specCol = findCol(SPEC_KEYS);
-  const unitCol = findCol(UNIT_KEYS);
-  const amountCol = findCol(AMOUNT_KEYS);
-  const taxCol = findCol(TAX_KEYS);
-  const dateCol = findCol(DATE_KEYS);
-  const cell = (r: unknown[], c: number) => (c >= 0 && c < r.length ? r[c] : null);
-
-  const out: Rec[] = [];
-  for (const r of rows) {
-    const jan = normalizeJan(cell(r, janCol));
-    if (!isJan(jan)) continue;
-    const maker = cell(r, makerCol) ?? "";
-    const pnum = cell(r, pnumCol) ?? "";
-    const spec = cell(r, specCol);
-    out.push({
-      jan,
-      qty: toInt(cell(r, qtyCol)) ?? 0,
-      product_code: String(pnum),
-      product_name: `${maker} ${pnum}`.trim(),
-      spec: spec == null ? null : String(spec).trim() || null,
-      unit: toInt(cell(r, unitCol)),
-      amount: toInt(cell(r, amountCol)),
-      tax_rate: toNum(cell(r, taxCol)),
-      order_date: dateStr(cell(r, dateCol)),
-    });
+  if (code && code !== UNKNOWN_CODE) {
+    const { data } = await admin.from("delivery_suppliers")
+      .select("id").eq("code", code).maybeSingle();
+    if (data) return data.id as number;
   }
-  // Excel plans carry no printed note header; leave it for the operator to fill.
-  return { records: out, header: emptyHeader() };
-}
-
-const PROMPT =
-  "この画像/PDFは日本の物流の納品書または注文明細です。次の2つを返してください。\n" +
-  "1) header: 書類の相手先(仕入先/発行元)の情報。" +
-  "{supplier_name: 会社名, registration_number: インボイス登録番号(Tで始まる13桁), " +
-  "customer_code: お客様コード/得意先コード, doc_number: 伝票番号/納品書番号, " +
-  "doc_date: 日付(YYYY-MM-DD)}。読めない項目は省略。\n" +
-  "2) lines: 明細表。各行を {jan_code, product_name, spec, quantity, unit_price, " +
-  "amount, tax_rate}。jan_code は商品のバーコード数字(13桁または8桁)で半角数字のみ・" +
-  "ハイフンや空白なし。spec は規格/仕様、unit_price は単価、amount は金額、" +
-  "tax_rate は税率(%)の数値。読めない項目は省略。住所・電話・登録番号・合計金額は" +
-  "JANとして扱わない。数量が読めない行は quantity を省略。";
-const SCHEMA = {
-  type: "object",
-  properties: {
-    header: {
-      type: "object",
-      properties: {
-        supplier_name: { type: "string" },
-        registration_number: { type: "string" },
-        customer_code: { type: "string" },
-        doc_number: { type: "string" },
-        doc_date: { type: "string" },
-      },
-    },
-    lines: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          jan_code: { type: "string" },
-          product_name: { type: "string" },
-          spec: { type: "string" },
-          quantity: { type: "integer" },
-          unit_price: { type: "number" },
-          amount: { type: "number" },
-          tax_rate: { type: "number" },
-        },
-        required: ["jan_code"],
-      },
-    },
-  },
-  required: ["lines"],
-};
-
-async function parseWithGemini(
-  bytes: Uint8Array,
-  mime: string,
-): Promise<{ records: Rec[]; header: Header }> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY is not set on the server.");
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
-  const endpoint =
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  const payload = {
-    contents: [{
-      role: "user",
-      parts: [
-        { text: PROMPT },
-        { inline_data: { mime_type: mime, data: encodeBase64(bytes) } },
-      ],
-    }],
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: SCHEMA,
-      temperature: 0,
-    },
-  };
-  let res: Response | null = null;
-  for (let attempt = 0; attempt < 4; attempt++) {
-    res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify(payload),
-    });
-    if (res.status !== 503 && res.status !== 429) break;
-    if (attempt < 3) await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+  if (name) {
+    const { data } = await admin.from("delivery_suppliers")
+      .select("id").eq("name", name).maybeSingle();
+    if (data) return data.id as number;
   }
-  if (!res || !res.ok) {
-    throw new Error(`Gemini error ${res ? res.status : "?"}: ${res ? await res.text() : ""}`);
-  }
-  const body = await res.json();
-  const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-  let parsed: { lines?: unknown[]; header?: Record<string, unknown> } = {};
-  try { parsed = JSON.parse(text); } catch (_) { parsed = {}; }
-
-  const h = parsed.header ?? {};
-  const header: Header = {
-    supplier_name: str(h.supplier_name),
-    registration_number: normalizeRegNo(h.registration_number),
-    customer_code: str(h.customer_code),
-    doc_number: str(h.doc_number),
-    doc_date: str(h.doc_date),
-  };
-
-  const lines = Array.isArray(parsed.lines) ? parsed.lines : [];
-  const out: Rec[] = [];
-  for (const ln of lines as Record<string, unknown>[]) {
-    const jan = normalizeJan(ln.jan_code);
-    if (!isJan(jan)) continue;
-    out.push({
-      jan, qty: toInt(ln.quantity) ?? 0, product_code: "",
-      product_name: String(ln.product_name ?? ""),
-      spec: ln.spec == null ? null : String(ln.spec).trim() || null,
-      unit: toInt(ln.unit_price), amount: toInt(ln.amount),
-      tax_rate: toNum(ln.tax_rate), order_date: null,
-    });
-  }
-  return { records: out, header };
-}
-
-function aggregate(records: Rec[]) {
-  const map = new Map<string, Record<string, unknown>>();
-  for (const r of records) {
-    let m = map.get(r.jan);
-    if (!m) {
-      m = {
-        jan_code: r.jan, product_code: r.product_code,
-        product_name: r.product_name, spec: r.spec, planned_quantity: 0,
-        unit_price: r.unit, amount: 0, tax_rate: r.tax_rate,
-        order_date: r.order_date,
-      };
-      map.set(r.jan, m);
-    }
-    m.planned_quantity = (m.planned_quantity as number) + (r.qty || 0);
-    if (r.amount) m.amount = (m.amount as number) + r.amount;
-    if (m.spec == null && r.spec != null) m.spec = r.spec;
-    if (m.tax_rate == null && r.tax_rate != null) m.tax_rate = r.tax_rate;
-  }
-  return [...map.values()];
+  return null;
 }
 
 // Find or create the supplier (company). Matches by 登録番号, then code, then
@@ -359,21 +141,8 @@ async function resolveSupplier(
   code: string | null,
   regNo: string | null,
 ): Promise<{ id: number; unidentified: boolean }> {
-  if (regNo) {
-    const { data } = await admin.from("delivery_suppliers")
-      .select("id").eq("registration_number", regNo).maybeSingle();
-    if (data) return { id: data.id as number, unidentified: false };
-  }
-  if (code && code !== UNKNOWN_CODE) {
-    const { data } = await admin.from("delivery_suppliers")
-      .select("id").eq("code", code).maybeSingle();
-    if (data) return { id: data.id as number, unidentified: false };
-  }
-  if (name) {
-    const { data } = await admin.from("delivery_suppliers")
-      .select("id").eq("name", name).maybeSingle();
-    if (data) return { id: data.id as number, unidentified: false };
-  }
+  const found = await findPartner(name, code, regNo);
+  if (found !== null) return { id: found, unidentified: false };
   if (name || code || regNo) {
     const { data, error } = await admin.from("delivery_suppliers")
       .insert({ name: name ?? code ?? regNo, code, registration_number: regNo })
@@ -381,7 +150,6 @@ async function resolveSupplier(
     if (error) throw new Error(error.message);
     return { id: data.id as number, unidentified: false };
   }
-  // Nothing identifies this company → the UNKNOWN bucket.
   const { data } = await admin.from("delivery_suppliers")
     .select("id").eq("code", UNKNOWN_CODE).maybeSingle();
   if (data) return { id: data.id as number, unidentified: true };
@@ -392,12 +160,73 @@ async function resolveSupplier(
   return { id: created.id as number, unidentified: true };
 }
 
-// Turn one aggregated line back into a plan-line row.
+/** One line per product: the same JAN (or the same 品番/name when there is no
+ * JAN) listed twice adds up. */
+function aggregate(lines: ReadLine[]): ReadLine[] {
+  const map = new Map<string, ReadLine>();
+  for (const l of lines) {
+    const key = l.jan_code ||
+      `${normalizeText(l.maker)}|${normalizeText(l.product_code)}|${normalizeText(l.product_name)}`;
+    const m = map.get(key);
+    if (!m) {
+      map.set(key, { ...l, flags: [...l.flags], alternatives: { ...l.alternatives } });
+      continue;
+    }
+    m.planned_quantity += l.planned_quantity || 0;
+    if (l.amount) m.amount = (m.amount ?? 0) + l.amount;
+    for (const f of l.flags) if (!m.flags.includes(f)) m.flags.push(f);
+    m.spec ??= l.spec;
+    m.tax_rate ??= l.tax_rate;
+  }
+  return [...map.values()];
+}
+
+/** Our product for each line, through the dialect dictionary (0105). */
+async function resolveLines(
+  supabase: Client, partnerId: number | null, lines: ReadLine[],
+): Promise<Record<string, unknown>[]> {
+  const { data, error } = await supabase.rpc("resolve_notation_lines", {
+    p_partner_id: partnerId,
+    p_lines: lines.map((l) => ({
+      jan_code: l.raw_jan_code ?? l.jan_code, maker: l.maker,
+      product_name: l.product_name, product_code: l.product_code,
+    })),
+  });
+  if (error) throw new Error(error.message);
+  const resolved = (data ?? []) as Record<string, unknown>[];
+  return lines.map((l, i) => {
+    const r = resolved[i] ?? {};
+    const product = r.product as Record<string, unknown> | null;
+    const flags = [...l.flags];
+    if (!product) flags.push("unresolved");
+    // A maker we know from our product is no longer missing.
+    const noMaker = flags.indexOf("no_maker");
+    if (noMaker >= 0 && (product?.maker || r.maker_name)) flags.splice(noMaker, 1);
+    return {
+      ...l,
+      flags,
+      product,
+      product_id: product?.id ?? null,
+      matched_by: r.matched_by ?? null,
+      maker_resolved: r.maker_name ?? null,
+    };
+  });
+}
+
+// Turn one reviewed line into a plan-line row, in the company's own words;
+// the database books it under our JAN when it resolves (0105).
 function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
+  const productId = Number(l.product_id);
+  const jan = normalizeJan(l.jan_code ?? l.raw_jan_code);
   return {
-    jan_code: normalizeJan(l.jan_code),
+    jan_code: isJan(jan) ? jan : "",
+    raw_jan_code: str(l.raw_jan_code),
+    product_id: Number.isFinite(productId) && productId > 0 ? productId : null,
+    maker: str(l.maker),
     product_code: str(l.product_code) ?? "",
-    product_name: str(l.product_name) ?? "",
+    product_name: str(l.product_name) ?? str(l.product_code) ?? "",
+    raw_name_code: str(l.raw_name_code),
+    review_flags: Array.isArray(l.flags) && (l.flags as unknown[]).length ? l.flags : null,
     spec: str(l.spec),
     planned_quantity: toInt(l.planned_quantity) ?? 0,
     unit_price: toInt(l.unit_price),
@@ -407,13 +236,8 @@ function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
-// deno-lint-ignore no-explicit-any
-type Client = any;
-
 /** Decide which warehouse this import belongs to, and refuse rather than guess.
- * See the §37 note in the file header for the four cases. Returns either the
- * resolved id (null meaning "let fill_default_warehouse() decide", which only
- * an unscoped caller reaches) or the Response to send instead. */
+ * See the §37 note in the file header for the four cases. */
 async function resolveWarehouse(
   supabase: Client,
   requested: number | null,
@@ -425,11 +249,9 @@ async function resolveWarehouse(
     return { warehouseId: requested };
   }
   const scope = await accessibleWarehouseIds(supabase);
-  if (scope === null) return { warehouseId: null }; // unscoped: prior behaviour
+  if (scope === null) return { warehouseId: null };
   if (scope.length === 0) {
-    return {
-      error: json({ message: "no warehouse is assigned to your account" }, 403),
-    };
+    return { error: json({ message: "no warehouse is assigned to your account" }, 403) };
   }
   if (scope.length === 1) return { warehouseId: scope[0] };
   return {
@@ -440,10 +262,35 @@ async function resolveWarehouse(
   };
 }
 
-// Save a plan + its lines. Shared by the multipart one-shot and the JSON commit.
-// target "plan" (inbound delivery) or "shipment" (outbound) picks the tables
-// and, since they're different halves of the warehouse (receiving vs.
-// shipping), the permission that gates writing one.
+/** What was confirmed on commit, learned for next time. Best effort: a
+ * failure to learn never undoes a saved plan. */
+async function learn(
+  supabase: Client, partnerId: number, rows: Record<string, unknown>[],
+  columns: { header?: string | null; field?: string | null }[],
+) {
+  const learnable = rows.filter((r) => r.product_id).map((r) => ({
+    product_id: r.product_id,
+    jan_code: r.raw_jan_code ?? null,
+    maker: r.source_maker ?? r.maker,
+    product_name: r.source_product_name ?? r.product_name,
+    product_code: r.source_product_code ?? r.product_code,
+  }));
+  let learned: unknown = null;
+  if (learnable.length) {
+    const { data } = await supabase.rpc("learn_notation_lines", {
+      p_partner_id: partnerId, p_lines: learnable, p_source: "import", p_confirmed: true,
+    });
+    learned = data;
+  }
+  const map = columns
+    .filter((c) => str(c.header) && FIELDS.includes(c.field as Field))
+    .map((c) => ({ header: c.header, field: c.field }));
+  if (map.length) {
+    await supabase.rpc("learn_column_aliases", { p_partner_id: partnerId, p_map: map });
+  }
+  return learned;
+}
+
 async function commit(supabase: Client, input: {
   deliveryNumber: string;
   supplier: string | null;
@@ -455,6 +302,7 @@ async function commit(supabase: Client, input: {
   orderDate: string | null;
   warehouseId: number | null;
   lines: Record<string, unknown>[];
+  columns: { header?: string | null; field?: string | null }[];
   source: string;
   target: string;
 }): Promise<Response> {
@@ -466,7 +314,10 @@ async function commit(supabase: Client, input: {
   if ("error" in resolved) return resolved.error;
   const { warehouseId } = resolved;
 
-  const lines = input.lines.map(toLineRow).filter((l) => isJan(l.jan_code as string));
+  // A line is saved when it carries a JAN or has been tied to our product.
+  const all = input.lines.map(toLineRow);
+  const lines = all.filter((l) => isJan(l.jan_code as string) || l.product_id);
+  const skipped = all.length - lines.length;
   if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
   const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
 
@@ -480,8 +331,6 @@ async function commit(supabase: Client, input: {
     const { data: plan, error: e1 } = await admin
       .from("shipment_plans")
       .insert({
-        // Explicit, so `fill_default_warehouse()` no longer gets to choose for
-        // a scoped operator. Null only reaches here for an unscoped caller.
         warehouse_id: warehouseId,
         shipment_number: input.deliveryNumber,
         party_id: supplierId,
@@ -502,6 +351,8 @@ async function commit(supabase: Client, input: {
     const withId = lines.map((l) => ({
       shipment_plan_id: plan.id,
       jan_code: l.jan_code,
+      product_id: l.product_id,
+      maker: l.maker,
       product_code: l.product_code,
       product_name: l.product_name,
       spec: l.spec,
@@ -511,13 +362,17 @@ async function commit(supabase: Client, input: {
       tax_rate: l.tax_rate,
       order_date: l.order_date,
     }));
-    const { error: e2 } = await admin.from("shipment_lines").insert(withId);
+    const { data: saved, error: e2 } = await admin.from("shipment_lines").insert(withId).select();
     if (e2) return json({ message: e2.message }, 400);
+    const learned = await learn(supabase, supplierId,
+      (saved ?? []).map((r: Record<string, unknown>) => ({ ...r, raw_jan_code: r.source_jan_code })),
+      input.columns);
 
     return json({ data: {
       source: input.source, plan_id: plan.id, target: "shipment",
       delivery_number: input.deliveryNumber, reference_no: referenceNo,
       needs_review: unidentified, line_count: lines.length, total_quantity: totalQty,
+      skipped, learned,
     } });
   }
 
@@ -536,7 +391,7 @@ async function commit(supabase: Client, input: {
       order_date: input.orderDate ?? input.deliveryDate,
       delivery_date: input.deliveryDate,
       doc_type: "plan",
-      needs_review: unidentified,
+      needs_review: unidentified || lines.some((l) => !l.product_id && !isJan(l.jan_code as string)),
       status: "open",
     })
     .select("id")
@@ -544,15 +399,29 @@ async function commit(supabase: Client, input: {
   if (e1) return json({ message: e1.message }, 400);
 
   const withId = lines.map((l) => ({ ...l, delivery_plan_id: plan.id }));
-  const { error: e2 } = await admin.from("delivery_plan_lines").insert(withId);
+  const { data: saved, error: e2 } = await admin.from("delivery_plan_lines").insert(withId).select();
   if (e2) return json({ message: e2.message }, 400);
+  const learned = await learn(supabase, supplierId, saved ?? [], input.columns);
 
   return json({ data: {
     source: input.source, plan_id: plan.id, target: "plan",
     delivery_number: input.deliveryNumber,
     reference_no: referenceNo, needs_review: unidentified,
-    line_count: lines.length, total_quantity: totalQty,
+    line_count: lines.length, total_quantity: totalQty, skipped, learned,
   } });
+}
+
+function parseOverrides(raw: unknown): Record<number, Field> {
+  const out: Record<number, Field> = {};
+  const s = str(raw);
+  if (!s) return out;
+  try {
+    const obj = JSON.parse(s) as Record<string, string>;
+    for (const [k, v] of Object.entries(obj)) {
+      if (FIELDS.includes(v as Field) && Number.isFinite(Number(k))) out[Number(k)] = v as Field;
+    }
+  } catch (_) { /* ignore a malformed override */ }
+  return out;
 }
 
 Deno.serve(async (req) => {
@@ -560,14 +429,31 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ message: "Not found" }, 404);
 
   try {
-    // Carries the caller's JWT: used for the permission check and for resolving
-    // which warehouse this import may land in. All writes go through `admin`.
     const supabase = callerClient(req, supabaseUrl);
     const ctype = req.headers.get("content-type") ?? "";
 
     // COMMIT: the reviewed/edited header + lines come back as JSON.
     if (ctype.includes("application/json")) {
       const b = await req.json();
+      // Training (0106): what a checked sample taught, learned — nothing booked.
+      if (str(b.mode) === "learn") {
+        const { data: allowed } = await supabase.rpc("notation_training_allowed");
+        if (allowed !== true) return json({ message: notPermittedMessage("product.manage") }, 403);
+        const partnerId = Number(b.partner_id);
+        if (!Number.isFinite(partnerId) || partnerId <= 0) {
+          return json({ message: "partner_id is required" }, 400);
+        }
+        const learned = await learn(supabase, partnerId,
+          (Array.isArray(b.lines) ? b.lines : []) as Record<string, unknown>[],
+          Array.isArray(b.columns) ? b.columns : []);
+        const trainingId = Number(b.training_id);
+        if (Number.isFinite(trainingId) && trainingId > 0) {
+          await supabase.rpc("finish_notation_training", {
+            p_id: trainingId, p_partner_id: partnerId, p_learned: learned ?? {},
+          });
+        }
+        return json({ data: { learned, training_id: Number.isFinite(trainingId) ? trainingId : null } });
+      }
       const deliveryNumber = String(b.delivery_number ?? "").trim();
       if (!deliveryNumber) return json({ message: "delivery_number is required" }, 400);
       const lines = Array.isArray(b.lines) ? b.lines : [];
@@ -583,6 +469,7 @@ Deno.serve(async (req) => {
         orderDate: str(b.order_date),
         warehouseId: Number.isFinite(wh) && wh > 0 ? wh : null,
         lines,
+        columns: Array.isArray(b.columns) ? b.columns : [],
         source: str(b.source) ?? "review",
         target: str(b.target) === "shipment" ? "shipment" : "plan",
       });
@@ -598,29 +485,48 @@ Deno.serve(async (req) => {
     const target = str(form.get("target")) === "shipment" ? "shipment" : "plan";
     const formWh = Number(form.get("warehouse_id"));
     const warehouseId = Number.isFinite(formWh) && formWh > 0 ? formWh : null;
-    const dryRun = String(form.get("dry_run") ?? "") === "1";
+    const training = str(form.get("mode")) === "training";
+    const dryRun = training || String(form.get("dry_run") ?? "") === "1";
+    const formPartner = Number(form.get("partner_id"));
+    const overrides = parseOverrides(form.get("column_overrides"));
     if (!(file instanceof File)) return json({ message: "file is required" }, 400);
 
     const name = file.name.toLowerCase();
     const bytes = new Uint8Array(await file.arrayBuffer());
-    let records: Rec[];
-    let header: Header;
+    let lines: ReadLine[];
+    let columns: Column[];
+    let header: Header = {
+      supplier_name: null, registration_number: null,
+      customer_code: null, doc_number: null, doc_date: null,
+    };
     let source: string;
-    if (name.endsWith(".xlsx") || name.endsWith(".xlsm")) {
-      ({ records, header } = parseXlsx(bytes));
-      source = "xlsx";
+    let verified = true;
+
+    if (training) {
+      const { data: allowed } = await supabase.rpc("notation_training_allowed");
+      if (allowed !== true) return json({ message: notPermittedMessage("product.manage") }, 403);
+    }
+    let partnerId = Number.isFinite(formPartner) && formPartner > 0
+      ? formPartner
+      : await findPartner(supplier, supplierCode, null);
+    if (/\.(xlsx|xlsm|xls|csv)$/.test(name)) {
+      const { data: aliasData } = await supabase.rpc("column_alias_map", { p_partner_id: partnerId });
+      ({ columns, lines } = await readSpreadsheet(bytes, (aliasData ?? []) as AliasRow[], overrides));
+      source = name.endsWith(".csv") ? "csv" : "xlsx";
     } else {
       const mime = file.type || (name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
-      ({ records, header } = await parseWithGemini(bytes, mime));
+      ({ header, columns, lines, verified } = await readDocument(bytes, mime));
+      header.registration_number = normalizeRegNo(header.registration_number);
       source = "gemini";
+      partnerId ??= await findPartner(header.supplier_name, null, header.registration_number);
     }
 
-    const lines = aggregate(records);
-    const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
-    if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
-    const orderDate = (lines.find((l) => l.order_date)?.order_date as string) ?? null;
+    const merged = aggregate(lines);
+    if (merged.length === 0) return json({ message: "No JAN rows found." }, 422);
+    const withProducts = await resolveLines(supabase, partnerId, merged);
+    const totalQty = merged.reduce((s, l) => s + (l.planned_quantity || 0), 0);
+    const orderDate = merged.find((l) => l.order_date)?.order_date ?? null;
 
-    // Operator-supplied form fields win over what was auto-read.
     const mergedHeader: Header = {
       supplier_name: supplier ?? header.supplier_name,
       registration_number: header.registration_number,
@@ -629,19 +535,31 @@ Deno.serve(async (req) => {
       doc_date: header.doc_date ?? deliveryDate,
     };
 
+    // Training (0106): the read is kept, with what went wrong, for review.
+    let trainingId: number | null = null;
+    if (training) {
+      const { data: tid, error: te } = await supabase.rpc("record_notation_training", {
+        p_partner_id: partnerId, p_file_name: file.name, p_source: source,
+        p_verified: verified, p_columns: columns, p_lines: withProducts,
+      });
+      if (te) return json({ message: te.message }, 400);
+      trainingId = tid as number;
+    }
+
     if (dryRun) {
       return json({ data: {
-        source, dry_run: true,
+        source, dry_run: true, verified, training_id: trainingId,
         header: mergedHeader,
         supplier_code: supplierCode,
+        partner_id: partnerId,
         delivery_number: deliveryNumber || header.doc_number || "",
         order_date: orderDate,
-        line_count: lines.length, total_quantity: totalQty,
-        lines,
+        columns,
+        line_count: merged.length, total_quantity: totalQty,
+        lines: withProducts,
       } });
     }
 
-    // One-shot save (no review): needs a delivery number now.
     const num = deliveryNumber || mergedHeader.doc_number;
     if (!num) return json({ message: "delivery_number is required" }, 400);
     return await commit(supabase, {
@@ -654,7 +572,8 @@ Deno.serve(async (req) => {
       deliveryDate,
       orderDate,
       warehouseId,
-      lines,
+      lines: withProducts,
+      columns,
       source,
       target,
     });
