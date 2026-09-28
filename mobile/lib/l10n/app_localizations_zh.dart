@@ -5311,4 +5311,330 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get whInspectionApplies => '适用于供应商到货，不影响仓库间调拨。';
+
+  @override
+  String get productMakerRequired => '请输入制造商（商品必须有制造商）';
+
+  @override
+  String get productPickerTitle => '选择本公司商品';
+
+  @override
+  String get featNotationTraining => '表记预先学习';
+
+  @override
+  String get featNotationTrainingDesc => '从Excel・PDF・照片预先学习各商社的写法';
+
+  @override
+  String get ntTitle => '表记预先学习';
+
+  @override
+  String get ntTabTrain => '预先学习';
+
+  @override
+  String get ntTabDialects => '方言词典';
+
+  @override
+  String get ntTabColumns => '列标题';
+
+  @override
+  String get ntTabHistory => '历史・倾向';
+
+  @override
+  String get ntPartner => '商社（往来单位）';
+
+  @override
+  String get ntAllPartners => '全部（共通）';
+
+  @override
+  String get ntChoosePartner => '请选择商社';
+
+  @override
+  String get ntChooseFile => '请选择文件';
+
+  @override
+  String ntLearned(int learned, int added, int conflicts) {
+    return '已学习$learned项（新增$added・冲突$conflicts）';
+  }
+
+  @override
+  String get ntTrainIntro =>
+      '读取商社的Excel・CSV・PDF・照片样本，以与实际入库相同的方式试读（AI读两次、拆分品名与货号、转换为本公司商品），不会登记任何内容。确认修正后点“学习”，即记住该商社的写法和列标题。';
+
+  @override
+  String get ntPickFile => '选择样本文件';
+
+  @override
+  String get ntRead => '读取试验';
+
+  @override
+  String get ntReread => '按修正的列重新读取';
+
+  @override
+  String get ntReading => '读取中（PDF・照片由AI读取两次）…';
+
+  @override
+  String ntLinesTitle(int count) {
+    return '明细 $count行';
+  }
+
+  @override
+  String get ntDiscard => '放弃';
+
+  @override
+  String ntLearn(int count) {
+    return '学习$count行';
+  }
+
+  @override
+  String ntSummaryLines(int count) {
+    return '$count行';
+  }
+
+  @override
+  String ntSummaryResolved(int done, int total) {
+    return '已转换 $done/$total';
+  }
+
+  @override
+  String ntSummaryReview(int count) {
+    return '需确认 $count行';
+  }
+
+  @override
+  String get ntReadTwice => 'AI读取两次已核对';
+
+  @override
+  String get ntReadOnce => '核对读取失败（仅一次）';
+
+  @override
+  String get ntReadSheet => '从表格读取（列也由AI确认）';
+
+  @override
+  String get ntErrorsTitle => '发现的问题';
+
+  @override
+  String get ntColumnsTitle => '列的读法';
+
+  @override
+  String get ntColumnsHint => '如有错误请修正后重新读取。学习后将记住为该商社的标题。';
+
+  @override
+  String get ntNoHeader => '（无标题）';
+
+  @override
+  String ntAiThinks(String field) {
+    return 'AI判断：$field';
+  }
+
+  @override
+  String get ntNotMatched => '未找到本公司商品';
+
+  @override
+  String get ntChooseProduct => '选择本公司商品';
+
+  @override
+  String get ntChangeProduct => '更改';
+
+  @override
+  String ntSplitFrom(String text) {
+    return '拆分前：$text';
+  }
+
+  @override
+  String ntOtherReading(String field, String value) {
+    return '另一读法（$field）：$value';
+  }
+
+  @override
+  String get ntDialectsIntro => '各商社的写法（方言）及其对应的本公司商品・制造商，各有ID（D-000000）。';
+
+  @override
+  String get ntAllFields => '全部';
+
+  @override
+  String get ntUnconfirmedOnly => '仅未确认';
+
+  @override
+  String get ntDialectSearch => '按写法・品名・JAN搜索';
+
+  @override
+  String get ntDialectsEmpty => '尚未学习写法';
+
+  @override
+  String ntSeen(int count) {
+    return '$count次';
+  }
+
+  @override
+  String get ntConfirm => '设为已确认';
+
+  @override
+  String get ntAddColumn => '添加标题';
+
+  @override
+  String get ntColumnHeader => '标题（按商社写法）';
+
+  @override
+  String get ntColumnsIntro => '列标题及其含义。将日语（汉字・假名）或英语标题对应到本公司项目。选择商社可显示其专用标题。';
+
+  @override
+  String get ntCommon => '共通';
+
+  @override
+  String get ntStatsTitle => '各商社的倾向';
+
+  @override
+  String get ntHistoryEmpty => '尚无预先学习记录';
+
+  @override
+  String get ntUnknownPartner => '未指定商社';
+
+  @override
+  String ntStatsLine(
+      int runs, int lines, String rate, int dialects, int columns) {
+    return '$runs次・$lines行・转换率$rate・方言$dialects项・标题$columns项';
+  }
+
+  @override
+  String get ntRunsTitle => '读取历史';
+
+  @override
+  String get ntStatusLearned => '已学习';
+
+  @override
+  String get ntStatusDiscarded => '已放弃';
+
+  @override
+  String get ntStatusRead => '未学习';
+
+  @override
+  String get ntFieldJan => 'JAN';
+
+  @override
+  String get ntFieldMaker => '制造商';
+
+  @override
+  String get ntFieldName => '品名';
+
+  @override
+  String get ntFieldCode => '货号';
+
+  @override
+  String get ntFieldNameCode => '品名＋货号（一栏）';
+
+  @override
+  String get ntFieldQuantity => '数量';
+
+  @override
+  String get ntFieldCaseQuantity => '入数';
+
+  @override
+  String get ntFieldCases => '箱数';
+
+  @override
+  String get ntFieldUnitPrice => '单价';
+
+  @override
+  String get ntFieldAmount => '金额';
+
+  @override
+  String get ntFieldSpec => '规格';
+
+  @override
+  String get ntFieldTaxRate => '税率';
+
+  @override
+  String get ntFieldDate => '日期';
+
+  @override
+  String get ntFieldIgnore => '不使用';
+
+  @override
+  String get ntFieldUnknown => '不明';
+
+  @override
+  String get ntSourcePartner => '该商社已学习';
+
+  @override
+  String get ntSourceGlobal => '共通标题';
+
+  @override
+  String get ntSourceContains => '从标题部分推定';
+
+  @override
+  String get ntSourceValues => '从数值判定';
+
+  @override
+  String get ntSourceAi => 'AI判定';
+
+  @override
+  String get ntSourceOverride => '手动修正';
+
+  @override
+  String get ntSourceNone => '无法判定';
+
+  @override
+  String get ntFlagUnresolved => '无本公司商品';
+
+  @override
+  String get ntFlagJanCheck => 'JAN校验位错误';
+
+  @override
+  String get ntFlagNoJan => '无JAN';
+
+  @override
+  String get ntFlagNoMaker => '无制造商';
+
+  @override
+  String get ntFlagNoQuantity => '无数量';
+
+  @override
+  String get ntFlagAmount => '金额≠数量×单价';
+
+  @override
+  String get ntFlagAiDisagree => 'AI两次读取不一致';
+
+  @override
+  String ntFlagAiDisagreeOn(String field) {
+    return 'AI读取不一致：$field';
+  }
+
+  @override
+  String get ntFlagSplitDisagree => '品名货号拆分不一致';
+
+  @override
+  String get ntFlagSplitSingle => '已拆分品名货号（仅一种方法）';
+
+  @override
+  String get ntFlagSplitFailed => '无法拆分品名货号';
+
+  @override
+  String get ntFlagAdded => '核对时追加的行';
+
+  @override
+  String get ntFlagDropped => '核对时消失的行';
+
+  @override
+  String get ntFlagNotVerified => '无核对读取';
+
+  @override
+  String get ntFlagQtyFromCases => '数量＝入数×箱数';
+
+  @override
+  String get ntMatchJan => 'JAN一致';
+
+  @override
+  String get ntMatchDialect => '已学习方言一致';
+
+  @override
+  String get ntMatchSku => '本公司货号一致';
+
+  @override
+  String get ntMatchName => '本公司品名一致';
+
+  @override
+  String get ntMatchManual => '手动选择';
+
+  @override
+  String get ntMatchNone => '';
 }

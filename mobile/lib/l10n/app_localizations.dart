@@ -9749,6 +9749,607 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'仕入先からの入荷に適用されます。倉庫間の移動には影響しません。'**
   String get whInspectionApplies;
+
+  /// Notation dialects / training (0105-0106): productMakerRequired
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーを入力してください（商品には必ずメーカーが必要です）'**
+  String get productMakerRequired;
+
+  /// Notation dialects / training (0105-0106): productPickerTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品を選ぶ'**
+  String get productPickerTitle;
+
+  /// Notation dialects / training (0105-0106): featNotationTraining
+  ///
+  /// In ja, this message translates to:
+  /// **'表記の事前学習'**
+  String get featNotationTraining;
+
+  /// Notation dialects / training (0105-0106): featNotationTrainingDesc
+  ///
+  /// In ja, this message translates to:
+  /// **'商社ごとの書き方（方言）を事前にExcel・PDF・写真から学習'**
+  String get featNotationTrainingDesc;
+
+  /// Notation dialects / training (0105-0106): ntTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'表記の事前学習'**
+  String get ntTitle;
+
+  /// Notation dialects / training (0105-0106): ntTabTrain
+  ///
+  /// In ja, this message translates to:
+  /// **'事前学習'**
+  String get ntTabTrain;
+
+  /// Notation dialects / training (0105-0106): ntTabDialects
+  ///
+  /// In ja, this message translates to:
+  /// **'方言辞書'**
+  String get ntTabDialects;
+
+  /// Notation dialects / training (0105-0106): ntTabColumns
+  ///
+  /// In ja, this message translates to:
+  /// **'列見出し'**
+  String get ntTabColumns;
+
+  /// Notation dialects / training (0105-0106): ntTabHistory
+  ///
+  /// In ja, this message translates to:
+  /// **'履歴・傾向'**
+  String get ntTabHistory;
+
+  /// Notation dialects / training (0105-0106): ntPartner
+  ///
+  /// In ja, this message translates to:
+  /// **'商社（取引先）'**
+  String get ntPartner;
+
+  /// Notation dialects / training (0105-0106): ntAllPartners
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて（共通）'**
+  String get ntAllPartners;
+
+  /// Notation dialects / training (0105-0106): ntChoosePartner
+  ///
+  /// In ja, this message translates to:
+  /// **'商社を選んでください'**
+  String get ntChoosePartner;
+
+  /// Notation dialects / training (0105-0106): ntChooseFile
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選んでください'**
+  String get ntChooseFile;
+
+  /// Notation dialects / training (0105-0106): ntLearned
+  ///
+  /// In ja, this message translates to:
+  /// **'{learned}件を学習しました（新規{added}・衝突{conflicts}）'**
+  String ntLearned(int learned, int added, int conflicts);
+
+  /// Notation dialects / training (0105-0106): ntTrainIntro
+  ///
+  /// In ja, this message translates to:
+  /// **'商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。'**
+  String get ntTrainIntro;
+
+  /// Notation dialects / training (0105-0106): ntPickFile
+  ///
+  /// In ja, this message translates to:
+  /// **'見本ファイルを選ぶ'**
+  String get ntPickFile;
+
+  /// Notation dialects / training (0105-0106): ntRead
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取って試す'**
+  String get ntRead;
+
+  /// Notation dialects / training (0105-0106): ntReread
+  ///
+  /// In ja, this message translates to:
+  /// **'直した列で読み直す'**
+  String get ntReread;
+
+  /// Notation dialects / training (0105-0106): ntReading
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り中です（PDF・写真はAIで2回読み取ります）…'**
+  String get ntReading;
+
+  /// Notation dialects / training (0105-0106): ntLinesTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'明細 {count}行'**
+  String ntLinesTitle(int count);
+
+  /// Notation dialects / training (0105-0106): ntDiscard
+  ///
+  /// In ja, this message translates to:
+  /// **'破棄'**
+  String get ntDiscard;
+
+  /// Notation dialects / training (0105-0106): ntLearn
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}行を学習する'**
+  String ntLearn(int count);
+
+  /// Notation dialects / training (0105-0106): ntSummaryLines
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}行'**
+  String ntSummaryLines(int count);
+
+  /// Notation dialects / training (0105-0106): ntSummaryResolved
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品に変換 {done}/{total}'**
+  String ntSummaryResolved(int done, int total);
+
+  /// Notation dialects / training (0105-0106): ntSummaryReview
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認 {count}行'**
+  String ntSummaryReview(int count);
+
+  /// Notation dialects / training (0105-0106): ntReadTwice
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで2回読み取り照合済み'**
+  String get ntReadTwice;
+
+  /// Notation dialects / training (0105-0106): ntReadOnce
+  ///
+  /// In ja, this message translates to:
+  /// **'確認の読み取りに失敗（1回のみ）'**
+  String get ntReadOnce;
+
+  /// Notation dialects / training (0105-0106): ntReadSheet
+  ///
+  /// In ja, this message translates to:
+  /// **'表から読み取り（列はAIでも確認）'**
+  String get ntReadSheet;
+
+  /// Notation dialects / training (0105-0106): ntErrorsTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'見つかった問題'**
+  String get ntErrorsTitle;
+
+  /// Notation dialects / training (0105-0106): ntColumnsTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'列の読み方'**
+  String get ntColumnsTitle;
+
+  /// Notation dialects / training (0105-0106): ntColumnsHint
+  ///
+  /// In ja, this message translates to:
+  /// **'違っていれば直して「直した列で読み直す」。学習するとこの商社の見出しとして覚えます。'**
+  String get ntColumnsHint;
+
+  /// Notation dialects / training (0105-0106): ntNoHeader
+  ///
+  /// In ja, this message translates to:
+  /// **'（見出しなし）'**
+  String get ntNoHeader;
+
+  /// Notation dialects / training (0105-0106): ntAiThinks
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの判断：{field}'**
+  String ntAiThinks(String field);
+
+  /// Notation dialects / training (0105-0106): ntNotMatched
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品が見つかりません'**
+  String get ntNotMatched;
+
+  /// Notation dialects / training (0105-0106): ntChooseProduct
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品を選ぶ'**
+  String get ntChooseProduct;
+
+  /// Notation dialects / training (0105-0106): ntChangeProduct
+  ///
+  /// In ja, this message translates to:
+  /// **'変更'**
+  String get ntChangeProduct;
+
+  /// Notation dialects / training (0105-0106): ntSplitFrom
+  ///
+  /// In ja, this message translates to:
+  /// **'分解前：{text}'**
+  String ntSplitFrom(String text);
+
+  /// Notation dialects / training (0105-0106): ntOtherReading
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一方の読み（{field}）：{value}'**
+  String ntOtherReading(String field, String value);
+
+  /// Notation dialects / training (0105-0106): ntDialectsIntro
+  ///
+  /// In ja, this message translates to:
+  /// **'商社ごとの書き方（方言）とそれが指す自社の商品・メーカー。それぞれにID（D-000000）が付きます。'**
+  String get ntDialectsIntro;
+
+  /// Notation dialects / training (0105-0106): ntAllFields
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get ntAllFields;
+
+  /// Notation dialects / training (0105-0106): ntUnconfirmedOnly
+  ///
+  /// In ja, this message translates to:
+  /// **'未確認のみ'**
+  String get ntUnconfirmedOnly;
+
+  /// Notation dialects / training (0105-0106): ntDialectSearch
+  ///
+  /// In ja, this message translates to:
+  /// **'書き方・品名・JANで検索'**
+  String get ntDialectSearch;
+
+  /// Notation dialects / training (0105-0106): ntDialectsEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ学習した書き方はありません'**
+  String get ntDialectsEmpty;
+
+  /// Notation dialects / training (0105-0106): ntSeen
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}回'**
+  String ntSeen(int count);
+
+  /// Notation dialects / training (0105-0106): ntConfirm
+  ///
+  /// In ja, this message translates to:
+  /// **'確認済みにする'**
+  String get ntConfirm;
+
+  /// Notation dialects / training (0105-0106): ntAddColumn
+  ///
+  /// In ja, this message translates to:
+  /// **'見出しを追加'**
+  String get ntAddColumn;
+
+  /// Notation dialects / training (0105-0106): ntColumnHeader
+  ///
+  /// In ja, this message translates to:
+  /// **'見出し（商社の書き方どおり）'**
+  String get ntColumnHeader;
+
+  /// Notation dialects / training (0105-0106): ntColumnsIntro
+  ///
+  /// In ja, this message translates to:
+  /// **'表の見出しと意味。日本語（漢字・カナ）や英語の見出しを自社の項目に対応させます。商社を選ぶとその商社専用の見出しも表示します。'**
+  String get ntColumnsIntro;
+
+  /// Notation dialects / training (0105-0106): ntCommon
+  ///
+  /// In ja, this message translates to:
+  /// **'共通'**
+  String get ntCommon;
+
+  /// Notation dialects / training (0105-0106): ntStatsTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'商社ごとの傾向'**
+  String get ntStatsTitle;
+
+  /// Notation dialects / training (0105-0106): ntHistoryEmpty
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ事前学習の記録はありません'**
+  String get ntHistoryEmpty;
+
+  /// Notation dialects / training (0105-0106): ntUnknownPartner
+  ///
+  /// In ja, this message translates to:
+  /// **'商社未指定'**
+  String get ntUnknownPartner;
+
+  /// Notation dialects / training (0105-0106): ntStatsLine
+  ///
+  /// In ja, this message translates to:
+  /// **'{runs}回・{lines}行・変換率{rate}・方言{dialects}件・見出し{columns}件'**
+  String ntStatsLine(
+      int runs, int lines, String rate, int dialects, int columns);
+
+  /// Notation dialects / training (0105-0106): ntRunsTitle
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り履歴'**
+  String get ntRunsTitle;
+
+  /// Notation dialects / training (0105-0106): ntStatusLearned
+  ///
+  /// In ja, this message translates to:
+  /// **'学習済み'**
+  String get ntStatusLearned;
+
+  /// Notation dialects / training (0105-0106): ntStatusDiscarded
+  ///
+  /// In ja, this message translates to:
+  /// **'破棄'**
+  String get ntStatusDiscarded;
+
+  /// Notation dialects / training (0105-0106): ntStatusRead
+  ///
+  /// In ja, this message translates to:
+  /// **'未学習'**
+  String get ntStatusRead;
+
+  /// Notation dialects / training (0105-0106): ntFieldJan
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN'**
+  String get ntFieldJan;
+
+  /// Notation dialects / training (0105-0106): ntFieldMaker
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get ntFieldMaker;
+
+  /// Notation dialects / training (0105-0106): ntFieldName
+  ///
+  /// In ja, this message translates to:
+  /// **'品名'**
+  String get ntFieldName;
+
+  /// Notation dialects / training (0105-0106): ntFieldCode
+  ///
+  /// In ja, this message translates to:
+  /// **'品番'**
+  String get ntFieldCode;
+
+  /// Notation dialects / training (0105-0106): ntFieldNameCode
+  ///
+  /// In ja, this message translates to:
+  /// **'品名＋品番（1欄）'**
+  String get ntFieldNameCode;
+
+  /// Notation dialects / training (0105-0106): ntFieldQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get ntFieldQuantity;
+
+  /// Notation dialects / training (0105-0106): ntFieldCaseQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'入数'**
+  String get ntFieldCaseQuantity;
+
+  /// Notation dialects / training (0105-0106): ntFieldCases
+  ///
+  /// In ja, this message translates to:
+  /// **'ケース数'**
+  String get ntFieldCases;
+
+  /// Notation dialects / training (0105-0106): ntFieldUnitPrice
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get ntFieldUnitPrice;
+
+  /// Notation dialects / training (0105-0106): ntFieldAmount
+  ///
+  /// In ja, this message translates to:
+  /// **'金額'**
+  String get ntFieldAmount;
+
+  /// Notation dialects / training (0105-0106): ntFieldSpec
+  ///
+  /// In ja, this message translates to:
+  /// **'規格'**
+  String get ntFieldSpec;
+
+  /// Notation dialects / training (0105-0106): ntFieldTaxRate
+  ///
+  /// In ja, this message translates to:
+  /// **'税率'**
+  String get ntFieldTaxRate;
+
+  /// Notation dialects / training (0105-0106): ntFieldDate
+  ///
+  /// In ja, this message translates to:
+  /// **'日付'**
+  String get ntFieldDate;
+
+  /// Notation dialects / training (0105-0106): ntFieldIgnore
+  ///
+  /// In ja, this message translates to:
+  /// **'使わない'**
+  String get ntFieldIgnore;
+
+  /// Notation dialects / training (0105-0106): ntFieldUnknown
+  ///
+  /// In ja, this message translates to:
+  /// **'不明'**
+  String get ntFieldUnknown;
+
+  /// Notation dialects / training (0105-0106): ntSourcePartner
+  ///
+  /// In ja, this message translates to:
+  /// **'この商社で学習済み'**
+  String get ntSourcePartner;
+
+  /// Notation dialects / training (0105-0106): ntSourceGlobal
+  ///
+  /// In ja, this message translates to:
+  /// **'共通の見出し'**
+  String get ntSourceGlobal;
+
+  /// Notation dialects / training (0105-0106): ntSourceContains
+  ///
+  /// In ja, this message translates to:
+  /// **'見出しの一部から推定'**
+  String get ntSourceContains;
+
+  /// Notation dialects / training (0105-0106): ntSourceValues
+  ///
+  /// In ja, this message translates to:
+  /// **'値から判定'**
+  String get ntSourceValues;
+
+  /// Notation dialects / training (0105-0106): ntSourceAi
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが判定'**
+  String get ntSourceAi;
+
+  /// Notation dialects / training (0105-0106): ntSourceOverride
+  ///
+  /// In ja, this message translates to:
+  /// **'手動で修正'**
+  String get ntSourceOverride;
+
+  /// Notation dialects / training (0105-0106): ntSourceNone
+  ///
+  /// In ja, this message translates to:
+  /// **'判定できず'**
+  String get ntSourceNone;
+
+  /// Notation dialects / training (0105-0106): ntFlagUnresolved
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品なし'**
+  String get ntFlagUnresolved;
+
+  /// Notation dialects / training (0105-0106): ntFlagJanCheck
+  ///
+  /// In ja, this message translates to:
+  /// **'JANのチェック数字が不正'**
+  String get ntFlagJanCheck;
+
+  /// Notation dialects / training (0105-0106): ntFlagNoJan
+  ///
+  /// In ja, this message translates to:
+  /// **'JANなし'**
+  String get ntFlagNoJan;
+
+  /// Notation dialects / training (0105-0106): ntFlagNoMaker
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーなし'**
+  String get ntFlagNoMaker;
+
+  /// Notation dialects / training (0105-0106): ntFlagNoQuantity
+  ///
+  /// In ja, this message translates to:
+  /// **'数量なし'**
+  String get ntFlagNoQuantity;
+
+  /// Notation dialects / training (0105-0106): ntFlagAmount
+  ///
+  /// In ja, this message translates to:
+  /// **'金額≠数量×単価'**
+  String get ntFlagAmount;
+
+  /// Notation dialects / training (0105-0106): ntFlagAiDisagree
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの2回の読みが不一致'**
+  String get ntFlagAiDisagree;
+
+  /// Notation dialects / training (0105-0106): ntFlagAiDisagreeOn
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの読みが不一致：{field}'**
+  String ntFlagAiDisagreeOn(String field);
+
+  /// Notation dialects / training (0105-0106): ntFlagSplitDisagree
+  ///
+  /// In ja, this message translates to:
+  /// **'品名と品番の分け方が不一致'**
+  String get ntFlagSplitDisagree;
+
+  /// Notation dialects / training (0105-0106): ntFlagSplitSingle
+  ///
+  /// In ja, this message translates to:
+  /// **'品名と品番を分解（片方の方法のみ）'**
+  String get ntFlagSplitSingle;
+
+  /// Notation dialects / training (0105-0106): ntFlagSplitFailed
+  ///
+  /// In ja, this message translates to:
+  /// **'品名と品番を分けられず'**
+  String get ntFlagSplitFailed;
+
+  /// Notation dialects / training (0105-0106): ntFlagAdded
+  ///
+  /// In ja, this message translates to:
+  /// **'確認で追加された行'**
+  String get ntFlagAdded;
+
+  /// Notation dialects / training (0105-0106): ntFlagDropped
+  ///
+  /// In ja, this message translates to:
+  /// **'確認で消えた行'**
+  String get ntFlagDropped;
+
+  /// Notation dialects / training (0105-0106): ntFlagNotVerified
+  ///
+  /// In ja, this message translates to:
+  /// **'確認の読み取りなし'**
+  String get ntFlagNotVerified;
+
+  /// Notation dialects / training (0105-0106): ntFlagQtyFromCases
+  ///
+  /// In ja, this message translates to:
+  /// **'数量＝入数×ケース数'**
+  String get ntFlagQtyFromCases;
+
+  /// Notation dialects / training (0105-0106): ntMatchJan
+  ///
+  /// In ja, this message translates to:
+  /// **'JANで一致'**
+  String get ntMatchJan;
+
+  /// Notation dialects / training (0105-0106): ntMatchDialect
+  ///
+  /// In ja, this message translates to:
+  /// **'学習済みの方言で一致'**
+  String get ntMatchDialect;
+
+  /// Notation dialects / training (0105-0106): ntMatchSku
+  ///
+  /// In ja, this message translates to:
+  /// **'自社品番で一致'**
+  String get ntMatchSku;
+
+  /// Notation dialects / training (0105-0106): ntMatchName
+  ///
+  /// In ja, this message translates to:
+  /// **'自社品名で一致'**
+  String get ntMatchName;
+
+  /// Notation dialects / training (0105-0106): ntMatchManual
+  ///
+  /// In ja, this message translates to:
+  /// **'手動で選択'**
+  String get ntMatchManual;
+
+  /// Notation dialects / training (0105-0106): ntMatchNone
+  ///
+  /// In ja, this message translates to:
+  /// **''**
+  String get ntMatchNone;
 }
 
 class _AppLocalizationsDelegate

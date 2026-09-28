@@ -63,6 +63,7 @@ void main() {
 
     await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4901234567890');
     await tester.enterText(find.widgetWithText(TextField, '商品名'), 'テストペン');
+    await tester.enterText(find.byKey(const ValueKey('product-maker')), 'テスト文具');
     await tester.enterText(find.widgetWithText(TextField, '価格'), '300');
     await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
@@ -86,6 +87,7 @@ void main() {
 
     await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4901234567890');
     await tester.enterText(find.widgetWithText(TextField, '商品名'), 'テストペン');
+    await tester.enterText(find.byKey(const ValueKey('product-maker')), 'テスト文具');
     await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
 

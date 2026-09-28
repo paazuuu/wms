@@ -58,6 +58,7 @@ void main() {
       final result = await repo.create(
         janCode: '4901234567890',
         name: 'テストペン',
+        maker: 'テスト文具',
         category: '文房具',
         price: 300,
       );
@@ -66,6 +67,7 @@ void main() {
       final body = captured.data as Map;
       expect(body['p_jan_code'], '4901234567890');
       expect(body['p_name'], 'テストペン');
+      expect(body['p_maker'], 'テスト文具');
       expect(body['p_category'], '文房具');
       expect(body['p_price'], 300);
       result.when(

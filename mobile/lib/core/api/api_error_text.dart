@@ -34,6 +34,9 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
       rawMessage.contains('not converted to one of your products')) {
     return l10n.qcErrorUnconverted;
   }
+  if (rawMessage.contains('maker is required')) {
+    return l10n.productMakerRequired;
+  }
   if (rawMessage.contains('is not a sampling inspection')) {
     return l10n.qcErrorNotSampling;
   }

@@ -117,6 +117,8 @@ class FeatureEntry {
         return l10n.featWorkOrders;
       case 'reports':
         return l10n.featReports;
+      case 'notation_training':
+        return l10n.featNotationTraining;
       case 'putaway':
         return l10n.featPutaway;
       case 'expiring_lots':
@@ -185,6 +187,8 @@ class FeatureEntry {
         return l10n.featWorkOrdersDesc;
       case 'reports':
         return l10n.featReportsDesc;
+      case 'notation_training':
+        return l10n.featNotationTrainingDesc;
       case 'putaway':
         return l10n.featPutawayDesc;
       case 'expiring_lots':

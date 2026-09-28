@@ -5326,4 +5326,332 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get whInspectionApplies => '仕入先からの入荷に適用されます。倉庫間の移動には影響しません。';
+
+  @override
+  String get productMakerRequired => 'メーカーを入力してください（商品には必ずメーカーが必要です）';
+
+  @override
+  String get productPickerTitle => '自社商品を選ぶ';
+
+  @override
+  String get featNotationTraining => '表記の事前学習';
+
+  @override
+  String get featNotationTrainingDesc => '商社ごとの書き方（方言）を事前にExcel・PDF・写真から学習';
+
+  @override
+  String get ntTitle => '表記の事前学習';
+
+  @override
+  String get ntTabTrain => '事前学習';
+
+  @override
+  String get ntTabDialects => '方言辞書';
+
+  @override
+  String get ntTabColumns => '列見出し';
+
+  @override
+  String get ntTabHistory => '履歴・傾向';
+
+  @override
+  String get ntPartner => '商社（取引先）';
+
+  @override
+  String get ntAllPartners => 'すべて（共通）';
+
+  @override
+  String get ntChoosePartner => '商社を選んでください';
+
+  @override
+  String get ntChooseFile => 'ファイルを選んでください';
+
+  @override
+  String ntLearned(int learned, int added, int conflicts) {
+    return '$learned件を学習しました（新規$added・衝突$conflicts）';
+  }
+
+  @override
+  String get ntTrainIntro =>
+      '商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。';
+
+  @override
+  String get ntPickFile => '見本ファイルを選ぶ';
+
+  @override
+  String get ntRead => '読み取って試す';
+
+  @override
+  String get ntReread => '直した列で読み直す';
+
+  @override
+  String get ntReading => '読み取り中です（PDF・写真はAIで2回読み取ります）…';
+
+  @override
+  String ntLinesTitle(int count) {
+    return '明細 $count行';
+  }
+
+  @override
+  String get ntDiscard => '破棄';
+
+  @override
+  String ntLearn(int count) {
+    return '$count行を学習する';
+  }
+
+  @override
+  String ntSummaryLines(int count) {
+    return '$count行';
+  }
+
+  @override
+  String ntSummaryResolved(int done, int total) {
+    return '自社商品に変換 $done/$total';
+  }
+
+  @override
+  String ntSummaryReview(int count) {
+    return '要確認 $count行';
+  }
+
+  @override
+  String get ntReadTwice => 'AIで2回読み取り照合済み';
+
+  @override
+  String get ntReadOnce => '確認の読み取りに失敗（1回のみ）';
+
+  @override
+  String get ntReadSheet => '表から読み取り（列はAIでも確認）';
+
+  @override
+  String get ntErrorsTitle => '見つかった問題';
+
+  @override
+  String get ntColumnsTitle => '列の読み方';
+
+  @override
+  String get ntColumnsHint => '違っていれば直して「直した列で読み直す」。学習するとこの商社の見出しとして覚えます。';
+
+  @override
+  String get ntNoHeader => '（見出しなし）';
+
+  @override
+  String ntAiThinks(String field) {
+    return 'AIの判断：$field';
+  }
+
+  @override
+  String get ntNotMatched => '自社商品が見つかりません';
+
+  @override
+  String get ntChooseProduct => '自社商品を選ぶ';
+
+  @override
+  String get ntChangeProduct => '変更';
+
+  @override
+  String ntSplitFrom(String text) {
+    return '分解前：$text';
+  }
+
+  @override
+  String ntOtherReading(String field, String value) {
+    return 'もう一方の読み（$field）：$value';
+  }
+
+  @override
+  String get ntDialectsIntro =>
+      '商社ごとの書き方（方言）とそれが指す自社の商品・メーカー。それぞれにID（D-000000）が付きます。';
+
+  @override
+  String get ntAllFields => 'すべて';
+
+  @override
+  String get ntUnconfirmedOnly => '未確認のみ';
+
+  @override
+  String get ntDialectSearch => '書き方・品名・JANで検索';
+
+  @override
+  String get ntDialectsEmpty => 'まだ学習した書き方はありません';
+
+  @override
+  String ntSeen(int count) {
+    return '$count回';
+  }
+
+  @override
+  String get ntConfirm => '確認済みにする';
+
+  @override
+  String get ntAddColumn => '見出しを追加';
+
+  @override
+  String get ntColumnHeader => '見出し（商社の書き方どおり）';
+
+  @override
+  String get ntColumnsIntro =>
+      '表の見出しと意味。日本語（漢字・カナ）や英語の見出しを自社の項目に対応させます。商社を選ぶとその商社専用の見出しも表示します。';
+
+  @override
+  String get ntCommon => '共通';
+
+  @override
+  String get ntStatsTitle => '商社ごとの傾向';
+
+  @override
+  String get ntHistoryEmpty => 'まだ事前学習の記録はありません';
+
+  @override
+  String get ntUnknownPartner => '商社未指定';
+
+  @override
+  String ntStatsLine(
+      int runs, int lines, String rate, int dialects, int columns) {
+    return '$runs回・$lines行・変換率$rate・方言$dialects件・見出し$columns件';
+  }
+
+  @override
+  String get ntRunsTitle => '読み取り履歴';
+
+  @override
+  String get ntStatusLearned => '学習済み';
+
+  @override
+  String get ntStatusDiscarded => '破棄';
+
+  @override
+  String get ntStatusRead => '未学習';
+
+  @override
+  String get ntFieldJan => 'JAN';
+
+  @override
+  String get ntFieldMaker => 'メーカー';
+
+  @override
+  String get ntFieldName => '品名';
+
+  @override
+  String get ntFieldCode => '品番';
+
+  @override
+  String get ntFieldNameCode => '品名＋品番（1欄）';
+
+  @override
+  String get ntFieldQuantity => '数量';
+
+  @override
+  String get ntFieldCaseQuantity => '入数';
+
+  @override
+  String get ntFieldCases => 'ケース数';
+
+  @override
+  String get ntFieldUnitPrice => '単価';
+
+  @override
+  String get ntFieldAmount => '金額';
+
+  @override
+  String get ntFieldSpec => '規格';
+
+  @override
+  String get ntFieldTaxRate => '税率';
+
+  @override
+  String get ntFieldDate => '日付';
+
+  @override
+  String get ntFieldIgnore => '使わない';
+
+  @override
+  String get ntFieldUnknown => '不明';
+
+  @override
+  String get ntSourcePartner => 'この商社で学習済み';
+
+  @override
+  String get ntSourceGlobal => '共通の見出し';
+
+  @override
+  String get ntSourceContains => '見出しの一部から推定';
+
+  @override
+  String get ntSourceValues => '値から判定';
+
+  @override
+  String get ntSourceAi => 'AIが判定';
+
+  @override
+  String get ntSourceOverride => '手動で修正';
+
+  @override
+  String get ntSourceNone => '判定できず';
+
+  @override
+  String get ntFlagUnresolved => '自社商品なし';
+
+  @override
+  String get ntFlagJanCheck => 'JANのチェック数字が不正';
+
+  @override
+  String get ntFlagNoJan => 'JANなし';
+
+  @override
+  String get ntFlagNoMaker => 'メーカーなし';
+
+  @override
+  String get ntFlagNoQuantity => '数量なし';
+
+  @override
+  String get ntFlagAmount => '金額≠数量×単価';
+
+  @override
+  String get ntFlagAiDisagree => 'AIの2回の読みが不一致';
+
+  @override
+  String ntFlagAiDisagreeOn(String field) {
+    return 'AIの読みが不一致：$field';
+  }
+
+  @override
+  String get ntFlagSplitDisagree => '品名と品番の分け方が不一致';
+
+  @override
+  String get ntFlagSplitSingle => '品名と品番を分解（片方の方法のみ）';
+
+  @override
+  String get ntFlagSplitFailed => '品名と品番を分けられず';
+
+  @override
+  String get ntFlagAdded => '確認で追加された行';
+
+  @override
+  String get ntFlagDropped => '確認で消えた行';
+
+  @override
+  String get ntFlagNotVerified => '確認の読み取りなし';
+
+  @override
+  String get ntFlagQtyFromCases => '数量＝入数×ケース数';
+
+  @override
+  String get ntMatchJan => 'JANで一致';
+
+  @override
+  String get ntMatchDialect => '学習済みの方言で一致';
+
+  @override
+  String get ntMatchSku => '自社品番で一致';
+
+  @override
+  String get ntMatchName => '自社品名で一致';
+
+  @override
+  String get ntMatchManual => '手動で選択';
+
+  @override
+  String get ntMatchNone => '';
 }

@@ -104,6 +104,12 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       setState(() => _error = l10n.productValidationRequired);
       return;
     }
+    // Every product names its maker (0105): it is what a trading company's
+    // way of writing it is converted to, and what goes out on our slips.
+    if (_maker.text.trim().isEmpty) {
+      setState(() => _error = l10n.productMakerRequired);
+      return;
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -131,6 +137,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       final result = await repo.create(
         janCode: _jan.text.trim(),
         name: _name.text.trim(),
+        maker: _maker.text.trim(),
         category: category,
         price: price,
       );
@@ -143,7 +150,8 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
     // and the tracking mode go through `set_product_identity`, which refuses a
     // mode that contradicts lots or serials already recorded. Only sent when
     // something actually changed, so editing a name never risks that refusal.
-    final makerChanged = maker != (widget.product?.maker ?? '');
+    // A new product's maker went in with create().
+    final makerChanged = _isEdit && maker != (widget.product?.maker ?? '');
     final identityChanged = sku != (widget.product?.sku ?? '') ||
         makerChanged ||
         _tracking != (widget.product?.trackingMode ?? TrackingMode.untracked);
@@ -251,7 +259,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
             TextField(
               key: const ValueKey('product-maker'),
               controller: _maker,
-              decoration: InputDecoration(labelText: l10n.productMaker),
+              decoration: InputDecoration(labelText: '${l10n.productMaker} *'),
             ),
             const SizedBox(height: AppSpacing.lg),
             // What must be recorded when this product arrives. Changing it is

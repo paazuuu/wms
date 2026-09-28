@@ -37,9 +37,11 @@ abstract class ProductRepository {
 
   Future<ApiResult<bool>> removeSupplierName(int id);
 
+  /// A product must name its maker (0105).
   Future<ApiResult<int>> create({
     required String janCode,
     required String name,
+    required String maker,
     String? category,
     double? price,
   });
@@ -205,6 +207,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<ApiResult<int>> create({
     required String janCode,
     required String name,
+    required String maker,
     String? category,
     double? price,
   }) async {
@@ -212,6 +215,7 @@ class ProductRepositoryImpl implements ProductRepository {
       final response = await _dio.post('/rpc/create_product', data: {
         'p_jan_code': janCode,
         'p_name': name,
+        'p_maker': maker,
         'p_category': category,
         'p_price': price,
       });

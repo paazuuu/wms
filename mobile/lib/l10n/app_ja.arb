@@ -5367,5 +5367,489 @@
   "whInspectionApplies": "仕入先からの入荷に適用されます。倉庫間の移動には影響しません。",
   "@whInspectionApplies": {
     "description": "Supplier notation / warehouse inspection (0103-0104): whInspectionApplies"
+  },
+  "productMakerRequired": "メーカーを入力してください（商品には必ずメーカーが必要です）",
+  "@productMakerRequired": {
+    "description": "Notation dialects / training (0105-0106): productMakerRequired"
+  },
+  "productPickerTitle": "自社商品を選ぶ",
+  "@productPickerTitle": {
+    "description": "Notation dialects / training (0105-0106): productPickerTitle"
+  },
+  "featNotationTraining": "表記の事前学習",
+  "@featNotationTraining": {
+    "description": "Notation dialects / training (0105-0106): featNotationTraining"
+  },
+  "featNotationTrainingDesc": "商社ごとの書き方（方言）を事前にExcel・PDF・写真から学習",
+  "@featNotationTrainingDesc": {
+    "description": "Notation dialects / training (0105-0106): featNotationTrainingDesc"
+  },
+  "ntTitle": "表記の事前学習",
+  "@ntTitle": {
+    "description": "Notation dialects / training (0105-0106): ntTitle"
+  },
+  "ntTabTrain": "事前学習",
+  "@ntTabTrain": {
+    "description": "Notation dialects / training (0105-0106): ntTabTrain"
+  },
+  "ntTabDialects": "方言辞書",
+  "@ntTabDialects": {
+    "description": "Notation dialects / training (0105-0106): ntTabDialects"
+  },
+  "ntTabColumns": "列見出し",
+  "@ntTabColumns": {
+    "description": "Notation dialects / training (0105-0106): ntTabColumns"
+  },
+  "ntTabHistory": "履歴・傾向",
+  "@ntTabHistory": {
+    "description": "Notation dialects / training (0105-0106): ntTabHistory"
+  },
+  "ntPartner": "商社（取引先）",
+  "@ntPartner": {
+    "description": "Notation dialects / training (0105-0106): ntPartner"
+  },
+  "ntAllPartners": "すべて（共通）",
+  "@ntAllPartners": {
+    "description": "Notation dialects / training (0105-0106): ntAllPartners"
+  },
+  "ntChoosePartner": "商社を選んでください",
+  "@ntChoosePartner": {
+    "description": "Notation dialects / training (0105-0106): ntChoosePartner"
+  },
+  "ntChooseFile": "ファイルを選んでください",
+  "@ntChooseFile": {
+    "description": "Notation dialects / training (0105-0106): ntChooseFile"
+  },
+  "ntLearned": "{learned}件を学習しました（新規{added}・衝突{conflicts}）",
+  "@ntLearned": {
+    "description": "Notation dialects / training (0105-0106): ntLearned",
+    "placeholders": {
+      "learned": {
+        "type": "int"
+      },
+      "added": {
+        "type": "int"
+      },
+      "conflicts": {
+        "type": "int"
+      }
+    }
+  },
+  "ntTrainIntro": "商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。",
+  "@ntTrainIntro": {
+    "description": "Notation dialects / training (0105-0106): ntTrainIntro"
+  },
+  "ntPickFile": "見本ファイルを選ぶ",
+  "@ntPickFile": {
+    "description": "Notation dialects / training (0105-0106): ntPickFile"
+  },
+  "ntRead": "読み取って試す",
+  "@ntRead": {
+    "description": "Notation dialects / training (0105-0106): ntRead"
+  },
+  "ntReread": "直した列で読み直す",
+  "@ntReread": {
+    "description": "Notation dialects / training (0105-0106): ntReread"
+  },
+  "ntReading": "読み取り中です（PDF・写真はAIで2回読み取ります）…",
+  "@ntReading": {
+    "description": "Notation dialects / training (0105-0106): ntReading"
+  },
+  "ntLinesTitle": "明細 {count}行",
+  "@ntLinesTitle": {
+    "description": "Notation dialects / training (0105-0106): ntLinesTitle",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ntDiscard": "破棄",
+  "@ntDiscard": {
+    "description": "Notation dialects / training (0105-0106): ntDiscard"
+  },
+  "ntLearn": "{count}行を学習する",
+  "@ntLearn": {
+    "description": "Notation dialects / training (0105-0106): ntLearn",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ntSummaryLines": "{count}行",
+  "@ntSummaryLines": {
+    "description": "Notation dialects / training (0105-0106): ntSummaryLines",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ntSummaryResolved": "自社商品に変換 {done}/{total}",
+  "@ntSummaryResolved": {
+    "description": "Notation dialects / training (0105-0106): ntSummaryResolved",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "ntSummaryReview": "要確認 {count}行",
+  "@ntSummaryReview": {
+    "description": "Notation dialects / training (0105-0106): ntSummaryReview",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ntReadTwice": "AIで2回読み取り照合済み",
+  "@ntReadTwice": {
+    "description": "Notation dialects / training (0105-0106): ntReadTwice"
+  },
+  "ntReadOnce": "確認の読み取りに失敗（1回のみ）",
+  "@ntReadOnce": {
+    "description": "Notation dialects / training (0105-0106): ntReadOnce"
+  },
+  "ntReadSheet": "表から読み取り（列はAIでも確認）",
+  "@ntReadSheet": {
+    "description": "Notation dialects / training (0105-0106): ntReadSheet"
+  },
+  "ntErrorsTitle": "見つかった問題",
+  "@ntErrorsTitle": {
+    "description": "Notation dialects / training (0105-0106): ntErrorsTitle"
+  },
+  "ntColumnsTitle": "列の読み方",
+  "@ntColumnsTitle": {
+    "description": "Notation dialects / training (0105-0106): ntColumnsTitle"
+  },
+  "ntColumnsHint": "違っていれば直して「直した列で読み直す」。学習するとこの商社の見出しとして覚えます。",
+  "@ntColumnsHint": {
+    "description": "Notation dialects / training (0105-0106): ntColumnsHint"
+  },
+  "ntNoHeader": "（見出しなし）",
+  "@ntNoHeader": {
+    "description": "Notation dialects / training (0105-0106): ntNoHeader"
+  },
+  "ntAiThinks": "AIの判断：{field}",
+  "@ntAiThinks": {
+    "description": "Notation dialects / training (0105-0106): ntAiThinks",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "ntNotMatched": "自社商品が見つかりません",
+  "@ntNotMatched": {
+    "description": "Notation dialects / training (0105-0106): ntNotMatched"
+  },
+  "ntChooseProduct": "自社商品を選ぶ",
+  "@ntChooseProduct": {
+    "description": "Notation dialects / training (0105-0106): ntChooseProduct"
+  },
+  "ntChangeProduct": "変更",
+  "@ntChangeProduct": {
+    "description": "Notation dialects / training (0105-0106): ntChangeProduct"
+  },
+  "ntSplitFrom": "分解前：{text}",
+  "@ntSplitFrom": {
+    "description": "Notation dialects / training (0105-0106): ntSplitFrom",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "ntOtherReading": "もう一方の読み（{field}）：{value}",
+  "@ntOtherReading": {
+    "description": "Notation dialects / training (0105-0106): ntOtherReading",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "ntDialectsIntro": "商社ごとの書き方（方言）とそれが指す自社の商品・メーカー。それぞれにID（D-000000）が付きます。",
+  "@ntDialectsIntro": {
+    "description": "Notation dialects / training (0105-0106): ntDialectsIntro"
+  },
+  "ntAllFields": "すべて",
+  "@ntAllFields": {
+    "description": "Notation dialects / training (0105-0106): ntAllFields"
+  },
+  "ntUnconfirmedOnly": "未確認のみ",
+  "@ntUnconfirmedOnly": {
+    "description": "Notation dialects / training (0105-0106): ntUnconfirmedOnly"
+  },
+  "ntDialectSearch": "書き方・品名・JANで検索",
+  "@ntDialectSearch": {
+    "description": "Notation dialects / training (0105-0106): ntDialectSearch"
+  },
+  "ntDialectsEmpty": "まだ学習した書き方はありません",
+  "@ntDialectsEmpty": {
+    "description": "Notation dialects / training (0105-0106): ntDialectsEmpty"
+  },
+  "ntSeen": "{count}回",
+  "@ntSeen": {
+    "description": "Notation dialects / training (0105-0106): ntSeen",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ntConfirm": "確認済みにする",
+  "@ntConfirm": {
+    "description": "Notation dialects / training (0105-0106): ntConfirm"
+  },
+  "ntAddColumn": "見出しを追加",
+  "@ntAddColumn": {
+    "description": "Notation dialects / training (0105-0106): ntAddColumn"
+  },
+  "ntColumnHeader": "見出し（商社の書き方どおり）",
+  "@ntColumnHeader": {
+    "description": "Notation dialects / training (0105-0106): ntColumnHeader"
+  },
+  "ntColumnsIntro": "表の見出しと意味。日本語（漢字・カナ）や英語の見出しを自社の項目に対応させます。商社を選ぶとその商社専用の見出しも表示します。",
+  "@ntColumnsIntro": {
+    "description": "Notation dialects / training (0105-0106): ntColumnsIntro"
+  },
+  "ntCommon": "共通",
+  "@ntCommon": {
+    "description": "Notation dialects / training (0105-0106): ntCommon"
+  },
+  "ntStatsTitle": "商社ごとの傾向",
+  "@ntStatsTitle": {
+    "description": "Notation dialects / training (0105-0106): ntStatsTitle"
+  },
+  "ntHistoryEmpty": "まだ事前学習の記録はありません",
+  "@ntHistoryEmpty": {
+    "description": "Notation dialects / training (0105-0106): ntHistoryEmpty"
+  },
+  "ntUnknownPartner": "商社未指定",
+  "@ntUnknownPartner": {
+    "description": "Notation dialects / training (0105-0106): ntUnknownPartner"
+  },
+  "ntStatsLine": "{runs}回・{lines}行・変換率{rate}・方言{dialects}件・見出し{columns}件",
+  "@ntStatsLine": {
+    "description": "Notation dialects / training (0105-0106): ntStatsLine",
+    "placeholders": {
+      "runs": {
+        "type": "int"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "dialects": {
+        "type": "int"
+      },
+      "columns": {
+        "type": "int"
+      }
+    }
+  },
+  "ntRunsTitle": "読み取り履歴",
+  "@ntRunsTitle": {
+    "description": "Notation dialects / training (0105-0106): ntRunsTitle"
+  },
+  "ntStatusLearned": "学習済み",
+  "@ntStatusLearned": {
+    "description": "Notation dialects / training (0105-0106): ntStatusLearned"
+  },
+  "ntStatusDiscarded": "破棄",
+  "@ntStatusDiscarded": {
+    "description": "Notation dialects / training (0105-0106): ntStatusDiscarded"
+  },
+  "ntStatusRead": "未学習",
+  "@ntStatusRead": {
+    "description": "Notation dialects / training (0105-0106): ntStatusRead"
+  },
+  "ntFieldJan": "JAN",
+  "@ntFieldJan": {
+    "description": "Notation dialects / training (0105-0106): ntFieldJan"
+  },
+  "ntFieldMaker": "メーカー",
+  "@ntFieldMaker": {
+    "description": "Notation dialects / training (0105-0106): ntFieldMaker"
+  },
+  "ntFieldName": "品名",
+  "@ntFieldName": {
+    "description": "Notation dialects / training (0105-0106): ntFieldName"
+  },
+  "ntFieldCode": "品番",
+  "@ntFieldCode": {
+    "description": "Notation dialects / training (0105-0106): ntFieldCode"
+  },
+  "ntFieldNameCode": "品名＋品番（1欄）",
+  "@ntFieldNameCode": {
+    "description": "Notation dialects / training (0105-0106): ntFieldNameCode"
+  },
+  "ntFieldQuantity": "数量",
+  "@ntFieldQuantity": {
+    "description": "Notation dialects / training (0105-0106): ntFieldQuantity"
+  },
+  "ntFieldCaseQuantity": "入数",
+  "@ntFieldCaseQuantity": {
+    "description": "Notation dialects / training (0105-0106): ntFieldCaseQuantity"
+  },
+  "ntFieldCases": "ケース数",
+  "@ntFieldCases": {
+    "description": "Notation dialects / training (0105-0106): ntFieldCases"
+  },
+  "ntFieldUnitPrice": "単価",
+  "@ntFieldUnitPrice": {
+    "description": "Notation dialects / training (0105-0106): ntFieldUnitPrice"
+  },
+  "ntFieldAmount": "金額",
+  "@ntFieldAmount": {
+    "description": "Notation dialects / training (0105-0106): ntFieldAmount"
+  },
+  "ntFieldSpec": "規格",
+  "@ntFieldSpec": {
+    "description": "Notation dialects / training (0105-0106): ntFieldSpec"
+  },
+  "ntFieldTaxRate": "税率",
+  "@ntFieldTaxRate": {
+    "description": "Notation dialects / training (0105-0106): ntFieldTaxRate"
+  },
+  "ntFieldDate": "日付",
+  "@ntFieldDate": {
+    "description": "Notation dialects / training (0105-0106): ntFieldDate"
+  },
+  "ntFieldIgnore": "使わない",
+  "@ntFieldIgnore": {
+    "description": "Notation dialects / training (0105-0106): ntFieldIgnore"
+  },
+  "ntFieldUnknown": "不明",
+  "@ntFieldUnknown": {
+    "description": "Notation dialects / training (0105-0106): ntFieldUnknown"
+  },
+  "ntSourcePartner": "この商社で学習済み",
+  "@ntSourcePartner": {
+    "description": "Notation dialects / training (0105-0106): ntSourcePartner"
+  },
+  "ntSourceGlobal": "共通の見出し",
+  "@ntSourceGlobal": {
+    "description": "Notation dialects / training (0105-0106): ntSourceGlobal"
+  },
+  "ntSourceContains": "見出しの一部から推定",
+  "@ntSourceContains": {
+    "description": "Notation dialects / training (0105-0106): ntSourceContains"
+  },
+  "ntSourceValues": "値から判定",
+  "@ntSourceValues": {
+    "description": "Notation dialects / training (0105-0106): ntSourceValues"
+  },
+  "ntSourceAi": "AIが判定",
+  "@ntSourceAi": {
+    "description": "Notation dialects / training (0105-0106): ntSourceAi"
+  },
+  "ntSourceOverride": "手動で修正",
+  "@ntSourceOverride": {
+    "description": "Notation dialects / training (0105-0106): ntSourceOverride"
+  },
+  "ntSourceNone": "判定できず",
+  "@ntSourceNone": {
+    "description": "Notation dialects / training (0105-0106): ntSourceNone"
+  },
+  "ntFlagUnresolved": "自社商品なし",
+  "@ntFlagUnresolved": {
+    "description": "Notation dialects / training (0105-0106): ntFlagUnresolved"
+  },
+  "ntFlagJanCheck": "JANのチェック数字が不正",
+  "@ntFlagJanCheck": {
+    "description": "Notation dialects / training (0105-0106): ntFlagJanCheck"
+  },
+  "ntFlagNoJan": "JANなし",
+  "@ntFlagNoJan": {
+    "description": "Notation dialects / training (0105-0106): ntFlagNoJan"
+  },
+  "ntFlagNoMaker": "メーカーなし",
+  "@ntFlagNoMaker": {
+    "description": "Notation dialects / training (0105-0106): ntFlagNoMaker"
+  },
+  "ntFlagNoQuantity": "数量なし",
+  "@ntFlagNoQuantity": {
+    "description": "Notation dialects / training (0105-0106): ntFlagNoQuantity"
+  },
+  "ntFlagAmount": "金額≠数量×単価",
+  "@ntFlagAmount": {
+    "description": "Notation dialects / training (0105-0106): ntFlagAmount"
+  },
+  "ntFlagAiDisagree": "AIの2回の読みが不一致",
+  "@ntFlagAiDisagree": {
+    "description": "Notation dialects / training (0105-0106): ntFlagAiDisagree"
+  },
+  "ntFlagAiDisagreeOn": "AIの読みが不一致：{field}",
+  "@ntFlagAiDisagreeOn": {
+    "description": "Notation dialects / training (0105-0106): ntFlagAiDisagreeOn",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "ntFlagSplitDisagree": "品名と品番の分け方が不一致",
+  "@ntFlagSplitDisagree": {
+    "description": "Notation dialects / training (0105-0106): ntFlagSplitDisagree"
+  },
+  "ntFlagSplitSingle": "品名と品番を分解（片方の方法のみ）",
+  "@ntFlagSplitSingle": {
+    "description": "Notation dialects / training (0105-0106): ntFlagSplitSingle"
+  },
+  "ntFlagSplitFailed": "品名と品番を分けられず",
+  "@ntFlagSplitFailed": {
+    "description": "Notation dialects / training (0105-0106): ntFlagSplitFailed"
+  },
+  "ntFlagAdded": "確認で追加された行",
+  "@ntFlagAdded": {
+    "description": "Notation dialects / training (0105-0106): ntFlagAdded"
+  },
+  "ntFlagDropped": "確認で消えた行",
+  "@ntFlagDropped": {
+    "description": "Notation dialects / training (0105-0106): ntFlagDropped"
+  },
+  "ntFlagNotVerified": "確認の読み取りなし",
+  "@ntFlagNotVerified": {
+    "description": "Notation dialects / training (0105-0106): ntFlagNotVerified"
+  },
+  "ntFlagQtyFromCases": "数量＝入数×ケース数",
+  "@ntFlagQtyFromCases": {
+    "description": "Notation dialects / training (0105-0106): ntFlagQtyFromCases"
+  },
+  "ntMatchJan": "JANで一致",
+  "@ntMatchJan": {
+    "description": "Notation dialects / training (0105-0106): ntMatchJan"
+  },
+  "ntMatchDialect": "学習済みの方言で一致",
+  "@ntMatchDialect": {
+    "description": "Notation dialects / training (0105-0106): ntMatchDialect"
+  },
+  "ntMatchSku": "自社品番で一致",
+  "@ntMatchSku": {
+    "description": "Notation dialects / training (0105-0106): ntMatchSku"
+  },
+  "ntMatchName": "自社品名で一致",
+  "@ntMatchName": {
+    "description": "Notation dialects / training (0105-0106): ntMatchName"
+  },
+  "ntMatchManual": "手動で選択",
+  "@ntMatchManual": {
+    "description": "Notation dialects / training (0105-0106): ntMatchManual"
+  },
+  "ntMatchNone": "",
+  "@ntMatchNone": {
+    "description": "Notation dialects / training (0105-0106): ntMatchNone"
   }
 }

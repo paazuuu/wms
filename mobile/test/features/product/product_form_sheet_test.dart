@@ -33,7 +33,7 @@ void main() {
     ]);
     await _pumpSheet(tester, repo,
         product: const Product(
-            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+            id: 1, janCode: '4902505632037', name: 'ボールペン', maker: 'テスト文具'));
 
     await tester.enterText(find.widgetWithText(TextField, '品番（SKU）'), 'PEN-001');
     await tester.tap(find.byType(DropdownButtonFormField<TrackingMode>));
@@ -62,6 +62,7 @@ void main() {
             id: 1,
             janCode: '4902505632037',
             name: 'ボールペン',
+            maker: 'テスト文具',
             sku: 'PEN-001'));
 
     await tester.enterText(
@@ -87,6 +88,7 @@ void main() {
             id: 1,
             janCode: '4902505632037',
             name: 'ボールペン',
+            maker: 'テスト文具',
             sku: 'PEN-001'));
 
     await tester.enterText(find.widgetWithText(TextField, '品番（SKU）'), '');
@@ -110,7 +112,7 @@ void main() {
           'product 1 already has lots recorded; tracking_mode cannot become UNTRACKED';
     await _pumpSheet(tester, repo,
         product: const Product(
-            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+            id: 1, janCode: '4902505632037', name: 'ボールペン', maker: 'テスト文具'));
 
     await tester.tap(find.byType(DropdownButtonFormField<TrackingMode>));
     await tester.pumpAndSettle();
@@ -134,7 +136,7 @@ void main() {
     ]);
     await _pumpSheet(tester, repo,
         product: const Product(
-            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+            id: 1, janCode: '4902505632037', name: 'ボールペン', maker: 'テスト文具'));
 
     await tester.tap(find.byType(DropdownButtonFormField<String>));
     await tester.pumpAndSettle();
@@ -156,7 +158,7 @@ void main() {
     ]);
     await _pumpSheet(tester, repo,
         product: const Product(
-            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+            id: 1, janCode: '4902505632037', name: 'ボールペン', maker: 'テスト文具'));
 
     await tester.enterText(
         find.widgetWithText(TextField, '商品名'), 'ボールペン（黒）');
@@ -196,7 +198,7 @@ void main() {
     ]);
     await _pumpSheet(tester, repo,
         product: const Product(
-            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+            id: 1, janCode: '4902505632037', name: 'ボールペン', maker: 'テスト文具'));
 
     expect(find.byType(SwitchListTile), findsNothing);
     await tester.enterText(
@@ -205,6 +207,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.lastInspectionRequirement, isNull);
+    expect(repo.lastIdentity, isNull);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('an existing product without a maker cannot be saved until it has one',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pumpSheet(tester, repo,
+        product: const Product(
+            id: 1, janCode: '4902505632037', name: 'ボールペン'));
+
+    await tester.enterText(
+        find.widgetWithText(TextField, '商品名'), 'ボールペン（黒）');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('メーカー'), findsWidgets);
     expect(repo.lastIdentity, isNull);
 
     await tester.binding.setSurfaceSize(null);

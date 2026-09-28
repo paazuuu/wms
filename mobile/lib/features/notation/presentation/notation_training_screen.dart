@@ -1,0 +1,925 @@
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../../core/api/api_error_text.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/state_views.dart';
+import '../../../core/ui/status_pill.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../partners/application/trading_partner_providers.dart';
+import '../../partners/domain/trading_partner.dart';
+import '../../product/domain/product.dart';
+import '../../product/presentation/product_picker_sheet.dart';
+import '../application/notation_providers.dart';
+import '../domain/notation.dart';
+import 'notation_labels.dart';
+
+/// Teaching the system each trading company's way of writing things, before
+/// their goods arrive (0105/0106).
+///
+///   * 事前学習 — a sample Excel, CSV, PDF or photo from one company is read
+///     exactly as a real import would read it (headings mapped, read twice by
+///     the AI, name and 品番 split, lines matched to our products) but nothing
+///     is booked. What went wrong is shown line by line; columns and products
+///     can be corrected; then what it showed is taught.
+///   * 方言辞書 — every way of writing learned so far, each with its own id.
+///   * 列見出し — the column headings known, everyone's and each company's.
+///   * 履歴・傾向 — past runs, and per company what its documents get wrong.
+class NotationTrainingScreen extends ConsumerWidget {
+  const NotationTrainingScreen({super.key, this.pickFile});
+
+  /// Injectable for tests; defaults to the platform picker.
+  final Future<PlatformFile?> Function()? pickFile;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.ntTitle),
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: [
+              Tab(key: const ValueKey('nt-tab-train'), text: l10n.ntTabTrain),
+              Tab(key: const ValueKey('nt-tab-dialects'), text: l10n.ntTabDialects),
+              Tab(key: const ValueKey('nt-tab-columns'), text: l10n.ntTabColumns),
+              Tab(key: const ValueKey('nt-tab-history'), text: l10n.ntTabHistory),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _TrainTab(pickFile: pickFile),
+            const _DialectsTab(),
+            const _ColumnsTab(),
+            const _HistoryTab(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The companies whose documents can be taught (all active partners).
+final _partnersProvider = FutureProvider.autoDispose<List<TradingPartner>>((ref) async {
+  final r = await ref.watch(tradingPartnerRepositoryProvider).list();
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+class _PartnerDropdown extends ConsumerWidget {
+  const _PartnerDropdown({required this.value, required this.onChanged, this.allowAll = false});
+
+  final int? value;
+  final ValueChanged<int?> onChanged;
+  final bool allowAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final partners = ref.watch(_partnersProvider).valueOrNull ?? const <TradingPartner>[];
+    final ids = partners.map((p) => p.id).toSet();
+    return DropdownButtonFormField<int?>(
+      key: ValueKey('nt-partner-${allowAll ? 'filter' : 'train'}'),
+      initialValue: ids.contains(value) ? value : null,
+      isExpanded: true,
+      decoration: InputDecoration(labelText: l10n.ntPartner),
+      items: [
+        if (allowAll) DropdownMenuItem<int?>(value: null, child: Text(l10n.ntAllPartners)),
+        for (final p in partners) DropdownMenuItem<int?>(value: p.id, child: Text(p.name)),
+      ],
+      onChanged: onChanged,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 事前学習
+// ---------------------------------------------------------------------------
+
+class _TrainTab extends ConsumerStatefulWidget {
+  const _TrainTab({this.pickFile});
+
+  final Future<PlatformFile?> Function()? pickFile;
+
+  @override
+  ConsumerState<_TrainTab> createState() => _TrainTabState();
+}
+
+class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveClientMixin {
+  int? _partnerId;
+  PlatformFile? _file;
+  bool _busy = false;
+  TrainingRead? _read;
+
+  /// Columns corrected by hand since the last read.
+  final Map<int, ColumnField> _overrides = {};
+
+  @override
+  bool get wantKeepAlive => true;
+
+  void _snack(String m, {bool danger = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(m),
+        backgroundColor: danger ? Theme.of(context).colorScheme.error : null,
+      ));
+  }
+
+  Future<void> _pick() async {
+    final f = widget.pickFile != null
+        ? await widget.pickFile!()
+        : (await FilePicker.platform.pickFiles(
+            withData: true,
+            type: FileType.custom,
+            allowedExtensions: const ['xlsx', 'xlsm', 'xls', 'csv', 'pdf', 'jpg', 'jpeg', 'png', 'webp'],
+          ))
+            ?.files
+            .firstOrNull;
+    if (f != null) setState(() => _file = f);
+  }
+
+  Future<void> _readFile() async {
+    final l10n = AppLocalizations.of(context);
+    final f = _file;
+    if (_partnerId == null) {
+      _snack(l10n.ntChoosePartner, danger: true);
+      return;
+    }
+    if (f == null || f.bytes == null) {
+      _snack(l10n.ntChooseFile, danger: true);
+      return;
+    }
+    setState(() => _busy = true);
+    final r = await ref.read(notationRepositoryProvider).readSample(
+          partnerId: _partnerId!,
+          file: MultipartFile.fromBytes(f.bytes!, filename: f.name),
+          overrides: Map.of(_overrides),
+        );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    r.when(
+      success: (read) {
+        setState(() {
+          _read = read;
+          _overrides.clear();
+        });
+        ref.invalidate(trainingRunsProvider);
+        ref.invalidate(trainingStatsProvider);
+      },
+      failure: (e) => _snack(humanizeApiErrorMessage(l10n, e.message), danger: true),
+    );
+  }
+
+  Future<void> _pickProduct(ReadLineResult line) async {
+    final l10n = AppLocalizations.of(context);
+    final p = await showModalBottomSheet<Product>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => ProductPickerSheet(
+        initialQuery: line.productName ?? line.productCode ?? line.rawJanCode ?? '',
+        subtitle: l10n.qcSupplierNotation(_writing(line)),
+      ),
+    );
+    if (p == null || !mounted || _read == null) return;
+    setState(() {
+      _read = _read!.copyWith(lines: [
+        for (final l in _read!.lines)
+          if (identical(l, line))
+            l.withProduct(ResolvedProduct(
+                id: p.id, janCode: p.janCode, name: p.name, sku: p.sku, maker: p.maker))
+          else
+            l,
+      ]);
+    });
+  }
+
+  Future<void> _learn() async {
+    final l10n = AppLocalizations.of(context);
+    final read = _read;
+    if (read == null || _partnerId == null) return;
+    setState(() => _busy = true);
+    final r = await ref.read(notationRepositoryProvider).learn(
+          partnerId: _partnerId!,
+          trainingId: read.trainingId,
+          lines: read.lines,
+          columns: read.columns,
+        );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    r.when(
+      success: (res) {
+        _snack(l10n.ntLearned(res.learned, res.added, res.conflicts));
+        setState(() {
+          _read = null;
+          _file = null;
+        });
+        ref.invalidate(trainingRunsProvider);
+        ref.invalidate(trainingStatsProvider);
+        ref.invalidate(dialectsProvider);
+        ref.invalidate(columnAliasesProvider);
+      },
+      failure: (e) => _snack(humanizeApiErrorMessage(l10n, e.message), danger: true),
+    );
+  }
+
+  Future<void> _discard() async {
+    final id = _read?.trainingId;
+    if (id != null) await ref.read(notationRepositoryProvider).discard(id);
+    if (!mounted) return;
+    setState(() {
+      _read = null;
+      _overrides.clear();
+    });
+    ref.invalidate(trainingRunsProvider);
+    ref.invalidate(trainingStatsProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final read = _read;
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            children: [
+              Text(l10n.ntTrainIntro,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              const SizedBox(height: AppSpacing.md),
+              _PartnerDropdown(
+                value: _partnerId,
+                onChanged: (v) => setState(() {
+                  _partnerId = v;
+                  _read = null;
+                }),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('nt-pick'),
+                      onPressed: _busy ? null : _pick,
+                      icon: const Icon(Icons.attach_file),
+                      label: Text(_file?.name ?? l10n.ntPickFile, overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  FilledButton.icon(
+                    key: const ValueKey('nt-read'),
+                    onPressed: _busy ? null : _readFile,
+                    icon: const Icon(Icons.auto_awesome),
+                    label: Text(_overrides.isEmpty ? l10n.ntRead : l10n.ntReread),
+                  ),
+                ],
+              ),
+              if (_busy) ...[
+                const SizedBox(height: AppSpacing.md),
+                const LinearProgressIndicator(),
+                const SizedBox(height: AppSpacing.xs),
+                Text(l10n.ntReading, style: theme.textTheme.bodySmall),
+              ],
+              if (read != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _Summary(read: read),
+                const SizedBox(height: AppSpacing.lg),
+                _ColumnsCard(
+                  columns: read.columns,
+                  overrides: _overrides,
+                  onChange: (i, f) => setState(() {
+                    if (f == null) {
+                      _overrides.remove(i);
+                    } else {
+                      _overrides[i] = f;
+                    }
+                  }),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(l10n.ntLinesTitle(read.lines.length), style: theme.textTheme.titleSmall),
+                const SizedBox(height: AppSpacing.sm),
+                for (final line in read.lines)
+                  _LineCard(line: line, onPick: _busy ? null : () => _pickProduct(line)),
+              ],
+            ],
+          ),
+        ),
+        if (read != null)
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  TextButton(
+                    key: const ValueKey('nt-discard'),
+                    onPressed: _busy ? null : _discard,
+                    child: Text(l10n.ntDiscard),
+                  ),
+                  const Spacer(),
+                  FilledButton.icon(
+                    key: const ValueKey('nt-learn'),
+                    onPressed: _busy || read.resolvedCount == 0 ? null : _learn,
+                    icon: const Icon(Icons.school_outlined),
+                    label: Text(l10n.ntLearn(read.resolvedCount)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// How the company wrote a line, in one string.
+String _writing(ReadLineResult l) => [
+      if (l.rawJanCode != null) 'JAN ${l.rawJanCode}',
+      if (l.maker != null) l.maker!,
+      if (l.productName != null) l.productName!,
+      if (l.productCode != null) l.productCode!,
+    ].join(' · ');
+
+class _Summary extends StatelessWidget {
+  const _Summary({required this.read});
+
+  final TrainingRead read;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final flags = read.flagCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              children: [
+                StatusPill(
+                    key: const ValueKey('nt-summary-lines'),
+                    tone: StatusTone.neutral,
+                    label: l10n.ntSummaryLines(read.lines.length),
+                    dense: true),
+                StatusPill(
+                    key: const ValueKey('nt-summary-resolved'),
+                    tone: read.resolvedCount == read.lines.length ? StatusTone.success : StatusTone.info,
+                    label: l10n.ntSummaryResolved(read.resolvedCount, read.lines.length),
+                    dense: true),
+                if (read.reviewCount > 0)
+                  StatusPill(
+                      key: const ValueKey('nt-summary-review'),
+                      tone: StatusTone.warning,
+                      label: l10n.ntSummaryReview(read.reviewCount),
+                      dense: true),
+                StatusPill(
+                    tone: read.verified ? StatusTone.success : StatusTone.warning,
+                    icon: Icons.fact_check_outlined,
+                    label: read.source == 'gemini'
+                        ? (read.verified ? l10n.ntReadTwice : l10n.ntReadOnce)
+                        : l10n.ntReadSheet,
+                    dense: true),
+              ],
+            ),
+            if (flags.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(l10n.ntErrorsTitle, style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: AppSpacing.xs),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (final e in flags)
+                    StatusPill(
+                      tone: NotationFlag.isProblem(e.key) ? StatusTone.warning : StatusTone.neutral,
+                      label: '${flagLabel(AppLocalizations.of(context), e.key)} ${e.value}',
+                      dense: true,
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ColumnsCard extends StatelessWidget {
+  const _ColumnsCard({required this.columns, required this.overrides, required this.onChange});
+
+  final List<ReadColumn> columns;
+  final Map<int, ColumnField> overrides;
+  final void Function(int index, ColumnField? field) onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    if (columns.isEmpty) return const SizedBox.shrink();
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.ntColumnsTitle, style: theme.textTheme.titleSmall),
+            Text(l10n.ntColumnsHint,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            const SizedBox(height: AppSpacing.sm),
+            for (final c in columns)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(c.header.isEmpty ? l10n.ntNoHeader : c.header,
+                              style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            [
+                              columnSourceLabel(l10n, overrides.containsKey(c.index) ? 'override' : c.source),
+                              if (c.conflict) l10n.ntAiThinks(columnFieldLabel(l10n, c.aiField)),
+                            ].join(' · '),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                                color: c.conflict ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButton<ColumnField?>(
+                        key: ValueKey('nt-col-${c.index}'),
+                        isExpanded: true,
+                        value: overrides[c.index] ?? c.field,
+                        items: [
+                          DropdownMenuItem<ColumnField?>(value: null, child: Text(l10n.ntFieldUnknown)),
+                          for (final f in ColumnField.values)
+                            DropdownMenuItem<ColumnField?>(value: f, child: Text(columnFieldLabel(l10n, f))),
+                        ],
+                        onChanged: (f) => onChange(c.index, f == c.field ? null : f),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LineCard extends StatelessWidget {
+  const _LineCard({required this.line, this.onPick});
+
+  final ReadLineResult line;
+  final VoidCallback? onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final p = line.product;
+    return Card(
+      key: ValueKey('nt-line-${line.row}'),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Ours, or that there is none yet.
+            Row(
+              children: [
+                Expanded(
+                  child: p == null
+                      ? Text(l10n.ntNotMatched, style: theme.textTheme.titleSmall?.copyWith(color: scheme.error))
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.name, style: theme.textTheme.titleSmall),
+                            Text(
+                              [p.janCode, if (p.sku != null) l10n.qcOwnSku(p.sku!), if (p.maker != null) p.maker!]
+                                  .join(' · '),
+                              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                ),
+                if (line.quantity > 0) Text(l10n.dashUnitsCount(line.quantity)),
+                TextButton(
+                  key: ValueKey('nt-pick-product-${line.row}'),
+                  onPressed: onPick,
+                  child: Text(p == null ? l10n.ntChooseProduct : l10n.ntChangeProduct),
+                ),
+              ],
+            ),
+            // The company's own writing, faded.
+            Text(
+              l10n.qcSupplierNotation(_writing(line)),
+              key: ValueKey('nt-writing-${line.row}'),
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: 0.55)),
+            ),
+            if (line.rawNameCode != null)
+              Text(l10n.ntSplitFrom(line.rawNameCode!),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: 0.55))),
+            if (p != null)
+              Text(matchedByLabel(l10n, line.matchedBy),
+                  style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
+            if (line.flags.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (final f in line.flags)
+                    if (f != 'unresolved')
+                      StatusPill(
+                        tone: NotationFlag.isProblem(f) ? StatusTone.warning : StatusTone.neutral,
+                        label: flagLabel(l10n, f),
+                        dense: true,
+                      ),
+                ],
+              ),
+            ],
+            for (final e in line.alternatives.entries)
+              Text(l10n.ntOtherReading(alternativeLabel(l10n, e.key), e.value ?? '—'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 方言辞書
+// ---------------------------------------------------------------------------
+
+class _DialectsTab extends ConsumerWidget {
+  const _DialectsTab();
+
+  Future<void> _act(BuildContext context, WidgetRef ref, Future<dynamic> Function() op) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final r = await op();
+    r.when(
+      success: (_) => ref.invalidate(dialectsProvider),
+      failure: (f) => messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final field = ref.watch(dialectFieldProvider);
+    final repo = ref.read(notationRepositoryProvider);
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        Text(l10n.ntDialectsIntro,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        const SizedBox(height: AppSpacing.md),
+        _PartnerDropdown(
+          value: ref.watch(dialectPartnerProvider),
+          allowAll: true,
+          onChanged: (v) => ref.read(dialectPartnerProvider.notifier).state = v,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          children: [
+            for (final f in const [null, 'jan', 'maker', 'name', 'code'])
+              ChoiceChip(
+                key: ValueKey('nt-dialect-field-${f ?? 'all'}'),
+                label: Text(f == null ? l10n.ntAllFields : dialectFieldLabel(l10n, f)),
+                selected: field == f,
+                onSelected: (_) => ref.read(dialectFieldProvider.notifier).state = f,
+              ),
+            FilterChip(
+              key: const ValueKey('nt-dialect-unconfirmed'),
+              label: Text(l10n.ntUnconfirmedOnly),
+              selected: ref.watch(dialectUnconfirmedProvider),
+              onSelected: (v) => ref.read(dialectUnconfirmedProvider.notifier).state = v,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        TextField(
+          key: const ValueKey('nt-dialect-search'),
+          decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.ntDialectSearch),
+          onSubmitted: (v) => ref.read(dialectSearchProvider.notifier).state = v,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ...ref.watch(dialectsProvider).when(
+              loading: () => [const LinearProgressIndicator()],
+              error: (e, _) => [Text(humanizeApiErrorMessage(l10n, '$e'))],
+              data: (rows) => rows.isEmpty
+                  ? [Padding(padding: const EdgeInsets.all(AppSpacing.lg), child: Text(l10n.ntDialectsEmpty))]
+                  : [
+                      for (final d in rows)
+                        Card(
+                          key: ValueKey('nt-dialect-${d.id}'),
+                          child: ListTile(
+                            title: Text(d.rawValues.isEmpty ? d.rawValue : d.rawValues.join(' / ')),
+                            subtitle: Text([
+                              '${d.code} · ${dialectFieldLabel(l10n, d.field)}',
+                              '→ ${d.field == 'maker' ? (d.makerName ?? '') : [d.productName, d.productJan].whereType<String>().join(' · ')}',
+                              [d.partnerName ?? l10n.ntAllPartners, l10n.ntSeen(d.seenCount)].join(' · '),
+                            ].join('\n')),
+                            isThreeLine: true,
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!d.confirmed)
+                                  IconButton(
+                                    tooltip: l10n.ntConfirm,
+                                    icon: const Icon(Icons.check_circle_outline),
+                                    onPressed: () => _act(context, ref, () => repo.confirmDialect(d.id)),
+                                  )
+                                else
+                                  Icon(Icons.verified_outlined, color: theme.colorScheme.primary, size: 20),
+                                if (d.field != 'maker')
+                                  IconButton(
+                                    tooltip: l10n.ntChangeProduct,
+                                    icon: const Icon(Icons.swap_horiz),
+                                    onPressed: () async {
+                                      final p = await showModalBottomSheet<Product>(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        showDragHandle: true,
+                                        builder: (_) => ProductPickerSheet(
+                                            initialQuery: d.rawValue, subtitle: d.rawValue),
+                                      );
+                                      if (p != null && context.mounted) {
+                                        await _act(context, ref, () => repo.confirmDialect(d.id, productId: p.id));
+                                      }
+                                    },
+                                  ),
+                                IconButton(
+                                  tooltip: l10n.actionDelete,
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: () => _act(context, ref, () => repo.removeDialect(d.id)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+            ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 列見出し
+// ---------------------------------------------------------------------------
+
+class _ColumnsTab extends ConsumerWidget {
+  const _ColumnsTab();
+
+  Future<void> _add(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final header = TextEditingController();
+    var field = ColumnField.productName;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(l10n.ntAddColumn),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                key: const ValueKey('nt-column-header'),
+                controller: header,
+                decoration: InputDecoration(labelText: l10n.ntColumnHeader),
+              ),
+              DropdownButtonFormField<ColumnField>(
+                key: const ValueKey('nt-column-field'),
+                initialValue: field,
+                items: [
+                  for (final f in ColumnField.values)
+                    DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f))),
+                ],
+                onChanged: (v) => setState(() => field = v ?? field),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(l10n.actionCancel)),
+            FilledButton(
+              key: const ValueKey('nt-column-save'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.actionSave),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || header.text.trim().isEmpty) return;
+    final r = await ref.read(notationRepositoryProvider).setColumnAlias(
+        partnerId: ref.read(dialectPartnerProvider), header: header.text.trim(), field: field);
+    header.dispose();
+    r.when(success: (_) => ref.invalidate(columnAliasesProvider), failure: (_) {});
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        Text(l10n.ntColumnsIntro,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        const SizedBox(height: AppSpacing.md),
+        Row(
+          children: [
+            Expanded(
+              child: _PartnerDropdown(
+                value: ref.watch(dialectPartnerProvider),
+                allowAll: true,
+                onChanged: (v) => ref.read(dialectPartnerProvider.notifier).state = v,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            FilledButton.tonalIcon(
+              key: const ValueKey('nt-add-column'),
+              onPressed: () => _add(context, ref),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.ntAddColumn),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ...ref.watch(columnAliasesProvider).when(
+              loading: () => [const LinearProgressIndicator()],
+              error: (e, _) => [Text(humanizeApiErrorMessage(l10n, '$e'))],
+              data: (rows) => [
+                for (final a in rows)
+                  ListTile(
+                    key: ValueKey('nt-alias-${a.id}'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(a.header),
+                    subtitle: Text('${a.partnerName ?? l10n.ntCommon} · ${columnSourceLabel(l10n, a.isSeed ? 'global' : 'partner')}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('→ ${columnFieldLabel(l10n, a.field)}'),
+                        if (!a.isSeed)
+                          IconButton(
+                            tooltip: l10n.actionDelete,
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () async {
+                              await ref.read(notationRepositoryProvider).removeColumnAlias(a.id);
+                              ref.invalidate(columnAliasesProvider);
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 履歴・傾向
+// ---------------------------------------------------------------------------
+
+class _HistoryTab extends ConsumerWidget {
+  const _HistoryTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final df = DateFormat('yyyy-MM-dd HH:mm');
+    final pct = NumberFormat.percentPattern();
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(trainingStatsProvider);
+        ref.invalidate(trainingRunsProvider);
+      },
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          Text(l10n.ntStatsTitle, style: theme.textTheme.titleSmall),
+          const SizedBox(height: AppSpacing.sm),
+          ...ref.watch(trainingStatsProvider).when(
+                loading: () => [const LinearProgressIndicator()],
+                error: (e, _) => [Text(humanizeApiErrorMessage(l10n, '$e'))],
+                data: (rows) => rows.isEmpty
+                    ? [Text(l10n.ntHistoryEmpty)]
+                    : [
+                        for (final s in rows)
+                          Card(
+                            key: ValueKey('nt-stats-${s.partnerId}'),
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(s.partnerName ?? l10n.ntUnknownPartner, style: theme.textTheme.titleSmall),
+                                  Text(
+                                    l10n.ntStatsLine(s.runs, s.lines,
+                                        s.lines == 0 ? '—' : pct.format(s.resolved / s.lines), s.dialects, s.columns),
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                  if (s.flags.isNotEmpty) ...[
+                                    const SizedBox(height: AppSpacing.xs),
+                                    Wrap(
+                                      spacing: AppSpacing.xs,
+                                      runSpacing: AppSpacing.xs,
+                                      children: [
+                                        for (final e in (s.flags.entries.toList()
+                                          ..sort((a, b) => b.value.compareTo(a.value))))
+                                          StatusPill(
+                                            tone: NotationFlag.isProblem(e.key)
+                                                ? StatusTone.warning
+                                                : StatusTone.neutral,
+                                            label: '${flagLabel(l10n, e.key)} ${e.value}',
+                                            dense: true,
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+              ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(l10n.ntRunsTitle, style: theme.textTheme.titleSmall),
+          ...ref.watch(trainingRunsProvider).when(
+                loading: () => [const SizedBox.shrink()],
+                error: (e, _) => [Text(humanizeApiErrorMessage(l10n, '$e'))],
+                data: (rows) => rows.isEmpty
+                    ? [
+                        SizedBox(
+                          height: 200,
+                          child: EmptyStateView(icon: Icons.school_outlined, title: l10n.ntHistoryEmpty),
+                        ),
+                      ]
+                    : [
+                        for (final r in rows)
+                          ListTile(
+                            key: ValueKey('nt-run-${r.id}'),
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(r.learned ? Icons.school : Icons.description_outlined),
+                            title: Text(r.fileName ?? '#${r.id}'),
+                            subtitle: Text([
+                              r.partnerName ?? l10n.ntUnknownPartner,
+                              if (r.createdAt != null) df.format(r.createdAt!),
+                              l10n.ntSummaryResolved(r.resolvedCount, r.lineCount),
+                            ].join(' · ')),
+                            trailing: StatusPill(
+                              tone: r.learned
+                                  ? StatusTone.success
+                                  : r.status == 'discarded'
+                                      ? StatusTone.neutral
+                                      : StatusTone.info,
+                              label: r.learned
+                                  ? l10n.ntStatusLearned
+                                  : r.status == 'discarded'
+                                      ? l10n.ntStatusDiscarded
+                                      : l10n.ntStatusRead,
+                              dense: true,
+                            ),
+                          ),
+                      ],
+              ),
+        ],
+      ),
+    );
+  }
+}

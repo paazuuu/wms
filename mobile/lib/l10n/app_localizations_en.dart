@@ -5453,4 +5453,335 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get whInspectionApplies =>
       'Applies to arrivals from suppliers, not transfers between warehouses.';
+
+  @override
+  String get productMakerRequired =>
+      'Enter the maker (every product needs one)';
+
+  @override
+  String get productPickerTitle => 'Choose our product';
+
+  @override
+  String get featNotationTraining => 'Notation training';
+
+  @override
+  String get featNotationTrainingDesc =>
+      'Teach each trading company\'s way of writing from sample files';
+
+  @override
+  String get ntTitle => 'Notation training';
+
+  @override
+  String get ntTabTrain => 'Train';
+
+  @override
+  String get ntTabDialects => 'Dialects';
+
+  @override
+  String get ntTabColumns => 'Column headings';
+
+  @override
+  String get ntTabHistory => 'History';
+
+  @override
+  String get ntPartner => 'Trading company';
+
+  @override
+  String get ntAllPartners => 'All (shared)';
+
+  @override
+  String get ntChoosePartner => 'Choose the trading company';
+
+  @override
+  String get ntChooseFile => 'Choose a file';
+
+  @override
+  String ntLearned(int learned, int added, int conflicts) {
+    return 'Learned $learned (new $added, conflicts $conflicts)';
+  }
+
+  @override
+  String get ntTrainIntro =>
+      'Read a sample Excel, CSV, PDF or photo from a trading company exactly as a real import would (read twice by AI, name and code split, matched to our products) without booking anything. Check and correct it, then teach it.';
+
+  @override
+  String get ntPickFile => 'Choose a sample file';
+
+  @override
+  String get ntRead => 'Read and check';
+
+  @override
+  String get ntReread => 'Read again with the corrected columns';
+
+  @override
+  String get ntReading => 'Reading (a PDF or photo is read twice by the AI)…';
+
+  @override
+  String ntLinesTitle(int count) {
+    return '$count lines';
+  }
+
+  @override
+  String get ntDiscard => 'Discard';
+
+  @override
+  String ntLearn(int count) {
+    return 'Teach $count lines';
+  }
+
+  @override
+  String ntSummaryLines(int count) {
+    return '$count lines';
+  }
+
+  @override
+  String ntSummaryResolved(int done, int total) {
+    return 'Matched $done/$total';
+  }
+
+  @override
+  String ntSummaryReview(int count) {
+    return '$count to check';
+  }
+
+  @override
+  String get ntReadTwice => 'Read twice by the AI and compared';
+
+  @override
+  String get ntReadOnce => 'The check reading failed (read once)';
+
+  @override
+  String get ntReadSheet => 'Read from the sheet (columns checked by the AI)';
+
+  @override
+  String get ntErrorsTitle => 'Problems found';
+
+  @override
+  String get ntColumnsTitle => 'How the columns were read';
+
+  @override
+  String get ntColumnsHint =>
+      'Correct any that are wrong and read again. Teaching remembers them as this company\'s headings.';
+
+  @override
+  String get ntNoHeader => '(no heading)';
+
+  @override
+  String ntAiThinks(String field) {
+    return 'The AI thinks: $field';
+  }
+
+  @override
+  String get ntNotMatched => 'No product of ours matched';
+
+  @override
+  String get ntChooseProduct => 'Choose ours';
+
+  @override
+  String get ntChangeProduct => 'Change';
+
+  @override
+  String ntSplitFrom(String text) {
+    return 'Split from: $text';
+  }
+
+  @override
+  String ntOtherReading(String field, String value) {
+    return 'Other reading ($field): $value';
+  }
+
+  @override
+  String get ntDialectsIntro =>
+      'Each company\'s ways of writing and the product or maker of ours they mean, each with its own id (D-000000).';
+
+  @override
+  String get ntAllFields => 'All';
+
+  @override
+  String get ntUnconfirmedOnly => 'Unconfirmed only';
+
+  @override
+  String get ntDialectSearch => 'Search by writing, name or JAN';
+
+  @override
+  String get ntDialectsEmpty => 'Nothing learned yet';
+
+  @override
+  String ntSeen(int count) {
+    return 'seen $count×';
+  }
+
+  @override
+  String get ntConfirm => 'Confirm';
+
+  @override
+  String get ntAddColumn => 'Add heading';
+
+  @override
+  String get ntColumnHeader => 'Heading (as the company writes it)';
+
+  @override
+  String get ntColumnsIntro =>
+      'Column headings and what they mean — Japanese (kanji, kana) or English, mapped to our fields. Choose a company to see its own.';
+
+  @override
+  String get ntCommon => 'Shared';
+
+  @override
+  String get ntStatsTitle => 'By trading company';
+
+  @override
+  String get ntHistoryEmpty => 'No training runs yet';
+
+  @override
+  String get ntUnknownPartner => 'No company';
+
+  @override
+  String ntStatsLine(
+      int runs, int lines, String rate, int dialects, int columns) {
+    return '$runs runs · $lines lines · $rate matched · $dialects dialects · $columns headings';
+  }
+
+  @override
+  String get ntRunsTitle => 'Runs';
+
+  @override
+  String get ntStatusLearned => 'Learned';
+
+  @override
+  String get ntStatusDiscarded => 'Discarded';
+
+  @override
+  String get ntStatusRead => 'Not taught';
+
+  @override
+  String get ntFieldJan => 'JAN';
+
+  @override
+  String get ntFieldMaker => 'Maker';
+
+  @override
+  String get ntFieldName => 'Name';
+
+  @override
+  String get ntFieldCode => 'Code';
+
+  @override
+  String get ntFieldNameCode => 'Name + code (one cell)';
+
+  @override
+  String get ntFieldQuantity => 'Quantity';
+
+  @override
+  String get ntFieldCaseQuantity => 'Per case';
+
+  @override
+  String get ntFieldCases => 'Cases';
+
+  @override
+  String get ntFieldUnitPrice => 'Unit price';
+
+  @override
+  String get ntFieldAmount => 'Amount';
+
+  @override
+  String get ntFieldSpec => 'Spec';
+
+  @override
+  String get ntFieldTaxRate => 'Tax rate';
+
+  @override
+  String get ntFieldDate => 'Date';
+
+  @override
+  String get ntFieldIgnore => 'Ignore';
+
+  @override
+  String get ntFieldUnknown => 'Unknown';
+
+  @override
+  String get ntSourcePartner => 'Learned for this company';
+
+  @override
+  String get ntSourceGlobal => 'Shared heading';
+
+  @override
+  String get ntSourceContains => 'Guessed from part of the heading';
+
+  @override
+  String get ntSourceValues => 'Judged from the values';
+
+  @override
+  String get ntSourceAi => 'Judged by the AI';
+
+  @override
+  String get ntSourceOverride => 'Corrected by hand';
+
+  @override
+  String get ntSourceNone => 'Not recognised';
+
+  @override
+  String get ntFlagUnresolved => 'No product of ours';
+
+  @override
+  String get ntFlagJanCheck => 'JAN check digit wrong';
+
+  @override
+  String get ntFlagNoJan => 'No JAN';
+
+  @override
+  String get ntFlagNoMaker => 'No maker';
+
+  @override
+  String get ntFlagNoQuantity => 'No quantity';
+
+  @override
+  String get ntFlagAmount => 'Amount ≠ qty × price';
+
+  @override
+  String get ntFlagAiDisagree => 'The two AI readings differ';
+
+  @override
+  String ntFlagAiDisagreeOn(String field) {
+    return 'AI readings differ: $field';
+  }
+
+  @override
+  String get ntFlagSplitDisagree => 'Name/code split disagrees';
+
+  @override
+  String get ntFlagSplitSingle => 'Name/code split (one method only)';
+
+  @override
+  String get ntFlagSplitFailed => 'Could not split name/code';
+
+  @override
+  String get ntFlagAdded => 'Line added by the check';
+
+  @override
+  String get ntFlagDropped => 'Line dropped by the check';
+
+  @override
+  String get ntFlagNotVerified => 'Not checked';
+
+  @override
+  String get ntFlagQtyFromCases => 'Qty = per case × cases';
+
+  @override
+  String get ntMatchJan => 'Matched by JAN';
+
+  @override
+  String get ntMatchDialect => 'Matched by a learned dialect';
+
+  @override
+  String get ntMatchSku => 'Matched by our code';
+
+  @override
+  String get ntMatchName => 'Matched by our name';
+
+  @override
+  String get ntMatchManual => 'Chosen by hand';
+
+  @override
+  String get ntMatchNone => '';
 }

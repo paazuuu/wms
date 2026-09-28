@@ -1974,6 +1974,7 @@ class FakeProductRepository implements ProductRepository {
   Future<ApiResult<int>> create({
     required String janCode,
     required String name,
+    required String maker,
     String? category,
     double? price,
   }) async {
@@ -1983,7 +1984,7 @@ class FakeProductRepository implements ProductRepository {
     final id = _products.length + 1;
     _products = [
       ..._products,
-      Product(id: id, janCode: janCode, name: name, category: category, price: price),
+      Product(id: id, janCode: janCode, name: name, maker: maker, category: category, price: price),
     ];
     return ApiSuccess(id);
   }

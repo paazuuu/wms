@@ -7,6 +7,7 @@ import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../demand/presentation/open_demand_screen.dart';
 import '../../exceptions/presentation/exception_list_screen.dart';
+import '../../notation/presentation/notation_training_screen.dart';
 import '../../qc/presentation/held_stock_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
@@ -277,6 +278,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _reports,
             requiredAnyOf: ['report.view', 'report.manage'],
           ),
+          // Teaching each trading company's way of writing before its goods
+          // arrive (0105/0106): sample files read, checked and learned.
+          FeatureEntry(
+            id: 'notation_training',
+            icon: Icons.school_outlined,
+            status: FeatureStatus.ready,
+            builder: _notationTraining,
+            requiredAnyOf: ['product.manage', 'receiving.confirm'],
+          ),
         ],
       ),
     ];
@@ -322,6 +332,7 @@ Widget _partners(BuildContext _) => const TradingPartnerListScreen();
 
 /// Top-level (const-referenceable) builder for the Report Builder feature.
 Widget _reports(BuildContext _) => const ReportBuilderScreen();
+Widget _notationTraining(BuildContext _) => const NotationTrainingScreen();
 
 /// Top-level (const-referenceable) builder for the Put-away feature.
 Widget _putaway(BuildContext _) => const PutawayQueueScreen();
