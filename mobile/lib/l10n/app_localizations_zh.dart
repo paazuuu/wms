@@ -6732,4 +6732,280 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scNoChange => '无变化';
+
+  @override
+  String get aiFieldProduct => '本公司商品';
+
+  @override
+  String get aiBandAuto => '自动候选';
+
+  @override
+  String get aiBandReview => '建议确认';
+
+  @override
+  String get aiBandHuman => '需人工确认';
+
+  @override
+  String get aiSaved => '已保存阈值';
+
+  @override
+  String get featAiSettings => 'AI设置';
+
+  @override
+  String get featAiSettingsDesc => '读取置信度阈值';
+
+  @override
+  String get aiSettingsIntro =>
+      '读取结果的每个项目都有置信度（根据AI两次读取是否一致、JAN校验码、品名与品番的拆分、数量×单价＝金额等计算）。按所在区间分为自动候选、建议确认、需人工确认。';
+
+  @override
+  String get aiAutoThreshold => '自动候选下限';
+
+  @override
+  String get aiReviewThreshold => '建议确认下限（低于此为需人工确认）';
+
+  @override
+  String get aiExample => '示例';
+
+  @override
+  String get featDocExceptions => '单据差异';
+
+  @override
+  String get featDocExceptionsDesc => '采购单、发票、送货与检品的不一致';
+
+  @override
+  String get docFlagNotOrdered => '采购单中没有';
+
+  @override
+  String get docFlagNotInvoiced => '发票中没有';
+
+  @override
+  String get docFlagInvoiceQty => '发票数量与采购不同';
+
+  @override
+  String get docFlagInvoicePrice => '发票单价与采购不同';
+
+  @override
+  String get docFlagShortDelivery => '收货少于发票';
+
+  @override
+  String get docFlagInspectShort => '检品数少于收货';
+
+  @override
+  String get docFlagDefective => '有不良';
+
+  @override
+  String get docInvoiceOpen => '未核对';
+
+  @override
+  String get docInvoiceMatched => '一致';
+
+  @override
+  String get docInvoiceMismatch => '有差异';
+
+  @override
+  String get docInvoiceApproved => '已批准';
+
+  @override
+  String get docInvoiceVoid => '作废';
+
+  @override
+  String get docMatchOk => '核对一致';
+
+  @override
+  String get docMatchMismatch => '有差异';
+
+  @override
+  String get docMatchPending => '等待发票';
+
+  @override
+  String get docMatchTitle => '单据核对';
+
+  @override
+  String get docAddInvoice => '登记发票';
+
+  @override
+  String get docTolerance => '允许差';
+
+  @override
+  String get docToleranceQty => '数量';
+
+  @override
+  String get docTolerancePrice => '单价';
+
+  @override
+  String get docOrder => '采购';
+
+  @override
+  String get docInvoice => '发票';
+
+  @override
+  String get docDelivery => '送货';
+
+  @override
+  String get docReceived => '收货';
+
+  @override
+  String get docInspection => '检品';
+
+  @override
+  String get docOrderAmount => '采购金额';
+
+  @override
+  String get docInvoiceAmount => '发票金额';
+
+  @override
+  String get docDifference => '差额';
+
+  @override
+  String docFailedShort(String n) {
+    return '不良$n';
+  }
+
+  @override
+  String get docUnitPrice => '单价';
+
+  @override
+  String docApproved(int n) {
+    return '已批准（更新采购条件$n条）';
+  }
+
+  @override
+  String get docInvoices => '发票';
+
+  @override
+  String get docNoInvoices => '暂无发票';
+
+  @override
+  String get docLinesSuffix => '行';
+
+  @override
+  String get docReadFromDocument => '从单据读取';
+
+  @override
+  String get docApprove => '批准';
+
+  @override
+  String get docVoid => '作废';
+
+  @override
+  String get docInvoiceNumberRequired => '请输入发票编号';
+
+  @override
+  String get docSaved => '已保存';
+
+  @override
+  String get docReadFromFile => '从发票（PDF、照片、Excel）读取';
+
+  @override
+  String get docInvoiceNumber => '发票编号';
+
+  @override
+  String get docInvoiceDate => '发票日期';
+
+  @override
+  String get docInvoiceTotal => '发票合计';
+
+  @override
+  String get docLines => '明细';
+
+  @override
+  String get docAddLine => '添加明细';
+
+  @override
+  String get docSaveAndMatch => '保存并核对';
+
+  @override
+  String get docExceptionsTitle => '单据差异';
+
+  @override
+  String get docNoExceptions => '没有差异';
+
+  @override
+  String docExceptionCount(int count) {
+    return '需确认 $count项';
+  }
+
+  @override
+  String docDeltaQty(String n) {
+    return '数量 $n';
+  }
+
+  @override
+  String docDeltaPrice(String n) {
+    return '单价 $n';
+  }
+
+  @override
+  String get poDocumentMatch => '单据核对';
+
+  @override
+  String get ntTabVersions => '版本';
+
+  @override
+  String get ntSnapshot => '保存当前版本';
+
+  @override
+  String get ntSnapshotNote => '备注（例：新格式）';
+
+  @override
+  String ntRestored(int version, int dialects, int aliases, int conflicts) {
+    return '已恢复v$version（方言$dialects条、表头$aliases条、冲突$conflicts条）';
+  }
+
+  @override
+  String get ntVersionTraining => '事前学习';
+
+  @override
+  String get ntVersionRestore => '恢复';
+
+  @override
+  String get ntVersionManual => '手动保存';
+
+  @override
+  String get ntVersionsIntro =>
+      '按商社以编号保存词典（方言和表头）。每次学习自动保存，不会覆盖。恢复旧版本只补充当前缺少的内容；含义不同的写法不覆盖，作为冲突报告。';
+
+  @override
+  String get ntNoVersions => '暂无版本';
+
+  @override
+  String ntVersionCounts(int dialects, int aliases) {
+    return '方言$dialects・表头$aliases';
+  }
+
+  @override
+  String get ntVersionCurrent => '当前';
+
+  @override
+  String get ntRestore => '恢复';
+
+  @override
+  String syncSent(int count) {
+    return '已发送$count条';
+  }
+
+  @override
+  String syncOffline(int count) {
+    return '离线 — 记录保存在设备上，恢复网络后发送（未发送 $count条）';
+  }
+
+  @override
+  String syncPending(int count) {
+    return '未发送记录 $count条';
+  }
+
+  @override
+  String get syncNow => '立即发送';
+
+  @override
+  String syncRefused(String reason) {
+    return '未能发送的记录：$reason';
+  }
+
+  @override
+  String get syncDismiss => '关闭';
+
+  @override
+  String get errorOffline => '无法连接。请在网络恢复后确认（计数和检品记录保存在设备上）。';
 }

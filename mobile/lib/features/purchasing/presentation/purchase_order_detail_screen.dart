@@ -9,6 +9,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
 import '../../delivery/presentation/reconciliation_screen.dart';
+import '../../documents/presentation/document_match_screen.dart';
 import '../../sales/presentation/sales_order_detail_screen.dart';
 import '../application/purchase_order_providers.dart';
 import '../domain/purchase_order.dart';
@@ -37,6 +38,14 @@ class PurchaseOrderDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(async.valueOrNull?.poNumber ?? l10n.poTitle),
         actions: [
+          IconButton(
+            key: const ValueKey('po-document-match'),
+            tooltip: l10n.poDocumentMatch,
+            icon: const Icon(Icons.difference_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => DocumentMatchScreen(purchaseOrderId: purchaseOrderId),
+            )),
+          ),
           if (deliveryPlanId != null)
             IconButton(
               tooltip: l10n.poOpenDeliveryPlan,

@@ -46,6 +46,10 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('serial-numbered line cannot be converted')) {
     return l10n.qcErrorSerialConvert;
   }
+  // No answer from the server at all (spec §58): say so plainly.
+  if (rawMessage.contains('No connection to the server')) {
+    return l10n.errorOffline;
+  }
   if (rawMessage.contains('is already completed')) {
     return l10n.errorInspectionCompleted;
   }

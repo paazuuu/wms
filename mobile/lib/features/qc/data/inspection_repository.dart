@@ -70,14 +70,22 @@ class InspectionRepositoryImpl implements InspectionRepository {
   /// writes go through the edge function (`_dio`), which is the only gate in
   /// front of RPCs granted to `service_role` alone; the held-stock read is an
   /// ordinary guarded RPC and goes straight to PostgREST (`_restDio`).
-  InspectionRepositoryImpl(this._dio, {Dio? restDio})
+  InspectionRepositoryImpl(this._dio, {Dio? restDio, this.onRaw})
       : _restDio = restDio ?? _dio;
 
   final Dio _dio;
   final Dio _restDio;
 
-  Inspection _one(dynamic responseData) => Inspection.fromJson(
-      ((responseData as Map)['data'] as Map).cast<String, dynamic>());
+  /// Handed each work list and inspection as read, so it can be kept on the
+  /// device for when the connection drops (spec §58).
+  final void Function(String key, Object? raw)? onRaw;
+
+  Inspection _one(dynamic responseData) {
+    final data = ((responseData as Map)['data'] as Map).cast<String, dynamic>();
+    final id = data['id'];
+    if (id != null) onRaw?.call('inspection_show:$id', data);
+    return Inspection.fromJson(data);
+  }
 
   @override
   Future<ApiResult<List<Inspection>>> list(
@@ -88,6 +96,7 @@ class InspectionRepositoryImpl implements InspectionRepository {
         if (warehouseId != null) 'warehouse_id': warehouseId,
       });
       final rows = (response.data as Map)['data'] as List? ?? const [];
+      onRaw?.call('inspection_list:${status ?? ''}:${warehouseId ?? ''}', rows);
       return ApiSuccess(rows
           .whereType<Map>()
           .map((e) => Inspection.fromJson(e.cast<String, dynamic>()))

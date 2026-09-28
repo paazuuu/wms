@@ -21,6 +21,8 @@ import '../domain/delivery_note.dart';
 import '../domain/attachment.dart';
 import '../domain/inspection.dart';
 import 'qc_result_ui.dart';
+import '../../../core/offline/pending_sync_banner.dart';
+import '../data/offline_inspection_repository.dart';
 
 /// One inspection: each received line with its count and pass/fail split, then
 /// a sticky action to close it.
@@ -64,13 +66,26 @@ class InspectionDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: async.when(
-        loading: () => LoadingView(message: l10n.loading),
-        error: (e, _) => ErrorStateView(
-          message: '$e',
-          onRetry: () => ref.invalidate(inspectionDetailProvider(inspectionId)),
-        ),
-        data: (inspection) => _Body(inspection: inspection),
+      body: Column(
+        children: [
+          // Counts made offline wait here until the network is back (§58).
+          PendingSyncBanner(onSync: () async {
+            final repo = ref.read(inspectionRepositoryProvider);
+            final sent = repo is OfflineInspectionRepository ? await repo.flush() : 0;
+            ref.invalidate(inspectionDetailProvider(inspectionId));
+            return sent;
+          }),
+          Expanded(
+            child: async.when(
+              loading: () => LoadingView(message: l10n.loading),
+              error: (e, _) => ErrorStateView(
+                message: '$e',
+                onRetry: () => ref.invalidate(inspectionDetailProvider(inspectionId)),
+              ),
+              data: (inspection) => _Body(inspection: inspection),
+            ),
+          ),
+        ],
       ),
     );
   }

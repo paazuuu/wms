@@ -6367,5 +6367,178 @@
   "scBlocked": "使用不可",
   "scErrorRouteLegs": "区間がつながっていません（次の区間は前の到着地から出発してください）",
   "scErrorNameRequired": "名称を入力してください",
-  "scNoChange": "変化はありません"
+  "scNoChange": "変化はありません",
+  "aiFieldProduct": "自社商品",
+  "aiBandAuto": "自動候補",
+  "aiBandReview": "確認推奨",
+  "aiBandHuman": "要確認",
+  "aiSaved": "しきい値を保存しました",
+  "featAiSettings": "AI設定",
+  "featAiSettingsDesc": "読み取りの確信度のしきい値",
+  "aiSettingsIntro": "書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。",
+  "aiAutoThreshold": "自動候補の下限",
+  "aiReviewThreshold": "確認推奨の下限（これ未満は要確認）",
+  "aiExample": "例",
+  "featDocExceptions": "書類の差異",
+  "featDocExceptionsDesc": "発注・請求書・納品・検品の食い違い",
+  "docFlagNotOrdered": "発注にない商品",
+  "docFlagNotInvoiced": "請求書にない",
+  "docFlagInvoiceQty": "請求数量が発注と違う",
+  "docFlagInvoicePrice": "請求単価が発注と違う",
+  "docFlagShortDelivery": "請求より受領が少ない",
+  "docFlagInspectShort": "検品数が受領より少ない",
+  "docFlagDefective": "不良あり",
+  "docInvoiceOpen": "未照合",
+  "docInvoiceMatched": "一致",
+  "docInvoiceMismatch": "差異あり",
+  "docInvoiceApproved": "承認済み",
+  "docInvoiceVoid": "無効",
+  "docMatchOk": "照合OK",
+  "docMatchMismatch": "差異あり",
+  "docMatchPending": "請求書待ち",
+  "docMatchTitle": "書類照合",
+  "docAddInvoice": "請求書を登録",
+  "docTolerance": "許容差",
+  "docToleranceQty": "数量",
+  "docTolerancePrice": "単価",
+  "docOrder": "発注",
+  "docInvoice": "請求書",
+  "docDelivery": "納品",
+  "docReceived": "受領",
+  "docInspection": "検品",
+  "docOrderAmount": "発注額",
+  "docInvoiceAmount": "請求額",
+  "docDifference": "差額",
+  "docFailedShort": "不良{n}",
+  "@docFailedShort": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "docUnitPrice": "単価",
+  "docApproved": "承認しました（仕入条件{n}件を更新）",
+  "@docApproved": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "docInvoices": "請求書",
+  "docNoInvoices": "請求書はまだありません",
+  "docLinesSuffix": "行",
+  "docReadFromDocument": "書類から読取",
+  "docApprove": "承認",
+  "docVoid": "無効にする",
+  "docInvoiceNumberRequired": "請求書番号を入力してください",
+  "docSaved": "保存しました",
+  "docReadFromFile": "請求書（PDF・写真・Excel）から読み取る",
+  "docInvoiceNumber": "請求書番号",
+  "docInvoiceDate": "請求日",
+  "docInvoiceTotal": "請求合計",
+  "docLines": "明細",
+  "docAddLine": "明細を追加",
+  "docSaveAndMatch": "保存して照合",
+  "docExceptionsTitle": "書類の差異",
+  "docNoExceptions": "差異はありません",
+  "docExceptionCount": "要確認 {count}件",
+  "@docExceptionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docDeltaQty": "数量 {n}",
+  "@docDeltaQty": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "docDeltaPrice": "単価 {n}",
+  "@docDeltaPrice": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "poDocumentMatch": "書類照合",
+  "ntTabVersions": "バージョン",
+  "ntSnapshot": "今の状態を保存",
+  "ntSnapshotNote": "メモ（例: 新書式対応）",
+  "ntRestored": "v{version}を戻しました（方言{dialects}件・見出し{aliases}件、衝突{conflicts}件）",
+  "@ntRestored": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      },
+      "dialects": {
+        "type": "int"
+      },
+      "aliases": {
+        "type": "int"
+      },
+      "conflicts": {
+        "type": "int"
+      }
+    }
+  },
+  "ntVersionTraining": "事前学習",
+  "ntVersionRestore": "復元",
+  "ntVersionManual": "手動保存",
+  "ntVersionsIntro": "商社ごとの辞書（方言と列見出し）を番号付きで残します。学習するたびに自動で保存され、上書きはされません。古いバージョンを戻すと、今の辞書に足りない分だけを追加します（今と違う意味の書き方は上書きせず衝突として報告）。",
+  "ntNoVersions": "まだバージョンはありません",
+  "ntVersionCounts": "方言{dialects}・見出し{aliases}",
+  "@ntVersionCounts": {
+    "placeholders": {
+      "dialects": {
+        "type": "int"
+      },
+      "aliases": {
+        "type": "int"
+      }
+    }
+  },
+  "ntVersionCurrent": "現在",
+  "ntRestore": "戻す",
+  "syncSent": "{count}件を送信しました",
+  "@syncSent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncOffline": "オフライン — 記録は端末に保存し、通信が戻ったら送ります（未送信 {count}件）",
+  "@syncOffline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncPending": "未送信の記録 {count}件",
+  "@syncPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNow": "今すぐ送信",
+  "syncRefused": "送信できなかった記録: {reason}",
+  "@syncRefused": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "syncDismiss": "閉じる",
+  "errorOffline": "通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。"
 }

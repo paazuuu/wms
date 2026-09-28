@@ -24,8 +24,12 @@ void main() {
     });
 
     test('an unrelated error passes through unchanged', () {
-      const raw = 'No connection to the server.';
+      const raw = 'Request timed out.';
       expect(humanizeApiErrorMessage(ja, raw), raw);
+    });
+
+    test('no answer from the server says the device is offline (spec §58)', () {
+      expect(humanizeApiErrorMessage(ja, 'No connection to the server.'), ja.errorOffline);
     });
 
     test('a business-rule exception is not mistaken for a permission error',

@@ -27,12 +27,12 @@ void main() {
       tester,
       Scaffold(
         body: ErrorStateView(
-          message: 'No connection to the server.',
+          message: 'Request timed out.',
           onRetry: () {},
         ),
       ),
     );
 
-    expect(find.text('No connection to the server.'), findsOneWidget);
+    expect(find.text('Request timed out.'), findsOneWidget);
   });
 }

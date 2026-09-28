@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wms_mobile/features/notation/application/notation_providers.dart';
 import 'package:wms_mobile/features/notation/domain/notation.dart';
 import 'package:wms_mobile/features/notation/presentation/notation_training_screen.dart';
@@ -57,6 +58,7 @@ const _read = TrainingRead(
 Future<FakeNotationRepository> _pump(
   WidgetTester tester, {
   FakeNotationRepository? repo,
+  List<Override> extra = const [],
 }) async {
   await tester.binding.setSurfaceSize(const Size(1000, 2200));
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -72,6 +74,7 @@ Future<FakeNotationRepository> _pump(
         Product(id: 1, janCode: '4901234567894', name: 'ボールペン', maker: 'テスト文具'),
         Product(id: 2, janCode: '4900000000019', name: '消しゴム', maker: 'テスト文具', sku: 'ER-9'),
       ])),
+      ...extra,
     ],
   );
   return notation;
@@ -282,5 +285,35 @@ void main() {
     expect(find.text('JANのチェック数字が不正 4'), findsOneWidget);
     expect(find.byKey(const ValueKey('nt-run-5')), findsOneWidget);
     expect(find.text('学習済み'), findsOneWidget);
+  });
+
+  testWidgets('each company\'s library is kept in versions and an old one can be brought back',
+      (tester) async {
+    final repo = FakeNotationRepository()
+      ..versions = const [
+        LibraryVersion(id: 2, version: 2, source: 'training', dialectCount: 8, aliasCount: 3, added: 2),
+        LibraryVersion(id: 1, version: 1, source: 'manual', note: '初期', dialectCount: 6, aliasCount: 3),
+      ];
+    await _pump(tester, repo: repo, extra: [dialectPartnerProvider.overrideWith((_) => 1)]);
+    await tester.tap(find.byKey(const ValueKey('nt-tab-versions')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('nt-version-2')), findsOneWidget);
+    expect(find.text('現在'), findsOneWidget);
+    expect(find.textContaining('+2 / -0'), findsOneWidget);
+    expect(find.byKey(const ValueKey('nt-restore-2')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('nt-restore-1')));
+    await tester.pumpAndSettle();
+    expect(repo.lastRestored, 1);
+    expect(find.text('v1を戻しました（方言2件・見出し1件、衝突0件）'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nt-snapshot')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('nt-snapshot-note')), '書式変更前');
+    await tester.tap(find.byKey(const ValueKey('nt-snapshot-save')));
+    await tester.pumpAndSettle();
+    expect(repo.lastSnapshotPartner, 1);
+    expect(find.textContaining('書式変更前'), findsOneWidget);
   });
 }

@@ -10,6 +10,8 @@ import '../domain/inspection.dart';
 import 'bulk_inspection_screen.dart';
 import 'inspection_detail_screen.dart';
 import 'qc_result_ui.dart';
+import '../../../core/offline/pending_sync_banner.dart';
+import '../data/offline_inspection_repository.dart';
 
 /// Inbound inspections for the active warehouse, newest first, filterable by
 /// outcome so an operator can jump straight to what still needs checking.
@@ -57,6 +59,13 @@ class QcInspectionListScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          // A weak connection: what waits on the device, and a way to send it.
+          PendingSyncBanner(onSync: () async {
+          final repo = ref.read(inspectionRepositoryProvider);
+          final sent = repo is OfflineInspectionRepository ? await repo.flush() : 0;
+          ref.invalidate(inspectionListProvider);
+          return sent;
+        }),
           SizedBox(
             height: 56,
             child: ListView(

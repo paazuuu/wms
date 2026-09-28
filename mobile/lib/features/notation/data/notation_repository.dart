@@ -42,6 +42,11 @@ abstract class NotationRepository {
   Future<ApiResult<List<ColumnAlias>>> columnAliases({int? partnerId});
   Future<ApiResult<bool>> setColumnAlias({int? partnerId, required String header, required ColumnField field});
   Future<ApiResult<bool>> removeColumnAlias(int id);
+
+  /// The company's dictionary versions, newest first (0108).
+  Future<ApiResult<List<LibraryVersion>>> libraryVersions(int partnerId);
+  Future<ApiResult<int>> snapshotLibrary(int partnerId, {String? note});
+  Future<ApiResult<LibraryRestoreResult>> restoreLibrary(int versionId);
 }
 
 List<Map<String, dynamic>> _list(dynamic data) {
@@ -211,6 +216,38 @@ class NotationRepositoryImpl implements NotationRepository {
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<LibraryVersion>>> libraryVersions(int partnerId) async {
+    try {
+      final r = await _rest.post('/rpc/list_notation_library_versions', data: {'p_partner_id': partnerId});
+      return ApiSuccess([for (final m in _list(r.data)) LibraryVersion.fromJson(m)]);
+    } on DioException catch (e) {
+      return mapDioError<List<LibraryVersion>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> snapshotLibrary(int partnerId, {String? note}) async {
+    try {
+      final r = await _rest.post('/rpc/snapshot_notation_library', data: {'p_partner_id': partnerId, 'p_note': note});
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(d is int ? d : int.tryParse('$d') ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<LibraryRestoreResult>> restoreLibrary(int versionId) async {
+    try {
+      final r = await _rest.post('/rpc/restore_notation_library_version', data: {'p_id': versionId});
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(LibraryRestoreResult.fromJson((d as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<LibraryRestoreResult>(e);
     }
   }
 }

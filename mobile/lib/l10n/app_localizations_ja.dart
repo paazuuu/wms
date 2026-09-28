@@ -6751,4 +6751,280 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scNoChange => '変化はありません';
+
+  @override
+  String get aiFieldProduct => '自社商品';
+
+  @override
+  String get aiBandAuto => '自動候補';
+
+  @override
+  String get aiBandReview => '確認推奨';
+
+  @override
+  String get aiBandHuman => '要確認';
+
+  @override
+  String get aiSaved => 'しきい値を保存しました';
+
+  @override
+  String get featAiSettings => 'AI設定';
+
+  @override
+  String get featAiSettingsDesc => '読み取りの確信度のしきい値';
+
+  @override
+  String get aiSettingsIntro =>
+      '書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。';
+
+  @override
+  String get aiAutoThreshold => '自動候補の下限';
+
+  @override
+  String get aiReviewThreshold => '確認推奨の下限（これ未満は要確認）';
+
+  @override
+  String get aiExample => '例';
+
+  @override
+  String get featDocExceptions => '書類の差異';
+
+  @override
+  String get featDocExceptionsDesc => '発注・請求書・納品・検品の食い違い';
+
+  @override
+  String get docFlagNotOrdered => '発注にない商品';
+
+  @override
+  String get docFlagNotInvoiced => '請求書にない';
+
+  @override
+  String get docFlagInvoiceQty => '請求数量が発注と違う';
+
+  @override
+  String get docFlagInvoicePrice => '請求単価が発注と違う';
+
+  @override
+  String get docFlagShortDelivery => '請求より受領が少ない';
+
+  @override
+  String get docFlagInspectShort => '検品数が受領より少ない';
+
+  @override
+  String get docFlagDefective => '不良あり';
+
+  @override
+  String get docInvoiceOpen => '未照合';
+
+  @override
+  String get docInvoiceMatched => '一致';
+
+  @override
+  String get docInvoiceMismatch => '差異あり';
+
+  @override
+  String get docInvoiceApproved => '承認済み';
+
+  @override
+  String get docInvoiceVoid => '無効';
+
+  @override
+  String get docMatchOk => '照合OK';
+
+  @override
+  String get docMatchMismatch => '差異あり';
+
+  @override
+  String get docMatchPending => '請求書待ち';
+
+  @override
+  String get docMatchTitle => '書類照合';
+
+  @override
+  String get docAddInvoice => '請求書を登録';
+
+  @override
+  String get docTolerance => '許容差';
+
+  @override
+  String get docToleranceQty => '数量';
+
+  @override
+  String get docTolerancePrice => '単価';
+
+  @override
+  String get docOrder => '発注';
+
+  @override
+  String get docInvoice => '請求書';
+
+  @override
+  String get docDelivery => '納品';
+
+  @override
+  String get docReceived => '受領';
+
+  @override
+  String get docInspection => '検品';
+
+  @override
+  String get docOrderAmount => '発注額';
+
+  @override
+  String get docInvoiceAmount => '請求額';
+
+  @override
+  String get docDifference => '差額';
+
+  @override
+  String docFailedShort(String n) {
+    return '不良$n';
+  }
+
+  @override
+  String get docUnitPrice => '単価';
+
+  @override
+  String docApproved(int n) {
+    return '承認しました（仕入条件$n件を更新）';
+  }
+
+  @override
+  String get docInvoices => '請求書';
+
+  @override
+  String get docNoInvoices => '請求書はまだありません';
+
+  @override
+  String get docLinesSuffix => '行';
+
+  @override
+  String get docReadFromDocument => '書類から読取';
+
+  @override
+  String get docApprove => '承認';
+
+  @override
+  String get docVoid => '無効にする';
+
+  @override
+  String get docInvoiceNumberRequired => '請求書番号を入力してください';
+
+  @override
+  String get docSaved => '保存しました';
+
+  @override
+  String get docReadFromFile => '請求書（PDF・写真・Excel）から読み取る';
+
+  @override
+  String get docInvoiceNumber => '請求書番号';
+
+  @override
+  String get docInvoiceDate => '請求日';
+
+  @override
+  String get docInvoiceTotal => '請求合計';
+
+  @override
+  String get docLines => '明細';
+
+  @override
+  String get docAddLine => '明細を追加';
+
+  @override
+  String get docSaveAndMatch => '保存して照合';
+
+  @override
+  String get docExceptionsTitle => '書類の差異';
+
+  @override
+  String get docNoExceptions => '差異はありません';
+
+  @override
+  String docExceptionCount(int count) {
+    return '要確認 $count件';
+  }
+
+  @override
+  String docDeltaQty(String n) {
+    return '数量 $n';
+  }
+
+  @override
+  String docDeltaPrice(String n) {
+    return '単価 $n';
+  }
+
+  @override
+  String get poDocumentMatch => '書類照合';
+
+  @override
+  String get ntTabVersions => 'バージョン';
+
+  @override
+  String get ntSnapshot => '今の状態を保存';
+
+  @override
+  String get ntSnapshotNote => 'メモ（例: 新書式対応）';
+
+  @override
+  String ntRestored(int version, int dialects, int aliases, int conflicts) {
+    return 'v$versionを戻しました（方言$dialects件・見出し$aliases件、衝突$conflicts件）';
+  }
+
+  @override
+  String get ntVersionTraining => '事前学習';
+
+  @override
+  String get ntVersionRestore => '復元';
+
+  @override
+  String get ntVersionManual => '手動保存';
+
+  @override
+  String get ntVersionsIntro =>
+      '商社ごとの辞書（方言と列見出し）を番号付きで残します。学習するたびに自動で保存され、上書きはされません。古いバージョンを戻すと、今の辞書に足りない分だけを追加します（今と違う意味の書き方は上書きせず衝突として報告）。';
+
+  @override
+  String get ntNoVersions => 'まだバージョンはありません';
+
+  @override
+  String ntVersionCounts(int dialects, int aliases) {
+    return '方言$dialects・見出し$aliases';
+  }
+
+  @override
+  String get ntVersionCurrent => '現在';
+
+  @override
+  String get ntRestore => '戻す';
+
+  @override
+  String syncSent(int count) {
+    return '$count件を送信しました';
+  }
+
+  @override
+  String syncOffline(int count) {
+    return 'オフライン — 記録は端末に保存し、通信が戻ったら送ります（未送信 $count件）';
+  }
+
+  @override
+  String syncPending(int count) {
+    return '未送信の記録 $count件';
+  }
+
+  @override
+  String get syncNow => '今すぐ送信';
+
+  @override
+  String syncRefused(String reason) {
+    return '送信できなかった記録: $reason';
+  }
+
+  @override
+  String get syncDismiss => '閉じる';
+
+  @override
+  String get errorOffline => '通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。';
 }

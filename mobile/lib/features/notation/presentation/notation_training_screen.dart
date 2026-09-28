@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/ai/ai_confidence.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
@@ -38,7 +39,7 @@ class NotationTrainingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.ntTitle),
@@ -50,6 +51,7 @@ class NotationTrainingScreen extends ConsumerWidget {
               Tab(key: const ValueKey('nt-tab-dialects'), text: l10n.ntTabDialects),
               Tab(key: const ValueKey('nt-tab-columns'), text: l10n.ntTabColumns),
               Tab(key: const ValueKey('nt-tab-history'), text: l10n.ntTabHistory),
+              Tab(key: const ValueKey('nt-tab-versions'), text: l10n.ntTabVersions),
             ],
           ),
         ),
@@ -59,6 +61,7 @@ class NotationTrainingScreen extends ConsumerWidget {
             const _DialectsTab(),
             const _ColumnsTab(),
             const _HistoryTab(),
+            const _VersionsTab(),
           ],
         ),
       ),
@@ -310,7 +313,12 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
                 Text(l10n.ntLinesTitle(read.lines.length), style: theme.textTheme.titleSmall),
                 const SizedBox(height: AppSpacing.sm),
                 for (final line in read.lines)
-                  _LineCard(line: line, onPick: _busy ? null : () => _pickProduct(line)),
+                  _LineCard(
+                    line: line,
+                    onPick: _busy ? null : () => _pickProduct(line),
+                    verified: read.verified,
+                    spreadsheet: read.source != 'gemini',
+                  ),
               ],
             ],
           ),
@@ -492,10 +500,20 @@ class _ColumnsCard extends StatelessWidget {
 }
 
 class _LineCard extends StatelessWidget {
-  const _LineCard({required this.line, this.onPick});
+  const _LineCard({required this.line, this.onPick, this.verified = true, this.spreadsheet = false});
 
   final ReadLineResult line;
   final VoidCallback? onPick;
+  final bool verified;
+  final bool spreadsheet;
+
+  Map<String, double> get _confidence => lineConfidence(
+        line.flags,
+        verified: verified,
+        spreadsheet: spreadsheet,
+        hasJan: line.rawJanCode != null || line.janCode.isNotEmpty,
+        hasProduct: line.product != null,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -567,6 +585,16 @@ class _LineCard extends StatelessWidget {
             for (final e in line.alternatives.entries)
               Text(l10n.ntOtherReading(alternativeLabel(l10n, e.key), e.value ?? '—'),
                   style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary)),
+            // How sure the reading is, field by field (§50).
+            Padding(
+              key: ValueKey('nt-confidence-${line.row}'),
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: Row(children: [
+                AiBandPill(confidence: _confidence),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: AiConfidenceRow(confidence: _confidence)),
+              ]),
+            ),
           ],
         ),
       ),
@@ -944,6 +972,129 @@ class _HistoryTab extends ConsumerWidget {
               ),
         ],
       ),
+    );
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// バージョン (0108, spec §60)
+// ---------------------------------------------------------------------------
+
+final _libraryVersionsProvider = FutureProvider.autoDispose.family<List<LibraryVersion>, int>((ref, partnerId) async {
+  final r = await ref.watch(notationRepositoryProvider).libraryVersions(partnerId);
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+/// Each company's dictionary as numbered versions: taken by hand or each
+/// time a sample is learned. Nothing is overwritten; an old version is
+/// brought back alongside the current one, so documents in an old format
+/// still read.
+class _VersionsTab extends ConsumerWidget {
+  const _VersionsTab();
+
+  Future<void> _snapshot(BuildContext context, WidgetRef ref, int partnerId) async {
+    final l10n = AppLocalizations.of(context);
+    final note = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l10n.ntSnapshot),
+        content: TextField(key: const ValueKey('nt-snapshot-note'), controller: note, decoration: InputDecoration(labelText: l10n.ntSnapshotNote)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+          FilledButton(key: const ValueKey('nt-snapshot-save'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.actionSave)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await ref.read(notationRepositoryProvider).snapshotLibrary(partnerId, note: note.text.trim().isEmpty ? null : note.text.trim());
+    ref.invalidate(_libraryVersionsProvider(partnerId));
+  }
+
+  Future<void> _restore(BuildContext context, WidgetRef ref, int partnerId, LibraryVersion v) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final r = await ref.read(notationRepositoryProvider).restoreLibrary(v.id);
+    r.when(
+      success: (res) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.ntRestored(v.version, res.dialects, res.aliases, res.conflicts))));
+        ref.invalidate(_libraryVersionsProvider(partnerId));
+        ref.invalidate(dialectsProvider);
+        ref.invalidate(columnAliasesProvider);
+      },
+      failure: (f) => messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final partnerId = ref.watch(dialectPartnerProvider);
+    final df = DateFormat('yyyy-MM-dd HH:mm');
+    String source(String s) => switch (s) {
+          'training' => l10n.ntVersionTraining,
+          'restore' => l10n.ntVersionRestore,
+          _ => l10n.ntVersionManual,
+        };
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        Text(l10n.ntVersionsIntro, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        const SizedBox(height: AppSpacing.md),
+        Row(children: [
+          Expanded(
+            child: _PartnerDropdown(
+              value: partnerId,
+              allowAll: true,
+              onChanged: (v) => ref.read(dialectPartnerProvider.notifier).state = v,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          FilledButton.tonalIcon(
+            key: const ValueKey('nt-snapshot'),
+            onPressed: partnerId == null ? null : () => _snapshot(context, ref, partnerId),
+            icon: const Icon(Icons.bookmark_add_outlined),
+            label: Text(l10n.ntSnapshot),
+          ),
+        ]),
+        const SizedBox(height: AppSpacing.md),
+        if (partnerId == null)
+          Text(l10n.ntChoosePartner)
+        else
+          ...ref.watch(_libraryVersionsProvider(partnerId)).when(
+                loading: () => [const LinearProgressIndicator()],
+                error: (e, _) => [Text(humanizeApiErrorMessage(l10n, '$e'))],
+                data: (rows) => rows.isEmpty
+                    ? [Text(l10n.ntNoVersions)]
+                    : [
+                        for (var i = 0; i < rows.length; i++)
+                          Card(
+                            key: ValueKey('nt-version-${rows[i].id}'),
+                            child: ListTile(
+                              leading: CircleAvatar(child: Text('v${rows[i].version}')),
+                              title: Text([
+                                source(rows[i].source),
+                                if (rows[i].note != null) rows[i].note!,
+                              ].join(' · ')),
+                              subtitle: Text([
+                                if (rows[i].createdAt != null) df.format(rows[i].createdAt!.toLocal()),
+                                l10n.ntVersionCounts(rows[i].dialectCount, rows[i].aliasCount),
+                                if (rows[i].added > 0 || rows[i].removed > 0) '+${rows[i].added} / -${rows[i].removed}',
+                              ].join(' · ')),
+                              trailing: i == 0
+                                  ? StatusPill(tone: StatusTone.success, label: l10n.ntVersionCurrent, dense: true)
+                                  : TextButton(
+                                      key: ValueKey('nt-restore-${rows[i].id}'),
+                                      onPressed: () => _restore(context, ref, partnerId, rows[i]),
+                                      child: Text(l10n.ntRestore),
+                                    ),
+                            ),
+                          ),
+                      ],
+              ),
+      ],
     );
   }
 }

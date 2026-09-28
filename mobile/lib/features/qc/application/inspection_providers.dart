@@ -1,17 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/offline/pending_sync.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/inspection_repository.dart';
+import '../data/offline_inspection_repository.dart';
 import '../domain/bulk_inspection.dart';
 import '../domain/held_stock.dart';
 import '../domain/inspection.dart';
 
 final inspectionRepositoryProvider = Provider<InspectionRepository>((ref) {
-  // Reuses the Supabase Edge Functions Dio (anon key attached).
-  return InspectionRepositoryImpl(
-    ref.watch(deliveryDioProvider),
-    restDio: ref.watch(restDioProvider),
+  // Reuses the Supabase Edge Functions Dio (anon key attached). Wrapped so
+  // counts and findings survive a dropped connection (spec §58).
+  final sync = ref.watch(pendingSyncProvider.notifier);
+  return OfflineInspectionRepository(
+    InspectionRepositoryImpl(
+      ref.watch(deliveryDioProvider),
+      restDio: ref.watch(restDioProvider),
+      onRaw: OfflineInspectionRepository.cacheWriter(sync),
+    ),
+    sync,
   );
 });
 

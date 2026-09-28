@@ -5196,6 +5196,46 @@ here changes stock or orders (spec rule 3), and every run is kept (rule 4).
 as its own line); the RPCs were exercised live in a rolled-back transaction
 (legs must join up, terms, FX, tariff and cost rules load into `sc_model`).
 
+### 0108 — invoices matched against the order; AI confidence; library versions
+
+- **Four-way match (spec §51, §53, §55):** `supplier_invoices` and
+  `supplier_invoice_lines` hold the supplier's invoice, typed or read by the
+  document reader (with each line's confidence and flags). `document_match`
+  lays one purchase order against its invoices, delivery notes, receipts and
+  inspection, product by product, and flags `not_ordered`, `not_invoiced`,
+  `invoice_qty`, `invoice_price`, `short_delivery`, `inspect_short` and
+  `defective`. `supplier_match_rules` holds each supplier's quantity and
+  price tolerance (%). `document_exceptions` is the queue of every
+  difference on recent orders. An invoice is approved or voided by a person
+  (`set_supplier_invoice_status`), never automatically. Approving one
+  updates the supply terms' prices (`supply_chain_supplier_products`, source
+  `document`), except those that were set by hand.
+- **AI thresholds (§50):** `ai_settings` holds the auto-candidate threshold
+  (0.95) and the check-recommended threshold (0.80). They are read with
+  `get_ai_settings` and set with `set_ai_settings`, which needs `ai.review`
+  or `user.manage` and refuses a check-recommended threshold above the
+  auto-candidate one. Confidence per field is derived in the client from the
+  reading's own flags (two independent reads agreeing, JAN check digit,
+  name/品番 split, quantity × price = amount, resolved or not), so the same
+  reading always scores the same.
+- **Library versions:** `notation_library_versions` keeps a snapshot of a
+  company's dialects and column headings. A snapshot is taken by hand, and
+  automatically every time a sample is learned. `restore_notation_library_version`
+  adds back what is missing, never overwrites, reports conflicts, and
+  records the restore as a new version. 0108b adds `restore` to the allowed
+  sources of dialects and aliases.
+- **Offline inspection (§58, client only):** reads are kept on the device;
+  counts, ticks and line findings made offline are queued, shown at once, and
+  sent in order when the network is back. What the server refuses is set
+  aside for a person. Completing an inspection, bulk passing and disposing
+  held goods still need a connection.
+
+**Verified live (rolled back):** a hyphenated JAN on the invoice resolved to
+the product. The price, short delivery and defect differences and an
+unordered line were flagged. A 3% quantity / 5% price tolerance cleared all
+but the defect. Approval updated 3 supply terms. A snapshot, delete and
+restore brought the dialect back as v2. The thresholds' order is enforced.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

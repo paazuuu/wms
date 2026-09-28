@@ -12450,6 +12450,510 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'変化はありません'**
   String get scNoChange;
+
+  /// No description provided for @aiFieldProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社商品'**
+  String get aiFieldProduct;
+
+  /// No description provided for @aiBandAuto.
+  ///
+  /// In ja, this message translates to:
+  /// **'自動候補'**
+  String get aiBandAuto;
+
+  /// No description provided for @aiBandReview.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認推奨'**
+  String get aiBandReview;
+
+  /// No description provided for @aiBandHuman.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認'**
+  String get aiBandHuman;
+
+  /// No description provided for @aiSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'しきい値を保存しました'**
+  String get aiSaved;
+
+  /// No description provided for @featAiSettings.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI設定'**
+  String get featAiSettings;
+
+  /// No description provided for @featAiSettingsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取りの確信度のしきい値'**
+  String get featAiSettingsDesc;
+
+  /// No description provided for @aiSettingsIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。'**
+  String get aiSettingsIntro;
+
+  /// No description provided for @aiAutoThreshold.
+  ///
+  /// In ja, this message translates to:
+  /// **'自動候補の下限'**
+  String get aiAutoThreshold;
+
+  /// No description provided for @aiReviewThreshold.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認推奨の下限（これ未満は要確認）'**
+  String get aiReviewThreshold;
+
+  /// No description provided for @aiExample.
+  ///
+  /// In ja, this message translates to:
+  /// **'例'**
+  String get aiExample;
+
+  /// No description provided for @featDocExceptions.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の差異'**
+  String get featDocExceptions;
+
+  /// No description provided for @featDocExceptionsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注・請求書・納品・検品の食い違い'**
+  String get featDocExceptionsDesc;
+
+  /// No description provided for @docFlagNotOrdered.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注にない商品'**
+  String get docFlagNotOrdered;
+
+  /// No description provided for @docFlagNotInvoiced.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書にない'**
+  String get docFlagNotInvoiced;
+
+  /// No description provided for @docFlagInvoiceQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求数量が発注と違う'**
+  String get docFlagInvoiceQty;
+
+  /// No description provided for @docFlagInvoicePrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求単価が発注と違う'**
+  String get docFlagInvoicePrice;
+
+  /// No description provided for @docFlagShortDelivery.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求より受領が少ない'**
+  String get docFlagShortDelivery;
+
+  /// No description provided for @docFlagInspectShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品数が受領より少ない'**
+  String get docFlagInspectShort;
+
+  /// No description provided for @docFlagDefective.
+  ///
+  /// In ja, this message translates to:
+  /// **'不良あり'**
+  String get docFlagDefective;
+
+  /// No description provided for @docInvoiceOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'未照合'**
+  String get docInvoiceOpen;
+
+  /// No description provided for @docInvoiceMatched.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致'**
+  String get docInvoiceMatched;
+
+  /// No description provided for @docInvoiceMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異あり'**
+  String get docInvoiceMismatch;
+
+  /// No description provided for @docInvoiceApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認済み'**
+  String get docInvoiceApproved;
+
+  /// No description provided for @docInvoiceVoid.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効'**
+  String get docInvoiceVoid;
+
+  /// No description provided for @docMatchOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合OK'**
+  String get docMatchOk;
+
+  /// No description provided for @docMatchMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異あり'**
+  String get docMatchMismatch;
+
+  /// No description provided for @docMatchPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書待ち'**
+  String get docMatchPending;
+
+  /// No description provided for @docMatchTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類照合'**
+  String get docMatchTitle;
+
+  /// No description provided for @docAddInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書を登録'**
+  String get docAddInvoice;
+
+  /// No description provided for @docTolerance.
+  ///
+  /// In ja, this message translates to:
+  /// **'許容差'**
+  String get docTolerance;
+
+  /// No description provided for @docToleranceQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get docToleranceQty;
+
+  /// No description provided for @docTolerancePrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get docTolerancePrice;
+
+  /// No description provided for @docOrder.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get docOrder;
+
+  /// No description provided for @docInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書'**
+  String get docInvoice;
+
+  /// No description provided for @docDelivery.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品'**
+  String get docDelivery;
+
+  /// No description provided for @docReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領'**
+  String get docReceived;
+
+  /// No description provided for @docInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get docInspection;
+
+  /// No description provided for @docOrderAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注額'**
+  String get docOrderAmount;
+
+  /// No description provided for @docInvoiceAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求額'**
+  String get docInvoiceAmount;
+
+  /// No description provided for @docDifference.
+  ///
+  /// In ja, this message translates to:
+  /// **'差額'**
+  String get docDifference;
+
+  /// No description provided for @docFailedShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'不良{n}'**
+  String docFailedShort(String n);
+
+  /// No description provided for @docUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get docUnitPrice;
+
+  /// No description provided for @docApproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認しました（仕入条件{n}件を更新）'**
+  String docApproved(int n);
+
+  /// No description provided for @docInvoices.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書'**
+  String get docInvoices;
+
+  /// No description provided for @docNoInvoices.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書はまだありません'**
+  String get docNoInvoices;
+
+  /// No description provided for @docLinesSuffix.
+  ///
+  /// In ja, this message translates to:
+  /// **'行'**
+  String get docLinesSuffix;
+
+  /// No description provided for @docReadFromDocument.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類から読取'**
+  String get docReadFromDocument;
+
+  /// No description provided for @docApprove.
+  ///
+  /// In ja, this message translates to:
+  /// **'承認'**
+  String get docApprove;
+
+  /// No description provided for @docVoid.
+  ///
+  /// In ja, this message translates to:
+  /// **'無効にする'**
+  String get docVoid;
+
+  /// No description provided for @docInvoiceNumberRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書番号を入力してください'**
+  String get docInvoiceNumberRequired;
+
+  /// No description provided for @docSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get docSaved;
+
+  /// No description provided for @docReadFromFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書（PDF・写真・Excel）から読み取る'**
+  String get docReadFromFile;
+
+  /// No description provided for @docInvoiceNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書番号'**
+  String get docInvoiceNumber;
+
+  /// No description provided for @docInvoiceDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求日'**
+  String get docInvoiceDate;
+
+  /// No description provided for @docInvoiceTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求合計'**
+  String get docInvoiceTotal;
+
+  /// No description provided for @docLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細'**
+  String get docLines;
+
+  /// No description provided for @docAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細を追加'**
+  String get docAddLine;
+
+  /// No description provided for @docSaveAndMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存して照合'**
+  String get docSaveAndMatch;
+
+  /// No description provided for @docExceptionsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の差異'**
+  String get docExceptionsTitle;
+
+  /// No description provided for @docNoExceptions.
+  ///
+  /// In ja, this message translates to:
+  /// **'差異はありません'**
+  String get docNoExceptions;
+
+  /// No description provided for @docExceptionCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認 {count}件'**
+  String docExceptionCount(int count);
+
+  /// No description provided for @docDeltaQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量 {n}'**
+  String docDeltaQty(String n);
+
+  /// No description provided for @docDeltaPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価 {n}'**
+  String docDeltaPrice(String n);
+
+  /// No description provided for @poDocumentMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類照合'**
+  String get poDocumentMatch;
+
+  /// No description provided for @ntTabVersions.
+  ///
+  /// In ja, this message translates to:
+  /// **'バージョン'**
+  String get ntTabVersions;
+
+  /// No description provided for @ntSnapshot.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の状態を保存'**
+  String get ntSnapshot;
+
+  /// No description provided for @ntSnapshotNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（例: 新書式対応）'**
+  String get ntSnapshotNote;
+
+  /// No description provided for @ntRestored.
+  ///
+  /// In ja, this message translates to:
+  /// **'v{version}を戻しました（方言{dialects}件・見出し{aliases}件、衝突{conflicts}件）'**
+  String ntRestored(int version, int dialects, int aliases, int conflicts);
+
+  /// No description provided for @ntVersionTraining.
+  ///
+  /// In ja, this message translates to:
+  /// **'事前学習'**
+  String get ntVersionTraining;
+
+  /// No description provided for @ntVersionRestore.
+  ///
+  /// In ja, this message translates to:
+  /// **'復元'**
+  String get ntVersionRestore;
+
+  /// No description provided for @ntVersionManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動保存'**
+  String get ntVersionManual;
+
+  /// No description provided for @ntVersionsIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商社ごとの辞書（方言と列見出し）を番号付きで残します。学習するたびに自動で保存され、上書きはされません。古いバージョンを戻すと、今の辞書に足りない分だけを追加します（今と違う意味の書き方は上書きせず衝突として報告）。'**
+  String get ntVersionsIntro;
+
+  /// No description provided for @ntNoVersions.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだバージョンはありません'**
+  String get ntNoVersions;
+
+  /// No description provided for @ntVersionCounts.
+  ///
+  /// In ja, this message translates to:
+  /// **'方言{dialects}・見出し{aliases}'**
+  String ntVersionCounts(int dialects, int aliases);
+
+  /// No description provided for @ntVersionCurrent.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在'**
+  String get ntVersionCurrent;
+
+  /// No description provided for @ntRestore.
+  ///
+  /// In ja, this message translates to:
+  /// **'戻す'**
+  String get ntRestore;
+
+  /// No description provided for @syncSent.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を送信しました'**
+  String syncSent(int count);
+
+  /// No description provided for @syncOffline.
+  ///
+  /// In ja, this message translates to:
+  /// **'オフライン — 記録は端末に保存し、通信が戻ったら送ります（未送信 {count}件）'**
+  String syncOffline(int count);
+
+  /// No description provided for @syncPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'未送信の記録 {count}件'**
+  String syncPending(int count);
+
+  /// No description provided for @syncNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'今すぐ送信'**
+  String get syncNow;
+
+  /// No description provided for @syncRefused.
+  ///
+  /// In ja, this message translates to:
+  /// **'送信できなかった記録: {reason}'**
+  String syncRefused(String reason);
+
+  /// No description provided for @syncDismiss.
+  ///
+  /// In ja, this message translates to:
+  /// **'閉じる'**
+  String get syncDismiss;
+
+  /// No description provided for @errorOffline.
+  ///
+  /// In ja, this message translates to:
+  /// **'通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。'**
+  String get errorOffline;
 }
 
 class _AppLocalizationsDelegate

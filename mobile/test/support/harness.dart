@@ -6,7 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/providers.dart';
+import 'package:wms_mobile/core/offline/pending_sync.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
+import 'package:wms_mobile/features/documents/data/documents_repository.dart';
+import 'package:wms_mobile/features/documents/domain/documents.dart';
+import 'package:wms_mobile/features/documents/presentation/documents_labels.dart';
 import 'package:wms_mobile/features/admin/data/admin_repository.dart';
 import 'package:wms_mobile/features/admin/domain/app_user_summary.dart';
 import 'package:wms_mobile/features/ai_review/data/ai_review_repository.dart';
@@ -141,6 +145,9 @@ class _FakeSecureKeyValueStore implements SecureKeyValueStore {
 Override fakeScanModeOverride() => scanCountsPieceProvider
     .overrideWith((ref) => ScanCountsPieceController(_FakeSecureKeyValueStore()));
 
+/// The device store for the offline queue and read cache (spec §58), in memory.
+SecureKeyValueStore fakeSecureStore() => _FakeSecureKeyValueStore();
+
 /// The remembered dashboard view (0102) over an in-memory store.
 Override fakeDashboardViewOverride() => dashboardViewProvider
     .overrideWith((ref) => DashboardViewController(_FakeSecureKeyValueStore()));
@@ -173,6 +180,10 @@ List<Override> _defaultOverrides() => [
       // The supply chain layer is off unless a test turns it on (0107).
       scCanViewProvider.overrideWithValue(false),
       scCanManageProvider.overrideWithValue(false),
+      // The offline queue lives in memory, and nobody may settle invoices
+      // unless a test says so (0108).
+      offlineStoreProvider.overrideWithValue(_FakeSecureKeyValueStore()),
+      documentsCanManageProvider.overrideWithValue(false),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -4071,6 +4082,27 @@ class FakeNotationRepository implements NotationRepository {
     aliases = aliases.where((a) => a.id != id).toList();
     return const ApiSuccess(true);
   }
+
+  List<LibraryVersion> versions = [];
+  int? lastSnapshotPartner;
+  int? lastRestored;
+
+  @override
+  Future<ApiResult<List<LibraryVersion>>> libraryVersions(int partnerId) async => ApiSuccess(versions);
+
+  @override
+  Future<ApiResult<int>> snapshotLibrary(int partnerId, {String? note}) async {
+    lastSnapshotPartner = partnerId;
+    final v = LibraryVersion(id: 100 + versions.length, version: versions.length + 1, note: note, dialectCount: 3);
+    versions = [v, ...versions];
+    return ApiSuccess(v.id);
+  }
+
+  @override
+  Future<ApiResult<LibraryRestoreResult>> restoreLibrary(int versionId) async {
+    lastRestored = versionId;
+    return const ApiSuccess(LibraryRestoreResult(dialects: 2, aliases: 1));
+  }
 }
 
 
@@ -4237,4 +4269,56 @@ class FakeSupplyChainRepository implements SupplyChainRepository {
 
   @override
   Future<ApiResult<Map<String, dynamic>>> result(int id) async => const ApiSuccess({});
+}
+
+
+/// Supplier invoices and the four-way match (0108), in memory.
+class FakeDocumentsRepository implements DocumentsRepository {
+  FakeDocumentsRepository({this.matchResult, this.exceptionRows = const [], List<SupplierInvoice>? invoiceRows})
+      : invoiceRows = invoiceRows ?? [];
+
+  DocumentMatch? matchResult;
+  List<DocumentException> exceptionRows;
+  final List<SupplierInvoice> invoiceRows;
+  SupplierInvoice? lastSaved;
+  final List<(int, InvoiceStatus)> statusCalls = [];
+  (int, double, double)? lastTolerance;
+  int termsUpdated = 2;
+
+  @override
+  Future<ApiResult<DocumentMatch>> match(int purchaseOrderId) async =>
+      ApiSuccess(matchResult ?? DocumentMatch(purchaseOrderId: purchaseOrderId));
+
+  @override
+  Future<ApiResult<List<DocumentException>>> exceptions({int? warehouseId}) async => ApiSuccess(exceptionRows);
+
+  @override
+  Future<ApiResult<List<SupplierInvoice>>> invoices({int? purchaseOrderId}) async =>
+      ApiSuccess([for (final i in invoiceRows) if (purchaseOrderId == null || i.purchaseOrderId == purchaseOrderId) i]);
+
+  @override
+  Future<ApiResult<SupplierInvoice>> invoice(int id) async {
+    for (final i in invoiceRows) {
+      if (i.id == id) return ApiSuccess(i);
+    }
+    return const ApiFailure(message: 'not found', statusCode: 404);
+  }
+
+  @override
+  Future<ApiResult<InvoiceSaveResult>> save(SupplierInvoice invoice) async {
+    lastSaved = invoice;
+    return ApiSuccess(InvoiceSaveResult(id: invoice.id ?? 900, status: InvoiceStatus.mismatch, match: matchResult));
+  }
+
+  @override
+  Future<ApiResult<int>> setStatus(int id, InvoiceStatus status, {String? note}) async {
+    statusCalls.add((id, status));
+    return ApiSuccess(status == InvoiceStatus.approved ? termsUpdated : 0);
+  }
+
+  @override
+  Future<ApiResult<bool>> setTolerance(int partnerId, double qtyPct, double pricePct) async {
+    lastTolerance = (partnerId, qtyPct, pricePct);
+    return const ApiSuccess(true);
+  }
 }

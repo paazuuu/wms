@@ -468,3 +468,67 @@ abstract final class NotationFlag {
 
   static bool isProblem(String flag) => problems.contains(flag.split(':').first);
 }
+
+
+/// One numbered version of a company's dictionary (0108, spec §60).
+class LibraryVersion extends Equatable {
+  const LibraryVersion({
+    required this.id,
+    required this.version,
+    this.source = 'manual',
+    this.note,
+    this.dialectCount = 0,
+    this.aliasCount = 0,
+    this.added = 0,
+    this.removed = 0,
+    this.createdAt,
+    this.createdByName,
+  });
+
+  final int id;
+  final int version;
+
+  /// manual / training / restore
+  final String source;
+  final String? note;
+  final int dialectCount;
+  final int aliasCount;
+  final int added;
+  final int removed;
+  final DateTime? createdAt;
+  final String? createdByName;
+
+  factory LibraryVersion.fromJson(Map<String, dynamic> j) => LibraryVersion(
+        id: _int(j['id']),
+        version: _int(j['version']),
+        source: (j['source'] ?? 'manual').toString(),
+        note: _text(j['note']),
+        dialectCount: _int(j['dialect_count']),
+        aliasCount: _int(j['alias_count']),
+        added: _int(j['added']),
+        removed: _int(j['removed']),
+        createdAt: DateTime.tryParse('${j['created_at'] ?? ''}'),
+        createdByName: _text(j['created_by_name']),
+      );
+
+  @override
+  List<Object?> get props => [id, version, dialectCount, aliasCount];
+}
+
+/// What bringing an old version back did.
+class LibraryRestoreResult extends Equatable {
+  const LibraryRestoreResult({this.dialects = 0, this.aliases = 0, this.conflicts = 0});
+
+  final int dialects;
+  final int aliases;
+  final int conflicts;
+
+  factory LibraryRestoreResult.fromJson(Map<String, dynamic> j) => LibraryRestoreResult(
+        dialects: _int(j['restored_dialects']),
+        aliases: _int(j['restored_aliases']),
+        conflicts: (j['conflicts'] as List? ?? const []).length,
+      );
+
+  @override
+  List<Object?> get props => [dialects, aliases, conflicts];
+}

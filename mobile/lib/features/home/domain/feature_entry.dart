@@ -97,6 +97,10 @@ class FeatureEntry {
         return l10n.featConnectors;
       case 'ai_review':
         return l10n.featAiReview;
+      case 'ai_settings':
+        return l10n.featAiSettings;
+      case 'document_exceptions':
+        return l10n.featDocExceptions;
       case 'products':
         return l10n.featProducts;
       case 'unlinked_jan':
@@ -183,6 +187,10 @@ class FeatureEntry {
         return l10n.featConnectorsDesc;
       case 'ai_review':
         return l10n.featAiReviewDesc;
+      case 'ai_settings':
+        return l10n.featAiSettingsDesc;
+      case 'document_exceptions':
+        return l10n.featDocExceptionsDesc;
       case 'products':
         return l10n.featProductsDesc;
       case 'unlinked_jan':

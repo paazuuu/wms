@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ai/ai_settings_screen.dart';
 import '../../admin/presentation/user_management_screen.dart';
 import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../demand/presentation/open_demand_screen.dart';
+import '../../documents/presentation/document_exceptions_screen.dart';
 import '../../exceptions/presentation/exception_list_screen.dart';
 import '../../notation/presentation/notation_training_screen.dart';
 import '../../qc/presentation/held_stock_screen.dart';
@@ -176,6 +178,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _purchaseOrders,
             requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve'],
           ),
+          // Order, invoice, delivery and inspection that do not agree (0108):
+          // only the differences, so matching lines pass without a look.
+          FeatureEntry(
+            id: 'document_exceptions',
+            icon: Icons.difference_outlined,
+            status: FeatureStatus.ready,
+            builder: _documentExceptions,
+            requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve', 'receiving.view', 'inspection.view'],
+          ),
           FeatureEntry(
             id: 'sales_orders',
             icon: Icons.point_of_sale_outlined,
@@ -297,6 +308,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['ai.review'],
           ),
           FeatureEntry(
+            id: 'ai_settings',
+            icon: Icons.tune_outlined,
+            status: FeatureStatus.ready,
+            builder: _aiSettings,
+            requiredAnyOf: ['ai.review', 'user.manage'],
+          ),
+          FeatureEntry(
             id: 'products',
             icon: Icons.inventory_2_outlined,
             status: FeatureStatus.ready,
@@ -392,6 +410,8 @@ Widget _connectors(BuildContext _) => const ConnectorListScreen();
 
 /// Top-level (const-referenceable) builder for the AI Review feature.
 Widget _aiReview(BuildContext _) => const AiReviewListScreen();
+Widget _aiSettings(BuildContext _) => const AiSettingsScreen();
+Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 
 /// Top-level (const-referenceable) builder for the Product Master feature.
 Widget _products(BuildContext _) => const ProductListScreen();

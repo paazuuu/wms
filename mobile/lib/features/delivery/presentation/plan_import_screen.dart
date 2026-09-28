@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/ai/ai_confidence.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
@@ -828,6 +829,15 @@ class _LineIdentity extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.error)),
             ],
           ),
+        // How sure the reading is, field by field, against the thresholds
+        // set in AI設定 (§50). Only the fields that need a look are listed.
+        AiConfidenceRow(
+          confidence: lineConfidence(
+            [for (final f in (line['flags'] as List? ?? const [])) '$f'],
+            hasJan: '${line['raw_jan_code'] ?? line['jan_code'] ?? ''}'.isNotEmpty,
+            hasProduct: product != null,
+          ),
+        ),
       ],
     );
   }

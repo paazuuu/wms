@@ -6892,4 +6892,283 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scNoChange => 'No change';
+
+  @override
+  String get aiFieldProduct => 'Our product';
+
+  @override
+  String get aiBandAuto => 'Auto candidate';
+
+  @override
+  String get aiBandReview => 'Check recommended';
+
+  @override
+  String get aiBandHuman => 'Human review';
+
+  @override
+  String get aiSaved => 'Thresholds saved';
+
+  @override
+  String get featAiSettings => 'AI settings';
+
+  @override
+  String get featAiSettingsDesc => 'Confidence thresholds for document reading';
+
+  @override
+  String get aiSettingsIntro =>
+      'Each field of a reading has a confidence (from whether the AI\'s two reads agreed, the JAN check digit, the name/品番 split, and quantity × price = amount). Its band decides whether it is an automatic candidate, check recommended, or needs a person.';
+
+  @override
+  String get aiAutoThreshold => 'Automatic from';
+
+  @override
+  String get aiReviewThreshold =>
+      'Check recommended from (below: human review)';
+
+  @override
+  String get aiExample => 'Examples';
+
+  @override
+  String get featDocExceptions => 'Document differences';
+
+  @override
+  String get featDocExceptionsDesc =>
+      'Where order, invoice, delivery and inspection disagree';
+
+  @override
+  String get docFlagNotOrdered => 'Not on the order';
+
+  @override
+  String get docFlagNotInvoiced => 'Not invoiced';
+
+  @override
+  String get docFlagInvoiceQty => 'Invoiced quantity differs';
+
+  @override
+  String get docFlagInvoicePrice => 'Invoiced price differs';
+
+  @override
+  String get docFlagShortDelivery => 'Less received than invoiced';
+
+  @override
+  String get docFlagInspectShort => 'Less inspected than received';
+
+  @override
+  String get docFlagDefective => 'Defects found';
+
+  @override
+  String get docInvoiceOpen => 'Open';
+
+  @override
+  String get docInvoiceMatched => 'Matched';
+
+  @override
+  String get docInvoiceMismatch => 'Differences';
+
+  @override
+  String get docInvoiceApproved => 'Approved';
+
+  @override
+  String get docInvoiceVoid => 'Void';
+
+  @override
+  String get docMatchOk => 'All match';
+
+  @override
+  String get docMatchMismatch => 'Differences';
+
+  @override
+  String get docMatchPending => 'Awaiting invoice';
+
+  @override
+  String get docMatchTitle => 'Document match';
+
+  @override
+  String get docAddInvoice => 'Add invoice';
+
+  @override
+  String get docTolerance => 'Tolerance';
+
+  @override
+  String get docToleranceQty => 'Quantity';
+
+  @override
+  String get docTolerancePrice => 'Price';
+
+  @override
+  String get docOrder => 'Order';
+
+  @override
+  String get docInvoice => 'Invoice';
+
+  @override
+  String get docDelivery => 'Delivery';
+
+  @override
+  String get docReceived => 'Received';
+
+  @override
+  String get docInspection => 'Inspection';
+
+  @override
+  String get docOrderAmount => 'Ordered';
+
+  @override
+  String get docInvoiceAmount => 'Invoiced';
+
+  @override
+  String get docDifference => 'Difference';
+
+  @override
+  String docFailedShort(String n) {
+    return '$n defective';
+  }
+
+  @override
+  String get docUnitPrice => 'Unit price';
+
+  @override
+  String docApproved(int n) {
+    return 'Approved ($n supply terms updated)';
+  }
+
+  @override
+  String get docInvoices => 'Invoices';
+
+  @override
+  String get docNoInvoices => 'No invoices yet';
+
+  @override
+  String get docLinesSuffix => 'lines';
+
+  @override
+  String get docReadFromDocument => 'Read from document';
+
+  @override
+  String get docApprove => 'Approve';
+
+  @override
+  String get docVoid => 'Void';
+
+  @override
+  String get docInvoiceNumberRequired => 'Enter the invoice number';
+
+  @override
+  String get docSaved => 'Saved';
+
+  @override
+  String get docReadFromFile => 'Read from the invoice (PDF, photo, Excel)';
+
+  @override
+  String get docInvoiceNumber => 'Invoice number';
+
+  @override
+  String get docInvoiceDate => 'Invoice date';
+
+  @override
+  String get docInvoiceTotal => 'Invoice total';
+
+  @override
+  String get docLines => 'Lines';
+
+  @override
+  String get docAddLine => 'Add line';
+
+  @override
+  String get docSaveAndMatch => 'Save and match';
+
+  @override
+  String get docExceptionsTitle => 'Document differences';
+
+  @override
+  String get docNoExceptions => 'No differences';
+
+  @override
+  String docExceptionCount(int count) {
+    return '$count to check';
+  }
+
+  @override
+  String docDeltaQty(String n) {
+    return 'qty $n';
+  }
+
+  @override
+  String docDeltaPrice(String n) {
+    return 'price $n';
+  }
+
+  @override
+  String get poDocumentMatch => 'Document match';
+
+  @override
+  String get ntTabVersions => 'Versions';
+
+  @override
+  String get ntSnapshot => 'Save current version';
+
+  @override
+  String get ntSnapshotNote => 'Note (e.g. new layout)';
+
+  @override
+  String ntRestored(int version, int dialects, int aliases, int conflicts) {
+    return 'Brought back v$version ($dialects writings, $aliases headings, $conflicts conflicts)';
+  }
+
+  @override
+  String get ntVersionTraining => 'From training';
+
+  @override
+  String get ntVersionRestore => 'Restored';
+
+  @override
+  String get ntVersionManual => 'Saved by hand';
+
+  @override
+  String get ntVersionsIntro =>
+      'Each company\'s dictionary (writings and headings) is kept as numbered versions — saved each time a sample is learned, never overwritten. Bringing an old version back only adds what is missing now; a writing that now means something else is reported, not overwritten.';
+
+  @override
+  String get ntNoVersions => 'No versions yet';
+
+  @override
+  String ntVersionCounts(int dialects, int aliases) {
+    return '$dialects writings · $aliases headings';
+  }
+
+  @override
+  String get ntVersionCurrent => 'Current';
+
+  @override
+  String get ntRestore => 'Bring back';
+
+  @override
+  String syncSent(int count) {
+    return 'Sent $count';
+  }
+
+  @override
+  String syncOffline(int count) {
+    return 'Offline — records are kept on the device and sent when the network is back ($count waiting)';
+  }
+
+  @override
+  String syncPending(int count) {
+    return '$count records waiting to send';
+  }
+
+  @override
+  String get syncNow => 'Send now';
+
+  @override
+  String syncRefused(String reason) {
+    return 'Not accepted: $reason';
+  }
+
+  @override
+  String get syncDismiss => 'Dismiss';
+
+  @override
+  String get errorOffline =>
+      'No connection. Confirm once the network is back (counts and findings are kept on the device).';
 }
