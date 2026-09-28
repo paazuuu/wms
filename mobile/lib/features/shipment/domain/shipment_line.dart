@@ -7,6 +7,7 @@ class ShipmentLine extends Equatable {
     required this.janCode,
     required this.quantity,
     this.productCode,
+    this.maker,
     this.productName = '',
     this.spec,
     this.unitPrice,
@@ -16,7 +17,11 @@ class ShipmentLine extends Equatable {
   final int id;
   final String janCode;
   final int quantity;
+  /// Our own 品番 (the server rewrites a company's writing to our master, 0105).
   final String? productCode;
+
+  /// Our maker name for the product — every outbound document prints it.
+  final String? maker;
   final String productName;
   final String? spec;
   final int? unitPrice;
@@ -35,6 +40,7 @@ class ShipmentLine extends Equatable {
       janCode: (json['jan_code'] ?? '').toString(),
       quantity: asInt(json['quantity']) ?? 0,
       productCode: json['product_code']?.toString(),
+      maker: json['maker'] as String?,
       productName: json['product_name'] as String? ?? '',
       spec: json['spec'] as String?,
       unitPrice: asInt(json['unit_price']),

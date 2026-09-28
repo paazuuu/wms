@@ -6,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/delivery/application/delivery_providers.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:wms_mobile/features/delivery/presentation/plan_import_screen.dart';
+import 'package:wms_mobile/features/notation/domain/notation.dart';
+import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/domain/product.dart';
 
 import '../../support/harness.dart';
 
@@ -215,5 +218,92 @@ void main() {
     expect(repo.lastCommit, isNull);
     expect(find.text('この操作を行う権限がありません。'), findsOneWidget);
     expect(find.textContaining('receiving.confirm'), findsNothing);
+  });
+
+  testWidgets(
+      'a line shows our product with the company writing faded, an unmatched one can be tied, '
+      'and the columns go back on commit (0105)', (tester) async {
+    final repo = FakeDeliveryRepository(
+      const [],
+      preview: const ImportPreview(
+        source: 'xlsx',
+        lineCount: 2,
+        totalQuantity: 15,
+        deliveryNumber: 'ABC-123',
+        columns: [
+          ReadColumn(index: 0, header: '商品コード', field: ColumnField.jan, source: 'global'),
+          ReadColumn(index: 1, header: 'Item', field: ColumnField.productName, source: 'ai'),
+        ],
+        lines: [
+          {
+            'jan_code': '4901234567894',
+            'raw_jan_code': '4901234-567894',
+            'maker': 'TEST BUNGU',
+            'product_name': 'BALL PEN BLK',
+            'planned_quantity': 10,
+            'product_id': 1,
+            'product': {'id': 1, 'jan_code': '4901234567894', 'name': 'ボールペン', 'maker': 'テスト文具', 'sku': 'PEN-001'},
+            'matched_by': 'dialect_jan',
+            'flags': <String>[],
+          },
+          {
+            'jan_code': '',
+            'maker': 'テスト',
+            'product_name': 'けしごむ',
+            'product_code': 'ER-9',
+            'planned_quantity': 5,
+            'product_id': null,
+            'product': null,
+            'flags': ['unresolved', 'no_jan', 'ai_disagree:product_name'],
+          },
+        ],
+      ),
+    );
+    await tester.binding.setSurfaceSize(const Size(900, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(
+      tester,
+      PlanImportScreen(pickFile: () async => _fakeFile()),
+      overrides: [
+        deliveryRepositoryProvider.overrideWithValue(repo),
+        productRepositoryProvider.overrideWithValue(FakeProductRepository(products: const [
+          Product(id: 1, janCode: '4901234567894', name: 'ボールペン', maker: 'テスト文具'),
+          Product(id: 2, janCode: '4900000000019', name: '消しゴム', maker: 'テスト文具', sku: 'ER-9'),
+        ])),
+      ],
+    );
+    await tester.tap(find.text('ファイルを選ぶ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('読み取る'));
+    await tester.pumpAndSettle();
+
+    // Ours first, the company's writing under it for checking.
+    expect(find.text('ボールペン'), findsOneWidget);
+    expect(find.text('4901234567894 · テスト文具 · PEN-001'), findsOneWidget);
+    expect(find.textContaining('先方の表記：4901234-567894 · TEST BUNGU · BALL PEN BLK'), findsOneWidget);
+    expect(find.byKey(const ValueKey('import-unresolved')), findsOneWidget);
+    expect(find.textContaining('AIの読みが不一致：品名'), findsOneWidget);
+    // A missing JAN alone is no problem when the 品番 places it.
+    expect(find.textContaining('JANなし'), findsNothing);
+    expect(find.text('商品コード → JAN'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('import-pick-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('product-picker-2')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('import-unresolved')), findsNothing);
+    expect(find.text('消しゴム'), findsOneWidget);
+
+    await tester.tap(find.text('登録する'));
+    await tester.pumpAndSettle();
+    final sent = repo.lastCommit!;
+    expect(sent.lines[1]['product_id'], 2);
+    expect(sent.lines[1]['matched_by'], 'manual');
+    // The company's own writing still travels, to be learned.
+    expect(sent.lines[1]['product_name'], 'けしごむ');
+    expect(sent.toJson()['columns'], [
+      {'index': 0, 'header': '商品コード', 'field': 'jan'},
+      {'index': 1, 'header': 'Item', 'field': 'product_name'},
+    ]);
   });
 }

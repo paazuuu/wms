@@ -9,6 +9,10 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../notation/domain/notation.dart';
+import '../../notation/presentation/notation_labels.dart';
+import '../../product/domain/product.dart';
+import '../../product/presentation/product_picker_sheet.dart';
 import '../application/delivery_providers.dart';
 import '../data/delivery_repository.dart';
 
@@ -166,6 +170,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             docNumber: _docNumberController.text,
             orderDate: preview.orderDate,
             source: preview.source,
+            columns: preview.columns,
             lines: _lines,
             target: widget.target == ImportTarget.shipment ? 'shipment' : 'plan',
           ),
@@ -390,6 +395,15 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             ),
           ]),
         ),
+        if (!preview.verified) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _Notice(l10n.importNotVerified, color: scheme.error),
+        ],
+        if (_unresolvedCount > 0) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _Notice(l10n.importUnresolvedLines(_unresolvedCount),
+              color: scheme.tertiary, key: const ValueKey('import-unresolved')),
+        ],
         const SizedBox(height: AppSpacing.lg),
 
         _SectionLabel(l10n.importHeaderSection),
@@ -433,7 +447,27 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           onEdit: (i) => _editLine(index: i),
           onDelete: _deleteLine,
           onSplit: _splitLine,
+          onPickProduct: _pickProduct,
         ),
+        if (preview.columns.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _SectionLabel(l10n.importColumnsRead),
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final c in preview.columns)
+                if (c.header.isNotEmpty)
+                  Chip(
+                    visualDensity: VisualDensity.compact,
+                    label: Text(
+                        '${c.header} → ${columnFieldLabel(l10n, c.field)}',
+                        style: theme.textTheme.bodySmall),
+                  ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton.icon(
           onPressed: () => _editLine(index: null),
@@ -442,6 +476,45 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         ),
       ],
     );
+  }
+
+  int get _unresolvedCount => _lines.where((l) => l['product_id'] == null).length;
+
+  /// Ties a line the dictionary could not place to one of our products. The
+  /// company's writing stays on the line; on commit the server books it under
+  /// our JAN and learns the writing for next time (0105).
+  Future<void> _pickProduct(int index) async {
+    final line = _lines[index];
+    final writing = _supplierWriting(line);
+    final picked = await showModalBottomSheet<Product>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => ProductPickerSheet(
+        initialQuery: '${line['product_code'] ?? ''}'.trim().isNotEmpty
+            ? '${line['product_code']}'
+            : '${line['product_name'] ?? ''}',
+        subtitle: writing.isEmpty ? null : writing,
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _lines[index] = {
+        ...line,
+        'product_id': picked.id,
+        'product': {
+          'id': picked.id,
+          'jan_code': picked.janCode,
+          'name': picked.name,
+          'sku': picked.sku,
+          'maker': picked.maker,
+        },
+        'matched_by': 'manual',
+        'flags': [
+          for (final f in (line['flags'] as List? ?? const []))
+            if (f != 'unresolved' && f != 'no_maker') f,
+        ],
+      };
+    });
   }
 
   int get _totalQuantity =>
@@ -587,12 +660,14 @@ class _LinesPreview extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onSplit,
+    required this.onPickProduct,
   });
 
   final List<Map<String, dynamic>> lines;
   final ValueChanged<int> onEdit;
   final ValueChanged<int> onDelete;
   final ValueChanged<int> onSplit;
+  final ValueChanged<int> onPickProduct;
 
   int _int(dynamic v) =>
       v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
@@ -630,26 +705,10 @@ class _LinesPreview extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (lines[i]['product_name'] as String?)
-                                        ?.isNotEmpty ==
-                                    true
-                                ? lines[i]['product_name'] as String
-                                : '${lines[i]['jan_code']}',
-                            style: theme.textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '${lines[i]['jan_code']}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                                fontFamily: AppFonts.mono,
-                                color: scheme.onSurfaceVariant),
-                          ),
-                        ],
+                      child: _LineIdentity(
+                        line: lines[i],
+                        onPickProduct: () => onPickProduct(i),
+                        pickKey: ValueKey('import-pick-$i'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -678,6 +737,123 @@ class _LinesPreview extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// How the company wrote a line: JAN, maker, name and 品番 as they appeared.
+String _supplierWriting(Map<String, dynamic> line) => [
+      line['raw_jan_code'] ?? line['jan_code'],
+      line['maker'],
+      line['product_name'],
+      line['product_code'],
+    ]
+        .map((v) => (v ?? '').toString().trim())
+        .where((v) => v.isNotEmpty)
+        .toSet()
+        .join(' · ');
+
+/// One line's identity: our product in full, the company's writing faded under
+/// it (UI kept the original for checking, 0103), and what the reading flagged.
+class _LineIdentity extends StatelessWidget {
+  const _LineIdentity({required this.line, required this.onPickProduct, this.pickKey});
+
+  final Map<String, dynamic> line;
+  final VoidCallback onPickProduct;
+  final Key? pickKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final raw = line['product'];
+    final product = raw is Map ? ResolvedProduct.fromJson(Map<String, dynamic>.from(raw)) : null;
+    final writing = _supplierWriting(line);
+    final faded = theme.textTheme.bodySmall
+        ?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: 0.6));
+    final problems = [
+      for (final f in (line['flags'] as List? ?? const []))
+        if (NotationFlag.isProblem('$f') && f != 'unresolved') '$f',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (product != null) ...[
+          Text(product.name,
+              style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(
+            [product.janCode, if (product.maker != null) product.maker!, if (product.sku != null) product.sku!]
+                .join(' · '),
+            style: theme.textTheme.bodySmall
+                ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
+          ),
+          if (writing.isNotEmpty)
+            Text(l10n.importSupplierWriting(writing),
+                style: faded, maxLines: 2, overflow: TextOverflow.ellipsis),
+        ] else ...[
+          Text(
+            (line['product_name'] as String?)?.isNotEmpty == true
+                ? line['product_name'] as String
+                : '${line['jan_code']}',
+            style: theme.textTheme.bodyMedium,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(writing,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: pickKey,
+              style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
+              onPressed: onPickProduct,
+              icon: Icon(Icons.link, size: 16, color: scheme.tertiary),
+              label: Text('${l10n.ntNotMatched} — ${l10n.ntChooseProduct}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary)),
+            ),
+          ),
+        ],
+        if (problems.isNotEmpty)
+          Wrap(
+            spacing: AppSpacing.xs,
+            children: [
+              for (final f in problems)
+                Text('⚠ ${flagLabel(l10n, f)}',
+                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.error)),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+/// A one-line coloured notice above the review form.
+class _Notice extends StatelessWidget {
+  const _Notice(this.text, {required this.color, super.key});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Row(children: [
+        Icon(Icons.info_outline, size: 18, color: color),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(child: Text(text, style: Theme.of(context).textTheme.bodySmall)),
+      ]),
     );
   }
 }
@@ -723,8 +899,11 @@ class _LineEditDialogState extends State<_LineEditDialog> {
     final jan = _jan.text.trim();
     final qty = int.tryParse(_quantity.text.trim()) ?? 0;
     if (jan.isEmpty || qty <= 0) return;
+    final janChanged = widget.line != null && '${widget.line!['jan_code']}' != jan;
     Navigator.pop(context, {
       ...?widget.line,
+      // A different JAN is a different product: let the server resolve it.
+      if (janChanged) ...{'product_id': null, 'product': null, 'matched_by': null},
       'jan_code': jan,
       'product_name': _product.text.trim(),
       'planned_quantity': qty,

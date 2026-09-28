@@ -5061,6 +5061,94 @@ faded, so the inspector can check the two.
   line pending, and 5 passed it with 50 counted.
 - `NONE`: the receipt went straight to OK and no inspection opened.
 
+### 0105 — each company's way of writing is a dialect with its own id
+
+Most goods come through trading companies, and each writes the same product a
+little differently. That writing is now a first-class thing the system learns.
+
+- **Maker is required.** A `makers` master (with a folded `name_key`) backs
+  `products.maker_id`, kept in step with `products.maker` by a trigger.
+  `create_product` refuses a product without a maker ('maker is required'),
+  and `set_product_identity` refuses clearing it. The app's product form asks
+  for it on create and on edit.
+- **Dialects.** `notation_dialects` holds one row per (company, field,
+  folded value, maker scope). Fields are `jan`, `maker`, `name` and `code`
+  (品番 / 項目). Each row shows as `D-000123`, keeps every raw spelling seen
+  (`raw_values`), what it points to (a product, or a maker), whether it is
+  confirmed, its source and how often it was seen.
+- **Folding.** `normalize_product_text` (NFKC, lower case, katakana → hiragana,
+  separators dropped, a dot kept only between digits) and `normalize_jan`
+  (Excel `.0`, hyphens / dots / spaces / underscores, UPC-A → 13 digits,
+  GTIN-14 → 13 with a recomputed check digit) are the same in SQL and in the
+  edge functions.
+- **Resolution** (`resolve_supplier_product`, `resolve_notation_lines`):
+  1. our JAN or a registered barcode;
+  2. a confirmed JAN dialect, the company's own first;
+  3. a code dialect (scoped by maker), then our SKU when unique;
+  4. a name dialect, then our name when unique.
+  One company's dialect is never borrowed for another.
+- **Learning.** `learn_notation_lines(partner, lines, source, confirmed)`
+  records what a checked line showed. A value already confirmed for another
+  product is reported as a conflict, never overwritten. The existing
+  `supplier_product_names` feed the dictionary (backfilled as `legacy`).
+- **Column headings.** `column_aliases` maps headings (漢字, カナ, English) to
+  fields: jan / maker / product_name / product_code / name_code / quantity /
+  case_quantity / cases / unit_price / amount / spec / tax_rate / order_date /
+  ignore. They are seeded globally and learned per company.
+- **Reading documents** (`import-plan`, `ocr-delivery-note`):
+  - spreadsheets find the header row and map columns by alias, by part of a
+    heading, by the values, and by AI, reporting conflicts;
+  - PDFs and photos are read twice by the AI (extract, then an independent
+    check) — disagreements become `ai_disagree:<field>` with both readings
+    kept;
+  - a combined 品名+品番 cell is split by rule and by AI and the two compared
+    (`split_disagree` / `split_single` / `split_failed`);
+  - checks flag `jan_check`, `no_jan`, `no_quantity`, `no_maker`,
+    `amount_mismatch`.
+- **Plan lines** keep the company's writing (`raw_jan_code`, `raw_name_code`,
+  `review_flags`) and are booked under our JAN when they resolve. The import
+  review shows our product with the company's writing faded under it; an
+  unmatched line can be tied to our product there, and the columns go back
+  with the commit so the headings are learned too.
+- **Outbound is always ours.** `shipment_lines_a_canonical` rewrites every
+  shipment line to our JAN, maker, name and SKU, keeping the source values in
+  `source_jan_code` / `source_product_code` / `source_maker`. Every slip
+  (送り状, 出庫リスト, 段ボール別) prints the same columns in the same order:
+  JANコード / メーカー / 品名 / 品番 / 規格 / 数量 (+ 単価 / 金額).
+
+**Verified live** (aborted transaction): JAN spellings with hyphens, dots,
+spaces and underscores folded to one; kana variants matched; a company's code
+plus its English maker resolved through a dialect; another company could not
+use it; a conflicting value was reported, not overwritten; an outbound line
+was rewritten to our notation with the source kept.
+
+### 0106 — training on sample documents before the goods arrive
+
+`notation_trainings` records each practice read: company, file, source
+(xlsx / csv / gemini), whether the AI's check ran, line and resolved counts,
+counts per flag, the columns and the lines, and its status (read / learned /
+discarded).
+
+- `import-plan` with `mode=training` reads a sample exactly like a real
+  import but books nothing. JSON `mode: 'learn'` teaches what the checked
+  read showed and closes the run (`finish_notation_training`).
+- `record_notation_training`, `discard_notation_training`,
+  `list_notation_trainings`, `notation_training(id)` and
+  `notation_training_stats()` (per company: runs, lines, conversion rate,
+  dialects, headings, and which problems its documents have). All need
+  product.manage or receiving.confirm (`notation_training_allowed`).
+- The app's **管理 → 表記の事前学習** has four tabs:
+  - 事前学習: pick a company and a sample Excel / CSV / PDF / photo, see how
+    each column and line was understood and what went wrong, correct columns
+    and tie lines to our products, then learn or discard;
+  - 方言辞書: every learned writing with its id, filterable by company and
+    field, to confirm, re-point or delete;
+  - 列見出し: headings, shared and per company, with manual additions;
+  - 履歴・傾向: past runs and each company's error profile.
+
+**Verified live:** training runs recorded their flag counts, and the stats
+summed them per company.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

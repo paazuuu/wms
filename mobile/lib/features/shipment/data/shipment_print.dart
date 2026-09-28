@@ -7,12 +7,16 @@ import '../domain/sender_profile.dart';
 import '../../transfers/domain/transfer_order.dart';
 import '../domain/shipment.dart';
 
-/// One line of a downstream slip.
+/// One line of a downstream slip. Always our own notation: the server has
+/// already turned whatever a trading company wrote into our JAN, maker, name
+/// and 品番 (0105), so every document we send out reads the same.
 class SlipLine {
   const SlipLine({
     required this.janCode,
     required this.productName,
     required this.quantity,
+    this.maker,
+    this.productCode,
     this.spec,
     this.unitPrice,
     this.amount,
@@ -20,10 +24,23 @@ class SlipLine {
 
   final String janCode;
   final String productName;
+  final String? maker;
+  final String? productCode;
   final String? spec;
   final int quantity;
   final int? unitPrice;
   final int? amount;
+}
+
+/// One printed item row, in the fixed column order.
+class _Item {
+  const _Item(this.jan, this.maker, this.name, this.code, this.spec, this.quantity);
+  final String jan;
+  final String? maker;
+  final String name;
+  final String? code;
+  final String? spec;
+  final int quantity;
 }
 
 /// Everything a 送り状 prints, whichever document the goods left on.
@@ -70,6 +87,8 @@ class SlipDocument {
             SlipLine(
               janCode: l.janCode,
               productName: l.productName,
+              maker: l.maker,
+              productCode: l.productCode,
               spec: l.spec,
               quantity: l.quantity,
               unitPrice: l.unitPrice,
@@ -194,42 +213,49 @@ class ShipmentPrinter {
         '<div class="meta">${m.join()}</div>';
   }
 
+  /// The item columns every outbound document prints, in this order, whatever
+  /// headings the trading company used on its own paperwork.
+  static const itemHeadings = ['JANコード', 'メーカー', '品名', '品番', '規格'];
+
+  String get _itemHead =>
+      itemHeadings.map((h) => '<th>$h</th>').join();
+
+  String _itemCells(_Item r) => '<td class="jan">${_esc(r.jan)}</td>'
+      '<td>${_esc(r.maker)}</td><td>${_esc(r.name)}</td>'
+      '<td>${_esc(r.code)}</td><td>${_esc(r.spec)}</td>';
+
   /// A plain (text) item table — used for the overall list.
-  String _rows(Iterable<List<String>> rows, int total) {
+  String _rows(Iterable<_Item> rows, int total) {
     final body = rows
-        .map((r) =>
-            '<tr><td class="jan">${_esc(r[0])}</td><td>${_esc(r[1])}</td>'
-            '<td>${_esc(r[2])}</td><td class="num">${_esc(r[3])}</td></tr>')
+        .map((r) => '<tr>${_itemCells(r)}<td class="num">${r.quantity}</td></tr>')
         .join();
     return '''
 <table>
-  <thead><tr><th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th></tr></thead>
+  <thead><tr>$_itemHead<th class="num">数量</th></tr></thead>
   <tbody>$body</tbody>
-  <tfoot><tr><td colspan="3">合計</td><td class="num">$total</td></tr></tfoot>
+  <tfoot><tr><td colspan="${itemHeadings.length}">合計</td><td class="num">$total</td></tr></tfoot>
 </table>''';
   }
 
   /// An item table with a JAN barcode column — used for carton contents.
-  String _rowsWithBarcode(
-      Iterable<List<String>> rows, int total) {
+  String _rowsWithBarcode(Iterable<_Item> rows, int total) {
     final body = rows.map((r) {
-      final svg = _barcodeSvg(r[0]);
-      return '<tr><td class="bc">$svg</td><td class="jan">${_esc(r[0])}</td>'
-          '<td>${_esc(r[1])}</td><td>${_esc(r[2])}</td>'
-          '<td class="num">${_esc(r[3])}</td></tr>';
+      final svg = _barcodeSvg(r.jan);
+      return '<tr><td class="bc">$svg</td>${_itemCells(r)}'
+          '<td class="num">${r.quantity}</td></tr>';
     }).join();
     return '''
 <table>
-  <thead><tr><th class="bc">バーコード</th><th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th></tr></thead>
+  <thead><tr><th class="bc">バーコード</th>$_itemHead<th class="num">数量</th></tr></thead>
   <tbody>$body</tbody>
-  <tfoot><tr><td colspan="4">合計</td><td class="num">$total</td></tr></tfoot>
+  <tfoot><tr><td colspan="${itemHeadings.length + 1}">合計</td><td class="num">$total</td></tr></tfoot>
 </table>''';
   }
 
   /// The whole shipment as one list.
   String overallHtml(Shipment s, {List<SenderLine> sender = const []}) {
-    final rows = s.lines.map((l) =>
-        [l.janCode, l.productName, l.spec ?? '', '${l.quantity}']);
+    final rows = s.lines.map((l) => _Item(
+        l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
     final body = _headerBlock(s, '出庫リスト', sender) + _rows(rows, s.totalUnits);
     return _shell('出庫リスト ${s.shipmentNumber}', body);
   }
@@ -239,8 +265,14 @@ class ShipmentPrinter {
     final title = c.label == null || c.label!.isEmpty
         ? '段ボール #${c.cartonNo} / $boxes'
         : '段ボール #${c.cartonNo} / $boxes — ${c.label}';
-    final rows = c.items.map((it) =>
-        [it.janCode, it.productName, it.spec ?? '', '${it.quantity}']);
+    // A carton item carries only the JAN and name; the maker and 品番 come
+    // from the shipment line it was packed from.
+    final byJan = {for (final l in s.lines) l.janCode: l};
+    final rows = c.items.map((it) {
+      final line = byJan[it.janCode];
+      return _Item(it.janCode, line?.maker, it.productName, line?.productCode,
+          it.spec ?? line?.spec, it.quantity);
+    });
     return '<div class="carton"><div class="box">${_esc(title)}</div>'
         '${_rowsWithBarcode(rows, c.totalUnits)}</div>';
   }
@@ -282,12 +314,12 @@ class ShipmentPrinter {
     }
 
     final headCols = hasMoney
-        ? '<th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th>'
-        : '<th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th>';
+        ? '$_itemHead<th class="num">数量</th><th class="num">単価</th><th class="num">金額</th>'
+        : '$_itemHead<th class="num">数量</th>';
     final rows = d.lines.map((l) {
-      final base = '<td class="jan">${_esc(l.janCode)}</td>'
-          '<td>${_esc(l.productName)}</td><td>${_esc(l.spec ?? '')}</td>'
-          '<td class="num">${l.quantity}</td>';
+      final cells = _itemCells(_Item(
+          l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
+      final base = '$cells<td class="num">${l.quantity}</td>';
       final extra = hasMoney
           ? '<td class="num">${money(l.unitPrice)}</td>'
               '<td class="num">${money(l.amount ?? (l.unitPrice != null ? l.unitPrice! * l.quantity : null))}</td>'
@@ -295,9 +327,9 @@ class ShipmentPrinter {
       return '<tr>$base$extra</tr>';
     }).join();
     final footer = hasMoney
-        ? '<tr><td colspan="3">合計</td><td class="num">$units</td>'
+        ? '<tr><td colspan="${itemHeadings.length}">合計</td><td class="num">$units</td>'
             '<td></td><td class="num">¥$amountTotal</td></tr>'
-        : '<tr><td colspan="3">合計</td><td class="num">$units</td></tr>';
+        : '<tr><td colspan="${itemHeadings.length}">合計</td><td class="num">$units</td></tr>';
 
     final kv = <String>[];
     void add(String label, String? value) {

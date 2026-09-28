@@ -103,6 +103,9 @@ import 'package:wms_mobile/features/shipment/domain/shipment_parcel.dart';
 import 'package:wms_mobile/features/wave/application/pick_wave_providers.dart';
 import 'package:wms_mobile/features/wave/data/pick_wave_repository.dart';
 import 'package:wms_mobile/features/wave/domain/pick_wave.dart';
+import 'package:wms_mobile/features/notation/application/notation_providers.dart';
+import 'package:wms_mobile/features/notation/data/notation_repository.dart';
+import 'package:wms_mobile/features/notation/domain/notation.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
@@ -163,6 +166,7 @@ List<Override> _defaultOverrides() => [
       reportRepositoryProvider.overrideWithValue(FakeReportRepository()),
       putawayRepositoryProvider.overrideWithValue(FakePutawayRepository()),
       pickWaveRepositoryProvider.overrideWithValue(FakePickWaveRepository()),
+      notationRepositoryProvider.overrideWithValue(FakeNotationRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -1965,7 +1969,8 @@ class FakeProductRepository implements ProductRepository {
       final searchOk = search == null ||
           search.isEmpty ||
           p.name.contains(search) ||
-          p.janCode.contains(search);
+          p.janCode.contains(search) ||
+          (p.sku?.contains(search) ?? false);
       return statusOk && searchOk;
     }).toList());
   }
@@ -3946,5 +3951,118 @@ class FakeRoleDashboardRepository implements RoleDashboardRepository {
       expectedOn: expectedOn,
     );
     return const ApiSuccess('MN-000001');
+  }
+}
+
+
+/// The notation dictionary and training runs (0105/0106), in memory.
+class FakeNotationRepository implements NotationRepository {
+  FakeNotationRepository({
+    this.read = const TrainingRead(),
+    List<TrainingRun> runs = const [],
+    List<PartnerTrainingStats> stats = const [],
+    List<NotationDialect> dialectRows = const [],
+    List<ColumnAlias> aliases = const [],
+  })  : runs = List.of(runs),
+        statsRows = List.of(stats),
+        dialectRows = List.of(dialectRows),
+        aliases = List.of(aliases);
+
+  /// What readSample() returns.
+  TrainingRead read;
+  List<TrainingRun> runs;
+  List<PartnerTrainingStats> statsRows;
+  List<NotationDialect> dialectRows;
+  List<ColumnAlias> aliases;
+
+  ({int partnerId, Map<int, ColumnField> overrides, String fileName})? lastRead;
+  ({int partnerId, int? trainingId, List<ReadLineResult> lines, List<ReadColumn> columns})? lastLearn;
+  final List<int> discarded = [];
+  final List<({int id, int? productId, bool confirmed})> confirmed = [];
+  final List<int> removedDialects = [];
+  ({int? partnerId, String header, ColumnField field})? lastAlias;
+  ({int? partnerId, String? field, String? search, bool unconfirmedOnly})? lastDialectQuery;
+
+  @override
+  Future<ApiResult<TrainingRead>> readSample({
+    required int partnerId,
+    required MultipartFile file,
+    Map<int, ColumnField> overrides = const {},
+  }) async {
+    lastRead = (partnerId: partnerId, overrides: Map.of(overrides), fileName: file.filename ?? '');
+    return ApiSuccess(read);
+  }
+
+  @override
+  Future<ApiResult<LearnResult>> learn({
+    required int partnerId,
+    int? trainingId,
+    required List<ReadLineResult> lines,
+    required List<ReadColumn> columns,
+  }) async {
+    lastLearn = (partnerId: partnerId, trainingId: trainingId, lines: lines, columns: columns);
+    final n = lines.where((l) => l.resolved).length;
+    return ApiSuccess(LearnResult(learned: n, added: n));
+  }
+
+  @override
+  Future<ApiResult<List<TrainingRun>>> trainings({int? partnerId}) async => ApiSuccess(runs);
+
+  @override
+  Future<ApiResult<List<PartnerTrainingStats>>> stats() async => ApiSuccess(statsRows);
+
+  @override
+  Future<ApiResult<bool>> discard(int trainingId) async {
+    discarded.add(trainingId);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<NotationDialect>>> dialects({
+    int? partnerId,
+    String? field,
+    String? search,
+    bool unconfirmedOnly = false,
+  }) async {
+    lastDialectQuery =
+        (partnerId: partnerId, field: field, search: search, unconfirmedOnly: unconfirmedOnly);
+    return ApiSuccess(dialectRows
+        .where((d) =>
+            (field == null || d.field == field) &&
+            (!unconfirmedOnly || !d.confirmed) &&
+            (partnerId == null || d.partnerId == partnerId))
+        .toList());
+  }
+
+  @override
+  Future<ApiResult<bool>> confirmDialect(int id,
+      {int? productId, int? makerId, bool confirmed = true}) async {
+    this.confirmed.add((id: id, productId: productId, confirmed: confirmed));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> removeDialect(int id) async {
+    removedDialects.add(id);
+    dialectRows = dialectRows.where((d) => d.id != id).toList();
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<ColumnAlias>>> columnAliases({int? partnerId}) async =>
+      ApiSuccess(aliases);
+
+  @override
+  Future<ApiResult<bool>> setColumnAlias(
+      {int? partnerId, required String header, required ColumnField field}) async {
+    lastAlias = (partnerId: partnerId, header: header, field: field);
+    aliases = [...aliases, ColumnAlias(id: 900 + aliases.length, header: header, field: field, partnerId: partnerId, source: 'manual')];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> removeColumnAlias(int id) async {
+    aliases = aliases.where((a) => a.id != id).toList();
+    return const ApiSuccess(true);
   }
 }

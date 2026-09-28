@@ -2068,5 +2068,9 @@
   "ntMatchSku": "本公司货号一致",
   "ntMatchName": "本公司品名一致",
   "ntMatchManual": "手动选择",
-  "ntMatchNone": ""
+  "ntMatchNone": "",
+  "importSupplierWriting": "对方写法：{text}",
+  "importUnresolvedLines": "{count}行尚未转换为本公司商品。请选择，或先登记并在检品时转换。",
+  "importColumnsRead": "列的识别方式",
+  "importNotVerified": "AI复核读取失败（仅读取一次）。请仔细核对明细。"
 }

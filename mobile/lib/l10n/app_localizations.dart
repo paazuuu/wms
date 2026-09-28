@@ -10350,6 +10350,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **''**
   String get ntMatchNone;
+
+  /// No description provided for @importSupplierWriting.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方の表記：{text}'**
+  String importSupplierWriting(String text);
+
+  /// No description provided for @importUnresolvedLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}行が自社商品に未変換です。選ぶか、このまま登録して検品で変換してください。'**
+  String importUnresolvedLines(int count);
+
+  /// No description provided for @importColumnsRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'列の読み方'**
+  String get importColumnsRead;
+
+  /// No description provided for @importNotVerified.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。'**
+  String get importNotVerified;
 }
 
 class _AppLocalizationsDelegate

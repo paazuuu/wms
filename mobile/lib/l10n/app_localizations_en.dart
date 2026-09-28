@@ -5784,4 +5784,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ntMatchNone => '';
+
+  @override
+  String importSupplierWriting(String text) {
+    return 'Supplier wrote: $text';
+  }
+
+  @override
+  String importUnresolvedLines(int count) {
+    return '$count lines are not yet your products. Pick them, or register now and convert them at inspection.';
+  }
+
+  @override
+  String get importColumnsRead => 'How the columns were read';
+
+  @override
+  String get importNotVerified =>
+      'The AI\'s checking read failed (read once only). Check the lines carefully.';
 }

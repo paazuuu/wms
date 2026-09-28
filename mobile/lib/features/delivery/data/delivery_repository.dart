@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
+import '../../notation/domain/notation.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/reconciliation.dart';
 import '../domain/receipt.dart';
@@ -92,6 +93,8 @@ class ImportPreview {
     this.docDate,
     this.deliveryNumber,
     this.orderDate,
+    this.columns = const [],
+    this.verified = true,
   });
 
   final String source;
@@ -109,6 +112,13 @@ class ImportPreview {
   final String? docDate;
   final String? deliveryNumber;
   final String? orderDate;
+
+  /// How each column's heading was understood (0105) — sent back on commit so
+  /// the company's headings are learned with the lines.
+  final List<ReadColumn> columns;
+
+  /// False when the AI's second, checking read of a PDF/photo failed.
+  final bool verified;
 
   factory ImportPreview.fromJson(Map<String, dynamic> json) {
     int asInt(dynamic v) =>
@@ -135,6 +145,10 @@ class ImportPreview {
       docDate: s(header['doc_date']),
       deliveryNumber: s(json['delivery_number']),
       orderDate: s(json['order_date']),
+      columns: (json['columns'] as List<dynamic>? ?? const [])
+          .map((e) => ReadColumn.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      verified: json['verified'] != false,
     );
   }
 }
@@ -151,6 +165,7 @@ class PlanCommit {
     this.docNumber,
     this.orderDate,
     this.source,
+    this.columns = const [],
     this.target = 'plan',
   });
 
@@ -163,6 +178,7 @@ class PlanCommit {
   final String? docNumber;
   final String? orderDate;
   final String? source;
+  final List<ReadColumn> columns;
 
   /// "plan" (inbound) or "shipment" (outbound) — picks the destination tables.
   final String target;
@@ -184,6 +200,7 @@ class PlanCommit {
       if (clean(orderDate) != null) 'order_date': clean(orderDate),
       if (clean(source) != null) 'source': clean(source),
       'target': target,
+      if (columns.isNotEmpty) 'columns': [for (final c in columns) c.toJson()],
       'lines': lines,
     };
   }

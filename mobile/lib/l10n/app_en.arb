@@ -2068,5 +2068,9 @@
   "ntMatchSku": "Matched by our code",
   "ntMatchName": "Matched by our name",
   "ntMatchManual": "Chosen by hand",
-  "ntMatchNone": ""
+  "ntMatchNone": "",
+  "importSupplierWriting": "Supplier wrote: {text}",
+  "importUnresolvedLines": "{count} lines are not yet your products. Pick them, or register now and convert them at inspection.",
+  "importColumnsRead": "How the columns were read",
+  "importNotVerified": "The AI's checking read failed (read once only). Check the lines carefully."
 }

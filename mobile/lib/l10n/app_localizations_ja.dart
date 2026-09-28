@@ -5654,4 +5654,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ntMatchNone => '';
+
+  @override
+  String importSupplierWriting(String text) {
+    return '先方の表記：$text';
+  }
+
+  @override
+  String importUnresolvedLines(int count) {
+    return '$count行が自社商品に未変換です。選ぶか、このまま登録して検品で変換してください。';
+  }
+
+  @override
+  String get importColumnsRead => '列の読み方';
+
+  @override
+  String get importNotVerified => 'AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。';
 }

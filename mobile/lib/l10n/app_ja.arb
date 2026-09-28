@@ -5851,5 +5851,23 @@
   "ntMatchNone": "",
   "@ntMatchNone": {
     "description": "Notation dialects / training (0105-0106): ntMatchNone"
-  }
+  },
+  "importSupplierWriting": "先方の表記：{text}",
+  "@importSupplierWriting": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "importUnresolvedLines": "{count}行が自社商品に未変換です。選ぶか、このまま登録して検品で変換してください。",
+  "@importUnresolvedLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importColumnsRead": "列の読み方",
+  "importNotVerified": "AIの確認の読み取りに失敗しました（1回のみの読み取り）。明細をよく確認してください。"
 }

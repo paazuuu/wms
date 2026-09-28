@@ -5637,4 +5637,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ntMatchNone => '';
+
+  @override
+  String importSupplierWriting(String text) {
+    return '对方写法：$text';
+  }
+
+  @override
+  String importUnresolvedLines(int count) {
+    return '$count行尚未转换为本公司商品。请选择，或先登记并在检品时转换。';
+  }
+
+  @override
+  String get importColumnsRead => '列的识别方式';
+
+  @override
+  String get importNotVerified => 'AI复核读取失败（仅读取一次）。请仔细核对明细。';
 }

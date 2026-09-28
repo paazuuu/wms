@@ -15,7 +15,7 @@ void main() {
     'reference_no': 'ACME-00001',
     'status': 'packing',
     'lines': [
-      {'id': 1, 'jan_code': '4902505632037', 'product_name': 'ボールペン', 'quantity': 100, 'unit_price': 80, 'amount': 8000},
+      {'id': 1, 'jan_code': '4902505632037', 'product_name': 'ボールペン', 'maker': 'テスト文具', 'product_code': 'PEN-001', 'quantity': 100, 'unit_price': 80, 'amount': 8000},
     ],
     'cartons': [
       {
@@ -42,6 +42,27 @@ void main() {
     expect(html.contains('御中'), isTrue);
     expect(html.contains('¥8000'), isTrue); // line + total amount
     expect(html.contains('ACME-00001'), isTrue);
+  });
+
+  test('every outbound document prints our JAN, maker, name and 品番 in one order',
+      () {
+    const head =
+        '<th>JANコード</th><th>メーカー</th><th>品名</th><th>品番</th><th>規格</th>';
+    const cells = '<td class="jan">4902505632037</td><td>テスト文具</td>'
+        '<td>ボールペン</td><td>PEN-001</td>';
+    for (final html in [
+      printer.deliverySlipHtml(shipment),
+      printer.overallHtml(shipment),
+      // A carton item has no maker or 品番 of its own; they come from the line.
+      printer.cartonHtml(shipment, shipment.cartons.first),
+    ]) {
+      expect(html.contains(head), isTrue);
+      expect(html.contains(cells), isTrue);
+    }
+    // The total spans exactly the item columns.
+    expect(printer.overallHtml(shipment).contains('<td colspan="5">合計</td>'), isTrue);
+    expect(printer.cartonHtml(shipment, shipment.cartons.first)
+        .contains('<td colspan="6">合計</td>'), isTrue);
   });
 
   test('overall list stays text-only (no barcode column)', () {
@@ -151,7 +172,9 @@ void main() {
     // One layout: the same title and table head as a shipment's slip.
     expect(html.contains('送&nbsp;り&nbsp;状'), isTrue);
     expect(slip.contains('送&nbsp;り&nbsp;状'), isTrue);
-    expect(html.contains('<th>JAN</th><th>品名</th><th>規格</th><th class="num">数量</th>'), isTrue);
+    expect(
+        html.contains('<th>JANコード</th><th>メーカー</th><th>品名</th><th>品番</th><th>規格</th><th class="num">数量</th>'),
+        isTrue);
     expect(html.contains('上海倉庫'), isTrue);
     expect(html.contains('上海市'), isTrue);
     expect(html.contains('出荷元：東京倉庫'), isTrue);

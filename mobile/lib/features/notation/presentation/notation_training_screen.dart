@@ -185,7 +185,7 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => ProductPickerSheet(
-        initialQuery: line.productName ?? line.productCode ?? line.rawJanCode ?? '',
+        initialQuery: line.productCode ?? line.productName ?? line.rawJanCode ?? '',
         subtitle: l10n.qcSupplierNotation(_writing(line)),
       ),
     );
@@ -703,48 +703,13 @@ class _ColumnsTab extends ConsumerWidget {
   const _ColumnsTab();
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final header = TextEditingController();
-    var field = ColumnField.productName;
-    final ok = await showDialog<bool>(
+    final result = await showDialog<({String header, ColumnField field})>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(l10n.ntAddColumn),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                key: const ValueKey('nt-column-header'),
-                controller: header,
-                decoration: InputDecoration(labelText: l10n.ntColumnHeader),
-              ),
-              DropdownButtonFormField<ColumnField>(
-                key: const ValueKey('nt-column-field'),
-                initialValue: field,
-                items: [
-                  for (final f in ColumnField.values)
-                    DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f))),
-                ],
-                onChanged: (v) => setState(() => field = v ?? field),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(l10n.actionCancel)),
-            FilledButton(
-              key: const ValueKey('nt-column-save'),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(l10n.actionSave),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => const _AliasDialog(),
     );
-    if (ok != true || header.text.trim().isEmpty) return;
+    if (result == null) return;
     final r = await ref.read(notationRepositoryProvider).setColumnAlias(
-        partnerId: ref.read(dialectPartnerProvider), header: header.text.trim(), field: field);
-    header.dispose();
+        partnerId: ref.read(dialectPartnerProvider), header: result.header, field: result.field);
     r.when(success: (_) => ref.invalidate(columnAliasesProvider), failure: (_) {});
   }
 
@@ -806,6 +771,65 @@ class _ColumnsTab extends ConsumerWidget {
                   ),
               ],
             ),
+      ],
+    );
+  }
+}
+
+/// A heading and what it means. Owns its text controller, so the controller
+/// outlives the dialog's closing animation.
+class _AliasDialog extends StatefulWidget {
+  const _AliasDialog();
+
+  @override
+  State<_AliasDialog> createState() => _AliasDialogState();
+}
+
+class _AliasDialogState extends State<_AliasDialog> {
+  final _header = TextEditingController();
+  var _field = ColumnField.productName;
+
+  @override
+  void dispose() {
+    _header.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.ntAddColumn),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            key: const ValueKey('nt-column-header'),
+            controller: _header,
+            decoration: InputDecoration(labelText: l10n.ntColumnHeader),
+          ),
+          DropdownButtonFormField<ColumnField>(
+            key: const ValueKey('nt-column-field'),
+            initialValue: _field,
+            items: [
+              for (final f in ColumnField.values)
+                DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f))),
+            ],
+            onChanged: (v) => setState(() => _field = v ?? _field),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('nt-column-save'),
+          onPressed: () {
+            final h = _header.text.trim();
+            if (h.isEmpty) return;
+            Navigator.pop(context, (header: h, field: _field));
+          },
+          child: Text(l10n.actionSave),
+        ),
       ],
     );
   }
