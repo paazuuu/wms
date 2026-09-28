@@ -17,6 +17,8 @@ import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'supplier_names_card.dart';
+import '../../product_library/presentation/product_gallery_screen.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
 /// units (0059), its lots and serials (0060), and how this warehouse handles it
@@ -129,6 +131,8 @@ class _Header extends ConsumerWidget {
           children: [
             Row(
               children: [
+                ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 72),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(product.name, style: theme.textTheme.titleMedium),
                 ),
@@ -158,6 +162,19 @@ class _Header extends ConsumerWidget {
             ],
             const SizedBox(height: AppSpacing.sm),
             ProductFacts(product: product),
+            // The product's pictures (0109): the first is shown in front of
+            // its name on every screen that lists goods.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const ValueKey('product-photos'),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ProductGalleryScreen(productId: product.id, productName: product.name, janCode: product.janCode),
+                )),
+                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                label: Text(l10n.plOpenLibrary),
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Align(
               alignment: Alignment.centerLeft,

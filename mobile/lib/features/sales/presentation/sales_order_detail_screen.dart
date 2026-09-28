@@ -14,6 +14,7 @@ import '../../shipment/presentation/shipment_detail_screen.dart';
 import '../application/sales_order_providers.dart';
 import '../domain/sales_order.dart';
 import 'sales_order_status_ui.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One sales order, driven through its state machine one step at a time:
 /// draft → submit → approve/reject → (cancel) → complete. Completing is a
@@ -593,11 +594,18 @@ class _LineCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: theme.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Text(line.janCode,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
+            ProductWithThumb(
+              janCode: line.janCode,
+              productName: title,
+              size: 44,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: theme.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 2),
+                Text(line.janCode,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
+              ]),
+            ),
             const SizedBox(height: AppSpacing.sm),
             if (!tracksStock)
               Row(

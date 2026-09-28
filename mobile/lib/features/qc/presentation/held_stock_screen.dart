@@ -11,6 +11,7 @@ import '../../product/presentation/product_detail_screen.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/inspection_providers.dart';
 import '../domain/held_stock.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// Stock that is on hand and cannot ship: waiting for inspection (§13, 0068),
 /// or held, quarantined, damaged, expired or blocked (0098).
@@ -210,6 +211,8 @@ class _HeldCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
+                  ProductThumb(productId: row.productId, janCode: row.janCode, productName: row.productName, size: 44),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(row.productName ?? row.janCode ?? '—',
                         style: theme.textTheme.titleSmall,

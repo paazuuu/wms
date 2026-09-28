@@ -11,6 +11,7 @@ import '../application/shipment_providers.dart';
 import '../domain/carton.dart';
 import '../domain/shipment.dart';
 import 'shipment_status_ui.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// Pack a carton: record parcels against it one at a time (0076/0079). Each
 /// call to `pack_carton_item` *adds* a parcel rather than declaring a final
@@ -234,6 +235,8 @@ class _PackableLineCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
+            ProductThumb(janCode: line.janCode, productName: line.productName, size: 44),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,6 +299,8 @@ class _CartonItemRow extends StatelessWidget {
           horizontal: AppSpacing.md, vertical: AppSpacing.xs),
       child: Row(
         children: [
+          ProductThumb(janCode: item.janCode, productName: item.productName, size: 36),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

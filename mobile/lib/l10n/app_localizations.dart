@@ -12954,6 +12954,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。'**
   String get errorOffline;
+
+  /// No description provided for @featProductLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリー'**
+  String get featProductLibrary;
+
+  /// No description provided for @featProductLibraryDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごとの写真。先頭の写真が商品名の前に表示されます'**
+  String get featProductLibraryDesc;
+
+  /// No description provided for @plSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・JAN・品番・メーカーで検索'**
+  String get plSearchHint;
+
+  /// No description provided for @plWithoutImages.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真なしのみ'**
+  String get plWithoutImages;
+
+  /// No description provided for @plNoProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'該当する商品がありません'**
+  String get plNoProducts;
+
+  /// No description provided for @plImageCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真{count}枚'**
+  String plImageCount(int count);
+
+  /// No description provided for @plNoImages.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真がまだありません'**
+  String get plNoImages;
+
+  /// No description provided for @plAddPhoto.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真を追加'**
+  String get plAddPhoto;
+
+  /// No description provided for @plFromCamera.
+  ///
+  /// In ja, this message translates to:
+  /// **'カメラで撮る'**
+  String get plFromCamera;
+
+  /// No description provided for @plFromGallery.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真を選ぶ'**
+  String get plFromGallery;
+
+  /// No description provided for @plPutFirst.
+  ///
+  /// In ja, this message translates to:
+  /// **'先頭に置く（商品名の前に表示）'**
+  String get plPutFirst;
+
+  /// No description provided for @plFace.
+  ///
+  /// In ja, this message translates to:
+  /// **'表紙'**
+  String get plFace;
+
+  /// No description provided for @plMakeFace.
+  ///
+  /// In ja, this message translates to:
+  /// **'先頭にする'**
+  String get plMakeFace;
+
+  /// No description provided for @plWithdraw.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り下げ'**
+  String get plWithdraw;
+
+  /// No description provided for @plWithdrawConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'この写真を取り下げますか？（記録は残ります）'**
+  String get plWithdrawConfirm;
+
+  /// No description provided for @plUploaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真を追加しました'**
+  String get plUploaded;
+
+  /// No description provided for @plReorderHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ドラッグで並べ替えできます。先頭の写真（表紙）が、入荷・検品・棚入れ・ピッキング・出荷・発注などの画面で商品名の前に表示されます。'**
+  String get plReorderHint;
+
+  /// No description provided for @plFaceHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'先頭の写真（表紙）が、各画面で商品名の前に表示されます。'**
+  String get plFaceHint;
+
+  /// No description provided for @plGalleryTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の写真'**
+  String get plGalleryTitle;
+
+  /// No description provided for @plOpenLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の写真'**
+  String get plOpenLibrary;
 }
 
 class _AppLocalizationsDelegate

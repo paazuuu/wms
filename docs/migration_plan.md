@@ -5236,6 +5236,42 @@ unordered line were flagged. A 3% quantity / 5% price tolerance cleared all
 but the defect. Approval updated 3 supply terms. A snapshot, delete and
 restore brought the dialect back as v2. The thresholds' order is enforced.
 
+### 0109 — the product library: pictures in front of every product name
+
+- **Pictures:** `product_images` records each product's pictures, whose
+  files live in the private `product-images` bucket under
+  `<product id>/…`. The pictures are kept in the company's order, and the
+  first one is the product's face. `add_product_image` can put a new picture
+  first. `reorder_product_images` sets the order, and
+  `withdraw_product_image` takes a picture down without deleting it. All
+  three need `product.manage` and are audited.
+- **Faces everywhere:** `product_thumbnails` returns faces by product id,
+  or by JAN (normalised, so a hyphenated JAN still matches) for lines not
+  yet linked to a product. The app batches these lookups: every row on a
+  screen asks for its face, and one call answers all of them. The face is
+  shown in front of the name on:
+  - receiving (the reconciliation and receipt lines) and the import review;
+  - inspection (the lines and the finding sheet) and bulk inspection;
+  - held stock, putaway and the stock list;
+  - picking (with a large picture in the confirm dialog) and the pick-wave
+    sheet;
+  - shipping (the lines, cartons and parcels);
+  - purchase and sales order lines, transfers and counts;
+  - the product list and product detail.
+- **Library:** `product_library` lists every product with its face and how
+  many pictures it has, and can show only those still without a picture.
+  The 商品ライブラリー menu shows this list, and each product opens a
+  gallery where pictures are added (camera or file), dragged into order,
+  made the face or taken down.
+- **Access:** anyone who handles goods can see the pictures, including
+  packers and shippers, who hold no product permission
+  (`can_view_product_images`).
+
+**Verified live (rolled back):** a picture added "first" became the face,
+reordering and withdrawing renumbered the rest, a file outside the
+product's folder was refused, a hyphenated JAN found its face, and the
+library's "no pictures" filter left only the product without one.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

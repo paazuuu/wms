@@ -9,6 +9,7 @@ import '../application/delivery_providers.dart';
 import '../domain/jan.dart';
 import '../domain/stock_item.dart';
 import 'stock_ledger_screen.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// The "総在庫" column: per-JAN total on-hand, accumulated from every completed
 /// reconciliation. A scan/search box filters by JAN or product name.
@@ -215,6 +216,8 @@ class _StockCard extends StatelessWidget {
             horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         child: Row(
           children: [
+            ProductThumb(productId: item.productId, janCode: item.janCode, productName: item.productName, size: 44),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

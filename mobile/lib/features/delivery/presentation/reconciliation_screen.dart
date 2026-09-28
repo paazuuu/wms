@@ -22,6 +22,7 @@ import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
 import 'parcel_sheet.dart';
 import 'receipt_history_screen.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// Ties this delivery to the purchase order it fills. A plan created from an
 /// order already is; one imported from the supplier's own delivery note is
@@ -721,6 +722,8 @@ class _ReconLineCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  ProductThumb(janCode: line.janCode, productName: title, size: 44),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

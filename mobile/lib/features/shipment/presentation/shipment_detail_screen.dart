@@ -21,6 +21,7 @@ import 'carton_edit_screen.dart';
 import 'sender_picker.dart';
 import 'shipment_parcels_screen.dart';
 import 'shipment_status_ui.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One shipment: the overall list, the cartons it is split into, printing, and
 /// confirming (which deducts stock) or undoing the shipment.
@@ -706,8 +707,10 @@ class _LineRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          ProductThumb(janCode: jan, productName: name, size: 40),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

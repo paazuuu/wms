@@ -18,6 +18,7 @@ import '../../warehouse_context/domain/warehouse.dart';
 import '../application/picking_ops_providers.dart';
 import '../domain/pick_list.dart';
 import 'pick_status_ui.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One pick list: every task, what was actually picked, and — for a warehouse
 /// that uses locations — which bin it came from. A short or over pick shows as
@@ -364,6 +365,8 @@ class _TaskCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  ProductThumb(productId: task.productId, janCode: task.janCode, productName: title, size: 48),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,6 +628,9 @@ class _RecordPickDialogState extends State<_RecordPickDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // The picture first: the quickest check that this is the right item.
+            Center(child: ProductThumb(productId: task.productId, janCode: task.janCode, productName: title, size: 120)),
+            const SizedBox(height: AppSpacing.sm),
             Text('${task.janCode} · ${l10n.pickPlanned} ${task.plannedQuantity}',
                 style: theme.textTheme.bodySmall?.copyWith(
                     fontFamily: AppFonts.mono,

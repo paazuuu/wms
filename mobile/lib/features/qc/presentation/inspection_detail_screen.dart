@@ -23,6 +23,7 @@ import '../domain/inspection.dart';
 import 'qc_result_ui.dart';
 import '../../../core/offline/pending_sync_banner.dart';
 import '../data/offline_inspection_repository.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One inspection: each received line with its count and pass/fail split, then
 /// a sticky action to close it.
@@ -776,6 +777,8 @@ class _ItemCard extends StatelessWidget {
                         onChanged: onTick == null ? null : (v) => onTick!(v ?? false),
                       ),
                     ),
+                  ProductThumb(productId: item.productId, janCode: item.janCode, productName: title, size: 48),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1061,11 +1064,17 @@ class _FindingSheetState extends State<_FindingSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.item.productName.isNotEmpty
-                  ? widget.item.productName
-                  : widget.item.janCode,
-              style: theme.textTheme.titleMedium,
+            ProductWithThumb(
+              productId: widget.item.productId,
+              janCode: widget.item.janCode,
+              productName: widget.item.productName,
+              size: 64,
+              child: Text(
+                widget.item.productName.isNotEmpty
+                    ? widget.item.productName
+                    : widget.item.janCode,
+                style: theme.textTheme.titleMedium,
+              ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(l10n.qcSplitHint,

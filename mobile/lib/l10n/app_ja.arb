@@ -6540,5 +6540,32 @@
     }
   },
   "syncDismiss": "閉じる",
-  "errorOffline": "通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。"
+  "errorOffline": "通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。",
+  "featProductLibrary": "商品ライブラリー",
+  "featProductLibraryDesc": "商品ごとの写真。先頭の写真が商品名の前に表示されます",
+  "plSearchHint": "商品名・JAN・品番・メーカーで検索",
+  "plWithoutImages": "写真なしのみ",
+  "plNoProducts": "該当する商品がありません",
+  "plImageCount": "写真{count}枚",
+  "@plImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plNoImages": "写真がまだありません",
+  "plAddPhoto": "写真を追加",
+  "plFromCamera": "カメラで撮る",
+  "plFromGallery": "写真を選ぶ",
+  "plPutFirst": "先頭に置く（商品名の前に表示）",
+  "plFace": "表紙",
+  "plMakeFace": "先頭にする",
+  "plWithdraw": "取り下げ",
+  "plWithdrawConfirm": "この写真を取り下げますか？（記録は残ります）",
+  "plUploaded": "写真を追加しました",
+  "plReorderHint": "ドラッグで並べ替えできます。先頭の写真（表紙）が、入荷・検品・棚入れ・ピッキング・出荷・発注などの画面で商品名の前に表示されます。",
+  "plFaceHint": "先頭の写真（表紙）が、各画面で商品名の前に表示されます。",
+  "plGalleryTitle": "商品の写真",
+  "plOpenLibrary": "商品の写真"
 }

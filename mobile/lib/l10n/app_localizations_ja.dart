@@ -7027,4 +7027,67 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorOffline => '通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。';
+
+  @override
+  String get featProductLibrary => '商品ライブラリー';
+
+  @override
+  String get featProductLibraryDesc => '商品ごとの写真。先頭の写真が商品名の前に表示されます';
+
+  @override
+  String get plSearchHint => '商品名・JAN・品番・メーカーで検索';
+
+  @override
+  String get plWithoutImages => '写真なしのみ';
+
+  @override
+  String get plNoProducts => '該当する商品がありません';
+
+  @override
+  String plImageCount(int count) {
+    return '写真$count枚';
+  }
+
+  @override
+  String get plNoImages => '写真がまだありません';
+
+  @override
+  String get plAddPhoto => '写真を追加';
+
+  @override
+  String get plFromCamera => 'カメラで撮る';
+
+  @override
+  String get plFromGallery => '写真を選ぶ';
+
+  @override
+  String get plPutFirst => '先頭に置く（商品名の前に表示）';
+
+  @override
+  String get plFace => '表紙';
+
+  @override
+  String get plMakeFace => '先頭にする';
+
+  @override
+  String get plWithdraw => '取り下げ';
+
+  @override
+  String get plWithdrawConfirm => 'この写真を取り下げますか？（記録は残ります）';
+
+  @override
+  String get plUploaded => '写真を追加しました';
+
+  @override
+  String get plReorderHint =>
+      'ドラッグで並べ替えできます。先頭の写真（表紙）が、入荷・検品・棚入れ・ピッキング・出荷・発注などの画面で商品名の前に表示されます。';
+
+  @override
+  String get plFaceHint => '先頭の写真（表紙）が、各画面で商品名の前に表示されます。';
+
+  @override
+  String get plGalleryTitle => '商品の写真';
+
+  @override
+  String get plOpenLibrary => '商品の写真';
 }

@@ -11,6 +11,7 @@ import '../application/delivery_providers.dart';
 import '../domain/receipt_detail.dart';
 import '../domain/reconciliation.dart';
 import 'parcel_sheet.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One receipt, read back at all three of §12's levels (0067).
 ///
@@ -261,6 +262,8 @@ class _LineCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                ProductThumb(productId: line.productId, janCode: line.janCode, productName: line.title, size: 44),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(line.title,
                       style: theme.textTheme.titleSmall,

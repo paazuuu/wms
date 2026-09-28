@@ -11,6 +11,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/inspection_providers.dart';
 import '../domain/bulk_inspection.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// Settle many inspection lines as good in one go (0099).
 ///
@@ -373,7 +374,13 @@ class _Lines extends StatelessWidget {
               onChanged: l.isUnconverted ? null : (v) => onToggle([l.itemId], v ?? false),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: const EdgeInsets.only(left: AppSpacing.xl, right: AppSpacing.lg),
-              title: Text(l.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+              title: ProductWithThumb(
+                productId: l.productId,
+                janCode: l.janCode,
+                productName: l.title,
+                size: 36,
+                child: Text(l.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

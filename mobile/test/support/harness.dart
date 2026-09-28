@@ -9,6 +9,9 @@ import 'package:wms_mobile/core/providers.dart';
 import 'package:wms_mobile/core/offline/pending_sync.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
 import 'package:wms_mobile/features/documents/data/documents_repository.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/product_library/data/product_image_repository.dart';
+import 'package:wms_mobile/features/product_library/domain/product_image.dart';
 import 'package:wms_mobile/features/documents/domain/documents.dart';
 import 'package:wms_mobile/features/documents/presentation/documents_labels.dart';
 import 'package:wms_mobile/features/admin/data/admin_repository.dart';
@@ -184,6 +187,9 @@ List<Override> _defaultOverrides() => [
       // unless a test says so (0108).
       offlineStoreProvider.overrideWithValue(_FakeSecureKeyValueStore()),
       documentsCanManageProvider.overrideWithValue(false),
+      // No product pictures unless a test adds some (0109).
+      productImageRepositoryProvider.overrideWithValue(FakeProductImageRepository()),
+      productLibraryCanManageProvider.overrideWithValue(false),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -218,14 +224,23 @@ Future<void> pumpAppWith(
   ProviderContainer container,
   Widget child,
 ) async {
+  // Product pictures (0109) are served from memory here even when the
+  // caller's container predates them, so no row reaches for the network.
+  final images = FakeProductImageRepository();
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(
-        locale: const Locale('ja'),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: child,
+      child: ProviderScope(
+        overrides: [
+          productImageRepositoryProvider.overrideWithValue(images),
+          productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
+        ],
+        child: MaterialApp(
+          locale: const Locale('ja'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: child,
+        ),
       ),
     ),
   );
@@ -4320,5 +4335,106 @@ class FakeDocumentsRepository implements DocumentsRepository {
   Future<ApiResult<bool>> setTolerance(int partnerId, double qtyPct, double pricePct) async {
     lastTolerance = (partnerId, qtyPct, pricePct);
     return const ApiSuccess(true);
+  }
+}
+
+
+/// The product library (0109), in memory. Pictures "upload" to fake paths
+/// and sign to `https://img.test/<path>`.
+class FakeProductImageRepository implements ProductImageRepository {
+  FakeProductImageRepository({List<LibraryProduct>? products, Map<int, List<ProductImage>>? images})
+      : products = products ?? [],
+        images = images ?? {};
+
+  final List<LibraryProduct> products;
+  final Map<int, List<ProductImage>> images;
+  int facesCalls = 0;
+  final List<({List<int> ids, List<String> jans})> faceRequests = [];
+  final List<(int, List<int>)> reorders = [];
+  final List<int> withdrawn = [];
+  ({int productId, String fileName, bool first})? lastUpload;
+  ({String? query, bool withoutImages})? lastLibraryQuery;
+  int _seq = 1000;
+
+  List<ProductImage> _live(int productId) => [...(images[productId] ?? const <ProductImage>[])]..sort((a, b) => a.position.compareTo(b.position));
+
+  List<ProductImage> _renumber(int productId, List<ProductImage> list) {
+    final out = [
+      for (var i = 0; i < list.length; i++)
+        ProductImage(id: list[i].id, productId: productId, storagePath: list[i].storagePath, position: i + 1, caption: list[i].caption),
+    ];
+    images[productId] = out;
+    return out;
+  }
+
+  @override
+  Future<ApiResult<List<LibraryProduct>>> library({String? query, bool withoutImages = false, int limit = 60, int offset = 0}) async {
+    lastLibraryQuery = (query: query, withoutImages: withoutImages);
+    return ApiSuccess([
+      for (final p in products)
+        if ((query == null || p.name.contains(query) || (p.janCode ?? '').contains(query)) &&
+            (!withoutImages || _live(p.id).isEmpty))
+          LibraryProduct(
+            id: p.id,
+            name: p.name,
+            janCode: p.janCode,
+            maker: p.maker,
+            facePath: _live(p.id).isEmpty ? null : _live(p.id).first.storagePath,
+            imageCount: _live(p.id).length,
+          ),
+    ]);
+  }
+
+  @override
+  Future<ApiResult<List<ProductImage>>> imagesOf(int productId) async => ApiSuccess(_live(productId));
+
+  @override
+  Future<ApiResult<List<ProductFace>>> faces({List<int> productIds = const [], List<String> jans = const []}) async {
+    facesCalls++;
+    faceRequests.add((ids: productIds, jans: jans));
+    final out = <ProductFace>[];
+    for (final p in products) {
+      final live = _live(p.id);
+      if (live.isEmpty) continue;
+      if (productIds.contains(p.id) || jans.contains(normalizeJanKey(p.janCode))) {
+        out.add(ProductFace(productId: p.id, janCode: p.janCode, storagePath: live.first.storagePath, count: live.length));
+      }
+    }
+    return ApiSuccess(out);
+  }
+
+  @override
+  Future<ApiResult<Map<String, String>>> signUrls(List<String> paths) async =>
+      ApiSuccess({for (final p in paths) p: 'https://img.test/$p'});
+
+  @override
+  Future<ApiResult<List<ProductImage>>> upload(int productId,
+      {required Uint8List bytes, required String fileName, required String contentType, bool first = false, String? caption}) async {
+    lastUpload = (productId: productId, fileName: fileName, first: first);
+    final img = ProductImage(id: _seq++, productId: productId, storagePath: '$productId/$fileName');
+    final live = _live(productId);
+    return ApiSuccess(_renumber(productId, first ? [img, ...live] : [...live, img]));
+  }
+
+  @override
+  Future<ApiResult<List<ProductImage>>> reorder(int productId, List<int> ids) async {
+    reorders.add((productId, ids));
+    final live = _live(productId);
+    final ordered = [
+      for (final id in ids) ...live.where((i) => i.id == id),
+      ...live.where((i) => !ids.contains(i.id)),
+    ];
+    return ApiSuccess(_renumber(productId, ordered));
+  }
+
+  @override
+  Future<ApiResult<List<ProductImage>>> withdraw(int imageId) async {
+    withdrawn.add(imageId);
+    for (final e in images.entries) {
+      if (e.value.any((i) => i.id == imageId)) {
+        return ApiSuccess(_renumber(e.key, [for (final i in _live(e.key)) if (i.id != imageId) i]));
+      }
+    }
+    return const ApiFailure(message: 'not found', statusCode: 404);
   }
 }

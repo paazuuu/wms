@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/stock_ops_providers.dart';
 import '../domain/stock_ops.dart';
 import 'stock_ops_ui.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One count session: every frozen line, what was counted, and — once the
 /// session is closed — the variance the ledger corrected.
@@ -315,6 +316,8 @@ class _LineCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  ProductThumb(janCode: line.janCode, productName: title, size: 44),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -6,6 +6,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/pick_wave_providers.dart';
 import '../domain/pick_wave.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// The whole point of a wave (§15, 0077): one stop per place and parcel, not
 /// one line per order. Three orders wanting the same box show here as one
@@ -101,6 +102,8 @@ class _StopCard extends StatelessWidget {
                         fontFamily: AppFonts.mono, color: scheme.onPrimaryContainer),
                   ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
+                ProductThumb(janCode: stop.janCode, productName: stop.productName, size: 40),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(

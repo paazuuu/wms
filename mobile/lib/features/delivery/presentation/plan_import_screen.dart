@@ -16,6 +16,7 @@ import '../../product/domain/product.dart';
 import '../../product/presentation/product_picker_sheet.dart';
 import '../application/delivery_providers.dart';
 import '../data/delivery_repository.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// Whether the upload creates an inbound delivery plan or an outbound shipment.
 enum ImportTarget { plan, shipment }
@@ -782,8 +783,14 @@ class _LineIdentity extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (product != null) ...[
-          Text(product.name,
-              style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ProductWithThumb(
+            productId: product.id,
+            janCode: product.janCode,
+            productName: product.name,
+            size: 36,
+            child: Text(product.name,
+                style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
           Text(
             [product.janCode, if (product.maker != null) product.maker!, if (product.sku != null) product.sku!]
                 .join(' · '),

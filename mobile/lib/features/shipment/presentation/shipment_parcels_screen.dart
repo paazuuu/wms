@@ -9,6 +9,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../stock_ops/presentation/stock_ops_ui.dart' show signed;
 import '../application/shipment_providers.dart';
 import '../domain/shipment_parcel.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// What left the building on this shipment, parcel by parcel (§0075) — the
 /// read a recall starts from: which lots and serials went to this customer,
@@ -72,6 +73,8 @@ class _ParcelCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                ProductThumb(janCode: parcel.janCode, productName: parcel.productName, size: 40),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     parcel.productName.isEmpty

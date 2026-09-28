@@ -11,6 +11,7 @@ import '../domain/product.dart';
 import 'product_detail_screen.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// The product master (spec §19, 0032), now showing what 0057-0060 added to it:
 /// the internal SKU, the base unit its quantities are counted in, the pack units
@@ -196,6 +197,8 @@ class _ProductCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
+              ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 56),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

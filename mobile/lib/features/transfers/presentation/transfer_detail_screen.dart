@@ -15,6 +15,7 @@ import '../../shipment/presentation/sender_picker.dart';
 import '../application/transfer_providers.dart';
 import '../domain/transfer_order.dart';
 import 'transfer_status_ui.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// One transfer order, driven through its state machine one step at a time
 /// (spec §16): submit → approve → pick → ship → receive → complete. Every
@@ -470,6 +471,8 @@ class _LineCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  ProductThumb(janCode: line.janCode, productName: title, size: 44),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

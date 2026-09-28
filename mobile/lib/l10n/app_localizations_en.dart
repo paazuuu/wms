@@ -7171,4 +7171,70 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorOffline =>
       'No connection. Confirm once the network is back (counts and findings are kept on the device).';
+
+  @override
+  String get featProductLibrary => 'Product library';
+
+  @override
+  String get featProductLibraryDesc =>
+      'Pictures of each product; the first is shown in front of its name';
+
+  @override
+  String get plSearchHint => 'Search name, JAN, code or maker';
+
+  @override
+  String get plWithoutImages => 'Without pictures only';
+
+  @override
+  String get plNoProducts => 'No matching products';
+
+  @override
+  String plImageCount(int count) {
+    return '$count pictures';
+  }
+
+  @override
+  String get plNoImages => 'No pictures yet';
+
+  @override
+  String get plAddPhoto => 'Add picture';
+
+  @override
+  String get plFromCamera => 'Take a photo';
+
+  @override
+  String get plFromGallery => 'Choose a picture';
+
+  @override
+  String get plPutFirst => 'Put first (shown in front of the name)';
+
+  @override
+  String get plFace => 'Face';
+
+  @override
+  String get plMakeFace => 'Make it first';
+
+  @override
+  String get plWithdraw => 'Take down';
+
+  @override
+  String get plWithdrawConfirm =>
+      'Take this picture down? (It is kept on record.)';
+
+  @override
+  String get plUploaded => 'Picture added';
+
+  @override
+  String get plReorderHint =>
+      'Drag to reorder. The first picture (the face) is shown in front of the product name on receiving, inspection, putaway, picking, shipping and order screens.';
+
+  @override
+  String get plFaceHint =>
+      'The first picture (the face) is shown in front of the product name on every screen.';
+
+  @override
+  String get plGalleryTitle => 'Product pictures';
+
+  @override
+  String get plOpenLibrary => 'Product pictures';
 }

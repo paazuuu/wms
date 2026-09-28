@@ -7008,4 +7008,66 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorOffline => '无法连接。请在网络恢复后确认（计数和检品记录保存在设备上）。';
+
+  @override
+  String get featProductLibrary => '商品图库';
+
+  @override
+  String get featProductLibraryDesc => '每个商品的照片，第一张显示在商品名前';
+
+  @override
+  String get plSearchHint => '按商品名、JAN、品番、厂家搜索';
+
+  @override
+  String get plWithoutImages => '仅无照片';
+
+  @override
+  String get plNoProducts => '没有符合的商品';
+
+  @override
+  String plImageCount(int count) {
+    return '照片$count张';
+  }
+
+  @override
+  String get plNoImages => '还没有照片';
+
+  @override
+  String get plAddPhoto => '添加照片';
+
+  @override
+  String get plFromCamera => '拍照';
+
+  @override
+  String get plFromGallery => '选择照片';
+
+  @override
+  String get plPutFirst => '放在最前（显示在商品名前）';
+
+  @override
+  String get plFace => '封面';
+
+  @override
+  String get plMakeFace => '设为第一张';
+
+  @override
+  String get plWithdraw => '撤下';
+
+  @override
+  String get plWithdrawConfirm => '撤下这张照片吗？（记录会保留）';
+
+  @override
+  String get plUploaded => '已添加照片';
+
+  @override
+  String get plReorderHint => '拖动可排序。第一张照片（封面）会显示在入库、检品、上架、拣货、出库、订单等画面的商品名前。';
+
+  @override
+  String get plFaceHint => '第一张照片（封面）会显示在各画面的商品名前。';
+
+  @override
+  String get plGalleryTitle => '商品照片';
+
+  @override
+  String get plOpenLibrary => '商品照片';
 }

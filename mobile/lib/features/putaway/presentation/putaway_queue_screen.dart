@@ -9,6 +9,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/putaway_providers.dart';
 import '../domain/putaway_task.dart';
 import 'putaway_confirm_sheet.dart';
+import '../../product_library/presentation/product_thumb.dart';
 
 /// 棚入れ (put-away) — the dedicated queue UI spec §13 calls the current
 /// critical gap. Receiving raises the warehouse balance; this is where an
@@ -160,6 +161,8 @@ class _PutawayTaskCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  ProductThumb(productId: task.productId, janCode: task.janCode, productName: task.title, size: 48),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
