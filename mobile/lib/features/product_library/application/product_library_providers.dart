@@ -141,3 +141,12 @@ final productGalleryProvider = FutureProvider.autoDispose.family<List<(ProductIm
   final urls = (await repo.signUrls([for (final i in images) i.storagePath])).when(success: (m) => m, failure: (_) => const <String, String>{});
   return [for (final i in images) (i, urls[i.storagePath])];
 });
+
+/// Our attribute master (0110).
+final productAttributesProvider = FutureProvider.autoDispose<List<ProductAttributeDef>>((ref) async =>
+    (await ref.watch(productImageRepositoryProvider).attributes()).when(success: (d) => d, failure: (f) => throw Exception(f.message)));
+
+/// How this product is called: ours and each supplier's (0110).
+final productProfileProvider = FutureProvider.autoDispose.family<ProductProfile, int>((ref, productId) async =>
+    (await ref.watch(productImageRepositoryProvider).profile(productId))
+        .when(success: (d) => d, failure: (f) => throw Exception(f.message)));

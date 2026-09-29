@@ -57,6 +57,7 @@ import {
 } from "../_shared/require_permission.ts";
 import {
   type AliasRow,
+  type AttributeDef,
   type Column,
   type Field,
   FIELDS,
@@ -65,7 +66,9 @@ import {
   normalizeText,
   readDocument,
   readSpreadsheet,
+  type ReadAttribute,
   type ReadLine,
+  splitAttr,
   str,
   toInt,
   toNum,
@@ -169,12 +172,17 @@ function aggregate(lines: ReadLine[]): ReadLine[] {
       `${normalizeText(l.maker)}|${normalizeText(l.product_code)}|${normalizeText(l.product_name)}`;
     const m = map.get(key);
     if (!m) {
-      map.set(key, { ...l, flags: [...l.flags], alternatives: { ...l.alternatives } });
+      map.set(key, {
+        ...l, flags: [...l.flags], alternatives: { ...l.alternatives }, attributes: [...(l.attributes ?? [])],
+      });
       continue;
     }
     m.planned_quantity += l.planned_quantity || 0;
     if (l.amount) m.amount = (m.amount ?? 0) + l.amount;
     for (const f of l.flags) if (!m.flags.includes(f)) m.flags.push(f);
+    for (const a of l.attributes ?? []) {
+      if (!m.attributes.some((x) => x.key === a.key)) m.attributes.push(a);
+    }
     m.spec ??= l.spec;
     m.tax_rate ??= l.tax_rate;
   }
@@ -262,11 +270,35 @@ async function resolveWarehouse(
   };
 }
 
+type ColumnLike = { header?: string | null; field?: string | null; attribute?: string | null };
+
+/** A line's attributes as the company wrote them (0110): the attribute
+ * columns, plus its 入数 and — when the file had a 規格 column — its 規格,
+ * each under the company's own heading. */
+function attributesToLearn(r: Record<string, unknown>, columns: ColumnLike[]): ReadAttribute[] {
+  const out: ReadAttribute[] = [];
+  for (const a of (Array.isArray(r.attributes) ? r.attributes : []) as Partial<ReadAttribute>[]) {
+    const key = str(a?.key), value = str(a?.value);
+    if (key && value && !out.some((x) => x.key === key)) out.push({ key, name: str(a?.name) ?? "", value });
+  }
+  const headerOf = (f: string) => str(columns.find((c) => c.field === f)?.header);
+  const caseQty = toInt(r.case_quantity);
+  if (caseQty && !out.some((x) => x.key === "case_quantity")) {
+    out.push({ key: "case_quantity", name: headerOf("case_quantity") ?? "入数", value: String(caseQty) });
+  }
+  const spec = str(r.spec);
+  const specHeader = headerOf("spec");
+  if (spec && specHeader && !out.some((x) => x.key === "spec")) {
+    out.push({ key: "spec", name: specHeader, value: spec });
+  }
+  return out;
+}
+
 /** What was confirmed on commit, learned for next time. Best effort: a
  * failure to learn never undoes a saved plan. */
 async function learn(
   supabase: Client, partnerId: number, rows: Record<string, unknown>[],
-  columns: { header?: string | null; field?: string | null }[],
+  columns: ColumnLike[],
 ) {
   const learnable = rows.filter((r) => r.product_id).map((r) => ({
     product_id: r.product_id,
@@ -274,6 +306,7 @@ async function learn(
     maker: r.source_maker ?? r.maker,
     product_name: r.source_product_name ?? r.product_name,
     product_code: r.source_product_code ?? r.product_code,
+    attributes: attributesToLearn(r, columns),
   }));
   let learned: unknown = null;
   if (learnable.length) {
@@ -283,8 +316,8 @@ async function learn(
     learned = data;
   }
   const map = columns
-    .filter((c) => str(c.header) && FIELDS.includes(c.field as Field))
-    .map((c) => ({ header: c.header, field: c.field }));
+    .filter((c) => str(c.header) && FIELDS.includes(c.field as Field) && (c.field !== "attr" || str(c.attribute)))
+    .map((c) => ({ header: c.header, field: c.field, attribute: c.field === "attr" ? c.attribute : null }));
   if (map.length) {
     await supabase.rpc("learn_column_aliases", { p_partner_id: partnerId, p_map: map });
   }
@@ -302,7 +335,7 @@ async function commit(supabase: Client, input: {
   orderDate: string | null;
   warehouseId: number | null;
   lines: Record<string, unknown>[];
-  columns: { header?: string | null; field?: string | null }[];
+  columns: ColumnLike[];
   source: string;
   target: string;
 }): Promise<Response> {
@@ -316,7 +349,13 @@ async function commit(supabase: Client, input: {
 
   // A line is saved when it carries a JAN or has been tied to our product.
   const all = input.lines.map(toLineRow);
-  const lines = all.filter((l) => isJan(l.jan_code as string) || l.product_id);
+  const keep = all.map((l, i) => ({ l, i })).filter(({ l }) => isJan(l.jan_code as string) || l.product_id);
+  const lines = keep.map(({ l }) => l);
+  // What each kept line said about the product's attributes, for learning
+  // once the lines are saved (same order).
+  const attrsByLine = keep.map(({ i }) => attributesToLearn(input.lines[i], input.columns));
+  const withAttrs = (saved: Record<string, unknown>[]) =>
+    saved.map((r, i) => ({ ...r, attributes: attrsByLine[i] ?? [] }));
   const skipped = all.length - lines.length;
   if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
   const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);
@@ -365,7 +404,7 @@ async function commit(supabase: Client, input: {
     const { data: saved, error: e2 } = await admin.from("shipment_lines").insert(withId).select();
     if (e2) return json({ message: e2.message }, 400);
     const learned = await learn(supabase, supplierId,
-      (saved ?? []).map((r: Record<string, unknown>) => ({ ...r, raw_jan_code: r.source_jan_code })),
+      withAttrs((saved ?? []).map((r: Record<string, unknown>) => ({ ...r, raw_jan_code: r.source_jan_code }))),
       input.columns);
 
     return json({ data: {
@@ -401,7 +440,7 @@ async function commit(supabase: Client, input: {
   const withId = lines.map((l) => ({ ...l, delivery_plan_id: plan.id }));
   const { data: saved, error: e2 } = await admin.from("delivery_plan_lines").insert(withId).select();
   if (e2) return json({ message: e2.message }, 400);
-  const learned = await learn(supabase, supplierId, saved ?? [], input.columns);
+  const learned = await learn(supabase, supplierId, withAttrs(saved ?? []), input.columns);
 
   return json({ data: {
     source: input.source, plan_id: plan.id, target: "plan",
@@ -411,14 +450,15 @@ async function commit(supabase: Client, input: {
   } });
 }
 
-function parseOverrides(raw: unknown): Record<number, Field> {
-  const out: Record<number, Field> = {};
+function parseOverrides(raw: unknown): Record<number, string> {
+  const out: Record<number, string> = {};
   const s = str(raw);
   if (!s) return out;
   try {
     const obj = JSON.parse(s) as Record<string, string>;
     for (const [k, v] of Object.entries(obj)) {
-      if (FIELDS.includes(v as Field) && Number.isFinite(Number(k))) out[Number(k)] = v as Field;
+      // A field, or "attr:<attribute>" for one of our product attributes.
+      if (typeof v === "string" && splitAttr(v) && Number.isFinite(Number(k))) out[Number(k)] = v;
     }
   } catch (_) { /* ignore a malformed override */ }
   return out;
@@ -509,13 +549,20 @@ Deno.serve(async (req) => {
     let partnerId = Number.isFinite(formPartner) && formPartner > 0
       ? formPartner
       : await findPartner(supplier, supplierCode, null);
+    // The headings we know (this company's first), and our product
+    // attributes (0110), so attribute columns land on the right attribute.
+    const { data: aliasData } = await supabase.rpc("column_alias_map", { p_partner_id: partnerId });
+    const aliases = (aliasData ?? []) as AliasRow[];
+    const { data: attrData } = await supabase.rpc("list_product_attributes");
+    const attributes = ((attrData ?? []) as { key: string; name: string; status?: string }[])
+      .filter((a) => a.status !== "inactive")
+      .map((a): AttributeDef => ({ key: a.key, name: a.name }));
     if (/\.(xlsx|xlsm|xls|csv)$/.test(name)) {
-      const { data: aliasData } = await supabase.rpc("column_alias_map", { p_partner_id: partnerId });
-      ({ columns, lines } = await readSpreadsheet(bytes, (aliasData ?? []) as AliasRow[], overrides));
+      ({ columns, lines } = await readSpreadsheet(bytes, aliases, overrides, true, attributes));
       source = name.endsWith(".csv") ? "csv" : "xlsx";
     } else {
       const mime = file.type || (name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
-      ({ header, columns, lines, verified } = await readDocument(bytes, mime));
+      ({ header, columns, lines, verified } = await readDocument(bytes, mime, aliases));
       header.registration_number = normalizeRegNo(header.registration_number);
       source = "gemini";
       partnerId ??= await findPartner(header.supplier_name, null, header.registration_number);

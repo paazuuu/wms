@@ -31,6 +31,55 @@ abstract class ProductImageRepository {
   /// Ids first to last; the first becomes the face.
   Future<ApiResult<List<ProductImage>>> reorder(int productId, List<int> ids);
   Future<ApiResult<List<ProductImage>>> withdraw(int imageId);
+
+  // How each supplier calls the product (0110).
+
+  /// Our attribute master (色, サイズ, 容量, …).
+  Future<ApiResult<List<ProductAttributeDef>>> attributes();
+  Future<ApiResult<List<ProductAttributeDef>>> saveAttribute({int? id, required String name, String? unit, bool? active});
+  Future<ApiResult<ProductProfile>> profile(int productId);
+
+  /// Our values, attribute id → value; an empty value removes it.
+  Future<ApiResult<ProductProfile>> setAttributeValues(int productId, Map<int, String?> values);
+
+  /// How [supplierId] calls this product; an attribute with an empty value is removed.
+  Future<ApiResult<ProductProfile>> saveSupplierProfile(SupplierProfileDraft draft);
+  Future<ApiResult<ProductProfile>> removeSupplierProfile(int productId, int supplierId);
+}
+
+/// What a person sets for how one supplier calls a product.
+class SupplierProfileDraft {
+  const SupplierProfileDraft({
+    required this.productId,
+    required this.supplierId,
+    this.name,
+    this.code,
+    this.janCode,
+    this.maker,
+    this.attributes = const [],
+  });
+
+  final int productId;
+  final int supplierId;
+  final String? name;
+  final String? code;
+  final String? janCode;
+  final String? maker;
+
+  /// (attribute id, the supplier's heading, the supplier's value).
+  final List<({int attributeId, String? rawName, String? rawValue})> attributes;
+
+  Map<String, dynamic> toJson() => {
+        'product_id': productId,
+        'supplier_id': supplierId,
+        'name': name,
+        'code': code,
+        'jan_code': janCode,
+        'maker': maker,
+        'attributes': [
+          for (final a in attributes) {'attribute_id': a.attributeId, 'raw_name': a.rawName, 'raw_value': a.rawValue},
+        ],
+      };
 }
 
 const productImageBucket = 'product-images';
@@ -124,4 +173,44 @@ class ProductImageRepositoryImpl implements ProductImageRepository {
   @override
   Future<ApiResult<List<ProductImage>>> withdraw(int imageId) =>
       _rpc('withdraw_product_image', {'p_id': imageId}, _images);
+
+  List<ProductAttributeDef> _attrs(dynamic d) => [for (final r in _rows(d)) ProductAttributeDef.fromJson(r)];
+
+  ProductProfile _profile(dynamic d) {
+    final m = d is List && d.length == 1 ? d.first : d;
+    return ProductProfile.fromJson((m as Map).cast<String, dynamic>());
+  }
+
+  @override
+  Future<ApiResult<List<ProductAttributeDef>>> attributes() => _rpc('list_product_attributes', {}, _attrs);
+
+  @override
+  Future<ApiResult<List<ProductAttributeDef>>> saveAttribute({int? id, required String name, String? unit, bool? active}) =>
+      _rpc('save_product_attribute', {
+        'p': {
+          'id': id,
+          'name': name,
+          'unit': unit,
+          if (active != null) 'status': active ? 'active' : 'inactive',
+        },
+      }, _attrs);
+
+  @override
+  Future<ApiResult<ProductProfile>> profile(int productId) =>
+      _rpc('product_supplier_profile', {'p_product_id': productId}, _profile);
+
+  @override
+  Future<ApiResult<ProductProfile>> setAttributeValues(int productId, Map<int, String?> values) =>
+      _rpc('set_product_attribute_values', {
+        'p_product_id': productId,
+        'p_values': [for (final e in values.entries) {'attribute_id': e.key, 'value': e.value}],
+      }, _profile);
+
+  @override
+  Future<ApiResult<ProductProfile>> saveSupplierProfile(SupplierProfileDraft draft) =>
+      _rpc('save_supplier_product_profile', {'p': draft.toJson()}, _profile);
+
+  @override
+  Future<ApiResult<ProductProfile>> removeSupplierProfile(int productId, int supplierId) =>
+      _rpc('remove_supplier_product_profile', {'p_supplier_id': supplierId, 'p_product_id': productId}, _profile);
 }

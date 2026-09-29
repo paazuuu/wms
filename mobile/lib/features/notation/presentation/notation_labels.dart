@@ -17,6 +17,7 @@ String columnFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
       ColumnField.taxRate => l10n.ntFieldTaxRate,
       ColumnField.orderDate => l10n.ntFieldDate,
       ColumnField.ignore => l10n.ntFieldIgnore,
+      ColumnField.attr => l10n.ntFieldAttr,
       null => l10n.ntFieldUnknown,
     };
 

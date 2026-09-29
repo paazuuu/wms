@@ -13074,6 +13074,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'商品の写真'**
   String get plOpenLibrary;
+
+  /// No description provided for @plTabPhotos.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真'**
+  String get plTabPhotos;
+
+  /// No description provided for @plTabAttributes.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性'**
+  String get plTabAttributes;
+
+  /// No description provided for @plTabSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の呼び名'**
+  String get plTabSuppliers;
+
+  /// No description provided for @plAttributesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の値です。仕入先ごとの書き方（例: カラー「BK」）は「仕入先の呼び名」に並び、読み取りのときに自社の値（色「黒」）に置き換えられます。'**
+  String get plAttributesHint;
+
+  /// No description provided for @plAttrNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性を追加'**
+  String get plAttrNew;
+
+  /// No description provided for @plAttrName.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性名'**
+  String get plAttrName;
+
+  /// No description provided for @plAttrUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位（任意）'**
+  String get plAttrUnit;
+
+  /// No description provided for @plAttrValue.
+  ///
+  /// In ja, this message translates to:
+  /// **'値'**
+  String get plAttrValue;
+
+  /// No description provided for @plAttrHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出し（例: カラー）'**
+  String get plAttrHeading;
+
+  /// No description provided for @plSuppliersHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ごとの呼び名・品番・JAN・メーカーと属性の書き方。事前学習・取込・検品で確認したものが自動でたまります。'**
+  String get plSuppliersHint;
+
+  /// No description provided for @plNoSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ仕入先の呼び名はありません'**
+  String get plNoSuppliers;
+
+  /// No description provided for @plSupplierAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の呼び名を追加'**
+  String get plSupplierAdd;
+
+  /// No description provided for @plSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get plSupplier;
+
+  /// No description provided for @plSupplierSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get plSupplierSaved;
+
+  /// No description provided for @plWritings.
+  ///
+  /// In ja, this message translates to:
+  /// **'これまでの書き方'**
+  String get plWritings;
+
+  /// No description provided for @plAdopt.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の値にする'**
+  String get plAdopt;
+
+  /// No description provided for @plRemoveSupplierConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の呼び名と属性を外しますか？（読み取り用の辞書は残ります）'**
+  String plRemoveSupplierConfirm(String name);
+
+  /// No description provided for @ntFieldAttr.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性'**
+  String get ntFieldAttr;
+
+  /// No description provided for @ntAttr.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性: {name}'**
+  String ntAttr(String name);
+
+  /// No description provided for @ntLearnedLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーに 仕入先の呼び名{profiles}件・属性{attributes}件'**
+  String ntLearnedLibrary(int profiles, int attributes);
 }
 
 class _AppLocalizationsDelegate

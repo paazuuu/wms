@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
+import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/product_library/domain/product_image.dart';
 import 'package:wms_mobile/features/product_library/presentation/product_gallery_screen.dart';
@@ -153,5 +155,151 @@ void main() {
     final c = ProviderContainer(overrides: [productImageRepositoryProvider.overrideWithValue(_repo())]);
     addTearDown(c.dispose);
     expect(productLibraryProvider((query: 'a', withoutImages: false)), productLibraryProvider((query: 'a', withoutImages: false)));
+  });
+
+  group('how each supplier calls the product (0110)', () {
+    ProductProfile profile() => const ProductProfile(
+          productId: 1,
+          name: 'ボールペン黒',
+          janCode: '4901234567894',
+          sku: 'BP-01',
+          attributes: [
+            ProductAttributeValue(attribute: ProductAttributeDef(id: 1, key: 'color', name: '色'), value: '黒'),
+            ProductAttributeValue(attribute: ProductAttributeDef(id: 2, key: 'size', name: 'サイズ')),
+          ],
+          suppliers: [
+            SupplierProfile(
+              supplierId: 7,
+              supplierName: 'A商社',
+              name: 'BALL PEN BK',
+              code: 'BP01',
+              maker: 'TEST BUNGU',
+              writings: [SupplierWriting(field: 'jan', values: ['4901234-567894'], seenCount: 3)],
+              attributes: [
+                SupplierAttribute(attributeId: 1, key: 'color', name: '色', rawName: 'カラー', rawValue: 'BK', ourValue: '黒'),
+                SupplierAttribute(attributeId: 2, key: 'size', name: 'サイズ', rawName: 'Size', rawValue: 'M'),
+              ],
+            ),
+          ],
+        );
+
+    Future<FakeProductImageRepository> pumpTab(WidgetTester tester, int tab, {bool manage = true}) async {
+      await tester.binding.setSurfaceSize(const Size(900, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final repo = FakeProductImageRepository(profiles: {1: profile()});
+      await pumpApp(
+        tester,
+        ProductGalleryScreen(productId: 1, productName: 'ボールペン黒', initialTab: tab),
+        overrides: [
+          productImageRepositoryProvider.overrideWithValue(repo),
+          productLibraryCanManageProvider.overrideWithValue(manage),
+          tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(
+              partners: const [TradingPartner(id: 7, name: 'A商社'), TradingPartner(id: 8, name: 'B商事')])),
+        ],
+      );
+      return repo;
+    }
+
+    testWidgets("each supplier's name, 品番, spellings and attributes hang from the product", (tester) async {
+      final repo = await pumpTab(tester, 2);
+      final card = find.byKey(const ValueKey('pl-supplier-7'));
+      expect(find.descendant(of: card, matching: find.text('A商社')), findsOneWidget);
+      expect(find.descendant(of: card, matching: find.text('BALL PEN BK')), findsOneWidget);
+      expect(find.descendant(of: card, matching: find.text('BP01')), findsOneWidget);
+      // The supplier's word, and what it means in ours.
+      expect(find.text('カラー: BK  → 黒'), findsOneWidget);
+      expect(find.text('Size: M'), findsOneWidget);
+      expect(find.textContaining('4901234-567894'), findsOneWidget);
+      // Ours has no size yet: the supplier's can be taken.
+      expect(find.byKey(const ValueKey('pl-adopt-7-color')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('pl-adopt-7-size')));
+      await tester.pumpAndSettle();
+      expect(repo.lastAttributeValues, {2: 'M'});
+    });
+
+    testWidgets('a manager adds how another supplier calls it', (tester) async {
+      final repo = await pumpTab(tester, 2);
+      await tester.tap(find.byKey(const ValueKey('pl-supplier-add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('pl-supplier-pick')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('B商事').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('pl-sup-name')), 'ボールペン ブラック');
+      await tester.enterText(find.byKey(const ValueKey('pl-sup-code')), 'B-100');
+      await tester.enterText(find.byKey(const ValueKey('pl-sup-attr-heading-color')), '色番');
+      await tester.enterText(find.byKey(const ValueKey('pl-sup-attr-color')), '09');
+      await tester.tap(find.byKey(const ValueKey('pl-sup-save')));
+      await tester.pumpAndSettle();
+
+      final d = repo.lastDraft!;
+      expect((d.productId, d.supplierId, d.name, d.code), (1, 8, 'ボールペン ブラック', 'B-100'));
+      expect(d.attributes.single.attributeId, 1);
+      expect(d.attributes.single.rawName, '色番');
+      expect(d.attributes.single.rawValue, '09');
+      expect(find.byKey(const ValueKey('pl-supplier-8')), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('pl-supplier-remove-7')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('pl-supplier-remove-ok')));
+      await tester.pumpAndSettle();
+      expect(repo.lastRemoved, (1, 7));
+      expect(find.byKey(const ValueKey('pl-supplier-7')), findsNothing);
+    });
+
+    testWidgets('our attributes are set on the product; without the right they are read-only', (tester) async {
+      final repo = await pumpTab(tester, 1);
+      expect(find.descendant(of: find.byKey(const ValueKey('pl-attr-color')), matching: find.text('黒')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('pl-attr-size')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('pl-attr-value')), 'L');
+      await tester.tap(find.byKey(const ValueKey('pl-attr-save')));
+      await tester.pumpAndSettle();
+      expect(repo.lastAttributeValues, {2: 'L'});
+      expect(find.descendant(of: find.byKey(const ValueKey('pl-attr-size')), matching: find.text('L')), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('pl-attr-new')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('pl-attr-new-name')), '香り');
+      await tester.tap(find.byKey(const ValueKey('pl-attr-new-save')));
+      await tester.pumpAndSettle();
+      expect(repo.attributeDefs.last.name, '香り');
+    });
+
+    testWidgets('a viewer sees the names but cannot change them', (tester) async {
+      await pumpTab(tester, 2, manage: false);
+      expect(find.byKey(const ValueKey('pl-supplier-7')), findsOneWidget);
+      expect(find.byKey(const ValueKey('pl-supplier-add')), findsNothing);
+      expect(find.byKey(const ValueKey('pl-supplier-edit-7')), findsNothing);
+      expect(find.byKey(const ValueKey('pl-adopt-7-size')), findsNothing);
+      // The photo button belongs to the photo tab only.
+      expect(find.byKey(const ValueKey('pl-add-photo')), findsNothing);
+    });
+
+    test('the profile reads from the server shape', () {
+      final p = ProductProfile.fromJson(const {
+        'product': {'id': 1, 'name': 'X', 'jan_code': '4901234567894'},
+        'attributes': [
+          {'attribute_id': 1, 'key': 'color', 'name': '色', 'value': '黒'},
+        ],
+        'suppliers': [
+          {
+            'supplier_id': 7,
+            'supplier_name': 'A',
+            'name': 'BALL PEN',
+            'writings': [
+              {'field': 'name', 'raw_values': ['BALL PEN', 'BALLPEN'], 'seen_count': 2, 'confirmed': true},
+            ],
+            'attributes': [
+              {'attribute_id': 1, 'key': 'color', 'name': '色', 'raw_name': 'カラー', 'raw_value': 'BK', 'our_value': '黒'},
+            ],
+          },
+        ],
+      });
+      expect(p.attributes.single.attribute.id, 1);
+      expect(p.attributes.single.value, '黒');
+      expect(p.suppliers.single.writings.single.values, ['BALL PEN', 'BALLPEN']);
+      expect(p.suppliers.single.attributes.single.translated, isTrue);
+    });
   });
 }

@@ -7,6 +7,7 @@ import {
   normalizeJan,
   normalizeText,
   readSpreadsheet,
+  splitAttr,
   splitByRule,
 } from "./document_reader.ts";
 
@@ -63,4 +64,45 @@ Deno.test("a sheet headed in English and kana, with a combined column, reads", a
   assert(lines[0].flags.includes("qty_from_cases"));
   assertEquals(lines[1].product_code, "A-100");
   assertEquals(lines[1].maker, "ﾃｽﾄ文具");
+});
+
+Deno.test("attribute columns land on our attributes, however the company heads them (0110)", async () => {
+  const withAttrs: AliasRow[] = [
+    ...aliases,
+    { header_key: normalizeText("カラー"), field: "attr", partner: false, attribute: "color" },
+    { header_key: normalizeText("Size"), field: "attr", partner: false, attribute: "size" },
+    { header_key: normalizeText("品名"), field: "product_name", partner: false },
+  ];
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["JAN", "品名", "カラー", "Size", "qty"],
+    ["4901234567894", "Tシャツ", "BK", "M", 3],
+    ["4900000000019", "Tシャツ", "WH", null, 2],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "s");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { columns, lines } = await readSpreadsheet(bytes, withAttrs, {}, false);
+
+  assertEquals(columns.map((c) => [c.field, c.attribute ?? null]), [
+    ["jan", null], ["product_name", null], ["attr", "color"], ["attr", "size"], ["quantity", null],
+  ]);
+  assertEquals(lines[0].attributes, [
+    { key: "color", name: "カラー", value: "BK" },
+    { key: "size", name: "Size", value: "M" },
+  ]);
+  // No 規格 column: the attributes stand in for it on the slip.
+  assertEquals(lines[0].spec, "カラー:BK Size:M");
+  assertEquals(lines[1].attributes, [{ key: "color", name: "カラー", value: "WH" }]);
+
+  // An operator can point a column at an attribute.
+  const again = await readSpreadsheet(bytes, withAttrs, { 1: "attr:spec" }, false);
+  assertEquals([again.columns[1].field, again.columns[1].attribute], ["attr", "spec"]);
+});
+
+Deno.test("an override is a field or attr:<attribute>", () => {
+  assertEquals(splitAttr("attr:color"), { field: "attr", attribute: "color" });
+  assertEquals(splitAttr("jan"), { field: "jan", attribute: null });
+  assertEquals(splitAttr("attr"), null);
+  assertEquals(splitAttr("attr:"), null);
+  assertEquals(splitAttr("nonsense"), null);
 });

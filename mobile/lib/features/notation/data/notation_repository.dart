@@ -15,7 +15,7 @@ abstract class NotationRepository {
   Future<ApiResult<TrainingRead>> readSample({
     required int partnerId,
     required MultipartFile file,
-    Map<int, ColumnField> overrides = const {},
+    Map<int, ColumnChoice> overrides = const {},
   });
 
   /// Teaches what a checked reading showed.
@@ -67,7 +67,7 @@ class NotationRepositoryImpl implements NotationRepository {
   Future<ApiResult<TrainingRead>> readSample({
     required int partnerId,
     required MultipartFile file,
-    Map<int, ColumnField> overrides = const {},
+    Map<int, ColumnChoice> overrides = const {},
   }) async {
     try {
       final form = FormData.fromMap({
@@ -100,7 +100,8 @@ class NotationRepositoryImpl implements NotationRepository {
         'lines': [for (final l in lines) if (l.product != null) l.toLearnJson()],
         'columns': [
           for (final c in columns)
-            if (c.field != null && c.header.isNotEmpty) {'header': c.header, 'field': c.field!.wire},
+            if (c.field != null && c.header.isNotEmpty && (c.field != ColumnField.attr || c.attribute != null))
+              {'header': c.header, 'field': c.field!.wire, if (c.field == ColumnField.attr) 'attribute': c.attribute},
         ],
       });
       final body = (r.data as Map).cast<String, dynamic>();

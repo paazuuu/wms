@@ -12,6 +12,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_library_providers.dart';
 import '../domain/product_image.dart';
+import 'product_profile_tabs.dart';
 
 /// A picked picture: its bytes, file name and type.
 typedef PickedPicture = ({Uint8List bytes, String name, String contentType});
@@ -35,11 +36,21 @@ Future<PickedPicture?> _pickWithPlatform(ImageSource source) async {
 /// pictures (camera or file, optionally straight to the front), drags them
 /// into order, makes one the face, or takes one down.
 class ProductGalleryScreen extends ConsumerStatefulWidget {
-  const ProductGalleryScreen({super.key, required this.productId, this.productName, this.janCode, this.pickPicture});
+  const ProductGalleryScreen({
+    super.key,
+    required this.productId,
+    this.productName,
+    this.janCode,
+    this.pickPicture,
+    this.initialTab = 0,
+  });
 
   final int productId;
   final String? productName;
   final String? janCode;
+
+  /// 0 写真, 1 属性, 2 仕入先の呼び名.
+  final int initialTab;
 
   /// Injectable for tests; defaults to the camera / photo library.
   final Future<PickedPicture?> Function(ImageSource source)? pickPicture;
@@ -48,8 +59,18 @@ class ProductGalleryScreen extends ConsumerStatefulWidget {
   ConsumerState<ProductGalleryScreen> createState() => _ProductGalleryScreenState();
 }
 
-class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> {
+class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> with SingleTickerProviderStateMixin {
   bool _busy = false;
+  late final TabController _tabs = TabController(length: 3, vsync: this, initialIndex: widget.initialTab)
+    ..addListener(() {
+      if (mounted) setState(() {});
+    });
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
 
   void _changed() {
     ref.invalidate(productGalleryProvider(widget.productId));
@@ -144,12 +165,21 @@ class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final canManage = ref.watch(productLibraryCanManageProvider);
     final async = ref.watch(productGalleryProvider(widget.productId));
     return Scaffold(
-      appBar: AppBar(title: Text(widget.productName ?? l10n.plGalleryTitle)),
-      floatingActionButton: canManage
+      appBar: AppBar(
+        title: Text(widget.productName ?? l10n.plGalleryTitle),
+        bottom: TabBar(
+          controller: _tabs,
+          tabs: [
+            Tab(key: const ValueKey('pl-tab-photos'), text: l10n.plTabPhotos),
+            Tab(key: const ValueKey('pl-tab-attributes'), text: l10n.plTabAttributes),
+            Tab(key: const ValueKey('pl-tab-suppliers'), text: l10n.plTabSuppliers),
+          ],
+        ),
+      ),
+      floatingActionButton: canManage && _tabs.index == 0
           ? FloatingActionButton.extended(
               key: const ValueKey('pl-add-photo'),
               onPressed: _busy ? null : _add,
@@ -157,7 +187,21 @@ class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> {
               label: Text(l10n.plAddPhoto),
             )
           : null,
-      body: async.when(
+      body: TabBarView(
+        controller: _tabs,
+        children: [
+          _photos(context, async, canManage),
+          ProductAttributesTab(productId: widget.productId),
+          ProductSuppliersTab(productId: widget.productId),
+        ],
+      ),
+    );
+  }
+
+  Widget _photos(BuildContext context, AsyncValue<List<(ProductImage, String?)>> async, bool canManage) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return async.when(
         loading: () => LoadingView(message: l10n.loading),
         error: (e, _) => ErrorStateView(
             message: humanizeApiErrorMessage(l10n, '$e'), onRetry: () => ref.invalidate(productGalleryProvider(widget.productId))),
@@ -245,7 +289,6 @@ class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> {
             ),
           ]);
         },
-      ),
-    );
+      );
   }
 }

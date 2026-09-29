@@ -4007,7 +4007,7 @@ class FakeNotationRepository implements NotationRepository {
   List<NotationDialect> dialectRows;
   List<ColumnAlias> aliases;
 
-  ({int partnerId, Map<int, ColumnField> overrides, String fileName})? lastRead;
+  ({int partnerId, Map<int, ColumnChoice> overrides, String fileName})? lastRead;
   ({int partnerId, int? trainingId, List<ReadLineResult> lines, List<ReadColumn> columns})? lastLearn;
   final List<int> discarded = [];
   final List<({int id, int? productId, bool confirmed})> confirmed = [];
@@ -4019,7 +4019,7 @@ class FakeNotationRepository implements NotationRepository {
   Future<ApiResult<TrainingRead>> readSample({
     required int partnerId,
     required MultipartFile file,
-    Map<int, ColumnField> overrides = const {},
+    Map<int, ColumnChoice> overrides = const {},
   }) async {
     lastRead = (partnerId: partnerId, overrides: Map.of(overrides), fileName: file.filename ?? '');
     return ApiSuccess(read);
@@ -4342,9 +4342,106 @@ class FakeDocumentsRepository implements DocumentsRepository {
 /// The product library (0109), in memory. Pictures "upload" to fake paths
 /// and sign to `https://img.test/<path>`.
 class FakeProductImageRepository implements ProductImageRepository {
-  FakeProductImageRepository({List<LibraryProduct>? products, Map<int, List<ProductImage>>? images})
-      : products = products ?? [],
-        images = images ?? {};
+  FakeProductImageRepository({
+    List<LibraryProduct>? products,
+    Map<int, List<ProductImage>>? images,
+    List<ProductAttributeDef>? attributeDefs,
+    Map<int, ProductProfile>? profiles,
+  })  : products = products ?? [],
+        images = images ?? {},
+        attributeDefs = attributeDefs ??
+            [
+              const ProductAttributeDef(id: 1, key: 'color', name: '色'),
+              const ProductAttributeDef(id: 2, key: 'size', name: 'サイズ'),
+            ],
+        profiles = profiles ?? {};
+
+  /// How each supplier calls each product (0110).
+  final List<ProductAttributeDef> attributeDefs;
+  final Map<int, ProductProfile> profiles;
+  Map<int, String?>? lastAttributeValues;
+  SupplierProfileDraft? lastDraft;
+  (int, int)? lastRemoved;
+
+  ProductProfile _profileOf(int productId) =>
+      profiles[productId] ??
+      ProductProfile(
+        productId: productId,
+        name: 'P$productId',
+        attributes: [for (final a in attributeDefs) ProductAttributeValue(attribute: a)],
+      );
+
+  ProductProfile _with(ProductProfile p, {List<ProductAttributeValue>? attributes, List<SupplierProfile>? suppliers}) =>
+      profiles[p.productId] = ProductProfile(
+        productId: p.productId,
+        name: p.name,
+        janCode: p.janCode,
+        sku: p.sku,
+        maker: p.maker,
+        attributes: attributes ?? p.attributes,
+        suppliers: suppliers ?? p.suppliers,
+      );
+
+  @override
+  Future<ApiResult<List<ProductAttributeDef>>> attributes() async => ApiSuccess(attributeDefs);
+
+  @override
+  Future<ApiResult<List<ProductAttributeDef>>> saveAttribute({int? id, required String name, String? unit, bool? active}) async {
+    attributeDefs.add(ProductAttributeDef(id: 100 + attributeDefs.length, key: 'attr_${attributeDefs.length}', name: name, unit: unit));
+    return ApiSuccess(attributeDefs);
+  }
+
+  @override
+  Future<ApiResult<ProductProfile>> profile(int productId) async => ApiSuccess(_profileOf(productId));
+
+  @override
+  Future<ApiResult<ProductProfile>> setAttributeValues(int productId, Map<int, String?> values) async {
+    lastAttributeValues = values;
+    final p = _profileOf(productId);
+    return ApiSuccess(_with(p, attributes: [
+      for (final a in p.attributes)
+        values.containsKey(a.attribute.id)
+            ? ProductAttributeValue(attribute: a.attribute, value: (values[a.attribute.id] ?? '').isEmpty ? null : values[a.attribute.id])
+            : a,
+    ]));
+  }
+
+  @override
+  Future<ApiResult<ProductProfile>> saveSupplierProfile(SupplierProfileDraft draft) async {
+    lastDraft = draft;
+    final p = _profileOf(draft.productId);
+    final s = SupplierProfile(
+      supplierId: draft.supplierId,
+      supplierName: 'S${draft.supplierId}',
+      name: draft.name,
+      code: draft.code,
+      janCode: draft.janCode,
+      maker: draft.maker,
+      attributes: [
+        for (final a in draft.attributes)
+          if ((a.rawValue ?? '').isNotEmpty)
+            SupplierAttribute(
+              attributeId: a.attributeId,
+              key: attributeDefs.firstWhere((d) => d.id == a.attributeId).key,
+              name: attributeDefs.firstWhere((d) => d.id == a.attributeId).name,
+              rawName: a.rawName,
+              rawValue: a.rawValue!,
+            ),
+      ],
+    );
+    return ApiSuccess(_with(p, suppliers: [
+      for (final x in p.suppliers)
+        if (x.supplierId != draft.supplierId) x,
+      s,
+    ]));
+  }
+
+  @override
+  Future<ApiResult<ProductProfile>> removeSupplierProfile(int productId, int supplierId) async {
+    lastRemoved = (productId, supplierId);
+    final p = _profileOf(productId);
+    return ApiSuccess(_with(p, suppliers: [for (final x in p.suppliers) if (x.supplierId != supplierId) x]));
+  }
 
   final List<LibraryProduct> products;
   final Map<int, List<ProductImage>> images;

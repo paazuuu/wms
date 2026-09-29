@@ -26,7 +26,11 @@ enum ColumnField {
   spec('spec'),
   taxRate('tax_rate'),
   orderDate('order_date'),
-  ignore('ignore');
+  ignore('ignore'),
+
+  /// One of our product attributes (0110) — which one is the column's
+  /// [ReadColumn.attribute].
+  attr('attr');
 
   const ColumnField(this.wire);
   final String wire;
@@ -39,6 +43,23 @@ enum ColumnField {
   }
 }
 
+/// What a column holds: a field, or one of our product attributes (0110).
+/// On the wire an attribute is `attr:<key>`.
+class ColumnChoice extends Equatable {
+  const ColumnChoice(this.field, [this.attribute]);
+  const ColumnChoice.attr(String key)
+      : field = ColumnField.attr,
+        attribute = key;
+
+  final ColumnField field;
+  final String? attribute;
+
+  String get wire => field == ColumnField.attr ? 'attr:$attribute' : field.wire;
+
+  @override
+  List<Object?> get props => [field, attribute];
+}
+
 /// One column as it was read (0105): its heading, what it was taken to hold,
 /// how that was decided, and what the AI thought when it disagreed.
 class ReadColumn extends Equatable {
@@ -49,6 +70,7 @@ class ReadColumn extends Equatable {
     this.source,
     this.aiField,
     this.conflict = false,
+    this.attribute,
   });
 
   final int index;
@@ -61,6 +83,13 @@ class ReadColumn extends Equatable {
   final ColumnField? aiField;
   final bool conflict;
 
+  /// For [ColumnField.attr]: which of our attributes (color, size, …).
+  final String? attribute;
+
+  ColumnChoice? get choice => field == null
+      ? null
+      : (field == ColumnField.attr ? (attribute == null ? null : ColumnChoice.attr(attribute!)) : ColumnChoice(field!));
+
   factory ReadColumn.fromJson(Map<String, dynamic> j) => ReadColumn(
         index: _int(j['index']),
         header: (j['header'] ?? '').toString(),
@@ -68,15 +97,21 @@ class ReadColumn extends Equatable {
         source: _text(j['source']),
         aiField: ColumnField.parse(j['ai_field'] as String?),
         conflict: j['conflict'] == true,
+        attribute: _text(j['attribute']),
       );
 
-  Map<String, dynamic> toJson() => {'index': index, 'header': header, 'field': field?.wire};
+  Map<String, dynamic> toJson() => {
+        'index': index,
+        'header': header,
+        'field': field?.wire,
+        if (field == ColumnField.attr) 'attribute': attribute,
+      };
 
   ReadColumn withField(ColumnField? f) => ReadColumn(
       index: index, header: header, field: f, source: 'override', aiField: aiField);
 
   @override
-  List<Object?> get props => [index, header, field, source, aiField, conflict];
+  List<Object?> get props => [index, header, field, source, aiField, conflict, attribute];
 }
 
 /// Our product a line resolved to.
@@ -118,6 +153,9 @@ class ReadLineResult extends Equatable {
     this.alternatives = const {},
     this.product,
     this.matchedBy,
+    this.attributes = const [],
+    this.spec,
+    this.caseQuantity,
   });
 
   final int row;
@@ -137,6 +175,11 @@ class ReadLineResult extends Equatable {
   final Map<String, String?> alternatives;
   final ResolvedProduct? product;
   final String? matchedBy;
+
+  /// The line's attributes as the company wrote them (0110).
+  final List<ReadAttribute> attributes;
+  final String? spec;
+  final int? caseQuantity;
 
   bool get resolved => product != null;
   bool get needsReview => flags.any((f) => NotationFlag.isProblem(f));
@@ -160,6 +203,12 @@ class ReadLineResult extends Equatable {
             ? ResolvedProduct.fromJson((j['product'] as Map).cast<String, dynamic>())
             : null,
         matchedBy: _text(j['matched_by']),
+        attributes: [
+          for (final a in (j['attributes'] as List? ?? const []))
+            if (a is Map) ReadAttribute.fromJson(a.cast<String, dynamic>()),
+        ],
+        spec: _text(j['spec']),
+        caseQuantity: _intOrNull(j['case_quantity']),
       );
 
   ReadLineResult withProduct(ResolvedProduct? p) => ReadLineResult(
@@ -176,6 +225,9 @@ class ReadLineResult extends Equatable {
         alternatives: alternatives,
         product: p,
         matchedBy: p == null ? null : 'manual',
+        attributes: attributes,
+        spec: spec,
+        caseQuantity: caseQuantity,
       );
 
   /// What is taught from this line: the company's writing, tied to ours.
@@ -185,6 +237,9 @@ class ReadLineResult extends Equatable {
         'maker': maker,
         'product_name': productName,
         'product_code': productCode,
+        'spec': spec,
+        'case_quantity': caseQuantity,
+        'attributes': [for (final a in attributes) a.toJson()],
       };
 
   @override
@@ -402,6 +457,27 @@ class NotationDialect extends Equatable {
 }
 
 /// A company's column heading and the field it means (0105).
+/// An attribute as a company wrote it on one line: which of ours, the
+/// company's heading, and the value as written (0110).
+class ReadAttribute extends Equatable {
+  const ReadAttribute({required this.key, required this.name, required this.value});
+
+  final String key;
+  final String name;
+  final String value;
+
+  factory ReadAttribute.fromJson(Map<String, dynamic> j) => ReadAttribute(
+        key: (j['key'] ?? '').toString(),
+        name: (j['name'] ?? '').toString(),
+        value: (j['value'] ?? '').toString(),
+      );
+
+  Map<String, dynamic> toJson() => {'key': key, 'name': name, 'value': value};
+
+  @override
+  List<Object?> get props => [key, name, value];
+}
+
 class ColumnAlias extends Equatable {
   const ColumnAlias({
     required this.id,
@@ -411,6 +487,7 @@ class ColumnAlias extends Equatable {
     this.partnerName,
     this.source,
     this.seenCount = 0,
+    this.attributeName,
   });
 
   final int id;
@@ -420,6 +497,9 @@ class ColumnAlias extends Equatable {
   final String? partnerName;
   final String? source;
   final int seenCount;
+
+  /// For an attribute heading: which of our attributes, by name (色, サイズ…).
+  final String? attributeName;
 
   bool get isSeed => source == 'seed';
 
@@ -431,6 +511,7 @@ class ColumnAlias extends Equatable {
         partnerName: _text(j['partner_name']),
         source: _text(j['source']),
         seenCount: _int(j['seen_count']),
+        attributeName: _text(j['attribute_name']),
       );
 
   @override
@@ -439,11 +520,15 @@ class ColumnAlias extends Equatable {
 
 /// What was learned from a checked sample.
 class LearnResult extends Equatable {
-  const LearnResult({this.learned = 0, this.added = 0, this.conflicts = 0});
+  const LearnResult({this.learned = 0, this.added = 0, this.conflicts = 0, this.profiles = 0, this.attributes = 0});
 
   final int learned;
   final int added;
   final int conflicts;
+
+  /// Supplier profiles written to the product library, and attributes (0110).
+  final int profiles;
+  final int attributes;
 
   factory LearnResult.fromJson(Map<String, dynamic> j) {
     final l = (j['learned'] as Map?)?.cast<String, dynamic>() ?? const {};
@@ -451,6 +536,8 @@ class LearnResult extends Equatable {
       learned: _int(l['learned']),
       added: _int(l['new']),
       conflicts: (l['conflicts'] as List? ?? const []).length,
+      profiles: _int(l['profiles']),
+      attributes: _int(l['attributes']),
     );
   }
 

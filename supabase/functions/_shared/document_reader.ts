@@ -27,15 +27,24 @@ import { encodeBase64 } from "jsr:@std/encoding/base64";
 export type Field =
   | "jan" | "maker" | "product_name" | "product_code" | "name_code"
   | "quantity" | "case_quantity" | "cases" | "unit_price" | "amount"
-  | "spec" | "tax_rate" | "order_date" | "ignore";
+  | "spec" | "tax_rate" | "order_date" | "ignore" | "attr";
 
 export const FIELDS: Field[] = [
   "jan", "maker", "product_name", "product_code", "name_code", "quantity",
   "case_quantity", "cases", "unit_price", "amount", "spec", "tax_rate",
-  "order_date", "ignore",
+  "order_date", "ignore", "attr",
 ];
 
-export type AliasRow = { header_key: string; field: Field; partner: boolean };
+/** A column heading we know. For field 'attr', [attribute] says which of our
+ * product attributes (0110: color, size, capacity, …) the column holds. */
+export type AliasRow = { header_key: string; field: Field; partner: boolean; attribute?: string | null };
+
+/** One of our product attributes, as the AI is told about it. */
+export type AttributeDef = { key: string; name: string };
+
+/** An attribute as the company wrote it on one line: which of ours, the
+ * company's own heading for it, and its value as written. */
+export type ReadAttribute = { key: string; name: string; value: string };
 
 export type Column = {
   index: number;
@@ -44,6 +53,8 @@ export type Column = {
   source: "partner" | "global" | "contains" | "values" | "ai" | "override" | null;
   ai_field?: Field | null;
   conflict?: boolean;
+  /** For field 'attr': which of our attributes. */
+  attribute?: string | null;
 };
 
 export type ReadLine = {
@@ -65,6 +76,7 @@ export type ReadLine = {
   order_date: string | null;
   flags: string[];
   alternatives: Record<string, string | number | null>;
+  attributes: ReadAttribute[];
 };
 
 export type Header = {
@@ -189,7 +201,14 @@ const FIELD_HELP =
   "jan=JANコード/バーコード, maker=メーカー/ブランド, product_name=品名/商品名, " +
   "product_code=品番/型番/項目/商品コード, name_code=品名と品番が1つの欄に入っている, " +
   "quantity=数量(総数), case_quantity=入数, cases=ケース数/箱数, unit_price=単価, " +
-  "amount=金額, spec=規格/容量/色, tax_rate=税率, order_date=日付, ignore=その他";
+  "amount=金額, spec=規格/仕様, tax_rate=税率, order_date=日付, " +
+  "attr=色・サイズ・容量・材質・重量など商品の属性(どの属性かを attribute に), ignore=その他";
+
+/** "attr:color" as an override or wire value → field and attribute. */
+export function splitAttr(v: string): { field: Field; attribute: string | null } | null {
+  if (v.startsWith("attr:")) return v.length > 5 ? { field: "attr", attribute: v.slice(5) } : null;
+  return FIELDS.includes(v as Field) && v !== "attr" ? { field: v as Field, attribute: null } : null;
+}
 
 // ---------------------------------------------------------------------------
 // Name and 品番 in one cell
@@ -279,32 +298,40 @@ export async function splitNameCodes(values: string[]): Promise<SplitResult[]> {
 // Spreadsheets
 // ---------------------------------------------------------------------------
 
-function aliasFor(header: string, aliases: AliasRow[]): { field: Field; source: Column["source"] } | null {
+export function aliasFor(
+  header: string,
+  aliases: AliasRow[],
+): { field: Field; source: Column["source"]; attribute: string | null } | null {
   const key = normalizeText(header);
   if (!key) return null;
   const exact = aliases.filter((a) => a.header_key === key);
   const partner = exact.find((a) => a.partner);
-  if (partner) return { field: partner.field, source: "partner" };
-  if (exact.length) return { field: exact[0].field, source: "global" };
+  if (partner) return { field: partner.field, source: "partner", attribute: partner.attribute ?? null };
+  if (exact.length) return { field: exact[0].field, source: "global", attribute: exact[0].attribute ?? null };
   // The longest known heading contained in this one (JANコード(13桁), 商品名称/カナ).
   let best: AliasRow | null = null;
   for (const a of aliases) {
     if (a.header_key.length >= 2 && key.includes(a.header_key) &&
         (!best || a.header_key.length > best.header_key.length)) best = a;
   }
-  return best ? { field: best.field, source: "contains" } : null;
+  return best ? { field: best.field, source: "contains", attribute: best.attribute ?? null } : null;
 }
 
 async function aiColumns(
   headers: string[],
   samples: unknown[][],
-): Promise<(Field | null)[]> {
+  attributes: AttributeDef[] = [],
+): Promise<({ field: Field; attribute: string | null } | null)[]> {
+  const attrHelp = attributes.length
+    ? "attr の場合の attribute は次のどれか: " + attributes.map((a) => `${a.key}=${a.name}`).join(", ") + "。"
+    : "";
   try {
     const r = await gemini([{
       text:
         "これは取引先(商社)から届いた表の見出し行とデータ例です。見出しは日本語(漢字・カナ)や英語など" +
         "商社ごとに違います。各列が何を表すか、次のどれかで答えてください: " + FIELD_HELP + "。" +
-        "見出しだけでなく値も見て判断すること(13桁の数字ならjan、品名と品番が混ざっていればname_code)。\n" +
+        "見出しだけでなく値も見て判断すること(13桁の数字ならjan、品名と品番が混ざっていればname_code)。" +
+        attrHelp + "\n" +
         JSON.stringify({ headers, samples: samples.map((r) => r.map((c) => (c === null ? "" : String(c)))) }),
     }], {
       type: "object",
@@ -315,7 +342,8 @@ async function aiColumns(
             type: "object",
             properties: {
               index: { type: "integer" },
-              field: { type: "string", enum: FIELDS },
+              field: { type: "string", enum: attributes.length ? FIELDS : FIELDS.filter((f) => f !== "attr") },
+              ...(attributes.length ? { attribute: { type: "string", enum: attributes.map((a) => a.key) } } : {}),
             },
             required: ["index", "field"],
           },
@@ -323,11 +351,24 @@ async function aiColumns(
       },
       required: ["columns"],
     });
-    const cols = Array.isArray(r.columns) ? r.columns as { index: number; field: Field }[] : [];
-    return headers.map((_, i) => cols.find((c) => c.index === i)?.field ?? null);
+    const cols = Array.isArray(r.columns) ? r.columns as { index: number; field: Field; attribute?: string }[] : [];
+    return headers.map((_, i) => {
+      const c = cols.find((c) => c.index === i);
+      if (!c || !FIELDS.includes(c.field)) return null;
+      if (c.field === "attr") {
+        return attributes.some((a) => a.key === c.attribute) ? { field: "attr", attribute: c.attribute! } : null;
+      }
+      return { field: c.field, attribute: null };
+    });
   } catch (_) {
     return headers.map(() => null);
   }
+}
+
+/** The attributes as one 規格 text, for documents that print a single spec
+ * column (the slip, the plan line) when the file had none of its own. */
+export function specFrom(attrs: ReadAttribute[]): string | null {
+  return attrs.length ? attrs.map((a) => `${a.name}:${a.value}`).join(" ") : null;
 }
 
 const TOTAL_ROW = /^(合計|小計|総合計|計|total|subtotal|grand ?total)$/i;
@@ -337,8 +378,9 @@ const TOTAL_ROW = /^(合計|小計|総合計|計|total|subtotal|grand ?total)$/i
 export async function readSpreadsheet(
   bytes: Uint8Array,
   aliases: AliasRow[],
-  overrides: Record<number, Field> = {},
+  overrides: Record<number, string> = {},
   useAi = true,
+  attributes: AttributeDef[] = [],
 ): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number }> {
   const wb = XLSX.read(bytes, { type: "array", cellDates: true });
   const ws = wb.Sheets[wb.SheetNames[0]];
@@ -361,7 +403,10 @@ export async function readSpreadsheet(
   for (let c = 0; c < ncol; c++) {
     const header = str(headerCells[c]) ?? "";
     const hit = header ? aliasFor(header, aliases) : null;
-    columns.push({ index: c, header, field: hit?.field ?? null, source: hit?.source ?? null });
+    columns.push({
+      index: c, header, field: hit?.field ?? null, source: hit?.source ?? null,
+      attribute: hit?.field === "attr" ? hit.attribute : null,
+    });
   }
 
   // Values say more than headings: a column of valid JANs is the JAN column.
@@ -389,21 +434,26 @@ export async function readSpreadsheet(
   // Ask the AI about every column, and compare.
   if (useAi && ncol > 0) {
     const samples = body.filter((r) => r.some((c) => c !== null && String(c).trim() !== "")).slice(0, 6);
-    const ai = await aiColumns(columns.map((c) => c.header), samples);
+    const ai = await aiColumns(columns.map((c) => c.header), samples, attributes);
     for (const col of columns) {
       const a = ai[col.index];
-      col.ai_field = a;
-      if (col.field === null && a && a !== "ignore") {
-        col.field = a;
+      col.ai_field = a?.field ?? null;
+      if (col.field === null && a && a.field !== "ignore") {
+        col.field = a.field;
+        col.attribute = a.attribute;
         col.source = "ai";
-      } else if (col.field && a && a !== col.field && col.source !== "partner") {
+      } else if (col.field && a && (a.field !== col.field || a.attribute !== (col.attribute ?? null)) &&
+                 col.source !== "partner") {
         col.conflict = true;
       }
     }
   }
-  for (const [k, f] of Object.entries(overrides)) {
+  for (const [k, v] of Object.entries(overrides)) {
     const i = Number(k);
-    if (columns[i]) columns[i] = { ...columns[i], field: f, source: "override", conflict: false };
+    const o = splitAttr(v);
+    if (columns[i] && o) {
+      columns[i] = { ...columns[i], field: o.field, attribute: o.attribute, source: "override", conflict: false };
+    }
   }
 
   const colOf = (f: Field) => columns.find((c) => c.field === f)?.index ?? -1;
@@ -413,6 +463,8 @@ export async function readSpreadsheet(
   const cCaseQty = colOf("case_quantity"), cCases = colOf("cases"), cUnit = colOf("unit_price");
   const cAmount = colOf("amount"), cSpec = colOf("spec"), cTax = colOf("tax_rate");
   const cDate = colOf("order_date");
+  // Every attribute column, however many (色 and サイズ side by side).
+  const attrCols = columns.filter((c) => c.field === "attr" && c.attribute);
 
   const lines: ReadLine[] = [];
   body.forEach((r, i) => {
@@ -429,6 +481,11 @@ export async function readSpreadsheet(
     const caseQty = toInt(cell(r, cCaseQty));
     let qty = toInt(cell(r, cQty));
     const flags: string[] = [];
+    const attrs: ReadAttribute[] = [];
+    for (const c of attrCols) {
+      const v = str(cell(r, c.index));
+      if (v) attrs.push({ key: c.attribute!, name: c.header, value: v });
+    }
     if (qty === null && cases !== null && caseQty !== null) {
       qty = cases * caseQty;
       flags.push("qty_from_cases");
@@ -442,7 +499,7 @@ export async function readSpreadsheet(
       product_code: code,
       raw_name_code: nameCode,
       split_by: null,
-      spec: str(cell(r, cSpec)),
+      spec: str(cell(r, cSpec)) ?? specFrom(attrs),
       planned_quantity: qty ?? 0,
       case_quantity: caseQty,
       cases,
@@ -452,6 +509,7 @@ export async function readSpreadsheet(
       order_date: dateStr(cell(r, cDate)),
       flags,
       alternatives: {},
+      attributes: attrs,
     });
   });
 
@@ -526,6 +584,14 @@ const LINE_PROPS = {
   unit_price: { type: "number" },
   amount: { type: "number" },
   tax_rate: { type: "number" },
+  attributes: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: { name: { type: "string" }, value: { type: "string" } },
+      required: ["name", "value"],
+    },
+  },
 };
 
 const EXTRACT_PROMPT =
@@ -538,6 +604,8 @@ const EXTRACT_PROMPT =
   "品名と品番が1つの欄にまとめて書かれている場合は、その欄の文字をそのまま name_code に入れ、" +
   "さらに品名を product_name、品番を product_code に分けて入れる。別の欄ならそれぞれに。" +
   "quantity は総数(入数×ケース数の表記なら掛けた数)。case_quantity は入数、cases はケース数。" +
+  "色・サイズ・容量・材質・重量など商品の属性が別の欄(または品名の後ろ)に書かれていれば、attributes に " +
+  "{name: 見出しの文字どおり(カラー・Size など), value: 書かれた値} で入れる。" +
   "住所・電話・登録番号・合計行は明細にしない。読めない項目は省略。";
 
 const EXTRACT_SCHEMA = {
@@ -557,7 +625,9 @@ const EXTRACT_SCHEMA = {
       type: "array",
       items: {
         type: "object",
-        properties: { header: { type: "string" }, field: { type: "string", enum: FIELDS } },
+        properties: {
+          header: { type: "string" }, field: { type: "string", enum: FIELDS }, attribute: { type: "string" },
+        },
         required: ["header", "field"],
       },
     },
@@ -575,7 +645,23 @@ const VERIFY_PROMPT =
 
 type RawLine = Record<string, unknown> & { index?: number };
 
-function rawToLine(l: RawLine, row: number): ReadLine {
+/** The document's own attribute headings mapped to ours through the known
+ * headings; what maps to none of ours stays in the 規格 text. */
+function attributesOf(l: RawLine, aliases: AliasRow[]): { attrs: ReadAttribute[]; rest: string | null } {
+  const attrs: ReadAttribute[] = [];
+  const rest: string[] = [];
+  for (const a of (Array.isArray(l.attributes) ? l.attributes : []) as { name?: unknown; value?: unknown }[]) {
+    const name = str(a?.name), value = str(a?.value);
+    if (!name || !value) continue;
+    const hit = aliasFor(name, aliases);
+    if (hit?.field === "attr" && hit.attribute) attrs.push({ key: hit.attribute, name, value });
+    else rest.push(`${name}:${value}`);
+  }
+  return { attrs, rest: rest.length ? rest.join(" ") : null };
+}
+
+function rawToLine(l: RawLine, row: number, aliases: AliasRow[] = []): ReadLine {
+  const { attrs, rest } = attributesOf(l, aliases);
   const rawJan = str(l.jan_code);
   const jan = normalizeJan(l.jan_code);
   return {
@@ -587,7 +673,7 @@ function rawToLine(l: RawLine, row: number): ReadLine {
     product_code: str(l.product_code),
     raw_name_code: str(l.name_code),
     split_by: str(l.name_code) ? "ai" : null,
-    spec: str(l.spec),
+    spec: str(l.spec) ?? rest ?? specFrom(attrs),
     planned_quantity: toInt(l.quantity) ??
       ((toInt(l.cases) ?? 0) * (toInt(l.case_quantity) ?? 0) || 0),
     case_quantity: toInt(l.case_quantity),
@@ -598,6 +684,7 @@ function rawToLine(l: RawLine, row: number): ReadLine {
     order_date: null,
     flags: [],
     alternatives: {},
+    attributes: attrs,
   };
 }
 
@@ -616,6 +703,7 @@ function same(a: unknown, b: unknown, k: keyof ReadLine): boolean {
 export async function readDocument(
   bytes: Uint8Array,
   mime: string,
+  aliases: AliasRow[] = [],
 ): Promise<{ header: Header; columns: Column[]; lines: ReadLine[]; verified: boolean }> {
   const doc = { inline_data: { mime_type: mime, data: encodeBase64(bytes) } };
   const a = await gemini([{ text: EXTRACT_PROMPT }, doc], EXTRACT_SCHEMA);
@@ -644,21 +732,21 @@ export async function readDocument(
   const lines: ReadLine[] = [];
   if (bLines === null) {
     aLines.forEach((l, i) => {
-      const line = rawToLine(l, i + 1);
+      const line = rawToLine(l, i + 1, aliases);
       line.flags.push("not_verified");
       lines.push(line);
     });
   } else {
     const seen = new Set<number>();
     bLines.forEach((bl, i) => {
-      const line = rawToLine(bl, i + 1);
+      const line = rawToLine(bl, i + 1, aliases);
       const idx = typeof bl.index === "number" ? bl.index : -1;
       const al = idx >= 0 ? aLines[idx] : undefined;
       if (!al) {
         line.flags.push("added_by_check");
       } else {
         seen.add(idx);
-        const first = rawToLine(al, i + 1);
+        const first = rawToLine(al, i + 1, aliases);
         for (const k of COMPARED) {
           if (!same(first[k], line[k], k)) {
             line.flags.push(`ai_disagree:${k}`);
@@ -670,7 +758,7 @@ export async function readDocument(
     });
     aLines.forEach((al, i) => {
       if (seen.has(i)) return;
-      const line = rawToLine(al, lines.length + 1);
+      const line = rawToLine(al, lines.length + 1, aliases);
       line.flags.push("dropped_by_check");
       lines.push(line);
     });
@@ -698,7 +786,7 @@ export async function readDocument(
   checkLines(lines);
 
   const h = (a.header ?? {}) as Record<string, unknown>;
-  const cols = (Array.isArray(a.columns) ? a.columns : []) as { header?: string; field?: Field }[];
+  const cols = (Array.isArray(a.columns) ? a.columns : []) as { header?: string; field?: Field; attribute?: string }[];
   return {
     header: {
       supplier_name: str(h.supplier_name),
@@ -707,10 +795,13 @@ export async function readDocument(
       doc_number: str(h.doc_number),
       doc_date: str(h.doc_date),
     },
-    columns: cols.map((c, i) => ({
-      index: i, header: str(c.header) ?? "", field: FIELDS.includes(c.field as Field) ? c.field! : null,
-      source: "ai" as const,
-    })),
+    columns: cols.map((c, i) => {
+      // An attribute heading is placed through our known headings, not the AI's guess.
+      const hit = c.field === "attr" ? aliasFor(str(c.header) ?? "", aliases) : null;
+      const attribute = hit?.field === "attr" ? hit.attribute : null;
+      const field = FIELDS.includes(c.field as Field) && (c.field !== "attr" || attribute) ? c.field! : null;
+      return { index: i, header: str(c.header) ?? "", field, attribute, source: "ai" as const };
+    }),
     lines,
     verified: bLines !== null,
   };

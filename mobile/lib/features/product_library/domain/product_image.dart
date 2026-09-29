@@ -108,3 +108,194 @@ class ProductFace extends Equatable {
   @override
   List<Object?> get props => [productId, janCode, storagePath, count];
 }
+
+// ---------------------------------------------------------------------------
+// How each supplier calls the product (0110)
+// ---------------------------------------------------------------------------
+
+/// One of our product attributes: 色, サイズ, 容量, …
+class ProductAttributeDef extends Equatable {
+  const ProductAttributeDef({required this.id, required this.key, required this.name, this.unit, this.active = true});
+
+  final int id;
+  final String key;
+  final String name;
+  final String? unit;
+  final bool active;
+
+  factory ProductAttributeDef.fromJson(Map<String, dynamic> j) => ProductAttributeDef(
+        id: _i(j['id'] ?? j['attribute_id']),
+        key: (j['key'] ?? '').toString(),
+        name: (j['name'] ?? '').toString(),
+        unit: _s(j['unit']),
+        active: j['status'] != 'inactive',
+      );
+
+  @override
+  List<Object?> get props => [id, key, name, unit, active];
+}
+
+/// Our value of one attribute for this product.
+class ProductAttributeValue extends Equatable {
+  const ProductAttributeValue({required this.attribute, this.value});
+
+  final ProductAttributeDef attribute;
+  final String? value;
+
+  factory ProductAttributeValue.fromJson(Map<String, dynamic> j) =>
+      ProductAttributeValue(attribute: ProductAttributeDef.fromJson(j), value: _s(j['value']));
+
+  @override
+  List<Object?> get props => [attribute, value];
+}
+
+/// Every spelling of one field a supplier has used for this product.
+class SupplierWriting extends Equatable {
+  const SupplierWriting({required this.field, this.values = const [], this.seenCount = 0, this.confirmed = false});
+
+  /// jan / maker / name / code
+  final String field;
+  final List<String> values;
+  final int seenCount;
+  final bool confirmed;
+
+  factory SupplierWriting.fromJson(Map<String, dynamic> j) => SupplierWriting(
+        field: (j['field'] ?? '').toString(),
+        values: [for (final v in (j['raw_values'] as List? ?? const [])) v.toString()],
+        seenCount: _i(j['seen_count']),
+        confirmed: j['confirmed'] == true,
+      );
+
+  @override
+  List<Object?> get props => [field, values, seenCount, confirmed];
+}
+
+/// How a supplier heads and writes one attribute of this product, and what
+/// that means in ours.
+class SupplierAttribute extends Equatable {
+  const SupplierAttribute({
+    required this.attributeId,
+    required this.key,
+    required this.name,
+    required this.rawValue,
+    this.rawName,
+    this.ourValue,
+    this.seenCount = 0,
+  });
+
+  final int attributeId;
+  final String key;
+
+  /// Our name for the attribute.
+  final String name;
+  final String? rawName;
+  final String rawValue;
+  final String? ourValue;
+  final int seenCount;
+
+  /// The supplier's word already means something else in ours ("BK" → "黒").
+  bool get translated => ourValue != null && ourValue != rawValue;
+
+  factory SupplierAttribute.fromJson(Map<String, dynamic> j) => SupplierAttribute(
+        attributeId: _i(j['attribute_id']),
+        key: (j['key'] ?? '').toString(),
+        name: (j['name'] ?? '').toString(),
+        rawName: _s(j['raw_name']),
+        rawValue: (j['raw_value'] ?? '').toString(),
+        ourValue: _s(j['our_value']),
+        seenCount: _i(j['seen_count']),
+      );
+
+  @override
+  List<Object?> get props => [attributeId, rawName, rawValue, ourValue];
+}
+
+/// One supplier's way of calling the product: its name, 品番, JAN and maker
+/// for it, every spelling seen, and its attributes.
+class SupplierProfile extends Equatable {
+  const SupplierProfile({
+    required this.supplierId,
+    required this.supplierName,
+    this.name,
+    this.code,
+    this.janCode,
+    this.maker,
+    this.note,
+    this.writings = const [],
+    this.attributes = const [],
+  });
+
+  final int supplierId;
+  final String supplierName;
+  final String? name;
+  final String? code;
+  final String? janCode;
+  final String? maker;
+  final String? note;
+  final List<SupplierWriting> writings;
+  final List<SupplierAttribute> attributes;
+
+  factory SupplierProfile.fromJson(Map<String, dynamic> j) => SupplierProfile(
+        supplierId: _i(j['supplier_id']),
+        supplierName: (j['supplier_name'] ?? '').toString(),
+        name: _s(j['name']),
+        code: _s(j['code']),
+        janCode: _s(j['jan_code']),
+        maker: _s(j['maker']),
+        note: _s(j['note']),
+        writings: [
+          for (final w in (j['writings'] as List? ?? const []))
+            if (w is Map) SupplierWriting.fromJson(w.cast<String, dynamic>()),
+        ],
+        attributes: [
+          for (final a in (j['attributes'] as List? ?? const []))
+            if (a is Map) SupplierAttribute.fromJson(a.cast<String, dynamic>()),
+        ],
+      );
+
+  @override
+  List<Object?> get props => [supplierId, name, code, janCode, maker, writings, attributes];
+}
+
+/// Everything about how this product is called: ours and each supplier's.
+class ProductProfile extends Equatable {
+  const ProductProfile({
+    required this.productId,
+    required this.name,
+    this.janCode,
+    this.sku,
+    this.maker,
+    this.attributes = const [],
+    this.suppliers = const [],
+  });
+
+  final int productId;
+  final String name;
+  final String? janCode;
+  final String? sku;
+  final String? maker;
+  final List<ProductAttributeValue> attributes;
+  final List<SupplierProfile> suppliers;
+
+  factory ProductProfile.fromJson(Map<String, dynamic> j) {
+    final p = (j['product'] as Map? ?? const {}).cast<String, dynamic>();
+    return ProductProfile(
+      productId: _i(p['id']),
+      name: (p['name'] ?? '').toString(),
+      janCode: _s(p['jan_code']),
+      sku: _s(p['sku']),
+      maker: _s(p['maker']),
+      attributes: [
+        for (final a in (j['attributes'] as List? ?? const []))
+          if (a is Map) ProductAttributeValue.fromJson(a.cast<String, dynamic>()),
+      ],
+      suppliers: [
+        for (final s in (j['suppliers'] as List? ?? const []))
+          if (s is Map) SupplierProfile.fromJson(s.cast<String, dynamic>()),
+      ],
+    );
+  }
+
+  @override
+  List<Object?> get props => [productId, name, attributes, suppliers];
+}

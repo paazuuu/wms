@@ -6567,5 +6567,49 @@
   "plReorderHint": "ドラッグで並べ替えできます。先頭の写真（表紙）が、入荷・検品・棚入れ・ピッキング・出荷・発注などの画面で商品名の前に表示されます。",
   "plFaceHint": "先頭の写真（表紙）が、各画面で商品名の前に表示されます。",
   "plGalleryTitle": "商品の写真",
-  "plOpenLibrary": "商品の写真"
+  "plOpenLibrary": "商品の写真",
+  "plTabPhotos": "写真",
+  "plTabAttributes": "属性",
+  "plTabSuppliers": "仕入先の呼び名",
+  "plAttributesHint": "自社の値です。仕入先ごとの書き方（例: カラー「BK」）は「仕入先の呼び名」に並び、読み取りのときに自社の値（色「黒」）に置き換えられます。",
+  "plAttrNew": "属性を追加",
+  "plAttrName": "属性名",
+  "plAttrUnit": "単位（任意）",
+  "plAttrValue": "値",
+  "plAttrHeading": "見出し（例: カラー）",
+  "plSuppliersHint": "仕入先ごとの呼び名・品番・JAN・メーカーと属性の書き方。事前学習・取込・検品で確認したものが自動でたまります。",
+  "plNoSuppliers": "まだ仕入先の呼び名はありません",
+  "plSupplierAdd": "仕入先の呼び名を追加",
+  "plSupplier": "仕入先",
+  "plSupplierSaved": "保存しました",
+  "plWritings": "これまでの書き方",
+  "plAdopt": "自社の値にする",
+  "plRemoveSupplierConfirm": "{name} の呼び名と属性を外しますか？（読み取り用の辞書は残ります）",
+  "@plRemoveSupplierConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ntFieldAttr": "属性",
+  "ntAttr": "属性: {name}",
+  "@ntAttr": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ntLearnedLibrary": "商品ライブラリーに 仕入先の呼び名{profiles}件・属性{attributes}件",
+  "@ntLearnedLibrary": {
+    "placeholders": {
+      "profiles": {
+        "type": "int"
+      },
+      "attributes": {
+        "type": "int"
+      }
+    }
+  }
 }

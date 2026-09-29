@@ -156,7 +156,55 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('nt-read')));
     await tester.pumpAndSettle();
-    expect(repo.lastRead?.overrides, {2: ColumnField.cases});
+    expect(repo.lastRead?.overrides, {2: const ColumnChoice(ColumnField.cases)});
+  });
+
+  testWidgets('a column can be pointed at one of our attributes, and a line shows its attributes (0110)',
+      (tester) async {
+    final repo = await _pump(
+      tester,
+      repo: FakeNotationRepository(
+        read: const TrainingRead(
+          trainingId: 8,
+          partnerId: 1,
+          source: 'xlsx',
+          columns: [
+            ReadColumn(index: 0, header: 'JAN', field: ColumnField.jan, source: 'global'),
+            ReadColumn(index: 1, header: 'カラー', field: ColumnField.attr, attribute: 'color', source: 'global'),
+            ReadColumn(index: 2, header: 'ｻｲｽﾞ', source: null),
+          ],
+          lines: [
+            ReadLineResult(
+              row: 2,
+              rawJanCode: '4901234567894',
+              janCode: '4901234567894',
+              productName: 'Tシャツ',
+              attributes: [ReadAttribute(key: 'color', name: 'カラー', value: 'BK')],
+              product: ResolvedProduct(id: 1, janCode: '4901234567894', name: 'ボールペン', maker: 'テスト文具'),
+            ),
+          ],
+        ),
+      ),
+    );
+    await _choosePartnerAndRead(tester);
+
+    expect(find.text('属性: 色'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('nt-attrs-2')), matching: find.text('カラー: BK')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nt-col-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('属性: サイズ').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('nt-read')));
+    await tester.pumpAndSettle();
+    expect(repo.lastRead?.overrides, {2: const ColumnChoice.attr('size')});
+    expect(const ColumnChoice.attr('size').wire, 'attr:size');
+
+    // What is taught carries the attributes.
+    expect(const ReadLineResult(row: 1, attributes: [ReadAttribute(key: 'color', name: 'カラー', value: 'BK')])
+        .toLearnJson()['attributes'], [
+      {'key': 'color', 'name': 'カラー', 'value': 'BK'},
+    ]);
   });
 
   testWidgets('a read can be discarded without learning anything', (tester) async {

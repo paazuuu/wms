@@ -14,6 +14,8 @@ import '../../partners/application/trading_partner_providers.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../../product/domain/product.dart';
 import '../../product/presentation/product_picker_sheet.dart';
+import '../../product_library/application/product_library_providers.dart';
+import '../../product_library/domain/product_image.dart';
 import '../application/notation_providers.dart';
 import '../domain/notation.dart';
 import 'notation_labels.dart';
@@ -121,7 +123,7 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
   TrainingRead? _read;
 
   /// Columns corrected by hand since the last read.
-  final Map<int, ColumnField> _overrides = {};
+  final Map<int, ColumnChoice> _overrides = {};
 
   @override
   bool get wantKeepAlive => true;
@@ -220,7 +222,10 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
     setState(() => _busy = false);
     r.when(
       success: (res) {
-        _snack(l10n.ntLearned(res.learned, res.added, res.conflicts));
+        _snack([
+          l10n.ntLearned(res.learned, res.added, res.conflicts),
+          if (res.profiles > 0 || res.attributes > 0) l10n.ntLearnedLibrary(res.profiles, res.attributes),
+        ].join('\n'));
         setState(() {
           _read = null;
           _file = null;
@@ -428,18 +433,29 @@ class _Summary extends StatelessWidget {
   }
 }
 
-class _ColumnsCard extends StatelessWidget {
+class _ColumnsCard extends ConsumerWidget {
   const _ColumnsCard({required this.columns, required this.overrides, required this.onChange});
 
   final List<ReadColumn> columns;
-  final Map<int, ColumnField> overrides;
-  final void Function(int index, ColumnField? field) onChange;
+  final Map<int, ColumnChoice> overrides;
+  final void Function(int index, ColumnChoice? choice) onChange;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     if (columns.isEmpty) return const SizedBox.shrink();
+    // Our product attributes (0110): a column can hold one of them.
+    final attrs = ref.watch(productAttributesProvider).valueOrNull ?? const <ProductAttributeDef>[];
+    final attrName = {for (final a in attrs) a.key: a.name};
+    String choiceLabel(ColumnChoice c) =>
+        c.field == ColumnField.attr ? l10n.ntAttr(attrName[c.attribute] ?? c.attribute ?? '') : columnFieldLabel(l10n, c.field);
+    final choices = <ColumnChoice>[
+      for (final f in ColumnField.values)
+        if (f != ColumnField.attr) ColumnChoice(f),
+      for (final a in attrs)
+        if (a.active) ColumnChoice.attr(a.key),
+    ];
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -477,17 +493,23 @@ class _ColumnsCard extends StatelessWidget {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       flex: 2,
-                      child: DropdownButton<ColumnField?>(
-                        key: ValueKey('nt-col-${c.index}'),
-                        isExpanded: true,
-                        value: overrides[c.index] ?? c.field,
-                        items: [
-                          DropdownMenuItem<ColumnField?>(value: null, child: Text(l10n.ntFieldUnknown)),
-                          for (final f in ColumnField.values)
-                            DropdownMenuItem<ColumnField?>(value: f, child: Text(columnFieldLabel(l10n, f))),
-                        ],
-                        onChanged: (f) => onChange(c.index, f == c.field ? null : f),
-                      ),
+                      child: Builder(builder: (context) {
+                        final current = overrides[c.index] ?? c.choice;
+                        return DropdownButton<ColumnChoice?>(
+                          key: ValueKey('nt-col-${c.index}'),
+                          isExpanded: true,
+                          value: current,
+                          items: [
+                            DropdownMenuItem<ColumnChoice?>(value: null, child: Text(l10n.ntFieldUnknown)),
+                            for (final ch in choices)
+                              DropdownMenuItem<ColumnChoice?>(value: ch, child: Text(choiceLabel(ch))),
+                            // An attribute not (yet) in the list still shows.
+                            if (current != null && !choices.contains(current))
+                              DropdownMenuItem<ColumnChoice?>(value: current, child: Text(choiceLabel(current))),
+                          ],
+                          onChanged: (ch) => onChange(c.index, ch == c.choice ? null : ch),
+                        );
+                      }),
                     ),
                   ],
                 ),
@@ -563,6 +585,17 @@ class _LineCard extends StatelessWidget {
             if (line.rawNameCode != null)
               Text(l10n.ntSplitFrom(line.rawNameCode!),
                   style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: 0.55))),
+            // Its attributes as the company wrote them (0110), learned onto
+            // the product in the product library.
+            if (line.attributes.isNotEmpty)
+              Padding(
+                key: ValueKey('nt-attrs-${line.row}'),
+                padding: const EdgeInsets.only(top: 2),
+                child: Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, children: [
+                  for (final a in line.attributes)
+                    StatusPill(tone: StatusTone.info, label: '${a.name}: ${a.value}', dense: true),
+                ]),
+              ),
             if (p != null)
               Text(matchedByLabel(l10n, line.matchedBy),
                   style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
@@ -784,7 +817,7 @@ class _ColumnsTab extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('→ ${columnFieldLabel(l10n, a.field)}'),
+                        Text('→ ${a.field == ColumnField.attr ? l10n.ntAttr(a.attributeName ?? '') : columnFieldLabel(l10n, a.field)}'),
                         if (!a.isSeed)
                           IconButton(
                             tooltip: l10n.actionDelete,
@@ -841,7 +874,7 @@ class _AliasDialogState extends State<_AliasDialog> {
             initialValue: _field,
             items: [
               for (final f in ColumnField.values)
-                DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f))),
+                if (f != ColumnField.attr) DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f))),
             ],
             onChanged: (v) => setState(() => _field = v ?? _field),
           ),

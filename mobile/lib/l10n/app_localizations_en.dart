@@ -7237,4 +7237,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plOpenLibrary => 'Product pictures';
+
+  @override
+  String get plTabPhotos => 'Pictures';
+
+  @override
+  String get plTabAttributes => 'Attributes';
+
+  @override
+  String get plTabSuppliers => 'Supplier names';
+
+  @override
+  String get plAttributesHint =>
+      'Our values. Each supplier\'s way of writing them (e.g. カラー \'BK\') is listed under Supplier names and read as ours (色 \'黒\').';
+
+  @override
+  String get plAttrNew => 'Add attribute';
+
+  @override
+  String get plAttrName => 'Attribute name';
+
+  @override
+  String get plAttrUnit => 'Unit (optional)';
+
+  @override
+  String get plAttrValue => 'Value';
+
+  @override
+  String get plAttrHeading => 'Heading (e.g. Colour)';
+
+  @override
+  String get plSuppliersHint =>
+      'How each supplier calls this product — name, code, JAN, maker and attributes. Filled automatically by pre-training, imports and inspection.';
+
+  @override
+  String get plNoSuppliers => 'No supplier names yet';
+
+  @override
+  String get plSupplierAdd => 'Add supplier name';
+
+  @override
+  String get plSupplier => 'Supplier';
+
+  @override
+  String get plSupplierSaved => 'Saved';
+
+  @override
+  String get plWritings => 'Spellings seen';
+
+  @override
+  String get plAdopt => 'Use as ours';
+
+  @override
+  String plRemoveSupplierConfirm(String name) {
+    return 'Remove $name\'s names and attributes for this product? (The reading dictionary keeps them.)';
+  }
+
+  @override
+  String get ntFieldAttr => 'Attribute';
+
+  @override
+  String ntAttr(String name) {
+    return 'Attribute: $name';
+  }
+
+  @override
+  String ntLearnedLibrary(int profiles, int attributes) {
+    return 'Product library: $profiles supplier names, $attributes attributes';
+  }
 }

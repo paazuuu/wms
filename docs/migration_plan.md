@@ -5272,6 +5272,64 @@ reordering and withdrawing renumbered the rest, a file outside the
 product's folder was refused, a hyphenated JAN found its face, and the
 library's "no pictures" filter left only the product without one.
 
+### 0110 — the product library as the hub: each supplier's names and attributes
+
+- **One place per product.** What a supplier calls our product used to be
+  split in two:
+  - `supplier_product_names` (0087/0103): a name, 品番, JAN and maker per
+    supplier;
+  - `notation_dialects` (0105): every spelling seen.
+
+  Pre-training filled only the second. Now every confirmed learning — an
+  import, pre-training, the product page — writes both, and
+  `product_supplier_profile(product)` returns them together with the
+  product. A session flag keeps the profile trigger from counting the same
+  learning twice.
+- **Attributes.**
+  - `product_attributes` is our attribute master, seeded with 色, サイズ,
+    容量, 規格, 材質, 重量 and 入数; more can be added.
+  - `product_attribute_values` holds our value of each attribute for each
+    product.
+  - `supplier_product_attributes` holds how a supplier heads an attribute
+    and what it writes for it (e.g. "カラー: BK").
+  - `attribute_value_aliases` records a supplier's word for one of our
+    values ("BK" → "黒"). It is learned whenever the supplier's value sits
+    beside ours. A word that already means another value is left alone.
+- **Reading.**
+  - `column_aliases` accepts `field = 'attr'` together with the attribute.
+    The global 色 / カラー / サイズ / 容量 headings, which used to be read as
+    規格, now go to their own attributes. Headings for 材質, 重量, 寸法 and
+    内容量 were added.
+  - The reader (`import-plan`, deployed) puts every attribute column of a
+    sheet into `line.attributes`. A PDF or photo line's attributes are
+    matched to ours through the known headings; any the reader cannot match
+    stay in 規格.
+  - When there is no 規格 column, 規格 is built from the attributes, so
+    slips still print it.
+  - A column can be overridden to `attr:<key>`.
+  - Learning also takes 入数, and 規格 where the file had a 規格 column.
+- **Library versions** (0108) now carry the attribute headings and the
+  value words.
+- **App.** The product page has three tabs:
+  - 写真;
+  - 属性 — our values, editable, and new attributes can be added;
+  - 仕入先の呼び名 — per supplier: name, 品番, JAN, maker, every spelling
+    seen, and each attribute with what it means in ours. Managers can add,
+    correct or remove a supplier's entry and adopt a supplier's value as
+    ours.
+
+  Pre-training shows each line's attributes and lets a column be pointed at
+  an attribute.
+
+**Verified live (rolled back):** learning one line from supplier Z, with
+our 色 = 黒, did the following:
+- stored the supplier's name "BALL PEN BK", 品番 "BP01" and maker as its
+  profile of the product;
+- did not store the supplier's hyphenated JAN, which normalises to ours;
+- recorded 4 spellings, and "カラー: BK" plus "入数: 10" as attributes;
+- resolved "bk" to 黒 through the learned value word;
+- learned an attribute column heading.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

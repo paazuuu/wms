@@ -7070,4 +7070,72 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plOpenLibrary => '商品照片';
+
+  @override
+  String get plTabPhotos => '照片';
+
+  @override
+  String get plTabAttributes => '属性';
+
+  @override
+  String get plTabSuppliers => '供应商的叫法';
+
+  @override
+  String get plAttributesHint =>
+      '本公司的值。各供应商的写法（例：カラー“BK”）列在“供应商的叫法”中，读取时换成本公司的值（色“黑”）。';
+
+  @override
+  String get plAttrNew => '添加属性';
+
+  @override
+  String get plAttrName => '属性名';
+
+  @override
+  String get plAttrUnit => '单位（可选）';
+
+  @override
+  String get plAttrValue => '值';
+
+  @override
+  String get plAttrHeading => '表头（例：カラー）';
+
+  @override
+  String get plSuppliersHint =>
+      '各供应商对本商品的叫法——品名、品番、JAN、厂家和属性。事前学习、导入和检品确认后自动积累。';
+
+  @override
+  String get plNoSuppliers => '还没有供应商的叫法';
+
+  @override
+  String get plSupplierAdd => '添加供应商的叫法';
+
+  @override
+  String get plSupplier => '供应商';
+
+  @override
+  String get plSupplierSaved => '已保存';
+
+  @override
+  String get plWritings => '出现过的写法';
+
+  @override
+  String get plAdopt => '设为本公司的值';
+
+  @override
+  String plRemoveSupplierConfirm(String name) {
+    return '移除 $name 对本商品的叫法和属性吗？（读取用词典保留）';
+  }
+
+  @override
+  String get ntFieldAttr => '属性';
+
+  @override
+  String ntAttr(String name) {
+    return '属性：$name';
+  }
+
+  @override
+  String ntLearnedLibrary(int profiles, int attributes) {
+    return '商品图库：供应商叫法$profiles条、属性$attributes条';
+  }
 }

@@ -7090,4 +7090,72 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get plOpenLibrary => '商品の写真';
+
+  @override
+  String get plTabPhotos => '写真';
+
+  @override
+  String get plTabAttributes => '属性';
+
+  @override
+  String get plTabSuppliers => '仕入先の呼び名';
+
+  @override
+  String get plAttributesHint =>
+      '自社の値です。仕入先ごとの書き方（例: カラー「BK」）は「仕入先の呼び名」に並び、読み取りのときに自社の値（色「黒」）に置き換えられます。';
+
+  @override
+  String get plAttrNew => '属性を追加';
+
+  @override
+  String get plAttrName => '属性名';
+
+  @override
+  String get plAttrUnit => '単位（任意）';
+
+  @override
+  String get plAttrValue => '値';
+
+  @override
+  String get plAttrHeading => '見出し（例: カラー）';
+
+  @override
+  String get plSuppliersHint =>
+      '仕入先ごとの呼び名・品番・JAN・メーカーと属性の書き方。事前学習・取込・検品で確認したものが自動でたまります。';
+
+  @override
+  String get plNoSuppliers => 'まだ仕入先の呼び名はありません';
+
+  @override
+  String get plSupplierAdd => '仕入先の呼び名を追加';
+
+  @override
+  String get plSupplier => '仕入先';
+
+  @override
+  String get plSupplierSaved => '保存しました';
+
+  @override
+  String get plWritings => 'これまでの書き方';
+
+  @override
+  String get plAdopt => '自社の値にする';
+
+  @override
+  String plRemoveSupplierConfirm(String name) {
+    return '$name の呼び名と属性を外しますか？（読み取り用の辞書は残ります）';
+  }
+
+  @override
+  String get ntFieldAttr => '属性';
+
+  @override
+  String ntAttr(String name) {
+    return '属性: $name';
+  }
+
+  @override
+  String ntLearnedLibrary(int profiles, int attributes) {
+    return '商品ライブラリーに 仕入先の呼び名$profiles件・属性$attributes件';
+  }
 }
