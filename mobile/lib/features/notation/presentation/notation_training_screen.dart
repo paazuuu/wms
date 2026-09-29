@@ -488,8 +488,10 @@ class _ColumnsCard extends ConsumerWidget {
     // Our product attributes (0110): a column can hold one of them.
     final attrs = ref.watch(productAttributesProvider).valueOrNull ?? const <ProductAttributeDef>[];
     final attrName = {for (final a in attrs) a.key: a.name};
-    String choiceLabel(ColumnChoice c) =>
-        c.field == ColumnField.attr ? l10n.ntAttr(attrName[c.attribute] ?? c.attribute ?? '') : columnFieldLabel(l10n, c.field);
+    final fieldNames = ref.watch(customFieldLabelsProvider(Localizations.localeOf(context).languageCode));
+    String choiceLabel(ColumnChoice c) => c.field == ColumnField.attr
+        ? l10n.ntAttr(attrName[c.attribute] ?? c.attribute ?? '')
+        : columnFieldLabel(l10n, c.field, fieldNames);
     final choices = <ColumnChoice>[
       for (final f in ColumnField.values)
         if (f != ColumnField.attr) ColumnChoice(f),
@@ -522,7 +524,7 @@ class _ColumnsCard extends ConsumerWidget {
                           Text(
                             [
                               columnSourceLabel(l10n, overrides.containsKey(c.index) ? 'override' : c.source),
-                              if (c.conflict) l10n.ntAiThinks(columnFieldLabel(l10n, c.aiField)),
+                              if (c.conflict) l10n.ntAiThinks(columnFieldLabel(l10n, c.aiField, fieldNames)),
                             ].join(' · '),
                             style: theme.textTheme.bodySmall?.copyWith(
                                 color: c.conflict ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant),
@@ -698,6 +700,7 @@ class _DialectsTab extends ConsumerWidget {
     final theme = Theme.of(context);
     final field = ref.watch(dialectFieldProvider);
     final repo = ref.read(notationRepositoryProvider);
+    final fieldNames = ref.watch(customFieldLabelsProvider(Localizations.localeOf(context).languageCode));
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
@@ -716,7 +719,7 @@ class _DialectsTab extends ConsumerWidget {
             for (final f in const [null, 'jan', 'maker', 'name', 'code'])
               ChoiceChip(
                 key: ValueKey('nt-dialect-field-${f ?? 'all'}'),
-                label: Text(f == null ? l10n.ntAllFields : dialectFieldLabel(l10n, f)),
+                label: Text(f == null ? l10n.ntAllFields : dialectFieldLabel(l10n, f, fieldNames)),
                 selected: field == f,
                 onSelected: (_) => ref.read(dialectFieldProvider.notifier).state = f,
               ),
@@ -747,7 +750,7 @@ class _DialectsTab extends ConsumerWidget {
                           child: ListTile(
                             title: Text(d.rawValues.isEmpty ? d.rawValue : d.rawValues.join(' / ')),
                             subtitle: Text([
-                              '${d.code} · ${dialectFieldLabel(l10n, d.field)}',
+                              '${d.code} · ${dialectFieldLabel(l10n, d.field, fieldNames)}',
                               '→ ${d.field == 'maker' ? (d.makerName ?? '') : [d.productName, d.productJan].whereType<String>().join(' · ')}',
                               [d.partnerName ?? l10n.ntAllPartners, l10n.ntSeen(d.seenCount)].join(' · '),
                             ].join('\n')),
@@ -806,7 +809,7 @@ class _ColumnsTab extends ConsumerWidget {
   Future<void> _add(BuildContext context, WidgetRef ref) async {
     final result = await showDialog<({String header, ColumnField field})>(
       context: context,
-      builder: (_) => const _AliasDialog(),
+      builder: (_) => _AliasDialog(fieldNames: ref.read(customFieldLabelsProvider(Localizations.localeOf(context).languageCode))),
     );
     if (result == null) return;
     final r = await ref.read(notationRepositoryProvider).setColumnAlias(
@@ -818,6 +821,7 @@ class _ColumnsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final fieldNames = ref.watch(customFieldLabelsProvider(Localizations.localeOf(context).languageCode));
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
@@ -857,7 +861,7 @@ class _ColumnsTab extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('→ ${a.field == ColumnField.attr ? l10n.ntAttr(a.attributeName ?? '') : columnFieldLabel(l10n, a.field)}'),
+                        Text('→ ${a.field == ColumnField.attr ? l10n.ntAttr(a.attributeName ?? '') : columnFieldLabel(l10n, a.field, fieldNames)}'),
                         if (!a.isSeed)
                           IconButton(
                             tooltip: l10n.actionDelete,
@@ -880,7 +884,10 @@ class _ColumnsTab extends ConsumerWidget {
 /// A heading and what it means. Owns its text controller, so the controller
 /// outlives the dialog's closing animation.
 class _AliasDialog extends StatefulWidget {
-  const _AliasDialog();
+  const _AliasDialog({this.fieldNames = const {}});
+
+  /// The names chosen in the field library (0112).
+  final Map<String, String> fieldNames;
 
   @override
   State<_AliasDialog> createState() => _AliasDialogState();
@@ -914,7 +921,7 @@ class _AliasDialogState extends State<_AliasDialog> {
             initialValue: _field,
             items: [
               for (final f in ColumnField.values)
-                if (f != ColumnField.attr) DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f))),
+                if (f != ColumnField.attr) DropdownMenuItem(value: f, child: Text(columnFieldLabel(l10n, f, widget.fieldNames))),
             ],
             onChanged: (v) => setState(() => _field = v ?? _field),
           ),

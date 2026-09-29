@@ -43,6 +43,17 @@ abstract class TradingPartnerRepository {
 
   /// `set_trading_partner_country` (0102).
   Future<ApiResult<bool>> setCountry(int id, String countryCode);
+
+  // Our codes for companies (0112).
+
+  /// Our code for the company (empty keeps the one it has) and its code for us.
+  Future<ApiResult<bool>> setCodes(int id, {String? code, String? theirCodeForUs});
+  Future<ApiResult<List<PartnerCodeFormat>>> codeFormats();
+  Future<ApiResult<List<PartnerCodeFormat>>> saveCodeFormat(PartnerKind kind, {required String prefix, required int digits, int? nextNumber});
+
+  /// Gives every company without a code one; returns how many.
+  Future<ApiResult<int>> issueMissingCodes();
+  Future<ApiResult<List<PartnerVendorCode>>> vendorCodes(int partnerId);
 }
 
 class TradingPartnerRepositoryImpl implements TradingPartnerRepository {
@@ -164,6 +175,72 @@ class TradingPartnerRepositoryImpl implements TradingPartnerRepository {
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  List<Map<String, dynamic>> _rows(dynamic d) {
+    final raw = d is List && d.length == 1 && d.first is List ? d.first : d;
+    return [for (final e in (raw as List? ?? const []).whereType<Map>()) e.cast<String, dynamic>()];
+  }
+
+  @override
+  Future<ApiResult<bool>> setCodes(int id, {String? code, String? theirCodeForUs}) async {
+    try {
+      await _dio.post('/rpc/set_partner_codes', data: {
+        'p_id': id,
+        'p_code': code,
+        'p_their_code_for_us': theirCodeForUs,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<PartnerCodeFormat>>> codeFormats() async {
+    try {
+      final r = await _dio.post('/rpc/list_partner_code_formats', data: {});
+      return ApiSuccess([for (final m in _rows(r.data)) PartnerCodeFormat.fromJson(m)]);
+    } on DioException catch (e) {
+      return mapDioError<List<PartnerCodeFormat>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<PartnerCodeFormat>>> saveCodeFormat(PartnerKind kind,
+      {required String prefix, required int digits, int? nextNumber}) async {
+    try {
+      final r = await _dio.post('/rpc/save_partner_code_format', data: {
+        'p_kind': kind.wire,
+        'p_prefix': prefix,
+        'p_digits': digits,
+        'p_next_number': nextNumber,
+      });
+      return ApiSuccess([for (final m in _rows(r.data)) PartnerCodeFormat.fromJson(m)]);
+    } on DioException catch (e) {
+      return mapDioError<List<PartnerCodeFormat>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> issueMissingCodes() async {
+    try {
+      final r = await _dio.post('/rpc/issue_missing_partner_codes', data: {});
+      final d = r.data;
+      return ApiSuccess(d is num ? d.toInt() : int.tryParse('$d') ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<PartnerVendorCode>>> vendorCodes(int partnerId) async {
+    try {
+      final r = await _dio.post('/rpc/list_partner_vendor_codes', data: {'p_partner_id': partnerId});
+      return ApiSuccess([for (final m in _rows(r.data)) PartnerVendorCode.fromJson(m)]);
+    } on DioException catch (e) {
+      return mapDioError<List<PartnerVendorCode>>(e);
     }
   }
 }

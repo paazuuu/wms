@@ -22,6 +22,7 @@ import '../../picking_ops/presentation/pick_list_index_screen.dart';
 import '../../wave/presentation/pick_wave_list_screen.dart';
 import '../../partners/presentation/trading_partner_list_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
+import '../../notation/presentation/field_library_screen.dart';
 import '../../product_library/presentation/name_formats_screen.dart';
 import '../../product_library/presentation/product_library_screen.dart';
 import '../../product/presentation/unlinked_jan_screen.dart';
@@ -334,6 +335,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
           ),
           // Our own product format (0111): how product names are built, and
           // renaming a maker or a colour everywhere at once.
+          // The field library (0112): every heading companies use for JAN,
+          // メーカー, 品番 …, and the names this system shows for them.
+          FeatureEntry(
+            id: 'field_library',
+            icon: Icons.translate_outlined,
+            status: FeatureStatus.ready,
+            builder: _fieldLibrary,
+            requiredAnyOf: ['product.view', 'product.manage', 'purchase_order.view'],
+          ),
           FeatureEntry(
             id: 'name_formats',
             icon: Icons.text_format_outlined,
@@ -437,6 +447,7 @@ Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 Widget _products(BuildContext _) => const ProductListScreen();
 Widget _productLibrary(BuildContext _) => const ProductLibraryScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
+Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 
 /// Top-level (const-referenceable) builder for the Unlinked JAN Codes feature.
 Widget _unlinkedJan(BuildContext _) => const UnlinkedJanScreen();

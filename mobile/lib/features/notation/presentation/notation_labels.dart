@@ -1,8 +1,12 @@
 import '../../../l10n/app_localizations.dart';
 import '../domain/notation.dart';
 
-/// What a column holds, in words.
-String columnFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
+/// What a column holds, in words: the name chosen in the field library
+/// (0112) when there is one ([custom], field key → name), else ours.
+String columnFieldLabel(AppLocalizations l10n, ColumnField? f, [Map<String, String> custom = const {}]) =>
+    (f == null ? null : custom[f.wire]) ?? _builtInFieldLabel(l10n, f);
+
+String _builtInFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
       ColumnField.jan => l10n.ntFieldJan,
       ColumnField.maker => l10n.ntFieldMaker,
       ColumnField.productName => l10n.ntFieldName,
@@ -17,6 +21,8 @@ String columnFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
       ColumnField.amount => l10n.ntFieldAmount,
       ColumnField.unit => l10n.ntFieldUnit,
       ColumnField.supplierCode => l10n.ntFieldSupplierCode,
+      ColumnField.upstreamCode => l10n.ntFieldUpstreamCode,
+      ColumnField.customerCode => l10n.ntFieldCustomerCode,
       ColumnField.spec => l10n.ntFieldSpec,
       ColumnField.taxRate => l10n.ntFieldTaxRate,
       ColumnField.orderDate => l10n.ntFieldDate,
@@ -36,12 +42,13 @@ String columnSourceLabel(AppLocalizations l10n, String? s) => switch (s) {
       _ => l10n.ntSourceNone,
     };
 
-/// The dictionary's four fields.
-String dialectFieldLabel(AppLocalizations l10n, String field) => switch (field) {
-      'jan' => l10n.ntFieldJan,
-      'maker' => l10n.ntFieldMaker,
-      'name' => l10n.ntFieldName,
-      'code' => l10n.ntFieldCode,
+/// The dictionary's four fields, by the library's names when chosen.
+String dialectFieldLabel(AppLocalizations l10n, String field, [Map<String, String> custom = const {}]) =>
+    switch (field) {
+      'jan' => custom['jan'] ?? l10n.ntFieldJan,
+      'maker' => custom['maker'] ?? l10n.ntFieldMaker,
+      'name' => custom['product_name'] ?? l10n.ntFieldName,
+      'code' => custom['product_code'] ?? l10n.ntFieldCode,
       _ => field,
     };
 
@@ -51,6 +58,7 @@ String flagLabel(AppLocalizations l10n, String flag) {
   return switch (parts.first) {
     'unresolved' => l10n.ntFlagUnresolved,
     'jan_check' => l10n.ntFlagJanCheck,
+    'jan_exponent' => l10n.ntFlagJanExponent,
     'no_jan' => l10n.ntFlagNoJan,
     'no_maker' => l10n.ntFlagNoMaker,
     'no_quantity' => l10n.ntFlagNoQuantity,

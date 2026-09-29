@@ -13614,6 +13614,246 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'自社様式で新規登録'**
   String get ntMatchRegistered;
+
+  /// No description provided for @featFieldLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目ライブラリー'**
+  String get featFieldLibrary;
+
+  /// No description provided for @featFieldLibraryDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先ごとに違う見出し（JAN・JANコード・ジャパンコード…）をまとめ、システムで表示する名前を決める'**
+  String get featFieldLibraryDesc;
+
+  /// No description provided for @flTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目ライブラリー'**
+  String get flTitle;
+
+  /// No description provided for @flIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の列の意味（JAN・メーカー・品番など）ごとに、各社がどんな見出しで書いてくるかをまとめています。見出しは取り込みや事前学習で自動的に増えます。鉛筆のボタンで、このシステムで表示する名前を言語ごとに決められます（空欄は標準の名前）。'**
+  String get flIntro;
+
+  /// No description provided for @flBuiltIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'標準の名前：{name}'**
+  String flBuiltIn(String name);
+
+  /// No description provided for @flEditNames.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示名を決める'**
+  String get flEditNames;
+
+  /// No description provided for @flNamesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄の言語は標準の名前「{name}」のままです。'**
+  String flNamesHint(String name);
+
+  /// No description provided for @flLangJa.
+  ///
+  /// In ja, this message translates to:
+  /// **'日本語'**
+  String get flLangJa;
+
+  /// No description provided for @flLangEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語'**
+  String get flLangEn;
+
+  /// No description provided for @flLangZh.
+  ///
+  /// In ja, this message translates to:
+  /// **'中国語'**
+  String get flLangZh;
+
+  /// No description provided for @flSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示名を保存しました'**
+  String get flSaved;
+
+  /// No description provided for @flHeadings.
+  ///
+  /// In ja, this message translates to:
+  /// **'各社の見出し {count}件'**
+  String flHeadings(int count);
+
+  /// No description provided for @flAddHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出しを追加'**
+  String get flAddHeading;
+
+  /// No description provided for @flAddHeadingTo.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」の見出しを追加'**
+  String flAddHeadingTo(String name);
+
+  /// No description provided for @flHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出し（書類に書かれているとおり）'**
+  String get flHeading;
+
+  /// No description provided for @flEveryone.
+  ///
+  /// In ja, this message translates to:
+  /// **'全社共通'**
+  String get flEveryone;
+
+  /// No description provided for @flOnlyFor.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} だけ'**
+  String flOnlyFor(String name);
+
+  /// No description provided for @flHeadingAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{header}」を追加しました'**
+  String flHeadingAdded(String header);
+
+  /// No description provided for @flAttributes.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の属性'**
+  String get flAttributes;
+
+  /// No description provided for @flAttributesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'色・サイズなどの属性の名前は、商品の写真画面の「属性」タブで変えられます。'**
+  String get flAttributesHint;
+
+  /// No description provided for @ntFieldUpstreamCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先の仕入先コード'**
+  String get ntFieldUpstreamCode;
+
+  /// No description provided for @ntFieldCustomerCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'得意先コード（先方での当社コード）'**
+  String get ntFieldCustomerCode;
+
+  /// No description provided for @ntFlagJanExponent.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが指数表記（4.90E+12など）で桁が失われています'**
+  String get ntFlagJanExponent;
+
+  /// No description provided for @pcRulesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先コードの採番'**
+  String get pcRulesTitle;
+
+  /// No description provided for @pcRulesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい取引先にコードを入れなかったとき、この規則で自社のコードを振ります。あとから取引先ごとに変更できます。'**
+  String get pcRulesHint;
+
+  /// No description provided for @pcPrefix.
+  ///
+  /// In ja, this message translates to:
+  /// **'頭文字'**
+  String get pcPrefix;
+
+  /// No description provided for @pcDigits.
+  ///
+  /// In ja, this message translates to:
+  /// **'桁数'**
+  String get pcDigits;
+
+  /// No description provided for @pcNext.
+  ///
+  /// In ja, this message translates to:
+  /// **'次の番号'**
+  String get pcNext;
+
+  /// No description provided for @pcNextCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'次に振るコード：{code}'**
+  String pcNextCode(String code);
+
+  /// No description provided for @pcRulesSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'採番の規則を保存しました'**
+  String get pcRulesSaved;
+
+  /// No description provided for @pcIssueMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'未採番の取引先に振る'**
+  String get pcIssueMissing;
+
+  /// No description provided for @pcIssued.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}社にコードを振りました'**
+  String pcIssued(int count);
+
+  /// No description provided for @pcOurCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の取引先コード'**
+  String get pcOurCode;
+
+  /// No description provided for @pcAutoHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄なら採番の規則で自動的に振ります'**
+  String get pcAutoHint;
+
+  /// No description provided for @pcTheirCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方での当社コード（得意先コード）'**
+  String get pcTheirCode;
+
+  /// No description provided for @pcTheirCodeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'相手の請求書・見積書にある当社の番号。書類から自動で入ることもあります'**
+  String get pcTheirCodeHint;
+
+  /// No description provided for @pcOurCodeShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社コード {code}'**
+  String pcOurCodeShort(String code);
+
+  /// No description provided for @pcTheirCodeShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方での当社 {code}'**
+  String pcTheirCodeShort(String code);
+
+  /// No description provided for @pcVendorCodesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取引先の仕入先コード'**
+  String get pcVendorCodesTitle;
+
+  /// No description provided for @pcVendorCodesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。'**
+  String get pcVendorCodesHint;
 }
 
 class _AppLocalizationsDelegate

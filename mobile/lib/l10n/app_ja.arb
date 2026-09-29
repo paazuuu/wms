@@ -6744,5 +6744,115 @@
   "ntFieldDiscountRate": "掛率",
   "ntFieldUnit": "単位",
   "ntFieldSupplierCode": "仕入先の商品コード",
-  "ntMatchRegistered": "自社様式で新規登録"
+  "ntMatchRegistered": "自社様式で新規登録",
+  "featFieldLibrary": "項目ライブラリー",
+  "featFieldLibraryDesc": "取引先ごとに違う見出し（JAN・JANコード・ジャパンコード…）をまとめ、システムで表示する名前を決める",
+  "flTitle": "項目ライブラリー",
+  "flIntro": "書類の列の意味（JAN・メーカー・品番など）ごとに、各社がどんな見出しで書いてくるかをまとめています。見出しは取り込みや事前学習で自動的に増えます。鉛筆のボタンで、このシステムで表示する名前を言語ごとに決められます（空欄は標準の名前）。",
+  "flBuiltIn": "標準の名前：{name}",
+  "@flBuiltIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "flEditNames": "表示名を決める",
+  "flNamesHint": "空欄の言語は標準の名前「{name}」のままです。",
+  "@flNamesHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "flLangJa": "日本語",
+  "flLangEn": "英語",
+  "flLangZh": "中国語",
+  "flSaved": "表示名を保存しました",
+  "flHeadings": "各社の見出し {count}件",
+  "@flHeadings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "flAddHeading": "見出しを追加",
+  "flAddHeadingTo": "「{name}」の見出しを追加",
+  "@flAddHeadingTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "flHeading": "見出し（書類に書かれているとおり）",
+  "flEveryone": "全社共通",
+  "flOnlyFor": "{name} だけ",
+  "@flOnlyFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "flHeadingAdded": "「{header}」を追加しました",
+  "@flHeadingAdded": {
+    "placeholders": {
+      "header": {
+        "type": "String"
+      }
+    }
+  },
+  "flAttributes": "商品の属性",
+  "flAttributesHint": "色・サイズなどの属性の名前は、商品の写真画面の「属性」タブで変えられます。",
+  "ntFieldUpstreamCode": "取引先の仕入先コード",
+  "ntFieldCustomerCode": "得意先コード（先方での当社コード）",
+  "ntFlagJanExponent": "JANが指数表記（4.90E+12など）で桁が失われています",
+  "pcRulesTitle": "取引先コードの採番",
+  "pcRulesHint": "新しい取引先にコードを入れなかったとき、この規則で自社のコードを振ります。あとから取引先ごとに変更できます。",
+  "pcPrefix": "頭文字",
+  "pcDigits": "桁数",
+  "pcNext": "次の番号",
+  "pcNextCode": "次に振るコード：{code}",
+  "@pcNextCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "pcRulesSaved": "採番の規則を保存しました",
+  "pcIssueMissing": "未採番の取引先に振る",
+  "pcIssued": "{count}社にコードを振りました",
+  "@pcIssued": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pcOurCode": "自社の取引先コード",
+  "pcAutoHint": "空欄なら採番の規則で自動的に振ります",
+  "pcTheirCode": "先方での当社コード（得意先コード）",
+  "pcTheirCodeHint": "相手の請求書・見積書にある当社の番号。書類から自動で入ることもあります",
+  "pcOurCodeShort": "自社コード {code}",
+  "@pcOurCodeShort": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "pcTheirCodeShort": "先方での当社 {code}",
+  "@pcTheirCodeShort": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "pcVendorCodesTitle": "この取引先の仕入先コード",
+  "pcVendorCodesHint": "取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。"
 }

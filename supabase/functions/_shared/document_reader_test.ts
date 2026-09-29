@@ -4,6 +4,7 @@ import { assert, assertEquals } from "jsr:@std/assert";
 import {
   type AliasRow,
   janCheckOk,
+  janLostDigits,
   normalizeJan,
   normalizeText,
   readSpreadsheet,
@@ -158,4 +159,76 @@ Deno.test("a wholesaler's quote: 品番 over its own 商品コード, 見積単�
   const again = await readSpreadsheet(bytes, older, {}, false);
   assertEquals(again.columns.find((c) => c.header === "定価")?.field, "list_price");
   assertEquals(again.lines[0].unit_price, 465);
+});
+
+Deno.test("the wholesaler's codes for its suppliers and for us are read apart from ours (0112)", async () => {
+  const quoteAliases: AliasRow[] = [
+    ["得意先コード", "customer_code"], ["仕入先コード", "upstream_code"], ["商品コード", "product_code"],
+    ["品番", "product_code"], ["ブランド名", "maker"], ["数量", "quantity"], ["JANコード", "jan"], ["店名", "ignore"],
+  ].map(([k, f]) => ({ header_key: normalizeText(k), field: f as AliasRow["field"], partner: false }));
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["得意先コード", "店名", "商品コード", "仕入先コード", "ブランド名", "品番", "数量", "JANコード"],
+    [5001033, "サンプル商店様", 7245556, 724, "", "UBA20105.15", 200, "4902778198940"],
+    [5001033, "サンプル商店様", 504048, 50, "ゼブラ", "P-JJ31-BL", 500, "4901681233922"],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "s");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { columns, lines } = await readSpreadsheet(bytes, quoteAliases, {}, false);
+  const fieldOf = (h: string) => columns.find((c) => c.header === h)?.field;
+  assertEquals(fieldOf("仕入先コード"), "upstream_code");
+  assertEquals(fieldOf("得意先コード"), "customer_code");
+  assertEquals(fieldOf("商品コード"), "supplier_code");
+  assertEquals(lines[0].upstream_code, "724");
+  assertEquals(lines[0].customer_code, "5001033");
+  assertEquals(lines[0].supplier_code, "7245556");
+  assertEquals(lines[0].product_code, "UBA20105.15");
+  assertEquals(lines[1].maker, "ゼブラ");
+});
+
+Deno.test("an order sheet headed ジャパンコード with the JAN as a number reads whole (0112)", async () => {
+  const orderAliases: AliasRow[] = [
+    ["メーカー", "maker"], ["品番", "product_code"], ["発注数量", "quantity"], ["ジャパンコード", "jan"],
+  ].map(([k, f]) => ({ header_key: normalizeText(k), field: f as AliasRow["field"], partner: false }));
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["番号", "メーカー", "品番", "ジャパンコード", "発注数量"],
+    [830, "kokuyo", "ル-PP158M", 4901480344041, 60],
+    [830, "uni", "UBA-201-05.15", 4902778198940, 200],
+  ]);
+  // Shown as "0" in Excel: the cell holds the number, not the text.
+  sheet["D2"].z = "0";
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "Sheet1");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { columns, lines } = await readSpreadsheet(bytes, orderAliases, {}, false);
+  assertEquals(columns.find((c) => c.header === "ジャパンコード")?.field, "jan");
+  assertEquals(lines.map((l) => l.jan_code), ["4901480344041", "4902778198940"]);
+  assert(lines.every((l) => !l.flags.includes("jan_check")));
+
+  // Without the heading known, the values still say it is the JAN column.
+  const bare = await readSpreadsheet(bytes, orderAliases.filter((a) => a.field !== "jan"), {}, false);
+  assertEquals(bare.columns.find((c) => c.header === "ジャパンコード")?.source, "values");
+});
+
+Deno.test("a JAN that lost its digits to exponent form is flagged, not guessed (0112)", async () => {
+  assert(janLostDigits("4.90148E+12"));
+  assert(janLostDigits("4.90148e12"));
+  assert(janLostDigits("4901480000000"));
+  assert(!janLostDigits("4901480344041"));
+  assert(!janLostDigits(4901480344041));
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["JAN", "qty", "maker"],
+    ["4.90148E+12", 5, "コクヨ"],
+    [4901480000000, 5, "コクヨ"],
+    ["4901480344041", 5, "コクヨ"],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "s");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { lines } = await readSpreadsheet(bytes, aliases, {}, false);
+  assertEquals(lines[0].flags.includes("jan_exponent"), true);
+  assertEquals(lines[0].jan_code, "");
+  assertEquals(lines[1].flags.includes("jan_exponent"), true);
+  assertEquals(lines[2].flags.includes("jan_exponent"), false);
+  assertEquals(lines[2].jan_code, "4901480344041");
 });

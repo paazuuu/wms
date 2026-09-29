@@ -33,3 +33,8 @@ final tradingPartnerListProvider =
     failure: (f) => throw Exception(f.message),
   );
 });
+
+/// A company's codes for its own suppliers (0112).
+final partnerVendorCodesProvider = FutureProvider.autoDispose.family<List<PartnerVendorCode>, int>((ref, partnerId) async =>
+    (await ref.watch(tradingPartnerRepositoryProvider).vendorCodes(partnerId))
+        .when(success: (d) => d, failure: (f) => throw Exception(f.message)));

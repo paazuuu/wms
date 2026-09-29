@@ -70,6 +70,16 @@ class TradingPartnerListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.partnersTitle),
         actions: [
+          // How our codes for companies are numbered (0112).
+          IconButton(
+            key: const ValueKey('partner-code-rules'),
+            tooltip: l10n.pcRulesTitle,
+            icon: const Icon(Icons.pin_outlined),
+            onPressed: () async {
+              await showDialog<void>(context: context, builder: (_) => const PartnerCodeRulesDialog());
+              ref.invalidate(tradingPartnerListProvider);
+            },
+          ),
           IconButton(
             tooltip: l10n.productsShowInactive,
             icon: Icon(showInactive
@@ -216,6 +226,19 @@ class _PartnerCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    // Our code for it, and its code for us (0112).
+                    if ((partner.code ?? '').isNotEmpty || partner.theirCodeForUs != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          if ((partner.code ?? '').isNotEmpty) l10n.pcOurCodeShort(partner.code!),
+                          if (partner.theirCodeForUs != null) l10n.pcTheirCodeShort(partner.theirCodeForUs!),
+                        ].join(' · '),
+                        key: ValueKey('partner-codes-${partner.id}'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                            fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
+                      ),
+                    ],
                     if (partner.contactName != null &&
                         partner.contactName!.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -265,6 +288,8 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
       TextEditingController(text: widget.partner?.name ?? '');
   late final TextEditingController _code =
       TextEditingController(text: widget.partner?.code ?? '');
+  late final TextEditingController _theirCode =
+      TextEditingController(text: widget.partner?.theirCodeForUs ?? '');
   late final TextEditingController _contactName =
       TextEditingController(text: widget.partner?.contactName ?? '');
   late final TextEditingController _phone =
@@ -288,6 +313,7 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
   void dispose() {
     _name.dispose();
     _code.dispose();
+    _theirCode.dispose();
     _contactName.dispose();
     _phone.dispose();
     _email.dispose();
@@ -327,6 +353,14 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
         final c = await repo.setCountry(widget.partner!.id, _country);
         c.when(success: (_) {}, failure: (f) => errorMessage = f.message);
       }
+      // Our code for it and its code for us (0112).
+      if (errorMessage == null &&
+          (_code.text.trim() != (widget.partner!.code ?? '') ||
+              _theirCode.text.trim() != (widget.partner!.theirCodeForUs ?? ''))) {
+        final c = await repo.setCodes(widget.partner!.id,
+            code: _code.text.trim(), theirCodeForUs: _theirCode.text.trim());
+        c.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+      }
     } else {
       final result = await repo.create(
         name: _name.text.trim(),
@@ -343,6 +377,10 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
       result.when(success: (id) => createdId = id, failure: (f) => errorMessage = f.message);
       if (createdId != null && _country != 'JP') {
         final c = await repo.setCountry(createdId!, _country);
+        c.when(success: (_) {}, failure: (f) => errorMessage = f.message);
+      }
+      if (createdId != null && _theirCode.text.trim().isNotEmpty) {
+        final c = await repo.setCodes(createdId!, theirCodeForUs: _theirCode.text.trim());
         c.when(success: (_) {}, failure: (f) => errorMessage = f.message);
       }
     }
@@ -409,12 +447,26 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
               ],
               onChanged: (v) => setState(() => _country = v ?? _country),
             ),
-            if (!_isEdit) ...[
-              const SizedBox(height: AppSpacing.lg),
-              TextField(
-                controller: _code,
-                decoration: InputDecoration(labelText: l10n.partnerCode),
+            // Our code for the company: numbered by our rule when left
+            // empty, and changeable later (0112).
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              key: const ValueKey('partner-code'),
+              controller: _code,
+              decoration: InputDecoration(
+                labelText: l10n.pcOurCode,
+                helperText: _isEdit ? null : l10n.pcAutoHint,
               ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              key: const ValueKey('partner-their-code'),
+              controller: _theirCode,
+              decoration: InputDecoration(labelText: l10n.pcTheirCode, helperText: l10n.pcTheirCodeHint),
+            ),
+            if (_isEdit && widget.partner!.vendorCodes > 0) ...[
+              const SizedBox(height: AppSpacing.lg),
+              _VendorCodes(partnerId: widget.partner!.id),
             ],
             const SizedBox(height: AppSpacing.lg),
             TextField(
@@ -470,6 +522,214 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A company's codes for its own suppliers, and the makers we learned they
+/// stand for (0112).
+class _VendorCodes extends ConsumerWidget {
+  const _VendorCodes({required this.partnerId});
+
+  final int partnerId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final codes = ref.watch(partnerVendorCodesProvider(partnerId)).valueOrNull ?? const <PartnerVendorCode>[];
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(l10n.pcVendorCodesTitle, style: theme.textTheme.titleSmall),
+      Text(l10n.pcVendorCodesHint, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      const SizedBox(height: AppSpacing.xs),
+      for (final c in codes)
+        Padding(
+          key: ValueKey('partner-vendor-${c.code}'),
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(children: [
+            SizedBox(width: 72, child: Text(c.code, style: const TextStyle(fontFamily: AppFonts.mono))),
+            Expanded(child: Text(c.makerName ?? c.rawMaker ?? '—')),
+          ]),
+        ),
+    ]);
+  }
+}
+
+/// How our codes for companies are numbered, per kind (0112).
+class PartnerCodeRulesDialog extends ConsumerStatefulWidget {
+  const PartnerCodeRulesDialog({super.key});
+
+  @override
+  ConsumerState<PartnerCodeRulesDialog> createState() => _PartnerCodeRulesDialogState();
+}
+
+class _PartnerCodeRulesDialogState extends ConsumerState<PartnerCodeRulesDialog> {
+  final Map<PartnerKind, (TextEditingController, TextEditingController, TextEditingController)> _c = {};
+  List<PartnerCodeFormat>? _formats;
+  bool _busy = false;
+  String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    for (final (a, b, c) in _c.values) {
+      a.dispose();
+      b.dispose();
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _fill(List<PartnerCodeFormat> formats) {
+    for (final f in formats) {
+      final t = _c[f.kind];
+      if (t == null) {
+        _c[f.kind] = (
+          TextEditingController(text: f.prefix),
+          TextEditingController(text: '${f.digits}'),
+          TextEditingController(text: '${f.nextNumber}'),
+        );
+      } else {
+        t.$1.text = f.prefix;
+        t.$2.text = '${f.digits}';
+        t.$3.text = '${f.nextNumber}';
+      }
+    }
+    _formats = formats;
+  }
+
+  Future<void> _load() async {
+    final r = await ref.read(tradingPartnerRepositoryProvider).codeFormats();
+    if (!mounted) return;
+    setState(() => r.when(success: _fill, failure: (f) => _message = f.message));
+  }
+
+  static String _preview(String prefix, String digits, String next) {
+    final d = int.tryParse(digits) ?? 5;
+    final n = int.tryParse(next) ?? 1;
+    return '$prefix${'$n'.padLeft(d, '0')}';
+  }
+
+  Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
+    final repo = ref.read(tradingPartnerRepositoryProvider);
+    setState(() => _busy = true);
+    String? error;
+    List<PartnerCodeFormat>? latest;
+    for (final f in _formats ?? const <PartnerCodeFormat>[]) {
+      final (p, d, n) = _c[f.kind]!;
+      final prefix = p.text.trim();
+      final digits = int.tryParse(d.text.trim()) ?? f.digits;
+      final next = int.tryParse(n.text.trim()) ?? f.nextNumber;
+      if (prefix == f.prefix && digits == f.digits && next == f.nextNumber) continue;
+      final r = await repo.saveCodeFormat(f.kind, prefix: prefix, digits: digits, nextNumber: next);
+      r.when(success: (v) => latest = v, failure: (e) => error = e.message);
+      if (error != null) break;
+    }
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (latest != null) _fill(latest!);
+      _message = error == null ? l10n.pcRulesSaved : humanizeApiErrorMessage(l10n, error!);
+    });
+  }
+
+  Future<void> _issue() async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final r = await ref.read(tradingPartnerRepositoryProvider).issueMissingCodes();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _message = r.when(success: (n) => l10n.pcIssued(n), failure: (f) => humanizeApiErrorMessage(l10n, f.message));
+    });
+    await _load();
+  }
+
+  String _kindLabel(AppLocalizations l10n, PartnerKind k) => switch (k) {
+        PartnerKind.supplier => l10n.partnerKindSupplier,
+        PartnerKind.customer => l10n.partnerKindCustomer,
+        PartnerKind.both => l10n.partnerKindBoth,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final formats = _formats;
+    return AlertDialog(
+      title: Text(l10n.pcRulesTitle),
+      content: SizedBox(
+        width: 520,
+        child: formats == null
+            ? (_message == null ? const LinearProgressIndicator() : Text(_message!))
+            : SingleChildScrollView(
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(l10n.pcRulesHint, style: theme.textTheme.bodySmall),
+                  const SizedBox(height: AppSpacing.md),
+                  for (final f in formats) ...[
+                    Text(_kindLabel(l10n, f.kind), style: theme.textTheme.titleSmall),
+                    Row(children: [
+                      Expanded(
+                        child: TextField(
+                          key: ValueKey('pc-prefix-${f.kind.wire}'),
+                          controller: _c[f.kind]!.$1,
+                          onChanged: (_) => setState(() {}),
+                          decoration: InputDecoration(labelText: l10n.pcPrefix, isDense: true),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: TextField(
+                          key: ValueKey('pc-digits-${f.kind.wire}'),
+                          controller: _c[f.kind]!.$2,
+                          keyboardType: TextInputType.number,
+                          onChanged: (_) => setState(() {}),
+                          decoration: InputDecoration(labelText: l10n.pcDigits, isDense: true),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: TextField(
+                          key: ValueKey('pc-next-${f.kind.wire}'),
+                          controller: _c[f.kind]!.$3,
+                          keyboardType: TextInputType.number,
+                          onChanged: (_) => setState(() {}),
+                          decoration: InputDecoration(labelText: l10n.pcNext, isDense: true),
+                        ),
+                      ),
+                    ]),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: AppSpacing.md),
+                      child: Text(
+                        l10n.pcNextCode(_preview(_c[f.kind]!.$1.text.trim(), _c[f.kind]!.$2.text, _c[f.kind]!.$3.text)),
+                        key: ValueKey('pc-preview-${f.kind.wire}'),
+                        style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono),
+                      ),
+                    ),
+                  ],
+                  if (_message != null) Text(_message!, key: const ValueKey('pc-message')),
+                ]),
+              ),
+      ),
+      actions: [
+        TextButton(
+          key: const ValueKey('pc-issue'),
+          onPressed: _busy || formats == null ? null : _issue,
+          child: Text(l10n.pcIssueMissing),
+        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
+        FilledButton(
+          key: const ValueKey('pc-save'),
+          onPressed: _busy || formats == null ? null : _save,
+          child: Text(l10n.actionSave),
+        ),
+      ],
     );
   }
 }

@@ -3142,6 +3142,67 @@ class FakeTradingPartnerRepository implements TradingPartnerRepository {
     lastCountry = (id: id, country: countryCode);
     return const ApiSuccess(true);
   }
+
+  // Our codes for companies (0112), in memory.
+  List<PartnerCodeFormat> formats = const [
+    PartnerCodeFormat(kind: PartnerKind.supplier, prefix: 'S', digits: 5, nextNumber: 1, nextCode: 'S00001'),
+    PartnerCodeFormat(kind: PartnerKind.customer, prefix: 'C', digits: 5, nextNumber: 1, nextCode: 'C00001'),
+    PartnerCodeFormat(kind: PartnerKind.both, prefix: 'B', digits: 5, nextNumber: 1, nextCode: 'B00001'),
+  ];
+  ({int id, String? code, String? theirCodeForUs})? lastCodes;
+  final List<(PartnerKind, String, int, int?)> savedFormats = [];
+  int issued = 0;
+  Map<int, List<PartnerVendorCode>> vendors = {};
+
+  @override
+  Future<ApiResult<bool>> setCodes(int id, {String? code, String? theirCodeForUs}) async {
+    lastCodes = (id: id, code: code, theirCodeForUs: theirCodeForUs);
+    _partners = [
+      for (final p in _partners)
+        if (p.id == id)
+          TradingPartner(
+            id: p.id,
+            name: p.name,
+            kind: p.kind,
+            code: (code ?? '').isEmpty ? p.code : code,
+            status: p.status,
+            theirCodeForUs: (theirCodeForUs ?? '').isEmpty ? null : theirCodeForUs,
+            vendorCodes: p.vendorCodes,
+          )
+        else
+          p,
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<PartnerCodeFormat>>> codeFormats() async => ApiSuccess(formats);
+
+  @override
+  Future<ApiResult<List<PartnerCodeFormat>>> saveCodeFormat(PartnerKind kind,
+      {required String prefix, required int digits, int? nextNumber}) async {
+    savedFormats.add((kind, prefix, digits, nextNumber));
+    formats = [
+      for (final f in formats)
+        if (f.kind == kind)
+          PartnerCodeFormat(
+            kind: kind,
+            prefix: prefix,
+            digits: digits,
+            nextNumber: nextNumber ?? f.nextNumber,
+            nextCode: '$prefix${'${nextNumber ?? f.nextNumber}'.padLeft(digits, '0')}',
+          )
+        else
+          f,
+    ];
+    return ApiSuccess(formats);
+  }
+
+  @override
+  Future<ApiResult<int>> issueMissingCodes() async => ApiSuccess(issued);
+
+  @override
+  Future<ApiResult<List<PartnerVendorCode>>> vendorCodes(int partnerId) async => ApiSuccess(vendors[partnerId] ?? const []);
 }
 
 /// Work order stub. Mirrors the real RPCs' state-machine transitions
@@ -4125,6 +4186,46 @@ class FakeNotationRepository implements NotationRepository {
   Future<ApiResult<LibraryRestoreResult>> restoreLibrary(int versionId) async {
     lastRestored = versionId;
     return const ApiSuccess(LibraryRestoreResult(dialects: 2, aliases: 1));
+  }
+
+  // The field library (0112), in memory.
+  FieldLibrary library = const FieldLibrary(fields: [
+    DocumentField(key: 'jan', description: 'JANコード', headings: [
+      FieldHeading(id: 1, header: 'JANコード', source: 'seed'),
+      FieldHeading(id: 2, header: 'ジャパンコード', source: 'seed'),
+      FieldHeading(id: 3, header: 'Jan', partnerId: 1, partnerName: 'A商社', source: 'import'),
+    ]),
+    DocumentField(key: 'maker', headings: [FieldHeading(id: 4, header: 'メーカー', source: 'seed')]),
+  ], attributes: [
+    AttributeHeadings(id: 1, key: 'color', name: '色', headings: [FieldHeading(id: 5, header: 'カラー', source: 'seed')]),
+  ]);
+  Map<String, Map<String, String>> labels = {};
+  ({String key, Map<String, String> labels})? lastLabels;
+  ({int? partnerId, String header, ColumnChoice choice})? lastHeading;
+  final List<int> removedAliases = [];
+
+  @override
+  Future<ApiResult<FieldLibrary>> fieldLibrary() async => ApiSuccess(library);
+
+  @override
+  Future<ApiResult<FieldLibrary>> saveFieldLabels(String key, Map<String, String> labels, {String? description}) async {
+    final clean = {for (final e in labels.entries) if (e.value.trim().isNotEmpty) e.key: e.value.trim()};
+    lastLabels = (key: key, labels: clean);
+    this.labels = {...this.labels, key: clean};
+    library = FieldLibrary(fields: [
+      for (final f in library.fields)
+        f.key == key ? DocumentField(key: f.key, labels: clean, description: f.description, headings: f.headings) : f,
+    ], attributes: library.attributes);
+    return ApiSuccess(library);
+  }
+
+  @override
+  Future<ApiResult<Map<String, Map<String, String>>>> fieldLabels() async => ApiSuccess(labels);
+
+  @override
+  Future<ApiResult<bool>> setHeading({int? partnerId, required String header, required ColumnChoice choice}) async {
+    lastHeading = (partnerId: partnerId, header: header, choice: choice);
+    return const ApiSuccess(true);
   }
 }
 

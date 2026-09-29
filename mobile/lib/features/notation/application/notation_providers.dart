@@ -33,3 +33,22 @@ final columnAliasesProvider = FutureProvider.autoDispose<List<ColumnAlias>>((ref
     _unwrap<List<ColumnAlias>>(await ref
         .watch(notationRepositoryProvider)
         .columnAliases(partnerId: ref.watch(dialectPartnerProvider))));
+
+/// The field library (0112).
+final fieldLibraryProvider = FutureProvider.autoDispose<FieldLibrary>((ref) async =>
+    _unwrap<FieldLibrary>(await ref.watch(notationRepositoryProvider).fieldLibrary()));
+
+/// field key → {language → name}: the names chosen for fields. Kept for the
+/// session; a failure means the built-in names.
+final fieldLabelsProvider = FutureProvider<Map<String, Map<String, String>>>((ref) async =>
+    (await ref.watch(notationRepositoryProvider).fieldLabels())
+        .when(success: (d) => d, failure: (_) => const <String, Map<String, String>>{}));
+
+/// field key → the name chosen for it in [languageCode].
+final customFieldLabelsProvider = Provider.family<Map<String, String>, String>((ref, languageCode) {
+  final all = ref.watch(fieldLabelsProvider).valueOrNull ?? const <String, Map<String, String>>{};
+  return {
+    for (final e in all.entries)
+      if (e.value[languageCode] != null) e.key: e.value[languageCode]!,
+  };
+});

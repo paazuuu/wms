@@ -310,6 +310,8 @@ async function learn(
     supplier_code: r.supplier_code ?? null,
     unit: r.unit ?? null,
     list_price: r.list_price ?? null,
+    // The company's code for its own supplier of the item (0112).
+    upstream_code: r.upstream_code ?? null,
     attributes: attributesToLearn(r, columns),
   }));
   let learned: unknown = null;
@@ -362,6 +364,7 @@ async function commit(supabase: Client, input: {
     supplier_code: str(input.lines[i].supplier_code),
     unit: str(input.lines[i].unit),
     list_price: toNum(input.lines[i].list_price),
+    upstream_code: str(input.lines[i].upstream_code),
   }));
   const withAttrs = (saved: Record<string, unknown>[]) =>
     saved.map((r, i) => ({ ...r, ...(extraByLine[i] ?? {}), attributes: attrsByLine[i] ?? [] }));
@@ -372,6 +375,14 @@ async function commit(supabase: Client, input: {
   const { id: supplierId, unidentified } = await resolveSupplier(
     input.supplier, input.supplierCode, input.registrationNumber,
   );
+  // Its code for us (得意先コード), read off the document, is kept on the
+  // company the first time (0112); ours for it is the company's own code.
+  const customerCode = input.customerCode ??
+    input.lines.map((l) => str(l.customer_code)).find((c) => c) ?? null;
+  if (customerCode && !unidentified) {
+    await admin.from("delivery_suppliers").update({ their_code_for_us: customerCode })
+      .eq("id", supplierId).is("their_code_for_us", null);
+  }
   const { data: ref } = await admin.rpc("assign_reference", { p_supplier_id: supplierId });
   const referenceNo = (ref as string) ?? null;
 
@@ -586,7 +597,8 @@ Deno.serve(async (req) => {
     const mergedHeader: Header = {
       supplier_name: supplier ?? header.supplier_name,
       registration_number: header.registration_number,
-      customer_code: header.customer_code,
+      // A sheet may repeat its code for us (得意先コード) on every line (0112).
+      customer_code: header.customer_code ?? merged.map((l) => l.customer_code).find((c) => c) ?? null,
       doc_number: header.doc_number ?? (deliveryNumber || null),
       doc_date: header.doc_date ?? deliveryDate,
     };

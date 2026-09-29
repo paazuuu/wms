@@ -7368,4 +7368,146 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ntMatchRegistered => '按本公司格式新登记';
+
+  @override
+  String get featFieldLibrary => '项目库';
+
+  @override
+  String get featFieldLibraryDesc =>
+      '汇总各交易方不同的标题（JAN、JANコード、ジャパンコード…），并决定系统显示的名称';
+
+  @override
+  String get flTitle => '项目库';
+
+  @override
+  String get flIntro =>
+      '按单据列的含义（JAN、厂家、品番等）汇总各公司使用的标题。标题会在导入和预先学习时自动增加。点击铅笔可按语言设定本系统显示的名称（空白为标准名称）。';
+
+  @override
+  String flBuiltIn(String name) {
+    return '标准名称：$name';
+  }
+
+  @override
+  String get flEditNames => '设定显示名称';
+
+  @override
+  String flNamesHint(String name) {
+    return '留空的语言保持标准名称\"$name\"。';
+  }
+
+  @override
+  String get flLangJa => '日语';
+
+  @override
+  String get flLangEn => '英语';
+
+  @override
+  String get flLangZh => '中文';
+
+  @override
+  String get flSaved => '已保存显示名称';
+
+  @override
+  String flHeadings(int count) {
+    return '各公司标题 $count个';
+  }
+
+  @override
+  String get flAddHeading => '添加标题';
+
+  @override
+  String flAddHeadingTo(String name) {
+    return '为\"$name\"添加标题';
+  }
+
+  @override
+  String get flHeading => '标题（按单据原样）';
+
+  @override
+  String get flEveryone => '所有公司通用';
+
+  @override
+  String flOnlyFor(String name) {
+    return '仅 $name';
+  }
+
+  @override
+  String flHeadingAdded(String header) {
+    return '已添加\"$header\"';
+  }
+
+  @override
+  String get flAttributes => '商品属性';
+
+  @override
+  String get flAttributesHint => '颜色、尺寸等属性名称可在商品照片画面的\"属性\"标签中修改。';
+
+  @override
+  String get ntFieldUpstreamCode => '交易方的供应商代码';
+
+  @override
+  String get ntFieldCustomerCode => '客户代码（对方给本公司的代码）';
+
+  @override
+  String get ntFlagJanExponent => 'JAN被写成指数形式（如4.90E+12），位数已丢失';
+
+  @override
+  String get pcRulesTitle => '交易方代码编号规则';
+
+  @override
+  String get pcRulesHint => '新增交易方未输入代码时，按此规则编本公司代码。之后可逐个修改。';
+
+  @override
+  String get pcPrefix => '前缀';
+
+  @override
+  String get pcDigits => '位数';
+
+  @override
+  String get pcNext => '下一个编号';
+
+  @override
+  String pcNextCode(String code) {
+    return '下一个代码：$code';
+  }
+
+  @override
+  String get pcRulesSaved => '已保存编号规则';
+
+  @override
+  String get pcIssueMissing => '为未编号的交易方编号';
+
+  @override
+  String pcIssued(int count) {
+    return '已为$count家公司编号';
+  }
+
+  @override
+  String get pcOurCode => '本公司的交易方代码';
+
+  @override
+  String get pcAutoHint => '留空则按编号规则自动编号';
+
+  @override
+  String get pcTheirCode => '对方给本公司的代码（客户代码）';
+
+  @override
+  String get pcTheirCodeHint => '对方发票、报价单上的本公司编号，读取单据时也会自动填入';
+
+  @override
+  String pcOurCodeShort(String code) {
+    return '本公司代码 $code';
+  }
+
+  @override
+  String pcTheirCodeShort(String code) {
+    return '对方给我方 $code';
+  }
+
+  @override
+  String get pcVendorCodesTitle => '该交易方的供应商代码';
+
+  @override
+  String get pcVendorCodesHint => '交易方给其自身供应商（厂家等）的编号，并非本公司代码。';
 }

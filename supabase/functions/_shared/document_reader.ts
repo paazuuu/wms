@@ -28,12 +28,14 @@ export type Field =
   | "jan" | "maker" | "product_name" | "product_code" | "name_code"
   | "quantity" | "case_quantity" | "cases" | "unit_price" | "amount"
   | "spec" | "tax_rate" | "order_date" | "ignore" | "attr"
-  | "list_price" | "discount_rate" | "unit" | "supplier_code";
+  | "list_price" | "discount_rate" | "unit" | "supplier_code"
+  | "upstream_code" | "customer_code";
 
 export const FIELDS: Field[] = [
   "jan", "maker", "product_name", "product_code", "name_code", "quantity",
   "case_quantity", "cases", "unit_price", "amount", "spec", "tax_rate",
   "order_date", "ignore", "attr", "list_price", "discount_rate", "unit", "supplier_code",
+  "upstream_code", "customer_code",
 ];
 
 /** A column heading we know. For field 'attr', [attribute] says which of our
@@ -84,6 +86,11 @@ export type ReadLine = {
   unit: string | null;
   /** The trading company's own code for the item, beside the maker's 品番. */
   supplier_code: string | null;
+  /** The trading company's code for ITS supplier (仕入先コード — the maker
+   * or vendor upstream of it), and its code for us (得意先コード) when a
+   * sheet repeats it on every line (0112). */
+  upstream_code: string | null;
+  customer_code: string | null;
 };
 
 export type Header = {
@@ -218,6 +225,8 @@ const FIELD_HELP =
   "amount=金額, spec=規格/仕様, tax_rate=税率, order_date=日付, " +
   "list_price=定価/上代/希望小売価格, discount_rate=掛率, unit=単位(本・冊・個・P など), " +
   "supplier_code=取引先独自の商品コード(品番とは別の欄がある場合), " +
+  "upstream_code=仕入先コード(取引先がさらに仕入れている先=メーカー等のコード), " +
+  "customer_code=得意先コード/お客様コード(取引先から見た当社のコード), " +
   "attr=色・サイズ・容量・材質・重量など商品の属性(どの属性かを attribute に), ignore=その他";
 
 /** "attr:color" as an override or wire value → field and attribute. */
@@ -506,6 +515,7 @@ export async function readSpreadsheet(
   const cDate = colOf("order_date");
   const cList = colOf("list_price"), cRate = colOf("discount_rate"), cUnitName = colOf("unit");
   const cSupCode = colOf("supplier_code");
+  const cUpstream = colOf("upstream_code"), cCustomer = colOf("customer_code");
   // Every attribute column, however many (色 and サイズ side by side).
   const attrCols = columns.filter((c) => c.field === "attr" && c.attribute);
 
@@ -560,6 +570,8 @@ export async function readSpreadsheet(
       discount_rate: rate,
       unit: str(cell(r, cUnitName)),
       supplier_code: str(cell(r, cSupCode)),
+      upstream_code: str(cell(r, cUpstream)),
+      customer_code: str(cell(r, cCustomer)),
     });
   });
 
@@ -604,9 +616,21 @@ async function applySplits(lines: ReadLine[], useAi: boolean) {
 }
 
 /** The checks no AI is needed for. */
+/** A JAN that went through a spreadsheet as a number shown in exponent form
+ * ("4.90148E+12", or 4901480000000 after it was saved that way): its last
+ * digits are gone, and no reading can bring them back. */
+export function janLostDigits(raw: unknown): boolean {
+  const s = String(raw ?? "").normalize("NFKC").trim();
+  if (/^[0-9](\.[0-9]+)?e\+?[0-9]+$/i.test(s)) return true;
+  return /^[0-9]{7,8}0{5,}$/.test(s) && s.length === 13 && !janCheckOk(s);
+}
+
 export function checkLines(lines: ReadLine[]) {
   for (const l of lines) {
-    if (l.raw_jan_code && !janCheckOk(l.raw_jan_code)) l.flags.push("jan_check");
+    if (l.raw_jan_code && janLostDigits(l.raw_jan_code)) {
+      l.flags.push("jan_exponent");
+      l.jan_code = "";
+    } else if (l.raw_jan_code && !janCheckOk(l.raw_jan_code)) l.flags.push("jan_check");
     if (!l.raw_jan_code) l.flags.push("no_jan");
     if (!l.planned_quantity) l.flags.push("no_quantity");
     if (!l.maker) l.flags.push("no_maker");
@@ -638,6 +662,7 @@ const LINE_PROPS = {
   discount_rate: { type: "number" },
   unit: { type: "string" },
   supplier_code: { type: "string" },
+  upstream_code: { type: "string" },
   attributes: {
     type: "array",
     items: {
@@ -660,6 +685,7 @@ const EXTRACT_PROMPT =
   "quantity は総数(入数×ケース数の表記なら掛けた数)。case_quantity は入数、cases はケース数。" +
   "unit_price は実際の単価(見積単価・納品単価)、list_price は定価(上代)、discount_rate は掛率、unit は単位(本・冊・P など書かれたとおり)。" +
   "品番(メーカー品番・項目)とは別に取引先独自の商品コードの欄があれば supplier_code に。" +
+  "仕入先コード(取引先の仕入先=メーカー等のコード)の欄があれば upstream_code に。" +
   "色・サイズ・容量・材質・重量など商品の属性が別の欄(または品名の後ろ)に書かれていれば、attributes に " +
   "{name: 見出しの文字どおり(カラー・Size など), value: 書かれた値} で入れる。" +
   "住所・電話・登録番号・合計行は明細にしない。読めない項目は省略。";
@@ -745,6 +771,8 @@ function rawToLine(l: RawLine, row: number, aliases: AliasRow[] = []): ReadLine 
     discount_rate: toRate(l.discount_rate),
     unit: str(l.unit),
     supplier_code: str(l.supplier_code),
+    upstream_code: str(l.upstream_code),
+    customer_code: null,
   };
 }
 

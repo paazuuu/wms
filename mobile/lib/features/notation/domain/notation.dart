@@ -34,6 +34,11 @@ enum ColumnField {
   /// maker's 品番 (0111).
   unit('unit'),
   supplierCode('supplier_code'),
+
+  /// The trading company's code for ITS supplier (仕入先コード), and its
+  /// code for us (得意先コード) — neither is ours (0112).
+  upstreamCode('upstream_code'),
+  customerCode('customer_code'),
   spec('spec'),
   taxRate('tax_rate'),
   orderDate('order_date'),
@@ -171,6 +176,8 @@ class ReadLineResult extends Equatable {
     this.unitPrice,
     this.listPrice,
     this.supplierCode,
+    this.upstreamCode,
+    this.customerCode,
   });
 
   final int row;
@@ -201,6 +208,10 @@ class ReadLineResult extends Equatable {
   final double? unitPrice;
   final double? listPrice;
   final String? supplierCode;
+
+  /// 仕入先コード and 得意先コード as the company wrote them (0112).
+  final String? upstreamCode;
+  final String? customerCode;
 
   bool get resolved => product != null;
   bool get needsReview => flags.any((f) => NotationFlag.isProblem(f));
@@ -234,6 +245,8 @@ class ReadLineResult extends Equatable {
         unitPrice: _numOrNull(j['unit_price']),
         listPrice: _numOrNull(j['list_price']),
         supplierCode: _text(j['supplier_code']),
+        upstreamCode: _text(j['upstream_code']),
+        customerCode: _text(j['customer_code']),
       );
 
   ReadLineResult withProduct(ResolvedProduct? p) => ReadLineResult(
@@ -257,6 +270,8 @@ class ReadLineResult extends Equatable {
         unitPrice: unitPrice,
         listPrice: listPrice,
         supplierCode: supplierCode,
+        upstreamCode: upstreamCode,
+        customerCode: customerCode,
       );
 
   /// What is taught from this line: the company's writing, tied to ours.
@@ -271,6 +286,7 @@ class ReadLineResult extends Equatable {
         'supplier_code': supplierCode,
         'unit': unit,
         'list_price': listPrice,
+        'upstream_code': upstreamCode,
         'attributes': [for (final a in attributes) a.toJson()],
       };
 
@@ -589,7 +605,7 @@ abstract final class NotationFlag {
   static const problems = {
     'unresolved', 'jan_check', 'ai_disagree', 'split_disagree', 'split_failed',
     'no_quantity', 'no_maker', 'amount_mismatch', 'added_by_check', 'dropped_by_check',
-    'not_verified',
+    'not_verified', 'jan_exponent',
   };
 
   static bool isProblem(String flag) => problems.contains(flag.split(':').first);
@@ -657,4 +673,104 @@ class LibraryRestoreResult extends Equatable {
 
   @override
   List<Object?> get props => [dialects, aliases, conflicts];
+}
+
+/// One heading a company uses for a field, in the field library (0112).
+class FieldHeading extends Equatable {
+  const FieldHeading({required this.id, required this.header, this.partnerId, this.partnerName, this.source, this.seenCount = 0});
+
+  final int id;
+  final String header;
+
+  /// Null: everyone's heading.
+  final int? partnerId;
+  final String? partnerName;
+  final String? source;
+  final int seenCount;
+
+  bool get isSeed => source == 'seed';
+
+  factory FieldHeading.fromJson(Map<String, dynamic> j) => FieldHeading(
+        id: _int(j['id']),
+        header: (j['header'] ?? '').toString(),
+        partnerId: _intOrNull(j['partner_id']),
+        partnerName: _text(j['partner_name']),
+        source: _text(j['source']),
+        seenCount: _int(j['seen_count']),
+      );
+
+  @override
+  List<Object?> get props => [id, header, partnerId];
+}
+
+/// A field of the library (0112): what a document column can mean, the
+/// names we chose to show for it (per language; empty = the built-in
+/// name), and every heading that means it.
+class DocumentField extends Equatable {
+  const DocumentField({
+    required this.key,
+    this.labels = const {},
+    this.description,
+    this.headings = const [],
+  });
+
+  final String key;
+  final Map<String, String> labels;
+  final String? description;
+  final List<FieldHeading> headings;
+
+  ColumnField? get field => ColumnField.parse(key);
+
+  factory DocumentField.fromJson(Map<String, dynamic> j) => DocumentField(
+        key: (j['key'] ?? '').toString(),
+        labels: {
+          for (final e in ((j['labels'] as Map?) ?? const {}).entries)
+            if (_text(e.value) != null) e.key.toString(): _text(e.value)!,
+        },
+        description: _text(j['description']),
+        headings: [for (final h in _rows(j['headings'])) FieldHeading.fromJson(h)],
+      );
+
+  @override
+  List<Object?> get props => [key, labels, description, headings];
+}
+
+/// One of our product attributes in the library, with its headings.
+class AttributeHeadings extends Equatable {
+  const AttributeHeadings({required this.id, required this.key, required this.name, this.unit, this.active = true, this.headings = const []});
+
+  final int id;
+  final String key;
+  final String name;
+  final String? unit;
+  final bool active;
+  final List<FieldHeading> headings;
+
+  factory AttributeHeadings.fromJson(Map<String, dynamic> j) => AttributeHeadings(
+        id: _int(j['id']),
+        key: (j['key'] ?? '').toString(),
+        name: (j['name'] ?? '').toString(),
+        unit: _text(j['unit']),
+        active: (j['status'] ?? 'active') == 'active',
+        headings: [for (final h in _rows(j['headings'])) FieldHeading.fromJson(h)],
+      );
+
+  @override
+  List<Object?> get props => [id, key, name, headings];
+}
+
+/// The whole field library.
+class FieldLibrary extends Equatable {
+  const FieldLibrary({this.fields = const [], this.attributes = const []});
+
+  final List<DocumentField> fields;
+  final List<AttributeHeadings> attributes;
+
+  factory FieldLibrary.fromJson(Map<String, dynamic> j) => FieldLibrary(
+        fields: [for (final f in _rows(j['fields'])) DocumentField.fromJson(f)],
+        attributes: [for (final a in _rows(j['attributes'])) AttributeHeadings.fromJson(a)],
+      );
+
+  @override
+  List<Object?> get props => [fields, attributes];
 }

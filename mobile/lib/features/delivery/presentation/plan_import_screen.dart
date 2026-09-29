@@ -10,6 +10,7 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../notation/application/notation_providers.dart';
 import '../../notation/domain/notation.dart';
 import '../../notation/presentation/notation_labels.dart';
 import '../../product/domain/product.dart';
@@ -378,6 +379,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final preview = _preview!;
+    final fieldNames = ref.watch(customFieldLabelsProvider(Localizations.localeOf(context).languageCode));
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -477,7 +479,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
                   Chip(
                     visualDensity: VisualDensity.compact,
                     label: Text(
-                        '${c.header} → ${columnFieldLabel(l10n, c.field)}',
+                        '${c.header} → ${columnFieldLabel(l10n, c.field, fieldNames)}',
                         style: theme.textTheme.bodySmall),
                   ),
             ],

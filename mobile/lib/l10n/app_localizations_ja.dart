@@ -7390,4 +7390,147 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ntMatchRegistered => '自社様式で新規登録';
+
+  @override
+  String get featFieldLibrary => '項目ライブラリー';
+
+  @override
+  String get featFieldLibraryDesc =>
+      '取引先ごとに違う見出し（JAN・JANコード・ジャパンコード…）をまとめ、システムで表示する名前を決める';
+
+  @override
+  String get flTitle => '項目ライブラリー';
+
+  @override
+  String get flIntro =>
+      '書類の列の意味（JAN・メーカー・品番など）ごとに、各社がどんな見出しで書いてくるかをまとめています。見出しは取り込みや事前学習で自動的に増えます。鉛筆のボタンで、このシステムで表示する名前を言語ごとに決められます（空欄は標準の名前）。';
+
+  @override
+  String flBuiltIn(String name) {
+    return '標準の名前：$name';
+  }
+
+  @override
+  String get flEditNames => '表示名を決める';
+
+  @override
+  String flNamesHint(String name) {
+    return '空欄の言語は標準の名前「$name」のままです。';
+  }
+
+  @override
+  String get flLangJa => '日本語';
+
+  @override
+  String get flLangEn => '英語';
+
+  @override
+  String get flLangZh => '中国語';
+
+  @override
+  String get flSaved => '表示名を保存しました';
+
+  @override
+  String flHeadings(int count) {
+    return '各社の見出し $count件';
+  }
+
+  @override
+  String get flAddHeading => '見出しを追加';
+
+  @override
+  String flAddHeadingTo(String name) {
+    return '「$name」の見出しを追加';
+  }
+
+  @override
+  String get flHeading => '見出し（書類に書かれているとおり）';
+
+  @override
+  String get flEveryone => '全社共通';
+
+  @override
+  String flOnlyFor(String name) {
+    return '$name だけ';
+  }
+
+  @override
+  String flHeadingAdded(String header) {
+    return '「$header」を追加しました';
+  }
+
+  @override
+  String get flAttributes => '商品の属性';
+
+  @override
+  String get flAttributesHint => '色・サイズなどの属性の名前は、商品の写真画面の「属性」タブで変えられます。';
+
+  @override
+  String get ntFieldUpstreamCode => '取引先の仕入先コード';
+
+  @override
+  String get ntFieldCustomerCode => '得意先コード（先方での当社コード）';
+
+  @override
+  String get ntFlagJanExponent => 'JANが指数表記（4.90E+12など）で桁が失われています';
+
+  @override
+  String get pcRulesTitle => '取引先コードの採番';
+
+  @override
+  String get pcRulesHint =>
+      '新しい取引先にコードを入れなかったとき、この規則で自社のコードを振ります。あとから取引先ごとに変更できます。';
+
+  @override
+  String get pcPrefix => '頭文字';
+
+  @override
+  String get pcDigits => '桁数';
+
+  @override
+  String get pcNext => '次の番号';
+
+  @override
+  String pcNextCode(String code) {
+    return '次に振るコード：$code';
+  }
+
+  @override
+  String get pcRulesSaved => '採番の規則を保存しました';
+
+  @override
+  String get pcIssueMissing => '未採番の取引先に振る';
+
+  @override
+  String pcIssued(int count) {
+    return '$count社にコードを振りました';
+  }
+
+  @override
+  String get pcOurCode => '自社の取引先コード';
+
+  @override
+  String get pcAutoHint => '空欄なら採番の規則で自動的に振ります';
+
+  @override
+  String get pcTheirCode => '先方での当社コード（得意先コード）';
+
+  @override
+  String get pcTheirCodeHint => '相手の請求書・見積書にある当社の番号。書類から自動で入ることもあります';
+
+  @override
+  String pcOurCodeShort(String code) {
+    return '自社コード $code';
+  }
+
+  @override
+  String pcTheirCodeShort(String code) {
+    return '先方での当社 $code';
+  }
+
+  @override
+  String get pcVendorCodesTitle => 'この取引先の仕入先コード';
+
+  @override
+  String get pcVendorCodesHint => '取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。';
 }

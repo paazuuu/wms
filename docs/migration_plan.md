@@ -5415,6 +5415,88 @@ The uploaded samples themselves are not in the repository (they carry
 customer and bank details). The reader test uses a synthetic sheet with
 the same headings.
 
+### 0112 — our own partner codes, the field library, and codes upstream of us
+
+A wholesaler's quote carries three codes, and none of them is ours:
+- 得意先コード (5001033) is the wholesaler's code for us;
+- 仕入先コード (90, 724, …) is its code for its own suppliers, the makers
+  upstream of it (724 = ミツビシ);
+- 商品コード is its own item code (0111 `supplier_code`).
+
+We had no code of our own for the wholesaler.
+
+- **Our codes for companies.**
+  - `delivery_suppliers.code` is our code. A company added without one is
+    numbered by `partner_code_formats`, a prefix, digit count and next
+    number per kind. The seeds are S00001 for suppliers, C00001 for
+    customers and B00001 for both.
+  - A code typed by hand is skipped by the numbering.
+  - Our code can be changed later (`set_partner_codes`); a code already used
+    by another company is refused.
+  - `issue_missing_partner_codes` numbers every company that has no code.
+  - `their_code_for_us` holds the company's code for us. An import fills it
+    the first time a document shows it, from the header or from a 得意先コード
+    column repeated on every line.
+- **Codes upstream of us.**
+  - `partner_vendor_codes` holds a company's codes for its own suppliers.
+    Each is learned together with the maker of the product on the same
+    line.
+  - A later line that has the code but no maker gets its maker from it
+    (`propose_product_parts`).
+  - The reader (`import-plan`, deployed as v13) has two new fields,
+    `upstream_code` (仕入先コード, 仕入先CD, Vendor Code, …) and
+    `customer_code` (得意先コード, お客様コード, …).
+  - 店名, 件名, 行NO and 行備考 are read as ignore.
+- **The field library.**
+  - `document_fields` is one row per thing a column can mean: JAN, メーカー,
+    品番, 単価, 定価, …, and each attribute.
+  - `column_aliases.field` is now a foreign key to it, so a heading can only
+    mean a field the library has.
+  - `labels` is the name the system shows for a field, per language (ja /
+    en / zh). The company chooses it; an empty one falls back to the
+    built-in name.
+  - `list_document_fields` returns each field with every heading companies
+    use for it.
+  - `set_column_alias(partner, header, field, attribute)` teaches a heading
+    for one company or for everyone, including headings for attributes.
+  - Headings seeded: ジャパンコード, JAPANコード, JAN番号, 商品JAN, …
+- **JAN in a spreadsheet.**
+  - The reader takes a cell's value, not its display. A JAN stored as a
+    number (`4901480344041` with format `0`) reads whole, however narrow
+    the column or whichever program shows it.
+  - A JAN that lost its digits to exponent form is flagged `jan_exponent`
+    and not guessed. This covers text such as "4.90148E+12" and numbers such
+    as 4901480000000 whose check digit fails.
+- **App.**
+  - 項目ライブラリー: every field with its headings, grouped by company, a
+    pencil to choose the shown name per language, and headings added or
+    removed.
+  - The chosen names are used in pre-training, the column headings tab, the
+    dialect dictionary and the import review.
+  - 取引先: shows our code and their code for us, both editable, and the
+    company's supplier codes with their makers.
+  - A numbering-rule dialog on the 取引先 list edits the rule with a preview
+    and can number the companies that have none.
+
+**Verified live (rolled back):**
+- new companies got S00001 and C00001, and a hand-typed S00002 was skipped
+  (the next one got S00003);
+- a duplicate code was refused;
+- the rule SUP- with 4 digits from 50 gave SUP-0050;
+- saved labels were tidied to {"ja": "JAN", "en": "JAN code"}, with the
+  empty and unknown languages dropped;
+- ジャパンコード is listed under JAN;
+- a heading with an unknown field was refused by the foreign key;
+- learning a line with 仕入先コード 724 and maker ミツビシ recorded 724 →
+  that maker, and a later line carrying only 724 was proposed with it.
+
+The user's order sheet was read with the reader as it now is. It has 43
+lines, a ジャパンコード heading and JANs stored as numbers with format `0`.
+All 43 JANs read whole, with valid check digits.
+
+`ocr-delivery-note` shares the reader but was not redeployed. The new
+fields matter for imports, and its flag handling is otherwise unchanged.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

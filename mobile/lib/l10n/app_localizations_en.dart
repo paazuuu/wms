@@ -7543,4 +7543,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ntMatchRegistered => 'Registered in our format';
+
+  @override
+  String get featFieldLibrary => 'Field library';
+
+  @override
+  String get featFieldLibraryDesc =>
+      'Every heading companies use (JAN, JANコード, ジャパンコード…) in one place, and the names this system shows';
+
+  @override
+  String get flTitle => 'Field library';
+
+  @override
+  String get flIntro =>
+      'Each thing a document column can mean (JAN, maker, code…) with every heading companies use for it. Headings are added by imports and pre-training. Use the pencil to choose the name this system shows, per language (empty = the built-in name).';
+
+  @override
+  String flBuiltIn(String name) {
+    return 'Built-in name: $name';
+  }
+
+  @override
+  String get flEditNames => 'Choose the names shown';
+
+  @override
+  String flNamesHint(String name) {
+    return 'A language left empty keeps the built-in name \"$name\".';
+  }
+
+  @override
+  String get flLangJa => 'Japanese';
+
+  @override
+  String get flLangEn => 'English';
+
+  @override
+  String get flLangZh => 'Chinese';
+
+  @override
+  String get flSaved => 'Names saved';
+
+  @override
+  String flHeadings(int count) {
+    return '$count headings';
+  }
+
+  @override
+  String get flAddHeading => 'Add a heading';
+
+  @override
+  String flAddHeadingTo(String name) {
+    return 'Add a heading for \"$name\"';
+  }
+
+  @override
+  String get flHeading => 'Heading (as the document writes it)';
+
+  @override
+  String get flEveryone => 'Everyone';
+
+  @override
+  String flOnlyFor(String name) {
+    return 'Only $name';
+  }
+
+  @override
+  String flHeadingAdded(String header) {
+    return 'Added \"$header\"';
+  }
+
+  @override
+  String get flAttributes => 'Product attributes';
+
+  @override
+  String get flAttributesHint =>
+      'Attribute names (colour, size…) are changed on the Attributes tab of the product pictures screen.';
+
+  @override
+  String get ntFieldUpstreamCode => 'The company’s supplier code';
+
+  @override
+  String get ntFieldCustomerCode => 'Their code for us';
+
+  @override
+  String get ntFlagJanExponent =>
+      'The JAN lost its digits to exponent form (e.g. 4.90E+12)';
+
+  @override
+  String get pcRulesTitle => 'Numbering our partner codes';
+
+  @override
+  String get pcRulesHint =>
+      'When a new company is added without a code, ours is numbered by this rule. Each company’s code can be changed later.';
+
+  @override
+  String get pcPrefix => 'Prefix';
+
+  @override
+  String get pcDigits => 'Digits';
+
+  @override
+  String get pcNext => 'Next number';
+
+  @override
+  String pcNextCode(String code) {
+    return 'Next code: $code';
+  }
+
+  @override
+  String get pcRulesSaved => 'Numbering saved';
+
+  @override
+  String get pcIssueMissing => 'Number those without a code';
+
+  @override
+  String pcIssued(int count) {
+    return '$count companies numbered';
+  }
+
+  @override
+  String get pcOurCode => 'Our code for this company';
+
+  @override
+  String get pcAutoHint => 'Left empty, it is numbered by our rule';
+
+  @override
+  String get pcTheirCode => 'Their code for us';
+
+  @override
+  String get pcTheirCodeHint =>
+      'Our number on their invoices and quotes; filled from their documents when seen';
+
+  @override
+  String pcOurCodeShort(String code) {
+    return 'Ours $code';
+  }
+
+  @override
+  String pcTheirCodeShort(String code) {
+    return 'Theirs for us $code';
+  }
+
+  @override
+  String get pcVendorCodesTitle => 'This company’s supplier codes';
+
+  @override
+  String get pcVendorCodesHint =>
+      'Numbers this company gives its own suppliers (makers). They are not our codes.';
 }

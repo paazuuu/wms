@@ -41,6 +41,8 @@ class TradingPartner extends Equatable {
     this.countryCode = 'JP',
     this.createdAt,
     this.updatedAt,
+    this.theirCodeForUs,
+    this.vendorCodes = 0,
   });
 
   final int id;
@@ -61,6 +63,13 @@ class TradingPartner extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  /// Our code for the company is [code], numbered by our rule (0112); this
+  /// is its code for us (得意先コード), from its documents or typed in.
+  final String? theirCodeForUs;
+
+  /// How many of its own supplier codes (仕入先コード) we have learned.
+  final int vendorCodes;
+
   bool get isActive => status == 'active';
 
   factory TradingPartner.fromJson(Map<String, dynamic> json) => TradingPartner(
@@ -78,8 +87,58 @@ class TradingPartner extends Equatable {
         status: (json['status'] ?? 'active').toString(),
         createdAt: DateTime.tryParse('${json['created_at']}')?.toLocal(),
         updatedAt: DateTime.tryParse('${json['updated_at']}')?.toLocal(),
+        theirCodeForUs: json['their_code_for_us'] as String?,
+        vendorCodes: _asInt(json['vendor_codes']),
       );
 
   @override
-  List<Object?> get props => [id, name, kind, code, status];
+  List<Object?> get props => [id, name, kind, code, status, theirCodeForUs];
+}
+
+/// How our codes for companies of one kind are numbered (0112): e.g. S +
+/// 5 digits → S00001.
+class PartnerCodeFormat extends Equatable {
+  const PartnerCodeFormat({required this.kind, this.prefix = '', this.digits = 5, this.nextNumber = 1, this.nextCode = ''});
+
+  final PartnerKind kind;
+  final String prefix;
+  final int digits;
+  final int nextNumber;
+
+  /// The code the next new company of this kind gets.
+  final String nextCode;
+
+  factory PartnerCodeFormat.fromJson(Map<String, dynamic> j) => PartnerCodeFormat(
+        kind: PartnerKind.parse(j['kind'] as String?),
+        prefix: (j['prefix'] ?? '').toString(),
+        digits: _asInt(j['digits']),
+        nextNumber: _asInt(j['next_number']),
+        nextCode: (j['next_code'] ?? '').toString(),
+      );
+
+  @override
+  List<Object?> get props => [kind, prefix, digits, nextNumber];
+}
+
+/// A company's code for one of its own suppliers (仕入先コード), and the
+/// maker we learned it stands for (0112).
+class PartnerVendorCode extends Equatable {
+  const PartnerVendorCode({required this.id, required this.code, this.makerName, this.rawMaker, this.seenCount = 0});
+
+  final int id;
+  final String code;
+  final String? makerName;
+  final String? rawMaker;
+  final int seenCount;
+
+  factory PartnerVendorCode.fromJson(Map<String, dynamic> j) => PartnerVendorCode(
+        id: _asInt(j['id']),
+        code: (j['code'] ?? '').toString(),
+        makerName: j['maker_name'] as String?,
+        rawMaker: j['raw_maker'] as String?,
+        seenCount: _asInt(j['seen_count']),
+      );
+
+  @override
+  List<Object?> get props => [id, code, makerName];
 }
