@@ -16,6 +16,7 @@ import '../../product/domain/product.dart';
 import '../../product/presentation/product_picker_sheet.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/domain/product_image.dart';
+import '../../product_library/presentation/register_products_sheet.dart';
 import '../application/notation_providers.dart';
 import '../domain/notation.dart';
 import 'notation_labels.dart';
@@ -207,6 +208,36 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
     });
   }
 
+  static String _janOf(ReadLineResult l) => normalizeJanKey(l.janCode.isEmpty ? l.rawJanCode : l.janCode);
+
+  /// Lines no product answers to yet that carry a JAN: they can become
+  /// products in our format (0111).
+  List<ReadLineResult> get _registrable => [
+        for (final l in _read?.lines ?? const <ReadLineResult>[])
+          if (!l.resolved && const {8, 13}.contains(_janOf(l).length)) l,
+      ];
+
+  Future<void> _registerProducts() async {
+    final l10n = AppLocalizations.of(context);
+    if (_read == null) return;
+    final created = await showRegisterProductsSheet(
+      context,
+      partnerId: _partnerId,
+      lines: [for (final l in _registrable) l.toProposeJson()],
+    );
+    if (created.isEmpty || !mounted || _read == null) return;
+    final byRow = {for (final c in created) c.row: c};
+    final byJan = {for (final c in created) normalizeJanKey(c.janCode): c};
+    ReadLineResult tie(ReadLineResult l) {
+      final c = l.resolved ? null : (byRow[l.row] ?? byJan[_janOf(l)]);
+      return c == null ? l : l.withProduct(ResolvedProduct(id: c.productId, janCode: c.janCode, name: c.name, maker: l.maker));
+    }
+
+    setState(() => _read = _read!.copyWith(lines: [for (final l in _read!.lines) tie(l)]));
+    ref.invalidate(dialectsProvider);
+    _snack(l10n.rpRegistered(created.length));
+  }
+
   Future<void> _learn() async {
     final l10n = AppLocalizations.of(context);
     final read = _read;
@@ -302,6 +333,15 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
               if (read != null) ...[
                 const SizedBox(height: AppSpacing.lg),
                 _Summary(read: read),
+                if (_registrable.isNotEmpty && ref.watch(productLibraryCanManageProvider)) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  OutlinedButton.icon(
+                    key: const ValueKey('nt-register-products'),
+                    onPressed: _busy ? null : _registerProducts,
+                    icon: const Icon(Icons.library_add_outlined),
+                    label: Text(l10n.rpOpen(_registrable.length)),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 _ColumnsCard(
                   columns: read.columns,

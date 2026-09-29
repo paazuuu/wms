@@ -16,7 +16,10 @@ import '../../product/domain/product.dart';
 import '../../product/presentation/product_picker_sheet.dart';
 import '../application/delivery_providers.dart';
 import '../data/delivery_repository.dart';
+import '../../product_library/application/product_library_providers.dart';
+import '../../product_library/domain/product_image.dart';
 import '../../product_library/presentation/product_thumb.dart';
+import '../../product_library/presentation/register_products_sheet.dart';
 
 /// Whether the upload creates an inbound delivery plan or an outbound shipment.
 enum ImportTarget { plan, shipment }
@@ -405,6 +408,16 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           const SizedBox(height: AppSpacing.sm),
           _Notice(l10n.importUnresolvedLines(_unresolvedCount),
               color: scheme.tertiary, key: const ValueKey('import-unresolved')),
+          if (_registrable.isNotEmpty && ref.watch(productLibraryCanManageProvider))
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const ValueKey('import-register-products'),
+                onPressed: _busy ? null : _registerProducts,
+                icon: const Icon(Icons.library_add_outlined, size: 18),
+                label: Text(l10n.rpOpen(_registrable.length)),
+              ),
+            ),
         ],
         const SizedBox(height: AppSpacing.lg),
 
@@ -481,6 +494,46 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
   }
 
   int get _unresolvedCount => _lines.where((l) => l['product_id'] == null).length;
+
+  static String _janOf(Map<String, dynamic> l) =>
+      normalizeJanKey('${l['jan_code'] ?? ''}'.isEmpty ? '${l['raw_jan_code'] ?? ''}' : '${l['jan_code']}');
+
+  /// Indexes of lines with no product that carry a JAN: they can become
+  /// products in our format (0111).
+  List<int> get _registrable => [
+        for (final (i, l) in _lines.indexed)
+          if (l['product_id'] == null && const {8, 13}.contains(_janOf(l).length)) i,
+      ];
+
+  /// Creates the products this note brings that we do not have yet, in our
+  /// format, and ties its lines to them.
+  Future<void> _registerProducts() async {
+    final l10n = AppLocalizations.of(context);
+    final created = await showRegisterProductsSheet(
+      context,
+      partnerId: _preview?.partnerId,
+      lines: [for (final i in _registrable) {..._lines[i], 'row': i}],
+    );
+    if (created.isEmpty || !mounted) return;
+    final byJan = {for (final c in created) normalizeJanKey(c.janCode): c};
+    Map<String, dynamic> tie(Map<String, dynamic> l) {
+      final c = l['product_id'] == null ? byJan[_janOf(l)] : null;
+      if (c == null) return l;
+      return {
+        ...l,
+        'product_id': c.productId,
+        'product': {'id': c.productId, 'jan_code': c.janCode, 'name': c.name, 'maker': l['maker']},
+        'matched_by': 'registered',
+        'flags': [
+          for (final f in (l['flags'] as List? ?? const []))
+            if (f != 'unresolved' && f != 'no_maker') f,
+        ],
+      };
+    }
+
+    setState(() => _lines = [for (final l in _lines) tie(l)]);
+    _snack(l10n.rpRegistered(created.length), tone: StatusTone.success);
+  }
 
   /// Ties a line the dictionary could not place to one of our products. The
   /// company's writing stays on the line; on commit the server books it under

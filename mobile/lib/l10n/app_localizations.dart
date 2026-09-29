@@ -13194,6 +13194,426 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'商品ライブラリーに 仕入先の呼び名{profiles}件・属性{attributes}件'**
   String ntLearnedLibrary(int profiles, int attributes);
+
+  /// No description provided for @featNameFormats.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品様式'**
+  String get featNameFormats;
+
+  /// No description provided for @featNameFormatsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更'**
+  String get featNameFormatsDesc;
+
+  /// No description provided for @nfTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品様式'**
+  String get nfTitle;
+
+  /// No description provided for @nfTabFormats.
+  ///
+  /// In ja, this message translates to:
+  /// **'様式'**
+  String get nfTabFormats;
+
+  /// No description provided for @nfTabMakers.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get nfTabMakers;
+
+  /// No description provided for @nfTabValues.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性の値'**
+  String get nfTabValues;
+
+  /// No description provided for @nfIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名は「基本名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う商品名がすべて作り直されます。手入力の商品名はそのまま残ります。'**
+  String get nfIntro;
+
+  /// No description provided for @nfDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'既定'**
+  String get nfDefault;
+
+  /// No description provided for @nfProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件の商品'**
+  String nfProducts(int count);
+
+  /// No description provided for @nfNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'様式を追加'**
+  String get nfNew;
+
+  /// No description provided for @nfEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'様式の編集'**
+  String get nfEdit;
+
+  /// No description provided for @nfName.
+  ///
+  /// In ja, this message translates to:
+  /// **'様式の名前'**
+  String get nfName;
+
+  /// No description provided for @nfTemplate.
+  ///
+  /// In ja, this message translates to:
+  /// **'組み立て方'**
+  String get nfTemplate;
+
+  /// No description provided for @nfTemplateHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'「基本名」は必ず入れてください'**
+  String get nfTemplateHint;
+
+  /// No description provided for @nfInsert.
+  ///
+  /// In ja, this message translates to:
+  /// **'差し込む項目（タップで追加）'**
+  String get nfInsert;
+
+  /// No description provided for @nfPartBase.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本名'**
+  String get nfPartBase;
+
+  /// No description provided for @nfPartMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get nfPartMaker;
+
+  /// No description provided for @nfPartCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番'**
+  String get nfPartCode;
+
+  /// No description provided for @nfPartJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN'**
+  String get nfPartJan;
+
+  /// No description provided for @nfPartUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get nfPartUnit;
+
+  /// No description provided for @nfSample.
+  ///
+  /// In ja, this message translates to:
+  /// **'例'**
+  String get nfSample;
+
+  /// No description provided for @nfSampleBase.
+  ///
+  /// In ja, this message translates to:
+  /// **'ボールペン'**
+  String get nfSampleBase;
+
+  /// No description provided for @nfSampleMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'サンプル文具'**
+  String get nfSampleMaker;
+
+  /// No description provided for @nfSampleUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'本'**
+  String get nfSampleUnit;
+
+  /// No description provided for @nfSampleColor.
+  ///
+  /// In ja, this message translates to:
+  /// **'赤'**
+  String get nfSampleColor;
+
+  /// No description provided for @nfMakeDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい商品の既定の様式にする'**
+  String get nfMakeDefault;
+
+  /// No description provided for @nfPreview.
+  ///
+  /// In ja, this message translates to:
+  /// **'実際の商品名の変わり方'**
+  String get nfPreview;
+
+  /// No description provided for @nfPreviewRefresh.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認'**
+  String get nfPreviewRefresh;
+
+  /// No description provided for @nfPreviewNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'この様式の商品はまだありません'**
+  String get nfPreviewNone;
+
+  /// No description provided for @nfNeedsBase.
+  ///
+  /// In ja, this message translates to:
+  /// **'組み立て方に「基本名」を入れてください'**
+  String get nfNeedsBase;
+
+  /// No description provided for @nfNeedsName.
+  ///
+  /// In ja, this message translates to:
+  /// **'様式の名前を入れてください'**
+  String get nfNeedsName;
+
+  /// No description provided for @nfSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました。{count}件の商品名を作り直しました'**
+  String nfSaved(int count);
+
+  /// No description provided for @nfSearchMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーを検索（別表記でも可）'**
+  String get nfSearchMaker;
+
+  /// No description provided for @nfMakersHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー名を変えると、そのメーカーの商品名もすべて変わります。旧名は今後も同じメーカーとして読み取ります。'**
+  String get nfMakersHint;
+
+  /// No description provided for @nfRename.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー名を変える'**
+  String get nfRename;
+
+  /// No description provided for @nfNewName.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい名前'**
+  String get nfNewName;
+
+  /// No description provided for @nfDialects.
+  ///
+  /// In ja, this message translates to:
+  /// **'別表記{count}件'**
+  String nfDialects(int count);
+
+  /// No description provided for @nfMakerRenamed.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件の商品に反映しました'**
+  String nfMakerRenamed(int count);
+
+  /// No description provided for @nfValuesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性の値の呼び方を一括で変えます（例：色「赤」→「レッド」）。その値を持つ商品の名前と、仕入先の書き方の対応も変わります。旧い値は今後も新しい値として読み取ります。'**
+  String get nfValuesHint;
+
+  /// No description provided for @nfAttribute.
+  ///
+  /// In ja, this message translates to:
+  /// **'属性'**
+  String get nfAttribute;
+
+  /// No description provided for @nfFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の値'**
+  String get nfFrom;
+
+  /// No description provided for @nfTo.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい値'**
+  String get nfTo;
+
+  /// No description provided for @nfRenameEverywhere.
+  ///
+  /// In ja, this message translates to:
+  /// **'一括で変更'**
+  String get nfRenameEverywhere;
+
+  /// No description provided for @nfValueRenamed.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件の商品を変更しました'**
+  String nfValueRenamed(int count);
+
+  /// No description provided for @pnTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名の組み立て'**
+  String get pnTitle;
+
+  /// No description provided for @pnBaseName.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本名（サイズ・色を除いた名前）'**
+  String get pnBaseName;
+
+  /// No description provided for @pnUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get pnUnit;
+
+  /// No description provided for @pnListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価'**
+  String get pnListPrice;
+
+  /// No description provided for @pnFormat.
+  ///
+  /// In ja, this message translates to:
+  /// **'様式'**
+  String get pnFormat;
+
+  /// No description provided for @pnFormatDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'既定の様式（{name}）'**
+  String pnFormatDefault(String name);
+
+  /// No description provided for @pnManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名を手入力する（様式を使わない）'**
+  String get pnManual;
+
+  /// No description provided for @pnName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get pnName;
+
+  /// No description provided for @pnPreview.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get pnPreview;
+
+  /// No description provided for @pnLegacy.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品はまだ部品に分かれていません。基本名を入れると様式で名前が作られます。'**
+  String get pnLegacy;
+
+  /// No description provided for @pnAttrsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・色などは商品の写真画面の「属性」タブで設定します'**
+  String get pnAttrsHint;
+
+  /// No description provided for @pnNeedsBase.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本名を入れてください'**
+  String get pnNeedsBase;
+
+  /// No description provided for @pnSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名を更新しました'**
+  String get pnSaved;
+
+  /// No description provided for @rpOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録の商品を自社様式で登録（{count}）'**
+  String rpOpen(int count);
+
+  /// No description provided for @rpTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社様式で商品登録'**
+  String get rpTitle;
+
+  /// No description provided for @rpIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の行から、自社の様式に整えた商品案を作りました。確認・修正して登録してください。登録すると、この仕入先の書き方も一緒に学習します。'**
+  String get rpIntro;
+
+  /// No description provided for @rpNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録できる新しい商品はありません（JANの無い行と登録済みの商品は除きます）'**
+  String get rpNone;
+
+  /// No description provided for @rpFromCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類に商品名がありません。品番を仮の名前にしています'**
+  String get rpFromCode;
+
+  /// No description provided for @rpRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を登録'**
+  String rpRegister(int count);
+
+  /// No description provided for @rpRegistered.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件の商品を登録しました'**
+  String rpRegistered(int count);
+
+  /// No description provided for @rpNeedsMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ商品にはメーカーと基本名が必要です'**
+  String get rpNeedsMaker;
+
+  /// No description provided for @ntFieldListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価'**
+  String get ntFieldListPrice;
+
+  /// No description provided for @ntFieldDiscountRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率'**
+  String get ntFieldDiscountRate;
+
+  /// No description provided for @ntFieldUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get ntFieldUnit;
+
+  /// No description provided for @ntFieldSupplierCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の商品コード'**
+  String get ntFieldSupplierCode;
+
+  /// No description provided for @ntMatchRegistered.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社様式で新規登録'**
+  String get ntMatchRegistered;
 }
 
 class _AppLocalizationsDelegate

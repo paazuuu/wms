@@ -7138,4 +7138,234 @@ class AppLocalizationsZh extends AppLocalizations {
   String ntLearnedLibrary(int profiles, int attributes) {
     return '商品图库：供应商叫法$profiles条、属性$attributes条';
   }
+
+  @override
+  String get featNameFormats => '商品格式';
+
+  @override
+  String get featNameFormatsDesc => '商品名的组成方式，以及批量修改厂家名、颜色等叫法';
+
+  @override
+  String get nfTitle => '商品格式';
+
+  @override
+  String get nfTabFormats => '格式';
+
+  @override
+  String get nfTabMakers => '厂家';
+
+  @override
+  String get nfTabValues => '属性值';
+
+  @override
+  String get nfIntro =>
+      '商品名由\"基本名\"与厂家、品番、尺寸、颜色等部件按所选格式组成。修改格式后，使用该格式的商品名会全部重新生成。手动输入的商品名保持不变。';
+
+  @override
+  String get nfDefault => '默认';
+
+  @override
+  String nfProducts(int count) {
+    return '$count个商品';
+  }
+
+  @override
+  String get nfNew => '添加格式';
+
+  @override
+  String get nfEdit => '编辑格式';
+
+  @override
+  String get nfName => '格式名称';
+
+  @override
+  String get nfTemplate => '组成方式';
+
+  @override
+  String get nfTemplateHint => '必须包含「基本名」';
+
+  @override
+  String get nfInsert => '插入项目（点击添加）';
+
+  @override
+  String get nfPartBase => '基本名';
+
+  @override
+  String get nfPartMaker => '厂家';
+
+  @override
+  String get nfPartCode => '品番';
+
+  @override
+  String get nfPartJan => 'JAN';
+
+  @override
+  String get nfPartUnit => '单位';
+
+  @override
+  String get nfSample => '示例';
+
+  @override
+  String get nfSampleBase => '圆珠笔';
+
+  @override
+  String get nfSampleMaker => '示例文具';
+
+  @override
+  String get nfSampleUnit => '支';
+
+  @override
+  String get nfSampleColor => '红';
+
+  @override
+  String get nfMakeDefault => '设为新商品的默认格式';
+
+  @override
+  String get nfPreview => '实际商品名的变化';
+
+  @override
+  String get nfPreviewRefresh => '确认';
+
+  @override
+  String get nfPreviewNone => '还没有使用此格式的商品';
+
+  @override
+  String get nfNeedsBase => '请在组成方式中加入「基本名」';
+
+  @override
+  String get nfNeedsName => '请输入格式名称';
+
+  @override
+  String nfSaved(int count) {
+    return '已保存，重新生成了$count个商品名';
+  }
+
+  @override
+  String get nfSearchMaker => '搜索厂家（其他写法也可）';
+
+  @override
+  String get nfMakersHint => '修改厂家名后，该厂家的商品名也会全部变更。旧名称今后仍识别为同一厂家。';
+
+  @override
+  String get nfRename => '修改厂家名';
+
+  @override
+  String get nfNewName => '新名称';
+
+  @override
+  String nfDialects(int count) {
+    return '其他写法$count个';
+  }
+
+  @override
+  String nfMakerRenamed(int count) {
+    return '已应用到$count个商品';
+  }
+
+  @override
+  String get nfValuesHint =>
+      '批量修改属性值的叫法（例：颜色\"赤\"→\"レッド\"）。带有该值的商品名及供应商写法的对应也会随之变更。旧值今后仍识别为新值。';
+
+  @override
+  String get nfAttribute => '属性';
+
+  @override
+  String get nfFrom => '当前值';
+
+  @override
+  String get nfTo => '新值';
+
+  @override
+  String get nfRenameEverywhere => '批量修改';
+
+  @override
+  String nfValueRenamed(int count) {
+    return '已修改$count个商品';
+  }
+
+  @override
+  String get pnTitle => '商品名组成';
+
+  @override
+  String get pnBaseName => '基本名（不含尺寸、颜色）';
+
+  @override
+  String get pnUnit => '单位';
+
+  @override
+  String get pnListPrice => '定价';
+
+  @override
+  String get pnFormat => '格式';
+
+  @override
+  String pnFormatDefault(String name) {
+    return '默认格式（$name）';
+  }
+
+  @override
+  String get pnManual => '手动输入商品名（不使用格式）';
+
+  @override
+  String get pnName => '商品名';
+
+  @override
+  String get pnPreview => '商品名';
+
+  @override
+  String get pnLegacy => '此商品尚未分成部件。输入基本名后将按格式生成名称。';
+
+  @override
+  String get pnAttrsHint => '尺寸、颜色等在商品照片画面的\"属性\"标签中设置';
+
+  @override
+  String get pnNeedsBase => '请输入基本名';
+
+  @override
+  String get pnSaved => '已更新商品名';
+
+  @override
+  String rpOpen(int count) {
+    return '按本公司格式登记未登记商品（$count）';
+  }
+
+  @override
+  String get rpTitle => '按本公司格式登记商品';
+
+  @override
+  String get rpIntro => '已根据单据行生成按本公司格式整理的商品方案。请确认、修改后登记。登记时也会一并学习该供应商的写法。';
+
+  @override
+  String get rpNone => '没有可登记的新商品（不含无JAN的行和已登记的商品）';
+
+  @override
+  String get rpFromCode => '单据中没有商品名，暂以品番作为名称';
+
+  @override
+  String rpRegister(int count) {
+    return '登记$count个';
+  }
+
+  @override
+  String rpRegistered(int count) {
+    return '已登记$count个商品';
+  }
+
+  @override
+  String get rpNeedsMaker => '所选商品需要厂家和基本名';
+
+  @override
+  String get ntFieldListPrice => '定价';
+
+  @override
+  String get ntFieldDiscountRate => '折扣率';
+
+  @override
+  String get ntFieldUnit => '单位';
+
+  @override
+  String get ntFieldSupplierCode => '供应商商品代码';
+
+  @override
+  String get ntMatchRegistered => '按本公司格式新登记';
 }

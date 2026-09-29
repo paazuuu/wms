@@ -5330,6 +5330,91 @@ our 色 = 黒, did the following:
 - resolved "bk" to 黒 through the learned value word;
 - learned an attribute column heading.
 
+### 0111 — our own product format, and registering products from documents
+
+Two real samples showed what suppliers send:
+- a PDF invoice with only メーカー, 項目 (the 品番), JAN, 数量, 定価, 単価 and
+  金額 — no product name;
+- an Excel quote with its own 商品コード beside the maker's 品番, 定価 beside
+  見積単価, 単位 (ｻﾂ, P, ﾎﾝ) and 掛率, and names in 半角カナ with the size
+  and colour inside ("ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ", "…A4ﾗｲﾄﾌﾞﾙ").
+
+The reader read three of these wrong: the supplier's 商品コード as the 品番,
+定価 as the price paid, and 単位 and 掛率 not at all.
+
+- **Reading** (`document_reader`, `import-plan` deployed):
+  - new fields `list_price` (定価, 上代, 希望小売価格), `discount_rate`
+    (掛率; 52 or "52%" is 0.52), `unit` and `supplier_code`
+    (社内コード);
+  - when two columns both look like the 品番, the one headed 品番 / 型番 /
+    項目 stays the 品番 and the other becomes `supplier_code`;
+  - when two columns both look like the price, the one headed 定価 / 上代
+    becomes `list_price`;
+  - a price missing but 定価 and 掛率 present is 定価 × 掛率;
+  - plan and shipment line prices keep their decimals (¥41.6).
+- **Our format.**
+  - A product keeps its parts: `base_name` (the name without size or
+    colour), maker, 品番 (`sku`), JAN, `unit`, `list_price` and its
+    attributes (0110).
+  - `product_name_formats` holds templates such as
+    `{base} {attr:size} {attr:color}`. Seeded: 標準 (the default),
+    メーカー名つき and 品番つき. A placeholder with nothing to fill it
+    disappears, and so does an empty bracket.
+  - A trigger builds the name whenever a part changes. Products from before
+    0111 have no `base_name` and keep their names. A name typed by hand
+    sets `name_manual`, and the format leaves it alone.
+  - Changing it later, in one place:
+    - `save_name_format` rebuilds every product using the format and says
+      how many;
+    - `rename_maker` renames a maker and all its products, and the old name
+      still reads as that maker;
+    - `rename_attribute_value` (赤 → レッド) changes every product with the
+      value and every supplier word for it, and the old word still reads as
+      the new one.
+  - Text is tidied the same way everywhere: `tidy_text` is NFKC plus single
+    spaces, so 半角カナ becomes 全角 and 全角英数 becomes 半角.
+  - Seeded words: `unit_aliases` (ﾎﾝ → 本, ｻﾂ → 冊, P → パック, …) and
+    colour words (ｱｶ → 赤, BK → 黒, ﾗｲﾄﾌﾞﾙ → 水色, …).
+- **Registering from a document.**
+  - `propose_products_from_lines` turns the read lines that have no product
+    (with a JAN, one per JAN) into products in our format. Size tokens
+    (0.5MM, 0.7) and colour words (also one glued to the last word) become
+    attributes; 単位 and 定価 come along. A line with no name takes its 品番
+    as the name and is flagged. Nothing is written.
+  - `register_products` creates what a person confirmed and learns each
+    supplier line against its new product in the same call.
+  - Learning now also records the supplier's own 商品コード as its code
+    for the product, and fills 単位 / 定価 when the product has none.
+- **App.**
+  - 商品様式 (management menu, product.manage) has three tabs:
+    - 様式: templates edited with tap-in parts, an example, and what real
+      product names would become;
+    - メーカー: rename a maker everywhere;
+    - 属性の値: rename a value everywhere.
+  - The product page has 商品名の組み立て: base name, 単位, 定価, format,
+    or a name typed by hand, with a live preview.
+  - Pre-training and the import review offer 未登録の商品を自社様式で登録:
+    the proposals can be corrected (base name, maker, 品番, 単位, 定価,
+    dropping an attribute) and registered, and the lines are then tied to
+    the new products.
+
+**Verified live (rolled back):**
+- "ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ" became "ユニボール エア 0.5mm 赤";
+- "C_2穴ﾊﾞｲﾝﾀﾞｰA4ﾗｲﾄﾌﾞﾙ" became "C_2穴バインダーA4 水色";
+- ｻﾂ, P and ﾎﾝ became 冊, パック and 本;
+- a PDF line with no name took its 品番, flagged;
+- six lines with one JAN twice gave five proposals, and all five were
+  registered;
+- making the default format put the maker in front renamed all five;
+- `rename_maker` ミツビシ → 三菱鉛筆 and `rename_attribute_value` 赤 → レッド
+  followed through to "三菱鉛筆 ユニボール エア 0.5mm レッド";
+- the quote's own 商品コード was kept as the supplier's code, and 冊 / 910
+  were filled in.
+
+The uploaded samples themselves are not in the repository (they carry
+customer and bank details). The reader test uses a synthetic sheet with
+the same headings.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

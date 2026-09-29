@@ -12,7 +12,11 @@ String columnFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
       ColumnField.caseQuantity => l10n.ntFieldCaseQuantity,
       ColumnField.cases => l10n.ntFieldCases,
       ColumnField.unitPrice => l10n.ntFieldUnitPrice,
+      ColumnField.listPrice => l10n.ntFieldListPrice,
+      ColumnField.discountRate => l10n.ntFieldDiscountRate,
       ColumnField.amount => l10n.ntFieldAmount,
+      ColumnField.unit => l10n.ntFieldUnit,
+      ColumnField.supplierCode => l10n.ntFieldSupplierCode,
       ColumnField.spec => l10n.ntFieldSpec,
       ColumnField.taxRate => l10n.ntFieldTaxRate,
       ColumnField.orderDate => l10n.ntFieldDate,
@@ -72,6 +76,8 @@ String _comparedLabel(AppLocalizations l10n, String key) => switch (key) {
       'product_code' => l10n.ntFieldCode,
       'planned_quantity' => l10n.ntFieldQuantity,
       'unit_price' => l10n.ntFieldUnitPrice,
+      'list_price' => l10n.ntFieldListPrice,
+      'unit' => l10n.ntFieldUnit,
       'amount' => l10n.ntFieldAmount,
       _ => key,
     };
@@ -85,5 +91,6 @@ String matchedByLabel(AppLocalizations l10n, String? m) => switch (m) {
       'sku' => l10n.ntMatchSku,
       'name' => l10n.ntMatchName,
       'manual' => l10n.ntMatchManual,
+      'registered' => l10n.ntMatchRegistered,
       _ => l10n.ntMatchNone,
     };

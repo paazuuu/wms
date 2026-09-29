@@ -17,7 +17,9 @@ import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'supplier_names_card.dart';
+import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_gallery_screen.dart';
+import '../../product_library/presentation/product_naming_dialog.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
@@ -175,6 +177,26 @@ class _Header extends ConsumerWidget {
                 label: Text(l10n.plOpenLibrary),
               ),
             ),
+            // Its name in our format (0111): built from its parts.
+            if (ref.watch(productLibraryCanManageProvider))
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const ValueKey('product-naming'),
+                  onPressed: () async {
+                    final saved = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => ProductNamingDialog(productId: product.id),
+                    );
+                    if (saved == true) {
+                      ref.invalidate(productListProvider);
+                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pnSaved)));
+                    }
+                  },
+                  icon: const Icon(Icons.text_format_outlined, size: 18),
+                  label: Text(l10n.pnTitle),
+                ),
+              ),
             const SizedBox(height: AppSpacing.sm),
             Align(
               alignment: Alignment.centerLeft,

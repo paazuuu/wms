@@ -95,6 +95,7 @@ class ImportPreview {
     this.orderDate,
     this.columns = const [],
     this.verified = true,
+    this.partnerId,
   });
 
   final String source;
@@ -119,6 +120,9 @@ class ImportPreview {
 
   /// False when the AI's second, checking read of a PDF/photo failed.
   final bool verified;
+
+  /// The trading company the note was matched to, when it was.
+  final int? partnerId;
 
   factory ImportPreview.fromJson(Map<String, dynamic> json) {
     int asInt(dynamic v) =>
@@ -149,6 +153,7 @@ class ImportPreview {
           .map((e) => ReadColumn.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
       verified: json['verified'] != false,
+      partnerId: json['partner_id'] is num ? (json['partner_id'] as num).toInt() : int.tryParse('${json['partner_id']}'),
     );
   }
 }

@@ -105,6 +105,8 @@ class FeatureEntry {
         return l10n.featProducts;
       case 'product_library':
         return l10n.featProductLibrary;
+      case 'name_formats':
+        return l10n.featNameFormats;
       case 'unlinked_jan':
         return l10n.featUnlinkedJan;
       case 'purchase_orders':
@@ -197,6 +199,8 @@ class FeatureEntry {
         return l10n.featProductsDesc;
       case 'product_library':
         return l10n.featProductLibraryDesc;
+      case 'name_formats':
+        return l10n.featNameFormatsDesc;
       case 'unlinked_jan':
         return l10n.featUnlinkedJanDesc;
       case 'purchase_orders':

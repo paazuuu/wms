@@ -9,6 +9,9 @@ import 'package:wms_mobile/features/delivery/presentation/plan_import_screen.dar
 import 'package:wms_mobile/features/notation/domain/notation.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/product_library/application/product_naming_providers.dart';
+import 'package:wms_mobile/features/product_library/domain/product_naming.dart';
 
 import '../../support/harness.dart';
 
@@ -305,5 +308,66 @@ void main() {
       {'index': 0, 'header': '商品コード', 'field': 'jan'},
       {'index': 1, 'header': 'Item', 'field': 'product_name'},
     ]);
+  });
+
+  testWidgets('new products on the note are registered in our format and its lines tied to them (0111)',
+      (tester) async {
+    final repo = FakeDeliveryRepository(
+      const [],
+      preview: const ImportPreview(
+        source: 'xlsx',
+        lineCount: 2,
+        totalQuantity: 12,
+        deliveryNumber: 'Q-1',
+        partnerId: 4,
+        lines: [
+          {
+            'jan_code': '4902505000001',
+            'maker': 'ﾐﾂﾋﾞｼ',
+            'product_name': 'ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ',
+            'unit': 'ﾎﾝ',
+            'list_price': 200,
+            'planned_quantity': 10,
+            'flags': ['unresolved'],
+          },
+          {'jan_code': '', 'product_name': 'けしごむ', 'planned_quantity': 2, 'flags': ['unresolved']},
+        ],
+      ),
+    );
+    final naming = FakeProductNamingRepository(proposals: const [
+      ProductProposal(row: 0, janCode: '4902505000001', maker: '三菱鉛筆', baseName: 'ユニボール エア', attributes: {'size': '0.5mm'}),
+    ]);
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(
+      tester,
+      PlanImportScreen(pickFile: () async => _fakeFile()),
+      overrides: [
+        deliveryRepositoryProvider.overrideWithValue(repo),
+        productLibraryCanManageProvider.overrideWithValue(true),
+        productNamingRepositoryProvider.overrideWithValue(naming),
+      ],
+    );
+    await tester.tap(find.text('ファイルを選ぶ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('読み取る'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('import-register-products')));
+    await tester.pumpAndSettle();
+    expect(naming.lastProposePartner, 4);
+    expect(naming.lastProposeLines?.single['row'], 0);
+    await tester.tap(find.byKey(const ValueKey('rp-register')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('import-register-products')), findsNothing);
+
+    tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).removeCurrentSnackBar();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('登録する'));
+    await tester.pumpAndSettle();
+    final sent = repo.lastCommit!.lines;
+    expect(sent.first['product_id'], 500);
+    expect(sent.first['flags'], isEmpty);
+    expect(sent.last['product_id'], isNull);
   });
 }

@@ -237,7 +237,7 @@ function toLineRow(l: Record<string, unknown>): Record<string, unknown> {
     review_flags: Array.isArray(l.flags) && (l.flags as unknown[]).length ? l.flags : null,
     spec: str(l.spec),
     planned_quantity: toInt(l.planned_quantity) ?? 0,
-    unit_price: toInt(l.unit_price),
+    unit_price: toNum(l.unit_price),
     amount: toInt(l.amount),
     tax_rate: toNum(l.tax_rate),
     order_date: str(l.order_date),
@@ -306,6 +306,10 @@ async function learn(
     maker: r.source_maker ?? r.maker,
     product_name: r.source_product_name ?? r.product_name,
     product_code: r.source_product_code ?? r.product_code,
+    // The company's own code for the item, its 単位 and 定価 (0111).
+    supplier_code: r.supplier_code ?? null,
+    unit: r.unit ?? null,
+    list_price: r.list_price ?? null,
     attributes: attributesToLearn(r, columns),
   }));
   let learned: unknown = null;
@@ -354,8 +358,13 @@ async function commit(supabase: Client, input: {
   // What each kept line said about the product's attributes, for learning
   // once the lines are saved (same order).
   const attrsByLine = keep.map(({ i }) => attributesToLearn(input.lines[i], input.columns));
+  const extraByLine = keep.map(({ i }) => ({
+    supplier_code: str(input.lines[i].supplier_code),
+    unit: str(input.lines[i].unit),
+    list_price: toNum(input.lines[i].list_price),
+  }));
   const withAttrs = (saved: Record<string, unknown>[]) =>
-    saved.map((r, i) => ({ ...r, attributes: attrsByLine[i] ?? [] }));
+    saved.map((r, i) => ({ ...r, ...(extraByLine[i] ?? {}), attributes: attrsByLine[i] ?? [] }));
   const skipped = all.length - lines.length;
   if (lines.length === 0) return json({ message: "No JAN rows found." }, 422);
   const totalQty = lines.reduce((s, l) => s + (l.planned_quantity as number), 0);

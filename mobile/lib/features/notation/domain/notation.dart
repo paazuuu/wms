@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 int _int(dynamic v) => v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+double? _numOrNull(dynamic v) =>
+    v == null ? null : (v is num ? v.toDouble() : double.tryParse('$v'.replaceAll(',', '')));
 int? _intOrNull(dynamic v) =>
     v == null ? null : (v is int ? v : (v is num ? v.toInt() : int.tryParse('$v')));
 String? _text(dynamic v) {
@@ -22,7 +24,16 @@ enum ColumnField {
   caseQuantity('case_quantity'),
   cases('cases'),
   unitPrice('unit_price'),
+
+  /// 定価・上代 and 掛率 (0111): the list price, and the rate paid of it.
+  listPrice('list_price'),
+  discountRate('discount_rate'),
   amount('amount'),
+
+  /// 単位 (本, 冊, パック…) and the supplier's own 商品コード beside the
+  /// maker's 品番 (0111).
+  unit('unit'),
+  supplierCode('supplier_code'),
   spec('spec'),
   taxRate('tax_rate'),
   orderDate('order_date'),
@@ -156,6 +167,10 @@ class ReadLineResult extends Equatable {
     this.attributes = const [],
     this.spec,
     this.caseQuantity,
+    this.unit,
+    this.unitPrice,
+    this.listPrice,
+    this.supplierCode,
   });
 
   final int row;
@@ -180,6 +195,12 @@ class ReadLineResult extends Equatable {
   final List<ReadAttribute> attributes;
   final String? spec;
   final int? caseQuantity;
+
+  /// 単位, 単価, 定価 and the supplier's own 商品コード as written (0111).
+  final String? unit;
+  final double? unitPrice;
+  final double? listPrice;
+  final String? supplierCode;
 
   bool get resolved => product != null;
   bool get needsReview => flags.any((f) => NotationFlag.isProblem(f));
@@ -209,6 +230,10 @@ class ReadLineResult extends Equatable {
         ],
         spec: _text(j['spec']),
         caseQuantity: _intOrNull(j['case_quantity']),
+        unit: _text(j['unit']),
+        unitPrice: _numOrNull(j['unit_price']),
+        listPrice: _numOrNull(j['list_price']),
+        supplierCode: _text(j['supplier_code']),
       );
 
   ReadLineResult withProduct(ResolvedProduct? p) => ReadLineResult(
@@ -228,6 +253,10 @@ class ReadLineResult extends Equatable {
         attributes: attributes,
         spec: spec,
         caseQuantity: caseQuantity,
+        unit: unit,
+        unitPrice: unitPrice,
+        listPrice: listPrice,
+        supplierCode: supplierCode,
       );
 
   /// What is taught from this line: the company's writing, tied to ours.
@@ -239,7 +268,17 @@ class ReadLineResult extends Equatable {
         'product_code': productCode,
         'spec': spec,
         'case_quantity': caseQuantity,
+        'supplier_code': supplierCode,
+        'unit': unit,
+        'list_price': listPrice,
         'attributes': [for (final a in attributes) a.toJson()],
+      };
+
+  /// The line as sent to propose a product for it in our format (0111).
+  Map<String, dynamic> toProposeJson() => {
+        'row': row,
+        ...toLearnJson(),
+        'jan_code': janCode,
       };
 
   @override
@@ -456,7 +495,6 @@ class NotationDialect extends Equatable {
   List<Object?> get props => [id, confirmed, productId, makerId, seenCount];
 }
 
-/// A company's column heading and the field it means (0105).
 /// An attribute as a company wrote it on one line: which of ours, the
 /// company's heading, and the value as written (0110).
 class ReadAttribute extends Equatable {
@@ -478,6 +516,7 @@ class ReadAttribute extends Equatable {
   List<Object?> get props => [key, name, value];
 }
 
+/// A company's column heading and the field it means (0105).
 class ColumnAlias extends Equatable {
   const ColumnAlias({
     required this.id,

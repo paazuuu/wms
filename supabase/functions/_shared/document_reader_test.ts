@@ -106,3 +106,56 @@ Deno.test("an override is a field or attr:<attribute>", () => {
   assertEquals(splitAttr("attr:"), null);
   assertEquals(splitAttr("nonsense"), null);
 });
+
+// Headings and rows as in a real wholesaler's quote (提出用): the
+// wholesaler's own 商品コード beside the maker's 品番, 定価 beside the actual
+// 見積単価, 単位 and 掛率. (Rows trimmed; no customer or bank data.)
+Deno.test("a wholesaler's quote: 品番 over its own 商品コード, 見積単価 over 定価, 単位 and 掛率 read", async () => {
+  const quoteAliases: AliasRow[] = [
+    ["商品コード", "product_code"], ["品番", "product_code"], ["ブランド名", "maker"], ["商品名", "product_name"],
+    ["数量", "quantity"], ["定価", "list_price"], ["単価", "unit_price"], ["掛率", "discount_rate"],
+    ["単位", "unit"], ["金額", "amount"], ["JANコード", "jan"], ["備考", "ignore"], ["日付", "order_date"],
+  ].map(([k, f]) => ({ header_key: normalizeText(k), field: f as AliasRow["field"], partner: false }));
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["行NO", "見積日付", "見積NO", "商品コード", "ブランド名", "品番", "商品名", "数量", "単位", "定価", "見積単価", "掛率", "見積金額", "行備考", "JANコード"],
+    [1, 20260831, 131749, 934953, "コクヨ", "ﾙ-PP158M", "C_2穴ﾊﾞｲﾝﾀﾞｰA4 ｸﾞﾚｰ", 60, "ｻﾂ", 910, 465, 0.510989010989011, 27900, "830", "4901480344041"],
+    [2, 20260831, 131749, 7245556, "ミツビシ", "UBA20105.15", "ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ", 200, "P", 200, 104, 0.52, 20800, "830", "4902778198940"],
+    [3, 20260831, 131749, 505825, "ゼブラ", "RJLV7-BK", "JLV-0.7芯　黒", 2000, "ﾎﾝ", 100, 49, 0.49, 98000, "830", "4901681171415"],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "提出用");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { columns, lines } = await readSpreadsheet(bytes, quoteAliases, {}, false);
+
+  const fieldOf = (h: string) => columns.find((c) => c.header === h)?.field;
+  assertEquals(fieldOf("品番"), "product_code");
+  assertEquals(fieldOf("商品コード"), "supplier_code");
+  assertEquals(fieldOf("定価"), "list_price");
+  assertEquals(fieldOf("見積単価"), "unit_price");
+  assertEquals(fieldOf("単位"), "unit");
+  assertEquals(fieldOf("掛率"), "discount_rate");
+
+  assertEquals(lines.length, 3);
+  const [a, b, c] = lines;
+  assertEquals(a.product_code, "ﾙ-PP158M");
+  assertEquals(a.supplier_code, "934953");
+  assertEquals(a.unit_price, 465);
+  assertEquals(a.list_price, 910);
+  assertEquals(a.unit, "ｻﾂ");
+  assertEquals(a.discount_rate, 0.510989010989011);
+  assertEquals(a.planned_quantity, 60);
+  assertEquals(a.maker, "コクヨ");
+  // 60 × 465 = 27,900: the amount agrees once the right price is read.
+  assert(!a.flags.includes("amount_mismatch"));
+  assertEquals(b.unit_price, 104);
+  assertEquals(b.unit, "P");
+  assertEquals(c.jan_code, "4901681171415");
+  assert(!c.flags.includes("amount_mismatch"));
+
+  // Where 定価 is still known as a price heading, the two price columns are
+  // told apart by their headings.
+  const older = quoteAliases.map((a) => a.header_key === normalizeText("定価") ? { ...a, field: "unit_price" as const } : a);
+  const again = await readSpreadsheet(bytes, older, {}, false);
+  assertEquals(again.columns.find((c) => c.header === "定価")?.field, "list_price");
+  assertEquals(again.lines[0].unit_price, 465);
+});

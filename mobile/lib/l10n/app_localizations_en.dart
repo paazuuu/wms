@@ -7305,4 +7305,242 @@ class AppLocalizationsEn extends AppLocalizations {
   String ntLearnedLibrary(int profiles, int attributes) {
     return 'Product library: $profiles supplier names, $attributes attributes';
   }
+
+  @override
+  String get featNameFormats => 'Product format';
+
+  @override
+  String get featNameFormatsDesc =>
+      'How product names are built, and renaming a maker or a colour everywhere at once';
+
+  @override
+  String get nfTitle => 'Product format';
+
+  @override
+  String get nfTabFormats => 'Formats';
+
+  @override
+  String get nfTabMakers => 'Makers';
+
+  @override
+  String get nfTabValues => 'Attribute values';
+
+  @override
+  String get nfIntro =>
+      'A product name is built from its parts — the base name, maker, code, size, colour and so on — by the chosen format. Change a format and every product using it is renamed. Names typed by hand are left alone.';
+
+  @override
+  String get nfDefault => 'Default';
+
+  @override
+  String nfProducts(int count) {
+    return '$count products';
+  }
+
+  @override
+  String get nfNew => 'Add format';
+
+  @override
+  String get nfEdit => 'Edit format';
+
+  @override
+  String get nfName => 'Format name';
+
+  @override
+  String get nfTemplate => 'Template';
+
+  @override
+  String get nfTemplateHint => 'The base name must be in it';
+
+  @override
+  String get nfInsert => 'Parts (tap to add)';
+
+  @override
+  String get nfPartBase => 'Base name';
+
+  @override
+  String get nfPartMaker => 'Maker';
+
+  @override
+  String get nfPartCode => 'Code';
+
+  @override
+  String get nfPartJan => 'JAN';
+
+  @override
+  String get nfPartUnit => 'Unit';
+
+  @override
+  String get nfSample => 'Example';
+
+  @override
+  String get nfSampleBase => 'Ballpoint pen';
+
+  @override
+  String get nfSampleMaker => 'Sample Stationery';
+
+  @override
+  String get nfSampleUnit => 'pc';
+
+  @override
+  String get nfSampleColor => 'red';
+
+  @override
+  String get nfMakeDefault => 'Default for new products';
+
+  @override
+  String get nfPreview => 'How real product names change';
+
+  @override
+  String get nfPreviewRefresh => 'Check';
+
+  @override
+  String get nfPreviewNone => 'No products use this format yet';
+
+  @override
+  String get nfNeedsBase => 'Put the base name in the template';
+
+  @override
+  String get nfNeedsName => 'Give the format a name';
+
+  @override
+  String nfSaved(int count) {
+    return 'Saved. $count product names rebuilt';
+  }
+
+  @override
+  String get nfSearchMaker => 'Search makers (any spelling)';
+
+  @override
+  String get nfMakersHint =>
+      'Renaming a maker renames all its products. The old name keeps reading as the same maker.';
+
+  @override
+  String get nfRename => 'Rename maker';
+
+  @override
+  String get nfNewName => 'New name';
+
+  @override
+  String nfDialects(int count) {
+    return '$count other spellings';
+  }
+
+  @override
+  String nfMakerRenamed(int count) {
+    return 'Applied to $count products';
+  }
+
+  @override
+  String get nfValuesHint =>
+      'Call an attribute value something else everywhere (e.g. colour 赤 → レッド). Product names with it and the suppliers’ words for it follow. The old value keeps reading as the new one.';
+
+  @override
+  String get nfAttribute => 'Attribute';
+
+  @override
+  String get nfFrom => 'Current value';
+
+  @override
+  String get nfTo => 'New value';
+
+  @override
+  String get nfRenameEverywhere => 'Rename everywhere';
+
+  @override
+  String nfValueRenamed(int count) {
+    return '$count products changed';
+  }
+
+  @override
+  String get pnTitle => 'Build the name';
+
+  @override
+  String get pnBaseName => 'Base name (without size or colour)';
+
+  @override
+  String get pnUnit => 'Unit';
+
+  @override
+  String get pnListPrice => 'List price';
+
+  @override
+  String get pnFormat => 'Format';
+
+  @override
+  String pnFormatDefault(String name) {
+    return 'Default format ($name)';
+  }
+
+  @override
+  String get pnManual => 'Type the name by hand (no format)';
+
+  @override
+  String get pnName => 'Product name';
+
+  @override
+  String get pnPreview => 'Product name';
+
+  @override
+  String get pnLegacy =>
+      'This product has no parts yet. Enter a base name and the format will build its name.';
+
+  @override
+  String get pnAttrsHint =>
+      'Size, colour and so on are set on the Attributes tab of the product pictures screen';
+
+  @override
+  String get pnNeedsBase => 'Enter a base name';
+
+  @override
+  String get pnSaved => 'Product name updated';
+
+  @override
+  String rpOpen(int count) {
+    return 'Register new products in our format ($count)';
+  }
+
+  @override
+  String get rpTitle => 'Register in our format';
+
+  @override
+  String get rpIntro =>
+      'These are the document’s new lines as products in our format. Check and correct them, then register. Registering also learns this supplier’s way of writing them.';
+
+  @override
+  String get rpNone =>
+      'Nothing new to register (lines without a JAN and products we have are left out)';
+
+  @override
+  String get rpFromCode =>
+      'The document has no name for it; the code stands in for now';
+
+  @override
+  String rpRegister(int count) {
+    return 'Register $count';
+  }
+
+  @override
+  String rpRegistered(int count) {
+    return '$count products registered';
+  }
+
+  @override
+  String get rpNeedsMaker =>
+      'Every chosen product needs a maker and a base name';
+
+  @override
+  String get ntFieldListPrice => 'List price';
+
+  @override
+  String get ntFieldDiscountRate => 'Rate';
+
+  @override
+  String get ntFieldUnit => 'Unit';
+
+  @override
+  String get ntFieldSupplierCode => 'Supplier’s own code';
+
+  @override
+  String get ntMatchRegistered => 'Registered in our format';
 }

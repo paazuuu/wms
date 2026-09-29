@@ -10,6 +10,9 @@ import 'package:wms_mobile/core/offline/pending_sync.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
 import 'package:wms_mobile/features/documents/data/documents_repository.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/product_library/application/product_naming_providers.dart';
+import 'package:wms_mobile/features/product_library/data/product_naming_repository.dart';
+import 'package:wms_mobile/features/product_library/domain/product_naming.dart';
 import 'package:wms_mobile/features/product_library/data/product_image_repository.dart';
 import 'package:wms_mobile/features/product_library/domain/product_image.dart';
 import 'package:wms_mobile/features/documents/domain/documents.dart';
@@ -190,6 +193,8 @@ List<Override> _defaultOverrides() => [
       // No product pictures unless a test adds some (0109).
       productImageRepositoryProvider.overrideWithValue(FakeProductImageRepository()),
       productLibraryCanManageProvider.overrideWithValue(false),
+      // Our product format (0111), in memory.
+      productNamingRepositoryProvider.overrideWithValue(FakeProductNamingRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -225,7 +230,8 @@ Future<void> pumpAppWith(
   Widget child,
 ) async {
   // Product pictures (0109) are served from memory here even when the
-  // caller's container predates them, so no row reaches for the network.
+  // caller's container predates them, so no row reaches for the network;
+  // nobody manages products here, so the sign-in state is never read.
   final images = FakeProductImageRepository();
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -234,6 +240,8 @@ Future<void> pumpAppWith(
         overrides: [
           productImageRepositoryProvider.overrideWithValue(images),
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
+          // Managing products (0111's name builder) is off here, as in pumpApp.
+          productLibraryCanManageProvider.overrideWithValue(false),
         ],
         child: MaterialApp(
           locale: const Locale('ja'),
@@ -4533,5 +4541,123 @@ class FakeProductImageRepository implements ProductImageRepository {
       }
     }
     return const ApiFailure(message: 'not found', statusCode: 404);
+  }
+}
+
+/// Our product format (0111) in memory: formats, each product's naming parts,
+/// makers, and proposals for a document's new lines.
+class FakeProductNamingRepository implements ProductNamingRepository {
+  FakeProductNamingRepository({
+    List<NameFormat>? formats,
+    Map<int, ProductNaming>? namings,
+    List<MakerEntry>? makerList,
+    List<ProductProposal>? proposals,
+  })  : formatList = formats ??
+            [
+              const NameFormat(id: 1, name: '標準', template: '{base} {attr:size} {attr:color}', isDefault: true, products: 3),
+              const NameFormat(id: 2, name: 'メーカー名つき', template: '{maker} {base} {attr:size} {attr:color}'),
+            ],
+        namings = namings ?? {},
+        makerList = makerList ?? [const MakerEntry(id: 7, name: 'ミツビシ', products: 5, dialects: 1)],
+        proposals = proposals ?? [];
+
+  final List<NameFormat> formatList;
+  final Map<int, ProductNaming> namings;
+  final List<MakerEntry> makerList;
+  final List<ProductProposal> proposals;
+
+  ({int? id, String name, String template, bool? isDefault})? lastSaved;
+  (int, ProductNamingDraft)? lastNaming;
+  (int, String)? lastMakerRename;
+  (int, String, String)? lastValueRename;
+  List<Map<String, dynamic>>? lastProposeLines;
+  int? lastProposePartner;
+  List<ProductProposal>? lastRegistered;
+  int? lastRegisterFormat;
+  String? lastPreviewTemplate;
+
+  @override
+  Future<ApiResult<List<NameFormat>>> formats() async => ApiSuccess([...formatList]);
+
+  @override
+  Future<ApiResult<List<NamePreview>>> preview(String template, {int? formatId, int limit = 20}) async {
+    lastPreviewTemplate = template;
+    return ApiSuccess([
+      NamePreview(
+        productId: 1,
+        current: 'ユニボール エア 0.5mm 赤',
+        next: renderProductName(template, base: 'ユニボール エア', maker: '三菱鉛筆', attributes: const {'size': '0.5mm', 'color': '赤'}),
+      ),
+    ]);
+  }
+
+  @override
+  Future<ApiResult<NameFormatSaved>> saveFormat({int? id, required String name, required String template, bool? isDefault, bool? active}) async {
+    lastSaved = (id: id, name: name, template: template, isDefault: isDefault);
+    final newId = id ?? 100 + formatList.length;
+    formatList.removeWhere((f) => f.id == newId);
+    formatList.add(NameFormat(id: newId, name: name, template: template, isDefault: isDefault ?? false));
+    return ApiSuccess(NameFormatSaved(id: newId, renamed: 3, formats: [...formatList]));
+  }
+
+  @override
+  Future<ApiResult<ProductNaming>> naming(int productId) async =>
+      ApiSuccess(namings[productId] ?? ProductNaming(id: productId, name: 'P$productId'));
+
+  @override
+  Future<ApiResult<ProductNaming>> setNaming(int productId, ProductNamingDraft draft) async {
+    lastNaming = (productId, draft);
+    final n = ProductNaming(
+      id: productId,
+      name: draft.manual ? (draft.name ?? '') : (draft.baseName ?? ''),
+      baseName: draft.baseName,
+      unit: draft.unit,
+      listPrice: draft.listPrice,
+      formatId: draft.formatId,
+      manual: draft.manual,
+    );
+    namings[productId] = n;
+    return ApiSuccess(n);
+  }
+
+  @override
+  Future<ApiResult<List<MakerEntry>>> makers({String? search}) async =>
+      ApiSuccess([for (final m in makerList) if (search == null || m.name.contains(search)) m]);
+
+  @override
+  Future<ApiResult<int>> renameMaker(int makerId, String name) async {
+    lastMakerRename = (makerId, name);
+    final i = makerList.indexWhere((m) => m.id == makerId);
+    final m = makerList[i];
+    makerList[i] = MakerEntry(id: m.id, name: name, products: m.products, dialects: m.dialects + 1);
+    return ApiSuccess(m.products);
+  }
+
+  @override
+  Future<ApiResult<int>> renameAttributeValue(int attributeId, String from, String to) async {
+    lastValueRename = (attributeId, from, to);
+    return const ApiSuccess(2);
+  }
+
+  @override
+  Future<ApiResult<List<ProductProposal>>> propose(int? partnerId, List<Map<String, dynamic>> lines) async {
+    lastProposePartner = partnerId;
+    lastProposeLines = lines;
+    return ApiSuccess([...proposals]);
+  }
+
+  @override
+  Future<ApiResult<List<RegisteredProduct>>> register(int? partnerId, List<ProductProposal> items, {int? formatId}) async {
+    lastRegistered = items;
+    lastRegisterFormat = formatId;
+    return ApiSuccess([
+      for (final (i, p) in items.indexed)
+        RegisteredProduct(
+          row: p.row,
+          janCode: p.janCode,
+          productId: 500 + i,
+          name: renderProductName('{base} {attr:size} {attr:color}', base: p.baseName, attributes: p.attributes),
+        ),
+    ]);
   }
 }

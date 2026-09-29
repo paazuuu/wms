@@ -27,12 +27,13 @@ import { encodeBase64 } from "jsr:@std/encoding/base64";
 export type Field =
   | "jan" | "maker" | "product_name" | "product_code" | "name_code"
   | "quantity" | "case_quantity" | "cases" | "unit_price" | "amount"
-  | "spec" | "tax_rate" | "order_date" | "ignore" | "attr";
+  | "spec" | "tax_rate" | "order_date" | "ignore" | "attr"
+  | "list_price" | "discount_rate" | "unit" | "supplier_code";
 
 export const FIELDS: Field[] = [
   "jan", "maker", "product_name", "product_code", "name_code", "quantity",
   "case_quantity", "cases", "unit_price", "amount", "spec", "tax_rate",
-  "order_date", "ignore", "attr",
+  "order_date", "ignore", "attr", "list_price", "discount_rate", "unit", "supplier_code",
 ];
 
 /** A column heading we know. For field 'attr', [attribute] says which of our
@@ -77,6 +78,12 @@ export type ReadLine = {
   flags: string[];
   alternatives: Record<string, string | number | null>;
   attributes: ReadAttribute[];
+  /** 定価 (list price), 掛率 as a fraction, 単位 as written (0111). */
+  list_price: number | null;
+  discount_rate: number | null;
+  unit: string | null;
+  /** The trading company's own code for the item, beside the maker's 品番. */
+  supplier_code: string | null;
 };
 
 export type Header = {
@@ -148,6 +155,13 @@ export function toNum(v: unknown): number | null {
   const n = Number(String(v).normalize("NFKC").replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? n : null;
 }
+/** 掛率 as a fraction: 0.52, 52 and "52%" all read as 0.52. */
+export function toRate(v: unknown): number | null {
+  const n = toNum(v);
+  if (n === null || n <= 0) return null;
+  return n > 1 ? n / 100 : n;
+}
+
 function dateStr(v: unknown): string | null {
   if (v === null || v === undefined || v === "") return null;
   if (v instanceof Date) return v.toISOString().slice(0, 10);
@@ -202,6 +216,8 @@ const FIELD_HELP =
   "product_code=品番/型番/項目/商品コード, name_code=品名と品番が1つの欄に入っている, " +
   "quantity=数量(総数), case_quantity=入数, cases=ケース数/箱数, unit_price=単価, " +
   "amount=金額, spec=規格/仕様, tax_rate=税率, order_date=日付, " +
+  "list_price=定価/上代/希望小売価格, discount_rate=掛率, unit=単位(本・冊・個・P など), " +
+  "supplier_code=取引先独自の商品コード(品番とは別の欄がある場合), " +
   "attr=色・サイズ・容量・材質・重量など商品の属性(どの属性かを attribute に), ignore=その他";
 
 /** "attr:color" as an override or wire value → field and attribute. */
@@ -371,6 +387,29 @@ export function specFrom(attrs: ReadAttribute[]): string | null {
   return attrs.length ? attrs.map((a) => `${a.name}:${a.value}`).join(" ") : null;
 }
 
+const MAKER_CODE_HEADING = /品番|型番|型式|項目|めーかー|model|partno|partnumber|styleno/;
+const LIST_PRICE_HEADING = /定価|上代|希望小売|小売価格|listprice|retail|msrp/;
+
+/** Two columns read as the same thing, as in a wholesaler's sheet with its
+ * own 商品コード beside the maker's 品番, or 定価 beside 見積単価: the
+ * maker's code stays the 品番 and the other is the company's own code; a
+ * 定価-like heading is the list price and the other is the price paid. */
+export function settleDuplicates(columns: Column[]) {
+  const codes = columns.filter((c) => c.field === "product_code");
+  if (codes.length > 1) {
+    const maker = codes.find((c) => MAKER_CODE_HEADING.test(normalizeText(c.header))) ?? codes[0];
+    for (const c of codes) if (c !== maker) c.field = "supplier_code";
+  }
+  const prices = columns.filter((c) => c.field === "unit_price");
+  if (prices.length > 1) {
+    for (const c of prices) {
+      if (LIST_PRICE_HEADING.test(normalizeText(c.header)) && !columns.some((x) => x.field === "list_price")) {
+        c.field = "list_price";
+      }
+    }
+  }
+}
+
 const TOTAL_ROW = /^(合計|小計|総合計|計|total|subtotal|grand ?total)$/i;
 
 /** Reads the first sheet of an Excel or CSV file. [overrides] maps a column
@@ -456,6 +495,8 @@ export async function readSpreadsheet(
     }
   }
 
+  settleDuplicates(columns);
+
   const colOf = (f: Field) => columns.find((c) => c.field === f)?.index ?? -1;
   const cell = (r: unknown[], c: number) => (c >= 0 && c < r.length ? r[c] : null);
   const cJan = colOf("jan"), cMaker = colOf("maker"), cName = colOf("product_name");
@@ -463,6 +504,8 @@ export async function readSpreadsheet(
   const cCaseQty = colOf("case_quantity"), cCases = colOf("cases"), cUnit = colOf("unit_price");
   const cAmount = colOf("amount"), cSpec = colOf("spec"), cTax = colOf("tax_rate");
   const cDate = colOf("order_date");
+  const cList = colOf("list_price"), cRate = colOf("discount_rate"), cUnitName = colOf("unit");
+  const cSupCode = colOf("supplier_code");
   // Every attribute column, however many (色 and サイズ side by side).
   const attrCols = columns.filter((c) => c.field === "attr" && c.attribute);
 
@@ -477,6 +520,8 @@ export async function readSpreadsheet(
     const code = str(cell(r, cCode));
     const nameCode = str(cell(r, cNameCode));
     if (!rawJan && !name && !code && !nameCode) return;
+    const listPrice = toNum(cell(r, cList));
+    const rate = toRate(cell(r, cRate));
     const cases = toInt(cell(r, cCases));
     const caseQty = toInt(cell(r, cCaseQty));
     let qty = toInt(cell(r, cQty));
@@ -503,13 +548,18 @@ export async function readSpreadsheet(
       planned_quantity: qty ?? 0,
       case_quantity: caseQty,
       cases,
-      unit_price: toInt(cell(r, cUnit)),
+      unit_price: toNum(cell(r, cUnit)) ??
+        (listPrice !== null && rate !== null ? Math.round(listPrice * rate * 100) / 100 : null),
       amount: toInt(cell(r, cAmount)),
       tax_rate: toNum(cell(r, cTax)),
       order_date: dateStr(cell(r, cDate)),
       flags,
       alternatives: {},
       attributes: attrs,
+      list_price: listPrice,
+      discount_rate: rate,
+      unit: str(cell(r, cUnitName)),
+      supplier_code: str(cell(r, cSupCode)),
     });
   });
 
@@ -584,6 +634,10 @@ const LINE_PROPS = {
   unit_price: { type: "number" },
   amount: { type: "number" },
   tax_rate: { type: "number" },
+  list_price: { type: "number" },
+  discount_rate: { type: "number" },
+  unit: { type: "string" },
+  supplier_code: { type: "string" },
   attributes: {
     type: "array",
     items: {
@@ -604,6 +658,8 @@ const EXTRACT_PROMPT =
   "品名と品番が1つの欄にまとめて書かれている場合は、その欄の文字をそのまま name_code に入れ、" +
   "さらに品名を product_name、品番を product_code に分けて入れる。別の欄ならそれぞれに。" +
   "quantity は総数(入数×ケース数の表記なら掛けた数)。case_quantity は入数、cases はケース数。" +
+  "unit_price は実際の単価(見積単価・納品単価)、list_price は定価(上代)、discount_rate は掛率、unit は単位(本・冊・P など書かれたとおり)。" +
+  "品番(メーカー品番・項目)とは別に取引先独自の商品コードの欄があれば supplier_code に。" +
   "色・サイズ・容量・材質・重量など商品の属性が別の欄(または品名の後ろ)に書かれていれば、attributes に " +
   "{name: 見出しの文字どおり(カラー・Size など), value: 書かれた値} で入れる。" +
   "住所・電話・登録番号・合計行は明細にしない。読めない項目は省略。";
@@ -678,13 +734,17 @@ function rawToLine(l: RawLine, row: number, aliases: AliasRow[] = []): ReadLine 
       ((toInt(l.cases) ?? 0) * (toInt(l.case_quantity) ?? 0) || 0),
     case_quantity: toInt(l.case_quantity),
     cases: toInt(l.cases),
-    unit_price: toInt(l.unit_price),
+    unit_price: toNum(l.unit_price),
     amount: toInt(l.amount),
     tax_rate: toNum(l.tax_rate),
     order_date: null,
     flags: [],
     alternatives: {},
     attributes: attrs,
+    list_price: toNum(l.list_price),
+    discount_rate: toRate(l.discount_rate),
+    unit: str(l.unit),
+    supplier_code: str(l.supplier_code),
   };
 }
 

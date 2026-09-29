@@ -11,6 +11,9 @@ import 'package:wms_mobile/features/partners/application/trading_partner_provide
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/product_library/application/product_naming_providers.dart';
+import 'package:wms_mobile/features/product_library/domain/product_naming.dart';
 
 import '../../support/harness.dart';
 
@@ -363,5 +366,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.lastSnapshotPartner, 1);
     expect(find.textContaining('書式変更前'), findsOneWidget);
+  });
+
+  testWidgets('lines we have no product for become products in our format, and are tied to them (0111)',
+      (tester) async {
+    const read = TrainingRead(trainingId: 8, partnerId: 1, source: 'xlsx', lines: [
+      ReadLineResult(
+        row: 4,
+        rawJanCode: '4902505000001',
+        janCode: '4902505000001',
+        maker: 'ﾐﾂﾋﾞｼ',
+        productName: 'ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ',
+        productCode: 'UBA-188',
+        unit: 'ﾎﾝ',
+        listPrice: 200,
+        quantity: 10,
+        flags: ['unresolved'],
+      ),
+      // No JAN: it cannot become a product from here.
+      ReadLineResult(row: 5, productName: 'けしごむ', quantity: 1, flags: ['unresolved', 'no_jan']),
+    ]);
+    final naming = FakeProductNamingRepository(proposals: const [
+      ProductProposal(
+        row: 4,
+        janCode: '4902505000001',
+        maker: '三菱鉛筆',
+        code: 'UBA-188',
+        baseName: 'ユニボール エア',
+        unit: '本',
+        attributes: {'size': '0.5mm', 'color': '赤'},
+      ),
+    ]);
+    final repo = await _pump(tester, repo: FakeNotationRepository(read: read), extra: [
+      productLibraryCanManageProvider.overrideWithValue(true),
+      productNamingRepositoryProvider.overrideWithValue(naming),
+    ]);
+    await _choosePartnerAndRead(tester);
+    expect(find.text('未登録の商品を自社様式で登録（1）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('nt-register-products')));
+    await tester.pumpAndSettle();
+    expect(naming.lastProposePartner, 1);
+    final sent = naming.lastProposeLines!.single;
+    expect(sent['row'], 4);
+    expect(sent['unit'], 'ﾎﾝ');
+    expect(sent['list_price'], 200);
+    await tester.tap(find.byKey(const ValueKey('rp-register')));
+    await tester.pumpAndSettle();
+    expect(find.text('1件の商品を登録しました'), findsOneWidget);
+    // The line now answers to the new product, and the button is gone.
+    expect(find.text('ユニボール エア 0.5mm 赤'), findsOneWidget);
+    expect(find.byKey(const ValueKey('nt-register-products')), findsNothing);
+    tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).removeCurrentSnackBar();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('nt-learn')));
+    await tester.pumpAndSettle();
+    expect(repo.lastLearn?.lines.first.product?.id, 500);
   });
 }

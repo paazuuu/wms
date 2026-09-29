@@ -7158,4 +7158,236 @@ class AppLocalizationsJa extends AppLocalizations {
   String ntLearnedLibrary(int profiles, int attributes) {
     return '商品ライブラリーに 仕入先の呼び名$profiles件・属性$attributes件';
   }
+
+  @override
+  String get featNameFormats => '商品様式';
+
+  @override
+  String get featNameFormatsDesc => '商品名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更';
+
+  @override
+  String get nfTitle => '商品様式';
+
+  @override
+  String get nfTabFormats => '様式';
+
+  @override
+  String get nfTabMakers => 'メーカー';
+
+  @override
+  String get nfTabValues => '属性の値';
+
+  @override
+  String get nfIntro =>
+      '商品名は「基本名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う商品名がすべて作り直されます。手入力の商品名はそのまま残ります。';
+
+  @override
+  String get nfDefault => '既定';
+
+  @override
+  String nfProducts(int count) {
+    return '$count件の商品';
+  }
+
+  @override
+  String get nfNew => '様式を追加';
+
+  @override
+  String get nfEdit => '様式の編集';
+
+  @override
+  String get nfName => '様式の名前';
+
+  @override
+  String get nfTemplate => '組み立て方';
+
+  @override
+  String get nfTemplateHint => '「基本名」は必ず入れてください';
+
+  @override
+  String get nfInsert => '差し込む項目（タップで追加）';
+
+  @override
+  String get nfPartBase => '基本名';
+
+  @override
+  String get nfPartMaker => 'メーカー';
+
+  @override
+  String get nfPartCode => '品番';
+
+  @override
+  String get nfPartJan => 'JAN';
+
+  @override
+  String get nfPartUnit => '単位';
+
+  @override
+  String get nfSample => '例';
+
+  @override
+  String get nfSampleBase => 'ボールペン';
+
+  @override
+  String get nfSampleMaker => 'サンプル文具';
+
+  @override
+  String get nfSampleUnit => '本';
+
+  @override
+  String get nfSampleColor => '赤';
+
+  @override
+  String get nfMakeDefault => '新しい商品の既定の様式にする';
+
+  @override
+  String get nfPreview => '実際の商品名の変わり方';
+
+  @override
+  String get nfPreviewRefresh => '確認';
+
+  @override
+  String get nfPreviewNone => 'この様式の商品はまだありません';
+
+  @override
+  String get nfNeedsBase => '組み立て方に「基本名」を入れてください';
+
+  @override
+  String get nfNeedsName => '様式の名前を入れてください';
+
+  @override
+  String nfSaved(int count) {
+    return '保存しました。$count件の商品名を作り直しました';
+  }
+
+  @override
+  String get nfSearchMaker => 'メーカーを検索（別表記でも可）';
+
+  @override
+  String get nfMakersHint =>
+      'メーカー名を変えると、そのメーカーの商品名もすべて変わります。旧名は今後も同じメーカーとして読み取ります。';
+
+  @override
+  String get nfRename => 'メーカー名を変える';
+
+  @override
+  String get nfNewName => '新しい名前';
+
+  @override
+  String nfDialects(int count) {
+    return '別表記$count件';
+  }
+
+  @override
+  String nfMakerRenamed(int count) {
+    return '$count件の商品に反映しました';
+  }
+
+  @override
+  String get nfValuesHint =>
+      '属性の値の呼び方を一括で変えます（例：色「赤」→「レッド」）。その値を持つ商品の名前と、仕入先の書き方の対応も変わります。旧い値は今後も新しい値として読み取ります。';
+
+  @override
+  String get nfAttribute => '属性';
+
+  @override
+  String get nfFrom => '今の値';
+
+  @override
+  String get nfTo => '新しい値';
+
+  @override
+  String get nfRenameEverywhere => '一括で変更';
+
+  @override
+  String nfValueRenamed(int count) {
+    return '$count件の商品を変更しました';
+  }
+
+  @override
+  String get pnTitle => '商品名の組み立て';
+
+  @override
+  String get pnBaseName => '基本名（サイズ・色を除いた名前）';
+
+  @override
+  String get pnUnit => '単位';
+
+  @override
+  String get pnListPrice => '定価';
+
+  @override
+  String get pnFormat => '様式';
+
+  @override
+  String pnFormatDefault(String name) {
+    return '既定の様式（$name）';
+  }
+
+  @override
+  String get pnManual => '商品名を手入力する（様式を使わない）';
+
+  @override
+  String get pnName => '商品名';
+
+  @override
+  String get pnPreview => '商品名';
+
+  @override
+  String get pnLegacy => 'この商品はまだ部品に分かれていません。基本名を入れると様式で名前が作られます。';
+
+  @override
+  String get pnAttrsHint => 'サイズ・色などは商品の写真画面の「属性」タブで設定します';
+
+  @override
+  String get pnNeedsBase => '基本名を入れてください';
+
+  @override
+  String get pnSaved => '商品名を更新しました';
+
+  @override
+  String rpOpen(int count) {
+    return '未登録の商品を自社様式で登録（$count）';
+  }
+
+  @override
+  String get rpTitle => '自社様式で商品登録';
+
+  @override
+  String get rpIntro =>
+      '書類の行から、自社の様式に整えた商品案を作りました。確認・修正して登録してください。登録すると、この仕入先の書き方も一緒に学習します。';
+
+  @override
+  String get rpNone => '登録できる新しい商品はありません（JANの無い行と登録済みの商品は除きます）';
+
+  @override
+  String get rpFromCode => '書類に商品名がありません。品番を仮の名前にしています';
+
+  @override
+  String rpRegister(int count) {
+    return '$count件を登録';
+  }
+
+  @override
+  String rpRegistered(int count) {
+    return '$count件の商品を登録しました';
+  }
+
+  @override
+  String get rpNeedsMaker => '選んだ商品にはメーカーと基本名が必要です';
+
+  @override
+  String get ntFieldListPrice => '定価';
+
+  @override
+  String get ntFieldDiscountRate => '掛率';
+
+  @override
+  String get ntFieldUnit => '単位';
+
+  @override
+  String get ntFieldSupplierCode => '仕入先の商品コード';
+
+  @override
+  String get ntMatchRegistered => '自社様式で新規登録';
 }
