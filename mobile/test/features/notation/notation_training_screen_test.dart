@@ -422,4 +422,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.lastLearn?.lines.first.product?.id, 500);
   });
+
+  testWidgets('a warning on a line can be reported, and the history shows how right each kind was (0113)',
+      (tester) async {
+    const read = TrainingRead(trainingId: 9, partnerId: 1, source: 'xlsx', lines: [
+      ReadLineResult(
+        row: 2,
+        rawJanCode: '4901480344041',
+        janCode: '4901480344041',
+        productCode: 'ル-PP158B',
+        quantity: 5,
+        flags: ['jan_code_mismatch'],
+        alternatives: {'code_product': 'バインダー 青 (4901480344010)'},
+        product: ResolvedProduct(id: 1, janCode: '4901480344041', name: 'バインダー 灰'),
+      ),
+    ]);
+    final repo = FakeNotationRepository(read: read)
+      ..warningRows = [
+        const WarningStat(flag: 'jan_code_mismatch', right: 3, wrong: 1, notes: [
+          (verdict: 'wrong', note: 'ケース品と単品で同じ品番', partnerName: 'A商社'),
+        ]),
+      ];
+    await _pump(tester, repo: repo);
+    await _choosePartnerAndRead(tester);
+    expect(find.text('JANと品番が別の商品を指しています'), findsOneWidget);
+    expect(find.text('もう一方の読み（品番から引いた商品）：バインダー 青 (4901480344010)'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('nt-flag-2-jan_code_mismatch')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wr-right')));
+    await tester.pumpAndSettle();
+    expect(repo.reports.single.flag, 'jan_code_mismatch');
+    expect(repo.reports.single.right, isTrue);
+    expect(repo.reports.single.partnerId, 1);
+
+    await tester.tap(find.byKey(const ValueKey('nt-tab-history')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('nt-warning-stat-jan_code_mismatch')), findsOneWidget);
+    expect(find.text('正しい 3'), findsOneWidget);
+    expect(find.text('誤り 1'), findsOneWidget);
+    expect(find.text('✕ ケース品と単品で同じ品番（A商社）'), findsOneWidget);
+  });
 }

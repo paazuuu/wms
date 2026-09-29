@@ -3,8 +3,11 @@ import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
   type AliasRow,
+  checkJan,
   janCheckOk,
   janLostDigits,
+  janShownAsExponent,
+  janSurvivingDigits,
   normalizeJan,
   normalizeText,
   readSpreadsheet,
@@ -231,4 +234,67 @@ Deno.test("a JAN that lost its digits to exponent form is flagged, not guessed (
   assertEquals(lines[1].flags.includes("jan_exponent"), true);
   assertEquals(lines[2].flags.includes("jan_exponent"), false);
   assertEquals(lines[2].jan_code, "4901480344041");
+});
+
+Deno.test("a JAN kept whole but shown in exponent form is read right and warned about (0113)", async () => {
+  assert(janShownAsExponent(4901480344041, "General"));
+  assert(!janShownAsExponent(4901480344041, null));
+  assert(janShownAsExponent(4901480344041, "0.00E+00"));
+  assert(!janShownAsExponent(4901480344041, "0"));
+  assert(!janShownAsExponent("4901480344041", "General"));
+  assert(!janShownAsExponent(12345678, "General"));
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["JAN", "qty", "maker"],
+    [4901480344041, 5, "コクヨ"],
+    [4902778198940, 5, "三菱鉛筆"],
+  ]);
+  sheet["A2"].z = "General";
+  sheet["A3"].z = "0";
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "s");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { lines } = await readSpreadsheet(bytes, aliases, {}, false);
+  assertEquals(lines[0].jan_code, "4901480344041");
+  assert(lines[0].flags.includes("jan_display_exponent"));
+  assert(!lines[0].flags.includes("jan_exponent"));
+  assert(!lines[1].flags.includes("jan_display_exponent"));
+});
+
+Deno.test("what survives of a JAN that lost its digits", () => {
+  assertEquals(janSurvivingDigits("4.90148E+12"), "490148");
+  assertEquals(janSurvivingDigits("4.901480344E+12"), "4901480344");
+  assertEquals(janSurvivingDigits("4901480000000"), "490148");
+  assertEquals(janSurvivingDigits("4.9E+12"), null);
+});
+
+Deno.test("a lost JAN is restored from the 品番 only when the surviving digits agree (0113)", () => {
+  const lost = { flags: ["jan_exponent"], raw_jan_code: "4.90148E+12", jan_code: "" };
+  const kokuyo = { id: 1, name: "バインダー", jan_code: "4901480344041" };
+  const pilot = { id: 2, name: "ペン", jan_code: "4902505591624" };
+  const ok = checkJan(lost, null, null, kokuyo);
+  assertEquals(ok.flag, "jan_restored");
+  assertEquals(ok.restored, kokuyo);
+  const bad = checkJan(lost, null, null, pilot);
+  assertEquals(bad.flag, "jan_restore_mismatch");
+  assertEquals(bad.restored, undefined);
+  assertEquals(bad.alternative, "ペン (4902505591624)");
+  // Found by name alone, but the digits disagree: dropped, not guessed.
+  const byName = checkJan(lost, pilot, "name", null);
+  assertEquals(byName.drop, true);
+  // Nothing to restore from: stays as it is.
+  assertEquals(checkJan(lost, null, null, null), {});
+});
+
+Deno.test("a JAN and a 品番 naming two products are flagged (0113)", () => {
+  const line = { flags: [], raw_jan_code: "4901480344041", jan_code: "4901480344041" };
+  const a = { id: 1, name: "バインダー 灰", jan_code: "4901480344041" };
+  const b = { id: 2, name: "バインダー 青", jan_code: "4901480344010" };
+  assertEquals(checkJan(line, a, "jan", b).flag, "jan_code_mismatch");
+  assertEquals(checkJan(line, a, "jan", b).alternative, "バインダー 青 (4901480344010)");
+  assertEquals(checkJan(line, a, "jan", a), {});
+  // Matched on the name, not the JAN: nothing to compare.
+  assertEquals(checkJan(line, a, "name", b), {});
+  // A JAN failing its check digit, with a 品番 we know: say which product.
+  const typo = { flags: ["jan_check"], raw_jan_code: "4901480344042", jan_code: "4901480344042" };
+  assertEquals(checkJan(typo, null, null, b).alternative, "バインダー 青 (4901480344010)");
 });

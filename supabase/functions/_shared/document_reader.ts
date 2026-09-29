@@ -430,9 +430,15 @@ export async function readSpreadsheet(
   useAi = true,
   attributes: AttributeDef[] = [],
 ): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number }> {
-  const wb = XLSX.read(bytes, { type: "array", cellDates: true });
+  const wb = XLSX.read(bytes, { type: "array", cellDates: true, cellNF: true });
   const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null }) as unknown[][];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }) as unknown[][];
+  // Row/column 0 of [rows] is the sheet's first used cell.
+  const origin = ws["!ref"] ? XLSX.utils.decode_range(ws["!ref"]).s : { r: 0, c: 0 };
+  const formatAt = (r: number, c: number): string | null => {
+    const cellObj = ws[XLSX.utils.encode_cell({ r: origin.r + r, c: origin.c + c })] as { z?: unknown } | undefined;
+    return typeof cellObj?.z === "string" ? cellObj.z : null;
+  };
   const ncol = rows.reduce((m, r) => Math.max(m, r.length), 0);
 
   // The heading row: the one most of whose cells are headings we know.
@@ -545,6 +551,11 @@ export async function readSpreadsheet(
       qty = cases * caseQty;
       flags.push("qty_from_cases");
     }
+    // A JAN kept whole as a number but SHOWN in exponent form (4.90148E+12):
+    // read right, but warned about, since the file loses it once saved as CSV.
+    if (cJan >= 0 && janShownAsExponent(cell(r, cJan), formatAt(headerRow + 1 + i, cJan))) {
+      flags.push("jan_display_exponent");
+    }
     lines.push({
       row: headerRow + 2 + i,
       jan_code: isJanLength(jan) ? jan : "",
@@ -619,10 +630,62 @@ async function applySplits(lines: ReadLine[], useAi: boolean) {
 /** A JAN that went through a spreadsheet as a number shown in exponent form
  * ("4.90148E+12", or 4901480000000 after it was saved that way): its last
  * digits are gone, and no reading can bring them back. */
+/** Excel shows a number of 12 digits or more in exponent form under the
+ * "General" format (and under any format with E+ in it). */
+export function janShownAsExponent(value: unknown, format: string | null): boolean {
+  if (typeof value !== "number" || !Number.isFinite(value) || Math.abs(value) < 1e11) return false;
+  // No format at all (a CSV) has no display to speak of.
+  return format !== null && (/^general$/i.test(format) || /e\+/i.test(format));
+}
+
+/** The leading digits a JAN that lost its tail still has: "4.90148E+12" and
+ * 4901480000000 both keep 490148. Null when nothing trustworthy is left. */
+export function janSurvivingDigits(raw: unknown): string | null {
+  const s = String(raw ?? "").normalize("NFKC").trim();
+  const m = s.match(/^([0-9])(?:\.([0-9]+))?e\+?([0-9]+)$/i);
+  const digits = m ? (m[1] + (m[2] ?? "")) : (/^[0-9]{13}$/.test(s) ? s : "");
+  const kept = digits.replace(/0+$/, "");
+  return kept.length >= 5 ? kept : null;
+}
+
 export function janLostDigits(raw: unknown): boolean {
   const s = String(raw ?? "").normalize("NFKC").trim();
   if (/^[0-9](\.[0-9]+)?e\+?[0-9]+$/i.test(s)) return true;
   return /^[0-9]{7,8}0{5,}$/.test(s) && s.length === 13 && !janCheckOk(s);
+}
+
+/** A match made on the 品番 alone, trusted enough to check a JAN against. */
+export const CODE_MATCHES = new Set(["dialect_code", "sku"]);
+
+/** The JAN checked against the 品番 on the same line (0113):
+ *   * digits lost (jan_exponent) — the product the 品番 names is taken only
+ *     when its JAN starts with the digits that survived (jan_restored, for a
+ *     person to confirm); otherwise nothing is guessed (jan_restore_mismatch);
+ *   * a JAN and a 品番 naming two different products — jan_code_mismatch. */
+export function checkJan(
+  l: Pick<ReadLine, "flags" | "raw_jan_code" | "jan_code">,
+  product: Record<string, unknown> | null,
+  matchedBy: string | null,
+  codeProduct: Record<string, unknown> | null,
+): { flag?: string; alternative?: string; restored?: Record<string, unknown>; drop?: boolean } {
+  const describe = (p: Record<string, unknown>) => `${p.name ?? ""} (${p.jan_code ?? ""})`;
+  if (l.flags.includes("jan_exponent")) {
+    const prefix = janSurvivingDigits(l.raw_jan_code);
+    const candidate = codeProduct ?? product;
+    if (!candidate) return {};
+    const jan = String(candidate.jan_code ?? "");
+    if (prefix && jan.startsWith(prefix)) return { flag: "jan_restored", restored: candidate };
+    return { flag: "jan_restore_mismatch", alternative: describe(candidate), drop: true };
+  }
+  if (product && codeProduct && (matchedBy === "jan" || matchedBy === "dialect_jan") &&
+      codeProduct.id !== product.id) {
+    return { flag: "jan_code_mismatch", alternative: describe(codeProduct) };
+  }
+  if (!product && codeProduct && l.raw_jan_code && !janCheckOk(l.raw_jan_code)) {
+    // A JAN that fails its check digit, with a 品番 we know: say which.
+    return { alternative: describe(codeProduct) };
+  }
+  return {};
 }
 
 export function checkLines(lines: ReadLine[]) {

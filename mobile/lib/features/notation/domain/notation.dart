@@ -606,9 +606,23 @@ abstract final class NotationFlag {
     'unresolved', 'jan_check', 'ai_disagree', 'split_disagree', 'split_failed',
     'no_quantity', 'no_maker', 'amount_mismatch', 'added_by_check', 'dropped_by_check',
     'not_verified', 'jan_exponent',
+    // The JAN checked against the 品番 on the same line (0113).
+    'jan_restored', 'jan_restore_mismatch', 'jan_code_mismatch',
   };
 
+  /// Worth a warning, but the reading is right (0113): a JAN shown in
+  /// exponent form whose digits are all there.
+  static const notices = {'jan_display_exponent'};
+
   static bool isProblem(String flag) => problems.contains(flag.split(':').first);
+
+  /// Shown with a warning mark: a problem, or a notice.
+  static bool isWarning(String flag) => isProblem(flag) || notices.contains(flag.split(':').first);
+
+  /// The JAN warnings the import review counts at the top.
+  static const janWarnings = {
+    'jan_display_exponent', 'jan_exponent', 'jan_restored', 'jan_restore_mismatch', 'jan_code_mismatch', 'jan_check',
+  };
 }
 
 
@@ -773,4 +787,29 @@ class FieldLibrary extends Equatable {
 
   @override
   List<Object?> get props => [fields, attributes];
+}
+
+/// How one kind of warning has fared with the people who checked it (0113).
+class WarningStat extends Equatable {
+  const WarningStat({required this.flag, this.right = 0, this.wrong = 0, this.notes = const []});
+
+  final String flag;
+  final int right;
+  final int wrong;
+
+  /// The latest notes, newest first.
+  final List<({String verdict, String note, String? partnerName})> notes;
+
+  factory WarningStat.fromJson(Map<String, dynamic> j) => WarningStat(
+        flag: (j['flag'] ?? '').toString(),
+        right: _int(j['right']),
+        wrong: _int(j['wrong']),
+        notes: [
+          for (final n in _rows(j['notes']))
+            (verdict: (n['verdict'] ?? '').toString(), note: (n['note'] ?? '').toString(), partnerName: _text(n['partner_name'])),
+        ],
+      );
+
+  @override
+  List<Object?> get props => [flag, right, wrong];
 }

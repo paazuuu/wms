@@ -35,6 +35,11 @@ void main() {
     expect(columnFieldLabel(l10n, ColumnField.upstreamCode), '取引先の仕入先コード');
     expect(flagLabel(l10n, 'jan_exponent'), l10n.ntFlagJanExponent);
     expect(NotationFlag.isProblem('jan_exponent'), isTrue);
+    // Shown in exponent form but read whole: a warning, not a problem (0113).
+    expect(NotationFlag.isProblem('jan_display_exponent'), isFalse);
+    expect(NotationFlag.isWarning('jan_display_exponent'), isTrue);
+    expect(NotationFlag.isProblem('jan_code_mismatch'), isTrue);
+    expect(flagLabel(l10n, 'jan_restored'), l10n.ntFlagJanRestored);
   });
 
   test('the chosen names are served per language', () async {

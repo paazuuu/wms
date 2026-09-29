@@ -20,6 +20,7 @@ import '../../product_library/presentation/register_products_sheet.dart';
 import '../application/notation_providers.dart';
 import '../domain/notation.dart';
 import 'notation_labels.dart';
+import 'warning_report.dart';
 
 /// Teaching the system each trading company's way of writing things, before
 /// their goods arrive (0105/0106).
@@ -363,6 +364,8 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
                     onPick: _busy ? null : () => _pickProduct(line),
                     verified: read.verified,
                     spreadsheet: read.source != 'gemini',
+                    onReport: (f) => showWarningReport(context, ref,
+                        flag: f, partnerId: _partnerId, line: {...line.toProposeJson(), 'flags': line.flags}),
                   ),
               ],
             ],
@@ -564,10 +567,13 @@ class _ColumnsCard extends ConsumerWidget {
 }
 
 class _LineCard extends StatelessWidget {
-  const _LineCard({required this.line, this.onPick, this.verified = true, this.spreadsheet = false});
+  const _LineCard({required this.line, this.onPick, this.verified = true, this.spreadsheet = false, this.onReport});
 
   final ReadLineResult line;
   final VoidCallback? onPick;
+
+  /// Says whether a warning on the line was right (0113).
+  final ValueChanged<String>? onReport;
   final bool verified;
   final bool spreadsheet;
 
@@ -649,10 +655,15 @@ class _LineCard extends StatelessWidget {
                 children: [
                   for (final f in line.flags)
                     if (f != 'unresolved')
-                      StatusPill(
-                        tone: NotationFlag.isProblem(f) ? StatusTone.warning : StatusTone.neutral,
-                        label: flagLabel(l10n, f),
-                        dense: true,
+                      // A warning can be said to be right or wrong (0113).
+                      InkWell(
+                        key: ValueKey('nt-flag-${line.row}-$f'),
+                        onTap: onReport == null || !NotationFlag.isWarning(f) ? null : () => onReport!(f),
+                        child: StatusPill(
+                          tone: NotationFlag.isWarning(f) ? StatusTone.warning : StatusTone.neutral,
+                          label: flagLabel(l10n, f),
+                          dense: true,
+                        ),
                       ),
                 ],
               ),
@@ -960,10 +971,13 @@ class _HistoryTab extends ConsumerWidget {
       onRefresh: () async {
         ref.invalidate(trainingStatsProvider);
         ref.invalidate(trainingRunsProvider);
+        ref.invalidate(warningStatsProvider);
       },
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
+          // Were the warnings right? What the people checking said (0113).
+          const _WarningStatsCard(),
           Text(l10n.ntStatsTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: AppSpacing.sm),
           ...ref.watch(trainingStatsProvider).when(
@@ -1175,6 +1189,53 @@ class _VersionsTab extends ConsumerWidget {
                       ],
               ),
       ],
+    );
+  }
+}
+
+/// How each kind of warning has fared with the people who checked it: how
+/// often it was right, how often wrong, and their latest notes (0113).
+class _WarningStatsCard extends ConsumerWidget {
+  const _WarningStatsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final stats = ref.watch(warningStatsProvider).valueOrNull ?? const <WarningStat>[];
+    return Card(
+      key: const ValueKey('nt-warning-stats'),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.wrStatsTitle, style: theme.textTheme.titleSmall),
+          Text(l10n.wrStatsHint, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          const SizedBox(height: AppSpacing.sm),
+          if (stats.isEmpty)
+            Text(l10n.wrStatsEmpty, style: theme.textTheme.bodySmall)
+          else
+            for (final s in stats) ...[
+              Row(
+                key: ValueKey('nt-warning-stat-${s.flag}'),
+                children: [
+                  Expanded(child: Text(flagLabel(l10n, s.flag), style: theme.textTheme.bodyMedium)),
+                  StatusPill(tone: StatusTone.success, label: l10n.wrRightCount(s.right), dense: true),
+                  const SizedBox(width: AppSpacing.xs),
+                  StatusPill(tone: s.wrong > 0 ? StatusTone.warning : StatusTone.neutral, label: l10n.wrWrongCount(s.wrong), dense: true),
+                ],
+              ),
+              for (final n in s.notes)
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.md, top: 2),
+                  child: Text(
+                    '${n.verdict == 'wrong' ? '✕' : '✓'} ${n.note}${n.partnerName == null ? '' : '（${n.partnerName}）'}',
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.xs),
+            ],
+        ]),
+      ),
     );
   }
 }

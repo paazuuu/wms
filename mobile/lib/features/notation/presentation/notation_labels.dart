@@ -59,6 +59,10 @@ String flagLabel(AppLocalizations l10n, String flag) {
     'unresolved' => l10n.ntFlagUnresolved,
     'jan_check' => l10n.ntFlagJanCheck,
     'jan_exponent' => l10n.ntFlagJanExponent,
+    'jan_display_exponent' => l10n.ntFlagJanDisplayExponent,
+    'jan_restored' => l10n.ntFlagJanRestored,
+    'jan_restore_mismatch' => l10n.ntFlagJanRestoreMismatch,
+    'jan_code_mismatch' => l10n.ntFlagJanCodeMismatch,
     'no_jan' => l10n.ntFlagNoJan,
     'no_maker' => l10n.ntFlagNoMaker,
     'no_quantity' => l10n.ntFlagNoQuantity,
@@ -87,6 +91,7 @@ String _comparedLabel(AppLocalizations l10n, String key) => switch (key) {
       'list_price' => l10n.ntFieldListPrice,
       'unit' => l10n.ntFieldUnit,
       'amount' => l10n.ntFieldAmount,
+      'code_product' => l10n.ntAltCodeProduct,
       _ => key,
     };
 
@@ -100,5 +105,6 @@ String matchedByLabel(AppLocalizations l10n, String? m) => switch (m) {
       'name' => l10n.ntMatchName,
       'manual' => l10n.ntMatchManual,
       'registered' => l10n.ntMatchRegistered,
+      'jan_restored' => l10n.ntMatchJanRestored,
       _ => l10n.ntMatchNone,
     };

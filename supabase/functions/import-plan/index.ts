@@ -62,6 +62,8 @@ import {
   type Field,
   FIELDS,
   type Header,
+  checkJan,
+  CODE_MATCHES,
   normalizeJan,
   normalizeText,
   readDocument,
@@ -193,29 +195,57 @@ function aggregate(lines: ReadLine[]): ReadLine[] {
 async function resolveLines(
   supabase: Client, partnerId: number | null, lines: ReadLine[],
 ): Promise<Record<string, unknown>[]> {
+  // A JAN that lost its digits is not used to find anything (0113).
+  const lost = (l: ReadLine) => l.flags.includes("jan_exponent");
   const { data, error } = await supabase.rpc("resolve_notation_lines", {
     p_partner_id: partnerId,
     p_lines: lines.map((l) => ({
-      jan_code: l.raw_jan_code ?? l.jan_code, maker: l.maker,
+      jan_code: lost(l) ? null : (l.raw_jan_code ?? l.jan_code), maker: l.maker,
       product_name: l.product_name, product_code: l.product_code,
     })),
   });
   if (error) throw new Error(error.message);
   const resolved = (data ?? []) as Record<string, unknown>[];
+  // What the 品番 alone points to, to check the JAN against (0113).
+  const { data: byCodeData } = await supabase.rpc("resolve_notation_lines", {
+    p_partner_id: partnerId,
+    p_lines: lines.map((l) => ({ jan_code: null, maker: l.maker, product_name: null, product_code: l.product_code })),
+  });
+  const byCode = (byCodeData ?? []) as Record<string, unknown>[];
   return lines.map((l, i) => {
     const r = resolved[i] ?? {};
-    const product = r.product as Record<string, unknown> | null;
+    let product = r.product as Record<string, unknown> | null;
+    let matchedBy = (r.matched_by ?? null) as string | null;
+    let janCode = l.jan_code;
     const flags = [...l.flags];
+    const alternatives = { ...l.alternatives };
+    const c = byCode[i] ?? {};
+    const codeProduct = CODE_MATCHES.has(String(c.matched_by ?? "")) ? c.product as Record<string, unknown> | null : null;
+    const check = checkJan(l, product, matchedBy, codeProduct);
+    if (check.flag) flags.push(check.flag);
+    if (check.alternative) alternatives.code_product = check.alternative;
+    if (check.restored) {
+      product = check.restored;
+      matchedBy = "jan_restored";
+      janCode = String(check.restored.jan_code ?? "");
+      const at = flags.indexOf("jan_exponent");
+      if (at >= 0) flags.splice(at, 1);
+    } else if (check.drop) {
+      product = null;
+      matchedBy = null;
+    }
     if (!product) flags.push("unresolved");
     // A maker we know from our product is no longer missing.
     const noMaker = flags.indexOf("no_maker");
     if (noMaker >= 0 && (product?.maker || r.maker_name)) flags.splice(noMaker, 1);
     return {
       ...l,
+      jan_code: janCode,
       flags,
+      alternatives,
       product,
       product_id: product?.id ?? null,
-      matched_by: r.matched_by ?? null,
+      matched_by: matchedBy,
       maker_resolved: r.maker_name ?? null,
     };
   });

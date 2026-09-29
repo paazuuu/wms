@@ -13854,6 +13854,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。'**
   String get pcVendorCodesHint;
+
+  /// No description provided for @ntFlagJanDisplayExponent.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANの表示が指数表記（4.90E+12など）です。中身の13桁で読み取りました'**
+  String get ntFlagJanDisplayExponent;
+
+  /// No description provided for @ntFlagJanRestored.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANの桁が失われていたため、品番の商品から補いました（先頭の桁は一致）。確認してください'**
+  String get ntFlagJanRestored;
+
+  /// No description provided for @ntFlagJanRestoreMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANの桁が失われています。品番の商品とJANの先頭の桁が合わないため、補っていません'**
+  String get ntFlagJanRestoreMismatch;
+
+  /// No description provided for @ntFlagJanCodeMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANと品番が別の商品を指しています'**
+  String get ntFlagJanCodeMismatch;
+
+  /// No description provided for @ntAltCodeProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番から引いた商品'**
+  String get ntAltCodeProduct;
+
+  /// No description provided for @ntMatchJanRestored.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番から補ったJAN'**
+  String get ntMatchJanRestored;
+
+  /// No description provided for @importJanWarnings.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANの確認が必要な行が{count}行あります（⚠をタップすると、警告が正しかったか報告できます）'**
+  String importJanWarnings(int count);
+
+  /// No description provided for @importJanDisplayExponent.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}行のJANはファイル上で指数表記（4.90E+12など）で表示されていますが、中身の13桁で正しく読み取りました。CSVで保存し直すと桁が消えるので、Excel（.xlsx）のまま送ってもらってください'**
+  String importJanDisplayExponent(int count);
+
+  /// No description provided for @wrTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告の確認'**
+  String get wrTitle;
+
+  /// No description provided for @wrQuestion.
+  ///
+  /// In ja, this message translates to:
+  /// **'この警告は正しかったですか？ 答えは警告のルールの見直しに使います。'**
+  String get wrQuestion;
+
+  /// No description provided for @wrNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get wrNote;
+
+  /// No description provided for @wrNoteHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例：ケース品と単品で同じ品番'**
+  String get wrNoteHint;
+
+  /// No description provided for @wrRight.
+  ///
+  /// In ja, this message translates to:
+  /// **'正しかった'**
+  String get wrRight;
+
+  /// No description provided for @wrWrong.
+  ///
+  /// In ja, this message translates to:
+  /// **'誤り（問題なかった）'**
+  String get wrWrong;
+
+  /// No description provided for @wrThanks.
+  ///
+  /// In ja, this message translates to:
+  /// **'報告しました。警告の見直しに使います'**
+  String get wrThanks;
+
+  /// No description provided for @wrStatsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告の正確さ'**
+  String get wrStatsTitle;
+
+  /// No description provided for @wrStatsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認した人が「正しかった／誤り」と報告した数です。誤りが多い警告はルールを見直します。'**
+  String get wrStatsHint;
+
+  /// No description provided for @wrStatsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ報告はありません。行の⚠をタップすると報告できます'**
+  String get wrStatsEmpty;
+
+  /// No description provided for @wrRightCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'正しい {count}'**
+  String wrRightCount(int count);
+
+  /// No description provided for @wrWrongCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'誤り {count}'**
+  String wrWrongCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -13,6 +13,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../notation/application/notation_providers.dart';
 import '../../notation/domain/notation.dart';
 import '../../notation/presentation/notation_labels.dart';
+import '../../notation/presentation/warning_report.dart';
 import '../../product/domain/product.dart';
 import '../../product/presentation/product_picker_sheet.dart';
 import '../application/delivery_providers.dart';
@@ -406,6 +407,17 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           const SizedBox(height: AppSpacing.sm),
           _Notice(l10n.importNotVerified, color: scheme.error),
         ],
+        // JANs that need a look, or were shown in exponent form (0113).
+        if (_janWarningCount > 0) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _Notice(l10n.importJanWarnings(_janWarningCount),
+              color: scheme.error, key: const ValueKey('import-jan-warnings')),
+        ],
+        if (_displayExponentCount > 0) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _Notice(l10n.importJanDisplayExponent(_displayExponentCount),
+              color: scheme.tertiary, key: const ValueKey('import-jan-display')),
+        ],
         if (_unresolvedCount > 0) ...[
           const SizedBox(height: AppSpacing.sm),
           _Notice(l10n.importUnresolvedLines(_unresolvedCount),
@@ -465,6 +477,8 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           onDelete: _deleteLine,
           onSplit: _splitLine,
           onPickProduct: _pickProduct,
+          onReport: (i, f) => showWarningReport(context, ref,
+              flag: f, partnerId: _preview?.partnerId, line: _lines[i]),
         ),
         if (preview.columns.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
@@ -496,6 +510,14 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
   }
 
   int get _unresolvedCount => _lines.where((l) => l['product_id'] == null).length;
+
+  List<String> _flagsOf(Map<String, dynamic> l) => [for (final f in (l['flags'] as List? ?? const [])) '$f'];
+
+  int get _janWarningCount => _lines
+      .where((l) => _flagsOf(l).any((f) => f != 'jan_display_exponent' && NotationFlag.janWarnings.contains(f)))
+      .length;
+
+  int get _displayExponentCount => _lines.where((l) => _flagsOf(l).contains('jan_display_exponent')).length;
 
   static String _janOf(Map<String, dynamic> l) =>
       normalizeJanKey('${l['jan_code'] ?? ''}'.isEmpty ? '${l['raw_jan_code'] ?? ''}' : '${l['jan_code']}');
@@ -718,9 +740,13 @@ class _LinesPreview extends StatelessWidget {
     required this.onDelete,
     required this.onSplit,
     required this.onPickProduct,
+    this.onReport,
   });
 
   final List<Map<String, dynamic>> lines;
+
+  /// Says whether a warning on line [int] was right (0113).
+  final void Function(int, String)? onReport;
   final ValueChanged<int> onEdit;
   final ValueChanged<int> onDelete;
   final ValueChanged<int> onSplit;
@@ -765,6 +791,7 @@ class _LinesPreview extends StatelessWidget {
                       child: _LineIdentity(
                         line: lines[i],
                         onPickProduct: () => onPickProduct(i),
+                        onReport: onReport == null ? null : (f) => onReport!(i, f),
                         pickKey: ValueKey('import-pick-$i'),
                       ),
                     ),
@@ -813,10 +840,11 @@ String _supplierWriting(Map<String, dynamic> line) => [
 /// One line's identity: our product in full, the company's writing faded under
 /// it (UI kept the original for checking, 0103), and what the reading flagged.
 class _LineIdentity extends StatelessWidget {
-  const _LineIdentity({required this.line, required this.onPickProduct, this.pickKey});
+  const _LineIdentity({required this.line, required this.onPickProduct, this.pickKey, this.onReport});
 
   final Map<String, dynamic> line;
   final VoidCallback onPickProduct;
+  final ValueChanged<String>? onReport;
   final Key? pickKey;
 
   @override
@@ -831,8 +859,9 @@ class _LineIdentity extends StatelessWidget {
         ?.copyWith(color: scheme.onSurfaceVariant.withValues(alpha: 0.6));
     final problems = [
       for (final f in (line['flags'] as List? ?? const []))
-        if (NotationFlag.isProblem('$f') && f != 'unresolved') '$f',
+        if (NotationFlag.isWarning('$f') && f != 'unresolved') '$f',
     ];
+    final alternatives = (line['alternatives'] as Map?) ?? const {};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -887,10 +916,21 @@ class _LineIdentity extends StatelessWidget {
             spacing: AppSpacing.xs,
             children: [
               for (final f in problems)
-                Text('⚠ ${flagLabel(l10n, f)}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.error)),
+                InkWell(
+                  key: ValueKey('import-warning-$f'),
+                  onTap: onReport == null ? null : () => onReport!(f),
+                  child: Text('⚠ ${flagLabel(l10n, f)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          color: NotationFlag.isProblem(f) ? scheme.error : scheme.tertiary,
+                          decoration: onReport == null ? null : TextDecoration.underline)),
+                ),
             ],
           ),
+        // What the 品番 on the line points to, when it disagrees (0113).
+        if (alternatives['code_product'] != null)
+          Text(l10n.ntOtherReading(alternativeLabel(l10n, 'code_product'), '${alternatives['code_product']}'),
+              key: const ValueKey('import-code-product'),
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary)),
         // How sure the reading is, field by field, against the thresholds
         // set in AI設定 (§50). Only the fields that need a look are listed.
         AiConfidenceRow(

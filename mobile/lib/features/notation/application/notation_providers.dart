@@ -52,3 +52,7 @@ final customFieldLabelsProvider = Provider.family<Map<String, String>, String>((
       if (e.value[languageCode] != null) e.key: e.value[languageCode]!,
   };
 });
+
+/// How each kind of warning has fared (0113).
+final warningStatsProvider = FutureProvider.autoDispose<List<WarningStat>>((ref) async =>
+    _unwrap<List<WarningStat>>(await ref.watch(notationRepositoryProvider).warningStats()));

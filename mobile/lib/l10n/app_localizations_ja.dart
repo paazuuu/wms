@@ -7533,4 +7533,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pcVendorCodesHint => '取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。';
+
+  @override
+  String get ntFlagJanDisplayExponent =>
+      'JANの表示が指数表記（4.90E+12など）です。中身の13桁で読み取りました';
+
+  @override
+  String get ntFlagJanRestored =>
+      'JANの桁が失われていたため、品番の商品から補いました（先頭の桁は一致）。確認してください';
+
+  @override
+  String get ntFlagJanRestoreMismatch =>
+      'JANの桁が失われています。品番の商品とJANの先頭の桁が合わないため、補っていません';
+
+  @override
+  String get ntFlagJanCodeMismatch => 'JANと品番が別の商品を指しています';
+
+  @override
+  String get ntAltCodeProduct => '品番から引いた商品';
+
+  @override
+  String get ntMatchJanRestored => '品番から補ったJAN';
+
+  @override
+  String importJanWarnings(int count) {
+    return 'JANの確認が必要な行が$count行あります（⚠をタップすると、警告が正しかったか報告できます）';
+  }
+
+  @override
+  String importJanDisplayExponent(int count) {
+    return '$count行のJANはファイル上で指数表記（4.90E+12など）で表示されていますが、中身の13桁で正しく読み取りました。CSVで保存し直すと桁が消えるので、Excel（.xlsx）のまま送ってもらってください';
+  }
+
+  @override
+  String get wrTitle => '警告の確認';
+
+  @override
+  String get wrQuestion => 'この警告は正しかったですか？ 答えは警告のルールの見直しに使います。';
+
+  @override
+  String get wrNote => 'メモ（任意）';
+
+  @override
+  String get wrNoteHint => '例：ケース品と単品で同じ品番';
+
+  @override
+  String get wrRight => '正しかった';
+
+  @override
+  String get wrWrong => '誤り（問題なかった）';
+
+  @override
+  String get wrThanks => '報告しました。警告の見直しに使います';
+
+  @override
+  String get wrStatsTitle => '警告の正確さ';
+
+  @override
+  String get wrStatsHint => '確認した人が「正しかった／誤り」と報告した数です。誤りが多い警告はルールを見直します。';
+
+  @override
+  String get wrStatsEmpty => 'まだ報告はありません。行の⚠をタップすると報告できます';
+
+  @override
+  String wrRightCount(int count) {
+    return '正しい $count';
+  }
+
+  @override
+  String wrWrongCount(int count) {
+    return '誤り $count';
+  }
 }

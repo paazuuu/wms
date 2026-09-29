@@ -7690,4 +7690,78 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pcVendorCodesHint =>
       'Numbers this company gives its own suppliers (makers). They are not our codes.';
+
+  @override
+  String get ntFlagJanDisplayExponent =>
+      'The JAN is shown in exponent form (e.g. 4.90E+12); read from the full 13 digits it holds';
+
+  @override
+  String get ntFlagJanRestored =>
+      'The JAN had lost its digits; taken from the product the 品番 names (its leading digits agree). Please check';
+
+  @override
+  String get ntFlagJanRestoreMismatch =>
+      'The JAN lost its digits, and the 品番’s product does not match what is left, so nothing was filled in';
+
+  @override
+  String get ntFlagJanCodeMismatch =>
+      'The JAN and the 品番 point to different products';
+
+  @override
+  String get ntAltCodeProduct => 'The product the 品番 names';
+
+  @override
+  String get ntMatchJanRestored => 'JAN taken from the 品番';
+
+  @override
+  String importJanWarnings(int count) {
+    return '$count lines need their JAN checked (tap ⚠ to say whether the warning was right)';
+  }
+
+  @override
+  String importJanDisplayExponent(int count) {
+    return '$count JANs are shown in exponent form in the file (e.g. 4.90E+12) but were read right from their full digits. Saving the file as CSV would lose the digits, so ask for the Excel file as it is';
+  }
+
+  @override
+  String get wrTitle => 'Check the warning';
+
+  @override
+  String get wrQuestion =>
+      'Was this warning right? Your answer is used to tune the warning rules.';
+
+  @override
+  String get wrNote => 'Note (optional)';
+
+  @override
+  String get wrNoteHint => 'e.g. the case and the single item share a 品番';
+
+  @override
+  String get wrRight => 'It was right';
+
+  @override
+  String get wrWrong => 'Wrong (nothing was amiss)';
+
+  @override
+  String get wrThanks => 'Reported; it will be used to tune the warnings';
+
+  @override
+  String get wrStatsTitle => 'How right the warnings were';
+
+  @override
+  String get wrStatsHint =>
+      'What the people checking reported. Warnings often wrong get their rules reviewed.';
+
+  @override
+  String get wrStatsEmpty => 'No reports yet. Tap ⚠ on a line to report';
+
+  @override
+  String wrRightCount(int count) {
+    return 'Right $count';
+  }
+
+  @override
+  String wrWrongCount(int count) {
+    return 'Wrong $count';
+  }
 }

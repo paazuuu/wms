@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/delivery/application/delivery_providers.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:wms_mobile/features/delivery/presentation/plan_import_screen.dart';
+import 'package:wms_mobile/features/notation/application/notation_providers.dart';
 import 'package:wms_mobile/features/notation/domain/notation.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
@@ -369,5 +370,71 @@ void main() {
     expect(sent.first['product_id'], 500);
     expect(sent.first['flags'], isEmpty);
     expect(sent.last['product_id'], isNull);
+  });
+
+  testWidgets('JAN warnings are counted at the top, and each can be said to be right or wrong (0113)',
+      (tester) async {
+    final repo = FakeDeliveryRepository(
+      const [],
+      preview: const ImportPreview(
+        source: 'xlsx',
+        lineCount: 2,
+        totalQuantity: 70,
+        deliveryNumber: 'Q-2',
+        partnerId: 4,
+        lines: [
+          {
+            'jan_code': '4901480344041',
+            'raw_jan_code': '4901480344041',
+            'product_name': 'バインダー',
+            'planned_quantity': 60,
+            'flags': ['jan_display_exponent'],
+          },
+          {
+            'jan_code': '4902778198940',
+            'raw_jan_code': '4.90278E+12',
+            'product_code': 'UBA20105.15',
+            'planned_quantity': 10,
+            'product_id': 9,
+            'product': {'id': 9, 'jan_code': '4902778198940', 'name': 'ユニボール エア'},
+            'flags': ['jan_restored'],
+            'alternatives': {'code_product': 'ユニボール エア (4902778198940)'},
+          },
+        ],
+      ),
+    );
+    final notation = FakeNotationRepository();
+    await tester.binding.setSurfaceSize(const Size(900, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(
+      tester,
+      PlanImportScreen(pickFile: () async => _fakeFile()),
+      overrides: [
+        deliveryRepositoryProvider.overrideWithValue(repo),
+        notationRepositoryProvider.overrideWithValue(notation),
+      ],
+    );
+    await tester.tap(find.text('ファイルを選ぶ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('読み取る'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('import-jan-warnings')), findsOneWidget);
+    expect(find.textContaining('JANの確認が必要な行が1行'), findsOneWidget);
+    expect(find.byKey(const ValueKey('import-jan-display')), findsOneWidget);
+    expect(find.byKey(const ValueKey('import-code-product')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('import-warning-jan_restored')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('wr-note')), '品番の読み違い');
+    await tester.tap(find.byKey(const ValueKey('wr-wrong')));
+    await tester.pumpAndSettle();
+    final r = notation.reports.single;
+    expect(r.flag, 'jan_restored');
+    expect(r.right, isFalse);
+    expect(r.partnerId, 4);
+    expect(r.note, '品番の読み違い');
+    expect(r.line?['raw_jan_code'], '4.90278E+12');
+    expect(find.text('報告しました。警告の見直しに使います'), findsOneWidget);
   });
 }

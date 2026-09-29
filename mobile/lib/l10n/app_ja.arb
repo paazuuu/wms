@@ -6854,5 +6854,53 @@
     }
   },
   "pcVendorCodesTitle": "この取引先の仕入先コード",
-  "pcVendorCodesHint": "取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。"
+  "pcVendorCodesHint": "取引先が自分の仕入先（メーカー等）に付けている番号です。自社のコードではありません。",
+  "ntFlagJanDisplayExponent": "JANの表示が指数表記（4.90E+12など）です。中身の13桁で読み取りました",
+  "ntFlagJanRestored": "JANの桁が失われていたため、品番の商品から補いました（先頭の桁は一致）。確認してください",
+  "ntFlagJanRestoreMismatch": "JANの桁が失われています。品番の商品とJANの先頭の桁が合わないため、補っていません",
+  "ntFlagJanCodeMismatch": "JANと品番が別の商品を指しています",
+  "ntAltCodeProduct": "品番から引いた商品",
+  "ntMatchJanRestored": "品番から補ったJAN",
+  "importJanWarnings": "JANの確認が必要な行が{count}行あります（⚠をタップすると、警告が正しかったか報告できます）",
+  "@importJanWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importJanDisplayExponent": "{count}行のJANはファイル上で指数表記（4.90E+12など）で表示されていますが、中身の13桁で正しく読み取りました。CSVで保存し直すと桁が消えるので、Excel（.xlsx）のまま送ってもらってください",
+  "@importJanDisplayExponent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrTitle": "警告の確認",
+  "wrQuestion": "この警告は正しかったですか？ 答えは警告のルールの見直しに使います。",
+  "wrNote": "メモ（任意）",
+  "wrNoteHint": "例：ケース品と単品で同じ品番",
+  "wrRight": "正しかった",
+  "wrWrong": "誤り（問題なかった）",
+  "wrThanks": "報告しました。警告の見直しに使います",
+  "wrStatsTitle": "警告の正確さ",
+  "wrStatsHint": "確認した人が「正しかった／誤り」と報告した数です。誤りが多い警告はルールを見直します。",
+  "wrStatsEmpty": "まだ報告はありません。行の⚠をタップすると報告できます",
+  "wrRightCount": "正しい {count}",
+  "@wrRightCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrWrongCount": "誤り {count}",
+  "@wrWrongCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

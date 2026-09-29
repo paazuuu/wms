@@ -7510,4 +7510,72 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pcVendorCodesHint => '交易方给其自身供应商（厂家等）的编号，并非本公司代码。';
+
+  @override
+  String get ntFlagJanDisplayExponent => 'JAN显示为指数形式（如4.90E+12），已按其中完整的13位读取';
+
+  @override
+  String get ntFlagJanRestored => 'JAN位数已丢失，已按品番对应的商品补全（前几位一致），请确认';
+
+  @override
+  String get ntFlagJanRestoreMismatch => 'JAN位数已丢失，且与品番对应商品的前几位不一致，未补全';
+
+  @override
+  String get ntFlagJanCodeMismatch => 'JAN与品番指向不同的商品';
+
+  @override
+  String get ntAltCodeProduct => '按品番查到的商品';
+
+  @override
+  String get ntMatchJanRestored => '按品番补全的JAN';
+
+  @override
+  String importJanWarnings(int count) {
+    return '有$count行需要确认JAN（点击⚠可报告警告是否正确）';
+  }
+
+  @override
+  String importJanDisplayExponent(int count) {
+    return '有$count行JAN在文件中显示为指数形式（如4.90E+12），但已按完整位数正确读取。另存为CSV会丢失位数，请让对方直接发送Excel（.xlsx）文件';
+  }
+
+  @override
+  String get wrTitle => '确认警告';
+
+  @override
+  String get wrQuestion => '这个警告正确吗？您的回答将用于调整警告规则。';
+
+  @override
+  String get wrNote => '备注（可选）';
+
+  @override
+  String get wrNoteHint => '例：箱装和单品使用同一品番';
+
+  @override
+  String get wrRight => '正确';
+
+  @override
+  String get wrWrong => '错误（没有问题）';
+
+  @override
+  String get wrThanks => '已报告，将用于调整警告';
+
+  @override
+  String get wrStatsTitle => '警告的准确度';
+
+  @override
+  String get wrStatsHint => '确认人员报告\"正确／错误\"的次数。错误多的警告将重新审视规则。';
+
+  @override
+  String get wrStatsEmpty => '尚无报告。点击行上的⚠即可报告';
+
+  @override
+  String wrRightCount(int count) {
+    return '正确 $count';
+  }
+
+  @override
+  String wrWrongCount(int count) {
+    return '错误 $count';
+  }
 }

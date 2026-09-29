@@ -64,6 +64,18 @@ abstract class NotationRepository {
   /// A heading taught by hand — a field or one of our attributes — for one
   /// company, or everyone when [partnerId] is null.
   Future<ApiResult<bool>> setHeading({int? partnerId, required String header, required ColumnChoice choice});
+
+  // Were the reader's warnings right? (0113)
+
+  /// [verdict] is right or wrong; [line] is the line as read.
+  Future<ApiResult<bool>> reportWarning({
+    int? partnerId,
+    required String flag,
+    required bool right,
+    Map<String, dynamic>? line,
+    String? note,
+  });
+  Future<ApiResult<List<WarningStat>>> warningStats();
 }
 
 List<Map<String, dynamic>> _list(dynamic data) {
@@ -327,6 +339,38 @@ class NotationRepositoryImpl implements NotationRepository {
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> reportWarning({
+    int? partnerId,
+    required String flag,
+    required bool right,
+    Map<String, dynamic>? line,
+    String? note,
+  }) async {
+    try {
+      await _rest.post('/rpc/report_reader_warning', data: {
+        'p_partner_id': partnerId,
+        'p_flag': flag,
+        'p_verdict': right ? 'right' : 'wrong',
+        'p_line': line,
+        'p_note': note,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<WarningStat>>> warningStats() async {
+    try {
+      final r = await _rest.post('/rpc/reader_warning_stats', data: {});
+      return ApiSuccess([for (final m in _list(r.data)) WarningStat.fromJson(m)]);
+    } on DioException catch (e) {
+      return mapDioError<List<WarningStat>>(e);
     }
   }
 }

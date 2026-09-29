@@ -5497,6 +5497,44 @@ All 43 JANs read whole, with valid check digits.
 `ocr-delivery-note` shares the reader but was not redeployed. The new
 fields matter for imports, and its flag handling is otherwise unchanged.
 
+### 0113 — JAN warnings, and telling the reader when they were right
+
+A JAN in a spreadsheet can be wrong in three ways, and each is now warned
+about instead of passing silently.
+
+- **Shown in exponent form, but whole.** The cell is a number formatted
+  "General" (or with E+), which Excel shows as 4.90148E+12.
+  - The flag is `jan_display_exponent`, a notice rather than a problem: the
+    reader takes the value, so the JAN is right.
+  - The import review says how many lines were affected and asks for the
+    file as .xlsx, because saving it as CSV would lose the digits.
+  - A CSV has no cell formats, so it never gets this flag.
+- **Digits lost** (`jan_exponent`, 0112).
+  - The broken JAN is no longer used to find a product. Its digits run
+    together ("49014812") and could have matched some other 8-digit JAN.
+  - The 品番 on the same line is looked up on its own, through the dictionary
+    code or our `sku`.
+  - If that product's JAN starts with the digits that survived (490148…),
+    it is taken: `jan_restored`, matched by `jan_restored`, for a person to
+    confirm.
+  - If it does not start with them, nothing is guessed:
+    `jan_restore_mismatch`, and the product found is shown for reference.
+- **JAN and 品番 disagree.**
+  - A line matched on its JAN whose 品番 names a different product is
+    flagged `jan_code_mismatch`, with that other product shown.
+  - A JAN that fails its check digit also shows the product the 品番 names.
+- **Trial and error.**
+  - Every warning on a line can be tapped, in pre-training and the import
+    review, to say whether it was right, with an optional note.
+  - `reader_warning_reports` keeps each answer with the line as read.
+  - `reader_warning_stats` counts right and wrong per warning and keeps the
+    latest notes. The 履歴・傾向 tab shows it, so the rules that are wrong
+    most often can be tuned first.
+
+The reader (`import-plan` v14) was deployed, and v14 was checked identical
+to the local copies. The uploaded order sheet still reads all 43 lines, with
+no warnings: its JAN cells use format `0`.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

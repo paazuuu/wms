@@ -4227,6 +4227,25 @@ class FakeNotationRepository implements NotationRepository {
     lastHeading = (partnerId: partnerId, header: header, choice: choice);
     return const ApiSuccess(true);
   }
+
+  // Warning reports (0113), in memory.
+  final List<({int? partnerId, String flag, bool right, Map<String, dynamic>? line, String? note})> reports = [];
+  List<WarningStat> warningRows = const [];
+
+  @override
+  Future<ApiResult<bool>> reportWarning({
+    int? partnerId,
+    required String flag,
+    required bool right,
+    Map<String, dynamic>? line,
+    String? note,
+  }) async {
+    reports.add((partnerId: partnerId, flag: flag, right: right, line: line, note: note));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<WarningStat>>> warningStats() async => ApiSuccess(warningRows);
 }
 
 
