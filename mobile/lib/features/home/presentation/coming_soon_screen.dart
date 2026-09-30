@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/status_pill.dart';
@@ -67,7 +68,16 @@ class ComingSoonScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).maybePop(),
+                  // A tab's first screen has nothing under it to pop back to,
+                  // so this goes to the menu instead of silently doing nothing.
+                  onPressed: () {
+                    final navigator = Navigator.of(context);
+                    if (navigator.canPop()) {
+                      navigator.pop();
+                    } else {
+                      GoRouter.maybeOf(context)?.go('/');
+                    }
+                  },
                   icon: const Icon(Icons.arrow_back),
                   label: Text(l10n.backToMenu),
                 ),

@@ -96,7 +96,7 @@ class _BodyState extends ConsumerState<_Body> {
     final uncounted = _count.uncountedLines;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.cntCompleteQ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -115,11 +115,11 @@ class _BodyState extends ConsumerState<_Body> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(l10n.actionCancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(l10n.cntComplete),
           ),
         ],
@@ -149,16 +149,16 @@ class _BodyState extends ConsumerState<_Body> {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.cntCancelQ),
         content: Text(l10n.cntCancelBody),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(l10n.actionCancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(l10n.cntCancel),
           ),
         ],

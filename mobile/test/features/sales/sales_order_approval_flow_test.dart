@@ -74,6 +74,39 @@ Future<void> _pump(
 
 void main() {
   testWidgets(
+      'cancelling the confirmation inside a tab closes the dialog, not the screen',
+      (tester) async {
+    // In the app every screen sits in its tab's own Navigator while dialogs
+    // open on the root one. Closing a dialog with the screen's context popped
+    // the screen underneath and left the dialog stuck open over a blank tab.
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    final repo = FakeSalesOrderRepository(orders: [_submittedOrder()]);
+    await pumpApp(
+      tester,
+      Navigator(
+        onGenerateRoute: (_) => MaterialPageRoute(
+          builder: (_) => const SalesOrderDetailScreen(salesOrderId: 1),
+        ),
+      ),
+      overrides: [
+        salesOrderRepositoryProvider.overrideWithValue(repo),
+        shipmentRepositoryProvider.overrideWithValue(FakeShipmentRepository([])),
+      ],
+    );
+
+    await tester.tap(find.text('承認'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(SalesOrderDetailScreen), findsOneWidget);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets(
       'approving with a full reservation shows how much was reserved (§6, 0073)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));

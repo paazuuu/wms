@@ -102,16 +102,16 @@ class _BodyState extends ConsumerState<_Body> {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(title),
         content: Text(body),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(l10n.actionCancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(action),
           ),
         ],
