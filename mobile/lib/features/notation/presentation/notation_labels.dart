@@ -23,6 +23,7 @@ String _builtInFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
       ColumnField.supplierCode => l10n.ntFieldSupplierCode,
       ColumnField.upstreamCode => l10n.ntFieldUpstreamCode,
       ColumnField.customerCode => l10n.ntFieldCustomerCode,
+      ColumnField.multi => l10n.ntFieldMulti,
       ColumnField.spec => l10n.ntFieldSpec,
       ColumnField.taxRate => l10n.ntFieldTaxRate,
       ColumnField.orderDate => l10n.ntFieldDate,
@@ -63,6 +64,7 @@ String flagLabel(AppLocalizations l10n, String flag) {
     'jan_restored' => l10n.ntFlagJanRestored,
     'jan_restore_mismatch' => l10n.ntFlagJanRestoreMismatch,
     'jan_code_mismatch' => l10n.ntFlagJanCodeMismatch,
+    'total_mismatch' => l10n.ntFlagTotalMismatch,
     'no_jan' => l10n.ntFlagNoJan,
     'no_maker' => l10n.ntFlagNoMaker,
     'no_quantity' => l10n.ntFlagNoQuantity,
@@ -107,4 +109,30 @@ String matchedByLabel(AppLocalizations l10n, String? m) => switch (m) {
       'registered' => l10n.ntMatchRegistered,
       'jan_restored' => l10n.ntMatchJanRestored,
       _ => l10n.ntMatchNone,
+    };
+
+/// A column choice in words: a field, an attribute, or a combined cell with
+/// its parts ("複数：メーカー／品名／品番").
+String choiceLabel(
+  AppLocalizations l10n,
+  ColumnChoice c, {
+  Map<String, String> attributeNames = const {},
+  Map<String, String> custom = const {},
+}) {
+  if (c.field == ColumnField.attr) return l10n.ntAttr(attributeNames[c.attribute] ?? c.attribute ?? '');
+  if (c.field == ColumnField.multi && c.parts.length >= 2) {
+    return l10n.ntMultiOf(c.parts.map((p) => partLabel(l10n, p, custom)).join('／'));
+  }
+  return columnFieldLabel(l10n, c.field, custom);
+}
+
+/// A part of a combined cell in words ("読まない" for ignore).
+String partLabel(AppLocalizations l10n, ColumnField f, [Map<String, String> custom = const {}]) =>
+    f == ColumnField.ignore ? l10n.ntPartSkip : columnFieldLabel(l10n, f, custom);
+
+/// How a combined cell is split, in words.
+String separatorLabel(AppLocalizations l10n, String? sep) => switch (sep) {
+      null => l10n.ntSepAuto,
+      'space' => l10n.ntSepSpace,
+      _ => l10n.ntSepChar(sep),
     };

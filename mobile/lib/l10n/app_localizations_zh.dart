@@ -7578,4 +7578,82 @@ class AppLocalizationsZh extends AppLocalizations {
   String wrWrongCount(int count) {
     return '错误 $count';
   }
+
+  @override
+  String get ntFieldMulti => '多个项目（分隔读取）';
+
+  @override
+  String get ntFieldMultiPick => '多个项目（分隔读取）…';
+
+  @override
+  String ntMultiOf(String parts) {
+    return '多项：$parts';
+  }
+
+  @override
+  String get ntPartSkip => '不读取';
+
+  @override
+  String get ntSepAuto => '自动（有／或/则按其分隔，否则按空格）';
+
+  @override
+  String get ntSepSpace => '空格';
+
+  @override
+  String ntSepChar(String sep) {
+    return '「$sep」';
+  }
+
+  @override
+  String get ntSeparator => '分隔符';
+
+  @override
+  String ntPartsTitle(String header) {
+    return '「$header」的分隔方法';
+  }
+
+  @override
+  String get ntPartsHint => '请按从左到右的顺序点击此栏中的项目。最后一个项目会包含剩余全部内容（品番中有空格也不会被切断）。';
+
+  @override
+  String get ntPartsEmpty => '尚未选择';
+
+  @override
+  String get ntPartsAdd => '添加项目';
+
+  @override
+  String get ntFlagTotalMismatch => '明细合计与单据合计不一致';
+
+  @override
+  String get ntReadPdfText => '直接读取PDF中的文字';
+
+  @override
+  String get ntNotesTitle => '格式备注（给AI的指示）';
+
+  @override
+  String get ntNotesHint => '写在这里的内容会在每次读取该交易方的PDF或照片时告诉AI';
+
+  @override
+  String get ntNotesExample => '例：JAN在「备注」栏。品番前的「9A」「8E」等记号不读取。';
+
+  @override
+  String get ntNotesSaved => '已保存格式备注';
+
+  @override
+  String totalsOk(String sum) {
+    return '明细合计 $sum 与单据合计一致';
+  }
+
+  @override
+  String totalsMismatch(String sum, String expected) {
+    return '明细合计 $sum 与单据合计 $expected 不一致，可能有数量或单价读错的行';
+  }
+
+  @override
+  String totalsNotFound(String sum) {
+    return '明细合计 $sum 与单据中任何合计都不一致';
+  }
+
+  @override
+  String get totalsReport => '报告警告';
 }

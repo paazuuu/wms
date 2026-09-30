@@ -5535,6 +5535,87 @@ The reader (`import-plan` v14) was deployed, and v14 was checked identical
 to the local copies. The uploaded order sheet still reads all 43 lines, with
 no warnings: its JAN cells use format `0`.
 
+### 0114 — combined cells, text PDFs, 書式メモ and the totals check
+
+Two real PDFs showed what training could not yet teach. Both were taught
+using synthetic fixtures; the uploaded files are not in the repository.
+
+- **Crowded text columns** (a text PDF: アケボノクラウン). Columns sit close
+  together, and メーカー, 品名 and 品番 share one cell, split by ／.
+- **A scan with tight columns** (新東光通商). "商品名・品番" holds a code,
+  the maker in 半角カナ and the 品番 ("9A ｺｸﾖ ﾌ-CE755P"). The JAN is in 備考.
+
+The changes:
+
+- **Combined cells (`multi`).**
+  - A column can be marked "複数項目". Its `parts` are the fields in order,
+    and its `separator` is:
+    - a given character;
+    - `space`;
+    - or none, meaning ／ or / when the cell has one, else whitespace.
+  - The last part takes what is left, so a 品番 with a space stays whole. A
+    cell with fewer pieces fills the parts from the right.
+  - `ignore` can be a part (e.g. the "9A" code).
+  - The layout is learned per company in `column_aliases.parts/separator`.
+  - The layout is also inferred from a heading made of known headings
+    ("メーカー/品名/品番"). The single-cell 品名/品番 heading is still
+    `name_code`.
+- **Text PDFs read directly** (`readPdfText`).
+  - The text layer is read with its positions (unpdf), and words are grouped
+    into lines.
+  - The header line is the one with the most known headings, at least 3.
+  - Each column boundary goes in the gap between two heading centres that
+    the fewest words cross (the widest gap on a tie), not at the midpoint.
+    So a long 品名 stays in its column.
+  - Rows then go through the same path as spreadsheets:
+    - the layouts and overrides apply;
+    - repeated header rows and summary rows (合計, 消費税, 税抜…) are dropped;
+    - 登録番号, date, 得意先No and 伝票No are read by pattern.
+  - The source is `pdf_text`, and the partner is found by 登録番号.
+  - The PDF falls back to the AI if:
+    - there is no text layer (a scan);
+    - no header is found;
+    - fewer than half the lines have a valid JAN or a 品番.
+- **Hints for the AI.** When a PDF or photo goes to the AI, the EXTRACT and
+  VERIFY prompts are told:
+  - what this company's headings mean, layouts included;
+  - the columns corrected on this read;
+  - the company's `reading_notes` (書式メモ, set with
+    `set_partner_reading_notes`, at most 2000 characters).
+
+  After the AI reads, combined cells are split again by the layout. If the
+  AI's 品番 differs, the line gets `split_disagree`.
+- **Totals check.**
+  - The line amounts are summed and compared with the document, within ±1:
+    - its 小計;
+    - its total minus tax;
+    - its total;
+    - any number found outside the lines.
+  - The pre-training and import review screens show it matched or didn't
+    (`TotalsNotice`). A mismatch can be reported as `total_mismatch`, and
+    goes into the same warning statistics as 0113.
+- **Fixes.**
+  - `toNum` returns null for text without digits. Before, "税抜金額" read
+    as 0.
+  - The 得意先No pattern accepts "No.:".
+
+The migration was applied live and checked in a rolled-back DO block:
+- a `multi` alias with parts and a separator is learned, and one with fewer
+  than 2 valid parts is skipped;
+- `column_alias_map` returns the layout;
+- the 書式メモ is saved, trimmed and length-checked.
+
+`import-plan` v15 was deployed and checked against the local copies.
+
+Tried on the real files:
+- The アケボノクラウン PDF reads by text alone:
+  - 9 lines, each split correctly into メーカー/品名/品番;
+  - 登録番号, date and 伝票番号 are read;
+  - the line sum 328,600 matches the document.
+- The 新東光通商 scan has no text layer, so it goes to the AI with the hints.
+  Its line sum was checked by hand against the document's 614,820.
+- The order sheet from 0113 still reads 43 lines with no warnings.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

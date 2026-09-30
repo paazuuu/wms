@@ -437,4 +437,23 @@ void main() {
     expect(r.line?['raw_jan_code'], '4.90278E+12');
     expect(find.text('報告しました。警告の見直しに使います'), findsOneWidget);
   });
+
+  testWidgets('the lines adding up to the document is confirmed at the top (0114)', (tester) async {
+    final repo = FakeDeliveryRepository(
+      const [],
+      preview: const ImportPreview(
+        source: 'pdf_text',
+        lineCount: 1,
+        totalQuantity: 500,
+        deliveryNumber: 'C-1',
+        totals: ReadTotals(linesSum: 31800, matched: 'found', ok: true),
+        lines: [
+          {'jan_code': '4902778318232', 'product_name': 'ジェットストリーム', 'planned_quantity': 500, 'amount': 31800},
+        ],
+      ),
+    );
+    await _openReview(tester, repo);
+    expect(find.byKey(const ValueKey('totals-ok')), findsOneWidget);
+    expect(find.text('明細の合計 ¥31,800 が書類の合計と一致しました'), findsOneWidget);
+  });
 }

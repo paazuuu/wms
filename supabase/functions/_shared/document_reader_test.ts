@@ -4,15 +4,24 @@ import { assert, assertEquals } from "jsr:@std/assert";
 import {
   type AliasRow,
   checkJan,
+  checkTotals,
+  headingParts,
+  hintText,
   janCheckOk,
   janLostDigits,
   janShownAsExponent,
   janSurvivingDigits,
   normalizeJan,
   normalizeText,
+  pdfHeaderFrom,
+  pdfTable,
+  readRows,
   readSpreadsheet,
   splitAttr,
   splitByRule,
+  splitMulti,
+  toInt,
+  toNum,
 } from "./document_reader.ts";
 
 Deno.test("a JAN written any company's way is one JAN", () => {
@@ -297,4 +306,106 @@ Deno.test("a JAN and a 品番 naming two products are flagged (0113)", () => {
   // A JAN failing its check digit, with a 品番 we know: say which product.
   const typo = { flags: ["jan_check"], raw_jan_code: "4901480344042", jan_code: "4901480344042" };
   assertEquals(checkJan(typo, null, null, b).alternative, "バインダー 青 (4901480344010)");
+});
+
+const known: AliasRow[] = [
+  ["JAN", "jan"], ["メーカー", "maker"], ["品名", "product_name"], ["品番", "product_code"], ["数量", "quantity"],
+  ["単位", "unit"], ["単価", "unit_price"], ["金額", "amount"], ["備考", "ignore"], ["商品コード", "product_code"],
+].map(([k, f]) => ({ header_key: normalizeText(k), field: f as AliasRow["field"], partner: false }));
+
+Deno.test("a heading naming several fields says how its cells split (0114)", () => {
+  assertEquals(headingParts("メーカー/品名/品番", known), ["maker", "product_name", "product_code"]);
+  assertEquals(headingParts("メーカー・品番", known), ["maker", "product_code"]);
+  // A name and a 品番 are name_code, split as before.
+  assertEquals(headingParts("品名・品番", known), null);
+  assertEquals(headingParts("品名/よく分からない", known), null);
+  assertEquals(headingParts("数量", known), null);
+});
+
+Deno.test("a combined cell splits in order; the last field keeps what is left (0114)", () => {
+  assertEquals(splitMulti("三菱鉛筆／ユニボール エア ０．５ 黒／UBA20105.24", ["maker", "product_name", "product_code"]), {
+    maker: "三菱鉛筆", product_name: "ユニボール エア ０．５ 黒", product_code: "UBA20105.24",
+  });
+  assertEquals(splitMulti("三菱鉛筆／ジェットストリームシングル ０．７／SXN-LS-07 1P#1", ["maker", "product_name", "product_code"]).product_code,
+    "SXN-LS-07 1P#1");
+  // Spaces: a code first (not read), the maker, then a 品番 with a space in it.
+  assertEquals(splitMulti("8D ﾐﾂﾋﾞｼ UMN105EW 33", ["ignore", "maker", "product_code"]), { maker: "ﾐﾂﾋﾞｼ", product_code: "UMN105EW 33" });
+  // Shorter than its parts: filled from the end.
+  assertEquals(splitMulti("ﾊﾟｲﾛｯﾄ BIL80EFSULB", ["ignore", "maker", "product_code"]), { maker: "ﾊﾟｲﾛｯﾄ", product_code: "BIL80EFSULB" });
+  assertEquals(splitMulti("A-1|赤|ペン", ["product_code", "spec", "product_name"], "|"), { product_code: "A-1", spec: "赤", product_name: "ペン" });
+  assertEquals(splitAttr("multi:ignore,maker,product_code|space"), {
+    field: "multi", attribute: null, parts: ["ignore", "maker", "product_code"], separator: "space",
+  });
+  assertEquals(splitAttr("multi:maker"), null);
+});
+
+Deno.test("text with no digit is no number", () => {
+  assertEquals(toInt("税抜金額"), null);
+  assertEquals(toNum("単価"), null);
+  assertEquals(toInt("3,000"), 3000);
+  assertEquals(toNum("62.4"), 62.4);
+});
+
+// A text PDF's words, as the PDF places them (x from the left, one line each).
+const at = (str: string, x0: number, x1: number) => ({ str, x0, x1, y: 0 });
+const crownLike = [
+  [at("今回お買上額", 384, 434), at("消費税", 524, 549)],
+  [at("328,600", 443, 484), at("32,860", 539, 574)],
+  [at("商品ｺｰﾄﾞ", 92, 126), at("JAN", 165, 181), at("メーカー/品名/品番", 334, 401), at("数量", 530, 547),
+    at("単位", 560, 577), at("単価", 599, 616), at("金額", 663, 680), at("備考", 747, 764)],
+  [at("4902778318232", 137, 205), at("三菱鉛筆／ジェットストリーム０．７赤替／SXRL7.15", 216, 440),
+    at("500", 538, 554), at("本", 565, 573), at("63.60", 604, 628), at("31,800", 675, 704)],
+  [at("4902778198957", 137, 205), at("三菱鉛筆／ユニボール", 216, 292), at("エア", 298, 311), at("０．５", 317, 342),
+    at("黒／UBA20105.24", 348, 423), at("500", 538, 554), at("本", 565, 573), at("106.00", 599, 628), at("53,000", 675, 704)],
+  [at("消費税10％対象", 457, 519), at("税抜金額", 534, 568), at("84,800", 594, 628), at("消費税", 639, 664), at("8,480", 675, 704)],
+];
+
+Deno.test("a text PDF is laid out into columns by where its words stand (0114)", async () => {
+  const table = pdfTable(crownLike, known)!;
+  const { columns, lines, totals } = await readRows(table.rows, known, {}, false);
+  assertEquals(columns.find((c) => c.header === "メーカー/品名/品番")?.field, "multi");
+  assertEquals(lines.length, 2);
+  // A name in several pieces stays in its column, the maker included.
+  assertEquals(lines[1].maker, "三菱鉛筆");
+  assertEquals(lines[1].product_name, "ユニボール エア ０．５ 黒");
+  assertEquals(lines[1].product_code, "UBA20105.24");
+  assertEquals(lines[1].jan_code, "4902778198957");
+  assertEquals([lines[1].planned_quantity, lines[1].unit, lines[1].unit_price, lines[1].amount], [500, "本", 106, 53000]);
+  assert(!lines[1].flags.includes("split_single"));
+  // The summary row below is not a line; its figure checks the lines.
+  assertEquals(totals.lines_sum, 84800);
+  assertEquals(totals.ok, true);
+});
+
+Deno.test("the lines are checked against the document's totals (0114)", () => {
+  const lines = [{ amount: 44000 }, { amount: 570820 }];
+  assertEquals(checkTotals(lines, { subtotal: 614820 }).matched, "subtotal");
+  assertEquals(checkTotals(lines, { total: 676302, tax: 61482 }).matched, "total_minus_tax");
+  const wrong = checkTotals([{ amount: 44000 }, { amount: 507820 }], { subtotal: 614820, total: 676302, tax: 61482 });
+  assertEquals(wrong.ok, false);
+  assertEquals(wrong.lines_sum, 551820);
+  assertEquals(checkTotals(lines, {}).ok, null);
+  assertEquals(checkTotals([{ amount: null }], { subtotal: 1 }).ok, null);
+});
+
+Deno.test("what a text PDF says of itself", () => {
+  const h = pdfHeaderFrom("発 行 日 2026年8月19日\n入金依頼No 009013-260806\n登録番号:T6120001059877\n得意先No.:5001033");
+  assertEquals(h.registration_number, "T6120001059877");
+  assertEquals(h.doc_date, "2026-08-19");
+  assertEquals(h.doc_number, "009013-260806");
+  assertEquals(h.customer_code, "5001033");
+});
+
+Deno.test("what was learned of a company is told to the AI (0114)", () => {
+  const t = hintText({
+    columns: [
+      { header: "備考", field: "jan" },
+      { header: "商品名・品番", field: "multi", parts: ["ignore", "maker", "product_code"], separator: "space" },
+    ],
+    notes: "1行目の区分記号(9A等)は無視",
+  });
+  assert(t.includes("見出し『備考』の列には JANコード(jan)"));
+  assert(t.includes("見出し『商品名・品番』の欄は空白で区切って 読まない記号・メーカー・品番 の順"));
+  assert(t.includes("書式メモ: 1行目の区分記号(9A等)は無視"));
+  assertEquals(hintText({}), "");
 });

@@ -6902,5 +6902,72 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ntFieldMulti": "複数項目（区切って読む）",
+  "ntFieldMultiPick": "複数項目（区切って読む）…",
+  "ntMultiOf": "複数：{parts}",
+  "@ntMultiOf": {
+    "placeholders": {
+      "parts": {
+        "type": "String"
+      }
+    }
+  },
+  "ntPartSkip": "読まない",
+  "ntSepAuto": "自動（／か / があればそれで、なければ空白）",
+  "ntSepSpace": "空白",
+  "ntSepChar": "「{sep}」",
+  "@ntSepChar": {
+    "placeholders": {
+      "sep": {
+        "type": "String"
+      }
+    }
+  },
+  "ntSeparator": "区切り",
+  "ntPartsTitle": "「{header}」の分け方",
+  "@ntPartsTitle": {
+    "placeholders": {
+      "header": {
+        "type": "String"
+      }
+    }
+  },
+  "ntPartsHint": "この欄に入っている項目を、左から順にタップして並べてください。最後の項目には残りがすべて入ります（品番に空白があっても切れません）。",
+  "ntPartsEmpty": "まだ選んでいません",
+  "ntPartsAdd": "項目を追加",
+  "ntFlagTotalMismatch": "明細の合計が書類の合計と合いません",
+  "ntReadPdfText": "PDFの文字をそのまま読み取り",
+  "ntNotesTitle": "書式メモ（AIへの指示）",
+  "ntNotesHint": "この取引先の書類の読み方を書いておくと、PDFや写真を読むたびにAIに伝えます",
+  "ntNotesExample": "例：JANは「備考」欄にあります。品番の前の「9A」「8E」などの記号は読まない。",
+  "ntNotesSaved": "書式メモを保存しました",
+  "totalsOk": "明細の合計 {sum} が書類の合計と一致しました",
+  "@totalsOk": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      }
+    }
+  },
+  "totalsMismatch": "明細の合計 {sum} が書類の合計 {expected} と合いません。数量や単価を読み間違えた行がある可能性があります",
+  "@totalsMismatch": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "totalsNotFound": "明細の合計 {sum} が、書類のどの合計とも一致しませんでした",
+  "@totalsNotFound": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      }
+    }
+  },
+  "totalsReport": "警告を報告"
 }

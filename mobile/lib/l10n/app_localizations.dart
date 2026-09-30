@@ -13974,6 +13974,138 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'誤り {count}'**
   String wrWrongCount(int count);
+
+  /// No description provided for @ntFieldMulti.
+  ///
+  /// In ja, this message translates to:
+  /// **'複数項目（区切って読む）'**
+  String get ntFieldMulti;
+
+  /// No description provided for @ntFieldMultiPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'複数項目（区切って読む）…'**
+  String get ntFieldMultiPick;
+
+  /// No description provided for @ntMultiOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'複数：{parts}'**
+  String ntMultiOf(String parts);
+
+  /// No description provided for @ntPartSkip.
+  ///
+  /// In ja, this message translates to:
+  /// **'読まない'**
+  String get ntPartSkip;
+
+  /// No description provided for @ntSepAuto.
+  ///
+  /// In ja, this message translates to:
+  /// **'自動（／か / があればそれで、なければ空白）'**
+  String get ntSepAuto;
+
+  /// No description provided for @ntSepSpace.
+  ///
+  /// In ja, this message translates to:
+  /// **'空白'**
+  String get ntSepSpace;
+
+  /// No description provided for @ntSepChar.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{sep}」'**
+  String ntSepChar(String sep);
+
+  /// No description provided for @ntSeparator.
+  ///
+  /// In ja, this message translates to:
+  /// **'区切り'**
+  String get ntSeparator;
+
+  /// No description provided for @ntPartsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{header}」の分け方'**
+  String ntPartsTitle(String header);
+
+  /// No description provided for @ntPartsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'この欄に入っている項目を、左から順にタップして並べてください。最後の項目には残りがすべて入ります（品番に空白があっても切れません）。'**
+  String get ntPartsHint;
+
+  /// No description provided for @ntPartsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ選んでいません'**
+  String get ntPartsEmpty;
+
+  /// No description provided for @ntPartsAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目を追加'**
+  String get ntPartsAdd;
+
+  /// No description provided for @ntFlagTotalMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細の合計が書類の合計と合いません'**
+  String get ntFlagTotalMismatch;
+
+  /// No description provided for @ntReadPdfText.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFの文字をそのまま読み取り'**
+  String get ntReadPdfText;
+
+  /// No description provided for @ntNotesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'書式メモ（AIへの指示）'**
+  String get ntNotesTitle;
+
+  /// No description provided for @ntNotesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取引先の書類の読み方を書いておくと、PDFや写真を読むたびにAIに伝えます'**
+  String get ntNotesHint;
+
+  /// No description provided for @ntNotesExample.
+  ///
+  /// In ja, this message translates to:
+  /// **'例：JANは「備考」欄にあります。品番の前の「9A」「8E」などの記号は読まない。'**
+  String get ntNotesExample;
+
+  /// No description provided for @ntNotesSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'書式メモを保存しました'**
+  String get ntNotesSaved;
+
+  /// No description provided for @totalsOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細の合計 {sum} が書類の合計と一致しました'**
+  String totalsOk(String sum);
+
+  /// No description provided for @totalsMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細の合計 {sum} が書類の合計 {expected} と合いません。数量や単価を読み間違えた行がある可能性があります'**
+  String totalsMismatch(String sum, String expected);
+
+  /// No description provided for @totalsNotFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細の合計 {sum} が、書類のどの合計とも一致しませんでした'**
+  String totalsNotFound(String sum);
+
+  /// No description provided for @totalsReport.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告を報告'**
+  String get totalsReport;
 }
 
 class _AppLocalizationsDelegate

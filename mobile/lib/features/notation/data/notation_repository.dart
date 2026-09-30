@@ -16,6 +16,7 @@ abstract class NotationRepository {
     required int partnerId,
     required MultipartFile file,
     Map<int, ColumnChoice> overrides = const {},
+    Map<int, String> columnHeaders = const {},
   });
 
   /// Teaches what a checked reading showed.
@@ -97,6 +98,7 @@ class NotationRepositoryImpl implements NotationRepository {
     required int partnerId,
     required MultipartFile file,
     Map<int, ColumnChoice> overrides = const {},
+    Map<int, String> columnHeaders = const {},
   }) async {
     try {
       final form = FormData.fromMap({
@@ -105,6 +107,12 @@ class NotationRepositoryImpl implements NotationRepository {
         'partner_id': '$partnerId',
         if (overrides.isNotEmpty)
           'column_overrides': jsonEncode({for (final e in overrides.entries) '${e.key}': e.value.wire}),
+        // The corrected columns' headings, for a PDF read by the AI (0114).
+        if (overrides.isNotEmpty)
+          'column_headers': jsonEncode({
+            for (final e in overrides.entries)
+              if (columnHeaders[e.key] != null) '${e.key}': columnHeaders[e.key],
+          }),
       });
       final r = await _functions.post('/import-plan', data: form);
       final body = (r.data as Map).cast<String, dynamic>();

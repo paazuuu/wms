@@ -462,4 +462,82 @@ void main() {
     expect(find.text('誤り 1'), findsOneWidget);
     expect(find.text('✕ ケース品と単品で同じ品番（A商社）'), findsOneWidget);
   });
+
+  testWidgets('a combined cell is taught how it splits, and the heading goes with the re-read (0114)', (tester) async {
+    const read = TrainingRead(trainingId: 10, partnerId: 1, source: 'gemini', columns: [
+      ReadColumn(index: 0, header: 'JAN', field: ColumnField.jan, source: 'global'),
+      ReadColumn(index: 1, header: '商品名・品番', field: ColumnField.nameCode, source: 'global'),
+    ], lines: [
+      ReadLineResult(row: 1, rawJanCode: '4901480367316', janCode: '4901480367316', rawNameCode: '9A ｺｸﾖ ﾌ-CE755P', quantity: 50),
+    ]);
+    final repo = await _pump(tester, repo: FakeNotationRepository(read: read));
+    await _choosePartnerAndRead(tester);
+
+    await tester.tap(find.byKey(const ValueKey('nt-col-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('複数項目（区切って読む）…').last);
+    await tester.pumpAndSettle();
+    expect(find.text('「商品名・品番」の分け方'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('nt-part-add-ignore')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('nt-part-add-maker')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('nt-part-add-product_code')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('nt-part-sep')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('空白').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('nt-part-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('複数：読まない／メーカー／品番'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nt-read')));
+    await tester.pumpAndSettle();
+    final sent = repo.lastRead!;
+    expect(sent.overrides[1]?.wire, 'multi:ignore,maker,product_code|space');
+    expect(sent.headers[1], '商品名・品番');
+  });
+
+  testWidgets('the lines not adding up to the document is warned about and can be reported (0114)', (tester) async {
+    const read = TrainingRead(
+      trainingId: 11,
+      partnerId: 1,
+      source: 'pdf_text',
+      totals: ReadTotals(linesSum: 551820, docSubtotal: 614820, ok: false),
+      lines: [ReadLineResult(row: 1, rawJanCode: '4901480367316', janCode: '4901480367316', quantity: 50)],
+    );
+    final repo = await _pump(tester, repo: FakeNotationRepository(read: read));
+    await _choosePartnerAndRead(tester);
+    expect(find.byKey(const ValueKey('totals-mismatch')), findsOneWidget);
+    expect(find.textContaining('¥551,820 が書類の合計 ¥614,820 と合いません'), findsOneWidget);
+    expect(find.text('PDFの文字をそのまま読み取り'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('totals-report')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wr-right')));
+    await tester.pumpAndSettle();
+    expect(repo.reports.single.flag, 'total_mismatch');
+    expect(repo.reports.single.line?['doc_subtotal'], 614820);
+  });
+
+  testWidgets('a company\'s 書式メモ is kept for the AI (0114)', (tester) async {
+    final partners = FakeTradingPartnerRepository(partners: const [
+      TradingPartner(id: 1, name: 'A商社', readingNotes: 'JANは備考欄'),
+    ]);
+    await _pump(tester, extra: [
+      productLibraryCanManageProvider.overrideWithValue(true),
+      tradingPartnerRepositoryProvider.overrideWithValue(partners),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('nt-partner-train')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('A商社').last);
+    await tester.pumpAndSettle();
+    expect(find.text('書式メモ（AIへの指示）'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('nt-notes-text'))).controller!.text, 'JANは備考欄');
+    await tester.enterText(find.byKey(const ValueKey('nt-notes-text')), 'JANは備考欄。9A・8Eなどの記号は読まない');
+    await tester.tap(find.byKey(const ValueKey('nt-notes-save')));
+    await tester.pumpAndSettle();
+    expect(partners.lastNotes, (id: 1, notes: 'JANは備考欄。9A・8Eなどの記号は読まない'));
+    expect(find.text('書式メモを保存しました'), findsOneWidget);
+  });
 }

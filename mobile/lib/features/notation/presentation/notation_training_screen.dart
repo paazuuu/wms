@@ -20,6 +20,7 @@ import '../../product_library/presentation/register_products_sheet.dart';
 import '../application/notation_providers.dart';
 import '../domain/notation.dart';
 import 'notation_labels.dart';
+import 'totals_notice.dart';
 import 'warning_report.dart';
 
 /// Teaching the system each trading company's way of writing things, before
@@ -169,6 +170,7 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
           partnerId: _partnerId!,
           file: MultipartFile.fromBytes(f.bytes!, filename: f.name),
           overrides: Map.of(_overrides),
+          columnHeaders: {for (final c in _read?.columns ?? const <ReadColumn>[]) c.index: c.header},
         );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -305,6 +307,11 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
                   _read = null;
                 }),
               ),
+              // How this company's documents are laid out, in plain words (0114).
+              if (_partnerId != null && ref.watch(productLibraryCanManageProvider)) ...[
+                const SizedBox(height: AppSpacing.sm),
+                _ReadingNotes(key: ValueKey('nt-notes-$_partnerId'), partnerId: _partnerId!),
+              ],
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
@@ -334,6 +341,14 @@ class _TrainTabState extends ConsumerState<_TrainTab> with AutomaticKeepAliveCli
               if (read != null) ...[
                 const SizedBox(height: AppSpacing.lg),
                 _Summary(read: read),
+                if (read.totals != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  TotalsNotice(
+                    totals: read.totals!,
+                    onReport: () => showWarningReport(context, ref,
+                        flag: 'total_mismatch', partnerId: _partnerId, line: read.totals!.toJson()),
+                  ),
+                ],
                 if (_registrable.isNotEmpty && ref.watch(productLibraryCanManageProvider)) ...[
                   const SizedBox(height: AppSpacing.sm),
                   OutlinedButton.icon(
@@ -446,9 +461,11 @@ class _Summary extends StatelessWidget {
                 StatusPill(
                     tone: read.verified ? StatusTone.success : StatusTone.warning,
                     icon: Icons.fact_check_outlined,
-                    label: read.source == 'gemini'
-                        ? (read.verified ? l10n.ntReadTwice : l10n.ntReadOnce)
-                        : l10n.ntReadSheet,
+                    label: switch (read.source) {
+                      'gemini' => read.verified ? l10n.ntReadTwice : l10n.ntReadOnce,
+                      'pdf_text' => l10n.ntReadPdfText,
+                      _ => l10n.ntReadSheet,
+                    },
                     dense: true),
               ],
             ),
@@ -492,15 +509,27 @@ class _ColumnsCard extends ConsumerWidget {
     final attrs = ref.watch(productAttributesProvider).valueOrNull ?? const <ProductAttributeDef>[];
     final attrName = {for (final a in attrs) a.key: a.name};
     final fieldNames = ref.watch(customFieldLabelsProvider(Localizations.localeOf(context).languageCode));
-    String choiceLabel(ColumnChoice c) => c.field == ColumnField.attr
-        ? l10n.ntAttr(attrName[c.attribute] ?? c.attribute ?? '')
-        : columnFieldLabel(l10n, c.field, fieldNames);
+    String label(ColumnChoice c) => c.field == ColumnField.multi && c.parts.length < 2
+        ? l10n.ntFieldMultiPick
+        : choiceLabel(l10n, c, attributeNames: attrName, custom: fieldNames);
     final choices = <ColumnChoice>[
       for (final f in ColumnField.values)
         if (f != ColumnField.attr) ColumnChoice(f),
       for (final a in attrs)
         if (a.active) ColumnChoice.attr(a.key),
     ];
+    // A combined cell: which fields, in what order, split by what (0114).
+    Future<void> pickParts(ReadColumn c, ColumnChoice? current) async {
+      final picked = await showDialog<ColumnChoice>(
+        context: context,
+        builder: (_) => _PartsDialog(
+          header: c.header,
+          initial: current?.field == ColumnField.multi && current!.parts.length >= 2 ? current : null,
+          fieldNames: fieldNames,
+        ),
+      );
+      if (picked != null) onChange(c.index, picked == c.choice ? null : picked);
+    }
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -547,12 +576,19 @@ class _ColumnsCard extends ConsumerWidget {
                           items: [
                             DropdownMenuItem<ColumnChoice?>(value: null, child: Text(l10n.ntFieldUnknown)),
                             for (final ch in choices)
-                              DropdownMenuItem<ColumnChoice?>(value: ch, child: Text(choiceLabel(ch))),
-                            // An attribute not (yet) in the list still shows.
+                              DropdownMenuItem<ColumnChoice?>(value: ch, child: Text(label(ch))),
+                            // An attribute not (yet) in the list, or a combined
+                            // cell with its parts, still shows.
                             if (current != null && !choices.contains(current))
-                              DropdownMenuItem<ColumnChoice?>(value: current, child: Text(choiceLabel(current))),
+                              DropdownMenuItem<ColumnChoice?>(value: current, child: Text(label(current))),
                           ],
-                          onChanged: (ch) => onChange(c.index, ch == c.choice ? null : ch),
+                          onChanged: (ch) {
+                            if (ch?.field == ColumnField.multi) {
+                              pickParts(c, current);
+                              return;
+                            }
+                            onChange(c.index, ch == c.choice ? null : ch);
+                          },
                         );
                       }),
                     ),
@@ -872,7 +908,7 @@ class _ColumnsTab extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('→ ${a.field == ColumnField.attr ? l10n.ntAttr(a.attributeName ?? '') : columnFieldLabel(l10n, a.field, fieldNames)}'),
+                        Text('→ ${a.field == ColumnField.attr ? l10n.ntAttr(a.attributeName ?? '') : a.field == ColumnField.multi ? choiceLabel(l10n, ColumnChoice.multi(a.parts, a.separator), custom: fieldNames) : columnFieldLabel(l10n, a.field, fieldNames)}'),
                         if (!a.isSeed)
                           IconButton(
                             tooltip: l10n.actionDelete,
@@ -1236,6 +1272,158 @@ class _WarningStatsCard extends ConsumerWidget {
             ],
         ]),
       ),
+    );
+  }
+}
+
+/// Which fields a combined cell holds, in order, and what splits them
+/// (0114): "三菱鉛筆／ユニボール エア／UBA20105.24" is メーカー・品名・品番 by ／;
+/// "8E ﾐﾂﾋﾞｼ UMR05S.15" is 読まない・メーカー・品番 by spaces.
+class _PartsDialog extends StatefulWidget {
+  const _PartsDialog({required this.header, this.initial, this.fieldNames = const {}});
+
+  final String header;
+  final ColumnChoice? initial;
+  final Map<String, String> fieldNames;
+
+  @override
+  State<_PartsDialog> createState() => _PartsDialogState();
+}
+
+class _PartsDialogState extends State<_PartsDialog> {
+  late final List<ColumnField> _parts = [...?widget.initial?.parts];
+  late String? _separator = widget.initial?.separator;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final seps = <String?>[null, '／', '/', 'space', '・', '|'];
+    return AlertDialog(
+      title: Text(l10n.ntPartsTitle(widget.header.isEmpty ? l10n.ntNoHeader : widget.header)),
+      content: SizedBox(
+        width: 480,
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l10n.ntPartsHint, style: theme.textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.sm),
+            // The order chosen so far.
+            Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, children: [
+              for (final (i, p) in _parts.indexed)
+                InputChip(
+                  key: ValueKey('nt-part-$i'),
+                  label: Text('${i + 1}. ${partLabel(l10n, p, widget.fieldNames)}'),
+                  onDeleted: () => setState(() => _parts.removeAt(i)),
+                ),
+              if (_parts.isEmpty) Text(l10n.ntPartsEmpty, style: theme.textTheme.bodySmall),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.ntPartsAdd, style: theme.textTheme.labelMedium),
+            Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, children: [
+              for (final f in ColumnChoice.partFields)
+                if (f == ColumnField.ignore || !_parts.contains(f))
+                  ActionChip(
+                    key: ValueKey('nt-part-add-${f.wire}'),
+                    label: Text(partLabel(l10n, f, widget.fieldNames)),
+                    onPressed: () => setState(() => _parts.add(f)),
+                  ),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            DropdownButtonFormField<String?>(
+              key: const ValueKey('nt-part-sep'),
+              initialValue: seps.contains(_separator) ? _separator : null,
+              decoration: InputDecoration(labelText: l10n.ntSeparator),
+              items: [for (final sp in seps) DropdownMenuItem<String?>(value: sp, child: Text(separatorLabel(l10n, sp)))],
+              onChanged: (v) => setState(() => _separator = v),
+            ),
+          ]),
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('nt-part-save'),
+          onPressed: _parts.length < 2 ? null : () => Navigator.pop(context, ColumnChoice.multi([..._parts], _separator)),
+          child: Text(l10n.actionSave),
+        ),
+      ],
+    );
+  }
+}
+
+/// A company's 書式メモ (0114): given to the AI with every document from it
+/// — "JANは備考欄", "9A・8Eなどの区分記号は読まない", …
+class _ReadingNotes extends ConsumerStatefulWidget {
+  const _ReadingNotes({super.key, required this.partnerId});
+
+  final int partnerId;
+
+  @override
+  ConsumerState<_ReadingNotes> createState() => _ReadingNotesState();
+}
+
+class _ReadingNotesState extends ConsumerState<_ReadingNotes> {
+  final _c = TextEditingController();
+  bool _filled = false;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _busy = true);
+    final r = await ref.read(tradingPartnerRepositoryProvider).setReadingNotes(widget.partnerId, _c.text);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    r.when(
+      success: (_) {
+        ref.invalidate(_partnersProvider);
+        messenger.showSnackBar(SnackBar(content: Text(l10n.ntNotesSaved)));
+      },
+      failure: (f) => messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final partner = (ref.watch(_partnersProvider).valueOrNull ?? const <TradingPartner>[])
+        .where((p) => p.id == widget.partnerId)
+        .firstOrNull;
+    if (partner != null && !_filled) {
+      _filled = true;
+      _c.text = partner.readingNotes ?? '';
+    }
+    return ExpansionTile(
+      key: const ValueKey('nt-notes'),
+      tilePadding: EdgeInsets.zero,
+      initiallyExpanded: (partner?.readingNotes ?? '').isNotEmpty,
+      title: Text(l10n.ntNotesTitle, style: theme.textTheme.titleSmall),
+      subtitle: Text(l10n.ntNotesHint, style: theme.textTheme.bodySmall),
+      children: [
+        TextField(
+          key: const ValueKey('nt-notes-text'),
+          controller: _c,
+          minLines: 2,
+          maxLines: 5,
+          maxLength: 2000,
+          decoration: InputDecoration(hintText: l10n.ntNotesExample, border: const OutlineInputBorder()),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton.tonal(
+            key: const ValueKey('nt-notes-save'),
+            onPressed: _busy ? null : _save,
+            child: Text(l10n.actionSave),
+          ),
+        ),
+      ],
     );
   }
 }

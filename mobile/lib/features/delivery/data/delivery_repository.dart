@@ -96,6 +96,7 @@ class ImportPreview {
     this.columns = const [],
     this.verified = true,
     this.partnerId,
+    this.totals,
   });
 
   final String source;
@@ -123,6 +124,9 @@ class ImportPreview {
 
   /// The trading company the note was matched to, when it was.
   final int? partnerId;
+
+  /// The lines against the document's own totals (0114).
+  final ReadTotals? totals;
 
   factory ImportPreview.fromJson(Map<String, dynamic> json) {
     int asInt(dynamic v) =>
@@ -154,6 +158,7 @@ class ImportPreview {
           .toList(),
       verified: json['verified'] != false,
       partnerId: json['partner_id'] is num ? (json['partner_id'] as num).toInt() : int.tryParse('${json['partner_id']}'),
+      totals: json['totals'] is Map ? ReadTotals.fromJson((json['totals'] as Map).cast<String, dynamic>()) : null,
     );
   }
 }

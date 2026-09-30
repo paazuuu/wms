@@ -54,6 +54,9 @@ abstract class TradingPartnerRepository {
   /// Gives every company without a code one; returns how many.
   Future<ApiResult<int>> issueMissingCodes();
   Future<ApiResult<List<PartnerVendorCode>>> vendorCodes(int partnerId);
+
+  /// The company's 書式メモ (0114); empty clears it.
+  Future<ApiResult<String?>> setReadingNotes(int id, String notes);
 }
 
 class TradingPartnerRepositoryImpl implements TradingPartnerRepository {
@@ -241,6 +244,17 @@ class TradingPartnerRepositoryImpl implements TradingPartnerRepository {
       return ApiSuccess([for (final m in _rows(r.data)) PartnerVendorCode.fromJson(m)]);
     } on DioException catch (e) {
       return mapDioError<List<PartnerVendorCode>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<String?>> setReadingNotes(int id, String notes) async {
+    try {
+      final r = await _dio.post('/rpc/set_partner_reading_notes', data: {'p_id': id, 'p_notes': notes});
+      final d = r.data;
+      return ApiSuccess(d is String && d.isNotEmpty ? d : null);
+    } on DioException catch (e) {
+      return mapDioError<String?>(e);
     }
   }
 }

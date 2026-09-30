@@ -43,6 +43,7 @@ class TradingPartner extends Equatable {
     this.updatedAt,
     this.theirCodeForUs,
     this.vendorCodes = 0,
+    this.readingNotes,
   });
 
   final int id;
@@ -70,6 +71,10 @@ class TradingPartner extends Equatable {
   /// How many of its own supplier codes (仕入先コード) we have learned.
   final int vendorCodes;
 
+  /// 書式メモ (0114): how its documents are laid out, in plain words, given
+  /// to the AI with every document from it.
+  final String? readingNotes;
+
   bool get isActive => status == 'active';
 
   factory TradingPartner.fromJson(Map<String, dynamic> json) => TradingPartner(
@@ -89,6 +94,7 @@ class TradingPartner extends Equatable {
         updatedAt: DateTime.tryParse('${json['updated_at']}')?.toLocal(),
         theirCodeForUs: json['their_code_for_us'] as String?,
         vendorCodes: _asInt(json['vendor_codes']),
+        readingNotes: json['reading_notes'] as String?,
       );
 
   @override

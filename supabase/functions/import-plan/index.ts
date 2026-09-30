@@ -67,7 +67,10 @@ import {
   normalizeJan,
   normalizeText,
   readDocument,
+  readPdfText,
+  type ReadingHints,
   readSpreadsheet,
+  type Totals,
   type ReadAttribute,
   type ReadLine,
   splitAttr,
@@ -300,7 +303,13 @@ async function resolveWarehouse(
   };
 }
 
-type ColumnLike = { header?: string | null; field?: string | null; attribute?: string | null };
+type ColumnLike = {
+  header?: string | null;
+  field?: string | null;
+  attribute?: string | null;
+  parts?: string[] | null;
+  separator?: string | null;
+};
 
 /** A line's attributes as the company wrote them (0110): the attribute
  * columns, plus its 入数 and — when the file had a 規格 column — its 規格,
@@ -353,7 +362,12 @@ async function learn(
   }
   const map = columns
     .filter((c) => str(c.header) && FIELDS.includes(c.field as Field) && (c.field !== "attr" || str(c.attribute)))
-    .map((c) => ({ header: c.header, field: c.field, attribute: c.field === "attr" ? c.attribute : null }));
+    .map((c) => ({
+      header: c.header, field: c.field, attribute: c.field === "attr" ? c.attribute : null,
+      // How a combined cell splits (0114).
+      parts: c.field === "multi" ? c.parts ?? null : null,
+      separator: c.field === "multi" ? c.separator ?? null : null,
+    }));
   if (map.length) {
     await supabase.rpc("learn_column_aliases", { p_partner_id: partnerId, p_map: map });
   }
@@ -514,6 +528,62 @@ function parseOverrides(raw: unknown): Record<number, string> {
   return out;
 }
 
+function parseHeaders(raw: unknown): Record<number, string> {
+  const out: Record<number, string> = {};
+  const s = str(raw);
+  if (!s) return out;
+  try {
+    for (const [k, v] of Object.entries(JSON.parse(s) as Record<string, unknown>)) {
+      const h = str(v);
+      if (h && Number.isFinite(Number(k))) out[Number(k)] = h;
+    }
+  } catch (_) { /* ignore malformed headings */ }
+  return out;
+}
+
+/** The AI's columns with what we know of their headings put over them. */
+function withHints(
+  columns: Column[], hints: ReadingHints, overrides: Record<number, string>, headers: Record<number, string>,
+): Column[] {
+  const out = columns.map((c) => ({ ...c }));
+  const corrected = new Set(Object.keys(overrides).map((k) => normalizeText(headers[Number(k)] ?? "")));
+  for (const h of hints.columns ?? []) {
+    const key = normalizeText(h.header);
+    const source: Column["source"] = corrected.has(key) ? "override" : "partner";
+    const set = { field: h.field, parts: h.parts ?? null, separator: h.separator ?? null, source, conflict: false };
+    const at = out.findIndex((c) => normalizeText(c.header) === key);
+    if (at >= 0) out[at] = { ...out[at], ...set };
+    else out.push({ index: out.length, header: h.header, attribute: null, ...set });
+  }
+  return out;
+}
+
+/** What the AI is told of this company's documents: its own headings as
+ * learned, the columns corrected on this reading, and its 書式メモ (0114). */
+async function readingHints(
+  partnerId: number | null, aliases: AliasRow[], overrides: Record<number, string>, headers: Record<number, string>,
+): Promise<ReadingHints> {
+  const columns: NonNullable<ReadingHints["columns"]> = [];
+  for (const [k, v] of Object.entries(overrides)) {
+    const o = splitAttr(v);
+    const header = headers[Number(k)];
+    if (o && header) columns.push({ header, field: o.field, parts: o.parts ?? null, separator: o.separator ?? null });
+  }
+  for (const a of aliases) {
+    if (!a.partner || !a.header || columns.some((c) => normalizeText(c.header) === a.header_key)) continue;
+    columns.push({
+      header: a.header, field: a.field,
+      parts: a.field === "multi" ? (a.parts ?? []) as Field[] : null, separator: a.separator ?? null,
+    });
+  }
+  let notes: string | null = null;
+  if (partnerId) {
+    const { data } = await admin.from("delivery_suppliers").select("reading_notes").eq("id", partnerId).maybeSingle();
+    notes = str(data?.reading_notes);
+  }
+  return { columns, notes };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ message: "Not found" }, 404);
@@ -579,6 +649,9 @@ Deno.serve(async (req) => {
     const dryRun = training || String(form.get("dry_run") ?? "") === "1";
     const formPartner = Number(form.get("partner_id"));
     const overrides = parseOverrides(form.get("column_overrides"));
+    // The headings the corrected columns had on the last reading (0114), so a
+    // PDF read by the AI can be told what they mean.
+    const overrideHeaders = parseHeaders(form.get("column_headers"));
     if (!(file instanceof File)) return json({ message: "file is required" }, 400);
 
     const name = file.name.toLowerCase();
@@ -591,6 +664,7 @@ Deno.serve(async (req) => {
     };
     let source: string;
     let verified = true;
+    let totals: Totals | null = null;
 
     if (training) {
       const { data: allowed } = await supabase.rpc("notation_training_allowed");
@@ -607,12 +681,26 @@ Deno.serve(async (req) => {
     const attributes = ((attrData ?? []) as { key: string; name: string; status?: string }[])
       .filter((a) => a.status !== "inactive")
       .map((a): AttributeDef => ({ key: a.key, name: a.name }));
+    const mime = file.type || (name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
+    // A PDF that carries its text is read where the words stand, exactly;
+    // a scan or photo is read by the AI (0114).
+    const asText = mime === "application/pdf"
+      ? await readPdfText(bytes, aliases, overrides, true, attributes)
+      : null;
     if (/\.(xlsx|xlsm|xls|csv)$/.test(name)) {
-      ({ columns, lines } = await readSpreadsheet(bytes, aliases, overrides, true, attributes));
+      ({ columns, lines, totals } = await readSpreadsheet(bytes, aliases, overrides, true, attributes));
       source = name.endsWith(".csv") ? "csv" : "xlsx";
+    } else if (asText) {
+      ({ header, columns, lines, totals } = asText);
+      header.registration_number = normalizeRegNo(header.registration_number);
+      source = "pdf_text";
+      partnerId ??= await findPartner(null, null, header.registration_number);
     } else {
-      const mime = file.type || (name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
-      ({ header, columns, lines, verified } = await readDocument(bytes, mime, aliases));
+      const hints = await readingHints(partnerId, aliases, overrides, overrideHeaders);
+      ({ header, columns, lines, verified, totals } = await readDocument(bytes, mime, aliases, hints));
+      // What the AI was told stands for the columns too, so a correction made
+      // on this reading is what gets learned (0114).
+      columns = withHints(columns, hints, overrides, overrideHeaders);
       header.registration_number = normalizeRegNo(header.registration_number);
       source = "gemini";
       partnerId ??= await findPartner(header.supplier_name, null, header.registration_number);
@@ -654,6 +742,8 @@ Deno.serve(async (req) => {
         order_date: orderDate,
         columns,
         line_count: merged.length, total_quantity: totalQty,
+        // The lines against the document's own totals (0114).
+        totals,
         lines: withProducts,
       } });
     }

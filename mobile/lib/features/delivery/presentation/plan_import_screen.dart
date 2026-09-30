@@ -13,6 +13,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../notation/application/notation_providers.dart';
 import '../../notation/domain/notation.dart';
 import '../../notation/presentation/notation_labels.dart';
+import '../../notation/presentation/totals_notice.dart';
 import '../../notation/presentation/warning_report.dart';
 import '../../product/domain/product.dart';
 import '../../product/presentation/product_picker_sheet.dart';
@@ -406,6 +407,15 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         if (!preview.verified) ...[
           const SizedBox(height: AppSpacing.sm),
           _Notice(l10n.importNotVerified, color: scheme.error),
+        ],
+        // The lines against the document's own total (0114).
+        if (preview.totals != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          TotalsNotice(
+            totals: preview.totals!,
+            onReport: () => showWarningReport(context, ref,
+                flag: 'total_mismatch', partnerId: preview.partnerId, line: preview.totals!.toJson()),
+          ),
         ],
         // JANs that need a look, or were shown in exponent form (0113).
         if (_janWarningCount > 0) ...[

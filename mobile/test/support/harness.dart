@@ -3203,6 +3203,30 @@ class FakeTradingPartnerRepository implements TradingPartnerRepository {
 
   @override
   Future<ApiResult<List<PartnerVendorCode>>> vendorCodes(int partnerId) async => ApiSuccess(vendors[partnerId] ?? const []);
+
+  ({int id, String notes})? lastNotes;
+
+  @override
+  Future<ApiResult<String?>> setReadingNotes(int id, String notes) async {
+    lastNotes = (id: id, notes: notes);
+    _partners = [
+      for (final p in _partners)
+        if (p.id == id)
+          TradingPartner(
+            id: p.id,
+            name: p.name,
+            kind: p.kind,
+            code: p.code,
+            status: p.status,
+            theirCodeForUs: p.theirCodeForUs,
+            vendorCodes: p.vendorCodes,
+            readingNotes: notes.trim().isEmpty ? null : notes.trim(),
+          )
+        else
+          p,
+    ];
+    return ApiSuccess(notes.trim().isEmpty ? null : notes.trim());
+  }
 }
 
 /// Work order stub. Mirrors the real RPCs' state-machine transitions
@@ -4076,7 +4100,7 @@ class FakeNotationRepository implements NotationRepository {
   List<NotationDialect> dialectRows;
   List<ColumnAlias> aliases;
 
-  ({int partnerId, Map<int, ColumnChoice> overrides, String fileName})? lastRead;
+  ({int partnerId, Map<int, ColumnChoice> overrides, String fileName, Map<int, String> headers})? lastRead;
   ({int partnerId, int? trainingId, List<ReadLineResult> lines, List<ReadColumn> columns})? lastLearn;
   final List<int> discarded = [];
   final List<({int id, int? productId, bool confirmed})> confirmed = [];
@@ -4089,8 +4113,14 @@ class FakeNotationRepository implements NotationRepository {
     required int partnerId,
     required MultipartFile file,
     Map<int, ColumnChoice> overrides = const {},
+    Map<int, String> columnHeaders = const {},
   }) async {
-    lastRead = (partnerId: partnerId, overrides: Map.of(overrides), fileName: file.filename ?? '');
+    lastRead = (
+      partnerId: partnerId,
+      overrides: Map.of(overrides),
+      fileName: file.filename ?? '',
+      headers: Map.of(columnHeaders),
+    );
     return ApiSuccess(read);
   }
 

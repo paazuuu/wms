@@ -64,6 +64,22 @@ void main() {
     expect(ColumnField.parse('customer_code'), ColumnField.customerCode);
   });
 
+  test('a combined cell travels as its parts and separator (0114)', () {
+    const c = ColumnChoice.multi([ColumnField.maker, ColumnField.productName, ColumnField.productCode], '／');
+    expect(c.wire, 'multi:maker,product_name,product_code|／');
+    expect(const ColumnChoice.multi([ColumnField.maker, ColumnField.productCode]).wire, 'multi:maker,product_code');
+    final col = ReadColumn.fromJson(const {
+      'index': 5, 'header': 'メーカー/品名/品番', 'field': 'multi', 'parts': ['maker', 'product_name', 'product_code'],
+    });
+    expect(col.choice, const ColumnChoice.multi([ColumnField.maker, ColumnField.productName, ColumnField.productCode]));
+    expect(col.toJson()['parts'], ['maker', 'product_name', 'product_code']);
+    final l10n = AppLocalizationsJa();
+    expect(choiceLabel(l10n, col.choice!), '複数：メーカー／品名／品番');
+    const t = ReadTotals(linesSum: 551820, docTotal: 676302, docTax: 61482, ok: false);
+    expect(t.expected, 614820);
+    expect(ReadTotals.fromJson(const {'lines_sum': 328600, 'matched': 'found', 'ok': true}).ok, isTrue);
+  });
+
   testWidgets('every heading companies use is gathered under its field', (tester) async {
     await _pump(tester);
     expect(find.byKey(const ValueKey('fl-field-jan')), findsOneWidget);

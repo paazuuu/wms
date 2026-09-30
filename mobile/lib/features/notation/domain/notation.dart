@@ -39,6 +39,10 @@ enum ColumnField {
   /// code for us (得意先コード) — neither is ours (0112).
   upstreamCode('upstream_code'),
   customerCode('customer_code'),
+
+  /// Several fields in one cell, split by a layout (0114) — which ones, in
+  /// what order, is the column's [ReadColumn.parts].
+  multi('multi'),
   spec('spec'),
   taxRate('tax_rate'),
   orderDate('order_date'),
@@ -59,21 +63,47 @@ enum ColumnField {
   }
 }
 
-/// What a column holds: a field, or one of our product attributes (0110).
-/// On the wire an attribute is `attr:<key>`.
+/// What a column holds: a field, one of our product attributes (0110), or
+/// several fields in one cell (0114). On the wire an attribute is
+/// `attr:<key>`, and a combined cell `multi:maker,product_name,product_code`
+/// with `|<separator>` when one is set.
 class ColumnChoice extends Equatable {
-  const ColumnChoice(this.field, [this.attribute]);
+  const ColumnChoice(this.field, [this.attribute])
+      : parts = const [],
+        separator = null;
   const ColumnChoice.attr(String key)
       : field = ColumnField.attr,
-        attribute = key;
+        attribute = key,
+        parts = const [],
+        separator = null;
+  const ColumnChoice.multi(this.parts, [this.separator])
+      : field = ColumnField.multi,
+        attribute = null;
 
   final ColumnField field;
   final String? attribute;
 
-  String get wire => field == ColumnField.attr ? 'attr:$attribute' : field.wire;
+  /// For [ColumnField.multi]: the fields in the cell, in order.
+  final List<ColumnField> parts;
+
+  /// null: ／ or / when the cell has one, else spaces; `space`: spaces.
+  final String? separator;
+
+  String get wire => switch (field) {
+        ColumnField.attr => 'attr:$attribute',
+        ColumnField.multi when parts.length >= 2 =>
+          'multi:${parts.map((p) => p.wire).join(',')}${separator == null ? '' : '|$separator'}',
+        _ => field.wire,
+      };
+
+  /// The fields a combined cell can be split into.
+  static const partFields = [
+    ColumnField.ignore, ColumnField.maker, ColumnField.productName, ColumnField.productCode, ColumnField.jan,
+    ColumnField.spec, ColumnField.supplierCode, ColumnField.upstreamCode, ColumnField.unit,
+  ];
 
   @override
-  List<Object?> get props => [field, attribute];
+  List<Object?> get props => [field, attribute, parts, separator];
 }
 
 /// One column as it was read (0105): its heading, what it was taken to hold,
@@ -87,6 +117,8 @@ class ReadColumn extends Equatable {
     this.aiField,
     this.conflict = false,
     this.attribute,
+    this.parts = const [],
+    this.separator,
   });
 
   final int index;
@@ -102,9 +134,16 @@ class ReadColumn extends Equatable {
   /// For [ColumnField.attr]: which of our attributes (color, size, …).
   final String? attribute;
 
-  ColumnChoice? get choice => field == null
-      ? null
-      : (field == ColumnField.attr ? (attribute == null ? null : ColumnChoice.attr(attribute!)) : ColumnChoice(field!));
+  /// For [ColumnField.multi]: the fields in the cell and what splits them.
+  final List<ColumnField> parts;
+  final String? separator;
+
+  ColumnChoice? get choice => switch (field) {
+        null => null,
+        ColumnField.attr => attribute == null ? null : ColumnChoice.attr(attribute!),
+        ColumnField.multi => parts.length >= 2 ? ColumnChoice.multi(parts, separator) : const ColumnChoice(ColumnField.multi),
+        _ => ColumnChoice(field!),
+      };
 
   factory ReadColumn.fromJson(Map<String, dynamic> j) => ReadColumn(
         index: _int(j['index']),
@@ -114,6 +153,11 @@ class ReadColumn extends Equatable {
         aiField: ColumnField.parse(j['ai_field'] as String?),
         conflict: j['conflict'] == true,
         attribute: _text(j['attribute']),
+        parts: [
+          for (final p in (j['parts'] as List? ?? const []))
+            if (ColumnField.parse('$p') != null) ColumnField.parse('$p')!,
+        ],
+        separator: _text(j['separator']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -121,13 +165,14 @@ class ReadColumn extends Equatable {
         'header': header,
         'field': field?.wire,
         if (field == ColumnField.attr) 'attribute': attribute,
+        if (field == ColumnField.multi) ...{'parts': [for (final p in parts) p.wire], 'separator': separator},
       };
 
   ReadColumn withField(ColumnField? f) => ReadColumn(
       index: index, header: header, field: f, source: 'override', aiField: aiField);
 
   @override
-  List<Object?> get props => [index, header, field, source, aiField, conflict, attribute];
+  List<Object?> get props => [index, header, field, source, aiField, conflict, attribute, parts, separator];
 }
 
 /// Our product a line resolved to.
@@ -310,6 +355,7 @@ class TrainingRead extends Equatable {
     this.verified = true,
     this.columns = const [],
     this.lines = const [],
+    this.totals,
   });
 
   final int? trainingId;
@@ -320,6 +366,9 @@ class TrainingRead extends Equatable {
   final bool verified;
   final List<ReadColumn> columns;
   final List<ReadLineResult> lines;
+
+  /// The lines against the document's own totals (0114).
+  final ReadTotals? totals;
 
   int get resolvedCount => lines.where((l) => l.resolved).length;
   int get reviewCount => lines.where((l) => l.needsReview || !l.resolved).length;
@@ -343,6 +392,7 @@ class TrainingRead extends Equatable {
         verified: j['verified'] != false,
         columns: [for (final c in _rows(j['columns'])) ReadColumn.fromJson(c)],
         lines: [for (final l in _rows(j['lines'])) ReadLineResult.fromJson(l)],
+        totals: j['totals'] is Map ? ReadTotals.fromJson((j['totals'] as Map).cast<String, dynamic>()) : null,
       );
 
   TrainingRead copyWith({List<ReadColumn>? columns, List<ReadLineResult>? lines}) => TrainingRead(
@@ -352,6 +402,7 @@ class TrainingRead extends Equatable {
         verified: verified,
         columns: columns ?? this.columns,
         lines: lines ?? this.lines,
+        totals: totals,
       );
 
   @override
@@ -543,11 +594,17 @@ class ColumnAlias extends Equatable {
     this.source,
     this.seenCount = 0,
     this.attributeName,
+    this.parts = const [],
+    this.separator,
   });
 
   final int id;
   final String header;
   final ColumnField? field;
+
+  /// For a combined cell (0114): its fields in order, and what splits them.
+  final List<ColumnField> parts;
+  final String? separator;
   final int? partnerId;
   final String? partnerName;
   final String? source;
@@ -567,6 +624,11 @@ class ColumnAlias extends Equatable {
         source: _text(j['source']),
         seenCount: _int(j['seen_count']),
         attributeName: _text(j['attribute_name']),
+        parts: [
+          for (final p in (j['parts'] as List? ?? const []))
+            if (ColumnField.parse('$p') != null) ColumnField.parse('$p')!,
+        ],
+        separator: _text(j['separator']),
       );
 
   @override
@@ -812,4 +874,44 @@ class WarningStat extends Equatable {
 
   @override
   List<Object?> get props => [flag, right, wrong];
+}
+
+/// What a document's lines add up to against what it says it totals (0114).
+class ReadTotals extends Equatable {
+  const ReadTotals({this.linesSum, this.docSubtotal, this.docTax, this.docTotal, this.matched, this.ok});
+
+  final double? linesSum;
+  final double? docSubtotal;
+  final double? docTax;
+  final double? docTotal;
+
+  /// subtotal / total_minus_tax / total / found.
+  final String? matched;
+
+  /// null: nothing to compare with.
+  final bool? ok;
+
+  /// The document's figure the lines should come to.
+  double? get expected => docSubtotal ?? (docTotal != null && docTax != null ? docTotal! - docTax! : docTotal);
+
+  factory ReadTotals.fromJson(Map<String, dynamic> j) => ReadTotals(
+        linesSum: _numOrNull(j['lines_sum']),
+        docSubtotal: _numOrNull(j['doc_subtotal']),
+        docTax: _numOrNull(j['doc_tax']),
+        docTotal: _numOrNull(j['doc_total']),
+        matched: _text(j['matched']),
+        ok: j['ok'] is bool ? j['ok'] as bool : null,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'lines_sum': linesSum,
+        'doc_subtotal': docSubtotal,
+        'doc_tax': docTax,
+        'doc_total': docTotal,
+        'matched': matched,
+        'ok': ok,
+      };
+
+  @override
+  List<Object?> get props => [linesSum, docSubtotal, docTax, docTotal, matched, ok];
 }

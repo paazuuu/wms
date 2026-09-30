@@ -7764,4 +7764,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String wrWrongCount(int count) {
     return 'Wrong $count';
   }
+
+  @override
+  String get ntFieldMulti => 'Several fields in one cell';
+
+  @override
+  String get ntFieldMultiPick => 'Several fields in one cell…';
+
+  @override
+  String ntMultiOf(String parts) {
+    return 'Combined: $parts';
+  }
+
+  @override
+  String get ntPartSkip => 'Skip';
+
+  @override
+  String get ntSepAuto => 'Automatic (／ or / when present, else spaces)';
+
+  @override
+  String get ntSepSpace => 'Spaces';
+
+  @override
+  String ntSepChar(String sep) {
+    return '\"$sep\"';
+  }
+
+  @override
+  String get ntSeparator => 'Separator';
+
+  @override
+  String ntPartsTitle(String header) {
+    return 'How \"$header\" splits';
+  }
+
+  @override
+  String get ntPartsHint =>
+      'Tap the fields this cell holds, left to right. The last one takes whatever is left, so a 品番 with a space stays whole.';
+
+  @override
+  String get ntPartsEmpty => 'None chosen yet';
+
+  @override
+  String get ntPartsAdd => 'Add a field';
+
+  @override
+  String get ntFlagTotalMismatch =>
+      'The lines do not add up to the document’s total';
+
+  @override
+  String get ntReadPdfText => 'Read from the PDF’s own text';
+
+  @override
+  String get ntNotesTitle => 'Reading notes (for the AI)';
+
+  @override
+  String get ntNotesHint =>
+      'Written here, it is given to the AI with every PDF or photo from this company';
+
+  @override
+  String get ntNotesExample =>
+      'e.g. The JAN is in the 備考 column. Skip the codes like 9A or 8E before the 品番.';
+
+  @override
+  String get ntNotesSaved => 'Reading notes saved';
+
+  @override
+  String totalsOk(String sum) {
+    return 'The lines come to $sum, as the document says';
+  }
+
+  @override
+  String totalsMismatch(String sum, String expected) {
+    return 'The lines come to $sum but the document says $expected; a quantity or price may be misread';
+  }
+
+  @override
+  String totalsNotFound(String sum) {
+    return 'The lines come to $sum, which matches none of the document’s totals';
+  }
+
+  @override
+  String get totalsReport => 'Report';
 }

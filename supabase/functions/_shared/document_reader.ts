@@ -23,24 +23,40 @@
 // that through `resolve_notation_lines` once the lines are read.
 import * as XLSX from "npm:xlsx@0.18.5";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
+import { getDocumentProxy } from "npm:unpdf@1.1.0";
 
 export type Field =
   | "jan" | "maker" | "product_name" | "product_code" | "name_code"
   | "quantity" | "case_quantity" | "cases" | "unit_price" | "amount"
   | "spec" | "tax_rate" | "order_date" | "ignore" | "attr"
   | "list_price" | "discount_rate" | "unit" | "supplier_code"
-  | "upstream_code" | "customer_code";
+  | "upstream_code" | "customer_code" | "multi";
 
 export const FIELDS: Field[] = [
   "jan", "maker", "product_name", "product_code", "name_code", "quantity",
   "case_quantity", "cases", "unit_price", "amount", "spec", "tax_rate",
   "order_date", "ignore", "attr", "list_price", "discount_rate", "unit", "supplier_code",
-  "upstream_code", "customer_code",
+  "upstream_code", "customer_code", "multi",
+];
+
+/** What a cell holding several fields (0114, field 'multi') can be split into. */
+export const PART_FIELDS: Field[] = [
+  "maker", "product_name", "product_code", "jan", "spec", "supplier_code", "upstream_code", "unit", "ignore",
 ];
 
 /** A column heading we know. For field 'attr', [attribute] says which of our
  * product attributes (0110: color, size, capacity, …) the column holds. */
-export type AliasRow = { header_key: string; field: Field; partner: boolean; attribute?: string | null };
+export type AliasRow = {
+  header_key: string;
+  field: Field;
+  partner: boolean;
+  attribute?: string | null;
+  /** The heading as written, and for field 'multi' its parts in order and
+   * separator (0114). */
+  header?: string | null;
+  parts?: string[] | null;
+  separator?: string | null;
+};
 
 /** One of our product attributes, as the AI is told about it. */
 export type AttributeDef = { key: string; name: string };
@@ -58,6 +74,10 @@ export type Column = {
   conflict?: boolean;
   /** For field 'attr': which of our attributes. */
   attribute?: string | null;
+  /** For field 'multi': the fields in the cell, in order, and what separates
+   * them (null = ／ or / when present, else spaces). */
+  parts?: Field[] | null;
+  separator?: string | null;
 };
 
 export type ReadLine = {
@@ -68,7 +88,7 @@ export type ReadLine = {
   product_name: string | null;
   product_code: string | null;
   raw_name_code: string | null;
-  split_by: "rule" | "ai" | "both" | null;
+  split_by: "rule" | "ai" | "both" | "layout" | null;
   spec: string | null;
   planned_quantity: number;
   case_quantity: number | null;
@@ -153,13 +173,15 @@ export function str(v: unknown): string | null {
   return s === "" ? null : s;
 }
 export function toInt(v: unknown): number | null {
-  if (v === null || v === undefined || String(v).trim() === "") return null;
-  const n = Number(String(v).normalize("NFKC").replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? Math.round(n) : null;
+  const n = toNum(v);
+  return n === null ? null : Math.round(n);
 }
 export function toNum(v: unknown): number | null {
   if (v === null || v === undefined || String(v).trim() === "") return null;
-  const n = Number(String(v).normalize("NFKC").replace(/[^\d.-]/g, ""));
+  // Text with no digit in it ("税抜金額") is no number, not zero.
+  const t = String(v).normalize("NFKC").replace(/[^\d.-]/g, "");
+  if (!/\d/.test(t)) return null;
+  const n = Number(t);
   return Number.isFinite(n) ? n : null;
 }
 /** 掛率 as a fraction: 0.52, 52 and "52%" all read as 0.52. */
@@ -227,11 +249,20 @@ const FIELD_HELP =
   "supplier_code=取引先独自の商品コード(品番とは別の欄がある場合), " +
   "upstream_code=仕入先コード(取引先がさらに仕入れている先=メーカー等のコード), " +
   "customer_code=得意先コード/お客様コード(取引先から見た当社のコード), " +
+  "multi=メーカー・品名・品番など複数の項目が1つの欄にまとまっている, " +
   "attr=色・サイズ・容量・材質・重量など商品の属性(どの属性かを attribute に), ignore=その他";
 
 /** "attr:color" as an override or wire value → field and attribute. */
-export function splitAttr(v: string): { field: Field; attribute: string | null } | null {
+export function splitAttr(
+  v: string,
+): { field: Field; attribute: string | null; parts?: Field[]; separator?: string | null } | null {
   if (v.startsWith("attr:")) return v.length > 5 ? { field: "attr", attribute: v.slice(5) } : null;
+  // "multi:maker,product_name,product_code" with "|／" for its separator.
+  if (v.startsWith("multi:")) {
+    const [list, sep] = v.slice(6).split("|");
+    const parts = list.split(",").filter((p) => PART_FIELDS.includes(p as Field)) as Field[];
+    return parts.length >= 2 ? { field: "multi", attribute: null, parts, separator: sep || null } : null;
+  }
   return FIELDS.includes(v as Field) && v !== "attr" ? { field: v as Field, attribute: null } : null;
 }
 
@@ -323,16 +354,82 @@ export async function splitNameCodes(values: string[]): Promise<SplitResult[]> {
 // Spreadsheets
 // ---------------------------------------------------------------------------
 
+/** The fields a heading names, in order, when it names several of them and
+ * more than a name and a 品番 (those are name_code): "メーカー/品名/品番" →
+ * maker, product_name, product_code. Null otherwise. */
+export function headingParts(header: string, aliases: AliasRow[]): Field[] | null {
+  const segs = header.normalize("NFKC").split(/[/／・,、|｜]/).map((x) => x.trim()).filter(Boolean);
+  if (segs.length < 2) return null;
+  const parts: Field[] = [];
+  for (const seg of segs) {
+    const key = normalizeText(seg);
+    const hit = aliases.find((a) => a.header_key === key && !a.partner);
+    if (!hit || !PART_FIELDS.includes(hit.field) || parts.includes(hit.field)) return null;
+    parts.push(hit.field);
+  }
+  if (parts.length === 2 && parts.includes("product_name") && parts.includes("product_code")) return null;
+  return parts;
+}
+
+/** A cell holding several fields, split in order (0114). The separator is
+ * the one given, else ／ or / when the cell has one, else spaces. The last
+ * field takes what is left ("UMN105EW 33" stays one 品番); a cell shorter
+ * than its parts fills them from the end, since the 品番 comes last. */
+export function splitMulti(raw: string, parts: Field[], separator?: string | null): Partial<Record<Field, string>> {
+  const text = raw.trim();
+  let tokens: string[];
+  let glue: string;
+  if (separator && separator !== "space") {
+    tokens = text.split(separator);
+    glue = separator;
+  } else if (!separator && /[／/]/.test(text)) {
+    tokens = text.split(/[／/]/);
+    glue = text.includes("／") ? "／" : "/";
+  } else {
+    tokens = text.split(/[\s\u3000]+/);
+    glue = " ";
+  }
+  tokens = tokens.map((t) => t.trim()).filter(Boolean);
+  const out: Partial<Record<Field, string>> = {};
+  if (tokens.length === 0) return out;
+  if (tokens.length >= parts.length) {
+    parts.forEach((p, i) => {
+      const v = i === parts.length - 1 ? tokens.slice(i).join(glue) : tokens[i];
+      if (p !== "ignore" && v) out[p] = v;
+    });
+  } else {
+    const from = parts.length - tokens.length;
+    tokens.forEach((t, i) => {
+      const p = parts[from + i];
+      if (p !== "ignore") out[p] = t;
+    });
+  }
+  return out;
+}
+
 export function aliasFor(
   header: string,
   aliases: AliasRow[],
-): { field: Field; source: Column["source"]; attribute: string | null } | null {
+): {
+  field: Field;
+  source: Column["source"];
+  attribute: string | null;
+  parts?: Field[] | null;
+  separator?: string | null;
+} | null {
   const key = normalizeText(header);
   if (!key) return null;
   const exact = aliases.filter((a) => a.header_key === key);
+  const layout = (a: AliasRow) => ({
+    parts: a.field === "multi" ? (a.parts ?? []).filter((p) => PART_FIELDS.includes(p as Field)) as Field[] : null,
+    separator: a.field === "multi" ? a.separator ?? null : null,
+  });
   const partner = exact.find((a) => a.partner);
-  if (partner) return { field: partner.field, source: "partner", attribute: partner.attribute ?? null };
-  if (exact.length) return { field: exact[0].field, source: "global", attribute: exact[0].attribute ?? null };
+  if (partner) return { field: partner.field, source: "partner", attribute: partner.attribute ?? null, ...layout(partner) };
+  if (exact.length) return { field: exact[0].field, source: "global", attribute: exact[0].attribute ?? null, ...layout(exact[0]) };
+  // A heading naming several fields ("メーカー/品名/品番") says how its cells split (0114).
+  const parts = headingParts(header, aliases);
+  if (parts) return { field: "multi", source: "global", attribute: null, parts, separator: null };
   // The longest known heading contained in this one (JANコード(13桁), 商品名称/カナ).
   let best: AliasRow | null = null;
   for (const a of aliases) {
@@ -367,7 +464,10 @@ async function aiColumns(
             type: "object",
             properties: {
               index: { type: "integer" },
-              field: { type: "string", enum: attributes.length ? FIELDS : FIELDS.filter((f) => f !== "attr") },
+              field: {
+                type: "string",
+                enum: FIELDS.filter((f) => f !== "multi" && (attributes.length > 0 || f !== "attr")),
+              },
               ...(attributes.length ? { attribute: { type: "string", enum: attributes.map((a) => a.key) } } : {}),
             },
             required: ["index", "field"],
@@ -420,6 +520,46 @@ export function settleDuplicates(columns: Column[]) {
 }
 
 const TOTAL_ROW = /^(合計|小計|総合計|計|total|subtotal|grand ?total)$/i;
+const SUMMARY_WORDS = /合計|小計|消費税|税抜|税込|対象額?|総額|値引|送料|繰越|前回|今回|total|tax/i;
+
+/** What the lines add up to, against what the document says it totals
+ * (0114). A misread quantity or price shows here. */
+export type Totals = {
+  lines_sum: number | null;
+  doc_subtotal: number | null;
+  doc_tax: number | null;
+  doc_total: number | null;
+  /** subtotal / total_minus_tax / total / found (a figure elsewhere on the
+   * document), or null. */
+  matched: string | null;
+  /** null when there is nothing to compare. */
+  ok: boolean | null;
+};
+
+export function checkTotals(
+  lines: Pick<ReadLine, "amount">[],
+  doc: { subtotal?: number | null; tax?: number | null; total?: number | null; numbers?: number[] } = {},
+): Totals {
+  const amounts = lines.map((l) => l.amount).filter((a): a is number => a !== null && Number.isFinite(a));
+  const sum = amounts.length ? Math.round(amounts.reduce((x, y) => x + y, 0) * 100) / 100 : null;
+  const subtotal = doc.subtotal ?? null, tax = doc.tax ?? null, total = doc.total ?? null;
+  const out: Totals = { lines_sum: sum, doc_subtotal: subtotal, doc_tax: tax, doc_total: total, matched: null, ok: null };
+  if (sum === null) return out;
+  const near = (x: number | null) => x !== null && Math.abs(x - sum) <= 1;
+  if (near(subtotal)) return { ...out, matched: "subtotal", ok: true };
+  if (total !== null && tax !== null && near(total - tax)) return { ...out, matched: "total_minus_tax", ok: true };
+  if (near(total)) return { ...out, matched: "total", ok: true };
+  if ((doc.numbers ?? []).some((n) => near(n))) return { ...out, matched: "found", ok: true };
+  const anything = subtotal !== null || total !== null || (doc.numbers ?? []).length > 0;
+  return { ...out, ok: anything ? false : null };
+}
+
+/** A cell that is a plain amount ("¥614,820", "328,600", 12480). */
+function amountOf(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  const t = String(v ?? "").normalize("NFKC").replace(/[¥\s円]/g, "");
+  return /^-?[0-9][0-9,]*(\.[0-9]+)?$/.test(t) ? Number(t.replace(/,/g, "")) : null;
+}
 
 /** Reads the first sheet of an Excel or CSV file. [overrides] maps a column
  * index to a field when the operator corrected the reading. */
@@ -429,7 +569,7 @@ export async function readSpreadsheet(
   overrides: Record<number, string> = {},
   useAi = true,
   attributes: AttributeDef[] = [],
-): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number }> {
+): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number; totals: Totals }> {
   const wb = XLSX.read(bytes, { type: "array", cellDates: true, cellNF: true });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }) as unknown[][];
@@ -439,11 +579,24 @@ export async function readSpreadsheet(
     const cellObj = ws[XLSX.utils.encode_cell({ r: origin.r + r, c: origin.c + c })] as { z?: unknown } | undefined;
     return typeof cellObj?.z === "string" ? cellObj.z : null;
   };
+  return await readRows(rows, aliases, overrides, useAi, attributes, formatAt);
+}
+
+/** Reads a table given as rows of cells — a sheet, or a PDF's text laid out
+ * by position (0114). */
+export async function readRows(
+  rows: unknown[][],
+  aliases: AliasRow[],
+  overrides: Record<number, string> = {},
+  useAi = true,
+  attributes: AttributeDef[] = [],
+  formatAt: (r: number, c: number) => string | null = () => null,
+): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number; totals: Totals }> {
   const ncol = rows.reduce((m, r) => Math.max(m, r.length), 0);
 
   // The heading row: the one most of whose cells are headings we know.
   let headerRow = -1, bestScore = 0;
-  for (let ri = 0; ri < Math.min(rows.length, 40); ri++) {
+  for (let ri = 0; ri < Math.min(rows.length, 60); ri++) {
     const score = (rows[ri] ?? []).filter((c) =>
       typeof c === "string" && aliasFor(c, aliases) !== null
     ).length;
@@ -451,6 +604,7 @@ export async function readSpreadsheet(
   }
   if (bestScore < 2) headerRow = -1;
   const headerCells = headerRow >= 0 ? rows[headerRow] : [];
+  const headerKey = headerCells.map((c) => normalizeText(c)).join("|");
   const body = rows.slice(headerRow + 1);
 
   const columns: Column[] = [];
@@ -460,6 +614,7 @@ export async function readSpreadsheet(
     columns.push({
       index: c, header, field: hit?.field ?? null, source: hit?.source ?? null,
       attribute: hit?.field === "attr" ? hit.attribute : null,
+      ...(hit?.field === "multi" ? { parts: hit.parts ?? null, separator: hit.separator ?? null } : {}),
     });
   }
 
@@ -496,7 +651,8 @@ export async function readSpreadsheet(
         col.field = a.field;
         col.attribute = a.attribute;
         col.source = "ai";
-      } else if (col.field && a && (a.field !== col.field || a.attribute !== (col.attribute ?? null)) &&
+      } else if (col.field && col.field !== "multi" && a &&
+                 (a.field !== col.field || a.attribute !== (col.attribute ?? null)) &&
                  col.source !== "partner") {
         col.conflict = true;
       }
@@ -506,7 +662,10 @@ export async function readSpreadsheet(
     const i = Number(k);
     const o = splitAttr(v);
     if (columns[i] && o) {
-      columns[i] = { ...columns[i], field: o.field, attribute: o.attribute, source: "override", conflict: false };
+      columns[i] = {
+        ...columns[i], field: o.field, attribute: o.attribute, source: "override", conflict: false,
+        parts: o.parts ?? null, separator: o.separator ?? null,
+      };
     }
   }
 
@@ -524,18 +683,56 @@ export async function readSpreadsheet(
   const cUpstream = colOf("upstream_code"), cCustomer = colOf("customer_code");
   // Every attribute column, however many (色 and サイズ side by side).
   const attrCols = columns.filter((c) => c.field === "attr" && c.attribute);
+  // Cells holding several fields, split by their layout (0114).
+  const multiCols = columns.filter((c) => c.field === "multi" && (c.parts ?? []).length >= 2);
+
+  // Figures outside the lines — totals rows, the summary above the table —
+  // to check the lines against.
+  const numbers: number[] = [];
+  const keepNumbers = (r: unknown[]) => {
+    for (const c of r) {
+      const n = amountOf(c);
+      if (n !== null && Math.abs(n) >= 1) numbers.push(n);
+    }
+  };
+  rows.slice(0, Math.max(headerRow, 0)).forEach(keepNumbers);
 
   const lines: ReadLine[] = [];
   body.forEach((r, i) => {
     if (!r.some((c) => c !== null && String(c).trim() !== "")) return;
+    // The heading again (a second page) is not a line.
+    if (headerRow >= 0 && r.map((c) => normalizeText(c)).join("|") === headerKey) return;
     const first = str(r.find((c) => str(c) !== null));
-    if (first && TOTAL_ROW.test(first.normalize("NFKC").replace(/\s/g, ""))) return;
-    const rawJan = str(cell(r, cJan));
-    const jan = normalizeJan(cell(r, cJan));
-    const name = str(cell(r, cName));
-    const code = str(cell(r, cCode));
+    if (first && TOTAL_ROW.test(first.normalize("NFKC").replace(/\s/g, ""))) {
+      keepNumbers(r);
+      return;
+    }
+    const split: Partial<Record<Field, string>> = {};
+    let multiRaw: string | null = null;
+    for (const c of multiCols) {
+      const v = str(cell(r, c.index));
+      if (!v) continue;
+      multiRaw ??= v;
+      for (const [k, val] of Object.entries(splitMulti(v, c.parts!, c.separator))) {
+        split[k as Field] ??= val;
+      }
+    }
+    const rawJan = str(cell(r, cJan)) ?? split.jan ?? null;
+    const jan = normalizeJan(cell(r, cJan) ?? split.jan ?? null);
+    const name = str(cell(r, cName)) ?? split.product_name ?? null;
+    const code = str(cell(r, cCode)) ?? split.product_code ?? null;
     const nameCode = str(cell(r, cNameCode));
-    if (!rawJan && !name && !code && !nameCode) return;
+    if (!rawJan && !name && !code && !nameCode) {
+      keepNumbers(r);
+      return;
+    }
+    // A summary row below the lines (消費税10%対象 / 税抜金額 …): its figures
+    // are for checking, it is not a line.
+    if (!janCheckOk(rawJan) && toInt(cell(r, cQty)) === null &&
+        r.some((c) => SUMMARY_WORDS.test(String(c ?? "").normalize("NFKC")))) {
+      keepNumbers(r);
+      return;
+    }
     const listPrice = toNum(cell(r, cList));
     const rate = toRate(cell(r, cRate));
     const cases = toInt(cell(r, cCases));
@@ -560,12 +757,12 @@ export async function readSpreadsheet(
       row: headerRow + 2 + i,
       jan_code: isJanLength(jan) ? jan : "",
       raw_jan_code: rawJan,
-      maker: str(cell(r, cMaker)),
+      maker: str(cell(r, cMaker)) ?? split.maker ?? null,
       product_name: name,
       product_code: code,
-      raw_name_code: nameCode,
-      split_by: null,
-      spec: str(cell(r, cSpec)) ?? specFrom(attrs),
+      raw_name_code: nameCode ?? multiRaw,
+      split_by: !nameCode && multiRaw ? "layout" : null,
+      spec: str(cell(r, cSpec)) ?? split.spec ?? specFrom(attrs),
       planned_quantity: qty ?? 0,
       case_quantity: caseQty,
       cases,
@@ -579,16 +776,150 @@ export async function readSpreadsheet(
       attributes: attrs,
       list_price: listPrice,
       discount_rate: rate,
-      unit: str(cell(r, cUnitName)),
-      supplier_code: str(cell(r, cSupCode)),
-      upstream_code: str(cell(r, cUpstream)),
+      unit: str(cell(r, cUnitName)) ?? split.unit ?? null,
+      supplier_code: str(cell(r, cSupCode)) ?? split.supplier_code ?? null,
+      upstream_code: str(cell(r, cUpstream)) ?? split.upstream_code ?? null,
       customer_code: str(cell(r, cCustomer)),
     });
   });
 
   await applySplits(lines, useAi);
   checkLines(lines);
-  return { columns, lines, header_row: headerRow + 1 };
+  return { columns, lines, header_row: headerRow + 1, totals: checkTotals(lines, { numbers }) };
+}
+
+// ---------------------------------------------------------------------------
+// PDFs that carry their text: read it where it stands (0114)
+// ---------------------------------------------------------------------------
+
+type TextItem = { str: string; x0: number; x1: number; y: number };
+
+/** A PDF's words with their positions, page after page, as lines of words
+ * from the top. Null for a scan (no text to read). */
+export async function pdfTextLines(bytes: Uint8Array): Promise<TextItem[][] | null> {
+  let pdf;
+  try {
+    pdf = await getDocumentProxy(new Uint8Array(bytes));
+  } catch (_) {
+    return null;
+  }
+  const out: TextItem[][] = [];
+  let count = 0;
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page = await pdf.getPage(n);
+    const content = await page.getTextContent();
+    const items: TextItem[] = [];
+    for (const it of content.items as { str?: string; transform?: number[]; width?: number }[]) {
+      const text = (it.str ?? "").trim();
+      if (!text || !it.transform) continue;
+      items.push({ str: text, x0: it.transform[4], x1: it.transform[4] + (it.width ?? 0), y: it.transform[5] });
+    }
+    count += items.length;
+    items.sort((a, b) => b.y - a.y || a.x0 - b.x0);
+    let line: TextItem[] = [];
+    let y = Number.POSITIVE_INFINITY;
+    for (const it of items) {
+      if (Math.abs(it.y - y) > 3 && line.length) {
+        out.push(line.sort((a, b) => a.x0 - b.x0));
+        line = [];
+      }
+      if (!line.length) y = it.y;
+      line.push(it);
+    }
+    if (line.length) out.push(line.sort((a, b) => a.x0 - b.x0));
+  }
+  return count >= 5 ? out : null;
+}
+
+/** The PDF's text as a table: the heading line we know best sets the
+ * columns (each heading's middle, split halfway to the next), and every
+ * word goes to the column its middle falls in. Null when no heading line is
+ * found — the PDF is then read as a picture. */
+export function pdfTable(lines: TextItem[][], aliases: AliasRow[]): { rows: unknown[][]; text: string } | null {
+  let header: TextItem[] | null = null, best = 0;
+  for (const l of lines) {
+    const score = l.filter((it) => aliasFor(it.str, aliases) !== null).length;
+    if (score > best) { best = score; header = l; }
+  }
+  if (!header || best < 3) return null;
+  const centers = header.map((it) => (it.x0 + it.x1) / 2);
+  // Between two headings, the line to split on is where the fewest words
+  // below the heading cross it — in the widest empty gap. Text sits left in
+  // a wide column and numbers sit right, so halfway is often wrong.
+  const below = lines.slice(lines.indexOf(header) + 1).filter((l) => l.length >= 3).flat();
+  const bounds = centers.slice(1).map((right, i) => {
+    const left = centers[i];
+    const edges = [left, right];
+    for (const it of below) {
+      if (it.x0 > left && it.x0 < right) edges.push(it.x0);
+      if (it.x1 > left && it.x1 < right) edges.push(it.x1);
+    }
+    edges.sort((a, b) => a - b);
+    let pick = (left + right) / 2, bestCross = Number.POSITIVE_INFINITY, bestGap = -1;
+    for (let k = 0; k + 1 < edges.length; k++) {
+      const gap = edges[k + 1] - edges[k];
+      if (gap <= 0) continue;
+      const mid = (edges[k] + edges[k + 1]) / 2;
+      const cross = below.filter((it) => it.x0 < mid && it.x1 > mid).length;
+      if (cross < bestCross || (cross === bestCross && gap > bestGap)) {
+        bestCross = cross;
+        bestGap = gap;
+        pick = mid;
+      }
+    }
+    return pick;
+  });
+  const columnOf = (it: TextItem) => {
+    const mid = (it.x0 + it.x1) / 2;
+    let i = 0;
+    while (i < bounds.length && mid > bounds[i]) i++;
+    return i;
+  };
+  const rows = lines.map((l) => {
+    if (l === header) return header.map((it) => it.str);
+    const cells: (string | null)[] = header!.map(() => null);
+    for (const it of l) {
+      const i = columnOf(it);
+      cells[i] = cells[i] === null ? it.str : `${cells[i]} ${it.str}`;
+    }
+    return cells;
+  });
+  return { rows, text: lines.map((l) => l.map((it) => it.str).join(" ")).join("\n") };
+}
+
+/** What a text PDF says of itself, found by its words. */
+export function pdfHeaderFrom(text: string): Header {
+  const t = text.normalize("NFKC");
+  const reg = t.match(/T\s?(\d{13})/);
+  const date = t.match(/(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
+  const customer = t.match(/得意先\s*(?:No|NO|№|コード|CD|番号)?[\s.:：]*([0-9A-Za-z-]{3,})/);
+  const doc = t.match(/(?:伝票|請求|納品|依頼)\s*(?:No|NO|№|番号)[\s.:：]*([0-9A-Za-z-]{3,})/);
+  return {
+    supplier_name: null,
+    registration_number: reg ? `T${reg[1]}` : null,
+    customer_code: customer?.[1] ?? null,
+    doc_number: doc?.[1] ?? null,
+    doc_date: date ? `${date[1]}-${date[2].padStart(2, "0")}-${date[3].padStart(2, "0")}` : null,
+  };
+}
+
+/** Reads a PDF by its own text when it has some and a table we know
+ * (exact, no AI reading needed); null when it must be read as a picture. */
+export async function readPdfText(
+  bytes: Uint8Array,
+  aliases: AliasRow[],
+  overrides: Record<number, string> = {},
+  useAi = true,
+  attributes: AttributeDef[] = [],
+): Promise<{ columns: Column[]; lines: ReadLine[]; header: Header; totals: Totals } | null> {
+  const textLines = await pdfTextLines(bytes);
+  if (!textLines) return null;
+  const table = pdfTable(textLines, aliases);
+  if (!table) return null;
+  const read = await readRows(table.rows, aliases, overrides, useAi, attributes);
+  const good = read.lines.filter((l) => janCheckOk(l.raw_jan_code) || l.product_code).length;
+  if (read.header_row === 0 || read.lines.length === 0 || good * 2 < read.lines.length) return null;
+  return { columns: read.columns, lines: read.lines, header: pdfHeaderFrom(table.text), totals: read.totals };
 }
 
 /** A combined 品名・品番 cell, or a name column with the 品番 inside it when the
@@ -596,6 +927,7 @@ export async function readSpreadsheet(
 async function applySplits(lines: ReadLine[], useAi: boolean) {
   const targets: { line: ReadLine; text: string }[] = [];
   for (const l of lines) {
+    if (l.split_by === "layout") continue;
     if (l.raw_name_code) targets.push({ line: l, text: l.raw_name_code });
     else if (!l.product_code && l.product_name && splitByRule(l.product_name)) {
       targets.push({ line: l, text: l.product_name });
@@ -740,7 +1072,8 @@ const EXTRACT_PROMPT =
   "この画像/PDFは日本の取引先(商社)の納品書・出荷案内・注文明細です。商社ごとに書式も見出しの言葉" +
   "(日本語の漢字・カナ、英語)も違います。見出しの意味を理解して、次を返してください。\n" +
   "1) header: {supplier_name: 発行元の会社名, registration_number: インボイス登録番号(T+13桁), " +
-  "customer_code: お客様コード, doc_number: 伝票番号, doc_date: 日付(YYYY-MM-DD)}。\n" +
+  "customer_code: お客様コード, doc_number: 伝票番号, doc_date: 日付(YYYY-MM-DD), " +
+  "subtotal: 明細の税抜合計(今回お買上額・10%対象と8%対象の合計など), tax: 消費税額, total: 税込の合計(請求額)}。\n" +
   "2) columns: 表の見出しを左から順に {header: 見出しの文字どおり, field: 意味} で。field は " + FIELD_HELP + "。\n" +
   "3) lines: 明細の各行。jan_code は印字どおり(ハイフン・点・空白もそのまま、無ければ空)。maker はメーカー名を印字どおり。" +
   "品名と品番が1つの欄にまとめて書かれている場合は、その欄の文字をそのまま name_code に入れ、" +
@@ -764,6 +1097,9 @@ const EXTRACT_SCHEMA = {
         customer_code: { type: "string" },
         doc_number: { type: "string" },
         doc_date: { type: "string" },
+        subtotal: { type: "number" },
+        tax: { type: "number" },
+        total: { type: "number" },
       },
     },
     columns: {
@@ -851,19 +1187,53 @@ function same(a: unknown, b: unknown, k: keyof ReadLine): boolean {
 
 /** Reads a PDF or photo twice — once to extract, once to check — and returns
  * lines flagged wherever the two readings differ. */
+/** What is known of one company's documents (0114): what its headings mean
+ * (learned, or corrected on this reading), how its combined cells split,
+ * and its 書式メモ in plain words. */
+export type ReadingHints = {
+  columns?: { header: string; field: Field; parts?: Field[] | null; separator?: string | null }[];
+  notes?: string | null;
+};
+
+const PART_WORDS: Partial<Record<Field, string>> = {
+  jan: "JANコード", maker: "メーカー", product_name: "品名", product_code: "品番", spec: "規格",
+  supplier_code: "取引先独自の商品コード", upstream_code: "仕入先コード", unit: "単位", ignore: "読まない記号",
+  quantity: "数量", unit_price: "単価", amount: "金額", list_price: "定価", customer_code: "得意先コード",
+};
+
+/** The hints as words for the AI. */
+export function hintText(h: ReadingHints): string {
+  const out: string[] = [];
+  for (const c of h.columns ?? []) {
+    if (c.field === "multi" && (c.parts ?? []).length >= 2) {
+      const sep = c.separator === "space" ? "空白" : (c.separator ? `「${c.separator}」` : "区切り記号か空白");
+      out.push(`見出し『${c.header}』の欄は${sep}で区切って ${(c.parts ?? []).map((p) => PART_WORDS[p] ?? p).join("・")} の順に入っている。` +
+        "欄の文字はそのまま name_code に入れること。");
+    } else if (c.field === "ignore") {
+      out.push(`見出し『${c.header}』の列は読まない。`);
+    } else {
+      out.push(`見出し『${c.header}』の列には ${PART_WORDS[c.field] ?? c.field}(${c.field}) が入っている。`);
+    }
+  }
+  if (h.notes) out.push(`書式メモ: ${h.notes}`);
+  return out.length ? "\nこの取引先の書類について、これまでの確認で分かっていること:\n- " + out.join("\n- ") + "\n" : "";
+}
+
 export async function readDocument(
   bytes: Uint8Array,
   mime: string,
   aliases: AliasRow[] = [],
-): Promise<{ header: Header; columns: Column[]; lines: ReadLine[]; verified: boolean }> {
+  hints: ReadingHints = {},
+): Promise<{ header: Header; columns: Column[]; lines: ReadLine[]; verified: boolean; totals: Totals }> {
   const doc = { inline_data: { mime_type: mime, data: encodeBase64(bytes) } };
-  const a = await gemini([{ text: EXTRACT_PROMPT }, doc], EXTRACT_SCHEMA);
+  const known = hintText(hints);
+  const a = await gemini([{ text: EXTRACT_PROMPT + known }, doc], EXTRACT_SCHEMA);
   const aLines = (Array.isArray(a.lines) ? a.lines : []) as RawLine[];
 
   let bLines: RawLine[] | null = null;
   try {
     const b = await gemini(
-      [{ text: VERIFY_PROMPT + JSON.stringify(aLines.map((l, i) => ({ index: i, ...l }))) }, doc],
+      [{ text: known + VERIFY_PROMPT + JSON.stringify(aLines.map((l, i) => ({ index: i, ...l }))) }, doc],
       {
         type: "object",
         properties: {
@@ -917,8 +1287,34 @@ export async function readDocument(
 
   // A combined cell the AI did not split gets the rule's try, and a split
   // the rule reads differently is flagged.
+  // A combined cell whose layout we know is split by rule, not by guess:
+  // what this company's heading was taught, else what the heading names.
+  const cols = (Array.isArray(a.columns) ? a.columns : []) as { header?: string; field?: Field; attribute?: string }[];
+  const layout = (hints.columns ?? []).find((c) => c.field === "multi" && (c.parts ?? []).length >= 2) ??
+    cols.map((c) => ({ parts: headingParts(str(c.header) ?? "", aliases), separator: null as string | null }))
+      .find((c) => c.parts !== null);
+  if (layout?.parts) {
+    for (const l of lines) {
+      if (!l.raw_name_code) continue;
+      const part = splitMulti(l.raw_name_code, layout.parts, layout.separator);
+      if (!part.product_code && !part.maker && !part.product_name) continue;
+      if (part.product_code && l.product_code && normalizeText(part.product_code) !== normalizeText(l.product_code)) {
+        l.alternatives.product_code = l.product_code;
+        if (!l.flags.includes("split_disagree")) l.flags.push("split_disagree");
+      }
+      l.maker = part.maker ?? l.maker;
+      l.product_name = part.product_name ?? (layout.parts.includes("product_name") ? null : l.product_name);
+      l.product_code = part.product_code ?? l.product_code;
+      if (!l.raw_jan_code && part.jan) {
+        l.raw_jan_code = part.jan;
+        const jan = normalizeJan(part.jan);
+        l.jan_code = isJanLength(jan) ? jan : "";
+      }
+      l.split_by = "layout";
+    }
+  }
   for (const l of lines) {
-    if (!l.raw_name_code) continue;
+    if (!l.raw_name_code || l.split_by === "layout") continue;
     const r = splitByRule(l.raw_name_code);
     if (!l.product_name && !l.product_code && r) {
       l.product_name = r.name;
@@ -937,7 +1333,7 @@ export async function readDocument(
   checkLines(lines);
 
   const h = (a.header ?? {}) as Record<string, unknown>;
-  const cols = (Array.isArray(a.columns) ? a.columns : []) as { header?: string; field?: Field; attribute?: string }[];
+  const totals = checkTotals(lines, { subtotal: toNum(h.subtotal), tax: toNum(h.tax), total: toNum(h.total) });
   return {
     header: {
       supplier_name: str(h.supplier_name),
@@ -955,5 +1351,6 @@ export async function readDocument(
     }),
     lines,
     verified: bLines !== null,
+    totals,
   };
 }

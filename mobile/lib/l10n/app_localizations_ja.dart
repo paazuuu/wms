@@ -7604,4 +7604,83 @@ class AppLocalizationsJa extends AppLocalizations {
   String wrWrongCount(int count) {
     return '誤り $count';
   }
+
+  @override
+  String get ntFieldMulti => '複数項目（区切って読む）';
+
+  @override
+  String get ntFieldMultiPick => '複数項目（区切って読む）…';
+
+  @override
+  String ntMultiOf(String parts) {
+    return '複数：$parts';
+  }
+
+  @override
+  String get ntPartSkip => '読まない';
+
+  @override
+  String get ntSepAuto => '自動（／か / があればそれで、なければ空白）';
+
+  @override
+  String get ntSepSpace => '空白';
+
+  @override
+  String ntSepChar(String sep) {
+    return '「$sep」';
+  }
+
+  @override
+  String get ntSeparator => '区切り';
+
+  @override
+  String ntPartsTitle(String header) {
+    return '「$header」の分け方';
+  }
+
+  @override
+  String get ntPartsHint =>
+      'この欄に入っている項目を、左から順にタップして並べてください。最後の項目には残りがすべて入ります（品番に空白があっても切れません）。';
+
+  @override
+  String get ntPartsEmpty => 'まだ選んでいません';
+
+  @override
+  String get ntPartsAdd => '項目を追加';
+
+  @override
+  String get ntFlagTotalMismatch => '明細の合計が書類の合計と合いません';
+
+  @override
+  String get ntReadPdfText => 'PDFの文字をそのまま読み取り';
+
+  @override
+  String get ntNotesTitle => '書式メモ（AIへの指示）';
+
+  @override
+  String get ntNotesHint => 'この取引先の書類の読み方を書いておくと、PDFや写真を読むたびにAIに伝えます';
+
+  @override
+  String get ntNotesExample => '例：JANは「備考」欄にあります。品番の前の「9A」「8E」などの記号は読まない。';
+
+  @override
+  String get ntNotesSaved => '書式メモを保存しました';
+
+  @override
+  String totalsOk(String sum) {
+    return '明細の合計 $sum が書類の合計と一致しました';
+  }
+
+  @override
+  String totalsMismatch(String sum, String expected) {
+    return '明細の合計 $sum が書類の合計 $expected と合いません。数量や単価を読み間違えた行がある可能性があります';
+  }
+
+  @override
+  String totalsNotFound(String sum) {
+    return '明細の合計 $sum が、書類のどの合計とも一致しませんでした';
+  }
+
+  @override
+  String get totalsReport => '警告を報告';
 }
