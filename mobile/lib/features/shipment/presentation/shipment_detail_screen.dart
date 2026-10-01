@@ -10,6 +10,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../delivery/domain/stock_item.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
+import '../application/packaging_providers.dart';
 import '../application/sender_profile_controller.dart';
 import '../application/shipment_providers.dart';
 import '../data/shipment_print.dart';
@@ -19,6 +20,7 @@ import '../domain/shipment.dart';
 import '../domain/shipment_status.dart';
 import 'carton_edit_screen.dart';
 import 'sender_picker.dart';
+import 'shipment_weight_card.dart';
 import 'shipment_parcels_screen.dart';
 import 'shipment_status_ui.dart';
 import '../../product_library/presentation/product_thumb.dart';
@@ -44,6 +46,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
   void _refresh() {
     ref.invalidate(shipmentDetailProvider(_id));
     ref.invalidate(shipmentsListProvider);
+    ref.invalidate(shipmentWeightProvider(_id));
   }
 
   Future<void> _addCarton() async {
@@ -512,6 +515,12 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
             label: Text(l10n.addCarton),
           ),
         ],
+
+        // What it should weigh, before anyone puts it on a scale (0115).
+        const SizedBox(height: AppSpacing.lg),
+        _SectionHeader(label: l10n.swSection),
+        const SizedBox(height: AppSpacing.sm),
+        ShipmentWeightCard(planId: s.id, editable: !shipped),
 
         // §21's shipping block: what is going out, how heavy, with whom.
         const SizedBox(height: AppSpacing.lg),

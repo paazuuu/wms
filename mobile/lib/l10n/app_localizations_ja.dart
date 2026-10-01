@@ -7683,4 +7683,195 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get totalsReport => '警告を報告';
+
+  @override
+  String get wtSection => '重量';
+
+  @override
+  String get wtAdd => '重量を入力';
+
+  @override
+  String get wtEdit => '重量を変更';
+
+  @override
+  String get wtNone => 'まだ重量が入っていません。出荷時の総重量には入りません';
+
+  @override
+  String wtPerUnit(String weight, String unit) {
+    return '$weight / 1$unit';
+  }
+
+  @override
+  String wtGramsLabel(String unit) {
+    return '$unitあたりの重さ';
+  }
+
+  @override
+  String get wtSourceManual => '手入力';
+
+  @override
+  String get wtSourceMeasured => '実測';
+
+  @override
+  String get wtSourceWeb => 'ネットで調べた値';
+
+  @override
+  String get wtUrl => '調べたページ（任意）';
+
+  @override
+  String get wtNote => 'メモ（任意）';
+
+  @override
+  String get wtClear => '重量を消す';
+
+  @override
+  String get wtInvalid => '重さは0以上の数字で入れてください';
+
+  @override
+  String get wtPackEdit => '単位と重さを変更';
+
+  @override
+  String get wtPackageLabel => '箱・ケースそのものの重さ（任意）';
+
+  @override
+  String get wtPackageHint => '中身の重さ（入数 × 1個の重さ）に足して計算します';
+
+  @override
+  String get wtGrossLabel => '1ケースを丸ごと量った重さ（任意）';
+
+  @override
+  String get wtGrossHint => '入れると、計算よりこちらを優先します';
+
+  @override
+  String get wtPackNoUnitWeight =>
+      'この商品の1個あたりの重さがまだないため、丸ごとの重さを入れない限りケースの重さは計算できません';
+
+  @override
+  String get swSection => '出荷重量の見込み';
+
+  @override
+  String get swGoods => '商品';
+
+  @override
+  String swGoodsLine(String weight) {
+    return '商品だけで $weight';
+  }
+
+  @override
+  String swBoxes(int count) {
+    return 'ダンボール $count箱';
+  }
+
+  @override
+  String get swMaterial => '梱包材';
+
+  @override
+  String get swTotal => '総重量（見込み）';
+
+  @override
+  String get swMeasured => '実際に量った重さ';
+
+  @override
+  String swMissing(int count) {
+    return '$count件の商品に重量がなく、合計に入っていません';
+  }
+
+  @override
+  String get swNoPlan => 'ダンボールの数はまだ決めていません';
+
+  @override
+  String get swPlanned => '予定しているダンボール';
+
+  @override
+  String swSuggest(String list) {
+    return '重さからの目安: $list';
+  }
+
+  @override
+  String swSuggestOne(int count) {
+    return '重さからの目安 $count箱';
+  }
+
+  @override
+  String swCarton(int no, String type) {
+    return '$no箱目 $type';
+  }
+
+  @override
+  String get swNoType => '（種類未設定）';
+
+  @override
+  String swEmpty(String weight) {
+    return '箱 $weight';
+  }
+
+  @override
+  String swMaterialOf(String weight) {
+    return '梱包材 $weight';
+  }
+
+  @override
+  String swEstimate(String weight) {
+    return '見込み $weight';
+  }
+
+  @override
+  String get swSetBox => 'ダンボールの種類と重さ';
+
+  @override
+  String get swPlanAction => 'ダンボールの数を決める';
+
+  @override
+  String get swBoxType => 'ダンボールの種類';
+
+  @override
+  String get ctTitle => 'ダンボールの種類';
+
+  @override
+  String get ctAdd => 'ダンボールを追加';
+
+  @override
+  String get ctEdit => 'ダンボールを変更';
+
+  @override
+  String get ctHint =>
+      '出荷に使うダンボールの大きさと重さです。総重量の見込みはここの値で計算します。使わなくなったものは「使う」を切ってください（過去の出荷が名前を参照しているため消しません）。';
+
+  @override
+  String get ctName => '名前（例：100サイズ）';
+
+  @override
+  String get ctLength => '縦';
+
+  @override
+  String get ctWidth => '横';
+
+  @override
+  String get ctHeight => '高さ';
+
+  @override
+  String get ctEmptyWeight => '空のダンボールの重さ';
+
+  @override
+  String get ctMaterial => '緩衝材など梱包材の重さ';
+
+  @override
+  String get ctMaxLoad => '1箱に入れられる重さの上限';
+
+  @override
+  String ctMaxLoadOf(String kg) {
+    return '上限 $kg kg';
+  }
+
+  @override
+  String get ctDefault => 'いつも使う箱';
+
+  @override
+  String get ctActive => '使う';
+
+  @override
+  String get ctInactive => '使わない';
+
+  @override
+  String get ctSaved => 'ダンボールを保存しました';
 }

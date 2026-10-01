@@ -39,6 +39,9 @@ class ProductUom extends Equatable {
     required this.name,
     required this.conversionFactor,
     required this.isBase,
+    this.packageWeightG,
+    this.grossWeightG,
+    this.packWeightG,
   });
 
   final String code;
@@ -46,15 +49,30 @@ class ProductUom extends Equatable {
   final double conversionFactor;
   final bool isBase;
 
+  /// The empty packaging of one of these — the inner box, the case (0115).
+  final double? packageWeightG;
+
+  /// One whole pack, weighed (0115). Wins over the pieces plus packaging.
+  final double? grossWeightG;
+
+  /// What one pack weighs as the server works it out: [grossWeightG] when
+  /// known, else the pieces at the product's unit weight plus the packaging.
+  /// Null while the product has no unit weight.
+  final double? packWeightG;
+
   factory ProductUom.fromJson(Map<String, dynamic> json) => ProductUom(
         code: (json['code'] ?? '').toString(),
         name: (json['name'] ?? '').toString(),
         conversionFactor: _asDouble(json['conversion_factor']) ?? 1,
         isBase: json['is_base'] == true,
+        packageWeightG: _asDouble(json['package_weight_g']),
+        grossWeightG: _asDouble(json['gross_weight_g']),
+        packWeightG: _asDouble(json['pack_weight_g']),
       );
 
   @override
-  List<Object?> get props => [code, name, conversionFactor, isBase];
+  List<Object?> get props =>
+      [code, name, conversionFactor, isBase, packageWeightG, grossWeightG, packWeightG];
 }
 
 /// One row of `product_barcodes` (0057): a JAN, an EAN, a case code, an
@@ -151,6 +169,10 @@ class Product extends Equatable {
     this.uoms = const [],
     this.barcodes = const [],
     this.supplierNames = const [],
+    this.unitWeightG,
+    this.weightSource,
+    this.weightSourceUrl,
+    this.weightNote,
     this.createdAt,
     this.updatedAt,
   });
@@ -185,6 +207,16 @@ class Product extends Equatable {
 
   /// What each supplier calls this product (0087).
   final List<SupplierProductName> supplierNames;
+
+  /// One base unit's weight in grams (0115), or null while nobody has
+  /// entered or found one.
+  final double? unitWeightG;
+
+  /// Where [unitWeightG] came from: `manual`, `web` (with [weightSourceUrl])
+  /// or `measured` — weighed here.
+  final String? weightSource;
+  final String? weightSourceUrl;
+  final String? weightNote;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -226,6 +258,10 @@ class Product extends Equatable {
         uoms: _list(json['uoms'], ProductUom.fromJson),
         barcodes: _list(json['barcodes'], ProductBarcode.fromJson),
         supplierNames: _list(json['supplier_names'], SupplierProductName.fromJson),
+        unitWeightG: _asDouble(json['unit_weight_g']),
+        weightSource: _asText(json['weight_source']),
+        weightSourceUrl: _asText(json['weight_source_url']),
+        weightNote: _asText(json['weight_note']),
         createdAt: DateTime.tryParse('${json['created_at']}')?.toLocal(),
         updatedAt: DateTime.tryParse('${json['updated_at']}')?.toLocal(),
       );
@@ -246,5 +282,9 @@ class Product extends Equatable {
         baseUom,
         uoms,
         barcodes,
+        unitWeightG,
+        weightSource,
+        weightSourceUrl,
+        weightNote,
       ];
 }

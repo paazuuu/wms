@@ -39,6 +39,9 @@ import 'package:wms_mobile/features/home/data/role_dashboard_repository.dart';
 import 'package:wms_mobile/features/home/domain/role_dashboards.dart';
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/qc/application/attachment_providers.dart';
+import 'package:wms_mobile/features/shipment/application/packaging_providers.dart';
+import 'package:wms_mobile/features/shipment/data/packaging_repository.dart';
+import 'package:wms_mobile/features/shipment/domain/packaging.dart';
 import 'package:wms_mobile/features/qc/data/attachment_repository.dart';
 import 'package:wms_mobile/features/qc/application/qc_scan_mode.dart';
 import 'package:wms_mobile/features/qc/data/inspection_repository.dart';
@@ -195,6 +198,8 @@ List<Override> _defaultOverrides() => [
       productLibraryCanManageProvider.overrideWithValue(false),
       // Our product format (0111), in memory.
       productNamingRepositoryProvider.overrideWithValue(FakeProductNamingRepository()),
+      // Boxes and shipping weights (0115), in memory.
+      packagingRepositoryProvider.overrideWithValue(FakePackagingRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -2246,6 +2251,35 @@ class FakeProductRepository implements ProductRepository {
       uomCode: uomCode,
       factor: conversionFactor,
     ));
+    return const ApiSuccess(true);
+  }
+
+  /// What setPack() and setWeight() were asked to save (0115).
+  final setPacks = <({int productId, String uomCode, double factor, double? packageWeightG, double? grossWeightG})>[];
+  final setWeights = <({int productId, double? unitWeightG, String source, String? url, String? note})>[];
+
+  @override
+  Future<ApiResult<bool>> setPack({
+    required int productId,
+    required String uomCode,
+    required double conversionFactor,
+    double? packageWeightG,
+    double? grossWeightG,
+  }) async {
+    setPacks.add((productId: productId, uomCode: uomCode, factor: conversionFactor,
+        packageWeightG: packageWeightG, grossWeightG: grossWeightG));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> setWeight({
+    required int productId,
+    double? unitWeightG,
+    String source = 'manual',
+    String? url,
+    String? note,
+  }) async {
+    setWeights.add((productId: productId, unitWeightG: unitWeightG, source: source, url: url, note: note));
     return const ApiSuccess(true);
   }
 
@@ -4809,5 +4843,52 @@ class FakeProductNamingRepository implements ProductNamingRepository {
           name: renderProductName('{base} {attr:size} {attr:color}', base: p.baseName, attributes: p.attributes),
         ),
     ]);
+  }
+}
+
+
+/// Boxes and shipping weights (0115), in memory.
+class FakePackagingRepository implements PackagingRepository {
+  FakePackagingRepository({
+    List<CartonType>? types,
+    this.weight = const ShipmentWeightEstimate(),
+  }) : types = types ??
+            [
+              const CartonType(id: 1, name: '80サイズ', lengthCm: 35, widthCm: 25, heightCm: 20,
+                  emptyWeightG: 250, packingMaterialG: 50, maxLoadKg: 15),
+              const CartonType(id: 2, name: '100サイズ', lengthCm: 40, widthCm: 30, heightCm: 30,
+                  emptyWeightG: 400, packingMaterialG: 80, maxLoadKg: 20, isDefault: true),
+            ];
+
+  final List<CartonType> types;
+  ShipmentWeightEstimate weight;
+  final saved = <CartonType>[];
+  final planned = <List<PlannedCarton>>[];
+  final packaging = <({int cartonId, int typeId, double? empty, double? material})>[];
+
+  @override
+  Future<ApiResult<List<CartonType>>> cartonTypes({bool includeInactive = false}) async =>
+      ApiSuccess(includeInactive ? types : types.where((t) => t.active).toList());
+
+  @override
+  Future<ApiResult<int>> saveCartonType(CartonType type) async {
+    saved.add(type);
+    return ApiSuccess(type.id ?? 99);
+  }
+
+  @override
+  Future<ApiResult<ShipmentWeightEstimate>> estimate(int planId) async => ApiSuccess(weight);
+
+  @override
+  Future<ApiResult<ShipmentWeightEstimate>> setPlannedCartons(int planId, List<PlannedCarton> items) async {
+    planned.add(items);
+    return ApiSuccess(weight);
+  }
+
+  @override
+  Future<ApiResult<bool>> setCartonPackaging(int cartonId,
+      {required int cartonTypeId, double? emptyWeightG, double? packingMaterialG}) async {
+    packaging.add((cartonId: cartonId, typeId: cartonTypeId, empty: emptyWeightG, material: packingMaterialG));
+    return const ApiSuccess(true);
   }
 }

@@ -14106,6 +14106,336 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'警告を報告'**
   String get totalsReport;
+
+  /// No description provided for @wtSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量'**
+  String get wtSection;
+
+  /// No description provided for @wtAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量を入力'**
+  String get wtAdd;
+
+  /// No description provided for @wtEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量を変更'**
+  String get wtEdit;
+
+  /// No description provided for @wtNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ重量が入っていません。出荷時の総重量には入りません'**
+  String get wtNone;
+
+  /// No description provided for @wtPerUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'{weight} / 1{unit}'**
+  String wtPerUnit(String weight, String unit);
+
+  /// No description provided for @wtGramsLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'{unit}あたりの重さ'**
+  String wtGramsLabel(String unit);
+
+  /// No description provided for @wtSourceManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手入力'**
+  String get wtSourceManual;
+
+  /// No description provided for @wtSourceMeasured.
+  ///
+  /// In ja, this message translates to:
+  /// **'実測'**
+  String get wtSourceMeasured;
+
+  /// No description provided for @wtSourceWeb.
+  ///
+  /// In ja, this message translates to:
+  /// **'ネットで調べた値'**
+  String get wtSourceWeb;
+
+  /// No description provided for @wtUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べたページ（任意）'**
+  String get wtUrl;
+
+  /// No description provided for @wtNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get wtNote;
+
+  /// No description provided for @wtClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量を消す'**
+  String get wtClear;
+
+  /// No description provided for @wtInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さは0以上の数字で入れてください'**
+  String get wtInvalid;
+
+  /// No description provided for @wtPackEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位と重さを変更'**
+  String get wtPackEdit;
+
+  /// No description provided for @wtPackageLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱・ケースそのものの重さ（任意）'**
+  String get wtPackageLabel;
+
+  /// No description provided for @wtPackageHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'中身の重さ（入数 × 1個の重さ）に足して計算します'**
+  String get wtPackageHint;
+
+  /// No description provided for @wtGrossLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'1ケースを丸ごと量った重さ（任意）'**
+  String get wtGrossLabel;
+
+  /// No description provided for @wtGrossHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'入れると、計算よりこちらを優先します'**
+  String get wtGrossHint;
+
+  /// No description provided for @wtPackNoUnitWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品の1個あたりの重さがまだないため、丸ごとの重さを入れない限りケースの重さは計算できません'**
+  String get wtPackNoUnitWeight;
+
+  /// No description provided for @swSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷重量の見込み'**
+  String get swSection;
+
+  /// No description provided for @swGoods.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get swGoods;
+
+  /// No description provided for @swGoodsLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品だけで {weight}'**
+  String swGoodsLine(String weight);
+
+  /// No description provided for @swBoxes.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボール {count}箱'**
+  String swBoxes(int count);
+
+  /// No description provided for @swMaterial.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包材'**
+  String get swMaterial;
+
+  /// No description provided for @swTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量（見込み）'**
+  String get swTotal;
+
+  /// No description provided for @swMeasured.
+  ///
+  /// In ja, this message translates to:
+  /// **'実際に量った重さ'**
+  String get swMeasured;
+
+  /// No description provided for @swMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件の商品に重量がなく、合計に入っていません'**
+  String swMissing(int count);
+
+  /// No description provided for @swNoPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールの数はまだ決めていません'**
+  String get swNoPlan;
+
+  /// No description provided for @swPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定しているダンボール'**
+  String get swPlanned;
+
+  /// No description provided for @swSuggest.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さからの目安: {list}'**
+  String swSuggest(String list);
+
+  /// No description provided for @swSuggestOne.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さからの目安 {count}箱'**
+  String swSuggestOne(int count);
+
+  /// No description provided for @swCarton.
+  ///
+  /// In ja, this message translates to:
+  /// **'{no}箱目 {type}'**
+  String swCarton(int no, String type);
+
+  /// No description provided for @swNoType.
+  ///
+  /// In ja, this message translates to:
+  /// **'（種類未設定）'**
+  String get swNoType;
+
+  /// No description provided for @swEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱 {weight}'**
+  String swEmpty(String weight);
+
+  /// No description provided for @swMaterialOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包材 {weight}'**
+  String swMaterialOf(String weight);
+
+  /// No description provided for @swEstimate.
+  ///
+  /// In ja, this message translates to:
+  /// **'見込み {weight}'**
+  String swEstimate(String weight);
+
+  /// No description provided for @swSetBox.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールの種類と重さ'**
+  String get swSetBox;
+
+  /// No description provided for @swPlanAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールの数を決める'**
+  String get swPlanAction;
+
+  /// No description provided for @swBoxType.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールの種類'**
+  String get swBoxType;
+
+  /// No description provided for @ctTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールの種類'**
+  String get ctTitle;
+
+  /// No description provided for @ctAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールを追加'**
+  String get ctAdd;
+
+  /// No description provided for @ctEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールを変更'**
+  String get ctEdit;
+
+  /// No description provided for @ctHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷に使うダンボールの大きさと重さです。総重量の見込みはここの値で計算します。使わなくなったものは「使う」を切ってください（過去の出荷が名前を参照しているため消しません）。'**
+  String get ctHint;
+
+  /// No description provided for @ctName.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前（例：100サイズ）'**
+  String get ctName;
+
+  /// No description provided for @ctLength.
+  ///
+  /// In ja, this message translates to:
+  /// **'縦'**
+  String get ctLength;
+
+  /// No description provided for @ctWidth.
+  ///
+  /// In ja, this message translates to:
+  /// **'横'**
+  String get ctWidth;
+
+  /// No description provided for @ctHeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'高さ'**
+  String get ctHeight;
+
+  /// No description provided for @ctEmptyWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'空のダンボールの重さ'**
+  String get ctEmptyWeight;
+
+  /// No description provided for @ctMaterial.
+  ///
+  /// In ja, this message translates to:
+  /// **'緩衝材など梱包材の重さ'**
+  String get ctMaterial;
+
+  /// No description provided for @ctMaxLoad.
+  ///
+  /// In ja, this message translates to:
+  /// **'1箱に入れられる重さの上限'**
+  String get ctMaxLoad;
+
+  /// No description provided for @ctMaxLoadOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'上限 {kg} kg'**
+  String ctMaxLoadOf(String kg);
+
+  /// No description provided for @ctDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'いつも使う箱'**
+  String get ctDefault;
+
+  /// No description provided for @ctActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'使う'**
+  String get ctActive;
+
+  /// No description provided for @ctInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'使わない'**
+  String get ctInactive;
+
+  /// No description provided for @ctSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールを保存しました'**
+  String get ctSaved;
 }
 
 class _AppLocalizationsDelegate

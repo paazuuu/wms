@@ -6969,5 +6969,150 @@
       }
     }
   },
-  "totalsReport": "警告を報告"
+  "totalsReport": "警告を報告",
+  "wtSection": "重量",
+  "wtAdd": "重量を入力",
+  "wtEdit": "重量を変更",
+  "wtNone": "まだ重量が入っていません。出荷時の総重量には入りません",
+  "wtPerUnit": "{weight} / 1{unit}",
+  "@wtPerUnit": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "wtGramsLabel": "{unit}あたりの重さ",
+  "@wtGramsLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "wtSourceManual": "手入力",
+  "wtSourceMeasured": "実測",
+  "wtSourceWeb": "ネットで調べた値",
+  "wtUrl": "調べたページ（任意）",
+  "wtNote": "メモ（任意）",
+  "wtClear": "重量を消す",
+  "wtInvalid": "重さは0以上の数字で入れてください",
+  "wtPackEdit": "単位と重さを変更",
+  "wtPackageLabel": "箱・ケースそのものの重さ（任意）",
+  "wtPackageHint": "中身の重さ（入数 × 1個の重さ）に足して計算します",
+  "wtGrossLabel": "1ケースを丸ごと量った重さ（任意）",
+  "wtGrossHint": "入れると、計算よりこちらを優先します",
+  "wtPackNoUnitWeight": "この商品の1個あたりの重さがまだないため、丸ごとの重さを入れない限りケースの重さは計算できません",
+  "swSection": "出荷重量の見込み",
+  "swGoods": "商品",
+  "swGoodsLine": "商品だけで {weight}",
+  "@swGoodsLine": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "swBoxes": "ダンボール {count}箱",
+  "@swBoxes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "swMaterial": "梱包材",
+  "swTotal": "総重量（見込み）",
+  "swMeasured": "実際に量った重さ",
+  "swMissing": "{count}件の商品に重量がなく、合計に入っていません",
+  "@swMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "swNoPlan": "ダンボールの数はまだ決めていません",
+  "swPlanned": "予定しているダンボール",
+  "swSuggest": "重さからの目安: {list}",
+  "@swSuggest": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "swSuggestOne": "重さからの目安 {count}箱",
+  "@swSuggestOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "swCarton": "{no}箱目 {type}",
+  "@swCarton": {
+    "placeholders": {
+      "no": {
+        "type": "int"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "swNoType": "（種類未設定）",
+  "swEmpty": "箱 {weight}",
+  "@swEmpty": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "swMaterialOf": "梱包材 {weight}",
+  "@swMaterialOf": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "swEstimate": "見込み {weight}",
+  "@swEstimate": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "swSetBox": "ダンボールの種類と重さ",
+  "swPlanAction": "ダンボールの数を決める",
+  "swBoxType": "ダンボールの種類",
+  "ctTitle": "ダンボールの種類",
+  "ctAdd": "ダンボールを追加",
+  "ctEdit": "ダンボールを変更",
+  "ctHint": "出荷に使うダンボールの大きさと重さです。総重量の見込みはここの値で計算します。使わなくなったものは「使う」を切ってください（過去の出荷が名前を参照しているため消しません）。",
+  "ctName": "名前（例：100サイズ）",
+  "ctLength": "縦",
+  "ctWidth": "横",
+  "ctHeight": "高さ",
+  "ctEmptyWeight": "空のダンボールの重さ",
+  "ctMaterial": "緩衝材など梱包材の重さ",
+  "ctMaxLoad": "1箱に入れられる重さの上限",
+  "ctMaxLoadOf": "上限 {kg} kg",
+  "@ctMaxLoadOf": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "ctDefault": "いつも使う箱",
+  "ctActive": "使う",
+  "ctInactive": "使わない",
+  "ctSaved": "ダンボールを保存しました"
 }

@@ -88,6 +88,8 @@ class ProductDetailScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
                 _BarcodesCard(product: product, onMessage: _snack),
                 const SizedBox(height: AppSpacing.md),
+                _WeightCard(product: product),
+                const SizedBox(height: AppSpacing.md),
                 _UnitsCard(product: product, onMessage: _snack),
                 const SizedBox(height: AppSpacing.md),
                 SupplierNamesCard(product: product),
@@ -509,7 +511,207 @@ class _BarcodeSheetState extends ConsumerState<_BarcodeSheet> {
   }
 }
 
-/// The base unit and the pack sizes defined against it (0059).
+/// What one of this product weighs (0115), and where that figure came from.
+/// Shipping weights are worked out from it, so a product without one is
+/// said to be left out rather than counted as nothing.
+class _WeightCard extends ConsumerWidget {
+  const _WeightCard({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final weight = product.unitWeightG;
+    final unit = product.baseUom?.name ?? '';
+
+    return _Section(
+      title: l10n.wtSection,
+      trailing: weight == null
+          ? null
+          : StatusPill(
+              tone: product.weightSource == 'measured' ? StatusTone.success : StatusTone.neutral,
+              label: weightSourceLabel(l10n, product.weightSource),
+              dense: true,
+            ),
+      action: TextButton.icon(
+        key: const ValueKey('wt-edit'),
+        icon: const Icon(Icons.scale_outlined, size: 18),
+        label: Text(weight == null ? l10n.wtAdd : l10n.wtEdit),
+        onPressed: () async {
+          final saved = await showModalBottomSheet<bool>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => _WeightSheet(product: product),
+          );
+          if (saved == true) ref.invalidate(productListProvider);
+        },
+      ),
+      children: [
+        if (weight == null)
+          Text(l10n.wtNone, style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant))
+        else
+          Text(unit.isEmpty ? gramsText(weight) : l10n.wtPerUnit(gramsText(weight), unit),
+              key: const ValueKey('wt-value'), style: theme.textTheme.titleMedium),
+        if (product.weightNote != null) ...[
+          const SizedBox(height: 2),
+          Text(product.weightNote!, style: theme.textTheme.bodySmall),
+        ],
+        if (product.weightSourceUrl != null) ...[
+          const SizedBox(height: 2),
+          SelectableText(product.weightSourceUrl!,
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.primary)),
+        ],
+      ],
+    );
+  }
+}
+
+/// Entering, correcting or clearing a product's weight.
+class _WeightSheet extends ConsumerStatefulWidget {
+  const _WeightSheet({required this.product});
+
+  final Product product;
+
+  @override
+  ConsumerState<_WeightSheet> createState() => _WeightSheetState();
+}
+
+class _WeightSheetState extends ConsumerState<_WeightSheet> {
+  late final _weight = TextEditingController(
+      text: widget.product.unitWeightG == null ? '' : formatFactor(widget.product.unitWeightG!));
+  late final _url = TextEditingController(text: widget.product.weightSourceUrl ?? '');
+  late final _note = TextEditingController(text: widget.product.weightNote ?? '');
+  late String _source = widget.product.weightSource ?? 'manual';
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _weight.dispose();
+    _url.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save({bool clear = false}) async {
+    final l10n = AppLocalizations.of(context);
+    final grams = double.tryParse(_weight.text.trim().replaceAll(',', ''));
+    if (!clear && (grams == null || grams < 0)) {
+      setState(() => _error = l10n.wtInvalid);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final result = await ref.read(productRepositoryProvider).setWeight(
+          productId: widget.product.id,
+          unitWeightG: clear ? null : grams,
+          source: _source,
+          url: _url.text.trim().isEmpty ? null : _url.text.trim(),
+          note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+        );
+    if (!mounted) return;
+    result.when(
+      success: (_) => Navigator.pop(context, true),
+      failure: (f) => setState(() {
+        _busy = false;
+        _error = humanizeApiErrorMessage(l10n, f.message);
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final unit = widget.product.baseUom?.name ?? '';
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.wtSection, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 2),
+            Text(widget.product.name, style: theme.textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.lg),
+            TextField(
+              key: const ValueKey('wt-weight'),
+              controller: _weight,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: l10n.wtGramsLabel(unit.isEmpty ? '1' : '1 $unit'),
+                suffixText: 'g',
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SegmentedButton<String>(
+              key: const ValueKey('wt-source'),
+              segments: [
+                ButtonSegment(value: 'manual', label: Text(l10n.wtSourceManual)),
+                ButtonSegment(value: 'measured', label: Text(l10n.wtSourceMeasured)),
+                ButtonSegment(value: 'web', label: Text(l10n.wtSourceWeb)),
+              ],
+              selected: {_source},
+              onSelectionChanged: _busy ? null : (v) => setState(() => _source = v.first),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const ValueKey('wt-url'),
+              controller: _url,
+              keyboardType: TextInputType.url,
+              decoration: InputDecoration(labelText: l10n.wtUrl),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const ValueKey('wt-note'),
+              controller: _note,
+              decoration: InputDecoration(labelText: l10n.wtNote),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                if (widget.product.unitWeightG != null)
+                  TextButton(
+                    key: const ValueKey('wt-clear'),
+                    onPressed: _busy ? null : () => _save(clear: true),
+                    child: Text(l10n.wtClear),
+                  ),
+                const Spacer(),
+                FilledButton(
+                  key: const ValueKey('wt-save'),
+                  onPressed: _busy ? null : _save,
+                  child: _busy
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(l10n.productSave),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The base unit and the pack sizes defined against it (0059), with what
+/// each pack weighs (0115).
 class _UnitsCard extends ConsumerWidget {
   const _UnitsCard({required this.product, required this.onMessage});
 
@@ -548,6 +750,15 @@ class _UnitsCard extends ConsumerWidget {
     );
   }
 
+  Future<void> _edit(BuildContext context, WidgetRef ref, [ProductUom? uom]) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _UomSheet(product: product, existing: uom),
+    );
+    if (saved == true) ref.invalidate(productListProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -560,44 +771,44 @@ class _UnitsCard extends ConsumerWidget {
       action: TextButton.icon(
         icon: const Icon(Icons.add, size: 18),
         label: Text(l10n.productUnitAdd),
-        onPressed: () async {
-          final saved = await showModalBottomSheet<bool>(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => _UomSheet(product: product),
-          );
-          if (saved == true) ref.invalidate(productListProvider);
-        },
+        onPressed: () => _edit(context, ref),
       ),
       children: [
         for (final uom in product.uoms)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text('${uom.code} — ${uom.name}',
-                      style: theme.textTheme.bodyMedium),
-                ),
-                if (uom.isBase)
-                  StatusPill(
-                      tone: StatusTone.neutral,
-                      label: l10n.productUnitBase,
-                      dense: true)
-                else ...[
-                  Text(
-                    '${formatFactor(uom.conversionFactor)} ${base?.name ?? ''}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: AppFonts.mono,
-                        color: scheme.onSurfaceVariant),
+            child: InkWell(
+              key: ValueKey('uom-${uom.code}'),
+              onTap: uom.isBase ? null : () => _edit(context, ref, uom),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text('${uom.code} — ${uom.name}',
+                        style: theme.textTheme.bodyMedium),
                   ),
-                  IconButton(
-                    tooltip: l10n.actionDelete,
-                    icon: const Icon(Icons.delete_outline, size: 20),
-                    onPressed: () => _remove(context, ref, uom),
-                  ),
+                  if (uom.isBase)
+                    StatusPill(
+                        tone: StatusTone.neutral,
+                        label: l10n.productUnitBase,
+                        dense: true)
+                  else ...[
+                    Text(
+                      [
+                        '${formatFactor(uom.conversionFactor)} ${base?.name ?? ''}',
+                        if (uom.packWeightG != null) gramsText(uom.packWeightG!),
+                      ].join(' · '),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                          fontFamily: AppFonts.mono,
+                          color: scheme.onSurfaceVariant),
+                    ),
+                    IconButton(
+                      tooltip: l10n.actionDelete,
+                      icon: const Icon(Icons.delete_outline, size: 20),
+                      onPressed: () => _remove(context, ref, uom),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
       ],
@@ -605,28 +816,37 @@ class _UnitsCard extends ConsumerWidget {
   }
 }
 
-/// Define or correct one pack size. Correcting it re-derives every barcode that
-/// names the unit (0059), which is why this is an upsert and not an insert.
+/// Define or correct one pack size and its weights. Correcting it re-derives
+/// every barcode that names the unit (0059), which is why this is an upsert
+/// and not an insert.
 class _UomSheet extends ConsumerStatefulWidget {
-  const _UomSheet({required this.product});
+  const _UomSheet({required this.product, this.existing});
 
   final Product product;
+  final ProductUom? existing;
 
   @override
   ConsumerState<_UomSheet> createState() => _UomSheetState();
 }
 
 class _UomSheetState extends ConsumerState<_UomSheet> {
-  final _factor = TextEditingController();
-  String? _code;
+  String _num(double? v) => v == null ? '' : formatFactor(v);
+  late final _factor = TextEditingController(text: _num(widget.existing?.conversionFactor));
+  late final _package = TextEditingController(text: _num(widget.existing?.packageWeightG));
+  late final _gross = TextEditingController(text: _num(widget.existing?.grossWeightG));
+  late String? _code = widget.existing?.code;
   bool _busy = false;
   String? _error;
 
   @override
   void dispose() {
     _factor.dispose();
+    _package.dispose();
+    _gross.dispose();
     super.dispose();
   }
+
+  double? _grams(TextEditingController c) => double.tryParse(c.text.trim().replaceAll(',', ''));
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
@@ -635,14 +855,22 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
       setState(() => _error = l10n.productValidationRequired);
       return;
     }
+    final package = _grams(_package), gross = _grams(_gross);
+    if ((_package.text.trim().isNotEmpty && (package == null || package < 0)) ||
+        (_gross.text.trim().isNotEmpty && (gross == null || gross < 0))) {
+      setState(() => _error = l10n.wtInvalid);
+      return;
+    }
     setState(() {
       _busy = true;
       _error = null;
     });
-    final result = await ref.read(productRepositoryProvider).setUom(
+    final result = await ref.read(productRepositoryProvider).setPack(
           productId: widget.product.id,
           uomCode: _code!,
           conversionFactor: factor,
+          packageWeightG: package,
+          grossWeightG: gross,
         );
     if (!mounted) return;
     result.when(
@@ -661,6 +889,7 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final vocabulary = ref.watch(uomVocabularyProvider);
+    final unitWeight = widget.product.unitWeightG;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -674,7 +903,8 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.productUnitAdd, style: theme.textTheme.titleMedium),
+            Text(widget.existing == null ? l10n.productUnitAdd : l10n.wtPackEdit,
+                style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpacing.lg),
             vocabulary.when(
               loading: () => const LinearProgressIndicator(),
@@ -684,11 +914,17 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
                 initialValue: _code,
                 decoration: InputDecoration(labelText: l10n.productUnitsSection),
                 items: [
+                  // The pack being edited, even when the vocabulary no
+                  // longer offers its unit.
+                  if (widget.existing != null && !uoms.any((u) => u.code == widget.existing!.code))
+                    DropdownMenuItem(
+                        value: widget.existing!.code,
+                        child: Text('${widget.existing!.code} — ${widget.existing!.name}')),
                   for (final u in uoms)
                     DropdownMenuItem(
                         value: u.code, child: Text('${u.code} — ${u.name}')),
                 ],
-                onChanged: _busy ? null : (v) => setState(() => _code = v),
+                onChanged: _busy || widget.existing != null ? null : (v) => setState(() => _code = v),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -700,6 +936,32 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
                 helperText: widget.product.baseUom?.name,
               ),
             ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const ValueKey('uom-package'),
+              controller: _package,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: l10n.wtPackageLabel,
+                helperText: l10n.wtPackageHint,
+                suffixText: 'g',
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const ValueKey('uom-gross'),
+              controller: _gross,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: l10n.wtGrossLabel,
+                helperText: l10n.wtGrossHint,
+                suffixText: 'g',
+              ),
+            ),
+            if (unitWeight == null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.wtPackNoUnitWeight, style: theme.textTheme.bodySmall),
+            ],
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(_error!, style: TextStyle(color: theme.colorScheme.error)),

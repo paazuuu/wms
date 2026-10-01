@@ -7656,4 +7656,193 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get totalsReport => '报告警告';
+
+  @override
+  String get wtSection => '重量';
+
+  @override
+  String get wtAdd => '输入重量';
+
+  @override
+  String get wtEdit => '修改重量';
+
+  @override
+  String get wtNone => '尚未输入重量，不会计入发货总重量';
+
+  @override
+  String wtPerUnit(String weight, String unit) {
+    return '每$unit $weight';
+  }
+
+  @override
+  String wtGramsLabel(String unit) {
+    return '$unit的重量';
+  }
+
+  @override
+  String get wtSourceManual => '手动输入';
+
+  @override
+  String get wtSourceMeasured => '实测';
+
+  @override
+  String get wtSourceWeb => '网上查到的值';
+
+  @override
+  String get wtUrl => '查询的网页（可选）';
+
+  @override
+  String get wtNote => '备注（可选）';
+
+  @override
+  String get wtClear => '清除重量';
+
+  @override
+  String get wtInvalid => '请输入0以上的数字';
+
+  @override
+  String get wtPackEdit => '修改单位与重量';
+
+  @override
+  String get wtPackageLabel => '箱子/外箱本身的重量（可选）';
+
+  @override
+  String get wtPackageHint => '加在内容物（入数 × 单个重量）上计算';
+
+  @override
+  String get wtGrossLabel => '整箱实测重量（可选）';
+
+  @override
+  String get wtGrossHint => '填写后优先于计算值';
+
+  @override
+  String get wtPackNoUnitWeight => '该商品尚无单个重量，除非填写整箱重量，否则无法计算外箱重量';
+
+  @override
+  String get swSection => '预计发货重量';
+
+  @override
+  String get swGoods => '商品';
+
+  @override
+  String swGoodsLine(String weight) {
+    return '仅商品 $weight';
+  }
+
+  @override
+  String swBoxes(int count) {
+    return '纸箱 $count箱';
+  }
+
+  @override
+  String get swMaterial => '包装材料';
+
+  @override
+  String get swTotal => '总重量（预计）';
+
+  @override
+  String get swMeasured => '实际称重';
+
+  @override
+  String swMissing(int count) {
+    return '$count件商品没有重量，未计入合计';
+  }
+
+  @override
+  String get swNoPlan => '尚未决定纸箱数量';
+
+  @override
+  String get swPlanned => '计划使用的纸箱';
+
+  @override
+  String swSuggest(String list) {
+    return '按重量估算: $list';
+  }
+
+  @override
+  String swSuggestOne(int count) {
+    return '按重量约$count箱';
+  }
+
+  @override
+  String swCarton(int no, String type) {
+    return '第$no箱 $type';
+  }
+
+  @override
+  String get swNoType => '（未设置类型）';
+
+  @override
+  String swEmpty(String weight) {
+    return '箱 $weight';
+  }
+
+  @override
+  String swMaterialOf(String weight) {
+    return '包装材料 $weight';
+  }
+
+  @override
+  String swEstimate(String weight) {
+    return '预计 $weight';
+  }
+
+  @override
+  String get swSetBox => '纸箱类型与重量';
+
+  @override
+  String get swPlanAction => '决定纸箱数量';
+
+  @override
+  String get swBoxType => '纸箱类型';
+
+  @override
+  String get ctTitle => '纸箱类型';
+
+  @override
+  String get ctAdd => '添加纸箱';
+
+  @override
+  String get ctEdit => '修改纸箱';
+
+  @override
+  String get ctHint => '发货用纸箱的尺寸与重量。预计总重量按此计算。不再使用的请关闭「使用」（历史发货仍引用其名称，因此不删除）。';
+
+  @override
+  String get ctName => '名称（例：100尺寸）';
+
+  @override
+  String get ctLength => '长';
+
+  @override
+  String get ctWidth => '宽';
+
+  @override
+  String get ctHeight => '高';
+
+  @override
+  String get ctEmptyWeight => '空纸箱重量';
+
+  @override
+  String get ctMaterial => '缓冲材等包装材料重量';
+
+  @override
+  String get ctMaxLoad => '每箱可装重量上限';
+
+  @override
+  String ctMaxLoadOf(String kg) {
+    return '上限 $kg kg';
+  }
+
+  @override
+  String get ctDefault => '常用纸箱';
+
+  @override
+  String get ctActive => '使用';
+
+  @override
+  String get ctInactive => '不使用';
+
+  @override
+  String get ctSaved => '已保存纸箱';
 }

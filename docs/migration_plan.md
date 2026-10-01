@@ -5616,6 +5616,75 @@ Tried on the real files:
   Its line sum was checked by hand against the document's 614,820.
 - The order sheet from 0113 still reads 43 lines with no warnings.
 
+### 0115 — weights, packs and boxes: what a shipment should weigh
+
+Nothing knew what a product weighs, so a shipment's weight was only known
+after someone put each box on a scale.
+
+- **Product weight.**
+  - `products.unit_weight_g` holds one base unit's weight.
+  - `weight_source` records where it came from: `manual`, `web` (with
+    `weight_source_url`) or `measured`. A note goes beside it.
+  - `set_product_weight` sets or clears it, and is audited.
+- **Pack weights.**
+  - Pack sizes already existed (`product_uoms`, 0059: 1 DOZEN = 12).
+    Each now carries `package_weight_g` (the empty inner box or case) and,
+    when one is weighed whole, `gross_weight_g`.
+  - `pack_weight_g` is the gross weight when known, else the pieces plus
+    the packaging.
+  - `set_product_pack` saves a pack and its weights.
+    (`remove_product_pack` duplicates 0059's `remove_product_uom` and is
+    not used by the app.)
+- **Boxes.**
+  - `carton_types` holds each box's size, empty weight, the packing
+    material that usually goes in, the most it takes, and a usual box.
+  - It is seeded with 60–140 size boxes, which can be edited.
+  - `save_carton_type` adds or changes one. A box no longer used is
+    retired, not deleted.
+- **Shipments.**
+  - A carton (0076) can name its type (`set_carton_packaging`). It then has
+    its own empty weight and packing material, copied from the type and
+    changeable.
+  - Before packing, `shipment_planned_cartons` says how many of which box
+    the shipment will need.
+  - `shipment_weight_estimate` adds up:
+    - the goods, from the lines at each product's weight;
+    - the boxes and packing material, from the real cartons once there are
+      any, else from the planned ones.
+
+    It also reports:
+    - which products have no weight yet;
+    - the measured weight, when the boxes were weighed;
+    - how many of each box the goods need by weight alone.
+- **App.**
+  - The product screen has a 重量 card and weights on its pack sizes.
+  - The shipment screen shows the expected weight. Boxes can be planned
+    there, and each carton given a type.
+  - ダンボールの種類 (box types) is opened from that card.
+
+Checked live in a rolled-back DO block:
+- a dozen at 10.5 g a piece with a 30 g box came to 156 g;
+- two planned 80-size boxes gave 1,650 g;
+- once a real carton existed, the estimate used it (1,360 g);
+- a negative weight was refused;
+- the product with no weight was reported.
+
+Data entered:
+- The 91 products from the past order sheet, quotes and invoices were
+  registered through `register_products`, with each supplier's way of
+  writing them learned:
+  - 新東光通商's Excel quote, and its scanned invoice (read by eye; every
+    JAN passes its check digit);
+  - アケボノクラウン's text PDF;
+  - ウエダ商事's July invoice.
+
+  One invoice line with no JAN (パイロット BIL80EFSULB) was left out.
+- With them came:
+  - the three trading partners;
+  - seven makers, with ミツビシ/uni → 三菱鉛筆, トンボ → トンボ鉛筆, etc.
+- 40 products got a web weight (source `web`, with the page and a note to
+  check it). The rest have none until entered.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

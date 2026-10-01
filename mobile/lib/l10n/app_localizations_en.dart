@@ -7846,4 +7846,195 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalsReport => 'Report';
+
+  @override
+  String get wtSection => 'Weight';
+
+  @override
+  String get wtAdd => 'Enter weight';
+
+  @override
+  String get wtEdit => 'Change weight';
+
+  @override
+  String get wtNone => 'No weight yet; it is left out of shipping weights';
+
+  @override
+  String wtPerUnit(String weight, String unit) {
+    return '$weight per $unit';
+  }
+
+  @override
+  String wtGramsLabel(String unit) {
+    return 'Weight of $unit';
+  }
+
+  @override
+  String get wtSourceManual => 'Entered';
+
+  @override
+  String get wtSourceMeasured => 'Weighed here';
+
+  @override
+  String get wtSourceWeb => 'From the web';
+
+  @override
+  String get wtUrl => 'Page it came from (optional)';
+
+  @override
+  String get wtNote => 'Note (optional)';
+
+  @override
+  String get wtClear => 'Clear weight';
+
+  @override
+  String get wtInvalid => 'Enter a weight of 0 or more';
+
+  @override
+  String get wtPackEdit => 'Change pack and weight';
+
+  @override
+  String get wtPackageLabel => 'Weight of the empty box or case (optional)';
+
+  @override
+  String get wtPackageHint => 'Added to the pieces (count × unit weight)';
+
+  @override
+  String get wtGrossLabel => 'One whole pack, weighed (optional)';
+
+  @override
+  String get wtGrossHint => 'When given, it wins over the calculation';
+
+  @override
+  String get wtPackNoUnitWeight =>
+      'This product has no unit weight yet, so a pack weighs nothing unless weighed whole';
+
+  @override
+  String get swSection => 'Expected shipping weight';
+
+  @override
+  String get swGoods => 'Goods';
+
+  @override
+  String swGoodsLine(String weight) {
+    return '$weight of goods';
+  }
+
+  @override
+  String swBoxes(int count) {
+    return '$count boxes';
+  }
+
+  @override
+  String get swMaterial => 'Packing material';
+
+  @override
+  String get swTotal => 'Total (expected)';
+
+  @override
+  String get swMeasured => 'Weighed';
+
+  @override
+  String swMissing(int count) {
+    return '$count products have no weight and are left out';
+  }
+
+  @override
+  String get swNoPlan => 'No boxes planned yet';
+
+  @override
+  String get swPlanned => 'Boxes planned';
+
+  @override
+  String swSuggest(String list) {
+    return 'By weight: $list';
+  }
+
+  @override
+  String swSuggestOne(int count) {
+    return 'By weight: $count';
+  }
+
+  @override
+  String swCarton(int no, String type) {
+    return 'Box $no $type';
+  }
+
+  @override
+  String get swNoType => '(no type)';
+
+  @override
+  String swEmpty(String weight) {
+    return 'box $weight';
+  }
+
+  @override
+  String swMaterialOf(String weight) {
+    return 'packing $weight';
+  }
+
+  @override
+  String swEstimate(String weight) {
+    return 'about $weight';
+  }
+
+  @override
+  String get swSetBox => 'Box type and weight';
+
+  @override
+  String get swPlanAction => 'Plan boxes';
+
+  @override
+  String get swBoxType => 'Box type';
+
+  @override
+  String get ctTitle => 'Box types';
+
+  @override
+  String get ctAdd => 'Add a box';
+
+  @override
+  String get ctEdit => 'Change box';
+
+  @override
+  String get ctHint =>
+      'The boxes you ship in. Expected weights use these figures. Turn off \"In use\" for a box you no longer use; past shipments still name it.';
+
+  @override
+  String get ctName => 'Name (e.g. 100 size)';
+
+  @override
+  String get ctLength => 'Length';
+
+  @override
+  String get ctWidth => 'Width';
+
+  @override
+  String get ctHeight => 'Height';
+
+  @override
+  String get ctEmptyWeight => 'Empty box weight';
+
+  @override
+  String get ctMaterial => 'Packing material weight';
+
+  @override
+  String get ctMaxLoad => 'Most a box takes';
+
+  @override
+  String ctMaxLoadOf(String kg) {
+    return 'up to $kg kg';
+  }
+
+  @override
+  String get ctDefault => 'Usual box';
+
+  @override
+  String get ctActive => 'In use';
+
+  @override
+  String get ctInactive => 'Retired';
+
+  @override
+  String get ctSaved => 'Box saved';
 }

@@ -10,12 +10,14 @@ import 'package:wms_mobile/features/virtual_stock/presentation/virtual_stock_scr
 import '../../support/fake_http_adapter.dart';
 import '../../support/harness.dart';
 
+// Months in the past, so they never coincide with the month pickers, which
+// show two months ago and this month.
 final _summary = VirtualStockSummary(
   totals: VirtualFigures(opening: 0, arrived: 11, adjusted: -1, countDiff: -4, closing: 6),
   months: [
-    VirtualMonth(month: '2026-08', figures: VirtualFigures(arrived: 6, closing: 6)),
+    VirtualMonth(month: '2025-08', figures: VirtualFigures(arrived: 6, closing: 6)),
     VirtualMonth(
-        month: '2026-09',
+        month: '2025-09',
         figures: VirtualFigures(opening: 6, arrived: 5, adjusted: -1, countDiff: -4, closing: 6)),
   ],
   products: [
@@ -54,8 +56,8 @@ void main() {
 
     expect(find.text('+11'), findsWidgets);
     expect(find.text('-4'), findsWidgets);
-    expect(find.text('2026-08'), findsOneWidget);
-    expect(find.text('2026-09'), findsWidgets);
+    expect(find.text('2025-08'), findsOneWidget);
+    expect(find.text('2025-09'), findsOneWidget);
     expect(find.text('ボールペン'), findsOneWidget);
     expect(find.textContaining('最終実数 2026-09-27：7'), findsOneWidget);
 

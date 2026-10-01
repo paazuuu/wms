@@ -105,6 +105,26 @@ abstract class ProductRepository {
     required double conversionFactor,
   });
 
+  /// `set_product_pack` (0115) — a pack size with its weights: the empty
+  /// packaging and, when someone weighed a whole one, the gross weight.
+  Future<ApiResult<bool>> setPack({
+    required int productId,
+    required String uomCode,
+    required double conversionFactor,
+    double? packageWeightG,
+    double? grossWeightG,
+  });
+
+  /// `set_product_weight` (0115) — one base unit's weight in grams, or null
+  /// to clear it. [source] is `manual`, `web` or `measured`.
+  Future<ApiResult<bool>> setWeight({
+    required int productId,
+    double? unitWeightG,
+    String source = 'manual',
+    String? url,
+    String? note,
+  });
+
   /// `list_uoms` (0059) — the vocabulary a pack size can be chosen from.
   Future<ApiResult<List<Uom>>> listUoms();
 
@@ -370,6 +390,50 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_conversion_factor': conversionFactor,
       });
       return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setPack({
+    required int productId,
+    required String uomCode,
+    required double conversionFactor,
+    double? packageWeightG,
+    double? grossWeightG,
+  }) async {
+    try {
+      await _dio.post('/rpc/set_product_pack', data: {
+        'p_product_id': productId,
+        'p_uom_code': uomCode,
+        'p_conversion_factor': conversionFactor,
+        'p_package_weight_g': packageWeightG,
+        'p_gross_weight_g': grossWeightG,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setWeight({
+    required int productId,
+    double? unitWeightG,
+    String source = 'manual',
+    String? url,
+    String? note,
+  }) async {
+    try {
+      await _dio.post('/rpc/set_product_weight', data: {
+        'p_product_id': productId,
+        'p_unit_weight_g': unitWeightG,
+        'p_source': source,
+        'p_url': url,
+        'p_note': note,
+      });
+      return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
     }

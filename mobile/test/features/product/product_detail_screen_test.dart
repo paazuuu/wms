@@ -407,8 +407,9 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
-    expect(repo.setUoms.single.uomCode, 'CASE');
-    expect(repo.setUoms.single.factor, 144);
+    expect(repo.setPacks.single.uomCode, 'CASE');
+    expect(repo.setPacks.single.factor, 144);
+    expect(repo.setPacks.single.packageWeightG, isNull);
 
     await tester.binding.setSurfaceSize(null);
   });

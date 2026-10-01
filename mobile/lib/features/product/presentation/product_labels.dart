@@ -50,3 +50,21 @@ String pickingRuleLabel(AppLocalizations l10n, String rule) => switch (rule) {
       'MANUAL' => l10n.pickRuleManual,
       _ => rule,
     };
+
+/// A weight in grams as an operator reads it: "10.5 g", or "1.25 kg" from a
+/// kilogram up (0115).
+String gramsText(double grams) {
+  String trim(double v, int digits) {
+    final s = v.toStringAsFixed(digits);
+    return s.contains('.') ? s.replaceFirst(RegExp(r'\.?0+$'), '') : s;
+  }
+
+  return grams.abs() >= 1000 ? '${trim(grams / 1000, 2)} kg' : '${trim(grams, 1)} g';
+}
+
+/// Where a product's weight came from (0115).
+String weightSourceLabel(AppLocalizations l10n, String? source) => switch (source) {
+      'web' => l10n.wtSourceWeb,
+      'measured' => l10n.wtSourceMeasured,
+      _ => l10n.wtSourceManual,
+    };
