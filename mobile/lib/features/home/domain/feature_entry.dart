@@ -280,6 +280,8 @@ class FeatureGroup {
   /// Localized group heading.
   String title(AppLocalizations l10n) {
     switch (id) {
+      case 'products_master':
+        return l10n.groupProducts;
       case 'field_operations':
         return l10n.groupFieldOperations;
       case 'supply_chain':

@@ -2749,5 +2749,11 @@
   "ctDefault": "常用纸箱",
   "ctActive": "使用",
   "ctInactive": "不使用",
-  "ctSaved": "已保存纸箱"
+  "ctSaved": "已保存纸箱",
+  "groupProducts": "商品",
+  "planMenu": "更多操作",
+  "planDelete": "删除此计划",
+  "planDeleteQ": "删除「{number}」吗？",
+  "planDeleteBody": "计划明细也会一并删除。需要时可通过「导入计划」重新上传。已记录入库的计划无法删除。",
+  "planDeleted": "已删除「{number}」"
 }

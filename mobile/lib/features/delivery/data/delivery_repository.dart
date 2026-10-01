@@ -228,6 +228,10 @@ abstract class DeliveryRepository {
   Future<ApiResult<List<DeliveryPlan>>> list(
       {String? status, String? search, int? warehouseId});
   Future<ApiResult<DeliveryPlan>> show(int id);
+
+  /// `delete_delivery_plan` (0116) — removes a plan nothing has been
+  /// received against yet; refused once it has.
+  Future<ApiResult<bool>> deletePlan(int id);
   Future<ApiResult<DeliveryPlan>> reconcile(
     int id, {
     required List<ReconcileEntry> entries,
@@ -315,6 +319,16 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       return ApiSuccess(data);
     } on DioException catch (e) {
       return mapDioError<List<DeliveryPlan>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> deletePlan(int id) async {
+    try {
+      await _restDio.post('/rpc/delete_delivery_plan', data: {'p_id': id});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 

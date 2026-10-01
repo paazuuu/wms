@@ -7845,4 +7845,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ctSaved => '已保存纸箱';
+
+  @override
+  String get groupProducts => '商品';
+
+  @override
+  String get planMenu => '更多操作';
+
+  @override
+  String get planDelete => '删除此计划';
+
+  @override
+  String planDeleteQ(String number) {
+    return '删除「$number」吗？';
+  }
+
+  @override
+  String get planDeleteBody => '计划明细也会一并删除。需要时可通过「导入计划」重新上传。已记录入库的计划无法删除。';
+
+  @override
+  String planDeleted(String number) {
+    return '已删除「$number」';
+  }
 }

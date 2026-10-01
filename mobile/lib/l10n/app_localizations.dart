@@ -14436,6 +14436,42 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ダンボールを保存しました'**
   String get ctSaved;
+
+  /// No description provided for @groupProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get groupProducts;
+
+  /// No description provided for @planMenu.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の操作'**
+  String get planMenu;
+
+  /// No description provided for @planDelete.
+  ///
+  /// In ja, this message translates to:
+  /// **'この予定を削除'**
+  String get planDelete;
+
+  /// No description provided for @planDeleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{number}」を削除しますか？'**
+  String planDeleteQ(String number);
+
+  /// No description provided for @planDeleteBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定明細も一緒に消えます。必要になったら「予定を取り込む」からもう一度アップロードできます。入荷を記録したあとの予定は削除できません。'**
+  String get planDeleteBody;
+
+  /// No description provided for @planDeleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{number}」を削除しました'**
+  String planDeleted(String number);
 }
 
 class _AppLocalizationsDelegate

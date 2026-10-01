@@ -68,10 +68,15 @@ class AppTheme {
         space: 1,
       ),
 
+      // Buttons are 52px tall but only as wide as their label: a full-width
+      // minimum (Size.fromHeight) made any button placed in a Row ask for an
+      // infinite width and broke the layout. A button meant to fill its
+      // line says so with a SizedBox or a stretched Column.
+      //
       // Filled primary buttons — the main CTA (Sign in, Scan, Complete).
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(AppSpacing.minTouch),
+          minimumSize: const Size(64, AppSpacing.minTouch),
           shape: RoundedRectangleBorder(borderRadius: r12),
           textStyle: const TextStyle(
             fontFamily: AppFonts.sans,
@@ -83,13 +88,13 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          minimumSize: const Size.fromHeight(AppSpacing.minTouch),
+          minimumSize: const Size(64, AppSpacing.minTouch),
           shape: RoundedRectangleBorder(borderRadius: r12),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(AppSpacing.minTouch),
+          minimumSize: const Size(64, AppSpacing.minTouch),
           side: BorderSide(color: scheme.outline),
           foregroundColor: scheme.onSurface,
           shape: RoundedRectangleBorder(borderRadius: r12),

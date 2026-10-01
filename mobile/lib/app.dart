@@ -37,7 +37,11 @@ class WmsApp extends ConsumerWidget {
                 ? media.textScaler
                 : TextScaler.linear(textScale),
           ),
-          child: child ?? const SizedBox.shrink(),
+          // Every text on screen — names, codes, labels — can be selected
+          // and copied, so a JAN or 品番 never has to be typed out again.
+          // Scanning is unaffected: the hardware scanner and shortcuts
+          // listen on HardwareKeyboard, not on focus.
+          child: SelectionArea(child: child ?? const SizedBox.shrink()),
         );
       },
     );

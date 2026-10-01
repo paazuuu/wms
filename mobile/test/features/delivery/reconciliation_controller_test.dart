@@ -39,6 +39,9 @@ class _FakeRepo implements DeliveryRepository {
       ApiSuccess(_plan());
 
   @override
+  Future<ApiResult<bool>> deletePlan(int id) async => const ApiSuccess(true);
+
+  @override
   Future<ApiResult<ImportPreview>> previewPlan({
     required MultipartFile file,
     String? deliveryNumber,

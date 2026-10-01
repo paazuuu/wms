@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/providers.dart';
+import 'package:wms_mobile/core/theme/app_theme.dart';
 import 'package:wms_mobile/core/offline/pending_sync.dart';
 import 'package:wms_mobile/core/storage/supabase_session_storage.dart';
 import 'package:wms_mobile/features/documents/data/documents_repository.dart';
@@ -213,6 +214,9 @@ Future<void> pumpApp(
     ProviderScope(
       overrides: [..._defaultOverrides(), ...overrides],
       child: MaterialApp(
+        // The app's own theme, so a style that breaks a layout (a button
+        // asking for infinite width) fails here as it would in the app.
+        theme: AppTheme.light(),
         locale: const Locale('ja'),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -249,6 +253,7 @@ Future<void> pumpAppWith(
           productLibraryCanManageProvider.overrideWithValue(false),
         ],
         child: MaterialApp(
+          theme: AppTheme.light(),
           locale: const Locale('ja'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -331,6 +336,17 @@ class FakeDeliveryRepository implements DeliveryRepository {
   @override
   Future<ApiResult<DeliveryPlan>> show(int id) async =>
       ApiSuccess(plans.firstWhere((p) => p.id == id));
+
+  /// Plans deletePlan() removed (0116).
+  final deleted = <int>[];
+
+  @override
+  Future<ApiResult<bool>> deletePlan(int id) async {
+    if (failWith != null) return ApiFailure(message: failWith!);
+    deleted.add(id);
+    plans.removeWhere((p) => p.id == id);
+    return const ApiSuccess(true);
+  }
 
   @override
   Future<ApiResult<DeliveryPlan>> reconcile(int id,

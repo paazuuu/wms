@@ -5685,6 +5685,30 @@ Data entered:
 - 40 products got a web weight (source `web`, with the page and a note to
   check it). The rest have none until entered.
 
+### 0116 — deleting a plan nobody has started on
+
+- `delete_delivery_plan(p_id)` removes a delivery plan that is still open
+  and has no receipt. Its lines go with it. Inspections, invoices and AI
+  notes that named it keep their rows, with the plan cleared.
+- It needs `receiving.confirm` and the plan's warehouse, and is audited.
+- The 納品照合 list offers it on each open plan, and has a labelled
+  「予定を取り込む」 button to upload one again when it is needed.
+- Both plans imported earlier for testing were deleted with it (0901 with
+  3 lines, 20260829-事前 with 66).
+
+Also:
+- **Button theme.** Filled, elevated and outlined buttons were themed with
+  a full-width minimum (`Size.fromHeight`). Any of them placed in a Row
+  asked for an infinite width and broke the screen; the 納品照合 OCR
+  button did. The minimum is now 64×52. The test harness now uses the
+  app's theme, so a style that breaks a layout fails in tests too.
+- **Virtual stock.** Its month pickers overflowed at phone width under the
+  real theme; they now fill their width.
+- **Selectable text.** The whole app sits in a `SelectionArea`, so names,
+  JANs, 品番 and labels can be selected and copied.
+- **Menu.** 商品マスタ and 商品ライブラリー have their own group, 商品, at
+  the top of the menu, instead of the bottom of 管理.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

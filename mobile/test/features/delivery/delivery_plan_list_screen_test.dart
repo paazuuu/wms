@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/delivery/application/delivery_providers.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
@@ -18,6 +19,32 @@ DeliveryPlan _plan(int id, String number, DeliveryPlanStatus status,
     );
 
 void main() {
+  testWidgets('an open plan can be deleted, and only an open one', (tester) async {
+    final repo = FakeDeliveryRepository([
+      _plan(1, '20260829-事前', DeliveryPlanStatus.open, supplier: '事前予定(Excel)'),
+      _plan(2, 'D-002', DeliveryPlanStatus.partial, supplier: 'B社'),
+    ]);
+    await pumpApp(tester, const DeliveryPlanListScreen(),
+        overrides: [deliveryRepositoryProvider.overrideWithValue(repo)]);
+
+    // A plan already received against has no delete.
+    expect(find.byKey(const ValueKey('plan-menu-2')), findsNothing);
+    // Uploading again is one labelled button away.
+    expect(find.byKey(const ValueKey('plan-import')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('plan-menu-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('この予定を削除'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('「20260829-事前」を削除しますか'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('plan-delete-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(repo.deleted, [1]);
+    expect(find.text('20260829-事前'), findsNothing);
+    expect(find.text('D-002'), findsOneWidget);
+  });
+
   testWidgets('lists plans and filters by status chip', (tester) async {
     await pumpApp(
       tester,

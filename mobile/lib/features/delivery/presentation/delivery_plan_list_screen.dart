@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -57,6 +58,16 @@ class _DeliveryPlanListScreenState
     final showCompleted = ref.watch(showCompletedPlansProvider);
 
     return Scaffold(
+      // Uploading a plan is the way in, so it is a labelled button and not
+      // only an icon in the corner.
+      floatingActionButton: FloatingActionButton.extended(
+        key: const ValueKey('plan-import'),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const PlanImportScreen()),
+        ),
+        icon: const Icon(Icons.upload_file_outlined),
+        label: Text(l10n.planImportTitle),
+      ),
       appBar: AppBar(
         title: Text(l10n.deliveryPlansTitle),
         actions: [
@@ -134,7 +145,10 @@ class _DeliveryPlanListScreenState
                     );
                   }
                   return ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    // Room at the bottom so the import button never covers
+                    // the last card.
+                    padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
                     itemCount: filtered.length,
                     separatorBuilder: (_, __) =>
                         const SizedBox(height: AppSpacing.md),
@@ -254,13 +268,47 @@ class _ScrollableEmpty extends StatelessWidget {
   }
 }
 
-class _DeliveryPlanCard extends StatelessWidget {
+class _DeliveryPlanCard extends ConsumerWidget {
   const _DeliveryPlanCard({required this.plan});
 
   final DeliveryPlan plan;
 
+  /// Deleting a plan nothing has been received against (0116). It can be
+  /// imported again from the import screen whenever it is needed.
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.planDeleteQ(plan.deliveryNumber)),
+        content: Text(l10n.planDeleteBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            key: const ValueKey('plan-delete-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.actionDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final result = await ref.read(deliveryRepositoryProvider).deletePlan(plan.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result.when(
+        success: (_) => l10n.planDeleted(plan.deliveryNumber),
+        failure: (f) => humanizeApiErrorMessage(l10n, f.message),
+      )),
+    ));
+    ref.invalidate(deliveryPlansProvider);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
@@ -338,6 +386,25 @@ class _DeliveryPlanCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
+              if (plan.status == DeliveryPlanStatus.open)
+                PopupMenuButton<String>(
+                  key: ValueKey('plan-menu-${plan.id}'),
+                  tooltip: l10n.planMenu,
+                  onSelected: (v) {
+                    if (v == 'delete') _delete(context, ref);
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.delete_outline),
+                        title: Text(l10n.planDelete),
+                      ),
+                    ),
+                  ],
+                ),
               Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
             ],
           ),

@@ -2749,5 +2749,11 @@
   "ctDefault": "Usual box",
   "ctActive": "In use",
   "ctInactive": "Retired",
-  "ctSaved": "Box saved"
+  "ctSaved": "Box saved",
+  "groupProducts": "Products",
+  "planMenu": "More",
+  "planDelete": "Delete this plan",
+  "planDeleteQ": "Delete \"{number}\"?",
+  "planDeleteBody": "Its lines go with it. Upload it again with Import plan when it is needed. A plan with a recorded receipt cannot be deleted.",
+  "planDeleted": "Deleted \"{number}\""
 }

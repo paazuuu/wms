@@ -147,6 +147,7 @@ class _VirtualStockScreenState extends ConsumerState<VirtualStockScreen> {
                   Expanded(
                     child: DropdownButtonFormField<DateTime>(
                       key: const ValueKey('virtual-from'),
+                      isExpanded: true,
                       initialValue: _fromMonth,
                       decoration: InputDecoration(labelText: l10n.virtualFromMonth),
                       items: [
@@ -163,6 +164,7 @@ class _VirtualStockScreenState extends ConsumerState<VirtualStockScreen> {
                   Expanded(
                     child: DropdownButtonFormField<DateTime>(
                       key: ValueKey('virtual-to-${_ym(_toMonth)}'),
+                      isExpanded: true,
                       initialValue: _toMonth,
                       decoration: InputDecoration(labelText: l10n.virtualToMonth),
                       items: [

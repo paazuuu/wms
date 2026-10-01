@@ -7874,4 +7874,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ctSaved => 'ダンボールを保存しました';
+
+  @override
+  String get groupProducts => '商品';
+
+  @override
+  String get planMenu => 'その他の操作';
+
+  @override
+  String get planDelete => 'この予定を削除';
+
+  @override
+  String planDeleteQ(String number) {
+    return '「$number」を削除しますか？';
+  }
+
+  @override
+  String get planDeleteBody =>
+      '予定明細も一緒に消えます。必要になったら「予定を取り込む」からもう一度アップロードできます。入荷を記録したあとの予定は削除できません。';
+
+  @override
+  String planDeleted(String number) {
+    return '「$number」を削除しました';
+  }
 }

@@ -8037,4 +8037,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ctSaved => 'Box saved';
+
+  @override
+  String get groupProducts => 'Products';
+
+  @override
+  String get planMenu => 'More';
+
+  @override
+  String get planDelete => 'Delete this plan';
+
+  @override
+  String planDeleteQ(String number) {
+    return 'Delete \"$number\"?';
+  }
+
+  @override
+  String get planDeleteBody =>
+      'Its lines go with it. Upload it again with Import plan when it is needed. A plan with a recorded receipt cannot be deleted.';
+
+  @override
+  String planDeleted(String number) {
+    return 'Deleted \"$number\"';
+  }
 }

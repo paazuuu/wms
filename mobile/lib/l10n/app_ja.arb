@@ -7114,5 +7114,25 @@
   "ctDefault": "いつも使う箱",
   "ctActive": "使う",
   "ctInactive": "使わない",
-  "ctSaved": "ダンボールを保存しました"
+  "ctSaved": "ダンボールを保存しました",
+  "groupProducts": "商品",
+  "planMenu": "その他の操作",
+  "planDelete": "この予定を削除",
+  "planDeleteQ": "「{number}」を削除しますか？",
+  "@planDeleteQ": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "planDeleteBody": "予定明細も一緒に消えます。必要になったら「予定を取り込む」からもう一度アップロードできます。入荷を記録したあとの予定は削除できません。",
+  "planDeleted": "「{number}」を削除しました",
+  "@planDeleted": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  }
 }

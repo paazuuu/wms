@@ -56,6 +56,30 @@ import 'feature_entry.dart';
 /// warehouse management, work orders, reports, receiving) were removed: that
 /// backend was never actually reachable, and building on it was abandoned.
 List<FeatureGroup> buildFeatureCatalog() => const [
+      // Our own product list first: it is what every arrival is checked
+      // against and what people open most, so it is not left at the bottom
+      // of 管理.
+      FeatureGroup(
+        id: 'products_master',
+        entries: [
+          FeatureEntry(
+            id: 'products',
+            icon: Icons.inventory_2_outlined,
+            status: FeatureStatus.ready,
+            builder: _products,
+            requiredAnyOf: ['product.view', 'product.manage'],
+          ),
+          // Each product's pictures (0109); the first is shown in front of
+          // the name on every screen that lists goods.
+          FeatureEntry(
+            id: 'product_library',
+            icon: Icons.photo_library_outlined,
+            status: FeatureStatus.ready,
+            builder: _productLibrary,
+            requiredAnyOf: ['product.view', 'product.manage', 'inventory.view', 'inspection.view', 'receiving.view'],
+          ),
+        ],
+      ),
       FeatureGroup(
         id: 'field_operations',
         entries: [
@@ -316,22 +340,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _aiSettings,
             requiredAnyOf: ['ai.review', 'user.manage'],
-          ),
-          FeatureEntry(
-            id: 'products',
-            icon: Icons.inventory_2_outlined,
-            status: FeatureStatus.ready,
-            builder: _products,
-            requiredAnyOf: ['product.view', 'product.manage'],
-          ),
-          // Each product's pictures (0109); the first is shown in front of
-          // the name on every screen that lists goods.
-          FeatureEntry(
-            id: 'product_library',
-            icon: Icons.photo_library_outlined,
-            status: FeatureStatus.ready,
-            builder: _productLibrary,
-            requiredAnyOf: ['product.view', 'product.manage', 'inventory.view', 'inspection.view', 'receiving.view'],
           ),
           // Our own product format (0111): how product names are built, and
           // renaming a maker or a colour everywhere at once.
