@@ -105,7 +105,7 @@ void main() {
     final repo = await _pumpProduct(tester, weighed);
 
     expect(find.byKey(const ValueKey('wt-value')), findsOneWidget);
-    expect(find.text('10.5 g / 1本'), findsOneWidget);
+    expect(find.text('10.5 g / 1個'), findsOneWidget);
     expect(find.text('実測'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('wt-edit')));

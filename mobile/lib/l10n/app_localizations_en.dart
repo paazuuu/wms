@@ -1624,11 +1624,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm or reject AI-extracted results before they count';
 
   @override
-  String get featProducts => 'Product master';
+  String get featProducts => 'Product library';
 
   @override
   String get featProductsDesc =>
-      'Name, category and price against each JAN code';
+      'Our products: edit them in the list, check and add photos in the grid';
 
   @override
   String get featUnlinkedJan => 'Unlinked JAN codes';
@@ -2192,7 +2192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get poStatusCompleted => 'Completed';
 
   @override
-  String get productsTitle => 'Product master';
+  String get productsTitle => 'Product library';
 
   @override
   String get productsShowInactive => 'Show inactive products';
@@ -8060,4 +8060,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String planDeleted(String number) {
     return 'Deleted \"$number\"';
   }
+
+  @override
+  String get productsListView => 'List';
+
+  @override
+  String get productsPhotoView => 'Photos';
+
+  @override
+  String get productNameEnTitle => 'English name';
+
+  @override
+  String get productNameEnAdd => 'Add English name';
+
+  @override
+  String get productNameEnLabel =>
+      'English name (shown on English and Chinese screens)';
+
+  @override
+  String get uomPcs => 'pc';
+
+  @override
+  String get uomSet => 'set';
+
+  @override
+  String get uomPack => 'pack';
+
+  @override
+  String get uomBox => 'box';
+
+  @override
+  String get uomCase => 'case';
+
+  @override
+  String get uomBag => 'bag';
+
+  @override
+  String get uomRoll => 'roll';
+
+  @override
+  String get uomSheet => 'sheet';
+
+  @override
+  String get uomDozen => 'dozen';
+
+  @override
+  String get uomPallet => 'pallet';
 }

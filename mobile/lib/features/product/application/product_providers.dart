@@ -19,6 +19,9 @@ final productSearchProvider = StateProvider<String>((_) => '');
 /// Whether the list also shows deactivated products.
 final showInactiveProductsProvider = StateProvider<bool>((_) => false);
 
+/// 商品ライブラリー as a grid of pictures rather than a list.
+final productPhotoViewProvider = StateProvider<bool>((_) => false);
+
 /// The unit vocabulary a pack size is chosen from (`list_uoms`, 0059). Global
 /// and effectively static, so it is fetched once per screen rather than filtered.
 final uomVocabularyProvider = FutureProvider.autoDispose<List<Uom>>((ref) async {

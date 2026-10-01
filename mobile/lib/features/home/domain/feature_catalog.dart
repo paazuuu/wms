@@ -24,7 +24,6 @@ import '../../partners/presentation/trading_partner_list_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
 import '../../notation/presentation/field_library_screen.dart';
 import '../../product_library/presentation/name_formats_screen.dart';
-import '../../product_library/presentation/product_library_screen.dart';
 import '../../product/presentation/unlinked_jan_screen.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
@@ -62,21 +61,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
       FeatureGroup(
         id: 'products_master',
         entries: [
+          // 商品ライブラリー: our products, as a list to edit or as pictures
+          // (0109) — one place, since both are the same products.
           FeatureEntry(
             id: 'products',
             icon: Icons.inventory_2_outlined,
             status: FeatureStatus.ready,
             builder: _products,
             requiredAnyOf: ['product.view', 'product.manage'],
-          ),
-          // Each product's pictures (0109); the first is shown in front of
-          // the name on every screen that lists goods.
-          FeatureEntry(
-            id: 'product_library',
-            icon: Icons.photo_library_outlined,
-            status: FeatureStatus.ready,
-            builder: _productLibrary,
-            requiredAnyOf: ['product.view', 'product.manage', 'inventory.view', 'inspection.view', 'receiving.view'],
           ),
         ],
       ),
@@ -453,7 +445,6 @@ Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 
 /// Top-level (const-referenceable) builder for the Product Master feature.
 Widget _products(BuildContext _) => const ProductListScreen();
-Widget _productLibrary(BuildContext _) => const ProductLibraryScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 

@@ -68,3 +68,26 @@ String weightSourceLabel(AppLocalizations l10n, String? source) => switch (sourc
       'measured' => l10n.wtSourceMeasured,
       _ => l10n.wtSourceManual,
     };
+
+/// A unit's name in this screen's language. The unit vocabulary (0059) stores
+/// Japanese names (個, 箱, ケース); the code is the stable key, so a known code
+/// is named by the app and an unknown one keeps its stored name.
+String uomName(AppLocalizations l10n, String code, String stored) => switch (code.toUpperCase()) {
+      'PCS' => l10n.uomPcs,
+      'SET' => l10n.uomSet,
+      'PACK' => l10n.uomPack,
+      'BOX' => l10n.uomBox,
+      'CASE' => l10n.uomCase,
+      'BAG' => l10n.uomBag,
+      'ROLL' => l10n.uomRoll,
+      'SHEET' => l10n.uomSheet,
+      'DOZEN' => l10n.uomDozen,
+      'PALLET' => l10n.uomPallet,
+      'KG' => 'kg',
+      'G' => 'g',
+      'L' => 'L',
+      'ML' => 'mL',
+      'M' => 'm',
+      'CM' => 'cm',
+      _ => stored,
+    };

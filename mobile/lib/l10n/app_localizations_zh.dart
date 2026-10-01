@@ -349,7 +349,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reconcileConfirmBody => '提交当前计数并结束本次核对。';
 
   @override
-  String get reconcileConfirmDiscrepancy => '存在差异（不足・超量・计划外）。仍要完成吗？';
+  String get reconcileConfirmDiscrepancy => '存在差异（不足、超量、计划外）。仍要完成吗？';
 
   @override
   String get reconcilePartialQ => '仍有未送达的项目';
@@ -1327,7 +1327,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String pickCompleted(int short, int over) {
-    return '拣货已完成（不足$short件・超出$over件）';
+    return '拣货已完成（不足$short件、超出$over件）';
   }
 
   @override
@@ -1573,10 +1573,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featAiReviewDesc => '在生效前确认或拒绝 AI 提取的结果';
 
   @override
-  String get featProducts => '商品主数据';
+  String get featProducts => '商品库';
 
   @override
-  String get featProductsDesc => '按 JAN 码管理商品名称、分类与价格';
+  String get featProductsDesc => '本公司的商品：列表中编辑，照片中查看与添加';
 
   @override
   String get featUnlinkedJan => '未关联的JAN码';
@@ -2129,7 +2129,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get poStatusCompleted => '已完成';
 
   @override
-  String get productsTitle => '商品主数据';
+  String get productsTitle => '商品库';
 
   @override
   String get productsShowInactive => '显示已停用商品';
@@ -3393,7 +3393,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get replenishmentNoWarehouse => '选择仓库后可查看';
 
   @override
-  String get exceptionsTitle => '异常・不一致';
+  String get exceptionsTitle => '异常、不一致';
 
   @override
   String get exceptionsEmpty => '没有未处理的异常';
@@ -3797,7 +3797,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String soApprovedWithSkips(int reserved, int skipped) {
-    return '已批准订单（已预留 $reserved 项・未预留 $skipped 项）';
+    return '已批准订单（已预留 $reserved 项、未预留 $skipped 项）';
   }
 
   @override
@@ -3868,7 +3868,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String waveCreatedWithSkips(String code, int lists, int skipped) {
-    return '已创建波次 $code（$lists 个加入・$skipped 个跳过）';
+    return '已创建波次 $code（$lists 个加入、$skipped 个跳过）';
   }
 
   @override
@@ -4030,7 +4030,7 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String demandLineStatus(
       int ordered, int promised, int backordered, int onOrder) {
-    return '订购 $ordered ・已预留 $promised ・欠 $backordered ・采购中 $onOrder';
+    return '订购 $ordered 、已预留 $promised 、欠 $backordered 、采购中 $onOrder';
   }
 
   @override
@@ -4052,7 +4052,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String demandPoLineHint(int backordered, int toPurchase) {
-    return '欠货 $backordered ・需采购 $toPurchase';
+    return '欠货 $backordered 、需采购 $toPurchase';
   }
 
   @override
@@ -4069,7 +4069,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String soSkipPartial(int reserved, int backordered) {
-    return '已预留 $reserved ・欠货 $backordered';
+    return '已预留 $reserved 、欠货 $backordered';
   }
 
   @override
@@ -4175,7 +4175,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reservationAllocate => '分配库存';
 
   @override
-  String get reservationManualNote => '用途・备注';
+  String get reservationManualNote => '用途、备注';
 
   @override
   String get reservationManualSubmit => '预留';
@@ -4200,7 +4200,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String demandPoProductHint(int backordered, int toPurchase, int incoming) {
-    return '欠货 $backordered ・需采购 $toPurchase ・在途 $incoming';
+    return '欠货 $backordered 、需采购 $toPurchase 、在途 $incoming';
   }
 
   @override
@@ -4225,12 +4225,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String demandPoLineWaiting(int backordered, int onOrder) {
-    return '欠货 $backordered ・采购中 $onOrder';
+    return '欠货 $backordered 、采购中 $onOrder';
   }
 
   @override
   String demandPoRowSummary(int linked, int ahead) {
-    return '已关联 $linked ・预购（未关联）$ahead';
+    return '已关联 $linked 、预购（未关联）$ahead';
   }
 
   @override
@@ -4274,12 +4274,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String poLinkSaved(int linked, int reserved, int released) {
-    return '已保存关联（关联 $linked・从到货预留 $reserved・释放 $released）';
+    return '已保存关联（关联 $linked、从到货预留 $reserved、释放 $released）';
   }
 
   @override
   String poLinkLineSummary(int quantity, int received) {
-    return '采购 $quantity ・已到货 $received';
+    return '采购 $quantity 、已到货 $received';
   }
 
   @override
@@ -4292,7 +4292,7 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String poLinkCandidateStatus(
       int ordered, int promised, int backordered, int onOrder) {
-    return '订购 $ordered ・已预留 $promised ・欠 $backordered ・采购中 $onOrder';
+    return '订购 $ordered 、已预留 $promised 、欠 $backordered 、采购中 $onOrder';
   }
 
   @override
@@ -4325,7 +4325,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String poLineLinkedAhead(int linked, int ahead) {
-    return '关联订单 $linked ・预购 $ahead';
+    return '关联订单 $linked 、预购 $ahead';
   }
 
   @override
@@ -4497,7 +4497,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String virtualProductLine(int opening, int arrived, int change) {
-    return '期初 $opening ・来自日本 +$arrived ・增减 $change';
+    return '期初 $opening 、来自日本 +$arrived 、增减 $change';
   }
 
   @override
@@ -4602,7 +4602,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chartReserved => '已预留';
 
   @override
-  String get chartUnusable => '不可用（冻结・待检）';
+  String get chartUnusable => '不可用（冻结、待检）';
 
   @override
   String get chartVirtualAbroad => '海外（虚拟）';
@@ -4777,7 +4777,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String bulkQcSummary(int lines, int units) {
-    return '已选 $lines 行・共 $units 件';
+    return '已选 $lines 行、共 $units 件';
   }
 
   @override
@@ -5322,7 +5322,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featNotationTraining => '表记预先学习';
 
   @override
-  String get featNotationTrainingDesc => '从Excel・PDF・照片预先学习各商社的写法';
+  String get featNotationTrainingDesc => '从Excel、PDF、照片预先学习各商社的写法';
 
   @override
   String get ntTitle => '表记预先学习';
@@ -5337,7 +5337,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ntTabColumns => '列标题';
 
   @override
-  String get ntTabHistory => '历史・倾向';
+  String get ntTabHistory => '历史、倾向';
 
   @override
   String get ntPartner => '商社（往来单位）';
@@ -5353,12 +5353,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ntLearned(int learned, int added, int conflicts) {
-    return '已学习$learned项（新增$added・冲突$conflicts）';
+    return '已学习$learned项（新增$added、冲突$conflicts）';
   }
 
   @override
   String get ntTrainIntro =>
-      '读取商社的Excel・CSV・PDF・照片样本，以与实际入库相同的方式试读（AI读两次、拆分品名与货号、转换为本公司商品），不会登记任何内容。确认修正后点“学习”，即记住该商社的写法和列标题。';
+      '读取商社的Excel、CSV、PDF、照片样本，以与实际入库相同的方式试读（AI读两次、拆分品名与货号、转换为本公司商品），不会登记任何内容。确认修正后点“学习”，即记住该商社的写法和列标题。';
 
   @override
   String get ntPickFile => '选择样本文件';
@@ -5370,7 +5370,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ntReread => '按修正的列重新读取';
 
   @override
-  String get ntReading => '读取中（PDF・照片由AI读取两次）…';
+  String get ntReading => '读取中（PDF、照片由AI读取两次）…';
 
   @override
   String ntLinesTitle(int count) {
@@ -5446,7 +5446,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get ntDialectsIntro => '各商社的写法（方言）及其对应的本公司商品・制造商，各有ID（D-000000）。';
+  String get ntDialectsIntro => '各商社的写法（方言）及其对应的本公司商品、制造商，各有ID（D-000000）。';
 
   @override
   String get ntAllFields => '全部';
@@ -5455,7 +5455,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ntUnconfirmedOnly => '仅未确认';
 
   @override
-  String get ntDialectSearch => '按写法・品名・JAN搜索';
+  String get ntDialectSearch => '按写法、品名、JAN搜索';
 
   @override
   String get ntDialectsEmpty => '尚未学习写法';
@@ -5475,7 +5475,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ntColumnHeader => '标题（按商社写法）';
 
   @override
-  String get ntColumnsIntro => '列标题及其含义。将日语（汉字・假名）或英语标题对应到本公司项目。选择商社可显示其专用标题。';
+  String get ntColumnsIntro => '列标题及其含义。将日语（汉字、假名）或英语标题对应到本公司项目。选择商社可显示其专用标题。';
 
   @override
   String get ntCommon => '共通';
@@ -5492,7 +5492,7 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String ntStatsLine(
       int runs, int lines, String rate, int dialects, int columns) {
-    return '$runs次・$lines行・转换率$rate・方言$dialects项・标题$columns项';
+    return '$runs次、$lines行、转换率$rate、方言$dialects项、标题$columns项';
   }
 
   @override
@@ -5957,7 +5957,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String scStatLine(int products, int sole, int orders) {
-    return '$products个品目・独家供应$sole・订单$orders笔';
+    return '$products个品目、独家供应$sole、订单$orders笔';
   }
 
   @override
@@ -6971,7 +6971,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ntVersionCounts(int dialects, int aliases) {
-    return '方言$dialects・表头$aliases';
+    return '方言$dialects、表头$aliases';
   }
 
   @override
@@ -7867,4 +7867,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String planDeleted(String number) {
     return '已删除「$number」';
   }
+
+  @override
+  String get productsListView => '列表';
+
+  @override
+  String get productsPhotoView => '照片';
+
+  @override
+  String get productNameEnTitle => '英文名称';
+
+  @override
+  String get productNameEnAdd => '添加英文名称';
+
+  @override
+  String get productNameEnLabel => '英文名称（英文与中文界面显示此名称）';
+
+  @override
+  String get uomPcs => '个';
+
+  @override
+  String get uomSet => '套';
+
+  @override
+  String get uomPack => '包';
+
+  @override
+  String get uomBox => '盒';
+
+  @override
+  String get uomCase => '箱';
+
+  @override
+  String get uomBag => '袋';
+
+  @override
+  String get uomRoll => '卷';
+
+  @override
+  String get uomSheet => '张';
+
+  @override
+  String get uomDozen => '打';
+
+  @override
+  String get uomPallet => '托盘';
 }

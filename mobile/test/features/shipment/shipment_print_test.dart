@@ -46,8 +46,11 @@ void main() {
 
   test('every outbound document prints our JAN, maker, name and 品番 in one order',
       () {
+    // Every heading in Japanese with its English beneath.
     const head =
-        '<th>JANコード</th><th>メーカー</th><th>品名</th><th>品番</th><th>規格</th>';
+        '<th>JANコード<span class="en">JAN</span></th><th>メーカー<span class="en">Maker</span></th>'
+        '<th>品名<span class="en">Product</span></th><th>品番<span class="en">Item code</span></th>'
+        '<th>規格<span class="en">Spec</span></th>';
     const cells = '<td class="jan">4902505632037</td><td>テスト文具</td>'
         '<td>ボールペン</td><td>PEN-001</td>';
     for (final html in [
@@ -60,9 +63,9 @@ void main() {
       expect(html.contains(cells), isTrue);
     }
     // The total spans exactly the item columns.
-    expect(printer.overallHtml(shipment).contains('<td colspan="5">合計</td>'), isTrue);
+    expect(printer.overallHtml(shipment).contains('<td colspan="5">合計<span class="en">Total</span></td>'), isTrue);
     expect(printer.cartonHtml(shipment, shipment.cartons.first)
-        .contains('<td colspan="6">合計</td>'), isTrue);
+        .contains('<td colspan="6">合計<span class="en">Total</span></td>'), isTrue);
   });
 
   test('overall list stays text-only (no barcode column)', () {
@@ -105,7 +108,7 @@ void main() {
     expect(values['lot'], 'L-A');
 
     final html = printer.cartonLabelHtml(oneLot, oneLot.cartons.first);
-    expect(html.contains('ロット L-A'), isTrue);
+    expect(html.contains('ロット Lot L-A'), isTrue);
   });
 
   test('a carton split across two lots of the same JAN prints no lot row',
@@ -173,13 +176,16 @@ void main() {
     expect(html.contains('送&nbsp;り&nbsp;状'), isTrue);
     expect(slip.contains('送&nbsp;り&nbsp;状'), isTrue);
     expect(
-        html.contains('<th>JANコード</th><th>メーカー</th><th>品名</th><th>品番</th><th>規格</th><th class="num">数量</th>'),
+        html.contains('<th>JANコード<span class="en">JAN</span></th><th>メーカー<span class="en">Maker</span></th>'
+        '<th>品名<span class="en">Product</span></th><th>品番<span class="en">Item code</span></th>'
+        '<th>規格<span class="en">Spec</span></th>' '<th class="num">数量<span class="en">Qty</span></th>'),
         isTrue);
+    expect(html.contains('DELIVERY NOTE'), isTrue);
     expect(html.contains('上海倉庫'), isTrue);
     expect(html.contains('上海市'), isTrue);
-    expect(html.contains('出荷元：東京倉庫'), isTrue);
-    expect(html.contains('仕向国：CN'), isTrue);
-    expect(html.contains('出庫番号：TR-000003'), isTrue);
+    expect(html.contains('出荷元<span class="en">Ship from</span>：東京倉庫'), isTrue);
+    expect(html.contains('仕向国<span class="en">Destination</span>：CN'), isTrue);
+    expect(html.contains('出庫番号<span class="en">Shipment No.</span>：TR-000003'), isTrue);
     // What actually left: 8, and the line nothing was picked for is left off.
     expect(html.contains('<td class="num">8</td>'), isTrue);
     expect(html.contains('消しゴム'), isFalse);

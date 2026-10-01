@@ -10,19 +10,36 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_library_providers.dart';
 import '../domain/product_image.dart';
 import 'product_gallery_screen.dart';
+import '../../../core/ui/product_name.dart';
 import 'product_thumb.dart';
 
 /// 商品ライブラリー (0109): every product with its face, so pictures can be
 /// found, checked and added. "写真なしのみ" narrows to the products still
 /// without one — the list to work through when setting the library up.
-class ProductLibraryScreen extends ConsumerStatefulWidget {
+class ProductLibraryScreen extends StatelessWidget {
   const ProductLibraryScreen({super.key});
 
   @override
-  ConsumerState<ProductLibraryScreen> createState() => _ProductLibraryScreenState();
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context).featProductLibrary)),
+        body: const ProductLibraryView(),
+      );
 }
 
-class _ProductLibraryScreenState extends ConsumerState<ProductLibraryScreen> {
+/// The products as a grid of pictures, searchable and narrowed to those
+/// still without one. [onOpen] decides what a tap opens — the product
+/// screen when this is the photo view of 商品ライブラリー, the pictures
+/// otherwise.
+class ProductLibraryView extends ConsumerStatefulWidget {
+  const ProductLibraryView({super.key, this.onOpen});
+
+  final void Function(LibraryProduct product)? onOpen;
+
+  @override
+  ConsumerState<ProductLibraryView> createState() => _ProductLibraryViewState();
+}
+
+class _ProductLibraryViewState extends ConsumerState<ProductLibraryView> {
   final _search = TextEditingController();
   Timer? _debounce;
   String _query = '';
@@ -47,9 +64,7 @@ class _ProductLibraryScreenState extends ConsumerState<ProductLibraryScreen> {
     final l10n = AppLocalizations.of(context);
     final q = (query: _query, withoutImages: _withoutImages);
     final async = ref.watch(productLibraryProvider(q));
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.featProductLibrary)),
-      body: Column(children: [
+    return Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
           child: TextField(
@@ -88,20 +103,20 @@ class _ProductLibraryScreenState extends ConsumerState<ProductLibraryScreen> {
                         mainAxisSpacing: AppSpacing.md,
                       ),
                       itemCount: rows.length,
-                      itemBuilder: (_, i) => _ProductCard(product: rows[i]),
+                      itemBuilder: (_, i) => _ProductCard(product: rows[i], onOpen: widget.onOpen),
                     ),
                   ),
           ),
         ),
-      ]),
-    );
+      ]);
   }
 }
 
 class _ProductCard extends StatelessWidget {
-  const _ProductCard({required this.product});
+  const _ProductCard({required this.product, this.onOpen});
 
   final LibraryProduct product;
+  final void Function(LibraryProduct product)? onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -113,9 +128,11 @@ class _ProductCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.zero,
       child: InkWell(
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => ProductGalleryScreen(productId: p.id, productName: p.name, janCode: p.janCode),
-        )),
+        onTap: onOpen != null
+            ? () => onOpen!(p)
+            : () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ProductGalleryScreen(productId: p.id, productName: p.name, janCode: p.janCode),
+                )),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Expanded(
             child: LayoutBuilder(
@@ -127,7 +144,7 @@ class _ProductCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(p.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleSmall),
+              ProductNameText(name: p.name, nameEn: p.nameEn, maxLines: 1, style: theme.textTheme.titleSmall),
               Text([if (p.maker != null) p.maker!, if (p.janCode != null) p.janCode!].join(' · '),
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
               Text(p.imageCount == 0 ? l10n.plNoImages : l10n.plImageCount(p.imageCount),

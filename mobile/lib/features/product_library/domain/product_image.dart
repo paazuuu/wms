@@ -55,6 +55,7 @@ class LibraryProduct extends Equatable {
   const LibraryProduct({
     required this.id,
     required this.name,
+    this.nameEn,
     this.janCode,
     this.sku,
     this.maker,
@@ -65,6 +66,9 @@ class LibraryProduct extends Equatable {
 
   final int id;
   final String name;
+
+  /// The English name (0117).
+  final String? nameEn;
   final String? janCode;
   final String? sku;
   final String? maker;
@@ -77,6 +81,7 @@ class LibraryProduct extends Equatable {
   factory LibraryProduct.fromJson(Map<String, dynamic> j) => LibraryProduct(
         id: _i(j['id']),
         name: (j['name'] ?? '').toString(),
+        nameEn: _s(j['name_en']),
         janCode: _s(j['jan_code']),
         sku: _s(j['sku']),
         maker: _s(j['maker']),

@@ -5709,6 +5709,28 @@ Also:
 - **Menu.** 商品マスタ and 商品ライブラリー have their own group, 商品, at
   the top of the menu, instead of the bottom of 管理.
 
+### 0117 — English product names, one product library, bilingual print
+
+- `products.name_en` is the English name. `set_product_name_en` sets it.
+  `list_products` and `product_library` return it and search it.
+  - English and Chinese screens show it in place of the Japanese name,
+    which is not translated.
+  - Japanese screens show it under the Japanese name.
+  - All 91 products got one. Lines with a known product line are named
+    (uni-ball AIR, Sarasa Dry, Mildliner…). The rest are the maker plus
+    the code.
+- 商品マスタ and 商品ライブラリー were the same products in two screens: a
+  list to edit, and a grid of pictures. They are now one entry,
+  商品ライブラリー, with a list/photos switch. Either view opens the same
+  product screen.
+- Unit names (個, 箱, ケース…) are shown in the screen's language by their
+  code.
+- Half-width kana from suppliers (ｺｸﾖ) is shown full-width. A Chinese
+  screen's font has no half-width kana and drew □.
+- Chinese text uses 、 for the Japanese ・.
+- Printed lists, slips and carton labels carry English under, or beside,
+  each Japanese heading (数量 Qty, 送り状 DELIVERY NOTE).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

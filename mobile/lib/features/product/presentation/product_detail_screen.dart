@@ -20,6 +20,7 @@ import 'supplier_names_card.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_gallery_screen.dart';
 import '../../product_library/presentation/product_naming_dialog.dart';
+import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
@@ -138,7 +139,7 @@ class _Header extends ConsumerWidget {
                 ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 72),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Text(product.name, style: theme.textTheme.titleMedium),
+                  child: ProductNameText(name: product.name, nameEn: product.nameEn, style: theme.textTheme.titleMedium),
                 ),
                 StatusPill(
                   tone: product.isActive
@@ -179,6 +180,52 @@ class _Header extends ConsumerWidget {
                 label: Text(l10n.plOpenLibrary),
               ),
             ),
+            // Its English name (0117): shown instead of the Japanese one on
+            // English and Chinese screens, and under it on Japanese ones.
+            if (ref.watch(productLibraryCanManageProvider))
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const ValueKey('product-name-en'),
+                  onPressed: () async {
+                    final ctl = TextEditingController(text: product.nameEn ?? '');
+                    final value = await showDialog<String>(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text(l10n.productNameEnTitle),
+                        content: SizedBox(
+                          width: 420,
+                          child: TextField(
+                            key: const ValueKey('product-name-en-field'),
+                            controller: ctl,
+                            autofocus: true,
+                            decoration: InputDecoration(labelText: l10n.productNameEnLabel, helperText: product.name),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.actionCancel)),
+                          FilledButton(
+                            key: const ValueKey('product-name-en-save'),
+                            onPressed: () => Navigator.pop(dialogContext, ctl.text.trim()),
+                            child: Text(l10n.productSave),
+                          ),
+                        ],
+                      ),
+                    );
+                    ctl.dispose();
+                    if (value == null) return;
+                    final r = await ref.read(productRepositoryProvider).setNameEn(product.id, value.isEmpty ? null : value);
+                    if (!context.mounted) return;
+                    r.when(
+                      success: (_) => ref.invalidate(productListProvider),
+                      failure: (f) => ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, f.message)))),
+                    );
+                  },
+                  icon: const Icon(Icons.translate, size: 18),
+                  label: Text(product.nameEn == null ? l10n.productNameEnAdd : l10n.productNameEnTitle),
+                ),
+              ),
             // Its name in our format (0111): built from its parts.
             if (ref.watch(productLibraryCanManageProvider))
               Align(
@@ -525,7 +572,7 @@ class _WeightCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final weight = product.unitWeightG;
-    final unit = product.baseUom?.name ?? '';
+    final unit = product.baseUom == null ? '' : uomName(l10n, product.baseUom!.code, product.baseUom!.name);
 
     return _Section(
       title: l10n.wtSection,
@@ -628,7 +675,7 @@ class _WeightSheetState extends ConsumerState<_WeightSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final unit = widget.product.baseUom?.name ?? '';
+    final unit = widget.product.baseUom == null ? '' : uomName(l10n, widget.product.baseUom!.code, widget.product.baseUom!.name);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -644,7 +691,7 @@ class _WeightSheetState extends ConsumerState<_WeightSheet> {
           children: [
             Text(l10n.wtSection, style: theme.textTheme.titleMedium),
             const SizedBox(height: 2),
-            Text(widget.product.name, style: theme.textTheme.bodySmall),
+            Text(productDisplayName(context, widget.product.name, widget.product.nameEn), style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.lg),
             TextField(
               key: const ValueKey('wt-weight'),
@@ -783,7 +830,7 @@ class _UnitsCard extends ConsumerWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('${uom.code} — ${uom.name}',
+                    child: Text('${uom.code} — ${uomName(l10n, uom.code, uom.name)}',
                         style: theme.textTheme.bodyMedium),
                   ),
                   if (uom.isBase)
@@ -794,7 +841,7 @@ class _UnitsCard extends ConsumerWidget {
                   else ...[
                     Text(
                       [
-                        '${formatFactor(uom.conversionFactor)} ${base?.name ?? ''}',
+                        '${formatFactor(uom.conversionFactor)} ${base == null ? '' : uomName(l10n, base.code, base.name)}',
                         if (uom.packWeightG != null) gramsText(uom.packWeightG!),
                       ].join(' · '),
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -919,10 +966,10 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
                   if (widget.existing != null && !uoms.any((u) => u.code == widget.existing!.code))
                     DropdownMenuItem(
                         value: widget.existing!.code,
-                        child: Text('${widget.existing!.code} — ${widget.existing!.name}')),
+                        child: Text('${widget.existing!.code} — ${uomName(l10n, widget.existing!.code, widget.existing!.name)}')),
                   for (final u in uoms)
                     DropdownMenuItem(
-                        value: u.code, child: Text('${u.code} — ${u.name}')),
+                        value: u.code, child: Text('${u.code} — ${uomName(l10n, u.code, u.name)}')),
                 ],
                 onChanged: _busy || widget.existing != null ? null : (v) => setState(() => _code = v),
               ),
@@ -933,7 +980,7 @@ class _UomSheetState extends ConsumerState<_UomSheet> {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 labelText: l10n.productUnitFactor,
-                helperText: widget.product.baseUom?.name,
+                helperText: widget.product.baseUom == null ? null : uomName(l10n, widget.product.baseUom!.code, widget.product.baseUom!.name),
               ),
             ),
             const SizedBox(height: AppSpacing.md),

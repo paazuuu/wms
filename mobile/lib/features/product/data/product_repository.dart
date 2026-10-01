@@ -125,6 +125,9 @@ abstract class ProductRepository {
     String? note,
   });
 
+  /// `set_product_name_en` (0117) — the English name, or null to clear it.
+  Future<ApiResult<bool>> setNameEn(int productId, String? nameEn);
+
   /// `list_uoms` (0059) — the vocabulary a pack size can be chosen from.
   Future<ApiResult<List<Uom>>> listUoms();
 
@@ -433,6 +436,16 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_url': url,
         'p_note': note,
       });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setNameEn(int productId, String? nameEn) async {
+    try {
+      await _dio.post('/rpc/set_product_name_en', data: {'p_product_id': productId, 'p_name_en': nameEn});
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);

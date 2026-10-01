@@ -117,8 +117,8 @@ void main() {
       final html = printer.cartonLabelHtml(shipment, carton);
 
       expect(html, contains('SHP-000123'));
-      expect(html, contains('箱 2 / 2'));
-      expect(html, contains('数量 24'));
+      expect(html, contains('箱 Box 2 / 2'));
+      expect(html, contains('数量 Qty 24'));
       // A QR and a barcode are both drawn as inline SVG — no network fetch.
       expect(html, contains('<svg'));
       expect(html, isNot(contains('{{')));
@@ -134,8 +134,8 @@ void main() {
 
       final html = printer.allCartonLabelsHtml(shipment);
 
-      expect(html, contains('箱 1 / 2'));
-      expect(html, contains('箱 2 / 2'));
+      expect(html, contains('箱 Box 1 / 2'));
+      expect(html, contains('箱 Box 2 / 2'));
       // One <html> shell, two labels.
       expect('<!doctype html>'.allMatches(html).length, 1);
       expect('class="label"'.allMatches(html).length, 2);

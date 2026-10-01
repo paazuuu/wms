@@ -37,13 +37,13 @@ class ProductFacts extends StatelessWidget {
         );
 
     if (base != null) {
-      facts.add(chip('${l10n.productBaseUnit}: ${base.name}'));
+      facts.add(chip('${l10n.productBaseUnit}: ${uomName(l10n, base.code, base.name)}'));
     }
     for (final uom in product.packUoms) {
       facts.add(chip(l10n.productPackUnit(
         uom.code,
         formatFactor(uom.conversionFactor),
-        base?.name ?? '',
+        base == null ? '' : uomName(l10n, base.code, base.name),
       )));
     }
     if (product.trackingMode != TrackingMode.untracked) {

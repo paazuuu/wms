@@ -154,6 +154,10 @@ class ShipmentPrinter {
     return '';
   }
 
+  /// A Japanese heading with its English beneath, as every printed document
+  /// carries both: the goods often go to people who read only one.
+  static String bi(String ja, String en) => '$ja<span class="en">$en</span>';
+
   String _shell(String title, String body) => '''
 <!doctype html><html><head><meta charset="utf-8"><style>
   * { font-family: sans-serif; }
@@ -164,6 +168,8 @@ class ShipmentPrinter {
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th, td { border: 1px solid #999; padding: 5px 6px; text-align: left; vertical-align: middle; }
   th { background: #eee; }
+  .en { display: block; font-size: 9px; font-weight: normal; color: #666; letter-spacing: 0; }
+  .meta .en, .kv .en { display: inline; margin-left: 3px; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .jan { font-family: monospace; white-space: nowrap; }
   .bc svg { height: 34px; width: 132px; }
@@ -204,11 +210,11 @@ class ShipmentPrinter {
       }
     }
 
-    add('出庫番号', s.shipmentNumber);
-    add('整理番号', s.referenceNo);
-    add('得意先', s.customerName);
-    add('お客様コード', s.customerCode);
-    add('日付', s.shipDate);
+    add(bi('出庫番号', 'Shipment No.'), s.shipmentNumber);
+    add(bi('整理番号', 'Ref. No.'), s.referenceNo);
+    add(bi('得意先', 'Customer'), s.customerName);
+    add(bi('お客様コード', 'Customer code'), s.customerCode);
+    add(bi('日付', 'Date'), s.shipDate);
     return '<h1>${_esc(heading)}</h1>${_senderBlock(sender)}'
         '<div class="meta">${m.join()}</div>';
   }
@@ -216,9 +222,15 @@ class ShipmentPrinter {
   /// The item columns every outbound document prints, in this order, whatever
   /// headings the trading company used on its own paperwork.
   static const itemHeadings = ['JANコード', 'メーカー', '品名', '品番', '規格'];
+  static const itemHeadingsEn = ['JAN', 'Maker', 'Product', 'Item code', 'Spec'];
 
-  String get _itemHead =>
-      itemHeadings.map((h) => '<th>$h</th>').join();
+  String get _itemHead => [
+        for (var i = 0; i < itemHeadings.length; i++)
+          '<th>${bi(itemHeadings[i], itemHeadingsEn[i])}</th>'
+      ].join();
+
+  static final _qtyHead = '<th class="num">${bi('数量', 'Qty')}</th>';
+  static final _totalCell = bi('合計', 'Total');
 
   String _itemCells(_Item r) => '<td class="jan">${_esc(r.jan)}</td>'
       '<td>${_esc(r.maker)}</td><td>${_esc(r.name)}</td>'
@@ -231,9 +243,9 @@ class ShipmentPrinter {
         .join();
     return '''
 <table>
-  <thead><tr>$_itemHead<th class="num">数量</th></tr></thead>
+  <thead><tr>$_itemHead$_qtyHead</tr></thead>
   <tbody>$body</tbody>
-  <tfoot><tr><td colspan="${itemHeadings.length}">合計</td><td class="num">$total</td></tr></tfoot>
+  <tfoot><tr><td colspan="${itemHeadings.length}">$_totalCell</td><td class="num">$total</td></tr></tfoot>
 </table>''';
   }
 
@@ -246,9 +258,9 @@ class ShipmentPrinter {
     }).join();
     return '''
 <table>
-  <thead><tr><th class="bc">バーコード</th>$_itemHead<th class="num">数量</th></tr></thead>
+  <thead><tr><th class="bc">${bi('バーコード', 'Barcode')}</th>$_itemHead$_qtyHead</tr></thead>
   <tbody>$body</tbody>
-  <tfoot><tr><td colspan="${itemHeadings.length + 1}">合計</td><td class="num">$total</td></tr></tfoot>
+  <tfoot><tr><td colspan="${itemHeadings.length + 1}">$_totalCell</td><td class="num">$total</td></tr></tfoot>
 </table>''';
   }
 
@@ -256,15 +268,15 @@ class ShipmentPrinter {
   String overallHtml(Shipment s, {List<SenderLine> sender = const []}) {
     final rows = s.lines.map((l) => _Item(
         l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
-    final body = _headerBlock(s, '出庫リスト', sender) + _rows(rows, s.totalUnits);
+    final body = _headerBlock(s, '出庫リスト / Shipping List', sender) + _rows(rows, s.totalUnits);
     return _shell('出庫リスト ${s.shipmentNumber}', body);
   }
 
   String _cartonSection(Shipment s, Carton c) {
     final boxes = s.cartonCount;
     final title = c.label == null || c.label!.isEmpty
-        ? '段ボール #${c.cartonNo} / $boxes'
-        : '段ボール #${c.cartonNo} / $boxes — ${c.label}';
+        ? '段ボール #${c.cartonNo} / $boxes (Carton)'
+        : '段ボール #${c.cartonNo} / $boxes (Carton) — ${c.label}';
     // A carton item carries only the JAN and name; the maker and 品番 come
     // from the shipment line it was packed from.
     final byJan = {for (final l in s.lines) l.janCode: l};
@@ -279,13 +291,13 @@ class ShipmentPrinter {
 
   /// One carton's contents, with JAN barcodes.
   String cartonHtml(Shipment s, Carton c, {List<SenderLine> sender = const []}) {
-    final body = _headerBlock(s, '内容リスト', sender) + _cartonSection(s, c);
+    final body = _headerBlock(s, '内容リスト / Packing List', sender) + _cartonSection(s, c);
     return _shell('段ボール${c.cartonNo} ${s.shipmentNumber}', body);
   }
 
   /// Every carton, one section per box (page-break between them), with barcodes.
   String allCartonsHtml(Shipment s, {List<SenderLine> sender = const []}) {
-    final body = _headerBlock(s, '段ボール別 内容リスト', sender) +
+    final body = _headerBlock(s, '段ボール別 内容リスト / Packing List by Carton', sender) +
         s.cartons.map((c) => _cartonSection(s, c)).join();
     return _shell('段ボール一覧 ${s.shipmentNumber}', body);
   }
@@ -314,8 +326,8 @@ class ShipmentPrinter {
     }
 
     final headCols = hasMoney
-        ? '$_itemHead<th class="num">数量</th><th class="num">単価</th><th class="num">金額</th>'
-        : '$_itemHead<th class="num">数量</th>';
+        ? '$_itemHead$_qtyHead<th class="num">${bi('単価', 'Unit price')}</th><th class="num">${bi('金額', 'Amount')}</th>'
+        : '$_itemHead$_qtyHead';
     final rows = d.lines.map((l) {
       final cells = _itemCells(_Item(
           l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
@@ -327,9 +339,9 @@ class ShipmentPrinter {
       return '<tr>$base$extra</tr>';
     }).join();
     final footer = hasMoney
-        ? '<tr><td colspan="${itemHeadings.length}">合計</td><td class="num">$units</td>'
+        ? '<tr><td colspan="${itemHeadings.length}">$_totalCell</td><td class="num">$units</td>'
             '<td></td><td class="num">¥$amountTotal</td></tr>'
-        : '<tr><td colspan="${itemHeadings.length}">合計</td><td class="num">$units</td></tr>';
+        : '<tr><td colspan="${itemHeadings.length}">$_totalCell</td><td class="num">$units</td></tr>';
 
     final kv = <String>[];
     void add(String label, String? value) {
@@ -338,13 +350,13 @@ class ShipmentPrinter {
       }
     }
 
-    add('発行日', d.date);
-    add('出庫番号', d.number);
-    add('整理番号', d.referenceNo);
-    add('お客様コード', d.customerCode);
-    add('出荷元', d.origin);
-    add('仕向国', d.destinationCountry);
-    add('箱数', d.cartonCount > 0 ? '${d.cartonCount}' : null);
+    add(bi('発行日', 'Issued'), d.date);
+    add(bi('出庫番号', 'Shipment No.'), d.number);
+    add(bi('整理番号', 'Ref. No.'), d.referenceNo);
+    add(bi('お客様コード', 'Customer code'), d.customerCode);
+    add(bi('出荷元', 'Ship from'), d.origin);
+    add(bi('仕向国', 'Destination'), d.destinationCountry);
+    add(bi('箱数', 'Cartons'), d.cartonCount > 0 ? '${d.cartonCount}' : null);
 
     final address = [d.recipientAddress, d.recipientPhone]
         .where((v) => v != null && v.trim().isNotEmpty)
@@ -356,10 +368,10 @@ class ShipmentPrinter {
   <div>
     <div class="to"><b>${_esc(d.recipient)}</b> 御中</div>
     $address
-    <div class="kv">下記の通り納品いたします。</div>
+    <div class="kv">下記の通り納品いたします。<span class="en">Please find the goods listed below.</span></div>
   </div>
   <div>
-    <div class="slip-title">送&nbsp;り&nbsp;状</div>
+    <div class="slip-title">送&nbsp;り&nbsp;状<span class="en">DELIVERY NOTE</span></div>
     <div class="kv">${kv.join()}</div>
     ${_senderBlock(sender, inline: true)}
   </div>

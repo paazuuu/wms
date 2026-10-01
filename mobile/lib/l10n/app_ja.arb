@@ -772,8 +772,8 @@
   "featConnectorsDesc": "将来の外部連携のために登録された外部システム",
   "featAiReview": "AIレビュー",
   "featAiReviewDesc": "AIの抽出結果を反映前に承認・却下",
-  "featProducts": "商品マスタ",
-  "featProductsDesc": "JANコードに紐づく商品名・カテゴリ・価格を管理",
+  "featProducts": "商品ライブラリー",
+  "featProductsDesc": "自社の商品。一覧で編集、写真で確認・追加",
   "featUnlinkedJan": "未紐付けJANコード",
   "@featUnlinkedJan": {
     "description": "Home menu: unlinked_jan_codes / product_id_coverage (0058) — the registration worklist."
@@ -1016,7 +1016,7 @@
   "poStatusRejected": "却下",
   "poStatusCancelled": "取消",
   "poStatusCompleted": "完了",
-  "productsTitle": "商品マスタ",
+  "productsTitle": "商品ライブラリー",
   "productsShowInactive": "無効な商品も表示",
   "productsSearchHint": "商品名またはJANコードで検索",
   "productsEmpty": "商品がまだありません",
@@ -7134,5 +7134,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "productsListView": "一覧",
+  "productsPhotoView": "写真",
+  "productNameEnTitle": "英語名",
+  "productNameEnAdd": "英語名を入れる",
+  "productNameEnLabel": "英語名（英語・中国語の画面ではこの名前で表示）",
+  "uomPcs": "個",
+  "uomSet": "セット",
+  "uomPack": "パック",
+  "uomBox": "箱",
+  "uomCase": "ケース",
+  "uomBag": "袋",
+  "uomRoll": "巻",
+  "uomSheet": "枚",
+  "uomDozen": "ダース",
+  "uomPallet": "パレット"
 }

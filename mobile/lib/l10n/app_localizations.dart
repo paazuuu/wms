@@ -3073,13 +3073,13 @@ abstract class AppLocalizations {
   /// No description provided for @featProducts.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ'**
+  /// **'商品ライブラリー'**
   String get featProducts;
 
   /// No description provided for @featProductsDesc.
   ///
   /// In ja, this message translates to:
-  /// **'JANコードに紐づく商品名・カテゴリ・価格を管理'**
+  /// **'自社の商品。一覧で編集、写真で確認・追加'**
   String get featProductsDesc;
 
   /// Home menu: unlinked_jan_codes / product_id_coverage (0058) — the registration worklist.
@@ -4165,7 +4165,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsTitle.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ'**
+  /// **'商品ライブラリー'**
   String get productsTitle;
 
   /// No description provided for @productsShowInactive.
@@ -14472,6 +14472,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'「{number}」を削除しました'**
   String planDeleted(String number);
+
+  /// No description provided for @productsListView.
+  ///
+  /// In ja, this message translates to:
+  /// **'一覧'**
+  String get productsListView;
+
+  /// No description provided for @productsPhotoView.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真'**
+  String get productsPhotoView;
+
+  /// No description provided for @productNameEnTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語名'**
+  String get productNameEnTitle;
+
+  /// No description provided for @productNameEnAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語名を入れる'**
+  String get productNameEnAdd;
+
+  /// No description provided for @productNameEnLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語名（英語・中国語の画面ではこの名前で表示）'**
+  String get productNameEnLabel;
+
+  /// No description provided for @uomPcs.
+  ///
+  /// In ja, this message translates to:
+  /// **'個'**
+  String get uomPcs;
+
+  /// No description provided for @uomSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'セット'**
+  String get uomSet;
+
+  /// No description provided for @uomPack.
+  ///
+  /// In ja, this message translates to:
+  /// **'パック'**
+  String get uomPack;
+
+  /// No description provided for @uomBox.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱'**
+  String get uomBox;
+
+  /// No description provided for @uomCase.
+  ///
+  /// In ja, this message translates to:
+  /// **'ケース'**
+  String get uomCase;
+
+  /// No description provided for @uomBag.
+  ///
+  /// In ja, this message translates to:
+  /// **'袋'**
+  String get uomBag;
+
+  /// No description provided for @uomRoll.
+  ///
+  /// In ja, this message translates to:
+  /// **'巻'**
+  String get uomRoll;
+
+  /// No description provided for @uomSheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'枚'**
+  String get uomSheet;
+
+  /// No description provided for @uomDozen.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダース'**
+  String get uomDozen;
+
+  /// No description provided for @uomPallet.
+  ///
+  /// In ja, this message translates to:
+  /// **'パレット'**
+  String get uomPallet;
 }
 
 class _AppLocalizationsDelegate

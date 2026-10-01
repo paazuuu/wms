@@ -11,6 +11,8 @@ import '../domain/product.dart';
 import 'product_detail_screen.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
+import '../../product_library/presentation/product_library_screen.dart';
+import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// The product master (spec §19, 0032), now showing what 0057-0060 added to it:
@@ -45,9 +47,12 @@ class ProductListScreen extends ConsumerWidget {
   }
 
   Future<void> _openDetail(
-      BuildContext context, WidgetRef ref, Product product) async {
+      BuildContext context, WidgetRef ref, Product product) => _openDetailById(context, ref, product.id);
+
+  Future<void> _openDetailById(
+      BuildContext context, WidgetRef ref, int productId) async {
     await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ProductDetailScreen(productId: product.id),
+      builder: (_) => ProductDetailScreen(productId: productId),
     ));
     // The detail screen can change the identity, the codes or the units, so the
     // list is refetched rather than left showing what it had.
@@ -96,12 +101,26 @@ class ProductListScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(productListProvider);
     final showInactive = ref.watch(showInactiveProductsProvider);
+    final photos = ref.watch(productPhotoViewProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.productsTitle),
         actions: [
-          IconButton(
+          // One place for our products: the list to edit them, or their
+          // pictures to check and add photos. Either opens the same product.
+          SegmentedButton<bool>(
+            key: const ValueKey('products-view'),
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(value: false, icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
+              ButtonSegment(value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
+            ],
+            selected: {photos},
+            onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          if (!photos) IconButton(
             tooltip: l10n.productsShowInactive,
             icon: Icon(showInactive
                 ? Icons.visibility_outlined
@@ -116,7 +135,9 @@ class ProductListScreen extends ConsumerWidget {
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),
-      body: Column(
+      body: photos
+          ? ProductLibraryView(onOpen: (p) => _openDetailById(context, ref, p.id))
+          : Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -203,10 +224,11 @@ class _ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.name,
+                    ProductNameText(
+                        name: product.name,
+                        nameEn: product.nameEn,
                         style: theme.textTheme.titleSmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                        maxLines: 1),
                     const SizedBox(height: 2),
                     Row(
                       children: [

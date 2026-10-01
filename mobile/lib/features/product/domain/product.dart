@@ -157,6 +157,7 @@ class Product extends Equatable {
     required this.id,
     required this.janCode,
     required this.name,
+    this.nameEn,
     this.sku,
     this.maker,
     this.category,
@@ -180,6 +181,10 @@ class Product extends Equatable {
   final int id;
   final String janCode;
   final String name;
+
+  /// The English name (0117), shown on English and Chinese screens and under
+  /// the Japanese one on Japanese screens.
+  final String? nameEn;
   final String? sku;
 
   /// Our maker name (0103). With [janCode], [name] and [sku] (our 品番) it is
@@ -244,6 +249,7 @@ class Product extends Equatable {
         id: _asInt(json['id']),
         janCode: (json['jan_code'] ?? '').toString(),
         name: (json['name'] ?? '').toString(),
+        nameEn: _asText(json['name_en']),
         sku: _asText(json['sku']),
         maker: _asText(json['maker']),
         category: _asText(json['category']),
@@ -271,6 +277,7 @@ class Product extends Equatable {
         id,
         janCode,
         name,
+        nameEn,
         sku,
         maker,
         category,

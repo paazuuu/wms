@@ -8,6 +8,7 @@ import '../../partners/application/trading_partner_providers.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
+import '../../../core/ui/product_name.dart';
 import '../domain/supplier_product_name.dart';
 
 /// What each supplier calls this product (0087). The same product carries a
@@ -123,12 +124,12 @@ class SupplierNamesCard extends ConsumerWidget {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
-                          title: Text(n.supplierName),
+                          title: Text(widenKana(n.supplierName)),
                           subtitle: Text([
                             n.supplierDisplayName,
                             if (n.supplierCode != null) l10n.supplierNameCodeLabel(n.supplierCode!),
                             if (n.supplierJanCode != null) 'JAN ${n.supplierJanCode}',
-                            if (n.supplierMaker != null) n.supplierMaker!,
+                            if (n.supplierMaker != null) widenKana(n.supplierMaker!),
                           ].join(' · ')),
                           onTap: () => _edit(context, ref, n),
                           trailing: IconButton(

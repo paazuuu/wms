@@ -1577,10 +1577,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featAiReviewDesc => 'AIの抽出結果を反映前に承認・却下';
 
   @override
-  String get featProducts => '商品マスタ';
+  String get featProducts => '商品ライブラリー';
 
   @override
-  String get featProductsDesc => 'JANコードに紐づく商品名・カテゴリ・価格を管理';
+  String get featProductsDesc => '自社の商品。一覧で編集、写真で確認・追加';
 
   @override
   String get featUnlinkedJan => '未紐付けJANコード';
@@ -2133,7 +2133,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get poStatusCompleted => '完了';
 
   @override
-  String get productsTitle => '商品マスタ';
+  String get productsTitle => '商品ライブラリー';
 
   @override
   String get productsShowInactive => '無効な商品も表示';
@@ -7897,4 +7897,49 @@ class AppLocalizationsJa extends AppLocalizations {
   String planDeleted(String number) {
     return '「$number」を削除しました';
   }
+
+  @override
+  String get productsListView => '一覧';
+
+  @override
+  String get productsPhotoView => '写真';
+
+  @override
+  String get productNameEnTitle => '英語名';
+
+  @override
+  String get productNameEnAdd => '英語名を入れる';
+
+  @override
+  String get productNameEnLabel => '英語名（英語・中国語の画面ではこの名前で表示）';
+
+  @override
+  String get uomPcs => '個';
+
+  @override
+  String get uomSet => 'セット';
+
+  @override
+  String get uomPack => 'パック';
+
+  @override
+  String get uomBox => '箱';
+
+  @override
+  String get uomCase => 'ケース';
+
+  @override
+  String get uomBag => '袋';
+
+  @override
+  String get uomRoll => '巻';
+
+  @override
+  String get uomSheet => '枚';
+
+  @override
+  String get uomDozen => 'ダース';
+
+  @override
+  String get uomPallet => 'パレット';
 }
