@@ -42,15 +42,21 @@ String widenKana(String s) {
   return out.toString();
 }
 
-/// A product's name for this screen's language (0117): the English name on
-/// English and Chinese screens (Japanese product names are not translated),
-/// the Japanese one on Japanese screens. Falls back to whichever exists.
-String productDisplayName(BuildContext context, String name, String? nameEn) {
-  final ja = Localizations.localeOf(context).languageCode == 'ja';
-  final en = nameEn?.trim();
-  if (!ja && en != null && en.isNotEmpty) return en;
-  return widenKana(name);
+/// A product's name in [lang] from its names (0118: `{ja, en, zh, …}`), else
+/// English, else the Japanese name — a name that has not been translated
+/// still reads in a script the screen can draw.
+String productNameIn(String lang, String name, {String? nameEn, Map<String, String> names = const {}}) {
+  String? pick(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
+  if (lang == 'ja') return widenKana(pick(names['ja']) ?? name);
+  return pick(names[lang]) ?? pick(names['en']) ?? pick(nameEn) ?? widenKana(name);
 }
+
+/// A product's name for this screen's language: the name in that language
+/// if the product has one (0118), the English one otherwise (0117), the
+/// Japanese one on Japanese screens.
+String productDisplayName(BuildContext context, String name, String? nameEn,
+        {Map<String, String> names = const {}}) =>
+    productNameIn(Localizations.localeOf(context).languageCode, name, nameEn: nameEn, names: names);
 
 /// The product name, with the English one beneath it on Japanese screens.
 class ProductNameText extends StatelessWidget {
@@ -58,12 +64,14 @@ class ProductNameText extends StatelessWidget {
     super.key,
     required this.name,
     this.nameEn,
+    this.names = const {},
     this.style,
     this.maxLines,
   });
 
   final String name;
   final String? nameEn;
+  final Map<String, String> names;
   final TextStyle? style;
   final int? maxLines;
 
@@ -71,9 +79,9 @@ class ProductNameText extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final ja = Localizations.localeOf(context).languageCode == 'ja';
-    final en = nameEn?.trim();
+    final en = (names['en'] ?? nameEn)?.trim();
     final main = Text(
-      productDisplayName(context, name, nameEn),
+      productDisplayName(context, name, nameEn, names: names),
       style: style,
       maxLines: maxLines,
       overflow: maxLines == null ? null : TextOverflow.ellipsis,

@@ -7149,5 +7149,26 @@
   "uomRoll": "巻",
   "uomSheet": "枚",
   "uomDozen": "ダース",
-  "uomPallet": "パレット"
+  "uomPallet": "パレット",
+  "productNamesTitle": "商品名（言語別）",
+  "productNamesJa": "日本語（商品名）",
+  "productNamesJaHint": "日本語名は商品様式で作られます。変更は「商品名の組み立て」から",
+  "productNamesEn": "English（英語の画面と、中国語名がないときに表示）",
+  "productNamesZh": "中文（中国語の画面と、中国語を選んだ印刷物に表示）",
+  "featPrintLanguage": "印刷の言語",
+  "featPrintLanguageDesc": "送り状・内容リスト・箱ラベルを何語で印刷するかと、その用語",
+  "plLanguagesTitle": "印刷する言語",
+  "plLanguagesHint": "押した順に並びます。1番目が大きく、2番目以降がその下に小さく印刷されます。商品名もこの順に、その言語の名前があれば印刷されます。",
+  "plPreview": "例: {sample}",
+  "@plPreview": {
+    "placeholders": {
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "plSaved": "保存しました",
+  "plWordsTitle": "帳票とラベルの用語",
+  "plWordsHint": "押すと日本語・英語・中国語を直せます。",
+  "plWordNeedsAll": "3つの言語すべてに入れてください"
 }

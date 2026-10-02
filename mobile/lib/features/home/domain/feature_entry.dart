@@ -107,6 +107,8 @@ class FeatureEntry {
         return l10n.featProductLibrary;
       case 'name_formats':
         return l10n.featNameFormats;
+      case 'print_language':
+        return l10n.featPrintLanguage;
       case 'field_library':
         return l10n.featFieldLibrary;
       case 'unlinked_jan':
@@ -203,6 +205,8 @@ class FeatureEntry {
         return l10n.featProductLibraryDesc;
       case 'name_formats':
         return l10n.featNameFormatsDesc;
+      case 'print_language':
+        return l10n.featPrintLanguageDesc;
       case 'field_library':
         return l10n.featFieldLibraryDesc;
       case 'unlinked_jan':

@@ -11,6 +11,7 @@ import '../../delivery/application/delivery_providers.dart';
 import '../../delivery/domain/stock_item.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/packaging_providers.dart';
+import '../application/print_language_providers.dart';
 import '../application/sender_profile_controller.dart';
 import '../application/shipment_providers.dart';
 import '../data/shipment_print.dart';
@@ -38,7 +39,6 @@ class ShipmentDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
-  static const _printer = ShipmentPrinter();
   bool _busy = false;
 
   int get _id => widget.shipmentId;
@@ -286,12 +286,19 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
   }
 
   /// Ask which sender fields to include, then print. Aborts if cancelled.
+  /// Prints in the print languages (0118), with each product's names.
   Future<void> _printWith(
-      Future<void> Function(List<SenderLine> sender) build) async {
+      Future<void> Function(ShipmentPrinter printer, List<SenderLine> sender) build) async {
     final profile = ref.read(senderProfileControllerProvider);
     final sender = await showSenderPicker(context, profile);
     if (sender == null || !mounted) return;
-    await _print(() => build(sender));
+    final s = ref.read(shipmentDetailProvider(_id)).valueOrNull;
+    final printer = await printerFor(ref, [
+      ...?s?.lines.map((l) => l.janCode),
+      for (final c in s?.cartons ?? const <Carton>[]) ...c.items.map((i) => i.janCode),
+    ]);
+    if (!mounted) return;
+    await _print(() => build(printer, sender));
   }
 
   void _snack(String message, {StatusTone tone = StatusTone.neutral}) {
@@ -339,15 +346,15 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                 final s = detail.value!;
                 switch (v) {
                   case 'list':
-                    _printWith((snd) => _printer.printOverall(s, sender: snd));
+                    _printWith((p, snd) => p.printOverall(s, sender: snd));
                   case 'slip':
                     _printWith(
-                        (snd) => _printer.printDeliverySlip(s, sender: snd));
+                        (p, snd) => p.printDeliverySlip(s, sender: snd));
                   case 'cartons':
                     _printWith(
-                        (snd) => _printer.printAllCartons(s, sender: snd));
+                        (p, snd) => p.printAllCartons(s, sender: snd));
                   case 'labels':
-                    _printWith((snd) => _printer.printAllCartonLabels(s,
+                    _printWith((p, snd) => p.printAllCartonLabels(s,
                         sender: snd,
                         warehouseName:
                             ref.read(activeWarehouseProvider)?.name));
@@ -466,7 +473,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
               ? null
               : TextButton.icon(
                   onPressed: () => _printWith(
-                      (snd) => _printer.printAllCartons(s, sender: snd)),
+                      (p, snd) => p.printAllCartons(s, sender: snd)),
                   icon: const Icon(Icons.print_outlined, size: 18),
                   label: Text(l10n.printAllCartons),
                 ),
@@ -491,8 +498,8 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                       },
                 onDelete: shipped ? null : () => _deleteCarton(c),
                 onPrint: () =>
-                    _printWith((snd) => _printer.printCarton(s, c, sender: snd)),
-                onPrintLabel: () => _printWith((snd) => _printer.printCartonLabel(
+                    _printWith((p, snd) => p.printCarton(s, c, sender: snd)),
+                onPrintLabel: () => _printWith((p, snd) => p.printCartonLabel(
                       s,
                       c,
                       sender: snd,

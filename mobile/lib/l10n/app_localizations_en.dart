@@ -8106,4 +8106,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uomPallet => 'pallet';
+
+  @override
+  String get productNamesTitle => 'Names by language';
+
+  @override
+  String get productNamesJa => 'Japanese (product name)';
+
+  @override
+  String get productNamesJaHint =>
+      'The Japanese name is built in our name format; change it with \"Build the name\"';
+
+  @override
+  String get productNamesEn =>
+      'English (shown on English screens, and when there is no Chinese name)';
+
+  @override
+  String get productNamesZh =>
+      'Chinese (shown on Chinese screens and on prints in Chinese)';
+
+  @override
+  String get featPrintLanguage => 'Print languages';
+
+  @override
+  String get featPrintLanguageDesc =>
+      'Which languages delivery notes, packing lists and carton labels print in, and their words';
+
+  @override
+  String get plLanguagesTitle => 'Languages to print';
+
+  @override
+  String get plLanguagesHint =>
+      'In the order you tap them. The first prints large and the rest smaller beneath it. Product names print in the same order where the product has a name in that language.';
+
+  @override
+  String plPreview(String sample) {
+    return 'e.g. $sample';
+  }
+
+  @override
+  String get plSaved => 'Saved';
+
+  @override
+  String get plWordsTitle => 'Words on documents and labels';
+
+  @override
+  String get plWordsHint =>
+      'Tap a word to change its Japanese, English and Chinese.';
+
+  @override
+  String get plWordNeedsAll => 'Fill in all three languages';
 }

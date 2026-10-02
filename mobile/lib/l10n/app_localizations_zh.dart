@@ -7912,4 +7912,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get uomPallet => '托盘';
+
+  @override
+  String get productNamesTitle => '各语言商品名';
+
+  @override
+  String get productNamesJa => '日语（商品名）';
+
+  @override
+  String get productNamesJaHint => '日语名称按商品格式生成，请通过“商品名组成”修改';
+
+  @override
+  String get productNamesEn => 'English（英文界面显示；无中文名时也显示）';
+
+  @override
+  String get productNamesZh => '中文（中文界面及选择中文的打印件显示）';
+
+  @override
+  String get featPrintLanguage => '打印语言';
+
+  @override
+  String get featPrintLanguageDesc => '送货单、装箱清单、箱标签的打印语言及用语';
+
+  @override
+  String get plLanguagesTitle => '打印的语言';
+
+  @override
+  String get plLanguagesHint =>
+      '按点选顺序排列。第一种语言大字打印，其余在下方小字打印。商品名也按此顺序打印（有该语言名称时）。';
+
+  @override
+  String plPreview(String sample) {
+    return '示例：$sample';
+  }
+
+  @override
+  String get plSaved => '已保存';
+
+  @override
+  String get plWordsTitle => '单据与标签用语';
+
+  @override
+  String get plWordsHint => '点按可修改日语、英语、中文。';
+
+  @override
+  String get plWordNeedsAll => '请填写全部三种语言';
 }

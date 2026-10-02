@@ -51,6 +51,10 @@ class LabelTemplate extends Equatable {
     'customer',
   ];
 
+  /// `{{t_<word>}}` is one of the label words (0118) in the print languages
+  /// — 数量 Qty — and counts as the row's own text, not as a value.
+  static bool isWord(String token) => token.startsWith('t_');
+
   static final RegExp _token = RegExp(r'\{\{\s*(\w+)\s*\}\}');
 
   /// Substitute [values] into [template]. Unknown or null values become ''.
@@ -63,13 +67,13 @@ class LabelTemplate extends Equatable {
   /// A row is dropped when it has variables and *every* one of them resolved
   /// empty — otherwise a template row like `ロット {{lot}}` would print its own
   /// label with nothing after it on a shipment that has no lot. A row with no
-  /// variables at all is static text and always kept.
+  /// variables at all — or only label words — is static text and always kept.
   List<String> render(Map<String, String?> values) {
     final out = <String>[];
     for (final line in lines) {
       final filled = fill(line, values).trim();
       if (filled.isEmpty) continue;
-      final tokens = _token.allMatches(line).map((m) => m.group(1)!);
+      final tokens = _token.allMatches(line).map((m) => m.group(1)!).where((t) => !isWord(t));
       if (tokens.isNotEmpty &&
           tokens.every((t) => (values[t] ?? '').trim().isEmpty)) {
         continue;
@@ -113,12 +117,12 @@ class LabelTemplates {
     lines: [
       '{{company}}',
       '{{customer}}',
-      '出庫 Shipment {{shipment_no}}',
-      '箱 Box {{carton_no}} / {{carton_total}}',
+      '{{t_label_shipment}} {{shipment_no}}',
+      '{{t_label_box}} {{carton_no}} / {{carton_total}}',
       '{{product_name}}',
       'JAN {{jan}}',
-      '数量 Qty {{quantity}}',
-      'ロット Lot {{lot}}',
+      '{{t_label_qty}} {{quantity}}',
+      '{{t_label_lot}} {{lot}}',
       '{{warehouse}}',
     ],
     codeVariable: '{{jan}}',

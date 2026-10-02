@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../product/domain/product.dart' show productNamesFromJson;
+
 // The product library (0109): each product's pictures in the company's
 // order; the first is the product's face, shown in front of its name
 // wherever the product appears.
@@ -56,6 +58,7 @@ class LibraryProduct extends Equatable {
     required this.id,
     required this.name,
     this.nameEn,
+    this.names = const {},
     this.janCode,
     this.sku,
     this.maker,
@@ -69,6 +72,9 @@ class LibraryProduct extends Equatable {
 
   /// The English name (0117).
   final String? nameEn;
+
+  /// Every name by language (0118).
+  final Map<String, String> names;
   final String? janCode;
   final String? sku;
   final String? maker;
@@ -82,6 +88,7 @@ class LibraryProduct extends Equatable {
         id: _i(j['id']),
         name: (j['name'] ?? '').toString(),
         nameEn: _s(j['name_en']),
+        names: productNamesFromJson(j['names']),
         janCode: _s(j['jan_code']),
         sku: _s(j['sku']),
         maker: _s(j['maker']),
@@ -91,7 +98,7 @@ class LibraryProduct extends Equatable {
       );
 
   @override
-  List<Object?> get props => [id, name, janCode, facePath, imageCount];
+  List<Object?> get props => [id, name, nameEn, names, janCode, facePath, imageCount];
 }
 
 /// The face of one product, as found by id or JAN.

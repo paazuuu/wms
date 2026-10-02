@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -20,6 +21,7 @@ import 'supplier_names_card.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_gallery_screen.dart';
 import '../../product_library/presentation/product_naming_dialog.dart';
+import '../../../core/ui/fields_dialog.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
@@ -122,6 +124,48 @@ class _Header extends ConsumerWidget {
 
   final Product product;
 
+  /// The product's names in each language (0118). Japanese is the product
+  /// name itself, built in our format, so it is shown, not edited, here.
+  Future<void> _editNames(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    const langs = ['en', 'zh'];
+    final current = {
+      'en': product.names['en'] ?? product.nameEn ?? '',
+      'zh': product.names['zh'] ?? '',
+    };
+    final next = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => FieldsDialog(
+        title: l10n.productNamesTitle,
+        keyPrefix: 'product-name',
+        header: InputDecorator(
+          decoration: InputDecoration(labelText: l10n.productNamesJa, helperText: l10n.productNamesJaHint),
+          child: Text(product.name, key: const ValueKey('product-name-ja')),
+        ),
+        fields: {
+          'en': (l10n.productNamesEn, current['en']!),
+          'zh': (l10n.productNamesZh, current['zh']!),
+        },
+        saveKey: const ValueKey('product-name-en-save'),
+        saveLabel: l10n.productSave,
+        cancelLabel: l10n.actionCancel,
+      ),
+    );
+    if (next == null || !context.mounted) return;
+    final repo = ref.read(productRepositoryProvider);
+    for (final l in langs) {
+      if (next[l] == current[l]) continue;
+      final r = await repo.setName(product.id, l, next[l]!.isEmpty ? null : next[l]);
+      if (!context.mounted) return;
+      if (r case ApiFailure(:final message)) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+        return;
+      }
+    }
+    ref.invalidate(productListProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -139,7 +183,7 @@ class _Header extends ConsumerWidget {
                 ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 72),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: ProductNameText(name: product.name, nameEn: product.nameEn, style: theme.textTheme.titleMedium),
+                  child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleMedium),
                 ),
                 StatusPill(
                   tone: product.isActive
@@ -159,6 +203,16 @@ class _Header extends ConsumerWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                   fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
             ),
+            // Every name it has (0118), so the Chinese and English are at
+            // hand whatever language this screen is in.
+            if (product.names.length > 1) ...[
+              const SizedBox(height: 2),
+              for (final l in const ['ja', 'en', 'zh'])
+                if (product.names[l] case final n?)
+                  Text('${const {'ja': '日本語', 'en': 'English', 'zh': '中文'}[l]}  $n',
+                      key: ValueKey('product-name-row-$l'),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+            ],
             if (product.category != null) ...[
               const SizedBox(height: 2),
               Text(product.category!,
@@ -180,50 +234,17 @@ class _Header extends ConsumerWidget {
                 label: Text(l10n.plOpenLibrary),
               ),
             ),
-            // Its English name (0117): shown instead of the Japanese one on
-            // English and Chinese screens, and under it on Japanese ones.
+            // Its names by language (0118): English and Chinese beside our
+            // Japanese name, shown on screens in that language and printed on
+            // documents and labels.
             if (ref.watch(productLibraryCanManageProvider))
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  key: const ValueKey('product-name-en'),
-                  onPressed: () async {
-                    final ctl = TextEditingController(text: product.nameEn ?? '');
-                    final value = await showDialog<String>(
-                      context: context,
-                      builder: (dialogContext) => AlertDialog(
-                        title: Text(l10n.productNameEnTitle),
-                        content: SizedBox(
-                          width: 420,
-                          child: TextField(
-                            key: const ValueKey('product-name-en-field'),
-                            controller: ctl,
-                            autofocus: true,
-                            decoration: InputDecoration(labelText: l10n.productNameEnLabel, helperText: product.name),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.actionCancel)),
-                          FilledButton(
-                            key: const ValueKey('product-name-en-save'),
-                            onPressed: () => Navigator.pop(dialogContext, ctl.text.trim()),
-                            child: Text(l10n.productSave),
-                          ),
-                        ],
-                      ),
-                    );
-                    ctl.dispose();
-                    if (value == null) return;
-                    final r = await ref.read(productRepositoryProvider).setNameEn(product.id, value.isEmpty ? null : value);
-                    if (!context.mounted) return;
-                    r.when(
-                      success: (_) => ref.invalidate(productListProvider),
-                      failure: (f) => ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, f.message)))),
-                    );
-                  },
+                  key: const ValueKey('product-names'),
+                  onPressed: () => _editNames(context, ref),
                   icon: const Icon(Icons.translate, size: 18),
-                  label: Text(product.nameEn == null ? l10n.productNameEnAdd : l10n.productNameEnTitle),
+                  label: Text(l10n.productNamesTitle),
                 ),
               ),
             // Its name in our format (0111): built from its parts.
@@ -691,7 +712,7 @@ class _WeightSheetState extends ConsumerState<_WeightSheet> {
           children: [
             Text(l10n.wtSection, style: theme.textTheme.titleMedium),
             const SizedBox(height: 2),
-            Text(productDisplayName(context, widget.product.name, widget.product.nameEn), style: theme.textTheme.bodySmall),
+            Text(productDisplayName(context, widget.product.name, widget.product.nameEn, names: widget.product.names), style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.lg),
             TextField(
               key: const ValueKey('wt-weight'),

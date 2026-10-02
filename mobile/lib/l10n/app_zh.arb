@@ -2770,5 +2770,19 @@
   "uomRoll": "卷",
   "uomSheet": "张",
   "uomDozen": "打",
-  "uomPallet": "托盘"
+  "uomPallet": "托盘",
+  "productNamesTitle": "各语言商品名",
+  "productNamesJa": "日语（商品名）",
+  "productNamesJaHint": "日语名称按商品格式生成，请通过“商品名组成”修改",
+  "productNamesEn": "English（英文界面显示；无中文名时也显示）",
+  "productNamesZh": "中文（中文界面及选择中文的打印件显示）",
+  "featPrintLanguage": "打印语言",
+  "featPrintLanguageDesc": "送货单、装箱清单、箱标签的打印语言及用语",
+  "plLanguagesTitle": "打印的语言",
+  "plLanguagesHint": "按点选顺序排列。第一种语言大字打印，其余在下方小字打印。商品名也按此顺序打印（有该语言名称时）。",
+  "plPreview": "示例：{sample}",
+  "plSaved": "已保存",
+  "plWordsTitle": "单据与标签用语",
+  "plWordsHint": "点按可修改日语、英语、中文。",
+  "plWordNeedsAll": "请填写全部三种语言"
 }

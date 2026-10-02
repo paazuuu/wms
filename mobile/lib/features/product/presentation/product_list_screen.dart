@@ -227,6 +227,7 @@ class _ProductCard extends StatelessWidget {
                     ProductNameText(
                         name: product.name,
                         nameEn: product.nameEn,
+                        names: product.names,
                         style: theme.textTheme.titleSmall,
                         maxLines: 1),
                     const SizedBox(height: 2),

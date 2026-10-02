@@ -15,6 +15,7 @@ import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
 import '../../inventory/presentation/stock_reconciliation_screen.dart';
+import '../../shipment/presentation/print_language_screen.dart';
 import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/bulk_inspection_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
@@ -351,6 +352,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _nameFormats,
             requiredAnyOf: ['product.manage'],
           ),
+          // The languages documents and carton labels print in, and their
+          // words (0118).
+          FeatureEntry(
+            id: 'print_language',
+            icon: Icons.language_outlined,
+            status: FeatureStatus.ready,
+            builder: _printLanguage,
+            requiredAnyOf: ['pack.complete', 'product.manage'],
+          ),
           // The registration worklist behind that master data: a code the
           // system has seen but no product yet accounts for.
           FeatureEntry(
@@ -447,6 +457,7 @@ Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 Widget _products(BuildContext _) => const ProductListScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
+Widget _printLanguage(BuildContext _) => const PrintLanguageScreen();
 
 /// Top-level (const-referenceable) builder for the Unlinked JAN Codes feature.
 Widget _unlinkedJan(BuildContext _) => const UnlinkedJanScreen();

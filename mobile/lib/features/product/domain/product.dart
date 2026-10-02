@@ -152,12 +152,24 @@ enum TrackingMode {
 /// the key. The JAN stays on this model because it is still what the existing
 /// stock, receiving and picking paths are keyed by, and because it is what an
 /// operator reads off the box.
+/// `{lang: name}` from a `names` object (0118), empty names left out.
+Map<String, String> productNamesFromJson(dynamic raw) {
+  if (raw is! Map) return const {};
+  final out = <String, String>{};
+  raw.forEach((k, v) {
+    final s = v?.toString().trim() ?? '';
+    if (s.isNotEmpty) out[k.toString()] = s;
+  });
+  return out;
+}
+
 class Product extends Equatable {
   const Product({
     required this.id,
     required this.janCode,
     required this.name,
     this.nameEn,
+    this.names = const {},
     this.sku,
     this.maker,
     this.category,
@@ -185,6 +197,10 @@ class Product extends Equatable {
   /// The English name (0117), shown on English and Chinese screens and under
   /// the Japanese one on Japanese screens.
   final String? nameEn;
+
+  /// Every name the product has, by language (0118): `ja` is [name], `en`
+  /// is [nameEn], and `zh` and any other language are set on their own.
+  final Map<String, String> names;
   final String? sku;
 
   /// Our maker name (0103). With [janCode], [name] and [sku] (our 品番) it is
@@ -250,6 +266,7 @@ class Product extends Equatable {
         janCode: (json['jan_code'] ?? '').toString(),
         name: (json['name'] ?? '').toString(),
         nameEn: _asText(json['name_en']),
+        names: productNamesFromJson(json['names']),
         sku: _asText(json['sku']),
         maker: _asText(json['maker']),
         category: _asText(json['category']),
@@ -278,6 +295,7 @@ class Product extends Equatable {
         janCode,
         name,
         nameEn,
+        names,
         sku,
         maker,
         category,

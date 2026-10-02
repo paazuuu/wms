@@ -128,6 +128,10 @@ abstract class ProductRepository {
   /// `set_product_name_en` (0117) — the English name, or null to clear it.
   Future<ApiResult<bool>> setNameEn(int productId, String? nameEn);
 
+  /// `set_product_name` (0118) — the name in [lang] (`en`, `zh`, …), or null
+  /// to clear it. Japanese is the product name itself and is not set here.
+  Future<ApiResult<Map<String, String>>> setName(int productId, String lang, String? name);
+
   /// `list_uoms` (0059) — the vocabulary a pack size can be chosen from.
   Future<ApiResult<List<Uom>>> listUoms();
 
@@ -449,6 +453,17 @@ class ProductRepositoryImpl implements ProductRepository {
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<Map<String, String>>> setName(int productId, String lang, String? name) async {
+    try {
+      final r = await _dio.post('/rpc/set_product_name',
+          data: {'p_product_id': productId, 'p_lang': lang, 'p_name': name, 'p_source': 'manual'});
+      return ApiSuccess(productNamesFromJson(r.data));
+    } on DioException catch (e) {
+      return mapDioError<Map<String, String>>(e);
     }
   }
 

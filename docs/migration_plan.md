@@ -5731,6 +5731,47 @@ Also:
 - Printed lists, slips and carton labels carry English under, or beside,
   each Japanese heading (数量 Qty, 送り状 DELIVERY NOTE).
 
+### 0118 — product names by language, print languages and label words
+
+- `product_names(product_id, lang, name, source)` holds every name of a
+  product, one row per language.
+  - `ja` is `products.name` and `en` is `products.name_en`. A trigger keeps
+    both rows in step whatever changes them.
+  - `set_product_name(id, lang, name)` sets any other language.
+    - `en` goes through `products.name_en`.
+    - `ja` is refused: it is changed through the name format (0111).
+  - `product_names_of(id)` returns `{lang: name}`.
+  - `product_names_by_jan(jans)` returns the same for the products on a
+    document.
+  - `list_products` and `product_library` return `names`, and search every
+    name.
+  - All 91 products now have ja, en and zh. The Chinese names use the
+    Chinese maker names (斑马, 百乐, 三菱, 派通, 国誉, 蜻蜓, 奥托). The
+    product line, colour and code stay as printed.
+- Screens show the product name in the screen's language, else English,
+  else Japanese. Japanese screens keep the English name underneath. The
+  product screen lists every name, and 商品名（言語別） edits en and zh.
+- `label_terms(key, ja, en, zh)` holds the words documents and carton labels
+  print: headings, titles and label words. `set_label_term` edits one.
+- `print_settings.languages` sets which languages print, in order: the
+  first is the main line and the rest go under it.
+  - It defaults to ja then en, which prints the same as 0117.
+  - It is set with `set_print_languages` (ja, en and zh only).
+  - `print_language()` reads the languages and the words in one call.
+- Printing uses those languages for:
+  - document headings and titles;
+  - the 送り状 title and its lead line. 御中 is printed only when Japanese is
+    one of the languages;
+  - product names: each print language the product has a name in.
+- Carton label templates use `{{t_<key>}}` tokens for the words
+  (`{{t_label_qty}} {{quantity}}`). A row whose values are all empty is
+  still dropped, with its word.
+- The 印刷の言語 screen (under master data) chooses the languages and edits
+  the words.
+- Applied without `drop` statements: on this project a `drop` in a
+  migration waits for a confirmation and times out. Policies are created
+  only if missing, and the trigger uses `create or replace trigger`.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

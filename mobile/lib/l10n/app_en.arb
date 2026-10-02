@@ -2770,5 +2770,19 @@
   "uomRoll": "roll",
   "uomSheet": "sheet",
   "uomDozen": "dozen",
-  "uomPallet": "pallet"
+  "uomPallet": "pallet",
+  "productNamesTitle": "Names by language",
+  "productNamesJa": "Japanese (product name)",
+  "productNamesJaHint": "The Japanese name is built in our name format; change it with \"Build the name\"",
+  "productNamesEn": "English (shown on English screens, and when there is no Chinese name)",
+  "productNamesZh": "Chinese (shown on Chinese screens and on prints in Chinese)",
+  "featPrintLanguage": "Print languages",
+  "featPrintLanguageDesc": "Which languages delivery notes, packing lists and carton labels print in, and their words",
+  "plLanguagesTitle": "Languages to print",
+  "plLanguagesHint": "In the order you tap them. The first prints large and the rest smaller beneath it. Product names print in the same order where the product has a name in that language.",
+  "plPreview": "e.g. {sample}",
+  "plSaved": "Saved",
+  "plWordsTitle": "Words on documents and labels",
+  "plWordsHint": "Tap a word to change its Japanese, English and Chinese.",
+  "plWordNeedsAll": "Fill in all three languages"
 }

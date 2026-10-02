@@ -10,7 +10,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../audit/presentation/entity_audit_timeline.dart';
 import '../../shipment/application/sender_profile_controller.dart';
-import '../../shipment/data/shipment_print.dart';
+import '../../shipment/application/print_language_providers.dart';
 import '../../shipment/presentation/sender_picker.dart';
 import '../application/transfer_providers.dart';
 import '../domain/transfer_order.dart';
@@ -45,7 +45,8 @@ class TransferDetailScreen extends ConsumerWidget {
                 final profile = ref.read(senderProfileControllerProvider);
                 final sender = await showSenderPicker(context, profile);
                 if (sender == null) return;
-                await const ShipmentPrinter().printTransferSlip(order, sender: sender);
+                final printer = await printerFor(ref, order.lines.map((l) => l.janCode));
+                await printer.printTransferSlip(order, sender: sender);
               },
             ),
         ],

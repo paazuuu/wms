@@ -2279,6 +2279,15 @@ class FakeProductRepository implements ProductRepository {
     return const ApiSuccess(true);
   }
 
+  /// Names setName() was asked to save (0118).
+  final setNames = <({int productId, String lang, String? name})>[];
+
+  @override
+  Future<ApiResult<Map<String, String>>> setName(int productId, String lang, String? name) async {
+    setNames.add((productId: productId, lang: lang, name: name));
+    return ApiSuccess(name == null ? const <String, String>{} : {lang: name});
+  }
+
   /// What setPack() and setWeight() were asked to save (0115).
   final setPacks = <({int productId, String uomCode, double factor, double? packageWeightG, double? grossWeightG})>[];
   final setWeights = <({int productId, double? unitWeightG, String source, String? url, String? note})>[];

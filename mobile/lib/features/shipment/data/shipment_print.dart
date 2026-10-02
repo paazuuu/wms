@@ -3,6 +3,7 @@ import 'package:printing/printing.dart';
 
 import '../domain/carton.dart';
 import '../domain/label_template.dart';
+import '../domain/print_language.dart';
 import '../domain/sender_profile.dart';
 import '../../transfers/domain/transfer_order.dart';
 import '../domain/shipment.dart';
@@ -127,7 +128,14 @@ class SlipDocument {
 /// product names render with the device's own fonts — no bundled CJK font, no
 /// runtime font download. JAN barcodes are embedded as inline SVG.
 class ShipmentPrinter {
-  const ShipmentPrinter();
+  const ShipmentPrinter({this.language = const PrintLanguage(), this.namesByJan = const {}});
+
+  /// The languages to print in and their words (0118).
+  final PrintLanguage language;
+
+  /// Each product's names by language (0118), keyed by JAN — what the
+  /// product column and the label print beside our Japanese name.
+  final Map<String, Map<String, String>> namesByJan;
 
   String _esc(Object? v) => (v ?? '')
       .toString()
@@ -154,9 +162,35 @@ class ShipmentPrinter {
     return '';
   }
 
-  /// A Japanese heading with its English beneath, as every printed document
-  /// carries both: the goods often go to people who read only one.
-  static String bi(String ja, String en) => '$ja<span class="en">$en</span>';
+  /// A heading in the first print language with the others beneath, as
+  /// every printed document carries them: the goods often go to people who
+  /// read only one.
+  String _t(String key) {
+    final w = language.words(key);
+    return _esc(w.first) + w.skip(1).map((o) => '<span class="en">${_esc(o)}</span>').join();
+  }
+
+  /// [key] in every print language on one line, for titles.
+  String _line(String key) => language.words(key).join(' / ');
+
+  /// A product's name in each print language: our Japanese name as the
+  /// line carries it, the others from the product's names. A language the
+  /// product has no name in is left out.
+  List<String> productNames(String jan, String name) {
+    final names = namesByJan[jan] ?? const {};
+    final out = <String>[];
+    for (final l in language.languages) {
+      final n = (l == 'ja' ? name : names[l])?.trim();
+      if (n != null && n.isNotEmpty && !out.contains(n)) out.add(n);
+    }
+    if (out.isEmpty) out.add(name);
+    return out;
+  }
+
+  String _nameCell(String jan, String name) {
+    final n = productNames(jan, name);
+    return _esc(n.first) + n.skip(1).map((o) => '<span class="en">${_esc(o)}</span>').join();
+  }
 
   String _shell(String title, String body) => '''
 <!doctype html><html><head><meta charset="utf-8"><style>
@@ -210,11 +244,11 @@ class ShipmentPrinter {
       }
     }
 
-    add(bi('出庫番号', 'Shipment No.'), s.shipmentNumber);
-    add(bi('整理番号', 'Ref. No.'), s.referenceNo);
-    add(bi('得意先', 'Customer'), s.customerName);
-    add(bi('お客様コード', 'Customer code'), s.customerCode);
-    add(bi('日付', 'Date'), s.shipDate);
+    add(_t('shipment_no'), s.shipmentNumber);
+    add(_t('ref_no'), s.referenceNo);
+    add(_t('customer'), s.customerName);
+    add(_t('customer_code'), s.customerCode);
+    add(_t('date'), s.shipDate);
     return '<h1>${_esc(heading)}</h1>${_senderBlock(sender)}'
         '<div class="meta">${m.join()}</div>';
   }
@@ -222,18 +256,15 @@ class ShipmentPrinter {
   /// The item columns every outbound document prints, in this order, whatever
   /// headings the trading company used on its own paperwork.
   static const itemHeadings = ['JANコード', 'メーカー', '品名', '品番', '規格'];
-  static const itemHeadingsEn = ['JAN', 'Maker', 'Product', 'Item code', 'Spec'];
+  static const itemKeys = ['jan', 'maker', 'product', 'item_code', 'spec'];
 
-  String get _itemHead => [
-        for (var i = 0; i < itemHeadings.length; i++)
-          '<th>${bi(itemHeadings[i], itemHeadingsEn[i])}</th>'
-      ].join();
+  String get _itemHead => itemKeys.map((k) => '<th>${_t(k)}</th>').join();
 
-  static final _qtyHead = '<th class="num">${bi('数量', 'Qty')}</th>';
-  static final _totalCell = bi('合計', 'Total');
+  String get _qtyHead => '<th class="num">${_t('qty')}</th>';
+  String get _totalCell => _t('total');
 
   String _itemCells(_Item r) => '<td class="jan">${_esc(r.jan)}</td>'
-      '<td>${_esc(r.maker)}</td><td>${_esc(r.name)}</td>'
+      '<td>${_esc(r.maker)}</td><td>${_nameCell(r.jan, r.name)}</td>'
       '<td>${_esc(r.code)}</td><td>${_esc(r.spec)}</td>';
 
   /// A plain (text) item table — used for the overall list.
@@ -258,7 +289,7 @@ class ShipmentPrinter {
     }).join();
     return '''
 <table>
-  <thead><tr><th class="bc">${bi('バーコード', 'Barcode')}</th>$_itemHead$_qtyHead</tr></thead>
+  <thead><tr><th class="bc">${_t('barcode')}</th>$_itemHead$_qtyHead</tr></thead>
   <tbody>$body</tbody>
   <tfoot><tr><td colspan="${itemHeadings.length + 1}">$_totalCell</td><td class="num">$total</td></tr></tfoot>
 </table>''';
@@ -268,15 +299,17 @@ class ShipmentPrinter {
   String overallHtml(Shipment s, {List<SenderLine> sender = const []}) {
     final rows = s.lines.map((l) => _Item(
         l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
-    final body = _headerBlock(s, '出庫リスト / Shipping List', sender) + _rows(rows, s.totalUnits);
-    return _shell('出庫リスト ${s.shipmentNumber}', body);
+    final body = _headerBlock(s, _line('shipping_list'), sender) + _rows(rows, s.totalUnits);
+    return _shell('${language.word('shipping_list', language.main)} ${s.shipmentNumber}', body);
   }
 
   String _cartonSection(Shipment s, Carton c) {
     final boxes = s.cartonCount;
+    final words = language.words('carton');
+    final others = words.length > 1 ? ' (${words.skip(1).join(' / ')})' : '';
     final title = c.label == null || c.label!.isEmpty
-        ? '段ボール #${c.cartonNo} / $boxes (Carton)'
-        : '段ボール #${c.cartonNo} / $boxes (Carton) — ${c.label}';
+        ? '${words.first} #${c.cartonNo} / $boxes$others'
+        : '${words.first} #${c.cartonNo} / $boxes$others — ${c.label}';
     // A carton item carries only the JAN and name; the maker and 品番 come
     // from the shipment line it was packed from.
     final byJan = {for (final l in s.lines) l.janCode: l};
@@ -291,13 +324,13 @@ class ShipmentPrinter {
 
   /// One carton's contents, with JAN barcodes.
   String cartonHtml(Shipment s, Carton c, {List<SenderLine> sender = const []}) {
-    final body = _headerBlock(s, '内容リスト / Packing List', sender) + _cartonSection(s, c);
+    final body = _headerBlock(s, _line('packing_list'), sender) + _cartonSection(s, c);
     return _shell('段ボール${c.cartonNo} ${s.shipmentNumber}', body);
   }
 
   /// Every carton, one section per box (page-break between them), with barcodes.
   String allCartonsHtml(Shipment s, {List<SenderLine> sender = const []}) {
-    final body = _headerBlock(s, '段ボール別 内容リスト / Packing List by Carton', sender) +
+    final body = _headerBlock(s, _line('packing_list_by_carton'), sender) +
         s.cartons.map((c) => _cartonSection(s, c)).join();
     return _shell('段ボール一覧 ${s.shipmentNumber}', body);
   }
@@ -326,7 +359,7 @@ class ShipmentPrinter {
     }
 
     final headCols = hasMoney
-        ? '$_itemHead$_qtyHead<th class="num">${bi('単価', 'Unit price')}</th><th class="num">${bi('金額', 'Amount')}</th>'
+        ? '$_itemHead$_qtyHead<th class="num">${_t('unit_price')}</th><th class="num">${_t('amount')}</th>'
         : '$_itemHead$_qtyHead';
     final rows = d.lines.map((l) {
       final cells = _itemCells(_Item(
@@ -350,28 +383,32 @@ class ShipmentPrinter {
       }
     }
 
-    add(bi('発行日', 'Issued'), d.date);
-    add(bi('出庫番号', 'Shipment No.'), d.number);
-    add(bi('整理番号', 'Ref. No.'), d.referenceNo);
-    add(bi('お客様コード', 'Customer code'), d.customerCode);
-    add(bi('出荷元', 'Ship from'), d.origin);
-    add(bi('仕向国', 'Destination'), d.destinationCountry);
-    add(bi('箱数', 'Cartons'), d.cartonCount > 0 ? '${d.cartonCount}' : null);
+    add(_t('issued'), d.date);
+    add(_t('shipment_no'), d.number);
+    add(_t('ref_no'), d.referenceNo);
+    add(_t('customer_code'), d.customerCode);
+    add(_t('ship_from'), d.origin);
+    add(_t('destination'), d.destinationCountry);
+    add(_t('cartons'), d.cartonCount > 0 ? '${d.cartonCount}' : null);
 
     final address = [d.recipientAddress, d.recipientPhone]
         .where((v) => v != null && v.trim().isNotEmpty)
         .map((v) => '<div class="kv">${_esc(v)}</div>')
         .join();
 
+    final titleWords = language.words('delivery_note');
+    // A Japanese title is spaced out (送 り 状) as the form is printed.
+    final mainTitle = language.main == 'ja' ? titleWords.first.split('').join('&nbsp;') : _esc(titleWords.first);
+    final slipTitle = mainTitle + titleWords.skip(1).map((o) => '<span class="en">${_esc(o)}</span>').join();
     final body = '''
 <div class="slip-head">
   <div>
-    <div class="to"><b>${_esc(d.recipient)}</b> 御中</div>
+    <div class="to"><b>${_esc(d.recipient)}</b>${language.languages.contains('ja') ? ' 御中' : ''}</div>
     $address
-    <div class="kv">下記の通り納品いたします。<span class="en">Please find the goods listed below.</span></div>
+    <div class="kv">${_t('delivery_note_lead')}</div>
   </div>
   <div>
-    <div class="slip-title">送&nbsp;り&nbsp;状<span class="en">DELIVERY NOTE</span></div>
+    <div class="slip-title">$slipTitle</div>
     <div class="kv">${kv.join()}</div>
     ${_senderBlock(sender, inline: true)}
   </div>
@@ -381,7 +418,7 @@ class ShipmentPrinter {
   <tbody>$rows</tbody>
   <tfoot>$footer</tfoot>
 </table>''';
-    return _shell('送り状 ${d.number}', body);
+    return _shell('${language.word('delivery_note', language.main)} ${d.number}', body);
   }
 
   /// The variable set §20 defines, filled in for one carton of one shipment.
@@ -415,13 +452,18 @@ class ShipmentPrinter {
       'shipment_no': s.shipmentNumber,
       'carton_no': '${c.cartonNo}',
       'carton_total': '${s.cartonCount}',
-      'product_name': single?.productName ??
-          (janCodes.isEmpty ? null : '${janCodes.length} 品目'),
+      'product_name': single != null
+          ? productNames(single.janCode, single.productName).join(' / ')
+          : (janCodes.isEmpty
+              ? null
+              : language.words('label_items').map((w) => '${janCodes.length} $w').join(' / ')),
       'jan': single?.janCode,
       'sku': single?.spec,
       'lot': lotCodes.length == 1 ? lotCodes.first : null,
       'quantity': '${c.totalUnits}',
       'warehouse': warehouseName,
+      // The label's own words (0118): `{{t_label_qty}}` prints 数量 Qty …
+      for (final k in PrintLanguage.keys) 't_$k': language.words(k).join(' '),
     };
   }
 

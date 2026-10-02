@@ -14562,6 +14562,90 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'パレット'**
   String get uomPallet;
+
+  /// No description provided for @productNamesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名（言語別）'**
+  String get productNamesTitle;
+
+  /// No description provided for @productNamesJa.
+  ///
+  /// In ja, this message translates to:
+  /// **'日本語（商品名）'**
+  String get productNamesJa;
+
+  /// No description provided for @productNamesJaHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'日本語名は商品様式で作られます。変更は「商品名の組み立て」から'**
+  String get productNamesJaHint;
+
+  /// No description provided for @productNamesEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'English（英語の画面と、中国語名がないときに表示）'**
+  String get productNamesEn;
+
+  /// No description provided for @productNamesZh.
+  ///
+  /// In ja, this message translates to:
+  /// **'中文（中国語の画面と、中国語を選んだ印刷物に表示）'**
+  String get productNamesZh;
+
+  /// No description provided for @featPrintLanguage.
+  ///
+  /// In ja, this message translates to:
+  /// **'印刷の言語'**
+  String get featPrintLanguage;
+
+  /// No description provided for @featPrintLanguageDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'送り状・内容リスト・箱ラベルを何語で印刷するかと、その用語'**
+  String get featPrintLanguageDesc;
+
+  /// No description provided for @plLanguagesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'印刷する言語'**
+  String get plLanguagesTitle;
+
+  /// No description provided for @plLanguagesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'押した順に並びます。1番目が大きく、2番目以降がその下に小さく印刷されます。商品名もこの順に、その言語の名前があれば印刷されます。'**
+  String get plLanguagesHint;
+
+  /// No description provided for @plPreview.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: {sample}'**
+  String plPreview(String sample);
+
+  /// No description provided for @plSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get plSaved;
+
+  /// No description provided for @plWordsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'帳票とラベルの用語'**
+  String get plWordsTitle;
+
+  /// No description provided for @plWordsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'押すと日本語・英語・中国語を直せます。'**
+  String get plWordsHint;
+
+  /// No description provided for @plWordNeedsAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'3つの言語すべてに入れてください'**
+  String get plWordNeedsAll;
 }
 
 class _AppLocalizationsDelegate

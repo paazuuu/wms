@@ -144,7 +144,7 @@ class _ProductCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              ProductNameText(name: p.name, nameEn: p.nameEn, maxLines: 1, style: theme.textTheme.titleSmall),
+              ProductNameText(name: p.name, nameEn: p.nameEn, names: p.names, maxLines: 1, style: theme.textTheme.titleSmall),
               Text([if (p.maker != null) p.maker!, if (p.janCode != null) p.janCode!].join(' · '),
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
               Text(p.imageCount == 0 ? l10n.plNoImages : l10n.plImageCount(p.imageCount),

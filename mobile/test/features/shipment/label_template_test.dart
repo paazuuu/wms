@@ -103,7 +103,7 @@ void main() {
       final values = printer.cartonLabelValues(shipment, carton);
 
       // Printing one of the two names would be a label that lies about the rest.
-      expect(values['product_name'], '2 品目');
+      expect(values['product_name'], '2 品目 / 2 items');
       expect(values['jan'], isNull);
       expect(values['quantity'], '6');
     });

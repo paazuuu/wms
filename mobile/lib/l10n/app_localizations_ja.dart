@@ -7942,4 +7942,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get uomPallet => 'パレット';
+
+  @override
+  String get productNamesTitle => '商品名（言語別）';
+
+  @override
+  String get productNamesJa => '日本語（商品名）';
+
+  @override
+  String get productNamesJaHint => '日本語名は商品様式で作られます。変更は「商品名の組み立て」から';
+
+  @override
+  String get productNamesEn => 'English（英語の画面と、中国語名がないときに表示）';
+
+  @override
+  String get productNamesZh => '中文（中国語の画面と、中国語を選んだ印刷物に表示）';
+
+  @override
+  String get featPrintLanguage => '印刷の言語';
+
+  @override
+  String get featPrintLanguageDesc => '送り状・内容リスト・箱ラベルを何語で印刷するかと、その用語';
+
+  @override
+  String get plLanguagesTitle => '印刷する言語';
+
+  @override
+  String get plLanguagesHint =>
+      '押した順に並びます。1番目が大きく、2番目以降がその下に小さく印刷されます。商品名もこの順に、その言語の名前があれば印刷されます。';
+
+  @override
+  String plPreview(String sample) {
+    return '例: $sample';
+  }
+
+  @override
+  String get plSaved => '保存しました';
+
+  @override
+  String get plWordsTitle => '帳票とラベルの用語';
+
+  @override
+  String get plWordsHint => '押すと日本語・英語・中国語を直せます。';
+
+  @override
+  String get plWordNeedsAll => '3つの言語すべてに入れてください';
 }
