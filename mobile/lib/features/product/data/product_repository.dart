@@ -60,6 +60,12 @@ abstract class ProductRepository {
   /// instead.
   Future<ApiResult<bool>> delete(int id);
 
+  /// `reactivate_products` (0123) — the products a file lists, made active
+  /// again. Dormant ones need product.manage; archived or discontinued ones
+  /// need product.lifecycle and are otherwise left as they are, returned in
+  /// `skipped`.
+  Future<ApiResult<({int changed, List<int> skipped})>> reactivate(List<int> ids);
+
   /// `set_products_lifecycle` (0120) — many products at once into one
   /// lifecycle, with why; resolves to how many changed.
   Future<ApiResult<int>> setLifecycle(List<int> ids, ProductLifecycle lifecycle, {String? reason});
@@ -294,6 +300,21 @@ class ProductRepositoryImpl implements ProductRepository {
       return ApiSuccess(response.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<({int changed, List<int> skipped})>> reactivate(List<int> ids) async {
+    try {
+      final r = await _dio.post('/rpc/reactivate_products', data: {'p_ids': ids});
+      final json = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      final m = json is Map ? json : const {};
+      return ApiSuccess((
+        changed: (m['changed'] as num?)?.toInt() ?? 0,
+        skipped: [for (final v in (m['skipped'] as List? ?? const [])) (v as num).toInt()],
+      ));
+    } on DioException catch (e) {
+      return mapDioError<({int changed, List<int> skipped})>(e);
     }
   }
 

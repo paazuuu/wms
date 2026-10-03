@@ -223,15 +223,51 @@ class WarehouseStock extends Equatable {
 }
 
 /// A supplier that sells the product (0120): by its names for it or its
-/// prices.
+/// prices, with its terms (0123). A product usually has several.
 class ProductSupplierRef extends Equatable {
-  const ProductSupplierRef({required this.id, required this.name});
+  const ProductSupplierRef({
+    required this.id,
+    required this.name,
+    this.theirName,
+    this.theirCode,
+    this.unitPrice,
+    this.listPrice,
+    this.discountRate,
+    this.orderLot,
+    this.isPrimary = false,
+    this.updatedAt,
+  });
 
   final int id;
   final String name;
 
+  /// What this supplier calls the product, and its code for it.
+  final String? theirName;
+  final String? theirCode;
+  final double? unitPrice;
+  final double? listPrice;
+
+  /// 掛率 as a fraction (0.6 = 60%).
+  final double? discountRate;
+  final int? orderLot;
+  final bool isPrimary;
+  final DateTime? updatedAt;
+
+  factory ProductSupplierRef.fromJson(Map<String, dynamic> j) => ProductSupplierRef(
+        id: _asInt(j['id']),
+        name: (j['name'] ?? '').toString(),
+        theirName: _asText(j['their_name']),
+        theirCode: _asText(j['their_code']),
+        unitPrice: _asDouble(j['unit_price']),
+        listPrice: _asDouble(j['list_price']),
+        discountRate: _asDouble(j['discount_rate']),
+        orderLot: j['order_lot'] == null ? null : _asInt(j['order_lot']),
+        isPrimary: j['is_primary'] == true,
+        updatedAt: DateTime.tryParse('${j['updated_at']}')?.toLocal(),
+      );
+
   @override
-  List<Object?> get props => [id, name];
+  List<Object?> get props => [id, name, theirName, theirCode, unitPrice, listPrice, discountRate, orderLot, isPrimary, updatedAt];
 }
 
 /// One of the product's attributes (0110/0111) — 色, サイズ, 容量 … — by
@@ -369,6 +405,13 @@ class Product extends Equatable {
 
   bool get isActive => status == 'active';
 
+  /// The supplier with the lowest unit price, when any has one.
+  ProductSupplierRef? get cheapestSupplier {
+    final priced = [for (final s in suppliers) if (s.unitPrice != null) s]
+      ..sort((a, b) => a.unitPrice!.compareTo(b.unitPrice!));
+    return priced.firstOrNull;
+  }
+
   /// Where the product stands. [status] is the older on/off switch and wins
   /// when the two disagree: inactive without a lifecycle reads as dormant.
   ProductLifecycle get lifecycle {
@@ -425,7 +468,7 @@ class Product extends Equatable {
         stock: json['stock'] is Map ? ProductStock.fromJson((json['stock'] as Map).cast<String, dynamic>()) : null,
         suppliers: [
           for (final s in (json['suppliers'] as List? ?? const []).whereType<Map>())
-            ProductSupplierRef(id: _asInt(s['id']), name: (s['name'] ?? '').toString()),
+            ProductSupplierRef.fromJson(s.cast<String, dynamic>()),
         ],
         baseName: _asText(json['base_name']),
         unit: _asText(json['unit']),

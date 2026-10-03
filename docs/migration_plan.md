@@ -5897,6 +5897,33 @@ Also:
   - The screen looks products up in its own unfiltered read, so the
     library's search does not hide them.
 
+### 0123 — products a file brings back, and every supplier with its terms
+
+- Reading a file that lists a product which is not active (ファイルから一括登録):
+  - A file listing a product is taken to mean we will handle it. Each line
+    is ticked by its product's state, and the person can change any tick.
+
+    | State | Default |
+    |---|---|
+    | 休眠 | made active (it was only paused; needs `product.manage`) |
+    | アーカイブ | made active (needs `product.lifecycle`) |
+    | 提供終了 | left as it is (ended by the maker); tick to bring it back |
+
+  - Ticked products are made active when prices are saved, or with
+    取扱中に戻す.
+  - Stock is not changed: it comes from receiving.
+- `reactivate_products(ids[])` applies these rules on the server. Products
+  the caller may not bring back are left as they are and returned as
+  `skipped`.
+- The old on/off switch (`set_product_status`) can no longer bring back an
+  archived or discontinued product without `product.lifecycle`. The card's
+  switch is hidden for those.
+- `product_suppliers_json` gives, for every supplier of a product: what it
+  calls the product, its code, unit price, list price, rate, order lot,
+  main flag and last update. Cheapest comes first.
+  - The library card shows 仕入先 N社 with each price.
+  - The product screen has a 仕入先（N社） table with the cheapest marked.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

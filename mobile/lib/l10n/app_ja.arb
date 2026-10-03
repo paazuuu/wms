@@ -7449,7 +7449,6 @@
       }
     }
   },
-  "quoteRestoreNeedsAdmin": "取扱中に戻すには管理者の権限が必要です。",
   "quoteRestored": "{count}件を取扱中に戻しました",
   "@quoteRestored": {
     "placeholders": {
@@ -7458,17 +7457,6 @@
       }
     }
   },
-  "quoteRestoreQ": "取扱中でない商品が{count}件あります",
-  "@quoteRestoreQ": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "quoteRestoreBody": "価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。",
-  "quoteRestoreAndSave": "取扱中に戻して保存",
-  "quoteSaveOnly": "状態はそのままで保存",
   "pfNoneMatchTitle": "絞り込みに合う商品がありません",
   "pfHiddenByState": "今の「状態」の絞り込みで表示されていない商品があります：{states}",
   "@pfHiddenByState": {
@@ -7489,5 +7477,93 @@
       }
     }
   },
-  "pfShowEverything": "すべての商品を表示"
+  "pfShowEverything": "すべての商品を表示",
+  "quoteWakePolicy": "ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。",
+  "quoteWakeCount": "取扱中に戻す {wake}件・そのまま {keep}件",
+  "@quoteWakeCount": {
+    "placeholders": {
+      "wake": {
+        "type": "int"
+      },
+      "keep": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteWakeLine": "この商品を取扱中に戻す",
+  "quoteWakeDiscontinued": "提供終了の商品です（メーカー廃番など）。また扱うならチェックしてください",
+  "quoteWakeNeedsAdmin": "アーカイブ・提供終了から戻すには管理者の権限が必要です",
+  "quoteSaveAndWake": "価格を保存（{count}件）＋取扱中に戻す（{wake}件）",
+  "@quoteSaveAndWake": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "wake": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteRestoredSome": "{changed}件を取扱中に戻しました（{skipped}件は権限がないためそのままです）",
+  "@quoteRestoredSome": {
+    "placeholders": {
+      "changed": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "supTitle": "仕入先（{count}社）",
+  "@supTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supCount": "仕入先 {count}社",
+  "@supCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supMore": "ほか{count}社",
+  "@supMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supCheapest": "最安",
+  "supPrimary": "主な仕入先",
+  "supTheirName": "先方表記: {name}",
+  "@supTheirName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "supTheirCode": "先方コード: {code}",
+  "@supTheirCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "supUpdated": "更新 {date}",
+  "@supUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supNoPrice": "価格未登録"
 }

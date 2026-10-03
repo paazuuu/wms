@@ -15217,41 +15217,11 @@ abstract class AppLocalizations {
   /// **'取扱中に戻す（{count}件）'**
   String quoteRestore(int count);
 
-  /// No description provided for @quoteRestoreNeedsAdmin.
-  ///
-  /// In ja, this message translates to:
-  /// **'取扱中に戻すには管理者の権限が必要です。'**
-  String get quoteRestoreNeedsAdmin;
-
   /// No description provided for @quoteRestored.
   ///
   /// In ja, this message translates to:
   /// **'{count}件を取扱中に戻しました'**
   String quoteRestored(int count);
-
-  /// No description provided for @quoteRestoreQ.
-  ///
-  /// In ja, this message translates to:
-  /// **'取扱中でない商品が{count}件あります'**
-  String quoteRestoreQ(int count);
-
-  /// No description provided for @quoteRestoreBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。'**
-  String get quoteRestoreBody;
-
-  /// No description provided for @quoteRestoreAndSave.
-  ///
-  /// In ja, this message translates to:
-  /// **'取扱中に戻して保存'**
-  String get quoteRestoreAndSave;
-
-  /// No description provided for @quoteSaveOnly.
-  ///
-  /// In ja, this message translates to:
-  /// **'状態はそのままで保存'**
-  String get quoteSaveOnly;
 
   /// No description provided for @pfNoneMatchTitle.
   ///
@@ -15276,6 +15246,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'すべての商品を表示'**
   String get pfShowEverything;
+
+  /// No description provided for @quoteWakePolicy.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。'**
+  String get quoteWakePolicy;
+
+  /// No description provided for @quoteWakeCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中に戻す {wake}件・そのまま {keep}件'**
+  String quoteWakeCount(int wake, int keep);
+
+  /// No description provided for @quoteWakeLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品を取扱中に戻す'**
+  String get quoteWakeLine;
+
+  /// No description provided for @quoteWakeDiscontinued.
+  ///
+  /// In ja, this message translates to:
+  /// **'提供終了の商品です（メーカー廃番など）。また扱うならチェックしてください'**
+  String get quoteWakeDiscontinued;
+
+  /// No description provided for @quoteWakeNeedsAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'アーカイブ・提供終了から戻すには管理者の権限が必要です'**
+  String get quoteWakeNeedsAdmin;
+
+  /// No description provided for @quoteSaveAndWake.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格を保存（{count}件）＋取扱中に戻す（{wake}件）'**
+  String quoteSaveAndWake(int count, int wake);
+
+  /// No description provided for @quoteRestoredSome.
+  ///
+  /// In ja, this message translates to:
+  /// **'{changed}件を取扱中に戻しました（{skipped}件は権限がないためそのままです）'**
+  String quoteRestoredSome(int changed, int skipped);
+
+  /// No description provided for @supTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先（{count}社）'**
+  String supTitle(int count);
+
+  /// No description provided for @supCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先 {count}社'**
+  String supCount(int count);
+
+  /// No description provided for @supMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'ほか{count}社'**
+  String supMore(int count);
+
+  /// No description provided for @supCheapest.
+  ///
+  /// In ja, this message translates to:
+  /// **'最安'**
+  String get supCheapest;
+
+  /// No description provided for @supPrimary.
+  ///
+  /// In ja, this message translates to:
+  /// **'主な仕入先'**
+  String get supPrimary;
+
+  /// No description provided for @supTheirName.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方表記: {name}'**
+  String supTheirName(String name);
+
+  /// No description provided for @supTheirCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方コード: {code}'**
+  String supTheirCode(String code);
+
+  /// No description provided for @supUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'更新 {date}'**
+  String supUpdated(String date);
+
+  /// No description provided for @supNoPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格未登録'**
+  String get supNoPrice;
 }
 
 class _AppLocalizationsDelegate

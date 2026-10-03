@@ -202,20 +202,18 @@ void main() {
     expect(quotes.savePartner, 4);
   });
 
-  testWidgets('a line tied to an archived product says so, and can be made active as prices are saved', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(900, 1800));
+  Future<FakeProductRepository> pumpWith(WidgetTester tester, _FakeQuoteRepository quotes, List<Product> products,
+      {bool admin = true}) async {
+    await tester.binding.setSurfaceSize(const Size(900, 2000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final quotes = _FakeQuoteRepository(_quote);
-    final products = FakeProductRepository(products: const [
-      Product(id: 9, janCode: '4902778198940', name: 'ユニボール エア 0.5 黒', status: 'inactive', lifecycleCode: 'archived'),
-    ]);
+    final repo = FakeProductRepository(products: products)..mayLift = admin;
     await pumpApp(
       tester,
       QuoteImportScreen(pickFile: () async => _file()),
       overrides: [
         quoteRepositoryProvider.overrideWithValue(quotes),
-        productRepositoryProvider.overrideWithValue(products),
-        productCanLifecycleProvider.overrideWithValue(true),
+        productRepositoryProvider.overrideWithValue(repo),
+        productCanLifecycleProvider.overrideWithValue(admin),
         tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
           TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
         ])),
@@ -225,21 +223,57 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('quote-read')));
     await tester.pumpAndSettle();
+    return repo;
+  }
 
+  QuoteRead threeLines() => const QuoteRead(partnerId: 4, lines: [
+        {'jan_code': '4900000000001', 'product_name': 'A', 'unit_price': 10, 'product_id': 1, 'product': {'id': 1, 'name': 'A'}},
+        {'jan_code': '4900000000002', 'product_name': 'B', 'unit_price': 20, 'product_id': 2, 'product': {'id': 2, 'name': 'B'}},
+        {'jan_code': '4900000000003', 'product_name': 'C', 'unit_price': 30, 'product_id': 3, 'product': {'id': 3, 'name': 'C'}},
+      ]);
+
+  const asleep = Product(id: 1, janCode: '4900000000001', name: 'A', status: 'inactive', lifecycleCode: 'dormant');
+  const archived = Product(id: 2, janCode: '4900000000002', name: 'B', status: 'inactive', lifecycleCode: 'archived');
+  const ended = Product(id: 3, janCode: '4900000000003', name: 'C', status: 'inactive', lifecycleCode: 'discontinued');
+
+  testWidgets('by state: dormant and archived come back, discontinued stays, as prices are saved', (tester) async {
+    final quotes = _FakeQuoteRepository(threeLines());
+    final repo = await pumpWith(tester, quotes, const [asleep, archived, ended]);
+
+    expect(find.text('休眠中'), findsOneWidget);
     expect(find.text('アーカイブ中'), findsOneWidget);
-    expect(find.byKey(const ValueKey('quote-inactive')), findsOneWidget);
+    expect(find.text('提供終了'), findsOneWidget);
+    expect(find.text('取扱中に戻す 2件・そのまま 1件'), findsOneWidget);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('quote-wake-1'))).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('quote-wake-2'))).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('quote-wake-3'))).value, isFalse);
+    expect(find.textContaining('提供終了の商品です'), findsOneWidget);
+
+    // The person keeps the archived one where it is.
+    await tester.tap(find.byKey(const ValueKey('quote-wake-2')));
+    await tester.pump();
+    expect(find.text('取扱中に戻す 1件・そのまま 2件'), findsOneWidget);
+    expect(find.text('価格を保存（3件）＋取扱中に戻す（1件）'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('quote-save')));
     await tester.pumpAndSettle();
-    expect(find.text('取扱中でない商品が1件あります'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('quote-restore-save')));
-    await tester.pumpAndSettle();
+    expect(repo.reactivateCalls.single, [1]);
+    expect(quotes.saved!.length, 3);
+    expect(find.text('休眠中'), findsNothing);
+    expect(find.text('アーカイブ中'), findsOneWidget);
+  });
 
-    expect(products.lifecycleCalls.single.ids, [9]);
-    expect(products.lifecycleCalls.single.lifecycle, ProductLifecycle.active);
-    expect(quotes.saved, isNotNull);
-    // Active now: the line and the note follow.
-    expect(find.text('アーカイブ中'), findsNothing);
-    expect(find.byKey(const ValueKey('quote-inactive')), findsNothing);
+  testWidgets('without the administrator only dormant products come back', (tester) async {
+    final quotes = _FakeQuoteRepository(threeLines());
+    final repo = await pumpWith(tester, quotes, const [asleep, archived, ended], admin: false);
+
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('quote-wake-1'))).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('quote-wake-2'))).onChanged, isNull);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('quote-wake-3'))).onChanged, isNull);
+    expect(find.textContaining('管理者の権限が必要です'), findsNWidgets(2));
+
+    await tester.tap(find.byKey(const ValueKey('quote-restore')));
+    await tester.pumpAndSettle();
+    expect(repo.reactivateCalls.single, [1]);
   });
 }

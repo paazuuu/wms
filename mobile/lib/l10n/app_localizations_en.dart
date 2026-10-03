@@ -8499,28 +8499,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get quoteRestoreNeedsAdmin =>
-      'Making them active needs the administrator.';
-
-  @override
   String quoteRestored(int count) {
     return '$count made active';
   }
-
-  @override
-  String quoteRestoreQ(int count) {
-    return '$count of these are not active';
-  }
-
-  @override
-  String get quoteRestoreBody =>
-      'They can be made active as the prices are saved, so the library shows them again.';
-
-  @override
-  String get quoteRestoreAndSave => 'Make active and save';
-
-  @override
-  String get quoteSaveOnly => 'Save, leave as they are';
 
   @override
   String get pfNoneMatchTitle => 'No product matches the filters';
@@ -8537,4 +8518,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pfShowEverything => 'Show every product';
+
+  @override
+  String get quoteWakePolicy =>
+      'Products on a file are taken to be ones we mean to handle, so by state: dormant → made active; archived → made active (administrator only); discontinued → left as it is (ended by the maker; tick its line to bring it back). Each line\'s tick changes it. Stock comes from receiving and does not change here.';
+
+  @override
+  String quoteWakeCount(int wake, int keep) {
+    return 'Make active: $wake, leave as is: $keep';
+  }
+
+  @override
+  String get quoteWakeLine => 'Make this product active';
+
+  @override
+  String get quoteWakeDiscontinued =>
+      'This product is discontinued (e.g. ended by the maker). Tick to handle it again';
+
+  @override
+  String get quoteWakeNeedsAdmin =>
+      'Bringing back archived or discontinued products needs the administrator';
+
+  @override
+  String quoteSaveAndWake(int count, int wake) {
+    return 'Save prices ($count) and make active ($wake)';
+  }
+
+  @override
+  String quoteRestoredSome(int changed, int skipped) {
+    return '$changed made active ($skipped left: not permitted)';
+  }
+
+  @override
+  String supTitle(int count) {
+    return 'Suppliers ($count)';
+  }
+
+  @override
+  String supCount(int count) {
+    return '$count suppliers';
+  }
+
+  @override
+  String supMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get supCheapest => 'Cheapest';
+
+  @override
+  String get supPrimary => 'Main';
+
+  @override
+  String supTheirName(String name) {
+    return 'Their name: $name';
+  }
+
+  @override
+  String supTheirCode(String code) {
+    return 'Their code: $code';
+  }
+
+  @override
+  String supUpdated(String date) {
+    return 'Updated $date';
+  }
+
+  @override
+  String get supNoPrice => 'No price yet';
 }

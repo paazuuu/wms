@@ -315,7 +315,14 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                                   ? () => setState(() => _selected = {p.id})
                                   : null,
                               onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
-                              onToggleStatus: canManage && selected == null && p.lifecycle != ProductLifecycle.archived
+                              // Bringing back an archived or discontinued product is
+                              // the administrator's (0123); the switch is for active ↔ dormant.
+                              onToggleStatus: canManage &&
+                                      selected == null &&
+                                      (canLifecycle ||
+                                          p.lifecycle == ProductLifecycle.active ||
+                                          p.lifecycle == ProductLifecycle.dormant) &&
+                                      p.lifecycle != ProductLifecycle.archived
                                   ? () => _toggleStatus(p)
                                   : null,
                               onEdit: canManage && selected == null ? () => _openForm(product: p) : null,
@@ -875,6 +882,11 @@ class _ProductCard extends StatelessWidget {
                         ],
                       ],
                     ),
+                    // Every supplier, cheapest first, with its price (0123).
+                    if (product.suppliers.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      SupplierLine(key: ValueKey('product-suppliers-${product.id}'), suppliers: product.suppliers),
+                    ],
                     // What suppliers call it, so a search by a supplier's
                     // own name shows why this product matched (0087).
                     if (product.supplierNames.isNotEmpty) ...[

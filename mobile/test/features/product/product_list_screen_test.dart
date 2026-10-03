@@ -384,6 +384,7 @@ void main() {
     await _pump(tester, FakeProductRepository(products: const [stocked, empty]));
 
     expect(find.text('在庫 40・引当 10・引当可能 30  (メイン倉庫 30 / 神戸倉庫 10)'), findsOneWidget);
+    expect(find.text('仕入先 1社: 新東光通商'), findsOneWidget);
     expect(find.text('在庫なし'), findsOneWidget);
     expect(find.text('2件を表示（全2件）'), findsOneWidget);
   });

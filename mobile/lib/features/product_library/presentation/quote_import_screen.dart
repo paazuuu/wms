@@ -65,6 +65,10 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
 
   /// Whether [_partnerId] was found on the document rather than chosen.
   bool _detected = false;
+
+  /// Per product id, the person's choice to make it active again or leave
+  /// it; without a choice, [_wakeByDefault] decides.
+  final Map<int, bool> _wakeChoice = {};
   PlatformFile? _file;
   bool _busy = false;
   QuoteRead? _read;
@@ -144,15 +148,43 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
       }.toList()
         ..sort();
 
-  Future<bool> _restore(List<int> ids) async {
+  /// What a file listing an inactive product asks for, by its state:
+  ///   * 休眠 was only paused — the file means it is handled again: wake it.
+  ///   * アーカイブ was taken out of the list, and reading a file of it is
+  ///     the wish to handle it: bring it back, unless the person says not.
+  ///   * 提供終了 has ended (the maker's discontinued item): leave it, and
+  ///     say so — bringing it back is a decision, not a side effect.
+  /// What the person may not bring back is never ticked.
+  bool _wakeByDefault(ProductLifecycle l) => switch (l) {
+        ProductLifecycle.dormant => true,
+        ProductLifecycle.archived => ref.read(productCanLifecycleProvider),
+        _ => false,
+      };
+
+  bool _mayWake(ProductLifecycle l) =>
+      l == ProductLifecycle.dormant || ref.read(productCanLifecycleProvider);
+
+  bool _wakes(Product p) => _mayWake(p.lifecycle) && (_wakeChoice[p.id] ?? _wakeByDefault(p.lifecycle));
+
+  List<int> _toWake(Map<int, Product> byId) => [
+        for (final id in _inactiveIds(byId))
+          if (_wakes(byId[id]!)) id,
+      ];
+
+  /// Makes the ticked products active. Resolves to false when that failed.
+  Future<bool> _wake(List<int> ids) async {
+    if (ids.isEmpty) return true;
     final l10n = AppLocalizations.of(context);
-    final r = await ref.read(productRepositoryProvider).setLifecycle(ids, ProductLifecycle.active);
+    final r = await ref.read(productRepositoryProvider).reactivate(ids);
     if (!mounted) return false;
     switch (r) {
       case ApiSuccess(:final data):
         ref.invalidate(productListProvider);
         ref.invalidate(quoteAllProductsProvider);
-        _snack(l10n.quoteRestored(data));
+        _wakeChoice.removeWhere((id, _) => ids.contains(id));
+        _snack(data.skipped.isEmpty
+            ? l10n.quoteRestored(data.changed)
+            : l10n.quoteRestoredSome(data.changed, data.skipped.length));
         return true;
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -195,33 +227,9 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
-    // Saving prices for products that are not active leaves them out of the
-    // library's list: offer to make them active at the same time.
-    final inactive = _inactiveIds(_products);
-    if (inactive.isNotEmpty && ref.read(productCanLifecycleProvider)) {
-      final restore = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(l10n.quoteRestoreQ(inactive.length)),
-          content: Text(l10n.quoteRestoreBody),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.actionCancel)),
-            OutlinedButton(
-              key: const ValueKey('quote-save-only'),
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(l10n.quoteSaveOnly),
-            ),
-            FilledButton(
-              key: const ValueKey('quote-restore-save'),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(l10n.quoteRestoreAndSave),
-            ),
-          ],
-        ),
-      );
-      if (restore == null || !mounted) return;
-      if (restore && !await _restore(inactive)) return;
-    }
+    // The products the file brings back, as ticked, first: saving prices
+    // for a product still archived would leave it out of the library.
+    if (!await _wake(_toWake(_products))) return;
     setState(() => _busy = true);
     final r = await ref.read(quoteRepositoryProvider).save(
           partnerId: _partnerId!,
@@ -252,7 +260,8 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
     // Watched so a line's state follows the library's.
     final byId = {for (final p in ref.watch(quoteAllProductsProvider).valueOrNull ?? const <Product>[]) p.id: p};
     final inactive = _inactiveIds(byId);
-    final canRestore = ref.watch(productCanLifecycleProvider);
+    ref.watch(productCanLifecycleProvider);
+    final toWake = _toWake(byId);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.quoteImportTitle)),
@@ -334,12 +343,12 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
                   key: const ValueKey('quote-save'),
                   onPressed: _busy || _matched == 0 || _partnerId == null ? null : _save,
                   icon: const Icon(Icons.price_check_outlined),
-                  label: Text(l10n.quoteSave(_matched)),
+                  label: Text(toWake.isEmpty ? l10n.quoteSave(_matched) : l10n.quoteSaveAndWake(_matched, toWake.length)),
                 ),
               ],
             ),
-            // Registered, but archived, dormant or discontinued (0120): the
-            // library's list does not show them until they are active again.
+            // Registered, but archived, dormant or discontinued (0120): what
+            // happens to each is shown on its line, ticked by its state.
             if (inactive.isNotEmpty)
               Card(
                 key: const ValueKey('quote-inactive'),
@@ -350,16 +359,18 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(l10n.quoteInactiveNote(inactive.length)),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(l10n.quoteWakePolicy, style: theme.textTheme.bodySmall),
                       const SizedBox(height: AppSpacing.sm),
-                      if (canRestore)
-                        FilledButton.icon(
-                          key: const ValueKey('quote-restore'),
-                          onPressed: _busy ? null : () => _restore(inactive),
-                          icon: const Icon(Icons.unarchive_outlined, size: 18),
-                          label: Text(l10n.quoteRestore(inactive.length)),
-                        )
-                      else
-                        Text(l10n.quoteRestoreNeedsAdmin, style: theme.textTheme.bodySmall),
+                      Text(l10n.quoteWakeCount(toWake.length, inactive.length - toWake.length),
+                          key: const ValueKey('quote-wake-count'), style: theme.textTheme.titleSmall),
+                      const SizedBox(height: AppSpacing.sm),
+                      FilledButton.icon(
+                        key: const ValueKey('quote-restore'),
+                        onPressed: _busy || toWake.isEmpty ? null : () => _wake(toWake),
+                        icon: const Icon(Icons.unarchive_outlined, size: 18),
+                        label: Text(l10n.quoteRestore(toWake.length)),
+                      ),
                     ],
                   ),
                 ),
@@ -379,6 +390,15 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
                 key: ValueKey('quote-line-$i'),
                 line: l,
                 lifecycle: byId[QuoteLine.productId(l)]?.lifecycle,
+                wake: switch (byId[QuoteLine.productId(l)]) {
+                  final p? when p.lifecycle != ProductLifecycle.active => _wakes(p),
+                  _ => null,
+                },
+                onWake: switch (byId[QuoteLine.productId(l)]) {
+                  final p? when p.lifecycle != ProductLifecycle.active && _mayWake(p.lifecycle) =>
+                    (v) => setState(() => _wakeChoice[p.id] = v),
+                  _ => null,
+                },
               ),
           ],
         ],
@@ -388,12 +408,19 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
 }
 
 class _QuoteLineCard extends StatelessWidget {
-  const _QuoteLineCard({super.key, required this.line, this.lifecycle});
+  const _QuoteLineCard({super.key, required this.line, this.lifecycle, this.wake, this.onWake});
 
   final Map<String, dynamic> line;
 
   /// The tied product's lifecycle, when it is known.
   final ProductLifecycle? lifecycle;
+
+  /// For a product that is not active: whether it is to be made active
+  /// again; null for an active one or none.
+  final bool? wake;
+
+  /// Null when the person may not bring this one back.
+  final ValueChanged<bool>? onWake;
 
   String _yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
@@ -481,6 +508,28 @@ class _QuoteLineCard extends StatelessWidget {
                     ),
               ],
             ),
+            if (wake != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                children: [
+                  Checkbox(
+                    key: ValueKey('quote-wake-${QuoteLine.productId(line)}'),
+                    value: wake,
+                    onChanged: onWake == null ? null : (v) => onWake!(v ?? false),
+                  ),
+                  Expanded(
+                    child: Text(
+                      onWake == null
+                          ? l10n.quoteWakeNeedsAdmin
+                          : lifecycle == ProductLifecycle.discontinued
+                              ? l10n.quoteWakeDiscontinued
+                              : l10n.quoteWakeLine,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

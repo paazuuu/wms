@@ -8323,26 +8323,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get quoteRestoreNeedsAdmin => '取扱中に戻すには管理者の権限が必要です。';
-
-  @override
   String quoteRestored(int count) {
     return '$count件を取扱中に戻しました';
   }
-
-  @override
-  String quoteRestoreQ(int count) {
-    return '取扱中でない商品が$count件あります';
-  }
-
-  @override
-  String get quoteRestoreBody => '価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。';
-
-  @override
-  String get quoteRestoreAndSave => '取扱中に戻して保存';
-
-  @override
-  String get quoteSaveOnly => '状態はそのままで保存';
 
   @override
   String get pfNoneMatchTitle => '絞り込みに合う商品がありません';
@@ -8359,4 +8342,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pfShowEverything => 'すべての商品を表示';
+
+  @override
+  String get quoteWakePolicy =>
+      'ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。';
+
+  @override
+  String quoteWakeCount(int wake, int keep) {
+    return '取扱中に戻す $wake件・そのまま $keep件';
+  }
+
+  @override
+  String get quoteWakeLine => 'この商品を取扱中に戻す';
+
+  @override
+  String get quoteWakeDiscontinued => '提供終了の商品です（メーカー廃番など）。また扱うならチェックしてください';
+
+  @override
+  String get quoteWakeNeedsAdmin => 'アーカイブ・提供終了から戻すには管理者の権限が必要です';
+
+  @override
+  String quoteSaveAndWake(int count, int wake) {
+    return '価格を保存（$count件）＋取扱中に戻す（$wake件）';
+  }
+
+  @override
+  String quoteRestoredSome(int changed, int skipped) {
+    return '$changed件を取扱中に戻しました（$skipped件は権限がないためそのままです）';
+  }
+
+  @override
+  String supTitle(int count) {
+    return '仕入先（$count社）';
+  }
+
+  @override
+  String supCount(int count) {
+    return '仕入先 $count社';
+  }
+
+  @override
+  String supMore(int count) {
+    return 'ほか$count社';
+  }
+
+  @override
+  String get supCheapest => '最安';
+
+  @override
+  String get supPrimary => '主な仕入先';
+
+  @override
+  String supTheirName(String name) {
+    return '先方表記: $name';
+  }
+
+  @override
+  String supTheirCode(String code) {
+    return '先方コード: $code';
+  }
+
+  @override
+  String supUpdated(String date) {
+    return '更新 $date';
+  }
+
+  @override
+  String get supNoPrice => '価格未登録';
 }

@@ -207,7 +207,8 @@ class _Header extends ConsumerWidget {
       if (product.listPrice case final lp?) (l10n.pdListPrice, yen(lp), const ValueKey('pd-list-price'), false),
       if (product.price case final pr?) (l10n.pdPrice, yen(pr), const ValueKey('pd-price'), false),
       if (product.suppliers.isNotEmpty)
-        (l10n.pdSuppliers, product.suppliers.map((s) => s.name).join('、'), const ValueKey('pd-suppliers'), false),
+        (l10n.pdSuppliers, '${l10n.supCount(product.suppliers.length)}（${product.suppliers.map((s) => s.name).join('、')}）',
+            const ValueKey('pd-suppliers'), false),
     ];
 
     return Column(
@@ -332,6 +333,14 @@ class _Header extends ConsumerWidget {
                   value: l10n.stockWarehouseRow(w.onHand, w.reserved, w.available),
                 ),
             ],
+          ),
+        ],
+        // Every supplier with its terms, cheapest first (0123).
+        if (product.suppliers.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: l10n.supTitle(product.suppliers.length),
+            children: [SupplierTable(suppliers: product.suppliers)],
           ),
         ],
         // Every name it has (0118), whatever language this screen is in.

@@ -208,7 +208,11 @@ void main() {
       id: 143, janCode: _jan, name: 'サラサドライ 0.5 青', maker: 'ゼブラ', sku: 'JJ31-BL',
       baseName: 'サラサドライ', unit: '本', listPrice: 165,
       attributes: [ProductPart(key: 'size', name: 'サイズ', value: '0.5'), ProductPart(key: 'color', name: '色', value: '青')],
-      suppliers: [ProductSupplierRef(id: 4, name: '新東光通商')],
+      suppliers: [
+        ProductSupplierRef(id: 5, name: 'アケボノクラウン', unitPrice: 88, listPrice: 165, discountRate: 0.53, theirCode: 'A-1'),
+        ProductSupplierRef(id: 4, name: '新東光通商', unitPrice: 92, theirName: 'ｻﾗｻﾄﾞﾗｲ 0.5 ｱｵ'),
+        ProductSupplierRef(id: 6, name: 'ウエダ商事'),
+      ],
       baseUom: Uom(code: 'PCS', name: '本'),
     );
     final container = ProviderContainer(overrides: [
@@ -232,6 +236,13 @@ void main() {
     expect(valueOf('pd-attr-color'), '青');
     expect(valueOf('pd-attr-size'), '0.5');
     expect(valueOf('pd-list-price'), '¥165');
-    expect(valueOf('pd-suppliers'), '新東光通商');
+    expect(valueOf('pd-suppliers'), '仕入先 3社（アケボノクラウン、新東光通商、ウエダ商事）');
+    // Every supplier with its terms, the cheapest marked.
+    expect(find.text('仕入先（3社）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pd-supplier-6')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-5')), matching: find.text('最安')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-5')), matching: find.text('¥88')), findsOneWidget);
+    expect(find.text('定価 ¥165　掛率 53%'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-6')), matching: find.text('価格未登録')), findsOneWidget);
   });
 }

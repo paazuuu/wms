@@ -2296,6 +2296,34 @@ class FakeProductRepository implements ProductRepository {
     return const ApiSuccess(true);
   }
 
+  /// What reactivate() was asked (0123); [mayLift] says whether archived and
+  /// discontinued ones may come back (product.lifecycle), dormant ones always.
+  final reactivateCalls = <List<int>>[];
+  bool mayLift = true;
+
+  @override
+  Future<ApiResult<({int changed, List<int> skipped})>> reactivate(List<int> ids) async {
+    reactivateCalls.add(ids);
+    final skipped = <int>[];
+    var changed = 0;
+    _products = [
+      for (final p in _products)
+        if (ids.contains(p.id) && p.lifecycle != ProductLifecycle.active)
+          (p.lifecycle == ProductLifecycle.dormant || mayLift)
+              ? (() {
+                  changed++;
+                  return p.withLifecycle(ProductLifecycle.active);
+                })()
+              : (() {
+                  skipped.add(p.id);
+                  return p;
+                })()
+        else
+          p,
+    ];
+    return ApiSuccess((changed: changed, skipped: skipped));
+  }
+
   /// What setLifecycle() was asked (0120).
   final lifecycleCalls = <({List<int> ids, ProductLifecycle lifecycle, String? reason})>[];
 

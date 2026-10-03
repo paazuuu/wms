@@ -8289,26 +8289,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get quoteRestoreNeedsAdmin => '恢复在售需要管理员权限。';
-
-  @override
   String quoteRestored(int count) {
     return '已将 $count 件恢复在售';
   }
-
-  @override
-  String quoteRestoreQ(int count) {
-    return '其中 $count 件未在售';
-  }
-
-  @override
-  String get quoteRestoreBody => '保存价格时可一并恢复在售，恢复后会在商品库中显示。';
-
-  @override
-  String get quoteRestoreAndSave => '恢复在售并保存';
-
-  @override
-  String get quoteSaveOnly => '保持状态并保存';
 
   @override
   String get pfNoneMatchTitle => '没有符合筛选条件的商品';
@@ -8325,4 +8308,71 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pfShowEverything => '显示全部商品';
+
+  @override
+  String get quoteWakePolicy =>
+      '文件中的商品视为准备经营的商品，按状态处理：休眠 → 恢复在售；已归档 → 恢复在售（仅管理员）；停止供应 → 保持不变（厂商停产等，如需恢复请勾选该行）。可逐行更改。库存由入库增加，此处不变。';
+
+  @override
+  String quoteWakeCount(int wake, int keep) {
+    return '恢复在售 $wake 件・保持不变 $keep 件';
+  }
+
+  @override
+  String get quoteWakeLine => '将此商品恢复在售';
+
+  @override
+  String get quoteWakeDiscontinued => '此商品已停止供应（如厂商停产）。如需再次经营请勾选';
+
+  @override
+  String get quoteWakeNeedsAdmin => '从已归档或停止供应恢复需要管理员权限';
+
+  @override
+  String quoteSaveAndWake(int count, int wake) {
+    return '保存价格（$count 件）并恢复在售（$wake 件）';
+  }
+
+  @override
+  String quoteRestoredSome(int changed, int skipped) {
+    return '已将 $changed 件恢复在售（$skipped 件因无权限保持不变）';
+  }
+
+  @override
+  String supTitle(int count) {
+    return '供应商（$count 家）';
+  }
+
+  @override
+  String supCount(int count) {
+    return '供应商 $count 家';
+  }
+
+  @override
+  String supMore(int count) {
+    return '另 $count 家';
+  }
+
+  @override
+  String get supCheapest => '最低价';
+
+  @override
+  String get supPrimary => '主要供应商';
+
+  @override
+  String supTheirName(String name) {
+    return '对方写法：$name';
+  }
+
+  @override
+  String supTheirCode(String code) {
+    return '对方代码：$code';
+  }
+
+  @override
+  String supUpdated(String date) {
+    return '更新 $date';
+  }
+
+  @override
+  String get supNoPrice => '未登记价格';
 }
