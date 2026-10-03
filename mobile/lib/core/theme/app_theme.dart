@@ -21,6 +21,7 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surfaceContainerLow,
       fontFamily: AppFonts.sans,
+      fontFamilyFallback: AppFonts.fallback,
       splashFactory: InkRipple.splashFactory,
       visualDensity: VisualDensity.standard,
     );
@@ -41,6 +42,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         titleTextStyle: TextStyle(
           fontFamily: AppFonts.sans,
+          fontFamilyFallback: AppFonts.fallback,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: scheme.onSurface,
@@ -80,6 +82,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(borderRadius: r12),
           textStyle: const TextStyle(
             fontFamily: AppFonts.sans,
+            fontFamilyFallback: AppFonts.fallback,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -100,6 +103,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(borderRadius: r12),
           textStyle: const TextStyle(
             fontFamily: AppFonts.sans,
+            fontFamilyFallback: AppFonts.fallback,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -111,6 +115,7 @@ class AppTheme {
           foregroundColor: scheme.primary,
           textStyle: const TextStyle(
             fontFamily: AppFonts.sans,
+            fontFamilyFallback: AppFonts.fallback,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -132,6 +137,7 @@ class AppTheme {
         foregroundColor: scheme.onPrimary,
         extendedTextStyle: const TextStyle(
           fontFamily: AppFonts.sans,
+          fontFamilyFallback: AppFonts.fallback,
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),
@@ -185,14 +191,14 @@ class AppTheme {
         side: BorderSide.none,
         labelStyle: TextStyle(
           fontFamily: AppFonts.sans,
+          fontFamilyFallback: AppFonts.fallback,
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: scheme.onSurfaceVariant,
         ),
         padding:
             const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       ),
 
       snackBarTheme: SnackBarThemeData(
@@ -200,6 +206,7 @@ class AppTheme {
         backgroundColor: scheme.inverseSurface,
         contentTextStyle: TextStyle(
           fontFamily: AppFonts.sans,
+          fontFamilyFallback: AppFonts.fallback,
           color: scheme.onInverseSurface,
           fontSize: 14,
         ),
@@ -231,8 +238,11 @@ class AppTheme {
   }
 
   static TextTheme _textTheme(TextTheme base, ColorScheme scheme) {
-    TextStyle? s(TextStyle? t, {FontWeight? w, double? h}) =>
-        t?.copyWith(fontFamily: AppFonts.sans, fontWeight: w, height: h);
+    TextStyle? s(TextStyle? t, {FontWeight? w, double? h}) => t?.copyWith(
+        fontFamily: AppFonts.sans,
+        fontFamilyFallback: AppFonts.fallback,
+        fontWeight: w,
+        height: h);
     return base
         .copyWith(
           headlineSmall: s(base.headlineSmall, w: FontWeight.w700),
@@ -245,6 +255,7 @@ class AppTheme {
         )
         .apply(
           fontFamily: AppFonts.sans,
+          fontFamilyFallback: AppFonts.fallback,
           bodyColor: scheme.onSurface,
           displayColor: scheme.onSurface,
         );

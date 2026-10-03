@@ -14,6 +14,7 @@ import '../application/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_lot.dart';
 import '../domain/warehouse_product.dart';
+import 'product_delete.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
@@ -55,7 +56,24 @@ class ProductDetailScreen extends ConsumerWidget {
     final async = ref.watch(productListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.productDetailTitle)),
+      appBar: AppBar(
+        title: Text(l10n.productDetailTitle),
+        actions: [
+          // A product registered by mistake and never used (0119).
+          if (ref.watch(productCanDeleteProvider))
+            if (async.valueOrNull?.where((p) => p.id == productId).firstOrNull case final product?)
+              IconButton(
+                key: const ValueKey('product-detail-delete'),
+                tooltip: l10n.productDeleteAction,
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () async {
+                  if (await confirmDeleteProduct(context, ref, product) && context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+        ],
+      ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
         error: (e, _) => ErrorStateView(
@@ -268,6 +286,7 @@ class _Header extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: AppSpacing.sm),
+            if (ref.watch(productLibraryCanManageProvider))
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton.icon(

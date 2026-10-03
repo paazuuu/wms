@@ -16,6 +16,13 @@ final productLibraryCanManageProvider = Provider<bool>((ref) {
   return p.contains('product.manage');
 });
 
+/// Deleting a product that was never used needs its own permission
+/// (product.delete, 0119): admins only, apart from everyday editing.
+final productCanDeleteProvider = Provider<bool>((ref) {
+  final p = ref.watch(authControllerProvider).user?.permissions ?? const <String>[];
+  return p.contains('product.delete');
+});
+
 /// A product's face as cached on the device: its viewable URL, or known to
 /// have none.
 class FaceEntry {

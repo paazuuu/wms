@@ -8,10 +8,13 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
+import 'product_delete.dart';
 import 'product_detail_screen.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
+import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_library_screen.dart';
+import '../../product_library/presentation/quote_import_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
@@ -20,8 +23,10 @@ import '../../product_library/presentation/product_thumb.dart';
 /// defined against it, how many barcodes reach it, and whether a lot or a serial
 /// has to be recorded when it arrives.
 ///
-/// Anyone can open this screen; the server is the real gate
-/// (`product.view`/`product.manage`), same pattern as every other screen.
+/// Anyone who can see products sees them here. Adding one — by hand or a
+/// whole quotation at once — and editing need `product.manage`; deleting one
+/// that was never used needs `product.delete` (0119). The server checks
+/// both again.
 class ProductListScreen extends ConsumerWidget {
   const ProductListScreen({super.key});
 
@@ -102,6 +107,8 @@ class ProductListScreen extends ConsumerWidget {
     final async = ref.watch(productListProvider);
     final showInactive = ref.watch(showInactiveProductsProvider);
     final photos = ref.watch(productPhotoViewProvider);
+    final canManage = ref.watch(productLibraryCanManageProvider);
+    final canDelete = ref.watch(productCanDeleteProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -120,6 +127,18 @@ class ProductListScreen extends ConsumerWidget {
             onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
           ),
           const SizedBox(width: AppSpacing.sm),
+          // A supplier's quotation read by the AI, its new products
+          // registered and its prices kept, in one go.
+          if (canManage)
+            IconButton(
+              key: const ValueKey('products-from-quote'),
+              tooltip: l10n.quoteImportTitle,
+              icon: const Icon(Icons.auto_awesome_outlined),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuoteImportScreen()));
+                ref.invalidate(productListProvider);
+              },
+            ),
           if (!photos) IconButton(
             tooltip: l10n.productsShowInactive,
             icon: Icon(showInactive
@@ -131,10 +150,14 @@ class ProductListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openForm(context, ref),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton(
+              key: const ValueKey('products-add'),
+              tooltip: l10n.productAddOne,
+              onPressed: () => _openForm(context, ref),
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: photos
           ? ProductLibraryView(onOpen: (p) => _openDetailById(context, ref, p.id))
           : Column(
@@ -179,8 +202,15 @@ class ProductListScreen extends ConsumerWidget {
                     itemBuilder: (context, i) => _ProductCard(
                       product: products[i],
                       onTap: () => _openDetail(context, ref, products[i]),
-                      onToggleStatus: () =>
-                          _toggleStatus(context, ref, products[i]),
+                      onToggleStatus: canManage
+                          ? () => _toggleStatus(context, ref, products[i])
+                          : null,
+                      onEdit: canManage
+                          ? () => _openForm(context, ref, product: products[i])
+                          : null,
+                      onDelete: canDelete
+                          ? () => confirmDeleteProduct(context, ref, products[i])
+                          : null,
                     ),
                   ),
                 );
@@ -197,12 +227,20 @@ class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
     required this.onTap,
-    required this.onToggleStatus,
+    this.onToggleStatus,
+    this.onEdit,
+    this.onDelete,
   });
 
   final Product product;
   final VoidCallback onTap;
-  final VoidCallback onToggleStatus;
+
+  /// Null where the person may not change products.
+  final VoidCallback? onToggleStatus;
+  final VoidCallback? onEdit;
+
+  /// Null without `product.delete`.
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -261,8 +299,8 @@ class _ProductCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         product.supplierNames
-                            .map((n) => '${n.supplierDisplayName}: ${n.supplierName}'
-                                '${n.supplierCode == null ? '' : ' (${n.supplierCode})'}')
+                            .map((n) => '${n.supplierDisplayName}: ${widenKana(n.supplierName)}'
+                                '${n.supplierCode == null ? '' : ' (${widenKana(n.supplierCode!)})'}')
                             .join(' / '),
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
@@ -290,7 +328,34 @@ class _ProductCard extends StatelessWidget {
                     Text('¥${product.price!.toStringAsFixed(0)}',
                         style: theme.textTheme.titleMedium
                             ?.copyWith(fontFamily: AppFonts.mono)),
-                  const SizedBox(height: AppSpacing.sm),
+                  if (onEdit != null || onToggleStatus != null || onDelete != null)
+                    PopupMenuButton<String>(
+                      key: ValueKey('product-menu-${product.id}'),
+                      tooltip: l10n.productMenu,
+                      onSelected: (v) => switch (v) {
+                        'edit' => onEdit?.call(),
+                        'status' => onToggleStatus?.call(),
+                        'delete' => onDelete?.call(),
+                        _ => null,
+                      },
+                      itemBuilder: (_) => [
+                        if (onEdit != null)
+                          PopupMenuItem(value: 'edit', child: Text(l10n.productEdit)),
+                        if (onToggleStatus != null)
+                          PopupMenuItem(
+                            value: 'status',
+                            child: Text(product.isActive ? l10n.productDeactivateAction : l10n.productActivate),
+                          ),
+                        if (onDelete != null)
+                          PopupMenuItem(
+                            key: ValueKey('product-delete-${product.id}'),
+                            value: 'delete',
+                            child: Text(l10n.productDeleteAction, style: TextStyle(color: scheme.error)),
+                          ),
+                      ],
+                    )
+                  else
+                    const SizedBox(height: AppSpacing.sm),
                   GestureDetector(
                     onTap: onToggleStatus,
                     child: StatusPill(

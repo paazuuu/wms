@@ -7170,5 +7170,129 @@
   "plSaved": "保存しました",
   "plWordsTitle": "帳票とラベルの用語",
   "plWordsHint": "押すと日本語・英語・中国語を直せます。",
-  "plWordNeedsAll": "3つの言語すべてに入れてください"
+  "plWordNeedsAll": "3つの言語すべてに入れてください",
+  "productMenu": "操作",
+  "productActivate": "有効にする",
+  "productAddOne": "商品を1件追加",
+  "productDeleteQ": "この商品を削除しますか？",
+  "productDeleteBody": "{name}（JAN {jan}）を削除します。元に戻せません。在庫や取引で使われた商品は削除できないため、その場合は無効にします。",
+  "@productDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "jan": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeleteAction": "削除",
+  "productDeleted": "「{name}」を削除しました",
+  "@productDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeleteInUseTitle": "この商品は削除できません",
+  "productDeleteInUse": "在庫・発注・入荷・出荷・請求のどれかで使われています。履歴が読めるよう、削除ではなく無効にしてください。",
+  "productDeleteNotReady": "削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。",
+  "quoteImportTitle": "見積もりから一括登録",
+  "quoteImportIntro": "仕入先の見積書（Excel・PDF・写真）をAIが読み取ります。まだない商品は自社の様式で登録し、見積もりの単価・定価・掛率・入数はこの仕入先の価格として保存します。仕入先の書き方も覚えるので、次からはもっと正確に読めます。",
+  "quoteSupplier": "仕入先",
+  "quoteChooseSupplier": "先に仕入先を選んでください",
+  "quoteChooseFile": "見積書のファイルを選ぶ",
+  "quoteRead": "AIで読み取る",
+  "quoteReading": "読み取り中です。PDFや写真は1分ほどかかることがあります。",
+  "quoteNothingRead": "商品の行が読み取れませんでした。表の見出し（JAN・品名・単価など）があるか確かめてください。",
+  "quoteUnverified": "AIの2回の読み取りが一部食い違いました。数字を確かめてください",
+  "quoteSummary": "{total}行：登録済み {known}・新しい商品 {fresh}・JANなし {noJan}",
+  "@quoteSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "known": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      },
+      "noJan": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteRegister": "新しい商品を登録（{count}件）",
+  "@quoteRegister": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteSave": "価格を保存（{count}件）",
+  "@quoteSave": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteSaved": "{prices}件の価格を保存しました（商品 {products}件）",
+  "@quoteSaved": {
+    "placeholders": {
+      "prices": {
+        "type": "int"
+      },
+      "products": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteLineKnown": "登録済み",
+  "quoteLineRegistered": "今回登録",
+  "quoteLineNew": "新しい商品",
+  "quoteLineNoJan": "JANなし",
+  "quoteTheirName": "仕入先の表記: {name}",
+  "@quoteTheirName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteUnitPrice": "単価 {price}",
+  "@quoteUnitPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteListPrice": "定価 {price}",
+  "@quoteListPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteRate": "掛率 {rate}",
+  "@quoteRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "quoteCase": "入数 {count}",
+  "@quoteCase": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }

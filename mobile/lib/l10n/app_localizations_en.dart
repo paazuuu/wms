@@ -8156,4 +8156,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plWordNeedsAll => 'Fill in all three languages';
+
+  @override
+  String get productMenu => 'Actions';
+
+  @override
+  String get productActivate => 'Activate';
+
+  @override
+  String get productAddOne => 'Add a product';
+
+  @override
+  String get productDeleteQ => 'Delete this product?';
+
+  @override
+  String productDeleteBody(String name, String jan) {
+    return '$name (JAN $jan) will be deleted. This cannot be undone. A product used in stock or a transaction cannot be deleted; deactivate it instead.';
+  }
+
+  @override
+  String get productDeleteAction => 'Delete';
+
+  @override
+  String productDeleted(String name) {
+    return 'Deleted \"$name\"';
+  }
+
+  @override
+  String get productDeleteInUseTitle => 'This product cannot be deleted';
+
+  @override
+  String get productDeleteInUse =>
+      'It is used by stock, an order, a receipt, a shipment or an invoice. Deactivate it instead, so its history stays readable.';
+
+  @override
+  String get productDeleteNotReady =>
+      'Deleting is not set up in the database yet (delete_product in 0119). Ask an administrator to apply it.';
+
+  @override
+  String get quoteImportTitle => 'Register from a quotation';
+
+  @override
+  String get quoteImportIntro =>
+      'The AI reads a supplier\'s quotation (Excel, PDF or a photo). Products we do not have yet are registered in our format, and the quoted unit price, list price, rate and case quantity are kept as this supplier\'s prices. Their way of writing is learned too, so the next one reads better.';
+
+  @override
+  String get quoteSupplier => 'Supplier';
+
+  @override
+  String get quoteChooseSupplier => 'Choose the supplier first';
+
+  @override
+  String get quoteChooseFile => 'Choose the quotation file';
+
+  @override
+  String get quoteRead => 'Read with AI';
+
+  @override
+  String get quoteReading => 'Reading. A PDF or photo can take about a minute.';
+
+  @override
+  String get quoteNothingRead =>
+      'No product lines could be read. Check that the table has headings (JAN, name, price…).';
+
+  @override
+  String get quoteUnverified =>
+      'The AI\'s two readings disagreed in places; check the figures';
+
+  @override
+  String quoteSummary(int total, int known, int fresh, int noJan) {
+    return '$total lines: $known known, $fresh new, $noJan without a JAN';
+  }
+
+  @override
+  String quoteRegister(int count) {
+    return 'Register new products ($count)';
+  }
+
+  @override
+  String quoteSave(int count) {
+    return 'Save prices ($count)';
+  }
+
+  @override
+  String quoteSaved(int prices, int products) {
+    return 'Saved $prices prices ($products products)';
+  }
+
+  @override
+  String get quoteLineKnown => 'Known';
+
+  @override
+  String get quoteLineRegistered => 'Registered now';
+
+  @override
+  String get quoteLineNew => 'New';
+
+  @override
+  String get quoteLineNoJan => 'No JAN';
+
+  @override
+  String quoteTheirName(String name) {
+    return 'Their name: $name';
+  }
+
+  @override
+  String quoteUnitPrice(String price) {
+    return 'Unit $price';
+  }
+
+  @override
+  String quoteListPrice(String price) {
+    return 'List $price';
+  }
+
+  @override
+  String quoteRate(String rate) {
+    return 'Rate $rate';
+  }
+
+  @override
+  String quoteCase(String count) {
+    return 'Case $count';
+  }
 }

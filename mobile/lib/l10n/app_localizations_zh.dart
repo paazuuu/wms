@@ -7957,4 +7957,124 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plWordNeedsAll => '请填写全部三种语言';
+
+  @override
+  String get productMenu => '操作';
+
+  @override
+  String get productActivate => '启用';
+
+  @override
+  String get productAddOne => '添加商品';
+
+  @override
+  String get productDeleteQ => '删除此商品？';
+
+  @override
+  String productDeleteBody(String name, String jan) {
+    return '将删除 $name（JAN $jan），无法恢复。已用于库存或交易的商品无法删除，请改为停用。';
+  }
+
+  @override
+  String get productDeleteAction => '删除';
+
+  @override
+  String productDeleted(String name) {
+    return '已删除“$name”';
+  }
+
+  @override
+  String get productDeleteInUseTitle => '此商品无法删除';
+
+  @override
+  String get productDeleteInUse => '它已用于库存、订单、入库、出库或发票。为保留历史记录，请停用而不是删除。';
+
+  @override
+  String get productDeleteNotReady =>
+      '数据库尚未启用删除功能（0119 的 delete_product），请联系管理员。';
+
+  @override
+  String get quoteImportTitle => '从报价单批量登录';
+
+  @override
+  String get quoteImportIntro =>
+      'AI 读取供应商的报价单（Excel、PDF 或照片）。尚未登录的商品按本公司格式登录，报价中的单价、定价、折扣率、入数作为该供应商的价格保存。同时学习其写法，下次读取更准确。';
+
+  @override
+  String get quoteSupplier => '供应商';
+
+  @override
+  String get quoteChooseSupplier => '请先选择供应商';
+
+  @override
+  String get quoteChooseFile => '选择报价单文件';
+
+  @override
+  String get quoteRead => '用 AI 读取';
+
+  @override
+  String get quoteReading => '读取中。PDF 或照片可能需要约一分钟。';
+
+  @override
+  String get quoteNothingRead => '未能读取商品行。请确认表格有标题（JAN、品名、单价等）。';
+
+  @override
+  String get quoteUnverified => 'AI 两次读取结果部分不一致，请核对数字';
+
+  @override
+  String quoteSummary(int total, int known, int fresh, int noJan) {
+    return '$total 行：已登录 $known、新商品 $fresh、无 JAN $noJan';
+  }
+
+  @override
+  String quoteRegister(int count) {
+    return '登录新商品（$count 件）';
+  }
+
+  @override
+  String quoteSave(int count) {
+    return '保存价格（$count 件）';
+  }
+
+  @override
+  String quoteSaved(int prices, int products) {
+    return '已保存 $prices 个价格（商品 $products 件）';
+  }
+
+  @override
+  String get quoteLineKnown => '已登录';
+
+  @override
+  String get quoteLineRegistered => '本次登录';
+
+  @override
+  String get quoteLineNew => '新商品';
+
+  @override
+  String get quoteLineNoJan => '无 JAN';
+
+  @override
+  String quoteTheirName(String name) {
+    return '供应商写法：$name';
+  }
+
+  @override
+  String quoteUnitPrice(String price) {
+    return '单价 $price';
+  }
+
+  @override
+  String quoteListPrice(String price) {
+    return '定价 $price';
+  }
+
+  @override
+  String quoteRate(String rate) {
+    return '折扣率 $rate';
+  }
+
+  @override
+  String quoteCase(String count) {
+    return '入数 $count';
+  }
 }

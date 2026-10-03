@@ -5,18 +5,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
 
 import '../../support/harness.dart';
 
+/// Pumped as someone who manages products (product.manage) unless [manage]
+/// is false; [delete] adds product.delete (0119).
 Future<ProviderContainer> _pump(
-    WidgetTester tester, FakeProductRepository repo) async {
+    WidgetTester tester, FakeProductRepository repo, {bool manage = true, bool delete = false}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
     scCanViewProvider.overrideWithValue(false),
   ]);
   addTearDown(container.dispose);
-  await pumpAppWith(tester, container, const ProductListScreen());
+  await pumpAppWith(
+    tester,
+    container,
+    ProviderScope(
+      overrides: [
+        productLibraryCanManageProvider.overrideWithValue(manage),
+        productCanDeleteProvider.overrideWithValue(delete),
+      ],
+      child: const ProductListScreen(),
+    ),
+  );
   return container;
 }
 
@@ -270,5 +283,83 @@ void main() {
     expect(find.textContaining('基本単位'), findsNothing);
 
     await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('someone who only views sees the products, with no add, edit or delete', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pump(tester, repo, manage: false);
+
+    expect(find.text('ボールペン'), findsOneWidget);
+    expect(find.byKey(const ValueKey('products-add')), findsNothing);
+    expect(find.byKey(const ValueKey('products-from-quote')), findsNothing);
+    expect(find.byKey(const ValueKey('product-menu-1')), findsNothing);
+    // The status reads, but tapping it changes nothing.
+    await tester.tap(find.text('有効'));
+    await tester.pumpAndSettle();
+    expect(find.text('この商品を無効にしますか？'), findsNothing);
+  });
+
+  testWidgets('managing products offers adding, editing and the quotation import, not deleting', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pump(tester, repo);
+
+    expect(find.byKey(const ValueKey('products-add')), findsOneWidget);
+    expect(find.byKey(const ValueKey('products-from-quote')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('product-menu-1')));
+    await tester.pumpAndSettle();
+    expect(find.text('編集'), findsOneWidget);
+    expect(find.byKey(const ValueKey('product-delete-1')), findsNothing);
+  });
+
+  testWidgets('with product.delete an unused product is deleted after asking', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ]);
+    await _pump(tester, repo, delete: true);
+
+    await tester.tap(find.byKey(const ValueKey('product-menu-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('product-delete-1')));
+    await tester.pumpAndSettle();
+    expect(find.text('この商品を削除しますか？'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('product-delete-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(repo.deleted, [1]);
+    expect(find.text('ボールペン'), findsNothing);
+  });
+
+  testWidgets('a product in use is not deleted; deactivating it is offered instead', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4902505632037', name: 'ボールペン'),
+    ])..inUse.add(1);
+    await _pump(tester, repo, delete: true);
+    await tester.tap(find.byIcon(Icons.visibility_off_outlined));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('product-menu-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('product-delete-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('product-delete-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(repo.deleted, isEmpty);
+    expect(find.byKey(const ValueKey('product-delete-deactivate')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('product-delete-deactivate')));
+    await tester.pumpAndSettle();
+    expect(find.text('無効'), findsOneWidget);
   });
 }

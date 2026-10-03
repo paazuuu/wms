@@ -14646,6 +14646,198 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'3つの言語すべてに入れてください'**
   String get plWordNeedsAll;
+
+  /// No description provided for @productMenu.
+  ///
+  /// In ja, this message translates to:
+  /// **'操作'**
+  String get productMenu;
+
+  /// No description provided for @productActivate.
+  ///
+  /// In ja, this message translates to:
+  /// **'有効にする'**
+  String get productActivate;
+
+  /// No description provided for @productAddOne.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を1件追加'**
+  String get productAddOne;
+
+  /// No description provided for @productDeleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品を削除しますか？'**
+  String get productDeleteQ;
+
+  /// No description provided for @productDeleteBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}（JAN {jan}）を削除します。元に戻せません。在庫や取引で使われた商品は削除できないため、その場合は無効にします。'**
+  String productDeleteBody(String name, String jan);
+
+  /// No description provided for @productDeleteAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get productDeleteAction;
+
+  /// No description provided for @productDeleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」を削除しました'**
+  String productDeleted(String name);
+
+  /// No description provided for @productDeleteInUseTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品は削除できません'**
+  String get productDeleteInUseTitle;
+
+  /// No description provided for @productDeleteInUse.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫・発注・入荷・出荷・請求のどれかで使われています。履歴が読めるよう、削除ではなく無効にしてください。'**
+  String get productDeleteInUse;
+
+  /// No description provided for @productDeleteNotReady.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。'**
+  String get productDeleteNotReady;
+
+  /// No description provided for @quoteImportTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積もりから一括登録'**
+  String get quoteImportTitle;
+
+  /// No description provided for @quoteImportIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の見積書（Excel・PDF・写真）をAIが読み取ります。まだない商品は自社の様式で登録し、見積もりの単価・定価・掛率・入数はこの仕入先の価格として保存します。仕入先の書き方も覚えるので、次からはもっと正確に読めます。'**
+  String get quoteImportIntro;
+
+  /// No description provided for @quoteSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get quoteSupplier;
+
+  /// No description provided for @quoteChooseSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'先に仕入先を選んでください'**
+  String get quoteChooseSupplier;
+
+  /// No description provided for @quoteChooseFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積書のファイルを選ぶ'**
+  String get quoteChooseFile;
+
+  /// No description provided for @quoteRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取る'**
+  String get quoteRead;
+
+  /// No description provided for @quoteReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り中です。PDFや写真は1分ほどかかることがあります。'**
+  String get quoteReading;
+
+  /// No description provided for @quoteNothingRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の行が読み取れませんでした。表の見出し（JAN・品名・単価など）があるか確かめてください。'**
+  String get quoteNothingRead;
+
+  /// No description provided for @quoteUnverified.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの2回の読み取りが一部食い違いました。数字を確かめてください'**
+  String get quoteUnverified;
+
+  /// No description provided for @quoteSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{total}行：登録済み {known}・新しい商品 {fresh}・JANなし {noJan}'**
+  String quoteSummary(int total, int known, int fresh, int noJan);
+
+  /// No description provided for @quoteRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい商品を登録（{count}件）'**
+  String quoteRegister(int count);
+
+  /// No description provided for @quoteSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格を保存（{count}件）'**
+  String quoteSave(int count);
+
+  /// No description provided for @quoteSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{prices}件の価格を保存しました（商品 {products}件）'**
+  String quoteSaved(int prices, int products);
+
+  /// No description provided for @quoteLineKnown.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済み'**
+  String get quoteLineKnown;
+
+  /// No description provided for @quoteLineRegistered.
+  ///
+  /// In ja, this message translates to:
+  /// **'今回登録'**
+  String get quoteLineRegistered;
+
+  /// No description provided for @quoteLineNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい商品'**
+  String get quoteLineNew;
+
+  /// No description provided for @quoteLineNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANなし'**
+  String get quoteLineNoJan;
+
+  /// No description provided for @quoteTheirName.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の表記: {name}'**
+  String quoteTheirName(String name);
+
+  /// No description provided for @quoteUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価 {price}'**
+  String quoteUnitPrice(String price);
+
+  /// No description provided for @quoteListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価 {price}'**
+  String quoteListPrice(String price);
+
+  /// No description provided for @quoteRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率 {rate}'**
+  String quoteRate(String rate);
+
+  /// No description provided for @quoteCase.
+  ///
+  /// In ja, this message translates to:
+  /// **'入数 {count}'**
+  String quoteCase(String count);
 }
 
 class _AppLocalizationsDelegate

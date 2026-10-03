@@ -31,4 +31,9 @@ class AppFonts {
 
   /// Fira Code — monospace for codes, barcodes and quantities so digits align.
   static const String mono = 'Fira Code';
+
+  /// Tried after either of the above: half-width katakana (ｺｸﾖ, ﾊﾞｲﾝﾀﾞｰ),
+  /// which suppliers still print. Bundled because on the web the system
+  /// fallback fetches these in several pieces and some of them drew as □.
+  static const List<String> fallback = ['WMS Kana'];
 }

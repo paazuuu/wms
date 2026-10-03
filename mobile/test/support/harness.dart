@@ -197,6 +197,7 @@ List<Override> _defaultOverrides() => [
       // No product pictures unless a test adds some (0109).
       productImageRepositoryProvider.overrideWithValue(FakeProductImageRepository()),
       productLibraryCanManageProvider.overrideWithValue(false),
+      productCanDeleteProvider.overrideWithValue(false),
       // Our product format (0111), in memory.
       productNamingRepositoryProvider.overrideWithValue(FakeProductNamingRepository()),
       // Boxes and shipping weights (0115), in memory.
@@ -251,6 +252,7 @@ Future<void> pumpAppWith(
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(false),
+          productCanDeleteProvider.overrideWithValue(false),
         ],
         child: MaterialApp(
           theme: AppTheme.light(),
@@ -2276,6 +2278,19 @@ class FakeProductRepository implements ProductRepository {
   @override
   Future<ApiResult<bool>> setNameEn(int productId, String? nameEn) async {
     setNamesEn.add((productId: productId, nameEn: nameEn));
+    return const ApiSuccess(true);
+  }
+
+  /// Products delete() was asked to remove (0119), and the ids it refuses
+  /// as in use.
+  final deleted = <int>[];
+  final inUse = <int>{};
+
+  @override
+  Future<ApiResult<bool>> delete(int id) async {
+    if (inUse.contains(id)) return const ApiFailure(message: 'product is in use; deactivate it instead');
+    deleted.add(id);
+    _products = [for (final p in _products) if (p.id != id) p];
     return const ApiSuccess(true);
   }
 

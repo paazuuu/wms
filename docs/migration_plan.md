@@ -5772,6 +5772,36 @@ Also:
   migration waits for a confirmation and times out. Policies are created
   only if missing, and the trigger uses `create or replace trigger`.
 
+### 0119 — deleting a product, and quotations into the product library
+
+- `product.delete` is a new permission, given to system_admin and
+  company_admin. Adding and editing products stays `product.manage`.
+- `delete_product(id)` removes a product that was never used, with its
+  pictures, names, units and barcodes. A product that stock, an order, a
+  receipt, a shipment or an invoice names is refused ("product is in use").
+  The app then offers to deactivate it instead.
+  - **Not yet applied live.** On this project a migration that deletes rows
+    waits for a confirmation, and it timed out here. Apply this function
+    from the Supabase SQL editor, or with `supabase db push`.
+- `save_supplier_quote(partner_id, lines, note)` keeps a quotation's prices
+  per product in `supply_chain_supplier_products`: unit price (or list price
+  × rate), list price, rate, their code and the case quantity as order lot.
+  It also learns the supplier's writing (`learn_notation_lines`).
+- App:
+  - 商品ライブラリー: anyone who can view products sees them. With
+    `product.manage` there is the add button, 見積もりから一括登録 and, per
+    product, 編集 and 有効/無効. With `product.delete` there is 削除, on the
+    list and on the product screen.
+  - 見積もりから一括登録: choose the supplier and the file (Excel, PDF or
+    photo). The import-plan reader reads it in preview mode, so nothing is
+    booked. Each line shows 登録済み, 新しい商品 or JANなし.
+    新しい商品を登録 opens the register-in-our-format sheet (0111).
+    価格を保存 calls `save_supplier_quote`.
+- Half-width katakana (ｺｸﾖ, ﾊﾞｲﾝﾀﾞｰ) drew as □ on the web: the browser
+  fetches them from Noto Sans JP in several pieces, and some failed. A
+  bundled font, WMS Kana (18 KB per weight, a Noto Sans JP subset under the
+  SIL OFL), is now the theme's fallback after Fira Sans and Fira Code.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

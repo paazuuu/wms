@@ -55,6 +55,11 @@ abstract class ProductRepository {
 
   Future<ApiResult<bool>> setStatus(int id, String status);
 
+  /// `delete_product` (0119) — removes a product that was never used. One
+  /// that stock, an order or a document names is refused; it is deactivated
+  /// instead.
+  Future<ApiResult<bool>> delete(int id);
+
   /// `set_product_identity` (0057). Either field may be null, which leaves it
   /// as it was — so this can set a SKU without restating the tracking mode.
   Future<ApiResult<bool>> setIdentity({
@@ -283,6 +288,16 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_status': status,
       });
       return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> delete(int id) async {
+    try {
+      await _dio.post('/rpc/delete_product', data: {'p_id': id});
+      return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
     }

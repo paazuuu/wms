@@ -7987,4 +7987,126 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get plWordNeedsAll => '3つの言語すべてに入れてください';
+
+  @override
+  String get productMenu => '操作';
+
+  @override
+  String get productActivate => '有効にする';
+
+  @override
+  String get productAddOne => '商品を1件追加';
+
+  @override
+  String get productDeleteQ => 'この商品を削除しますか？';
+
+  @override
+  String productDeleteBody(String name, String jan) {
+    return '$name（JAN $jan）を削除します。元に戻せません。在庫や取引で使われた商品は削除できないため、その場合は無効にします。';
+  }
+
+  @override
+  String get productDeleteAction => '削除';
+
+  @override
+  String productDeleted(String name) {
+    return '「$name」を削除しました';
+  }
+
+  @override
+  String get productDeleteInUseTitle => 'この商品は削除できません';
+
+  @override
+  String get productDeleteInUse =>
+      '在庫・発注・入荷・出荷・請求のどれかで使われています。履歴が読めるよう、削除ではなく無効にしてください。';
+
+  @override
+  String get productDeleteNotReady =>
+      '削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。';
+
+  @override
+  String get quoteImportTitle => '見積もりから一括登録';
+
+  @override
+  String get quoteImportIntro =>
+      '仕入先の見積書（Excel・PDF・写真）をAIが読み取ります。まだない商品は自社の様式で登録し、見積もりの単価・定価・掛率・入数はこの仕入先の価格として保存します。仕入先の書き方も覚えるので、次からはもっと正確に読めます。';
+
+  @override
+  String get quoteSupplier => '仕入先';
+
+  @override
+  String get quoteChooseSupplier => '先に仕入先を選んでください';
+
+  @override
+  String get quoteChooseFile => '見積書のファイルを選ぶ';
+
+  @override
+  String get quoteRead => 'AIで読み取る';
+
+  @override
+  String get quoteReading => '読み取り中です。PDFや写真は1分ほどかかることがあります。';
+
+  @override
+  String get quoteNothingRead =>
+      '商品の行が読み取れませんでした。表の見出し（JAN・品名・単価など）があるか確かめてください。';
+
+  @override
+  String get quoteUnverified => 'AIの2回の読み取りが一部食い違いました。数字を確かめてください';
+
+  @override
+  String quoteSummary(int total, int known, int fresh, int noJan) {
+    return '$total行：登録済み $known・新しい商品 $fresh・JANなし $noJan';
+  }
+
+  @override
+  String quoteRegister(int count) {
+    return '新しい商品を登録（$count件）';
+  }
+
+  @override
+  String quoteSave(int count) {
+    return '価格を保存（$count件）';
+  }
+
+  @override
+  String quoteSaved(int prices, int products) {
+    return '$prices件の価格を保存しました（商品 $products件）';
+  }
+
+  @override
+  String get quoteLineKnown => '登録済み';
+
+  @override
+  String get quoteLineRegistered => '今回登録';
+
+  @override
+  String get quoteLineNew => '新しい商品';
+
+  @override
+  String get quoteLineNoJan => 'JANなし';
+
+  @override
+  String quoteTheirName(String name) {
+    return '仕入先の表記: $name';
+  }
+
+  @override
+  String quoteUnitPrice(String price) {
+    return '単価 $price';
+  }
+
+  @override
+  String quoteListPrice(String price) {
+    return '定価 $price';
+  }
+
+  @override
+  String quoteRate(String rate) {
+    return '掛率 $rate';
+  }
+
+  @override
+  String quoteCase(String count) {
+    return '入数 $count';
+  }
 }

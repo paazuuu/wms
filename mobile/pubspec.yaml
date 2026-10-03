@@ -56,6 +56,14 @@ flutter:
           weight: 600
         - asset: assets/fonts/FiraSans-Bold.ttf
           weight: 700
+    # Half-width katakana only, from Noto Sans JP (SIL OFL 1.1, see
+    # assets/fonts/WmsKana-OFL.txt).
+    - family: WMS Kana
+      fonts:
+        - asset: assets/fonts/WmsKana-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/WmsKana-Bold.ttf
+          weight: 700
     - family: Fira Code
       fonts:
         - asset: assets/fonts/FiraCode-VF.ttf
