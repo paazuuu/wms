@@ -15252,6 +15252,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'状態はそのままで保存'**
   String get quoteSaveOnly;
+
+  /// No description provided for @pfNoneMatchTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込みに合う商品がありません'**
+  String get pfNoneMatchTitle;
+
+  /// No description provided for @pfHiddenByState.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の「状態」の絞り込みで表示されていない商品があります：{states}'**
+  String pfHiddenByState(String states);
+
+  /// No description provided for @pfShowState.
+  ///
+  /// In ja, this message translates to:
+  /// **'{state}の{count}件を表示'**
+  String pfShowState(String state, int count);
+
+  /// No description provided for @pfShowEverything.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての商品を表示'**
+  String get pfShowEverything;
 }
 
 class _AppLocalizationsDelegate

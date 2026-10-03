@@ -2885,5 +2885,9 @@
   "quoteRestoreQ": "其中 {count} 件未在售",
   "quoteRestoreBody": "保存价格时可一并恢复在售，恢复后会在商品库中显示。",
   "quoteRestoreAndSave": "恢复在售并保存",
-  "quoteSaveOnly": "保持状态并保存"
+  "quoteSaveOnly": "保持状态并保存",
+  "pfNoneMatchTitle": "没有符合筛选条件的商品",
+  "pfHiddenByState": "部分商品因“状态”筛选未显示：{states}",
+  "pfShowState": "显示{state}的 {count} 件",
+  "pfShowEverything": "显示全部商品"
 }

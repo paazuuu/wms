@@ -259,11 +259,16 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     ),
                     data: (products) {
                       if (products.isEmpty) {
-                        return EmptyStateView(
-                          icon: Icons.inventory_2_outlined,
-                          title: l10n.productsEmpty,
-                          message: (total ?? 0) > 0 ? l10n.pfNoneMatch : l10n.productsEmptyBody,
-                        );
+                        if ((total ?? 0) == 0) {
+                          return EmptyStateView(
+                            icon: Icons.inventory_2_outlined,
+                            title: l10n.productsEmpty,
+                            message: l10n.productsEmptyBody,
+                          );
+                        }
+                        // There are products, only none the filters let
+                        // through: say where they are and offer to show them.
+                        return _HiddenProducts(filter: filter);
                       }
                       void toggle(Product p) =>
                           setState(() => selected!.contains(p.id) ? selected.remove(p.id) : selected.add(p.id));
@@ -324,6 +329,77 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// Shown when products exist but none pass the filters: how many are in
+/// each state the filter leaves out, a button to show them, and one to clear
+/// the filters.
+class _HiddenProducts extends ConsumerWidget {
+  const _HiddenProducts({required this.filter});
+
+  final ProductFilter filter;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final counts = ref.watch(productFacetsProvider).lifecycles;
+    final hidden = [
+      for (final l in ProductLifecycle.values)
+        if (!filter.lifecycles.contains(l) && (counts[l] ?? 0) > 0) (l, counts[l]!),
+    ];
+    void set(ProductFilter f) => ref.read(productFilterProvider.notifier).state = f;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.filter_alt_outlined, size: 48, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.pfNoneMatchTitle, key: const ValueKey('pf-none-title'), style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
+            if (hidden.isNotEmpty)
+              Text(
+                l10n.pfHiddenByState(hidden.map((h) => '${lifecycleLabel(l10n, h.$1)} ${h.$2}件').join('・')),
+                key: const ValueKey('pf-hidden'),
+                textAlign: TextAlign.center,
+              )
+            else
+              Text(l10n.pfNoneMatch, textAlign: TextAlign.center),
+            const SizedBox(height: AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final (l, n) in hidden)
+                  FilledButton.tonalIcon(
+                    key: ValueKey('pf-show-${l.wire}'),
+                    onPressed: () => set(filter.copyWith(lifecycles: {...filter.lifecycles, l})),
+                    icon: Icon(lifecycleIcon(l), size: 18),
+                    label: Text(l10n.pfShowState(lifecycleLabel(l10n, l), n)),
+                  ),
+                OutlinedButton.icon(
+                  key: const ValueKey('pf-clear-empty'),
+                  onPressed: () => set(filter.copyWith(
+                    lifecycles: ProductLifecycle.values.toSet(),
+                    makers: const {},
+                    supplierIds: const {},
+                    categories: const {},
+                    stock: StockFilter.all,
+                    withoutImages: false,
+                  )),
+                  icon: const Icon(Icons.filter_alt_off_outlined, size: 18),
+                  label: Text(l10n.pfShowEverything),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

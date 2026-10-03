@@ -8343,4 +8343,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get quoteSaveOnly => '状態はそのままで保存';
+
+  @override
+  String get pfNoneMatchTitle => '絞り込みに合う商品がありません';
+
+  @override
+  String pfHiddenByState(String states) {
+    return '今の「状態」の絞り込みで表示されていない商品があります：$states';
+  }
+
+  @override
+  String pfShowState(String state, int count) {
+    return '$stateの$count件を表示';
+  }
+
+  @override
+  String get pfShowEverything => 'すべての商品を表示';
 }

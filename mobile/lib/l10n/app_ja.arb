@@ -7468,5 +7468,26 @@
   },
   "quoteRestoreBody": "価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。",
   "quoteRestoreAndSave": "取扱中に戻して保存",
-  "quoteSaveOnly": "状態はそのままで保存"
+  "quoteSaveOnly": "状態はそのままで保存",
+  "pfNoneMatchTitle": "絞り込みに合う商品がありません",
+  "pfHiddenByState": "今の「状態」の絞り込みで表示されていない商品があります：{states}",
+  "@pfHiddenByState": {
+    "placeholders": {
+      "states": {
+        "type": "String"
+      }
+    }
+  },
+  "pfShowState": "{state}の{count}件を表示",
+  "@pfShowState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pfShowEverything": "すべての商品を表示"
 }

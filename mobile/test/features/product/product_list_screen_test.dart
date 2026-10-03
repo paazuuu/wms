@@ -554,4 +554,34 @@ void main() {
     expect(find.text('サラサ'), findsNothing);
     expect(find.text('ボールペン'), findsOneWidget);
   });
+
+  testWidgets('when every product is archived, the empty list says so and shows them on a tap', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: [
+      for (var i = 1; i <= 3; i++)
+        Product(id: i, janCode: '490000000000$i', name: '商品$i', status: 'inactive', lifecycleCode: 'archived'),
+    ]);
+    await _pump(tester, repo, lifecycle: true);
+
+    expect(find.text('商品がまだありません'), findsNothing);
+    expect(find.text('絞り込みに合う商品がありません'), findsOneWidget);
+    expect(find.textContaining('アーカイブ 3件'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pf-show-archived')));
+    await tester.pumpAndSettle();
+    expect(find.text('商品1'), findsOneWidget);
+    expect(find.text('3件を表示（全3件）'), findsOneWidget);
+
+    // From here they are made active together.
+    await tester.tap(find.byKey(const ValueKey('lc-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-select-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-to-active')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.lifecycleCalls.single.lifecycle, ProductLifecycle.active);
+    expect(repo.lifecycleCalls.single.ids, [1, 2, 3]);
+  });
 }

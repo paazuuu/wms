@@ -8309,4 +8309,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get quoteSaveOnly => '保持状态并保存';
+
+  @override
+  String get pfNoneMatchTitle => '没有符合筛选条件的商品';
+
+  @override
+  String pfHiddenByState(String states) {
+    return '部分商品因“状态”筛选未显示：$states';
+  }
+
+  @override
+  String pfShowState(String state, int count) {
+    return '显示$state的 $count 件';
+  }
+
+  @override
+  String get pfShowEverything => '显示全部商品';
 }

@@ -2885,5 +2885,9 @@
   "quoteRestoreQ": "{count} of these are not active",
   "quoteRestoreBody": "They can be made active as the prices are saved, so the library shows them again.",
   "quoteRestoreAndSave": "Make active and save",
-  "quoteSaveOnly": "Save, leave as they are"
+  "quoteSaveOnly": "Save, leave as they are",
+  "pfNoneMatchTitle": "No product matches the filters",
+  "pfHiddenByState": "Some products are hidden by the state filter: {states}",
+  "pfShowState": "Show {count} {state}",
+  "pfShowEverything": "Show every product"
 }

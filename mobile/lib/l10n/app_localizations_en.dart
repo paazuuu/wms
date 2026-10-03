@@ -8521,4 +8521,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quoteSaveOnly => 'Save, leave as they are';
+
+  @override
+  String get pfNoneMatchTitle => 'No product matches the filters';
+
+  @override
+  String pfHiddenByState(String states) {
+    return 'Some products are hidden by the state filter: $states';
+  }
+
+  @override
+  String pfShowState(String state, int count) {
+    return 'Show $count $state';
+  }
+
+  @override
+  String get pfShowEverything => 'Show every product';
 }
