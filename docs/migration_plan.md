@@ -5802,6 +5802,52 @@ Also:
   bundled font, WMS Kana (18 KB per weight, a Noto Sans JP subset under the
   SIL OFL), is now the theme's fallback after Fira Sans and Fira Code.
 
+### 0120 — product lifecycle, stock in the library, filters
+
+- `products.lifecycle` says where a product stands:
+
+  | Code | Label | Meaning |
+  |---|---|---|
+  | `active` | 取扱中 | Handled as usual |
+  | `dormant` | 休眠 | Not handled for now; can be made active any time |
+  | `discontinued` | 提供終了 | Ended by the maker or by us |
+  | `archived` | 削除済み | Logical delete: out of the library, nothing erased, restorable |
+
+  - `lifecycle_reason`, `lifecycle_changed_at` and `lifecycle_changed_by`
+    record why, when and who.
+  - `status` (active/inactive) is kept in step by a trigger, so every screen
+    and RPC that filters on `status = 'active'` is unchanged. The old switch
+    (`set_product_status`) moves a product between active and dormant.
+    Products that were inactive became dormant.
+  - It is a new column rather than new status values, because widening the
+    old check would need a `drop`.
+- `product.lifecycle` is a new permission, given to system_admin only.
+  `set_products_lifecycle(ids[], lifecycle, reason)` changes many products
+  at once, and is audited.
+- `product_stock_json(id)` is the product's stock in the warehouses the
+  caller can see (`can_access_warehouse`). It gives on hand, reserved (ACTIVE
+  reservations not yet fulfilled) and available, in total and per
+  warehouse.
+- `product_suppliers_json(id)` lists every supplier that sells the product,
+  by its names for it (0087) or its prices (0107 and 0119).
+- `list_products` returns `lifecycle`, `lifecycle_reason`, `stock` and
+  `suppliers`. `p_status = null` lists every product. It takes about
+  140 ms for 91 products.
+- `product_library_facets()` gives makers, suppliers, categories and
+  lifecycles with counts. The app counts the same from its list.
+- App, 商品ライブラリー:
+  - Each card shows its stock: on hand, reserved and available, by
+    warehouse. The product screen lists it per warehouse.
+  - Filters for 状態, メーカー, 仕入先, カテゴリ and 在庫, plus 絞り込みを解除
+    and an "N件を表示（全M件）" count.
+  - With `product.lifecycle`, 選んでまとめて変更 opens a selection mode:
+    tap to choose or exclude, 表示中をすべて選択, 選択を解除. 状態を変える
+    applies 取扱中 / 休眠 / 提供終了 / 削除済み to the chosen products, with a
+    reason.
+  - The card's own switch now reads 取扱中 ↔ 休眠.
+- Not counted yet: stock on order. Purchase-order lines do not record what
+  has been received, so it cannot be computed correctly.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

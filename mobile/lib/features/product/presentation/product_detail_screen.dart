@@ -16,6 +16,7 @@ import '../domain/product_lot.dart';
 import '../domain/warehouse_product.dart';
 import 'product_delete.dart';
 import 'product_facts.dart';
+import 'product_lifecycle_ui.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'supplier_names_card.dart';
@@ -203,14 +204,7 @@ class _Header extends ConsumerWidget {
                 Expanded(
                   child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleMedium),
                 ),
-                StatusPill(
-                  tone: product.isActive
-                      ? StatusTone.success
-                      : StatusTone.neutral,
-                  label:
-                      product.isActive ? l10n.productActive : l10n.productInactive,
-                  dense: true,
-                ),
+                LifecyclePill(lifecycle: product.lifecycle),
               ],
             ),
             const SizedBox(height: 2),
@@ -237,8 +231,20 @@ class _Header extends ConsumerWidget {
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant)),
             ],
+            if (product.lifecycleReason case final why? when !product.isActive)
+              Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.sm),
             ProductFacts(product: product),
+            // Its stock in each warehouse this person can see (0120).
+            if (product.stock case final st?) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.stockTitle, style: theme.textTheme.labelLarge),
+              StockLine(key: const ValueKey('product-detail-stock'), stock: st, style: theme.textTheme.bodyMedium),
+              for (final w in st.warehouses)
+                Text('${w.name}　${l10n.stockWarehouseRow(w.onHand, w.reserved, w.available)}',
+                    key: ValueKey('product-stock-wh-${w.warehouseId}'),
+                    style: theme.textTheme.bodySmall),
+            ],
             // The product's pictures (0109): the first is shown in front of
             // its name on every screen that lists goods.
             Align(

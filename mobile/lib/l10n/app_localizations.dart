@@ -4171,7 +4171,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsShowInactive.
   ///
   /// In ja, this message translates to:
-  /// **'無効な商品も表示'**
+  /// **'休眠・提供終了も表示'**
   String get productsShowInactive;
 
   /// No description provided for @productsSearchHint.
@@ -4207,19 +4207,19 @@ abstract class AppLocalizations {
   /// No description provided for @productDeactivateQ.
   ///
   /// In ja, this message translates to:
-  /// **'この商品を無効にしますか？'**
+  /// **'この商品を休眠にしますか？'**
   String get productDeactivateQ;
 
   /// No description provided for @productDeactivateBody.
   ///
   /// In ja, this message translates to:
-  /// **'無効にすると、入荷・出荷などの操作でこの商品を選べなくなります。'**
+  /// **'休眠にすると、入荷・出荷などの操作でこの商品を選べなくなります。いつでも取扱中に戻せます。'**
   String get productDeactivateBody;
 
   /// No description provided for @productDeactivateAction.
   ///
   /// In ja, this message translates to:
-  /// **'無効にする'**
+  /// **'休眠にする'**
   String get productDeactivateAction;
 
   /// No description provided for @productNewTitle.
@@ -14838,6 +14838,228 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'入数 {count}'**
   String quoteCase(String count);
+
+  /// No description provided for @lifecycleActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中'**
+  String get lifecycleActive;
+
+  /// No description provided for @lifecycleDormant.
+  ///
+  /// In ja, this message translates to:
+  /// **'休眠'**
+  String get lifecycleDormant;
+
+  /// No description provided for @lifecycleDiscontinued.
+  ///
+  /// In ja, this message translates to:
+  /// **'提供終了'**
+  String get lifecycleDiscontinued;
+
+  /// No description provided for @lifecycleArchived.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除済み'**
+  String get lifecycleArchived;
+
+  /// No description provided for @lifecycleToActive.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中に戻す'**
+  String get lifecycleToActive;
+
+  /// No description provided for @lifecycleToDormant.
+  ///
+  /// In ja, this message translates to:
+  /// **'休眠にする'**
+  String get lifecycleToDormant;
+
+  /// No description provided for @lifecycleToDiscontinued.
+  ///
+  /// In ja, this message translates to:
+  /// **'提供終了にする'**
+  String get lifecycleToDiscontinued;
+
+  /// No description provided for @lifecycleToArchived.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除済みにする（論理削除）'**
+  String get lifecycleToArchived;
+
+  /// No description provided for @lcSelect.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んでまとめて変更'**
+  String get lcSelect;
+
+  /// No description provided for @lcSelected.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を選択中'**
+  String lcSelected(int count);
+
+  /// No description provided for @lcSelectAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中をすべて選択（{count}件）'**
+  String lcSelectAll(int count);
+
+  /// No description provided for @lcClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択を解除'**
+  String get lcClear;
+
+  /// No description provided for @lcChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'状態を変える'**
+  String get lcChange;
+
+  /// No description provided for @lcHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を押すと選択／除外を切り替えます。絞り込みで対象を減らしてから「すべて選択」も使えます。'**
+  String get lcHint;
+
+  /// No description provided for @lcConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を「{state}」にしますか？'**
+  String lcConfirm(int count, String state);
+
+  /// No description provided for @lcActiveBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・出荷・発注などで、また選べるようになります。'**
+  String get lcActiveBody;
+
+  /// No description provided for @lcDormantBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'しばらく扱わない商品です。入荷・出荷などで選べなくなりますが、いつでも取扱中に戻せます。'**
+  String get lcDormantBody;
+
+  /// No description provided for @lcDiscontinuedBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーの廃番や取扱いの終了です。入荷・出荷などで選べなくなります。履歴と在庫の記録は残ります。'**
+  String get lcDiscontinuedBody;
+
+  /// No description provided for @lcArchivedBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーから外します（論理削除）。データは消えず、「状態」の絞り込みで「削除済み」を選べば見られ、戻すこともできます。'**
+  String get lcArchivedBody;
+
+  /// No description provided for @lcReason.
+  ///
+  /// In ja, this message translates to:
+  /// **'理由（任意）　例：メーカー廃番'**
+  String get lcReason;
+
+  /// No description provided for @lcDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を「{state}」にしました'**
+  String lcDone(int count, String state);
+
+  /// No description provided for @pfLifecycle.
+  ///
+  /// In ja, this message translates to:
+  /// **'状態'**
+  String get pfLifecycle;
+
+  /// No description provided for @pfMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get pfMaker;
+
+  /// No description provided for @pfSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get pfSupplier;
+
+  /// No description provided for @pfCategory.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリ'**
+  String get pfCategory;
+
+  /// No description provided for @pfStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get pfStock;
+
+  /// No description provided for @pfStockAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get pfStockAll;
+
+  /// No description provided for @pfStockIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫あり'**
+  String get pfStockIn;
+
+  /// No description provided for @pfStockOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫なし'**
+  String get pfStockOut;
+
+  /// No description provided for @pfClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込みを解除'**
+  String get pfClear;
+
+  /// No description provided for @pfShowing.
+  ///
+  /// In ja, this message translates to:
+  /// **'{shown}件を表示（全{total}件）'**
+  String pfShowing(int shown, int total);
+
+  /// No description provided for @pfNoneMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込みに合う商品がありません。条件を変えるか「絞り込みを解除」を押してください。'**
+  String get pfNoneMatch;
+
+  /// No description provided for @stockNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫なし'**
+  String get stockNone;
+
+  /// No description provided for @stockLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand}'**
+  String stockLine(int onHand);
+
+  /// No description provided for @stockLineReserved.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand}・引当 {reserved}・引当可能 {available}'**
+  String stockLineReserved(int onHand, int reserved, int available);
+
+  /// No description provided for @stockTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫（倉庫別）'**
+  String get stockTitle;
+
+  /// No description provided for @stockWarehouseRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand}・引当 {reserved}・引当可能 {available}'**
+  String stockWarehouseRow(int onHand, int reserved, int available);
 }
 
 class _AppLocalizationsDelegate

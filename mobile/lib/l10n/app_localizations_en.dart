@@ -2195,7 +2195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsTitle => 'Product library';
 
   @override
-  String get productsShowInactive => 'Show inactive products';
+  String get productsShowInactive => 'Show dormant and discontinued too';
 
   @override
   String get productsSearchHint => 'Search by name or JAN code';
@@ -2213,14 +2213,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productInactive => 'Inactive';
 
   @override
-  String get productDeactivateQ => 'Deactivate this product?';
+  String get productDeactivateQ => 'Make this product dormant?';
 
   @override
   String get productDeactivateBody =>
-      'Once inactive, it can no longer be selected for receiving, shipping, or other operations.';
+      'A dormant product cannot be chosen for receiving, shipping and the like. It can be made active again at any time.';
 
   @override
-  String get productDeactivateAction => 'Deactivate';
+  String get productDeactivateAction => 'Make dormant';
 
   @override
   String get productNewTitle => 'New product';
@@ -8278,5 +8278,138 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String quoteCase(String count) {
     return 'Case $count';
+  }
+
+  @override
+  String get lifecycleActive => 'Active';
+
+  @override
+  String get lifecycleDormant => 'Dormant';
+
+  @override
+  String get lifecycleDiscontinued => 'Discontinued';
+
+  @override
+  String get lifecycleArchived => 'Archived';
+
+  @override
+  String get lifecycleToActive => 'Make active';
+
+  @override
+  String get lifecycleToDormant => 'Make dormant';
+
+  @override
+  String get lifecycleToDiscontinued => 'Discontinue';
+
+  @override
+  String get lifecycleToArchived => 'Archive (logical delete)';
+
+  @override
+  String get lcSelect => 'Choose and change together';
+
+  @override
+  String lcSelected(int count) {
+    return '$count chosen';
+  }
+
+  @override
+  String lcSelectAll(int count) {
+    return 'Choose all shown ($count)';
+  }
+
+  @override
+  String get lcClear => 'Clear';
+
+  @override
+  String get lcChange => 'Change state';
+
+  @override
+  String get lcHint =>
+      'Tap a product to choose or exclude it. Narrow the list with the filters first to choose all of them at once.';
+
+  @override
+  String lcConfirm(int count, String state) {
+    return 'Make $count products \"$state\"?';
+  }
+
+  @override
+  String get lcActiveBody =>
+      'They can be chosen again for receiving, shipping and orders.';
+
+  @override
+  String get lcDormantBody =>
+      'Not handled for now: they cannot be chosen for receiving or shipping, and can be made active again at any time.';
+
+  @override
+  String get lcDiscontinuedBody =>
+      'Ended by the maker or by us: they cannot be chosen for receiving or shipping. Their history and stock records stay.';
+
+  @override
+  String get lcArchivedBody =>
+      'Taken out of the product library (a logical delete). Nothing is erased: choose \"Archived\" in the state filter to see them, and they can be restored.';
+
+  @override
+  String get lcReason => 'Reason (optional), e.g. ended by the maker';
+
+  @override
+  String lcDone(int count, String state) {
+    return '$count products are now \"$state\"';
+  }
+
+  @override
+  String get pfLifecycle => 'State';
+
+  @override
+  String get pfMaker => 'Maker';
+
+  @override
+  String get pfSupplier => 'Supplier';
+
+  @override
+  String get pfCategory => 'Category';
+
+  @override
+  String get pfStock => 'Stock';
+
+  @override
+  String get pfStockAll => 'All';
+
+  @override
+  String get pfStockIn => 'In stock';
+
+  @override
+  String get pfStockOut => 'Out of stock';
+
+  @override
+  String get pfClear => 'Clear filters';
+
+  @override
+  String pfShowing(int shown, int total) {
+    return 'Showing $shown of $total';
+  }
+
+  @override
+  String get pfNoneMatch =>
+      'No product matches the filters. Change them or clear them.';
+
+  @override
+  String get stockNone => 'No stock';
+
+  @override
+  String stockLine(int onHand) {
+    return 'Stock $onHand';
+  }
+
+  @override
+  String stockLineReserved(int onHand, int reserved, int available) {
+    return 'Stock $onHand, reserved $reserved, available $available';
+  }
+
+  @override
+  String get stockTitle => 'Stock by warehouse';
+
+  @override
+  String stockWarehouseRow(int onHand, int reserved, int available) {
+    return 'On hand $onHand, reserved $reserved, available $available';
   }
 }

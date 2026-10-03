@@ -2132,7 +2132,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productsTitle => '商品库';
 
   @override
-  String get productsShowInactive => '显示已停用商品';
+  String get productsShowInactive => '同时显示休眠与停止供应';
 
   @override
   String get productsSearchHint => '按商品名或 JAN 码搜索';
@@ -2150,13 +2150,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productInactive => '停用';
 
   @override
-  String get productDeactivateQ => '停用此商品？';
+  String get productDeactivateQ => '将此商品设为休眠？';
 
   @override
-  String get productDeactivateBody => '停用后，将无法在入库、出库等操作中选择此商品。';
+  String get productDeactivateBody => '设为休眠后，入库、出库等操作中无法选择此商品，可随时恢复在售。';
 
   @override
-  String get productDeactivateAction => '停用';
+  String get productDeactivateAction => '设为休眠';
 
   @override
   String get productNewTitle => '新增商品';
@@ -8076,5 +8076,132 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String quoteCase(String count) {
     return '入数 $count';
+  }
+
+  @override
+  String get lifecycleActive => '在售';
+
+  @override
+  String get lifecycleDormant => '休眠';
+
+  @override
+  String get lifecycleDiscontinued => '停止供应';
+
+  @override
+  String get lifecycleArchived => '已删除';
+
+  @override
+  String get lifecycleToActive => '恢复在售';
+
+  @override
+  String get lifecycleToDormant => '设为休眠';
+
+  @override
+  String get lifecycleToDiscontinued => '设为停止供应';
+
+  @override
+  String get lifecycleToArchived => '设为已删除（逻辑删除）';
+
+  @override
+  String get lcSelect => '选择后批量更改';
+
+  @override
+  String lcSelected(int count) {
+    return '已选择 $count 件';
+  }
+
+  @override
+  String lcSelectAll(int count) {
+    return '全选当前显示（$count 件）';
+  }
+
+  @override
+  String get lcClear => '取消选择';
+
+  @override
+  String get lcChange => '更改状态';
+
+  @override
+  String get lcHint => '点按商品可选择或排除。也可先筛选，再“全选”。';
+
+  @override
+  String lcConfirm(int count, String state) {
+    return '将 $count 件设为“$state”？';
+  }
+
+  @override
+  String get lcActiveBody => '可再次用于入库、出库、订单等。';
+
+  @override
+  String get lcDormantBody => '暂时不经营：入库、出库等无法选择，可随时恢复在售。';
+
+  @override
+  String get lcDiscontinuedBody => '厂商停产或我方停止经营：无法用于入库、出库等。历史与库存记录保留。';
+
+  @override
+  String get lcArchivedBody => '从商品库移除（逻辑删除）。数据不会删除，在“状态”筛选中选择“已删除”即可查看并恢复。';
+
+  @override
+  String get lcReason => '原因（可选），例如：厂商停产';
+
+  @override
+  String lcDone(int count, String state) {
+    return '已将 $count 件设为“$state”';
+  }
+
+  @override
+  String get pfLifecycle => '状态';
+
+  @override
+  String get pfMaker => '制造商';
+
+  @override
+  String get pfSupplier => '供应商';
+
+  @override
+  String get pfCategory => '类别';
+
+  @override
+  String get pfStock => '库存';
+
+  @override
+  String get pfStockAll => '全部';
+
+  @override
+  String get pfStockIn => '有库存';
+
+  @override
+  String get pfStockOut => '无库存';
+
+  @override
+  String get pfClear => '清除筛选';
+
+  @override
+  String pfShowing(int shown, int total) {
+    return '显示 $shown 件（共 $total 件）';
+  }
+
+  @override
+  String get pfNoneMatch => '没有符合筛选条件的商品。请更改或清除筛选。';
+
+  @override
+  String get stockNone => '无库存';
+
+  @override
+  String stockLine(int onHand) {
+    return '库存 $onHand';
+  }
+
+  @override
+  String stockLineReserved(int onHand, int reserved, int available) {
+    return '库存 $onHand・已预留 $reserved・可用 $available';
+  }
+
+  @override
+  String get stockTitle => '库存（按仓库）';
+
+  @override
+  String stockWarehouseRow(int onHand, int reserved, int available) {
+    return '库存 $onHand・已预留 $reserved・可用 $available';
   }
 }

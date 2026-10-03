@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/product/application/product_filter.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
@@ -13,7 +14,8 @@ import '../../support/harness.dart';
 /// Pumped as someone who manages products (product.manage) unless [manage]
 /// is false; [delete] adds product.delete (0119).
 Future<ProviderContainer> _pump(
-    WidgetTester tester, FakeProductRepository repo, {bool manage = true, bool delete = false}) async {
+    WidgetTester tester, FakeProductRepository repo,
+    {bool manage = true, bool delete = false, bool lifecycle = false}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
     scCanViewProvider.overrideWithValue(false),
@@ -26,6 +28,7 @@ Future<ProviderContainer> _pump(
       overrides: [
         productLibraryCanManageProvider.overrideWithValue(manage),
         productCanDeleteProvider.overrideWithValue(delete),
+        productCanLifecycleProvider.overrideWithValue(lifecycle),
       ],
       child: const ProductListScreen(),
     ),
@@ -51,7 +54,7 @@ void main() {
     expect(find.text('4902505632037'), findsOneWidget);
     expect(find.text('文房具'), findsOneWidget);
     expect(find.text('¥150'), findsOneWidget);
-    expect(find.text('有効'), findsOneWidget);
+    expect(find.text('取扱中'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });
@@ -161,18 +164,18 @@ void main() {
     await tester.tap(find.byIcon(Icons.visibility_off_outlined));
     await tester.pumpAndSettle();
 
-    expect(find.text('有効'), findsOneWidget);
-    await tester.tap(find.text('有効'));
+    expect(find.text('取扱中'), findsOneWidget);
+    await tester.tap(find.text('取扱中'));
     await tester.pumpAndSettle();
 
-    expect(find.text('この商品を無効にしますか？'), findsOneWidget);
+    expect(find.text('この商品を休眠にしますか？'), findsOneWidget);
     // Not yet applied — still shown as active behind the dialog.
-    expect(find.text('有効'), findsOneWidget);
+    expect(find.text('取扱中'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, '無効にする'));
+    await tester.tap(find.widgetWithText(FilledButton, '休眠にする'));
     await tester.pumpAndSettle();
 
-    expect(find.text('無効'), findsOneWidget);
+    expect(find.text('休眠'), findsOneWidget);
   });
 
   testWidgets(
@@ -184,13 +187,13 @@ void main() {
     ]);
     await _pump(tester, repo);
 
-    await tester.tap(find.text('有効'));
+    await tester.tap(find.text('取扱中'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'キャンセル'));
     await tester.pumpAndSettle();
 
-    expect(find.text('有効'), findsOneWidget);
-    expect(find.text('無効'), findsNothing);
+    expect(find.text('取扱中'), findsOneWidget);
+    expect(find.text('休眠'), findsNothing);
   });
 
   testWidgets(
@@ -205,14 +208,14 @@ void main() {
     await tester.tap(find.byIcon(Icons.visibility_off_outlined));
     await tester.pumpAndSettle();
 
-    expect(find.text('無効'), findsOneWidget);
-    await tester.tap(find.text('無効'));
+    expect(find.text('休眠'), findsOneWidget);
+    await tester.tap(find.text('休眠'));
     await tester.pumpAndSettle();
 
     // No dialog appears — reactivating is harmless (§36's "don't overuse
     // confirmations" side).
-    expect(find.text('この商品を無効にしますか？'), findsNothing);
-    expect(find.text('有効'), findsOneWidget);
+    expect(find.text('この商品を休眠にしますか？'), findsNothing);
+    expect(find.text('取扱中'), findsOneWidget);
   });
 
   testWidgets('a card shows the SKU, base unit, pack units and tracking mode',
@@ -298,9 +301,9 @@ void main() {
     expect(find.byKey(const ValueKey('products-from-quote')), findsNothing);
     expect(find.byKey(const ValueKey('product-menu-1')), findsNothing);
     // The status reads, but tapping it changes nothing.
-    await tester.tap(find.text('有効'));
+    await tester.tap(find.text('取扱中'));
     await tester.pumpAndSettle();
-    expect(find.text('この商品を無効にしますか？'), findsNothing);
+    expect(find.text('この商品を休眠にしますか？'), findsNothing);
   });
 
   testWidgets('managing products offers adding, editing and the quotation import, not deleting', (tester) async {
@@ -360,6 +363,127 @@ void main() {
     expect(find.byKey(const ValueKey('product-delete-deactivate')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('product-delete-deactivate')));
     await tester.pumpAndSettle();
-    expect(find.text('無効'), findsOneWidget);
+    expect(find.text('休眠'), findsOneWidget);
+  });
+
+  const stocked = Product(
+    id: 1, janCode: '4902505632037', name: 'ボールペン', maker: '三菱鉛筆',
+    suppliers: [ProductSupplierRef(id: 4, name: '新東光通商')],
+    stock: ProductStock(onHand: 40, reserved: 10, available: 30, warehouses: [
+      WarehouseStock(warehouseId: 1, name: 'メイン倉庫', onHand: 30, reserved: 10, available: 20),
+      WarehouseStock(warehouseId: 2, name: '神戸倉庫', onHand: 10),
+    ]),
+  );
+  const empty = Product(id: 2, janCode: '4901681233922', name: 'サラサ', maker: 'ゼブラ', stock: ProductStock());
+  const sleeping = Product(id: 3, janCode: '4901480344041', name: 'バインダー', maker: 'コクヨ',
+      status: 'inactive', lifecycleCode: 'discontinued', lifecycleReason: 'メーカー廃番');
+
+  testWidgets('each product shows its stock, reserved and available, by warehouse', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked, empty]));
+
+    expect(find.text('在庫 40・引当 10・引当可能 30  (メイン倉庫 30 / 神戸倉庫 10)'), findsOneWidget);
+    expect(find.text('在庫なし'), findsOneWidget);
+    expect(find.text('2件を表示（全2件）'), findsOneWidget);
+  });
+
+  testWidgets('the library narrows by maker, supplier, stock and state', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final container = await _pump(tester, FakeProductRepository(products: const [stocked, empty, sleeping]));
+
+    // Active products only, by default.
+    expect(find.text('2件を表示（全3件）'), findsOneWidget);
+    expect(find.text('バインダー'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('pf-maker')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pf-opt-ゼブラ')));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.text('サラサ'), findsOneWidget);
+    expect(find.text('ボールペン'), findsNothing);
+    expect(find.text('メーカー: ゼブラ'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('pf-clear')));
+    await tester.pumpAndSettle();
+    container.read(productFilterProvider.notifier).state = const ProductFilter(supplierIds: {4});
+    await tester.pumpAndSettle();
+    expect(find.text('ボールペン'), findsOneWidget);
+    expect(find.text('サラサ'), findsNothing);
+
+    container.read(productFilterProvider.notifier).state = const ProductFilter(stock: StockFilter.outOfStock);
+    await tester.pumpAndSettle();
+    expect(find.text('サラサ'), findsOneWidget);
+    expect(find.text('ボールペン'), findsNothing);
+
+    // A discontinued one shows under its state, with why.
+    container.read(productFilterProvider.notifier).state =
+        const ProductFilter(lifecycles: {ProductLifecycle.discontinued});
+    await tester.pumpAndSettle();
+    expect(find.text('バインダー'), findsOneWidget);
+    expect(find.text('提供終了'), findsOneWidget);
+    expect(find.text('メーカー廃番'), findsOneWidget);
+  });
+
+  testWidgets('without product.lifecycle there is no choosing many', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked]));
+    expect(find.byKey(const ValueKey('lc-start')), findsNothing);
+  });
+
+  testWidgets('the administrator chooses all, excludes one, and archives the rest with a reason', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [stocked, empty, Product(id: 4, janCode: '4900000000004', name: 'ノート')]);
+    await _pump(tester, repo, lifecycle: true);
+
+    await tester.tap(find.byKey(const ValueKey('lc-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-select-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('3件を選択中'), findsOneWidget);
+    // Tapping a chosen product leaves it out.
+    await tester.tap(find.text('サラサ'));
+    await tester.pumpAndSettle();
+    expect(find.text('2件を選択中'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('lc-actions')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-to-archived')));
+    await tester.pumpAndSettle();
+    expect(find.text('2件を「削除済み」にしますか？'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('lc-reason')), '取扱い終了');
+    await tester.tap(find.byKey(const ValueKey('lc-confirm')));
+    await tester.pumpAndSettle();
+
+    final call = repo.lifecycleCalls.single;
+    expect(call.ids, [1, 4]);
+    expect(call.lifecycle, ProductLifecycle.archived);
+    expect(call.reason, '取扱い終了');
+    // Out of the library; the one left out stays.
+    expect(find.text('ボールペン'), findsNothing);
+    expect(find.text('ノート'), findsNothing);
+    expect(find.text('サラサ'), findsOneWidget);
+    expect(find.byKey(const ValueKey('lc-select-all')), findsNothing);
+  });
+
+  test('the old on/off switch and the lifecycle agree', () {
+    expect(const Product(id: 1, janCode: 'x', name: 'x', status: 'inactive').lifecycle, ProductLifecycle.dormant);
+    expect(const Product(id: 1, janCode: 'x', name: 'x', lifecycleCode: 'archived', status: 'inactive').lifecycle,
+        ProductLifecycle.archived);
+    expect(stocked.withLifecycle(ProductLifecycle.discontinued).status, 'inactive');
+    expect(sleeping.withLifecycle(ProductLifecycle.active).isActive, isTrue);
+    final j = Product.fromJson(const {
+      'id': 9, 'jan_code': '1', 'name': 'n', 'status': 'inactive', 'lifecycle': 'discontinued',
+      'stock': {'on_hand': 5, 'reserved': 1, 'available': 4, 'warehouses': [{'warehouse_id': 1, 'name': 'A', 'on_hand': 5}]},
+      'suppliers': [{'id': 4, 'name': 'S'}],
+    });
+    expect(j.lifecycle, ProductLifecycle.discontinued);
+    expect(j.stock!.warehouses.single.onHand, 5);
+    expect(j.suppliers.single.id, 4);
   });
 }

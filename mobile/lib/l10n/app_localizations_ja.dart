@@ -2136,7 +2136,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productsTitle => '商品ライブラリー';
 
   @override
-  String get productsShowInactive => '無効な商品も表示';
+  String get productsShowInactive => '休眠・提供終了も表示';
 
   @override
   String get productsSearchHint => '商品名またはJANコードで検索';
@@ -2154,13 +2154,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productInactive => '無効';
 
   @override
-  String get productDeactivateQ => 'この商品を無効にしますか？';
+  String get productDeactivateQ => 'この商品を休眠にしますか？';
 
   @override
-  String get productDeactivateBody => '無効にすると、入荷・出荷などの操作でこの商品を選べなくなります。';
+  String get productDeactivateBody =>
+      '休眠にすると、入荷・出荷などの操作でこの商品を選べなくなります。いつでも取扱中に戻せます。';
 
   @override
-  String get productDeactivateAction => '無効にする';
+  String get productDeactivateAction => '休眠にする';
 
   @override
   String get productNewTitle => '商品を登録';
@@ -8108,5 +8109,134 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String quoteCase(String count) {
     return '入数 $count';
+  }
+
+  @override
+  String get lifecycleActive => '取扱中';
+
+  @override
+  String get lifecycleDormant => '休眠';
+
+  @override
+  String get lifecycleDiscontinued => '提供終了';
+
+  @override
+  String get lifecycleArchived => '削除済み';
+
+  @override
+  String get lifecycleToActive => '取扱中に戻す';
+
+  @override
+  String get lifecycleToDormant => '休眠にする';
+
+  @override
+  String get lifecycleToDiscontinued => '提供終了にする';
+
+  @override
+  String get lifecycleToArchived => '削除済みにする（論理削除）';
+
+  @override
+  String get lcSelect => '選んでまとめて変更';
+
+  @override
+  String lcSelected(int count) {
+    return '$count件を選択中';
+  }
+
+  @override
+  String lcSelectAll(int count) {
+    return '表示中をすべて選択（$count件）';
+  }
+
+  @override
+  String get lcClear => '選択を解除';
+
+  @override
+  String get lcChange => '状態を変える';
+
+  @override
+  String get lcHint => '商品を押すと選択／除外を切り替えます。絞り込みで対象を減らしてから「すべて選択」も使えます。';
+
+  @override
+  String lcConfirm(int count, String state) {
+    return '$count件を「$state」にしますか？';
+  }
+
+  @override
+  String get lcActiveBody => '入荷・出荷・発注などで、また選べるようになります。';
+
+  @override
+  String get lcDormantBody => 'しばらく扱わない商品です。入荷・出荷などで選べなくなりますが、いつでも取扱中に戻せます。';
+
+  @override
+  String get lcDiscontinuedBody =>
+      'メーカーの廃番や取扱いの終了です。入荷・出荷などで選べなくなります。履歴と在庫の記録は残ります。';
+
+  @override
+  String get lcArchivedBody =>
+      '商品ライブラリーから外します（論理削除）。データは消えず、「状態」の絞り込みで「削除済み」を選べば見られ、戻すこともできます。';
+
+  @override
+  String get lcReason => '理由（任意）　例：メーカー廃番';
+
+  @override
+  String lcDone(int count, String state) {
+    return '$count件を「$state」にしました';
+  }
+
+  @override
+  String get pfLifecycle => '状態';
+
+  @override
+  String get pfMaker => 'メーカー';
+
+  @override
+  String get pfSupplier => '仕入先';
+
+  @override
+  String get pfCategory => 'カテゴリ';
+
+  @override
+  String get pfStock => '在庫';
+
+  @override
+  String get pfStockAll => 'すべて';
+
+  @override
+  String get pfStockIn => '在庫あり';
+
+  @override
+  String get pfStockOut => '在庫なし';
+
+  @override
+  String get pfClear => '絞り込みを解除';
+
+  @override
+  String pfShowing(int shown, int total) {
+    return '$shown件を表示（全$total件）';
+  }
+
+  @override
+  String get pfNoneMatch => '絞り込みに合う商品がありません。条件を変えるか「絞り込みを解除」を押してください。';
+
+  @override
+  String get stockNone => '在庫なし';
+
+  @override
+  String stockLine(int onHand) {
+    return '在庫 $onHand';
+  }
+
+  @override
+  String stockLineReserved(int onHand, int reserved, int available) {
+    return '在庫 $onHand・引当 $reserved・引当可能 $available';
+  }
+
+  @override
+  String get stockTitle => '在庫（倉庫別）';
+
+  @override
+  String stockWarehouseRow(int onHand, int reserved, int available) {
+    return '在庫 $onHand・引当 $reserved・引当可能 $available';
   }
 }

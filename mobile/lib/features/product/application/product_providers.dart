@@ -16,9 +16,6 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 /// Free-text filter over name/JAN; empty shows every product in scope.
 final productSearchProvider = StateProvider<String>((_) => '');
 
-/// Whether the list also shows deactivated products.
-final showInactiveProductsProvider = StateProvider<bool>((_) => false);
-
 /// 商品ライブラリー as a grid of pictures rather than a list.
 final productPhotoViewProvider = StateProvider<bool>((_) => false);
 
@@ -99,15 +96,16 @@ final productIdCoverageProvider =
   );
 });
 
-/// The product master filtered by [productSearchProvider] and
-/// [showInactiveProductsProvider], name-sorted.
+/// Every product matching [productSearchProvider], whatever its lifecycle,
+/// name-sorted. The library narrows it with its filter
+/// (`filteredProductsProvider`, 0120); a product screen reads its product
+/// from here, so a dormant one opens too.
 final productListProvider =
     FutureProvider.autoDispose<List<Product>>((ref) async {
   final search = ref.watch(productSearchProvider);
-  final showInactive = ref.watch(showInactiveProductsProvider);
   final result = await ref.watch(productRepositoryProvider).list(
         search: search.isEmpty ? null : search,
-        status: showInactive ? null : 'active',
+        status: null,
       );
   return result.when(
     success: (data) => data,

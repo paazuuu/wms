@@ -23,6 +23,13 @@ final productCanDeleteProvider = Provider<bool>((ref) {
   return p.contains('product.delete');
 });
 
+/// Making products dormant, discontinued or archived, many at once
+/// (product.lifecycle, 0120): the system administrator's.
+final productCanLifecycleProvider = Provider<bool>((ref) {
+  final p = ref.watch(authControllerProvider).user?.permissions ?? const <String>[];
+  return p.contains('product.lifecycle');
+});
+
 /// A product's face as cached on the device: its viewable URL, or known to
 /// have none.
 class FaceEntry {

@@ -2,35 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
-import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/product_filter.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
 import 'product_delete.dart';
 import 'product_detail_screen.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
+import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_library_screen.dart';
 import '../../product_library/presentation/quote_import_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
-/// The product master (spec §19, 0032), now showing what 0057-0060 added to it:
-/// the internal SKU, the base unit its quantities are counted in, the pack units
-/// defined against it, how many barcodes reach it, and whether a lot or a serial
-/// has to be recorded when it arrives.
+/// 商品ライブラリー: our products with their stock beside them (0120), the
+/// SKU, base unit, pack units, codes and tracking (0057-0060).
 ///
-/// Anyone who can see products sees them here. Adding one — by hand or a
-/// whole quotation at once — and editing need `product.manage`; deleting one
-/// that was never used needs `product.delete` (0119). The server checks
-/// both again.
-class ProductListScreen extends ConsumerWidget {
+/// Anyone who can see products sees them, and can narrow them by state,
+/// maker, supplier, category and stock. Adding one — by hand or a whole
+/// quotation — and editing need `product.manage`; deleting one never used
+/// needs `product.delete` (0119); choosing many at once to make them
+/// dormant, discontinued or archived needs `product.lifecycle` (0120). The
+/// server checks each again.
+class ProductListScreen extends ConsumerStatefulWidget {
   const ProductListScreen({super.key});
 
-  void _snackError(BuildContext context, String message) {
+  @override
+  ConsumerState<ProductListScreen> createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends ConsumerState<ProductListScreen> {
+  /// Null outside selection mode; the chosen product ids within it.
+  Set<int>? _selected;
+
+  void _snackError(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
@@ -39,23 +49,16 @@ class ProductListScreen extends ConsumerWidget {
       ));
   }
 
-  Future<void> _openForm(BuildContext context, WidgetRef ref,
-      {Product? product}) async {
+  Future<void> _openForm({Product? product}) async {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (_) => ProductFormSheet(product: product),
     );
-    if (saved == true) {
-      ref.invalidate(productListProvider);
-    }
+    if (saved == true) ref.invalidate(productListProvider);
   }
 
-  Future<void> _openDetail(
-      BuildContext context, WidgetRef ref, Product product) => _openDetailById(context, ref, product.id);
-
-  Future<void> _openDetailById(
-      BuildContext context, WidgetRef ref, int productId) async {
+  Future<void> _openDetailById(int productId) async {
     await Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => ProductDetailScreen(productId: productId),
     ));
@@ -64,169 +67,500 @@ class ProductListScreen extends ConsumerWidget {
     ref.invalidate(productListProvider);
   }
 
-  Future<void> _toggleStatus(
-      BuildContext context, WidgetRef ref, Product product) async {
+  /// The card's own switch: active ↔ dormant. Waking is harmless; putting
+  /// to sleep hides the product from receiving and shipping, so it asks (§36).
+  Future<void> _toggleStatus(Product product) async {
     final l10n = AppLocalizations.of(context);
-    // Reactivating is harmless and needs no dialog; deactivating hides the
-    // product from receiving/shipping, so confirm before that one (§36).
     if (product.isActive) {
       final ok = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: Text(l10n.productDeactivateQ),
           content: Text(l10n.productDeactivateBody),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: Text(l10n.actionCancel),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(l10n.productDeactivateAction),
             ),
           ],
         ),
       );
-      if (ok != true || !context.mounted) return;
+      if (ok != true || !mounted) return;
     }
-
-    final nextStatus = product.isActive ? 'inactive' : 'active';
     final result = await ref
         .read(productRepositoryProvider)
-        .setStatus(product.id, nextStatus);
-    if (!context.mounted) return;
+        .setStatus(product.id, product.isActive ? 'inactive' : 'active');
+    if (!mounted) return;
     result.when(
       success: (_) => ref.invalidate(productListProvider),
-      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
+      failure: (f) => _snackError(humanizeApiErrorMessage(l10n, f.message)),
     );
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  /// The chosen products into [target], after asking, with an optional reason.
+  Future<void> _applyLifecycle(ProductLifecycle target) async {
     final l10n = AppLocalizations.of(context);
-    final async = ref.watch(productListProvider);
-    final showInactive = ref.watch(showInactiveProductsProvider);
+    final ids = (_selected ?? const <int>{}).toList()..sort();
+    if (ids.isEmpty) return;
+    final label = lifecycleLabel(l10n, target);
+    final why = await showDialog<String>(
+      context: context,
+      builder: (_) => _LifecycleDialog(count: ids.length, target: target),
+    );
+    if (why == null || !mounted) return;
+    final r = await ref
+        .read(productRepositoryProvider)
+        .setLifecycle(ids, target, reason: why.isEmpty ? null : why);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess(:final data):
+        setState(() => _selected = null);
+        ref.invalidate(productListProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.lcDone(data, label))));
+      case ApiFailure(:final message):
+        _snackError(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final async = ref.watch(filteredProductsProvider);
+    final total = ref.watch(productListProvider).valueOrNull?.length;
+    final filter = ref.watch(productFilterProvider);
     final photos = ref.watch(productPhotoViewProvider);
     final canManage = ref.watch(productLibraryCanManageProvider);
     final canDelete = ref.watch(productCanDeleteProvider);
+    final canLifecycle = ref.watch(productCanLifecycleProvider);
+    final selected = _selected;
+    final shown = async.valueOrNull ?? const <Product>[];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.productsTitle),
-        actions: [
-          // One place for our products: the list to edit them, or their
-          // pictures to check and add photos. Either opens the same product.
-          SegmentedButton<bool>(
-            key: const ValueKey('products-view'),
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: false, icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
-              ButtonSegment(value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
-            ],
-            selected: {photos},
-            onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          // A supplier's quotation read by the AI, its new products
-          // registered and its prices kept, in one go.
-          if (canManage)
-            IconButton(
-              key: const ValueKey('products-from-quote'),
-              tooltip: l10n.quoteImportTitle,
-              icon: const Icon(Icons.auto_awesome_outlined),
-              onPressed: () async {
-                await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuoteImportScreen()));
-                ref.invalidate(productListProvider);
-              },
+      appBar: selected != null
+          ? AppBar(
+              leading: IconButton(
+                key: const ValueKey('lc-exit'),
+                tooltip: l10n.actionCancel,
+                icon: const Icon(Icons.close),
+                onPressed: () => setState(() => _selected = null),
+              ),
+              title: Text(l10n.lcSelected(selected.length)),
+              actions: [
+                TextButton(
+                  key: const ValueKey('lc-select-all'),
+                  onPressed: () => setState(() => _selected = {for (final p in shown) p.id}),
+                  child: Text(l10n.lcSelectAll(shown.length)),
+                ),
+                TextButton(
+                  key: const ValueKey('lc-clear'),
+                  onPressed: selected.isEmpty ? null : () => setState(() => _selected = {}),
+                  child: Text(l10n.lcClear),
+                ),
+                PopupMenuButton<ProductLifecycle>(
+                  key: const ValueKey('lc-actions'),
+                  enabled: selected.isNotEmpty,
+                  tooltip: l10n.lcChange,
+                  icon: const Icon(Icons.swap_horiz),
+                  onSelected: _applyLifecycle,
+                  itemBuilder: (_) => [
+                    for (final l in ProductLifecycle.values)
+                      PopupMenuItem(
+                        key: ValueKey('lc-to-${l.wire}'),
+                        value: l,
+                        child: ListTile(
+                          leading: Icon(lifecycleIcon(l)),
+                          title: Text(lifecycleAction(l10n, l)),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            )
+          : AppBar(
+              title: Text(l10n.productsTitle),
+              actions: [
+                // One place for our products: the list to edit them, or their
+                // pictures to check and add photos. Either opens the same product.
+                SegmentedButton<bool>(
+                  key: const ValueKey('products-view'),
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: false, icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
+                    ButtonSegment(value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
+                  ],
+                  selected: {photos},
+                  onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                if (canLifecycle && !photos)
+                  IconButton(
+                    key: const ValueKey('lc-start'),
+                    tooltip: l10n.lcSelect,
+                    icon: const Icon(Icons.checklist_outlined),
+                    onPressed: () => setState(() => _selected = {}),
+                  ),
+                // A supplier's quotation read by the AI, its new products
+                // registered and its prices kept, in one go.
+                if (canManage)
+                  IconButton(
+                    key: const ValueKey('products-from-quote'),
+                    tooltip: l10n.quoteImportTitle,
+                    icon: const Icon(Icons.auto_awesome_outlined),
+                    onPressed: () async {
+                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuoteImportScreen()));
+                      ref.invalidate(productListProvider);
+                    },
+                  ),
+                if (!photos)
+                  IconButton(
+                    tooltip: l10n.productsShowInactive,
+                    icon: Icon(filter.lifecycles.length > 1
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined),
+                    onPressed: () => ref.read(productFilterProvider.notifier).update((f) => f.copyWith(
+                        lifecycles: f.lifecycles.length > 1 ? {ProductLifecycle.active} : ProductFilter.notArchived)),
+                  ),
+              ],
             ),
-          if (!photos) IconButton(
-            tooltip: l10n.productsShowInactive,
-            icon: Icon(showInactive
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined),
-            onPressed: () => ref
-                .read(showInactiveProductsProvider.notifier)
-                .update((v) => !v),
-          ),
-        ],
-      ),
-      floatingActionButton: canManage
+      floatingActionButton: canManage && selected == null
           ? FloatingActionButton(
               key: const ValueKey('products-add'),
               tooltip: l10n.productAddOne,
-              onPressed: () => _openForm(context, ref),
+              onPressed: () => _openForm(),
               child: const Icon(Icons.add),
             )
           : null,
       body: photos
-          ? ProductLibraryView(onOpen: (p) => _openDetailById(context, ref, p.id))
+          ? ProductLibraryView(onOpen: (p) => _openDetailById(p.id))
           : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: TextField(
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: l10n.productsSearchHint,
-                isDense: true,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
-              ),
-              onChanged: (value) =>
-                  ref.read(productSearchProvider.notifier).state = value,
-            ),
-          ),
-          Expanded(
-            child: async.when(
-              loading: () => LoadingView(message: l10n.loading),
-              error: (e, _) => ErrorStateView(
-                message: '$e',
-                onRetry: () => ref.invalidate(productListProvider),
-              ),
-              data: (products) {
-                if (products.isEmpty) {
-                  return EmptyStateView(
-                    icon: Icons.inventory_2_outlined,
-                    title: l10n.productsEmpty,
-                    message: l10n.productsEmptyBody,
-                  );
-                }
-                return RefreshIndicator(
-                  onRefresh: () async => ref.invalidate(productListProvider),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
-                    itemCount: products.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, i) => _ProductCard(
-                      product: products[i],
-                      onTap: () => _openDetail(context, ref, products[i]),
-                      onToggleStatus: canManage
-                          ? () => _toggleStatus(context, ref, products[i])
-                          : null,
-                      onEdit: canManage
-                          ? () => _openForm(context, ref, product: products[i])
-                          : null,
-                      onDelete: canDelete
-                          ? () => confirmDeleteProduct(context, ref, products[i])
-                          : null,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: l10n.productsSearchHint,
+                      isDense: true,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
+                    ),
+                    onChanged: (value) => ref.read(productSearchProvider.notifier).state = value,
+                  ),
+                ),
+                const _FilterBar(),
+                if (total != null && async.hasValue)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
+                        key: const ValueKey('pf-showing'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
                   ),
-                );
-              },
+                Expanded(
+                  child: async.when(
+                    loading: () => LoadingView(message: l10n.loading),
+                    error: (e, _) => ErrorStateView(
+                      message: '$e',
+                      onRetry: () => ref.invalidate(productListProvider),
+                    ),
+                    data: (products) {
+                      if (products.isEmpty) {
+                        return EmptyStateView(
+                          icon: Icons.inventory_2_outlined,
+                          title: l10n.productsEmpty,
+                          message: (total ?? 0) > 0 ? l10n.pfNoneMatch : l10n.productsEmptyBody,
+                        );
+                      }
+                      return RefreshIndicator(
+                        onRefresh: () async => ref.invalidate(productListProvider),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
+                          itemCount: products.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                          itemBuilder: (context, i) {
+                            final p = products[i];
+                            return _ProductCard(
+                              product: p,
+                              selected: selected?.contains(p.id),
+                              onTap: selected != null
+                                  ? () => setState(() => selected.contains(p.id) ? selected.remove(p.id) : selected.add(p.id))
+                                  : () => _openDetailById(p.id),
+                              onToggleStatus: canManage && selected == null && p.lifecycle != ProductLifecycle.archived
+                                  ? () => _toggleStatus(p)
+                                  : null,
+                              onEdit: canManage && selected == null ? () => _openForm(product: p) : null,
+                              onDelete: canDelete && selected == null ? () => confirmDeleteProduct(context, ref, p) : null,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+/// Asks before moving products into [target]; resolves to the reason typed
+/// ('' for none), or null when cancelled.
+class _LifecycleDialog extends StatefulWidget {
+  const _LifecycleDialog({required this.count, required this.target});
+
+  final int count;
+  final ProductLifecycle target;
+
+  @override
+  State<_LifecycleDialog> createState() => _LifecycleDialogState();
+}
+
+class _LifecycleDialogState extends State<_LifecycleDialog> {
+  final _reason = TextEditingController();
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final target = widget.target;
+    return AlertDialog(
+      title: Text(l10n.lcConfirm(widget.count, lifecycleLabel(l10n, target))),
+      content: SizedBox(
+        width: 420,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(switch (target) {
+              ProductLifecycle.active => l10n.lcActiveBody,
+              ProductLifecycle.dormant => l10n.lcDormantBody,
+              ProductLifecycle.discontinued => l10n.lcDiscontinuedBody,
+              ProductLifecycle.archived => l10n.lcArchivedBody,
+            }),
+            if (target != ProductLifecycle.active) ...[
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                key: const ValueKey('lc-reason'),
+                controller: _reason,
+                decoration: InputDecoration(labelText: l10n.lcReason),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('lc-confirm'),
+          onPressed: () => Navigator.pop(context, _reason.text.trim()),
+          child: Text(lifecycleAction(l10n, target)),
+        ),
+      ],
+    );
+  }
+}
+
+/// The library's filters: state, maker, supplier, category and stock, each
+/// a chip that opens its choices with how many products each has.
+class _FilterBar extends ConsumerWidget {
+  const _FilterBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final filter = ref.watch(productFilterProvider);
+    final facets = ref.watch(productFacetsProvider);
+    void set(ProductFilter f) => ref.read(productFilterProvider.notifier).state = f;
+
+    String summary(String name, Iterable<String> picked) {
+      final list = picked.toList();
+      if (list.isEmpty) return name;
+      return list.length == 1 ? '$name: ${list.single}' : '$name: ${list.first} +${list.length - 1}';
+    }
+
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        children: [
+          _FacetChip(
+            key: const ValueKey('pf-lifecycle'),
+            label: summary(l10n.pfLifecycle, [for (final l in filter.lifecycles) lifecycleLabel(l10n, l)]),
+            active: filter.lifecycles.length != 1 || !filter.lifecycles.contains(ProductLifecycle.active),
+            options: [
+              for (final l in ProductLifecycle.values)
+                (l.wire, lifecycleLabel(l10n, l), facets.lifecycles[l] ?? 0, filter.lifecycles.contains(l)),
+            ],
+            onChanged: (v, on) {
+              final l = ProductLifecycle.parse(v)!;
+              final next = {...filter.lifecycles};
+              on ? next.add(l) : next.remove(l);
+              set(filter.copyWith(lifecycles: next));
+            },
+          ),
+          _FacetChip(
+            key: const ValueKey('pf-maker'),
+            label: summary(l10n.pfMaker, filter.makers),
+            active: filter.makers.isNotEmpty,
+            options: [
+              for (final e in facets.makers.entries) (e.key, e.key, e.value, filter.makers.contains(e.key)),
+            ],
+            onChanged: (v, on) => set(filter.copyWith(makers: on ? {...filter.makers, v} : ({...filter.makers}..remove(v)))),
+          ),
+          _FacetChip(
+            key: const ValueKey('pf-supplier'),
+            label: summary(l10n.pfSupplier, [
+              for (final id in filter.supplierIds) facets.suppliers[id]?.$1 ?? '#$id',
+            ]),
+            active: filter.supplierIds.isNotEmpty,
+            options: [
+              for (final e in facets.suppliers.entries)
+                ('${e.key}', e.value.$1, e.value.$2, filter.supplierIds.contains(e.key)),
+            ],
+            onChanged: (v, on) {
+              final id = int.parse(v);
+              set(filter.copyWith(supplierIds: on ? {...filter.supplierIds, id} : ({...filter.supplierIds}..remove(id))));
+            },
+          ),
+          if (facets.categories.isNotEmpty)
+            _FacetChip(
+              key: const ValueKey('pf-category'),
+              label: summary(l10n.pfCategory, filter.categories),
+              active: filter.categories.isNotEmpty,
+              options: [
+                for (final e in facets.categories.entries) (e.key, e.key, e.value, filter.categories.contains(e.key)),
+              ],
+              onChanged: (v, on) =>
+                  set(filter.copyWith(categories: on ? {...filter.categories, v} : ({...filter.categories}..remove(v)))),
+            ),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: PopupMenuButton<StockFilter>(
+              key: const ValueKey('pf-stock'),
+              initialValue: filter.stock,
+              onSelected: (v) => set(filter.copyWith(stock: v)),
+              itemBuilder: (_) => [
+                for (final s in StockFilter.values)
+                  PopupMenuItem(key: ValueKey('pf-stock-${s.name}'), value: s, child: Text(_stockLabel(l10n, s))),
+              ],
+              child: Chip(
+                avatar: const Icon(Icons.inventory_outlined, size: 18),
+                label: Text(filter.stock == StockFilter.all ? l10n.pfStock : '${l10n.pfStock}: ${_stockLabel(l10n, filter.stock)}'),
+                backgroundColor: filter.stock == StockFilter.all ? null : Theme.of(context).colorScheme.secondaryContainer,
+              ),
             ),
           ),
+          if (filter != const ProductFilter())
+            ActionChip(
+              key: const ValueKey('pf-clear'),
+              avatar: const Icon(Icons.filter_alt_off_outlined, size: 18),
+              label: Text(l10n.pfClear),
+              onPressed: () => set(const ProductFilter()),
+            ),
         ],
       ),
     );
   }
+
+  static String _stockLabel(AppLocalizations l10n, StockFilter s) => switch (s) {
+        StockFilter.all => l10n.pfStockAll,
+        StockFilter.inStock => l10n.pfStockIn,
+        StockFilter.outOfStock => l10n.pfStockOut,
+      };
+}
+
+/// One filter: a chip that opens a list of choices to tick.
+class _FacetChip extends StatelessWidget {
+  const _FacetChip({
+    super.key,
+    required this.label,
+    required this.active,
+    required this.options,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool active;
+
+  /// (value, label, count, chosen).
+  final List<(String, String, int, bool)> options;
+  final void Function(String value, bool on) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSpacing.sm),
+      child: ActionChip(
+        label: Text(label),
+        avatar: Icon(Icons.arrow_drop_down, size: 18, color: active ? scheme.onSecondaryContainer : null),
+        backgroundColor: active ? scheme.secondaryContainer : null,
+        onPressed: options.isEmpty
+            ? null
+            : () => showModalBottomSheet<void>(
+                  context: context,
+                  showDragHandle: true,
+                  builder: (sheetContext) => _FacetSheet(title: label, options: options, onChanged: onChanged),
+                ),
+      ),
+    );
+  }
+}
+
+class _FacetSheet extends StatefulWidget {
+  const _FacetSheet({required this.title, required this.options, required this.onChanged});
+
+  final String title;
+  final List<(String, String, int, bool)> options;
+  final void Function(String value, bool on) onChanged;
+
+  @override
+  State<_FacetSheet> createState() => _FacetSheetState();
+}
+
+class _FacetSheetState extends State<_FacetSheet> {
+  late final Map<String, bool> _on = {for (final o in widget.options) o.$1: o.$4};
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final o in widget.options)
+              CheckboxListTile(
+                key: ValueKey('pf-opt-${o.$1}'),
+                value: _on[o.$1],
+                title: Text(widenKana(o.$2)),
+                secondary: Text('${o.$3}'),
+                onChanged: (v) {
+                  setState(() => _on[o.$1] = v ?? false);
+                  widget.onChanged(o.$1, v ?? false);
+                },
+              ),
+          ],
+        ),
+      );
 }
 
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
     required this.onTap,
+    this.selected,
     this.onToggleStatus,
     this.onEdit,
     this.onDelete,
@@ -234,6 +568,9 @@ class _ProductCard extends StatelessWidget {
 
   final Product product;
   final VoidCallback onTap;
+
+  /// Null outside selection mode; whether this one is chosen within it.
+  final bool? selected;
 
   /// Null where the person may not change products.
   final VoidCallback? onToggleStatus;
@@ -256,6 +593,12 @@ class _ProductCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
+              if (selected != null)
+                Checkbox(
+                  key: ValueKey('lc-check-${product.id}'),
+                  value: selected,
+                  onChanged: (_) => onTap(),
+                ),
               ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 56),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -315,6 +658,13 @@ class _ProductCard extends StatelessWidget {
                           style: theme.textTheme.bodySmall
                               ?.copyWith(color: scheme.onSurfaceVariant)),
                     ],
+                    // Its stock where this person can see (0120).
+                    if (product.stock case final st?) ...[
+                      const SizedBox(height: 2),
+                      StockLine(key: ValueKey('product-stock-${product.id}'), stock: st),
+                    ],
+                    if (product.lifecycleReason case final why? when !product.isActive)
+                      Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                     const SizedBox(height: AppSpacing.xs),
                     ProductFacts(product: product),
                   ],
@@ -344,7 +694,7 @@ class _ProductCard extends StatelessWidget {
                         if (onToggleStatus != null)
                           PopupMenuItem(
                             value: 'status',
-                            child: Text(product.isActive ? l10n.productDeactivateAction : l10n.productActivate),
+                            child: Text(product.isActive ? l10n.productDeactivateAction : l10n.lifecycleToActive),
                           ),
                         if (onDelete != null)
                           PopupMenuItem(
@@ -358,15 +708,7 @@ class _ProductCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.sm),
                   GestureDetector(
                     onTap: onToggleStatus,
-                    child: StatusPill(
-                      tone: product.isActive
-                          ? StatusTone.success
-                          : StatusTone.neutral,
-                      label: product.isActive
-                          ? l10n.productActive
-                          : l10n.productInactive,
-                      dense: true,
-                    ),
+                    child: LifecyclePill(lifecycle: product.lifecycle),
                   ),
                 ],
               ),

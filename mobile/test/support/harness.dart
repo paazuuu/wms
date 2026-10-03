@@ -198,6 +198,7 @@ List<Override> _defaultOverrides() => [
       productImageRepositoryProvider.overrideWithValue(FakeProductImageRepository()),
       productLibraryCanManageProvider.overrideWithValue(false),
       productCanDeleteProvider.overrideWithValue(false),
+      productCanLifecycleProvider.overrideWithValue(false),
       // Our product format (0111), in memory.
       productNamingRepositoryProvider.overrideWithValue(FakeProductNamingRepository()),
       // Boxes and shipping weights (0115), in memory.
@@ -253,6 +254,7 @@ Future<void> pumpAppWith(
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(false),
           productCanDeleteProvider.overrideWithValue(false),
+          productCanLifecycleProvider.overrideWithValue(false),
         ],
         child: MaterialApp(
           theme: AppTheme.light(),
@@ -2292,6 +2294,23 @@ class FakeProductRepository implements ProductRepository {
     deleted.add(id);
     _products = [for (final p in _products) if (p.id != id) p];
     return const ApiSuccess(true);
+  }
+
+  /// What setLifecycle() was asked (0120).
+  final lifecycleCalls = <({List<int> ids, ProductLifecycle lifecycle, String? reason})>[];
+
+  @override
+  Future<ApiResult<int>> setLifecycle(List<int> ids, ProductLifecycle lifecycle, {String? reason}) async {
+    lifecycleCalls.add((ids: ids, lifecycle: lifecycle, reason: reason));
+    var n = 0;
+    _products = [
+      for (final p in _products)
+        if (ids.contains(p.id) && p.lifecycle != lifecycle) (() {
+          n++;
+          return p.withLifecycle(lifecycle, reason: reason);
+        })() else p,
+    ];
+    return ApiSuccess(n);
   }
 
   /// Names setName() was asked to save (0118).

@@ -60,6 +60,10 @@ abstract class ProductRepository {
   /// instead.
   Future<ApiResult<bool>> delete(int id);
 
+  /// `set_products_lifecycle` (0120) — many products at once into one
+  /// lifecycle, with why; resolves to how many changed.
+  Future<ApiResult<int>> setLifecycle(List<int> ids, ProductLifecycle lifecycle, {String? reason});
+
   /// `set_product_identity` (0057). Either field may be null, which leaves it
   /// as it was — so this can set a SKU without restating the tracking mode.
   Future<ApiResult<bool>> setIdentity({
@@ -290,6 +294,18 @@ class ProductRepositoryImpl implements ProductRepository {
       return ApiSuccess(response.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> setLifecycle(List<int> ids, ProductLifecycle lifecycle, {String? reason}) async {
+    try {
+      final r = await _dio.post('/rpc/set_products_lifecycle',
+          data: {'p_ids': ids, 'p_lifecycle': lifecycle.wire, 'p_reason': reason});
+      final json = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(json is Map ? (json['changed'] as num?)?.toInt() ?? 0 : 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
     }
   }
 

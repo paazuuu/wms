@@ -1017,15 +1017,15 @@
   "poStatusCancelled": "取消",
   "poStatusCompleted": "完了",
   "productsTitle": "商品ライブラリー",
-  "productsShowInactive": "無効な商品も表示",
+  "productsShowInactive": "休眠・提供終了も表示",
   "productsSearchHint": "商品名またはJANコードで検索",
   "productsEmpty": "商品がまだありません",
   "productsEmptyBody": "右下の＋から商品を登録できます。",
   "productActive": "有効",
   "productInactive": "無効",
-  "productDeactivateQ": "この商品を無効にしますか？",
-  "productDeactivateBody": "無効にすると、入荷・出荷などの操作でこの商品を選べなくなります。",
-  "productDeactivateAction": "無効にする",
+  "productDeactivateQ": "この商品を休眠にしますか？",
+  "productDeactivateBody": "休眠にすると、入荷・出荷などの操作でこの商品を選べなくなります。いつでも取扱中に戻せます。",
+  "productDeactivateAction": "休眠にする",
   "productNewTitle": "商品を登録",
   "productEditTitle": "商品を編集",
   "productJanCode": "JANコード",
@@ -7292,6 +7292,120 @@
     "placeholders": {
       "count": {
         "type": "String"
+      }
+    }
+  },
+  "lifecycleActive": "取扱中",
+  "lifecycleDormant": "休眠",
+  "lifecycleDiscontinued": "提供終了",
+  "lifecycleArchived": "削除済み",
+  "lifecycleToActive": "取扱中に戻す",
+  "lifecycleToDormant": "休眠にする",
+  "lifecycleToDiscontinued": "提供終了にする",
+  "lifecycleToArchived": "削除済みにする（論理削除）",
+  "lcSelect": "選んでまとめて変更",
+  "lcSelected": "{count}件を選択中",
+  "@lcSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lcSelectAll": "表示中をすべて選択（{count}件）",
+  "@lcSelectAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lcClear": "選択を解除",
+  "lcChange": "状態を変える",
+  "lcHint": "商品を押すと選択／除外を切り替えます。絞り込みで対象を減らしてから「すべて選択」も使えます。",
+  "lcConfirm": "{count}件を「{state}」にしますか？",
+  "@lcConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "lcActiveBody": "入荷・出荷・発注などで、また選べるようになります。",
+  "lcDormantBody": "しばらく扱わない商品です。入荷・出荷などで選べなくなりますが、いつでも取扱中に戻せます。",
+  "lcDiscontinuedBody": "メーカーの廃番や取扱いの終了です。入荷・出荷などで選べなくなります。履歴と在庫の記録は残ります。",
+  "lcArchivedBody": "商品ライブラリーから外します（論理削除）。データは消えず、「状態」の絞り込みで「削除済み」を選べば見られ、戻すこともできます。",
+  "lcReason": "理由（任意）　例：メーカー廃番",
+  "lcDone": "{count}件を「{state}」にしました",
+  "@lcDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "pfLifecycle": "状態",
+  "pfMaker": "メーカー",
+  "pfSupplier": "仕入先",
+  "pfCategory": "カテゴリ",
+  "pfStock": "在庫",
+  "pfStockAll": "すべて",
+  "pfStockIn": "在庫あり",
+  "pfStockOut": "在庫なし",
+  "pfClear": "絞り込みを解除",
+  "pfShowing": "{shown}件を表示（全{total}件）",
+  "@pfShowing": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pfNoneMatch": "絞り込みに合う商品がありません。条件を変えるか「絞り込みを解除」を押してください。",
+  "stockNone": "在庫なし",
+  "stockLine": "在庫 {onHand}",
+  "@stockLine": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      }
+    }
+  },
+  "stockLineReserved": "在庫 {onHand}・引当 {reserved}・引当可能 {available}",
+  "@stockLineReserved": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "reserved": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "stockTitle": "在庫（倉庫別）",
+  "stockWarehouseRow": "在庫 {onHand}・引当 {reserved}・引当可能 {available}",
+  "@stockWarehouseRow": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "reserved": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
       }
     }
   }

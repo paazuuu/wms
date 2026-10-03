@@ -152,6 +152,88 @@ enum TrackingMode {
 /// the key. The JAN stays on this model because it is still what the existing
 /// stock, receiving and picking paths are keyed by, and because it is what an
 /// operator reads off the box.
+/// Where a product stands (0120). Only [active] is handled; the rest are
+/// kept, with their history, and can be brought back.
+enum ProductLifecycle {
+  /// 取扱中 — handled as usual.
+  active('active'),
+
+  /// 休眠 — not handled for now.
+  dormant('dormant'),
+
+  /// 提供終了 — no longer offered.
+  discontinued('discontinued'),
+
+  /// 削除済み — taken out of the library; a logical delete, restorable.
+  archived('archived');
+
+  const ProductLifecycle(this.wire);
+  final String wire;
+
+  static ProductLifecycle? parse(Object? v) =>
+      ProductLifecycle.values.where((l) => l.wire == '$v').firstOrNull;
+}
+
+/// A product's stock in the warehouses the person can see (0120).
+class ProductStock extends Equatable {
+  const ProductStock({this.onHand = 0, this.reserved = 0, this.available = 0, this.warehouses = const []});
+
+  final int onHand;
+  final int reserved;
+  final int available;
+
+  /// Only the warehouses that hold or have reserved some.
+  final List<WarehouseStock> warehouses;
+
+  bool get isEmpty => onHand == 0 && reserved == 0;
+
+  factory ProductStock.fromJson(Map<String, dynamic> j) => ProductStock(
+        onHand: _asInt(j['on_hand']),
+        reserved: _asInt(j['reserved']),
+        available: _asInt(j['available']),
+        warehouses: [
+          for (final w in (j['warehouses'] as List? ?? const []).whereType<Map>())
+            WarehouseStock.fromJson(w.cast<String, dynamic>()),
+        ],
+      );
+
+  @override
+  List<Object?> get props => [onHand, reserved, available, warehouses];
+}
+
+class WarehouseStock extends Equatable {
+  const WarehouseStock({required this.warehouseId, required this.name, this.onHand = 0, this.reserved = 0, this.available = 0});
+
+  final int warehouseId;
+  final String name;
+  final int onHand;
+  final int reserved;
+  final int available;
+
+  factory WarehouseStock.fromJson(Map<String, dynamic> j) => WarehouseStock(
+        warehouseId: _asInt(j['warehouse_id']),
+        name: (j['name'] ?? '').toString(),
+        onHand: _asInt(j['on_hand']),
+        reserved: _asInt(j['reserved']),
+        available: _asInt(j['available']),
+      );
+
+  @override
+  List<Object?> get props => [warehouseId, name, onHand, reserved, available];
+}
+
+/// A supplier that sells the product (0120): by its names for it or its
+/// prices.
+class ProductSupplierRef extends Equatable {
+  const ProductSupplierRef({required this.id, required this.name});
+
+  final int id;
+  final String name;
+
+  @override
+  List<Object?> get props => [id, name];
+}
+
 /// `{lang: name}` from a `names` object (0118), empty names left out.
 Map<String, String> productNamesFromJson(dynamic raw) {
   if (raw is! Map) return const {};
@@ -175,6 +257,10 @@ class Product extends Equatable {
     this.category,
     this.price,
     this.status = 'active',
+    this.lifecycleCode,
+    this.lifecycleReason,
+    this.stock,
+    this.suppliers = const [],
     this.trackingMode = TrackingMode.untracked,
     this.pickingRule = 'FEFO',
     this.requiresInspection = false,
@@ -209,6 +295,18 @@ class Product extends Equatable {
   final String? category;
   final double? price;
   final String status;
+
+  /// As stored (0120); read through [lifecycle].
+  final String? lifecycleCode;
+
+  /// Why it was made dormant, discontinued or archived.
+  final String? lifecycleReason;
+
+  /// Its stock where the person can see (0120); null when not loaded.
+  final ProductStock? stock;
+
+  /// Every supplier that sells it (0120).
+  final List<ProductSupplierRef> suppliers;
   final TrackingMode trackingMode;
 
   /// §16's default draw order for this product (0074): FIFO/FEFO/LIFO/MANUAL.
@@ -243,6 +341,27 @@ class Product extends Equatable {
 
   bool get isActive => status == 'active';
 
+  /// Where the product stands. [status] is the older on/off switch and wins
+  /// when the two disagree: inactive without a lifecycle reads as dormant.
+  ProductLifecycle get lifecycle {
+    final l = ProductLifecycle.parse(lifecycleCode);
+    if (!isActive) return l == null || l == ProductLifecycle.active ? ProductLifecycle.dormant : l;
+    return ProductLifecycle.active;
+  }
+
+  /// This product in another lifecycle (for screens and fakes; the server
+  /// keeps [status] in step the same way).
+  Product withLifecycle(ProductLifecycle l, {String? reason}) => Product(
+        id: id, janCode: janCode, name: name, nameEn: nameEn, names: names, sku: sku, maker: maker,
+        category: category, price: price,
+        status: l == ProductLifecycle.active ? 'active' : 'inactive',
+        lifecycleCode: l.wire, lifecycleReason: l == ProductLifecycle.active ? null : reason,
+        stock: stock, suppliers: suppliers, trackingMode: trackingMode, pickingRule: pickingRule,
+        requiresInspection: requiresInspection, baseUom: baseUom, uoms: uoms, barcodes: barcodes,
+        supplierNames: supplierNames, unitWeightG: unitWeightG, weightSource: weightSource,
+        weightSourceUrl: weightSourceUrl, weightNote: weightNote, createdAt: createdAt, updatedAt: updatedAt,
+      );
+
   /// The pack units beyond the base one — what an operator can actually choose
   /// between when counting or receiving.
   List<ProductUom> get packUoms =>
@@ -272,6 +391,13 @@ class Product extends Equatable {
         category: _asText(json['category']),
         price: _asDouble(json['price']),
         status: (json['status'] ?? 'active').toString(),
+        lifecycleCode: _asText(json['lifecycle']),
+        lifecycleReason: _asText(json['lifecycle_reason']),
+        stock: json['stock'] is Map ? ProductStock.fromJson((json['stock'] as Map).cast<String, dynamic>()) : null,
+        suppliers: [
+          for (final s in (json['suppliers'] as List? ?? const []).whereType<Map>())
+            ProductSupplierRef(id: _asInt(s['id']), name: (s['name'] ?? '').toString()),
+        ],
         trackingMode: TrackingMode.fromCode(json['tracking_mode']),
         pickingRule: (json['picking_rule'] ?? 'FEFO').toString(),
         requiresInspection: json['requires_inspection'] == true,
@@ -301,6 +427,10 @@ class Product extends Equatable {
         category,
         price,
         status,
+        lifecycleCode,
+        lifecycleReason,
+        stock,
+        suppliers,
         trackingMode,
         pickingRule,
         requiresInspection,
