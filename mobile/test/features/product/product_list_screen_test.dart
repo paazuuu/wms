@@ -455,7 +455,7 @@ void main() {
     expect(find.byKey(const ValueKey('lc-bar')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('lc-to-archived')));
     await tester.pumpAndSettle();
-    expect(find.text('2件を「削除済み」にしますか？'), findsOneWidget);
+    expect(find.text('2件を「アーカイブ」にしますか？'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('lc-reason')), '取扱い終了');
     await tester.tap(find.byKey(const ValueKey('lc-confirm')));
     await tester.pumpAndSettle();
@@ -512,5 +512,46 @@ void main() {
     expect(repo.lifecycleCalls.single.ids, [1]);
     expect(repo.lifecycleCalls.single.lifecycle, ProductLifecycle.dormant);
     expect(repo.lifecycleCalls.single.reason, isNull);
+  });
+
+  testWidgets('the photo view shows the same products, filters and selection as the list', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: [
+      stocked,
+      empty,
+      sleeping,
+      const Product(id: 5, janCode: '4900000000005', name: '写真あり', imageCount: 2),
+    ]);
+    final container = await _pump(tester, repo, lifecycle: true);
+    container.read(productPhotoViewProvider.notifier).state = true;
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('products-grid')), findsOneWidget);
+    // Active ones only, as in the list: the discontinued one is not there.
+    expect(find.byKey(const ValueKey('pl-product-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pl-product-3')), findsNothing);
+    expect(find.text('3件を表示（全4件）'), findsOneWidget);
+
+    // 写真なし is a filter of the same list.
+    await tester.tap(find.byKey(const ValueKey('pf-without-images')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pl-product-5')), findsNothing);
+    expect(find.text('2件を表示（全4件）'), findsOneWidget);
+
+    // A state change shows in both views at once.
+    await tester.tap(find.byKey(const ValueKey('lc-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pl-product-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-to-archived')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pl-product-2')), findsNothing);
+    container.read(productPhotoViewProvider.notifier).state = false;
+    await tester.pumpAndSettle();
+    expect(find.text('サラサ'), findsNothing);
+    expect(find.text('ボールペン'), findsOneWidget);
   });
 }

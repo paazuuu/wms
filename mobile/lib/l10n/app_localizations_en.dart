@@ -8302,7 +8302,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lifecycleToDiscontinued => 'Discontinue';
 
   @override
-  String get lifecycleToArchived => 'Archive (logical delete)';
+  String get lifecycleToArchived => 'Archive';
 
   @override
   String get lcSelect => 'Choose and change';
@@ -8346,7 +8346,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lcArchivedBody =>
-      'Taken out of the product library (a logical delete). Nothing is erased: choose \"Archived\" in the state filter to see them, and they can be restored.';
+      'Kept out of the everyday list. Its data, history and stock records all stay, and it can be made active again at any time (choose \"Archived\" in the state filter to see it).';
 
   @override
   String get lcReason => 'Reason (optional), e.g. ended by the maker';
@@ -8478,4 +8478,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quoteRateLabel => 'Rate';
+
+  @override
+  String get quoteLineArchived => 'Archived';
+
+  @override
+  String get quoteLineDormant => 'Dormant';
+
+  @override
+  String get quoteLineDiscontinued => 'Discontinued';
+
+  @override
+  String quoteInactiveNote(int count) {
+    return '$count are registered but not active (archived, dormant or discontinued), so the library\'s list does not show them.';
+  }
+
+  @override
+  String quoteRestore(int count) {
+    return 'Make active ($count)';
+  }
+
+  @override
+  String get quoteRestoreNeedsAdmin =>
+      'Making them active needs the administrator.';
+
+  @override
+  String quoteRestored(int count) {
+    return '$count made active';
+  }
+
+  @override
+  String quoteRestoreQ(int count) {
+    return '$count of these are not active';
+  }
+
+  @override
+  String get quoteRestoreBody =>
+      'They can be made active as the prices are saved, so the library shows them again.';
+
+  @override
+  String get quoteRestoreAndSave => 'Make active and save';
+
+  @override
+  String get quoteSaveOnly => 'Save, leave as they are';
 }

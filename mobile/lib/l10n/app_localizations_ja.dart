@@ -8121,7 +8121,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lifecycleDiscontinued => '提供終了';
 
   @override
-  String get lifecycleArchived => '削除済み';
+  String get lifecycleArchived => 'アーカイブ';
 
   @override
   String get lifecycleToActive => '取扱中に戻す';
@@ -8133,7 +8133,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lifecycleToDiscontinued => '提供終了にする';
 
   @override
-  String get lifecycleToArchived => '削除済みにする（論理削除）';
+  String get lifecycleToArchived => 'アーカイブする';
 
   @override
   String get lcSelect => '選択して一括操作';
@@ -8174,7 +8174,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get lcArchivedBody =>
-      '商品ライブラリーから外します（論理削除）。データは消えず、「状態」の絞り込みで「削除済み」を選べば見られ、戻すこともできます。';
+      '普段の一覧から外して保管します。データ・履歴・在庫の記録はすべて残り、いつでも取扱中に戻せます（「状態」の絞り込みで「アーカイブ」を選ぶと見られます）。';
 
   @override
   String get lcReason => '理由（任意）　例：メーカー廃番';
@@ -8302,4 +8302,45 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get quoteRateLabel => '掛率';
+
+  @override
+  String get quoteLineArchived => 'アーカイブ中';
+
+  @override
+  String get quoteLineDormant => '休眠中';
+
+  @override
+  String get quoteLineDiscontinued => '提供終了';
+
+  @override
+  String quoteInactiveNote(int count) {
+    return '$count件は登録済みですが取扱中ではありません（アーカイブ・休眠・提供終了）。このままでは商品ライブラリーの一覧に出ません。';
+  }
+
+  @override
+  String quoteRestore(int count) {
+    return '取扱中に戻す（$count件）';
+  }
+
+  @override
+  String get quoteRestoreNeedsAdmin => '取扱中に戻すには管理者の権限が必要です。';
+
+  @override
+  String quoteRestored(int count) {
+    return '$count件を取扱中に戻しました';
+  }
+
+  @override
+  String quoteRestoreQ(int count) {
+    return '取扱中でない商品が$count件あります';
+  }
+
+  @override
+  String get quoteRestoreBody => '価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。';
+
+  @override
+  String get quoteRestoreAndSave => '取扱中に戻して保存';
+
+  @override
+  String get quoteSaveOnly => '状態はそのままで保存';
 }

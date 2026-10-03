@@ -47,6 +47,8 @@ void main() {
     expect(find.text('商品ライブラリー'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.photo_library_outlined));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('pl-without-images')), findsOneWidget);
+    // The same list, drawn as pictures, with the same filters.
+    expect(find.byKey(const ValueKey('pf-without-images')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pf-maker')), findsOneWidget);
   });
 }

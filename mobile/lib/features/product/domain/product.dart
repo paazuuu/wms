@@ -278,6 +278,7 @@ class Product extends Equatable {
     this.unit,
     this.listPrice,
     this.attributes = const [],
+    this.imageCount = 0,
     this.trackingMode = TrackingMode.untracked,
     this.pickingRule = 'FEFO',
     this.requiresInspection = false,
@@ -331,6 +332,9 @@ class Product extends Equatable {
   final String? unit;
   final double? listPrice;
   final List<ProductPart> attributes;
+
+  /// How many pictures it has (0109, read since 0122).
+  final int imageCount;
   final TrackingMode trackingMode;
 
   /// §16's default draw order for this product (0074): FIFO/FEFO/LIFO/MANUAL.
@@ -381,7 +385,7 @@ class Product extends Equatable {
         status: l == ProductLifecycle.active ? 'active' : 'inactive',
         lifecycleCode: l.wire, lifecycleReason: l == ProductLifecycle.active ? null : reason,
         stock: stock, suppliers: suppliers, baseName: baseName, unit: unit, listPrice: listPrice,
-        attributes: attributes, trackingMode: trackingMode, pickingRule: pickingRule,
+        attributes: attributes, imageCount: imageCount, trackingMode: trackingMode, pickingRule: pickingRule,
         requiresInspection: requiresInspection, baseUom: baseUom, uoms: uoms, barcodes: barcodes,
         supplierNames: supplierNames, unitWeightG: unitWeightG, weightSource: weightSource,
         weightSourceUrl: weightSourceUrl, weightNote: weightNote, createdAt: createdAt, updatedAt: updatedAt,
@@ -435,6 +439,7 @@ class Product extends Equatable {
                 value: _asText(a['value'])!,
               ),
         ],
+        imageCount: _asInt(json['image_count'] ?? 0),
         trackingMode: TrackingMode.fromCode(json['tracking_mode']),
         pickingRule: (json['picking_rule'] ?? 'FEFO').toString(),
         requiresInspection: json['requires_inspection'] == true,
@@ -472,6 +477,7 @@ class Product extends Equatable {
         unit,
         listPrice,
         attributes,
+        imageCount,
         trackingMode,
         pickingRule,
         requiresInspection,

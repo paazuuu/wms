@@ -7,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
+import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/product_library/application/product_naming_providers.dart';
 import 'package:wms_mobile/features/product_library/data/quote_repository.dart';
 import 'package:wms_mobile/features/product_library/domain/product_naming.dart';
@@ -89,6 +92,9 @@ void main() {
       QuoteImportScreen(pickFile: () async => _file()),
       overrides: [
         quoteRepositoryProvider.overrideWithValue(quotes),
+        productRepositoryProvider.overrideWithValue(FakeProductRepository(products: const [
+          Product(id: 9, janCode: '4902778198940', name: 'ユニボール エア 0.5 黒'),
+        ])),
         productNamingRepositoryProvider.overrideWithValue(naming),
         tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
           TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
@@ -149,6 +155,9 @@ void main() {
       QuoteImportScreen(pickFile: () async => _file()),
       overrides: [
         quoteRepositoryProvider.overrideWithValue(quotes),
+        productRepositoryProvider.overrideWithValue(FakeProductRepository(products: const [
+          Product(id: 9, janCode: '4902778198940', name: 'ユニボール エア 0.5 黒'),
+        ])),
         tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
           TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
         ])),
@@ -175,6 +184,9 @@ void main() {
       QuoteImportScreen(pickFile: () async => _file()),
       overrides: [
         quoteRepositoryProvider.overrideWithValue(quotes),
+        productRepositoryProvider.overrideWithValue(FakeProductRepository(products: const [
+          Product(id: 9, janCode: '4902778198940', name: 'ユニボール エア 0.5 黒'),
+        ])),
         tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
           TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
         ])),
@@ -188,5 +200,46 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('quote-save')));
     await tester.pumpAndSettle();
     expect(quotes.savePartner, 4);
+  });
+
+  testWidgets('a line tied to an archived product says so, and can be made active as prices are saved', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final quotes = _FakeQuoteRepository(_quote);
+    final products = FakeProductRepository(products: const [
+      Product(id: 9, janCode: '4902778198940', name: 'ユニボール エア 0.5 黒', status: 'inactive', lifecycleCode: 'archived'),
+    ]);
+    await pumpApp(
+      tester,
+      QuoteImportScreen(pickFile: () async => _file()),
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(quotes),
+        productRepositoryProvider.overrideWithValue(products),
+        productCanLifecycleProvider.overrideWithValue(true),
+        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
+          TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
+        ])),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('quote-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('quote-read')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('アーカイブ中'), findsOneWidget);
+    expect(find.byKey(const ValueKey('quote-inactive')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('quote-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('取扱中でない商品が1件あります'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('quote-restore-save')));
+    await tester.pumpAndSettle();
+
+    expect(products.lifecycleCalls.single.ids, [9]);
+    expect(products.lifecycleCalls.single.lifecycle, ProductLifecycle.active);
+    expect(quotes.saved, isNotNull);
+    // Active now: the line and the note follow.
+    expect(find.text('アーカイブ中'), findsNothing);
+    expect(find.byKey(const ValueKey('quote-inactive')), findsNothing);
   });
 }

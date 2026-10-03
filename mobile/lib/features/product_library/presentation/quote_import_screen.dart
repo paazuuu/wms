@@ -13,6 +13,7 @@ import '../../delivery/application/delivery_providers.dart';
 import '../../partners/application/trading_partner_providers.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../../product/application/product_providers.dart';
+import '../../product/domain/product.dart';
 import '../application/product_library_providers.dart';
 import '../data/quote_repository.dart';
 import '../domain/supplier_quote.dart';
@@ -22,6 +23,13 @@ final quoteRepositoryProvider = Provider<QuoteRepository>((ref) => QuoteReposito
       functions: ref.watch(deliveryDioProvider),
       rest: ref.watch(restDioProvider),
     ));
+
+/// Every product, whatever its lifecycle and whatever the library's search
+/// says, to tell what each line is tied to.
+final quoteAllProductsProvider = FutureProvider.autoDispose<List<Product>>((ref) async {
+  final r = await ref.watch(productRepositoryProvider).list(search: null, status: null);
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
 
 /// The suppliers a quotation can come from.
 final quoteSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>>((ref) async {
@@ -123,6 +131,35 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
 
   int get _matched => _lines.where((l) => QuoteLine.productId(l) != null).length;
 
+  /// Every product of ours, whatever its lifecycle (0120), by id — so a line
+  /// tied to an archived, dormant or discontinued product says so.
+  Map<int, Product> get _products => {
+        for (final p in ref.read(quoteAllProductsProvider).valueOrNull ?? const <Product>[]) p.id: p,
+      };
+
+  /// Products the lines are tied to that are not active.
+  List<int> _inactiveIds(Map<int, Product> byId) => {
+        for (final l in _lines)
+          if (QuoteLine.productId(l) case final id? when byId[id] != null && byId[id]!.lifecycle != ProductLifecycle.active) id,
+      }.toList()
+        ..sort();
+
+  Future<bool> _restore(List<int> ids) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(productRepositoryProvider).setLifecycle(ids, ProductLifecycle.active);
+    if (!mounted) return false;
+    switch (r) {
+      case ApiSuccess(:final data):
+        ref.invalidate(productListProvider);
+        ref.invalidate(quoteAllProductsProvider);
+        _snack(l10n.quoteRestored(data));
+        return true;
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+        return false;
+    }
+  }
+
   Future<void> _register() async {
     final l10n = AppLocalizations.of(context);
     final created = await showRegisterProductsSheet(
@@ -152,11 +189,39 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
       ];
     });
     ref.invalidate(productListProvider);
+    ref.invalidate(quoteAllProductsProvider);
     _snack(l10n.rpRegistered(created.length));
   }
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
+    // Saving prices for products that are not active leaves them out of the
+    // library's list: offer to make them active at the same time.
+    final inactive = _inactiveIds(_products);
+    if (inactive.isNotEmpty && ref.read(productCanLifecycleProvider)) {
+      final restore = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.quoteRestoreQ(inactive.length)),
+          content: Text(l10n.quoteRestoreBody),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.actionCancel)),
+            OutlinedButton(
+              key: const ValueKey('quote-save-only'),
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.quoteSaveOnly),
+            ),
+            FilledButton(
+              key: const ValueKey('quote-restore-save'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.quoteRestoreAndSave),
+            ),
+          ],
+        ),
+      );
+      if (restore == null || !mounted) return;
+      if (restore && !await _restore(inactive)) return;
+    }
     setState(() => _busy = true);
     final r = await ref.read(quoteRepositoryProvider).save(
           partnerId: _partnerId!,
@@ -184,6 +249,10 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
     final read = _read;
     final newOnes = _newOnes;
     final noJan = _lines.where((l) => QuoteLine.productId(l) == null && !QuoteLine.hasJan(l)).length;
+    // Watched so a line's state follows the library's.
+    final byId = {for (final p in ref.watch(quoteAllProductsProvider).valueOrNull ?? const <Product>[]) p.id: p};
+    final inactive = _inactiveIds(byId);
+    final canRestore = ref.watch(productCanLifecycleProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.quoteImportTitle)),
@@ -269,6 +338,32 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
                 ),
               ],
             ),
+            // Registered, but archived, dormant or discontinued (0120): the
+            // library's list does not show them until they are active again.
+            if (inactive.isNotEmpty)
+              Card(
+                key: const ValueKey('quote-inactive'),
+                color: theme.colorScheme.tertiaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.quoteInactiveNote(inactive.length)),
+                      const SizedBox(height: AppSpacing.sm),
+                      if (canRestore)
+                        FilledButton.icon(
+                          key: const ValueKey('quote-restore'),
+                          onPressed: _busy ? null : () => _restore(inactive),
+                          icon: const Icon(Icons.unarchive_outlined, size: 18),
+                          label: Text(l10n.quoteRestore(inactive.length)),
+                        )
+                      else
+                        Text(l10n.quoteRestoreNeedsAdmin, style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ),
             if (_partnerId == null && _matched > 0)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -279,7 +374,12 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
               StatusPill(tone: StatusTone.success, label: l10n.quoteSaved(s.prices, s.products)),
             ],
             const SizedBox(height: AppSpacing.md),
-            for (final (i, l) in _lines.indexed) _QuoteLineCard(key: ValueKey('quote-line-$i'), line: l),
+            for (final (i, l) in _lines.indexed)
+              _QuoteLineCard(
+                key: ValueKey('quote-line-$i'),
+                line: l,
+                lifecycle: byId[QuoteLine.productId(l)]?.lifecycle,
+              ),
           ],
         ],
       ),
@@ -288,9 +388,12 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
 }
 
 class _QuoteLineCard extends StatelessWidget {
-  const _QuoteLineCard({super.key, required this.line});
+  const _QuoteLineCard({super.key, required this.line, this.lifecycle});
 
   final Map<String, dynamic> line;
+
+  /// The tied product's lifecycle, when it is known.
+  final ProductLifecycle? lifecycle;
 
   String _yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
@@ -301,9 +404,14 @@ class _QuoteLineCard extends StatelessWidget {
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final matched = QuoteLine.productId(line) != null;
     final (tone, label) = matched
-        ? (line['matched_by'] == 'registered'
-            ? (StatusTone.success, l10n.quoteLineRegistered)
-            : (StatusTone.info, l10n.quoteLineKnown))
+        ? switch (lifecycle) {
+            ProductLifecycle.archived => (StatusTone.danger, l10n.quoteLineArchived),
+            ProductLifecycle.dormant => (StatusTone.neutral, l10n.quoteLineDormant),
+            ProductLifecycle.discontinued => (StatusTone.warning, l10n.quoteLineDiscontinued),
+            _ => line['matched_by'] == 'registered'
+                ? (StatusTone.success, l10n.quoteLineRegistered)
+                : (StatusTone.info, l10n.quoteLineKnown),
+          }
         : QuoteLine.hasJan(line)
             ? (StatusTone.warning, l10n.quoteLineNew)
             : (StatusTone.neutral, l10n.quoteLineNoJan);

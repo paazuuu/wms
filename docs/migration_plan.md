@@ -5876,6 +5876,27 @@ Also:
   - 選択して一括操作 and ファイルから一括登録 moved beside the list's count.
   - A long press on a product also starts choosing.
 
+### 0122 — one list for both views of 商品ライブラリー
+
+- The photo view read `product_library` (0109) on its own. So it showed
+  archived and filtered-out products, kept its own search, and missed state
+  changes made in the list.
+  - Both views now draw `list_products`. It returns `image_count`, so 写真なし
+    is a filter of the same list.
+  - Both views share the search, filters, the count, selection with the
+    bottom action bar, and long press.
+- The archived lifecycle is now called アーカイブ (アーカイブする), not
+  削除済み. Nothing is erased: an archived product is kept out of the
+  everyday list and can be made active again.
+- ファイルから一括登録:
+  - A line tied to a product that is not active says so: アーカイブ中, 休眠中
+    or 提供終了, instead of 登録済み.
+  - A note counts those products, with 取扱中に戻す for `product.lifecycle`.
+  - 価格を保存 asks whether to make them active as the prices are saved;
+    otherwise the library's list still would not show them.
+  - The screen looks products up in its own unfiltered read, so the
+    library's search does not hide them.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -16,6 +16,7 @@ class ProductFilter extends Equatable {
     this.supplierIds = const {},
     this.categories = const {},
     this.stock = StockFilter.all,
+    this.withoutImages = false,
   });
 
   final Set<ProductLifecycle> lifecycles;
@@ -23,6 +24,10 @@ class ProductFilter extends Equatable {
   final Set<int> supplierIds;
   final Set<String> categories;
   final StockFilter stock;
+
+  /// Only the products still without a picture (the photo view's old
+  /// 写真なしのみ, now a filter of the one list).
+  final bool withoutImages;
 
   /// Every lifecycle but the archived one: what "show inactive" shows.
   static const notArchived = {ProductLifecycle.active, ProductLifecycle.dormant, ProductLifecycle.discontinued};
@@ -32,6 +37,7 @@ class ProductFilter extends Equatable {
     if (makers.isNotEmpty && !makers.contains(p.maker ?? '')) return false;
     if (categories.isNotEmpty && !categories.contains(p.category ?? '')) return false;
     if (supplierIds.isNotEmpty && !p.suppliers.any((s) => supplierIds.contains(s.id))) return false;
+    if (withoutImages && p.imageCount > 0) return false;
     final onHand = p.stock?.onHand ?? 0;
     return switch (stock) {
       StockFilter.all => true,
@@ -42,7 +48,8 @@ class ProductFilter extends Equatable {
 
   /// How many choices narrow the list beyond the default.
   int get narrowing =>
-      makers.length + supplierIds.length + categories.length + (stock == StockFilter.all ? 0 : 1);
+      makers.length + supplierIds.length + categories.length + (stock == StockFilter.all ? 0 : 1) +
+      (withoutImages ? 1 : 0);
 
   ProductFilter copyWith({
     Set<ProductLifecycle>? lifecycles,
@@ -50,6 +57,7 @@ class ProductFilter extends Equatable {
     Set<int>? supplierIds,
     Set<String>? categories,
     StockFilter? stock,
+    bool? withoutImages,
   }) =>
       ProductFilter(
         lifecycles: lifecycles ?? this.lifecycles,
@@ -57,10 +65,11 @@ class ProductFilter extends Equatable {
         supplierIds: supplierIds ?? this.supplierIds,
         categories: categories ?? this.categories,
         stock: stock ?? this.stock,
+        withoutImages: withoutImages ?? this.withoutImages,
       );
 
   @override
-  List<Object?> get props => [lifecycles, makers, supplierIds, categories, stock];
+  List<Object?> get props => [lifecycles, makers, supplierIds, categories, stock, withoutImages];
 }
 
 final productFilterProvider = StateProvider<ProductFilter>((_) => const ProductFilter());

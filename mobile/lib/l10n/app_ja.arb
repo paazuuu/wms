@@ -7298,11 +7298,11 @@
   "lifecycleActive": "取扱中",
   "lifecycleDormant": "休眠",
   "lifecycleDiscontinued": "提供終了",
-  "lifecycleArchived": "削除済み",
+  "lifecycleArchived": "アーカイブ",
   "lifecycleToActive": "取扱中に戻す",
   "lifecycleToDormant": "休眠にする",
   "lifecycleToDiscontinued": "提供終了にする",
-  "lifecycleToArchived": "削除済みにする（論理削除）",
+  "lifecycleToArchived": "アーカイブする",
   "lcSelect": "選択して一括操作",
   "lcSelected": "{count}件を選択中",
   "@lcSelected": {
@@ -7337,7 +7337,7 @@
   "lcActiveBody": "入荷・出荷・発注などで、また選べるようになります。",
   "lcDormantBody": "しばらく扱わない商品です。入荷・出荷などで選べなくなりますが、いつでも取扱中に戻せます。",
   "lcDiscontinuedBody": "メーカーの廃番や取扱いの終了です。入荷・出荷などで選べなくなります。履歴と在庫の記録は残ります。",
-  "lcArchivedBody": "商品ライブラリーから外します（論理削除）。データは消えず、「状態」の絞り込みで「削除済み」を選べば見られ、戻すこともできます。",
+  "lcArchivedBody": "普段の一覧から外して保管します。データ・履歴・在庫の記録はすべて残り、いつでも取扱中に戻せます（「状態」の絞り込みで「アーカイブ」を選ぶと見られます）。",
   "lcReason": "理由（任意）　例：メーカー廃番",
   "lcDone": "{count}件を「{state}」にしました",
   "@lcDone": {
@@ -7429,5 +7429,44 @@
   "quoteTheirCode": "先方コード",
   "quoteCaseLabel": "入数",
   "quoteUnitPriceLabel": "単価",
-  "quoteRateLabel": "掛率"
+  "quoteRateLabel": "掛率",
+  "quoteLineArchived": "アーカイブ中",
+  "quoteLineDormant": "休眠中",
+  "quoteLineDiscontinued": "提供終了",
+  "quoteInactiveNote": "{count}件は登録済みですが取扱中ではありません（アーカイブ・休眠・提供終了）。このままでは商品ライブラリーの一覧に出ません。",
+  "@quoteInactiveNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteRestore": "取扱中に戻す（{count}件）",
+  "@quoteRestore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteRestoreNeedsAdmin": "取扱中に戻すには管理者の権限が必要です。",
+  "quoteRestored": "{count}件を取扱中に戻しました",
+  "@quoteRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteRestoreQ": "取扱中でない商品が{count}件あります",
+  "@quoteRestoreQ": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quoteRestoreBody": "価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。",
+  "quoteRestoreAndSave": "取扱中に戻して保存",
+  "quoteSaveOnly": "状態はそのままで保存"
 }

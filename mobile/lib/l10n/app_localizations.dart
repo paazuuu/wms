@@ -14860,7 +14860,7 @@ abstract class AppLocalizations {
   /// No description provided for @lifecycleArchived.
   ///
   /// In ja, this message translates to:
-  /// **'削除済み'**
+  /// **'アーカイブ'**
   String get lifecycleArchived;
 
   /// No description provided for @lifecycleToActive.
@@ -14884,7 +14884,7 @@ abstract class AppLocalizations {
   /// No description provided for @lifecycleToArchived.
   ///
   /// In ja, this message translates to:
-  /// **'削除済みにする（論理削除）'**
+  /// **'アーカイブする'**
   String get lifecycleToArchived;
 
   /// No description provided for @lcSelect.
@@ -14950,7 +14950,7 @@ abstract class AppLocalizations {
   /// No description provided for @lcArchivedBody.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーから外します（論理削除）。データは消えず、「状態」の絞り込みで「削除済み」を選べば見られ、戻すこともできます。'**
+  /// **'普段の一覧から外して保管します。データ・履歴・在庫の記録はすべて残り、いつでも取扱中に戻せます（「状態」の絞り込みで「アーカイブ」を選ぶと見られます）。'**
   String get lcArchivedBody;
 
   /// No description provided for @lcReason.
@@ -15186,6 +15186,72 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'掛率'**
   String get quoteRateLabel;
+
+  /// No description provided for @quoteLineArchived.
+  ///
+  /// In ja, this message translates to:
+  /// **'アーカイブ中'**
+  String get quoteLineArchived;
+
+  /// No description provided for @quoteLineDormant.
+  ///
+  /// In ja, this message translates to:
+  /// **'休眠中'**
+  String get quoteLineDormant;
+
+  /// No description provided for @quoteLineDiscontinued.
+  ///
+  /// In ja, this message translates to:
+  /// **'提供終了'**
+  String get quoteLineDiscontinued;
+
+  /// No description provided for @quoteInactiveNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件は登録済みですが取扱中ではありません（アーカイブ・休眠・提供終了）。このままでは商品ライブラリーの一覧に出ません。'**
+  String quoteInactiveNote(int count);
+
+  /// No description provided for @quoteRestore.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中に戻す（{count}件）'**
+  String quoteRestore(int count);
+
+  /// No description provided for @quoteRestoreNeedsAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中に戻すには管理者の権限が必要です。'**
+  String get quoteRestoreNeedsAdmin;
+
+  /// No description provided for @quoteRestored.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を取扱中に戻しました'**
+  String quoteRestored(int count);
+
+  /// No description provided for @quoteRestoreQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中でない商品が{count}件あります'**
+  String quoteRestoreQ(int count);
+
+  /// No description provided for @quoteRestoreBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格を保存すると一緒に取扱中に戻せます。戻すと商品ライブラリーの一覧に表示されます。'**
+  String get quoteRestoreBody;
+
+  /// No description provided for @quoteRestoreAndSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱中に戻して保存'**
+  String get quoteRestoreAndSave;
+
+  /// No description provided for @quoteSaveOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'状態はそのままで保存'**
+  String get quoteSaveOnly;
 }
 
 class _AppLocalizationsDelegate

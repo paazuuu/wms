@@ -8088,7 +8088,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lifecycleDiscontinued => '停止供应';
 
   @override
-  String get lifecycleArchived => '已删除';
+  String get lifecycleArchived => '已归档';
 
   @override
   String get lifecycleToActive => '恢复在售';
@@ -8100,7 +8100,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lifecycleToDiscontinued => '设为停止供应';
 
   @override
-  String get lifecycleToArchived => '设为已删除（逻辑删除）';
+  String get lifecycleToArchived => '归档';
 
   @override
   String get lcSelect => '选择后批量操作';
@@ -8139,7 +8139,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lcDiscontinuedBody => '厂商停产或我方停止经营：无法用于入库、出库等。历史与库存记录保留。';
 
   @override
-  String get lcArchivedBody => '从商品库移除（逻辑删除）。数据不会删除，在“状态”筛选中选择“已删除”即可查看并恢复。';
+  String get lcArchivedBody =>
+      '从日常列表中移出保管。数据、历史和库存记录全部保留，可随时恢复在售（在“状态”筛选中选择“已归档”即可查看）。';
 
   @override
   String get lcReason => '原因（可选），例如：厂商停产';
@@ -8267,4 +8268,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get quoteRateLabel => '折扣率';
+
+  @override
+  String get quoteLineArchived => '已归档';
+
+  @override
+  String get quoteLineDormant => '休眠中';
+
+  @override
+  String get quoteLineDiscontinued => '停止供应';
+
+  @override
+  String quoteInactiveNote(int count) {
+    return '$count 件已登录但未在售（已归档、休眠或停止供应），商品库列表中不会显示。';
+  }
+
+  @override
+  String quoteRestore(int count) {
+    return '恢复在售（$count 件）';
+  }
+
+  @override
+  String get quoteRestoreNeedsAdmin => '恢复在售需要管理员权限。';
+
+  @override
+  String quoteRestored(int count) {
+    return '已将 $count 件恢复在售';
+  }
+
+  @override
+  String quoteRestoreQ(int count) {
+    return '其中 $count 件未在售';
+  }
+
+  @override
+  String get quoteRestoreBody => '保存价格时可一并恢复在售，恢复后会在商品库中显示。';
+
+  @override
+  String get quoteRestoreAndSave => '恢复在售并保存';
+
+  @override
+  String get quoteSaveOnly => '保持状态并保存';
 }

@@ -15,7 +15,6 @@ import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
-import '../../product_library/presentation/product_library_screen.dart';
 import '../../product_library/presentation/quote_import_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
@@ -166,8 +165,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                if (!photos)
-                  IconButton(
+                IconButton(
                     tooltip: l10n.productsShowInactive,
                     icon: Icon(filter.lifecycles.length > 1
                         ? Icons.visibility_outlined
@@ -196,9 +194,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               child: const Icon(Icons.add),
             )
           : null,
-      body: photos
-          ? ProductLibraryView(onOpen: (p) => _openDetailById(p.id))
-          : Column(
+      // One list for both views: the same products, search, filters and
+      // selection, drawn as cards or as pictures (0122).
+      body: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
@@ -267,6 +265,35 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           message: (total ?? 0) > 0 ? l10n.pfNoneMatch : l10n.productsEmptyBody,
                         );
                       }
+                      void toggle(Product p) =>
+                          setState(() => selected!.contains(p.id) ? selected.remove(p.id) : selected.add(p.id));
+                      if (photos) {
+                        return RefreshIndicator(
+                          onRefresh: () async => ref.invalidate(productListProvider),
+                          child: GridView.builder(
+                            key: const ValueKey('products-grid'),
+                            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 220,
+                              mainAxisExtent: 270,
+                              crossAxisSpacing: AppSpacing.md,
+                              mainAxisSpacing: AppSpacing.md,
+                            ),
+                            itemCount: products.length,
+                            itemBuilder: (_, i) {
+                              final p = products[i];
+                              return _PhotoCard(
+                                product: p,
+                                selected: selected?.contains(p.id),
+                                onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
+                                onLongPress: canLifecycle && selected == null
+                                    ? () => setState(() => _selected = {p.id})
+                                    : null,
+                              );
+                            },
+                          ),
+                        );
+                      }
                       return RefreshIndicator(
                         onRefresh: () async => ref.invalidate(productListProvider),
                         child: ListView.separated(
@@ -282,9 +309,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                               onLongPress: canLifecycle && selected == null
                                   ? () => setState(() => _selected = {p.id})
                                   : null,
-                              onTap: selected != null
-                                  ? () => setState(() => selected.contains(p.id) ? selected.remove(p.id) : selected.add(p.id))
-                                  : () => _openDetailById(p.id),
+                              onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
                               onToggleStatus: canManage && selected == null && p.lifecycle != ProductLifecycle.archived
                                   ? () => _toggleStatus(p)
                                   : null,
@@ -299,6 +324,74 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// One product as a picture: its face, name, maker, JAN, stock, state and
+/// how many pictures it has — the same product as its card in the list.
+class _PhotoCard extends StatelessWidget {
+  const _PhotoCard({required this.product, required this.onTap, this.onLongPress, this.selected});
+
+  final Product product;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final bool? selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final p = product;
+    return Card(
+      key: ValueKey('pl-product-${p.id}'),
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      color: selected == true ? scheme.secondaryContainer : null,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Expanded(
+            child: Stack(children: [
+              Positioned.fill(
+                child: LayoutBuilder(
+                  builder: (_, c) => Center(
+                    child: ProductThumb(
+                      productId: p.id,
+                      janCode: p.janCode,
+                      productName: p.name,
+                      size: c.maxHeight < c.maxWidth ? c.maxHeight : c.maxWidth,
+                      openOnTap: false,
+                    ),
+                  ),
+                ),
+              ),
+              if (selected != null)
+                Positioned(
+                  left: 4,
+                  top: 4,
+                  child: Checkbox(key: ValueKey('lc-check-${p.id}'), value: selected, onChanged: (_) => onTap()),
+                ),
+              if (p.lifecycle != ProductLifecycle.active)
+                Positioned(right: 6, top: 6, child: LifecyclePill(lifecycle: p.lifecycle)),
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ProductNameText(name: p.name, nameEn: p.nameEn, names: p.names, maxLines: 1, style: theme.textTheme.titleSmall),
+              Text([if (p.maker != null) widenKana(p.maker!), p.janCode].join(' · '),
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
+              if (p.stock case final st?) StockLine(stock: st),
+              Text(p.imageCount == 0 ? l10n.plNoImages : l10n.plImageCount(p.imageCount),
+                  style: theme.textTheme.labelSmall
+                      ?.copyWith(color: p.imageCount == 0 ? scheme.error : scheme.onSurfaceVariant)),
+            ]),
+          ),
+        ]),
+      ),
     );
   }
 }
@@ -523,6 +616,13 @@ class _FilterBar extends ConsumerWidget {
               ),
             ),
           ),
+          FilterChip(
+            key: const ValueKey('pf-without-images'),
+            label: Text(l10n.plWithoutImages),
+            selected: filter.withoutImages,
+            onSelected: (v) => set(filter.copyWith(withoutImages: v)),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           if (filter != const ProductFilter())
             ActionChip(
               key: const ValueKey('pf-clear'),
