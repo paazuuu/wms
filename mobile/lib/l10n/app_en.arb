@@ -2900,5 +2900,8 @@
   "supTheirName": "Their name: {name}",
   "supTheirCode": "Their code: {code}",
   "supUpdated": "Updated {date}",
-  "supNoPrice": "No price yet"
+  "supNoPrice": "No price yet",
+  "pdTabOurs": "Ours",
+  "pdSupplierTerms": "Terms with {name}",
+  "pdProductId": "Product ID"
 }

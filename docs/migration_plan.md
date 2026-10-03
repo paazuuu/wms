@@ -5924,6 +5924,27 @@ Also:
   - The library card shows 仕入先 N社 with each price.
   - The product screen has a 仕入先（N社） table with the cheapest marked.
 
+### Product screen: one tab per supplier (app only)
+
+- Everything a supplier says about a product already hangs off the
+  product's own id (`products.id`), one relation per supplier:
+
+  | Table | Holds |
+  |---|---|
+  | `supplier_product_names` | its name, code, JAN and maker for the product |
+  | `supplier_product_attributes` | the product's attributes in its words |
+  | `notation_dialects` | every way it has written them |
+  | `supply_chain_supplier_products` | its price and terms |
+
+- The product screen now has a 自社 tab and one tab per supplier. Each
+  supplier tab shows the price on its label.
+  - 自社: our name, the parts it is built from, stock, the suppliers
+    compared, names by language, and settings.
+  - A supplier tab: its terms (取引条件), then its writing. That is its
+    name, code, JAN and maker, its attributes with 採用 to take one as
+    ours, and every spelling seen. Managers can edit it there.
+- 基本情報 shows the product id as P-000143.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

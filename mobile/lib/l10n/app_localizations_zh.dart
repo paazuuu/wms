@@ -8375,4 +8375,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get supNoPrice => '未登记价格';
+
+  @override
+  String get pdTabOurs => '本公司';
+
+  @override
+  String pdSupplierTerms(String name) {
+    return '与$name的交易条件';
+  }
+
+  @override
+  String get pdProductId => '商品ID';
 }

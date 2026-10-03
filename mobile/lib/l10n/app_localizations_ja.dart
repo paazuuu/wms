@@ -8409,4 +8409,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get supNoPrice => '価格未登録';
+
+  @override
+  String get pdTabOurs => '自社';
+
+  @override
+  String pdSupplierTerms(String name) {
+    return '$nameの取引条件';
+  }
+
+  @override
+  String get pdProductId => '商品ID';
 }

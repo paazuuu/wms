@@ -159,9 +159,15 @@ final _partnersProvider = FutureProvider.autoDispose<List<TradingPartner>>((ref)
     (await ref.watch(tradingPartnerRepositoryProvider).list()).when(success: (d) => d, failure: (f) => throw Exception(f.message)));
 
 class ProductSuppliersTab extends ConsumerWidget {
-  const ProductSuppliersTab({super.key, required this.productId});
+  const ProductSuppliersTab({super.key, required this.productId, this.onlySupplierId, this.header});
 
   final int productId;
+
+  /// One supplier only — the product screen's tab for that supplier.
+  final int? onlySupplierId;
+
+  /// Shown first, above the supplier's writing (its terms, on that tab).
+  final Widget? header;
 
   Future<void> _edit(BuildContext context, WidgetRef ref, ProductProfile p, SupplierProfile? s) async {
     final l10n = AppLocalizations.of(context);
@@ -203,9 +209,12 @@ class ProductSuppliersTab extends ConsumerWidget {
               message: humanizeApiErrorMessage(l10n, '$e'), onRetry: () => ref.invalidate(productProfileProvider(productId))),
           data: (p) {
             final ours = {for (final a in p.attributes) a.attribute.id: a.value};
+            final only = onlySupplierId;
+            final shown = only == null ? p.suppliers : [for (final s in p.suppliers) if (s.supplierId == only) s];
             return ListView(
               padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
               children: [
+                if (header != null) ...[header!, const SizedBox(height: AppSpacing.md)],
                 // Ours, for comparison.
                 Text(
                   [p.name, if (p.sku != null) p.sku!, if (p.janCode != null) p.janCode!, if (p.maker != null) p.maker!].join(' · '),
@@ -213,9 +222,9 @@ class ProductSuppliersTab extends ConsumerWidget {
                 ),
                 Text(l10n.plSuppliersHint, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.sm),
-                if (p.suppliers.isEmpty)
+                if (shown.isEmpty)
                   Padding(padding: const EdgeInsets.all(AppSpacing.lg), child: Text(l10n.plNoSuppliers)),
-                for (final s in p.suppliers)
+                for (final s in shown)
                   _SupplierCard(
                     supplier: s,
                     ours: ours,
@@ -225,7 +234,7 @@ class ProductSuppliersTab extends ConsumerWidget {
                     onAdopt: (a) => _save(context, ref, productId,
                         () => ref.read(productImageRepositoryProvider).setAttributeValues(productId, {a.attributeId: a.rawValue})),
                   ),
-                if (canManage)
+                if (canManage && (only == null || shown.isEmpty))
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(

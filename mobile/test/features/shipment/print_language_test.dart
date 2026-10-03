@@ -215,13 +215,11 @@ void main() {
       ],
       baseUom: Uom(code: 'PCS', name: '本'),
     );
-    final container = ProviderContainer(overrides: [
+    // At the root, as in the app: the supplier tabs read the product's
+    // profile through the picture repository.
+    await pumpApp(tester, const ProductDetailScreen(productId: 143), overrides: [
       productRepositoryProvider.overrideWithValue(FakeProductRepository(products: [product])),
-      tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
-      scCanViewProvider.overrideWithValue(false),
     ]);
-    addTearDown(container.dispose);
-    await pumpAppWith(tester, container, const ProductDetailScreen(productId: 143));
 
     String valueOf(String key) {
       final row = find.byKey(ValueKey(key));
@@ -244,5 +242,17 @@ void main() {
     expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-5')), matching: find.text('¥88')), findsOneWidget);
     expect(find.text('定価 ¥165　掛率 53%'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-6')), matching: find.text('価格未登録')), findsOneWidget);
+    expect(valueOf('pd-id'), 'P-000143');
+
+    // One tab for us and one per supplier, cheapest first, its price on the tab.
+    expect(find.byKey(const ValueKey('pd-tab-ours')), findsOneWidget);
+    expect(find.text('アケボノクラウン  ¥88'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pd-tab-supplier-6')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pd-tab-supplier-5')));
+    await tester.pumpAndSettle();
+    expect(find.text('アケボノクラウンの取引条件'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pd-supplier-tab-5')), findsOneWidget);
+    // Ours is not on this tab.
+    expect(find.text('基本情報'), findsNothing);
   });
 }

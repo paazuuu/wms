@@ -7565,5 +7565,15 @@
       }
     }
   },
-  "supNoPrice": "価格未登録"
+  "supNoPrice": "価格未登録",
+  "pdTabOurs": "自社",
+  "pdSupplierTerms": "{name}の取引条件",
+  "@pdSupplierTerms": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pdProductId": "商品ID"
 }

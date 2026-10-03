@@ -8587,4 +8587,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supNoPrice => 'No price yet';
+
+  @override
+  String get pdTabOurs => 'Ours';
+
+  @override
+  String pdSupplierTerms(String name) {
+    return 'Terms with $name';
+  }
+
+  @override
+  String get pdProductId => 'Product ID';
 }

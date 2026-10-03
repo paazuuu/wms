@@ -2900,5 +2900,8 @@
   "supTheirName": "对方写法：{name}",
   "supTheirCode": "对方代码：{code}",
   "supUpdated": "更新 {date}",
-  "supNoPrice": "未登记价格"
+  "supNoPrice": "未登记价格",
+  "pdTabOurs": "本公司",
+  "pdSupplierTerms": "与{name}的交易条件",
+  "pdProductId": "商品ID"
 }

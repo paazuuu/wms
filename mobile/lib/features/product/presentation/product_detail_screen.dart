@@ -25,6 +25,7 @@ import '../../product_library/presentation/product_gallery_screen.dart';
 import '../../product_library/presentation/product_naming_dialog.dart';
 import '../../../core/ui/fields_dialog.dart';
 import '../../../core/ui/product_name.dart';
+import '../../product_library/presentation/product_profile_tabs.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
@@ -95,7 +96,7 @@ class ProductDetailScreen extends ConsumerWidget {
               message: l10n.productsEmptyBody,
             );
           }
-          return RefreshIndicator(
+          final ours = RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(productListProvider);
               ref.invalidate(productLotsProvider(productId));
@@ -130,11 +131,58 @@ class ProductDetailScreen extends ConsumerWidget {
               ],
             ),
           );
+          if (product.suppliers.isEmpty) return ours;
+          // One tab for us — our name, codes, stock and settings — and one
+          // per supplier: what it calls the product, its code, its terms and
+          // its attributes in its own words, so no supplier's writing is
+          // squeezed into ours.
+          return DefaultTabController(
+            length: 1 + product.suppliers.length,
+            child: Column(
+              children: [
+                Material(
+                  color: Theme.of(context).colorScheme.surface,
+                  child: TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    tabs: [
+                      Tab(key: const ValueKey('pd-tab-ours'), icon: const Icon(Icons.home_work_outlined, size: 18), text: l10n.pdTabOurs),
+                      for (final s in product.suppliers)
+                        Tab(
+                          key: ValueKey('pd-tab-supplier-${s.id}'),
+                          icon: const Icon(Icons.storefront_outlined, size: 18),
+                          text: s.unitPrice == null ? s.name : '${s.name}  ¥${_price(s.unitPrice!)}',
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      ours,
+                      for (final s in product.suppliers)
+                        ProductSuppliersTab(
+                          key: ValueKey('pd-supplier-tab-${s.id}'),
+                          productId: productId,
+                          onlySupplierId: s.id,
+                          header: _Section(
+                            title: l10n.pdSupplierTerms(s.name),
+                            children: [SupplierTable(suppliers: [s])],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 }
+
+String _price(double v) => v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
 
 /// Name, codes, status and the fact chips the list screen shows too — so the
 /// detail opens on the same summary the operator tapped.
@@ -197,6 +245,9 @@ class _Header extends ConsumerWidget {
     // What the product is, one fact a row: who makes it, what it is called,
     // its codes and its attributes — the parts its name is built from.
     final facts = <(String, String, Key, bool)>[
+      // The product's own id: every supplier's name, code, price and
+      // attributes for it hang off this one key.
+      (l10n.pdProductId, 'P-${product.id.toString().padLeft(6, '0')}', const ValueKey('pd-id'), true),
       (l10n.pdMaker, widenKana(product.maker ?? '—'), const ValueKey('pd-maker'), false),
       (l10n.pdBaseName, widenKana(product.baseName ?? product.name), const ValueKey('pd-base-name'), false),
       (l10n.pdCode, product.sku ?? '—', const ValueKey('pd-code'), true),

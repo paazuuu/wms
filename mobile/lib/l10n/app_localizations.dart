@@ -15342,6 +15342,24 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'価格未登録'**
   String get supNoPrice;
+
+  /// No description provided for @pdTabOurs.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社'**
+  String get pdTabOurs;
+
+  /// No description provided for @pdSupplierTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}の取引条件'**
+  String pdSupplierTerms(String name);
+
+  /// No description provided for @pdProductId.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ID'**
+  String get pdProductId;
 }
 
 class _AppLocalizationsDelegate
