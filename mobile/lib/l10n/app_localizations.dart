@@ -14710,13 +14710,13 @@ abstract class AppLocalizations {
   /// No description provided for @quoteImportTitle.
   ///
   /// In ja, this message translates to:
-  /// **'見積もりから一括登録'**
+  /// **'ファイルから一括登録'**
   String get quoteImportTitle;
 
   /// No description provided for @quoteImportIntro.
   ///
   /// In ja, this message translates to:
-  /// **'仕入先の見積書（Excel・PDF・写真）をAIが読み取ります。まだない商品は自社の様式で登録し、見積もりの単価・定価・掛率・入数はこの仕入先の価格として保存します。仕入先の書き方も覚えるので、次からはもっと正確に読めます。'**
+  /// **'見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。'**
   String get quoteImportIntro;
 
   /// No description provided for @quoteSupplier.
@@ -14890,7 +14890,7 @@ abstract class AppLocalizations {
   /// No description provided for @lcSelect.
   ///
   /// In ja, this message translates to:
-  /// **'選んでまとめて変更'**
+  /// **'選択して一括操作'**
   String get lcSelect;
 
   /// No description provided for @lcSelected.
@@ -15060,6 +15060,132 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫 {onHand}・引当 {reserved}・引当可能 {available}'**
   String stockWarehouseRow(int onHand, int reserved, int available);
+
+  /// No description provided for @pdBasics.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本情報'**
+  String get pdBasics;
+
+  /// No description provided for @pdMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get pdMaker;
+
+  /// No description provided for @pdBaseName.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名'**
+  String get pdBaseName;
+
+  /// No description provided for @pdCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番'**
+  String get pdCode;
+
+  /// No description provided for @pdJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get pdJan;
+
+  /// No description provided for @pdCategory.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリ'**
+  String get pdCategory;
+
+  /// No description provided for @pdUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get pdUnit;
+
+  /// No description provided for @pdListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価'**
+  String get pdListPrice;
+
+  /// No description provided for @pdPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売価格'**
+  String get pdPrice;
+
+  /// No description provided for @pdSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get pdSuppliers;
+
+  /// No description provided for @pdSpec.
+  ///
+  /// In ja, this message translates to:
+  /// **'規格'**
+  String get pdSpec;
+
+  /// No description provided for @quoteSupplierOptional.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先（任意）'**
+  String get quoteSupplierOptional;
+
+  /// No description provided for @quoteSupplierNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'指定しない（ファイルから判断）'**
+  String get quoteSupplierNone;
+
+  /// No description provided for @quoteSupplierHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'選ぶと、その仕入先の書き方で読み、価格も保存できます'**
+  String get quoteSupplierHint;
+
+  /// No description provided for @quoteSupplierDetected.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルに書かれた会社から判断しました'**
+  String get quoteSupplierDetected;
+
+  /// No description provided for @quoteSaveNeedsSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格を保存するには仕入先を選んでください（商品の登録だけなら不要です）'**
+  String get quoteSaveNeedsSupplier;
+
+  /// No description provided for @quoteOurProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済みの自社商品'**
+  String get quoteOurProduct;
+
+  /// No description provided for @quoteTheirCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方コード'**
+  String get quoteTheirCode;
+
+  /// No description provided for @quoteCaseLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'入数'**
+  String get quoteCaseLabel;
+
+  /// No description provided for @quoteUnitPriceLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get quoteUnitPriceLabel;
+
+  /// No description provided for @quoteRateLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率'**
+  String get quoteRateLabel;
 }
 
 class _AppLocalizationsDelegate

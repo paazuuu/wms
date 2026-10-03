@@ -7198,8 +7198,8 @@
   "productDeleteInUseTitle": "この商品は削除できません",
   "productDeleteInUse": "在庫・発注・入荷・出荷・請求のどれかで使われています。履歴が読めるよう、削除ではなく無効にしてください。",
   "productDeleteNotReady": "削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。",
-  "quoteImportTitle": "見積もりから一括登録",
-  "quoteImportIntro": "仕入先の見積書（Excel・PDF・写真）をAIが読み取ります。まだない商品は自社の様式で登録し、見積もりの単価・定価・掛率・入数はこの仕入先の価格として保存します。仕入先の書き方も覚えるので、次からはもっと正確に読めます。",
+  "quoteImportTitle": "ファイルから一括登録",
+  "quoteImportIntro": "見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。",
   "quoteSupplier": "仕入先",
   "quoteChooseSupplier": "先に仕入先を選んでください",
   "quoteChooseFile": "見積書のファイルを選ぶ",
@@ -7303,7 +7303,7 @@
   "lifecycleToDormant": "休眠にする",
   "lifecycleToDiscontinued": "提供終了にする",
   "lifecycleToArchived": "削除済みにする（論理削除）",
-  "lcSelect": "選んでまとめて変更",
+  "lcSelect": "選択して一括操作",
   "lcSelected": "{count}件を選択中",
   "@lcSelected": {
     "placeholders": {
@@ -7408,5 +7408,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "pdBasics": "基本情報",
+  "pdMaker": "メーカー",
+  "pdBaseName": "品名",
+  "pdCode": "品番",
+  "pdJan": "JANコード",
+  "pdCategory": "カテゴリ",
+  "pdUnit": "単位",
+  "pdListPrice": "定価",
+  "pdPrice": "販売価格",
+  "pdSuppliers": "仕入先",
+  "pdSpec": "規格",
+  "quoteSupplierOptional": "仕入先（任意）",
+  "quoteSupplierNone": "指定しない（ファイルから判断）",
+  "quoteSupplierHint": "選ぶと、その仕入先の書き方で読み、価格も保存できます",
+  "quoteSupplierDetected": "ファイルに書かれた会社から判断しました",
+  "quoteSaveNeedsSupplier": "価格を保存するには仕入先を選んでください（商品の登録だけなら不要です）",
+  "quoteOurProduct": "登録済みの自社商品",
+  "quoteTheirCode": "先方コード",
+  "quoteCaseLabel": "入数",
+  "quoteUnitPriceLabel": "単価",
+  "quoteRateLabel": "掛率"
 }

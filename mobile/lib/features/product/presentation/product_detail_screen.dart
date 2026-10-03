@@ -190,126 +190,201 @@ class _Header extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final canManage = ref.watch(productLibraryCanManageProvider);
+    final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    String yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    // What the product is, one fact a row: who makes it, what it is called,
+    // its codes and its attributes — the parts its name is built from.
+    final facts = <(String, String, Key, bool)>[
+      (l10n.pdMaker, widenKana(product.maker ?? '—'), const ValueKey('pd-maker'), false),
+      (l10n.pdBaseName, widenKana(product.baseName ?? product.name), const ValueKey('pd-base-name'), false),
+      (l10n.pdCode, product.sku ?? '—', const ValueKey('pd-code'), true),
+      (l10n.pdJan, product.janCode, const ValueKey('pd-jan'), true),
+      for (final at in product.attributes) (at.name, widenKana(at.value), ValueKey('pd-attr-${at.key}'), false),
+      if (product.category case final c? when c.trim().isNotEmpty) (l10n.pdCategory, c, const ValueKey('pd-category'), false),
+      if (product.unit case final u? when u.trim().isNotEmpty) (l10n.pdUnit, u, const ValueKey('pd-unit'), false),
+      if (product.listPrice case final lp?) (l10n.pdListPrice, yen(lp), const ValueKey('pd-list-price'), false),
+      if (product.price case final pr?) (l10n.pdPrice, yen(pr), const ValueKey('pd-price'), false),
+      if (product.suppliers.isNotEmpty)
+        (l10n.pdSuppliers, product.suppliers.map((s) => s.name).join('、'), const ValueKey('pd-suppliers'), false),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 72),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleMedium),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 96),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (product.maker case final m?) Text(widenKana(m), style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary)),
+                          ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleLarge),
+                          const SizedBox(height: AppSpacing.xs),
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.xs,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              LifecyclePill(lifecycle: product.lifecycle),
+                              Text(product.sku == null ? product.janCode : '${product.janCode} · ${product.sku}',
+                                  style: muted?.copyWith(fontFamily: AppFonts.mono)),
+                            ],
+                          ),
+                          if (product.lifecycleReason case final why? when !product.isActive)
+                            Padding(padding: const EdgeInsets.only(top: AppSpacing.xs), child: Text(why, style: muted)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                LifecyclePill(lifecycle: product.lifecycle),
+                const SizedBox(height: AppSpacing.md),
+                // What can be done with it, in one row.
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    if (canManage)
+                      FilledButton.tonalIcon(
+                        key: const ValueKey('product-edit'),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: Text(l10n.productEdit),
+                        onPressed: () async {
+                          final saved = await showModalBottomSheet<bool>(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (_) => ProductFormSheet(product: product),
+                          );
+                          if (saved == true) ref.invalidate(productListProvider);
+                        },
+                      ),
+                    // Its name in our format (0111): built from its parts.
+                    if (canManage)
+                      OutlinedButton.icon(
+                        key: const ValueKey('product-naming'),
+                        onPressed: () async {
+                          final saved = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => ProductNamingDialog(productId: product.id),
+                          );
+                          if (saved == true) {
+                            ref.invalidate(productListProvider);
+                            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pnSaved)));
+                          }
+                        },
+                        icon: const Icon(Icons.text_format_outlined, size: 18),
+                        label: Text(l10n.pnTitle),
+                      ),
+                    // Its names by language (0118).
+                    if (canManage)
+                      OutlinedButton.icon(
+                        key: const ValueKey('product-names'),
+                        onPressed: () => _editNames(context, ref),
+                        icon: const Icon(Icons.translate, size: 18),
+                        label: Text(l10n.productNamesTitle),
+                      ),
+                    // The product's pictures (0109).
+                    OutlinedButton.icon(
+                      key: const ValueKey('product-photos'),
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ProductGalleryScreen(productId: product.id, productName: product.name, janCode: product.janCode),
+                      )),
+                      icon: const Icon(Icons.photo_library_outlined, size: 18),
+                      label: Text(l10n.plOpenLibrary),
+                    ),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 2),
-            Text(
-              product.sku == null
-                  ? product.janCode
-                  : '${product.janCode} · ${product.sku}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                  fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
-            ),
-            // Every name it has (0118), so the Chinese and English are at
-            // hand whatever language this screen is in.
-            if (product.names.length > 1) ...[
-              const SizedBox(height: 2),
-              for (final l in const ['ja', 'en', 'zh'])
-                if (product.names[l] case final n?)
-                  Text('${const {'ja': '日本語', 'en': 'English', 'zh': '中文'}[l]}  $n',
-                      key: ValueKey('product-name-row-$l'),
-                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-            ],
-            if (product.category != null) ...[
-              const SizedBox(height: 2),
-              Text(product.category!,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
-            ],
-            if (product.lifecycleReason case final why? when !product.isActive)
-              Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-            const SizedBox(height: AppSpacing.sm),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _Section(
+          title: l10n.pdBasics,
+          children: [
+            for (final (label, value, key, mono) in facts)
+              _FactRow(key: key, label: label, value: value, mono: mono),
+            const SizedBox(height: AppSpacing.xs),
             ProductFacts(product: product),
-            // Its stock in each warehouse this person can see (0120).
-            if (product.stock case final st?) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(l10n.stockTitle, style: theme.textTheme.labelLarge),
-              StockLine(key: const ValueKey('product-detail-stock'), stock: st, style: theme.textTheme.bodyMedium),
-              for (final w in st.warehouses)
-                Text('${w.name}　${l10n.stockWarehouseRow(w.onHand, w.reserved, w.available)}',
-                    key: ValueKey('product-stock-wh-${w.warehouseId}'),
-                    style: theme.textTheme.bodySmall),
-            ],
-            // The product's pictures (0109): the first is shown in front of
-            // its name on every screen that lists goods.
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: const ValueKey('product-photos'),
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => ProductGalleryScreen(productId: product.id, productName: product.name, janCode: product.janCode),
-                )),
-                icon: const Icon(Icons.photo_library_outlined, size: 18),
-                label: Text(l10n.plOpenLibrary),
-              ),
-            ),
-            // Its names by language (0118): English and Chinese beside our
-            // Japanese name, shown on screens in that language and printed on
-            // documents and labels.
-            if (ref.watch(productLibraryCanManageProvider))
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  key: const ValueKey('product-names'),
-                  onPressed: () => _editNames(context, ref),
-                  icon: const Icon(Icons.translate, size: 18),
-                  label: Text(l10n.productNamesTitle),
-                ),
-              ),
-            // Its name in our format (0111): built from its parts.
-            if (ref.watch(productLibraryCanManageProvider))
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  key: const ValueKey('product-naming'),
-                  onPressed: () async {
-                    final saved = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => ProductNamingDialog(productId: product.id),
-                    );
-                    if (saved == true) {
-                      ref.invalidate(productListProvider);
-                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pnSaved)));
-                    }
-                  },
-                  icon: const Icon(Icons.text_format_outlined, size: 18),
-                  label: Text(l10n.pnTitle),
-                ),
-              ),
-            const SizedBox(height: AppSpacing.sm),
-            if (ref.watch(productLibraryCanManageProvider))
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: Text(l10n.productEdit),
-                onPressed: () async {
-                  final saved = await showModalBottomSheet<bool>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => ProductFormSheet(product: product),
-                  );
-                  if (saved == true) ref.invalidate(productListProvider);
-                },
-              ),
-            ),
           ],
         ),
+        // Its stock in each warehouse this person can see (0120).
+        if (product.stock case final st?) ...[
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: l10n.stockTitle,
+            children: [
+              StockLine(key: const ValueKey('product-detail-stock'), stock: st, style: theme.textTheme.titleSmall),
+              for (final w in st.warehouses)
+                _FactRow(
+                  key: ValueKey('product-stock-wh-${w.warehouseId}'),
+                  label: w.name,
+                  value: l10n.stockWarehouseRow(w.onHand, w.reserved, w.available),
+                ),
+            ],
+          ),
+        ],
+        // Every name it has (0118), whatever language this screen is in.
+        if (product.names.length > 1) ...[
+          const SizedBox(height: AppSpacing.md),
+          _Section(
+            title: l10n.productNamesTitle,
+            children: [
+              for (final l in const ['ja', 'en', 'zh'])
+                if (product.names[l] case final n?)
+                  _FactRow(
+                    key: ValueKey('product-name-row-$l'),
+                    label: const {'ja': '日本語', 'en': 'English', 'zh': '中文'}[l]!,
+                    value: n,
+                  ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// One label and its value, side by side, the value selectable.
+class _FactRow extends StatelessWidget {
+  const _FactRow({super.key, required this.label, required this.value, this.mono = false});
+
+  final String label;
+  final String value;
+  final bool mono;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontFamily: mono ? AppFonts.mono : null,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

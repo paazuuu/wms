@@ -200,4 +200,38 @@ void main() {
     expect(saved.lang, 'zh');
     expect(saved.name, '斑马 速干中性笔 0.5 蓝色');
   });
+
+  testWidgets('the product screen lists maker, name, item code, JAN and attributes as one table', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const product = Product(
+      id: 143, janCode: _jan, name: 'サラサドライ 0.5 青', maker: 'ゼブラ', sku: 'JJ31-BL',
+      baseName: 'サラサドライ', unit: '本', listPrice: 165,
+      attributes: [ProductPart(key: 'size', name: 'サイズ', value: '0.5'), ProductPart(key: 'color', name: '色', value: '青')],
+      suppliers: [ProductSupplierRef(id: 4, name: '新東光通商')],
+      baseUom: Uom(code: 'PCS', name: '本'),
+    );
+    final container = ProviderContainer(overrides: [
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: [product])),
+      tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
+      scCanViewProvider.overrideWithValue(false),
+    ]);
+    addTearDown(container.dispose);
+    await pumpAppWith(tester, container, const ProductDetailScreen(productId: 143));
+
+    String valueOf(String key) {
+      final row = find.byKey(ValueKey(key));
+      return tester.widgetList<Text>(find.descendant(of: row, matching: find.byType(Text))).last.data!;
+    }
+
+    expect(find.text('基本情報'), findsOneWidget);
+    expect(valueOf('pd-maker'), 'ゼブラ');
+    expect(valueOf('pd-base-name'), 'サラサドライ');
+    expect(valueOf('pd-code'), 'JJ31-BL');
+    expect(valueOf('pd-jan'), _jan);
+    expect(valueOf('pd-attr-color'), '青');
+    expect(valueOf('pd-attr-size'), '0.5');
+    expect(valueOf('pd-list-price'), '¥165');
+    expect(valueOf('pd-suppliers'), '新東光通商');
+  });
 }

@@ -5848,6 +5848,34 @@ Also:
 - Not counted yet: stock on order. Purchase-order lines do not record what
   has been received, so it cannot be computed correctly.
 
+### 0121 — the product's parts on the product screen
+
+- `list_products` also returns `base_name` (品名), `unit`, `list_price` (定価)
+  and `attributes`, as `[{key, name, value}]` (色, サイズ, 容量 …).
+- The product screen is laid out again:
+  - a header with the picture, maker, name, state and codes;
+  - one row of actions: 編集, 商品名の組み立て, 商品名（言語別）, 写真;
+  - 基本情報, one fact a row: メーカー, 品名, 品番, JANコード, each
+    attribute, カテゴリ, 単位, 定価, 販売価格, 仕入先;
+  - 在庫（倉庫別）;
+  - 商品名（言語別）.
+- ファイルから一括登録 (formerly 見積もりから一括登録):
+  - Any document listing products is accepted: a quotation, an invoice, a
+    delivery note or our own catalogue.
+  - The supplier is optional. Without one, the reader looks for the company
+    named on the file, and the screen chooses it when found.
+  - Saving prices needs a supplier. Registering products does not.
+  - Each line shows what the reader sorted it into, each part under its
+    own name: メーカー, 品名, 品番, JAN, 先方コード, 規格, attributes, 単位,
+    入数, 単価, 定価, 掛率.
+- Bulk lifecycle (0120):
+  - The actions were icons at the right end of the top bar, and could sit
+    off-screen. They are now labelled buttons in a bar at the bottom:
+    N件を選択中, 表示中をすべて選択, 選択を解除, 取扱中に戻す, 休眠にする,
+    提供終了にする, 削除済みにする.
+  - 選択して一括操作 and ファイルから一括登録 moved beside the list's count.
+  - A long press on a product also starts choosing.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

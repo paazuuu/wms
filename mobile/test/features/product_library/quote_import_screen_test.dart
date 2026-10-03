@@ -26,7 +26,7 @@ class _FakeQuoteRepository implements QuoteRepository {
   String? savedNote;
 
   @override
-  Future<ApiResult<QuoteRead>> read({required int partnerId, required MultipartFile file}) async {
+  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file}) async {
     readPartner = partnerId;
     readFile = file.filename;
     return ApiSuccess(read_);
@@ -97,7 +97,7 @@ void main() {
       ],
     );
 
-    // Reading waits for a supplier and a file.
+    // Reading waits for a file only.
     expect(tester.widget<FilledButton>(find.byKey(const ValueKey('quote-read'))).onPressed, isNull);
     await tester.tap(find.byKey(const ValueKey('quote-partner')));
     await tester.pumpAndSettle();
@@ -115,9 +115,12 @@ void main() {
     expect(find.text('3行：登録済み 1・新しい商品 1・JANなし 1'), findsOneWidget);
     // Our name, with theirs beneath, widened from half-width kana.
     expect(find.text('ユニボール エア 0.5 黒'), findsOneWidget);
-    expect(find.text('仕入先の表記: ユニボール エア 0.5 クロ'), findsOneWidget);
-    expect(find.textContaining('単価 ¥132'), findsOneWidget);
-    expect(find.textContaining('掛率 55%'), findsOneWidget);
+    // Each line sorted into its parts, under their names.
+    expect(find.text('品名 ユニボール エア 0.5 クロ', findRichText: true), findsOneWidget);
+    expect(find.text('品番 UBA20105.24', findRichText: true), findsOneWidget);
+    expect(find.text('メーカー 三菱鉛筆', findRichText: true), findsOneWidget);
+    expect(find.text('単価 ¥132', findRichText: true), findsOneWidget);
+    expect(find.text('掛率 55%', findRichText: true), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('quote-register')));
     await tester.pumpAndSettle();
@@ -132,5 +135,58 @@ void main() {
     expect(quotes.savePartner, 4);
     expect([for (final l in quotes.saved!) l['product_id']], [9, 500]);
     expect(quotes.savedNote, 'mitsumori.pdf');
+  });
+
+  testWidgets('a file is read with no supplier chosen; the company on it is used, else prices wait', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final quotes = _FakeQuoteRepository(const QuoteRead(partnerId: null, lines: [
+      {'jan_code': '4902778198940', 'product_name': 'エア', 'unit_price': 100, 'product_id': 9,
+       'product': {'id': 9, 'name': 'ユニボール エア'}},
+    ]));
+    await pumpApp(
+      tester,
+      QuoteImportScreen(pickFile: () async => _file()),
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(quotes),
+        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
+          TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
+        ])),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('quote-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('quote-read')));
+    await tester.pumpAndSettle();
+
+    expect(quotes.readPartner, isNull);
+    expect(find.text('ユニボール エア'), findsOneWidget);
+    // Nothing named the company: prices wait for one to be chosen.
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('quote-save'))).onPressed, isNull);
+    expect(find.textContaining('価格を保存するには仕入先を選んでください'), findsOneWidget);
+  });
+
+  testWidgets('the company named on the file is chosen for the person', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final quotes = _FakeQuoteRepository(_quote);
+    await pumpApp(
+      tester,
+      QuoteImportScreen(pickFile: () async => _file()),
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(quotes),
+        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository(partners: const [
+          TradingPartner(id: 4, name: '新東光通商', kind: PartnerKind.supplier),
+        ])),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('quote-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('quote-read')));
+    await tester.pumpAndSettle();
+    expect(find.text('ファイルに書かれた会社から判断しました'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('quote-save')));
+    await tester.pumpAndSettle();
+    expect(quotes.savePartner, 4);
   });
 }

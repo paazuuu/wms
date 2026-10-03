@@ -8194,11 +8194,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Deleting is not set up in the database yet (delete_product in 0119). Ask an administrator to apply it.';
 
   @override
-  String get quoteImportTitle => 'Register from a quotation';
+  String get quoteImportTitle => 'Register from a file';
 
   @override
   String get quoteImportIntro =>
-      'The AI reads a supplier\'s quotation (Excel, PDF or a photo). Products we do not have yet are registered in our format, and the quoted unit price, list price, rate and case quantity are kept as this supplier\'s prices. Their way of writing is learned too, so the next one reads better.';
+      'The AI reads any file listing products (Excel, PDF or a photo): a quotation, an invoice, a delivery note or our own catalogue. It sorts each line into maker, name, item code, JAN, spec and prices. Products we do not have yet can be registered in our format. Choosing the supplier is optional: the company named on the file is looked for.';
 
   @override
   String get quoteSupplier => 'Supplier';
@@ -8305,7 +8305,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lifecycleToArchived => 'Archive (logical delete)';
 
   @override
-  String get lcSelect => 'Choose and change together';
+  String get lcSelect => 'Choose and change';
 
   @override
   String lcSelected(int count) {
@@ -8412,4 +8412,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String stockWarehouseRow(int onHand, int reserved, int available) {
     return 'On hand $onHand, reserved $reserved, available $available';
   }
+
+  @override
+  String get pdBasics => 'Details';
+
+  @override
+  String get pdMaker => 'Maker';
+
+  @override
+  String get pdBaseName => 'Product name';
+
+  @override
+  String get pdCode => 'Item code';
+
+  @override
+  String get pdJan => 'JAN';
+
+  @override
+  String get pdCategory => 'Category';
+
+  @override
+  String get pdUnit => 'Unit';
+
+  @override
+  String get pdListPrice => 'List price';
+
+  @override
+  String get pdPrice => 'Price';
+
+  @override
+  String get pdSuppliers => 'Suppliers';
+
+  @override
+  String get pdSpec => 'Spec';
+
+  @override
+  String get quoteSupplierOptional => 'Supplier (optional)';
+
+  @override
+  String get quoteSupplierNone => 'None (look on the file)';
+
+  @override
+  String get quoteSupplierHint =>
+      'Choosing one reads the file in its way of writing, and lets its prices be saved';
+
+  @override
+  String get quoteSupplierDetected =>
+      'Found from the company named on the file';
+
+  @override
+  String get quoteSaveNeedsSupplier =>
+      'Choose the supplier to save prices (not needed to register products)';
+
+  @override
+  String get quoteOurProduct => 'Our product';
+
+  @override
+  String get quoteTheirCode => 'Their code';
+
+  @override
+  String get quoteCaseLabel => 'Case';
+
+  @override
+  String get quoteUnitPriceLabel => 'Unit price';
+
+  @override
+  String get quoteRateLabel => 'Rate';
 }

@@ -54,6 +54,9 @@ class QuoteImportScreen extends ConsumerStatefulWidget {
 
 class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
   int? _partnerId;
+
+  /// Whether [_partnerId] was found on the document rather than chosen.
+  bool _detected = false;
   PlatformFile? _file;
   bool _busy = false;
   QuoteRead? _read;
@@ -88,7 +91,6 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
     final l10n = AppLocalizations.of(context);
     final partnerId = _partnerId;
     final file = _file;
-    if (partnerId == null) return _snack(l10n.quoteChooseSupplier);
     if (file == null || file.bytes == null) return _snack(l10n.planImportChooseFirst);
     setState(() => _busy = true);
     final r = await ref.read(quoteRepositoryProvider).read(
@@ -103,6 +105,11 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
           _read = data;
           _lines = data.lines;
           _saved = null;
+          // The company the document names, when none was chosen.
+          if (_partnerId == null && data.partnerId != null) {
+            _partnerId = data.partnerId;
+            _detected = true;
+          }
         });
       case ApiFailure(:final message):
         _snack(message.contains('No JAN rows') ? l10n.quoteNothingRead : humanizeApiErrorMessage(l10n, message));
@@ -189,10 +196,17 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
             key: const ValueKey('quote-partner'),
             initialValue: suppliers.any((p) => p.id == _partnerId) ? _partnerId : null,
             isExpanded: true,
-            decoration: InputDecoration(labelText: l10n.quoteSupplier),
-            items: [for (final p in suppliers) DropdownMenuItem(value: p.id, child: Text(p.name))],
+            decoration: InputDecoration(
+              labelText: l10n.quoteSupplierOptional,
+              helperText: _detected ? l10n.quoteSupplierDetected : l10n.quoteSupplierHint,
+            ),
+            items: [
+              DropdownMenuItem<int>(value: null, child: Text(l10n.quoteSupplierNone)),
+              for (final p in suppliers) DropdownMenuItem(value: p.id, child: Text(p.name)),
+            ],
             onChanged: (v) => setState(() {
               _partnerId = v;
+              _detected = false;
               _read = null;
               _lines = const [];
               _saved = null;
@@ -212,7 +226,7 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
               ),
               FilledButton.icon(
                 key: const ValueKey('quote-read'),
-                onPressed: _busy || _file == null || _partnerId == null ? null : _readQuote,
+                onPressed: _busy || _file == null ? null : _readQuote,
                 icon: const Icon(Icons.auto_awesome_outlined),
                 label: Text(l10n.quoteRead),
               ),
@@ -249,12 +263,17 @@ class _QuoteImportScreenState extends ConsumerState<QuoteImportScreen> {
                 ),
                 FilledButton.icon(
                   key: const ValueKey('quote-save'),
-                  onPressed: _busy || _matched == 0 ? null : _save,
+                  onPressed: _busy || _matched == 0 || _partnerId == null ? null : _save,
                   icon: const Icon(Icons.price_check_outlined),
                   label: Text(l10n.quoteSave(_matched)),
                 ),
               ],
             ),
+            if (_partnerId == null && _matched > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(l10n.quoteSaveNeedsSupplier, style: theme.textTheme.bodySmall),
+              ),
             if (_saved case final s?) ...[
               const SizedBox(height: AppSpacing.sm),
               StatusPill(tone: StatusTone.success, label: l10n.quoteSaved(s.prices, s.products)),
@@ -288,42 +307,72 @@ class _QuoteLineCard extends StatelessWidget {
         : QuoteLine.hasJan(line)
             ? (StatusTone.warning, l10n.quoteLineNew)
             : (StatusTone.neutral, l10n.quoteLineNoJan);
-    final supplierName = widenKana(QuoteLine.supplierName(line));
-    final prices = [
-      if (QuoteLine.unitPrice(line) case final u?) l10n.quoteUnitPrice(_yen(u)),
-      if (QuoteLine.listPrice(line) case final lp?) l10n.quoteListPrice(_yen(lp)),
-      if (QuoteLine.discountRate(line) case final r?)
-        l10n.quoteRate('${(r * 100).toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}%'),
-      if (QuoteLine.caseQuantity(line) case final c?) l10n.quoteCase(c.toStringAsFixed(0)),
+    String? t(Object? v) {
+      final x = v == null ? '' : widenKana('$v'.trim());
+      return x.isEmpty ? null : x;
+    }
+
+    // What the reader sorted the line into, each under its own name — the
+    // same parts a product of ours is built from.
+    final attrs = [
+      for (final a in (line['attributes'] as List? ?? const []).whereType<Map>())
+        if (t(a['value']) case final v?) ('${a['name'] ?? a['key'] ?? ''}', v),
     ];
+    final fields = <(String, String?)>[
+      (l10n.pdMaker, t(line['maker'])),
+      (l10n.pdBaseName, t(line['product_name'])),
+      (l10n.pdCode, t(line['product_code'])),
+      (l10n.pdJan, QuoteLine.jan(line).isEmpty ? null : QuoteLine.jan(line)),
+      (l10n.quoteTheirCode, t(line['supplier_code'])),
+      (l10n.pdSpec, t(line['spec'])),
+      for (final (n, v) in attrs) (n, v),
+      (l10n.pdUnit, t(line['unit'])),
+      (l10n.quoteCaseLabel, QuoteLine.caseQuantity(line)?.toStringAsFixed(0)),
+      (l10n.quoteUnitPriceLabel, QuoteLine.unitPrice(line) == null ? null : _yen(QuoteLine.unitPrice(line)!)),
+      (l10n.pdListPrice, QuoteLine.listPrice(line) == null ? null : _yen(QuoteLine.listPrice(line)!)),
+      (l10n.quoteRateLabel, QuoteLine.discountRate(line) == null
+          ? null
+          : '${(QuoteLine.discountRate(line)! * 100).toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}%'),
+    ];
+    final ours = matched ? widenKana(QuoteLine.name(line)) : null;
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widenKana(QuoteLine.name(line)), style: theme.textTheme.titleSmall),
-                  if (matched && supplierName.isNotEmpty && supplierName != widenKana(QuoteLine.name(line)))
-                    Text(l10n.quoteTheirName(supplierName), style: muted),
-                  Text(
-                    [
-                      if (QuoteLine.jan(line).isNotEmpty) QuoteLine.jan(line),
-                      if (QuoteLine.maker(line) case final m?) widenKana(m),
-                      if (QuoteLine.code(line) case final c?) widenKana(c),
-                    ].join(' · '),
-                    style: muted,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    ours ?? t(line['product_name']) ?? QuoteLine.jan(line),
+                    style: theme.textTheme.titleSmall,
                   ),
-                  if (prices.isNotEmpty) Text(prices.join('　'), style: theme.textTheme.bodyMedium),
-                ],
-              ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                StatusPill(tone: tone, label: label, dense: true),
+              ],
             ),
-            const SizedBox(width: AppSpacing.sm),
-            StatusPill(tone: tone, label: label, dense: true),
+            if (ours != null) Text(l10n.quoteOurProduct, style: muted),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.lg,
+              runSpacing: AppSpacing.xs,
+              children: [
+                for (final (name, value) in fields)
+                  if (value != null)
+                    RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodyMedium,
+                        children: [
+                          TextSpan(text: '$name ', style: muted),
+                          TextSpan(text: value, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+              ],
+            ),
           ],
         ),
       ),

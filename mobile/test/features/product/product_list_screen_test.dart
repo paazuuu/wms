@@ -445,14 +445,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('lc-select-all')));
     await tester.pumpAndSettle();
-    expect(find.text('3件を選択中'), findsOneWidget);
+    expect(find.text('3件を選択中'), findsWidgets);
     // Tapping a chosen product leaves it out.
     await tester.tap(find.text('サラサ'));
     await tester.pumpAndSettle();
-    expect(find.text('2件を選択中'), findsOneWidget);
+    expect(find.text('2件を選択中'), findsWidgets);
 
-    await tester.tap(find.byKey(const ValueKey('lc-actions')));
-    await tester.pumpAndSettle();
+    // The actions are labelled buttons in the bar at the bottom.
+    expect(find.byKey(const ValueKey('lc-bar')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('lc-to-archived')));
     await tester.pumpAndSettle();
     expect(find.text('2件を「削除済み」にしますか？'), findsOneWidget);
@@ -485,5 +485,32 @@ void main() {
     expect(j.lifecycle, ProductLifecycle.discontinued);
     expect(j.stock!.warehouses.single.onHand, 5);
     expect(j.suppliers.single.id, 4);
+  });
+
+  testWidgets('a long press starts choosing; every state is a button, off until something is chosen', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [stocked, empty]);
+    await _pump(tester, repo, lifecycle: true);
+
+    await tester.longPress(find.text('サラサ'));
+    await tester.pumpAndSettle();
+    expect(find.text('1件を選択中'), findsWidgets);
+    for (final l in ProductLifecycle.values) {
+      expect(find.byKey(ValueKey('lc-to-${l.wire}')), findsOneWidget);
+    }
+    await tester.tap(find.byKey(const ValueKey('lc-clear')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ButtonStyleButton>(find.byKey(const ValueKey('lc-to-dormant'))).onPressed, isNull);
+
+    await tester.tap(find.text('ボールペン'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-to-dormant')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.lifecycleCalls.single.ids, [1]);
+    expect(repo.lifecycleCalls.single.lifecycle, ProductLifecycle.dormant);
+    expect(repo.lifecycleCalls.single.reason, isNull);
   });
 }

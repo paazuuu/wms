@@ -7994,11 +7994,11 @@ class AppLocalizationsZh extends AppLocalizations {
       '数据库尚未启用删除功能（0119 的 delete_product），请联系管理员。';
 
   @override
-  String get quoteImportTitle => '从报价单批量登录';
+  String get quoteImportTitle => '从文件批量登录';
 
   @override
   String get quoteImportIntro =>
-      'AI 读取供应商的报价单（Excel、PDF 或照片）。尚未登录的商品按本公司格式登录，报价中的单价、定价、折扣率、入数作为该供应商的价格保存。同时学习其写法，下次读取更准确。';
+      'AI 读取列有商品的任意文件（Excel、PDF 或照片）：报价单、发票、送货单或本公司商品目录，并将每行整理为制造商、品名、货号、JAN、规格和价格。尚未登录的商品可按本公司格式登录。供应商可不选（会查找文件上写的公司）。';
 
   @override
   String get quoteSupplier => '供应商';
@@ -8103,7 +8103,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lifecycleToArchived => '设为已删除（逻辑删除）';
 
   @override
-  String get lcSelect => '选择后批量更改';
+  String get lcSelect => '选择后批量操作';
 
   @override
   String lcSelected(int count) {
@@ -8204,4 +8204,67 @@ class AppLocalizationsZh extends AppLocalizations {
   String stockWarehouseRow(int onHand, int reserved, int available) {
     return '库存 $onHand・已预留 $reserved・可用 $available';
   }
+
+  @override
+  String get pdBasics => '基本信息';
+
+  @override
+  String get pdMaker => '制造商';
+
+  @override
+  String get pdBaseName => '品名';
+
+  @override
+  String get pdCode => '货号';
+
+  @override
+  String get pdJan => 'JAN码';
+
+  @override
+  String get pdCategory => '类别';
+
+  @override
+  String get pdUnit => '单位';
+
+  @override
+  String get pdListPrice => '定价';
+
+  @override
+  String get pdPrice => '售价';
+
+  @override
+  String get pdSuppliers => '供应商';
+
+  @override
+  String get pdSpec => '规格';
+
+  @override
+  String get quoteSupplierOptional => '供应商（可选）';
+
+  @override
+  String get quoteSupplierNone => '不指定（从文件判断）';
+
+  @override
+  String get quoteSupplierHint => '选择后按其写法读取，并可保存价格';
+
+  @override
+  String get quoteSupplierDetected => '根据文件上的公司判断';
+
+  @override
+  String get quoteSaveNeedsSupplier => '保存价格需选择供应商（仅登录商品则不需要）';
+
+  @override
+  String get quoteOurProduct => '本公司已登录商品';
+
+  @override
+  String get quoteTheirCode => '对方代码';
+
+  @override
+  String get quoteCaseLabel => '入数';
+
+  @override
+  String get quoteUnitPriceLabel => '单价';
+
+  @override
+  String get quoteRateLabel => '折扣率';
 }

@@ -149,37 +149,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 onPressed: () => setState(() => _selected = null),
               ),
               title: Text(l10n.lcSelected(selected.length)),
-              actions: [
-                TextButton(
-                  key: const ValueKey('lc-select-all'),
-                  onPressed: () => setState(() => _selected = {for (final p in shown) p.id}),
-                  child: Text(l10n.lcSelectAll(shown.length)),
-                ),
-                TextButton(
-                  key: const ValueKey('lc-clear'),
-                  onPressed: selected.isEmpty ? null : () => setState(() => _selected = {}),
-                  child: Text(l10n.lcClear),
-                ),
-                PopupMenuButton<ProductLifecycle>(
-                  key: const ValueKey('lc-actions'),
-                  enabled: selected.isNotEmpty,
-                  tooltip: l10n.lcChange,
-                  icon: const Icon(Icons.swap_horiz),
-                  onSelected: _applyLifecycle,
-                  itemBuilder: (_) => [
-                    for (final l in ProductLifecycle.values)
-                      PopupMenuItem(
-                        key: ValueKey('lc-to-${l.wire}'),
-                        value: l,
-                        child: ListTile(
-                          leading: Icon(lifecycleIcon(l)),
-                          title: Text(lifecycleAction(l10n, l)),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
             )
           : AppBar(
               title: Text(l10n.productsTitle),
@@ -197,25 +166,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                if (canLifecycle && !photos)
-                  IconButton(
-                    key: const ValueKey('lc-start'),
-                    tooltip: l10n.lcSelect,
-                    icon: const Icon(Icons.checklist_outlined),
-                    onPressed: () => setState(() => _selected = {}),
-                  ),
-                // A supplier's quotation read by the AI, its new products
-                // registered and its prices kept, in one go.
-                if (canManage)
-                  IconButton(
-                    key: const ValueKey('products-from-quote'),
-                    tooltip: l10n.quoteImportTitle,
-                    icon: const Icon(Icons.auto_awesome_outlined),
-                    onPressed: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuoteImportScreen()));
-                      ref.invalidate(productListProvider);
-                    },
-                  ),
                 if (!photos)
                   IconButton(
                     tooltip: l10n.productsShowInactive,
@@ -226,6 +176,17 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         lifecycles: f.lifecycles.length > 1 ? {ProductLifecycle.active} : ProductFilter.notArchived)),
                   ),
               ],
+            ),
+      // The chosen products' actions sit at the bottom, labelled, where they
+      // cannot end up off the side of a narrow or zoomed window.
+      bottomNavigationBar: selected == null
+          ? null
+          : _SelectionBar(
+              count: selected.length,
+              shown: shown.length,
+              onSelectAll: () => setState(() => _selected = {for (final p in shown) p.id}),
+              onClear: selected.isEmpty ? null : () => setState(() => _selected = {}),
+              onApply: selected.isEmpty ? null : _applyLifecycle,
             ),
       floatingActionButton: canManage && selected == null
           ? FloatingActionButton(
@@ -255,13 +216,40 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 if (total != null && async.hasValue)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
-                        key: const ValueKey('pf-showing'),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                    child: Row(
+                      children: [
+                        // Any document listing products — quotation, invoice,
+                        // catalogue — read by the AI and registered at once.
+                        if (canManage && selected == null) ...[
+                          FilledButton.tonalIcon(
+                            key: const ValueKey('products-from-quote'),
+                            onPressed: () async {
+                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuoteImportScreen()));
+                              ref.invalidate(productListProvider);
+                            },
+                            icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                            label: Text(l10n.quoteImportTitle),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                        ],
+                        // Choosing many at once (0120), for the administrator.
+                        if (canLifecycle && selected == null) ...[
+                          OutlinedButton.icon(
+                            key: const ValueKey('lc-start'),
+                            onPressed: () => setState(() => _selected = {}),
+                            icon: const Icon(Icons.checklist_outlined, size: 18),
+                            label: Text(l10n.lcSelect),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                        ],
+                        Expanded(
+                          child: Text(
+                            selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
+                            key: const ValueKey('pf-showing'),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 Expanded(
@@ -290,6 +278,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                             return _ProductCard(
                               product: p,
                               selected: selected?.contains(p.id),
+                              // A long press starts choosing, on the product pressed.
+                              onLongPress: canLifecycle && selected == null
+                                  ? () => setState(() => _selected = {p.id})
+                                  : null,
                               onTap: selected != null
                                   ? () => setState(() => selected.contains(p.id) ? selected.remove(p.id) : selected.add(p.id))
                                   : () => _openDetailById(p.id),
@@ -307,6 +299,73 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// What can be done with the chosen products: choose all shown, clear,
+/// and move them into a lifecycle — each a labelled button.
+class _SelectionBar extends StatelessWidget {
+  const _SelectionBar({
+    required this.count,
+    required this.shown,
+    required this.onSelectAll,
+    required this.onClear,
+    required this.onApply,
+  });
+
+  final int count;
+  final int shown;
+  final VoidCallback onSelectAll;
+  final VoidCallback? onClear;
+  final void Function(ProductLifecycle)? onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      key: const ValueKey('lc-bar'),
+      elevation: 8,
+      color: scheme.surfaceContainerHigh,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(l10n.lcSelected(count), style: theme.textTheme.titleSmall),
+              TextButton.icon(
+                key: const ValueKey('lc-select-all'),
+                onPressed: onSelectAll,
+                icon: const Icon(Icons.select_all, size: 18),
+                label: Text(l10n.lcSelectAll(shown)),
+              ),
+              TextButton.icon(
+                key: const ValueKey('lc-clear'),
+                onPressed: onClear,
+                icon: const Icon(Icons.deselect, size: 18),
+                label: Text(l10n.lcClear),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              for (final l in ProductLifecycle.values)
+                FilledButton.tonalIcon(
+                  key: ValueKey('lc-to-${l.wire}'),
+                  style: l == ProductLifecycle.archived
+                      ? FilledButton.styleFrom(backgroundColor: scheme.errorContainer, foregroundColor: scheme.onErrorContainer)
+                      : null,
+                  onPressed: onApply == null ? null : () => onApply!(l),
+                  icon: Icon(lifecycleIcon(l), size: 18),
+                  label: Text(lifecycleAction(l10n, l)),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -560,6 +619,7 @@ class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
     required this.onTap,
+    this.onLongPress,
     this.selected,
     this.onToggleStatus,
     this.onEdit,
@@ -568,6 +628,7 @@ class _ProductCard extends StatelessWidget {
 
   final Product product;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   /// Null outside selection mode; whether this one is chosen within it.
   final bool? selected;
@@ -587,8 +648,10 @@ class _ProductCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      color: selected == true ? Theme.of(context).colorScheme.secondaryContainer : null,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(

@@ -8026,11 +8026,11 @@ class AppLocalizationsJa extends AppLocalizations {
       '削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。';
 
   @override
-  String get quoteImportTitle => '見積もりから一括登録';
+  String get quoteImportTitle => 'ファイルから一括登録';
 
   @override
   String get quoteImportIntro =>
-      '仕入先の見積書（Excel・PDF・写真）をAIが読み取ります。まだない商品は自社の様式で登録し、見積もりの単価・定価・掛率・入数はこの仕入先の価格として保存します。仕入先の書き方も覚えるので、次からはもっと正確に読めます。';
+      '見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。';
 
   @override
   String get quoteSupplier => '仕入先';
@@ -8136,7 +8136,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lifecycleToArchived => '削除済みにする（論理削除）';
 
   @override
-  String get lcSelect => '選んでまとめて変更';
+  String get lcSelect => '選択して一括操作';
 
   @override
   String lcSelected(int count) {
@@ -8239,4 +8239,67 @@ class AppLocalizationsJa extends AppLocalizations {
   String stockWarehouseRow(int onHand, int reserved, int available) {
     return '在庫 $onHand・引当 $reserved・引当可能 $available';
   }
+
+  @override
+  String get pdBasics => '基本情報';
+
+  @override
+  String get pdMaker => 'メーカー';
+
+  @override
+  String get pdBaseName => '品名';
+
+  @override
+  String get pdCode => '品番';
+
+  @override
+  String get pdJan => 'JANコード';
+
+  @override
+  String get pdCategory => 'カテゴリ';
+
+  @override
+  String get pdUnit => '単位';
+
+  @override
+  String get pdListPrice => '定価';
+
+  @override
+  String get pdPrice => '販売価格';
+
+  @override
+  String get pdSuppliers => '仕入先';
+
+  @override
+  String get pdSpec => '規格';
+
+  @override
+  String get quoteSupplierOptional => '仕入先（任意）';
+
+  @override
+  String get quoteSupplierNone => '指定しない（ファイルから判断）';
+
+  @override
+  String get quoteSupplierHint => '選ぶと、その仕入先の書き方で読み、価格も保存できます';
+
+  @override
+  String get quoteSupplierDetected => 'ファイルに書かれた会社から判断しました';
+
+  @override
+  String get quoteSaveNeedsSupplier => '価格を保存するには仕入先を選んでください（商品の登録だけなら不要です）';
+
+  @override
+  String get quoteOurProduct => '登録済みの自社商品';
+
+  @override
+  String get quoteTheirCode => '先方コード';
+
+  @override
+  String get quoteCaseLabel => '入数';
+
+  @override
+  String get quoteUnitPriceLabel => '単価';
+
+  @override
+  String get quoteRateLabel => '掛率';
 }

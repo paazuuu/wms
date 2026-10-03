@@ -4,11 +4,15 @@ import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../domain/supplier_quote.dart';
 
-/// A supplier's quotation (見積書), read by the same reader as a delivery
+/// Any document listing products — a quotation (見積書), an invoice, a
+/// delivery note, our own catalogue — read by the same reader as a delivery
 /// note (import-plan, dry run: Excel by its columns, a PDF or photo by the
 /// AI, checked twice), and its prices kept (0119).
 abstract class QuoteRepository {
-  Future<ApiResult<QuoteRead>> read({required int partnerId, required MultipartFile file});
+  /// Reads [file]. [partnerId] is optional: when given, that company's way of
+  /// writing is used to read it; when not, the reader looks for the company
+  /// on the document itself (its name or 登録番号).
+  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file});
 
   Future<ApiResult<QuoteSaved>> save({
     required int partnerId,
@@ -26,13 +30,13 @@ class QuoteRepositoryImpl implements QuoteRepository {
   final Dio _rest;
 
   @override
-  Future<ApiResult<QuoteRead>> read({required int partnerId, required MultipartFile file}) async {
+  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file}) async {
     try {
       final form = FormData();
       form.files.add(MapEntry('file', file));
       form.fields
         ..add(const MapEntry('dry_run', '1'))
-        ..add(MapEntry('partner_id', '$partnerId'));
+        ..addAll([if (partnerId != null) MapEntry('partner_id', '$partnerId')]);
       final r = await _functions.post(
         '/import-plan',
         data: form,

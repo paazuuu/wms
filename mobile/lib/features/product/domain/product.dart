@@ -234,6 +234,19 @@ class ProductSupplierRef extends Equatable {
   List<Object?> get props => [id, name];
 }
 
+/// One of the product's attributes (0110/0111) — 色, サイズ, 容量 … — by
+/// its name and value, as the product screen lists it (0121).
+class ProductPart extends Equatable {
+  const ProductPart({required this.key, required this.name, required this.value});
+
+  final String key;
+  final String name;
+  final String value;
+
+  @override
+  List<Object?> get props => [key, name, value];
+}
+
 /// `{lang: name}` from a `names` object (0118), empty names left out.
 Map<String, String> productNamesFromJson(dynamic raw) {
   if (raw is! Map) return const {};
@@ -261,6 +274,10 @@ class Product extends Equatable {
     this.lifecycleReason,
     this.stock,
     this.suppliers = const [],
+    this.baseName,
+    this.unit,
+    this.listPrice,
+    this.attributes = const [],
     this.trackingMode = TrackingMode.untracked,
     this.pickingRule = 'FEFO',
     this.requiresInspection = false,
@@ -307,6 +324,13 @@ class Product extends Equatable {
 
   /// Every supplier that sells it (0120).
   final List<ProductSupplierRef> suppliers;
+
+  /// What the name is built from (0111, read since 0121): 品名 without the
+  /// maker or attributes, the unit as written, 定価, and the attributes.
+  final String? baseName;
+  final String? unit;
+  final double? listPrice;
+  final List<ProductPart> attributes;
   final TrackingMode trackingMode;
 
   /// §16's default draw order for this product (0074): FIFO/FEFO/LIFO/MANUAL.
@@ -356,7 +380,8 @@ class Product extends Equatable {
         category: category, price: price,
         status: l == ProductLifecycle.active ? 'active' : 'inactive',
         lifecycleCode: l.wire, lifecycleReason: l == ProductLifecycle.active ? null : reason,
-        stock: stock, suppliers: suppliers, trackingMode: trackingMode, pickingRule: pickingRule,
+        stock: stock, suppliers: suppliers, baseName: baseName, unit: unit, listPrice: listPrice,
+        attributes: attributes, trackingMode: trackingMode, pickingRule: pickingRule,
         requiresInspection: requiresInspection, baseUom: baseUom, uoms: uoms, barcodes: barcodes,
         supplierNames: supplierNames, unitWeightG: unitWeightG, weightSource: weightSource,
         weightSourceUrl: weightSourceUrl, weightNote: weightNote, createdAt: createdAt, updatedAt: updatedAt,
@@ -398,6 +423,18 @@ class Product extends Equatable {
           for (final s in (json['suppliers'] as List? ?? const []).whereType<Map>())
             ProductSupplierRef(id: _asInt(s['id']), name: (s['name'] ?? '').toString()),
         ],
+        baseName: _asText(json['base_name']),
+        unit: _asText(json['unit']),
+        listPrice: _asDouble(json['list_price']),
+        attributes: [
+          for (final a in (json['attributes'] is List ? json['attributes'] as List : const []).whereType<Map>())
+            if (_asText(a['value']) != null)
+              ProductPart(
+                key: (a['key'] ?? '').toString(),
+                name: (a['name'] ?? a['key'] ?? '').toString(),
+                value: _asText(a['value'])!,
+              ),
+        ],
         trackingMode: TrackingMode.fromCode(json['tracking_mode']),
         pickingRule: (json['picking_rule'] ?? 'FEFO').toString(),
         requiresInspection: json['requires_inspection'] == true,
@@ -431,6 +468,10 @@ class Product extends Equatable {
         lifecycleReason,
         stock,
         suppliers,
+        baseName,
+        unit,
+        listPrice,
+        attributes,
         trackingMode,
         pickingRule,
         requiresInspection,
