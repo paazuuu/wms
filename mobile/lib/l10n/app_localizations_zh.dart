@@ -1573,10 +1573,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featAiReviewDesc => '在生效前确认或拒绝 AI 提取的结果';
 
   @override
-  String get featProducts => '商品库';
+  String get featProducts => '商品主数据';
 
   @override
-  String get featProductsDesc => '本公司的商品：列表中编辑，照片中查看与添加';
+  String get featProductsDesc => '实际经营的商品，库存、订单、入库、出库都与此关联';
 
   @override
   String get featUnlinkedJan => '未关联的JAN码';
@@ -2129,7 +2129,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get poStatusCompleted => '已完成';
 
   @override
-  String get productsTitle => '商品库';
+  String get productsTitle => '商品主数据';
 
   @override
   String get productsShowInactive => '同时显示休眠与停止供应';
@@ -8386,4 +8386,163 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pdProductId => '商品ID';
+
+  @override
+  String get featCatalog => '商品库';
+
+  @override
+  String get featCatalogDesc => '从文件和目录收集的商品，以及各供应商按分店、时期的价格，与商品主数据分开管理';
+
+  @override
+  String get clTitle => '商品库';
+
+  @override
+  String get clSearchHint => '按品名、制造商、货号、JAN 或供应商写法搜索';
+
+  @override
+  String get clEmpty => '商品库为空';
+
+  @override
+  String get clEmptyBody => '请用“从文件导入”读取报价单、发票或目录等。';
+
+  @override
+  String get clInMaster => '已登录主数据';
+
+  @override
+  String get clNotInMaster => '未登录主数据';
+
+  @override
+  String get clToMaster => '登录到商品主数据';
+
+  @override
+  String clToMasterDone(int created, int linked, int skipped) {
+    return '已登录到商品主数据：新建 $created 件、关联已有 $linked 件、因无 JAN 或制造商跳过 $skipped 件';
+  }
+
+  @override
+  String get clDelete => '从商品库删除';
+
+  @override
+  String clDeleteQ(int count) {
+    return '从商品库删除 $count 件？';
+  }
+
+  @override
+  String get clDeleteBody => '删除商品库中的商品及其各供应商价格历史，无法恢复。不影响商品主数据、库存、订单、入库等。';
+
+  @override
+  String clDeleted(int count) {
+    return '已从商品库删除 $count 件';
+  }
+
+  @override
+  String get ciTitle => '从文件导入';
+
+  @override
+  String get ciIntro =>
+      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN、规格、价格整理后放入商品库。相同 JAN 的商品会更新。不影响商品主数据和库存。';
+
+  @override
+  String get ciTermsFor => '价格（可选）';
+
+  @override
+  String get ciBranch => '供应商分店';
+
+  @override
+  String get ciBranchHint => '例如：大阪分店（留空则所有分店通用）';
+
+  @override
+  String ciValidFrom(String date) {
+    return '生效日期：$date';
+  }
+
+  @override
+  String ciSummary(int total, int fresh, int known) {
+    return '$total 行：新商品 $fresh 件・更新商品库已有商品 $known 件';
+  }
+
+  @override
+  String get ciNoSupplierNote => '不选择供应商时只导入商品，不保存价格。';
+
+  @override
+  String ciImport(int count) {
+    return '导入商品库（$count 件）';
+  }
+
+  @override
+  String ciDone(int created, int updated, int terms) {
+    return '已导入：新建 $created 件、更新 $updated 件、价格 $terms 件';
+  }
+
+  @override
+  String get ciLineNew => '新建';
+
+  @override
+  String get ciLineUpdate => '更新';
+
+  @override
+  String get citOverview => '概要';
+
+  @override
+  String get citSourceFile => '来源文件';
+
+  @override
+  String get citMaster => '商品主数据・库存';
+
+  @override
+  String get citFoundByJan => 'JAN 相同的主数据商品（尚未关联）';
+
+  @override
+  String get citOpenMaster => '在商品主数据中打开';
+
+  @override
+  String get citNotInMaster => '尚未登录商品主数据。在列表中选择并“登录到商品主数据”后，即可用于库存和订单。';
+
+  @override
+  String get citCurrentTerms => '当前交易条件（按供应商、分店）';
+
+  @override
+  String get citNoTerms => '尚无价格';
+
+  @override
+  String get citAddTerm => '添加交易条件';
+
+  @override
+  String get citNewTerm => '新条件';
+
+  @override
+  String get citAddBranch => '添加其他分店的条件';
+
+  @override
+  String get citAllBranches => '所有分店通用';
+
+  @override
+  String citSupplierHint(String name) {
+    return '与$name的交易条件历史。录入新条件后，之前的条件在前一天结束并保留在此。';
+  }
+
+  @override
+  String citFrom(String date) {
+    return '$date 起';
+  }
+
+  @override
+  String citPeriod(String from, String to) {
+    return '$from 至 $to';
+  }
+
+  @override
+  String get citPast => '已结束';
+
+  @override
+  String get citValidFromField => '生效日期（YYYY-MM-DD）';
+
+  @override
+  String get citRateField => '折扣率（60 或 0.6）';
+
+  @override
+  String get citTheirName => '对方商品名';
+
+  @override
+  String get clOpenLibrary => '打开商品库';
 }

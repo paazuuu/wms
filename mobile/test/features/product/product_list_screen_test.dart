@@ -298,7 +298,7 @@ void main() {
 
     expect(find.text('ボールペン'), findsOneWidget);
     expect(find.byKey(const ValueKey('products-add')), findsNothing);
-    expect(find.byKey(const ValueKey('products-from-quote')), findsNothing);
+    expect(find.byKey(const ValueKey('products-from-library')), findsNothing);
     expect(find.byKey(const ValueKey('product-menu-1')), findsNothing);
     // The status reads, but tapping it changes nothing.
     await tester.tap(find.text('取扱中'));
@@ -315,7 +315,7 @@ void main() {
     await _pump(tester, repo);
 
     expect(find.byKey(const ValueKey('products-add')), findsOneWidget);
-    expect(find.byKey(const ValueKey('products-from-quote')), findsOneWidget);
+    expect(find.byKey(const ValueKey('products-from-library')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('product-menu-1')));
     await tester.pumpAndSettle();
     expect(find.text('編集'), findsOneWidget);

@@ -5945,6 +5945,50 @@ Also:
     ours, and every spelling seen. Managers can edit it there.
 - 基本情報 shows the product id as P-000143.
 
+### 0124 — 商品ライブラリー on its own, with terms by period and branch
+
+- 商品ライブラリー is now its own set of tables, apart from the product
+  master (`products`, now called 商品マスタ), which stock, orders, receipts
+  and shipments hang off. Reading a file again, or deleting from the
+  library, never touches the master or anything booked.
+  - `catalog_items`: every product a file or a person brought in (maker,
+    name, 品番, JAN, spec, unit, list price, attributes, source file).
+    - Found again by JAN, else by maker and 品番, and updated.
+    - `product_id` links it to the master: set by `catalog_to_products`,
+      cleared if the product is deleted.
+  - `catalog_supplier_terms`: one row per supplier, branch (支店) or our
+    warehouse, and period (`valid_from`, `valid_to`). It holds their
+    name and code, unit price (or list price × rate), list price, rate,
+    case quantity, MOQ and source file.
+    - A new term for the same supplier, branch and warehouse ends the one
+      before it the day before, so price history stays readable.
+- RPCs:
+  - `catalog_list(search)`: items with the terms in force today, the
+    number of terms ever, and the master product (linked, or found by
+    JAN) with its stock.
+  - `catalog_term_history(id)`: every term an item has had.
+  - `catalog_import(lines, partner, branch, valid_from, file)`: a read file
+    into the library.
+  - `catalog_add_term(id, term)`: a term set by hand.
+  - `catalog_to_products(ids)`: items into the master (new product, or
+    linked to the one with its JAN).
+- Deleting library items is a row delete under an RLS policy
+  (`product.manage`); their terms go by cascade. A function holding a
+  `delete` statement could not be applied here (see 0118).
+- App:
+  - 商品ライブラリー (new menu entry): search; filters for maker, supplier,
+    in/not in the master, and in stock; each supplier's current price by
+    branch; stock when in the master; ファイルから取り込む; choosing many →
+    商品マスタに登録 or ライブラリーから削除.
+  - An item: 概要 (its parts, the master and stock, current terms), and one
+    tab per supplier. That tab lists terms by branch, current and ended,
+    with dates, and can take new ones.
+  - 商品マスタ's former file import now opens the library.
+- Product data reset: the 91 products were copied into `backup_20261004_*`
+  tables. The delete itself waits for a confirmation, so it is in
+  `supabase/manual/2026-10-04_reset_products.sql`, to run in the SQL
+  editor.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

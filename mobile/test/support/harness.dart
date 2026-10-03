@@ -60,6 +60,9 @@ import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/data_quality.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/catalog/application/catalog_providers.dart';
+import 'package:wms_mobile/features/catalog/data/catalog_repository.dart';
+import 'package:wms_mobile/features/catalog/domain/catalog.dart';
 import 'package:wms_mobile/features/inventory/data/inventory_repository.dart';
 import 'package:wms_mobile/features/inventory/domain/reservation.dart';
 import 'package:wms_mobile/features/inventory/domain/stock_discrepancy.dart';
@@ -203,6 +206,8 @@ List<Override> _defaultOverrides() => [
       productNamingRepositoryProvider.overrideWithValue(FakeProductNamingRepository()),
       // Boxes and shipping weights (0115), in memory.
       packagingRepositoryProvider.overrideWithValue(FakePackagingRepository()),
+      // 商品ライブラリー (0124), empty unless a test fills it.
+      catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -4986,5 +4991,66 @@ class FakePackagingRepository implements PackagingRepository {
       {required int cartonTypeId, double? emptyWeightG, double? packingMaterialG}) async {
     packaging.add((cartonId: cartonId, typeId: cartonTypeId, empty: emptyWeightG, material: packingMaterialG));
     return const ApiSuccess(true);
+  }
+}
+
+
+/// 商品ライブラリー in memory (0124).
+class FakeCatalogRepository implements CatalogRepository {
+  FakeCatalogRepository({List<CatalogItem> items = const [], Map<int, List<CatalogTerm>> history = const {}})
+      : items = List.of(items),
+        histories = Map.of(history);
+
+  List<CatalogItem> items;
+  Map<int, List<CatalogTerm>> histories;
+  final imports = <({List<Map<String, dynamic>> lines, int? partnerId, String? branch, DateTime? validFrom, String? file})>[];
+  final addedTerms = <(int, Map<String, dynamic>)>[];
+  final toMaster = <List<int>>[];
+  final deleted = <List<int>>[];
+
+  @override
+  Future<ApiResult<List<CatalogItem>>> list({String? search}) async => ApiSuccess([
+        for (final i in items)
+          if (search == null || i.name.contains(search) || (i.janCode ?? '').contains(search)) i,
+      ]);
+
+  @override
+  Future<ApiResult<List<CatalogTerm>>> history(int itemId) async => ApiSuccess(histories[itemId] ?? const []);
+
+  @override
+  Future<ApiResult<CatalogImported>> import(List<Map<String, dynamic>> lines,
+      {int? partnerId, String? branch, DateTime? validFrom, String? sourceFile}) async {
+    imports.add((lines: lines, partnerId: partnerId, branch: branch, validFrom: validFrom, file: sourceFile));
+    return ApiSuccess(CatalogImported(created: lines.length, terms: partnerId == null ? 0 : lines.length));
+  }
+
+  @override
+  Future<ApiResult<List<CatalogTerm>>> addTerm(int itemId, Map<String, dynamic> term) async {
+    addedTerms.add((itemId, term));
+    return ApiSuccess(histories[itemId] ?? const []);
+  }
+
+  @override
+  Future<ApiResult<({int created, int linked, int skipped})>> toProducts(List<int> ids) async {
+    toMaster.add(ids);
+    items = [
+      for (final i in items)
+        if (ids.contains(i.id))
+          CatalogItem(
+            id: i.id, name: i.name, janCode: i.janCode, maker: i.maker, itemCode: i.itemCode, terms: i.terms,
+            stock: i.stock, termCount: i.termCount,
+            product: CatalogProductRef(id: 900 + i.id, name: i.name, lifecycle: ProductLifecycle.active, linked: true),
+          )
+        else
+          i,
+    ];
+    return ApiSuccess((created: ids.length, linked: 0, skipped: 0));
+  }
+
+  @override
+  Future<ApiResult<int>> delete(List<int> ids) async {
+    deleted.add(ids);
+    items = [for (final i in items) if (!ids.contains(i.id)) i];
+    return ApiSuccess(ids.length);
   }
 }

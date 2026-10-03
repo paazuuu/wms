@@ -3073,13 +3073,13 @@ abstract class AppLocalizations {
   /// No description provided for @featProducts.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリー'**
+  /// **'商品マスタ'**
   String get featProducts;
 
   /// No description provided for @featProductsDesc.
   ///
   /// In ja, this message translates to:
-  /// **'自社の商品。一覧で編集、写真で確認・追加'**
+  /// **'実際に扱う商品。在庫・発注・入荷・出荷はここにつながります'**
   String get featProductsDesc;
 
   /// Home menu: unlinked_jan_codes / product_id_coverage (0058) — the registration worklist.
@@ -4165,7 +4165,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsTitle.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリー'**
+  /// **'商品マスタ'**
   String get productsTitle;
 
   /// No description provided for @productsShowInactive.
@@ -15360,6 +15360,282 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'商品ID'**
   String get pdProductId;
+
+  /// No description provided for @featCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリー'**
+  String get featCatalog;
+
+  /// No description provided for @featCatalogDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルやカタログから集めた商品と、仕入先ごと・支店ごと・時期ごとの価格。商品マスタとは別に管理'**
+  String get featCatalogDesc;
+
+  /// No description provided for @clTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリー'**
+  String get clTitle;
+
+  /// No description provided for @clSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名・メーカー・品番・JAN・仕入先の表記で検索'**
+  String get clSearchHint;
+
+  /// No description provided for @clEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーは空です'**
+  String get clEmpty;
+
+  /// No description provided for @clEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。'**
+  String get clEmptyBody;
+
+  /// No description provided for @clInMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'マスタ登録済み'**
+  String get clInMaster;
+
+  /// No description provided for @clNotInMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'マスタ未登録'**
+  String get clNotInMaster;
+
+  /// No description provided for @clToMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタに登録'**
+  String get clToMaster;
+
+  /// No description provided for @clToMasterDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタに登録しました（新規 {created}件・既存とつなげた {linked}件・JANかメーカーがなく登録できない {skipped}件）'**
+  String clToMasterDone(int created, int linked, int skipped);
+
+  /// No description provided for @clDelete.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーから削除'**
+  String get clDelete;
+
+  /// No description provided for @clDeleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件をライブラリーから削除しますか？'**
+  String clDeleteQ(int count);
+
+  /// No description provided for @clDeleteBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーの商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。'**
+  String get clDeleteBody;
+
+  /// No description provided for @clDeleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件をライブラリーから削除しました'**
+  String clDeleted(int count);
+
+  /// No description provided for @ciTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから取り込む'**
+  String get ciTitle;
+
+  /// No description provided for @ciIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて商品ライブラリーに入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。'**
+  String get ciIntro;
+
+  /// No description provided for @ciTermsFor.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格の扱い（任意）'**
+  String get ciTermsFor;
+
+  /// No description provided for @ciBranch.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の支店'**
+  String get ciBranch;
+
+  /// No description provided for @ciBranchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 大阪支店（空欄なら全支店共通）'**
+  String get ciBranchHint;
+
+  /// No description provided for @ciValidFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'適用開始日: {date}'**
+  String ciValidFrom(String date);
+
+  /// No description provided for @ciSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{total}行：新しい商品 {fresh}件・ライブラリーにある商品の更新 {known}件'**
+  String ciSummary(int total, int fresh, int known);
+
+  /// No description provided for @ciNoSupplierNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を選ばないと、商品だけが取り込まれ、価格は保存されません。'**
+  String get ciNoSupplierNote;
+
+  /// No description provided for @ciImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーに取り込む（{count}件）'**
+  String ciImport(int count);
+
+  /// No description provided for @ciDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込みました：新規 {created}件・更新 {updated}件・価格 {terms}件'**
+  String ciDone(int created, int updated, int terms);
+
+  /// No description provided for @ciLineNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新規'**
+  String get ciLineNew;
+
+  /// No description provided for @ciLineUpdate.
+  ///
+  /// In ja, this message translates to:
+  /// **'更新'**
+  String get ciLineUpdate;
+
+  /// No description provided for @citOverview.
+  ///
+  /// In ja, this message translates to:
+  /// **'概要'**
+  String get citOverview;
+
+  /// No description provided for @citSourceFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込んだファイル'**
+  String get citSourceFile;
+
+  /// No description provided for @citMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ・在庫'**
+  String get citMaster;
+
+  /// No description provided for @citFoundByJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが同じ商品マスタの商品です（まだつなげていません）'**
+  String get citFoundByJan;
+
+  /// No description provided for @citOpenMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタで開く'**
+  String get citOpenMaster;
+
+  /// No description provided for @citNotInMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタにはまだありません。一覧で選んで「商品マスタに登録」すると、在庫・発注で使えるようになります。'**
+  String get citNotInMaster;
+
+  /// No description provided for @citCurrentTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の取引条件（仕入先・支店ごと）'**
+  String get citCurrentTerms;
+
+  /// No description provided for @citNoTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格はまだありません'**
+  String get citNoTerms;
+
+  /// No description provided for @citAddTerm.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引条件を追加'**
+  String get citAddTerm;
+
+  /// No description provided for @citNewTerm.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい条件'**
+  String get citNewTerm;
+
+  /// No description provided for @citAddBranch.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の支店の条件を追加'**
+  String get citAddBranch;
+
+  /// No description provided for @citAllBranches.
+  ///
+  /// In ja, this message translates to:
+  /// **'全支店共通'**
+  String get citAllBranches;
+
+  /// No description provided for @citSupplierHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}の取引条件の履歴です。新しい条件を入れると、それまでの条件は前日までで終わり、ここに残ります。'**
+  String citSupplierHint(String name);
+
+  /// No description provided for @citFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date}〜'**
+  String citFrom(String date);
+
+  /// No description provided for @citPeriod.
+  ///
+  /// In ja, this message translates to:
+  /// **'{from}〜{to}'**
+  String citPeriod(String from, String to);
+
+  /// No description provided for @citPast.
+  ///
+  /// In ja, this message translates to:
+  /// **'終了'**
+  String get citPast;
+
+  /// No description provided for @citValidFromField.
+  ///
+  /// In ja, this message translates to:
+  /// **'適用開始日（YYYY-MM-DD）'**
+  String get citValidFromField;
+
+  /// No description provided for @citRateField.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率（60 または 0.6）'**
+  String get citRateField;
+
+  /// No description provided for @citTheirName.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方の商品名'**
+  String get citTheirName;
+
+  /// No description provided for @clOpenLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーを開く'**
+  String get clOpenLibrary;
 }
 
 class _AppLocalizationsDelegate

@@ -44,7 +44,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1000, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const ProductListScreen());
-    expect(find.text('商品ライブラリー'), findsOneWidget);
+    expect(find.text('商品マスタ'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.photo_library_outlined));
     await tester.pumpAndSettle();
     // The same list, drawn as pictures, with the same filters.

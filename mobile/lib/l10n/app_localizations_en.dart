@@ -1624,11 +1624,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm or reject AI-extracted results before they count';
 
   @override
-  String get featProducts => 'Product library';
+  String get featProducts => 'Product master';
 
   @override
   String get featProductsDesc =>
-      'Our products: edit them in the list, check and add photos in the grid';
+      'The products we handle: stock, orders, receipts and shipments hang off these';
 
   @override
   String get featUnlinkedJan => 'Unlinked JAN codes';
@@ -2192,7 +2192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get poStatusCompleted => 'Completed';
 
   @override
-  String get productsTitle => 'Product library';
+  String get productsTitle => 'Product master';
 
   @override
   String get productsShowInactive => 'Show dormant and discontinued too';
@@ -8598,4 +8598,170 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pdProductId => 'Product ID';
+
+  @override
+  String get featCatalog => 'Product library';
+
+  @override
+  String get featCatalogDesc =>
+      'Products gathered from files and catalogues, with each supplier\'s prices by branch and period — kept apart from the master';
+
+  @override
+  String get clTitle => 'Product library';
+
+  @override
+  String get clSearchHint =>
+      'Search by name, maker, item code, JAN or a supplier\'s writing';
+
+  @override
+  String get clEmpty => 'The library is empty';
+
+  @override
+  String get clEmptyBody =>
+      'Use \"Import from a file\" to read a quotation, invoice or catalogue.';
+
+  @override
+  String get clInMaster => 'In the master';
+
+  @override
+  String get clNotInMaster => 'Not in the master';
+
+  @override
+  String get clToMaster => 'Add to the master';
+
+  @override
+  String clToMasterDone(int created, int linked, int skipped) {
+    return 'Added to the master: $created new, $linked linked to existing, $skipped skipped (no JAN or maker)';
+  }
+
+  @override
+  String get clDelete => 'Delete from the library';
+
+  @override
+  String clDeleteQ(int count) {
+    return 'Delete $count from the library?';
+  }
+
+  @override
+  String get clDeleteBody =>
+      'The library items and their price history by supplier are deleted, for good. The product master, stock, orders and receipts are not touched.';
+
+  @override
+  String clDeleted(int count) {
+    return '$count deleted from the library';
+  }
+
+  @override
+  String get ciTitle => 'Import from a file';
+
+  @override
+  String get ciIntro =>
+      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code, JAN, spec and prices, and puts it into the library. An item with the same JAN is updated. The master and stock are not touched.';
+
+  @override
+  String get ciTermsFor => 'Prices (optional)';
+
+  @override
+  String get ciBranch => 'Supplier branch';
+
+  @override
+  String get ciBranchHint => 'e.g. Osaka branch (blank: all branches)';
+
+  @override
+  String ciValidFrom(String date) {
+    return 'From $date';
+  }
+
+  @override
+  String ciSummary(int total, int fresh, int known) {
+    return '$total lines: $fresh new, $known updating items in the library';
+  }
+
+  @override
+  String get ciNoSupplierNote =>
+      'Without a supplier only the products go in; their prices are not kept.';
+
+  @override
+  String ciImport(int count) {
+    return 'Import into the library ($count)';
+  }
+
+  @override
+  String ciDone(int created, int updated, int terms) {
+    return 'Imported: $created new, $updated updated, $terms prices';
+  }
+
+  @override
+  String get ciLineNew => 'New';
+
+  @override
+  String get ciLineUpdate => 'Update';
+
+  @override
+  String get citOverview => 'Overview';
+
+  @override
+  String get citSourceFile => 'From file';
+
+  @override
+  String get citMaster => 'Master and stock';
+
+  @override
+  String get citFoundByJan =>
+      'A master product with the same JAN (not linked yet)';
+
+  @override
+  String get citOpenMaster => 'Open in the master';
+
+  @override
+  String get citNotInMaster =>
+      'Not in the master yet. Choose it in the list and add it to the master to use it for stock and orders.';
+
+  @override
+  String get citCurrentTerms => 'Current terms (by supplier and branch)';
+
+  @override
+  String get citNoTerms => 'No prices yet';
+
+  @override
+  String get citAddTerm => 'Add terms';
+
+  @override
+  String get citNewTerm => 'New terms';
+
+  @override
+  String get citAddBranch => 'Add terms for another branch';
+
+  @override
+  String get citAllBranches => 'All branches';
+
+  @override
+  String citSupplierHint(String name) {
+    return 'The history of terms with $name. New terms end the earlier ones the day before, which stay here.';
+  }
+
+  @override
+  String citFrom(String date) {
+    return '$date –';
+  }
+
+  @override
+  String citPeriod(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String get citPast => 'Ended';
+
+  @override
+  String get citValidFromField => 'From (YYYY-MM-DD)';
+
+  @override
+  String get citRateField => 'Rate (60 or 0.6)';
+
+  @override
+  String get citTheirName => 'Their name';
+
+  @override
+  String get clOpenLibrary => 'Open the library';
 }

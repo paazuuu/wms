@@ -772,8 +772,8 @@
   "featConnectorsDesc": "将来の外部連携のために登録された外部システム",
   "featAiReview": "AIレビュー",
   "featAiReviewDesc": "AIの抽出結果を反映前に承認・却下",
-  "featProducts": "商品ライブラリー",
-  "featProductsDesc": "自社の商品。一覧で編集、写真で確認・追加",
+  "featProducts": "商品マスタ",
+  "featProductsDesc": "実際に扱う商品。在庫・発注・入荷・出荷はここにつながります",
   "featUnlinkedJan": "未紐付けJANコード",
   "@featUnlinkedJan": {
     "description": "Home menu: unlinked_jan_codes / product_id_coverage (0058) — the registration worklist."
@@ -1016,7 +1016,7 @@
   "poStatusRejected": "却下",
   "poStatusCancelled": "取消",
   "poStatusCompleted": "完了",
-  "productsTitle": "商品ライブラリー",
+  "productsTitle": "商品マスタ",
   "productsShowInactive": "休眠・提供終了も表示",
   "productsSearchHint": "商品名またはJANコードで検索",
   "productsEmpty": "商品がまだありません",
@@ -7575,5 +7575,142 @@
       }
     }
   },
-  "pdProductId": "商品ID"
+  "pdProductId": "商品ID",
+  "featCatalog": "商品ライブラリー",
+  "featCatalogDesc": "ファイルやカタログから集めた商品と、仕入先ごと・支店ごと・時期ごとの価格。商品マスタとは別に管理",
+  "clTitle": "商品ライブラリー",
+  "clSearchHint": "品名・メーカー・品番・JAN・仕入先の表記で検索",
+  "clEmpty": "商品ライブラリーは空です",
+  "clEmptyBody": "「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。",
+  "clInMaster": "マスタ登録済み",
+  "clNotInMaster": "マスタ未登録",
+  "clToMaster": "商品マスタに登録",
+  "clToMasterDone": "商品マスタに登録しました（新規 {created}件・既存とつなげた {linked}件・JANかメーカーがなく登録できない {skipped}件）",
+  "@clToMasterDone": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "linked": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "clDelete": "ライブラリーから削除",
+  "clDeleteQ": "{count}件をライブラリーから削除しますか？",
+  "@clDeleteQ": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clDeleteBody": "ライブラリーの商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。",
+  "clDeleted": "{count}件をライブラリーから削除しました",
+  "@clDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ciTitle": "ファイルから取り込む",
+  "ciIntro": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて商品ライブラリーに入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。",
+  "ciTermsFor": "価格の扱い（任意）",
+  "ciBranch": "仕入先の支店",
+  "ciBranchHint": "例: 大阪支店（空欄なら全支店共通）",
+  "ciValidFrom": "適用開始日: {date}",
+  "@ciValidFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ciSummary": "{total}行：新しい商品 {fresh}件・ライブラリーにある商品の更新 {known}件",
+  "@ciSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      },
+      "known": {
+        "type": "int"
+      }
+    }
+  },
+  "ciNoSupplierNote": "仕入先を選ばないと、商品だけが取り込まれ、価格は保存されません。",
+  "ciImport": "ライブラリーに取り込む（{count}件）",
+  "@ciImport": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ciDone": "取り込みました：新規 {created}件・更新 {updated}件・価格 {terms}件",
+  "@ciDone": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "terms": {
+        "type": "int"
+      }
+    }
+  },
+  "ciLineNew": "新規",
+  "ciLineUpdate": "更新",
+  "citOverview": "概要",
+  "citSourceFile": "取り込んだファイル",
+  "citMaster": "商品マスタ・在庫",
+  "citFoundByJan": "JANが同じ商品マスタの商品です（まだつなげていません）",
+  "citOpenMaster": "商品マスタで開く",
+  "citNotInMaster": "商品マスタにはまだありません。一覧で選んで「商品マスタに登録」すると、在庫・発注で使えるようになります。",
+  "citCurrentTerms": "今の取引条件（仕入先・支店ごと）",
+  "citNoTerms": "価格はまだありません",
+  "citAddTerm": "取引条件を追加",
+  "citNewTerm": "新しい条件",
+  "citAddBranch": "別の支店の条件を追加",
+  "citAllBranches": "全支店共通",
+  "citSupplierHint": "{name}の取引条件の履歴です。新しい条件を入れると、それまでの条件は前日までで終わり、ここに残ります。",
+  "@citSupplierHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "citFrom": "{date}〜",
+  "@citFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "citPeriod": "{from}〜{to}",
+  "@citPeriod": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "citPast": "終了",
+  "citValidFromField": "適用開始日（YYYY-MM-DD）",
+  "citRateField": "掛率（60 または 0.6）",
+  "citTheirName": "先方の商品名",
+  "clOpenLibrary": "商品ライブラリーを開く"
 }

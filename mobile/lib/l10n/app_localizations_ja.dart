@@ -1577,10 +1577,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featAiReviewDesc => 'AIの抽出結果を反映前に承認・却下';
 
   @override
-  String get featProducts => '商品ライブラリー';
+  String get featProducts => '商品マスタ';
 
   @override
-  String get featProductsDesc => '自社の商品。一覧で編集、写真で確認・追加';
+  String get featProductsDesc => '実際に扱う商品。在庫・発注・入荷・出荷はここにつながります';
 
   @override
   String get featUnlinkedJan => '未紐付けJANコード';
@@ -2133,7 +2133,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get poStatusCompleted => '完了';
 
   @override
-  String get productsTitle => '商品ライブラリー';
+  String get productsTitle => '商品マスタ';
 
   @override
   String get productsShowInactive => '休眠・提供終了も表示';
@@ -8420,4 +8420,166 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pdProductId => '商品ID';
+
+  @override
+  String get featCatalog => '商品ライブラリー';
+
+  @override
+  String get featCatalogDesc =>
+      'ファイルやカタログから集めた商品と、仕入先ごと・支店ごと・時期ごとの価格。商品マスタとは別に管理';
+
+  @override
+  String get clTitle => '商品ライブラリー';
+
+  @override
+  String get clSearchHint => '品名・メーカー・品番・JAN・仕入先の表記で検索';
+
+  @override
+  String get clEmpty => '商品ライブラリーは空です';
+
+  @override
+  String get clEmptyBody => '「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。';
+
+  @override
+  String get clInMaster => 'マスタ登録済み';
+
+  @override
+  String get clNotInMaster => 'マスタ未登録';
+
+  @override
+  String get clToMaster => '商品マスタに登録';
+
+  @override
+  String clToMasterDone(int created, int linked, int skipped) {
+    return '商品マスタに登録しました（新規 $created件・既存とつなげた $linked件・JANかメーカーがなく登録できない $skipped件）';
+  }
+
+  @override
+  String get clDelete => 'ライブラリーから削除';
+
+  @override
+  String clDeleteQ(int count) {
+    return '$count件をライブラリーから削除しますか？';
+  }
+
+  @override
+  String get clDeleteBody =>
+      'ライブラリーの商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。';
+
+  @override
+  String clDeleted(int count) {
+    return '$count件をライブラリーから削除しました';
+  }
+
+  @override
+  String get ciTitle => 'ファイルから取り込む';
+
+  @override
+  String get ciIntro =>
+      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて商品ライブラリーに入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。';
+
+  @override
+  String get ciTermsFor => '価格の扱い（任意）';
+
+  @override
+  String get ciBranch => '仕入先の支店';
+
+  @override
+  String get ciBranchHint => '例: 大阪支店（空欄なら全支店共通）';
+
+  @override
+  String ciValidFrom(String date) {
+    return '適用開始日: $date';
+  }
+
+  @override
+  String ciSummary(int total, int fresh, int known) {
+    return '$total行：新しい商品 $fresh件・ライブラリーにある商品の更新 $known件';
+  }
+
+  @override
+  String get ciNoSupplierNote => '仕入先を選ばないと、商品だけが取り込まれ、価格は保存されません。';
+
+  @override
+  String ciImport(int count) {
+    return 'ライブラリーに取り込む（$count件）';
+  }
+
+  @override
+  String ciDone(int created, int updated, int terms) {
+    return '取り込みました：新規 $created件・更新 $updated件・価格 $terms件';
+  }
+
+  @override
+  String get ciLineNew => '新規';
+
+  @override
+  String get ciLineUpdate => '更新';
+
+  @override
+  String get citOverview => '概要';
+
+  @override
+  String get citSourceFile => '取り込んだファイル';
+
+  @override
+  String get citMaster => '商品マスタ・在庫';
+
+  @override
+  String get citFoundByJan => 'JANが同じ商品マスタの商品です（まだつなげていません）';
+
+  @override
+  String get citOpenMaster => '商品マスタで開く';
+
+  @override
+  String get citNotInMaster =>
+      '商品マスタにはまだありません。一覧で選んで「商品マスタに登録」すると、在庫・発注で使えるようになります。';
+
+  @override
+  String get citCurrentTerms => '今の取引条件（仕入先・支店ごと）';
+
+  @override
+  String get citNoTerms => '価格はまだありません';
+
+  @override
+  String get citAddTerm => '取引条件を追加';
+
+  @override
+  String get citNewTerm => '新しい条件';
+
+  @override
+  String get citAddBranch => '別の支店の条件を追加';
+
+  @override
+  String get citAllBranches => '全支店共通';
+
+  @override
+  String citSupplierHint(String name) {
+    return '$nameの取引条件の履歴です。新しい条件を入れると、それまでの条件は前日までで終わり、ここに残ります。';
+  }
+
+  @override
+  String citFrom(String date) {
+    return '$date〜';
+  }
+
+  @override
+  String citPeriod(String from, String to) {
+    return '$from〜$to';
+  }
+
+  @override
+  String get citPast => '終了';
+
+  @override
+  String get citValidFromField => '適用開始日（YYYY-MM-DD）';
+
+  @override
+  String get citRateField => '掛率（60 または 0.6）';
+
+  @override
+  String get citTheirName => '先方の商品名';
+
+  @override
+  String get clOpenLibrary => '商品ライブラリーを開く';
 }

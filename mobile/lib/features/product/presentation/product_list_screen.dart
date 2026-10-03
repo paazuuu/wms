@@ -15,7 +15,7 @@ import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
-import '../../product_library/presentation/quote_import_screen.dart';
+import '../../catalog/presentation/catalog_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
@@ -216,17 +216,17 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
                     child: Row(
                       children: [
-                        // Any document listing products — quotation, invoice,
-                        // catalogue — read by the AI and registered at once.
+                        // Files are read into 商品ライブラリー (0124); products
+                        // come into the master from there.
                         if (canManage && selected == null) ...[
                           FilledButton.tonalIcon(
-                            key: const ValueKey('products-from-quote'),
+                            key: const ValueKey('products-from-library'),
                             onPressed: () async {
-                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuoteImportScreen()));
+                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CatalogScreen()));
                               ref.invalidate(productListProvider);
                             },
-                            icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-                            label: Text(l10n.quoteImportTitle),
+                            icon: const Icon(Icons.local_library_outlined, size: 18),
+                            label: Text(l10n.clOpenLibrary),
                           ),
                           const SizedBox(width: AppSpacing.sm),
                         ],
