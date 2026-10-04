@@ -55,10 +55,15 @@ abstract class ProductRepository {
 
   Future<ApiResult<bool>> setStatus(int id, String status);
 
-  /// `delete_product` (0119) — removes a product that was never used. One
-  /// that stock, an order or a document names is refused; it is deactivated
-  /// instead.
+  /// Removes one product for good (0126). One that stock, an order or a
+  /// document names is refused ("product is in use"); it is archived or
+  /// deactivated instead.
   Future<ApiResult<bool>> delete(int id);
+
+  /// Removes products for good (0126): those nothing booked points at go,
+  /// with their names, codes and picture rows; the rest are left and
+  /// returned in `inUse`. 商品ライブラリー keeps its items.
+  Future<ApiResult<({List<int> removed, List<int> inUse})>> deleteMany(List<int> ids);
 
   /// `reactivate_products` (0123) — the products a file lists, made active
   /// again. Dormant ones need product.manage; archived or discontinued ones
@@ -138,6 +143,17 @@ abstract class ProductRepository {
     String source = 'manual',
     String? url,
     String? note,
+  });
+
+  /// `set_product_size` (0125) — 幅・奥行・高さ in mm and any other
+  /// notation; all null clears it.
+  Future<ApiResult<bool>> setSize({
+    required int productId,
+    double? widthMm,
+    double? depthMm,
+    double? heightMm,
+    String? note,
+    String source = 'manual',
   });
 
   /// `set_product_name_en` (0117) — the English name, or null to clear it.
@@ -332,11 +348,66 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<ApiResult<bool>> delete(int id) async {
+    final r = await deleteMany([id]);
+    return switch (r) {
+      ApiSuccess(:final data) when data.removed.contains(id) => const ApiSuccess(true),
+      ApiSuccess(:final data) when data.inUse.contains(id) =>
+        const ApiFailure(message: 'product is in use; deactivate it instead'),
+      ApiSuccess() => const ApiFailure(message: 'not permitted: product.delete required'),
+      ApiFailure(:final message, :final statusCode) => ApiFailure(message: message, statusCode: statusCode),
+    };
+  }
+
+  static bool _refusedAsInUse(DioException e) {
+    final d = e.response?.data;
+    return e.response?.statusCode == 409 || (d is Map && d['code'] == '23503');
+  }
+
+  /// Row removals under 0126's policies: the picture rows first (their key
+  /// would refuse), then the products; the ids actually removed come back.
+  Future<List<int>> _remove(List<int> ids) async {
+    final inList = 'in.(${ids.join(',')})';
+    await _dio.delete('/product_images', queryParameters: {'product_id': inList});
+    final r = await _dio.delete(
+      '/products',
+      queryParameters: {'id': inList, 'select': 'id'},
+      options: Options(headers: {'Prefer': 'return=representation'}),
+    );
+    return [
+      for (final e in (r.data is List ? r.data as List : const []).whereType<Map>())
+        if (e['id'] case final num id) id.toInt(),
+    ];
+  }
+
+  @override
+  Future<ApiResult<({List<int> removed, List<int> inUse})>> deleteMany(List<int> ids) async {
+    if (ids.isEmpty) return const ApiSuccess((removed: <int>[], inUse: <int>[]));
     try {
-      await _dio.post('/rpc/delete_product', data: {'p_id': id});
-      return const ApiSuccess(true);
+      // What anything booked still names stays — pictures included.
+      final u = await _dio.post('/rpc/products_in_use', data: {'p_ids': ids});
+      final raw = u.data is List && u.data.length == 1 && u.data.first is List ? u.data.first : u.data;
+      final inUse = {for (final x in (raw as List? ?? const [])) (x as num).toInt()};
+      final free = [for (final id in ids) if (!inUse.contains(id)) id];
+      final removed = <int>[];
+      if (free.isNotEmpty) {
+        try {
+          removed.addAll(await _remove(free));
+        } on DioException catch (e) {
+          // Booked against in the meantime: one at a time, keeping the rest.
+          if (!_refusedAsInUse(e)) rethrow;
+          for (final id in free) {
+            try {
+              removed.addAll(await _remove([id]));
+            } on DioException catch (e2) {
+              if (!_refusedAsInUse(e2)) rethrow;
+              inUse.add(id);
+            }
+          }
+        }
+      }
+      return ApiSuccess((removed: removed, inUse: [for (final id in ids) if (inUse.contains(id)) id]));
     } on DioException catch (e) {
-      return mapDioError<bool>(e);
+      return mapDioError<({List<int> removed, List<int> inUse})>(e);
     }
   }
 
@@ -491,6 +562,30 @@ class ProductRepositoryImpl implements ProductRepository {
         'p_source': source,
         'p_url': url,
         'p_note': note,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setSize({
+    required int productId,
+    double? widthMm,
+    double? depthMm,
+    double? heightMm,
+    String? note,
+    String source = 'manual',
+  }) async {
+    try {
+      await _dio.post('/rpc/set_product_size', data: {
+        'p_product_id': productId,
+        'p_width_mm': widthMm,
+        'p_depth_mm': depthMm,
+        'p_height_mm': heightMm,
+        'p_note': note,
+        'p_source': source,
       });
       return const ApiSuccess(true);
     } on DioException catch (e) {

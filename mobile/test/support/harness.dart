@@ -243,8 +243,9 @@ Future<void> pumpApp(
 Future<void> pumpAppWith(
   WidgetTester tester,
   ProviderContainer container,
-  Widget child,
-) async {
+  Widget child, {
+  bool canManageProducts = false,
+}) async {
   // Product pictures (0109) are served from memory here even when the
   // caller's container predates them, so no row reaches for the network;
   // nobody manages products here, so the sign-in state is never read.
@@ -257,7 +258,7 @@ Future<void> pumpAppWith(
           productImageRepositoryProvider.overrideWithValue(images),
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
           // Managing products (0111's name builder) is off here, as in pumpApp.
-          productLibraryCanManageProvider.overrideWithValue(false),
+          productLibraryCanManageProvider.overrideWithValue(canManageProducts),
           productCanDeleteProvider.overrideWithValue(false),
           productCanLifecycleProvider.overrideWithValue(false),
         ],
@@ -2301,6 +2302,18 @@ class FakeProductRepository implements ProductRepository {
     return const ApiSuccess(true);
   }
 
+  /// What deleteMany() was asked (0126).
+  final deleteManyCalls = <List<int>>[];
+
+  @override
+  Future<ApiResult<({List<int> removed, List<int> inUse})>> deleteMany(List<int> ids) async {
+    deleteManyCalls.add(ids);
+    final removed = [for (final id in ids) if (!inUse.contains(id)) id];
+    deleted.addAll(removed);
+    _products = [for (final p in _products) if (!removed.contains(p.id)) p];
+    return ApiSuccess((removed: removed, inUse: [for (final id in ids) if (inUse.contains(id)) id]));
+  }
+
   /// What reactivate() was asked (0123); [mayLift] says whether archived and
   /// discontinued ones may come back (product.lifecycle), dormant ones always.
   final reactivateCalls = <List<int>>[];
@@ -2381,6 +2394,22 @@ class FakeProductRepository implements ProductRepository {
     String? note,
   }) async {
     setWeights.add((productId: productId, unitWeightG: unitWeightG, source: source, url: url, note: note));
+    return const ApiSuccess(true);
+  }
+
+  /// What setSize() was asked to save (0125).
+  final setSizes = <({int productId, double? width, double? depth, double? height, String? note, String source})>[];
+
+  @override
+  Future<ApiResult<bool>> setSize({
+    required int productId,
+    double? widthMm,
+    double? depthMm,
+    double? heightMm,
+    String? note,
+    String source = 'manual',
+  }) async {
+    setSizes.add((productId: productId, width: widthMm, depth: depthMm, height: heightMm, note: note, source: source));
     return const ApiSuccess(true);
   }
 
@@ -4997,9 +5026,42 @@ class FakePackagingRepository implements PackagingRepository {
 
 /// 商品ライブラリー in memory (0124).
 class FakeCatalogRepository implements CatalogRepository {
-  FakeCatalogRepository({List<CatalogItem> items = const [], Map<int, List<CatalogTerm>> history = const {}})
-      : items = List.of(items),
-        histories = Map.of(history);
+  FakeCatalogRepository({
+    List<CatalogItem> items = const [],
+    Map<int, List<CatalogTerm>> history = const {},
+    List<MasterCandidate> candidates = const [],
+  })  : items = List.of(items),
+        histories = Map.of(history),
+        candidates = List.of(candidates);
+
+  List<MasterCandidate> candidates;
+  final fromMasterCalls = <List<int>>[];
+  final updates = <(int, Map<String, dynamic>)>[];
+
+  @override
+  Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search}) async => ApiSuccess(List.of(candidates));
+
+  @override
+  Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds) async {
+    fromMasterCalls.add(productIds);
+    final taken = [for (final c in candidates) if (productIds.contains(c.id)) c];
+    candidates = [for (final c in candidates) if (!productIds.contains(c.id)) c];
+    items = [
+      ...items,
+      for (final c in taken)
+        CatalogItem(
+          id: 500 + c.id, name: c.name, maker: c.maker, itemCode: c.sku, janCode: c.janCode, source: 'master',
+          product: CatalogProductRef(id: c.id, name: c.name, lifecycle: c.lifecycle, linked: true),
+        ),
+    ];
+    return ApiSuccess((created: taken.length, terms: taken.fold(0, (n, c) => n + c.supplierCount), skipped: 0));
+  }
+
+  @override
+  Future<ApiResult<bool>> update(int itemId, Map<String, dynamic> fields) async {
+    updates.add((itemId, fields));
+    return const ApiSuccess(true);
+  }
 
   List<CatalogItem> items;
   Map<int, List<CatalogTerm>> histories;

@@ -36,7 +36,7 @@ Future<FakeProductRepository> _pumpProduct(WidgetTester tester, Product product)
     scCanViewProvider.overrideWithValue(false),
   ]);
   addTearDown(container.dispose);
-  await pumpAppWith(tester, container, ProductDetailScreen(productId: product.id));
+  await pumpAppWith(tester, container, ProductDetailScreen(productId: product.id), canManageProducts: true);
   return repo;
 }
 
@@ -113,6 +113,32 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('wt-clear')));
     await tester.pumpAndSettle();
     expect(repo.setWeights.single.unitWeightG, isNull);
+  });
+
+  testWidgets('a product shows its size beside its weight, and the size is entered in mm', (tester) async {
+    const sized = Product(
+      id: 1, janCode: '4901681233922', name: 'サラサドライ 0.5 青',
+      widthMm: 10, depthMm: 12.5, heightMm: 140, sizeSource: 'file');
+    final repo = await _pumpProduct(tester, sized);
+
+    expect(find.text('幅 10 × 奥行 12.5 × 高さ 140 mm'), findsOneWidget);
+    expect(find.text('ファイルから'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('size-edit')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('size-w')), '11');
+    await tester.enterText(find.byKey(const ValueKey('size-note')), 'キャップ付き');
+    await tester.tap(find.text('実測'));
+    await tester.tap(find.byKey(const ValueKey('size-save')));
+    await tester.pumpAndSettle();
+    final s = repo.setSizes.single;
+    expect((s.width, s.depth, s.height, s.note, s.source), (11.0, 12.5, 140.0, 'キャップ付き', 'measured'));
+  });
+
+  test('size reads as 幅 × 奥行 × 高さ, short on cards', () {
+    expect(specShort(weightG: 12, width: 10, depth: 12.5, height: 140), '10×12.5×140 mm · 12 g');
+    expect(specShort(note: 'A4'), 'A4');
+    expect(specShort(), isNull);
   });
 
   testWidgets('a pack size is edited with its box weight', (tester) async {

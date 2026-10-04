@@ -157,7 +157,7 @@ void main() {
     expect(productLibraryProvider((query: 'a', withoutImages: false)), productLibraryProvider((query: 'a', withoutImages: false)));
   });
 
-  group('how each supplier calls the product (0110)', () {
+  group('the product\'s attributes (0110)', () {
     ProductProfile profile() => const ProductProfile(
           productId: 1,
           name: 'ボールペン黒',
@@ -200,53 +200,6 @@ void main() {
       return repo;
     }
 
-    testWidgets("each supplier's name, 品番, spellings and attributes hang from the product", (tester) async {
-      final repo = await pumpTab(tester, 2);
-      final card = find.byKey(const ValueKey('pl-supplier-7'));
-      expect(find.descendant(of: card, matching: find.text('A商社')), findsOneWidget);
-      expect(find.descendant(of: card, matching: find.text('BALL PEN BK')), findsOneWidget);
-      expect(find.descendant(of: card, matching: find.text('BP01')), findsOneWidget);
-      // The supplier's word, and what it means in ours.
-      expect(find.text('カラー: BK  → 黒'), findsOneWidget);
-      expect(find.text('Size: M'), findsOneWidget);
-      expect(find.textContaining('4901234-567894'), findsOneWidget);
-      // Ours has no size yet: the supplier's can be taken.
-      expect(find.byKey(const ValueKey('pl-adopt-7-color')), findsNothing);
-      await tester.tap(find.byKey(const ValueKey('pl-adopt-7-size')));
-      await tester.pumpAndSettle();
-      expect(repo.lastAttributeValues, {2: 'M'});
-    });
-
-    testWidgets('a manager adds how another supplier calls it', (tester) async {
-      final repo = await pumpTab(tester, 2);
-      await tester.tap(find.byKey(const ValueKey('pl-supplier-add')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('pl-supplier-pick')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('B商事').last);
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const ValueKey('pl-sup-name')), 'ボールペン ブラック');
-      await tester.enterText(find.byKey(const ValueKey('pl-sup-code')), 'B-100');
-      await tester.enterText(find.byKey(const ValueKey('pl-sup-attr-heading-color')), '色番');
-      await tester.enterText(find.byKey(const ValueKey('pl-sup-attr-color')), '09');
-      await tester.tap(find.byKey(const ValueKey('pl-sup-save')));
-      await tester.pumpAndSettle();
-
-      final d = repo.lastDraft!;
-      expect((d.productId, d.supplierId, d.name, d.code), (1, 8, 'ボールペン ブラック', 'B-100'));
-      expect(d.attributes.single.attributeId, 1);
-      expect(d.attributes.single.rawName, '色番');
-      expect(d.attributes.single.rawValue, '09');
-      expect(find.byKey(const ValueKey('pl-supplier-8')), findsOneWidget);
-
-      await tester.tap(find.byKey(const ValueKey('pl-supplier-remove-7')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('pl-supplier-remove-ok')));
-      await tester.pumpAndSettle();
-      expect(repo.lastRemoved, (1, 7));
-      expect(find.byKey(const ValueKey('pl-supplier-7')), findsNothing);
-    });
-
     testWidgets('our attributes are set on the product; without the right they are read-only', (tester) async {
       final repo = await pumpTab(tester, 1);
       expect(find.descendant(of: find.byKey(const ValueKey('pl-attr-color')), matching: find.text('黒')), findsOneWidget);
@@ -266,12 +219,12 @@ void main() {
       expect(repo.attributeDefs.last.name, '香り');
     });
 
-    testWidgets('a viewer sees the names but cannot change them', (tester) async {
-      await pumpTab(tester, 2, manage: false);
-      expect(find.byKey(const ValueKey('pl-supplier-7')), findsOneWidget);
-      expect(find.byKey(const ValueKey('pl-supplier-add')), findsNothing);
-      expect(find.byKey(const ValueKey('pl-supplier-edit-7')), findsNothing);
-      expect(find.byKey(const ValueKey('pl-adopt-7-size')), findsNothing);
+    testWidgets('the master\'s product page has its photos and attributes, not its suppliers (0125)', (tester) async {
+      await pumpTab(tester, 1, manage: false);
+      expect(find.byKey(const ValueKey('pl-tab-photos')), findsOneWidget);
+      expect(find.byKey(const ValueKey('pl-tab-attributes')), findsOneWidget);
+      expect(find.byKey(const ValueKey('pl-tab-suppliers')), findsNothing);
+      expect(find.text('A商社'), findsNothing);
       // The photo button belongs to the photo tab only.
       expect(find.byKey(const ValueKey('pl-add-photo')), findsNothing);
     });

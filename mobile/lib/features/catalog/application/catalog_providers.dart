@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../delivery/application/delivery_providers.dart';
+import '../../product_library/application/product_library_providers.dart';
 import '../data/catalog_repository.dart';
 import '../domain/catalog.dart';
 
@@ -74,4 +75,22 @@ final catalogFilterProvider = StateProvider<CatalogFilter>((_) => const CatalogF
 final filteredCatalogProvider = Provider.autoDispose<AsyncValue<List<CatalogItem>>>((ref) {
   final f = ref.watch(catalogFilterProvider);
   return ref.watch(catalogListProvider).whenData((all) => [for (final i in all) if (f.matches(i)) i]);
+});
+
+/// List or pictures: the same items, drawn two ways (0125).
+final catalogPhotoViewProvider = StateProvider<bool>((_) => false);
+
+/// Viewable URLs for the faces of the items listed, signed in one call.
+final catalogFaceUrlsProvider = FutureProvider.autoDispose<Map<String, String>>((ref) async {
+  final items = await ref.watch(catalogListProvider.future);
+  final paths = {for (final i in items) if (i.facePath != null) i.facePath!}.toList();
+  if (paths.isEmpty) return const {};
+  final r = await ref.watch(productImageRepositoryProvider).signUrls(paths);
+  return r.when(success: (m) => m, failure: (_) => const <String, String>{});
+});
+
+/// Master products that can be brought into the library.
+final masterCandidatesProvider = FutureProvider.autoDispose<List<MasterCandidate>>((ref) async {
+  final r = await ref.watch(catalogRepositoryProvider).masterCandidates();
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });

@@ -8582,4 +8582,146 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get clOpenLibrary => '商品ライブラリーを開く';
+
+  @override
+  String get specSizeWeight => 'サイズ・重量';
+
+  @override
+  String get specWeight => '重量';
+
+  @override
+  String get specSize => 'サイズ';
+
+  @override
+  String specSizeValue(String w, String d, String h) {
+    return '幅 $w × 奥行 $d × 高さ $h mm';
+  }
+
+  @override
+  String get specNotEntered => '未登録';
+
+  @override
+  String get specSizeAdd => 'サイズを入力';
+
+  @override
+  String get specSizeEdit => 'サイズを変更';
+
+  @override
+  String get specWidth => '幅';
+
+  @override
+  String get specDepth => '奥行';
+
+  @override
+  String get specHeight => '高さ';
+
+  @override
+  String get specSizeNote => 'その他の表記（A4、φ10×140mm など・任意）';
+
+  @override
+  String get specSizeHint => '外箱ではなく商品そのものの外寸を、ミリ単位で入れてください。';
+
+  @override
+  String get specSizeInvalid => 'サイズは0以上の数字で入れてください';
+
+  @override
+  String get specSizeClear => 'サイズを消す';
+
+  @override
+  String get specSourceFile => 'ファイルから';
+
+  @override
+  String get specWeightField => '重量 (g)';
+
+  @override
+  String get clFromMaster => 'マスタから取り込む';
+
+  @override
+  String get cfmTitle => '商品マスタから取り込む';
+
+  @override
+  String get cfmIntro =>
+      '商品ライブラリーにまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごとライブラリーにコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、ライブラリーのコピーは残ります。';
+
+  @override
+  String get cfmEmpty => '取り込める商品はありません';
+
+  @override
+  String get cfmEmptyBody => '商品マスタの商品は、すべて商品ライブラリーにあります。';
+
+  @override
+  String cfmSelectAll(int count) {
+    return 'すべて選ぶ（$count件）';
+  }
+
+  @override
+  String cfmImport(int count) {
+    return '選んだ$count件を取り込む';
+  }
+
+  @override
+  String cfmDone(int created, int terms) {
+    return '$created件を商品ライブラリーに取り込みました（仕入先の条件 $terms件）';
+  }
+
+  @override
+  String cfmSuppliers(int count) {
+    return '仕入先 $count社';
+  }
+
+  @override
+  String get citEdit => '商品情報を編集';
+
+  @override
+  String get citNameField => '品名（表示名）';
+
+  @override
+  String get citSaved => '保存しました';
+
+  @override
+  String get citSpecFromLibrary =>
+      'サイズ・重量・写真はライブラリーの記録です。商品マスタを変えても、ここは変わりません。';
+
+  @override
+  String get citHowTheyCall => 'この仕入先での呼び方と今の条件';
+
+  @override
+  String get citRateLabel => '掛率';
+
+  @override
+  String get citTheirCodeLabel => '先方の品番';
+
+  @override
+  String get citWhere => '支店';
+
+  @override
+  String get citNoNaming => 'この仕入先での呼び方はまだ記録されていません';
+
+  @override
+  String get rmAction => '完全に削除';
+
+  @override
+  String rmQ(int count) {
+    return '$count件を商品マスタから完全に削除しますか？';
+  }
+
+  @override
+  String get rmBody =>
+      '商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n商品ライブラリーの商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。';
+
+  @override
+  String get rmConfirmLabel => '確認のため「削除」と入力してください';
+
+  @override
+  String get rmConfirmWord => '削除';
+
+  @override
+  String rmDone(int removed) {
+    return '$removed件を完全に削除しました';
+  }
+
+  @override
+  String rmDoneInUse(int removed, int inUse) {
+    return '$removed件を完全に削除しました。$inUse件は在庫・入出荷などの記録があるため削除できず、残しています（アーカイブのままにしておけます）';
+  }
 }

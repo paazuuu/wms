@@ -453,43 +453,21 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('each supplier\'s name and code for the product can be recorded (0087)',
-      (tester) async {
+  testWidgets('the master shows what the product is, not who supplies it (0125)', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeProductRepository(products: const [_untracked])
       ..supplierNameList = [
         SupplierProductName(
             id: 5, supplierId: 1, supplierDisplayName: '新東光通商', productId: 2,
             supplierName: '追跡なし品（大）', supplierCode: 'SK-100'),
       ];
-    await _pump(tester, repo, productId: 2, partners: [
-      TradingPartner(id: 1, name: '新東光通商', kind: PartnerKind.supplier),
-      TradingPartner(id: 2, name: '別の商会', kind: PartnerKind.both),
-      TradingPartner(id: 3, name: 'お客様', kind: PartnerKind.customer),
-    ]);
+    await _pump(tester, repo, productId: 2);
 
-    expect(find.text('仕入先ごとの呼び名'), findsOneWidget);
-    expect(find.text('追跡なし品（大）'), findsOneWidget);
-    expect(find.text('新東光通商 · 品番 SK-100'), findsOneWidget);
-
-    await tester.scrollUntilVisible(find.text('呼び名を追加'), 200);
-    await tester.tap(find.text('呼び名を追加'));
-    await tester.pumpAndSettle();
-    // Customers are not suppliers.
-    await tester.tap(find.byType(DropdownButtonFormField<int>));
-    await tester.pumpAndSettle();
-    expect(find.text('お客様'), findsNothing);
-    await tester.tap(find.text('別の商会').last);
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('supplier-name')), 'ケシゴムS');
-    await tester.enterText(find.byKey(const ValueKey('supplier-code')), 'B-7');
-    await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, '保存'));
-    await tester.pumpAndSettle();
-
-    expect(repo.lastSupplierName, (supplierId: 2, productId: 2, name: 'ケシゴムS', code: 'B-7'));
-    expect(find.text('呼び名を保存しました'), findsOneWidget);
-
-    await tester.binding.setSurfaceSize(null);
+    expect(find.text('サイズ・重量'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pd-size')), findsOneWidget);
+    expect(find.text('仕入先ごとの呼び名'), findsNothing);
+    expect(find.text('追跡なし品（大）'), findsNothing);
+    expect(find.byKey(const ValueKey('pd-tab-ours')), findsNothing);
   });
 }

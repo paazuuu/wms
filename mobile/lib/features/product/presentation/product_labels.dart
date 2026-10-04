@@ -91,3 +91,34 @@ String uomName(AppLocalizations l10n, String code, String stored) => switch (cod
       'CM' => 'cm',
       _ => stored,
     };
+
+String _mm(double? v) => v == null ? '—' : (v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1));
+
+/// A product's outer size (0125) in this screen's language — "幅 100 ×
+/// 奥行 50 × 高さ 20 mm" — then any other notation; null when nothing is
+/// known.
+String? sizeText(AppLocalizations l10n, {double? width, double? depth, double? height, String? note}) {
+  final parts = [
+    if (width != null || depth != null || height != null) l10n.specSizeValue(_mm(width), _mm(depth), _mm(height)),
+    if (note != null && note.trim().isNotEmpty) note.trim(),
+  ];
+  return parts.isEmpty ? null : parts.join('　');
+}
+
+/// Size and weight on one short line for a card: "100×50×20 mm · 12 g".
+String? specShort({double? weightG, double? width, double? depth, double? height, String? note}) {
+  final parts = [
+    if (width != null || depth != null || height != null) '${_mm(width)}×${_mm(depth)}×${_mm(height)} mm'
+    else if (note != null && note.trim().isNotEmpty) note.trim(),
+    if (weightG != null) gramsText(weightG),
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}
+
+/// Where a product's size came from (0125).
+String sizeSourceLabel(AppLocalizations l10n, String? source) => switch (source) {
+      'web' => l10n.wtSourceWeb,
+      'measured' => l10n.wtSourceMeasured,
+      'file' => l10n.specSourceFile,
+      _ => l10n.wtSourceManual,
+    };

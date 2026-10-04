@@ -15636,6 +15636,252 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'商品ライブラリーを開く'**
   String get clOpenLibrary;
+
+  /// No description provided for @specSizeWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量'**
+  String get specSizeWeight;
+
+  /// No description provided for @specWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量'**
+  String get specWeight;
+
+  /// No description provided for @specSize.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ'**
+  String get specSize;
+
+  /// No description provided for @specSizeValue.
+  ///
+  /// In ja, this message translates to:
+  /// **'幅 {w} × 奥行 {d} × 高さ {h} mm'**
+  String specSizeValue(String w, String d, String h);
+
+  /// No description provided for @specNotEntered.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録'**
+  String get specNotEntered;
+
+  /// No description provided for @specSizeAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズを入力'**
+  String get specSizeAdd;
+
+  /// No description provided for @specSizeEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズを変更'**
+  String get specSizeEdit;
+
+  /// No description provided for @specWidth.
+  ///
+  /// In ja, this message translates to:
+  /// **'幅'**
+  String get specWidth;
+
+  /// No description provided for @specDepth.
+  ///
+  /// In ja, this message translates to:
+  /// **'奥行'**
+  String get specDepth;
+
+  /// No description provided for @specHeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'高さ'**
+  String get specHeight;
+
+  /// No description provided for @specSizeNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の表記（A4、φ10×140mm など・任意）'**
+  String get specSizeNote;
+
+  /// No description provided for @specSizeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'外箱ではなく商品そのものの外寸を、ミリ単位で入れてください。'**
+  String get specSizeHint;
+
+  /// No description provided for @specSizeInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズは0以上の数字で入れてください'**
+  String get specSizeInvalid;
+
+  /// No description provided for @specSizeClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズを消す'**
+  String get specSizeClear;
+
+  /// No description provided for @specSourceFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから'**
+  String get specSourceFile;
+
+  /// No description provided for @specWeightField.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量 (g)'**
+  String get specWeightField;
+
+  /// No description provided for @clFromMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'マスタから取り込む'**
+  String get clFromMaster;
+
+  /// No description provided for @cfmTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタから取り込む'**
+  String get cfmTitle;
+
+  /// No description provided for @cfmIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごとライブラリーにコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、ライブラリーのコピーは残ります。'**
+  String get cfmIntro;
+
+  /// No description provided for @cfmEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込める商品はありません'**
+  String get cfmEmpty;
+
+  /// No description provided for @cfmEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタの商品は、すべて商品ライブラリーにあります。'**
+  String get cfmEmptyBody;
+
+  /// No description provided for @cfmSelectAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて選ぶ（{count}件）'**
+  String cfmSelectAll(int count);
+
+  /// No description provided for @cfmImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ{count}件を取り込む'**
+  String cfmImport(int count);
+
+  /// No description provided for @cfmDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{created}件を商品ライブラリーに取り込みました（仕入先の条件 {terms}件）'**
+  String cfmDone(int created, int terms);
+
+  /// No description provided for @cfmSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先 {count}社'**
+  String cfmSuppliers(int count);
+
+  /// No description provided for @citEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品情報を編集'**
+  String get citEdit;
+
+  /// No description provided for @citNameField.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名（表示名）'**
+  String get citNameField;
+
+  /// No description provided for @citSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get citSaved;
+
+  /// No description provided for @citSpecFromLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量・写真はライブラリーの記録です。商品マスタを変えても、ここは変わりません。'**
+  String get citSpecFromLibrary;
+
+  /// No description provided for @citHowTheyCall.
+  ///
+  /// In ja, this message translates to:
+  /// **'この仕入先での呼び方と今の条件'**
+  String get citHowTheyCall;
+
+  /// No description provided for @citRateLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率'**
+  String get citRateLabel;
+
+  /// No description provided for @citTheirCodeLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方の品番'**
+  String get citTheirCodeLabel;
+
+  /// No description provided for @citWhere.
+  ///
+  /// In ja, this message translates to:
+  /// **'支店'**
+  String get citWhere;
+
+  /// No description provided for @citNoNaming.
+  ///
+  /// In ja, this message translates to:
+  /// **'この仕入先での呼び方はまだ記録されていません'**
+  String get citNoNaming;
+
+  /// No description provided for @rmAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'完全に削除'**
+  String get rmAction;
+
+  /// No description provided for @rmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を商品マスタから完全に削除しますか？'**
+  String rmQ(int count);
+
+  /// No description provided for @rmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n商品ライブラリーの商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。'**
+  String get rmBody;
+
+  /// No description provided for @rmConfirmLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認のため「削除」と入力してください'**
+  String get rmConfirmLabel;
+
+  /// No description provided for @rmConfirmWord.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get rmConfirmWord;
+
+  /// No description provided for @rmDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{removed}件を完全に削除しました'**
+  String rmDone(int removed);
+
+  /// No description provided for @rmDoneInUse.
+  ///
+  /// In ja, this message translates to:
+  /// **'{removed}件を完全に削除しました。{inUse}件は在庫・入出荷などの記録があるため削除できず、残しています（アーカイブのままにしておけます）'**
+  String rmDoneInUse(int removed, int inUse);
 }
 
 class _AppLocalizationsDelegate

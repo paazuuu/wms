@@ -13,17 +13,20 @@ import 'product_delete.dart';
 import 'product_detail_screen.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
+import 'product_labels.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
+import '../../catalog/application/catalog_providers.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
-/// 商品ライブラリー: our products with their stock beside them (0120), the
-/// SKU, base unit, pack units, codes and tracking (0057-0060).
+/// 商品マスタ: what each product is — its names, codes, attributes, size and
+/// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
+/// their terms and stock are shown by 商品ライブラリー (0124/0125).
 ///
 /// Anyone who can see products sees them, and can narrow them by state,
-/// maker, supplier, category and stock. Adding one — by hand or a whole
+/// maker and category. Adding one — by hand or a whole
 /// quotation — and editing need `product.manage`; deleting one never used
 /// needs `product.delete` (0119); choosing many at once to make them
 /// dormant, discontinued or archived needs `product.lifecycle` (0120). The
@@ -125,6 +128,31 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     }
   }
 
+  /// The chosen products out of the master for good (0126), after the
+  /// person types 削除. Those anything booked still names are kept.
+  Future<void> _removeForGood() async {
+    final l10n = AppLocalizations.of(context);
+    final ids = (_selected ?? const <int>{}).toList()..sort();
+    if (ids.isEmpty) return;
+    final ok = await showDialog<bool>(context: context, builder: (_) => _RemoveDialog(count: ids.length));
+    if (ok != true || !mounted) return;
+    final r = await ref.read(productRepositoryProvider).deleteMany(ids);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess(:final data):
+        setState(() => _selected = null);
+        ref.invalidate(productListProvider);
+        ref.invalidate(catalogListProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(data.inUse.isEmpty
+              ? l10n.rmDone(data.removed.length)
+              : l10n.rmDoneInUse(data.removed.length, data.inUse.length)),
+        ));
+      case ApiFailure(:final message):
+        _snackError(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -135,6 +163,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final canManage = ref.watch(productLibraryCanManageProvider);
     final canDelete = ref.watch(productCanDeleteProvider);
     final canLifecycle = ref.watch(productCanLifecycleProvider);
+    // Choosing many: to move them between states, or to remove them.
+    final canSelect = canLifecycle || canDelete;
     final selected = _selected;
     final shown = async.valueOrNull ?? const <Product>[];
 
@@ -184,7 +214,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               shown: shown.length,
               onSelectAll: () => setState(() => _selected = {for (final p in shown) p.id}),
               onClear: selected.isEmpty ? null : () => setState(() => _selected = {}),
-              onApply: selected.isEmpty ? null : _applyLifecycle,
+              onApply: !canLifecycle || selected.isEmpty ? null : _applyLifecycle,
+              showLifecycle: canLifecycle,
+              onRemove: canDelete && selected.isNotEmpty ? _removeForGood : null,
+              showRemove: canDelete,
             ),
       floatingActionButton: canManage && selected == null
           ? FloatingActionButton(
@@ -231,7 +264,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           const SizedBox(width: AppSpacing.sm),
                         ],
                         // Choosing many at once (0120), for the administrator.
-                        if (canLifecycle && selected == null) ...[
+                        if (canSelect && selected == null) ...[
                           OutlinedButton.icon(
                             key: const ValueKey('lc-start'),
                             onPressed: () => setState(() => _selected = {}),
@@ -291,7 +324,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                                 product: p,
                                 selected: selected?.contains(p.id),
                                 onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
-                                onLongPress: canLifecycle && selected == null
+                                onLongPress: canSelect && selected == null
                                     ? () => setState(() => _selected = {p.id})
                                     : null,
                               );
@@ -311,7 +344,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                               product: p,
                               selected: selected?.contains(p.id),
                               // A long press starts choosing, on the product pressed.
-                              onLongPress: canLifecycle && selected == null
+                              onLongPress: canSelect && selected == null
                                   ? () => setState(() => _selected = {p.id})
                                   : null,
                               onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
@@ -467,7 +500,9 @@ class _PhotoCard extends StatelessWidget {
               ProductNameText(name: p.name, nameEn: p.nameEn, names: p.names, maxLines: 1, style: theme.textTheme.titleSmall),
               Text([if (p.maker != null) widenKana(p.maker!), p.janCode].join(' · '),
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
-              if (p.stock case final st?) StockLine(stock: st),
+              if (specShort(weightG: p.unitWeightG, width: p.widthMm, depth: p.depthMm, height: p.heightMm, note: p.sizeNote)
+                  case final spec?)
+                Text(spec, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.labelSmall),
               Text(p.imageCount == 0 ? l10n.plNoImages : l10n.plImageCount(p.imageCount),
                   style: theme.textTheme.labelSmall
                       ?.copyWith(color: p.imageCount == 0 ? scheme.error : scheme.onSurfaceVariant)),
@@ -488,6 +523,9 @@ class _SelectionBar extends StatelessWidget {
     required this.onSelectAll,
     required this.onClear,
     required this.onApply,
+    this.showLifecycle = true,
+    this.onRemove,
+    this.showRemove = false,
   });
 
   final int count;
@@ -495,6 +533,11 @@ class _SelectionBar extends StatelessWidget {
   final VoidCallback onSelectAll;
   final VoidCallback? onClear;
   final void Function(ProductLifecycle)? onApply;
+  final bool showLifecycle;
+
+  /// Removing for good (0126), for whoever holds product.delete.
+  final VoidCallback? onRemove;
+  final bool showRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -528,20 +571,85 @@ class _SelectionBar extends StatelessWidget {
                 label: Text(l10n.lcClear),
               ),
               const SizedBox(width: AppSpacing.md),
-              for (final l in ProductLifecycle.values)
-                FilledButton.tonalIcon(
-                  key: ValueKey('lc-to-${l.wire}'),
-                  style: l == ProductLifecycle.archived
-                      ? FilledButton.styleFrom(backgroundColor: scheme.errorContainer, foregroundColor: scheme.onErrorContainer)
-                      : null,
-                  onPressed: onApply == null ? null : () => onApply!(l),
-                  icon: Icon(lifecycleIcon(l), size: 18),
-                  label: Text(lifecycleAction(l10n, l)),
+              if (showLifecycle)
+                for (final l in ProductLifecycle.values)
+                  FilledButton.tonalIcon(
+                    key: ValueKey('lc-to-${l.wire}'),
+                    style: l == ProductLifecycle.archived
+                        ? FilledButton.styleFrom(backgroundColor: scheme.errorContainer, foregroundColor: scheme.onErrorContainer)
+                        : null,
+                    onPressed: onApply == null ? null : () => onApply!(l),
+                    icon: Icon(lifecycleIcon(l), size: 18),
+                    label: Text(lifecycleAction(l10n, l)),
+                  ),
+              if (showRemove) ...[
+                const SizedBox(width: AppSpacing.md),
+                FilledButton.icon(
+                  key: const ValueKey('lc-remove'),
+                  style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
+                  onPressed: onRemove,
+                  icon: const Icon(Icons.delete_forever_outlined, size: 18),
+                  label: Text(l10n.rmAction),
                 ),
+              ],
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Asks before removing products for good: says what goes and what stays,
+/// and is confirmed only once 削除 is typed.
+class _RemoveDialog extends StatefulWidget {
+  const _RemoveDialog({required this.count});
+
+  final int count;
+
+  @override
+  State<_RemoveDialog> createState() => _RemoveDialogState();
+}
+
+class _RemoveDialogState extends State<_RemoveDialog> {
+  final _word = TextEditingController();
+
+  @override
+  void dispose() {
+    _word.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final ready = _word.text.trim() == l10n.rmConfirmWord;
+    return AlertDialog(
+      title: Text(l10n.rmQ(widget.count)),
+      content: SizedBox(
+        width: 480,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.rmBody),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            key: const ValueKey('rm-word'),
+            controller: _word,
+            autofocus: true,
+            decoration: InputDecoration(labelText: l10n.rmConfirmLabel),
+            onChanged: (_) => setState(() {}),
+          ),
+        ]),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('rm-confirm'),
+          style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
+          onPressed: ready ? () => Navigator.pop(context, true) : null,
+          child: Text(l10n.rmAction),
+        ),
+      ],
     );
   }
 }
@@ -608,8 +716,9 @@ class _LifecycleDialogState extends State<_LifecycleDialog> {
   }
 }
 
-/// The library's filters: state, maker, supplier, category and stock, each
-/// a chip that opens its choices with how many products each has.
+/// The master's filters: state, maker and category, each a chip that opens
+/// its choices with how many products each has. Suppliers and stock are the
+/// library's (0125).
 class _FilterBar extends ConsumerWidget {
   const _FilterBar();
 
@@ -656,21 +765,6 @@ class _FilterBar extends ConsumerWidget {
             ],
             onChanged: (v, on) => set(filter.copyWith(makers: on ? {...filter.makers, v} : ({...filter.makers}..remove(v)))),
           ),
-          _FacetChip(
-            key: const ValueKey('pf-supplier'),
-            label: summary(l10n.pfSupplier, [
-              for (final id in filter.supplierIds) facets.suppliers[id]?.$1 ?? '#$id',
-            ]),
-            active: filter.supplierIds.isNotEmpty,
-            options: [
-              for (final e in facets.suppliers.entries)
-                ('${e.key}', e.value.$1, e.value.$2, filter.supplierIds.contains(e.key)),
-            ],
-            onChanged: (v, on) {
-              final id = int.parse(v);
-              set(filter.copyWith(supplierIds: on ? {...filter.supplierIds, id} : ({...filter.supplierIds}..remove(id))));
-            },
-          ),
           if (facets.categories.isNotEmpty)
             _FacetChip(
               key: const ValueKey('pf-category'),
@@ -682,23 +776,6 @@ class _FilterBar extends ConsumerWidget {
               onChanged: (v, on) =>
                   set(filter.copyWith(categories: on ? {...filter.categories, v} : ({...filter.categories}..remove(v)))),
             ),
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: PopupMenuButton<StockFilter>(
-              key: const ValueKey('pf-stock'),
-              initialValue: filter.stock,
-              onSelected: (v) => set(filter.copyWith(stock: v)),
-              itemBuilder: (_) => [
-                for (final s in StockFilter.values)
-                  PopupMenuItem(key: ValueKey('pf-stock-${s.name}'), value: s, child: Text(_stockLabel(l10n, s))),
-              ],
-              child: Chip(
-                avatar: const Icon(Icons.inventory_outlined, size: 18),
-                label: Text(filter.stock == StockFilter.all ? l10n.pfStock : '${l10n.pfStock}: ${_stockLabel(l10n, filter.stock)}'),
-                backgroundColor: filter.stock == StockFilter.all ? null : Theme.of(context).colorScheme.secondaryContainer,
-              ),
-            ),
-          ),
           FilterChip(
             key: const ValueKey('pf-without-images'),
             label: Text(l10n.plWithoutImages),
@@ -717,12 +794,6 @@ class _FilterBar extends ConsumerWidget {
       ),
     );
   }
-
-  static String _stockLabel(AppLocalizations l10n, StockFilter s) => switch (s) {
-        StockFilter.all => l10n.pfStockAll,
-        StockFilter.inStock => l10n.pfStockIn,
-        StockFilter.outOfStock => l10n.pfStockOut,
-      };
 }
 
 /// One filter: a chip that opens a list of choices to tick.
@@ -882,25 +953,18 @@ class _ProductCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    // Every supplier, cheapest first, with its price (0123).
-                    if (product.suppliers.isNotEmpty) ...[
+                    // Its size and weight, as on the spec (0125).
+                    if (specShort(
+                            weightG: product.unitWeightG,
+                            width: product.widthMm,
+                            depth: product.depthMm,
+                            height: product.heightMm,
+                            note: product.sizeNote)
+                        case final spec?) ...[
                       const SizedBox(height: 2),
-                      SupplierLine(key: ValueKey('product-suppliers-${product.id}'), suppliers: product.suppliers),
-                    ],
-                    // What suppliers call it, so a search by a supplier's
-                    // own name shows why this product matched (0087).
-                    if (product.supplierNames.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        product.supplierNames
-                            .map((n) => '${n.supplierDisplayName}: ${widenKana(n.supplierName)}'
-                                '${n.supplierCode == null ? '' : ' (${widenKana(n.supplierCode!)})'}')
-                            .join(' / '),
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text(spec,
+                          key: ValueKey('product-spec-${product.id}'),
+                          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                     ],
                     if (product.category != null &&
                         product.category!.isNotEmpty) ...[
@@ -908,11 +972,6 @@ class _ProductCard extends StatelessWidget {
                       Text(product.category!,
                           style: theme.textTheme.bodySmall
                               ?.copyWith(color: scheme.onSurfaceVariant)),
-                    ],
-                    // Its stock where this person can see (0120).
-                    if (product.stock case final st?) ...[
-                      const SizedBox(height: 2),
-                      StockLine(key: ValueKey('product-stock-${product.id}'), stock: st),
                     ],
                     if (product.lifecycleReason case final why? when !product.isActive)
                       Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),

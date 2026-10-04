@@ -5987,7 +5987,72 @@ Also:
 - Product data reset: the 91 products were copied into `backup_20261004_*`
   tables. The delete itself waits for a confirmation, so it is in
   `supabase/manual/2026-10-04_reset_products.sql`, to run in the SQL
-  editor.
+  editor. Since 0126 the same can be done from 商品マスタ (完全に削除).
+
+### 0125 — 商品マスタ as the product's spec, 商品ライブラリー as its own record
+
+- 商品マスタ shows what the product is, as a buyer reads it: maker, name,
+  品番, JAN, attributes, size and weight. Suppliers, their terms and stock
+  are the library's.
+  - `products.width_mm / depth_mm / height_mm` (幅・奥行・高さ), `size_note`
+    for a size that is not three figures (A4, φ10×140mm), `size_source`
+    (manual / web / measured / file). `set_product_size` sets or clears it.
+  - `list_products` returns them.
+- The library keeps its own copy of what it shows, so removing a product
+  from the master never reaches it:
+  - `catalog_items.weight_g`, `width_mm`, `depth_mm`, `height_mm`,
+    `size_note`, and `image_paths` (storage paths of its pictures).
+  - `catalog_list` adds them, plus `face_path` (its first picture, else its
+    product's) and `image_count`.
+  - Stock stays safe on its own: every stock and booking table restricts
+    the key to `products`, so a product with any stock cannot be removed.
+  - Trigger `products_z_catalog_relink`: when a product with the JAN of an
+    unlinked item appears, the item is linked again.
+- RPCs:
+  - `catalog_master_candidates(search)`: master products not in the library
+    (no item links to them or has their JAN).
+  - `catalog_from_master(ids)`: copies them in with attributes, weight,
+    size, pictures, and each supplier's name, code and terms as they stand.
+    Products already in the library are skipped.
+  - `catalog_update_item(id, fields)`: corrects an item; only the keys given
+    change.
+  - `catalog_to_products` now also copies weight, size and pictures.
+- Reading files: attribute `dimensions` (寸法) is new. A line's `weight` and
+  `dimensions` attributes go to the item's weight and size
+  (`parse_weight_g`, `parse_dimensions_mm`: "W100×D50×H20mm", "10x5x2cm").
+  Headings 寸法 / dimensions / 外寸 / 外形寸法 / 本体寸法 / 商品寸法 map
+  to it (0126). サイズ stays for 0.5mm, A4 and the like.
+- App:
+  - 商品マスタ: no supplier tabs, supplier table, supplier names or stock.
+    Filters are state, maker and category. A サイズ・重量 card has its own
+    editor, and cards show "100×50×20 mm · 12 g". The photo screen keeps
+    写真 and 属性 only.
+  - 商品ライブラリー: list or large pictures (same items, same filters).
+    Cards show the face, size and weight, every supplier's current price,
+    and stock when there is some. マスタから取り込む lists only products
+    missing from the library.
+  - Library item: face, size and weight, 商品情報を編集. Each supplier tab
+    starts with この仕入先での呼び方と今の条件: their name, their 品番,
+    unit price, list price, rate and case quantity per branch.
+
+### 0126 — removing products from 商品マスタ for good
+
+- Removing is a row removal under RLS policies, as for the library:
+  - `products: product.delete can remove` (system_admin, company_admin).
+  - `product_images: product.delete can remove`. Picture rows go first;
+    stored files stay, so library copies keep showing them.
+- `products_in_use(ids)` reads which products a restricting key still
+  points at (stock, movements, receipts, orders, shipments, counts …). The
+  app removes only the others, so a product in use keeps its pictures and
+  stays archived.
+- Names, codes, units, supplier names and attributes go by cascade. Library
+  items only lose their link. Trigger `products_z_log_removed` writes
+  `product.deleted` to the audit log.
+- App: in 商品マスタ, choosing many → 完全に削除. The person types 削除 to
+  confirm. The result says how many were removed and how many were kept
+  because they are in use. `product.delete` alone is enough to choose
+  products; the state buttons need `product.lifecycle`. The single delete
+  on a product uses the same path.
 
 ## Rollout discipline
 

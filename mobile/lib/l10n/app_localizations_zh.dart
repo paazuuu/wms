@@ -8545,4 +8545,145 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get clOpenLibrary => '打开商品库';
+
+  @override
+  String get specSizeWeight => '尺寸与重量';
+
+  @override
+  String get specWeight => '重量';
+
+  @override
+  String get specSize => '尺寸';
+
+  @override
+  String specSizeValue(String w, String d, String h) {
+    return '宽 $w × 深 $d × 高 $h mm';
+  }
+
+  @override
+  String get specNotEntered => '未登记';
+
+  @override
+  String get specSizeAdd => '输入尺寸';
+
+  @override
+  String get specSizeEdit => '修改尺寸';
+
+  @override
+  String get specWidth => '宽';
+
+  @override
+  String get specDepth => '深';
+
+  @override
+  String get specHeight => '高';
+
+  @override
+  String get specSizeNote => '其他写法（A4、φ10×140mm 等，可选）';
+
+  @override
+  String get specSizeHint => '请以毫米填写商品本身（非外箱）的外形尺寸。';
+
+  @override
+  String get specSizeInvalid => '尺寸请输入 0 以上的数字';
+
+  @override
+  String get specSizeClear => '清除尺寸';
+
+  @override
+  String get specSourceFile => '来自文件';
+
+  @override
+  String get specWeightField => '重量 (g)';
+
+  @override
+  String get clFromMaster => '从主数据导入';
+
+  @override
+  String get cfmTitle => '从商品主数据导入';
+
+  @override
+  String get cfmIntro =>
+      '尚未在商品库中的主数据商品。所选商品将连同规格、照片以及各供应商的叫法和交易条件复制到商品库。商品主数据不变；即使之后删除主数据商品，商品库中的副本仍会保留。';
+
+  @override
+  String get cfmEmpty => '没有可导入的商品';
+
+  @override
+  String get cfmEmptyBody => '商品主数据中的商品都已在商品库中。';
+
+  @override
+  String cfmSelectAll(int count) {
+    return '全选（$count 件）';
+  }
+
+  @override
+  String cfmImport(int count) {
+    return '导入所选 $count 件';
+  }
+
+  @override
+  String cfmDone(int created, int terms) {
+    return '已将 $created 件导入商品库（供应商条件 $terms 件）';
+  }
+
+  @override
+  String cfmSuppliers(int count) {
+    return '供应商 $count 家';
+  }
+
+  @override
+  String get citEdit => '编辑商品信息';
+
+  @override
+  String get citNameField => '品名（显示名）';
+
+  @override
+  String get citSaved => '已保存';
+
+  @override
+  String get citSpecFromLibrary => '此处的尺寸、重量和照片是商品库自己的记录，修改主数据不会改变它们。';
+
+  @override
+  String get citHowTheyCall => '该供应商的叫法与当前条件';
+
+  @override
+  String get citRateLabel => '折扣率';
+
+  @override
+  String get citTheirCodeLabel => '对方货号';
+
+  @override
+  String get citWhere => '分店';
+
+  @override
+  String get citNoNaming => '尚未记录该供应商的叫法';
+
+  @override
+  String get rmAction => '彻底删除';
+
+  @override
+  String rmQ(int count) {
+    return '要从商品主数据中彻底删除 $count 件吗？';
+  }
+
+  @override
+  String get rmBody =>
+      '将从商品主数据中彻底删除，无法恢复。商品名、编码、单位、照片登记也会一并删除。\n有库存、入库、出库、订单等记录的商品不会删除，保持原样。\n商品库中的商品会保留（只解除关联，用相同 JAN 重新登录后会自动关联）。';
+
+  @override
+  String get rmConfirmLabel => '请输入「削除」以确认';
+
+  @override
+  String get rmConfirmWord => '削除';
+
+  @override
+  String rmDone(int removed) {
+    return '已彻底删除 $removed 件';
+  }
+
+  @override
+  String rmDoneInUse(int removed, int inUse) {
+    return '已彻底删除 $removed 件。$inUse 件因有库存或出入库等记录而无法删除，已保留（可保持归档）';
+  }
 }

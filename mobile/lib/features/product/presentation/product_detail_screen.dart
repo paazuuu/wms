@@ -8,7 +8,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../supply_chain/presentation/sc_product_sheet.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
@@ -19,13 +18,11 @@ import 'product_facts.dart';
 import 'product_lifecycle_ui.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
-import 'supplier_names_card.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_gallery_screen.dart';
 import '../../product_library/presentation/product_naming_dialog.dart';
 import '../../../core/ui/fields_dialog.dart';
 import '../../../core/ui/product_name.dart';
-import '../../product_library/presentation/product_profile_tabs.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
@@ -96,28 +93,26 @@ class ProductDetailScreen extends ConsumerWidget {
               message: l10n.productsEmptyBody,
             );
           }
-          final ours = RefreshIndicator(
+          // What the product is, as whoever buys it would read it: its
+          // names, codes, attributes, size and weight, and how we handle it.
+          // Who supplies it and on what terms is the library's (0124/0125).
+          return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(productListProvider);
               ref.invalidate(productLotsProvider(productId));
               ref.invalidate(productSerialsProvider(productId));
               ref.invalidate(warehouseProductProvider(productId));
-              ref.invalidate(productSupplierNamesProvider(productId));
             },
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
                 _Header(product: product),
                 const SizedBox(height: AppSpacing.md),
+                _SizeWeightCard(product: product),
+                const SizedBox(height: AppSpacing.md),
                 _BarcodesCard(product: product, onMessage: _snack),
                 const SizedBox(height: AppSpacing.md),
-                _WeightCard(product: product),
-                const SizedBox(height: AppSpacing.md),
                 _UnitsCard(product: product, onMessage: _snack),
-                const SizedBox(height: AppSpacing.md),
-                SupplierNamesCard(product: product),
-                // Where it comes from and what is left when it sells (§27).
-                ScProductProfitCard(productId: productId),
                 if (product.trackingMode.tracksLot) ...[
                   const SizedBox(height: AppSpacing.md),
                   _LotsCard(productId: productId),
@@ -131,58 +126,11 @@ class ProductDetailScreen extends ConsumerWidget {
               ],
             ),
           );
-          if (product.suppliers.isEmpty) return ours;
-          // One tab for us — our name, codes, stock and settings — and one
-          // per supplier: what it calls the product, its code, its terms and
-          // its attributes in its own words, so no supplier's writing is
-          // squeezed into ours.
-          return DefaultTabController(
-            length: 1 + product.suppliers.length,
-            child: Column(
-              children: [
-                Material(
-                  color: Theme.of(context).colorScheme.surface,
-                  child: TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    tabs: [
-                      Tab(key: const ValueKey('pd-tab-ours'), icon: const Icon(Icons.home_work_outlined, size: 18), text: l10n.pdTabOurs),
-                      for (final s in product.suppliers)
-                        Tab(
-                          key: ValueKey('pd-tab-supplier-${s.id}'),
-                          icon: const Icon(Icons.storefront_outlined, size: 18),
-                          text: s.unitPrice == null ? s.name : '${s.name}  ¥${_price(s.unitPrice!)}',
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      ours,
-                      for (final s in product.suppliers)
-                        ProductSuppliersTab(
-                          key: ValueKey('pd-supplier-tab-${s.id}'),
-                          productId: productId,
-                          onlySupplierId: s.id,
-                          header: _Section(
-                            title: l10n.pdSupplierTerms(s.name),
-                            children: [SupplierTable(suppliers: [s])],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
         },
       ),
     );
   }
 }
-
-String _price(double v) => v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
 
 /// Name, codes, status and the fact chips the list screen shows too — so the
 /// detail opens on the same summary the operator tapped.
@@ -245,8 +193,7 @@ class _Header extends ConsumerWidget {
     // What the product is, one fact a row: who makes it, what it is called,
     // its codes and its attributes — the parts its name is built from.
     final facts = <(String, String, Key, bool)>[
-      // The product's own id: every supplier's name, code, price and
-      // attributes for it hang off this one key.
+      // The product's own id in the master.
       (l10n.pdProductId, 'P-${product.id.toString().padLeft(6, '0')}', const ValueKey('pd-id'), true),
       (l10n.pdMaker, widenKana(product.maker ?? '—'), const ValueKey('pd-maker'), false),
       (l10n.pdBaseName, widenKana(product.baseName ?? product.name), const ValueKey('pd-base-name'), false),
@@ -257,9 +204,6 @@ class _Header extends ConsumerWidget {
       if (product.unit case final u? when u.trim().isNotEmpty) (l10n.pdUnit, u, const ValueKey('pd-unit'), false),
       if (product.listPrice case final lp?) (l10n.pdListPrice, yen(lp), const ValueKey('pd-list-price'), false),
       if (product.price case final pr?) (l10n.pdPrice, yen(pr), const ValueKey('pd-price'), false),
-      if (product.suppliers.isNotEmpty)
-        (l10n.pdSuppliers, '${l10n.supCount(product.suppliers.length)}（${product.suppliers.map((s) => s.name).join('、')}）',
-            const ValueKey('pd-suppliers'), false),
     ];
 
     return Column(
@@ -370,30 +314,6 @@ class _Header extends ConsumerWidget {
             ProductFacts(product: product),
           ],
         ),
-        // Its stock in each warehouse this person can see (0120).
-        if (product.stock case final st?) ...[
-          const SizedBox(height: AppSpacing.md),
-          _Section(
-            title: l10n.stockTitle,
-            children: [
-              StockLine(key: const ValueKey('product-detail-stock'), stock: st, style: theme.textTheme.titleSmall),
-              for (final w in st.warehouses)
-                _FactRow(
-                  key: ValueKey('product-stock-wh-${w.warehouseId}'),
-                  label: w.name,
-                  value: l10n.stockWarehouseRow(w.onHand, w.reserved, w.available),
-                ),
-            ],
-          ),
-        ],
-        // Every supplier with its terms, cheapest first (0123).
-        if (product.suppliers.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          _Section(
-            title: l10n.supTitle(product.suppliers.length),
-            children: [SupplierTable(suppliers: product.suppliers)],
-          ),
-        ],
         // Every name it has (0118), whatever language this screen is in.
         if (product.names.length > 1) ...[
           const SizedBox(height: AppSpacing.md),
@@ -739,11 +659,11 @@ class _BarcodeSheetState extends ConsumerState<_BarcodeSheet> {
   }
 }
 
-/// What one of this product weighs (0115), and where that figure came from.
-/// Shipping weights are worked out from it, so a product without one is
-/// said to be left out rather than counted as nothing.
-class _WeightCard extends ConsumerWidget {
-  const _WeightCard({required this.product});
+/// The product's size and weight (0115, 0125) — the spec a buyer reads, and
+/// what shipping weights are worked out from: a product without a weight is
+/// said to be left out of them rather than counted as nothing.
+class _SizeWeightCard extends ConsumerWidget {
+  const _SizeWeightCard({required this.product});
 
   final Product product;
 
@@ -752,37 +672,88 @@ class _WeightCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final canManage = ref.watch(productLibraryCanManageProvider);
     final weight = product.unitWeightG;
     final unit = product.baseUom == null ? '' : uomName(l10n, product.baseUom!.code, product.baseUom!.name);
+    final size = sizeText(l10n,
+        width: product.widthMm, depth: product.depthMm, height: product.heightMm, note: product.sizeNote);
+    final muted = theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant);
+
+    Widget row(String label, Widget value, {Widget? pill}) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 120, child: Text(label, style: muted)),
+              Expanded(child: value),
+              if (pill != null) pill,
+            ],
+          ),
+        );
 
     return _Section(
-      title: l10n.wtSection,
-      trailing: weight == null
-          ? null
-          : StatusPill(
-              tone: product.weightSource == 'measured' ? StatusTone.success : StatusTone.neutral,
-              label: weightSourceLabel(l10n, product.weightSource),
-              dense: true,
-            ),
-      action: TextButton.icon(
-        key: const ValueKey('wt-edit'),
-        icon: const Icon(Icons.scale_outlined, size: 18),
-        label: Text(weight == null ? l10n.wtAdd : l10n.wtEdit),
-        onPressed: () async {
-          final saved = await showModalBottomSheet<bool>(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => _WeightSheet(product: product),
-          );
-          if (saved == true) ref.invalidate(productListProvider);
-        },
-      ),
+      title: l10n.specSizeWeight,
+      action: canManage
+          ? Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                TextButton.icon(
+                  key: const ValueKey('size-edit'),
+                  icon: const Icon(Icons.straighten, size: 18),
+                  label: Text(size == null ? l10n.specSizeAdd : l10n.specSizeEdit),
+                  onPressed: () async {
+                    final saved = await showModalBottomSheet<bool>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => _SizeSheet(product: product),
+                    );
+                    if (saved == true) ref.invalidate(productListProvider);
+                  },
+                ),
+                TextButton.icon(
+                  key: const ValueKey('wt-edit'),
+                  icon: const Icon(Icons.scale_outlined, size: 18),
+                  label: Text(weight == null ? l10n.wtAdd : l10n.wtEdit),
+                  onPressed: () async {
+                    final saved = await showModalBottomSheet<bool>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => _WeightSheet(product: product),
+                    );
+                    if (saved == true) ref.invalidate(productListProvider);
+                  },
+                ),
+              ],
+            )
+          : null,
       children: [
-        if (weight == null)
-          Text(l10n.wtNone, style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant))
-        else
-          Text(unit.isEmpty ? gramsText(weight) : l10n.wtPerUnit(gramsText(weight), unit),
-              key: const ValueKey('wt-value'), style: theme.textTheme.titleMedium),
+        row(
+          l10n.specSize,
+          size == null
+              ? Text(l10n.specNotEntered, key: const ValueKey('pd-size'), style: muted)
+              : Text(size, key: const ValueKey('pd-size'), style: theme.textTheme.titleMedium),
+          pill: size == null
+              ? null
+              : StatusPill(
+                  tone: product.sizeSource == 'measured' ? StatusTone.success : StatusTone.neutral,
+                  label: sizeSourceLabel(l10n, product.sizeSource),
+                  dense: true,
+                ),
+        ),
+        row(
+          l10n.specWeight,
+          weight == null
+              ? Text(l10n.wtNone, key: const ValueKey('wt-value'), style: muted)
+              : Text(unit.isEmpty ? gramsText(weight) : l10n.wtPerUnit(gramsText(weight), unit),
+                  key: const ValueKey('wt-value'), style: theme.textTheme.titleMedium),
+          pill: weight == null
+              ? null
+              : StatusPill(
+                  tone: product.weightSource == 'measured' ? StatusTone.success : StatusTone.neutral,
+                  label: weightSourceLabel(l10n, product.weightSource),
+                  dense: true,
+                ),
+        ),
         if (product.weightNote != null) ...[
           const SizedBox(height: 2),
           Text(product.weightNote!, style: theme.textTheme.bodySmall),
@@ -793,6 +764,153 @@ class _WeightCard extends ConsumerWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.primary)),
         ],
       ],
+    );
+  }
+}
+
+/// Entering, correcting or clearing a product's size (0125).
+class _SizeSheet extends ConsumerStatefulWidget {
+  const _SizeSheet({required this.product});
+
+  final Product product;
+
+  @override
+  ConsumerState<_SizeSheet> createState() => _SizeSheetState();
+}
+
+class _SizeSheetState extends ConsumerState<_SizeSheet> {
+  static String _text(double? v) => v == null ? '' : formatFactor(v);
+  late final _w = TextEditingController(text: _text(widget.product.widthMm));
+  late final _d = TextEditingController(text: _text(widget.product.depthMm));
+  late final _h = TextEditingController(text: _text(widget.product.heightMm));
+  late final _note = TextEditingController(text: widget.product.sizeNote ?? '');
+  late String _source = switch (widget.product.sizeSource) { 'measured' => 'measured', 'web' => 'web', _ => 'manual' };
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _w.dispose();
+    _d.dispose();
+    _h.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save({bool clear = false}) async {
+    final l10n = AppLocalizations.of(context);
+    double? read(TextEditingController c) => double.tryParse(c.text.trim().replaceAll(',', ''));
+    final fields = [_w, _d, _h];
+    if (!clear && fields.any((c) => c.text.trim().isNotEmpty && ((read(c) ?? -1) < 0))) {
+      setState(() => _error = l10n.specSizeInvalid);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final note = _note.text.trim();
+    final result = await ref.read(productRepositoryProvider).setSize(
+          productId: widget.product.id,
+          widthMm: clear ? null : read(_w),
+          depthMm: clear ? null : read(_d),
+          heightMm: clear ? null : read(_h),
+          note: clear || note.isEmpty ? null : note,
+          source: _source,
+        );
+    if (!mounted) return;
+    result.when(
+      success: (_) => Navigator.pop(context, true),
+      failure: (f) => setState(() {
+        _busy = false;
+        _error = humanizeApiErrorMessage(l10n, f.message);
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    Widget field(String key, String label, TextEditingController c, {bool autofocus = false}) => Expanded(
+          child: TextField(
+            key: ValueKey(key),
+            controller: c,
+            autofocus: autofocus,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: label, suffixText: 'mm'),
+          ),
+        );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.specSize, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 2),
+            Text(productDisplayName(context, widget.product.name, widget.product.nameEn, names: widget.product.names),
+                style: theme.textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.xs),
+            Text(l10n.specSizeHint, style: theme.textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.lg),
+            Row(children: [
+              field('size-w', l10n.specWidth, _w, autofocus: true),
+              const SizedBox(width: AppSpacing.sm),
+              field('size-d', l10n.specDepth, _d),
+              const SizedBox(width: AppSpacing.sm),
+              field('size-h', l10n.specHeight, _h),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const ValueKey('size-note'),
+              controller: _note,
+              decoration: InputDecoration(labelText: l10n.specSizeNote),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SegmentedButton<String>(
+              key: const ValueKey('size-source'),
+              segments: [
+                ButtonSegment(value: 'manual', label: Text(l10n.wtSourceManual)),
+                ButtonSegment(value: 'measured', label: Text(l10n.wtSourceMeasured)),
+                ButtonSegment(value: 'web', label: Text(l10n.wtSourceWeb)),
+              ],
+              selected: {_source},
+              onSelectionChanged: _busy ? null : (v) => setState(() => _source = v.first),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                if (widget.product.hasSize)
+                  TextButton(
+                    key: const ValueKey('size-clear'),
+                    onPressed: _busy ? null : () => _save(clear: true),
+                    child: Text(l10n.specSizeClear),
+                  ),
+                const Spacer(),
+                FilledButton(
+                  key: const ValueKey('size-save'),
+                  onPressed: _busy ? null : _save,
+                  child: _busy
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(l10n.productSave),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

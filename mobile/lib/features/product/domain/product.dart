@@ -326,6 +326,11 @@ class Product extends Equatable {
     this.weightSource,
     this.weightSourceUrl,
     this.weightNote,
+    this.widthMm,
+    this.depthMm,
+    this.heightMm,
+    this.sizeNote,
+    this.sizeSource,
     this.createdAt,
     this.updatedAt,
   });
@@ -400,6 +405,15 @@ class Product extends Equatable {
   final String? weightSource;
   final String? weightSourceUrl;
   final String? weightNote;
+
+  /// Its outer size (0125): 幅・奥行・高さ in mm, and [sizeNote] for a size
+  /// that is not three figures (A4, φ10×140mm). [sizeSource] says where it
+  /// came from: `manual`, `web`, `measured` or `file`.
+  final double? widthMm;
+  final double? depthMm;
+  final double? heightMm;
+  final String? sizeNote;
+  final String? sizeSource;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -431,8 +445,13 @@ class Product extends Equatable {
         attributes: attributes, imageCount: imageCount, trackingMode: trackingMode, pickingRule: pickingRule,
         requiresInspection: requiresInspection, baseUom: baseUom, uoms: uoms, barcodes: barcodes,
         supplierNames: supplierNames, unitWeightG: unitWeightG, weightSource: weightSource,
-        weightSourceUrl: weightSourceUrl, weightNote: weightNote, createdAt: createdAt, updatedAt: updatedAt,
+        weightSourceUrl: weightSourceUrl, weightNote: weightNote,
+        widthMm: widthMm, depthMm: depthMm, heightMm: heightMm, sizeNote: sizeNote, sizeSource: sizeSource,
+        createdAt: createdAt, updatedAt: updatedAt,
       );
+
+  /// Whether any size is known.
+  bool get hasSize => widthMm != null || depthMm != null || heightMm != null || sizeNote != null;
 
   /// The pack units beyond the base one — what an operator can actually choose
   /// between when counting or receiving.
@@ -496,6 +515,11 @@ class Product extends Equatable {
         weightSource: _asText(json['weight_source']),
         weightSourceUrl: _asText(json['weight_source_url']),
         weightNote: _asText(json['weight_note']),
+        widthMm: _asDouble(json['width_mm']),
+        depthMm: _asDouble(json['depth_mm']),
+        heightMm: _asDouble(json['height_mm']),
+        sizeNote: _asText(json['size_note']),
+        sizeSource: _asText(json['size_source']),
         createdAt: DateTime.tryParse('${json['created_at']}')?.toLocal(),
         updatedAt: DateTime.tryParse('${json['updated_at']}')?.toLocal(),
       );
@@ -531,5 +555,10 @@ class Product extends Equatable {
         weightSource,
         weightSourceUrl,
         weightNote,
+        widthMm,
+        depthMm,
+        heightMm,
+        sizeNote,
+        sizeSource,
       ];
 }

@@ -29,6 +29,16 @@ abstract class CatalogRepository {
 
   /// Removes items from the library only (their terms go with them).
   Future<ApiResult<int>> delete(List<int> ids);
+
+  /// Master products not in the library yet (0125).
+  Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search});
+
+  /// Master products into the library with their spec, pictures and each
+  /// supplier's terms; resolves to (created, terms, skipped).
+  Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds);
+
+  /// Corrects an item: only the keys given change (0125).
+  Future<ApiResult<bool>> update(int itemId, Map<String, dynamic> fields);
 }
 
 String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -124,6 +134,38 @@ class CatalogRepositoryImpl implements CatalogRepository {
       return ApiSuccess(r.data is List ? (r.data as List).length : ids.length);
     } on DioException catch (e) {
       return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search}) async {
+    try {
+      final r = await _rest.post('/rpc/catalog_master_candidates', data: {'p_search': search});
+      return ApiSuccess([for (final e in _rows(r.data)) MasterCandidate.fromJson(e)]);
+    } on DioException catch (e) {
+      return mapDioError<List<MasterCandidate>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds) async {
+    try {
+      final r = await _rest.post('/rpc/catalog_from_master', data: {'p_ids': productIds});
+      final j = (_one(r.data) as Map).cast<String, dynamic>();
+      int n(String k) => (j[k] as num?)?.toInt() ?? 0;
+      return ApiSuccess((created: n('created'), terms: n('terms'), skipped: n('skipped')));
+    } on DioException catch (e) {
+      return mapDioError<({int created, int terms, int skipped})>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> update(int itemId, Map<String, dynamic> fields) async {
+    try {
+      await _rest.post('/rpc/catalog_update_item', data: {'p_id': itemId, 'p': fields});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 }

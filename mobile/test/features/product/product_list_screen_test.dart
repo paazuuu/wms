@@ -378,18 +378,26 @@ void main() {
   const sleeping = Product(id: 3, janCode: '4901480344041', name: 'バインダー', maker: 'コクヨ',
       status: 'inactive', lifecycleCode: 'discontinued', lifecycleReason: 'メーカー廃番');
 
-  testWidgets('each product shows its stock, reserved and available, by warehouse', (tester) async {
+  testWidgets('the master shows each product\'s spec, not its suppliers or stock (0125)', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await _pump(tester, FakeProductRepository(products: const [stocked, empty]));
+    const sized = Product(
+      id: 1, janCode: '4902505632037', name: 'ボールペン', maker: '三菱鉛筆',
+      suppliers: [ProductSupplierRef(id: 4, name: '新東光通商')],
+      stock: ProductStock(onHand: 40, reserved: 10, available: 30),
+      widthMm: 10, depthMm: 10, heightMm: 140, unitWeightG: 12,
+    );
+    await _pump(tester, FakeProductRepository(products: const [sized, empty]));
 
-    expect(find.text('在庫 40・引当 10・引当可能 30  (メイン倉庫 30 / 神戸倉庫 10)'), findsOneWidget);
-    expect(find.text('仕入先 1社: 新東光通商'), findsOneWidget);
-    expect(find.text('在庫なし'), findsOneWidget);
+    expect(find.text('10×10×140 mm · 12 g'), findsOneWidget);
+    expect(find.textContaining('新東光通商'), findsNothing);
+    expect(find.textContaining('在庫'), findsNothing);
+    expect(find.byKey(const ValueKey('pf-supplier')), findsNothing);
+    expect(find.byKey(const ValueKey('pf-stock')), findsNothing);
     expect(find.text('2件を表示（全2件）'), findsOneWidget);
   });
 
-  testWidgets('the library narrows by maker, supplier, stock and state', (tester) async {
+  testWidgets('the master narrows by maker and state', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final container = await _pump(tester, FakeProductRepository(products: const [stocked, empty, sleeping]));
@@ -410,15 +418,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('pf-clear')));
     await tester.pumpAndSettle();
-    container.read(productFilterProvider.notifier).state = const ProductFilter(supplierIds: {4});
-    await tester.pumpAndSettle();
     expect(find.text('ボールペン'), findsOneWidget);
-    expect(find.text('サラサ'), findsNothing);
-
-    container.read(productFilterProvider.notifier).state = const ProductFilter(stock: StockFilter.outOfStock);
-    await tester.pumpAndSettle();
-    expect(find.text('サラサ'), findsOneWidget);
-    expect(find.text('ボールペン'), findsNothing);
 
     // A discontinued one shows under its state, with why.
     container.read(productFilterProvider.notifier).state =
@@ -427,6 +427,46 @@ void main() {
     expect(find.text('バインダー'), findsOneWidget);
     expect(find.text('提供終了'), findsOneWidget);
     expect(find.text('メーカー廃番'), findsOneWidget);
+  });
+
+  testWidgets('an admin chooses all and removes them for good; ones in use are kept (0126)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [stocked, empty, Product(id: 4, janCode: '4900000000004', name: 'ノート')])
+      ..inUse.add(1);
+    await _pump(tester, repo, delete: true);
+
+    // product.delete alone is enough to choose; the state buttons need product.lifecycle.
+    await tester.tap(find.byKey(const ValueKey('lc-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('lc-select-all')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('lc-to-archived')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('lc-remove')));
+    await tester.pumpAndSettle();
+    expect(find.text('3件を商品マスタから完全に削除しますか？'), findsOneWidget);
+    // Not until 削除 is typed.
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('rm-confirm'))).onPressed, isNull);
+    await tester.enterText(find.byKey(const ValueKey('rm-word')), '削除');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('rm-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(repo.deleteManyCalls.single, [1, 2, 4]);
+    expect(repo.deleted, [2, 4]);
+    expect(find.textContaining('2件を完全に削除しました。1件は在庫・入出荷などの記録があるため'), findsOneWidget);
+    expect(find.text('ボールペン'), findsOneWidget);
+    expect(find.text('ノート'), findsNothing);
+  });
+
+  testWidgets('without product.delete there is no removing for good', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked]), lifecycle: true);
+    await tester.tap(find.byKey(const ValueKey('lc-start')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('lc-to-archived')), findsOneWidget);
+    expect(find.byKey(const ValueKey('lc-remove')), findsNothing);
   });
 
   testWidgets('without product.lifecycle there is no choosing many', (tester) async {

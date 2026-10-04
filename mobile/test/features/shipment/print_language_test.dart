@@ -215,8 +215,6 @@ void main() {
       ],
       baseUom: Uom(code: 'PCS', name: '本'),
     );
-    // At the root, as in the app: the supplier tabs read the product's
-    // profile through the picture repository.
     await pumpApp(tester, const ProductDetailScreen(productId: 143), overrides: [
       productRepositoryProvider.overrideWithValue(FakeProductRepository(products: [product])),
     ]);
@@ -234,25 +232,11 @@ void main() {
     expect(valueOf('pd-attr-color'), '青');
     expect(valueOf('pd-attr-size'), '0.5');
     expect(valueOf('pd-list-price'), '¥165');
-    expect(valueOf('pd-suppliers'), '仕入先 3社（アケボノクラウン、新東光通商、ウエダ商事）');
-    // Every supplier with its terms, the cheapest marked.
-    expect(find.text('仕入先（3社）'), findsOneWidget);
-    expect(find.byKey(const ValueKey('pd-supplier-6')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-5')), matching: find.text('最安')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-5')), matching: find.text('¥88')), findsOneWidget);
-    expect(find.text('定価 ¥165　掛率 53%'), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const ValueKey('pd-supplier-6')), matching: find.text('価格未登録')), findsOneWidget);
     expect(valueOf('pd-id'), 'P-000143');
-
-    // One tab for us and one per supplier, cheapest first, its price on the tab.
-    expect(find.byKey(const ValueKey('pd-tab-ours')), findsOneWidget);
-    expect(find.text('アケボノクラウン  ¥88'), findsOneWidget);
-    expect(find.byKey(const ValueKey('pd-tab-supplier-6')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('pd-tab-supplier-5')));
-    await tester.pumpAndSettle();
-    expect(find.text('アケボノクラウンの取引条件'), findsOneWidget);
-    expect(find.byKey(const ValueKey('pd-supplier-tab-5')), findsOneWidget);
-    // Ours is not on this tab.
-    expect(find.text('基本情報'), findsNothing);
+    // The spec, as a buyer reads it: no suppliers, no terms, no tabs (0125).
+    expect(find.byKey(const ValueKey('pd-suppliers')), findsNothing);
+    expect(find.textContaining('アケボノクラウン'), findsNothing);
+    expect(find.byKey(const ValueKey('pd-tab-ours')), findsNothing);
+    expect(find.text('サイズ・重量'), findsOneWidget);
   });
 }

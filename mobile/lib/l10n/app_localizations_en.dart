@@ -8764,4 +8764,147 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clOpenLibrary => 'Open the library';
+
+  @override
+  String get specSizeWeight => 'Size and weight';
+
+  @override
+  String get specWeight => 'Weight';
+
+  @override
+  String get specSize => 'Size';
+
+  @override
+  String specSizeValue(String w, String d, String h) {
+    return 'W $w × D $d × H $h mm';
+  }
+
+  @override
+  String get specNotEntered => 'Not entered';
+
+  @override
+  String get specSizeAdd => 'Enter the size';
+
+  @override
+  String get specSizeEdit => 'Change the size';
+
+  @override
+  String get specWidth => 'Width';
+
+  @override
+  String get specDepth => 'Depth';
+
+  @override
+  String get specHeight => 'Height';
+
+  @override
+  String get specSizeNote => 'Other notation (A4, φ10×140mm … optional)';
+
+  @override
+  String get specSizeHint =>
+      'The product\'s own outer size, not its box, in millimetres.';
+
+  @override
+  String get specSizeInvalid => 'Enter the size as numbers of 0 or more';
+
+  @override
+  String get specSizeClear => 'Clear the size';
+
+  @override
+  String get specSourceFile => 'From a file';
+
+  @override
+  String get specWeightField => 'Weight (g)';
+
+  @override
+  String get clFromMaster => 'Bring in from the master';
+
+  @override
+  String get cfmTitle => 'Bring in from the master';
+
+  @override
+  String get cfmIntro =>
+      'Master products not in the library yet. The ones you choose are copied into the library with their spec, pictures and each supplier\'s name and terms. The master is not changed, and the copy stays even if the master product is later removed.';
+
+  @override
+  String get cfmEmpty => 'Nothing to bring in';
+
+  @override
+  String get cfmEmptyBody => 'Every master product is already in the library.';
+
+  @override
+  String cfmSelectAll(int count) {
+    return 'Choose all ($count)';
+  }
+
+  @override
+  String cfmImport(int count) {
+    return 'Bring in $count';
+  }
+
+  @override
+  String cfmDone(int created, int terms) {
+    return '$created brought into the library ($terms supplier terms)';
+  }
+
+  @override
+  String cfmSuppliers(int count) {
+    return '$count suppliers';
+  }
+
+  @override
+  String get citEdit => 'Edit the item';
+
+  @override
+  String get citNameField => 'Name (as shown)';
+
+  @override
+  String get citSaved => 'Saved';
+
+  @override
+  String get citSpecFromLibrary =>
+      'The size, weight and pictures here are the library\'s own record; changing the master does not change them.';
+
+  @override
+  String get citHowTheyCall => 'How this supplier calls it, and its terms now';
+
+  @override
+  String get citRateLabel => 'Rate';
+
+  @override
+  String get citTheirCodeLabel => 'Their item code';
+
+  @override
+  String get citWhere => 'Branch';
+
+  @override
+  String get citNoNaming => 'No name from this supplier yet';
+
+  @override
+  String get rmAction => 'Remove for good';
+
+  @override
+  String rmQ(int count) {
+    return 'Remove $count from the master for good?';
+  }
+
+  @override
+  String get rmBody =>
+      'They leave the master for good, with their names, codes, units and picture records.\nProducts with stock, receipts, shipments or orders are not removed and stay as they are.\nThe library keeps its items: only the link goes, and comes back by JAN if the product is added again.';
+
+  @override
+  String get rmConfirmLabel => 'Type 削除 to confirm';
+
+  @override
+  String get rmConfirmWord => '削除';
+
+  @override
+  String rmDone(int removed) {
+    return '$removed removed for good';
+  }
+
+  @override
+  String rmDoneInUse(int removed, int inUse) {
+    return '$removed removed for good. $inUse have stock, receipt or shipment records and were kept (they can stay archived)';
+  }
 }

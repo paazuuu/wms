@@ -61,7 +61,7 @@ class ProductGalleryScreen extends ConsumerStatefulWidget {
 
 class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> with SingleTickerProviderStateMixin {
   bool _busy = false;
-  late final TabController _tabs = TabController(length: 3, vsync: this, initialIndex: widget.initialTab)
+  late final TabController _tabs = TabController(length: 2, vsync: this, initialIndex: widget.initialTab.clamp(0, 1))
     ..addListener(() {
       if (mounted) setState(() {});
     });
@@ -175,7 +175,6 @@ class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> wit
           tabs: [
             Tab(key: const ValueKey('pl-tab-photos'), text: l10n.plTabPhotos),
             Tab(key: const ValueKey('pl-tab-attributes'), text: l10n.plTabAttributes),
-            Tab(key: const ValueKey('pl-tab-suppliers'), text: l10n.plTabSuppliers),
           ],
         ),
       ),
@@ -192,7 +191,6 @@ class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> wit
         children: [
           _photos(context, async, canManage),
           ProductAttributesTab(productId: widget.productId),
-          ProductSuppliersTab(productId: widget.productId),
         ],
       ),
     );

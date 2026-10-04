@@ -11,18 +11,21 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../../product/presentation/product_detail_screen.dart';
+import '../../product/presentation/product_labels.dart';
 import '../../product/presentation/product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../application/catalog_providers.dart';
 import '../domain/catalog.dart';
 import 'catalog_import_screen.dart' show importSuppliersProvider;
+import 'catalog_thumb.dart';
 
 String _yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-/// One library item: what it is, its stock when it is in the master, and a
-/// tab per supplier with that supplier's terms by branch — the ones in force
-/// now, and every earlier one with its dates.
+/// One library item: what it is — with its own pictures, size and weight —
+/// its stock when it is in the master, and a tab per supplier with what that
+/// supplier calls it and its terms by branch: the ones in force now, and
+/// every earlier one with its dates.
 class CatalogItemScreen extends ConsumerWidget {
   const CatalogItemScreen({super.key, required this.itemId});
 
@@ -90,6 +93,59 @@ class CatalogItemScreen extends ConsumerWidget {
     }
   }
 
+  /// Correcting the item's own record: only what changed is sent (0125).
+  Future<void> _edit(BuildContext context, WidgetRef ref, CatalogItem item) async {
+    final l10n = AppLocalizations.of(context);
+    String n(double? v) => v == null ? '' : (v == v.roundToDouble() ? v.toStringAsFixed(0) : '$v');
+    final current = <String, (String, String)>{
+      'name': (l10n.citNameField, item.name),
+      'maker': (l10n.pdMaker, item.maker ?? ''),
+      'base_name': (l10n.pdBaseName, item.baseName ?? ''),
+      'item_code': (l10n.pdCode, item.itemCode ?? ''),
+      'jan_code': (l10n.pdJan, item.janCode ?? ''),
+      'unit': (l10n.pdUnit, item.unit ?? ''),
+      'list_price': (l10n.pdListPrice, n(item.listPrice)),
+      'weight_g': (l10n.specWeightField, n(item.weightG)),
+      'width_mm': ('${l10n.specWidth} (mm)', n(item.widthMm)),
+      'depth_mm': ('${l10n.specDepth} (mm)', n(item.depthMm)),
+      'height_mm': ('${l10n.specHeight} (mm)', n(item.heightMm)),
+      'size_note': (l10n.specSizeNote, item.sizeNote ?? ''),
+    };
+    final v = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (_) => FieldsDialog(
+        title: l10n.citEdit,
+        keyPrefix: 'cit-edit',
+        fields: current,
+        saveKey: const ValueKey('cit-edit-save'),
+        saveLabel: l10n.productSave,
+        cancelLabel: l10n.actionCancel,
+      ),
+    );
+    if (v == null || !context.mounted) return;
+    const numbers = {'list_price', 'weight_g', 'width_mm', 'depth_mm', 'height_mm'};
+    final changed = <String, dynamic>{
+      for (final e in v.entries)
+        if (e.value.trim() != current[e.key]!.$2.trim())
+          e.key: e.value.trim().isEmpty
+              ? null
+              : numbers.contains(e.key)
+                  ? double.tryParse(e.value.trim().replaceAll(',', ''))
+                  : e.value.trim(),
+    };
+    if (changed.isEmpty) return;
+    final r = await ref.read(catalogRepositoryProvider).update(item.id, changed);
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(catalogListProvider);
+        messenger.showSnackBar(SnackBar(content: Text(l10n.citSaved)));
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -110,7 +166,11 @@ class CatalogItemScreen extends ConsumerWidget {
       partners.putIfAbsent(t.partnerId, () => t.partnerName);
     }
 
-    final overview = _Overview(item: item, onAddTerm: canManage ? () => _addTerm(context, ref, item) : null);
+    final overview = _Overview(
+      item: item,
+      onAddTerm: canManage ? () => _addTerm(context, ref, item) : null,
+      onEdit: canManage ? () => _edit(context, ref, item) : null,
+    );
     return DefaultTabController(
       length: 1 + partners.length,
       child: Scaffold(
@@ -153,10 +213,11 @@ class CatalogItemScreen extends ConsumerWidget {
 }
 
 class _Overview extends StatelessWidget {
-  const _Overview({required this.item, this.onAddTerm});
+  const _Overview({required this.item, this.onAddTerm, this.onEdit});
 
   final CatalogItem item;
   final VoidCallback? onAddTerm;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +235,37 @@ class _Overview extends StatelessWidget {
             ]),
           );
     final i = item;
+    final size = sizeText(l10n, width: i.widthMm, depth: i.depthMm, height: i.heightMm, note: i.sizeNote);
     return ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: [
+      // Its face, maker and name, large.
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            CatalogThumb(key: const ValueKey('cit-face'), item: i, size: 120),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (i.maker != null)
+                  Text(widenKana(i.maker!), style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary)),
+                Text(widenKana(i.name), style: theme.textTheme.titleLarge),
+                const SizedBox(height: AppSpacing.xs),
+                Text(i.imageCount == 0 ? l10n.plNoImages : l10n.plImageCount(i.imageCount), style: muted),
+                if (onEdit != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  FilledButton.tonalIcon(
+                    key: const ValueKey('cit-edit'),
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: Text(l10n.citEdit),
+                  ),
+                ],
+              ]),
+            ),
+          ]),
+        ),
+      ),
+      const SizedBox(height: AppSpacing.md),
       Card(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -189,7 +280,11 @@ class _Overview extends StatelessWidget {
             for (final (n, v) in i.attributes) row(n, widenKana(v), 'cit-attr-$n'),
             row(l10n.pdUnit, i.unit, 'cit-unit'),
             row(l10n.pdListPrice, i.listPrice == null ? null : _yen(i.listPrice!), 'cit-list'),
+            row(l10n.specSize, size ?? l10n.specNotEntered, 'cit-size'),
+            row(l10n.specWeight, i.weightG == null ? l10n.specNotEntered : gramsText(i.weightG!), 'cit-weight'),
             row(l10n.citSourceFile, i.sourceFile, 'cit-file'),
+            const SizedBox(height: AppSpacing.xs),
+            Text(l10n.citSpecFromLibrary, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ]),
         ),
       ),
@@ -272,7 +367,45 @@ class _SupplierTermsTab extends StatelessWidget {
     for (final t in history.isEmpty ? current : history) {
       byWhere.putIfAbsent(t.where ?? '', () => []).add(t);
     }
+    final muted = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    Widget fact(String k, String v, String key) => Padding(
+          key: ValueKey(key),
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SizedBox(width: 120, child: Text(k, style: muted)),
+            Expanded(child: Text(v, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500))),
+          ]),
+        );
+    String rate(double r) => '${(r * 100).toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}%';
+    // What it calls the product and on what terms, now, branch by branch.
+    final now = current.isNotEmpty ? current : history.take(1).toList();
     return ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: [
+      Card(
+        key: const ValueKey('cit-naming'),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l10n.citHowTheyCall, style: theme.textTheme.labelLarge),
+            const SizedBox(height: AppSpacing.sm),
+            if (now.every((t) => t.theirName == null && t.theirCode == null))
+              Text(l10n.citNoNaming, style: muted),
+            for (final t in now) ...[
+              if (now.length > 1 || t.where != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs),
+                  child: Text(t.where ?? l10n.citAllBranches, style: theme.textTheme.titleSmall),
+                ),
+              if (t.theirName != null) fact(l10n.citTheirName, widenKana(t.theirName!), 'cit-their-name-${t.id}'),
+              if (t.theirCode != null) fact(l10n.citTheirCodeLabel, widenKana(t.theirCode!), 'cit-their-code-${t.id}'),
+              if (t.unitPrice != null) fact(l10n.quoteUnitPriceLabel, _yen(t.unitPrice!), 'cit-their-price-${t.id}'),
+              if (t.listPrice != null) fact(l10n.pdListPrice, _yen(t.listPrice!), 'cit-their-list-${t.id}'),
+              if (t.discountRate != null) fact(l10n.citRateLabel, rate(t.discountRate!), 'cit-their-rate-${t.id}'),
+              if (t.caseQuantity != null) fact(l10n.quoteCaseLabel, '${t.caseQuantity}', 'cit-their-case-${t.id}'),
+            ],
+          ]),
+        ),
+      ),
+      const SizedBox(height: AppSpacing.md),
       Text(l10n.citSupplierHint(partnerName), style: theme.textTheme.bodySmall),
       const SizedBox(height: AppSpacing.sm),
       for (final e in byWhere.entries)

@@ -140,6 +140,15 @@ class CatalogItem extends Equatable {
     this.stock,
     this.terms = const [],
     this.termCount = 0,
+    this.weightG,
+    this.widthMm,
+    this.depthMm,
+    this.heightMm,
+    this.sizeNote,
+    this.imagePaths = const [],
+    this.facePath,
+    this.imageCount = 0,
+    this.source = 'file',
     this.updatedAt,
   });
 
@@ -169,6 +178,23 @@ class CatalogItem extends Equatable {
 
   /// Every term it has had, current and past.
   final int termCount;
+
+  /// Its own record of weight and size (0125), copied from a file or the
+  /// master and kept when the master changes or loses the product.
+  final double? weightG;
+  final double? widthMm;
+  final double? depthMm;
+  final double? heightMm;
+  final String? sizeNote;
+
+  /// Its own pictures' storage paths, and the face to show: its first, else
+  /// its product's. [imageCount] counts whichever is more.
+  final List<String> imagePaths;
+  final String? facePath;
+  final int imageCount;
+
+  /// `file`, `manual` or `master` (brought in from the master).
+  final String source;
   final DateTime? updatedAt;
 
   bool get inMaster => product != null;
@@ -218,12 +244,24 @@ class CatalogItem extends Equatable {
         for (final t in (j['terms'] as List? ?? const []).whereType<Map>()) CatalogTerm.fromJson(t.cast<String, dynamic>()),
       ],
       termCount: _i(j['term_count']) ?? 0,
+      weightG: _d(j['weight_g']),
+      widthMm: _d(j['width_mm']),
+      depthMm: _d(j['depth_mm']),
+      heightMm: _d(j['height_mm']),
+      sizeNote: _t(j['size_note']),
+      imagePaths: [for (final x in (j['image_paths'] as List? ?? const [])) if (_t(x) case final v?) v],
+      facePath: _t(j['face_path']),
+      imageCount: _i(j['image_count']) ?? 0,
+      source: _t(j['source']) ?? 'file',
       updatedAt: _date(j['updated_at']),
     );
   }
 
   @override
-  List<Object?> get props => [id, name, janCode, maker, itemCode, spec, product, stock, terms, termCount];
+  List<Object?> get props => [
+        id, name, janCode, maker, itemCode, spec, product, stock, terms, termCount,
+        weightG, widthMm, depthMm, heightMm, sizeNote, imagePaths, facePath, imageCount,
+      ];
 }
 
 /// What reading a file into the library did.
@@ -244,4 +282,39 @@ class CatalogImported extends Equatable {
 
   @override
   List<Object?> get props => [created, updated, terms, skipped];
+}
+
+/// A master product that is not in the library yet (0125), as
+/// `catalog_master_candidates` lists it.
+class MasterCandidate extends Equatable {
+  const MasterCandidate({
+    required this.id,
+    required this.name,
+    this.maker,
+    this.sku,
+    this.janCode,
+    this.lifecycle = ProductLifecycle.active,
+    this.supplierCount = 0,
+  });
+
+  final int id;
+  final String name;
+  final String? maker;
+  final String? sku;
+  final String? janCode;
+  final ProductLifecycle lifecycle;
+  final int supplierCount;
+
+  factory MasterCandidate.fromJson(Map<String, dynamic> j) => MasterCandidate(
+        id: _i(j['id']) ?? 0,
+        name: _t(j['name']) ?? '',
+        maker: _t(j['maker']),
+        sku: _t(j['sku']),
+        janCode: _t(j['jan_code']),
+        lifecycle: ProductLifecycle.parse(j['lifecycle']) ?? ProductLifecycle.active,
+        supplierCount: _i(j['supplier_count']) ?? 0,
+      );
+
+  @override
+  List<Object?> get props => [id, name, maker, sku, janCode, lifecycle, supplierCount];
 }

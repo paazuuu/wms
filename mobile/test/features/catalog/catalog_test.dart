@@ -10,6 +10,7 @@ import 'package:wms_mobile/features/catalog/domain/catalog.dart';
 import 'package:wms_mobile/features/catalog/presentation/catalog_import_screen.dart';
 import 'package:wms_mobile/features/catalog/presentation/catalog_item_screen.dart';
 import 'package:wms_mobile/features/catalog/presentation/catalog_screen.dart';
+import 'package:wms_mobile/features/catalog/presentation/master_import_screen.dart';
 import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
@@ -181,6 +182,97 @@ void main() {
     expect(added.$2['branch'], '大阪支店');
     expect(added.$2['unit_price'], '95');
     expect(added.$2['discount_rate'], 0.6);
+  });
+
+  testWidgets('the library shows the same items as large pictures, with suppliers and stock', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const CatalogScreen(), overrides: [
+      catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository(items: [_pen, _note])),
+    ]);
+    expect(find.byKey(const ValueKey('cl-grid')), findsNothing);
+    await tester.tap(find.byIcon(Icons.photo_library_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cl-grid')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cl-photo-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cl-photo-2')), findsOneWidget);
+    expect(find.text('¥88 · 仕入先 2社'), findsOneWidget);
+    expect(find.byKey(const ValueKey('cl-photo-stock-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cl-photo-stock-2')), findsNothing);
+  });
+
+  testWidgets('master products not in the library are brought in, and only those are offered', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeCatalogRepository(items: [_pen], candidates: const [
+      MasterCandidate(id: 7, name: 'キャンパスノート B罫', maker: 'コクヨ', sku: 'ノ-3CBN', janCode: '4901480000017', supplierCount: 2),
+      MasterCandidate(id: 8, name: '消しゴム', maker: 'トンボ鉛筆', lifecycle: ProductLifecycle.dormant),
+    ]);
+    await pumpApp(tester, const CatalogScreen(), overrides: [
+      catalogRepositoryProvider.overrideWithValue(repo),
+      productLibraryCanManageProvider.overrideWithValue(true),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('cl-from-master')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cfm-intro')), findsOneWidget);
+    expect(find.text('仕入先 2社'), findsOneWidget);
+    expect(find.text('休眠'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('cfm-select-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cfm-7')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cfm-import')));
+    await tester.pumpAndSettle();
+    expect(repo.fromMasterCalls.single, [8]);
+    expect(find.textContaining('1件を商品ライブラリーに取り込みました'), findsOneWidget);
+    expect(find.byKey(const ValueKey('cfm-8')), findsNothing);
+    expect(find.byKey(const ValueKey('cfm-7')), findsOneWidget);
+
+    Navigator.of(tester.element(find.byType(MasterImportScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('消しゴム'), findsOneWidget);
+  });
+
+  testWidgets("an item shows its own size and weight, and each supplier's tab says what it calls it", (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final pen = CatalogItem(
+      id: 1, name: _pen.name, maker: _pen.maker, itemCode: _pen.itemCode, janCode: _pen.janCode,
+      weightG: 12, widthMm: 10, depthMm: 12, heightMm: 140,
+      terms: [
+        CatalogTerm(id: 21, partnerId: 4, partnerName: '新東光通商', unitPrice: 88, listPrice: 165, discountRate: 0.53,
+            theirName: 'ｻﾗｻﾄﾞﾗｲ 0.5 ｱｵ', theirCode: 'SK-31', validFrom: DateTime(2026, 4, 1)),
+      ],
+    );
+    final repo = FakeCatalogRepository(items: [pen]);
+    await pumpApp(tester, const CatalogItemScreen(itemId: 1), overrides: [
+      catalogRepositoryProvider.overrideWithValue(repo),
+      productLibraryCanManageProvider.overrideWithValue(true),
+      tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
+    ]);
+
+    String valueOf(String key) =>
+        tester.widgetList<Text>(find.descendant(of: find.byKey(ValueKey(key)), matching: find.byType(Text))).last.data!;
+    expect(valueOf('cit-size'), '幅 10 × 奥行 12 × 高さ 140 mm');
+    expect(valueOf('cit-weight'), '12 g');
+
+    // Correcting the weight sends only the weight.
+    await tester.tap(find.byKey(const ValueKey('cit-edit')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('cit-edit-weight_g')), '12.5');
+    await tester.tap(find.byKey(const ValueKey('cit-edit-save')));
+    await tester.pumpAndSettle();
+    expect(repo.updates.single.$1, 1);
+    expect(repo.updates.single.$2, {'weight_g': 12.5});
+
+    await tester.tap(find.byKey(const ValueKey('cit-tab-4')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cit-naming')), findsOneWidget);
+    expect(valueOf('cit-their-name-21'), 'サラサドライ 0.5 アオ');
+    expect(valueOf('cit-their-code-21'), 'SK-31');
+    expect(valueOf('cit-their-rate-21'), '53%');
+    expect(valueOf('cit-their-price-21'), '¥88');
   });
 
   testWidgets('a file goes into the library with its supplier, branch and start date', (tester) async {

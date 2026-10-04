@@ -7712,5 +7712,114 @@
   "citValidFromField": "適用開始日（YYYY-MM-DD）",
   "citRateField": "掛率（60 または 0.6）",
   "citTheirName": "先方の商品名",
-  "clOpenLibrary": "商品ライブラリーを開く"
+  "clOpenLibrary": "商品ライブラリーを開く",
+  "specSizeWeight": "サイズ・重量",
+  "specWeight": "重量",
+  "specSize": "サイズ",
+  "specSizeValue": "幅 {w} × 奥行 {d} × 高さ {h} mm",
+  "@specSizeValue": {
+    "placeholders": {
+      "w": {
+        "type": "String"
+      },
+      "d": {
+        "type": "String"
+      },
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "specNotEntered": "未登録",
+  "specSizeAdd": "サイズを入力",
+  "specSizeEdit": "サイズを変更",
+  "specWidth": "幅",
+  "specDepth": "奥行",
+  "specHeight": "高さ",
+  "specSizeNote": "その他の表記（A4、φ10×140mm など・任意）",
+  "specSizeHint": "外箱ではなく商品そのものの外寸を、ミリ単位で入れてください。",
+  "specSizeInvalid": "サイズは0以上の数字で入れてください",
+  "specSizeClear": "サイズを消す",
+  "specSourceFile": "ファイルから",
+  "specWeightField": "重量 (g)",
+  "clFromMaster": "マスタから取り込む",
+  "cfmTitle": "商品マスタから取り込む",
+  "cfmIntro": "商品ライブラリーにまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごとライブラリーにコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、ライブラリーのコピーは残ります。",
+  "cfmEmpty": "取り込める商品はありません",
+  "cfmEmptyBody": "商品マスタの商品は、すべて商品ライブラリーにあります。",
+  "cfmSelectAll": "すべて選ぶ（{count}件）",
+  "@cfmSelectAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cfmImport": "選んだ{count}件を取り込む",
+  "@cfmImport": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cfmDone": "{created}件を商品ライブラリーに取り込みました（仕入先の条件 {terms}件）",
+  "@cfmDone": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "terms": {
+        "type": "int"
+      }
+    }
+  },
+  "cfmSuppliers": "仕入先 {count}社",
+  "@cfmSuppliers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "citEdit": "商品情報を編集",
+  "citNameField": "品名（表示名）",
+  "citSaved": "保存しました",
+  "citSpecFromLibrary": "サイズ・重量・写真はライブラリーの記録です。商品マスタを変えても、ここは変わりません。",
+  "citHowTheyCall": "この仕入先での呼び方と今の条件",
+  "citRateLabel": "掛率",
+  "citTheirCodeLabel": "先方の品番",
+  "citWhere": "支店",
+  "citNoNaming": "この仕入先での呼び方はまだ記録されていません",
+  "rmAction": "完全に削除",
+  "rmQ": "{count}件を商品マスタから完全に削除しますか？",
+  "@rmQ": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rmBody": "商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n商品ライブラリーの商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。",
+  "rmConfirmLabel": "確認のため「削除」と入力してください",
+  "rmConfirmWord": "削除",
+  "rmDone": "{removed}件を完全に削除しました",
+  "@rmDone": {
+    "placeholders": {
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
+  "rmDoneInUse": "{removed}件を完全に削除しました。{inUse}件は在庫・入出荷などの記録があるため削除できず、残しています（アーカイブのままにしておけます）",
+  "@rmDoneInUse": {
+    "placeholders": {
+      "removed": {
+        "type": "int"
+      },
+      "inUse": {
+        "type": "int"
+      }
+    }
+  }
 }
