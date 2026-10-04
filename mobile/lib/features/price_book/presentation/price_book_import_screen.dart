@@ -15,8 +15,8 @@ import '../../product/application/product_providers.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../../product_library/data/quote_repository.dart';
 import '../../product_library/domain/supplier_quote.dart';
-import '../application/catalog_providers.dart';
-import '../domain/catalog.dart';
+import '../application/price_book_providers.dart';
+import '../domain/price_book.dart';
 
 /// The file reader (import-plan, preview only — nothing booked).
 final fileReaderProvider = Provider<QuoteRepository>((ref) => QuoteRepositoryImpl(
@@ -35,17 +35,17 @@ final importSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>>
 
 String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-/// A file into 商品ライブラリー (0124): a quotation, invoice, delivery note or
+/// A file into 価格台帳 (0124): a quotation, invoice, delivery note or
 /// catalogue — Excel, PDF or a photo — read and sorted into maker, 品名,
-/// 品番, JAN, spec and prices. Each line becomes a library item (or updates
+/// 品番, JAN, spec and prices. Each line becomes a price book item (or updates
 /// the one with its JAN); with a supplier, its prices become that supplier's
 /// terms for the branch and from the date given, closing the ones before.
 /// Nothing in the product master, stock or anything booked is touched —
 /// unless 商品マスタにも登録する is on (0127): then the items the file became
 /// are taken into the master too, each new or linked to the product with
 /// its JAN. That is how 商品マスタ's ファイルから登録 opens this screen.
-class CatalogImportScreen extends ConsumerStatefulWidget {
-  const CatalogImportScreen({super.key, this.pickFile, this.today, this.toMaster = false});
+class PriceBookImportScreen extends ConsumerStatefulWidget {
+  const PriceBookImportScreen({super.key, this.pickFile, this.today, this.toMaster = false});
 
   final Future<PlatformFile?> Function()? pickFile;
 
@@ -56,10 +56,10 @@ class CatalogImportScreen extends ConsumerStatefulWidget {
   final DateTime? today;
 
   @override
-  ConsumerState<CatalogImportScreen> createState() => _CatalogImportScreenState();
+  ConsumerState<PriceBookImportScreen> createState() => _PriceBookImportScreenState();
 }
 
-class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
+class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
   int? _partnerId;
   bool _detected = false;
   final _branch = TextEditingController();
@@ -67,7 +67,7 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
   PlatformFile? _file;
   bool _busy = false;
   QuoteRead? _read;
-  CatalogImported? _done;
+  PriceBookImported? _done;
   late bool _toMaster = widget.toMaster;
   ({int created, int linked, int skipped})? _master;
 
@@ -149,7 +149,7 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
     if (read == null) return;
     setState(() => _busy = true);
     final branch = _branch.text.trim();
-    final r = await ref.read(catalogRepositoryProvider).import(
+    final r = await ref.read(priceBookRepositoryProvider).import(
           [for (final l in read.lines) QuoteLine.toSaveJson(l)],
           partnerId: _partnerId,
           branch: branch.isEmpty ? null : branch,
@@ -159,10 +159,10 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookListProvider);
         if (_toMaster && data.ids.isNotEmpty) {
           // The same items into the master: new, or linked by JAN.
-          final m = await ref.read(catalogRepositoryProvider).toProducts(data.ids);
+          final m = await ref.read(priceBookRepositoryProvider).toProducts(data.ids);
           if (!mounted) return;
           ref.invalidate(productListProvider);
           setState(() {
@@ -196,7 +196,7 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
     final theme = Theme.of(context);
     final suppliers = ref.watch(importSuppliersProvider).valueOrNull ?? const <TradingPartner>[];
     final inLibrary = {
-      for (final i in ref.watch(catalogListProvider).valueOrNull ?? const <CatalogItem>[])
+      for (final i in ref.watch(priceBookListProvider).valueOrNull ?? const <PriceBookItem>[])
         if (i.janCode != null) i.janCode!: i,
     };
     final read = _read;
@@ -292,7 +292,7 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
             if (_partnerId == null)
               Text(l10n.ciNoSupplierNote, style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.sm),
-            // Into the master as well, or the library only.
+            // Into the master as well, or the price book only.
             CheckboxListTile(
               key: const ValueKey('ci-to-master'),
               contentPadding: EdgeInsets.zero,

@@ -13192,7 +13192,7 @@ abstract class AppLocalizations {
   /// No description provided for @ntLearnedLibrary.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーに 仕入先の呼び名{profiles}件・属性{attributes}件'**
+  /// **'学習済み：仕入先の呼び名{profiles}件・属性{attributes}件'**
   String ntLearnedLibrary(int profiles, int attributes);
 
   /// No description provided for @featNameFormats.
@@ -15361,22 +15361,22 @@ abstract class AppLocalizations {
   /// **'商品ID'**
   String get pdProductId;
 
-  /// No description provided for @featCatalog.
+  /// No description provided for @featPriceBook.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリー'**
-  String get featCatalog;
+  /// **'価格台帳'**
+  String get featPriceBook;
 
-  /// No description provided for @featCatalogDesc.
+  /// No description provided for @featPriceBookDesc.
   ///
   /// In ja, this message translates to:
-  /// **'ファイルやカタログから集めた商品と、仕入先ごと・支店ごと・時期ごとの価格。商品マスタとは別に管理'**
-  String get featCatalogDesc;
+  /// **'仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品マスタとは別に管理します'**
+  String get featPriceBookDesc;
 
   /// No description provided for @clTitle.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリー'**
+  /// **'価格台帳'**
   String get clTitle;
 
   /// No description provided for @clSearchHint.
@@ -15388,7 +15388,7 @@ abstract class AppLocalizations {
   /// No description provided for @clEmpty.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーは空です'**
+  /// **'価格台帳は空です'**
   String get clEmpty;
 
   /// No description provided for @clEmptyBody.
@@ -15424,25 +15424,25 @@ abstract class AppLocalizations {
   /// No description provided for @clDelete.
   ///
   /// In ja, this message translates to:
-  /// **'ライブラリーから削除'**
+  /// **'価格台帳から削除'**
   String get clDelete;
 
   /// No description provided for @clDeleteQ.
   ///
   /// In ja, this message translates to:
-  /// **'{count}件をライブラリーから削除しますか？'**
+  /// **'{count}件を価格台帳から削除しますか？'**
   String clDeleteQ(int count);
 
   /// No description provided for @clDeleteBody.
   ///
   /// In ja, this message translates to:
-  /// **'ライブラリーの商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。'**
+  /// **'価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。'**
   String get clDeleteBody;
 
   /// No description provided for @clDeleted.
   ///
   /// In ja, this message translates to:
-  /// **'{count}件をライブラリーから削除しました'**
+  /// **'{count}件を価格台帳から削除しました'**
   String clDeleted(int count);
 
   /// No description provided for @ciTitle.
@@ -15454,7 +15454,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciIntro.
   ///
   /// In ja, this message translates to:
-  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて商品ライブラリーに入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。'**
+  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。'**
   String get ciIntro;
 
   /// No description provided for @ciTermsFor.
@@ -15484,7 +15484,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciSummary.
   ///
   /// In ja, this message translates to:
-  /// **'{total}行：新しい商品 {fresh}件・ライブラリーにある商品の更新 {known}件'**
+  /// **'{total}行：新しい商品 {fresh}件・価格台帳にある商品の更新 {known}件'**
   String ciSummary(int total, int fresh, int known);
 
   /// No description provided for @ciNoSupplierNote.
@@ -15496,7 +15496,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciImport.
   ///
   /// In ja, this message translates to:
-  /// **'ライブラリーに取り込む（{count}件）'**
+  /// **'価格台帳に取り込む（{count}件）'**
   String ciImport(int count);
 
   /// No description provided for @ciDone.
@@ -15631,11 +15631,11 @@ abstract class AppLocalizations {
   /// **'先方の商品名'**
   String get citTheirName;
 
-  /// No description provided for @clOpenLibrary.
+  /// No description provided for @clOpenPriceBook.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーを開く'**
-  String get clOpenLibrary;
+  /// **'価格台帳を開く'**
+  String get clOpenPriceBook;
 
   /// No description provided for @specSizeWeight.
   ///
@@ -15748,7 +15748,7 @@ abstract class AppLocalizations {
   /// No description provided for @cfmIntro.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーにまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごとライブラリーにコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、ライブラリーのコピーは残ります。'**
+  /// **'価格台帳にまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごと価格台帳にコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、価格台帳のコピーは残ります。'**
   String get cfmIntro;
 
   /// No description provided for @cfmEmpty.
@@ -15760,7 +15760,7 @@ abstract class AppLocalizations {
   /// No description provided for @cfmEmptyBody.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタの商品は、すべて商品ライブラリーにあります。'**
+  /// **'商品マスタの商品は、すべて価格台帳にあります。'**
   String get cfmEmptyBody;
 
   /// No description provided for @cfmSelectAll.
@@ -15778,7 +15778,7 @@ abstract class AppLocalizations {
   /// No description provided for @cfmDone.
   ///
   /// In ja, this message translates to:
-  /// **'{created}件を商品ライブラリーに取り込みました（仕入先の条件 {terms}件）'**
+  /// **'{created}件を価格台帳に取り込みました（仕入先の条件 {terms}件）'**
   String cfmDone(int created, int terms);
 
   /// No description provided for @cfmSuppliers.
@@ -15805,11 +15805,11 @@ abstract class AppLocalizations {
   /// **'保存しました'**
   String get citSaved;
 
-  /// No description provided for @citSpecFromLibrary.
+  /// No description provided for @citSpecFromPriceBook.
   ///
   /// In ja, this message translates to:
-  /// **'サイズ・重量・写真はライブラリーの記録です。商品マスタを変えても、ここは変わりません。'**
-  String get citSpecFromLibrary;
+  /// **'サイズ・重量・写真は価格台帳の記録です。商品マスタを変えても、ここは変わりません。'**
+  String get citSpecFromPriceBook;
 
   /// No description provided for @citHowTheyCall.
   ///
@@ -15856,7 +15856,7 @@ abstract class AppLocalizations {
   /// No description provided for @rmBody.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n商品ライブラリーの商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。'**
+  /// **'商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。'**
   String get rmBody;
 
   /// No description provided for @rmConfirmLabel.
@@ -15892,7 +15892,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciIntroMaster.
   ///
   /// In ja, this message translates to:
-  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は商品ライブラリー（仕入先ごとの商品・価格の台帳）にも記録されます。'**
+  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は価格台帳（仕入先ごとの商品・価格の台帳）にも記録されます。'**
   String get ciIntroMaster;
 
   /// No description provided for @ciToMaster.
@@ -15904,13 +15904,13 @@ abstract class AppLocalizations {
   /// No description provided for @ciToMasterHint.
   ///
   /// In ja, this message translates to:
-  /// **'オフにすると商品ライブラリーにだけ記録し、商品マスタは変えません。'**
+  /// **'オフにすると価格台帳にだけ記録し、商品マスタは変えません。'**
   String get ciToMasterHint;
 
   /// No description provided for @ciMasterBlocked.
   ///
   /// In ja, this message translates to:
-  /// **'{count}行はJANコードかメーカーがないため商品マスタには登録されず、商品ライブラリーにだけ入ります。'**
+  /// **'{count}行はJANコードかメーカーがないため商品マスタには登録されず、価格台帳にだけ入ります。'**
   String ciMasterBlocked(int count);
 
   /// No description provided for @ciLineNoMaster.
@@ -15928,7 +15928,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciDoneMaster.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタに登録しました：新規 {created}件・既存の商品とつなげた {linked}件・JANかメーカーがなく登録できなかった {skipped}件（商品ライブラリーには全件記録）'**
+  /// **'商品マスタに登録しました：新規 {created}件・既存の商品とつなげた {linked}件・JANかメーカーがなく登録できなかった {skipped}件（価格台帳には全件記録）'**
   String ciDoneMaster(int created, int linked, int skipped);
 
   /// No description provided for @pmImportFile.

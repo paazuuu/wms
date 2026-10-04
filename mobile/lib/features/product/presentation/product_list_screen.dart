@@ -16,15 +16,15 @@ import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
-import '../../catalog/application/catalog_providers.dart';
-import '../../catalog/presentation/catalog_import_screen.dart';
-import '../../catalog/presentation/catalog_screen.dart';
+import '../../price_book/application/price_book_providers.dart';
+import '../../price_book/presentation/price_book_import_screen.dart';
+import '../../price_book/presentation/price_book_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
 /// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
-/// their terms and stock are shown by 商品ライブラリー (0124/0125).
+/// their terms and stock are shown by 価格台帳 (0124/0125).
 ///
 /// Anyone who can see products sees them, and can narrow them by state,
 /// maker and category. Adding one — by hand or a whole
@@ -143,7 +143,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       case ApiSuccess(:final data):
         setState(() => _selected = null);
         ref.invalidate(productListProvider);
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookListProvider);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(data.inUse.isEmpty
               ? l10n.rmDone(data.removed.length)
@@ -250,14 +250,14 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
                     child: Row(
                       children: [
-                        // Products from a file (0127): read into 商品ライブラリー
+                        // Products from a file (0127): read into 価格台帳
                         // and registered here in the same go.
                         if (canManage && selected == null) ...[
                           FilledButton.tonalIcon(
                             key: const ValueKey('products-import'),
                             onPressed: () async {
                               await Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const CatalogImportScreen(toMaster: true),
+                                builder: (_) => const PriceBookImportScreen(toMaster: true),
                               ));
                               ref.invalidate(productListProvider);
                             },
@@ -268,11 +268,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           OutlinedButton.icon(
                             key: const ValueKey('products-from-library'),
                             onPressed: () async {
-                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CatalogScreen()));
+                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookScreen()));
                               ref.invalidate(productListProvider);
                             },
                             icon: const Icon(Icons.local_library_outlined, size: 18),
-                            label: Text(l10n.clOpenLibrary),
+                            label: Text(l10n.clOpenPriceBook),
                           ),
                           const SizedBox(width: AppSpacing.sm),
                         ],

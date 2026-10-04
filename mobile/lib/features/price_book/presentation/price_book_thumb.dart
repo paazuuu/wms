@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../application/catalog_providers.dart';
-import '../domain/catalog.dart';
+import '../application/price_book_providers.dart';
+import '../domain/price_book.dart';
 
-/// A library item's face (0125): its own first picture, else its product's,
+/// A price book item's face (0125): its own first picture, else its product's,
 /// signed with the rest of the list. Without one a plain box keeps its place.
-class CatalogThumb extends ConsumerWidget {
-  const CatalogThumb({super.key, required this.item, this.size = 56});
+class PriceBookThumb extends ConsumerWidget {
+  const PriceBookThumb({super.key, required this.item, this.size = 56});
 
-  final CatalogItem item;
+  final PriceBookItem item;
   final double size;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final path = item.facePath;
-    final url = path == null ? null : ref.watch(catalogFaceUrlsProvider).valueOrNull?[path];
+    final url = path == null ? null : ref.watch(priceBookFaceUrlsProvider).valueOrNull?[path];
     final radius = BorderRadius.circular(size >= 64 ? 10 : 6);
     final placeholder = Container(
       width: size,

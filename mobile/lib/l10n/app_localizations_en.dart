@@ -7303,7 +7303,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ntLearnedLibrary(int profiles, int attributes) {
-    return 'Product library: $profiles supplier names, $attributes attributes';
+    return 'Learned: $profiles supplier names, $attributes attributes';
   }
 
   @override
@@ -8600,21 +8600,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pdProductId => 'Product ID';
 
   @override
-  String get featCatalog => 'Product library';
+  String get featPriceBook => 'Price book';
 
   @override
-  String get featCatalogDesc =>
-      'Products gathered from files and catalogues, with each supplier\'s prices by branch and period — kept apart from the master';
+  String get featPriceBookDesc =>
+      'Each supplier\'s names, prices and rates for products, by branch and period — read from files and kept apart from the master';
 
   @override
-  String get clTitle => 'Product library';
+  String get clTitle => 'Price book';
 
   @override
   String get clSearchHint =>
       'Search by name, maker, item code, JAN or a supplier\'s writing';
 
   @override
-  String get clEmpty => 'The library is empty';
+  String get clEmpty => 'The price book is empty';
 
   @override
   String get clEmptyBody =>
@@ -8635,20 +8635,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get clDelete => 'Delete from the library';
+  String get clDelete => 'Delete from the price book';
 
   @override
   String clDeleteQ(int count) {
-    return 'Delete $count from the library?';
+    return 'Delete $count from the price book?';
   }
 
   @override
   String get clDeleteBody =>
-      'The library items and their price history by supplier are deleted, for good. The product master, stock, orders and receipts are not touched.';
+      'The price book items and their price history by supplier are deleted, for good. The product master, stock, orders and receipts are not touched.';
 
   @override
   String clDeleted(int count) {
-    return '$count deleted from the library';
+    return '$count deleted from the price book';
   }
 
   @override
@@ -8656,7 +8656,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ciIntro =>
-      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code, JAN, spec and prices, and puts it into the library. An item with the same JAN is updated. The master and stock are not touched.';
+      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code, JAN, spec and prices, and puts it into the price book. An item with the same JAN is updated. The master and stock are not touched.';
 
   @override
   String get ciTermsFor => 'Prices (optional)';
@@ -8674,7 +8674,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ciSummary(int total, int fresh, int known) {
-    return '$total lines: $fresh new, $known updating items in the library';
+    return '$total lines: $fresh new, $known updating items in the price book';
   }
 
   @override
@@ -8683,7 +8683,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ciImport(int count) {
-    return 'Import into the library ($count)';
+    return 'Import into the price book ($count)';
   }
 
   @override
@@ -8763,7 +8763,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get citTheirName => 'Their name';
 
   @override
-  String get clOpenLibrary => 'Open the library';
+  String get clOpenPriceBook => 'Open the price book';
 
   @override
   String get specSizeWeight => 'Size and weight';
@@ -8824,13 +8824,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cfmIntro =>
-      'Master products not in the library yet. The ones you choose are copied into the library with their spec, pictures and each supplier\'s name and terms. The master is not changed, and the copy stays even if the master product is later removed.';
+      'Master products not in the price book yet. The ones you choose are copied into the price book with their spec, pictures and each supplier\'s name and terms. The master is not changed, and the copy stays even if the master product is later removed.';
 
   @override
   String get cfmEmpty => 'Nothing to bring in';
 
   @override
-  String get cfmEmptyBody => 'Every master product is already in the library.';
+  String get cfmEmptyBody =>
+      'Every master product is already in the price book.';
 
   @override
   String cfmSelectAll(int count) {
@@ -8844,7 +8845,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cfmDone(int created, int terms) {
-    return '$created brought into the library ($terms supplier terms)';
+    return '$created brought into the price book ($terms supplier terms)';
   }
 
   @override
@@ -8862,8 +8863,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get citSaved => 'Saved';
 
   @override
-  String get citSpecFromLibrary =>
-      'The size, weight and pictures here are the library\'s own record; changing the master does not change them.';
+  String get citSpecFromPriceBook =>
+      'The size, weight and pictures here are the price book\'s own record; changing the master does not change them.';
 
   @override
   String get citHowTheyCall => 'How this supplier calls it, and its terms now';
@@ -8890,7 +8891,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rmBody =>
-      'They leave the master for good, with their names, codes, units and picture records.\nProducts with stock, receipts, shipments or orders are not removed and stay as they are.\nThe library keeps its items: only the link goes, and comes back by JAN if the product is added again.';
+      'They leave the master for good, with their names, codes, units and picture records.\nProducts with stock, receipts, shipments or orders are not removed and stay as they are.\nThe price book keeps its items: only the link goes, and comes back by JAN if the product is added again.';
 
   @override
   String get rmConfirmLabel => 'Type 削除 to confirm';
@@ -8913,7 +8914,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ciIntroMaster =>
-      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code and JAN, and registers it in the product master. A product whose JAN is already in the master is linked rather than made again. What was read — each supplier\'s names and prices — is also kept in the product library.';
+      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code and JAN, and registers it in the product master. A product whose JAN is already in the master is linked rather than made again. What was read — each supplier\'s names and prices — is also kept in the price book.';
 
   @override
   String get ciToMaster =>
@@ -8921,11 +8922,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ciToMasterHint =>
-      'Off: only the library is updated; the master is not changed.';
+      'Off: only the price book is updated; the master is not changed.';
 
   @override
   String ciMasterBlocked(int count) {
-    return '$count lines have no JAN or maker, so they go into the library only, not the master.';
+    return '$count lines have no JAN or maker, so they go into the price book only, not the master.';
   }
 
   @override
@@ -8938,7 +8939,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ciDoneMaster(int created, int linked, int skipped) {
-    return 'Registered in the master: $created new, $linked linked to existing products, $skipped not registered (no JAN or maker). All lines are kept in the library.';
+    return 'Registered in the master: $created new, $linked linked to existing products, $skipped not registered (no JAN or maker). All lines are kept in the price book.';
   }
 
   @override

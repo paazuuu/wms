@@ -967,7 +967,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ledgerTitle => '库存履历';
 
   @override
-  String get ledgerSubtitle => '该商品库存变动的原因';
+  String get ledgerSubtitle => '该价格台账存变动的原因';
 
   @override
   String get ledgerEmpty => '暂无库存变动';
@@ -4565,7 +4565,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get virtualNote => '备注（可选）';
 
   @override
-  String get chartStockTitle => '商品库存构成';
+  String get chartStockTitle => '价格台账存构成';
 
   @override
   String get chartByWarehouse => '按仓库';
@@ -7136,7 +7136,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ntLearnedLibrary(int profiles, int attributes) {
-    return '商品图库：供应商叫法$profiles条、属性$attributes条';
+    return '已学习：供应商叫法$profiles条、属性$attributes条';
   }
 
   @override
@@ -8388,19 +8388,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pdProductId => '商品ID';
 
   @override
-  String get featCatalog => '商品库';
+  String get featPriceBook => '价格台账';
 
   @override
-  String get featCatalogDesc => '从文件和目录收集的商品，以及各供应商按分店、时期的价格，与商品主数据分开管理';
+  String get featPriceBookDesc => '各供应商的商品叫法、价格、折扣率台账（按分店、时期），从文件导入，与商品主数据分开管理';
 
   @override
-  String get clTitle => '商品库';
+  String get clTitle => '价格台账';
 
   @override
   String get clSearchHint => '按品名、制造商、货号、JAN 或供应商写法搜索';
 
   @override
-  String get clEmpty => '商品库为空';
+  String get clEmpty => '价格台账为空';
 
   @override
   String get clEmptyBody => '请用“从文件导入”读取报价单、发票或目录等。';
@@ -8420,19 +8420,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get clDelete => '从商品库删除';
+  String get clDelete => '从价格台账删除';
 
   @override
   String clDeleteQ(int count) {
-    return '从商品库删除 $count 件？';
+    return '从价格台账删除 $count 件？';
   }
 
   @override
-  String get clDeleteBody => '删除商品库中的商品及其各供应商价格历史，无法恢复。不影响商品主数据、库存、订单、入库等。';
+  String get clDeleteBody => '删除价格台账中的商品及其各供应商价格历史，无法恢复。不影响商品主数据、库存、订单、入库等。';
 
   @override
   String clDeleted(int count) {
-    return '已从商品库删除 $count 件';
+    return '已从价格台账删除 $count 件';
   }
 
   @override
@@ -8440,7 +8440,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ciIntro =>
-      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN、规格、价格整理后放入商品库。相同 JAN 的商品会更新。不影响商品主数据和库存。';
+      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN、规格、价格整理后放入价格台账。相同 JAN 的商品会更新。不影响商品主数据和库存。';
 
   @override
   String get ciTermsFor => '价格（可选）';
@@ -8458,7 +8458,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ciSummary(int total, int fresh, int known) {
-    return '$total 行：新商品 $fresh 件・更新商品库已有商品 $known 件';
+    return '$total 行：新商品 $fresh 件・更新价格台账已有商品 $known 件';
   }
 
   @override
@@ -8466,7 +8466,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ciImport(int count) {
-    return '导入商品库（$count 件）';
+    return '导入价格台账（$count 件）';
   }
 
   @override
@@ -8544,7 +8544,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get citTheirName => '对方商品名';
 
   @override
-  String get clOpenLibrary => '打开商品库';
+  String get clOpenPriceBook => '打开价格台账';
 
   @override
   String get specSizeWeight => '尺寸与重量';
@@ -8604,13 +8604,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cfmIntro =>
-      '尚未在商品库中的主数据商品。所选商品将连同规格、照片以及各供应商的叫法和交易条件复制到商品库。商品主数据不变；即使之后删除主数据商品，商品库中的副本仍会保留。';
+      '尚未在价格台账中的主数据商品。所选商品将连同规格、照片以及各供应商的叫法和交易条件复制到价格台账。商品主数据不变；即使之后删除主数据商品，价格台账中的副本仍会保留。';
 
   @override
   String get cfmEmpty => '没有可导入的商品';
 
   @override
-  String get cfmEmptyBody => '商品主数据中的商品都已在商品库中。';
+  String get cfmEmptyBody => '商品主数据中的商品都已在价格台账中。';
 
   @override
   String cfmSelectAll(int count) {
@@ -8624,7 +8624,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String cfmDone(int created, int terms) {
-    return '已将 $created 件导入商品库（供应商条件 $terms 件）';
+    return '已将 $created 件导入价格台账（供应商条件 $terms 件）';
   }
 
   @override
@@ -8642,7 +8642,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get citSaved => '已保存';
 
   @override
-  String get citSpecFromLibrary => '此处的尺寸、重量和照片是商品库自己的记录，修改主数据不会改变它们。';
+  String get citSpecFromPriceBook => '此处的尺寸、重量和照片是价格台账自己的记录，修改主数据不会改变它们。';
 
   @override
   String get citHowTheyCall => '该供应商的叫法与当前条件';
@@ -8669,7 +8669,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rmBody =>
-      '将从商品主数据中彻底删除，无法恢复。商品名、编码、单位、照片登记也会一并删除。\n有库存、入库、出库、订单等记录的商品不会删除，保持原样。\n商品库中的商品会保留（只解除关联，用相同 JAN 重新登录后会自动关联）。';
+      '将从商品主数据中彻底删除，无法恢复。商品名、编码、单位、照片登记也会一并删除。\n有库存、入库、出库、订单等记录的商品不会删除，保持原样。\n价格台账中的商品会保留（只解除关联，用相同 JAN 重新登录后会自动关联）。';
 
   @override
   String get rmConfirmLabel => '请输入「削除」以确认';
@@ -8692,17 +8692,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ciIntroMaster =>
-      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN 整理后登录到商品主数据。主数据中已有相同 JAN 的商品时不新建而是关联。读取的内容（各供应商的叫法与价格）也会记录在商品库中。';
+      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN 整理后登录到商品主数据。主数据中已有相同 JAN 的商品时不新建而是关联。读取的内容（各供应商的叫法与价格）也会记录在价格台账中。';
 
   @override
   String get ciToMaster => '同时登录到商品主数据（用于库存、入库、出库）';
 
   @override
-  String get ciToMasterHint => '关闭时只记录到商品库，不更改商品主数据。';
+  String get ciToMasterHint => '关闭时只记录到价格台账，不更改商品主数据。';
 
   @override
   String ciMasterBlocked(int count) {
-    return '$count 行没有 JAN 或制造商，不会登录到商品主数据，只记录到商品库。';
+    return '$count 行没有 JAN 或制造商，不会登录到商品主数据，只记录到价格台账。';
   }
 
   @override
@@ -8715,7 +8715,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ciDoneMaster(int created, int linked, int skipped) {
-    return '已登录到商品主数据：新建 $created 件、关联已有商品 $linked 件、因无 JAN 或制造商未登录 $skipped 件（全部记录在商品库）';
+    return '已登录到商品主数据：新建 $created 件、关联已有商品 $linked 件、因无 JAN 或制造商未登录 $skipped 件（全部记录在价格台账）';
   }
 
   @override

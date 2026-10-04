@@ -13,7 +13,7 @@ import 'product_gallery_screen.dart';
 import '../../../core/ui/product_name.dart';
 import 'product_thumb.dart';
 
-/// 商品ライブラリー (0109): every product with its face, so pictures can be
+/// 商品マスタ's pictures (0109): every product with its face, so pictures can be
 /// found, checked and added. "写真なしのみ" narrows to the products still
 /// without one — the list to work through when setting the library up.
 class ProductLibraryScreen extends StatelessWidget {
@@ -28,7 +28,7 @@ class ProductLibraryScreen extends StatelessWidget {
 
 /// The products as a grid of pictures, searchable and narrowed to those
 /// still without one. [onOpen] decides what a tap opens — the product
-/// screen when this is the photo view of 商品ライブラリー, the pictures
+/// screen when this is the photo view of 商品マスタ, the pictures
 /// otherwise.
 class ProductLibraryView extends ConsumerStatefulWidget {
   const ProductLibraryView({super.key, this.onOpen});

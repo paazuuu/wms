@@ -10,7 +10,7 @@ import '../application/product_library_providers.dart';
 import '../domain/product_image.dart';
 
 // The product page's attributes tab (0110). How each supplier calls the
-// product and on what terms is shown by 商品ライブラリー (0124/0125), not
+// product and on what terms is shown by 価格台帳 (0124/0125), not
 // the master.
 
 Future<void> _save(

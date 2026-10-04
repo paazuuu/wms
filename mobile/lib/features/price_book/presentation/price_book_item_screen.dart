@@ -14,24 +14,24 @@ import '../../product/presentation/product_detail_screen.dart';
 import '../../product/presentation/product_labels.dart';
 import '../../product/presentation/product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
-import '../application/catalog_providers.dart';
-import '../domain/catalog.dart';
-import 'catalog_import_screen.dart' show importSuppliersProvider;
-import 'catalog_thumb.dart';
+import '../application/price_book_providers.dart';
+import '../domain/price_book.dart';
+import 'price_book_import_screen.dart' show importSuppliersProvider;
+import 'price_book_thumb.dart';
 
 String _yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-/// One library item: what it is — with its own pictures, size and weight —
+/// One price book item: what it is — with its own pictures, size and weight —
 /// its stock when it is in the master, and a tab per supplier with what that
 /// supplier calls it and its terms by branch: the ones in force now, and
 /// every earlier one with its dates.
-class CatalogItemScreen extends ConsumerWidget {
-  const CatalogItemScreen({super.key, required this.itemId});
+class PriceBookItemScreen extends ConsumerWidget {
+  const PriceBookItemScreen({super.key, required this.itemId});
 
   final int itemId;
 
-  Future<void> _addTerm(BuildContext context, WidgetRef ref, CatalogItem item, {int? partnerId, String? branch}) async {
+  Future<void> _addTerm(BuildContext context, WidgetRef ref, PriceBookItem item, {int? partnerId, String? branch}) async {
     final l10n = AppLocalizations.of(context);
     var partner = partnerId;
     if (partner == null) {
@@ -71,7 +71,7 @@ class CatalogItemScreen extends ConsumerWidget {
     );
     if (v == null || !context.mounted) return;
     final rate = double.tryParse(v['discount_rate'] ?? '');
-    final r = await ref.read(catalogRepositoryProvider).addTerm(item.id, {
+    final r = await ref.read(priceBookRepositoryProvider).addTerm(item.id, {
       'partner_id': partner,
       'branch': v['branch'],
       'valid_from': v['valid_from'],
@@ -86,15 +86,15 @@ class CatalogItemScreen extends ConsumerWidget {
     if (!context.mounted) return;
     switch (r) {
       case ApiSuccess():
-        ref.invalidate(catalogHistoryProvider(item.id));
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookHistoryProvider(item.id));
+        ref.invalidate(priceBookListProvider);
       case ApiFailure(:final message):
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
     }
   }
 
   /// Correcting the item's own record: only what changed is sent (0125).
-  Future<void> _edit(BuildContext context, WidgetRef ref, CatalogItem item) async {
+  Future<void> _edit(BuildContext context, WidgetRef ref, PriceBookItem item) async {
     final l10n = AppLocalizations.of(context);
     String n(double? v) => v == null ? '' : (v == v.roundToDouble() ? v.toStringAsFixed(0) : '$v');
     final current = <String, (String, String)>{
@@ -134,12 +134,12 @@ class CatalogItemScreen extends ConsumerWidget {
                   : e.value.trim(),
     };
     if (changed.isEmpty) return;
-    final r = await ref.read(catalogRepositoryProvider).update(item.id, changed);
+    final r = await ref.read(priceBookRepositoryProvider).update(item.id, changed);
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     switch (r) {
       case ApiSuccess():
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookListProvider);
         messenger.showSnackBar(SnackBar(content: Text(l10n.citSaved)));
       case ApiFailure(:final message):
         messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
@@ -149,15 +149,15 @@ class CatalogItemScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final async = ref.watch(catalogListProvider);
+    final async = ref.watch(priceBookListProvider);
     final item = async.valueOrNull?.where((i) => i.id == itemId).firstOrNull;
-    final history = ref.watch(catalogHistoryProvider(itemId)).valueOrNull ?? const <CatalogTerm>[];
+    final history = ref.watch(priceBookHistoryProvider(itemId)).valueOrNull ?? const <PriceBookTerm>[];
     final canManage = ref.watch(productLibraryCanManageProvider);
 
     if (item == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.clTitle)),
-        body: async.isLoading ? LoadingView(message: l10n.loading) : EmptyStateView(icon: Icons.local_library_outlined, title: l10n.clEmpty),
+        body: async.isLoading ? LoadingView(message: l10n.loading) : EmptyStateView(icon: Icons.request_quote_outlined, title: l10n.clEmpty),
       );
     }
     // A tab per supplier the item has ever had a term with.
@@ -215,7 +215,7 @@ class CatalogItemScreen extends ConsumerWidget {
 class _Overview extends StatelessWidget {
   const _Overview({required this.item, this.onAddTerm, this.onEdit});
 
-  final CatalogItem item;
+  final PriceBookItem item;
   final VoidCallback? onAddTerm;
   final VoidCallback? onEdit;
 
@@ -242,7 +242,7 @@ class _Overview extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            CatalogThumb(key: const ValueKey('cit-face'), item: i, size: 120),
+            PriceBookThumb(key: const ValueKey('cit-face'), item: i, size: 120),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -284,7 +284,7 @@ class _Overview extends StatelessWidget {
             row(l10n.specWeight, i.weightG == null ? l10n.specNotEntered : gramsText(i.weightG!), 'cit-weight'),
             row(l10n.citSourceFile, i.sourceFile, 'cit-file'),
             const SizedBox(height: AppSpacing.xs),
-            Text(l10n.citSpecFromLibrary, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            Text(l10n.citSpecFromPriceBook, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ]),
         ),
       ),
@@ -353,8 +353,8 @@ class _SupplierTermsTab extends StatelessWidget {
   const _SupplierTermsTab({super.key, required this.partnerName, required this.current, required this.history, this.onAdd});
 
   final String partnerName;
-  final List<CatalogTerm> current;
-  final List<CatalogTerm> history;
+  final List<PriceBookTerm> current;
+  final List<PriceBookTerm> history;
   final void Function(String? branch)? onAdd;
 
   @override
@@ -363,7 +363,7 @@ class _SupplierTermsTab extends StatelessWidget {
     final theme = Theme.of(context);
     final currentIds = {for (final t in current) t.id};
     // By branch: the one in force first, then the rest, newest first.
-    final byWhere = <String, List<CatalogTerm>>{};
+    final byWhere = <String, List<PriceBookTerm>>{};
     for (final t in history.isEmpty ? current : history) {
       byWhere.putIfAbsent(t.where ?? '', () => []).add(t);
     }
@@ -446,7 +446,7 @@ class _SupplierTermsTab extends StatelessWidget {
 class _TermRow extends StatelessWidget {
   const _TermRow({required this.term, this.current = true, this.showPartner = false});
 
-  final CatalogTerm term;
+  final PriceBookTerm term;
   final bool current;
   final bool showPartner;
 

@@ -7157,7 +7157,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String ntLearnedLibrary(int profiles, int attributes) {
-    return '商品ライブラリーに 仕入先の呼び名$profiles件・属性$attributes件';
+    return '学習済み：仕入先の呼び名$profiles件・属性$attributes件';
   }
 
   @override
@@ -8422,20 +8422,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pdProductId => '商品ID';
 
   @override
-  String get featCatalog => '商品ライブラリー';
+  String get featPriceBook => '価格台帳';
 
   @override
-  String get featCatalogDesc =>
-      'ファイルやカタログから集めた商品と、仕入先ごと・支店ごと・時期ごとの価格。商品マスタとは別に管理';
+  String get featPriceBookDesc =>
+      '仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品マスタとは別に管理します';
 
   @override
-  String get clTitle => '商品ライブラリー';
+  String get clTitle => '価格台帳';
 
   @override
   String get clSearchHint => '品名・メーカー・品番・JAN・仕入先の表記で検索';
 
   @override
-  String get clEmpty => '商品ライブラリーは空です';
+  String get clEmpty => '価格台帳は空です';
 
   @override
   String get clEmptyBody => '「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。';
@@ -8455,20 +8455,20 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get clDelete => 'ライブラリーから削除';
+  String get clDelete => '価格台帳から削除';
 
   @override
   String clDeleteQ(int count) {
-    return '$count件をライブラリーから削除しますか？';
+    return '$count件を価格台帳から削除しますか？';
   }
 
   @override
   String get clDeleteBody =>
-      'ライブラリーの商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。';
+      '価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。';
 
   @override
   String clDeleted(int count) {
-    return '$count件をライブラリーから削除しました';
+    return '$count件を価格台帳から削除しました';
   }
 
   @override
@@ -8476,7 +8476,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ciIntro =>
-      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて商品ライブラリーに入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。';
+      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。';
 
   @override
   String get ciTermsFor => '価格の扱い（任意）';
@@ -8494,7 +8494,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String ciSummary(int total, int fresh, int known) {
-    return '$total行：新しい商品 $fresh件・ライブラリーにある商品の更新 $known件';
+    return '$total行：新しい商品 $fresh件・価格台帳にある商品の更新 $known件';
   }
 
   @override
@@ -8502,7 +8502,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String ciImport(int count) {
-    return 'ライブラリーに取り込む（$count件）';
+    return '価格台帳に取り込む（$count件）';
   }
 
   @override
@@ -8581,7 +8581,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get citTheirName => '先方の商品名';
 
   @override
-  String get clOpenLibrary => '商品ライブラリーを開く';
+  String get clOpenPriceBook => '価格台帳を開く';
 
   @override
   String get specSizeWeight => 'サイズ・重量';
@@ -8641,13 +8641,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cfmIntro =>
-      '商品ライブラリーにまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごとライブラリーにコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、ライブラリーのコピーは残ります。';
+      '価格台帳にまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごと価格台帳にコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、価格台帳のコピーは残ります。';
 
   @override
   String get cfmEmpty => '取り込める商品はありません';
 
   @override
-  String get cfmEmptyBody => '商品マスタの商品は、すべて商品ライブラリーにあります。';
+  String get cfmEmptyBody => '商品マスタの商品は、すべて価格台帳にあります。';
 
   @override
   String cfmSelectAll(int count) {
@@ -8661,7 +8661,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String cfmDone(int created, int terms) {
-    return '$created件を商品ライブラリーに取り込みました（仕入先の条件 $terms件）';
+    return '$created件を価格台帳に取り込みました（仕入先の条件 $terms件）';
   }
 
   @override
@@ -8679,8 +8679,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get citSaved => '保存しました';
 
   @override
-  String get citSpecFromLibrary =>
-      'サイズ・重量・写真はライブラリーの記録です。商品マスタを変えても、ここは変わりません。';
+  String get citSpecFromPriceBook =>
+      'サイズ・重量・写真は価格台帳の記録です。商品マスタを変えても、ここは変わりません。';
 
   @override
   String get citHowTheyCall => 'この仕入先での呼び方と今の条件';
@@ -8707,7 +8707,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rmBody =>
-      '商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n商品ライブラリーの商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。';
+      '商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。';
 
   @override
   String get rmConfirmLabel => '確認のため「削除」と入力してください';
@@ -8730,17 +8730,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ciIntroMaster =>
-      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は商品ライブラリー（仕入先ごとの商品・価格の台帳）にも記録されます。';
+      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は価格台帳（仕入先ごとの商品・価格の台帳）にも記録されます。';
 
   @override
   String get ciToMaster => '商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）';
 
   @override
-  String get ciToMasterHint => 'オフにすると商品ライブラリーにだけ記録し、商品マスタは変えません。';
+  String get ciToMasterHint => 'オフにすると価格台帳にだけ記録し、商品マスタは変えません。';
 
   @override
   String ciMasterBlocked(int count) {
-    return '$count行はJANコードかメーカーがないため商品マスタには登録されず、商品ライブラリーにだけ入ります。';
+    return '$count行はJANコードかメーカーがないため商品マスタには登録されず、価格台帳にだけ入ります。';
   }
 
   @override
@@ -8753,7 +8753,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String ciDoneMaster(int created, int linked, int skipped) {
-    return '商品マスタに登録しました：新規 $created件・既存の商品とつなげた $linked件・JANかメーカーがなく登録できなかった $skipped件（商品ライブラリーには全件記録）';
+    return '商品マスタに登録しました：新規 $created件・既存の商品とつなげた $linked件・JANかメーカーがなく登録できなかった $skipped件（価格台帳には全件記録）';
   }
 
   @override

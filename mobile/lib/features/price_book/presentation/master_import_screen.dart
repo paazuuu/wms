@@ -10,12 +10,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/domain/product.dart' show ProductLifecycle;
 import '../../product/presentation/product_lifecycle_ui.dart';
 import '../../product_library/presentation/product_thumb.dart';
-import '../application/catalog_providers.dart';
-import '../domain/catalog.dart';
+import '../application/price_book_providers.dart';
+import '../domain/price_book.dart';
 
-/// マスタから取り込む (0125): the master products not in 商品ライブラリー yet,
+/// マスタから取り込む (0125): the master products not in 価格台帳 yet,
 /// to choose from and copy in — spec, pictures and each supplier's name and
-/// terms. Only products missing from the library are listed, so nothing
+/// terms. Only products missing from the price book are listed, so nothing
 /// already there is overwritten.
 class MasterImportScreen extends ConsumerStatefulWidget {
   const MasterImportScreen({super.key});
@@ -33,13 +33,13 @@ class _MasterImportScreenState extends ConsumerState<MasterImportScreen> {
     final ids = _chosen.toList()..sort();
     if (ids.isEmpty) return;
     setState(() => _busy = true);
-    final r = await ref.read(catalogRepositoryProvider).fromMaster(ids);
+    final r = await ref.read(priceBookRepositoryProvider).fromMaster(ids);
     if (!mounted) return;
     setState(() => _busy = false);
     final messenger = ScaffoldMessenger.of(context);
     switch (r) {
       case ApiSuccess(:final data):
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookListProvider);
         ref.invalidate(masterCandidatesProvider);
         _chosen.clear();
         messenger.showSnackBar(SnackBar(content: Text(l10n.cfmDone(data.created, data.terms))));

@@ -22,7 +22,7 @@ import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
 import '../../wave/presentation/pick_wave_list_screen.dart';
 import '../../partners/presentation/trading_partner_list_screen.dart';
-import '../../catalog/presentation/catalog_screen.dart';
+import '../../price_book/presentation/price_book_screen.dart';
 import '../../product/presentation/product_list_screen.dart';
 import '../../notation/presentation/field_library_screen.dart';
 import '../../product_library/presentation/name_formats_screen.dart';
@@ -63,7 +63,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
       FeatureGroup(
         id: 'products_master',
         entries: [
-          // 商品ライブラリー: our products, as a list to edit or as pictures
+          // 商品マスタ: our products, as a list to edit or as pictures
           // (0109) — one place, since both are the same products.
           FeatureEntry(
             id: 'products',
@@ -72,14 +72,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _products,
             requiredAnyOf: ['product.view', 'product.manage'],
           ),
-          // 商品ライブラリー (0124): what files and catalogues brought in,
+          // 価格台帳 (0124): what files and catalogues brought in,
           // with each supplier's terms by branch and period — apart from
           // the master, so reading or deleting there touches nothing booked.
           FeatureEntry(
-            id: 'catalog',
-            icon: Icons.local_library_outlined,
+            id: 'price_book',
+            icon: Icons.request_quote_outlined,
             status: FeatureStatus.ready,
-            builder: _catalog,
+            builder: _priceBook,
             requiredAnyOf: ['product.view', 'product.manage'],
           ),
         ],
@@ -466,7 +466,7 @@ Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 
 /// Top-level (const-referenceable) builder for the Product Master feature.
 Widget _products(BuildContext _) => const ProductListScreen();
-Widget _catalog(BuildContext _) => const CatalogScreen();
+Widget _priceBook(BuildContext _) => const PriceBookScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 Widget _printLanguage(BuildContext _) => const PrintLanguageScreen();

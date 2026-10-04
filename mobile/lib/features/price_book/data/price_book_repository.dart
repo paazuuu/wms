@@ -2,18 +2,18 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
-import '../domain/catalog.dart';
+import '../domain/price_book.dart';
 
-/// 商品ライブラリー (0124), apart from the product master.
-abstract class CatalogRepository {
-  Future<ApiResult<List<CatalogItem>>> list({String? search});
+/// 価格台帳 (0124), apart from the product master.
+abstract class PriceBookRepository {
+  Future<ApiResult<List<PriceBookItem>>> list({String? search});
 
   /// Every term the item has had, newest first per supplier and branch.
-  Future<ApiResult<List<CatalogTerm>>> history(int itemId);
+  Future<ApiResult<List<PriceBookTerm>>> history(int itemId);
 
-  /// Read lines (import-plan's) into the library; with [partnerId], their
+  /// Read lines (import-plan's) into the price book; with [partnerId], their
   /// prices become that supplier's terms for [branch] from [validFrom].
-  Future<ApiResult<CatalogImported>> import(
+  Future<ApiResult<PriceBookImported>> import(
     List<Map<String, dynamic>> lines, {
     int? partnerId,
     String? branch,
@@ -22,18 +22,18 @@ abstract class CatalogRepository {
   });
 
   /// A term set by hand; resolves to the item's history.
-  Future<ApiResult<List<CatalogTerm>>> addTerm(int itemId, Map<String, dynamic> term);
+  Future<ApiResult<List<PriceBookTerm>>> addTerm(int itemId, Map<String, dynamic> term);
 
   /// Items into the product master; resolves to (created, linked, skipped).
   Future<ApiResult<({int created, int linked, int skipped})>> toProducts(List<int> ids);
 
-  /// Removes items from the library only (their terms go with them).
+  /// Removes items from the price book only (their terms go with them).
   Future<ApiResult<int>> delete(List<int> ids);
 
-  /// Master products not in the library yet (0125).
+  /// Master products not in the price book yet (0125).
   Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search});
 
-  /// Master products into the library with their spec, pictures and each
+  /// Master products into the price book with their spec, pictures and each
   /// supplier's terms; resolves to (created, terms, skipped).
   Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds);
 
@@ -43,8 +43,8 @@ abstract class CatalogRepository {
 
 String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-class CatalogRepositoryImpl implements CatalogRepository {
-  CatalogRepositoryImpl(this._rest);
+class PriceBookRepositoryImpl implements PriceBookRepository {
+  PriceBookRepositoryImpl(this._rest);
 
   final Dio _rest;
 
@@ -56,27 +56,27 @@ class CatalogRepositoryImpl implements CatalogRepository {
   }
 
   @override
-  Future<ApiResult<List<CatalogItem>>> list({String? search}) async {
+  Future<ApiResult<List<PriceBookItem>>> list({String? search}) async {
     try {
-      final r = await _rest.post('/rpc/catalog_list', data: {'p_search': search});
-      return ApiSuccess([for (final e in _rows(r.data)) CatalogItem.fromJson(e)]);
+      final r = await _rest.post('/rpc/price_book_list', data: {'p_search': search});
+      return ApiSuccess([for (final e in _rows(r.data)) PriceBookItem.fromJson(e)]);
     } on DioException catch (e) {
-      return mapDioError<List<CatalogItem>>(e);
+      return mapDioError<List<PriceBookItem>>(e);
     }
   }
 
   @override
-  Future<ApiResult<List<CatalogTerm>>> history(int itemId) async {
+  Future<ApiResult<List<PriceBookTerm>>> history(int itemId) async {
     try {
-      final r = await _rest.post('/rpc/catalog_term_history', data: {'p_item_id': itemId});
-      return ApiSuccess([for (final e in _rows(r.data)) CatalogTerm.fromJson(e)]);
+      final r = await _rest.post('/rpc/price_book_term_history', data: {'p_item_id': itemId});
+      return ApiSuccess([for (final e in _rows(r.data)) PriceBookTerm.fromJson(e)]);
     } on DioException catch (e) {
-      return mapDioError<List<CatalogTerm>>(e);
+      return mapDioError<List<PriceBookTerm>>(e);
     }
   }
 
   @override
-  Future<ApiResult<CatalogImported>> import(
+  Future<ApiResult<PriceBookImported>> import(
     List<Map<String, dynamic>> lines, {
     int? partnerId,
     String? branch,
@@ -84,7 +84,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
     String? sourceFile,
   }) async {
     try {
-      final r = await _rest.post('/rpc/catalog_import', data: {
+      final r = await _rest.post('/rpc/price_book_import', data: {
         'p_lines': lines,
         'p_partner_id': partnerId,
         'p_branch': branch,
@@ -92,26 +92,26 @@ class CatalogRepositoryImpl implements CatalogRepository {
         'p_source_file': sourceFile,
       });
       final j = _one(r.data);
-      return ApiSuccess(CatalogImported.fromJson((j as Map).cast<String, dynamic>()));
+      return ApiSuccess(PriceBookImported.fromJson((j as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
-      return mapDioError<CatalogImported>(e);
+      return mapDioError<PriceBookImported>(e);
     }
   }
 
   @override
-  Future<ApiResult<List<CatalogTerm>>> addTerm(int itemId, Map<String, dynamic> term) async {
+  Future<ApiResult<List<PriceBookTerm>>> addTerm(int itemId, Map<String, dynamic> term) async {
     try {
-      final r = await _rest.post('/rpc/catalog_add_term', data: {'p_item_id': itemId, 'p': term});
-      return ApiSuccess([for (final e in _rows(r.data)) CatalogTerm.fromJson(e)]);
+      final r = await _rest.post('/rpc/price_book_add_term', data: {'p_item_id': itemId, 'p': term});
+      return ApiSuccess([for (final e in _rows(r.data)) PriceBookTerm.fromJson(e)]);
     } on DioException catch (e) {
-      return mapDioError<List<CatalogTerm>>(e);
+      return mapDioError<List<PriceBookTerm>>(e);
     }
   }
 
   @override
   Future<ApiResult<({int created, int linked, int skipped})>> toProducts(List<int> ids) async {
     try {
-      final r = await _rest.post('/rpc/catalog_to_products', data: {'p_ids': ids});
+      final r = await _rest.post('/rpc/price_book_to_products', data: {'p_ids': ids});
       final j = (_one(r.data) as Map).cast<String, dynamic>();
       int n(String k) => (j[k] as num?)?.toInt() ?? 0;
       return ApiSuccess((created: n('created'), linked: n('linked'), skipped: n('skipped')));
@@ -127,7 +127,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
       // A row delete under the table's policy (product.manage); the terms
       // go with the item.
       final r = await _rest.delete(
-        '/catalog_items',
+        '/price_book_items',
         queryParameters: {'id': 'in.(${ids.join(',')})'},
         options: Options(headers: {'Prefer': 'return=representation'}),
       );
@@ -140,7 +140,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
   @override
   Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search}) async {
     try {
-      final r = await _rest.post('/rpc/catalog_master_candidates', data: {'p_search': search});
+      final r = await _rest.post('/rpc/price_book_master_candidates', data: {'p_search': search});
       return ApiSuccess([for (final e in _rows(r.data)) MasterCandidate.fromJson(e)]);
     } on DioException catch (e) {
       return mapDioError<List<MasterCandidate>>(e);
@@ -150,7 +150,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
   @override
   Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds) async {
     try {
-      final r = await _rest.post('/rpc/catalog_from_master', data: {'p_ids': productIds});
+      final r = await _rest.post('/rpc/price_book_from_master', data: {'p_ids': productIds});
       final j = (_one(r.data) as Map).cast<String, dynamic>();
       int n(String k) => (j[k] as num?)?.toInt() ?? 0;
       return ApiSuccess((created: n('created'), terms: n('terms'), skipped: n('skipped')));
@@ -162,7 +162,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
   @override
   Future<ApiResult<bool>> update(int itemId, Map<String, dynamic> fields) async {
     try {
-      await _rest.post('/rpc/catalog_update_item', data: {'p_id': itemId, 'p': fields});
+      await _rest.post('/rpc/price_book_update_item', data: {'p_id': itemId, 'p': fields});
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);

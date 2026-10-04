@@ -12,30 +12,30 @@ import '../../product/application/product_providers.dart';
 import '../../product/presentation/product_labels.dart';
 import '../../product/presentation/product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
-import '../application/catalog_providers.dart';
-import '../domain/catalog.dart';
-import 'catalog_import_screen.dart';
-import 'catalog_item_screen.dart';
-import 'catalog_thumb.dart';
+import '../application/price_book_providers.dart';
+import '../domain/price_book.dart';
+import 'price_book_import_screen.dart';
+import 'price_book_item_screen.dart';
+import 'price_book_thumb.dart';
 import 'master_import_screen.dart';
 
 String _yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
-/// 商品ライブラリー (0124/0125): every product a file, a person or the master
+/// 価格台帳 (0124/0125): every product a file, a person or the master
 /// brought in, as a list or as pictures, with each supplier's current terms
 /// and, when the product is in the master, its stock. Apart from the product
 /// master: reading files again or deleting here never touches the master,
 /// stock or anything booked, and removing a product from the master leaves
 /// the item here. Items are taken into the master by choosing them and マス
 /// タに登録; master products not here yet come in by マスタから取り込む.
-class CatalogScreen extends ConsumerStatefulWidget {
-  const CatalogScreen({super.key});
+class PriceBookScreen extends ConsumerStatefulWidget {
+  const PriceBookScreen({super.key});
 
   @override
-  ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
+  ConsumerState<PriceBookScreen> createState() => _PriceBookScreenState();
 }
 
-class _CatalogScreenState extends ConsumerState<CatalogScreen> {
+class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
   Set<int>? _selected;
 
   void _snack(String t) => ScaffoldMessenger.of(context)
@@ -46,12 +46,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     final l10n = AppLocalizations.of(context);
     final ids = (_selected ?? const <int>{}).toList()..sort();
     if (ids.isEmpty) return;
-    final r = await ref.read(catalogRepositoryProvider).toProducts(ids);
+    final r = await ref.read(priceBookRepositoryProvider).toProducts(ids);
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
         setState(() => _selected = null);
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookListProvider);
         ref.invalidate(productListProvider);
         _snack(l10n.clToMasterDone(data.created, data.linked, data.skipped));
       case ApiFailure(:final message):
@@ -80,12 +80,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       ),
     );
     if (ok != true || !mounted) return;
-    final r = await ref.read(catalogRepositoryProvider).delete(ids);
+    final r = await ref.read(priceBookRepositoryProvider).delete(ids);
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
         setState(() => _selected = null);
-        ref.invalidate(catalogListProvider);
+        ref.invalidate(priceBookListProvider);
         _snack(l10n.clDeleted(data));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -97,15 +97,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final canManage = ref.watch(productLibraryCanManageProvider);
-    final async = ref.watch(filteredCatalogProvider);
-    final all = ref.watch(catalogListProvider).valueOrNull ?? const <CatalogItem>[];
-    final shown = async.valueOrNull ?? const <CatalogItem>[];
+    final async = ref.watch(filteredPriceBookProvider);
+    final all = ref.watch(priceBookListProvider).valueOrNull ?? const <PriceBookItem>[];
+    final shown = async.valueOrNull ?? const <PriceBookItem>[];
     final selected = _selected;
-    final photos = ref.watch(catalogPhotoViewProvider);
+    final photos = ref.watch(priceBookPhotoViewProvider);
 
-    void open(CatalogItem item) async {
-      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => CatalogItemScreen(itemId: item.id)));
-      ref.invalidate(catalogListProvider);
+    void open(PriceBookItem item) async {
+      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PriceBookItemScreen(itemId: item.id)));
+      ref.invalidate(priceBookListProvider);
     }
 
     return Scaffold(
@@ -129,7 +129,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 ButtonSegment(value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
               ],
               selected: {photos},
-              onSelectionChanged: (v) => ref.read(catalogPhotoViewProvider.notifier).state = v.first,
+              onSelectionChanged: (v) => ref.read(priceBookPhotoViewProvider.notifier).state = v.first,
             ),
             const SizedBox(width: AppSpacing.sm),
           ],
@@ -196,10 +196,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 isDense: true,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
               ),
-              onChanged: (v) => ref.read(catalogSearchProvider.notifier).state = v.trim(),
+              onChanged: (v) => ref.read(priceBookSearchProvider.notifier).state = v.trim(),
             ),
           ),
-          _CatalogFilterBar(items: all),
+          _PriceBookFilterBar(items: all),
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
             child: Wrap(spacing: 0, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -207,19 +207,19 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 FilledButton.tonalIcon(
                   key: const ValueKey('cl-import'),
                   onPressed: () async {
-                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CatalogImportScreen()));
-                    ref.invalidate(catalogListProvider);
+                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookImportScreen()));
+                    ref.invalidate(priceBookListProvider);
                   },
                   icon: const Icon(Icons.auto_awesome_outlined, size: 18),
                   label: Text(l10n.ciTitle),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                // Master products not in the library yet (0125).
+                // Master products not in the price book yet (0125).
                 OutlinedButton.icon(
                   key: const ValueKey('cl-from-master'),
                   onPressed: () async {
                     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasterImportScreen()));
-                    ref.invalidate(catalogListProvider);
+                    ref.invalidate(priceBookListProvider);
                   },
                   icon: const Icon(Icons.move_down_outlined, size: 18),
                   label: Text(l10n.clFromMaster),
@@ -248,20 +248,20 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               loading: () => LoadingView(message: l10n.loading),
               error: (e, _) => ErrorStateView(
                 message: humanizeApiErrorMessage(l10n, '$e'),
-                onRetry: () => ref.invalidate(catalogListProvider),
+                onRetry: () => ref.invalidate(priceBookListProvider),
               ),
               data: (items) => items.isEmpty
                   ? EmptyStateView(
-                      icon: Icons.local_library_outlined,
+                      icon: Icons.request_quote_outlined,
                       title: all.isEmpty ? l10n.clEmpty : l10n.pfNoneMatchTitle,
                       message: all.isEmpty ? l10n.clEmptyBody : l10n.pfNoneMatch,
                     )
                   : RefreshIndicator(
-                      onRefresh: () async => ref.invalidate(catalogListProvider),
+                      onRefresh: () async => ref.invalidate(priceBookListProvider),
                       child: Builder(builder: (context) {
-                        void toggle(CatalogItem item) =>
+                        void toggle(PriceBookItem item) =>
                             setState(() => selected!.contains(item.id) ? selected.remove(item.id) : selected.add(item.id));
-                        VoidCallback? press(CatalogItem item) =>
+                        VoidCallback? press(PriceBookItem item) =>
                             canManage && selected == null ? () => setState(() => _selected = {item.id}) : null;
                         if (photos) {
                           return GridView.builder(
@@ -276,7 +276,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                             itemCount: items.length,
                             itemBuilder: (_, n) {
                               final item = items[n];
-                              return _CatalogPhotoCard(
+                              return _PriceBookPhotoCard(
                                 item: item,
                                 selected: selected?.contains(item.id),
                                 onTap: selected != null ? () => toggle(item) : () => open(item),
@@ -291,7 +291,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                           itemBuilder: (_, n) {
                             final item = items[n];
-                            return _CatalogCard(
+                            return _PriceBookCard(
                               item: item,
                               selected: selected?.contains(item.id),
                               onTap: selected != null ? () => toggle(item) : () => open(item),
@@ -309,16 +309,16 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   }
 }
 
-class _CatalogFilterBar extends ConsumerWidget {
-  const _CatalogFilterBar({required this.items});
+class _PriceBookFilterBar extends ConsumerWidget {
+  const _PriceBookFilterBar({required this.items});
 
-  final List<CatalogItem> items;
+  final List<PriceBookItem> items;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final f = ref.watch(catalogFilterProvider);
-    void set(CatalogFilter v) => ref.read(catalogFilterProvider.notifier).state = v;
+    final f = ref.watch(priceBookFilterProvider);
+    void set(PriceBookFilter v) => ref.read(priceBookFilterProvider.notifier).state = v;
     final makers = <String, int>{};
     final suppliers = <int, (String, int)>{};
     for (final i in items) {
@@ -370,7 +370,7 @@ class _CatalogFilterBar extends ConsumerWidget {
             onPressed: makers.isEmpty
                 ? null
                 : () => pick<String>(l10n.pfMaker, [for (final e in makers.entries) (e.key, e.key, e.value)], f.makers,
-                    (s) => set(ref.read(catalogFilterProvider).copyWith(makers: s))),
+                    (s) => set(ref.read(priceBookFilterProvider).copyWith(makers: s))),
           ),
           const SizedBox(width: AppSpacing.sm),
           ActionChip(
@@ -379,34 +379,34 @@ class _CatalogFilterBar extends ConsumerWidget {
             onPressed: suppliers.isEmpty
                 ? null
                 : () => pick<int>(l10n.pfSupplier, [for (final e in suppliers.entries) (e.key, e.value.$1, e.value.$2)],
-                    f.supplierIds, (s) => set(ref.read(catalogFilterProvider).copyWith(supplierIds: s))),
+                    f.supplierIds, (s) => set(ref.read(priceBookFilterProvider).copyWith(supplierIds: s))),
           ),
           const SizedBox(width: AppSpacing.sm),
           for (final (v, text) in [
-            (CatalogMasterFilter.notInMaster, l10n.clNotInMaster),
-            (CatalogMasterFilter.inMaster, l10n.clInMaster),
+            (PriceBookMasterFilter.notInMaster, l10n.clNotInMaster),
+            (PriceBookMasterFilter.inMaster, l10n.clInMaster),
           ]) ...[
             FilterChip(
               key: ValueKey('cl-f-${v.name}'),
               label: Text(text),
               selected: f.master == v,
-              onSelected: (on) => set(f.copyWith(master: on ? v : CatalogMasterFilter.all)),
+              onSelected: (on) => set(f.copyWith(master: on ? v : PriceBookMasterFilter.all)),
             ),
             const SizedBox(width: AppSpacing.sm),
           ],
           FilterChip(
             key: const ValueKey('cl-f-stock'),
             label: Text(l10n.pfStockIn),
-            selected: f.stock == CatalogStockFilter.inStock,
-            onSelected: (on) => set(f.copyWith(stock: on ? CatalogStockFilter.inStock : CatalogStockFilter.all)),
+            selected: f.stock == PriceBookStockFilter.inStock,
+            onSelected: (on) => set(f.copyWith(stock: on ? PriceBookStockFilter.inStock : PriceBookStockFilter.all)),
           ),
           const SizedBox(width: AppSpacing.sm),
-          if (f != const CatalogFilter())
+          if (f != const PriceBookFilter())
             ActionChip(
               key: const ValueKey('cl-f-clear'),
               avatar: const Icon(Icons.filter_alt_off_outlined, size: 18),
               label: Text(l10n.pfClear),
-              onPressed: () => set(const CatalogFilter()),
+              onPressed: () => set(const PriceBookFilter()),
             ),
         ],
       ),
@@ -414,10 +414,10 @@ class _CatalogFilterBar extends ConsumerWidget {
   }
 }
 
-class _CatalogCard extends StatelessWidget {
-  const _CatalogCard({required this.item, required this.onTap, this.onLongPress, this.selected});
+class _PriceBookCard extends StatelessWidget {
+  const _PriceBookCard({required this.item, required this.onTap, this.onLongPress, this.selected});
 
-  final CatalogItem item;
+  final PriceBookItem item;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool? selected;
@@ -441,7 +441,7 @@ class _CatalogCard extends StatelessWidget {
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (selected != null)
               Checkbox(key: ValueKey('cl-check-${i.id}'), value: selected, onChanged: (_) => onTap()),
-            CatalogThumb(item: i, size: 56),
+            PriceBookThumb(item: i, size: 56),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -453,13 +453,21 @@ class _CatalogCard extends StatelessWidget {
                   if (i.spec != null) widenKana(i.spec!),
                 ].join('　'), style: muted),
                 if (_spec(i) case final spec?) Text(spec, key: ValueKey('cl-spec-${i.id}'), style: muted),
+                // Every supplier's current price and rate, one a row,
+                // cheapest first — what the price book is for.
                 if (terms.isNotEmpty)
-                  Text(
-                    _termsLine(l10n, i),
-                    key: ValueKey('cl-terms-${i.id}'),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: muted,
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Column(
+                      key: ValueKey('cl-terms-${i.id}'),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.supCount(i.suppliers.length), style: theme.textTheme.labelMedium),
+                        for (final t in terms.take(4))
+                          Text(_termRow(l10n, t), key: ValueKey('cl-term-${t.id}'), style: theme.textTheme.bodySmall),
+                        if (terms.length > 4) Text(l10n.supMore(terms.length - 4), style: muted),
+                      ],
+                    ),
                   ),
                 // Its stock, when it is in the master and has any.
                 if (i.stock case final st? when !st.isEmpty) StockLine(key: ValueKey('cl-stock-${i.id}'), stock: st),
@@ -483,27 +491,27 @@ class _CatalogCard extends StatelessWidget {
   }
 }
 
-String? _spec(CatalogItem i) =>
+String? _spec(PriceBookItem i) =>
     specShort(weightG: i.weightG, width: i.widthMm, depth: i.depthMm, height: i.heightMm, note: i.sizeNote);
 
-/// Every supplier with its current price, cheapest first: "仕入先 2社: A
-/// (大阪支店) ¥88 / B ¥92".
-String _termsLine(AppLocalizations l10n, CatalogItem i) {
-  final terms = i.terms;
-  return '${l10n.supCount(i.suppliers.length)}: ${terms.take(3).map((t) => [
-        t.partnerName,
-        if (t.where != null) '(${t.where})',
-        if (t.unitPrice != null) _yen(t.unitPrice!),
-      ].join(' ')).join(' / ')}${terms.length > 3 ? ' ${l10n.supMore(terms.length - 3)}' : ''}';
-}
+/// One supplier's current terms on a row: "新東光通商（大阪支店）  ¥88
+/// 掛率 53%  定価 ¥165  入数 10".
+String _termRow(AppLocalizations l10n, PriceBookTerm t) => [
+      t.where == null ? t.partnerName : '${t.partnerName}（${t.where}）',
+      t.unitPrice == null ? l10n.supNoPrice : _yen(t.unitPrice!),
+      if (t.discountRate != null)
+        l10n.quoteRate('${(t.discountRate! * 100).toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}%'),
+      if (t.listPrice != null) l10n.quoteListPrice(_yen(t.listPrice!)),
+      if (t.caseQuantity != null) l10n.quoteCase('${t.caseQuantity}'),
+    ].join('　');
 
 /// One item as a large picture: its face, maker, name, the cheapest price
 /// with how many suppliers, its stock and whether it is in the master — the
 /// same item as its card in the list.
-class _CatalogPhotoCard extends StatelessWidget {
-  const _CatalogPhotoCard({required this.item, required this.onTap, this.onLongPress, this.selected});
+class _PriceBookPhotoCard extends StatelessWidget {
+  const _PriceBookPhotoCard({required this.item, required this.onTap, this.onLongPress, this.selected});
 
-  final CatalogItem item;
+  final PriceBookItem item;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool? selected;
@@ -528,7 +536,7 @@ class _CatalogPhotoCard extends StatelessWidget {
             child: Stack(children: [
               Positioned.fill(
                 child: LayoutBuilder(
-                  builder: (_, c) => Center(child: CatalogThumb(item: i, size: c.maxHeight < c.maxWidth ? c.maxHeight : c.maxWidth)),
+                  builder: (_, c) => Center(child: PriceBookThumb(item: i, size: c.maxHeight < c.maxWidth ? c.maxHeight : c.maxWidth)),
                 ),
               ),
               if (selected != null)

@@ -16,7 +16,7 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 /// Free-text filter over name/JAN; empty shows every product in scope.
 final productSearchProvider = StateProvider<String>((_) => '');
 
-/// 商品ライブラリー as a grid of pictures rather than a list.
+/// 商品マスタ as a grid of pictures rather than a list.
 final productPhotoViewProvider = StateProvider<bool>((_) => false);
 
 /// The unit vocabulary a pack size is chosen from (`list_uoms`, 0059). Global

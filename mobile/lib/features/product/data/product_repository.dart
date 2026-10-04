@@ -62,7 +62,7 @@ abstract class ProductRepository {
 
   /// Removes products for good (0126): those nothing booked points at go,
   /// with their names, codes and picture rows; the rest are left and
-  /// returned in `inUse`. 商品ライブラリー keeps its items.
+  /// returned in `inUse`. 価格台帳 keeps its items.
   Future<ApiResult<({List<int> removed, List<int> inUse})>> deleteMany(List<int> ids);
 
   /// `reactivate_products` (0123) — the products a file lists, made active

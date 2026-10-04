@@ -60,9 +60,9 @@ import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/data/product_repository.dart';
 import 'package:wms_mobile/features/product/domain/data_quality.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
-import 'package:wms_mobile/features/catalog/application/catalog_providers.dart';
-import 'package:wms_mobile/features/catalog/data/catalog_repository.dart';
-import 'package:wms_mobile/features/catalog/domain/catalog.dart';
+import 'package:wms_mobile/features/price_book/application/price_book_providers.dart';
+import 'package:wms_mobile/features/price_book/data/price_book_repository.dart';
+import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/inventory/data/inventory_repository.dart';
 import 'package:wms_mobile/features/inventory/domain/reservation.dart';
 import 'package:wms_mobile/features/inventory/domain/stock_discrepancy.dart';
@@ -206,8 +206,8 @@ List<Override> _defaultOverrides() => [
       productNamingRepositoryProvider.overrideWithValue(FakeProductNamingRepository()),
       // Boxes and shipping weights (0115), in memory.
       packagingRepositoryProvider.overrideWithValue(FakePackagingRepository()),
-      // 商品ライブラリー (0124), empty unless a test fills it.
-      catalogRepositoryProvider.overrideWithValue(FakeCatalogRepository()),
+      // 価格台帳 (0124), empty unless a test fills it.
+      priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -5024,11 +5024,11 @@ class FakePackagingRepository implements PackagingRepository {
 }
 
 
-/// 商品ライブラリー in memory (0124).
-class FakeCatalogRepository implements CatalogRepository {
-  FakeCatalogRepository({
-    List<CatalogItem> items = const [],
-    Map<int, List<CatalogTerm>> history = const {},
+/// 価格台帳 in memory (0124).
+class FakePriceBookRepository implements PriceBookRepository {
+  FakePriceBookRepository({
+    List<PriceBookItem> items = const [],
+    Map<int, List<PriceBookTerm>> history = const {},
     List<MasterCandidate> candidates = const [],
   })  : items = List.of(items),
         histories = Map.of(history),
@@ -5049,9 +5049,9 @@ class FakeCatalogRepository implements CatalogRepository {
     items = [
       ...items,
       for (final c in taken)
-        CatalogItem(
+        PriceBookItem(
           id: 500 + c.id, name: c.name, maker: c.maker, itemCode: c.sku, janCode: c.janCode, source: 'master',
-          product: CatalogProductRef(id: c.id, name: c.name, lifecycle: c.lifecycle, linked: true),
+          product: PriceBookProductRef(id: c.id, name: c.name, lifecycle: c.lifecycle, linked: true),
         ),
     ];
     return ApiSuccess((created: taken.length, terms: taken.fold(0, (n, c) => n + c.supplierCount), skipped: 0));
@@ -5063,27 +5063,27 @@ class FakeCatalogRepository implements CatalogRepository {
     return const ApiSuccess(true);
   }
 
-  List<CatalogItem> items;
-  Map<int, List<CatalogTerm>> histories;
+  List<PriceBookItem> items;
+  Map<int, List<PriceBookTerm>> histories;
   final imports = <({List<Map<String, dynamic>> lines, int? partnerId, String? branch, DateTime? validFrom, String? file})>[];
   final addedTerms = <(int, Map<String, dynamic>)>[];
   final toMaster = <List<int>>[];
   final deleted = <List<int>>[];
 
   @override
-  Future<ApiResult<List<CatalogItem>>> list({String? search}) async => ApiSuccess([
+  Future<ApiResult<List<PriceBookItem>>> list({String? search}) async => ApiSuccess([
         for (final i in items)
           if (search == null || i.name.contains(search) || (i.janCode ?? '').contains(search)) i,
       ]);
 
   @override
-  Future<ApiResult<List<CatalogTerm>>> history(int itemId) async => ApiSuccess(histories[itemId] ?? const []);
+  Future<ApiResult<List<PriceBookTerm>>> history(int itemId) async => ApiSuccess(histories[itemId] ?? const []);
 
   @override
-  Future<ApiResult<CatalogImported>> import(List<Map<String, dynamic>> lines,
+  Future<ApiResult<PriceBookImported>> import(List<Map<String, dynamic>> lines,
       {int? partnerId, String? branch, DateTime? validFrom, String? sourceFile}) async {
     imports.add((lines: lines, partnerId: partnerId, branch: branch, validFrom: validFrom, file: sourceFile));
-    return ApiSuccess(CatalogImported(
+    return ApiSuccess(PriceBookImported(
       created: lines.length,
       terms: partnerId == null ? 0 : lines.length,
       ids: [for (var i = 0; i < lines.length; i++) 1000 + i],
@@ -5091,7 +5091,7 @@ class FakeCatalogRepository implements CatalogRepository {
   }
 
   @override
-  Future<ApiResult<List<CatalogTerm>>> addTerm(int itemId, Map<String, dynamic> term) async {
+  Future<ApiResult<List<PriceBookTerm>>> addTerm(int itemId, Map<String, dynamic> term) async {
     addedTerms.add((itemId, term));
     return ApiSuccess(histories[itemId] ?? const []);
   }
@@ -5102,10 +5102,10 @@ class FakeCatalogRepository implements CatalogRepository {
     items = [
       for (final i in items)
         if (ids.contains(i.id))
-          CatalogItem(
+          PriceBookItem(
             id: i.id, name: i.name, janCode: i.janCode, maker: i.maker, itemCode: i.itemCode, terms: i.terms,
             stock: i.stock, termCount: i.termCount,
-            product: CatalogProductRef(id: 900 + i.id, name: i.name, lifecycle: ProductLifecycle.active, linked: true),
+            product: PriceBookProductRef(id: 900 + i.id, name: i.name, lifecycle: ProductLifecycle.active, linked: true),
           )
         else
           i,

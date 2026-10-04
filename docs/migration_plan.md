@@ -6069,6 +6069,30 @@ Also:
 - From the library the box starts off, so the master is not changed unless
   asked.
 
+### 0128 — 商品ライブラリー becomes 価格台帳 (price book)
+
+- The library holds each supplier's names, codes and terms for products, by
+  branch and period. It is now named for that, on screen and in the
+  database:
+
+  | Before | Now |
+  |---|---|
+  | `catalog_items` | `price_book_items` |
+  | `catalog_supplier_terms` (`catalog_item_id`) | `price_book_terms` (`item_id`) |
+  | `catalog_*` functions | `price_book_*` (renamed in place) |
+  | trigger `products_z_catalog_relink` | `products_z_price_book_relink` |
+  | audit events `catalog.*` | `price_book.*` |
+
+  Sequences, indexes, constraints and policies are renamed to match. Rows,
+  keys and grants carry over; nothing is left under the old names.
+- App:
+  - The feature is now `lib/features/price_book` (PriceBook* types,
+    `priceBook*` providers). The menu entry id is `price_book`, so its path
+    changes too.
+  - Labels: 価格台帳 / Price book / 价格台账.
+  - In the list, each item shows every supplier on its own row: name and
+    branch, unit price, 掛率, list price and case quantity, cheapest first.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -15,8 +15,8 @@ DateTime? _date(Object? v) => v == null ? null : DateTime.tryParse('$v');
 /// or one of our warehouses, from a date and until one. A new term for the
 /// same supplier and branch closes the one before it, so these read as a
 /// history.
-class CatalogTerm extends Equatable {
-  const CatalogTerm({
+class PriceBookTerm extends Equatable {
+  const PriceBookTerm({
     required this.id,
     required this.partnerId,
     required this.partnerName,
@@ -71,7 +71,7 @@ class CatalogTerm extends Equatable {
     return !validFrom.isAfter(d) && (validTo == null || !validTo!.isBefore(d));
   }
 
-  factory CatalogTerm.fromJson(Map<String, dynamic> j) => CatalogTerm(
+  factory PriceBookTerm.fromJson(Map<String, dynamic> j) => PriceBookTerm(
         id: _i(j['id']) ?? 0,
         partnerId: _i(j['partner_id']) ?? 0,
         partnerName: _t(j['partner_name']) ?? '#${j['partner_id']}',
@@ -103,26 +103,26 @@ extension on String {
 
 /// The item's product in the master (`products`), when there is one: linked
 /// by registering, or found by its JAN.
-class CatalogProductRef extends Equatable {
-  const CatalogProductRef({required this.id, required this.name, required this.lifecycle, required this.linked});
+class PriceBookProductRef extends Equatable {
+  const PriceBookProductRef({required this.id, required this.name, required this.lifecycle, required this.linked});
 
   final int id;
   final String name;
   final ProductLifecycle lifecycle;
 
-  /// True when registered from the library; false when only its JAN matches.
+  /// True when registered from the price book; false when only its JAN matches.
   final bool linked;
 
   @override
   List<Object?> get props => [id, name, lifecycle, linked];
 }
 
-/// One product in 商品ライブラリー (0124) — what a file or a person brought
+/// One product in 価格台帳 (0124) — what a file or a person brought
 /// in, kept apart from the product master: reading a file again updates it,
 /// deleting it removes only it, and neither touches stock or anything
 /// booked.
-class CatalogItem extends Equatable {
-  const CatalogItem({
+class PriceBookItem extends Equatable {
+  const PriceBookItem({
     required this.id,
     required this.name,
     this.janCode,
@@ -167,14 +167,14 @@ class CatalogItem extends Equatable {
   final List<(String, String)> attributes;
   final String? note;
   final String? sourceFile;
-  final CatalogProductRef? product;
+  final PriceBookProductRef? product;
 
   /// The master product's stock, when there is a product.
   final ProductStock? stock;
 
   /// The terms that apply today: one per supplier, branch and warehouse,
   /// cheapest first.
-  final List<CatalogTerm> terms;
+  final List<PriceBookTerm> terms;
 
   /// Every term it has had, current and past.
   final int termCount;
@@ -208,13 +208,13 @@ class CatalogItem extends Equatable {
     return [for (final e in seen.entries) (e.key, e.value)];
   }
 
-  CatalogTerm? get cheapest => ([for (final t in terms) if (t.unitPrice != null) t]
+  PriceBookTerm? get cheapest => ([for (final t in terms) if (t.unitPrice != null) t]
         ..sort((a, b) => a.unitPrice!.compareTo(b.unitPrice!)))
       .firstOrNull;
 
-  factory CatalogItem.fromJson(Map<String, dynamic> j) {
+  factory PriceBookItem.fromJson(Map<String, dynamic> j) {
     final p = j['product'];
-    return CatalogItem(
+    return PriceBookItem(
       id: _i(j['id']) ?? 0,
       name: _t(j['name']) ?? '',
       janCode: _t(j['jan_code']),
@@ -232,7 +232,7 @@ class CatalogItem extends Equatable {
       note: _t(j['note']),
       sourceFile: _t(j['source_file']),
       product: p is Map
-          ? CatalogProductRef(
+          ? PriceBookProductRef(
               id: _i(p['id']) ?? 0,
               name: _t(p['name']) ?? '',
               lifecycle: ProductLifecycle.parse(p['lifecycle']) ?? ProductLifecycle.active,
@@ -241,7 +241,7 @@ class CatalogItem extends Equatable {
           : null,
       stock: j['stock'] is Map ? ProductStock.fromJson((j['stock'] as Map).cast<String, dynamic>()) : null,
       terms: [
-        for (final t in (j['terms'] as List? ?? const []).whereType<Map>()) CatalogTerm.fromJson(t.cast<String, dynamic>()),
+        for (final t in (j['terms'] as List? ?? const []).whereType<Map>()) PriceBookTerm.fromJson(t.cast<String, dynamic>()),
       ],
       termCount: _i(j['term_count']) ?? 0,
       weightG: _d(j['weight_g']),
@@ -264,20 +264,20 @@ class CatalogItem extends Equatable {
       ];
 }
 
-/// What reading a file into the library did.
-class CatalogImported extends Equatable {
-  const CatalogImported({this.created = 0, this.updated = 0, this.terms = 0, this.skipped = 0, this.ids = const []});
+/// What reading a file into the price book did.
+class PriceBookImported extends Equatable {
+  const PriceBookImported({this.created = 0, this.updated = 0, this.terms = 0, this.skipped = 0, this.ids = const []});
 
   final int created;
   final int updated;
   final int terms;
   final int skipped;
 
-  /// The library items the lines became or updated (0127), for taking them
+  /// The price book items the lines became or updated (0127), for taking them
   /// into the master straight after.
   final List<int> ids;
 
-  factory CatalogImported.fromJson(Map<String, dynamic> j) => CatalogImported(
+  factory PriceBookImported.fromJson(Map<String, dynamic> j) => PriceBookImported(
         created: _i(j['created']) ?? 0,
         updated: _i(j['updated']) ?? 0,
         terms: _i(j['terms']) ?? 0,
@@ -289,8 +289,8 @@ class CatalogImported extends Equatable {
   List<Object?> get props => [created, updated, terms, skipped, ids];
 }
 
-/// A master product that is not in the library yet (0125), as
-/// `catalog_master_candidates` lists it.
+/// A master product that is not in the price book yet (0125), as
+/// `price_book_master_candidates` lists it.
 class MasterCandidate extends Equatable {
   const MasterCandidate({
     required this.id,
