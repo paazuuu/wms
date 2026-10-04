@@ -88,9 +88,3 @@ final priceBookFaceUrlsProvider = FutureProvider.autoDispose<Map<String, String>
   final r = await ref.watch(productImageRepositoryProvider).signUrls(paths);
   return r.when(success: (m) => m, failure: (_) => const <String, String>{});
 });
-
-/// Master products that can be brought into the price book.
-final masterCandidatesProvider = FutureProvider.autoDispose<List<MasterCandidate>>((ref) async {
-  final r = await ref.watch(priceBookRepositoryProvider).masterCandidates();
-  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
-});

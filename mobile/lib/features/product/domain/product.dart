@@ -562,3 +562,91 @@ class Product extends Equatable {
         sizeSource,
       ];
 }
+
+/// What reading a file of our own into the library did (0130): how many
+/// were registered, and how many became alerts (a JAN or 品番 already there).
+class LibraryImported extends Equatable {
+  const LibraryImported({this.created = 0, this.alerts = 0, this.ids = const []});
+
+  final int created;
+  final int alerts;
+  final List<int> ids;
+
+  factory LibraryImported.fromJson(Map<String, dynamic> j) => LibraryImported(
+        created: _asInt(j['created'] ?? 0),
+        alerts: _asInt(j['alerts'] ?? 0),
+        ids: [for (final x in (j['ids'] as List? ?? const [])) _asInt(x)],
+      );
+
+  @override
+  List<Object?> get props => [created, alerts, ids];
+}
+
+/// Why a line became an alert instead of a product (0130).
+enum ProductAlertReason {
+  janExists('jan_exists'),
+  janInFile('jan_in_file'),
+  skuExists('sku_exists');
+
+  const ProductAlertReason(this.wire);
+  final String wire;
+
+  static ProductAlertReason parse(Object? v) =>
+      ProductAlertReason.values.firstWhere((r) => r.wire == '$v', orElse: () => ProductAlertReason.janExists);
+}
+
+/// A line kept back from registering (0130): what it said, why, and the
+/// product already in the library it collides with.
+class ProductAlert extends Equatable {
+  const ProductAlert({
+    required this.id,
+    required this.reason,
+    this.line = const {},
+    this.janCode,
+    this.maker,
+    this.name,
+    this.itemCode,
+    this.existingProductId,
+    this.existingName,
+    this.existingMaker,
+    this.existingSku,
+    this.sourceFile,
+    this.rowNo,
+    this.createdAt,
+  });
+
+  final int id;
+  final ProductAlertReason reason;
+  final Map<String, dynamic> line;
+  final String? janCode;
+  final String? maker;
+  final String? name;
+  final String? itemCode;
+  final int? existingProductId;
+  final String? existingName;
+  final String? existingMaker;
+  final String? existingSku;
+  final String? sourceFile;
+  final int? rowNo;
+  final DateTime? createdAt;
+
+  factory ProductAlert.fromJson(Map<String, dynamic> j) => ProductAlert(
+        id: _asInt(j['id']),
+        reason: ProductAlertReason.parse(j['reason']),
+        line: j['line'] is Map ? (j['line'] as Map).cast<String, dynamic>() : const {},
+        janCode: _asText(j['jan_code']),
+        maker: _asText(j['maker']),
+        name: _asText(j['name']),
+        itemCode: _asText(j['item_code']),
+        existingProductId: j['existing_product_id'] == null ? null : _asInt(j['existing_product_id']),
+        existingName: _asText(j['existing_name']),
+        existingMaker: _asText(j['existing_maker']),
+        existingSku: _asText(j['existing_sku']),
+        sourceFile: _asText(j['source_file']),
+        rowNo: j['row_no'] == null ? null : _asInt(j['row_no']),
+        createdAt: DateTime.tryParse('${j['created_at']}')?.toLocal(),
+      );
+
+  @override
+  List<Object?> get props => [id, reason, janCode, name, existingProductId, rowNo];
+}

@@ -131,3 +131,10 @@ final supplierNamesBySupplierProvider = FutureProvider.autoDispose
     failure: (f) => throw Exception(f.message),
   );
 });
+
+/// Lines kept back from imports because their JAN or 品番 was already in the
+/// library (0130).
+final productAlertsProvider = FutureProvider.autoDispose<List<ProductAlert>>((ref) async {
+  final r = await ref.watch(productRepositoryProvider).alerts();
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});

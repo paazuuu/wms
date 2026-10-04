@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_filter.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
+import 'product_alerts_tab.dart';
 import 'product_delete.dart';
 import 'product_detail_screen.dart';
 import 'product_facts.dart';
@@ -18,7 +19,7 @@ import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
-import '../../price_book/presentation/price_book_screen.dart';
+import '../../price_book/presentation/price_book_pick_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
@@ -129,6 +130,59 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     }
   }
 
+  /// 新規登録 (0130): how the products come in — a file of our own, items
+  /// chosen from 価格台帳, or one by hand.
+  Future<void> _newProducts() async {
+    final l10n = AppLocalizations.of(context);
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+            child: Text(l10n.pmNewTitle, style: Theme.of(c).textTheme.titleMedium),
+          ),
+          ListTile(
+            key: const ValueKey('new-file'),
+            leading: const Icon(Icons.auto_awesome_outlined),
+            title: Text(l10n.pmImportFile),
+            subtitle: Text(l10n.pmNewFileDesc),
+            onTap: () => Navigator.pop(c, 'file'),
+          ),
+          ListTile(
+            key: const ValueKey('new-price-book'),
+            leading: const Icon(Icons.request_quote_outlined),
+            title: Text(l10n.pmFromPriceBook),
+            subtitle: Text(l10n.pmNewPriceBookDesc),
+            onTap: () => Navigator.pop(c, 'price_book'),
+          ),
+          ListTile(
+            key: const ValueKey('new-manual'),
+            leading: const Icon(Icons.edit_note_outlined),
+            title: Text(l10n.pmNewManual),
+            subtitle: Text(l10n.pmNewManualDesc),
+            onTap: () => Navigator.pop(c, 'manual'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ]),
+      ),
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case 'manual':
+        await _openForm();
+      case 'file':
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => const PriceBookImportScreen(target: ImportTarget.library),
+        ));
+      case 'price_book':
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookPickScreen()));
+    }
+    ref.invalidate(productListProvider);
+    ref.invalidate(productAlertsProvider);
+  }
+
   /// The chosen products out of the master for good (0126), after the
   /// person types 削除. Those anything booked still names are kept.
   Future<void> _removeForGood() async {
@@ -168,8 +222,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final canSelect = canLifecycle || canDelete;
     final selected = _selected;
     final shown = async.valueOrNull ?? const <Product>[];
+    final alertCount = ref.watch(productAlertsProvider).valueOrNull?.length ?? 0;
 
-    return Scaffold(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
       appBar: selected != null
           ? AppBar(
               leading: IconButton(
@@ -205,6 +262,13 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         lifecycles: f.lifecycles.length > 1 ? {ProductLifecycle.active} : ProductFilter.notArchived)),
                   ),
               ],
+              // The products, and the lines imports kept back (0130).
+              bottom: TabBar(
+                tabs: [
+                  Tab(key: const ValueKey('pm-tab-list'), text: l10n.plTabList),
+                  Tab(key: const ValueKey('pm-tab-alerts'), text: l10n.plTabAlerts(alertCount)),
+                ],
+              ),
             ),
       // The chosen products' actions sit at the bottom, labelled, where they
       // cannot end up off the side of a narrow or zoomed window.
@@ -220,17 +284,20 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               onRemove: canDelete && selected.isNotEmpty ? _removeForGood : null,
               showRemove: canDelete,
             ),
+      // 新規登録: from a file of our own, from 価格台帳, or one by hand.
       floatingActionButton: canManage && selected == null
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               key: const ValueKey('products-add'),
-              tooltip: l10n.productAddOne,
-              onPressed: () => _openForm(),
-              child: const Icon(Icons.add),
+              tooltip: l10n.pmNew,
+              onPressed: _newProducts,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.pmNew),
             )
           : null,
       // One list for both views: the same products, search, filters and
       // selection, drawn as cards or as pictures (0122).
-      body: Column(
+      body: TabBarView(children: [
+        Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
@@ -248,34 +315,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 if (total != null && async.hasValue)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
-                    child: Row(
+                    child: Wrap(
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        // Products from a file (0127): read into 価格台帳
-                        // and registered here in the same go.
-                        if (canManage && selected == null) ...[
-                          FilledButton.tonalIcon(
-                            key: const ValueKey('products-import'),
-                            onPressed: () async {
-                              await Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const PriceBookImportScreen(toMaster: true),
-                              ));
-                              ref.invalidate(productListProvider);
-                            },
-                            icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-                            label: Text(l10n.pmImportFile),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          OutlinedButton.icon(
-                            key: const ValueKey('products-from-library'),
-                            onPressed: () async {
-                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookScreen()));
-                              ref.invalidate(productListProvider);
-                            },
-                            icon: const Icon(Icons.local_library_outlined, size: 18),
-                            label: Text(l10n.clOpenPriceBook),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                        ],
                         // Choosing many at once (0120), for the administrator.
                         if (canSelect && selected == null) ...[
                           OutlinedButton.icon(
@@ -286,7 +329,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           ),
                           const SizedBox(width: AppSpacing.md),
                         ],
-                        Expanded(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                           child: Text(
                             selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
                             key: const ValueKey('pf-showing'),
@@ -382,6 +426,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
               ],
             ),
+        const ProductAlertsTab(),
+      ]),
+      ),
     );
   }
 }

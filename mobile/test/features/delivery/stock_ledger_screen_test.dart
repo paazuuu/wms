@@ -198,7 +198,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('このJANは商品マスタに未登録です'), findsOneWidget);
+    expect(find.text('このJANは商品ライブラリーに未登録です'), findsOneWidget);
     expect(find.text('在庫内訳'), findsNothing);
     // Asking for a position would have been meaningless, so it is not asked.
     expect(repo.lastPositionQuery, isNull);

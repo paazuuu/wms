@@ -212,7 +212,7 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('an existing product without a maker cannot be saved until it has one',
+  testWidgets('an existing product without a maker can be saved (nothing is required but a name)',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1400));
     final repo = FakeProductRepository(products: const [
@@ -227,7 +227,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('メーカー'), findsWidgets);
+    expect(find.textContaining('メーカーを入力'), findsNothing);
     expect(repo.lastIdentity, isNull);
 
     await tester.binding.setSurfaceSize(null);

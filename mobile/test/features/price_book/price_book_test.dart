@@ -10,9 +10,10 @@ import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/price_book/presentation/price_book_import_screen.dart';
 import 'package:wms_mobile/features/price_book/presentation/price_book_item_screen.dart';
 import 'package:wms_mobile/features/price_book/presentation/price_book_screen.dart';
-import 'package:wms_mobile/features/price_book/presentation/master_import_screen.dart';
+import 'package:wms_mobile/features/price_book/presentation/price_book_pick_screen.dart';
 import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
+import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/product_library/data/quote_repository.dart';
@@ -96,8 +97,8 @@ void main() {
     expect(find.byKey(const ValueKey('cl-stock-1')), findsOneWidget);
     // No stock line for one not in the master.
     expect(find.byKey(const ValueKey('cl-stock-2')), findsNothing);
-    expect(find.descendant(of: find.byKey(const ValueKey('cl-item-1')), matching: find.text('マスタ登録済み')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const ValueKey('cl-item-2')), matching: find.text('マスタ未登録')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('cl-item-1')), matching: find.text('ライブラリー登録済み')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('cl-item-2')), matching: find.text('ライブラリー未登録')), findsOneWidget);
   });
 
   testWidgets('items are chosen, taken into the master, and deleted from the library only', (tester) async {
@@ -128,7 +129,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('cl-delete')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('商品マスタ・在庫・発注・入荷などには影響しません'), findsOneWidget);
+    expect(find.textContaining('商品ライブラリー・在庫・発注・入荷などには影響しません'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('cl-delete-confirm')));
     await tester.pumpAndSettle();
     expect(repo.deleted.single, [1]);
@@ -206,39 +207,6 @@ void main() {
     expect(find.text('¥88 · 仕入先 2社'), findsOneWidget);
     expect(find.byKey(const ValueKey('cl-photo-stock-1')), findsOneWidget);
     expect(find.byKey(const ValueKey('cl-photo-stock-2')), findsNothing);
-  });
-
-  testWidgets('master products not in the library are brought in, and only those are offered', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1400, 1000));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final repo = FakePriceBookRepository(items: [_pen], candidates: const [
-      MasterCandidate(id: 7, name: 'キャンパスノート B罫', maker: 'コクヨ', sku: 'ノ-3CBN', janCode: '4901480000017', supplierCount: 2),
-      MasterCandidate(id: 8, name: '消しゴム', maker: 'トンボ鉛筆', lifecycle: ProductLifecycle.dormant),
-    ]);
-    await pumpApp(tester, const PriceBookScreen(), overrides: [
-      priceBookRepositoryProvider.overrideWithValue(repo),
-      productLibraryCanManageProvider.overrideWithValue(true),
-    ]);
-    await tester.tap(find.byKey(const ValueKey('cl-from-master')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('cfm-intro')), findsOneWidget);
-    expect(find.text('仕入先 2社'), findsOneWidget);
-    expect(find.text('休眠'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('cfm-select-all')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('cfm-7')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('cfm-import')));
-    await tester.pumpAndSettle();
-    expect(repo.fromMasterCalls.single, [8]);
-    expect(find.textContaining('1件を価格台帳に取り込みました'), findsOneWidget);
-    expect(find.byKey(const ValueKey('cfm-8')), findsNothing);
-    expect(find.byKey(const ValueKey('cfm-7')), findsOneWidget);
-
-    Navigator.of(tester.element(find.byType(MasterImportScreen))).pop();
-    await tester.pumpAndSettle();
-    expect(find.text('消しゴム'), findsOneWidget);
   });
 
   testWidgets("an item shows its own size and weight, and each supplier's tab says what it calls it", (tester) async {
@@ -324,63 +292,63 @@ void main() {
     expect(imp.lines.length, 2);
   });
 
-  testWidgets('from 商品マスタ a file is registered in the master in one go; lines without JAN or maker stay in the library', (tester) async {
+  testWidgets('items are chosen from the price book into the library; ones without JAN or maker cannot be', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const noJan = PriceBookItem(id: 3, name: 'JANのない商品', maker: 'コクヨ');
+    final repo = FakePriceBookRepository(items: [_pen, _note, noJan]);
+    await pumpApp(tester, const PriceBookPickScreen(), overrides: [
+      priceBookRepositoryProvider.overrideWithValue(repo),
+    ]);
+    // Only what is not in the library yet: the pen is already there.
+    expect(find.byKey(const ValueKey('pk-1')), findsNothing);
+    expect(find.byKey(const ValueKey('pk-2')), findsOneWidget);
+    expect(find.text('JAN・メーカーなし（取り込めません）'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('pk-select-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pk-import')));
+    await tester.pumpAndSettle();
+    expect(repo.toMaster.single, [2]);
+  });
+
+  testWidgets('a file of our own goes straight into the library; duplicates become alerts', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 1800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final repo = FakePriceBookRepository();
+    final products = FakeProductRepository(products: const [
+      Product(id: 143, janCode: '4901681233922', name: 'サラサドライ 0.5 青'),
+    ]);
+    final book = FakePriceBookRepository();
     await pumpApp(
       tester,
       PriceBookImportScreen(
-        toMaster: true,
-        today: DateTime(2026, 10, 4),
-        pickFile: () async => PlatformFile(name: 'catalog.xlsx', size: 3, bytes: Uint8List.fromList([1, 2, 3])),
+        target: ImportTarget.library,
+        pickFile: () async => PlatformFile(name: 'own.xlsx', size: 3, bytes: Uint8List.fromList([1, 2, 3])),
       ),
       overrides: [
-        priceBookRepositoryProvider.overrideWithValue(repo),
+        productRepositoryProvider.overrideWithValue(products),
+        priceBookRepositoryProvider.overrideWithValue(book),
         fileReaderProvider.overrideWithValue(_Reader(extra: const [
-          {'jan_code': '', 'maker': 'コクヨ', 'product_name': 'JANのない商品', 'product_code': 'X-1'},
+          {'jan_code': '4999999000017', 'product_name': '同じJANがもう一度'},
+          {'product_name': 'JANもメーカーもない商品'},
         ])),
-        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
       ],
     );
-    expect(find.text('ファイルから商品登録'), findsOneWidget);
+    expect(find.text('ファイルから商品ライブラリーに登録'), findsOneWidget);
+    // No supplier, branch or date for our own list.
+    expect(find.byKey(const ValueKey('ci-partner')), findsNothing);
     await tester.tap(find.byKey(const ValueKey('ci-pick')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('ci-read')));
     await tester.pumpAndSettle();
 
-    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('ci-to-master'))).value, isTrue);
-    expect(find.textContaining('1行はJANコードかメーカーがないため'), findsOneWidget);
-    expect(find.text('マスタ登録不可（JAN・メーカーなし）'), findsOneWidget);
+    // The pen's JAN is registered already; the new pen's comes twice.
+    expect(find.textContaining('4行：登録 2件・アラート 2件'), findsOneWidget);
+    expect(find.text('アラート（重複）'), findsNWidgets(2));
     await tester.tap(find.byKey(const ValueKey('ci-import')));
     await tester.pumpAndSettle();
-    // Into the price book first, then the same items into the master.
-    expect(repo.imports.single.lines.length, 3);
-    expect(repo.toMaster.single, [1000, 1001, 1002]);
-    expect(find.byKey(const ValueKey('ci-master-done')), findsOneWidget);
-  });
-
-  testWidgets('from the library the master is left alone unless asked', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 1600));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final repo = FakePriceBookRepository();
-    await pumpApp(
-      tester,
-      PriceBookImportScreen(pickFile: () async => PlatformFile(name: 'q.pdf', size: 3, bytes: Uint8List.fromList([1, 2, 3]))),
-      overrides: [
-        priceBookRepositoryProvider.overrideWithValue(repo),
-        fileReaderProvider.overrideWithValue(_Reader()),
-        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
-      ],
-    );
-    await tester.tap(find.byKey(const ValueKey('ci-pick')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('ci-read')));
-    await tester.pumpAndSettle();
-    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('ci-to-master'))).value, isFalse);
-    await tester.tap(find.byKey(const ValueKey('ci-import')));
-    await tester.pumpAndSettle();
-    expect(repo.imports, hasLength(1));
-    expect(repo.toMaster, isEmpty);
+    expect(products.importedLines.single.length, 4);
+    expect(book.imports, isEmpty);
+    expect(find.text('登録しました：2件・アラート 2件（アラートのタブで確認できます）'), findsWidgets);
   });
 }

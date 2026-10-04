@@ -186,7 +186,7 @@ void main() {
     );
     await _pump(tester, const StockBreakdownPanel(), FakeDashboardChartsRepository(chart: chart));
 
-    expect(find.text('商品マスタ未登録のJAN 2 件（計 1,200 個）はグラフに含まれていません'),
+    expect(find.text('商品ライブラリー未登録のJAN 2 件（計 1,200 個）はグラフに含まれていません'),
         findsOneWidget);
     expect(find.byKey(const ValueKey('chart-unregistered-open')), findsOneWidget);
 

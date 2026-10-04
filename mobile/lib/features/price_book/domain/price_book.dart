@@ -288,38 +288,3 @@ class PriceBookImported extends Equatable {
   @override
   List<Object?> get props => [created, updated, terms, skipped, ids];
 }
-
-/// A master product that is not in the price book yet (0125), as
-/// `price_book_master_candidates` lists it.
-class MasterCandidate extends Equatable {
-  const MasterCandidate({
-    required this.id,
-    required this.name,
-    this.maker,
-    this.sku,
-    this.janCode,
-    this.lifecycle = ProductLifecycle.active,
-    this.supplierCount = 0,
-  });
-
-  final int id;
-  final String name;
-  final String? maker;
-  final String? sku;
-  final String? janCode;
-  final ProductLifecycle lifecycle;
-  final int supplierCount;
-
-  factory MasterCandidate.fromJson(Map<String, dynamic> j) => MasterCandidate(
-        id: _i(j['id']) ?? 0,
-        name: _t(j['name']) ?? '',
-        maker: _t(j['maker']),
-        sku: _t(j['sku']),
-        janCode: _t(j['jan_code']),
-        lifecycle: ProductLifecycle.parse(j['lifecycle']) ?? ProductLifecycle.active,
-        supplierCount: _i(j['supplier_count']) ?? 0,
-      );
-
-  @override
-  List<Object?> get props => [id, name, maker, sku, janCode, lifecycle, supplierCount];
-}

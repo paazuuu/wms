@@ -2302,6 +2302,66 @@ class FakeProductRepository implements ProductRepository {
     return const ApiSuccess(true);
   }
 
+  /// What importLines() was given (0130); lines whose JAN is already a
+  /// product's become alerts.
+  final importedLines = <List<Map<String, dynamic>>>[];
+  List<ProductAlert> alertList = [];
+  final deletedAlerts = <List<int>?>[];
+  final addedOne = <Map<String, dynamic>>[];
+
+  @override
+  Future<ApiResult<LibraryImported>> importLines(List<Map<String, dynamic>> lines, {String? sourceFile}) async {
+    importedLines.add(lines);
+    final jans = {for (final p in _products) p.janCode};
+    var created = 0;
+    for (final l in lines) {
+      final jan = '${l['jan_code'] ?? ''}';
+      if (jan.isNotEmpty && jans.contains(jan)) {
+        alertList = [
+          ...alertList,
+          ProductAlert(id: 900 + alertList.length, reason: ProductAlertReason.janExists, janCode: jan, name: '${l['product_name']}'),
+        ];
+      } else {
+        created++;
+        if (jan.isNotEmpty) jans.add(jan);
+      }
+    }
+    return ApiSuccess(LibraryImported(created: created, alerts: lines.length - created));
+  }
+
+  @override
+  Future<ApiResult<int>> addOne(Map<String, dynamic> fields) async {
+    if (failCreateWith != null) return ApiFailure(message: failCreateWith!, statusCode: 400);
+    final jan = '${fields['jan_code'] ?? ''}';
+    final hit = _products.where((p) => jan.isNotEmpty && p.janCode == jan).firstOrNull;
+    if (hit != null) return ApiFailure(message: 'jan_exists:${hit.id}:${hit.name}');
+    addedOne.add(fields);
+    final id = 800 + addedOne.length;
+    _products = [
+      ..._products,
+      Product(
+        id: id,
+        janCode: jan,
+        name: '${fields['name'] ?? fields['sku'] ?? (jan.isEmpty ? '名称未設定' : jan)}',
+        maker: fields['maker'] as String?,
+        category: fields['category'] as String?,
+        price: (fields['price'] as num?)?.toDouble(),
+      ),
+    ];
+    return ApiSuccess(id);
+  }
+
+  @override
+  Future<ApiResult<List<ProductAlert>>> alerts() async => ApiSuccess(List.of(alertList));
+
+  @override
+  Future<ApiResult<int>> deleteAlerts(List<int>? ids) async {
+    deletedAlerts.add(ids);
+    final before = alertList.length;
+    alertList = ids == null ? [] : [for (final a in alertList) if (!ids.contains(a.id)) a];
+    return ApiSuccess(before - alertList.length);
+  }
+
   /// What deleteMany() was asked (0126).
   final deleteManyCalls = <List<int>>[];
 
@@ -5029,33 +5089,10 @@ class FakePriceBookRepository implements PriceBookRepository {
   FakePriceBookRepository({
     List<PriceBookItem> items = const [],
     Map<int, List<PriceBookTerm>> history = const {},
-    List<MasterCandidate> candidates = const [],
   })  : items = List.of(items),
-        histories = Map.of(history),
-        candidates = List.of(candidates);
+        histories = Map.of(history);
 
-  List<MasterCandidate> candidates;
-  final fromMasterCalls = <List<int>>[];
   final updates = <(int, Map<String, dynamic>)>[];
-
-  @override
-  Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search}) async => ApiSuccess(List.of(candidates));
-
-  @override
-  Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds) async {
-    fromMasterCalls.add(productIds);
-    final taken = [for (final c in candidates) if (productIds.contains(c.id)) c];
-    candidates = [for (final c in candidates) if (!productIds.contains(c.id)) c];
-    items = [
-      ...items,
-      for (final c in taken)
-        PriceBookItem(
-          id: 500 + c.id, name: c.name, maker: c.maker, itemCode: c.sku, janCode: c.janCode, source: 'master',
-          product: PriceBookProductRef(id: c.id, name: c.name, lifecycle: c.lifecycle, linked: true),
-        ),
-    ];
-    return ApiSuccess((created: taken.length, terms: taken.fold(0, (n, c) => n + c.supplierCount), skipped: 0));
-  }
 
   @override
   Future<ApiResult<bool>> update(int itemId, Map<String, dynamic> fields) async {

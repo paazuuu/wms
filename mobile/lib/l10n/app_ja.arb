@@ -772,7 +772,7 @@
   "featConnectorsDesc": "将来の外部連携のために登録された外部システム",
   "featAiReview": "AIレビュー",
   "featAiReviewDesc": "AIの抽出結果を反映前に承認・却下",
-  "featProducts": "商品マスタ",
+  "featProducts": "商品ライブラリー",
   "featProductsDesc": "実際に扱う商品。在庫・発注・入荷・出荷はここにつながります",
   "featUnlinkedJan": "未紐付けJANコード",
   "@featUnlinkedJan": {
@@ -806,7 +806,7 @@
   "@unlinkedJanEmpty": {
     "description": "Unlinked JAN screen: empty state (the healthy state)."
   },
-  "unlinkedJanEmptyBody": "在庫・入荷・出荷などの記録は、すべて商品マスタに紐付いています。",
+  "unlinkedJanEmptyBody": "在庫・入荷・出荷などの記録は、すべて商品ライブラリーに紐付いています。",
   "@unlinkedJanEmptyBody": {
     "description": "Unlinked JAN screen: empty state body."
   },
@@ -843,7 +843,7 @@
   "reportSourceSalesOrders": "受注",
   "reportSourceWorkOrders": "作業指示",
   "reportSourceAuditLog": "監査ログ",
-  "reportSourceProducts": "商品マスタ",
+  "reportSourceProducts": "商品ライブラリー",
   "reportWarehouse": "倉庫",
   "reportAllWarehouses": "すべての倉庫",
   "reportCountry": "国",
@@ -1016,11 +1016,11 @@
   "poStatusRejected": "却下",
   "poStatusCancelled": "取消",
   "poStatusCompleted": "完了",
-  "productsTitle": "商品マスタ",
+  "productsTitle": "商品ライブラリー",
   "productsShowInactive": "休眠・提供終了も表示",
   "productsSearchHint": "商品名またはJANコードで検索",
   "productsEmpty": "商品がまだありません",
-  "productsEmptyBody": "右下の＋から商品を登録できます。",
+  "productsEmptyBody": "「ファイルから登録」（自社のExcelなど）、「価格台帳から取り込む」、または右下の＋から1件ずつ登録できます。",
   "productActive": "有効",
   "productInactive": "無効",
   "productDeactivateQ": "この商品を休眠にしますか？",
@@ -1557,7 +1557,7 @@
   "@stockOverPromised": {
     "description": "Stock position: available went negative."
   },
-  "stockNotLinkedToProduct": "このJANは商品マスタに未登録です",
+  "stockNotLinkedToProduct": "このJANは商品ライブラリーに未登録です",
   "@stockNotLinkedToProduct": {
     "description": "Stock: stock_levels row whose product_id is still null (0058)."
   },
@@ -3403,7 +3403,7 @@
   "@soShipmentOpen": {
     "description": "soShipmentOpen"
   },
-  "soLineUnlinked": "商品マスタ未登録のため引当できません",
+  "soLineUnlinked": "商品ライブラリー未登録のため引当できません",
   "@soLineUnlinked": {
     "description": "soLineUnlinked"
   },
@@ -4192,7 +4192,7 @@
   "@chartEmpty": {
     "description": "chartEmpty"
   },
-  "chartUnregisteredNote": "商品マスタ未登録のJAN {jans} 件（計 {units} 個）はグラフに含まれていません",
+  "chartUnregisteredNote": "商品ライブラリー未登録のJAN {jans} 件（計 {units} 個）はグラフに含まれていません",
   "@chartUnregisteredNote": {
     "description": "Dashboard stock chart: stock under JANs with no product record is left out of the bars (0094)",
     "placeholders": {
@@ -6032,7 +6032,7 @@
   "scEditProfile": "前提を編集",
   "scAnnualVolume": "年間販売数量",
   "scAnnualVolumeHint": "空欄: 過去12か月の出荷数",
-  "scSalesPriceHint": "空欄: 商品マスタの価格",
+  "scSalesPriceHint": "空欄: 商品ライブラリーの価格",
   "scWeight": "重量（kg/個）",
   "scUnitsPerCarton": "入数（個/箱）",
   "scStorageDays": "保管日数",
@@ -6541,7 +6541,7 @@
   },
   "syncDismiss": "閉じる",
   "errorOffline": "通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。",
-  "featProductLibrary": "商品ライブラリー",
+  "featProductLibrary": "商品の写真",
   "featProductLibraryDesc": "商品ごとの写真。先頭の写真が商品名の前に表示されます",
   "plSearchHint": "商品名・JAN・品番・メーカーで検索",
   "plWithoutImages": "写真なしのみ",
@@ -7577,15 +7577,15 @@
   },
   "pdProductId": "商品ID",
   "featPriceBook": "価格台帳",
-  "featPriceBookDesc": "仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品マスタとは別に管理します",
+  "featPriceBookDesc": "仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品ライブラリーとは別に管理します",
   "clTitle": "価格台帳",
   "clSearchHint": "品名・メーカー・品番・JAN・仕入先の表記で検索",
   "clEmpty": "価格台帳は空です",
   "clEmptyBody": "「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。",
-  "clInMaster": "マスタ登録済み",
-  "clNotInMaster": "マスタ未登録",
-  "clToMaster": "商品マスタに登録",
-  "clToMasterDone": "商品マスタに登録しました（新規 {created}件・既存とつなげた {linked}件・JANかメーカーがなく登録できない {skipped}件）",
+  "clInMaster": "ライブラリー登録済み",
+  "clNotInMaster": "ライブラリー未登録",
+  "clToMaster": "商品ライブラリーに登録",
+  "clToMasterDone": "商品ライブラリーに登録しました（新規 {created}件・既存とつなげた {linked}件・JANかメーカーがなく登録できない {skipped}件）",
   "@clToMasterDone": {
     "placeholders": {
       "created": {
@@ -7608,7 +7608,7 @@
       }
     }
   },
-  "clDeleteBody": "価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。",
+  "clDeleteBody": "価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品ライブラリー・在庫・発注・入荷などには影響しません。",
   "clDeleted": "{count}件を価格台帳から削除しました",
   "@clDeleted": {
     "placeholders": {
@@ -7618,7 +7618,7 @@
     }
   },
   "ciTitle": "ファイルから取り込む",
-  "ciIntro": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。",
+  "ciIntro": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。",
   "ciTermsFor": "価格の扱い（任意）",
   "ciBranch": "仕入先の支店",
   "ciBranchHint": "例: 大阪支店（空欄なら全支店共通）",
@@ -7671,10 +7671,10 @@
   "ciLineUpdate": "更新",
   "citOverview": "概要",
   "citSourceFile": "取り込んだファイル",
-  "citMaster": "商品マスタ・在庫",
-  "citFoundByJan": "JANが同じ商品マスタの商品です（まだつなげていません）",
-  "citOpenMaster": "商品マスタで開く",
-  "citNotInMaster": "商品マスタにはまだありません。一覧で選んで「商品マスタに登録」すると、在庫・発注で使えるようになります。",
+  "citMaster": "商品ライブラリー・在庫",
+  "citFoundByJan": "JANが同じ商品ライブラリーの商品です（まだつなげていません）",
+  "citOpenMaster": "商品ライブラリーで開く",
+  "citNotInMaster": "商品ライブラリーにはまだありません。一覧で選んで「商品ライブラリーに登録」すると、在庫・発注で使えるようになります。",
   "citCurrentTerms": "今の取引条件（仕入先・支店ごと）",
   "citNoTerms": "価格はまだありません",
   "citAddTerm": "取引条件を追加",
@@ -7742,57 +7742,17 @@
   "specSizeClear": "サイズを消す",
   "specSourceFile": "ファイルから",
   "specWeightField": "重量 (g)",
-  "clFromMaster": "マスタから取り込む",
-  "cfmTitle": "商品マスタから取り込む",
-  "cfmIntro": "価格台帳にまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごと価格台帳にコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、価格台帳のコピーは残ります。",
-  "cfmEmpty": "取り込める商品はありません",
-  "cfmEmptyBody": "商品マスタの商品は、すべて価格台帳にあります。",
-  "cfmSelectAll": "すべて選ぶ（{count}件）",
-  "@cfmSelectAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "cfmImport": "選んだ{count}件を取り込む",
-  "@cfmImport": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "cfmDone": "{created}件を価格台帳に取り込みました（仕入先の条件 {terms}件）",
-  "@cfmDone": {
-    "placeholders": {
-      "created": {
-        "type": "int"
-      },
-      "terms": {
-        "type": "int"
-      }
-    }
-  },
-  "cfmSuppliers": "仕入先 {count}社",
-  "@cfmSuppliers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "citEdit": "商品情報を編集",
   "citNameField": "品名（表示名）",
   "citSaved": "保存しました",
-  "citSpecFromPriceBook": "サイズ・重量・写真は価格台帳の記録です。商品マスタを変えても、ここは変わりません。",
+  "citSpecFromPriceBook": "サイズ・重量・写真は価格台帳の記録です。商品ライブラリーを変えても、ここは変わりません。",
   "citHowTheyCall": "この仕入先での呼び方と今の条件",
   "citRateLabel": "掛率",
   "citTheirCodeLabel": "先方の品番",
   "citWhere": "支店",
   "citNoNaming": "この仕入先での呼び方はまだ記録されていません",
   "rmAction": "完全に削除",
-  "rmQ": "{count}件を商品マスタから完全に削除しますか？",
+  "rmQ": "{count}件を商品ライブラリーから完全に削除しますか？",
   "@rmQ": {
     "placeholders": {
       "count": {
@@ -7800,7 +7760,7 @@
       }
     }
   },
-  "rmBody": "商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。",
+  "rmBody": "商品ライブラリーから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。",
   "rmConfirmLabel": "確認のため「削除」と入力してください",
   "rmConfirmWord": "削除",
   "rmDone": "{removed}件を完全に削除しました",
@@ -7822,34 +7782,64 @@
       }
     }
   },
-  "ciTitleMaster": "ファイルから商品登録",
-  "ciIntroMaster": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は価格台帳（仕入先ごとの商品・価格の台帳）にも記録されます。",
-  "ciToMaster": "商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）",
-  "ciToMasterHint": "オフにすると価格台帳にだけ記録し、商品マスタは変えません。",
-  "ciMasterBlocked": "{count}行はJANコードかメーカーがないため商品マスタには登録されず、価格台帳にだけ入ります。",
-  "@ciMasterBlocked": {
+  "ciLineNoMaster": "ライブラリー登録不可（JAN・メーカーなし）",
+  "pmImportFile": "ファイルから登録",
+  "pkTitle": "価格台帳から取り込む",
+  "pkIntro": "価格台帳にある商品のうち、まだ商品ライブラリーにないものです。仕入れると決めた商品を選んで取り込んでください。同じJANの商品が商品ライブラリーにあれば、新しく作らずにつなぎます。価格台帳の記録はそのまま残ります。",
+  "pkEmpty": "取り込める商品はありません",
+  "pkEmptyBody": "価格台帳の商品は、すべて商品ライブラリーに入っています。価格台帳が空のときは、先に「価格台帳」でファイルを取り込んでください。",
+  "pkSelectAll": "取り込めるものをすべて選ぶ（{count}件）",
+  "@pkSelectAll": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "ciLineNoMaster": "マスタ登録不可（JAN・メーカーなし）",
-  "ciImportMaster": "取り込んで商品マスタに登録（{count}件）",
-  "@ciImportMaster": {
+  "pkImport": "選んだ{count}件を商品ライブラリーに取り込む",
+  "@pkImport": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "ciDoneMaster": "商品マスタに登録しました：新規 {created}件・既存の商品とつなげた {linked}件・JANかメーカーがなく登録できなかった {skipped}件（価格台帳には全件記録）",
-  "@ciDoneMaster": {
+  "pkBlocked": "JAN・メーカーなし（取り込めません）",
+  "pmFromPriceBook": "価格台帳から取り込む",
+  "libImportTitle": "ファイルから商品ライブラリーに登録",
+  "libImportIntro": "自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。",
+  "libImportSummary": "{total}行：新規 {fresh}件・更新 {known}件・登録できない {blocked}件（JANかメーカーがない）",
+  "@libImportSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      },
+      "known": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "libImportAction": "商品ライブラリーに登録（{count}件）",
+  "@libImportAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libImportDone": "登録しました：新規 {created}件・更新 {updated}件・登録できなかった {skipped}件",
+  "@libImportDone": {
     "placeholders": {
       "created": {
         "type": "int"
       },
-      "linked": {
+      "updated": {
         "type": "int"
       },
       "skipped": {
@@ -7857,5 +7847,134 @@
       }
     }
   },
-  "pmImportFile": "ファイルから登録"
+  "libImportInactive": "更新した商品のうち{count}件はアーカイブ・休眠などのままです。使うときは一覧で選んで「取扱中に戻す」を押してください。",
+  "@libImportInactive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libLineNew": "新規",
+  "libLineUpdate": "更新",
+  "pmNew": "新規登録",
+  "pmNewTitle": "商品の登録方法を選んでください",
+  "pmNewFileDesc": "自社で作ったExcel・CSV・PDF・写真などの商品一覧から、まとめて登録します",
+  "pmNewPriceBookDesc": "価格台帳（仕入先の見積）から、仕入れると決めた商品を選んで取り込みます",
+  "pmNewManual": "手動で1件追加",
+  "pmNewManualDesc": "項目を入力して1件ずつ登録します（必須の項目はありません）",
+  "plTabList": "商品一覧",
+  "plTabAlerts": "アラート（{count}）",
+  "@plTabAlerts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alEmpty": "アラートはありません",
+  "alEmptyBody": "ファイルから登録したとき、JANや品番がすでに登録されている行はここに入り、登録されません。",
+  "alHint": "ここにある行は登録されていません。必要なら、登録済みの商品を開いて編集するか、内容を直してから登録し直してください。",
+  "alReasonJanExists": "JANがすでに登録されています",
+  "alReasonJanInFile": "同じファイルの中でJANが重複しています",
+  "alReasonSkuExists": "品番がすでに登録されています",
+  "alExisting": "登録済みの商品：{name}",
+  "@alExisting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "alFrom": "{file}　{row}行目",
+  "@alFrom": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "alOpenExisting": "登録済みの商品を開く",
+  "alDeleteSelected": "選んだアラートを削除（{count}件）",
+  "@alDeleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alDeleteAll": "アラートをすべて削除（{count}件）",
+  "@alDeleteAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alDeleteQ": "{count}件のアラートを完全に削除しますか？",
+  "@alDeleteQ": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alDeleteBody": "アラートの記録だけが消え、元に戻せません。商品ライブラリーの商品には影響しません。",
+  "alDeleted": "{count}件のアラートを削除しました",
+  "@alDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libImportSummary2": "{total}行：登録 {fresh}件・アラート {alerts}件（JAN・品番が登録済み、またはファイル内で重複）",
+  "@libImportSummary2": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      },
+      "alerts": {
+        "type": "int"
+      }
+    }
+  },
+  "libImportDone2": "登録しました：{created}件・アラート {alerts}件（アラートのタブで確認できます）",
+  "@libImportDone2": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "alerts": {
+        "type": "int"
+      }
+    }
+  },
+  "libLineAlert": "アラート（重複）",
+  "pfDupTitle": "同じJAN・品番の商品があります",
+  "pfDupJanBody": "このJANは「{name}」で登録済みのため、登録できません。",
+  "@pfDupJanBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pfDupSkuBody": "この品番は「{name}」で登録済みのため、登録できません。",
+  "@pfDupSkuBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productColor": "色",
+  "productNewHint": "入力した項目だけで登録できます（必須の項目はありません）。",
+  "productNameRequiredEdit": "品名を入力してください"
 }

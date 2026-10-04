@@ -60,6 +60,22 @@ abstract class ProductRepository {
   /// deactivated instead.
   Future<ApiResult<bool>> delete(int id);
 
+  /// `products_import` (0130): lines read from a file of our own straight
+  /// into the library. A line whose JAN or 品番 is already there (or whose
+  /// JAN came earlier in the file) becomes an alert instead.
+  Future<ApiResult<LibraryImported>> importLines(List<Map<String, dynamic>> lines, {String? sourceFile});
+
+  /// `products_add_one` (0130): one product by hand, every field optional.
+  /// A JAN or 品番 already in the library is refused as
+  /// `jan_exists:<id>:<name>` / `sku_exists:<id>:<name>`.
+  Future<ApiResult<int>> addOne(Map<String, dynamic> fields);
+
+  /// The alerts kept back from imports, newest first (0130).
+  Future<ApiResult<List<ProductAlert>>> alerts();
+
+  /// Removes alerts for good: the ones given, or every one when [ids] is null.
+  Future<ApiResult<int>> deleteAlerts(List<int>? ids);
+
   /// Removes products for good (0126): those nothing booked points at go,
   /// with their names, codes and picture rows; the rest are left and
   /// returned in `inUse`. 価格台帳 keeps its items.
@@ -356,6 +372,57 @@ class ProductRepositoryImpl implements ProductRepository {
       ApiSuccess() => const ApiFailure(message: 'not permitted: product.delete required'),
       ApiFailure(:final message, :final statusCode) => ApiFailure(message: message, statusCode: statusCode),
     };
+  }
+
+  @override
+  Future<ApiResult<LibraryImported>> importLines(List<Map<String, dynamic>> lines, {String? sourceFile}) async {
+    try {
+      final r = await _dio.post('/rpc/products_import', data: {'p_lines': lines, 'p_source_file': sourceFile});
+      final j = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(LibraryImported.fromJson((j as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<LibraryImported>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> addOne(Map<String, dynamic> fields) async {
+    try {
+      final r = await _dio.post('/rpc/products_add_one', data: {'p': fields});
+      final id = r.data is int ? r.data as int : int.tryParse('${r.data}') ?? 0;
+      return ApiSuccess(id);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<ProductAlert>>> alerts() async {
+    try {
+      final r = await _dio.get('/product_import_alerts', queryParameters: {'select': '*', 'order': 'created_at.desc,id.desc'});
+      return ApiSuccess([
+        for (final e in (r.data is List ? r.data as List : const []).whereType<Map>())
+          ProductAlert.fromJson(e.cast<String, dynamic>()),
+      ]);
+    } on DioException catch (e) {
+      return mapDioError<List<ProductAlert>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> deleteAlerts(List<int>? ids) async {
+    if (ids != null && ids.isEmpty) return const ApiSuccess(0);
+    try {
+      // Row removals under the alerts' policy (product.manage).
+      final r = await _dio.delete(
+        '/product_import_alerts',
+        queryParameters: {'id': ids == null ? 'gt.0' : 'in.(${ids.join(',')})', 'select': 'id'},
+        options: Options(headers: {'Prefer': 'return=representation'}),
+      );
+      return ApiSuccess(r.data is List ? (r.data as List).length : 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
   }
 
   static bool _refusedAsInUse(DioException e) {

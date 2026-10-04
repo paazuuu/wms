@@ -6093,6 +6093,57 @@ Also:
   - In the list, each item shows every supplier on its own row: name and
     branch, unit price, 掛率, list price and case quantity, cheapest first.
 
+### 0129 / 0130 — 商品マスタ is called 商品ライブラリー; registering products
+
+- On screen, 商品マスタ is now **商品ライブラリー** (Product library / 商品库):
+  the products we stock, receive and ship. 価格台帳 keeps what suppliers
+  quoted, which may never be bought; nothing moves from there until it is
+  chosen.
+  - The table stays `products`. That name already says what it holds, and
+    every stock, order and shipment table points at it.
+  - `comment on table` notes which is which.
+  - The old photo screen's label, which was also 商品ライブラリー, is now
+    商品の写真.
+- Nothing is required to register a product (0130). JAN, maker, name, 品番,
+  colour, weight and size are all optional, and `products.jan_code` may now
+  be null. A product without a name is called by its 品番 or JAN, else
+  名称未設定.
+- A JAN or 品番 that is already registered is an **alert**, never an
+  overwrite:
+  - `products_add_one(p)` (by hand) refuses it with `jan_exists:<id>:<name>`
+    or `sku_exists:<id>:<name>`, and the form shows which product has it.
+  - `products_import(lines, file)` (a file of our own) registers every line
+    without an alert. Each alerted line goes to `product_import_alerts` with:
+    - the line as read, and why: `jan_exists`, `jan_in_file` or
+      `sku_exists`;
+    - the product it collides with (id, name, maker, 品番);
+    - the file and row.
+    Empty lines are skipped.
+  - Alerts are read and removed under RLS (product.view / product.manage),
+    by row: chosen ones, or all.
+- `price_book_to_products` also copies the item's attributes
+  (`product_put_attributes`). An item whose JAN is already registered is
+  linked to that product, not duplicated.
+- App:
+  - 商品ライブラリー has 新規登録 (bottom right) with three ways in:
+    - ファイルから登録: the reading screen in library mode, with no
+      supplier, branch or date. Lines that will be alerts are marked
+      beforehand.
+    - 価格台帳から取り込む (`PriceBookPickScreen`): price book items not in
+      the library yet. Search, choose some or all, take them in. An item
+      with no JAN or maker cannot be taken.
+    - 手動で1件追加: the form. It now has colour, weight and size, and no
+      required fields.
+  - Two tabs: 商品一覧 and アラート（n）. Each alert shows its reason, the
+    line's fields, file and row, and the registered product, with a button
+    to open it. Alerts can be removed chosen or all, after a confirmation.
+  - Editing, the size and weight card, names and deletion stay on each
+    product, so every product has full CRUD.
+  - 価格台帳 no longer brings products in from the library, and its reading
+    screen no longer registers into the library.
+    `price_book_master_candidates` and `price_book_from_master` stay in the
+    database, unused.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -1624,7 +1624,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm or reject AI-extracted results before they count';
 
   @override
-  String get featProducts => 'Product master';
+  String get featProducts => 'Product library';
 
   @override
   String get featProductsDesc =>
@@ -1729,7 +1729,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSourceAuditLog => 'Audit log';
 
   @override
-  String get reportSourceProducts => 'Product master';
+  String get reportSourceProducts => 'Product library';
 
   @override
   String get reportWarehouse => 'Warehouse';
@@ -2192,7 +2192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get poStatusCompleted => 'Completed';
 
   @override
-  String get productsTitle => 'Product master';
+  String get productsTitle => 'Product library';
 
   @override
   String get productsShowInactive => 'Show dormant and discontinued too';
@@ -2204,7 +2204,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsEmpty => 'No products yet';
 
   @override
-  String get productsEmptyBody => 'Add one with the + button.';
+  String get productsEmptyBody =>
+      'Register products from a file of your own, take them in from the price book, or add one at a time with + at the bottom right.';
 
   @override
   String get productActive => 'Active';
@@ -2970,7 +2971,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stockNotLinkedToProduct =>
-      'This JAN is not in the product master yet';
+      'This JAN is not in the product library yet';
 
   @override
   String stockPositionLot(String code) {
@@ -6137,7 +6138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scAnnualVolumeHint => 'Blank: last 12 months shipped';
 
   @override
-  String get scSalesPriceHint => 'Blank: the product master price';
+  String get scSalesPriceHint => 'Blank: the product library price';
 
   @override
   String get scWeight => 'Weight (kg/unit)';
@@ -7173,7 +7174,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'No connection. Confirm once the network is back (counts and findings are kept on the device).';
 
   @override
-  String get featProductLibrary => 'Product library';
+  String get featProductLibrary => 'Product photos';
 
   @override
   String get featProductLibraryDesc =>
@@ -8604,7 +8605,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featPriceBookDesc =>
-      'Each supplier\'s names, prices and rates for products, by branch and period — read from files and kept apart from the master';
+      'Each supplier\'s names, prices and rates for products, by branch and period — read from files and kept apart from the product library';
 
   @override
   String get clTitle => 'Price book';
@@ -8621,17 +8622,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use \"Import from a file\" to read a quotation, invoice or catalogue.';
 
   @override
-  String get clInMaster => 'In the master';
+  String get clInMaster => 'In the library';
 
   @override
-  String get clNotInMaster => 'Not in the master';
+  String get clNotInMaster => 'Not in the library';
 
   @override
-  String get clToMaster => 'Add to the master';
+  String get clToMaster => 'Add to the product library';
 
   @override
   String clToMasterDone(int created, int linked, int skipped) {
-    return 'Added to the master: $created new, $linked linked to existing, $skipped skipped (no JAN or maker)';
+    return 'Added to the product library: $created new, $linked linked to existing, $skipped skipped (no JAN or maker)';
   }
 
   @override
@@ -8644,7 +8645,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clDeleteBody =>
-      'The price book items and their price history by supplier are deleted, for good. The product master, stock, orders and receipts are not touched.';
+      'The price book items and their price history by supplier are deleted, for good. The product library, stock, orders and receipts are not touched.';
 
   @override
   String clDeleted(int count) {
@@ -8704,18 +8705,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get citSourceFile => 'From file';
 
   @override
-  String get citMaster => 'Master and stock';
+  String get citMaster => 'Library and stock';
 
   @override
   String get citFoundByJan =>
-      'A master product with the same JAN (not linked yet)';
+      'A library product with the same JAN (not linked yet)';
 
   @override
-  String get citOpenMaster => 'Open in the master';
+  String get citOpenMaster => 'Open in the product library';
 
   @override
   String get citNotInMaster =>
-      'Not in the master yet. Choose it in the list and add it to the master to use it for stock and orders.';
+      'Not in the library yet. Choose it in the list and add it to the product library to use it for stock and orders.';
 
   @override
   String get citCurrentTerms => 'Current terms (by supplier and branch)';
@@ -8817,43 +8818,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specWeightField => 'Weight (g)';
 
   @override
-  String get clFromMaster => 'Bring in from the master';
-
-  @override
-  String get cfmTitle => 'Bring in from the master';
-
-  @override
-  String get cfmIntro =>
-      'Master products not in the price book yet. The ones you choose are copied into the price book with their spec, pictures and each supplier\'s name and terms. The master is not changed, and the copy stays even if the master product is later removed.';
-
-  @override
-  String get cfmEmpty => 'Nothing to bring in';
-
-  @override
-  String get cfmEmptyBody =>
-      'Every master product is already in the price book.';
-
-  @override
-  String cfmSelectAll(int count) {
-    return 'Choose all ($count)';
-  }
-
-  @override
-  String cfmImport(int count) {
-    return 'Bring in $count';
-  }
-
-  @override
-  String cfmDone(int created, int terms) {
-    return '$created brought into the price book ($terms supplier terms)';
-  }
-
-  @override
-  String cfmSuppliers(int count) {
-    return '$count suppliers';
-  }
-
-  @override
   String get citEdit => 'Edit the item';
 
   @override
@@ -8864,7 +8828,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get citSpecFromPriceBook =>
-      'The size, weight and pictures here are the price book\'s own record; changing the master does not change them.';
+      'The size, weight and pictures here are the price book\'s own record; changing the product library does not change them.';
 
   @override
   String get citHowTheyCall => 'How this supplier calls it, and its terms now';
@@ -8886,12 +8850,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rmQ(int count) {
-    return 'Remove $count from the master for good?';
+    return 'Remove $count from the product library for good?';
   }
 
   @override
   String get rmBody =>
-      'They leave the master for good, with their names, codes, units and picture records.\nProducts with stock, receipts, shipments or orders are not removed and stay as they are.\nThe price book keeps its items: only the link goes, and comes back by JAN if the product is added again.';
+      'They leave the product library for good, with their names, codes, units and picture records.\nProducts with stock, receipts, shipments or orders are not removed and stay as they are.\nThe price book keeps its items: only the link goes, and comes back by JAN if the product is added again.';
 
   @override
   String get rmConfirmLabel => 'Type 削除 to confirm';
@@ -8910,38 +8874,193 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get ciTitleMaster => 'Register products from a file';
-
-  @override
-  String get ciIntroMaster =>
-      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code and JAN, and registers it in the product master. A product whose JAN is already in the master is linked rather than made again. What was read — each supplier\'s names and prices — is also kept in the price book.';
-
-  @override
-  String get ciToMaster =>
-      'Also register in the product master (to use for stock, receipts and shipments)';
-
-  @override
-  String get ciToMasterHint =>
-      'Off: only the price book is updated; the master is not changed.';
-
-  @override
-  String ciMasterBlocked(int count) {
-    return '$count lines have no JAN or maker, so they go into the price book only, not the master.';
-  }
-
-  @override
-  String get ciLineNoMaster => 'Not for the master (no JAN or maker)';
-
-  @override
-  String ciImportMaster(int count) {
-    return 'Import and register in the master ($count)';
-  }
-
-  @override
-  String ciDoneMaster(int created, int linked, int skipped) {
-    return 'Registered in the master: $created new, $linked linked to existing products, $skipped not registered (no JAN or maker). All lines are kept in the price book.';
-  }
+  String get ciLineNoMaster => 'Not for the library (no JAN or maker)';
 
   @override
   String get pmImportFile => 'Register from a file';
+
+  @override
+  String get pkTitle => 'Take in from the price book';
+
+  @override
+  String get pkIntro =>
+      'Price book items not in the product library yet. Choose the ones you will buy and take them in. An item whose JAN is already in the library is linked rather than made again. The price book keeps its records.';
+
+  @override
+  String get pkEmpty => 'Nothing to take in';
+
+  @override
+  String get pkEmptyBody =>
+      'Every price book item is already in the library. If the price book is empty, read a file into it first.';
+
+  @override
+  String pkSelectAll(int count) {
+    return 'Choose all that can come in ($count)';
+  }
+
+  @override
+  String pkImport(int count) {
+    return 'Take $count into the library';
+  }
+
+  @override
+  String get pkBlocked => 'No JAN or maker (cannot come in)';
+
+  @override
+  String get pmFromPriceBook => 'From the price book';
+
+  @override
+  String get libImportTitle => 'Register in the library from a file';
+
+  @override
+  String get libImportIntro =>
+      'The AI reads a product list of your own (Excel, CSV, PDF or a photo), sorts each line into maker, name, item code, JAN, attributes, size and weight, and registers it straight in the product library. A product with the same JAN is updated. Nothing goes into the price book (read suppliers\' quotations there).';
+
+  @override
+  String libImportSummary(int total, int fresh, int known, int blocked) {
+    return '$total lines: $fresh new, $known updates, $blocked cannot be registered (no JAN or maker)';
+  }
+
+  @override
+  String libImportAction(int count) {
+    return 'Register in the library ($count)';
+  }
+
+  @override
+  String libImportDone(int created, int updated, int skipped) {
+    return 'Registered: $created new, $updated updated, $skipped not registered';
+  }
+
+  @override
+  String libImportInactive(int count) {
+    return '$count of the updated products are still archived, dormant or discontinued. To use them, choose them in the list and bring them back.';
+  }
+
+  @override
+  String get libLineNew => 'New';
+
+  @override
+  String get libLineUpdate => 'Update';
+
+  @override
+  String get pmNew => 'Register';
+
+  @override
+  String get pmNewTitle => 'How do you want to register products?';
+
+  @override
+  String get pmNewFileDesc =>
+      'Register many at once from a product list of your own (Excel, CSV, PDF or a photo)';
+
+  @override
+  String get pmNewPriceBookDesc =>
+      'Take in the items you will buy from the price book (suppliers\' quotations)';
+
+  @override
+  String get pmNewManual => 'Add one by hand';
+
+  @override
+  String get pmNewManualDesc =>
+      'Enter the fields and register one product (nothing is required)';
+
+  @override
+  String get plTabList => 'Products';
+
+  @override
+  String plTabAlerts(int count) {
+    return 'Alerts ($count)';
+  }
+
+  @override
+  String get alEmpty => 'No alerts';
+
+  @override
+  String get alEmptyBody =>
+      'When a file is registered, lines whose JAN or item code is already registered come here instead of being registered.';
+
+  @override
+  String get alHint =>
+      'These lines were not registered. If needed, open the registered product and edit it, or correct the line and register it again.';
+
+  @override
+  String get alReasonJanExists => 'JAN already registered';
+
+  @override
+  String get alReasonJanInFile => 'JAN repeated in the same file';
+
+  @override
+  String get alReasonSkuExists => 'Item code already registered';
+
+  @override
+  String alExisting(String name) {
+    return 'Registered product: $name';
+  }
+
+  @override
+  String alFrom(String file, int row) {
+    return '$file, row $row';
+  }
+
+  @override
+  String get alOpenExisting => 'Open the registered product';
+
+  @override
+  String alDeleteSelected(int count) {
+    return 'Delete chosen alerts ($count)';
+  }
+
+  @override
+  String alDeleteAll(int count) {
+    return 'Delete all alerts ($count)';
+  }
+
+  @override
+  String alDeleteQ(int count) {
+    return 'Delete $count alerts for good?';
+  }
+
+  @override
+  String get alDeleteBody =>
+      'Only the alert records go, for good. Products in the library are not touched.';
+
+  @override
+  String alDeleted(int count) {
+    return '$count alerts deleted';
+  }
+
+  @override
+  String libImportSummary2(int total, int fresh, int alerts) {
+    return '$total lines: $fresh to register, $alerts alerts (JAN or item code already registered, or repeated in the file)';
+  }
+
+  @override
+  String libImportDone2(int created, int alerts) {
+    return 'Registered $created; $alerts alerts (see the Alerts tab)';
+  }
+
+  @override
+  String get libLineAlert => 'Alert (duplicate)';
+
+  @override
+  String get pfDupTitle => 'A product with this JAN or item code exists';
+
+  @override
+  String pfDupJanBody(String name) {
+    return 'This JAN is already registered as “$name”, so it cannot be registered again.';
+  }
+
+  @override
+  String pfDupSkuBody(String name) {
+    return 'This item code is already registered as “$name”, so it cannot be registered again.';
+  }
+
+  @override
+  String get productColor => 'Colour';
+
+  @override
+  String get productNewHint =>
+      'Only what you enter is registered; nothing is required.';
+
+  @override
+  String get productNameRequiredEdit => 'Enter a name';
 }

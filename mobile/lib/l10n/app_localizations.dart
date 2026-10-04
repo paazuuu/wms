@@ -3073,7 +3073,7 @@ abstract class AppLocalizations {
   /// No description provided for @featProducts.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ'**
+  /// **'商品ライブラリー'**
   String get featProducts;
 
   /// No description provided for @featProductsDesc.
@@ -3121,7 +3121,7 @@ abstract class AppLocalizations {
   /// Unlinked JAN screen: empty state body.
   ///
   /// In ja, this message translates to:
-  /// **'在庫・入荷・出荷などの記録は、すべて商品マスタに紐付いています。'**
+  /// **'在庫・入荷・出荷などの記録は、すべて商品ライブラリーに紐付いています。'**
   String get unlinkedJanEmptyBody;
 
   /// Unlinked JAN screen: total row count for one JAN code.
@@ -3259,7 +3259,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportSourceProducts.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ'**
+  /// **'商品ライブラリー'**
   String get reportSourceProducts;
 
   /// No description provided for @reportWarehouse.
@@ -4165,7 +4165,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsTitle.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ'**
+  /// **'商品ライブラリー'**
   String get productsTitle;
 
   /// No description provided for @productsShowInactive.
@@ -4189,7 +4189,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsEmptyBody.
   ///
   /// In ja, this message translates to:
-  /// **'右下の＋から商品を登録できます。'**
+  /// **'「ファイルから登録」（自社のExcelなど）、「価格台帳から取り込む」、または右下の＋から1件ずつ登録できます。'**
   String get productsEmptyBody;
 
   /// No description provided for @productActive.
@@ -5569,7 +5569,7 @@ abstract class AppLocalizations {
   /// Stock: stock_levels row whose product_id is still null (0058).
   ///
   /// In ja, this message translates to:
-  /// **'このJANは商品マスタに未登録です'**
+  /// **'このJANは商品ライブラリーに未登録です'**
   String get stockNotLinkedToProduct;
 
   /// Stock position: which lot a parcel came from.
@@ -7712,7 +7712,7 @@ abstract class AppLocalizations {
   /// soLineUnlinked
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ未登録のため引当できません'**
+  /// **'商品ライブラリー未登録のため引当できません'**
   String get soLineUnlinked;
 
   /// soLineOnOrder
@@ -8517,7 +8517,7 @@ abstract class AppLocalizations {
   /// Dashboard stock chart: stock under JANs with no product record is left out of the bars (0094)
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ未登録のJAN {jans} 件（計 {units} 個）はグラフに含まれていません'**
+  /// **'商品ライブラリー未登録のJAN {jans} 件（計 {units} 個）はグラフに含まれていません'**
   String chartUnregisteredNote(int jans, String units);
 
   /// Dashboard stock chart: opens the unregistered-JAN list
@@ -11002,7 +11002,7 @@ abstract class AppLocalizations {
   /// No description provided for @scSalesPriceHint.
   ///
   /// In ja, this message translates to:
-  /// **'空欄: 商品マスタの価格'**
+  /// **'空欄: 商品ライブラリーの価格'**
   String get scSalesPriceHint;
 
   /// No description provided for @scWeight.
@@ -12958,7 +12958,7 @@ abstract class AppLocalizations {
   /// No description provided for @featProductLibrary.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリー'**
+  /// **'商品の写真'**
   String get featProductLibrary;
 
   /// No description provided for @featProductLibraryDesc.
@@ -15370,7 +15370,7 @@ abstract class AppLocalizations {
   /// No description provided for @featPriceBookDesc.
   ///
   /// In ja, this message translates to:
-  /// **'仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品マスタとは別に管理します'**
+  /// **'仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品ライブラリーとは別に管理します'**
   String get featPriceBookDesc;
 
   /// No description provided for @clTitle.
@@ -15400,25 +15400,25 @@ abstract class AppLocalizations {
   /// No description provided for @clInMaster.
   ///
   /// In ja, this message translates to:
-  /// **'マスタ登録済み'**
+  /// **'ライブラリー登録済み'**
   String get clInMaster;
 
   /// No description provided for @clNotInMaster.
   ///
   /// In ja, this message translates to:
-  /// **'マスタ未登録'**
+  /// **'ライブラリー未登録'**
   String get clNotInMaster;
 
   /// No description provided for @clToMaster.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタに登録'**
+  /// **'商品ライブラリーに登録'**
   String get clToMaster;
 
   /// No description provided for @clToMasterDone.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタに登録しました（新規 {created}件・既存とつなげた {linked}件・JANかメーカーがなく登録できない {skipped}件）'**
+  /// **'商品ライブラリーに登録しました（新規 {created}件・既存とつなげた {linked}件・JANかメーカーがなく登録できない {skipped}件）'**
   String clToMasterDone(int created, int linked, int skipped);
 
   /// No description provided for @clDelete.
@@ -15436,7 +15436,7 @@ abstract class AppLocalizations {
   /// No description provided for @clDeleteBody.
   ///
   /// In ja, this message translates to:
-  /// **'価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。'**
+  /// **'価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品ライブラリー・在庫・発注・入荷などには影響しません。'**
   String get clDeleteBody;
 
   /// No description provided for @clDeleted.
@@ -15454,7 +15454,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciIntro.
   ///
   /// In ja, this message translates to:
-  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。'**
+  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。'**
   String get ciIntro;
 
   /// No description provided for @ciTermsFor.
@@ -15532,25 +15532,25 @@ abstract class AppLocalizations {
   /// No description provided for @citMaster.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタ・在庫'**
+  /// **'商品ライブラリー・在庫'**
   String get citMaster;
 
   /// No description provided for @citFoundByJan.
   ///
   /// In ja, this message translates to:
-  /// **'JANが同じ商品マスタの商品です（まだつなげていません）'**
+  /// **'JANが同じ商品ライブラリーの商品です（まだつなげていません）'**
   String get citFoundByJan;
 
   /// No description provided for @citOpenMaster.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタで開く'**
+  /// **'商品ライブラリーで開く'**
   String get citOpenMaster;
 
   /// No description provided for @citNotInMaster.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタにはまだありません。一覧で選んで「商品マスタに登録」すると、在庫・発注で使えるようになります。'**
+  /// **'商品ライブラリーにはまだありません。一覧で選んで「商品ライブラリーに登録」すると、在庫・発注で使えるようになります。'**
   String get citNotInMaster;
 
   /// No description provided for @citCurrentTerms.
@@ -15733,60 +15733,6 @@ abstract class AppLocalizations {
   /// **'重量 (g)'**
   String get specWeightField;
 
-  /// No description provided for @clFromMaster.
-  ///
-  /// In ja, this message translates to:
-  /// **'マスタから取り込む'**
-  String get clFromMaster;
-
-  /// No description provided for @cfmTitle.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品マスタから取り込む'**
-  String get cfmTitle;
-
-  /// No description provided for @cfmIntro.
-  ///
-  /// In ja, this message translates to:
-  /// **'価格台帳にまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごと価格台帳にコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、価格台帳のコピーは残ります。'**
-  String get cfmIntro;
-
-  /// No description provided for @cfmEmpty.
-  ///
-  /// In ja, this message translates to:
-  /// **'取り込める商品はありません'**
-  String get cfmEmpty;
-
-  /// No description provided for @cfmEmptyBody.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品マスタの商品は、すべて価格台帳にあります。'**
-  String get cfmEmptyBody;
-
-  /// No description provided for @cfmSelectAll.
-  ///
-  /// In ja, this message translates to:
-  /// **'すべて選ぶ（{count}件）'**
-  String cfmSelectAll(int count);
-
-  /// No description provided for @cfmImport.
-  ///
-  /// In ja, this message translates to:
-  /// **'選んだ{count}件を取り込む'**
-  String cfmImport(int count);
-
-  /// No description provided for @cfmDone.
-  ///
-  /// In ja, this message translates to:
-  /// **'{created}件を価格台帳に取り込みました（仕入先の条件 {terms}件）'**
-  String cfmDone(int created, int terms);
-
-  /// No description provided for @cfmSuppliers.
-  ///
-  /// In ja, this message translates to:
-  /// **'仕入先 {count}社'**
-  String cfmSuppliers(int count);
-
   /// No description provided for @citEdit.
   ///
   /// In ja, this message translates to:
@@ -15808,7 +15754,7 @@ abstract class AppLocalizations {
   /// No description provided for @citSpecFromPriceBook.
   ///
   /// In ja, this message translates to:
-  /// **'サイズ・重量・写真は価格台帳の記録です。商品マスタを変えても、ここは変わりません。'**
+  /// **'サイズ・重量・写真は価格台帳の記録です。商品ライブラリーを変えても、ここは変わりません。'**
   String get citSpecFromPriceBook;
 
   /// No description provided for @citHowTheyCall.
@@ -15850,13 +15796,13 @@ abstract class AppLocalizations {
   /// No description provided for @rmQ.
   ///
   /// In ja, this message translates to:
-  /// **'{count}件を商品マスタから完全に削除しますか？'**
+  /// **'{count}件を商品ライブラリーから完全に削除しますか？'**
   String rmQ(int count);
 
   /// No description provided for @rmBody.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。'**
+  /// **'商品ライブラリーから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。'**
   String get rmBody;
 
   /// No description provided for @rmConfirmLabel.
@@ -15883,59 +15829,299 @@ abstract class AppLocalizations {
   /// **'{removed}件を完全に削除しました。{inUse}件は在庫・入出荷などの記録があるため削除できず、残しています（アーカイブのままにしておけます）'**
   String rmDoneInUse(int removed, int inUse);
 
-  /// No description provided for @ciTitleMaster.
-  ///
-  /// In ja, this message translates to:
-  /// **'ファイルから商品登録'**
-  String get ciTitleMaster;
-
-  /// No description provided for @ciIntroMaster.
-  ///
-  /// In ja, this message translates to:
-  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は価格台帳（仕入先ごとの商品・価格の台帳）にも記録されます。'**
-  String get ciIntroMaster;
-
-  /// No description provided for @ciToMaster.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）'**
-  String get ciToMaster;
-
-  /// No description provided for @ciToMasterHint.
-  ///
-  /// In ja, this message translates to:
-  /// **'オフにすると価格台帳にだけ記録し、商品マスタは変えません。'**
-  String get ciToMasterHint;
-
-  /// No description provided for @ciMasterBlocked.
-  ///
-  /// In ja, this message translates to:
-  /// **'{count}行はJANコードかメーカーがないため商品マスタには登録されず、価格台帳にだけ入ります。'**
-  String ciMasterBlocked(int count);
-
   /// No description provided for @ciLineNoMaster.
   ///
   /// In ja, this message translates to:
-  /// **'マスタ登録不可（JAN・メーカーなし）'**
+  /// **'ライブラリー登録不可（JAN・メーカーなし）'**
   String get ciLineNoMaster;
-
-  /// No description provided for @ciImportMaster.
-  ///
-  /// In ja, this message translates to:
-  /// **'取り込んで商品マスタに登録（{count}件）'**
-  String ciImportMaster(int count);
-
-  /// No description provided for @ciDoneMaster.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品マスタに登録しました：新規 {created}件・既存の商品とつなげた {linked}件・JANかメーカーがなく登録できなかった {skipped}件（価格台帳には全件記録）'**
-  String ciDoneMaster(int created, int linked, int skipped);
 
   /// No description provided for @pmImportFile.
   ///
   /// In ja, this message translates to:
   /// **'ファイルから登録'**
   String get pmImportFile;
+
+  /// No description provided for @pkTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳から取り込む'**
+  String get pkTitle;
+
+  /// No description provided for @pkIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳にある商品のうち、まだ商品ライブラリーにないものです。仕入れると決めた商品を選んで取り込んでください。同じJANの商品が商品ライブラリーにあれば、新しく作らずにつなぎます。価格台帳の記録はそのまま残ります。'**
+  String get pkIntro;
+
+  /// No description provided for @pkEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込める商品はありません'**
+  String get pkEmpty;
+
+  /// No description provided for @pkEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳の商品は、すべて商品ライブラリーに入っています。価格台帳が空のときは、先に「価格台帳」でファイルを取り込んでください。'**
+  String get pkEmptyBody;
+
+  /// No description provided for @pkSelectAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込めるものをすべて選ぶ（{count}件）'**
+  String pkSelectAll(int count);
+
+  /// No description provided for @pkImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ{count}件を商品ライブラリーに取り込む'**
+  String pkImport(int count);
+
+  /// No description provided for @pkBlocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN・メーカーなし（取り込めません）'**
+  String get pkBlocked;
+
+  /// No description provided for @pmFromPriceBook.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳から取り込む'**
+  String get pmFromPriceBook;
+
+  /// No description provided for @libImportTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから商品ライブラリーに登録'**
+  String get libImportTitle;
+
+  /// No description provided for @libImportIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。'**
+  String get libImportIntro;
+
+  /// No description provided for @libImportSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{total}行：新規 {fresh}件・更新 {known}件・登録できない {blocked}件（JANかメーカーがない）'**
+  String libImportSummary(int total, int fresh, int known, int blocked);
+
+  /// No description provided for @libImportAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーに登録（{count}件）'**
+  String libImportAction(int count);
+
+  /// No description provided for @libImportDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録しました：新規 {created}件・更新 {updated}件・登録できなかった {skipped}件'**
+  String libImportDone(int created, int updated, int skipped);
+
+  /// No description provided for @libImportInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'更新した商品のうち{count}件はアーカイブ・休眠などのままです。使うときは一覧で選んで「取扱中に戻す」を押してください。'**
+  String libImportInactive(int count);
+
+  /// No description provided for @libLineNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新規'**
+  String get libLineNew;
+
+  /// No description provided for @libLineUpdate.
+  ///
+  /// In ja, this message translates to:
+  /// **'更新'**
+  String get libLineUpdate;
+
+  /// No description provided for @pmNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新規登録'**
+  String get pmNew;
+
+  /// No description provided for @pmNewTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の登録方法を選んでください'**
+  String get pmNewTitle;
+
+  /// No description provided for @pmNewFileDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社で作ったExcel・CSV・PDF・写真などの商品一覧から、まとめて登録します'**
+  String get pmNewFileDesc;
+
+  /// No description provided for @pmNewPriceBookDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳（仕入先の見積）から、仕入れると決めた商品を選んで取り込みます'**
+  String get pmNewPriceBookDesc;
+
+  /// No description provided for @pmNewManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動で1件追加'**
+  String get pmNewManual;
+
+  /// No description provided for @pmNewManualDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'項目を入力して1件ずつ登録します（必須の項目はありません）'**
+  String get pmNewManualDesc;
+
+  /// No description provided for @plTabList.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品一覧'**
+  String get plTabList;
+
+  /// No description provided for @plTabAlerts.
+  ///
+  /// In ja, this message translates to:
+  /// **'アラート（{count}）'**
+  String plTabAlerts(int count);
+
+  /// No description provided for @alEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'アラートはありません'**
+  String get alEmpty;
+
+  /// No description provided for @alEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから登録したとき、JANや品番がすでに登録されている行はここに入り、登録されません。'**
+  String get alEmptyBody;
+
+  /// No description provided for @alHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ここにある行は登録されていません。必要なら、登録済みの商品を開いて編集するか、内容を直してから登録し直してください。'**
+  String get alHint;
+
+  /// No description provided for @alReasonJanExists.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANがすでに登録されています'**
+  String get alReasonJanExists;
+
+  /// No description provided for @alReasonJanInFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じファイルの中でJANが重複しています'**
+  String get alReasonJanInFile;
+
+  /// No description provided for @alReasonSkuExists.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番がすでに登録されています'**
+  String get alReasonSkuExists;
+
+  /// No description provided for @alExisting.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済みの商品：{name}'**
+  String alExisting(String name);
+
+  /// No description provided for @alFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'{file}　{row}行目'**
+  String alFrom(String file, int row);
+
+  /// No description provided for @alOpenExisting.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済みの商品を開く'**
+  String get alOpenExisting;
+
+  /// No description provided for @alDeleteSelected.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだアラートを削除（{count}件）'**
+  String alDeleteSelected(int count);
+
+  /// No description provided for @alDeleteAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'アラートをすべて削除（{count}件）'**
+  String alDeleteAll(int count);
+
+  /// No description provided for @alDeleteQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件のアラートを完全に削除しますか？'**
+  String alDeleteQ(int count);
+
+  /// No description provided for @alDeleteBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'アラートの記録だけが消え、元に戻せません。商品ライブラリーの商品には影響しません。'**
+  String get alDeleteBody;
+
+  /// No description provided for @alDeleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件のアラートを削除しました'**
+  String alDeleted(int count);
+
+  /// No description provided for @libImportSummary2.
+  ///
+  /// In ja, this message translates to:
+  /// **'{total}行：登録 {fresh}件・アラート {alerts}件（JAN・品番が登録済み、またはファイル内で重複）'**
+  String libImportSummary2(int total, int fresh, int alerts);
+
+  /// No description provided for @libImportDone2.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録しました：{created}件・アラート {alerts}件（アラートのタブで確認できます）'**
+  String libImportDone2(int created, int alerts);
+
+  /// No description provided for @libLineAlert.
+  ///
+  /// In ja, this message translates to:
+  /// **'アラート（重複）'**
+  String get libLineAlert;
+
+  /// No description provided for @pfDupTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じJAN・品番の商品があります'**
+  String get pfDupTitle;
+
+  /// No description provided for @pfDupJanBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'このJANは「{name}」で登録済みのため、登録できません。'**
+  String pfDupJanBody(String name);
+
+  /// No description provided for @pfDupSkuBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この品番は「{name}」で登録済みのため、登録できません。'**
+  String pfDupSkuBody(String name);
+
+  /// No description provided for @productColor.
+  ///
+  /// In ja, this message translates to:
+  /// **'色'**
+  String get productColor;
+
+  /// No description provided for @productNewHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'入力した項目だけで登録できます（必須の項目はありません）。'**
+  String get productNewHint;
+
+  /// No description provided for @productNameRequiredEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名を入力してください'**
+  String get productNameRequiredEdit;
 }
 
 class _AppLocalizationsDelegate

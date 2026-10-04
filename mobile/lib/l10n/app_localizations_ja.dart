@@ -1577,7 +1577,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featAiReviewDesc => 'AIの抽出結果を反映前に承認・却下';
 
   @override
-  String get featProducts => '商品マスタ';
+  String get featProducts => '商品ライブラリー';
 
   @override
   String get featProductsDesc => '実際に扱う商品。在庫・発注・入荷・出荷はここにつながります';
@@ -1603,7 +1603,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get unlinkedJanEmpty => '未紐付けのJANコードはありません';
 
   @override
-  String get unlinkedJanEmptyBody => '在庫・入荷・出荷などの記録は、すべて商品マスタに紐付いています。';
+  String get unlinkedJanEmptyBody => '在庫・入荷・出荷などの記録は、すべて商品ライブラリーに紐付いています。';
 
   @override
   String unlinkedJanRows(int qty) {
@@ -1674,7 +1674,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportSourceAuditLog => '監査ログ';
 
   @override
-  String get reportSourceProducts => '商品マスタ';
+  String get reportSourceProducts => '商品ライブラリー';
 
   @override
   String get reportWarehouse => '倉庫';
@@ -2133,7 +2133,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get poStatusCompleted => '完了';
 
   @override
-  String get productsTitle => '商品マスタ';
+  String get productsTitle => '商品ライブラリー';
 
   @override
   String get productsShowInactive => '休眠・提供終了も表示';
@@ -2145,7 +2145,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productsEmpty => '商品がまだありません';
 
   @override
-  String get productsEmptyBody => '右下の＋から商品を登録できます。';
+  String get productsEmptyBody =>
+      '「ファイルから登録」（自社のExcelなど）、「価格台帳から取り込む」、または右下の＋から1件ずつ登録できます。';
 
   @override
   String get productActive => '有効';
@@ -2892,7 +2893,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get stockOverPromised => '予約が引当可能数を超えています';
 
   @override
-  String get stockNotLinkedToProduct => 'このJANは商品マスタに未登録です';
+  String get stockNotLinkedToProduct => 'このJANは商品ライブラリーに未登録です';
 
   @override
   String stockPositionLot(String code) {
@@ -4109,7 +4110,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get soShipmentOpen => '作業中';
 
   @override
-  String get soLineUnlinked => '商品マスタ未登録のため引当できません';
+  String get soLineUnlinked => '商品ライブラリー未登録のため引当できません';
 
   @override
   String soLineOnOrder(int count) {
@@ -4596,7 +4597,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String chartUnregisteredNote(int jans, String units) {
-    return '商品マスタ未登録のJAN $jans 件（計 $units 個）はグラフに含まれていません';
+    return '商品ライブラリー未登録のJAN $jans 件（計 $units 個）はグラフに含まれていません';
   }
 
   @override
@@ -6000,7 +6001,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get scAnnualVolumeHint => '空欄: 過去12か月の出荷数';
 
   @override
-  String get scSalesPriceHint => '空欄: 商品マスタの価格';
+  String get scSalesPriceHint => '空欄: 商品ライブラリーの価格';
 
   @override
   String get scWeight => '重量（kg/個）';
@@ -7030,7 +7031,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorOffline => '通信できません。確定は通信が戻ってから行ってください（数え・検品の記録は端末に保存されます）。';
 
   @override
-  String get featProductLibrary => '商品ライブラリー';
+  String get featProductLibrary => '商品の写真';
 
   @override
   String get featProductLibraryDesc => '商品ごとの写真。先頭の写真が商品名の前に表示されます';
@@ -8426,7 +8427,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featPriceBookDesc =>
-      '仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品マスタとは別に管理します';
+      '仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品ライブラリーとは別に管理します';
 
   @override
   String get clTitle => '価格台帳';
@@ -8441,17 +8442,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clEmptyBody => '「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。';
 
   @override
-  String get clInMaster => 'マスタ登録済み';
+  String get clInMaster => 'ライブラリー登録済み';
 
   @override
-  String get clNotInMaster => 'マスタ未登録';
+  String get clNotInMaster => 'ライブラリー未登録';
 
   @override
-  String get clToMaster => '商品マスタに登録';
+  String get clToMaster => '商品ライブラリーに登録';
 
   @override
   String clToMasterDone(int created, int linked, int skipped) {
-    return '商品マスタに登録しました（新規 $created件・既存とつなげた $linked件・JANかメーカーがなく登録できない $skipped件）';
+    return '商品ライブラリーに登録しました（新規 $created件・既存とつなげた $linked件・JANかメーカーがなく登録できない $skipped件）';
   }
 
   @override
@@ -8464,7 +8465,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get clDeleteBody =>
-      '価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品マスタ・在庫・発注・入荷などには影響しません。';
+      '価格台帳の商品と、その仕入先ごとの価格の履歴を削除します。元に戻せません。商品ライブラリー・在庫・発注・入荷などには影響しません。';
 
   @override
   String clDeleted(int count) {
@@ -8476,7 +8477,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ciIntro =>
-      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品マスタ・在庫には影響しません。';
+      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。';
 
   @override
   String get ciTermsFor => '価格の扱い（任意）';
@@ -8523,17 +8524,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get citSourceFile => '取り込んだファイル';
 
   @override
-  String get citMaster => '商品マスタ・在庫';
+  String get citMaster => '商品ライブラリー・在庫';
 
   @override
-  String get citFoundByJan => 'JANが同じ商品マスタの商品です（まだつなげていません）';
+  String get citFoundByJan => 'JANが同じ商品ライブラリーの商品です（まだつなげていません）';
 
   @override
-  String get citOpenMaster => '商品マスタで開く';
+  String get citOpenMaster => '商品ライブラリーで開く';
 
   @override
   String get citNotInMaster =>
-      '商品マスタにはまだありません。一覧で選んで「商品マスタに登録」すると、在庫・発注で使えるようになります。';
+      '商品ライブラリーにはまだありません。一覧で選んで「商品ライブラリーに登録」すると、在庫・発注で使えるようになります。';
 
   @override
   String get citCurrentTerms => '今の取引条件（仕入先・支店ごと）';
@@ -8634,42 +8635,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get specWeightField => '重量 (g)';
 
   @override
-  String get clFromMaster => 'マスタから取り込む';
-
-  @override
-  String get cfmTitle => '商品マスタから取り込む';
-
-  @override
-  String get cfmIntro =>
-      '価格台帳にまだない、商品マスタの商品です。選んだ商品を、仕様・写真・仕入先ごとの呼び方と取引条件ごと価格台帳にコピーします。商品マスタは変わりません。あとで商品マスタの商品が削除されても、価格台帳のコピーは残ります。';
-
-  @override
-  String get cfmEmpty => '取り込める商品はありません';
-
-  @override
-  String get cfmEmptyBody => '商品マスタの商品は、すべて価格台帳にあります。';
-
-  @override
-  String cfmSelectAll(int count) {
-    return 'すべて選ぶ（$count件）';
-  }
-
-  @override
-  String cfmImport(int count) {
-    return '選んだ$count件を取り込む';
-  }
-
-  @override
-  String cfmDone(int created, int terms) {
-    return '$created件を価格台帳に取り込みました（仕入先の条件 $terms件）';
-  }
-
-  @override
-  String cfmSuppliers(int count) {
-    return '仕入先 $count社';
-  }
-
-  @override
   String get citEdit => '商品情報を編集';
 
   @override
@@ -8680,7 +8645,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get citSpecFromPriceBook =>
-      'サイズ・重量・写真は価格台帳の記録です。商品マスタを変えても、ここは変わりません。';
+      'サイズ・重量・写真は価格台帳の記録です。商品ライブラリーを変えても、ここは変わりません。';
 
   @override
   String get citHowTheyCall => 'この仕入先での呼び方と今の条件';
@@ -8702,12 +8667,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String rmQ(int count) {
-    return '$count件を商品マスタから完全に削除しますか？';
+    return '$count件を商品ライブラリーから完全に削除しますか？';
   }
 
   @override
   String get rmBody =>
-      '商品マスタから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。';
+      '商品ライブラリーから消え、元に戻せません。商品名・コード・単位・写真の登録も一緒に消えます。\n在庫・入荷・出荷・発注などの記録がある商品は削除されず、そのまま残ります。\n価格台帳の商品は残ります（つながりだけが外れ、同じJANで登録し直すと自動でつながります）。';
 
   @override
   String get rmConfirmLabel => '確認のため「削除」と入力してください';
@@ -8726,36 +8691,187 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get ciTitleMaster => 'ファイルから商品登録';
-
-  @override
-  String get ciIntroMaster =>
-      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は価格台帳（仕入先ごとの商品・価格の台帳）にも記録されます。';
-
-  @override
-  String get ciToMaster => '商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）';
-
-  @override
-  String get ciToMasterHint => 'オフにすると価格台帳にだけ記録し、商品マスタは変えません。';
-
-  @override
-  String ciMasterBlocked(int count) {
-    return '$count行はJANコードかメーカーがないため商品マスタには登録されず、価格台帳にだけ入ります。';
-  }
-
-  @override
-  String get ciLineNoMaster => 'マスタ登録不可（JAN・メーカーなし）';
-
-  @override
-  String ciImportMaster(int count) {
-    return '取り込んで商品マスタに登録（$count件）';
-  }
-
-  @override
-  String ciDoneMaster(int created, int linked, int skipped) {
-    return '商品マスタに登録しました：新規 $created件・既存の商品とつなげた $linked件・JANかメーカーがなく登録できなかった $skipped件（価格台帳には全件記録）';
-  }
+  String get ciLineNoMaster => 'ライブラリー登録不可（JAN・メーカーなし）';
 
   @override
   String get pmImportFile => 'ファイルから登録';
+
+  @override
+  String get pkTitle => '価格台帳から取り込む';
+
+  @override
+  String get pkIntro =>
+      '価格台帳にある商品のうち、まだ商品ライブラリーにないものです。仕入れると決めた商品を選んで取り込んでください。同じJANの商品が商品ライブラリーにあれば、新しく作らずにつなぎます。価格台帳の記録はそのまま残ります。';
+
+  @override
+  String get pkEmpty => '取り込める商品はありません';
+
+  @override
+  String get pkEmptyBody =>
+      '価格台帳の商品は、すべて商品ライブラリーに入っています。価格台帳が空のときは、先に「価格台帳」でファイルを取り込んでください。';
+
+  @override
+  String pkSelectAll(int count) {
+    return '取り込めるものをすべて選ぶ（$count件）';
+  }
+
+  @override
+  String pkImport(int count) {
+    return '選んだ$count件を商品ライブラリーに取り込む';
+  }
+
+  @override
+  String get pkBlocked => 'JAN・メーカーなし（取り込めません）';
+
+  @override
+  String get pmFromPriceBook => '価格台帳から取り込む';
+
+  @override
+  String get libImportTitle => 'ファイルから商品ライブラリーに登録';
+
+  @override
+  String get libImportIntro =>
+      '自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。';
+
+  @override
+  String libImportSummary(int total, int fresh, int known, int blocked) {
+    return '$total行：新規 $fresh件・更新 $known件・登録できない $blocked件（JANかメーカーがない）';
+  }
+
+  @override
+  String libImportAction(int count) {
+    return '商品ライブラリーに登録（$count件）';
+  }
+
+  @override
+  String libImportDone(int created, int updated, int skipped) {
+    return '登録しました：新規 $created件・更新 $updated件・登録できなかった $skipped件';
+  }
+
+  @override
+  String libImportInactive(int count) {
+    return '更新した商品のうち$count件はアーカイブ・休眠などのままです。使うときは一覧で選んで「取扱中に戻す」を押してください。';
+  }
+
+  @override
+  String get libLineNew => '新規';
+
+  @override
+  String get libLineUpdate => '更新';
+
+  @override
+  String get pmNew => '新規登録';
+
+  @override
+  String get pmNewTitle => '商品の登録方法を選んでください';
+
+  @override
+  String get pmNewFileDesc => '自社で作ったExcel・CSV・PDF・写真などの商品一覧から、まとめて登録します';
+
+  @override
+  String get pmNewPriceBookDesc => '価格台帳（仕入先の見積）から、仕入れると決めた商品を選んで取り込みます';
+
+  @override
+  String get pmNewManual => '手動で1件追加';
+
+  @override
+  String get pmNewManualDesc => '項目を入力して1件ずつ登録します（必須の項目はありません）';
+
+  @override
+  String get plTabList => '商品一覧';
+
+  @override
+  String plTabAlerts(int count) {
+    return 'アラート（$count）';
+  }
+
+  @override
+  String get alEmpty => 'アラートはありません';
+
+  @override
+  String get alEmptyBody => 'ファイルから登録したとき、JANや品番がすでに登録されている行はここに入り、登録されません。';
+
+  @override
+  String get alHint =>
+      'ここにある行は登録されていません。必要なら、登録済みの商品を開いて編集するか、内容を直してから登録し直してください。';
+
+  @override
+  String get alReasonJanExists => 'JANがすでに登録されています';
+
+  @override
+  String get alReasonJanInFile => '同じファイルの中でJANが重複しています';
+
+  @override
+  String get alReasonSkuExists => '品番がすでに登録されています';
+
+  @override
+  String alExisting(String name) {
+    return '登録済みの商品：$name';
+  }
+
+  @override
+  String alFrom(String file, int row) {
+    return '$file　$row行目';
+  }
+
+  @override
+  String get alOpenExisting => '登録済みの商品を開く';
+
+  @override
+  String alDeleteSelected(int count) {
+    return '選んだアラートを削除（$count件）';
+  }
+
+  @override
+  String alDeleteAll(int count) {
+    return 'アラートをすべて削除（$count件）';
+  }
+
+  @override
+  String alDeleteQ(int count) {
+    return '$count件のアラートを完全に削除しますか？';
+  }
+
+  @override
+  String get alDeleteBody => 'アラートの記録だけが消え、元に戻せません。商品ライブラリーの商品には影響しません。';
+
+  @override
+  String alDeleted(int count) {
+    return '$count件のアラートを削除しました';
+  }
+
+  @override
+  String libImportSummary2(int total, int fresh, int alerts) {
+    return '$total行：登録 $fresh件・アラート $alerts件（JAN・品番が登録済み、またはファイル内で重複）';
+  }
+
+  @override
+  String libImportDone2(int created, int alerts) {
+    return '登録しました：$created件・アラート $alerts件（アラートのタブで確認できます）';
+  }
+
+  @override
+  String get libLineAlert => 'アラート（重複）';
+
+  @override
+  String get pfDupTitle => '同じJAN・品番の商品があります';
+
+  @override
+  String pfDupJanBody(String name) {
+    return 'このJANは「$name」で登録済みのため、登録できません。';
+  }
+
+  @override
+  String pfDupSkuBody(String name) {
+    return 'この品番は「$name」で登録済みのため、登録できません。';
+  }
+
+  @override
+  String get productColor => '色';
+
+  @override
+  String get productNewHint => '入力した項目だけで登録できます（必須の項目はありません）。';
+
+  @override
+  String get productNameRequiredEdit => '品名を入力してください';
 }

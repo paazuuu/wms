@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../partners/application/trading_partner_providers.dart';
 import '../../product/application/product_providers.dart';
+import '../../product/domain/product.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../../product_library/data/quote_repository.dart';
 import '../../product_library/domain/supplier_quote.dart';
@@ -35,22 +36,33 @@ final importSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>>
 
 String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-/// A file into 価格台帳 (0124): a quotation, invoice, delivery note or
-/// catalogue — Excel, PDF or a photo — read and sorted into maker, 品名,
-/// 品番, JAN, spec and prices. Each line becomes a price book item (or updates
-/// the one with its JAN); with a supplier, its prices become that supplier's
-/// terms for the branch and from the date given, closing the ones before.
-/// Nothing in the product master, stock or anything booked is touched —
-/// unless 商品マスタにも登録する is on (0127): then the items the file became
-/// are taken into the master too, each new or linked to the product with
-/// its JAN. That is how 商品マスタ's ファイルから登録 opens this screen.
+/// Where a read file goes.
+enum ImportTarget {
+  /// 価格台帳 (0124): a supplier's quotation, invoice or catalogue, with its
+  /// prices as that supplier's terms. Nothing in 商品ライブラリー changes.
+  priceBook,
+
+  /// 商品ライブラリー (0129): a product list of our own, registered straight
+  /// in the library (`products_import`). Nothing goes into 価格台帳.
+  library,
+}
+
+/// A file read by the AI — Excel, PDF or a photo — and sorted into maker,
+/// 品名, 品番, JAN, spec, attributes, size, weight and prices, then put into
+/// [target]:
+///
+///   * 価格台帳: each line becomes a price book item (or updates the one with
+///     its JAN); with a supplier, its prices become that supplier's terms for
+///     the branch and from the date given, closing the ones before.
+///   * 商品ライブラリー: each line becomes a product — nothing is required —
+///     unless its JAN or 品番 is already there or its JAN came earlier in the
+///     file: those are alerts (0130), shown here beforehand and kept in the
+///     library's アラート tab.
 class PriceBookImportScreen extends ConsumerStatefulWidget {
-  const PriceBookImportScreen({super.key, this.pickFile, this.today, this.toMaster = false});
+  const PriceBookImportScreen({super.key, this.pickFile, this.today, this.target = ImportTarget.priceBook});
 
   final Future<PlatformFile?> Function()? pickFile;
-
-  /// Whether 商品マスタにも登録する starts on (opened from 商品マスタ).
-  final bool toMaster;
+  final ImportTarget target;
 
   /// Today, for tests.
   final DateTime? today;
@@ -68,14 +80,23 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
   bool _busy = false;
   QuoteRead? _read;
   PriceBookImported? _done;
-  late bool _toMaster = widget.toMaster;
-  ({int created, int linked, int skipped})? _master;
+  LibraryImported? _libraryDone;
 
-  /// A line the master cannot take: no JAN or no maker.
-  static bool _masterBlocked(Map<String, dynamic> l) {
-    final jan = QuoteLine.jan(l);
-    final maker = '${l['maker'] ?? ''}'.trim();
-    return !(jan.length == 13 || jan.length == 8) || maker.isEmpty;
+  bool get _toLibrary => widget.target == ImportTarget.library;
+
+  /// The lines that will become alerts in the library: a JAN or 品番 that
+  /// is already a product's, or a JAN that came earlier in the file.
+  static Set<int> _alerts(List<Map<String, dynamic>> lines, Set<String> jans, Set<String> skus) {
+    final seen = <String>{};
+    final out = <int>{};
+    for (final (i, l) in lines.indexed) {
+      final jan = QuoteLine.jan(l);
+      final code = '${l['product_code'] ?? ''}'.trim();
+      if (jan.isNotEmpty && (jans.contains(jan) || seen.contains(jan))) out.add(i);
+      if (code.isNotEmpty && skus.contains(code)) out.add(i);
+      if (jan.isNotEmpty) seen.add(jan);
+    }
+    return out;
   }
 
   @override
@@ -103,7 +124,7 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
       _file = picked;
       _read = null;
       _done = null;
-      _master = null;
+      _libraryDone = null;
     });
   }
 
@@ -113,7 +134,7 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
     if (file == null || file.bytes == null) return _snack(l10n.planImportChooseFirst);
     setState(() => _busy = true);
     final r = await ref.read(fileReaderProvider).read(
-          partnerId: _partnerId,
+          partnerId: _toLibrary ? null : _partnerId,
           file: MultipartFile.fromBytes(file.bytes!, filename: file.name),
         );
     if (!mounted) return;
@@ -123,7 +144,8 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
         setState(() {
           _read = data;
           _done = null;
-          if (_partnerId == null && data.partnerId != null) {
+          _libraryDone = null;
+          if (!_toLibrary && _partnerId == null && data.partnerId != null) {
             _partnerId = data.partnerId;
             _detected = true;
           }
@@ -144,48 +166,44 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
   }
 
   Future<void> _import() async {
-    final l10n = AppLocalizations.of(context);
     final read = _read;
     if (read == null) return;
     setState(() => _busy = true);
+    final lines = [for (final l in read.lines) QuoteLine.toSaveJson(l)];
+    if (_toLibrary) return _importToLibrary(lines);
+    final l10n = AppLocalizations.of(context);
     final branch = _branch.text.trim();
     final r = await ref.read(priceBookRepositoryProvider).import(
-          [for (final l in read.lines) QuoteLine.toSaveJson(l)],
+          lines,
           partnerId: _partnerId,
           branch: branch.isEmpty ? null : branch,
           validFrom: _from,
           sourceFile: _file?.name,
         );
     if (!mounted) return;
+    setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
+        setState(() => _done = data);
         ref.invalidate(priceBookListProvider);
-        if (_toMaster && data.ids.isNotEmpty) {
-          // The same items into the master: new, or linked by JAN.
-          final m = await ref.read(priceBookRepositoryProvider).toProducts(data.ids);
-          if (!mounted) return;
-          ref.invalidate(productListProvider);
-          setState(() {
-            _busy = false;
-            _done = data;
-            _master = switch (m) { ApiSuccess(data: final d) => d, ApiFailure() => null };
-          });
-          switch (m) {
-            case ApiSuccess(data: final d):
-              _snack(l10n.ciDoneMaster(d.created, d.linked, d.skipped));
-            case ApiFailure(:final message):
-              _snack(humanizeApiErrorMessage(l10n, message));
-          }
-          return;
-        }
-        setState(() {
-          _busy = false;
-          _done = data;
-          _master = null;
-        });
         _snack(l10n.ciDone(data.created, data.updated, data.terms));
       case ApiFailure(:final message):
-        setState(() => _busy = false);
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  Future<void> _importToLibrary(List<Map<String, dynamic>> lines) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(productRepositoryProvider).importLines(lines, sourceFile: _file?.name);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        setState(() => _libraryDone = data);
+        ref.invalidate(productListProvider);
+        ref.invalidate(productAlertsProvider);
+        _snack(l10n.libImportDone2(data.created, data.alerts));
+      case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
   }
@@ -194,22 +212,31 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final suppliers = ref.watch(importSuppliersProvider).valueOrNull ?? const <TradingPartner>[];
-    final inLibrary = {
-      for (final i in ref.watch(priceBookListProvider).valueOrNull ?? const <PriceBookItem>[])
-        if (i.janCode != null) i.janCode!: i,
-    };
+    final suppliers = _toLibrary
+        ? const <TradingPartner>[]
+        : ref.watch(importSuppliersProvider).valueOrNull ?? const <TradingPartner>[];
+    // What is there already, by JAN: products for the library, items for
+    // the price book.
+    final products = _toLibrary ? ref.watch(productListProvider).valueOrNull ?? const <Product>[] : const <Product>[];
+    final known = _toLibrary
+        ? {for (final p in products) if (p.janCode.isNotEmpty) p.janCode}
+        : {
+            for (final i in ref.watch(priceBookListProvider).valueOrNull ?? const <PriceBookItem>[])
+              if (i.janCode != null) i.janCode!,
+          };
     final read = _read;
     final lines = read?.lines ?? const <Map<String, dynamic>>[];
-    final known = lines.where((l) => inLibrary.containsKey(QuoteLine.jan(l))).length;
-    final blocked = lines.where(_masterBlocked).length;
+    final knownCount = lines.where((l) => known.contains(QuoteLine.jan(l))).length;
+    final alerts = _toLibrary
+        ? _alerts(lines, known, {for (final p in products) if (p.sku != null) p.sku!})
+        : const <int>{};
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.toMaster ? l10n.ciTitleMaster : l10n.ciTitle)),
+      appBar: AppBar(title: Text(_toLibrary ? l10n.libImportTitle : l10n.ciTitle)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          Text(widget.toMaster ? l10n.ciIntroMaster : l10n.ciIntro, key: const ValueKey('ci-intro'), style: theme.textTheme.bodySmall),
+          Text(_toLibrary ? l10n.libImportIntro : l10n.ciIntro, key: const ValueKey('ci-intro'), style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.sm,
@@ -230,50 +257,53 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          // What the prices are for: optional, and only needed for terms.
-          Text(l10n.ciTermsFor, style: theme.textTheme.titleSmall),
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.sm,
-            children: [
-              SizedBox(
-                width: 320,
-                child: DropdownButtonFormField<int>(
-                  key: const ValueKey('ci-partner'),
-                  initialValue: suppliers.any((p) => p.id == _partnerId) ? _partnerId : null,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.quoteSupplierOptional,
-                    helperText: _detected ? l10n.quoteSupplierDetected : null,
+          // What the prices are for (price book only): optional, and only
+          // needed for terms.
+          if (!_toLibrary) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.ciTermsFor, style: theme.textTheme.titleSmall),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.sm,
+              children: [
+                SizedBox(
+                  width: 320,
+                  child: DropdownButtonFormField<int>(
+                    key: const ValueKey('ci-partner'),
+                    initialValue: suppliers.any((p) => p.id == _partnerId) ? _partnerId : null,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: l10n.quoteSupplierOptional,
+                      helperText: _detected ? l10n.quoteSupplierDetected : null,
+                    ),
+                    items: [
+                      DropdownMenuItem<int>(value: null, child: Text(l10n.quoteSupplierNone)),
+                      for (final p in suppliers) DropdownMenuItem(value: p.id, child: Text(p.name)),
+                    ],
+                    onChanged: (v) => setState(() {
+                      _partnerId = v;
+                      _detected = false;
+                    }),
                   ),
-                  items: [
-                    DropdownMenuItem<int>(value: null, child: Text(l10n.quoteSupplierNone)),
-                    for (final p in suppliers) DropdownMenuItem(value: p.id, child: Text(p.name)),
-                  ],
-                  onChanged: (v) => setState(() {
-                    _partnerId = v;
-                    _detected = false;
-                  }),
                 ),
-              ),
-              SizedBox(
-                width: 220,
-                child: TextField(
-                  key: const ValueKey('ci-branch'),
-                  controller: _branch,
-                  decoration: InputDecoration(labelText: l10n.ciBranch, hintText: l10n.ciBranchHint),
+                SizedBox(
+                  width: 220,
+                  child: TextField(
+                    key: const ValueKey('ci-branch'),
+                    controller: _branch,
+                    decoration: InputDecoration(labelText: l10n.ciBranch, hintText: l10n.ciBranchHint),
+                  ),
                 ),
-              ),
-              OutlinedButton.icon(
-                key: const ValueKey('ci-from'),
-                onPressed: _pickDate,
-                icon: const Icon(Icons.event_outlined, size: 18),
-                label: Text(l10n.ciValidFrom(_day(_from))),
-              ),
-            ],
-          ),
+                OutlinedButton.icon(
+                  key: const ValueKey('ci-from'),
+                  onPressed: _pickDate,
+                  icon: const Icon(Icons.event_outlined, size: 18),
+                  label: Text(l10n.ciValidFrom(_day(_from))),
+                ),
+              ],
+            ),
+          ],
           if (_busy) ...[
             const SizedBox(height: AppSpacing.md),
             const LinearProgressIndicator(),
@@ -287,39 +317,31 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: StatusPill(tone: StatusTone.warning, label: l10n.quoteUnverified),
               ),
-            Text(l10n.ciSummary(lines.length, lines.length - known, known),
-                key: const ValueKey('ci-summary'), style: theme.textTheme.titleSmall),
-            if (_partnerId == null)
-              Text(l10n.ciNoSupplierNote, style: theme.textTheme.bodySmall),
-            const SizedBox(height: AppSpacing.sm),
-            // Into the master as well, or the price book only.
-            CheckboxListTile(
-              key: const ValueKey('ci-to-master'),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: _toMaster,
-              onChanged: _busy ? null : (v) => setState(() => _toMaster = v ?? false),
-              title: Text(l10n.ciToMaster),
-              subtitle: Text(_toMaster && blocked > 0 ? l10n.ciMasterBlocked(blocked) : l10n.ciToMasterHint,
-                  key: const ValueKey('ci-to-master-note')),
+            Text(
+              _toLibrary
+                  ? l10n.libImportSummary2(lines.length, lines.length - alerts.length, alerts.length)
+                  : l10n.ciSummary(lines.length, lines.length - knownCount, knownCount),
+              key: const ValueKey('ci-summary'),
+              style: theme.textTheme.titleSmall,
             ),
+            if (!_toLibrary && _partnerId == null) Text(l10n.ciNoSupplierNote, style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.sm),
             FilledButton.icon(
               key: const ValueKey('ci-import'),
               onPressed: _busy || lines.isEmpty ? null : _import,
-              icon: Icon(_toMaster ? Icons.inventory_2_outlined : Icons.library_add_outlined),
-              label: Text(_toMaster ? l10n.ciImportMaster(lines.length) : l10n.ciImport(lines.length)),
+              icon: Icon(_toLibrary ? Icons.inventory_2_outlined : Icons.library_add_outlined),
+              label: Text(_toLibrary ? l10n.libImportAction(lines.length - alerts.length) : l10n.ciImport(lines.length)),
             ),
             if (_done case final d?) ...[
               const SizedBox(height: AppSpacing.sm),
               StatusPill(tone: StatusTone.success, label: l10n.ciDone(d.created, d.updated, d.terms)),
             ],
-            if (_master case final m?) ...[
-              const SizedBox(height: AppSpacing.xs),
+            if (_libraryDone case final d?) ...[
+              const SizedBox(height: AppSpacing.sm),
               StatusPill(
-                key: const ValueKey('ci-master-done'),
-                tone: m.skipped > 0 ? StatusTone.warning : StatusTone.success,
-                label: l10n.ciDoneMaster(m.created, m.linked, m.skipped),
+                key: const ValueKey('ci-library-done'),
+                tone: d.alerts == 0 ? StatusTone.success : StatusTone.warning,
+                label: l10n.libImportDone2(d.created, d.alerts),
               ),
             ],
             const SizedBox(height: AppSpacing.md),
@@ -327,8 +349,8 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
               ImportLineCard(
                 key: ValueKey('ci-line-$i'),
                 line: l,
-                inLibrary: inLibrary.containsKey(QuoteLine.jan(l)),
-                masterBlocked: _toMaster && _masterBlocked(l),
+                known: !_toLibrary && known.contains(QuoteLine.jan(l)),
+                alert: alerts.contains(i),
               ),
           ],
         ],
@@ -339,13 +361,15 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
 
 /// One read line, each part under its name.
 class ImportLineCard extends StatelessWidget {
-  const ImportLineCard({super.key, required this.line, required this.inLibrary, this.masterBlocked = false});
+  const ImportLineCard({super.key, required this.line, required this.known, this.alert = false});
 
   final Map<String, dynamic> line;
-  final bool inLibrary;
 
-  /// Shown when the line is to go into the master but cannot (no JAN or maker).
-  final bool masterBlocked;
+  /// Whether its JAN is there already (updated rather than new).
+  final bool known;
+
+  /// Shown when the line will be an alert in the library (a duplicate).
+  final bool alert;
 
   static String yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
@@ -386,13 +410,13 @@ class ImportLineCard extends StatelessWidget {
               Expanded(
                 child: Text(t(line['product_name']) ?? QuoteLine.jan(line), style: theme.textTheme.titleSmall),
               ),
-              if (masterBlocked) ...[
-                StatusPill(tone: StatusTone.warning, label: l10n.ciLineNoMaster, dense: true),
+              if (alert) ...[
+                StatusPill(tone: StatusTone.warning, label: l10n.libLineAlert, dense: true),
                 const SizedBox(width: AppSpacing.xs),
               ],
               StatusPill(
-                tone: inLibrary ? StatusTone.info : StatusTone.success,
-                label: inLibrary ? l10n.ciLineUpdate : l10n.ciLineNew,
+                tone: known ? StatusTone.info : StatusTone.success,
+                label: known ? l10n.ciLineUpdate : l10n.ciLineNew,
                 dense: true,
               ),
             ]),

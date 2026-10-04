@@ -78,6 +78,8 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('new-manual')));
+    await tester.pumpAndSettle();
 
     await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4901234567890');
     await tester.enterText(find.widgetWithText(TextField, '商品名'), 'テストペン');
@@ -102,6 +104,8 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('new-manual')));
+    await tester.pumpAndSettle();
 
     await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4901234567890');
     await tester.enterText(find.widgetWithText(TextField, '商品名'), 'テストペン');
@@ -123,6 +127,8 @@ void main() {
     await _pump(tester, repo);
 
     await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('new-manual')));
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.qr_code_scanner_outlined), findsOneWidget);
@@ -315,7 +321,14 @@ void main() {
     await _pump(tester, repo);
 
     expect(find.byKey(const ValueKey('products-add')), findsOneWidget);
-    expect(find.byKey(const ValueKey('products-from-library')), findsOneWidget);
+    // 新規登録 offers a file of our own, the price book, and one by hand.
+    await tester.tap(find.byKey(const ValueKey('products-add')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('new-file')), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-price-book')), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-manual')), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('product-menu-1')));
     await tester.pumpAndSettle();
     expect(find.text('編集'), findsOneWidget);
@@ -444,7 +457,7 @@ void main() {
     expect(find.byKey(const ValueKey('lc-to-archived')), findsNothing);
     await tester.tap(find.byKey(const ValueKey('lc-remove')));
     await tester.pumpAndSettle();
-    expect(find.text('3件を商品マスタから完全に削除しますか？'), findsOneWidget);
+    expect(find.text('3件を商品ライブラリーから完全に削除しますか？'), findsOneWidget);
     // Not until 削除 is typed.
     expect(tester.widget<FilledButton>(find.byKey(const ValueKey('rm-confirm'))).onPressed, isNull);
     await tester.enterText(find.byKey(const ValueKey('rm-word')), '削除');
@@ -624,5 +637,86 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.lifecycleCalls.single.lifecycle, ProductLifecycle.active);
     expect(repo.lifecycleCalls.single.ids, [1, 2, 3]);
+  });
+
+  testWidgets('a new product needs nothing filled in; a JAN already registered is an alert (0130)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [stocked]);
+    await _pump(tester, repo);
+
+    Future<void> openForm() async {
+      await tester.tap(find.byKey(const ValueKey('products-add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('new-manual')));
+      await tester.pumpAndSettle();
+    }
+
+    // The JAN of the pen already in the library: an alert, nothing saved.
+    await openForm();
+    expect(find.byKey(const ValueKey('product-new-hint')), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '4902505632037');
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('product-dup-alert')), findsOneWidget);
+    expect(find.text('このJANは「ボールペン」で登録済みのため、登録できません。'), findsOneWidget);
+    expect(repo.addedOne, isEmpty);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    // Only a colour and a size: saved as it is.
+    await tester.enterText(find.widgetWithText(TextField, 'JANコード'), '');
+    await tester.enterText(find.byKey(const ValueKey('product-color')), '青');
+    await tester.enterText(find.byKey(const ValueKey('product-w')), '10');
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+    final added = repo.addedOne.single;
+    expect(added['jan_code'], isNull);
+    expect(added['maker'], isNull);
+    expect(added['width_mm'], 10.0);
+    expect((added['attributes'] as List).single['value'], '青');
+  });
+
+  testWidgets('imports kept back show in the alerts tab, with why, and are removed chosen or all (0130)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [stocked])
+      ..alertList = const [
+        ProductAlert(
+          id: 1, reason: ProductAlertReason.janExists, janCode: '4902505632037', name: 'ボールペン（取引先の表記）',
+          existingProductId: 1, existingName: 'ボールペン', sourceFile: 'own.xlsx', rowNo: 3,
+        ),
+        ProductAlert(id: 2, reason: ProductAlertReason.skuExists, name: '品番かぶり', itemCode: 'BP-1', existingName: 'ボールペン'),
+        ProductAlert(id: 3, reason: ProductAlertReason.janInFile, janCode: '4999999000017', name: '同じJAN'),
+      ];
+    await _pump(tester, repo);
+
+    expect(find.text('アラート（3）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pm-tab-alerts')));
+    await tester.pumpAndSettle();
+    expect(find.text('JANがすでに登録されています'), findsOneWidget);
+    expect(find.text('品番がすでに登録されています'), findsOneWidget);
+    expect(find.text('同じファイルの中でJANが重複しています'), findsOneWidget);
+    expect(find.text('own.xlsx　3行目'), findsOneWidget);
+    expect(find.byKey(const ValueKey('al-existing-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('al-open-1')), findsOneWidget);
+
+    // One chosen and removed for good.
+    await tester.tap(find.byKey(const ValueKey('al-check-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('al-delete-selected')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('al-delete-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.deletedAlerts.first, [2]);
+    expect(find.byKey(const ValueKey('al-2')), findsNothing);
+
+    // The rest, all at once.
+    await tester.tap(find.byKey(const ValueKey('al-delete-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('al-delete-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.deletedAlerts.last, isNull);
+    expect(find.text('アラートはありません'), findsOneWidget);
   });
 }

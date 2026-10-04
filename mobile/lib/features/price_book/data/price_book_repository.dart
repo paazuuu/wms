@@ -30,13 +30,6 @@ abstract class PriceBookRepository {
   /// Removes items from the price book only (their terms go with them).
   Future<ApiResult<int>> delete(List<int> ids);
 
-  /// Master products not in the price book yet (0125).
-  Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search});
-
-  /// Master products into the price book with their spec, pictures and each
-  /// supplier's terms; resolves to (created, terms, skipped).
-  Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds);
-
   /// Corrects an item: only the keys given change (0125).
   Future<ApiResult<bool>> update(int itemId, Map<String, dynamic> fields);
 }
@@ -134,28 +127,6 @@ class PriceBookRepositoryImpl implements PriceBookRepository {
       return ApiSuccess(r.data is List ? (r.data as List).length : ids.length);
     } on DioException catch (e) {
       return mapDioError<int>(e);
-    }
-  }
-
-  @override
-  Future<ApiResult<List<MasterCandidate>>> masterCandidates({String? search}) async {
-    try {
-      final r = await _rest.post('/rpc/price_book_master_candidates', data: {'p_search': search});
-      return ApiSuccess([for (final e in _rows(r.data)) MasterCandidate.fromJson(e)]);
-    } on DioException catch (e) {
-      return mapDioError<List<MasterCandidate>>(e);
-    }
-  }
-
-  @override
-  Future<ApiResult<({int created, int terms, int skipped})>> fromMaster(List<int> productIds) async {
-    try {
-      final r = await _rest.post('/rpc/price_book_from_master', data: {'p_ids': productIds});
-      final j = (_one(r.data) as Map).cast<String, dynamic>();
-      int n(String k) => (j[k] as num?)?.toInt() ?? 0;
-      return ApiSuccess((created: n('created'), terms: n('terms'), skipped: n('skipped')));
-    } on DioException catch (e) {
-      return mapDioError<({int created, int terms, int skipped})>(e);
     }
   }
 

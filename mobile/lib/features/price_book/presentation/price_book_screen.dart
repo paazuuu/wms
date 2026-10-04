@@ -17,7 +17,6 @@ import '../domain/price_book.dart';
 import 'price_book_import_screen.dart';
 import 'price_book_item_screen.dart';
 import 'price_book_thumb.dart';
-import 'master_import_screen.dart';
 
 String _yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
@@ -212,17 +211,6 @@ class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
                   },
                   icon: const Icon(Icons.auto_awesome_outlined, size: 18),
                   label: Text(l10n.ciTitle),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                // Master products not in the price book yet (0125).
-                OutlinedButton.icon(
-                  key: const ValueKey('cl-from-master'),
-                  onPressed: () async {
-                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasterImportScreen()));
-                    ref.invalidate(priceBookListProvider);
-                  },
-                  icon: const Icon(Icons.move_down_outlined, size: 18),
-                  label: Text(l10n.clFromMaster),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 OutlinedButton.icon(

@@ -1573,7 +1573,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featAiReviewDesc => '在生效前确认或拒绝 AI 提取的结果';
 
   @override
-  String get featProducts => '商品主数据';
+  String get featProducts => '商品库';
 
   @override
   String get featProductsDesc => '实际经营的商品，库存、订单、入库、出库都与此关联';
@@ -1670,7 +1670,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportSourceAuditLog => '审计日志';
 
   @override
-  String get reportSourceProducts => '商品主数据';
+  String get reportSourceProducts => '商品库';
 
   @override
   String get reportWarehouse => '仓库';
@@ -2129,7 +2129,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get poStatusCompleted => '已完成';
 
   @override
-  String get productsTitle => '商品主数据';
+  String get productsTitle => '商品库';
 
   @override
   String get productsShowInactive => '同时显示休眠与停止供应';
@@ -2141,7 +2141,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productsEmpty => '暂无商品';
 
   @override
-  String get productsEmptyBody => '点击右下角的 + 添加商品。';
+  String get productsEmptyBody =>
+      '可通过“从文件登录”（自制 Excel 等）、“从价格台账导入”，或右下角的＋逐件登录。';
 
   @override
   String get productActive => '启用';
@@ -2885,7 +2886,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stockOverPromised => '预留超过可用库存';
 
   @override
-  String get stockNotLinkedToProduct => '该JAN尚未登记到商品主数据';
+  String get stockNotLinkedToProduct => '该JAN尚未登记到商品库';
 
   @override
   String stockPositionLot(String code) {
@@ -5982,7 +5983,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scAnnualVolumeHint => '留空：过去12个月出货量';
 
   @override
-  String get scSalesPriceHint => '留空：商品主数据价格';
+  String get scSalesPriceHint => '留空：商品库价格';
 
   @override
   String get scWeight => '重量（kg/件）';
@@ -8391,7 +8392,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPriceBook => '价格台账';
 
   @override
-  String get featPriceBookDesc => '各供应商的商品叫法、价格、折扣率台账（按分店、时期），从文件导入，与商品主数据分开管理';
+  String get featPriceBookDesc => '各供应商的商品叫法、价格、折扣率台账（按分店、时期），从文件导入，与商品库分开管理';
 
   @override
   String get clTitle => '价格台账';
@@ -8406,17 +8407,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clEmptyBody => '请用“从文件导入”读取报价单、发票或目录等。';
 
   @override
-  String get clInMaster => '已登录主数据';
+  String get clInMaster => '已登录商品库';
 
   @override
-  String get clNotInMaster => '未登录主数据';
+  String get clNotInMaster => '未登录商品库';
 
   @override
-  String get clToMaster => '登录到商品主数据';
+  String get clToMaster => '登录到商品库';
 
   @override
   String clToMasterDone(int created, int linked, int skipped) {
-    return '已登录到商品主数据：新建 $created 件、关联已有 $linked 件、因无 JAN 或制造商跳过 $skipped 件';
+    return '已登录到商品库：新建 $created 件、关联已有 $linked 件、因无 JAN 或制造商跳过 $skipped 件';
   }
 
   @override
@@ -8428,7 +8429,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get clDeleteBody => '删除价格台账中的商品及其各供应商价格历史，无法恢复。不影响商品主数据、库存、订单、入库等。';
+  String get clDeleteBody => '删除价格台账中的商品及其各供应商价格历史，无法恢复。不影响商品库、库存、订单、入库等。';
 
   @override
   String clDeleted(int count) {
@@ -8440,7 +8441,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ciIntro =>
-      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN、规格、价格整理后放入价格台账。相同 JAN 的商品会更新。不影响商品主数据和库存。';
+      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN、规格、价格整理后放入价格台账。相同 JAN 的商品会更新。不影响商品库和库存。';
 
   @override
   String get ciTermsFor => '价格（可选）';
@@ -8487,16 +8488,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get citSourceFile => '来源文件';
 
   @override
-  String get citMaster => '商品主数据・库存';
+  String get citMaster => '商品库・库存';
 
   @override
-  String get citFoundByJan => 'JAN 相同的主数据商品（尚未关联）';
+  String get citFoundByJan => 'JAN 相同的商品库商品（尚未关联）';
 
   @override
-  String get citOpenMaster => '在商品主数据中打开';
+  String get citOpenMaster => '在商品库中打开';
 
   @override
-  String get citNotInMaster => '尚未登录商品主数据。在列表中选择并“登录到商品主数据”后，即可用于库存和订单。';
+  String get citNotInMaster => '尚未登录商品库。在列表中选择并“登录到商品库”后，即可用于库存和订单。';
 
   @override
   String get citCurrentTerms => '当前交易条件（按供应商、分店）';
@@ -8597,42 +8598,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get specWeightField => '重量 (g)';
 
   @override
-  String get clFromMaster => '从主数据导入';
-
-  @override
-  String get cfmTitle => '从商品主数据导入';
-
-  @override
-  String get cfmIntro =>
-      '尚未在价格台账中的主数据商品。所选商品将连同规格、照片以及各供应商的叫法和交易条件复制到价格台账。商品主数据不变；即使之后删除主数据商品，价格台账中的副本仍会保留。';
-
-  @override
-  String get cfmEmpty => '没有可导入的商品';
-
-  @override
-  String get cfmEmptyBody => '商品主数据中的商品都已在价格台账中。';
-
-  @override
-  String cfmSelectAll(int count) {
-    return '全选（$count 件）';
-  }
-
-  @override
-  String cfmImport(int count) {
-    return '导入所选 $count 件';
-  }
-
-  @override
-  String cfmDone(int created, int terms) {
-    return '已将 $created 件导入价格台账（供应商条件 $terms 件）';
-  }
-
-  @override
-  String cfmSuppliers(int count) {
-    return '供应商 $count 家';
-  }
-
-  @override
   String get citEdit => '编辑商品信息';
 
   @override
@@ -8642,7 +8607,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get citSaved => '已保存';
 
   @override
-  String get citSpecFromPriceBook => '此处的尺寸、重量和照片是价格台账自己的记录，修改主数据不会改变它们。';
+  String get citSpecFromPriceBook => '此处的尺寸、重量和照片是价格台账自己的记录，修改商品库不会改变它们。';
 
   @override
   String get citHowTheyCall => '该供应商的叫法与当前条件';
@@ -8664,12 +8629,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String rmQ(int count) {
-    return '要从商品主数据中彻底删除 $count 件吗？';
+    return '要从商品库中彻底删除 $count 件吗？';
   }
 
   @override
   String get rmBody =>
-      '将从商品主数据中彻底删除，无法恢复。商品名、编码、单位、照片登记也会一并删除。\n有库存、入库、出库、订单等记录的商品不会删除，保持原样。\n价格台账中的商品会保留（只解除关联，用相同 JAN 重新登录后会自动关联）。';
+      '将从商品库中彻底删除，无法恢复。商品名、编码、单位、照片登记也会一并删除。\n有库存、入库、出库、订单等记录的商品不会删除，保持原样。\n价格台账中的商品会保留（只解除关联，用相同 JAN 重新登录后会自动关联）。';
 
   @override
   String get rmConfirmLabel => '请输入「削除」以确认';
@@ -8688,36 +8653,185 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get ciTitleMaster => '从文件登录商品';
-
-  @override
-  String get ciIntroMaster =>
-      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN 整理后登录到商品主数据。主数据中已有相同 JAN 的商品时不新建而是关联。读取的内容（各供应商的叫法与价格）也会记录在价格台账中。';
-
-  @override
-  String get ciToMaster => '同时登录到商品主数据（用于库存、入库、出库）';
-
-  @override
-  String get ciToMasterHint => '关闭时只记录到价格台账，不更改商品主数据。';
-
-  @override
-  String ciMasterBlocked(int count) {
-    return '$count 行没有 JAN 或制造商，不会登录到商品主数据，只记录到价格台账。';
-  }
-
-  @override
-  String get ciLineNoMaster => '无法登录主数据（无 JAN 或制造商）';
-
-  @override
-  String ciImportMaster(int count) {
-    return '导入并登录到商品主数据（$count 件）';
-  }
-
-  @override
-  String ciDoneMaster(int created, int linked, int skipped) {
-    return '已登录到商品主数据：新建 $created 件、关联已有商品 $linked 件、因无 JAN 或制造商未登录 $skipped 件（全部记录在价格台账）';
-  }
+  String get ciLineNoMaster => '无法登录商品库（无 JAN 或制造商）';
 
   @override
   String get pmImportFile => '从文件登录';
+
+  @override
+  String get pkTitle => '从价格台账导入';
+
+  @override
+  String get pkIntro =>
+      '价格台账中尚未进入商品库的商品。请选择决定采购的商品导入。商品库中已有相同 JAN 的商品时不新建而是关联。价格台账的记录保持不变。';
+
+  @override
+  String get pkEmpty => '没有可导入的商品';
+
+  @override
+  String get pkEmptyBody => '价格台账中的商品都已在商品库中。价格台账为空时，请先在“价格台账”中导入文件。';
+
+  @override
+  String pkSelectAll(int count) {
+    return '全选可导入的（$count 件）';
+  }
+
+  @override
+  String pkImport(int count) {
+    return '将所选 $count 件导入商品库';
+  }
+
+  @override
+  String get pkBlocked => '无 JAN 或制造商（无法导入）';
+
+  @override
+  String get pmFromPriceBook => '从价格台账导入';
+
+  @override
+  String get libImportTitle => '从文件登录到商品库';
+
+  @override
+  String get libImportIntro =>
+      'AI 读取自制的商品清单（Excel、CSV、PDF、照片等），按制造商、品名、货号、JAN、属性、尺寸、重量整理后直接登录到商品库。相同 JAN 的商品会更新。不记录到价格台账（供应商报价请在“价格台账”中导入）。';
+
+  @override
+  String libImportSummary(int total, int fresh, int known, int blocked) {
+    return '$total 行：新建 $fresh 件・更新 $known 件・无法登录 $blocked 件（无 JAN 或制造商）';
+  }
+
+  @override
+  String libImportAction(int count) {
+    return '登录到商品库（$count 件）';
+  }
+
+  @override
+  String libImportDone(int created, int updated, int skipped) {
+    return '已登录：新建 $created 件・更新 $updated 件・未登录 $skipped 件';
+  }
+
+  @override
+  String libImportInactive(int count) {
+    return '更新的商品中有 $count 件仍为归档、休眠等状态。使用时请在列表中选择并“恢复在售”。';
+  }
+
+  @override
+  String get libLineNew => '新建';
+
+  @override
+  String get libLineUpdate => '更新';
+
+  @override
+  String get pmNew => '新登录';
+
+  @override
+  String get pmNewTitle => '请选择登录商品的方式';
+
+  @override
+  String get pmNewFileDesc => '从自制的商品清单（Excel、CSV、PDF、照片等）批量登录';
+
+  @override
+  String get pmNewPriceBookDesc => '从价格台账（供应商报价）中选择决定采购的商品导入';
+
+  @override
+  String get pmNewManual => '手动添加 1 件';
+
+  @override
+  String get pmNewManualDesc => '输入项目逐件登录（没有必填项）';
+
+  @override
+  String get plTabList => '商品列表';
+
+  @override
+  String plTabAlerts(int count) {
+    return '提醒（$count）';
+  }
+
+  @override
+  String get alEmpty => '没有提醒';
+
+  @override
+  String get alEmptyBody => '从文件登录时，JAN 或货号已登录的行会放到这里，不会被登录。';
+
+  @override
+  String get alHint => '这些行没有被登录。如有需要，请打开已登录的商品进行编辑，或修改内容后重新登录。';
+
+  @override
+  String get alReasonJanExists => 'JAN 已登录';
+
+  @override
+  String get alReasonJanInFile => '同一文件中 JAN 重复';
+
+  @override
+  String get alReasonSkuExists => '货号已登录';
+
+  @override
+  String alExisting(String name) {
+    return '已登录的商品：$name';
+  }
+
+  @override
+  String alFrom(String file, int row) {
+    return '$file 第 $row 行';
+  }
+
+  @override
+  String get alOpenExisting => '打开已登录的商品';
+
+  @override
+  String alDeleteSelected(int count) {
+    return '删除所选提醒（$count 件）';
+  }
+
+  @override
+  String alDeleteAll(int count) {
+    return '删除全部提醒（$count 件）';
+  }
+
+  @override
+  String alDeleteQ(int count) {
+    return '要彻底删除 $count 件提醒吗？';
+  }
+
+  @override
+  String get alDeleteBody => '只删除提醒记录，无法恢复。不影响商品库中的商品。';
+
+  @override
+  String alDeleted(int count) {
+    return '已删除 $count 件提醒';
+  }
+
+  @override
+  String libImportSummary2(int total, int fresh, int alerts) {
+    return '$total 行：登录 $fresh 件・提醒 $alerts 件（JAN 或货号已登录，或文件内重复）';
+  }
+
+  @override
+  String libImportDone2(int created, int alerts) {
+    return '已登录 $created 件・提醒 $alerts 件（可在提醒标签页查看）';
+  }
+
+  @override
+  String get libLineAlert => '提醒（重复）';
+
+  @override
+  String get pfDupTitle => '已有相同 JAN 或货号的商品';
+
+  @override
+  String pfDupJanBody(String name) {
+    return '该 JAN 已登录为“$name”，无法再次登录。';
+  }
+
+  @override
+  String pfDupSkuBody(String name) {
+    return '该货号已登录为“$name”，无法再次登录。';
+  }
+
+  @override
+  String get productColor => '颜色';
+
+  @override
+  String get productNewHint => '仅登录输入的项目（没有必填项）。';
+
+  @override
+  String get productNameRequiredEdit => '请输入品名';
 }

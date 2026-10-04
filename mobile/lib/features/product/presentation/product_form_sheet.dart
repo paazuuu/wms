@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
 import '../../../core/scan/barcode_resolver.dart';
 import '../../../core/scan/scan_context.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
@@ -16,6 +17,10 @@ import 'product_labels.dart';
 /// Bottom sheet for creating or editing one product. The JAN code is fixed
 /// once created — `update_product` never touches it — so it's read-only
 /// (shown, not editable) when [product] is non-null.
+///
+/// A new product needs nothing filled in (0130): JAN, name, 品番, maker,
+/// colour, weight and size are all optional. A JAN or 品番 already in the
+/// library is an alert naming the product that has it, and nothing is saved.
 class ProductFormSheet extends ConsumerStatefulWidget {
   const ProductFormSheet({super.key, this.product});
 
@@ -40,6 +45,12 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       TextEditingController(text: widget.product?.sku ?? '');
   late final TextEditingController _maker =
       TextEditingController(text: widget.product?.maker ?? '');
+  // New products only: colour, weight and size go in with the product.
+  final _color = TextEditingController();
+  final _weight = TextEditingController();
+  final _width = TextEditingController();
+  final _depth = TextEditingController();
+  final _height = TextEditingController();
   late TrackingMode _tracking =
       widget.product?.trackingMode ?? TrackingMode.untracked;
   late String _pickingRule = widget.product?.pickingRule ?? 'FEFO';
@@ -95,19 +106,19 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
     _price.dispose();
     _sku.dispose();
     _maker.dispose();
+    _color.dispose();
+    _weight.dispose();
+    _width.dispose();
+    _depth.dispose();
+    _height.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
-    if (_jan.text.trim().isEmpty || _name.text.trim().isEmpty) {
-      setState(() => _error = l10n.productValidationRequired);
-      return;
-    }
-    // Every product names its maker (0105): it is what a trading company's
-    // way of writing it is converted to, and what goes out on our slips.
-    if (_maker.text.trim().isEmpty) {
-      setState(() => _error = l10n.productMakerRequired);
+    // Editing keeps a name on the product; a new one needs nothing (0130).
+    if (_isEdit && _name.text.trim().isEmpty) {
+      setState(() => _error = l10n.productNameRequiredEdit);
       return;
     }
     setState(() {
@@ -134,16 +145,46 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       );
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     } else {
-      final result = await repo.create(
-        janCode: _jan.text.trim(),
-        name: _name.text.trim(),
-        maker: _maker.text.trim(),
-        category: category,
-        price: price,
-      );
-      result.when(
-          success: (id) => productId = id,
-          failure: (f) => errorMessage = f.message);
+      String? t(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
+      double? n(TextEditingController c) => double.tryParse(c.text.trim().replaceAll(',', ''));
+      final result = await repo.addOne({
+        'jan_code': t(_jan),
+        'name': t(_name),
+        'sku': t(_sku),
+        'maker': t(_maker),
+        'category': category,
+        'price': price,
+        'weight_g': n(_weight),
+        'width_mm': n(_width),
+        'depth_mm': n(_depth),
+        'height_mm': n(_height),
+        if (t(_color) case final color?) 'attributes': [
+          {'key': 'color', 'name': l10n.productColor, 'value': color},
+        ],
+      });
+      switch (result) {
+        case ApiSuccess(:final data):
+          productId = data;
+        // The JAN or 品番 is already a product's: say whose, save nothing.
+        case ApiFailure(:final message) when message.contains('jan_exists:') || message.contains('sku_exists:'):
+          final sku = message.contains('sku_exists:');
+          final name = message.split(RegExp(r'(jan|sku)_exists:\d+:')).last.trim();
+          if (!mounted) return;
+          setState(() => _busy = false);
+          await showDialog<void>(
+            context: context,
+            builder: (d) => AlertDialog(
+              key: const ValueKey('product-dup-alert'),
+              icon: const Icon(Icons.warning_amber_rounded),
+              title: Text(l10n.pfDupTitle),
+              content: Text(sku ? l10n.pfDupSkuBody(name) : l10n.pfDupJanBody(name)),
+              actions: [FilledButton(onPressed: () => Navigator.pop(d), child: Text(l10n.actionOk))],
+            ),
+          );
+          return;
+        case ApiFailure(:final message):
+          errorMessage = message;
+      }
     }
 
     // Identity is a second call because it is a second decision (0057): the SKU
@@ -151,13 +192,14 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
     // mode that contradicts lots or serials already recorded. Only sent when
     // something actually changed, so editing a name never risks that refusal.
     // A new product's maker went in with create().
+    // A new product's 品番 and maker went in with addOne().
     final makerChanged = _isEdit && maker != (widget.product?.maker ?? '');
-    final identityChanged = sku != (widget.product?.sku ?? '') ||
+    final identityChanged = (_isEdit && sku != (widget.product?.sku ?? '')) ||
         makerChanged ||
         _tracking != (widget.product?.trackingMode ?? TrackingMode.untracked);
     if (errorMessage == null && productId != null && identityChanged) {
       final result = await repo.setIdentity(
-        id: productId!,
+        id: productId,
         sku: sku,
         trackingMode: _tracking,
         // '' clears it; left out (null) when unchanged (0103).
@@ -172,7 +214,7 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
         _pickingRule != (widget.product?.pickingRule ?? 'FEFO');
     if (errorMessage == null && productId != null && pickingRuleChanged) {
       final result = await repo.setPickingRule(
-        productId: productId!,
+        productId: productId,
         rule: _pickingRule,
       );
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
@@ -210,6 +252,8 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
               _isEdit ? l10n.productEditTitle : l10n.productNewTitle,
               style: theme.textTheme.titleMedium,
             ),
+            if (!_isEdit)
+              Text(l10n.productNewHint, key: const ValueKey('product-new-hint'), style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.lg),
             TextField(
               controller: _jan,
@@ -259,8 +303,43 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
             TextField(
               key: const ValueKey('product-maker'),
               controller: _maker,
-              decoration: InputDecoration(labelText: '${l10n.productMaker} *'),
+              decoration: InputDecoration(labelText: l10n.productMaker),
             ),
+            // Colour, weight and size for a new product; an existing one
+            // edits them on its own screen.
+            if (!_isEdit) ...[
+              const SizedBox(height: AppSpacing.lg),
+              TextField(
+                key: const ValueKey('product-color'),
+                controller: _color,
+                decoration: InputDecoration(labelText: l10n.productColor),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              TextField(
+                key: const ValueKey('product-weight'),
+                controller: _weight,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: l10n.specWeightField, suffixText: 'g'),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Row(children: [
+                for (final (key, label, c) in [
+                  ('product-w', l10n.specWidth, _width),
+                  ('product-d', l10n.specDepth, _depth),
+                  ('product-h', l10n.specHeight, _height),
+                ]) ...[
+                  Expanded(
+                    child: TextField(
+                      key: ValueKey(key),
+                      controller: c,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(labelText: label, suffixText: 'mm'),
+                    ),
+                  ),
+                  if (key != 'product-h') const SizedBox(width: AppSpacing.sm),
+                ],
+              ]),
+            ],
             const SizedBox(height: AppSpacing.lg),
             // What must be recorded when this product arrives. Changing it is
             // refused by the server once lots or serials exist (§37-15), so the
