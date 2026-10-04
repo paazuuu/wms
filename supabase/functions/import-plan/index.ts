@@ -64,11 +64,13 @@ import {
   type Header,
   type OwnCompany,
   checkJan,
+  companiesInFileName,
   companyKey,
   CODE_MATCHES,
   normalizeJan,
   normalizeText,
   readDocument,
+  readIssuer,
   readPdfText,
   type ReadingHints,
   readSpreadsheet,
@@ -150,17 +152,47 @@ async function ownCompany(): Promise<OwnCompany | null> {
   return { names, registration_number: str(data.registration_number) };
 }
 
-/** The supplier among the companies a document names: the first we already
- * know, else the likeliest issuer (0132). */
-async function pickSupplier(header: Header): Promise<{ name: string | null; partnerId: number | null }> {
-  const names = [...new Set([header.supplier_name, ...(header.supplier_candidates ?? [])]
-    .filter((n): n is string => !!n))];
+/** The supplier among the companies a document names (0132), in this order:
+ *   1. a company it (or its file name) names that we already know;
+ *   2. the company we know by its 登録番号 — under the name we keep for it;
+ *   3. the likeliest issuer in its text, then in its file name;
+ *   4. for a PDF or picture whose issuer is a logo, what the AI reads off
+ *      the page.
+ * Our own company is never among them. */
+async function pickSupplier(
+  header: Header, fileName: string, own: OwnCompany | null, page: { bytes: Uint8Array; mime: string } | null,
+): Promise<{ name: string | null; partnerId: number | null }> {
+  const names = [...new Set([
+    header.supplier_name, ...(header.supplier_candidates ?? []), ...companiesInFileName(fileName, own),
+  ].filter((n): n is string => !!n))];
+  header.supplier_candidates = names;
   for (const n of names) {
     const id = await findPartner(n, null, null);
     if (id !== null) return { name: n, partnerId: id };
   }
-  const byReg = header.registration_number ? await findPartner(null, null, header.registration_number) : null;
-  return { name: names[0] ?? null, partnerId: byReg };
+  if (header.registration_number) {
+    const id = await findPartner(null, null, header.registration_number);
+    if (id !== null) return { name: await partnerName(id), partnerId: id };
+  }
+  if (names.length) return { name: names[0], partnerId: null };
+  if (page) {
+    const read = await readIssuer(page.bytes, page.mime, own);
+    if (read) {
+      header.addressee ??= read.addressee;
+      header.registration_number ??= normalizeRegNo(read.registration_number);
+      if (read.supplier_name) {
+        header.supplier_candidates = [read.supplier_name];
+        const id = await findPartner(read.supplier_name, null, header.registration_number);
+        return { name: id !== null ? await partnerName(id) ?? read.supplier_name : read.supplier_name, partnerId: id };
+      }
+    }
+  }
+  return { name: null, partnerId: null };
+}
+
+async function partnerName(id: number): Promise<string | null> {
+  const { data } = await admin.from("delivery_suppliers").select("name").eq("id", id).maybeSingle();
+  return str(data?.name);
 }
 
 /** The company, if it is already known — for reading its file in its own
@@ -749,8 +781,8 @@ Deno.serve(async (req) => {
     const own = await ownCompany();
     // Of the companies the document names, the one we already know wins
     // (0132); the header then says it.
-    const settleSupplier = async (): Promise<number | null> => {
-      const pick = await pickSupplier(header);
+    const settleSupplier = async (page: { bytes: Uint8Array; mime: string } | null = null): Promise<number | null> => {
+      const pick = await pickSupplier(header, file.name, own, page);
       header.supplier_name = pick.name;
       return pick.partnerId;
     };
@@ -769,7 +801,7 @@ Deno.serve(async (req) => {
       ({ header, columns, lines, totals } = asText);
       header.registration_number = normalizeRegNo(header.registration_number);
       source = "pdf_text";
-      partnerId ??= await settleSupplier();
+      partnerId ??= await settleSupplier({ bytes, mime });
     } else {
       const hints = await readingHints(partnerId, aliases, overrides, overrideHeaders);
       ({ header, columns, lines, verified, totals } = await readDocument(bytes, mime, aliases, hints, own));
@@ -781,6 +813,8 @@ Deno.serve(async (req) => {
       partnerId ??= await settleSupplier();
     }
 
+    // A company chosen on the form, or found earlier, under the name we keep.
+    if (partnerId && !header.supplier_name && !supplier) header.supplier_name = await partnerName(partnerId);
     const merged = aggregate(lines);
     await noteEvidence(admin, documentId, {
       source, supplier_id: partnerId, supplier_name: supplier ?? header.supplier_name,

@@ -6206,6 +6206,16 @@ Also:
   - titles (納品書, 請求書 …) are no company.
   The header now carries `addressee` and `supplier_candidates`. import-plan
   prefers the first candidate already among our suppliers, then the 登録番号.
+  - A 様 / 御中 printed on a line of its own, under a name, also marks the
+    addressee.
+  - Many issuers print their name only as a logo, so the text names only us.
+    The supplier is then taken, in order, from:
+    - a company in the text or the file's name ("…_株式会社〇〇_請求書.pdf")
+      that we already know;
+    - the supplier we know by the 登録番号, under the name we keep for it;
+    - the first such company we do not know yet;
+    - for a text PDF with none of these, one AI reading of the page for its
+      issuer (`readIssuer`: logo, seal, URL, mail domain).
   The AI prompt names the addressee (`addressee_name`) and the issuer
   separately, and an answer naming the addressee is dropped.
 - With our name unset, the addressee two or more of our documents agree on

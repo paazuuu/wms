@@ -19,6 +19,7 @@ import {
   ownText,
   pdfHeaderFrom,
   companiesIn,
+  companiesInFileName,
   pdfTable,
   readRows,
   readSpreadsheet,
@@ -498,4 +499,32 @@ Deno.test("without our name set, the addressee is told from the issuer (0132)", 
   assertEquals(h2.supplier_name, "株式会社新東光通商");
   // A title is no company.
   assertEquals(pdfHeaderFrom("納品書\n2026年10月4日").supplier_name, null);
+});
+
+Deno.test("様 on the line below, and an issuer printed as a logo (0132)", () => {
+  // An 入金依頼書 laid out like a real one: our name with 様 under it, the
+  // issuer's address, phone and 登録番号 as text, its name only as a logo.
+  const text = [
+    "入 金 依 頼 書",
+    "〒 540-0029",
+    "大阪府大阪市中央区本町橋6-19",
+    "℡ 06-0000-0000 大阪府東大阪市長田中4-5-6",
+    "入金依頼No 009013-260806 電話 06-1111-2222",
+    "サンプル商事株式会社",
+    "入金希望日 2026年8月21日 FAX 06-1111-3333",
+    "様",
+    "登録番号:T6120001059877",
+  ].join("\n");
+  const h = pdfHeaderFrom(text);
+  assertEquals(h.addressee, "サンプル商事株式会社");
+  assertEquals(h.supplier_name, null);
+  assertEquals(h.registration_number, "T6120001059877");
+  // The file's name often carries the issuer's.
+  assertEquals(
+    companiesInFileName("20260819₋361,460₋株式会社ダミー文具₋仕入₋請求書.pdf"),
+    ["株式会社ダミー文具"],
+  );
+  const own = { names: ["サンプル商事株式会社"], registration_number: null };
+  assertEquals(companiesInFileName("株式会社ダミー文具_サンプル商事株式会社様_納品書.xlsx", own), ["株式会社ダミー文具"]);
+  assertEquals(companiesInFileName("請求書_2026-08.pdf"), []);
 });

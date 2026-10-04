@@ -1025,22 +1025,27 @@ export function companiesIn(
   const scored: { name: string; score: number; order: number }[] = [];
   let addressee: string | null = null;
   let order = 0;
+  // 様 / 御中 printed on a line of its own, under the name it belongs to.
+  const honorificBelow = (i: number) =>
+    [1, 2].some((d) => /^\s*(?:御中|様|殿|さま)\s*$/.test(lines[i + d] ?? ""));
   lines.forEach((l, i) => {
-    for (const m of l.matchAll(COMPANY_NAMES)) {
+    const found = [...l.matchAll(COMPANY_NAMES)];
+    found.forEach((m, at) => {
       const name = m[0].trim();
-      if (NOT_A_NAME.test(name) || companyKey(name).length < 2) continue;
+      if (NOT_A_NAME.test(name) || companyKey(name).length < 2) return;
       const after = l.slice((m.index ?? 0) + m[0].length);
-      if (ADDRESSEE.test(after) || /御中|様|殿/.test(name)) {
+      const lastOnLine = at === found.length - 1 && after.trim() === "";
+      if (ADDRESSEE.test(after) || /御中|様|殿/.test(name) || (lastOnLine && honorificBelow(i))) {
         addressee ??= name.replace(/\s*(?:御中|様|殿)\s*$/, "");
-        continue;
+        return;
       }
-      if (isOwnCompany(name, own)) continue;
+      if (isOwnCompany(name, own)) return;
       let score = 0;
       score += closeness(regAt, i, [6, 5, 4, 2], [2, 1]);
       score += closeness(cueAt, i, [3, 3, 2, 1], [1]);
       if (/発行元?|販売元|出荷元|納入者/.test(l)) score += 2;
       scored.push({ name, score, order: order++ });
-    }
+    });
   });
   // Our name on the document, wherever it stands, is the addressee.
   if (addressee) {
@@ -1076,6 +1081,54 @@ export function pdfHeaderFrom(text: string, own: OwnCompany | null = null): Head
     addressee,
     supplier_candidates: candidates,
   };
+}
+
+/** The companies a file's name gives ("20260819_株式会社アケボノクラウン_請求書.pdf"),
+ * ours left out (0132). Many companies' files carry the issuer's name. */
+export function companiesInFileName(fileName: string, own: OwnCompany | null = null): string[] {
+  const base = fileName.normalize("NFKC").replace(/\.[A-Za-z0-9]{1,8}$/, "");
+  const parts = base.split(/[_\-‐₋−–—,，\s　()\[\]【】]+/);
+  const out: string[] = [];
+  for (const p of parts) {
+    for (const m of p.matchAll(COMPANY_NAMES)) {
+      const name = m[0].trim();
+      if (companyKey(name).length < 2 || isOwnCompany(name, own)) continue;
+      if (!out.some((o) => companyKey(o) === companyKey(name))) out.push(name);
+    }
+  }
+  return out;
+}
+
+/** Who issued a PDF or picture, read by the AI from the page itself — for a
+ * document whose issuer is printed as a logo, so its text names only us
+ * (0132). Null when nothing could be read. */
+export async function readIssuer(
+  bytes: Uint8Array, mime: string, own: OwnCompany | null = null,
+): Promise<{ supplier_name: string | null; registration_number: string | null; addressee: string | null } | null> {
+  try {
+    const r = await gemini([{
+      text:
+        "この書類(納品書・請求書・入金依頼書・見積書など)を発行した会社の名前を読んでください。" +
+        "会社名はロゴや画像で書かれていることがあります。ロゴ・社印・URL・メールアドレスのドメインも手がかりにしてください。" +
+        "「〇〇御中」「〇〇様」と宛名になっている会社は受け取る側なので発行元ではありません。" +
+        "issuer_name は発行元の正式な会社名(株式会社などを含めて)、registration_number は発行元の登録番号(T+13桁)、" +
+        "addressee_name は宛名の会社名。分からない項目は空にすること。" + ownText(own),
+    }, { inline_data: { mime_type: mime, data: encodeBase64(bytes) } }], {
+      type: "object",
+      properties: {
+        issuer_name: { type: "string" },
+        registration_number: { type: "string" },
+        addressee_name: { type: "string" },
+      },
+    });
+    const addressee = str(r.addressee_name)?.replace(/\s*(?:御中|様|殿)\s*$/, "") ?? null;
+    const toUs = addressee ? { names: [addressee], registration_number: null } : null;
+    let name = str(r.issuer_name);
+    if (name && (isOwnCompany(name, own) || isOwnCompany(name, toUs))) name = null;
+    return { supplier_name: name, registration_number: str(r.registration_number), addressee };
+  } catch (_) {
+    return null;
+  }
 }
 
 /** Reads a PDF by its own text when it has some and a table we know
