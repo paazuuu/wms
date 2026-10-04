@@ -4,6 +4,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/company/application/company_providers.dart';
+import 'package:wms_mobile/features/company/data/company_repository.dart';
+import 'package:wms_mobile/features/company/domain/company_profile.dart';
+import 'package:wms_mobile/features/evidence/application/evidence_providers.dart';
+import 'package:wms_mobile/features/evidence/data/evidence_repository.dart';
+import 'package:wms_mobile/features/evidence/domain/import_document.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/providers.dart';
 import 'package:wms_mobile/core/theme/app_theme.dart';
@@ -208,6 +214,9 @@ List<Override> _defaultOverrides() => [
       packagingRepositoryProvider.overrideWithValue(FakePackagingRepository()),
       // 価格台帳 (0124), empty unless a test fills it.
       priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository()),
+      // Kept files (0132) and our company (0131), in memory.
+      evidenceRepositoryProvider.overrideWithValue(FakeEvidenceRepository()),
+      companyRepositoryProvider.overrideWithValue(FakeCompanyRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -256,6 +265,7 @@ Future<void> pumpAppWith(
       child: ProviderScope(
         overrides: [
           productImageRepositoryProvider.overrideWithValue(images),
+          evidenceRepositoryProvider.overrideWithValue(FakeEvidenceRepository()),
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(canManageProducts),
@@ -5156,4 +5166,64 @@ class FakePriceBookRepository implements PriceBookRepository {
     items = [for (final i in items) if (!ids.contains(i.id)) i];
     return ApiSuccess(ids.length);
   }
+}
+
+/// Kept files (0132), in memory.
+class FakeEvidenceRepository implements EvidenceRepository {
+  FakeEvidenceRepository([List<ImportDocument>? docs, this.bytes]) : docs = docs ?? [];
+
+  final List<ImportDocument> docs;
+  final Uint8List? bytes;
+  final List<int> downloaded = [];
+  EvidencePurpose? lastPurpose;
+  String? lastSearch;
+
+  @override
+  Future<ApiResult<List<ImportDocument>>> list({EvidencePurpose? purpose, String? search}) async {
+    lastPurpose = purpose;
+    lastSearch = search;
+    return ApiSuccess([
+      for (final d in docs)
+        if ((purpose == null || d.purpose == purpose) &&
+            (search == null || search.isEmpty || d.fileName.contains(search) || (d.supplierName ?? '').contains(search)))
+          d,
+    ]);
+  }
+
+  @override
+  Future<ApiResult<List<ImportDocument>>> forPlan({int? deliveryPlanId, int? shipmentPlanId}) async => ApiSuccess([
+        for (final d in docs)
+          if ((deliveryPlanId != null && d.deliveryPlanId == deliveryPlanId) ||
+              (shipmentPlanId != null && d.shipmentPlanId == shipmentPlanId))
+            d,
+      ]);
+
+  @override
+  Future<ApiResult<Uint8List>> download(ImportDocument doc) async {
+    downloaded.add(doc.id);
+    return ApiSuccess(bytes ?? Uint8List(0));
+  }
+}
+
+/// Our company (0131), in memory.
+class FakeCompanyRepository implements CompanyRepository {
+  FakeCompanyRepository({CompanyProfile? profile, this.suggested = const []})
+      : profile_ = profile ?? const CompanyProfile(name: CompanyProfile.placeholder);
+
+  CompanyProfile profile_;
+  final List<OwnNameSuggestion> suggested;
+  final List<CompanyProfile> saved = [];
+
+  @override
+  Future<ApiResult<CompanyProfile>> profile() async => ApiSuccess(profile_);
+
+  @override
+  Future<ApiResult<CompanyProfile>> save(CompanyProfile p) async {
+    saved.add(p);
+    profile_ = p;
+    return ApiSuccess(p);
+  }
+
+  @override
+  Future<ApiResult<List<OwnNameSuggestion>>> suggestions() async => ApiSuccess(suggested);
 }

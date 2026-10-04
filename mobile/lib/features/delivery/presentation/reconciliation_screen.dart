@@ -10,6 +10,8 @@ import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
+import '../../evidence/application/evidence_providers.dart';
+import '../../evidence/presentation/evidence_screen.dart';
 import '../../purchasing/application/purchase_order_providers.dart';
 import '../../purchasing/domain/purchase_order.dart';
 import '../../purchasing/presentation/purchase_order_detail_screen.dart';
@@ -126,6 +128,7 @@ class ReconciliationScreen extends ConsumerWidget {
         actions: [
           if (detail.valueOrNull != null)
             _PurchaseOrderLinkButton(plan: detail.value!),
+          _OriginalFileButton(planId: planId),
           IconButton(
             tooltip: l10n.receiptHistoryTitle,
             icon: const Icon(Icons.history),
@@ -940,6 +943,38 @@ class _RemainStat extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The file this plan was read from, kept as evidence (0132): one tap
+/// downloads it; several (a re-upload) open a list. Hidden when none was kept.
+class _OriginalFileButton extends ConsumerWidget {
+  const _OriginalFileButton({required this.planId});
+
+  final int planId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final docs = ref.watch(planEvidenceProvider(planId)).valueOrNull ?? const [];
+    if (docs.isEmpty) return const SizedBox.shrink();
+    return IconButton(
+      key: const ValueKey('plan-original-file'),
+      tooltip: l10n.evFile,
+      icon: const Icon(Icons.attach_file),
+      onPressed: () {
+        if (docs.length == 1) {
+          downloadEvidence(context, ref, docs.first);
+          return;
+        }
+        showModalBottomSheet<void>(
+          context: context,
+          builder: (_) => SafeArea(
+            child: ListView(shrinkWrap: true, children: [for (final d in docs) EvidenceCard(doc: d)]),
+          ),
+        );
+      },
     );
   }
 }

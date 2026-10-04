@@ -673,8 +673,9 @@ abstract final class NotationFlag {
   };
 
   /// Worth a warning, but the reading is right (0113): a JAN shown in
-  /// exponent form whose digits are all there.
-  static const notices = {'jan_display_exponent'};
+  /// exponent form whose digits are all there; a quantity worked out from
+  /// 金額÷単価 because none was printed on its line (0131).
+  static const notices = {'jan_display_exponent', 'qty_from_amount'};
 
   static bool isProblem(String flag) => problems.contains(flag.split(':').first);
 

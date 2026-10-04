@@ -79,6 +79,7 @@ String flagLabel(AppLocalizations l10n, String flag) {
     'dropped_by_check' => l10n.ntFlagDropped,
     'not_verified' => l10n.ntFlagNotVerified,
     'qty_from_cases' => l10n.ntFlagQtyFromCases,
+    'qty_from_amount' => l10n.ntFlagQtyFromAmount,
     _ => flag,
   };
 }

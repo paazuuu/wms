@@ -181,6 +181,7 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             columns: preview.columns,
             lines: _lines,
             target: widget.target == ImportTarget.shipment ? 'shipment' : 'plan',
+            documentId: preview.documentId,
           ),
         );
     if (!mounted) return;
@@ -456,6 +457,34 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         _field(l10n, _supplierController, l10n.fieldSupplier,
             Icons.local_shipping_outlined,
             wasRead: preview.supplierName != null),
+        // The other companies the document names, and the one it is
+        // addressed to (us), so a wrong pick is one tap away (0132).
+        if (preview.supplierCandidates.length > 1 || preview.addressee != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Wrap(
+              key: const ValueKey('supplier-candidates'),
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (preview.supplierCandidates.length > 1) ...[
+                  Text(l10n.evSupplierCandidates, style: theme.textTheme.bodySmall),
+                  for (final c in preview.supplierCandidates)
+                    ActionChip(
+                      key: ValueKey('supplier-candidate-$c'),
+                      label: Text(c),
+                      avatar: _supplierController.text == c ? const Icon(Icons.check, size: 16) : null,
+                      onPressed: () => setState(() => _supplierController.text = c),
+                    ),
+                ],
+                if (preview.addressee != null)
+                  Text(l10n.evAddressee(preview.addressee!),
+                      key: const ValueKey('supplier-addressee'),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              ],
+            ),
+          ),
         _field(l10n, _regNoController, l10n.fieldRegistrationNumber,
             Icons.verified_outlined,
             wasRead: preview.registrationNumber != null),

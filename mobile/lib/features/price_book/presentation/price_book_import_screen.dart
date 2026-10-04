@@ -136,6 +136,7 @@ class _PriceBookImportScreenState extends ConsumerState<PriceBookImportScreen> {
     final r = await ref.read(fileReaderProvider).read(
           partnerId: _toLibrary ? null : _partnerId,
           file: MultipartFile.fromBytes(file.bytes!, filename: file.name),
+          purpose: _toLibrary ? 'library' : 'price_book',
         );
     if (!mounted) return;
     setState(() => _busy = false);

@@ -6144,6 +6144,81 @@ Also:
     `price_book_master_candidates` and `price_book_from_master` stay in the
     database, unused.
 
+## 0131 — our own company (自社情報), and merged cells in printed PDFs
+
+- `companies` gains `name_kana`, `name_en`, `aliases` (略称・旧社名・支店名),
+  `registration_number`, `postal_code`, `address`, `phone`, `fax`, `email`.
+  `company_profile()` reads it (anyone signed in); `set_company_profile(p)`
+  sets it (user.manage). Only the keys given change; every change is
+  audited as `company.profile_set`. The row starts as the placeholder "自社".
+- The reader (`_shared/document_reader.ts`) is told who we are:
+  - our names and 登録番号 never become the supplier;
+  - the AI prompt says which company is us (the addressee), so the other
+    one is taken as the issuer.
+- Text PDFs printed from a sheet with merged cells (縦結合): the merged
+  quantity, price or amount is drawn once, between an item's lines, and
+  used to come out as a row of its own that was dropped.
+  `mergeCellFragments` folds a line into the item above when:
+  - their filled columns do not overlap;
+  - they sit within 2.5× the usual line gap;
+  - neither is a totals line.
+  A name wrapped onto its own line under a line with a JAN or 品番 is
+  folded in too.
+- A line with no quantity but an amount and a unit price that divide
+  evenly gets amount ÷ unit price, flagged `qty_from_amount` (a notice). An
+  `amount_mismatch` line keeps what the amount says as the alternative
+  quantity.
+- App: 管理 → 自社情報 edits all of it (read only without user.manage).
+
+## 0132 — every uploaded file kept as evidence; the supplier read without our name
+
+- Bucket `import-documents` (private) and table `import_documents`. Each
+  row holds:
+  - what the file was for: plan / shipment / training / quote /
+    price_book / library / ocr;
+  - name, type, size, sha256, storage path;
+  - what it was read as: source, supplier, 登録番号, number, date, lines,
+    and the addressee;
+  - who uploaded it and when;
+  - once committed, the delivery or shipment plan it became.
+- Writes are by the edge functions on the service role only (no write
+  policies; evidence stays):
+  - `_shared/evidence.ts` stores every multipart upload to import-plan and
+    every photo sent to ocr-delivery-note;
+  - only a signed-in user's upload is kept;
+  - the same file sent again for the same purpose before commit is the
+    same row.
+  - The preview returns `document_id`; the commit sends it back, and the
+    row is tied to the plan.
+- Reading (`import_document_visible`) follows the purpose:
+  - inbound files and photos: receiving.view / receiving.confirm;
+  - outbound: pack.complete;
+  - the rest: product.view;
+  - everything: audit.view;
+  - a file tied to a warehouse only inside the caller's scope.
+  The same rule gates the bytes in `storage.objects`.
+  `import_documents_list(purpose, search, limit)` lists them.
+- The supplier, even with our name not set (`companiesIn`):
+  - a company written 〇〇御中 / 様 is the addressee (us), also when it
+    shares a line with the issuer, as in a text PDF;
+  - the other companies are scored by how close they stand to a 登録番号
+    (below the name counts most) and to TEL / FAX / 〒 / 住所 / 担当 / 発行元;
+  - titles (納品書, 請求書 …) are no company.
+  The header now carries `addressee` and `supplier_candidates`. import-plan
+  prefers the first candidate already among our suppliers, then the 登録番号.
+  The AI prompt names the addressee (`addressee_name`) and the issuer
+  separately, and an answer naming the addressee is dropped.
+- With our name unset, the addressee two or more of our documents agree on
+  is taken as ours. `own_company_suggestions()` offers those names on
+  自社情報 ("社名にする" / "別名に追加").
+- App:
+  - 管理 → アップロード履歴: every kept file with its purpose, plan or
+    "read only", supplier, number, lines, size, uploader and time; filter by
+    purpose, search, download.
+  - 納品照合 has a 元のファイル button for the file a plan was read from.
+  - The import review shows the other companies on the document as chips to
+    switch the supplier, and the addressee it took as us.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -22,6 +22,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { encodeHex } from "jsr:@std/encoding/hex";
 import { readDocument } from "../_shared/document_reader.ts";
+import { keepEvidence, noteEvidence } from "../_shared/evidence.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -164,6 +165,15 @@ Deno.serve(async (req) => {
     const bytes = new Uint8Array(await image.arrayBuffer());
     const mime = image.type || "image/jpeg";
     const inputHash = await sha256Hex(bytes);
+    // The photo is kept as evidence, tied to its plan when there is one (0132).
+    const caller = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
+    });
+    let documentId: number | null = null;
+    try {
+      documentId = await keepEvidence(supabase, caller, image, bytes, "ocr", null,
+        deliveryPlanId ? { delivery_plan_id: deliveryPlanId } : {});
+    } catch (_) { /* never stops the reading */ }
 
     const { data: reuse, error: reuseError } = await supabase.rpc(
       "find_ai_analysis_reuse",
@@ -180,6 +190,7 @@ Deno.serve(async (req) => {
           lines,
           analysis_id: (reuse as { id?: number }).id,
           reused: true,
+          document_id: documentId,
         },
       });
     }
@@ -203,9 +214,10 @@ Deno.serve(async (req) => {
       },
     );
     if (recordError) return json({ message: recordError.message }, 500);
+    await noteEvidence(supabase, documentId, { source: "gemini", line_count: lines.length });
 
     return json({
-      data: { provider: provider.name, lines, analysis_id: analysisId, reused: false },
+      data: { provider: provider.name, lines, analysis_id: analysisId, reused: false, document_id: documentId },
     });
   } catch (e) {
     if (e instanceof AIProviderError) return json({ message: e.message }, e.status);

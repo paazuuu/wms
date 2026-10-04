@@ -97,6 +97,9 @@ class ImportPreview {
     this.verified = true,
     this.partnerId,
     this.totals,
+    this.documentId,
+    this.addressee,
+    this.supplierCandidates = const [],
   });
 
   final String source;
@@ -127,6 +130,16 @@ class ImportPreview {
 
   /// The lines against the document's own totals (0114).
   final ReadTotals? totals;
+
+  /// The uploaded file as kept for evidence (0132), sent back on commit so
+  /// the file is tied to the plan it became.
+  final int? documentId;
+
+  /// The company the document was addressed to (〇〇御中) — us (0132).
+  final String? addressee;
+
+  /// Every other company the document names, likeliest supplier first.
+  final List<String> supplierCandidates;
 
   factory ImportPreview.fromJson(Map<String, dynamic> json) {
     int asInt(dynamic v) =>
@@ -159,6 +172,12 @@ class ImportPreview {
       verified: json['verified'] != false,
       partnerId: json['partner_id'] is num ? (json['partner_id'] as num).toInt() : int.tryParse('${json['partner_id']}'),
       totals: json['totals'] is Map ? ReadTotals.fromJson((json['totals'] as Map).cast<String, dynamic>()) : null,
+      documentId: json['document_id'] is num ? (json['document_id'] as num).toInt() : null,
+      addressee: s(header['addressee']),
+      supplierCandidates: [
+        for (final c in (header['supplier_candidates'] as List<dynamic>? ?? const []))
+          if (s(c) != null) s(c)!,
+      ],
     );
   }
 }
@@ -177,6 +196,7 @@ class PlanCommit {
     this.source,
     this.columns = const [],
     this.target = 'plan',
+    this.documentId,
   });
 
   final String deliveryNumber;
@@ -192,6 +212,9 @@ class PlanCommit {
 
   /// "plan" (inbound) or "shipment" (outbound) — picks the destination tables.
   final String target;
+
+  /// The uploaded file kept for evidence (0132), tied to the saved plan.
+  final int? documentId;
 
   Map<String, dynamic> toJson() {
     String? clean(String? v) {
@@ -210,6 +233,7 @@ class PlanCommit {
       if (clean(orderDate) != null) 'order_date': clean(orderDate),
       if (clean(source) != null) 'source': clean(source),
       'target': target,
+      if (documentId != null) 'document_id': documentId,
       if (columns.isNotEmpty) 'columns': [for (final c in columns) c.toJson()],
       'lines': lines,
     };

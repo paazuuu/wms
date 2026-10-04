@@ -12,7 +12,8 @@ abstract class QuoteRepository {
   /// Reads [file]. [partnerId] is optional: when given, that company's way of
   /// writing is used to read it; when not, the reader looks for the company
   /// on the document itself (its name or 登録番号).
-  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file});
+  /// [purpose] is what the file is kept as evidence for (0132).
+  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file, String purpose = 'quote'});
 
   Future<ApiResult<QuoteSaved>> save({
     required int partnerId,
@@ -30,12 +31,13 @@ class QuoteRepositoryImpl implements QuoteRepository {
   final Dio _rest;
 
   @override
-  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file}) async {
+  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file, String purpose = 'quote'}) async {
     try {
       final form = FormData();
       form.files.add(MapEntry('file', file));
       form.fields
         ..add(const MapEntry('dry_run', '1'))
+        ..add(MapEntry('purpose', purpose))
         ..addAll([if (partnerId != null) MapEntry('partner_id', '$partnerId')]);
       final r = await _functions.post(
         '/import-plan',

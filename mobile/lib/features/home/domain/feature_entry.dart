@@ -93,6 +93,10 @@ class FeatureEntry {
         return l10n.featAuditLog;
       case 'user_management':
         return l10n.featUserManagement;
+      case 'company_profile':
+        return l10n.featCompanyProfile;
+      case 'evidence':
+        return l10n.featEvidence;
       case 'connectors':
         return l10n.featConnectors;
       case 'ai_review':
@@ -193,6 +197,10 @@ class FeatureEntry {
         return l10n.featAuditLogDesc;
       case 'user_management':
         return l10n.featUserManagementDesc;
+      case 'company_profile':
+        return l10n.featCompanyProfileDesc;
+      case 'evidence':
+        return l10n.featEvidenceDesc;
       case 'connectors':
         return l10n.featConnectorsDesc;
       case 'ai_review':

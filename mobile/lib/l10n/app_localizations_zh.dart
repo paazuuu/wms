@@ -8834,4 +8834,147 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productNameRequiredEdit => '请输入品名';
+
+  @override
+  String get ntFlagQtyFromAmount => '数量＝金额÷单价（该行没有数量，按计算）';
+
+  @override
+  String get featCompanyProfile => '本公司信息';
+
+  @override
+  String get featCompanyProfileDesc => '本公司名称、别名与登记号。用于区分单据上的收件方（本公司）与开具方（供应商）';
+
+  @override
+  String get featEvidence => '上传记录';
+
+  @override
+  String get featEvidenceDesc => '读取过的送货单、发票、报价单等文件作为凭证保存，可随时重新下载';
+
+  @override
+  String get cpHint => '读取单据时，与此处名称（含别名）或登记号一致的公司视为收件方＝本公司，另一方读取为供应商。';
+
+  @override
+  String get cpNotSet => '尚未设置本公司名称。设置后供应商判定更准确（未设置时，也会根据「〇〇御中」及登记号、地址的位置来判定）。';
+
+  @override
+  String get cpName => '公司名称';
+
+  @override
+  String get cpNameKana => '公司名称（假名）';
+
+  @override
+  String get cpNameEn => '公司名称（英文）';
+
+  @override
+  String get cpAliases => '别名・简称・旧名・分店名（每行一个）';
+
+  @override
+  String get cpRegNo => '登记号（T＋13位）';
+
+  @override
+  String get cpPostal => '邮政编码';
+
+  @override
+  String get cpAddress => '地址';
+
+  @override
+  String get cpPhone => '电话';
+
+  @override
+  String get cpFax => '传真';
+
+  @override
+  String get cpEmail => '邮箱';
+
+  @override
+  String get cpSave => '保存';
+
+  @override
+  String get cpSaved => '已保存本公司信息';
+
+  @override
+  String get cpNameRequired => '请输入公司名称';
+
+  @override
+  String get cpReadOnly => '修改需要用户管理权限';
+
+  @override
+  String get cpSuggestions => '最近单据的收件方';
+
+  @override
+  String get cpSuggestionsHint => '读取的单据上写为「〇〇御中」的公司。如果是本公司，请设为名称或加入别名。';
+
+  @override
+  String cpSuggestionCount(int count) {
+    return '$count份';
+  }
+
+  @override
+  String get cpUseAsName => '设为名称';
+
+  @override
+  String get cpAddAlias => '加入别名';
+
+  @override
+  String get evSupplierCandidates => '单据上的其他公司:';
+
+  @override
+  String evAddressee(String name) {
+    return '收件方（本公司）: $name';
+  }
+
+  @override
+  String get evSearch => '按文件名、供应商、单号搜索';
+
+  @override
+  String get evAll => '全部';
+
+  @override
+  String get evPurposePlan => '入库・到货核对';
+
+  @override
+  String get evPurposeShipment => '出库';
+
+  @override
+  String get evPurposeTraining => '预先学习';
+
+  @override
+  String get evPurposeQuote => '报价';
+
+  @override
+  String get evPurposePriceBook => '价格台账';
+
+  @override
+  String get evPurposeLibrary => '商品库';
+
+  @override
+  String get evPurposeOcr => '送货单照片';
+
+  @override
+  String get evDownload => '下载';
+
+  @override
+  String get evDownloaded => '文件已保存';
+
+  @override
+  String get evEmpty => '尚无保存的文件';
+
+  @override
+  String get evEmptyBody => '在到货核对、出库、报价等处读取文件后，会自动保存在这里。';
+
+  @override
+  String evCommitted(String ref) {
+    return '已登记 $ref';
+  }
+
+  @override
+  String get evNotCommitted => '仅读取（未登记）';
+
+  @override
+  String evLines(int count) {
+    return '$count行';
+  }
+
+  @override
+  String get evFile => '原始文件';
 }

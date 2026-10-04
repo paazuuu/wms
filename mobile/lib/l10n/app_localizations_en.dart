@@ -9063,4 +9063,155 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productNameRequiredEdit => 'Enter a name';
+
+  @override
+  String get ntFlagQtyFromAmount =>
+      'Quantity = amount ÷ unit price (none printed on the line)';
+
+  @override
+  String get featCompanyProfile => 'Our company';
+
+  @override
+  String get featCompanyProfileDesc =>
+      'Our name, other names and registration number — used to tell us (the addressee) from the supplier on documents';
+
+  @override
+  String get featEvidence => 'Upload history';
+
+  @override
+  String get featEvidenceDesc =>
+      'Every delivery note, invoice or quote read is kept as evidence and can be downloaded again';
+
+  @override
+  String get cpHint =>
+      'When a document is read, the company with these names or this registration number is taken as us (the addressee), and the other company as the supplier.';
+
+  @override
+  String get cpNotSet =>
+      'Our name is not set yet. Setting it makes the supplier reading surer (without it, the reader still goes by \"〇〇御中\" and where the registration number and address stand).';
+
+  @override
+  String get cpName => 'Company name';
+
+  @override
+  String get cpNameKana => 'Name in kana';
+
+  @override
+  String get cpNameEn => 'Name in English';
+
+  @override
+  String get cpAliases =>
+      'Other names, short names, former names, branches (one per line)';
+
+  @override
+  String get cpRegNo => 'Registration number (T + 13 digits)';
+
+  @override
+  String get cpPostal => 'Postal code';
+
+  @override
+  String get cpAddress => 'Address';
+
+  @override
+  String get cpPhone => 'Phone';
+
+  @override
+  String get cpFax => 'Fax';
+
+  @override
+  String get cpEmail => 'Email';
+
+  @override
+  String get cpSave => 'Save';
+
+  @override
+  String get cpSaved => 'Our company saved';
+
+  @override
+  String get cpNameRequired => 'Enter the company name';
+
+  @override
+  String get cpReadOnly => 'Changing this needs user management permission';
+
+  @override
+  String get cpSuggestions => 'Recent documents were addressed to';
+
+  @override
+  String get cpSuggestionsHint =>
+      'Companies written \"〇〇御中\" on documents read. If it is us, use it as the name or add it as another name.';
+
+  @override
+  String cpSuggestionCount(int count) {
+    return '$count documents';
+  }
+
+  @override
+  String get cpUseAsName => 'Use as name';
+
+  @override
+  String get cpAddAlias => 'Add as other name';
+
+  @override
+  String get evSupplierCandidates => 'Other companies on the document:';
+
+  @override
+  String evAddressee(String name) {
+    return 'Addressed to (us): $name';
+  }
+
+  @override
+  String get evSearch => 'Search by file, supplier or number';
+
+  @override
+  String get evAll => 'All';
+
+  @override
+  String get evPurposePlan => 'Inbound';
+
+  @override
+  String get evPurposeShipment => 'Outbound';
+
+  @override
+  String get evPurposeTraining => 'Training';
+
+  @override
+  String get evPurposeQuote => 'Quote';
+
+  @override
+  String get evPurposePriceBook => 'Price book';
+
+  @override
+  String get evPurposeLibrary => 'Product library';
+
+  @override
+  String get evPurposeOcr => 'Delivery note photo';
+
+  @override
+  String get evDownload => 'Download';
+
+  @override
+  String get evDownloaded => 'File saved';
+
+  @override
+  String get evEmpty => 'No files kept yet';
+
+  @override
+  String get evEmptyBody =>
+      'Files read for inbound, outbound, quotes and more are kept here automatically.';
+
+  @override
+  String evCommitted(String ref) {
+    return 'Saved as $ref';
+  }
+
+  @override
+  String get evNotCommitted => 'Read only, not saved as a plan';
+
+  @override
+  String evLines(int count) {
+    return '$count lines';
+  }
+
+  @override
+  String get evFile => 'Original file';
 }

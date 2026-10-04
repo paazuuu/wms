@@ -119,6 +119,10 @@ export type Header = {
   customer_code: string | null;
   doc_number: string | null;
   doc_date: string | null;
+  /** The company the document is addressed to (〇〇御中) — us (0132). */
+  addressee?: string | null;
+  /** Every other company it names, likeliest issuer first (0132). */
+  supplier_candidates?: string[];
 };
 
 // ---------------------------------------------------------------------------
@@ -569,7 +573,8 @@ export async function readSpreadsheet(
   overrides: Record<number, string> = {},
   useAi = true,
   attributes: AttributeDef[] = [],
-): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number; totals: Totals }> {
+  own: OwnCompany | null = null,
+): Promise<{ columns: Column[]; lines: ReadLine[]; header_row: number; totals: Totals; header: Header }> {
   const wb = XLSX.read(bytes, { type: "array", cellDates: true, cellNF: true });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }) as unknown[][];
@@ -579,7 +584,12 @@ export async function readSpreadsheet(
     const cellObj = ws[XLSX.utils.encode_cell({ r: origin.r + r, c: origin.c + c })] as { z?: unknown } | undefined;
     return typeof cellObj?.z === "string" ? cellObj.z : null;
   };
-  return await readRows(rows, aliases, overrides, useAi, attributes, formatAt);
+  const read = await readRows(rows, aliases, overrides, useAi, attributes, formatAt);
+  // What the sheet says above its table: who sent it, its number and date.
+  const top = rows.slice(0, Math.max(read.header_row - 1, 0))
+    .map((r) => r.filter((c) => c !== null && String(c).trim() !== "").map((c) => String(c)).join(" "))
+    .join("\n");
+  return { ...read, header: pdfHeaderFrom(top, own) };
 }
 
 /** Reads a table given as rows of cells — a sheet, or a PDF's text laid out
@@ -884,22 +894,187 @@ export function pdfTable(lines: TextItem[][], aliases: AliasRow[]): { rows: unkn
     }
     return cells;
   });
-  return { rows, text: lines.map((l) => l.map((it) => it.str).join(" ")).join("\n") };
+  const fields = header.map((it) => aliasFor(it.str, aliases)?.field ?? null);
+  return {
+    rows: mergeCellFragments(rows, lines.indexOf(header), lines.map((l) => l[0]?.y ?? 0), fields),
+    text: lines.map((l) => l.map((it) => it.str).join(" ")).join("\n"),
+  };
 }
 
-/** What a text PDF says of itself, found by its words. */
-export function pdfHeaderFrom(text: string): Header {
+const TEXT_FIELDS = new Set<Field>(["product_name", "maker", "spec", "name_code", "multi", "attr", "unit"]);
+
+/** A sheet printed to PDF draws a merged cell (縦結合) once, at the middle
+ * of the rows it spans: its quantity, price or amount lands on a line of its
+ * own between the item's lines, and an item written on two lines (maker and
+ * JAN above, name below) comes out as two. Lines that only complete the
+ * item above — they fill none of the same columns, sit close, and are no
+ * totals — are folded into it; so is a name wrapped onto a line of its own
+ * under an item with a JAN or 品番. Lines above the heading stay as they
+ * are. */
+export function mergeCellFragments(
+  rows: (string | null)[][],
+  headerIndex: number,
+  ys: number[],
+  fields: (Field | null)[],
+): (string | null)[][] {
+  const body = rows.slice(headerIndex + 1);
+  const bodyYs = ys.slice(headerIndex + 1);
+  const gaps: number[] = [];
+  for (let i = 1; i < bodyYs.length; i++) {
+    const g = Math.abs(bodyYs[i] - bodyYs[i - 1]);
+    if (g > 0) gaps.push(g);
+  }
+  gaps.sort((a, b) => a - b);
+  const limit = gaps.length ? gaps[Math.floor(gaps.length / 2)] * 2.5 : Number.POSITIVE_INFINITY;
+  const filled = (r: (string | null)[]) => new Set(r.flatMap((c, i) => (c !== null && c.trim() !== "" ? [i] : [])));
+  const onlyText = (cols: Set<number>) =>
+    [...cols].every((i) => fields[i] !== null && TEXT_FIELDS.has(fields[i]!) && fields[i] !== "multi" && fields[i] !== "name_code");
+  const isTotal = (r: (string | null)[]) =>
+    r.some((c) => c !== null && (TOTAL_ROW.test(c.normalize("NFKC").replace(/\s/g, "")) || SUMMARY_WORDS.test(c.normalize("NFKC"))));
+  const out: (string | null)[][] = [];
+  let last: { row: (string | null)[]; y: number; total: boolean } | null = null;
+  body.forEach((r, i) => {
+    const mine = filled(r);
+    const total = isTotal(r);
+    if (mine.size === 0) return;
+    if (last && !last.total && !total && Math.abs(bodyYs[i] - last.y) <= limit) {
+      const theirs = filled(last.row);
+      const disjoint = [...mine].every((c) => !theirs.has(c));
+      // A wrapped name: text only, under a line that has its JAN or 品番.
+      const wrapped = !disjoint && onlyText(mine) &&
+        [...theirs].some((c) => fields[c] === "jan" || fields[c] === "product_code");
+      if (disjoint || wrapped) {
+        r.forEach((c, k) => {
+          if (c === null || c.trim() === "") return;
+          last!.row[k] = last!.row[k] === null ? c : `${last!.row[k]} ${c}`;
+        });
+        last.y = bodyYs[i];
+        return;
+      }
+    }
+    const copy = [...r];
+    out.push(copy);
+    last = { row: copy, y: bodyYs[i], total };
+  });
+  return [...rows.slice(0, headerIndex + 1), ...out];
+}
+
+/** Our own company (0131): its names and 登録番号, so a document's other
+ * company — the one that issued it — is taken as the supplier. */
+export type OwnCompany = { names: string[]; registration_number: string | null };
+
+const COMPANY_FORMS = /株式会社|有限会社|合同会社|合資会社|合名会社|\(株\)|\(有\)|㈱|㈲/g;
+
+/** A company name reduced to what tells it apart: no 株式会社 or (株), no
+ * 御中 or 様, no spaces or punctuation. */
+export function companyKey(v: unknown): string {
+  const t = String(v ?? "").normalize("NFKC").replace(COMPANY_FORMS, "").replace(/御中|様|殿/g, "");
+  return normalizeText(t);
+}
+
+/** Whether [name] is ours, by any of our names. */
+export function isOwnCompany(name: unknown, own: OwnCompany | null | undefined): boolean {
+  const k = companyKey(name);
+  if (!own || k.length < 2) return false;
+  return own.names.some((n) => {
+    const o = companyKey(n);
+    return o.length >= 2 && (k === o || k.includes(o) || o.includes(k));
+  });
+}
+
+const REG_NO = /T\s?-?\s?(\d{4})\s?-?\s?(\d{4})\s?-?\s?(\d{5})|T\s?(\d{13})/g;
+const FORMS = "株式会社|有限会社|合同会社|合資会社|合名会社|\\(株\\)|\\(有\\)|㈱|㈲";
+const NAME_CHARS = "[^\\s\\d〒:：,、()（）「」【】]";
+const COMPANY_NAMES = new RegExp(
+  `(?:${FORMS})\\s?${NAME_CHARS}{1,30}|${NAME_CHARS}{1,30}\\s?(?:${FORMS})`, "g",
+);
+/** Words that mark the one a document is addressed to (us). */
+const ADDRESSEE = /^\s*(?:御中|様|殿|さま|宛)/;
+/** Words near the company that issued it: its 登録番号, address, phone, seal. */
+const ISSUER_CUES = /TEL|FAX|電話|〒|住所|担当|発行元?|販売元|出荷元|納入者|代表|印/i;
+/** Lines that carry no company of their own. */
+const NOT_A_NAME = /^(?:納品書|請求書|見積書|御見積書|注文書|発注書|出荷案内|明細書|控|合計|小計)$/;
+
+/** The companies a document names, best guess for the issuer first (0132):
+ * the one written 〇〇御中 / 様 is the addressee (us), ours by name or
+ * 登録番号 is never the issuer, and the issuer is the one beside a 登録番号,
+ * an address or a phone number. Works without our own name known. */
+export function companiesIn(
+  text: string, own: OwnCompany | null = null,
+): { candidates: string[]; addressee: string | null } {
   const t = text.normalize("NFKC");
-  const reg = t.match(/T\s?(\d{13})/);
+  const lines = t.split(/\n/);
+  const ownReg = own?.registration_number?.replace(/[^0-9]/g, "") ?? "";
+  const regAt = new Set<number>();
+  const cueAt = new Set<number>();
+  lines.forEach((l, i) => {
+    for (const m of l.matchAll(REG_NO)) {
+      const r = m[4] ?? `${m[1]}${m[2]}${m[3]}`;
+      if (r !== ownReg) regAt.add(i);
+    }
+    if (ISSUER_CUES.test(l)) cueAt.add(i);
+  });
+  // Closer is likelier; a 登録番号 or address is usually printed under the
+  // name it belongs to.
+  const closeness = (set: Set<number>, i: number, below: number[], above: number[]) => {
+    let best = 0;
+    below.forEach((w, d) => { if (set.has(i + d)) best = Math.max(best, w); });
+    above.forEach((w, d) => { if (set.has(i - d - 1)) best = Math.max(best, w); });
+    return best;
+  };
+  const scored: { name: string; score: number; order: number }[] = [];
+  let addressee: string | null = null;
+  let order = 0;
+  lines.forEach((l, i) => {
+    for (const m of l.matchAll(COMPANY_NAMES)) {
+      const name = m[0].trim();
+      if (NOT_A_NAME.test(name) || companyKey(name).length < 2) continue;
+      const after = l.slice((m.index ?? 0) + m[0].length);
+      if (ADDRESSEE.test(after) || /御中|様|殿/.test(name)) {
+        addressee ??= name.replace(/\s*(?:御中|様|殿)\s*$/, "");
+        continue;
+      }
+      if (isOwnCompany(name, own)) continue;
+      let score = 0;
+      score += closeness(regAt, i, [6, 5, 4, 2], [2, 1]);
+      score += closeness(cueAt, i, [3, 3, 2, 1], [1]);
+      if (/発行元?|販売元|出荷元|納入者/.test(l)) score += 2;
+      scored.push({ name, score, order: order++ });
+    }
+  });
+  // Our name on the document, wherever it stands, is the addressee.
+  if (addressee) {
+    for (let k = scored.length - 1; k >= 0; k--) {
+      if (isOwnCompany(scored[k].name, { names: [addressee], registration_number: null })) scored.splice(k, 1);
+    }
+  }
+  scored.sort((a, b) => b.score - a.score || a.order - b.order);
+  const candidates: string[] = [];
+  for (const s of scored) if (!candidates.some((c) => companyKey(c) === companyKey(s.name))) candidates.push(s.name);
+  return { candidates, addressee };
+}
+
+/** What a text PDF (or the top of a sheet) says of itself, found by its
+ * words. Our 登録番号 and our name are left out, the company written
+ * 〇〇御中 is taken as the addressee, and the issuer — the one beside a
+ * 登録番号, an address or a phone — as the supplier (0131, 0132). */
+export function pdfHeaderFrom(text: string, own: OwnCompany | null = null): Header {
+  const t = text.normalize("NFKC");
+  const regs = [...t.matchAll(REG_NO)].map((m) => `T${m[4] ?? `${m[1]}${m[2]}${m[3]}`}`);
+  const ownReg = own?.registration_number?.replace(/[^0-9]/g, "") ?? "";
+  const reg = regs.find((r) => r.slice(1) !== ownReg) ?? null;
+  const { candidates, addressee } = companiesIn(t, own);
   const date = t.match(/(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
   const customer = t.match(/得意先\s*(?:No|NO|№|コード|CD|番号)?[\s.:：]*([0-9A-Za-z-]{3,})/);
   const doc = t.match(/(?:伝票|請求|納品|依頼)\s*(?:No|NO|№|番号)[\s.:：]*([0-9A-Za-z-]{3,})/);
   return {
-    supplier_name: null,
-    registration_number: reg ? `T${reg[1]}` : null,
+    supplier_name: candidates[0] ?? null,
+    registration_number: reg,
     customer_code: customer?.[1] ?? null,
     doc_number: doc?.[1] ?? null,
     doc_date: date ? `${date[1]}-${date[2].padStart(2, "0")}-${date[3].padStart(2, "0")}` : null,
+    addressee,
+    supplier_candidates: candidates,
   };
 }
 
@@ -911,6 +1086,7 @@ export async function readPdfText(
   overrides: Record<number, string> = {},
   useAi = true,
   attributes: AttributeDef[] = [],
+  own: OwnCompany | null = null,
 ): Promise<{ columns: Column[]; lines: ReadLine[]; header: Header; totals: Totals } | null> {
   const textLines = await pdfTextLines(bytes);
   if (!textLines) return null;
@@ -919,7 +1095,7 @@ export async function readPdfText(
   const read = await readRows(table.rows, aliases, overrides, useAi, attributes);
   const good = read.lines.filter((l) => janCheckOk(l.raw_jan_code) || l.product_code).length;
   if (read.header_row === 0 || read.lines.length === 0 || good * 2 < read.lines.length) return null;
-  return { columns: read.columns, lines: read.lines, header: pdfHeaderFrom(table.text), totals: read.totals };
+  return { columns: read.columns, lines: read.lines, header: pdfHeaderFrom(table.text, own), totals: read.totals };
 }
 
 /** A combined 品名・品番 cell, or a name column with the 品番 inside it when the
@@ -1027,11 +1203,23 @@ export function checkLines(lines: ReadLine[]) {
       l.jan_code = "";
     } else if (l.raw_jan_code && !janCheckOk(l.raw_jan_code)) l.flags.push("jan_check");
     if (!l.raw_jan_code) l.flags.push("no_jan");
+    // No quantity read, but an amount and a unit price that divide evenly:
+    // the quantity is what they say, flagged for a person to see.
+    if (!l.planned_quantity && l.amount && l.unit_price && l.unit_price > 0) {
+      const q = l.amount / l.unit_price;
+      if (Math.round(q) > 0 && Math.abs(q - Math.round(q)) < 0.01) {
+        l.planned_quantity = Math.round(q);
+        l.flags.push("qty_from_amount");
+      }
+    }
     if (!l.planned_quantity) l.flags.push("no_quantity");
     if (!l.maker) l.flags.push("no_maker");
     if (l.amount !== null && l.unit_price !== null && l.planned_quantity &&
         Math.abs(l.amount - l.unit_price * l.planned_quantity) > Math.max(1, l.amount * 0.01)) {
       l.flags.push("amount_mismatch");
+      // What the amount says the quantity is, when it divides evenly.
+      const q = l.unit_price > 0 ? l.amount / l.unit_price : 0;
+      if (Math.round(q) > 0 && Math.abs(q - Math.round(q)) < 0.01) l.alternatives.planned_quantity = Math.round(q);
     }
   }
 }
@@ -1071,7 +1259,9 @@ const LINE_PROPS = {
 const EXTRACT_PROMPT =
   "この画像/PDFは日本の取引先(商社)の納品書・出荷案内・注文明細です。商社ごとに書式も見出しの言葉" +
   "(日本語の漢字・カナ、英語)も違います。見出しの意味を理解して、次を返してください。\n" +
-  "1) header: {supplier_name: 発行元の会社名, registration_number: インボイス登録番号(T+13桁), " +
+  "1) header: {supplier_name: 発行元の会社名(この書類を出した側。登録番号・住所・電話・社印の近くに書かれた会社。" +
+  "「〇〇御中」「〇〇様」と宛名になっている会社は受け取る側なので入れない), addressee_name: 宛名の会社名(御中・様の付く側), " +
+  "registration_number: 発行元のインボイス登録番号(T+13桁), " +
   "customer_code: お客様コード, doc_number: 伝票番号, doc_date: 日付(YYYY-MM-DD), " +
   "subtotal: 明細の税抜合計(今回お買上額・10%対象と8%対象の合計など), tax: 消費税額, total: 税込の合計(請求額)}。\n" +
   "2) columns: 表の見出しを左から順に {header: 見出しの文字どおり, field: 意味} で。field は " + FIELD_HELP + "。\n" +
@@ -1084,6 +1274,10 @@ const EXTRACT_PROMPT =
   "仕入先コード(取引先の仕入先=メーカー等のコード)の欄があれば upstream_code に。" +
   "色・サイズ・容量・材質・重量など商品の属性が別の欄(または品名の後ろ)に書かれていれば、attributes に " +
   "{name: 見出しの文字どおり(カラー・Size など), value: 書かれた値} で入れる。" +
+  "表に縦に結合されたセル(複数の行にまたがるセル)があるときは、その値は結合された範囲の商品のもの。" +
+  "数量・単価・金額が行と行の間の高さに印字されていても、上下の別の商品ではなく、その結合範囲の商品の行に入れる。" +
+  "1つの商品が2段(上段にメーカー・JAN、下段に品名など)に分かれて書かれていれば1行にまとめる。" +
+  "数量は 金額÷単価 と合うか確かめ、合わなければ印字をもう一度読む。" +
   "住所・電話・登録番号・合計行は明細にしない。読めない項目は省略。";
 
 const EXTRACT_SCHEMA = {
@@ -1093,6 +1287,7 @@ const EXTRACT_SCHEMA = {
       type: "object",
       properties: {
         supplier_name: { type: "string" },
+        addressee_name: { type: "string" },
         registration_number: { type: "string" },
         customer_code: { type: "string" },
         doc_number: { type: "string" },
@@ -1122,6 +1317,7 @@ const VERIFY_PROMPT =
   "1行ずつ確認してください。数字(JAN・数量・金額)は1桁ずつ、メーカー名・品名・品番は1文字ずつ確かめ、" +
   "間違いがあれば正しい値にしてください。読み漏れた行は追加し、存在しない行は削除してください。" +
   "品名と品番がまとめて書かれた欄は name_code にそのまま、分けた値を product_name/product_code に。" +
+  "縦に結合されたセルの数量・単価・金額は、その結合範囲の商品の行のもの。数量が 金額÷単価 と合うかも確かめる。" +
   "各行に確認済みの印として index(元の行番号、追加した行は -1) を付けてください。\n読み取り結果:\n";
 
 type RawLine = Record<string, unknown> & { index?: number };
@@ -1219,15 +1415,26 @@ export function hintText(h: ReadingHints): string {
   return out.length ? "\nこの取引先の書類について、これまでの確認で分かっていること:\n- " + out.join("\n- ") + "\n" : "";
 }
 
+/** Our company for the AI: who receives the document, so the other company
+ * named on it is the supplier (0131). */
+export function ownText(own: OwnCompany | null): string {
+  if (!own || own.names.length === 0) return "";
+  return "\n当社(この書類を受け取る側・宛先・〇〇御中と書かれる側)は「" + own.names.join("」「") + "」" +
+    (own.registration_number ? `(登録番号 ${own.registration_number})` : "") +
+    "。header.supplier_name には当社ではない会社(書類を発行した側)の名前を、registration_number にはその会社の登録番号を入れる。" +
+    "当社の名前や登録番号は入れない。\n";
+}
+
 export async function readDocument(
   bytes: Uint8Array,
   mime: string,
   aliases: AliasRow[] = [],
   hints: ReadingHints = {},
+  own: OwnCompany | null = null,
 ): Promise<{ header: Header; columns: Column[]; lines: ReadLine[]; verified: boolean; totals: Totals }> {
   const doc = { inline_data: { mime_type: mime, data: encodeBase64(bytes) } };
   const known = hintText(hints);
-  const a = await gemini([{ text: EXTRACT_PROMPT + known }, doc], EXTRACT_SCHEMA);
+  const a = await gemini([{ text: EXTRACT_PROMPT + ownText(own) + known }, doc], EXTRACT_SCHEMA);
   const aLines = (Array.isArray(a.lines) ? a.lines : []) as RawLine[];
 
   let bLines: RawLine[] | null = null;
@@ -1334,13 +1541,25 @@ export async function readDocument(
 
   const h = (a.header ?? {}) as Record<string, unknown>;
   const totals = checkTotals(lines, { subtotal: toNum(h.subtotal), tax: toNum(h.tax), total: toNum(h.total) });
+  // Ours is never the supplier, whatever the reading put there; nor is the
+  // company the document is addressed to (0132).
+  const addressee = str(h.addressee_name)?.replace(/\s*(?:御中|様|殿)\s*$/, "") ?? null;
+  const toUs = addressee ? { names: [addressee], registration_number: null } : null;
+  const supplierName = isOwnCompany(h.supplier_name, own) || isOwnCompany(h.supplier_name, toUs) ||
+      /御中|様$|殿$/.test(str(h.supplier_name) ?? "")
+    ? null
+    : str(h.supplier_name);
+  const ownReg = own?.registration_number?.replace(/[^0-9]/g, "") ?? "";
+  const regNo = str(h.registration_number);
   return {
     header: {
-      supplier_name: str(h.supplier_name),
-      registration_number: str(h.registration_number),
+      supplier_name: supplierName,
+      registration_number: regNo && ownReg && regNo.replace(/[^0-9]/g, "") === ownReg ? null : regNo,
       customer_code: str(h.customer_code),
       doc_number: str(h.doc_number),
       doc_date: str(h.doc_date),
+      addressee,
+      supplier_candidates: supplierName ? [supplierName] : [],
     },
     columns: cols.map((c, i) => {
       // An attribute heading is placed through our known headings, not the AI's guess.

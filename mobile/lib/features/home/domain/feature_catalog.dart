@@ -4,10 +4,12 @@ import '../../../core/ai/ai_settings_screen.dart';
 import '../../admin/presentation/user_management_screen.dart';
 import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
+import '../../company/presentation/company_profile_screen.dart';
 import '../../connectors/presentation/connector_list_screen.dart';
 import '../../delivery/presentation/delivery_plan_list_screen.dart';
 import '../../demand/presentation/open_demand_screen.dart';
 import '../../documents/presentation/document_exceptions_screen.dart';
+import '../../evidence/presentation/evidence_screen.dart';
 import '../../exceptions/presentation/exception_list_screen.dart';
 import '../../notation/presentation/notation_training_screen.dart';
 import '../../qc/presentation/held_stock_screen.dart';
@@ -317,6 +319,23 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _auditLog,
             requiredAnyOf: ['audit.view'],
           ),
+          // Who we are (0131): the addressee on every document, told from
+          // the supplier that issued it.
+          FeatureEntry(
+            id: 'company_profile',
+            icon: Icons.apartment_outlined,
+            status: FeatureStatus.ready,
+            builder: _companyProfile,
+            requiredAnyOf: ['user.manage', 'receiving.confirm', 'product.manage'],
+          ),
+          // Every uploaded file, kept as evidence and downloadable (0132).
+          FeatureEntry(
+            id: 'evidence',
+            icon: Icons.folder_copy_outlined,
+            status: FeatureStatus.ready,
+            builder: _evidence,
+            requiredAnyOf: ['audit.view', 'receiving.view', 'receiving.confirm', 'pack.complete', 'product.view'],
+          ),
           FeatureEntry(
             id: 'user_management',
             icon: Icons.manage_accounts_outlined,
@@ -455,6 +474,8 @@ Widget _auditLog(BuildContext _) => const AuditLogScreen();
 
 /// Top-level (const-referenceable) builder for the User Management feature.
 Widget _userManagement(BuildContext _) => const UserManagementScreen();
+Widget _companyProfile(BuildContext _) => const CompanyProfileScreen();
+Widget _evidence(BuildContext _) => const EvidenceScreen();
 
 /// Top-level (const-referenceable) builder for the Connectors feature.
 Widget _connectors(BuildContext _) => const ConnectorListScreen();

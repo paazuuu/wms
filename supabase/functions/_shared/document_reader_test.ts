@@ -4,16 +4,21 @@ import { assert, assertEquals } from "jsr:@std/assert";
 import {
   type AliasRow,
   checkJan,
+  checkLines,
   checkTotals,
+  companyKey,
   headingParts,
   hintText,
+  isOwnCompany,
   janCheckOk,
   janLostDigits,
   janShownAsExponent,
   janSurvivingDigits,
   normalizeJan,
   normalizeText,
+  ownText,
   pdfHeaderFrom,
+  companiesIn,
   pdfTable,
   readRows,
   readSpreadsheet,
@@ -408,4 +413,89 @@ Deno.test("what was learned of a company is told to the AI (0114)", () => {
   assert(t.includes("見出し『商品名・品番』の欄は空白で区切って 読まない記号・メーカー・品番 の順"));
   assert(t.includes("書式メモ: 1行目の区分記号(9A等)は無視"));
   assertEquals(hintText({}), "");
+});
+
+// A sheet printed to PDF with merged cells (縦結合): each item on two lines —
+// JAN and maker above, the name below — and its quantity, price and amount
+// drawn once, between the two.
+const atY = (str: string, x0: number, x1: number, y: number) => ({ str, x0, x1, y });
+const mergedLike = [
+  [atY("JAN", 60, 80, 700), atY("メーカー", 120, 160, 700), atY("品名", 200, 220, 700), atY("数量", 400, 420, 700),
+    atY("単価", 460, 480, 700), atY("金額", 520, 540, 700)],
+  [atY("4902778318232", 40, 100, 680), atY("三菱鉛筆", 120, 160, 680)],
+  [atY("500", 405, 420, 671), atY("63.60", 460, 485, 671), atY("31,800", 515, 545, 671)],
+  [atY("ジェットストリーム 0.7 赤", 190, 300, 662)],
+  [atY("4902778198957", 40, 100, 644), atY("三菱鉛筆", 120, 160, 644)],
+  [atY("200", 405, 420, 635), atY("106", 462, 480, 635), atY("21,200", 515, 545, 635)],
+  [atY("ユニボール エア 0.5 黒", 190, 300, 626)],
+  [atY("合計", 200, 220, 600), atY("53,000", 515, 545, 600)],
+];
+
+Deno.test("merged cells in a printed PDF: the quantity and the second line join their item", async () => {
+  const table = pdfTable(mergedLike, known)!;
+  const { lines, totals } = await readRows(table.rows, known, {}, false);
+  assertEquals(lines.length, 2);
+  assertEquals([lines[0].jan_code, lines[0].maker, lines[0].product_name], ["4902778318232", "三菱鉛筆", "ジェットストリーム 0.7 赤"]);
+  assertEquals([lines[0].planned_quantity, lines[0].unit_price, lines[0].amount], [500, 63.6, 31800]);
+  assertEquals([lines[1].planned_quantity, lines[1].product_name], [200, "ユニボール エア 0.5 黒"]);
+  // The total row stays apart, and checks the lines.
+  assertEquals(totals.lines_sum, 53000);
+});
+
+Deno.test("no quantity read, but amount ÷ unit price: the quantity, flagged", () => {
+  const line = {
+    row: 1, jan_code: "4902778318232", raw_jan_code: "4902778318232", maker: "三菱鉛筆", product_name: "x",
+    product_code: null, raw_name_code: null, split_by: null, spec: null, planned_quantity: 0, case_quantity: null,
+    cases: null, unit_price: 63.6, amount: 31800, tax_rate: null, order_date: null, flags: [] as string[],
+    alternatives: {} as Record<string, string | number | null>, attributes: [], list_price: null, discount_rate: null,
+    unit: null, supplier_code: null, upstream_code: null, customer_code: null,
+  };
+  checkLines([line]);
+  assertEquals(line.planned_quantity, 500);
+  assert(line.flags.includes("qty_from_amount"));
+  assert(!line.flags.includes("no_quantity"));
+  // A quantity that disagrees with the amount: what the amount says, as the alternative.
+  const wrong = { ...line, planned_quantity: 50, flags: [] as string[], alternatives: {} as Record<string, string | number | null> };
+  checkLines([wrong]);
+  assert(wrong.flags.includes("amount_mismatch"));
+  assertEquals(wrong.alternatives.planned_quantity, 500);
+});
+
+Deno.test("with our own company known, the other company is the supplier (0131)", () => {
+  const own = { names: ["株式会社サンプル文具", "サンプル文具"], registration_number: "T1111111111111" };
+  assert(isOwnCompany("(株)サンプル文具 御中", own));
+  assert(isOwnCompany("サンプル文具株式会社", own));
+  assert(!isOwnCompany("株式会社新東光通商", own));
+  assertEquals(companyKey("株式会社 新東光通商"), companyKey("新東光通商(株)"));
+  const h = pdfHeaderFrom(
+    "納品書\n株式会社サンプル文具 御中\n登録番号 T1111111111111\n株式会社新東光通商\n登録番号:T6120001059877\n2026年10月4日",
+    own,
+  );
+  assertEquals(h.supplier_name, "株式会社新東光通商");
+  assertEquals(h.registration_number, "T6120001059877");
+  // Our name alone (written without 御中) is still not the supplier.
+  const h2 = pdfHeaderFrom("株式会社サンプル文具\nアケボノクラウン株式会社\nT 6120-0010-59877", own);
+  assertEquals(h2.supplier_name, "アケボノクラウン株式会社");
+  assertEquals(h2.registration_number, "T6120001059877");
+  // The AI is told who we are.
+  assert(ownText(own).includes("サンプル文具"));
+  assertEquals(ownText(null), "");
+});
+
+Deno.test("without our name set, the addressee is told from the issuer (0132)", () => {
+  // Both at the same height in a text PDF: one line, addressee on the left.
+  const h = pdfHeaderFrom(
+    "納品書\n株式会社サンプル文具 御中      株式会社新東光通商\n〒530-0001 大阪市北区 TEL 06-0000-0000\n登録番号 T6120001059877",
+  );
+  assertEquals(h.supplier_name, "株式会社新東光通商");
+  assertEquals(h.addressee, "株式会社サンプル文具");
+  // The issuer is the one beside the 登録番号, not the first company named.
+  const c = companiesIn("アケボノクラウン株式会社\n株式会社ダミー商事\nT 6120-0010-59877\nTEL 06-1111-2222");
+  assertEquals(c.candidates[0], "株式会社ダミー商事");
+  assertEquals(c.candidates.length, 2);
+  // Our name written again without 御中 is still the addressee, not the issuer.
+  const h2 = pdfHeaderFrom("株式会社サンプル文具 様\n株式会社サンプル文具\n株式会社新東光通商 TEL 06-0000-0000");
+  assertEquals(h2.supplier_name, "株式会社新東光通商");
+  // A title is no company.
+  assertEquals(pdfHeaderFrom("納品書\n2026年10月4日").supplier_name, null);
 });

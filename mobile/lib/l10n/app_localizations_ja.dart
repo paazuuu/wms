@@ -8874,4 +8874,151 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get productNameRequiredEdit => '品名を入力してください';
+
+  @override
+  String get ntFlagQtyFromAmount => '数量＝金額÷単価（行に数量が無いため計算）';
+
+  @override
+  String get featCompanyProfile => '自社情報';
+
+  @override
+  String get featCompanyProfileDesc =>
+      '自社の名前・別名・登録番号。書類の宛先（自社）と発行元（仕入先）を見分けるのに使います';
+
+  @override
+  String get featEvidence => 'アップロード履歴';
+
+  @override
+  String get featEvidenceDesc => '読み込んだ納品書・請求書・見積書などのファイルを証拠として保管し、いつでも再ダウンロード';
+
+  @override
+  String get cpHint =>
+      '書類を読むとき、ここの名前（別名を含む）と登録番号の会社は宛先＝自社として扱い、もう一方の会社を仕入先として読み取ります。';
+
+  @override
+  String get cpNotSet =>
+      '自社名がまだ設定されていません。設定すると仕入先の判定がより確実になります（未設定でも、宛名「〇〇御中」や登録番号・住所の位置から判定します）。';
+
+  @override
+  String get cpName => '会社名';
+
+  @override
+  String get cpNameKana => '会社名（カナ）';
+
+  @override
+  String get cpNameEn => '会社名（英語）';
+
+  @override
+  String get cpAliases => '別名・略称・旧社名・支店名（1行に1つ）';
+
+  @override
+  String get cpRegNo => '登録番号（T＋13桁）';
+
+  @override
+  String get cpPostal => '郵便番号';
+
+  @override
+  String get cpAddress => '住所';
+
+  @override
+  String get cpPhone => '電話';
+
+  @override
+  String get cpFax => 'FAX';
+
+  @override
+  String get cpEmail => 'メール';
+
+  @override
+  String get cpSave => '保存';
+
+  @override
+  String get cpSaved => '自社情報を保存しました';
+
+  @override
+  String get cpNameRequired => '会社名を入力してください';
+
+  @override
+  String get cpReadOnly => '変更するにはユーザー管理の権限が必要です';
+
+  @override
+  String get cpSuggestions => '最近の書類の宛先';
+
+  @override
+  String get cpSuggestionsHint =>
+      '読み込んだ書類で「〇〇御中」と書かれていた会社です。自社なら社名か別名に入れてください。';
+
+  @override
+  String cpSuggestionCount(int count) {
+    return '$count件';
+  }
+
+  @override
+  String get cpUseAsName => '社名にする';
+
+  @override
+  String get cpAddAlias => '別名に追加';
+
+  @override
+  String get evSupplierCandidates => '書類にある他の会社:';
+
+  @override
+  String evAddressee(String name) {
+    return '宛先（自社）: $name';
+  }
+
+  @override
+  String get evSearch => 'ファイル名・仕入先・伝票番号で検索';
+
+  @override
+  String get evAll => 'すべて';
+
+  @override
+  String get evPurposePlan => '入荷・納品照合';
+
+  @override
+  String get evPurposeShipment => '出荷';
+
+  @override
+  String get evPurposeTraining => '事前学習';
+
+  @override
+  String get evPurposeQuote => '見積';
+
+  @override
+  String get evPurposePriceBook => '価格台帳';
+
+  @override
+  String get evPurposeLibrary => '商品ライブラリー';
+
+  @override
+  String get evPurposeOcr => '納品書の写真';
+
+  @override
+  String get evDownload => 'ダウンロード';
+
+  @override
+  String get evDownloaded => 'ファイルを保存しました';
+
+  @override
+  String get evEmpty => '保管されたファイルはまだありません';
+
+  @override
+  String get evEmptyBody => '納品照合・出荷・見積などでファイルを読み込むと、ここに自動で保管されます。';
+
+  @override
+  String evCommitted(String ref) {
+    return '登録済み $ref';
+  }
+
+  @override
+  String get evNotCommitted => '読み取りのみ（未登録）';
+
+  @override
+  String evLines(int count) {
+    return '$count行';
+  }
+
+  @override
+  String get evFile => '元のファイル';
 }

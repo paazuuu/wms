@@ -58,7 +58,7 @@ class _Reader implements QuoteRepository {
   final List<Map<String, dynamic>> extra;
   int? partner;
   @override
-  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file}) async {
+  Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file, String purpose = 'quote'}) async {
     partner = partnerId;
     return ApiSuccess(QuoteRead(partnerId: 4, lines: [
       const {'jan_code': '4901681233922', 'maker': 'ゼブラ', 'product_name': 'ｻﾗｻ ﾄﾞﾗｲ 0.5 ｱｵ', 'product_code': 'JJ31-BL', 'unit_price': 90},

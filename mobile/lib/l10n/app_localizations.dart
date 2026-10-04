@@ -16122,6 +16122,276 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'品名を入力してください'**
   String get productNameRequiredEdit;
+
+  /// No description provided for @ntFlagQtyFromAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量＝金額÷単価（行に数量が無いため計算）'**
+  String get ntFlagQtyFromAmount;
+
+  /// No description provided for @featCompanyProfile.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社情報'**
+  String get featCompanyProfile;
+
+  /// No description provided for @featCompanyProfileDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の名前・別名・登録番号。書類の宛先（自社）と発行元（仕入先）を見分けるのに使います'**
+  String get featCompanyProfileDesc;
+
+  /// No description provided for @featEvidence.
+  ///
+  /// In ja, this message translates to:
+  /// **'アップロード履歴'**
+  String get featEvidence;
+
+  /// No description provided for @featEvidenceDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだ納品書・請求書・見積書などのファイルを証拠として保管し、いつでも再ダウンロード'**
+  String get featEvidenceDesc;
+
+  /// No description provided for @cpHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類を読むとき、ここの名前（別名を含む）と登録番号の会社は宛先＝自社として扱い、もう一方の会社を仕入先として読み取ります。'**
+  String get cpHint;
+
+  /// No description provided for @cpNotSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社名がまだ設定されていません。設定すると仕入先の判定がより確実になります（未設定でも、宛名「〇〇御中」や登録番号・住所の位置から判定します）。'**
+  String get cpNotSet;
+
+  /// No description provided for @cpName.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名'**
+  String get cpName;
+
+  /// No description provided for @cpNameKana.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名（カナ）'**
+  String get cpNameKana;
+
+  /// No description provided for @cpNameEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名（英語）'**
+  String get cpNameEn;
+
+  /// No description provided for @cpAliases.
+  ///
+  /// In ja, this message translates to:
+  /// **'別名・略称・旧社名・支店名（1行に1つ）'**
+  String get cpAliases;
+
+  /// No description provided for @cpRegNo.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号（T＋13桁）'**
+  String get cpRegNo;
+
+  /// No description provided for @cpPostal.
+  ///
+  /// In ja, this message translates to:
+  /// **'郵便番号'**
+  String get cpPostal;
+
+  /// No description provided for @cpAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所'**
+  String get cpAddress;
+
+  /// No description provided for @cpPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話'**
+  String get cpPhone;
+
+  /// No description provided for @cpFax.
+  ///
+  /// In ja, this message translates to:
+  /// **'FAX'**
+  String get cpFax;
+
+  /// No description provided for @cpEmail.
+  ///
+  /// In ja, this message translates to:
+  /// **'メール'**
+  String get cpEmail;
+
+  /// No description provided for @cpSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get cpSave;
+
+  /// No description provided for @cpSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社情報を保存しました'**
+  String get cpSaved;
+
+  /// No description provided for @cpNameRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名を入力してください'**
+  String get cpNameRequired;
+
+  /// No description provided for @cpReadOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更するにはユーザー管理の権限が必要です'**
+  String get cpReadOnly;
+
+  /// No description provided for @cpSuggestions.
+  ///
+  /// In ja, this message translates to:
+  /// **'最近の書類の宛先'**
+  String get cpSuggestions;
+
+  /// No description provided for @cpSuggestionsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだ書類で「〇〇御中」と書かれていた会社です。自社なら社名か別名に入れてください。'**
+  String get cpSuggestionsHint;
+
+  /// No description provided for @cpSuggestionCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件'**
+  String cpSuggestionCount(int count);
+
+  /// No description provided for @cpUseAsName.
+  ///
+  /// In ja, this message translates to:
+  /// **'社名にする'**
+  String get cpUseAsName;
+
+  /// No description provided for @cpAddAlias.
+  ///
+  /// In ja, this message translates to:
+  /// **'別名に追加'**
+  String get cpAddAlias;
+
+  /// No description provided for @evSupplierCandidates.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類にある他の会社:'**
+  String get evSupplierCandidates;
+
+  /// No description provided for @evAddressee.
+  ///
+  /// In ja, this message translates to:
+  /// **'宛先（自社）: {name}'**
+  String evAddressee(String name);
+
+  /// No description provided for @evSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル名・仕入先・伝票番号で検索'**
+  String get evSearch;
+
+  /// No description provided for @evAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get evAll;
+
+  /// No description provided for @evPurposePlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・納品照合'**
+  String get evPurposePlan;
+
+  /// No description provided for @evPurposeShipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get evPurposeShipment;
+
+  /// No description provided for @evPurposeTraining.
+  ///
+  /// In ja, this message translates to:
+  /// **'事前学習'**
+  String get evPurposeTraining;
+
+  /// No description provided for @evPurposeQuote.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積'**
+  String get evPurposeQuote;
+
+  /// No description provided for @evPurposePriceBook.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳'**
+  String get evPurposePriceBook;
+
+  /// No description provided for @evPurposeLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリー'**
+  String get evPurposeLibrary;
+
+  /// No description provided for @evPurposeOcr.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書の写真'**
+  String get evPurposeOcr;
+
+  /// No description provided for @evDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get evDownload;
+
+  /// No description provided for @evDownloaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを保存しました'**
+  String get evDownloaded;
+
+  /// No description provided for @evEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'保管されたファイルはまだありません'**
+  String get evEmpty;
+
+  /// No description provided for @evEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品照合・出荷・見積などでファイルを読み込むと、ここに自動で保管されます。'**
+  String get evEmptyBody;
+
+  /// No description provided for @evCommitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済み {ref}'**
+  String evCommitted(String ref);
+
+  /// No description provided for @evNotCommitted.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取りのみ（未登録）'**
+  String get evNotCommitted;
+
+  /// No description provided for @evLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}行'**
+  String evLines(int count);
+
+  /// No description provided for @evFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイル'**
+  String get evFile;
 }
 
 class _AppLocalizationsDelegate

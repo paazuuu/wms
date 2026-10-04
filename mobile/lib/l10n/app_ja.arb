@@ -7976,5 +7976,78 @@
   },
   "productColor": "色",
   "productNewHint": "入力した項目だけで登録できます（必須の項目はありません）。",
-  "productNameRequiredEdit": "品名を入力してください"
+  "productNameRequiredEdit": "品名を入力してください",
+  "ntFlagQtyFromAmount": "数量＝金額÷単価（行に数量が無いため計算）",
+  "featCompanyProfile": "自社情報",
+  "featCompanyProfileDesc": "自社の名前・別名・登録番号。書類の宛先（自社）と発行元（仕入先）を見分けるのに使います",
+  "featEvidence": "アップロード履歴",
+  "featEvidenceDesc": "読み込んだ納品書・請求書・見積書などのファイルを証拠として保管し、いつでも再ダウンロード",
+  "cpHint": "書類を読むとき、ここの名前（別名を含む）と登録番号の会社は宛先＝自社として扱い、もう一方の会社を仕入先として読み取ります。",
+  "cpNotSet": "自社名がまだ設定されていません。設定すると仕入先の判定がより確実になります（未設定でも、宛名「〇〇御中」や登録番号・住所の位置から判定します）。",
+  "cpName": "会社名",
+  "cpNameKana": "会社名（カナ）",
+  "cpNameEn": "会社名（英語）",
+  "cpAliases": "別名・略称・旧社名・支店名（1行に1つ）",
+  "cpRegNo": "登録番号（T＋13桁）",
+  "cpPostal": "郵便番号",
+  "cpAddress": "住所",
+  "cpPhone": "電話",
+  "cpFax": "FAX",
+  "cpEmail": "メール",
+  "cpSave": "保存",
+  "cpSaved": "自社情報を保存しました",
+  "cpNameRequired": "会社名を入力してください",
+  "cpReadOnly": "変更するにはユーザー管理の権限が必要です",
+  "cpSuggestions": "最近の書類の宛先",
+  "cpSuggestionsHint": "読み込んだ書類で「〇〇御中」と書かれていた会社です。自社なら社名か別名に入れてください。",
+  "cpSuggestionCount": "{count}件",
+  "@cpSuggestionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cpUseAsName": "社名にする",
+  "cpAddAlias": "別名に追加",
+  "evSupplierCandidates": "書類にある他の会社:",
+  "evAddressee": "宛先（自社）: {name}",
+  "@evAddressee": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "evSearch": "ファイル名・仕入先・伝票番号で検索",
+  "evAll": "すべて",
+  "evPurposePlan": "入荷・納品照合",
+  "evPurposeShipment": "出荷",
+  "evPurposeTraining": "事前学習",
+  "evPurposeQuote": "見積",
+  "evPurposePriceBook": "価格台帳",
+  "evPurposeLibrary": "商品ライブラリー",
+  "evPurposeOcr": "納品書の写真",
+  "evDownload": "ダウンロード",
+  "evDownloaded": "ファイルを保存しました",
+  "evEmpty": "保管されたファイルはまだありません",
+  "evEmptyBody": "納品照合・出荷・見積などでファイルを読み込むと、ここに自動で保管されます。",
+  "evCommitted": "登録済み {ref}",
+  "@evCommitted": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "evNotCommitted": "読み取りのみ（未登録）",
+  "evLines": "{count}行",
+  "@evLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evFile": "元のファイル"
 }

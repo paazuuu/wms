@@ -62,7 +62,9 @@ import {
   type Field,
   FIELDS,
   type Header,
+  type OwnCompany,
   checkJan,
+  companyKey,
   CODE_MATCHES,
   normalizeJan,
   normalizeText,
@@ -78,6 +80,7 @@ import {
   toInt,
   toNum,
 } from "../_shared/document_reader.ts";
+import { EVIDENCE_PURPOSES, keepEvidence, noteEvidence } from "../_shared/evidence.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -117,6 +120,48 @@ function normalizeRegNo(v: unknown): string | null {
 
 // deno-lint-ignore no-explicit-any
 type Client = any;
+
+/** Our own company (0131) as the reader needs it: every name it goes by,
+ * and its 登録番号. Null while none is set beyond the placeholder. */
+async function ownCompany(): Promise<OwnCompany | null> {
+  const { data } = await admin.from("companies")
+    .select("name, name_kana, name_en, aliases, registration_number").order("id").limit(1).maybeSingle();
+  if (!data) return null;
+  const names = [data.name, data.name_kana, data.name_en, ...((data.aliases as string[] | null) ?? [])]
+    .map((n) => str(n))
+    .filter((n): n is string => n !== null && n !== "自社");
+  // Not set yet: the company our earlier documents were addressed to, when
+  // at least two of them agree (0132).
+  if (names.length === 0) {
+    const { data: seen } = await admin.from("import_documents")
+      .select("addressee").not("addressee", "is", null).order("uploaded_at", { ascending: false }).limit(200);
+    const count = new Map<string, { name: string; n: number }>();
+    for (const r of (seen ?? []) as { addressee: string }[]) {
+      const k = companyKey(r.addressee);
+      if (k.length < 2) continue;
+      const c = count.get(k) ?? { name: r.addressee, n: 0 };
+      c.n++;
+      count.set(k, c);
+    }
+    const top = [...count.values()].sort((a, b) => b.n - a.n)[0];
+    if (top && top.n >= 2) names.push(top.name);
+  }
+  if (names.length === 0 && !data.registration_number) return null;
+  return { names, registration_number: str(data.registration_number) };
+}
+
+/** The supplier among the companies a document names: the first we already
+ * know, else the likeliest issuer (0132). */
+async function pickSupplier(header: Header): Promise<{ name: string | null; partnerId: number | null }> {
+  const names = [...new Set([header.supplier_name, ...(header.supplier_candidates ?? [])]
+    .filter((n): n is string => !!n))];
+  for (const n of names) {
+    const id = await findPartner(n, null, null);
+    if (id !== null) return { name: n, partnerId: id };
+  }
+  const byReg = header.registration_number ? await findPartner(null, null, header.registration_number) : null;
+  return { name: names[0] ?? null, partnerId: byReg };
+}
 
 /** The company, if it is already known — for reading its file in its own
  * words before anything is saved. Never creates one. */
@@ -388,6 +433,7 @@ async function commit(supabase: Client, input: {
   columns: ColumnLike[];
   source: string;
   target: string;
+  documentId: number | null;
 }): Promise<Response> {
   const permission = input.target === "shipment" ? "pack.complete" : "receiving.confirm";
   if (!(await clientPermitted(supabase, permission))) {
@@ -470,12 +516,16 @@ async function commit(supabase: Client, input: {
     const learned = await learn(supabase, supplierId,
       withAttrs((saved ?? []).map((r: Record<string, unknown>) => ({ ...r, raw_jan_code: r.source_jan_code }))),
       input.columns);
+    await noteEvidence(admin, input.documentId, {
+      shipment_plan_id: plan.id, committed_at: new Date().toISOString(), supplier_id: supplierId,
+      warehouse_id: warehouseId, doc_number: input.docNumber ?? input.deliveryNumber, line_count: lines.length,
+    });
 
     return json({ data: {
       source: input.source, plan_id: plan.id, target: "shipment",
       delivery_number: input.deliveryNumber, reference_no: referenceNo,
       needs_review: unidentified, line_count: lines.length, total_quantity: totalQty,
-      skipped, learned,
+      skipped, learned, document_id: input.documentId,
     } });
   }
 
@@ -505,12 +555,17 @@ async function commit(supabase: Client, input: {
   const { data: saved, error: e2 } = await admin.from("delivery_plan_lines").insert(withId).select();
   if (e2) return json({ message: e2.message }, 400);
   const learned = await learn(supabase, supplierId, withAttrs(saved ?? []), input.columns);
+  await noteEvidence(admin, input.documentId, {
+    delivery_plan_id: plan.id, committed_at: new Date().toISOString(), supplier_id: supplierId,
+    warehouse_id: warehouseId, doc_number: input.docNumber ?? input.deliveryNumber, line_count: lines.length,
+  });
 
   return json({ data: {
     source: input.source, plan_id: plan.id, target: "plan",
     delivery_number: input.deliveryNumber,
     reference_no: referenceNo, needs_review: unidentified,
     line_count: lines.length, total_quantity: totalQty, skipped, learned,
+    document_id: input.documentId,
   } });
 }
 
@@ -632,6 +687,7 @@ Deno.serve(async (req) => {
         columns: Array.isArray(b.columns) ? b.columns : [],
         source: str(b.source) ?? "review",
         target: str(b.target) === "shipment" ? "shipment" : "plan",
+        documentId: Number.isFinite(Number(b.document_id)) && Number(b.document_id) > 0 ? Number(b.document_id) : null,
       });
     }
 
@@ -670,6 +726,13 @@ Deno.serve(async (req) => {
       const { data: allowed } = await supabase.rpc("notation_training_allowed");
       if (allowed !== true) return json({ message: notPermittedMessage("product.manage") }, 403);
     }
+    // The file is kept as evidence before it is read, so even one that
+    // cannot be read is on record (0132).
+    const askedPurpose = str(form.get("purpose"));
+    const purpose = askedPurpose && EVIDENCE_PURPOSES.has(askedPurpose)
+      ? askedPurpose
+      : training ? "training" : target === "shipment" ? "shipment" : "plan";
+    const documentId = await keepEvidence(admin, supabase, file, bytes, purpose, warehouseId);
     let partnerId = Number.isFinite(formPartner) && formPartner > 0
       ? formPartner
       : await findPartner(supplier, supplierCode, null);
@@ -681,33 +744,50 @@ Deno.serve(async (req) => {
     const attributes = ((attrData ?? []) as { key: string; name: string; status?: string }[])
       .filter((a) => a.status !== "inactive")
       .map((a): AttributeDef => ({ key: a.key, name: a.name }));
+    // Our own company (0131): kept out of the supplier, so the other company
+    // on the document is taken as the supplier.
+    const own = await ownCompany();
+    // Of the companies the document names, the one we already know wins
+    // (0132); the header then says it.
+    const settleSupplier = async (): Promise<number | null> => {
+      const pick = await pickSupplier(header);
+      header.supplier_name = pick.name;
+      return pick.partnerId;
+    };
     const mime = file.type || (name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
     // A PDF that carries its text is read where the words stand, exactly;
     // a scan or photo is read by the AI (0114).
     const asText = mime === "application/pdf"
-      ? await readPdfText(bytes, aliases, overrides, true, attributes)
+      ? await readPdfText(bytes, aliases, overrides, true, attributes, own)
       : null;
     if (/\.(xlsx|xlsm|xls|csv)$/.test(name)) {
-      ({ columns, lines, totals } = await readSpreadsheet(bytes, aliases, overrides, true, attributes));
+      ({ header, columns, lines, totals } = await readSpreadsheet(bytes, aliases, overrides, true, attributes, own));
+      header.registration_number = normalizeRegNo(header.registration_number);
       source = name.endsWith(".csv") ? "csv" : "xlsx";
+      partnerId ??= await settleSupplier();
     } else if (asText) {
       ({ header, columns, lines, totals } = asText);
       header.registration_number = normalizeRegNo(header.registration_number);
       source = "pdf_text";
-      partnerId ??= await findPartner(null, null, header.registration_number);
+      partnerId ??= await settleSupplier();
     } else {
       const hints = await readingHints(partnerId, aliases, overrides, overrideHeaders);
-      ({ header, columns, lines, verified, totals } = await readDocument(bytes, mime, aliases, hints));
+      ({ header, columns, lines, verified, totals } = await readDocument(bytes, mime, aliases, hints, own));
       // What the AI was told stands for the columns too, so a correction made
       // on this reading is what gets learned (0114).
       columns = withHints(columns, hints, overrides, overrideHeaders);
       header.registration_number = normalizeRegNo(header.registration_number);
       source = "gemini";
-      partnerId ??= await findPartner(header.supplier_name, null, header.registration_number);
+      partnerId ??= await settleSupplier();
     }
 
     const merged = aggregate(lines);
-    if (merged.length === 0) return json({ message: "No JAN rows found." }, 422);
+    await noteEvidence(admin, documentId, {
+      source, supplier_id: partnerId, supplier_name: supplier ?? header.supplier_name,
+      registration_number: header.registration_number, doc_number: header.doc_number ?? (deliveryNumber || null),
+      doc_date: header.doc_date ?? deliveryDate, line_count: merged.length, addressee: header.addressee ?? null,
+    });
+    if (merged.length === 0) return json({ message: "No JAN rows found.", document_id: documentId }, 422);
     const withProducts = await resolveLines(supabase, partnerId, merged);
     const totalQty = merged.reduce((s, l) => s + (l.planned_quantity || 0), 0);
     const orderDate = merged.find((l) => l.order_date)?.order_date ?? null;
@@ -719,6 +799,8 @@ Deno.serve(async (req) => {
       customer_code: header.customer_code ?? merged.map((l) => l.customer_code).find((c) => c) ?? null,
       doc_number: header.doc_number ?? (deliveryNumber || null),
       doc_date: header.doc_date ?? deliveryDate,
+      addressee: header.addressee ?? null,
+      supplier_candidates: header.supplier_candidates ?? [],
     };
 
     // Training (0106): the read is kept, with what went wrong, for review.
@@ -734,7 +816,7 @@ Deno.serve(async (req) => {
 
     if (dryRun) {
       return json({ data: {
-        source, dry_run: true, verified, training_id: trainingId,
+        source, dry_run: true, verified, training_id: trainingId, document_id: documentId,
         header: mergedHeader,
         supplier_code: supplierCode,
         partner_id: partnerId,
@@ -764,6 +846,7 @@ Deno.serve(async (req) => {
       columns,
       source,
       target,
+      documentId,
     });
   } catch (e) {
     return json({ message: String(e) }, 500);
