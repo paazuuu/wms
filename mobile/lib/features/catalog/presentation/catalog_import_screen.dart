@@ -11,6 +11,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../partners/application/trading_partner_providers.dart';
+import '../../product/application/product_providers.dart';
 import '../../partners/domain/trading_partner.dart';
 import '../../product_library/data/quote_repository.dart';
 import '../../product_library/domain/supplier_quote.dart';
@@ -39,11 +40,17 @@ String _day(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.
 /// 品番, JAN, spec and prices. Each line becomes a library item (or updates
 /// the one with its JAN); with a supplier, its prices become that supplier's
 /// terms for the branch and from the date given, closing the ones before.
-/// Nothing in the product master, stock or anything booked is touched.
+/// Nothing in the product master, stock or anything booked is touched —
+/// unless 商品マスタにも登録する is on (0127): then the items the file became
+/// are taken into the master too, each new or linked to the product with
+/// its JAN. That is how 商品マスタ's ファイルから登録 opens this screen.
 class CatalogImportScreen extends ConsumerStatefulWidget {
-  const CatalogImportScreen({super.key, this.pickFile, this.today});
+  const CatalogImportScreen({super.key, this.pickFile, this.today, this.toMaster = false});
 
   final Future<PlatformFile?> Function()? pickFile;
+
+  /// Whether 商品マスタにも登録する starts on (opened from 商品マスタ).
+  final bool toMaster;
 
   /// Today, for tests.
   final DateTime? today;
@@ -61,6 +68,15 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
   bool _busy = false;
   QuoteRead? _read;
   CatalogImported? _done;
+  late bool _toMaster = widget.toMaster;
+  ({int created, int linked, int skipped})? _master;
+
+  /// A line the master cannot take: no JAN or no maker.
+  static bool _masterBlocked(Map<String, dynamic> l) {
+    final jan = QuoteLine.jan(l);
+    final maker = '${l['maker'] ?? ''}'.trim();
+    return !(jan.length == 13 || jan.length == 8) || maker.isEmpty;
+  }
 
   @override
   void dispose() {
@@ -87,6 +103,7 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
       _file = picked;
       _read = null;
       _done = null;
+      _master = null;
     });
   }
 
@@ -140,13 +157,35 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
           sourceFile: _file?.name,
         );
     if (!mounted) return;
-    setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
-        setState(() => _done = data);
         ref.invalidate(catalogListProvider);
+        if (_toMaster && data.ids.isNotEmpty) {
+          // The same items into the master: new, or linked by JAN.
+          final m = await ref.read(catalogRepositoryProvider).toProducts(data.ids);
+          if (!mounted) return;
+          ref.invalidate(productListProvider);
+          setState(() {
+            _busy = false;
+            _done = data;
+            _master = switch (m) { ApiSuccess(data: final d) => d, ApiFailure() => null };
+          });
+          switch (m) {
+            case ApiSuccess(data: final d):
+              _snack(l10n.ciDoneMaster(d.created, d.linked, d.skipped));
+            case ApiFailure(:final message):
+              _snack(humanizeApiErrorMessage(l10n, message));
+          }
+          return;
+        }
+        setState(() {
+          _busy = false;
+          _done = data;
+          _master = null;
+        });
         _snack(l10n.ciDone(data.created, data.updated, data.terms));
       case ApiFailure(:final message):
+        setState(() => _busy = false);
         _snack(humanizeApiErrorMessage(l10n, message));
     }
   }
@@ -163,13 +202,14 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
     final read = _read;
     final lines = read?.lines ?? const <Map<String, dynamic>>[];
     final known = lines.where((l) => inLibrary.containsKey(QuoteLine.jan(l))).length;
+    final blocked = lines.where(_masterBlocked).length;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.ciTitle)),
+      appBar: AppBar(title: Text(widget.toMaster ? l10n.ciTitleMaster : l10n.ciTitle)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          Text(l10n.ciIntro, style: theme.textTheme.bodySmall),
+          Text(widget.toMaster ? l10n.ciIntroMaster : l10n.ciIntro, key: const ValueKey('ci-intro'), style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.sm,
@@ -252,19 +292,44 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
             if (_partnerId == null)
               Text(l10n.ciNoSupplierNote, style: theme.textTheme.bodySmall),
             const SizedBox(height: AppSpacing.sm),
+            // Into the master as well, or the library only.
+            CheckboxListTile(
+              key: const ValueKey('ci-to-master'),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: _toMaster,
+              onChanged: _busy ? null : (v) => setState(() => _toMaster = v ?? false),
+              title: Text(l10n.ciToMaster),
+              subtitle: Text(_toMaster && blocked > 0 ? l10n.ciMasterBlocked(blocked) : l10n.ciToMasterHint,
+                  key: const ValueKey('ci-to-master-note')),
+            ),
+            const SizedBox(height: AppSpacing.sm),
             FilledButton.icon(
               key: const ValueKey('ci-import'),
               onPressed: _busy || lines.isEmpty ? null : _import,
-              icon: const Icon(Icons.library_add_outlined),
-              label: Text(l10n.ciImport(lines.length)),
+              icon: Icon(_toMaster ? Icons.inventory_2_outlined : Icons.library_add_outlined),
+              label: Text(_toMaster ? l10n.ciImportMaster(lines.length) : l10n.ciImport(lines.length)),
             ),
             if (_done case final d?) ...[
               const SizedBox(height: AppSpacing.sm),
               StatusPill(tone: StatusTone.success, label: l10n.ciDone(d.created, d.updated, d.terms)),
             ],
+            if (_master case final m?) ...[
+              const SizedBox(height: AppSpacing.xs),
+              StatusPill(
+                key: const ValueKey('ci-master-done'),
+                tone: m.skipped > 0 ? StatusTone.warning : StatusTone.success,
+                label: l10n.ciDoneMaster(m.created, m.linked, m.skipped),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             for (final (i, l) in lines.indexed)
-              ImportLineCard(key: ValueKey('ci-line-$i'), line: l, inLibrary: inLibrary.containsKey(QuoteLine.jan(l))),
+              ImportLineCard(
+                key: ValueKey('ci-line-$i'),
+                line: l,
+                inLibrary: inLibrary.containsKey(QuoteLine.jan(l)),
+                masterBlocked: _toMaster && _masterBlocked(l),
+              ),
           ],
         ],
       ),
@@ -274,10 +339,13 @@ class _CatalogImportScreenState extends ConsumerState<CatalogImportScreen> {
 
 /// One read line, each part under its name.
 class ImportLineCard extends StatelessWidget {
-  const ImportLineCard({super.key, required this.line, required this.inLibrary});
+  const ImportLineCard({super.key, required this.line, required this.inLibrary, this.masterBlocked = false});
 
   final Map<String, dynamic> line;
   final bool inLibrary;
+
+  /// Shown when the line is to go into the master but cannot (no JAN or maker).
+  final bool masterBlocked;
 
   static String yen(double v) => '¥${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2)}';
 
@@ -318,6 +386,10 @@ class ImportLineCard extends StatelessWidget {
               Expanded(
                 child: Text(t(line['product_name']) ?? QuoteLine.jan(line), style: theme.textTheme.titleSmall),
               ),
+              if (masterBlocked) ...[
+                StatusPill(tone: StatusTone.warning, label: l10n.ciLineNoMaster, dense: true),
+                const SizedBox(width: AppSpacing.xs),
+              ],
               StatusPill(
                 tone: inLibrary ? StatusTone.info : StatusTone.success,
                 label: inLibrary ? l10n.ciLineUpdate : l10n.ciLineNew,

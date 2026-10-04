@@ -6054,6 +6054,21 @@ Also:
   products; the state buttons need `product.lifecycle`. The single delete
   on a product uses the same path.
 
+### 0127 — a file into 商品マスタ in one go
+
+- `catalog_import` also returns `ids`: the library items its lines became
+  or updated.
+- App: 商品マスタ has ファイルから登録. It opens the same reading screen
+  as the library, with 商品マスタにも登録する turned on.
+  - The file goes into 商品ライブラリー first, so each supplier's names
+    and prices are kept.
+  - The same items then go into the master through `catalog_to_products`:
+    new, or linked to the product with their JAN.
+  - Lines with no JAN or maker are marked マスタ登録不可 and stay in the
+    library only.
+- From the library the box starts off, so the master is not changed unless
+  asked.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

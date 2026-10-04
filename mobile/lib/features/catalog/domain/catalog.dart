@@ -266,22 +266,27 @@ class CatalogItem extends Equatable {
 
 /// What reading a file into the library did.
 class CatalogImported extends Equatable {
-  const CatalogImported({this.created = 0, this.updated = 0, this.terms = 0, this.skipped = 0});
+  const CatalogImported({this.created = 0, this.updated = 0, this.terms = 0, this.skipped = 0, this.ids = const []});
 
   final int created;
   final int updated;
   final int terms;
   final int skipped;
 
+  /// The library items the lines became or updated (0127), for taking them
+  /// into the master straight after.
+  final List<int> ids;
+
   factory CatalogImported.fromJson(Map<String, dynamic> j) => CatalogImported(
         created: _i(j['created']) ?? 0,
         updated: _i(j['updated']) ?? 0,
         terms: _i(j['terms']) ?? 0,
         skipped: _i(j['skipped']) ?? 0,
+        ids: [for (final x in (j['ids'] as List? ?? const [])) if (_i(x) case final id?) id],
       );
 
   @override
-  List<Object?> get props => [created, updated, terms, skipped];
+  List<Object?> get props => [created, updated, terms, skipped, ids];
 }
 
 /// A master product that is not in the library yet (0125), as

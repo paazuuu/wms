@@ -17,6 +17,7 @@ import 'product_labels.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../catalog/application/catalog_providers.dart';
+import '../../catalog/presentation/catalog_import_screen.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
@@ -249,10 +250,22 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
                     child: Row(
                       children: [
-                        // Files are read into 商品ライブラリー (0124); products
-                        // come into the master from there.
+                        // Products from a file (0127): read into 商品ライブラリー
+                        // and registered here in the same go.
                         if (canManage && selected == null) ...[
                           FilledButton.tonalIcon(
+                            key: const ValueKey('products-import'),
+                            onPressed: () async {
+                              await Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => const CatalogImportScreen(toMaster: true),
+                              ));
+                              ref.invalidate(productListProvider);
+                            },
+                            icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                            label: Text(l10n.pmImportFile),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          OutlinedButton.icon(
                             key: const ValueKey('products-from-library'),
                             onPressed: () async {
                               await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CatalogScreen()));

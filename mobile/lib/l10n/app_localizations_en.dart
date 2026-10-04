@@ -8907,4 +8907,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String rmDoneInUse(int removed, int inUse) {
     return '$removed removed for good. $inUse have stock, receipt or shipment records and were kept (they can stay archived)';
   }
+
+  @override
+  String get ciTitleMaster => 'Register products from a file';
+
+  @override
+  String get ciIntroMaster =>
+      'The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code and JAN, and registers it in the product master. A product whose JAN is already in the master is linked rather than made again. What was read — each supplier\'s names and prices — is also kept in the product library.';
+
+  @override
+  String get ciToMaster =>
+      'Also register in the product master (to use for stock, receipts and shipments)';
+
+  @override
+  String get ciToMasterHint =>
+      'Off: only the library is updated; the master is not changed.';
+
+  @override
+  String ciMasterBlocked(int count) {
+    return '$count lines have no JAN or maker, so they go into the library only, not the master.';
+  }
+
+  @override
+  String get ciLineNoMaster => 'Not for the master (no JAN or maker)';
+
+  @override
+  String ciImportMaster(int count) {
+    return 'Import and register in the master ($count)';
+  }
+
+  @override
+  String ciDoneMaster(int created, int linked, int skipped) {
+    return 'Registered in the master: $created new, $linked linked to existing products, $skipped not registered (no JAN or maker). All lines are kept in the library.';
+  }
+
+  @override
+  String get pmImportFile => 'Register from a file';
 }

@@ -5083,7 +5083,11 @@ class FakeCatalogRepository implements CatalogRepository {
   Future<ApiResult<CatalogImported>> import(List<Map<String, dynamic>> lines,
       {int? partnerId, String? branch, DateTime? validFrom, String? sourceFile}) async {
     imports.add((lines: lines, partnerId: partnerId, branch: branch, validFrom: validFrom, file: sourceFile));
-    return ApiSuccess(CatalogImported(created: lines.length, terms: partnerId == null ? 0 : lines.length));
+    return ApiSuccess(CatalogImported(
+      created: lines.length,
+      terms: partnerId == null ? 0 : lines.length,
+      ids: [for (var i = 0; i < lines.length; i++) 1000 + i],
+    ));
   }
 
   @override

@@ -2990,5 +2990,14 @@
   "rmConfirmLabel": "Type 削除 to confirm",
   "rmConfirmWord": "削除",
   "rmDone": "{removed} removed for good",
-  "rmDoneInUse": "{removed} removed for good. {inUse} have stock, receipt or shipment records and were kept (they can stay archived)"
+  "rmDoneInUse": "{removed} removed for good. {inUse} have stock, receipt or shipment records and were kept (they can stay archived)",
+  "ciTitleMaster": "Register products from a file",
+  "ciIntroMaster": "The AI reads a quotation, invoice, delivery note or catalogue (Excel, PDF or a photo), sorts each line into maker, name, item code and JAN, and registers it in the product master. A product whose JAN is already in the master is linked rather than made again. What was read — each supplier's names and prices — is also kept in the product library.",
+  "ciToMaster": "Also register in the product master (to use for stock, receipts and shipments)",
+  "ciToMasterHint": "Off: only the library is updated; the master is not changed.",
+  "ciMasterBlocked": "{count} lines have no JAN or maker, so they go into the library only, not the master.",
+  "ciLineNoMaster": "Not for the master (no JAN or maker)",
+  "ciImportMaster": "Import and register in the master ({count})",
+  "ciDoneMaster": "Registered in the master: {created} new, {linked} linked to existing products, {skipped} not registered (no JAN or maker). All lines are kept in the library.",
+  "pmImportFile": "Register from a file"
 }

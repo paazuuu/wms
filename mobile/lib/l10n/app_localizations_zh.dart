@@ -8686,4 +8686,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String rmDoneInUse(int removed, int inUse) {
     return '已彻底删除 $removed 件。$inUse 件因有库存或出入库等记录而无法删除，已保留（可保持归档）';
   }
+
+  @override
+  String get ciTitleMaster => '从文件登录商品';
+
+  @override
+  String get ciIntroMaster =>
+      'AI 读取报价单、发票、送货单或目录（Excel、PDF、照片），按制造商、品名、货号、JAN 整理后登录到商品主数据。主数据中已有相同 JAN 的商品时不新建而是关联。读取的内容（各供应商的叫法与价格）也会记录在商品库中。';
+
+  @override
+  String get ciToMaster => '同时登录到商品主数据（用于库存、入库、出库）';
+
+  @override
+  String get ciToMasterHint => '关闭时只记录到商品库，不更改商品主数据。';
+
+  @override
+  String ciMasterBlocked(int count) {
+    return '$count 行没有 JAN 或制造商，不会登录到商品主数据，只记录到商品库。';
+  }
+
+  @override
+  String get ciLineNoMaster => '无法登录主数据（无 JAN 或制造商）';
+
+  @override
+  String ciImportMaster(int count) {
+    return '导入并登录到商品主数据（$count 件）';
+  }
+
+  @override
+  String ciDoneMaster(int created, int linked, int skipped) {
+    return '已登录到商品主数据：新建 $created 件、关联已有商品 $linked 件、因无 JAN 或制造商未登录 $skipped 件（全部记录在商品库）';
+  }
+
+  @override
+  String get pmImportFile => '从文件登录';
 }

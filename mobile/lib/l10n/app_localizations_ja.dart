@@ -8724,4 +8724,38 @@ class AppLocalizationsJa extends AppLocalizations {
   String rmDoneInUse(int removed, int inUse) {
     return '$removed件を完全に削除しました。$inUse件は在庫・入出荷などの記録があるため削除できず、残しています（アーカイブのままにしておけます）';
   }
+
+  @override
+  String get ciTitleMaster => 'ファイルから商品登録';
+
+  @override
+  String get ciIntroMaster =>
+      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は商品ライブラリー（仕入先ごとの商品・価格の台帳）にも記録されます。';
+
+  @override
+  String get ciToMaster => '商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）';
+
+  @override
+  String get ciToMasterHint => 'オフにすると商品ライブラリーにだけ記録し、商品マスタは変えません。';
+
+  @override
+  String ciMasterBlocked(int count) {
+    return '$count行はJANコードかメーカーがないため商品マスタには登録されず、商品ライブラリーにだけ入ります。';
+  }
+
+  @override
+  String get ciLineNoMaster => 'マスタ登録不可（JAN・メーカーなし）';
+
+  @override
+  String ciImportMaster(int count) {
+    return '取り込んで商品マスタに登録（$count件）';
+  }
+
+  @override
+  String ciDoneMaster(int created, int linked, int skipped) {
+    return '商品マスタに登録しました：新規 $created件・既存の商品とつなげた $linked件・JANかメーカーがなく登録できなかった $skipped件（商品ライブラリーには全件記録）';
+  }
+
+  @override
+  String get pmImportFile => 'ファイルから登録';
 }

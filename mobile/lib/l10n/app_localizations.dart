@@ -15882,6 +15882,60 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{removed}件を完全に削除しました。{inUse}件は在庫・入出荷などの記録があるため削除できず、残しています（アーカイブのままにしておけます）'**
   String rmDoneInUse(int removed, int inUse);
+
+  /// No description provided for @ciTitleMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから商品登録'**
+  String get ciTitleMaster;
+
+  /// No description provided for @ciIntroMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は商品ライブラリー（仕入先ごとの商品・価格の台帳）にも記録されます。'**
+  String get ciIntroMaster;
+
+  /// No description provided for @ciToMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）'**
+  String get ciToMaster;
+
+  /// No description provided for @ciToMasterHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'オフにすると商品ライブラリーにだけ記録し、商品マスタは変えません。'**
+  String get ciToMasterHint;
+
+  /// No description provided for @ciMasterBlocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}行はJANコードかメーカーがないため商品マスタには登録されず、商品ライブラリーにだけ入ります。'**
+  String ciMasterBlocked(int count);
+
+  /// No description provided for @ciLineNoMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'マスタ登録不可（JAN・メーカーなし）'**
+  String get ciLineNoMaster;
+
+  /// No description provided for @ciImportMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込んで商品マスタに登録（{count}件）'**
+  String ciImportMaster(int count);
+
+  /// No description provided for @ciDoneMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタに登録しました：新規 {created}件・既存の商品とつなげた {linked}件・JANかメーカーがなく登録できなかった {skipped}件（商品ライブラリーには全件記録）'**
+  String ciDoneMaster(int created, int linked, int skipped);
+
+  /// No description provided for @pmImportFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから登録'**
+  String get pmImportFile;
 }
 
 class _AppLocalizationsDelegate

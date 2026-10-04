@@ -7821,5 +7821,41 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ciTitleMaster": "ファイルから商品登録",
+  "ciIntroMaster": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JANに仕分けて商品マスタに登録します。同じJANの商品が商品マスタにあれば、新しく作らずにつなぎます。読み取った内容（仕入先ごとの呼び方・価格）は商品ライブラリー（仕入先ごとの商品・価格の台帳）にも記録されます。",
+  "ciToMaster": "商品マスタにも登録する（在庫・入荷・出庫で使えるようにする）",
+  "ciToMasterHint": "オフにすると商品ライブラリーにだけ記録し、商品マスタは変えません。",
+  "ciMasterBlocked": "{count}行はJANコードかメーカーがないため商品マスタには登録されず、商品ライブラリーにだけ入ります。",
+  "@ciMasterBlocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ciLineNoMaster": "マスタ登録不可（JAN・メーカーなし）",
+  "ciImportMaster": "取り込んで商品マスタに登録（{count}件）",
+  "@ciImportMaster": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ciDoneMaster": "商品マスタに登録しました：新規 {created}件・既存の商品とつなげた {linked}件・JANかメーカーがなく登録できなかった {skipped}件（商品ライブラリーには全件記録）",
+  "@ciDoneMaster": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "linked": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "pmImportFile": "ファイルから登録"
 }

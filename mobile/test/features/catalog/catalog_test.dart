@@ -52,13 +52,17 @@ final _pen = CatalogItem(
 const _note = CatalogItem(id: 2, name: 'キャンパスノート A罫', maker: 'コクヨ', janCode: '4901480000000');
 
 class _Reader implements QuoteRepository {
+  _Reader({this.extra = const []});
+
+  final List<Map<String, dynamic>> extra;
   int? partner;
   @override
   Future<ApiResult<QuoteRead>> read({int? partnerId, required MultipartFile file}) async {
     partner = partnerId;
-    return const ApiSuccess(QuoteRead(partnerId: 4, lines: [
-      {'jan_code': '4901681233922', 'maker': 'ゼブラ', 'product_name': 'ｻﾗｻ ﾄﾞﾗｲ 0.5 ｱｵ', 'product_code': 'JJ31-BL', 'unit_price': 90},
-      {'jan_code': '4999999000017', 'maker': 'テスト', 'product_name': '新しいペン', 'list_price': 200, 'discount_rate': 0.5},
+    return ApiSuccess(QuoteRead(partnerId: 4, lines: [
+      const {'jan_code': '4901681233922', 'maker': 'ゼブラ', 'product_name': 'ｻﾗｻ ﾄﾞﾗｲ 0.5 ｱｵ', 'product_code': 'JJ31-BL', 'unit_price': 90},
+      const {'jan_code': '4999999000017', 'maker': 'テスト', 'product_name': '新しいペン', 'list_price': 200, 'discount_rate': 0.5},
+      ...extra,
     ]));
   }
 
@@ -315,5 +319,65 @@ void main() {
     expect(imp.validFrom, DateTime(2026, 10, 4));
     expect(imp.file, 'mitsumori.pdf');
     expect(imp.lines.length, 2);
+  });
+
+  testWidgets('from 商品マスタ a file is registered in the master in one go; lines without JAN or maker stay in the library', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeCatalogRepository();
+    await pumpApp(
+      tester,
+      CatalogImportScreen(
+        toMaster: true,
+        today: DateTime(2026, 10, 4),
+        pickFile: () async => PlatformFile(name: 'catalog.xlsx', size: 3, bytes: Uint8List.fromList([1, 2, 3])),
+      ),
+      overrides: [
+        catalogRepositoryProvider.overrideWithValue(repo),
+        fileReaderProvider.overrideWithValue(_Reader(extra: const [
+          {'jan_code': '', 'maker': 'コクヨ', 'product_name': 'JANのない商品', 'product_code': 'X-1'},
+        ])),
+        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
+      ],
+    );
+    expect(find.text('ファイルから商品登録'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ci-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ci-read')));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('ci-to-master'))).value, isTrue);
+    expect(find.textContaining('1行はJANコードかメーカーがないため'), findsOneWidget);
+    expect(find.text('マスタ登録不可（JAN・メーカーなし）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ci-import')));
+    await tester.pumpAndSettle();
+    // Into the library first, then the same items into the master.
+    expect(repo.imports.single.lines.length, 3);
+    expect(repo.toMaster.single, [1000, 1001, 1002]);
+    expect(find.byKey(const ValueKey('ci-master-done')), findsOneWidget);
+  });
+
+  testWidgets('from the library the master is left alone unless asked', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeCatalogRepository();
+    await pumpApp(
+      tester,
+      CatalogImportScreen(pickFile: () async => PlatformFile(name: 'q.pdf', size: 3, bytes: Uint8List.fromList([1, 2, 3]))),
+      overrides: [
+        catalogRepositoryProvider.overrideWithValue(repo),
+        fileReaderProvider.overrideWithValue(_Reader()),
+        tradingPartnerRepositoryProvider.overrideWithValue(FakeTradingPartnerRepository()),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('ci-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ci-read')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('ci-to-master'))).value, isFalse);
+    await tester.tap(find.byKey(const ValueKey('ci-import')));
+    await tester.pumpAndSettle();
+    expect(repo.imports, hasLength(1));
+    expect(repo.toMaster, isEmpty);
   });
 }
