@@ -20,6 +20,8 @@ import {
   pdfHeaderFrom,
   companiesIn,
   companiesInFileName,
+  aiErrorKind,
+  readingQuality,
   pdfTable,
   readRows,
   readSpreadsheet,
@@ -527,4 +529,24 @@ Deno.test("様 on the line below, and an issuer printed as a logo (0132)", () =>
   const own = { names: ["サンプル商事株式会社"], registration_number: null };
   assertEquals(companiesInFileName("株式会社ダミー文具_サンプル商事株式会社様_納品書.xlsx", own), ["株式会社ダミー文具"]);
   assertEquals(companiesInFileName("請求書_2026-08.pdf"), []);
+});
+
+Deno.test("what kind of AI failure, and how a reading went (0133)", () => {
+  assertEquals(aiErrorKind(400, '{"error":{"status":"INVALID_ARGUMENT","message":"API key not valid"}}'), "auth");
+  assertEquals(aiErrorKind(403, ""), "auth");
+  assertEquals(aiErrorKind(429, ""), "quota");
+  assertEquals(aiErrorKind(503, ""), "overload");
+  assertEquals(aiErrorKind(400, "bad schema"), "bad_request");
+  assertEquals(aiErrorKind(null), "network");
+  const q = readingQuality(
+    [
+      { flags: ["ai_disagree:planned_quantity", "no_maker"] },
+      { flags: [] },
+      { flags: ["added_by_check"] },
+      { flags: ["qty_from_amount"] },
+    ],
+    "gemini", true, { ok: true },
+  );
+  assertEquals([q.lines, q.disagree, q.added, q.dropped, q.qty_from_amount, q.totals_ok, q.agreement], [4, 1, 1, 0, 1, true, 0.5]);
+  assertEquals(readingQuality([], "xlsx", true, null).agreement, null);
 });

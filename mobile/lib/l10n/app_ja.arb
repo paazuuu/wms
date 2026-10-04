@@ -8049,5 +8049,132 @@
       }
     }
   },
-  "evFile": "元のファイル"
+  "evFile": "元のファイル",
+  "featAiHealth": "AIの稼働状況",
+  "featAiHealthDesc": "AIが正しく動いているかを、応答率・応答時間・読み取りの一致率・合計の一致率で判定します",
+  "ahVerdictGood": "正常",
+  "ahVerdictWarn": "注意",
+  "ahVerdictBad": "異常",
+  "ahVerdictUnknown": "データなし",
+  "ahPeriod24h": "24時間",
+  "ahPeriod7d": "7日間",
+  "ahPeriod30d": "30日間",
+  "ahAvailability": "応答率",
+  "ahAvailabilityFormula": "正常に返った回数 ÷ 呼び出した回数",
+  "ahLatency": "応答時間（遅い方の5%）",
+  "ahLatencyFormula": "応答した呼び出しを速い順に並べて95%目の時間",
+  "ahAgreement": "読み取りの一致率",
+  "ahAgreementFormula": "1 −（2回の読み取りで食い違った行＋確認で追加・削除された行）÷ AIが読んだ行",
+  "ahTotals": "合計の一致率",
+  "ahTotalsFormula": "明細の合計が書類の合計と合ったファイル ÷ 比べられたファイル",
+  "ahThresholdHigher": "正常 {good} 以上・注意 {warn} 以上・それ未満は異常",
+  "@ahThresholdHigher": {
+    "placeholders": {
+      "good": {
+        "type": "String"
+      },
+      "warn": {
+        "type": "String"
+      }
+    }
+  },
+  "ahThresholdLower": "正常 {good} 以下・注意 {warn} 以下・それを超えると異常",
+  "@ahThresholdLower": {
+    "placeholders": {
+      "good": {
+        "type": "String"
+      },
+      "warn": {
+        "type": "String"
+      }
+    }
+  },
+  "ahCalls": "呼び出し {total}回（成功 {ok}・失敗 {failed}）",
+  "@ahCalls": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "ok": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "ahTokens": "使用トークン 入力 {input}・出力 {output}",
+  "@ahTokens": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "ahFiles": "読み込んだファイル {files}件（うちAIで読んだもの {aiFiles}件）",
+  "@ahFiles": {
+    "placeholders": {
+      "files": {
+        "type": "int"
+      },
+      "aiFiles": {
+        "type": "int"
+      }
+    }
+  },
+  "ahLastCall": "最後の呼び出し {when}",
+  "@ahLastCall": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "ahLastOk": "最後に成功 {when}",
+  "@ahLastOk": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "ahBlockingNoKey": "サーバーに GEMINI_API_KEY が設定されていません。Supabase のシークレットに設定してください。",
+  "ahBlockingAuth": "APIキーが拒否されました（無効・削除済み・別のプロジェクト）。Google AI Studio でキーを確認してください。",
+  "ahBlockingQuota": "回数の上限に達しています。無料枠なら有料枠への切り替えを検討してください。",
+  "ahKindNoKey": "キー未設定",
+  "ahKindAuth": "キー拒否",
+  "ahKindQuota": "回数上限",
+  "ahKindOverload": "混雑・障害",
+  "ahKindBadRequest": "要求エラー",
+  "ahKindNetwork": "接続できない",
+  "ahKindParse": "応答の形式違い",
+  "ahKindOther": "その他",
+  "ahRecentErrors": "最近のエラー",
+  "ahNoErrors": "この期間のエラーはありません",
+  "ahPing": "接続テスト",
+  "ahPingOk": "接続OK（{ms} ms・{model}）",
+  "@ahPingOk": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "ahPingFailed": "接続できません: {kind}",
+  "@ahPingFailed": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "ahHowJudged": "判定のしかた",
+  "ahHowJudgedBody": "4つの指標のうち一番悪い判定が全体の判定です（データのない指標は数えません）。最後の呼び出しがキー未設定・キー拒否・回数上限で失敗していれば、ほかの指標に関係なく「異常」になります。",
+  "ahRefresh": "更新"
 }

@@ -16392,6 +16392,264 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'元のファイル'**
   String get evFile;
+
+  /// No description provided for @featAiHealth.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの稼働状況'**
+  String get featAiHealth;
+
+  /// No description provided for @featAiHealthDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが正しく動いているかを、応答率・応答時間・読み取りの一致率・合計の一致率で判定します'**
+  String get featAiHealthDesc;
+
+  /// No description provided for @ahVerdictGood.
+  ///
+  /// In ja, this message translates to:
+  /// **'正常'**
+  String get ahVerdictGood;
+
+  /// No description provided for @ahVerdictWarn.
+  ///
+  /// In ja, this message translates to:
+  /// **'注意'**
+  String get ahVerdictWarn;
+
+  /// No description provided for @ahVerdictBad.
+  ///
+  /// In ja, this message translates to:
+  /// **'異常'**
+  String get ahVerdictBad;
+
+  /// No description provided for @ahVerdictUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'データなし'**
+  String get ahVerdictUnknown;
+
+  /// No description provided for @ahPeriod24h.
+  ///
+  /// In ja, this message translates to:
+  /// **'24時間'**
+  String get ahPeriod24h;
+
+  /// No description provided for @ahPeriod7d.
+  ///
+  /// In ja, this message translates to:
+  /// **'7日間'**
+  String get ahPeriod7d;
+
+  /// No description provided for @ahPeriod30d.
+  ///
+  /// In ja, this message translates to:
+  /// **'30日間'**
+  String get ahPeriod30d;
+
+  /// No description provided for @ahAvailability.
+  ///
+  /// In ja, this message translates to:
+  /// **'応答率'**
+  String get ahAvailability;
+
+  /// No description provided for @ahAvailabilityFormula.
+  ///
+  /// In ja, this message translates to:
+  /// **'正常に返った回数 ÷ 呼び出した回数'**
+  String get ahAvailabilityFormula;
+
+  /// No description provided for @ahLatency.
+  ///
+  /// In ja, this message translates to:
+  /// **'応答時間（遅い方の5%）'**
+  String get ahLatency;
+
+  /// No description provided for @ahLatencyFormula.
+  ///
+  /// In ja, this message translates to:
+  /// **'応答した呼び出しを速い順に並べて95%目の時間'**
+  String get ahLatencyFormula;
+
+  /// No description provided for @ahAgreement.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取りの一致率'**
+  String get ahAgreement;
+
+  /// No description provided for @ahAgreementFormula.
+  ///
+  /// In ja, this message translates to:
+  /// **'1 −（2回の読み取りで食い違った行＋確認で追加・削除された行）÷ AIが読んだ行'**
+  String get ahAgreementFormula;
+
+  /// No description provided for @ahTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計の一致率'**
+  String get ahTotals;
+
+  /// No description provided for @ahTotalsFormula.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細の合計が書類の合計と合ったファイル ÷ 比べられたファイル'**
+  String get ahTotalsFormula;
+
+  /// No description provided for @ahThresholdHigher.
+  ///
+  /// In ja, this message translates to:
+  /// **'正常 {good} 以上・注意 {warn} 以上・それ未満は異常'**
+  String ahThresholdHigher(String good, String warn);
+
+  /// No description provided for @ahThresholdLower.
+  ///
+  /// In ja, this message translates to:
+  /// **'正常 {good} 以下・注意 {warn} 以下・それを超えると異常'**
+  String ahThresholdLower(String good, String warn);
+
+  /// No description provided for @ahCalls.
+  ///
+  /// In ja, this message translates to:
+  /// **'呼び出し {total}回（成功 {ok}・失敗 {failed}）'**
+  String ahCalls(int total, int ok, int failed);
+
+  /// No description provided for @ahTokens.
+  ///
+  /// In ja, this message translates to:
+  /// **'使用トークン 入力 {input}・出力 {output}'**
+  String ahTokens(String input, String output);
+
+  /// No description provided for @ahFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだファイル {files}件（うちAIで読んだもの {aiFiles}件）'**
+  String ahFiles(int files, int aiFiles);
+
+  /// No description provided for @ahLastCall.
+  ///
+  /// In ja, this message translates to:
+  /// **'最後の呼び出し {when}'**
+  String ahLastCall(String when);
+
+  /// No description provided for @ahLastOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'最後に成功 {when}'**
+  String ahLastOk(String when);
+
+  /// No description provided for @ahBlockingNoKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'サーバーに GEMINI_API_KEY が設定されていません。Supabase のシークレットに設定してください。'**
+  String get ahBlockingNoKey;
+
+  /// No description provided for @ahBlockingAuth.
+  ///
+  /// In ja, this message translates to:
+  /// **'APIキーが拒否されました（無効・削除済み・別のプロジェクト）。Google AI Studio でキーを確認してください。'**
+  String get ahBlockingAuth;
+
+  /// No description provided for @ahBlockingQuota.
+  ///
+  /// In ja, this message translates to:
+  /// **'回数の上限に達しています。無料枠なら有料枠への切り替えを検討してください。'**
+  String get ahBlockingQuota;
+
+  /// No description provided for @ahKindNoKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'キー未設定'**
+  String get ahKindNoKey;
+
+  /// No description provided for @ahKindAuth.
+  ///
+  /// In ja, this message translates to:
+  /// **'キー拒否'**
+  String get ahKindAuth;
+
+  /// No description provided for @ahKindQuota.
+  ///
+  /// In ja, this message translates to:
+  /// **'回数上限'**
+  String get ahKindQuota;
+
+  /// No description provided for @ahKindOverload.
+  ///
+  /// In ja, this message translates to:
+  /// **'混雑・障害'**
+  String get ahKindOverload;
+
+  /// No description provided for @ahKindBadRequest.
+  ///
+  /// In ja, this message translates to:
+  /// **'要求エラー'**
+  String get ahKindBadRequest;
+
+  /// No description provided for @ahKindNetwork.
+  ///
+  /// In ja, this message translates to:
+  /// **'接続できない'**
+  String get ahKindNetwork;
+
+  /// No description provided for @ahKindParse.
+  ///
+  /// In ja, this message translates to:
+  /// **'応答の形式違い'**
+  String get ahKindParse;
+
+  /// No description provided for @ahKindOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get ahKindOther;
+
+  /// No description provided for @ahRecentErrors.
+  ///
+  /// In ja, this message translates to:
+  /// **'最近のエラー'**
+  String get ahRecentErrors;
+
+  /// No description provided for @ahNoErrors.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間のエラーはありません'**
+  String get ahNoErrors;
+
+  /// No description provided for @ahPing.
+  ///
+  /// In ja, this message translates to:
+  /// **'接続テスト'**
+  String get ahPing;
+
+  /// No description provided for @ahPingOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'接続OK（{ms} ms・{model}）'**
+  String ahPingOk(int ms, String model);
+
+  /// No description provided for @ahPingFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'接続できません: {kind}'**
+  String ahPingFailed(String kind);
+
+  /// No description provided for @ahHowJudged.
+  ///
+  /// In ja, this message translates to:
+  /// **'判定のしかた'**
+  String get ahHowJudged;
+
+  /// No description provided for @ahHowJudgedBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'4つの指標のうち一番悪い判定が全体の判定です（データのない指標は数えません）。最後の呼び出しがキー未設定・キー拒否・回数上限で失敗していれば、ほかの指標に関係なく「異常」になります。'**
+  String get ahHowJudgedBody;
+
+  /// No description provided for @ahRefresh.
+  ///
+  /// In ja, this message translates to:
+  /// **'更新'**
+  String get ahRefresh;
 }
 
 class _AppLocalizationsDelegate

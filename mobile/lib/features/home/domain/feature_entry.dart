@@ -103,6 +103,8 @@ class FeatureEntry {
         return l10n.featAiReview;
       case 'ai_settings':
         return l10n.featAiSettings;
+      case 'ai_health':
+        return l10n.featAiHealth;
       case 'document_exceptions':
         return l10n.featDocExceptions;
       case 'products':
@@ -207,6 +209,8 @@ class FeatureEntry {
         return l10n.featAiReviewDesc;
       case 'ai_settings':
         return l10n.featAiSettingsDesc;
+      case 'ai_health':
+        return l10n.featAiHealthDesc;
       case 'document_exceptions':
         return l10n.featDocExceptionsDesc;
       case 'products':

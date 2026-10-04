@@ -6229,6 +6229,44 @@ Also:
   - The import review shows the other companies on the document as chips to
     switch the supplier, and the addressee it took as us.
 
+## 0133 — is the AI working? (AIの稼働状況)
+
+- `ai_calls` records every Gemini call made by the edge functions:
+  - which function and task (columns / split / extract / verify / issuer /
+    ping) and which model;
+  - whether it answered, the HTTP status, attempts, time in ms, tokens in
+    and out;
+  - on failure, its kind: no_key / auth / quota / overload / bad_request /
+    network / parse / other.
+  Writes come from `gemini()` in the reader (service role) and never fail
+  a reading. Reading needs ai.review, user.manage or audit.view.
+- `import_documents.quality` holds `readingQuality()` for every read file:
+  lines, how many the two AI readings disagreed on, the check added or
+  dropped, no quantity, bad JAN check digit, quantity from amount, and
+  whether the lines add up to the document's total.
+- `ai_health(p_hours)` judges four measures. A measure with no data is
+  unknown and does not count.
+
+  | Measure | Formula | Good | Warn |
+  |---|---|---|---|
+  | Answer rate | answered calls ÷ calls made | ≥ 98% | ≥ 90% |
+  | Response time | 95th percentile of answered calls | ≤ 20 s | ≤ 45 s |
+  | Reading agreement | 1 − (disagreed + added + dropped lines) ÷ lines the AI read | ≥ 90% | ≥ 75% |
+  | Totals match | files whose lines meet the document's total ÷ files compared | ≥ 90% | ≥ 70% |
+
+  - The overall verdict is the worst of the four.
+  - If the last call failed for a missing or refused key, or for quota, the
+    verdict is bad whatever the measures say, and `blocking` names why.
+- `import-plan` takes `{mode: "ai_ping"}` (ai.review or user.manage): one
+  tiny call that reports whether the key works, how fast, and on which
+  model.
+- App: 管理 → AIの稼働状況:
+  - the verdict, with what to do for a missing, refused or exhausted key;
+  - each measure with its value, formula and thresholds;
+  - calls, tokens and files for 24 h / 7 days / 30 days;
+  - recent errors;
+  - a 接続テスト button.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

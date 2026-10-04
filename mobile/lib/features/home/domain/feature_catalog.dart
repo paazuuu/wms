@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ai/ai_health_screen.dart';
 import '../../../core/ai/ai_settings_screen.dart';
 import '../../admin/presentation/user_management_screen.dart';
 import '../../ai_review/presentation/ai_review_list_screen.dart';
@@ -364,6 +365,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _aiSettings,
             requiredAnyOf: ['ai.review', 'user.manage'],
           ),
+          // Is the AI working (0133): answer rate, response time, reading
+          // agreement and totals match, judged by formula, and a connection test.
+          FeatureEntry(
+            id: 'ai_health',
+            icon: Icons.monitor_heart_outlined,
+            status: FeatureStatus.ready,
+            builder: _aiHealth,
+            requiredAnyOf: ['ai.review', 'user.manage', 'audit.view'],
+          ),
           // Our own product format (0111): how product names are built, and
           // renaming a maker or a colour everywhere at once.
           // The field library (0112): every heading companies use for JAN,
@@ -474,6 +484,7 @@ Widget _auditLog(BuildContext _) => const AuditLogScreen();
 
 /// Top-level (const-referenceable) builder for the User Management feature.
 Widget _userManagement(BuildContext _) => const UserManagementScreen();
+Widget _aiHealth(BuildContext _) => const AiHealthScreen();
 Widget _companyProfile(BuildContext _) => const CompanyProfileScreen();
 Widget _evidence(BuildContext _) => const EvidenceScreen();
 

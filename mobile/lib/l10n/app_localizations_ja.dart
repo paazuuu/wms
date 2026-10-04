@@ -9021,4 +9021,154 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get evFile => '元のファイル';
+
+  @override
+  String get featAiHealth => 'AIの稼働状況';
+
+  @override
+  String get featAiHealthDesc => 'AIが正しく動いているかを、応答率・応答時間・読み取りの一致率・合計の一致率で判定します';
+
+  @override
+  String get ahVerdictGood => '正常';
+
+  @override
+  String get ahVerdictWarn => '注意';
+
+  @override
+  String get ahVerdictBad => '異常';
+
+  @override
+  String get ahVerdictUnknown => 'データなし';
+
+  @override
+  String get ahPeriod24h => '24時間';
+
+  @override
+  String get ahPeriod7d => '7日間';
+
+  @override
+  String get ahPeriod30d => '30日間';
+
+  @override
+  String get ahAvailability => '応答率';
+
+  @override
+  String get ahAvailabilityFormula => '正常に返った回数 ÷ 呼び出した回数';
+
+  @override
+  String get ahLatency => '応答時間（遅い方の5%）';
+
+  @override
+  String get ahLatencyFormula => '応答した呼び出しを速い順に並べて95%目の時間';
+
+  @override
+  String get ahAgreement => '読み取りの一致率';
+
+  @override
+  String get ahAgreementFormula => '1 −（2回の読み取りで食い違った行＋確認で追加・削除された行）÷ AIが読んだ行';
+
+  @override
+  String get ahTotals => '合計の一致率';
+
+  @override
+  String get ahTotalsFormula => '明細の合計が書類の合計と合ったファイル ÷ 比べられたファイル';
+
+  @override
+  String ahThresholdHigher(String good, String warn) {
+    return '正常 $good 以上・注意 $warn 以上・それ未満は異常';
+  }
+
+  @override
+  String ahThresholdLower(String good, String warn) {
+    return '正常 $good 以下・注意 $warn 以下・それを超えると異常';
+  }
+
+  @override
+  String ahCalls(int total, int ok, int failed) {
+    return '呼び出し $total回（成功 $ok・失敗 $failed）';
+  }
+
+  @override
+  String ahTokens(String input, String output) {
+    return '使用トークン 入力 $input・出力 $output';
+  }
+
+  @override
+  String ahFiles(int files, int aiFiles) {
+    return '読み込んだファイル $files件（うちAIで読んだもの $aiFiles件）';
+  }
+
+  @override
+  String ahLastCall(String when) {
+    return '最後の呼び出し $when';
+  }
+
+  @override
+  String ahLastOk(String when) {
+    return '最後に成功 $when';
+  }
+
+  @override
+  String get ahBlockingNoKey =>
+      'サーバーに GEMINI_API_KEY が設定されていません。Supabase のシークレットに設定してください。';
+
+  @override
+  String get ahBlockingAuth =>
+      'APIキーが拒否されました（無効・削除済み・別のプロジェクト）。Google AI Studio でキーを確認してください。';
+
+  @override
+  String get ahBlockingQuota => '回数の上限に達しています。無料枠なら有料枠への切り替えを検討してください。';
+
+  @override
+  String get ahKindNoKey => 'キー未設定';
+
+  @override
+  String get ahKindAuth => 'キー拒否';
+
+  @override
+  String get ahKindQuota => '回数上限';
+
+  @override
+  String get ahKindOverload => '混雑・障害';
+
+  @override
+  String get ahKindBadRequest => '要求エラー';
+
+  @override
+  String get ahKindNetwork => '接続できない';
+
+  @override
+  String get ahKindParse => '応答の形式違い';
+
+  @override
+  String get ahKindOther => 'その他';
+
+  @override
+  String get ahRecentErrors => '最近のエラー';
+
+  @override
+  String get ahNoErrors => 'この期間のエラーはありません';
+
+  @override
+  String get ahPing => '接続テスト';
+
+  @override
+  String ahPingOk(int ms, String model) {
+    return '接続OK（$ms ms・$model）';
+  }
+
+  @override
+  String ahPingFailed(String kind) {
+    return '接続できません: $kind';
+  }
+
+  @override
+  String get ahHowJudged => '判定のしかた';
+
+  @override
+  String get ahHowJudgedBody =>
+      '4つの指標のうち一番悪い判定が全体の判定です（データのない指標は数えません）。最後の呼び出しがキー未設定・キー拒否・回数上限で失敗していれば、ほかの指標に関係なく「異常」になります。';
+
+  @override
+  String get ahRefresh => '更新';
 }

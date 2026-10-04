@@ -8977,4 +8977,153 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get evFile => '原始文件';
+
+  @override
+  String get featAiHealth => 'AI运行状态';
+
+  @override
+  String get featAiHealthDesc => '根据响应率、响应时间、读取一致率和合计一致率判断AI是否正常工作';
+
+  @override
+  String get ahVerdictGood => '正常';
+
+  @override
+  String get ahVerdictWarn => '注意';
+
+  @override
+  String get ahVerdictBad => '异常';
+
+  @override
+  String get ahVerdictUnknown => '暂无数据';
+
+  @override
+  String get ahPeriod24h => '24小时';
+
+  @override
+  String get ahPeriod7d => '7天';
+
+  @override
+  String get ahPeriod30d => '30天';
+
+  @override
+  String get ahAvailability => '响应率';
+
+  @override
+  String get ahAvailabilityFormula => '正常返回次数 ÷ 调用次数';
+
+  @override
+  String get ahLatency => '响应时间（最慢的5%）';
+
+  @override
+  String get ahLatencyFormula => '按速度排列已响应调用，第95%位的时间';
+
+  @override
+  String get ahAgreement => '读取一致率';
+
+  @override
+  String get ahAgreementFormula => '1 −（两次读取不一致的行＋核对时增加或删除的行）÷ AI读取的行';
+
+  @override
+  String get ahTotals => '合计一致率';
+
+  @override
+  String get ahTotalsFormula => '明细合计与单据合计一致的文件 ÷ 可比较的文件';
+
+  @override
+  String ahThresholdHigher(String good, String warn) {
+    return '$good以上正常・$warn以上注意・低于则异常';
+  }
+
+  @override
+  String ahThresholdLower(String good, String warn) {
+    return '$good以下正常・$warn以下注意・超过则异常';
+  }
+
+  @override
+  String ahCalls(int total, int ok, int failed) {
+    return '调用 $total次（成功 $ok・失败 $failed）';
+  }
+
+  @override
+  String ahTokens(String input, String output) {
+    return '使用令牌 输入 $input・输出 $output';
+  }
+
+  @override
+  String ahFiles(int files, int aiFiles) {
+    return '读取文件 $files件（其中AI读取 $aiFiles件）';
+  }
+
+  @override
+  String ahLastCall(String when) {
+    return '最后调用 $when';
+  }
+
+  @override
+  String ahLastOk(String when) {
+    return '最后成功 $when';
+  }
+
+  @override
+  String get ahBlockingNoKey => '服务器未设置 GEMINI_API_KEY。请在 Supabase 的密钥中设置。';
+
+  @override
+  String get ahBlockingAuth =>
+      'API密钥被拒绝（无效、已删除或属于其他项目）。请在 Google AI Studio 确认密钥。';
+
+  @override
+  String get ahBlockingQuota => '已达到调用上限。若为免费额度，请考虑切换到付费。';
+
+  @override
+  String get ahKindNoKey => '未设置密钥';
+
+  @override
+  String get ahKindAuth => '密钥被拒';
+
+  @override
+  String get ahKindQuota => '达到上限';
+
+  @override
+  String get ahKindOverload => '繁忙或故障';
+
+  @override
+  String get ahKindBadRequest => '请求错误';
+
+  @override
+  String get ahKindNetwork => '无法连接';
+
+  @override
+  String get ahKindParse => '响应格式错误';
+
+  @override
+  String get ahKindOther => '其他';
+
+  @override
+  String get ahRecentErrors => '最近的错误';
+
+  @override
+  String get ahNoErrors => '此期间没有错误';
+
+  @override
+  String get ahPing => '连接测试';
+
+  @override
+  String ahPingOk(int ms, String model) {
+    return '连接正常（$ms ms・$model）';
+  }
+
+  @override
+  String ahPingFailed(String kind) {
+    return '无法连接: $kind';
+  }
+
+  @override
+  String get ahHowJudged => '判定方法';
+
+  @override
+  String get ahHowJudgedBody =>
+      '整体判定取四项指标中最差的结果（无数据的指标不计入）。若最后一次调用因未设置密钥、密钥被拒或达到上限而失败，则无论其他指标如何均为「异常」。';
+
+  @override
+  String get ahRefresh => '刷新';
 }

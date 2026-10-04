@@ -9214,4 +9214,159 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get evFile => 'Original file';
+
+  @override
+  String get featAiHealth => 'AI status';
+
+  @override
+  String get featAiHealthDesc =>
+      'Whether the AI is working, judged by answer rate, response time, reading agreement and totals match';
+
+  @override
+  String get ahVerdictGood => 'Working';
+
+  @override
+  String get ahVerdictWarn => 'Needs attention';
+
+  @override
+  String get ahVerdictBad => 'Not working';
+
+  @override
+  String get ahVerdictUnknown => 'No data yet';
+
+  @override
+  String get ahPeriod24h => '24 hours';
+
+  @override
+  String get ahPeriod7d => '7 days';
+
+  @override
+  String get ahPeriod30d => '30 days';
+
+  @override
+  String get ahAvailability => 'Answer rate';
+
+  @override
+  String get ahAvailabilityFormula => 'Calls answered ÷ calls made';
+
+  @override
+  String get ahLatency => 'Response time (slowest 5%)';
+
+  @override
+  String get ahLatencyFormula =>
+      'The time 95% of answered calls came back within';
+
+  @override
+  String get ahAgreement => 'Reading agreement';
+
+  @override
+  String get ahAgreementFormula =>
+      '1 − (lines the two readings disagreed on + lines the check added or removed) ÷ lines the AI read';
+
+  @override
+  String get ahTotals => 'Totals match';
+
+  @override
+  String get ahTotalsFormula =>
+      'Files whose lines add up to the document total ÷ files that could be compared';
+
+  @override
+  String ahThresholdHigher(String good, String warn) {
+    return 'Working at $good or more, attention at $warn or more, below that not working';
+  }
+
+  @override
+  String ahThresholdLower(String good, String warn) {
+    return 'Working at $good or less, attention at $warn or less, above that not working';
+  }
+
+  @override
+  String ahCalls(int total, int ok, int failed) {
+    return '$total calls ($ok answered, $failed failed)';
+  }
+
+  @override
+  String ahTokens(String input, String output) {
+    return 'Tokens used: $input in, $output out';
+  }
+
+  @override
+  String ahFiles(int files, int aiFiles) {
+    return '$files files read ($aiFiles by the AI)';
+  }
+
+  @override
+  String ahLastCall(String when) {
+    return 'Last call $when';
+  }
+
+  @override
+  String ahLastOk(String when) {
+    return 'Last answered $when';
+  }
+
+  @override
+  String get ahBlockingNoKey =>
+      'GEMINI_API_KEY is not set on the server. Add it to the Supabase secrets.';
+
+  @override
+  String get ahBlockingAuth =>
+      'The API key was refused (invalid, deleted or from another project). Check the key in Google AI Studio.';
+
+  @override
+  String get ahBlockingQuota =>
+      'The request limit is reached. On the free tier, consider switching to paid.';
+
+  @override
+  String get ahKindNoKey => 'No key';
+
+  @override
+  String get ahKindAuth => 'Key refused';
+
+  @override
+  String get ahKindQuota => 'Limit reached';
+
+  @override
+  String get ahKindOverload => 'Busy or failing';
+
+  @override
+  String get ahKindBadRequest => 'Request refused';
+
+  @override
+  String get ahKindNetwork => 'Unreachable';
+
+  @override
+  String get ahKindParse => 'Malformed answer';
+
+  @override
+  String get ahKindOther => 'Other';
+
+  @override
+  String get ahRecentErrors => 'Recent errors';
+
+  @override
+  String get ahNoErrors => 'No errors in this period';
+
+  @override
+  String get ahPing => 'Connection test';
+
+  @override
+  String ahPingOk(int ms, String model) {
+    return 'Connected ($ms ms, $model)';
+  }
+
+  @override
+  String ahPingFailed(String kind) {
+    return 'Not connected: $kind';
+  }
+
+  @override
+  String get ahHowJudged => 'How it is judged';
+
+  @override
+  String get ahHowJudgedBody =>
+      'The overall verdict is the worst of the four measures (a measure with no data does not count). If the last call failed for a missing or refused key, or the request limit, it is \"not working\" whatever the others say.';
+
+  @override
+  String get ahRefresh => 'Refresh';
 }

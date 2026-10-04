@@ -205,13 +205,62 @@ function dateStr(v: unknown): string | null {
 // The AI (Gemini), with retries on overload
 // ---------------------------------------------------------------------------
 
+/** What kind of failure an AI call was (0133), for 稼働状況. */
+export type AiErrorKind = "no_key" | "auth" | "quota" | "overload" | "bad_request" | "network" | "parse" | "other";
+
+export class AiError extends Error {
+  constructor(message: string, readonly kind: AiErrorKind, readonly status: number | null = null) {
+    super(message);
+  }
+}
+
+export function aiErrorKind(status: number | null, body = ""): AiErrorKind {
+  if (status === null) return "network";
+  if (status === 401 || status === 403 || /API_KEY_INVALID|API key not valid|PERMISSION_DENIED/i.test(body)) return "auth";
+  if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(body)) return "quota";
+  if (status >= 500) return "overload";
+  if (status >= 400) return "bad_request";
+  return "other";
+}
+
+let aiFunction = "unknown";
+/** Which edge function the calls are made from, for the record. */
+export function setAiFunction(name: string) {
+  aiFunction = name;
+}
+
+/** Every AI call is recorded in `ai_calls` (0133). Best effort: a record that
+ * cannot be written never fails the reading. */
+async function logAiCall(row: Record<string, unknown>) {
+  const url = Deno.env.get("SUPABASE_URL"), key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/ai_calls`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify({ function_name: aiFunction, ...row }),
+    });
+  } catch (_) { /* the record is not worth failing for */ }
+}
+
+export function aiModel(): string {
+  return Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
+}
+
+/** One call to the AI (Gemini), retried on overload, and recorded with its
+ * outcome, time and tokens (0133). [task] says what it was for. */
 export async function gemini(
   parts: unknown[],
   schema: unknown,
+  task = "other",
 ): Promise<Record<string, unknown>> {
+  const model = aiModel();
+  const started = Date.now();
   const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY is not set on the server.");
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
+  if (!apiKey) {
+    await logAiCall({ task, model, ok: false, error_kind: "no_key", error: "GEMINI_API_KEY is not set", attempts: 0 });
+    throw new AiError("GEMINI_API_KEY is not set on the server.", "no_key");
+  }
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const payload = {
@@ -223,25 +272,81 @@ export async function gemini(
     },
   };
   let res: Response | null = null;
+  let attempts = 0;
   for (let attempt = 0; attempt < 4; attempt++) {
-    res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify(payload),
-    });
+    attempts++;
+    try {
+      res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      await logAiCall({ task, model, ok: false, error_kind: "network", error: String(e).slice(0, 500), attempts,
+        latency_ms: Date.now() - started });
+      throw new AiError(`Gemini unreachable: ${e}`, "network");
+    }
     if (res.status !== 503 && res.status !== 429) break;
     if (attempt < 3) await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
   }
   if (!res || !res.ok) {
-    throw new Error(`Gemini error ${res ? res.status : "?"}: ${res ? await res.text() : ""}`);
+    const status = res ? res.status : null;
+    const body = res ? await res.text() : "";
+    const kind = aiErrorKind(status, body);
+    await logAiCall({ task, model, ok: false, http_status: status, error_kind: kind, error: body.slice(0, 500), attempts,
+      latency_ms: Date.now() - started });
+    throw new AiError(`Gemini error ${status ?? "?"}: ${body}`, kind, status);
   }
   const body = await res.json();
+  const usage = body?.usageMetadata ?? {};
   const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+  let parsed: Record<string, unknown> | null = null;
   try {
-    return JSON.parse(text);
+    parsed = JSON.parse(text);
   } catch (_) {
-    return {};
+    parsed = null;
   }
+  await logAiCall({
+    task, model, ok: parsed !== null, http_status: res.status, attempts, latency_ms: Date.now() - started,
+    input_tokens: usage.promptTokenCount ?? null, output_tokens: usage.candidatesTokenCount ?? null,
+    ...(parsed === null ? { error_kind: "parse", error: String(text).slice(0, 500) } : {}),
+  });
+  return parsed ?? {};
+}
+
+/** 接続テスト (0133): one tiny call, to tell at once whether the key works. */
+export async function aiPing(): Promise<
+  { ok: boolean; model: string; latency_ms: number; error_kind: AiErrorKind | null; message: string | null }
+> {
+  const started = Date.now();
+  try {
+    const r = await gemini([{ text: "接続確認です。reply に OK とだけ入れて返してください。" }],
+      { type: "object", properties: { reply: { type: "string" } }, required: ["reply"] }, "ping");
+    const ok = typeof r.reply === "string";
+    return { ok, model: aiModel(), latency_ms: Date.now() - started, error_kind: ok ? null : "parse", message: null };
+  } catch (e) {
+    return {
+      ok: false, model: aiModel(), latency_ms: Date.now() - started,
+      error_kind: e instanceof AiError ? e.kind : "other", message: String(e).slice(0, 300),
+    };
+  }
+}
+
+/** How a reading went (0133), kept on its file's record: how many lines,
+ * how many the AI's two readings disagreed on, or the check added or
+ * dropped, and whether the lines add up to the document's total. */
+export function readingQuality(
+  lines: Pick<ReadLine, "flags">[], source: string, verified: boolean, totals: Pick<Totals, "ok"> | null,
+): Record<string, unknown> {
+  const count = (f: string) => lines.filter((l) => l.flags.some((x) => x === f || x.startsWith(`${f}:`))).length;
+  const disagree = count("ai_disagree"), added = count("added_by_check"), dropped = count("dropped_by_check");
+  const n = lines.length;
+  return {
+    source, verified, lines: n, disagree, added, dropped,
+    no_quantity: count("no_quantity"), jan_check: count("jan_check"), qty_from_amount: count("qty_from_amount"),
+    totals_ok: totals?.ok ?? null,
+    agreement: n ? Math.round((1 - (disagree + added + dropped) / n) * 1000) / 1000 : null,
+  };
 }
 
 const FIELD_HELP =
@@ -331,7 +436,7 @@ export async function splitNameCodes(values: string[]): Promise<SplitResult[]> {
           },
         },
         required: ["items"],
-      });
+      }, "split");
       ai = Array.isArray(r.items) ? r.items as typeof ai : [];
     } catch (_) {
       ai = [];
@@ -479,7 +584,7 @@ async function aiColumns(
         },
       },
       required: ["columns"],
-    });
+    }, "columns");
     const cols = Array.isArray(r.columns) ? r.columns as { index: number; field: Field; attribute?: string }[] : [];
     return headers.map((_, i) => {
       const c = cols.find((c) => c.index === i);
@@ -1120,7 +1225,7 @@ export async function readIssuer(
         registration_number: { type: "string" },
         addressee_name: { type: "string" },
       },
-    });
+    }, "issuer");
     const addressee = str(r.addressee_name)?.replace(/\s*(?:御中|様|殿)\s*$/, "") ?? null;
     const toUs = addressee ? { names: [addressee], registration_number: null } : null;
     let name = str(r.issuer_name);
@@ -1487,7 +1592,7 @@ export async function readDocument(
 ): Promise<{ header: Header; columns: Column[]; lines: ReadLine[]; verified: boolean; totals: Totals }> {
   const doc = { inline_data: { mime_type: mime, data: encodeBase64(bytes) } };
   const known = hintText(hints);
-  const a = await gemini([{ text: EXTRACT_PROMPT + ownText(own) + known }, doc], EXTRACT_SCHEMA);
+  const a = await gemini([{ text: EXTRACT_PROMPT + ownText(own) + known }, doc], EXTRACT_SCHEMA, "extract");
   const aLines = (Array.isArray(a.lines) ? a.lines : []) as RawLine[];
 
   let bLines: RawLine[] | null = null;
@@ -1504,6 +1609,7 @@ export async function readDocument(
         },
         required: ["lines"],
       },
+      "verify",
     );
     bLines = (Array.isArray(b.lines) ? b.lines : []) as RawLine[];
   } catch (_) {

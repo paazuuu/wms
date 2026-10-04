@@ -21,7 +21,7 @@
 // implementation today; `qwen` is a reserved, not-yet-implemented slot.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { encodeHex } from "jsr:@std/encoding/hex";
-import { readDocument } from "../_shared/document_reader.ts";
+import { readDocument, readingQuality, setAiFunction } from "../_shared/document_reader.ts";
 import { keepEvidence, noteEvidence } from "../_shared/evidence.ts";
 
 const cors = {
@@ -44,6 +44,7 @@ const supabase = createClient(
 );
 
 const TASK_TYPE = "ocr_delivery_note";
+setAiFunction("ocr-delivery-note");
 
 // ---------------------------------------------------------------------------
 // AIProvider abstraction (spec §27): business code below depends on this
@@ -62,6 +63,8 @@ interface OcrLineRaw {
 
 interface OcrResult {
   lines: OcrLineRaw[];
+  /** How the reading went, for AIの稼働状況 (0133). */
+  quality?: Record<string, unknown>;
   /** The model's own read-quality self-assessment, 0-1, or null if it didn't
    * return one — never fabricated client-side (spec §31's 信頼度). */
   confidence: number | null;
@@ -109,6 +112,7 @@ class GeminiProvider implements AIProvider {
         })),
         // Not a score anyone measured: none, rather than a made-up one.
         confidence: null,
+        quality: readingQuality(r.lines, "gemini", r.verified, r.totals),
       };
     } catch (e) {
       const msg = String(e);
@@ -196,7 +200,7 @@ Deno.serve(async (req) => {
     }
 
     const provider = getProvider(providerName);
-    const { lines, confidence } = await provider.extractDeliveryNote(bytes, mime);
+    const { lines, confidence, quality } = await provider.extractDeliveryNote(bytes, mime);
 
     const { data: analysisId, error: recordError } = await supabase.rpc(
       "record_ai_analysis",
@@ -214,7 +218,7 @@ Deno.serve(async (req) => {
       },
     );
     if (recordError) return json({ message: recordError.message }, 500);
-    await noteEvidence(supabase, documentId, { source: "gemini", line_count: lines.length });
+    await noteEvidence(supabase, documentId, { source: "gemini", line_count: lines.length, quality: quality ?? null });
 
     return json({
       data: { provider: provider.name, lines, analysis_id: analysisId, reused: false, document_id: documentId },

@@ -69,11 +69,14 @@ import {
   CODE_MATCHES,
   normalizeJan,
   normalizeText,
+  aiPing,
   readDocument,
+  readingQuality,
   readIssuer,
   readPdfText,
   type ReadingHints,
   readSpreadsheet,
+  setAiFunction,
   type Totals,
   type ReadAttribute,
   type ReadLine,
@@ -99,6 +102,7 @@ function json(body: unknown, status = 200): Response {
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const admin = adminClient(supabaseUrl);
+setAiFunction("import-plan");
 
 const UNKNOWN_CODE = "UNKNOWN";
 const isJan = (d: string) => d.length === 13 || d.length === 8;
@@ -682,6 +686,13 @@ Deno.serve(async (req) => {
     // COMMIT: the reviewed/edited header + lines come back as JSON.
     if (ctype.includes("application/json")) {
       const b = await req.json();
+      // 接続テスト (0133): is the AI answering, with this key, right now?
+      if (str(b.mode) === "ai_ping") {
+        if (!(await clientPermitted(supabase, "ai.review")) && !(await clientPermitted(supabase, "user.manage"))) {
+          return json({ message: notPermittedMessage("ai.review") }, 403);
+        }
+        return json({ data: await aiPing() });
+      }
       // Training (0106): what a checked sample taught, learned — nothing booked.
       if (str(b.mode) === "learn") {
         const { data: allowed } = await supabase.rpc("notation_training_allowed");
@@ -820,6 +831,8 @@ Deno.serve(async (req) => {
       source, supplier_id: partnerId, supplier_name: supplier ?? header.supplier_name,
       registration_number: header.registration_number, doc_number: header.doc_number ?? (deliveryNumber || null),
       doc_date: header.doc_date ?? deliveryDate, line_count: merged.length, addressee: header.addressee ?? null,
+      // How the reading went, for AIの稼働状況 (0133).
+      quality: readingQuality(lines, source, verified, totals),
     });
     if (merged.length === 0) return json({ message: "No JAN rows found.", document_id: documentId }, 422);
     const withProducts = await resolveLines(supabase, partnerId, merged);
