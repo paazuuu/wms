@@ -28,6 +28,15 @@ void main() {
       expect(humanizeApiErrorMessage(ja, raw), raw);
     });
 
+    test('the AI out of credits or with a refused key says what to check (0133)', () {
+      expect(
+        humanizeApiErrorMessage(ja, 'Error: Gemini error 402: {"error":{"code":402,"message":"Your prepayment credits are depleted."}}'),
+        ja.errorAiCredits,
+      );
+      expect(humanizeApiErrorMessage(ja, 'Gemini error 429: too many'), ja.errorAiCredits);
+      expect(humanizeApiErrorMessage(ja, 'Gemini error 400: API key not valid'), ja.errorAiKey);
+    });
+
     test('no answer from the server says the device is offline (spec §58)', () {
       expect(humanizeApiErrorMessage(ja, 'No connection to the server.'), ja.errorOffline);
     });

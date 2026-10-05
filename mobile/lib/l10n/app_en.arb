@@ -3102,7 +3102,7 @@
   "ahLastOk": "Last answered {when}",
   "ahBlockingNoKey": "GEMINI_API_KEY is not set on the server. Add it to the Supabase secrets.",
   "ahBlockingAuth": "The API key was refused (invalid, deleted or from another project). Check the key in Google AI Studio.",
-  "ahBlockingQuota": "The request limit is reached. On the free tier, consider switching to paid.",
+  "ahBlockingQuota": "The AI's prepaid credits or request limit are used up. Check the balance and billing in Google AI Studio (ai.studio/projects).",
   "ahKindNoKey": "No key",
   "ahKindAuth": "Key refused",
   "ahKindQuota": "Limit reached",
@@ -3118,5 +3118,7 @@
   "ahPingFailed": "Not connected: {kind}",
   "ahHowJudged": "How it is judged",
   "ahHowJudgedBody": "The overall verdict is the worst of the four measures (a measure with no data does not count). If the last call failed for a missing or refused key, or the request limit, it is \"not working\" whatever the others say.",
-  "ahRefresh": "Refresh"
+  "ahRefresh": "Refresh",
+  "errorAiCredits": "The AI could not read this: its prepaid credits or request limit are used up. Check the balance and billing in Google AI Studio. Excel, CSV and PDFs with text can still be read without the AI.",
+  "errorAiKey": "The AI key could not be used, so the AI could not read this. Run the connection test in Management → AI status."
 }

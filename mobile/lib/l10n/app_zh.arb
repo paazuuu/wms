@@ -3102,7 +3102,7 @@
   "ahLastOk": "最后成功 {when}",
   "ahBlockingNoKey": "服务器未设置 GEMINI_API_KEY。请在 Supabase 的密钥中设置。",
   "ahBlockingAuth": "API密钥被拒绝（无效、已删除或属于其他项目）。请在 Google AI Studio 确认密钥。",
-  "ahBlockingQuota": "已达到调用上限。若为免费额度，请考虑切换到付费。",
+  "ahBlockingQuota": "AI额度（预付费额度或调用上限）已用完。请在 Google AI Studio（ai.studio/projects）确认余额与付费设置。",
   "ahKindNoKey": "未设置密钥",
   "ahKindAuth": "密钥被拒",
   "ahKindQuota": "达到上限",
@@ -3118,5 +3118,7 @@
   "ahPingFailed": "无法连接: {kind}",
   "ahHowJudged": "判定方法",
   "ahHowJudgedBody": "整体判定取四项指标中最差的结果（无数据的指标不计入）。若最后一次调用因未设置密钥、密钥被拒或达到上限而失败，则无论其他指标如何均为「异常」。",
-  "ahRefresh": "刷新"
+  "ahRefresh": "刷新",
+  "errorAiCredits": "AI额度（预付费额度或调用上限）已用完，无法用AI读取。请在 Google AI Studio 确认余额与付费设置。Excel、CSV 及含文字的PDF不使用AI也可读取。",
+  "errorAiKey": "AI的API密钥无法使用，无法用AI读取。请在 管理 → AI运行状态 进行连接测试。"
 }

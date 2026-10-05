@@ -9072,7 +9072,8 @@ class AppLocalizationsZh extends AppLocalizations {
       'API密钥被拒绝（无效、已删除或属于其他项目）。请在 Google AI Studio 确认密钥。';
 
   @override
-  String get ahBlockingQuota => '已达到调用上限。若为免费额度，请考虑切换到付费。';
+  String get ahBlockingQuota =>
+      'AI额度（预付费额度或调用上限）已用完。请在 Google AI Studio（ai.studio/projects）确认余额与付费设置。';
 
   @override
   String get ahKindNoKey => '未设置密钥';
@@ -9126,4 +9127,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ahRefresh => '刷新';
+
+  @override
+  String get errorAiCredits =>
+      'AI额度（预付费额度或调用上限）已用完，无法用AI读取。请在 Google AI Studio 确认余额与付费设置。Excel、CSV 及含文字的PDF不使用AI也可读取。';
+
+  @override
+  String get errorAiKey => 'AI的API密钥无法使用，无法用AI读取。请在 管理 → AI运行状态 进行连接测试。';
 }

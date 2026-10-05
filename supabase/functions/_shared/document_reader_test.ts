@@ -22,6 +22,7 @@ import {
   companiesInFileName,
   aiErrorKind,
   readingQuality,
+  dropTotalsLines,
   pdfTable,
   readRows,
   readSpreadsheet,
@@ -549,4 +550,30 @@ Deno.test("what kind of AI failure, and how a reading went (0133)", () => {
   );
   assertEquals([q.lines, q.disagree, q.added, q.dropped, q.qty_from_amount, q.totals_ok, q.agreement], [4, 1, 1, 0, 1, true, 0.5]);
   assertEquals(readingQuality([], "xlsx", true, null).agreement, null);
+});
+
+Deno.test("a totals row read as a line is taken out by its sum (0134)", async () => {
+  // 請求金額 printed under the name column, and the tax with "10" in the
+  // quantity column: the lines' own sum doubled before.
+  const rows = [
+    ["JAN", "品名", "数量", "単価", "金額"],
+    ["4902778318232", "ジェットストリーム 赤", "500", "63.60", "31,800"],
+    ["4902778198957", "ユニボール エア 黒", "200", "106", "21,200"],
+    [null, "お買上金額", null, null, "53,000"],
+    [null, "請求金額", null, null, "58,300"],
+  ];
+  const { lines, totals } = await readRows(rows, known, {}, false);
+  assertEquals(lines.length, 2);
+  assertEquals(totals.lines_sum, 53000);
+  assertEquals(totals.ok, true);
+  // On its own: the line equal to the goods with 10% tax goes, a real line stays.
+  const line = (amount: number, extra: Partial<Record<string, unknown>> = {}) => ({
+    row: 1, jan_code: "", raw_jan_code: null, maker: null, product_name: "x", product_code: null, raw_name_code: null,
+    split_by: null, spec: null, planned_quantity: 0, case_quantity: null, cases: null, unit_price: null, amount,
+    tax_rate: null, order_date: null, flags: [] as string[], alternatives: {}, attributes: [], list_price: null,
+    discount_rate: null, unit: null, supplier_code: null, upstream_code: null, customer_code: null, ...extra,
+  }) as Parameters<typeof dropTotalsLines>[0][number];
+  const ls = [line(1000, { raw_jan_code: "4902778318232", planned_quantity: 10 }), line(1100), line(70)];
+  assertEquals(dropTotalsLines(ls).map((l) => l.amount), [1100]);
+  assertEquals(ls.map((l) => l.amount), [1000, 70]);
 });

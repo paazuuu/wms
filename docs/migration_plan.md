@@ -6267,6 +6267,25 @@ Also:
   - recent errors;
   - a 接続テスト button.
 
+## 0134 — a totals row read as goods; AI credits run out (no migration)
+
+- 明細の合計 compares the sum of line amounts with the document's own
+  totals (税抜合計, 税込−消費税, 税込合計, or a figure on the page). It is a
+  warning only; the plan can still be registered.
+- A file came back with the line sum exactly twice the document total: a
+  合計 row had been kept as a product line.
+  - More summary words now mark a row as a totals row (税抜, 税込, 対象額,
+    総額, 値引, 送料, 繰越, 請求, 入金, 残高, 買上, 差引, 振込, 手数料).
+  - `dropTotalsLines`: a line with no JAN, no quantity and no unit price,
+    whose amount equals the sum of the other lines (or ×1.1, ×1.08, or the
+    10% / 8% tax), is taken out and kept as a document figure. This runs for
+    spreadsheets, text PDFs and the AI reading.
+- Gemini answers 402 "prepayment credits are depleted" when the prepaid
+  balance is used up. That is now counted as `quota`, so AIの稼働状況 shows
+  it as blocking.
+- The import screens say in plain words when the AI has no credits
+  (`errorAiCredits`) or its key is refused (`errorAiKey`).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

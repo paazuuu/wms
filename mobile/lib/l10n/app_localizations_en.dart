@@ -9315,7 +9315,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ahBlockingQuota =>
-      'The request limit is reached. On the free tier, consider switching to paid.';
+      'The AI\'s prepaid credits or request limit are used up. Check the balance and billing in Google AI Studio (ai.studio/projects).';
 
   @override
   String get ahKindNoKey => 'No key';
@@ -9369,4 +9369,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ahRefresh => 'Refresh';
+
+  @override
+  String get errorAiCredits =>
+      'The AI could not read this: its prepaid credits or request limit are used up. Check the balance and billing in Google AI Studio. Excel, CSV and PDFs with text can still be read without the AI.';
+
+  @override
+  String get errorAiKey =>
+      'The AI key could not be used, so the AI could not read this. Run the connection test in Management → AI status.';
 }

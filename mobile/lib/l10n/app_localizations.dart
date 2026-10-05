@@ -16552,7 +16552,7 @@ abstract class AppLocalizations {
   /// No description provided for @ahBlockingQuota.
   ///
   /// In ja, this message translates to:
-  /// **'回数の上限に達しています。無料枠なら有料枠への切り替えを検討してください。'**
+  /// **'AIの利用枠（前払いクレジット・回数上限）を使い切っています。Google AI Studio（ai.studio/projects）で残高と請求設定を確認してください。'**
   String get ahBlockingQuota;
 
   /// No description provided for @ahKindNoKey.
@@ -16650,6 +16650,18 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'更新'**
   String get ahRefresh;
+
+  /// No description provided for @errorAiCredits.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの利用枠（前払いクレジット・回数上限）を使い切っているため、AIで読み取れませんでした。Google AI Studio で残高と請求設定を確認してください。Excel・CSV と文字の入ったPDFはAIなしでも読み取れます。'**
+  String get errorAiCredits;
+
+  /// No description provided for @errorAiKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIのAPIキーが使えないため、AIで読み取れませんでした。管理 → AIの稼働状況 で接続テストをしてください。'**
+  String get errorAiKey;
 }
 
 class _AppLocalizationsDelegate

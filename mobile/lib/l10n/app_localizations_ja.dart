@@ -9117,7 +9117,8 @@ class AppLocalizationsJa extends AppLocalizations {
       'APIキーが拒否されました（無効・削除済み・別のプロジェクト）。Google AI Studio でキーを確認してください。';
 
   @override
-  String get ahBlockingQuota => '回数の上限に達しています。無料枠なら有料枠への切り替えを検討してください。';
+  String get ahBlockingQuota =>
+      'AIの利用枠（前払いクレジット・回数上限）を使い切っています。Google AI Studio（ai.studio/projects）で残高と請求設定を確認してください。';
 
   @override
   String get ahKindNoKey => 'キー未設定';
@@ -9171,4 +9172,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ahRefresh => '更新';
+
+  @override
+  String get errorAiCredits =>
+      'AIの利用枠（前払いクレジット・回数上限）を使い切っているため、AIで読み取れませんでした。Google AI Studio で残高と請求設定を確認してください。Excel・CSV と文字の入ったPDFはAIなしでも読み取れます。';
+
+  @override
+  String get errorAiKey =>
+      'AIのAPIキーが使えないため、AIで読み取れませんでした。管理 → AIの稼働状況 で接続テストをしてください。';
 }

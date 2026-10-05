@@ -46,6 +46,14 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('serial-numbered line cannot be converted')) {
     return l10n.qcErrorSerialConvert;
   }
+  // The AI (Gemini) refusing for its credits, its limit or its key (0133):
+  // what to check, rather than Google's JSON.
+  if (RegExp(r'Gemini error (402|429)|credits are depleted|RESOURCE_EXHAUSTED').hasMatch(rawMessage)) {
+    return l10n.errorAiCredits;
+  }
+  if (RegExp(r'Gemini error (401|403)|API key not valid|API_KEY_INVALID|GEMINI_API_KEY is not set').hasMatch(rawMessage)) {
+    return l10n.errorAiKey;
+  }
   // No answer from the server at all (spec §58): say so plainly.
   if (rawMessage.contains('No connection to the server')) {
     return l10n.errorOffline;

@@ -217,7 +217,8 @@ export class AiError extends Error {
 export function aiErrorKind(status: number | null, body = ""): AiErrorKind {
   if (status === null) return "network";
   if (status === 401 || status === 403 || /API_KEY_INVALID|API key not valid|PERMISSION_DENIED/i.test(body)) return "auth";
-  if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(body)) return "quota";
+  // 402: the project's prepaid credits are spent; 429: too many requests.
+  if (status === 402 || status === 429 || /RESOURCE_EXHAUSTED|quota|credits/i.test(body)) return "quota";
   if (status >= 500) return "overload";
   if (status >= 400) return "bad_request";
   return "other";
@@ -629,7 +630,7 @@ export function settleDuplicates(columns: Column[]) {
 }
 
 const TOTAL_ROW = /^(合計|小計|総合計|計|total|subtotal|grand ?total)$/i;
-const SUMMARY_WORDS = /合計|小計|消費税|税抜|税込|対象額?|総額|値引|送料|繰越|前回|今回|total|tax/i;
+const SUMMARY_WORDS = /合計|小計|消費税|税抜|税込|対象額?|総額|値引|送料|繰越|前回|今回|請求|入金|残高|買上|差引|振込|手数料|total|tax/i;
 
 /** What the lines add up to, against what the document says it totals
  * (0114). A misread quantity or price shows here. */
@@ -898,6 +899,12 @@ export async function readRows(
     });
   });
 
+  // A totals row that slipped in as a line (請求金額 under the name column, a
+  // tax figure in the quantity column …) is told by its sum: no JAN, no
+  // quantity, no unit price, and an amount that is what the other lines add
+  // up to — with or without tax, or the tax alone (0134).
+  for (const l of dropTotalsLines(lines)) numbers.push(l.amount!);
+
   await applySplits(lines, useAi);
   checkLines(lines);
   return { columns, lines, header_row: headerRow + 1, totals: checkTotals(lines, { numbers }) };
@@ -906,6 +913,26 @@ export async function readRows(
 // ---------------------------------------------------------------------------
 // PDFs that carry their text: read it where it stands (0114)
 // ---------------------------------------------------------------------------
+
+/** Takes out of [lines] those that are the document's totals, not goods: no
+ * JAN, no quantity, no unit price, and an amount equal to what the goods
+ * lines add up to — as is, with 8% or 10% tax, or the tax alone. Returns
+ * what it took out. */
+export function dropTotalsLines(lines: ReadLine[]): ReadLine[] {
+  const loose = (l: ReadLine) =>
+    !l.raw_jan_code && !l.planned_quantity && l.unit_price === null && l.amount !== null && l.amount !== 0;
+  const taken: ReadLine[] = [];
+  for (let pass = 0; pass < 4; pass++) {
+    const goods = lines.filter((l) => !loose(l));
+    const base = goods.reduce((s, l) => s + (l.amount ?? 0), 0);
+    if (base <= 0) break;
+    const looks = [base, base * 1.1, base * 1.08, base * 0.1, base * 0.08];
+    const at = lines.findIndex((l) => loose(l) && looks.some((v) => Math.abs(l.amount! - v) <= Math.max(1, v * 0.001)));
+    if (at < 0) break;
+    taken.push(...lines.splice(at, 1));
+  }
+  return taken;
+}
 
 type TextItem = { str: string; x0: number; x1: number; y: number };
 
@@ -1696,10 +1723,14 @@ export async function readDocument(
       l.split_by = "both";
     }
   }
+  // A totals row the reading took for goods is set aside as a figure (0134).
+  const totalsRows = dropTotalsLines(lines).map((l) => l.amount!);
   checkLines(lines);
 
   const h = (a.header ?? {}) as Record<string, unknown>;
-  const totals = checkTotals(lines, { subtotal: toNum(h.subtotal), tax: toNum(h.tax), total: toNum(h.total) });
+  const totals = checkTotals(lines, {
+    subtotal: toNum(h.subtotal), tax: toNum(h.tax), total: toNum(h.total), numbers: totalsRows,
+  });
   // Ours is never the supplier, whatever the reading put there; nor is the
   // company the document is addressed to (0132).
   const addressee = str(h.addressee_name)?.replace(/\s*(?:御中|様|殿)\s*$/, "") ?? null;
