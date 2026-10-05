@@ -6407,11 +6407,28 @@ tables keep their names:
 - Product detail: what each supplier calls it, the learned names, receipts
   with inspection results, open plans and files.
 
+- 商品ライブラリー → 仕入先商品名: every supplier's writing and code, each
+  pointing at one product id; searchable, and a tap opens the product.
+- New products (§43): the registration sheet has an 英語標準名 field and an
+  "AIで英語標準名を提案" button.
+  - It calls `import-plan` with `mode: suggest_names` (product.manage).
+  - The rules are given to the AI: English, the product kind stated,
+    size and model kept, no supplier name, no marketing words or packing
+    counts. `tidyEnglishName` removes a supplier name or packing count if
+    one still slips in.
+  - Nothing is saved until the person registers; the name is then stored as
+    the product's `name_en`. The supplier's own name stays in the mapping
+    as written.
+
 ### Not done here
 
 - The putaway completion time per receipt is not recorded. Put-away works on
   stock units, which no longer know their receipt; 棚入れ待ち shows what is
   still unbinned.
+- The `suggest_names` mode of `import-plan` is in the code but not yet
+  deployed (the deploy needs approval in this session). Until it is, and
+  while the Gemini prepaid credits are used up, the button answers with an
+  error and the English name is typed by hand.
 
 ## Rollout discipline
 

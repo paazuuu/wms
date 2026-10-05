@@ -330,9 +330,10 @@ void main() {
 
     testWidgets('the menu filter narrows entries and whole groups',
         (tester) async {
+      // Tall enough that every group heading is built before filtering.
       tester.view
         ..devicePixelRatio = 1.0
-        ..physicalSize = const Size(1400, 1200);
+        ..physicalSize = const Size(1400, 1600);
       addTearDown(tester.view.reset);
 
       final app = _wrap();

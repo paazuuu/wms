@@ -9,7 +9,23 @@ import 'package:wms_mobile/features/product_library/presentation/name_formats_sc
 import 'package:wms_mobile/features/product_library/presentation/product_naming_dialog.dart';
 import 'package:wms_mobile/features/product_library/presentation/register_products_sheet.dart';
 
+import 'package:wms_mobile/core/api/api_result.dart';
+import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product_library/data/english_name_suggester.dart';
+
 import '../../support/harness.dart';
+
+class _FakeSuggester implements EnglishNameSuggester {
+  _FakeSuggester(this.names);
+  final Map<int, String> names;
+  List<NameRequest>? asked;
+
+  @override
+  Future<ApiResult<Map<int, String>>> suggest(List<NameRequest> items) async {
+    asked = items;
+    return ApiSuccess(names);
+  }
+}
 
 const _proposals = [
   ProductProposal(
@@ -317,6 +333,49 @@ void main() {
       expect(repo.lastRegistered?.first.attributes, {'size': '0.5mm'});
       expect(repo.lastRegistered?.first.source, {'product_name': 'ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ'});
       expect(find.byType(RegisterProductsSheet), findsNothing);
+    });
+
+    testWidgets('an English standard name is proposed, corrected and saved with the product (§43)', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final repo = FakeProductNamingRepository(proposals: [..._proposals]);
+      final products = FakeProductRepository();
+      final suggester = _FakeSuggester({2: 'Uni-ball Air Rollerball Pen 0.5 mm Red'});
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showRegisterProductsSheet(context, partnerId: 9, lines: const [
+                {'row': 2, 'product_name': 'ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ'},
+              ]),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+        overrides: [
+          productNamingRepositoryProvider.overrideWithValue(repo),
+          productRepositoryProvider.overrideWithValue(products),
+          englishNameSuggesterProvider.overrideWithValue(suggester),
+        ],
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('rp-suggest-en')));
+      await tester.pumpAndSettle();
+      // The supplier's own writing is what the AI reads.
+      expect(suggester.asked?.first.supplierName, 'ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ');
+      expect(tester.widget<TextField>(find.byKey(const ValueKey('rp-name-en-2'))).controller?.text,
+          'Uni-ball Air Rollerball Pen 0.5 mm Red');
+      await tester.enterText(find.byKey(const ValueKey('rp-name-en-3')), 'Campus Loose-leaf Paper');
+      await tester.tap(find.byKey(const ValueKey('rp-register')));
+      await tester.pumpAndSettle();
+
+      expect(products.setNamesEn, [
+        (productId: 500, nameEn: 'Uni-ball Air Rollerball Pen 0.5 mm Red'),
+        (productId: 501, nameEn: 'Campus Loose-leaf Paper'),
+      ]);
     });
 
     testWidgets('only the chosen ones are registered, and each needs a maker', (tester) async {

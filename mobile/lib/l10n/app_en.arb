@@ -3214,5 +3214,14 @@
   "ibAliases": "Names learned for matching",
   "ibOpenPlans": "Still expected",
   "ibNoHistory": "Nothing has come in for this product yet",
-  "ibLastSeen": "Last {date}"
+  "ibLastSeen": "Last {date}",
+  "featSupplierProductNames": "Supplier product names",
+  "featSupplierProductNamesDesc": "What each supplier calls our products, and which product each name points to",
+  "spnSearchHint": "Search by supplier name, code, JAN or our product",
+  "spnEmpty": "No supplier names yet",
+  "spnEmptyBody": "They are added here on their own when a line of a supplier file is tied to one of our products.",
+  "rpEnglishName": "English standard name",
+  "rpSuggestEnglish": "Suggest English names with AI",
+  "rpSuggestEnglishHint": "Proposals are not saved on their own: check and correct them before registering. The supplier's name is never included.",
+  "rpEnglishSuggested": "{n} English names proposed"
 }

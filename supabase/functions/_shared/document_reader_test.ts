@@ -31,6 +31,7 @@ import {
   splitMulti,
   toInt,
   toNum,
+  tidyEnglishName,
 } from "./document_reader.ts";
 
 Deno.test("a JAN written any company's way is one JAN", () => {
@@ -576,4 +577,12 @@ Deno.test("a totals row read as a line is taken out by its sum (0134)", async ()
   const ls = [line(1000, { raw_jan_code: "4902778318232", planned_quantity: 10 }), line(1100), line(70)];
   assertEquals(dropTotalsLines(ls).map((l) => l.amount), [1100]);
   assertEquals(ls.map((l) => l.amount), [1000, 70]);
+});
+
+Deno.test("an English name proposal is tidied: no supplier name, no packing count (§43)", () => {
+  assertEquals(tidyEnglishName("  Stainless Steel Hex Bolt M8 x 50 mm  "), "Stainless Steel Hex Bolt M8 x 50 mm");
+  assertEquals(tidyEnglishName("ABC Hex Bolt M8", "ABC商事株式会社"), "ABC Hex Bolt M8");
+  assertEquals(tidyEnglishName("Ueda Hex Bolt M8", "Ueda"), "Hex Bolt M8");
+  assertEquals(tidyEnglishName("Hex Bolt M8 x 50 mm 50 pcs"), "Hex Bolt M8 x 50 mm");
+  assertEquals(tidyEnglishName(null), "");
 });

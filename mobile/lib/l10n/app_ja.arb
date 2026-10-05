@@ -8452,5 +8452,21 @@
         "type": "String"
       }
     }
+  },
+  "featSupplierProductNames": "仕入先商品名",
+  "featSupplierProductNamesDesc": "仕入先ごとの商品名・コードと、それが指す自社の商品",
+  "spnSearchHint": "仕入先の商品名・コード・JAN・自社商品名で探す",
+  "spnEmpty": "仕入先商品名はまだありません",
+  "spnEmptyBody": "仕入先ファイルの行を自社の商品に紐付けると、ここに自動で登録されます。",
+  "rpEnglishName": "英語標準名",
+  "rpSuggestEnglish": "AIで英語標準名を提案",
+  "rpSuggestEnglishHint": "提案は確定されません。確認・修正してから登録してください。仕入先名は入りません。",
+  "rpEnglishSuggested": "{n} 件の英語名を提案しました",
+  "@rpEnglishSuggested": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

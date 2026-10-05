@@ -1602,6 +1602,62 @@ export function hintText(h: ReadingHints): string {
 
 /** Our company for the AI: who receives the document, so the other company
  * named on it is the supplier (0131). */
+// §43: an English standard name for a product we do not have yet. Proposed
+// only; a person decides, and the supplier's own writing stays as it was.
+export type NameRequest = {
+  index: number;
+  supplier_name?: string | null;
+  maker?: string | null;
+  code?: string | null;
+  spec?: string | null;
+  supplier?: string | null;
+};
+
+const NAME_EN_PROMPT =
+  "次の商品は、仕入先の書類に書かれた商品名です。当社の商品マスタに登録する英語の標準商品名を提案してください。\n" +
+  "ルール: 英語で書く。商品の種類がはっきり分かるようにする(例: Hex Bolt, Ballpoint Pen)。" +
+  "サイズ・型番・容量・色など商品を区別する大事な属性は残す(例: M8 x 50 mm)。" +
+  "仕入先の会社名は入れない。仕入先独自の宣伝文句(新発売・お買い得・送料無料など)や入数表記(50本入など)は入れない。" +
+  "メーカー名(ブランド)は商品を区別するのに必要なら先頭に入れてよい。短く、何度でも使える名前にする。" +
+  "index はそのまま返すこと。分からないものは name_en を空にすること。\n";
+
+/** The proposal tidied: one line, no supplier name, no packing count. */
+export function tidyEnglishName(name: unknown, supplier?: string | null): string {
+  let s = String(name ?? "").normalize("NFKC").replace(/\s+/g, " ").trim();
+  const sup = String(supplier ?? "").normalize("NFKC").replace(COMPANY_FORMS, "").trim();
+  if (sup.length >= 2) s = s.split(sup).join("").trim();
+  s = s.replace(/\b(?:pack of|set of)?\s*\d+\s*(?:pcs|pieces|pc)\.?\s*(?:per pack|\/pack)?$/i, "").trim();
+  return s.replace(/\s{2,}/g, " ").replace(/^[-–,\s]+|[-–,\s]+$/g, "");
+}
+
+export async function suggestEnglishNames(items: NameRequest[]): Promise<{ index: number; name_en: string }[]> {
+  const asked = items.filter((i) => str(i.supplier_name) || str(i.code)).slice(0, 100);
+  if (asked.length === 0) return [];
+  const r = await gemini([{
+    text: NAME_EN_PROMPT + JSON.stringify(asked.map((i) => ({
+      index: i.index, supplier_product_name: i.supplier_name ?? "", maker: i.maker ?? "", code: i.code ?? "",
+      spec: i.spec ?? "",
+    }))),
+  }], {
+    type: "object",
+    properties: {
+      items: {
+        type: "array",
+        items: { type: "object", properties: { index: { type: "integer" }, name_en: { type: "string" } }, required: ["index"] },
+      },
+    },
+    required: ["items"],
+  }, "name_en");
+  const out: { index: number; name_en: string }[] = [];
+  for (const it of (Array.isArray(r.items) ? r.items : []) as { index?: number; name_en?: string }[]) {
+    const req = asked.find((a) => a.index === it.index);
+    if (!req) continue;
+    const name = tidyEnglishName(it.name_en, req.supplier);
+    if (name) out.push({ index: req.index, name_en: name });
+  }
+  return out;
+}
+
 export function ownText(own: OwnCompany | null): string {
   if (!own || own.names.length === 0) return "";
   return "\n当社(この書類を受け取る側・宛先・〇〇御中と書かれる側)は「" + own.names.join("」「") + "」" +

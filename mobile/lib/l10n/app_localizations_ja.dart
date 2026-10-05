@@ -9507,4 +9507,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String ibLastSeen(String date) {
     return '最終 $date';
   }
+
+  @override
+  String get featSupplierProductNames => '仕入先商品名';
+
+  @override
+  String get featSupplierProductNamesDesc => '仕入先ごとの商品名・コードと、それが指す自社の商品';
+
+  @override
+  String get spnSearchHint => '仕入先の商品名・コード・JAN・自社商品名で探す';
+
+  @override
+  String get spnEmpty => '仕入先商品名はまだありません';
+
+  @override
+  String get spnEmptyBody => '仕入先ファイルの行を自社の商品に紐付けると、ここに自動で登録されます。';
+
+  @override
+  String get rpEnglishName => '英語標準名';
+
+  @override
+  String get rpSuggestEnglish => 'AIで英語標準名を提案';
+
+  @override
+  String get rpSuggestEnglishHint => '提案は確定されません。確認・修正してから登録してください。仕入先名は入りません。';
+
+  @override
+  String rpEnglishSuggested(int n) {
+    return '$n 件の英語名を提案しました';
+  }
 }

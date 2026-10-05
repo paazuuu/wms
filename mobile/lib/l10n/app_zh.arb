@@ -3214,5 +3214,14 @@
   "ibAliases": "用于识别的别名",
   "ibOpenPlans": "待到货的计划",
   "ibNoHistory": "该商品尚无到货记录",
-  "ibLastSeen": "最近 {date}"
+  "ibLastSeen": "最近 {date}",
+  "featSupplierProductNames": "供应商商品名",
+  "featSupplierProductNamesDesc": "各供应商的商品名与编码，以及对应的本公司商品",
+  "spnSearchHint": "按供应商商品名、编码、JAN或本公司商品搜索",
+  "spnEmpty": "尚无供应商商品名",
+  "spnEmptyBody": "将供应商文件中的行关联到本公司商品后，会自动登记到这里。",
+  "rpEnglishName": "英文标准名",
+  "rpSuggestEnglish": "用AI建议英文标准名",
+  "rpSuggestEnglishHint": "建议不会自动保存，请确认或修改后再登记。不会包含供应商名称。",
+  "rpEnglishSuggested": "已建议 {n} 个英文名"
 }

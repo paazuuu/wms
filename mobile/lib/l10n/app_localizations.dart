@@ -17226,6 +17226,60 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'最終 {date}'**
   String ibLastSeen(String date);
+
+  /// No description provided for @featSupplierProductNames.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先商品名'**
+  String get featSupplierProductNames;
+
+  /// No description provided for @featSupplierProductNamesDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ごとの商品名・コードと、それが指す自社の商品'**
+  String get featSupplierProductNamesDesc;
+
+  /// No description provided for @spnSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の商品名・コード・JAN・自社商品名で探す'**
+  String get spnSearchHint;
+
+  /// No description provided for @spnEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先商品名はまだありません'**
+  String get spnEmpty;
+
+  /// No description provided for @spnEmptyBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ファイルの行を自社の商品に紐付けると、ここに自動で登録されます。'**
+  String get spnEmptyBody;
+
+  /// No description provided for @rpEnglishName.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語標準名'**
+  String get rpEnglishName;
+
+  /// No description provided for @rpSuggestEnglish.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで英語標準名を提案'**
+  String get rpSuggestEnglish;
+
+  /// No description provided for @rpSuggestEnglishHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'提案は確定されません。確認・修正してから登録してください。仕入先名は入りません。'**
+  String get rpSuggestEnglishHint;
+
+  /// No description provided for @rpEnglishSuggested.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n} 件の英語名を提案しました'**
+  String rpEnglishSuggested(int n);
 }
 
 class _AppLocalizationsDelegate

@@ -9458,4 +9458,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String ibLastSeen(String date) {
     return '最近 $date';
   }
+
+  @override
+  String get featSupplierProductNames => '供应商商品名';
+
+  @override
+  String get featSupplierProductNamesDesc => '各供应商的商品名与编码，以及对应的本公司商品';
+
+  @override
+  String get spnSearchHint => '按供应商商品名、编码、JAN或本公司商品搜索';
+
+  @override
+  String get spnEmpty => '尚无供应商商品名';
+
+  @override
+  String get spnEmptyBody => '将供应商文件中的行关联到本公司商品后，会自动登记到这里。';
+
+  @override
+  String get rpEnglishName => '英文标准名';
+
+  @override
+  String get rpSuggestEnglish => '用AI建议英文标准名';
+
+  @override
+  String get rpSuggestEnglishHint => '建议不会自动保存，请确认或修改后再登记。不会包含供应商名称。';
+
+  @override
+  String rpEnglishSuggested(int n) {
+    return '已建议 $n 个英文名';
+  }
 }

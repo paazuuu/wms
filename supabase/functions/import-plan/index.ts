@@ -82,6 +82,7 @@ import {
   type ReadLine,
   splitAttr,
   str,
+  suggestEnglishNames,
   toInt,
   toNum,
 } from "../_shared/document_reader.ts";
@@ -694,6 +695,14 @@ Deno.serve(async (req) => {
         return json({ data: await aiPing() });
       }
       // Training (0106): what a checked sample taught, learned — nothing booked.
+      if (str(b.mode) === "suggest_names") {
+        // §43: English standard names for products we do not have yet,
+        // proposed for a person to accept or change.
+        if (!(await clientPermitted(supabase, "product.manage"))) {
+          return json({ message: notPermittedMessage("product.manage") }, 403);
+        }
+        return json({ data: await suggestEnglishNames(Array.isArray(b.items) ? b.items : []) });
+      }
       if (str(b.mode) === "learn") {
         const { data: allowed } = await supabase.rpc("notation_training_allowed");
         if (allowed !== true) return json({ message: notPermittedMessage("product.manage") }, 403);

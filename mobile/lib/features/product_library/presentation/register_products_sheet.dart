@@ -7,6 +7,9 @@ import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_library_providers.dart';
 import '../application/product_naming_providers.dart';
+import '../../../core/api/api_result.dart';
+import '../../product/application/product_providers.dart';
+import '../data/english_name_suggester.dart';
 import '../domain/product_image.dart';
 import '../domain/product_naming.dart';
 
@@ -52,6 +55,40 @@ class _RegisterProductsSheetState extends ConsumerState<RegisterProductsSheet> {
   int? _formatId;
   bool _busy = false;
 
+  /// 英語標準名 per proposal row (§43): proposed by the AI or typed, saved
+  /// with the product when it is registered.
+  final Map<int, String> _nameEn = {};
+  bool _suggesting = false;
+
+  Future<void> _suggestEnglish() async {
+    final l10n = AppLocalizations.of(context);
+    final items = _items;
+    if (items == null) return;
+    final asked = [
+      for (final (i, p) in items.indexed)
+        if (_chosen.isEmpty || _chosen.contains(i))
+          NameRequest(
+            index: p.row,
+            supplierName: '${p.source['product_name'] ?? ''}'.trim().isNotEmpty ? '${p.source['product_name']}' : p.name,
+            maker: p.maker,
+            code: p.code,
+            spec: p.attributes.values.isEmpty ? null : p.attributes.values.join(' '),
+          ),
+    ];
+    setState(() => _suggesting = true);
+    final r = await ref.read(englishNameSuggesterProvider).suggest(asked);
+    if (!mounted) return;
+    setState(() => _suggesting = false);
+    final messenger = ScaffoldMessenger.of(context);
+    switch (r) {
+      case ApiSuccess(:final data):
+        setState(() => _nameEn.addAll(data));
+        messenger.showSnackBar(SnackBar(content: Text(l10n.rpEnglishSuggested(data.length))));
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -88,7 +125,14 @@ class _RegisterProductsSheetState extends ConsumerState<RegisterProductsSheet> {
     if (!mounted) return;
     setState(() => _busy = false);
     r.when(
-      success: (created) {
+      success: (created) async {
+        // The English standard name goes with the product it was made for.
+        final products = ref.read(productRepositoryProvider);
+        for (final c in created) {
+          final en = _nameEn[c.row]?.trim() ?? '';
+          if (en.isNotEmpty) await products.setNameEn(c.productId, en);
+        }
+        if (!mounted) return;
         ref.invalidate(productLibraryProvider);
         Navigator.pop(context, created);
       },
@@ -140,6 +184,20 @@ class _RegisterProductsSheetState extends ConsumerState<RegisterProductsSheet> {
             ],
             onChanged: (v) => setState(() => _formatId = v),
           ),
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              key: const ValueKey('rp-suggest-en'),
+              onPressed: _suggesting || _busy ? null : _suggestEnglish,
+              icon: _suggesting
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.translate, size: 18),
+              label: Text(l10n.rpSuggestEnglish),
+            ),
+          ),
+          Text(l10n.rpSuggestEnglishHint,
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppSpacing.md),
           for (final (i, p) in items.indexed)
             _ProposalCard(
@@ -148,6 +206,8 @@ class _RegisterProductsSheetState extends ConsumerState<RegisterProductsSheet> {
               template: template,
               attributeNames: {for (final a in attrs) a.key: a.name},
               chosen: _chosen.contains(i),
+              nameEn: _nameEn[p.row] ?? '',
+              onNameEn: (v) => _nameEn[p.row] = v,
               onChosen: (v) => setState(() => v ? _chosen.add(i) : _chosen.remove(i)),
               onChanged: (next) => setState(() {
                 _items = [for (final (j, q) in items.indexed) j == i ? next : q];
@@ -194,7 +254,13 @@ class _ProposalCard extends StatefulWidget {
     required this.chosen,
     required this.onChosen,
     required this.onChanged,
+    this.nameEn = '',
+    this.onNameEn,
   });
+
+  /// 英語標準名 (§43) for this proposal.
+  final String nameEn;
+  final ValueChanged<String>? onNameEn;
 
   final ProductProposal proposal;
   final String template;
@@ -219,8 +285,18 @@ class _ProposalCardState extends State<_ProposalCard> {
               ? widget.proposal.listPrice!.toInt().toString()
               : widget.proposal.listPrice!.toString()));
 
+  late final _nameEn = TextEditingController(text: widget.nameEn);
+
+  @override
+  void didUpdateWidget(covariant _ProposalCard old) {
+    super.didUpdateWidget(old);
+    // A proposal that just arrived replaces what the field shows.
+    if (widget.nameEn != old.nameEn && widget.nameEn != _nameEn.text) _nameEn.text = widget.nameEn;
+  }
+
   @override
   void dispose() {
+    _nameEn.dispose();
     _base.dispose();
     _maker.dispose();
     _code.dispose();
@@ -287,6 +363,12 @@ class _ProposalCardState extends State<_ProposalCard> {
               ]),
             ),
           _field(_base, l10n.pnBaseName, 'base'),
+          TextField(
+            key: ValueKey('rp-name-en-${widget.proposal.row}'),
+            controller: _nameEn,
+            onChanged: (v) => widget.onNameEn?.call(v),
+            decoration: InputDecoration(labelText: l10n.rpEnglishName, isDense: true),
+          ),
           Row(children: [
             Expanded(child: _field(_maker, l10n.ntFieldMaker, 'maker')),
             const SizedBox(width: AppSpacing.sm),

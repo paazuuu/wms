@@ -117,6 +117,8 @@ class FeatureEntry {
         return l10n.featPrintLanguage;
       case 'price_book':
         return l10n.featPriceBook;
+      case 'supplier_product_names':
+        return l10n.featSupplierProductNames;
       case 'field_library':
         return l10n.featFieldLibrary;
       case 'unlinked_jan':
@@ -223,6 +225,8 @@ class FeatureEntry {
         return l10n.featPrintLanguageDesc;
       case 'price_book':
         return l10n.featPriceBookDesc;
+      case 'supplier_product_names':
+        return l10n.featSupplierProductNamesDesc;
       case 'field_library':
         return l10n.featFieldLibraryDesc;
       case 'unlinked_jan':

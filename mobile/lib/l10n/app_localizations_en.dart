@@ -9704,4 +9704,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String ibLastSeen(String date) {
     return 'Last $date';
   }
+
+  @override
+  String get featSupplierProductNames => 'Supplier product names';
+
+  @override
+  String get featSupplierProductNamesDesc =>
+      'What each supplier calls our products, and which product each name points to';
+
+  @override
+  String get spnSearchHint =>
+      'Search by supplier name, code, JAN or our product';
+
+  @override
+  String get spnEmpty => 'No supplier names yet';
+
+  @override
+  String get spnEmptyBody =>
+      'They are added here on their own when a line of a supplier file is tied to one of our products.';
+
+  @override
+  String get rpEnglishName => 'English standard name';
+
+  @override
+  String get rpSuggestEnglish => 'Suggest English names with AI';
+
+  @override
+  String get rpSuggestEnglishHint =>
+      'Proposals are not saved on their own: check and correct them before registering. The supplier\'s name is never included.';
+
+  @override
+  String rpEnglishSuggested(int n) {
+    return '$n English names proposed';
+  }
 }

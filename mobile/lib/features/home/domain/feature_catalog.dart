@@ -48,6 +48,7 @@ import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../transfers/presentation/transfer_list_screen.dart';
 import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
+import '../../inbound/presentation/supplier_product_names_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -83,6 +84,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.request_quote_outlined,
             status: FeatureStatus.ready,
             builder: _priceBook,
+            requiredAnyOf: ['product.view', 'product.manage'],
+          ),
+          // 仕入先商品名 (0135): what each supplier calls our products, one
+          // product id behind every writing.
+          FeatureEntry(
+            id: 'supplier_product_names',
+            icon: Icons.translate,
+            status: FeatureStatus.ready,
+            builder: _supplierProductNames,
             requiredAnyOf: ['product.view', 'product.manage'],
           ),
         ],
@@ -499,6 +509,7 @@ Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 /// Top-level (const-referenceable) builder for the Product Master feature.
 Widget _products(BuildContext _) => const ProductListScreen();
 Widget _priceBook(BuildContext _) => const PriceBookScreen();
+Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 Widget _printLanguage(BuildContext _) => const PrintLanguageScreen();
