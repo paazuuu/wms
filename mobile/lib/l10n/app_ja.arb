@@ -8178,5 +8178,279 @@
   "ahHowJudgedBody": "4つの指標のうち一番悪い判定が全体の判定です（データのない指標は数えません）。最後の呼び出しがキー未設定・キー拒否・回数上限で失敗していれば、ほかの指標に関係なく「異常」になります。",
   "ahRefresh": "更新",
   "errorAiCredits": "AIの利用枠（前払いクレジット・回数上限）を使い切っているため、AIで読み取れませんでした。Google AI Studio で残高と請求設定を確認してください。Excel・CSV と文字の入ったPDFはAIなしでも読み取れます。",
-  "errorAiKey": "AIのAPIキーが使えないため、AIで読み取れませんでした。管理 → AIの稼働状況 で接続テストをしてください。"
+  "errorAiKey": "AIのAPIキーが使えないため、AIで読み取れませんでした。管理 → AIの稼働状況 で接続テストをしてください。",
+  "ibStateDraft": "下書き",
+  "ibStateExpected": "入荷待ち",
+  "ibStatePartial": "一部入荷",
+  "ibStateReceived": "入荷済",
+  "ibStateOver": "超過入荷",
+  "ibStateClosed": "締め（不足あり）",
+  "ibStateCancelled": "取消",
+  "ibStateOnHold": "保留",
+  "ibDocPurchaseConfirmation": "注文確認書",
+  "ibDocDeliverySchedule": "納品予定表",
+  "ibDocDeliveryNote": "納品書",
+  "ibDocInvoice": "請求書",
+  "ibDocOther": "その他",
+  "ibDocType": "書類の種類",
+  "ibExpectedArrival": "予定入荷日",
+  "ibScheduledInspection": "予定検品日",
+  "ibUndated": "未定",
+  "ibSetDate": "日付を選ぶ",
+  "ibClearDate": "未定にする",
+  "ibChange": "変更",
+  "ibInvoiceNote": "請求書の数量は入荷の実績になりません。入荷予定の候補として登録し、実際に届いた数は入荷受付で確定します。",
+  "ibDatesSection": "書類と予定",
+  "ibDatesHint": "仕入先から日付をもらっていなければ「未定」のままにしてください。今日や明日を勝手に入れることはありません。",
+  "ibUseDocDate": "書類の日付（{date}）を予定入荷日にする",
+  "@ibUseDocDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibDuplicateTitle": "この書類は既に登録されています",
+  "ibDuplicateSameFile": "同じファイル",
+  "ibDuplicateSameNumber": "同じ書類番号",
+  "ibOpenExisting": "既存データを開く",
+  "ibUpdateExisting": "この書類で既存の入荷予定を更新",
+  "ibRegisterSeparately": "別書類として登録",
+  "ibUpdatedExisting": "既存の入荷予定を更新しました",
+  "ibMatchPercent": "一致度 {pct}%",
+  "@ibMatchPercent": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "ibMatchNeedsCheck": "要確認",
+  "ibCandidates": "候補",
+  "ibUseCandidate": "この商品で確定",
+  "ibNewProductCandidate": "新商品候補 — 一致する商品がありません",
+  "ibDetailTitle": "入荷予定",
+  "ibPlanned": "予定",
+  "ibReceivedQty": "入荷済",
+  "ibRemaining": "残",
+  "ibOverQty": "超過 {n}",
+  "@ibOverQty": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ibPlanTotals": "予定 {planned}・入荷済 {received}・残 {remaining}",
+  "@ibPlanTotals": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "received": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "ibExpectedOn": "予定日 {date}",
+  "@ibExpectedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibReceiveAction": "入荷受付",
+  "ibLinesSection": "商品ごとの予定と入荷",
+  "ibReceiptsSection": "入荷実績（分納）",
+  "ibReceiptSeq": "第{n}回入荷",
+  "@ibReceiptSeq": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ibNoReceipts": "まだ入荷はありません",
+  "ibArrivedOn": "実際の入荷日",
+  "ibInspectionPending": "検品待ち",
+  "ibInspectionDone": "検品完了",
+  "ibInspectionScheduled": "検品予定 {date}",
+  "@ibInspectionScheduled": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibInspectionStarted": "検品開始 {date}",
+  "@ibInspectionStarted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibInspectionCompleted": "検品完了 {date}",
+  "@ibInspectionCompleted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibInspectionPassFail": "合格 {pass}・不合格 {fail}",
+  "@ibInspectionPassFail": {
+    "placeholders": {
+      "pass": {
+        "type": "int"
+      },
+      "fail": {
+        "type": "int"
+      }
+    }
+  },
+  "ibInspectionProposed": "検品予定日は {date} です。",
+  "@ibInspectionProposed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibMoveInspection": "検品予定日を変更",
+  "ibDocumentsSection": "添付ファイル",
+  "ibNoDocuments": "添付ファイルはありません",
+  "ibHistorySection": "入荷予定の履歴",
+  "ibDatesSaved": "保存しました",
+  "ibHold": "保留にする",
+  "ibUnhold": "保留を解除",
+  "ibEvCreated": "入荷予定を作成（予定日: {date}）",
+  "@ibEvCreated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvExpectedChanged": "予定入荷日: {from} → {to}",
+  "@ibEvExpectedChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvInspectionDateChanged": "予定検品日: {from} → {to}",
+  "@ibEvInspectionDateChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvStateChanged": "状態: {from} → {to}",
+  "@ibEvStateChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvReceived": "入荷を受け付けました",
+  "ibEvArrivalSet": "実際の入荷日: {from} → {to}",
+  "@ibEvArrivalSet": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvOverReceipt": "予定超過を受付（{choice}）",
+  "@ibEvOverReceipt": {
+    "placeholders": {
+      "choice": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvCancelled": "入荷を取り消しました",
+  "ibEvItemRecorded": "受入 {jan} ×{qty}",
+  "@ibEvItemRecorded": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "ibEvInspectionOpened": "検品待ちに登録",
+  "ibEvInspectionConfirmed": "検品を完了しました",
+  "ibOverTitle": "予定数量を超えています",
+  "ibOverLine": "予定 {planned}・入荷済 {received}・今回 {arriving}・超過 {over}",
+  "@ibOverLine": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "received": {
+        "type": "int"
+      },
+      "arriving": {
+        "type": "int"
+      },
+      "over": {
+        "type": "int"
+      }
+    }
+  },
+  "ibOverAccept": "全量受入",
+  "ibOverCap": "予定数のみ受入",
+  "ibOverHold": "超過分は保留で受入",
+  "ibOverAcceptNoPermission": "全量受入には承認の権限が必要です。保留で受け入れると、権限のある人が後で判断できます。",
+  "ibCandidatesApplied": "納品書の数量 {n} 件を候補として入れました。届いた数を確認してから確定してください。",
+  "@ibCandidatesApplied": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ibTodayTitle": "今日の入荷",
+  "ibTodayDue": "今日の入荷予定",
+  "ibTodayOverdue": "遅れ",
+  "ibTodayUndated": "予定日未定",
+  "ibTodayAwaitingInspection": "検品待ち",
+  "ibTodayPutaway": "棚入れ待ち",
+  "ibTodayEmpty": "この先1週間の入荷予定はありません",
+  "ibProductHistory": "仕入先・入荷・検品の履歴",
+  "ibSupplierNames": "仕入先での呼び名",
+  "ibAliases": "AI認識用別名",
+  "ibOpenPlans": "入荷待ちの予定",
+  "ibNoHistory": "入荷の記録はまだありません",
+  "ibLastSeen": "最終 {date}",
+  "@ibLastSeen": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

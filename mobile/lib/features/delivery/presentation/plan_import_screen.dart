@@ -23,6 +23,13 @@ import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/domain/product_image.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../product_library/presentation/register_products_sheet.dart';
+import '../../../core/api/api_result.dart';
+import '../../inbound/application/inbound_providers.dart';
+import '../../inbound/domain/inbound.dart';
+import '../../inbound/presentation/expected_receipt_screen.dart';
+import '../../inbound/presentation/inbound_labels.dart';
+import '../domain/ocr_line.dart';
+import 'reconciliation_screen.dart';
 
 /// Whether the upload creates an inbound delivery plan or an outbound shipment.
 enum ImportTarget { plan, shipment }
@@ -78,6 +85,20 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
   /// the header fields). This, not `_preview.lines`, is what gets sent on
   /// commit.
   List<Map<String, dynamic>> _lines = [];
+
+  /// What the supplier sent and the dates it gives (0134). Only for inbound.
+  DocumentType? _docType;
+  DateTime? _expectedArrival;
+  DateTime? _scheduledInspection;
+
+  /// Plans this file or document number already became (§23).
+  List<InboundDuplicate> _duplicates = const [];
+  bool _duplicatesDismissed = false;
+
+  /// Products that may be what an unplaced line means (§44), per line.
+  final Map<Map<String, dynamic>, List<MatchCandidate>> _candidates = Map.identity();
+
+  bool get _inbound => widget.target == ImportTarget.plan;
 
   int _int(dynamic v) =>
       v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
@@ -149,8 +170,18 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
           _lines = [
             for (final line in preview.lines) Map<String, dynamic>.from(line),
           ];
+          _docType = DocumentType.guess(file.name);
+          _expectedArrival = null;
+          _scheduledInspection = null;
+          _duplicates = const [];
+          _duplicatesDismissed = false;
+          _candidates.clear();
         });
         HapticFeedback.selectionClick();
+        if (_inbound) {
+          _checkDuplicates(preview);
+          _loadCandidates();
+        }
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
@@ -189,6 +220,10 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
 
     result.when(
       success: (summary) async {
+        if (_inbound && summary.planId > 0 && _planChanges.isNotEmpty) {
+          await ref.read(inboundRepositoryProvider)
+              .setExpectedReceipt(summary.planId, _planChanges, documentId: preview.documentId);
+        }
         await HapticFeedback.mediumImpact();
         if (!mounted) return;
         if (widget.onImported != null) {
@@ -207,6 +242,132 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
+  }
+
+  /// The dates and type the reviewer set, as `set_expected_receipt` takes
+  /// them. Unset dates stay 未定 and are not sent.
+  Map<String, dynamic> get _planChanges => {
+        if (_docType != null) 'document_type': _docType!.wire,
+        if (_expectedArrival != null) 'expected_arrival_date': isoDay(_expectedArrival!),
+        if (_scheduledInspection != null) 'scheduled_inspection_date': isoDay(_scheduledInspection!),
+      };
+
+  Future<void> _checkDuplicates(ImportPreview preview) async {
+    final r = await ref.read(inboundRepositoryProvider).duplicates(
+          documentId: preview.documentId,
+          supplierId: preview.partnerId,
+          supplierName: preview.supplierName,
+          docNumber: preview.docNumber ?? preview.deliveryNumber,
+        );
+    if (!mounted || _preview != preview) return;
+    if (r case ApiSuccess(:final data)) setState(() => _duplicates = data);
+  }
+
+  /// Asks for candidates for every line no product was found for.
+  Future<void> _loadCandidates() async {
+    final open = [
+      for (final (i, l) in _lines.indexed)
+        if (l['product_id'] == null) (i, l),
+    ];
+    if (open.isEmpty) return;
+    final r = await ref.read(inboundRepositoryProvider).matchCandidates(_preview?.partnerId, [
+      for (final (i, l) in open)
+        {
+          'index': i,
+          'jan_code': l['jan_code'],
+          'raw_jan_code': l['raw_jan_code'],
+          'product_name': l['product_name'],
+          'product_code': l['product_code'],
+          'maker': l['maker'],
+        },
+    ]);
+    if (!mounted) return;
+    if (r case ApiSuccess(:final data)) {
+      setState(() {
+        for (final (i, l) in open) {
+          final found = data[i] ?? const [];
+          if (found.isNotEmpty) _candidates[l] = found;
+        }
+      });
+    }
+  }
+
+  /// Ties a line to a candidate the reviewer chose.
+  void _useCandidate(int index, MatchCandidate c) {
+    final line = _lines[index];
+    setState(() {
+      _lines[index] = {
+        ...line,
+        'product_id': c.productId,
+        'product': {'id': c.productId, 'jan_code': c.janCode, 'name': c.name, 'sku': c.sku, 'maker': c.maker},
+        'matched_by': 'manual',
+        'flags': [
+          for (final f in (line['flags'] as List? ?? const []))
+            if (f != 'unresolved' && f != 'no_maker') f,
+        ],
+      };
+    });
+  }
+
+  /// Updates a plan this document belongs to instead of making a new one
+  /// (§24): its dates and type, the file kept among its documents. A
+  /// delivery note goes on to receiving with its quantities as candidates.
+  Future<void> _updateExisting(InboundDuplicate d) async {
+    final l10n = AppLocalizations.of(context);
+    final preview = _preview;
+    if (preview == null) return;
+    setState(() => _busy = true);
+    final r = await ref.read(inboundRepositoryProvider).setExpectedReceipt(
+          d.planId,
+          {
+            ..._planChanges,
+            if (_docType == DocumentType.deliveryNote) 'action': 'receipt_candidate',
+          },
+          documentId: preview.documentId,
+        );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(deliveryPlansProvider);
+        ref.invalidate(expectedReceiptProvider(d.planId));
+        _snack(l10n.ibUpdatedExisting, tone: StatusTone.success);
+        final navigator = Navigator.of(context);
+        if (_docType == DocumentType.deliveryNote) {
+          navigator.pushReplacement(MaterialPageRoute(
+            builder: (_) => ReconciliationScreen(
+              planId: d.planId,
+              candidates: [
+                for (final l in _lines)
+                  if (_janOf(l).isNotEmpty)
+                    OcrLine(
+                      janCode: _janOf(l),
+                      quantityHint: _int(l['planned_quantity']) > 0 ? _int(l['planned_quantity']) : null,
+                      productName: '${l['product_name'] ?? ''}',
+                    ),
+              ],
+            ),
+          ));
+        } else {
+          navigator.pushReplacement(MaterialPageRoute(builder: (_) => ExpectedReceiptScreen(planId: d.planId)));
+        }
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message), tone: StatusTone.danger);
+    }
+  }
+
+  Future<void> _pickPlanned(bool inspection) async {
+    final picked = await pickPlannedDay(context, inspection ? _scheduledInspection : _expectedArrival);
+    if (picked == null || !mounted) return;
+    setState(() {
+      if (inspection) {
+        _scheduledInspection = picked.date;
+      } else {
+        _expectedArrival = picked.date;
+        // §4: the inspection is proposed for the day the goods are due.
+        _scheduledInspection ??= picked.date;
+      }
+    });
   }
 
   void _snack(String message, {StatusTone tone = StatusTone.neutral}) {
@@ -387,6 +548,17 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        if (_inbound && _duplicates.isNotEmpty && !_duplicatesDismissed) ...[
+          _DuplicatesBanner(
+            duplicates: _duplicates,
+            busy: _busy,
+            onOpen: (d) => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => ExpectedReceiptScreen(planId: d.planId))),
+            onUpdate: _updateExisting,
+            onSeparate: () => setState(() => _duplicatesDismissed = true),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
@@ -496,6 +668,64 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
             wasRead: preview.docNumber != null),
         _field(l10n, _codeController, l10n.companyCode, Icons.tag_outlined,
             helper: 'ABC → ABC-00001', caps: true, wasRead: false),
+        if (_inbound) ...[
+          _SectionLabel(l10n.ibDatesSection),
+          const SizedBox(height: AppSpacing.xs),
+          Text(l10n.ibDatesHint,
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+          const SizedBox(height: AppSpacing.sm),
+          DropdownButtonFormField<DocumentType?>(
+            key: const ValueKey('import-document-type'),
+            initialValue: _docType,
+            decoration: InputDecoration(labelText: l10n.ibDocType, prefixIcon: const Icon(Icons.description_outlined)),
+            items: [
+              DropdownMenuItem<DocumentType?>(value: null, child: Text(l10n.ibUndated)),
+              for (final t in DocumentType.values)
+                DropdownMenuItem(value: t, child: Text(documentTypeLabel(l10n, t))),
+            ],
+            onChanged: (t) => setState(() => _docType = t),
+          ),
+          if (_docType == DocumentType.invoice) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _Notice(l10n.ibInvoiceNote, color: scheme.tertiary, key: const ValueKey('import-invoice-note')),
+          ],
+          ListTile(
+            key: const ValueKey('import-expected-arrival'),
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.local_shipping_outlined),
+            title: Text(l10n.ibExpectedArrival),
+            subtitle: Text(ibDayOrUndated(l10n, _expectedArrival),
+                style: TextStyle(fontFamily: AppFonts.mono,
+                    color: _expectedArrival == null ? scheme.onSurfaceVariant : null)),
+            trailing: const Icon(Icons.edit_calendar_outlined),
+            onTap: () => _pickPlanned(false),
+          ),
+          if (_expectedArrival == null && DateTime.tryParse(preview.docDate ?? '') != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ActionChip(
+                key: const ValueKey('import-use-doc-date'),
+                avatar: const Icon(Icons.event, size: 16),
+                label: Text(l10n.ibUseDocDate(ibDay(l10n, DateTime.parse(preview.docDate!)))),
+                onPressed: () => setState(() {
+                  _expectedArrival = DateTime.parse(preview.docDate!);
+                  _scheduledInspection ??= _expectedArrival;
+                }),
+              ),
+            ),
+          ListTile(
+            key: const ValueKey('import-scheduled-inspection'),
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.fact_check_outlined),
+            title: Text(l10n.ibScheduledInspection),
+            subtitle: Text(ibDayOrUndated(l10n, _scheduledInspection),
+                style: TextStyle(fontFamily: AppFonts.mono,
+                    color: _scheduledInspection == null ? scheme.onSurfaceVariant : null)),
+            trailing: const Icon(Icons.edit_calendar_outlined),
+            onTap: () => _pickPlanned(true),
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
 
         const SizedBox(height: AppSpacing.sm),
         Row(
@@ -512,6 +742,8 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         const SizedBox(height: AppSpacing.sm),
         _LinesPreview(
           lines: _lines,
+          candidates: _candidates,
+          onUseCandidate: _useCandidate,
           onEdit: (i) => _editLine(index: i),
           onDelete: _deleteLine,
           onSplit: _splitLine,
@@ -775,6 +1007,8 @@ class _SectionLabel extends StatelessWidget {
 class _LinesPreview extends StatelessWidget {
   const _LinesPreview({
     required this.lines,
+    this.candidates = const {},
+    this.onUseCandidate,
     required this.onEdit,
     required this.onDelete,
     required this.onSplit,
@@ -783,6 +1017,10 @@ class _LinesPreview extends StatelessWidget {
   });
 
   final List<Map<String, dynamic>> lines;
+
+  /// Products that may be what an unplaced line means (§44).
+  final Map<Map<String, dynamic>, List<MatchCandidate>> candidates;
+  final void Function(int, MatchCandidate)? onUseCandidate;
 
   /// Says whether a warning on line [int] was right (0113).
   final void Function(int, String)? onReport;
@@ -829,6 +1067,9 @@ class _LinesPreview extends StatelessWidget {
                     Expanded(
                       child: _LineIdentity(
                         line: lines[i],
+                        candidates: candidates[lines[i]] ?? const [],
+                        onUseCandidate: onUseCandidate == null ? null : (c) => onUseCandidate!(i, c),
+                        candidateKeyPrefix: 'import-candidate-$i',
                         onPickProduct: () => onPickProduct(i),
                         onReport: onReport == null ? null : (f) => onReport!(i, f),
                         pickKey: ValueKey('import-pick-$i'),
@@ -879,9 +1120,20 @@ String _supplierWriting(Map<String, dynamic> line) => [
 /// One line's identity: our product in full, the company's writing faded under
 /// it (UI kept the original for checking, 0103), and what the reading flagged.
 class _LineIdentity extends StatelessWidget {
-  const _LineIdentity({required this.line, required this.onPickProduct, this.pickKey, this.onReport});
+  const _LineIdentity({
+    required this.line,
+    required this.onPickProduct,
+    this.pickKey,
+    this.onReport,
+    this.candidates = const [],
+    this.onUseCandidate,
+    this.candidateKeyPrefix = 'import-candidate',
+  });
 
   final Map<String, dynamic> line;
+  final List<MatchCandidate> candidates;
+  final ValueChanged<MatchCandidate>? onUseCandidate;
+  final String candidateKeyPrefix;
   final VoidCallback onPickProduct;
   final ValueChanged<String>? onReport;
   final Key? pickKey;
@@ -923,6 +1175,13 @@ class _LineIdentity extends StatelessWidget {
           if (writing.isNotEmpty)
             Text(l10n.importSupplierWriting(writing),
                 style: faded, maxLines: 2, overflow: TextOverflow.ellipsis),
+          if (matchPercent(line['matched_by'] as String?) case final pct?)
+            Text(
+              pct < kConfidentMatch ? '${l10n.ibMatchPercent(pct)} · ${l10n.ibMatchNeedsCheck}' : l10n.ibMatchPercent(pct),
+              key: ValueKey('$candidateKeyPrefix-pct'),
+              style: theme.textTheme.bodySmall?.copyWith(
+                  color: pct < kConfidentMatch ? scheme.tertiary : scheme.primary),
+            ),
         ] else ...[
           Text(
             (line['product_name'] as String?)?.isNotEmpty == true
@@ -949,6 +1208,30 @@ class _LineIdentity extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary)),
             ),
           ),
+          // §44: candidates by identifier first, then by name; none is tied
+          // until the reviewer says so. No candidate makes it a new product.
+          if (candidates.isEmpty)
+            Text(l10n.ibNewProductCandidate,
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant))
+          else
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: 2,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(l10n.ibCandidates, style: theme.textTheme.bodySmall),
+                for (final (k, c) in candidates.indexed)
+                  ActionChip(
+                    key: ValueKey('$candidateKeyPrefix-$k'),
+                    visualDensity: VisualDensity.compact,
+                    avatar: Icon(Icons.check, size: 14,
+                        color: c.percent >= kConfidentMatch ? scheme.primary : scheme.tertiary),
+                    label: Text('${c.name}  ${c.percent}%', style: theme.textTheme.bodySmall),
+                    tooltip: l10n.ibUseCandidate,
+                    onPressed: onUseCandidate == null ? null : () => onUseCandidate!(c),
+                  ),
+              ],
+            ),
         ],
         if (problems.isNotEmpty)
           Wrap(
@@ -980,6 +1263,82 @@ class _LineIdentity extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// §23: this file or this document number already became a plan.
+class _DuplicatesBanner extends StatelessWidget {
+  const _DuplicatesBanner({
+    required this.duplicates,
+    required this.busy,
+    required this.onOpen,
+    required this.onUpdate,
+    required this.onSeparate,
+  });
+
+  final List<InboundDuplicate> duplicates;
+  final bool busy;
+  final ValueChanged<InboundDuplicate> onOpen;
+  final ValueChanged<InboundDuplicate> onUpdate;
+  final VoidCallback onSeparate;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      key: const ValueKey('import-duplicates'),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer.withValues(alpha: 0.35),
+        border: Border.all(color: scheme.error.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.warning_amber, color: scheme.error, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text(l10n.ibDuplicateTitle, style: theme.textTheme.titleSmall)),
+          ]),
+          for (final d in duplicates) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              [
+                d.deliveryNumber,
+                if (d.referenceNo != null) d.referenceNo!,
+                if (d.supplierName != null) d.supplierName!,
+                receiptStateLabel(l10n, d.receiptState),
+                for (final r in d.reasons) r == 'same_file' ? l10n.ibDuplicateSameFile : l10n.ibDuplicateSameNumber,
+              ].join(' · '),
+              style: theme.textTheme.bodySmall,
+            ),
+            Wrap(spacing: AppSpacing.sm, children: [
+              TextButton(
+                key: ValueKey('dup-open-${d.planId}'),
+                onPressed: busy ? null : () => onOpen(d),
+                child: Text(l10n.ibOpenExisting),
+              ),
+              TextButton(
+                key: ValueKey('dup-update-${d.planId}'),
+                onPressed: busy ? null : () => onUpdate(d),
+                child: Text(l10n.ibUpdateExisting),
+              ),
+            ]),
+          ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton(
+              key: const ValueKey('dup-separate'),
+              onPressed: busy ? null : onSeparate,
+              child: Text(l10n.ibRegisterSeparately),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

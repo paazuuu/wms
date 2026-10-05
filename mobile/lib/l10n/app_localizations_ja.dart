@@ -9180,4 +9180,331 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get errorAiKey =>
       'AIのAPIキーが使えないため、AIで読み取れませんでした。管理 → AIの稼働状況 で接続テストをしてください。';
+
+  @override
+  String get ibStateDraft => '下書き';
+
+  @override
+  String get ibStateExpected => '入荷待ち';
+
+  @override
+  String get ibStatePartial => '一部入荷';
+
+  @override
+  String get ibStateReceived => '入荷済';
+
+  @override
+  String get ibStateOver => '超過入荷';
+
+  @override
+  String get ibStateClosed => '締め（不足あり）';
+
+  @override
+  String get ibStateCancelled => '取消';
+
+  @override
+  String get ibStateOnHold => '保留';
+
+  @override
+  String get ibDocPurchaseConfirmation => '注文確認書';
+
+  @override
+  String get ibDocDeliverySchedule => '納品予定表';
+
+  @override
+  String get ibDocDeliveryNote => '納品書';
+
+  @override
+  String get ibDocInvoice => '請求書';
+
+  @override
+  String get ibDocOther => 'その他';
+
+  @override
+  String get ibDocType => '書類の種類';
+
+  @override
+  String get ibExpectedArrival => '予定入荷日';
+
+  @override
+  String get ibScheduledInspection => '予定検品日';
+
+  @override
+  String get ibUndated => '未定';
+
+  @override
+  String get ibSetDate => '日付を選ぶ';
+
+  @override
+  String get ibClearDate => '未定にする';
+
+  @override
+  String get ibChange => '変更';
+
+  @override
+  String get ibInvoiceNote =>
+      '請求書の数量は入荷の実績になりません。入荷予定の候補として登録し、実際に届いた数は入荷受付で確定します。';
+
+  @override
+  String get ibDatesSection => '書類と予定';
+
+  @override
+  String get ibDatesHint =>
+      '仕入先から日付をもらっていなければ「未定」のままにしてください。今日や明日を勝手に入れることはありません。';
+
+  @override
+  String ibUseDocDate(String date) {
+    return '書類の日付（$date）を予定入荷日にする';
+  }
+
+  @override
+  String get ibDuplicateTitle => 'この書類は既に登録されています';
+
+  @override
+  String get ibDuplicateSameFile => '同じファイル';
+
+  @override
+  String get ibDuplicateSameNumber => '同じ書類番号';
+
+  @override
+  String get ibOpenExisting => '既存データを開く';
+
+  @override
+  String get ibUpdateExisting => 'この書類で既存の入荷予定を更新';
+
+  @override
+  String get ibRegisterSeparately => '別書類として登録';
+
+  @override
+  String get ibUpdatedExisting => '既存の入荷予定を更新しました';
+
+  @override
+  String ibMatchPercent(int pct) {
+    return '一致度 $pct%';
+  }
+
+  @override
+  String get ibMatchNeedsCheck => '要確認';
+
+  @override
+  String get ibCandidates => '候補';
+
+  @override
+  String get ibUseCandidate => 'この商品で確定';
+
+  @override
+  String get ibNewProductCandidate => '新商品候補 — 一致する商品がありません';
+
+  @override
+  String get ibDetailTitle => '入荷予定';
+
+  @override
+  String get ibPlanned => '予定';
+
+  @override
+  String get ibReceivedQty => '入荷済';
+
+  @override
+  String get ibRemaining => '残';
+
+  @override
+  String ibOverQty(int n) {
+    return '超過 $n';
+  }
+
+  @override
+  String ibPlanTotals(int planned, int received, int remaining) {
+    return '予定 $planned・入荷済 $received・残 $remaining';
+  }
+
+  @override
+  String ibExpectedOn(String date) {
+    return '予定日 $date';
+  }
+
+  @override
+  String get ibReceiveAction => '入荷受付';
+
+  @override
+  String get ibLinesSection => '商品ごとの予定と入荷';
+
+  @override
+  String get ibReceiptsSection => '入荷実績（分納）';
+
+  @override
+  String ibReceiptSeq(int n) {
+    return '第$n回入荷';
+  }
+
+  @override
+  String get ibNoReceipts => 'まだ入荷はありません';
+
+  @override
+  String get ibArrivedOn => '実際の入荷日';
+
+  @override
+  String get ibInspectionPending => '検品待ち';
+
+  @override
+  String get ibInspectionDone => '検品完了';
+
+  @override
+  String ibInspectionScheduled(String date) {
+    return '検品予定 $date';
+  }
+
+  @override
+  String ibInspectionStarted(String date) {
+    return '検品開始 $date';
+  }
+
+  @override
+  String ibInspectionCompleted(String date) {
+    return '検品完了 $date';
+  }
+
+  @override
+  String ibInspectionPassFail(int pass, int fail) {
+    return '合格 $pass・不合格 $fail';
+  }
+
+  @override
+  String ibInspectionProposed(String date) {
+    return '検品予定日は $date です。';
+  }
+
+  @override
+  String get ibMoveInspection => '検品予定日を変更';
+
+  @override
+  String get ibDocumentsSection => '添付ファイル';
+
+  @override
+  String get ibNoDocuments => '添付ファイルはありません';
+
+  @override
+  String get ibHistorySection => '入荷予定の履歴';
+
+  @override
+  String get ibDatesSaved => '保存しました';
+
+  @override
+  String get ibHold => '保留にする';
+
+  @override
+  String get ibUnhold => '保留を解除';
+
+  @override
+  String ibEvCreated(String date) {
+    return '入荷予定を作成（予定日: $date）';
+  }
+
+  @override
+  String ibEvExpectedChanged(String from, String to) {
+    return '予定入荷日: $from → $to';
+  }
+
+  @override
+  String ibEvInspectionDateChanged(String from, String to) {
+    return '予定検品日: $from → $to';
+  }
+
+  @override
+  String ibEvStateChanged(String from, String to) {
+    return '状態: $from → $to';
+  }
+
+  @override
+  String get ibEvReceived => '入荷を受け付けました';
+
+  @override
+  String ibEvArrivalSet(String from, String to) {
+    return '実際の入荷日: $from → $to';
+  }
+
+  @override
+  String ibEvOverReceipt(String choice) {
+    return '予定超過を受付（$choice）';
+  }
+
+  @override
+  String get ibEvCancelled => '入荷を取り消しました';
+
+  @override
+  String ibEvItemRecorded(String jan, String qty) {
+    return '受入 $jan ×$qty';
+  }
+
+  @override
+  String get ibEvInspectionOpened => '検品待ちに登録';
+
+  @override
+  String get ibEvInspectionConfirmed => '検品を完了しました';
+
+  @override
+  String get ibOverTitle => '予定数量を超えています';
+
+  @override
+  String ibOverLine(int planned, int received, int arriving, int over) {
+    return '予定 $planned・入荷済 $received・今回 $arriving・超過 $over';
+  }
+
+  @override
+  String get ibOverAccept => '全量受入';
+
+  @override
+  String get ibOverCap => '予定数のみ受入';
+
+  @override
+  String get ibOverHold => '超過分は保留で受入';
+
+  @override
+  String get ibOverAcceptNoPermission =>
+      '全量受入には承認の権限が必要です。保留で受け入れると、権限のある人が後で判断できます。';
+
+  @override
+  String ibCandidatesApplied(int n) {
+    return '納品書の数量 $n 件を候補として入れました。届いた数を確認してから確定してください。';
+  }
+
+  @override
+  String get ibTodayTitle => '今日の入荷';
+
+  @override
+  String get ibTodayDue => '今日の入荷予定';
+
+  @override
+  String get ibTodayOverdue => '遅れ';
+
+  @override
+  String get ibTodayUndated => '予定日未定';
+
+  @override
+  String get ibTodayAwaitingInspection => '検品待ち';
+
+  @override
+  String get ibTodayPutaway => '棚入れ待ち';
+
+  @override
+  String get ibTodayEmpty => 'この先1週間の入荷予定はありません';
+
+  @override
+  String get ibProductHistory => '仕入先・入荷・検品の履歴';
+
+  @override
+  String get ibSupplierNames => '仕入先での呼び名';
+
+  @override
+  String get ibAliases => 'AI認識用別名';
+
+  @override
+  String get ibOpenPlans => '入荷待ちの予定';
+
+  @override
+  String get ibNoHistory => '入荷の記録はまだありません';
+
+  @override
+  String ibLastSeen(String date) {
+    return '最終 $date';
+  }
 }

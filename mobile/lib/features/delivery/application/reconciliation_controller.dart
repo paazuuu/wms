@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_result.dart';
+import '../../inbound/data/inbound_repository.dart';
+import '../../inbound/domain/inbound.dart';
 import '../data/delivery_repository.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/delivery_plan_line.dart';
@@ -38,13 +40,18 @@ class ReconciliationState {
 /// Drives a reconciliation session. Scanning is authoritative; OCR only seeds
 /// JANs that have no count yet, so a scanned quantity is never overwritten.
 class ReconciliationController extends StateNotifier<ReconciliationState> {
-  ReconciliationController(this._repository, DeliveryPlan plan)
-      : _planLines = {
+  ReconciliationController(this._repository, DeliveryPlan plan, {InboundRepository? inbound})
+      : _inbound = inbound,
+        _planLines = {
           for (final l in plan.lines) normalizeJan(l.janCode): l,
         },
         super(ReconciliationState(plan: plan));
 
   final DeliveryRepository _repository;
+
+  /// The guarded receiving call (0134): the arrival date, and what to do with
+  /// more than was expected. Without it, [receive] falls back to [submit].
+  final InboundRepository? _inbound;
   final Map<String, DeliveryPlanLine> _planLines;
 
   /// Count one more unit of [janCode] from a scan.
@@ -154,19 +161,53 @@ class ReconciliationController extends StateNotifier<ReconciliationState> {
   }
 
   /// Submit the reconciliation to the shared backend.
+  List<ReconcileEntry> get _entries => [
+        for (final entry in state.counts.entries)
+          ReconcileEntry(
+            janCode: entry.key,
+            actualQuantity: entry.value.quantity,
+            source: entry.value.source,
+            lineId: _planLines[entry.key]?.id,
+            parcels: entry.value.parcels,
+          ),
+      ];
+
+  /// Posts this delivery as one actual receipt (分納 allowed): [arrivedOn] is
+  /// the day the goods came (today when null); [over] says what to do with
+  /// more than the plan still expects. A refusal for that comes back as a
+  /// failure whose message [parseOverReceipt] reads.
+  Future<ApiResult<ReceiveOutcome>> receive({
+    bool complete = true,
+    String? noteReference,
+    DateTime? arrivedOn,
+    OverReceiptChoice? over,
+  }) async {
+    final inbound = _inbound;
+    if (inbound == null) {
+      final r = await submit(noteReference: noteReference, complete: complete);
+      return r.when(
+        success: (plan) => ApiSuccess(ReceiveOutcome(
+            reconciliationId: 0, planId: plan.id, receiptState: ReceiptState.expected)),
+        failure: (f) => ApiFailure(message: f.message, statusCode: f.statusCode),
+      );
+    }
+    state = state.copyWith(submitting: true);
+    final result = await inbound.receiveDelivery(
+      state.plan.id,
+      entries: _entries,
+      complete: complete,
+      noteReference: noteReference,
+      arrivedOn: arrivedOn,
+      over: over,
+    );
+    if (mounted) state = state.copyWith(submitting: false);
+    return result;
+  }
+
   Future<ApiResult<DeliveryPlan>> submit(
       {String? noteReference, bool complete = true}) async {
     state = state.copyWith(submitting: true);
-    final entries = [
-      for (final entry in state.counts.entries)
-        ReconcileEntry(
-          janCode: entry.key,
-          actualQuantity: entry.value.quantity,
-          source: entry.value.source,
-          lineId: _planLines[entry.key]?.id,
-          parcels: entry.value.parcels,
-        ),
-    ];
+    final entries = _entries;
     final result = await _repository.reconcile(
       state.plan.id,
       entries: entries,

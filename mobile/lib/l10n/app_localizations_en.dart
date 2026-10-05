@@ -9377,4 +9377,331 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorAiKey =>
       'The AI key could not be used, so the AI could not read this. Run the connection test in Management → AI status.';
+
+  @override
+  String get ibStateDraft => 'Draft';
+
+  @override
+  String get ibStateExpected => 'Expected';
+
+  @override
+  String get ibStatePartial => 'Partly received';
+
+  @override
+  String get ibStateReceived => 'Received';
+
+  @override
+  String get ibStateOver => 'Over-received';
+
+  @override
+  String get ibStateClosed => 'Closed short';
+
+  @override
+  String get ibStateCancelled => 'Cancelled';
+
+  @override
+  String get ibStateOnHold => 'On hold';
+
+  @override
+  String get ibDocPurchaseConfirmation => 'Order confirmation';
+
+  @override
+  String get ibDocDeliverySchedule => 'Delivery schedule';
+
+  @override
+  String get ibDocDeliveryNote => 'Delivery note';
+
+  @override
+  String get ibDocInvoice => 'Invoice';
+
+  @override
+  String get ibDocOther => 'Other';
+
+  @override
+  String get ibDocType => 'Document type';
+
+  @override
+  String get ibExpectedArrival => 'Expected arrival';
+
+  @override
+  String get ibScheduledInspection => 'Planned inspection';
+
+  @override
+  String get ibUndated => 'Not set';
+
+  @override
+  String get ibSetDate => 'Pick a date';
+
+  @override
+  String get ibClearDate => 'Set to not set';
+
+  @override
+  String get ibChange => 'Change';
+
+  @override
+  String get ibInvoiceNote =>
+      'An invoice\'s quantities are not goods received. They are registered as expected; what actually arrives is confirmed at receiving.';
+
+  @override
+  String get ibDatesSection => 'Document and dates';
+
+  @override
+  String get ibDatesHint =>
+      'Leave it as not set if the supplier gave no date; it is never filled with today or tomorrow.';
+
+  @override
+  String ibUseDocDate(String date) {
+    return 'Use the document date ($date) as expected arrival';
+  }
+
+  @override
+  String get ibDuplicateTitle => 'This document is already registered';
+
+  @override
+  String get ibDuplicateSameFile => 'Same file';
+
+  @override
+  String get ibDuplicateSameNumber => 'Same document number';
+
+  @override
+  String get ibOpenExisting => 'Open existing';
+
+  @override
+  String get ibUpdateExisting => 'Update the existing plan with this document';
+
+  @override
+  String get ibRegisterSeparately => 'Register as a separate document';
+
+  @override
+  String get ibUpdatedExisting => 'The existing plan was updated';
+
+  @override
+  String ibMatchPercent(int pct) {
+    return 'Match $pct%';
+  }
+
+  @override
+  String get ibMatchNeedsCheck => 'Check';
+
+  @override
+  String get ibCandidates => 'Candidates';
+
+  @override
+  String get ibUseCandidate => 'Use this product';
+
+  @override
+  String get ibNewProductCandidate => 'New product candidate — nothing matches';
+
+  @override
+  String get ibDetailTitle => 'Expected receipt';
+
+  @override
+  String get ibPlanned => 'Expected';
+
+  @override
+  String get ibReceivedQty => 'Received';
+
+  @override
+  String get ibRemaining => 'Left';
+
+  @override
+  String ibOverQty(int n) {
+    return 'Over $n';
+  }
+
+  @override
+  String ibPlanTotals(int planned, int received, int remaining) {
+    return 'Expected $planned · received $received · left $remaining';
+  }
+
+  @override
+  String ibExpectedOn(String date) {
+    return 'Expected $date';
+  }
+
+  @override
+  String get ibReceiveAction => 'Receive';
+
+  @override
+  String get ibLinesSection => 'Expected and received per product';
+
+  @override
+  String get ibReceiptsSection => 'Receipts (split deliveries)';
+
+  @override
+  String ibReceiptSeq(int n) {
+    return 'Delivery $n';
+  }
+
+  @override
+  String get ibNoReceipts => 'Nothing has arrived yet';
+
+  @override
+  String get ibArrivedOn => 'Actual arrival';
+
+  @override
+  String get ibInspectionPending => 'Awaiting inspection';
+
+  @override
+  String get ibInspectionDone => 'Inspected';
+
+  @override
+  String ibInspectionScheduled(String date) {
+    return 'Inspection planned $date';
+  }
+
+  @override
+  String ibInspectionStarted(String date) {
+    return 'Started $date';
+  }
+
+  @override
+  String ibInspectionCompleted(String date) {
+    return 'Completed $date';
+  }
+
+  @override
+  String ibInspectionPassFail(int pass, int fail) {
+    return 'Passed $pass · failed $fail';
+  }
+
+  @override
+  String ibInspectionProposed(String date) {
+    return 'Inspection planned for $date.';
+  }
+
+  @override
+  String get ibMoveInspection => 'Move the inspection date';
+
+  @override
+  String get ibDocumentsSection => 'Files';
+
+  @override
+  String get ibNoDocuments => 'No files';
+
+  @override
+  String get ibHistorySection => 'History';
+
+  @override
+  String get ibDatesSaved => 'Saved';
+
+  @override
+  String get ibHold => 'Put on hold';
+
+  @override
+  String get ibUnhold => 'Release hold';
+
+  @override
+  String ibEvCreated(String date) {
+    return 'Created (expected $date)';
+  }
+
+  @override
+  String ibEvExpectedChanged(String from, String to) {
+    return 'Expected arrival: $from → $to';
+  }
+
+  @override
+  String ibEvInspectionDateChanged(String from, String to) {
+    return 'Planned inspection: $from → $to';
+  }
+
+  @override
+  String ibEvStateChanged(String from, String to) {
+    return 'State: $from → $to';
+  }
+
+  @override
+  String get ibEvReceived => 'Delivery received';
+
+  @override
+  String ibEvArrivalSet(String from, String to) {
+    return 'Actual arrival: $from → $to';
+  }
+
+  @override
+  String ibEvOverReceipt(String choice) {
+    return 'Over-receipt taken ($choice)';
+  }
+
+  @override
+  String get ibEvCancelled => 'Receipt cancelled';
+
+  @override
+  String ibEvItemRecorded(String jan, String qty) {
+    return 'Received $jan ×$qty';
+  }
+
+  @override
+  String get ibEvInspectionOpened => 'Queued for inspection';
+
+  @override
+  String get ibEvInspectionConfirmed => 'Inspection completed';
+
+  @override
+  String get ibOverTitle => 'More than expected';
+
+  @override
+  String ibOverLine(int planned, int received, int arriving, int over) {
+    return 'Expected $planned · received $received · now $arriving · over $over';
+  }
+
+  @override
+  String get ibOverAccept => 'Accept all';
+
+  @override
+  String get ibOverCap => 'Only what was expected';
+
+  @override
+  String get ibOverHold => 'Excess on hold';
+
+  @override
+  String get ibOverAcceptNoPermission =>
+      'Accepting everything needs approval rights. Take the excess on hold and someone with the right can decide later.';
+
+  @override
+  String ibCandidatesApplied(int n) {
+    return '$n quantities from the delivery note were put in as candidates. Check what arrived before confirming.';
+  }
+
+  @override
+  String get ibTodayTitle => 'Today\'s inbound';
+
+  @override
+  String get ibTodayDue => 'Due today';
+
+  @override
+  String get ibTodayOverdue => 'Overdue';
+
+  @override
+  String get ibTodayUndated => 'Not dated';
+
+  @override
+  String get ibTodayAwaitingInspection => 'Awaiting inspection';
+
+  @override
+  String get ibTodayPutaway => 'Waiting for put-away';
+
+  @override
+  String get ibTodayEmpty => 'Nothing is due in the next week';
+
+  @override
+  String get ibProductHistory => 'Suppliers, receipts and inspections';
+
+  @override
+  String get ibSupplierNames => 'What suppliers call it';
+
+  @override
+  String get ibAliases => 'Names learned for matching';
+
+  @override
+  String get ibOpenPlans => 'Still expected';
+
+  @override
+  String get ibNoHistory => 'Nothing has come in for this product yet';
+
+  @override
+  String ibLastSeen(String date) {
+    return 'Last $date';
+  }
 }

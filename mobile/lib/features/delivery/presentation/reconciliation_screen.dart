@@ -5,6 +5,11 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
+import '../../auth/application/auth_controller.dart';
+import '../../inbound/application/inbound_providers.dart';
+import '../../inbound/domain/inbound.dart';
+import '../../inbound/presentation/inbound_labels.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -20,6 +25,7 @@ import '../application/reconciliation_controller.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/delivery_plan_status.dart';
 import '../domain/jan.dart';
+import '../domain/ocr_line.dart';
 import '../domain/reconciliation.dart';
 import 'delivery_status_ui.dart';
 import 'parcel_sheet.dart';
@@ -113,9 +119,13 @@ enum _FinishChoice { cancel, partial, finalize }
 /// (with its expected lines), then hands off to [_ReconcileView] for the live
 /// scan/OCR session.
 class ReconciliationScreen extends ConsumerWidget {
-  const ReconciliationScreen({super.key, required this.planId});
+  const ReconciliationScreen({super.key, required this.planId, this.candidates = const []});
 
   final int planId;
+
+  /// Quantities a delivery note says came (§24): put in as counts to check,
+  /// never posted until the operator confirms them.
+  final List<OcrLine> candidates;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -141,7 +151,7 @@ class ReconciliationScreen extends ConsumerWidget {
         ],
       ),
       body: detail.when(
-        data: (plan) => _ReconcileView(plan: plan),
+        data: (plan) => _ReconcileView(plan: plan, candidates: candidates),
         loading: () => LoadingView(message: l10n.loading),
         error: (error, _) => ErrorStateView(
           message: '$error',
@@ -153,9 +163,10 @@ class ReconciliationScreen extends ConsumerWidget {
 }
 
 class _ReconcileView extends ConsumerStatefulWidget {
-  const _ReconcileView({required this.plan});
+  const _ReconcileView({required this.plan, this.candidates = const []});
 
   final DeliveryPlan plan;
+  final List<OcrLine> candidates;
 
   @override
   ConsumerState<_ReconcileView> createState() => _ReconcileViewState();
@@ -164,6 +175,10 @@ class _ReconcileView extends ConsumerStatefulWidget {
 class _ReconcileViewState extends ConsumerState<_ReconcileView> {
   final FocusNode _scanFocus = FocusNode();
   bool _ocrBusy = false;
+
+  /// 実際の入荷日 of this delivery: today unless the operator says the goods
+  /// came earlier (§3). Never the plan's expected date.
+  DateTime _arrivedOn = DateUtils.dateOnly(DateTime.now());
 
   DeliveryPlan get _plan => widget.plan;
 
@@ -178,6 +193,13 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
     if (_plan.status == DeliveryPlanStatus.completed) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _warnAlreadyReconciled();
+      });
+    }
+    if (widget.candidates.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _controller.applyOcr(widget.candidates);
+        _snack(AppLocalizations.of(context).ibCandidatesApplied(widget.candidates.length), tone: StatusTone.info);
       });
     }
   }
@@ -406,34 +428,70 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
     if (choice == null || choice == _FinishChoice.cancel || !mounted) return;
 
     final keepOpen = choice == _FinishChoice.partial;
-    final apiResult = await _controller.submit(complete: !keepOpen);
+    await _receive(keepOpen: keepOpen);
+  }
+
+  /// Posts the delivery. More than the plan still expects is refused with the
+  /// lines; the operator then says what to do with the excess and it is sent
+  /// again (§8).
+  Future<void> _receive({required bool keepOpen, OverReceiptChoice? over}) async {
+    final l10n = AppLocalizations.of(context);
+    final apiResult = await _controller.receive(
+        complete: !keepOpen, arrivedOn: _arrivedOn, over: over);
     if (!mounted) return;
-    apiResult.when(
-      success: (_) {
-        ref.invalidate(deliveryPlansProvider);
-        ref.invalidate(deliveryPlanDetailProvider(_plan.id));
-        // §35: a reconciliation posts a receipt, and QC works per receipt —
-        // so offer the receipt history, which is where a QC pass is actually
-        // started, instead of leaving the operator to find it. Captured
-        // before the pop below, since this screen's own context is gone by
-        // the time the action can be tapped. Offered for a partial save too:
-        // that posts a receipt just the same.
-        final navigator = Navigator.of(context);
-        final planId = _plan.id;
-        _snack(
-          keepOpen ? l10n.reconcilePartialSaved : l10n.reconcileDone,
-          tone: StatusTone.success,
-          action: SnackBarAction(
-            label: l10n.nextStepInspection,
-            onPressed: () => navigator.push(MaterialPageRoute(
-              builder: (_) => ReceiptHistoryScreen(planId: planId),
-            )),
-          ),
-        );
-        navigator.pop();
-      },
-      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
+    switch (apiResult) {
+      case ApiSuccess(:final data):
+        _received(keepOpen, data);
+      case ApiFailure(:final message):
+        final lines = parseOverReceipt(message);
+        if (lines != null && over == null) {
+          final pick = await showOverReceiptDialog(context, lines,
+              canAcceptAll: ref.read(authControllerProvider).user?.hasPermission('receiving.over_accept') ?? false);
+          if (pick != null && mounted) await _receive(keepOpen: keepOpen, over: pick);
+          return;
+        }
+        _snack(humanizeApiErrorMessage(l10n, message), tone: StatusTone.danger);
+    }
+  }
+
+  void _received(bool keepOpen, ReceiveOutcome outcome) {
+    final l10n = AppLocalizations.of(context);
+    ref.invalidate(deliveryPlansProvider);
+    ref.invalidate(deliveryPlanDetailProvider(_plan.id));
+    ref.invalidate(expectedReceiptProvider(_plan.id));
+    ref.invalidate(inboundTodayProvider);
+    // §35: a reconciliation posts a receipt, and QC works per receipt —
+    // so offer the receipt history, which is where a QC pass is actually
+    // started, instead of leaving the operator to find it. Captured
+    // before the pop below, since this screen's own context is gone by
+    // the time the action can be tapped. Offered for a partial save too:
+    // that posts a receipt just the same.
+    final navigator = Navigator.of(context);
+    final planId = _plan.id;
+    final done = keepOpen ? l10n.reconcilePartialSaved : l10n.reconcileDone;
+    final inspection = outcome.scheduledInspectionDate;
+    _snack(
+      inspection == null ? done : '$done ${l10n.ibInspectionProposed(ibDay(l10n, inspection))}',
+      tone: StatusTone.success,
+      action: SnackBarAction(
+        label: l10n.nextStepInspection,
+        onPressed: () => navigator.push(MaterialPageRoute(
+          builder: (_) => ReceiptHistoryScreen(planId: planId),
+        )),
+      ),
     );
+    navigator.pop();
+  }
+
+  Future<void> _pickArrivedOn() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _arrivedOn.isAfter(today) ? today : _arrivedOn,
+      firstDate: today.subtract(const Duration(days: 365)),
+      lastDate: today,
+    );
+    if (picked != null && mounted) setState(() => _arrivedOn = picked);
   }
 
   void _snack(String message,
@@ -547,7 +605,26 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
             top: false,
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: SizedBox(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+              // 実際の入荷日 — the day these goods came, kept apart from the
+              // plan's expected date; the inspection is proposed for it.
+              InkWell(
+                key: const ValueKey('recon-arrived-on'),
+                onTap: state.submitting ? null : _pickArrivedOn,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Row(children: [
+                    const Icon(Icons.event_available_outlined, size: 18),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text('${l10n.ibArrivedOn}: ${ibDay(l10n, _arrivedOn)}'),
+                    const Spacer(),
+                    Text(l10n.ibChange, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                  ]),
+                ),
+              ),
+              SizedBox(
                 width: double.infinity,
                 height: AppSpacing.minTouch,
                 child: FilledButton.icon(
@@ -562,6 +639,8 @@ class _ReconcileViewState extends ConsumerState<_ReconcileView> {
                   label: Text(
                       state.submitting ? l10n.working : l10n.completeReconcile),
                 ),
+              ),
+                ],
               ),
             ),
           ),

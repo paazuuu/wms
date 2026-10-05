@@ -24,6 +24,7 @@ import '../../product_library/presentation/product_naming_dialog.dart';
 import '../../../core/ui/fields_dialog.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
+import '../../inbound/presentation/product_inbound_card.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
 /// units (0059), its lots and serials (0060), and how this warehouse handles it
@@ -123,6 +124,8 @@ class ProductDetailScreen extends ConsumerWidget {
                 ],
                 const SizedBox(height: AppSpacing.md),
                 _WarehouseSettingsCard(product: product, onMessage: _snack),
+                const SizedBox(height: AppSpacing.md),
+                ProductInboundCard(productId: productId),
               ],
             ),
           );

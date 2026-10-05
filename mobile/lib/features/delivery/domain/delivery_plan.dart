@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../inbound/domain/inbound.dart';
 import 'delivery_plan_line.dart';
 import 'delivery_plan_status.dart';
 
@@ -25,7 +26,31 @@ class DeliveryPlan extends Equatable {
     this.warehouseId,
     this.purchaseOrderId,
     int? lineCount,
+    this.expectedArrivalDate,
+    this.scheduledInspectionDate,
+    this.documentType,
+    this.receiptState = ReceiptState.expected,
+    this.plannedUnits,
+    this.receivedUnits,
+    this.remainingUnits,
   }) : _lineCount = lineCount;
+
+  /// 仕入先から提示された入荷予定日 (0134); null is 未定.
+  final DateTime? expectedArrivalDate;
+
+  /// 予定検品日 — a plan, not a fact (0134).
+  final DateTime? scheduledInspectionDate;
+
+  /// What the supplier sent (0134).
+  final DocumentType? documentType;
+
+  /// EXPECTED / PARTIALLY_RECEIVED / RECEIVED / OVER_RECEIVED / … (0134).
+  final ReceiptState receiptState;
+
+  /// 予定 / 入荷済 / 残 kept on the plan (0136), so a list needs no lines.
+  final int? plannedUnits;
+  final int? receivedUnits;
+  final int? remainingUnits;
 
   final int id;
 
@@ -95,7 +120,19 @@ class DeliveryPlan extends Equatable {
       warehouseId: _asInt(json['warehouse_id']),
       purchaseOrderId: _asInt(json['purchase_order_id']),
       lineCount: _asInt(json['line_count']),
+      expectedArrivalDate: _asDate(json['expected_arrival_date']),
+      scheduledInspectionDate: _asDate(json['scheduled_inspection_date']),
+      documentType: DocumentType.fromWire(json['document_type'] as String?),
+      receiptState: ReceiptState.fromWire(json['receipt_state'] as String?),
+      plannedUnits: _asInt(json['planned_units']),
+      receivedUnits: _asInt(json['received_units']),
+      remainingUnits: _asInt(json['remaining_units']),
     );
+  }
+
+  static DateTime? _asDate(dynamic value) {
+    final t = value?.toString().trim() ?? '';
+    return t.isEmpty ? null : DateTime.tryParse(t);
   }
 
   static int? _asInt(dynamic value) {
@@ -107,5 +144,6 @@ class DeliveryPlan extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, deliveryNumber, status, lines, warehouseId, purchaseOrderId];
+      [id, deliveryNumber, status, lines, warehouseId, purchaseOrderId, expectedArrivalDate, receiptState,
+       plannedUnits, receivedUnits];
 }

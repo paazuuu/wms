@@ -9134,4 +9134,328 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorAiKey => 'AI的API密钥无法使用，无法用AI读取。请在 管理 → AI运行状态 进行连接测试。';
+
+  @override
+  String get ibStateDraft => '草稿';
+
+  @override
+  String get ibStateExpected => '待到货';
+
+  @override
+  String get ibStatePartial => '部分到货';
+
+  @override
+  String get ibStateReceived => '已到货';
+
+  @override
+  String get ibStateOver => '超量到货';
+
+  @override
+  String get ibStateClosed => '已结（有短缺）';
+
+  @override
+  String get ibStateCancelled => '已取消';
+
+  @override
+  String get ibStateOnHold => '暂缓';
+
+  @override
+  String get ibDocPurchaseConfirmation => '订单确认书';
+
+  @override
+  String get ibDocDeliverySchedule => '交货计划表';
+
+  @override
+  String get ibDocDeliveryNote => '送货单';
+
+  @override
+  String get ibDocInvoice => '发票';
+
+  @override
+  String get ibDocOther => '其他';
+
+  @override
+  String get ibDocType => '单据类型';
+
+  @override
+  String get ibExpectedArrival => '预计到货日';
+
+  @override
+  String get ibScheduledInspection => '预计检验日';
+
+  @override
+  String get ibUndated => '未定';
+
+  @override
+  String get ibSetDate => '选择日期';
+
+  @override
+  String get ibClearDate => '设为未定';
+
+  @override
+  String get ibChange => '更改';
+
+  @override
+  String get ibInvoiceNote => '发票上的数量不等于实际到货。按预计入库登记，实际到货数量在收货时确认。';
+
+  @override
+  String get ibDatesSection => '单据与计划';
+
+  @override
+  String get ibDatesHint => '如果供应商未提供日期，请保持「未定」。系统不会自动填入今天或明天。';
+
+  @override
+  String ibUseDocDate(String date) {
+    return '将单据日期（$date）作为预计到货日';
+  }
+
+  @override
+  String get ibDuplicateTitle => '该单据已登记';
+
+  @override
+  String get ibDuplicateSameFile => '相同文件';
+
+  @override
+  String get ibDuplicateSameNumber => '相同单号';
+
+  @override
+  String get ibOpenExisting => '打开已有数据';
+
+  @override
+  String get ibUpdateExisting => '用此单据更新已有预计入库';
+
+  @override
+  String get ibRegisterSeparately => '作为另一份单据登记';
+
+  @override
+  String get ibUpdatedExisting => '已更新已有预计入库';
+
+  @override
+  String ibMatchPercent(int pct) {
+    return '匹配度 $pct%';
+  }
+
+  @override
+  String get ibMatchNeedsCheck => '需确认';
+
+  @override
+  String get ibCandidates => '候选';
+
+  @override
+  String get ibUseCandidate => '确认为此商品';
+
+  @override
+  String get ibNewProductCandidate => '新商品候选 — 没有匹配的商品';
+
+  @override
+  String get ibDetailTitle => '预计入库';
+
+  @override
+  String get ibPlanned => '预计';
+
+  @override
+  String get ibReceivedQty => '已到';
+
+  @override
+  String get ibRemaining => '剩余';
+
+  @override
+  String ibOverQty(int n) {
+    return '超出 $n';
+  }
+
+  @override
+  String ibPlanTotals(int planned, int received, int remaining) {
+    return '预计 $planned・已到 $received・剩余 $remaining';
+  }
+
+  @override
+  String ibExpectedOn(String date) {
+    return '预计 $date';
+  }
+
+  @override
+  String get ibReceiveAction => '收货';
+
+  @override
+  String get ibLinesSection => '各商品的预计与到货';
+
+  @override
+  String get ibReceiptsSection => '到货记录（分批）';
+
+  @override
+  String ibReceiptSeq(int n) {
+    return '第$n次到货';
+  }
+
+  @override
+  String get ibNoReceipts => '尚未到货';
+
+  @override
+  String get ibArrivedOn => '实际到货日';
+
+  @override
+  String get ibInspectionPending => '待检验';
+
+  @override
+  String get ibInspectionDone => '已检验';
+
+  @override
+  String ibInspectionScheduled(String date) {
+    return '计划检验 $date';
+  }
+
+  @override
+  String ibInspectionStarted(String date) {
+    return '开始检验 $date';
+  }
+
+  @override
+  String ibInspectionCompleted(String date) {
+    return '完成检验 $date';
+  }
+
+  @override
+  String ibInspectionPassFail(int pass, int fail) {
+    return '合格 $pass・不合格 $fail';
+  }
+
+  @override
+  String ibInspectionProposed(String date) {
+    return '计划检验日为 $date。';
+  }
+
+  @override
+  String get ibMoveInspection => '更改检验日期';
+
+  @override
+  String get ibDocumentsSection => '附件';
+
+  @override
+  String get ibNoDocuments => '没有附件';
+
+  @override
+  String get ibHistorySection => '历史';
+
+  @override
+  String get ibDatesSaved => '已保存';
+
+  @override
+  String get ibHold => '暂缓';
+
+  @override
+  String get ibUnhold => '解除暂缓';
+
+  @override
+  String ibEvCreated(String date) {
+    return '创建预计入库（预计日: $date）';
+  }
+
+  @override
+  String ibEvExpectedChanged(String from, String to) {
+    return '预计到货日: $from → $to';
+  }
+
+  @override
+  String ibEvInspectionDateChanged(String from, String to) {
+    return '预计检验日: $from → $to';
+  }
+
+  @override
+  String ibEvStateChanged(String from, String to) {
+    return '状态: $from → $to';
+  }
+
+  @override
+  String get ibEvReceived => '已收货';
+
+  @override
+  String ibEvArrivalSet(String from, String to) {
+    return '实际到货日: $from → $to';
+  }
+
+  @override
+  String ibEvOverReceipt(String choice) {
+    return '超量收货（$choice）';
+  }
+
+  @override
+  String get ibEvCancelled => '已取消收货';
+
+  @override
+  String ibEvItemRecorded(String jan, String qty) {
+    return '收货 $jan ×$qty';
+  }
+
+  @override
+  String get ibEvInspectionOpened => '加入待检验';
+
+  @override
+  String get ibEvInspectionConfirmed => '检验完成';
+
+  @override
+  String get ibOverTitle => '超过预计数量';
+
+  @override
+  String ibOverLine(int planned, int received, int arriving, int over) {
+    return '预计 $planned・已到 $received・本次 $arriving・超出 $over';
+  }
+
+  @override
+  String get ibOverAccept => '全部收货';
+
+  @override
+  String get ibOverCap => '仅收预计数量';
+
+  @override
+  String get ibOverHold => '超出部分暂缓收货';
+
+  @override
+  String get ibOverAcceptNoPermission => '全部收货需要审批权限。暂缓收货后可由有权限的人员稍后决定。';
+
+  @override
+  String ibCandidatesApplied(int n) {
+    return '已将送货单上的 $n 项数量作为候选填入。请确认实际到货后再确定。';
+  }
+
+  @override
+  String get ibTodayTitle => '今日到货';
+
+  @override
+  String get ibTodayDue => '今日预计到货';
+
+  @override
+  String get ibTodayOverdue => '延迟';
+
+  @override
+  String get ibTodayUndated => '日期未定';
+
+  @override
+  String get ibTodayAwaitingInspection => '待检验';
+
+  @override
+  String get ibTodayPutaway => '待上架';
+
+  @override
+  String get ibTodayEmpty => '未来一周没有预计到货';
+
+  @override
+  String get ibProductHistory => '供应商・到货・检验记录';
+
+  @override
+  String get ibSupplierNames => '供应商的叫法';
+
+  @override
+  String get ibAliases => '用于识别的别名';
+
+  @override
+  String get ibOpenPlans => '待到货的计划';
+
+  @override
+  String get ibNoHistory => '该商品尚无到货记录';
+
+  @override
+  String ibLastSeen(String date) {
+    return '最近 $date';
+  }
 }

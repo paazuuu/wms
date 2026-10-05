@@ -17,6 +17,7 @@ import '../domain/stock_item.dart';
 import '../domain/stock_movement.dart';
 import '../domain/stock_position.dart';
 import 'reconciliation_controller.dart';
+import '../../inbound/application/inbound_providers.dart';
 
 /// Dedicated Dio for the delivery feature, pointed at the Supabase Edge
 /// Functions that back it (schema + reconcile RPC + OCR). Separate from the
@@ -213,7 +214,8 @@ final reconciliationControllerProvider = StateNotifierProvider.autoDispose
     .family<ReconciliationController, ReconciliationState, DeliveryPlan>(
         (ref, plan) {
   return ReconciliationController(
-      ref.watch(deliveryRepositoryProvider), plan);
+      ref.watch(deliveryRepositoryProvider), plan,
+      inbound: ref.watch(inboundRepositoryProvider));
 });
 
 /// One receipt at §12's three levels (0067). Keyed by the reconciliation id, and

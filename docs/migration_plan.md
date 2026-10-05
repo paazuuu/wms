@@ -6286,6 +6286,133 @@ Also:
 - The import screens say in plain words when the AI has no credits
   (`errorAiCredits`) or its key is refused (`errorAiKey`).
 
+## 0134 / 0135 / 0136 — 仕入先ファイル起点の入荷 and the Product Master
+
+From `WMS_仕入先ファイル起点_ProductMaster追加仕様書.md`. Orders are placed by
+phone and mail; the supplier's file is what the warehouse works from. The
+tables keep their names:
+
+| Spec | Table |
+|---|---|
+| Expected Receipt | `delivery_plans` + `delivery_plan_lines` |
+| Actual Receipt (one per delivery, 分納) | `delivery_reconciliations` + `reconciliation_lines` |
+| Inspection (one per receipt) | `inspections` + `inspection_items` |
+| Attachment / Inbound Document | `import_documents` (0132) + `inbound_plan_documents` |
+| Supplier Product Mapping | `supplier_product_names` (+ `notation_dialects` for further spellings) |
+| Stock Movement | `stock_movements` — unchanged: a receipt books QC_PENDING, only a passed inspection releases it |
+
+### 0134 — dates, state, over-receipts, documents, duplicates
+
+- Dates kept apart:
+  - `delivery_plans.expected_arrival_date` — 予定入荷日; null is 未定, never
+    filled with today.
+  - `delivery_plans.scheduled_inspection_date` — 予定検品日, a plan only.
+  - `delivery_reconciliations.arrived_on` — 実際の入荷日 of each delivery.
+  - `inspections.scheduled_date` — proposed from the arrival date; can be
+    moved (`set_inspection_schedule`).
+  - `inspections.started_at` — the first count or judgement.
+  - `inspections.completed_at` — unchanged.
+  - The printed `delivery_date` text and the expected date are kept in step
+    by trigger.
+- `delivery_plans.receipt_state`, kept by trigger: EXPECTED,
+  PARTIALLY_RECEIVED, RECEIVED, OVER_RECEIVED, CLOSED (closed short),
+  CANCELLED, ON_HOLD, DRAFT. Plus `on_hold`.
+- `document_type` on plans and files: purchase_confirmation,
+  delivery_schedule, delivery_note, invoice, other. It is guessed from the
+  file name (`guess_document_type`). An invoice never posts a receipt.
+- `receive_delivery(plan, lines, complete, note, arrived_on, over)`:
+  - receiving as a guarded call (receiving.confirm and the warehouse);
+  - more than the plan still expects stops with `OVER_RECEIPT [...]`
+    unless the caller chose:
+    - `accept` — everything (new permission `receiving.over_accept`,
+      given to admins and warehouse managers);
+    - `cap` — only what was still expected;
+    - `hold` — everything, the excess on HOLD.
+- `set_expected_receipt(plan, changes, document_id)`: only the keys sent
+  change. Every date change is logged (`inbound.expected_date_changed`) with
+  the document that brought it.
+- `inbound_plan_documents`: every file behind a plan, and what it did:
+  - created;
+  - dates_updated;
+  - attached;
+  - receipt_candidate.
+- `inbound_duplicates`: the same file (sha256) or the same supplier and
+  document number already became a plan.
+- `expected_receipt_timeline(plan)`: header, lines with 予定/入荷済/残, each
+  receipt (第n回) with its inspection, the files, and the history.
+- `inbound_today(warehouse)`: counts for the floor:
+  - due today, overdue and 未定;
+  - awaiting inspection;
+  - waiting for put-away.
+
+### 0135 — Product Master and the Supplier Product Mapping
+
+- One product, one product id. `supplier_product_names` gains
+  `supplier_model_number`, `supplier_unit`, `last_seen_at`, `seen_count`,
+  `is_active` and `source`.
+- A plan line tied to one of our products fills the mapping for that
+  supplier on its own, so the next file is recognised without a person
+  choosing again. This is skipped for the UNKNOWN placeholder supplier.
+- `product_match_candidates(partner, lines)`: candidates for a line nobody
+  could place.
+  - Identifiers come first:
+    1. the supplier's own code — 99%;
+    2. JAN — 99%;
+    3. the supplier's JAN — 98%;
+    4. our SKU — 95%;
+    5. the model number inside our name — 85%.
+  - Then name likeness (Dice coefficient of character pairs, × 0.9) is
+    checked against our name, the English name, other names, every
+    supplier's writing and learned readings.
+  - Nothing is tied automatically.
+- The library search (`list_products`) also matches a supplier's JAN, their
+  maker writing and every learned reading (AI認識用別名).
+- `product_inbound_history(product)` returns:
+  - plans that expect it;
+  - each receipt with its inspection;
+  - the files;
+  - supplier names;
+  - learned readings.
+
+### 0136 — totals on the plan
+
+- `planned_units`, `received_units` and `remaining_units` on
+  `delivery_plans`, kept by the same trigger, so a plan list shows
+  予定・入荷済・残 without reading lines.
+
+### App
+
+- 納品照合 list: each card shows 予定・入荷済・残, 予定日 (未定) and the state.
+  A tap opens 入荷予定の詳細.
+- 入荷予定の詳細:
+  - edit the expected date, the inspection date (未定 allowed), the
+    document type and the hold;
+  - lines with what is left;
+  - 第n回入荷 with its inspection dates, and moving the inspection date;
+  - the files (downloadable) and the history.
+- Receiving:
+  - 実際の入荷日 is picked (today by default);
+  - goes through `receive_delivery`;
+  - more than expected asks: 全量受入 / 予定数のみ受入 / 超過分は保留で受入.
+- Import review (inbound):
+  - 書類の種類, 予定入荷日 and 予定検品日; a note for invoices;
+  - a duplicates banner offering:
+    - 既存データを開く;
+    - この書類で既存の入荷予定を更新 — a delivery note goes on to receiving
+      with its quantities as candidates;
+    - 別書類として登録;
+  - 一致度 for tied lines and candidates for the rest; 新商品候補 when there
+    are none.
+- Dashboard: 今日の入荷 (due / overdue / 未定, 検品待ち, 棚入れ待ち).
+- Product detail: what each supplier calls it, the learned names, receipts
+  with inspection results, open plans and files.
+
+### Not done here
+
+- The putaway completion time per receipt is not recorded. Put-away works on
+  stock units, which no longer know their receipt; 棚入れ待ち shows what is
+  still unbinned.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

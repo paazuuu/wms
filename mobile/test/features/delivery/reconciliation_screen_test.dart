@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/delivery/application/delivery_providers.dart';
+import 'package:wms_mobile/features/inbound/application/inbound_providers.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan.dart';
 import 'package:wms_mobile/features/delivery/domain/delivery_plan_line.dart';
 import 'package:wms_mobile/features/delivery/presentation/reconciliation_screen.dart';
@@ -25,13 +26,18 @@ void main() {
   testWidgets(
       'a permission-denied reconcile shows the friendly message, not the raw RPC text (§34)',
       (tester) async {
-    final repo = FakeDeliveryRepository([_plan()])
-      ..failWith = 'not permitted: receiving.confirm required';
+    final repo = FakeDeliveryRepository([_plan()]);
+    // Receiving goes through receive_delivery (0134), so the refusal comes
+    // from there.
+    final inbound = FakeInboundRepository()..receiveFailures.add('not permitted: receiving.confirm required');
 
     await pumpApp(
       tester,
       const ReconciliationScreen(planId: 1),
-      overrides: [deliveryRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        deliveryRepositoryProvider.overrideWithValue(repo),
+        inboundRepositoryProvider.overrideWithValue(inbound),
+      ],
     );
     await tester.pumpAndSettle();
 

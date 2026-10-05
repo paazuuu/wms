@@ -11,8 +11,9 @@ import '../application/delivery_providers.dart';
 import '../domain/delivery_plan.dart';
 import '../domain/delivery_plan_status.dart';
 import 'delivery_status_ui.dart';
+import '../../inbound/presentation/expected_receipt_screen.dart';
+import '../../inbound/presentation/inbound_labels.dart';
 import 'plan_import_screen.dart';
-import 'reconciliation_screen.dart';
 import 'stock_list_screen.dart';
 
 /// Lists delivery plans imported from suppliers' Excel that still need a
@@ -317,9 +318,11 @@ class _DeliveryPlanCard extends ConsumerWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
+        // The plan itself first (§17): dates, what is left, every delivery
+        // and its inspection; receiving is one tap from there.
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => ReconciliationScreen(planId: plan.id),
+            builder: (_) => ExpectedReceiptScreen(planId: plan.id),
           ),
         ),
         child: Padding(
@@ -356,21 +359,34 @@ class _DeliveryPlanCard extends ConsumerWidget {
                             fontFamily: AppFonts.mono, color: scheme.primary),
                       ),
                     ],
+                    if (plan.plannedUnits != null && plan.plannedUnits! > 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        ibTotals(l10n,
+                            planned: plan.plannedUnits!,
+                            received: plan.receivedUnits ?? 0,
+                            remaining: plan.remainingUnits ?? 0),
+                        key: ValueKey('plan-totals-${plan.id}'),
+                        style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.xs,
                       children: [
-                        StatusPill(
-                          tone: status.tone,
-                          label: status.label,
-                          icon: status.icon,
-                          dense: true,
-                        ),
+                        ReceiptStatePill(plan.receiptState),
                         StatusPill(
                           tone: StatusTone.neutral,
                           label: l10n.plannedLines(plan.lineCount),
                           icon: Icons.list_alt_outlined,
+                          dense: true,
+                        ),
+                        StatusPill(
+                          key: ValueKey('plan-expected-${plan.id}'),
+                          tone: plan.expectedArrivalDate == null ? StatusTone.neutral : StatusTone.info,
+                          label: l10n.ibExpectedOn(ibDayOrUndated(l10n, plan.expectedArrivalDate)),
+                          icon: Icons.event_outlined,
                           dense: true,
                         ),
                         if (plan.needsReview)

@@ -31,6 +31,9 @@ import 'package:wms_mobile/features/ai_review/domain/ai_analysis_entry.dart';
 import 'package:wms_mobile/features/connectors/data/connector_repository.dart';
 import 'package:wms_mobile/features/connectors/domain/connector.dart';
 import 'package:wms_mobile/features/delivery/data/delivery_repository.dart';
+import 'package:wms_mobile/features/inbound/application/inbound_providers.dart';
+import 'package:wms_mobile/features/inbound/data/inbound_repository.dart';
+import 'package:wms_mobile/features/inbound/domain/inbound.dart';
 import 'package:wms_mobile/features/exceptions/data/exception_repository.dart';
 import 'package:wms_mobile/features/exceptions/domain/warehouse_exception.dart';
 import 'package:wms_mobile/features/delivery/data/stock_repository.dart';
@@ -173,6 +176,8 @@ Override fakeDashboardViewOverride() => dashboardViewProvider
 
 List<Override> _defaultOverrides() => [
       fakeScanModeOverride(),
+      // 仕入先ファイル起点の入荷 (0134), in memory.
+      inboundRepositoryProvider.overrideWithValue(FakeInboundRepository()),
       fakeDashboardViewOverride(),
       roleDashboardRepositoryProvider.overrideWithValue(FakeRoleDashboardRepository()),
       supabaseSessionStorageProvider
@@ -266,6 +271,8 @@ Future<void> pumpAppWith(
         overrides: [
           productImageRepositoryProvider.overrideWithValue(images),
           evidenceRepositoryProvider.overrideWithValue(FakeEvidenceRepository()),
+          // What came in for a product (0135): nothing here.
+          productInboundHistoryProvider.overrideWith((ref, productId) async => const ProductInboundHistory()),
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(canManageProducts),
@@ -5226,4 +5233,93 @@ class FakeCompanyRepository implements CompanyRepository {
 
   @override
   Future<ApiResult<List<OwnNameSuggestion>>> suggestions() async => ApiSuccess(suggested);
+}
+
+
+/// 仕入先ファイル起点の入荷 (0134–0136) in memory. [receiveFailures] are
+/// answered in turn before receiving succeeds — e.g. an OVER_RECEIPT refusal
+/// first, then the call with the operator's choice.
+class FakeInboundRepository implements InboundRepository {
+  FakeInboundRepository({
+    this.receipt,
+    this.duplicatesFound = const [],
+    this.candidates = const {},
+    this.todayCounts,
+    this.history = const ProductInboundHistory(),
+  });
+
+  ExpectedReceipt? receipt;
+  List<InboundDuplicate> duplicatesFound;
+  Map<int, List<MatchCandidate>> candidates;
+  InboundToday? todayCounts;
+  ProductInboundHistory history;
+
+  final List<String> receiveFailures = [];
+  final List<({int planId, List<ReconcileEntry> entries, bool complete, DateTime? arrivedOn, OverReceiptChoice? over})>
+      received = [];
+  final List<({int planId, Map<String, dynamic> changes, int? documentId})> expectedSet = [];
+  final List<({int inspectionId, DateTime date})> inspectionMoved = [];
+  List<Map<String, dynamic>>? lastCandidateLines;
+
+  @override
+  Future<ApiResult<ExpectedReceipt>> timeline(int planId) async =>
+      receipt == null ? const ApiFailure(message: 'not found', statusCode: 404) : ApiSuccess(receipt!);
+
+  @override
+  Future<ApiResult<bool>> setExpectedReceipt(int planId, Map<String, dynamic> changes, {int? documentId}) async {
+    expectedSet.add((planId: planId, changes: changes, documentId: documentId));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<InboundDuplicate>>> duplicates({
+    int? documentId,
+    int? supplierId,
+    String? supplierName,
+    String? docNumber,
+  }) async =>
+      ApiSuccess(duplicatesFound);
+
+  @override
+  Future<ApiResult<ReceiveOutcome>> receiveDelivery(
+    int planId, {
+    required List<ReconcileEntry> entries,
+    bool complete = false,
+    String? noteReference,
+    DateTime? arrivedOn,
+    OverReceiptChoice? over,
+  }) async {
+    received.add((planId: planId, entries: entries, complete: complete, arrivedOn: arrivedOn, over: over));
+    if (receiveFailures.isNotEmpty) return ApiFailure(message: receiveFailures.removeAt(0));
+    return ApiSuccess(ReceiveOutcome(
+      reconciliationId: 10,
+      planId: planId,
+      receiptState: ReceiptState.partiallyReceived,
+      arrivedOn: arrivedOn,
+      inspectionId: 20,
+      scheduledInspectionDate: arrivedOn,
+    ));
+  }
+
+  @override
+  Future<ApiResult<bool>> setInspectionSchedule(int inspectionId, DateTime date) async {
+    inspectionMoved.add((inspectionId: inspectionId, date: date));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<InboundToday>> today(int warehouseId) async =>
+      todayCounts == null ? const ApiFailure(message: 'none') : ApiSuccess(todayCounts!);
+
+  @override
+  Future<ApiResult<Map<int, List<MatchCandidate>>>> matchCandidates(
+    int? partnerId,
+    List<Map<String, dynamic>> lines,
+  ) async {
+    lastCandidateLines = lines;
+    return ApiSuccess(candidates);
+  }
+
+  @override
+  Future<ApiResult<ProductInboundHistory>> productHistory(int productId) async => ApiSuccess(history);
 }

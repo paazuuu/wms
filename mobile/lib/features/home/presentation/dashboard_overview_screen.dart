@@ -17,6 +17,7 @@ import '../domain/role_dashboards.dart';
 import 'dashboard_charts.dart';
 import 'dashboard_widgets.dart';
 import 'role_dashboard_views.dart';
+import '../../inbound/presentation/inbound_today_card.dart';
 
 /// The content-area landing page inside the app shell: a branded greeting,
 /// a "ready to scan" banner, and the full capability menu grouped by area.
@@ -87,6 +88,11 @@ class DashboardOverviewScreen extends ConsumerWidget {
           DashboardView.inspection => [
               _ScanHeroCard(onTap: () => context.go(AppRoutes.search)),
               const SizedBox(height: AppSpacing.lg),
+              // §28: the floor starts from what arrives today.
+              if (permissions.contains('receiving.view') || permissions.contains('inspection.view')) ...[
+                InboundTodayCard(onOpenFeature: openById),
+                const SizedBox(height: AppSpacing.lg),
+              ],
               InspectionDashboardView(
                 onOpenFeature: openById,
                 canCreateList: permissions.contains('receiving.confirm') ||
@@ -140,6 +146,10 @@ class DashboardOverviewScreen extends ConsumerWidget {
       [
         _ScanHeroCard(onTap: () => context.go(AppRoutes.search)),
         const SizedBox(height: AppSpacing.xl),
+        if (permissions.contains('receiving.view') || permissions.contains('inspection.view')) ...[
+          InboundTodayCard(onOpenFeature: openById),
+          const SizedBox(height: AppSpacing.xl),
+        ],
         _SectionLabel(l10n.dashTodayTasks),
         const SizedBox(height: AppSpacing.md),
         TodayTasksRow(

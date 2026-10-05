@@ -16662,6 +16662,570 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'AIのAPIキーが使えないため、AIで読み取れませんでした。管理 → AIの稼働状況 で接続テストをしてください。'**
   String get errorAiKey;
+
+  /// No description provided for @ibStateDraft.
+  ///
+  /// In ja, this message translates to:
+  /// **'下書き'**
+  String get ibStateDraft;
+
+  /// No description provided for @ibStateExpected.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷待ち'**
+  String get ibStateExpected;
+
+  /// No description provided for @ibStatePartial.
+  ///
+  /// In ja, this message translates to:
+  /// **'一部入荷'**
+  String get ibStatePartial;
+
+  /// No description provided for @ibStateReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済'**
+  String get ibStateReceived;
+
+  /// No description provided for @ibStateOver.
+  ///
+  /// In ja, this message translates to:
+  /// **'超過入荷'**
+  String get ibStateOver;
+
+  /// No description provided for @ibStateClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'締め（不足あり）'**
+  String get ibStateClosed;
+
+  /// No description provided for @ibStateCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消'**
+  String get ibStateCancelled;
+
+  /// No description provided for @ibStateOnHold.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留'**
+  String get ibStateOnHold;
+
+  /// No description provided for @ibDocPurchaseConfirmation.
+  ///
+  /// In ja, this message translates to:
+  /// **'注文確認書'**
+  String get ibDocPurchaseConfirmation;
+
+  /// No description provided for @ibDocDeliverySchedule.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品予定表'**
+  String get ibDocDeliverySchedule;
+
+  /// No description provided for @ibDocDeliveryNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書'**
+  String get ibDocDeliveryNote;
+
+  /// No description provided for @ibDocInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書'**
+  String get ibDocInvoice;
+
+  /// No description provided for @ibDocOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get ibDocOther;
+
+  /// No description provided for @ibDocType.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の種類'**
+  String get ibDocType;
+
+  /// No description provided for @ibExpectedArrival.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定入荷日'**
+  String get ibExpectedArrival;
+
+  /// No description provided for @ibScheduledInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定検品日'**
+  String get ibScheduledInspection;
+
+  /// No description provided for @ibUndated.
+  ///
+  /// In ja, this message translates to:
+  /// **'未定'**
+  String get ibUndated;
+
+  /// No description provided for @ibSetDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付を選ぶ'**
+  String get ibSetDate;
+
+  /// No description provided for @ibClearDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'未定にする'**
+  String get ibClearDate;
+
+  /// No description provided for @ibChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更'**
+  String get ibChange;
+
+  /// No description provided for @ibInvoiceNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書の数量は入荷の実績になりません。入荷予定の候補として登録し、実際に届いた数は入荷受付で確定します。'**
+  String get ibInvoiceNote;
+
+  /// No description provided for @ibDatesSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類と予定'**
+  String get ibDatesSection;
+
+  /// No description provided for @ibDatesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先から日付をもらっていなければ「未定」のままにしてください。今日や明日を勝手に入れることはありません。'**
+  String get ibDatesHint;
+
+  /// No description provided for @ibUseDocDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の日付（{date}）を予定入荷日にする'**
+  String ibUseDocDate(String date);
+
+  /// No description provided for @ibDuplicateTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この書類は既に登録されています'**
+  String get ibDuplicateTitle;
+
+  /// No description provided for @ibDuplicateSameFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じファイル'**
+  String get ibDuplicateSameFile;
+
+  /// No description provided for @ibDuplicateSameNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ書類番号'**
+  String get ibDuplicateSameNumber;
+
+  /// No description provided for @ibOpenExisting.
+  ///
+  /// In ja, this message translates to:
+  /// **'既存データを開く'**
+  String get ibOpenExisting;
+
+  /// No description provided for @ibUpdateExisting.
+  ///
+  /// In ja, this message translates to:
+  /// **'この書類で既存の入荷予定を更新'**
+  String get ibUpdateExisting;
+
+  /// No description provided for @ibRegisterSeparately.
+  ///
+  /// In ja, this message translates to:
+  /// **'別書類として登録'**
+  String get ibRegisterSeparately;
+
+  /// No description provided for @ibUpdatedExisting.
+  ///
+  /// In ja, this message translates to:
+  /// **'既存の入荷予定を更新しました'**
+  String get ibUpdatedExisting;
+
+  /// No description provided for @ibMatchPercent.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致度 {pct}%'**
+  String ibMatchPercent(int pct);
+
+  /// No description provided for @ibMatchNeedsCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認'**
+  String get ibMatchNeedsCheck;
+
+  /// No description provided for @ibCandidates.
+  ///
+  /// In ja, this message translates to:
+  /// **'候補'**
+  String get ibCandidates;
+
+  /// No description provided for @ibUseCandidate.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品で確定'**
+  String get ibUseCandidate;
+
+  /// No description provided for @ibNewProductCandidate.
+  ///
+  /// In ja, this message translates to:
+  /// **'新商品候補 — 一致する商品がありません'**
+  String get ibNewProductCandidate;
+
+  /// No description provided for @ibDetailTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定'**
+  String get ibDetailTitle;
+
+  /// No description provided for @ibPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定'**
+  String get ibPlanned;
+
+  /// No description provided for @ibReceivedQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷済'**
+  String get ibReceivedQty;
+
+  /// No description provided for @ibRemaining.
+  ///
+  /// In ja, this message translates to:
+  /// **'残'**
+  String get ibRemaining;
+
+  /// No description provided for @ibOverQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'超過 {n}'**
+  String ibOverQty(int n);
+
+  /// No description provided for @ibPlanTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定 {planned}・入荷済 {received}・残 {remaining}'**
+  String ibPlanTotals(int planned, int received, int remaining);
+
+  /// No description provided for @ibExpectedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定日 {date}'**
+  String ibExpectedOn(String date);
+
+  /// No description provided for @ibReceiveAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷受付'**
+  String get ibReceiveAction;
+
+  /// No description provided for @ibLinesSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごとの予定と入荷'**
+  String get ibLinesSection;
+
+  /// No description provided for @ibReceiptsSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷実績（分納）'**
+  String get ibReceiptsSection;
+
+  /// No description provided for @ibReceiptSeq.
+  ///
+  /// In ja, this message translates to:
+  /// **'第{n}回入荷'**
+  String ibReceiptSeq(int n);
+
+  /// No description provided for @ibNoReceipts.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ入荷はありません'**
+  String get ibNoReceipts;
+
+  /// No description provided for @ibArrivedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'実際の入荷日'**
+  String get ibArrivedOn;
+
+  /// No description provided for @ibInspectionPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get ibInspectionPending;
+
+  /// No description provided for @ibInspectionDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品完了'**
+  String get ibInspectionDone;
+
+  /// No description provided for @ibInspectionScheduled.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品予定 {date}'**
+  String ibInspectionScheduled(String date);
+
+  /// No description provided for @ibInspectionStarted.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品開始 {date}'**
+  String ibInspectionStarted(String date);
+
+  /// No description provided for @ibInspectionCompleted.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品完了 {date}'**
+  String ibInspectionCompleted(String date);
+
+  /// No description provided for @ibInspectionPassFail.
+  ///
+  /// In ja, this message translates to:
+  /// **'合格 {pass}・不合格 {fail}'**
+  String ibInspectionPassFail(int pass, int fail);
+
+  /// No description provided for @ibInspectionProposed.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品予定日は {date} です。'**
+  String ibInspectionProposed(String date);
+
+  /// No description provided for @ibMoveInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品予定日を変更'**
+  String get ibMoveInspection;
+
+  /// No description provided for @ibDocumentsSection.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付ファイル'**
+  String get ibDocumentsSection;
+
+  /// No description provided for @ibNoDocuments.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付ファイルはありません'**
+  String get ibNoDocuments;
+
+  /// No description provided for @ibHistorySection.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定の履歴'**
+  String get ibHistorySection;
+
+  /// No description provided for @ibDatesSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get ibDatesSaved;
+
+  /// No description provided for @ibHold.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留にする'**
+  String get ibHold;
+
+  /// No description provided for @ibUnhold.
+  ///
+  /// In ja, this message translates to:
+  /// **'保留を解除'**
+  String get ibUnhold;
+
+  /// No description provided for @ibEvCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定を作成（予定日: {date}）'**
+  String ibEvCreated(String date);
+
+  /// No description provided for @ibEvExpectedChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定入荷日: {from} → {to}'**
+  String ibEvExpectedChanged(String from, String to);
+
+  /// No description provided for @ibEvInspectionDateChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定検品日: {from} → {to}'**
+  String ibEvInspectionDateChanged(String from, String to);
+
+  /// No description provided for @ibEvStateChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'状態: {from} → {to}'**
+  String ibEvStateChanged(String from, String to);
+
+  /// No description provided for @ibEvReceived.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷を受け付けました'**
+  String get ibEvReceived;
+
+  /// No description provided for @ibEvArrivalSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'実際の入荷日: {from} → {to}'**
+  String ibEvArrivalSet(String from, String to);
+
+  /// No description provided for @ibEvOverReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定超過を受付（{choice}）'**
+  String ibEvOverReceipt(String choice);
+
+  /// No description provided for @ibEvCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷を取り消しました'**
+  String get ibEvCancelled;
+
+  /// No description provided for @ibEvItemRecorded.
+  ///
+  /// In ja, this message translates to:
+  /// **'受入 {jan} ×{qty}'**
+  String ibEvItemRecorded(String jan, String qty);
+
+  /// No description provided for @ibEvInspectionOpened.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちに登録'**
+  String get ibEvInspectionOpened;
+
+  /// No description provided for @ibEvInspectionConfirmed.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を完了しました'**
+  String get ibEvInspectionConfirmed;
+
+  /// No description provided for @ibOverTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定数量を超えています'**
+  String get ibOverTitle;
+
+  /// No description provided for @ibOverLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定 {planned}・入荷済 {received}・今回 {arriving}・超過 {over}'**
+  String ibOverLine(int planned, int received, int arriving, int over);
+
+  /// No description provided for @ibOverAccept.
+  ///
+  /// In ja, this message translates to:
+  /// **'全量受入'**
+  String get ibOverAccept;
+
+  /// No description provided for @ibOverCap.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定数のみ受入'**
+  String get ibOverCap;
+
+  /// No description provided for @ibOverHold.
+  ///
+  /// In ja, this message translates to:
+  /// **'超過分は保留で受入'**
+  String get ibOverHold;
+
+  /// No description provided for @ibOverAcceptNoPermission.
+  ///
+  /// In ja, this message translates to:
+  /// **'全量受入には承認の権限が必要です。保留で受け入れると、権限のある人が後で判断できます。'**
+  String get ibOverAcceptNoPermission;
+
+  /// No description provided for @ibCandidatesApplied.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書の数量 {n} 件を候補として入れました。届いた数を確認してから確定してください。'**
+  String ibCandidatesApplied(int n);
+
+  /// No description provided for @ibTodayTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日の入荷'**
+  String get ibTodayTitle;
+
+  /// No description provided for @ibTodayDue.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日の入荷予定'**
+  String get ibTodayDue;
+
+  /// No description provided for @ibTodayOverdue.
+  ///
+  /// In ja, this message translates to:
+  /// **'遅れ'**
+  String get ibTodayOverdue;
+
+  /// No description provided for @ibTodayUndated.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定日未定'**
+  String get ibTodayUndated;
+
+  /// No description provided for @ibTodayAwaitingInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get ibTodayAwaitingInspection;
+
+  /// No description provided for @ibTodayPutaway.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚入れ待ち'**
+  String get ibTodayPutaway;
+
+  /// No description provided for @ibTodayEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この先1週間の入荷予定はありません'**
+  String get ibTodayEmpty;
+
+  /// No description provided for @ibProductHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先・入荷・検品の履歴'**
+  String get ibProductHistory;
+
+  /// No description provided for @ibSupplierNames.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先での呼び名'**
+  String get ibSupplierNames;
+
+  /// No description provided for @ibAliases.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI認識用別名'**
+  String get ibAliases;
+
+  /// No description provided for @ibOpenPlans.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷待ちの予定'**
+  String get ibOpenPlans;
+
+  /// No description provided for @ibNoHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷の記録はまだありません'**
+  String get ibNoHistory;
+
+  /// No description provided for @ibLastSeen.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終 {date}'**
+  String ibLastSeen(String date);
 }
 
 class _AppLocalizationsDelegate
