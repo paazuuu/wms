@@ -6430,6 +6430,52 @@ tables keep their names:
   while the Gemini prepaid credits are used up, the button answers with an
   error and the English name is typed by hand.
 
+## 0137 — the Gemini API key chosen from the screen
+
+Until now the key was the `GEMINI_API_KEY` secret of the edge functions, so
+only someone with the Supabase dashboard could change it. When the prepaid
+credits ran out (HTTP 402) nobody in the app could move to another key.
+
+- **Where:** 管理 → AI設定 → Gemini APIキー. Shown to whoever holds
+  `ai.key_manage` (new; given to system_admin and company_admin) or
+  `user.manage`.
+- **Storage:** `ai_api_keys` holds a label, the last four characters, the
+  tier (無料枠 / 有料 / 不明), an optional model, and whether it is the one
+  in use (one at a time, by a unique partial index). The key itself is in
+  Supabase Vault (`vault.create_secret`). RLS is on with no policies: the
+  table is read and written only through the functions.
+- **Functions:**
+  - `ai_keys_list()` — the keys, with calls and failures in the last 24
+    hours, and `using_server_key`. Never returns the key.
+  - `ai_key_add(label, key, tier, model, activate, note)`.
+  - `ai_key_activate(id)` — null goes back to `GEMINI_API_KEY`.
+  - `ai_key_update(id, …, new_key)` — replacing the key clears the last
+    result.
+  - `ai_key_retire(id)` — blanks the secret in the vault and stops using it.
+  - `ai_active_key(id default null)` — for the service role only: the key
+    in use, or one key by id for a connection test.
+  - Every change is written to the audit log with the hint, never the key.
+- **Edge functions:** `resolveAiKey()` in `_shared/document_reader.ts` asks
+  `ai_active_key` with the service key and keeps the answer for 60 seconds,
+  so a switch takes effect within a minute. When no key is chosen it uses
+  `GEMINI_API_KEY` as before. A key's own model, when set, replaces
+  `GEMINI_MODEL`. Each call is logged in `ai_calls` with `key_id`, and a
+  trigger notes the last result on the key, so the screen shows
+  "最後の呼び出し: 回数上限" next to the key that ran out. The `ai_ping` mode of
+  `import-plan` takes a `key_id` to try one key before using it.
+- **Screen:** radio buttons for the server key and each registered key, a
+  connection test per key, edit (name, tier, model, or a new key), and delete
+  with a confirmation. The key field is masked and the key is never shown
+  again after saving.
+
+### Not done here
+
+- `import-plan` and `ocr-delivery-note` must be deployed for the screen's
+  choice to reach the AI calls (the deploy needs approval in this session):
+  `supabase functions deploy import-plan --project-ref vjunicsfobglmncjucbb`
+  and the same for `ocr-delivery-note`. Until then the DB part works, but
+  the AI keeps using `GEMINI_API_KEY`.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

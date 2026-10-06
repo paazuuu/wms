@@ -9737,4 +9737,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String rpEnglishSuggested(int n) {
     return '$n English names proposed';
   }
+
+  @override
+  String get akTitle => 'Gemini API keys';
+
+  @override
+  String get akIntro =>
+      'The keys the AI is called with. A registered key is stored encrypted and only its last four characters are shown. Choosing a key switches to it within a minute.';
+
+  @override
+  String get akAdd => 'Add a key';
+
+  @override
+  String get akEdit => 'Edit key';
+
+  @override
+  String get akServerKey => 'Server key (GEMINI_API_KEY)';
+
+  @override
+  String get akServerKeyHint =>
+      'Used when no key is chosen here: the key set in Supabase';
+
+  @override
+  String get akInUse => 'In use';
+
+  @override
+  String get akTierFree => 'Free tier';
+
+  @override
+  String get akTierPaid => 'Paid';
+
+  @override
+  String get akTierUnknown => 'Not set';
+
+  @override
+  String get akDefaultModel => 'Model: default';
+
+  @override
+  String akCalls24h(int n, int failed) {
+    return '$n calls in 24 h ($failed failed)';
+  }
+
+  @override
+  String get akNotUsedYet => 'Not used yet';
+
+  @override
+  String get akLastOk => 'Last call: OK';
+
+  @override
+  String akLastFailed(String kind) {
+    return 'Last call: $kind';
+  }
+
+  @override
+  String get akSwitched => 'Switched. It takes effect within a minute.';
+
+  @override
+  String get akTesting => 'Testing the connection…';
+
+  @override
+  String akRetireQ(String label) {
+    return 'Delete \"$label\"?';
+  }
+
+  @override
+  String get akRetireBody =>
+      'The key is erased from storage and cannot be recovered.';
+
+  @override
+  String get akRetireActiveBody =>
+      'This key is in use. Deleting it goes back to the server key. The key is erased from storage and cannot be recovered.';
+
+  @override
+  String get akRetired => 'Key deleted';
+
+  @override
+  String get akAdded => 'Key added';
+
+  @override
+  String get akLabel => 'Name';
+
+  @override
+  String get akLabelHint => 'e.g. Free key, Production';
+
+  @override
+  String get akKey => 'API key';
+
+  @override
+  String get akKeyHelp =>
+      'Paste a key made with \"Get API key\" in Google AI Studio (ai.studio). It is not shown again after saving.';
+
+  @override
+  String get akNewKey => 'New API key (only to replace it)';
+
+  @override
+  String akNewKeyHelp(String hint) {
+    return 'Leave empty to keep the current key ($hint)';
+  }
+
+  @override
+  String get akModel => 'Model (optional)';
+
+  @override
+  String get akModelHint => 'Empty for the server\'s default model';
+
+  @override
+  String get akActivateNow => 'Use this key right away';
+
+  @override
+  String get akNeedLabelKey => 'Enter a name and the API key';
+
+  @override
+  String get akFreeTierNote =>
+      'A free-tier key has per-minute and per-day limits and stops until the limit resets. What is sent may be used to improve Google\'s services. A paid key whose prepaid credits are used up stops until they are topped up.';
 }

@@ -9487,4 +9487,113 @@ class AppLocalizationsZh extends AppLocalizations {
   String rpEnglishSuggested(int n) {
     return '已建议 $n 个英文名';
   }
+
+  @override
+  String get akTitle => 'Gemini API密钥';
+
+  @override
+  String get akIntro => '调用AI时使用的密钥。登记的密钥会加密保存，界面上只显示末尾4个字符。选择密钥后1分钟内切换。';
+
+  @override
+  String get akAdd => '登记密钥';
+
+  @override
+  String get akEdit => '编辑密钥';
+
+  @override
+  String get akServerKey => '服务器设置的密钥（GEMINI_API_KEY）';
+
+  @override
+  String get akServerKeyHint => '未选择密钥时，使用在 Supabase 中设置的密钥';
+
+  @override
+  String get akInUse => '使用中';
+
+  @override
+  String get akTierFree => '免费额度';
+
+  @override
+  String get akTierPaid => '付费';
+
+  @override
+  String get akTierUnknown => '未指定';
+
+  @override
+  String get akDefaultModel => '模型: 默认';
+
+  @override
+  String akCalls24h(int n, int failed) {
+    return '24小时内 $n 次（失败 $failed）';
+  }
+
+  @override
+  String get akNotUsedYet => '尚未使用';
+
+  @override
+  String get akLastOk => '最近一次调用: 正常';
+
+  @override
+  String akLastFailed(String kind) {
+    return '最近一次调用: $kind';
+  }
+
+  @override
+  String get akSwitched => '已切换密钥，1分钟内生效。';
+
+  @override
+  String get akTesting => '正在测试连接…';
+
+  @override
+  String akRetireQ(String label) {
+    return '删除「$label」吗？';
+  }
+
+  @override
+  String get akRetireBody => '密钥将从存储中清除，无法恢复。';
+
+  @override
+  String get akRetireActiveBody => '这是正在使用的密钥。删除后将改用服务器设置的密钥。密钥将从存储中清除，无法恢复。';
+
+  @override
+  String get akRetired => '已删除密钥';
+
+  @override
+  String get akAdded => '已登记密钥';
+
+  @override
+  String get akLabel => '名称';
+
+  @override
+  String get akLabelHint => '例: 免费密钥、正式用';
+
+  @override
+  String get akKey => 'API密钥';
+
+  @override
+  String get akKeyHelp =>
+      '请粘贴在 Google AI Studio（ai.studio）的「Get API key」中创建的密钥。保存后不再显示。';
+
+  @override
+  String get akNewKey => '新的API密钥（仅更换时填写）';
+
+  @override
+  String akNewKeyHelp(String hint) {
+    return '留空则保持当前密钥（$hint）';
+  }
+
+  @override
+  String get akModel => '模型（可选）';
+
+  @override
+  String get akModelHint => '留空则使用服务器默认模型';
+
+  @override
+  String get akActivateNow => '登记后立即使用此密钥';
+
+  @override
+  String get akNeedLabelKey => '请输入名称和API密钥';
+
+  @override
+  String get akFreeTierNote =>
+      '免费额度的密钥有每分钟和每天的次数上限，超过后需等待重置。发送的内容可能被用于改进Google的服务。预付额度用完的付费密钥在充值前无法使用。';
 }

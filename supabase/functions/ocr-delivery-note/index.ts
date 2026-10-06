@@ -21,7 +21,7 @@
 // implementation today; `qwen` is a reserved, not-yet-implemented slot.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { encodeHex } from "jsr:@std/encoding/hex";
-import { readDocument, readingQuality, setAiFunction } from "../_shared/document_reader.ts";
+import { aiModel, readDocument, readingQuality, resolveAiKey, setAiFunction } from "../_shared/document_reader.ts";
 import { keepEvidence, noteEvidence } from "../_shared/evidence.ts";
 
 const cors = {
@@ -121,13 +121,14 @@ class GeminiProvider implements AIProvider {
   }
 }
 
-function getProvider(name: string): AIProvider {
+async function getProvider(name: string): Promise<AIProvider> {
   if (name === "gemini") {
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!apiKey) {
+    // The key chosen on 管理 → AI設定, else GEMINI_API_KEY (0137).
+    const chosen = await resolveAiKey();
+    if (!chosen.key) {
       throw new AIProviderError("GEMINI_API_KEY is not set on the server.", 500);
     }
-    return new GeminiProvider(apiKey, Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash");
+    return new GeminiProvider(chosen.key, aiModel(chosen));
   }
   if (name === "qwen") {
     throw new AIProviderError("Qwen provider is not implemented yet.", 501);
@@ -199,7 +200,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const provider = getProvider(providerName);
+    const provider = await getProvider(providerName);
     const { lines, confidence, quality } = await provider.extractDeliveryNote(bytes, mime);
 
     const { data: analysisId, error: recordError } = await supabase.rpc(

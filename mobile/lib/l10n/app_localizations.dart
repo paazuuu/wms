@@ -17280,6 +17280,204 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{n} 件の英語名を提案しました'**
   String rpEnglishSuggested(int n);
+
+  /// No description provided for @akTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'Gemini APIキー'**
+  String get akTitle;
+
+  /// No description provided for @akIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIを呼ぶときに使うキーです。登録したキーは暗号化して保存し、画面には末尾4文字だけを表示します。使うキーを選ぶと、1分以内に切り替わります。'**
+  String get akIntro;
+
+  /// No description provided for @akAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーを登録'**
+  String get akAdd;
+
+  /// No description provided for @akEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーを編集'**
+  String get akEdit;
+
+  /// No description provided for @akServerKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'サーバーの設定キー（GEMINI_API_KEY）'**
+  String get akServerKey;
+
+  /// No description provided for @akServerKeyHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーを選ばないときは、Supabase に設定したキーを使います'**
+  String get akServerKeyHint;
+
+  /// No description provided for @akInUse.
+  ///
+  /// In ja, this message translates to:
+  /// **'使用中'**
+  String get akInUse;
+
+  /// No description provided for @akTierFree.
+  ///
+  /// In ja, this message translates to:
+  /// **'無料枠'**
+  String get akTierFree;
+
+  /// No description provided for @akTierPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'有料'**
+  String get akTierPaid;
+
+  /// No description provided for @akTierUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'不明'**
+  String get akTierUnknown;
+
+  /// No description provided for @akDefaultModel.
+  ///
+  /// In ja, this message translates to:
+  /// **'モデル: 既定'**
+  String get akDefaultModel;
+
+  /// No description provided for @akCalls24h.
+  ///
+  /// In ja, this message translates to:
+  /// **'24時間で {n} 回（失敗 {failed}）'**
+  String akCalls24h(int n, int failed);
+
+  /// No description provided for @akNotUsedYet.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ使われていません'**
+  String get akNotUsedYet;
+
+  /// No description provided for @akLastOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'最後の呼び出し: 正常'**
+  String get akLastOk;
+
+  /// No description provided for @akLastFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'最後の呼び出し: {kind}'**
+  String akLastFailed(String kind);
+
+  /// No description provided for @akSwitched.
+  ///
+  /// In ja, this message translates to:
+  /// **'使うキーを切り替えました。1分以内に反映されます。'**
+  String get akSwitched;
+
+  /// No description provided for @akTesting.
+  ///
+  /// In ja, this message translates to:
+  /// **'接続を確かめています…'**
+  String get akTesting;
+
+  /// No description provided for @akRetireQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{label}」を削除しますか？'**
+  String akRetireQ(String label);
+
+  /// No description provided for @akRetireBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーは保存場所から消され、元には戻せません。'**
+  String get akRetireBody;
+
+  /// No description provided for @akRetireActiveBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'使用中のキーです。削除するとサーバーの設定キーに戻ります。キーは保存場所から消され、元には戻せません。'**
+  String get akRetireActiveBody;
+
+  /// No description provided for @akRetired.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーを削除しました'**
+  String get akRetired;
+
+  /// No description provided for @akAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'キーを登録しました'**
+  String get akAdded;
+
+  /// No description provided for @akLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前'**
+  String get akLabel;
+
+  /// No description provided for @akLabelHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 無料キー、本番用'**
+  String get akLabelHint;
+
+  /// No description provided for @akKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'APIキー'**
+  String get akKey;
+
+  /// No description provided for @akKeyHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'Google AI Studio（ai.studio）の「Get API key」で作ったキーを貼り付けてください。保存後は表示されません。'**
+  String get akKeyHelp;
+
+  /// No description provided for @akNewKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しいAPIキー（変えるときだけ）'**
+  String get akNewKey;
+
+  /// No description provided for @akNewKeyHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄なら今のキー（{hint}）のままです'**
+  String akNewKeyHelp(String hint);
+
+  /// No description provided for @akModel.
+  ///
+  /// In ja, this message translates to:
+  /// **'モデル（任意）'**
+  String get akModel;
+
+  /// No description provided for @akModelHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄ならサーバーの既定のモデル'**
+  String get akModelHint;
+
+  /// No description provided for @akActivateNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録したらすぐにこのキーを使う'**
+  String get akActivateNow;
+
+  /// No description provided for @akNeedLabelKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前とAPIキーを入れてください'**
+  String get akNeedLabelKey;
+
+  /// No description provided for @akFreeTierNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。'**
+  String get akFreeTierNote;
 }
 
 class _AppLocalizationsDelegate

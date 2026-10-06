@@ -32,6 +32,8 @@ import {
   toInt,
   toNum,
   tidyEnglishName,
+  forgetAiKey,
+  resolveAiKey,
 } from "./document_reader.ts";
 
 Deno.test("a JAN written any company's way is one JAN", () => {
@@ -585,4 +587,25 @@ Deno.test("an English name proposal is tidied: no supplier name, no packing coun
   assertEquals(tidyEnglishName("Ueda Hex Bolt M8", "Ueda"), "Hex Bolt M8");
   assertEquals(tidyEnglishName("Hex Bolt M8 x 50 mm 50 pcs"), "Hex Bolt M8 x 50 mm");
   assertEquals(tidyEnglishName(null), "");
+});
+
+Deno.test("with no key chosen on the screen, the server's GEMINI_API_KEY is used (0137)", async () => {
+  const url = Deno.env.get("SUPABASE_URL");
+  Deno.env.delete("SUPABASE_URL");
+  Deno.env.set("GEMINI_API_KEY", "server-key-for-test");
+  forgetAiKey();
+  try {
+    const k = await resolveAiKey();
+    assertEquals(k.key, "server-key-for-test");
+    assertEquals(k.id, null);
+    // Trying one registered key never hands out the server key in its place,
+    // nor changes the key other calls use.
+    const one = await resolveAiKey(7);
+    assertEquals([one.id, one.key], [7, null]);
+    assertEquals((await resolveAiKey()).key, "server-key-for-test");
+  } finally {
+    Deno.env.delete("GEMINI_API_KEY");
+    if (url) Deno.env.set("SUPABASE_URL", url);
+    forgetAiKey();
+  }
 });

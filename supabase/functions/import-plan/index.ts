@@ -689,10 +689,17 @@ Deno.serve(async (req) => {
       const b = await req.json();
       // 接続テスト (0133): is the AI answering, with this key, right now?
       if (str(b.mode) === "ai_ping") {
-        if (!(await clientPermitted(supabase, "ai.review")) && !(await clientPermitted(supabase, "user.manage"))) {
+        // A registered key can be tried before it is put to use (0137).
+        const keyId = Number(b.key_id);
+        const oneKey = Number.isFinite(keyId) && keyId > 0;
+        if (oneKey) {
+          if (!(await clientPermitted(supabase, "ai.key_manage")) && !(await clientPermitted(supabase, "user.manage"))) {
+            return json({ message: notPermittedMessage("ai.key_manage") }, 403);
+          }
+        } else if (!(await clientPermitted(supabase, "ai.review")) && !(await clientPermitted(supabase, "user.manage"))) {
           return json({ message: notPermittedMessage("ai.review") }, 403);
         }
-        return json({ data: await aiPing() });
+        return json({ data: await aiPing(oneKey ? keyId : null) });
       }
       // Training (0106): what a checked sample taught, learned — nothing booked.
       if (str(b.mode) === "suggest_names") {

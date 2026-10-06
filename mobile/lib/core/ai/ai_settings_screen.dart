@@ -7,6 +7,8 @@ import '../api/api_error_text.dart';
 import '../theme/app_spacing.dart';
 import '../ui/state_views.dart';
 import 'ai_confidence.dart';
+import 'ai_keys_section.dart';
+import '../../features/auth/application/auth_controller.dart';
 
 /// AI設定 (spec §50): the two thresholds that decide what a person has to do
 /// with a reading — automatic candidate, check recommended, human review.
@@ -43,6 +45,8 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final user = ref.watch(authControllerProvider).user;
+    final canManageKeys = (user?.hasPermission('ai.key_manage') ?? false) || (user?.hasPermission('user.manage') ?? false);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.featAiSettings)),
       body: ref.watch(aiThresholdsProvider).when(
@@ -101,6 +105,12 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                     icon: const Icon(Icons.save_outlined),
                     label: Text(l10n.actionSave),
                   ),
+                  // Which Gemini API key the AI is called with (0137), for
+                  // whoever may manage the keys.
+                  if (canManageKeys) ...[
+                    const SizedBox(height: AppSpacing.xl),
+                    const AiKeysSection(),
+                  ],
                 ],
               );
             },

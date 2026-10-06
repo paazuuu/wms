@@ -8468,5 +8468,69 @@
         "type": "int"
       }
     }
-  }
+  },
+  "akTitle": "Gemini APIキー",
+  "akIntro": "AIを呼ぶときに使うキーです。登録したキーは暗号化して保存し、画面には末尾4文字だけを表示します。使うキーを選ぶと、1分以内に切り替わります。",
+  "akAdd": "キーを登録",
+  "akEdit": "キーを編集",
+  "akServerKey": "サーバーの設定キー（GEMINI_API_KEY）",
+  "akServerKeyHint": "キーを選ばないときは、Supabase に設定したキーを使います",
+  "akInUse": "使用中",
+  "akTierFree": "無料枠",
+  "akTierPaid": "有料",
+  "akTierUnknown": "不明",
+  "akDefaultModel": "モデル: 既定",
+  "akCalls24h": "24時間で {n} 回（失敗 {failed}）",
+  "@akCalls24h": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "akNotUsedYet": "まだ使われていません",
+  "akLastOk": "最後の呼び出し: 正常",
+  "akLastFailed": "最後の呼び出し: {kind}",
+  "@akLastFailed": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "akSwitched": "使うキーを切り替えました。1分以内に反映されます。",
+  "akTesting": "接続を確かめています…",
+  "akRetireQ": "「{label}」を削除しますか？",
+  "@akRetireQ": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "akRetireBody": "キーは保存場所から消され、元には戻せません。",
+  "akRetireActiveBody": "使用中のキーです。削除するとサーバーの設定キーに戻ります。キーは保存場所から消され、元には戻せません。",
+  "akRetired": "キーを削除しました",
+  "akAdded": "キーを登録しました",
+  "akLabel": "名前",
+  "akLabelHint": "例: 無料キー、本番用",
+  "akKey": "APIキー",
+  "akKeyHelp": "Google AI Studio（ai.studio）の「Get API key」で作ったキーを貼り付けてください。保存後は表示されません。",
+  "akNewKey": "新しいAPIキー（変えるときだけ）",
+  "akNewKeyHelp": "空欄なら今のキー（{hint}）のままです",
+  "@akNewKeyHelp": {
+    "placeholders": {
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "akModel": "モデル（任意）",
+  "akModelHint": "空欄ならサーバーの既定のモデル",
+  "akActivateNow": "登録したらすぐにこのキーを使う",
+  "akNeedLabelKey": "名前とAPIキーを入れてください",
+  "akFreeTierNote": "無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。"
 }

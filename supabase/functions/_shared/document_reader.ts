@@ -244,8 +244,48 @@ async function logAiCall(row: Record<string, unknown>) {
   } catch (_) { /* the record is not worth failing for */ }
 }
 
-export function aiModel(): string {
-  return Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
+export function aiModel(chosen: ChosenKey | null = cachedKey): string {
+  return chosen?.model ?? Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
+}
+
+/** The key the AI is called with (0137): the one chosen on 管理 → AI設定 —
+ * kept encrypted in Supabase Vault — or, when none is chosen, the server's
+ * GEMINI_API_KEY. Read once a minute at most. */
+export type ChosenKey = { id: number | null; key: string | null; model: string | null; label: string | null };
+
+let cachedKey: ChosenKey | null = null;
+let cachedAt = 0;
+
+/** Forget the key in use, so the next call asks again. */
+export function forgetAiKey() {
+  cachedKey = null;
+  cachedAt = 0;
+}
+
+/** The key in use, or — for 接続テスト of one registered key before it is
+ * put to use — that key, read afresh and not kept, so a test never changes
+ * the key other requests are using. */
+export async function resolveAiKey(keyId: number | null = null): Promise<ChosenKey> {
+  if (keyId === null && cachedKey && Date.now() - cachedAt < 60_000) return cachedKey;
+  const url = Deno.env.get("SUPABASE_URL"), service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  let picked: ChosenKey | null = null;
+  if (url && service) {
+    try {
+      const r = await fetch(`${url}/rest/v1/rpc/ai_active_key`, {
+        method: "POST",
+        headers: { apikey: service, Authorization: `Bearer ${service}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_id: keyId }),
+      });
+      if (r.ok) {
+        const j = await r.json() as { key_id?: number; key?: string; model?: string | null; label?: string } | null;
+        if (j?.key) picked = { id: j.key_id ?? null, key: j.key, model: j.model ?? null, label: j.label ?? null };
+      }
+    } catch (_) { /* the server's own key is used */ }
+  }
+  if (keyId !== null) return picked ?? { id: keyId, key: null, model: null, label: null };
+  cachedKey = picked ?? { id: null, key: Deno.env.get("GEMINI_API_KEY") ?? null, model: null, label: null };
+  cachedAt = Date.now();
+  return cachedKey;
 }
 
 /** One call to the AI (Gemini), retried on overload, and recorded with its
@@ -254,12 +294,15 @@ export async function gemini(
   parts: unknown[],
   schema: unknown,
   task = "other",
+  key?: ChosenKey,
 ): Promise<Record<string, unknown>> {
-  const model = aiModel();
+  const chosen = key ?? await resolveAiKey();
+  const model = aiModel(chosen);
   const started = Date.now();
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  const apiKey = chosen.key;
+  const logCall = (row: Record<string, unknown>) => logAiCall({ key_id: chosen.id, ...row });
   if (!apiKey) {
-    await logAiCall({ task, model, ok: false, error_kind: "no_key", error: "GEMINI_API_KEY is not set", attempts: 0 });
+    await logCall({ task, model, ok: false, error_kind: "no_key", error: "no API key is chosen or set", attempts: 0 });
     throw new AiError("GEMINI_API_KEY is not set on the server.", "no_key");
   }
   const endpoint =
@@ -283,7 +326,7 @@ export async function gemini(
         body: JSON.stringify(payload),
       });
     } catch (e) {
-      await logAiCall({ task, model, ok: false, error_kind: "network", error: String(e).slice(0, 500), attempts,
+      await logCall({ task, model, ok: false, error_kind: "network", error: String(e).slice(0, 500), attempts,
         latency_ms: Date.now() - started });
       throw new AiError(`Gemini unreachable: ${e}`, "network");
     }
@@ -294,7 +337,7 @@ export async function gemini(
     const status = res ? res.status : null;
     const body = res ? await res.text() : "";
     const kind = aiErrorKind(status, body);
-    await logAiCall({ task, model, ok: false, http_status: status, error_kind: kind, error: body.slice(0, 500), attempts,
+    await logCall({ task, model, ok: false, http_status: status, error_kind: kind, error: body.slice(0, 500), attempts,
       latency_ms: Date.now() - started });
     throw new AiError(`Gemini error ${status ?? "?"}: ${body}`, kind, status);
   }
@@ -307,7 +350,7 @@ export async function gemini(
   } catch (_) {
     parsed = null;
   }
-  await logAiCall({
+  await logCall({
     task, model, ok: parsed !== null, http_status: res.status, attempts, latency_ms: Date.now() - started,
     input_tokens: usage.promptTokenCount ?? null, output_tokens: usage.candidatesTokenCount ?? null,
     ...(parsed === null ? { error_kind: "parse", error: String(text).slice(0, 500) } : {}),
@@ -316,19 +359,24 @@ export async function gemini(
 }
 
 /** 接続テスト (0133): one tiny call, to tell at once whether the key works. */
-export async function aiPing(): Promise<
-  { ok: boolean; model: string; latency_ms: number; error_kind: AiErrorKind | null; message: string | null }
+export async function aiPing(keyId: number | null = null): Promise<
+  {
+    ok: boolean; model: string; latency_ms: number; error_kind: AiErrorKind | null; message: string | null;
+    key_id: number | null; key_label: string | null;
+  }
 > {
   const started = Date.now();
+  const chosen = await resolveAiKey(keyId);
+  const who = { key_id: chosen.id, key_label: chosen.label };
   try {
     const r = await gemini([{ text: "接続確認です。reply に OK とだけ入れて返してください。" }],
-      { type: "object", properties: { reply: { type: "string" } }, required: ["reply"] }, "ping");
+      { type: "object", properties: { reply: { type: "string" } }, required: ["reply"] }, "ping", chosen);
     const ok = typeof r.reply === "string";
-    return { ok, model: aiModel(), latency_ms: Date.now() - started, error_kind: ok ? null : "parse", message: null };
+    return { ok, model: aiModel(chosen), latency_ms: Date.now() - started, error_kind: ok ? null : "parse", message: null, ...who };
   } catch (e) {
     return {
-      ok: false, model: aiModel(), latency_ms: Date.now() - started,
-      error_kind: e instanceof AiError ? e.kind : "other", message: String(e).slice(0, 300),
+      ok: false, model: aiModel(chosen), latency_ms: Date.now() - started,
+      error_kind: e instanceof AiError ? e.kind : "other", message: String(e).slice(0, 300), ...who,
     };
   }
 }

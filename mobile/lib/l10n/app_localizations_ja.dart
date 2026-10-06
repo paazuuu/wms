@@ -9536,4 +9536,115 @@ class AppLocalizationsJa extends AppLocalizations {
   String rpEnglishSuggested(int n) {
     return '$n 件の英語名を提案しました';
   }
+
+  @override
+  String get akTitle => 'Gemini APIキー';
+
+  @override
+  String get akIntro =>
+      'AIを呼ぶときに使うキーです。登録したキーは暗号化して保存し、画面には末尾4文字だけを表示します。使うキーを選ぶと、1分以内に切り替わります。';
+
+  @override
+  String get akAdd => 'キーを登録';
+
+  @override
+  String get akEdit => 'キーを編集';
+
+  @override
+  String get akServerKey => 'サーバーの設定キー（GEMINI_API_KEY）';
+
+  @override
+  String get akServerKeyHint => 'キーを選ばないときは、Supabase に設定したキーを使います';
+
+  @override
+  String get akInUse => '使用中';
+
+  @override
+  String get akTierFree => '無料枠';
+
+  @override
+  String get akTierPaid => '有料';
+
+  @override
+  String get akTierUnknown => '不明';
+
+  @override
+  String get akDefaultModel => 'モデル: 既定';
+
+  @override
+  String akCalls24h(int n, int failed) {
+    return '24時間で $n 回（失敗 $failed）';
+  }
+
+  @override
+  String get akNotUsedYet => 'まだ使われていません';
+
+  @override
+  String get akLastOk => '最後の呼び出し: 正常';
+
+  @override
+  String akLastFailed(String kind) {
+    return '最後の呼び出し: $kind';
+  }
+
+  @override
+  String get akSwitched => '使うキーを切り替えました。1分以内に反映されます。';
+
+  @override
+  String get akTesting => '接続を確かめています…';
+
+  @override
+  String akRetireQ(String label) {
+    return '「$label」を削除しますか？';
+  }
+
+  @override
+  String get akRetireBody => 'キーは保存場所から消され、元には戻せません。';
+
+  @override
+  String get akRetireActiveBody =>
+      '使用中のキーです。削除するとサーバーの設定キーに戻ります。キーは保存場所から消され、元には戻せません。';
+
+  @override
+  String get akRetired => 'キーを削除しました';
+
+  @override
+  String get akAdded => 'キーを登録しました';
+
+  @override
+  String get akLabel => '名前';
+
+  @override
+  String get akLabelHint => '例: 無料キー、本番用';
+
+  @override
+  String get akKey => 'APIキー';
+
+  @override
+  String get akKeyHelp =>
+      'Google AI Studio（ai.studio）の「Get API key」で作ったキーを貼り付けてください。保存後は表示されません。';
+
+  @override
+  String get akNewKey => '新しいAPIキー（変えるときだけ）';
+
+  @override
+  String akNewKeyHelp(String hint) {
+    return '空欄なら今のキー（$hint）のままです';
+  }
+
+  @override
+  String get akModel => 'モデル（任意）';
+
+  @override
+  String get akModelHint => '空欄ならサーバーの既定のモデル';
+
+  @override
+  String get akActivateNow => '登録したらすぐにこのキーを使う';
+
+  @override
+  String get akNeedLabelKey => '名前とAPIキーを入れてください';
+
+  @override
+  String get akFreeTierNote =>
+      '無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。';
 }
