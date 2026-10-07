@@ -251,41 +251,72 @@ export function aiModel(chosen: ChosenKey | null = cachedKey): string {
 /** The key the AI is called with (0137): the one chosen on 管理 → AI設定 —
  * kept encrypted in Supabase Vault — or, when none is chosen, the server's
  * GEMINI_API_KEY. Read once a minute at most. */
-export type ChosenKey = { id: number | null; key: string | null; model: string | null; label: string | null };
+export type ChosenKey = {
+  id: number | null; key: string | null; model: string | null; label: string | null;
+  /** The lookup had no key of its own and took the reading key (0141). */
+  fallback?: boolean;
+};
+
+/** What a key is used for (0141): reading documents, or looking a
+ * product's size and weight up on the web. */
+export type AiPurpose = "general" | "spec_lookup";
 
 let cachedKey: ChosenKey | null = null;
 let cachedAt = 0;
+let cachedSpecKey: ChosenKey | null = null;
+let cachedSpecAt = 0;
 
-/** Forget the key in use, so the next call asks again. */
+/** Forget the keys in use, so the next call asks again. */
 export function forgetAiKey() {
   cachedKey = null;
   cachedAt = 0;
+  cachedSpecKey = null;
+  cachedSpecAt = 0;
 }
 
-/** The key in use, or — for 接続テスト of one registered key before it is
- * put to use — that key, read afresh and not kept, so a test never changes
- * the key other requests are using. */
-export async function resolveAiKey(keyId: number | null = null): Promise<ChosenKey> {
-  if (keyId === null && cachedKey && Date.now() - cachedAt < 60_000) return cachedKey;
+/** The key in use for [purpose], or — for 接続テスト of one registered key
+ * before it is put to use — that key, read afresh and not kept, so a test
+ * never changes the key other requests are using. The lookup with no key of
+ * its own uses the reading key, then GEMINI_SPEC_API_KEY, then
+ * GEMINI_API_KEY. */
+export async function resolveAiKey(keyId: number | null = null, purpose: AiPurpose = "general"): Promise<ChosenKey> {
+  const spec = purpose === "spec_lookup";
+  if (keyId === null) {
+    if (!spec && cachedKey && Date.now() - cachedAt < 60_000) return cachedKey;
+    if (spec && cachedSpecKey && Date.now() - cachedSpecAt < 60_000) return cachedSpecKey;
+  }
   const url = Deno.env.get("SUPABASE_URL"), service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   let picked: ChosenKey | null = null;
   if (url && service) {
     try {
-      const r = await fetch(`${url}/rest/v1/rpc/ai_active_key`, {
+      const r = await fetch(`${url}/rest/v1/rpc/${spec ? "ai_active_key_for" : "ai_active_key"}`, {
         method: "POST",
         headers: { apikey: service, Authorization: `Bearer ${service}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ p_id: keyId }),
+        body: JSON.stringify(spec ? { p_purpose: purpose, p_id: keyId } : { p_id: keyId }),
       });
       if (r.ok) {
-        const j = await r.json() as { key_id?: number; key?: string; model?: string | null; label?: string } | null;
-        if (j?.key) picked = { id: j.key_id ?? null, key: j.key, model: j.model ?? null, label: j.label ?? null };
+        const j = await r.json() as
+          | { key_id?: number; key?: string; model?: string | null; label?: string; fallback?: boolean }
+          | null;
+        if (j?.key) {
+          picked = { id: j.key_id ?? null, key: j.key, model: j.model ?? null, label: j.label ?? null, fallback: j.fallback };
+        }
       }
     } catch (_) { /* the server's own key is used */ }
   }
   if (keyId !== null) return picked ?? { id: keyId, key: null, model: null, label: null };
-  cachedKey = picked ?? { id: null, key: Deno.env.get("GEMINI_API_KEY") ?? null, model: null, label: null };
-  cachedAt = Date.now();
-  return cachedKey;
+  const env = spec
+    ? Deno.env.get("GEMINI_SPEC_API_KEY") ?? Deno.env.get("GEMINI_API_KEY") ?? null
+    : Deno.env.get("GEMINI_API_KEY") ?? null;
+  const chosen = picked ?? { id: null, key: env, model: null, label: null, fallback: spec };
+  if (spec) {
+    cachedSpecKey = chosen;
+    cachedSpecAt = Date.now();
+  } else {
+    cachedKey = chosen;
+    cachedAt = Date.now();
+  }
+  return chosen;
 }
 
 /** One call to the AI (Gemini), retried on overload, and recorded with its
@@ -379,6 +410,183 @@ export async function aiPing(keyId: number | null = null): Promise<
       error_kind: e instanceof AiError ? e.kind : "other", message: String(e).slice(0, 300), ...who,
     };
   }
+}
+
+/** One web-grounded call (0141): Gemini with Google Search, answering in
+ * text that holds a JSON object. Returns the text and the pages it drew on;
+ * retried on overload and recorded like [gemini]. */
+export async function geminiSearch(
+  prompt: string,
+  task: string,
+  key: ChosenKey,
+): Promise<{ text: string; sources: { title: string | null; url: string }[] }> {
+  const model = aiModel(key);
+  const started = Date.now();
+  const logCall = (row: Record<string, unknown>) => logAiCall({ key_id: key.id, ...row });
+  if (!key.key) {
+    await logCall({ task, model, ok: false, error_kind: "no_key", error: "no API key is chosen or set", attempts: 0 });
+    throw new AiError("GEMINI_API_KEY is not set on the server.", "no_key");
+  }
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    tools: [{ google_search: {} }],
+    generationConfig: { temperature: 0 },
+  };
+  let res: Response | null = null;
+  let attempts = 0;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    attempts++;
+    try {
+      res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key.key },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      await logCall({ task, model, ok: false, error_kind: "network", error: String(e).slice(0, 500), attempts,
+        latency_ms: Date.now() - started });
+      throw new AiError(`Gemini unreachable: ${e}`, "network");
+    }
+    if (res.status !== 503 && res.status !== 429) break;
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 900 * (attempt + 1)));
+  }
+  if (!res || !res.ok) {
+    const status = res ? res.status : null;
+    const body = res ? await res.text() : "";
+    const kind = aiErrorKind(status, body);
+    await logCall({ task, model, ok: false, http_status: status, error_kind: kind, error: body.slice(0, 500), attempts,
+      latency_ms: Date.now() - started });
+    throw new AiError(`Gemini error ${status ?? "?"}: ${body}`, kind, status);
+  }
+  const body = await res.json();
+  const usage = body?.usageMetadata ?? {};
+  const cand = body?.candidates?.[0];
+  const text = ((cand?.content?.parts ?? []) as { text?: string }[]).map((p) => p.text ?? "").join("");
+  const chunks = (cand?.groundingMetadata?.groundingChunks ?? []) as { web?: { uri?: string; title?: string } }[];
+  const sources = chunks
+    .map((c) => ({ title: c.web?.title ?? null, url: c.web?.uri ?? "" }))
+    .filter((c) => c.url.startsWith("http"))
+    .slice(0, 6);
+  await logCall({
+    task, model, ok: text.trim() !== "", http_status: res.status, attempts, latency_ms: Date.now() - started,
+    input_tokens: usage.promptTokenCount ?? null, output_tokens: usage.candidatesTokenCount ?? null,
+    ...(text.trim() === "" ? { error_kind: "parse", error: "empty answer" } : {}),
+  });
+  return { text, sources };
+}
+
+/** A product's size and weight as found on the web (0141). Null where the
+ * AI found nothing it was sure of. */
+export type SpecFound = {
+  weight_g: number | null;
+  weight_basis: "product" | "package" | null;
+  width_mm: number | null;
+  depth_mm: number | null;
+  height_mm: number | null;
+  size_basis: "product" | "package" | null;
+  source_url: string | null;
+  confidence: number | null;
+  note: string | null;
+};
+
+/** The JSON object in an answer, made safe: numbers positive and in range
+ * (grams under 10 t, millimetres under 100 m), anything else null. */
+export function parseSpecLookup(text: string): SpecFound | null {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  let j: Record<string, unknown>;
+  try {
+    j = JSON.parse(text.slice(start, end + 1));
+  } catch (_) {
+    return null;
+  }
+  const num = (v: unknown, max: number): number | null => {
+    const n = typeof v === "number" ? v : typeof v === "string" ? Number(v.replace(/[,\s]/g, "")) : NaN;
+    return Number.isFinite(n) && n > 0 && n < max ? Math.round(n * 10) / 10 : null;
+  };
+  const basis = (v: unknown) => (v === "product" || v === "package" ? v : null);
+  const url = typeof j.source_url === "string" && /^https?:\/\//.test(j.source_url) ? j.source_url : null;
+  const conf = typeof j.confidence === "number" && j.confidence >= 0 && j.confidence <= 1 ? j.confidence : null;
+  const note = typeof j.note === "string" && j.note.trim() ? j.note.trim().slice(0, 300) : null;
+  return {
+    weight_g: num(j.weight_g, 10_000_000),
+    weight_basis: basis(j.weight_basis),
+    width_mm: num(j.width_mm, 100_000),
+    depth_mm: num(j.depth_mm, 100_000),
+    height_mm: num(j.height_mm, 100_000),
+    size_basis: basis(j.size_basis),
+    source_url: url,
+    confidence: conf,
+    note,
+  };
+}
+
+export type SpecRequest = {
+  index: number; name: string; maker?: string | null; code?: string | null; jan?: string | null;
+  name_en?: string | null;
+};
+
+export function specLookupPrompt(item: SpecRequest): string {
+  const lines = [
+    "次の商品の「重量」と「サイズ（幅×奥行×高さ）」を、Google検索で調べてください。",
+    "メーカー公式サイト・カタログ・大手販売サイトなど、信頼できる情報だけを使ってください。",
+    "",
+    `商品名: ${item.name}`,
+    item.maker ? `メーカー: ${item.maker}` : null,
+    item.code ? `型番・品番: ${item.code}` : null,
+    item.jan ? `JANコード: ${item.jan}` : null,
+    item.name_en ? `英語名: ${item.name_en}` : null,
+    "",
+    "ルール:",
+    "- 見つからない値は null にする。推測しない。",
+    "- 重量はグラム(g)、サイズはミリメートル(mm)の数値に換算する。",
+    "- できれば商品本体の値を使う。パッケージ込みの値しか無いときは basis を package にする。",
+    "- 色違い・容量違い・セット違いなど、別の商品の値を使わない。",
+    "",
+    "次のJSONだけを返す（説明文は不要）:",
+    '{"weight_g": 数値またはnull, "weight_basis": "product"か"package"かnull, "width_mm": 数値またはnull, ' +
+    '"depth_mm": 数値またはnull, "height_mm": 数値またはnull, "size_basis": "product"か"package"かnull, ' +
+    '"source_url": "根拠のページのURL"またはnull, "confidence": 0から1, "note": "根拠を一言で（日本語）"}',
+  ];
+  return lines.filter((l) => l !== null).join("\n");
+}
+
+/** サイズ・重量を調べる (0141): each product looked up on the web with the
+ * key chosen for it, at most ten at a time. Nothing is saved here. */
+export async function lookupSpecs(items: SpecRequest[]): Promise<{
+  key: { id: number | null; label: string | null; fallback: boolean };
+  results: (SpecFound & { index: number; sources: { title: string | null; url: string }[]; error_kind: string | null; message: string | null })[];
+}> {
+  const key = await resolveAiKey(null, "spec_lookup");
+  const results = [];
+  for (const item of items.slice(0, 10)) {
+    try {
+      const { text, sources } = await geminiSearch(specLookupPrompt(item), "spec_lookup", key);
+      const found = parseSpecLookup(text);
+      results.push({
+        index: item.index,
+        ...(found ?? {
+          weight_g: null, weight_basis: null, width_mm: null, depth_mm: null, height_mm: null, size_basis: null,
+          source_url: null, confidence: null, note: null,
+        }),
+        sources,
+        error_kind: found ? null : "parse",
+        message: found ? null : text.slice(0, 200),
+      });
+    } catch (e) {
+      const kind = e instanceof AiError ? e.kind : "other";
+      results.push({
+        index: item.index, weight_g: null, weight_basis: null, width_mm: null, depth_mm: null, height_mm: null,
+        size_basis: null, source_url: null, confidence: null, note: null, sources: [],
+        error_kind: kind, message: String(e).slice(0, 300),
+      });
+      // Out of credits or quota: the rest would fail the same way.
+      if (kind === "quota" || kind === "auth" || kind === "no_key") break;
+    }
+  }
+  return { key: { id: key.id, label: key.label, fallback: key.fallback === true }, results };
 }
 
 /** How a reading went (0133), kept on its file's record: how many lines,

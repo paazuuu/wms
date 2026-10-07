@@ -33,6 +33,8 @@ import {
   toNum,
   tidyEnglishName,
   forgetAiKey,
+  parseSpecLookup,
+  specLookupPrompt,
   resolveAiKey,
 } from "./document_reader.ts";
 
@@ -605,6 +607,52 @@ Deno.test("with no key chosen on the screen, the server's GEMINI_API_KEY is used
     assertEquals((await resolveAiKey()).key, "server-key-for-test");
   } finally {
     Deno.env.delete("GEMINI_API_KEY");
+    if (url) Deno.env.set("SUPABASE_URL", url);
+    forgetAiKey();
+  }
+});
+
+Deno.test("a size and weight answer is read safely, whatever is around it (0141)", () => {
+  const found = parseSpecLookup(
+    'はい。```json\n{"weight_g": "1,250", "weight_basis": "product", "width_mm": 120.04, "depth_mm": 0, ' +
+      '"height_mm": 99999999, "size_basis": "box", "source_url": "https://example.com/p", "confidence": 0.8, ' +
+      '"note": " 公式サイト "}\n```',
+  );
+  assertEquals(found?.weight_g, 1250);
+  assertEquals(found?.weight_basis, "product");
+  assertEquals(found?.width_mm, 120);
+  assertEquals(found?.depth_mm, null); // zero is not a size
+  assertEquals(found?.height_mm, null); // nor is 100 km
+  assertEquals(found?.size_basis, null);
+  assertEquals(found?.source_url, "https://example.com/p");
+  assertEquals(found?.note, "公式サイト");
+  assertEquals(parseSpecLookup("見つかりませんでした"), null);
+  assertEquals(parseSpecLookup('{"source_url": "javascript:alert(1)", "confidence": 3}')?.source_url, null);
+});
+
+Deno.test("the lookup asks for one product by what we know of it, and not to guess (0141)", () => {
+  const p = specLookupPrompt({ index: 0, name: "ボールペン", maker: "パイロット", jan: "4902505450679" });
+  assertEquals(p.includes("商品名: ボールペン"), true);
+  assertEquals(p.includes("JANコード: 4902505450679"), true);
+  assertEquals(p.includes("型番"), false);
+  assertEquals(p.includes("推測しない"), true);
+});
+
+Deno.test("with no key chosen for the lookup, the lookup's own server key is used, then the reading one (0141)", async () => {
+  const url = Deno.env.get("SUPABASE_URL");
+  Deno.env.delete("SUPABASE_URL");
+  Deno.env.set("GEMINI_API_KEY", "reading-key");
+  forgetAiKey();
+  try {
+    assertEquals((await resolveAiKey(null, "spec_lookup")).key, "reading-key");
+    Deno.env.set("GEMINI_SPEC_API_KEY", "lookup-key");
+    forgetAiKey();
+    const k = await resolveAiKey(null, "spec_lookup");
+    assertEquals([k.key, k.fallback], ["lookup-key", true]);
+    assertEquals((await resolveAiKey()).key, "reading-key");
+  } finally {
+    Deno.env.delete("GEMINI_API_KEY");
+    Deno.env.delete("GEMINI_SPEC_API_KEY");
     if (url) Deno.env.set("SUPABASE_URL", url);
     forgetAiKey();
   }

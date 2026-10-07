@@ -9088,5 +9088,85 @@
       }
     }
   },
-  "prNothing": "リストに商品がありません"
+  "prNothing": "リストに商品がありません",
+  "akReadingTitle": "読み取り用（ファイルの読み取り・商品名など）",
+  "akSpecTitle": "サイズ・重量の調べもの用",
+  "akSpecIntro": "商品マスタの「AIでサイズ・重量を調べる」で使うキーです。Google検索を使うため、読み取りとは別のキーにすると回数や費用を分けられます。",
+  "akSpecSameAsReading": "読み取り用と同じキーを使う",
+  "akSpecSameAsReadingHint": "調べもの用のキーを選ばないときは、上で使用中のキーで調べます",
+  "akLookups24h": "24時間の調べもの {n} 回",
+  "@akLookups24h": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "akForLookup": "調べもの用",
+  "akPurpose": "主な用途",
+  "akPurposeReading": "読み取り用",
+  "akPurposeLookup": "サイズ・重量の調べもの用",
+  "akActivateNowLookup": "登録したらすぐ調べもの用に使う",
+  "slButton": "AIでサイズ・重量を調べる",
+  "slTitle": "AIでサイズ・重量を調べる",
+  "slSearching": "Webで調べています…（数十秒かかることがあります）",
+  "slRetry": "もう一度調べる",
+  "slNothingFound": "確かな値は見つかりませんでした。手入力してください。",
+  "slWeight": "重量 {value}",
+  "@slWeight": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "slWeightNone": "重量は見つかりませんでした",
+  "slSize": "サイズ 幅{w}×奥行{d}×高さ{h} mm",
+  "@slSize": {
+    "placeholders": {
+      "w": {
+        "type": "String"
+      },
+      "d": {
+        "type": "String"
+      },
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "slSizeNone": "サイズは見つかりませんでした",
+  "slBasisProduct": "商品本体の値",
+  "slBasisPackage": "パッケージ込みの値",
+  "slBasisUnknown": "本体かパッケージ込みか不明",
+  "slConfidence": "確からしさ {n}%",
+  "@slConfidence": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "slCheckPlease": "根拠のページを確認してから反映してください",
+  "slSources": "根拠のページ",
+  "slNoSources": "根拠のページは返ってきませんでした",
+  "slKey": "使ったキー: {label}",
+  "@slKey": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "slKeyFallback": "調べもの用のキーが無いため、読み取り用のキー（{label}）で調べました",
+  "@slKeyFallback": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "slSave": "チェックした値を反映",
+  "slSaved": "サイズ・重量を反映しました（出どころ: Web）",
+  "slSavedNote": "AIで調べた値（要確認）"
 }

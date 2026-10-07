@@ -6614,6 +6614,46 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Nothing is ordered from here. Everything is SQL plus the app; no edge
   function needs deploying.
 
+## 0141 — a Gemini key per use; サイズ・重量を調べる
+
+- **Keys by use.** On 管理 → AI設定 → Gemini APIキー a key is chosen for
+  each use:
+  - 読み取り用 (`is_active`, as in 0137): files, names, the connection test.
+  - サイズ・重量の調べもの用 (`spec_active`): the lookup below. With none
+    chosen, the lookup uses the reading key.
+  - Any registered key can be chosen for either use, or for both.
+    `purpose` records what a key was registered for, so that "use it now"
+    at registration applies it to that use.
+  - `ai_key_add_for(purpose, …)` registers; `ai_key_use(purpose, id)`
+    chooses. `ai_active_key_for(purpose, id)` gives the edge functions the
+    key, with `fallback` set when the lookup took the reading key.
+  - Retiring a key takes it off both uses.
+  - With no key chosen anywhere, the server's secrets are used:
+    `GEMINI_SPEC_API_KEY`, then `GEMINI_API_KEY`.
+  - The tooling here would not run `drop index`, so 0137's one-active index
+    stays. The lookup therefore has a column of its own rather than a
+    purpose-scoped `is_active`.
+- **サイズ・重量を調べる** (import-plan `mode: lookup_spec`, `product.manage`):
+  - Gemini looks each product up with Google Search, by name, maker, item
+    code, JAN and English name. It is told not to guess and to use only
+    pages it can trust. It answers in grams and millimetres, says whether
+    the values are for the product itself or with its packaging, and gives
+    the source page and a confidence.
+  - `parseSpecLookup` keeps only positive, sane numbers and http(s) links.
+  - The pages the search used are returned as well. Each call is logged in
+    `ai_calls` with `task = spec_lookup` against the key used.
+  - On a product's page (サイズ・重量) the button shows what was found. A
+    person ticks the values to keep; they are saved through
+    `set_product_weight` / `set_product_size` with source `web`, the page,
+    and the note "AIで調べた値（要確認）".
+  - Up to 10 products per request; the app sends one at a time.
+- Google Search through Gemini has its own limits on the free tier and is
+  billed on a paid key, which is why it can have a key of its own.
+- **Deploy:** `import-plan` must be deployed for the lookup and the per-use
+  keys to work (`supabase functions deploy import-plan --project-ref
+  vjunicsfobglmncjucbb`). Until then the DB and the screens are ready, but
+  the button answers with an error.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

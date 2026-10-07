@@ -26,13 +26,15 @@ class _FakeAiKeyRepository implements AiKeyRepository {
   final List<Map<String, Object?>> added = [];
   AiPingResult ping = const AiPingResult(ok: true, model: 'gemini-x', latencyMs: 500);
 
-  AiApiKey _with(AiApiKey k, {required bool active}) => AiApiKey(
+  AiApiKey _with(AiApiKey k, {bool? active, bool? spec}) => AiApiKey(
         id: k.id,
         label: k.label,
         keyHint: k.keyHint,
         tier: k.tier,
         model: k.model,
-        isActive: active,
+        isActive: active ?? k.isActive,
+        specActive: spec ?? k.specActive,
+        purpose: k.purpose,
         lastOk: k.lastOk,
         lastErrorKind: k.lastErrorKind,
         calls24h: k.calls24h,
@@ -41,7 +43,8 @@ class _FakeAiKeyRepository implements AiKeyRepository {
 
   @override
   Future<ApiResult<AiKeys>> list() async =>
-      ApiSuccess(AiKeys(keys: keys, usingServerKey: !keys.any((k) => k.isActive)));
+      ApiSuccess(AiKeys(
+          keys: keys, usingServerKey: !keys.any((k) => k.isActive), specUsesGeneral: !keys.any((k) => k.specActive)));
 
   @override
   Future<ApiResult<int>> add({
@@ -51,8 +54,9 @@ class _FakeAiKeyRepository implements AiKeyRepository {
     String? model,
     bool activate = false,
     String? note,
+    AiKeyPurpose purpose = AiKeyPurpose.general,
   }) async {
-    added.add({'label': label, 'key': key, 'tier': tier, 'model': model, 'activate': activate});
+    added.add({'label': label, 'key': key, 'tier': tier, 'model': model, 'activate': activate, 'purpose': purpose});
     final id = 100 + added.length;
     keys = [
       for (final k in keys) activate ? _with(k, active: false) : k,
@@ -65,6 +69,16 @@ class _FakeAiKeyRepository implements AiKeyRepository {
   Future<ApiResult<bool>> activate(int? id) async {
     activated.add(id);
     keys = [for (final k in keys) _with(k, active: k.id == id)];
+    return const ApiSuccess(true);
+  }
+
+  final List<int?> specUsed = [];
+
+  @override
+  Future<ApiResult<bool>> use(AiKeyPurpose purpose, int? id) async {
+    if (purpose == AiKeyPurpose.general) return activate(id);
+    specUsed.add(id);
+    keys = [for (final k in keys) _with(k, spec: k.id == id)];
     return const ApiSuccess(true);
   }
 
@@ -142,7 +156,7 @@ void main() {
   testWidgets('the keys show their hint, tier, use and last result; one is chosen', (tester) async {
     final repo = await _pump(tester);
     expect(find.byKey(const ValueKey('ai-keys')), findsOneWidget);
-    expect(find.text('…a1b2'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('ak-key-1')), matching: find.text('…a1b2')), findsOneWidget);
     expect(find.text('有料'), findsOneWidget);
     expect(find.text('無料枠'), findsOneWidget);
     expect(find.text('使用中'), findsOneWidget);
@@ -204,7 +218,7 @@ void main() {
     expect(repo.added.single['tier'], AiKeyTier.free);
     expect(repo.added.single['activate'], isTrue);
     expect(find.text('キーを登録しました'), findsOneWidget);
-    expect(find.text('…wxyz'), findsOneWidget);
+    expect(find.text('…wxyz'), findsWidgets);
     // The key itself is never shown back.
     expect(find.textContaining('AIzaSyTESTKEY'), findsNothing);
   });
@@ -212,5 +226,38 @@ void main() {
   testWidgets('without the permission the keys are not on the screen', (tester) async {
     await _pump(tester, permissions: const []);
     expect(find.byKey(const ValueKey('ai-keys')), findsNothing);
+  });
+
+  testWidgets('a key is chosen for the size and weight lookup apart from reading, or the reading one is used', (tester) async {
+    final repo = await _pump(tester);
+    expect(find.text('サイズ・重量の調べもの用'), findsWidgets);
+    // Nothing chosen for the lookup: it uses the reading key.
+    final radio = tester.widget<RadioGroup<int>>(find.byType(RadioGroup<int>).last);
+    expect(radio.groupValue, 0);
+
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('ak-spec-2')), matching: find.byType(Radio<int>)));
+    await tester.pumpAndSettle();
+    expect(repo.specUsed, [2]);
+    expect(repo.activated, isEmpty);
+    expect(repo.keys.firstWhere((k) => k.id == 2).specActive, isTrue);
+    expect(repo.keys.firstWhere((k) => k.id == 1).isActive, isTrue);
+
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('ak-spec-general')), matching: find.byType(Radio<int>)));
+    await tester.pumpAndSettle();
+    expect(repo.specUsed, [2, null]);
+  });
+
+  testWidgets('a new key can be registered for the lookup', (tester) async {
+    final repo = await _pump(tester);
+    await tester.tap(find.byKey(const ValueKey('ak-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('ak-label')), '調べもの');
+    await tester.enterText(find.byKey(const ValueKey('ak-key')), 'AIzaSyTESTKEY0000000000000look');
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('ak-purpose')), matching: find.text('サイズ・重量の調べもの用')));
+    await tester.pumpAndSettle();
+    expect(find.text('登録したらすぐ調べもの用に使う'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ak-save')));
+    await tester.pumpAndSettle();
+    expect(repo.added.single['purpose'], AiKeyPurpose.specLookup);
   });
 }

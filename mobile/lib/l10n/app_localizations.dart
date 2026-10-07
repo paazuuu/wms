@@ -18733,6 +18733,198 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'リストに商品がありません'**
   String get prNothing;
+
+  /// No description provided for @akReadingTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り用（ファイルの読み取り・商品名など）'**
+  String get akReadingTitle;
+
+  /// No description provided for @akSpecTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量の調べもの用'**
+  String get akSpecTitle;
+
+  /// No description provided for @akSpecIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタの「AIでサイズ・重量を調べる」で使うキーです。Google検索を使うため、読み取りとは別のキーにすると回数や費用を分けられます。'**
+  String get akSpecIntro;
+
+  /// No description provided for @akSpecSameAsReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り用と同じキーを使う'**
+  String get akSpecSameAsReading;
+
+  /// No description provided for @akSpecSameAsReadingHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べもの用のキーを選ばないときは、上で使用中のキーで調べます'**
+  String get akSpecSameAsReadingHint;
+
+  /// No description provided for @akLookups24h.
+  ///
+  /// In ja, this message translates to:
+  /// **'24時間の調べもの {n} 回'**
+  String akLookups24h(int n);
+
+  /// No description provided for @akForLookup.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べもの用'**
+  String get akForLookup;
+
+  /// No description provided for @akPurpose.
+  ///
+  /// In ja, this message translates to:
+  /// **'主な用途'**
+  String get akPurpose;
+
+  /// No description provided for @akPurposeReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り用'**
+  String get akPurposeReading;
+
+  /// No description provided for @akPurposeLookup.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量の調べもの用'**
+  String get akPurposeLookup;
+
+  /// No description provided for @akActivateNowLookup.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録したらすぐ調べもの用に使う'**
+  String get akActivateNowLookup;
+
+  /// No description provided for @slButton.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIでサイズ・重量を調べる'**
+  String get slButton;
+
+  /// No description provided for @slTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIでサイズ・重量を調べる'**
+  String get slTitle;
+
+  /// No description provided for @slSearching.
+  ///
+  /// In ja, this message translates to:
+  /// **'Webで調べています…（数十秒かかることがあります）'**
+  String get slSearching;
+
+  /// No description provided for @slRetry.
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一度調べる'**
+  String get slRetry;
+
+  /// No description provided for @slNothingFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'確かな値は見つかりませんでした。手入力してください。'**
+  String get slNothingFound;
+
+  /// No description provided for @slWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量 {value}'**
+  String slWeight(String value);
+
+  /// No description provided for @slWeightNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量は見つかりませんでした'**
+  String get slWeightNone;
+
+  /// No description provided for @slSize.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ 幅{w}×奥行{d}×高さ{h} mm'**
+  String slSize(String w, String d, String h);
+
+  /// No description provided for @slSizeNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズは見つかりませんでした'**
+  String get slSizeNone;
+
+  /// No description provided for @slBasisProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品本体の値'**
+  String get slBasisProduct;
+
+  /// No description provided for @slBasisPackage.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッケージ込みの値'**
+  String get slBasisPackage;
+
+  /// No description provided for @slBasisUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'本体かパッケージ込みか不明'**
+  String get slBasisUnknown;
+
+  /// No description provided for @slConfidence.
+  ///
+  /// In ja, this message translates to:
+  /// **'確からしさ {n}%'**
+  String slConfidence(int n);
+
+  /// No description provided for @slCheckPlease.
+  ///
+  /// In ja, this message translates to:
+  /// **'根拠のページを確認してから反映してください'**
+  String get slCheckPlease;
+
+  /// No description provided for @slSources.
+  ///
+  /// In ja, this message translates to:
+  /// **'根拠のページ'**
+  String get slSources;
+
+  /// No description provided for @slNoSources.
+  ///
+  /// In ja, this message translates to:
+  /// **'根拠のページは返ってきませんでした'**
+  String get slNoSources;
+
+  /// No description provided for @slKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'使ったキー: {label}'**
+  String slKey(String label);
+
+  /// No description provided for @slKeyFallback.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べもの用のキーが無いため、読み取り用のキー（{label}）で調べました'**
+  String slKeyFallback(String label);
+
+  /// No description provided for @slSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'チェックした値を反映'**
+  String get slSave;
+
+  /// No description provided for @slSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量を反映しました（出どころ: Web）'**
+  String get slSaved;
+
+  /// No description provided for @slSavedNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで調べた値（要確認）'**
+  String get slSavedNote;
 }
 
 class _AppLocalizationsDelegate

@@ -10586,4 +10586,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prNothing => 'The list is empty';
+
+  @override
+  String get akReadingTitle => 'For reading (files, names…)';
+
+  @override
+  String get akSpecTitle => 'For looking up size and weight';
+
+  @override
+  String get akSpecIntro =>
+      'The key 商品マスタ\'s \"look up size and weight\" uses. It searches Google, so a separate key keeps its quota and cost apart from reading.';
+
+  @override
+  String get akSpecSameAsReading => 'Use the reading key';
+
+  @override
+  String get akSpecSameAsReadingHint =>
+      'With none chosen here, the key in use above looks things up';
+
+  @override
+  String akLookups24h(int n) {
+    return '$n lookups in 24 hours';
+  }
+
+  @override
+  String get akForLookup => 'for lookups';
+
+  @override
+  String get akPurpose => 'Used for';
+
+  @override
+  String get akPurposeReading => 'Reading';
+
+  @override
+  String get akPurposeLookup => 'Size and weight lookup';
+
+  @override
+  String get akActivateNowLookup => 'Use it for lookups at once';
+
+  @override
+  String get slButton => 'Look up size and weight';
+
+  @override
+  String get slTitle => 'Size and weight from the web';
+
+  @override
+  String get slSearching => 'Searching the web… (it can take tens of seconds)';
+
+  @override
+  String get slRetry => 'Try again';
+
+  @override
+  String get slNothingFound => 'Nothing reliable was found. Enter it by hand.';
+
+  @override
+  String slWeight(String value) {
+    return 'Weight $value';
+  }
+
+  @override
+  String get slWeightNone => 'No weight found';
+
+  @override
+  String slSize(String w, String d, String h) {
+    return 'Size $w × $d × $h mm';
+  }
+
+  @override
+  String get slSizeNone => 'No size found';
+
+  @override
+  String get slBasisProduct => 'The product itself';
+
+  @override
+  String get slBasisPackage => 'With its packaging';
+
+  @override
+  String get slBasisUnknown => 'Product or package: not said';
+
+  @override
+  String slConfidence(int n) {
+    return 'Confidence $n%';
+  }
+
+  @override
+  String get slCheckPlease => 'Check the page before keeping it';
+
+  @override
+  String get slSources => 'Sources';
+
+  @override
+  String get slNoSources => 'No pages came back';
+
+  @override
+  String slKey(String label) {
+    return 'Key used: $label';
+  }
+
+  @override
+  String slKeyFallback(String label) {
+    return 'No lookup key is chosen, so the reading key ($label) was used';
+  }
+
+  @override
+  String get slSave => 'Keep the ticked values';
+
+  @override
+  String get slSaved => 'Size and weight kept (source: web)';
+
+  @override
+  String get slSavedNote => 'Looked up by AI (to check)';
 }

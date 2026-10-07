@@ -18,6 +18,7 @@ import 'product_facts.dart';
 import 'product_lifecycle_ui.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
+import 'spec_lookup_sheet.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_gallery_screen.dart';
 import '../../product_library/presentation/product_naming_dialog.dart';
@@ -726,6 +727,13 @@ class _SizeWeightCard extends ConsumerWidget {
                     );
                     if (saved == true) ref.invalidate(productListProvider);
                   },
+                ),
+                // サイズ・重量を調べる (0141): the AI looks it up on the web.
+                TextButton.icon(
+                  key: const ValueKey('spec-lookup'),
+                  icon: const Icon(Icons.travel_explore_outlined, size: 18),
+                  label: Text(l10n.slButton),
+                  onPressed: () => showSpecLookupSheet(context, product),
                 ),
               ],
             )

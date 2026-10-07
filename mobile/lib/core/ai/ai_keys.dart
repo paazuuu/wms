@@ -20,6 +20,19 @@ enum AiKeyTier {
       AiKeyTier.values.firstWhere((t) => t.wire == v, orElse: () => AiKeyTier.unknown);
 }
 
+/// What a key is used for (0141): reading documents, or looking a
+/// product's size and weight up on the web.
+enum AiKeyPurpose {
+  general('general'),
+  specLookup('spec_lookup');
+
+  const AiKeyPurpose(this.wire);
+  final String wire;
+
+  static AiKeyPurpose fromWire(String? v) =>
+      AiKeyPurpose.values.firstWhere((p) => p.wire == v, orElse: () => AiKeyPurpose.general);
+}
+
 /// One Gemini API key registered on the screen (0137). The key itself stays
 /// in Supabase Vault; only its last four characters come back.
 class AiApiKey extends Equatable {
@@ -36,6 +49,9 @@ class AiApiKey extends Equatable {
     this.lastErrorKind,
     this.calls24h = 0,
     this.failed24h = 0,
+    this.purpose = AiKeyPurpose.general,
+    this.specActive = false,
+    this.lookups24h = 0,
   });
 
   final int id;
@@ -52,6 +68,13 @@ class AiApiKey extends Equatable {
   final String? lastErrorKind;
   final int calls24h;
   final int failed24h;
+
+  /// What it was registered for (0141).
+  final AiKeyPurpose purpose;
+
+  /// In use for サイズ・重量を調べる (0141); [isActive] is reading.
+  final bool specActive;
+  final int lookups24h;
 
   factory AiApiKey.fromJson(Map<String, dynamic> j) {
     String? s(Object? v) {
@@ -73,20 +96,27 @@ class AiApiKey extends Equatable {
       lastErrorKind: s(j['last_error_kind']),
       calls24h: n(j['calls_24h']),
       failed24h: n(j['failed_24h']),
+      purpose: AiKeyPurpose.fromWire(s(j['purpose'])),
+      specActive: j['spec_active'] == true,
+      lookups24h: n(j['lookups_24h']),
     );
   }
 
   @override
-  List<Object?> get props => [id, label, keyHint, tier, model, isActive, lastOk, lastErrorKind, calls24h, failed24h];
+  List<Object?> get props =>
+      [id, label, keyHint, tier, model, isActive, lastOk, lastErrorKind, calls24h, failed24h, purpose, specActive, lookups24h];
 }
 
 /// The registered keys, and whether the server's own GEMINI_API_KEY is the
 /// one in use because none is chosen.
 class AiKeys extends Equatable {
-  const AiKeys({this.keys = const [], this.usingServerKey = true});
+  const AiKeys({this.keys = const [], this.usingServerKey = true, this.specUsesGeneral = true});
 
   final List<AiApiKey> keys;
   final bool usingServerKey;
+
+  /// No key is chosen for the lookup: it uses the reading key (0141).
+  final bool specUsesGeneral;
 
   factory AiKeys.fromJson(Map<String, dynamic> j) => AiKeys(
         keys: [
@@ -94,10 +124,11 @@ class AiKeys extends Equatable {
             if (e is Map) AiApiKey.fromJson(e.cast<String, dynamic>()),
         ],
         usingServerKey: j['using_server_key'] != false,
+        specUsesGeneral: j['spec_uses_general'] != false,
       );
 
   @override
-  List<Object?> get props => [keys, usingServerKey];
+  List<Object?> get props => [keys, usingServerKey, specUsesGeneral];
 }
 
 abstract class AiKeyRepository {
@@ -109,10 +140,15 @@ abstract class AiKeyRepository {
     String? model,
     bool activate = false,
     String? note,
+    AiKeyPurpose purpose = AiKeyPurpose.general,
   });
 
   /// Null puts the server's GEMINI_API_KEY back in use.
   Future<ApiResult<bool>> activate(int? id);
+
+  /// The key for [purpose] (0141); null goes back to the fallback — for the
+  /// lookup, the reading key.
+  Future<ApiResult<bool>> use(AiKeyPurpose purpose, int? id);
   Future<ApiResult<bool>> update(int id, {String? label, AiKeyTier? tier, String? model, String? note, String? newKey});
   Future<ApiResult<bool>> retire(int id);
 
@@ -151,8 +187,10 @@ class AiKeyRepositoryImpl implements AiKeyRepository {
     String? model,
     bool activate = false,
     String? note,
+    AiKeyPurpose purpose = AiKeyPurpose.general,
   }) =>
-      _rpc('ai_key_add', {
+      _rpc('ai_key_add_for', {
+        'p_purpose': purpose.wire,
         'p_label': label,
         'p_key': key,
         'p_tier': tier.wire,
@@ -162,7 +200,11 @@ class AiKeyRepositoryImpl implements AiKeyRepository {
       }, (d) => d is num ? d.toInt() : int.tryParse('$d') ?? 0);
 
   @override
-  Future<ApiResult<bool>> activate(int? id) => _rpc('ai_key_activate', {'p_id': id}, (_) => true);
+  Future<ApiResult<bool>> activate(int? id) => use(AiKeyPurpose.general, id);
+
+  @override
+  Future<ApiResult<bool>> use(AiKeyPurpose purpose, int? id) =>
+      _rpc('ai_key_use', {'p_purpose': purpose.wire, 'p_id': id}, (_) => true);
 
   @override
   Future<ApiResult<bool>> update(int id, {String? label, AiKeyTier? tier, String? model, String? note, String? newKey}) =>

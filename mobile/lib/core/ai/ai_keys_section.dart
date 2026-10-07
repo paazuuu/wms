@@ -31,9 +31,10 @@ class AiKeysSection extends ConsumerWidget {
       ));
   }
 
-  Future<void> _activate(BuildContext context, WidgetRef ref, int? id) async {
+  Future<void> _activate(BuildContext context, WidgetRef ref, int? id,
+      {AiKeyPurpose purpose = AiKeyPurpose.general}) async {
     final l10n = AppLocalizations.of(context);
-    final r = await ref.read(aiKeyRepositoryProvider).activate(id);
+    final r = await ref.read(aiKeyRepositoryProvider).use(purpose, id);
     if (!context.mounted) return;
     switch (r) {
       case ApiSuccess():
@@ -111,6 +112,8 @@ class AiKeysSection extends ConsumerWidget {
     final keys = async.valueOrNull;
     final groupValue =
         keys == null ? null : (keys.usingServerKey ? 0 : keys.keys.where((k) => k.isActive).firstOrNull?.id ?? 0);
+    final specValue =
+        keys == null ? null : (keys.specUsesGeneral ? 0 : keys.keys.where((k) => k.specActive).firstOrNull?.id ?? 0);
 
     Widget status(AiApiKey k) {
       if (k.lastOk == null) return Text(l10n.akNotUsedYet, style: muted);
@@ -144,7 +147,8 @@ class AiKeysSection extends ConsumerWidget {
               Text(humanizeApiErrorMessage(l10n, '${async.error}'), style: TextStyle(color: scheme.error))
             else if (keys == null)
               const LinearProgressIndicator()
-            else
+            else ...[
+              Text(l10n.akReadingTitle, key: const ValueKey('ak-reading-title'), style: theme.textTheme.titleSmall),
               RadioGroup<int>(
                 groupValue: groupValue,
                 onChanged: (v) => _activate(context, ref, v == 0 ? null : v),
@@ -173,6 +177,8 @@ class AiKeysSection extends ConsumerWidget {
                           visualDensity: VisualDensity.compact,
                           label: Text(aiKeyTierLabel(l10n, k.tier), style: theme.textTheme.bodySmall),
                         ),
+                        if (k.purpose == AiKeyPurpose.specLookup)
+                          Text(l10n.akForLookup, style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary)),
                         if (k.isActive)
                           Text(l10n.akInUse,
                               style: theme.textTheme.bodySmall
@@ -205,6 +211,49 @@ class AiKeysSection extends ConsumerWidget {
                     ),
                 ]),
               ),
+            ],
+            // Which key looks a product's size and weight up (0141).
+            if (keys != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              const Divider(),
+              Row(children: [
+                const Icon(Icons.travel_explore_outlined, size: 20),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: Text(l10n.akSpecTitle, style: theme.textTheme.titleSmall)),
+              ]),
+              Text(l10n.akSpecIntro, style: muted),
+              RadioGroup<int>(
+                groupValue: specValue,
+                onChanged: (v) => _activate(context, ref, v == 0 ? null : v, purpose: AiKeyPurpose.specLookup),
+                child: Column(children: [
+                  ListTile(
+                    key: const ValueKey('ak-spec-general'),
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Radio<int>(value: 0),
+                    title: Text(l10n.akSpecSameAsReading),
+                    subtitle: Text(l10n.akSpecSameAsReadingHint, style: muted),
+                  ),
+                  for (final k in keys.keys)
+                    ListTile(
+                      key: ValueKey('ak-spec-${k.id}'),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      leading: Radio<int>(value: k.id),
+                      title: Wrap(spacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                        Text(k.label),
+                        Text(k.keyHint ?? '', style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono)),
+                        if (k.specActive)
+                          Text(l10n.akInUse,
+                              style: theme.textTheme.bodySmall?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700)),
+                      ]),
+                      subtitle: Text(
+                          [aiKeyTierLabel(l10n, k.tier), l10n.akLookups24h(k.lookups24h)].join(' · '),
+                          style: muted),
+                    ),
+                ]),
+              ),
+            ],
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.akFreeTierNote, style: muted),
           ],
@@ -229,6 +278,7 @@ class _KeyDialogState extends ConsumerState<_KeyDialog> {
   final _key = TextEditingController();
   late final _model = TextEditingController(text: widget.existing?.model ?? '');
   late AiKeyTier _tier = widget.existing?.tier ?? AiKeyTier.unknown;
+  AiKeyPurpose _purpose = AiKeyPurpose.general;
   bool _activate = true;
   bool _show = false;
   bool _busy = false;
@@ -257,7 +307,8 @@ class _KeyDialogState extends ConsumerState<_KeyDialog> {
     });
     final repo = ref.read(aiKeyRepositoryProvider);
     final ApiResult<Object> r = isNew
-        ? await repo.add(label: label, key: key, tier: _tier, model: _model.text.trim(), activate: _activate)
+        ? await repo.add(
+            label: label, key: key, tier: _tier, model: _model.text.trim(), activate: _activate, purpose: _purpose)
         : await repo.update(widget.existing!.id,
             label: label, tier: _tier, model: _model.text.trim(), newKey: key.isEmpty ? null : key);
     if (!mounted) return;
@@ -319,14 +370,27 @@ class _KeyDialogState extends ConsumerState<_KeyDialog> {
             style: const TextStyle(fontFamily: AppFonts.mono),
             decoration: InputDecoration(labelText: l10n.akModel, hintText: l10n.akModelHint),
           ),
-          if (isNew)
+          if (isNew) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.akPurpose, style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<AiKeyPurpose>(
+              key: const ValueKey('ak-purpose'),
+              segments: [
+                ButtonSegment(value: AiKeyPurpose.general, label: Text(l10n.akPurposeReading)),
+                ButtonSegment(value: AiKeyPurpose.specLookup, label: Text(l10n.akPurposeLookup)),
+              ],
+              selected: {_purpose},
+              onSelectionChanged: (v) => setState(() => _purpose = v.first),
+            ),
             CheckboxListTile(
               key: const ValueKey('ak-activate'),
               contentPadding: EdgeInsets.zero,
               value: _activate,
               onChanged: (v) => setState(() => _activate = v ?? false),
-              title: Text(l10n.akActivateNow),
+              title: Text(_purpose == AiKeyPurpose.specLookup ? l10n.akActivateNowLookup : l10n.akActivateNow),
             ),
+          ],
           if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
         ]),
       ),

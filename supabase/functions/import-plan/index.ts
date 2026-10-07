@@ -70,6 +70,7 @@ import {
   normalizeJan,
   normalizeText,
   aiPing,
+  lookupSpecs,
   readDocument,
   readingQuality,
   readIssuer,
@@ -702,6 +703,23 @@ Deno.serve(async (req) => {
         return json({ data: await aiPing(oneKey ? keyId : null) });
       }
       // Training (0106): what a checked sample taught, learned — nothing booked.
+      // サイズ・重量を調べる (0141): looked up on the web with the key chosen
+      // for it; nothing is saved here, a person takes what they trust.
+      if (str(b.mode) === "lookup_spec") {
+        if (!(await clientPermitted(supabase, "product.manage"))) {
+          return json({ message: notPermittedMessage("product.manage") }, 403);
+        }
+        const items = (Array.isArray(b.items) ? b.items : [])
+          .filter((i: unknown): i is Record<string, unknown> => !!i && typeof i === "object")
+          .map((i: Record<string, unknown>, n: number) => ({
+            index: Number.isFinite(Number(i.index)) ? Number(i.index) : n,
+            name: str(i.name) ?? "",
+            maker: str(i.maker), code: str(i.code), jan: str(i.jan), name_en: str(i.name_en),
+          }))
+          .filter((i: { name: string; jan: string | null }) => i.name !== "" || i.jan);
+        if (items.length === 0) return json({ message: "items are required" }, 400);
+        return json({ data: await lookupSpecs(items) });
+      }
       if (str(b.mode) === "suggest_names") {
         // §43: English standard names for products we do not have yet,
         // proposed for a person to accept or change.

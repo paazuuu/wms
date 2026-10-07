@@ -10313,4 +10313,113 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prNothing => '清单中没有商品';
+
+  @override
+  String get akReadingTitle => '读取用（读取文件、商品名等）';
+
+  @override
+  String get akSpecTitle => '尺寸・重量查询用';
+
+  @override
+  String get akSpecIntro =>
+      '商品主数据中\"用AI查询尺寸・重量\"所用的密钥。因使用Google搜索，与读取分开使用不同密钥可区分次数和费用。';
+
+  @override
+  String get akSpecSameAsReading => '使用与读取相同的密钥';
+
+  @override
+  String get akSpecSameAsReadingHint => '此处未选择时，用上方正在使用的密钥查询';
+
+  @override
+  String akLookups24h(int n) {
+    return '24小时内查询 $n 次';
+  }
+
+  @override
+  String get akForLookup => '查询用';
+
+  @override
+  String get akPurpose => '主要用途';
+
+  @override
+  String get akPurposeReading => '读取用';
+
+  @override
+  String get akPurposeLookup => '尺寸・重量查询用';
+
+  @override
+  String get akActivateNowLookup => '登记后立即用于查询';
+
+  @override
+  String get slButton => '用AI查询尺寸・重量';
+
+  @override
+  String get slTitle => '用AI查询尺寸・重量';
+
+  @override
+  String get slSearching => '正在网上查询…（可能需要几十秒）';
+
+  @override
+  String get slRetry => '重新查询';
+
+  @override
+  String get slNothingFound => '没有找到可靠的数值，请手动输入。';
+
+  @override
+  String slWeight(String value) {
+    return '重量 $value';
+  }
+
+  @override
+  String get slWeightNone => '没有找到重量';
+
+  @override
+  String slSize(String w, String d, String h) {
+    return '尺寸 宽$w×深$d×高$h mm';
+  }
+
+  @override
+  String get slSizeNone => '没有找到尺寸';
+
+  @override
+  String get slBasisProduct => '商品本体的数值';
+
+  @override
+  String get slBasisPackage => '含包装的数值';
+
+  @override
+  String get slBasisUnknown => '不明是本体还是含包装';
+
+  @override
+  String slConfidence(int n) {
+    return '可信度 $n%';
+  }
+
+  @override
+  String get slCheckPlease => '请先确认依据页面再反映';
+
+  @override
+  String get slSources => '依据页面';
+
+  @override
+  String get slNoSources => '没有返回依据页面';
+
+  @override
+  String slKey(String label) {
+    return '使用的密钥：$label';
+  }
+
+  @override
+  String slKeyFallback(String label) {
+    return '因没有查询用密钥，使用了读取用密钥（$label）';
+  }
+
+  @override
+  String get slSave => '反映勾选的数值';
+
+  @override
+  String get slSaved => '已反映尺寸・重量（来源：网络）';
+
+  @override
+  String get slSavedNote => 'AI查询的数值（需确认）';
 }

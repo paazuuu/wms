@@ -10367,4 +10367,113 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prNothing => 'リストに商品がありません';
+
+  @override
+  String get akReadingTitle => '読み取り用（ファイルの読み取り・商品名など）';
+
+  @override
+  String get akSpecTitle => 'サイズ・重量の調べもの用';
+
+  @override
+  String get akSpecIntro =>
+      '商品マスタの「AIでサイズ・重量を調べる」で使うキーです。Google検索を使うため、読み取りとは別のキーにすると回数や費用を分けられます。';
+
+  @override
+  String get akSpecSameAsReading => '読み取り用と同じキーを使う';
+
+  @override
+  String get akSpecSameAsReadingHint => '調べもの用のキーを選ばないときは、上で使用中のキーで調べます';
+
+  @override
+  String akLookups24h(int n) {
+    return '24時間の調べもの $n 回';
+  }
+
+  @override
+  String get akForLookup => '調べもの用';
+
+  @override
+  String get akPurpose => '主な用途';
+
+  @override
+  String get akPurposeReading => '読み取り用';
+
+  @override
+  String get akPurposeLookup => 'サイズ・重量の調べもの用';
+
+  @override
+  String get akActivateNowLookup => '登録したらすぐ調べもの用に使う';
+
+  @override
+  String get slButton => 'AIでサイズ・重量を調べる';
+
+  @override
+  String get slTitle => 'AIでサイズ・重量を調べる';
+
+  @override
+  String get slSearching => 'Webで調べています…（数十秒かかることがあります）';
+
+  @override
+  String get slRetry => 'もう一度調べる';
+
+  @override
+  String get slNothingFound => '確かな値は見つかりませんでした。手入力してください。';
+
+  @override
+  String slWeight(String value) {
+    return '重量 $value';
+  }
+
+  @override
+  String get slWeightNone => '重量は見つかりませんでした';
+
+  @override
+  String slSize(String w, String d, String h) {
+    return 'サイズ 幅$w×奥行$d×高さ$h mm';
+  }
+
+  @override
+  String get slSizeNone => 'サイズは見つかりませんでした';
+
+  @override
+  String get slBasisProduct => '商品本体の値';
+
+  @override
+  String get slBasisPackage => 'パッケージ込みの値';
+
+  @override
+  String get slBasisUnknown => '本体かパッケージ込みか不明';
+
+  @override
+  String slConfidence(int n) {
+    return '確からしさ $n%';
+  }
+
+  @override
+  String get slCheckPlease => '根拠のページを確認してから反映してください';
+
+  @override
+  String get slSources => '根拠のページ';
+
+  @override
+  String get slNoSources => '根拠のページは返ってきませんでした';
+
+  @override
+  String slKey(String label) {
+    return '使ったキー: $label';
+  }
+
+  @override
+  String slKeyFallback(String label) {
+    return '調べもの用のキーが無いため、読み取り用のキー（$label）で調べました';
+  }
+
+  @override
+  String get slSave => 'チェックした値を反映';
+
+  @override
+  String get slSaved => 'サイズ・重量を反映しました（出どころ: Web）';
+
+  @override
+  String get slSavedNote => 'AIで調べた値（要確認）';
 }
