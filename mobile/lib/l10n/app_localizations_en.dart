@@ -10198,4 +10198,211 @@ class AppLocalizationsEn extends AppLocalizations {
   String miSetOnHandDone(int before, int after) {
     return 'Stock changed from $before to $after';
   }
+
+  @override
+  String get featOutboundProposal => 'Outbound proposal';
+
+  @override
+  String get featOutboundProposalDesc =>
+      'Work out a shipment from the stock by percentage or quantity, and send the destination and list as Excel';
+
+  @override
+  String get featShipDestinations => 'Ship-to destinations';
+
+  @override
+  String get featShipDestinationsDesc =>
+      'Companies, addresses, contacts and phone numbers goods often go to';
+
+  @override
+  String get obIntro =>
+      'Choose the destination, then have quantities proposed as a percentage of the stock or type one per product. Nothing goes over what is free (stock − reserved − on open shipments). The shipment\'s destination and list download as Excel, ready to send.';
+
+  @override
+  String get obDestination => 'Ship to';
+
+  @override
+  String get obChooseDestination => 'Choose a saved destination';
+
+  @override
+  String get obDestNew => 'New destination';
+
+  @override
+  String get obDestEdit => 'Edit destination';
+
+  @override
+  String get obDestName => 'Company name (required)';
+
+  @override
+  String get obDestDepartment => 'Department';
+
+  @override
+  String get obDestContact => 'Contact';
+
+  @override
+  String get obDestPostal => 'Postal code';
+
+  @override
+  String get obDestCountry => 'Country (JP, US…)';
+
+  @override
+  String get obDestAddress1 => 'Address';
+
+  @override
+  String get obDestAddress2 => 'Building, room…';
+
+  @override
+  String get obDestPhone => 'Phone';
+
+  @override
+  String get obDestEmail => 'Email';
+
+  @override
+  String get obDestNote => 'Note';
+
+  @override
+  String obDestAttn(String name) {
+    return 'Attn. $name';
+  }
+
+  @override
+  String obDestUsed(int n) {
+    return 'Used $n times';
+  }
+
+  @override
+  String get obDestEmpty => 'No destinations saved yet';
+
+  @override
+  String obDestRetireQ(String name) {
+    return 'Remove \"$name\" from the destinations?';
+  }
+
+  @override
+  String get obDestRetireBody =>
+      'Shipments already made keep the address they had.';
+
+  @override
+  String get obNeedName => 'Enter the company name';
+
+  @override
+  String get obShipDate => 'Ship date';
+
+  @override
+  String obShipDateIs(String date) {
+    return 'Ship date: $date';
+  }
+
+  @override
+  String get obHowMuch => 'How much';
+
+  @override
+  String get obModePercent => 'By percentage';
+
+  @override
+  String get obModeDirect => 'By quantity';
+
+  @override
+  String get obPercent => 'Share';
+
+  @override
+  String get obBaseOnHand => 'Of all stock';
+
+  @override
+  String get obBaseFree => 'Of what is free';
+
+  @override
+  String get obRoundDown => 'Round down';
+
+  @override
+  String get obRoundNearest => 'Round';
+
+  @override
+  String get obRoundUp => 'Round up';
+
+  @override
+  String get obPropose => 'Propose';
+
+  @override
+  String obProposed(int n, int units) {
+    return 'Proposed $n products, $units in all. Each can be changed.';
+  }
+
+  @override
+  String get obPercentInvalid => 'Enter a share from 0 to 100';
+
+  @override
+  String get obDirectHint =>
+      'Type how many of each product go. Unticked products stay.';
+
+  @override
+  String get obCapNote =>
+      'Whichever way, nothing goes over what is free to send.';
+
+  @override
+  String get obSearch => 'Filter by name, JAN, maker';
+
+  @override
+  String get obNoStock => 'No stock in this warehouse';
+
+  @override
+  String obStockLine(int onHand, int reserved, int inOpen, int free) {
+    return 'Stock $onHand · reserved $reserved · on shipments $inOpen · free $free';
+  }
+
+  @override
+  String get obQty => 'Qty';
+
+  @override
+  String obOverShort(int n) {
+    return 'Max $n';
+  }
+
+  @override
+  String obOverFree(String name, int free) {
+    return '\"$name\" is over what is free ($free)';
+  }
+
+  @override
+  String obSummary(int n, int units) {
+    return '$n products, $units in all';
+  }
+
+  @override
+  String get obDraftExcel => 'Draft as Excel';
+
+  @override
+  String obCreate(int n) {
+    return 'Make the shipment ($n products)';
+  }
+
+  @override
+  String get obNothing => 'Nothing to ship';
+
+  @override
+  String get obNeedDestination => 'Choose a destination or add one';
+
+  @override
+  String obCreated(String number, int lines, int units) {
+    return 'Shipment $number made ($lines products, $units in all)';
+  }
+
+  @override
+  String get obSheetExcel => 'Destination and list as Excel';
+
+  @override
+  String get obOpenShipment => 'Open the shipment';
+
+  @override
+  String get obAnother => 'Make another';
+
+  @override
+  String get obExcelSaved => 'The Excel file is saved, ready to send.';
+
+  @override
+  String get obStockExcel => 'All stock as Excel';
+
+  @override
+  String obStockSaved(int n) {
+    return 'The stock list ($n rows) is saved as Excel';
+  }
 }

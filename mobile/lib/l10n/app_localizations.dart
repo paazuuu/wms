@@ -18073,6 +18073,360 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫数を {before} → {after} に変更しました'**
   String miSetOnHandDone(int before, int after);
+
+  /// No description provided for @featOutboundProposal.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫の提案'**
+  String get featOutboundProposal;
+
+  /// No description provided for @featOutboundProposalDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫からパーセントまたは数量で出庫を作り、出荷先と出庫リストをExcelで送れる形にします'**
+  String get featOutboundProposalDesc;
+
+  /// No description provided for @featShipDestinations.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先'**
+  String get featShipDestinations;
+
+  /// No description provided for @featShipDestinationsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'よく使う出荷先の会社名・住所・担当・電話を保存'**
+  String get featShipDestinationsDesc;
+
+  /// No description provided for @obIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先を選び、在庫からパーセントで提案させるか、商品ごとに数量を入れて出庫を作ります。出荷可能数（在庫 − 引当 − 出庫予定）を超える数は出せません。作った出庫は、出荷先と出庫リストをExcelでダウンロードして相手に送れます。'**
+  String get obIntro;
+
+  /// No description provided for @obDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先'**
+  String get obDestination;
+
+  /// No description provided for @obChooseDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存した出荷先から選ぶ'**
+  String get obChooseDestination;
+
+  /// No description provided for @obDestNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい出荷先'**
+  String get obDestNew;
+
+  /// No description provided for @obDestEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先を編集'**
+  String get obDestEdit;
+
+  /// No description provided for @obDestName.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名（必須）'**
+  String get obDestName;
+
+  /// No description provided for @obDestDepartment.
+  ///
+  /// In ja, this message translates to:
+  /// **'部署'**
+  String get obDestDepartment;
+
+  /// No description provided for @obDestContact.
+  ///
+  /// In ja, this message translates to:
+  /// **'担当者'**
+  String get obDestContact;
+
+  /// No description provided for @obDestPostal.
+  ///
+  /// In ja, this message translates to:
+  /// **'郵便番号'**
+  String get obDestPostal;
+
+  /// No description provided for @obDestCountry.
+  ///
+  /// In ja, this message translates to:
+  /// **'国（JP・US など）'**
+  String get obDestCountry;
+
+  /// No description provided for @obDestAddress1.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所'**
+  String get obDestAddress1;
+
+  /// No description provided for @obDestAddress2.
+  ///
+  /// In ja, this message translates to:
+  /// **'建物名・部屋番号など'**
+  String get obDestAddress2;
+
+  /// No description provided for @obDestPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話番号'**
+  String get obDestPhone;
+
+  /// No description provided for @obDestEmail.
+  ///
+  /// In ja, this message translates to:
+  /// **'メール'**
+  String get obDestEmail;
+
+  /// No description provided for @obDestNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get obDestNote;
+
+  /// No description provided for @obDestAttn.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} 様'**
+  String obDestAttn(String name);
+
+  /// No description provided for @obDestUsed.
+  ///
+  /// In ja, this message translates to:
+  /// **'使った回数: {n}'**
+  String obDestUsed(int n);
+
+  /// No description provided for @obDestEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存した出荷先はまだありません'**
+  String get obDestEmpty;
+
+  /// No description provided for @obDestRetireQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」を出荷先から外しますか？'**
+  String obDestRetireQ(String name);
+
+  /// No description provided for @obDestRetireBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'これまでの出庫に記録された宛先はそのまま残ります。'**
+  String get obDestRetireBody;
+
+  /// No description provided for @obNeedName.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名を入れてください'**
+  String get obNeedName;
+
+  /// No description provided for @obShipDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷日を選ぶ'**
+  String get obShipDate;
+
+  /// No description provided for @obShipDateIs.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷日: {date}'**
+  String obShipDateIs(String date);
+
+  /// No description provided for @obHowMuch.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量の決め方'**
+  String get obHowMuch;
+
+  /// No description provided for @obModePercent.
+  ///
+  /// In ja, this message translates to:
+  /// **'パーセントで提案'**
+  String get obModePercent;
+
+  /// No description provided for @obModeDirect.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を直接入力'**
+  String get obModeDirect;
+
+  /// No description provided for @obPercent.
+  ///
+  /// In ja, this message translates to:
+  /// **'割合'**
+  String get obPercent;
+
+  /// No description provided for @obBaseOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'全在庫に対して'**
+  String get obBaseOnHand;
+
+  /// No description provided for @obBaseFree.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷可能数に対して'**
+  String get obBaseFree;
+
+  /// No description provided for @obRoundDown.
+  ///
+  /// In ja, this message translates to:
+  /// **'端数切り捨て'**
+  String get obRoundDown;
+
+  /// No description provided for @obRoundNearest.
+  ///
+  /// In ja, this message translates to:
+  /// **'四捨五入'**
+  String get obRoundNearest;
+
+  /// No description provided for @obRoundUp.
+  ///
+  /// In ja, this message translates to:
+  /// **'端数切り上げ'**
+  String get obRoundUp;
+
+  /// No description provided for @obPropose.
+  ///
+  /// In ja, this message translates to:
+  /// **'提案する'**
+  String get obPropose;
+
+  /// No description provided for @obProposed.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目・合計 {units}個を提案しました。数量は直せます。'**
+  String obProposed(int n, int units);
+
+  /// No description provided for @obPercentInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'割合は0〜100で入れてください'**
+  String get obPercentInvalid;
+
+  /// No description provided for @obDirectHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごとに出す数を入れてください。チェックを外した商品は出しません。'**
+  String get obDirectHint;
+
+  /// No description provided for @obCapNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'どの方法でも、出荷可能数を超える数は出せません。'**
+  String get obCapNote;
+
+  /// No description provided for @obSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・JAN・メーカーで絞り込み'**
+  String get obSearch;
+
+  /// No description provided for @obNoStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫に在庫がありません'**
+  String get obNoStock;
+
+  /// No description provided for @obStockLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'全在庫 {onHand} ・引当 {reserved} ・出庫予定 {inOpen} ・出荷可能 {free}'**
+  String obStockLine(int onHand, int reserved, int inOpen, int free);
+
+  /// No description provided for @obQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'出す数'**
+  String get obQty;
+
+  /// No description provided for @obOverShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'最大 {n}'**
+  String obOverShort(int n);
+
+  /// No description provided for @obOverFree.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」は出荷可能数（{free}）を超えています'**
+  String obOverFree(String name, int free);
+
+  /// No description provided for @obSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目・合計 {units}個'**
+  String obSummary(int n, int units);
+
+  /// No description provided for @obDraftExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelで確認（下書き）'**
+  String get obDraftExcel;
+
+  /// No description provided for @obCreate.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目で出庫を作成'**
+  String obCreate(int n);
+
+  /// No description provided for @obNothing.
+  ///
+  /// In ja, this message translates to:
+  /// **'出す商品がありません'**
+  String get obNothing;
+
+  /// No description provided for @obNeedDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先を選ぶか、新しく登録してください'**
+  String get obNeedDestination;
+
+  /// No description provided for @obCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫 {number} を作成しました（{lines}品目・{units}個）'**
+  String obCreated(String number, int lines, int units);
+
+  /// No description provided for @obSheetExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先と出庫リストをExcelでダウンロード'**
+  String get obSheetExcel;
+
+  /// No description provided for @obOpenShipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を開く（梱包・出荷へ）'**
+  String get obOpenShipment;
+
+  /// No description provided for @obAnother.
+  ///
+  /// In ja, this message translates to:
+  /// **'続けて別の出庫を作る'**
+  String get obAnother;
+
+  /// No description provided for @obExcelSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelを保存しました。そのまま相手に送れます。'**
+  String get obExcelSaved;
+
+  /// No description provided for @obStockExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'全在庫をExcelでダウンロード'**
+  String get obStockExcel;
+
+  /// No description provided for @obStockSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫一覧（{n}件）をExcelで保存しました'**
+  String obStockSaved(int n);
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../delivery/application/delivery_providers.dart';
+import '../../outbound/presentation/outbound_downloads.dart';
 import '../../delivery/domain/stock_item.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/packaging_providers.dart';
@@ -332,6 +333,13 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         title: Text(detail.valueOrNull?.shipmentNumber ?? l10n.featShipment),
         actions: [
           if (detail.valueOrNull != null) ...[
+            // The destination and lines as Excel, to send (0139).
+            IconButton(
+              key: const ValueKey('shipment-excel'),
+              tooltip: l10n.obSheetExcel,
+              icon: const Icon(Icons.grid_on_outlined),
+              onPressed: () => downloadShipmentSheet(context, ref, _id),
+            ),
             IconButton(
               tooltip: l10n.shipmentParcelsAction,
               icon: const Icon(Icons.history),

@@ -6539,6 +6539,41 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   typed (by hand on screen or in the sheet). Reading Excel sheets of our own
   format needs no edge function at all.
 
+## 0139 — 出庫の提案, saved destinations, sheets to send
+
+- **出荷先** (`ship_destinations`): the companies goods often go to: name,
+  department, contact, postal code, address, phone, email, country and a
+  note. They are listed with the most used first. They are saved from the
+  proposal screen or from 出荷先 (`ship_destination_save`). Removing one only
+  takes it off the list; shipments keep the address they had.
+- **出庫の提案** (`outbound_stock`, `outbound_create`):
+  - For each product the screen shows its stock in the warehouse: on hand,
+    reserved, already on shipments that have not left, and what is free to
+    send.
+  - The quantities are either proposed as a percentage or typed per product.
+    The percentage is of all stock or of what is free, rounded down, to the
+    nearest or up, and never more than is free.
+  - The result becomes an open shipment (`OUT-000123`). It keeps its
+    destination as it was at the time (`shipment_plans.ship_to`) and how it
+    was proposed (`proposal`).
+  - From there it is packed and shipped like any other shipment; stock moves
+    when it ships.
+  - The server refuses a line over what is free (`over_free:<jan>:<free>`).
+- **Excel to send**:
+  - `outbound_sheet(shipment)` gives any shipment's destination and lines.
+    The app turns them into an .xlsx: a 出荷明細書 / Packing List with the
+    ship-to block, our sender (差出人 from the sender settings), and the lines
+    with JAN, name, English name, maker, item code, quantity and unit, plus a
+    total. Headings are in Japanese and English.
+  - The sheet downloads from the proposal (a draft before saving, and the
+    sheet once made) and from every shipment's detail screen.
+- **All stock in Excel** (`stock_export`): every product's stock in the
+  warehouses the person may see, or in one, with the reserved figure and
+  totals. It downloads from 在庫一覧 and from 出庫の提案.
+- Everything here is SQL plus the app; no edge function needs deploying.
+- Not covered: two people proposing the same last units at the same moment
+  can both pass the check. Packing and shipping still check the stock.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

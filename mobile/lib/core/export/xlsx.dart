@@ -8,12 +8,18 @@ import 'package:xml/xml.dart';
 /// scrolling, and [flagged] cells (row, column; 0-based over [rows]) filled
 /// yellow so a person sees at once what needs looking at. Text stays text —
 /// a JAN keeps its leading zero and is not turned into 4.9E+12.
+///
+/// [top] rows come above the header — a document's heading: who it is for,
+/// who sends it — with their first cell in bold; [bottom] rows come under the
+/// lines (a total), in bold.
 Uint8List buildXlsx({
   required String sheetName,
   required List<String> headers,
   required List<List<Object?>> rows,
   Set<(int, int)> flagged = const {},
   List<double>? widths,
+  List<List<Object?>> top = const [],
+  List<List<Object?>> bottom = const [],
 }) {
   String esc(String s) => const HtmlEscape(HtmlEscapeMode.element).convert(s.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), ''));
 
@@ -25,10 +31,12 @@ Uint8List buildXlsx({
     return '<c r="$ref"$s t="inlineStr"><is><t xml:space="preserve">${esc('$v')}</t></is></c>';
   }
 
+  final head = top.length;
   final sheet = StringBuffer()
     ..write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
     ..write('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">')
-    ..write('<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>');
+    ..write('<sheetViews><sheetView workbookViewId="0"><pane ySplit="${head + 1}" topLeftCell="A${head + 2}" '
+        'activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>');
   if (widths != null && widths.isNotEmpty) {
     sheet.write('<cols>');
     for (final (i, w) in widths.indexed) {
@@ -36,15 +44,31 @@ Uint8List buildXlsx({
     }
     sheet.write('</cols>');
   }
-  sheet.write('<sheetData><row r="1">');
+  sheet.write('<sheetData>');
+  for (final (r, row) in top.indexed) {
+    sheet.write('<row r="${r + 1}">');
+    for (final (c, v) in row.indexed) {
+      sheet.write(cell(r, c, v, c == 0 ? 3 : 0));
+    }
+    sheet.write('</row>');
+  }
+  sheet.write('<row r="${head + 1}">');
   for (final (c, h) in headers.indexed) {
-    sheet.write(cell(0, c, h, 1));
+    sheet.write(cell(head, c, h, 1));
   }
   sheet.write('</row>');
   for (final (r, row) in rows.indexed) {
-    sheet.write('<row r="${r + 2}">');
+    sheet.write('<row r="${head + r + 2}">');
     for (var c = 0; c < headers.length; c++) {
-      sheet.write(cell(r + 1, c, c < row.length ? row[c] : null, flagged.contains((r, c)) ? 2 : 0));
+      sheet.write(cell(head + r + 1, c, c < row.length ? row[c] : null, flagged.contains((r, c)) ? 2 : 0));
+    }
+    sheet.write('</row>');
+  }
+  for (final (r, row) in bottom.indexed) {
+    final at = head + rows.length + r + 1;
+    sheet.write('<row r="${at + 1}">');
+    for (final (c, v) in row.indexed) {
+      sheet.write(cell(at, c, v, 3));
     }
     sheet.write('</row>');
   }
@@ -60,9 +84,10 @@ Uint8List buildXlsx({
       '<fill><patternFill patternType="solid"><fgColor rgb="FFFFF2A8"/><bgColor indexed="64"/></patternFill></fill></fills>'
       '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
       '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-      '<cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+      '<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
       '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
-      '<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFill="1"/></cellXfs>'
+      '<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFill="1"/>'
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
       '</styleSheet>';
   final archive = Archive()
     ..add(ArchiveFile.string(

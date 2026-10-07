@@ -10,6 +10,8 @@ import '../domain/jan.dart';
 import '../domain/stock_item.dart';
 import 'stock_ledger_screen.dart';
 import '../../product_library/presentation/product_thumb.dart';
+import '../../outbound/presentation/outbound_downloads.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 
 /// The "総在庫" column: per-JAN total on-hand, accumulated from every completed
 /// reconciliation. A scan/search box filters by JAN or product name.
@@ -57,6 +59,15 @@ class _StockListScreenState extends ConsumerState<StockListScreen> {
       appBar: AppBar(
         title: Text(l10n.totalStockTitle),
         actions: [
+          // Every product's stock as Excel (0139).
+          IconButton(
+            key: const ValueKey('stock-excel'),
+            tooltip: l10n.obStockExcel,
+            icon: const Icon(Icons.download_outlined),
+            onPressed: () => downloadStockList(context, ref,
+                warehouseId: ref.read(activeWarehouseIdProvider),
+                warehouseName: ref.read(activeWarehouseProvider)?.name),
+          ),
           PopupMenuButton<_StockSort>(
             tooltip: l10n.sortMenu,
             icon: const Icon(Icons.sort),

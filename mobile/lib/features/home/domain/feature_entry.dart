@@ -79,6 +79,10 @@ class FeatureEntry {
         return l10n.featDelivery;
       case 'shipment':
         return l10n.featShipment;
+      case 'outbound_proposal':
+        return l10n.featOutboundProposal;
+      case 'ship_destinations':
+        return l10n.featShipDestinations;
       case 'stock_adjustment':
         return l10n.featStockAdjustment;
       case 'stock_count':
@@ -189,6 +193,10 @@ class FeatureEntry {
         return l10n.featDeliveryDesc;
       case 'shipment':
         return l10n.featShipmentDesc;
+      case 'outbound_proposal':
+        return l10n.featOutboundProposalDesc;
+      case 'ship_destinations':
+        return l10n.featShipDestinationsDesc;
       case 'stock_adjustment':
         return l10n.featStockAdjustmentDesc;
       case 'stock_count':

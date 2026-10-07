@@ -8787,5 +8787,172 @@
         "type": "int"
       }
     }
+  },
+  "featOutboundProposal": "出庫の提案",
+  "featOutboundProposalDesc": "在庫からパーセントまたは数量で出庫を作り、出荷先と出庫リストをExcelで送れる形にします",
+  "featShipDestinations": "出荷先",
+  "featShipDestinationsDesc": "よく使う出荷先の会社名・住所・担当・電話を保存",
+  "obIntro": "出荷先を選び、在庫からパーセントで提案させるか、商品ごとに数量を入れて出庫を作ります。出荷可能数（在庫 − 引当 − 出庫予定）を超える数は出せません。作った出庫は、出荷先と出庫リストをExcelでダウンロードして相手に送れます。",
+  "obDestination": "出荷先",
+  "obChooseDestination": "保存した出荷先から選ぶ",
+  "obDestNew": "新しい出荷先",
+  "obDestEdit": "出荷先を編集",
+  "obDestName": "会社名（必須）",
+  "obDestDepartment": "部署",
+  "obDestContact": "担当者",
+  "obDestPostal": "郵便番号",
+  "obDestCountry": "国（JP・US など）",
+  "obDestAddress1": "住所",
+  "obDestAddress2": "建物名・部屋番号など",
+  "obDestPhone": "電話番号",
+  "obDestEmail": "メール",
+  "obDestNote": "備考",
+  "obDestAttn": "{name} 様",
+  "@obDestAttn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "obDestUsed": "使った回数: {n}",
+  "@obDestUsed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obDestEmpty": "保存した出荷先はまだありません",
+  "obDestRetireQ": "「{name}」を出荷先から外しますか？",
+  "@obDestRetireQ": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "obDestRetireBody": "これまでの出庫に記録された宛先はそのまま残ります。",
+  "obNeedName": "会社名を入れてください",
+  "obShipDate": "出荷日を選ぶ",
+  "obShipDateIs": "出荷日: {date}",
+  "@obShipDateIs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "obHowMuch": "数量の決め方",
+  "obModePercent": "パーセントで提案",
+  "obModeDirect": "数量を直接入力",
+  "obPercent": "割合",
+  "obBaseOnHand": "全在庫に対して",
+  "obBaseFree": "出荷可能数に対して",
+  "obRoundDown": "端数切り捨て",
+  "obRoundNearest": "四捨五入",
+  "obRoundUp": "端数切り上げ",
+  "obPropose": "提案する",
+  "obProposed": "{n}品目・合計 {units}個を提案しました。数量は直せます。",
+  "@obProposed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "obPercentInvalid": "割合は0〜100で入れてください",
+  "obDirectHint": "商品ごとに出す数を入れてください。チェックを外した商品は出しません。",
+  "obCapNote": "どの方法でも、出荷可能数を超える数は出せません。",
+  "obSearch": "商品名・JAN・メーカーで絞り込み",
+  "obNoStock": "この倉庫に在庫がありません",
+  "obStockLine": "全在庫 {onHand} ・引当 {reserved} ・出庫予定 {inOpen} ・出荷可能 {free}",
+  "@obStockLine": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "reserved": {
+        "type": "int"
+      },
+      "inOpen": {
+        "type": "int"
+      },
+      "free": {
+        "type": "int"
+      }
+    }
+  },
+  "obQty": "出す数",
+  "obOverShort": "最大 {n}",
+  "@obOverShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obOverFree": "「{name}」は出荷可能数（{free}）を超えています",
+  "@obOverFree": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "free": {
+        "type": "int"
+      }
+    }
+  },
+  "obSummary": "{n}品目・合計 {units}個",
+  "@obSummary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "obDraftExcel": "Excelで確認（下書き）",
+  "obCreate": "{n}品目で出庫を作成",
+  "@obCreate": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obNothing": "出す商品がありません",
+  "obNeedDestination": "出荷先を選ぶか、新しく登録してください",
+  "obCreated": "出庫 {number} を作成しました（{lines}品目・{units}個）",
+  "@obCreated": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "obSheetExcel": "出荷先と出庫リストをExcelでダウンロード",
+  "obOpenShipment": "出庫を開く（梱包・出荷へ）",
+  "obAnother": "続けて別の出庫を作る",
+  "obExcelSaved": "Excelを保存しました。そのまま相手に送れます。",
+  "obStockExcel": "全在庫をExcelでダウンロード",
+  "obStockSaved": "在庫一覧（{n}件）をExcelで保存しました",
+  "@obStockSaved": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

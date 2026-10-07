@@ -9987,4 +9987,207 @@ class AppLocalizationsJa extends AppLocalizations {
   String miSetOnHandDone(int before, int after) {
     return '在庫数を $before → $after に変更しました';
   }
+
+  @override
+  String get featOutboundProposal => '出庫の提案';
+
+  @override
+  String get featOutboundProposalDesc =>
+      '在庫からパーセントまたは数量で出庫を作り、出荷先と出庫リストをExcelで送れる形にします';
+
+  @override
+  String get featShipDestinations => '出荷先';
+
+  @override
+  String get featShipDestinationsDesc => 'よく使う出荷先の会社名・住所・担当・電話を保存';
+
+  @override
+  String get obIntro =>
+      '出荷先を選び、在庫からパーセントで提案させるか、商品ごとに数量を入れて出庫を作ります。出荷可能数（在庫 − 引当 − 出庫予定）を超える数は出せません。作った出庫は、出荷先と出庫リストをExcelでダウンロードして相手に送れます。';
+
+  @override
+  String get obDestination => '出荷先';
+
+  @override
+  String get obChooseDestination => '保存した出荷先から選ぶ';
+
+  @override
+  String get obDestNew => '新しい出荷先';
+
+  @override
+  String get obDestEdit => '出荷先を編集';
+
+  @override
+  String get obDestName => '会社名（必須）';
+
+  @override
+  String get obDestDepartment => '部署';
+
+  @override
+  String get obDestContact => '担当者';
+
+  @override
+  String get obDestPostal => '郵便番号';
+
+  @override
+  String get obDestCountry => '国（JP・US など）';
+
+  @override
+  String get obDestAddress1 => '住所';
+
+  @override
+  String get obDestAddress2 => '建物名・部屋番号など';
+
+  @override
+  String get obDestPhone => '電話番号';
+
+  @override
+  String get obDestEmail => 'メール';
+
+  @override
+  String get obDestNote => '備考';
+
+  @override
+  String obDestAttn(String name) {
+    return '$name 様';
+  }
+
+  @override
+  String obDestUsed(int n) {
+    return '使った回数: $n';
+  }
+
+  @override
+  String get obDestEmpty => '保存した出荷先はまだありません';
+
+  @override
+  String obDestRetireQ(String name) {
+    return '「$name」を出荷先から外しますか？';
+  }
+
+  @override
+  String get obDestRetireBody => 'これまでの出庫に記録された宛先はそのまま残ります。';
+
+  @override
+  String get obNeedName => '会社名を入れてください';
+
+  @override
+  String get obShipDate => '出荷日を選ぶ';
+
+  @override
+  String obShipDateIs(String date) {
+    return '出荷日: $date';
+  }
+
+  @override
+  String get obHowMuch => '数量の決め方';
+
+  @override
+  String get obModePercent => 'パーセントで提案';
+
+  @override
+  String get obModeDirect => '数量を直接入力';
+
+  @override
+  String get obPercent => '割合';
+
+  @override
+  String get obBaseOnHand => '全在庫に対して';
+
+  @override
+  String get obBaseFree => '出荷可能数に対して';
+
+  @override
+  String get obRoundDown => '端数切り捨て';
+
+  @override
+  String get obRoundNearest => '四捨五入';
+
+  @override
+  String get obRoundUp => '端数切り上げ';
+
+  @override
+  String get obPropose => '提案する';
+
+  @override
+  String obProposed(int n, int units) {
+    return '$n品目・合計 $units個を提案しました。数量は直せます。';
+  }
+
+  @override
+  String get obPercentInvalid => '割合は0〜100で入れてください';
+
+  @override
+  String get obDirectHint => '商品ごとに出す数を入れてください。チェックを外した商品は出しません。';
+
+  @override
+  String get obCapNote => 'どの方法でも、出荷可能数を超える数は出せません。';
+
+  @override
+  String get obSearch => '商品名・JAN・メーカーで絞り込み';
+
+  @override
+  String get obNoStock => 'この倉庫に在庫がありません';
+
+  @override
+  String obStockLine(int onHand, int reserved, int inOpen, int free) {
+    return '全在庫 $onHand ・引当 $reserved ・出庫予定 $inOpen ・出荷可能 $free';
+  }
+
+  @override
+  String get obQty => '出す数';
+
+  @override
+  String obOverShort(int n) {
+    return '最大 $n';
+  }
+
+  @override
+  String obOverFree(String name, int free) {
+    return '「$name」は出荷可能数（$free）を超えています';
+  }
+
+  @override
+  String obSummary(int n, int units) {
+    return '$n品目・合計 $units個';
+  }
+
+  @override
+  String get obDraftExcel => 'Excelで確認（下書き）';
+
+  @override
+  String obCreate(int n) {
+    return '$n品目で出庫を作成';
+  }
+
+  @override
+  String get obNothing => '出す商品がありません';
+
+  @override
+  String get obNeedDestination => '出荷先を選ぶか、新しく登録してください';
+
+  @override
+  String obCreated(String number, int lines, int units) {
+    return '出庫 $number を作成しました（$lines品目・$units個）';
+  }
+
+  @override
+  String get obSheetExcel => '出荷先と出庫リストをExcelでダウンロード';
+
+  @override
+  String get obOpenShipment => '出庫を開く（梱包・出荷へ）';
+
+  @override
+  String get obAnother => '続けて別の出庫を作る';
+
+  @override
+  String get obExcelSaved => 'Excelを保存しました。そのまま相手に送れます。';
+
+  @override
+  String get obStockExcel => '全在庫をExcelでダウンロード';
+
+  @override
+  String obStockSaved(int n) {
+    return '在庫一覧（$n件）をExcelで保存しました';
+  }
 }

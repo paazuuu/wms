@@ -50,6 +50,8 @@ import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
 import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
+import '../../outbound/presentation/outbound_proposal_screen.dart';
+import '../../outbound/presentation/ship_destinations_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -148,6 +150,23 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _shipment,
             requiredAnyOf: ['pack.complete', 'ship.complete'],
+          ),
+          // 出庫の提案 (0139): a shipment worked out from the stock, by
+          // percentage or by quantity, to a saved destination.
+          FeatureEntry(
+            id: 'outbound_proposal',
+            icon: Icons.playlist_add_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundProposal,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage'],
+          ),
+          // 出荷先 (0139): the destinations goods often go to.
+          FeatureEntry(
+            id: 'ship_destinations',
+            icon: Icons.location_on_outlined,
+            status: FeatureStatus.ready,
+            builder: _shipDestinations,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
           ),
           FeatureEntry(
             id: 'stock_adjustment',
@@ -521,6 +540,8 @@ Widget _products(BuildContext _) => const ProductListScreen();
 Widget _priceBook(BuildContext _) => const PriceBookScreen();
 Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen();
 Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
+Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
+Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 Widget _printLanguage(BuildContext _) => const PrintLanguageScreen();

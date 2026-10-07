@@ -9934,4 +9934,206 @@ class AppLocalizationsZh extends AppLocalizations {
   String miSetOnHandDone(int before, int after) {
     return '库存数已从 $before 改为 $after';
   }
+
+  @override
+  String get featOutboundProposal => '出库建议';
+
+  @override
+  String get featOutboundProposalDesc => '按库存的百分比或数量生成出库，并把收货方和出库清单做成可发送的Excel';
+
+  @override
+  String get featShipDestinations => '收货方';
+
+  @override
+  String get featShipDestinationsDesc => '保存常用收货方的公司名、地址、联系人、电话';
+
+  @override
+  String get obIntro =>
+      '选择收货方，按库存百分比自动建议，或逐个商品输入数量来创建出库。不能超过可出货数（库存 − 已分配 − 待出库）。创建后可将收货方和出库清单下载为Excel发送给对方。';
+
+  @override
+  String get obDestination => '收货方';
+
+  @override
+  String get obChooseDestination => '从已保存的收货方中选择';
+
+  @override
+  String get obDestNew => '新收货方';
+
+  @override
+  String get obDestEdit => '编辑收货方';
+
+  @override
+  String get obDestName => '公司名（必填）';
+
+  @override
+  String get obDestDepartment => '部门';
+
+  @override
+  String get obDestContact => '联系人';
+
+  @override
+  String get obDestPostal => '邮编';
+
+  @override
+  String get obDestCountry => '国家（JP、US等）';
+
+  @override
+  String get obDestAddress1 => '地址';
+
+  @override
+  String get obDestAddress2 => '楼名、房间号等';
+
+  @override
+  String get obDestPhone => '电话';
+
+  @override
+  String get obDestEmail => '邮箱';
+
+  @override
+  String get obDestNote => '备注';
+
+  @override
+  String obDestAttn(String name) {
+    return '$name 收';
+  }
+
+  @override
+  String obDestUsed(int n) {
+    return '使用次数：$n';
+  }
+
+  @override
+  String get obDestEmpty => '还没有保存的收货方';
+
+  @override
+  String obDestRetireQ(String name) {
+    return '要从收货方中移除\"$name\"吗？';
+  }
+
+  @override
+  String get obDestRetireBody => '已有出库记录中的地址保持不变。';
+
+  @override
+  String get obNeedName => '请输入公司名';
+
+  @override
+  String get obShipDate => '选择出货日';
+
+  @override
+  String obShipDateIs(String date) {
+    return '出货日：$date';
+  }
+
+  @override
+  String get obHowMuch => '数量的决定方式';
+
+  @override
+  String get obModePercent => '按百分比建议';
+
+  @override
+  String get obModeDirect => '直接输入数量';
+
+  @override
+  String get obPercent => '比例';
+
+  @override
+  String get obBaseOnHand => '相对全部库存';
+
+  @override
+  String get obBaseFree => '相对可出货数';
+
+  @override
+  String get obRoundDown => '舍去零头';
+
+  @override
+  String get obRoundNearest => '四舍五入';
+
+  @override
+  String get obRoundUp => '进位';
+
+  @override
+  String get obPropose => '建议';
+
+  @override
+  String obProposed(int n, int units) {
+    return '已建议$n个品目，共$units个。数量可以修改。';
+  }
+
+  @override
+  String get obPercentInvalid => '请输入0〜100的比例';
+
+  @override
+  String get obDirectHint => '请逐个输入出货数量。取消勾选的商品不出货。';
+
+  @override
+  String get obCapNote => '无论哪种方式，都不能超过可出货数。';
+
+  @override
+  String get obSearch => '按商品名、JAN、制造商筛选';
+
+  @override
+  String get obNoStock => '此仓库没有库存';
+
+  @override
+  String obStockLine(int onHand, int reserved, int inOpen, int free) {
+    return '全部库存 $onHand・已分配 $reserved・待出库 $inOpen・可出货 $free';
+  }
+
+  @override
+  String get obQty => '出货数';
+
+  @override
+  String obOverShort(int n) {
+    return '最多 $n';
+  }
+
+  @override
+  String obOverFree(String name, int free) {
+    return '\"$name\"超过可出货数（$free）';
+  }
+
+  @override
+  String obSummary(int n, int units) {
+    return '$n个品目，共$units个';
+  }
+
+  @override
+  String get obDraftExcel => '用Excel确认（草稿）';
+
+  @override
+  String obCreate(int n) {
+    return '以$n个品目创建出库';
+  }
+
+  @override
+  String get obNothing => '没有要出货的商品';
+
+  @override
+  String get obNeedDestination => '请选择或新建收货方';
+
+  @override
+  String obCreated(String number, int lines, int units) {
+    return '已创建出库 $number（$lines个品目，$units个）';
+  }
+
+  @override
+  String get obSheetExcel => '将收货方和出库清单下载为Excel';
+
+  @override
+  String get obOpenShipment => '打开出库（去装箱、出货）';
+
+  @override
+  String get obAnother => '继续创建另一个出库';
+
+  @override
+  String get obExcelSaved => '已保存Excel，可直接发送给对方。';
+
+  @override
+  String get obStockExcel => '将全部库存下载为Excel';
+
+  @override
+  String obStockSaved(int n) {
+    return '已将库存清单（$n条）保存为Excel';
+  }
 }
