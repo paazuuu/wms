@@ -6476,6 +6476,69 @@ credits ran out (HTTP 402) nobody in the app could move to another key.
   and the same for `ocr-delivery-note`. Until then the DB part works, but
   the AI keeps using `GEMINI_API_KEY`.
 
+## 0138 — one file: 商品マスタ first, then the stock in 商品ライブラリー
+
+The flow agreed for registering the goods of a warehouse: a list of products
+and quantities (Excel, CSV, PDF or a photo) is chosen once and goes through
+two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商品ライブラリー →
+新規登録 → ファイルから商品と在庫を登録).
+
+### Stage 1 — 商品マスタ
+
+- The file is read (our own sheet locally; anything else by import-plan, dry
+  run) and every line checked: a JAN that is missing, not 8/13 digits, has a
+  wrong check digit or comes twice; no name; a quantity that is not a whole
+  number; a line the AI read two ways; a document whose total disagrees with
+  its lines.
+- **Any of these stops the file and nothing is written.** The screen says
+  what stopped it, line by line, and offers:
+  - **手動で見分けて直す** — every line on screen, editable, lines can be
+    added or removed;
+  - **AIでExcelに変換して確認する** — the reading becomes an .xlsx with the
+    cells to check in yellow; the person corrects it in Excel and chooses it
+    again. When nothing could be read (an AI error, no lines), an empty
+    sheet to fill in is offered instead, and the reading can be retried.
+- The original file, the converted sheet and the sheet sent back are all kept
+  in the private bucket `master-import-files` under `imports/<id>/`, and can
+  be downloaded from the import and from the history.
+- Registering (`master_import_commit`, all or nothing, the same checks
+  again on the server): a JAN we have keeps its name and gets the English
+  name and any empty maker / 品番 / unit filled; a JAN we do not have becomes a
+  product named as the line says, with its English name (proposed by the AI
+  when the line has none and the AI answers). With a supplier, what it calls
+  the product goes into `supplier_product_names`.
+
+### Stage 2 — the stock
+
+- Each line's product is found by JAN and its stock in the chosen warehouse
+  shown. The stock there can be corrected by hand first; the file's quantity
+  (editable) is then added.
+- `master_import_apply_stock` posts both through the ledger
+  (`apply_stock_movement_detail`, ADJUST, reference `master_import`) with a
+  `stock_adjustments` row each (CORRECTION for the hand correction, OTHER for
+  the addition), so stock_units follows and the movements are in the ledger.
+  It runs once per import.
+- For every line the import keeps the stock found (`on_hand_before`), the
+  corrected figure (`on_hand_set`), what was added and what it came to
+  (`on_hand_after`).
+- Stage 2 needs `inventory.adjust` and the warehouse in scope; stage 1 needs
+  `product.manage`. An import left after stage 1 can be taken on from the
+  history (在庫に反映する).
+
+### Changing stock by hand
+
+- `stock_set_on_hand(warehouse, jan, quantity, note)` sets one product's
+  stock to a figure; the difference is booked as a CORRECTION adjustment.
+  On a product's page (この倉庫での扱い) 今の在庫 has 在庫数を変更 for whoever
+  holds `inventory.adjust`.
+
+### Not done here
+
+- The English name proposal goes through the `suggest_names` mode of
+  import-plan, still waiting for its deploy; until then English names are
+  typed (by hand on screen or in the sheet). Reading Excel sheets of our own
+  format needs no edge function at all.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

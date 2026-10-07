@@ -9850,4 +9850,352 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get akFreeTierNote =>
       'A free-tier key has per-minute and per-day limits and stops until the limit resets. What is sent may be used to improve Google\'s services. A paid key whose prepaid credits are used up stops until they are topped up.';
+
+  @override
+  String get featMasterStockImport => 'Products and stock from a file';
+
+  @override
+  String get featMasterStockImportDesc =>
+      'One file into ① the product master and ② the stock in the product library. Stops on any problem, to check by hand or in Excel';
+
+  @override
+  String get pmMasterStock => 'Products and stock from a file (2 steps)';
+
+  @override
+  String get pmMasterStockDesc =>
+      '① product master (supplier names, English names…) → ② stock. Stops on any problem and offers other ways';
+
+  @override
+  String get miTitle => 'Products and stock from a file';
+
+  @override
+  String get miIntro =>
+      'Choose a list of the goods and quantities going into the warehouse (Excel, CSV, PDF or a photo): ① the products go into the product master with the supplier\'s and English names, then ② the quantities are added to the stock in the product library by JAN. If the reading has any problem, nothing is registered and other ways are offered.';
+
+  @override
+  String get miStepFile => 'File';
+
+  @override
+  String get miStepMaster => '① Product master';
+
+  @override
+  String get miStepStock => '② Stock';
+
+  @override
+  String get miPick => 'Choose a file';
+
+  @override
+  String get miReading => 'Reading…';
+
+  @override
+  String get miRegistering => 'Registering in the product master…';
+
+  @override
+  String get miApplying => 'Adding to the stock…';
+
+  @override
+  String get miStoppedTitle => 'Stopped: the file has problems';
+
+  @override
+  String get miStoppedBody =>
+      'Nothing has been registered in the product master or the stock. Carry on in one of these ways.';
+
+  @override
+  String miProblemsCount(int n) {
+    return '$n problems stopped it';
+  }
+
+  @override
+  String miLine(int n) {
+    return 'Line $n';
+  }
+
+  @override
+  String get miFile => 'The whole file';
+
+  @override
+  String get miPbJanMissing => 'No JAN';
+
+  @override
+  String miPbJanInvalid(String value) {
+    return 'The JAN is not valid ($value)';
+  }
+
+  @override
+  String miPbJanDuplicate(String value) {
+    return 'The same JAN appears twice ($value)';
+  }
+
+  @override
+  String get miPbNameMissing => 'No product name';
+
+  @override
+  String miPbQtyInvalid(String value) {
+    return 'The quantity is not a whole number ($value)';
+  }
+
+  @override
+  String get miPbQtyMissing => 'No quantity (0 is added to the stock)';
+
+  @override
+  String get miPbAiDisagree => 'The AI read this line two different ways';
+
+  @override
+  String get miPbTotals => 'The document\'s total does not match its lines';
+
+  @override
+  String get miPbUnverified =>
+      'Some lines were read two different ways by the AI';
+
+  @override
+  String get miPbNoLines => 'No product lines were found';
+
+  @override
+  String get miPbNameEnMissing => 'No English name';
+
+  @override
+  String miPbReadFailed(String message) {
+    return 'The file could not be read: $message';
+  }
+
+  @override
+  String get miWayManual => 'Check and correct by hand';
+
+  @override
+  String get miWayManualDesc =>
+      'Go through the reading line by line on screen and correct it. Lines can be added or removed.';
+
+  @override
+  String get miWayExcel => 'Turn the reading into Excel and check it';
+
+  @override
+  String get miWayExcelDesc =>
+      'The reading becomes an Excel sheet, with the cells to check in yellow. Correct and save it in Excel, then choose it with \"Choose the checked Excel\". The original file and the sheet are kept with this import and can be downloaded later.';
+
+  @override
+  String get miWayTemplate => 'Download an Excel sheet to fill in';
+
+  @override
+  String get miWayTemplateDesc =>
+      'When nothing could be read, fill in an empty sheet by hand and choose it with \"Choose the checked Excel\".';
+
+  @override
+  String get miPickCorrected => 'Choose the checked Excel';
+
+  @override
+  String get miRetryRead => 'Read again';
+
+  @override
+  String get miCancel => 'Cancel this import';
+
+  @override
+  String get miExcelSaved =>
+      'The Excel sheet is saved. Once checked and corrected, choose it with \"Choose the checked Excel\".';
+
+  @override
+  String get miNotOurSheet => 'This sheet has no \"JANコード\" column';
+
+  @override
+  String get miDownloadOriginal => 'Original file';
+
+  @override
+  String get miDownloadConverted => 'Converted Excel';
+
+  @override
+  String get miDownloadCorrected => 'Checked Excel';
+
+  @override
+  String get miDownloaded => 'Downloaded';
+
+  @override
+  String get miUploadFailed =>
+      'The file could not be kept (registration carries on)';
+
+  @override
+  String get miManualTitle => 'Line by line';
+
+  @override
+  String get miManualHint =>
+      'Correct the highlighted fields. A JAN and a name are required. The quantity is what is added to the stock.';
+
+  @override
+  String get miSuggestEn => 'Suggest English names';
+
+  @override
+  String get miAddLine => 'Add a line';
+
+  @override
+  String get miDeleteLine => 'Remove this line';
+
+  @override
+  String get miRegisterChecked => 'Register these in the product master';
+
+  @override
+  String get miBack => 'Back';
+
+  @override
+  String get miFinish => 'Done';
+
+  @override
+  String get miFieldJan => 'JAN';
+
+  @override
+  String get miFieldSupplierName => 'Supplier\'s product name';
+
+  @override
+  String get miFieldName => 'Our product name (blank: the supplier\'s)';
+
+  @override
+  String miFieldNameKnown(String name) {
+    return 'Our product name (now: $name)';
+  }
+
+  @override
+  String get miFieldNameEn => 'English name';
+
+  @override
+  String get miFieldMaker => 'Maker';
+
+  @override
+  String get miFieldCode => 'Item code';
+
+  @override
+  String get miFieldQty => 'Quantity';
+
+  @override
+  String get miFieldUnit => 'Unit';
+
+  @override
+  String miMasterDone(int created, int updated, int mapped) {
+    return 'Registered in the product master ($created new, $updated updated, $mapped supplier names)';
+  }
+
+  @override
+  String miMasterSummary(int created, int updated) {
+    return 'Product master: $created new, $updated updated';
+  }
+
+  @override
+  String get miStockTitle => '② Into the stock of the product library';
+
+  @override
+  String get miStockIntro =>
+      'Each product is found by JAN and its quantity added to the stock there now. If the stock now is wrong, correct it first. The stock found, the corrected figure, what was added and the total are all kept.';
+
+  @override
+  String get miWarehouse => 'Warehouse';
+
+  @override
+  String get miChooseWarehouse => 'Choose the warehouse for the stock';
+
+  @override
+  String get miNeedAdjust =>
+      'Adding to the stock needs the stock adjustment permission';
+
+  @override
+  String get miOnHandNow => 'Stock now';
+
+  @override
+  String get miOnHandFix => 'Correct the stock now';
+
+  @override
+  String get miAddQty => 'Add';
+
+  @override
+  String get miTotal => 'Total';
+
+  @override
+  String miSupplierCalls(String name) {
+    return 'Supplier: $name';
+  }
+
+  @override
+  String miApplyStock(int n) {
+    return 'Add $n lines to the stock';
+  }
+
+  @override
+  String get miLater => 'Later';
+
+  @override
+  String miStockDone(int lines, int added) {
+    return 'Added to the stock ($lines lines, $added in all)';
+  }
+
+  @override
+  String miResultLine(String before, String added, String after) {
+    return 'Was $before + $added added = $after';
+  }
+
+  @override
+  String miResultLineFixed(
+      String before, String set, String added, String after) {
+    return 'Was $before → corrected to $set + $added added = $after';
+  }
+
+  @override
+  String get miNew => 'New';
+
+  @override
+  String get miUpdated => 'Updated';
+
+  @override
+  String get miHistory => 'Imports';
+
+  @override
+  String get miHistoryEmpty => 'No imports yet';
+
+  @override
+  String get miStatusReading => 'Reading';
+
+  @override
+  String get miStatusStopped => 'Stopped (nothing registered)';
+
+  @override
+  String get miStatusMasterDone => 'In the master; stock not yet added';
+
+  @override
+  String get miStatusStockDone => 'Stock added';
+
+  @override
+  String get miStatusCancelled => 'Cancelled';
+
+  @override
+  String get miOpenStock => 'Add to the stock';
+
+  @override
+  String get miOpenResult => 'See the result';
+
+  @override
+  String miLinesCount(int n) {
+    return '$n lines';
+  }
+
+  @override
+  String get miSheetName => 'Products';
+
+  @override
+  String get miSetOnHand => 'Change the stock';
+
+  @override
+  String miSetOnHandTitle(String name) {
+    return 'Stock of $name';
+  }
+
+  @override
+  String get miSetOnHandHint =>
+      'Enter the count there is now. The difference is booked as a stock adjustment (correction).';
+
+  @override
+  String miSetOnHandWas(int n) {
+    return 'Was $n';
+  }
+
+  @override
+  String get miSetOnHandNote => 'Note (optional)';
+
+  @override
+  String miSetOnHandDone(int before, int after) {
+    return 'Stock changed from $before to $after';
+  }
 }

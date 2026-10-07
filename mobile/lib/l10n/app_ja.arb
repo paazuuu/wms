@@ -8532,5 +8532,260 @@
   "akModelHint": "空欄ならサーバーの既定のモデル",
   "akActivateNow": "登録したらすぐにこのキーを使う",
   "akNeedLabelKey": "名前とAPIキーを入れてください",
-  "akFreeTierNote": "無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。"
+  "akFreeTierNote": "無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。",
+  "featMasterStockImport": "ファイルから商品・在庫登録",
+  "featMasterStockImportDesc": "1つのファイルで①商品マスタ ②商品ライブラリーの在庫まで登録。問題があれば止めて、手動またはExcelで確認",
+  "pmMasterStock": "ファイルから商品と在庫を登録（2段階）",
+  "pmMasterStockDesc": "①商品マスタ（仕入先の商品名・英語名など）→ ②在庫数。問題があれば止めて別の方法を案内します",
+  "miTitle": "ファイルから商品と在庫を登録",
+  "miIntro": "倉庫に入れる商品と数量の一覧（Excel・CSV・PDF・写真）を選ぶと、①商品マスタに仕入先の商品名・英語の商品名などを登録し、②商品ライブラリーの在庫にJANコードで数量を足します。読み取りに問題があるときは、何も登録せずに止めて、ほかの方法を案内します。",
+  "miStepFile": "ファイル",
+  "miStepMaster": "①商品マスタ",
+  "miStepStock": "②在庫",
+  "miPick": "ファイルを選んで登録",
+  "miReading": "読み取っています…",
+  "miRegistering": "商品マスタに登録しています…",
+  "miApplying": "在庫に反映しています…",
+  "miStoppedTitle": "問題があったため、登録を止めました",
+  "miStoppedBody": "商品マスタにも在庫にも、まだ何も登録していません。次のどちらかの方法で続けられます。",
+  "miProblemsCount": "止めた理由: {n}件",
+  "@miProblemsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "miLine": "{n}行目",
+  "@miLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "miFile": "ファイル全体",
+  "miPbJanMissing": "JANコードがありません",
+  "miPbJanInvalid": "JANコードが正しくありません（{value}）",
+  "@miPbJanInvalid": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "miPbJanDuplicate": "同じJANコードが2回あります（{value}）",
+  "@miPbJanDuplicate": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "miPbNameMissing": "商品名がありません",
+  "miPbQtyInvalid": "数量が数字ではありません（{value}）",
+  "@miPbQtyInvalid": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "miPbQtyMissing": "数量がありません（在庫には0を足します）",
+  "miPbAiDisagree": "AIの2回の読み取りが一致しません",
+  "miPbTotals": "書類の合計と明細の合計が合いません",
+  "miPbUnverified": "AIの2回の読み取りが一致しない行があります",
+  "miPbNoLines": "商品の行が見つかりません",
+  "miPbNameEnMissing": "英語の商品名がありません",
+  "miPbReadFailed": "ファイルを読み取れませんでした：{message}",
+  "@miPbReadFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "miWayManual": "手動で見分けて直す",
+  "miWayManualDesc": "読み取った内容を1行ずつ画面で確認・修正します。行の追加・削除もできます。",
+  "miWayExcel": "AIでExcelに変換して確認する",
+  "miWayExcelDesc": "読み取った内容をExcelにします。確認が必要なセルは黄色です。Excelで直して保存し、「確認したExcelを選ぶ」で選び直してください。元のファイルと変換したExcelはこの取込に保存され、あとからダウンロードできます。",
+  "miWayTemplate": "記入用のExcelをダウンロード",
+  "miWayTemplateDesc": "読み取れなかったときは、空のExcelに手で記入して「確認したExcelを選ぶ」で選び直せます。",
+  "miPickCorrected": "確認したExcelを選ぶ",
+  "miRetryRead": "もう一度読み取る",
+  "miCancel": "この取込をやめる",
+  "miExcelSaved": "Excelを保存しました。確認して直したら「確認したExcelを選ぶ」から選んでください。",
+  "miNotOurSheet": "このExcelには「JANコード」の列が見つかりません",
+  "miDownloadOriginal": "元のファイル",
+  "miDownloadConverted": "変換したExcel",
+  "miDownloadCorrected": "確認したExcel",
+  "miDownloaded": "ダウンロードしました",
+  "miUploadFailed": "ファイルを保存できませんでした（登録は続けます）",
+  "miManualTitle": "1行ずつ確認",
+  "miManualHint": "色の付いた項目を直してください。JANコードと商品名は必須です。数量は在庫に足す数です。",
+  "miSuggestEn": "英語名をAIで提案",
+  "miAddLine": "行を追加",
+  "miDeleteLine": "この行を削除",
+  "miRegisterChecked": "この内容で商品マスタに登録",
+  "miBack": "戻る",
+  "miFinish": "完了",
+  "miFieldJan": "JANコード",
+  "miFieldSupplierName": "仕入先の商品名",
+  "miFieldName": "自社の商品名（空なら仕入先の商品名）",
+  "miFieldNameKnown": "自社の商品名（今: {name}）",
+  "@miFieldNameKnown": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "miFieldNameEn": "英語の商品名",
+  "miFieldMaker": "メーカー",
+  "miFieldCode": "品番",
+  "miFieldQty": "数量",
+  "miFieldUnit": "単位",
+  "miMasterDone": "商品マスタに登録しました（新規 {created}・更新 {updated}・仕入先の商品名 {mapped}）",
+  "@miMasterDone": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "mapped": {
+        "type": "int"
+      }
+    }
+  },
+  "miMasterSummary": "商品マスタ: 新規 {created}・更新 {updated}",
+  "@miMasterSummary": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      }
+    }
+  },
+  "miStockTitle": "②商品ライブラリーの在庫に反映",
+  "miStockIntro": "JANコードで商品を探し、今の在庫に数量を足します。今の在庫が違うときは、先に手で直してから足せます。元の数・直した数・足した数・合計は記録に残ります。",
+  "miWarehouse": "倉庫",
+  "miChooseWarehouse": "在庫を入れる倉庫を選んでください",
+  "miNeedAdjust": "在庫に反映するには「在庫調整」の権限が必要です",
+  "miOnHandNow": "今の在庫",
+  "miOnHandFix": "今の在庫を手で直す",
+  "miAddQty": "足す数",
+  "miTotal": "合計",
+  "miSupplierCalls": "仕入先: {name}",
+  "@miSupplierCalls": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "miApplyStock": "{n}件を在庫に反映",
+  "@miApplyStock": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "miLater": "あとで反映する",
+  "miStockDone": "在庫に反映しました（{lines}件・合計 {added}個を追加）",
+  "@miStockDone": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "added": {
+        "type": "int"
+      }
+    }
+  },
+  "miResultLine": "元の在庫 {before} ＋ 追加 {added} ＝ {after}",
+  "@miResultLine": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "added": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "miResultLineFixed": "元の在庫 {before} → 手で直して {set} ＋ 追加 {added} ＝ {after}",
+  "@miResultLineFixed": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "set": {
+        "type": "String"
+      },
+      "added": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "miNew": "新規",
+  "miUpdated": "既存を更新",
+  "miHistory": "取込履歴",
+  "miHistoryEmpty": "まだ取込はありません",
+  "miStatusReading": "読み取り中",
+  "miStatusStopped": "停止（未登録）",
+  "miStatusMasterDone": "商品マスタ登録済み・在庫は未反映",
+  "miStatusStockDone": "在庫まで反映済み",
+  "miStatusCancelled": "中止",
+  "miOpenStock": "在庫に反映する",
+  "miOpenResult": "結果を見る",
+  "miLinesCount": "{n}行",
+  "@miLinesCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "miSheetName": "商品と数量",
+  "miSetOnHand": "在庫数を変更",
+  "miSetOnHandTitle": "「{name}」の在庫数",
+  "@miSetOnHandTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "miSetOnHandHint": "今ある数を入力します。前との差は「在庫調整（手動修正）」として記録されます。",
+  "miSetOnHandWas": "変更前: {n}",
+  "@miSetOnHandWas": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "miSetOnHandNote": "メモ（任意）",
+  "miSetOnHandDone": "在庫数を {before} → {after} に変更しました",
+  "@miSetOnHandDone": {
+    "placeholders": {
+      "before": {
+        "type": "int"
+      },
+      "after": {
+        "type": "int"
+      }
+    }
+  }
 }

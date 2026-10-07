@@ -17478,6 +17478,601 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。'**
   String get akFreeTierNote;
+
+  /// No description provided for @featMasterStockImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから商品・在庫登録'**
+  String get featMasterStockImport;
+
+  /// No description provided for @featMasterStockImportDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'1つのファイルで①商品マスタ ②商品ライブラリーの在庫まで登録。問題があれば止めて、手動またはExcelで確認'**
+  String get featMasterStockImportDesc;
+
+  /// No description provided for @pmMasterStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから商品と在庫を登録（2段階）'**
+  String get pmMasterStock;
+
+  /// No description provided for @pmMasterStockDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'①商品マスタ（仕入先の商品名・英語名など）→ ②在庫数。問題があれば止めて別の方法を案内します'**
+  String get pmMasterStockDesc;
+
+  /// No description provided for @miTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから商品と在庫を登録'**
+  String get miTitle;
+
+  /// No description provided for @miIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫に入れる商品と数量の一覧（Excel・CSV・PDF・写真）を選ぶと、①商品マスタに仕入先の商品名・英語の商品名などを登録し、②商品ライブラリーの在庫にJANコードで数量を足します。読み取りに問題があるときは、何も登録せずに止めて、ほかの方法を案内します。'**
+  String get miIntro;
+
+  /// No description provided for @miStepFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル'**
+  String get miStepFile;
+
+  /// No description provided for @miStepMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'①商品マスタ'**
+  String get miStepMaster;
+
+  /// No description provided for @miStepStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'②在庫'**
+  String get miStepStock;
+
+  /// No description provided for @miPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選んで登録'**
+  String get miPick;
+
+  /// No description provided for @miReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取っています…'**
+  String get miReading;
+
+  /// No description provided for @miRegistering.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタに登録しています…'**
+  String get miRegistering;
+
+  /// No description provided for @miApplying.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に反映しています…'**
+  String get miApplying;
+
+  /// No description provided for @miStoppedTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'問題があったため、登録を止めました'**
+  String get miStoppedTitle;
+
+  /// No description provided for @miStoppedBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタにも在庫にも、まだ何も登録していません。次のどちらかの方法で続けられます。'**
+  String get miStoppedBody;
+
+  /// No description provided for @miProblemsCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'止めた理由: {n}件'**
+  String miProblemsCount(int n);
+
+  /// No description provided for @miLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行目'**
+  String miLine(int n);
+
+  /// No description provided for @miFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル全体'**
+  String get miFile;
+
+  /// No description provided for @miPbJanMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードがありません'**
+  String get miPbJanMissing;
+
+  /// No description provided for @miPbJanInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードが正しくありません（{value}）'**
+  String miPbJanInvalid(String value);
+
+  /// No description provided for @miPbJanDuplicate.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じJANコードが2回あります（{value}）'**
+  String miPbJanDuplicate(String value);
+
+  /// No description provided for @miPbNameMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名がありません'**
+  String get miPbNameMissing;
+
+  /// No description provided for @miPbQtyInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量が数字ではありません（{value}）'**
+  String miPbQtyInvalid(String value);
+
+  /// No description provided for @miPbQtyMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量がありません（在庫には0を足します）'**
+  String get miPbQtyMissing;
+
+  /// No description provided for @miPbAiDisagree.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの2回の読み取りが一致しません'**
+  String get miPbAiDisagree;
+
+  /// No description provided for @miPbTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の合計と明細の合計が合いません'**
+  String get miPbTotals;
+
+  /// No description provided for @miPbUnverified.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの2回の読み取りが一致しない行があります'**
+  String get miPbUnverified;
+
+  /// No description provided for @miPbNoLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の行が見つかりません'**
+  String get miPbNoLines;
+
+  /// No description provided for @miPbNameEnMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語の商品名がありません'**
+  String get miPbNameEnMissing;
+
+  /// No description provided for @miPbReadFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを読み取れませんでした：{message}'**
+  String miPbReadFailed(String message);
+
+  /// No description provided for @miWayManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動で見分けて直す'**
+  String get miWayManual;
+
+  /// No description provided for @miWayManualDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った内容を1行ずつ画面で確認・修正します。行の追加・削除もできます。'**
+  String get miWayManualDesc;
+
+  /// No description provided for @miWayExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIでExcelに変換して確認する'**
+  String get miWayExcel;
+
+  /// No description provided for @miWayExcelDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った内容をExcelにします。確認が必要なセルは黄色です。Excelで直して保存し、「確認したExcelを選ぶ」で選び直してください。元のファイルと変換したExcelはこの取込に保存され、あとからダウンロードできます。'**
+  String get miWayExcelDesc;
+
+  /// No description provided for @miWayTemplate.
+  ///
+  /// In ja, this message translates to:
+  /// **'記入用のExcelをダウンロード'**
+  String get miWayTemplate;
+
+  /// No description provided for @miWayTemplateDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取れなかったときは、空のExcelに手で記入して「確認したExcelを選ぶ」で選び直せます。'**
+  String get miWayTemplateDesc;
+
+  /// No description provided for @miPickCorrected.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認したExcelを選ぶ'**
+  String get miPickCorrected;
+
+  /// No description provided for @miRetryRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一度読み取る'**
+  String get miRetryRead;
+
+  /// No description provided for @miCancel.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取込をやめる'**
+  String get miCancel;
+
+  /// No description provided for @miExcelSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelを保存しました。確認して直したら「確認したExcelを選ぶ」から選んでください。'**
+  String get miExcelSaved;
+
+  /// No description provided for @miNotOurSheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'このExcelには「JANコード」の列が見つかりません'**
+  String get miNotOurSheet;
+
+  /// No description provided for @miDownloadOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイル'**
+  String get miDownloadOriginal;
+
+  /// No description provided for @miDownloadConverted.
+  ///
+  /// In ja, this message translates to:
+  /// **'変換したExcel'**
+  String get miDownloadConverted;
+
+  /// No description provided for @miDownloadCorrected.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認したExcel'**
+  String get miDownloadCorrected;
+
+  /// No description provided for @miDownloaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロードしました'**
+  String get miDownloaded;
+
+  /// No description provided for @miUploadFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを保存できませんでした（登録は続けます）'**
+  String get miUploadFailed;
+
+  /// No description provided for @miManualTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'1行ずつ確認'**
+  String get miManualTitle;
+
+  /// No description provided for @miManualHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'色の付いた項目を直してください。JANコードと商品名は必須です。数量は在庫に足す数です。'**
+  String get miManualHint;
+
+  /// No description provided for @miSuggestEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語名をAIで提案'**
+  String get miSuggestEn;
+
+  /// No description provided for @miAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'行を追加'**
+  String get miAddLine;
+
+  /// No description provided for @miDeleteLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行を削除'**
+  String get miDeleteLine;
+
+  /// No description provided for @miRegisterChecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'この内容で商品マスタに登録'**
+  String get miRegisterChecked;
+
+  /// No description provided for @miBack.
+  ///
+  /// In ja, this message translates to:
+  /// **'戻る'**
+  String get miBack;
+
+  /// No description provided for @miFinish.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get miFinish;
+
+  /// No description provided for @miFieldJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get miFieldJan;
+
+  /// No description provided for @miFieldSupplierName.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の商品名'**
+  String get miFieldSupplierName;
+
+  /// No description provided for @miFieldName.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の商品名（空なら仕入先の商品名）'**
+  String get miFieldName;
+
+  /// No description provided for @miFieldNameKnown.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の商品名（今: {name}）'**
+  String miFieldNameKnown(String name);
+
+  /// No description provided for @miFieldNameEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'英語の商品名'**
+  String get miFieldNameEn;
+
+  /// No description provided for @miFieldMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get miFieldMaker;
+
+  /// No description provided for @miFieldCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番'**
+  String get miFieldCode;
+
+  /// No description provided for @miFieldQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get miFieldQty;
+
+  /// No description provided for @miFieldUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get miFieldUnit;
+
+  /// No description provided for @miMasterDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタに登録しました（新規 {created}・更新 {updated}・仕入先の商品名 {mapped}）'**
+  String miMasterDone(int created, int updated, int mapped);
+
+  /// No description provided for @miMasterSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ: 新規 {created}・更新 {updated}'**
+  String miMasterSummary(int created, int updated);
+
+  /// No description provided for @miStockTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'②商品ライブラリーの在庫に反映'**
+  String get miStockTitle;
+
+  /// No description provided for @miStockIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードで商品を探し、今の在庫に数量を足します。今の在庫が違うときは、先に手で直してから足せます。元の数・直した数・足した数・合計は記録に残ります。'**
+  String get miStockIntro;
+
+  /// No description provided for @miWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get miWarehouse;
+
+  /// No description provided for @miChooseWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を入れる倉庫を選んでください'**
+  String get miChooseWarehouse;
+
+  /// No description provided for @miNeedAdjust.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に反映するには「在庫調整」の権限が必要です'**
+  String get miNeedAdjust;
+
+  /// No description provided for @miOnHandNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の在庫'**
+  String get miOnHandNow;
+
+  /// No description provided for @miOnHandFix.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の在庫を手で直す'**
+  String get miOnHandFix;
+
+  /// No description provided for @miAddQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'足す数'**
+  String get miAddQty;
+
+  /// No description provided for @miTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get miTotal;
+
+  /// No description provided for @miSupplierCalls.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先: {name}'**
+  String miSupplierCalls(String name);
+
+  /// No description provided for @miApplyStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件を在庫に反映'**
+  String miApplyStock(int n);
+
+  /// No description provided for @miLater.
+  ///
+  /// In ja, this message translates to:
+  /// **'あとで反映する'**
+  String get miLater;
+
+  /// No description provided for @miStockDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に反映しました（{lines}件・合計 {added}個を追加）'**
+  String miStockDone(int lines, int added);
+
+  /// No description provided for @miResultLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'元の在庫 {before} ＋ 追加 {added} ＝ {after}'**
+  String miResultLine(String before, String added, String after);
+
+  /// No description provided for @miResultLineFixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'元の在庫 {before} → 手で直して {set} ＋ 追加 {added} ＝ {after}'**
+  String miResultLineFixed(
+      String before, String set, String added, String after);
+
+  /// No description provided for @miNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新規'**
+  String get miNew;
+
+  /// No description provided for @miUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'既存を更新'**
+  String get miUpdated;
+
+  /// No description provided for @miHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込履歴'**
+  String get miHistory;
+
+  /// No description provided for @miHistoryEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ取込はありません'**
+  String get miHistoryEmpty;
+
+  /// No description provided for @miStatusReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り中'**
+  String get miStatusReading;
+
+  /// No description provided for @miStatusStopped.
+  ///
+  /// In ja, this message translates to:
+  /// **'停止（未登録）'**
+  String get miStatusStopped;
+
+  /// No description provided for @miStatusMasterDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタ登録済み・在庫は未反映'**
+  String get miStatusMasterDone;
+
+  /// No description provided for @miStatusStockDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫まで反映済み'**
+  String get miStatusStockDone;
+
+  /// No description provided for @miStatusCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'中止'**
+  String get miStatusCancelled;
+
+  /// No description provided for @miOpenStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に反映する'**
+  String get miOpenStock;
+
+  /// No description provided for @miOpenResult.
+  ///
+  /// In ja, this message translates to:
+  /// **'結果を見る'**
+  String get miOpenResult;
+
+  /// No description provided for @miLinesCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行'**
+  String miLinesCount(int n);
+
+  /// No description provided for @miSheetName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品と数量'**
+  String get miSheetName;
+
+  /// No description provided for @miSetOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫数を変更'**
+  String get miSetOnHand;
+
+  /// No description provided for @miSetOnHandTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」の在庫数'**
+  String miSetOnHandTitle(String name);
+
+  /// No description provided for @miSetOnHandHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'今ある数を入力します。前との差は「在庫調整（手動修正）」として記録されます。'**
+  String get miSetOnHandHint;
+
+  /// No description provided for @miSetOnHandWas.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更前: {n}'**
+  String miSetOnHandWas(int n);
+
+  /// No description provided for @miSetOnHandNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get miSetOnHandNote;
+
+  /// No description provided for @miSetOnHandDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫数を {before} → {after} に変更しました'**
+  String miSetOnHandDone(int before, int after);
 }
 
 class _AppLocalizationsDelegate

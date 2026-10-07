@@ -25,6 +25,7 @@ import '../../../core/ui/fields_dialog.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../inbound/presentation/product_inbound_card.dart';
+import '../../master_import/presentation/master_imports_screen.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
 /// units (0059), its lots and serials (0060), and how this warehouse handles it
@@ -1714,6 +1715,14 @@ class _WarehouseSettingsCard extends ConsumerWidget {
               onPressed: () => _clear(context, ref, warehouseId),
             ),
       children: [
+        // The stock here, correctable by hand (0138).
+        ProductOnHandRow(
+          warehouseId: warehouseId,
+          janCode: product.janCode,
+          name: product.name,
+          onChanged: () => ref.invalidate(warehouseProductProvider(product.id)),
+        ),
+        const SizedBox(height: AppSpacing.xs),
         async.when(
           loading: () => const LinearProgressIndicator(),
           error: (e, _) => Text('$e',

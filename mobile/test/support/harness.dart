@@ -4,6 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
+import 'package:wms_mobile/features/master_import/domain/master_import.dart';
+import 'package:wms_mobile/features/master_import/presentation/master_imports_screen.dart';
 import 'package:wms_mobile/features/company/application/company_providers.dart';
 import 'package:wms_mobile/features/company/data/company_repository.dart';
 import 'package:wms_mobile/features/company/domain/company_profile.dart';
@@ -178,6 +181,8 @@ List<Override> _defaultOverrides() => [
       fakeScanModeOverride(),
       // 仕入先ファイル起点の入荷 (0134), in memory.
       inboundRepositoryProvider.overrideWithValue(FakeInboundRepository()),
+      // ファイルから商品・在庫登録 (0138), in memory.
+      masterImportRepositoryProvider.overrideWithValue(FakeMasterImportRepository()),
       fakeDashboardViewOverride(),
       roleDashboardRepositoryProvider.overrideWithValue(FakeRoleDashboardRepository()),
       supabaseSessionStorageProvider
@@ -273,6 +278,9 @@ Future<void> pumpAppWith(
           evidenceRepositoryProvider.overrideWithValue(FakeEvidenceRepository()),
           // What came in for a product (0135): nothing here.
           productInboundHistoryProvider.overrideWith((ref, productId) async => const ProductInboundHistory()),
+          // A product's stock for the hand correction (0138): none here.
+          productOnHandProvider.overrideWith((ref, key) async => 0),
+          stockCanAdjustProvider.overrideWithValue(false),
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(canManageProducts),
@@ -5322,4 +5330,147 @@ class FakeInboundRepository implements InboundRepository {
 
   @override
   Future<ApiResult<ProductInboundHistory>> productHistory(int productId) async => ApiSuccess(history);
+}
+
+/// 0138's import in memory: [readResult] is what reading a file gives;
+/// commit applies the same checks the server does, and the stock stage adds
+/// to [onHandByJan] the way the ledger would.
+class FakeMasterImportRepository implements MasterImportRepository {
+  FakeMasterImportRepository({this.readResult, this.readFailure, Map<String, int>? onHandByJan, this.imports = const []})
+      : onHandByJan = onHandByJan ?? {};
+
+  MasterRead? readResult;
+  String? readFailure;
+  final Map<String, int> onHandByJan;
+  List<MasterImport> imports;
+
+  int reads = 0;
+  final List<List<MasterLine>> commits = [];
+  final List<(String kind, String name, Uint8List bytes)> kept = [];
+  final List<List<MasterProblem>> stops = [];
+  final List<List<Map<String, dynamic>>> stockApplied = [];
+  final List<(String, int)> setOnHands = [];
+  List<MasterImportLine> _lines = const [];
+  MasterImportStatus _status = MasterImportStatus.reading;
+  int? _warehouseId;
+
+  @override
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes) async {
+    reads++;
+    if (readFailure != null) return ApiFailure(message: readFailure!);
+    return ApiSuccess(readResult ?? const MasterRead(lines: []));
+  }
+
+  @override
+  Future<ApiResult<int>> start({required String fileName, String? contentType, String? source, int? documentId, int? supplierId}) async =>
+      const ApiSuccess(7);
+
+  @override
+  Future<ApiResult<String>> keepFile(int importId, String kind, String fileName, Uint8List bytes, String contentType) async {
+    kept.add((kind, fileName, bytes));
+    return ApiSuccess('imports/$importId/$kind-$fileName');
+  }
+
+  @override
+  Future<ApiResult<bool>> stop(int importId, List<MasterProblem> problems, int lineCount) async {
+    stops.add(problems);
+    _status = MasterImportStatus.stopped;
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> cancel(int importId) async => const ApiSuccess(true);
+
+  @override
+  Future<ApiResult<MasterCommitResult>> commit(int importId, List<MasterLine> lines, {int? supplierId}) async {
+    final problems = checkMasterLines(lines, checked: true).where((p) => p.blocking).toList();
+    if (problems.isNotEmpty) return ApiSuccess(MasterCommitResult(ok: false, problems: problems));
+    commits.add(lines);
+    _status = MasterImportStatus.masterDone;
+    _lines = [
+      for (final l in lines)
+        MasterImportLine(
+          lineNo: l.lineNo,
+          janCode: l.jan,
+          productId: 100 + l.lineNo,
+          name: l.name.isEmpty ? (l.knownName ?? l.supplierName) : l.name,
+          nameEn: l.nameEn.isEmpty ? null : l.nameEn,
+          supplierName: l.supplierName,
+          quantity: l.quantityValue ?? 0,
+          masterStatus: l.knownProductId == null ? 'new' : 'updated',
+        ),
+    ];
+    final created = lines.where((l) => l.knownProductId == null).length;
+    return ApiSuccess(MasterCommitResult(ok: true, created: created, updated: lines.length - created, mapped: 0));
+  }
+
+  @override
+  Future<ApiResult<MasterImport>> detail(int importId, {int? warehouseId}) async => ApiSuccess(MasterImport(
+        id: importId,
+        status: _status,
+        warehouseName: _warehouseId == null ? null : '本社倉庫',
+        stockLines: _status == MasterImportStatus.stockDone ? _lines.length : 0,
+        stockAdded: _status == MasterImportStatus.stockDone ? _lines.fold(0, (s, l) => s + (l.added ?? 0)) : 0,
+        lines: [
+          for (final l in _lines)
+            MasterImportLine(
+              lineNo: l.lineNo,
+              janCode: l.janCode,
+              productId: l.productId,
+              name: l.name,
+              nameEn: l.nameEn,
+              supplierName: l.supplierName,
+              quantity: l.quantity,
+              masterStatus: l.masterStatus,
+              onHandBefore: l.onHandBefore,
+              onHandSet: l.onHandSet,
+              added: l.added,
+              onHandAfter: l.onHandAfter,
+              onHandNow: warehouseId == null ? null : onHandByJan[l.janCode] ?? 0,
+            ),
+        ],
+      ));
+
+  @override
+  Future<ApiResult<int>> applyStock(int importId, int warehouseId, List<Map<String, dynamic>> lines) async {
+    stockApplied.add(lines);
+    var added = 0;
+    _lines = [
+      for (final l in _lines)
+        () {
+          final e = lines.firstWhere((x) => x['line_no'] == l.lineNo, orElse: () => const {});
+          final before = onHandByJan[l.janCode] ?? 0;
+          final set = e['on_hand_set'] as int?;
+          final q = (e['quantity'] as int?) ?? l.quantity;
+          final after = (set ?? before) + q;
+          onHandByJan[l.janCode] = after;
+          added += q;
+          return MasterImportLine(
+            lineNo: l.lineNo, janCode: l.janCode, productId: l.productId, name: l.name, nameEn: l.nameEn,
+            supplierName: l.supplierName, quantity: q, masterStatus: l.masterStatus,
+            onHandBefore: before, onHandSet: set, added: q, onHandAfter: after,
+          );
+        }(),
+    ];
+    _status = MasterImportStatus.stockDone;
+    _warehouseId = warehouseId;
+    return ApiSuccess(added);
+  }
+
+  @override
+  Future<ApiResult<List<MasterImport>>> list() async => ApiSuccess(imports);
+
+  @override
+  Future<ApiResult<Uint8List>> download(String path) async => ApiSuccess(Uint8List.fromList(path.codeUnits));
+
+  @override
+  Future<ApiResult<int>> onHand(int warehouseId, String janCode) async => ApiSuccess(onHandByJan[janCode] ?? 0);
+
+  @override
+  Future<ApiResult<({int before, int after})>> setOnHand(int warehouseId, String janCode, int quantity, {String? note}) async {
+    final before = onHandByJan[janCode] ?? 0;
+    onHandByJan[janCode] = quantity;
+    setOnHands.add((janCode, quantity));
+    return ApiSuccess((before: before, after: quantity));
+  }
 }

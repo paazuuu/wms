@@ -9596,4 +9596,342 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get akFreeTierNote =>
       '免费额度的密钥有每分钟和每天的次数上限，超过后需等待重置。发送的内容可能被用于改进Google的服务。预付额度用完的付费密钥在充值前无法使用。';
+
+  @override
+  String get featMasterStockImport => '从文件登记商品和库存';
+
+  @override
+  String get featMasterStockImportDesc =>
+      '用一个文件登记①商品主数据 ②商品库的库存。有问题时停止，可手动或用Excel确认';
+
+  @override
+  String get pmMasterStock => '从文件登记商品和库存（2步）';
+
+  @override
+  String get pmMasterStockDesc => '①商品主数据（供应商品名、英文名等）→ ②库存数。有问题时停止并提示其他方法';
+
+  @override
+  String get miTitle => '从文件登记商品和库存';
+
+  @override
+  String get miIntro =>
+      '选择要入库的商品和数量清单（Excel、CSV、PDF、照片）：①把供应商品名、英文品名等登记到商品主数据，②按JAN码把数量加到商品库的库存。读取有问题时不登记任何内容，并提示其他方法。';
+
+  @override
+  String get miStepFile => '文件';
+
+  @override
+  String get miStepMaster => '①商品主数据';
+
+  @override
+  String get miStepStock => '②库存';
+
+  @override
+  String get miPick => '选择文件并登记';
+
+  @override
+  String get miReading => '正在读取…';
+
+  @override
+  String get miRegistering => '正在登记到商品主数据…';
+
+  @override
+  String get miApplying => '正在反映到库存…';
+
+  @override
+  String get miStoppedTitle => '有问题，已停止登记';
+
+  @override
+  String get miStoppedBody => '商品主数据和库存都还没有登记任何内容。可以用以下任一方法继续。';
+
+  @override
+  String miProblemsCount(int n) {
+    return '停止原因：$n项';
+  }
+
+  @override
+  String miLine(int n) {
+    return '第$n行';
+  }
+
+  @override
+  String get miFile => '整个文件';
+
+  @override
+  String get miPbJanMissing => '没有JAN码';
+
+  @override
+  String miPbJanInvalid(String value) {
+    return 'JAN码不正确（$value）';
+  }
+
+  @override
+  String miPbJanDuplicate(String value) {
+    return '同一JAN码出现两次（$value）';
+  }
+
+  @override
+  String get miPbNameMissing => '没有商品名';
+
+  @override
+  String miPbQtyInvalid(String value) {
+    return '数量不是整数（$value）';
+  }
+
+  @override
+  String get miPbQtyMissing => '没有数量（库存加0）';
+
+  @override
+  String get miPbAiDisagree => 'AI两次读取结果不一致';
+
+  @override
+  String get miPbTotals => '单据合计与明细合计不一致';
+
+  @override
+  String get miPbUnverified => '有AI两次读取不一致的行';
+
+  @override
+  String get miPbNoLines => '没有找到商品行';
+
+  @override
+  String get miPbNameEnMissing => '没有英文品名';
+
+  @override
+  String miPbReadFailed(String message) {
+    return '无法读取文件：$message';
+  }
+
+  @override
+  String get miWayManual => '手动确认并修改';
+
+  @override
+  String get miWayManualDesc => '在画面上逐行确认并修改读取内容，也可以增删行。';
+
+  @override
+  String get miWayExcel => '用AI转换成Excel后确认';
+
+  @override
+  String get miWayExcelDesc =>
+      '把读取内容转换成Excel，需要确认的单元格为黄色。在Excel中修改保存后，用\"选择已确认的Excel\"重新选择。原文件和转换的Excel会保存在本次导入中，之后可以下载。';
+
+  @override
+  String get miWayTemplate => '下载填写用Excel';
+
+  @override
+  String get miWayTemplateDesc => '无法读取时，可在空白Excel中手动填写，再用\"选择已确认的Excel\"选择。';
+
+  @override
+  String get miPickCorrected => '选择已确认的Excel';
+
+  @override
+  String get miRetryRead => '重新读取';
+
+  @override
+  String get miCancel => '取消本次导入';
+
+  @override
+  String get miExcelSaved => '已保存Excel。确认修改后，请用\"选择已确认的Excel\"选择。';
+
+  @override
+  String get miNotOurSheet => '此Excel中找不到\"JANコード\"列';
+
+  @override
+  String get miDownloadOriginal => '原文件';
+
+  @override
+  String get miDownloadConverted => '转换的Excel';
+
+  @override
+  String get miDownloadCorrected => '已确认的Excel';
+
+  @override
+  String get miDownloaded => '已下载';
+
+  @override
+  String get miUploadFailed => '无法保存文件（继续登记）';
+
+  @override
+  String get miManualTitle => '逐行确认';
+
+  @override
+  String get miManualHint => '请修改有颜色的项目。JAN码和商品名为必填。数量是要加到库存的数。';
+
+  @override
+  String get miSuggestEn => '用AI建议英文名';
+
+  @override
+  String get miAddLine => '添加行';
+
+  @override
+  String get miDeleteLine => '删除此行';
+
+  @override
+  String get miRegisterChecked => '按此内容登记到商品主数据';
+
+  @override
+  String get miBack => '返回';
+
+  @override
+  String get miFinish => '完成';
+
+  @override
+  String get miFieldJan => 'JAN码';
+
+  @override
+  String get miFieldSupplierName => '供应商品名';
+
+  @override
+  String get miFieldName => '本公司品名（空则用供应商品名）';
+
+  @override
+  String miFieldNameKnown(String name) {
+    return '本公司品名（现在：$name）';
+  }
+
+  @override
+  String get miFieldNameEn => '英文品名';
+
+  @override
+  String get miFieldMaker => '制造商';
+
+  @override
+  String get miFieldCode => '货号';
+
+  @override
+  String get miFieldQty => '数量';
+
+  @override
+  String get miFieldUnit => '单位';
+
+  @override
+  String miMasterDone(int created, int updated, int mapped) {
+    return '已登记到商品主数据（新建 $created・更新 $updated・供应商品名 $mapped）';
+  }
+
+  @override
+  String miMasterSummary(int created, int updated) {
+    return '商品主数据：新建 $created・更新 $updated';
+  }
+
+  @override
+  String get miStockTitle => '②反映到商品库的库存';
+
+  @override
+  String get miStockIntro =>
+      '按JAN码找到商品，把数量加到当前库存。当前库存不对时，可先手动修改再加。原数、修改后的数、追加数和合计都会记录。';
+
+  @override
+  String get miWarehouse => '仓库';
+
+  @override
+  String get miChooseWarehouse => '请选择入库的仓库';
+
+  @override
+  String get miNeedAdjust => '反映到库存需要\"库存调整\"权限';
+
+  @override
+  String get miOnHandNow => '当前库存';
+
+  @override
+  String get miOnHandFix => '手动修改当前库存';
+
+  @override
+  String get miAddQty => '追加数';
+
+  @override
+  String get miTotal => '合计';
+
+  @override
+  String miSupplierCalls(String name) {
+    return '供应商：$name';
+  }
+
+  @override
+  String miApplyStock(int n) {
+    return '将$n项反映到库存';
+  }
+
+  @override
+  String get miLater => '稍后反映';
+
+  @override
+  String miStockDone(int lines, int added) {
+    return '已反映到库存（$lines项，共追加$added个）';
+  }
+
+  @override
+  String miResultLine(String before, String added, String after) {
+    return '原库存 $before ＋ 追加 $added ＝ $after';
+  }
+
+  @override
+  String miResultLineFixed(
+      String before, String set, String added, String after) {
+    return '原库存 $before → 手动改为 $set ＋ 追加 $added ＝ $after';
+  }
+
+  @override
+  String get miNew => '新建';
+
+  @override
+  String get miUpdated => '更新已有';
+
+  @override
+  String get miHistory => '导入记录';
+
+  @override
+  String get miHistoryEmpty => '还没有导入';
+
+  @override
+  String get miStatusReading => '读取中';
+
+  @override
+  String get miStatusStopped => '已停止（未登记）';
+
+  @override
+  String get miStatusMasterDone => '已登记主数据，库存未反映';
+
+  @override
+  String get miStatusStockDone => '已反映到库存';
+
+  @override
+  String get miStatusCancelled => '已取消';
+
+  @override
+  String get miOpenStock => '反映到库存';
+
+  @override
+  String get miOpenResult => '查看结果';
+
+  @override
+  String miLinesCount(int n) {
+    return '$n行';
+  }
+
+  @override
+  String get miSheetName => '商品和数量';
+
+  @override
+  String get miSetOnHand => '修改库存数';
+
+  @override
+  String miSetOnHandTitle(String name) {
+    return '\"$name\"的库存数';
+  }
+
+  @override
+  String get miSetOnHandHint => '输入现有数量。与之前的差额会作为\"库存调整（手动修改）\"记录。';
+
+  @override
+  String miSetOnHandWas(int n) {
+    return '修改前：$n';
+  }
+
+  @override
+  String get miSetOnHandNote => '备注（可选）';
+
+  @override
+  String miSetOnHandDone(int before, int after) {
+    return '库存数已从 $before 改为 $after';
+  }
 }

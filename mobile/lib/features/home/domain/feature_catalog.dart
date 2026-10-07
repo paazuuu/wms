@@ -49,6 +49,7 @@ import '../../transfers/presentation/transfer_list_screen.dart';
 import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
 import '../../inbound/presentation/supplier_product_names_screen.dart';
+import '../../master_import/presentation/master_imports_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -75,6 +76,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _products,
             requiredAnyOf: ['product.view', 'product.manage'],
+          ),
+          // ファイルから商品・在庫登録 (0138): one file into 商品マスタ, then
+          // its quantities onto the stock, stopping on anything doubtful.
+          FeatureEntry(
+            id: 'master_stock_import',
+            icon: Icons.playlist_add_check_outlined,
+            status: FeatureStatus.ready,
+            builder: _masterStockImport,
+            requiredAnyOf: ['product.manage', 'inventory.adjust'],
           ),
           // 価格台帳 (0124): what files and catalogues brought in,
           // with each supplier's terms by branch and period — apart from
@@ -510,6 +520,7 @@ Widget _documentExceptions(BuildContext _) => const DocumentExceptionsScreen();
 Widget _products(BuildContext _) => const ProductListScreen();
 Widget _priceBook(BuildContext _) => const PriceBookScreen();
 Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen();
+Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 Widget _printLanguage(BuildContext _) => const PrintLanguageScreen();

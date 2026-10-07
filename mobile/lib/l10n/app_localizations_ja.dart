@@ -9647,4 +9647,344 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get akFreeTierNote =>
       '無料枠のキーは1分・1日の回数に上限があり、超えると時間が経つまで使えません。送った内容は Google のサービス改善に使われることがあります。前払いのクレジットを使い切った有料キーは、補充するまで使えません。';
+
+  @override
+  String get featMasterStockImport => 'ファイルから商品・在庫登録';
+
+  @override
+  String get featMasterStockImportDesc =>
+      '1つのファイルで①商品マスタ ②商品ライブラリーの在庫まで登録。問題があれば止めて、手動またはExcelで確認';
+
+  @override
+  String get pmMasterStock => 'ファイルから商品と在庫を登録（2段階）';
+
+  @override
+  String get pmMasterStockDesc =>
+      '①商品マスタ（仕入先の商品名・英語名など）→ ②在庫数。問題があれば止めて別の方法を案内します';
+
+  @override
+  String get miTitle => 'ファイルから商品と在庫を登録';
+
+  @override
+  String get miIntro =>
+      '倉庫に入れる商品と数量の一覧（Excel・CSV・PDF・写真）を選ぶと、①商品マスタに仕入先の商品名・英語の商品名などを登録し、②商品ライブラリーの在庫にJANコードで数量を足します。読み取りに問題があるときは、何も登録せずに止めて、ほかの方法を案内します。';
+
+  @override
+  String get miStepFile => 'ファイル';
+
+  @override
+  String get miStepMaster => '①商品マスタ';
+
+  @override
+  String get miStepStock => '②在庫';
+
+  @override
+  String get miPick => 'ファイルを選んで登録';
+
+  @override
+  String get miReading => '読み取っています…';
+
+  @override
+  String get miRegistering => '商品マスタに登録しています…';
+
+  @override
+  String get miApplying => '在庫に反映しています…';
+
+  @override
+  String get miStoppedTitle => '問題があったため、登録を止めました';
+
+  @override
+  String get miStoppedBody => '商品マスタにも在庫にも、まだ何も登録していません。次のどちらかの方法で続けられます。';
+
+  @override
+  String miProblemsCount(int n) {
+    return '止めた理由: $n件';
+  }
+
+  @override
+  String miLine(int n) {
+    return '$n行目';
+  }
+
+  @override
+  String get miFile => 'ファイル全体';
+
+  @override
+  String get miPbJanMissing => 'JANコードがありません';
+
+  @override
+  String miPbJanInvalid(String value) {
+    return 'JANコードが正しくありません（$value）';
+  }
+
+  @override
+  String miPbJanDuplicate(String value) {
+    return '同じJANコードが2回あります（$value）';
+  }
+
+  @override
+  String get miPbNameMissing => '商品名がありません';
+
+  @override
+  String miPbQtyInvalid(String value) {
+    return '数量が数字ではありません（$value）';
+  }
+
+  @override
+  String get miPbQtyMissing => '数量がありません（在庫には0を足します）';
+
+  @override
+  String get miPbAiDisagree => 'AIの2回の読み取りが一致しません';
+
+  @override
+  String get miPbTotals => '書類の合計と明細の合計が合いません';
+
+  @override
+  String get miPbUnverified => 'AIの2回の読み取りが一致しない行があります';
+
+  @override
+  String get miPbNoLines => '商品の行が見つかりません';
+
+  @override
+  String get miPbNameEnMissing => '英語の商品名がありません';
+
+  @override
+  String miPbReadFailed(String message) {
+    return 'ファイルを読み取れませんでした：$message';
+  }
+
+  @override
+  String get miWayManual => '手動で見分けて直す';
+
+  @override
+  String get miWayManualDesc => '読み取った内容を1行ずつ画面で確認・修正します。行の追加・削除もできます。';
+
+  @override
+  String get miWayExcel => 'AIでExcelに変換して確認する';
+
+  @override
+  String get miWayExcelDesc =>
+      '読み取った内容をExcelにします。確認が必要なセルは黄色です。Excelで直して保存し、「確認したExcelを選ぶ」で選び直してください。元のファイルと変換したExcelはこの取込に保存され、あとからダウンロードできます。';
+
+  @override
+  String get miWayTemplate => '記入用のExcelをダウンロード';
+
+  @override
+  String get miWayTemplateDesc =>
+      '読み取れなかったときは、空のExcelに手で記入して「確認したExcelを選ぶ」で選び直せます。';
+
+  @override
+  String get miPickCorrected => '確認したExcelを選ぶ';
+
+  @override
+  String get miRetryRead => 'もう一度読み取る';
+
+  @override
+  String get miCancel => 'この取込をやめる';
+
+  @override
+  String get miExcelSaved => 'Excelを保存しました。確認して直したら「確認したExcelを選ぶ」から選んでください。';
+
+  @override
+  String get miNotOurSheet => 'このExcelには「JANコード」の列が見つかりません';
+
+  @override
+  String get miDownloadOriginal => '元のファイル';
+
+  @override
+  String get miDownloadConverted => '変換したExcel';
+
+  @override
+  String get miDownloadCorrected => '確認したExcel';
+
+  @override
+  String get miDownloaded => 'ダウンロードしました';
+
+  @override
+  String get miUploadFailed => 'ファイルを保存できませんでした（登録は続けます）';
+
+  @override
+  String get miManualTitle => '1行ずつ確認';
+
+  @override
+  String get miManualHint => '色の付いた項目を直してください。JANコードと商品名は必須です。数量は在庫に足す数です。';
+
+  @override
+  String get miSuggestEn => '英語名をAIで提案';
+
+  @override
+  String get miAddLine => '行を追加';
+
+  @override
+  String get miDeleteLine => 'この行を削除';
+
+  @override
+  String get miRegisterChecked => 'この内容で商品マスタに登録';
+
+  @override
+  String get miBack => '戻る';
+
+  @override
+  String get miFinish => '完了';
+
+  @override
+  String get miFieldJan => 'JANコード';
+
+  @override
+  String get miFieldSupplierName => '仕入先の商品名';
+
+  @override
+  String get miFieldName => '自社の商品名（空なら仕入先の商品名）';
+
+  @override
+  String miFieldNameKnown(String name) {
+    return '自社の商品名（今: $name）';
+  }
+
+  @override
+  String get miFieldNameEn => '英語の商品名';
+
+  @override
+  String get miFieldMaker => 'メーカー';
+
+  @override
+  String get miFieldCode => '品番';
+
+  @override
+  String get miFieldQty => '数量';
+
+  @override
+  String get miFieldUnit => '単位';
+
+  @override
+  String miMasterDone(int created, int updated, int mapped) {
+    return '商品マスタに登録しました（新規 $created・更新 $updated・仕入先の商品名 $mapped）';
+  }
+
+  @override
+  String miMasterSummary(int created, int updated) {
+    return '商品マスタ: 新規 $created・更新 $updated';
+  }
+
+  @override
+  String get miStockTitle => '②商品ライブラリーの在庫に反映';
+
+  @override
+  String get miStockIntro =>
+      'JANコードで商品を探し、今の在庫に数量を足します。今の在庫が違うときは、先に手で直してから足せます。元の数・直した数・足した数・合計は記録に残ります。';
+
+  @override
+  String get miWarehouse => '倉庫';
+
+  @override
+  String get miChooseWarehouse => '在庫を入れる倉庫を選んでください';
+
+  @override
+  String get miNeedAdjust => '在庫に反映するには「在庫調整」の権限が必要です';
+
+  @override
+  String get miOnHandNow => '今の在庫';
+
+  @override
+  String get miOnHandFix => '今の在庫を手で直す';
+
+  @override
+  String get miAddQty => '足す数';
+
+  @override
+  String get miTotal => '合計';
+
+  @override
+  String miSupplierCalls(String name) {
+    return '仕入先: $name';
+  }
+
+  @override
+  String miApplyStock(int n) {
+    return '$n件を在庫に反映';
+  }
+
+  @override
+  String get miLater => 'あとで反映する';
+
+  @override
+  String miStockDone(int lines, int added) {
+    return '在庫に反映しました（$lines件・合計 $added個を追加）';
+  }
+
+  @override
+  String miResultLine(String before, String added, String after) {
+    return '元の在庫 $before ＋ 追加 $added ＝ $after';
+  }
+
+  @override
+  String miResultLineFixed(
+      String before, String set, String added, String after) {
+    return '元の在庫 $before → 手で直して $set ＋ 追加 $added ＝ $after';
+  }
+
+  @override
+  String get miNew => '新規';
+
+  @override
+  String get miUpdated => '既存を更新';
+
+  @override
+  String get miHistory => '取込履歴';
+
+  @override
+  String get miHistoryEmpty => 'まだ取込はありません';
+
+  @override
+  String get miStatusReading => '読み取り中';
+
+  @override
+  String get miStatusStopped => '停止（未登録）';
+
+  @override
+  String get miStatusMasterDone => '商品マスタ登録済み・在庫は未反映';
+
+  @override
+  String get miStatusStockDone => '在庫まで反映済み';
+
+  @override
+  String get miStatusCancelled => '中止';
+
+  @override
+  String get miOpenStock => '在庫に反映する';
+
+  @override
+  String get miOpenResult => '結果を見る';
+
+  @override
+  String miLinesCount(int n) {
+    return '$n行';
+  }
+
+  @override
+  String get miSheetName => '商品と数量';
+
+  @override
+  String get miSetOnHand => '在庫数を変更';
+
+  @override
+  String miSetOnHandTitle(String name) {
+    return '「$name」の在庫数';
+  }
+
+  @override
+  String get miSetOnHandHint => '今ある数を入力します。前との差は「在庫調整（手動修正）」として記録されます。';
+
+  @override
+  String miSetOnHandWas(int n) {
+    return '変更前: $n';
+  }
+
+  @override
+  String get miSetOnHandNote => 'メモ（任意）';
+
+  @override
+  String miSetOnHandDone(int before, int after) {
+    return '在庫数を $before → $after に変更しました';
+  }
 }

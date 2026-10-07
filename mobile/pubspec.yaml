@@ -31,6 +31,9 @@ dependencies:
   # Value equality
   equatable: ^2.0.5
   printing: ^5.15.0
+  # Zip for reading and writing .xlsx sheets (master import, 0138)
+  archive: ^4.0.9
+  xml: ^7.0.0
   barcode: ^2.2.9
 
 dev_dependencies:

@@ -17,6 +17,7 @@ import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
+import '../../master_import/presentation/master_import_screen.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../price_book/presentation/price_book_pick_screen.dart';
@@ -143,6 +144,15 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
             child: Text(l10n.pmNewTitle, style: Theme.of(c).textTheme.titleMedium),
           ),
+          // ファイルから商品と在庫を登録 (0138): 商品マスタ first, then the
+          // stock, all from the one file.
+          ListTile(
+            key: const ValueKey('new-master-stock'),
+            leading: const Icon(Icons.playlist_add_check_outlined),
+            title: Text(l10n.pmMasterStock),
+            subtitle: Text(l10n.pmMasterStockDesc),
+            onTap: () => Navigator.pop(c, 'master_stock'),
+          ),
           ListTile(
             key: const ValueKey('new-file'),
             leading: const Icon(Icons.auto_awesome_outlined),
@@ -170,6 +180,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     );
     if (!mounted || choice == null) return;
     switch (choice) {
+      case 'master_stock':
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasterImportScreen()));
       case 'manual':
         await _openForm();
       case 'file':
