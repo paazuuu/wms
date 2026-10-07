@@ -10405,4 +10405,185 @@ class AppLocalizationsEn extends AppLocalizations {
   String obStockSaved(int n) {
     return 'The stock list ($n rows) is saved as Excel';
   }
+
+  @override
+  String get featPurchaseRequest => 'Purchase requests';
+
+  @override
+  String get featPurchaseRequestDesc =>
+      'What we would like to receive, from the master and the stock, as an Excel sheet to ask a supplier';
+
+  @override
+  String get prIntro =>
+      'Pick what you would like from every product in the master, with how many. Set quantities in bulk (a % of stock, the same number, or up to the maximum), choose ranges, exclude, add, or type by hand. The supplier is optional. Save the list, and download it as Excel for the supplier, with columns for them to answer availability, quantity, price and lead time.';
+
+  @override
+  String get prNew => 'New list';
+
+  @override
+  String get prEmpty => 'No lists saved yet';
+
+  @override
+  String prRemoveQ(String number) {
+    return 'Remove $number?';
+  }
+
+  @override
+  String get prSupplier => 'Supplier (optional)';
+
+  @override
+  String get prSupplierNone => 'None';
+
+  @override
+  String get prStockOf => 'Stock of';
+
+  @override
+  String get prAllWarehouses => 'All warehouses';
+
+  @override
+  String get prTitleField => 'Subject';
+
+  @override
+  String get prReplyBy => 'Reply by';
+
+  @override
+  String prReplyByIs(String date) {
+    return 'Reply by $date';
+  }
+
+  @override
+  String get prBulkTitle => 'Set in bulk';
+
+  @override
+  String get prModePercent => '% of stock';
+
+  @override
+  String get prModeFixed => 'Same number';
+
+  @override
+  String get prModeMax => 'Up to max stock';
+
+  @override
+  String get prModePercentHint =>
+      'A share of the stock there now (0 for a product with none).';
+
+  @override
+  String get prModeFixedHint => 'The same number for every product chosen.';
+
+  @override
+  String get prModeMaxHint =>
+      'The warehouse\'s maximum stock (or reorder point) less what is there.';
+
+  @override
+  String get prBulkQty => 'Quantity';
+
+  @override
+  String get prBulkInvalid => 'Enter the bulk number';
+
+  @override
+  String prBulkApplied(int n) {
+    return 'Quantities set on $n products';
+  }
+
+  @override
+  String prApplySelected(int n) {
+    return 'Apply to $n chosen';
+  }
+
+  @override
+  String prApplyVisible(int n) {
+    return 'Apply to $n shown';
+  }
+
+  @override
+  String get prOnlyInList => 'Only those in the list';
+
+  @override
+  String get prOnlySupplier => 'Only this supplier\'s';
+
+  @override
+  String get prRangeMode => 'Range';
+
+  @override
+  String get prRangeHint =>
+      'Range: tap the first and the last product to choose everything between.';
+
+  @override
+  String get prShiftHint =>
+      'Hold Shift to choose everything between this and the last one chosen.';
+
+  @override
+  String get prSelectVisible => 'Choose all shown';
+
+  @override
+  String prSelectedCount(int n) {
+    return '$n chosen';
+  }
+
+  @override
+  String get prInclude => 'Add to the list';
+
+  @override
+  String get prExclude => 'Take out of the list';
+
+  @override
+  String get prClearSelection => 'Clear';
+
+  @override
+  String get prAddManual => 'Add a product by hand';
+
+  @override
+  String get prAddManualOk => 'Add';
+
+  @override
+  String get prManualName => 'Name (required)';
+
+  @override
+  String get prManualNeed => 'Enter a name and a quantity of 1 or more';
+
+  @override
+  String get prManualTag => 'by hand';
+
+  @override
+  String get prNoRows => 'Nothing to show';
+
+  @override
+  String prOnHand(int n) {
+    return 'Stock $n';
+  }
+
+  @override
+  String prReorder(int n) {
+    return 'Reorder at $n';
+  }
+
+  @override
+  String prMax(int n) {
+    return 'Max $n';
+  }
+
+  @override
+  String prTheirs(String text) {
+    return 'Theirs: $text';
+  }
+
+  @override
+  String get prQty => 'Qty';
+
+  @override
+  String get prWithStock => 'Our stock in the sheet';
+
+  @override
+  String get prExcel => 'Download as Excel';
+
+  @override
+  String get prSave => 'Save';
+
+  @override
+  String prSaved(String number, int lines, int units) {
+    return '$number saved ($lines products, $units in all)';
+  }
+
+  @override
+  String get prNothing => 'The list is empty';
 }

@@ -6574,6 +6574,46 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Not covered: two people proposing the same last units at the same moment
   can both pass the check. Packing and shipping still check the stock.
 
+## 0140 — 入荷希望リスト: asking a supplier what they have
+
+- **Where:** 発注 → 入荷希望リスト. It needs `purchase_order.view` or
+  `purchase_order.manage`, or `product.manage`.
+- **Candidates** (`request_candidates(warehouse, supplier)`):
+  - Every product in 商品マスタ, in stock or not, except archived or
+    inactive ones.
+  - Each comes with its stock in one warehouse or in all the warehouses
+    allowed, and that warehouse's min / reorder point / max.
+  - With a supplier chosen, each also shows that supplier's code and name
+    for the product (`supplier_product_names`), and the list can be cut
+    down to that supplier's products.
+- **Setting quantities:**
+  - In bulk, on the chosen rows or on all shown: a percentage of the stock
+    (rounded up, to the nearest or down), the same number for all, or up to
+    the maximum stock (the reorder point when there is no maximum).
+  - Rows are chosen as in a spreadsheet: one at a time, all shown, or a
+    range. For a range, choose the first row, then the last one with Shift
+    held or 範囲選択 on.
+  - Chosen rows are added to the list (a row without a quantity gets the
+    bulk setting's, at least 1) or taken out.
+  - Any quantity can be typed by hand. A product not in the master can be
+    added by hand (name, JAN, maker, code, quantity, unit, note).
+- **Kept lists** (`purchase_requests`, `purchase_request_lines`, numbered
+  REQ-000001):
+  - The supplier is optional.
+  - Each save writes a new revision of the lines, and the earlier ones stay.
+    The database tooling here holds back functions containing DELETE, so
+    nothing is deleted: a removed list is marked `removed`.
+- **Excel to send:**
+  - The sheet is headed 入荷希望リスト（在庫・お見積りのご確認）, with the
+    number, the date, the supplier (御中), the subject, a reply-by date,
+    our sender and a note.
+  - Each line has JAN, name, English name, maker, item code, the supplier's
+    code and name, the quantity wanted and the unit. Yellow columns are left
+    for the supplier to fill in: 在庫の有無, ご用意数量, 単価, 納期, 備考.
+  - Our own stock goes on the sheet only when asked for.
+- Nothing is ordered from here. Everything is SQL plus the app; no edge
+  function needs deploying.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

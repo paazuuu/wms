@@ -52,6 +52,7 @@ import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
 import '../../outbound/presentation/outbound_proposal_screen.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart';
+import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -250,6 +251,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _purchaseOrders,
             requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve'],
+          ),
+          // 入荷希望リスト (0140): what we would like to receive, from the
+          // master and the stock, to ask a supplier about as Excel.
+          FeatureEntry(
+            id: 'purchase_request',
+            icon: Icons.request_page_outlined,
+            status: FeatureStatus.ready,
+            builder: _purchaseRequests,
+            requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'product.manage'],
           ),
           // Order, invoice, delivery and inspection that do not agree (0108):
           // only the differences, so matching lines pass without a look.
@@ -542,6 +552,7 @@ Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen
 Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
+Widget _purchaseRequests(BuildContext _) => const PurchaseRequestsScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();
 Widget _printLanguage(BuildContext _) => const PrintLanguageScreen();

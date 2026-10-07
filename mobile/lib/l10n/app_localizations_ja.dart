@@ -10190,4 +10190,181 @@ class AppLocalizationsJa extends AppLocalizations {
   String obStockSaved(int n) {
     return '在庫一覧（$n件）をExcelで保存しました';
   }
+
+  @override
+  String get featPurchaseRequest => '入荷希望リスト';
+
+  @override
+  String get featPurchaseRequestDesc =>
+      '商品マスタと在庫から欲しい商品と数量をまとめ、仕入先に在庫や見積りを確認するExcelを作成';
+
+  @override
+  String get prIntro =>
+      '商品マスタの全商品から、欲しい商品と数量を選んでリストにします。一括設定（在庫の◯%・一律◯個・最大在庫まで）、範囲選択・除外・追加、手入力もできます。仕入先は任意です。できたリストは保存でき、仕入先に送るExcelとしてダウンロードできます（相手が在庫の有無・数量・単価・納期を記入する欄付き）。';
+
+  @override
+  String get prNew => '新しいリスト';
+
+  @override
+  String get prEmpty => '保存したリストはまだありません';
+
+  @override
+  String prRemoveQ(String number) {
+    return '$number を削除しますか？';
+  }
+
+  @override
+  String get prSupplier => '仕入先（任意）';
+
+  @override
+  String get prSupplierNone => '指定なし';
+
+  @override
+  String get prStockOf => '在庫の対象';
+
+  @override
+  String get prAllWarehouses => 'すべての倉庫';
+
+  @override
+  String get prTitleField => '件名';
+
+  @override
+  String get prReplyBy => '回答期限を選ぶ';
+
+  @override
+  String prReplyByIs(String date) {
+    return '回答期限: $date';
+  }
+
+  @override
+  String get prBulkTitle => '一括設定';
+
+  @override
+  String get prModePercent => '在庫の◯%';
+
+  @override
+  String get prModeFixed => '一律◯個';
+
+  @override
+  String get prModeMax => '最大在庫まで';
+
+  @override
+  String get prModePercentHint => '今の在庫に対する割合です（在庫0の商品は0になります）。';
+
+  @override
+  String get prModeFixedHint => '選んだ商品すべてに同じ数を入れます。';
+
+  @override
+  String get prModeMaxHint => '倉庫の最大在庫（なければ発注点）から今の在庫を引いた数です。';
+
+  @override
+  String get prBulkQty => '数量';
+
+  @override
+  String get prBulkInvalid => '一括設定の数を入れてください';
+
+  @override
+  String prBulkApplied(int n) {
+    return '$n品目に数量を入れました';
+  }
+
+  @override
+  String prApplySelected(int n) {
+    return '選択した$n件に適用';
+  }
+
+  @override
+  String prApplyVisible(int n) {
+    return '表示中の$n件に適用';
+  }
+
+  @override
+  String get prOnlyInList => 'リストに入っている商品だけ';
+
+  @override
+  String get prOnlySupplier => 'この仕入先の商品だけ';
+
+  @override
+  String get prRangeMode => '範囲選択';
+
+  @override
+  String get prRangeHint => '範囲選択: 最初の商品と最後の商品をタップすると、その間をすべて選択します。';
+
+  @override
+  String get prShiftHint => 'Shiftキーを押しながら選ぶと、前に選んだ商品との間をまとめて選択できます。';
+
+  @override
+  String get prSelectVisible => '表示中をすべて選択';
+
+  @override
+  String prSelectedCount(int n) {
+    return '$n件選択中';
+  }
+
+  @override
+  String get prInclude => 'リストに追加';
+
+  @override
+  String get prExclude => 'リストから除外';
+
+  @override
+  String get prClearSelection => '選択を解除';
+
+  @override
+  String get prAddManual => '手入力で商品を追加';
+
+  @override
+  String get prAddManualOk => '追加';
+
+  @override
+  String get prManualName => '品名（必須）';
+
+  @override
+  String get prManualNeed => '品名と1以上の数量を入れてください';
+
+  @override
+  String get prManualTag => '手入力';
+
+  @override
+  String get prNoRows => '表示する商品がありません';
+
+  @override
+  String prOnHand(int n) {
+    return '在庫 $n';
+  }
+
+  @override
+  String prReorder(int n) {
+    return '発注点 $n';
+  }
+
+  @override
+  String prMax(int n) {
+    return '最大 $n';
+  }
+
+  @override
+  String prTheirs(String text) {
+    return '仕入先: $text';
+  }
+
+  @override
+  String get prQty => '希望数';
+
+  @override
+  String get prWithStock => 'Excelに当社在庫を載せる';
+
+  @override
+  String get prExcel => 'Excelでダウンロード';
+
+  @override
+  String get prSave => '保存';
+
+  @override
+  String prSaved(String number, int lines, int units) {
+    return '$number を保存しました（$lines品目・$units個）';
+  }
+
+  @override
+  String get prNothing => 'リストに商品がありません';
 }

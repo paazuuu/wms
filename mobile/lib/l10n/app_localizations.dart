@@ -18427,6 +18427,312 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫一覧（{n}件）をExcelで保存しました'**
   String obStockSaved(int n);
+
+  /// No description provided for @featPurchaseRequest.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷希望リスト'**
+  String get featPurchaseRequest;
+
+  /// No description provided for @featPurchaseRequestDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタと在庫から欲しい商品と数量をまとめ、仕入先に在庫や見積りを確認するExcelを作成'**
+  String get featPurchaseRequestDesc;
+
+  /// No description provided for @prIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品マスタの全商品から、欲しい商品と数量を選んでリストにします。一括設定（在庫の◯%・一律◯個・最大在庫まで）、範囲選択・除外・追加、手入力もできます。仕入先は任意です。できたリストは保存でき、仕入先に送るExcelとしてダウンロードできます（相手が在庫の有無・数量・単価・納期を記入する欄付き）。'**
+  String get prIntro;
+
+  /// No description provided for @prNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しいリスト'**
+  String get prNew;
+
+  /// No description provided for @prEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存したリストはまだありません'**
+  String get prEmpty;
+
+  /// No description provided for @prRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{number} を削除しますか？'**
+  String prRemoveQ(String number);
+
+  /// No description provided for @prSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先（任意）'**
+  String get prSupplier;
+
+  /// No description provided for @prSupplierNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'指定なし'**
+  String get prSupplierNone;
+
+  /// No description provided for @prStockOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の対象'**
+  String get prStockOf;
+
+  /// No description provided for @prAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての倉庫'**
+  String get prAllWarehouses;
+
+  /// No description provided for @prTitleField.
+  ///
+  /// In ja, this message translates to:
+  /// **'件名'**
+  String get prTitleField;
+
+  /// No description provided for @prReplyBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答期限を選ぶ'**
+  String get prReplyBy;
+
+  /// No description provided for @prReplyByIs.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答期限: {date}'**
+  String prReplyByIs(String date);
+
+  /// No description provided for @prBulkTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'一括設定'**
+  String get prBulkTitle;
+
+  /// No description provided for @prModePercent.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の◯%'**
+  String get prModePercent;
+
+  /// No description provided for @prModeFixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'一律◯個'**
+  String get prModeFixed;
+
+  /// No description provided for @prModeMax.
+  ///
+  /// In ja, this message translates to:
+  /// **'最大在庫まで'**
+  String get prModeMax;
+
+  /// No description provided for @prModePercentHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の在庫に対する割合です（在庫0の商品は0になります）。'**
+  String get prModePercentHint;
+
+  /// No description provided for @prModeFixedHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ商品すべてに同じ数を入れます。'**
+  String get prModeFixedHint;
+
+  /// No description provided for @prModeMaxHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫の最大在庫（なければ発注点）から今の在庫を引いた数です。'**
+  String get prModeMaxHint;
+
+  /// No description provided for @prBulkQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get prBulkQty;
+
+  /// No description provided for @prBulkInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'一括設定の数を入れてください'**
+  String get prBulkInvalid;
+
+  /// No description provided for @prBulkApplied.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目に数量を入れました'**
+  String prBulkApplied(int n);
+
+  /// No description provided for @prApplySelected.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択した{n}件に適用'**
+  String prApplySelected(int n);
+
+  /// No description provided for @prApplyVisible.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の{n}件に適用'**
+  String prApplyVisible(int n);
+
+  /// No description provided for @prOnlyInList.
+  ///
+  /// In ja, this message translates to:
+  /// **'リストに入っている商品だけ'**
+  String get prOnlyInList;
+
+  /// No description provided for @prOnlySupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'この仕入先の商品だけ'**
+  String get prOnlySupplier;
+
+  /// No description provided for @prRangeMode.
+  ///
+  /// In ja, this message translates to:
+  /// **'範囲選択'**
+  String get prRangeMode;
+
+  /// No description provided for @prRangeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'範囲選択: 最初の商品と最後の商品をタップすると、その間をすべて選択します。'**
+  String get prRangeHint;
+
+  /// No description provided for @prShiftHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'Shiftキーを押しながら選ぶと、前に選んだ商品との間をまとめて選択できます。'**
+  String get prShiftHint;
+
+  /// No description provided for @prSelectVisible.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中をすべて選択'**
+  String get prSelectVisible;
+
+  /// No description provided for @prSelectedCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件選択中'**
+  String prSelectedCount(int n);
+
+  /// No description provided for @prInclude.
+  ///
+  /// In ja, this message translates to:
+  /// **'リストに追加'**
+  String get prInclude;
+
+  /// No description provided for @prExclude.
+  ///
+  /// In ja, this message translates to:
+  /// **'リストから除外'**
+  String get prExclude;
+
+  /// No description provided for @prClearSelection.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択を解除'**
+  String get prClearSelection;
+
+  /// No description provided for @prAddManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手入力で商品を追加'**
+  String get prAddManual;
+
+  /// No description provided for @prAddManualOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加'**
+  String get prAddManualOk;
+
+  /// No description provided for @prManualName.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名（必須）'**
+  String get prManualName;
+
+  /// No description provided for @prManualNeed.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名と1以上の数量を入れてください'**
+  String get prManualNeed;
+
+  /// No description provided for @prManualTag.
+  ///
+  /// In ja, this message translates to:
+  /// **'手入力'**
+  String get prManualTag;
+
+  /// No description provided for @prNoRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示する商品がありません'**
+  String get prNoRows;
+
+  /// No description provided for @prOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {n}'**
+  String prOnHand(int n);
+
+  /// No description provided for @prReorder.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注点 {n}'**
+  String prReorder(int n);
+
+  /// No description provided for @prMax.
+  ///
+  /// In ja, this message translates to:
+  /// **'最大 {n}'**
+  String prMax(int n);
+
+  /// No description provided for @prTheirs.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先: {text}'**
+  String prTheirs(String text);
+
+  /// No description provided for @prQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'希望数'**
+  String get prQty;
+
+  /// No description provided for @prWithStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelに当社在庫を載せる'**
+  String get prWithStock;
+
+  /// No description provided for @prExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelでダウンロード'**
+  String get prExcel;
+
+  /// No description provided for @prSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get prSave;
+
+  /// No description provided for @prSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{number} を保存しました（{lines}品目・{units}個）'**
+  String prSaved(String number, int lines, int units);
+
+  /// No description provided for @prNothing.
+  ///
+  /// In ja, this message translates to:
+  /// **'リストに商品がありません'**
+  String get prNothing;
 }
 
 class _AppLocalizationsDelegate

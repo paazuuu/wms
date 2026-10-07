@@ -10136,4 +10136,181 @@ class AppLocalizationsZh extends AppLocalizations {
   String obStockSaved(int n) {
     return '已将库存清单（$n条）保存为Excel';
   }
+
+  @override
+  String get featPurchaseRequest => '进货希望清单';
+
+  @override
+  String get featPurchaseRequestDesc =>
+      '根据商品主数据和库存汇总想要的商品和数量，生成向供应商确认库存和报价的Excel';
+
+  @override
+  String get prIntro =>
+      '从商品主数据的全部商品中选择想要的商品和数量做成清单。可批量设置（库存的◯%、统一◯个、补到最大库存）、范围选择、排除、追加，也可手动输入。供应商可选。清单可以保存，并下载为发给供应商的Excel（附有对方填写有无库存、数量、单价、交期的栏）。';
+
+  @override
+  String get prNew => '新清单';
+
+  @override
+  String get prEmpty => '还没有保存的清单';
+
+  @override
+  String prRemoveQ(String number) {
+    return '要删除 $number 吗？';
+  }
+
+  @override
+  String get prSupplier => '供应商（可选）';
+
+  @override
+  String get prSupplierNone => '不指定';
+
+  @override
+  String get prStockOf => '库存对象';
+
+  @override
+  String get prAllWarehouses => '全部仓库';
+
+  @override
+  String get prTitleField => '标题';
+
+  @override
+  String get prReplyBy => '选择回复期限';
+
+  @override
+  String prReplyByIs(String date) {
+    return '回复期限：$date';
+  }
+
+  @override
+  String get prBulkTitle => '批量设置';
+
+  @override
+  String get prModePercent => '库存的◯%';
+
+  @override
+  String get prModeFixed => '统一◯个';
+
+  @override
+  String get prModeMax => '补到最大库存';
+
+  @override
+  String get prModePercentHint => '相对当前库存的比例（库存为0的商品为0）。';
+
+  @override
+  String get prModeFixedHint => '给所选商品全部填入相同数量。';
+
+  @override
+  String get prModeMaxHint => '仓库最大库存（没有则用订货点）减去当前库存。';
+
+  @override
+  String get prBulkQty => '数量';
+
+  @override
+  String get prBulkInvalid => '请输入批量设置的数值';
+
+  @override
+  String prBulkApplied(int n) {
+    return '已为$n个品目填入数量';
+  }
+
+  @override
+  String prApplySelected(int n) {
+    return '应用到所选$n项';
+  }
+
+  @override
+  String prApplyVisible(int n) {
+    return '应用到显示中的$n项';
+  }
+
+  @override
+  String get prOnlyInList => '只显示清单中的商品';
+
+  @override
+  String get prOnlySupplier => '只显示该供应商的商品';
+
+  @override
+  String get prRangeMode => '范围选择';
+
+  @override
+  String get prRangeHint => '范围选择：点击第一个和最后一个商品，选中其间所有商品。';
+
+  @override
+  String get prShiftHint => '按住Shift键选择，可一次选中与上次所选商品之间的全部商品。';
+
+  @override
+  String get prSelectVisible => '选择全部显示';
+
+  @override
+  String prSelectedCount(int n) {
+    return '已选$n项';
+  }
+
+  @override
+  String get prInclude => '加入清单';
+
+  @override
+  String get prExclude => '从清单排除';
+
+  @override
+  String get prClearSelection => '取消选择';
+
+  @override
+  String get prAddManual => '手动添加商品';
+
+  @override
+  String get prAddManualOk => '添加';
+
+  @override
+  String get prManualName => '品名（必填）';
+
+  @override
+  String get prManualNeed => '请输入品名和1以上的数量';
+
+  @override
+  String get prManualTag => '手动';
+
+  @override
+  String get prNoRows => '没有可显示的商品';
+
+  @override
+  String prOnHand(int n) {
+    return '库存 $n';
+  }
+
+  @override
+  String prReorder(int n) {
+    return '订货点 $n';
+  }
+
+  @override
+  String prMax(int n) {
+    return '最大 $n';
+  }
+
+  @override
+  String prTheirs(String text) {
+    return '供应商：$text';
+  }
+
+  @override
+  String get prQty => '希望数';
+
+  @override
+  String get prWithStock => '在Excel中写入本公司库存';
+
+  @override
+  String get prExcel => '下载Excel';
+
+  @override
+  String get prSave => '保存';
+
+  @override
+  String prSaved(String number, int lines, int units) {
+    return '已保存 $number（$lines个品目，$units个）';
+  }
+
+  @override
+  String get prNothing => '清单中没有商品';
 }
