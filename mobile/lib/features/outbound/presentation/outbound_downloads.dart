@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../shipment/application/sender_profile_controller.dart';
 import '../data/outbound_excel.dart';
 import '../data/outbound_repository.dart';
+import '../domain/pricing.dart';
 
 /// Where a file goes: the save dialog (a download on the web), or a test's
 /// list.
@@ -50,6 +51,11 @@ Future<void> downloadShipmentSheet(BuildContext context, WidgetRef ref, int ship
         warehouseName: data.warehouseName,
         carrier: data.carrier,
         trackingNumber: data.trackingNumber,
+        // The prices chosen when it was made; a shipment with prices but no
+        // choice (an imported one) shows its unit price.
+        priceColumns: data.priceColumns.isNotEmpty
+            ? data.priceColumns
+            : [if (data.lines.any((l) => l.unitPrice != null)) PriceColumn.ship],
       );
       await ref.read(saveFileProvider)(shipmentSheetFileName(data.shipmentNumber, data.shipTo?.name), bytes);
       _snack(messenger, l10n.obExcelSaved);

@@ -10476,4 +10476,97 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get slSavedNote => 'AIで調べた値（要確認）';
+
+  @override
+  String get obPriceTitle => '価格（伝票に載せる値段）';
+
+  @override
+  String get obPriceBase => '基準にする列';
+
+  @override
+  String get obPriceRate => '掛け率';
+
+  @override
+  String get obPricePercent => '％';
+
+  @override
+  String get obPriceFormula => '式';
+
+  @override
+  String get obPriceValueInvalid => '掛け率・％を数字で入れてください';
+
+  @override
+  String obFormulaError(String err) {
+    return '式が読めません: $err';
+  }
+
+  @override
+  String obPriceApplied(int n) {
+    return '$n 件の出荷単価を設定しました';
+  }
+
+  @override
+  String obPriceAppliedSkipped(int set, int skipped) {
+    return '$set 件を設定、$skipped 件は基準の値が無いため変えていません';
+  }
+
+  @override
+  String get obStepCent => '0.01単位';
+
+  @override
+  String obStep(int n) {
+    return '$n円単位';
+  }
+
+  @override
+  String obPriceApplyShipping(int n) {
+    return '出荷する $n 件に一括設定';
+  }
+
+  @override
+  String obPriceApplyShown(int n) {
+    return '表示中の $n 件すべてに一括設定';
+  }
+
+  @override
+  String get obPriceRateHint =>
+      '基準 × 掛け率。例: 原価を基準に 1.3 → 原価の1.3倍、定価を基準に 0.7 → 7掛け';
+
+  @override
+  String get obPricePercentHint => '基準 ± ％。例: +20 → 20%上乗せ、-10 → 10%引き';
+
+  @override
+  String get obPriceFormulaHint =>
+      '使える名前: 原価・定価・販売価格・出荷単価・基準（選んだ列）。関数: ROUND / ROUNDUP / ROUNDDOWN(値, 桁)、CEILING / FLOOR(値, 単位)、MIN / MAX / ABS。例: ROUNDUP(原価*1.3, -1)、MAX(原価*1.2, 定価*0.6)、基準*(1+15%)';
+
+  @override
+  String get obSheetColumns => '伝票に載せる値段:';
+
+  @override
+  String get obColCost => '原価';
+
+  @override
+  String get obColList => '定価';
+
+  @override
+  String get obColSell => '販売価格';
+
+  @override
+  String get obColShip => '出荷単価';
+
+  @override
+  String get obBaseShip => '今の出荷単価（掛け率後）';
+
+  @override
+  String get obBelowCost => '原価割れです';
+
+  @override
+  String obAmountTotal(String amount) {
+    return '出荷金額の合計 ¥$amount';
+  }
+
+  @override
+  String obPricesLine(String cost, String list, String sell) {
+    return '原価 $cost · 定価 $list · 販売価格 $sell';
+  }
 }

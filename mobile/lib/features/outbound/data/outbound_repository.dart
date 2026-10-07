@@ -15,10 +15,14 @@ abstract class OutboundRepository {
   /// What each product has in [warehouseId], and what is free to send.
   Future<ApiResult<List<OutboundStockItem>>> stock(int warehouseId);
 
-  /// The proposal as an open shipment. [lines] maps JAN → quantity.
+  /// The proposal as an open shipment. [lines] maps JAN → quantity;
+  /// [prices] JAN → 出荷単価, and [snapshots] JAN → the prices it was
+  /// worked out from ({cost, list, sell}) (0142).
   Future<ApiResult<OutboundCreated>> create({
     required int warehouseId,
     required Map<String, int> lines,
+    Map<String, double> prices = const {},
+    Map<String, Map<String, double?>> snapshots = const {},
     int? destinationId,
     Map<String, dynamic>? shipTo,
     String? shipDate,
@@ -75,6 +79,8 @@ class OutboundRepositoryImpl implements OutboundRepository {
   Future<ApiResult<OutboundCreated>> create({
     required int warehouseId,
     required Map<String, int> lines,
+    Map<String, double> prices = const {},
+    Map<String, Map<String, double?>> snapshots = const {},
     int? destinationId,
     Map<String, dynamic>? shipTo,
     String? shipDate,
@@ -85,7 +91,13 @@ class OutboundRepositoryImpl implements OutboundRepository {
         'p_warehouse_id': warehouseId,
         'p_lines': [
           for (final e in lines.entries)
-            if (e.value > 0) {'jan_code': e.key, 'quantity': e.value},
+            if (e.value > 0)
+              {
+                'jan_code': e.key,
+                'quantity': e.value,
+                if (prices[e.key] != null) 'unit_price': prices[e.key],
+                if (snapshots[e.key] != null) 'price_snapshot': snapshots[e.key],
+              },
         ],
         'p_destination_id': destinationId,
         'p_ship_to': shipTo,

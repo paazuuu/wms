@@ -18925,6 +18925,156 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'AIで調べた値（要確認）'**
   String get slSavedNote;
+
+  /// No description provided for @obPriceTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格（伝票に載せる値段）'**
+  String get obPriceTitle;
+
+  /// No description provided for @obPriceBase.
+  ///
+  /// In ja, this message translates to:
+  /// **'基準にする列'**
+  String get obPriceBase;
+
+  /// No description provided for @obPriceRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛け率'**
+  String get obPriceRate;
+
+  /// No description provided for @obPricePercent.
+  ///
+  /// In ja, this message translates to:
+  /// **'％'**
+  String get obPricePercent;
+
+  /// No description provided for @obPriceFormula.
+  ///
+  /// In ja, this message translates to:
+  /// **'式'**
+  String get obPriceFormula;
+
+  /// No description provided for @obPriceValueInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛け率・％を数字で入れてください'**
+  String get obPriceValueInvalid;
+
+  /// No description provided for @obFormulaError.
+  ///
+  /// In ja, this message translates to:
+  /// **'式が読めません: {err}'**
+  String obFormulaError(String err);
+
+  /// No description provided for @obPriceApplied.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n} 件の出荷単価を設定しました'**
+  String obPriceApplied(int n);
+
+  /// No description provided for @obPriceAppliedSkipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'{set} 件を設定、{skipped} 件は基準の値が無いため変えていません'**
+  String obPriceAppliedSkipped(int set, int skipped);
+
+  /// No description provided for @obStepCent.
+  ///
+  /// In ja, this message translates to:
+  /// **'0.01単位'**
+  String get obStepCent;
+
+  /// No description provided for @obStep.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}円単位'**
+  String obStep(int n);
+
+  /// No description provided for @obPriceApplyShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷する {n} 件に一括設定'**
+  String obPriceApplyShipping(int n);
+
+  /// No description provided for @obPriceApplyShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の {n} 件すべてに一括設定'**
+  String obPriceApplyShown(int n);
+
+  /// No description provided for @obPriceRateHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'基準 × 掛け率。例: 原価を基準に 1.3 → 原価の1.3倍、定価を基準に 0.7 → 7掛け'**
+  String get obPriceRateHint;
+
+  /// No description provided for @obPricePercentHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'基準 ± ％。例: +20 → 20%上乗せ、-10 → 10%引き'**
+  String get obPricePercentHint;
+
+  /// No description provided for @obPriceFormulaHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'使える名前: 原価・定価・販売価格・出荷単価・基準（選んだ列）。関数: ROUND / ROUNDUP / ROUNDDOWN(値, 桁)、CEILING / FLOOR(値, 単位)、MIN / MAX / ABS。例: ROUNDUP(原価*1.3, -1)、MAX(原価*1.2, 定価*0.6)、基準*(1+15%)'**
+  String get obPriceFormulaHint;
+
+  /// No description provided for @obSheetColumns.
+  ///
+  /// In ja, this message translates to:
+  /// **'伝票に載せる値段:'**
+  String get obSheetColumns;
+
+  /// No description provided for @obColCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価'**
+  String get obColCost;
+
+  /// No description provided for @obColList.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価'**
+  String get obColList;
+
+  /// No description provided for @obColSell.
+  ///
+  /// In ja, this message translates to:
+  /// **'販売価格'**
+  String get obColSell;
+
+  /// No description provided for @obColShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷単価'**
+  String get obColShip;
+
+  /// No description provided for @obBaseShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の出荷単価（掛け率後）'**
+  String get obBaseShip;
+
+  /// No description provided for @obBelowCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価割れです'**
+  String get obBelowCost;
+
+  /// No description provided for @obAmountTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷金額の合計 ¥{amount}'**
+  String obAmountTotal(String amount);
+
+  /// No description provided for @obPricesLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価 {cost} · 定価 {list} · 販売価格 {sell}'**
+  String obPricesLine(String cost, String list, String sell);
 }
 
 class _AppLocalizationsDelegate

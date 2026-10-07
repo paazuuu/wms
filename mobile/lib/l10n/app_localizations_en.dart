@@ -10696,4 +10696,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slSavedNote => 'Looked up by AI (to check)';
+
+  @override
+  String get obPriceTitle => 'Prices (on the slip)';
+
+  @override
+  String get obPriceBase => 'Base column';
+
+  @override
+  String get obPriceRate => 'Rate';
+
+  @override
+  String get obPricePercent => '%';
+
+  @override
+  String get obPriceFormula => 'Formula';
+
+  @override
+  String get obPriceValueInvalid => 'Enter the rate or percentage as a number';
+
+  @override
+  String obFormulaError(String err) {
+    return 'The formula does not read: $err';
+  }
+
+  @override
+  String obPriceApplied(int n) {
+    return 'Set the price of $n products';
+  }
+
+  @override
+  String obPriceAppliedSkipped(int set, int skipped) {
+    return 'Set $set; $skipped have no base price and were left as they were';
+  }
+
+  @override
+  String get obStepCent => 'To 0.01';
+
+  @override
+  String obStep(int n) {
+    return 'To ¥$n';
+  }
+
+  @override
+  String obPriceApplyShipping(int n) {
+    return 'Set for the $n going out';
+  }
+
+  @override
+  String obPriceApplyShown(int n) {
+    return 'Set for all $n shown';
+  }
+
+  @override
+  String get obPriceRateHint =>
+      'Base × rate. E.g. cost × 1.3, or list price × 0.7';
+
+  @override
+  String get obPricePercentHint =>
+      'Base ± %. E.g. +20 adds 20%, -10 takes 10% off';
+
+  @override
+  String get obPriceFormulaHint =>
+      'Names: 原価 (cost), 定価 (list), 販売価格 (sell), 出荷単価 (ship), 基準 (the base column). Functions: ROUND / ROUNDUP / ROUNDDOWN(x, digits), CEILING / FLOOR(x, step), MIN / MAX / ABS. E.g. ROUNDUP(cost*1.3, -1), MAX(cost*1.2, list*0.6), base*(1+15%)';
+
+  @override
+  String get obSheetColumns => 'Prices on the slip:';
+
+  @override
+  String get obColCost => 'Cost';
+
+  @override
+  String get obColList => 'List price';
+
+  @override
+  String get obColSell => 'Selling price';
+
+  @override
+  String get obColShip => 'Unit price';
+
+  @override
+  String get obBaseShip => 'Current unit price (after a rate)';
+
+  @override
+  String get obBelowCost => 'Below cost';
+
+  @override
+  String obAmountTotal(String amount) {
+    return 'Total ¥$amount';
+  }
+
+  @override
+  String obPricesLine(String cost, String list, String sell) {
+    return 'Cost $cost · List $list · Selling $sell';
+  }
 }

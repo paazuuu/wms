@@ -10422,4 +10422,97 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get slSavedNote => 'AI查询的数值（需确认）';
+
+  @override
+  String get obPriceTitle => '价格（显示在单据上）';
+
+  @override
+  String get obPriceBase => '基准列';
+
+  @override
+  String get obPriceRate => '折扣率';
+
+  @override
+  String get obPricePercent => '％';
+
+  @override
+  String get obPriceFormula => '公式';
+
+  @override
+  String get obPriceValueInvalid => '请用数字输入折扣率・％';
+
+  @override
+  String obFormulaError(String err) {
+    return '无法读取公式：$err';
+  }
+
+  @override
+  String obPriceApplied(int n) {
+    return '已设定 $n 件的出货单价';
+  }
+
+  @override
+  String obPriceAppliedSkipped(int set, int skipped) {
+    return '已设定 $set 件，$skipped 件因没有基准值未变更';
+  }
+
+  @override
+  String get obStepCent => '0.01单位';
+
+  @override
+  String obStep(int n) {
+    return '$n日元单位';
+  }
+
+  @override
+  String obPriceApplyShipping(int n) {
+    return '批量设定出货的 $n 件';
+  }
+
+  @override
+  String obPriceApplyShown(int n) {
+    return '批量设定显示中的全部 $n 件';
+  }
+
+  @override
+  String get obPriceRateHint =>
+      '基准 × 折扣率。例：以成本为基准 1.3 → 成本的1.3倍，以定价为基准 0.7 → 七折';
+
+  @override
+  String get obPricePercentHint => '基准 ± ％。例：+20 → 加价20%，-10 → 减价10%';
+
+  @override
+  String get obPriceFormulaHint =>
+      '可用名称：原价・定价・销售价格・出货单价・基准（所选列）。函数：ROUND / ROUNDUP / ROUNDDOWN(值, 位数)、CEILING / FLOOR(值, 单位)、MIN / MAX / ABS。例：ROUNDUP(原価*1.3, -1)';
+
+  @override
+  String get obSheetColumns => '单据上显示的价格：';
+
+  @override
+  String get obColCost => '成本';
+
+  @override
+  String get obColList => '定价';
+
+  @override
+  String get obColSell => '销售价格';
+
+  @override
+  String get obColShip => '出货单价';
+
+  @override
+  String get obBaseShip => '当前出货单价（折扣后）';
+
+  @override
+  String get obBelowCost => '低于成本';
+
+  @override
+  String obAmountTotal(String amount) {
+    return '出货金额合计 ¥$amount';
+  }
+
+  @override
+  String obPricesLine(String cost, String list, String sell) {
+    return '成本 $cost · 定价 $list · 销售价格 $sell';
+  }
 }

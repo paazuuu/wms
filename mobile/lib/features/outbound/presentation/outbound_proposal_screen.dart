@@ -14,6 +14,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/outbound_excel.dart';
 import '../data/outbound_repository.dart';
 import '../domain/outbound.dart';
+import '../domain/pricing.dart';
 import 'outbound_downloads.dart';
 import 'ship_destinations_screen.dart';
 
@@ -51,16 +52,72 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
   bool _busy = false;
   OutboundCreated? _created;
 
+  // Prices (0142): 出荷単価 per product, how it is set in bulk, and which
+  // prices the sheet shows.
+  final Map<String, TextEditingController> _price = {};
+  PriceMethod _priceMethod = PriceMethod.rate;
+  PriceColumn _priceBase = PriceColumn.cost;
+  final _priceValue = TextEditingController(text: '1.3');
+  final _formula = TextEditingController(text: 'ROUNDUP(原価*1.3, -1)');
+  double _priceStep = 1;
+  PriceRounding _priceRounding = PriceRounding.nearest;
+  final Set<PriceColumn> _sheetColumns = {PriceColumn.ship};
+
   @override
   void dispose() {
     _note.dispose();
     _percent.dispose();
     _search.dispose();
-    for (final c in _qty.values) {
+    _priceValue.dispose();
+    _formula.dispose();
+    for (final c in [..._qty.values, ..._price.values]) {
       c.dispose();
     }
     super.dispose();
   }
+
+  TextEditingController _pc(String jan) => _price.putIfAbsent(jan, () => TextEditingController());
+
+  double? _shipPrice(String jan) => double.tryParse((_price[jan]?.text ?? '').replaceAll(',', '').replaceAll('¥', '').trim());
+
+  /// The bulk price on [items]: each one's 出荷単価 from its base column by a
+  /// rate, a percentage or a formula, rounded as chosen. Products without
+  /// the base price (no 原価, say) are left as they are.
+  void _applyPrices(List<OutboundStockItem> items) {
+    final l10n = AppLocalizations.of(context);
+    double? value;
+    if (_priceMethod == PriceMethod.formula) {
+      final err = priceFormulaError(_formula.text);
+      if (err != null) return _snack(l10n.obFormulaError(err));
+    } else {
+      value = double.tryParse(_priceValue.text.replaceAll('%', '').replaceAll(',', '').trim());
+      if (value == null) return _snack(l10n.obPriceValueInvalid);
+    }
+    var set = 0;
+    var skipped = 0;
+    setState(() {
+      for (final i in items) {
+        final v = applyPrice(
+          i.prices(ship: _shipPrice(i.janCode)),
+          method: _priceMethod,
+          base: _priceBase,
+          value: value,
+          formula: _formula.text,
+          step: _priceStep,
+          rounding: _priceRounding,
+        );
+        if (v == null) {
+          skipped++;
+          continue;
+        }
+        _pc(i.janCode).text = _priceText(v);
+        set++;
+      }
+    });
+    _snack(skipped == 0 ? l10n.obPriceApplied(set) : l10n.obPriceAppliedSkipped(set, skipped));
+  }
+
+  static String _priceText(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 
   void _snack(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
@@ -126,7 +183,18 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
       for (final i in items)
         if (lines[i.janCode] case final q?)
           OutboundSheetLine(
-            janCode: i.janCode, name: i.name, quantity: q, nameEn: i.nameEn, maker: i.maker, productCode: i.sku, unit: i.unit),
+            janCode: i.janCode,
+            name: i.name,
+            quantity: q,
+            nameEn: i.nameEn,
+            maker: i.maker,
+            productCode: i.sku,
+            unit: i.unit,
+            unitPrice: _shipPrice(i.janCode),
+            costPrice: i.costPrice,
+            listPrice: i.listPrice,
+            sellPrice: i.sellPrice,
+          ),
     ];
   }
 
@@ -141,6 +209,7 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
       sender: ref.read(senderProfileControllerProvider),
       shipDate: _shipDateText,
       note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+      priceColumns: _sheetColumns.toList(),
     );
     await ref.read(saveFileProvider)(shipmentSheetFileName('', _destination?.name), bytes);
     if (mounted) _snack(l10n.obExcelSaved);
@@ -161,12 +230,29 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
     final r = await ref.read(outboundRepositoryProvider).create(
           warehouseId: wh,
           lines: lines,
+          prices: {
+            for (final jan in lines.keys)
+              if (_shipPrice(jan) case final p?) jan: p,
+          },
+          snapshots: {
+            for (final i in items)
+              if (lines.containsKey(i.janCode)) i.janCode: {'cost': i.costPrice, 'list': i.listPrice, 'sell': i.sellPrice},
+          },
           destinationId: _destinationId,
           shipDate: _shipDateText,
           note: _note.text.trim().isEmpty ? null : _note.text.trim(),
           proposal: {
             'mode': _mode.name,
             if (_mode == _Mode.percent) ...{'percent': _percent.text.trim(), 'base': _base.name, 'rounding': _rounding.name},
+            'price_columns': [for (final c in PriceColumn.values) if (_sheetColumns.contains(c)) c.wire],
+            'pricing': {
+              'method': _priceMethod.name,
+              'base': _priceBase.wire,
+              'value': _priceValue.text.trim(),
+              if (_priceMethod == PriceMethod.formula) 'formula': _formula.text.trim(),
+              'step': _priceStep,
+              'rounding': _priceRounding.name,
+            },
           },
         );
     if (!mounted) return;
@@ -209,6 +295,8 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
           ];
     final lines = _lines(items);
     final total = lines.values.fold(0, (s, v) => s + v);
+    final amount = lines.entries.fold<double>(0, (s, e) => s + (_shipPrice(e.key) ?? 0) * e.value);
+    final shipping = [for (final i in items) if (lines.containsKey(i.janCode)) i];
     final created = _created;
 
     return Scaffold(
@@ -397,6 +485,107 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
           else
             Text(l10n.obDirectHint, style: muted),
           Text(l10n.obCapNote, style: muted),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Prices (0142).
+          Text(l10n.obPriceTitle, style: theme.textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            SizedBox(
+              width: 220,
+              child: DropdownButtonFormField<PriceColumn>(
+                key: const ValueKey('ob-price-base'),
+                initialValue: _priceBase,
+                isExpanded: true,
+                decoration: InputDecoration(labelText: l10n.obPriceBase, isDense: true),
+                items: [
+                  for (final c in PriceColumn.values) DropdownMenuItem(value: c, child: Text(_baseLabel(l10n, c))),
+                ],
+                onChanged: (v) => setState(() => _priceBase = v ?? _priceBase),
+              ),
+            ),
+            SegmentedButton<PriceMethod>(
+              key: const ValueKey('ob-price-method'),
+              segments: [
+                ButtonSegment(value: PriceMethod.rate, label: Text(l10n.obPriceRate)),
+                ButtonSegment(value: PriceMethod.percent, label: Text(l10n.obPricePercent)),
+                ButtonSegment(value: PriceMethod.formula, label: Text(l10n.obPriceFormula)),
+              ],
+              selected: {_priceMethod},
+              onSelectionChanged: (v) => setState(() => _priceMethod = v.first),
+            ),
+            if (_priceMethod == PriceMethod.formula)
+              SizedBox(
+                width: 340,
+                child: TextField(
+                  key: const ValueKey('ob-price-formula'),
+                  controller: _formula,
+                  style: const TextStyle(fontFamily: 'monospace'),
+                  decoration: InputDecoration(labelText: l10n.obPriceFormula, isDense: true, prefixText: '= '),
+                ),
+              )
+            else
+              SizedBox(
+                width: 130,
+                child: TextField(
+                  key: const ValueKey('ob-price-value'),
+                  controller: _priceValue,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                  decoration: InputDecoration(
+                    labelText: _priceMethod == PriceMethod.rate ? l10n.obPriceRate : l10n.obPricePercent,
+                    suffixText: _priceMethod == PriceMethod.percent ? '%' : '×',
+                    isDense: true,
+                  ),
+                ),
+              ),
+            DropdownButton<double>(
+              key: const ValueKey('ob-price-step'),
+              value: _priceStep,
+              items: [
+                DropdownMenuItem(value: 0.01, child: Text(l10n.obStepCent)),
+                DropdownMenuItem(value: 1, child: Text(l10n.obStep(1))),
+                DropdownMenuItem(value: 10, child: Text(l10n.obStep(10))),
+                DropdownMenuItem(value: 100, child: Text(l10n.obStep(100))),
+              ],
+              onChanged: (v) => setState(() => _priceStep = v ?? _priceStep),
+            ),
+            DropdownButton<PriceRounding>(
+              key: const ValueKey('ob-price-rounding'),
+              value: _priceRounding,
+              items: [
+                DropdownMenuItem(value: PriceRounding.down, child: Text(l10n.obRoundDown)),
+                DropdownMenuItem(value: PriceRounding.nearest, child: Text(l10n.obRoundNearest)),
+                DropdownMenuItem(value: PriceRounding.up, child: Text(l10n.obRoundUp)),
+              ],
+              onChanged: (v) => setState(() => _priceRounding = v ?? _priceRounding),
+            ),
+            FilledButton.tonal(
+              key: const ValueKey('ob-price-apply'),
+              onPressed: shipping.isEmpty ? null : () => _applyPrices(shipping),
+              child: Text(l10n.obPriceApplyShipping(shipping.length)),
+            ),
+            OutlinedButton(
+              key: const ValueKey('ob-price-apply-all'),
+              onPressed: shown.isEmpty ? null : () => _applyPrices(shown),
+              child: Text(l10n.obPriceApplyShown(shown.length)),
+            ),
+          ]),
+          Text(switch (_priceMethod) {
+            PriceMethod.rate => l10n.obPriceRateHint,
+            PriceMethod.percent => l10n.obPricePercentHint,
+            PriceMethod.formula => l10n.obPriceFormulaHint,
+          }, style: muted),
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            Text(l10n.obSheetColumns, style: theme.textTheme.labelLarge),
+            for (final c in PriceColumn.values)
+              FilterChip(
+                key: ValueKey('ob-col-${c.wire}'),
+                label: Text(_columnLabel(l10n, c)),
+                selected: _sheetColumns.contains(c),
+                onSelected: (v) => setState(() => v ? _sheetColumns.add(c) : _sheetColumns.remove(c)),
+              ),
+          ]),
           const SizedBox(height: AppSpacing.md),
 
           // The products.
@@ -424,12 +613,16 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
                 key: ValueKey('ob-item-${i.janCode}'),
                 item: i,
                 qty: _c(i.janCode),
+                price: _pc(i.janCode),
                 included: !_off.contains(i.janCode),
                 onIncluded: (v) => setState(() => v ? _off.remove(i.janCode) : _off.add(i.janCode)),
                 onChanged: () => setState(() {}),
               ),
           const SizedBox(height: AppSpacing.md),
           Text(l10n.obSummary(lines.length, total), key: const ValueKey('ob-summary'), style: theme.textTheme.titleSmall),
+          if (amount > 0)
+            Text(l10n.obAmountTotal(NumberFormat('#,##0.##').format(amount)),
+                key: const ValueKey('ob-amount'), style: theme.textTheme.titleSmall),
           const SizedBox(height: AppSpacing.sm),
           Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
             OutlinedButton.icon(
@@ -451,11 +644,24 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
   }
 }
 
+String _columnLabel(AppLocalizations l10n, PriceColumn c) => switch (c) {
+      PriceColumn.cost => l10n.obColCost,
+      PriceColumn.list => l10n.obColList,
+      PriceColumn.sell => l10n.obColSell,
+      PriceColumn.ship => l10n.obColShip,
+    };
+
+String _money(double? v) => v == null ? '—' : NumberFormat('#,##0.##').format(v);
+
+String _baseLabel(AppLocalizations l10n, PriceColumn c) =>
+    c == PriceColumn.ship ? l10n.obBaseShip : _columnLabel(l10n, c);
+
 class _ItemCard extends StatelessWidget {
   const _ItemCard({
     super.key,
     required this.item,
     required this.qty,
+    required this.price,
     required this.included,
     required this.onIncluded,
     required this.onChanged,
@@ -463,6 +669,9 @@ class _ItemCard extends StatelessWidget {
 
   final OutboundStockItem item;
   final TextEditingController qty;
+
+  /// 出荷単価 (0142).
+  final TextEditingController price;
   final bool included;
   final ValueChanged<bool> onIncluded;
   final VoidCallback onChanged;
@@ -475,6 +684,8 @@ class _ItemCard extends StatelessWidget {
     final q = int.tryParse(qty.text.replaceAll(',', '').trim()) ?? 0;
     final over = q > item.free;
     final share = item.onHand == 0 ? 0.0 : q * 100 / item.onHand;
+    final shipPrice = double.tryParse(price.text.replaceAll(',', '').trim());
+    final loss = shipPrice != null && item.costPrice != null && shipPrice < item.costPrice!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
@@ -490,7 +701,28 @@ class _ItemCard extends StatelessWidget {
                 key: ValueKey('ob-stock-${item.janCode}'),
                 style: theme.textTheme.bodySmall,
               ),
+              Text(
+                l10n.obPricesLine(_money(item.costPrice), _money(item.listPrice), _money(item.sellPrice)),
+                key: ValueKey('ob-prices-${item.janCode}'),
+                style: muted,
+              ),
+              if (loss)
+                Text(l10n.obBelowCost, key: ValueKey('ob-loss-${item.janCode}'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
             ]),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          SizedBox(
+            width: 104,
+            child: TextField(
+              key: ValueKey('ob-price-${item.janCode}'),
+              controller: price,
+              enabled: included,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              textAlign: TextAlign.end,
+              onChanged: (_) => onChanged(),
+              decoration: InputDecoration(labelText: l10n.obColShip, isDense: true, prefixText: '¥'),
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           SizedBox(

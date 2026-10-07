@@ -8,6 +8,7 @@ import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/outbound/data/outbound_excel.dart';
 import 'package:wms_mobile/features/outbound/data/outbound_repository.dart';
 import 'package:wms_mobile/features/outbound/domain/outbound.dart';
+import 'package:wms_mobile/features/outbound/domain/pricing.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_proposal_screen.dart';
 import 'package:wms_mobile/features/outbound/presentation/ship_destinations_screen.dart';
@@ -59,13 +60,23 @@ class _FakeOutboundRepository implements OutboundRepository {
   Future<ApiResult<OutboundCreated>> create({
     required int warehouseId,
     required Map<String, int> lines,
+    Map<String, double> prices = const {},
+    Map<String, Map<String, double?>> snapshots = const {},
     int? destinationId,
     Map<String, dynamic>? shipTo,
     String? shipDate,
     String? note,
     Map<String, dynamic>? proposal,
   }) async {
-    created.add({'warehouse': warehouseId, 'lines': lines, 'destination': destinationId, 'proposal': proposal, 'note': note});
+    created.add({
+      'warehouse': warehouseId,
+      'lines': lines,
+      'prices': prices,
+      'snapshots': snapshots,
+      'destination': destinationId,
+      'proposal': proposal,
+      'note': note,
+    });
     return ApiSuccess(OutboundCreated(
         id: 9, shipmentNumber: 'OUT-000009', lines: lines.length, units: lines.values.fold(0, (s, v) => s + v)));
   }
@@ -88,8 +99,9 @@ class _FakeOutboundRepository implements OutboundRepository {
 }
 
 const _items = [
-  OutboundStockItem(janCode: _janA, name: 'ボルト', onHand: 10, reserved: 2, inOpen: 2, free: 6, nameEn: 'Bolt'),
-  OutboundStockItem(janCode: _janB, name: 'ナット', onHand: 4, free: 4),
+  OutboundStockItem(janCode: _janA, name: 'ボルト', onHand: 10, reserved: 2, inOpen: 2, free: 6, nameEn: 'Bolt',
+      costPrice: 42, listPrice: 100, sellPrice: 80),
+  OutboundStockItem(janCode: _janB, name: 'ナット', onHand: 4, free: 4, listPrice: 50),
 ];
 
 Future<(_FakeOutboundRepository, List<(String, Uint8List)>)> _pump(WidgetTester tester, {
@@ -151,6 +163,45 @@ void main() {
       expect(t.last[5], '合計 / Total');
       expect(t.last[6], '7');
       expect(shipmentSheetFileName('OUT-000009', 'テスト 商事', now: DateTime(2026, 10, 10)), '出荷明細_OUT-000009_テスト_商事_20261010.xlsx');
+    });
+
+    test('the sheet shows the prices chosen, and an amount with its total', () {
+      final t = readXlsx(buildShipmentSheetXlsx(
+        number: 'OUT-000010',
+        to: null,
+        lines: [
+          OutboundSheetLine(janCode: _janA, name: 'ボルト', quantity: 3, unitPrice: 123.4, costPrice: 42, listPrice: 100),
+          OutboundSheetLine(janCode: _janB, name: 'ナット', quantity: 2, unitPrice: 60),
+        ],
+        priceColumns: [PriceColumn.ship, PriceColumn.cost],
+      ));
+      final header = t.indexWhere((r) => r.isNotEmpty && r.first == 'No.');
+      // Fixed order: 原価 before 単価, whatever order they were ticked in.
+      expect(t[header].sublist(8), ['原価 / Cost', '単価 / Unit price', '金額 / Amount']);
+      expect(double.parse(t[header + 1][8]), 42);
+      expect(double.parse(t[header + 1][9]), 123.4);
+      expect(double.parse(t[header + 1][10]), closeTo(370.2, 1e-9));
+      expect(t[header + 2].length < 9 || t[header + 2][8].isEmpty, isTrue);
+      expect(double.parse(t.last[10]), closeTo(490.2, 1e-9));
+
+      // Only 定価: the amount goes by it.
+      final l = readXlsx(buildShipmentSheetXlsx(
+        number: 'OUT-000011',
+        to: null,
+        lines: [OutboundSheetLine(janCode: _janA, name: 'ボルト', quantity: 3, listPrice: 100)],
+        priceColumns: [PriceColumn.list],
+      ));
+      final h = l.indexWhere((r) => r.isNotEmpty && r.first == 'No.');
+      expect(l[h].sublist(8), ['定価 / List price', '金額 / Amount']);
+      expect(double.parse(l[h + 1][9]), 300);
+
+      // No prices chosen: no price columns at all.
+      final n = readXlsx(buildShipmentSheetXlsx(
+        number: 'OUT-000012',
+        to: null,
+        lines: [OutboundSheetLine(janCode: _janA, name: 'ボルト', quantity: 3, unitPrice: 10)],
+      ));
+      expect(n[n.indexWhere((r) => r.isNotEmpty && r.first == 'No.')].length, 8);
     });
 
     test('the stock list adds up', () {
@@ -247,6 +298,100 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.created.single['destination'], 101);
     expect(repo.created.single['lines'], {_janA: 6, _janB: 4});
+  });
+
+  testWidgets('prices are set in bulk from a chosen column, by a rate, a percentage or a formula, and go with the shipment',
+      (tester) async {
+    final (repo, saved) = await _pump(tester);
+    expect(find.text('原価 42 · 定価 100 · 販売価格 80'), findsOneWidget);
+    expect(find.text('原価 — · 定価 50 · 販売価格 —'), findsOneWidget);
+    await _chooseDestination(tester, 'テスト商事 物流部');
+    await tester.tap(find.text('数量を直接入力'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '3');
+    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janB')), '2');
+    await tester.pumpAndSettle();
+
+    String price(String jan) => tester.widget<TextField>(find.byKey(ValueKey('ob-price-$jan'))).controller!.text;
+
+    // 原価 × 1.3: the nut has no 原価 and is left alone.
+    await tester.tap(find.byKey(const ValueKey('ob-price-apply')));
+    await tester.pumpAndSettle();
+    expect(price(_janA), '55');
+    expect(price(_janB), '');
+    expect(find.text('1 件を設定、1 件は基準の値が無いため変えていません'), findsOneWidget);
+
+    // 定価 − 45%, up to the next 10 yen.
+    await tester.tap(find.byKey(const ValueKey('ob-price-base')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('定価').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('％').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('ob-price-value')), '-45');
+    await tester.tap(find.byKey(const ValueKey('ob-price-step')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('10円単位').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-price-rounding')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('端数切り上げ').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-price-apply')));
+    await tester.pumpAndSettle();
+    expect(price(_janA), '60');
+    expect(price(_janB), '30');
+    expect(find.text('2 件の出荷単価を設定しました'), findsOneWidget);
+    expect(find.text('出荷金額の合計 ¥240'), findsOneWidget);
+
+    // The price after that, + 10%, as a formula on 基準 (今の出荷単価).
+    await tester.tap(find.byKey(const ValueKey('ob-price-base')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('今の出荷単価（掛け率後）').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('式').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('ob-price-formula')), 'ROUNDUP(基準*1.1, -1');
+    await tester.tap(find.byKey(const ValueKey('ob-price-apply')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('式が読めません'), findsOneWidget);
+    expect(price(_janA), '60');
+    await tester.enterText(find.byKey(const ValueKey('ob-price-formula')), 'ROUNDUP(基準*1.1, -1)');
+    await tester.tap(find.byKey(const ValueKey('ob-price-apply')));
+    await tester.pumpAndSettle();
+    expect(price(_janA), '70');
+    expect(price(_janB), '40');
+
+    // By hand, under 原価: said beside the line.
+    await tester.enterText(find.byKey(const ValueKey('ob-price-$_janA')), '40');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ob-loss-$_janA')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ob-loss-$_janB')), findsNothing);
+    expect(find.text('出荷金額の合計 ¥200'), findsOneWidget);
+
+    // The slip shows 原価 too.
+    await tester.tap(find.byKey(const ValueKey('ob-col-cost')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-draft')));
+    await tester.pumpAndSettle();
+    final t = readXlsx(saved.single.$2);
+    final header = t.indexWhere((r) => r.isNotEmpty && r.first == 'No.');
+    expect(t[header].sublist(8), ['原価 / Cost', '単価 / Unit price', '金額 / Amount']);
+    expect(double.parse(t.last[10]), 200);
+
+    await tester.tap(find.byKey(const ValueKey('ob-create')));
+    await tester.pumpAndSettle();
+    final made = repo.created.single;
+    expect(made['prices'], {_janA: 40.0, _janB: 40.0});
+    expect(made['snapshots'], {
+      _janA: {'cost': 42.0, 'list': 100.0, 'sell': 80.0},
+      _janB: {'cost': null, 'list': 50.0, 'sell': null},
+    });
+    final proposal = made['proposal'] as Map;
+    expect(proposal['price_columns'], ['cost', 'ship']);
+    expect((proposal['pricing'] as Map)['method'], 'formula');
+    expect((proposal['pricing'] as Map)['base'], 'ship');
+    expect((proposal['pricing'] as Map)['formula'], 'ROUNDUP(基準*1.1, -1)');
   });
 
   testWidgets('all stock downloads as Excel', (tester) async {

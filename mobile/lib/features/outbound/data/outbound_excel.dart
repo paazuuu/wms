@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/export/xlsx.dart';
 import '../../shipment/domain/sender_profile.dart';
 import '../domain/outbound.dart';
+import '../domain/pricing.dart';
 
 /// The shipment sheet sent to the other company (0139): who it goes to, who
 /// sends it, and what goes — in Japanese with English beside each heading,
@@ -19,6 +20,7 @@ Uint8List buildShipmentSheetXlsx({
   String? warehouseName,
   String? carrier,
   String? trackingNumber,
+  List<PriceColumn> priceColumns = const [],
   DateTime? now,
 }) {
   final top = <List<Object?>>[
@@ -49,23 +51,51 @@ Uint8List buildShipmentSheetXlsx({
     [],
   ];
   final total = lines.fold<int>(0, (s, l) => s + l.quantity);
+  // The prices chosen, in a fixed order; the amount is at 出荷単価 when it is
+  // shown, else at the first price shown.
+  final cols = [for (final c in PriceColumn.values) if (priceColumns.contains(c)) c];
+  final amountBy = cols.contains(PriceColumn.ship) ? PriceColumn.ship : cols.firstOrNull;
+  double? amount(OutboundSheetLine l) {
+    final p = amountBy == null ? null : l.price(amountBy);
+    return p == null ? null : (p * l.quantity * 100).roundToDouble() / 100;
+  }
+
+  final sum = amountBy == null ? null : lines.fold<double>(0, (s, l) => s + (amount(l) ?? 0));
   return buildXlsx(
     sheetName: number.isEmpty ? '出荷明細' : number,
     top: top,
-    headers: const [
+    headers: [
       'No.', 'JANコード / JAN', '品名 / Product', '英語名 / English name', 'メーカー / Maker', '品番 / Item code',
       '数量 / Qty', '単位 / Unit',
+      for (final c in cols) priceColumnHeading(c),
+      if (amountBy != null) '金額 / Amount',
     ],
     rows: [
       for (final (i, l) in lines.indexed)
-        [i + 1, l.janCode, l.name, l.nameEn, l.maker, l.productCode, l.quantity, l.unit],
+        [
+          i + 1, l.janCode, l.name, l.nameEn, l.maker, l.productCode, l.quantity, l.unit,
+          for (final c in cols) l.price(c),
+          if (amountBy != null) amount(l),
+        ],
     ],
     bottom: [
-      ['', '', '', '', '', '合計 / Total', total, '${lines.length}品目 / items'],
+      [
+        '', '', '', '', '', '合計 / Total', total, '${lines.length}品目 / items',
+        for (final _ in cols) '',
+        if (sum != null) (sum * 100).roundToDouble() / 100,
+      ],
     ],
-    widths: const [20, 16, 36, 34, 16, 14, 10, 14],
+    widths: [20, 16, 36, 34, 16, 14, 10, 14, for (final _ in cols) 14, if (amountBy != null) 16],
   );
 }
+
+/// A price column's heading on a sheet, Japanese and English.
+String priceColumnHeading(PriceColumn c) => switch (c) {
+      PriceColumn.cost => '原価 / Cost',
+      PriceColumn.list => '定価 / List price',
+      PriceColumn.sell => '販売価格 / Selling price',
+      PriceColumn.ship => '単価 / Unit price',
+    };
 
 /// Every product's stock, warehouse by warehouse (0139).
 Uint8List buildStockListXlsx(List<StockExportRow> rows, {String? warehouseName, DateTime? now}) {

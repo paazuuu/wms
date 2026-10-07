@@ -1,11 +1,15 @@
 import 'package:equatable/equatable.dart';
 
+import 'pricing.dart';
+
 String? _s(Object? v) {
   final t = v?.toString().trim();
   return t == null || t.isEmpty ? null : t;
 }
 
 int _n(Object? v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}') ?? 0;
+
+double? _d(Object? v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}');
 
 /// A company goods often go to, kept so a shipment picks it instead of
 /// typing it again (0139).
@@ -97,6 +101,9 @@ class OutboundStockItem extends Equatable {
     this.reserved = 0,
     this.inOpen = 0,
     this.free = 0,
+    this.costPrice,
+    this.listPrice,
+    this.sellPrice,
   });
 
   final String janCode;
@@ -119,6 +126,13 @@ class OutboundStockItem extends Equatable {
   /// 出荷可能: what may still be sent.
   final int free;
 
+  /// 原価・定価・販売価格 (0142), to work a shipment price out from.
+  final double? costPrice;
+  final double? listPrice;
+  final double? sellPrice;
+
+  PriceInputs prices({double? ship}) => PriceInputs(cost: costPrice, list: listPrice, sell: sellPrice, ship: ship);
+
   factory OutboundStockItem.fromJson(Map<String, dynamic> j) => OutboundStockItem(
         janCode: _s(j['jan_code']) ?? '',
         name: _s(j['name']) ?? _s(j['jan_code']) ?? '',
@@ -131,10 +145,13 @@ class OutboundStockItem extends Equatable {
         reserved: _n(j['reserved']),
         inOpen: _n(j['in_open']),
         free: _n(j['free']),
+        costPrice: _d(j['cost_price']),
+        listPrice: _d(j['list_price']),
+        sellPrice: _d(j['sell_price']),
       );
 
   @override
-  List<Object?> get props => [janCode, name, productId, onHand, reserved, inOpen, free];
+  List<Object?> get props => [janCode, name, productId, onHand, reserved, inOpen, free, costPrice, listPrice, sellPrice];
 }
 
 /// What a percentage is taken of.
@@ -182,6 +199,7 @@ class OutboundSheet extends Equatable {
     this.carrier,
     this.trackingNumber,
     this.lines = const [],
+    this.priceColumns = const [],
   });
 
   final int id;
@@ -194,6 +212,9 @@ class OutboundSheet extends Equatable {
   final String? carrier;
   final String? trackingNumber;
   final List<OutboundSheetLine> lines;
+
+  /// The prices its sheet shows, as chosen when it was made (0142).
+  final List<PriceColumn> priceColumns;
 
   int get totalUnits => lines.fold(0, (s, l) => s + l.quantity);
 
@@ -208,6 +229,10 @@ class OutboundSheet extends Equatable {
       warehouseName: _s(j['warehouse_name']),
       shipTo: to is Map && _s(to['name']) != null ? ShipDestination.fromJson(to.cast<String, dynamic>()) : null,
       carrier: _s(j['carrier']),
+      priceColumns: [
+        for (final c in (j['price_columns'] as List? ?? const []))
+          if (PriceColumn.fromWire('$c') case final col?) col,
+      ],
       trackingNumber: _s(j['tracking_number']),
       lines: [
         for (final l in (j['lines'] as List? ?? const []).whereType<Map>())
@@ -229,6 +254,10 @@ class OutboundSheetLine extends Equatable {
     this.maker,
     this.productCode,
     this.unit,
+    this.unitPrice,
+    this.costPrice,
+    this.listPrice,
+    this.sellPrice,
   });
 
   final String janCode;
@@ -239,6 +268,19 @@ class OutboundSheetLine extends Equatable {
   final String? productCode;
   final String? unit;
 
+  /// 出荷単価, and the prices it was worked out from (0142).
+  final double? unitPrice;
+  final double? costPrice;
+  final double? listPrice;
+  final double? sellPrice;
+
+  double? price(PriceColumn c) => switch (c) {
+        PriceColumn.cost => costPrice,
+        PriceColumn.list => listPrice,
+        PriceColumn.sell => sellPrice,
+        PriceColumn.ship => unitPrice,
+      };
+
   factory OutboundSheetLine.fromJson(Map<String, dynamic> j) => OutboundSheetLine(
         janCode: _s(j['jan_code']) ?? '',
         name: _s(j['name']) ?? '',
@@ -247,10 +289,15 @@ class OutboundSheetLine extends Equatable {
         maker: _s(j['maker']),
         productCode: _s(j['product_code']),
         unit: _s(j['unit']),
+        unitPrice: _d(j['unit_price']),
+        costPrice: _d(j['cost_price']),
+        listPrice: _d(j['list_price']),
+        sellPrice: _d(j['sell_price']),
       );
 
   @override
-  List<Object?> get props => [janCode, name, quantity, nameEn, maker, productCode, unit];
+  List<Object?> get props =>
+      [janCode, name, quantity, nameEn, maker, productCode, unit, unitPrice, costPrice, listPrice, sellPrice];
 }
 
 /// One row of the stock list in Excel.
@@ -301,18 +348,22 @@ class StockExportRow extends Equatable {
 
 /// What creating a shipment gave back.
 class OutboundCreated extends Equatable {
-  const OutboundCreated({required this.id, required this.shipmentNumber, this.lines = 0, this.units = 0});
+  const OutboundCreated({required this.id, required this.shipmentNumber, this.lines = 0, this.units = 0, this.total});
 
   final int id;
   final String shipmentNumber;
   final int lines;
   final int units;
 
+  /// The shipment's value at its prices, when it has any (0142).
+  final double? total;
+
   factory OutboundCreated.fromJson(Map<String, dynamic> j) => OutboundCreated(
         id: _n(j['id']),
         shipmentNumber: _s(j['shipment_number']) ?? '',
         lines: _n(j['lines']),
         units: _n(j['units']),
+        total: _d(j['total']),
       );
 
   @override

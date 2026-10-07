@@ -6654,6 +6654,52 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   vjunicsfobglmncjucbb`). Until then the DB and the screens are ready, but
   the button answers with an error.
 
+## 0142 — prices on the shipment slip; bulk price setting
+
+- **Data:**
+  - `shipment_lines.price_snapshot jsonb` keeps {cost, list, sell} as they
+    were when the shipment was made. A later price change does not move an
+    old slip.
+  - `unit_price` / `amount` (already there) hold the 出荷単価 and its amount.
+- **`product_cost(product_id)`:** 原価 is the price book term in force
+  (`unit_price`, or `list_price × discount_rate`). Without one, it is the last
+  purchase order price. Null when there is neither.
+- **`outbound_stock`** also returns `cost_price`, `list_price` (定価) and
+  `sell_price` (販売価格 = `products.price`).
+- **`outbound_create`:**
+  - Each line may carry `unit_price` and `price_snapshot`.
+  - It stores the amount (`round(price × qty)`) and returns `total`.
+  - `proposal.price_columns` records which prices the slip shows, and
+    `proposal.pricing` records how they were set.
+- **`outbound_sheet`** returns `price_columns`. Each line carries
+  `unit_price`, `amount` and the cost, list and sell prices, taken from the
+  snapshot first, else from the current values.
+- **App (出庫の提案):**
+  - A 価格 section picks the base column: 原価, 定価, 販売価格, or 今の出荷単価
+    (the price after a rate, so steps can be stacked).
+  - It then sets the price by one of three methods:
+    - 掛け率: base × rate;
+    - ％: base ± percent;
+    - 式: an Excel-like formula. It knows 原価・定価・販売価格・出荷単価・基準;
+      ROUND / ROUNDUP / ROUNDDOWN(x, digits); CEILING / FLOOR(x, step);
+      MIN / MAX / ABS; `15%`; × ÷; full-width digits.
+  - Rounding is to 0.01, 1, 10 or 100 yen, down, nearest or up.
+  - The setting applies to the lines going out, or to every product shown.
+    A product without the base value (no 原価, say) is left as it is and
+    counted in the message.
+  - Each line shows 原価・定価・販売価格 and a ¥ field for its price. A price
+    under 原価 is flagged, and the total amount is shown.
+  - Chips choose which prices the slip shows (原価・定価・販売価格・出荷単価).
+    The Excel adds those columns in a fixed order, plus 金額. 金額 is at
+    出荷単価 when that is shown, else at the first price shown, with a total.
+  - A shipment downloaded later uses the columns saved with it. Older
+    shipments that have a unit price show 単価.
+- Tests:
+  - The pricing parser and rounding (`test/features/outbound/pricing_test.dart`).
+  - The sheet columns, and the screen from rate to formula to creation
+    (`outbound_test.dart`).
+  - DB create/sheet, checked in a rolled-back transaction.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

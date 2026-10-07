@@ -9168,5 +9168,95 @@
   },
   "slSave": "チェックした値を反映",
   "slSaved": "サイズ・重量を反映しました（出どころ: Web）",
-  "slSavedNote": "AIで調べた値（要確認）"
+  "slSavedNote": "AIで調べた値（要確認）",
+  "obPriceTitle": "価格（伝票に載せる値段）",
+  "obPriceBase": "基準にする列",
+  "obPriceRate": "掛け率",
+  "obPricePercent": "％",
+  "obPriceFormula": "式",
+  "obPriceValueInvalid": "掛け率・％を数字で入れてください",
+  "obFormulaError": "式が読めません: {err}",
+  "@obFormulaError": {
+    "placeholders": {
+      "err": {
+        "type": "String"
+      }
+    }
+  },
+  "obPriceApplied": "{n} 件の出荷単価を設定しました",
+  "@obPriceApplied": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obPriceAppliedSkipped": "{set} 件を設定、{skipped} 件は基準の値が無いため変えていません",
+  "@obPriceAppliedSkipped": {
+    "placeholders": {
+      "set": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "obStepCent": "0.01単位",
+  "obStep": "{n}円単位",
+  "@obStep": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obPriceApplyShipping": "出荷する {n} 件に一括設定",
+  "@obPriceApplyShipping": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obPriceApplyShown": "表示中の {n} 件すべてに一括設定",
+  "@obPriceApplyShown": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obPriceRateHint": "基準 × 掛け率。例: 原価を基準に 1.3 → 原価の1.3倍、定価を基準に 0.7 → 7掛け",
+  "obPricePercentHint": "基準 ± ％。例: +20 → 20%上乗せ、-10 → 10%引き",
+  "obPriceFormulaHint": "使える名前: 原価・定価・販売価格・出荷単価・基準（選んだ列）。関数: ROUND / ROUNDUP / ROUNDDOWN(値, 桁)、CEILING / FLOOR(値, 単位)、MIN / MAX / ABS。例: ROUNDUP(原価*1.3, -1)、MAX(原価*1.2, 定価*0.6)、基準*(1+15%)",
+  "obSheetColumns": "伝票に載せる値段:",
+  "obColCost": "原価",
+  "obColList": "定価",
+  "obColSell": "販売価格",
+  "obColShip": "出荷単価",
+  "obBaseShip": "今の出荷単価（掛け率後）",
+  "obBelowCost": "原価割れです",
+  "obAmountTotal": "出荷金額の合計 ¥{amount}",
+  "@obAmountTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "obPricesLine": "原価 {cost} · 定価 {list} · 販売価格 {sell}",
+  "@obPricesLine": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      },
+      "sell": {
+        "type": "String"
+      }
+    }
+  }
 }
