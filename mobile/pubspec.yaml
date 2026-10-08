@@ -35,6 +35,8 @@ dependencies:
   archive: ^4.0.9
   xml: ^7.0.0
   barcode: ^2.2.9
+  # Browser downloads (file_picker has no saveFile on the web)
+  web: ^1.1.0
 
 dev_dependencies:
   flutter_test:

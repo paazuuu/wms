@@ -455,6 +455,27 @@ void main() {
     expect(find.text('サラサ'), findsOneWidget);
   });
 
+  testWidgets('the warehouse shown is the one chosen at the top right, both ways', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final container =
+        await _pump(tester, FakeProductRepository(products: const [stocked, empty]), warehouses: const [main, kobe]);
+
+    // Choosing 神戸倉庫 in the app's picker shows 神戸倉庫 here.
+    container.read(activeWarehouseIdProvider.notifier).state = 2;
+    await tester.pumpAndSettle();
+    expect(find.text('表示中の倉庫: 神戸倉庫'), findsOneWidget);
+    expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('pl-wh-2'))).selected, isTrue);
+
+    // Choosing here moves the picker too.
+    await tester.tap(find.byKey(const ValueKey('pl-wh-1')));
+    await tester.pumpAndSettle();
+    expect(container.read(activeWarehouseIdProvider), 1);
+    await tester.tap(find.byKey(const ValueKey('pl-wh-all')));
+    await tester.pumpAndSettle();
+    expect(container.read(activeWarehouseIdProvider), isNull);
+  });
+
   testWidgets('two warehouses side by side, each with its own choice and stock', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));

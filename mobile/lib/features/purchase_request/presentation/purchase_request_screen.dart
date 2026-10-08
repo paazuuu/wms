@@ -564,7 +564,9 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
             child: ErrorStateView(message: humanizeApiErrorMessage(l10n, _error!), onRetry: _loadCandidates),
           )
         else if (visible.isEmpty)
-          SliverToBoxAdapter(child: EmptyStateView(icon: Icons.inventory_2_outlined, title: l10n.prNoRows))
+          // The empty state scrolls itself, so it needs the space left
+          // rather than an unbounded box.
+          SliverFillRemaining(child: EmptyStateView(icon: Icons.inventory_2_outlined, title: l10n.prNoRows))
         else
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

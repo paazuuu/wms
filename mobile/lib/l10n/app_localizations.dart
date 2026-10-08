@@ -19189,6 +19189,234 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'空欄なら「{code}」で登録します。変えたいときだけ入力してください'**
   String whCodeAuto(String code);
+
+  /// No description provided for @supViewSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ごと'**
+  String get supViewSuppliers;
+
+  /// No description provided for @supViewNames.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名の一覧'**
+  String get supViewNames;
+
+  /// No description provided for @supSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先名・コード・よく仕入れる商品で探す'**
+  String get supSearchHint;
+
+  /// No description provided for @supEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先がありません'**
+  String get supEmpty;
+
+  /// No description provided for @supCardStats.
+  ///
+  /// In ja, this message translates to:
+  /// **'取扱 {products}品目 · 仕入 {purchases}回 · 合計 {units}個'**
+  String supCardStats(int products, int purchases, int units);
+
+  /// No description provided for @supLastAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終仕入 {date}'**
+  String supLastAt(String date);
+
+  /// No description provided for @supNoPurchases.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ仕入れの記録はありません'**
+  String get supNoPurchases;
+
+  /// No description provided for @supTop.
+  ///
+  /// In ja, this message translates to:
+  /// **'よく仕入れる: {names}'**
+  String supTop(String names);
+
+  /// No description provided for @supTabProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'よく仕入れる商品（{n}）'**
+  String supTabProducts(int n);
+
+  /// No description provided for @supTabHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れの履歴（{n}）'**
+  String supTabHistory(int n);
+
+  /// No description provided for @supTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入 {purchases}回 · 合計 {units}個'**
+  String supTotals(int purchases, String units);
+
+  /// No description provided for @supNoProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'この仕入先の商品はまだありません'**
+  String get supNoProducts;
+
+  /// No description provided for @supNoProductsBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を付けて請求書・納品書を取り込むか、発注すると、ここに並びます。'**
+  String get supNoProductsBody;
+
+  /// No description provided for @supNextOrderHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'前回仕入れた商品はチェック済みで、数量は前回と同じです。確認して「入荷希望リストを作る」を押すと、この仕入先あての入荷希望リストになります（Excelで送れます）。'**
+  String get supNextOrderHint;
+
+  /// No description provided for @supQtyLast.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量: 前回と同じ'**
+  String get supQtyLast;
+
+  /// No description provided for @supQtyAverage.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量: 平均'**
+  String get supQtyAverage;
+
+  /// No description provided for @supQtyNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量: 空欄'**
+  String get supQtyNone;
+
+  /// No description provided for @supSelectAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて選ぶ'**
+  String get supSelectAll;
+
+  /// No description provided for @supSelectDue.
+  ///
+  /// In ja, this message translates to:
+  /// **'次回目安を過ぎたものだけ'**
+  String get supSelectDue;
+
+  /// No description provided for @supClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択解除'**
+  String get supClear;
+
+  /// No description provided for @supStockIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫: {warehouse}'**
+  String supStockIn(String warehouse);
+
+  /// No description provided for @supNeverBought.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ仕入れていません（商品名の対応のみ）'**
+  String get supNeverBought;
+
+  /// No description provided for @supBought.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入 {times}回 · 合計 {total}個'**
+  String supBought(int times, String total);
+
+  /// No description provided for @supLast.
+  ///
+  /// In ja, this message translates to:
+  /// **'前回 {qty}個（{date}）'**
+  String supLast(String qty, String date);
+
+  /// No description provided for @supAverage.
+  ///
+  /// In ja, this message translates to:
+  /// **'平均 {qty}個'**
+  String supAverage(String qty);
+
+  /// No description provided for @supEvery.
+  ///
+  /// In ja, this message translates to:
+  /// **'約{days}日ごと · 次回目安 {date}'**
+  String supEvery(int days, String date);
+
+  /// No description provided for @supDue.
+  ///
+  /// In ja, this message translates to:
+  /// **'目安を過ぎています'**
+  String get supDue;
+
+  /// No description provided for @supOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {n}'**
+  String supOnHand(String n);
+
+  /// No description provided for @supQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get supQty;
+
+  /// No description provided for @supChosen.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}品目 · 合計 {units}個'**
+  String supChosen(int count, int units);
+
+  /// No description provided for @supMakeRequest.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷希望リストを作る'**
+  String get supMakeRequest;
+
+  /// No description provided for @supNothingChosen.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量の入った商品を選んでください'**
+  String get supNothingChosen;
+
+  /// No description provided for @supRequestTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{supplier} 次回注文（{date}）'**
+  String supRequestTitle(String supplier, String date);
+
+  /// No description provided for @supRequestMade.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷希望リスト {number} を作りました（{lines}品目・{units}個）'**
+  String supRequestMade(String number, int lines, int units);
+
+  /// No description provided for @supSourcePo.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注'**
+  String get supSourcePo;
+
+  /// No description provided for @supSourceDelivery.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品・請求'**
+  String get supSourceDelivery;
+
+  /// No description provided for @supSourceImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル取込'**
+  String get supSourceImport;
+
+  /// No description provided for @supEventLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}品目 · {units}個'**
+  String supEventLines(int lines, String units);
 }
 
 class _AppLocalizationsDelegate

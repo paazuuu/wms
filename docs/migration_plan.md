@@ -6758,6 +6758,67 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     - the JAN on each library card.
   - A copy says 「…」をコピーしました. Blank values have no button.
 
+## 0143 — 仕入先から: supplier cards, purchase history, the next order; one warehouse choice; downloads on the web
+
+- **The library follows the warehouse picker.** The first pane of
+  商品ライブラリー is the app's own warehouse (`activeWarehouseIdProvider`).
+  - Choosing a warehouse at the top right shows it in the list, and choosing
+    in the list moves the picker. 全倉庫 is the picker's 「すべての倉庫」.
+  - The second pane, when split, keeps a warehouse of its own.
+- **Downloads on the web.** The `file_picker` in use (8.3.x) has no
+  `saveFile` in the browser, so every 「ダウンロード」 there failed: the
+  import history's 元のファイル, the shipment and stock Excel files, CSV
+  exports and アップロード履歴.
+  - `core/export/save_bytes.dart` now saves every file. In the browser it
+    downloads a blob through a hidden link (`package:web`); elsewhere it opens
+    the save dialog. Each file gets the right MIME type.
+  - The files themselves were stored correctly; checked in storage.
+- **`supplier_purchase_lines(supplier)`** (internal) puts purchases from three
+  places into one shape: product, JAN, name, quantity, unit price, date,
+  source and reference.
+  - **Sent orders.** Drafts, rejected and cancelled orders are not counted.
+    An order with a delivery booked against it counts once, as the delivery.
+  - **Deliveries and invoices read in.** The quantity is what was received,
+    else what was planned.
+  - **Files put through 商品マスタ → stock** (0138) that reached stock.
+- **`supplier_cards(search)`** returns each supplier (not customers, not
+  stopped ones). For each it gives:
+  - products bought or with a name on file;
+  - purchases, units and amount;
+  - the last purchase date;
+  - the three products bought most.
+- **`supplier_purchase_history(supplier, warehouse)`** returns the supplier's
+  details and totals, plus every product, most often bought first.
+  - Each product has the supplier's own name and code for it, times bought,
+    the total, the average, the last quantity and price, and the first and
+    last dates.
+  - It also has the average days between purchases and the next date due,
+    plus stock in the chosen warehouse (or every warehouse allowed).
+  - It ends with the last 50 purchases.
+  - Products with only a name on file for the supplier are listed as never
+    bought.
+- **App:**
+  - 仕入先商品名 opens on supplier cards (仕入先ごと), and the old names list
+    is the other view (商品名の一覧). Search also matches what is bought.
+  - A card opens 仕入先 with two tabs: よく仕入れる商品 and 仕入れの履歴. The
+    first tab starts with the supplier's contacts, which can be copied.
+  - Everything bought before comes ticked, with last time's quantity. The
+    quantity can be switched to the average or blank.
+  - Quick choices: すべて選ぶ, 次回目安を過ぎたものだけ, 選択解除. A product
+    past its next date is shown in red.
+  - 入荷希望リストを作る saves a 入荷希望リスト (0140) for this supplier
+    with the chosen products, quantities and the supplier's own names and
+    codes. It then opens the list to adjust and download as Excel.
+- **Also fixed:** an empty 入荷希望リスト no longer breaks its layout (an
+  empty state inside a sliver list).
+- Tests:
+  - `supplier_history_test.dart`: cards, detail, history, the next order,
+    and a supplier with nothing yet;
+  - the picker sync in `product_list_screen_test.dart`;
+  - `save_bytes_test.dart`.
+  - The DB functions were checked against the live data: one supplier,
+    9 products, 4,100 units.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

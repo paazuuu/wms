@@ -10859,4 +10859,152 @@ class AppLocalizationsEn extends AppLocalizations {
   String whCodeAuto(String code) {
     return 'Left blank, it will be $code. Type one only to choose your own';
   }
+
+  @override
+  String get supViewSuppliers => 'By supplier';
+
+  @override
+  String get supViewNames => 'All names';
+
+  @override
+  String get supSearchHint => 'Find a supplier by name, code or what you buy';
+
+  @override
+  String get supEmpty => 'No suppliers';
+
+  @override
+  String supCardStats(int products, int purchases, int units) {
+    return '$products products · $purchases purchases · $units units';
+  }
+
+  @override
+  String supLastAt(String date) {
+    return 'Last bought $date';
+  }
+
+  @override
+  String get supNoPurchases => 'No purchases recorded yet';
+
+  @override
+  String supTop(String names) {
+    return 'Bought most: $names';
+  }
+
+  @override
+  String supTabProducts(int n) {
+    return 'Products ($n)';
+  }
+
+  @override
+  String supTabHistory(int n) {
+    return 'Purchases ($n)';
+  }
+
+  @override
+  String supTotals(int purchases, String units) {
+    return '$purchases purchases · $units units';
+  }
+
+  @override
+  String get supNoProducts => 'No products from this supplier yet';
+
+  @override
+  String get supNoProductsBody =>
+      'Read in an invoice or delivery note with this supplier, or order from them, and the products appear here.';
+
+  @override
+  String get supNextOrderHint =>
+      'What was bought before is ticked with last time\'s quantity. Check it and press 「入荷希望リストを作る」 to make a request to this supplier (it downloads as Excel).';
+
+  @override
+  String get supQtyLast => 'Quantity: as last time';
+
+  @override
+  String get supQtyAverage => 'Quantity: average';
+
+  @override
+  String get supQtyNone => 'Quantity: blank';
+
+  @override
+  String get supSelectAll => 'Select all';
+
+  @override
+  String get supSelectDue => 'Only those due';
+
+  @override
+  String get supClear => 'Clear';
+
+  @override
+  String supStockIn(String warehouse) {
+    return 'Stock: $warehouse';
+  }
+
+  @override
+  String get supNeverBought => 'Not bought yet (name on file only)';
+
+  @override
+  String supBought(int times, String total) {
+    return '$times times · $total in all';
+  }
+
+  @override
+  String supLast(String qty, String date) {
+    return 'Last $qty ($date)';
+  }
+
+  @override
+  String supAverage(String qty) {
+    return 'Average $qty';
+  }
+
+  @override
+  String supEvery(int days, String date) {
+    return 'About every $days days · next around $date';
+  }
+
+  @override
+  String get supDue => 'Due';
+
+  @override
+  String supOnHand(String n) {
+    return 'On hand $n';
+  }
+
+  @override
+  String get supQty => 'Qty';
+
+  @override
+  String supChosen(int count, int units) {
+    return '$count products · $units units';
+  }
+
+  @override
+  String get supMakeRequest => 'Make a request';
+
+  @override
+  String get supNothingChosen => 'Choose products with a quantity';
+
+  @override
+  String supRequestTitle(String supplier, String date) {
+    return '$supplier next order ($date)';
+  }
+
+  @override
+  String supRequestMade(String number, int lines, int units) {
+    return 'Made request $number ($lines products, $units units)';
+  }
+
+  @override
+  String get supSourcePo => 'Order';
+
+  @override
+  String get supSourceDelivery => 'Delivery / invoice';
+
+  @override
+  String get supSourceImport => 'File import';
+
+  @override
+  String supEventLines(int lines, String units) {
+    return '$lines products · $units units';
+  }
 }

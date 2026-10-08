@@ -10638,4 +10638,151 @@ class AppLocalizationsJa extends AppLocalizations {
   String whCodeAuto(String code) {
     return '空欄なら「$code」で登録します。変えたいときだけ入力してください';
   }
+
+  @override
+  String get supViewSuppliers => '仕入先ごと';
+
+  @override
+  String get supViewNames => '商品名の一覧';
+
+  @override
+  String get supSearchHint => '仕入先名・コード・よく仕入れる商品で探す';
+
+  @override
+  String get supEmpty => '仕入先がありません';
+
+  @override
+  String supCardStats(int products, int purchases, int units) {
+    return '取扱 $products品目 · 仕入 $purchases回 · 合計 $units個';
+  }
+
+  @override
+  String supLastAt(String date) {
+    return '最終仕入 $date';
+  }
+
+  @override
+  String get supNoPurchases => 'まだ仕入れの記録はありません';
+
+  @override
+  String supTop(String names) {
+    return 'よく仕入れる: $names';
+  }
+
+  @override
+  String supTabProducts(int n) {
+    return 'よく仕入れる商品（$n）';
+  }
+
+  @override
+  String supTabHistory(int n) {
+    return '仕入れの履歴（$n）';
+  }
+
+  @override
+  String supTotals(int purchases, String units) {
+    return '仕入 $purchases回 · 合計 $units個';
+  }
+
+  @override
+  String get supNoProducts => 'この仕入先の商品はまだありません';
+
+  @override
+  String get supNoProductsBody => '仕入先を付けて請求書・納品書を取り込むか、発注すると、ここに並びます。';
+
+  @override
+  String get supNextOrderHint =>
+      '前回仕入れた商品はチェック済みで、数量は前回と同じです。確認して「入荷希望リストを作る」を押すと、この仕入先あての入荷希望リストになります（Excelで送れます）。';
+
+  @override
+  String get supQtyLast => '数量: 前回と同じ';
+
+  @override
+  String get supQtyAverage => '数量: 平均';
+
+  @override
+  String get supQtyNone => '数量: 空欄';
+
+  @override
+  String get supSelectAll => 'すべて選ぶ';
+
+  @override
+  String get supSelectDue => '次回目安を過ぎたものだけ';
+
+  @override
+  String get supClear => '選択解除';
+
+  @override
+  String supStockIn(String warehouse) {
+    return '在庫: $warehouse';
+  }
+
+  @override
+  String get supNeverBought => 'まだ仕入れていません（商品名の対応のみ）';
+
+  @override
+  String supBought(int times, String total) {
+    return '仕入 $times回 · 合計 $total個';
+  }
+
+  @override
+  String supLast(String qty, String date) {
+    return '前回 $qty個（$date）';
+  }
+
+  @override
+  String supAverage(String qty) {
+    return '平均 $qty個';
+  }
+
+  @override
+  String supEvery(int days, String date) {
+    return '約$days日ごと · 次回目安 $date';
+  }
+
+  @override
+  String get supDue => '目安を過ぎています';
+
+  @override
+  String supOnHand(String n) {
+    return '在庫 $n';
+  }
+
+  @override
+  String get supQty => '数量';
+
+  @override
+  String supChosen(int count, int units) {
+    return '$count品目 · 合計 $units個';
+  }
+
+  @override
+  String get supMakeRequest => '入荷希望リストを作る';
+
+  @override
+  String get supNothingChosen => '数量の入った商品を選んでください';
+
+  @override
+  String supRequestTitle(String supplier, String date) {
+    return '$supplier 次回注文（$date）';
+  }
+
+  @override
+  String supRequestMade(String number, int lines, int units) {
+    return '入荷希望リスト $number を作りました（$lines品目・$units個）';
+  }
+
+  @override
+  String get supSourcePo => '発注';
+
+  @override
+  String get supSourceDelivery => '納品・請求';
+
+  @override
+  String get supSourceImport => 'ファイル取込';
+
+  @override
+  String supEventLines(int lines, String units) {
+    return '$lines品目 · $units個';
+  }
 }

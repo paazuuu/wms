@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/product.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 import 'product_providers.dart';
 
 /// Stock, as the library filters by it.
@@ -99,9 +100,15 @@ final filteredProductsProvider = Provider.autoDispose<AsyncValue<List<Product>>>
 /// narrow screen), each with its own warehouse.
 final librarySplitProvider = StateProvider<bool>((_) => false);
 
-/// Which warehouse pane 0 or 1 shows; null is every warehouse. Kept for the
-/// session, so coming back to the library shows the same warehouses.
-final libraryPaneWarehouseProvider = StateProvider.family<int?, int>((_, __) => null);
+/// The second pane's warehouse; null is every warehouse.
+final _secondPaneWarehouseProvider = StateProvider<int?>((_) => null);
+
+/// Which warehouse pane 0 or 1 shows; null is every warehouse. The first
+/// pane is the app's own warehouse — the picker at the top right — so the
+/// two always agree, and choosing in either changes both. The second pane
+/// keeps its own for the session.
+StateProvider<int?> libraryPaneWarehouseProvider(int pane) =>
+    pane == 0 ? activeWarehouseIdProvider : _secondPaneWarehouseProvider;
 
 /// Each pane's stock filter, against its own warehouse.
 final libraryPaneStockProvider = StateProvider.family<StockFilter, int>((_, __) => StockFilter.all);

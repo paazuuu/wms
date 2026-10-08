@@ -1,6 +1,6 @@
+import '../../../core/export/save_bytes.dart';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -18,12 +18,7 @@ import '../domain/pricing.dart';
 typedef SaveFile = Future<void> Function(String fileName, Uint8List bytes);
 
 Future<void> saveWithPicker(String fileName, Uint8List bytes) async {
-  await FilePicker.platform.saveFile(
-    fileName: fileName,
-    bytes: bytes,
-    type: FileType.custom,
-    allowedExtensions: const ['xlsx'],
-  );
+  await saveBytes(fileName, bytes);
 }
 
 /// Overridden in tests so nothing reaches for the platform.

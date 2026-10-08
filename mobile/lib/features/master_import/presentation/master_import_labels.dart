@@ -1,6 +1,6 @@
+import '../../../core/export/save_bytes.dart';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,13 +43,7 @@ String masterStatusLabel(AppLocalizations l10n, MasterImportStatus s) => switch 
 typedef SaveBytes = Future<void> Function(String fileName, Uint8List bytes);
 
 Future<void> saveBytesWithPicker(String fileName, Uint8List bytes) async {
-  final ext = fileName.contains('.') ? fileName.split('.').last : null;
-  await FilePicker.platform.saveFile(
-    fileName: fileName,
-    bytes: bytes,
-    type: ext == null ? FileType.any : FileType.custom,
-    allowedExtensions: ext == null ? null : [ext],
-  );
+  await saveBytes(fileName, bytes);
 }
 
 /// Downloads one kept file of an import.

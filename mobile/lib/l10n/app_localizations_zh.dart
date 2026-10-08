@@ -10584,4 +10584,151 @@ class AppLocalizationsZh extends AppLocalizations {
   String whCodeAuto(String code) {
     return '留空则以「$code」登记。仅在需要更改时输入';
   }
+
+  @override
+  String get supViewSuppliers => '按供应商';
+
+  @override
+  String get supViewNames => '商品名一览';
+
+  @override
+  String get supSearchHint => '按供应商名称・代码・常购商品查找';
+
+  @override
+  String get supEmpty => '没有供应商';
+
+  @override
+  String supCardStats(int products, int purchases, int units) {
+    return '经营 $products 种 · 进货 $purchases 次 · 合计 $units 个';
+  }
+
+  @override
+  String supLastAt(String date) {
+    return '最后进货 $date';
+  }
+
+  @override
+  String get supNoPurchases => '尚无进货记录';
+
+  @override
+  String supTop(String names) {
+    return '常购：$names';
+  }
+
+  @override
+  String supTabProducts(int n) {
+    return '常购商品（$n）';
+  }
+
+  @override
+  String supTabHistory(int n) {
+    return '进货记录（$n）';
+  }
+
+  @override
+  String supTotals(int purchases, String units) {
+    return '进货 $purchases 次 · 合计 $units 个';
+  }
+
+  @override
+  String get supNoProducts => '此供应商尚无商品';
+
+  @override
+  String get supNoProductsBody => '导入带有此供应商的发票・送货单或下单后，将显示在这里。';
+
+  @override
+  String get supNextOrderHint =>
+      '以前进过的商品已勾选，数量与上次相同。确认后按「入荷希望リストを作る」即生成发给此供应商的进货希望清单（可下载Excel）。';
+
+  @override
+  String get supQtyLast => '数量：与上次相同';
+
+  @override
+  String get supQtyAverage => '数量：平均';
+
+  @override
+  String get supQtyNone => '数量：空白';
+
+  @override
+  String get supSelectAll => '全选';
+
+  @override
+  String get supSelectDue => '仅超过下次目安的';
+
+  @override
+  String get supClear => '取消选择';
+
+  @override
+  String supStockIn(String warehouse) {
+    return '库存：$warehouse';
+  }
+
+  @override
+  String get supNeverBought => '尚未进货（仅有商品名对应）';
+
+  @override
+  String supBought(int times, String total) {
+    return '进货 $times 次 · 合计 $total 个';
+  }
+
+  @override
+  String supLast(String qty, String date) {
+    return '上次 $qty 个（$date）';
+  }
+
+  @override
+  String supAverage(String qty) {
+    return '平均 $qty 个';
+  }
+
+  @override
+  String supEvery(int days, String date) {
+    return '约每$days天 · 下次目安 $date';
+  }
+
+  @override
+  String get supDue => '已超过目安';
+
+  @override
+  String supOnHand(String n) {
+    return '库存 $n';
+  }
+
+  @override
+  String get supQty => '数量';
+
+  @override
+  String supChosen(int count, int units) {
+    return '$count 种 · 合计 $units 个';
+  }
+
+  @override
+  String get supMakeRequest => '生成进货希望清单';
+
+  @override
+  String get supNothingChosen => '请选择已填数量的商品';
+
+  @override
+  String supRequestTitle(String supplier, String date) {
+    return '$supplier 下次订货（$date）';
+  }
+
+  @override
+  String supRequestMade(String number, int lines, int units) {
+    return '已生成进货希望清单 $number（$lines 种・$units 个）';
+  }
+
+  @override
+  String get supSourcePo => '订单';
+
+  @override
+  String get supSourceDelivery => '送货・发票';
+
+  @override
+  String get supSourceImport => '文件导入';
+
+  @override
+  String supEventLines(int lines, String units) {
+    return '$lines 种 · $units 个';
+  }
 }

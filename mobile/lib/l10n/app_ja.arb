@@ -9331,5 +9331,188 @@
         "type": "String"
       }
     }
+  },
+  "supViewSuppliers": "仕入先ごと",
+  "supViewNames": "商品名の一覧",
+  "supSearchHint": "仕入先名・コード・よく仕入れる商品で探す",
+  "supEmpty": "仕入先がありません",
+  "supCardStats": "取扱 {products}品目 · 仕入 {purchases}回 · 合計 {units}個",
+  "@supCardStats": {
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "purchases": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "supLastAt": "最終仕入 {date}",
+  "@supLastAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supNoPurchases": "まだ仕入れの記録はありません",
+  "supTop": "よく仕入れる: {names}",
+  "@supTop": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "supTabProducts": "よく仕入れる商品（{n}）",
+  "@supTabProducts": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "supTabHistory": "仕入れの履歴（{n}）",
+  "@supTabHistory": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "supTotals": "仕入 {purchases}回 · 合計 {units}個",
+  "@supTotals": {
+    "placeholders": {
+      "purchases": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "supNoProducts": "この仕入先の商品はまだありません",
+  "supNoProductsBody": "仕入先を付けて請求書・納品書を取り込むか、発注すると、ここに並びます。",
+  "supNextOrderHint": "前回仕入れた商品はチェック済みで、数量は前回と同じです。確認して「入荷希望リストを作る」を押すと、この仕入先あての入荷希望リストになります（Excelで送れます）。",
+  "supQtyLast": "数量: 前回と同じ",
+  "supQtyAverage": "数量: 平均",
+  "supQtyNone": "数量: 空欄",
+  "supSelectAll": "すべて選ぶ",
+  "supSelectDue": "次回目安を過ぎたものだけ",
+  "supClear": "選択解除",
+  "supStockIn": "在庫: {warehouse}",
+  "@supStockIn": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "supNeverBought": "まだ仕入れていません（商品名の対応のみ）",
+  "supBought": "仕入 {times}回 · 合計 {total}個",
+  "@supBought": {
+    "placeholders": {
+      "times": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "supLast": "前回 {qty}個（{date}）",
+  "@supLast": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supAverage": "平均 {qty}個",
+  "@supAverage": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "supEvery": "約{days}日ごと · 次回目安 {date}",
+  "@supEvery": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supDue": "目安を過ぎています",
+  "supOnHand": "在庫 {n}",
+  "@supOnHand": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "supQty": "数量",
+  "supChosen": "{count}品目 · 合計 {units}個",
+  "@supChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "supMakeRequest": "入荷希望リストを作る",
+  "supNothingChosen": "数量の入った商品を選んでください",
+  "supRequestTitle": "{supplier} 次回注文（{date}）",
+  "@supRequestTitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "supRequestMade": "入荷希望リスト {number} を作りました（{lines}品目・{units}個）",
+  "@supRequestMade": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "supSourcePo": "発注",
+  "supSourceDelivery": "納品・請求",
+  "supSourceImport": "ファイル取込",
+  "supEventLines": "{lines}品目 · {units}個",
+  "@supEventLines": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
   }
 }

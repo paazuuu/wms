@@ -1,11 +1,10 @@
+import 'save_bytes.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 
-/// Builds a CSV document from [headers] + [rows] and hands it to the OS save
-/// dialog via `file_picker` (already a dependency for import, so this adds no
-/// new native permissions). A UTF-8 BOM is prepended so Excel on Windows opens
+/// Builds a CSV document from [headers] + [rows] and saves it ([saveBytes]:
+/// a download in the browser, the save dialog elsewhere). A UTF-8 BOM is prepended so Excel on Windows opens
 /// Japanese text correctly instead of guessing the wrong encoding.
 ///
 /// Returns the path/uri the file was saved to, or null if the user cancelled.
@@ -15,12 +14,7 @@ Future<String?> exportCsv({
   required List<List<Object?>> rows,
 }) async {
   final bytes = csvBytes(headers: headers, rows: rows);
-  return FilePicker.platform.saveFile(
-    fileName: fileName,
-    type: FileType.custom,
-    allowedExtensions: const ['csv'],
-    bytes: bytes,
-  );
+  return saveBytes(fileName, bytes);
 }
 
 /// The CSV document as UTF-8 bytes with a leading BOM. Split out from

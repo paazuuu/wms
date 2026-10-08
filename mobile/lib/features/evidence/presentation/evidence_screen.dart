@@ -1,4 +1,4 @@
-import 'package:file_picker/file_picker.dart';
+import '../../../core/export/save_bytes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -29,13 +29,7 @@ Future<void> downloadEvidence(BuildContext context, WidgetRef ref, ImportDocumen
   final r = await ref.read(evidenceRepositoryProvider).download(doc);
   switch (r) {
     case ApiSuccess(:final data):
-      final ext = doc.fileName.contains('.') ? doc.fileName.split('.').last : null;
-      final saved = await FilePicker.platform.saveFile(
-        fileName: doc.fileName,
-        bytes: data,
-        type: ext == null ? FileType.any : FileType.custom,
-        allowedExtensions: ext == null ? null : [ext],
-      );
+      final saved = await saveBytes(doc.fileName, data);
       if (saved != null || data.isNotEmpty) {
         messenger.showSnackBar(SnackBar(content: Text(l10n.evDownloaded)));
       }
