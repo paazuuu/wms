@@ -8,6 +8,8 @@ import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
+import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
 import '../../support/harness.dart';
 
@@ -15,9 +17,11 @@ import '../../support/harness.dart';
 /// is false; [delete] adds product.delete (0119).
 Future<ProviderContainer> _pump(
     WidgetTester tester, FakeProductRepository repo,
-    {bool manage = true, bool delete = false, bool lifecycle = false}) async {
+    {bool manage = true, bool delete = false, bool lifecycle = false, List<Warehouse> warehouses = const []}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
+    warehouseRepositoryProvider.overrideWithValue(
+        FakeWarehouseRepository(WarehouseOverview(warehouses: warehouses, totals: const WarehouseTotals()))),
     scCanViewProvider.overrideWithValue(false),
   ]);
   addTearDown(container.dispose);
@@ -384,14 +388,14 @@ void main() {
     suppliers: [ProductSupplierRef(id: 4, name: '新東光通商')],
     stock: ProductStock(onHand: 40, reserved: 10, available: 30, warehouses: [
       WarehouseStock(warehouseId: 1, name: 'メイン倉庫', onHand: 30, reserved: 10, available: 20),
-      WarehouseStock(warehouseId: 2, name: '神戸倉庫', onHand: 10),
+      WarehouseStock(warehouseId: 2, name: '神戸倉庫', onHand: 10, available: 10),
     ]),
   );
   const empty = Product(id: 2, janCode: '4901681233922', name: 'サラサ', maker: 'ゼブラ', stock: ProductStock());
   const sleeping = Product(id: 3, janCode: '4901480344041', name: 'バインダー', maker: 'コクヨ',
       status: 'inactive', lifecycleCode: 'discontinued', lifecycleReason: 'メーカー廃番');
 
-  testWidgets('the master shows each product\'s spec, not its suppliers or stock (0125)', (tester) async {
+  testWidgets('the library shows each product\'s spec and its stock, not its suppliers', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     const sized = Product(
@@ -404,10 +408,108 @@ void main() {
 
     expect(find.text('10×10×140 mm · 12 g'), findsOneWidget);
     expect(find.textContaining('新東光通商'), findsNothing);
-    expect(find.textContaining('在庫'), findsNothing);
     expect(find.byKey(const ValueKey('pf-supplier')), findsNothing);
-    expect(find.byKey(const ValueKey('pf-stock')), findsNothing);
+    expect(find.text('在庫 40 · 引当 10 · 出荷可能 30'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pl-stock-0-2')), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-0-2'))).data, '在庫なし');
     expect(find.text('2件を表示（全2件）'), findsOneWidget);
+  });
+
+  const main = Warehouse(id: 1, code: 'MAIN', name: 'メイン倉庫');
+  const kobe = Warehouse(id: 2, code: 'KOBE', name: '神戸倉庫');
+
+  testWidgets('the warehouse shown is named and chosen in a band; its stock filter is its own', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked, empty]), warehouses: const [main, kobe]);
+
+    // Every warehouse to begin with, said so.
+    expect(find.text('表示中の倉庫: 全倉庫'), findsOneWidget);
+    expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('pl-wh-all'))).selected, isTrue);
+    expect(find.text('在庫 40 · 引当 10 · 出荷可能 30 (メイン倉庫 30 / 神戸倉庫 10)'), findsOneWidget);
+    expect(find.text('在庫あり 1品目・合計 40個'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('pl-wh-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('表示中の倉庫: 神戸倉庫'), findsOneWidget);
+    expect(find.text('在庫 10 · 引当 0 · 出荷可能 10'), findsOneWidget);
+    expect(find.text('この倉庫に在庫なし'), findsOneWidget);
+    expect(find.text('在庫あり 1品目・合計 10個'), findsOneWidget);
+
+    // Only what this warehouse holds.
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('pl-stock-filter')), matching: find.text('在庫あり')));
+    await tester.pumpAndSettle();
+    expect(find.text('ボールペン'), findsOneWidget);
+    expect(find.text('サラサ'), findsNothing);
+    expect(find.text('1件を表示（全2件）'), findsOneWidget);
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('pl-stock-filter')), matching: find.text('在庫なし')));
+    await tester.pumpAndSettle();
+    expect(find.text('ボールペン'), findsNothing);
+    expect(find.text('サラサ'), findsOneWidget);
+  });
+
+  testWidgets('two warehouses side by side, each with its own choice and stock', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const osakaOnly = Product(
+      id: 4, janCode: '4901234567894', name: 'クリップ', maker: 'コクヨ',
+      stock: ProductStock(onHand: 7, available: 7, warehouses: [WarehouseStock(warehouseId: 1, name: 'メイン倉庫', onHand: 7, available: 7)]),
+    );
+    final container = await _pump(tester, FakeProductRepository(products: const [stocked, osakaOnly]),
+        warehouses: const [main, kobe]);
+
+    expect(find.byKey(const ValueKey('pl-warehouse-bar-1')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('pl-split')));
+    await tester.pumpAndSettle();
+
+    // The first two warehouses, one per pane, side by side.
+    expect(find.byKey(const ValueKey('pl-warehouse-bar-1')), findsOneWidget);
+    expect(find.text('表示中の倉庫: メイン倉庫'), findsOneWidget);
+    expect(find.text('表示中の倉庫: 神戸倉庫'), findsOneWidget);
+    final left = tester.getCenter(find.byKey(const ValueKey('pl-warehouse-bar')));
+    final right = tester.getCenter(find.byKey(const ValueKey('pl-warehouse-bar-1')));
+    expect(right.dx, greaterThan(left.dx));
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-0-1'))).data, '在庫 30 · 引当 10 · 出荷可能 20');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-1-1'))).data, '在庫 10 · 引当 0 · 出荷可能 10');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-1-4'))).data, 'この倉庫に在庫なし');
+
+    // Only the second pane narrows to its stock.
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('pl-stock-filter-1')), matching: find.text('在庫あり')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pl-stock-1-4')), findsNothing);
+    expect(find.byKey(const ValueKey('pl-stock-0-4')), findsOneWidget);
+
+    // The second pane can show every warehouse too.
+    await tester.tap(find.byKey(const ValueKey('pl-wh-1-all')));
+    await tester.pumpAndSettle();
+    expect(container.read(libraryPaneWarehouseProvider(1)), isNull);
+    expect(find.text('表示中の倉庫: 全倉庫'), findsOneWidget);
+
+    // Back to one pane, keeping its warehouse.
+    await tester.tap(find.byKey(const ValueKey('pl-split')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pl-warehouse-bar-1')), findsNothing);
+    expect(find.text('表示中の倉庫: メイン倉庫'), findsOneWidget);
+  });
+
+  testWidgets('on a narrow screen the two panes are one above the other', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(600, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked]), warehouses: const [main, kobe]);
+    await tester.tap(find.byKey(const ValueKey('pl-split')));
+    await tester.pumpAndSettle();
+    final top = tester.getCenter(find.byKey(const ValueKey('pl-warehouse-bar')));
+    final bottom = tester.getCenter(find.byKey(const ValueKey('pl-warehouse-bar-1')));
+    expect(bottom.dy, greaterThan(top.dy));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('with one warehouse there is nothing to split', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked]), warehouses: const [main]);
+    expect(find.byKey(const ValueKey('pl-split')), findsNothing);
+    expect(find.byKey(const ValueKey('pl-wh-1')), findsOneWidget);
   });
 
   testWidgets('the master narrows by maker and state', (tester) async {

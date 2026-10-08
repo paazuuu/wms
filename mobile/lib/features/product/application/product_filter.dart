@@ -32,14 +32,16 @@ class ProductFilter extends Equatable {
   /// Every lifecycle but the archived one: what "show inactive" shows.
   static const notArchived = {ProductLifecycle.active, ProductLifecycle.dormant, ProductLifecycle.discontinued};
 
-  bool matches(Product p) {
+  /// [warehouseId] narrows the stock test to one warehouse (null: every
+  /// one the person can see); [stockIn] replaces [stock] for it.
+  bool matches(Product p, {int? warehouseId, StockFilter? stockIn}) {
     if (lifecycles.isNotEmpty && !lifecycles.contains(p.lifecycle)) return false;
     if (makers.isNotEmpty && !makers.contains(p.maker ?? '')) return false;
     if (categories.isNotEmpty && !categories.contains(p.category ?? '')) return false;
     if (supplierIds.isNotEmpty && !p.suppliers.any((s) => supplierIds.contains(s.id))) return false;
     if (withoutImages && p.imageCount > 0) return false;
-    final onHand = p.stock?.onHand ?? 0;
-    return switch (stock) {
+    final onHand = productStockIn(p, warehouseId).onHand;
+    return switch (stockIn ?? stock) {
       StockFilter.all => true,
       StockFilter.inStock => onHand > 0,
       StockFilter.outOfStock => onHand <= 0,
@@ -78,6 +80,42 @@ final productFilterProvider = StateProvider<ProductFilter>((_) => const ProductF
 final filteredProductsProvider = Provider.autoDispose<AsyncValue<List<Product>>>((ref) {
   final filter = ref.watch(productFilterProvider);
   return ref.watch(productListProvider).whenData((all) => [for (final p in all) if (filter.matches(p)) p]);
+});
+
+/// A product's stock in one warehouse, or in every warehouse the person can
+/// see for null. A warehouse that is not in the product's breakdown holds
+/// none of it.
+({int onHand, int reserved, int available}) productStockIn(Product p, int? warehouseId) {
+  final s = p.stock;
+  if (s == null) return (onHand: 0, reserved: 0, available: 0);
+  if (warehouseId == null) return (onHand: s.onHand, reserved: s.reserved, available: s.available);
+  final w = s.warehouses.where((w) => w.warehouseId == warehouseId).firstOrNull;
+  return w == null
+      ? (onHand: 0, reserved: 0, available: 0)
+      : (onHand: w.onHand, reserved: w.reserved, available: w.available);
+}
+
+/// The library shown as two panes side by side (or one above the other on a
+/// narrow screen), each with its own warehouse.
+final librarySplitProvider = StateProvider<bool>((_) => false);
+
+/// Which warehouse pane 0 or 1 shows; null is every warehouse. Kept for the
+/// session, so coming back to the library shows the same warehouses.
+final libraryPaneWarehouseProvider = StateProvider.family<int?, int>((_, __) => null);
+
+/// Each pane's stock filter, against its own warehouse.
+final libraryPaneStockProvider = StateProvider.family<StockFilter, int>((_, __) => StockFilter.all);
+
+/// The products pane [pane] shows: the shared filters, and its own
+/// warehouse's stock filter.
+final libraryPaneProductsProvider = Provider.autoDispose.family<AsyncValue<List<Product>>, int>((ref, pane) {
+  final filter = ref.watch(productFilterProvider);
+  final warehouseId = ref.watch(libraryPaneWarehouseProvider(pane));
+  final stock = ref.watch(libraryPaneStockProvider(pane));
+  return ref.watch(productListProvider).whenData((all) => [
+        for (final p in all)
+          if (filter.matches(p, warehouseId: warehouseId, stockIn: stock)) p,
+      ]);
 });
 
 /// What the filters can choose from, with how many products each has —

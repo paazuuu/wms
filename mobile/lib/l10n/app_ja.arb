@@ -9258,5 +9258,60 @@
         "type": "String"
       }
     }
-  }
+  },
+  "plAllWarehouses": "全倉庫",
+  "plShowingWarehouse": "表示中の倉庫: {name}",
+  "@plShowingWarehouse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "plStockSummary": "在庫あり {items}品目・合計 {units}個",
+  "@plStockSummary": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "plWarehouseInactive": "停止中",
+  "plSplitOn": "倉庫を2画面で並べる",
+  "plSplitOff": "1画面に戻す",
+  "plStockAll": "全商品",
+  "plStockIn": "在庫あり",
+  "plStockOut": "在庫なし",
+  "plStockLine": "在庫 {onHand} · 引当 {reserved} · 出荷可能 {available}",
+  "@plStockLine": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "reserved": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "plStockShort": "在庫 {onHand}（出荷可能 {available}）",
+  "@plStockShort": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "plNoStock": "在庫なし",
+  "plNoStockHere": "この倉庫に在庫なし",
+  "plNoneInStock": "この倉庫に在庫のある商品はありません",
+  "plNoneOutOfStock": "この倉庫で在庫切れの商品はありません"
 }

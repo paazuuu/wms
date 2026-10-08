@@ -3522,5 +3522,20 @@
   "obBaseShip": "Current unit price (after a rate)",
   "obBelowCost": "Below cost",
   "obAmountTotal": "Total ¥{amount}",
-  "obPricesLine": "Cost {cost} · List {list} · Selling {sell}"
+  "obPricesLine": "Cost {cost} · List {list} · Selling {sell}",
+  "plAllWarehouses": "All warehouses",
+  "plShowingWarehouse": "Showing: {name}",
+  "plStockSummary": "{items} in stock · {units} units",
+  "plWarehouseInactive": "inactive",
+  "plSplitOn": "Two warehouses side by side",
+  "plSplitOff": "Back to one view",
+  "plStockAll": "All",
+  "plStockIn": "In stock",
+  "plStockOut": "Out of stock",
+  "plStockLine": "On hand {onHand} · reserved {reserved} · free {available}",
+  "plStockShort": "{onHand} on hand ({available} free)",
+  "plNoStock": "No stock",
+  "plNoStockHere": "None in this warehouse",
+  "plNoneInStock": "Nothing in stock in this warehouse",
+  "plNoneOutOfStock": "Nothing out of stock in this warehouse"
 }

@@ -3522,5 +3522,20 @@
   "obBaseShip": "当前出货单价（折扣后）",
   "obBelowCost": "低于成本",
   "obAmountTotal": "出货金额合计 ¥{amount}",
-  "obPricesLine": "成本 {cost} · 定价 {list} · 销售价格 {sell}"
+  "obPricesLine": "成本 {cost} · 定价 {list} · 销售价格 {sell}",
+  "plAllWarehouses": "全部仓库",
+  "plShowingWarehouse": "显示中的仓库：{name}",
+  "plStockSummary": "有库存 {items} 种・合计 {units} 个",
+  "plWarehouseInactive": "停用",
+  "plSplitOn": "两个仓库分屏显示",
+  "plSplitOff": "恢复为单屏",
+  "plStockAll": "全部商品",
+  "plStockIn": "有库存",
+  "plStockOut": "无库存",
+  "plStockLine": "库存 {onHand} · 已分配 {reserved} · 可出货 {available}",
+  "plStockShort": "库存 {onHand}（可出货 {available}）",
+  "plNoStock": "无库存",
+  "plNoStockHere": "此仓库无库存",
+  "plNoneInStock": "此仓库没有有库存的商品",
+  "plNoneOutOfStock": "此仓库没有缺货的商品"
 }

@@ -10569,4 +10569,57 @@ class AppLocalizationsJa extends AppLocalizations {
   String obPricesLine(String cost, String list, String sell) {
     return '原価 $cost · 定価 $list · 販売価格 $sell';
   }
+
+  @override
+  String get plAllWarehouses => '全倉庫';
+
+  @override
+  String plShowingWarehouse(String name) {
+    return '表示中の倉庫: $name';
+  }
+
+  @override
+  String plStockSummary(int items, int units) {
+    return '在庫あり $items品目・合計 $units個';
+  }
+
+  @override
+  String get plWarehouseInactive => '停止中';
+
+  @override
+  String get plSplitOn => '倉庫を2画面で並べる';
+
+  @override
+  String get plSplitOff => '1画面に戻す';
+
+  @override
+  String get plStockAll => '全商品';
+
+  @override
+  String get plStockIn => '在庫あり';
+
+  @override
+  String get plStockOut => '在庫なし';
+
+  @override
+  String plStockLine(int onHand, int reserved, int available) {
+    return '在庫 $onHand · 引当 $reserved · 出荷可能 $available';
+  }
+
+  @override
+  String plStockShort(int onHand, int available) {
+    return '在庫 $onHand（出荷可能 $available）';
+  }
+
+  @override
+  String get plNoStock => '在庫なし';
+
+  @override
+  String get plNoStockHere => 'この倉庫に在庫なし';
+
+  @override
+  String get plNoneInStock => 'この倉庫に在庫のある商品はありません';
+
+  @override
+  String get plNoneOutOfStock => 'この倉庫で在庫切れの商品はありません';
 }

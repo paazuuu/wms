@@ -10515,4 +10515,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String obPricesLine(String cost, String list, String sell) {
     return '成本 $cost · 定价 $list · 销售价格 $sell';
   }
+
+  @override
+  String get plAllWarehouses => '全部仓库';
+
+  @override
+  String plShowingWarehouse(String name) {
+    return '显示中的仓库：$name';
+  }
+
+  @override
+  String plStockSummary(int items, int units) {
+    return '有库存 $items 种・合计 $units 个';
+  }
+
+  @override
+  String get plWarehouseInactive => '停用';
+
+  @override
+  String get plSplitOn => '两个仓库分屏显示';
+
+  @override
+  String get plSplitOff => '恢复为单屏';
+
+  @override
+  String get plStockAll => '全部商品';
+
+  @override
+  String get plStockIn => '有库存';
+
+  @override
+  String get plStockOut => '无库存';
+
+  @override
+  String plStockLine(int onHand, int reserved, int available) {
+    return '库存 $onHand · 已分配 $reserved · 可出货 $available';
+  }
+
+  @override
+  String plStockShort(int onHand, int available) {
+    return '库存 $onHand（可出货 $available）';
+  }
+
+  @override
+  String get plNoStock => '无库存';
+
+  @override
+  String get plNoStockHere => '此仓库无库存';
+
+  @override
+  String get plNoneInStock => '此仓库没有有库存的商品';
+
+  @override
+  String get plNoneOutOfStock => '此仓库没有缺货的商品';
 }

@@ -19075,6 +19075,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'原価 {cost} · 定価 {list} · 販売価格 {sell}'**
   String obPricesLine(String cost, String list, String sell);
+
+  /// No description provided for @plAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'全倉庫'**
+  String get plAllWarehouses;
+
+  /// No description provided for @plShowingWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の倉庫: {name}'**
+  String plShowingWarehouse(String name);
+
+  /// No description provided for @plStockSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫あり {items}品目・合計 {units}個'**
+  String plStockSummary(int items, int units);
+
+  /// No description provided for @plWarehouseInactive.
+  ///
+  /// In ja, this message translates to:
+  /// **'停止中'**
+  String get plWarehouseInactive;
+
+  /// No description provided for @plSplitOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を2画面で並べる'**
+  String get plSplitOn;
+
+  /// No description provided for @plSplitOff.
+  ///
+  /// In ja, this message translates to:
+  /// **'1画面に戻す'**
+  String get plSplitOff;
+
+  /// No description provided for @plStockAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'全商品'**
+  String get plStockAll;
+
+  /// No description provided for @plStockIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫あり'**
+  String get plStockIn;
+
+  /// No description provided for @plStockOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫なし'**
+  String get plStockOut;
+
+  /// No description provided for @plStockLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand} · 引当 {reserved} · 出荷可能 {available}'**
+  String plStockLine(int onHand, int reserved, int available);
+
+  /// No description provided for @plStockShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand}（出荷可能 {available}）'**
+  String plStockShort(int onHand, int available);
+
+  /// No description provided for @plNoStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫なし'**
+  String get plNoStock;
+
+  /// No description provided for @plNoStockHere.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫に在庫なし'**
+  String get plNoStockHere;
+
+  /// No description provided for @plNoneInStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫に在庫のある商品はありません'**
+  String get plNoneInStock;
+
+  /// No description provided for @plNoneOutOfStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫で在庫切れの商品はありません'**
+  String get plNoneOutOfStock;
 }
 
 class _AppLocalizationsDelegate

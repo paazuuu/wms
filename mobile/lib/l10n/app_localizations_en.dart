@@ -10790,4 +10790,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String obPricesLine(String cost, String list, String sell) {
     return 'Cost $cost · List $list · Selling $sell';
   }
+
+  @override
+  String get plAllWarehouses => 'All warehouses';
+
+  @override
+  String plShowingWarehouse(String name) {
+    return 'Showing: $name';
+  }
+
+  @override
+  String plStockSummary(int items, int units) {
+    return '$items in stock · $units units';
+  }
+
+  @override
+  String get plWarehouseInactive => 'inactive';
+
+  @override
+  String get plSplitOn => 'Two warehouses side by side';
+
+  @override
+  String get plSplitOff => 'Back to one view';
+
+  @override
+  String get plStockAll => 'All';
+
+  @override
+  String get plStockIn => 'In stock';
+
+  @override
+  String get plStockOut => 'Out of stock';
+
+  @override
+  String plStockLine(int onHand, int reserved, int available) {
+    return 'On hand $onHand · reserved $reserved · free $available';
+  }
+
+  @override
+  String plStockShort(int onHand, int available) {
+    return '$onHand on hand ($available free)';
+  }
+
+  @override
+  String get plNoStock => 'No stock';
+
+  @override
+  String get plNoStockHere => 'None in this warehouse';
+
+  @override
+  String get plNoneInStock => 'Nothing in stock in this warehouse';
+
+  @override
+  String get plNoneOutOfStock => 'Nothing out of stock in this warehouse';
 }

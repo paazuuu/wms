@@ -22,6 +22,8 @@ import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../price_book/presentation/price_book_pick_screen.dart';
 import '../../../core/ui/product_name.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
+import '../../warehouse_context/domain/warehouse.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
@@ -220,11 +222,32 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Into two panes, or back to one. A first split shows the first two
+  /// warehouses when the one pane was showing every warehouse; else the
+  /// second pane takes the first warehouse the first is not showing.
+  void _toggleSplit(List<Warehouse> warehouses) {
+    final on = !ref.read(librarySplitProvider);
+    if (on && warehouses.length > 1) {
+      final first = ref.read(libraryPaneWarehouseProvider(0));
+      if (first == null) {
+        ref.read(libraryPaneWarehouseProvider(0).notifier).state = warehouses[0].id;
+        ref.read(libraryPaneWarehouseProvider(1).notifier).state = warehouses[1].id;
+      } else {
+        final second = ref.read(libraryPaneWarehouseProvider(1));
+        if (second == null || second == first) {
+          ref.read(libraryPaneWarehouseProvider(1).notifier).state =
+              warehouses.firstWhere((w) => w.id != first).id;
+        }
+      }
+    }
+    ref.read(librarySplitProvider.notifier).state = on;
+  }
+
+  /// One pane: whose warehouse it shows, how many, and the products with
+  /// their stock there.
+  Widget _pane(int pane, {required List<Warehouse> warehouses, required int? total, required bool split}) {
     final l10n = AppLocalizations.of(context);
-    final async = ref.watch(filteredProductsProvider);
-    final total = ref.watch(productListProvider).valueOrNull?.length;
+    final async = ref.watch(libraryPaneProductsProvider(pane));
     final filter = ref.watch(productFilterProvider);
     final photos = ref.watch(productPhotoViewProvider);
     final canManage = ref.watch(productLibraryCanManageProvider);
@@ -234,6 +257,160 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final canSelect = canLifecycle || canDelete;
     final selected = _selected;
     final shown = async.valueOrNull ?? const <Product>[];
+    final chosen = ref.watch(libraryPaneWarehouseProvider(pane));
+    // A warehouse no longer listed is read as every warehouse.
+    final warehouseId = warehouses.any((w) => w.id == chosen) ? chosen : null;
+    final stockFilter = ref.watch(libraryPaneStockProvider(pane));
+    final suffix = pane == 0 ? '' : '-$pane';
+    return Column(
+      children: [
+        _WarehouseBar(
+          pane: pane,
+          split: split,
+          warehouses: warehouses,
+          warehouseId: warehouseId,
+          products: shown,
+        ),
+        if (total != null && async.hasValue)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xs),
+            child: Wrap(
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                // Choosing many at once (0120), for the administrator.
+                if (pane == 0 && canSelect && selected == null) ...[
+                  OutlinedButton.icon(
+                    key: const ValueKey('lc-start'),
+                    onPressed: () => setState(() => _selected = {}),
+                    icon: const Icon(Icons.checklist_outlined, size: 18),
+                    label: Text(l10n.lcSelect),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                  child: Text(
+                    selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
+                    key: ValueKey('pf-showing$suffix'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Expanded(
+          child: async.when(
+            loading: () => LoadingView(message: l10n.loading),
+            error: (e, _) => ErrorStateView(
+              message: '$e',
+              onRetry: () => ref.invalidate(productListProvider),
+            ),
+            data: (products) {
+              if (products.isEmpty) {
+                if ((total ?? 0) == 0) {
+                  return EmptyStateView(
+                    icon: Icons.inventory_2_outlined,
+                    title: l10n.productsEmpty,
+                    message: l10n.productsEmptyBody,
+                  );
+                }
+                // There are products, only none the filters let
+                // through: say where they are and offer to show them.
+                if (stockFilter != StockFilter.all) {
+                  return EmptyStateView(
+                    key: ValueKey('pl-no-stock$suffix'),
+                    icon: Icons.inventory_2_outlined,
+                    title: stockFilter == StockFilter.inStock ? l10n.plNoneInStock : l10n.plNoneOutOfStock,
+                  );
+                }
+                return _HiddenProducts(filter: filter);
+              }
+              void toggle(Product p) =>
+                  setState(() => selected!.contains(p.id) ? selected.remove(p.id) : selected.add(p.id));
+              if (photos) {
+                return RefreshIndicator(
+                  onRefresh: () async => ref.invalidate(productListProvider),
+                  child: GridView.builder(
+                    key: ValueKey('products-grid$suffix'),
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 220,
+                      mainAxisExtent: 290,
+                      crossAxisSpacing: AppSpacing.md,
+                      mainAxisSpacing: AppSpacing.md,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (_, i) {
+                      final p = products[i];
+                      return _PhotoCard(
+                        product: p,
+                        warehouseId: warehouseId,
+                        pane: pane,
+                        selected: selected?.contains(p.id),
+                        onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
+                        onLongPress: canSelect && selected == null
+                            ? () => setState(() => _selected = {p.id})
+                            : null,
+                      );
+                    },
+                  ),
+                );
+              }
+              return RefreshIndicator(
+                onRefresh: () async => ref.invalidate(productListProvider),
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
+                  itemCount: products.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                  itemBuilder: (context, i) {
+                    final p = products[i];
+                    return _ProductCard(
+                      product: p,
+                      warehouseId: warehouseId,
+                      pane: pane,
+                      selected: selected?.contains(p.id),
+                      // A long press starts choosing, on the product pressed.
+                      onLongPress: canSelect && selected == null
+                          ? () => setState(() => _selected = {p.id})
+                          : null,
+                      onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
+                      // Bringing back an archived or discontinued product is
+                      // the administrator's (0123); the switch is for active ↔ dormant.
+                      onToggleStatus: canManage &&
+                              selected == null &&
+                              (canLifecycle ||
+                                  p.lifecycle == ProductLifecycle.active ||
+                                  p.lifecycle == ProductLifecycle.dormant) &&
+                              p.lifecycle != ProductLifecycle.archived
+                          ? () => _toggleStatus(p)
+                          : null,
+                      onEdit: canManage && selected == null ? () => _openForm(product: p) : null,
+                      onDelete: canDelete && selected == null ? () => confirmDeleteProduct(context, ref, p) : null,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final total = ref.watch(productListProvider).valueOrNull?.length;
+    final filter = ref.watch(productFilterProvider);
+    final photos = ref.watch(productPhotoViewProvider);
+    final canManage = ref.watch(productLibraryCanManageProvider);
+    final canDelete = ref.watch(productCanDeleteProvider);
+    final canLifecycle = ref.watch(productCanLifecycleProvider);
+    final selected = _selected;
+    final shown = ref.watch(libraryPaneProductsProvider(0)).valueOrNull ?? const <Product>[];
+    final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const <Warehouse>[];
+    final split = ref.watch(librarySplitProvider);
     final alertCount = ref.watch(productAlertsProvider).valueOrNull?.length ?? 0;
 
     return DefaultTabController(
@@ -252,6 +429,18 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           : AppBar(
               title: Text(l10n.productsTitle),
               actions: [
+                // Two warehouses side by side (or one above the other).
+                if (warehouses.length > 1) ...[
+                  IconButton(
+                    key: const ValueKey('pl-split'),
+                    tooltip: split ? l10n.plSplitOff : l10n.plSplitOn,
+                    isSelected: split,
+                    icon: const Icon(Icons.vertical_split_outlined),
+                    selectedIcon: const Icon(Icons.vertical_split),
+                    onPressed: () => _toggleSplit(warehouses),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
                 // One place for our products: the list to edit them, or their
                 // pictures to check and add photos. Either opens the same product.
                 SegmentedButton<bool>(
@@ -310,134 +499,41 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       // selection, drawn as cards or as pictures (0122).
       body: TabBarView(children: [
         Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: l10n.productsSearchHint,
-                      isDense: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
-                    ),
-                    onChanged: (value) => ref.read(productSearchProvider.notifier).state = value,
-                  ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+              child: TextField(
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.productsSearchHint,
+                  isDense: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
                 ),
-                const _FilterBar(),
-                if (total != null && async.hasValue)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
-                    child: Wrap(
-                      runSpacing: AppSpacing.xs,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        // Choosing many at once (0120), for the administrator.
-                        if (canSelect && selected == null) ...[
-                          OutlinedButton.icon(
-                            key: const ValueKey('lc-start'),
-                            onPressed: () => setState(() => _selected = {}),
-                            icon: const Icon(Icons.checklist_outlined, size: 18),
-                            label: Text(l10n.lcSelect),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                        ],
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                          child: Text(
-                            selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
-                            key: const ValueKey('pf-showing'),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Expanded(
-                  child: async.when(
-                    loading: () => LoadingView(message: l10n.loading),
-                    error: (e, _) => ErrorStateView(
-                      message: '$e',
-                      onRetry: () => ref.invalidate(productListProvider),
-                    ),
-                    data: (products) {
-                      if (products.isEmpty) {
-                        if ((total ?? 0) == 0) {
-                          return EmptyStateView(
-                            icon: Icons.inventory_2_outlined,
-                            title: l10n.productsEmpty,
-                            message: l10n.productsEmptyBody,
-                          );
-                        }
-                        // There are products, only none the filters let
-                        // through: say where they are and offer to show them.
-                        return _HiddenProducts(filter: filter);
-                      }
-                      void toggle(Product p) =>
-                          setState(() => selected!.contains(p.id) ? selected.remove(p.id) : selected.add(p.id));
-                      if (photos) {
-                        return RefreshIndicator(
-                          onRefresh: () async => ref.invalidate(productListProvider),
-                          child: GridView.builder(
-                            key: const ValueKey('products-grid'),
-                            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
-                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 220,
-                              mainAxisExtent: 270,
-                              crossAxisSpacing: AppSpacing.md,
-                              mainAxisSpacing: AppSpacing.md,
-                            ),
-                            itemCount: products.length,
-                            itemBuilder: (_, i) {
-                              final p = products[i];
-                              return _PhotoCard(
-                                product: p,
-                                selected: selected?.contains(p.id),
-                                onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
-                                onLongPress: canSelect && selected == null
-                                    ? () => setState(() => _selected = {p.id})
-                                    : null,
-                              );
-                            },
-                          ),
-                        );
-                      }
-                      return RefreshIndicator(
-                        onRefresh: () async => ref.invalidate(productListProvider),
-                        child: ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
-                          itemCount: products.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                          itemBuilder: (context, i) {
-                            final p = products[i];
-                            return _ProductCard(
-                              product: p,
-                              selected: selected?.contains(p.id),
-                              // A long press starts choosing, on the product pressed.
-                              onLongPress: canSelect && selected == null
-                                  ? () => setState(() => _selected = {p.id})
-                                  : null,
-                              onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
-                              // Bringing back an archived or discontinued product is
-                              // the administrator's (0123); the switch is for active ↔ dormant.
-                              onToggleStatus: canManage &&
-                                      selected == null &&
-                                      (canLifecycle ||
-                                          p.lifecycle == ProductLifecycle.active ||
-                                          p.lifecycle == ProductLifecycle.dormant) &&
-                                      p.lifecycle != ProductLifecycle.archived
-                                  ? () => _toggleStatus(p)
-                                  : null,
-                              onEdit: canManage && selected == null ? () => _openForm(product: p) : null,
-                              onDelete: canDelete && selected == null ? () => confirmDeleteProduct(context, ref, p) : null,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                onChanged: (value) => ref.read(productSearchProvider.notifier).state = value,
+              ),
             ),
+            const _FilterBar(),
+            Expanded(
+              child: !split
+                  ? _pane(0, warehouses: warehouses, total: total, split: false)
+                  // Two warehouses at once: side by side when there is room,
+                  // else one above the other.
+                  : LayoutBuilder(
+                      builder: (context, c) => c.maxWidth >= 720
+                          ? Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                              Expanded(child: _pane(0, warehouses: warehouses, total: total, split: true)),
+                              const VerticalDivider(width: 1),
+                              Expanded(child: _pane(1, warehouses: warehouses, total: total, split: true)),
+                            ])
+                          : Column(children: [
+                              Expanded(child: _pane(0, warehouses: warehouses, total: total, split: true)),
+                              const Divider(height: 1),
+                              Expanded(child: _pane(1, warehouses: warehouses, total: total, split: true)),
+                            ]),
+                    ),
+            ),
+          ],
+        ),
         const ProductAlertsTab(),
       ]),
       ),
@@ -519,9 +615,20 @@ class _HiddenProducts extends ConsumerWidget {
 /// One product as a picture: its face, name, maker, JAN, stock, state and
 /// how many pictures it has — the same product as its card in the list.
 class _PhotoCard extends StatelessWidget {
-  const _PhotoCard({required this.product, required this.onTap, this.onLongPress, this.selected});
+  const _PhotoCard({
+    required this.product,
+    required this.onTap,
+    this.onLongPress,
+    this.selected,
+    this.warehouseId,
+    this.pane = 0,
+  });
 
   final Product product;
+
+  /// The pane's warehouse, whose stock is shown; null for every warehouse.
+  final int? warehouseId;
+  final int pane;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool? selected;
@@ -575,6 +682,7 @@ class _PhotoCard extends StatelessWidget {
               if (specShort(weightG: p.unitWeightG, width: p.widthMm, depth: p.depthMm, height: p.heightMm, note: p.sizeNote)
                   case final spec?)
                 Text(spec, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.labelSmall),
+              _StockLine(product: p, warehouseId: warehouseId, pane: pane, compact: true),
               Text(p.imageCount == 0 ? l10n.plNoImages : l10n.plImageCount(p.imageCount),
                   style: theme.textTheme.labelSmall
                       ?.copyWith(color: p.imageCount == 0 ? scheme.error : scheme.onSurfaceVariant)),
@@ -945,6 +1053,8 @@ class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
     required this.onTap,
+    this.warehouseId,
+    this.pane = 0,
     this.onLongPress,
     this.selected,
     this.onToggleStatus,
@@ -955,6 +1065,10 @@ class _ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
+
+  /// The pane's warehouse, whose stock is shown; null for every warehouse.
+  final int? warehouseId;
+  final int pane;
 
   /// Null outside selection mode; whether this one is chosen within it.
   final bool? selected;
@@ -1047,6 +1161,8 @@ class _ProductCard extends StatelessWidget {
                     ],
                     if (product.lifecycleReason case final why? when !product.isActive)
                       Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                    const SizedBox(height: 2),
+                    _StockLine(product: product, warehouseId: warehouseId, pane: pane),
                     const SizedBox(height: AppSpacing.xs),
                     ProductFacts(product: product),
                   ],
@@ -1097,6 +1213,165 @@ class _ProductCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Which warehouse a pane shows, unmissable: a tinted band naming it, a
+/// chip for 全倉庫 and for each warehouse, the pane's stock filter, and how
+/// much of what is shown is in stock there.
+class _WarehouseBar extends ConsumerWidget {
+  const _WarehouseBar({
+    required this.pane,
+    required this.split,
+    required this.warehouses,
+    required this.warehouseId,
+    required this.products,
+  });
+
+  final int pane;
+  final bool split;
+  final List<Warehouse> warehouses;
+  final int? warehouseId;
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    // Each pane its own colour, so which side is which stays clear.
+    final (bg, fg) = pane == 0
+        ? (scheme.primaryContainer, scheme.onPrimaryContainer)
+        : (scheme.tertiaryContainer, scheme.onTertiaryContainer);
+    final name = warehouseId == null
+        ? l10n.plAllWarehouses
+        : warehouses.firstWhere((w) => w.id == warehouseId).name;
+    final stock = ref.watch(libraryPaneStockProvider(pane));
+    final suffix = pane == 0 ? '' : '-$pane';
+    var items = 0;
+    var units = 0;
+    for (final p in products) {
+      final s = productStockIn(p, warehouseId);
+      if (s.onHand > 0) {
+        items++;
+        units += s.onHand;
+      }
+    }
+    void choose(int? id) => ref.read(libraryPaneWarehouseProvider(pane).notifier).state = id;
+
+    return Material(
+      key: ValueKey('pl-warehouse-bar$suffix'),
+      color: bg.withValues(alpha: 0.55),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (split)
+                CircleAvatar(
+                  radius: 11,
+                  backgroundColor: fg,
+                  child: Text('${pane + 1}', style: theme.textTheme.labelSmall?.copyWith(color: bg)),
+                ),
+              Icon(warehouseId == null ? Icons.domain_outlined : Icons.warehouse_outlined, size: 20, color: fg),
+              Text(
+                l10n.plShowingWarehouse(name),
+                key: ValueKey('pl-warehouse-name$suffix'),
+                style: theme.textTheme.titleSmall?.copyWith(color: fg, fontWeight: FontWeight.w700),
+              ),
+              Text(
+                l10n.plStockSummary(items, units),
+                key: ValueKey('pl-stock-summary$suffix'),
+                style: theme.textTheme.bodySmall?.copyWith(color: fg),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(children: [
+              ChoiceChip(
+                key: ValueKey('pl-wh$suffix-all'),
+                avatar: const Icon(Icons.domain_outlined, size: 16),
+                label: Text(l10n.plAllWarehouses),
+                selected: warehouseId == null,
+                onSelected: (_) => choose(null),
+              ),
+              for (final w in warehouses) ...[
+                const SizedBox(width: AppSpacing.xs),
+                ChoiceChip(
+                  key: ValueKey('pl-wh$suffix-${w.id}'),
+                  label: Text(w.isActive ? w.name : '${w.name} (${l10n.plWarehouseInactive})'),
+                  selected: warehouseId == w.id,
+                  onSelected: (_) => choose(w.id),
+                ),
+              ],
+              const SizedBox(width: AppSpacing.md),
+              SegmentedButton<StockFilter>(
+                key: ValueKey('pl-stock-filter$suffix'),
+                showSelectedIcon: false,
+                style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                segments: [
+                  ButtonSegment(value: StockFilter.all, label: Text(l10n.plStockAll)),
+                  ButtonSegment(value: StockFilter.inStock, label: Text(l10n.plStockIn)),
+                  ButtonSegment(value: StockFilter.outOfStock, label: Text(l10n.plStockOut)),
+                ],
+                selected: {stock},
+                onSelectionChanged: (v) => ref.read(libraryPaneStockProvider(pane).notifier).state = v.first,
+              ),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// A product's stock in the pane's warehouse; for every warehouse, the total
+/// and where it is.
+class _StockLine extends StatelessWidget {
+  const _StockLine({required this.product, required this.warehouseId, required this.pane, this.compact = false});
+
+  final Product product;
+  final int? warehouseId;
+  final int pane;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final s = productStockIn(product, warehouseId);
+    final key = ValueKey('pl-stock-$pane-${product.id}');
+    if (s.onHand == 0 && s.reserved == 0) {
+      return Text(
+        warehouseId == null ? l10n.plNoStock : l10n.plNoStockHere,
+        key: key,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+      );
+    }
+    final line = compact
+        ? l10n.plStockShort(s.onHand, s.available)
+        : l10n.plStockLine(s.onHand, s.reserved, s.available);
+    final where = warehouseId == null && !compact && (product.stock?.warehouses.length ?? 0) > 0
+        ? ' (${[for (final w in product.stock!.warehouses) '${w.name} ${w.onHand}'].join(' / ')})'
+        : '';
+    return Text(
+      '$line$where',
+      key: key,
+      maxLines: compact ? 1 : 2,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: s.available > 0 ? scheme.primary : scheme.error,
+        fontWeight: FontWeight.w600,
       ),
     );
   }

@@ -6700,6 +6700,35 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     (`outbound_test.dart`).
   - DB create/sheet, checked in a rolled-back transaction.
 
+## 商品ライブラリー: which warehouse, and two at once (app only)
+
+- No migration is needed. `list_products` already returns each product's
+  stock per warehouse (`product_stock_json`, 0120), covering the warehouses
+  the person may see.
+- **The chosen warehouse is always visible.** A tinted band at the top of the
+  list says 「表示中の倉庫: …」. It has:
+  - a chip for 全倉庫 and one for each warehouse (stopped ones marked 停止中);
+  - a 全商品 / 在庫あり / 在庫なし filter that tests that warehouse's stock;
+  - a count of 在庫あり N品目・合計 M個 among the products shown.
+- **Each card shows its stock** for the chosen warehouse (在庫 · 引当 · 出荷可能),
+  or 「この倉庫に在庫なし」. For 全倉庫 it shows the total and the warehouses
+  it is in. This brings back what 0125 had taken off the list, now that the
+  library is where stock is looked at.
+- **Two panes:** the 2画面 button in the app bar (shown when there are two
+  or more warehouses) splits the list.
+  - The panes are side by side from 720 px wide, else one above the other.
+  - Each has its own warehouse and stock filter. Search, the other filters,
+    the list/photo view and selection are shared.
+  - The first split shows the first two warehouses when one pane was on
+    全倉庫. Either pane can still be set to 全倉庫.
+  - Panes are numbered 1 and 2, each in its own colour.
+- The choices last for the session (`libraryPaneWarehouseProvider`,
+  `libraryPaneStockProvider`, `librarySplitProvider`).
+- Tests are in `test/features/product/product_list_screen_test.dart`:
+  - the band, chips and per-warehouse stock filter;
+  - side by side, and stacked on a narrow screen;
+  - no split with one warehouse.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
