@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
@@ -12,6 +13,8 @@ import 'package:wms_mobile/features/product/domain/warehouse_product.dart';
 import 'package:wms_mobile/features/product/presentation/product_detail_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
+
+import 'package:wms_mobile/core/ui/copy_text.dart';
 
 import '../../support/harness.dart';
 
@@ -78,6 +81,41 @@ Future<ProviderContainer> _pump(
 }
 
 void main() {
+  testWidgets('a JAN, 品番 or any shown value is copied with one click', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final copied = <String>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') copied.add((call.arguments as Map)['text'] as String);
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    await _pump(tester, FakeProductRepository(products: const [_lotTracked]));
+
+    await tester.tap(find.byKey(const ValueKey('pd-head-copy-jan')));
+    await tester.pumpAndSettle();
+    expect(copied.last, '4902505632037');
+    expect(find.text('「4902505632037」をコピーしました'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('pd-head-copy-sku')));
+    await tester.pumpAndSettle();
+    expect(copied.last, 'PEN-001');
+
+    // Every fact row has its own copy button.
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('pd-id')), matching: find.byTooltip('コピー')));
+    await tester.pumpAndSettle();
+    expect(copied.last, 'P-000001');
+    // A blank value has nothing to copy.
+    expect(find.descendant(of: find.byKey(const ValueKey('pd-maker')), matching: find.byTooltip('コピー')), findsNothing);
+
+    // And every barcode.
+    await tester.ensureVisible(find.text('14902505632034'));
+    final caseCode = find.ancestor(of: find.text('14902505632034'), matching: find.byType(CopyableText));
+    await tester.tap(find.descendant(of: caseCode, matching: find.byTooltip('コピー')));
+    await tester.pumpAndSettle();
+    expect(copied.last, '14902505632034');
+  });
+
   testWidgets('shows every code with what one scan of it means', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     final repo = FakeProductRepository(products: const [_lotTracked]);

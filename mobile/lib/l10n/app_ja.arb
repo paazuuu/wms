@@ -9313,5 +9313,23 @@
   "plNoStock": "在庫なし",
   "plNoStockHere": "この倉庫に在庫なし",
   "plNoneInStock": "この倉庫に在庫のある商品はありません",
-  "plNoneOutOfStock": "この倉庫で在庫切れの商品はありません"
+  "plNoneOutOfStock": "この倉庫で在庫切れの商品はありません",
+  "copyAction": "コピー",
+  "copiedValue": "「{value}」をコピーしました",
+  "@copiedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "whFieldCodeOptional": "倉庫コード（空欄で自動）",
+  "whCodeAuto": "空欄なら「{code}」で登録します。変えたいときだけ入力してください",
+  "@whCodeAuto": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  }
 }

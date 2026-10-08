@@ -19165,6 +19165,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この倉庫で在庫切れの商品はありません'**
   String get plNoneOutOfStock;
+
+  /// No description provided for @copyAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'コピー'**
+  String get copyAction;
+
+  /// No description provided for @copiedValue.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{value}」をコピーしました'**
+  String copiedValue(String value);
+
+  /// No description provided for @whFieldCodeOptional.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫コード（空欄で自動）'**
+  String get whFieldCodeOptional;
+
+  /// No description provided for @whCodeAuto.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄なら「{code}」で登録します。変えたいときだけ入力してください'**
+  String whCodeAuto(String code);
 }
 
 class _AppLocalizationsDelegate

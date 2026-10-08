@@ -10568,4 +10568,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plNoneOutOfStock => '此仓库没有缺货的商品';
+
+  @override
+  String get copyAction => '复制';
+
+  @override
+  String copiedValue(String value) {
+    return '已复制「$value」';
+  }
+
+  @override
+  String get whFieldCodeOptional => '仓库代码（留空自动生成）';
+
+  @override
+  String whCodeAuto(String code) {
+    return '留空则以「$code」登记。仅在需要更改时输入';
+  }
 }

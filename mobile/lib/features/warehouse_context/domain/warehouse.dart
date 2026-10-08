@@ -247,3 +247,26 @@ class NewWarehouse {
           'shipping_bin': shippingBin,
       };
 }
+
+/// A code for a new warehouse when none is typed: the name's letters and
+/// digits when it has any ("Kobe DC" → KOBE-DC), else the next free WH01,
+/// WH02…. Never one of [taken].
+String suggestWarehouseCode(String name, Iterable<String> taken) {
+  final used = {for (final t in taken) t.toUpperCase()};
+  var base = name
+      .toUpperCase()
+      .replaceAll(RegExp(r'[^A-Z0-9]+'), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
+  if (base.length > 16) base = base.substring(0, 16).replaceAll(RegExp(r'-+$'), '');
+  // A name with only a digit or two in it says nothing; number it instead.
+  if (base.isNotEmpty && RegExp(r'[A-Z]').hasMatch(base)) {
+    if (!used.contains(base)) return base;
+    for (var n = 2;; n++) {
+      if (!used.contains('$base-$n')) return '$base-$n';
+    }
+  }
+  for (var n = used.length + 1;; n++) {
+    final c = 'WH${n.toString().padLeft(2, '0')}';
+    if (!used.contains(c)) return c;
+  }
+}

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/fields_dialog.dart';
 import '../../../core/ui/product_name.dart';
 import '../../../core/ui/state_views.dart';
@@ -232,6 +233,7 @@ class _Overview extends StatelessWidget {
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SizedBox(width: 120, child: Text(k, style: muted)),
               Expanded(child: Text(v, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500))),
+              CopyButton(value: v),
             ]),
           );
     final i = item;

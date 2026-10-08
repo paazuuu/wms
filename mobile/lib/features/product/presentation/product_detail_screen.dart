@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
@@ -238,8 +239,13 @@ class _Header extends ConsumerWidget {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               LifecyclePill(lifecycle: product.lifecycle),
-                              Text(product.sku == null ? product.janCode : '${product.janCode} · ${product.sku}',
+                              CopyableText(product.janCode,
+                                  buttonKey: const ValueKey('pd-head-copy-jan'),
                                   style: muted?.copyWith(fontFamily: AppFonts.mono)),
+                              if (product.sku case final sku?)
+                                CopyableText(sku,
+                                    buttonKey: const ValueKey('pd-head-copy-sku'),
+                                    style: muted?.copyWith(fontFamily: AppFonts.mono)),
                             ],
                           ),
                           if (product.lifecycleReason case final why? when !product.isActive)
@@ -340,7 +346,7 @@ class _Header extends ConsumerWidget {
   }
 }
 
-/// One label and its value, side by side, the value selectable.
+/// One label and its value, side by side, the value selectable and copyable.
 class _FactRow extends StatelessWidget {
   const _FactRow({super.key, required this.label, required this.value, this.mono = false});
 
@@ -369,6 +375,8 @@ class _FactRow extends StatelessWidget {
               ),
             ),
           ),
+          // Any value can be copied with one click (JAN, 品番, names…).
+          CopyButton(value: value),
         ],
       ),
     );
@@ -500,7 +508,7 @@ class _BarcodesCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(barcode.barcode,
+                      CopyableText(barcode.barcode,
                           style: theme.textTheme.bodyMedium
                               ?.copyWith(fontFamily: AppFonts.mono)),
                       Text(

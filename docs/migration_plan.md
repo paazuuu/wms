@@ -6729,6 +6729,35 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - side by side, and stacked on a narrow screen;
   - no split with one warehouse.
 
+## Small fixes: bulk-select button, automatic warehouse codes, copy buttons (app only)
+
+- **商品ライブラリー:**
+  - 「選択して一括操作」 is now a small icon in the app bar (`lc-start`). It
+    no longer sits mid-screen.
+  - Each pane's warehouse band and its count line run full width from the
+    left.
+- **倉庫を追加:**
+  - The code may be left blank (「倉庫コード（空欄で自動）」). The code it will
+    get is shown below the field and changes as the name is typed.
+  - The code comes from the name's letters and digits ("Kobe DC" → KOBE-DC).
+    Without any, it is the next free WH01, WH02…
+  - It never repeats a code the overview lists.
+  - If the server says the code is taken (a warehouse this person cannot
+    see), the next one is tried, up to three times.
+  - A code typed by hand is kept as typed. The `warehouses` function still
+    receives a code, so nothing needs deploying.
+- **Copying:**
+  - Every text could already be selected (`SelectableApp`).
+  - A one-click copy button (`core/ui/copy_text.dart`: `CopyButton`,
+    `CopyableText`, `copyToClipboard`) now sits next to:
+    - the JAN and 品番 under a product's name;
+    - every value in 基本情報 and the names by language;
+    - each barcode;
+    - every value on a price book item;
+    - a shipment's weight, carrier and tracking number;
+    - the JAN on each library card.
+  - A copy says 「…」をコピーしました. Blank values have no button.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

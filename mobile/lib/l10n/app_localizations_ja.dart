@@ -10622,4 +10622,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get plNoneOutOfStock => 'この倉庫で在庫切れの商品はありません';
+
+  @override
+  String get copyAction => 'コピー';
+
+  @override
+  String copiedValue(String value) {
+    return '「$value」をコピーしました';
+  }
+
+  @override
+  String get whFieldCodeOptional => '倉庫コード（空欄で自動）';
+
+  @override
+  String whCodeAuto(String code) {
+    return '空欄なら「$code」で登録します。変えたいときだけ入力してください';
+  }
 }

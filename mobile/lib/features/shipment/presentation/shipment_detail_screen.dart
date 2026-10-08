@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../delivery/application/delivery_providers.dart';
@@ -1098,6 +1099,7 @@ class _LogisticsCard extends StatelessWidget {
                   color: value == null ? scheme.onSurfaceVariant : scheme.onSurface,
                 ),
               ),
+              if (value != null) CopyButton(value: value),
             ],
           ),
         );

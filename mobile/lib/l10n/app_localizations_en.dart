@@ -10843,4 +10843,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plNoneOutOfStock => 'Nothing out of stock in this warehouse';
+
+  @override
+  String get copyAction => 'Copy';
+
+  @override
+  String copiedValue(String value) {
+    return 'Copied \"$value\"';
+  }
+
+  @override
+  String get whFieldCodeOptional => 'Warehouse code (blank: automatic)';
+
+  @override
+  String whCodeAuto(String code) {
+    return 'Left blank, it will be $code. Type one only to choose your own';
+  }
 }

@@ -3537,5 +3537,9 @@
   "plNoStock": "No stock",
   "plNoStockHere": "None in this warehouse",
   "plNoneInStock": "Nothing in stock in this warehouse",
-  "plNoneOutOfStock": "Nothing out of stock in this warehouse"
+  "plNoneOutOfStock": "Nothing out of stock in this warehouse",
+  "copyAction": "Copy",
+  "copiedValue": "Copied \"{value}\"",
+  "whFieldCodeOptional": "Warehouse code (blank: automatic)",
+  "whCodeAuto": "Left blank, it will be {code}. Type one only to choose your own"
 }

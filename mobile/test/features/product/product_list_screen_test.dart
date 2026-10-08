@@ -421,10 +421,17 @@ void main() {
   testWidgets('the warehouse shown is named and chosen in a band; its stock filter is its own', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await _pump(tester, FakeProductRepository(products: const [stocked, empty]), warehouses: const [main, kobe]);
+    await _pump(tester, FakeProductRepository(products: const [stocked, empty]), warehouses: const [main, kobe],
+        lifecycle: true);
+    // Choosing many starts from a small button in the bar at the top.
+    expect(find.descendant(of: find.byType(AppBar), matching: find.byKey(const ValueKey('lc-start'))), findsOneWidget);
 
     // Every warehouse to begin with, said so.
     expect(find.text('表示中の倉庫: 全倉庫'), findsOneWidget);
+    // The band runs the width of the list, from the left; nothing sits in
+    // the middle of it.
+    expect(tester.getSize(find.byKey(const ValueKey('pl-warehouse-bar'))).width, greaterThan(900));
+    expect(tester.getTopLeft(find.byKey(const ValueKey('pf-showing'))).dx, lessThan(40));
     expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('pl-wh-all'))).selected, isTrue);
     expect(find.text('在庫 40 · 引当 10 · 出荷可能 30 (メイン倉庫 30 / 神戸倉庫 10)'), findsOneWidget);
     expect(find.text('在庫あり 1品目・合計 40個'), findsOneWidget);

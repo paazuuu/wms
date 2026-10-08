@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/warehouse_providers.dart';
@@ -55,14 +56,46 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
-    final l10n = AppLocalizations.of(context);
-    if (!(_form.currentState?.validate() ?? false)) return;
+  @override
+  void initState() {
+    super.initState();
+    // The code suggested follows the name as it is typed.
+    _name.addListener(() => setState(() {}));
+  }
 
+  /// Codes already used, so the suggestion never repeats one.
+  List<String> get _taken =>
+      [for (final w in ref.read(warehouseOverviewProvider).valueOrNull?.warehouses ?? const <Warehouse>[]) w.code];
+
+  Future<void> _save() async {
+    if (!(_form.currentState?.validate() ?? false)) return;
+    final typed = _code.text.trim().toUpperCase();
+    final taken = _taken;
+    // Left blank, the code is made; should another warehouse this person
+    // cannot see hold it already, the next one is tried.
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final code = typed.isNotEmpty ? typed : suggestWarehouseCode(_name.text.trim(), taken);
+      final conflict = await _create(code);
+      if (!conflict || typed.isNotEmpty || !mounted) return;
+      taken.add(code);
+    }
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(humanizeApiErrorMessage(l10n, 'warehouse code already exists')),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
+  }
+
+  /// True when the code is taken (and nothing was made).
+  Future<bool> _create(String code) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _saving = true);
     final result = await ref.read(warehouseRepositoryProvider).create(
           NewWarehouse(
-            code: _code.text.trim().toUpperCase(),
+            code: code,
             name: _name.text.trim(),
             address: _address.text.trim(),
             phone: _phone.text.trim(),
@@ -76,8 +109,11 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
                 _usesLocations && _defaultBins ? _shippingBin.text.trim() : null,
           ),
         );
-    if (!mounted) return;
+    if (!mounted) return false;
     setState(() => _saving = false);
+    if (result case ApiFailure(:final message) when _code.text.trim().isEmpty && message.contains('already exists')) {
+      return true;
+    }
 
     result.when(
       success: (warehouse) {
@@ -99,6 +135,7 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
           ));
       },
     );
+    return false;
   }
 
   @override
@@ -131,13 +168,16 @@ class _AddWarehouseScreenState extends ConsumerState<AddWarehouseScreen> {
                 FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9\-_]')),
                 LengthLimitingTextInputFormatter(20),
               ],
+              onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
-                labelText: l10n.whFieldCode,
+                labelText: l10n.whFieldCodeOptional,
                 prefixIcon: const Icon(Icons.tag),
-                helperText: 'MAIN, KOBE, OSAKA…',
+                // Nothing to think up: left blank, one is made.
+                hintText: suggestWarehouseCode(_name.text.trim(), _taken),
+                helperText: _code.text.trim().isEmpty
+                    ? l10n.whCodeAuto(suggestWarehouseCode(_name.text.trim(), _taken))
+                    : null,
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? l10n.whCodeRequired : null,
             ),
             const SizedBox(height: AppSpacing.lg),
             TextFormField(

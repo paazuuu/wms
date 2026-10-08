@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_filter.dart';
@@ -263,6 +264,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final stockFilter = ref.watch(libraryPaneStockProvider(pane));
     final suffix = pane == 0 ? '' : '-$pane';
     return Column(
+      // Full width, from the left: nothing sits in the middle of the list.
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _WarehouseBar(
           pane: pane,
@@ -273,30 +276,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         ),
         if (total != null && async.hasValue)
           Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.xs),
-            child: Wrap(
-              runSpacing: AppSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                // Choosing many at once (0120), for the administrator.
-                if (pane == 0 && canSelect && selected == null) ...[
-                  OutlinedButton.icon(
-                    key: const ValueKey('lc-start'),
-                    onPressed: () => setState(() => _selected = {}),
-                    icon: const Icon(Icons.checklist_outlined, size: 18),
-                    label: Text(l10n.lcSelect),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                ],
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: Text(
-                    selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
-                    key: ValueKey('pf-showing$suffix'),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.xs),
+            child: Text(
+              selected != null ? l10n.lcHint : l10n.pfShowing(shown.length, total),
+              key: ValueKey('pf-showing$suffix'),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
         Expanded(
@@ -408,6 +392,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final canDelete = ref.watch(productCanDeleteProvider);
     final canLifecycle = ref.watch(productCanLifecycleProvider);
     final selected = _selected;
+    final canSelect = canLifecycle || canDelete;
     final shown = ref.watch(libraryPaneProductsProvider(0)).valueOrNull ?? const <Product>[];
     final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const <Warehouse>[];
     final split = ref.watch(librarySplitProvider);
@@ -429,6 +414,15 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           : AppBar(
               title: Text(l10n.productsTitle),
               actions: [
+                // Choosing many at once (0120), for the administrator: a
+                // small button up here, out of the way of the list.
+                if (canSelect)
+                  IconButton(
+                    key: const ValueKey('lc-start'),
+                    tooltip: l10n.lcSelect,
+                    icon: const Icon(Icons.checklist_outlined),
+                    onPressed: () => setState(() => _selected = {}),
+                  ),
                 // Two warehouses side by side (or one above the other).
                 if (warehouses.length > 1) ...[
                   IconButton(
@@ -1121,6 +1115,7 @@ class _ProductCard extends StatelessWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                                 fontFamily: AppFonts.mono,
                                 color: scheme.onSurfaceVariant)),
+                        CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
                         // The SKU sits beside the JAN rather than replacing it:
                         // one is what the supplier printed, the other is what
                         // this warehouse calls it, and both get scanned (0057).
