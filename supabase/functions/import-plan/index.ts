@@ -77,6 +77,8 @@ import {
   readPdfText,
   type ReadingHints,
   readSpreadsheet,
+  aiFailure,
+  resetAiFailures,
   setAiFunction,
   type Totals,
   type ReadAttribute,
@@ -680,6 +682,7 @@ async function readingHints(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ message: "Not found" }, 404);
+  resetAiFailures();
 
   try {
     const supabase = callerClient(req, supabaseUrl);
@@ -868,7 +871,15 @@ Deno.serve(async (req) => {
       // How the reading went, for AIの稼働状況 (0133).
       quality: readingQuality(lines, source, verified, totals),
     });
-    if (merged.length === 0) return json({ message: "No JAN rows found.", document_id: documentId }, 422);
+    if (merged.length === 0) {
+      // Nothing read because the AI could not be used: say that, not "no rows".
+      const failed = aiFailure();
+      return json({
+        message: failed ? `Gemini error ${failed.status ?? "?"}: ${failed.message}` : "No JAN rows found.",
+        ai_failure: failed,
+        document_id: documentId,
+      }, 422);
+    }
     const withProducts = await resolveLines(supabase, partnerId, merged);
     const totalQty = merged.reduce((s, l) => s + (l.planned_quantity || 0), 0);
     const orderDate = merged.find((l) => l.order_date)?.order_date ?? null;
@@ -907,6 +918,9 @@ Deno.serve(async (req) => {
         line_count: merged.length, total_quantity: totalQty,
         // The lines against the document's own totals (0114).
         totals,
+        // An AI call that failed while reading (credits, key, network), so the
+        // app can say why columns or names are missing.
+        ai_failure: aiFailure(),
         lines: withProducts,
       } });
     }

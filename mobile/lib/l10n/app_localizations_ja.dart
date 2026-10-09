@@ -10785,4 +10785,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String supEventLines(int lines, String units) {
     return '$lines品目 · $units個';
   }
+
+  @override
+  String get miPbAiQuota =>
+      'AIの利用残高（クレジット）が足りないため、AIで項目を読み取れませんでした。下の商品名などの不足はそのためです。管理 → AI設定で別のキーに切り替えるか、Google AI Studio で残高を追加してから、もう一度選んでください。';
+
+  @override
+  String get miPbAiAuth => 'AIのキーが受け付けられませんでした（無効・権限なし）。管理 → AI設定でキーを確かめてください。';
+
+  @override
+  String get miPbAiNoKey => '使えるAIのキーがありません。管理 → AI設定でキーを登録して「使用中」にしてください。';
+
+  @override
+  String get miPbAiDown => 'AIにつながりませんでした。少し待ってから、もう一度選んでください。';
 }

@@ -171,7 +171,7 @@ class MasterProblem extends Equatable {
 
   /// jan_missing, jan_invalid, jan_duplicate, name_missing, qty_invalid,
   /// qty_missing, ai_disagree, totals_mismatch, unverified, no_lines,
-  /// name_en_missing.
+  /// name_en_missing, ai_unavailable (value: no_key, auth, quota, network…).
   final String code;
 
   /// 0 for the file as a whole.
@@ -207,9 +207,13 @@ List<MasterProblem> checkMasterLines(
   bool checked = false,
   bool verified = true,
   bool? totalsOk,
+  String? aiFailure,
 }) {
   final out = <MasterProblem>[];
-  if (lines.isEmpty) return const [MasterProblem('no_lines')];
+  // The AI could not be used while reading: said first, as the reason the
+  // names and columns below may be missing.
+  if (!checked && aiFailure != null) out.add(MasterProblem('ai_unavailable', value: aiFailure));
+  if (lines.isEmpty) return [...out, const MasterProblem('no_lines')];
   if (!checked && !verified) out.add(const MasterProblem('unverified'));
   if (!checked && totalsOk == false) out.add(const MasterProblem('totals_mismatch'));
   final seen = <String>{};
@@ -355,9 +359,14 @@ class MasterRead extends Equatable {
     this.supplierId,
     this.supplierName,
     this.documentId,
+    this.aiFailure,
   });
 
   final List<MasterLine> lines;
+
+  /// Why the AI could not be used while reading (no_key, auth, quota,
+  /// network, overload, bad_request), or null when it could.
+  final String? aiFailure;
 
   /// xlsx, csv, pdf_text or gemini.
   final String? source;
@@ -383,11 +392,12 @@ class MasterRead extends Equatable {
       supplierId: (j['partner_id'] as num?)?.toInt(),
       supplierName: header is Map ? header['supplier_name']?.toString() : null,
       documentId: (j['document_id'] as num?)?.toInt(),
+      aiFailure: j['ai_failure'] is Map ? (j['ai_failure'] as Map)['kind']?.toString() : null,
     );
   }
 
   @override
-  List<Object?> get props => [lines, source, verified, totalsOk, supplierId, documentId];
+  List<Object?> get props => [lines, source, verified, totalsOk, supplierId, documentId, aiFailure];
 }
 
 /// What stage 1 did, or why it stopped.

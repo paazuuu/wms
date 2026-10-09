@@ -6819,6 +6819,40 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The DB functions were checked against the live data: one supplier,
     9 products, 4,100 units.
 
+## AI reading re-checked with the new key; AI failures said plainly (functions only)
+
+- **Deployed:** `import-plan` (v22) and `ocr-delivery-note` (v14) now run the
+  code in main. They had last been deployed on 2026-10-04/05.
+  - The old functions did not read the keys kept in 管理 → AI設定 (0137,
+    0141). They used the server's `GEMINI_API_KEY`, whose prepaid credits
+    were used up, so every call failed with 402. In `ai_calls` those calls
+    have no `key_id`.
+  - The deployed copies are the same code with comments removed (esbuild).
+    The reader's tests were run on that copy before deploying.
+- **The key added** (「ganki AITELIN WMS」, id 5) is the one in use for reading.
+  With no lookup key of its own, it is used for サイズ・重量 too.
+  - The key's text was checked as clean (no spaces).
+  - It could not be called from here: the database has no outbound HTTP, and
+    the functions need a signed-in user. 管理 → AI設定 → 接続テスト confirms
+    it.
+- **AI failures are no longer hidden.**
+  - `document_reader.ts` keeps each failed AI call of a request: no_key,
+    auth, quota, network, overload or bad_request.
+    `resetAiFailures()` starts a request and `aiFailure()` returns the most
+    serious.
+  - A column mapping that fell back to the dictionary used to leave
+    「商品名がありません」 on every line, with no sign that the AI had failed.
+  - `import-plan` returns `ai_failure` with the reading. When nothing could
+    be read, its 422 carries the AI's own error, which the app turns into
+    「AIの残高…」.
+  - In ファイルから商品・在庫登録, `ai_unavailable` is the first stop
+    reason. It says which kind of failure it was and what to do: switch key,
+    add credits, check the key, or retry.
+- Tests:
+  - Deno: an AI failure is kept, then cleared (50 pass).
+  - Flutter: `ai_unavailable` comes first, is read from the answer, and is
+    gone once the lines are checked by hand (958 pass).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -24,6 +24,12 @@ String masterProblemText(AppLocalizations l10n, MasterProblem p) => switch (p.co
       'no_lines' => l10n.miPbNoLines,
       'name_en_missing' => l10n.miPbNameEnMissing,
       'read_failed' => l10n.miPbReadFailed(p.value ?? ''),
+      'ai_unavailable' => switch (p.value) {
+          'quota' => l10n.miPbAiQuota,
+          'auth' => l10n.miPbAiAuth,
+          'no_key' => l10n.miPbAiNoKey,
+          _ => l10n.miPbAiDown,
+        },
       _ => p.code,
     };
 

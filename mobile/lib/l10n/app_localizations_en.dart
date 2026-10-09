@@ -11007,4 +11007,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String supEventLines(int lines, String units) {
     return '$lines products · $units units';
   }
+
+  @override
+  String get miPbAiQuota =>
+      'The AI had no credits left, so it could not read the columns; that is why names are missing below. Switch to another key in 管理 → AI設定, or add credits in Google AI Studio, then choose the file again.';
+
+  @override
+  String get miPbAiAuth =>
+      'The AI key was refused (invalid or not allowed). Check it in 管理 → AI設定.';
+
+  @override
+  String get miPbAiNoKey =>
+      'No AI key is in use. Add one in 管理 → AI設定 and set it in use.';
+
+  @override
+  String get miPbAiDown =>
+      'The AI could not be reached. Wait a little and choose the file again.';
 }

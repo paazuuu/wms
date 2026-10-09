@@ -2,6 +2,9 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  aiFailure,
+  gemini,
+  resetAiFailures,
   type AliasRow,
   checkJan,
   checkLines,
@@ -656,4 +659,19 @@ Deno.test("with no key chosen for the lookup, the lookup's own server key is use
     if (url) Deno.env.set("SUPABASE_URL", url);
     forgetAiKey();
   }
+});
+
+Deno.test("an AI call that fails is kept for the request, the most serious first", async () => {
+  resetAiFailures();
+  assertEquals(aiFailure(), null);
+  let threw = false;
+  try {
+    await gemini([{ text: "x" }], {}, "test", { id: null, key: null, model: null, label: null });
+  } catch (_) {
+    threw = true;
+  }
+  assert(threw);
+  assertEquals(aiFailure()?.kind, "no_key");
+  resetAiFailures();
+  assertEquals(aiFailure(), null);
 });

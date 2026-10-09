@@ -10731,4 +10731,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String supEventLines(int lines, String units) {
     return '$lines 种 · $units 个';
   }
+
+  @override
+  String get miPbAiQuota =>
+      'AI余额（额度）不足，无法用AI读取项目，下面缺少商品名等即因此。请在 管理 → AI设置 切换密钥或在 Google AI Studio 充值后重新选择。';
+
+  @override
+  String get miPbAiAuth => 'AI密钥被拒绝（无效或无权限）。请在 管理 → AI设置 检查密钥。';
+
+  @override
+  String get miPbAiNoKey => '没有可用的AI密钥。请在 管理 → AI设置 登记并设为使用中。';
+
+  @override
+  String get miPbAiDown => '无法连接AI。请稍候再重新选择。';
 }

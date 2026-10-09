@@ -19417,6 +19417,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{lines}品目 · {units}個'**
   String supEventLines(int lines, String units);
+
+  /// No description provided for @miPbAiQuota.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの利用残高（クレジット）が足りないため、AIで項目を読み取れませんでした。下の商品名などの不足はそのためです。管理 → AI設定で別のキーに切り替えるか、Google AI Studio で残高を追加してから、もう一度選んでください。'**
+  String get miPbAiQuota;
+
+  /// No description provided for @miPbAiAuth.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIのキーが受け付けられませんでした（無効・権限なし）。管理 → AI設定でキーを確かめてください。'**
+  String get miPbAiAuth;
+
+  /// No description provided for @miPbAiNoKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'使えるAIのキーがありません。管理 → AI設定でキーを登録して「使用中」にしてください。'**
+  String get miPbAiNoKey;
+
+  /// No description provided for @miPbAiDown.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIにつながりませんでした。少し待ってから、もう一度選んでください。'**
+  String get miPbAiDown;
 }
 
 class _AppLocalizationsDelegate

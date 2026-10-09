@@ -206,7 +206,7 @@ class _MasterImportScreenState extends ConsumerState<MasterImportScreen> {
     _lines = lines;
     _checked = checked;
     final problems = checkMasterLines(lines,
-        checked: checked, verified: _read?.verified ?? true, totalsOk: _read?.totalsOk);
+        checked: checked, verified: _read?.verified ?? true, totalsOk: _read?.totalsOk, aiFailure: _read?.aiFailure);
     if (problems.any((p) => p.blocking)) return _stop(problems);
     _problems = problems;
     await _register();

@@ -122,6 +122,24 @@ void main() {
       expect(checkMasterLines(const []).single.code, 'no_lines');
     });
 
+    test('an AI that could not be used is said first, as the reason', () {
+      final lines = [MasterLine(lineNo: 1, janCode: _jan1, supplierName: '', quantity: '3')];
+      final p = checkMasterLines(lines, aiFailure: 'quota');
+      expect(p.first.code, 'ai_unavailable');
+      expect(p.first.value, 'quota');
+      expect(p.first.blocking, isTrue);
+      expect(p.any((x) => x.code == 'name_missing'), isTrue);
+      // Read from the server's answer.
+      final read = MasterRead.fromJson({
+        'lines': [],
+        'ai_failure': {'kind': 'auth', 'status': 403, 'message': 'API key not valid'},
+      });
+      expect(read.aiFailure, 'auth');
+      expect(MasterRead.fromJson({'lines': []}).aiFailure, isNull);
+      // Once checked by hand, it no longer stops the file.
+      expect(checkMasterLines(lines, checked: true, aiFailure: 'quota').any((x) => x.code == 'ai_unavailable'), isFalse);
+    });
+
     test('a sheet is matched by its headings, in any order and any wording', () {
       final lines = MasterSheet.parse([
         ['在庫一覧'],

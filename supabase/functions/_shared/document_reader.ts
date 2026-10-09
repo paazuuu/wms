@@ -230,9 +230,35 @@ export function setAiFunction(name: string) {
   aiFunction = name;
 }
 
+/** The AI calls that failed since [resetAiFailures], most serious first —
+ * so a reading that went on without the AI (a column mapping that fell back
+ * to the dictionary, say) can still say why, rather than leave the person
+ * with "no product name" on every line. */
+export type AiFailure = { kind: string; status: number | null; message: string };
+let aiFailures: AiFailure[] = [];
+const FAILURE_ORDER = ["no_key", "auth", "quota", "network", "overload", "bad_request"];
+
+export function resetAiFailures() {
+  aiFailures = [];
+}
+
+/** The most serious AI failure of this request, or null when none failed. */
+export function aiFailure(): AiFailure | null {
+  if (aiFailures.length === 0) return null;
+  return [...aiFailures].sort((a, b) => FAILURE_ORDER.indexOf(a.kind) - FAILURE_ORDER.indexOf(b.kind))[0];
+}
+
 /** Every AI call is recorded in `ai_calls` (0133). Best effort: a record that
  * cannot be written never fails the reading. */
 async function logAiCall(row: Record<string, unknown>) {
+  const kind = String(row.error_kind ?? "");
+  if (row.ok === false && FAILURE_ORDER.includes(kind)) {
+    aiFailures.push({
+      kind,
+      status: typeof row.http_status === "number" ? row.http_status : null,
+      message: String(row.error ?? "").slice(0, 300),
+    });
+  }
   const url = Deno.env.get("SUPABASE_URL"), key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return;
   try {
