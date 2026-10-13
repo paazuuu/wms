@@ -127,6 +127,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _bulkInspection,
             requiredAnyOf: ['inspection.confirm'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'delivery',
@@ -168,6 +169,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _shipDestinations,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'stock_adjustment',
@@ -191,6 +193,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _heldStock,
             requiredAnyOf: ['inspection.view', 'inventory.view'],
+            inMenu: false,
           ),
           // Beside the floor tasks, not with the reports: an open blocker is
           // work, and the person who has to clear it is on the dock.
@@ -221,6 +224,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _wave,
             requiredAnyOf: ['pick.confirm'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'transfer',
@@ -235,6 +239,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _replenishment,
             requiredAnyOf: ['inventory.view'],
+            inMenu: false,
           ),
           // Beside replenishment: both answer "how much is where", this one
           // for the warehouses abroad whose stock left the system (0088).
@@ -269,6 +274,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _documentExceptions,
             requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve', 'receiving.view', 'inspection.view'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sales_orders',
@@ -314,6 +320,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scSuppliers,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sc_costs',
@@ -321,6 +328,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scCosts,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sc_routes',
@@ -328,6 +336,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scRoutes,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sc_simulation',
@@ -335,6 +344,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scSimulation,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sc_risk',
@@ -342,6 +352,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scRisk,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sc_bottleneck',
@@ -349,6 +360,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scBottleneck,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'sc_history',
@@ -356,6 +368,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _scHistory,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+            inMenu: false,
           ),
         ],
       ),
@@ -399,6 +412,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _connectors,
             requiredAnyOf: ['connector.manage'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'ai_review',
@@ -406,6 +420,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _aiReview,
             requiredAnyOf: ['ai.review'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'ai_settings',
@@ -422,6 +437,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _aiHealth,
             requiredAnyOf: ['ai.review', 'user.manage', 'audit.view'],
+            inMenu: false,
           ),
           // Our own product format (0111): how product names are built, and
           // renaming a maker or a colour everywhere at once.
@@ -458,6 +474,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _unlinkedJan,
             requiredAnyOf: ['product.view', 'inventory.view'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'partners',
@@ -479,6 +496,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _reservations,
             requiredAnyOf: ['inventory.view'],
+            inMenu: false,
           ),
           // A diagnostic, not a routine list — beside reservations because
           // both live off the same inventory.view read, not because either
@@ -489,6 +507,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _stockReconciliation,
             requiredAnyOf: ['inventory.view'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'reports',

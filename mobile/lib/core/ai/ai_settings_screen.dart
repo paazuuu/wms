@@ -9,6 +9,7 @@ import '../ui/state_views.dart';
 import 'ai_confidence.dart';
 import 'ai_keys_section.dart';
 import '../../features/auth/application/auth_controller.dart';
+import '../../features/home/presentation/feature_link.dart';
 
 /// AI設定 (spec §50): the two thresholds that decide what a person has to do
 /// with a reading — automatic candidate, check recommended, human review.
@@ -48,7 +49,11 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
     final user = ref.watch(authControllerProvider).user;
     final canManageKeys = (user?.hasPermission('ai.key_manage') ?? false) || (user?.hasPermission('user.manage') ?? false);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.featAiSettings)),
+      appBar: AppBar(
+        title: Text(l10n.featAiSettings),
+        // How the AI is doing and what it left for review belong with its settings.
+        actions: const [FeatureLinkButton('ai_health'), FeatureLinkButton('ai_review')],
+      ),
       body: ref.watch(aiThresholdsProvider).when(
             loading: () => LoadingView(message: l10n.loading),
             error: (e, _) => ErrorStateView(message: '$e', onRetry: () => ref.invalidate(aiThresholdsProvider)),

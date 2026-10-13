@@ -6853,6 +6853,42 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Flutter: `ai_unavailable` comes first, is read from the answer, and is
     gone once the lines are checked by hand (958 pass).
 
+## Menu without repeats; unfinished parts checked again (app; `inspections` redeployed)
+
+- **The menu no longer offers the same work twice.** `FeatureEntry.inMenu`
+  (default true) leaves an entry out of the sidebar and the dashboard tiles.
+  The entry keeps its screen, route and permission rule, and is opened from
+  the screen it belongs to with `FeatureLinkButton` / `FeatureLinkChips`
+  (`home/presentation/feature_link.dart`). A link shows only to a user the
+  entry's own permission rule lets in.
+- Left out of the menu, and where each is now:
+  - 一括検品, 検品待ち在庫 → buttons in 検品.
+  - ウェーブピッキング → a button in ピッキング.
+  - 出荷先 → a button in 出庫の提案 (it was already chosen and added there).
+  - 書類の差異 → a button in 例外対応.
+  - 予約・引当, 補充提案 → buttons in 受注残・発注.
+  - 在庫整合性チェック → a button in 在庫調整.
+  - 未紐付けJANコード → a button in 商品ライブラリー (and the dashboard chart,
+    as before).
+  - AIの稼働状況, AIレビュー → buttons in AI設定.
+  - サプライチェーン: 仕入先比較, 原価構成, ルート, シミュレーション, リスク,
+    ボトルネック, 履歴 → chips on the サプライチェーン dashboard, which is now
+    the group's only menu item.
+  - コネクタ → not linked anywhere. It is still the 0012 skeleton: a
+    registration records intent and no adapter runs. Its URL still works.
+- **Kept, though they look alike:** 入荷希望リスト (an Excel for a supplier)
+  and 発注 (the order itself); アップロード履歴 (every kept file) and the
+  import history inside ファイルから商品・在庫登録; 仕入先商品名 (cards per
+  supplier) and 取引先 (the partner record).
+- **Deployed:** `inspections` (v5). The running copy dated from 2026-09-18
+  and did not return `stock_effect`, so closing an inspection could not say
+  how much was released to OK and how much was held (0068). The other
+  functions were checked against their last commits and are current.
+- Still unfinished: コネクタ (above); the new AI key is untested until
+  管理 → AI設定 → 接続テスト is pressed.
+- Tests: the catalog leaves these entries out yet keeps them openable; a
+  link opens its screen, and none shows without the permission (962 pass).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/exception_providers.dart';
 import '../domain/warehouse_exception.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// How much someone has to care, in words.
 String exceptionSeverityLabel(AppLocalizations l10n, ExceptionSeverity s) =>
@@ -139,6 +140,7 @@ class ExceptionListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.exceptionsTitle),
         actions: [
+          const FeatureLinkButton('document_exceptions'),
           IconButton(
             tooltip: l10n.exceptionShowClosed,
             isSelected: showClosed,

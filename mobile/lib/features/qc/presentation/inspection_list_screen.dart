@@ -12,6 +12,7 @@ import 'inspection_detail_screen.dart';
 import 'qc_result_ui.dart';
 import '../../../core/offline/pending_sync_banner.dart';
 import '../data/offline_inspection_repository.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// Inbound inspections for the active warehouse, newest first, filterable by
 /// outcome so an operator can jump straight to what still needs checking.
@@ -55,6 +56,7 @@ class QcInspectionListScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const BulkInspectionScreen()),
             ),
           ),
+          const FeatureLinkButton('held_stock'),
         ],
       ),
       body: Column(

@@ -13,6 +13,7 @@ import '../domain/supply_chain.dart';
 import 'sc_labels.dart';
 import 'sc_product_sheet.dart';
 import 'sc_widgets.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// 収益ダッシュボード (§4): what is left after every cost, for the warehouse
 /// in the header — totals, what the cost is made of, what needs attention,
@@ -98,6 +99,7 @@ class _ScDashboardScreenState extends ConsumerState<ScDashboardScreen> {
             return ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
+                const FeatureLinkChips(_scScreens),
                 SizedBox(
                   height: 260,
                   child: EmptyStateView(icon: Icons.stacked_line_chart, title: l10n.scNoData, message: l10n.scNoDataBody),
@@ -123,6 +125,8 @@ class _ScDashboardScreenState extends ConsumerState<ScDashboardScreen> {
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.sm),
                 ScKpiGrid(summary: run.summary),
+                const SizedBox(height: AppSpacing.md),
+                const FeatureLinkChips(_scScreens),
                 const SizedBox(height: AppSpacing.md),
                 ScSection(title: l10n.scCostBreakdown, child: ScCostBreakdownBar(lines: run.summary.lines)),
                 _Alerts(run: run),
@@ -240,3 +244,7 @@ class _ProductTable extends StatelessWidget {
     );
   }
 }
+
+/// The supply chain's detail screens, opened from here rather than listed one
+/// by one in the menu.
+const _scScreens = ['sc_suppliers', 'sc_costs', 'sc_routes', 'sc_simulation', 'sc_risk', 'sc_bottleneck', 'sc_history'];

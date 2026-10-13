@@ -65,6 +65,21 @@ void main() {
       }
     });
 
+    test('screens that belong to another are left out of the menu', () {
+      final all = [for (final g in buildFeatureCatalog()) ...g.entries];
+      final listed = {
+        for (final g in buildFeatureCatalog())
+          ...g.visibleEntries(const ['inspection.confirm', 'pick.confirm', 'ai.review', 'supply_chain.view', 'connector.manage'])
+              .map((e) => e.id),
+      };
+      for (final id in ['bulk_inspection', 'wave', 'ai_review', 'ai_health', 'sc_routes', 'connectors']) {
+        // Still a screen with its route, just not a second way in from the menu.
+        expect(all.where((e) => e.id == id).single.isReady, isTrue, reason: id);
+        expect(listed, isNot(contains(id)), reason: id);
+      }
+      expect(listed, containsAll(['inspection', 'picking', 'ai_settings', 'sc_dashboard']));
+    });
+
     test('an unpermissioned user sees no groups at all', () {
       final groups = buildFeatureCatalog()
           .map((g) => g.visibleEntries(const []))

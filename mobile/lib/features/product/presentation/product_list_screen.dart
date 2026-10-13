@@ -26,6 +26,7 @@ import '../../../core/ui/product_name.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../../product_library/presentation/product_thumb.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
 /// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
@@ -448,6 +449,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
                 ),
                 const SizedBox(width: AppSpacing.sm),
+                // JAN codes in stock that no product claims yet.
+                const FeatureLinkButton('unlinked_jan'),
                 IconButton(
                     tooltip: l10n.productsShowInactive,
                     icon: Icon(filter.lifecycles.length > 1

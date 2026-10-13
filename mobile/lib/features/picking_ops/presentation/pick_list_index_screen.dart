@@ -11,6 +11,7 @@ import '../application/picking_ops_providers.dart';
 import '../domain/pick_list.dart';
 import 'pick_list_detail_screen.dart';
 import 'pick_status_ui.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// Pick lists for the active warehouse. Starting one asks which open shipment
 /// to pick against, then hands off to its detail screen.
@@ -64,7 +65,11 @@ class _PickListIndexScreenState extends ConsumerState<PickListIndexScreen> {
     final async = ref.watch(pickListsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.pickListsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.pickListsTitle),
+        // Several shipments in one walk belongs with picking.
+        actions: const [FeatureLinkButton('wave')],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _busy ? null : _start,
         icon: _busy

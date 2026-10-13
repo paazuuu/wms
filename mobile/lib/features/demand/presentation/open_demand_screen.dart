@@ -16,6 +16,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/demand_providers.dart';
 import '../domain/open_demand.dart';
 import 'purchase_from_demand_page.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// The purchasing worklist for an order-first warehouse (0084): every product
 /// approved sales orders are still waiting for, how much free stock can cover
@@ -188,6 +189,9 @@ class _OpenDemandScreenState extends ConsumerState<OpenDemandScreen> {
       appBar: AppBar(
         title: Text(l10n.demandTitle),
         actions: [
+          // What is reserved, and what has fallen below its reorder point.
+          const FeatureLinkButton('reservations'),
+          const FeatureLinkButton('replenishment'),
           IconButton(
             tooltip: l10n.demandFillAll,
             onPressed: _busy || !anyFillable ? null : _fillAll,

@@ -17,6 +17,7 @@ import '../domain/outbound.dart';
 import '../domain/pricing.dart';
 import 'outbound_downloads.dart';
 import 'ship_destinations_screen.dart';
+import '../../home/presentation/feature_link.dart';
 
 enum _Mode { percent, direct }
 
@@ -303,6 +304,7 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
       appBar: AppBar(
         title: Text(l10n.featOutboundProposal),
         actions: [
+          const FeatureLinkButton('ship_destinations'),
           IconButton(
             key: const ValueKey('ob-stock-excel'),
             tooltip: l10n.obStockExcel,

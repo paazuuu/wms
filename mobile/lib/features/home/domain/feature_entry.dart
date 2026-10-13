@@ -23,6 +23,7 @@ class FeatureEntry {
     this.status = FeatureStatus.comingSoon,
     this.builder,
     this.requiredAnyOf = const [],
+    this.inMenu = true,
   });
 
   final String id;
@@ -37,6 +38,13 @@ class FeatureEntry {
   /// are usually a view/manage pair. Empty means every signed-in user may
   /// open it — the menu doesn't hide a screen it never restricted.
   final List<String> requiredAnyOf;
+
+  /// Whether the menu lists this entry. An entry left out of the menu keeps
+  /// its route and its permission rule; it is reached from the screen it
+  /// belongs to (bulk inspection from 検品, the supply chain detail screens
+  /// from the supply chain dashboard), so the menu does not offer the same
+  /// work twice.
+  final bool inMenu;
 
   bool get isReady => status == FeatureStatus.ready && builder != null;
 
@@ -315,7 +323,7 @@ class FeatureGroup {
   /// empty (every entry gated on something this user lacks) is meant to be
   /// dropped entirely by the caller, not shown as an empty heading.
   List<FeatureEntry> visibleEntries(Iterable<String> permissions) =>
-      entries.where((e) => e.visibleFor(permissions)).toList();
+      entries.where((e) => e.inMenu && e.visibleFor(permissions)).toList();
 
   /// Localized group heading.
   String title(AppLocalizations l10n) {

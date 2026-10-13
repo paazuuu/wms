@@ -12,6 +12,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/stock_ops_providers.dart';
 import '../domain/stock_ops.dart';
 import 'stock_ops_ui.dart';
+import '../../home/presentation/feature_link.dart';
 
 /// Reason-coded stock corrections.
 ///
@@ -110,7 +111,11 @@ class _StockAdjustmentScreenState extends ConsumerState<StockAdjustmentScreen> {
     final async = ref.watch(adjustmentListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.adjTitle)),
+      appBar: AppBar(
+        title: Text(l10n.adjTitle),
+        // Where the stock levels disagree is what an adjustment fixes.
+        actions: const [FeatureLinkButton('stock_reconciliation')],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _busy ? null : _newAdjustment,
         icon: _busy
