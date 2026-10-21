@@ -6889,6 +6889,26 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Tests: the catalog leaves these entries out yet keeps them openable; a
   link opens its screen, and none shows without the permission (962 pass).
 
+## Excel export from 価格台帳 and 商品ライブラリー (app only)
+
+- Both screens have an Excel button in the app bar (`ExcelExportMenu`,
+  `core/ui/excel_export_menu.dart`) with two choices:
+  - 表示中のN件: what the search and filters show now.
+  - 全件: everything, fetched again without the search.
+- 価格台帳 (`price_book/data/price_book_export.dart`): a row per supplier's
+  terms, cheapest first within an item (仕入先, 支店・倉庫, their name and
+  code, price, list price, 掛率, 入数, 最低発注数, dates), then stock, whether
+  it is in 商品ライブラリー and the file it came from. An item with no terms
+  has one row.
+- 商品ライブラリー (`product/data/product_export.dart`): a product a row
+  with codes, names, maker, category, prices, state, the main supplier's
+  terms, weight and size, the stock in total, and a column per warehouse.
+  表示中 is the first pane (the warehouse chosen at the top right).
+- JAN codes stay text. Files are named 価格台帳_絞り込み_YYYYMMDD.xlsx,
+  商品ライブラリー_全件_YYYYMMDD.xlsx and so on.
+- Tests: both sheets' rows and columns; each screen saves the shown rows or
+  all of them (966 pass).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

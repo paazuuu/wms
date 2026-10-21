@@ -9518,5 +9518,25 @@
   "miPbAiQuota": "AIの利用残高（クレジット）が足りないため、AIで項目を読み取れませんでした。下の商品名などの不足はそのためです。管理 → AI設定で別のキーに切り替えるか、Google AI Studio で残高を追加してから、もう一度選んでください。",
   "miPbAiAuth": "AIのキーが受け付けられませんでした（無効・権限なし）。管理 → AI設定でキーを確かめてください。",
   "miPbAiNoKey": "使えるAIのキーがありません。管理 → AI設定でキーを登録して「使用中」にしてください。",
-  "miPbAiDown": "AIにつながりませんでした。少し待ってから、もう一度選んでください。"
+  "miPbAiDown": "AIにつながりませんでした。少し待ってから、もう一度選んでください。",
+  "xlExport": "Excelに出力",
+  "xlExportShown": "表示中の{n}件",
+  "@xlExportShown": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "xlExportShownHint": "検索・絞り込みの結果だけ",
+  "xlExportAll": "全件",
+  "xlExportAllHint": "検索・絞り込みに関係なくすべて",
+  "xlSaved": "{n}件をExcelで保存しました",
+  "@xlSaved": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

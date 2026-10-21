@@ -11023,4 +11023,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get miPbAiDown =>
       'The AI could not be reached. Wait a little and choose the file again.';
+
+  @override
+  String get xlExport => 'Export to Excel';
+
+  @override
+  String xlExportShown(int n) {
+    return 'The $n shown';
+  }
+
+  @override
+  String get xlExportShownHint => 'Only what the search and filters show';
+
+  @override
+  String get xlExportAll => 'Everything';
+
+  @override
+  String get xlExportAllHint => 'All of it, whatever the search and filters';
+
+  @override
+  String xlSaved(int n) {
+    return '$n rows saved as Excel';
+  }
 }

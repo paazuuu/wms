@@ -19441,6 +19441,42 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'AIにつながりませんでした。少し待ってから、もう一度選んでください。'**
   String get miPbAiDown;
+
+  /// No description provided for @xlExport.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelに出力'**
+  String get xlExport;
+
+  /// No description provided for @xlExportShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の{n}件'**
+  String xlExportShown(int n);
+
+  /// No description provided for @xlExportShownHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'検索・絞り込みの結果だけ'**
+  String get xlExportShownHint;
+
+  /// No description provided for @xlExportAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'全件'**
+  String get xlExportAll;
+
+  /// No description provided for @xlExportAllHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'検索・絞り込みに関係なくすべて'**
+  String get xlExportAllHint;
+
+  /// No description provided for @xlSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件をExcelで保存しました'**
+  String xlSaved(int n);
 }
 
 class _AppLocalizationsDelegate

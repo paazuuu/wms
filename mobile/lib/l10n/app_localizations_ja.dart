@@ -10798,4 +10798,26 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get miPbAiDown => 'AIにつながりませんでした。少し待ってから、もう一度選んでください。';
+
+  @override
+  String get xlExport => 'Excelに出力';
+
+  @override
+  String xlExportShown(int n) {
+    return '表示中の$n件';
+  }
+
+  @override
+  String get xlExportShownHint => '検索・絞り込みの結果だけ';
+
+  @override
+  String get xlExportAll => '全件';
+
+  @override
+  String get xlExportAllHint => '検索・絞り込みに関係なくすべて';
+
+  @override
+  String xlSaved(int n) {
+    return '$n件をExcelで保存しました';
+  }
 }

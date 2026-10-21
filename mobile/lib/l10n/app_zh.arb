@@ -3583,5 +3583,11 @@
   "miPbAiQuota": "AI余额（额度）不足，无法用AI读取项目，下面缺少商品名等即因此。请在 管理 → AI设置 切换密钥或在 Google AI Studio 充值后重新选择。",
   "miPbAiAuth": "AI密钥被拒绝（无效或无权限）。请在 管理 → AI设置 检查密钥。",
   "miPbAiNoKey": "没有可用的AI密钥。请在 管理 → AI设置 登记并设为使用中。",
-  "miPbAiDown": "无法连接AI。请稍候再重新选择。"
+  "miPbAiDown": "无法连接AI。请稍候再重新选择。",
+  "xlExport": "导出为Excel",
+  "xlExportShown": "当前显示的{n}条",
+  "xlExportShownHint": "仅搜索和筛选的结果",
+  "xlExportAll": "全部",
+  "xlExportAllHint": "不论搜索和筛选，全部导出",
+  "xlSaved": "已将{n}条保存为Excel"
 }

@@ -6,13 +6,16 @@ import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/product_name.dart';
 import '../../../core/ui/state_views.dart';
+import '../../../core/ui/excel_export_menu.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../product/presentation/product_labels.dart';
 import '../../product/presentation/product_lifecycle_ui.dart';
+import '../../outbound/presentation/outbound_downloads.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../application/price_book_providers.dart';
+import '../data/price_book_export.dart';
 import '../domain/price_book.dart';
 import 'price_book_import_screen.dart';
 import 'price_book_item_screen.dart';
@@ -91,6 +94,29 @@ class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
     }
   }
 
+  /// What the screen shows (its search and filters), or every item, as one
+  /// Excel sheet.
+  Future<void> _export(ExportScope scope) async {
+    final l10n = AppLocalizations.of(context);
+    final List<PriceBookItem> items;
+    if (scope == ExportScope.shown) {
+      items = ref.read(filteredPriceBookProvider).valueOrNull ?? const [];
+    } else {
+      final r = await ref.read(priceBookRepositoryProvider).list();
+      if (!mounted) return;
+      switch (r) {
+        case ApiSuccess(:final data):
+          items = data;
+        case ApiFailure(:final message):
+          _snack(humanizeApiErrorMessage(l10n, message));
+          return;
+      }
+    }
+    final day = DateTime.now().toIso8601String().substring(0, 10).replaceAll('-', '');
+    await ref.read(saveFileProvider)('価格台帳_${scope == ExportScope.shown ? '絞り込み' : '全件'}_$day.xlsx', buildPriceBookXlsx(items));
+    if (mounted) _snack(l10n.xlSaved(items.length));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -130,6 +156,7 @@ class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
               selected: {photos},
               onSelectionChanged: (v) => ref.read(priceBookPhotoViewProvider.notifier).state = v.first,
             ),
+            ExcelExportMenu(keyPrefix: 'cl', shown: shown.length, onExport: _export),
             const SizedBox(width: AppSpacing.sm),
           ],
         ],

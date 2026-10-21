@@ -10744,4 +10744,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get miPbAiDown => '无法连接AI。请稍候再重新选择。';
+
+  @override
+  String get xlExport => '导出为Excel';
+
+  @override
+  String xlExportShown(int n) {
+    return '当前显示的$n条';
+  }
+
+  @override
+  String get xlExportShownHint => '仅搜索和筛选的结果';
+
+  @override
+  String get xlExportAll => '全部';
+
+  @override
+  String get xlExportAllHint => '不论搜索和筛选，全部导出';
+
+  @override
+  String xlSaved(int n) {
+    return '已将$n条保存为Excel';
+  }
 }

@@ -5,10 +5,12 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/copy_text.dart';
+import '../../../core/ui/excel_export_menu.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_filter.dart';
 import '../application/product_providers.dart';
+import '../data/product_export.dart';
 import '../domain/product.dart';
 import 'product_alerts_tab.dart';
 import 'product_delete.dart';
@@ -27,6 +29,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../home/presentation/feature_link.dart';
+import '../../outbound/presentation/outbound_downloads.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
 /// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
@@ -65,6 +68,40 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       builder: (_) => ProductFormSheet(product: product),
     );
     if (saved == true) ref.invalidate(productListProvider);
+  }
+
+  /// What the first pane shows (search, filters, its warehouse's stock
+  /// filter), or every product, as one Excel sheet with each warehouse's
+  /// stock on its own column.
+  Future<void> _export(ExportScope scope) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    void snack(String t) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(t)));
+    final List<Product> products;
+    if (scope == ExportScope.shown) {
+      products = ref.read(libraryPaneProductsProvider(0)).valueOrNull ?? const [];
+    } else {
+      final r = await ref.read(productRepositoryProvider).list(status: null);
+      if (!mounted) return;
+      switch (r) {
+        case ApiSuccess(:final data):
+          products = data;
+        case ApiFailure(:final message):
+          snack(humanizeApiErrorMessage(l10n, message));
+          return;
+      }
+    }
+    final warehouses = ref.read(warehouseOverviewProvider).valueOrNull?.warehouses ?? const <Warehouse>[];
+    final bytes = buildProductsXlsx(
+      products: products,
+      warehouses: [for (final w in warehouses) (w.id, w.name)],
+      lifecycle: (p) => lifecycleLabel(l10n, p.lifecycle),
+    );
+    final day = DateTime.now().toIso8601String().substring(0, 10).replaceAll('-', '');
+    await ref.read(saveFileProvider)('商品ライブラリー_${scope == ExportScope.shown ? '絞り込み' : '全件'}_$day.xlsx', bytes);
+    if (mounted) snack(l10n.xlSaved(products.length));
   }
 
   Future<void> _openDetailById(int productId) async {
@@ -449,6 +486,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
                 ),
                 const SizedBox(width: AppSpacing.sm),
+                ExcelExportMenu(keyPrefix: 'pl', shown: shown.length, onExport: _export),
                 // JAN codes in stock that no product claims yet.
                 const FeatureLinkButton('unlinked_jan'),
                 IconButton(
