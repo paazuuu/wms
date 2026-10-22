@@ -2525,7 +2525,7 @@
   "plOpenLibrary": "Product pictures",
   "plTabPhotos": "Pictures",
   "plTabAttributes": "Attributes",
-  "plTabSuppliers": "Supplier names",
+  "plTabSuppliers": "By supplier",
   "plAttributesHint": "Our values. Each supplier's way of writing them (e.g. カラー 'BK') is listed under Supplier names and read as ours (色 '黒').",
   "plAttrNew": "Add attribute",
   "plAttrName": "Attribute name",

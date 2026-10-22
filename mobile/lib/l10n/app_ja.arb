@@ -6570,7 +6570,7 @@
   "plOpenLibrary": "商品の写真",
   "plTabPhotos": "写真",
   "plTabAttributes": "属性",
-  "plTabSuppliers": "仕入先の呼び名",
+  "plTabSuppliers": "仕入先別",
   "plAttributesHint": "自社の値です。仕入先ごとの書き方（例: カラー「BK」）は「仕入先の呼び名」に並び、読み取りのときに自社の値（色「黒」）に置き換えられます。",
   "plAttrNew": "属性を追加",
   "plAttrName": "属性名",

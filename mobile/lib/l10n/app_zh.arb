@@ -2525,7 +2525,7 @@
   "plOpenLibrary": "商品照片",
   "plTabPhotos": "照片",
   "plTabAttributes": "属性",
-  "plTabSuppliers": "供应商的叫法",
+  "plTabSuppliers": "按供应商",
   "plAttributesHint": "本公司的值。各供应商的写法（例：カラー“BK”）列在“供应商的叫法”中，读取时换成本公司的值（色“黑”）。",
   "plAttrNew": "添加属性",
   "plAttrName": "属性名",

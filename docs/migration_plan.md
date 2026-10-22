@@ -6909,6 +6909,17 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Tests: both sheets' rows and columns; each screen saves the shown rows or
   all of them (966 pass).
 
+## 仕入先商品名 is a tab of 商品ライブラリー (app only)
+
+- 商品ライブラリー has a third tab, 仕入先別, after 商品一覧 and アラート. It
+  is the old 仕入先商品名 screen: supplier cards (0143), or each supplier's
+  names for our products, with one search box for both.
+- The menu entry is gone (`inMenu: false`). `/supplier-product-names` still
+  opens the same view on its own screen.
+- `SupplierProductNamesView` is the view; `SupplierProductNamesScreen` is
+  only its Scaffold.
+- Tests: the tab shows the cards and its search narrows them (967 pass).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

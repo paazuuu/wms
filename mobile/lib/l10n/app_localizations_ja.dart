@@ -7100,7 +7100,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get plTabAttributes => '属性';
 
   @override
-  String get plTabSuppliers => '仕入先の呼び名';
+  String get plTabSuppliers => '仕入先別';
 
   @override
   String get plAttributesHint =>

@@ -7079,7 +7079,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plTabAttributes => '属性';
 
   @override
-  String get plTabSuppliers => '供应商的叫法';
+  String get plTabSuppliers => '按供应商';
 
   @override
   String get plAttributesHint =>

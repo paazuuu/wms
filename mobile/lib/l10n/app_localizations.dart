@@ -13090,7 +13090,7 @@ abstract class AppLocalizations {
   /// No description provided for @plTabSuppliers.
   ///
   /// In ja, this message translates to:
-  /// **'仕入先の呼び名'**
+  /// **'仕入先別'**
   String get plTabSuppliers;
 
   /// No description provided for @plAttributesHint.

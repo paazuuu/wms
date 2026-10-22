@@ -29,6 +29,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../home/presentation/feature_link.dart';
+import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
@@ -437,7 +438,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final alertCount = ref.watch(productAlertsProvider).valueOrNull?.length ?? 0;
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
       appBar: selected != null
           ? AppBar(
@@ -503,6 +504,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 tabs: [
                   Tab(key: const ValueKey('pm-tab-list'), text: l10n.plTabList),
                   Tab(key: const ValueKey('pm-tab-alerts'), text: l10n.plTabAlerts(alertCount)),
+                  // What each supplier calls our products, and what is bought
+                  // from whom (仕入先商品名, once a menu item of its own).
+                  Tab(key: const ValueKey('pm-tab-suppliers'), text: l10n.plTabSuppliers),
                 ],
               ),
             ),
@@ -570,6 +574,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           ],
         ),
         const ProductAlertsTab(),
+        const SupplierProductNamesView(),
       ]),
       ),
     );

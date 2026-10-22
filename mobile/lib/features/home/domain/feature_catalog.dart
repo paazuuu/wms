@@ -107,6 +107,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _supplierProductNames,
             requiredAnyOf: ['product.view', 'product.manage'],
+            inMenu: false,
           ),
         ],
       ),

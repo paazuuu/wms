@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/inbound/presentation/supplier_product_names_screen.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
+import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
 import 'package:wms_mobile/features/purchase_request/data/purchase_request_repository.dart';
 import 'package:wms_mobile/features/purchase_request/domain/purchase_request.dart';
 import 'package:wms_mobile/features/purchase_request/presentation/purchase_request_screen.dart';
@@ -108,6 +109,23 @@ void main() {
     expect(nextOrderQuantity(zento, NextOrderQty.none), 0);
     expect(nextOrderQuantity(h.products.last, NextOrderQty.last), 0);
     expect(h.events.map((e) => e.source), [PurchaseSource.import, PurchaseSource.delivery, PurchaseSource.po]);
+  });
+
+  testWidgets('the supplier cards are a tab of 商品ライブラリー, with their search', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const ProductListScreen(), overrides: [
+      supplierHistoryRepositoryProvider.overrideWithValue(_FakeHistory()),
+      purchaseRequestRepositoryProvider.overrideWithValue(_FakeRequests()),
+    ]);
+
+    await tester.tap(find.byKey(const ValueKey('pm-tab-suppliers')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sup-card-41')), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('spn-search')), 'ジェット');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sup-card-42')), findsNothing);
+    expect(find.byKey(const ValueKey('sup-card-41')), findsOneWidget);
   });
 
   testWidgets('suppliers are cards; one opens their products and history', (tester) async {

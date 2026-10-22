@@ -18,22 +18,34 @@ final _supplierNamesProvider = FutureProvider.autoDispose<List<SupplierProductNa
   return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });
 
-/// 仕入先商品名 (§38, §40): what every supplier calls our products, kept as
-/// they write it, each pointing at one product id. A supplier's Japanese
-/// name finds our product here.
+/// 仕入先商品名 (§38, §40) on its own screen. It lives in 商品ライブラリー
+/// as the 仕入先別 tab; the screen stays for its URL.
+class SupplierProductNamesScreen extends StatelessWidget {
+  const SupplierProductNamesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context).featSupplierProductNames)),
+        body: const SupplierProductNamesView(),
+      );
+}
+
+/// What every supplier calls our products, kept as they write it, each
+/// pointing at one product id. A supplier's Japanese name finds our product
+/// here.
 ///
 /// It opens on the suppliers themselves (0143): a card each with what is
 /// bought from them, how often and when last. A card opens the supplier —
 /// their products and purchases, and the next order from them. The names
-/// one by one are the other view.
-class SupplierProductNamesScreen extends ConsumerStatefulWidget {
-  const SupplierProductNamesScreen({super.key});
+/// one by one are the other view; one search box serves both.
+class SupplierProductNamesView extends ConsumerStatefulWidget {
+  const SupplierProductNamesView({super.key});
 
   @override
-  ConsumerState<SupplierProductNamesScreen> createState() => _SupplierProductNamesScreenState();
+  ConsumerState<SupplierProductNamesView> createState() => _SupplierProductNamesViewState();
 }
 
-class _SupplierProductNamesScreenState extends ConsumerState<SupplierProductNamesScreen> {
+class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesView> {
   String _query = '';
   bool _bySupplier = true;
 
@@ -53,38 +65,41 @@ class _SupplierProductNamesScreenState extends ConsumerState<SupplierProductName
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.featSupplierProductNames),
-        actions: [
-          SegmentedButton<bool>(
-            key: const ValueKey('spn-view'),
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: true, icon: const Icon(Icons.storefront_outlined, size: 18), label: Text(l10n.supViewSuppliers)),
-              ButtonSegment(value: false, icon: const Icon(Icons.translate, size: 18), label: Text(l10n.supViewNames)),
-            ],
-            selected: {_bySupplier},
-            onSelectionChanged: (v) => setState(() => _bySupplier = v.first),
-          ),
-          const SizedBox(width: AppSpacing.md),
-        ],
-      ),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
-          child: TextField(
-            key: const ValueKey('spn-search'),
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
-              hintText: _bySupplier ? l10n.supSearchHint : l10n.spnSearchHint,
+    return Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
+        child: Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: TextField(
+                key: const ValueKey('spn-search'),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: _bySupplier ? l10n.supSearchHint : l10n.spnSearchHint,
+                  isDense: true,
+                ),
+                onChanged: (v) => setState(() => _query = v),
+              ),
             ),
-            onChanged: (v) => setState(() => _query = v),
-          ),
+            SegmentedButton<bool>(
+              key: const ValueKey('spn-view'),
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: true, icon: const Icon(Icons.storefront_outlined, size: 18), label: Text(l10n.supViewSuppliers)),
+                ButtonSegment(value: false, icon: const Icon(Icons.translate, size: 18), label: Text(l10n.supViewNames)),
+              ],
+              selected: {_bySupplier},
+              onSelectionChanged: (v) => setState(() => _bySupplier = v.first),
+            ),
+          ],
         ),
-        Expanded(child: _bySupplier ? _cards(context) : _names(context)),
-      ]),
-    );
+      ),
+      Expanded(child: _bySupplier ? _cards(context) : _names(context)),
+    ]);
   }
 
   /// The suppliers, a card each, most recently bought from first.

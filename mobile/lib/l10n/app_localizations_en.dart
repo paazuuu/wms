@@ -7246,7 +7246,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plTabAttributes => 'Attributes';
 
   @override
-  String get plTabSuppliers => 'Supplier names';
+  String get plTabSuppliers => 'By supplier';
 
   @override
   String get plAttributesHint =>
