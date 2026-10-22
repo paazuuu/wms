@@ -8766,7 +8766,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pmNewTitle => '商品の登録方法を選んでください';
 
   @override
-  String get pmNewFileDesc => '自社で作ったExcel・CSV・PDF・写真などの商品一覧から、まとめて登録します';
+  String get pmNewFileDesc =>
+      'Excel・CSV・PDF・写真などの商品一覧を価格台帳に読み込み、続けて登録する商品を選びます';
 
   @override
   String get pmNewPriceBookDesc => '価格台帳（仕入先の見積）から、仕入れると決めた商品を選んで取り込みます';
@@ -10819,5 +10820,124 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String xlSaved(int n) {
     return '$n件をExcelで保存しました';
+  }
+
+  @override
+  String get featStockFileImport => 'ファイルから在庫登録';
+
+  @override
+  String get featStockFileImportDesc =>
+      'JANコードと数量の表（Excel・CSV）から、選んだ倉庫の在庫を追加・修正';
+
+  @override
+  String get sfIntro =>
+      'JANコードと数量の表から在庫を登録します（AIは使いません）。1行目に「JANコード」「数量」の見出しがあれば、ほかの列は無視します。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。';
+
+  @override
+  String get sfWarehouse => '倉庫';
+
+  @override
+  String get sfModeAdd => '今の在庫に足す';
+
+  @override
+  String get sfModeSet => '在庫をこの数にする';
+
+  @override
+  String get sfModeAddHint => '入荷した分などを、今ある数に足します。';
+
+  @override
+  String get sfModeSetHint => '棚卸の結果などで、在庫をファイルの数に合わせます。差は修正として記録されます。';
+
+  @override
+  String get sfPick => 'ファイルを選ぶ（Excel・CSV）';
+
+  @override
+  String get sfTemplate => '記入用のExcel';
+
+  @override
+  String sfRead(String name, int n, int units) {
+    return '$name: $n商品・合計$units個';
+  }
+
+  @override
+  String get sfNoHeader =>
+      '「JANコード」と「数量」の列が見つかりません。上の行にこの見出しを入れてください（記入用のExcelを使うと確実です）。';
+
+  @override
+  String sfProblems(int n) {
+    return '読めなかった行 $n件（在庫には入れません）';
+  }
+
+  @override
+  String sfPbNoJan(int row, String value) {
+    return '$row行目: JANコードが読めません（$value）';
+  }
+
+  @override
+  String sfPbBadQty(int row, String value) {
+    return '$row行目: 数量が読めません（$value）';
+  }
+
+  @override
+  String sfUnknown(int n) {
+    return '商品ライブラリーにないJAN $n件 — 在庫には入れません。先に価格台帳から登録してください';
+  }
+
+  @override
+  String get sfOpenPriceBook => '価格台帳でファイルを読み込む';
+
+  @override
+  String sfMerged(int n) {
+    return '同じJANの$n行を合計';
+  }
+
+  @override
+  String sfApply(int n) {
+    return '在庫に反映（$n商品）';
+  }
+
+  @override
+  String get sfApplyShort => '反映する';
+
+  @override
+  String sfConfirmQ(String warehouse) {
+    return '$warehouseの在庫に反映しますか？';
+  }
+
+  @override
+  String sfConfirmAdd(int n, int units) {
+    return '$n商品・合計$units個を今の在庫に足します。';
+  }
+
+  @override
+  String sfConfirmSet(int n) {
+    return '$n商品の在庫を、ファイルの数にします。差は修正として記録されます。';
+  }
+
+  @override
+  String sfDone(int id, int n, int change) {
+    return '取込 #$id: $n商品を反映しました（増減 $change個）';
+  }
+
+  @override
+  String sfSkipped(int n) {
+    return '商品ライブラリーにないJAN $n件は入れていません';
+  }
+
+  @override
+  String get sfHistory => '取込履歴';
+
+  @override
+  String get sfBadFile => 'このファイルは読めません。Excel（.xlsx）かCSVを選んでください。';
+
+  @override
+  String get sfNoPermission => '在庫を反映するには「在庫調整」の権限が必要です。';
+
+  @override
+  String get miHistoryTitle => '取込履歴（商品・在庫）';
+
+  @override
+  String miStockFileSummary(int n, int change) {
+    return '在庫ファイル: $n商品・増減 $change個';
   }
 }

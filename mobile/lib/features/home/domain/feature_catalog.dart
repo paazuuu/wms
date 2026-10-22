@@ -53,6 +53,7 @@ import '../../master_import/presentation/master_imports_screen.dart';
 import '../../outbound/presentation/outbound_proposal_screen.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
+import '../../stock_import/presentation/stock_file_import_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -88,6 +89,17 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _masterStockImport,
             requiredAnyOf: ['product.manage', 'inventory.adjust'],
+            // Its history only, opened from ファイルから在庫登録 (0144):
+            // products come in from files through 価格台帳 now.
+            inMenu: false,
+          ),
+          // Stock from a file, on its own (0144): a JAN and a quantity a row.
+          FeatureEntry(
+            id: 'stock_file_import',
+            icon: Icons.inventory_outlined,
+            status: FeatureStatus.ready,
+            builder: _stockFileImport,
+            requiredAnyOf: ['inventory.adjust'],
           ),
           // 価格台帳 (0124): what files and catalogues brought in,
           // with each supplier's terms by branch and period — apart from
@@ -570,6 +582,7 @@ Widget _products(BuildContext _) => const ProductListScreen();
 Widget _priceBook(BuildContext _) => const PriceBookScreen();
 Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen();
 Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
+Widget _stockFileImport(BuildContext _) => const StockFileImportScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
 Widget _purchaseRequests(BuildContext _) => const PurchaseRequestsScreen();

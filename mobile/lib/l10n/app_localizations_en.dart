@@ -8950,7 +8950,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pmNewFileDesc =>
-      'Register many at once from a product list of your own (Excel, CSV, PDF or a photo)';
+      'Read a product list (Excel, CSV, PDF or a photo) into the price book, then choose the products to register';
 
   @override
   String get pmNewPriceBookDesc =>
@@ -11044,5 +11044,128 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String xlSaved(int n) {
     return '$n rows saved as Excel';
+  }
+
+  @override
+  String get featStockFileImport => 'Stock from a file';
+
+  @override
+  String get featStockFileImportDesc =>
+      'Add or correct a warehouse\'s stock from a sheet of JAN codes and quantities (Excel or CSV)';
+
+  @override
+  String get sfIntro =>
+      'Puts stock in from a sheet of JAN codes and quantities (no AI). The first row needs the headings JANコード and 数量; other columns are ignored. Products themselves are registered from files through the price book: read the file there, then register to the product library.';
+
+  @override
+  String get sfWarehouse => 'Warehouse';
+
+  @override
+  String get sfModeAdd => 'Add to the stock';
+
+  @override
+  String get sfModeSet => 'Set the stock to this';
+
+  @override
+  String get sfModeAddHint =>
+      'Adds each quantity to what the warehouse has, as for goods that arrived.';
+
+  @override
+  String get sfModeSetHint =>
+      'Sets the stock to each quantity, as after a count. The difference is booked as a correction.';
+
+  @override
+  String get sfPick => 'Choose a file (Excel, CSV)';
+
+  @override
+  String get sfTemplate => 'Blank sheet to fill in';
+
+  @override
+  String sfRead(String name, int n, int units) {
+    return '$name: $n products, $units units in all';
+  }
+
+  @override
+  String get sfNoHeader =>
+      'No JANコード and 数量 columns were found. Put these headings in the top row (the blank sheet has them).';
+
+  @override
+  String sfProblems(int n) {
+    return '$n rows could not be read (left out)';
+  }
+
+  @override
+  String sfPbNoJan(int row, String value) {
+    return 'Row $row: no JAN code ($value)';
+  }
+
+  @override
+  String sfPbBadQty(int row, String value) {
+    return 'Row $row: the quantity cannot be read ($value)';
+  }
+
+  @override
+  String sfUnknown(int n) {
+    return '$n JAN codes are not in the product library and are left out. Register them through the price book first';
+  }
+
+  @override
+  String get sfOpenPriceBook => 'Read a file into the price book';
+
+  @override
+  String sfMerged(int n) {
+    return '$n rows of this JAN added up';
+  }
+
+  @override
+  String sfApply(int n) {
+    return 'Put into stock ($n products)';
+  }
+
+  @override
+  String get sfApplyShort => 'Put in';
+
+  @override
+  String sfConfirmQ(String warehouse) {
+    return 'Put this into $warehouse\'s stock?';
+  }
+
+  @override
+  String sfConfirmAdd(int n, int units) {
+    return '$n products, $units units in all, are added to the stock.';
+  }
+
+  @override
+  String sfConfirmSet(int n) {
+    return 'The stock of $n products is set to the file\'s figures. The differences are booked as corrections.';
+  }
+
+  @override
+  String sfDone(int id, int n, int change) {
+    return 'Import #$id: $n products put in (change $change)';
+  }
+
+  @override
+  String sfSkipped(int n) {
+    return '$n JAN codes not in the product library were left out';
+  }
+
+  @override
+  String get sfHistory => 'Import history';
+
+  @override
+  String get sfBadFile =>
+      'This file cannot be read. Choose an Excel (.xlsx) or CSV file.';
+
+  @override
+  String get sfNoPermission =>
+      'Putting stock in needs the stock adjustment permission.';
+
+  @override
+  String get miHistoryTitle => 'Import history (products and stock)';
+
+  @override
+  String miStockFileSummary(int n, int change) {
+    return 'Stock file: $n products, change $change';
   }
 }

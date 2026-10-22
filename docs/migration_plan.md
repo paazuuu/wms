@@ -6920,6 +6920,51 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   only its Scaffold.
 - Tests: the tab shows the cards and its search narrows them (967 pass).
 
+## One way in for files: products through 価格台帳, stock on its own (0144)
+
+- **Products from files go through 価格台帳 only.** 商品ライブラリー →
+  新規登録 → ファイルから登録 now reads the file into 価格台帳 (a supplier is
+  optional), then opens the choice of items to register. The direct
+  file → library path (`ImportTarget.library`) is no longer offered from the
+  app; its code stays.
+- **The 0138 two-stage import (ファイルから商品・在庫登録) is no longer
+  started.** Its menu entry is gone and 新規登録 no longer offers it. Its
+  history stays, at `/master-stock-import` and from the new screen's
+  取込履歴 button: an import left at 商品マスタ登録済み can still have its
+  stock put in, and every original can still be downloaded. No row was
+  removed.
+- **Stock from a file is its own function: ファイルから在庫登録**
+  (`stock_import/`, menu 商品, permission `inventory.adjust`).
+  - A sheet (Excel or UTF-8 CSV/TSV) with JANコード and 数量 headings in one
+    of its top ten rows; other columns are ignored. Read in the app, without
+    AI. A blank sheet to fill in can be downloaded.
+  - A warehouse is chosen (the one at the top right by default), and a mode:
+    今の在庫に足す (add) or 在庫をこの数にする (set; the difference is booked
+    as a correction).
+  - The same JAN twice is one line, summed. Rows with no readable JAN or
+    quantity are listed and left out. JANs 商品ライブラリー does not have are
+    listed and left out, with a button to read a file into 価格台帳 and look
+    them up again.
+  - 在庫に反映 asks first, then calls `stock_file_import`.
+- **DB 0144** (additive):
+  - `stock_file_import(warehouse, mode, lines, file name, type)` books each
+    line through `master_import_post` (stock movement and adjustment, as in
+    0138). The batch is kept in `master_imports` with source `stock_file` and
+    its lines in `master_import_lines`. It is audited as
+    `inventory.stock_file_imported`. Unknown JANs come back as `skipped`.
+  - `stock_file_import_attach` keeps the original with the import.
+  - A storage policy lets `inventory.adjust` upload to `master-import-files`.
+  - Checked in a transaction that was rolled back, with nothing written: add
+    5, then set to 2 (−3), an unknown JAN skipped, the file attached.
+- 取込履歴 shows a stock file as 「在庫ファイル: N商品・増減 X個」. Its
+  button starts ファイルから在庫登録.
+- Tests (973 pass):
+  - Reading: headings under a title, full-width digits, 1,200, duplicates
+    summed, bad rows listed, Excel and quoted CSV.
+  - The screen: set mode into the chosen warehouse, unknown JANs left out,
+    the file kept, nothing without the permission.
+  - The history row; 新規登録 goes through 価格台帳.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -8727,7 +8727,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pmNewTitle => '请选择登录商品的方式';
 
   @override
-  String get pmNewFileDesc => '从自制的商品清单（Excel、CSV、PDF、照片等）批量登录';
+  String get pmNewFileDesc => '将商品清单（Excel、CSV、PDF、照片等）读入价格台账，然后选择要登记的商品';
 
   @override
   String get pmNewPriceBookDesc => '从价格台账（供应商报价）中选择决定采购的商品导入';
@@ -10765,5 +10765,122 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String xlSaved(int n) {
     return '已将$n条保存为Excel';
+  }
+
+  @override
+  String get featStockFileImport => '从文件登记库存';
+
+  @override
+  String get featStockFileImportDesc => '根据JAN码和数量表（Excel/CSV），追加或修正所选仓库的库存';
+
+  @override
+  String get sfIntro =>
+      '根据JAN码和数量表登记库存（不使用AI）。第一行需有“JANコード”“数量”标题，其他列忽略。商品本身请在价格台账读取文件后“登记到商品库”。';
+
+  @override
+  String get sfWarehouse => '仓库';
+
+  @override
+  String get sfModeAdd => '加到现有库存';
+
+  @override
+  String get sfModeSet => '把库存改为此数';
+
+  @override
+  String get sfModeAddHint => '把数量加到现有库存上（如到货）。';
+
+  @override
+  String get sfModeSetHint => '按文件中的数量设定库存（如盘点后）。差额记为修正。';
+
+  @override
+  String get sfPick => '选择文件（Excel/CSV）';
+
+  @override
+  String get sfTemplate => '填写用Excel';
+
+  @override
+  String sfRead(String name, int n, int units) {
+    return '$name：$n个商品，共$units件';
+  }
+
+  @override
+  String get sfNoHeader => '找不到“JANコード”和“数量”列。请在首行加上这些标题（可使用填写用Excel）。';
+
+  @override
+  String sfProblems(int n) {
+    return '$n行无法读取（不登记）';
+  }
+
+  @override
+  String sfPbNoJan(int row, String value) {
+    return '第$row行：无法读取JAN码（$value）';
+  }
+
+  @override
+  String sfPbBadQty(int row, String value) {
+    return '第$row行：无法读取数量（$value）';
+  }
+
+  @override
+  String sfUnknown(int n) {
+    return '$n个JAN不在商品库中，不登记。请先通过价格台账登记';
+  }
+
+  @override
+  String get sfOpenPriceBook => '在价格台账读取文件';
+
+  @override
+  String sfMerged(int n) {
+    return '同一JAN的$n行已合计';
+  }
+
+  @override
+  String sfApply(int n) {
+    return '登记到库存（$n个商品）';
+  }
+
+  @override
+  String get sfApplyShort => '登记';
+
+  @override
+  String sfConfirmQ(String warehouse) {
+    return '要登记到$warehouse的库存吗？';
+  }
+
+  @override
+  String sfConfirmAdd(int n, int units) {
+    return '将$n个商品、共$units件加到现有库存。';
+  }
+
+  @override
+  String sfConfirmSet(int n) {
+    return '将$n个商品的库存设为文件中的数量。差额记为修正。';
+  }
+
+  @override
+  String sfDone(int id, int n, int change) {
+    return '导入 #$id：已登记$n个商品（增减$change件）';
+  }
+
+  @override
+  String sfSkipped(int n) {
+    return '不在商品库中的$n个JAN未登记';
+  }
+
+  @override
+  String get sfHistory => '导入记录';
+
+  @override
+  String get sfBadFile => '无法读取此文件。请选择Excel（.xlsx）或CSV。';
+
+  @override
+  String get sfNoPermission => '登记库存需要“库存调整”权限。';
+
+  @override
+  String get miHistoryTitle => '导入记录（商品与库存）';
+
+  @override
+  String miStockFileSummary(int n, int change) {
+    return '库存文件：$n个商品，增减$change件';
   }
 }

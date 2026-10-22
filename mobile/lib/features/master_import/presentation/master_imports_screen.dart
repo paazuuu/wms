@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../product/application/product_providers.dart';
 import '../data/master_import_repository.dart';
+import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../domain/master_import.dart';
 import 'master_import_labels.dart';
 import 'master_import_screen.dart';
@@ -41,17 +42,22 @@ class MasterImportsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
-    final canManage = ref.watch(authControllerProvider).user?.hasPermission('product.manage') ?? false;
+    final canAdjust = ref.watch(authControllerProvider).user?.hasPermission('inventory.adjust') ?? false;
     final async = ref.watch(masterImportsProvider);
     final fmt = DateFormat('y/MM/dd HH:mm');
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.featMasterStockImport)),
-      floatingActionButton: canManage
+      appBar: AppBar(title: Text(l10n.miHistoryTitle)),
+      // New files: stock here (0144); products through 価格台帳. The 0138
+      // two-stage import is no longer started, only finished and looked at.
+      floatingActionButton: canAdjust
           ? FloatingActionButton.extended(
               key: const ValueKey('mi-new'),
-              onPressed: () => _open(context, ref),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockFileImportScreen()));
+                ref.invalidate(masterImportsProvider);
+              },
               icon: const Icon(Icons.upload_file_outlined),
-              label: Text(l10n.miPick),
+              label: Text(l10n.featStockFileImport),
             )
           : null,
       body: async.when(
@@ -65,12 +71,9 @@ class MasterImportsScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 96),
             children: [
-              Text(l10n.miIntro, style: muted),
-              const SizedBox(height: AppSpacing.md),
-              Text(l10n.miHistory, style: theme.textTheme.titleMedium),
-              const SizedBox(height: AppSpacing.sm),
+
               if (rows.isEmpty) Text(l10n.miHistoryEmpty, key: const ValueKey('mi-history-empty'), style: muted),
-              for (final m in rows)
+              for (final (m, stockFile) in [for (final m in rows) (m, m.source == 'stock_file')])
                 Card(
                   key: ValueKey('mi-row-${m.id}'),
                   child: Padding(
@@ -92,10 +95,14 @@ class MasterImportsScreen extends ConsumerWidget {
                         ].join(' · '),
                         style: muted,
                       ),
-                      if (m.status == MasterImportStatus.masterDone || m.status == MasterImportStatus.stockDone)
-                        Text(l10n.miMasterSummary(m.created, m.updated), style: theme.textTheme.bodySmall),
-                      if (m.status == MasterImportStatus.stockDone)
-                        Text(l10n.miStockDone(m.stockLines, m.stockAdded), style: theme.textTheme.bodySmall),
+                      if (stockFile)
+                        Text(l10n.miStockFileSummary(m.stockLines, m.stockAdded), style: theme.textTheme.bodySmall)
+                      else ...[
+                        if (m.status == MasterImportStatus.masterDone || m.status == MasterImportStatus.stockDone)
+                          Text(l10n.miMasterSummary(m.created, m.updated), style: theme.textTheme.bodySmall),
+                        if (m.status == MasterImportStatus.stockDone)
+                          Text(l10n.miStockDone(m.stockLines, m.stockAdded), style: theme.textTheme.bodySmall),
+                      ],
                       if (m.status == MasterImportStatus.stopped && m.issues.isNotEmpty)
                         Text(
                           '${l10n.miProblemsCount(m.issues.where((p) => p.blocking).length)}: '
@@ -118,7 +125,7 @@ class MasterImportsScreen extends ConsumerWidget {
                             icon: const Icon(Icons.inventory_outlined, size: 18),
                             label: Text(l10n.miOpenStock),
                           ),
-                        if (m.status == MasterImportStatus.stockDone)
+                        if (m.status == MasterImportStatus.stockDone && !stockFile)
                           TextButton(
                             key: ValueKey('mi-row-${m.id}-result'),
                             onPressed: () => _open(context, ref, resume: m.id),

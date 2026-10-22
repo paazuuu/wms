@@ -346,6 +346,30 @@ void main() {
     expect(saved, ['scan_確認用.xlsx']);
   });
 
+  testWidgets('the history shows a stock file as one, and starts the next one from a stock file (0144)', (tester) async {
+    final repo = FakeMasterImportRepository(imports: [
+      MasterImport.fromJson({
+        'id': 9,
+        'status': 'stock_done',
+        'source': 'stock_file',
+        'original_name': '在庫.csv',
+        'original_path': 'imports/9/original-a.csv',
+        'line_count': 3,
+        'stock_lines': 2,
+        'stock_added': 13,
+      }),
+    ]);
+    await pumpApp(tester, const MasterImportsScreen(), overrides: [
+      masterImportRepositoryProvider.overrideWithValue(repo),
+      _signedIn(const ['inventory.adjust']),
+    ]);
+    expect(find.text('取込履歴（商品・在庫）'), findsOneWidget);
+    expect(find.text('在庫ファイル: 2商品・増減 13個'), findsOneWidget);
+    expect(find.textContaining('商品マスタ:'), findsNothing);
+    expect(find.byKey(const ValueKey('mi-row-9-result')), findsNothing);
+    expect(find.descendant(of: find.byKey(const ValueKey('mi-new')), matching: find.text('ファイルから在庫登録')), findsOneWidget);
+  });
+
   testWidgets('a product stock is set by hand', (tester) async {
     final repo = FakeMasterImportRepository(onHandByJan: {_jan1: 5});
     await pumpApp(

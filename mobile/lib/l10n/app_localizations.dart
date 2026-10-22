@@ -15952,7 +15952,7 @@ abstract class AppLocalizations {
   /// No description provided for @pmNewFileDesc.
   ///
   /// In ja, this message translates to:
-  /// **'自社で作ったExcel・CSV・PDF・写真などの商品一覧から、まとめて登録します'**
+  /// **'Excel・CSV・PDF・写真などの商品一覧を価格台帳に読み込み、続けて登録する商品を選びます'**
   String get pmNewFileDesc;
 
   /// No description provided for @pmNewPriceBookDesc.
@@ -19477,6 +19477,186 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{n}件をExcelで保存しました'**
   String xlSaved(int n);
+
+  /// No description provided for @featStockFileImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから在庫登録'**
+  String get featStockFileImport;
+
+  /// No description provided for @featStockFileImportDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードと数量の表（Excel・CSV）から、選んだ倉庫の在庫を追加・修正'**
+  String get featStockFileImportDesc;
+
+  /// No description provided for @sfIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコードと数量の表から在庫を登録します（AIは使いません）。1行目に「JANコード」「数量」の見出しがあれば、ほかの列は無視します。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。'**
+  String get sfIntro;
+
+  /// No description provided for @sfWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get sfWarehouse;
+
+  /// No description provided for @sfModeAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の在庫に足す'**
+  String get sfModeAdd;
+
+  /// No description provided for @sfModeSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫をこの数にする'**
+  String get sfModeSet;
+
+  /// No description provided for @sfModeAddHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷した分などを、今ある数に足します。'**
+  String get sfModeAddHint;
+
+  /// No description provided for @sfModeSetHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚卸の結果などで、在庫をファイルの数に合わせます。差は修正として記録されます。'**
+  String get sfModeSetHint;
+
+  /// No description provided for @sfPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選ぶ（Excel・CSV）'**
+  String get sfPick;
+
+  /// No description provided for @sfTemplate.
+  ///
+  /// In ja, this message translates to:
+  /// **'記入用のExcel'**
+  String get sfTemplate;
+
+  /// No description provided for @sfRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}: {n}商品・合計{units}個'**
+  String sfRead(String name, int n, int units);
+
+  /// No description provided for @sfNoHeader.
+  ///
+  /// In ja, this message translates to:
+  /// **'「JANコード」と「数量」の列が見つかりません。上の行にこの見出しを入れてください（記入用のExcelを使うと確実です）。'**
+  String get sfNoHeader;
+
+  /// No description provided for @sfProblems.
+  ///
+  /// In ja, this message translates to:
+  /// **'読めなかった行 {n}件（在庫には入れません）'**
+  String sfProblems(int n);
+
+  /// No description provided for @sfPbNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'{row}行目: JANコードが読めません（{value}）'**
+  String sfPbNoJan(int row, String value);
+
+  /// No description provided for @sfPbBadQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'{row}行目: 数量が読めません（{value}）'**
+  String sfPbBadQty(int row, String value);
+
+  /// No description provided for @sfUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにないJAN {n}件 — 在庫には入れません。先に価格台帳から登録してください'**
+  String sfUnknown(int n);
+
+  /// No description provided for @sfOpenPriceBook.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳でファイルを読み込む'**
+  String get sfOpenPriceBook;
+
+  /// No description provided for @sfMerged.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じJANの{n}行を合計'**
+  String sfMerged(int n);
+
+  /// No description provided for @sfApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に反映（{n}商品）'**
+  String sfApply(int n);
+
+  /// No description provided for @sfApplyShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'反映する'**
+  String get sfApplyShort;
+
+  /// No description provided for @sfConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{warehouse}の在庫に反映しますか？'**
+  String sfConfirmQ(String warehouse);
+
+  /// No description provided for @sfConfirmAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}商品・合計{units}個を今の在庫に足します。'**
+  String sfConfirmAdd(int n, int units);
+
+  /// No description provided for @sfConfirmSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}商品の在庫を、ファイルの数にします。差は修正として記録されます。'**
+  String sfConfirmSet(int n);
+
+  /// No description provided for @sfDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id}: {n}商品を反映しました（増減 {change}個）'**
+  String sfDone(int id, int n, int change);
+
+  /// No description provided for @sfSkipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにないJAN {n}件は入れていません'**
+  String sfSkipped(int n);
+
+  /// No description provided for @sfHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込履歴'**
+  String get sfHistory;
+
+  /// No description provided for @sfBadFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'このファイルは読めません。Excel（.xlsx）かCSVを選んでください。'**
+  String get sfBadFile;
+
+  /// No description provided for @sfNoPermission.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を反映するには「在庫調整」の権限が必要です。'**
+  String get sfNoPermission;
+
+  /// No description provided for @miHistoryTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込履歴（商品・在庫）'**
+  String get miHistoryTitle;
+
+  /// No description provided for @miStockFileSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫ファイル: {n}商品・増減 {change}個'**
+  String miStockFileSummary(int n, int change);
 }
 
 class _AppLocalizationsDelegate
