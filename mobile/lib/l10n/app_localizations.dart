@@ -19903,6 +19903,174 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この行を外す'**
   String get sfRemoveLine;
+
+  /// No description provided for @ivOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果を見る'**
+  String get ivOpen;
+
+  /// No description provided for @ivWindow.
+  ///
+  /// In ja, this message translates to:
+  /// **'別ウィンドウで開く'**
+  String get ivWindow;
+
+  /// No description provided for @ivTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id}'**
+  String ivTitle(int id);
+
+  /// No description provided for @ivOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイル'**
+  String get ivOriginal;
+
+  /// No description provided for @ivRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った内容と結果'**
+  String get ivRead;
+
+  /// No description provided for @ivNoOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取込には元のファイルが残っていません'**
+  String get ivNoOriginal;
+
+  /// No description provided for @ivSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルを保存'**
+  String get ivSave;
+
+  /// No description provided for @ivCannotShow.
+  ///
+  /// In ja, this message translates to:
+  /// **'この形式はここでは表示できません。「元のファイルを保存」で開いてください。'**
+  String get ivCannotShow;
+
+  /// No description provided for @ivFateIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ {name}: 在庫 {before} → {after}（{change}）'**
+  String ivFateIn(String name, String before, String after, String change);
+
+  /// No description provided for @ivFateMerged.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ 同じJANの上の行と合計して反映'**
+  String get ivFateMerged;
+
+  /// No description provided for @ivFateNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ 入れていません: JANコードが読めません'**
+  String get ivFateNoJan;
+
+  /// No description provided for @ivFateBadQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ 入れていません: 数量が読めません'**
+  String get ivFateBadQty;
+
+  /// No description provided for @ivFateNotInLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ 入れていません: 商品ライブラリーにない商品'**
+  String get ivFateNotInLibrary;
+
+  /// No description provided for @ivFateRemoved.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ 入れていません: 反映前に外しました'**
+  String get ivFateRemoved;
+
+  /// No description provided for @ivByAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取り'**
+  String get ivByAi;
+
+  /// No description provided for @ivBySheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'表（Excel・CSV）から読み取り'**
+  String get ivBySheet;
+
+  /// No description provided for @ivByOld.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った内容は保存されていない取込です（反映した行だけ表示）'**
+  String get ivByOld;
+
+  /// No description provided for @ivRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行'**
+  String ivRows(int n);
+
+  /// No description provided for @ivIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'反映 {n}'**
+  String ivIn(int n);
+
+  /// No description provided for @ivOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'入れていない {n}'**
+  String ivOut(int n);
+
+  /// No description provided for @ivDoubts.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認 {n}'**
+  String ivDoubts(int n);
+
+  /// No description provided for @ivAsRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル: JAN {jan} ・「{name}」・ 数量 {qty}'**
+  String ivAsRead(String jan, String name, String qty);
+
+  /// No description provided for @ivEdited.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量はファイルの {file} から {applied} に直して反映'**
+  String ivEdited(String file, String applied);
+
+  /// No description provided for @sfNotInLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにない商品 {n}件'**
+  String sfNotInLibrary(int n);
+
+  /// No description provided for @sfRegisterNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'これらも商品ライブラリーに登録して在庫に入れる（{n}件）'**
+  String sfRegisterNew(int n);
+
+  /// No description provided for @sfRegisterNewHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳にあるJANは台帳の商品名で、ないものはファイルの商品名で、価格台帳と商品ライブラリーに登録します'**
+  String get sfRegisterNewHint;
+
+  /// No description provided for @sfCannotRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名がないため登録できない行 {n}件（在庫には入れません）'**
+  String sfCannotRegister(int n);
+
+  /// No description provided for @sfConfirmRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'うち{n}件は、新しく商品ライブラリーに登録してから在庫に入れます。'**
+  String sfConfirmRegister(int n);
 }
 
 class _AppLocalizationsDelegate

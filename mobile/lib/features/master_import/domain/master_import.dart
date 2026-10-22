@@ -534,6 +534,10 @@ class MasterImport extends Equatable {
     this.createdAt,
     this.createdByName,
     this.lines = const [],
+    this.readLines = const [],
+    this.readBy,
+    this.originalType,
+    this.skippedJans = const {},
   });
 
   final int id;
@@ -551,6 +555,17 @@ class MasterImport extends Equatable {
   final DateTime? createdAt;
   final String? createdByName;
   final List<MasterImportLine> lines;
+
+  /// What the file was read as (0146): each row with the file's own JAN,
+  /// name and quantity and the reader's flags. Empty for imports before it.
+  final List<Map<String, dynamic>> readLines;
+
+  /// `ai` or `sheet`.
+  final String? readBy;
+  final String? originalType;
+
+  /// JANs a stock file had that 商品ライブラリー did not (0144's unknown_jan).
+  final Set<String> skippedJans;
 
   String? get originalName => files.where((f) => f.kind == 'original').firstOrNull?.name;
 
@@ -582,9 +597,18 @@ class MasterImport extends Equatable {
         for (final l in (j['lines'] as List? ?? const []).whereType<Map>())
           MasterImportLine.fromJson(l.cast<String, dynamic>()),
       ],
+      readLines: [for (final r in (j['read_lines'] as List? ?? const []).whereType<Map>()) r.cast<String, dynamic>()],
+      readBy: j['read_by']?.toString(),
+      originalType: j['original_type']?.toString(),
+      skippedJans: {
+        for (final p in (j['issues'] as List? ?? const []).whereType<Map>())
+          if (p['code'] == 'unknown_jan')
+            for (final l in (p['lines'] as List? ?? const []).whereType<Map>()) '${l['jan_code'] ?? ''}',
+      },
     );
   }
 
   @override
-  List<Object?> get props => [id, status, files, lineCount, issues, created, updated, stockLines, stockAdded, lines];
+  List<Object?> get props =>
+      [id, status, files, lineCount, issues, created, updated, stockLines, stockAdded, lines, readLines, readBy];
 }

@@ -11,6 +11,7 @@ import '../../features/home/presentation/coming_soon_screen.dart';
 import '../../features/home/presentation/dashboard_overview_screen.dart';
 import '../../features/search/presentation/global_search_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/stock_import/presentation/import_view_screen.dart';
 
 /// Route paths that are not catalog features.
 class AppRoutes {
@@ -93,6 +94,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (_, __) => const LoginScreen(),
+      ),
+      // A file beside what was read from it (0146), in a window of its own:
+      // no sidebar or tabs, only the two to compare.
+      GoRoute(
+        path: '/import-view/:id',
+        builder: (_, state) => ImportViewScreen(importId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0),
       ),
 
       // Everything below renders inside the persistent shell (sidebar + top

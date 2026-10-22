@@ -11036,4 +11036,112 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfRemoveLine => '排除此行';
+
+  @override
+  String get ivOpen => '查看读取结果';
+
+  @override
+  String get ivWindow => '在新窗口打开';
+
+  @override
+  String ivTitle(int id) {
+    return '导入 #$id';
+  }
+
+  @override
+  String get ivOriginal => '原始文件';
+
+  @override
+  String get ivRead => '读取内容与结果';
+
+  @override
+  String get ivNoOriginal => '此导入未保存原始文件';
+
+  @override
+  String get ivSave => '保存原始文件';
+
+  @override
+  String get ivCannotShow => '此格式无法在此显示。请“保存原始文件”后打开。';
+
+  @override
+  String ivFateIn(String name, String before, String after, String change) {
+    return '→ $name：库存 $before → $after（$change）';
+  }
+
+  @override
+  String get ivFateMerged => '→ 与上方同一JAN的行合计后登记';
+
+  @override
+  String get ivFateNoJan => '→ 未登记：无法读取JAN码';
+
+  @override
+  String get ivFateBadQty => '→ 未登记：无法读取数量';
+
+  @override
+  String get ivFateNotInLibrary => '→ 未登记：不在商品库中';
+
+  @override
+  String get ivFateRemoved => '→ 未登记：登记前已排除';
+
+  @override
+  String get ivByAi => '由AI读取';
+
+  @override
+  String get ivBySheet => '从表格（Excel/CSV）读取';
+
+  @override
+  String get ivByOld => '此导入未保存读取内容（仅显示已登记的行）';
+
+  @override
+  String ivRows(int n) {
+    return '$n行';
+  }
+
+  @override
+  String ivIn(int n) {
+    return '已登记 $n';
+  }
+
+  @override
+  String ivOut(int n) {
+    return '未登记 $n';
+  }
+
+  @override
+  String ivDoubts(int n) {
+    return '需确认 $n';
+  }
+
+  @override
+  String ivAsRead(String jan, String name, String qty) {
+    return '文件：JAN $jan ・「$name」・ 数量 $qty';
+  }
+
+  @override
+  String ivEdited(String file, String applied) {
+    return '数量由文件的$file修改为$applied后登记';
+  }
+
+  @override
+  String sfNotInLibrary(int n) {
+    return '$n个商品不在商品库中';
+  }
+
+  @override
+  String sfRegisterNew(int n) {
+    return '也将这些登记到商品库并登记库存（$n个）';
+  }
+
+  @override
+  String get sfRegisterNewHint => '价格台账中有的JAN用台账名称，没有的用文件中的商品名，登记到价格台账和商品库';
+
+  @override
+  String sfCannotRegister(int n) {
+    return '$n行没有商品名，无法登记（不登记库存）';
+  }
+
+  @override
+  String sfConfirmRegister(int n) {
+    return '其中$n个将先登记为商品库的新商品，再登记库存。';
+  }
 }

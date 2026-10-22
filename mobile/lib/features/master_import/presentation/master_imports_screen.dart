@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../product/application/product_providers.dart';
 import '../data/master_import_repository.dart';
+import '../../stock_import/presentation/import_view_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../domain/master_import.dart';
 import 'master_import_labels.dart';
@@ -111,6 +112,9 @@ class MasterImportsScreen extends ConsumerWidget {
                         ),
                       const SizedBox(height: AppSpacing.xs),
                       Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+                        // The file beside what was read from it (0146).
+                        if (m.files.any((f) => f.kind == 'original') || m.status == MasterImportStatus.stockDone)
+                          ImportViewButtons(importId: m.id),
                         for (final f in m.files)
                           OutlinedButton.icon(
                             key: ValueKey('mi-row-${m.id}-${f.kind}'),

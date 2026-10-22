@@ -20,6 +20,7 @@ import '../../product/application/product_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../data/stock_import_repository.dart';
+import 'import_view_screen.dart';
 import '../domain/stock_file.dart';
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
@@ -76,6 +77,13 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   /// The AI is reading the file (it can take a minute for a long PDF).
   bool _aiReading = false;
+
+  /// The kept copy import-plan made of a file the AI read (0132).
+  int? _documentId;
+
+  /// Products the file has that 商品ライブラリー does not: registered
+  /// (through 価格台帳) before the stock goes in, so the whole file lands.
+  bool _registerNew = true;
   StockFileResult? _done;
   String? _error;
 
@@ -100,6 +108,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _bytes = f.bytes;
       _sheet = null;
       _known = const {};
+      _documentId = null;
     });
     StockSheet? sheet;
     if (readsLocally(f.name)) {
@@ -129,8 +138,18 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             });
             return;
           }
+          _documentId = data.documentId;
           sheet = stockSheetFromRead([
-            for (final l in data.lines) (l.lineNo, l.janCode, l.supplierName, l.quantity, l.flags.isNotEmpty),
+            for (final l in data.lines)
+              ReadRow(
+                lineNo: l.lineNo,
+                jan: l.janCode,
+                name: l.supplierName,
+                quantity: l.quantity,
+                maker: l.maker,
+                code: l.productCode,
+                flags: l.flags,
+              ),
           ]);
         case ApiFailure(:final message):
           setState(() {
@@ -190,31 +209,50 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     });
   }
 
-  /// The JANs 価格台帳 has, into 商品ライブラリー under the names they have
-  /// there; then their stock can be added like the others.
-  Future<void> _registerFromBook() async {
+  /// The lines whose product 商品ライブラリー lacks but can be made: 価格台帳
+  /// has the JAN, or the file names the product.
+  List<StockFileLine> get _registrable =>
+      [for (final l in _unknown) if (_book.containsKey(l.janCode) || (l.name ?? '').trim().isNotEmpty) l];
+
+  /// The file's products 商品ライブラリー lacks, registered through 価格台帳:
+  /// those it has go in under its names; the rest are read into it first
+  /// (JAN, name, maker, 品番 as the file has them), then registered. Their
+  /// stock then goes in with the others. False when it failed (and said so).
+  Future<bool> _registerUnknown() async {
     final l10n = AppLocalizations.of(context);
-    final ids = [for (final l in _unknown) if (_book[l.janCode] case (final id, _)) id];
-    if (ids.isEmpty) return;
-    setState(() => _busy = true);
-    final r = await ref.read(priceBookRepositoryProvider).toProducts(ids);
-    if (!mounted) return;
+    final book = ref.read(priceBookRepositoryProvider);
+    final todo = _registrable;
+    final ids = [for (final l in todo) if (_book[l.janCode] case (final id, _)) id];
+    final fresh = [for (final l in todo) if (!_book.containsKey(l.janCode)) l];
+    if (fresh.isNotEmpty) {
+      final r = await book.import([for (final l in fresh) l.toPriceBookLine()], sourceFile: _fileName);
+      if (!mounted) return false;
+      switch (r) {
+        case ApiSuccess(:final data):
+          ids.addAll(data.ids);
+        case ApiFailure(:final message):
+          setState(() => _error = humanizeApiErrorMessage(l10n, message));
+          return false;
+      }
+    }
+    if (ids.isEmpty) return true;
+    final r = await book.toProducts(ids);
+    if (!mounted) return false;
     switch (r) {
-      case ApiSuccess(:final data):
+      case ApiSuccess():
         ref.invalidate(productListProvider);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.sfRegistered(data.created + data.linked))));
-        await _lookup();
+        ref.invalidate(priceBookListProvider);
+        return true;
       case ApiFailure(:final message):
-        setState(() {
-          _busy = false;
-          _error = humanizeApiErrorMessage(l10n, message);
-        });
+        setState(() => _error = humanizeApiErrorMessage(l10n, message));
+        return false;
     }
   }
 
-  Future<void> _apply(Warehouse wh) async {
+  Future<void> _apply(Warehouse wh, {required bool register}) async {
     final l10n = AppLocalizations.of(context);
-    final lines = _ready;
+    final toRegister = register ? _registrable : const <StockFileLine>[];
+    final lines = [..._ready, ...toRegister];
     final units = lines.fold<int>(0, (s, l) => s + l.quantity);
     final before = lines.fold<int>(0, (s, l) => s + (_onHand[l.janCode] ?? 0));
     final after = _mode == StockFileMode.add ? before + units : units;
@@ -224,6 +262,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         title: Text(l10n.sfConfirmQ(wh.name)),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(_mode == StockFileMode.add ? l10n.sfConfirmAdd(lines.length, units) : l10n.sfConfirmSet(lines.length)),
+          if (toRegister.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.sfConfirmRegister(toRegister.length), key: const ValueKey('sf-confirm-register')),
+          ],
           const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.sfConfirmTotals(before, after),
@@ -242,8 +284,19 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _busy = true;
       _error = null;
     });
+    var send = lines;
+    if (toRegister.isNotEmpty) {
+      if (!await _registerUnknown()) {
+        if (mounted) setState(() => _busy = false);
+        return;
+      }
+      await _lookup();
+      if (!mounted) return;
+      setState(() => _busy = true);
+      send = _ready;
+    }
     final repo = ref.read(stockImportRepositoryProvider);
-    final r = await repo.apply(wh.id, _mode, lines, fileName: _fileName, fileType: mimeTypeFor(_fileName ?? ''));
+    final r = await repo.apply(wh.id, _mode, send, fileName: _fileName, fileType: mimeTypeFor(_fileName ?? ''));
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
@@ -251,6 +304,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         // the stock, it only leaves the history without the file.
         if (_bytes != null && _fileName != null) {
           await repo.keepFile(data.importId, _fileName!, _bytes!, mimeTypeFor(_fileName!));
+        }
+        // And what the file was read as, to set beside it later (0146).
+        if (_sheet case final sh?) {
+          await repo.note(data.importId, sh.read, byAi: sh.byAi, documentId: _documentId);
         }
         if (!mounted) return;
         ref.invalidate(productListProvider);
@@ -304,8 +361,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final sheet = _sheet;
     final ready = _ready;
     final unknown = _unknown;
-    final inBook = [for (final l in unknown) if (_book.containsKey(l.janCode)) l];
     final canManage = ref.watch(authControllerProvider).user?.hasPermission('product.manage') ?? false;
+    final registrable = _registrable;
+    final willRegister = canManage && _registerNew ? registrable.length : 0;
     final done = _done;
 
     return Scaffold(
@@ -404,10 +462,20 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               key: const ValueKey('sf-done'),
               color: theme.colorScheme.secondaryContainer,
               margin: const EdgeInsets.only(top: AppSpacing.md),
-              child: ListTile(
-                leading: const Icon(Icons.check_circle_outline),
-                title: Text(l10n.sfDone(done.importId, done.lines, done.change)),
-                subtitle: done.skipped.isEmpty ? null : Text(l10n.sfSkipped(done.skipped.length)),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  ListTile(
+                    leading: const Icon(Icons.check_circle_outline),
+                    title: Text(l10n.sfDone(done.importId, done.lines, done.change)),
+                    subtitle: done.skipped.isEmpty ? null : Text(l10n.sfSkipped(done.skipped.length)),
+                  ),
+                  // What the file said and what was made of it, side by side.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    child: ImportViewButtons(importId: done.importId),
+                  ),
+                ]),
               ),
             ),
           if (sheet != null && !sheet.header)
@@ -458,24 +526,31 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(l10n.sfUnknown(unknown.length), style: theme.textTheme.labelLarge),
-                    Text(unknown.take(10).map((l) => l.name == null ? l.janCode : '${l.janCode} ${l.name}').join('、'),
+                    Text(l10n.sfNotInLibrary(unknown.length), style: theme.textTheme.labelLarge),
+                    Text(
+                        unknown
+                            .take(10)
+                            .map((l) => [l.janCode, _book[l.janCode]?.$2 ?? l.name ?? ''].join(' ').trim())
+                            .join('、'),
                         style: theme.textTheme.bodySmall),
                     const SizedBox(height: AppSpacing.xs),
-                    // Those 価格台帳 already has: into the library under the
-                    // names they have there, then their stock adds up too.
-                    if (inBook.isNotEmpty) ...[
-                      Text(l10n.sfInPriceBook(inBook.length), style: theme.textTheme.bodySmall),
-                      if (canManage)
-                        FilledButton.tonalIcon(
-                          key: const ValueKey('sf-register-book'),
-                          onPressed: _busy ? null : _registerFromBook,
-                          icon: const Icon(Icons.inventory_2_outlined, size: 18),
-                          label: Text(l10n.sfRegisterFromBook(inBook.length)),
-                        )
-                      else
-                        Text(l10n.sfNeedManage, style: theme.textTheme.bodySmall),
-                    ],
+                    // The whole file lands: products the library lacks are
+                    // registered through 価格台帳 (under its name when it has
+                    // the JAN, else the file's), then their stock goes in.
+                    if (canManage && registrable.isNotEmpty)
+                      CheckboxListTile(
+                        key: const ValueKey('sf-register-new'),
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: _registerNew,
+                        onChanged: _busy ? null : (v) => setState(() => _registerNew = v ?? false),
+                        title: Text(l10n.sfRegisterNew(registrable.length)),
+                        subtitle: Text(l10n.sfRegisterNewHint),
+                      )
+                    else if (!canManage)
+                      Text(l10n.sfNeedManage, style: theme.textTheme.bodySmall),
+                    if (unknown.length > registrable.length)
+                      Text(l10n.sfCannotRegister(unknown.length - registrable.length), style: theme.textTheme.bodySmall),
                     TextButton.icon(
                       key: const ValueKey('sf-price-book'),
                       onPressed: () async {
@@ -524,9 +599,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             const SizedBox(height: AppSpacing.md),
             FilledButton.icon(
               key: const ValueKey('sf-apply'),
-              onPressed: !canAdjust || _busy || ready.isEmpty || wh == null ? null : () => _apply(wh),
+              onPressed: !canAdjust || _busy || ready.length + willRegister == 0 || wh == null
+                  ? null
+                  : () => _apply(wh, register: willRegister > 0),
               icon: const Icon(Icons.inventory_outlined),
-              label: Text(l10n.sfApply(ready.length)),
+              label: Text(l10n.sfApply(ready.length + willRegister)),
             ),
             if (!canAdjust) Text(l10n.sfNoPermission, style: muted),
           ],

@@ -11326,4 +11326,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sfRemoveLine => 'Leave this line out';
+
+  @override
+  String get ivOpen => 'See what was read';
+
+  @override
+  String get ivWindow => 'Open in a new window';
+
+  @override
+  String ivTitle(int id) {
+    return 'Import #$id';
+  }
+
+  @override
+  String get ivOriginal => 'The original';
+
+  @override
+  String get ivRead => 'What was read, and what became of it';
+
+  @override
+  String get ivNoOriginal => 'This import has no original file kept';
+
+  @override
+  String get ivSave => 'Save the original';
+
+  @override
+  String get ivCannotShow =>
+      'This kind of file cannot be shown here. Save the original to open it.';
+
+  @override
+  String ivFateIn(String name, String before, String after, String change) {
+    return '→ $name: stock $before → $after ($change)';
+  }
+
+  @override
+  String get ivFateMerged =>
+      '→ Added up with the row above that has the same JAN';
+
+  @override
+  String get ivFateNoJan => '→ Not put in: no JAN code could be read';
+
+  @override
+  String get ivFateBadQty => '→ Not put in: no quantity could be read';
+
+  @override
+  String get ivFateNotInLibrary => '→ Not put in: not in the product library';
+
+  @override
+  String get ivFateRemoved => '→ Not put in: left out before the stock went in';
+
+  @override
+  String get ivByAi => 'Read by the AI';
+
+  @override
+  String get ivBySheet => 'Read from the sheet (Excel, CSV)';
+
+  @override
+  String get ivByOld =>
+      'The reading of this import was not kept (only the lines put in are shown)';
+
+  @override
+  String ivRows(int n) {
+    return '$n rows';
+  }
+
+  @override
+  String ivIn(int n) {
+    return 'Put in $n';
+  }
+
+  @override
+  String ivOut(int n) {
+    return 'Not put in $n';
+  }
+
+  @override
+  String ivDoubts(int n) {
+    return 'To check $n';
+  }
+
+  @override
+  String ivAsRead(String jan, String name, String qty) {
+    return 'In the file: JAN $jan · “$name” · quantity $qty';
+  }
+
+  @override
+  String ivEdited(String file, String applied) {
+    return 'Quantity corrected from the file\'s $file to $applied';
+  }
+
+  @override
+  String sfNotInLibrary(int n) {
+    return '$n products not in the product library';
+  }
+
+  @override
+  String sfRegisterNew(int n) {
+    return 'Register these in the product library too, and put their stock in ($n)';
+  }
+
+  @override
+  String get sfRegisterNewHint =>
+      'A JAN in the price book is registered under its name there; the others under the file\'s name, in the price book and the product library';
+
+  @override
+  String sfCannotRegister(int n) {
+    return '$n lines have no product name and cannot be registered (left out)';
+  }
+
+  @override
+  String sfConfirmRegister(int n) {
+    return '$n of them are first registered as new products in the product library.';
+  }
 }

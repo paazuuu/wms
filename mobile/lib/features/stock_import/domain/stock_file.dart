@@ -28,12 +28,19 @@ class StockFileLine extends Equatable {
     this.name,
     this.merged = 1,
     this.doubtful = false,
+    this.maker,
+    this.code,
   });
 
   final int lineNo;
   final String janCode;
   final int quantity;
   final String? name;
+
+  /// The file's maker and 品番 for it, when it had them: what a product made
+  /// from this line is registered with.
+  final String? maker;
+  final String? code;
 
   /// How many of the file's rows had this JAN (their quantities summed).
   final int merged;
@@ -49,12 +56,22 @@ class StockFileLine extends Equatable {
         name: name,
         merged: merged,
         doubtful: doubtful,
+        maker: maker,
+        code: code,
       );
+
+  /// The line as 価格台帳 takes it, to register its product.
+  Map<String, dynamic> toPriceBookLine() => {
+        'jan_code': janCode,
+        'product_name': name,
+        if (maker != null) 'maker': maker,
+        if (code != null) 'product_code': code,
+      };
 
   Map<String, dynamic> toJson() => {'line_no': lineNo, 'jan_code': janCode, 'quantity': quantity};
 
   @override
-  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful];
+  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful, maker, code];
 }
 
 /// A row the file had that cannot be taken: its row number and why.
@@ -71,13 +88,69 @@ class StockFileProblem extends Equatable {
   List<Object?> get props => [lineNo, code, value];
 }
 
+/// One row of the file as it was read, before anything was made of it: its
+/// JAN, name and quantity as the file has them, and what the reader was
+/// unsure of. Kept with the import (0146) so it can be set beside the
+/// original.
+class ReadRow extends Equatable {
+  const ReadRow({
+    required this.lineNo,
+    this.jan = '',
+    this.name = '',
+    this.quantity = '',
+    this.maker = '',
+    this.code = '',
+    this.flags = const [],
+  });
+
+  final int lineNo;
+  final String jan;
+  final String name;
+  final String quantity;
+  final String maker;
+  final String code;
+  final List<String> flags;
+
+  Map<String, dynamic> toJson() => {
+        'line_no': lineNo,
+        'jan': jan,
+        'name': name,
+        'quantity': quantity,
+        if (maker.isNotEmpty) 'maker': maker,
+        if (code.isNotEmpty) 'code': code,
+        if (flags.isNotEmpty) 'flags': flags,
+      };
+
+  factory ReadRow.fromJson(Map<String, dynamic> j) => ReadRow(
+        lineNo: (j['line_no'] as num?)?.toInt() ?? 0,
+        jan: '${j['jan'] ?? ''}',
+        name: '${j['name'] ?? ''}',
+        quantity: '${j['quantity'] ?? ''}',
+        maker: '${j['maker'] ?? ''}',
+        code: '${j['code'] ?? ''}',
+        flags: [for (final f in (j['flags'] as List? ?? const [])) '$f'],
+      );
+
+  @override
+  List<Object?> get props => [lineNo, jan, name, quantity, maker, code, flags];
+}
+
 /// What a stock file holds: its lines, one per JAN, and the rows that could
 /// not be read. [header] is false when no JAN and quantity columns were
 /// found at all.
 class StockSheet extends Equatable {
-  const StockSheet({this.lines = const [], this.problems = const [], this.header = true, this.byAi = false});
+  const StockSheet({
+    this.lines = const [],
+    this.problems = const [],
+    this.header = true,
+    this.byAi = false,
+    this.read = const [],
+  });
 
   final List<StockFileLine> lines;
+
+  /// Every row as it was read, lines and problems alike.
+  final List<ReadRow> read;
   final List<StockFileProblem> problems;
   final bool header;
 
@@ -86,10 +159,10 @@ class StockSheet extends Equatable {
   final bool byAi;
 
   StockSheet copyWith({List<StockFileLine>? lines}) =>
-      StockSheet(lines: lines ?? this.lines, problems: problems, header: header, byAi: byAi);
+      StockSheet(lines: lines ?? this.lines, problems: problems, header: header, byAi: byAi, read: read);
 
   @override
-  List<Object?> get props => [lines, problems, header, byAi];
+  List<Object?> get props => [lines, problems, header, byAi, read];
 }
 
 String _key(String s) => s.toLowerCase().replaceAll(RegExp(r'[\s　_\-()（）・/]'), '');
@@ -97,6 +170,8 @@ String _key(String s) => s.toLowerCase().replaceAll(RegExp(r'[\s　_\-()（）�
 const _janNames = {'jan', 'janコード', 'jancode', 'バーコード', 'barcode', 'ean', 'ean13', 'janno'};
 const _qtyNames = {'数量', '在庫数', '在庫', '個数', '入庫数', '実在庫', '実在庫数', 'qty', 'quantity', 'stock', 'onhand'};
 const _nameNames = {'商品名', '品名', '名称', 'name', 'productname', 'itemname'};
+const _makerNames = {'メーカー', 'メーカー名', 'maker', 'brand', 'manufacturer'};
+const _codeNames = {'品番', '型番', '商品コード', 'sku', 'itemcode', 'productcode'};
 
 /// Reads the rows of a stock sheet: the first row (of the top ten) naming a
 /// JAN column and a quantity column is the header. A JAN is any 8–14 digits
@@ -104,7 +179,7 @@ const _nameNames = {'商品名', '品名', '名称', 'name', 'productname', 'ite
 /// whole number of 0 or more. The same JAN twice is one line, its
 /// quantities summed.
 StockSheet parseStockRows(List<List<String>> rows) {
-  var head = -1, jan = -1, qty = -1, name = -1;
+  var head = -1, jan = -1, qty = -1, name = -1, makerCol = -1, codeCol = -1;
   for (var r = 0; r < rows.length && r < 10; r++) {
     final keys = [for (final c in rows[r]) _key(c)];
     final j = keys.indexWhere(_janNames.contains);
@@ -114,6 +189,8 @@ StockSheet parseStockRows(List<List<String>> rows) {
       jan = j;
       qty = q;
       name = keys.indexWhere(_nameNames.contains);
+      makerCol = keys.indexWhere(_makerNames.contains);
+      codeCol = keys.indexWhere(_codeNames.contains);
       break;
     }
   }
@@ -121,11 +198,21 @@ StockSheet parseStockRows(List<List<String>> rows) {
 
   final byJan = <String, StockFileLine>{};
   final problems = <StockFileProblem>[];
+  final read = <ReadRow>[];
   String at(List<String> row, int c) => c >= 0 && c < row.length ? row[c].trim() : '';
+  String? opt(List<String> row, int c) => at(row, c).isEmpty ? null : at(row, c);
   for (var r = head + 1; r < rows.length; r++) {
     final row = rows[r];
     if (row.every((c) => c.trim().isEmpty)) continue;
     final no = r + 1;
+    read.add(ReadRow(
+      lineNo: no,
+      jan: at(row, jan),
+      name: at(row, name),
+      quantity: at(row, qty),
+      maker: at(row, makerCol),
+      code: at(row, codeCol),
+    ));
     final rawJan = at(row, jan);
     final code = normalizeJan(rawJan);
     if (code == null || code.length < 8 || code.length > 14) {
@@ -143,11 +230,13 @@ StockSheet parseStockRows(List<List<String>> rows) {
       lineNo: prev?.lineNo ?? no,
       janCode: code,
       quantity: (prev?.quantity ?? 0) + q,
-      name: prev?.name ?? (at(row, name).isEmpty ? null : at(row, name)),
+      name: prev?.name ?? opt(row, name),
       merged: (prev?.merged ?? 0) + 1,
+      maker: prev?.maker ?? opt(row, makerCol),
+      code: prev?.code ?? opt(row, codeCol),
     );
   }
-  return StockSheet(lines: byJan.values.toList(), problems: problems);
+  return StockSheet(lines: byJan.values.toList(), problems: problems, read: read);
 }
 
 /// Whether the app reads [fileName] itself (a sheet or CSV); anything else
@@ -157,23 +246,27 @@ bool readsLocally(String fileName) {
   return ['.xlsx', '.xlsm', '.csv', '.tsv', '.txt'].any(lower.endsWith);
 }
 
+/// Flags that say something is missing, not that the reading is in doubt.
+const _noDoubt = {'no_maker'};
+
 /// Lines the AI read (import-plan, nothing booked) as a stock sheet: a JAN
 /// and a quantity each, the same JAN summed, and the ones it could not be
-/// sure of marked. [rows] is (row number, JAN, name, quantity, doubtful).
-StockSheet stockSheetFromRead(List<(int, String, String, String, bool)> rows) {
+/// sure of (any flag on the row) marked.
+StockSheet stockSheetFromRead(List<ReadRow> rows) {
   final byJan = <String, StockFileLine>{};
   final problems = <StockFileProblem>[];
-  for (final (no, rawJan, name, rawQty, doubtful) in rows) {
-    final code = normalizeJan(rawJan);
+  for (final row in rows) {
+    final no = row.lineNo;
+    final code = normalizeJan(row.jan);
     if (code == null || code.length < 8 || code.length > 14) {
-      problems.add(StockFileProblem(no, 'no_jan', value: rawJan.isEmpty ? name : rawJan));
+      problems.add(StockFileProblem(no, 'no_jan', value: row.jan.isEmpty ? row.name : row.jan));
       continue;
     }
-    final t = rawQty.replaceAll(RegExp(r'[,，\s]'), '');
+    final t = row.quantity.replaceAll(RegExp(r'[,，\s]'), '');
     final d = double.tryParse(t);
     final q = int.tryParse(t) ?? (d != null && d == d.roundToDouble() ? d.toInt() : null);
     if (q == null || q < 0) {
-      problems.add(StockFileProblem(no, 'bad_quantity', value: rawQty.isEmpty ? '—' : rawQty));
+      problems.add(StockFileProblem(no, 'bad_quantity', value: row.quantity.isEmpty ? '—' : row.quantity));
       continue;
     }
     final prev = byJan[code];
@@ -181,12 +274,14 @@ StockSheet stockSheetFromRead(List<(int, String, String, String, bool)> rows) {
       lineNo: prev?.lineNo ?? no,
       janCode: code,
       quantity: (prev?.quantity ?? 0) + q,
-      name: prev?.name ?? (name.isEmpty ? null : name),
+      name: prev?.name ?? (row.name.isEmpty ? null : row.name),
       merged: (prev?.merged ?? 0) + 1,
-      doubtful: (prev?.doubtful ?? false) || doubtful,
+      doubtful: (prev?.doubtful ?? false) || row.flags.any((f) => !_noDoubt.contains(f.split(':').first)),
+      maker: prev?.maker ?? (row.maker.isEmpty ? null : row.maker),
+      code: prev?.code ?? (row.code.isEmpty ? null : row.code),
     );
   }
-  return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: true);
+  return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: true, read: rows);
 }
 
 /// A stock file's rows: an .xlsx's first sheet, or a UTF-8 CSV / TSV with

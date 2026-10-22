@@ -26,17 +26,43 @@ const _jan2 = '4909999000021';
 const _jan3 = '4909999000038';
 
 class _FakeStock implements StockImportRepository {
-  _FakeStock(this.products, {this.stock = const {}, this.book = const {}});
+  _FakeStock(this.products, {this.stock = const {}, this.book = const {}, this.priceBook});
 
   final Map<String, String> products;
   final Map<String, int> stock;
   final Map<String, (int, String)> book;
+
+  /// When given, what it registered counts as in 商品ライブラリー.
+  final FakePriceBookRepository? priceBook;
+  final notes = <(int, List<ReadRow>, bool, int?)>[];
+
+  Map<String, String> get _library {
+    final m = {...products};
+    final pb = priceBook;
+    if (pb == null) return m;
+    final registered = {for (final ids in pb.toMaster) ...ids};
+    for (final i in pb.items) {
+      if (registered.contains(i.id) && i.janCode != null) m[i.janCode!] = i.name;
+    }
+    for (final imp in pb.imports) {
+      for (var k = 0; k < imp.lines.length; k++) {
+        if (registered.contains(1000 + k)) m['${imp.lines[k]['jan_code']}'] = '${imp.lines[k]['product_name']}';
+      }
+    }
+    return m;
+  }
+
+  @override
+  Future<ApiResult<bool>> note(int importId, List<ReadRow> read, {required bool byAi, int? documentId}) async {
+    notes.add((importId, read, byAi, documentId));
+    return const ApiSuccess(true);
+  }
   final applied = <(int, StockFileMode, List<StockFileLine>)>[];
   final kept = <(int, String)>[];
 
   @override
   Future<ApiResult<Map<String, String>>> known(List<String> jans) async =>
-      ApiSuccess({for (final j in jans) if (products.containsKey(j)) j: products[j]!});
+      ApiSuccess({for (final j in jans) if (_library.containsKey(j)) j: _library[j]!});
 
   @override
   Future<ApiResult<Map<String, int>>> onHand(int warehouseId, List<String> jans) async =>
@@ -184,13 +210,13 @@ void main() {
     expect(lines.single.quantity, 15);
   });
 
-  testWidgets('a JAN in the price book is registered under its name there, then added', (tester) async {
+  testWidgets('the whole file lands: products the library lacks are registered, then their stock goes in', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final products = <String, String>{};
-    final repo = _FakeStock(products, book: {_jan2: (7, 'テストノート A罫')});
     final book = FakePriceBookRepository(items: const [PriceBookItem(id: 7, name: 'テストノート A罫', janCode: _jan2)]);
-    final csv = Uint8List.fromList(utf8.encode('JAN,品名,数量\n$_jan2,ノート,6\n'));
+    final repo = _FakeStock({_jan1: 'テストペン 青'}, stock: {_jan1: 4}, book: {_jan2: (7, 'テストノート A罫')}, priceBook: book);
+    // jan1 is in the library, jan2 only in the price book, jan3 nowhere but named.
+    final csv = Uint8List.fromList(utf8.encode('JAN,品名,メーカー,数量\n$_jan1,ペン,テスト文具,10\n$_jan2,ノート,,6\n$_jan3,テスト消しゴム,テスト文具,2\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
       _signedIn(['inventory.adjust', 'product.manage']),
       stockImportRepositoryProvider.overrideWithValue(repo),
@@ -203,30 +229,70 @@ void main() {
     ]);
     await tester.tap(find.byKey(const ValueKey('sf-pick')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('sf-unknown')), findsOneWidget);
-    expect(find.byKey(const ValueKey('sf-apply')), findsOneWidget);
-    expect(tester.widget<ButtonStyleButton>(find.byKey(const ValueKey('sf-apply'))).onPressed, isNull);
 
-    // Registering makes it a product, under the price book's name.
-    products[_jan2] = 'テストノート A罫';
-    await tester.tap(find.byKey(const ValueKey('sf-register-book')));
+    expect(find.text('商品ライブラリーにない商品 2件'), findsOneWidget);
+    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('sf-register-new'))).value, isTrue);
+    expect(find.text('在庫に反映（3商品）'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
-    expect(book.toMaster.single, [7]);
-    expect(find.byKey(const ValueKey('sf-unknown')), findsNothing);
-    expect(find.text('テストノート A罫'), findsOneWidget);
-    expect(find.text('現在庫 0 ＋ 6 ＝ 6'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-confirm-register')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+
+    // The new one went into the price book under the file's name and maker…
+    expect(book.imports.single.lines.single, {'jan_code': _jan3, 'product_name': 'テスト消しゴム', 'maker': 'テスト文具'});
+    // …and both into the library: the price book's item, and the new one.
+    expect(book.toMaster.single.toSet(), {7, 1000});
+    final (_, _, lines) = repo.applied.single;
+    expect(lines.map((l) => (l.janCode, l.quantity)).toSet(), {(_jan1, 10), (_jan2, 6), (_jan3, 2)});
+    // What the file was read as is kept with the import.
+    expect(repo.notes.single.$2.map((r) => r.name), ['ペン', 'ノート', 'テスト消しゴム']);
+    expect(repo.notes.single.$3, isFalse);
+    expect(find.byKey(const ValueKey('iv-open-12')), findsOneWidget);
+  });
+
+  testWidgets('unticked, only what the library has goes in', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final book = FakePriceBookRepository();
+    final repo = _FakeStock({_jan1: 'テストペン 青'}, priceBook: book);
+    final csv = Uint8List.fromList(utf8.encode('JAN,品名,数量\n$_jan1,ペン,10\n$_jan3,消しゴム,2\n'));
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust', 'product.manage']),
+      stockImportRepositoryProvider.overrideWithValue(repo),
+      priceBookRepositoryProvider.overrideWithValue(book),
+      stockFilePickerProvider.overrideWithValue(() async => (name: 'a.csv', bytes: csv)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-register-new')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-confirm-register')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    expect(book.imports, isEmpty);
+    expect(repo.applied.single.$3.map((l) => l.janCode), [_jan1]);
   });
 
   test('what the AI read becomes a stock sheet: JANs checked, the same JAN summed, doubts kept', () {
-    final s = stockSheetFromRead([
-      (1, _jan1, 'テストペン', '10', false),
-      (2, _jan1, 'ﾃｽﾄﾍﾟﾝ', '2', true),
-      (3, '', 'メモ帳', '4', false),
-      (4, _jan2, 'テストノート', '', false),
+    final s = stockSheetFromRead(const [
+      ReadRow(lineNo: 1, jan: _jan1, name: 'テストペン', quantity: '10'),
+      ReadRow(lineNo: 2, jan: _jan1, name: 'ﾃｽﾄﾍﾟﾝ', quantity: '2', flags: ['ai_disagree']),
+      ReadRow(lineNo: 3, name: 'メモ帳', quantity: '4'),
+      ReadRow(lineNo: 4, jan: _jan2, name: 'テストノート', flags: ['no_maker']),
     ]);
     expect(s.byAi, isTrue);
     expect(s.lines.single, const StockFileLine(lineNo: 1, janCode: _jan1, quantity: 12, name: 'テストペン', merged: 2, doubtful: true));
     expect(s.problems.map((p) => p.code), ['no_jan', 'bad_quantity']);
+    // Every row is kept as read, for the viewer.
+    expect(s.read.length, 4);
     expect(readsLocally('a.PDF'), isFalse);
     expect(readsLocally('a.xlsx'), isTrue);
   });

@@ -11096,4 +11096,113 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfRemoveLine => 'この行を外す';
+
+  @override
+  String get ivOpen => '読み取り結果を見る';
+
+  @override
+  String get ivWindow => '別ウィンドウで開く';
+
+  @override
+  String ivTitle(int id) {
+    return '取込 #$id';
+  }
+
+  @override
+  String get ivOriginal => '元のファイル';
+
+  @override
+  String get ivRead => '読み取った内容と結果';
+
+  @override
+  String get ivNoOriginal => 'この取込には元のファイルが残っていません';
+
+  @override
+  String get ivSave => '元のファイルを保存';
+
+  @override
+  String get ivCannotShow => 'この形式はここでは表示できません。「元のファイルを保存」で開いてください。';
+
+  @override
+  String ivFateIn(String name, String before, String after, String change) {
+    return '→ $name: 在庫 $before → $after（$change）';
+  }
+
+  @override
+  String get ivFateMerged => '→ 同じJANの上の行と合計して反映';
+
+  @override
+  String get ivFateNoJan => '→ 入れていません: JANコードが読めません';
+
+  @override
+  String get ivFateBadQty => '→ 入れていません: 数量が読めません';
+
+  @override
+  String get ivFateNotInLibrary => '→ 入れていません: 商品ライブラリーにない商品';
+
+  @override
+  String get ivFateRemoved => '→ 入れていません: 反映前に外しました';
+
+  @override
+  String get ivByAi => 'AIで読み取り';
+
+  @override
+  String get ivBySheet => '表（Excel・CSV）から読み取り';
+
+  @override
+  String get ivByOld => '読み取った内容は保存されていない取込です（反映した行だけ表示）';
+
+  @override
+  String ivRows(int n) {
+    return '$n行';
+  }
+
+  @override
+  String ivIn(int n) {
+    return '反映 $n';
+  }
+
+  @override
+  String ivOut(int n) {
+    return '入れていない $n';
+  }
+
+  @override
+  String ivDoubts(int n) {
+    return '要確認 $n';
+  }
+
+  @override
+  String ivAsRead(String jan, String name, String qty) {
+    return 'ファイル: JAN $jan ・「$name」・ 数量 $qty';
+  }
+
+  @override
+  String ivEdited(String file, String applied) {
+    return '数量はファイルの $file から $applied に直して反映';
+  }
+
+  @override
+  String sfNotInLibrary(int n) {
+    return '商品ライブラリーにない商品 $n件';
+  }
+
+  @override
+  String sfRegisterNew(int n) {
+    return 'これらも商品ライブラリーに登録して在庫に入れる（$n件）';
+  }
+
+  @override
+  String get sfRegisterNewHint =>
+      '価格台帳にあるJANは台帳の商品名で、ないものはファイルの商品名で、価格台帳と商品ライブラリーに登録します';
+
+  @override
+  String sfCannotRegister(int n) {
+    return '商品名がないため登録できない行 $n件（在庫には入れません）';
+  }
+
+  @override
+  String sfConfirmRegister(int n) {
+    return 'うち$n件は、新しく商品ライブラリーに登録してから在庫に入れます。';
+  }
 }

@@ -9850,5 +9850,135 @@
   "sfAiNothing": "AIでもJANコードと数量を読み取れませんでした。記入用のExcelに書き写してから選んでください。",
   "sfDoubtful": "AIの読み取りに迷いがあった行です（2回の読み取りが違った、JANの検査数字が合わないなど）",
   "sfQty": "数量",
-  "sfRemoveLine": "この行を外す"
+  "sfRemoveLine": "この行を外す",
+  "ivOpen": "読み取り結果を見る",
+  "ivWindow": "別ウィンドウで開く",
+  "ivTitle": "取込 #{id}",
+  "@ivTitle": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "ivOriginal": "元のファイル",
+  "ivRead": "読み取った内容と結果",
+  "ivNoOriginal": "この取込には元のファイルが残っていません",
+  "ivSave": "元のファイルを保存",
+  "ivCannotShow": "この形式はここでは表示できません。「元のファイルを保存」で開いてください。",
+  "ivFateIn": "→ {name}: 在庫 {before} → {after}（{change}）",
+  "@ivFateIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "ivFateMerged": "→ 同じJANの上の行と合計して反映",
+  "ivFateNoJan": "→ 入れていません: JANコードが読めません",
+  "ivFateBadQty": "→ 入れていません: 数量が読めません",
+  "ivFateNotInLibrary": "→ 入れていません: 商品ライブラリーにない商品",
+  "ivFateRemoved": "→ 入れていません: 反映前に外しました",
+  "ivByAi": "AIで読み取り",
+  "ivBySheet": "表（Excel・CSV）から読み取り",
+  "ivByOld": "読み取った内容は保存されていない取込です（反映した行だけ表示）",
+  "ivRows": "{n}行",
+  "@ivRows": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ivIn": "反映 {n}",
+  "@ivIn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ivOut": "入れていない {n}",
+  "@ivOut": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ivDoubts": "要確認 {n}",
+  "@ivDoubts": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ivAsRead": "ファイル: JAN {jan} ・「{name}」・ 数量 {qty}",
+  "@ivAsRead": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "ivEdited": "数量はファイルの {file} から {applied} に直して反映",
+  "@ivEdited": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "applied": {
+        "type": "String"
+      }
+    }
+  },
+  "sfNotInLibrary": "商品ライブラリーにない商品 {n}件",
+  "@sfNotInLibrary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfRegisterNew": "これらも商品ライブラリーに登録して在庫に入れる（{n}件）",
+  "@sfRegisterNew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfRegisterNewHint": "価格台帳にあるJANは台帳の商品名で、ないものはファイルの商品名で、価格台帳と商品ライブラリーに登録します",
+  "sfCannotRegister": "商品名がないため登録できない行 {n}件（在庫には入れません）",
+  "@sfCannotRegister": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfConfirmRegister": "うち{n}件は、新しく商品ライブラリーに登録してから在庫に入れます。",
+  "@sfConfirmRegister": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

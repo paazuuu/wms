@@ -7079,6 +7079,54 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   line corrected from 100 to 10, another left out, the corrected line sent
   and the PDF kept; the reason shown when the AI is out of credit.
 
+## A stock file lands whole; its reading set beside the original (DB 0146)
+
+- **Products the library lacks are registered before their stock goes in.**
+  In ファイルから在庫登録, the 「商品ライブラリーにない商品」 card has a
+  checkbox, on by default for whoever has product.manage: 「これらも商品
+  ライブラリーに登録して在庫に入れる」.
+  - A JAN that 価格台帳 has is registered under its name there.
+  - Any other JAN the file names is first read into 価格台帳 (JAN, the file's
+    name, its maker and 品番 when the sheet or the AI gave them), then
+    registered.
+  - Then all the stock goes in together. The button counts every line that
+    will go in, and the confirmation says how many products are new.
+  - Lines with no product name cannot be registered. They are listed and
+    left out.
+  - Unticked, only what the library already has goes in.
+  - Sheets now also read a メーカー and a 品番 column when the file has them.
+- **What the file was read as is kept (0146).**
+  - `master_imports.read_lines` holds every row as it was read: the file's
+    own JAN, name and quantity, maker and 品番, and the reader's flags.
+    `read_by` says whether the AI read it or it was read cell by cell.
+  - `stock_file_import_note(import, read, read_by, document)` notes it right
+    after the import, the way `stock_file_import_attach` keeps the original.
+  - `stock_file_import` itself is unchanged: two attempts to replace it with
+    a longer signature timed out over the connection and were rolled back,
+    so this smaller function does the job instead.
+- **読み取り結果 (`/import-view/:id`).** A file opened beside what was made
+  of it.
+  - Left, the original: the PDF's pages (pdf.js through `printing`), the
+    picture, or the sheet's cells with their row numbers.
+  - Right, every row as read: what the file says, the reader's doubts in
+    words, a quantity corrected by hand (「ファイルの 105 から 15 に直して
+    反映」), and what became of it. Either 「→ テストペン 青: 在庫 40 → 55
+    （+15）」 or why it was not put in: no JAN, no quantity, not in the
+    library, left out by hand, or added to the row above with the same JAN.
+  - Totals at the top: rows, put in, not put in, to check.
+  - Side by side on a wide screen, tabs on a narrow one.
+  - Opened from 取込履歴 (every row with a file) and from the finished
+    import: 「読み取り結果を見る」. On the web, 「別ウィンドウで開く」 opens it
+    in a window of its own, without the sidebar, to keep beside the app.
+  - An import from before 0146 shows only the lines that went in.
+- Tests (991 pass):
+  - The whole file lands: a library product, a price-book product and a new
+    one; the new one read into 価格台帳 with its maker; both registered; all
+    three put in; the reading noted.
+  - Unticked, only the library's.
+  - Each row's fate.
+  - The viewer side by side and as tabs.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

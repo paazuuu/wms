@@ -26,6 +26,10 @@ abstract class StockImportRepository {
 
   /// Keeps the file the stock was read from with its import.
   Future<ApiResult<bool>> keepFile(int importId, String fileName, Uint8List bytes, String contentType);
+
+  /// Notes on the import what the file was read as (0146), by the AI or
+  /// cell by cell, so it can be set beside the original later.
+  Future<ApiResult<bool>> note(int importId, List<ReadRow> read, {required bool byAi, int? documentId});
 }
 
 class StockImportRepositoryImpl implements StockImportRepository {
@@ -114,6 +118,21 @@ class StockImportRepositoryImpl implements StockImportRepository {
       await _storage.post('/object/$masterImportBucket/$path',
           data: bytes, options: Options(headers: {'Content-Type': contentType}));
       final r = await _rest.post('/rpc/stock_file_import_attach', data: {'p_id': importId, 'p_name': fileName, 'p_path': path});
+      return ApiSuccess(r.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> note(int importId, List<ReadRow> read, {required bool byAi, int? documentId}) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_import_note', data: {
+        'p_id': importId,
+        'p_read': [for (final row in read) row.toJson()],
+        'p_read_by': byAi ? 'ai' : 'sheet',
+        'p_document_id': documentId,
+      });
       return ApiSuccess(r.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
