@@ -3,6 +3,7 @@ import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
   aiFailure,
+  withinTime,
   gemini,
   resetAiFailures,
   type AliasRow,
@@ -674,4 +675,17 @@ Deno.test("an AI call that fails is kept for the request, the most serious first
   assertEquals(aiFailure()?.kind, "no_key");
   resetAiFailures();
   assertEquals(aiFailure(), null);
+});
+
+Deno.test("a reading that takes too long gives up with its name, a quick one answers", async () => {
+  const slow = new Promise<number>((r) => setTimeout(() => r(1), 200));
+  let err = "";
+  try {
+    await withinTime(slow, 20, "read_timeout");
+  } catch (e) {
+    err = String(e);
+  }
+  assertEquals(err.includes("read_timeout"), true);
+  await slow;
+  assertEquals(await withinTime(Promise.resolve(2), 100, "read_timeout"), 2);
 });

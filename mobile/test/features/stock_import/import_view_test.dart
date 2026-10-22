@@ -5,7 +5,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
+import 'package:wms_mobile/features/auth/application/auth_controller.dart';
+import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
+import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/stock_import/presentation/import_view_screen.dart';
 
@@ -33,7 +36,7 @@ final _import = MasterImport.fromJson({
     {'line_no': 3, 'jan': _jan2, 'name': 'ノート', 'quantity': '3'},
     {'line_no': 4, 'jan': 'なし', 'name': 'メモ', 'quantity': '1'},
     {'line_no': 5, 'jan': _jan3, 'name': '消しゴム', 'quantity': '2'},
-    {'line_no': 6, 'jan': _jan1, 'name': 'テストペン', 'quantity': '5'},
+    {'line_no': 6, 'jan': _jan1, 'name': 'テストペン', 'quantity': '5', 'ai_jan': _jan1, 'ai_quantity': '50', 'flags': ['human_corrected']},
   ],
   'issues': [
     {'code': 'unknown_jan', 'lines': [{'line_no': 5, 'jan_code': _jan3}]},
@@ -43,6 +46,19 @@ final _import = MasterImport.fromJson({
     {'line_no': 2, 'jan_code': _jan1, 'name': 'テストペン 青', 'quantity': 15, 'on_hand_before': 40, 'added': 15, 'on_hand_after': 55},
   ],
 });
+
+class _Undo implements StockImportRepository {
+  final undone = <int>[];
+
+  @override
+  Future<ApiResult<int>> undo(int importId) async {
+    undone.add(importId);
+    return const ApiSuccess(1);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class _Repo extends FakeMasterImportRepository {
   @override
@@ -64,6 +80,9 @@ void main() {
     ]);
     // The file gave 105 for the pen; 15 went in.
     expect(o.first.fileQuantity, 105);
+    // Row 6 was corrected on the 確認用Excel (50 → 5) — not a doubt of the AI's.
+    expect(o.last.row.corrected, isTrue);
+    expect(o.last.doubtful, isFalse);
     expect(o.first.doubtful, isTrue);
   });
 
@@ -90,6 +109,26 @@ void main() {
     expect(find.text('→ 入れていません: JANコードが読めません'), findsOneWidget);
     expect(find.text('→ 入れていません: 反映前に外しました'), findsOneWidget);
     expect(find.text('→ 同じJANの上の行と合計して反映'), findsOneWidget);
+    expect(find.text('確認用Excelで直した: JAN $_jan1 → $_jan1 ・ 数量 50 → 5'), findsOneWidget);
+  });
+
+  testWidgets('a stock file can be taken back, after asking', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final stock = _Undo();
+    await pumpApp(tester, const ImportViewScreen(importId: 12), overrides: [
+      masterImportRepositoryProvider.overrideWithValue(_Repo()),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      authControllerProvider.overrideWith((ref) =>
+          fakeAuthControllerFor(const AuthUser(id: 'u1', email: 'a@b.test', name: '倉庫', permissions: ['inventory.adjust']))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('iv-undo')));
+    await tester.pumpAndSettle();
+    expect(find.text('取込 #12 を取り消しますか？'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('iv-undo-ok')));
+    await tester.pumpAndSettle();
+    expect(stock.undone, [12]);
+    expect(find.text('取込 #12 を取り消しました'), findsOneWidget);
   });
 
   testWidgets('on a narrow screen the two are tabs', (tester) async {

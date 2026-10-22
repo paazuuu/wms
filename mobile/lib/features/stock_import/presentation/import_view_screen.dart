@@ -7,13 +7,17 @@ import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
+import '../../auth/application/auth_controller.dart';
 import '../../master_import/presentation/master_import_labels.dart';
+import '../../product/application/product_providers.dart';
+import '../data/stock_import_repository.dart';
 import '../../notation/presentation/notation_labels.dart';
 import '../../qc/domain/inspection.dart' show normalizeJan;
 import '../domain/stock_file.dart';
@@ -65,7 +69,7 @@ class ReadOutcome {
   /// from what went in (corrected by hand).
   final int? fileQuantity;
 
-  bool get doubtful => row.flags.any((f) => f.split(':').first != 'no_maker');
+  bool get doubtful => row.flags.any((f) => !const {'no_maker', 'human_corrected'}.contains(f.split(':').first));
 }
 
 int? _qty(String raw) {
@@ -160,6 +164,34 @@ class ImportViewScreen extends ConsumerWidget {
 
   final int importId;
 
+  /// Takes the import back after asking: each line's change the other way.
+  Future<void> _undo(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l10n.ivUndoQ(importId)),
+        content: Text(l10n.ivUndoBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
+          FilledButton(key: const ValueKey('iv-undo-ok'), onPressed: () => Navigator.pop(d, true), child: Text(l10n.ivUndo)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final r = await ref.read(stockImportRepositoryProvider).undo(importId);
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(importDetailProvider(importId));
+        ref.invalidate(masterImportsProvider);
+        ref.invalidate(productListProvider);
+        messenger.showSnackBar(SnackBar(content: Text(l10n.ivUndoDone(importId))));
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -167,6 +199,22 @@ class ImportViewScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(async.valueOrNull?.originalName ?? l10n.ivTitle(importId)),
+        actions: [
+          if (async.valueOrNull case final m? when m.source == 'stock_file')
+            if (m.undoneAt != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Center(child: Text(l10n.ivUndone, key: const ValueKey('iv-undone'))),
+              )
+            else if (m.status == MasterImportStatus.stockDone &&
+                (ref.watch(authControllerProvider).user?.hasPermission('inventory.adjust') ?? false))
+              TextButton.icon(
+                key: const ValueKey('iv-undo'),
+                onPressed: () => _undo(context, ref),
+                icon: const Icon(Icons.undo),
+                label: Text(l10n.ivUndo),
+              ),
+        ],
       ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
@@ -404,8 +452,14 @@ class _ReadPane extends StatelessWidget {
                 ),
                 if (o.row.maker.isNotEmpty || o.row.code.isNotEmpty)
                   Text([o.row.maker, o.row.code].where((v) => v.isNotEmpty).join(' · '), style: muted),
-                for (final f in o.row.flags)
+                for (final f in o.row.flags.where((f) => f != 'human_corrected'))
                   Text('⚠ ${flagLabel(l10n, f)}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                if (o.row.corrected)
+                  Text(
+                    l10n.ivCorrected(o.row.aiJan ?? '—', o.row.jan, o.row.aiQuantity ?? '—', o.row.quantity),
+                    key: ValueKey('iv-corrected-${o.row.lineNo}'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.tertiary),
+                  ),
                 if (o.fileQuantity case final q?)
                   Text(l10n.ivEdited(n.format(q), n.format(o.line?.quantity ?? 0)),
                       key: ValueKey('iv-edited-${o.row.lineNo}'), style: theme.textTheme.bodySmall),

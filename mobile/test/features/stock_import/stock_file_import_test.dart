@@ -57,6 +57,26 @@ class _FakeStock implements StockImportRepository {
     notes.add((importId, read, byAi, documentId));
     return const ApiSuccess(true);
   }
+
+  /// What duplicates() answers; fingerprints and undos as asked.
+  List<DuplicateImport> dupes = const [];
+  final fingerprints = <(int, String?, String?)>[];
+  final undone = <int>[];
+
+  @override
+  Future<ApiResult<List<DuplicateImport>>> duplicates({String? file, String? lines}) async => ApiSuccess(dupes);
+
+  @override
+  Future<ApiResult<bool>> fingerprint(int importId, {String? file, String? lines}) async {
+    fingerprints.add((importId, file, lines));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> undo(int importId) async {
+    undone.add(importId);
+    return const ApiSuccess(1);
+  }
   final applied = <(int, StockFileMode, List<StockFileLine>)>[];
   final kept = <(int, String)>[];
 
@@ -86,8 +106,38 @@ class _FakeStock implements StockImportRepository {
   }
 }
 
+/// 読み取った内容を確認しました — nothing goes in without it.
+Future<void> _tick(WidgetTester tester) async {
+  await tester.ensureVisible(find.byKey(const ValueKey('sf-checked')));
+  await tester.tap(find.byKey(const ValueKey('sf-checked')));
+  await tester.pumpAndSettle();
+}
+
 Override _signedIn(List<String> permissions) => authControllerProvider.overrideWith((ref) =>
     fakeAuthControllerFor(AuthUser(id: 'u1', email: 'a@b.test', name: '倉庫', permissions: permissions)));
+
+
+Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
+    {Map<String, String> products = const {}, Map<String, int> stock = const {}, List<String> perms = const ['inventory.adjust'],
+    List<(String, Uint8List)>? saved, MasterImportRepository? reader, String name = 'a.csv'}) async {
+  await tester.binding.setSurfaceSize(const Size(1000, 2000));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  final repo = _FakeStock(products, stock: stock);
+  await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _signedIn(perms),
+    stockImportRepositoryProvider.overrideWithValue(repo),
+    if (reader != null) masterImportRepositoryProvider.overrideWithValue(reader),
+    stockFilePickerProvider.overrideWithValue(() async => (name: name, bytes: Uint8List.fromList(utf8.encode(csv)))),
+    if (saved != null) stockTemplateSaverProvider.overrideWithValue((n, b) async => saved.add((n, b))),
+    warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+      warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+      totals: WarehouseTotals(),
+    ))),
+  ]);
+  await tester.tap(find.byKey(const ValueKey('sf-pick')));
+  await tester.pumpAndSettle();
+  return repo;
+}
 
 void main() {
   group('reading a stock sheet', () {
@@ -153,7 +203,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('在庫.csv: 3商品・合計21個'), findsOneWidget);
-    expect(find.byKey(const ValueKey('sf-problems')), findsOneWidget);
+    // Every row that will not go in is listed, with why.
+    expect(find.byKey(const ValueKey('sf-problem-5')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-out-$_jan3')), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-unknown')), findsOneWidget);
     expect(find.text('テストペン 青'), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-line-$_jan3')), findsNothing);
@@ -161,6 +213,7 @@ void main() {
     expect(find.byKey(const ValueKey('sf-set-warning')), findsOneWidget);
     expect(find.text('現在庫 4 → 10（+6）'), findsOneWidget);
 
+    await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     expect(find.text('本社倉庫の在庫に反映しますか？'), findsOneWidget);
@@ -200,6 +253,7 @@ void main() {
     expect(find.textContaining('同じJANの2行を合計'), findsOneWidget);
     expect(find.text('現在庫 40 ＋ 15 ＝ 55'), findsOneWidget);
 
+    await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     expect(find.text('在庫の合計: 40 → 55'), findsOneWidget);
@@ -234,6 +288,7 @@ void main() {
     expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('sf-register-new'))).value, isTrue);
     expect(find.text('在庫に反映（3商品）'), findsOneWidget);
 
+    await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sf-confirm-register')), findsOneWidget);
@@ -272,6 +327,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sf-register-new')));
     await tester.pumpAndSettle();
+    await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sf-confirm-register')), findsNothing);
@@ -340,6 +396,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sf-line-$_jan2')), findsNothing);
 
+    await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sf-confirm')));
@@ -367,6 +424,96 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('sf-pick')));
     await tester.pumpAndSettle();
     expect(find.textContaining('AIの利用残高'), findsOneWidget);
+  });
+
+  testWidgets('nothing goes in until the reading is checked', (tester) async {
+    await _pumpCsv(tester, 'JAN,数量\n$_jan1,10\n', products: {_jan1: 'テストペン 青'});
+    ButtonStyleButton apply() => tester.widget<ButtonStyleButton>(find.byKey(const ValueKey('sf-apply')));
+    expect(apply().onPressed, isNull);
+    await _tick(tester);
+    expect(apply().onPressed, isNotNull);
+    // A change to a line asks for the look again.
+    await tester.tap(find.byKey(const ValueKey('sf-line-$_jan1')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('sf-edit-qty')), '12');
+    await tester.tap(find.byKey(const ValueKey('sf-edit-ok')));
+    await tester.pumpAndSettle();
+    expect(apply().onPressed, isNull);
+  });
+
+  testWidgets('the same lines already in: asked first, and nothing goes in on cancel', (tester) async {
+    final repo = await _pumpCsv(tester, 'JAN,数量\n$_jan1,10\n', products: {_jan1: 'テストペン 青'});
+    repo.dupes = [DuplicateImport(importId: 9, at: DateTime(2026, 10, 22, 14), fileName: '在庫.csv', lines: 1, change: 10)];
+    await _tick(tester);
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    expect(find.text('同じ内容がすでに反映されています'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-dup-9')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-dup-cancel')));
+    await tester.pumpAndSettle();
+    expect(repo.applied, isEmpty);
+
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-dup-go')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.applied, hasLength(1));
+    // Fingerprinted, so the next time is caught too.
+    final (id, file, lines) = repo.fingerprints.single;
+    expect(id, 12);
+    expect(file, startsWith('f:'));
+    expect(lines, linesFingerprint(const [StockFileLine(lineNo: 2, janCode: _jan1, quantity: 10)]));
+  });
+
+  testWidgets('every row is shown; rows that are not products are counted apart; a huge quantity is asked about', (tester) async {
+    await _pumpCsv(
+      tester,
+      'JAN,商品名,数量\n$_jan1,ペン,4909999000014\n,船場支店,\n,,\n$_jan2,ノート,3\n',
+      products: {_jan1: 'テストペン 青', _jan2: 'テストノート'},
+    );
+    expect(find.byKey(const ValueKey('sf-line-$_jan1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-line-$_jan2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-doubt-$_jan1')), findsOneWidget);
+    expect(find.textContaining('数量が大きすぎます'), findsWidgets);
+    // 船場支店 and the blank row are not products, and not errors either.
+    expect(find.textContaining('商品ではない行 1'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-left-out')), findsNothing);
+  });
+
+  testWidgets('the 確認用Excel has every row; corrected and chosen again, the corrections are known', (tester) async {
+    final saved = <(String, Uint8List)>[];
+    final reader = FakeMasterImportRepository(
+      readResult: const MasterRead(lines: [
+        MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ', quantity: '100', flags: ['ai_disagree']),
+        MasterLine(lineNo: 2, janCode: '', supplierName: 'ノート', quantity: '3'),
+      ]),
+    );
+    await _pumpCsv(tester, '%PDF', products: {_jan1: 'テストペン 青'}, saved: saved, reader: reader, name: '納品書.pdf');
+    await tester.tap(find.byKey(const ValueKey('sf-review-xlsx')));
+    await tester.pumpAndSettle();
+    expect(saved.single.$1, '在庫登録_確認用_納品書.xlsx');
+    final rows = readXlsx(saved.single.$2);
+    final head = rows.indexWhere((r) => r.contains('JANコード'));
+    expect(rows[head].take(6), ['元の行', 'JANコード', '商品名', 'メーカー', '品番', '数量']);
+    expect(rows[head + 1][6], '反映できる・要確認');
+    expect(rows[head + 2][6], 'JANが読めない（直してください）');
+
+    // A person corrects it: 100 → 10, and fills in the missing JAN.
+    final fixed = [for (final r in rows) [...r]];
+    fixed[head + 1][5] = '10';
+    fixed[head + 2][1] = _jan2;
+    final again = parseStockRows(fixed);
+    expect(again.lines.map((l) => (l.janCode, l.quantity)), [(_jan1, 10), (_jan2, 3)]);
+    expect(again.read.where((r) => r.corrected).length, 2);
+    expect(again.read.first.flags, ['human_corrected']);
+  });
+
+  testWidgets('a PDF too long for the AI says what to do instead', (tester) async {
+    await _pumpCsv(tester, '%PDF',
+        reader: FakeMasterImportRepository(readFailure: 'Request idle timeout limit (150s) reached'), name: 'long.pdf');
+    expect(find.textContaining('時間内に終わりませんでした'), findsOneWidget);
   });
 
   testWidgets('without the stock permission the file is read but not put in', (tester) async {

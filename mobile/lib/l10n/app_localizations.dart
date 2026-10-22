@@ -20071,6 +20071,168 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'うち{n}件は、新しく商品ライブラリーに登録してから在庫に入れます。'**
   String sfConfirmRegister(int n);
+
+  /// No description provided for @sfTooLong.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの読み取りが時間内に終わりませんでした（ページや商品が多いPDF）。PDFをページごとに分けて選ぶか、記入用のExcelに書き写して選んでください。'**
+  String get sfTooLong;
+
+  /// No description provided for @sfReviewXlsx.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認用Excelをダウンロード'**
+  String get sfReviewXlsx;
+
+  /// No description provided for @sfReviewHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'全行を確かめ、直したらそのファイルをもう一度「ファイルを選ぶ」で選べます'**
+  String get sfReviewHint;
+
+  /// No description provided for @sfReviewSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認用Excelを保存しました'**
+  String get sfReviewSaved;
+
+  /// No description provided for @sfCorrectedRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認用Excelで直した行: {n}（読み取りと並べて取込履歴に残ります）'**
+  String sfCorrectedRows(int n);
+
+  /// No description provided for @sfGoingIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に入れる行（{n}商品）'**
+  String sfGoingIn(int n);
+
+  /// No description provided for @sfNewProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しく登録'**
+  String get sfNewProduct;
+
+  /// No description provided for @sfImplausible.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量が大きすぎます（JANや金額を読んだかもしれません）'**
+  String get sfImplausible;
+
+  /// No description provided for @sfLeftOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'入れない行（{n}）'**
+  String sfLeftOut(int n);
+
+  /// No description provided for @sfNoNameToRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名がないため登録できません'**
+  String get sfNoNameToRegister;
+
+  /// No description provided for @sfNotRegistering.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにないため入れません'**
+  String get sfNotRegistering;
+
+  /// No description provided for @sfNotItems.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ではない行 {n}（支店名・住所・空行など。無視します）'**
+  String sfNotItems(int n);
+
+  /// No description provided for @sfCheckedTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った内容を確認しました'**
+  String get sfCheckedTitle;
+
+  /// No description provided for @sfCheckedHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'上の一覧（または確認用Excel）で、JANコードと数量に間違いがないことを確かめてから反映してください'**
+  String get sfCheckedHint;
+
+  /// No description provided for @sfDuplicateQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ内容がすでに反映されています'**
+  String get sfDuplicateQ;
+
+  /// No description provided for @sfDuplicateAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一度足すと、在庫が二重になります。直したファイルを入れ直したいときは、先に前の取込を取込履歴から取り消してください。'**
+  String get sfDuplicateAdd;
+
+  /// No description provided for @sfDuplicateSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ数に合わせ直すことになります。間違いでなければそのまま進めてください。'**
+  String get sfDuplicateSet;
+
+  /// No description provided for @sfDuplicateLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id}（{at}・{file}）: {why}'**
+  String sfDuplicateLine(int id, String at, String file, String why);
+
+  /// No description provided for @sfSameFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じファイル'**
+  String get sfSameFile;
+
+  /// No description provided for @sfSameLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じJANと数量'**
+  String get sfSameLines;
+
+  /// No description provided for @sfDuplicateGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'それでも反映する'**
+  String get sfDuplicateGo;
+
+  /// No description provided for @ivUndo.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取込を取り消す'**
+  String get ivUndo;
+
+  /// No description provided for @ivUndoQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} を取り消しますか？'**
+  String ivUndoQ(int id);
+
+  /// No description provided for @ivUndoBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取込で増減した数を、それぞれ元に戻します（修正として記録されます）。その後に出荷などで在庫が減っていて0未満になる商品があるときは、取り消せません。'**
+  String get ivUndoBody;
+
+  /// No description provided for @ivUndone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消し済み'**
+  String get ivUndone;
+
+  /// No description provided for @ivUndoDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} を取り消しました'**
+  String ivUndoDone(int id);
+
+  /// No description provided for @ivCorrected.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認用Excelで直した: JAN {aiJan} → {jan} ・ 数量 {aiQty} → {qty}'**
+  String ivCorrected(String aiJan, String jan, String aiQty, String qty);
 }
 
 class _AppLocalizationsDelegate

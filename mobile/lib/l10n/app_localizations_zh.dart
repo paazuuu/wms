@@ -11144,4 +11144,101 @@ class AppLocalizationsZh extends AppLocalizations {
   String sfConfirmRegister(int n) {
     return '其中$n个将先登记为商品库的新商品，再登记库存。';
   }
+
+  @override
+  String get sfTooLong => 'AI未能在时限内读完（页数或商品很多的PDF）。请分页选择PDF，或抄写到填写用Excel后再选择。';
+
+  @override
+  String get sfReviewXlsx => '下载确认用Excel';
+
+  @override
+  String get sfReviewHint => '可在其中核对所有行，修改后再用“选择文件”选择该文件';
+
+  @override
+  String get sfReviewSaved => '已保存确认用Excel';
+
+  @override
+  String sfCorrectedRows(int n) {
+    return '在确认用Excel中修改的行：$n（与读取内容一并保留在记录中）';
+  }
+
+  @override
+  String sfGoingIn(int n) {
+    return '登记到库存的行（$n个商品）';
+  }
+
+  @override
+  String get sfNewProduct => '新登记';
+
+  @override
+  String get sfImplausible => '数量过大（可能读取了JAN或金额）';
+
+  @override
+  String sfLeftOut(int n) {
+    return '不登记的行（$n）';
+  }
+
+  @override
+  String get sfNoNameToRegister => '没有商品名，无法登记';
+
+  @override
+  String get sfNotRegistering => '不在商品库中，不登记';
+
+  @override
+  String sfNotItems(int n) {
+    return '$n行不是商品（分店名、地址、空行等，忽略）';
+  }
+
+  @override
+  String get sfCheckedTitle => '我已确认读取内容';
+
+  @override
+  String get sfCheckedHint => '请在上方列表（或确认用Excel）中确认JAN码和数量无误后再登记';
+
+  @override
+  String get sfDuplicateQ => '相同内容已登记';
+
+  @override
+  String get sfDuplicateAdd => '再次追加会导致库存重复。如要改用修改后的文件，请先在导入记录中撤销之前的导入。';
+
+  @override
+  String get sfDuplicateSet => '这会再次按相同数量设定库存。如无误可继续。';
+
+  @override
+  String sfDuplicateLine(int id, String at, String file, String why) {
+    return '导入 #$id（$at・$file）：$why';
+  }
+
+  @override
+  String get sfSameFile => '同一文件';
+
+  @override
+  String get sfSameLines => '相同JAN与数量';
+
+  @override
+  String get sfDuplicateGo => '仍然登记';
+
+  @override
+  String get ivUndo => '撤销此导入';
+
+  @override
+  String ivUndoQ(int id) {
+    return '要撤销导入 #$id 吗？';
+  }
+
+  @override
+  String get ivUndoBody => '将此导入增减的数量逐一恢复（记为修正）。若之后因出库等使某商品低于0，则无法撤销。';
+
+  @override
+  String get ivUndone => '已撤销';
+
+  @override
+  String ivUndoDone(int id) {
+    return '已撤销导入 #$id';
+  }
+
+  @override
+  String ivCorrected(String aiJan, String jan, String aiQty, String qty) {
+    return '在确认用Excel中修改：JAN $aiJan → $jan・数量 $aiQty → $qty';
+  }
 }

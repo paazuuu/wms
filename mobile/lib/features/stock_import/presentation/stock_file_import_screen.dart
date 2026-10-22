@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
@@ -14,6 +15,7 @@ import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../master_import/presentation/master_import_labels.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
+import '../../notation/presentation/notation_labels.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../product/application/product_providers.dart';
@@ -84,6 +86,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// Products the file has that 商品ライブラリー does not: registered
   /// (through 価格台帳) before the stock goes in, so the whole file lands.
   bool _registerNew = true;
+
+  /// The person has looked the reading over and says it is right: nothing
+  /// goes in before. Cleared by a new file and by any change to a line.
+  bool _checked = false;
   StockFileResult? _done;
   String? _error;
 
@@ -109,6 +115,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _sheet = null;
       _known = const {};
       _documentId = null;
+      _checked = false;
     });
     StockSheet? sheet;
     if (readsLocally(f.name)) {
@@ -155,7 +162,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           setState(() {
             _busy = false;
             _aiReading = false;
-            _error = humanizeApiErrorMessage(l10n, message);
+            // A long PDF the AI could not finish within the server's time:
+            // what to do instead, rather than the server's own words.
+            _error = RegExp('timeout', caseSensitive: false).hasMatch(message)
+                ? l10n.sfTooLong
+                : humanizeApiErrorMessage(l10n, message);
           });
           return;
       }
@@ -253,6 +264,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final l10n = AppLocalizations.of(context);
     final toRegister = register ? _registrable : const <StockFileLine>[];
     final lines = [..._ready, ...toRegister];
+    // The same delivery put in twice is the costliest mistake there is.
+    if (!await _passesDuplicateCheck(lines)) return;
+    if (!mounted) return;
     final units = lines.fold<int>(0, (s, l) => s + l.quantity);
     final before = lines.fold<int>(0, (s, l) => s + (_onHand[l.janCode] ?? 0));
     final after = _mode == StockFileMode.add ? before + units : units;
@@ -309,6 +323,12 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         if (_sheet case final sh?) {
           await repo.note(data.importId, sh.read, byAi: sh.byAi, documentId: _documentId);
         }
+        // So the same file, or the same lines again, is caught next time.
+        await repo.fingerprint(
+          data.importId,
+          file: _bytes == null ? null : fileFingerprint(_bytes!),
+          lines: linesFingerprint(send),
+        );
         if (!mounted) return;
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);
@@ -326,6 +346,61 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     }
   }
 
+  /// The 確認用Excel of what was read: every row, what would become of it,
+  /// and the cells to look at in yellow — to check it all at once, correct
+  /// it, and choose the corrected file to put in.
+  Future<void> _downloadReview() async {
+    final sheet = _sheet;
+    if (sheet == null) return;
+    final l10n = AppLocalizations.of(context);
+    final base = (_fileName ?? 'file').replaceAll(RegExp(r'\.[A-Za-z0-9]+$'), '');
+    final bytes = buildReviewXlsx(
+      fileName: _fileName ?? '',
+      sheet: sheet,
+      inLibrary: _known.keys.toSet(),
+      inPriceBook: _book.keys.toSet(),
+      flagText: (f) => flagLabel(l10n, f),
+    );
+    await ref.read(stockTemplateSaverProvider)('在庫登録_確認用_$base.xlsx', bytes);
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.sfReviewSaved)));
+  }
+
+  /// Whether to go on although an import of the same file, or of the same
+  /// lines, is already in: adding it again would count the stock twice.
+  Future<bool> _passesDuplicateCheck(List<StockFileLine> lines) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(stockImportRepositoryProvider).duplicates(
+          file: _bytes == null ? null : fileFingerprint(_bytes!),
+          lines: linesFingerprint(lines),
+        );
+    if (!mounted) return false;
+    final found = r is ApiSuccess<List<DuplicateImport>> ? r.data : const <DuplicateImport>[];
+    if (found.isEmpty) return true;
+    final fmt = DateFormat('y/MM/dd HH:mm');
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        icon: Icon(Icons.warning_amber_rounded, color: Theme.of(d).colorScheme.error),
+        title: Text(l10n.sfDuplicateQ),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(_mode == StockFileMode.add ? l10n.sfDuplicateAdd : l10n.sfDuplicateSet),
+          const SizedBox(height: AppSpacing.sm),
+          for (final f in found.take(5))
+            Text(
+              l10n.sfDuplicateLine(f.importId, fmt.format(f.at), f.fileName ?? '', f.sameFile ? l10n.sfSameFile : l10n.sfSameLines),
+              key: ValueKey('sf-dup-${f.importId}'),
+              style: Theme.of(d).textTheme.bodySmall,
+            ),
+        ]),
+        actions: [
+          FilledButton(key: const ValueKey('sf-dup-cancel'), onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
+          TextButton(key: const ValueKey('sf-dup-go'), onPressed: () => Navigator.pop(d, true), child: Text(l10n.sfDuplicateGo)),
+        ],
+      ),
+    );
+    return go == true;
+  }
+
   /// One line's quantity corrected by hand, or the line left out: what the
   /// AI read is checked here, before anything is booked.
   Future<void> _editLine(StockFileLine line) async {
@@ -335,6 +410,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     );
     final sheet = _sheet;
     if (result == null || sheet == null || !mounted) return;
+    setState(() => _checked = false);
     setState(() => _sheet = sheet.copyWith(lines: [
           for (final l in sheet.lines)
             if (l.janCode != line.janCode) l else if (result >= 0) l.copyWith(quantity: result),
@@ -364,6 +440,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final canManage = ref.watch(authControllerProvider).user?.hasPermission('product.manage') ?? false;
     final registrable = _registrable;
     final willRegister = canManage && _registerNew ? registrable.length : 0;
+    // Lines whose product is not there and will not be made now.
+    final leftOut = [for (final l in unknown) if (willRegister == 0 || !registrable.contains(l)) l];
+    final problems = [for (final p in sheet?.problems ?? const <StockFileProblem>[]) if (p.code != 'not_item') p];
+    final notItems = (sheet?.problems ?? const <StockFileProblem>[]).where((p) => p.code == 'not_item').length;
     final done = _done;
 
     return Scaffold(
@@ -506,16 +586,60 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ]),
                 ),
               ),
-            if (sheet.problems.isNotEmpty)
-              Card(
-                key: const ValueKey('sf-problems'),
-                margin: const EdgeInsets.only(top: AppSpacing.sm),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(l10n.sfProblems(sheet.problems.length), style: theme.textTheme.labelLarge),
-                    for (final p in sheet.problems.take(20)) Text(_problemText(l10n, p), style: theme.textTheme.bodySmall),
-                  ]),
+            // Everything at once, to check and correct outside: the 確認用Excel.
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                OutlinedButton.icon(
+                  key: const ValueKey('sf-review-xlsx'),
+                  onPressed: _busy ? null : _downloadReview,
+                  icon: const Icon(Icons.download_outlined, size: 18),
+                  label: Text(l10n.sfReviewXlsx),
+                ),
+                Text(l10n.sfReviewHint, style: muted),
+              ]),
+            ),
+            if (sheet.read.any((r) => r.corrected))
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(l10n.sfCorrectedRows(sheet.read.where((r) => r.corrected).length),
+                    key: const ValueKey('sf-corrected'), style: theme.textTheme.bodySmall),
+              ),
+            // Every line that will go in — those the library has, and the
+            // new ones to be registered — with the arithmetic for each.
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.sfGoingIn(ready.length + willRegister), key: const ValueKey('sf-going-in'), style: theme.textTheme.titleSmall),
+            for (final l in [...ready, if (willRegister > 0) ...registrable])
+              ListTile(
+                key: ValueKey('sf-line-${l.janCode}'),
+                dense: true,
+                onTap: _busy ? null : () => _editLine(l),
+                leading: l.doubtful || implausibleQuantity(l.quantity)
+                    ? Tooltip(
+                        message: implausibleQuantity(l.quantity) ? l10n.sfImplausible : l10n.sfDoubtful,
+                        child: Icon(Icons.help_outline, key: ValueKey('sf-doubt-${l.janCode}'), color: theme.colorScheme.error),
+                      )
+                    : null,
+                // The product's own name: the file may write it otherwise,
+                // and the JAN alone decides whose stock it is.
+                title: Text(_known[l.janCode] ?? _book[l.janCode]?.$2 ?? l.name ?? l.janCode),
+                subtitle: Text([
+                  l.janCode,
+                  if (!_known.containsKey(l.janCode)) l10n.sfNewProduct,
+                  if (l.name case final n? when n.trim() != (_known[l.janCode] ?? _book[l.janCode]?.$2 ?? '').trim())
+                    l10n.sfFileName(n),
+                  if (l.merged > 1) l10n.sfMerged(l.merged),
+                  if (implausibleQuantity(l.quantity)) l10n.sfImplausible,
+                ].join(' · ')),
+                trailing: Text(
+                  () {
+                    final before = _onHand[l.janCode] ?? 0;
+                    return _mode == StockFileMode.add
+                        ? l10n.sfLineAdd(before, l.quantity, before + l.quantity)
+                        : l10n.sfLineSet(before, l.quantity, _signedDiff(l.quantity - before));
+                  }(),
+                  key: ValueKey('sf-calc-${l.janCode}'),
+                  style: theme.textTheme.titleSmall,
                 ),
               ),
             if (unknown.isNotEmpty)
@@ -527,13 +651,6 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(l10n.sfNotInLibrary(unknown.length), style: theme.textTheme.labelLarge),
-                    Text(
-                        unknown
-                            .take(10)
-                            .map((l) => [l.janCode, _book[l.janCode]?.$2 ?? l.name ?? ''].join(' ').trim())
-                            .join('、'),
-                        style: theme.textTheme.bodySmall),
-                    const SizedBox(height: AppSpacing.xs),
                     // The whole file lands: products the library lacks are
                     // registered through 価格台帳 (under its name when it has
                     // the JAN, else the file's), then their stock goes in.
@@ -543,14 +660,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                         contentPadding: EdgeInsets.zero,
                         controlAffinity: ListTileControlAffinity.leading,
                         value: _registerNew,
-                        onChanged: _busy ? null : (v) => setState(() => _registerNew = v ?? false),
+                        onChanged: _busy
+                            ? null
+                            : (v) => setState(() {
+                                  _registerNew = v ?? false;
+                                  _checked = false;
+                                }),
                         title: Text(l10n.sfRegisterNew(registrable.length)),
                         subtitle: Text(l10n.sfRegisterNewHint),
                       )
                     else if (!canManage)
                       Text(l10n.sfNeedManage, style: theme.textTheme.bodySmall),
-                    if (unknown.length > registrable.length)
-                      Text(l10n.sfCannotRegister(unknown.length - registrable.length), style: theme.textTheme.bodySmall),
                     TextButton.icon(
                       key: const ValueKey('sf-price-book'),
                       onPressed: () async {
@@ -564,42 +684,47 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ]),
                 ),
               ),
-            const SizedBox(height: AppSpacing.sm),
-            for (final l in ready.take(100))
-              ListTile(
-                key: ValueKey('sf-line-${l.janCode}'),
-                dense: true,
-                onTap: _busy ? null : () => _editLine(l),
-                leading: l.doubtful
-                    ? Tooltip(
-                        message: l10n.sfDoubtful,
-                        child: Icon(Icons.help_outline, key: ValueKey('sf-doubt-${l.janCode}'), color: theme.colorScheme.error),
-                      )
-                    : null,
-                // The product's own name: the file may write it otherwise,
-                // and the JAN alone decides whose stock it is.
-                title: Text(_known[l.janCode] ?? l.name ?? l.janCode),
-                subtitle: Text([
-                  l.janCode,
-                  if (l.name case final n? when n.trim() != (_known[l.janCode] ?? '').trim()) l10n.sfFileName(n),
-                  if (l.merged > 1) l10n.sfMerged(l.merged),
-                ].join(' · ')),
-                trailing: Text(
-                  () {
-                    final before = _onHand[l.janCode] ?? 0;
-                    return _mode == StockFileMode.add
-                        ? l10n.sfLineAdd(before, l.quantity, before + l.quantity)
-                        : l10n.sfLineSet(before, l.quantity, _signedDiff(l.quantity - before));
-                  }(),
-                  key: ValueKey('sf-calc-${l.janCode}'),
-                  style: theme.textTheme.titleSmall,
+            // Every row that will not go in, and why — none hidden.
+            if (leftOut.isNotEmpty || problems.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(l10n.sfLeftOut(leftOut.length + problems.length), key: const ValueKey('sf-left-out'), style: theme.textTheme.titleSmall),
+              for (final p in problems)
+                ListTile(
+                  key: ValueKey('sf-problem-${p.lineNo}'),
+                  dense: true,
+                  leading: Icon(Icons.block, color: theme.colorScheme.error, size: 20),
+                  title: Text(_problemText(l10n, p)),
                 ),
+              for (final l in leftOut)
+                ListTile(
+                  key: ValueKey('sf-out-${l.janCode}'),
+                  dense: true,
+                  leading: Icon(Icons.block, color: theme.colorScheme.error, size: 20),
+                  title: Text([l.janCode, if (l.name != null) l.name!].join(' ')),
+                  subtitle: Text(canManage && (l.name ?? '').trim().isEmpty && !_book.containsKey(l.janCode)
+                      ? l10n.sfNoNameToRegister
+                      : l10n.sfNotRegistering),
+                ),
+            ],
+            if (notItems > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(l10n.sfNotItems(notItems), key: const ValueKey('sf-not-items'), style: muted),
               ),
-            if (ready.length > 100) Text(l10n.supMore(ready.length - 100), style: muted),
             const SizedBox(height: AppSpacing.md),
+            // The last look: nothing goes in until the person says it is right.
+            CheckboxListTile(
+              key: const ValueKey('sf-checked'),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: _checked,
+              onChanged: _busy ? null : (v) => setState(() => _checked = v ?? false),
+              title: Text(l10n.sfCheckedTitle),
+              subtitle: Text(l10n.sfCheckedHint),
+            ),
             FilledButton.icon(
               key: const ValueKey('sf-apply'),
-              onPressed: !canAdjust || _busy || ready.length + willRegister == 0 || wh == null
+              onPressed: !canAdjust || _busy || !_checked || ready.length + willRegister == 0 || wh == null
                   ? null
                   : () => _apply(wh, register: willRegister > 0),
               icon: const Icon(Icons.inventory_outlined),

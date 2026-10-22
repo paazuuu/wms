@@ -7127,6 +7127,76 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Each row's fate.
   - The viewer side by side and as tabs.
 
+## A stock file is checked in full before it goes in (DB 0147)
+
+- **The reader keeps within the time limit.**
+  - A long PDF used to run past the function's 150 s limit, and the app only
+    saw the timeout.
+  - The extraction now has a 125 s budget (`READ_BUDGET_MS`, `withinTime`).
+  - The checking pass runs only when at least 15 s are left. When it is
+    skipped or fails, every line is flagged 「未確認」 (`not_verified`)
+    instead of failing the whole reading.
+  - A timeout reaches the app as 「ファイルが大きく時間内に読み切れません…」,
+    with the advice to split the file or use the review sheet below.
+- **The prompt names what was being missed.**
+  - Rows that are only a branch, an office, a person in charge, a note or a
+    page number are not line items.
+  - Every page's lines are returned.
+  - A JAN printed under the name, or on another row of the same item, belongs
+    to that item's line.
+- **Every row read is shown.**
+  - 「在庫に入る行」 lists each line that will go in, with its calculation:
+    在庫 → 反映後.
+  - 「入らない行」 lists each line left out and why.
+  - 「商品ではない行」 lists rows with no JAN and no quantity. These are
+    ignored, not counted as errors.
+  - A quantity of 100,000 or more is marked as too large.
+- **確認用Excel (the review sheet).**
+  - 「確認用Excelをダウンロード」 saves every row with these columns: the
+    file's row, JAN, name, maker, 品番, quantity, what will happen, the AI's
+    doubts, and what the AI read.
+  - The JAN and quantity cells that need a look are yellow.
+  - Corrected and uploaded again, it is read cell by cell.
+  - A row whose JAN or quantity differs from what the AI read is marked
+    `human_corrected`. The reading keeps both values, so the viewer shows
+    「AIは … と読みました → … に直しました」. Misreadings can then be
+    counted.
+  - A file the AI cannot read at all can be typed into the same sheet (or the
+    stock template) and uploaded.
+- **Nothing goes in without a final check.**
+  - 「内容を確認しました」 must be ticked before 在庫に反映 is enabled.
+  - Picking another file, or changing a line, unticks it.
+- **Duplicates are caught (0147).**
+  - `master_imports.file_fingerprint` (CRC-32 and length of the bytes) and
+    `lines_fingerprint` (CRC-32 of the sorted `JAN=quantity` list) are
+    recorded after each import by `stock_file_import_fingerprint`.
+  - Before applying, `stock_file_import_duplicates` returns earlier imports
+    that are not undone and have the same file or the same lines.
+  - The app shows them and asks before adding again. In add mode, putting the
+    same file in twice would double the stock.
+- **A file import can be undone (0147).**
+  - `stock_file_import_undo(import)` checks every line first. If any product
+    has already gone below what the file added, it refuses and names it.
+  - Otherwise it posts reverse CORRECTION movements, then marks the import
+    `undone_at` / `cancelled` and audits `inventory.stock_file_undone`.
+  - In 読み取り結果, 「この取込を取り消す」 is offered to whoever has
+    inventory.adjust. 取込履歴 shows 「取り消し済み」.
+  - Tried in a rolled-back transaction: a duplicate was found, the undo
+    brought the stock back to 0, and a second undo after the stock had moved
+    was refused.
+- **Limits.**
+  - The AI does not learn by itself from day to day. Readings improve through
+    the prompt rules, the supplier's 書式メモ and column aliases, and the
+    recorded corrections, which show where it goes wrong.
+- Tests (994 Flutter, 51 Deno pass):
+  - Apply is disabled until the check is ticked.
+  - The duplicate dialog.
+  - Every row is shown, including non-items and implausible quantities.
+  - The review sheet round trip finds the corrections.
+  - The timeout message.
+  - The viewer shows corrections and undo.
+  - The reader gives up by name when it runs out of time.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

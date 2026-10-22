@@ -11205,4 +11205,105 @@ class AppLocalizationsJa extends AppLocalizations {
   String sfConfirmRegister(int n) {
     return 'うち$n件は、新しく商品ライブラリーに登録してから在庫に入れます。';
   }
+
+  @override
+  String get sfTooLong =>
+      'AIの読み取りが時間内に終わりませんでした（ページや商品が多いPDF）。PDFをページごとに分けて選ぶか、記入用のExcelに書き写して選んでください。';
+
+  @override
+  String get sfReviewXlsx => '確認用Excelをダウンロード';
+
+  @override
+  String get sfReviewHint => '全行を確かめ、直したらそのファイルをもう一度「ファイルを選ぶ」で選べます';
+
+  @override
+  String get sfReviewSaved => '確認用Excelを保存しました';
+
+  @override
+  String sfCorrectedRows(int n) {
+    return '確認用Excelで直した行: $n（読み取りと並べて取込履歴に残ります）';
+  }
+
+  @override
+  String sfGoingIn(int n) {
+    return '在庫に入れる行（$n商品）';
+  }
+
+  @override
+  String get sfNewProduct => '新しく登録';
+
+  @override
+  String get sfImplausible => '数量が大きすぎます（JANや金額を読んだかもしれません）';
+
+  @override
+  String sfLeftOut(int n) {
+    return '入れない行（$n）';
+  }
+
+  @override
+  String get sfNoNameToRegister => '商品名がないため登録できません';
+
+  @override
+  String get sfNotRegistering => '商品ライブラリーにないため入れません';
+
+  @override
+  String sfNotItems(int n) {
+    return '商品ではない行 $n（支店名・住所・空行など。無視します）';
+  }
+
+  @override
+  String get sfCheckedTitle => '読み取った内容を確認しました';
+
+  @override
+  String get sfCheckedHint =>
+      '上の一覧（または確認用Excel）で、JANコードと数量に間違いがないことを確かめてから反映してください';
+
+  @override
+  String get sfDuplicateQ => '同じ内容がすでに反映されています';
+
+  @override
+  String get sfDuplicateAdd =>
+      'もう一度足すと、在庫が二重になります。直したファイルを入れ直したいときは、先に前の取込を取込履歴から取り消してください。';
+
+  @override
+  String get sfDuplicateSet => '同じ数に合わせ直すことになります。間違いでなければそのまま進めてください。';
+
+  @override
+  String sfDuplicateLine(int id, String at, String file, String why) {
+    return '取込 #$id（$at・$file）: $why';
+  }
+
+  @override
+  String get sfSameFile => '同じファイル';
+
+  @override
+  String get sfSameLines => '同じJANと数量';
+
+  @override
+  String get sfDuplicateGo => 'それでも反映する';
+
+  @override
+  String get ivUndo => 'この取込を取り消す';
+
+  @override
+  String ivUndoQ(int id) {
+    return '取込 #$id を取り消しますか？';
+  }
+
+  @override
+  String get ivUndoBody =>
+      'この取込で増減した数を、それぞれ元に戻します（修正として記録されます）。その後に出荷などで在庫が減っていて0未満になる商品があるときは、取り消せません。';
+
+  @override
+  String get ivUndone => '取り消し済み';
+
+  @override
+  String ivUndoDone(int id) {
+    return '取込 #$id を取り消しました';
+  }
+
+  @override
+  String ivCorrected(String aiJan, String jan, String aiQty, String qty) {
+    return '確認用Excelで直した: JAN $aiJan → $jan ・ 数量 $aiQty → $qty';
+  }
 }

@@ -84,7 +84,11 @@ class MasterImportsScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(m.originalName ?? '#${m.id}', style: theme.textTheme.titleSmall),
                         ),
-                        StatusPill(tone: _tone(m.status), label: masterStatusLabel(l10n, m.status), dense: true),
+                        StatusPill(
+                          tone: m.undoneAt != null ? StatusTone.neutral : _tone(m.status),
+                          label: m.undoneAt != null ? l10n.ivUndone : masterStatusLabel(l10n, m.status),
+                          dense: true,
+                        ),
                       ]),
                       Text(
                         [

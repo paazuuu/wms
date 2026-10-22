@@ -538,6 +538,7 @@ class MasterImport extends Equatable {
     this.readBy,
     this.originalType,
     this.skippedJans = const {},
+    this.undoneAt,
   });
 
   final int id;
@@ -566,6 +567,9 @@ class MasterImport extends Equatable {
 
   /// JANs a stock file had that 商品ライブラリー did not (0144's unknown_jan).
   final Set<String> skippedJans;
+
+  /// When a stock file's import was taken back (0147).
+  final DateTime? undoneAt;
 
   String? get originalName => files.where((f) => f.kind == 'original').firstOrNull?.name;
 
@@ -600,6 +604,7 @@ class MasterImport extends Equatable {
       readLines: [for (final r in (j['read_lines'] as List? ?? const []).whereType<Map>()) r.cast<String, dynamic>()],
       readBy: j['read_by']?.toString(),
       originalType: j['original_type']?.toString(),
+      undoneAt: DateTime.tryParse('${j['undone_at'] ?? ''}')?.toLocal(),
       skippedJans: {
         for (final p in (j['issues'] as List? ?? const []).whereType<Map>())
           if (p['code'] == 'unknown_jan')

@@ -30,6 +30,46 @@ abstract class StockImportRepository {
   /// Notes on the import what the file was read as (0146), by the AI or
   /// cell by cell, so it can be set beside the original later.
   Future<ApiResult<bool>> note(int importId, List<ReadRow> read, {required bool byAi, int? documentId});
+
+  /// Imports already in with the same file or the same lines (0147).
+  Future<ApiResult<List<DuplicateImport>>> duplicates({String? file, String? lines});
+
+  /// Notes the two fingerprints on an import, right after it.
+  Future<ApiResult<bool>> fingerprint(int importId, {String? file, String? lines});
+
+  /// Takes an import back: every line's change booked the other way.
+  Future<ApiResult<int>> undo(int importId);
+}
+
+/// An earlier import of the same file or the same lines.
+class DuplicateImport {
+  const DuplicateImport({
+    required this.importId,
+    required this.at,
+    this.fileName,
+    this.warehouseName,
+    this.lines = 0,
+    this.change = 0,
+    this.sameFile = false,
+  });
+
+  final int importId;
+  final DateTime at;
+  final String? fileName;
+  final String? warehouseName;
+  final int lines;
+  final int change;
+  final bool sameFile;
+
+  factory DuplicateImport.fromJson(Map<String, dynamic> j) => DuplicateImport(
+        importId: (j['import_id'] as num?)?.toInt() ?? 0,
+        at: DateTime.tryParse('${j['at'] ?? ''}')?.toLocal() ?? DateTime.fromMillisecondsSinceEpoch(0),
+        fileName: j['file_name']?.toString(),
+        warehouseName: j['warehouse_name']?.toString(),
+        lines: (j['lines'] as num?)?.toInt() ?? 0,
+        change: (j['change'] as num?)?.toInt() ?? 0,
+        sameFile: j['same_file'] == true,
+      );
 }
 
 class StockImportRepositoryImpl implements StockImportRepository {
@@ -136,6 +176,38 @@ class StockImportRepositoryImpl implements StockImportRepository {
       return ApiSuccess(r.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<DuplicateImport>>> duplicates({String? file, String? lines}) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_import_duplicates', data: {'p_file': file, 'p_lines': lines});
+      final d = r.data is List && (r.data as List).isNotEmpty && (r.data as List).first is List ? (r.data as List).first : r.data;
+      return ApiSuccess([for (final e in (d as List? ?? const []).whereType<Map>()) DuplicateImport.fromJson(e.cast())]);
+    } on DioException catch (e) {
+      return mapDioError<List<DuplicateImport>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> fingerprint(int importId, {String? file, String? lines}) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_import_fingerprint', data: {'p_id': importId, 'p_file': file, 'p_lines': lines});
+      return ApiSuccess(r.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> undo(int importId) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_import_undo', data: {'p_id': importId});
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(((d as Map)['lines'] as num?)?.toInt() ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
     }
   }
 }

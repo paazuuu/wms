@@ -11438,4 +11438,108 @@ class AppLocalizationsEn extends AppLocalizations {
   String sfConfirmRegister(int n) {
     return '$n of them are first registered as new products in the product library.';
   }
+
+  @override
+  String get sfTooLong =>
+      'The AI could not finish reading in time (a PDF with many pages or items). Choose the PDF a few pages at a time, or copy it into the blank sheet.';
+
+  @override
+  String get sfReviewXlsx => 'Download the sheet to check';
+
+  @override
+  String get sfReviewHint =>
+      'Check every row there; once corrected, choose that file again';
+
+  @override
+  String get sfReviewSaved => 'The sheet to check is saved';
+
+  @override
+  String sfCorrectedRows(int n) {
+    return 'Rows corrected on the sheet: $n (kept beside the reading in the history)';
+  }
+
+  @override
+  String sfGoingIn(int n) {
+    return 'Going into stock ($n products)';
+  }
+
+  @override
+  String get sfNewProduct => 'To be registered';
+
+  @override
+  String get sfImplausible =>
+      'The quantity is too large (a JAN or an amount may have been read)';
+
+  @override
+  String sfLeftOut(int n) {
+    return 'Not going in ($n)';
+  }
+
+  @override
+  String get sfNoNameToRegister => 'No product name to register it under';
+
+  @override
+  String get sfNotRegistering => 'Not in the product library, so not put in';
+
+  @override
+  String sfNotItems(int n) {
+    return '$n rows are not products (a branch, an address, a blank; ignored)';
+  }
+
+  @override
+  String get sfCheckedTitle => 'I have checked what was read';
+
+  @override
+  String get sfCheckedHint =>
+      'Make sure of the JAN codes and quantities in the list above (or the sheet to check) before putting them in';
+
+  @override
+  String get sfDuplicateQ => 'The same has already been put in';
+
+  @override
+  String get sfDuplicateAdd =>
+      'Adding it again counts the stock twice. To put a corrected file in instead, first undo the earlier import from the history.';
+
+  @override
+  String get sfDuplicateSet =>
+      'This sets the stock to the same figures again. Go on if that is what you mean.';
+
+  @override
+  String sfDuplicateLine(int id, String at, String file, String why) {
+    return 'Import #$id ($at, $file): $why';
+  }
+
+  @override
+  String get sfSameFile => 'the same file';
+
+  @override
+  String get sfSameLines => 'the same JANs and quantities';
+
+  @override
+  String get sfDuplicateGo => 'Put it in anyway';
+
+  @override
+  String get ivUndo => 'Undo this import';
+
+  @override
+  String ivUndoQ(int id) {
+    return 'Undo import #$id?';
+  }
+
+  @override
+  String get ivUndoBody =>
+      'Each change this import made is booked back (as a correction). If stock has since gone out so that a product would go below zero, it cannot be undone.';
+
+  @override
+  String get ivUndone => 'Undone';
+
+  @override
+  String ivUndoDone(int id) {
+    return 'Import #$id undone';
+  }
+
+  @override
+  String ivCorrected(String aiJan, String jan, String aiQty, String qty) {
+    return 'Corrected on the sheet: JAN $aiJan → $jan, quantity $aiQty → $qty';
+  }
 }

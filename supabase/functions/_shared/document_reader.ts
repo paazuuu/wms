@@ -1745,7 +1745,10 @@ const EXTRACT_PROMPT =
   "数量・単価・金額が行と行の間の高さに印字されていても、上下の別の商品ではなく、その結合範囲の商品の行に入れる。" +
   "1つの商品が2段(上段にメーカー・JAN、下段に品名など)に分かれて書かれていれば1行にまとめる。" +
   "数量は 金額÷単価 と合うか確かめ、合わなければ印字をもう一度読む。" +
-  "住所・電話・登録番号・合計行は明細にしない。読めない項目は省略。";
+  "住所・電話・登録番号・合計行は明細にしない。支店名・営業所名・担当者・備考・ページ番号だけの行も明細にしない。" +
+  "複数ページのときは、すべてのページの明細を1行も漏らさずに返す。" +
+  "JANコードが品名の下や別の段・別の欄に印字されていても、その商品の行の jan_code に入れる(桁を1つずつ確かめて)。" +
+  "読めない項目は省略。";
 
 const EXTRACT_SCHEMA = {
   type: "object",
@@ -1948,6 +1951,21 @@ export function ownText(own: OwnCompany | null): string {
     "当社の名前や登録番号は入れない。\n";
 }
 
+/** How long one document may take to read, of the function's 150 s: the
+ * rest is for keeping the file, the aliases and the answer. */
+export const READ_BUDGET_MS = 125_000;
+
+/** [p], or an error named [label] when it takes longer than [ms]. */
+export function withinTime<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: number | undefined;
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(label)), Math.max(0, ms));
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
+
 export async function readDocument(
   bytes: Uint8Array,
   mime: string,
@@ -1957,28 +1975,44 @@ export async function readDocument(
 ): Promise<{ header: Header; columns: Column[]; lines: ReadLine[]; verified: boolean; totals: Totals }> {
   const doc = { inline_data: { mime_type: mime, data: encodeBase64(bytes) } };
   const known = hintText(hints);
-  const a = await gemini([{ text: EXTRACT_PROMPT + ownText(own) + known }, doc], EXTRACT_SCHEMA, "extract");
+  const started = Date.now();
+  const a = await withinTime(
+    gemini([{ text: EXTRACT_PROMPT + ownText(own) + known }, doc], EXTRACT_SCHEMA, "extract"),
+    READ_BUDGET_MS,
+    "read_timeout",
+  );
   const aLines = (Array.isArray(a.lines) ? a.lines : []) as RawLine[];
 
+  // The check reads the whole document again. The function is cut off at
+  // 150 s, so when the first reading took most of that the check is not
+  // started (or is given up on), and every line comes back flagged
+  // not_verified for a person to look at — a reading rather than nothing.
   let bLines: RawLine[] | null = null;
-  try {
-    const b = await gemini(
-      [{ text: known + VERIFY_PROMPT + JSON.stringify(aLines.map((l, i) => ({ index: i, ...l }))) }, doc],
-      {
-        type: "object",
-        properties: {
-          lines: {
-            type: "array",
-            items: { type: "object", properties: { index: { type: "integer" }, ...LINE_PROPS } },
+  const left = READ_BUDGET_MS - (Date.now() - started);
+  if (left >= 15_000) {
+    try {
+      const b = await withinTime(
+        gemini(
+          [{ text: known + VERIFY_PROMPT + JSON.stringify(aLines.map((l, i) => ({ index: i, ...l }))) }, doc],
+          {
+            type: "object",
+            properties: {
+              lines: {
+                type: "array",
+                items: { type: "object", properties: { index: { type: "integer" }, ...LINE_PROPS } },
+              },
+            },
+            required: ["lines"],
           },
-        },
-        required: ["lines"],
-      },
-      "verify",
-    );
-    bLines = (Array.isArray(b.lines) ? b.lines : []) as RawLine[];
-  } catch (_) {
-    bLines = null;
+          "verify",
+        ),
+        left,
+        "verify_timeout",
+      );
+      bLines = (Array.isArray(b.lines) ? b.lines : []) as RawLine[];
+    } catch (_) {
+      bLines = null;
+    }
   }
 
   const lines: ReadLine[] = [];
