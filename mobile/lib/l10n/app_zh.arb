@@ -3592,13 +3592,13 @@
   "xlSaved": "已将{n}条保存为Excel",
   "featStockFileImport": "从文件登记库存",
   "featStockFileImportDesc": "根据JAN码和数量表（Excel/CSV），追加或修正所选仓库的库存",
-  "sfIntro": "根据JAN码和数量表登记库存（不使用AI）。第一行需有“JANコード”“数量”标题，其他列忽略。商品本身请在价格台账读取文件后“登记到商品库”。",
+  "sfIntro": "根据JAN码和数量登记库存。Excel/CSV按“JANコード”“数量”标题读取；PDF（文字或扫描）和照片由AI读取，登记前可核对修改。商品本身请通过价格台账登记。",
   "sfWarehouse": "仓库",
   "sfModeAdd": "加到现有库存",
   "sfModeSet": "把库存改为此数",
   "sfModeAddHint": "把数量加到现有库存上（如到货）。",
   "sfModeSetHint": "按文件中的数量设定库存（如盘点后）。差额记为修正。",
-  "sfPick": "选择文件（Excel/CSV）",
+  "sfPick": "选择文件（Excel/CSV/PDF/图片）",
   "sfTemplate": "填写用Excel",
   "sfRead": "{name}：{n}个商品，共{units}件",
   "sfNoHeader": "找不到“JANコード”和“数量”列。请在首行加上这些标题（可使用填写用Excel）。",
@@ -3654,5 +3654,11 @@
   "sfInPriceBook": "{n}个JAN在价格台账中——用台账的商品名登记到商品库后即可追加库存",
   "sfRegisterFromBook": "用台账名称登记（{n}个）",
   "sfRegistered": "已将{n}个登记到商品库",
-  "sfNeedManage": "登记需要“商品管理”权限"
+  "sfNeedManage": "登记需要“商品管理”权限",
+  "sfAiReading": "AI正在读取文件（较长的PDF约需1分钟）…",
+  "sfAiRead": "已由AI读取。请核对JAN码和数量（点击行可修改数量或排除）。需确认{n}行",
+  "sfAiNothing": "AI也无法读取JAN码和数量。请抄写到填写用Excel后再选择。",
+  "sfDoubtful": "AI对此行没有把握（两次读取不一致或JAN校验位不符等）",
+  "sfQty": "数量",
+  "sfRemoveLine": "排除此行"
 }

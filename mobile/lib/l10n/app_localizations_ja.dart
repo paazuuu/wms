@@ -10832,7 +10832,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfIntro =>
-      'JANコードと数量の表から在庫を登録します（AIは使いません）。1行目に「JANコード」「数量」の見出しがあれば、ほかの列は無視します。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。';
+      'JANコードと数量の表から在庫を登録します。Excel・CSVは1行目の「JANコード」「数量」の見出しで読み、PDF（文字のPDF・スキャンした画像のPDF）や写真はAIが読み取ります。AIで読んだ内容は反映前に確かめて直せます。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。';
 
   @override
   String get sfWarehouse => '倉庫';
@@ -10850,7 +10850,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sfModeSetHint => '棚卸の結果などで、在庫をファイルの数に合わせます。差は修正として記録されます。';
 
   @override
-  String get sfPick => 'ファイルを選ぶ（Excel・CSV）';
+  String get sfPick => 'ファイルを選ぶ（Excel・CSV・PDF・画像）';
 
   @override
   String get sfTemplate => '記入用のExcel';
@@ -11075,4 +11075,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfNeedManage => '登録には「商品管理」の権限が必要です';
+
+  @override
+  String get sfAiReading => 'AIでファイルを読み取っています（長いPDFは1分ほどかかります）…';
+
+  @override
+  String sfAiRead(int n) {
+    return 'AIで読み取りました。JANコードと数量を確かめてください（行をタップすると数量を直す・外すことができます）。要確認 $n行';
+  }
+
+  @override
+  String get sfAiNothing =>
+      'AIでもJANコードと数量を読み取れませんでした。記入用のExcelに書き写してから選んでください。';
+
+  @override
+  String get sfDoubtful => 'AIの読み取りに迷いがあった行です（2回の読み取りが違った、JANの検査数字が合わないなど）';
+
+  @override
+  String get sfQty => '数量';
+
+  @override
+  String get sfRemoveLine => 'この行を外す';
 }

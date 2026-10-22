@@ -11,6 +11,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../master_import/data/master_import_repository.dart';
+import '../../master_import/domain/master_import.dart';
+import '../../master_import/presentation/master_import_labels.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
@@ -27,7 +29,8 @@ Future<({String name, Uint8List bytes})?> _pickWithPicker() async {
   final r = await FilePicker.platform.pickFiles(
     withData: true,
     type: FileType.custom,
-    allowedExtensions: const ['xlsx', 'xlsm', 'csv', 'tsv', 'txt'],
+    // Sheets are read here; PDFs (text or scanned), pictures and old .xls by the AI.
+    allowedExtensions: const ['xlsx', 'xlsm', 'csv', 'tsv', 'txt', 'xls', 'pdf', 'jpg', 'jpeg', 'png', 'webp', 'heic'],
   );
   final f = r?.files.firstOrNull;
   if (f?.bytes == null) return null;
@@ -70,6 +73,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   Map<String, (int, String)> _book = const {};
   bool _badFile = false;
   bool _busy = false;
+
+  /// The AI is reading the file (it can take a minute for a long PDF).
+  bool _aiReading = false;
   StockFileResult? _done;
   String? _error;
 
@@ -95,16 +101,47 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _sheet = null;
       _known = const {};
     });
-    StockSheet sheet;
-    try {
-      sheet = parseStockRows(readStockFile(f.name, f.bytes));
-    } on FormatException {
-      setState(() {
-        _busy = false;
-        _badFile = true;
-      });
-      return;
+    StockSheet? sheet;
+    if (readsLocally(f.name)) {
+      try {
+        sheet = parseStockRows(readStockFile(f.name, f.bytes));
+      } on FormatException {
+        sheet = null;
+      }
     }
+    // A PDF, a scan, a photo, an old .xls — or a sheet whose headings were
+    // not found: the AI reads it (import-plan, nothing booked), and every
+    // line it gives is to be checked here before it goes in.
+    if (sheet == null || !sheet.header) {
+      setState(() => _aiReading = true);
+      final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes);
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      switch (r) {
+        case ApiSuccess(:final data):
+          if (data.lines.isEmpty) {
+            setState(() {
+              _busy = false;
+              _aiReading = false;
+              _error = data.aiFailure != null
+                  ? masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure))
+                  : l10n.sfAiNothing;
+            });
+            return;
+          }
+          sheet = stockSheetFromRead([
+            for (final l in data.lines) (l.lineNo, l.janCode, l.supplierName, l.quantity, l.flags.isNotEmpty),
+          ]);
+        case ApiFailure(:final message):
+          setState(() {
+            _busy = false;
+            _aiReading = false;
+            _error = humanizeApiErrorMessage(l10n, message);
+          });
+          return;
+      }
+    }
+    _aiReading = false;
     setState(() => _sheet = sheet);
     await _lookup();
   }
@@ -232,6 +269,21 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     }
   }
 
+  /// One line's quantity corrected by hand, or the line left out: what the
+  /// AI read is checked here, before anything is booked.
+  Future<void> _editLine(StockFileLine line) async {
+    final result = await showDialog<int>(
+      context: context,
+      builder: (_) => _QtyDialog(title: _known[line.janCode] ?? line.name ?? line.janCode, line: line),
+    );
+    final sheet = _sheet;
+    if (result == null || sheet == null || !mounted) return;
+    setState(() => _sheet = sheet.copyWith(lines: [
+          for (final l in sheet.lines)
+            if (l.janCode != line.janCode) l else if (result >= 0) l.copyWith(quantity: result),
+        ]));
+  }
+
   static String _signedDiff(int v) => v > 0 ? '+$v' : '$v';
 
   String _problemText(AppLocalizations l10n, StockFileProblem p) => switch (p.code) {
@@ -326,7 +378,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               label: Text(l10n.sfTemplate),
             ),
           ]),
-          if (_busy) const Padding(padding: EdgeInsets.all(AppSpacing.md), child: LinearProgressIndicator()),
+          if (_busy)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const LinearProgressIndicator(),
+                if (_aiReading) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(l10n.sfAiReading, key: const ValueKey('sf-ai-reading'), style: muted),
+                ],
+              ]),
+            ),
           if (_error case final e?)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.md),
@@ -357,6 +419,25 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             const SizedBox(height: AppSpacing.md),
             Text(l10n.sfRead(_fileName ?? '', sheet.lines.length, sheet.lines.fold<int>(0, (s, l) => s + l.quantity)),
                 key: const ValueKey('sf-read'), style: theme.textTheme.titleSmall),
+            if (sheet.byAi)
+              Card(
+                key: const ValueKey('sf-ai'),
+                color: theme.colorScheme.tertiaryContainer,
+                margin: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Row(children: [
+                    Icon(Icons.auto_awesome_outlined, color: theme.colorScheme.onTertiaryContainer),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        l10n.sfAiRead(sheet.lines.where((l) => l.doubtful).length),
+                        style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
             if (sheet.problems.isNotEmpty)
               Card(
                 key: const ValueKey('sf-problems'),
@@ -413,6 +494,13 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               ListTile(
                 key: ValueKey('sf-line-${l.janCode}'),
                 dense: true,
+                onTap: _busy ? null : () => _editLine(l),
+                leading: l.doubtful
+                    ? Tooltip(
+                        message: l10n.sfDoubtful,
+                        child: Icon(Icons.help_outline, key: ValueKey('sf-doubt-${l.janCode}'), color: theme.colorScheme.error),
+                      )
+                    : null,
                 // The product's own name: the file may write it otherwise,
                 // and the JAN alone decides whose stock it is.
                 title: Text(_known[l.janCode] ?? l.name ?? l.janCode),
@@ -444,6 +532,59 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// A line's quantity, or -1 to leave the line out. The dialog owns its field,
+/// so the field lives exactly as long as the dialog does.
+class _QtyDialog extends StatefulWidget {
+  const _QtyDialog({required this.title, required this.line});
+
+  final String title;
+  final StockFileLine line;
+
+  @override
+  State<_QtyDialog> createState() => _QtyDialogState();
+}
+
+class _QtyDialogState extends State<_QtyDialog> {
+  late final _c = TextEditingController(text: '${widget.line.quantity}');
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        key: const ValueKey('sf-edit-qty'),
+        controller: _c,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(labelText: l10n.sfQty, helperText: widget.line.janCode),
+      ),
+      actions: [
+        TextButton(
+          key: const ValueKey('sf-edit-remove'),
+          onPressed: () => Navigator.pop(context, -1),
+          child: Text(l10n.sfRemoveLine),
+        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('sf-edit-ok'),
+          onPressed: () {
+            final q = int.tryParse(_c.text.replaceAll(RegExp(r'[,\s]'), ''));
+            if (q != null && q >= 0) Navigator.pop(context, q);
+          },
+          child: Text(l10n.actionSave),
+        ),
+      ],
     );
   }
 }

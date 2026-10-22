@@ -9541,13 +9541,13 @@
   },
   "featStockFileImport": "ファイルから在庫登録",
   "featStockFileImportDesc": "JANコードと数量の表（Excel・CSV）から、選んだ倉庫の在庫を追加・修正",
-  "sfIntro": "JANコードと数量の表から在庫を登録します（AIは使いません）。1行目に「JANコード」「数量」の見出しがあれば、ほかの列は無視します。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。",
+  "sfIntro": "JANコードと数量の表から在庫を登録します。Excel・CSVは1行目の「JANコード」「数量」の見出しで読み、PDF（文字のPDF・スキャンした画像のPDF）や写真はAIが読み取ります。AIで読んだ内容は反映前に確かめて直せます。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。",
   "sfWarehouse": "倉庫",
   "sfModeAdd": "今の在庫に足す",
   "sfModeSet": "在庫をこの数にする",
   "sfModeAddHint": "入荷した分などを、今ある数に足します。",
   "sfModeSetHint": "棚卸の結果などで、在庫をファイルの数に合わせます。差は修正として記録されます。",
-  "sfPick": "ファイルを選ぶ（Excel・CSV）",
+  "sfPick": "ファイルを選ぶ（Excel・CSV・PDF・画像）",
   "sfTemplate": "記入用のExcel",
   "sfRead": "{name}: {n}商品・合計{units}個",
   "@sfRead": {
@@ -9837,5 +9837,18 @@
       }
     }
   },
-  "sfNeedManage": "登録には「商品管理」の権限が必要です"
+  "sfNeedManage": "登録には「商品管理」の権限が必要です",
+  "sfAiReading": "AIでファイルを読み取っています（長いPDFは1分ほどかかります）…",
+  "sfAiRead": "AIで読み取りました。JANコードと数量を確かめてください（行をタップすると数量を直す・外すことができます）。要確認 {n}行",
+  "@sfAiRead": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfAiNothing": "AIでもJANコードと数量を読み取れませんでした。記入用のExcelに書き写してから選んでください。",
+  "sfDoubtful": "AIの読み取りに迷いがあった行です（2回の読み取りが違った、JANの検査数字が合わないなど）",
+  "sfQty": "数量",
+  "sfRemoveLine": "この行を外す"
 }

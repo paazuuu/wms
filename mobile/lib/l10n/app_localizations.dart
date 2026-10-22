@@ -19493,7 +19493,7 @@ abstract class AppLocalizations {
   /// No description provided for @sfIntro.
   ///
   /// In ja, this message translates to:
-  /// **'JANコードと数量の表から在庫を登録します（AIは使いません）。1行目に「JANコード」「数量」の見出しがあれば、ほかの列は無視します。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。'**
+  /// **'JANコードと数量の表から在庫を登録します。Excel・CSVは1行目の「JANコード」「数量」の見出しで読み、PDF（文字のPDF・スキャンした画像のPDF）や写真はAIが読み取ります。AIで読んだ内容は反映前に確かめて直せます。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。'**
   String get sfIntro;
 
   /// No description provided for @sfWarehouse.
@@ -19529,7 +19529,7 @@ abstract class AppLocalizations {
   /// No description provided for @sfPick.
   ///
   /// In ja, this message translates to:
-  /// **'ファイルを選ぶ（Excel・CSV）'**
+  /// **'ファイルを選ぶ（Excel・CSV・PDF・画像）'**
   String get sfPick;
 
   /// No description provided for @sfTemplate.
@@ -19867,6 +19867,42 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'登録には「商品管理」の権限が必要です'**
   String get sfNeedManage;
+
+  /// No description provided for @sfAiReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIでファイルを読み取っています（長いPDFは1分ほどかかります）…'**
+  String get sfAiReading;
+
+  /// No description provided for @sfAiRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取りました。JANコードと数量を確かめてください（行をタップすると数量を直す・外すことができます）。要確認 {n}行'**
+  String sfAiRead(int n);
+
+  /// No description provided for @sfAiNothing.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIでもJANコードと数量を読み取れませんでした。記入用のExcelに書き写してから選んでください。'**
+  String get sfAiNothing;
+
+  /// No description provided for @sfDoubtful.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの読み取りに迷いがあった行です（2回の読み取りが違った、JANの検査数字が合わないなど）'**
+  String get sfDoubtful;
+
+  /// No description provided for @sfQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get sfQty;
+
+  /// No description provided for @sfRemoveLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行を外す'**
+  String get sfRemoveLine;
 }
 
 class _AppLocalizationsDelegate

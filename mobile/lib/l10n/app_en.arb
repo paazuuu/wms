@@ -3592,13 +3592,13 @@
   "xlSaved": "{n} rows saved as Excel",
   "featStockFileImport": "Stock from a file",
   "featStockFileImportDesc": "Add or correct a warehouse's stock from a sheet of JAN codes and quantities (Excel or CSV)",
-  "sfIntro": "Puts stock in from a sheet of JAN codes and quantities (no AI). The first row needs the headings JANコード and 数量; other columns are ignored. Products themselves are registered from files through the price book: read the file there, then register to the product library.",
+  "sfIntro": "Puts stock in from JAN codes and quantities. Excel and CSV are read by their JANコード and 数量 headings; PDFs (text or scanned) and photos are read by the AI, and what it read can be checked and corrected before anything goes in. Products themselves are registered through the price book.",
   "sfWarehouse": "Warehouse",
   "sfModeAdd": "Add to the stock",
   "sfModeSet": "Set the stock to this",
   "sfModeAddHint": "Adds each quantity to what the warehouse has, as for goods that arrived.",
   "sfModeSetHint": "Sets the stock to each quantity, as after a count. The difference is booked as a correction.",
-  "sfPick": "Choose a file (Excel, CSV)",
+  "sfPick": "Choose a file (Excel, CSV, PDF, picture)",
   "sfTemplate": "Blank sheet to fill in",
   "sfRead": "{name}: {n} products, {units} units in all",
   "sfNoHeader": "No JANコード and 数量 columns were found. Put these headings in the top row (the blank sheet has them).",
@@ -3654,5 +3654,11 @@
   "sfInPriceBook": "{n} JAN codes are in the price book — register them in the product library under the price book's names to add their stock",
   "sfRegisterFromBook": "Register under the price book names ({n})",
   "sfRegistered": "{n} registered in the product library",
-  "sfNeedManage": "Registering needs the product management permission"
+  "sfNeedManage": "Registering needs the product management permission",
+  "sfAiReading": "The AI is reading the file (a long PDF can take a minute)…",
+  "sfAiRead": "Read by the AI. Check the JAN codes and quantities (tap a line to correct its quantity or leave it out). {n} to check",
+  "sfAiNothing": "The AI could not read JAN codes and quantities either. Copy them into the blank sheet and choose that.",
+  "sfDoubtful": "The AI was not sure of this line (its two readings differed, or the JAN check digit failed)",
+  "sfQty": "Quantity",
+  "sfRemoveLine": "Leave this line out"
 }

@@ -10775,7 +10775,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfIntro =>
-      '根据JAN码和数量表登记库存（不使用AI）。第一行需有“JANコード”“数量”标题，其他列忽略。商品本身请在价格台账读取文件后“登记到商品库”。';
+      '根据JAN码和数量登记库存。Excel/CSV按“JANコード”“数量”标题读取；PDF（文字或扫描）和照片由AI读取，登记前可核对修改。商品本身请通过价格台账登记。';
 
   @override
   String get sfWarehouse => '仓库';
@@ -10793,7 +10793,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sfModeSetHint => '按文件中的数量设定库存（如盘点后）。差额记为修正。';
 
   @override
-  String get sfPick => '选择文件（Excel/CSV）';
+  String get sfPick => '选择文件（Excel/CSV/PDF/图片）';
 
   @override
   String get sfTemplate => '填写用Excel';
@@ -11016,4 +11016,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfNeedManage => '登记需要“商品管理”权限';
+
+  @override
+  String get sfAiReading => 'AI正在读取文件（较长的PDF约需1分钟）…';
+
+  @override
+  String sfAiRead(int n) {
+    return '已由AI读取。请核对JAN码和数量（点击行可修改数量或排除）。需确认$n行';
+  }
+
+  @override
+  String get sfAiNothing => 'AI也无法读取JAN码和数量。请抄写到填写用Excel后再选择。';
+
+  @override
+  String get sfDoubtful => 'AI对此行没有把握（两次读取不一致或JAN校验位不符等）';
+
+  @override
+  String get sfQty => '数量';
+
+  @override
+  String get sfRemoveLine => '排除此行';
 }

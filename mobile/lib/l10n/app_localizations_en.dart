@@ -11055,7 +11055,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sfIntro =>
-      'Puts stock in from a sheet of JAN codes and quantities (no AI). The first row needs the headings JANコード and 数量; other columns are ignored. Products themselves are registered from files through the price book: read the file there, then register to the product library.';
+      'Puts stock in from JAN codes and quantities. Excel and CSV are read by their JANコード and 数量 headings; PDFs (text or scanned) and photos are read by the AI, and what it read can be checked and corrected before anything goes in. Products themselves are registered through the price book.';
 
   @override
   String get sfWarehouse => 'Warehouse';
@@ -11075,7 +11075,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sets the stock to each quantity, as after a count. The difference is booked as a correction.';
 
   @override
-  String get sfPick => 'Choose a file (Excel, CSV)';
+  String get sfPick => 'Choose a file (Excel, CSV, PDF, picture)';
 
   @override
   String get sfTemplate => 'Blank sheet to fill in';
@@ -11303,4 +11303,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sfNeedManage =>
       'Registering needs the product management permission';
+
+  @override
+  String get sfAiReading =>
+      'The AI is reading the file (a long PDF can take a minute)…';
+
+  @override
+  String sfAiRead(int n) {
+    return 'Read by the AI. Check the JAN codes and quantities (tap a line to correct its quantity or leave it out). $n to check';
+  }
+
+  @override
+  String get sfAiNothing =>
+      'The AI could not read JAN codes and quantities either. Copy them into the blank sheet and choose that.';
+
+  @override
+  String get sfDoubtful =>
+      'The AI was not sure of this line (its two readings differed, or the JAN check digit failed)';
+
+  @override
+  String get sfQty => 'Quantity';
+
+  @override
+  String get sfRemoveLine => 'Leave this line out';
 }

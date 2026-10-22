@@ -8,6 +8,8 @@ import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
+import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
+import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/price_book/application/price_book_providers.dart';
 import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
@@ -213,6 +215,92 @@ void main() {
     expect(find.byKey(const ValueKey('sf-unknown')), findsNothing);
     expect(find.text('テストノート A罫'), findsOneWidget);
     expect(find.text('現在庫 0 ＋ 6 ＝ 6'), findsOneWidget);
+  });
+
+  test('what the AI read becomes a stock sheet: JANs checked, the same JAN summed, doubts kept', () {
+    final s = stockSheetFromRead([
+      (1, _jan1, 'テストペン', '10', false),
+      (2, _jan1, 'ﾃｽﾄﾍﾟﾝ', '2', true),
+      (3, '', 'メモ帳', '4', false),
+      (4, _jan2, 'テストノート', '', false),
+    ]);
+    expect(s.byAi, isTrue);
+    expect(s.lines.single, const StockFileLine(lineNo: 1, janCode: _jan1, quantity: 12, name: 'テストペン', merged: 2, doubtful: true));
+    expect(s.problems.map((p) => p.code), ['no_jan', 'bad_quantity']);
+    expect(readsLocally('a.PDF'), isFalse);
+    expect(readsLocally('a.xlsx'), isTrue);
+  });
+
+  testWidgets('a PDF is read by the AI; its lines are checked, corrected and left out before they go in', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = _FakeStock({_jan1: 'テストペン 青', _jan2: 'テストノート'}, stock: {_jan1: 40});
+    final reader = FakeMasterImportRepository(
+      readResult: const MasterRead(lines: [
+        MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ ｱｵ', quantity: '100', flags: ['ai_disagree']),
+        MasterLine(lineNo: 2, janCode: _jan2, supplierName: 'ノート', quantity: '30'),
+      ]),
+    );
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(repo),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+      stockFilePickerProvider.overrideWithValue(() async => (name: '納品書.pdf', bytes: Uint8List.fromList([37, 80, 68, 70]))),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+
+    expect(reader.reads, 1);
+    expect(find.byKey(const ValueKey('sf-ai')), findsOneWidget);
+    expect(find.textContaining('要確認 1行'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-doubt-$_jan1')), findsOneWidget);
+    expect(find.text('現在庫 40 ＋ 100 ＝ 140'), findsOneWidget);
+
+    // The doubtful one was 10, not 100.
+    await tester.tap(find.byKey(const ValueKey('sf-line-$_jan1')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('sf-edit-qty')), '10');
+    await tester.tap(find.byKey(const ValueKey('sf-edit-ok')));
+    await tester.pumpAndSettle();
+    expect(find.text('現在庫 40 ＋ 10 ＝ 50'), findsOneWidget);
+    // The other is left out.
+    await tester.tap(find.byKey(const ValueKey('sf-line-$_jan2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-edit-remove')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-line-$_jan2')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    final (_, mode, lines) = repo.applied.single;
+    expect(mode, StockFileMode.add);
+    expect(lines.map((l) => (l.janCode, l.quantity)), [(_jan1, 10)]);
+    expect(repo.kept.single.$2, '納品書.pdf');
+  });
+
+  testWidgets('when the AI cannot be used, it says why', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(_FakeStock({})),
+      masterImportRepositoryProvider.overrideWithValue(
+          FakeMasterImportRepository(readResult: const MasterRead(lines: [], aiFailure: 'quota'))),
+      stockFilePickerProvider.overrideWithValue(() async => (name: 'scan.jpg', bytes: Uint8List.fromList([1, 2, 3]))),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('AIの利用残高'), findsOneWidget);
   });
 
   testWidgets('without the stock permission the file is read but not put in', (tester) async {

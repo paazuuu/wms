@@ -7050,6 +7050,35 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   library has no supplier tab and no file option; the supplier's own name
   on a term row.
 
+## ファイルから在庫登録 reads PDFs and pictures too (app only)
+
+- **What is read where:**
+  - Excel (.xlsx/.xlsm) and CSV/TSV are read in the app, by their JANコード
+    and 数量 headings.
+  - PDFs (text or scanned), photos (jpg, png, webp, heic), old .xls, and a
+    sheet whose headings are not found go to the AI.
+  - The AI reading is the same one 0138 used (`import-plan` with
+    `dry_run=1`): nothing is booked, and the file is kept as evidence.
+  - `stockSheetFromRead` turns what it read into stock lines. JANs are
+    normalized and checked, the same JAN is summed, and a line the reader
+    flagged (its two readings disagreed, the check digit failed…) is marked
+    要確認.
+- **What the AI read is checked before anything goes in.**
+  - A banner says the file was read by the AI and how many lines to check.
+  - A 要確認 line carries a red ?.
+  - Tapping any line opens its quantity to correct, or 「この行を外す」.
+  - The current-stock arithmetic (現在庫 ＋ ファイル ＝ 反映後) and the
+    confirmation are as before.
+  - The original PDF or picture is kept with the import.
+- When the AI cannot be used (no credit, a refused key, no key, no
+  connection), the screen says which, as 0138's import did. When it reads
+  nothing, it says to copy the lines into the blank sheet.
+- Fixed while testing: the quantity dialog now owns its text field, so the
+  field is not freed while the dialog is still closing.
+- Tests (984 pass): the AI lines as a stock sheet; a PDF read, a doubtful
+  line corrected from 100 to 10, another left out, the corrected line sent
+  and the PDF kept; the reason shown when the AI is out of credit.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

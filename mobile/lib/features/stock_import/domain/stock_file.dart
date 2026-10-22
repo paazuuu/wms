@@ -21,7 +21,14 @@ enum StockFileMode {
 /// One product's quantity from a stock file. [lineNo] is the sheet's own
 /// row number, so a problem can say where to look.
 class StockFileLine extends Equatable {
-  const StockFileLine({required this.lineNo, required this.janCode, required this.quantity, this.name, this.merged = 1});
+  const StockFileLine({
+    required this.lineNo,
+    required this.janCode,
+    required this.quantity,
+    this.name,
+    this.merged = 1,
+    this.doubtful = false,
+  });
 
   final int lineNo;
   final String janCode;
@@ -31,10 +38,23 @@ class StockFileLine extends Equatable {
   /// How many of the file's rows had this JAN (their quantities summed).
   final int merged;
 
+  /// The AI was not sure of this line (its two readings disagreed, or the
+  /// JAN's check digit failed): to be looked at before it goes in.
+  final bool doubtful;
+
+  StockFileLine copyWith({int? quantity}) => StockFileLine(
+        lineNo: lineNo,
+        janCode: janCode,
+        quantity: quantity ?? this.quantity,
+        name: name,
+        merged: merged,
+        doubtful: doubtful,
+      );
+
   Map<String, dynamic> toJson() => {'line_no': lineNo, 'jan_code': janCode, 'quantity': quantity};
 
   @override
-  List<Object?> get props => [lineNo, janCode, quantity, name, merged];
+  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful];
 }
 
 /// A row the file had that cannot be taken: its row number and why.
@@ -55,14 +75,21 @@ class StockFileProblem extends Equatable {
 /// not be read. [header] is false when no JAN and quantity columns were
 /// found at all.
 class StockSheet extends Equatable {
-  const StockSheet({this.lines = const [], this.problems = const [], this.header = true});
+  const StockSheet({this.lines = const [], this.problems = const [], this.header = true, this.byAi = false});
 
   final List<StockFileLine> lines;
   final List<StockFileProblem> problems;
   final bool header;
 
+  /// Read by the AI (a PDF, a picture, or a sheet without the headings),
+  /// not cell by cell: its lines are to be checked by eye.
+  final bool byAi;
+
+  StockSheet copyWith({List<StockFileLine>? lines}) =>
+      StockSheet(lines: lines ?? this.lines, problems: problems, header: header, byAi: byAi);
+
   @override
-  List<Object?> get props => [lines, problems, header];
+  List<Object?> get props => [lines, problems, header, byAi];
 }
 
 String _key(String s) => s.toLowerCase().replaceAll(RegExp(r'[\s　_\-()（）・/]'), '');
@@ -121,6 +148,45 @@ StockSheet parseStockRows(List<List<String>> rows) {
     );
   }
   return StockSheet(lines: byJan.values.toList(), problems: problems);
+}
+
+/// Whether the app reads [fileName] itself (a sheet or CSV); anything else
+/// — a PDF, a scan, a photo, an old .xls — is read by the AI.
+bool readsLocally(String fileName) {
+  final lower = fileName.toLowerCase();
+  return ['.xlsx', '.xlsm', '.csv', '.tsv', '.txt'].any(lower.endsWith);
+}
+
+/// Lines the AI read (import-plan, nothing booked) as a stock sheet: a JAN
+/// and a quantity each, the same JAN summed, and the ones it could not be
+/// sure of marked. [rows] is (row number, JAN, name, quantity, doubtful).
+StockSheet stockSheetFromRead(List<(int, String, String, String, bool)> rows) {
+  final byJan = <String, StockFileLine>{};
+  final problems = <StockFileProblem>[];
+  for (final (no, rawJan, name, rawQty, doubtful) in rows) {
+    final code = normalizeJan(rawJan);
+    if (code == null || code.length < 8 || code.length > 14) {
+      problems.add(StockFileProblem(no, 'no_jan', value: rawJan.isEmpty ? name : rawJan));
+      continue;
+    }
+    final t = rawQty.replaceAll(RegExp(r'[,，\s]'), '');
+    final d = double.tryParse(t);
+    final q = int.tryParse(t) ?? (d != null && d == d.roundToDouble() ? d.toInt() : null);
+    if (q == null || q < 0) {
+      problems.add(StockFileProblem(no, 'bad_quantity', value: rawQty.isEmpty ? '—' : rawQty));
+      continue;
+    }
+    final prev = byJan[code];
+    byJan[code] = StockFileLine(
+      lineNo: prev?.lineNo ?? no,
+      janCode: code,
+      quantity: (prev?.quantity ?? 0) + q,
+      name: prev?.name ?? (name.isEmpty ? null : name),
+      merged: (prev?.merged ?? 0) + 1,
+      doubtful: (prev?.doubtful ?? false) || doubtful,
+    );
+  }
+  return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: true);
 }
 
 /// A stock file's rows: an .xlsx's first sheet, or a UTF-8 CSV / TSV with
