@@ -6,8 +6,6 @@ import 'package:wms_mobile/features/product/application/product_filter.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
-import 'package:wms_mobile/features/price_book/presentation/price_book_import_screen.dart';
-import 'package:wms_mobile/features/price_book/presentation/price_book_pick_screen.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
@@ -327,23 +325,15 @@ void main() {
     await _pump(tester, repo);
 
     expect(find.byKey(const ValueKey('products-add')), findsOneWidget);
-    // 新規登録 offers a file of our own, the price book, and one by hand.
+    // 新規登録 offers the price book and one by hand.
     await tester.tap(find.byKey(const ValueKey('products-add')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('new-file')), findsOneWidget);
     expect(find.byKey(const ValueKey('new-price-book')), findsOneWidget);
     expect(find.byKey(const ValueKey('new-manual')), findsOneWidget);
-    // Products from files come through 価格台帳 only, and stock is not here (0144).
+    // Files are read in 価格台帳, and stock is not here: no second way in.
     expect(find.byKey(const ValueKey('new-master-stock')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('new-file')));
-    await tester.pumpAndSettle();
-    expect(find.byWidgetPredicate((w) => w is PriceBookImportScreen && w.target == ImportTarget.priceBook), findsOneWidget);
-    Navigator.of(tester.element(find.byType(PriceBookImportScreen))).pop();
-    await tester.pumpAndSettle();
-    // Then the items to register are chosen from it.
-    expect(find.byType(PriceBookPickScreen), findsOneWidget);
-    Navigator.of(tester.element(find.byType(PriceBookPickScreen))).pop();
-    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('new-file')), findsNothing);
+    await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('product-menu-1')));
     await tester.pumpAndSettle();

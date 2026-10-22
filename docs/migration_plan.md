@@ -7030,6 +7030,26 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Charts: the product card (dot, table, readout, period), the library view
     (totals, series, files).
 
+## Suppliers in 価格台帳; one way to register products (app only)
+
+- **What suppliers call our products is in 価格台帳**, where their terms are.
+  - Each supplier's row on an item card now carries the supplier's own name
+    and code: 「仕入先A 「テストペン アオ」 TP-B ¥80」. The search already
+    matched them (0128).
+  - 価格台帳's view switch is now 一覧 / 写真 / 仕入先別. 仕入先別 is the
+    supplier cards (0143): what is bought from each, how often, and the next
+    order. It also lists each supplier's names, one by one.
+- **商品ライブラリー loses the 仕入先別 tab** added in 4e87d7c. Its tabs are
+  商品一覧 / アラート / 在庫の推移.
+- **新規登録 no longer has ファイルから登録.** Product files are read in
+  価格台帳 only. 新規登録 offers 価格台帳から取り込む (choose from what was
+  read) and 手で1件.
+- Unchanged: Excel export of everything or the filtered rows, from both
+  screens (f12118d).
+- Tests (981 pass): the supplier view of 価格台帳 with its search; the
+  library has no supplier tab and no file option; the supplier's own name
+  on a term row.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

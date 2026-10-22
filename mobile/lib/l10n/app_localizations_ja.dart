@@ -8770,7 +8770,8 @@ class AppLocalizationsJa extends AppLocalizations {
       'Excel・CSV・PDF・写真などの商品一覧を価格台帳に読み込み、続けて登録する商品を選びます';
 
   @override
-  String get pmNewPriceBookDesc => '価格台帳（仕入先の見積）から、仕入れると決めた商品を選んで取り込みます';
+  String get pmNewPriceBookDesc =>
+      '見積・請求書・商品一覧などのファイルは価格台帳で読み込み、ここで登録する商品を選びます';
 
   @override
   String get pmNewManual => '手動で1件追加';

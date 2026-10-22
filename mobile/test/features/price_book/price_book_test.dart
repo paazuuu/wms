@@ -101,6 +101,20 @@ void main() {
     expect(find.descendant(of: find.byKey(const ValueKey('cl-item-2')), matching: find.text('ライブラリー未登録')), findsOneWidget);
   });
 
+  testWidgets("each supplier's row says what that supplier calls the item", (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final item = PriceBookItem(id: 3, name: 'テストペン 青', janCode: '4909999000014', terms: [
+      PriceBookTerm(
+          id: 31, partnerId: 4, partnerName: '仕入先A', theirName: 'ﾃｽﾄﾍﾟﾝ ｱｵ', theirCode: 'TP-B',
+          unitPrice: 80, validFrom: DateTime(2026, 4, 1)),
+    ]);
+    await pumpApp(tester, const PriceBookScreen(), overrides: [
+      priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository(items: [item])),
+    ]);
+    expect(find.text('仕入先A　「テストペン アオ」　TP-B　¥80'), findsOneWidget);
+  });
+
   testWidgets('items are chosen, taken into the master, and deleted from the library only', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));

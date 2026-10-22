@@ -3003,7 +3003,7 @@
   "pmNew": "新登录",
   "pmNewTitle": "请选择登录商品的方式",
   "pmNewFileDesc": "将商品清单（Excel、CSV、PDF、照片等）读入价格台账，然后选择要登记的商品",
-  "pmNewPriceBookDesc": "从价格台账（供应商报价）中选择决定采购的商品导入",
+  "pmNewPriceBookDesc": "报价单、发票、商品清单等文件在价格台账读取，在此选择要登记的商品",
   "pmNewManual": "手动添加 1 件",
   "pmNewManualDesc": "输入项目逐件登录（没有必填项）",
   "plTabList": "商品列表",

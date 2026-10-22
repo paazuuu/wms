@@ -8730,7 +8730,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pmNewFileDesc => '将商品清单（Excel、CSV、PDF、照片等）读入价格台账，然后选择要登记的商品';
 
   @override
-  String get pmNewPriceBookDesc => '从价格台账（供应商报价）中选择决定采购的商品导入';
+  String get pmNewPriceBookDesc => '报价单、发票、商品清单等文件在价格台账读取，在此选择要登记的商品';
 
   @override
   String get pmNewManual => '手动添加 1 件';

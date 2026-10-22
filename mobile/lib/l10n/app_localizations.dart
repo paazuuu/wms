@@ -15958,7 +15958,7 @@ abstract class AppLocalizations {
   /// No description provided for @pmNewPriceBookDesc.
   ///
   /// In ja, this message translates to:
-  /// **'価格台帳（仕入先の見積）から、仕入れると決めた商品を選んで取り込みます'**
+  /// **'見積・請求書・商品一覧などのファイルは価格台帳で読み込み、ここで登録する商品を選びます'**
   String get pmNewPriceBookDesc;
 
   /// No description provided for @pmNewManual.

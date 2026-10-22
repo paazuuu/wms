@@ -3003,7 +3003,7 @@
   "pmNew": "Register",
   "pmNewTitle": "How do you want to register products?",
   "pmNewFileDesc": "Read a product list (Excel, CSV, PDF or a photo) into the price book, then choose the products to register",
-  "pmNewPriceBookDesc": "Take in the items you will buy from the price book (suppliers' quotations)",
+  "pmNewPriceBookDesc": "Files (quotations, invoices, product lists) are read in the price book; choose here the products to register",
   "pmNewManual": "Add one by hand",
   "pmNewManualDesc": "Enter the fields and register one product (nothing is required)",
   "plTabList": "Products",

@@ -80,6 +80,9 @@ final filteredPriceBookProvider = Provider.autoDispose<AsyncValue<List<PriceBook
 /// List or pictures: the same items, drawn two ways (0125).
 final priceBookPhotoViewProvider = StateProvider<bool>((_) => false);
 
+/// 価格台帳 shown by supplier instead of by item.
+final priceBookSupplierViewProvider = StateProvider<bool>((_) => false);
+
 /// Viewable URLs for the faces of the items listed, signed in one call.
 final priceBookFaceUrlsProvider = FutureProvider.autoDispose<Map<String, String>>((ref) async {
   final items = await ref.watch(priceBookListProvider.future);

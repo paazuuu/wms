@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../product/presentation/product_labels.dart';
 import '../../product/presentation/product_lifecycle_ui.dart';
+import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../application/price_book_providers.dart';
@@ -127,6 +128,10 @@ class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
     final shown = async.valueOrNull ?? const <PriceBookItem>[];
     final selected = _selected;
     final photos = ref.watch(priceBookPhotoViewProvider);
+    // 仕入先別: the suppliers as cards (what is bought from each, how often,
+    // the next order) and what each calls our products — in the price book,
+    // where the suppliers' terms are.
+    final bySupplier = ref.watch(priceBookSupplierViewProvider);
 
     void open(PriceBookItem item) async {
       await Navigator.of(context).push(MaterialPageRoute(builder: (_) => PriceBookItemScreen(itemId: item.id)));
@@ -146,17 +151,25 @@ class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
         actions: [
           if (selected == null) ...[
             // The same items as cards or as large pictures.
-            SegmentedButton<bool>(
+            SegmentedButton<String>(
               key: const ValueKey('cl-view'),
               showSelectedIcon: false,
               segments: [
-                ButtonSegment(value: false, icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
-                ButtonSegment(value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
+                ButtonSegment(value: 'list', icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
+                ButtonSegment(value: 'photo', icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
+                ButtonSegment(
+                  value: 'suppliers',
+                  icon: const Icon(Icons.storefront_outlined, key: ValueKey('cl-view-suppliers')),
+                  tooltip: l10n.plTabSuppliers,
+                ),
               ],
-              selected: {photos},
-              onSelectionChanged: (v) => ref.read(priceBookPhotoViewProvider.notifier).state = v.first,
+              selected: {bySupplier ? 'suppliers' : (photos ? 'photo' : 'list')},
+              onSelectionChanged: (v) {
+                ref.read(priceBookSupplierViewProvider.notifier).state = v.first == 'suppliers';
+                if (v.first != 'suppliers') ref.read(priceBookPhotoViewProvider.notifier).state = v.first == 'photo';
+              },
             ),
-            ExcelExportMenu(keyPrefix: 'cl', shown: shown.length, onExport: _export),
+            if (!bySupplier) ExcelExportMenu(keyPrefix: 'cl', shown: shown.length, onExport: _export),
             const SizedBox(width: AppSpacing.sm),
           ],
         ],
@@ -210,7 +223,9 @@ class _PriceBookScreenState extends ConsumerState<PriceBookScreen> {
                 ),
               ),
             ),
-      body: Column(
+      body: bySupplier && selected == null
+          ? const SupplierProductNamesView()
+          : Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
@@ -513,6 +528,9 @@ String? _spec(PriceBookItem i) =>
 /// 掛率 53%  定価 ¥165  入数 10".
 String _termRow(AppLocalizations l10n, PriceBookTerm t) => [
       t.where == null ? t.partnerName : '${t.partnerName}（${t.where}）',
+      // What this supplier calls it, and its code for it.
+      if (t.theirName != null) '「${widenKana(t.theirName!)}」',
+      if (t.theirCode != null && t.theirCode != t.theirName) widenKana(t.theirCode!),
       t.unitPrice == null ? l10n.supNoPrice : _yen(t.unitPrice!),
       if (t.discountRate != null)
         l10n.quoteRate('${(t.discountRate! * 100).toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '')}%'),

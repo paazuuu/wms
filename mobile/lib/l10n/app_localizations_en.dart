@@ -8954,7 +8954,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pmNewPriceBookDesc =>
-      'Take in the items you will buy from the price book (suppliers\' quotations)';
+      'Files (quotations, invoices, product lists) are read in the price book; choose here the products to register';
 
   @override
   String get pmNewManual => 'Add one by hand';

@@ -21,14 +21,12 @@ import 'product_labels.dart';
 import 'product_lifecycle_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../price_book/application/price_book_providers.dart';
-import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../price_book/presentation/price_book_pick_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../home/presentation/feature_link.dart';
-import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../stock_history/presentation/stock_history_views.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
 
@@ -187,13 +185,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             child: Text(l10n.pmNewTitle, style: Theme.of(c).textTheme.titleMedium),
           ),
           ListTile(
-            key: const ValueKey('new-file'),
-            leading: const Icon(Icons.auto_awesome_outlined),
-            title: Text(l10n.pmImportFile),
-            subtitle: Text(l10n.pmNewFileDesc),
-            onTap: () => Navigator.pop(c, 'file'),
-          ),
-          ListTile(
             key: const ValueKey('new-price-book'),
             leading: const Icon(Icons.request_quote_outlined),
             title: Text(l10n.pmFromPriceBook),
@@ -215,13 +206,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     switch (choice) {
       case 'manual':
         await _openForm();
-      // Every product file goes through 価格台帳 (0144): read there, then
-      // the items chosen from it are registered here.
-      case 'file':
-        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookImportScreen()));
-        ref.invalidate(priceBookListProvider);
-        if (!mounted) return;
-        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookPickScreen()));
       case 'price_book':
         await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookPickScreen()));
     }
@@ -430,7 +414,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final alertCount = ref.watch(productAlertsProvider).valueOrNull?.length ?? 0;
 
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
       appBar: selected != null
           ? AppBar(
@@ -498,9 +482,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 tabs: [
                   Tab(key: const ValueKey('pm-tab-list'), text: l10n.plTabList),
                   Tab(key: const ValueKey('pm-tab-alerts'), text: l10n.plTabAlerts(alertCount)),
-                  // What each supplier calls our products, and what is bought
-                  // from whom (仕入先商品名, once a menu item of its own).
-                  Tab(key: const ValueKey('pm-tab-suppliers'), text: l10n.plTabSuppliers),
                   // When, how and from which file stock came in (0145).
                   Tab(key: const ValueKey('pm-tab-stock'), text: l10n.plTabStock),
                 ],
@@ -570,7 +551,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           ],
         ),
         const ProductAlertsTab(),
-        const SupplierProductNamesView(),
         Builder(builder: (_) {
           final id = ref.watch(libraryPaneWarehouseProvider(0));
           return LibraryInflowView(
