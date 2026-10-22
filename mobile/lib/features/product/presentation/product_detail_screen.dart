@@ -28,6 +28,7 @@ import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../inbound/presentation/product_inbound_card.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
+import '../../stock_history/presentation/stock_history_views.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
 /// units (0059), its lots and serials (0060), and how this warehouse handles it
@@ -129,6 +130,9 @@ class ProductDetailScreen extends ConsumerWidget {
                 _WarehouseSettingsCard(product: product, onMessage: _snack),
                 const SizedBox(height: AppSpacing.md),
                 ProductInboundCard(productId: productId),
+                const SizedBox(height: AppSpacing.md),
+                // When, how and from which file its stock changed (0145).
+                ProductStockChartCard(productId: productId, warehouseId: ref.watch(activeWarehouseIdProvider)),
               ],
             ),
           );

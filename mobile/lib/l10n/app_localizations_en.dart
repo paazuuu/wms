@@ -11168,4 +11168,139 @@ class AppLocalizationsEn extends AppLocalizations {
   String miStockFileSummary(int n, int change) {
     return 'Stock file: $n products, change $change';
   }
+
+  @override
+  String get shFileStock => 'Stock from a file';
+
+  @override
+  String get shFileMaster => 'Products and stock from a file';
+
+  @override
+  String get shReceipt => 'Receiving';
+
+  @override
+  String get shAdjust => 'Correction or count';
+
+  @override
+  String get shShip => 'Shipping';
+
+  @override
+  String get shTransfer => 'Transfer';
+
+  @override
+  String get shOther => 'Other';
+
+  @override
+  String get sgFile => 'From files';
+
+  @override
+  String get sgReceipt => 'Receiving';
+
+  @override
+  String get sgAdjust => 'Corrections and counts';
+
+  @override
+  String get sgOther => 'Other (transfers etc.)';
+
+  @override
+  String shDays(int n) {
+    return '$n days';
+  }
+
+  @override
+  String get shProductTitle => 'Stock over time';
+
+  @override
+  String get shStock => 'Stock';
+
+  @override
+  String get shFromFile => 'Added from a file';
+
+  @override
+  String shNoChanges(int n) {
+    return 'No stock changes in this period (stock now: $n)';
+  }
+
+  @override
+  String shSummary(int start, int now) {
+    return 'Start of period $start → now $now';
+  }
+
+  @override
+  String shAfter(int n) {
+    return '→ $n';
+  }
+
+  @override
+  String get shAllWarehouses => 'All warehouses';
+
+  @override
+  String shUnits(String n) {
+    return '$n units';
+  }
+
+  @override
+  String get shLibraryChartTitle => 'Units added so far, by how they came in';
+
+  @override
+  String get shLibraryEmpty => 'No stock was added in this period';
+
+  @override
+  String shFilesTitle(int n) {
+    return 'Files that changed stock ($n)';
+  }
+
+  @override
+  String get shNoFiles => 'No stock came from files in this period';
+
+  @override
+  String shFileLine(int products, String units) {
+    return '$products products, $units units';
+  }
+
+  @override
+  String get plTabStock => 'Stock over time';
+
+  @override
+  String sfLineAdd(int before, int qty, int after) {
+    return 'Now $before + $qty = $after';
+  }
+
+  @override
+  String sfLineSet(int before, int qty, String diff) {
+    return 'Now $before → $qty ($diff)';
+  }
+
+  @override
+  String sfFileName(String name) {
+    return 'In the file: $name';
+  }
+
+  @override
+  String get sfSetWarning =>
+      'This replaces the stock with the file\'s figures. To add goods that arrived, choose “Add to the stock”.';
+
+  @override
+  String sfConfirmTotals(int before, int after) {
+    return 'Stock in all: $before → $after';
+  }
+
+  @override
+  String sfInPriceBook(int n) {
+    return '$n JAN codes are in the price book — register them in the product library under the price book\'s names to add their stock';
+  }
+
+  @override
+  String sfRegisterFromBook(int n) {
+    return 'Register under the price book names ($n)';
+  }
+
+  @override
+  String sfRegistered(int n) {
+    return '$n registered in the product library';
+  }
+
+  @override
+  String get sfNeedManage =>
+      'Registering needs the product management permission';
 }

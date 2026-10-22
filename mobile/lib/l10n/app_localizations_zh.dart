@@ -10883,4 +10883,137 @@ class AppLocalizationsZh extends AppLocalizations {
   String miStockFileSummary(int n, int change) {
     return '库存文件：$n个商品，增减$change件';
   }
+
+  @override
+  String get shFileStock => '从文件登记库存';
+
+  @override
+  String get shFileMaster => '从文件登记商品与库存';
+
+  @override
+  String get shReceipt => '入库・检品';
+
+  @override
+  String get shAdjust => '手动修正・盘点';
+
+  @override
+  String get shShip => '出库';
+
+  @override
+  String get shTransfer => '仓库间调拨';
+
+  @override
+  String get shOther => '其他';
+
+  @override
+  String get sgFile => '文件导入';
+
+  @override
+  String get sgReceipt => '入库・检品';
+
+  @override
+  String get sgAdjust => '手动修正・盘点';
+
+  @override
+  String get sgOther => '其他（调拨等）';
+
+  @override
+  String shDays(int n) {
+    return '$n天';
+  }
+
+  @override
+  String get shProductTitle => '库存推移';
+
+  @override
+  String get shStock => '库存数';
+
+  @override
+  String get shFromFile => '从文件追加';
+
+  @override
+  String shNoChanges(int n) {
+    return '此期间无库存变动（当前库存$n）';
+  }
+
+  @override
+  String shSummary(int start, int now) {
+    return '期初$start → 当前$now';
+  }
+
+  @override
+  String shAfter(int n) {
+    return '→ $n';
+  }
+
+  @override
+  String get shAllWarehouses => '全部仓库';
+
+  @override
+  String shUnits(String n) {
+    return '$n件';
+  }
+
+  @override
+  String get shLibraryChartTitle => '累计追加数量（按方式）';
+
+  @override
+  String get shLibraryEmpty => '此期间没有追加库存';
+
+  @override
+  String shFilesTitle(int n) {
+    return '改变库存的文件（$n个）';
+  }
+
+  @override
+  String get shNoFiles => '此期间没有从文件登记的库存';
+
+  @override
+  String shFileLine(int products, String units) {
+    return '$products个商品・$units件';
+  }
+
+  @override
+  String get plTabStock => '库存推移';
+
+  @override
+  String sfLineAdd(int before, int qty, int after) {
+    return '当前$before ＋ $qty ＝ $after';
+  }
+
+  @override
+  String sfLineSet(int before, int qty, String diff) {
+    return '当前$before → $qty（$diff）';
+  }
+
+  @override
+  String sfFileName(String name) {
+    return '文件中的写法：$name';
+  }
+
+  @override
+  String get sfSetWarning => '此方式会清除当前库存并替换为文件数量。追加到货请选择“加到现有库存”。';
+
+  @override
+  String sfConfirmTotals(int before, int after) {
+    return '库存合计：$before → $after';
+  }
+
+  @override
+  String sfInPriceBook(int n) {
+    return '$n个JAN在价格台账中——用台账的商品名登记到商品库后即可追加库存';
+  }
+
+  @override
+  String sfRegisterFromBook(int n) {
+    return '用台账名称登记（$n个）';
+  }
+
+  @override
+  String sfRegistered(int n) {
+    return '已将$n个登记到商品库';
+  }
+
+  @override
+  String get sfNeedManage => '登记需要“商品管理”权限';
 }

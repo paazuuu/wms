@@ -8,6 +8,8 @@ import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
+import 'package:wms_mobile/features/price_book/application/price_book_providers.dart';
+import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_file_import_screen.dart';
@@ -22,15 +24,25 @@ const _jan2 = '4909999000021';
 const _jan3 = '4909999000038';
 
 class _FakeStock implements StockImportRepository {
-  _FakeStock(this.products);
+  _FakeStock(this.products, {this.stock = const {}, this.book = const {}});
 
   final Map<String, String> products;
+  final Map<String, int> stock;
+  final Map<String, (int, String)> book;
   final applied = <(int, StockFileMode, List<StockFileLine>)>[];
   final kept = <(int, String)>[];
 
   @override
   Future<ApiResult<Map<String, String>>> known(List<String> jans) async =>
       ApiSuccess({for (final j in jans) if (products.containsKey(j)) j: products[j]!});
+
+  @override
+  Future<ApiResult<Map<String, int>>> onHand(int warehouseId, List<String> jans) async =>
+      ApiSuccess({for (final j in jans) if (stock.containsKey(j)) j: stock[j]!});
+
+  @override
+  Future<ApiResult<Map<String, (int, String)>>> inPriceBook(List<String> jans) async =>
+      ApiSuccess({for (final j in jans) if (book.containsKey(j)) j: book[j]!});
 
   @override
   Future<ApiResult<StockFileResult>> apply(int warehouseId, StockFileMode mode, List<StockFileLine> lines,
@@ -95,7 +107,7 @@ void main() {
   testWidgets('a file is read, a JAN not in the library is left out, and the rest go into the warehouse', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final repo = _FakeStock({_jan1: 'テストペン 青', _jan2: 'テストノート'});
+    final repo = _FakeStock({_jan1: 'テストペン 青', _jan2: 'テストノート'}, stock: {_jan1: 4});
     final csv = Uint8List.fromList(utf8.encode('JANコード,数量\n$_jan1,10\n$_jan2,3\n$_jan3,8\nx,1\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
       _signedIn(['inventory.adjust']),
@@ -117,10 +129,14 @@ void main() {
     expect(find.byKey(const ValueKey('sf-unknown')), findsOneWidget);
     expect(find.text('テストペン 青'), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-line-$_jan3')), findsNothing);
+    // Set: said plainly, with what each becomes.
+    expect(find.byKey(const ValueKey('sf-set-warning')), findsOneWidget);
+    expect(find.text('現在庫 4 → 10（+6）'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     expect(find.text('本社倉庫の在庫に反映しますか？'), findsOneWidget);
+    expect(find.text('在庫の合計: 4 → 13'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('sf-confirm')));
     await tester.pumpAndSettle();
 
@@ -130,6 +146,73 @@ void main() {
     expect(lines.map((l) => l.janCode), [_jan1, _jan2]);
     expect(repo.kept.single, (12, '在庫.csv'));
     expect(find.byKey(const ValueKey('sf-done')), findsOneWidget);
+  });
+
+  testWidgets('a file adds to the stock there is; its own name for a product does not matter, the JAN does', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = _FakeStock({_jan1: 'テストペン 青'}, stock: {_jan1: 40});
+    // The supplier calls it something else, twice.
+    final csv = Uint8List.fromList(utf8.encode('JANコード,商品名,数量\n$_jan1,ﾃｽﾄﾍﾟﾝ ｱｵ,10\n$_jan1,テストペン(青),5\n'));
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(repo),
+      stockFilePickerProvider.overrideWithValue(() async => (name: '入荷.csv', bytes: csv)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('sf-set-warning')), findsNothing);
+    expect(find.text('テストペン 青'), findsOneWidget);
+    expect(find.textContaining('ファイルでの表記: ﾃｽﾄﾍﾟﾝ ｱｵ'), findsOneWidget);
+    expect(find.textContaining('同じJANの2行を合計'), findsOneWidget);
+    expect(find.text('現在庫 40 ＋ 15 ＝ 55'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    expect(find.text('在庫の合計: 40 → 55'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    final (_, mode, lines) = repo.applied.single;
+    expect(mode, StockFileMode.add);
+    expect(lines.single.quantity, 15);
+  });
+
+  testWidgets('a JAN in the price book is registered under its name there, then added', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final products = <String, String>{};
+    final repo = _FakeStock(products, book: {_jan2: (7, 'テストノート A罫')});
+    final book = FakePriceBookRepository(items: const [PriceBookItem(id: 7, name: 'テストノート A罫', janCode: _jan2)]);
+    final csv = Uint8List.fromList(utf8.encode('JAN,品名,数量\n$_jan2,ノート,6\n'));
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust', 'product.manage']),
+      stockImportRepositoryProvider.overrideWithValue(repo),
+      priceBookRepositoryProvider.overrideWithValue(book),
+      stockFilePickerProvider.overrideWithValue(() async => (name: 'a.csv', bytes: csv)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-unknown')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-apply')), findsOneWidget);
+    expect(tester.widget<ButtonStyleButton>(find.byKey(const ValueKey('sf-apply'))).onPressed, isNull);
+
+    // Registering makes it a product, under the price book's name.
+    products[_jan2] = 'テストノート A罫';
+    await tester.tap(find.byKey(const ValueKey('sf-register-book')));
+    await tester.pumpAndSettle();
+    expect(book.toMaster.single, [7]);
+    expect(find.byKey(const ValueKey('sf-unknown')), findsNothing);
+    expect(find.text('テストノート A罫'), findsOneWidget);
+    expect(find.text('現在庫 0 ＋ 6 ＝ 6'), findsOneWidget);
   });
 
   testWidgets('without the stock permission the file is read but not put in', (tester) async {

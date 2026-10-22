@@ -10940,4 +10940,138 @@ class AppLocalizationsJa extends AppLocalizations {
   String miStockFileSummary(int n, int change) {
     return '在庫ファイル: $n商品・増減 $change個';
   }
+
+  @override
+  String get shFileStock => 'ファイルから在庫登録';
+
+  @override
+  String get shFileMaster => 'ファイルから商品・在庫登録';
+
+  @override
+  String get shReceipt => '入荷・検品';
+
+  @override
+  String get shAdjust => '手動修正・棚卸';
+
+  @override
+  String get shShip => '出荷';
+
+  @override
+  String get shTransfer => '倉庫間移動';
+
+  @override
+  String get shOther => 'その他';
+
+  @override
+  String get sgFile => 'ファイル取込';
+
+  @override
+  String get sgReceipt => '入荷・検品';
+
+  @override
+  String get sgAdjust => '手動修正・棚卸';
+
+  @override
+  String get sgOther => 'その他（移動など）';
+
+  @override
+  String shDays(int n) {
+    return '$n日';
+  }
+
+  @override
+  String get shProductTitle => '在庫の推移';
+
+  @override
+  String get shStock => '在庫数';
+
+  @override
+  String get shFromFile => 'ファイルから追加';
+
+  @override
+  String shNoChanges(int n) {
+    return 'この期間に在庫の動きはありません（今の在庫 $n）';
+  }
+
+  @override
+  String shSummary(int start, int now) {
+    return '期間のはじめ $start → 今 $now';
+  }
+
+  @override
+  String shAfter(int n) {
+    return '→ $n';
+  }
+
+  @override
+  String get shAllWarehouses => '全倉庫';
+
+  @override
+  String shUnits(String n) {
+    return '$n個';
+  }
+
+  @override
+  String get shLibraryChartTitle => '追加された数の累計（方法別）';
+
+  @override
+  String get shLibraryEmpty => 'この期間に追加された在庫はありません';
+
+  @override
+  String shFilesTitle(int n) {
+    return '在庫を変えたファイル（$n件）';
+  }
+
+  @override
+  String get shNoFiles => 'この期間にファイルからの在庫登録はありません';
+
+  @override
+  String shFileLine(int products, String units) {
+    return '$products商品・$units個';
+  }
+
+  @override
+  String get plTabStock => '在庫の推移';
+
+  @override
+  String sfLineAdd(int before, int qty, int after) {
+    return '現在庫 $before ＋ $qty ＝ $after';
+  }
+
+  @override
+  String sfLineSet(int before, int qty, String diff) {
+    return '現在庫 $before → $qty（$diff）';
+  }
+
+  @override
+  String sfFileName(String name) {
+    return 'ファイルでの表記: $name';
+  }
+
+  @override
+  String get sfSetWarning =>
+      'この方法では今の在庫は消え、ファイルの数に置き換わります。入荷した分を足すときは「今の在庫に足す」を選んでください。';
+
+  @override
+  String sfConfirmTotals(int before, int after) {
+    return '在庫の合計: $before → $after';
+  }
+
+  @override
+  String sfInPriceBook(int n) {
+    return '価格台帳にあるJAN $n件 — 台帳の商品名で商品ライブラリーに登録すれば、在庫に足せます';
+  }
+
+  @override
+  String sfRegisterFromBook(int n) {
+    return '台帳の名前で登録（$n件）';
+  }
+
+  @override
+  String sfRegistered(int n) {
+    return '$n件を商品ライブラリーに登録しました';
+  }
+
+  @override
+  String get sfNeedManage => '登録には「商品管理」の権限が必要です';
 }

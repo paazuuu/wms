@@ -6965,6 +6965,71 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     the file kept, nothing without the permission.
   - The history row; 新規登録 goes through 価格台帳.
 
+## Stock files add to what is there; the JAN decides; stock over time as charts (0145)
+
+- **A stock file adds to the stock there is.** In ファイルから在庫登録 each
+  line shows 「現在庫 40 ＋ 15 ＝ 55」 for the chosen warehouse. The
+  confirmation gives the total before and after.
+  - 今の在庫に足す stays the default.
+  - 在庫をこの数にする shows a warning every time it is chosen, and each line
+    reads 「現在庫 4 → 10（+6）」.
+  - The screen also opens from 商品ライブラリー (a button in the app bar).
+- **The JAN decides whose stock it is, not the name in the file.**
+  - Lines are matched to 商品ライブラリー by JAN and shown under the
+    product's own name. A different name in the file appears as
+    「ファイルでの表記: …」.
+  - The same JAN on several rows is one line, its quantities summed (as
+    before).
+  - A JAN the library does not have but 価格台帳 does can be registered from
+    the screen under the price book's name (`price_book_to_products`, needs
+    product.manage). It is then added like the rest.
+  - Reading a product file into 価格台帳 already kept an existing item's
+    name when its JAN matched (0128). The file's own name goes to that
+    supplier's term (their_name).
+- **Stock over time (BI), DB 0145, read-only:**
+  - `stock_movement_method` names how each stock movement came about:
+    - file_stock: ファイルから在庫登録
+    - file_master: ファイルから商品・在庫登録
+    - receipt: 入荷・検品
+    - adjust: 手動修正・棚卸
+    - ship: 出荷
+    - transfer: 倉庫間移動
+    - other
+  - `product_stock_history(product, warehouse, days)` returns a product's
+    changes, each with when, how, which file (`master_imports.original_name`)
+    and which warehouse. It also gives the stock at the start of the period
+    and now.
+  - `library_stock_inflow(warehouse, days)` returns units in and out per day
+    and method, and each file that changed stock: when, which file, how,
+    products, units and by whom.
+  - Checked against the live data: import #3 gave 9 products and 4,106
+    units, matching its movements.
+- **Charts** (`core/ui/time_line_chart.dart`, drawn in Flutter):
+  - Hairline grid, 2px lines, names at the line ends, and a crosshair whose
+    readout lists every series at the nearest date (hover or tap).
+  - Colors are four fixed slots (blue, orange, aqua, yellow), validated for
+    colour-blind separation in light and dark. Two light steps are under 3:1
+    on white, so every chart has labels and a table.
+  - 商品詳細 → 在庫の推移:
+    - A stepped line of the stock, with an orange dot where a file added to
+      it.
+    - Under it, every change, newest first: ±quantity, how, file, warehouse,
+      and the stock after.
+    - Periods: 30, 90 and 365 days.
+  - 商品ライブラリー → 在庫の推移 (fourth tab), for the first pane's
+    warehouse:
+    - Units added in the period by how: ファイル取込, 入荷・検品,
+      手動修正・棚卸, その他.
+    - Their running totals as stepped lines.
+    - A table of every file that changed stock.
+- Tests (979 pass):
+  - Stock import: add math, set warning and math, a different name in the
+    file, rows summed, registering from 価格台帳.
+  - History: levels from the period start to today, running totals per
+    method.
+  - Charts: the product card (dot, table, readout, period), the library view
+    (totals, series, files).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -9683,5 +9683,159 @@
         "type": "int"
       }
     }
-  }
+  },
+  "shFileStock": "ファイルから在庫登録",
+  "shFileMaster": "ファイルから商品・在庫登録",
+  "shReceipt": "入荷・検品",
+  "shAdjust": "手動修正・棚卸",
+  "shShip": "出荷",
+  "shTransfer": "倉庫間移動",
+  "shOther": "その他",
+  "sgFile": "ファイル取込",
+  "sgReceipt": "入荷・検品",
+  "sgAdjust": "手動修正・棚卸",
+  "sgOther": "その他（移動など）",
+  "shDays": "{n}日",
+  "@shDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shProductTitle": "在庫の推移",
+  "shStock": "在庫数",
+  "shFromFile": "ファイルから追加",
+  "shNoChanges": "この期間に在庫の動きはありません（今の在庫 {n}）",
+  "@shNoChanges": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shSummary": "期間のはじめ {start} → 今 {now}",
+  "@shSummary": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "now": {
+        "type": "int"
+      }
+    }
+  },
+  "shAfter": "→ {n}",
+  "@shAfter": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shAllWarehouses": "全倉庫",
+  "shUnits": "{n}個",
+  "@shUnits": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "shLibraryChartTitle": "追加された数の累計（方法別）",
+  "shLibraryEmpty": "この期間に追加された在庫はありません",
+  "shFilesTitle": "在庫を変えたファイル（{n}件）",
+  "@shFilesTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shNoFiles": "この期間にファイルからの在庫登録はありません",
+  "shFileLine": "{products}商品・{units}個",
+  "@shFileLine": {
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "plTabStock": "在庫の推移",
+  "sfLineAdd": "現在庫 {before} ＋ {qty} ＝ {after}",
+  "@sfLineAdd": {
+    "placeholders": {
+      "before": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "after": {
+        "type": "int"
+      }
+    }
+  },
+  "sfLineSet": "現在庫 {before} → {qty}（{diff}）",
+  "@sfLineSet": {
+    "placeholders": {
+      "before": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "sfFileName": "ファイルでの表記: {name}",
+  "@sfFileName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sfSetWarning": "この方法では今の在庫は消え、ファイルの数に置き換わります。入荷した分を足すときは「今の在庫に足す」を選んでください。",
+  "sfConfirmTotals": "在庫の合計: {before} → {after}",
+  "@sfConfirmTotals": {
+    "placeholders": {
+      "before": {
+        "type": "int"
+      },
+      "after": {
+        "type": "int"
+      }
+    }
+  },
+  "sfInPriceBook": "価格台帳にあるJAN {n}件 — 台帳の商品名で商品ライブラリーに登録すれば、在庫に足せます",
+  "@sfInPriceBook": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfRegisterFromBook": "台帳の名前で登録（{n}件）",
+  "@sfRegisterFromBook": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfRegistered": "{n}件を商品ライブラリーに登録しました",
+  "@sfRegistered": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfNeedManage": "登録には「商品管理」の権限が必要です"
 }

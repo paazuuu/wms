@@ -19657,6 +19657,216 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫ファイル: {n}商品・増減 {change}個'**
   String miStockFileSummary(int n, int change);
+
+  /// No description provided for @shFileStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから在庫登録'**
+  String get shFileStock;
+
+  /// No description provided for @shFileMaster.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから商品・在庫登録'**
+  String get shFileMaster;
+
+  /// No description provided for @shReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・検品'**
+  String get shReceipt;
+
+  /// No description provided for @shAdjust.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動修正・棚卸'**
+  String get shAdjust;
+
+  /// No description provided for @shShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get shShip;
+
+  /// No description provided for @shTransfer.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫間移動'**
+  String get shTransfer;
+
+  /// No description provided for @shOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get shOther;
+
+  /// No description provided for @sgFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル取込'**
+  String get sgFile;
+
+  /// No description provided for @sgReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・検品'**
+  String get sgReceipt;
+
+  /// No description provided for @sgAdjust.
+  ///
+  /// In ja, this message translates to:
+  /// **'手動修正・棚卸'**
+  String get sgAdjust;
+
+  /// No description provided for @sgOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他（移動など）'**
+  String get sgOther;
+
+  /// No description provided for @shDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}日'**
+  String shDays(int n);
+
+  /// No description provided for @shProductTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の推移'**
+  String get shProductTitle;
+
+  /// No description provided for @shStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫数'**
+  String get shStock;
+
+  /// No description provided for @shFromFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから追加'**
+  String get shFromFile;
+
+  /// No description provided for @shNoChanges.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間に在庫の動きはありません（今の在庫 {n}）'**
+  String shNoChanges(int n);
+
+  /// No description provided for @shSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間のはじめ {start} → 今 {now}'**
+  String shSummary(int start, int now);
+
+  /// No description provided for @shAfter.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ {n}'**
+  String shAfter(int n);
+
+  /// No description provided for @shAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'全倉庫'**
+  String get shAllWarehouses;
+
+  /// No description provided for @shUnits.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}個'**
+  String shUnits(String n);
+
+  /// No description provided for @shLibraryChartTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加された数の累計（方法別）'**
+  String get shLibraryChartTitle;
+
+  /// No description provided for @shLibraryEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間に追加された在庫はありません'**
+  String get shLibraryEmpty;
+
+  /// No description provided for @shFilesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を変えたファイル（{n}件）'**
+  String shFilesTitle(int n);
+
+  /// No description provided for @shNoFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間にファイルからの在庫登録はありません'**
+  String get shNoFiles;
+
+  /// No description provided for @shFileLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'{products}商品・{units}個'**
+  String shFileLine(int products, String units);
+
+  /// No description provided for @plTabStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の推移'**
+  String get plTabStock;
+
+  /// No description provided for @sfLineAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在庫 {before} ＋ {qty} ＝ {after}'**
+  String sfLineAdd(int before, int qty, int after);
+
+  /// No description provided for @sfLineSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在庫 {before} → {qty}（{diff}）'**
+  String sfLineSet(int before, int qty, String diff);
+
+  /// No description provided for @sfFileName.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルでの表記: {name}'**
+  String sfFileName(String name);
+
+  /// No description provided for @sfSetWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'この方法では今の在庫は消え、ファイルの数に置き換わります。入荷した分を足すときは「今の在庫に足す」を選んでください。'**
+  String get sfSetWarning;
+
+  /// No description provided for @sfConfirmTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の合計: {before} → {after}'**
+  String sfConfirmTotals(int before, int after);
+
+  /// No description provided for @sfInPriceBook.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳にあるJAN {n}件 — 台帳の商品名で商品ライブラリーに登録すれば、在庫に足せます'**
+  String sfInPriceBook(int n);
+
+  /// No description provided for @sfRegisterFromBook.
+  ///
+  /// In ja, this message translates to:
+  /// **'台帳の名前で登録（{n}件）'**
+  String sfRegisterFromBook(int n);
+
+  /// No description provided for @sfRegistered.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件を商品ライブラリーに登録しました'**
+  String sfRegistered(int n);
+
+  /// No description provided for @sfNeedManage.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録には「商品管理」の権限が必要です'**
+  String get sfNeedManage;
 }
 
 class _AppLocalizationsDelegate

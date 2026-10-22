@@ -139,6 +139,8 @@ import 'package:wms_mobile/features/supply_chain/application/supply_chain_provid
 import 'package:wms_mobile/features/supply_chain/data/supply_chain_repository.dart';
 import 'package:wms_mobile/features/supply_chain/domain/supply_chain.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
+import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
+import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
 /// no test-harness implementation and its platform channel simply never
@@ -227,6 +229,8 @@ List<Override> _defaultOverrides() => [
       // Kept files (0132) and our company (0131), in memory.
       evidenceRepositoryProvider.overrideWithValue(FakeEvidenceRepository()),
       companyRepositoryProvider.overrideWithValue(FakeCompanyRepository()),
+      // How stock came to be (0145): nothing moved unless a test says so.
+      stockHistoryRepositoryProvider.overrideWithValue(FakeStockHistoryRepository()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -281,6 +285,10 @@ Future<void> pumpAppWith(
           // A product's stock for the hand correction (0138): none here.
           productOnHandProvider.overrideWith((ref, key) async => 0),
           stockCanAdjustProvider.overrideWithValue(false),
+          // How stock came to be (0145): nothing moved here.
+          productStockHistoryProvider
+              .overrideWith((ref, key) async => ProductStockHistory(since: DateTime(2026, 7, 1), start: 0, current: 0)),
+          libraryInflowProvider.overrideWith((ref, key) async => LibraryInflow(since: DateTime(2026, 7, 1))),
           productFaceCacheProvider.overrideWith((ref) => ProductFaceCache(images)),
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(canManageProducts),
@@ -5472,5 +5480,29 @@ class FakeMasterImportRepository implements MasterImportRepository {
     onHandByJan[janCode] = quantity;
     setOnHands.add((janCode, quantity));
     return ApiSuccess((before: before, after: quantity));
+  }
+}
+
+
+/// How stock came to be (0145), from memory.
+class FakeStockHistoryRepository implements StockHistoryRepository {
+  FakeStockHistoryRepository({ProductStockHistory? product, LibraryInflow? library})
+      : productHistory = product,
+        libraryInflow = library;
+
+  ProductStockHistory? productHistory;
+  LibraryInflow? libraryInflow;
+  final asked = <(int?, int)>[];
+
+  @override
+  Future<ApiResult<ProductStockHistory>> product(int productId, {int? warehouseId, int days = 90}) async {
+    asked.add((warehouseId, days));
+    return ApiSuccess(productHistory ?? ProductStockHistory(since: DateTime(2026, 7, 1), start: 0, current: 0));
+  }
+
+  @override
+  Future<ApiResult<LibraryInflow>> library({int? warehouseId, int days = 90}) async {
+    asked.add((warehouseId, days));
+    return ApiSuccess(libraryInflow ?? LibraryInflow(since: DateTime(2026, 7, 1)));
   }
 }

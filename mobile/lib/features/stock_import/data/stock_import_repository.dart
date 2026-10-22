@@ -14,6 +14,12 @@ abstract class StockImportRepository {
   /// The JANs of [jans] that a product in 商品ライブラリー has, with its name.
   Future<ApiResult<Map<String, String>>> known(List<String> jans);
 
+  /// What each of [jans] has in [warehouseId] now (missing = none).
+  Future<ApiResult<Map<String, int>>> onHand(int warehouseId, List<String> jans);
+
+  /// The JANs of [jans] in 価格台帳: the item's id and the name it has there.
+  Future<ApiResult<Map<String, (int, String)>>> inPriceBook(List<String> jans);
+
   /// Puts [lines] into [warehouseId], added or set.
   Future<ApiResult<StockFileResult>> apply(int warehouseId, StockFileMode mode, List<StockFileLine> lines,
       {String? fileName, String? fileType});
@@ -48,6 +54,37 @@ class StockImportRepositoryImpl implements StockImportRepository {
       return ApiSuccess(out);
     } on DioException catch (e) {
       return mapDioError<Map<String, String>>(e);
+    }
+  }
+
+  /// [jans] a few hundred at a time, so the URL stays short.
+  Future<List<Map>> _byJan(String table, String select, List<String> jans, [Map<String, dynamic> extra = const {}]) async {
+    final out = <Map>[];
+    for (var i = 0; i < jans.length; i += 200) {
+      final part = jans.sublist(i, i + 200 > jans.length ? jans.length : i + 200);
+      final r = await _rest.get('/$table', queryParameters: {'select': select, 'jan_code': 'in.(${part.join(',')})', ...extra});
+      out.addAll((r.data as List? ?? const []).whereType<Map>());
+    }
+    return out;
+  }
+
+  @override
+  Future<ApiResult<Map<String, int>>> onHand(int warehouseId, List<String> jans) async {
+    try {
+      final rows = await _byJan('stock_levels', 'jan_code,on_hand', jans, {'warehouse_id': 'eq.$warehouseId'});
+      return ApiSuccess({for (final e in rows) '${e['jan_code']}': (e['on_hand'] as num?)?.toInt() ?? 0});
+    } on DioException catch (e) {
+      return mapDioError<Map<String, int>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<Map<String, (int, String)>>> inPriceBook(List<String> jans) async {
+    try {
+      final rows = await _byJan('price_book_items', 'id,jan_code,name', jans);
+      return ApiSuccess({for (final e in rows) '${e['jan_code']}': ((e['id'] as num).toInt(), '${e['name'] ?? ''}')});
+    } on DioException catch (e) {
+      return mapDioError<Map<String, (int, String)>>(e);
     }
   }
 

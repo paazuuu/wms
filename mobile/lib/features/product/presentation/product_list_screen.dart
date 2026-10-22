@@ -29,6 +29,7 @@ import '../../warehouse_context/domain/warehouse.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../home/presentation/feature_link.dart';
 import '../../inbound/presentation/supplier_product_names_screen.dart';
+import '../../stock_history/presentation/stock_history_views.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
@@ -429,7 +430,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final alertCount = ref.watch(productAlertsProvider).valueOrNull?.length ?? 0;
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
       appBar: selected != null
           ? AppBar(
@@ -479,6 +480,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 ExcelExportMenu(keyPrefix: 'pl', shown: shown.length, onExport: _export),
+                // Stock from a file of JANs and quantities, added to what is there (0144).
+                const FeatureLinkButton('stock_file_import'),
                 // JAN codes in stock that no product claims yet.
                 const FeatureLinkButton('unlinked_jan'),
                 IconButton(
@@ -498,6 +501,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   // What each supplier calls our products, and what is bought
                   // from whom (仕入先商品名, once a menu item of its own).
                   Tab(key: const ValueKey('pm-tab-suppliers'), text: l10n.plTabSuppliers),
+                  // When, how and from which file stock came in (0145).
+                  Tab(key: const ValueKey('pm-tab-stock'), text: l10n.plTabStock),
                 ],
               ),
             ),
@@ -566,6 +571,13 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         ),
         const ProductAlertsTab(),
         const SupplierProductNamesView(),
+        Builder(builder: (_) {
+          final id = ref.watch(libraryPaneWarehouseProvider(0));
+          return LibraryInflowView(
+            warehouseId: id,
+            warehouseName: warehouses.where((w) => w.id == id).firstOrNull?.name,
+          );
+        }),
       ]),
       ),
     );
