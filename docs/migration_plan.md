@@ -7393,6 +7393,31 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - 補充 now shows the unit's name, not its code.
 - Tests (1020 Flutter pass): the unit's names, the shared unit, and 補充.
 
+## A smaller 取込カレンダー; stock files on 検品 too (app only)
+
+- 取込カレンダー:
+  - The grid stretched to the full width, so on a PC each day was about
+    240 px and the month ran off the screen.
+  - The calendar is now at most 480 px wide (`calendarMaxWidth`), with
+    smaller day cells.
+  - From 900 px wide (`calendarSideBySide`) the month's files sit beside
+    the calendar. Narrower, they sit below it.
+- 検品: files registered for inspection (0148) are listed at the top
+  (`StockFileWaiting`), for the warehouse in view.
+  - It shows the first three, each opening its lines to count, plus a link
+    to 取込の検品 when there are more.
+  - It shows under the 全て and 未検品 filters.
+- Checked against the database, rolled back: staging a file lists it in
+  `stock_file_awaiting` and `stock_pending_inspection`, and stock stays the
+  same until it is inspected.
+- Import #13 is in stock without inspection because it was taken in before
+  0148 added the inspection step. It is not on the list, and that is
+  expected.
+- Tests (1022 Flutter pass):
+  - The calendar fits a 1600×800 screen with the list beside it, and sits
+    above the list on a phone.
+  - 検品 lists the waiting file for its own warehouse only.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -11,6 +11,12 @@ import '../data/stock_import_repository.dart';
 import '../domain/stock_ledger.dart';
 import 'import_view_screen.dart';
 
+/// The calendar is never wider than this, so a month is seen whole.
+const double calendarMaxWidth = 480;
+
+/// From this width on, the files of the month sit beside the calendar.
+const double calendarSideBySide = 900;
+
 /// A month's stock files, by the date each is filed under.
 final stockImportMonthProvider =
     FutureProvider.autoDispose.family<List<CalendarImport>, (int, int)>((ref, ym) async {
@@ -84,9 +90,9 @@ class _StockImportCalendarScreenState extends ConsumerState<StockImportCalendarS
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        children: [
+      body: LayoutBuilder(builder: (context, box) {
+        final wide = box.maxWidth >= calendarSideBySide;
+        final nav = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             IconButton(
               key: const ValueKey('cal-prev'),
@@ -101,7 +107,7 @@ class _StockImportCalendarScreenState extends ConsumerState<StockImportCalendarS
               onChanged: (y) => y == null ? null : _go(DateTime(y, y == now.year && _month.month > now.month ? now.month : _month.month)),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text(l10n.calMonth(_month.month), key: const ValueKey('cal-month'), style: theme.textTheme.titleLarge),
+            Text(l10n.calMonth(_month.month), key: const ValueKey('cal-month'), style: theme.textTheme.titleMedium),
             IconButton(
               key: const ValueKey('cal-next'),
               tooltip: l10n.calNext,
@@ -113,23 +119,26 @@ class _StockImportCalendarScreenState extends ConsumerState<StockImportCalendarS
           ]),
           Text(l10n.calKept(keepYears), style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.sm),
-          month.when(
-            loading: () => const Padding(padding: EdgeInsets.all(AppSpacing.xl), child: LoadingView()),
-            error: (e, _) => SizedBox(
-              height: 240,
-              child: ErrorStateView(
-                message: humanizeApiErrorMessage(l10n, '$e'),
-                onRetry: () => ref.invalidate(stockImportMonthProvider(key)),
-              ),
-            ),
-            data: (items) {
-              final byDay = <DateTime, List<CalendarImport>>{};
-              for (final i in items) {
-                byDay.putIfAbsent(i.day, () => []).add(i);
-              }
-              final day = _day;
-              final shown = day == null ? items : (byDay[day] ?? const <CalendarImport>[]);
-              return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        ]);
+        return month.when(
+          loading: () => const Padding(padding: EdgeInsets.all(AppSpacing.xl), child: LoadingView()),
+          error: (e, _) => ErrorStateView(
+            message: humanizeApiErrorMessage(l10n, '$e'),
+            onRetry: () => ref.invalidate(stockImportMonthProvider(key)),
+          ),
+          data: (items) {
+            final byDay = <DateTime, List<CalendarImport>>{};
+            for (final i in items) {
+              byDay.putIfAbsent(i.day, () => []).add(i);
+            }
+            final day = _day;
+            final shown = day == null ? items : (byDay[day] ?? const <CalendarImport>[]);
+            // Small enough to be seen whole: never wider than [calendarMaxWidth].
+            final calendar = ConstrainedBox(
+              key: const ValueKey('cal-calendar'),
+              constraints: const BoxConstraints(maxWidth: calendarMaxWidth),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+                nav,
                 _MonthGrid(
                   month: _month,
                   byDay: byDay,
@@ -137,23 +146,42 @@ class _StockImportCalendarScreenState extends ConsumerState<StockImportCalendarS
                   today: today,
                   onDay: (d) => setState(() => _day = _day == d ? null : d),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  day == null ? l10n.calMonthList(items.length) : l10n.calDayList(DateFormat('y/MM/dd').format(day), shown.length),
-                  key: const ValueKey('cal-list-title'),
-                  style: theme.textTheme.titleSmall,
+              ]),
+            );
+            final list = <Widget>[
+              Text(
+                day == null ? l10n.calMonthList(items.length) : l10n.calDayList(DateFormat('y/MM/dd').format(day), shown.length),
+                key: const ValueKey('cal-list-title'),
+                style: theme.textTheme.titleSmall,
+              ),
+              if (shown.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Text(l10n.calNone, key: const ValueKey('cal-none'), textAlign: TextAlign.center),
                 ),
-                if (shown.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Text(l10n.calNone, key: const ValueKey('cal-none'), textAlign: TextAlign.center),
-                  ),
-                for (final i in shown) _CalendarTile(item: i),
+              for (final i in shown) _CalendarTile(item: i),
+            ];
+            if (wide) {
+              // The month on the left, its files beside it.
+              return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                SingleChildScrollView(padding: const EdgeInsets.all(AppSpacing.md), child: SizedBox(width: calendarMaxWidth, child: calendar)),
+                const VerticalDivider(width: 1),
+                Expanded(
+                  child: ListView(padding: const EdgeInsets.all(AppSpacing.md), children: list),
+                ),
               ]);
-            },
-          ),
-        ],
-      ),
+            }
+            return ListView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              children: [
+                Center(child: calendar),
+                const SizedBox(height: AppSpacing.md),
+                ...list,
+              ],
+            );
+          },
+        );
+      }),
     );
   }
 }
@@ -201,9 +229,9 @@ class _MonthGrid extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: date == today ? Border.all(color: scheme.primary) : null,
               ),
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(2),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text('$d', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: items.isNotEmpty ? FontWeight.bold : null)),
+                Text('$d', style: theme.textTheme.bodySmall?.copyWith(fontWeight: items.isNotEmpty ? FontWeight.bold : null)),
                 if (items.isNotEmpty)
                   Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                     Text(l10n.calCount(items.length), key: ValueKey('cal-count-$d'), style: theme.textTheme.labelSmall),
@@ -219,9 +247,9 @@ class _MonthGrid extends StatelessWidget {
       crossAxisCount: 7,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.3,
-      mainAxisSpacing: 4,
-      crossAxisSpacing: 4,
+      childAspectRatio: 1.15,
+      mainAxisSpacing: 3,
+      crossAxisSpacing: 3,
       children: cells,
     );
   }

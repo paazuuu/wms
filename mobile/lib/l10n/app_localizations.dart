@@ -20797,6 +20797,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'本'**
   String get uomHon;
+
+  /// No description provided for @qcFileWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル取込の検品待ち {n}件'**
+  String qcFileWaiting(int n);
+
+  /// No description provided for @qcFileWaitingHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから登録した在庫です。検品が済むまで在庫に入りません。'**
+  String get qcFileWaitingHint;
+
+  /// No description provided for @qcFileWaitingAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて見る（{n}件）'**
+  String qcFileWaitingAll(int n);
+
+  /// No description provided for @qcFileBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル取込'**
+  String get qcFileBadge;
 }
 
 class _AppLocalizationsDelegate

@@ -10,7 +10,9 @@ import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_import_calendar_screen.dart';
+import 'package:wms_mobile/features/qc/presentation/inspection_list_screen.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_inspection_screen.dart';
+import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 
 import '../../support/harness.dart';
 
@@ -192,5 +194,45 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('cal-day-20')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('cal-none')), findsOneWidget);
+  });
+
+  testWidgets('a file registered for inspection is listed on 検品 too, for its warehouse', (tester) async {
+    AwaitingImport waiting(int id, int wh) => AwaitingImport.fromJson({
+          'id': id, 'original_name': '請求書$id.pdf', 'warehouse_id': wh, 'warehouse_name': '倉庫$wh', 'lines': 9, 'left': 9,
+          'quantity_left': 4100,
+        });
+    final stock = _Stock(waiting: [waiting(21, 1), waiting(22, 2)]);
+    await pumpApp(tester, const QcInspectionListScreen(), overrides: [
+      _signedIn(['inspection.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      activeWarehouseIdProvider.overrideWith((ref) => 1),
+    ]);
+    expect(find.text('ファイル取込の検品待ち 1件'), findsOneWidget);
+    expect(find.byKey(const ValueKey('qc-file-21')), findsOneWidget);
+    expect(find.byKey(const ValueKey('qc-file-22')), findsNothing);
+    expect(find.textContaining('未検品 9/9行'), findsOneWidget);
+  });
+
+  testWidgets('the calendar is small enough to be seen whole, its files beside it on a wide screen', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1600, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final stock = _Stock(month: [
+      CalendarImport.fromJson({'id': 13, 'day': '2026-08-19', 'original_name': '請求書.pdf', 'status': 'stock_done'}),
+    ]);
+    await pumpApp(tester, StockImportCalendarScreen(initialMonth: DateTime(2026, 8)), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+    ]);
+    final cal = tester.getRect(find.byKey(const ValueKey('cal-calendar')));
+    expect(cal.width, lessThanOrEqualTo(calendarMaxWidth));
+    // August 2026 runs to the 31st on the sixth row: still on screen.
+    expect(tester.getRect(find.byKey(const ValueKey('cal-day-31'))).bottom, lessThan(800));
+    expect(tester.getRect(find.byKey(const ValueKey('cal-list-title'))).left, greaterThan(cal.right));
+
+    // A phone: the list under the calendar.
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.pumpAndSettle();
+    final small = tester.getRect(find.byKey(const ValueKey('cal-calendar')));
+    expect(tester.getRect(find.byKey(const ValueKey('cal-list-title'))).top, greaterThan(small.bottom));
   });
 }

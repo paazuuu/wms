@@ -10507,5 +10507,23 @@
       }
     }
   },
-  "uomHon": "本"
+  "uomHon": "本",
+  "qcFileWaiting": "ファイル取込の検品待ち {n}件",
+  "@qcFileWaiting": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcFileWaitingHint": "ファイルから登録した在庫です。検品が済むまで在庫に入りません。",
+  "qcFileWaitingAll": "すべて見る（{n}件）",
+  "@qcFileWaitingAll": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qcFileBadge": "ファイル取込"
 }

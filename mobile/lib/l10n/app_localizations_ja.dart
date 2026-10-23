@@ -11669,4 +11669,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get uomHon => '本';
+
+  @override
+  String qcFileWaiting(int n) {
+    return 'ファイル取込の検品待ち $n件';
+  }
+
+  @override
+  String get qcFileWaitingHint => 'ファイルから登録した在庫です。検品が済むまで在庫に入りません。';
+
+  @override
+  String qcFileWaitingAll(int n) {
+    return 'すべて見る（$n件）';
+  }
+
+  @override
+  String get qcFileBadge => 'ファイル取込';
 }

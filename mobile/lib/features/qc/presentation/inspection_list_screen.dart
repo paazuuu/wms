@@ -13,6 +13,9 @@ import 'qc_result_ui.dart';
 import '../../../core/offline/pending_sync_banner.dart';
 import '../data/offline_inspection_repository.dart';
 import '../../home/presentation/feature_link.dart';
+import '../../stock_import/data/stock_import_repository.dart' show awaitingImportsProvider;
+import '../../stock_import/presentation/stock_inspection_screen.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
 
 /// Inbound inspections for the active warehouse, newest first, filterable by
 /// outcome so an operator can jump straight to what still needs checking.
@@ -91,6 +94,8 @@ class QcInspectionListScreen extends ConsumerWidget {
               ],
             ),
           ),
+          // Stock read in from files waits here too (0148), not only in 取込の検品.
+          if (active == null || active == 'PENDING') const StockFileWaiting(),
           Expanded(
             child: async.when(
               loading: () => LoadingView(message: l10n.loading),
@@ -122,6 +127,64 @@ class QcInspectionListScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Stock files waiting for inspection, for the warehouse in view: the first
+/// few, each opening its lines to count, and a way to all of them.
+class StockFileWaiting extends ConsumerWidget {
+  const StockFileWaiting({super.key});
+
+  static const shown = 3;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final warehouseId = ref.watch(activeWarehouseIdProvider);
+    final all = ref.watch(awaitingImportsProvider).valueOrNull ?? const [];
+    final items = [for (final a in all) if (warehouseId == null || a.warehouseId == warehouseId) a];
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const ValueKey('qc-file-waiting'),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.pending_actions_outlined, size: 18, color: scheme.tertiary),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(child: Text(l10n.qcFileWaiting(items.length), style: theme.textTheme.titleSmall)),
+          if (items.length > shown)
+            TextButton(
+              key: const ValueKey('qc-file-waiting-all'),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockInspectionScreen())),
+              child: Text(l10n.qcFileWaitingAll(items.length)),
+            ),
+        ]),
+        Text(l10n.qcFileWaitingHint, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+        const SizedBox(height: AppSpacing.xs),
+        for (final a in items.take(shown))
+          Card(
+            key: ValueKey('qc-file-${a.id}'),
+            margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: ListTile(
+              dense: true,
+              leading: const StatusAvatar(tone: StatusTone.warning, icon: Icons.pending_actions_outlined),
+              title: Text(l10n.siFile(a.id, a.fileName ?? ''), maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Text([
+                if (a.warehouseName case final w?) w,
+                l10n.siLeft(a.left, a.lines, a.quantityLeft),
+              ].join(' · ')),
+              trailing: StatusPill(tone: StatusTone.warning, label: l10n.qcFileBadge, dense: true),
+              onTap: () async {
+                await Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => StockInspectionDetailScreen(importId: a.id)));
+                ref.invalidate(awaitingImportsProvider);
+              },
+            ),
+          ),
+      ]),
     );
   }
 }

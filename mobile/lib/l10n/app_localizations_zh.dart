@@ -11601,4 +11601,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get uomHon => '支';
+
+  @override
+  String qcFileWaiting(int n) {
+    return '文件导入待验货 $n 件';
+  }
+
+  @override
+  String get qcFileWaitingHint => '从文件登记的库存。验货完成后才计入库存。';
+
+  @override
+  String qcFileWaitingAll(int n) {
+    return '查看全部（$n 件）';
+  }
+
+  @override
+  String get qcFileBadge => '文件导入';
 }

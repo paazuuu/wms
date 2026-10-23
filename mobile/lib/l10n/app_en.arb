@@ -3809,5 +3809,9 @@
   "bwWaiting": "Not looked up yet",
   "bwSave": "Keep the {n} ticked",
   "bwSaved": "Kept {n} weights",
-  "uomHon": "pc"
+  "uomHon": "pc",
+  "qcFileWaiting": "Stock files waiting for inspection: {n}",
+  "qcFileWaitingHint": "Stock registered from a file. It goes into stock once inspected.",
+  "qcFileWaitingAll": "See all ({n})",
+  "qcFileBadge": "Stock file"
 }

@@ -3809,5 +3809,9 @@
   "bwWaiting": "尚未查询",
   "bwSave": "应用已勾选的{n}件",
   "bwSaved": "已应用{n}件重量",
-  "uomHon": "支"
+  "uomHon": "支",
+  "qcFileWaiting": "文件导入待验货 {n} 件",
+  "qcFileWaitingHint": "从文件登记的库存。验货完成后才计入库存。",
+  "qcFileWaitingAll": "查看全部（{n} 件）",
+  "qcFileBadge": "文件导入"
 }

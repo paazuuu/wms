@@ -11914,4 +11914,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uomHon => 'pc';
+
+  @override
+  String qcFileWaiting(int n) {
+    return 'Stock files waiting for inspection: $n';
+  }
+
+  @override
+  String get qcFileWaitingHint =>
+      'Stock registered from a file. It goes into stock once inspected.';
+
+  @override
+  String qcFileWaitingAll(int n) {
+    return 'See all ($n)';
+  }
+
+  @override
+  String get qcFileBadge => 'Stock file';
 }
