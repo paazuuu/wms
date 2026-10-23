@@ -9,7 +9,6 @@ import 'package:printing/printing.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/ui/open_window.dart';
 import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -22,6 +21,10 @@ import '../data/stock_import_repository.dart';
 import '../../notation/presentation/notation_labels.dart';
 import '../../qc/domain/inspection.dart' show normalizeJan;
 import '../domain/stock_file.dart';
+import '../domain/stock_ledger.dart';
+import 'reading_export.dart';
+import 'stock_file_import_screen.dart' show documentDateSourceLabel;
+import 'stock_inspection_screen.dart' show keptUntilText;
 
 /// One import with its lines, for the viewer.
 final importDetailProvider = FutureProvider.autoDispose.family<MasterImport, int>((ref, id) async {
@@ -54,6 +57,9 @@ enum ReadFate {
 
   /// Left out by hand before the stock went in.
   removed,
+
+  /// Kept for inspection, not in stock yet (0148).
+  awaiting,
 }
 
 /// A row as read, beside what became of it.
@@ -89,7 +95,7 @@ List<ReadOutcome> readOutcomes(MasterImport m) {
       for (final l in m.lines)
         ReadOutcome(
           row: ReadRow(lineNo: l.lineNo, jan: l.janCode, name: l.supplierName ?? '', quantity: '${l.quantity}'),
-          fate: ReadFate.inStock,
+          fate: _waiting(m, l) ? ReadFate.awaiting : ReadFate.inStock,
           line: l,
         ),
     ];
@@ -117,39 +123,72 @@ List<ReadOutcome> readOutcomes(MasterImport m) {
           return ReadOutcome(row: r, fate: unknown.contains(jan) ? ReadFate.notInLibrary : ReadFate.removed);
         }
         final total = fileTotals[jan];
-        return ReadOutcome(row: r, fate: ReadFate.inStock, line: line, fileQuantity: total != line.quantity ? total : null);
+        return ReadOutcome(
+            row: r,
+            fate: _waiting(m, line) ? ReadFate.awaiting : ReadFate.inStock,
+            line: line,
+            fileQuantity: total != line.quantity ? total : null);
       }(),
   ];
 }
 
-/// 読み取り結果を見る, and on the web the same in a window of its own to keep
-/// beside the app.
-class ImportViewButtons extends StatelessWidget {
-  const ImportViewButtons({super.key, required this.importId});
+/// A line kept for inspection and not checked in yet (0148).
+bool _waiting(MasterImport m, MasterImportLine l) =>
+    m.status == MasterImportStatus.awaitingInspection && m.undoneAt == null && !l.inspected;
+
+/// What became of a row, in words.
+String readFateText(AppLocalizations l10n, ReadOutcome o) {
+  final n = NumberFormat.decimalPattern();
+  String signed(int v) => v > 0 ? '+${n.format(v)}' : n.format(v);
+  return switch (o.fate) {
+    ReadFate.inStock => l10n.ivFateIn(
+        o.line?.name ?? o.line?.janCode ?? '',
+        n.format(o.line?.onHandBefore ?? 0),
+        n.format(o.line?.onHandAfter ?? 0),
+        signed(o.line?.added ?? 0)),
+    ReadFate.merged => l10n.ivFateMerged,
+    ReadFate.noJan => l10n.ivFateNoJan,
+    ReadFate.badQuantity => l10n.ivFateBadQty,
+    ReadFate.notInLibrary => l10n.ivFateNotInLibrary,
+    ReadFate.removed => l10n.ivFateRemoved,
+    ReadFate.awaiting => l10n.ivFateAwaiting(o.line?.name ?? o.line?.janCode ?? '', n.format(o.line?.quantity ?? 0)),
+  };
+}
+
+/// 読み取り結果を見る; the reading as a sheet in a browser tab of its own
+/// (not the app again); and the same as an Excel file.
+class ImportViewButtons extends ConsumerWidget {
+  const ImportViewButtons({super.key, required this.importId, this.known});
 
   final int importId;
 
+  /// The import, when it is already loaded.
+  final MasterImport? known;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
-      OutlinedButton.icon(
-        key: ValueKey('iv-open-$importId'),
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: importId))),
-        icon: const Icon(Icons.compare_outlined, size: 18),
-        label: Text(l10n.ivOpen),
-      ),
+      if (known == null)
+        OutlinedButton.icon(
+          key: ValueKey('iv-open-$importId'),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: importId))),
+          icon: const Icon(Icons.compare_outlined, size: 18),
+          label: Text(l10n.ivOpen),
+        ),
       if (kIsWeb)
         TextButton.icon(
-          key: ValueKey('iv-window-$importId'),
-          onPressed: () {
-            if (!openAppWindow('/import-view/$importId')) {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: importId)));
-            }
-          },
+          key: ValueKey('iv-tab-$importId'),
+          onPressed: () => openReadingTab(context, ref, importId, known: known),
           icon: const Icon(Icons.open_in_new, size: 18),
-          label: Text(l10n.ivWindow),
+          label: Text(l10n.ivOpenTab),
         ),
+      TextButton.icon(
+        key: ValueKey('iv-xlsx-$importId'),
+        onPressed: () => downloadReading(context, ref, importId, known: known),
+        icon: const Icon(Icons.table_view_outlined, size: 18),
+        label: Text(l10n.ivDownloadXlsx),
+      ),
     ]);
   }
 }
@@ -187,6 +226,8 @@ class ImportViewScreen extends ConsumerWidget {
         ref.invalidate(importDetailProvider(importId));
         ref.invalidate(masterImportsProvider);
         ref.invalidate(productListProvider);
+        ref.invalidate(pendingInspectionProvider);
+        ref.invalidate(awaitingImportsProvider);
         messenger.showSnackBar(SnackBar(content: Text(l10n.ivUndoDone(importId))));
       case ApiFailure(:final message):
         messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
@@ -207,7 +248,7 @@ class ImportViewScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Center(child: Text(l10n.ivUndone, key: const ValueKey('iv-undone'))),
               )
-            else if (m.status == MasterImportStatus.stockDone &&
+            else if ((m.status == MasterImportStatus.stockDone || m.status == MasterImportStatus.awaitingInspection) &&
                 (ref.watch(authControllerProvider).user?.hasPermission('inventory.adjust') ?? false))
               TextButton.icon(
                 key: const ValueKey('iv-undo'),
@@ -395,23 +436,17 @@ class _ReadPane extends StatelessWidget {
     final out = outcomes.where((o) => o.fate != ReadFate.inStock && o.fate != ReadFate.merged).length;
     final doubts = outcomes.where((o) => o.doubtful).length;
     final n = NumberFormat.decimalPattern();
-    String signed(int v) => v > 0 ? '+${n.format(v)}' : n.format(v);
-    String fate(ReadOutcome o) => switch (o.fate) {
-          ReadFate.inStock => l10n.ivFateIn(
-              o.line?.name ?? o.line?.janCode ?? '',
-              n.format(o.line?.onHandBefore ?? 0),
-              n.format(o.line?.onHandAfter ?? 0),
-              signed(o.line?.added ?? 0)),
-          ReadFate.merged => l10n.ivFateMerged,
-          ReadFate.noJan => l10n.ivFateNoJan,
-          ReadFate.badQuantity => l10n.ivFateBadQty,
-          ReadFate.notInLibrary => l10n.ivFateNotInLibrary,
-          ReadFate.removed => l10n.ivFateRemoved,
-        };
+    final waiting = outcomes.where((o) => o.fate == ReadFate.awaiting).length;
     return ListView(
       key: const ValueKey('iv-read'),
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
+        if (m.source == 'stock_file') ...[
+          _NotesPanel(import: m),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        ImportViewButtons(importId: m.id, known: m),
+        const SizedBox(height: AppSpacing.sm),
         Text(l10n.ivRead, style: theme.textTheme.titleSmall),
         const SizedBox(height: AppSpacing.xs),
         Text(
@@ -428,6 +463,7 @@ class _ReadPane extends StatelessWidget {
           Chip(key: const ValueKey('iv-count-in'), label: Text(l10n.ivIn(into))),
           Chip(key: const ValueKey('iv-count-out'), label: Text(l10n.ivOut(out))),
           if (doubts > 0) Chip(key: const ValueKey('iv-count-doubt'), label: Text(l10n.ivDoubts(doubts))),
+          if (waiting > 0) Chip(key: const ValueKey('iv-count-awaiting'), label: Text(l10n.ivAwaitingCount(waiting))),
         ]),
         const SizedBox(height: AppSpacing.sm),
         for (final o in outcomes)
@@ -468,17 +504,144 @@ class _ReadPane extends StatelessWidget {
                 const SizedBox(height: 2),
                 // What became of it.
                 Text(
-                  fate(o),
+                  readFateText(l10n, o),
                   key: ValueKey('iv-fate-${o.row.lineNo}'),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: o.fate == ReadFate.inStock ? null : theme.colorScheme.onSurfaceVariant,
+                    color: o.fate == ReadFate.inStock
+                        ? null
+                        : o.fate == ReadFate.awaiting
+                            ? theme.colorScheme.tertiary
+                            : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ]),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The import's date, whether the supplier is paid, and the memo (0148) —
+/// changeable here at any time by whoever may adjust stock.
+class _NotesPanel extends ConsumerStatefulWidget {
+  const _NotesPanel({required this.import});
+
+  final MasterImport import;
+
+  @override
+  ConsumerState<_NotesPanel> createState() => _NotesPanelState();
+}
+
+class _NotesPanelState extends ConsumerState<_NotesPanel> {
+  late final TextEditingController _note = TextEditingController(text: widget.import.note ?? '');
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The save button follows what is typed.
+    _note.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save({DocumentDate? date, bool? paid, String? note}) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _busy = true);
+    final r = await ref.read(stockImportRepositoryProvider).updateNotes(widget.import.id, date: date, paid: paid, note: note);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(importDetailProvider(widget.import.id));
+        ref.invalidate(masterImportsProvider);
+        messenger.showSnackBar(SnackBar(content: Text(l10n.ivSaved)));
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final m = widget.import;
+    final may = ref.watch(authControllerProvider).user?.hasPermission('inventory.adjust') ?? false;
+    final filed = m.filedOn;
+    final fmt = DateFormat('y/MM/dd');
+    return Card(
+      key: const ValueKey('iv-notes'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          if (m.status == MasterImportStatus.awaitingInspection && m.undoneAt == null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Text(l10n.ivAwaiting, key: const ValueKey('iv-awaiting'),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.tertiary)),
+            ),
+          if (filed != null)
+            Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: AppSpacing.sm, children: [
+              Icon(Icons.event_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+              Text(
+                l10n.sfDocDate(fmt.format(filed), documentDateSourceLabel(l10n, DocumentDateSource.fromWire(m.documentDateSource))),
+                key: const ValueKey('iv-doc-date'),
+              ),
+              if (may)
+                TextButton(
+                  key: const ValueKey('iv-doc-date-change'),
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: filed,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now().add(const Duration(days: 31)),
+                          );
+                          if (picked != null) await _save(date: DocumentDate(picked, DocumentDateSource.manual));
+                        },
+                  child: Text(l10n.sfDocDateChange),
+                ),
+              Text(keptUntilText(l10n, filed), key: const ValueKey('iv-kept'), style: theme.textTheme.bodySmall),
+            ]),
+          CheckboxListTile(
+            key: const ValueKey('iv-paid'),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: m.paid,
+            onChanged: !may || _busy ? null : (v) => _save(paid: v ?? false),
+            title: Text(l10n.ivPaid),
+            subtitle: m.paid && m.paidAt != null ? Text(l10n.ivPaidAt(DateFormat('y/MM/dd HH:mm').format(m.paidAt!))) : null,
+          ),
+          TextField(
+            key: const ValueKey('iv-note'),
+            controller: _note,
+            enabled: may && !_busy,
+            minLines: 1,
+            maxLines: 6,
+            maxLength: 4000,
+            decoration: InputDecoration(labelText: l10n.ivNote, border: const OutlineInputBorder()),
+          ),
+          if (may)
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                key: const ValueKey('iv-note-save'),
+                onPressed: _busy || _note.text.trim() == (m.note ?? '').trim() ? null : () => _save(note: _note.text.trim()),
+                child: Text(l10n.ivNoteSave),
+              ),
+            ),
+        ]),
+      ),
     );
   }
 }

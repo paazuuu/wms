@@ -7227,6 +7227,101 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Ctrl+A on the picking tab copies the picking screen, not the
     dashboard behind it or the menu. This test fails without the fix.
 
+## A stock file kept for seven years, checked in by an inspector (DB 0148)
+
+- **Filed under the document's date.** Each stock-file import carries
+  `document_date` and where it came from (`document_date_source`):
+  1. `content`: what the file prints. For a PDF or picture this is the AI's
+     `header.doc_date`. For a sheet it is the top rows: a cell naming
+     発行日・作成日・請求日・納品日・日付 with the date in it or just after
+     it (an Excel serial number counts), else the first date there. Accepted
+     forms: 2026年8月19日, 2026/8/19, 2026-08-19, 令和8年8月19日.
+  2. `file`: the file's own record, a PDF's /CreationDate or a workbook's
+     dcterms:created.
+  3. `uploaded`: today. It can be changed by hand (`manual`) before it goes
+     in and afterwards.
+  - Only dates from 2000 up to a month ahead are taken.
+- **取込カレンダー (`stock_file_calendar`).**
+  - A month grid (Sunday first) with the count on each day, a mark where
+    something waits for inspection and where something is unpaid.
+  - Year and month to move back through the seven years, and 今日.
+  - A day lists its files with warehouse, state, paid or not, and the memo;
+    a file opens its 読み取り結果.
+  - Opened from ファイルから在庫登録's app bar.
+- **Payment and memo (`stock_file_import_update`).** 仕入先へ振り込み済み
+  (`paid`, `paid_at`, `paid_by`) and 備考 (`note`, up to 4000 characters).
+  They are set on the import screen before it goes in, and changed in
+  読み取り結果 at any time by whoever has inventory.adjust. 取込履歴 shows
+  the date, paid or not, and the memo.
+- **Added stock waits for inspection.**
+  - 今の在庫に足す no longer books stock. `stock_file_stage` keeps the lines
+    with status `awaiting_inspection` (検品待ち); nothing moves.
+  - 在庫をこの数にする (a count correction) still goes in at once.
+  - 取込の検品 (`stock_inspection`, new menu entry under 現場作業;
+    inspection.confirm or inventory.adjust) lists the files waiting.
+  - Per file, each line shows the file's quantity and a field for what was
+    counted. Ticking can be done by hand, by すべて選ぶ, or by scanning a JAN
+    (an unknown JAN is said so).
+  - 検品完了 says how many units go in and the difference from the file,
+    then `stock_file_inspect` books what was counted (reason OTHER, 「在庫
+    ファイル取込 #N を検品して追加」), noting who and when on each line.
+  - When no line is left the import becomes `stock_done`. A line already
+    checked in is not booked twice.
+  - A waiting file can be taken back (取り消し); only the lines checked in
+    are reversed.
+  - The duplicate check counts waiting files too.
+- **商品ライブラリー shows the two apart (`stock_pending_inspection`).**
+  - Under each product's stock: 「未検品 +500」.
+  - In the warehouse band: 「未検品 2商品・600個（在庫と合わせて 640個）」.
+  - Both are per warehouse. Waiting units are never added into the stock
+    figures.
+- **読み取り結果 as a sheet, not the app again.**
+  - 別ウィンドウで開く opened the WMS a second time. It is replaced by
+    「Excel形式で別タブに開く」: a new browser tab (opened in the click, so
+    it is not blocked) showing the reading as a spreadsheet. That means
+    column letters, row numbers, a header that stays put, the cells to
+    check in yellow, and light/dark.
+  - 「Excelでダウンロード」 saves the same as .xlsx:
+    `読み取り結果_<id>_<file>.xlsx`, with the import's date, warehouse,
+    state, payment and memo above the rows.
+  - Where a tab cannot be opened, the file is saved instead.
+- **Seven years, then deleted.**
+  - `stock_file_expired` (service role only) lists stock-file imports whose
+    date is more than seven years back, with their files.
+  - purge-expired (edge function, verify_jwt off) deletes the files through
+    the Storage API first, then the import (its lines go with it) and the
+    kept copies no other import refers to. It writes an audit entry.
+  - An import whose files could not all be deleted is kept for the next run.
+  - The stock it moved stays in the ledger: today's stock does not change.
+  - pg_cron (now enabled, with pg_net) calls it every day at 03:17 JST with a
+    random secret kept only in the vault (`purge_expired_secret`, checked by
+    `purge_secret_matches`).
+  - Tried: a wrong secret is refused (401); a dry run answers nothing due.
+  - A `stock_file_purge` SQL function was planned, but the MCP connection
+    hangs on any statement that deletes, so the edge function does it
+    through PostgREST instead.
+- Tried in a rolled-back transaction:
+  - Staging leaves the stock at 0 and lists 500 waiting.
+  - The date, payment and memo save, and the calendar finds the import.
+  - Inspecting 498 makes the stock 498 and the import done, with nothing
+    left waiting. A second check-in is refused.
+  - Taking back a waiting file moves nothing.
+  - An eight-year-old import is listed as expired and this year's is not.
+- Tests (1013 Flutter, 56 Deno pass):
+  - Dates from the AI, the sheet, the file and today, and the kept-until
+    day.
+  - Pending stock by warehouse.
+  - The sheet page escapes text.
+  - Staging with the date, payment and memo; a count correction is not
+    staged.
+  - The inspection screen: scan, count, difference, check in, and no
+    permission.
+  - The calendar.
+  - 読み取り結果: waiting lines, notes, and the Excel.
+  - The library's 未検品 breakdown.
+  - Purge: files first, a failed file keeps its import, a shared copy stays,
+    dry run, secret.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

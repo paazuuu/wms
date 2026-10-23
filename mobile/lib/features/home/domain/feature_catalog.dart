@@ -54,6 +54,7 @@ import '../../outbound/presentation/outbound_proposal_screen.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
+import '../../stock_import/presentation/stock_inspection_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -132,6 +133,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _inspectionList,
             requiredAnyOf: ['inspection.view', 'inspection.confirm'],
+          ),
+          // Stock read in from files waits here until it is counted (0148).
+          FeatureEntry(
+            id: 'stock_inspection',
+            icon: Icons.pending_actions_outlined,
+            status: FeatureStatus.ready,
+            builder: _stockInspection,
+            requiredAnyOf: ['inspection.confirm', 'inventory.adjust'],
           ),
           // Most deliveries are fine: settle them as good in one go (0099).
           FeatureEntry(
@@ -583,6 +592,7 @@ Widget _priceBook(BuildContext _) => const PriceBookScreen();
 Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen();
 Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _stockFileImport(BuildContext _) => const StockFileImportScreen();
+Widget _stockInspection(BuildContext _) => const StockInspectionScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
 Widget _purchaseRequests(BuildContext _) => const PurchaseRequestsScreen();

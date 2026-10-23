@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
+import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart' show PendingInspection;
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/master_import/presentation/master_imports_screen.dart';
@@ -231,6 +233,8 @@ List<Override> _defaultOverrides() => [
       companyRepositoryProvider.overrideWithValue(FakeCompanyRepository()),
       // How stock came to be (0145): nothing moved unless a test says so.
       stockHistoryRepositoryProvider.overrideWithValue(FakeStockHistoryRepository()),
+      // Nothing waits for inspection (0148) unless a test says so.
+      pendingInspectionProvider.overrideWith((ref) async => const PendingInspection()),
     ];
 
 /// Pumps [child] inside a localized MaterialApp and a ProviderScope with the
@@ -294,6 +298,7 @@ Future<void> pumpAppWith(
           productLibraryCanManageProvider.overrideWithValue(canManageProducts),
           productCanDeleteProvider.overrideWithValue(false),
           productCanLifecycleProvider.overrideWithValue(false),
+          pendingInspectionProvider.overrideWith((ref) async => const PendingInspection()),
         ],
         child: MaterialApp(
           theme: AppTheme.light(),

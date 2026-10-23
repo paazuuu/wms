@@ -360,9 +360,14 @@ class MasterRead extends Equatable {
     this.supplierName,
     this.documentId,
     this.aiFailure,
+    this.docDate,
   });
 
   final List<MasterLine> lines;
+
+  /// The date the document prints (発行日 …), YYYY-MM-DD, when the reader
+  /// found one.
+  final String? docDate;
 
   /// Why the AI could not be used while reading (no_key, auth, quota,
   /// network, overload, bad_request), or null when it could.
@@ -393,11 +398,12 @@ class MasterRead extends Equatable {
       supplierName: header is Map ? header['supplier_name']?.toString() : null,
       documentId: (j['document_id'] as num?)?.toInt(),
       aiFailure: j['ai_failure'] is Map ? (j['ai_failure'] as Map)['kind']?.toString() : null,
+      docDate: header is Map ? header['doc_date']?.toString() : null,
     );
   }
 
   @override
-  List<Object?> get props => [lines, source, verified, totalsOk, supplierId, documentId, aiFailure];
+  List<Object?> get props => [lines, source, verified, totalsOk, supplierId, documentId, aiFailure, docDate];
 }
 
 /// What stage 1 did, or why it stopped.
@@ -430,7 +436,10 @@ enum MasterImportStatus {
   stopped('stopped'),
   masterDone('master_done'),
   stockDone('stock_done'),
-  cancelled('cancelled');
+  cancelled('cancelled'),
+
+  /// A stock file whose lines wait for an inspector (0148).
+  awaitingInspection('awaiting_inspection');
 
   const MasterImportStatus(this.wire);
   final String wire;
@@ -470,6 +479,9 @@ class MasterImportLine extends Equatable {
     this.added,
     this.onHandAfter,
     this.onHandNow,
+    this.inspectedAt,
+    this.inspectedQuantity,
+    this.inspectedByName,
   });
 
   final int lineNo;
@@ -492,6 +504,13 @@ class MasterImportLine extends Equatable {
   /// The stock in the warehouse asked about, now.
   final int? onHandNow;
 
+  /// When an inspector checked the line in (0148), what they counted and who.
+  final DateTime? inspectedAt;
+  final int? inspectedQuantity;
+  final String? inspectedByName;
+
+  bool get inspected => inspectedAt != null;
+
   factory MasterImportLine.fromJson(Map<String, dynamic> j) {
     int? n(Object? v) => (v as num?)?.toInt();
     return MasterImportLine(
@@ -508,12 +527,16 @@ class MasterImportLine extends Equatable {
       added: n(j['added']),
       onHandAfter: n(j['on_hand_after']),
       onHandNow: n(j['on_hand_now']),
+      inspectedAt: DateTime.tryParse('${j['inspected_at'] ?? ''}')?.toLocal(),
+      inspectedQuantity: n(j['inspected_quantity']),
+      inspectedByName: j['inspected_by_name']?.toString(),
     );
   }
 
   @override
   List<Object?> get props =>
-      [lineNo, janCode, productId, name, nameEn, quantity, masterStatus, onHandBefore, onHandSet, added, onHandAfter, onHandNow];
+      [lineNo, janCode, productId, name, nameEn, quantity, masterStatus, onHandBefore, onHandSet, added, onHandAfter, onHandNow,
+       inspectedAt, inspectedQuantity];
 }
 
 /// An import: its files, where it got to, and its lines when asked for.
@@ -539,6 +562,11 @@ class MasterImport extends Equatable {
     this.originalType,
     this.skippedJans = const {},
     this.undoneAt,
+    this.documentDate,
+    this.documentDateSource,
+    this.paid = false,
+    this.paidAt,
+    this.note,
   });
 
   final int id;
@@ -570,6 +598,19 @@ class MasterImport extends Equatable {
 
   /// When a stock file's import was taken back (0147).
   final DateTime? undoneAt;
+
+  /// The date it is filed under (0148): printed in the file, the file's own,
+  /// or the upload day — `content`, `file`, `uploaded` or `manual`.
+  final DateTime? documentDate;
+  final String? documentDateSource;
+
+  /// Whether the supplier has been paid for it, since when, and a memo.
+  final bool paid;
+  final DateTime? paidAt;
+  final String? note;
+
+  /// The day it is filed under: its document's date, else the upload day.
+  DateTime? get filedOn => documentDate ?? createdAt?.let((c) => DateTime(c.year, c.month, c.day));
 
   String? get originalName => files.where((f) => f.kind == 'original').firstOrNull?.name;
 
@@ -605,6 +646,11 @@ class MasterImport extends Equatable {
       readBy: j['read_by']?.toString(),
       originalType: j['original_type']?.toString(),
       undoneAt: DateTime.tryParse('${j['undone_at'] ?? ''}')?.toLocal(),
+      documentDate: DateTime.tryParse('${j['document_date'] ?? ''}'),
+      documentDateSource: j['document_date_source']?.toString(),
+      paid: j['paid'] == true,
+      paidAt: DateTime.tryParse('${j['paid_at'] ?? ''}')?.toLocal(),
+      note: j['note']?.toString(),
       skippedJans: {
         for (final p in (j['issues'] as List? ?? const []).whereType<Map>())
           if (p['code'] == 'unknown_jan')
@@ -615,5 +661,10 @@ class MasterImport extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, status, files, lineCount, issues, created, updated, stockLines, stockAdded, lines, readLines, readBy];
+      [id, status, files, lineCount, issues, created, updated, stockLines, stockAdded, lines, readLines, readBy,
+       documentDate, documentDateSource, paid, note, undoneAt];
+}
+
+extension _LetImport<T> on T {
+  R let<R>(R Function(T) f) => f(this);
 }

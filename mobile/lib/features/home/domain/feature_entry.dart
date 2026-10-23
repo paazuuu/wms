@@ -135,6 +135,8 @@ class FeatureEntry {
         return l10n.featMasterStockImport;
       case 'stock_file_import':
         return l10n.featStockFileImport;
+      case 'stock_inspection':
+        return l10n.featStockInspection;
       case 'field_library':
         return l10n.featFieldLibrary;
       case 'unlinked_jan':
@@ -253,6 +255,8 @@ class FeatureEntry {
         return l10n.featMasterStockImportDesc;
       case 'stock_file_import':
         return l10n.featStockFileImportDesc;
+      case 'stock_inspection':
+        return l10n.featStockInspectionDesc;
       case 'field_library':
         return l10n.featFieldLibraryDesc;
       case 'unlinked_jan':

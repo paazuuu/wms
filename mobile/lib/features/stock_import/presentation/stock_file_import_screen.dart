@@ -22,8 +22,11 @@ import '../../product/application/product_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../data/stock_import_repository.dart';
-import 'import_view_screen.dart';
 import '../domain/stock_file.dart';
+import '../domain/stock_ledger.dart';
+import 'import_view_screen.dart';
+import 'stock_import_calendar_screen.dart';
+import 'stock_inspection_screen.dart';
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
 typedef PickStockFile = Future<({String name, Uint8List bytes})?> Function();
@@ -93,6 +96,20 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   StockFileResult? _done;
   String? _error;
 
+  /// The date the import is filed under (0148): read from the file, else the
+  /// file's own, else today. Changeable before it goes in.
+  DocumentDate? _docDate;
+
+  /// Whether the supplier has been paid for it, and a memo (0148).
+  bool _paid = false;
+  final _note = TextEditingController();
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
   List<StockFileLine> get _ready => [
         for (final l in _sheet?.lines ?? const <StockFileLine>[])
           if (_known.containsKey(l.janCode)) l,
@@ -116,11 +133,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _known = const {};
       _documentId = null;
       _checked = false;
+      _docDate = null;
+      _paid = false;
+      _note.clear();
     });
     StockSheet? sheet;
+    List<List<String>>? rows;
+    String? readDate;
     if (readsLocally(f.name)) {
       try {
-        sheet = parseStockRows(readStockFile(f.name, f.bytes));
+        rows = readStockFile(f.name, f.bytes);
+        sheet = parseStockRows(rows);
       } on FormatException {
         sheet = null;
       }
@@ -146,6 +169,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             return;
           }
           _documentId = data.documentId;
+          readDate = data.docDate;
           sheet = stockSheetFromRead([
             for (final l in data.lines)
               ReadRow(
@@ -172,7 +196,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       }
     }
     _aiReading = false;
-    setState(() => _sheet = sheet);
+    final date = findDocumentDate(fileName: f.name, bytes: f.bytes, rows: rows, readDate: readDate);
+    setState(() {
+      _sheet = sheet;
+      _docDate = date;
+    });
     await _lookup();
   }
 
@@ -276,6 +304,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         title: Text(l10n.sfConfirmQ(wh.name)),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(_mode == StockFileMode.add ? l10n.sfConfirmAdd(lines.length, units) : l10n.sfConfirmSet(lines.length)),
+          // Added stock waits for the inspector (0148); a count correction does not.
+          if (_mode == StockFileMode.add) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.sfConfirmStage, key: const ValueKey('sf-confirm-stage')),
+          ],
           if (toRegister.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.sfConfirmRegister(toRegister.length), key: const ValueKey('sf-confirm-register')),
@@ -310,10 +343,21 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       send = _ready;
     }
     final repo = ref.read(stockImportRepositoryProvider);
-    final r = await repo.apply(wh.id, _mode, send, fileName: _fileName, fileType: mimeTypeFor(_fileName ?? ''));
+    // Added stock is kept for inspection and goes in when it is checked; a
+    // count correction (set) goes in at once.
+    final r = _mode == StockFileMode.add
+        ? await repo.stage(wh.id, send, fileName: _fileName, fileType: mimeTypeFor(_fileName ?? ''))
+        : await repo.apply(wh.id, _mode, send, fileName: _fileName, fileType: mimeTypeFor(_fileName ?? ''));
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
+        // The date it is filed under, whether it is paid, and the memo.
+        await repo.updateNotes(
+          data.importId,
+          date: _docDate,
+          paid: _paid ? true : null,
+          note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+        );
         // The original goes with the import; a failure here does not undo
         // the stock, it only leaves the history without the file.
         if (_bytes != null && _fileName != null) {
@@ -332,6 +376,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         if (!mounted) return;
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);
+        ref.invalidate(pendingInspectionProvider);
+        ref.invalidate(awaitingImportsProvider);
         setState(() {
           _busy = false;
           _done = data;
@@ -451,6 +497,12 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         title: Text(l10n.featStockFileImport),
         actions: [
           IconButton(
+            key: const ValueKey('sf-calendar'),
+            tooltip: l10n.calTitle,
+            icon: const Icon(Icons.calendar_month_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockImportCalendarScreen())),
+          ),
+          IconButton(
             key: const ValueKey('sf-history'),
             tooltip: l10n.sfHistory,
             icon: const Icon(Icons.history),
@@ -486,6 +538,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(_mode == StockFileMode.add ? l10n.sfModeAddHint : l10n.sfModeSetHint, style: muted),
+          Text(_mode == StockFileMode.add ? l10n.sfAddInspection : l10n.sfSetNoInspection,
+              key: const ValueKey('sf-inspection-hint'), style: muted),
           // Replacing the stock is the exception: said plainly, every time.
           if (_mode == StockFileMode.set)
             Card(
@@ -546,10 +600,23 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   ListTile(
-                    leading: const Icon(Icons.check_circle_outline),
-                    title: Text(l10n.sfDone(done.importId, done.lines, done.change)),
+                    leading: Icon(done.staged ? Icons.pending_actions_outlined : Icons.check_circle_outline),
+                    title: Text(done.staged
+                        ? l10n.sfStaged(done.importId, done.lines, done.awaiting ?? 0)
+                        : l10n.sfDone(done.importId, done.lines, done.change)),
                     subtitle: done.skipped.isEmpty ? null : Text(l10n.sfSkipped(done.skipped.length)),
                   ),
+                  if (done.staged)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
+                      child: FilledButton.tonalIcon(
+                        key: const ValueKey('sf-go-inspect'),
+                        onPressed: () => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => StockInspectionScreen(openImportId: done.importId))),
+                        icon: const Icon(Icons.fact_check_outlined, size: 18),
+                        label: Text(l10n.sfGoInspect),
+                      ),
+                    ),
                   // What the file said and what was made of it, side by side.
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -712,6 +779,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 child: Text(l10n.sfNotItems(notItems), key: const ValueKey('sf-not-items'), style: muted),
               ),
             const SizedBox(height: AppSpacing.md),
+            // Kept with the import for seven years (0148): the date it is
+            // filed under, whether the supplier is paid, and a memo.
+            _NotesCard(
+              date: _docDate,
+              paid: _paid,
+              note: _note,
+              enabled: !_busy,
+              onDate: (d) => setState(() => _docDate = d),
+              onPaid: (v) => setState(() => _paid = v),
+            ),
+            const SizedBox(height: AppSpacing.md),
             // The last look: nothing goes in until the person says it is right.
             CheckboxListTile(
               key: const ValueKey('sf-checked'),
@@ -728,7 +806,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ? null
                   : () => _apply(wh, register: willRegister > 0),
               icon: const Icon(Icons.inventory_outlined),
-              label: Text(l10n.sfApply(ready.length + willRegister)),
+              label: Text(_mode == StockFileMode.add
+                  ? l10n.sfApplyStage(ready.length + willRegister)
+                  : l10n.sfApply(ready.length + willRegister)),
             ),
             if (!canAdjust) Text(l10n.sfNoPermission, style: muted),
           ],
@@ -790,3 +870,86 @@ class _QtyDialogState extends State<_QtyDialog> {
     );
   }
 }
+
+/// The date an import is filed under, whether the supplier is paid, and a
+/// memo — before it goes in.
+class _NotesCard extends StatelessWidget {
+  const _NotesCard({
+    required this.date,
+    required this.paid,
+    required this.note,
+    required this.enabled,
+    required this.onDate,
+    required this.onPaid,
+  });
+
+  final DocumentDate? date;
+  final bool paid;
+  final TextEditingController note;
+  final bool enabled;
+  final ValueChanged<DocumentDate> onDate;
+  final ValueChanged<bool> onPaid;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final d = date;
+    return Card(
+      key: const ValueKey('sf-notes'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          if (d != null)
+            Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: AppSpacing.sm, children: [
+              Icon(Icons.event_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+              Text(l10n.sfDocDate(DateFormat('y/MM/dd').format(d.date), documentDateSourceLabel(l10n, d.source)),
+                  key: const ValueKey('sf-doc-date')),
+              TextButton(
+                key: const ValueKey('sf-doc-date-change'),
+                onPressed: !enabled
+                    ? null
+                    : () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: d.date,
+                          firstDate: DateTime(2000),
+                          lastDate: now.add(const Duration(days: 31)),
+                        );
+                        if (picked != null) onDate(DocumentDate(picked, DocumentDateSource.manual));
+                      },
+                child: Text(l10n.sfDocDateChange),
+              ),
+            ]),
+          CheckboxListTile(
+            key: const ValueKey('sf-paid'),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: paid,
+            onChanged: enabled ? (v) => onPaid(v ?? false) : null,
+            title: Text(l10n.ivPaid),
+          ),
+          TextField(
+            key: const ValueKey('sf-note'),
+            controller: note,
+            enabled: enabled,
+            minLines: 1,
+            maxLines: 4,
+            maxLength: 4000,
+            decoration: InputDecoration(labelText: l10n.ivNote, border: const OutlineInputBorder()),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// How an import's date was found, in words.
+String documentDateSourceLabel(AppLocalizations l10n, DocumentDateSource? s) => switch (s) {
+      DocumentDateSource.content => l10n.sfDateContent,
+      DocumentDateSource.file => l10n.sfDateFile,
+      DocumentDateSource.uploaded || null => l10n.sfDateUploaded,
+      DocumentDateSource.manual => l10n.sfDateManual,
+    };

@@ -14,6 +14,7 @@ import 'package:wms_mobile/features/price_book/application/price_book_providers.
 import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
+import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_file_import_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
@@ -104,6 +105,41 @@ class _FakeStock implements StockImportRepository {
     kept.add((importId, fileName));
     return const ApiSuccess(true);
   }
+
+  /// Added stock is staged for inspection (0148): recorded with the others
+  /// in [applied], and here.
+  final staged = <int>[];
+
+  @override
+  Future<ApiResult<StockFileResult>> stage(int warehouseId, List<StockFileLine> lines, {String? fileName, String? fileType}) async {
+    applied.add((warehouseId, StockFileMode.add, lines));
+    staged.add(12);
+    return ApiSuccess(StockFileResult(
+        importId: 12, lines: lines.length, change: 0, awaiting: lines.fold<int>(0, (s, l) => s + l.quantity)));
+  }
+
+  /// What updateNotes() was given: the date, paid and the memo.
+  final notesSet = <(int, DocumentDate?, bool?, String?)>[];
+
+  @override
+  Future<ApiResult<bool>> updateNotes(int importId, {DocumentDate? date, bool? paid, String? note}) async {
+    notesSet.add((importId, date, paid, note));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<AwaitingImport>>> awaiting({int? warehouseId}) async => const ApiSuccess([]);
+
+  @override
+  Future<ApiResult<InspectionResult>> inspect(int importId, List<InspectedLine> lines) async =>
+      const ApiSuccess(InspectionResult());
+
+  @override
+  Future<ApiResult<PendingInspection>> pendingInspection({int? warehouseId}) async =>
+      const ApiSuccess(PendingInspection());
+
+  @override
+  Future<ApiResult<List<CalendarImport>>> calendar(DateTime from, DateTime to) async => const ApiSuccess([]);
 }
 
 /// 読み取った内容を確認しました — nothing goes in without it.
@@ -180,6 +216,59 @@ void main() {
       expect(s.lines.single, const StockFileLine(lineNo: 2, janCode: _jan2, quantity: 7, name: 'ノート, A罫'));
       expect(() => readStockFile('a.pdf', csv), throwsFormatException);
     });
+  });
+
+  testWidgets('added stock waits for inspection, filed under the date the sheet prints, with payment and a memo', (tester) async {
+    final repo = await _pumpCsv(
+      tester,
+      '入金依頼書\n発行日,2026/08/19\nJANコード,数量\n$_jan1,500\n$_jan2,100\n',
+      products: {_jan1: 'テストペン 青', _jan2: 'テストノート'},
+    );
+    // Said before anything goes in: added stock waits for the inspector.
+    expect(find.byKey(const ValueKey('sf-inspection-hint')), findsOneWidget);
+    expect(find.text('書類の日付: 2026/08/19（ファイルに書かれた日付）'), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const ValueKey('sf-paid')));
+    await tester.tap(find.byKey(const ValueKey('sf-paid')));
+    await tester.enterText(find.byKey(const ValueKey('sf-note')), '8/21 振込予定');
+    await tester.pumpAndSettle();
+    await _tick(tester);
+    expect(find.text('検品待ちとして登録（2商品）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-confirm-stage')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(repo.staged, [12]);
+    final (id, date, paid, note) = repo.notesSet.single;
+    expect(id, 12);
+    expect(date, DocumentDate(DateTime(2026, 8, 19), DocumentDateSource.content));
+    expect(paid, isTrue);
+    expect(note, '8/21 振込予定');
+    expect(find.text('取込 #12: 2商品を検品待ちにしました（合計 600個）。検品が済むと在庫に入ります。'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-go-inspect')), findsOneWidget);
+  });
+
+  testWidgets('without a date in the file, the import is filed under the upload day; setting the stock is not staged',
+      (tester) async {
+    final repo = await _pumpCsv(tester, 'JANコード,数量\n$_jan1,5\n', products: {_jan1: 'テストペン 青'});
+    final today = DateTime.now();
+    expect(find.textContaining('（アップロード日）'), findsOneWidget);
+    await tester.tap(find.text('在庫をこの数にする'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-inspection-hint')), findsOneWidget);
+    await _tick(tester);
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.staged, isEmpty);
+    expect(repo.applied.single.$2, StockFileMode.set);
+    final (_, date, paid, note) = repo.notesSet.single;
+    expect(date, DocumentDate(DateTime(today.year, today.month, today.day), DocumentDateSource.uploaded));
+    expect(paid, isNull);
+    expect(note, isNull);
   });
 
   testWidgets('a file is read, a JAN not in the library is left out, and the rest go into the warehouse', (tester) async {
@@ -286,7 +375,7 @@ void main() {
 
     expect(find.text('商品ライブラリーにない商品 2件'), findsOneWidget);
     expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('sf-register-new'))).value, isTrue);
-    expect(find.text('在庫に反映（3商品）'), findsOneWidget);
+    expect(find.text('検品待ちとして登録（3商品）'), findsOneWidget);
 
     await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));

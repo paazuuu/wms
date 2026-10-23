@@ -11542,4 +11542,298 @@ class AppLocalizationsEn extends AppLocalizations {
   String ivCorrected(String aiJan, String jan, String aiQty, String qty) {
     return 'Corrected on the sheet: JAN $aiJan → $jan, quantity $aiQty → $qty';
   }
+
+  @override
+  String get miStatusAwaiting => 'Awaiting inspection';
+
+  @override
+  String miFiledOn(String date) {
+    return 'Dated $date';
+  }
+
+  @override
+  String get sfConfirmStage =>
+      'These lines are kept as awaiting inspection. Only what is counted and checked in on the inspection screen goes into stock.';
+
+  @override
+  String sfStaged(int id, int lines, int qty) {
+    return 'Import #$id: $lines products are awaiting inspection ($qty units). They go into stock once inspected.';
+  }
+
+  @override
+  String get sfGoInspect => 'Go to inspection';
+
+  @override
+  String get sfAddInspection =>
+      'Added stock is registered as not yet inspected; it goes into stock when someone checks it in on “Inspect imports”.';
+
+  @override
+  String get sfSetNoInspection =>
+      '“Set the stock to this” is a count correction: it goes in at once, without inspection.';
+
+  @override
+  String sfApplyStage(int n) {
+    return 'Register for inspection ($n products)';
+  }
+
+  @override
+  String sfDocDate(String date, String how) {
+    return 'Document date: $date ($how)';
+  }
+
+  @override
+  String get sfDocDateChange => 'Change date';
+
+  @override
+  String get sfDateContent => 'printed in the file';
+
+  @override
+  String get sfDateFile => 'the file’s creation date';
+
+  @override
+  String get sfDateUploaded => 'upload date';
+
+  @override
+  String get sfDateManual => 'entered by hand';
+
+  @override
+  String get calTitle => 'Import calendar';
+
+  @override
+  String get calToday => 'Today';
+
+  @override
+  String get calPrev => 'Previous month';
+
+  @override
+  String get calNext => 'Next month';
+
+  @override
+  String calYear(int y) {
+    return '$y';
+  }
+
+  @override
+  String calMonth(int m) {
+    return 'Month $m';
+  }
+
+  @override
+  String calKept(int years) {
+    return 'Imports are kept for $years years from the document date and then deleted automatically (the stock movements stay).';
+  }
+
+  @override
+  String calMonthList(int n) {
+    return '$n imports this month';
+  }
+
+  @override
+  String calDayList(String date, int n) {
+    return '$n imports on $date';
+  }
+
+  @override
+  String get calNone => 'No imports on this day';
+
+  @override
+  String calCount(int n) {
+    return '$n';
+  }
+
+  @override
+  String get calSun => 'Su';
+
+  @override
+  String get calMon => 'Mo';
+
+  @override
+  String get calTue => 'Tu';
+
+  @override
+  String get calWed => 'We';
+
+  @override
+  String get calThu => 'Th';
+
+  @override
+  String get calFri => 'Fr';
+
+  @override
+  String get calSat => 'Sa';
+
+  @override
+  String calIn(int lines, String change) {
+    return '$lines products · $change units';
+  }
+
+  @override
+  String get calPaid => 'Paid';
+
+  @override
+  String get calUnpaid => 'Unpaid';
+
+  @override
+  String get featStockInspection => 'Inspect imports';
+
+  @override
+  String get featStockInspectionDesc =>
+      'Count stock read in from files and check it in to stock';
+
+  @override
+  String get siEmpty => 'No files are waiting for inspection';
+
+  @override
+  String get siIntro =>
+      'Stock read in from files does not count until it is counted and checked in here.';
+
+  @override
+  String siFile(int id, String name) {
+    return 'Import #$id · $name';
+  }
+
+  @override
+  String siLeft(int left, int lines, int qty) {
+    return '$left/$lines lines not inspected · $qty units';
+  }
+
+  @override
+  String siBy(String name, String at) {
+    return 'registered by $name at $at';
+  }
+
+  @override
+  String siBadCount(String name) {
+    return 'Enter the counted quantity for “$name”';
+  }
+
+  @override
+  String get siConfirmQ => 'Check these in?';
+
+  @override
+  String siConfirmBody(int n, int units, String diff) {
+    return '$n lines, $units units go into stock. Difference from the file: $diff.';
+  }
+
+  @override
+  String get siConfirmGo => 'Check in';
+
+  @override
+  String siDone(int n, int left) {
+    return '$n lines went into stock ($left still to inspect)';
+  }
+
+  @override
+  String siTitle(int id) {
+    return 'Inspect import #$id';
+  }
+
+  @override
+  String siOpenLines(int open, int total) {
+    return '$open of $total lines not inspected';
+  }
+
+  @override
+  String get siAllDone => 'All lines are inspected';
+
+  @override
+  String get siScan => 'Scan a JAN (ticks its line)';
+
+  @override
+  String siScanMiss(String jan) {
+    return '$jan is not among this file’s lines to inspect';
+  }
+
+  @override
+  String get siAll => 'Select all';
+
+  @override
+  String siInspected(int qty, String who) {
+    return 'Inspected: $qty ($who)';
+  }
+
+  @override
+  String siFileSaid(int qty) {
+    return 'file: $qty';
+  }
+
+  @override
+  String get siNoPermission =>
+      'Checking in needs the inspection-confirm or stock-adjust permission.';
+
+  @override
+  String siCheckIn(int n) {
+    return 'Check in the $n selected lines';
+  }
+
+  @override
+  String siDiff(String d) {
+    return 'difference $d';
+  }
+
+  @override
+  String get siCounted => 'Counted';
+
+  @override
+  String ivKeptUntil(String date, int years) {
+    return 'Kept until $date ($years years)';
+  }
+
+  @override
+  String get ivPaid => 'Supplier paid';
+
+  @override
+  String ivPaidAt(String at) {
+    return 'Marked paid at $at';
+  }
+
+  @override
+  String get ivNote => 'Notes';
+
+  @override
+  String get ivNoteSave => 'Save notes';
+
+  @override
+  String get ivSaved => 'Saved';
+
+  @override
+  String get ivAwaiting =>
+      'Awaiting inspection: this import’s stock is not in stock until it is inspected.';
+
+  @override
+  String ivAwaitingCount(int n) {
+    return 'Awaiting $n';
+  }
+
+  @override
+  String ivFateAwaiting(String name, String qty) {
+    return '→ $name: awaiting inspection (file: $qty)';
+  }
+
+  @override
+  String get ivOpenTab => 'Open as a sheet in a new tab';
+
+  @override
+  String get ivDownloadXlsx => 'Download as Excel';
+
+  @override
+  String get ivTabBlocked =>
+      'Could not open a new tab; saving the Excel file instead.';
+
+  @override
+  String get ivTabHint =>
+      'Select and copy anything in this table. To open it in Excel, use “Download as Excel” in the app.';
+
+  @override
+  String get ivXlsxSaved => 'Saved the Excel file';
+
+  @override
+  String plPending(int n) {
+    return 'not inspected +$n';
+  }
+
+  @override
+  String plPendingSummary(int items, int units, int total) {
+    return 'Not inspected: $items products, $units units ($total with stock)';
+  }
 }

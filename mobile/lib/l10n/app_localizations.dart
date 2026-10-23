@@ -20233,6 +20233,456 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'確認用Excelで直した: JAN {aiJan} → {jan} ・ 数量 {aiQty} → {qty}'**
   String ivCorrected(String aiJan, String jan, String aiQty, String qty);
+
+  /// No description provided for @miStatusAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get miStatusAwaiting;
+
+  /// No description provided for @miFiledOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の日付 {date}'**
+  String miFiledOn(String date);
+
+  /// No description provided for @sfConfirmStage.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちとして登録します。検品画面で数を確かめて「検品完了」にした分だけ、在庫に入ります。'**
+  String get sfConfirmStage;
+
+  /// No description provided for @sfStaged.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id}: {lines}商品を検品待ちにしました（合計 {qty}個）。検品が済むと在庫に入ります。'**
+  String sfStaged(int id, int lines, int qty);
+
+  /// No description provided for @sfGoInspect.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品へ'**
+  String get sfGoInspect;
+
+  /// No description provided for @sfAddInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'足す分は「検品未完了」として登録され、検品担当が「取込の検品」で確かめると在庫に入ります。'**
+  String get sfAddInspection;
+
+  /// No description provided for @sfSetNoInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'「在庫をこの数にする」は数合わせなので、検品を待たずにすぐ反映します。'**
+  String get sfSetNoInspection;
+
+  /// No description provided for @sfApplyStage.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちとして登録（{n}商品）'**
+  String sfApplyStage(int n);
+
+  /// No description provided for @sfDocDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の日付: {date}（{how}）'**
+  String sfDocDate(String date, String how);
+
+  /// No description provided for @sfDocDateChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付を変える'**
+  String get sfDocDateChange;
+
+  /// No description provided for @sfDateContent.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルに書かれた日付'**
+  String get sfDateContent;
+
+  /// No description provided for @sfDateFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルの作成日'**
+  String get sfDateFile;
+
+  /// No description provided for @sfDateUploaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'アップロード日'**
+  String get sfDateUploaded;
+
+  /// No description provided for @sfDateManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手で入力'**
+  String get sfDateManual;
+
+  /// No description provided for @calTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込カレンダー'**
+  String get calTitle;
+
+  /// No description provided for @calToday.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日'**
+  String get calToday;
+
+  /// No description provided for @calPrev.
+  ///
+  /// In ja, this message translates to:
+  /// **'前の月'**
+  String get calPrev;
+
+  /// No description provided for @calNext.
+  ///
+  /// In ja, this message translates to:
+  /// **'次の月'**
+  String get calNext;
+
+  /// No description provided for @calYear.
+  ///
+  /// In ja, this message translates to:
+  /// **'{y}年'**
+  String calYear(int y);
+
+  /// No description provided for @calMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'{m}月'**
+  String calMonth(int m);
+
+  /// No description provided for @calKept.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込は書類の日付から{years}年間保存され、過ぎると自動で削除されます（在庫の増減の記録は残ります）。'**
+  String calKept(int years);
+
+  /// No description provided for @calMonthList.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月の取込 {n}件'**
+  String calMonthList(int n);
+
+  /// No description provided for @calDayList.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date} の取込 {n}件'**
+  String calDayList(String date, int n);
+
+  /// No description provided for @calNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'この日の取込はありません'**
+  String get calNone;
+
+  /// No description provided for @calCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件'**
+  String calCount(int n);
+
+  /// No description provided for @calSun.
+  ///
+  /// In ja, this message translates to:
+  /// **'日'**
+  String get calSun;
+
+  /// No description provided for @calMon.
+  ///
+  /// In ja, this message translates to:
+  /// **'月'**
+  String get calMon;
+
+  /// No description provided for @calTue.
+  ///
+  /// In ja, this message translates to:
+  /// **'火'**
+  String get calTue;
+
+  /// No description provided for @calWed.
+  ///
+  /// In ja, this message translates to:
+  /// **'水'**
+  String get calWed;
+
+  /// No description provided for @calThu.
+  ///
+  /// In ja, this message translates to:
+  /// **'木'**
+  String get calThu;
+
+  /// No description provided for @calFri.
+  ///
+  /// In ja, this message translates to:
+  /// **'金'**
+  String get calFri;
+
+  /// No description provided for @calSat.
+  ///
+  /// In ja, this message translates to:
+  /// **'土'**
+  String get calSat;
+
+  /// No description provided for @calIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}商品・{change}個'**
+  String calIn(int lines, String change);
+
+  /// No description provided for @calPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込済'**
+  String get calPaid;
+
+  /// No description provided for @calUnpaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'未払い'**
+  String get calUnpaid;
+
+  /// No description provided for @featStockInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込の検品'**
+  String get featStockInspection;
+
+  /// No description provided for @featStockInspectionDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから登録した在庫を数えて確かめ、検品完了にして在庫に入れる'**
+  String get featStockInspectionDesc;
+
+  /// No description provided for @siEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちのファイルはありません'**
+  String get siEmpty;
+
+  /// No description provided for @siIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから登録した在庫は、ここで数を確かめて「検品完了」にするまで在庫に入りません。'**
+  String get siIntro;
+
+  /// No description provided for @siFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} · {name}'**
+  String siFile(int id, String name);
+
+  /// No description provided for @siLeft.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品 {left}/{lines}行・{qty}個'**
+  String siLeft(int left, int lines, int qty);
+
+  /// No description provided for @siBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}が{at}に登録'**
+  String siBy(String name, String at);
+
+  /// No description provided for @siBadCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」の数えた数を入れてください'**
+  String siBadCount(String name);
+
+  /// No description provided for @siConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品完了にしますか？'**
+  String get siConfirmQ;
+
+  /// No description provided for @siConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行・{units}個を在庫に入れます。ファイルとの差は {diff}個です。'**
+  String siConfirmBody(int n, int units, String diff);
+
+  /// No description provided for @siConfirmGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品完了'**
+  String get siConfirmGo;
+
+  /// No description provided for @siDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行を在庫に入れました（未検品 残り{left}行）'**
+  String siDone(int n, int left);
+
+  /// No description provided for @siTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} の検品'**
+  String siTitle(int id);
+
+  /// No description provided for @siOpenLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品 {open}行（全{total}行）'**
+  String siOpenLines(int open, int total);
+
+  /// No description provided for @siAllDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて検品済みです'**
+  String get siAllDone;
+
+  /// No description provided for @siScan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANをスキャン（その行に印が付きます）'**
+  String get siScan;
+
+  /// No description provided for @siScanMiss.
+  ///
+  /// In ja, this message translates to:
+  /// **'{jan} はこのファイルの未検品の行にありません'**
+  String siScanMiss(String jan);
+
+  /// No description provided for @siAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて選ぶ'**
+  String get siAll;
+
+  /// No description provided for @siInspected.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済み {qty}個（{who}）'**
+  String siInspected(int qty, String who);
+
+  /// No description provided for @siFileSaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル {qty}個'**
+  String siFileSaid(int qty);
+
+  /// No description provided for @siNoPermission.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品するには「検品の確定」か「在庫調整」の権限が要ります。'**
+  String get siNoPermission;
+
+  /// No description provided for @siCheckIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ{n}行を検品完了にする'**
+  String siCheckIn(int n);
+
+  /// No description provided for @siDiff.
+  ///
+  /// In ja, this message translates to:
+  /// **'差 {d}'**
+  String siDiff(String d);
+
+  /// No description provided for @siCounted.
+  ///
+  /// In ja, this message translates to:
+  /// **'数えた数'**
+  String get siCounted;
+
+  /// No description provided for @ivKeptUntil.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date}まで保存（{years}年）'**
+  String ivKeptUntil(String date, int years);
+
+  /// No description provided for @ivPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先へ振り込み済み'**
+  String get ivPaid;
+
+  /// No description provided for @ivPaidAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'{at} に振込済みにしました'**
+  String ivPaidAt(String at);
+
+  /// No description provided for @ivNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考（メモ）'**
+  String get ivNote;
+
+  /// No description provided for @ivNoteSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを保存'**
+  String get ivNoteSave;
+
+  /// No description provided for @ivSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get ivSaved;
+
+  /// No description provided for @ivAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち: この取込の在庫は、検品が済むまで在庫に入っていません。'**
+  String get ivAwaiting;
+
+  /// No description provided for @ivAwaitingCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち {n}'**
+  String ivAwaitingCount(int n);
+
+  /// No description provided for @ivFateAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ {name}: 検品待ち（ファイル {qty}個）'**
+  String ivFateAwaiting(String name, String qty);
+
+  /// No description provided for @ivOpenTab.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excel形式で別タブに開く'**
+  String get ivOpenTab;
+
+  /// No description provided for @ivDownloadXlsx.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelでダウンロード'**
+  String get ivDownloadXlsx;
+
+  /// No description provided for @ivTabBlocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'別タブを開けませんでした。代わりにExcelファイルを保存します。'**
+  String get ivTabBlocked;
+
+  /// No description provided for @ivTabHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'この表はそのまま選んでコピーできます。Excelで開くには、アプリの「Excelでダウンロード」を使ってください。'**
+  String get ivTabHint;
+
+  /// No description provided for @ivXlsxSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelファイルを保存しました'**
+  String get ivXlsxSaved;
+
+  /// No description provided for @plPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品 +{n}'**
+  String plPending(int n);
+
+  /// No description provided for @plPendingSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品 {items}商品・{units}個（在庫と合わせて {total}個）'**
+  String plPendingSummary(int items, int units, int total);
 }
 
 class _AppLocalizationsDelegate

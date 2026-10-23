@@ -11241,4 +11241,289 @@ class AppLocalizationsZh extends AppLocalizations {
   String ivCorrected(String aiJan, String jan, String aiQty, String qty) {
     return '在确认用Excel中修改：JAN $aiJan → $jan・数量 $aiQty → $qty';
   }
+
+  @override
+  String get miStatusAwaiting => '待验货';
+
+  @override
+  String miFiledOn(String date) {
+    return '单据日期 $date';
+  }
+
+  @override
+  String get sfConfirmStage => '将登记为待验货。在验货画面清点并“验货完成”后，才会计入库存。';
+
+  @override
+  String sfStaged(int id, int lines, int qty) {
+    return '导入 #$id：$lines个商品已设为待验货（共 $qty个）。验货后计入库存。';
+  }
+
+  @override
+  String get sfGoInspect => '去验货';
+
+  @override
+  String get sfAddInspection => '追加的数量登记为“未验货”，验货人员在“导入验货”确认后才计入库存。';
+
+  @override
+  String get sfSetNoInspection => '“将库存设为此数”是数量校正，不经验货立即生效。';
+
+  @override
+  String sfApplyStage(int n) {
+    return '登记为待验货（$n个商品）';
+  }
+
+  @override
+  String sfDocDate(String date, String how) {
+    return '单据日期：$date（$how）';
+  }
+
+  @override
+  String get sfDocDateChange => '修改日期';
+
+  @override
+  String get sfDateContent => '文件中记载的日期';
+
+  @override
+  String get sfDateFile => '文件的创建日期';
+
+  @override
+  String get sfDateUploaded => '上传日期';
+
+  @override
+  String get sfDateManual => '手动输入';
+
+  @override
+  String get calTitle => '导入日历';
+
+  @override
+  String get calToday => '今天';
+
+  @override
+  String get calPrev => '上个月';
+
+  @override
+  String get calNext => '下个月';
+
+  @override
+  String calYear(int y) {
+    return '$y年';
+  }
+
+  @override
+  String calMonth(int m) {
+    return '$m月';
+  }
+
+  @override
+  String calKept(int years) {
+    return '导入自单据日期起保存$years年，之后自动删除（库存增减记录保留）。';
+  }
+
+  @override
+  String calMonthList(int n) {
+    return '本月导入 $n件';
+  }
+
+  @override
+  String calDayList(String date, int n) {
+    return '$date 的导入 $n件';
+  }
+
+  @override
+  String get calNone => '这一天没有导入';
+
+  @override
+  String calCount(int n) {
+    return '$n件';
+  }
+
+  @override
+  String get calSun => '日';
+
+  @override
+  String get calMon => '一';
+
+  @override
+  String get calTue => '二';
+
+  @override
+  String get calWed => '三';
+
+  @override
+  String get calThu => '四';
+
+  @override
+  String get calFri => '五';
+
+  @override
+  String get calSat => '六';
+
+  @override
+  String calIn(int lines, String change) {
+    return '$lines个商品・$change个';
+  }
+
+  @override
+  String get calPaid => '已付款';
+
+  @override
+  String get calUnpaid => '未付款';
+
+  @override
+  String get featStockInspection => '导入验货';
+
+  @override
+  String get featStockInspectionDesc => '清点从文件登记的库存，验货完成后计入库存';
+
+  @override
+  String get siEmpty => '没有待验货的文件';
+
+  @override
+  String get siIntro => '从文件登记的库存，在这里清点并“验货完成”之前不计入库存。';
+
+  @override
+  String siFile(int id, String name) {
+    return '导入 #$id · $name';
+  }
+
+  @override
+  String siLeft(int left, int lines, int qty) {
+    return '未验货 $left/$lines行・$qty个';
+  }
+
+  @override
+  String siBy(String name, String at) {
+    return '$name于$at登记';
+  }
+
+  @override
+  String siBadCount(String name) {
+    return '请输入“$name”的清点数量';
+  }
+
+  @override
+  String get siConfirmQ => '确认验货完成？';
+
+  @override
+  String siConfirmBody(int n, int units, String diff) {
+    return '$n行・$units个将计入库存。与文件的差异为 $diff个。';
+  }
+
+  @override
+  String get siConfirmGo => '验货完成';
+
+  @override
+  String siDone(int n, int left) {
+    return '已将$n行计入库存（剩余未验货$left行）';
+  }
+
+  @override
+  String siTitle(int id) {
+    return '导入 #$id 验货';
+  }
+
+  @override
+  String siOpenLines(int open, int total) {
+    return '未验货 $open行（共$total行）';
+  }
+
+  @override
+  String get siAllDone => '全部已验货';
+
+  @override
+  String get siScan => '扫描JAN（该行将被勾选）';
+
+  @override
+  String siScanMiss(String jan) {
+    return '$jan 不在此文件的未验货行中';
+  }
+
+  @override
+  String get siAll => '全选';
+
+  @override
+  String siInspected(int qty, String who) {
+    return '已验货 $qty个（$who）';
+  }
+
+  @override
+  String siFileSaid(int qty) {
+    return '文件 $qty个';
+  }
+
+  @override
+  String get siNoPermission => '验货需要“验货确认”或“库存调整”权限。';
+
+  @override
+  String siCheckIn(int n) {
+    return '将所选$n行设为验货完成';
+  }
+
+  @override
+  String siDiff(String d) {
+    return '差异 $d';
+  }
+
+  @override
+  String get siCounted => '清点数';
+
+  @override
+  String ivKeptUntil(String date, int years) {
+    return '保存至$date（$years年）';
+  }
+
+  @override
+  String get ivPaid => '已向供应商付款';
+
+  @override
+  String ivPaidAt(String at) {
+    return '于$at标记为已付款';
+  }
+
+  @override
+  String get ivNote => '备注';
+
+  @override
+  String get ivNoteSave => '保存备注';
+
+  @override
+  String get ivSaved => '已保存';
+
+  @override
+  String get ivAwaiting => '待验货：此导入的库存在验货完成前未计入库存。';
+
+  @override
+  String ivAwaitingCount(int n) {
+    return '待验货 $n';
+  }
+
+  @override
+  String ivFateAwaiting(String name, String qty) {
+    return '→ $name：待验货（文件 $qty个）';
+  }
+
+  @override
+  String get ivOpenTab => '以Excel格式在新标签页打开';
+
+  @override
+  String get ivDownloadXlsx => '以Excel下载';
+
+  @override
+  String get ivTabBlocked => '无法打开新标签页，改为保存Excel文件。';
+
+  @override
+  String get ivTabHint => '此表可直接选择复制。如需用Excel打开，请在应用中使用“以Excel下载”。';
+
+  @override
+  String get ivXlsxSaved => '已保存Excel文件';
+
+  @override
+  String plPending(int n) {
+    return '未验货 +$n';
+  }
+
+  @override
+  String plPendingSummary(int items, int units, int total) {
+    return '未验货 $items个商品・$units个（含库存共 $total个）';
+  }
 }

@@ -466,7 +466,8 @@ Uint8List stockTemplateXlsx() => buildXlsx(
 
 /// What the server did with a stock file.
 class StockFileResult extends Equatable {
-  const StockFileResult({required this.importId, required this.lines, required this.change, this.skipped = const []});
+  const StockFileResult(
+      {required this.importId, required this.lines, required this.change, this.skipped = const [], this.awaiting});
 
   final int importId;
   final int lines;
@@ -475,6 +476,12 @@ class StockFileResult extends Equatable {
   final int change;
   final List<String> skipped;
 
+  /// The units kept for inspection (0148), when the file was staged rather
+  /// than booked; null when it went straight into stock.
+  final int? awaiting;
+
+  bool get staged => awaiting != null;
+
   factory StockFileResult.fromJson(Map<String, dynamic> j) => StockFileResult(
         importId: (j['import_id'] as num?)?.toInt() ?? 0,
         lines: (j['lines'] as num?)?.toInt() ?? 0,
@@ -482,10 +489,11 @@ class StockFileResult extends Equatable {
         skipped: [
           for (final s in (j['skipped'] as List? ?? const []).whereType<Map>()) '${s['jan_code'] ?? ''}',
         ],
+        awaiting: (j['awaiting'] as num?)?.toInt(),
       );
 
   @override
-  List<Object?> get props => [importId, lines, change, skipped];
+  List<Object?> get props => [importId, lines, change, skipped, awaiting];
 }
 
 extension _Let<T> on T {

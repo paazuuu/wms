@@ -6,6 +6,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/excel_export_menu.dart';
+import '../../stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
 import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -1276,13 +1277,21 @@ class _WarehouseBar extends ConsumerWidget {
         : warehouses.firstWhere((w) => w.id == warehouseId).name;
     final stock = ref.watch(libraryPaneStockProvider(pane));
     final suffix = pane == 0 ? '' : '-$pane';
+    final pending = ref.watch(pendingInspectionProvider).valueOrNull;
     var items = 0;
     var units = 0;
+    var waitingItems = 0;
+    var waiting = 0;
     for (final p in products) {
       final s = productStockIn(p, warehouseId);
       if (s.onHand > 0) {
         items++;
         units += s.onHand;
+      }
+      final w = pending?.of(p.janCode, warehouseId: warehouseId) ?? 0;
+      if (w > 0) {
+        waitingItems++;
+        waiting += w;
       }
     }
     void choose(int? id) => ref.read(libraryPaneWarehouseProvider(pane).notifier).state = id;
@@ -1315,6 +1324,13 @@ class _WarehouseBar extends ConsumerWidget {
                 key: ValueKey('pl-stock-summary$suffix'),
                 style: theme.textTheme.bodySmall?.copyWith(color: fg),
               ),
+              // The breakdown: in stock, and read in but not inspected yet.
+              if (waiting > 0)
+                Text(
+                  l10n.plPendingSummary(waitingItems, waiting, units + waiting),
+                  key: ValueKey('pl-pending-summary$suffix'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: fg, fontWeight: FontWeight.w600),
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -1360,7 +1376,7 @@ class _WarehouseBar extends ConsumerWidget {
 
 /// A product's stock in the pane's warehouse; for every warehouse, the total
 /// and where it is.
-class _StockLine extends StatelessWidget {
+class _StockLine extends ConsumerWidget {
   const _StockLine({required this.product, required this.warehouseId, required this.pane, this.compact = false});
 
   final Product product;
@@ -1369,20 +1385,33 @@ class _StockLine extends StatelessWidget {
   final bool compact;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final s = productStockIn(product, warehouseId);
     final key = ValueKey('pl-stock-$pane-${product.id}');
+    // Read in from a file and not inspected yet (0148): beside the stock,
+    // never in it.
+    final waiting = ref.watch(pendingInspectionProvider).valueOrNull?.of(product.janCode, warehouseId: warehouseId) ?? 0;
+    final pending = waiting > 0
+        ? Text(
+            l10n.plPending(waiting),
+            key: ValueKey('pl-pending-$pane-${product.id}'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelMedium?.copyWith(color: scheme.tertiary, fontWeight: FontWeight.w600),
+          )
+        : null;
     if (s.onHand == 0 && s.reserved == 0) {
-      return Text(
+      final none = Text(
         warehouseId == null ? l10n.plNoStock : l10n.plNoStockHere,
         key: key,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
       );
+      return pending == null ? none : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [none, pending]);
     }
     final line = compact
         ? l10n.plStockShort(s.onHand, s.available)
@@ -1390,7 +1419,7 @@ class _StockLine extends StatelessWidget {
     final where = warehouseId == null && !compact && (product.stock?.warehouses.length ?? 0) > 0
         ? ' (${[for (final w in product.stock!.warehouses) '${w.name} ${w.onHand}'].join(' / ')})'
         : '';
-    return Text(
+    final text = Text(
       '$line$where',
       key: key,
       maxLines: compact ? 1 : 2,
@@ -1400,5 +1429,6 @@ class _StockLine extends StatelessWidget {
         fontWeight: FontWeight.w600,
       ),
     );
+    return pending == null ? text : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [text, pending]);
   }
 }

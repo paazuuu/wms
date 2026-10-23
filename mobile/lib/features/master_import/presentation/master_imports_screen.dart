@@ -31,6 +31,7 @@ class MasterImportsScreen extends ConsumerWidget {
         MasterImportStatus.stopped => StatusTone.danger,
         MasterImportStatus.cancelled => StatusTone.neutral,
         MasterImportStatus.reading => StatusTone.warning,
+        MasterImportStatus.awaitingInspection => StatusTone.info,
       };
 
   Future<void> _open(BuildContext context, WidgetRef ref, {int? resume}) async {
@@ -100,9 +101,21 @@ class MasterImportsScreen extends ConsumerWidget {
                         ].join(' · '),
                         style: muted,
                       ),
-                      if (stockFile)
-                        Text(l10n.miStockFileSummary(m.stockLines, m.stockAdded), style: theme.textTheme.bodySmall)
-                      else ...[
+                      if (stockFile) ...[
+                        Text(l10n.miStockFileSummary(m.stockLines, m.stockAdded), style: theme.textTheme.bodySmall),
+                        // Filed under its document's date; paid or not; the memo (0148).
+                        Text(
+                          [
+                            if (m.filedOn case final d?) l10n.miFiledOn(DateFormat('y/MM/dd').format(d)),
+                            m.paid ? l10n.calPaid : l10n.calUnpaid,
+                            if ((m.note ?? '').isNotEmpty) m.note!,
+                          ].join(' · '),
+                          key: ValueKey('mi-notes-${m.id}'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ] else ...[
                         if (m.status == MasterImportStatus.masterDone || m.status == MasterImportStatus.stockDone)
                           Text(l10n.miMasterSummary(m.created, m.updated), style: theme.textTheme.bodySmall),
                         if (m.status == MasterImportStatus.stockDone)
@@ -117,7 +130,9 @@ class MasterImportsScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.xs),
                       Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
                         // The file beside what was read from it (0146).
-                        if (m.files.any((f) => f.kind == 'original') || m.status == MasterImportStatus.stockDone)
+                        if (m.files.any((f) => f.kind == 'original') ||
+                            m.status == MasterImportStatus.stockDone ||
+                            m.status == MasterImportStatus.awaitingInspection)
                           ImportViewButtons(importId: m.id),
                         for (final f in m.files)
                           OutlinedButton.icon(

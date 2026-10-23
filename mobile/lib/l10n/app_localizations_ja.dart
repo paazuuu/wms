@@ -11306,4 +11306,290 @@ class AppLocalizationsJa extends AppLocalizations {
   String ivCorrected(String aiJan, String jan, String aiQty, String qty) {
     return '確認用Excelで直した: JAN $aiJan → $jan ・ 数量 $aiQty → $qty';
   }
+
+  @override
+  String get miStatusAwaiting => '検品待ち';
+
+  @override
+  String miFiledOn(String date) {
+    return '書類の日付 $date';
+  }
+
+  @override
+  String get sfConfirmStage => '検品待ちとして登録します。検品画面で数を確かめて「検品完了」にした分だけ、在庫に入ります。';
+
+  @override
+  String sfStaged(int id, int lines, int qty) {
+    return '取込 #$id: $lines商品を検品待ちにしました（合計 $qty個）。検品が済むと在庫に入ります。';
+  }
+
+  @override
+  String get sfGoInspect => '検品へ';
+
+  @override
+  String get sfAddInspection => '足す分は「検品未完了」として登録され、検品担当が「取込の検品」で確かめると在庫に入ります。';
+
+  @override
+  String get sfSetNoInspection => '「在庫をこの数にする」は数合わせなので、検品を待たずにすぐ反映します。';
+
+  @override
+  String sfApplyStage(int n) {
+    return '検品待ちとして登録（$n商品）';
+  }
+
+  @override
+  String sfDocDate(String date, String how) {
+    return '書類の日付: $date（$how）';
+  }
+
+  @override
+  String get sfDocDateChange => '日付を変える';
+
+  @override
+  String get sfDateContent => 'ファイルに書かれた日付';
+
+  @override
+  String get sfDateFile => 'ファイルの作成日';
+
+  @override
+  String get sfDateUploaded => 'アップロード日';
+
+  @override
+  String get sfDateManual => '手で入力';
+
+  @override
+  String get calTitle => '取込カレンダー';
+
+  @override
+  String get calToday => '今日';
+
+  @override
+  String get calPrev => '前の月';
+
+  @override
+  String get calNext => '次の月';
+
+  @override
+  String calYear(int y) {
+    return '$y年';
+  }
+
+  @override
+  String calMonth(int m) {
+    return '$m月';
+  }
+
+  @override
+  String calKept(int years) {
+    return '取込は書類の日付から$years年間保存され、過ぎると自動で削除されます（在庫の増減の記録は残ります）。';
+  }
+
+  @override
+  String calMonthList(int n) {
+    return 'この月の取込 $n件';
+  }
+
+  @override
+  String calDayList(String date, int n) {
+    return '$date の取込 $n件';
+  }
+
+  @override
+  String get calNone => 'この日の取込はありません';
+
+  @override
+  String calCount(int n) {
+    return '$n件';
+  }
+
+  @override
+  String get calSun => '日';
+
+  @override
+  String get calMon => '月';
+
+  @override
+  String get calTue => '火';
+
+  @override
+  String get calWed => '水';
+
+  @override
+  String get calThu => '木';
+
+  @override
+  String get calFri => '金';
+
+  @override
+  String get calSat => '土';
+
+  @override
+  String calIn(int lines, String change) {
+    return '$lines商品・$change個';
+  }
+
+  @override
+  String get calPaid => '振込済';
+
+  @override
+  String get calUnpaid => '未払い';
+
+  @override
+  String get featStockInspection => '取込の検品';
+
+  @override
+  String get featStockInspectionDesc => 'ファイルから登録した在庫を数えて確かめ、検品完了にして在庫に入れる';
+
+  @override
+  String get siEmpty => '検品待ちのファイルはありません';
+
+  @override
+  String get siIntro => 'ファイルから登録した在庫は、ここで数を確かめて「検品完了」にするまで在庫に入りません。';
+
+  @override
+  String siFile(int id, String name) {
+    return '取込 #$id · $name';
+  }
+
+  @override
+  String siLeft(int left, int lines, int qty) {
+    return '未検品 $left/$lines行・$qty個';
+  }
+
+  @override
+  String siBy(String name, String at) {
+    return '$nameが$atに登録';
+  }
+
+  @override
+  String siBadCount(String name) {
+    return '「$name」の数えた数を入れてください';
+  }
+
+  @override
+  String get siConfirmQ => '検品完了にしますか？';
+
+  @override
+  String siConfirmBody(int n, int units, String diff) {
+    return '$n行・$units個を在庫に入れます。ファイルとの差は $diff個です。';
+  }
+
+  @override
+  String get siConfirmGo => '検品完了';
+
+  @override
+  String siDone(int n, int left) {
+    return '$n行を在庫に入れました（未検品 残り$left行）';
+  }
+
+  @override
+  String siTitle(int id) {
+    return '取込 #$id の検品';
+  }
+
+  @override
+  String siOpenLines(int open, int total) {
+    return '未検品 $open行（全$total行）';
+  }
+
+  @override
+  String get siAllDone => 'すべて検品済みです';
+
+  @override
+  String get siScan => 'JANをスキャン（その行に印が付きます）';
+
+  @override
+  String siScanMiss(String jan) {
+    return '$jan はこのファイルの未検品の行にありません';
+  }
+
+  @override
+  String get siAll => 'すべて選ぶ';
+
+  @override
+  String siInspected(int qty, String who) {
+    return '検品済み $qty個（$who）';
+  }
+
+  @override
+  String siFileSaid(int qty) {
+    return 'ファイル $qty個';
+  }
+
+  @override
+  String get siNoPermission => '検品するには「検品の確定」か「在庫調整」の権限が要ります。';
+
+  @override
+  String siCheckIn(int n) {
+    return '選んだ$n行を検品完了にする';
+  }
+
+  @override
+  String siDiff(String d) {
+    return '差 $d';
+  }
+
+  @override
+  String get siCounted => '数えた数';
+
+  @override
+  String ivKeptUntil(String date, int years) {
+    return '$dateまで保存（$years年）';
+  }
+
+  @override
+  String get ivPaid => '仕入先へ振り込み済み';
+
+  @override
+  String ivPaidAt(String at) {
+    return '$at に振込済みにしました';
+  }
+
+  @override
+  String get ivNote => '備考（メモ）';
+
+  @override
+  String get ivNoteSave => 'メモを保存';
+
+  @override
+  String get ivSaved => '保存しました';
+
+  @override
+  String get ivAwaiting => '検品待ち: この取込の在庫は、検品が済むまで在庫に入っていません。';
+
+  @override
+  String ivAwaitingCount(int n) {
+    return '検品待ち $n';
+  }
+
+  @override
+  String ivFateAwaiting(String name, String qty) {
+    return '→ $name: 検品待ち（ファイル $qty個）';
+  }
+
+  @override
+  String get ivOpenTab => 'Excel形式で別タブに開く';
+
+  @override
+  String get ivDownloadXlsx => 'Excelでダウンロード';
+
+  @override
+  String get ivTabBlocked => '別タブを開けませんでした。代わりにExcelファイルを保存します。';
+
+  @override
+  String get ivTabHint =>
+      'この表はそのまま選んでコピーできます。Excelで開くには、アプリの「Excelでダウンロード」を使ってください。';
+
+  @override
+  String get ivXlsxSaved => 'Excelファイルを保存しました';
+
+  @override
+  String plPending(int n) {
+    return '未検品 +$n';
+  }
+
+  @override
+  String plPendingSummary(int items, int units, int total) {
+    return '未検品 $items商品・$units個（在庫と合わせて $total個）';
+  }
 }

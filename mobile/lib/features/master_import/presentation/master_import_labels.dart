@@ -43,6 +43,7 @@ String masterStatusLabel(AppLocalizations l10n, MasterImportStatus s) => switch 
       MasterImportStatus.masterDone => l10n.miStatusMasterDone,
       MasterImportStatus.stockDone => l10n.miStatusStockDone,
       MasterImportStatus.cancelled => l10n.miStatusCancelled,
+      MasterImportStatus.awaitingInspection => l10n.miStatusAwaiting,
     };
 
 /// Saves bytes where the person chooses (a download on the web).

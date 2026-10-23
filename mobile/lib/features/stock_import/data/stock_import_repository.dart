@@ -8,6 +8,7 @@ import '../../../core/api/api_result.dart';
 import '../../delivery/application/delivery_providers.dart';
 import '../../master_import/data/master_import_repository.dart' show masterImportBucket;
 import '../domain/stock_file.dart';
+import '../domain/stock_ledger.dart';
 
 /// Stock from a file, on its own (0144).
 abstract class StockImportRepository {
@@ -39,6 +40,26 @@ abstract class StockImportRepository {
 
   /// Takes an import back: every line's change booked the other way.
   Future<ApiResult<int>> undo(int importId);
+
+  /// Keeps [lines] for inspection in [warehouseId] (0148): nothing is
+  /// booked until [inspect].
+  Future<ApiResult<StockFileResult>> stage(int warehouseId, List<StockFileLine> lines, {String? fileName, String? fileType});
+
+  /// Stock files waiting for inspection.
+  Future<ApiResult<List<AwaitingImport>>> awaiting({int? warehouseId});
+
+  /// The inspector's count of [lines] of [importId], booked into stock.
+  Future<ApiResult<InspectionResult>> inspect(int importId, List<InspectedLine> lines);
+
+  /// Units waiting for inspection, by warehouse and JAN.
+  Future<ApiResult<PendingInspection>> pendingInspection({int? warehouseId});
+
+  /// Notes the document's date, whether the supplier is paid, and a memo.
+  /// Only what is given changes.
+  Future<ApiResult<bool>> updateNotes(int importId, {DocumentDate? date, bool? paid, String? note});
+
+  /// Stock files dated from [from] to [to], for the calendar.
+  Future<ApiResult<List<CalendarImport>>> calendar(DateTime from, DateTime to);
 }
 
 /// An earlier import of the same file or the same lines.
@@ -210,9 +231,109 @@ class StockImportRepositoryImpl implements StockImportRepository {
       return mapDioError<int>(e);
     }
   }
+  @override
+  Future<ApiResult<StockFileResult>> stage(int warehouseId, List<StockFileLine> lines,
+      {String? fileName, String? fileType}) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_stage', data: {
+        'p_warehouse_id': warehouseId,
+        'p_lines': [for (final l in lines) l.toJson()],
+        'p_file_name': fileName,
+        'p_file_type': fileType,
+      });
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(StockFileResult.fromJson((d as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<StockFileResult>(e);
+    }
+  }
+
+  List<Map> _rows(Object? data) {
+    final d = data is List && data.isNotEmpty && data.first is List ? data.first : data;
+    return (d as List? ?? const []).whereType<Map>().toList();
+  }
+
+  @override
+  Future<ApiResult<List<AwaitingImport>>> awaiting({int? warehouseId}) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_awaiting', data: {'p_warehouse_id': warehouseId});
+      return ApiSuccess([for (final e in _rows(r.data)) AwaitingImport.fromJson(e.cast())]);
+    } on DioException catch (e) {
+      return mapDioError<List<AwaitingImport>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<InspectionResult>> inspect(int importId, List<InspectedLine> lines) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_inspect', data: {
+        'p_id': importId,
+        'p_lines': [for (final l in lines) l.toJson()],
+      });
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(InspectionResult.fromJson((d as Map).cast<String, dynamic>()));
+    } on DioException catch (e) {
+      return mapDioError<InspectionResult>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<PendingInspection>> pendingInspection({int? warehouseId}) async {
+    try {
+      final r = await _rest.post('/rpc/stock_pending_inspection', data: {'p_warehouse_id': warehouseId});
+      return ApiSuccess(PendingInspection.fromRows(_rows(r.data)));
+    } on DioException catch (e) {
+      return mapDioError<PendingInspection>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> updateNotes(int importId, {DocumentDate? date, bool? paid, String? note}) async {
+    try {
+      await _rest.post('/rpc/stock_file_import_update', data: {
+        'p_id': importId,
+        'p_patch': {
+          if (date != null) 'document_date': date.wire,
+          if (date != null) 'document_date_source': date.source.wire,
+          if (paid != null) 'paid': paid,
+          if (note != null) 'note': note,
+        },
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<CalendarImport>>> calendar(DateTime from, DateTime to) async {
+    String day(DateTime d) => DocumentDate(d, DocumentDateSource.manual).wire;
+    try {
+      final r = await _rest.post('/rpc/stock_file_calendar', data: {'p_from': day(from), 'p_to': day(to)});
+      return ApiSuccess([for (final e in _rows(r.data)) CalendarImport.fromJson(e.cast())]);
+    } on DioException catch (e) {
+      return mapDioError<List<CalendarImport>>(e);
+    }
+  }
 }
 
 final stockImportRepositoryProvider = Provider<StockImportRepository>((ref) => StockImportRepositoryImpl(
       rest: ref.watch(restDioProvider),
       storage: ref.watch(storageDioProvider),
     ));
+
+/// Units waiting for inspection in every warehouse one may see (0148).
+/// Empty when it cannot be read: the stock shown stays right either way.
+final pendingInspectionProvider = FutureProvider.autoDispose<PendingInspection>((ref) async {
+  final r = await ref.watch(stockImportRepositoryProvider).pendingInspection();
+  return r is ApiSuccess<PendingInspection> ? r.data : const PendingInspection();
+});
+
+/// Stock files waiting for their inspection.
+final awaitingImportsProvider = FutureProvider.autoDispose<List<AwaitingImport>>((ref) async {
+  final r = await ref.watch(stockImportRepositoryProvider).awaiting();
+  return switch (r) {
+    ApiSuccess(:final data) => data,
+    ApiFailure(:final message) => throw Exception(message),
+  };
+});

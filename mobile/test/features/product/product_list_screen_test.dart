@@ -7,6 +7,8 @@ import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
+import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart' show PendingInspection;
 import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
@@ -17,7 +19,11 @@ import '../../support/harness.dart';
 /// is false; [delete] adds product.delete (0119).
 Future<ProviderContainer> _pump(
     WidgetTester tester, FakeProductRepository repo,
-    {bool manage = true, bool delete = false, bool lifecycle = false, List<Warehouse> warehouses = const []}) async {
+    {bool manage = true,
+    bool delete = false,
+    bool lifecycle = false,
+    List<Warehouse> warehouses = const [],
+    PendingInspection pending = const PendingInspection()}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
     warehouseRepositoryProvider.overrideWithValue(
@@ -33,6 +39,7 @@ Future<ProviderContainer> _pump(
         productLibraryCanManageProvider.overrideWithValue(manage),
         productCanDeleteProvider.overrideWithValue(delete),
         productCanLifecycleProvider.overrideWithValue(lifecycle),
+        pendingInspectionProvider.overrideWith((ref) async => pending),
       ],
       child: const ProductListScreen(),
     ),
@@ -415,6 +422,27 @@ void main() {
     expect(find.byKey(const ValueKey('pl-stock-0-2')), findsOneWidget);
     expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-0-2'))).data, '在庫なし');
     expect(find.text('2件を表示（全2件）'), findsOneWidget);
+  });
+
+  testWidgets('stock read in from a file and not inspected is shown apart from the stock (0148)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const pen = Product(
+      id: 1, janCode: '4909999000014', name: 'テストペン', maker: 'テスト',
+      stock: ProductStock(onHand: 40, available: 40),
+    );
+    const note = Product(id: 2, janCode: '4909999000021', name: 'テストノート', maker: 'テスト');
+    await _pump(tester, FakeProductRepository(products: const [pen, note]),
+        pending: PendingInspection.fromRows([
+          {'warehouse_id': 1, 'jan_code': '4909999000014', 'quantity': 500},
+          {'warehouse_id': 1, 'jan_code': '4909999000021', 'quantity': 100},
+        ]));
+    // The stock as it is, and beside it what waits for inspection.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-0-1'))).data, '在庫 40 · 引当 0 · 出荷可能 40');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-pending-0-1'))).data, '未検品 +500');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-0-2'))).data, '在庫なし');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-pending-0-2'))).data, '未検品 +100');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pl-pending-summary'))).data, '未検品 2商品・600個（在庫と合わせて 640個）');
   });
 
   const main = Warehouse(id: 1, code: 'MAIN', name: 'メイン倉庫');

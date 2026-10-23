@@ -10081,5 +10081,344 @@
         "type": "String"
       }
     }
+  },
+  "miStatusAwaiting": "検品待ち",
+  "miFiledOn": "書類の日付 {date}",
+  "@miFiledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sfConfirmStage": "検品待ちとして登録します。検品画面で数を確かめて「検品完了」にした分だけ、在庫に入ります。",
+  "sfStaged": "取込 #{id}: {lines}商品を検品待ちにしました（合計 {qty}個）。検品が済むと在庫に入ります。",
+  "@sfStaged": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "sfGoInspect": "検品へ",
+  "sfAddInspection": "足す分は「検品未完了」として登録され、検品担当が「取込の検品」で確かめると在庫に入ります。",
+  "sfSetNoInspection": "「在庫をこの数にする」は数合わせなので、検品を待たずにすぐ反映します。",
+  "sfApplyStage": "検品待ちとして登録（{n}商品）",
+  "@sfApplyStage": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sfDocDate": "書類の日付: {date}（{how}）",
+  "@sfDocDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "how": {
+        "type": "String"
+      }
+    }
+  },
+  "sfDocDateChange": "日付を変える",
+  "sfDateContent": "ファイルに書かれた日付",
+  "sfDateFile": "ファイルの作成日",
+  "sfDateUploaded": "アップロード日",
+  "sfDateManual": "手で入力",
+  "calTitle": "取込カレンダー",
+  "calToday": "今日",
+  "calPrev": "前の月",
+  "calNext": "次の月",
+  "calYear": "{y}年",
+  "@calYear": {
+    "placeholders": {
+      "y": {
+        "type": "int"
+      }
+    }
+  },
+  "calMonth": "{m}月",
+  "@calMonth": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "calKept": "取込は書類の日付から{years}年間保存され、過ぎると自動で削除されます（在庫の増減の記録は残ります）。",
+  "@calKept": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "calMonthList": "この月の取込 {n}件",
+  "@calMonthList": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "calDayList": "{date} の取込 {n}件",
+  "@calDayList": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "calNone": "この日の取込はありません",
+  "calCount": "{n}件",
+  "@calCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "calSun": "日",
+  "calMon": "月",
+  "calTue": "火",
+  "calWed": "水",
+  "calThu": "木",
+  "calFri": "金",
+  "calSat": "土",
+  "calIn": "{lines}商品・{change}個",
+  "@calIn": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "calPaid": "振込済",
+  "calUnpaid": "未払い",
+  "featStockInspection": "取込の検品",
+  "featStockInspectionDesc": "ファイルから登録した在庫を数えて確かめ、検品完了にして在庫に入れる",
+  "siEmpty": "検品待ちのファイルはありません",
+  "siIntro": "ファイルから登録した在庫は、ここで数を確かめて「検品完了」にするまで在庫に入りません。",
+  "siFile": "取込 #{id} · {name}",
+  "@siFile": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "siLeft": "未検品 {left}/{lines}行・{qty}個",
+  "@siLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "siBy": "{name}が{at}に登録",
+  "@siBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "siBadCount": "「{name}」の数えた数を入れてください",
+  "@siBadCount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "siConfirmQ": "検品完了にしますか？",
+  "siConfirmBody": "{n}行・{units}個を在庫に入れます。ファイルとの差は {diff}個です。",
+  "@siConfirmBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "siConfirmGo": "検品完了",
+  "siDone": "{n}行を在庫に入れました（未検品 残り{left}行）",
+  "@siDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "siTitle": "取込 #{id} の検品",
+  "@siTitle": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "siOpenLines": "未検品 {open}行（全{total}行）",
+  "@siOpenLines": {
+    "placeholders": {
+      "open": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "siAllDone": "すべて検品済みです",
+  "siScan": "JANをスキャン（その行に印が付きます）",
+  "siScanMiss": "{jan} はこのファイルの未検品の行にありません",
+  "@siScanMiss": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      }
+    }
+  },
+  "siAll": "すべて選ぶ",
+  "siInspected": "検品済み {qty}個（{who}）",
+  "@siInspected": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "siFileSaid": "ファイル {qty}個",
+  "@siFileSaid": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "siNoPermission": "検品するには「検品の確定」か「在庫調整」の権限が要ります。",
+  "siCheckIn": "選んだ{n}行を検品完了にする",
+  "@siCheckIn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "siDiff": "差 {d}",
+  "@siDiff": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "siCounted": "数えた数",
+  "ivKeptUntil": "{date}まで保存（{years}年）",
+  "@ivKeptUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "ivPaid": "仕入先へ振り込み済み",
+  "ivPaidAt": "{at} に振込済みにしました",
+  "@ivPaidAt": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "ivNote": "備考（メモ）",
+  "ivNoteSave": "メモを保存",
+  "ivSaved": "保存しました",
+  "ivAwaiting": "検品待ち: この取込の在庫は、検品が済むまで在庫に入っていません。",
+  "ivAwaitingCount": "検品待ち {n}",
+  "@ivAwaitingCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ivFateAwaiting": "→ {name}: 検品待ち（ファイル {qty}個）",
+  "@ivFateAwaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "ivOpenTab": "Excel形式で別タブに開く",
+  "ivDownloadXlsx": "Excelでダウンロード",
+  "ivTabBlocked": "別タブを開けませんでした。代わりにExcelファイルを保存します。",
+  "ivTabHint": "この表はそのまま選んでコピーできます。Excelで開くには、アプリの「Excelでダウンロード」を使ってください。",
+  "ivXlsxSaved": "Excelファイルを保存しました",
+  "plPending": "未検品 +{n}",
+  "@plPending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plPendingSummary": "未検品 {items}商品・{units}個（在庫と合わせて {total}個）",
+  "@plPendingSummary": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   }
 }
