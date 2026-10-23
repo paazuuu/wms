@@ -7236,10 +7236,11 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
      発行日・作成日・請求日・納品日・日付 with the date in it or just after
      it (an Excel serial number counts), else the first date there. Accepted
      forms: 2026年8月19日, 2026/8/19, 2026-08-19, 令和8年8月19日.
-  2. `file`: the file's own record, a PDF's /CreationDate or a workbook's
-     dcterms:created.
-  3. `uploaded`: today. It can be changed by hand (`manual`) before it goes
+  2. `uploaded`: today. It can be changed by hand (`manual`) before it goes
      in and afterwards.
+  - The file's own creation date (a PDF's /CreationDate, a workbook's
+    dcterms:created) is not used. It says when the file was saved, not the
+    document's date, and was dropped at the user's request.
   - Only dates from 2000 up to a month ahead are taken.
 - **取込カレンダー (`stock_file_calendar`).**
   - A month grid (Sunday first) with the count on each day, a mark where
@@ -7308,8 +7309,8 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Taking back a waiting file moves nothing.
   - An eight-year-old import is listed as expired and this year's is not.
 - Tests (1013 Flutter, 56 Deno pass):
-  - Dates from the AI, the sheet, the file and today, and the kept-until
-    day.
+  - Dates from the AI, the sheet and today (never the file's own), and the
+    kept-until day.
   - Pending stock by warehouse.
   - The sheet page escapes text.
   - Staging with the date, payment and memo; a count correction is not

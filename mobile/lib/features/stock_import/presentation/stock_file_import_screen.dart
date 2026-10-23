@@ -949,7 +949,6 @@ class _NotesCard extends StatelessWidget {
 /// How an import's date was found, in words.
 String documentDateSourceLabel(AppLocalizations l10n, DocumentDateSource? s) => switch (s) {
       DocumentDateSource.content => l10n.sfDateContent,
-      DocumentDateSource.file => l10n.sfDateFile,
       DocumentDateSource.uploaded || null => l10n.sfDateUploaded,
       DocumentDateSource.manual => l10n.sfDateManual,
     };

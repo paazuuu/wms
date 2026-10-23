@@ -20300,12 +20300,6 @@ abstract class AppLocalizations {
   /// **'ファイルに書かれた日付'**
   String get sfDateContent;
 
-  /// No description provided for @sfDateFile.
-  ///
-  /// In ja, this message translates to:
-  /// **'ファイルの作成日'**
-  String get sfDateFile;
-
   /// No description provided for @sfDateUploaded.
   ///
   /// In ja, this message translates to:

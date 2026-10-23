@@ -11349,9 +11349,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sfDateContent => 'ファイルに書かれた日付';
 
   @override
-  String get sfDateFile => 'ファイルの作成日';
-
-  @override
   String get sfDateUploaded => 'アップロード日';
 
   @override

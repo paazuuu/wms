@@ -10130,7 +10130,6 @@
   },
   "sfDocDateChange": "日付を変える",
   "sfDateContent": "ファイルに書かれた日付",
-  "sfDateFile": "ファイルの作成日",
   "sfDateUploaded": "アップロード日",
   "sfDateManual": "手で入力",
   "calTitle": "取込カレンダー",

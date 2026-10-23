@@ -2,19 +2,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/html_sheet.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
 
 final _now = DateTime(2026, 10, 23);
-
-Uint8List _xlsxWithCreated(String created) {
-  final a = Archive()
-    ..addFile(ArchiveFile.string('docProps/core.xml',
-        '<cp:coreProperties xmlns:dcterms="http://purl.org/dc/terms/"><dcterms:created xsi:type="dcterms:W3CDTF">$created</dcterms:created></cp:coreProperties>'));
-  return Uint8List.fromList(ZipEncoder().encode(a));
-}
 
 void main() {
   group('the date a file prints', () {
@@ -50,19 +42,13 @@ void main() {
       ], now: _now), DateTime(2026, 7, 1));
     });
 
-    test('the file’s own record: a PDF’s CreationDate, a workbook’s created', () {
-      final pdf = Uint8List.fromList(latin1.encode('%PDF-1.4\n1 0 obj << /CreationDate (D:20260818093000+09\'00\') >>'));
-      expect(fileCreated('a.pdf', pdf, now: _now), DateTime(2026, 8, 18));
-      expect(fileCreated('a.xlsx', _xlsxWithCreated('2026-08-17T01:02:03Z'), now: _now), DateTime(2026, 8, 17));
-      expect(fileCreated('a.png', Uint8List(10), now: _now), isNull);
-    });
-
-    test('the order: what the reader found, the sheet, the file’s own date, then today', () {
+    test('the order: what the reader found, the sheet, then the upload day — never the file’s own date', () {
+      // A PDF saved on 8/18 that prints no date of its own is filed today.
       final pdf = Uint8List.fromList(latin1.encode('/CreationDate (D:20260818)'));
       expect(findDocumentDate(fileName: 'a.pdf', bytes: pdf, readDate: '2026-08-19', now: _now),
           DocumentDate(DateTime(2026, 8, 19), DocumentDateSource.content));
       expect(findDocumentDate(fileName: 'a.pdf', bytes: pdf, now: _now),
-          DocumentDate(DateTime(2026, 8, 18), DocumentDateSource.file));
+          DocumentDate(DateTime(2026, 10, 23), DocumentDateSource.uploaded));
       expect(
           findDocumentDate(fileName: 'a.csv', bytes: Uint8List(0), rows: [
             ['請求日', '2026/08/01']

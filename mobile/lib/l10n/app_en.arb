@@ -3727,7 +3727,6 @@
   "sfDocDate": "Document date: {date} ({how})",
   "sfDocDateChange": "Change date",
   "sfDateContent": "printed in the file",
-  "sfDateFile": "the file’s creation date",
   "sfDateUploaded": "upload date",
   "sfDateManual": "entered by hand",
   "calTitle": "Import calendar",

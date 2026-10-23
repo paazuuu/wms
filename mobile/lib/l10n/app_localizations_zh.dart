@@ -11284,9 +11284,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sfDateContent => '文件中记载的日期';
 
   @override
-  String get sfDateFile => '文件的创建日期';
-
-  @override
   String get sfDateUploaded => '上传日期';
 
   @override

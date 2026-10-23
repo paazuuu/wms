@@ -11588,9 +11588,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sfDateContent => 'printed in the file';
 
   @override
-  String get sfDateFile => 'the file’s creation date';
-
-  @override
   String get sfDateUploaded => 'upload date';
 
   @override

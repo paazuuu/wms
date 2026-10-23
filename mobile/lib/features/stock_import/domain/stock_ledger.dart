@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart' show ZipDecoder;
 import 'package:equatable/equatable.dart';
 
 /// Where an import's date came from (0148).
@@ -9,10 +7,7 @@ enum DocumentDateSource {
   /// Printed in the file: 発行日, 作成日, 請求日 and the like.
   content('content'),
 
-  /// The file's own record of when it was made (a PDF's or workbook's).
-  file('file'),
-
-  /// Neither: the day it was uploaded.
+  /// Not printed in it: the day it was uploaded.
   uploaded('uploaded'),
 
   /// Set by hand afterwards.
@@ -109,32 +104,10 @@ DateTime? dateInRows(List<List<String>> rows, {DateTime? now}) {
   return null;
 }
 
-/// When the file says it was made: a PDF's /CreationDate, a workbook's
-/// docProps/core.xml dcterms:created.
-DateTime? fileCreated(String fileName, Uint8List bytes, {DateTime? now}) {
-  final at = now ?? DateTime.now();
-  final lower = fileName.toLowerCase();
-  if (lower.endsWith('.pdf')) {
-    final head = latin1.decode(bytes.length > 4000000 ? bytes.sublist(0, 4000000) : bytes, allowInvalid: true);
-    final m = RegExp(r'/CreationDate\s*\(D:(\d{4})(\d{2})(\d{2})').firstMatch(head) ??
-        RegExp(r'<xmp:CreateDate>(\d{4})-(\d{2})-(\d{2})').firstMatch(head);
-    if (m != null) return _plausible(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!), at);
-    return null;
-  }
-  if (lower.endsWith('.xlsx') || lower.endsWith('.xlsm')) {
-    try {
-      final core = ZipDecoder().decodeBytes(bytes).findFile('docProps/core.xml')?.readBytes();
-      if (core == null) return null;
-      final m = RegExp(r'<dcterms:created[^>]*>(\d{4})-(\d{2})-(\d{2})').firstMatch(utf8.decode(core, allowMalformed: true));
-      if (m != null) return _plausible(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!), at);
-    } catch (_) {}
-  }
-  return null;
-}
-
 /// The date an import is filed under (0148): what the file prints (the AI's
-/// reading of it, or the sheet's top rows), else when the file says it was
-/// made, else today.
+/// reading of it, or the sheet's top rows), else the upload day. The file's
+/// own creation date is not used: it is when the file was saved, not the
+/// document's date.
 DocumentDate findDocumentDate({
   required String fileName,
   required Uint8List bytes,
@@ -147,8 +120,6 @@ DocumentDate findDocumentDate({
   final fromRead = m == null ? null : _plausible(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!), at);
   final content = fromRead ?? (rows == null ? null : dateInRows(rows, now: at));
   if (content != null) return DocumentDate(content, DocumentDateSource.content);
-  final made = fileCreated(fileName, bytes, now: at);
-  if (made != null) return DocumentDate(made, DocumentDateSource.file);
   return DocumentDate(DateTime(at.year, at.month, at.day), DocumentDateSource.uploaded);
 }
 

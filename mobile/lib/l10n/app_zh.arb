@@ -3727,7 +3727,6 @@
   "sfDocDate": "单据日期：{date}（{how}）",
   "sfDocDateChange": "修改日期",
   "sfDateContent": "文件中记载的日期",
-  "sfDateFile": "文件的创建日期",
   "sfDateUploaded": "上传日期",
   "sfDateManual": "手动输入",
   "calTitle": "导入日历",
