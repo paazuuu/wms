@@ -20677,6 +20677,120 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'未検品 {items}商品・{units}個（在庫と合わせて {total}個）'**
   String plPendingSummary(int items, int units, int total);
+
+  /// No description provided for @pdStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get pdStock;
+
+  /// No description provided for @pdStockTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての倉庫'**
+  String get pdStockTotal;
+
+  /// No description provided for @pdStockUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'数は基本単位（{base}）です。未検品は検品が済むまで在庫に入りません。'**
+  String pdStockUnit(String base);
+
+  /// No description provided for @pdUnitEquals.
+  ///
+  /// In ja, this message translates to:
+  /// **'{unit}（ファイルの表記。在庫は基本単位で数え、1{unit} = 1{base}）'**
+  String pdUnitEquals(String unit, String base);
+
+  /// No description provided for @slEstimated.
+  ///
+  /// In ja, this message translates to:
+  /// **'このキーではWeb検索が使えないため（無料プランの上限）、AIの知識による推定値です。根拠のページはありません。確かめてから、チェックして反映してください。'**
+  String get slEstimated;
+
+  /// No description provided for @slQuota.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの回数上限です。Web検索を使った調べものは、有料プラン（課金を有効にした）のキーで使えます。AI設定で「調べもの用」のキーを選べます。'**
+  String get slQuota;
+
+  /// No description provided for @slUsedKey.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べもの用のキーが上限のため「{label}」で調べました'**
+  String slUsedKey(String label);
+
+  /// No description provided for @slSavedEstimate.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの推定値（Web検索なし）を確認して入力'**
+  String get slSavedEstimate;
+
+  /// No description provided for @bwTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さをまとめて調べる'**
+  String get bwTitle;
+
+  /// No description provided for @bwIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さが未登録の取扱中の商品を、AIが5件ずつ調べます。反映するまで何も保存されません。Webで見つかり確度の高いものは最初からチェックが入り、推定値や確度の低いものは入りません。'**
+  String get bwIntro;
+
+  /// No description provided for @bwCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さが未登録: {n}件'**
+  String bwCount(int n);
+
+  /// No description provided for @bwStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件を調べる'**
+  String bwStart(int n);
+
+  /// No description provided for @bwStop.
+  ///
+  /// In ja, this message translates to:
+  /// **'止める'**
+  String get bwStop;
+
+  /// No description provided for @bwProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{done}/{total}件 調べました'**
+  String bwProgress(int done, int total);
+
+  /// No description provided for @bwEstimates.
+  ///
+  /// In ja, this message translates to:
+  /// **'Web検索が使えないキーのため（無料プランの上限）、見つからなかった分はAIの知識による推定値です。「推定」と付いた値は、確かめてからチェックしてください。'**
+  String get bwEstimates;
+
+  /// No description provided for @bwEstimate.
+  ///
+  /// In ja, this message translates to:
+  /// **'推定'**
+  String get bwEstimate;
+
+  /// No description provided for @bwWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ調べていません'**
+  String get bwWaiting;
+
+  /// No description provided for @bwSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'チェックした{n}件を反映'**
+  String bwSave(int n);
+
+  /// No description provided for @bwSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件の重さを反映しました'**
+  String bwSaved(int n);
 }
 
 class _AppLocalizationsDelegate

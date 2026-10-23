@@ -9,7 +9,9 @@ import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
 import '../../warehouse_context/application/warehouse_providers.dart';
+import '../../warehouse_context/domain/warehouse.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_lot.dart';
@@ -113,6 +115,10 @@ class ProductDetailScreen extends ConsumerWidget {
               children: [
                 _Header(product: product),
                 const SizedBox(height: AppSpacing.md),
+                // The stock as figures, whichever warehouse is chosen at the
+                // top: the total, each warehouse, and what waits for inspection.
+                _StockCard(product: product),
+                const SizedBox(height: AppSpacing.md),
                 _SizeWeightCard(product: product),
                 const SizedBox(height: AppSpacing.md),
                 _BarcodesCard(product: product, onMessage: _snack),
@@ -211,7 +217,18 @@ class _Header extends ConsumerWidget {
       (l10n.pdJan, product.janCode, const ValueKey('pd-jan'), true),
       for (final at in product.attributes) (at.name, widenKana(at.value), ValueKey('pd-attr-${at.key}'), false),
       if (product.category case final c? when c.trim().isNotEmpty) (l10n.pdCategory, c, const ValueKey('pd-category'), false),
-      if (product.unit case final u? when u.trim().isNotEmpty) (l10n.pdUnit, u, const ValueKey('pd-unit'), false),
+      // The unit as the supplier's file writes it; stock is counted in the
+      // base unit, one for one — said so when the two words differ.
+      if (product.unit case final u? when u.trim().isNotEmpty)
+        (
+          l10n.pdUnit,
+          switch (product.baseUom) {
+            final b? when uomName(l10n, b.code, b.name) != u.trim() => l10n.pdUnitEquals(u.trim(), uomName(l10n, b.code, b.name)),
+            _ => u,
+          },
+          const ValueKey('pd-unit'),
+          false
+        ),
       if (product.listPrice case final lp?) (l10n.pdListPrice, yen(lp), const ValueKey('pd-list-price'), false),
       if (product.price case final pr?) (l10n.pdPrice, yen(pr), const ValueKey('pd-price'), false),
     ];
@@ -389,6 +406,79 @@ class _FactRow extends StatelessWidget {
 
 /// A titled card with an optional trailing action — the shape every section on
 /// this screen uses, so they read as one list rather than four designs.
+/// 在庫: the figures in every warehouse one may see, the chosen one first;
+/// with 「すべての倉庫」 chosen, every one of them.
+class _StockCard extends ConsumerWidget {
+  const _StockCard({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final active = ref.watch(activeWarehouseIdProvider);
+    final s = product.stock ?? const ProductStock();
+    final waiting = ref.watch(pendingInspectionProvider).valueOrNull?.byWarehouse(product.janCode) ?? const <int, int>{};
+    // Names for warehouses that only have units waiting: the list the shell
+    // already holds; never fetched here for that alone.
+    final overview = ref.exists(warehouseOverviewProvider) ? ref.watch(warehouseOverviewProvider).valueOrNull : null;
+    final names = {
+      for (final w in overview?.warehouses ?? const <Warehouse>[]) w.id: w.name,
+      for (final w in s.warehouses) w.warehouseId: w.name,
+    };
+    final ids = {for (final w in s.warehouses) w.warehouseId, ...waiting.keys}.toList()
+      ..sort((a, b) => a == active ? -1 : (b == active ? 1 : (names[a] ?? '').compareTo(names[b] ?? '')));
+    final totalWaiting = waiting.values.fold<int>(0, (a, b) => a + b);
+
+    Widget line(String label, String figures, {Key? key, bool strong = false, int? pending}) => Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SizedBox(
+              width: 140,
+              child: Text(label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant, fontWeight: strong ? FontWeight.w700 : null)),
+            ),
+            Expanded(
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: figures, style: TextStyle(fontWeight: strong ? FontWeight.w700 : FontWeight.w600)),
+                  if ((pending ?? 0) > 0)
+                    TextSpan(text: '  ${l10n.plPending(pending!)}', style: TextStyle(color: scheme.tertiary)),
+                ]),
+                key: key,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          ]),
+        );
+
+    return _Section(
+      title: l10n.pdStock,
+      children: [
+        line(l10n.pdStockTotal, l10n.plStockLine(s.onHand, s.reserved, s.available),
+            key: const ValueKey('pd-stock-total'), strong: true, pending: totalWaiting),
+        for (final id in ids)
+          () {
+            final w = s.warehouses.where((x) => x.warehouseId == id).firstOrNull;
+            return line(
+              names[id] ?? '#$id',
+              l10n.plStockLine(w?.onHand ?? 0, w?.reserved ?? 0, w?.available ?? 0),
+              key: ValueKey('pd-stock-$id'),
+              pending: waiting[id],
+            );
+          }(),
+        if (ids.isEmpty && s.isEmpty)
+          Text(l10n.plNoStock, key: const ValueKey('pd-stock-none'), style: theme.textTheme.bodySmall),
+        Text(l10n.pdStockUnit(product.baseUom == null ? '' : uomName(l10n, product.baseUom!.code, product.baseUom!.name)),
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+      ],
+    );
+  }
+}
+
 class _Section extends StatelessWidget {
   const _Section({
     required this.title,

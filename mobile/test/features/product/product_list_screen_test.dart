@@ -445,6 +445,27 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const ValueKey('pl-pending-summary'))).data, '未検品 2商品・600個（在庫と合わせて 640個）');
   });
 
+  testWidgets('on a PC each product is one line: name, JAN, 品番, size, stock and units side by side', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1600, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const pen = Product(
+      id: 1, janCode: '4909999000014', name: 'テストペン', maker: 'テスト', sku: 'TP-1',
+      stock: ProductStock(onHand: 40, available: 40), unitWeightG: 12,
+      baseUom: Uom(code: 'PCS', name: '個'),
+    );
+    await _pump(tester, FakeProductRepository(products: const [pen]));
+    final row = find.byKey(const ValueKey('pl-row-1'));
+    expect(row, findsOneWidget);
+    double y(Finder f) => tester.getCenter(find.descendant(of: row, matching: f)).dy;
+    final line = y(find.text('テストペン'));
+    expect(y(find.text('4909999000014')), closeTo(line, 4));
+    expect(y(find.text('TP-1')), closeTo(line, 4));
+    expect(y(find.byKey(const ValueKey('pl-stock-0-1'))), closeTo(line, 4));
+    expect(y(find.text('基本単位: 個')), closeTo(line, 4));
+    // A row, not a card: low enough for many products on one screen.
+    expect(tester.getSize(row).height, lessThan(64));
+  });
+
   const main = Warehouse(id: 1, code: 'MAIN', name: 'メイン倉庫');
   const kobe = Warehouse(id: 2, code: 'KOBE', name: '神戸倉庫');
 

@@ -11589,4 +11589,81 @@ class AppLocalizationsJa extends AppLocalizations {
   String plPendingSummary(int items, int units, int total) {
     return '未検品 $items商品・$units個（在庫と合わせて $total個）';
   }
+
+  @override
+  String get pdStock => '在庫';
+
+  @override
+  String get pdStockTotal => 'すべての倉庫';
+
+  @override
+  String pdStockUnit(String base) {
+    return '数は基本単位（$base）です。未検品は検品が済むまで在庫に入りません。';
+  }
+
+  @override
+  String pdUnitEquals(String unit, String base) {
+    return '$unit（ファイルの表記。在庫は基本単位で数え、1$unit = 1$base）';
+  }
+
+  @override
+  String get slEstimated =>
+      'このキーではWeb検索が使えないため（無料プランの上限）、AIの知識による推定値です。根拠のページはありません。確かめてから、チェックして反映してください。';
+
+  @override
+  String get slQuota =>
+      'AIの回数上限です。Web検索を使った調べものは、有料プラン（課金を有効にした）のキーで使えます。AI設定で「調べもの用」のキーを選べます。';
+
+  @override
+  String slUsedKey(String label) {
+    return '調べもの用のキーが上限のため「$label」で調べました';
+  }
+
+  @override
+  String get slSavedEstimate => 'AIの推定値（Web検索なし）を確認して入力';
+
+  @override
+  String get bwTitle => '重さをまとめて調べる';
+
+  @override
+  String get bwIntro =>
+      '重さが未登録の取扱中の商品を、AIが5件ずつ調べます。反映するまで何も保存されません。Webで見つかり確度の高いものは最初からチェックが入り、推定値や確度の低いものは入りません。';
+
+  @override
+  String bwCount(int n) {
+    return '重さが未登録: $n件';
+  }
+
+  @override
+  String bwStart(int n) {
+    return '$n件を調べる';
+  }
+
+  @override
+  String get bwStop => '止める';
+
+  @override
+  String bwProgress(int done, int total) {
+    return '$done/$total件 調べました';
+  }
+
+  @override
+  String get bwEstimates =>
+      'Web検索が使えないキーのため（無料プランの上限）、見つからなかった分はAIの知識による推定値です。「推定」と付いた値は、確かめてからチェックしてください。';
+
+  @override
+  String get bwEstimate => '推定';
+
+  @override
+  String get bwWaiting => 'まだ調べていません';
+
+  @override
+  String bwSave(int n) {
+    return 'チェックした$n件を反映';
+  }
+
+  @override
+  String bwSaved(int n) {
+    return '$n件の重さを反映しました';
+  }
 }

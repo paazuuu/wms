@@ -10419,5 +10419,86 @@
         "type": "int"
       }
     }
+  },
+  "pdStock": "在庫",
+  "pdStockTotal": "すべての倉庫",
+  "pdStockUnit": "数は基本単位（{base}）です。未検品は検品が済むまで在庫に入りません。",
+  "@pdStockUnit": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "pdUnitEquals": "{unit}（ファイルの表記。在庫は基本単位で数え、1{unit} = 1{base}）",
+  "@pdUnitEquals": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "slEstimated": "このキーではWeb検索が使えないため（無料プランの上限）、AIの知識による推定値です。根拠のページはありません。確かめてから、チェックして反映してください。",
+  "slQuota": "AIの回数上限です。Web検索を使った調べものは、有料プラン（課金を有効にした）のキーで使えます。AI設定で「調べもの用」のキーを選べます。",
+  "slUsedKey": "調べもの用のキーが上限のため「{label}」で調べました",
+  "@slUsedKey": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "slSavedEstimate": "AIの推定値（Web検索なし）を確認して入力",
+  "bwTitle": "重さをまとめて調べる",
+  "bwIntro": "重さが未登録の取扱中の商品を、AIが5件ずつ調べます。反映するまで何も保存されません。Webで見つかり確度の高いものは最初からチェックが入り、推定値や確度の低いものは入りません。",
+  "bwCount": "重さが未登録: {n}件",
+  "@bwCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "bwStart": "{n}件を調べる",
+  "@bwStart": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "bwStop": "止める",
+  "bwProgress": "{done}/{total}件 調べました",
+  "@bwProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bwEstimates": "Web検索が使えないキーのため（無料プランの上限）、見つからなかった分はAIの知識による推定値です。「推定」と付いた値は、確かめてからチェックしてください。",
+  "bwEstimate": "推定",
+  "bwWaiting": "まだ調べていません",
+  "bwSave": "チェックした{n}件を反映",
+  "@bwSave": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "bwSaved": "{n}件の重さを反映しました",
+  "@bwSaved": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

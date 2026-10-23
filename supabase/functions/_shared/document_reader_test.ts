@@ -39,6 +39,9 @@ import {
   forgetAiKey,
   parseSpecLookup,
   specLookupPrompt,
+  specEstimatePrompt,
+  lookupSpecs,
+  AiError,
   resolveAiKey,
 } from "./document_reader.ts";
 
@@ -688,4 +691,62 @@ Deno.test("a reading that takes too long gives up with its name, a quick one ans
   assertEquals(err.includes("read_timeout"), true);
   await slow;
   assertEquals(await withinTime(Promise.resolve(2), 100, "read_timeout"), 2);
+});
+
+
+// --- 0149: when web search is out of quota -----------------------------------
+
+const keyA = { id: 6, key: "a", model: null, label: "lookup key" };
+const keyB = { id: 5, key: "b", model: null, label: "reading key" };
+const quota = () => new AiError("Gemini error 429: quota", "quota", 429);
+
+Deno.test("lookup: the lookup key's search first; on quota the reading key's; neither asked again after", async () => {
+  const asked: string[] = [];
+  const r = await lookupSpecs(
+    [{ index: 0, name: "ペン" }, { index: 1, name: "ノート" }],
+    {
+      resolve: async (_id, purpose) => (purpose === "spec_lookup" ? keyA : keyB),
+      search: async (_p, _t, k) => {
+        asked.push(`search:${k.label}`);
+        if (k.id === 6) throw quota();
+        return { text: '{"weight_g": 12, "confidence": 0.9, "source_url": "https://example.com/p"}', sources: [] };
+      },
+      plain: async () => { throw new Error("not used"); },
+    },
+  );
+  assertEquals(asked, ["search:lookup key", "search:reading key", "search:reading key"]);
+  assertEquals(r.results.map((x) => [x.mode, x.weight_g, x.key_label]), [["search", 12, "reading key"], ["search", 12, "reading key"]]);
+  assertEquals(r.search_unavailable, false);
+});
+
+Deno.test("lookup: no key may search — the AI's own knowledge, marked estimate, no source, confidence at most 0.5", async () => {
+  const r = await lookupSpecs([{ index: 0, name: "ペン", maker: "三菱鉛筆" }], {
+    resolve: async (_id, purpose) => (purpose === "spec_lookup" ? keyA : keyB),
+    search: async () => { throw quota(); },
+    plain: async (parts) => {
+      assertEquals(String((parts[0] as { text: string }).text).includes("Web検索は使えません"), true);
+      return { weight_g: 11.5, source_url: "https://made.up", confidence: 0.95, note: "公表値" };
+    },
+  });
+  const x = r.results[0];
+  assertEquals([x.mode, x.weight_g, x.source_url, x.confidence], ["estimate", 11.5, null, 0.5]);
+  assertEquals(r.search_unavailable, true);
+});
+
+Deno.test("lookup: when even the plain answer is out of quota, the rest are not tried", async () => {
+  let plain = 0;
+  const r = await lookupSpecs([{ index: 0, name: "A" }, { index: 1, name: "B" }], {
+    resolve: async () => keyB,
+    search: async () => { throw quota(); },
+    plain: async () => { plain++; throw quota(); },
+  });
+  assertEquals(plain, 1);
+  assertEquals(r.results.map((x) => x.error_kind), ["quota", "quota"]);
+});
+
+Deno.test("the estimate prompt says there is no web and asks not to guess", () => {
+  const p = specEstimatePrompt({ index: 0, name: "ボールペン" });
+  assertEquals(p.includes("Google検索で調べて"), false);
+  assertEquals(p.includes("Web検索は使えません"), true);
+  assertEquals(p.includes("推測しない"), true);
 });

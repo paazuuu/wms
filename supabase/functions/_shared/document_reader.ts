@@ -579,40 +579,130 @@ export function specLookupPrompt(item: SpecRequest): string {
   return lines.filter((l) => l !== null).join("\n");
 }
 
-/** サイズ・重量を調べる (0141): each product looked up on the web with the
- * key chosen for it, at most ten at a time. Nothing is saved here. */
-export async function lookupSpecs(items: SpecRequest[]): Promise<{
+/** The same question without the web (0149): what the AI itself knows of
+ * the product's published figures. Used only when no key may search. */
+export function specEstimatePrompt(item: SpecRequest): string {
+  return specLookupPrompt(item)
+    .replace("Google検索で調べてください。", "あなたが知っている公表値で答えてください（Web検索は使えません）。")
+    .replace("- 見つからない値は null にする。推測しない。",
+      "- その商品の公表値を確かに知っている場合だけ答える。知らない・あいまいな値は null にする。推測しない。\n" +
+        "- source_url は null にする。confidence は 0.5 以下にする。");
+}
+
+const SPEC_SCHEMA = {
+  type: "object",
+  properties: {
+    weight_g: { type: "number", nullable: true },
+    weight_basis: { type: "string", nullable: true },
+    width_mm: { type: "number", nullable: true },
+    depth_mm: { type: "number", nullable: true },
+    height_mm: { type: "number", nullable: true },
+    size_basis: { type: "string", nullable: true },
+    source_url: { type: "string", nullable: true },
+    confidence: { type: "number", nullable: true },
+    note: { type: "string", nullable: true },
+  },
+};
+
+export type SpecDeps = {
+  resolve: (keyId: number | null, purpose: AiPurpose) => Promise<ChosenKey>;
+  search: (prompt: string, task: string, key: ChosenKey) => Promise<{ text: string; sources: { title: string | null; url: string }[] }>;
+  plain: (parts: unknown[], schema: unknown, task: string, key: ChosenKey) => Promise<Record<string, unknown>>;
+};
+
+type SpecResult = SpecFound & {
+  index: number; sources: { title: string | null; url: string }[]; error_kind: string | null; message: string | null;
+  /** search: found on the web; estimate: the AI's own knowledge, no web (0149). */
+  mode: "search" | "estimate" | null;
+  key_label: string | null;
+};
+
+const EMPTY_SPEC: SpecFound = {
+  weight_g: null, weight_basis: null, width_mm: null, depth_mm: null, height_mm: null, size_basis: null,
+  source_url: null, confidence: null, note: null,
+};
+
+/** サイズ・重量を調べる (0141, 0149): each product looked up on the web, at
+ * most ten at a time. Nothing is saved here.
+ *
+ * Keys, in order: the one chosen for lookups, then the reading key. Web
+ * search has its own quota, which free keys often do not have at all: a key
+ * whose search answers "quota" is not asked again in this run. When no key
+ * can search, the product is answered from the AI's own knowledge instead,
+ * marked `estimate`, with no source and a confidence of at most 0.5 — for a
+ * person to check before taking it. */
+export async function lookupSpecs(items: SpecRequest[], deps?: Partial<SpecDeps>): Promise<{
   key: { id: number | null; label: string | null; fallback: boolean };
-  results: (SpecFound & { index: number; sources: { title: string | null; url: string }[]; error_kind: string | null; message: string | null })[];
+  search_unavailable: boolean;
+  results: SpecResult[];
 }> {
-  const key = await resolveAiKey(null, "spec_lookup");
-  const results = [];
+  const d: SpecDeps = { resolve: resolveAiKey, search: geminiSearch, plain: gemini, ...deps };
+  const key = await d.resolve(null, "spec_lookup");
+  const keys = [key];
+  const general = await d.resolve(null, "general");
+  if (general.key && general.id !== key.id) keys.push(general);
+  const outOfSearch = new Set<number>();
+  const results: SpecResult[] = [];
+  let stop: string | null = null;
   for (const item of items.slice(0, 10)) {
+    if (stop) {
+      results.push({ index: item.index, ...EMPTY_SPEC, sources: [], error_kind: stop, message: null, mode: null, key_label: null });
+      continue;
+    }
+    let done = false;
+    for (let k = 0; k < keys.length && !done; k++) {
+      if (outOfSearch.has(k) || !keys[k].key) continue;
+      try {
+        const { text, sources } = await d.search(specLookupPrompt(item), "spec_lookup", keys[k]);
+        const found = parseSpecLookup(text);
+        results.push({
+          index: item.index, ...(found ?? EMPTY_SPEC), sources,
+          error_kind: found ? null : "parse", message: found ? null : text.slice(0, 200),
+          mode: "search", key_label: keys[k].label,
+        });
+        done = true;
+      } catch (e) {
+        const kind = e instanceof AiError ? e.kind : "other";
+        if (kind === "quota") {
+          outOfSearch.add(k);
+          continue;
+        }
+        results.push({ index: item.index, ...EMPTY_SPEC, sources: [], error_kind: kind, message: String(e).slice(0, 300),
+          mode: null, key_label: keys[k].label });
+        if (kind === "auth" || kind === "no_key") stop = kind;
+        done = true;
+      }
+    }
+    if (done) continue;
+    // No key may search: what the AI knows, marked as an estimate.
+    const est = keys.find((k) => k.key) ?? key;
     try {
-      const { text, sources } = await geminiSearch(specLookupPrompt(item), "spec_lookup", key);
-      const found = parseSpecLookup(text);
+      const r = await d.plain([{ text: specEstimatePrompt(item) }], SPEC_SCHEMA, "spec_estimate", est);
+      const found = parseSpecLookup(JSON.stringify(r));
+      const conf = found?.confidence ?? null;
       results.push({
         index: item.index,
-        ...(found ?? {
-          weight_g: null, weight_basis: null, width_mm: null, depth_mm: null, height_mm: null, size_basis: null,
-          source_url: null, confidence: null, note: null,
-        }),
-        sources,
+        ...(found ?? EMPTY_SPEC),
+        source_url: null,
+        confidence: conf === null ? null : Math.min(conf, 0.5),
+        sources: [],
         error_kind: found ? null : "parse",
-        message: found ? null : text.slice(0, 200),
+        message: null,
+        mode: "estimate",
+        key_label: est.label,
       });
     } catch (e) {
       const kind = e instanceof AiError ? e.kind : "other";
-      results.push({
-        index: item.index, weight_g: null, weight_basis: null, width_mm: null, depth_mm: null, height_mm: null,
-        size_basis: null, source_url: null, confidence: null, note: null, sources: [],
-        error_kind: kind, message: String(e).slice(0, 300),
-      });
-      // Out of credits or quota: the rest would fail the same way.
-      if (kind === "quota" || kind === "auth" || kind === "no_key") break;
+      results.push({ index: item.index, ...EMPTY_SPEC, sources: [], error_kind: kind, message: String(e).slice(0, 300),
+        mode: null, key_label: est.label });
+      if (kind === "quota" || kind === "auth" || kind === "no_key") stop = kind;
     }
   }
-  return { key: { id: key.id, label: key.label, fallback: key.fallback === true }, results };
+  return {
+    key: { id: key.id, label: key.label, fallback: key.fallback === true },
+    search_unavailable: keys.length > 0 && outOfSearch.size >= keys.filter((k) => k.key).length && outOfSearch.size > 0,
+    results,
+  };
 }
 
 /** How a reading went (0133), kept on its file's record: how many lines,

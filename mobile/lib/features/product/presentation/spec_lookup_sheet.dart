@@ -66,8 +66,9 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
       switch (r) {
         case ApiSuccess(:final data):
           _result = data;
-          _takeWeight = data.hasWeight;
-          _takeSize = data.hasSize;
+          // An estimate (no web page behind it) is never taken unticked.
+          _takeWeight = data.hasWeight && !data.estimated;
+          _takeSize = data.hasSize && !data.estimated;
         case ApiFailure(:final message):
           _error = message;
       }
@@ -88,30 +89,7 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
     final r = _result;
     if (r == null || (!_takeWeight && !_takeSize)) return;
     setState(() => _saving = true);
-    final repo = ref.read(productRepositoryProvider);
-    final note = [l10n.slSavedNote, if (r.note != null) r.note!].join(' ');
-    String? failure;
-    if (_takeWeight && r.hasWeight) {
-      final w = await repo.setWeight(
-        productId: widget.product.id,
-        unitWeightG: r.weightG,
-        source: 'web',
-        url: r.bestUrl,
-        note: r.weightBasis == 'package' ? '$note（${l10n.slBasisPackage}）' : note,
-      );
-      if (w case ApiFailure(:final message)) failure = message;
-    }
-    if (failure == null && _takeSize && r.hasSize) {
-      final s = await repo.setSize(
-        productId: widget.product.id,
-        widthMm: r.widthMm,
-        depthMm: r.depthMm,
-        heightMm: r.heightMm,
-        note: [if (r.sizeBasis == 'package') l10n.slBasisPackage, if (r.bestUrl != null) r.bestUrl!].join(' ').trim(),
-        source: 'web',
-      );
-      if (s case ApiFailure(:final message)) failure = message;
-    }
+    final failure = await saveSpecResult(ref, l10n, widget.product.id, r, weight: _takeWeight, size: _takeSize);
     if (!mounted) return;
     if (failure != null) {
       setState(() => _saving = false);
@@ -149,7 +127,7 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
       ]);
     } else if (r != null && r.errorKind != null && !r.found) {
       children.addAll([
-        Text(r.errorKind == 'parse' ? l10n.slNothingFound : l10n.ahPingFailed(aiErrorKindLabel(l10n, r.errorKind)),
+        Text(specErrorText(l10n, r.errorKind),
             key: const ValueKey('sl-error'), style: TextStyle(color: theme.colorScheme.error)),
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton.icon(onPressed: _run, icon: const Icon(Icons.refresh), label: Text(l10n.slRetry)),
@@ -158,6 +136,16 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
       children.add(Text(l10n.slNothingFound, key: const ValueKey('sl-none'), style: muted));
     } else if (r != null) {
       children.addAll([
+        if (r.estimated)
+          Card(
+            key: const ValueKey('sl-estimated'),
+            color: theme.colorScheme.tertiaryContainer,
+            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Text(l10n.slEstimated, style: TextStyle(color: theme.colorScheme.onTertiaryContainer)),
+            ),
+          ),
         CheckboxListTile(
           key: const ValueKey('sl-take-weight'),
           contentPadding: EdgeInsets.zero,
@@ -206,6 +194,8 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
         const SizedBox(height: AppSpacing.sm),
         Text(r!.keyFallback ? l10n.slKeyFallback(r.keyLabel ?? 'GEMINI_API_KEY') : l10n.slKey(r.keyLabel!),
             key: const ValueKey('sl-key'), style: muted),
+        if (r.usedKeyLabel != null && r.usedKeyLabel != r.keyLabel)
+          Text(l10n.slUsedKey(r.usedKeyLabel!), key: const ValueKey('sl-used-key'), style: muted),
       ]);
     }
     return Padding(
@@ -229,4 +219,47 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
       ),
     );
   }
+}
+
+/// Why a lookup came back empty, in words; for a quota, what to do about it.
+String specErrorText(AppLocalizations l10n, String? kind) => switch (kind) {
+      'parse' || 'missing' => l10n.slNothingFound,
+      'quota' => l10n.slQuota,
+      _ => l10n.ahPingFailed(aiErrorKindLabel(l10n, kind)),
+    };
+
+/// Keeps what was ticked of [r] on the product: from the web with its page,
+/// or — for an estimate — as entered by the person who checked it. Returns
+/// the failure, or null.
+Future<String?> saveSpecResult(WidgetRef ref, AppLocalizations l10n, int productId, SpecLookupResult r,
+    {required bool weight, required bool size}) async {
+  final repo = ref.read(productRepositoryProvider);
+  final note = [r.estimated ? l10n.slSavedEstimate : l10n.slSavedNote, if (r.note != null) r.note!].join(' ');
+  final source = r.estimated ? 'manual' : 'web';
+  if (weight && r.hasWeight) {
+    final w = await repo.setWeight(
+      productId: productId,
+      unitWeightG: r.weightG,
+      source: source,
+      url: r.estimated ? null : r.bestUrl,
+      note: r.weightBasis == 'package' ? '$note（${l10n.slBasisPackage}）' : note,
+    );
+    if (w case ApiFailure(:final message)) return message;
+  }
+  if (size && r.hasSize) {
+    final s = await repo.setSize(
+      productId: productId,
+      widthMm: r.widthMm,
+      depthMm: r.depthMm,
+      heightMm: r.heightMm,
+      note: [
+        if (r.estimated) l10n.slSavedEstimate,
+        if (r.sizeBasis == 'package') l10n.slBasisPackage,
+        if (!r.estimated && r.bestUrl != null) r.bestUrl!,
+      ].join(' ').trim(),
+      source: source,
+    );
+    if (s case ApiFailure(:final message)) return message;
+  }
+  return null;
 }

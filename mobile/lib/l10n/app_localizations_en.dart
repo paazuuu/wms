@@ -11833,4 +11833,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String plPendingSummary(int items, int units, int total) {
     return 'Not inspected: $items products, $units units ($total with stock)';
   }
+
+  @override
+  String get pdStock => 'Stock';
+
+  @override
+  String get pdStockTotal => 'All warehouses';
+
+  @override
+  String pdStockUnit(String base) {
+    return 'Counted in the base unit ($base). Not-inspected units are not in stock until inspected.';
+  }
+
+  @override
+  String pdUnitEquals(String unit, String base) {
+    return '$unit (as the file writes it; stock is counted in the base unit, 1 $unit = 1 $base)';
+  }
+
+  @override
+  String get slEstimated =>
+      'Web search is not available with this key (free-tier limit), so this is the AI’s own estimate with no page behind it. Check it, then tick to keep it.';
+
+  @override
+  String get slQuota =>
+      'The AI quota is used up. Web-search lookups need a key on a paid (billing-enabled) plan; choose one for lookups in AI settings.';
+
+  @override
+  String slUsedKey(String label) {
+    return 'The lookup key was at its limit, so “$label” was used';
+  }
+
+  @override
+  String get slSavedEstimate =>
+      'Entered after checking the AI’s estimate (no web search)';
+
+  @override
+  String get bwTitle => 'Look up missing weights';
+
+  @override
+  String get bwIntro =>
+      'The AI looks up products in use that have no weight, five at a time. Nothing is saved until you keep it. Web finds with high confidence come ticked; estimates and doubtful ones do not.';
+
+  @override
+  String bwCount(int n) {
+    return 'No weight yet: $n';
+  }
+
+  @override
+  String bwStart(int n) {
+    return 'Look up $n';
+  }
+
+  @override
+  String get bwStop => 'Stop';
+
+  @override
+  String bwProgress(int done, int total) {
+    return '$done of $total looked up';
+  }
+
+  @override
+  String get bwEstimates =>
+      'Web search was not available (free-tier limit), so values marked “estimate” are the AI’s own estimates. Check them before ticking.';
+
+  @override
+  String get bwEstimate => 'Estimate';
+
+  @override
+  String get bwWaiting => 'Not looked up yet';
+
+  @override
+  String bwSave(int n) {
+    return 'Keep the $n ticked';
+  }
+
+  @override
+  String bwSaved(int n) {
+    return 'Kept $n weights';
+  }
 }

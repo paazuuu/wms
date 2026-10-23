@@ -20,6 +20,22 @@ class _FakeLookup implements SpecLookupRepository {
     asked.add(item);
     return answer;
   }
+
+  /// For a batch: each product's answer by its JAN, else [answer].
+  Map<String, SpecLookupResult> byJan = const {};
+  bool searchUnavailable = false;
+  final batches = <int>[];
+
+  @override
+  Future<ApiResult<SpecLookupBatch>> lookupMany(List<SpecLookupRequest> items) async {
+    asked.addAll(items);
+    batches.add(items.length);
+    final fallback = answer is ApiSuccess<SpecLookupResult> ? (answer as ApiSuccess<SpecLookupResult>).data : const SpecLookupResult();
+    return ApiSuccess((
+      results: [for (final i in items) byJan[i.jan] ?? fallback],
+      searchUnavailable: searchUnavailable,
+    ));
+  }
 }
 
 const _product = Product(id: 7, janCode: '4902505450679', name: 'ボールペン 0.7mm', maker: 'パイロット', sku: 'LJU-10EF');
@@ -115,6 +131,27 @@ void main() {
     expect(find.byKey(const ValueKey('sl-none')), findsOneWidget);
     expect(find.text('調べもの用のキーが無いため、読み取り用のキー（読み取り用）で調べました'), findsOneWidget);
     expect(tester.widget<FilledButton>(find.byKey(const ValueKey('sl-save'))).onPressed, isNull);
+  });
+
+  testWidgets('without web search the AI’s estimate is said to be one, comes unticked, and is kept as checked by hand',
+      (tester) async {
+    final lookup = _FakeLookup(const ApiSuccess(SpecLookupResult(weightG: 6.5, confidence: 0.5, estimated: true)));
+    final products = await _open(tester, lookup);
+    expect(find.byKey(const ValueKey('sl-estimated')), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('sl-save'))).onPressed, isNull);
+    await tester.tap(find.byKey(const ValueKey('sl-take-weight')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sl-save')));
+    await tester.pumpAndSettle();
+    expect(products.setWeights.single.unitWeightG, 6.5);
+    expect(products.setWeights.single.source, 'manual');
+    expect(products.setWeights.single.url, isNull);
+    expect(products.setWeights.single.note, startsWith('AIの推定値（Web検索なし）を確認して入力'));
+  });
+
+  testWidgets('out of quota says what to do: a paid key for lookups', (tester) async {
+    await _open(tester, _FakeLookup(const ApiSuccess(SpecLookupResult(errorKind: 'quota'))));
+    expect(find.textContaining('有料プラン'), findsOneWidget);
   });
 
   testWidgets('a failed lookup can be tried again', (tester) async {

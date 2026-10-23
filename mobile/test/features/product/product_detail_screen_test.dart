@@ -508,4 +508,22 @@ void main() {
     expect(find.text('追跡なし品（大）'), findsNothing);
     expect(find.byKey(const ValueKey('pd-tab-ours')), findsNothing);
   });
+
+  testWidgets('the stock is shown as figures with every warehouse chosen: the total and each one', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const pen = Product(
+      id: 5, janCode: '4902778322208', name: 'uniball ZENTO リフィル 黒', unit: '本',
+      baseUom: Uom(code: 'PCS', name: '個'),
+      stock: ProductStock(onHand: 1000, reserved: 0, available: 1000, warehouses: [
+        WarehouseStock(warehouseId: 1, name: 'メイン倉庫', onHand: 1000, available: 1000),
+      ]),
+    );
+    await _pump(tester, FakeProductRepository(products: const [pen]), productId: 5);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pd-stock-total'))).textSpan!.toPlainText(), '在庫 1000 · 引当 0 · 出荷可能 1000');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pd-stock-1'))).textSpan!.toPlainText(), '在庫 1000 · 引当 0 · 出荷可能 1000');
+    expect(find.text('メイン倉庫'), findsWidgets);
+    // 本 is how the file wrote it; the stock is counted in 個, one for one.
+    expect(find.text('本（ファイルの表記。在庫は基本単位で数え、1本 = 1個）'), findsOneWidget);
+  });
 }

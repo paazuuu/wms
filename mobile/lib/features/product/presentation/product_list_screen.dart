@@ -17,6 +17,7 @@ import '../domain/product.dart';
 import 'product_alerts_tab.dart';
 import 'product_delete.dart';
 import 'product_detail_screen.dart';
+import 'bulk_weight_screen.dart';
 import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
@@ -466,6 +467,14 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 ExcelExportMenu(keyPrefix: 'pl', shown: shown.length, onExport: _export),
+                // Weights still missing, looked up by the AI all at once (0149).
+                if (canManage)
+                  IconButton(
+                    key: const ValueKey('pl-bulk-weight'),
+                    tooltip: l10n.bwTitle,
+                    icon: const Icon(Icons.scale_outlined),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BulkWeightScreen())),
+                  ),
                 // Stock from a file of JANs and quantities, added to what is there (0144).
                 const FeatureLinkButton('stock_file_import'),
                 // JAN codes in stock that no product claims yet.
@@ -1112,7 +1121,11 @@ class _ProductCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
 
-    return Card(
+    return LayoutBuilder(builder: (context, c) {
+      // On a PC the card is wide: everything on one line, so more products
+      // fit on the screen and their facts line up column by column.
+      if (c.maxWidth >= wideProductRow) return _wide(context);
+      return Card(
       clipBehavior: Clip.antiAlias,
       color: selected == true ? Theme.of(context).colorScheme.secondaryContainer : null,
       child: InkWell(
@@ -1242,8 +1255,115 @@ class _ProductCard extends StatelessWidget {
         ),
       ),
     );
+    });
+  }
+
+  Widget? _menu(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    if (onEdit == null && onToggleStatus == null && onDelete == null) return null;
+    return PopupMenuButton<String>(
+      key: ValueKey('product-menu-${product.id}'),
+      tooltip: l10n.productMenu,
+      onSelected: (v) => switch (v) {
+        'edit' => onEdit?.call(),
+        'status' => onToggleStatus?.call(),
+        'delete' => onDelete?.call(),
+        _ => null,
+      },
+      itemBuilder: (_) => [
+        if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(l10n.productEdit)),
+        if (onToggleStatus != null)
+          PopupMenuItem(
+            value: 'status',
+            child: Text(product.isActive ? l10n.productDeactivateAction : l10n.lifecycleToActive),
+          ),
+        if (onDelete != null)
+          PopupMenuItem(
+            key: ValueKey('product-delete-${product.id}'),
+            value: 'delete',
+            child: Text(l10n.productDeleteAction, style: TextStyle(color: scheme.error)),
+          ),
+      ],
+    );
+  }
+
+  /// One line: picture, name, JAN, 品番, size and weight, stock, units,
+  /// price, state.
+  Widget _wide(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final small = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final mono = small?.copyWith(fontFamily: AppFonts.mono);
+    final spec = specShort(
+        weightG: product.unitWeightG,
+        width: product.widthMm,
+        depth: product.depthMm,
+        height: product.heightMm,
+        note: product.sizeNote);
+    final menu = _menu(context);
+    return Card(
+      key: ValueKey('pl-row-${product.id}'),
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      clipBehavior: Clip.antiAlias,
+      color: selected == true ? scheme.secondaryContainer : null,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+          child: Row(children: [
+            if (selected != null)
+              Checkbox(key: ValueKey('lc-check-${product.id}'), value: selected, onChanged: (_) => onTap()),
+            ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 36),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              flex: 5,
+              child: ProductNameText(
+                  name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleSmall, maxLines: 1),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            SizedBox(
+              width: 140,
+              child: Row(children: [
+                Flexible(child: Text(product.janCode, style: mono, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
+              ]),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              flex: 2,
+              child: Text(product.sku ?? '—', style: mono, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              flex: 3,
+              child: spec == null
+                  ? Text('—', style: small)
+                  : Text(spec, key: ValueKey('product-spec-${product.id}'), style: small, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(flex: 5, child: _StockLine(product: product, warehouseId: warehouseId, pane: pane, oneLine: true)),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(flex: 2, child: ProductFacts(product: product, oneLine: true)),
+            const SizedBox(width: AppSpacing.sm),
+            SizedBox(
+              width: 72,
+              child: Text(product.price == null ? '' : '¥${product.price!.toStringAsFixed(0)}',
+                  textAlign: TextAlign.end, style: theme.textTheme.bodyMedium?.copyWith(fontFamily: AppFonts.mono)),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            GestureDetector(onTap: onToggleStatus, child: LifecyclePill(lifecycle: product.lifecycle)),
+            if (menu != null) menu else const SizedBox(width: 40),
+          ]),
+        ),
+      ),
+    );
   }
 }
+
+/// From this card width on, a product is one line (a PC's window).
+const double wideProductRow = 1100;
 
 /// Which warehouse a pane shows, unmissable: a tinted band naming it, a
 /// chip for 全倉庫 and for each warehouse, the pane's stock filter, and how
@@ -1377,12 +1497,17 @@ class _WarehouseBar extends ConsumerWidget {
 /// A product's stock in the pane's warehouse; for every warehouse, the total
 /// and where it is.
 class _StockLine extends ConsumerWidget {
-  const _StockLine({required this.product, required this.warehouseId, required this.pane, this.compact = false});
+  const _StockLine(
+      {required this.product, required this.warehouseId, required this.pane, this.compact = false, this.oneLine = false});
 
   final Product product;
   final int? warehouseId;
   final int pane;
   final bool compact;
+
+  /// In the one-line row: the full figures on one line, the waiting units
+  /// after them.
+  final bool oneLine;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1411,7 +1536,10 @@ class _StockLine extends ConsumerWidget {
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
       );
-      return pending == null ? none : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [none, pending]);
+      if (pending == null) return none;
+      return oneLine
+          ? Row(children: [Flexible(child: none), const SizedBox(width: AppSpacing.sm), Flexible(child: pending)])
+          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [none, pending]);
     }
     final line = compact
         ? l10n.plStockShort(s.onHand, s.available)
@@ -1422,13 +1550,16 @@ class _StockLine extends ConsumerWidget {
     final text = Text(
       '$line$where',
       key: key,
-      maxLines: compact ? 1 : 2,
+      maxLines: compact || oneLine ? 1 : 2,
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.labelMedium?.copyWith(
         color: s.available > 0 ? scheme.primary : scheme.error,
         fontWeight: FontWeight.w600,
       ),
     );
-    return pending == null ? text : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [text, pending]);
+    if (pending == null) return text;
+    return oneLine
+        ? Row(children: [Flexible(child: text), const SizedBox(width: AppSpacing.sm), Flexible(child: pending)])
+        : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [text, pending]);
   }
 }

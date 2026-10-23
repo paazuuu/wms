@@ -7323,6 +7323,52 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Purge: files first, a failed file keeps its import, a shared copy stays,
     dry run, secret.
 
+## The library on one line on a PC; stock as figures; weights in bulk (edge only)
+
+- 商品ライブラリー: once the card is at least 1100 px wide (`wideProductRow`),
+  each product is one row. Name, attributes (`ProductFacts(oneLine)`), stock
+  and the menu sit side by side, so more products fit on a screen. A
+  narrower screen keeps the card.
+- 本 and 個: no product converts between them.
+  - The uoms table has no 本, and every product counts stock in its base
+    unit, 個.
+  - `product.unit` '本' is the unit text copied from the supplier's file. One
+    本 is one 個.
+  - The detail's 単位 row now says so (`pdUnitEquals`) whenever the two words
+    differ.
+- 商品詳細 in-stock figures: with 「すべての倉庫」 chosen, the warehouse card
+  only says "倉庫を選ぶと設定できます", so no number showed.
+  - A stock card (`_StockCard`) now sits under the header. It shows the total
+    and each warehouse, with what still waits for inspection beside each.
+  - `PendingInspection.byWarehouse` supplies the waiting figures.
+- Looking up weight and size with AI:
+  - Both keys answer 429 to Google-search grounding on every model tried.
+    That is the free tier's limit. Plain generation works.
+  - Key 6 is now the lookup key (`ai_key_use('spec_lookup', 6)`). Reading
+    files keeps key 5.
+  - `lookupSpecs` searches the web with the lookup key first, then the
+    general key. A key out of quota is skipped for the rest of the run.
+  - When no key can search, the AI estimates from what it knows instead:
+    `mode: 'estimate'`, no source URL, confidence at most 0.5. The answer
+    says `search_unavailable`.
+  - The sheet shows an estimate unticked under a warning. It explains that
+    web search needs a key with billing enabled, and names the key used.
+  - A saved estimate is recorded as manual, with a note saying so.
+- 重さをまとめて調べる: a new button in the library's app bar, for managers.
+  - It covers every product in use that has no weight, five per call.
+  - Only a weight found on the web with confidence of at least 0.7 comes
+    ticked. Nothing saves until 保存 is pressed.
+  - The run stops on quota, authentication or a missing key.
+  - Saving also fills the size when the product has none.
+- Deployed: import-plan v24.
+- Tests (1018 Flutter, 60 Deno pass):
+  - The key order, a quota key skipped, the estimate fallback, and stopping
+    on authentication failure.
+  - The sheet with estimates and with quota.
+  - The bulk screen: what comes ticked, and saving.
+  - The detail's stock card and the 本 = 1個 line.
+  - The library's one-line row.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

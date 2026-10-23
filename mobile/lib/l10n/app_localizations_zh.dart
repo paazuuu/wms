@@ -11523,4 +11523,79 @@ class AppLocalizationsZh extends AppLocalizations {
   String plPendingSummary(int items, int units, int total) {
     return '未验货 $items个商品・$units个（含库存共 $total个）';
   }
+
+  @override
+  String get pdStock => '库存';
+
+  @override
+  String get pdStockTotal => '所有仓库';
+
+  @override
+  String pdStockUnit(String base) {
+    return '数量以基本单位（$base）计。未验货的数量在验货前不计入库存。';
+  }
+
+  @override
+  String pdUnitEquals(String unit, String base) {
+    return '$unit（文件中的写法。库存按基本单位计，1$unit = 1$base）';
+  }
+
+  @override
+  String get slEstimated =>
+      '此密钥无法使用网络搜索（免费额度上限），这是AI根据自身知识的估计值，没有依据页面。请确认后勾选并应用。';
+
+  @override
+  String get slQuota => 'AI次数已达上限。使用网络搜索的查询需要付费（已启用计费）的密钥；可在AI设置中选择“查询用”密钥。';
+
+  @override
+  String slUsedKey(String label) {
+    return '查询用密钥已达上限，改用“$label”查询';
+  }
+
+  @override
+  String get slSavedEstimate => '确认AI的估计值（无网络搜索）后输入';
+
+  @override
+  String get bwTitle => '批量查询重量';
+
+  @override
+  String get bwIntro =>
+      'AI以每次5件的方式查询尚未登记重量的在售商品。应用前不会保存。网络上找到且可信度高的会预先勾选，估计值或可信度低的不会。';
+
+  @override
+  String bwCount(int n) {
+    return '未登记重量：$n件';
+  }
+
+  @override
+  String bwStart(int n) {
+    return '查询$n件';
+  }
+
+  @override
+  String get bwStop => '停止';
+
+  @override
+  String bwProgress(int done, int total) {
+    return '已查询 $done/$total件';
+  }
+
+  @override
+  String get bwEstimates => '由于无法使用网络搜索（免费额度上限），标有“估计”的数值是AI的估计。请确认后再勾选。';
+
+  @override
+  String get bwEstimate => '估计';
+
+  @override
+  String get bwWaiting => '尚未查询';
+
+  @override
+  String bwSave(int n) {
+    return '应用已勾选的$n件';
+  }
+
+  @override
+  String bwSaved(int n) {
+    return '已应用$n件重量';
+  }
 }

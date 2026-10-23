@@ -24,6 +24,8 @@ class SpecLookupResult extends Equatable {
     this.message,
     this.keyLabel,
     this.keyFallback = false,
+    this.estimated = false,
+    this.usedKeyLabel,
   });
 
   final double? weightG;
@@ -49,6 +51,14 @@ class SpecLookupResult extends Equatable {
   /// key because none is chosen for the lookup.
   final String? keyLabel;
   final bool keyFallback;
+
+  /// No key could search the web (0149): the AI answered from what it knows,
+  /// with no page behind it. Shown as an estimate, never taken unticked.
+  final bool estimated;
+
+  /// The key this one was answered with (the reading key when the lookup
+  /// key's web search was out of quota).
+  final String? usedKeyLabel;
 
   bool get hasWeight => weightG != null;
   bool get hasSize => widthMm != null || depthMm != null || heightMm != null;
@@ -82,11 +92,13 @@ class SpecLookupResult extends Equatable {
         message: _s(j['message']),
         keyLabel: keyLabel,
         keyFallback: keyFallback,
+        estimated: j['mode'] == 'estimate',
+        usedKeyLabel: _s(j['key_label']),
       );
 
   @override
   List<Object?> get props =>
-      [weightG, weightBasis, widthMm, depthMm, heightMm, sizeBasis, sourceUrl, sources, confidence, note, errorKind];
+      [weightG, weightBasis, widthMm, depthMm, heightMm, sizeBasis, sourceUrl, sources, confidence, note, errorKind, estimated];
 }
 
 /// What the AI is told about a product to look it up.
@@ -109,10 +121,20 @@ class SpecLookupRequest {
       };
 }
 
+/// A batch's answers, in the order asked, and whether web search was out of
+/// reach for every key (0149).
+typedef SpecLookupBatch = ({List<SpecLookupResult> results, bool searchUnavailable});
+
 abstract class SpecLookupRepository {
   /// サイズ・重量を調べる: one product looked up on the web.
   Future<ApiResult<SpecLookupResult>> lookup(SpecLookupRequest item);
+
+  /// Up to [specLookupBatchSize] products at once, answered in the order given.
+  Future<ApiResult<SpecLookupBatch>> lookupMany(List<SpecLookupRequest> items);
 }
+
+/// The most products one lookup call takes.
+const specLookupBatchSize = 5;
 
 class SpecLookupRepositoryImpl implements SpecLookupRepository {
   SpecLookupRepositoryImpl(this._functions);
@@ -121,23 +143,39 @@ class SpecLookupRepositoryImpl implements SpecLookupRepository {
 
   @override
   Future<ApiResult<SpecLookupResult>> lookup(SpecLookupRequest item) async {
+    final r = await lookupMany([item]);
+    return switch (r) {
+      ApiSuccess(:final data) when data.results.isNotEmpty => ApiSuccess(data.results.first),
+      ApiSuccess() => const ApiFailure(message: 'nothing came back from the lookup'),
+      ApiFailure(:final message, :final statusCode) => ApiFailure(message: message, statusCode: statusCode),
+    };
+  }
+
+  @override
+  Future<ApiResult<SpecLookupBatch>> lookupMany(List<SpecLookupRequest> items) async {
+    final asked = items.take(specLookupBatchSize).toList();
     try {
       final r = await _functions.post(
         '/import-plan',
         data: {
           'mode': 'lookup_spec',
-          'items': [item.toJson(0)],
+          'items': [for (final (i, item) in asked.indexed) item.toJson(i)],
         },
-        options: Options(contentType: Headers.jsonContentType, receiveTimeout: const Duration(seconds: 120)),
+        options: Options(contentType: Headers.jsonContentType, receiveTimeout: const Duration(seconds: 280)),
       );
       final data = ((r.data as Map)['data'] as Map).cast<String, dynamic>();
       final key = (data['key'] as Map?)?.cast<String, dynamic>() ?? const {};
-      final first = (data['results'] as List? ?? const []).whereType<Map>().firstOrNull;
-      if (first == null) return const ApiFailure(message: 'nothing came back from the lookup');
-      return ApiSuccess(SpecLookupResult.fromJson(first.cast<String, dynamic>(),
-          keyLabel: key['label']?.toString(), keyFallback: key['fallback'] == true));
+      final byIndex = {
+        for (final e in (data['results'] as List? ?? const []).whereType<Map>())
+          (e['index'] as num?)?.toInt() ?? -1: SpecLookupResult.fromJson(e.cast<String, dynamic>(),
+              keyLabel: key['label']?.toString(), keyFallback: key['fallback'] == true),
+      };
+      return ApiSuccess((
+        results: [for (var i = 0; i < asked.length; i++) byIndex[i] ?? const SpecLookupResult(errorKind: 'missing')],
+        searchUnavailable: data['search_unavailable'] == true,
+      ));
     } on DioException catch (e) {
-      return mapDioError<SpecLookupResult>(e);
+      return mapDioError<SpecLookupBatch>(e);
     }
   }
 }

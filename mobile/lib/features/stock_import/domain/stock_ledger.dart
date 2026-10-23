@@ -293,6 +293,12 @@ class PendingInspection extends Equatable {
       ? (_byWarehouse[warehouseId]?[jan] ?? 0)
       : _byWarehouse.values.fold(0, (s, m) => s + (m[jan] ?? 0));
 
+  /// [jan]'s units waiting, warehouse by warehouse (only those with some).
+  Map<int, int> byWarehouse(String jan) => {
+        for (final e in _byWarehouse.entries)
+          if ((e.value[jan] ?? 0) > 0) e.key: e.value[jan]!,
+      };
+
   @override
   List<Object?> get props => [_byWarehouse];
 }
