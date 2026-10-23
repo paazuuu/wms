@@ -6,6 +6,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/copy_text.dart';
 import '../../../core/ui/excel_export_menu.dart';
+import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_filter.dart';
@@ -537,9 +538,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   : LayoutBuilder(
                       builder: (context, c) => c.maxWidth >= 720
                           ? Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                              Expanded(child: _pane(0, warehouses: warehouses, total: total, split: true)),
+                              // Each side selected on its own: see [SelectablePane].
+                              Expanded(child: SelectablePane(child: _pane(0, warehouses: warehouses, total: total, split: true))),
                               const VerticalDivider(width: 1),
-                              Expanded(child: _pane(1, warehouses: warehouses, total: total, split: true)),
+                              Expanded(child: SelectablePane(child: _pane(1, warehouses: warehouses, total: total, split: true))),
                             ])
                           : Column(children: [
                               Expanded(child: _pane(0, warehouses: warehouses, total: total, split: true)),

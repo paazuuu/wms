@@ -5,6 +5,7 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/responsive.dart';
+import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/supply_chain_providers.dart';
@@ -214,9 +215,10 @@ class _ScSimulationScreenState extends ConsumerState<ScSimulationScreen> {
               final result = _results(context, l10n);
               if (isWideLayout(context)) {
                 return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  SizedBox(width: 440, child: ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: [editor])),
+                  // Each side selected on its own: see [SelectablePane].
+                  SizedBox(width: 440, child: SelectablePane(child: ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: [editor]))),
                   const VerticalDivider(width: 1),
-                  Expanded(child: ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: result)),
+                  Expanded(child: SelectablePane(child: ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: result))),
                 ]);
               }
               return ListView(padding: const EdgeInsets.all(AppSpacing.lg), children: [editor, ...result]);

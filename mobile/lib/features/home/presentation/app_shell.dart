@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show Selectable, SelectionRegistrar;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +16,7 @@ import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/text_scale_menu.dart';
 import '../../../core/ui/responsive.dart';
+import '../../../core/ui/selectable_app.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../warehouse_context/presentation/warehouse_picker.dart';
@@ -172,7 +174,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     // shrink something that costs no content width to begin with.
     final collapsed = wide && ref.watch(sidebarCollapsedProvider);
 
-    Widget sidebar({required bool asRail}) => _Sidebar(
+    Widget sidebar({required bool asRail}) => SelectablePane(child: _Sidebar(
           selectedId: selectedId,
           collapsed: asRail,
           onToggleCollapse: wide
@@ -184,7 +186,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           permissions: permissions,
           userName: user?.name,
           userEmail: user?.email,
-        );
+        ));
 
     final main = Column(
       children: [
@@ -210,8 +212,11 @@ class _AppShellState extends ConsumerState<AppShell> {
             onSelect: _go,
             onClose: (loc) => _closeTab(loc, location),
           ),
+        // Its own selection area, beside the sidebar: see [SelectablePane].
         Expanded(
-          child: _TabStack(tabs: tabs, activeLocation: location),
+          child: SelectablePane(
+            child: _TabStack(tabs: tabs, activeLocation: location),
+          ),
         ),
       ],
     );
@@ -332,17 +337,58 @@ class _TabStack extends StatelessWidget {
           // subtree rather than rebuilding its neighbour's state into it.
           KeyedSubtree(
             key: ValueKey('tab:$location'),
-            child: Navigator(
-              onGenerateRoute: (_) => MaterialPageRoute(
-                builder: (ctx) =>
-                    screenForLocation(ctx, location) ??
-                    const _UnknownLocation(),
+            // A tab out of sight lies in the same place as the one in front.
+            // Left selectable, a drag over the screen would start in its text
+            // and Ctrl+A would copy it too.
+            child: _TabSelection(
+              active: location == tabs[index < 0 ? 0 : index],
+              child: Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute(
+                  builder: (ctx) =>
+                      screenForLocation(ctx, location) ??
+                      const _UnknownLocation(),
+                ),
               ),
             ),
           ),
       ],
     );
   }
+}
+
+/// Takes a tab out of text selection while it is out of sight.
+///
+/// Always the same widget, whichever the tab is, so switching tabs only
+/// swaps the registrar its texts report to and never rebuilds the tab (its
+/// scroll position and half-filled form stay as they were).
+class _TabSelection extends StatelessWidget {
+  const _TabSelection({required this.active, required this.child});
+
+  final bool active;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final outer = SelectionContainer.maybeOf(context);
+    return SelectionRegistrarScope(
+      registrar: active && outer != null ? outer : _noSelection,
+      child: child,
+    );
+  }
+}
+
+const _noSelection = _NoSelection();
+
+/// A registrar that takes nothing in: what registers with it cannot be
+/// selected.
+class _NoSelection implements SelectionRegistrar {
+  const _NoSelection();
+
+  @override
+  void add(Selectable selectable) {}
+
+  @override
+  void remove(Selectable selectable) {}
 }
 
 /// Shown for a location this build does not serve — a URL from a newer

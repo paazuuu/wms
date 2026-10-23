@@ -7197,6 +7197,36 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The viewer shows corrections and undo.
   - The reader gives up by name when it runs out of time.
 
+## Every text on screen can be selected, in the browser too
+
+- **What was wrong.** Text in the app shell's scrolling areas could not be
+  selected with a mouse drag in the browser: the content of every screen
+  and the sidebar. Only text outside them (screen titles, the breadcrumb)
+  could be, and the browser's own selection lit up only on links.
+  - Selection reads one area in a single order. When a press lands outside
+    a scrolling list and to its right, Flutter treats it as "after all of
+    that list" (`_ScrollableSelectionContainerDelegate`). So the sidebar,
+    which runs past the bottom of the window, took every press in the
+    content beside it. The caret went to its last item, 「表記の事前学習」,
+    and the drag selected nothing.
+  - Found by driving a web build in Chromium with a debug hook on the
+    paragraphs. Widget tests do not show it.
+- **Fix: one selection area per column (`SelectablePane`).**
+  - The sidebar and the content are each their own area.
+  - So are the side-by-side panes: 読み取り結果 (the original and the
+    reading), 商品ライブラリー split view, and the SC simulation.
+  - A drag selects what is under the mouse, and Ctrl+A takes the column's
+    text (in the content: the open screen).
+- **Hidden tabs are no longer selectable.** A tab kept alive behind the
+  open one lies in the same place. Its text used to join drags and Ctrl+A.
+  - Each tab now reports to the real registrar only while it is in front,
+    and to one that takes nothing in otherwise.
+  - It is always the same widget, so switching tabs keeps its state.
+- Tests (996 pass):
+  - A drag beside a long column copies the text under the mouse.
+  - Ctrl+A on the picking tab copies the picking screen, not the
+    dashboard behind it or the menu. This test fails without the fix.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

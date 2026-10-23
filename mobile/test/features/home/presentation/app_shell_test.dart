@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wms_mobile/core/router/app_router.dart';
 import 'package:wms_mobile/core/scan/scan_field.dart';
+import 'package:wms_mobile/core/ui/selectable_app.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/home/presentation/app_shell.dart';
 import 'package:wms_mobile/features/home/presentation/coming_soon_screen.dart';
@@ -64,6 +66,7 @@ class _FakeAuthRepository implements AuthRepository {
 /// a test can assert on the current location.
 ({Widget widget, GoRouter router, ProviderContainer container}) _wrap({
   List<String> permissions = _allPermissions,
+  TransitionBuilder? builder,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -93,6 +96,7 @@ class _FakeAuthRepository implements AuthRepository {
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        builder: builder,
       ),
     ),
   );
@@ -488,6 +492,45 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('Ctrl+A copies the open tab, not the ones behind it', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 900);
+      addTearDown(tester.view.reset);
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+
+      final app = _wrap(builder: (context, child) => SelectableApp(child: child!));
+      await tester.pumpWidget(app.widget);
+      await tester.pumpAndSettle();
+      expect(find.text('Welcome back'), findsOneWidget);
+
+      app.router.go('/picking');
+      await tester.pumpAndSettle();
+      // The dashboard is still there behind the picking tab, keeping its place.
+      expect(find.text('Welcome back', skipOffstage: false), findsOneWidget);
+
+      final page = tester.getRect(find.byType(PickListIndexScreen));
+      final g = await tester.startGesture(page.center, kind: PointerDeviceKind.mouse);
+      await g.up();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+
+      expect(copied, isNotNull);
+      expect(copied, contains('Picking'));
+      expect(copied, isNot(contains('Welcome back')));
+      // The sidebar is an area of its own, so its menu is not in the copy.
+      expect(copied, isNot(contains('Field Operations')));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
     testWidgets('a tab keeps its scroll position across a switch',
         (tester) async {

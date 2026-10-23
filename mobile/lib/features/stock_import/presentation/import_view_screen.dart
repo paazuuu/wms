@@ -10,6 +10,7 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
+import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../master_import/data/master_import_repository.dart';
@@ -227,9 +228,10 @@ class ImportViewScreen extends ConsumerWidget {
           final read = _ReadPane(import: m);
           if (c.maxWidth >= 1000) {
             return Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Expanded(child: original),
+              // Each side selected on its own: see [SelectablePane].
+              Expanded(child: SelectablePane(child: original)),
               const VerticalDivider(width: 1),
-              Expanded(child: read),
+              Expanded(child: SelectablePane(child: read)),
             ]);
           }
           return DefaultTabController(

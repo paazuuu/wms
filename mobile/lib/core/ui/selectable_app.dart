@@ -45,3 +45,34 @@ class _SelectableAppState extends State<SelectableApp> {
   @override
   Widget build(BuildContext context) => Overlay(initialEntries: [_entry]);
 }
+
+/// A column of the screen whose text is selected on its own.
+///
+/// Selection reads the whole screen in one order, top to bottom and left to
+/// right. Beside a long column (the sidebar, a list running past the bottom
+/// of the window), a press to its right counts as inside that column, and
+/// the drag selects nothing where the mouse is. Each column set beside
+/// another is therefore its own area: a drag stays in its column, and Ctrl+A
+/// there takes that column's text.
+class SelectablePane extends StatefulWidget {
+  const SelectablePane({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<SelectablePane> createState() => _SelectablePaneState();
+}
+
+class _SelectablePaneState extends State<SelectablePane> {
+  // Not a Tab stop, for the same reason as the app's own area above.
+  final FocusNode _focus = FocusNode(debugLabel: 'SelectablePane', skipTraversal: true);
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SelectionArea(focusNode: _focus, child: widget.child);
+}
