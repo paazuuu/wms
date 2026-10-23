@@ -1414,6 +1414,7 @@ class _WarehouseBar extends ConsumerWidget {
         waiting += w;
       }
     }
+    final unit = sharedUnitName(l10n, products);
     void choose(int? id) => ref.read(libraryPaneWarehouseProvider(pane).notifier).state = id;
 
     return Material(
@@ -1440,14 +1441,14 @@ class _WarehouseBar extends ConsumerWidget {
                 style: theme.textTheme.titleSmall?.copyWith(color: fg, fontWeight: FontWeight.w700),
               ),
               Text(
-                l10n.plStockSummary(items, units),
+                l10n.plStockSummary(items, units, unit),
                 key: ValueKey('pl-stock-summary$suffix'),
                 style: theme.textTheme.bodySmall?.copyWith(color: fg),
               ),
               // The breakdown: in stock, and read in but not inspected yet.
               if (waiting > 0)
                 Text(
-                  l10n.plPendingSummary(waitingItems, waiting, units + waiting),
+                  l10n.plPendingSummary(waitingItems, waiting, units + waiting, unit),
                   key: ValueKey('pl-pending-summary$suffix'),
                   style: theme.textTheme.bodySmall?.copyWith(color: fg, fontWeight: FontWeight.w600),
                 ),

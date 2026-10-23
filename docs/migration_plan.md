@@ -7369,6 +7369,30 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The detail's stock card and the 本 = 1個 line.
   - The library's one-line row.
 
+## Stock counted in 本 (DB 0149)
+
+- 0149 adds the unit 本 (code `HON`, a count).
+- A new product now takes its base unit from its file's unit text
+  (`products.unit`) when that text names a counting unit: 本, 個, 箱, 枚 and
+  so on. Anything else, or no text, stays 個 as before.
+- The existing products were moved by hand at the user's request, not by
+  the migration (moving them is a data decision):
+  - All 11 products went from 個 to 本, the two without unit text included.
+    Their `product_uoms` base row was moved as well.
+  - Each move is in the audit log as `product.base_uom_changed`, with the
+    reason.
+  - 1本 = 1個, so no quantity changed. A rolled-back rehearsal showed the
+    names and `stock_levels` the same before and after.
+  - `set_product_base_uom` refuses this for products with movements,
+    because a different unit would change what the counts mean. With a
+    factor of 1 they mean the same, so the move was done directly.
+- App:
+  - `uomName` knows `HON` (本 / pc / 支).
+  - The library's totals use the unit every shown product shares
+    (`sharedUnitName`), otherwise 個.
+  - 補充 now shows the unit's name, not its code.
+- Tests (1020 Flutter pass): the unit's names, the shared unit, and 補充.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

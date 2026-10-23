@@ -53,7 +53,7 @@ void main() {
 
     expect(find.text('ボールペン'), findsOneWidget);
     // The number someone acts on gets the pill, with the base unit.
-    expect(find.text('発注目安 190 PCS'), findsOneWidget);
+    expect(find.text('発注目安 190 個'), findsOneWidget);
     // Available against the line, not on-hand against the line.
     expect(find.textContaining('引当可能 10'), findsOneWidget);
     expect(find.textContaining('発注点 50'), findsOneWidget);

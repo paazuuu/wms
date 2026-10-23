@@ -8,6 +8,7 @@ import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../product/domain/warehouse_product.dart';
 import '../../product/presentation/product_detail_screen.dart';
+import '../../product/presentation/product_labels.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/inventory_providers.dart';
 
@@ -83,7 +84,7 @@ class _SuggestionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final nf = NumberFormat.decimalPattern();
-    final unit = row.baseUom == null ? '' : ' ${row.baseUom}';
+    final unit = row.baseUom == null ? '' : ' ${uomName(l10n, row.baseUom!, row.baseUom!)}';
 
     return Card(
       clipBehavior: Clip.antiAlias,

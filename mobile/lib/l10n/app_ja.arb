@@ -9268,7 +9268,7 @@
       }
     }
   },
-  "plStockSummary": "在庫あり {items}品目・合計 {units}個",
+  "plStockSummary": "在庫あり {items}品目・合計 {units}{unit}",
   "@plStockSummary": {
     "placeholders": {
       "items": {
@@ -9276,6 +9276,9 @@
       },
       "units": {
         "type": "int"
+      },
+      "unit": {
+        "type": "String"
       }
     }
   },
@@ -10406,7 +10409,7 @@
       }
     }
   },
-  "plPendingSummary": "未検品 {items}商品・{units}個（在庫と合わせて {total}個）",
+  "plPendingSummary": "未検品 {items}商品・{units}{unit}（在庫と合わせて {total}{unit}）",
   "@plPendingSummary": {
     "placeholders": {
       "items": {
@@ -10417,6 +10420,9 @@
       },
       "total": {
         "type": "int"
+      },
+      "unit": {
+        "type": "String"
       }
     }
   },
@@ -10500,5 +10506,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "uomHon": "本"
 }

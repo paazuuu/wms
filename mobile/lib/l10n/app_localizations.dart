@@ -19091,8 +19091,8 @@ abstract class AppLocalizations {
   /// No description provided for @plStockSummary.
   ///
   /// In ja, this message translates to:
-  /// **'在庫あり {items}品目・合計 {units}個'**
-  String plStockSummary(int items, int units);
+  /// **'在庫あり {items}品目・合計 {units}{unit}'**
+  String plStockSummary(int items, int units, String unit);
 
   /// No description provided for @plWarehouseInactive.
   ///
@@ -20675,8 +20675,8 @@ abstract class AppLocalizations {
   /// No description provided for @plPendingSummary.
   ///
   /// In ja, this message translates to:
-  /// **'未検品 {items}商品・{units}個（在庫と合わせて {total}個）'**
-  String plPendingSummary(int items, int units, int total);
+  /// **'未検品 {items}商品・{units}{unit}（在庫と合わせて {total}{unit}）'**
+  String plPendingSummary(int items, int units, int total, String unit);
 
   /// No description provided for @pdStock.
   ///
@@ -20791,6 +20791,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{n}件の重さを反映しました'**
   String bwSaved(int n);
+
+  /// No description provided for @uomHon.
+  ///
+  /// In ja, this message translates to:
+  /// **'本'**
+  String get uomHon;
 }
 
 class _AppLocalizationsDelegate

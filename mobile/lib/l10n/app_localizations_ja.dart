@@ -10581,8 +10581,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String plStockSummary(int items, int units) {
-    return '在庫あり $items品目・合計 $units個';
+  String plStockSummary(int items, int units, String unit) {
+    return '在庫あり $items品目・合計 $units$unit';
   }
 
   @override
@@ -11586,8 +11586,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String plPendingSummary(int items, int units, int total) {
-    return '未検品 $items商品・$units個（在庫と合わせて $total個）';
+  String plPendingSummary(int items, int units, int total, String unit) {
+    return '未検品 $items商品・$units$unit（在庫と合わせて $total$unit）';
   }
 
   @override
@@ -11666,4 +11666,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String bwSaved(int n) {
     return '$n件の重さを反映しました';
   }
+
+  @override
+  String get uomHon => '本';
 }

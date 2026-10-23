@@ -10525,8 +10525,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String plStockSummary(int items, int units) {
-    return '有库存 $items 种・合计 $units 个';
+  String plStockSummary(int items, int units, String unit) {
+    return '有库存 $items 种・合计 $units $unit';
   }
 
   @override
@@ -11520,8 +11520,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String plPendingSummary(int items, int units, int total) {
-    return '未验货 $items个商品・$units个（含库存共 $total个）';
+  String plPendingSummary(int items, int units, int total, String unit) {
+    return '未验货 $items个商品・$units$unit（含库存共 $total$unit）';
   }
 
   @override
@@ -11598,4 +11598,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String bwSaved(int n) {
     return '已应用$n件重量';
   }
+
+  @override
+  String get uomHon => '支';
 }

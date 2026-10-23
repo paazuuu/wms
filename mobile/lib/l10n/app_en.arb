@@ -3525,7 +3525,7 @@
   "obPricesLine": "Cost {cost} · List {list} · Selling {sell}",
   "plAllWarehouses": "All warehouses",
   "plShowingWarehouse": "Showing: {name}",
-  "plStockSummary": "{items} in stock · {units} units",
+  "plStockSummary": "{items} in stock · {units} {unit}",
   "plWarehouseInactive": "inactive",
   "plSplitOn": "Two warehouses side by side",
   "plSplitOff": "Back to one view",
@@ -3789,7 +3789,7 @@
   "ivTabHint": "Select and copy anything in this table. To open it in Excel, use “Download as Excel” in the app.",
   "ivXlsxSaved": "Saved the Excel file",
   "plPending": "not inspected +{n}",
-  "plPendingSummary": "Not inspected: {items} products, {units} units ({total} with stock)",
+  "plPendingSummary": "Not inspected: {items} products, {units} {unit} ({total} with stock)",
   "pdStock": "Stock",
   "pdStockTotal": "All warehouses",
   "pdStockUnit": "Counted in the base unit ({base}). Not-inspected units are not in stock until inspected.",
@@ -3808,5 +3808,6 @@
   "bwEstimate": "Estimate",
   "bwWaiting": "Not looked up yet",
   "bwSave": "Keep the {n} ticked",
-  "bwSaved": "Kept {n} weights"
+  "bwSaved": "Kept {n} weights",
+  "uomHon": "pc"
 }

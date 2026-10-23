@@ -74,6 +74,7 @@ String weightSourceLabel(AppLocalizations l10n, String? source) => switch (sourc
 /// is named by the app and an unknown one keeps its stored name.
 String uomName(AppLocalizations l10n, String code, String stored) => switch (code.toUpperCase()) {
       'PCS' => l10n.uomPcs,
+      'HON' => l10n.uomHon,
       'SET' => l10n.uomSet,
       'PACK' => l10n.uomPack,
       'BOX' => l10n.uomBox,
@@ -91,6 +92,15 @@ String uomName(AppLocalizations l10n, String code, String stored) => switch (cod
       'CM' => 'cm',
       _ => stored,
     };
+
+/// The unit a total over [products] is counted in: their base unit when
+/// they all share one (本 for pens), else 個.
+String sharedUnitName(AppLocalizations l10n, Iterable<Product> products) {
+  final codes = {for (final p in products) if (p.baseUom case final b?) b.code.toUpperCase()};
+  if (codes.length != 1) return l10n.uomPcs;
+  final b = products.firstWhere((p) => p.baseUom != null).baseUom!;
+  return uomName(l10n, b.code, b.name);
+}
 
 String _mm(double? v) => v == null ? '—' : (v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1));
 

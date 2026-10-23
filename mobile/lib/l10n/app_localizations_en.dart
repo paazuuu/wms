@@ -10800,8 +10800,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String plStockSummary(int items, int units) {
-    return '$items in stock · $units units';
+  String plStockSummary(int items, int units, String unit) {
+    return '$items in stock · $units $unit';
   }
 
   @override
@@ -11830,8 +11830,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String plPendingSummary(int items, int units, int total) {
-    return 'Not inspected: $items products, $units units ($total with stock)';
+  String plPendingSummary(int items, int units, int total, String unit) {
+    return 'Not inspected: $items products, $units $unit ($total with stock)';
   }
 
   @override
@@ -11911,4 +11911,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String bwSaved(int n) {
     return 'Kept $n weights';
   }
+
+  @override
+  String get uomHon => 'pc';
 }

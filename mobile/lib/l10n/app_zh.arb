@@ -3525,7 +3525,7 @@
   "obPricesLine": "成本 {cost} · 定价 {list} · 销售价格 {sell}",
   "plAllWarehouses": "全部仓库",
   "plShowingWarehouse": "显示中的仓库：{name}",
-  "plStockSummary": "有库存 {items} 种・合计 {units} 个",
+  "plStockSummary": "有库存 {items} 种・合计 {units} {unit}",
   "plWarehouseInactive": "停用",
   "plSplitOn": "两个仓库分屏显示",
   "plSplitOff": "恢复为单屏",
@@ -3789,7 +3789,7 @@
   "ivTabHint": "此表可直接选择复制。如需用Excel打开，请在应用中使用“以Excel下载”。",
   "ivXlsxSaved": "已保存Excel文件",
   "plPending": "未验货 +{n}",
-  "plPendingSummary": "未验货 {items}个商品・{units}个（含库存共 {total}个）",
+  "plPendingSummary": "未验货 {items}个商品・{units}{unit}（含库存共 {total}{unit}）",
   "pdStock": "库存",
   "pdStockTotal": "所有仓库",
   "pdStockUnit": "数量以基本单位（{base}）计。未验货的数量在验货前不计入库存。",
@@ -3808,5 +3808,6 @@
   "bwEstimate": "估计",
   "bwWaiting": "尚未查询",
   "bwSave": "应用已勾选的{n}件",
-  "bwSaved": "已应用{n}件重量"
+  "bwSaved": "已应用{n}件重量",
+  "uomHon": "支"
 }
