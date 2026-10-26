@@ -7489,6 +7489,10 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     品番 of 4 characters or more, or two different real names.
 - Checked on an uploaded ledger, locally (not committed): 710 rows read,
   every column kept. The rows with no JAN are listed as before.
+- Deployed: import-plan v26 and ocr-delivery-note v16, from commit d9aed9c.
+  0150 is applied: 5 fields and 24 new headings.
+- A reading taken before this keeps only what it had. Its file must be read
+  again to get the new columns.
 - Tests (1025 Flutter, 63 Deno pass):
   - The ledger's Chinese headings and five fields, in Deno and in the app.
   - The split check on the invoice's own cells.
