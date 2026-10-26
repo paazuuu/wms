@@ -271,7 +271,7 @@ async function logAiCall(row: Record<string, unknown>) {
 }
 
 export function aiModel(chosen: ChosenKey | null = cachedKey): string {
-  return chosen?.model ?? Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
+  return chosen?.model ?? Deno.env.get("GEMINI_MODEL") ?? DEFAULT_MODEL;
 }
 
 /** The key the AI is called with (0137): the one chosen on 管理 → AI設定 —
@@ -1785,7 +1785,22 @@ export function checkLines(lines: ReadLine[]) {
 // PDF and photos: read, then read again to check
 // ---------------------------------------------------------------------------
 
-const LINE_PROPS = {
+/** The cheapest model that reads an invoice right (testdata/ai_bench): with
+ * every field asked for (and allowed to be empty) it read the date, the
+ * registration number, the tax and each line's amount as Flash did, for
+ * about a tenth of the cost. 2.5 Flash-Lite is no longer served to new keys. */
+export const DEFAULT_MODEL = "gemini-3.1-flash-lite";
+
+/** [props] with each plain value allowed to be null. Asked for every field
+ * (required) a lighter model fills what is printed instead of leaving it out
+ * or putting it in the wrong field; null keeps it from inventing what is not. */
+export function nullable(props: Record<string, Record<string, unknown>>): Record<string, Record<string, unknown>> {
+  return Object.fromEntries(
+    Object.entries(props).map(([k, v]) => [k, v.type === "array" || v.type === "object" ? v : { ...v, nullable: true }]),
+  );
+}
+
+const LINE_PROPS: Record<string, Record<string, unknown>> = {
   jan_code: { type: "string" },
   maker: { type: "string" },
   product_name: { type: "string" },
@@ -1840,22 +1855,28 @@ const EXTRACT_PROMPT =
   "JANコードが品名の下や別の段・別の欄に印字されていても、その商品の行の jan_code に入れる(桁を1つずつ確かめて)。" +
   "読めない項目は省略。";
 
-const EXTRACT_SCHEMA = {
+const HEADER_PROPS: Record<string, Record<string, unknown>> = {
+  supplier_name: { type: "string" },
+  addressee_name: { type: "string" },
+  registration_number: { type: "string" },
+  customer_code: { type: "string" },
+  doc_number: { type: "string" },
+  doc_date: { type: "string" },
+  subtotal: { type: "number" },
+  tax: { type: "number" },
+  total: { type: "number" },
+};
+
+/** What every line must answer, even with null. */
+const LINE_REQUIRED = ["quantity", "amount"];
+
+export const EXTRACT_SCHEMA = {
   type: "object",
   properties: {
     header: {
       type: "object",
-      properties: {
-        supplier_name: { type: "string" },
-        addressee_name: { type: "string" },
-        registration_number: { type: "string" },
-        customer_code: { type: "string" },
-        doc_number: { type: "string" },
-        doc_date: { type: "string" },
-        subtotal: { type: "number" },
-        tax: { type: "number" },
-        total: { type: "number" },
-      },
+      properties: nullable(HEADER_PROPS),
+      required: Object.keys(HEADER_PROPS),
     },
     columns: {
       type: "array",
@@ -1867,7 +1888,7 @@ const EXTRACT_SCHEMA = {
         required: ["header", "field"],
       },
     },
-    lines: { type: "array", items: { type: "object", properties: LINE_PROPS } },
+    lines: { type: "array", items: { type: "object", properties: nullable(LINE_PROPS), required: LINE_REQUIRED } },
   },
   required: ["lines"],
 };
@@ -2089,7 +2110,11 @@ export async function readDocument(
             properties: {
               lines: {
                 type: "array",
-                items: { type: "object", properties: { index: { type: "integer" }, ...LINE_PROPS } },
+                items: {
+                  type: "object",
+                  properties: { index: { type: "integer" }, ...nullable(LINE_PROPS) },
+                  required: ["index", ...LINE_REQUIRED],
+                },
               },
             },
             required: ["lines"],

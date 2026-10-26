@@ -7418,6 +7418,32 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     above the list on a phone.
   - 検品 lists the waiting file for its own warehouse only.
 
+## Reading with the cheapest model that reads right (edge only)
+
+- Compared on a made-up invoice (`_shared/testdata/ai_bench`), clean and
+  blurred, with the same prompt and schema as `readDocument`:
+  - 2.5 Flash-Lite is no longer served to new keys (404).
+  - 3.1 Flash-Lite read every JAN, count, unit and price right. It left out
+    the date, the registration number, the subtotal and the tax, and put
+    each line's amount in `upstream_code`.
+  - 3.5 Flash-Lite misread a code (TP-07B as TP-078) and took the row
+    number for `upstream_code`.
+  - 3.8 Flash (the old default) read everything right, but thinks too: about
+    700 tokens more per call.
+- The fix was the schema, not a bigger model:
+  - Every header field and each line's `quantity` and `amount` are now
+    required, and each may be null (`nullable`).
+  - With that, 3.1 Flash-Lite read both pictures exactly as 3.8 Flash did.
+- `DEFAULT_MODEL` is now `gemini-3.1-flash-lite`. A key's own model (AI
+  settings) or `GEMINI_MODEL` still wins.
+- Cost per reading (two calls: read, then check; about 2,000 tokens in and
+  700 out each):
+  - 3.1 Flash-Lite: about $0.003, roughly ¥0.5.
+  - 3.8 Flash with its thinking: roughly ten times that.
+- Deployed: import-plan and ocr-delivery-note.
+- Tests (61 Deno pass): the schema asks for every field, each nullable, and
+  lists stay lists.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

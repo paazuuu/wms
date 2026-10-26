@@ -2,6 +2,9 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  DEFAULT_MODEL,
+  EXTRACT_SCHEMA,
+  nullable,
   aiFailure,
   withinTime,
   gemini,
@@ -749,4 +752,19 @@ Deno.test("the estimate prompt says there is no web and asks not to guess", () =
   assertEquals(p.includes("Google検索で調べて"), false);
   assertEquals(p.includes("Web検索は使えません"), true);
   assertEquals(p.includes("推測しない"), true);
+});
+
+Deno.test("the reading asks for every field, each allowed to be empty; the default is the light model", () => {
+  const header = EXTRACT_SCHEMA.properties.header as { required: string[]; properties: Record<string, { nullable?: boolean }> };
+  for (const k of ["doc_date", "registration_number", "subtotal", "tax", "total", "supplier_name"]) {
+    assert(header.required.includes(k), k);
+    assertEquals(header.properties[k].nullable, true);
+  }
+  const line = (EXTRACT_SCHEMA.properties.lines as { items: { required: string[]; properties: Record<string, { nullable?: boolean; type: string }> } }).items;
+  assertEquals(line.required, ["quantity", "amount"]);
+  assertEquals(line.properties.amount.nullable, true);
+  // A list stays a list.
+  assertEquals(line.properties.attributes.nullable, undefined);
+  assertEquals(nullable({ a: { type: "string" }, b: { type: "array" } }), { a: { type: "string", nullable: true }, b: { type: "array" } });
+  assertEquals(DEFAULT_MODEL, "gemini-3.1-flash-lite");
 });
