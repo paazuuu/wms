@@ -29,6 +29,11 @@ String _builtInFieldLabel(AppLocalizations l10n, ColumnField? f) => switch (f) {
       ColumnField.orderDate => l10n.ntFieldDate,
       ColumnField.ignore => l10n.ntFieldIgnore,
       ColumnField.attr => l10n.ntFieldAttr,
+      ColumnField.serial => l10n.ntFieldSerial,
+      ColumnField.supplier => l10n.ntFieldSupplier,
+      ColumnField.unitPriceTax => l10n.ntFieldUnitPriceTax,
+      ColumnField.deliveryDate => l10n.ntFieldDeliveryDate,
+      ColumnField.orderNumber => l10n.ntFieldOrderNumber,
       null => l10n.ntFieldUnknown,
     };
 

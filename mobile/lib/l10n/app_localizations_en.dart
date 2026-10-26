@@ -11931,4 +11931,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qcFileBadge => 'Stock file';
+
+  @override
+  String get lgOrderDate => 'Ordered';
+
+  @override
+  String get lgDeliveryDate => 'Arrived';
+
+  @override
+  String get lgSerial => 'No.';
+
+  @override
+  String get lgSupplier => 'Supplier';
+
+  @override
+  String get lgUnit => 'Unit';
+
+  @override
+  String get lgListPrice => 'List price (excl. tax)';
+
+  @override
+  String get lgUnitPrice => 'Unit price (excl. tax)';
+
+  @override
+  String get lgUnitPriceTax => 'Unit price (incl. tax)';
+
+  @override
+  String get lgAmount => 'Amount';
+
+  @override
+  String get lgOrderNumber => 'Order no.';
+
+  @override
+  String get ntFieldSerial => 'Line number';
+
+  @override
+  String get ntFieldSupplier => 'Supplier (per line)';
+
+  @override
+  String get ntFieldUnitPriceTax => 'Unit price (incl. tax)';
+
+  @override
+  String get ntFieldDeliveryDate => 'Arrival date';
+
+  @override
+  String get ntFieldOrderNumber => 'Order number';
 }

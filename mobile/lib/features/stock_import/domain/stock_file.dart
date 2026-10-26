@@ -105,6 +105,7 @@ class ReadRow extends Equatable {
     this.flags = const [],
     this.aiJan,
     this.aiQuantity,
+    this.ledger = const LedgerFields(),
   });
 
   final int lineNo;
@@ -114,6 +115,9 @@ class ReadRow extends Equatable {
   final String maker;
   final String code;
   final List<String> flags;
+
+  /// The rest of a purchase ledger's (明細) columns, as the file wrote them.
+  final LedgerFields ledger;
 
   /// What the AI had read, when this row comes from a 確認用Excel a person
   /// corrected: set beside what they wrote, so a correction is on record.
@@ -135,6 +139,7 @@ class ReadRow extends Equatable {
         if (flags.isNotEmpty) 'flags': flags,
         if (aiJan != null) 'ai_jan': aiJan,
         if (aiQuantity != null) 'ai_quantity': aiQuantity,
+        ...ledger.toJson(),
       };
 
   factory ReadRow.fromJson(Map<String, dynamic> j) => ReadRow(
@@ -147,10 +152,101 @@ class ReadRow extends Equatable {
         flags: [for (final f in (j['flags'] as List? ?? const [])) '$f'],
         aiJan: j['ai_jan']?.toString(),
         aiQuantity: j['ai_quantity']?.toString(),
+        ledger: LedgerFields.fromJson(j),
+      );
+
+  ReadRow withFlags(List<String> flags) => ReadRow(
+        lineNo: lineNo, jan: jan, name: name, quantity: quantity, maker: maker, code: code,
+        aiJan: aiJan, aiQuantity: aiQuantity, ledger: ledger, flags: flags,
       );
 
   @override
-  List<Object?> get props => [lineNo, jan, name, quantity, maker, code, flags, aiJan, aiQuantity];
+  List<Object?> get props => [lineNo, jan, name, quantity, maker, code, flags, aiJan, aiQuantity, ledger];
+}
+
+/// A purchase ledger's (明細) columns beyond JAN, 品名, メーカー, 品番 and 数量
+/// (0150), as text the way the file wrote them: 発注日, 入荷日, the line's own
+/// number, the supplier named on it, 単位, 定価 (税抜), 単価 (税抜 and 税込),
+/// 金額, 税率 and 注番. Empty when the file had no such column.
+class LedgerFields extends Equatable {
+  const LedgerFields({
+    this.orderDate = '',
+    this.deliveryDate = '',
+    this.serial = '',
+    this.supplier = '',
+    this.unit = '',
+    this.listPrice = '',
+    this.unitPrice = '',
+    this.unitPriceTax = '',
+    this.amount = '',
+    this.taxRate = '',
+    this.orderNumber = '',
+  });
+
+  final String orderDate;
+  final String deliveryDate;
+  final String serial;
+  final String supplier;
+  final String unit;
+  final String listPrice;
+  final String unitPrice;
+  final String unitPriceTax;
+  final String amount;
+  final String taxRate;
+  final String orderNumber;
+
+  static const _keys = [
+    'order_date', 'delivery_date', 'serial', 'supplier', 'unit', 'list_price', 'unit_price', 'unit_price_tax',
+    'amount', 'tax_rate', 'order_number',
+  ];
+
+  List<String> get _values =>
+      [orderDate, deliveryDate, serial, supplier, unit, listPrice, unitPrice, unitPriceTax, amount, taxRate, orderNumber];
+
+  bool get isEmpty => _values.every((v) => v.isEmpty);
+
+  Map<String, dynamic> toJson() => {
+        for (final (i, k) in _keys.indexed)
+          if (_values[i].isNotEmpty) k: _values[i],
+      };
+
+  factory LedgerFields.fromJson(Map<String, dynamic> j) {
+    String s(String k) {
+      final v = j[k];
+      if (v == null) return '';
+      if (v is double && v == v.roundToDouble()) return v.toInt().toString();
+      return '$v'.trim();
+    }
+
+    return LedgerFields(
+      orderDate: s('order_date'),
+      deliveryDate: s('delivery_date'),
+      serial: s('serial'),
+      supplier: s('supplier'),
+      unit: s('unit'),
+      listPrice: s('list_price'),
+      unitPrice: s('unit_price'),
+      unitPriceTax: s('unit_price_tax'),
+      amount: s('amount'),
+      taxRate: s('tax_rate'),
+      orderNumber: s('order_number'),
+    );
+  }
+
+  /// 単価 (税込): as written, else 単価 (税抜) with the line's tax (10% when
+  /// it names none), to the yen's hundredth.
+  String get unitPriceWithTax {
+    if (unitPriceTax.isNotEmpty) return unitPriceTax;
+    final p = double.tryParse(unitPrice.replaceAll(RegExp(r'[,，\s¥円]'), ''));
+    if (p == null) return '';
+    var rate = double.tryParse(taxRate.replaceAll(RegExp(r'[%％\s]'), '')) ?? 0.1;
+    if (rate >= 1) rate /= 100;
+    final v = (p * (1 + rate) * 100).round() / 100;
+    return v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+  }
+
+  @override
+  List<Object?> get props => _values;
 }
 
 /// What a stock file holds: its lines, one per JAN, and the rows that could
@@ -185,10 +281,25 @@ class StockSheet extends Equatable {
 
 String _key(String s) => s.toLowerCase().replaceAll(RegExp(r'[\s　_\-()（）・/]'), '');
 
-const _janNames = {'jan', 'janコード', 'jancode', 'バーコード', 'barcode', 'ean', 'ean13', 'janno'};
+const _janNames = {'jan', 'janコード', 'jancode', 'バーコード', 'barcode', 'ean', 'ean13', 'janno', 'ジャパンコード', 'japanコード'};
 const _qtyNames = {'数量', '在庫数', '在庫', '個数', '入庫数', '実在庫', '実在庫数', 'qty', 'quantity', 'stock', 'onhand'};
 const _nameNames = {'商品名', '品名', '名称', 'name', 'productname', 'itemname'};
-const _makerNames = {'メーカー', 'メーカー名', 'maker', 'brand', 'manufacturer'};
+const _makerNames = {'メーカー', 'メーカー名', 'maker', 'brand', 'manufacturer', '品牌', '厂家'};
+
+/// A purchase ledger's (明細) other headings (0150), Japanese and Chinese.
+const _ledgerNames = <String, Set<String>>{
+  'order_date': {'発注日', '注文日', '下单时间', '下单日期', '订购日期'},
+  'delivery_date': {'入荷日', '納品日', '着荷日', '到着日', '到货时间', '到货日期'},
+  'serial': {'番号', '序番', '编号', '序号'},
+  'supplier': {'仕入先', '仕入先名', '供給元', '供货商', '供应商'},
+  'unit': {'単位', '单位'},
+  'list_price': {'定価', '定価税抜', '上代', '零售价', '零售价税拔'},
+  'unit_price': {'単価', '単価税抜', '税抜単価', '单价', '单价税前'},
+  'unit_price_tax': {'単価税込', '税込単価', '单价税入', '单价含税'},
+  'amount': {'金額', '合計', '金额', '合计'},
+  'tax_rate': {'税率'},
+  'order_number': {'注番', '注文番号', '注文no', '発注番号', 'オーダー番号', '订单号'},
+};
 const _codeNames = {'品番', '型番', '商品コード', 'sku', 'itemcode', 'productcode'};
 const _aiJanNames = {'読み取ったjan', 'aiが読んだjan'};
 const _aiQtyNames = {'読み取った数量', 'aiが読んだ数量'};
@@ -200,6 +311,7 @@ const _aiQtyNames = {'読み取った数量', 'aiが読んだ数量'};
 /// quantities summed.
 StockSheet parseStockRows(List<List<String>> rows) {
   var head = -1, jan = -1, qty = -1, name = -1, makerCol = -1, codeCol = -1, aiJanCol = -1, aiQtyCol = -1;
+  final ledgerCols = <String, int>{};
   for (var r = 0; r < rows.length && r < 10; r++) {
     final keys = [for (final c in rows[r]) _key(c)];
     final j = keys.indexWhere(_janNames.contains);
@@ -213,6 +325,9 @@ StockSheet parseStockRows(List<List<String>> rows) {
       codeCol = keys.indexWhere(_codeNames.contains);
       aiJanCol = keys.indexWhere(_aiJanNames.contains);
       aiQtyCol = keys.indexWhere(_aiQtyNames.contains);
+      for (final e in _ledgerNames.entries) {
+        ledgerCols[e.key] = keys.indexWhere(e.value.contains);
+      }
       break;
     }
   }
@@ -236,12 +351,9 @@ StockSheet parseStockRows(List<List<String>> rows) {
       code: at(row, codeCol),
       aiJan: aiJanCol >= 0 ? at(row, aiJanCol) : null,
       aiQuantity: aiQtyCol >= 0 ? at(row, aiQtyCol) : null,
+      ledger: LedgerFields.fromJson({for (final e in ledgerCols.entries) e.key: at(row, e.value)}),
     );
-    read.add(readRow.corrected ? ReadRow(
-      lineNo: readRow.lineNo, jan: readRow.jan, name: readRow.name, quantity: readRow.quantity,
-      maker: readRow.maker, code: readRow.code, aiJan: readRow.aiJan, aiQuantity: readRow.aiQuantity,
-      flags: const ['human_corrected'],
-    ) : readRow);
+    read.add(readRow.corrected ? readRow.withFlags(const ['human_corrected']) : readRow);
     if (_notItem(at(row, jan), at(row, qty))) {
       problems.add(StockFileProblem(no, 'not_item', value: at(row, name)));
       continue;

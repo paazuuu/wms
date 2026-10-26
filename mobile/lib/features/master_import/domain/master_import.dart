@@ -35,7 +35,17 @@ class MasterLine extends Equatable {
     this.flags = const [],
     this.knownProductId,
     this.knownName,
+    this.ledger = const {},
   });
+
+  /// What the reader gave for a purchase ledger's (明細) other columns
+  /// (0150) — dates, number, supplier, prices, amount, 注番 — as it gave them.
+  final Map<String, dynamic> ledger;
+
+  static const ledgerKeys = [
+    'order_date', 'delivery_date', 'serial', 'supplier', 'unit', 'list_price', 'unit_price', 'unit_price_tax',
+    'amount', 'tax_rate', 'order_number',
+  ];
 
   final int lineNo;
   final String janCode;
@@ -92,6 +102,10 @@ class MasterLine extends Equatable {
       flags: [for (final f in (l['flags'] as List? ?? const [])) '$f'],
       knownProductId: (l['product_id'] as num?)?.toInt(),
       knownName: p is Map && _s(p['name']).isNotEmpty ? _s(p['name']) : null,
+      ledger: {
+        for (final k in ledgerKeys)
+          if (l[k] != null && _s(l[k]).isNotEmpty) k: l[k],
+      },
     );
   }
 
@@ -127,6 +141,7 @@ class MasterLine extends Equatable {
         flags: flags ?? this.flags,
         knownProductId: knownProductId,
         knownName: knownName,
+        ledger: ledger,
       );
 
   /// The JAN as digits when it reads as one, else as written.

@@ -466,6 +466,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(reader.reads, 1);
+    // Row by row, so a ledger keeps each 注番 (0150).
+    expect(reader.readKeptRows, isTrue);
     expect(find.byKey(const ValueKey('sf-ai')), findsOneWidget);
     expect(find.textContaining('要確認 1行'), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-doubt-$_jan1')), findsOneWidget);

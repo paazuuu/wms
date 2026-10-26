@@ -30,13 +30,16 @@ export type Field =
   | "quantity" | "case_quantity" | "cases" | "unit_price" | "amount"
   | "spec" | "tax_rate" | "order_date" | "ignore" | "attr"
   | "list_price" | "discount_rate" | "unit" | "supplier_code"
-  | "upstream_code" | "customer_code" | "multi";
+  | "upstream_code" | "customer_code" | "multi"
+  // A purchase ledger's (明細) own columns (0150).
+  | "serial" | "supplier" | "unit_price_tax" | "delivery_date" | "order_number";
 
 export const FIELDS: Field[] = [
   "jan", "maker", "product_name", "product_code", "name_code", "quantity",
   "case_quantity", "cases", "unit_price", "amount", "spec", "tax_rate",
   "order_date", "ignore", "attr", "list_price", "discount_rate", "unit", "supplier_code",
   "upstream_code", "customer_code", "multi",
+  "serial", "supplier", "unit_price_tax", "delivery_date", "order_number",
 ];
 
 /** What a cell holding several fields (0114, field 'multi') can be split into. */
@@ -111,6 +114,14 @@ export type ReadLine = {
    * sheet repeats it on every line (0112). */
   upstream_code: string | null;
   customer_code: string | null;
+  /** A purchase ledger's (明細) own columns (0150), as written: the
+   * document's number for the line, the supplier named on it, 単価(税込),
+   * 入荷日 and 注番. */
+  serial?: string | null;
+  supplier?: string | null;
+  unit_price_tax?: number | null;
+  delivery_date?: string | null;
+  order_number?: string | null;
 };
 
 export type Header = {
@@ -731,6 +742,8 @@ const FIELD_HELP =
   "supplier_code=取引先独自の商品コード(品番とは別の欄がある場合), " +
   "upstream_code=仕入先コード(取引先がさらに仕入れている先=メーカー等のコード), " +
   "customer_code=得意先コード/お客様コード(取引先から見た当社のコード), " +
+  "serial=番号/序番/No(書類の行の番号), supplier=仕入先/供給元(行ごとに書かれた仕入先名), " +
+  "unit_price_tax=単価(税込), delivery_date=入荷日/納品日/着日, order_number=注番/注文番号/発注番号, " +
   "multi=メーカー・品名・品番など複数の項目が1つの欄にまとまっている, " +
   "attr=色・サイズ・容量・材質・重量など商品の属性(どの属性かを attribute に), ignore=その他";
 
@@ -824,6 +837,8 @@ export async function splitNameCodes(values: string[]): Promise<SplitResult[]> {
       const same = normalizeText(rule.code) === normalizeText(aCode) &&
         normalizeText(rule.name) === normalizeText(aName);
       if (same) return { name: rule.name, code: rule.code, by: "both" as const };
+      // The AI's split, and the rule's beside it only when it is a real alternative.
+      if (!splitDisagrees(rule, { name: aName, code: aCode })) return { name: aName, code: aCode, by: "both" as const };
       return { name: aName, code: aCode, by: "ai" as const, alt: { name: rule.name, code: rule.code } };
     }
     if (rule) return { name: rule.name, code: rule.code, by: "rule" as const };
@@ -1169,6 +1184,8 @@ export async function readRows(
   const cList = colOf("list_price"), cRate = colOf("discount_rate"), cUnitName = colOf("unit");
   const cSupCode = colOf("supplier_code");
   const cUpstream = colOf("upstream_code"), cCustomer = colOf("customer_code");
+  const cSerial = colOf("serial"), cSupplier = colOf("supplier"), cUnitTax = colOf("unit_price_tax");
+  const cDelivery = colOf("delivery_date"), cOrderNo = colOf("order_number");
   // Every attribute column, however many (色 and サイズ side by side).
   const attrCols = columns.filter((c) => c.field === "attr" && c.attribute);
   // Cells holding several fields, split by their layout (0114).
@@ -1268,6 +1285,11 @@ export async function readRows(
       supplier_code: str(cell(r, cSupCode)) ?? split.supplier_code ?? null,
       upstream_code: str(cell(r, cUpstream)) ?? split.upstream_code ?? null,
       customer_code: str(cell(r, cCustomer)),
+      serial: str(cell(r, cSerial)),
+      supplier: str(cell(r, cSupplier)),
+      unit_price_tax: toNum(cell(r, cUnitTax)),
+      delivery_date: dateStr(cell(r, cDelivery)),
+      order_number: str(cell(r, cOrderNo)),
     });
   });
 
@@ -1657,6 +1679,26 @@ export async function readPdfText(
 
 /** A combined 品名・品番 cell, or a name column with the 品番 inside it when the
  * sheet has no 品番 column, is split twice and compared. */
+/** Whether the rule's split of a combined cell is a real alternative to the
+ * AI's, worth a person's look. It is not when the rule only told a maker or
+ * a short code in front of it (9A コクヨ, 8G ゼブラ) from the 品番 the AI
+ * found too, when what it took for a 品番 is that short code, or when it
+ * left the AI's 品番 inside the name — the cell then holds a maker and a
+ * 品番 with no product name, as many invoices print it. */
+export function splitDisagrees(
+  rule: { name: string | null; code: string | null },
+  ai: { name: string | null; code: string | null; maker?: string | null },
+): boolean {
+  const lead = (v: string | null) => normalizeText(String(v ?? "").normalize("NFKC").replace(/^(?:[A-Za-z0-9]{1,3}\s+)+/, ""));
+  const rc = normalizeText(rule.code), rn = lead(rule.name);
+  const ac = normalizeText(ai.code), an = normalizeText(ai.name), mk = normalizeText(ai.maker);
+  if (rc === ac && rn === an) return false;
+  if (rc === ac && (!an || an === ac || an === mk || rn === mk || !rn)) return false;
+  if (rc.length <= 3) return false;
+  if (ac && rn.includes(ac)) return false;
+  return true;
+}
+
 async function applySplits(lines: ReadLine[], useAi: boolean) {
   const targets: { line: ReadLine; text: string }[] = [];
   for (const l of lines) {
@@ -1818,6 +1860,12 @@ const LINE_PROPS: Record<string, Record<string, unknown>> = {
   unit: { type: "string" },
   supplier_code: { type: "string" },
   upstream_code: { type: "string" },
+  serial: { type: "string" },
+  supplier: { type: "string" },
+  unit_price_tax: { type: "number" },
+  order_date: { type: "string" },
+  delivery_date: { type: "string" },
+  order_number: { type: "string" },
   attributes: {
     type: "array",
     items: {
@@ -1844,6 +1892,8 @@ const EXTRACT_PROMPT =
   "unit_price は実際の単価(見積単価・納品単価)、list_price は定価(上代)、discount_rate は掛率、unit は単位(本・冊・P など書かれたとおり)。" +
   "品番(メーカー品番・項目)とは別に取引先独自の商品コードの欄があれば supplier_code に。" +
   "仕入先コード(取引先の仕入先=メーカー等のコード)の欄があれば upstream_code に。" +
+  "行ごとに、番号・序番の欄があれば serial に、仕入先名の欄があれば supplier に、税込単価の欄があれば unit_price_tax に、" +
+  "発注日・注文日は order_date に、入荷日・納品日(月日だけの欄も)は delivery_date に書かれたとおり、注番・注文番号は order_number に。" +
   "色・サイズ・容量・材質・重量など商品の属性が別の欄(または品名の後ろ)に書かれていれば、attributes に " +
   "{name: 見出しの文字どおり(カラー・Size など), value: 書かれた値} で入れる。" +
   "表に縦に結合されたセル(複数の行にまたがるセル)があるときは、その値は結合された範囲の商品のもの。" +
@@ -1939,7 +1989,7 @@ function rawToLine(l: RawLine, row: number, aliases: AliasRow[] = []): ReadLine 
     unit_price: toNum(l.unit_price),
     amount: toInt(l.amount),
     tax_rate: toNum(l.tax_rate),
-    order_date: null,
+    order_date: str(l.order_date),
     flags: [],
     alternatives: {},
     attributes: attrs,
@@ -1949,6 +1999,11 @@ function rawToLine(l: RawLine, row: number, aliases: AliasRow[] = []): ReadLine 
     supplier_code: str(l.supplier_code),
     upstream_code: str(l.upstream_code),
     customer_code: null,
+    serial: str(l.serial),
+    supplier: str(l.supplier),
+    unit_price_tax: toNum(l.unit_price_tax),
+    delivery_date: str(l.delivery_date),
+    order_number: str(l.order_number),
   };
 }
 
@@ -2201,8 +2256,7 @@ export async function readDocument(
       l.product_code = r.code;
       l.split_by = "rule";
       l.flags.push("split_single");
-    } else if (r && (normalizeText(r.code) !== normalizeText(l.product_code) ||
-                     normalizeText(r.name) !== normalizeText(l.product_name))) {
+    } else if (r && splitDisagrees(r, { name: l.product_name, code: l.product_code, maker: l.maker })) {
       l.flags.push("split_disagree");
       l.alternatives.product_name = r.name;
       l.alternatives.product_code = r.code;

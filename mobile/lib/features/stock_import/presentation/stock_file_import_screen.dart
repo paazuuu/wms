@@ -153,7 +153,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     // line it gives is to be checked here before it goes in.
     if (sheet == null || !sheet.header) {
       setState(() => _aiReading = true);
-      final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes);
+      // Row by row as the file has them, so a ledger (明細) keeps each 注番.
+      final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes, keepRows: true);
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       switch (r) {
@@ -180,6 +181,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 maker: l.maker,
                 code: l.productCode,
                 flags: l.flags,
+                ledger: LedgerFields.fromJson(l.ledger),
               ),
           ]);
         case ApiFailure(:final message):

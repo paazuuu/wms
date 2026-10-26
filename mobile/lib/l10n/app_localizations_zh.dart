@@ -11617,4 +11617,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qcFileBadge => '文件导入';
+
+  @override
+  String get lgOrderDate => '下单日期';
+
+  @override
+  String get lgDeliveryDate => '到货日期';
+
+  @override
+  String get lgSerial => '编号';
+
+  @override
+  String get lgSupplier => '供货商';
+
+  @override
+  String get lgUnit => '单位';
+
+  @override
+  String get lgListPrice => '零售价（税前）';
+
+  @override
+  String get lgUnitPrice => '单价（税前）';
+
+  @override
+  String get lgUnitPriceTax => '单价（含税）';
+
+  @override
+  String get lgAmount => '合计';
+
+  @override
+  String get lgOrderNumber => '注番';
+
+  @override
+  String get ntFieldSerial => '编号（行号）';
+
+  @override
+  String get ntFieldSupplier => '供货商（每行）';
+
+  @override
+  String get ntFieldUnitPriceTax => '单价（含税）';
+
+  @override
+  String get ntFieldDeliveryDate => '到货日期';
+
+  @override
+  String get ntFieldOrderNumber => '订单号';
 }

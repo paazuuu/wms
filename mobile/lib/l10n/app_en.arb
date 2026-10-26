@@ -3813,5 +3813,20 @@
   "qcFileWaiting": "Stock files waiting for inspection: {n}",
   "qcFileWaitingHint": "Stock registered from a file. It goes into stock once inspected.",
   "qcFileWaitingAll": "See all ({n})",
-  "qcFileBadge": "Stock file"
+  "qcFileBadge": "Stock file",
+  "lgOrderDate": "Ordered",
+  "lgDeliveryDate": "Arrived",
+  "lgSerial": "No.",
+  "lgSupplier": "Supplier",
+  "lgUnit": "Unit",
+  "lgListPrice": "List price (excl. tax)",
+  "lgUnitPrice": "Unit price (excl. tax)",
+  "lgUnitPriceTax": "Unit price (incl. tax)",
+  "lgAmount": "Amount",
+  "lgOrderNumber": "Order no.",
+  "ntFieldSerial": "Line number",
+  "ntFieldSupplier": "Supplier (per line)",
+  "ntFieldUnitPriceTax": "Unit price (incl. tax)",
+  "ntFieldDeliveryDate": "Arrival date",
+  "ntFieldOrderNumber": "Order number"
 }

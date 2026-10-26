@@ -10525,5 +10525,20 @@
       }
     }
   },
-  "qcFileBadge": "ファイル取込"
+  "qcFileBadge": "ファイル取込",
+  "lgOrderDate": "発注日",
+  "lgDeliveryDate": "入荷日",
+  "lgSerial": "番号",
+  "lgSupplier": "仕入先",
+  "lgUnit": "単位",
+  "lgListPrice": "定価（税抜）",
+  "lgUnitPrice": "単価（税抜）",
+  "lgUnitPriceTax": "単価（税込）",
+  "lgAmount": "金額",
+  "lgOrderNumber": "注番",
+  "ntFieldSerial": "番号（行の番号）",
+  "ntFieldSupplier": "仕入先（行ごと）",
+  "ntFieldUnitPriceTax": "単価（税込）",
+  "ntFieldDeliveryDate": "入荷日・納品日",
+  "ntFieldOrderNumber": "注番・注文番号"
 }

@@ -20821,6 +20821,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ファイル取込'**
   String get qcFileBadge;
+
+  /// No description provided for @lgOrderDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注日'**
+  String get lgOrderDate;
+
+  /// No description provided for @lgDeliveryDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日'**
+  String get lgDeliveryDate;
+
+  /// No description provided for @lgSerial.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号'**
+  String get lgSerial;
+
+  /// No description provided for @lgSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get lgSupplier;
+
+  /// No description provided for @lgUnit.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位'**
+  String get lgUnit;
+
+  /// No description provided for @lgListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価（税抜）'**
+  String get lgListPrice;
+
+  /// No description provided for @lgUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価（税抜）'**
+  String get lgUnitPrice;
+
+  /// No description provided for @lgUnitPriceTax.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価（税込）'**
+  String get lgUnitPriceTax;
+
+  /// No description provided for @lgAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額'**
+  String get lgAmount;
+
+  /// No description provided for @lgOrderNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'注番'**
+  String get lgOrderNumber;
+
+  /// No description provided for @ntFieldSerial.
+  ///
+  /// In ja, this message translates to:
+  /// **'番号（行の番号）'**
+  String get ntFieldSerial;
+
+  /// No description provided for @ntFieldSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先（行ごと）'**
+  String get ntFieldSupplier;
+
+  /// No description provided for @ntFieldUnitPriceTax.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価（税込）'**
+  String get ntFieldUnitPriceTax;
+
+  /// No description provided for @ntFieldDeliveryDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷日・納品日'**
+  String get ntFieldDeliveryDate;
+
+  /// No description provided for @ntFieldOrderNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'注番・注文番号'**
+  String get ntFieldOrderNumber;
 }
 
 class _AppLocalizationsDelegate

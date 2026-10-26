@@ -62,6 +62,23 @@ enum ReadFate {
   awaiting,
 }
 
+/// A row's ledger columns (0150) in one line: each one the file had, by name.
+String ledgerSummary(AppLocalizations l10n, LedgerFields f) => [
+      for (final (label, v) in [
+        (l10n.lgOrderDate, f.orderDate),
+        (l10n.lgDeliveryDate, f.deliveryDate),
+        (l10n.lgSerial, f.serial),
+        (l10n.lgSupplier, f.supplier),
+        (l10n.lgUnit, f.unit),
+        (l10n.lgListPrice, f.listPrice),
+        (l10n.lgUnitPrice, f.unitPrice),
+        (l10n.lgUnitPriceTax, f.unitPriceTax),
+        (l10n.lgAmount, f.amount),
+        (l10n.lgOrderNumber, f.orderNumber),
+      ])
+        if (v.isNotEmpty) '$label $v',
+    ].join(' · ');
+
 /// A row as read, beside what became of it.
 class ReadOutcome {
   const ReadOutcome({required this.row, required this.fate, this.line, this.fileQuantity});
@@ -490,6 +507,8 @@ class _ReadPane extends StatelessWidget {
                 ),
                 if (o.row.maker.isNotEmpty || o.row.code.isNotEmpty)
                   Text([o.row.maker, o.row.code].where((v) => v.isNotEmpty).join(' · '), style: muted),
+                if (!o.row.ledger.isEmpty)
+                  Text(ledgerSummary(l10n, o.row.ledger), key: ValueKey('iv-ledger-${o.row.lineNo}'), style: muted),
                 for (final f in o.row.flags.where((f) => f != 'human_corrected'))
                   Text('⚠ ${flagLabel(l10n, f)}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                 if (o.row.corrected)

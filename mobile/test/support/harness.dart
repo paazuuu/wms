@@ -5358,6 +5358,7 @@ class FakeMasterImportRepository implements MasterImportRepository {
   List<MasterImport> imports;
 
   int reads = 0;
+  bool readKeptRows = false;
   final List<List<MasterLine>> commits = [];
   final List<(String kind, String name, Uint8List bytes)> kept = [];
   final List<List<MasterProblem>> stops = [];
@@ -5368,8 +5369,9 @@ class FakeMasterImportRepository implements MasterImportRepository {
   int? _warehouseId;
 
   @override
-  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes) async {
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false}) async {
     reads++;
+    readKeptRows = keepRows;
     if (readFailure != null) return ApiFailure(message: readFailure!);
     return ApiSuccess(readResult ?? const MasterRead(lines: []));
   }

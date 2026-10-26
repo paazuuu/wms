@@ -3813,5 +3813,20 @@
   "qcFileWaiting": "文件导入待验货 {n} 件",
   "qcFileWaitingHint": "从文件登记的库存。验货完成后才计入库存。",
   "qcFileWaitingAll": "查看全部（{n} 件）",
-  "qcFileBadge": "文件导入"
+  "qcFileBadge": "文件导入",
+  "lgOrderDate": "下单日期",
+  "lgDeliveryDate": "到货日期",
+  "lgSerial": "编号",
+  "lgSupplier": "供货商",
+  "lgUnit": "单位",
+  "lgListPrice": "零售价（税前）",
+  "lgUnitPrice": "单价（税前）",
+  "lgUnitPriceTax": "单价（含税）",
+  "lgAmount": "合计",
+  "lgOrderNumber": "注番",
+  "ntFieldSerial": "编号（行号）",
+  "ntFieldSupplier": "供货商（每行）",
+  "ntFieldUnitPriceTax": "单价（含税）",
+  "ntFieldDeliveryDate": "到货日期",
+  "ntFieldOrderNumber": "订单号"
 }

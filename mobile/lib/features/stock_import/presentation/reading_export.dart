@@ -30,10 +30,16 @@ class ReadingTable {
   final Set<(int, int)> flagged;
 }
 
+/// A purchase ledger's (明細) columns first, in its order (0150), then what
+/// became of each row.
 const _headers = [
-  '行', 'ファイルのJAN', 'ファイルの商品名', 'メーカー', '品番', 'ファイルの数量', 'AIの迷い', '確認用Excelで直した',
-  '結果', '商品', '反映前', '増減', '反映後', '検品',
+  '行', '発注日', '入荷日', '番号', '仕入先', 'メーカー', '品番', 'JANコード', '商品名', '数量', '単位',
+  '定価（税抜）', '単価（税抜）', '単価（税込）', '金額', '注番',
+  'AIの迷い', '確認用Excelで直した', '結果', '商品', '反映前', '増減', '反映後', '検品',
 ];
+
+/// Where the JAN, the quantity and the result are among [_headers].
+const _janCol = 7, _qtyCol = 9, _resultCol = 18;
 
 /// [m]'s reading as rows (0146 kept it; 0148 adds the inspection). The
 /// file's own JAN and quantity stay as text, as they were written.
@@ -46,13 +52,25 @@ ReadingTable readingTable(AppLocalizations l10n, MasterImport m) {
     final i = rows.length;
     final doubts = [for (final f in o.row.flags) if (f != 'human_corrected') flagLabel(l10n, f)].join('、');
     final l = o.line;
+    final g = o.row.ledger;
     rows.add([
       o.row.lineNo,
-      o.row.jan,
-      o.row.name,
+      g.orderDate,
+      g.deliveryDate,
+      g.serial,
+      // The document's supplier when the line names none.
+      g.supplier.isNotEmpty ? g.supplier : (m.supplierName ?? ''),
       o.row.maker,
       o.row.code,
+      o.row.jan,
+      o.row.name,
       o.row.quantity,
+      g.unit,
+      g.listPrice,
+      g.unitPrice,
+      g.unitPriceWithTax,
+      g.amount,
+      g.orderNumber,
       doubts,
       o.row.corrected ? '${o.row.aiJan ?? ''} / ${o.row.aiQuantity ?? ''} → ${o.row.jan} / ${o.row.quantity}' : '',
       readFateText(l10n, o),
@@ -67,8 +85,8 @@ ReadingTable readingTable(AppLocalizations l10n, MasterImport m) {
         _ => '',
       },
     ]);
-    if (o.doubtful) flagged.addAll({(i, 1), (i, 5)});
-    if (o.fate != ReadFate.inStock && o.fate != ReadFate.merged && o.fate != ReadFate.awaiting) flagged.add((i, 8));
+    if (o.doubtful) flagged.addAll({(i, _janCol), (i, _qtyCol)});
+    if (o.fate != ReadFate.inStock && o.fate != ReadFate.merged && o.fate != ReadFate.awaiting) flagged.add((i, _resultCol));
   }
   final filed = m.filedOn;
   return ReadingTable(
@@ -99,7 +117,7 @@ Uint8List readingXlsx(ReadingTable t) => buildXlsx(
       rows: t.rows,
       flagged: t.flagged,
       top: t.top,
-      widths: const [6, 16, 32, 14, 14, 10, 24, 24, 40, 28, 9, 9, 9, 28],
+      widths: const [6, 10, 10, 8, 20, 14, 16, 16, 32, 9, 6, 10, 10, 10, 11, 14, 24, 24, 40, 28, 9, 9, 9, 28],
     );
 
 /// The reading as a spreadsheet-looking web page, for a browser tab.

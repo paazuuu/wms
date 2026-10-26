@@ -15,7 +15,9 @@ const masterImportBucket = 'master-import-files';
 abstract class MasterImportRepository {
   /// Reads [bytes] with import-plan (nothing booked); the file is kept as
   /// evidence there too.
-  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes);
+  /// With [keepRows], each row of the file comes back on its own, not summed
+  /// by JAN (0150).
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false});
 
   /// Opens an import for a chosen file.
   Future<ApiResult<int>> start({required String fileName, String? contentType, String? source, int? documentId, int? supplierId});
@@ -70,11 +72,15 @@ class MasterImportRepositoryImpl implements MasterImportRepository {
   }
 
   @override
-  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes) async {
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false}) async {
     try {
       final form = FormData()
         ..files.add(MapEntry('file', MultipartFile.fromBytes(bytes, filename: fileName)))
-        ..fields.addAll(const [MapEntry('dry_run', '1'), MapEntry('purpose', 'library')]);
+        ..fields.addAll([
+          const MapEntry('dry_run', '1'),
+          const MapEntry('purpose', 'library'),
+          if (keepRows) const MapEntry('keep_rows', '1'),
+        ]);
       final r = await _functions.post('/import-plan',
           data: form, options: Options(receiveTimeout: const Duration(seconds: 180)));
       return ApiSuccess(MasterRead.fromJson(((r.data as Map)['data'] as Map).cast<String, dynamic>()));

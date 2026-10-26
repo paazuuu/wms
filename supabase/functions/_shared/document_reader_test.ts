@@ -2,6 +2,7 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  splitDisagrees,
   DEFAULT_MODEL,
   EXTRACT_SCHEMA,
   nullable,
@@ -767,4 +768,43 @@ Deno.test("the reading asks for every field, each allowed to be empty; the defau
   assertEquals(line.properties.attributes.nullable, undefined);
   assertEquals(nullable({ a: { type: "string" }, b: { type: "array" } }), { a: { type: "string", nullable: true }, b: { type: "array" } });
   assertEquals(DEFAULT_MODEL, "gemini-3.1-flash-lite");
+});
+
+Deno.test("a maker or a short code in front of the 品番 is no other way to split the cell", () => {
+  // ﾊﾟｲﾛｯﾄ BIL80EFSULB: the rule takes the maker for the name; the AI found no name.
+  assertEquals(splitDisagrees({ name: "ﾊﾟｲﾛｯﾄ", code: "BIL80EFSULB" }, { name: "BIL80EFSULB", code: "BIL80EFSULB", maker: "パイロット" }), false);
+  // 9A ｺｸﾖ ﾗ-N205B: the rule took the 9A in front for the 品番.
+  assertEquals(splitDisagrees({ name: "ｺｸﾖ ﾗ-N205B", code: "9A" }, { name: "ラ-N205B", code: "ラ-N205B", maker: "コクヨ" }), false);
+  // 8G ｾﾞﾌﾞﾗ RJLV5-BK: the same 品番, the name only the maker behind a short code.
+  assertEquals(splitDisagrees({ name: "8G ｾﾞﾌﾞﾗ", code: "RJLV5-BK" }, { name: "RJLV5-BK", code: "RJLV5-BK", maker: "ゼブラ" }), false);
+  // Two different 品番: worth a look.
+  assertEquals(splitDisagrees({ name: "テストペン", code: "TP-07B" }, { name: "テストペン", code: "TP-078", maker: null }), true);
+  // The same 品番, two real names: worth a look.
+  assertEquals(splitDisagrees({ name: "テストペン 黒", code: "TP-07B" }, { name: "テストノート", code: "TP-07B", maker: null }), true);
+});
+
+Deno.test("a purchase ledger (明細): its Chinese headings and the five fields it adds are read", async () => {
+  const aliases: AliasRow[] = [
+    ["下单时间", "order_date"], ["到货时间", "delivery_date"], ["编号", "serial"], ["供货商", "supplier"],
+    ["品牌", "maker"], ["品番", "product_code"], ["ジャパンコード", "jan"], ["数量", "quantity"],
+    ["零售价（税拔）", "list_price"], ["单价（税前）", "unit_price"], ["单价（税入）", "unit_price_tax"],
+    ["合计", "amount"], ["注番", "order_number"],
+  ].map(([k, f]) => ({ header_key: normalizeText(k), field: f as AliasRow["field"], partner: false }));
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["下单时间", "到货时间", "编号", "供货商", "品牌", "品番", "ジャパンコード", "数量", "零售价（税拔）", "单价（税前）", "单价（税入）", "合计", "注番"],
+    ["9.20", "10.1", "A-1", "テスト商事", "テスト", "TP-07B", "4909999000014", 1000, 100, 50, 55, 55000, "BL 9E"],
+    ["9.20", "10.1", "A-2", "テスト商事", "テスト", "TP-07B", "4909999000014", 2000, 100, 50, 55, 110000, "HL 9E"],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "明细");
+  const bytes = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+  const { columns, lines } = await readSpreadsheet(bytes, aliases, {}, false);
+  assertEquals(columns.map((c) => c.field), [
+    "order_date", "delivery_date", "serial", "supplier", "maker", "product_code", "jan", "quantity",
+    "list_price", "unit_price", "unit_price_tax", "amount", "order_number",
+  ]);
+  assertEquals(lines.length, 2);
+  const l = lines[1];
+  assertEquals([l.order_date, l.delivery_date, l.serial, l.supplier, l.order_number], ["9.20", "10.1", "A-2", "テスト商事", "HL 9E"]);
+  assertEquals([l.list_price, l.unit_price, l.unit_price_tax, l.amount, l.planned_quantity], [100, 50, 55, 110000, 2000]);
 });

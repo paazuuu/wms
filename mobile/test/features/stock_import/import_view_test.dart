@@ -211,10 +211,14 @@ void main() {
     final rows = readXlsx(bytes);
     expect(rows.any((r) => r.length > 1 && r[0] == '書類の日付' && r[1].startsWith('2026/08/19')), isTrue);
     final header = rows.indexWhere((r) => r.isNotEmpty && r[0] == '行');
-    expect(rows[header].take(3), ['行', 'ファイルのJAN', 'ファイルの商品名']);
+    // A purchase ledger's (明細) columns first, in its order (0150).
+    expect(rows[header].take(16), [
+      '行', '発注日', '入荷日', '番号', '仕入先', 'メーカー', '品番', 'JANコード', '商品名', '数量', '単位',
+      '定価（税抜）', '単価（税抜）', '単価（税込）', '金額', '注番',
+    ]);
     expect(rows.length - header - 1, 5);
-    expect(rows[header + 1][1], _jan1);
-    expect(rows[header + 1][8], '→ テストペン 青: 検品待ち（ファイル 15個）');
-    expect(rows[header + 1][13], '検品待ち');
+    expect(rows[header + 1][7], _jan1);
+    expect(rows[header + 1][18], '→ テストペン 青: 検品待ち（ファイル 15個）');
+    expect(rows[header + 1][23], '検品待ち');
   });
 }

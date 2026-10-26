@@ -50,7 +50,15 @@ enum ColumnField {
 
   /// One of our product attributes (0110) — which one is the column's
   /// [ReadColumn.attribute].
-  attr('attr');
+  attr('attr'),
+
+  /// A purchase ledger's (明細) own columns (0150): the line's number, the
+  /// supplier named on it, 単価 (税込), 入荷日 and 注番.
+  serial('serial'),
+  supplier('supplier'),
+  unitPriceTax('unit_price_tax'),
+  deliveryDate('delivery_date'),
+  orderNumber('order_number');
 
   const ColumnField(this.wire);
   final String wire;

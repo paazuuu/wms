@@ -783,6 +783,9 @@ Deno.serve(async (req) => {
     const warehouseId = Number.isFinite(formWh) && formWh > 0 ? formWh : null;
     const training = str(form.get("mode")) === "training";
     const dryRun = training || String(form.get("dry_run") ?? "") === "1";
+    // Each row of the document as it is, not summed by JAN: a ledger (明細)
+    // keeps a row per 注番 and date (0150). Only for a reading.
+    const keepRows = dryRun && String(form.get("keep_rows") ?? "") === "1";
     const formPartner = Number(form.get("partner_id"));
     const overrides = parseOverrides(form.get("column_overrides"));
     // The headings the corrected columns had on the last reading (0114), so a
@@ -863,7 +866,7 @@ Deno.serve(async (req) => {
 
     // A company chosen on the form, or found earlier, under the name we keep.
     if (partnerId && !header.supplier_name && !supplier) header.supplier_name = await partnerName(partnerId);
-    const merged = aggregate(lines);
+    const merged = keepRows ? lines : aggregate(lines);
     await noteEvidence(admin, documentId, {
       source, supplier_id: partnerId, supplier_name: supplier ?? header.supplier_name,
       registration_number: header.registration_number, doc_number: header.doc_number ?? (deliveryNumber || null),

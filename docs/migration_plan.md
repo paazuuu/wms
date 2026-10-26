@@ -7451,6 +7451,52 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Tests (61 Deno pass): the schema asks for every field, each nullable, and
   lists stay lists.
 
+## A purchase ledger's (明細) columns, read and kept (DB 0150)
+
+- A ledger row has: 発注日, 入荷日, 番号, 仕入先, メーカー, 品番, JAN, 数量,
+  定価(税抜), 単価(税抜), 単価(税込), 金額, 注番.
+- A reading kept only JAN, 商品名, メーカー, 品番 and 数量 per row (0146).
+  Prices, amounts, dates and 注番 were read but then dropped.
+- 0150 adds five fields: `serial`, `supplier`, `unit_price_tax`,
+  `delivery_date` and `order_number`.
+  - It also teaches headings for them, and the Chinese headings such a
+    ledger uses for the fields we already had: 下单时间, 到货时间, 编号,
+    供货商, 品牌, 零售价（税拔）, 单价（税前）, 单价（税入）, 合计, 注番.
+- Reader (edge):
+  - The AI is asked for each of these per line, plus `order_date`, which it
+    was never asked for before.
+  - A sheet reads them by heading.
+  - `keep_rows=1` returns each row as it is, not summed by JAN. ファイルから
+    在庫登録 asks for it, and stock still sums by JAN in the app.
+- App:
+  - `ReadRow.ledger` (`LedgerFields`) keeps the columns in the import's
+    reading. No DB change was needed: `read_lines` is jsonb.
+  - A sheet read in the app knows the same headings, Chinese too.
+    `ジャパンコード` now counts as the JAN column, so such a ledger no longer
+    goes to the AI.
+  - 読み取り結果 shows them under each row. Its page and Excel put the
+    ledger's columns first, in the ledger's order.
+  - 単価(税込) is taken as written, else 単価(税抜) × (1 + the line's tax,
+    10% when none).
+  - 仕入先 is the line's own, else the document's.
+- 品名と品番の分け方が不一致 (`split_disagree`):
+  - It is raised when the AI's split of a 品名・品番 cell differs from a
+    simple rule's.
+  - On invoices that print only a maker and a 品番 ("9A ｺｸﾖ ﾗ-N205B",
+    "ﾊﾟｲﾛｯﾄ BIL80EFSULB"), the rule took the leading "9A" for the 品番, or the
+    maker for the name. So every line was flagged.
+  - `splitDisagrees` now raises it only for a real alternative: a different
+    品番 of 4 characters or more, or two different real names.
+- Checked on an uploaded ledger, locally (not committed): 710 rows read,
+  every column kept. The rows with no JAN are listed as before.
+- Tests (1025 Flutter, 63 Deno pass):
+  - The ledger's Chinese headings and five fields, in Deno and in the app.
+  - The split check on the invoice's own cells.
+  - 税込 worked out.
+  - A row's columns kept through `read_lines`.
+  - The export's column order.
+  - The reading asking for separate rows.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

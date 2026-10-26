@@ -11685,4 +11685,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qcFileBadge => 'ファイル取込';
+
+  @override
+  String get lgOrderDate => '発注日';
+
+  @override
+  String get lgDeliveryDate => '入荷日';
+
+  @override
+  String get lgSerial => '番号';
+
+  @override
+  String get lgSupplier => '仕入先';
+
+  @override
+  String get lgUnit => '単位';
+
+  @override
+  String get lgListPrice => '定価（税抜）';
+
+  @override
+  String get lgUnitPrice => '単価（税抜）';
+
+  @override
+  String get lgUnitPriceTax => '単価（税込）';
+
+  @override
+  String get lgAmount => '金額';
+
+  @override
+  String get lgOrderNumber => '注番';
+
+  @override
+  String get ntFieldSerial => '番号（行の番号）';
+
+  @override
+  String get ntFieldSupplier => '仕入先（行ごと）';
+
+  @override
+  String get ntFieldUnitPriceTax => '単価（税込）';
+
+  @override
+  String get ntFieldDeliveryDate => '入荷日・納品日';
+
+  @override
+  String get ntFieldOrderNumber => '注番・注文番号';
 }
