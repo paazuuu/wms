@@ -7440,7 +7440,14 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   700 out each):
   - 3.1 Flash-Lite: about $0.003, roughly ¥0.5.
   - 3.8 Flash with its thinking: roughly ten times that.
-- Deployed: import-plan and ocr-delivery-note.
+- Deployed: import-plan v25 and ocr-delivery-note v15.
+  - Each deploy is a one-line entry that imports the function from this
+    repository at a pinned commit (`raw.githubusercontent.com/.../5c431af/...`).
+    Supabase bundles it at deploy time, so nothing is fetched at run time.
+  - This avoids pasting the whole reader into the deploy. To update, push,
+    then deploy the same line with the new commit.
+  - A function named `import-plan-canary` tried this first. It now only
+    answers 410 and can be deleted in the dashboard.
 - Tests (61 Deno pass): the schema asks for every field, each nullable, and
   lists stay lists.
 
