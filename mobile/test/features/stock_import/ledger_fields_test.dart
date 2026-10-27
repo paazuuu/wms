@@ -75,4 +75,13 @@ void main() {
       2, '', '8月27日', '2', 'テスト商事', 'テスト', 'TP-07B', '4909999000014', 'TP-07B', '40', '本', '', '307', '337.7', '12280', '',
     ]);
   });
+
+  test('a line with no name but a 品番 is registered under its 品番', () {
+    const noName = StockFileLine(lineNo: 1, janCode: '4909999000014', quantity: 3, maker: 'パイロット', code: 'BIL80EFSULB');
+    expect(noName.registerName, 'BIL80EFSULB');
+    expect(noName.toPriceBookLine()['product_name'], 'BIL80EFSULB');
+    const named = StockFileLine(lineNo: 1, janCode: '4909999000014', quantity: 3, name: 'テストペン', code: 'TP-07B');
+    expect(named.registerName, 'テストペン');
+    expect(const StockFileLine(lineNo: 1, janCode: '4909999000014', quantity: 3).registerName, isNull);
+  });
 }

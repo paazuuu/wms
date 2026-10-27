@@ -284,7 +284,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// The lines whose product 商品ライブラリー lacks but can be made: 価格台帳
   /// has the JAN, or the file names the product.
   List<StockFileLine> get _registrable =>
-      [for (final l in _unknown) if (_book.containsKey(l.janCode) || (l.name ?? '').trim().isNotEmpty) l];
+      [for (final l in _unknown) if (_book.containsKey(l.janCode) || l.registerName != null) l];
 
   /// The file's products 商品ライブラリー lacks, registered through 価格台帳:
   /// those it has go in under its names; the rest are read into it first
@@ -847,7 +847,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   dense: true,
                   leading: Icon(Icons.block, color: theme.colorScheme.error, size: 20),
                   title: Text([l.janCode, if (l.name != null) l.name!].join(' ')),
-                  subtitle: Text(canManage && (l.name ?? '').trim().isEmpty && !_book.containsKey(l.janCode)
+                  subtitle: Text(canManage && l.registerName == null && !_book.containsKey(l.janCode)
                       ? l10n.sfNoNameToRegister
                       : l10n.sfNotRegistering),
                 ),

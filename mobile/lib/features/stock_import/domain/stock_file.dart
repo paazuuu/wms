@@ -61,10 +61,19 @@ class StockFileLine extends Equatable {
         code: code,
       );
 
+  /// What a product made from this line is called: the file's name for it,
+  /// else its 品番 (many invoices print only a maker and a 品番).
+  String? get registerName {
+    final n = (name ?? '').trim();
+    if (n.isNotEmpty) return n;
+    final c = (code ?? '').trim();
+    return c.isEmpty ? null : c;
+  }
+
   /// The line as 価格台帳 takes it, to register its product.
   Map<String, dynamic> toPriceBookLine() => {
         'jan_code': janCode,
-        'product_name': name,
+        'product_name': registerName,
         if (maker != null) 'maker': maker,
         if (code != null) 'product_code': code,
       };
@@ -589,7 +598,7 @@ Uint8List buildReviewXlsx({
       'bad_quantity' => '数量が読めない（直してください）',
       _ when inLibrary.contains(jan) => '反映できる',
       _ when inPriceBook.contains(jan) => '価格台帳の名前で登録して反映',
-      _ when r.name.trim().isNotEmpty => '新しく登録して反映',
+      _ when r.name.trim().isNotEmpty || r.code.trim().isNotEmpty => '新しく登録して反映',
       _ => '商品名がなく登録できない',
     };
     final n = rows.length;

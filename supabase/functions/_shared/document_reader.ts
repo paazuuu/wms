@@ -1889,6 +1889,38 @@ export function checkJan(
   return {};
 }
 
+/** A line whose 商品名 is only its maker — with its 品番, and a short code
+ * in front (9A, 8G) — has no product name: many invoices print none. The
+ * maker goes to the maker (full-width), the name is left empty, and a
+ * product made from it is named by its 品番. A real name ("ジェットストリーム
+ * ライトタッチ0.7赤替") is left as it is. */
+export function settleMakerName(l: ReadLine): void {
+  if (l.maker) l.maker = l.maker.normalize("NFKC").trim() || null;
+  const name = l.product_name;
+  if (!name) return;
+  const code = l.product_code?.normalize("NFKC").trim() ?? "";
+  const full = name.normalize("NFKC");
+  // The cell the name came from had the 品番 in it: maker and 品番 only.
+  const withCode = !!code && (full.includes(code) || (l.raw_name_code ?? "").normalize("NFKC").includes(code));
+  const rest = (code ? full.split(code).join(" ") : full)
+    .replace(/^(?:[A-Za-z0-9]{1,3}\s+)+/, "")
+    .replace(/[\s\u3000]+/g, " ")
+    .trim();
+  if (!rest) {
+    // The name was the 品番 (and a short code): no name.
+    if (code) l.product_name = null;
+    return;
+  }
+  if (l.maker && normalizeText(rest) === normalizeText(l.maker)) {
+    l.product_name = null;
+    return;
+  }
+  if (!l.maker && withCode && !/\s/.test(rest) && !/\d/.test(rest) && rest.length <= 12) {
+    l.maker = rest;
+    l.product_name = null;
+  }
+}
+
 export function checkLines(lines: ReadLine[]) {
   for (const l of lines) {
     if (l.raw_jan_code && janLostDigits(l.raw_jan_code)) {
@@ -1970,6 +2002,14 @@ const LINE_PROPS: Record<string, Record<string, unknown>> = {
   },
 };
 
+/** Many invoices print no product name at all: the cell holds a maker and a
+ * 品番 (9A ｺｸﾖ ﾗ-N205B, ﾊﾟｲﾛｯﾄ BIL80EFSULB), or a メーカー column and a 品番
+ * column. The maker is then not the name. */
+const MAKER_ONLY_RULE =
+  "商品名の欄に「メーカー名と品番」しか書かれておらず商品名が無い書類も多い(例: 9A ｺｸﾖ ﾗ-N205B、ﾊﾟｲﾛｯﾄ BIL80EFSULB)。" +
+  "その場合はメーカー名を maker に(半角カナは全角カナで)、品番を product_code に入れ、product_name は null にする。" +
+  "メーカー名を product_name に入れない。行頭の 9A・8G のような短い分類記号はメーカーでも品番でもないので入れない。";
+
 const EXTRACT_PROMPT =
   "この画像/PDFは日本の取引先(商社)の納品書・出荷案内・注文明細です。商社ごとに書式も見出しの言葉" +
   "(日本語の漢字・カナ、英語)も違います。見出しの意味を理解して、次を返してください。\n" +
@@ -1982,6 +2022,7 @@ const EXTRACT_PROMPT =
   "3) lines: 明細の各行。jan_code は印字どおり(ハイフン・点・空白もそのまま、無ければ空)。maker はメーカー名を印字どおり。" +
   "品名と品番が1つの欄にまとめて書かれている場合は、その欄の文字をそのまま name_code に入れ、" +
   "さらに品名を product_name、品番を product_code に分けて入れる。別の欄ならそれぞれに。" +
+  MAKER_ONLY_RULE +
   "quantity は総数(入数×ケース数の表記なら掛けた数)。case_quantity は入数、cases はケース数。" +
   "unit_price は実際の単価(見積単価・納品単価)、list_price は定価(上代)、discount_rate は掛率、unit は単位(本・冊・P など書かれたとおり)。" +
   "品番(メーカー品番・項目)とは別に取引先独自の商品コードの欄があれば supplier_code に。" +
@@ -2042,6 +2083,7 @@ const VERIFY_PROMPT =
   "1行ずつ確認してください。数字(JAN・数量・金額)は1桁ずつ、メーカー名・品名・品番は1文字ずつ確かめ、" +
   "間違いがあれば正しい値にしてください。読み漏れた行は追加し、存在しない行は削除してください。" +
   "品名と品番がまとめて書かれた欄は name_code にそのまま、分けた値を product_name/product_code に。" +
+  MAKER_ONLY_RULE +
   "縦に結合されたセルの数量・単価・金額は、その結合範囲の商品の行のもの。数量が 金額÷単価 と合うかも確かめる。" +
   "各行に確認済みの印として index(元の行番号、追加した行は -1) を付けてください。\n読み取り結果:\n";
 
@@ -2358,6 +2400,8 @@ export async function readDocument(
       l.split_by = "both";
     }
   }
+  // A maker taken for the product's name goes back to the maker.
+  for (const l of lines) settleMakerName(l);
   // A totals row the reading took for goods is set aside as a figure (0134).
   const totalsRows = dropTotalsLines(lines).map((l) => l.amount!);
   checkLines(lines);

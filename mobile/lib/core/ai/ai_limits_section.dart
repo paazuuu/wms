@@ -15,7 +15,7 @@ class AiLimits extends Equatable {
   const AiLimits({
     this.documentModel = 'gemini-3.8-flash',
     this.lightModel = 'gemini-3.1-flash-lite',
-    this.dailyLimit = 300,
+    this.dailyLimit = 50,
     this.dailyDocumentLimit = 50,
     this.callsToday = 0,
     this.documentsToday = 0,

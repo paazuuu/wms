@@ -2,6 +2,7 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  settleMakerName,
   aiModelFor,
   limitReached,
   splitDisagrees,
@@ -831,4 +832,33 @@ Deno.test("documents read with the strong model, the rest with the light one; to
   assertEquals(limitReached({ ...policy, calls: 300 }, "columns"), "daily");
   assertEquals(limitReached({ ...policy, daily_limit: null, daily_document_limit: null, calls: 9999, documents: 999 }, "extract"), null);
   assertEquals(limitReached(null, "extract"), null);
+});
+
+Deno.test("a 商品名 that is only the maker and its 品番 is no name: the maker goes to the maker", () => {
+  const line = (o: Partial<ReadLine>): ReadLine => ({
+    row: 1, jan_code: "", raw_jan_code: null, maker: null, product_name: null, product_code: null, raw_name_code: null,
+    split_by: null, spec: null, planned_quantity: 1, case_quantity: null, cases: null, unit_price: null, amount: null,
+    tax_rate: null, order_date: null, flags: [], alternatives: {}, attributes: [], list_price: null, discount_rate: null,
+    unit: null, supplier_code: null, upstream_code: null, customer_code: null, ...o,
+  });
+  // ﾊﾟｲﾛｯﾄ BIL80EFSULB, read as name パイロット beside the 品番.
+  const a = line({ product_name: "パイロット", product_code: "BIL80EFSULB", raw_name_code: "ﾊﾟｲﾛｯﾄ BIL80EFSULB" });
+  settleMakerName(a);
+  assertEquals([a.maker, a.product_name, a.product_code], ["パイロット", null, "BIL80EFSULB"]);
+  // 9A ｺｸﾖ ﾗ-N205B, the whole cell taken for the name.
+  const b = line({ product_name: "9A ｺｸﾖ ﾗ-N205B", product_code: "ラ-N205B" });
+  settleMakerName(b);
+  assertEquals([b.maker, b.product_name], ["コクヨ", null]);
+  // The maker known already, written again as the name.
+  const c = line({ maker: "ﾐﾂﾋﾞｼ", product_name: "8G ミツビシ", product_code: "UMN155N38P24" });
+  settleMakerName(c);
+  assertEquals([c.maker, c.product_name], ["ミツビシ", null]);
+  // A real name stays.
+  const d = line({ maker: "三菱鉛筆", product_name: "ジェットストリームライトタッチ0.7赤替", product_code: "SXRL7.15" });
+  settleMakerName(d);
+  assertEquals(d.product_name, "ジェットストリームライトタッチ0.7赤替");
+  // One word with no 品番 in its cell may be a name: left alone.
+  const e = line({ product_name: "ノート", product_code: "TN-A5" });
+  settleMakerName(e);
+  assertEquals([e.maker, e.product_name], [null, "ノート"]);
 });
