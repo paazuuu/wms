@@ -30,3 +30,11 @@ HtmlTab? openHtmlTab() {
   final w = web.window.open('', '_blank');
   return w == null ? null : _Tab(w);
 }
+
+bool openExternalUrl(String url) {
+  final u = Uri.tryParse(url);
+  if (u == null || u.scheme != 'https') return false;
+  // With noopener the browser gives no window back; the tab opens all the same.
+  web.window.open(url, '_blank', 'noopener');
+  return true;
+}

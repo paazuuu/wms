@@ -11833,4 +11833,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfColNote => '备注';
+
+  @override
+  String get rcCatalog => '目录核对';
+
+  @override
+  String rcCatalogPage(String page) {
+    return '第$page页';
+  }
+
+  @override
+  String get rcCatalogMissing => '目录中没有';
+
+  @override
+  String rcCatalogMissingHint(String maker) {
+    return '$maker的目录中没有此JAN，可能读错了。请与原文件核对。';
+  }
+
+  @override
+  String get rcCatalogNone => '未登记该厂商的目录，未核对';
+
+  @override
+  String rcCatalogFoundHint(String catalog, String page, String line) {
+    return '$catalog $page\n$line\n点击打开目录页面';
+  }
+
+  @override
+  String rcCatalogMissingCount(int n) {
+    return '目录中没有的JAN $n';
+  }
+
+  @override
+  String get rcCatalogCopied => '已复制目录URL';
+
+  @override
+  String get jcTitle => 'JAN目录';
+
+  @override
+  String get jcIntro =>
+      '从厂商的网页目录（mediapress iCata）读取JAN和型号，在核对AI读取结果的表格中核对JAN。商品库和进货价格表不会改变。每月2日自动重新读取。';
+
+  @override
+  String get jcUrl => '目录URL';
+
+  @override
+  String get jcUrlHint =>
+      'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…';
+
+  @override
+  String get jcAdd => '读取';
+
+  @override
+  String get jcSyncing => '正在读取目录（需要1〜2分钟）…';
+
+  @override
+  String get jcResync => '重新读取';
+
+  @override
+  String get jcDelete => '删除';
+
+  @override
+  String jcDeleteConfirm(String name) {
+    return '删除“$name”及其读取的JAN吗？';
+  }
+
+  @override
+  String jcCount(int n, int pages) {
+    return 'JAN $n个・$pages页';
+  }
+
+  @override
+  String jcSynced(String date) {
+    return '读取时间 $date';
+  }
+
+  @override
+  String jcError(String error) {
+    return '上次读取失败：$error';
+  }
+
+  @override
+  String get jcEmpty => '尚未登记目录';
+
+  @override
+  String get jcBadUrl => '不是mediapress（iCata）的目录URL';
+
+  @override
+  String get jcUnreachable => '无法连接目录网站';
+
+  @override
+  String get jcNoJan => '此目录中未找到JAN';
+
+  @override
+  String jcDone(int n) {
+    return '已读取 $n 个JAN';
+  }
+
+  @override
+  String get jcOpen => '打开目录';
 }

@@ -7691,6 +7691,31 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - A phone keeps the list, with 現在庫 ＋ 数量 ＝ 反映後.
 - Tests (1040 Flutter pass): the table's cells on a PC, the list on a phone.
 
+## 0153–0154: JAN catalogs (a maker's catalog to check a JAN against)
+
+- `jan_catalogs` / `jan_catalog_entries`: a catalog registered by its viewer URL
+  (mediapress iCata, e.g. the Pilot 総合カタログ), and every JAN read from its
+  pages with what is printed before it (the 品番 or its end: MAB-F, L（ブルー）),
+  the whole line and the page. Read by product.view; written only by the
+  `jan-catalog` edge function (service role). Products and the price book are
+  not touched.
+- `jan-catalog` (verify_jwt=false; a signed-in product.manage user, or the
+  database's job with the shared secret): `GET` the list, `POST /sync {url}`
+  reads every page a search for 49/45 finds and replaces the catalog's JANs,
+  `POST /refresh` reads every catalog again, `DELETE /:id`. Only a
+  `*.mediapress-net.com` host is fetched from.
+- `jan_catalog_lookup(jans[])`: per JAN, found (page, hint, a URL opening the
+  viewer at that page) or not, and `covered` — whether any catalog has a JAN
+  with the same first 7 digits (the maker's GS1 prefix). Not found but covered
+  means the maker's own catalog does not list it: perhaps misread.
+- App: 商品ライブラリ → JANカタログ (list, add by URL, read again, delete). The
+  reading check table (and the read-only look back) has a カタログ照合 column
+  beside the JAN: p.30 MAB-F (a click opens the page), カタログに無し in yellow
+  with the JAN cell marked, or — for a maker with no catalog.
+- 0154: pg_cron `jan-catalog-refresh`, the 2nd of each month 04:23 JST.
+- First read (2026-10-27): LOOK UP2026/2027 パイロット総合カタログ, 306 pages,
+  3,066 JANs (3,026 under 4902505).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

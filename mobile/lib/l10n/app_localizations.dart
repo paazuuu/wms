@@ -21211,6 +21211,162 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'備考'**
   String get sfColNote;
+
+  /// No description provided for @rcCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ照合'**
+  String get rcCatalog;
+
+  /// No description provided for @rcCatalogPage.
+  ///
+  /// In ja, this message translates to:
+  /// **'p.{page}'**
+  String rcCatalogPage(String page);
+
+  /// No description provided for @rcCatalogMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログに無し'**
+  String get rcCatalogMissing;
+
+  /// No description provided for @rcCatalogMissingHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'{maker}のカタログに載っていないJANです。読み違い・桁違いの可能性があります。元のファイルと見比べてください。'**
+  String rcCatalogMissingHint(String maker);
+
+  /// No description provided for @rcCatalogNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'このメーカーのカタログは未登録のため照合していません'**
+  String get rcCatalogNone;
+
+  /// No description provided for @rcCatalogFoundHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'{catalog} {page}\n{line}\nクリックでカタログのページを開きます'**
+  String rcCatalogFoundHint(String catalog, String page, String line);
+
+  /// No description provided for @rcCatalogMissingCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログに無いJAN {n}'**
+  String rcCatalogMissingCount(int n);
+
+  /// No description provided for @rcCatalogCopied.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログのURLをコピーしました'**
+  String get rcCatalogCopied;
+
+  /// No description provided for @jcTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANカタログ'**
+  String get jcTitle;
+
+  /// No description provided for @jcIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーのWebカタログ（mediapress iCata）からJANと品番を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。'**
+  String get jcIntro;
+
+  /// No description provided for @jcUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログのURL'**
+  String get jcUrl;
+
+  /// No description provided for @jcUrlHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…'**
+  String get jcUrlHint;
+
+  /// No description provided for @jcAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込む'**
+  String get jcAdd;
+
+  /// No description provided for @jcSyncing.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログを読み込んでいます（1〜2分かかります）…'**
+  String get jcSyncing;
+
+  /// No description provided for @jcResync.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み直す'**
+  String get jcResync;
+
+  /// No description provided for @jcDelete.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get jcDelete;
+
+  /// No description provided for @jcDeleteConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」と、読み込んだJANを削除しますか？'**
+  String jcDeleteConfirm(String name);
+
+  /// No description provided for @jcCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {n}件・{pages}ページ'**
+  String jcCount(int n, int pages);
+
+  /// No description provided for @jcSynced.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込み日時 {date}'**
+  String jcSynced(String date);
+
+  /// No description provided for @jcError.
+  ///
+  /// In ja, this message translates to:
+  /// **'前回の読み込みに失敗しました：{error}'**
+  String jcError(String error);
+
+  /// No description provided for @jcEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだカタログが登録されていません'**
+  String get jcEmpty;
+
+  /// No description provided for @jcBadUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'mediapress（iCata）のカタログURLではありません'**
+  String get jcBadUrl;
+
+  /// No description provided for @jcUnreachable.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログのサイトに接続できませんでした'**
+  String get jcUnreachable;
+
+  /// No description provided for @jcNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'このカタログにはJANが見つかりませんでした'**
+  String get jcNoJan;
+
+  /// No description provided for @jcDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {n}件を読み込みました'**
+  String jcDone(int n);
+
+  /// No description provided for @jcOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログを開く'**
+  String get jcOpen;
 }
 
 class _AppLocalizationsDelegate

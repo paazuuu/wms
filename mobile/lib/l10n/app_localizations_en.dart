@@ -12154,4 +12154,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sfColNote => 'Notes';
+
+  @override
+  String get rcCatalog => 'Catalog';
+
+  @override
+  String rcCatalogPage(String page) {
+    return 'p.$page';
+  }
+
+  @override
+  String get rcCatalogMissing => 'Not in catalog';
+
+  @override
+  String rcCatalogMissingHint(String maker) {
+    return 'The $maker catalog does not list this JAN: it may have been misread. Compare it with the original.';
+  }
+
+  @override
+  String get rcCatalogNone =>
+      'No catalog of this maker is registered, so not checked';
+
+  @override
+  String rcCatalogFoundHint(String catalog, String page, String line) {
+    return '$catalog $page\n$line\nClick to open the catalog page';
+  }
+
+  @override
+  String rcCatalogMissingCount(int n) {
+    return 'JANs not in the catalog: $n';
+  }
+
+  @override
+  String get rcCatalogCopied => 'Catalog URL copied';
+
+  @override
+  String get jcTitle => 'JAN catalogs';
+
+  @override
+  String get jcIntro =>
+      'Reads JAN codes and part numbers from a maker\'s web catalog (mediapress iCata) and checks the JANs in the table where an AI reading is checked. Products and the price book are not changed. Read again automatically on the 2nd of each month.';
+
+  @override
+  String get jcUrl => 'Catalog URL';
+
+  @override
+  String get jcUrlHint =>
+      'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…';
+
+  @override
+  String get jcAdd => 'Read';
+
+  @override
+  String get jcSyncing => 'Reading the catalog (takes a minute or two)…';
+
+  @override
+  String get jcResync => 'Read again';
+
+  @override
+  String get jcDelete => 'Delete';
+
+  @override
+  String jcDeleteConfirm(String name) {
+    return 'Delete “$name” and the JANs read from it?';
+  }
+
+  @override
+  String jcCount(int n, int pages) {
+    return '$n JANs · $pages pages';
+  }
+
+  @override
+  String jcSynced(String date) {
+    return 'Read $date';
+  }
+
+  @override
+  String jcError(String error) {
+    return 'The last read failed: $error';
+  }
+
+  @override
+  String get jcEmpty => 'No catalog yet';
+
+  @override
+  String get jcBadUrl => 'Not a mediapress (iCata) catalog URL';
+
+  @override
+  String get jcUnreachable => 'Could not reach the catalog site';
+
+  @override
+  String get jcNoJan => 'No JAN found in this catalog';
+
+  @override
+  String jcDone(int n) {
+    return '$n JANs read';
+  }
+
+  @override
+  String get jcOpen => 'Open the catalog';
 }

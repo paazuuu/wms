@@ -141,6 +141,8 @@ import 'package:wms_mobile/features/supply_chain/application/supply_chain_provid
 import 'package:wms_mobile/features/supply_chain/data/supply_chain_repository.dart';
 import 'package:wms_mobile/features/supply_chain/domain/supply_chain.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
+import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
+import 'fake_jan_catalog_repository.dart';
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
 import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 
@@ -210,6 +212,8 @@ List<Override> _defaultOverrides() => [
       putawayRepositoryProvider.overrideWithValue(FakePutawayRepository()),
       pickWaveRepositoryProvider.overrideWithValue(FakePickWaveRepository()),
       notationRepositoryProvider.overrideWithValue(FakeNotationRepository()),
+      // JAN catalogs (0153): none.
+      janCatalogRepositoryProvider.overrideWithValue(FakeJanCatalogRepository()),
       // The supply chain layer is off unless a test turns it on (0107).
       scCanViewProvider.overrideWithValue(false),
       scCanManageProvider.overrideWithValue(false),

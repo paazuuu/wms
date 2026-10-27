@@ -10662,5 +10662,103 @@
   "sfColBefore": "現在庫",
   "sfColChange": "増減",
   "sfColAfter": "反映後",
-  "sfColNote": "備考"
+  "sfColNote": "備考",
+  "rcCatalog": "カタログ照合",
+  "rcCatalogPage": "p.{page}",
+  "@rcCatalogPage": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "rcCatalogMissing": "カタログに無し",
+  "rcCatalogMissingHint": "{maker}のカタログに載っていないJANです。読み違い・桁違いの可能性があります。元のファイルと見比べてください。",
+  "@rcCatalogMissingHint": {
+    "placeholders": {
+      "maker": {
+        "type": "String"
+      }
+    }
+  },
+  "rcCatalogNone": "このメーカーのカタログは未登録のため照合していません",
+  "rcCatalogFoundHint": "{catalog} {page}\n{line}\nクリックでカタログのページを開きます",
+  "@rcCatalogFoundHint": {
+    "placeholders": {
+      "catalog": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      },
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "rcCatalogMissingCount": "カタログに無いJAN {n}",
+  "@rcCatalogMissingCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcCatalogCopied": "カタログのURLをコピーしました",
+  "jcTitle": "JANカタログ",
+  "jcIntro": "メーカーのWebカタログ（mediapress iCata）からJANと品番を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。",
+  "jcUrl": "カタログのURL",
+  "jcUrlHint": "https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…",
+  "jcAdd": "読み込む",
+  "jcSyncing": "カタログを読み込んでいます（1〜2分かかります）…",
+  "jcResync": "読み直す",
+  "jcDelete": "削除",
+  "jcDeleteConfirm": "「{name}」と、読み込んだJANを削除しますか？",
+  "@jcDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jcCount": "JAN {n}件・{pages}ページ",
+  "@jcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      }
+    }
+  },
+  "jcSynced": "読み込み日時 {date}",
+  "@jcSynced": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "jcError": "前回の読み込みに失敗しました：{error}",
+  "@jcError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "jcEmpty": "まだカタログが登録されていません",
+  "jcBadUrl": "mediapress（iCata）のカタログURLではありません",
+  "jcUnreachable": "カタログのサイトに接続できませんでした",
+  "jcNoJan": "このカタログにはJANが見つかりませんでした",
+  "jcDone": "JAN {n}件を読み込みました",
+  "@jcDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "jcOpen": "カタログを開く"
 }

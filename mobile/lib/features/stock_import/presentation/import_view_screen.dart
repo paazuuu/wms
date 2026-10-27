@@ -12,6 +12,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../jan_catalog/data/jan_catalog_repository.dart';
 import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../auth/application/auth_controller.dart';
@@ -520,6 +521,7 @@ class _ReadPane extends StatelessWidget {
                       fileName: file?.name ?? m.originalName,
                       bytes: bytes,
                       readOnly: true,
+                      catalogLookup: (jans) => lookupJans(ref.read(janCatalogRepositoryProvider), jans),
                     ),
                   ));
                 },

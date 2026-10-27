@@ -2,10 +2,13 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:intl/intl.dart' show NumberFormat;
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../jan_catalog/data/jan_catalog_repository.dart';
 import '../../notation/presentation/notation_labels.dart';
 import '../domain/stock_file.dart';
 import 'import_view_screen.dart' show OriginalFileView;
@@ -61,6 +64,12 @@ Color doubtColor(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark ? const Color(0x80A16207) : const Color(0xFFFEF08A);
 Color changedColor(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark ? const Color(0x802563EB) : const Color(0xFFBFDBFE);
+
+/// The JAN checked against the makers' catalogs (0153): not a field of the
+/// reading, shown beside the JAN when there is a catalog to ask.
+const _catalogCol = (key: 'catalog', width: 150.0);
+
+final _jan13 = RegExp(r'^\d{13}$');
 
 const _numeric = {'quantity', 'unit_price', 'amount', 'list_price', 'unit_price_tax'};
 
@@ -175,7 +184,8 @@ class _EditRow {
 /// stock is worked out. Pops with every row as the person left it, each
 /// marked checked; null when they go back without it.
 class ReadingCheckScreen extends StatefulWidget {
-  const ReadingCheckScreen({super.key, required this.rows, this.fileName, this.bytes, this.readOnly = false});
+  const ReadingCheckScreen(
+      {super.key, required this.rows, this.fileName, this.bytes, this.readOnly = false, this.catalogLookup});
 
   final List<ReadRow> rows;
   final String? fileName;
@@ -185,6 +195,10 @@ class ReadingCheckScreen extends StatefulWidget {
   /// beside the original, with nothing to change.
   final bool readOnly;
 
+  /// Asks the JAN catalogs about these JANs (see [lookupJans]); none, no
+  /// catalog column.
+  final Future<Map<String, JanCatalogHit>> Function(List<String> jans)? catalogLookup;
+
   @override
   State<ReadingCheckScreen> createState() => _ReadingCheckScreenState();
 }
@@ -192,6 +206,29 @@ class ReadingCheckScreen extends StatefulWidget {
 class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
   late final List<_EditRow> _rows = [for (final r in widget.rows) _EditRow(r)];
   bool _allColumns = false;
+  Map<String, JanCatalogHit> _hits = const {};
+  final _asked = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _lookup();
+  }
+
+  /// The catalogs asked about each JAN not yet asked: as read, and as typed.
+  void _lookup() {
+    final ask = widget.catalogLookup;
+    if (ask == null) return;
+    final jans = {
+      for (final r in _rows)
+        if (_jan13.hasMatch(r['jan']) && !_asked.contains(r['jan'])) r['jan'],
+    }.toList();
+    if (jans.isEmpty) return;
+    _asked.addAll(jans);
+    ask(jans).then((m) {
+      if (mounted && m.isNotEmpty) setState(() => _hits = {..._hits, ...m});
+    });
+  }
 
   @override
   void dispose() {
@@ -202,7 +239,9 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
   }
 
   List<_Col> get _cols => [
-        ..._core,
+        ..._core.take(1),
+        if (widget.catalogLookup != null) _catalogCol,
+        ..._core.skip(1),
         for (final c in _ledger)
           if (_allColumns || _rows.any((r) => r[c.key].isNotEmpty || _value(r.original, c.key).isNotEmpty)) c,
       ];
@@ -212,6 +251,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         'name' => l10n.ntFieldName,
         'maker' => l10n.ntFieldMaker,
         'maker_name' => l10n.rcMakerName,
+        'catalog' => l10n.rcCatalog,
         'code' => l10n.ntFieldCode,
         'quantity' => l10n.ntFieldQuantity,
         'unit' => l10n.lgUnit,
@@ -251,6 +291,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
     final qty = live.fold<double>(0, (s, r) => s + (_num(r['quantity']) ?? 0));
     final amount = live.fold<double>(0, (s, r) => s + (_num(r['amount']) ?? 0));
     final mismatches = live.where((r) => amountMismatch(r['quantity'], r['unit_price'], r['amount'])).length;
+    final notInCatalog = live.where((r) => _hits[r['jan']]?.missing ?? false).length;
     final bytes = widget.bytes;
     final name = widget.fileName;
 
@@ -283,7 +324,11 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           cols: _cols,
           label: (k) => _label(l10n, k),
           readOnly: widget.readOnly,
-          onChanged: () => setState(() {}),
+          hits: _hits,
+          onChanged: () {
+            _lookup();
+            setState(() {});
+          },
         ),
       ),
       const Divider(height: 1),
@@ -302,6 +347,9 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
               if (mismatches > 0)
                 Text(l10n.rcMismatch(mismatches),
                     key: const ValueKey('rc-mismatch'), style: TextStyle(color: theme.colorScheme.error)),
+              if (notInCatalog > 0)
+                Text(l10n.rcCatalogMissingCount(notInCatalog),
+                    key: const ValueKey('rc-catalog-missing'), style: TextStyle(color: theme.colorScheme.error)),
               if (!widget.readOnly)
                 FilledButton.icon(
                   key: const ValueKey('rc-ok'),
@@ -371,9 +419,16 @@ class _Swatch extends StatelessWidget {
 
 /// The rows as a table of fields, scrolled both ways, the heading kept on top.
 class _Table extends StatefulWidget {
-  const _Table(
-      {required this.rows, required this.cols, required this.label, required this.onChanged, this.readOnly = false});
+  const _Table({
+    required this.rows,
+    required this.cols,
+    required this.label,
+    required this.onChanged,
+    this.readOnly = false,
+    this.hits = const {},
+  });
 
+  final Map<String, JanCatalogHit> hits;
   final List<_EditRow> rows;
   final List<_Col> cols;
   final String Function(String) label;
@@ -441,8 +496,12 @@ class _TableState extends State<_Table> {
                 child: ListView.builder(
                   key: const ValueKey('rc-table'),
                   itemCount: rows.length,
-                  itemBuilder: (context, i) =>
-                      _RowView(row: rows[i], cols: cols, onChanged: widget.onChanged, readOnly: widget.readOnly),
+                  itemBuilder: (context, i) => _RowView(
+                      row: rows[i],
+                      cols: cols,
+                      onChanged: widget.onChanged,
+                      readOnly: widget.readOnly,
+                      hit: widget.hits[rows[i]['jan']]),
                 ),
               ),
             ]),
@@ -454,8 +513,9 @@ class _TableState extends State<_Table> {
 }
 
 class _RowView extends StatelessWidget {
-  const _RowView({required this.row, required this.cols, required this.onChanged, this.readOnly = false});
+  const _RowView({required this.row, required this.cols, required this.onChanged, this.readOnly = false, this.hit});
 
+  final JanCatalogHit? hit;
   final _EditRow row;
   final List<_Col> cols;
   final VoidCallback onChanged;
@@ -486,6 +546,8 @@ class _RowView extends StatelessWidget {
     // Once a person checked it, the reader's doubts are answered.
     final cells = readOnly && row.original.humanChecked ? const <String>{} : doubtfulCells(row.original);
     final mismatch = amountMismatch(row['quantity'], row['unit_price'], row['amount']);
+    // A JAN its maker's catalog does not list: the JAN to look at.
+    final notListed = hit?.missing ?? false;
     final style = theme.textTheme.bodyMedium?.copyWith(
       decoration: row.removed ? TextDecoration.lineThrough : null,
       color: row.removed ? scheme.onSurfaceVariant : null,
@@ -520,41 +582,124 @@ class _RowView extends StatelessWidget {
           ]),
         ),
         for (final col in cols)
-          Container(
-            width: col.width,
-            margin: const EdgeInsets.only(right: 4),
-            decoration: BoxDecoration(
-              // To look at: what the reader doubted (until changed), and a
-              // quantity or amount that does not add up.
-              color: (cells.contains(col.key) && !_changed(col.key)) ||
-                      (mismatch && (col.key == 'quantity' || col.key == 'amount'))
-                  ? doubtColor(context)
-                  : _changed(col.key)
-                      ? changedColor(context)
-                      : null,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: TextField(
-              key: ValueKey('rc-$no-${col.key}'),
-              controller: row.cells[col.key],
-              enabled: !row.removed,
-              readOnly: readOnly,
-              style: style,
-              textAlign: _numeric.contains(col.key) ? TextAlign.end : TextAlign.start,
-              keyboardType: _numeric.contains(col.key) ? const TextInputType.numberWithOptions(decimal: true) : null,
-              decoration: const InputDecoration(
-                isDense: true,
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          if (col.key == 'catalog')
+            Container(
+              width: col.width,
+              margin: const EdgeInsets.only(right: 4),
+              child: _CatalogCell(key: ValueKey('rc-$no-catalog'), hit: _jan13.hasMatch(row['jan']) ? hit : null),
+            )
+          else
+            Container(
+              width: col.width,
+              margin: const EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(
+                // To look at: what the reader doubted (until changed), a
+                // quantity or amount that does not add up, and a JAN the
+                // maker's catalog does not list.
+                color: (cells.contains(col.key) && !_changed(col.key)) ||
+                        (mismatch && (col.key == 'quantity' || col.key == 'amount')) ||
+                        (notListed && col.key == 'jan')
+                    ? doubtColor(context)
+                    : _changed(col.key)
+                        ? changedColor(context)
+                        : null,
+                borderRadius: BorderRadius.circular(4),
               ),
-              onChanged: (_) {
-                // 金額 follows 数量 × 単価, whichever of the two is changed.
-                if (col.key == 'quantity' || col.key == 'unit_price') row.recalcAmount();
-                onChanged();
-              },
+              child: TextField(
+                key: ValueKey('rc-$no-${col.key}'),
+                controller: row.cells[col.key],
+                enabled: !row.removed,
+                readOnly: readOnly,
+                style: style,
+                textAlign: _numeric.contains(col.key) ? TextAlign.end : TextAlign.start,
+                keyboardType: _numeric.contains(col.key) ? const TextInputType.numberWithOptions(decimal: true) : null,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                ),
+                onChanged: (_) {
+                  // 金額 follows 数量 × 単価, whichever of the two is changed.
+                  if (col.key == 'quantity' || col.key == 'unit_price') row.recalcAmount();
+                  onChanged();
+                },
+              ),
             ),
-          ),
       ]),
+    );
+  }
+}
+
+/// What the catalogs say of a row's JAN: listed (the page and what is
+/// printed beside it, a click opens that page), not listed though its
+/// maker's catalog is here, or nothing to say.
+class _CatalogCell extends StatelessWidget {
+  const _CatalogCell({super.key, this.hit});
+
+  final JanCatalogHit? hit;
+
+  void _open(BuildContext context, String url) {
+    if (openExternalUrl(url)) return;
+    Clipboard.setData(ClipboardData(text: url));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).rcCatalogCopied)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final small = theme.textTheme.bodySmall;
+    final h = hit;
+    if (h == null) return const SizedBox.shrink();
+    if (h.found) {
+      final page = h.pageNumber == null ? '' : l10n.rcCatalogPage(h.pageNumber!);
+      final text = [page, if ((h.codeHint ?? '').isNotEmpty) h.codeHint!].join(' ');
+      final url = h.pageUrl;
+      return Tooltip(
+        message: l10n.rcCatalogFoundHint(h.catalogName ?? h.maker ?? '', page, h.lineText ?? ''),
+        child: InkWell(
+          onTap: url == null ? null : () => _open(context, url),
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            child: Row(children: [
+              Icon(Icons.menu_book_outlined, size: 16, color: Colors.green.shade600),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(text,
+                    style: small?.copyWith(color: scheme.primary, decoration: TextDecoration.underline),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              ),
+            ]),
+          ),
+        ),
+      );
+    }
+    if (h.missing) {
+      return Tooltip(
+        message: l10n.rcCatalogMissingHint(h.maker ?? ''),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          decoration: BoxDecoration(color: doubtColor(context), borderRadius: BorderRadius.circular(4)),
+          child: Row(children: [
+            Icon(Icons.warning_amber_outlined, size: 16, color: scheme.error),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(l10n.rcCatalogMissing,
+                  style: small?.copyWith(color: scheme.error), maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          ]),
+        ),
+      );
+    }
+    return Tooltip(
+      message: l10n.rcCatalogNone,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        child: Text('—', style: small?.copyWith(color: scheme.onSurfaceVariant)),
+      ),
     );
   }
 }

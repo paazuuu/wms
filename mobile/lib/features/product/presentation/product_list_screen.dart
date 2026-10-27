@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../jan_catalog/presentation/jan_catalog_screen.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -474,6 +475,15 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 ExcelExportMenu(keyPrefix: 'pl', shown: shown.length, onExport: _export),
+                // The makers' catalogs a reading's JAN is checked against (0153).
+                IconButton(
+                  key: const ValueKey('pl-jan-catalog'),
+                  tooltip: l10n.jcTitle,
+                  icon: const Icon(Icons.menu_book_outlined),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => JanCatalogScreen(canManage: canManage),
+                  )),
+                ),
                 // Weights still missing, looked up by the AI all at once (0149).
                 if (canManage)
                   IconButton(

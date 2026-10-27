@@ -11904,4 +11904,102 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfColNote => '備考';
+
+  @override
+  String get rcCatalog => 'カタログ照合';
+
+  @override
+  String rcCatalogPage(String page) {
+    return 'p.$page';
+  }
+
+  @override
+  String get rcCatalogMissing => 'カタログに無し';
+
+  @override
+  String rcCatalogMissingHint(String maker) {
+    return '$makerのカタログに載っていないJANです。読み違い・桁違いの可能性があります。元のファイルと見比べてください。';
+  }
+
+  @override
+  String get rcCatalogNone => 'このメーカーのカタログは未登録のため照合していません';
+
+  @override
+  String rcCatalogFoundHint(String catalog, String page, String line) {
+    return '$catalog $page\n$line\nクリックでカタログのページを開きます';
+  }
+
+  @override
+  String rcCatalogMissingCount(int n) {
+    return 'カタログに無いJAN $n';
+  }
+
+  @override
+  String get rcCatalogCopied => 'カタログのURLをコピーしました';
+
+  @override
+  String get jcTitle => 'JANカタログ';
+
+  @override
+  String get jcIntro =>
+      'メーカーのWebカタログ（mediapress iCata）からJANと品番を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。';
+
+  @override
+  String get jcUrl => 'カタログのURL';
+
+  @override
+  String get jcUrlHint =>
+      'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…';
+
+  @override
+  String get jcAdd => '読み込む';
+
+  @override
+  String get jcSyncing => 'カタログを読み込んでいます（1〜2分かかります）…';
+
+  @override
+  String get jcResync => '読み直す';
+
+  @override
+  String get jcDelete => '削除';
+
+  @override
+  String jcDeleteConfirm(String name) {
+    return '「$name」と、読み込んだJANを削除しますか？';
+  }
+
+  @override
+  String jcCount(int n, int pages) {
+    return 'JAN $n件・$pagesページ';
+  }
+
+  @override
+  String jcSynced(String date) {
+    return '読み込み日時 $date';
+  }
+
+  @override
+  String jcError(String error) {
+    return '前回の読み込みに失敗しました：$error';
+  }
+
+  @override
+  String get jcEmpty => 'まだカタログが登録されていません';
+
+  @override
+  String get jcBadUrl => 'mediapress（iCata）のカタログURLではありません';
+
+  @override
+  String get jcUnreachable => 'カタログのサイトに接続できませんでした';
+
+  @override
+  String get jcNoJan => 'このカタログにはJANが見つかりませんでした';
+
+  @override
+  String jcDone(int n) {
+    return 'JAN $n件を読み込みました';
+  }
+
+  @override
+  String get jcOpen => 'カタログを開く';
 }

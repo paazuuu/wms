@@ -19,3 +19,7 @@ abstract class HtmlTab {
 /// there are no tabs, or when the browser blocked it: the caller then offers
 /// the file to download instead.
 HtmlTab? openHtmlTab() => impl.openHtmlTab();
+
+/// Opens [url] (a page elsewhere: a maker's catalog) in a new browser tab.
+/// False where there are no tabs, so the caller offers to copy it instead.
+bool openExternalUrl(String url) => impl.openExternalUrl(url);

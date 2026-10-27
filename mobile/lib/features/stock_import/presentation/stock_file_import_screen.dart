@@ -22,6 +22,7 @@ import '../../product/application/product_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../data/stock_import_repository.dart';
+import '../../jan_catalog/data/jan_catalog_repository.dart';
 import '../domain/stock_file.dart';
 import '../domain/stock_ledger.dart';
 import 'import_view_screen.dart';
@@ -226,7 +227,13 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final sheet = _sheet;
     if (sheet == null) return;
     final rows = await Navigator.of(context).push<List<ReadRow>>(MaterialPageRoute(
-      builder: (_) => ReadingCheckScreen(rows: sheet.read, fileName: _fileName, bytes: _bytes),
+      builder: (_) => ReadingCheckScreen(
+        rows: sheet.read,
+        fileName: _fileName,
+        bytes: _bytes,
+        // Each JAN against the makers' catalogs (0153).
+        catalogLookup: (jans) => lookupJans(ref.read(janCatalogRepositoryProvider), jans),
+      ),
     ));
     if (rows == null || !mounted) return;
     setState(() {
