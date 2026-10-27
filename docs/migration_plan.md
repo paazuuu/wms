@@ -7558,6 +7558,44 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - On a PC, side by side, with only the columns the file had.
   - The original shown from the new button.
 
+## Documents read with the accurate model again; daily AI limits (DB 0151)
+
+- With 3.1 Flash-Lite for everything, PDFs lost their JANs.
+  - A made-up invoice laid out like the real one: 商品名・品番 holds a maker
+    and a 品番, and the JAN is in 備考 (`testdata/ai_bench/invoice_bikou`).
+  - Flash-Lite returned no JAN and no 品番 on any line. The nullable schema
+    lets it leave what it does not see.
+  - 3.8 Flash read all four JANs, the 品番 and 序番.
+- 0151, in `ai_settings`:
+  - `document_model` (default gemini-3.8-flash): for `extract` and
+    `verify`, the reading of a PDF, scan or photo.
+  - `light_model` (default gemini-3.1-flash-lite): for the rest (headings,
+    splits, lookups).
+  - `daily_limit` (300 calls) and `daily_document_limit` (50 documents,
+    counted by `extract` only). Null means no limit. A day is Japan's day.
+  - `ai_usage_today()` counts calls that reached Google. `ai_policy()` is
+    for the service role. `get_ai_settings` now includes them, and
+    `set_ai_limits` sets them (ai.review or user.manage, audited).
+- Reader (edge):
+  - `aiModelFor(task, key, policy)`: the setting for the task, else the
+    key's model, else `GEMINI_MODEL`, else `DEFAULT_MODEL`.
+  - `limitReached` runs before every call, `gemini` and `geminiSearch`
+    alike. Over a limit, the call is not sent: it is logged with error kind
+    `limit` and fails as an `AiError` of that kind.
+  - The policy is read at most every 20 s and counted on in between.
+- App:
+  - AI設定 has モデルと1日の上限: both models, both limits, and today's use.
+  - The `limit` error is named in the reading, the weight lookup and AI稼働状況.
+- The original disappeared on the second view: in a browser, `Printing.raster`
+  hands the PDF bytes to pdf.js, which takes them for its own.
+  - The file held for the import was left empty. That also put the copy
+    kept with the import (`keepFile`) at risk.
+  - `_PdfPages` now draws from a copy.
+- Deployed: import-plan v27 and ocr-delivery-note v17, from 6c57e6b.
+- Tests (1034 Flutter, 64 Deno pass):
+  - Model by task, and the limits.
+  - The AI設定 section loads and saves.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
