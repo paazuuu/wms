@@ -3869,5 +3869,9 @@
   "aiLimitsHint": "When a limit is reached, the AI is not used for the rest of the day and the reason is shown. Reading one PDF or picture counts as two calls (the reading and its check).",
   "aiModelStrong": "{m} (accurate)",
   "aiModelMiddle": "{m} (standard)",
-  "aiModelLight": "{m} (cheapest)"
+  "aiModelLight": "{m} (cheapest)",
+  "rcMakerName": "Maker (name)",
+  "rcReadOnlyTitle": "Reading (table)",
+  "rcReadOnlyIntro": "What was checked when it was taken in. Blue: corrected by a person; struck through: left out. A name, when there is one, follows the maker in brackets.",
+  "ivTable": "View as a table"
 }

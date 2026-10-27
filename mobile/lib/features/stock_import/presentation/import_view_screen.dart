@@ -22,6 +22,7 @@ import '../../notation/presentation/notation_labels.dart';
 import '../../qc/domain/inspection.dart' show normalizeJan;
 import '../domain/stock_file.dart';
 import '../domain/stock_ledger.dart';
+import 'reading_check_screen.dart';
 import 'reading_export.dart';
 import 'stock_file_import_screen.dart' show documentDateSourceLabel;
 import 'stock_inspection_screen.dart' show keptUntilText;
@@ -495,6 +496,38 @@ class _ReadPane extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
         ],
         ImportViewButtons(importId: m.id, known: m),
+        // Looked back at as it was checked: the table beside the original.
+        if (outcomes.isNotEmpty)
+          Consumer(
+            builder: (context, ref, _) => Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                key: ValueKey('iv-table-${m.id}'),
+                onPressed: () async {
+                  final file = m.files.where((f) => f.kind == 'original').firstOrNull;
+                  Uint8List? bytes;
+                  if (file != null) {
+                    try {
+                      bytes = await ref.read(importFileBytesProvider(file.path).future);
+                    } catch (_) {
+                      bytes = null;
+                    }
+                  }
+                  if (!context.mounted) return;
+                  await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => ReadingCheckScreen(
+                      rows: [for (final o in outcomes) o.row],
+                      fileName: file?.name ?? m.originalName,
+                      bytes: bytes,
+                      readOnly: true,
+                    ),
+                  ));
+                },
+                icon: const Icon(Icons.table_chart_outlined, size: 18),
+                label: Text(l10n.ivTable),
+              ),
+            ),
+          ),
         const SizedBox(height: AppSpacing.sm),
         Text(l10n.ivRead, style: theme.textTheme.titleSmall),
         const SizedBox(height: AppSpacing.xs),

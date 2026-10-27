@@ -23,7 +23,7 @@ void main() {
 
   test('the cells a doubt points to', () {
     expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['jan_check', 'ai_disagree:planned_quantity'])), {'jan', 'quantity'});
-    expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['split_disagree'])), {'name', 'code'});
+    expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['split_disagree'])), {'maker_name', 'code'});
     expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['unresolved'])), isEmpty);
   });
 
@@ -80,5 +80,66 @@ void main() {
     expect(result!.single.flags, ['human_checked']);
     expect(result!.single.corrected, isFalse);
     expect(result!.single.ledger.amount, '12280');
+  });
+
+  test('メーカー（品名） as one text, and back into its two', () {
+    expect(makerAndName('パイロット', ''), 'パイロット');
+    expect(makerAndName('三菱鉛筆', 'ジェットストリーム 0.7'), '三菱鉛筆（ジェットストリーム 0.7）');
+    expect(splitMakerAndName('三菱鉛筆（ジェットストリーム 0.7）'), ('三菱鉛筆', 'ジェットストリーム 0.7'));
+    expect(splitMakerAndName('ゼブラ (サラサ)'), ('ゼブラ', 'サラサ'));
+    expect(splitMakerAndName('コクヨ'), ('コクヨ', ''));
+    expect(splitMakerAndName('（ノート）'), ('', 'ノート'));
+  });
+
+  testWidgets('maker and name share a column; edited there, both are kept', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    List<ReadRow>? result;
+    await pumpApp(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () async => result = await Navigator.of(context).push<List<ReadRow>>(MaterialPageRoute(
+              builder: (_) => const ReadingCheckScreen(rows: [
+                ReadRow(lineNo: 1, jan: _jan1, maker: 'パイロット', code: 'BIL80EFSULB', quantity: '100'),
+              ]),
+            )),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('メーカー（品名）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-1-name')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('rc-1-maker_name')), 'パイロット（テストペン 黒）');
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
+    await tester.pumpAndSettle();
+    expect([result!.single.maker, result!.single.name], ['パイロット', 'テストペン 黒']);
+    expect(result!.single.flags, containsAll(['human_checked', 'human_corrected']));
+  });
+
+  testWidgets('looked back at, the table is as it was left: nothing to change, the corrections in blue', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(
+      tester,
+      const ReadingCheckScreen(
+        readOnly: true,
+        rows: [
+          ReadRow(lineNo: 1, jan: _jan1, maker: 'コクヨ', quantity: '10', aiQuantity: '100', flags: ['ai_disagree', 'human_checked', 'human_corrected']),
+          ReadRow(lineNo: 2, jan: _jan2, quantity: '3', flags: ['human_checked', 'human_removed']),
+        ],
+      ),
+    );
+    expect(find.text('読み取り結果（表）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-ok')), findsNothing);
+    expect(find.byKey(const ValueKey('rc-add')), findsNothing);
+    expect(find.byKey(const ValueKey('rc-remove-1')), findsNothing);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-1-quantity'))).readOnly, isTrue);
+    // The row left out stays struck through.
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-2-quantity'))).enabled, isFalse);
   });
 }

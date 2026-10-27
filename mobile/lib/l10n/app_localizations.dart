@@ -21157,6 +21157,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{m}（最安）'**
   String aiModelLight(String m);
+
+  /// No description provided for @rcMakerName.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー（品名）'**
+  String get rcMakerName;
+
+  /// No description provided for @rcReadOnlyTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果（表）'**
+  String get rcReadOnlyTitle;
+
+  /// No description provided for @rcReadOnlyIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。品名がある場合はメーカーの後ろに（）で表示します。'**
+  String get rcReadOnlyIntro;
+
+  /// No description provided for @ivTable.
+  ///
+  /// In ja, this message translates to:
+  /// **'表で見る'**
+  String get ivTable;
 }
 
 class _AppLocalizationsDelegate

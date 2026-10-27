@@ -11876,4 +11876,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String aiModelLight(String m) {
     return '$m（最安）';
   }
+
+  @override
+  String get rcMakerName => 'メーカー（品名）';
+
+  @override
+  String get rcReadOnlyTitle => '読み取り結果（表）';
+
+  @override
+  String get rcReadOnlyIntro =>
+      '取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。品名がある場合はメーカーの後ろに（）で表示します。';
+
+  @override
+  String get ivTable => '表で見る';
 }

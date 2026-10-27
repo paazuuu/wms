@@ -3869,5 +3869,9 @@
   "aiLimitsHint": "达到上限后，当天不再使用AI并显示原因。读取一份PDF・图片计为2次（读取与复核）。",
   "aiModelStrong": "{m}（高精度）",
   "aiModelMiddle": "{m}（标准）",
-  "aiModelLight": "{m}（最便宜）"
+  "aiModelLight": "{m}（最便宜）",
+  "rcMakerName": "厂商（品名）",
+  "rcReadOnlyTitle": "读取结果（表）",
+  "rcReadOnlyIntro": "这是导入时核对过的内容。蓝色为人工修改的栏，删除线为去掉的行。有品名时显示在厂商后的（）中。",
+  "ivTable": "以表查看"
 }

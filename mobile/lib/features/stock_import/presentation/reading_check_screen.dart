@@ -14,13 +14,31 @@ import 'import_view_screen.dart' show OriginalFileView;
 /// [LedgerFields] key) and how wide it is.
 typedef _Col = ({String key, double width});
 
+/// メーカー and 品名 share a column: most invoices print no name, and an
+/// empty 品名 column took the most room. A name, when there is one, is shown
+/// after the maker in brackets: 三菱鉛筆（ジェットストリーム…）.
 const _core = <_Col>[
   (key: 'jan', width: 150),
-  (key: 'name', width: 230),
-  (key: 'maker', width: 110),
-  (key: 'code', width: 140),
+  (key: 'maker_name', width: 260),
+  (key: 'code', width: 150),
   (key: 'quantity', width: 80),
 ];
+
+/// メーカー（品名） as one text.
+String makerAndName(String maker, String name) {
+  final m = maker.trim(), n = name.trim();
+  if (n.isEmpty) return m;
+  return '$m（$n）';
+}
+
+/// メーカー（品名） back into its two: what is in brackets at the end is
+/// the name (（）or ()), the rest the maker.
+(String, String) splitMakerAndName(String text) {
+  final t = text.trim();
+  final m = RegExp(r'^(.*?)\s*[（(]([^（）()]*)[）)]\s*$').firstMatch(t);
+  if (m == null) return (t, '');
+  return (m.group(1)!.trim(), m.group(2)!.trim());
+}
 
 /// The ledger's columns, in its order; shown when the file had them.
 const _ledger = <_Col>[
@@ -49,6 +67,7 @@ String _value(ReadRow r, String key) => switch (key) {
       'jan' => r.jan,
       'name' => r.name,
       'maker' => r.maker,
+      'maker_name' => makerAndName(r.maker, r.name),
       'code' => r.code,
       'quantity' => r.quantity,
       _ => r.ledger[key],
@@ -60,13 +79,13 @@ Set<String> doubtfulCells(ReadRow r) => {
         ...switch (f) {
           'jan_check' || 'no_jan' || 'jan_code_mismatch' || 'jan_restore_mismatch' || 'ai_disagree:raw_jan_code' => {'jan'},
           'no_quantity' || 'qty_from_amount' || 'qty_from_cases' || 'ai_disagree:planned_quantity' => {'quantity'},
-          'ai_disagree:product_name' => {'name'},
+          'ai_disagree:product_name' => {'maker_name'},
           'ai_disagree:product_code' => {'code'},
-          'ai_disagree:maker' => {'maker'},
+          'ai_disagree:maker' => {'maker_name'},
           'ai_disagree:unit_price' => {'unit_price'},
           'ai_disagree:amount' => {'amount'},
           'amount_mismatch' => {'quantity', 'amount'},
-          'split_disagree' || 'split_failed' => {'name', 'code'},
+          'split_disagree' || 'split_failed' => {'maker_name', 'code'},
           _ => const <String>{},
         },
     };
@@ -86,14 +105,15 @@ bool amountMismatch(String quantity, String unitPrice, String amount) {
 
 class _EditRow {
   _EditRow(this.original, {this.added = false})
-      : cells = {
+      : removed = original.humanRemoved,
+        cells = {
           for (final c in [..._core, ..._ledger]) c.key: TextEditingController(text: _value(original, c.key)),
         };
 
   final ReadRow original;
   final bool added;
   final Map<String, TextEditingController> cells;
-  bool removed = false;
+  bool removed;
 
   String operator [](String key) => cells[key]!.text.trim();
 
@@ -117,10 +137,11 @@ class _EditRow {
       ledger = ledger.withValue(c.key, this[c.key]);
     }
     final janChanged = changed('jan'), qtyChanged = changed('quantity');
+    final (maker, name) = changed('maker_name') ? splitMakerAndName(this['maker_name']) : (original.maker, original.name);
     return original.copyWith(
       jan: this['jan'],
-      name: this['name'],
-      maker: this['maker'],
+      name: name,
+      maker: maker,
       code: this['code'],
       quantity: this['quantity'],
       ledger: ledger,
@@ -142,11 +163,15 @@ class _EditRow {
 /// stock is worked out. Pops with every row as the person left it, each
 /// marked checked; null when they go back without it.
 class ReadingCheckScreen extends StatefulWidget {
-  const ReadingCheckScreen({super.key, required this.rows, this.fileName, this.bytes});
+  const ReadingCheckScreen({super.key, required this.rows, this.fileName, this.bytes, this.readOnly = false});
 
   final List<ReadRow> rows;
   final String? fileName;
   final Uint8List? bytes;
+
+  /// Looked back at from the import's history: the table as it was left,
+  /// beside the original, with nothing to change.
+  final bool readOnly;
 
   @override
   State<ReadingCheckScreen> createState() => _ReadingCheckScreenState();
@@ -174,6 +199,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         'jan' => l10n.ntFieldJan,
         'name' => l10n.ntFieldName,
         'maker' => l10n.ntFieldMaker,
+        'maker_name' => l10n.rcMakerName,
         'code' => l10n.ntFieldCode,
         'quantity' => l10n.ntFieldQuantity,
         'unit' => l10n.lgUnit,
@@ -216,12 +242,14 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
     final table = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
-        child: Text(l10n.rcIntro, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        child: Text(widget.readOnly ? l10n.rcReadOnlyIntro : l10n.rcIntro,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
         child: Wrap(spacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          TextButton.icon(key: const ValueKey('rc-add'), onPressed: _add, icon: const Icon(Icons.add), label: Text(l10n.rcAdd)),
+          if (!widget.readOnly)
+            TextButton.icon(key: const ValueKey('rc-add'), onPressed: _add, icon: const Icon(Icons.add), label: Text(l10n.rcAdd)),
           FilterChip(
             key: const ValueKey('rc-all-columns'),
             label: Text(l10n.rcAllColumns),
@@ -233,7 +261,15 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           _Swatch(key: const ValueKey('rc-key-changed'), color: changedColor(context), label: l10n.rcKeyChanged),
         ]),
       ),
-      Expanded(child: _Table(rows: _rows, cols: _cols, label: (k) => _label(l10n, k), onChanged: () => setState(() {}))),
+      Expanded(
+        child: _Table(
+          rows: _rows,
+          cols: _cols,
+          label: (k) => _label(l10n, k),
+          readOnly: widget.readOnly,
+          onChanged: () => setState(() {}),
+        ),
+      ),
       const Divider(height: 1),
       Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -246,12 +282,13 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           if (mismatches > 0)
             Text(l10n.rcMismatch(mismatches),
                 key: const ValueKey('rc-mismatch'), style: TextStyle(color: theme.colorScheme.error)),
-          FilledButton.icon(
-            key: const ValueKey('rc-ok'),
-            onPressed: _done,
-            icon: const Icon(Icons.check),
-            label: Text(l10n.rcOk),
-          ),
+          if (!widget.readOnly)
+            FilledButton.icon(
+              key: const ValueKey('rc-ok'),
+              onPressed: _done,
+              icon: const Icon(Icons.check),
+              label: Text(l10n.rcOk),
+            ),
         ]),
       ),
     ]);
@@ -267,7 +304,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           ]);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.rcTitle)),
+      appBar: AppBar(title: Text(widget.readOnly ? l10n.rcReadOnlyTitle : l10n.rcTitle)),
       body: LayoutBuilder(builder: (context, c) {
         // On a PC the original and the reading side by side; else in tabs.
         if (c.maxWidth >= 1100) {
@@ -314,12 +351,13 @@ class _Swatch extends StatelessWidget {
 
 /// The rows as a table of fields, scrolled both ways, the heading kept on top.
 class _Table extends StatelessWidget {
-  const _Table({required this.rows, required this.cols, required this.label, required this.onChanged});
+  const _Table({required this.rows, required this.cols, required this.label, required this.onChanged, this.readOnly = false});
 
   final List<_EditRow> rows;
   final List<_Col> cols;
   final String Function(String) label;
   final VoidCallback onChanged;
+  final bool readOnly;
 
   static const _lead = 92.0;
 
@@ -356,7 +394,7 @@ class _Table extends StatelessWidget {
               child: ListView.builder(
                 key: const ValueKey('rc-table'),
                 itemCount: rows.length,
-                itemBuilder: (context, i) => _RowView(row: rows[i], cols: cols, onChanged: onChanged),
+                itemBuilder: (context, i) => _RowView(row: rows[i], cols: cols, onChanged: onChanged, readOnly: readOnly),
               ),
             ),
           ]),
@@ -367,11 +405,24 @@ class _Table extends StatelessWidget {
 }
 
 class _RowView extends StatelessWidget {
-  const _RowView({required this.row, required this.cols, required this.onChanged});
+  const _RowView({required this.row, required this.cols, required this.onChanged, this.readOnly = false});
 
   final _EditRow row;
   final List<_Col> cols;
   final VoidCallback onChanged;
+  final bool readOnly;
+
+  /// Changed by a person: as it is typed, or — looked back at — what the
+  /// reader had beside what they wrote.
+  bool _changed(String key) {
+    if (!readOnly) return row.changed(key);
+    final r = row.original;
+    return switch (key) {
+      'jan' => r.aiJan != null && r.aiJan!.trim() != r.jan.trim(),
+      'quantity' => r.aiQuantity != null && r.aiQuantity!.trim() != r.quantity.trim(),
+      _ => false,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +431,8 @@ class _RowView extends StatelessWidget {
     final scheme = theme.colorScheme;
     final no = row.original.lineNo;
     final doubts = [for (final f in row.original.flags) if (!_quiet.contains(f) && !humanFlags.contains(f)) flagLabel(l10n, f)];
-    final cells = doubtfulCells(row.original);
+    // Once a person checked it, the reader's doubts are answered.
+    final cells = readOnly && row.original.humanChecked ? const <String>{} : doubtfulCells(row.original);
     final mismatch = amountMismatch(row['quantity'], row['unit_price'], row['amount']);
     final style = theme.textTheme.bodyMedium?.copyWith(
       decoration: row.removed ? TextDecoration.lineThrough : null,
@@ -394,6 +446,9 @@ class _RowView extends StatelessWidget {
         SizedBox(
           width: _Table._lead,
           child: Row(children: [
+            if (readOnly)
+              const SizedBox(width: 40)
+            else
             IconButton(
               key: ValueKey('rc-remove-$no'),
               visualDensity: VisualDensity.compact,
@@ -419,10 +474,10 @@ class _RowView extends StatelessWidget {
             decoration: BoxDecoration(
               // To look at: what the reader doubted (until changed), and a
               // quantity or amount that does not add up.
-              color: (cells.contains(col.key) && !row.changed(col.key)) ||
+              color: (cells.contains(col.key) && !_changed(col.key)) ||
                       (mismatch && (col.key == 'quantity' || col.key == 'amount'))
                   ? doubtColor(context)
-                  : row.changed(col.key)
+                  : _changed(col.key)
                       ? changedColor(context)
                       : null,
               borderRadius: BorderRadius.circular(4),
@@ -431,6 +486,7 @@ class _RowView extends StatelessWidget {
               key: ValueKey('rc-$no-${col.key}'),
               controller: row.cells[col.key],
               enabled: !row.removed,
+              readOnly: readOnly,
               style: style,
               textAlign: _numeric.contains(col.key) ? TextAlign.end : TextAlign.start,
               keyboardType: _numeric.contains(col.key) ? const TextInputType.numberWithOptions(decimal: true) : null,

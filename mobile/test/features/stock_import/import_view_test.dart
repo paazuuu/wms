@@ -131,6 +131,14 @@ void main() {
     expect(find.text('→ 入れていません: 反映前に外しました'), findsOneWidget);
     expect(find.text('→ 同じJANの上の行と合計して反映'), findsOneWidget);
     expect(find.text('確認用Excelで直した: JAN $_jan1 → $_jan1 ・ 数量 50 → 5'), findsOneWidget);
+
+    // Looked back at as a table, beside the original, nothing to change.
+    await tester.tap(find.byKey(const ValueKey('iv-table-12')));
+    await tester.pumpAndSettle();
+    expect(find.text('読み取り結果（表）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-table')), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-ok')), findsNothing);
+    expect(find.byKey(const ValueKey('iv-sheet')), findsOneWidget);
   });
 
   testWidgets('a stock file can be taken back, after asking', (tester) async {

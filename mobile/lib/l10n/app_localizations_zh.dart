@@ -11805,4 +11805,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String aiModelLight(String m) {
     return '$m（最便宜）';
   }
+
+  @override
+  String get rcMakerName => '厂商（品名）';
+
+  @override
+  String get rcReadOnlyTitle => '读取结果（表）';
+
+  @override
+  String get rcReadOnlyIntro =>
+      '这是导入时核对过的内容。蓝色为人工修改的栏，删除线为去掉的行。有品名时显示在厂商后的（）中。';
+
+  @override
+  String get ivTable => '以表查看';
 }

@@ -7625,6 +7625,44 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The maker settled on the invoices' own cells; a real name kept.
   - A line with no name registered under its 品番.
 
+## メーカー（品名） in one column; a reading looked back at; the trial cleared
+
+- 読み取り結果の確認: メーカー and 品名 share one column, メーカー（品名）.
+  - Most invoices print no name, and the empty 品名 column took the most
+    room.
+  - A name, when there is one, follows the maker in （）. On editing, the text
+    is split back (`splitMakerAndName`: what is in （） or () at the end is the
+    name).
+  - A doubt about the maker or the name marks that column.
+- 読み取り結果 has 表で見る: the same table, read only (`readOnly`), beside the
+  original.
+  - It shows the rows as they were left: corrections in blue (the AI's JAN or
+    quantity kept beside them), rows left out struck through, and no
+    leftover doubts on rows a person checked.
+- What an import keeps, for looking back:
+  - its rows as checked (`read_lines`, with the person's marks and the AI's
+    values);
+  - the original file (master-import-files);
+  - the reading's evidence copy (`import_documents`);
+  - the filing date, payment, memo and fingerprints.
+- The trial's records were cleared on 2026-10-27, as asked: imports, their
+  lines and files, and all stock.
+  - Backups first: `backup_20261027_master_imports`, `…_master_import_lines`,
+    `…_import_documents`, `…_stock_movements`, `…_stock_levels`,
+    `…_stock_units`, `…_stock_adjustments` (RLS on, no policies).
+  - Deleted by a one-off edge function, `reset-trial-data`, guarded by the
+    purge secret. MCP SQL cannot delete. It now answers 410 and can be
+    removed in the dashboard.
+  - Removed:
+    - 7 imports, 43 import lines and 7 files;
+    - 21 stock movements, 21 adjustments, 9 stock units and 9 stock levels;
+    - 6 reading evidence rows (purpose library or plan).
+  - Kept: the 32 products, the price book and its 3 documents. The price
+    book's files are shared with those readings.
+- Tests (1038 Flutter pass):
+  - The combined column, and split back on edit.
+  - The read-only table, opened from 読み取り結果.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -12126,4 +12126,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String aiModelLight(String m) {
     return '$m (cheapest)';
   }
+
+  @override
+  String get rcMakerName => 'Maker (name)';
+
+  @override
+  String get rcReadOnlyTitle => 'Reading (table)';
+
+  @override
+  String get rcReadOnlyIntro =>
+      'What was checked when it was taken in. Blue: corrected by a person; struck through: left out. A name, when there is one, follows the maker in brackets.';
+
+  @override
+  String get ivTable => 'View as a table';
 }
