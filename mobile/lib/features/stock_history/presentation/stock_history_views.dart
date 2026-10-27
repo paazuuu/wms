@@ -143,10 +143,14 @@ class ProductStockChartCard extends ConsumerWidget {
 /// running totals, then every file that changed stock: when, which file, how,
 /// how many products and units, by whom.
 class LibraryInflowView extends ConsumerWidget {
-  const LibraryInflowView({super.key, this.warehouseId, this.warehouseName});
+  const LibraryInflowView({super.key, this.warehouseId, this.warehouseName, this.header});
 
   final int? warehouseId;
   final String? warehouseName;
+
+  /// Above the library's figures: one product's own 推移, when there is room
+  /// for it here.
+  final Widget? header;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -160,6 +164,7 @@ class LibraryInflowView extends ConsumerWidget {
       key: const ValueKey('sh-library'),
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        if (header case final h?) h,
         Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
           const StockPeriodChips(),
           Text(warehouseName ?? l10n.shAllWarehouses, style: muted),

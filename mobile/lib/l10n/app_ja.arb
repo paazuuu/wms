@@ -10540,5 +10540,17 @@
   "ntFieldSupplier": "仕入先（行ごと）",
   "ntFieldUnitPriceTax": "単価（税込）",
   "ntFieldDeliveryDate": "入荷日・納品日",
-  "ntFieldOrderNumber": "注番・注文番号"
+  "ntFieldOrderNumber": "注番・注文番号",
+  "plStockHistoryAction": "在庫の推移を見る",
+  "plStockHistoryPick": "商品を選んで在庫の推移を見る（商品名・JAN・品番）",
+  "plStockHistoryOf": "「{name}」の在庫の推移",
+  "@plStockHistoryOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "plStockHistoryAll": "全体に戻る",
+  "plStockHistoryLibrary": "全体の在庫の推移"
 }

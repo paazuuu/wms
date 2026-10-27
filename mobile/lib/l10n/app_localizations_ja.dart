@@ -11730,4 +11730,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ntFieldOrderNumber => '注番・注文番号';
+
+  @override
+  String get plStockHistoryAction => '在庫の推移を見る';
+
+  @override
+  String get plStockHistoryPick => '商品を選んで在庫の推移を見る（商品名・JAN・品番）';
+
+  @override
+  String plStockHistoryOf(String name) {
+    return '「$name」の在庫の推移';
+  }
+
+  @override
+  String get plStockHistoryAll => '全体に戻る';
+
+  @override
+  String get plStockHistoryLibrary => '全体の在庫の推移';
 }

@@ -11976,4 +11976,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ntFieldOrderNumber => 'Order number';
+
+  @override
+  String get plStockHistoryAction => 'Stock over time';
+
+  @override
+  String get plStockHistoryPick =>
+      'Choose a product to see its stock over time (name, JAN, code)';
+
+  @override
+  String plStockHistoryOf(String name) {
+    return 'Stock over time: $name';
+  }
+
+  @override
+  String get plStockHistoryAll => 'Back to all';
+
+  @override
+  String get plStockHistoryLibrary => 'All products';
 }

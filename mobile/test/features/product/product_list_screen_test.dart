@@ -7,6 +7,8 @@ import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
+import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart' show PendingInspection;
 import 'package:wms_mobile/features/supply_chain/application/supply_chain_providers.dart';
@@ -23,7 +25,8 @@ Future<ProviderContainer> _pump(
     bool delete = false,
     bool lifecycle = false,
     List<Warehouse> warehouses = const [],
-    PendingInspection pending = const PendingInspection()}) async {
+    PendingInspection pending = const PendingInspection(),
+    ProductStockHistory? history}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
     warehouseRepositoryProvider.overrideWithValue(
@@ -40,6 +43,7 @@ Future<ProviderContainer> _pump(
         productCanDeleteProvider.overrideWithValue(delete),
         productCanLifecycleProvider.overrideWithValue(lifecycle),
         pendingInspectionProvider.overrideWith((ref) async => pending),
+        if (history != null) productStockHistoryProvider.overrideWith((ref, key) async => history),
       ],
       child: const ProductListScreen(),
     ),
@@ -316,7 +320,14 @@ void main() {
     expect(find.text('ボールペン'), findsOneWidget);
     expect(find.byKey(const ValueKey('products-add')), findsNothing);
     expect(find.byKey(const ValueKey('products-from-library')), findsNothing);
-    expect(find.byKey(const ValueKey('product-menu-1')), findsNothing);
+    // The menu holds only 在庫の推移: nothing to change.
+    await tester.tap(find.byKey(const ValueKey('product-menu-1')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('product-stock-1')), findsOneWidget);
+    expect(find.text('編集'), findsNothing);
+    expect(find.text('削除'), findsNothing);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
     // The status reads, but tapping it changes nothing.
     await tester.tap(find.text('取扱中'));
     await tester.pumpAndSettle();
@@ -899,5 +910,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.deletedAlerts.last, isNull);
     expect(find.text('アラートはありません'), findsOneWidget);
+  });
+
+  testWidgets('a product\'s menu opens 在庫の推移 on it; another can be chosen there, or all again', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4909999000014', name: 'テストペン 黒', sku: 'TP-07B'),
+      Product(id: 2, janCode: '4909999000021', name: 'テストノート', sku: 'TN-A5'),
+    ]);
+    final history = ProductStockHistory.fromJson({
+      'since': '2026-09-27T00:00:00Z',
+      'start': 0,
+      'current': 40,
+      'events': [
+        {'id': 7, 'at': '2026-10-23T02:00:00Z', 'method': 'file_stock', 'type': 'ADJUST', 'quantity': 40, 'file_name': '請求書.pdf'},
+      ],
+    });
+    await _pump(tester, repo, manage: false, history: history);
+
+    await tester.tap(find.byKey(const ValueKey('product-menu-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('product-stock-1')));
+    await tester.pumpAndSettle();
+    // The 在庫の推移 tab, on that product: its chart and its changes, the library's under it.
+    expect(find.text('「テストペン 黒」の在庫の推移'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sh-product-chart')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sh-event-7')), findsOneWidget);
+    expect(find.text('全体の在庫の推移'), findsOneWidget);
+
+    // Back to all, then another product by its 品番.
+    await tester.tap(find.byKey(const ValueKey('sh-chosen-clear')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sh-product')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('sh-pick-field')), 'tn-a5');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sh-pick-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('「テストノート」の在庫の推移'), findsOneWidget);
   });
 }

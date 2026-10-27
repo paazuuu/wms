@@ -3828,5 +3828,10 @@
   "ntFieldSupplier": "Supplier (per line)",
   "ntFieldUnitPriceTax": "Unit price (incl. tax)",
   "ntFieldDeliveryDate": "Arrival date",
-  "ntFieldOrderNumber": "Order number"
+  "ntFieldOrderNumber": "Order number",
+  "plStockHistoryAction": "Stock over time",
+  "plStockHistoryPick": "Choose a product to see its stock over time (name, JAN, code)",
+  "plStockHistoryOf": "Stock over time: {name}",
+  "plStockHistoryAll": "Back to all",
+  "plStockHistoryLibrary": "All products"
 }

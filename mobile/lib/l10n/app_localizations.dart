@@ -20911,6 +20911,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'注番・注文番号'**
   String get ntFieldOrderNumber;
+
+  /// No description provided for @plStockHistoryAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の推移を見る'**
+  String get plStockHistoryAction;
+
+  /// No description provided for @plStockHistoryPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を選んで在庫の推移を見る（商品名・JAN・品番）'**
+  String get plStockHistoryPick;
+
+  /// No description provided for @plStockHistoryOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」の在庫の推移'**
+  String plStockHistoryOf(String name);
+
+  /// No description provided for @plStockHistoryAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'全体に戻る'**
+  String get plStockHistoryAll;
+
+  /// No description provided for @plStockHistoryLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'全体の在庫の推移'**
+  String get plStockHistoryLibrary;
 }
 
 class _AppLocalizationsDelegate

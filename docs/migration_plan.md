@@ -7501,6 +7501,23 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The export's column order.
   - The reading asking for separate rows.
 
+## One product's 在庫の推移 in the library (app only)
+
+- Each product's ⋮ menu has 在庫の推移を見る, for everyone who can see the
+  library: viewers now get a menu with just that item.
+  - It opens the library's 在庫の推移 tab on that product
+    (`libraryStockProductProvider`).
+- The tab's top (`LibraryInflowView.header`) is a search by 商品名, JAN, 品番
+  or メーカー. Once a product is chosen, it shows that product's own chart and
+  every change (`ProductStockChartCard`, as on its detail), in the warehouse
+  chosen above.
+  - 全体に戻る clears it. The library's totals stay below.
+- Both use the same period chips.
+- Tests (1026 Flutter pass):
+  - The menu opens the tab on the product, with its chart and changes.
+  - Back to all, and another product chosen by its 品番.
+  - A viewer's menu holds only this.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

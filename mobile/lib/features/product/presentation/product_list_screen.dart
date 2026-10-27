@@ -389,6 +389,13 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           : null,
                       onEdit: canManage && selected == null ? () => _openForm(product: p) : null,
                       onDelete: canDelete && selected == null ? () => confirmDeleteProduct(context, ref, p) : null,
+                      // 在庫の推移, on this product (the library's third tab).
+                      onStockHistory: selected == null
+                          ? () {
+                              ref.read(libraryStockProductProvider.notifier).state = p.id;
+                              DefaultTabController.maybeOf(context)?.animateTo(2);
+                            }
+                          : null,
                     );
                   },
                 ),
@@ -568,11 +575,107 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           return LibraryInflowView(
             warehouseId: id,
             warehouseName: warehouses.where((w) => w.id == id).firstOrNull?.name,
+            // One product's own 推移 above the library's, when one is chosen.
+            header: _StockProductPane(warehouseId: id),
           );
         }),
       ]),
       ),
     );
+  }
+}
+
+/// The product 在庫の推移 shows on its own (from a product's menu, or chosen
+/// there); null for the library as a whole.
+final libraryStockProductProvider = StateProvider<int?>((_) => null);
+
+/// 在庫の推移's top: a product to look at on its own, chosen by name, JAN or
+/// 品番, and, once chosen, its stock over the period and every change to it.
+class _StockProductPane extends ConsumerWidget {
+  const _StockProductPane({required this.warehouseId});
+
+  final int? warehouseId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final products = ref.watch(productListProvider).valueOrNull ?? const <Product>[];
+    final id = ref.watch(libraryStockProductProvider);
+    final chosen = products.where((p) => p.id == id).firstOrNull;
+    void choose(int? v) => ref.read(libraryStockProductProvider.notifier).state = v;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (chosen == null)
+        Autocomplete<Product>(
+          key: const ValueKey('sh-pick'),
+          displayStringForOption: (p) => p.name,
+          optionsBuilder: (v) {
+            final q = v.text.trim().toLowerCase();
+            if (q.isEmpty) return const Iterable<Product>.empty();
+            return products
+                .where((p) => [p.name, p.janCode, p.sku ?? '', p.maker ?? ''].any((t) => t.toLowerCase().contains(q)))
+                .take(20);
+          },
+          onSelected: (p) => choose(p.id),
+          fieldViewBuilder: (context, controller, focus, onSubmit) => TextField(
+            key: const ValueKey('sh-pick-field'),
+            controller: controller,
+            focusNode: focus,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              labelText: l10n.plStockHistoryPick,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+          optionsViewBuilder: (context, onSelected, options) => Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320, maxWidth: 560),
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  children: [
+                    for (final p in options)
+                      ListTile(
+                        key: ValueKey('sh-pick-${p.id}'),
+                        dense: true,
+                        title: Text(p.name),
+                        subtitle: Text([p.janCode, if (p.sku != null) p.sku!].join(' · ')),
+                        onTap: () => onSelected(p),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        )
+      else ...[
+        Row(children: [
+          Expanded(
+            child: Text(
+              l10n.plStockHistoryOf(chosen.name),
+              key: const ValueKey('sh-chosen'),
+              style: theme.textTheme.titleMedium,
+            ),
+          ),
+          TextButton.icon(
+            key: const ValueKey('sh-chosen-clear'),
+            onPressed: () => choose(null),
+            icon: const Icon(Icons.close),
+            label: Text(l10n.plStockHistoryAll),
+          ),
+        ]),
+        Text([chosen.janCode, if (chosen.sku != null) chosen.sku!].join(' · '),
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        const SizedBox(height: AppSpacing.sm),
+        ProductStockChartCard(productId: chosen.id, warehouseId: warehouseId),
+      ],
+      const SizedBox(height: AppSpacing.md),
+      if (chosen != null) Text(l10n.plStockHistoryLibrary, style: theme.textTheme.titleSmall),
+    ]);
   }
 }
 
@@ -1095,6 +1198,7 @@ class _ProductCard extends StatelessWidget {
     this.onToggleStatus,
     this.onEdit,
     this.onDelete,
+    this.onStockHistory,
   });
 
   final Product product;
@@ -1115,11 +1219,13 @@ class _ProductCard extends StatelessWidget {
   /// Null without `product.delete`.
   final VoidCallback? onDelete;
 
+  /// Opens 在庫の推移 on this product; null outside the library's tabs.
+  final VoidCallback? onStockHistory;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context);
 
     return LayoutBuilder(builder: (context, c) {
       // On a PC the card is wide: everything on one line, so more products
@@ -1216,34 +1322,7 @@ class _ProductCard extends StatelessWidget {
                     Text('¥${product.price!.toStringAsFixed(0)}',
                         style: theme.textTheme.titleMedium
                             ?.copyWith(fontFamily: AppFonts.mono)),
-                  if (onEdit != null || onToggleStatus != null || onDelete != null)
-                    PopupMenuButton<String>(
-                      key: ValueKey('product-menu-${product.id}'),
-                      tooltip: l10n.productMenu,
-                      onSelected: (v) => switch (v) {
-                        'edit' => onEdit?.call(),
-                        'status' => onToggleStatus?.call(),
-                        'delete' => onDelete?.call(),
-                        _ => null,
-                      },
-                      itemBuilder: (_) => [
-                        if (onEdit != null)
-                          PopupMenuItem(value: 'edit', child: Text(l10n.productEdit)),
-                        if (onToggleStatus != null)
-                          PopupMenuItem(
-                            value: 'status',
-                            child: Text(product.isActive ? l10n.productDeactivateAction : l10n.lifecycleToActive),
-                          ),
-                        if (onDelete != null)
-                          PopupMenuItem(
-                            key: ValueKey('product-delete-${product.id}'),
-                            value: 'delete',
-                            child: Text(l10n.productDeleteAction, style: TextStyle(color: scheme.error)),
-                          ),
-                      ],
-                    )
-                  else
-                    const SizedBox(height: AppSpacing.sm),
+                  _menu(context) ?? const SizedBox(height: AppSpacing.sm),
                   GestureDetector(
                     onTap: onToggleStatus,
                     child: LifecyclePill(lifecycle: product.lifecycle),
@@ -1261,7 +1340,7 @@ class _ProductCard extends StatelessWidget {
   Widget? _menu(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    if (onEdit == null && onToggleStatus == null && onDelete == null) return null;
+    if (onEdit == null && onToggleStatus == null && onDelete == null && onStockHistory == null) return null;
     return PopupMenuButton<String>(
       key: ValueKey('product-menu-${product.id}'),
       tooltip: l10n.productMenu,
@@ -1269,9 +1348,21 @@ class _ProductCard extends StatelessWidget {
         'edit' => onEdit?.call(),
         'status' => onToggleStatus?.call(),
         'delete' => onDelete?.call(),
+        'stock' => onStockHistory?.call(),
         _ => null,
       },
       itemBuilder: (_) => [
+        if (onStockHistory != null)
+          PopupMenuItem(
+            key: ValueKey('product-stock-${product.id}'),
+            value: 'stock',
+            child: ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.show_chart),
+              title: Text(l10n.plStockHistoryAction),
+            ),
+          ),
         if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(l10n.productEdit)),
         if (onToggleStatus != null)
           PopupMenuItem(

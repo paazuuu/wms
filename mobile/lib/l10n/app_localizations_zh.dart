@@ -11662,4 +11662,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ntFieldOrderNumber => '订单号';
+
+  @override
+  String get plStockHistoryAction => '查看库存走势';
+
+  @override
+  String get plStockHistoryPick => '选择商品查看库存走势（商品名・JAN・品番）';
+
+  @override
+  String plStockHistoryOf(String name) {
+    return '“$name”的库存走势';
+  }
+
+  @override
+  String get plStockHistoryAll => '返回全部';
+
+  @override
+  String get plStockHistoryLibrary => '全部商品的库存走势';
 }

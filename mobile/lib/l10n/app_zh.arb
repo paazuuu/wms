@@ -3828,5 +3828,10 @@
   "ntFieldSupplier": "供货商（每行）",
   "ntFieldUnitPriceTax": "单价（含税）",
   "ntFieldDeliveryDate": "到货日期",
-  "ntFieldOrderNumber": "订单号"
+  "ntFieldOrderNumber": "订单号",
+  "plStockHistoryAction": "查看库存走势",
+  "plStockHistoryPick": "选择商品查看库存走势（商品名・JAN・品番）",
+  "plStockHistoryOf": "“{name}”的库存走势",
+  "plStockHistoryAll": "返回全部",
+  "plStockHistoryLibrary": "全部商品的库存走势"
 }
