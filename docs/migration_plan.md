@@ -7520,6 +7520,44 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Back to all, and another product chosen by its 品番.
   - A viewer's menu holds only this.
 
+## A reading checked in a table beside the original, then counted (app only)
+
+- ファイルから在庫登録, after the AI has read a PDF, scan or photo, opens
+  読み取り結果の確認 (`ReadingCheckScreen`) first.
+  - On a PC the original sits on the left and the table on the right. On a
+    narrow screen they are two tabs.
+  - The table has a row per line: JAN, 商品名, メーカー, 品番 and 数量, plus
+    the ledger columns (0150) the file had. すべての列を表示 shows the rest.
+  - Every cell can be edited. A row can be left out or brought back, and a
+    row can be added.
+  - The foot shows the totals: rows, quantity and amount.
+- Colours, with a key on the screen:
+  - Yellow: a cell the reader doubted (`doubtfulCells`, from its flags),
+    until it is changed; or a row where 数量 × 単価 is not 金額
+    (`amountMismatch`, within a yen or 0.5%).
+  - Blue: a cell a person changed.
+  - Both are set colours that read the same in light and dark. The theme's
+    tertiary and secondary containers were the same grey in dark mode.
+- 内容は正しい・次へ returns every row:
+  - Each is marked `human_checked`, plus `human_corrected` if changed, or
+    `human_removed` if left out.
+  - Where the JAN or quantity changed, the AI's value stays beside it.
+  - The stock is then worked out from that, as before.
+- What a person checked is no longer in doubt, in `stockSheetFromRead` and
+  in 読み取り結果. A row left out is kept in the reading but not taken.
+- Until the table is checked, the stock step is not shown; a card asks for
+  the check. 表で確かめる・直す reopens the table at any time.
+- 元のファイルを見る, beside 記入用のExcel, shows the chosen file. The
+  確認用Excel button now sits next to it.
+  - `OriginalFileView` is shared with 読み取り結果. Its PDF pages are drawn
+    once, not on every keystroke beside them.
+- Tests (1032 Flutter pass):
+  - The table opens first, its doubts and amount check shown.
+  - Corrected, a row left out, then counted; the reading kept as left.
+  - Nothing counted before the check; reopened, with a row added.
+  - On a PC, side by side, with only the columns the file had.
+  - The original shown from the new button.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

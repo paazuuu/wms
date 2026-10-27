@@ -14,6 +14,7 @@ import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../master_import/presentation/master_import_labels.dart';
 import '../../notation/presentation/notation_labels.dart';
+import '../domain/stock_file.dart' show humanFlags;
 import '../domain/stock_ledger.dart';
 import 'import_view_screen.dart';
 import 'stock_file_import_screen.dart' show documentDateSourceLabel, stockTemplateSaverProvider;
@@ -50,7 +51,7 @@ ReadingTable readingTable(AppLocalizations l10n, MasterImport m) {
   final flagged = <(int, int)>{};
   for (final o in readOutcomes(m)) {
     final i = rows.length;
-    final doubts = [for (final f in o.row.flags) if (f != 'human_corrected') flagLabel(l10n, f)].join('、');
+    final doubts = [for (final f in o.row.flags) if (!humanFlags.contains(f)) flagLabel(l10n, f)].join('、');
     final l = o.line;
     final g = o.row.ledger;
     rows.add([

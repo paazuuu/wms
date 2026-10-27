@@ -11681,4 +11681,71 @@ class AppLocalizationsZh extends AppLocalizations {
   String plStockHistoryPending(int n) {
     return '另有 $n 个未验货。验货完成后计入库存并显示在走势中。';
   }
+
+  @override
+  String get rcTitle => '核对读取结果';
+
+  @override
+  String get rcIntro =>
+      '请与原文件对照，修改不一致的地方。黄色为AI不确定的栏，或“数量×单价”与金额不符的行。也可以去掉行或添加行。全部正确后请按“内容正确・下一步”。';
+
+  @override
+  String get rcOriginal => '原文件';
+
+  @override
+  String get rcRead => '读取结果';
+
+  @override
+  String get rcRow => '行';
+
+  @override
+  String get rcRemove => '去掉此行';
+
+  @override
+  String get rcRestore => '恢复';
+
+  @override
+  String get rcAdd => '添加行';
+
+  @override
+  String get rcAllColumns => '显示所有列';
+
+  @override
+  String rcTotals(int rows, String qty, String amount) {
+    return '$rows行・数量合计 $qty・金额合计 $amount';
+  }
+
+  @override
+  String rcMismatch(int n) {
+    return '数量×单价与金额不符的行 $n';
+  }
+
+  @override
+  String get rcOk => '内容正确・下一步';
+
+  @override
+  String get rcNoFile => '无法显示原文件';
+
+  @override
+  String get rcCheckedMark => '已与原文件核对';
+
+  @override
+  String get sfTableNeeded => '请在表中将AI的读取结果与原文件对照确认。确认前不会进入库存计算。';
+
+  @override
+  String get sfOpenTable => '在表中核对・修改';
+
+  @override
+  String sfTableChecked(int n, int removed) {
+    return '已与原文件核对（修改 $n 行・去掉 $removed 行）';
+  }
+
+  @override
+  String get sfViewOriginal => '查看原文件';
+
+  @override
+  String get rcKeyDoubt => '黄色：AI不确定的栏・数量×单价与金额不符';
+
+  @override
+  String get rcKeyChanged => '蓝色：已修改的栏';
 }

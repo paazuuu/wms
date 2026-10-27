@@ -155,6 +155,36 @@ class ReadRow extends Equatable {
         ledger: LedgerFields.fromJson(j),
       );
 
+  ReadRow copyWith({
+    String? jan,
+    String? name,
+    String? quantity,
+    String? maker,
+    String? code,
+    List<String>? flags,
+    String? aiJan,
+    String? aiQuantity,
+    LedgerFields? ledger,
+  }) =>
+      ReadRow(
+        lineNo: lineNo,
+        jan: jan ?? this.jan,
+        name: name ?? this.name,
+        quantity: quantity ?? this.quantity,
+        maker: maker ?? this.maker,
+        code: code ?? this.code,
+        flags: flags ?? this.flags,
+        aiJan: aiJan ?? this.aiJan,
+        aiQuantity: aiQuantity ?? this.aiQuantity,
+        ledger: ledger ?? this.ledger,
+      );
+
+  /// A person set it beside the original and found it right (or made it so).
+  bool get humanChecked => flags.contains(humanCheckedFlag);
+
+  /// A person left it out before the stock went in.
+  bool get humanRemoved => flags.contains(humanRemovedFlag);
+
   ReadRow withFlags(List<String> flags) => ReadRow(
         lineNo: lineNo, jan: jan, name: name, quantity: quantity, maker: maker, code: code,
         aiJan: aiJan, aiQuantity: aiQuantity, ledger: ledger, flags: flags,
@@ -163,6 +193,15 @@ class ReadRow extends Equatable {
   @override
   List<Object?> get props => [lineNo, jan, name, quantity, maker, code, flags, aiJan, aiQuantity, ledger];
 }
+
+/// Marks a person puts on a row read from a file: checked against the
+/// original, changed, or left out.
+const humanCheckedFlag = 'human_checked';
+const humanCorrectedFlag = 'human_corrected';
+const humanRemovedFlag = 'human_removed';
+
+/// Flags that are a person's, not a doubt of the reader's.
+const humanFlags = {humanCheckedFlag, humanCorrectedFlag, humanRemovedFlag};
 
 /// A purchase ledger's (明細) columns beyond JAN, 品名, メーカー, 品番 and 数量
 /// (0150), as text the way the file wrote them: 発注日, 入荷日, the line's own
@@ -204,6 +243,19 @@ class LedgerFields extends Equatable {
       [orderDate, deliveryDate, serial, supplier, unit, listPrice, unitPrice, unitPriceTax, amount, taxRate, orderNumber];
 
   bool get isEmpty => _values.every((v) => v.isEmpty);
+
+  /// Each column by its key, as [toJson] names them.
+  String operator [](String key) => _values[_keys.indexOf(key)];
+
+  /// This with [key] set to [value].
+  LedgerFields withValue(String key, String value) {
+    final v = [..._values];
+    v[_keys.indexOf(key)] = value;
+    return LedgerFields(
+      orderDate: v[0], deliveryDate: v[1], serial: v[2], supplier: v[3], unit: v[4], listPrice: v[5],
+      unitPrice: v[6], unitPriceTax: v[7], amount: v[8], taxRate: v[9], orderNumber: v[10],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         for (final (i, k) in _keys.indexed)
@@ -416,11 +468,13 @@ const _noDoubt = {'no_maker'};
 /// Lines the AI read (import-plan, nothing booked) as a stock sheet: a JAN
 /// and a quantity each, the same JAN summed, and the ones it could not be
 /// sure of (any flag on the row) marked.
-StockSheet stockSheetFromRead(List<ReadRow> rows) {
+StockSheet stockSheetFromRead(List<ReadRow> rows, {bool byAi = true}) {
   final byJan = <String, StockFileLine>{};
   final problems = <StockFileProblem>[];
   for (final row in rows) {
     final no = row.lineNo;
+    // Left out by hand: kept in the reading, not taken.
+    if (row.humanRemoved) continue;
     if (_notItem(row.jan, row.quantity)) {
       problems.add(StockFileProblem(no, 'not_item', value: row.name));
       continue;
@@ -444,12 +498,14 @@ StockSheet stockSheetFromRead(List<ReadRow> rows) {
       quantity: (prev?.quantity ?? 0) + q,
       name: prev?.name ?? (row.name.isEmpty ? null : row.name),
       merged: (prev?.merged ?? 0) + 1,
-      doubtful: (prev?.doubtful ?? false) || row.flags.any((f) => !_noDoubt.contains(f.split(':').first)),
+      // Checked against the original by a person: no longer in doubt.
+      doubtful: (prev?.doubtful ?? false) ||
+          (!row.humanChecked && row.flags.any((f) => !_noDoubt.contains(f.split(':').first) && !humanFlags.contains(f))),
       maker: prev?.maker ?? (row.maker.isEmpty ? null : row.maker),
       code: prev?.code ?? (row.code.isEmpty ? null : row.code),
     );
   }
-  return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: true, read: rows);
+  return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: byAi, read: rows);
 }
 
 /// A stock file's rows: an .xlsx's first sheet, or a UTF-8 CSV / TSV with
@@ -524,7 +580,7 @@ Uint8List buildReviewXlsx({
   for (final r in sheet.read) {
     final jan = normalizeJan(r.jan);
     final validJan = jan != null && jan.length >= 8 && jan.length <= 14;
-    final doubts = [for (final f in r.flags) if (!_noDoubt.contains(f.split(':').first) && f != 'human_corrected') flagText(f)];
+    final doubts = [for (final f in r.flags) if (!_noDoubt.contains(f.split(':').first) && !humanFlags.contains(f)) flagText(f)];
     final q = int.tryParse(r.quantity.replaceAll(RegExp(r'[,，\s]'), ''));
     final big = q != null && implausibleQuantity(q);
     final status = switch (problems[r.lineNo]) {

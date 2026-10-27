@@ -11996,4 +11996,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String plStockHistoryPending(int n) {
     return '$n more are waiting for inspection. They join the stock, and this chart, once inspected.';
   }
+
+  @override
+  String get rcTitle => 'Check the reading';
+
+  @override
+  String get rcIntro =>
+      'Set it beside the original and correct anything that differs. Yellow cells are where the AI was unsure, or where quantity × price does not make the amount. Rows can be left out or added. When all is right, press \"Correct — next\".';
+
+  @override
+  String get rcOriginal => 'Original';
+
+  @override
+  String get rcRead => 'Reading';
+
+  @override
+  String get rcRow => 'Row';
+
+  @override
+  String get rcRemove => 'Leave this row out';
+
+  @override
+  String get rcRestore => 'Bring it back';
+
+  @override
+  String get rcAdd => 'Add a row';
+
+  @override
+  String get rcAllColumns => 'All columns';
+
+  @override
+  String rcTotals(int rows, String qty, String amount) {
+    return '$rows rows · quantity $qty · amount $amount';
+  }
+
+  @override
+  String rcMismatch(int n) {
+    return '$n rows where quantity × price is not the amount';
+  }
+
+  @override
+  String get rcOk => 'Correct — next';
+
+  @override
+  String get rcNoFile => 'The original cannot be shown';
+
+  @override
+  String get rcCheckedMark => 'Checked against the original';
+
+  @override
+  String get sfTableNeeded =>
+      'Check what the AI read against the original, in the table. Stock is worked out once that is done.';
+
+  @override
+  String get sfOpenTable => 'Check and correct in the table';
+
+  @override
+  String sfTableChecked(int n, int removed) {
+    return 'Checked against the original ($n corrected, $removed left out)';
+  }
+
+  @override
+  String get sfViewOriginal => 'View the original';
+
+  @override
+  String get rcKeyDoubt =>
+      'Yellow: the AI was unsure, or quantity × price is not the amount';
+
+  @override
+  String get rcKeyChanged => 'Blue: corrected';
 }

@@ -93,7 +93,8 @@ class ReadOutcome {
   /// from what went in (corrected by hand).
   final int? fileQuantity;
 
-  bool get doubtful => row.flags.any((f) => !const {'no_maker', 'human_corrected'}.contains(f.split(':').first));
+  bool get doubtful =>
+      !row.humanChecked && row.flags.any((f) => f.split(':').first != 'no_maker' && !humanFlags.contains(f));
 }
 
 int? _qty(String raw) {
@@ -130,6 +131,7 @@ List<ReadOutcome> readOutcomes(MasterImport m) {
   return [
     for (final r in rows)
       () {
+        if (r.humanRemoved) return ReadOutcome(row: r, fate: ReadFate.removed);
         final jan = normalizeJan(r.jan);
         if (jan == null || jan.length < 8 || jan.length > 14) return ReadOutcome(row: r, fate: ReadFate.noJan);
         final q = _qty(r.quantity);
@@ -321,7 +323,6 @@ class _OriginalPane extends ConsumerWidget {
     if (file == null) {
       return Center(child: Text(l10n.ivNoOriginal, style: theme.textTheme.bodyMedium));
     }
-    final name = file.name.toLowerCase();
     final bytes = ref.watch(importFileBytesProvider(file.path));
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Padding(
@@ -343,41 +344,70 @@ class _OriginalPane extends ConsumerWidget {
             message: humanizeApiErrorMessage(l10n, '$e'),
             onRetry: () => ref.invalidate(importFileBytesProvider(file.path)),
           ),
-          data: (b) {
-            if (const ['.png', '.jpg', '.jpeg', '.webp', '.gif'].any(name.endsWith)) {
-              return InteractiveViewer(maxScale: 6, child: Image.memory(b, key: const ValueKey('iv-image')));
-            }
-            if (name.endsWith('.pdf')) return _PdfPages(bytes: b);
-            if (readsLocally(file.name)) {
-              try {
-                return _SheetTable(rows: readStockFile(file.name, b));
-              } on FormatException {
-                // Falls through to the message below.
-              }
-            }
-            return Center(child: Text(l10n.ivCannotShow, textAlign: TextAlign.center));
-          },
+          data: (b) => OriginalFileView(fileName: file.name, bytes: b),
         ),
       ),
     ]);
   }
 }
 
-/// A PDF's pages as pictures, one under the other, to zoom into.
-class _PdfPages extends StatelessWidget {
+/// A file as it is, to set a reading beside: a picture or a PDF's pages to
+/// zoom into, a sheet's cells, else a word that it cannot be shown.
+class OriginalFileView extends StatelessWidget {
+  const OriginalFileView({super.key, required this.fileName, required this.bytes});
+
+  final String fileName;
+  final Uint8List bytes;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final name = fileName.toLowerCase();
+    if (const ['.png', '.jpg', '.jpeg', '.webp', '.gif'].any(name.endsWith)) {
+      return InteractiveViewer(maxScale: 6, child: Image.memory(bytes, key: const ValueKey('iv-image')));
+    }
+    if (name.endsWith('.pdf')) return _PdfPages(bytes: bytes);
+    if (readsLocally(fileName)) {
+      try {
+        return _SheetTable(rows: readStockFile(fileName, bytes));
+      } on FormatException {
+        // Falls through to the message below.
+      }
+    }
+    return Center(child: Text(l10n.ivCannotShow, textAlign: TextAlign.center));
+  }
+}
+
+/// A PDF's pages as pictures, one under the other, to zoom into. Drawn once:
+/// whatever is rebuilt beside it (a table being typed into) does not draw
+/// them again.
+class _PdfPages extends StatefulWidget {
   const _PdfPages({required this.bytes});
 
   final Uint8List bytes;
 
-  Future<List<Uint8List>> _pages() async => [
-        await for (final page in Printing.raster(bytes, dpi: 120)) await page.toPng(),
+  @override
+  State<_PdfPages> createState() => _PdfPagesState();
+}
+
+class _PdfPagesState extends State<_PdfPages> {
+  late Future<List<Uint8List>> _pages = _draw();
+
+  Future<List<Uint8List>> _draw() async => [
+        await for (final page in Printing.raster(widget.bytes, dpi: 120)) await page.toPng(),
       ];
+
+  @override
+  void didUpdateWidget(_PdfPages old) {
+    super.didUpdateWidget(old);
+    if (!identical(old.bytes, widget.bytes)) _pages = _draw();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return FutureBuilder<List<Uint8List>>(
-      future: _pages(),
+      future: _pages,
       builder: (context, snap) {
         if (snap.hasError) return Center(child: Text(l10n.ivCannotShow, textAlign: TextAlign.center));
         final pages = snap.data;
@@ -509,8 +539,11 @@ class _ReadPane extends StatelessWidget {
                   Text([o.row.maker, o.row.code].where((v) => v.isNotEmpty).join(' · '), style: muted),
                 if (!o.row.ledger.isEmpty)
                   Text(ledgerSummary(l10n, o.row.ledger), key: ValueKey('iv-ledger-${o.row.lineNo}'), style: muted),
-                for (final f in o.row.flags.where((f) => f != 'human_corrected'))
+                for (final f in o.row.flags.where((f) => !humanFlags.contains(f)))
                   Text('⚠ ${flagLabel(l10n, f)}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                if (o.row.humanChecked)
+                  Text('✓ ${l10n.rcCheckedMark}', key: ValueKey('iv-checked-${o.row.lineNo}'),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary)),
                 if (o.row.corrected)
                   Text(
                     l10n.ivCorrected(o.row.aiJan ?? '—', o.row.jan, o.row.aiQuantity ?? '—', o.row.quantity),

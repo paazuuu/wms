@@ -11749,4 +11749,72 @@ class AppLocalizationsJa extends AppLocalizations {
   String plStockHistoryPending(int n) {
     return 'このほかに未検品が $n個あります。検品が済むと在庫に入り、この推移に表れます。';
   }
+
+  @override
+  String get rcTitle => '読み取り結果の確認';
+
+  @override
+  String get rcIntro =>
+      '元のファイルと見比べて、違うところを直してください。黄色はAIが迷った欄、または「数量×単価」が金額と合わない行です。行を外す・行を足すこともできます。すべて正しければ「内容は正しい・次へ」を押してください。';
+
+  @override
+  String get rcOriginal => '元のファイル';
+
+  @override
+  String get rcRead => '読み取り結果';
+
+  @override
+  String get rcRow => '行';
+
+  @override
+  String get rcRemove => 'この行を外す';
+
+  @override
+  String get rcRestore => '戻す';
+
+  @override
+  String get rcAdd => '行を追加';
+
+  @override
+  String get rcAllColumns => 'すべての列を表示';
+
+  @override
+  String rcTotals(int rows, String qty, String amount) {
+    return '$rows行・数量合計 $qty・金額合計 $amount';
+  }
+
+  @override
+  String rcMismatch(int n) {
+    return '数量×単価が金額と合わない行 $n';
+  }
+
+  @override
+  String get rcOk => '内容は正しい・次へ';
+
+  @override
+  String get rcNoFile => '元のファイルは表示できません';
+
+  @override
+  String get rcCheckedMark => '元のファイルと照合済み';
+
+  @override
+  String get sfTableNeeded =>
+      'AIの読み取り結果を、元のファイルと表で見比べて確かめてください。確かめるまで在庫の計算には進みません。';
+
+  @override
+  String get sfOpenTable => '表で確かめる・直す';
+
+  @override
+  String sfTableChecked(int n, int removed) {
+    return '元のファイルと照合済み（直した行 $n・外した行 $removed）';
+  }
+
+  @override
+  String get sfViewOriginal => '元のファイルを見る';
+
+  @override
+  String get rcKeyDoubt => '黄色：AIが迷った欄・数量×単価が金額と合わない';
+
+  @override
+  String get rcKeyChanged => '青：直した欄';
 }

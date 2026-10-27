@@ -15,6 +15,7 @@ import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
+import 'package:wms_mobile/features/stock_import/presentation/reading_check_screen.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_file_import_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
@@ -442,13 +443,16 @@ void main() {
     expect(readsLocally('a.xlsx'), isTrue);
   });
 
-  testWidgets('a PDF is read by the AI; its lines are checked, corrected and left out before they go in', (tester) async {
+  testWidgets('a PDF is read by the AI; its lines are checked in a table beside the original, then counted', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = _FakeStock({_jan1: 'テストペン 青', _jan2: 'テストノート'}, stock: {_jan1: 40});
     final reader = FakeMasterImportRepository(
       readResult: const MasterRead(lines: [
-        MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ ｱｵ', quantity: '100', flags: ['ai_disagree']),
+        MasterLine(
+          lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ ｱｵ', quantity: '100', flags: ['ai_disagree:planned_quantity'],
+          ledger: {'unit_price': 88, 'amount': 880},
+        ),
         MasterLine(lineNo: 2, janCode: _jan2, supplierName: 'ノート', quantity: '30'),
       ]),
     );
@@ -468,23 +472,27 @@ void main() {
     expect(reader.reads, 1);
     // Row by row, so a ledger keeps each 注番 (0150).
     expect(reader.readKeptRows, isTrue);
-    expect(find.byKey(const ValueKey('sf-ai')), findsOneWidget);
-    expect(find.textContaining('要確認 1行'), findsOneWidget);
-    expect(find.byKey(const ValueKey('sf-doubt-$_jan1')), findsOneWidget);
-    expect(find.text('現在庫 40 ＋ 100 ＝ 140'), findsOneWidget);
-
-    // The doubtful one was 10, not 100.
-    await tester.tap(find.byKey(const ValueKey('sf-line-$_jan1')));
+    // First the table: every row, its doubt marked, 数量 × 単価 against 金額.
+    expect(find.text('読み取り結果の確認'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-doubt-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-mismatch')), findsOneWidget);
+    expect(find.text('2行・数量合計 130・金額合計 880'), findsOneWidget);
+    // The doubtful one was 10, not 100: now it adds up.
+    await tester.enterText(find.byKey(const ValueKey('rc-1-quantity')), '10');
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('sf-edit-qty')), '10');
-    await tester.tap(find.byKey(const ValueKey('sf-edit-ok')));
-    await tester.pumpAndSettle();
-    expect(find.text('現在庫 40 ＋ 10 ＝ 50'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-mismatch')), findsNothing);
     // The other is left out.
-    await tester.tap(find.byKey(const ValueKey('sf-line-$_jan2')));
+    await tester.tap(find.byKey(const ValueKey('rc-remove-2')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('sf-edit-remove')));
+    expect(find.text('1行・数量合計 10・金額合計 880'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
     await tester.pumpAndSettle();
+
+    // Then the stock: what the person left, checked, no longer in doubt.
+    expect(find.byKey(const ValueKey('sf-table-checked')), findsOneWidget);
+    expect(find.text('元のファイルと照合済み（直した行 1・外した行 1）'), findsOneWidget);
+    expect(find.text('現在庫 40 ＋ 10 ＝ 50'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-doubt-$_jan1')), findsNothing);
     expect(find.byKey(const ValueKey('sf-line-$_jan2')), findsNothing);
 
     await _tick(tester);
@@ -496,6 +504,52 @@ void main() {
     expect(mode, StockFileMode.add);
     expect(lines.map((l) => (l.janCode, l.quantity)), [(_jan1, 10)]);
     expect(repo.kept.single.$2, '納品書.pdf');
+    // The reading is kept as the person left it: what the AI had beside it.
+    final read = repo.notes.single.$2;
+    expect(read.first.quantity, '10');
+    expect(read.first.aiQuantity, '100');
+    expect(read.first.flags, containsAll(['human_checked', 'human_corrected']));
+    expect(read.last.humanRemoved, isTrue);
+  });
+
+  testWidgets('read by the AI, nothing is counted until the table is checked; it can be opened again', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = FakeMasterImportRepository(
+      readResult: const MasterRead(lines: [MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ペン', quantity: '5')]),
+    );
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(_FakeStock({_jan1: 'テストペン 青'})),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+      stockFilePickerProvider.overrideWithValue(() async => (name: 'scan.jpg', bytes: Uint8List.fromList([1, 2, 3]))),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+    // Gone back without it: the stock is not worked out, and the table waits.
+    Navigator.of(tester.element(find.byType(ReadingCheckScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-table-needed')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-apply')), findsNothing);
+    expect(find.byKey(const ValueKey('sf-line-$_jan1')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('sf-open-table')));
+    await tester.pumpAndSettle();
+    // A row the AI missed, added by hand.
+    await tester.tap(find.byKey(const ValueKey('rc-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('rc-2-jan')), _jan2);
+    await tester.enterText(find.byKey(const ValueKey('rc-2-quantity')), '3');
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-table-needed')), findsNothing);
+    expect(find.byKey(const ValueKey('sf-line-$_jan1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-apply')), findsOneWidget);
+    expect(find.textContaining(_jan2), findsWidgets);
   });
 
   testWidgets('when the AI cannot be used, it says why', (tester) async {
@@ -582,6 +636,9 @@ void main() {
       ]),
     );
     await _pumpCsv(tester, '%PDF', products: {_jan1: 'テストペン 青'}, saved: saved, reader: reader, name: '納品書.pdf');
+    // The table opens first; the 確認用Excel is there too, behind it.
+    Navigator.of(tester.element(find.byType(ReadingCheckScreen))).pop();
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sf-review-xlsx')));
     await tester.pumpAndSettle();
     expect(saved.single.$1, '在庫登録_確認用_納品書.xlsx');
@@ -599,6 +656,16 @@ void main() {
     expect(again.lines.map((l) => (l.janCode, l.quantity)), [(_jan1, 10), (_jan2, 3)]);
     expect(again.read.where((r) => r.corrected).length, 2);
     expect(again.read.first.flags, ['human_corrected']);
+  });
+
+  testWidgets('the file chosen can be looked at; the 確認用Excel is beside it', (tester) async {
+    await _pumpCsv(tester, 'JAN,商品名,数量\n$_jan1,ペン,4\n', products: {_jan1: 'テストペン 青'});
+    expect(find.byKey(const ValueKey('sf-review-xlsx')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-view-original')));
+    await tester.pumpAndSettle();
+    // The sheet's own cells, as they are.
+    expect(find.byKey(const ValueKey('iv-sheet')), findsOneWidget);
+    expect(find.text('ペン'), findsOneWidget);
   });
 
   testWidgets('a PDF too long for the AI says what to do instead', (tester) async {

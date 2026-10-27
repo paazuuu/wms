@@ -20941,6 +20941,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'このほかに未検品が {n}個あります。検品が済むと在庫に入り、この推移に表れます。'**
   String plStockHistoryPending(int n);
+
+  /// No description provided for @rcTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果の確認'**
+  String get rcTitle;
+
+  /// No description provided for @rcIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルと見比べて、違うところを直してください。黄色はAIが迷った欄、または「数量×単価」が金額と合わない行です。行を外す・行を足すこともできます。すべて正しければ「内容は正しい・次へ」を押してください。'**
+  String get rcIntro;
+
+  /// No description provided for @rcOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイル'**
+  String get rcOriginal;
+
+  /// No description provided for @rcRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果'**
+  String get rcRead;
+
+  /// No description provided for @rcRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'行'**
+  String get rcRow;
+
+  /// No description provided for @rcRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行を外す'**
+  String get rcRemove;
+
+  /// No description provided for @rcRestore.
+  ///
+  /// In ja, this message translates to:
+  /// **'戻す'**
+  String get rcRestore;
+
+  /// No description provided for @rcAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'行を追加'**
+  String get rcAdd;
+
+  /// No description provided for @rcAllColumns.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての列を表示'**
+  String get rcAllColumns;
+
+  /// No description provided for @rcTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'{rows}行・数量合計 {qty}・金額合計 {amount}'**
+  String rcTotals(int rows, String qty, String amount);
+
+  /// No description provided for @rcMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量×単価が金額と合わない行 {n}'**
+  String rcMismatch(int n);
+
+  /// No description provided for @rcOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'内容は正しい・次へ'**
+  String get rcOk;
+
+  /// No description provided for @rcNoFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルは表示できません'**
+  String get rcNoFile;
+
+  /// No description provided for @rcCheckedMark.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルと照合済み'**
+  String get rcCheckedMark;
+
+  /// No description provided for @sfTableNeeded.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの読み取り結果を、元のファイルと表で見比べて確かめてください。確かめるまで在庫の計算には進みません。'**
+  String get sfTableNeeded;
+
+  /// No description provided for @sfOpenTable.
+  ///
+  /// In ja, this message translates to:
+  /// **'表で確かめる・直す'**
+  String get sfOpenTable;
+
+  /// No description provided for @sfTableChecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルと照合済み（直した行 {n}・外した行 {removed}）'**
+  String sfTableChecked(int n, int removed);
+
+  /// No description provided for @sfViewOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルを見る'**
+  String get sfViewOriginal;
+
+  /// No description provided for @rcKeyDoubt.
+  ///
+  /// In ja, this message translates to:
+  /// **'黄色：AIが迷った欄・数量×単価が金額と合わない'**
+  String get rcKeyDoubt;
+
+  /// No description provided for @rcKeyChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'青：直した欄'**
+  String get rcKeyChanged;
 }
 
 class _AppLocalizationsDelegate

@@ -25,6 +25,7 @@ import '../data/stock_import_repository.dart';
 import '../domain/stock_file.dart';
 import '../domain/stock_ledger.dart';
 import 'import_view_screen.dart';
+import 'reading_check_screen.dart';
 import 'stock_import_calendar_screen.dart';
 import 'stock_inspection_screen.dart';
 
@@ -93,6 +94,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// The person has looked the reading over and says it is right: nothing
   /// goes in before. Cleared by a new file and by any change to a line.
   bool _checked = false;
+
+  /// What the AI read has been set beside the original, row by row, in the
+  /// table (読み取り結果の確認): the stock is worked out only after.
+  bool _tableChecked = false;
   StockFileResult? _done;
   String? _error;
 
@@ -133,6 +138,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _known = const {};
       _documentId = null;
       _checked = false;
+      _tableChecked = false;
       _docDate = null;
       _paid = false;
       _note.clear();
@@ -202,6 +208,31 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     setState(() {
       _sheet = sheet;
       _docDate = date;
+    });
+    // Read by the AI: first set beside the original and corrected in the table.
+    if (sheet.byAi) {
+      // What the library has is looked up first, for the 確認用Excel meanwhile.
+      await _lookup();
+      if (!mounted) return;
+      await _openTable();
+      return;
+    }
+    await _lookup();
+  }
+
+  /// 読み取り結果の確認: every row read, as a table beside the original, to
+  /// correct; then the stock is worked out from what the person left.
+  Future<void> _openTable() async {
+    final sheet = _sheet;
+    if (sheet == null) return;
+    final rows = await Navigator.of(context).push<List<ReadRow>>(MaterialPageRoute(
+      builder: (_) => ReadingCheckScreen(rows: sheet.read, fileName: _fileName, bytes: _bytes),
+    ));
+    if (rows == null || !mounted) return;
+    setState(() {
+      _sheet = stockSheetFromRead(rows, byAi: sheet.byAi);
+      _tableChecked = true;
+      _checked = false;
     });
     await _lookup();
   }
@@ -571,7 +602,33 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               icon: const Icon(Icons.download_outlined),
               label: Text(l10n.sfTemplate),
             ),
+            // The file chosen, as it is, to look at beside what was read.
+            if (_bytes case final b? when _fileName != null)
+              OutlinedButton.icon(
+                key: const ValueKey('sf-view-original'),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: Text(_fileName!)),
+                    body: OriginalFileView(fileName: _fileName!, bytes: b),
+                  ),
+                )),
+                icon: const Icon(Icons.visibility_outlined),
+                label: Text(l10n.sfViewOriginal),
+              ),
+            // Everything read at once, to check and correct outside: the 確認用Excel.
+            if (sheet != null && sheet.header)
+              OutlinedButton.icon(
+                key: const ValueKey('sf-review-xlsx'),
+                onPressed: _busy ? null : _downloadReview,
+                icon: const Icon(Icons.download_outlined),
+                label: Text(l10n.sfReviewXlsx),
+              ),
           ]),
+          if (sheet != null && sheet.header)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: Text(l10n.sfReviewHint, style: muted),
+            ),
           if (_busy)
             Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
@@ -655,19 +712,39 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ]),
                 ),
               ),
-            // Everything at once, to check and correct outside: the 確認用Excel.
+            // The table: to check against the original, and to correct again.
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
               child: Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                OutlinedButton.icon(
-                  key: const ValueKey('sf-review-xlsx'),
-                  onPressed: _busy ? null : _downloadReview,
-                  icon: const Icon(Icons.download_outlined, size: 18),
-                  label: Text(l10n.sfReviewXlsx),
+                (sheet.byAi && !_tableChecked ? FilledButton.icon : OutlinedButton.icon)(
+                  key: const ValueKey('sf-open-table'),
+                  onPressed: _busy ? null : _openTable,
+                  icon: const Icon(Icons.table_chart_outlined, size: 18),
+                  label: Text(l10n.sfOpenTable),
                 ),
-                Text(l10n.sfReviewHint, style: muted),
+                if (_tableChecked)
+                  Text(
+                    l10n.sfTableChecked(
+                      sheet.read.where((r) => r.flags.contains(humanCorrectedFlag) && !r.humanRemoved).length,
+                      sheet.read.where((r) => r.humanRemoved).length,
+                    ),
+                    key: const ValueKey('sf-table-checked'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+                  ),
               ]),
             ),
+            if (sheet.byAi && !_tableChecked)
+              Card(
+                key: const ValueKey('sf-table-needed'),
+                color: theme.colorScheme.tertiaryContainer,
+                margin: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Text(l10n.sfTableNeeded, style: TextStyle(color: theme.colorScheme.onTertiaryContainer)),
+                ),
+              ),
+          ],
+          if (sheet != null && sheet.header && (!sheet.byAi || _tableChecked)) ...[
             if (sheet.read.any((r) => r.corrected))
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
