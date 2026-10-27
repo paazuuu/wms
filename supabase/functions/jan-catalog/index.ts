@@ -7,9 +7,11 @@
 // Reading: every page a search for 49 / 45 (a Japanese JAN's start) finds,
 // its text, each JAN with what is printed before it (see
 // ../_shared/jan_catalog.ts). Only a mediapress host is fetched from.
-// Writing needs product.manage and goes through the service role; reading
-// the table is open to product.view through its own policy.
+//   POST   /jan-catalog/refresh     every catalog read again (the monthly job)
+// Writing needs product.manage (or the scheduler's secret) and goes through
+// the service role; reading the table is open to product.view.
 import { adminClient, callerClient, clientPermitted, notPermittedMessage } from "../_shared/require_permission.ts";
+import { purgeAllowed } from "../_shared/purge.ts";
 import {
   type CatalogEntry,
   catalogInfo,
@@ -101,25 +103,105 @@ async function readCatalog(c: CatalogRef) {
   return { info, maker, pagesRead: read, entries: uniqueEntries(entries) };
 }
 
+type Admin = ReturnType<typeof adminClient>;
+
+/** Read the catalog at [url] and replace its JANs: [status, body]. */
+async function syncCatalog(admin: Admin, url: string, userId: string | null): Promise<[number, unknown]> {
+  const ref = parseCatalogUrl(url);
+  if (!ref) return [400, { message: "jan_catalog_bad_url" }];
+
+  const { data: row, error: upErr } = await admin
+    .from("jan_catalogs")
+    .upsert(
+      {
+        url: url.trim(),
+        host: ref.host,
+        volume_id: ref.volumeId,
+        catalog_id: ref.catalogId,
+        design_id: ref.designId,
+        ...(userId ? { created_by: userId } : {}),
+      },
+      { onConflict: "volume_id,catalog_id" },
+    )
+    .select("id")
+    .single();
+  if (upErr || !row) return [400, { message: upErr?.message ?? "upsert failed" }];
+  const id = row.id as number;
+
+  let read;
+  try {
+    read = await readCatalog(ref);
+  } catch (e) {
+    await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500) }).eq("id", id);
+    return [502, { message: `jan_catalog_unreachable: ${e}` }];
+  }
+  if (read.entries.length === 0) {
+    await admin.from("jan_catalogs").update({ sync_error: "no JAN found", pages_read: read.pagesRead }).eq("id", id);
+    return [422, { message: "jan_catalog_empty" }];
+  }
+
+  // Replace what the catalog had: what it no longer prints goes.
+  const del = await admin.from("jan_catalog_entries").delete().eq("catalog_id", id);
+  if (del.error) return [400, { message: del.error.message }];
+  for (let k = 0; k < read.entries.length; k += 500) {
+    const { error } = await admin
+      .from("jan_catalog_entries")
+      .insert(read.entries.slice(k, k + 500).map((e) => ({ catalog_id: id, ...e })));
+    if (error) return [400, { message: error.message }];
+  }
+  const { data: done, error: finErr } = await admin
+    .from("jan_catalogs")
+    .update({
+      maker: read.maker,
+      name: read.info.name,
+      published: read.info.published,
+      page_count: read.info.pageCount,
+      pages_read: read.pagesRead,
+      entry_count: read.entries.length,
+      synced_at: new Date().toISOString(),
+      sync_error: null,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (finErr) return [400, { message: finErr.message }];
+  await admin.rpc("log_audit", {
+    p_event_type: "jan_catalog.sync",
+    p_entity_type: "jan_catalog",
+    p_entity_id: String(id),
+    p_warehouse_id: null,
+    p_details: { url, entries: read.entries.length, pages: read.pagesRead },
+  }).then(() => {}, () => {});
+  return [200, { data: done }];
+}
+
+// verify_jwt=false: besides a signed-in person, the database's monthly job
+// calls this with the shared secret (purge_expired_secret, see 0148/0153).
+// Every route checks one or the other itself.
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
     const caller = callerClient(req, supabaseUrl);
+    const admin = adminClient(supabaseUrl);
     const parts = new URL(req.url).pathname.split("/").filter(Boolean);
     const i = parts.indexOf("jan-catalog");
     const rest = i >= 0 ? parts.slice(i + 1) : [];
+    // deno-lint-ignore no-explicit-any
+    const byScheduler = await purgeAllowed(admin as any, req.headers.get("x-purge-secret"));
 
     if (req.method === "GET" && rest.length === 0) {
-      const { data, error } = await caller.from("jan_catalogs").select("*").order("id");
+      if (!byScheduler && !(await clientPermitted(caller, "product.view"))) {
+        return json({ message: notPermittedMessage("product.view") }, 403);
+      }
+      const { data, error } = await (byScheduler ? admin : caller).from("jan_catalogs").select("*").order("id");
       if (error) return json({ message: error.message }, 400);
       return json({ data: data ?? [] });
     }
 
-    if (!(await clientPermitted(caller, "product.manage"))) {
+    if (!byScheduler && !(await clientPermitted(caller, "product.manage"))) {
       return json({ message: notPermittedMessage("product.manage") }, 403);
     }
-    const admin = adminClient(supabaseUrl);
-    const { data: who } = await caller.auth.getUser();
+    const userId = byScheduler ? null : (await caller.auth.getUser()).data?.user?.id ?? null;
 
     if (req.method === "DELETE" && rest.length === 1 && /^\d+$/.test(rest[0])) {
       const { error } = await admin.from("jan_catalogs").delete().eq("id", Number(rest[0]));
@@ -129,72 +211,20 @@ Deno.serve(async (req) => {
 
     if (req.method === "POST" && rest[0] === "sync" && rest.length === 1) {
       const body = await req.json().catch(() => ({}));
-      const ref = parseCatalogUrl(String(body?.url ?? ""));
-      if (!ref) return json({ message: "jan_catalog_bad_url" }, 400);
+      const [status, out] = await syncCatalog(admin, String(body?.url ?? ""), userId);
+      return json(out, status);
+    }
 
-      const { data: row, error: upErr } = await admin
-        .from("jan_catalogs")
-        .upsert(
-          {
-            url: String(body.url).trim(),
-            host: ref.host,
-            volume_id: ref.volumeId,
-            catalog_id: ref.catalogId,
-            design_id: ref.designId,
-            created_by: who?.user?.id ?? null,
-          },
-          { onConflict: "volume_id,catalog_id" },
-        )
-        .select("id")
-        .single();
-      if (upErr || !row) return json({ message: upErr?.message ?? "upsert failed" }, 400);
-      const id = row.id as number;
-
-      let read;
-      try {
-        read = await readCatalog(ref);
-      } catch (e) {
-        await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500) }).eq("id", id);
-        return json({ message: `jan_catalog_unreachable: ${e}` }, 502);
+    // Every catalog read again (the monthly job): what each came to.
+    if (req.method === "POST" && rest[0] === "refresh" && rest.length === 1) {
+      const { data, error } = await admin.from("jan_catalogs").select("url").order("id");
+      if (error) return json({ message: error.message }, 400);
+      const results = [];
+      for (const c of data ?? []) {
+        const [status, out] = await syncCatalog(admin, c.url as string, userId);
+        results.push({ url: c.url, status, ...(status === 200 ? {} : (out as object)) });
       }
-      if (read.entries.length === 0) {
-        await admin.from("jan_catalogs").update({ sync_error: "no JAN found", pages_read: read.pagesRead }).eq("id", id);
-        return json({ message: "jan_catalog_empty" }, 422);
-      }
-
-      // Replace what the catalog had: what it no longer prints goes.
-      const del = await admin.from("jan_catalog_entries").delete().eq("catalog_id", id);
-      if (del.error) return json({ message: del.error.message }, 400);
-      for (let k = 0; k < read.entries.length; k += 500) {
-        const { error } = await admin
-          .from("jan_catalog_entries")
-          .insert(read.entries.slice(k, k + 500).map((e) => ({ catalog_id: id, ...e })));
-        if (error) return json({ message: error.message }, 400);
-      }
-      const { data: done, error: finErr } = await admin
-        .from("jan_catalogs")
-        .update({
-          maker: read.maker,
-          name: read.info.name,
-          published: read.info.published,
-          page_count: read.info.pageCount,
-          pages_read: read.pagesRead,
-          entry_count: read.entries.length,
-          synced_at: new Date().toISOString(),
-          sync_error: null,
-        })
-        .eq("id", id)
-        .select("*")
-        .single();
-      if (finErr) return json({ message: finErr.message }, 400);
-      await admin.rpc("log_audit", {
-        p_event_type: "jan_catalog.sync",
-        p_entity_type: "jan_catalog",
-        p_entity_id: String(id),
-        p_warehouse_id: null,
-        p_details: { url: body.url, entries: read.entries.length, pages: read.pagesRead },
-      }).then(() => {}, () => {});
-      return json({ data: done });
+      return json({ data: results });
     }
 
     return json({ message: "not found" }, 404);
