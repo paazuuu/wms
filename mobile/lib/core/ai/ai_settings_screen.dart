@@ -8,6 +8,7 @@ import '../theme/app_spacing.dart';
 import '../ui/state_views.dart';
 import 'ai_confidence.dart';
 import 'ai_keys_section.dart';
+import 'ai_limits_section.dart';
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/home/presentation/feature_link.dart';
 
@@ -110,6 +111,9 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                     icon: const Icon(Icons.save_outlined),
                     label: Text(l10n.actionSave),
                   ),
+                  // Which model reads what, and the daily limits (0151).
+                  const SizedBox(height: AppSpacing.xl),
+                  const AiLimitsSection(),
                   // Which Gemini API key the AI is called with (0137), for
                   // whoever may manage the keys.
                   if (canManageKeys) ...[

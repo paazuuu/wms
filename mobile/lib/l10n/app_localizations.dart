@@ -21061,6 +21061,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'青：直した欄'**
   String get rcKeyChanged;
+
+  /// No description provided for @miPbAiLimit.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日のAIの利用上限に達しました。「AI設定」で上限を変えるか、明日もう一度読み取ってください。'**
+  String get miPbAiLimit;
+
+  /// No description provided for @ahKindLimit.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日の上限'**
+  String get ahKindLimit;
+
+  /// No description provided for @aiLimitsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'モデルと1日の上限'**
+  String get aiLimitsTitle;
+
+  /// No description provided for @aiLimitsIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDF・スキャン・写真は精度の高いモデルで、Excel・CSVの見出しなどは安いモデルで読みます。料金が増えすぎないよう、1日に使える回数を決められます（日本時間で0時に戻ります）。'**
+  String get aiLimitsIntro;
+
+  /// No description provided for @aiDocumentModel.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDF・画像の読み取り'**
+  String get aiDocumentModel;
+
+  /// No description provided for @aiDocumentModelHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが備考欄や品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。'**
+  String get aiDocumentModelHint;
+
+  /// No description provided for @aiLightModel.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excel・CSVの見出し、そのほか'**
+  String get aiLightModel;
+
+  /// No description provided for @aiLightModelHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出しの意味、品名と品番の分け方、重さ検索など。安いモデルで十分です。'**
+  String get aiLightModelHint;
+
+  /// No description provided for @aiDailyLimit.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIを使える回数（1日）'**
+  String get aiDailyLimit;
+
+  /// No description provided for @aiDocumentLimit.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDF・画像を読める数（1日）'**
+  String get aiDocumentLimit;
+
+  /// No description provided for @aiUsedToday.
+  ///
+  /// In ja, this message translates to:
+  /// **'今日 {n}回'**
+  String aiUsedToday(int n);
+
+  /// No description provided for @aiNoLimit.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄で上限なし'**
+  String get aiNoLimit;
+
+  /// No description provided for @aiLimitsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'上限に達すると、その日はAIを使わずに止まり、理由が表示されます。PDF・画像1枚の読み取りは、読み取りと見直しで2回と数えます。'**
+  String get aiLimitsHint;
+
+  /// No description provided for @aiModelStrong.
+  ///
+  /// In ja, this message translates to:
+  /// **'{m}（高精度）'**
+  String aiModelStrong(String m);
+
+  /// No description provided for @aiModelMiddle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{m}（標準）'**
+  String aiModelMiddle(String m);
+
+  /// No description provided for @aiModelLight.
+  ///
+  /// In ja, this message translates to:
+  /// **'{m}（最安）'**
+  String aiModelLight(String m);
 }
 
 class _AppLocalizationsDelegate

@@ -217,7 +217,10 @@ function dateStr(v: unknown): string | null {
 // ---------------------------------------------------------------------------
 
 /** What kind of failure an AI call was (0133), for 稼働状況. */
-export type AiErrorKind = "no_key" | "auth" | "quota" | "overload" | "bad_request" | "network" | "parse" | "other";
+export type AiErrorKind =
+  | "no_key" | "auth" | "quota" | "overload" | "bad_request" | "network" | "parse" | "other"
+  // Today's limit set in AI設定 is reached (0151): nothing was sent.
+  | "limit";
 
 export class AiError extends Error {
   constructor(message: string, readonly kind: AiErrorKind, readonly status: number | null = null) {
@@ -247,7 +250,7 @@ export function setAiFunction(name: string) {
  * with "no product name" on every line. */
 export type AiFailure = { kind: string; status: number | null; message: string };
 let aiFailures: AiFailure[] = [];
-const FAILURE_ORDER = ["no_key", "auth", "quota", "network", "overload", "bad_request"];
+const FAILURE_ORDER = ["no_key", "limit", "auth", "quota", "network", "overload", "bad_request"];
 
 export function resetAiFailures() {
   aiFailures = [];
@@ -283,6 +286,91 @@ async function logAiCall(row: Record<string, unknown>) {
 
 export function aiModel(chosen: ChosenKey | null = cachedKey): string {
   return chosen?.model ?? Deno.env.get("GEMINI_MODEL") ?? DEFAULT_MODEL;
+}
+
+/** The calls that read a document's picture (a PDF, a scan, a photo): the
+ * model strong enough for a JAN in a 備考 column is theirs (0151). */
+export const DOCUMENT_TASKS = new Set(["extract", "verify"]);
+
+/** AI設定's models and daily limits, and today's use (0151). */
+export type AiPolicy = {
+  document_model: string | null;
+  light_model: string | null;
+  daily_limit: number | null;
+  daily_document_limit: number | null;
+  calls: number;
+  documents: number;
+};
+
+let cachedPolicy: { at: number; policy: AiPolicy } | null = null;
+
+export function forgetAiPolicy() {
+  cachedPolicy = null;
+}
+
+/** The policy, read at most every 20 s and counted on between reads; null
+ * when it cannot be read (no limits then, the models by key or default). */
+export async function aiPolicy(): Promise<AiPolicy | null> {
+  if (cachedPolicy && Date.now() - cachedPolicy.at < 20_000) return cachedPolicy.policy;
+  const url = Deno.env.get("SUPABASE_URL"), service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !service) return null;
+  try {
+    const r = await fetch(`${url}/rest/v1/rpc/ai_policy`, {
+      method: "POST",
+      headers: { apikey: service, Authorization: `Bearer ${service}`, "Content-Type": "application/json" },
+      body: "{}",
+    });
+    if (!r.ok) return cachedPolicy?.policy ?? null;
+    const j = await r.json();
+    const d = (Array.isArray(j) ? j[0] : j) as Record<string, unknown> | null;
+    if (!d) return null;
+    const n = (v: unknown) => (typeof v === "number" ? v : null);
+    const policy: AiPolicy = {
+      document_model: typeof d.document_model === "string" ? d.document_model : null,
+      light_model: typeof d.light_model === "string" ? d.light_model : null,
+      daily_limit: n(d.daily_limit),
+      daily_document_limit: n(d.daily_document_limit),
+      calls: n(d.calls) ?? 0,
+      documents: n(d.documents) ?? 0,
+    };
+    cachedPolicy = { at: Date.now(), policy };
+    return policy;
+  } catch (_) {
+    return cachedPolicy?.policy ?? null;
+  }
+}
+
+/** The model for [task]: AI設定's for documents or for the rest, else the
+ * key's own, else GEMINI_MODEL, else the light default. */
+export function aiModelFor(task: string, chosen: ChosenKey | null, policy: AiPolicy | null): string {
+  const set = policy ? (DOCUMENT_TASKS.has(task) ? policy.document_model : policy.light_model) : null;
+  return set || (chosen?.model ?? Deno.env.get("GEMINI_MODEL") ?? DEFAULT_MODEL);
+}
+
+/** Which of today's limits one more call for [task] would pass: every call,
+ * or documents read (one per document: its checking read is not counted). */
+export function limitReached(policy: AiPolicy | null, task: string): "daily" | "documents" | null {
+  if (!policy) return null;
+  if (policy.daily_limit !== null && policy.calls >= policy.daily_limit) return "daily";
+  if (task === "extract" && policy.daily_document_limit !== null && policy.documents >= policy.daily_document_limit) {
+    return "documents";
+  }
+  return null;
+}
+
+/** A call that reached Google, counted until the policy is read again. */
+function countCall(task: string) {
+  if (!cachedPolicy) return;
+  cachedPolicy.policy.calls++;
+  if (task === "extract") cachedPolicy.policy.documents++;
+}
+
+/** Refused before it is sent, when today's limit is reached. */
+async function guardLimit(task: string, model: string, logCall: (row: Record<string, unknown>) => Promise<void>, policy: AiPolicy | null) {
+  const over = limitReached(policy, task);
+  if (!over) return;
+  await logCall({ task, model, ok: false, error_kind: "limit", error: `daily ${over} limit reached`, attempts: 0 });
+  throw new AiError(`AI daily ${over} limit reached (AI設定)`, "limit");
 }
 
 /** The key the AI is called with (0137): the one chosen on 管理 → AI設定 —
@@ -365,7 +453,8 @@ export async function gemini(
   key?: ChosenKey,
 ): Promise<Record<string, unknown>> {
   const chosen = key ?? await resolveAiKey();
-  const model = aiModel(chosen);
+  const policy = await aiPolicy();
+  const model = aiModelFor(task, chosen, policy);
   const started = Date.now();
   const apiKey = chosen.key;
   const logCall = (row: Record<string, unknown>) => logAiCall({ key_id: chosen.id, ...row });
@@ -373,6 +462,8 @@ export async function gemini(
     await logCall({ task, model, ok: false, error_kind: "no_key", error: "no API key is chosen or set", attempts: 0 });
     throw new AiError("GEMINI_API_KEY is not set on the server.", "no_key");
   }
+  await guardLimit(task, model, logCall, policy);
+  countCall(task);
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const payload = {
@@ -440,10 +531,10 @@ export async function aiPing(keyId: number | null = null): Promise<
     const r = await gemini([{ text: "接続確認です。reply に OK とだけ入れて返してください。" }],
       { type: "object", properties: { reply: { type: "string" } }, required: ["reply"] }, "ping", chosen);
     const ok = typeof r.reply === "string";
-    return { ok, model: aiModel(chosen), latency_ms: Date.now() - started, error_kind: ok ? null : "parse", message: null, ...who };
+    return { ok, model: aiModelFor("ping", chosen, cachedPolicy?.policy ?? null), latency_ms: Date.now() - started, error_kind: ok ? null : "parse", message: null, ...who };
   } catch (e) {
     return {
-      ok: false, model: aiModel(chosen), latency_ms: Date.now() - started,
+      ok: false, model: aiModelFor("ping", chosen, cachedPolicy?.policy ?? null), latency_ms: Date.now() - started,
       error_kind: e instanceof AiError ? e.kind : "other", message: String(e).slice(0, 300), ...who,
     };
   }
@@ -457,13 +548,16 @@ export async function geminiSearch(
   task: string,
   key: ChosenKey,
 ): Promise<{ text: string; sources: { title: string | null; url: string }[] }> {
-  const model = aiModel(key);
+  const policy = await aiPolicy();
+  const model = aiModelFor(task, key, policy);
   const started = Date.now();
   const logCall = (row: Record<string, unknown>) => logAiCall({ key_id: key.id, ...row });
   if (!key.key) {
     await logCall({ task, model, ok: false, error_kind: "no_key", error: "no API key is chosen or set", attempts: 0 });
     throw new AiError("GEMINI_API_KEY is not set on the server.", "no_key");
   }
+  await guardLimit(task, model, logCall, policy);
+  countCall(task);
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const payload = {
     contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -680,7 +774,7 @@ export async function lookupSpecs(items: SpecRequest[], deps?: Partial<SpecDeps>
         }
         results.push({ index: item.index, ...EMPTY_SPEC, sources: [], error_kind: kind, message: String(e).slice(0, 300),
           mode: null, key_label: keys[k].label });
-        if (kind === "auth" || kind === "no_key") stop = kind;
+        if (kind === "auth" || kind === "no_key" || kind === "limit") stop = kind;
         done = true;
       }
     }
@@ -706,7 +800,7 @@ export async function lookupSpecs(items: SpecRequest[], deps?: Partial<SpecDeps>
       const kind = e instanceof AiError ? e.kind : "other";
       results.push({ index: item.index, ...EMPTY_SPEC, sources: [], error_kind: kind, message: String(e).slice(0, 300),
         mode: null, key_label: est.label });
-      if (kind === "quota" || kind === "auth" || kind === "no_key") stop = kind;
+      if (kind === "quota" || kind === "auth" || kind === "no_key" || kind === "limit") stop = kind;
     }
   }
   return {

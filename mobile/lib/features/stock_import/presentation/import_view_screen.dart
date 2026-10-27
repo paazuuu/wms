@@ -393,8 +393,10 @@ class _PdfPages extends StatefulWidget {
 class _PdfPagesState extends State<_PdfPages> {
   late Future<List<Uint8List>> _pages = _draw();
 
+  // From a copy: in a browser the PDF reader takes the bytes it is given
+  // for its own, and the file kept here would be empty the next time.
   Future<List<Uint8List>> _draw() async => [
-        await for (final page in Printing.raster(widget.bytes, dpi: 120)) await page.toPng(),
+        await for (final page in Printing.raster(Uint8List.fromList(widget.bytes), dpi: 120)) await page.toPng(),
       ];
 
   @override

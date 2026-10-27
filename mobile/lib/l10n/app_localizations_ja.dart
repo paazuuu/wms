@@ -11817,4 +11817,63 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rcKeyChanged => '青：直した欄';
+
+  @override
+  String get miPbAiLimit => '今日のAIの利用上限に達しました。「AI設定」で上限を変えるか、明日もう一度読み取ってください。';
+
+  @override
+  String get ahKindLimit => '今日の上限';
+
+  @override
+  String get aiLimitsTitle => 'モデルと1日の上限';
+
+  @override
+  String get aiLimitsIntro =>
+      'PDF・スキャン・写真は精度の高いモデルで、Excel・CSVの見出しなどは安いモデルで読みます。料金が増えすぎないよう、1日に使える回数を決められます（日本時間で0時に戻ります）。';
+
+  @override
+  String get aiDocumentModel => 'PDF・画像の読み取り';
+
+  @override
+  String get aiDocumentModelHint =>
+      'JANが備考欄や品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。';
+
+  @override
+  String get aiLightModel => 'Excel・CSVの見出し、そのほか';
+
+  @override
+  String get aiLightModelHint => '見出しの意味、品名と品番の分け方、重さ検索など。安いモデルで十分です。';
+
+  @override
+  String get aiDailyLimit => 'AIを使える回数（1日）';
+
+  @override
+  String get aiDocumentLimit => 'PDF・画像を読める数（1日）';
+
+  @override
+  String aiUsedToday(int n) {
+    return '今日 $n回';
+  }
+
+  @override
+  String get aiNoLimit => '空欄で上限なし';
+
+  @override
+  String get aiLimitsHint =>
+      '上限に達すると、その日はAIを使わずに止まり、理由が表示されます。PDF・画像1枚の読み取りは、読み取りと見直しで2回と数えます。';
+
+  @override
+  String aiModelStrong(String m) {
+    return '$m（高精度）';
+  }
+
+  @override
+  String aiModelMiddle(String m) {
+    return '$m（標準）';
+  }
+
+  @override
+  String aiModelLight(String m) {
+    return '$m（最安）';
+  }
 }

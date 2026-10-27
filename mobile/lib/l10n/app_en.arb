@@ -3853,5 +3853,21 @@
   "sfTableChecked": "Checked against the original ({n} corrected, {removed} left out)",
   "sfViewOriginal": "View the original",
   "rcKeyDoubt": "Yellow: the AI was unsure, or quantity × price is not the amount",
-  "rcKeyChanged": "Blue: corrected"
+  "rcKeyChanged": "Blue: corrected",
+  "miPbAiLimit": "Today's AI limit is reached. Raise it in AI settings, or read the file again tomorrow.",
+  "ahKindLimit": "Daily limit",
+  "aiLimitsTitle": "Models and daily limits",
+  "aiLimitsIntro": "PDFs, scans and photos are read with an accurate model; a sheet's headings and the like with a cheap one. Set how many calls a day may be made, so the bill stays in check (reset at midnight, Japan time).",
+  "aiDocumentModel": "PDFs and pictures",
+  "aiDocumentModelHint": "An accurate model is recommended, so a JAN in a 備考 column or under a name is found (a few yen a page).",
+  "aiLightModel": "Sheet headings and the rest",
+  "aiLightModelHint": "What headings mean, splitting names and 品番, weight lookups: a cheap model is enough.",
+  "aiDailyLimit": "AI calls a day",
+  "aiDocumentLimit": "Documents read a day",
+  "aiUsedToday": "{n} today",
+  "aiNoLimit": "Empty: no limit",
+  "aiLimitsHint": "When a limit is reached, the AI is not used for the rest of the day and the reason is shown. Reading one PDF or picture counts as two calls (the reading and its check).",
+  "aiModelStrong": "{m} (accurate)",
+  "aiModelMiddle": "{m} (standard)",
+  "aiModelLight": "{m} (cheapest)"
 }

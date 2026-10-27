@@ -32,6 +32,7 @@ String aiErrorKindLabel(AppLocalizations l10n, String? kind) => switch (kind) {
       'bad_request' => l10n.ahKindBadRequest,
       'network' => l10n.ahKindNetwork,
       'parse' => l10n.ahKindParse,
+      'limit' => l10n.ahKindLimit,
       _ => l10n.ahKindOther,
     };
 

@@ -26,6 +26,7 @@ String masterProblemText(AppLocalizations l10n, MasterProblem p) => switch (p.co
       'read_failed' => l10n.miPbReadFailed(p.value ?? ''),
       'ai_unavailable' => switch (p.value) {
           'quota' => l10n.miPbAiQuota,
+          'limit' => l10n.miPbAiLimit,
           'auth' => l10n.miPbAiAuth,
           'no_key' => l10n.miPbAiNoKey,
           _ => l10n.miPbAiDown,

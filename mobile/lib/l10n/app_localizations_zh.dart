@@ -11748,4 +11748,61 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rcKeyChanged => '蓝色：已修改的栏';
+
+  @override
+  String get miPbAiLimit => '今天的AI使用上限已到。请在“AI设置”中修改上限，或明天再读取。';
+
+  @override
+  String get ahKindLimit => '今日上限';
+
+  @override
+  String get aiLimitsTitle => '模型与每日上限';
+
+  @override
+  String get aiLimitsIntro =>
+      'PDF・扫描件・照片用高精度模型读取，Excel・CSV的标题等用便宜的模型。可设定每天的使用次数，避免费用过高（日本时间0点重置）。';
+
+  @override
+  String get aiDocumentModel => 'PDF・图片读取';
+
+  @override
+  String get aiDocumentModelHint => '建议用高精度模型，以便读取备注栏或品名下方的JAN（每页约几日元）。';
+
+  @override
+  String get aiLightModel => 'Excel・CSV标题及其他';
+
+  @override
+  String get aiLightModelHint => '标题含义、品名与品番拆分、重量查询等，便宜模型即可。';
+
+  @override
+  String get aiDailyLimit => '每天AI调用次数';
+
+  @override
+  String get aiDocumentLimit => '每天可读取的PDF・图片数';
+
+  @override
+  String aiUsedToday(int n) {
+    return '今天 $n 次';
+  }
+
+  @override
+  String get aiNoLimit => '留空表示无上限';
+
+  @override
+  String get aiLimitsHint => '达到上限后，当天不再使用AI并显示原因。读取一份PDF・图片计为2次（读取与复核）。';
+
+  @override
+  String aiModelStrong(String m) {
+    return '$m（高精度）';
+  }
+
+  @override
+  String aiModelMiddle(String m) {
+    return '$m（标准）';
+  }
+
+  @override
+  String aiModelLight(String m) {
+    return '$m（最便宜）';
+  }
 }

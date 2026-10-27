@@ -12065,4 +12065,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rcKeyChanged => 'Blue: corrected';
+
+  @override
+  String get miPbAiLimit =>
+      'Today\'s AI limit is reached. Raise it in AI settings, or read the file again tomorrow.';
+
+  @override
+  String get ahKindLimit => 'Daily limit';
+
+  @override
+  String get aiLimitsTitle => 'Models and daily limits';
+
+  @override
+  String get aiLimitsIntro =>
+      'PDFs, scans and photos are read with an accurate model; a sheet\'s headings and the like with a cheap one. Set how many calls a day may be made, so the bill stays in check (reset at midnight, Japan time).';
+
+  @override
+  String get aiDocumentModel => 'PDFs and pictures';
+
+  @override
+  String get aiDocumentModelHint =>
+      'An accurate model is recommended, so a JAN in a 備考 column or under a name is found (a few yen a page).';
+
+  @override
+  String get aiLightModel => 'Sheet headings and the rest';
+
+  @override
+  String get aiLightModelHint =>
+      'What headings mean, splitting names and 品番, weight lookups: a cheap model is enough.';
+
+  @override
+  String get aiDailyLimit => 'AI calls a day';
+
+  @override
+  String get aiDocumentLimit => 'Documents read a day';
+
+  @override
+  String aiUsedToday(int n) {
+    return '$n today';
+  }
+
+  @override
+  String get aiNoLimit => 'Empty: no limit';
+
+  @override
+  String get aiLimitsHint =>
+      'When a limit is reached, the AI is not used for the rest of the day and the reason is shown. Reading one PDF or picture counts as two calls (the reading and its check).';
+
+  @override
+  String aiModelStrong(String m) {
+    return '$m (accurate)';
+  }
+
+  @override
+  String aiModelMiddle(String m) {
+    return '$m (standard)';
+  }
+
+  @override
+  String aiModelLight(String m) {
+    return '$m (cheapest)';
+  }
 }

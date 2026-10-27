@@ -73,7 +73,7 @@ class _BulkWeightScreenState extends ConsumerState<BulkWeightScreen> {
             _done += part.length;
           });
           // Out of quota or no key: the rest would fail the same way.
-          if (data.results.any((x) => const {'quota', 'auth', 'no_key'}.contains(x.errorKind) && !x.found)) {
+          if (data.results.any((x) => const {'quota', 'auth', 'no_key', 'limit'}.contains(x.errorKind) && !x.found)) {
             setState(() => _error = specErrorText(l10n, data.results.firstWhere((x) => x.errorKind != null).errorKind));
             _stop = true;
           }

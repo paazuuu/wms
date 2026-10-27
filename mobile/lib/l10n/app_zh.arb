@@ -3853,5 +3853,21 @@
   "sfTableChecked": "已与原文件核对（修改 {n} 行・去掉 {removed} 行）",
   "sfViewOriginal": "查看原文件",
   "rcKeyDoubt": "黄色：AI不确定的栏・数量×单价与金额不符",
-  "rcKeyChanged": "蓝色：已修改的栏"
+  "rcKeyChanged": "蓝色：已修改的栏",
+  "miPbAiLimit": "今天的AI使用上限已到。请在“AI设置”中修改上限，或明天再读取。",
+  "ahKindLimit": "今日上限",
+  "aiLimitsTitle": "模型与每日上限",
+  "aiLimitsIntro": "PDF・扫描件・照片用高精度模型读取，Excel・CSV的标题等用便宜的模型。可设定每天的使用次数，避免费用过高（日本时间0点重置）。",
+  "aiDocumentModel": "PDF・图片读取",
+  "aiDocumentModelHint": "建议用高精度模型，以便读取备注栏或品名下方的JAN（每页约几日元）。",
+  "aiLightModel": "Excel・CSV标题及其他",
+  "aiLightModelHint": "标题含义、品名与品番拆分、重量查询等，便宜模型即可。",
+  "aiDailyLimit": "每天AI调用次数",
+  "aiDocumentLimit": "每天可读取的PDF・图片数",
+  "aiUsedToday": "今天 {n} 次",
+  "aiNoLimit": "留空表示无上限",
+  "aiLimitsHint": "达到上限后，当天不再使用AI并显示原因。读取一份PDF・图片计为2次（读取与复核）。",
+  "aiModelStrong": "{m}（高精度）",
+  "aiModelMiddle": "{m}（标准）",
+  "aiModelLight": "{m}（最便宜）"
 }

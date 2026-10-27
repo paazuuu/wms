@@ -10609,5 +10609,49 @@
   },
   "sfViewOriginal": "元のファイルを見る",
   "rcKeyDoubt": "黄色：AIが迷った欄・数量×単価が金額と合わない",
-  "rcKeyChanged": "青：直した欄"
+  "rcKeyChanged": "青：直した欄",
+  "miPbAiLimit": "今日のAIの利用上限に達しました。「AI設定」で上限を変えるか、明日もう一度読み取ってください。",
+  "ahKindLimit": "今日の上限",
+  "aiLimitsTitle": "モデルと1日の上限",
+  "aiLimitsIntro": "PDF・スキャン・写真は精度の高いモデルで、Excel・CSVの見出しなどは安いモデルで読みます。料金が増えすぎないよう、1日に使える回数を決められます（日本時間で0時に戻ります）。",
+  "aiDocumentModel": "PDF・画像の読み取り",
+  "aiDocumentModelHint": "JANが備考欄や品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。",
+  "aiLightModel": "Excel・CSVの見出し、そのほか",
+  "aiLightModelHint": "見出しの意味、品名と品番の分け方、重さ検索など。安いモデルで十分です。",
+  "aiDailyLimit": "AIを使える回数（1日）",
+  "aiDocumentLimit": "PDF・画像を読める数（1日）",
+  "aiUsedToday": "今日 {n}回",
+  "@aiUsedToday": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "aiNoLimit": "空欄で上限なし",
+  "aiLimitsHint": "上限に達すると、その日はAIを使わずに止まり、理由が表示されます。PDF・画像1枚の読み取りは、読み取りと見直しで2回と数えます。",
+  "aiModelStrong": "{m}（高精度）",
+  "@aiModelStrong": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "aiModelMiddle": "{m}（標準）",
+  "@aiModelMiddle": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "aiModelLight": "{m}（最安）",
+  "@aiModelLight": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      }
+    }
+  }
 }

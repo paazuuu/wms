@@ -2,6 +2,8 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  aiModelFor,
+  limitReached,
   splitDisagrees,
   DEFAULT_MODEL,
   EXTRACT_SCHEMA,
@@ -807,4 +809,26 @@ Deno.test("a purchase ledger (明細): its Chinese headings and the five fields 
   const l = lines[1];
   assertEquals([l.order_date, l.delivery_date, l.serial, l.supplier, l.order_number], ["9.20", "10.1", "A-2", "テスト商事", "HL 9E"]);
   assertEquals([l.list_price, l.unit_price, l.unit_price_tax, l.amount, l.planned_quantity], [100, 50, 55, 110000, 2000]);
+});
+
+Deno.test("documents read with the strong model, the rest with the light one; today's limits refuse a call", () => {
+  const policy = {
+    document_model: "gemini-3.8-flash", light_model: "gemini-3.1-flash-lite",
+    daily_limit: 300, daily_document_limit: 50, calls: 10, documents: 2,
+  };
+  const key = { id: 5, key: "k", model: null, label: "a" };
+  assertEquals(aiModelFor("extract", key, policy), "gemini-3.8-flash");
+  assertEquals(aiModelFor("verify", key, policy), "gemini-3.8-flash");
+  assertEquals(aiModelFor("columns", key, policy), "gemini-3.1-flash-lite");
+  // No policy read: the key's own model, else the default.
+  assertEquals(aiModelFor("extract", { ...key, model: "gemini-x" }, null), "gemini-x");
+  assertEquals(aiModelFor("extract", key, null), "gemini-3.1-flash-lite");
+
+  assertEquals(limitReached(policy, "extract"), null);
+  assertEquals(limitReached({ ...policy, documents: 50 }, "extract"), "documents");
+  // The checking read and the rest are not documents.
+  assertEquals(limitReached({ ...policy, documents: 50 }, "verify"), null);
+  assertEquals(limitReached({ ...policy, calls: 300 }, "columns"), "daily");
+  assertEquals(limitReached({ ...policy, daily_limit: null, daily_document_limit: null, calls: 9999, documents: 999 }, "extract"), null);
+  assertEquals(limitReached(null, "extract"), null);
 });

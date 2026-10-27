@@ -225,6 +225,7 @@ class _SpecLookupSheetState extends ConsumerState<_SpecLookupSheet> {
 String specErrorText(AppLocalizations l10n, String? kind) => switch (kind) {
       'parse' || 'missing' => l10n.slNothingFound,
       'quota' => l10n.slQuota,
+      'limit' => l10n.miPbAiLimit,
       _ => l10n.ahPingFailed(aiErrorKindLabel(l10n, kind)),
     };
 
