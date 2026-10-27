@@ -7663,6 +7663,21 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The combined column, and split back on edit.
   - The read-only table, opened from 読み取り結果.
 
+## The check table fits, scrolls visibly, and works out 金額 (app only)
+
+- 金額 was cut off at the pane's edge.
+  - The table did scroll sideways, but with no bar on a PC nothing said so.
+  - It now has an always-shown horizontal scrollbar (`rc-across`). Shift +
+    wheel, or dragging the bar, scrolls it.
+  - 単価 and 金額 come right after 数量. The columns are narrower, and the
+    table takes 7/10 of the width beside the original.
+- Changing 数量 or 単価 sets 金額 to 数量 × 単価 (`recalcAmount`), to the
+  hundredth, whole yen kept whole. 金額 can still be typed by hand.
+- The 品名 column in the user's screenshot was the build before the merged
+  メーカー（品名） column; a pull and restart shows the current one.
+- Tests (1039 Flutter pass): 金額 follows both, the totals with it, and the
+  bar is shown.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -18,10 +18,10 @@ typedef _Col = ({String key, double width});
 /// empty 品名 column took the most room. A name, when there is one, is shown
 /// after the maker in brackets: 三菱鉛筆（ジェットストリーム…）.
 const _core = <_Col>[
-  (key: 'jan', width: 150),
-  (key: 'maker_name', width: 260),
-  (key: 'code', width: 150),
-  (key: 'quantity', width: 80),
+  (key: 'jan', width: 140),
+  (key: 'maker_name', width: 200),
+  (key: 'code', width: 140),
+  (key: 'quantity', width: 70),
 ];
 
 /// メーカー（品名） as one text.
@@ -41,10 +41,11 @@ String makerAndName(String maker, String name) {
 }
 
 /// The ledger's columns, in its order; shown when the file had them.
+/// 単価 and 金額 first: what a quantity is checked against.
 const _ledger = <_Col>[
-  (key: 'unit', width: 60),
-  (key: 'unit_price', width: 90),
-  (key: 'amount', width: 100),
+  (key: 'unit_price', width: 80),
+  (key: 'amount', width: 96),
+  (key: 'unit', width: 50),
   (key: 'list_price', width: 90),
   (key: 'unit_price_tax', width: 90),
   (key: 'delivery_date', width: 100),
@@ -77,7 +78,9 @@ String _value(ReadRow r, String key) => switch (key) {
 Set<String> doubtfulCells(ReadRow r) => {
       for (final f in r.flags)
         ...switch (f) {
-          'jan_check' || 'no_jan' || 'jan_code_mismatch' || 'jan_restore_mismatch' || 'ai_disagree:raw_jan_code' => {'jan'},
+          'jan_check' || 'no_jan' || 'jan_code_mismatch' || 'jan_restore_mismatch' || 'ai_disagree:raw_jan_code' => {
+              'jan'
+            },
           'no_quantity' || 'qty_from_amount' || 'qty_from_cases' || 'ai_disagree:planned_quantity' => {'quantity'},
           'ai_disagree:product_name' => {'maker_name'},
           'ai_disagree:product_code' => {'code'},
@@ -119,6 +122,14 @@ class _EditRow {
 
   bool get blank => cells.values.every((c) => c.text.trim().isEmpty);
 
+  /// 金額 as 数量 × 単価, when both are numbers (whole yen kept whole).
+  void recalcAmount() {
+    final q = _num(this['quantity']), p = _num(this['unit_price']);
+    if (q == null || p == null) return;
+    final v = (q * p * 100).round() / 100;
+    cells['amount']!.text = v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+  }
+
   bool changed(String key) => this[key] != _value(original, key).trim();
 
   bool get anyChange => added || cells.keys.any(changed);
@@ -137,7 +148,8 @@ class _EditRow {
       ledger = ledger.withValue(c.key, this[c.key]);
     }
     final janChanged = changed('jan'), qtyChanged = changed('quantity');
-    final (maker, name) = changed('maker_name') ? splitMakerAndName(this['maker_name']) : (original.maker, original.name);
+    final (maker, name) =
+        changed('maker_name') ? splitMakerAndName(this['maker_name']) : (original.maker, original.name);
     return original.copyWith(
       jan: this['jan'],
       name: name,
@@ -232,7 +244,10 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final n = NumberFormat.decimalPattern();
-    final live = [for (final r in _rows) if (!r.removed) r];
+    final live = [
+      for (final r in _rows)
+        if (!r.removed) r
+    ];
     final qty = live.fold<double>(0, (s, r) => s + (_num(r['quantity']) ?? 0));
     final amount = live.fold<double>(0, (s, r) => s + (_num(r['amount']) ?? 0));
     final mismatches = live.where((r) => amountMismatch(r['quantity'], r['unit_price'], r['amount'])).length;
@@ -249,7 +264,8 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
         child: Wrap(spacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
           if (!widget.readOnly)
-            TextButton.icon(key: const ValueKey('rc-add'), onPressed: _add, icon: const Icon(Icons.add), label: Text(l10n.rcAdd)),
+            TextButton.icon(
+                key: const ValueKey('rc-add'), onPressed: _add, icon: const Icon(Icons.add), label: Text(l10n.rcAdd)),
           FilterChip(
             key: const ValueKey('rc-all-columns'),
             label: Text(l10n.rcAllColumns),
@@ -273,23 +289,27 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
       const Divider(height: 1),
       Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Wrap(spacing: AppSpacing.lg, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          Text(
-            l10n.rcTotals(live.length, n.format(qty), n.format(amount)),
-            key: const ValueKey('rc-totals'),
-            style: theme.textTheme.titleSmall,
-          ),
-          if (mismatches > 0)
-            Text(l10n.rcMismatch(mismatches),
-                key: const ValueKey('rc-mismatch'), style: TextStyle(color: theme.colorScheme.error)),
-          if (!widget.readOnly)
-            FilledButton.icon(
-              key: const ValueKey('rc-ok'),
-              onPressed: _done,
-              icon: const Icon(Icons.check),
-              label: Text(l10n.rcOk),
-            ),
-        ]),
+        child: Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                l10n.rcTotals(live.length, n.format(qty), n.format(amount)),
+                key: const ValueKey('rc-totals'),
+                style: theme.textTheme.titleSmall,
+              ),
+              if (mismatches > 0)
+                Text(l10n.rcMismatch(mismatches),
+                    key: const ValueKey('rc-mismatch'), style: TextStyle(color: theme.colorScheme.error)),
+              if (!widget.readOnly)
+                FilledButton.icon(
+                  key: const ValueKey('rc-ok'),
+                  onPressed: _done,
+                  icon: const Icon(Icons.check),
+                  label: Text(l10n.rcOk),
+                ),
+            ]),
       ),
     ]);
 
@@ -309,9 +329,9 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         // On a PC the original and the reading side by side; else in tabs.
         if (c.maxWidth >= 1100) {
           return Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Expanded(flex: 4, child: original),
+            Expanded(flex: 3, child: original),
             const VerticalDivider(width: 1),
-            Expanded(flex: 6, child: table),
+            Expanded(flex: 7, child: table),
           ]);
         }
         return DefaultTabController(
@@ -350,8 +370,9 @@ class _Swatch extends StatelessWidget {
 }
 
 /// The rows as a table of fields, scrolled both ways, the heading kept on top.
-class _Table extends StatelessWidget {
-  const _Table({required this.rows, required this.cols, required this.label, required this.onChanged, this.readOnly = false});
+class _Table extends StatefulWidget {
+  const _Table(
+      {required this.rows, required this.cols, required this.label, required this.onChanged, this.readOnly = false});
 
   final List<_EditRow> rows;
   final List<_Col> cols;
@@ -362,42 +383,70 @@ class _Table extends StatelessWidget {
   static const _lead = 92.0;
 
   @override
+  State<_Table> createState() => _TableState();
+}
+
+class _TableState extends State<_Table> {
+  /// Sideways, with its bar always shown: on a PC a table wider than its
+  /// pane is otherwise not seen to go on (Shift + wheel, or drag the bar).
+  final _across = ScrollController();
+
+  @override
+  void dispose() {
+    _across.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final width = _lead + cols.fold<double>(0, (s, c) => s + c.width + 4);
+    final rows = widget.rows, cols = widget.cols, label = widget.label;
+    final width = _Table._lead + cols.fold<double>(0, (s, c) => s + c.width + 4);
     return LayoutBuilder(builder: (context, c) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: math.max(width, c.maxWidth),
-          height: c.maxHeight,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              color: scheme.surfaceContainerHighest,
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(children: [
-                SizedBox(width: _lead, child: Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.sm),
-                  child: Text(l10n.rcRow, style: theme.textTheme.labelMedium),
-                )),
-                for (final col in cols)
-                  Container(
-                    width: col.width,
-                    margin: const EdgeInsets.only(right: 4),
-                    child: Text(label(col.key), style: theme.textTheme.labelMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ),
-              ]),
-            ),
-            Expanded(
-              child: ListView.builder(
-                key: const ValueKey('rc-table'),
-                itemCount: rows.length,
-                itemBuilder: (context, i) => _RowView(row: rows[i], cols: cols, onChanged: onChanged, readOnly: readOnly),
+      return Scrollbar(
+        key: const ValueKey('rc-across'),
+        controller: _across,
+        thumbVisibility: true,
+        trackVisibility: true,
+        child: SingleChildScrollView(
+          controller: _across,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(bottom: 12),
+          child: SizedBox(
+            width: math.max(width, c.maxWidth),
+            height: math.max(0, c.maxHeight - 12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(
+                color: scheme.surfaceContainerHighest,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(children: [
+                  SizedBox(
+                      width: _Table._lead,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: AppSpacing.sm),
+                        child: Text(l10n.rcRow, style: theme.textTheme.labelMedium),
+                      )),
+                  for (final col in cols)
+                    Container(
+                      width: col.width,
+                      margin: const EdgeInsets.only(right: 4),
+                      child: Text(label(col.key),
+                          style: theme.textTheme.labelMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                ]),
               ),
-            ),
-          ]),
+              Expanded(
+                child: ListView.builder(
+                  key: const ValueKey('rc-table'),
+                  itemCount: rows.length,
+                  itemBuilder: (context, i) =>
+                      _RowView(row: rows[i], cols: cols, onChanged: widget.onChanged, readOnly: widget.readOnly),
+                ),
+              ),
+            ]),
+          ),
         ),
       );
     });
@@ -430,7 +479,10 @@ class _RowView extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final no = row.original.lineNo;
-    final doubts = [for (final f in row.original.flags) if (!_quiet.contains(f) && !humanFlags.contains(f)) flagLabel(l10n, f)];
+    final doubts = [
+      for (final f in row.original.flags)
+        if (!_quiet.contains(f) && !humanFlags.contains(f)) flagLabel(l10n, f)
+    ];
     // Once a person checked it, the reader's doubts are answered.
     final cells = readOnly && row.original.humanChecked ? const <String>{} : doubtfulCells(row.original);
     final mismatch = amountMismatch(row['quantity'], row['unit_price'], row['amount']);
@@ -449,16 +501,16 @@ class _RowView extends StatelessWidget {
             if (readOnly)
               const SizedBox(width: 40)
             else
-            IconButton(
-              key: ValueKey('rc-remove-$no'),
-              visualDensity: VisualDensity.compact,
-              tooltip: row.removed ? l10n.rcRestore : l10n.rcRemove,
-              icon: Icon(row.removed ? Icons.undo : Icons.remove_circle_outline, size: 18),
-              onPressed: () {
-                row.removed = !row.removed;
-                onChanged();
-              },
-            ),
+              IconButton(
+                key: ValueKey('rc-remove-$no'),
+                visualDensity: VisualDensity.compact,
+                tooltip: row.removed ? l10n.rcRestore : l10n.rcRemove,
+                icon: Icon(row.removed ? Icons.undo : Icons.remove_circle_outline, size: 18),
+                onPressed: () {
+                  row.removed = !row.removed;
+                  onChanged();
+                },
+              ),
             Text(row.added ? '+' : '$no', style: theme.textTheme.labelMedium),
             if (doubts.isNotEmpty)
               Tooltip(
@@ -495,7 +547,11 @@ class _RowView extends StatelessWidget {
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               ),
-              onChanged: (_) => onChanged(),
+              onChanged: (_) {
+                // 金額 follows 数量 × 単価, whichever of the two is changed.
+                if (col.key == 'quantity' || col.key == 'unit_price') row.recalcAmount();
+                onChanged();
+              },
             ),
           ),
       ]),

@@ -142,4 +142,43 @@ void main() {
     // The row left out stays struck through.
     expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-2-quantity'))).enabled, isFalse);
   });
+
+  testWidgets('金額 follows 数量 × 単価, whichever is changed; the table scrolls sideways with its bar shown', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    List<ReadRow>? result;
+    await pumpApp(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () async => result = await Navigator.of(context).push<List<ReadRow>>(MaterialPageRoute(
+              builder: (_) => const ReadingCheckScreen(rows: [
+                ReadRow(lineNo: 1, jan: _jan1, maker: 'コクヨ', code: 'フ-CE755P', quantity: '111',
+                    ledger: LedgerFields(unitPrice: '322', amount: '16100', deliveryDate: '8月27日', serial: '1')),
+              ]),
+            )),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('rc-mismatch')), findsOneWidget);
+    expect(tester.widget<Scrollbar>(find.byKey(const ValueKey('rc-across'))).thumbVisibility, isTrue);
+
+    await tester.enterText(find.byKey(const ValueKey('rc-1-quantity')), '50');
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-1-amount'))).controller!.text, '16100');
+    expect(find.byKey(const ValueKey('rc-mismatch')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('rc-1-unit_price')), '322.5');
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-1-amount'))).controller!.text, '16125');
+    expect(find.text('1行・数量合計 50・金額合計 16,125'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
+    await tester.pumpAndSettle();
+    expect([result!.single.quantity, result!.single.ledger.unitPrice, result!.single.ledger.amount], ['50', '322.5', '16125']);
+  });
 }
