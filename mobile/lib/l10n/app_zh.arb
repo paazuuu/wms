@@ -3833,5 +3833,5 @@
   "plStockHistoryPick": "选择商品查看库存走势（商品名・JAN・品番）",
   "plStockHistoryOf": "“{name}”的库存走势",
   "plStockHistoryAll": "返回全部",
-  "plStockHistoryLibrary": "全部商品的库存走势"
+  "plStockHistoryPending": "另有 {n} 个未验货。验货完成后计入库存并显示在走势中。"
 }

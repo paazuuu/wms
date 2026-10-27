@@ -572,10 +572,19 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         const ProductAlertsTab(),
         Builder(builder: (_) {
           final id = ref.watch(libraryPaneWarehouseProvider(0));
+          final chosen = ref.watch(libraryStockProductProvider);
+          // One product chosen (from its menu, or here): that product alone.
+          if (chosen != null) {
+            return ListView(
+              key: const ValueKey('sh-one'),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              children: [_StockProductPane(warehouseId: id)],
+            );
+          }
           return LibraryInflowView(
             warehouseId: id,
             warehouseName: warehouses.where((w) => w.id == id).firstOrNull?.name,
-            // One product's own 推移 above the library's, when one is chosen.
+            // A product to look at on its own, above the library's figures.
             header: _StockProductPane(warehouseId: id),
           );
         }),
@@ -671,10 +680,18 @@ class _StockProductPane extends ConsumerWidget {
         Text([chosen.janCode, if (chosen.sku != null) chosen.sku!].join(' · '),
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
         const SizedBox(height: AppSpacing.sm),
+        // Units read in but not inspected yet are not stock, so not on the line.
+        if ((ref.watch(pendingInspectionProvider).valueOrNull?.of(chosen.janCode, warehouseId: warehouseId) ?? 0)
+            case final waiting when waiting > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Text(l10n.plStockHistoryPending(waiting),
+                key: const ValueKey('sh-chosen-pending'),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.tertiary)),
+          ),
         ProductStockChartCard(productId: chosen.id, warehouseId: warehouseId),
       ],
-      const SizedBox(height: AppSpacing.md),
-      if (chosen != null) Text(l10n.plStockHistoryLibrary, style: theme.textTheme.titleSmall),
+      if (chosen == null) const SizedBox(height: AppSpacing.md),
     ]);
   }
 }

@@ -10552,5 +10552,12 @@
     }
   },
   "plStockHistoryAll": "全体に戻る",
-  "plStockHistoryLibrary": "全体の在庫の推移"
+  "plStockHistoryPending": "このほかに未検品が {n}個あります。検品が済むと在庫に入り、この推移に表れます。",
+  "@plStockHistoryPending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

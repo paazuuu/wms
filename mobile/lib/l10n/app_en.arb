@@ -3833,5 +3833,5 @@
   "plStockHistoryPick": "Choose a product to see its stock over time (name, JAN, code)",
   "plStockHistoryOf": "Stock over time: {name}",
   "plStockHistoryAll": "Back to all",
-  "plStockHistoryLibrary": "All products"
+  "plStockHistoryPending": "{n} more are waiting for inspection. They join the stock, and this chart, once inspected."
 }

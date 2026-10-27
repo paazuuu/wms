@@ -7511,7 +7511,9 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   or メーカー. Once a product is chosen, it shows that product's own chart and
   every change (`ProductStockChartCard`, as on its detail), in the warehouse
   chosen above.
-  - 全体に戻る clears it. The library's totals stay below.
+  - With a product chosen, the tab shows that product alone. Its units still
+    waiting for inspection are noted, since they are not stock yet.
+    全体に戻る brings back the library's figures, with the search above.
 - Both use the same period chips.
 - Tests (1026 Flutter pass):
   - The menu opens the tab on the product, with its chart and changes.

@@ -11746,5 +11746,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get plStockHistoryAll => '全体に戻る';
 
   @override
-  String get plStockHistoryLibrary => '全体の在庫の推移';
+  String plStockHistoryPending(int n) {
+    return 'このほかに未検品が $n個あります。検品が済むと在庫に入り、この推移に表れます。';
+  }
 }

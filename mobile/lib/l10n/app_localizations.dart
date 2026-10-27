@@ -20936,11 +20936,11 @@ abstract class AppLocalizations {
   /// **'全体に戻る'**
   String get plStockHistoryAll;
 
-  /// No description provided for @plStockHistoryLibrary.
+  /// No description provided for @plStockHistoryPending.
   ///
   /// In ja, this message translates to:
-  /// **'全体の在庫の推移'**
-  String get plStockHistoryLibrary;
+  /// **'このほかに未検品が {n}個あります。検品が済むと在庫に入り、この推移に表れます。'**
+  String plStockHistoryPending(int n);
 }
 
 class _AppLocalizationsDelegate

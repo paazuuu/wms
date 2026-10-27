@@ -11678,5 +11678,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plStockHistoryAll => '返回全部';
 
   @override
-  String get plStockHistoryLibrary => '全部商品的库存走势';
+  String plStockHistoryPending(int n) {
+    return '另有 $n 个未验货。验货完成后计入库存并显示在走势中。';
+  }
 }

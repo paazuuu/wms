@@ -11993,5 +11993,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plStockHistoryAll => 'Back to all';
 
   @override
-  String get plStockHistoryLibrary => 'All products';
+  String plStockHistoryPending(int n) {
+    return '$n more are waiting for inspection. They join the stock, and this chart, once inspected.';
+  }
 }

@@ -927,7 +927,12 @@ void main() {
         {'id': 7, 'at': '2026-10-23T02:00:00Z', 'method': 'file_stock', 'type': 'ADJUST', 'quantity': 40, 'file_name': '請求書.pdf'},
       ],
     });
-    await _pump(tester, repo, manage: false, history: history);
+    await _pump(tester, repo,
+        manage: false,
+        history: history,
+        pending: PendingInspection.fromRows(const [
+          {'warehouse_id': 1, 'jan_code': '4909999000014', 'quantity': 300},
+        ]));
 
     await tester.tap(find.byKey(const ValueKey('product-menu-1')));
     await tester.pumpAndSettle();
@@ -937,12 +942,17 @@ void main() {
     expect(find.text('「テストペン 黒」の在庫の推移'), findsOneWidget);
     expect(find.byKey(const ValueKey('sh-product-chart')), findsOneWidget);
     expect(find.byKey(const ValueKey('sh-event-7')), findsOneWidget);
-    expect(find.text('全体の在庫の推移'), findsOneWidget);
+    // That product alone: not the library's figures.
+    expect(find.byKey(const ValueKey('sh-library')), findsNothing);
+    expect(find.byKey(const ValueKey('sh-total-file')), findsNothing);
+    // What waits for inspection is said, since it is not on the line yet.
+    expect(find.text('このほかに未検品が 300個あります。検品が済むと在庫に入り、この推移に表れます。'), findsOneWidget);
 
     // Back to all, then another product by its 品番.
     await tester.tap(find.byKey(const ValueKey('sh-chosen-clear')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sh-product')), findsNothing);
+    expect(find.byKey(const ValueKey('sh-library')), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('sh-pick-field')), 'tn-a5');
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sh-pick-2')));
