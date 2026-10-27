@@ -755,7 +755,22 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             // new ones to be registered — with the arithmetic for each.
             const SizedBox(height: AppSpacing.md),
             Text(l10n.sfGoingIn(ready.length + willRegister), key: const ValueKey('sf-going-in'), style: theme.textTheme.titleSmall),
-            for (final l in [...ready, if (willRegister > 0) ...registrable])
+            // On a PC the lines as a table, field by field as in the check;
+            // on a phone, as a list.
+            LayoutBuilder(builder: (context, c) {
+              final going = [...ready, if (willRegister > 0) ...registrable];
+              if (c.maxWidth >= goingInTableWidth) {
+                return _GoingInTable(
+                  lines: going,
+                  known: _known,
+                  book: _book,
+                  onHand: _onHand,
+                  mode: _mode,
+                  onTap: _busy ? null : _editLine,
+                );
+              }
+              return Column(children: [
+                for (final l in going)
               ListTile(
                 key: ValueKey('sf-line-${l.janCode}'),
                 dense: true,
@@ -788,6 +803,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   style: theme.textTheme.titleSmall,
                 ),
               ),
+              ]);
+            }),
             if (unknown.isNotEmpty)
               Card(
                 key: const ValueKey('sf-unknown'),
@@ -1031,3 +1048,129 @@ String documentDateSourceLabel(AppLocalizations l10n, DocumentDateSource? s) => 
       DocumentDateSource.uploaded || null => l10n.sfDateUploaded,
       DocumentDateSource.manual => l10n.sfDateManual,
     };
+
+/// From this width the lines going in are a table.
+const double goingInTableWidth = 900;
+
+/// 在庫に入れる行 as a table: the product, its JAN, maker and 品番 side by
+/// side, then the stock now, the change and the stock after — the same
+/// field-by-field layout as the check. A row opens its quantity.
+class _GoingInTable extends StatefulWidget {
+  const _GoingInTable({
+    required this.lines,
+    required this.known,
+    required this.book,
+    required this.onHand,
+    required this.mode,
+    required this.onTap,
+  });
+
+  final List<StockFileLine> lines;
+  final Map<String, String> known;
+  final Map<String, (int, String)> book;
+  final Map<String, int> onHand;
+  final StockFileMode mode;
+  final void Function(StockFileLine)? onTap;
+
+  @override
+  State<_GoingInTable> createState() => _GoingInTableState();
+}
+
+class _GoingInTableState extends State<_GoingInTable> {
+  final _across = ScrollController();
+
+  static const _widths = [32.0, 260.0, 140.0, 120.0, 150.0, 90.0, 90.0, 90.0, 260.0];
+
+  @override
+  void dispose() {
+    _across.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final n = NumberFormat.decimalPattern();
+    final head = theme.textTheme.labelMedium;
+    String signed(int v) => v > 0 ? '+${n.format(v)}' : n.format(v);
+    Widget cell(int i, Widget child, {bool end = false}) => Container(
+          width: _widths[i],
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+          child: child,
+        );
+    final headers = [
+      '', l10n.sfColProduct, l10n.ntFieldJan, l10n.ntFieldMaker, l10n.ntFieldCode,
+      l10n.sfColBefore, l10n.sfColChange, l10n.sfColAfter, l10n.sfColNote,
+    ];
+    return Scrollbar(
+      controller: _across,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        key: const ValueKey('sf-going-table'),
+        controller: _across,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            color: scheme.surfaceContainerHighest,
+            child: Row(children: [
+              for (final (i, h) in headers.indexed) cell(i, Text(h, style: head), end: i >= 5 && i <= 7),
+            ]),
+          ),
+          for (final l in widget.lines)
+            () {
+              final before = widget.onHand[l.janCode] ?? 0;
+              final add = widget.mode == StockFileMode.add;
+              final change = add ? l.quantity : l.quantity - before;
+              final after = add ? before + l.quantity : l.quantity;
+              final big = implausibleQuantity(l.quantity);
+              final known = widget.known[l.janCode] ?? widget.book[l.janCode]?.$2;
+              final notes = [
+                if (!widget.known.containsKey(l.janCode)) l10n.sfNewProduct,
+                if (l.name case final nm? when nm.trim() != (known ?? '').trim()) l10n.sfFileName(nm),
+                if (l.merged > 1) l10n.sfMerged(l.merged),
+                if (big) l10n.sfImplausible,
+              ];
+              return InkWell(
+                key: ValueKey('sf-line-${l.janCode}'),
+                onTap: widget.onTap == null ? null : () => widget.onTap!(l),
+                child: Container(
+                  decoration: BoxDecoration(border: Border(bottom: BorderSide(color: scheme.outlineVariant))),
+                  child: Row(children: [
+                    cell(
+                      0,
+                      l.doubtful || big
+                          ? Tooltip(
+                              message: big ? l10n.sfImplausible : l10n.sfDoubtful,
+                              child: Icon(Icons.help_outline,
+                                  key: ValueKey('sf-doubt-${l.janCode}'), size: 18, color: scheme.error),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    // The product's own name: the file may write it otherwise.
+                    cell(1, Text(known ?? l.registerName ?? l.janCode, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                    cell(2, Text(l.janCode, style: theme.textTheme.bodySmall)),
+                    cell(3, Text(l.maker ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    cell(4, Text(l.code ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    cell(5, Text(n.format(before), key: ValueKey('sf-before-${l.janCode}')), end: true),
+                    cell(6, Text(signed(change), key: ValueKey('sf-change-${l.janCode}')), end: true),
+                    cell(
+                      7,
+                      Text(n.format(after),
+                          key: ValueKey('sf-calc-${l.janCode}'),
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                      end: true,
+                    ),
+                    cell(8, Text(notes.join(' · '), style: theme.textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                  ]),
+                ),
+              );
+            }(),
+        ]),
+      ),
+    );
+  }
+}

@@ -7678,6 +7678,19 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Tests (1039 Flutter pass): 金額 follows both, the totals with it, and the
   bar is shown.
 
+## 在庫に入れる行 as a table (app only)
+
+- After the check, the lines going in are a table on a PC
+  (`_GoingInTable`, from 900 px): doubt, 商品, JAN, メーカー, 品番, 現在庫,
+  増減, 反映後 and 備考.
+  - 備考 holds: new product, the file's own name for it, rows summed, a
+    quantity too large.
+  - In add mode 増減 is ＋数量; in set mode it is the difference.
+  - A row still opens its quantity, to change it or leave the line out. The
+    bar sideways is always shown.
+- A phone keeps the list, with 現在庫 ＋ 数量 ＝ 反映後.
+- Tests (1040 Flutter pass): the table's cells on a PC, the list on a phone.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

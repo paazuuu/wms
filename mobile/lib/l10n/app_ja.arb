@@ -10657,5 +10657,10 @@
   "rcMakerName": "メーカー（品名）",
   "rcReadOnlyTitle": "読み取り結果（表）",
   "rcReadOnlyIntro": "取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。品名がある場合はメーカーの後ろに（）で表示します。",
-  "ivTable": "表で見る"
+  "ivTable": "表で見る",
+  "sfColProduct": "商品",
+  "sfColBefore": "現在庫",
+  "sfColChange": "増減",
+  "sfColAfter": "反映後",
+  "sfColNote": "備考"
 }

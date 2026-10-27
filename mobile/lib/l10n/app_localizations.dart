@@ -21181,6 +21181,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'表で見る'**
   String get ivTable;
+
+  /// No description provided for @sfColProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品'**
+  String get sfColProduct;
+
+  /// No description provided for @sfColBefore.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在庫'**
+  String get sfColBefore;
+
+  /// No description provided for @sfColChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'増減'**
+  String get sfColChange;
+
+  /// No description provided for @sfColAfter.
+  ///
+  /// In ja, this message translates to:
+  /// **'反映後'**
+  String get sfColAfter;
+
+  /// No description provided for @sfColNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get sfColNote;
 }
 
 class _AppLocalizationsDelegate

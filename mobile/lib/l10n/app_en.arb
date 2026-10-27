@@ -3873,5 +3873,10 @@
   "rcMakerName": "Maker (name)",
   "rcReadOnlyTitle": "Reading (table)",
   "rcReadOnlyIntro": "What was checked when it was taken in. Blue: corrected by a person; struck through: left out. A name, when there is one, follows the maker in brackets.",
-  "ivTable": "View as a table"
+  "ivTable": "View as a table",
+  "sfColProduct": "Product",
+  "sfColBefore": "Now",
+  "sfColChange": "Change",
+  "sfColAfter": "After",
+  "sfColNote": "Notes"
 }

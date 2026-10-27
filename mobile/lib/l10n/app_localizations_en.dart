@@ -12139,4 +12139,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ivTable => 'View as a table';
+
+  @override
+  String get sfColProduct => 'Product';
+
+  @override
+  String get sfColBefore => 'Now';
+
+  @override
+  String get sfColChange => 'Change';
+
+  @override
+  String get sfColAfter => 'After';
+
+  @override
+  String get sfColNote => 'Notes';
 }

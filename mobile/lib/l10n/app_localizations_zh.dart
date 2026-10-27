@@ -11818,4 +11818,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ivTable => '以表查看';
+
+  @override
+  String get sfColProduct => '商品';
+
+  @override
+  String get sfColBefore => '现库存';
+
+  @override
+  String get sfColChange => '增减';
+
+  @override
+  String get sfColAfter => '反映后';
+
+  @override
+  String get sfColNote => '备注';
 }

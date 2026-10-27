@@ -11889,4 +11889,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ivTable => '表で見る';
+
+  @override
+  String get sfColProduct => '商品';
+
+  @override
+  String get sfColBefore => '現在庫';
+
+  @override
+  String get sfColChange => '増減';
+
+  @override
+  String get sfColAfter => '反映後';
+
+  @override
+  String get sfColNote => '備考';
 }

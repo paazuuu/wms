@@ -176,6 +176,12 @@ Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
   return repo;
 }
 
+/// A line going in, as the table shows it: the stock now, the change, after.
+void _expectRow(WidgetTester tester, String jan, String before, String change, String after) {
+  String text(String key) => tester.widget<Text>(find.byKey(ValueKey('$key-$jan'))).data!;
+  expect([text('sf-before'), text('sf-change'), text('sf-calc')], [before, change, after]);
+}
+
 void main() {
   group('reading a stock sheet', () {
     test('finds the JAN and quantity columns under a title, and adds up the same JAN', () {
@@ -301,7 +307,7 @@ void main() {
     expect(find.byKey(const ValueKey('sf-line-$_jan3')), findsNothing);
     // Set: said plainly, with what each becomes.
     expect(find.byKey(const ValueKey('sf-set-warning')), findsOneWidget);
-    expect(find.text('現在庫 4 → 10（+6）'), findsOneWidget);
+    _expectRow(tester, _jan1, '4', '+6', '10');
 
     await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
@@ -341,7 +347,7 @@ void main() {
     expect(find.text('テストペン 青'), findsOneWidget);
     expect(find.textContaining('ファイルでの表記: ﾃｽﾄﾍﾟﾝ ｱｵ'), findsOneWidget);
     expect(find.textContaining('同じJANの2行を合計'), findsOneWidget);
-    expect(find.text('現在庫 40 ＋ 15 ＝ 55'), findsOneWidget);
+    _expectRow(tester, _jan1, '40', '+15', '55');
 
     await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
@@ -491,7 +497,7 @@ void main() {
     // Then the stock: what the person left, checked, no longer in doubt.
     expect(find.byKey(const ValueKey('sf-table-checked')), findsOneWidget);
     expect(find.text('元のファイルと照合済み（直した行 1・外した行 1）'), findsOneWidget);
-    expect(find.text('現在庫 40 ＋ 10 ＝ 50'), findsOneWidget);
+    _expectRow(tester, _jan1, '40', '+10', '50');
     expect(find.byKey(const ValueKey('sf-doubt-$_jan1')), findsNothing);
     expect(find.byKey(const ValueKey('sf-line-$_jan2')), findsNothing);
 
@@ -656,6 +662,18 @@ void main() {
     expect(again.lines.map((l) => (l.janCode, l.quantity)), [(_jan1, 10), (_jan2, 3)]);
     expect(again.read.where((r) => r.corrected).length, 2);
     expect(again.read.first.flags, ['human_corrected']);
+  });
+
+  testWidgets('the lines going in are a table on a PC, field by field, and a list on a phone', (tester) async {
+    await _pumpCsv(tester, 'JAN,商品名,数量\n$_jan1,ペン,4\n', products: {_jan1: 'テストペン 青'});
+    expect(find.byKey(const ValueKey('sf-going-table')), findsOneWidget);
+    expect(find.text('反映後'), findsOneWidget);
+    _expectRow(tester, _jan1, '0', '+4', '4');
+
+    await tester.binding.setSurfaceSize(const Size(600, 1600));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-going-table')), findsNothing);
+    expect(find.text('現在庫 0 ＋ 4 ＝ 4'), findsOneWidget);
   });
 
   testWidgets('the file chosen can be looked at; the 確認用Excel is beside it', (tester) async {

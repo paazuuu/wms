@@ -3873,5 +3873,10 @@
   "rcMakerName": "厂商（品名）",
   "rcReadOnlyTitle": "读取结果（表）",
   "rcReadOnlyIntro": "这是导入时核对过的内容。蓝色为人工修改的栏，删除线为去掉的行。有品名时显示在厂商后的（）中。",
-  "ivTable": "以表查看"
+  "ivTable": "以表查看",
+  "sfColProduct": "商品",
+  "sfColBefore": "现库存",
+  "sfColChange": "增减",
+  "sfColAfter": "反映后",
+  "sfColNote": "备注"
 }
