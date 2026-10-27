@@ -54,47 +54,65 @@ export function pagesFromSearch(xml: string): { total: number; pages: PageRef[] 
   return { total, pages };
 }
 
-type Char = { x: number; y: number; w: number; h: number; t: string };
+/** A run of text on a page: one character (the iCata viewer) or a few (a
+ * PDF's text item), where it starts, how wide, and its line's y — growing
+ * down the page. */
+export type TextItem = { x: number; y: number; w: number; t: string };
 
-function charsOf(xml: string): Char[] {
-  const out: Char[] = [];
+/** A column's text on one line, with where it spans. */
+export type Segment = { x0: number; x1: number; y: number; text: string };
+
+/** The viewer's <text> elements as items. */
+export function itemsFromXml(xml: string): TextItem[] {
+  const out: TextItem[] = [];
   for (const m of xml.matchAll(/<text\s([^>]*)><!\[CDATA\[([\s\S]*?)\]\]><\/text>/g)) {
     const a: Record<string, number> = {};
     for (const [, k, v] of m[1].matchAll(/(\w+)="([^"]*)"/g)) a[k] = Number(v);
     if (!Number.isFinite(a.x) || !Number.isFinite(a.y)) continue;
-    out.push({ x: a.x, y: a.y, w: Number.isFinite(a.w) ? a.w : 0, h: Number.isFinite(a.h) ? a.h : 0, t: m[2] });
+    out.push({ x: a.x, y: a.y, w: Number.isFinite(a.w) ? a.w : 0, t: m[2] });
   }
   return out;
 }
 
-/** A page's text as lines, top to bottom, each split into its columns. */
-export function pageLines(xml: string): string[][] {
-  const chars = charsOf(xml).sort((a, b) => a.y - b.y || a.x - b.x);
-  const rows: Char[][] = [];
-  for (const c of chars) {
+/** Items into lines, top to bottom, each line into its columns: a gap wider
+ * than 12pt is a column, a smaller one a space. */
+export function segmentRows(items: TextItem[]): Segment[][] {
+  const sorted = items.filter((i) => i.t.length > 0).sort((a, b) => a.y - b.y || a.x - b.x);
+  const rows: TextItem[][] = [];
+  for (const c of sorted) {
     const row = rows[rows.length - 1];
     if (row && Math.abs(c.y - row[0].y) <= 1.5) row.push(c);
     else rows.push([c]);
   }
-  return rows.map((row) => {
-    row.sort((a, b) => a.x - b.x);
-    const cols: string[] = [];
-    let cur = "";
-    let end = -Infinity;
-    for (const c of row) {
-      const gap = c.x - end;
-      if (cur && gap > 12) {
-        cols.push(cur.trim());
-        cur = "";
-      } else if (cur && gap > 2) {
-        cur += " ";
+  return rows
+    .map((row) => {
+      row.sort((a, b) => a.x - b.x);
+      const segs: Segment[] = [];
+      let cur: Segment | null = null;
+      for (const c of row) {
+        const gap = cur ? c.x - cur.x1 : 0;
+        if (cur && gap > 12) {
+          segs.push(cur);
+          cur = null;
+        }
+        if (!cur) {
+          cur = { x0: c.x, x1: c.x + c.w, y: row[0].y, text: c.t };
+        } else {
+          cur.text += (gap > 2 ? " " : "") + c.t;
+          cur.x1 = Math.max(cur.x1, c.x + c.w);
+        }
       }
-      cur += c.t;
-      end = Math.max(end, c.x + c.w);
-    }
-    if (cur.trim()) cols.push(cur.trim());
-    return cols.filter((s) => s.length > 0);
-  });
+      if (cur) segs.push(cur);
+      return segs
+        .map((g) => ({ ...g, text: g.text.replace(/\s+/g, " ").trim() }))
+        .filter((g) => g.text.length > 0);
+    })
+    .filter((r) => r.length > 0);
+}
+
+/** A page's text as lines, top to bottom, each split into its columns. */
+export function pageLines(xml: string): string[][] {
+  return segmentRows(itemsFromXml(xml)).map((r) => r.map((g) => g.text));
 }
 
 /** A JAN (EAN-13) whose check digit adds up. */
@@ -115,19 +133,127 @@ function afterLastJan(text: string): string {
   return text.slice(end).trim();
 }
 
+export type WeightBasis = "product" | "package" | "pack";
+
 export type CatalogEntry = {
   jan: string;
   code_hint: string | null;
   line_text: string;
   page_number: string;
   page_group: string;
+  weight_g?: number | null;
+  weight_text?: string | null;
+  weight_basis?: WeightBasis | null;
 };
 
-/** Every JAN on a page, each with the column printed before it. */
-export function entriesFromPage(xml: string, page: PageRef): CatalogEntry[] {
+/** A weight printed on a page, and where. */
+export type PageWeight = { x0: number; x1: number; y: number; g: number; text: string; basis: WeightBasis };
+
+const LABELLED = /(?:重\s*量|質\s*量|重\s*さ)\s*[：:]?\s*約?\s*([0-9]+(?:\.[0-9]+)?)\s*(kg|ｋｇ|g|ｇ)(?![a-zA-Zａ-ｚ])/;
+// 55×15×191mm/20g, under a heading that says it is a weight.
+const AFTER_SIZE = /(?:mm|㎜)\s*[\/／]\s*約?\s*([0-9]+(?:\.[0-9]+)?)\s*(kg|ｋｇ|g|ｇ)(?![a-zA-Zａ-ｚ])/;
+const NOT_THE_ITEM = /物流|ケース|カートン|梱包単位|外箱/;
+
+function overlap(a: { x0: number; x1: number }, b: { x0: number; x1: number }): number {
+  return Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
+}
+
+/** The weights a page prints: 「●重量：11.5g／パック」, or a value under a
+ * 「…/重量」 heading. A carton's (物流…) is not the item's, and left out. */
+export function pageWeights(rows: Segment[][]): PageWeight[] {
+  const out: PageWeight[] = [];
+  for (let r = 0; r < rows.length; r++) {
+    for (const s of rows[r]) {
+      if (NOT_THE_ITEM.test(s.text)) continue;
+      let m = LABELLED.exec(s.text);
+      let header = "";
+      if (!m) {
+        m = AFTER_SIZE.exec(s.text);
+        if (!m) continue;
+        // The heading: the line just above, over the same place.
+        const above = r > 0 ? rows[r - 1] : [];
+        const h = above.find((a) => s.y - a.y <= 16 && overlap(a, s) > 0);
+        if (!h || !/重\s*量|質\s*量/.test(h.text) || NOT_THE_ITEM.test(h.text)) continue;
+        header = h.text;
+      }
+      const v = Number(m[1]);
+      if (!(v > 0)) continue;
+      const g = /k/i.test(m[2]) || /ｋ/.test(m[2]) ? v * 1000 : v;
+      const both = s.text + " " + header;
+      out.push({
+        x0: s.x0,
+        x1: s.x1,
+        y: s.y,
+        g: Math.round(g * 1000) / 1000,
+        text: s.text.slice(0, 80),
+        basis: /パック|袋/.test(both) ? "pack" : /包装|パッケージ/.test(both) ? "package" : "product",
+      });
+    }
+  }
+  return out;
+}
+
+type Mark = { x0: number; x1: number; y: number; entry: CatalogEntry };
+type Group = { x0: number; x1: number; top: number; bottom: number; marks: Mark[] };
+
+/** JANs one under another in the same place: one product's colours or sizes. */
+function groupsOf(marks: Mark[]): Group[] {
+  const groups: Group[] = [];
+  for (const m of [...marks].sort((a, b) => a.y - b.y || a.x0 - b.x0)) {
+    const g = groups.find((g) => overlap(g, m) >= 0.5 * Math.min(g.x1 - g.x0, m.x1 - m.x0) && m.y - g.bottom <= 14);
+    if (g) {
+      g.marks.push(m);
+      g.bottom = m.y;
+      g.x0 = Math.min(g.x0, m.x0);
+      g.x1 = Math.max(g.x1, m.x1);
+    } else {
+      groups.push({ x0: m.x0, x1: m.x1, top: m.y, bottom: m.y, marks: [m] });
+    }
+  }
+  return groups;
+}
+
+/** Each group's weight, the weights printed above their JANs (dir -1) or
+ * below them (+1): the nearest in the same place, before the next group. A
+ * weight two groups would take is no one's. */
+function placeWeights(groups: Group[], weights: PageWeight[], dir: -1 | 1): Map<Group, PageWeight> {
+  const got = new Map<Group, PageWeight>();
+  const claims = new Map<PageWeight, number>();
+  for (const g of groups) {
+    const near = (w: { x0: number; x1: number }) => overlap(g, w) >= 12;
+    const others = groups.filter((o) => o !== g && near(o));
+    let best: PageWeight | null = null;
+    for (const w of weights) {
+      if (!near(w)) continue;
+      if (dir < 0) {
+        if (w.y > g.top + 1 || g.top - w.y > 260) continue;
+        // Not past a group above.
+        if (others.some((o) => o.bottom < g.top && o.bottom > w.y)) continue;
+        if (!best || w.y > best.y) best = w;
+      } else {
+        if (w.y < g.bottom - 1 || w.y - g.bottom > 260) continue;
+        if (others.some((o) => o.top > g.bottom && o.top < w.y)) continue;
+        if (!best || w.y < best.y) best = w;
+      }
+    }
+    if (best) {
+      got.set(g, best);
+      claims.set(best, (claims.get(best) ?? 0) + 1);
+    }
+  }
+  for (const [g, w] of got) if ((claims.get(w) ?? 0) > 1) got.delete(g);
+  return got;
+}
+
+/** Every JAN on a page (as its lines of columns), each with the column
+ * printed before it, and the weight printed for it when the page's layout
+ * says which one that is. */
+export function entriesFromRows(rows: Segment[][], page: PageRef): CatalogEntry[] {
   const out: CatalogEntry[] = [];
-  for (const cols of pageLines(xml)) {
-    for (let i = 0; i < cols.length; i++) {
+  const marks: Mark[] = [];
+  for (const segs of rows) {
+    const cols = segs.map((g) => g.text);
+    for (let i = 0; i < segs.length; i++) {
       for (const m of cols[i].matchAll(JAN_RE)) {
         const jan = m[1].replace(/[^0-9]/g, "");
         if (!validJan(jan)) continue;
@@ -135,23 +261,65 @@ export function entriesFromPage(xml: string, page: PageRef): CatalogEntry[] {
         // what the column before ends with after its own JAN.
         const before = afterLastJan(cols[i].slice(0, m.index));
         const hint = before || (i > 0 ? afterLastJan(cols[i - 1]) : "");
-        out.push({
+        const entry: CatalogEntry = {
           jan,
           code_hint: hint ? hint.slice(0, 120) : null,
           line_text: cols.join(" | ").slice(0, 400),
           page_number: page.number,
           page_group: page.group,
-        });
+          weight_g: null,
+          weight_text: null,
+          weight_basis: null,
+        };
+        out.push(entry);
+        marks.push({ x0: segs[i].x0, x1: segs[i].x1, y: segs[i].y, entry });
+      }
+    }
+  }
+  const weights = pageWeights(rows);
+  if (weights.length > 0 && marks.length > 0) {
+    const groups = groupsOf(marks);
+    const above = placeWeights(groups, weights, -1);
+    const below = placeWeights(groups, weights, 1);
+    // The way this page is laid out: whichever places more; a tie that
+    // disagrees says nothing.
+    let chosen: Map<Group, PageWeight> | null = above.size > below.size ? above : below.size > above.size ? below : null;
+    if (!chosen && above.size > 0 && [...above].every(([g, w]) => below.get(g) === w)) chosen = above;
+    for (const [g, w] of chosen ?? []) {
+      for (const m of g.marks) {
+        m.entry.weight_g = w.g;
+        m.entry.weight_text = w.text;
+        m.entry.weight_basis = w.basis;
       }
     }
   }
   return out;
 }
 
-/** One entry per JAN, the first page it was seen on. */
+/** Every JAN on a viewer page (its text XML). */
+export function entriesFromPage(xml: string, page: PageRef): CatalogEntry[] {
+  return entriesFromRows(segmentRows(itemsFromXml(xml)), page);
+}
+
+/** Every JAN on a PDF page, from its text items (y down the page). */
+export function entriesFromItems(items: TextItem[], page: PageRef): CatalogEntry[] {
+  return entriesFromRows(segmentRows(items), page);
+}
+
+/** One entry per JAN, the first page it was seen on (with a weight from a
+ * later page when the first had none). */
 export function uniqueEntries(entries: CatalogEntry[]): CatalogEntry[] {
   const seen = new Map<string, CatalogEntry>();
-  for (const e of entries) if (!seen.has(e.jan)) seen.set(e.jan, e);
+  for (const e of entries) {
+    const first = seen.get(e.jan);
+    if (!first) seen.set(e.jan, { ...e });
+    // A weight found for it on a later page, when the first had none.
+    else if (first.weight_g == null && e.weight_g != null) {
+      first.weight_g = e.weight_g;
+      first.weight_text = e.weight_text;
+      first.weight_basis = e.weight_basis;
+    }
+  }
   return [...seen.values()];
 }
 

@@ -1,10 +1,13 @@
 import { assertEquals } from "jsr:@std/assert@1";
 import {
   catalogInfo,
+  entriesFromItems,
   entriesFromPage,
   makerFromSearch,
   pageLines,
   pagesFromSearch,
+  pageWeights,
+  segmentRows,
   parseCatalogUrl,
   uniqueEntries,
   validJan,
@@ -94,4 +97,75 @@ Deno.test("a search result's pages, total and maker; the catalog's name", () => 
     catalogInfo({ result: { article: { listDisplaySpecs: { "カタログ名": "テスト　総合カタログ", "発行年月": "2026年1月1日", "総ページ数": "304ページ" } } } }),
     { name: "テスト 総合カタログ", published: "2026年1月1日", pageCount: 304 },
   );
+});
+
+// Synthetic JANs with good check digits.
+const J = ["4909999000014", "4909999000021", "4909999000038", "4909999000045", "4909999000052", "4909999000069"];
+const weightsBy = (items: { x: number; y: number; w: number; t: string }[]) =>
+  Object.fromEntries(
+    entriesFromItems(items, { id: "1", group: "5", number: "5" }).map((e) => [e.jan, [e.weight_g, e.weight_basis]]),
+  );
+const item = (x: number, y: number, t: string, w = t.length * 5) => ({ x, y, w, t });
+
+Deno.test("weights: 「●重量：…」 and a value under a 「…/重量」 heading; a carton's is not the item's", () => {
+  const rows = segmentRows([
+    item(100, 100, "●重 量：11.5g／パック"),
+    item(300, 100, "●質量：1.2kg"),
+    item(100, 200, "包装サイズ（幅×厚さ×全長/重量）"),
+    item(100, 208, "55×15×191mm/20g"),
+    item(100, 220, "物流単位（コ）物流サイズ（mm）重量（g）"),
+    item(100, 228, "10 300×200×100 2.5kg"),
+    item(300, 208, "40×6×196mm/10g"), // no heading above it
+  ]);
+  assertEquals(pageWeights(rows).map((w) => [w.g, w.basis]), [[11.5, "pack"], [1200, "product"], [20, "package"]]);
+});
+
+Deno.test("a weight under each JAN (one product a block, three blocks across)", () => {
+  const got = weightsBy([
+    item(120, 100, J[0], 75), item(300, 100, J[1], 75), item(470, 100, J[2], 75),
+    item(140, 120, "（幅×厚さ×全長/重量）"), item(320, 120, "（幅×厚さ×全長/重量）"), item(490, 120, "（幅×厚さ×全長/重量）"),
+    item(113, 128, "55×15×191mm/20g"), item(293, 128, "40×6×196mm/10g"), item(463, 128, "40×6×196mm/12g"),
+    item(120, 300, J[3], 75), item(300, 300, J[4], 75),
+    item(140, 320, "（幅×厚さ×全長/重量）"), item(320, 320, "（幅×厚さ×全長/重量）"),
+    item(113, 328, "40×6×196mm/8g"), item(293, 328, "40×6×196mm/9g"),
+  ]);
+  assertEquals(got[J[0]], [20, "product"]);
+  assertEquals(got[J[1]], [10, "product"]);
+  assertEquals(got[J[2]], [12, "product"]);
+  assertEquals(got[J[3]], [8, "product"]);
+  assertEquals(got[J[4]], [9, "product"]);
+});
+
+Deno.test("a weight above a group of JANs (a product's colours), not the next product's below", () => {
+  const got = weightsBy([
+    item(290, 170, "●重 量：10.3g／パック", 80),
+    item(322, 280, J[0], 60), item(322, 288, J[1], 60), item(322, 296, J[2], 60),
+    item(290, 420, "●重 量：23g／パック", 75),
+    item(322, 516, J[3], 60), item(322, 524, J[4], 60),
+    // Off to the side of every weight: none.
+    item(60, 524, J[5], 60),
+  ]);
+  assertEquals(got[J[0]], [10.3, "pack"]);
+  assertEquals(got[J[2]], [10.3, "pack"]);
+  assertEquals(got[J[3]], [23, "pack"]);
+  assertEquals(got[J[4]], [23, "pack"]);
+  assertEquals(got[J[5]], [null, null]);
+});
+
+Deno.test("a page that could be read either way gives no weight", () => {
+  const got = weightsBy([
+    item(100, 100, "●重量：5g", 50),
+    item(100, 200, J[0], 60),
+    item(100, 300, "●重量：7g", 50),
+  ]);
+  assertEquals(got[J[0]], [null, null]);
+});
+
+Deno.test("one entry per JAN: a later page's weight when the first had none", () => {
+  const e = (n: string, g: number | null) => ({
+    jan: J[0], code_hint: null, line_text: "", page_number: n, page_group: n,
+    weight_g: g, weight_text: g ? `${g}g` : null, weight_basis: g ? "product" as const : null,
+  });
+  const [u] = uniqueEntries([e("3", null), e("9", 12)]);
+  assertEquals([u.page_number, u.weight_g], ["3", 12]);
 });

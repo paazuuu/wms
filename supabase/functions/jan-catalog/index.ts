@@ -8,6 +8,12 @@
 // its text, each JAN with what is printed before it (see
 // ../_shared/jan_catalog.ts). Only a mediapress host is fetched from.
 //   POST   /jan-catalog/refresh     every catalog read again (the monthly job)
+//   POST   /jan-catalog/pdf/start   a PDF catalog (0155): its name, its hash;
+//                                  what it had before is cleared
+//   POST   /jan-catalog/pdf/pages   its pages' text, as the browser read it
+//   POST   /jan-catalog/pdf/finish  counted, and products' weights filled
+// After every read, products' weights are filled from the catalogs (and the
+// AI's where there is none) by apply_jan_weights (0155).
 // Writing needs product.manage (or the scheduler's secret) and goes through
 // the service role; reading the table is open to product.view.
 import { adminClient, callerClient, clientPermitted, notPermittedMessage } from "../_shared/require_permission.ts";
@@ -16,9 +22,11 @@ import {
   type CatalogEntry,
   catalogInfo,
   type CatalogRef,
+  entriesFromItems,
   entriesFromPage,
   makerFromSearch,
   type PageRef,
+  type TextItem,
   pagesFromSearch,
   parseCatalogUrl,
   uniqueEntries,
@@ -115,6 +123,7 @@ async function syncCatalog(admin: Admin, url: string, userId: string | null): Pr
     .upsert(
       {
         url: url.trim(),
+        kind: "icata",
         host: ref.host,
         volume_id: ref.volumeId,
         catalog_id: ref.catalogId,
@@ -165,6 +174,7 @@ async function syncCatalog(admin: Admin, url: string, userId: string | null): Pr
     .select("*")
     .single();
   if (finErr) return [400, { message: finErr.message }];
+  await admin.rpc("apply_jan_weights", { p_jans: null });
   await admin.rpc("log_audit", {
     p_event_type: "jan_catalog.sync",
     p_entity_type: "jan_catalog",
@@ -173,6 +183,123 @@ async function syncCatalog(admin: Admin, url: string, userId: string | null): Pr
     p_details: { url, entries: read.entries.length, pages: read.pagesRead },
   }).then(() => {}, () => {});
   return [200, { data: done }];
+}
+
+const MAX_PAGES_A_CALL = 25;
+const MAX_ITEMS_A_PAGE = 40000;
+
+// deno-lint-ignore no-explicit-any
+function itemsOf(raw: any): TextItem[] {
+  const out: TextItem[] = [];
+  for (const i of Array.isArray(raw) ? raw.slice(0, MAX_ITEMS_A_PAGE) : []) {
+    if (!Array.isArray(i) || i.length < 4) continue;
+    const [x, y, w, t] = [Number(i[0]), Number(i[1]), Number(i[2]), String(i[3] ?? "")];
+    if (Number.isFinite(x) && Number.isFinite(y) && t) out.push({ x, y, w: Number.isFinite(w) ? w : 0, t: t.slice(0, 400) });
+  }
+  return out;
+}
+
+/** A PDF catalog read in the browser, step by step: start, its pages, finish. */
+// deno-lint-ignore no-explicit-any
+async function pdfStep(admin: Admin, step: string, body: any, userId: string | null): Promise<[number, unknown]> {
+  if (step === "start") {
+    const hash = String(body?.sha256 ?? "").toLowerCase();
+    if (!/^[0-9a-f]{64}$/.test(hash)) return [400, { message: "sha256 is required" }];
+    const url = String(body?.url ?? "").trim();
+    if (url && !/^https?:\/\/\S+$/.test(url)) return [400, { message: "jan_catalog_bad_url" }];
+    const name = String(body?.name ?? "").trim().slice(0, 200) || String(body?.file_name ?? "PDF").slice(0, 200);
+    const { data: row, error } = await admin
+      .from("jan_catalogs")
+      .upsert(
+        {
+          kind: "pdf",
+          url,
+          host: url ? new URL(url).hostname : "",
+          volume_id: "pdf",
+          catalog_id: hash,
+          design_id: "",
+          name,
+          maker: String(body?.maker ?? "").trim().slice(0, 200) || null,
+          file_name: String(body?.file_name ?? "").slice(0, 300) || null,
+          page_count: Number.isFinite(Number(body?.page_count)) ? Number(body.page_count) : null,
+          pages_read: 0,
+          entry_count: 0,
+          sync_error: null,
+          ...(userId ? { created_by: userId } : {}),
+        },
+        { onConflict: "volume_id,catalog_id" },
+      )
+      .select("*")
+      .single();
+    if (error || !row) return [400, { message: error?.message ?? "upsert failed" }];
+    const del = await admin.from("jan_catalog_entries").delete().eq("catalog_id", row.id);
+    if (del.error) return [400, { message: del.error.message }];
+    return [200, { data: row }];
+  }
+
+  const id = Number(body?.catalog_id);
+  if (!Number.isFinite(id)) return [400, { message: "catalog_id is required" }];
+  const { data: cat } = await admin.from("jan_catalogs").select("id, kind").eq("id", id).maybeSingle();
+  if (!cat || cat.kind !== "pdf") return [404, { message: "not a PDF catalog" }];
+
+  if (step === "pages") {
+    const pages = (Array.isArray(body?.pages) ? body.pages : []).slice(0, MAX_PAGES_A_CALL);
+    const entries: CatalogEntry[] = [];
+    for (const p of pages) {
+      const index = String(Number(p?.index) || "");
+      if (!index) continue;
+      entries.push(...entriesFromItems(itemsOf(p?.items), { id: index, group: index, number: String(p?.label ?? index) }));
+    }
+    const unique = uniqueEntries(entries);
+    if (unique.length === 0) return [200, { data: { entries: 0, weights: 0 } }];
+    // What earlier pages already gave: kept; a weight added where it had none.
+    const { data: had, error: hadErr } = await admin
+      .from("jan_catalog_entries")
+      .select("jan, weight_g")
+      .eq("catalog_id", id)
+      .in("jan", unique.map((e) => e.jan));
+    if (hadErr) return [400, { message: hadErr.message }];
+    const known = new Map((had ?? []).map((h) => [h.jan as string, h.weight_g as number | null]));
+    const fresh = unique.filter((e) => !known.has(e.jan));
+    if (fresh.length > 0) {
+      const { error } = await admin.from("jan_catalog_entries").insert(fresh.map((e) => ({ catalog_id: id, ...e })));
+      if (error) return [400, { message: error.message }];
+    }
+    for (const e of unique) {
+      if (known.has(e.jan) && known.get(e.jan) == null && e.weight_g != null) {
+        await admin.from("jan_catalog_entries")
+          .update({ weight_g: e.weight_g, weight_text: e.weight_text, weight_basis: e.weight_basis })
+          .eq("catalog_id", id).eq("jan", e.jan);
+      }
+    }
+    return [200, { data: { entries: fresh.length, weights: unique.filter((e) => e.weight_g != null).length } }];
+  }
+
+  if (step === "finish") {
+    const { count } = await admin.from("jan_catalog_entries").select("jan", { count: "exact", head: true }).eq("catalog_id", id);
+    const { data: done, error } = await admin
+      .from("jan_catalogs")
+      .update({
+        entry_count: count ?? 0,
+        pages_read: Number.isFinite(Number(body?.pages_read)) ? Number(body.pages_read) : 0,
+        synced_at: new Date().toISOString(),
+        sync_error: (count ?? 0) === 0 ? "no JAN found" : null,
+      })
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error) return [400, { message: error.message }];
+    await admin.rpc("apply_jan_weights", { p_jans: null });
+    await admin.rpc("log_audit", {
+      p_event_type: "jan_catalog.pdf",
+      p_entity_type: "jan_catalog",
+      p_entity_id: String(id),
+      p_warehouse_id: null,
+      p_details: { entries: count ?? 0, pages: body?.pages_read ?? null },
+    }).then(() => {}, () => {});
+    return [200, { data: done }];
+  }
+  return [404, { message: "not found" }];
 }
 
 // verify_jwt=false: besides a signed-in person, the database's monthly job
@@ -217,7 +344,7 @@ Deno.serve(async (req) => {
 
     // Every catalog read again (the monthly job): what each came to.
     if (req.method === "POST" && rest[0] === "refresh" && rest.length === 1) {
-      const { data, error } = await admin.from("jan_catalogs").select("url").order("id");
+      const { data, error } = await admin.from("jan_catalogs").select("url").eq("kind", "icata").order("id");
       if (error) return json({ message: error.message }, 400);
       const results = [];
       for (const c of data ?? []) {
@@ -225,6 +352,12 @@ Deno.serve(async (req) => {
         results.push({ url: c.url, status, ...(status === 200 ? {} : (out as object)) });
       }
       return json({ data: results });
+    }
+
+    if (req.method === "POST" && rest[0] === "pdf" && rest.length === 2) {
+      const body = await req.json().catch(() => ({}));
+      const [status, out] = await pdfStep(admin, rest[1], body, userId);
+      return json(out, status);
     }
 
     return json({ message: "not found" }, 404);
