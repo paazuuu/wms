@@ -108,6 +108,13 @@ export function validJan(jan: string): boolean {
 // 49-02505-625923, 4902505625923, 49 02505 625923 — a Japanese (45/49) JAN.
 const JAN_RE = /(?<![0-9])(4[59](?:[-‐－ ]?[0-9]){11})(?![0-9])/g;
 
+/** What is left of [text] after the last JAN in it. */
+function afterLastJan(text: string): string {
+  let end = 0;
+  for (const m of text.matchAll(JAN_RE)) end = (m.index ?? 0) + m[0].length;
+  return text.slice(end).trim();
+}
+
 export type CatalogEntry = {
   jan: string;
   code_hint: string | null;
@@ -124,9 +131,10 @@ export function entriesFromPage(xml: string, page: PageRef): CatalogEntry[] {
       for (const m of cols[i].matchAll(JAN_RE)) {
         const jan = m[1].replace(/[^0-9]/g, "");
         if (!validJan(jan)) continue;
-        // Before the JAN in its own column, else the column before.
-        const before = cols[i].slice(0, m.index).trim();
-        const hint = before || (i > 0 ? cols[i - 1] : "");
+        // Before the JAN in its own column (after any JAN before it), else
+        // what the column before ends with after its own JAN.
+        const before = afterLastJan(cols[i].slice(0, m.index));
+        const hint = before || (i > 0 ? afterLastJan(cols[i - 1]) : "");
         out.push({
           jan,
           code_hint: hint ? hint.slice(0, 120) : null,

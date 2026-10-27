@@ -58,12 +58,19 @@ Deno.test("each JAN with what is printed before it; a bad check digit is not one
     line(100, [[383.4, "TP-F"], [495.4, "49-09999-000014"]]) +
       line(110, [[383.4, "TP-B 4909999000021"]]) +
       line(120, [[383.4, "TP-X"], [495.4, "49-09999-000015"]]) +
-      line(130, [[383.4, "¥1,100"]]),
+      line(130, [[383.4, "¥1,100"]]) +
+      // Two to a line, and a JAN column with no 品番 before it.
+      line(140, [[10, "-03P"], [60, "49-09999-000038 -34G"], [160, "49-09999-000045"]]) +
+      line(150, [[10, "49-09999-000052"], [160, "49-09999-000069"]]),
   );
   const got = entriesFromPage(xml, { id: "1", group: "17", number: "30" });
   assertEquals(got.map((e) => [e.jan, e.code_hint, e.page_number, e.page_group]), [
     ["4909999000014", "TP-F", "30", "17"],
     ["4909999000021", "TP-B", "30", "17"],
+    ["4909999000038", "-03P", "30", "17"],
+    ["4909999000045", "-34G", "30", "17"],
+    ["4909999000052", null, "30", "17"],
+    ["4909999000069", null, "30", "17"],
   ]);
   assertEquals(got[0].line_text, "TP-F | 49-09999-000014");
 });
