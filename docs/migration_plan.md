@@ -7596,6 +7596,35 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Model by task, and the limits.
   - The AI設定 section loads and saves.
 
+## The maker is not the product name; 50 AI calls a day (DB 0152)
+
+- Of the four reference files, three print no product name:
+  - an invoice with メーカー and 項目 (= 品番) columns;
+  - an invoice whose 商品名・品番 cell holds a short code, a maker and a
+    品番 ("9A ｺｸﾖ ﾗ-N205B");
+  - the 明细 ledger, with 品牌 and 品番.
+  The fourth prints maker／name／品番 ("三菱鉛筆／ジェットストリーム…／SXRL7.15").
+- The reading put the maker in 品名, with メーカー empty.
+  - `MAKER_ONLY_RULE`, in both the extract and check prompts: such a cell's
+    maker goes to `maker` (full-width), its 品番 to `product_code`, and
+    `product_name` is null; the short code in front is neither.
+  - `settleMakerName` does the same after the reading:
+    - A name that is only the maker (with the 品番, and a short code in
+      front) is cleared.
+    - A single word without digits, from a cell that held the 品番, is
+      taken as the maker.
+    - A real name, or a single word with no 品番 in its cell, stays.
+- On the made-up 備考 invoice, 3.8 Flash with the rule read maker テスト /
+  サンプル, no name, the 品番 and every JAN. No split warning was raised.
+- App: a line with no name registers its product under its 品番
+  (`StockFileLine.registerName`), as the library's own products are named.
+- 0152: the daily AI call limit starts at 50 (it was 300); documents stay at
+  50. A document read is two calls.
+- Deployed: import-plan v28 and ocr-delivery-note v18, from d24e234.
+- Tests (1035 Flutter, 65 Deno pass):
+  - The maker settled on the invoices' own cells; a real name kept.
+  - A line with no name registered under its 品番.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
