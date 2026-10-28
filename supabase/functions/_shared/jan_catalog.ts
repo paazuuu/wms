@@ -37,6 +37,48 @@ export function parseCatalogUrl(raw: string): CatalogRef | null {
 
 export type PageRef = { id: string; group: string; number: string };
 
+/** A meclib e-book (Kobe Ecole's catalog library and others): its host and
+ * book id, from a URL such as https://ecole-rg.meclib.jp/zebra2026/book/. */
+export type MeclibRef = { host: string; book: string };
+
+export function parseMeclibUrl(raw: string): MeclibRef | null {
+  let u: URL;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "https:" || !/^[a-z0-9-]+\.meclib\.jp$/.test(u.hostname)) return null;
+  const m = /^\/(?:library\/books\/)?([A-Za-z0-9_-]+)\/book(?:\/|$)/.exec(u.pathname);
+  if (!m) return null;
+  return { host: u.hostname, book: m[1] };
+}
+
+/** The book's folder on its host (where book.txt, txtsearch.txt, pdf/ are). */
+export function meclibBase(r: MeclibRef): string {
+  return `https://${r.host}/${r.book}/book/`;
+}
+
+/** What a meclib book.txt says: its title, and whether a page may be had as
+ * a PDF from a PC browser (its `pdf` setting, the first of five). */
+export function meclibInfo(json: unknown): { title: string | null; pdfAllowed: boolean } {
+  // deno-lint-ignore no-explicit-any
+  const j = json as any;
+  const pdf = Array.isArray(j?.pdf) ? String(j.pdf[0]) : "0";
+  return { title: typeof j?.title === "string" && j.title.trim() ? j.title.trim() : null, pdfAllowed: pdf === "1" };
+}
+
+/** The pages (from 1) whose search text has a JAN's digits in it: one line a
+ * page in txtsearch.txt. Digits run on there (4901681773138商品コード:864231…),
+ * so this only says where to look; the page's PDF says what is there. */
+export function meclibJanPages(txtsearch: string): number[] {
+  const out: number[] = [];
+  txtsearch.split("\n").forEach((line, i) => {
+    if (/4[59][0-9]{11}|4[59][-‐－ ][0-9]{5}[-‐－ ][0-9]{6}|4[59][0-9]{5}[-‐－ ][0-9]{6}/.test(line)) out.push(i + 1);
+  });
+  return out;
+}
+
 /** The pages a search result names (each <page> with its id, group, number). */
 export function pagesFromSearch(xml: string): { total: number; pages: PageRef[] } {
   const total = Number(/<response[^>]*\btotal="(\d+)"/.exec(xml)?.[1] ?? 0);
@@ -77,7 +119,8 @@ export function itemsFromXml(xml: string): TextItem[] {
 /** Items into lines, top to bottom, each line into its columns: a gap wider
  * than 12pt is a column, a smaller one a space. */
 export function segmentRows(items: TextItem[]): Segment[][] {
-  const sorted = items.filter((i) => i.t.length > 0).sort((a, b) => a.y - b.y || a.x - b.x);
+  // A run of spaces (a PDF's spacer) would join two columns: left out.
+  const sorted = items.filter((i) => i.t.trim().length > 0).sort((a, b) => a.y - b.y || a.x - b.x);
   const rows: TextItem[][] = [];
   for (const c of sorted) {
     const row = rows[rows.length - 1];

@@ -7778,6 +7778,21 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   1-6-6): a looser pattern made JANs of runs of short codes in the Lion
   catalog (498-33 498-34 …), which prints almost none and was removed.
 
+## 0159: catalogs from a meclib library (Kobe Ecole)
+
+- Kind `meclib`: a book at `https://<site>.meclib.jp/<book>/book/` (Kobe
+  Ecole's maker catalog library has some 90: ゼブラ, 三菱鉛筆, ぺんてる,
+  コクヨ, キングジム …). Its `data/txtsearch.txt` (a line a page, digits run
+  together) says which pages have a JAN's digits; those pages are read from
+  the book's own page PDFs (`pdf/0001.pdf`, offered when book.txt `pdf[0]`
+  is 1) with unpdf on the server, 12 at a step, and placed by the same
+  parser as the others. A book that offers no PDF is not read
+  (jan_catalog_no_pdf). A JAN's link opens the book at its page
+  (`index.html#target/page_no=N`). The monthly refresh and the stepping
+  job take meclib books too.
+- mergeEntries asks for what a catalog has 150 JANs at a time: a step's few
+  hundred JANs made too long a URL once.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

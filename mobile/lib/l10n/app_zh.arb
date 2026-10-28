@@ -3888,9 +3888,9 @@
   "rcCatalogMissingCount": "目录中没有的JAN {n}",
   "rcCatalogCopied": "已复制目录URL",
   "jcTitle": "JAN目录",
-  "jcIntro": "从厂商的网页目录（mediapress iCata）读取JAN和型号，在核对AI读取结果的表格中核对JAN。商品库和进货价格表不会改变。每月2日自动重新读取。",
+  "jcIntro": "从厂商的网页目录（mediapress iCata，或神户Ecole等meclib目录库）读取JAN、型号和重量，在核对AI读取结果的表格中核对JAN。商品库和进货价格表不会改变。每月2日自动重新读取。",
   "jcUrl": "目录URL",
-  "jcUrlHint": "https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…",
+  "jcUrlHint": "iCata的浏览URL，或meclib书的URL（例：https://ecole-rg.meclib.jp/zebra2026/book/）",
   "jcAdd": "读取",
   "jcSyncing": "正在读取目录（需要1〜2分钟）…",
   "jcResync": "重新读取",
@@ -3900,7 +3900,7 @@
   "jcSynced": "读取时间 {date}",
   "jcError": "上次读取失败：{error}",
   "jcEmpty": "尚未登记目录",
-  "jcBadUrl": "不是mediapress（iCata）的目录URL",
+  "jcBadUrl": "不是mediapress（iCata）或meclib的目录URL",
   "jcUnreachable": "无法连接目录网站",
   "jcNoJan": "此目录中未找到JAN",
   "jcDone": "已读取 {n} 个JAN",
@@ -3934,5 +3934,6 @@
   "productWeightSourceCatalog": "目录",
   "swBreakdown": "明细（数量 × 单件重量）",
   "swLineCalc": "{qty} × {unit} = {total}",
-  "jcSyncingPages": "正在读取目录… {page}/{pages}页"
+  "jcSyncingPages": "正在读取目录… {page}/{pages}页",
+  "jcNoPdf": "此目录不提供页面PDF，无法读取"
 }

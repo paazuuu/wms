@@ -115,6 +115,7 @@ class _JanCatalogScreenState extends ConsumerState<JanCatalogScreen> {
     if (message.contains('jan_catalog_bad_url')) return l10n.jcBadUrl;
     if (message.contains('jan_catalog_unreachable')) return l10n.jcUnreachable;
     if (message.contains('jan_catalog_empty')) return l10n.jcNoJan;
+    if (message.contains('jan_catalog_no_pdf')) return l10n.jcNoPdf;
     return humanizeApiErrorMessage(l10n, message);
   }
 

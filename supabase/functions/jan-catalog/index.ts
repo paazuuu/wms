@@ -1,7 +1,9 @@
 // JAN catalogs (0153): a maker's catalog read for its JAN codes.
 //   GET    /jan-catalog            the catalogs registered, with their counts
 //   POST   /jan-catalog/sync {url} register a viewer URL (a mediapress iCata
-//                                  page) and set it to be read from page one
+//                                  page, or a meclib e-book such as Kobe
+//                                  Ecole's library) and set it to be read
+//                                  from page one
 //   POST   /jan-catalog/step {catalog_id?} read its next 40 pages (the app
 //                                  loops; the database's job steps every
 //                                  catalog waiting, one call at a time)
@@ -21,6 +23,7 @@
 // the service role; reading the table is open to product.view.
 import { adminClient, callerClient, clientPermitted, notPermittedMessage } from "../_shared/require_permission.ts";
 import { purgeAllowed } from "../_shared/purge.ts";
+import { getDocumentProxy } from "npm:unpdf@0.12.1";
 import {
   type CatalogEntry,
   catalogInfo,
@@ -28,6 +31,11 @@ import {
   entriesFromItems,
   entriesFromPage,
   makerFromSearch,
+  meclibBase,
+  meclibInfo,
+  meclibJanPages,
+  type MeclibRef,
+  parseMeclibUrl,
   type PageRef,
   type TextItem,
   pagesFromSearch,
@@ -50,6 +58,8 @@ const PARALLEL = 6;
 // Pages read in one call: a whole catalog (300–900 pages) is more than one
 // function run may compute.
 const CHUNK = 40;
+// A meclib book is read page by page from its PDFs: fewer at a time.
+const PDF_CHUNK = 12;
 
 async function fetchText(url: string): Promise<string> {
   for (let attempt = 0; ; attempt++) {
@@ -62,6 +72,66 @@ async function fetchText(url: string): Promise<string> {
       await new Promise((ok) => setTimeout(ok, 500 * (attempt + 1)));
     }
   }
+}
+
+async function fetchBytes(url: string): Promise<Uint8Array> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": "wms-jan-catalog/1.0" } });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return new Uint8Array(await r.arrayBuffer());
+    } catch (e) {
+      if (attempt >= 2) throw e;
+      await new Promise((ok) => setTimeout(ok, 500 * (attempt + 1)));
+    }
+  }
+}
+
+/** One page's PDF as runs of text, y down the page (as the browser's). */
+async function pdfItems(bytes: Uint8Array): Promise<TextItem[]> {
+  const pdf = await getDocumentProxy(bytes);
+  const out: TextItem[] = [];
+  try {
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      const vp = page.getViewport({ scale: 1 });
+      const tc = await page.getTextContent();
+      for (const it of tc.items) {
+        // deno-lint-ignore no-explicit-any
+        const i = it as any;
+        if (typeof i.str !== "string" || !i.str.trim()) continue;
+        out.push({ x: i.transform[4], y: vp.height - i.transform[5], w: i.width ?? 0, t: i.str });
+      }
+      page.cleanup();
+    }
+  } finally {
+    await pdf.destroy();
+  }
+  return out;
+}
+
+/** A meclib book's title, whether its pages may be had as PDFs, and the
+ * pages whose text has a JAN. */
+async function meclibPages(m: MeclibRef) {
+  const info = meclibInfo(JSON.parse(await fetchText(meclibBase(m) + "data/book.txt")));
+  const text = await fetchText(meclibBase(m) + "data/txtsearch.txt");
+  return { ...info, pages: meclibJanPages(text), pageCount: text.split("\n").length };
+}
+
+/** These pages of a meclib book read from their PDFs. */
+async function readMeclibPages(m: MeclibRef, pages: number[]): Promise<CatalogEntry[]> {
+  const byPage: CatalogEntry[][] = pages.map(() => []);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: 4 }, async () => {
+      for (let i = next++; i < pages.length; i = next++) {
+        const n = pages[i];
+        const bytes = await fetchBytes(`${meclibBase(m)}pdf/${String(n).padStart(4, "0")}.pdf`);
+        byPage[i] = entriesFromItems(await pdfItems(bytes), { id: String(n), group: String(n), number: String(n) });
+      }
+    }),
+  );
+  return uniqueEntries(byPage.flat());
 }
 
 function api(c: CatalogRef, params: Record<string, string>): string {
@@ -125,13 +195,17 @@ type Admin = ReturnType<typeof adminClient>;
 async function mergeEntries(admin: Admin, id: number, entries: CatalogEntry[]): Promise<number> {
   const unique = uniqueEntries(entries);
   if (unique.length === 0) return 0;
-  const { data: had, error: hadErr } = await admin
-    .from("jan_catalog_entries")
-    .select("jan, weight_g")
-    .eq("catalog_id", id)
-    .in("jan", unique.map((e) => e.jan));
-  if (hadErr) throw new Error(hadErr.message);
-  const known = new Map((had ?? []).map((h) => [h.jan as string, h.weight_g as number | null]));
+  // Asked 150 at a time: a few hundred JANs make too long a URL.
+  const known = new Map<string, number | null>();
+  for (let k = 0; k < unique.length; k += 150) {
+    const { data: had, error: hadErr } = await admin
+      .from("jan_catalog_entries")
+      .select("jan, weight_g")
+      .eq("catalog_id", id)
+      .in("jan", unique.slice(k, k + 150).map((e) => e.jan));
+    if (hadErr) throw new Error(hadErr.message);
+    for (const h of had ?? []) known.set(h.jan as string, h.weight_g as number | null);
+  }
   const fresh = unique.filter((e) => !known.has(e.jan));
   for (let k = 0; k < fresh.length; k += 500) {
     // Two steps of one catalog at once (the app's and the job's) may both
@@ -183,6 +257,29 @@ async function finishCatalog(admin: Admin, id: number, pagesRead: number, event:
 /** A viewer catalog registered (or again) and set to be read from its first
  * page; /step reads it a few pages at a time. */
 async function startSync(admin: Admin, url: string, userId: string | null): Promise<[number, unknown]> {
+  const book = parseMeclibUrl(url);
+  if (book) {
+    const { data: row, error } = await admin
+      .from("jan_catalogs")
+      .upsert(
+        {
+          url: url.trim(),
+          kind: "meclib",
+          host: book.host,
+          volume_id: "meclib",
+          catalog_id: book.book,
+          design_id: "",
+          next_page: 0,
+          sync_error: null,
+          ...(userId ? { created_by: userId } : {}),
+        },
+        { onConflict: "volume_id,catalog_id" },
+      )
+      .select("*")
+      .single();
+    if (error || !row) return [400, { message: error?.message ?? "upsert failed" }];
+    return [200, { data: row }];
+  }
   const ref = parseCatalogUrl(url);
   if (!ref) return [400, { message: "jan_catalog_bad_url" }];
   const { data: row, error } = await admin
@@ -207,17 +304,49 @@ async function startSync(admin: Admin, url: string, userId: string | null): Prom
   return [200, { data: row }];
 }
 
+/** The next pages of a meclib book: read from their PDFs, when the book lets
+ * a page be had as a PDF; else it is not read at all. */
+// deno-lint-ignore no-explicit-any
+async function stepMeclib(admin: Admin, cat: any, from: number): Promise<[number, unknown]> {
+  const book: MeclibRef = { host: cat.host, book: cat.catalog_id };
+  try {
+    const list = await meclibPages(book);
+    if (!list.pdfAllowed) {
+      await admin.from("jan_catalogs").update({ next_page: null, sync_error: "PDF not offered", name: list.title }).eq("id", cat.id);
+      return [422, { message: "jan_catalog_no_pdf" }];
+    }
+    if (from === 0) {
+      const del = await admin.from("jan_catalog_entries").delete().eq("catalog_id", cat.id);
+      if (del.error) throw new Error(del.error.message);
+      await admin.from("jan_catalogs").update({ name: list.title, page_count: list.pageCount }).eq("id", cat.id);
+    }
+    const slice = list.pages.slice(from, from + PDF_CHUNK);
+    await mergeEntries(admin, cat.id, await readMeclibPages(book, slice));
+    const next = from + slice.length;
+    if (next >= list.pages.length) {
+      const done = await finishCatalog(admin, cat.id, list.pages.length, "jan_catalog.sync");
+      return [200, { data: { done: true, catalog: done, page: next, pages: list.pages.length } }];
+    }
+    await admin.from("jan_catalogs").update({ next_page: next, pages_read: next }).eq("id", cat.id);
+    return [200, { data: { done: false, catalog_id: cat.id, page: next, pages: list.pages.length } }];
+  } catch (e) {
+    await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500) }).eq("id", cat.id);
+    return [502, { message: `jan_catalog_unreachable: ${e}` }];
+  }
+}
+
 /** The next few pages of a catalog being read ([id], else the one waiting
  * longest): what it came to, and how far. */
 async function stepSync(admin: Admin, id: number | null): Promise<[number, unknown]> {
-  let q = admin.from("jan_catalogs").select("*").eq("kind", "icata").not("next_page", "is", null);
+  let q = admin.from("jan_catalogs").select("*").in("kind", ["icata", "meclib"]).not("next_page", "is", null);
   q = id != null ? q.eq("id", id) : q.order("synced_at", { ascending: true, nullsFirst: true });
   const { data: rows, error } = await q.limit(1);
   if (error) return [400, { message: error.message }];
   const cat = rows?.[0];
   if (!cat) return [200, { data: { done: true, idle: true } }];
-  const ref: CatalogRef = { host: cat.host, volumeId: cat.volume_id, catalogId: cat.catalog_id, designId: cat.design_id };
   const from = Number(cat.next_page) || 0;
+  if (cat.kind === "meclib") return await stepMeclib(admin, cat, from);
+  const ref: CatalogRef = { host: cat.host, volumeId: cat.volume_id, catalogId: cat.catalog_id, designId: cat.design_id };
   try {
     const list = await listPages(ref);
     if (from === 0) {
@@ -375,7 +504,7 @@ Deno.serve(async (req) => {
     // Every viewer catalog set to be read again (the monthly job); the
     // stepping job reads them a few pages at a time.
     if (req.method === "POST" && rest[0] === "refresh" && rest.length === 1) {
-      const { data, error } = await admin.from("jan_catalogs").update({ next_page: 0 }).eq("kind", "icata").select("id");
+      const { data, error } = await admin.from("jan_catalogs").update({ next_page: 0 }).in("kind", ["icata", "meclib"]).select("id");
       if (error) return json({ message: error.message }, 400);
       return json({ data: { queued: (data ?? []).length } });
     }

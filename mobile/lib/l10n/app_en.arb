@@ -3888,9 +3888,9 @@
   "rcCatalogMissingCount": "JANs not in the catalog: {n}",
   "rcCatalogCopied": "Catalog URL copied",
   "jcTitle": "JAN catalogs",
-  "jcIntro": "Reads JAN codes and part numbers from a maker's web catalog (mediapress iCata) and checks the JANs in the table where an AI reading is checked. Products and the price book are not changed. Read again automatically on the 2nd of each month.",
+  "jcIntro": "Reads JAN codes, part numbers and weights from makers' web catalogs (mediapress iCata, or a meclib catalog library such as Kobe Ecole's) and checks the JANs in the table where an AI reading is checked. Products and the price book are not changed. Read again automatically on the 2nd of each month.",
   "jcUrl": "Catalog URL",
-  "jcUrlHint": "https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…",
+  "jcUrlHint": "An iCata viewer URL, or a meclib book URL (e.g. https://ecole-rg.meclib.jp/zebra2026/book/)",
   "jcAdd": "Read",
   "jcSyncing": "Reading the catalog (takes a minute or two)…",
   "jcResync": "Read again",
@@ -3900,7 +3900,7 @@
   "jcSynced": "Read {date}",
   "jcError": "The last read failed: {error}",
   "jcEmpty": "No catalog yet",
-  "jcBadUrl": "Not a mediapress (iCata) catalog URL",
+  "jcBadUrl": "Not a mediapress (iCata) or meclib catalog URL",
   "jcUnreachable": "Could not reach the catalog site",
   "jcNoJan": "No JAN found in this catalog",
   "jcDone": "{n} JANs read",
@@ -3934,5 +3934,6 @@
   "productWeightSourceCatalog": "Catalog",
   "swBreakdown": "Breakdown (quantity × one unit)",
   "swLineCalc": "{qty} × {unit} = {total}",
-  "jcSyncingPages": "Reading the catalog… page {page}/{pages}"
+  "jcSyncingPages": "Reading the catalog… page {page}/{pages}",
+  "jcNoPdf": "This catalog offers no page PDFs, so it cannot be read"
 }

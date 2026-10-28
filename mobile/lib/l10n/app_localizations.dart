@@ -21269,7 +21269,7 @@ abstract class AppLocalizations {
   /// No description provided for @jcIntro.
   ///
   /// In ja, this message translates to:
-  /// **'メーカーのWebカタログ（mediapress iCata）からJANと品番を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。'**
+  /// **'メーカーのWebカタログ（mediapressのiCata、神戸エコールなどのmeclibカタログライブラリ）からJAN・品番・重量を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。'**
   String get jcIntro;
 
   /// No description provided for @jcUrl.
@@ -21281,7 +21281,7 @@ abstract class AppLocalizations {
   /// No description provided for @jcUrlHint.
   ///
   /// In ja, this message translates to:
-  /// **'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…'**
+  /// **'iCataの表示URL、またはmeclibの本のURL（例：https://ecole-rg.meclib.jp/zebra2026/book/）'**
   String get jcUrlHint;
 
   /// No description provided for @jcAdd.
@@ -21341,7 +21341,7 @@ abstract class AppLocalizations {
   /// No description provided for @jcBadUrl.
   ///
   /// In ja, this message translates to:
-  /// **'mediapress（iCata）のカタログURLではありません'**
+  /// **'mediapress（iCata）またはmeclibのカタログURLではありません'**
   String get jcBadUrl;
 
   /// No description provided for @jcUnreachable.
@@ -21547,6 +21547,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'カタログを読み込んでいます… {page}/{pages}ページ'**
   String jcSyncingPages(int page, int pages);
+
+  /// No description provided for @jcNoPdf.
+  ///
+  /// In ja, this message translates to:
+  /// **'このカタログはページのPDFを出していないため読み込めません'**
+  String get jcNoPdf;
 }
 
 class _AppLocalizationsDelegate

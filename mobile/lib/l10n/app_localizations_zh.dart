@@ -11871,14 +11871,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get jcIntro =>
-      '从厂商的网页目录（mediapress iCata）读取JAN和型号，在核对AI读取结果的表格中核对JAN。商品库和进货价格表不会改变。每月2日自动重新读取。';
+      '从厂商的网页目录（mediapress iCata，或神户Ecole等meclib目录库）读取JAN、型号和重量，在核对AI读取结果的表格中核对JAN。商品库和进货价格表不会改变。每月2日自动重新读取。';
 
   @override
   String get jcUrl => '目录URL';
 
   @override
   String get jcUrlHint =>
-      'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…';
+      'iCata的浏览URL，或meclib书的URL（例：https://ecole-rg.meclib.jp/zebra2026/book/）';
 
   @override
   String get jcAdd => '读取';
@@ -11916,7 +11916,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jcEmpty => '尚未登记目录';
 
   @override
-  String get jcBadUrl => '不是mediapress（iCata）的目录URL';
+  String get jcBadUrl => '不是mediapress（iCata）或meclib的目录URL';
 
   @override
   String get jcUnreachable => '无法连接目录网站';
@@ -12034,4 +12034,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String jcSyncingPages(int page, int pages) {
     return '正在读取目录… $page/$pages页';
   }
+
+  @override
+  String get jcNoPdf => '此目录不提供页面PDF，无法读取';
 }

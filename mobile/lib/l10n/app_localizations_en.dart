@@ -12193,14 +12193,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jcIntro =>
-      'Reads JAN codes and part numbers from a maker\'s web catalog (mediapress iCata) and checks the JANs in the table where an AI reading is checked. Products and the price book are not changed. Read again automatically on the 2nd of each month.';
+      'Reads JAN codes, part numbers and weights from makers\' web catalogs (mediapress iCata, or a meclib catalog library such as Kobe Ecole\'s) and checks the JANs in the table where an AI reading is checked. Products and the price book are not changed. Read again automatically on the 2nd of each month.';
 
   @override
   String get jcUrl => 'Catalog URL';
 
   @override
   String get jcUrlHint =>
-      'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…';
+      'An iCata viewer URL, or a meclib book URL (e.g. https://ecole-rg.meclib.jp/zebra2026/book/)';
 
   @override
   String get jcAdd => 'Read';
@@ -12238,7 +12238,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jcEmpty => 'No catalog yet';
 
   @override
-  String get jcBadUrl => 'Not a mediapress (iCata) catalog URL';
+  String get jcBadUrl => 'Not a mediapress (iCata) or meclib catalog URL';
 
   @override
   String get jcUnreachable => 'Could not reach the catalog site';
@@ -12359,4 +12359,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String jcSyncingPages(int page, int pages) {
     return 'Reading the catalog… page $page/$pages';
   }
+
+  @override
+  String get jcNoPdf =>
+      'This catalog offers no page PDFs, so it cannot be read';
 }

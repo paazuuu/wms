@@ -4,6 +4,9 @@ import {
   entriesFromItems,
   entriesFromPage,
   makerFromSearch,
+  meclibInfo,
+  meclibJanPages,
+  parseMeclibUrl,
   pageLines,
   pagesFromSearch,
   pageWeights,
@@ -198,4 +201,27 @@ Deno.test("a JAN only as catalogs print one: runs of short codes are not one", (
     "4909999000038",
     "4909999000045",
   ]);
+});
+
+Deno.test("a meclib e-book by its URL; what its book.txt allows; the pages to look at", () => {
+  assertEquals(parseMeclibUrl("https://ecole-rg.meclib.jp/zebra2026/book/"), { host: "ecole-rg.meclib.jp", book: "zebra2026" });
+  assertEquals(parseMeclibUrl("https://ecole-rg.meclib.jp/library/books/2026OFFICE/book/index.html#target/page_no=3"), {
+    host: "ecole-rg.meclib.jp",
+    book: "2026OFFICE",
+  });
+  assertEquals(parseMeclibUrl("https://example.com/zebra2026/book/"), null);
+  // The library's own list is not a book.
+  assertEquals(parseMeclibUrl("https://ecole-rg.meclib.jp/library/maker_ctlg/book/list"), null);
+  assertEquals(meclibInfo({ title: "テスト総合カタログ", pdf: ["1", "1", "1", "0", "0"] }), { title: "テスト総合カタログ", pdfAllowed: true });
+  assertEquals(meclibInfo({ title: "x", pdf: ["0", "1"] }).pdfAllowed, false);
+  assertEquals(meclibJanPages("表紙\nTP-1 4909999000014商品コード:8642314909999000021\n索引\n49-09999-000038"), [2, 4]);
+});
+
+Deno.test("a PDF's spacer run does not join two columns", () => {
+  const got = entriesFromItems([
+    { x: 100, y: 142, w: 20, t: "TP-F" },
+    { x: 120, y: 142, w: 180, t: " " },
+    { x: 300, y: 142, w: 71, t: "49-09999-000014" },
+  ], { id: "1", group: "1", number: "1" });
+  assertEquals(got.map((e) => [e.jan, e.code_hint, e.line_text]), [["4909999000014", "TP-F", "TP-F | 49-09999-000014"]]);
 });

@@ -11942,14 +11942,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get jcIntro =>
-      'メーカーのWebカタログ（mediapress iCata）からJANと品番を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。';
+      'メーカーのWebカタログ（mediapressのiCata、神戸エコールなどのmeclibカタログライブラリ）からJAN・品番・重量を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。';
 
   @override
   String get jcUrl => 'カタログのURL';
 
   @override
   String get jcUrlHint =>
-      'https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…';
+      'iCataの表示URL、またはmeclibの本のURL（例：https://ecole-rg.meclib.jp/zebra2026/book/）';
 
   @override
   String get jcAdd => '読み込む';
@@ -11987,7 +11987,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get jcEmpty => 'まだカタログが登録されていません';
 
   @override
-  String get jcBadUrl => 'mediapress（iCata）のカタログURLではありません';
+  String get jcBadUrl => 'mediapress（iCata）またはmeclibのカタログURLではありません';
 
   @override
   String get jcUnreachable => 'カタログのサイトに接続できませんでした';
@@ -12105,4 +12105,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String jcSyncingPages(int page, int pages) {
     return 'カタログを読み込んでいます… $page/$pagesページ';
   }
+
+  @override
+  String get jcNoPdf => 'このカタログはページのPDFを出していないため読み込めません';
 }

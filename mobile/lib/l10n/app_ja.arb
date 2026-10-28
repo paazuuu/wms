@@ -10706,9 +10706,9 @@
   },
   "rcCatalogCopied": "カタログのURLをコピーしました",
   "jcTitle": "JANカタログ",
-  "jcIntro": "メーカーのWebカタログ（mediapress iCata）からJANと品番を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。",
+  "jcIntro": "メーカーのWebカタログ（mediapressのiCata、神戸エコールなどのmeclibカタログライブラリ）からJAN・品番・重量を読み込み、AIの読み取り結果を確認する表でJANを照合します。商品ライブラリや仕入価格表は変わりません。毎月2日に自動で読み直します。",
   "jcUrl": "カタログのURL",
-  "jcUrlHint": "https://dcs.mediapress-net.com/iportal/CatalogViewInterfaceStartUpAction.do?…",
+  "jcUrlHint": "iCataの表示URL、またはmeclibの本のURL（例：https://ecole-rg.meclib.jp/zebra2026/book/）",
   "jcAdd": "読み込む",
   "jcSyncing": "カタログを読み込んでいます（1〜2分かかります）…",
   "jcResync": "読み直す",
@@ -10749,7 +10749,7 @@
     }
   },
   "jcEmpty": "まだカタログが登録されていません",
-  "jcBadUrl": "mediapress（iCata）のカタログURLではありません",
+  "jcBadUrl": "mediapress（iCata）またはmeclibのカタログURLではありません",
   "jcUnreachable": "カタログのサイトに接続できませんでした",
   "jcNoJan": "このカタログにはJANが見つかりませんでした",
   "jcDone": "JAN {n}件を読み込みました",
@@ -10856,5 +10856,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "jcNoPdf": "このカタログはページのPDFを出していないため読み込めません"
 }
