@@ -178,6 +178,8 @@ void main() {
 
     // Overview: the parts, the master and its stock.
     expect(find.byKey(const ValueKey('cit-code')), findsOneWidget);
+    // No 品名 row beside the 品番 (0163): the 商品名 is the title above.
+    expect(find.byKey(const ValueKey('cit-name')), findsNothing);
     expect(find.byKey(const ValueKey('cit-stock')), findsOneWidget);
     expect(find.text('新東光通商  ¥88'), findsOneWidget);
     expect(find.text('アケボノクラウン  ¥92'), findsOneWidget);
@@ -292,7 +294,7 @@ void main() {
     // The company on the file was chosen; one line updates an item.
     expect(find.text('ファイルに書かれた会社から判断しました'), findsOneWidget);
     expect(find.text('2行：新しい商品 1件・価格台帳にある商品の更新 1件'), findsOneWidget);
-    expect(find.text('品名 サラサ ドライ 0.5 アオ', findRichText: true), findsOneWidget);
+    expect(find.text('商品名 サラサ ドライ 0.5 アオ', findRichText: true), findsOneWidget);
     expect(find.text('掛率 50%', findRichText: true), findsOneWidget);
 
     await tester.enterText(find.byKey(const ValueKey('ci-branch')), '大阪支店');

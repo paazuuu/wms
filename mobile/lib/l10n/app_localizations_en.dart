@@ -5668,7 +5668,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ntFieldCode => 'Code';
 
   @override
-  String get ntFieldNameCode => 'Name + code (one cell)';
+  String get ntFieldNameCode => 'Name + code (one column)';
 
   @override
   String get ntFieldQuantity => 'Quantity';
@@ -8421,9 +8421,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pdMaker => 'Maker';
 
   @override
-  String get pdBaseName => 'Product name';
-
-  @override
   String get pdCode => 'Item code';
 
   @override
@@ -8821,7 +8818,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get citEdit => 'Edit the item';
 
   @override
-  String get citNameField => 'Name (as shown)';
+  String get citNameField => 'Product name';
 
   @override
   String get citSaved => 'Saved';
@@ -12487,9 +12484,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refColYear => 'Fiscal year';
 
   @override
-  String get pcName => 'Name';
-
-  @override
   String get pcJan => 'JAN';
 
   @override
@@ -12511,9 +12505,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pcReset => 'Reset column widths';
 
   @override
-  String get plNoName => '(no name yet)';
+  String get sfJudgingHeadings =>
+      'Asking the AI what the unknown column headings mean…';
 
   @override
-  String get plNoNameHint =>
-      'The file it came from gave no name, so its part number stands in. Open the product to give it a name.';
+  String get sfHeadingsTitle => 'Column headings judged';
+
+  @override
+  String sfHeadingMeaning(String header, String field, String source) {
+    return '“$header” → $field ($source)';
+  }
+
+  @override
+  String get sfHeadingUnused => 'not used for stock';
+
+  @override
+  String get sfHeadingsHint =>
+      'Headings the app did not know were looked up among those learned for this company and the shared ones; the rest were judged by the AI from the heading and the values. If one is wrong, correct it in the reading check.';
+
+  @override
+  String get pdBasePart => 'Base name (part of the name)';
 }

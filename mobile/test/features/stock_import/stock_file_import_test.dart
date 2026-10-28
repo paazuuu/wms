@@ -184,6 +184,61 @@ void _expectRow(WidgetTester tester, String jan, String before, String change, S
 
 void main() {
   group('reading a stock sheet', () {
+
+  test('headings the app does not know are filled from what the server judged (0163)', () {
+    final rows = [
+      ['JANコード', '商品名称', 'メーカー品番', '数量', '規格'],
+      [_jan1, 'テストペン 黒', 'TP-1', '3', '0.5mm'],
+    ];
+    final first = parseStockRows(rows);
+    expect(first.unplaced, [1, 2, 4]);
+    expect(first.lines.single.name, isNull);
+    expect(first.samplesFrom(rows), [rows[1]]);
+    final again = parseStockRows(rows, meanings: const [
+      HeadingMeaning(index: 1, header: '商品名称', field: 'product_name'),
+      HeadingMeaning(index: 2, header: 'メーカー品番', field: 'product_code', source: 'partner'),
+      HeadingMeaning(index: 4, header: '規格', field: 'spec'),
+      // Never over a column the app already placed.
+      HeadingMeaning(index: 3, header: '数量', field: 'product_name'),
+    ]);
+    final l = again.lines.single;
+    expect((l.name, l.code, l.quantity), ('テストペン 黒', 'TP-1', 3));
+    expect(again.usedMeanings.map((m) => m.header), ['商品名称', 'メーカー品番', '数量']);
+    expect(again.unusedMeanings.map((m) => m.header), ['規格']);
+    expect(again.unplaced, [4]);
+  });
+
+  testWidgets('unknown headings are asked about once, and what they were taken for is shown', (tester) async {
+    final reader = FakeMasterImportRepository()
+      ..meanings = const [
+        HeadingMeaning(index: 1, header: '商品名称', field: 'product_name'),
+        HeadingMeaning(index: 3, header: '規格', field: 'spec'),
+      ];
+    await _pumpCsv(tester, 'JANコード,商品名称,数量,規格\n$_jan1,テストペン 黒,3,0.5mm\n',
+        products: {_jan1: 'テストペン'}, reader: reader);
+    expect(reader.askedHeadings, [
+      ['JANコード', '商品名称', '数量', '規格'],
+    ]);
+    expect(reader.reads, 0); // the sheet itself is still read here, not by the AI
+    expect(find.byKey(const ValueKey('sf-headings')), findsOneWidget);
+    expect(find.text('「商品名称」→ 商品名（AIが判定）'), findsOneWidget);
+    expect(find.text('「規格」→ 規格（AIが判定）　在庫の読み込みでは使いません'), findsOneWidget);
+  });
+
+  testWidgets('a sheet whose headings are all known asks nothing', (tester) async {
+    final reader = FakeMasterImportRepository();
+    await _pumpCsv(tester, 'JANコード,商品名,数量\n$_jan1,テストペン 黒,3\n', products: {_jan1: 'テストペン'}, reader: reader);
+    expect(reader.askedHeadings, isEmpty);
+    expect(find.byKey(const ValueKey('sf-headings')), findsNothing);
+  });
+
+  testWidgets('without an answer about the headings, the sheet stands as read', (tester) async {
+    final reader = FakeMasterImportRepository()..meaningsFail = true;
+    await _pumpCsv(tester, 'JANコード,商品名称,数量\n$_jan1,テストペン 黒,3\n', products: {_jan1: 'テストペン'}, reader: reader);
+    expect(reader.askedHeadings, hasLength(1));
+    expect(find.byKey(const ValueKey('sf-headings')), findsNothing);
+    expect(find.textContaining('1商品・合計3個'), findsOneWidget);
+  });
     test('finds the JAN and quantity columns under a title, and adds up the same JAN', () {
       final s = parseStockRows([
         ['在庫表 10月'],

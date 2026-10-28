@@ -212,8 +212,12 @@ class _Header extends ConsumerWidget {
       // The product's own id in the master.
       (l10n.pdProductId, 'P-${product.id.toString().padLeft(6, '0')}', const ValueKey('pd-id'), true),
       (l10n.pdMaker, widenKana(product.maker ?? '—'), const ValueKey('pd-maker'), false),
-      (l10n.pdBaseName, widenKana(product.baseName ?? product.name), const ValueKey('pd-base-name'), false),
       (l10n.pdCode, product.sku ?? '—', const ValueKey('pd-code'), true),
+      // 品名 is not a row of its own: the 商品名 is the title above, the 品番
+      // names the item. The 基本名 the name is built from (サラサドライ), only
+      // when it is a part of its own.
+      if (product.baseName case final b? when b.trim().isNotEmpty && b.trim() != product.name.trim() && b.trim() != product.sku?.trim())
+        (l10n.pdBasePart, widenKana(b), const ValueKey('pd-base-name'), false),
       (l10n.pdJan, product.janCode, const ValueKey('pd-jan'), true),
       for (final at in product.attributes) (at.name, widenKana(at.value), ValueKey('pd-attr-${at.key}'), false),
       if (product.category case final c? when c.trim().isNotEmpty) (l10n.pdCategory, c, const ValueKey('pd-category'), false),

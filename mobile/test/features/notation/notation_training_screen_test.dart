@@ -115,8 +115,8 @@ void main() {
     expect(find.textContaining('4901234-567894'), findsOneWidget);
     // Line 3: nothing matched yet, and the AI's two readings disagreed.
     expect(find.text('自社商品が見つかりません'), findsOneWidget);
-    expect(find.text('AIの読みが不一致：品名'), findsOneWidget);
-    expect(find.text('もう一方の読み（品名）：けしゴム'), findsOneWidget);
+    expect(find.text('AIの読みが不一致：商品名'), findsOneWidget);
+    expect(find.text('もう一方の読み（商品名）：けしゴム'), findsOneWidget);
   });
 
   testWidgets('a line is tied to our product, then the checked sample is learned',

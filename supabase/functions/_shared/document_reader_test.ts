@@ -14,6 +14,7 @@ import {
   gemini,
   resetAiFailures,
   type AliasRow,
+  mapColumns,
   checkJan,
   checkLines,
   checkTotals,
@@ -864,4 +865,41 @@ Deno.test("a 商品名 that is only the maker and its 品番 is no name: the mak
   const e = line({ product_name: "ノート", product_code: "TN-A5" });
   settleMakerName(e);
   assertEquals([e.maker, e.product_name], [null, "ノート"]);
+});
+
+Deno.test("mapColumns: known headings first, the AI only for the rest", async () => {
+  const known: AliasRow[] = [
+    { header_key: normalizeText("JAN"), field: "jan", partner: false },
+    { header_key: normalizeText("数量"), field: "quantity", partner: false },
+    { header_key: normalizeText("メーカー品番"), field: "product_code", partner: true },
+  ];
+  let asked: string[] = [];
+  const ask = (headers: string[]) => {
+    asked = headers;
+    return Promise.resolve(headers.map((h) =>
+      h === "商品名称" ? { field: "product_name" as const, attribute: null }
+      : h === "備考" ? { field: "ignore" as const, attribute: null }
+      : h === "JAN" ? { field: "maker" as const, attribute: null } // not asked about
+      : null
+    ));
+  };
+  const cols = await mapColumns(["JAN", "商品名称", "数量", "メーカー品番", "備考", "", "謎"],
+    [["4909999000014", "テストペン 黒", "3", "TP-1", "", "", "x"]], known, [], ask);
+  assertEquals(asked.length, 7); // every heading, for context
+  assertEquals(cols.map((c) => [c.index, c.field, c.source]), [
+    [0, "jan", "global"],
+    [1, "product_name", "ai"],
+    [2, "quantity", "global"],
+    [3, "product_code", "partner"],
+  ]);
+});
+
+Deno.test("mapColumns: no AI call when every heading is known", async () => {
+  let called = false;
+  const cols = await mapColumns(["JAN", "数量"], [], [
+    { header_key: normalizeText("JAN"), field: "jan", partner: false },
+    { header_key: normalizeText("数量"), field: "quantity", partner: false },
+  ], [], () => { called = true; return Promise.resolve([]); });
+  assertEquals(called, false);
+  assertEquals(cols.length, 2);
 });

@@ -239,4 +239,17 @@ void main() {
     expect(find.byKey(const ValueKey('pd-tab-ours')), findsNothing);
     expect(find.text('サイズ・重量'), findsOneWidget);
   });
+
+  testWidgets('no 品名 row beside the 品番: the 商品名 is the title, the 品番 names the item', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const product = Product(id: 144, janCode: _jan, name: 'ジェットストリーム 0.7 赤', maker: 'テスト', sku: 'TS-07R');
+    await pumpApp(tester, const ProductDetailScreen(productId: 144), overrides: [
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: [product])),
+    ]);
+    expect(find.byKey(const ValueKey('pd-code')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pd-base-name')), findsNothing);
+    expect(find.text('品名'), findsNothing);
+    expect(find.text('ジェットストリーム 0.7 赤'), findsWidgets);
+  });
 }

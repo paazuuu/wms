@@ -5533,13 +5533,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ntFieldMaker => 'メーカー';
 
   @override
-  String get ntFieldName => '品名';
+  String get ntFieldName => '商品名';
 
   @override
   String get ntFieldCode => '品番';
 
   @override
-  String get ntFieldNameCode => '品名＋品番（1欄）';
+  String get ntFieldNameCode => '商品名＋品番（1欄）';
 
   @override
   String get ntFieldQuantity => '数量';
@@ -8248,9 +8248,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pdMaker => 'メーカー';
 
   @override
-  String get pdBaseName => '品名';
-
-  @override
   String get pdCode => '品番';
 
   @override
@@ -8638,7 +8635,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get citEdit => '商品情報を編集';
 
   @override
-  String get citNameField => '品名（表示名）';
+  String get citNameField => '商品名';
 
   @override
   String get citSaved => '保存しました';
@@ -12230,9 +12227,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get refColYear => '年度';
 
   @override
-  String get pcName => '商品名';
-
-  @override
   String get pcJan => 'JANコード';
 
   @override
@@ -12254,9 +12248,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pcReset => '列の幅を元に戻す';
 
   @override
-  String get plNoName => '（品名未登録）';
+  String get sfJudgingHeadings => '知らない列見出しの意味をAIで判断しています…';
 
   @override
-  String get plNoNameHint =>
-      '取り込んだファイルに品名がなかったため、品番を仮の名前にしています。商品を開いて品名を入れてください。';
+  String get sfHeadingsTitle => '列見出しの判断';
+
+  @override
+  String sfHeadingMeaning(String header, String field, String source) {
+    return '「$header」→ $field（$source）';
+  }
+
+  @override
+  String get sfHeadingUnused => '在庫の読み込みでは使いません';
+
+  @override
+  String get sfHeadingsHint =>
+      'アプリが知らない見出しは、この取引先で学習した見出しと共通の見出しで調べ、それでも分からないものはAIが見出しと値から判断しました。違っていたら「読み取り結果の確認」で直してください。';
+
+  @override
+  String get pdBasePart => '基本名（名前の部品）';
 }

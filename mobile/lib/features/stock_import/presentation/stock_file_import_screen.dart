@@ -15,6 +15,7 @@ import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../master_import/presentation/master_import_labels.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
+import '../../notation/domain/notation.dart' show ColumnField;
 import '../../notation/presentation/notation_labels.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
@@ -87,6 +88,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// The AI is reading the file (it can take a minute for a long PDF).
   bool _aiReading = false;
 
+  /// Asking the server what unknown headings mean (0163).
+  bool _judgingHeadings = false;
+
   /// The kept copy import-plan made of a file the AI read (0132).
   int? _documentId;
 
@@ -155,6 +159,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         sheet = parseStockRows(rows);
       } on FormatException {
         sheet = null;
+      }
+      // Headings the app's own words do not know (商品名称, メーカー品番, …):
+      // the server says what they are — learned headings, then the AI — and
+      // the sheet is read again with them (0163). Without an answer, the
+      // sheet stands as read.
+      if (sheet != null && sheet.header && sheet.unplaced.isNotEmpty && rows != null) {
+        setState(() => _judgingHeadings = true);
+        final m = await ref.read(masterImportRepositoryProvider).mapColumns(sheet.headings, sheet.samplesFrom(rows));
+        if (!mounted) return;
+        if (m case ApiSuccess(:final data) when data.isNotEmpty) sheet = parseStockRows(rows, meanings: data);
+        setState(() => _judgingHeadings = false);
       }
     }
     // A PDF, a scan, a photo, an old .xls — or a sheet whose headings were
@@ -686,6 +701,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   const SizedBox(height: AppSpacing.xs),
                   Text(l10n.sfAiReading, key: const ValueKey('sf-ai-reading'), style: muted),
                 ],
+                if (_judgingHeadings) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(l10n.sfJudgingHeadings, key: const ValueKey('sf-judging-headings'), style: muted),
+                ],
               ]),
             ),
           if (_error case final e?)
@@ -762,6 +781,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ]),
                 ),
               ),
+            // Headings the app did not know, and what the server took them
+            // for (0163): each heading → its meaning, and who decided it.
+            if (sheet.meanings.isNotEmpty) _HeadingMeanings(sheet: sheet),
             // The table: to check against the original, and to correct again.
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -1238,6 +1260,45 @@ class _GoingInTableState extends State<_GoingInTable> {
                 ),
               );
             }(),
+        ]),
+      ),
+    );
+  }
+}
+
+/// What the server took the unknown headings for (0163): 「商品名称」→ 品名
+/// (AI). Headings a stock reading does not keep (規格, 入数) are named as
+/// such, so nothing is silently dropped.
+class _HeadingMeanings extends StatelessWidget {
+  const _HeadingMeanings({required this.sheet});
+
+  final StockSheet sheet;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    String field(String wire) => columnFieldLabel(l10n, ColumnField.values.where((f) => f.wire == wire).firstOrNull);
+    String line(HeadingMeaning m) =>
+        l10n.sfHeadingMeaning(m.header, field(m.field), columnSourceLabel(l10n, m.source));
+    return Card(
+      key: const ValueKey('sf-headings'),
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            const Icon(Icons.auto_awesome_outlined, size: 18),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(child: Text(l10n.sfHeadingsTitle, style: theme.textTheme.titleSmall)),
+          ]),
+          const SizedBox(height: AppSpacing.xs),
+          for (final m in sheet.usedMeanings) Text(line(m), key: ValueKey('sf-heading-${m.index}')),
+          for (final m in sheet.unusedMeanings)
+            Text('${line(m)}　${l10n.sfHeadingUnused}', key: ValueKey('sf-heading-${m.index}'), style: muted),
+          const SizedBox(height: AppSpacing.xs),
+          Text(l10n.sfHeadingsHint, style: muted),
         ]),
       ),
     );

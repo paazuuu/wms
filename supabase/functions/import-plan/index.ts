@@ -71,6 +71,7 @@ import {
   normalizeText,
   aiPing,
   lookupSpecs,
+  mapColumns,
   readDocument,
   readingQuality,
   readIssuer,
@@ -730,6 +731,26 @@ Deno.serve(async (req) => {
           return json({ message: notPermittedMessage("product.manage") }, 403);
         }
         return json({ data: await suggestEnglishNames(Array.isArray(b.items) ? b.items : []) });
+      }
+      // 見出しの意味 (0163): a sheet the device reads itself names its JAN and
+      // quantity, but other headings it does not know — what each one is,
+      // from this company's learned headings and then the AI. Nothing kept.
+      if (str(b.mode) === "map_columns") {
+        const headers = (Array.isArray(b.headers) ? b.headers : []).slice(0, 80).map((h: unknown) => str(h) ?? "");
+        if (!headers.some((h: string) => h !== "")) return json({ message: "headers are required" }, 400);
+        const samples = (Array.isArray(b.samples) ? b.samples : []).slice(0, 6)
+          .filter((r: unknown): r is unknown[] => Array.isArray(r))
+          .map((r: unknown[]) => r.slice(0, 80).map((c) => (c === null || c === undefined ? "" : String(c).slice(0, 200))));
+        const pid = Number(b.partner_id);
+        const { data: aliasData } = await supabase.rpc("column_alias_map", {
+          p_partner_id: Number.isFinite(pid) && pid > 0 ? pid : null,
+        });
+        const { data: attrData } = await supabase.rpc("list_product_attributes");
+        const attributes = ((attrData ?? []) as { key: string; name: string; status?: string }[])
+          .filter((a) => a.status !== "inactive")
+          .map((a): AttributeDef => ({ key: a.key, name: a.name }));
+        const columns = await mapColumns(headers, samples, (aliasData ?? []) as AliasRow[], attributes);
+        return json({ data: { columns, ai_failure: aiFailure() } });
       }
       if (str(b.mode) === "learn") {
         const { data: allowed } = await supabase.rpc("notation_training_allowed");

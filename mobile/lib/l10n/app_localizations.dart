@@ -10108,7 +10108,7 @@ abstract class AppLocalizations {
   /// Notation dialects / training (0105-0106): ntFieldName
   ///
   /// In ja, this message translates to:
-  /// **'品名'**
+  /// **'商品名'**
   String get ntFieldName;
 
   /// Notation dialects / training (0105-0106): ntFieldCode
@@ -10120,7 +10120,7 @@ abstract class AppLocalizations {
   /// Notation dialects / training (0105-0106): ntFieldNameCode
   ///
   /// In ja, this message translates to:
-  /// **'品名＋品番（1欄）'**
+  /// **'商品名＋品番（1欄）'**
   String get ntFieldNameCode;
 
   /// Notation dialects / training (0105-0106): ntFieldQuantity
@@ -15073,12 +15073,6 @@ abstract class AppLocalizations {
   /// **'メーカー'**
   String get pdMaker;
 
-  /// No description provided for @pdBaseName.
-  ///
-  /// In ja, this message translates to:
-  /// **'品名'**
-  String get pdBaseName;
-
   /// No description provided for @pdCode.
   ///
   /// In ja, this message translates to:
@@ -15742,7 +15736,7 @@ abstract class AppLocalizations {
   /// No description provided for @citNameField.
   ///
   /// In ja, this message translates to:
-  /// **'品名（表示名）'**
+  /// **'商品名'**
   String get citNameField;
 
   /// No description provided for @citSaved.
@@ -21776,12 +21770,6 @@ abstract class AppLocalizations {
   /// **'年度'**
   String get refColYear;
 
-  /// No description provided for @pcName.
-  ///
-  /// In ja, this message translates to:
-  /// **'商品名'**
-  String get pcName;
-
   /// No description provided for @pcJan.
   ///
   /// In ja, this message translates to:
@@ -21824,17 +21812,41 @@ abstract class AppLocalizations {
   /// **'列の幅を元に戻す'**
   String get pcReset;
 
-  /// No description provided for @plNoName.
+  /// No description provided for @sfJudgingHeadings.
   ///
   /// In ja, this message translates to:
-  /// **'（品名未登録）'**
-  String get plNoName;
+  /// **'知らない列見出しの意味をAIで判断しています…'**
+  String get sfJudgingHeadings;
 
-  /// No description provided for @plNoNameHint.
+  /// No description provided for @sfHeadingsTitle.
   ///
   /// In ja, this message translates to:
-  /// **'取り込んだファイルに品名がなかったため、品番を仮の名前にしています。商品を開いて品名を入れてください。'**
-  String get plNoNameHint;
+  /// **'列見出しの判断'**
+  String get sfHeadingsTitle;
+
+  /// No description provided for @sfHeadingMeaning.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{header}」→ {field}（{source}）'**
+  String sfHeadingMeaning(String header, String field, String source);
+
+  /// No description provided for @sfHeadingUnused.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の読み込みでは使いません'**
+  String get sfHeadingUnused;
+
+  /// No description provided for @sfHeadingsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'アプリが知らない見出しは、この取引先で学習した見出しと共通の見出しで調べ、それでも分からないものはAIが見出しと値から判断しました。違っていたら「読み取り結果の確認」で直してください。'**
+  String get sfHeadingsHint;
+
+  /// No description provided for @pdBasePart.
+  ///
+  /// In ja, this message translates to:
+  /// **'基本名（名前の部品）'**
+  String get pdBasePart;
 }
 
 class _AppLocalizationsDelegate

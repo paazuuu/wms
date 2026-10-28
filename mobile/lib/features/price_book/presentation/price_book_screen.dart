@@ -476,9 +476,11 @@ class _PriceBookCard extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 if (i.maker != null) Text(widenKana(i.maker!), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary)),
-                Text(widenKana(i.name), style: theme.textTheme.titleSmall),
+                // Named by its 品番; the 商品名 under it when it says more.
+                Text(widenKana(i.itemCode ?? i.name), key: ValueKey('cl-code-${i.id}'), style: theme.textTheme.titleSmall),
+                if (i.itemCode != null && i.name.trim() != i.itemCode!.trim())
+                  Text(widenKana(i.name), key: ValueKey('cl-desc-${i.id}'), style: muted),
                 Text([
-                  if (i.itemCode != null) '${l10n.pdCode} ${widenKana(i.itemCode!)}',
                   if (i.janCode != null) 'JAN ${i.janCode}',
                   if (i.spec != null) widenKana(i.spec!),
                 ].join('　'), style: muted),

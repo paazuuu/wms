@@ -286,7 +286,7 @@ void main() {
     expect(find.text('4901234567894 · テスト文具 · PEN-001'), findsOneWidget);
     expect(find.textContaining('先方の表記：4901234-567894 · TEST BUNGU · BALL PEN BLK'), findsOneWidget);
     expect(find.byKey(const ValueKey('import-unresolved')), findsOneWidget);
-    expect(find.textContaining('AIの読みが不一致：品名'), findsOneWidget);
+    expect(find.textContaining('AIの読みが不一致：商品名'), findsOneWidget);
     // A missing JAN alone is no problem when the 品番 places it.
     expect(find.textContaining('JANなし'), findsNothing);
     expect(find.text('商品コード → JAN'), findsOneWidget);

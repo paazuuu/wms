@@ -387,8 +387,9 @@ class ImportLineCard extends StatelessWidget {
     final rate = QuoteLine.discountRate(line);
     final fields = <(String, String?)>[
       (l10n.pdMaker, t(line['maker'])),
-      (l10n.pdBaseName, t(line['product_name'])),
+      // 品番 names the item; the file's 商品名 only when it says more.
       (l10n.pdCode, t(line['product_code'])),
+      (l10n.productName, t(line['product_name']) == t(line['product_code']) ? null : t(line['product_name'])),
       (l10n.pdJan, QuoteLine.jan(line).isEmpty ? null : QuoteLine.jan(line)),
       (l10n.quoteTheirCode, t(line['supplier_code'])),
       (l10n.pdSpec, t(line['spec'])),

@@ -457,7 +457,7 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const ValueKey('pl-pending-summary'))).data, '未検品 2商品・600個（在庫と合わせて 640個）');
   });
 
-  testWidgets('on a PC each product is one line: name, JAN, 品番, size, stock and units side by side', (tester) async {
+  testWidgets('on a PC each product is one line: 品番 (商品名 under it), JAN, size, stock and units side by side', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     const pen = Product(
@@ -469,11 +469,15 @@ void main() {
     final row = find.byKey(const ValueKey('pl-row-1'));
     expect(row, findsOneWidget);
     double y(Finder f) => tester.getCenter(find.descendant(of: row, matching: f)).dy;
-    final line = y(find.text('テストペン'));
-    expect(y(find.text('4909999000014')), closeTo(line, 4));
+    // The 品番 names it, the 商品名 just under; the rest beside them.
+    final line = y(find.byKey(const ValueKey('pl-code-1')));
     expect(y(find.text('TP-1')), closeTo(line, 4));
-    expect(y(find.byKey(const ValueKey('pl-stock-0-1'))), closeTo(line, 4));
-    expect(y(find.text('基本単位: 個')), closeTo(line, 4));
+    expect(y(find.text('テストペン')), greaterThan(line));
+    expect(y(find.text('テストペン')) - line, lessThan(24));
+    final mid = (line + y(find.text('テストペン'))) / 2;
+    expect(y(find.text('4909999000014')), closeTo(mid, 12));
+    expect(y(find.byKey(const ValueKey('pl-stock-0-1'))), closeTo(mid, 12));
+    expect(y(find.text('基本単位: 個')), closeTo(mid, 12));
     // A row, not a card: low enough for many products on one screen.
     expect(tester.getSize(row).height, lessThan(64));
   });
@@ -961,12 +965,13 @@ void main() {
     expect(find.text('「テストノート」の在庫の推移'), findsOneWidget);
   });
 
-  test('column widths fit the row: as dragged, else the name gives way, then all in proportion', () {
+  test('column widths fit the row: as dragged, else the 品番 column gives way, then all in proportion', () {
     final fits = fitProductColumns(productColumnDefaults, 3000);
     expect(fits['jan'], productColumnDefaults['jan']);
-    final tight = fitProductColumns(productColumnDefaults, 1400);
+    final tight = fitProductColumns(productColumnDefaults, 1250);
     expect(tight['jan'], productColumnDefaults['jan']);
-    expect(tight['name']!, lessThan(productColumnDefaults['name']!));
+    expect(tight['code']!, lessThan(productColumnDefaults['code']!));
+    expect(productColumnKeys, isNot(contains('name'))); // no 品名 column beside the 品番
     final tiny = fitProductColumns(productColumnDefaults, 900);
     final sum = productColumnKeys.fold<double>(0, (s, k) => s + tiny[k]!);
     expect(sum + productRowLead + productRowTail + productColumnGap * productColumnKeys.length, closeTo(900, 0.5));
@@ -1001,10 +1006,15 @@ void main() {
     await tester.pumpAndSettle();
     final after = tester.getSize(find.byKey(const ValueKey('pc-col-code'))).width;
     expect(after, greaterThan(before + 40));
-    // The name that only repeated the 品番 is said to be missing.
-    expect(find.byKey(const ValueKey('pl-no-name-2')), findsOneWidget);
-    expect(find.text('テスト （品名未登録）'), findsOneWidget);
+    // Named by the 品番; a 商品名 that says more sits under it, one that
+    // only repeats the 品番 is not shown twice.
+    expect(find.byKey(const ValueKey('pl-code-1')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('pl-code-1')), matching: find.text('TP-07B')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pl-desc-1')), findsOneWidget);
     expect(find.text('テストペン 黒'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pl-desc-2')), findsNothing);
+    expect(find.text('TP-07R'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pc-col-name')), findsNothing);
     container.read(productColumnsProvider.notifier).reset();
   });
 }

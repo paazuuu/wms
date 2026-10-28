@@ -313,6 +313,55 @@ class LedgerFields extends Equatable {
 /// What a stock file holds: its lines, one per JAN, and the rows that could
 /// not be read. [header] is false when no JAN and quantity columns were
 /// found at all.
+/// What a heading the app did not know means, as the server judged it
+/// (0163): from the headings learned for the company, or by the AI from the
+/// heading and a few rows. [field] is a reading field (document_fields:
+/// product_name, product_code, maker, spec, …).
+class HeadingMeaning extends Equatable {
+  const HeadingMeaning({required this.index, required this.header, required this.field, this.source = 'ai'});
+
+  final int index;
+  final String header;
+  final String field;
+
+  /// ai, or partner / global / contains (a heading already learned).
+  final String source;
+
+  bool get byAi => source == 'ai';
+
+  factory HeadingMeaning.fromJson(Map<String, dynamic> j) => HeadingMeaning(
+        index: (j['index'] as num?)?.toInt() ?? -1,
+        header: '${j['header'] ?? ''}',
+        field: '${j['field'] ?? ''}',
+        source: '${j['source'] ?? 'ai'}',
+      );
+
+  @override
+  List<Object?> get props => [index, header, field, source];
+}
+
+/// A reading field → what a stock sheet keeps of it. 品名 and 品番 are what
+/// each supplier calls the item; a cell holding both counts as its name.
+const _stockFieldOf = <String, String>{
+  'jan': 'jan',
+  'quantity': 'qty',
+  'product_name': 'name',
+  'name_code': 'name',
+  'maker': 'maker',
+  'product_code': 'code',
+  'order_date': 'order_date',
+  'delivery_date': 'delivery_date',
+  'serial': 'serial',
+  'supplier': 'supplier',
+  'unit': 'unit',
+  'list_price': 'list_price',
+  'unit_price': 'unit_price',
+  'unit_price_tax': 'unit_price_tax',
+  'amount': 'amount',
+  'tax_rate': 'tax_rate',
+  'order_number': 'order_number',
+};
+
 class StockSheet extends Equatable {
   const StockSheet({
     this.lines = const [],
@@ -320,6 +369,10 @@ class StockSheet extends Equatable {
     this.header = true,
     this.byAi = false,
     this.read = const [],
+    this.headerRow = -1,
+    this.headings = const [],
+    this.unplaced = const [],
+    this.meanings = const [],
   });
 
   final List<StockFileLine> lines;
@@ -333,11 +386,43 @@ class StockSheet extends Equatable {
   /// not cell by cell: its lines are to be checked by eye.
   final bool byAi;
 
-  StockSheet copyWith({List<StockFileLine>? lines}) =>
-      StockSheet(lines: lines ?? this.lines, problems: problems, header: header, byAi: byAi, read: read);
+  /// The heading row (0-based) of a sheet read here, and its cells.
+  final int headerRow;
+  final List<String> headings;
+
+  /// Columns with a heading the app's own words did not place: for the
+  /// server to judge (0163).
+  final List<int> unplaced;
+
+  /// What the server said those headings mean, used or not.
+  final List<HeadingMeaning> meanings;
+
+  /// The judged headings this reading took a column from.
+  List<HeadingMeaning> get usedMeanings => [for (final m in meanings) if (_stockFieldOf.containsKey(m.field)) m];
+
+  /// Judged, but nothing a stock reading keeps (規格, 入数, …).
+  List<HeadingMeaning> get unusedMeanings => [for (final m in meanings) if (!_stockFieldOf.containsKey(m.field)) m];
+
+  StockSheet copyWith({List<StockFileLine>? lines}) => StockSheet(
+        lines: lines ?? this.lines,
+        problems: problems,
+        header: header,
+        byAi: byAi,
+        read: read,
+        headerRow: headerRow,
+        headings: headings,
+        unplaced: unplaced,
+        meanings: meanings,
+      );
 
   @override
-  List<Object?> get props => [lines, problems, header, byAi, read];
+  List<Object?> get props => [lines, problems, header, byAi, read, headerRow, headings, unplaced, meanings];
+
+  /// A few rows under the heading, for the server to judge the headings by.
+  List<List<String>> samplesFrom(List<List<String>> rows) => [
+        for (var r = headerRow + 1; r < rows.length; r++)
+          if (rows[r].any((c) => c.trim().isNotEmpty)) rows[r],
+      ].take(6).toList();
 }
 
 String _key(String s) => s.toLowerCase().replaceAll(RegExp(r'[\s　_\-()（）・/]'), '');
@@ -370,7 +455,10 @@ const _aiQtyNames = {'読み取った数量', 'aiが読んだ数量'};
 /// (full-width too) and is normalized as the scanner does; a quantity is a
 /// whole number of 0 or more. The same JAN twice is one line, its
 /// quantities summed.
-StockSheet parseStockRows(List<List<String>> rows) {
+///
+/// [meanings] are headings the server judged (0163): each fills a column
+/// the app's own words left empty (商品名称 → 品名, メーカー品番 → 品番).
+StockSheet parseStockRows(List<List<String>> rows, {List<HeadingMeaning> meanings = const []}) {
   var head = -1, jan = -1, qty = -1, name = -1, makerCol = -1, codeCol = -1, aiJanCol = -1, aiQtyCol = -1;
   final ledgerCols = <String, int>{};
   for (var r = 0; r < rows.length && r < 10; r++) {
@@ -393,6 +481,32 @@ StockSheet parseStockRows(List<List<String>> rows) {
     }
   }
   if (head < 0) return const StockSheet(header: false);
+
+  // The server's judgement fills only what the app's own words left empty.
+  final used = <int>{jan, qty, name, makerCol, codeCol, aiJanCol, aiQtyCol, ...ledgerCols.values}..remove(-1);
+  for (final m in meanings) {
+    final f = _stockFieldOf[m.field];
+    if (f == null || used.contains(m.index) || m.index < 0) continue;
+    switch (f) {
+      case 'name' when name < 0:
+        name = m.index;
+      case 'maker' when makerCol < 0:
+        makerCol = m.index;
+      case 'code' when codeCol < 0:
+        codeCol = m.index;
+      case 'jan' || 'qty' || 'name' || 'maker' || 'code':
+        continue;
+      default:
+        if ((ledgerCols[f] ?? -1) >= 0) continue;
+        ledgerCols[f] = m.index;
+    }
+    used.add(m.index);
+  }
+  final headings = [for (final c in rows[head]) c.trim()];
+  final unplaced = [
+    for (var c = 0; c < headings.length; c++)
+      if (headings[c].isNotEmpty && !used.contains(c)) c,
+  ];
 
   final byJan = <String, StockFileLine>{};
   final problems = <StockFileProblem>[];
@@ -442,7 +556,15 @@ StockSheet parseStockRows(List<List<String>> rows) {
       code: prev?.code ?? opt(row, codeCol),
     );
   }
-  return StockSheet(lines: byJan.values.toList(), problems: problems, read: read);
+  return StockSheet(
+    lines: byJan.values.toList(),
+    problems: problems,
+    read: read,
+    headerRow: head,
+    headings: headings,
+    unplaced: unplaced,
+    meanings: meanings,
+  );
 }
 
 /// Whether the app reads [fileName] itself (a sheet or CSV); anything else

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart' show PendingInspection;
+import 'package:wms_mobile/features/stock_import/domain/stock_file.dart' show HeadingMeaning;
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/master_import/presentation/master_imports_screen.dart';
@@ -5381,6 +5382,18 @@ class FakeMasterImportRepository implements MasterImportRepository {
     readKeptRows = keepRows;
     if (readFailure != null) return ApiFailure(message: readFailure!);
     return ApiSuccess(readResult ?? const MasterRead(lines: []));
+  }
+
+  /// What the server says unknown headings mean (0163); asked with these.
+  List<HeadingMeaning> meanings = const [];
+  bool meaningsFail = false;
+  final List<List<String>> askedHeadings = [];
+
+  @override
+  Future<ApiResult<List<HeadingMeaning>>> mapColumns(List<String> headers, List<List<String>> samples) async {
+    askedHeadings.add(headers);
+    if (meaningsFail) return const ApiFailure(message: 'ai_unavailable');
+    return ApiSuccess(meanings);
   }
 
   @override

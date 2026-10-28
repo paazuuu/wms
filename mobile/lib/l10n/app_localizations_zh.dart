@@ -5515,13 +5515,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ntFieldMaker => '制造商';
 
   @override
-  String get ntFieldName => '品名';
+  String get ntFieldName => '商品名';
 
   @override
   String get ntFieldCode => '货号';
 
   @override
-  String get ntFieldNameCode => '品名＋货号（一栏）';
+  String get ntFieldNameCode => '商品名＋货号（一栏）';
 
   @override
   String get ntFieldQuantity => '数量';
@@ -8214,9 +8214,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pdMaker => '制造商';
 
   @override
-  String get pdBaseName => '品名';
-
-  @override
   String get pdCode => '货号';
 
   @override
@@ -8601,7 +8598,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get citEdit => '编辑商品信息';
 
   @override
-  String get citNameField => '品名（显示名）';
+  String get citNameField => '商品名';
 
   @override
   String get citSaved => '已保存';
@@ -12159,9 +12156,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get refColYear => '年度';
 
   @override
-  String get pcName => '商品名';
-
-  @override
   String get pcJan => 'JAN码';
 
   @override
@@ -12183,8 +12177,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pcReset => '恢复列宽';
 
   @override
-  String get plNoName => '（未登记品名）';
+  String get sfJudgingHeadings => '正在用AI判断未知列标题的含义…';
 
   @override
-  String get plNoNameHint => '导入的文件中没有品名，暂以型号作为名称。请打开商品填写品名。';
+  String get sfHeadingsTitle => '列标题的判断';
+
+  @override
+  String sfHeadingMeaning(String header, String field, String source) {
+    return '「$header」→ $field（$source）';
+  }
+
+  @override
+  String get sfHeadingUnused => '读取库存时不使用';
+
+  @override
+  String get sfHeadingsHint =>
+      '应用不认识的标题先在该交易方已学习的标题和通用标题中查找，仍无法确定的由AI根据标题和数值判断。如有错误，请在“读取结果确认”中修改。';
+
+  @override
+  String get pdBasePart => '基本名（名称的组成部分）';
 }

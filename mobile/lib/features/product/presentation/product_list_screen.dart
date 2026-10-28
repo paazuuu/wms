@@ -1294,15 +1294,7 @@ class _ProductCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (nameIsCode(product))
-                        _NoName(product: product, style: theme.textTheme.titleSmall)
-                      else
-                        ProductNameText(
-                            name: product.name,
-                            nameEn: product.nameEn,
-                            names: product.names,
-                            style: theme.textTheme.titleSmall,
-                            maxLines: 1),
+                      ProductCodeTitle(product: product, style: theme.textTheme.titleSmall),
                       const SizedBox(height: 2),
                       Row(
                         children: [
@@ -1310,19 +1302,6 @@ class _ProductCard extends StatelessWidget {
                               style: theme.textTheme.bodySmall
                                   ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
                           CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
-                          // The SKU sits beside the JAN rather than replacing it:
-                          // one is what the supplier printed, the other is what
-                          // this warehouse calls it, and both get scanned (0057).
-                          if (product.sku != null) ...[
-                            Text(' · ', style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-                            Flexible(
-                              child: Text(product.sku!,
-                                  style: theme.textTheme.bodySmall
-                                      ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                            ),
-                          ],
                         ],
                       ),
                       // Its size and weight, as on the spec (0125).
@@ -1416,7 +1395,7 @@ class _ProductCard extends StatelessWidget {
     );
   }
 
-  /// One line: picture, name, JAN, 品番, size and weight, stock, units,
+  /// One line: picture, 品番 (with its maker and 商品名), JAN, size and weight, stock, units,
   /// price, state.
   Widget _wide(BuildContext context) {
     final theme = Theme.of(context);
@@ -1458,17 +1437,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                 ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 36),
                 const SizedBox(width: AppSpacing.md),
-                col(
-                  'name',
-                  nameIsCode(product)
-                      ? _NoName(product: product, style: theme.textTheme.titleSmall)
-                      : ProductNameText(
-                          name: product.name,
-                          nameEn: product.nameEn,
-                          names: product.names,
-                          style: theme.textTheme.titleSmall,
-                          maxLines: 1),
-                ),
+                col('code', ProductCodeTitle(product: product, style: theme.textTheme.titleSmall)),
                 col(
                   'jan',
                   Row(children: [
@@ -1476,7 +1445,6 @@ class _ProductCard extends StatelessWidget {
                     CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
                   ]),
                 ),
-                col('code', Text(product.sku ?? '—', style: mono, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 col(
                   'spec',
                   spec == null
@@ -1508,31 +1476,48 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-/// A product registered from a file that gave no 品名: its name is its 品番
-/// (so it could be registered at all). Shown as such, not as a name that
-/// only repeats the 品番 column.
+/// Whether the 商品名 only repeats the 品番 (a file that gave no other name):
+/// then the 品番 alone names the product.
 bool nameIsCode(Product p) => p.sku != null && p.sku!.trim().isNotEmpty && p.name.trim() == p.sku!.trim();
 
-class _NoName extends StatelessWidget {
-  const _NoName({required this.product, this.style});
+/// A product named by its 品番, its maker before it; a 商品名 that says more
+/// than the 品番 (ジェットストリームライトタッチ0.7赤替) under it, small. A
+/// product without a 品番 is named by its 商品名.
+class ProductCodeTitle extends StatelessWidget {
+  const ProductCodeTitle({super.key, required this.product, this.style});
 
   final Product product;
   final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final muted = style?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic);
-    return Tooltip(
-      message: l10n.plNoNameHint,
-      child: Text(
-        [if ((product.maker ?? '').trim().isNotEmpty) product.maker!.trim(), l10n.plNoName].join(' '),
-        key: ValueKey('pl-no-name-${product.id}'),
-        style: muted,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+    final scheme = Theme.of(context).colorScheme;
+    final small = Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final code = product.sku?.trim() ?? '';
+    final maker = product.maker?.trim() ?? '';
+    final title = Row(key: ValueKey('pl-code-${product.id}'), children: [
+      if (maker.isNotEmpty) ...[
+        Flexible(
+          flex: 0,
+          child: Text(widenKana(maker),
+              style: style?.copyWith(color: scheme.primary), maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+      ],
+      Flexible(
+        child: code.isEmpty
+            ? ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: style, maxLines: 1)
+            : Text(code, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
-    );
+    ]);
+    if (code.isEmpty || nameIsCode(product)) return title;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+      title,
+      KeyedSubtree(
+        key: ValueKey('pl-desc-${product.id}'),
+        child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: small, maxLines: 1),
+      ),
+    ]);
   }
 }
 

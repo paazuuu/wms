@@ -1035,7 +1035,7 @@ export function aliasFor(
   return best ? { field: best.field, source: "contains", attribute: best.attribute ?? null } : null;
 }
 
-async function aiColumns(
+export async function aiColumns(
   headers: string[],
   samples: unknown[][],
   attributes: AttributeDef[] = [],
@@ -1084,6 +1084,57 @@ async function aiColumns(
   } catch (_) {
     return headers.map(() => null);
   }
+}
+
+/** A heading the device could not place, as the server places it (0163). */
+export type MappedColumn = {
+  index: number;
+  header: string;
+  field: Field;
+  attribute: string | null;
+  /** partner/global/contains: a heading learned or known; ai: judged by the AI. */
+  source: "partner" | "global" | "contains" | "ai";
+};
+
+type AskColumns = (
+  headers: string[],
+  samples: unknown[][],
+  attributes: AttributeDef[],
+) => Promise<({ field: Field; attribute: string | null } | null)[]>;
+
+/** What each of [headers] means (0163) — for a sheet read on the device,
+ * whose own word lists know only a few headings: the headings learned for
+ * this company and the known ones first, then the AI for the rest, from the
+ * headings and a few rows (13 digits = jan, and so on). A heading no one can
+ * place, and 'ignore', are left out. */
+export async function mapColumns(
+  headers: string[],
+  samples: unknown[][],
+  aliases: AliasRow[],
+  attributes: AttributeDef[] = [],
+  ask: AskColumns = aiColumns,
+): Promise<MappedColumn[]> {
+  const out: MappedColumn[] = [];
+  const open: number[] = [];
+  headers.forEach((h, index) => {
+    const header = (h ?? "").trim();
+    if (!header) return;
+    const hit = aliasFor(header, aliases);
+    if (hit && hit.field !== "multi" && hit.field !== "ignore") {
+      out.push({ index, header, field: hit.field, attribute: hit.attribute, source: hit.source as MappedColumn["source"] });
+    } else if (!hit) {
+      open.push(index);
+    }
+  });
+  if (open.length > 0) {
+    const ai = await ask(headers.map((h) => (h ?? "").trim()), samples.slice(0, 6), attributes);
+    for (const index of open) {
+      const a = ai[index];
+      if (!a || a.field === "ignore" || a.field === "multi") continue;
+      out.push({ index, header: headers[index].trim(), field: a.field, attribute: a.attribute, source: "ai" });
+    }
+  }
+  return out.sort((x, y) => x.index - y.index);
 }
 
 /** The attributes as one 規格 text, for documents that print a single spec

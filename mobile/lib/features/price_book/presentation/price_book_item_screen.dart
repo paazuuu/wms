@@ -101,7 +101,6 @@ class PriceBookItemScreen extends ConsumerWidget {
     final current = <String, (String, String)>{
       'name': (l10n.citNameField, item.name),
       'maker': (l10n.pdMaker, item.maker ?? ''),
-      'base_name': (l10n.pdBaseName, item.baseName ?? ''),
       'item_code': (l10n.pdCode, item.itemCode ?? ''),
       'jan_code': (l10n.pdJan, item.janCode ?? ''),
       'unit': (l10n.pdUnit, item.unit ?? ''),
@@ -275,8 +274,10 @@ class _Overview extends StatelessWidget {
             Text(l10n.pdBasics, style: theme.textTheme.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             row(l10n.pdMaker, i.maker == null ? null : widenKana(i.maker!), 'cit-maker'),
-            row(l10n.pdBaseName, widenKana(i.baseName ?? i.name), 'cit-name'),
             row(l10n.pdCode, i.itemCode, 'cit-code'),
+            // The 商品名 is the title above; the 基本名 only as a part of its own.
+            if (i.baseName case final b? when b.trim().isNotEmpty && b.trim() != i.name.trim() && b.trim() != i.itemCode?.trim())
+              row(l10n.pdBasePart, widenKana(b), 'cit-base-name'),
             row(l10n.pdJan, i.janCode, 'cit-jan'),
             row(l10n.pdSpec, i.spec, 'cit-spec'),
             for (final (n, v) in i.attributes) row(n, widenKana(v), 'cit-attr-$n'),

@@ -74,7 +74,7 @@ void main() {
     expect(col.choice, const ColumnChoice.multi([ColumnField.maker, ColumnField.productName, ColumnField.productCode]));
     expect(col.toJson()['parts'], ['maker', 'product_name', 'product_code']);
     final l10n = AppLocalizationsJa();
-    expect(choiceLabel(l10n, col.choice!), '複数：メーカー／品名／品番');
+    expect(choiceLabel(l10n, col.choice!), '複数：メーカー／商品名／品番');
     const t = ReadTotals(linesSum: 551820, docTotal: 676302, docTax: 61482, ok: false);
     expect(t.expected, 614820);
     expect(ReadTotals.fromJson(const {'lines_sum': 328600, 'matched': 'found', 'ok': true}).ok, isTrue);

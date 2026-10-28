@@ -7847,6 +7847,41 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   request (imports, stock, 検品待ち; backups in backup_20261027_*: 8,206 on
   hand, 43 lines awaiting inspection). Nothing had been shipped.
 
+## 0163: the 品番 names the item; headings judged by the AI (no migration)
+
+- 品名 and 商品名 were the same field (products.name / price_book_items.name).
+  The detail screens also showed it as a 品名 row under 基本情報, beside
+  the 品番. Many items were registered with no name, so the 品番 stood in
+  as the name and showed twice. Now:
+  - The library has no name column. Its first column, 品番, shows the
+    maker and the 品番. A 商品名 that says more than the 品番
+    (ジェットストリームライトタッチ0.7赤替) sits under it, small; one that only
+    repeats the 品番 is not shown. Column widths moved to
+    `wms.productLibrary.columns.v2`.
+  - The product detail and 価格台帳 detail have no 品名 row: the 商品名 is
+    the title above. A 基本名 (the part a name is built from, 0118) is
+    shown only when it is a part of its own, as 「基本名（名前の部品）」.
+  - The 価格台帳 list is headed by the 品番, with the 商品名 under it.
+  - A reading preview shows 商品名 only when it differs from the 品番.
+  - The edit dialog has 商品名 and no separate 品名 field.
+  - The field library says 商品名 for product_name.
+  No data was changed: names stay as they were, and each supplier's own
+  name and code stay in supplier_product_names.
+- Headings judged by the AI: a stock sheet read on the device finds its
+  JAN and 数量 with its own word lists, then sends the headings it does not
+  know (商品名称, メーカー品番, …) and up to six rows to `import-plan`
+  `{mode: "map_columns", headers, samples}`.
+  - `mapColumns` (document_reader) takes the headings learned for the
+    company and the shared ones first (`column_alias_map`), then asks the
+    AI (`aiColumns`, which looks at the values too) about the rest.
+  - The sheet is read again with the answer. A judged heading fills only a
+    column the app left empty.
+  - 「列見出しの判断」 lists each heading → field (AIが判定 / この商社で学習済み
+    / …), and names the ones a stock reading does not keep (規格, 入数).
+  - Without an answer, the sheet stands as read. Nothing is kept.
+  - Sheets with no JAN and 数量 headings, PDFs and photos were already read
+    by the server, where the AI judges every column.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

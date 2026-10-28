@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../../delivery/application/delivery_providers.dart';
+import '../../stock_import/domain/stock_file.dart' show HeadingMeaning;
 import '../domain/master_import.dart';
 
 /// Where an import's files are kept (0138).
@@ -18,6 +19,10 @@ abstract class MasterImportRepository {
   /// With [keepRows], each row of the file comes back on its own, not summed
   /// by JAN (0150).
   Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false});
+
+  /// What [headers] mean (0163): the headings learned for the company first,
+  /// then the AI, from the headings and a few [samples] rows. Nothing kept.
+  Future<ApiResult<List<HeadingMeaning>>> mapColumns(List<String> headers, List<List<String>> samples);
 
   /// Opens an import for a chosen file.
   Future<ApiResult<int>> start({required String fileName, String? contentType, String? source, int? documentId, int? supplierId});
@@ -86,6 +91,22 @@ class MasterImportRepositoryImpl implements MasterImportRepository {
       return ApiSuccess(MasterRead.fromJson(((r.data as Map)['data'] as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
       return mapDioError<MasterRead>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<HeadingMeaning>>> mapColumns(List<String> headers, List<List<String>> samples) async {
+    try {
+      final r = await _functions.post('/import-plan',
+          data: {'mode': 'map_columns', 'headers': headers, 'samples': samples},
+          options: Options(receiveTimeout: const Duration(seconds: 60)));
+      final data = ((r.data as Map)['data'] as Map?) ?? const {};
+      return ApiSuccess([
+        for (final c in (data['columns'] as List? ?? const []).whereType<Map>())
+          HeadingMeaning.fromJson(c.cast<String, dynamic>()),
+      ]);
+    } on DioException catch (e) {
+      return mapDioError<List<HeadingMeaning>>(e);
     }
   }
 
