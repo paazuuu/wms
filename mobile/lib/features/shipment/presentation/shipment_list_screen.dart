@@ -53,13 +53,11 @@ class _ShipmentListScreenState extends ConsumerState<ShipmentListScreen> {
         title: Text(l10n.shipmentListTitle),
         actions: [
           IconButton(
-            tooltip:
-                showShipped ? l10n.hideCompletedPlans : l10n.showCompletedPlans,
+            tooltip: showShipped ? l10n.hideCompletedPlans : l10n.showCompletedPlans,
             isSelected: showShipped,
             icon: const Icon(Icons.history_toggle_off),
             selectedIcon: const Icon(Icons.manage_history),
-            onPressed: () =>
-                ref.read(showShippedProvider.notifier).update((v) => !v),
+            onPressed: () => ref.read(showShippedProvider.notifier).update((v) => !v),
           ),
           IconButton(
             tooltip: l10n.senderSettingsTitle,
@@ -77,8 +75,7 @@ class _ShipmentListScreenState extends ConsumerState<ShipmentListScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
             child: ScanField(
               autofocusOnWide: true,
               clearOnSubmit: false,
@@ -109,10 +106,8 @@ class _ShipmentListScreenState extends ConsumerState<ShipmentListScreen> {
                   return ListView.separated(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     itemCount: filtered.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, index) =>
-                        _ShipmentCard(shipment: filtered[index]),
+                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+                    itemBuilder: (context, index) => _ShipmentCard(shipment: filtered[index]),
                   );
                 },
                 loading: () => LoadingView(message: l10n.loading),
@@ -163,36 +158,26 @@ class _ShipmentCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(shipment.shipmentNumber,
-                        style: theme.textTheme.titleSmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                        style: theme.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
                     Text(shipment.customerName ?? l10n.unknownSupplier,
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
+                        style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
-                    if (shipment.referenceNo != null &&
-                        shipment.referenceNo!.isNotEmpty) ...[
+                    if (shipment.referenceNo != null && shipment.referenceNo!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text('${l10n.referenceNoLabel}: ${shipment.referenceNo}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: AppFonts.mono, color: scheme.primary)),
+                          style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono, color: scheme.primary)),
                     ],
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.xs,
                       children: [
-                        StatusPill(
-                            tone: ui.tone,
-                            label: ui.label,
-                            icon: ui.icon,
-                            dense: true),
+                        StatusPill(tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
                         StatusPill(
                           tone: StatusTone.neutral,
-                          label: l10n.planPreviewCount(
-                              shipment.lineCount, shipment.totalUnits),
+                          label: l10n.planPreviewCount(shipment.lineCount, shipment.totalUnits),
                           icon: Icons.list_alt_outlined,
                           dense: true,
                         ),
@@ -218,8 +203,7 @@ class _ShipmentCard extends StatelessWidget {
 }
 
 class _ScrollableEmpty extends StatelessWidget {
-  const _ScrollableEmpty(
-      {required this.icon, required this.title, required this.message});
+  const _ScrollableEmpty({required this.icon, required this.title, required this.message});
 
   final IconData icon;
   final String title;

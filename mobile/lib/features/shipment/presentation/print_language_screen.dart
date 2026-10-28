@@ -27,8 +27,7 @@ class _PrintLanguageScreenState extends ConsumerState<PrintLanguageScreen> {
   List<String>? _order;
   bool _busy = false;
 
-  void _snack(String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void _snack(String text) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
   Future<void> _saveLanguages(List<String> order) async {
     final l10n = AppLocalizations.of(context);
@@ -105,9 +104,7 @@ class _PrintLanguageScreenState extends ConsumerState<PrintLanguageScreen> {
                     FilterChip(
                       key: ValueKey('pl-lang-$l'),
                       selected: order.contains(l),
-                      avatar: order.contains(l)
-                          ? CircleAvatar(child: Text('${order.indexOf(l) + 1}'))
-                          : null,
+                      avatar: order.contains(l) ? CircleAvatar(child: Text('${order.indexOf(l) + 1}')) : null,
                       showCheckmark: false,
                       label: Text(printLanguageNames[l]!),
                       onSelected: (on) {

@@ -33,7 +33,6 @@ class SenderProfileController extends StateNotifier<SenderProfile> {
   }
 }
 
-final senderProfileControllerProvider =
-    StateNotifierProvider<SenderProfileController, SenderProfile>((ref) {
+final senderProfileControllerProvider = StateNotifierProvider<SenderProfileController, SenderProfile>((ref) {
   return SenderProfileController(const FlutterSecureStorage());
 });

@@ -16,8 +16,7 @@ Future<List<SenderLine>?> showSenderPicker(
 
   final selected = {...profile.defaultEnabled};
   var include = selected.isNotEmpty;
-  final available =
-      SenderProfile.fieldKeys.where((k) => profile.valueOf(k).trim().isNotEmpty);
+  final available = SenderProfile.fieldKeys.where((k) => profile.valueOf(k).trim().isNotEmpty);
 
   return showDialog<List<SenderLine>>(
     context: context,
@@ -45,8 +44,7 @@ Future<List<SenderLine>?> showSenderPicker(
                     enabled: include,
                     value: selected.contains(k),
                     title: Text(senderFieldLabel(l10n, k)),
-                    subtitle: Text(profile.printText(k),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: Text(profile.printText(k), maxLines: 1, overflow: TextOverflow.ellipsis),
                     onChanged: include
                         ? (v) => setState(() {
                               if (v == true) {
@@ -80,5 +78,5 @@ Future<List<SenderLine>?> showSenderPicker(
 }
 
 /// Opens the sender settings screen.
-Future<void> openSenderSettings(BuildContext context) => Navigator.of(context)
-    .push(MaterialPageRoute(builder: (_) => const SenderSettingsScreen()));
+Future<void> openSenderSettings(BuildContext context) =>
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SenderSettingsScreen()));

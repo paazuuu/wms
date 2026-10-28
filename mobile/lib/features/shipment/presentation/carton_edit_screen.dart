@@ -66,9 +66,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
     if (label == null || !mounted) return;
 
     setState(() => _busy = true);
-    final result = await ref
-        .read(shipmentRepositoryProvider)
-        .setCartonLabel(_cartonId, label.isEmpty ? null : label);
+    final result = await ref.read(shipmentRepositoryProvider).setCartonLabel(_cartonId, label.isEmpty ? null : label);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
@@ -106,8 +104,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
     final id = item.id;
     if (id == null) return;
     setState(() => _busy = true);
-    final result =
-        await ref.read(shipmentRepositoryProvider).removeCartonItem(id);
+    final result = await ref.read(shipmentRepositoryProvider).removeCartonItem(id);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
@@ -140,8 +137,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
     );
   }
 
-  Widget _body(BuildContext context, AppLocalizations l10n,
-      ShipmentPacking packing, Carton carton) {
+  Widget _body(BuildContext context, AppLocalizations l10n, ShipmentPacking packing, Carton carton) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final ui = CartonStatusUi.of(l10n, carton.status);
@@ -165,9 +161,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
         ),
         if (!carton.isOpen) ...[
           const SizedBox(height: AppSpacing.xs),
-          Text(l10n.cartonMustReopenToEdit,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant)),
+          Text(l10n.cartonMustReopenToEdit, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
         ],
         const SizedBox(height: AppSpacing.lg),
         for (final line in packing.lines)
@@ -185,8 +179,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Text(l10n.cartonContentsEmpty,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
             ),
           )
         else
@@ -198,9 +191,7 @@ class _CartonEditScreenState extends ConsumerState<CartonEditScreen> {
                   if (i > 0) const Divider(height: 1),
                   _CartonItemRow(
                     item: carton.items[i],
-                    onRemove: carton.isOpen && !_busy
-                        ? () => _removeItem(carton.items[i])
-                        : null,
+                    onRemove: carton.isOpen && !_busy ? () => _removeItem(carton.items[i]) : null,
                   ),
                 ],
               ],
@@ -241,23 +232,18 @@ class _PackableLineCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                      line.productName.isEmpty ? line.janCode : line.productName,
-                      style: theme.textTheme.bodyMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  Text(line.productName.isEmpty ? line.janCode : line.productName,
+                      style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       Text(l10n.packProgress(line.packed, line.packable),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: AppFonts.mono,
-                              color: scheme.onSurfaceVariant)),
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
                       if (!done) ...[
                         const SizedBox(width: AppSpacing.sm),
                         Text(l10n.cartonUnpackedCount(line.unpacked),
-                            style: theme.textTheme.bodySmall
-                                ?.copyWith(color: scheme.onSurfaceVariant)),
+                            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                       ],
                     ],
                   ),
@@ -265,10 +251,7 @@ class _PackableLineCard extends StatelessWidget {
               ),
             ),
             if (done)
-              StatusPill(
-                  tone: StatusTone.success,
-                  label: l10n.cartonLineDone,
-                  dense: true)
+              StatusPill(tone: StatusTone.success, label: l10n.cartonLineDone, dense: true)
             else
               FilledButton.tonalIcon(
                 onPressed: canAdd ? onAdd : null,
@@ -295,8 +278,7 @@ class _CartonItemRow extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
       child: Row(
         children: [
           ProductThumb(janCode: item.janCode, productName: item.productName, size: 36),
@@ -306,19 +288,15 @@ class _CartonItemRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.productName.isEmpty ? item.janCode : item.productName,
-                    style: theme.textTheme.bodyMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
+                    style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                 Text(
                   [
                     if (item.lotCode != null) 'L:${item.lotCode}',
                     if (item.serialNumber != null) 'S/N:${item.serialNumber}',
-                    if (item.lotCode == null && item.serialNumber == null)
-                      l10n.pickItemNoLot,
+                    if (item.lotCode == null && item.serialNumber == null) l10n.pickItemNoLot,
                     '× ${item.quantity}',
                   ].join('  '),
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -351,8 +329,7 @@ class _RenameDialog extends StatefulWidget {
 }
 
 class _RenameDialogState extends State<_RenameDialog> {
-  late final TextEditingController _label =
-      TextEditingController(text: widget.initial);
+  late final TextEditingController _label = TextEditingController(text: widget.initial);
 
   @override
   void dispose() {
@@ -372,12 +349,8 @@ class _RenameDialogState extends State<_RenameDialog> {
         onSubmitted: (_) => Navigator.pop(context, _label.text.trim()),
       ),
       actions: [
-        TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.actionCancel)),
-        FilledButton(
-            onPressed: () => Navigator.pop(context, _label.text.trim()),
-            child: Text(l10n.actionSave)),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(onPressed: () => Navigator.pop(context, _label.text.trim()), child: Text(l10n.actionSave)),
       ],
     );
   }
@@ -400,8 +373,7 @@ class _PackDialog extends StatefulWidget {
 }
 
 class _PackDialogState extends State<_PackDialog> {
-  late final TextEditingController _quantity =
-      TextEditingController(text: widget.line.unpacked.toString());
+  late final TextEditingController _quantity = TextEditingController(text: widget.line.unpacked.toString());
   final TextEditingController _lotCode = TextEditingController();
   final TextEditingController _serial = TextEditingController();
 
@@ -427,9 +399,7 @@ class _PackDialogState extends State<_PackDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final title = widget.line.productName.isNotEmpty
-        ? widget.line.productName
-        : widget.line.janCode;
+    final title = widget.line.productName.isNotEmpty ? widget.line.productName : widget.line.janCode;
 
     return AlertDialog(
       title: Text(title),

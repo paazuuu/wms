@@ -182,7 +182,7 @@ void main() {
         },
       ),
     );
-    expect(find.text('重量'), findsOneWidget);
+    expect(find.text('重量（1単位）'), findsOneWidget);
     Finder cell(int n, String text) =>
         find.descendant(of: find.byKey(ValueKey('rc-$n-weight')), matching: find.text(text));
     expect(cell(1, '11.5 g'), findsOneWidget);

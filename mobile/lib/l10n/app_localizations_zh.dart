@@ -11971,7 +11971,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get rcWeight => '重量';
+  String get rcWeight => '重量（单件）';
 
   @override
   String get rcWeightCatalog => '目录';
@@ -12021,4 +12021,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productWeightSourceCatalog => '目录';
+
+  @override
+  String get swBreakdown => '明细（数量 × 单件重量）';
+
+  @override
+  String swLineCalc(int qty, String unit, String total) {
+    return '$qty × $unit = $total';
+  }
 }

@@ -12,8 +12,7 @@ import '../domain/shipment_parcel.dart';
 abstract class ShipmentRepository {
   /// Shipments, newest first. [warehouseId] scopes them to one warehouse
   /// (UI spec §4); null means every warehouse the caller can see.
-  Future<ApiResult<List<Shipment>>> list(
-      {String? status, String? search, int? warehouseId});
+  Future<ApiResult<List<Shipment>>> list({String? status, String? search, int? warehouseId});
   Future<ApiResult<Shipment>> show(int id);
 
   /// Confirm the shipment: deduct stock and mark it shipped.
@@ -28,8 +27,7 @@ abstract class ShipmentRepository {
   /// §18 — split the shipment into cartons of at most [unitsPerCarton] pieces,
   /// server-side, so nobody divides by hand. Refused when cartons already
   /// exist; returns how many boxes were made.
-  Future<ApiResult<AutopackResult>> autopack(int id,
-      {required int unitsPerCarton});
+  Future<ApiResult<AutopackResult>> autopack(int id, {required int unitsPerCarton});
 
   /// §21 — the shipping desk's weight / carrier / tracking. A null clears the
   /// field rather than leaving the old value behind.
@@ -106,8 +104,7 @@ class AutopackResult {
   final int totalUnits;
 
   factory AutopackResult.fromJson(Map<String, dynamic> json) {
-    int asInt(dynamic v) =>
-        v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+    int asInt(dynamic v) => v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
     return AutopackResult(
       cartonCount: asInt(json['carton_count']),
       unitsPerCarton: asInt(json['units_per_carton']),
@@ -134,17 +131,15 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   }
 
   @override
-  Future<ApiResult<List<Shipment>>> list(
-      {String? status, String? search, int? warehouseId}) async {
+  Future<ApiResult<List<Shipment>>> list({String? status, String? search, int? warehouseId}) async {
     try {
       final response = await _dio.get('/shipments', queryParameters: {
         if (status != null) 'status': status,
         if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
         if (warehouseId != null) 'warehouse_id': warehouseId,
       });
-      final data = (response.data['data'] as List<dynamic>)
-          .map((e) => Shipment.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final data =
+          (response.data['data'] as List<dynamic>).map((e) => Shipment.fromJson(e as Map<String, dynamic>)).toList();
       return ApiSuccess(data);
     } on DioException catch (e) {
       return mapDioError<List<Shipment>>(e);
@@ -168,8 +163,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   Future<ApiResult<Shipment>> deleteCarton(int id, int cartonId) async {
     try {
       final response = await _dio.delete('/shipments/$id/cartons/$cartonId');
-      return ApiSuccess(
-          Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
+      return ApiSuccess(Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<Shipment>(e);
     }
@@ -178,8 +172,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   Future<ApiResult<Shipment>> _get(String path) async {
     try {
       final response = await _dio.get(path);
-      return ApiSuccess(
-          Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
+      return ApiSuccess(Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<Shipment>(e);
     }
@@ -188,16 +181,14 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   Future<ApiResult<Shipment>> _post(String path, {Object? data}) async {
     try {
       final response = await _dio.post(path, data: data);
-      return ApiSuccess(
-          Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
+      return ApiSuccess(Shipment.fromJson(response.data['data'] as Map<String, dynamic>));
     } on DioException catch (e) {
       return mapDioError<Shipment>(e);
     }
   }
 
   @override
-  Future<ApiResult<AutopackResult>> autopack(int id,
-      {required int unitsPerCarton}) async {
+  Future<ApiResult<AutopackResult>> autopack(int id, {required int unitsPerCarton}) async {
     try {
       final response = await _rpc.post('/rpc/autopack_shipment', data: {
         'p_plan_id': id,
@@ -205,8 +196,7 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
       });
       final data = response.data;
       final json = data is List && data.isNotEmpty ? data.first : data;
-      return ApiSuccess(
-          AutopackResult.fromJson((json as Map).cast<String, dynamic>()));
+      return ApiSuccess(AutopackResult.fromJson((json as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
       return mapDioError<AutopackResult>(e);
     }
@@ -294,12 +284,10 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   @override
   Future<ApiResult<ShipmentPacking>> packing(int planId) async {
     try {
-      final response = await _rpc
-          .post('/rpc/shipment_packing', data: {'p_plan_id': planId});
+      final response = await _rpc.post('/rpc/shipment_packing', data: {'p_plan_id': planId});
       final data = response.data;
       final json = data is List && data.isNotEmpty ? data.first : data;
-      return ApiSuccess(
-          ShipmentPacking.fromJson((json as Map).cast<String, dynamic>()));
+      return ApiSuccess(ShipmentPacking.fromJson((json as Map).cast<String, dynamic>()));
     } on DioException catch (e) {
       return mapDioError<ShipmentPacking>(e);
     }
@@ -344,21 +332,15 @@ class ShipmentRepositoryImpl implements ShipmentRepository {
   @override
   Future<ApiResult<List<ShipmentParcel>>> parcels(int planId) async {
     try {
-      final response = await _rpc
-          .post('/rpc/shipment_parcels', data: {'p_plan_id': planId});
+      final response = await _rpc.post('/rpc/shipment_parcels', data: {'p_plan_id': planId});
       // `shipment_parcels` returns a plain (non-setof) jsonb array, so
       // PostgREST's body *is* that array — not a single-row wrapper around
       // it. Only unwrap when the response is the row-around-array shape
       // (one element that is itself a list), the same disambiguation
       // `lot_provenance` already needs for the same reason.
       final data = response.data;
-      final rows = data is List
-          ? (data.length == 1 && data.first is List ? data.first as List : data)
-          : const [];
-      return ApiSuccess(rows
-          .whereType<Map>()
-          .map((e) => ShipmentParcel.fromJson(e.cast<String, dynamic>()))
-          .toList());
+      final rows = data is List ? (data.length == 1 && data.first is List ? data.first as List : data) : const [];
+      return ApiSuccess(rows.whereType<Map>().map((e) => ShipmentParcel.fromJson(e.cast<String, dynamic>())).toList());
     } on DioException catch (e) {
       return mapDioError<List<ShipmentParcel>>(e);
     }

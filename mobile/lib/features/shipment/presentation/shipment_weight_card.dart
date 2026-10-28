@@ -19,10 +19,9 @@ class ShipmentWeightCard extends ConsumerWidget {
   final int planId;
   final bool editable;
 
-  void _snack(BuildContext context, String message) =>
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
+  void _snack(BuildContext context, String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
 
   Future<void> _planBoxes(BuildContext context, WidgetRef ref, ShipmentWeightEstimate e) async {
     final items = await showModalBottomSheet<List<PlannedCarton>>(
@@ -76,7 +75,8 @@ class ShipmentWeightCard extends ConsumerWidget {
             Widget row(String label, String value, {Key? key, bool strong = false}) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Row(children: [
-                    Expanded(child: Text(label, style: strong ? theme.textTheme.titleSmall : theme.textTheme.bodyMedium)),
+                    Expanded(
+                        child: Text(label, style: strong ? theme.textTheme.titleSmall : theme.textTheme.bodyMedium)),
                     Text(value,
                         key: key,
                         style: (strong ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)
@@ -91,8 +91,30 @@ class ShipmentWeightCard extends ConsumerWidget {
                 row(l10n.swMaterial, gramsText(e.packingMaterialG)),
                 const Divider(),
                 row(l10n.swTotal, '≈ ${gramsText(e.totalWeightG)}', key: const ValueKey('sw-total'), strong: true),
-                if (e.measuredWeightG != null)
-                  row(l10n.swMeasured, gramsText(e.measuredWeightG!)),
+                if (e.measuredWeightG != null) row(l10n.swMeasured, gramsText(e.measuredWeightG!)),
+                // Line by line: 数量 × one unit's weight = the line's.
+                if (e.lines.any((l) => !l.missing))
+                  ExpansionTile(
+                    key: const ValueKey('sw-lines'),
+                    tilePadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.scale_outlined),
+                    title: Text(l10n.swBreakdown, style: theme.textTheme.bodyMedium),
+                    children: [
+                      for (final l in e.lines)
+                        if (!l.missing)
+                          ListTile(
+                            key: ValueKey('sw-line-${l.janCode}'),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(l.productName),
+                            subtitle: Text([
+                              l10n.swLineCalc(l.quantity, gramsText(l.unitWeightG!), gramsText(l.lineWeightG ?? 0)),
+                              weightOriginLabel(l10n, l.weightSource),
+                              if (l.weightBasis == 'pack') l10n.rcWeightBasisPack,
+                            ].join(' · ')),
+                          ),
+                    ],
+                  ),
                 if (missing.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.sm),
                   ExpansionTile(
@@ -115,8 +137,7 @@ class ShipmentWeightCard extends ConsumerWidget {
                 if (!e.fromCartons) ...[
                   Text(e.planned.isEmpty ? l10n.swNoPlan : l10n.swPlanned,
                       style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
-                  for (final p in e.planned)
-                    Text('${p.cartonType} × ${p.quantity}', style: theme.textTheme.bodyMedium),
+                  for (final p in e.planned) Text('${p.cartonType} × ${p.quantity}', style: theme.textTheme.bodyMedium),
                   if (e.planned.isEmpty && e.suggested.isNotEmpty)
                     Text(l10n.swSuggest(e.suggested.map((s) => '${s.cartonType}×${s.quantity}').join(' / ')),
                         style: theme.textTheme.bodySmall),
@@ -234,7 +255,9 @@ class _PlannedCartonsSheetState extends ConsumerState<_PlannedCartonsSheet> {
                     SizedBox(
                       width: 28,
                       child: Text('${_counts[t.id] ?? 0}',
-                          key: ValueKey('sw-count-${t.id}'), textAlign: TextAlign.center, style: theme.textTheme.titleMedium),
+                          key: ValueKey('sw-count-${t.id}'),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium),
                     ),
                     IconButton(
                       key: ValueKey('sw-plus-${t.id}'),
@@ -351,3 +374,11 @@ class _CartonPackagingSheetState extends ConsumerState<_CartonPackagingSheet> {
     );
   }
 }
+
+/// Where a shipment line's unit weight came from, as said beside it.
+String weightOriginLabel(AppLocalizations l10n, String? source) => switch (source) {
+      'catalog' => l10n.rcWeightCatalog,
+      'ai' || 'web' => l10n.rcWeightAi,
+      'measured' => l10n.wtSourceMeasured,
+      _ => l10n.rcWeightProduct,
+    };

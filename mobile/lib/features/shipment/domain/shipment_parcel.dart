@@ -68,6 +68,5 @@ class ShipmentParcel extends Equatable {
       );
 
   @override
-  List<Object?> get props =>
-      [movementId, movementType, janCode, quantity, lotId, serialId];
+  List<Object?> get props => [movementId, movementType, janCode, quantity, lotId, serialId];
 }

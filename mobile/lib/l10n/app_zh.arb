@@ -3916,7 +3916,7 @@
   "jcPdfBadge": "PDF",
   "jcPdfUnreadable": "无法读取此PDF（可能已损坏或带密码）",
   "jcDoneWeights": "已读取 {n} 个JAN（其中 {w} 个有重量）",
-  "rcWeight": "重量",
+  "rcWeight": "重量（单件）",
   "rcWeightCatalog": "目录",
   "rcWeightAi": "AI",
   "rcWeightProduct": "已登记",
@@ -3931,5 +3931,7 @@
   "rcWeightBasisPack": "每包",
   "rcWeightAsk": "用AI查找目录中没有的重量",
   "rcWeightLimit": "已达到AI每日上限，停止查找重量",
-  "productWeightSourceCatalog": "目录"
+  "productWeightSourceCatalog": "目录",
+  "swBreakdown": "明细（数量 × 单件重量）",
+  "swLineCalc": "{qty} × {unit} = {total}"
 }

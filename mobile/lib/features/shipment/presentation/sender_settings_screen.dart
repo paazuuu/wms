@@ -26,8 +26,7 @@ class SenderSettingsScreen extends ConsumerStatefulWidget {
   const SenderSettingsScreen({super.key});
 
   @override
-  ConsumerState<SenderSettingsScreen> createState() =>
-      _SenderSettingsScreenState();
+  ConsumerState<SenderSettingsScreen> createState() => _SenderSettingsScreenState();
 }
 
 class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
@@ -107,19 +106,14 @@ class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           Text(l10n.senderSettingsHint,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppSpacing.lg),
           for (final k in SenderProfile.fieldKeys) ...[
             TextField(
               controller: _c[k],
               onChanged: (_) => setState(() {}),
-              textCapitalization: k == 'regno'
-                  ? TextCapitalization.characters
-                  : TextCapitalization.none,
-              keyboardType: (k == 'phone' || k == 'fax' || k == 'postal')
-                  ? TextInputType.phone
-                  : TextInputType.text,
+              textCapitalization: k == 'regno' ? TextCapitalization.characters : TextCapitalization.none,
+              keyboardType: (k == 'phone' || k == 'fax' || k == 'postal') ? TextInputType.phone : TextInputType.text,
               maxLines: k == 'address' || k == 'note' ? 2 : 1,
               decoration: InputDecoration(
                 labelText: senderFieldLabel(l10n, k),
@@ -134,8 +128,7 @@ class _SenderSettingsScreenState extends ConsumerState<SenderSettingsScreen> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          border: Border(
-              top: BorderSide(color: theme.colorScheme.outlineVariant)),
+          border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
         ),
         child: SafeArea(
           top: false,
@@ -177,9 +170,7 @@ class _PreviewCard extends StatelessWidget {
           children: [
             Icon(Icons.print_outlined, size: 16, color: scheme.onSurfaceVariant),
             const SizedBox(width: AppSpacing.sm),
-            Text(l10n.senderPreview,
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700)),
+            Text(l10n.senderPreview, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -188,9 +179,7 @@ class _PreviewCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: profile.isEmpty
-                ? Text(l10n.senderNoneSet,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant))
+                ? Text(l10n.senderNoneSet, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant))
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -199,10 +188,8 @@ class _PreviewCard extends StatelessWidget {
                           line.text,
                           textAlign: TextAlign.right,
                           style: line.key == 'company'
-                              ? theme.textTheme.titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w700)
-                              : theme.textTheme.bodySmall
-                                  ?.copyWith(color: scheme.onSurface),
+                              ? theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)
+                              : theme.textTheme.bodySmall?.copyWith(color: scheme.onSurface),
                         ),
                     ],
                   ),

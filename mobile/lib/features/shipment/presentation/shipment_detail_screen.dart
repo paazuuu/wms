@@ -36,8 +36,7 @@ class ShipmentDetailScreen extends ConsumerStatefulWidget {
   final int shipmentId;
 
   @override
-  ConsumerState<ShipmentDetailScreen> createState() =>
-      _ShipmentDetailScreenState();
+  ConsumerState<ShipmentDetailScreen> createState() => _ShipmentDetailScreenState();
 }
 
 class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
@@ -54,8 +53,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
   Future<void> _addCarton() async {
     final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
-    final result =
-        await ref.read(shipmentRepositoryProvider).createCarton(_id);
+    final result = await ref.read(shipmentRepositoryProvider).createCarton(_id);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
@@ -71,18 +69,13 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
       builder: (context) => AlertDialog(
         content: Text(l10n.deleteCartonQ),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.actionCancel)),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.actionDelete)),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.actionDelete)),
         ],
       ),
     );
     if (ok != true || !mounted) return;
-    final result =
-        await ref.read(shipmentRepositoryProvider).deleteCarton(_id, c.id);
+    final result = await ref.read(shipmentRepositoryProvider).deleteCarton(_id, c.id);
     if (!mounted) return;
     result.when(
       success: (_) => _refresh(),
@@ -111,12 +104,8 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         title: Text(l10n.shipConfirmQ),
         content: Text(short ? l10n.shipShortWarning : l10n.shipConfirmBody),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.actionCancel)),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.shipConfirmAction)),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.shipConfirmAction)),
         ],
       ),
     );
@@ -148,16 +137,13 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     if (units == null || !mounted) return;
 
     setState(() => _busy = true);
-    final result = await ref
-        .read(shipmentRepositoryProvider)
-        .autopack(s.id, unitsPerCarton: units);
+    final result = await ref.read(shipmentRepositoryProvider).autopack(s.id, unitsPerCarton: units);
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
       success: (r) {
         _refresh();
-        _snack(l10n.autopackDone(r.cartonCount, r.unitsPerCarton),
-            tone: StatusTone.success);
+        _snack(l10n.autopackDone(r.cartonCount, r.unitsPerCarton), tone: StatusTone.success);
       },
       failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), tone: StatusTone.danger),
     );
@@ -199,16 +185,15 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     if (draft == null || !mounted) return;
 
     setState(() => _busy = true);
-    final result =
-        await ref.read(shipmentRepositoryProvider).setCartonMeasurements(
-              c.id,
-              weightKg: draft.weightKg,
-              lengthCm: draft.lengthCm,
-              widthCm: draft.widthCm,
-              heightCm: draft.heightCm,
-              cartonType: draft.cartonType,
-              trackingNumber: draft.trackingNumber,
-            );
+    final result = await ref.read(shipmentRepositoryProvider).setCartonMeasurements(
+          c.id,
+          weightKg: draft.weightKg,
+          lengthCm: draft.lengthCm,
+          widthCm: draft.widthCm,
+          heightCm: draft.heightCm,
+          cartonType: draft.cartonType,
+          trackingNumber: draft.trackingNumber,
+        );
     if (!mounted) return;
     setState(() => _busy = false);
     result.when(
@@ -255,12 +240,8 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         title: Text(l10n.shipCancelQ),
         content: Text(l10n.shipCancelBody),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.actionCancel)),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.shipCancelAction)),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.shipCancelAction)),
         ],
       ),
     );
@@ -289,8 +270,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
 
   /// Ask which sender fields to include, then print. Aborts if cancelled.
   /// Prints in the print languages (0118), with each product's names.
-  Future<void> _printWith(
-      Future<void> Function(ShipmentPrinter printer, List<SenderLine> sender) build) async {
+  Future<void> _printWith(Future<void> Function(ShipmentPrinter printer, List<SenderLine> sender) build) async {
     final profile = ref.read(senderProfileControllerProvider);
     final sender = await showSenderPicker(context, profile);
     if (sender == null || !mounted) return;
@@ -357,26 +337,20 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                   case 'list':
                     _printWith((p, snd) => p.printOverall(s, sender: snd));
                   case 'slip':
-                    _printWith(
-                        (p, snd) => p.printDeliverySlip(s, sender: snd));
+                    _printWith((p, snd) => p.printDeliverySlip(s, sender: snd));
                   case 'cartons':
-                    _printWith(
-                        (p, snd) => p.printAllCartons(s, sender: snd));
+                    _printWith((p, snd) => p.printAllCartons(s, sender: snd));
                   case 'labels':
-                    _printWith((p, snd) => p.printAllCartonLabels(s,
-                        sender: snd,
-                        warehouseName:
-                            ref.read(activeWarehouseProvider)?.name));
+                    _printWith((p, snd) =>
+                        p.printAllCartonLabels(s, sender: snd, warehouseName: ref.read(activeWarehouseProvider)?.name));
                 }
               },
               itemBuilder: (context) => [
                 PopupMenuItem(value: 'list', child: Text(l10n.printOverall)),
                 PopupMenuItem(value: 'slip', child: Text(l10n.printDeliverySlip)),
                 if (detail.value!.cartons.isNotEmpty) ...[
-                  PopupMenuItem(
-                      value: 'cartons', child: Text(l10n.printAllCartons)),
-                  PopupMenuItem(
-                      value: 'labels', child: Text(l10n.printCartonLabels)),
+                  PopupMenuItem(value: 'cartons', child: Text(l10n.printAllCartons)),
+                  PopupMenuItem(value: 'labels', child: Text(l10n.printCartonLabels)),
                 ],
               ],
             ),
@@ -391,9 +365,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
           onRetry: () => ref.invalidate(shipmentDetailProvider(_id)),
         ),
       ),
-      bottomNavigationBar: detail.valueOrNull == null
-          ? null
-          : _bottomBar(context, l10n, detail.value!),
+      bottomNavigationBar: detail.valueOrNull == null ? null : _bottomBar(context, l10n, detail.value!),
     );
   }
 
@@ -415,16 +387,12 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                 ? OutlinedButton.icon(
                     onPressed: _busy ? null : _cancelShip,
                     icon: Icon(Icons.undo, color: scheme.error),
-                    label: Text(l10n.shipCancelAction,
-                        style: TextStyle(color: scheme.error)),
+                    label: Text(l10n.shipCancelAction, style: TextStyle(color: scheme.error)),
                   )
                 : FilledButton.icon(
                     onPressed: _busy ? null : () => _confirmShip(s),
                     icon: _busy
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2))
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.local_shipping_outlined),
                     label: Text(l10n.shipConfirmAction),
                   ),
@@ -440,8 +408,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
     final shipped = s.status == ShipmentStatus.shipped;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
       children: [
         _HeaderCard(shipment: s, packedTotal: packedTotal),
 
@@ -454,8 +421,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
             child: Column(
               children: [
                 for (var i = 0; i < s.lines.length; i++) ...[
@@ -476,13 +442,11 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
         const SizedBox(height: AppSpacing.lg),
         _SectionHeader(
           label: l10n.cartonsSection,
-          trailing:
-              s.cartons.isEmpty ? null : l10n.cartonCountLabel(s.cartons.length),
+          trailing: s.cartons.isEmpty ? null : l10n.cartonCountLabel(s.cartons.length),
           action: s.cartons.isEmpty
               ? null
               : TextButton.icon(
-                  onPressed: () => _printWith(
-                      (p, snd) => p.printAllCartons(s, sender: snd)),
+                  onPressed: () => _printWith((p, snd) => p.printAllCartons(s, sender: snd)),
                   icon: const Icon(Icons.print_outlined, size: 18),
                   label: Text(l10n.printAllCartons),
                 ),
@@ -500,28 +464,21 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
                     ? null
                     : () async {
                         await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) =>
-                              CartonEditScreen(shipment: s, carton: c),
+                          builder: (_) => CartonEditScreen(shipment: s, carton: c),
                         ));
                         _refresh();
                       },
                 onDelete: shipped ? null : () => _deleteCarton(c),
-                onPrint: () =>
-                    _printWith((p, snd) => p.printCarton(s, c, sender: snd)),
+                onPrint: () => _printWith((p, snd) => p.printCarton(s, c, sender: snd)),
                 onPrintLabel: () => _printWith((p, snd) => p.printCartonLabel(
                       s,
                       c,
                       sender: snd,
                       warehouseName: ref.read(activeWarehouseProvider)?.name,
                     )),
-                onEditMeasurements:
-                    _busy ? null : () => _editCartonMeasurements(c),
-                onClose: _busy || !c.isOpen || c.items.isEmpty
-                    ? null
-                    : () => _closeCarton(c),
-                onReopen: _busy || c.status != CartonStatus.packed
-                    ? null
-                    : () => _reopenCarton(c),
+                onEditMeasurements: _busy ? null : () => _editCartonMeasurements(c),
+                onClose: _busy || !c.isOpen || c.items.isEmpty ? null : () => _closeCarton(c),
+                onReopen: _busy || c.status != CartonStatus.packed ? null : () => _reopenCarton(c),
               )),
         if (s.cartons.isNotEmpty && !shipped) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -589,19 +546,15 @@ class _HeaderCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(shipment.customerName ?? l10n.unknownSupplier,
-                          style: theme.textTheme.titleMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                      if (shipment.referenceNo != null &&
-                          shipment.referenceNo!.isNotEmpty)
+                          style: theme.textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      if (shipment.referenceNo != null && shipment.referenceNo!.isNotEmpty)
                         Text('${l10n.referenceNoLabel}: ${shipment.referenceNo}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                                fontFamily: AppFonts.mono, color: scheme.primary)),
+                            style:
+                                theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono, color: scheme.primary)),
                     ],
                   ),
                 ),
-                StatusPill(
-                    tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
+                StatusPill(tone: ui.tone, label: ui.label, icon: ui.icon, dense: true),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -620,9 +573,7 @@ class _HeaderCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Text(l10n.packProgress(packedTotal, total),
                     style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: AppFonts.mono,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurfaceVariant)),
+                        fontFamily: AppFonts.mono, fontWeight: FontWeight.w600, color: scheme.onSurfaceVariant)),
               ],
             ),
           ],
@@ -646,14 +597,10 @@ class _SectionHeader extends StatelessWidget {
     final scheme = theme.colorScheme;
     return Row(
       children: [
-        Text(label,
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.w700)),
+        Text(label, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
         if (trailing != null) ...[
           const SizedBox(width: AppSpacing.sm),
-          Text(trailing!,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant)),
+          Text(trailing!, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
         ],
         const Spacer(),
         if (action != null) action!,
@@ -691,9 +638,7 @@ class _EmptyCartons extends StatelessWidget {
           children: [
             Icon(Icons.add_box_outlined, color: scheme.primary, size: 28),
             const SizedBox(height: AppSpacing.sm),
-            Text(l10n.addCarton,
-                style: TextStyle(
-                    color: scheme.primary, fontWeight: FontWeight.w600)),
+            Text(l10n.addCarton, style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w600)),
             if (onAutopack != null) ...[
               const SizedBox(height: AppSpacing.sm),
               FilledButton.tonalIcon(
@@ -741,13 +686,10 @@ class _LineRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name.isEmpty ? jan : name,
-                    style: theme.textTheme.bodyMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
+                    style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                 Text(
                   spec == null || spec!.isEmpty ? jan : '$jan · $spec',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                      fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -756,9 +698,8 @@ class _LineRow extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Text('$packed/$quantity',
-              style: theme.textTheme.titleSmall?.copyWith(
-                  fontFamily: AppFonts.mono,
-                  color: done ? scheme.tertiary : scheme.onSurface)),
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontFamily: AppFonts.mono, color: done ? scheme.tertiary : scheme.onSurface)),
         ],
       ),
     );
@@ -795,8 +736,7 @@ class _CartonCard extends StatelessWidget {
   final VoidCallback? onClose;
   final VoidCallback? onReopen;
 
-  static String _trimZeros(double v) =>
-      v == v.roundToDouble() ? '${v.round()}' : '$v';
+  static String _trimZeros(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';
 
   @override
   Widget build(BuildContext context) {
@@ -819,15 +759,11 @@ class _CartonCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.inventory_2_outlined,
-                      size: 20, color: scheme.primary),
+                  Icon(Icons.inventory_2_outlined, size: 20, color: scheme.primary),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                      child: Text(title, style: theme.textTheme.titleSmall)),
-                  Text(l10n.planPreviewCount(
-                      carton.items.length, carton.totalUnits),
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.onSurfaceVariant)),
+                  Expanded(child: Text(title, style: theme.textTheme.titleSmall)),
+                  Text(l10n.planPreviewCount(carton.items.length, carton.totalUnits),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                   const SizedBox(width: AppSpacing.sm),
                   StatusPill(tone: ui.tone, label: ui.label, dense: true),
                 ],
@@ -836,11 +772,9 @@ class _CartonCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   carton.items
-                      .map((it) =>
-                          '${it.productName.isEmpty ? it.janCode : it.productName}×${it.quantity}')
+                      .map((it) => '${it.productName.isEmpty ? it.janCode : it.productName}×${it.quantity}')
                       .join('  /  '),
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -852,30 +786,21 @@ class _CartonCard extends StatelessWidget {
                   runSpacing: 2,
                   children: [
                     if (carton.weightKg != null)
-                      _MetaChip(
-                          icon: Icons.scale_outlined,
-                          text: l10n.shipWeightKg(carton.weightKg!)),
-                    if (carton.lengthCm != null &&
-                        carton.widthCm != null &&
-                        carton.heightCm != null)
+                      _MetaChip(icon: Icons.scale_outlined, text: l10n.shipWeightKg(carton.weightKg!)),
+                    if (carton.lengthCm != null && carton.widthCm != null && carton.heightCm != null)
                       _MetaChip(
                           icon: Icons.straighten_outlined,
                           text: l10n.cartonDimensionsCm(
-                              _trimZeros(carton.lengthCm!),
-                              _trimZeros(carton.widthCm!),
-                              _trimZeros(carton.heightCm!))),
+                              _trimZeros(carton.lengthCm!), _trimZeros(carton.widthCm!), _trimZeros(carton.heightCm!))),
                     if (carton.trackingNumber != null)
-                      _MetaChip(
-                          icon: Icons.receipt_long_outlined,
-                          text: carton.trackingNumber!),
+                      _MetaChip(icon: Icons.receipt_long_outlined, text: carton.trackingNumber!),
                   ],
                 ),
               ],
               if (!carton.isOpen && onReopen != null) ...[
                 const SizedBox(height: 4),
                 Text(l10n.cartonMustReopenToEdit,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant)),
+                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
               ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -888,9 +813,7 @@ class _CartonCard extends StatelessWidget {
                     ),
                   if (carton.status == CartonStatus.open)
                     IconButton(
-                      tooltip: onClose == null
-                          ? l10n.cartonCloseEmptyHint
-                          : l10n.cartonClose,
+                      tooltip: onClose == null ? l10n.cartonCloseEmptyHint : l10n.cartonClose,
                       icon: const Icon(Icons.lock_outline, size: 20),
                       onPressed: onClose,
                     ),
@@ -942,13 +865,11 @@ class _MetaChip extends StatelessWidget {
         Icon(icon, size: 14, color: scheme.onSurfaceVariant),
         const SizedBox(width: 2),
         Text(text,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: scheme.onSurfaceVariant, fontFamily: AppFonts.mono)),
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant, fontFamily: AppFonts.mono)),
       ],
     );
   }
 }
-
 
 /// §18's dialog: type the box size, see the box count before committing.
 class _AutopackDialog extends StatefulWidget {
@@ -987,8 +908,7 @@ class _AutopackDialogState extends State<_AutopackDialog> {
     final theme = Theme.of(context);
     final per = _perCarton;
     final boxes = _boxes;
-    final remainder =
-        per == null ? null : widget.totalUnits - (boxes! - 1) * per;
+    final remainder = per == null ? null : widget.totalUnits - (boxes! - 1) * per;
 
     return AlertDialog(
       title: Text(l10n.autopackAction),
@@ -997,8 +917,7 @@ class _AutopackDialogState extends State<_AutopackDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.autopackTotal(widget.totalUnits),
-              style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant)),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _units,
@@ -1017,8 +936,7 @@ class _AutopackDialogState extends State<_AutopackDialog> {
           // anything is created.
           if (boxes == null)
             Text(l10n.autopackHint,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant))
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))
           else
             Container(
               width: double.infinity,
@@ -1031,16 +949,14 @@ class _AutopackDialogState extends State<_AutopackDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.autopackBoxes(boxes),
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700)),
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(
                     boxes == 1 || remainder == per
                         ? l10n.autopackEven(per!)
                         : l10n.autopackSplit(boxes - 1, per!, remainder!),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: AppFonts.mono,
-                        color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(fontFamily: AppFonts.mono, color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -1087,9 +1003,7 @@ class _LogisticsCard extends StatelessWidget {
             children: [
               Icon(icon, size: 18, color: scheme.onSurfaceVariant),
               const SizedBox(width: AppSpacing.sm),
-              Text(label,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
+              Text(label, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
               const Spacer(),
               Text(
                 value ?? l10n.shipLogisticsUnset,
@@ -1107,20 +1021,15 @@ class _LogisticsCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         child: Column(
           children: [
             row(Icons.scale_outlined, l10n.shipWeight,
-                shipment.weightKg == null
-                    ? null
-                    : l10n.shipWeightKg(shipment.weightKg!)),
+                shipment.weightKg == null ? null : l10n.shipWeightKg(shipment.weightKg!)),
             const Divider(height: 1),
-            row(Icons.local_shipping_outlined, l10n.shipCarrier,
-                shipment.carrier),
+            row(Icons.local_shipping_outlined, l10n.shipCarrier, shipment.carrier),
             const Divider(height: 1),
-            row(Icons.receipt_long_outlined, l10n.shipTracking,
-                shipment.trackingNumber),
+            row(Icons.receipt_long_outlined, l10n.shipTracking, shipment.trackingNumber),
           ],
         ),
       ),
@@ -1141,18 +1050,13 @@ class _LogisticsSheet extends StatefulWidget {
 }
 
 class _LogisticsSheetState extends State<_LogisticsSheet> {
-  late final TextEditingController _weight = TextEditingController(
-      text: widget.shipment.weightKg == null
-          ? ''
-          : _trimZeros(widget.shipment.weightKg!));
-  late final TextEditingController _carrier =
-      TextEditingController(text: widget.shipment.carrier ?? '');
-  late final TextEditingController _tracking =
-      TextEditingController(text: widget.shipment.trackingNumber ?? '');
+  late final TextEditingController _weight =
+      TextEditingController(text: widget.shipment.weightKg == null ? '' : _trimZeros(widget.shipment.weightKg!));
+  late final TextEditingController _carrier = TextEditingController(text: widget.shipment.carrier ?? '');
+  late final TextEditingController _tracking = TextEditingController(text: widget.shipment.trackingNumber ?? '');
   String? _error;
 
-  static String _trimZeros(double v) =>
-      v == v.roundToDouble() ? '${v.round()}' : '$v';
+  static String _trimZeros(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';
 
   static const _carriers = ['ヤマト運輸', '佐川急便', '日本郵便', '西濃運輸', '福山通運'];
 
@@ -1247,9 +1151,7 @@ class _LogisticsSheetState extends State<_LogisticsSheet> {
             ),
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(_error!,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.error)),
+              Text(_error!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
             ],
             const SizedBox(height: AppSpacing.lg),
             SizedBox(
@@ -1294,26 +1196,18 @@ class _CartonMeasurementsSheet extends StatefulWidget {
   final Carton carton;
 
   @override
-  State<_CartonMeasurementsSheet> createState() =>
-      _CartonMeasurementsSheetState();
+  State<_CartonMeasurementsSheet> createState() => _CartonMeasurementsSheetState();
 }
 
 class _CartonMeasurementsSheetState extends State<_CartonMeasurementsSheet> {
-  static String _num(double? v) =>
-      v == null ? '' : (v == v.roundToDouble() ? '${v.round()}' : '$v');
+  static String _num(double? v) => v == null ? '' : (v == v.roundToDouble() ? '${v.round()}' : '$v');
 
-  late final TextEditingController _weight =
-      TextEditingController(text: _num(widget.carton.weightKg));
-  late final TextEditingController _length =
-      TextEditingController(text: _num(widget.carton.lengthCm));
-  late final TextEditingController _width =
-      TextEditingController(text: _num(widget.carton.widthCm));
-  late final TextEditingController _height =
-      TextEditingController(text: _num(widget.carton.heightCm));
-  late final TextEditingController _type =
-      TextEditingController(text: widget.carton.cartonType ?? '');
-  late final TextEditingController _tracking =
-      TextEditingController(text: widget.carton.trackingNumber ?? '');
+  late final TextEditingController _weight = TextEditingController(text: _num(widget.carton.weightKg));
+  late final TextEditingController _length = TextEditingController(text: _num(widget.carton.lengthCm));
+  late final TextEditingController _width = TextEditingController(text: _num(widget.carton.widthCm));
+  late final TextEditingController _height = TextEditingController(text: _num(widget.carton.heightCm));
+  late final TextEditingController _type = TextEditingController(text: widget.carton.cartonType ?? '');
+  late final TextEditingController _tracking = TextEditingController(text: widget.carton.trackingNumber ?? '');
   String? _error;
 
   @override
@@ -1357,8 +1251,7 @@ class _CartonMeasurementsSheetState extends State<_CartonMeasurementsSheet> {
         widthCm: parsed['width'],
         heightCm: parsed['height'],
         cartonType: _type.text.trim().isEmpty ? null : _type.text.trim(),
-        trackingNumber:
-            _tracking.text.trim().isEmpty ? null : _tracking.text.trim(),
+        trackingNumber: _tracking.text.trim().isEmpty ? null : _tracking.text.trim(),
       ),
     );
   }
@@ -1440,9 +1333,7 @@ class _CartonMeasurementsSheetState extends State<_CartonMeasurementsSheet> {
             ),
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(_error!,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.error)),
+              Text(_error!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
             ],
             const SizedBox(height: AppSpacing.lg),
             SizedBox(

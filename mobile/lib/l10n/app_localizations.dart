@@ -21437,7 +21437,7 @@ abstract class AppLocalizations {
   /// No description provided for @rcWeight.
   ///
   /// In ja, this message translates to:
-  /// **'重量'**
+  /// **'重量（1単位）'**
   String get rcWeight;
 
   /// No description provided for @rcWeightCatalog.
@@ -21529,6 +21529,18 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'カタログ'**
   String get productWeightSourceCatalog;
+
+  /// No description provided for @swBreakdown.
+  ///
+  /// In ja, this message translates to:
+  /// **'内訳（数量 × 1単位の重さ）'**
+  String get swBreakdown;
+
+  /// No description provided for @swLineCalc.
+  ///
+  /// In ja, this message translates to:
+  /// **'{qty} × {unit} = {total}'**
+  String swLineCalc(int qty, String unit, String total);
 }
 
 class _AppLocalizationsDelegate

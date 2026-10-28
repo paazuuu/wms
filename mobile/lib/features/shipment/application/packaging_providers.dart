@@ -5,8 +5,8 @@ import '../../delivery/application/delivery_providers.dart';
 import '../data/packaging_repository.dart';
 import '../domain/packaging.dart';
 
-final packagingRepositoryProvider = Provider<PackagingRepository>(
-    (ref) => PackagingRepositoryImpl(ref.watch(restDioProvider)));
+final packagingRepositoryProvider =
+    Provider<PackagingRepository>((ref) => PackagingRepositoryImpl(ref.watch(restDioProvider)));
 
 /// The boxes in use, for choosing one (0115).
 final cartonTypesProvider = FutureProvider<List<CartonType>>((ref) async {

@@ -89,8 +89,7 @@ class CartonItem extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, janCode, quantity, shipmentLineId, lotId, serialId];
+  List<Object?> get props => [id, janCode, quantity, shipmentLineId, lotId, serialId];
 }
 
 /// One carton (段ボール / 小口) within a shipment, and its contents.
@@ -130,23 +129,16 @@ class Carton extends Equatable {
 
   bool get isOpen => status == CartonStatus.open;
   bool get hasMeasurements =>
-      weightKg != null ||
-      lengthCm != null ||
-      widthCm != null ||
-      heightCm != null ||
-      trackingNumber != null;
+      weightKg != null || lengthCm != null || widthCm != null || heightCm != null || trackingNumber != null;
 
   factory Carton.fromJson(Map<String, dynamic> json) {
-    int asInt(dynamic v) =>
-        v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+    int asInt(dynamic v) => v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
     final rawItems = json['items'] as List<dynamic>? ?? const [];
     return Carton(
       id: asInt(json['id']),
       cartonNo: asInt(json['carton_no']),
       label: json['label'] as String?,
-      items: rawItems
-          .map((e) => CartonItem.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      items: rawItems.map((e) => CartonItem.fromJson(e as Map<String, dynamic>)).toList(),
       status: CartonStatus.parse(json['status'] as String?),
       cartonType: json['carton_type'] as String?,
       weightKg: _asDoubleOrNull(json['weight_kg']),
@@ -196,8 +188,7 @@ class PackableLine extends Equatable {
   final int unpacked;
 
   factory PackableLine.fromJson(Map<String, dynamic> json) {
-    int asInt(dynamic v) =>
-        v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+    int asInt(dynamic v) => v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
     return PackableLine(
       productId: asInt(json['product_id']),
       janCode: (json['jan_code'] ?? '').toString(),
@@ -227,8 +218,7 @@ class ShipmentPacking extends Equatable {
   final List<Carton> cartons;
 
   factory ShipmentPacking.fromJson(Map<String, dynamic> json) {
-    int asInt(dynamic v) =>
-        v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+    int asInt(dynamic v) => v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
     return ShipmentPacking(
       shipmentPlanId: asInt(json['shipment_plan_id']),
       lines: (json['lines'] as List<dynamic>? ?? const [])

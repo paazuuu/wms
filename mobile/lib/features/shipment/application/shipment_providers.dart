@@ -12,8 +12,7 @@ import '../domain/shipment_parcel.dart';
 final shipmentRepositoryProvider = Provider<ShipmentRepository>((ref) {
   // Two clients: the edge function for the shipment routes, PostgREST for the
   // 0039 packing/logistics RPCs.
-  return ShipmentRepositoryImpl(
-      ref.watch(deliveryDioProvider), ref.watch(restDioProvider));
+  return ShipmentRepositoryImpl(ref.watch(deliveryDioProvider), ref.watch(restDioProvider));
 });
 
 /// Also show already-shipped shipments (for reprints / corrections).
@@ -25,8 +24,7 @@ final showShippedProvider = StateProvider<bool>((_) => false);
 /// Scoped to the current warehouse (UI spec §4: switching warehouse switches
 /// Shipping too). A null scope is the deliberate "all warehouses" view, not a
 /// missing filter.
-final shipmentsListProvider =
-    FutureProvider.autoDispose<List<Shipment>>((ref) async {
+final shipmentsListProvider = FutureProvider.autoDispose<List<Shipment>>((ref) async {
   final repo = ref.watch(shipmentRepositoryProvider);
   final includeShipped = ref.watch(showShippedProvider);
   final warehouseId = ref.watch(activeWarehouseIdProvider);
@@ -45,8 +43,7 @@ final shipmentsListProvider =
 });
 
 /// One shipment with its lines and cartons.
-final shipmentDetailProvider =
-    FutureProvider.autoDispose.family<Shipment, int>((ref, id) async {
+final shipmentDetailProvider = FutureProvider.autoDispose.family<Shipment, int>((ref, id) async {
   final result = await ref.watch(shipmentRepositoryProvider).show(id);
   return result.when(
     success: (data) => data,
@@ -57,8 +54,7 @@ final shipmentDetailProvider =
 /// One shipment's packing state (0076): each product's ceiling and every
 /// carton's own, lot/serial-joined detail — what the carton-packing screen
 /// reads, distinct from [shipmentDetailProvider]'s lighter, edge-function view.
-final shipmentPackingProvider =
-    FutureProvider.autoDispose.family<ShipmentPacking, int>((ref, planId) async {
+final shipmentPackingProvider = FutureProvider.autoDispose.family<ShipmentPacking, int>((ref, planId) async {
   final result = await ref.watch(shipmentRepositoryProvider).packing(planId);
   return result.when(
     success: (data) => data,
@@ -68,8 +64,7 @@ final shipmentPackingProvider =
 
 /// What left the building on this shipment, parcel by parcel (0075) — the
 /// recall-traceability read.
-final shipmentParcelsProvider =
-    FutureProvider.autoDispose.family<List<ShipmentParcel>, int>((ref, planId) async {
+final shipmentParcelsProvider = FutureProvider.autoDispose.family<List<ShipmentParcel>, int>((ref, planId) async {
   final result = await ref.watch(shipmentRepositoryProvider).parcels(planId);
   return result.when(
     success: (data) => data,

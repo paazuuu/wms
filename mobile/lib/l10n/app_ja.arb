@@ -10798,7 +10798,7 @@
       }
     }
   },
-  "rcWeight": "重量",
+  "rcWeight": "重量（1単位）",
   "rcWeightCatalog": "カタログ",
   "rcWeightAi": "AI",
   "rcWeightProduct": "登録済み",
@@ -10830,5 +10830,20 @@
   "rcWeightBasisPack": "1パックあたり",
   "rcWeightAsk": "カタログにない重量をAIで探す",
   "rcWeightLimit": "AIの1日の上限に達したため、重量の検索を止めました",
-  "productWeightSourceCatalog": "カタログ"
+  "productWeightSourceCatalog": "カタログ",
+  "swBreakdown": "内訳（数量 × 1単位の重さ）",
+  "swLineCalc": "{qty} × {unit} = {total}",
+  "@swLineCalc": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -12042,7 +12042,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get rcWeight => '重量';
+  String get rcWeight => '重量（1単位）';
 
   @override
   String get rcWeightCatalog => 'カタログ';
@@ -12092,4 +12092,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get productWeightSourceCatalog => 'カタログ';
+
+  @override
+  String get swBreakdown => '内訳（数量 × 1単位の重さ）';
+
+  @override
+  String swLineCalc(int qty, String unit, String total) {
+    return '$qty × $unit = $total';
+  }
 }

@@ -7747,6 +7747,19 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 2026-10-27: Tombow 総合 2026-2027 852 JANs (637 with a weight),
   オリジナル文具 vol3 2. Its エコロジー and ギフト catalogs print no JAN.
 
+## 0156: one unit's weight × quantity, in a shipment
+
+- A weight is always ONE unit as counted in a quantity: one pen; for a JAN
+  that is itself a pack (a refill pack), the pack. The catalog reader drops
+  a weight printed for several together (箱, ダース, ケース, 入数, N本入) —
+  the count is not always there to divide by — and the AI lookup prompt
+  asks for one unit, dividing only when the count is printed, else null.
+- `unit_weight_of(product, jan)`: the product's own, else the catalog's for
+  the JAN, else the AI's (trusted only), with where it came from.
+- `shipment_weight_estimate` uses it for lines and cartons, and each line
+  carries `weight_source / weight_basis / weight_text`. The shipping card
+  gains 内訳（数量 × 1単位の重さ）: 12 × 11.5 g = 138 g · カタログ.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

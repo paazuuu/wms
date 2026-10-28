@@ -79,11 +79,8 @@ class Shipment extends Equatable {
     // `lines`/`cartons` entirely (it returns counts instead), so the fallback
     // has to be a mutable list or sorting it throws.
     final rawLines = List<dynamic>.of(json['lines'] as List<dynamic>? ?? const []);
-    final rawCartons =
-        List<dynamic>.of(json['cartons'] as List<dynamic>? ?? const []);
-    final cartons = rawCartons
-        .map((e) => Carton.fromJson(e as Map<String, dynamic>))
-        .toList()
+    final rawCartons = List<dynamic>.of(json['cartons'] as List<dynamic>? ?? const []);
+    final cartons = rawCartons.map((e) => Carton.fromJson(e as Map<String, dynamic>)).toList()
       ..sort((a, b) => a.cartonNo.compareTo(b.cartonNo));
     return Shipment(
       id: asInt(json['id']) ?? 0,

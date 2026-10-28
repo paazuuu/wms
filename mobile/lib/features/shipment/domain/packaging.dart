@@ -7,9 +7,8 @@ String? _s(dynamic v) {
   return s == null || s.isEmpty ? null : s;
 }
 
-List<T> _list<T>(dynamic raw, T Function(Map<String, dynamic>) parse) => raw is List
-    ? raw.whereType<Map>().map((e) => parse(e.cast<String, dynamic>())).toList(growable: false)
-    : const [];
+List<T> _list<T>(dynamic raw, T Function(Map<String, dynamic>) parse) =>
+    raw is List ? raw.whereType<Map>().map((e) => parse(e.cast<String, dynamic>())).toList(growable: false) : const [];
 
 /// A box we ship in (0115): its size, what it weighs empty, the packing
 /// material that usually goes in with it, and how much it takes.
@@ -86,6 +85,9 @@ class WeightLine extends Equatable {
     required this.quantity,
     this.unitWeightG,
     this.lineWeightG,
+    this.weightSource,
+    this.weightBasis,
+    this.weightText,
   });
 
   final int? productId;
@@ -94,6 +96,14 @@ class WeightLine extends Equatable {
   final int quantity;
   final double? unitWeightG;
   final double? lineWeightG;
+
+  /// Where one unit's weight came from (0156): manual / measured / web /
+  /// catalog (the product's own), or catalog / ai found by its JAN.
+  final String? weightSource;
+
+  /// What the catalog weighed: product, package, or pack (the JAN is a pack).
+  final String? weightBasis;
+  final String? weightText;
 
   bool get missing => unitWeightG == null;
 
@@ -104,10 +114,14 @@ class WeightLine extends Equatable {
         quantity: _i(j['quantity']),
         unitWeightG: _d(j['unit_weight_g']),
         lineWeightG: _d(j['line_weight_g']),
+        weightSource: j['weight_source']?.toString(),
+        weightBasis: j['weight_basis']?.toString(),
+        weightText: j['weight_text']?.toString(),
       );
 
   @override
-  List<Object?> get props => [productId, janCode, productName, quantity, unitWeightG, lineWeightG];
+  List<Object?> get props =>
+      [productId, janCode, productName, quantity, unitWeightG, lineWeightG, weightSource, weightBasis, weightText];
 }
 
 /// A real carton of the shipment, with its packaging and contents weight.
@@ -241,7 +255,17 @@ class ShipmentWeightEstimate extends Equatable {
 
   @override
   List<Object?> get props => [
-        lines, goodsWeightG, missingWeights, fromCartons, cartons, planned, cartonCount,
-        boxesWeightG, packingMaterialG, totalWeightG, measuredWeightG, suggested,
+        lines,
+        goodsWeightG,
+        missingWeights,
+        fromCartons,
+        cartons,
+        planned,
+        cartonCount,
+        boxesWeightG,
+        packingMaterialG,
+        totalWeightG,
+        measuredWeightG,
+        suggested,
       ];
 }

@@ -202,8 +202,7 @@ class _CartonTypeDialogState extends State<_CartonTypeDialog> {
                 value: _active,
                 onChanged: (v) => setState(() => _active = v),
               ),
-              if (_error != null)
-                Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              if (_error != null) Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ],
           ),
         ),

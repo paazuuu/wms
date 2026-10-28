@@ -17,6 +17,7 @@ class ShipmentLine extends Equatable {
   final int id;
   final String janCode;
   final int quantity;
+
   /// Our own 品番 (the server rewrites a company's writing to our master, 0105).
   final String? productCode;
 

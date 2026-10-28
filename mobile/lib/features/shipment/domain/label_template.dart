@@ -59,8 +59,7 @@ class LabelTemplate extends Equatable {
 
   /// Substitute [values] into [template]. Unknown or null values become ''.
   static String fill(String template, Map<String, String?> values) =>
-      template.replaceAllMapped(
-          _token, (m) => values[m.group(1)]?.trim() ?? '');
+      template.replaceAllMapped(_token, (m) => values[m.group(1)]?.trim() ?? '');
 
   /// The text rows for one label, with rows that say nothing removed.
   ///
@@ -74,8 +73,7 @@ class LabelTemplate extends Equatable {
       final filled = fill(line, values).trim();
       if (filled.isEmpty) continue;
       final tokens = _token.allMatches(line).map((m) => m.group(1)!).where((t) => !isWord(t));
-      if (tokens.isNotEmpty &&
-          tokens.every((t) => (values[t] ?? '').trim().isEmpty)) {
+      if (tokens.isNotEmpty && tokens.every((t) => (values[t] ?? '').trim().isEmpty)) {
         continue;
       }
       out.add(filled);

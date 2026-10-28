@@ -650,6 +650,9 @@ Deno.test("the lookup asks for one product by what we know of it, and not to gue
   assertEquals(p.includes("JANコード: 4902505450679"), true);
   assertEquals(p.includes("型番"), false);
   assertEquals(p.includes("推測しない"), true);
+  // One unit as sold under the JAN: what 数量 × 重量 is worked out with.
+  assertEquals(p.includes("このJANコードで売られる1単位"), true);
+  assertEquals(p.includes("入数が分からなければ weight_g は null"), true);
 });
 
 Deno.test("with no key chosen for the lookup, the lookup's own server key is used, then the reading one (0141)", async () => {

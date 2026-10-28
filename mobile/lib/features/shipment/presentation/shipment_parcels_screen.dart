@@ -42,8 +42,7 @@ class ShipmentParcelsScreen extends ConsumerWidget {
             : ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: parcels.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.sm),
+                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (context, i) => _ParcelCard(parcel: parcels[i]),
               ),
       ),
@@ -77,58 +76,42 @@ class _ParcelCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    parcel.productName.isEmpty
-                        ? parcel.janCode
-                        : parcel.productName,
+                    parcel.productName.isEmpty ? parcel.janCode : parcel.productName,
                     style: theme.textTheme.titleSmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (parcel.isReversal) ...[
-                  StatusPill(
-                      tone: StatusTone.danger,
-                      label: l10n.shipmentParcelReversalTag,
-                      dense: true),
+                  StatusPill(tone: StatusTone.danger, label: l10n.shipmentParcelReversalTag, dense: true),
                   const SizedBox(width: AppSpacing.sm),
                 ],
                 Text(
                   signed(parcel.quantity),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontFamily: AppFonts.mono,
-                    color: tone == StatusTone.danger
-                        ? scheme.error
-                        : scheme.onSurface,
+                    color: tone == StatusTone.danger ? scheme.error : scheme.onSurface,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 2),
             Text(parcel.janCode,
-                style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: AppFonts.mono,
-                    color: scheme.onSurfaceVariant)),
+                style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.xs),
             Wrap(
               spacing: AppSpacing.md,
               runSpacing: 2,
               children: [
-                if (parcel.createdAt != null)
-                  _Meta(
-                      icon: Icons.schedule,
-                      text: fmt.format(parcel.createdAt!)),
+                if (parcel.createdAt != null) _Meta(icon: Icons.schedule, text: fmt.format(parcel.createdAt!)),
                 if (parcel.lotCode != null)
                   _Meta(
                       icon: Icons.inventory_2_outlined,
                       text: parcel.expiryDate == null
                           ? 'L:${parcel.lotCode}'
                           : 'L:${parcel.lotCode} (${parcel.expiryDate})'),
-                if (parcel.serialNumber != null)
-                  _Meta(
-                      icon: Icons.qr_code,
-                      text: 'S/N:${parcel.serialNumber}'),
-                if (parcel.binCode != null)
-                  _Meta(icon: Icons.place_outlined, text: parcel.binCode!),
+                if (parcel.serialNumber != null) _Meta(icon: Icons.qr_code, text: 'S/N:${parcel.serialNumber}'),
+                if (parcel.binCode != null) _Meta(icon: Icons.place_outlined, text: parcel.binCode!),
               ],
             ),
           ],
@@ -154,8 +137,7 @@ class _Meta extends StatelessWidget {
         Icon(icon, size: 14, color: scheme.onSurfaceVariant),
         const SizedBox(width: 2),
         Text(text,
-            style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
+            style: theme.textTheme.bodySmall?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
       ],
     );
   }

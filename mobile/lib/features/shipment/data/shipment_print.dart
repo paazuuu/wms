@@ -118,9 +118,8 @@ class SlipDocument {
         ],
       );
 
-  static String? _date(DateTime? d) => d == null
-      ? null
-      : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  static String? _date(DateTime? d) =>
+      d == null ? null : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
 /// Builds print-ready HTML for a shipment and hands it to the system print /
@@ -137,11 +136,8 @@ class ShipmentPrinter {
   /// product column and the label print beside our Japanese name.
   final Map<String, Map<String, String>> namesByJan;
 
-  String _esc(Object? v) => (v ?? '')
-      .toString()
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;');
+  String _esc(Object? v) =>
+      (v ?? '').toString().replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
   /// An inline SVG barcode for a JAN: EAN-13 when it is a valid 13-digit code,
   /// otherwise Code128. Returns '' when nothing sensible can be drawn.
@@ -228,15 +224,12 @@ class ShipmentPrinter {
   String _senderBlock(List<SenderLine> sender, {bool inline = false}) {
     if (sender.isEmpty) return '';
     final rows = sender
-        .map((l) => l.key == 'company'
-            ? '<div class="co">${_esc(l.text)}</div>'
-            : '<div>${_esc(l.text)}</div>')
+        .map((l) => l.key == 'company' ? '<div class="co">${_esc(l.text)}</div>' : '<div>${_esc(l.text)}</div>')
         .join();
     return '<div class="sender${inline ? ' inline' : ''}">$rows</div>';
   }
 
-  String _headerBlock(Shipment s, String heading,
-      [List<SenderLine> sender = const []]) {
+  String _headerBlock(Shipment s, String heading, [List<SenderLine> sender = const []]) {
     final m = <String>[];
     void add(String label, String? value) {
       if (value != null && value.trim().isNotEmpty) {
@@ -269,9 +262,7 @@ class ShipmentPrinter {
 
   /// A plain (text) item table — used for the overall list.
   String _rows(Iterable<_Item> rows, int total) {
-    final body = rows
-        .map((r) => '<tr>${_itemCells(r)}<td class="num">${r.quantity}</td></tr>')
-        .join();
+    final body = rows.map((r) => '<tr>${_itemCells(r)}<td class="num">${r.quantity}</td></tr>').join();
     return '''
 <table>
   <thead><tr>$_itemHead$_qtyHead</tr></thead>
@@ -297,8 +288,7 @@ class ShipmentPrinter {
 
   /// The whole shipment as one list.
   String overallHtml(Shipment s, {List<SenderLine> sender = const []}) {
-    final rows = s.lines.map((l) => _Item(
-        l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
+    final rows = s.lines.map((l) => _Item(l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
     final body = _headerBlock(s, _line('shipping_list'), sender) + _rows(rows, s.totalUnits);
     return _shell('${language.word('shipping_list', language.main)} ${s.shipmentNumber}', body);
   }
@@ -315,8 +305,7 @@ class ShipmentPrinter {
     final byJan = {for (final l in s.lines) l.janCode: l};
     final rows = c.items.map((it) {
       final line = byJan[it.janCode];
-      return _Item(it.janCode, line?.maker, it.productName, line?.productCode,
-          it.spec ?? line?.spec, it.quantity);
+      return _Item(it.janCode, line?.maker, it.productName, line?.productCode, it.spec ?? line?.spec, it.quantity);
     });
     return '<div class="carton"><div class="box">${_esc(title)}</div>'
         '${_rowsWithBarcode(rows, c.totalUnits)}</div>';
@@ -330,8 +319,8 @@ class ShipmentPrinter {
 
   /// Every carton, one section per box (page-break between them), with barcodes.
   String allCartonsHtml(Shipment s, {List<SenderLine> sender = const []}) {
-    final body = _headerBlock(s, _line('packing_list_by_carton'), sender) +
-        s.cartons.map((c) => _cartonSection(s, c)).join();
+    final body =
+        _headerBlock(s, _line('packing_list_by_carton'), sender) + s.cartons.map((c) => _cartonSection(s, c)).join();
     return _shell('段ボール一覧 ${s.shipmentNumber}', body);
   }
 
@@ -362,8 +351,7 @@ class ShipmentPrinter {
         ? '$_itemHead$_qtyHead<th class="num">${_t('unit_price')}</th><th class="num">${_t('amount')}</th>'
         : '$_itemHead$_qtyHead';
     final rows = d.lines.map((l) {
-      final cells = _itemCells(_Item(
-          l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
+      final cells = _itemCells(_Item(l.janCode, l.maker, l.productName, l.productCode, l.spec, l.quantity));
       final base = '$cells<td class="num">${l.quantity}</td>';
       final extra = hasMoney
           ? '<td class="num">${money(l.unitPrice)}</td>'
@@ -442,10 +430,7 @@ class ShipmentPrinter {
       for (final it in c.items)
         if (it.lotCode != null) it.lotCode!,
     };
-    final company = sender
-        .where((l) => l.key == 'company')
-        .map((l) => l.text)
-        .firstOrNull;
+    final company = sender.where((l) => l.key == 'company').map((l) => l.text).firstOrNull;
     return {
       'company': company,
       'customer': s.customerName,
@@ -454,9 +439,7 @@ class ShipmentPrinter {
       'carton_total': '${s.cartonCount}',
       'product_name': single != null
           ? productNames(single.janCode, single.productName).join(' / ')
-          : (janCodes.isEmpty
-              ? null
-              : language.words('label_items').map((w) => '${janCodes.length} $w').join(' / ')),
+          : (janCodes.isEmpty ? null : language.words('label_items').map((w) => '${janCodes.length} $w').join(' / ')),
       'jan': single?.janCode,
       'sku': single?.spec,
       'lot': lotCodes.length == 1 ? lotCodes.first : null,
@@ -477,8 +460,7 @@ class ShipmentPrinter {
     List<SenderLine> sender = const [],
     String? warehouseName,
   }) {
-    final values =
-        cartonLabelValues(s, c, sender: sender, warehouseName: warehouseName);
+    final values = cartonLabelValues(s, c, sender: sender, warehouseName: warehouseName);
     final rows = template.render(values);
     final code = template.renderCode(values);
     final qr = template.renderQr(values);
@@ -504,8 +486,7 @@ class ShipmentPrinter {
     String? warehouseName,
   }) {
     final body = s.cartons
-        .map((c) => cartonLabelHtml(s, c,
-            template: template, sender: sender, warehouseName: warehouseName))
+        .map((c) => cartonLabelHtml(s, c, template: template, sender: sender, warehouseName: warehouseName))
         .map(_labelBodyOf)
         .join();
     return _labelShell('箱ラベル ${s.shipmentNumber}', body);
@@ -514,8 +495,7 @@ class ShipmentPrinter {
   /// A QR as inline SVG. Empty string when the payload cannot be encoded.
   String _qrSvg(String payload) {
     try {
-      return Barcode.qrCode()
-          .toSvg(payload, width: 110, height: 110, drawText: false);
+      return Barcode.qrCode().toSvg(payload, width: 110, height: 110, drawText: false);
     } catch (_) {
       return '';
     }
@@ -558,18 +538,14 @@ class ShipmentPrinter {
 
   Future<void> printOverall(Shipment s, {List<SenderLine> sender = const []}) =>
       _printHtml(overallHtml(s, sender: sender));
-  Future<void> printCarton(Shipment s, Carton c,
-          {List<SenderLine> sender = const []}) =>
+  Future<void> printCarton(Shipment s, Carton c, {List<SenderLine> sender = const []}) =>
       _printHtml(cartonHtml(s, c, sender: sender));
-  Future<void> printAllCartons(Shipment s,
-          {List<SenderLine> sender = const []}) =>
+  Future<void> printAllCartons(Shipment s, {List<SenderLine> sender = const []}) =>
       _printHtml(allCartonsHtml(s, sender: sender));
-  Future<void> printTransferSlip(TransferOrder t,
-          {List<SenderLine> sender = const []}) =>
+  Future<void> printTransferSlip(TransferOrder t, {List<SenderLine> sender = const []}) =>
       _printHtml(transferSlipHtml(t, sender: sender));
 
-  Future<void> printDeliverySlip(Shipment s,
-          {List<SenderLine> sender = const []}) =>
+  Future<void> printDeliverySlip(Shipment s, {List<SenderLine> sender = const []}) =>
       _printHtml(deliverySlipHtml(s, sender: sender));
 
   /// §19's flow ends at a print job, and the system print dialog is the preview
@@ -579,13 +555,11 @@ class ShipmentPrinter {
           {LabelTemplate template = LabelTemplates.carton,
           List<SenderLine> sender = const [],
           String? warehouseName}) =>
-      _printHtml(cartonLabelHtml(s, c,
-          template: template, sender: sender, warehouseName: warehouseName));
+      _printHtml(cartonLabelHtml(s, c, template: template, sender: sender, warehouseName: warehouseName));
 
   Future<void> printAllCartonLabels(Shipment s,
           {LabelTemplate template = LabelTemplates.carton,
           List<SenderLine> sender = const [],
           String? warehouseName}) =>
-      _printHtml(allCartonLabelsHtml(s,
-          template: template, sender: sender, warehouseName: warehouseName));
+      _printHtml(allCartonLabelsHtml(s, template: template, sender: sender, warehouseName: warehouseName));
 }

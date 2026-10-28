@@ -169,3 +169,14 @@ Deno.test("one entry per JAN: a later page's weight when the first had none", ()
   const [u] = uniqueEntries([e("3", null), e("9", 12)]);
   assertEquals([u.page_number, u.weight_g], ["3", 12]);
 });
+
+Deno.test("a weight of several together (a box, a dozen, N本入) is not one item's: left out", () => {
+  const rows = segmentRows([
+    item(100, 100, "●重量：120g／箱"),
+    item(100, 120, "●重量：140g（1ダース）"),
+    item(100, 140, "●重量：35g／パック（3本入）"),
+    item(100, 160, "●重量：11.5g／パック"),
+    item(100, 180, "●重量：9g"),
+  ]);
+  assertEquals(pageWeights(rows).map((w) => [w.g, w.basis]), [[11.5, "pack"], [9, "product"]]);
+});

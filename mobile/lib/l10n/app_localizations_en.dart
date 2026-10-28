@@ -12294,7 +12294,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rcWeight => 'Weight';
+  String get rcWeight => 'Weight (one unit)';
 
   @override
   String get rcWeightCatalog => 'Catalog';
@@ -12346,4 +12346,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productWeightSourceCatalog => 'Catalog';
+
+  @override
+  String get swBreakdown => 'Breakdown (quantity × one unit)';
+
+  @override
+  String swLineCalc(int qty, String unit, String total) {
+    return '$qty × $unit = $total';
+  }
 }

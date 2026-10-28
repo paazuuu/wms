@@ -153,6 +153,9 @@ const LABELLED = /(?:重\s*量|質\s*量|重\s*さ)\s*[：:]?\s*約?\s*([0-9]+(?
 // 55×15×191mm/20g, under a heading that says it is a weight.
 const AFTER_SIZE = /(?:mm|㎜)\s*[\/／]\s*約?\s*([0-9]+(?:\.[0-9]+)?)\s*(kg|ｋｇ|g|ｇ)(?![a-zA-Zａ-ｚ])/;
 const NOT_THE_ITEM = /物流|ケース|カートン|梱包単位|外箱/;
+// A weight of several together (a box, a dozen, 10本入): not one item's,
+// and the count is not always there to divide by — left out.
+const SEVERAL = /箱|ダース|ケース|カートン|入数|[0-9０-９]+\s*(?:本|個|枚|冊|コ|ヶ|袋|パック)\s*入/;
 
 function overlap(a: { x0: number; x1: number }, b: { x0: number; x1: number }): number {
   return Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
@@ -178,6 +181,7 @@ export function pageWeights(rows: Segment[][]): PageWeight[] {
       }
       const v = Number(m[1]);
       if (!(v > 0)) continue;
+      if (SEVERAL.test(s.text) || SEVERAL.test(header)) continue;
       const g = /k/i.test(m[2]) || /ｋ/.test(m[2]) ? v * 1000 : v;
       const both = s.text + " " + header;
       out.push({

@@ -51,7 +51,8 @@ class PrintLanguageRepositoryImpl implements PrintLanguageRepository {
   }
 
   @override
-  Future<ApiResult<PrintLanguage>> setWord(String key, {required String ja, required String en, required String zh}) async {
+  Future<ApiResult<PrintLanguage>> setWord(String key,
+      {required String ja, required String en, required String zh}) async {
     try {
       final r = await _dio.post('/rpc/set_label_term', data: {'p_key': key, 'p_ja': ja, 'p_en': en, 'p_zh': zh});
       return ApiSuccess(_parse(r.data));

@@ -141,9 +141,7 @@ class SenderProfile {
         contact: json['contact'] as String? ?? '',
         registrationNumber: json['registration_number'] as String? ?? '',
         note: json['note'] as String? ?? '',
-        disabled: ((json['disabled'] as List<dynamic>?) ?? const [])
-            .map((e) => e.toString())
-            .toSet(),
+        disabled: ((json['disabled'] as List<dynamic>?) ?? const []).map((e) => e.toString()).toSet(),
       );
 
   static SenderProfile decode(String raw) {

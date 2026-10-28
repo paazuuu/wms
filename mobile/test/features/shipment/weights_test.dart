@@ -189,6 +189,26 @@ void main() {
     expect(items.single.quantity, 2);
   });
 
+  testWidgets('line by line: 数量 × one unit, with where the weight came from', (tester) async {
+    const weight = ShipmentWeightEstimate(
+      lines: [
+        WeightLine(
+            productId: 1, janCode: '4909999000014', productName: 'テストペン', quantity: 12, unitWeightG: 11.5,
+            lineWeightG: 138, weightSource: 'catalog', weightBasis: 'pack'),
+        WeightLine(
+            productId: 2, janCode: '4909999000021', productName: 'テストノート', quantity: 3, unitWeightG: 80,
+            lineWeightG: 240, weightSource: 'ai'),
+      ],
+      goodsWeightG: 378,
+      totalWeightG: 378,
+    );
+    await _pumpCard(tester, weight);
+    await tester.tap(find.byKey(const ValueKey('sw-lines')));
+    await tester.pumpAndSettle();
+    expect(find.text('12 × 11.5 g = 138 g · カタログ · 1パックあたり'), findsOneWidget);
+    expect(find.text('3 × 80 g = 240 g · AI'), findsOneWidget);
+  });
+
   testWidgets('a packed carton takes a box type, filling its weights', (tester) async {
     const weight = ShipmentWeightEstimate(
       fromCartons: true,
