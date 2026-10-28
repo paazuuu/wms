@@ -6,6 +6,7 @@ import {
   makerFromSearch,
   meclibInfo,
   meclibJanPages,
+  meclibTextEntries,
   parseMeclibUrl,
   pageLines,
   pagesFromSearch,
@@ -212,7 +213,11 @@ Deno.test("a meclib e-book by its URL; what its book.txt allows; the pages to lo
   assertEquals(parseMeclibUrl("https://example.com/zebra2026/book/"), null);
   // The library's own list is not a book.
   assertEquals(parseMeclibUrl("https://ecole-rg.meclib.jp/library/maker_ctlg/book/list"), null);
-  assertEquals(meclibInfo({ title: "テスト総合カタログ", pdf: ["1", "1", "1", "0", "0"] }), { title: "テスト総合カタログ", pdfAllowed: true });
+  assertEquals(meclibInfo({ title: "テスト総合カタログ", pdf: ["1", "1", "1", "0", "0"], txtsearch: ["1", "1"] }), {
+    title: "テスト総合カタログ",
+    pdfAllowed: true,
+    textAllowed: true,
+  });
   assertEquals(meclibInfo({ title: "x", pdf: ["0", "1"] }).pdfAllowed, false);
   assertEquals(meclibJanPages("表紙\nTP-1 4909999000014商品コード:8642314909999000021\n索引\n49-09999-000038"), [2, 4]);
 });
@@ -224,4 +229,23 @@ Deno.test("a PDF's spacer run does not join two columns", () => {
     { x: 300, y: 142, w: 71, t: "49-09999-000014" },
   ], { id: "1", group: "1", number: "1" });
   assertEquals(got.map((e) => [e.jan, e.code_hint, e.line_text]), [["4909999000014", "TP-F", "TP-F | 49-09999-000014"]]);
+});
+
+Deno.test("JANs in a meclib book's run-together text: alone, or inside digits with a prefix the book shows", () => {
+  // 4909999000014 and …021 stand alone (prefix 4909999 seen twice); …038 is
+  // run into a product code; 4512345000011 is run in with a prefix seen nowhere alone.
+  const text = [
+    "表紙",
+    "TP-1/黒4909999000014商品コード:864231",
+    "TP-2/赤4909999000021商品コード:8642324909999000038商品コード:864233",
+    "索引 1234512345000011 99",
+  ].join("\n");
+  const got = meclibTextEntries(text);
+  assertEquals(got.map((e) => [e.jan, e.page_number]), [
+    ["4909999000014", "2"],
+    ["4909999000021", "3"],
+    ["4909999000038", "3"],
+  ]);
+  assertEquals(got.every((e) => e.weight_g === null && e.code_hint === null), true);
+  assertEquals(got[0].line_text.includes("TP-1/黒4909999000014"), true);
 });

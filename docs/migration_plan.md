@@ -7792,6 +7792,14 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   job take meclib books too.
 - mergeEntries asks for what a catalog has 150 JANs at a time: a step's few
   hundred JANs made too long a URL once.
+- Reading a meclib book from its page PDFs on the server did not work: pdf.js
+  ran past the function's 2 s of CPU (and its Japanese fonts want CMaps).
+  So a meclib book is read whole, in one call, from its search text
+  (`data/txtsearch.txt`, offered when book.txt `txtsearch[0]` is 1). There
+  digits run together, so a JAN is taken standing alone with a good check
+  digit, or inside a run of digits only with a maker prefix the book shows
+  standing alone at least twice. No weights from it: without positions a
+  weight cannot be put to its JAN (the AI lookup fills those).
 
 ## Rollout discipline
 

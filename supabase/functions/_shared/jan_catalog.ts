@@ -59,13 +59,65 @@ export function meclibBase(r: MeclibRef): string {
   return `https://${r.host}/${r.book}/book/`;
 }
 
-/** What a meclib book.txt says: its title, and whether a page may be had as
- * a PDF from a PC browser (its `pdf` setting, the first of five). */
-export function meclibInfo(json: unknown): { title: string | null; pdfAllowed: boolean } {
+/** What a meclib book.txt says: its title, and what a PC browser may have
+ * of it (the first of each five-way setting): a page's PDF, text search. */
+export function meclibInfo(json: unknown): { title: string | null; pdfAllowed: boolean; textAllowed: boolean } {
   // deno-lint-ignore no-explicit-any
   const j = json as any;
-  const pdf = Array.isArray(j?.pdf) ? String(j.pdf[0]) : "0";
-  return { title: typeof j?.title === "string" && j.title.trim() ? j.title.trim() : null, pdfAllowed: pdf === "1" };
+  const first = (k: string) => (Array.isArray(j?.[k]) ? String(j[k][0]) : "0");
+  return {
+    title: typeof j?.title === "string" && j.title.trim() ? j.title.trim() : null,
+    pdfAllowed: first("pdf") === "1",
+    // Its text search, which is what is read.
+    textAllowed: first("txtsearch") === "1",
+  };
+}
+
+/** The JANs in a meclib book's search text (txtsearch.txt, a line a page),
+ * with the page and the text around each. That text runs digits together
+ * (4901681773138商品コード:8642314901681773145…), so a JAN is taken:
+ *   * standing alone (no digit either side) with a good check digit, or
+ *   * inside a run of digits only when its first 7 digits (the maker's GS1
+ *     prefix) are a prefix the book shows standing alone at least twice —
+ *     13 digits inside a run with a known prefix and a good check digit do
+ *     not happen by chance.
+ * No weight: without where things sit, a weight cannot be put to its JAN. */
+export function meclibTextEntries(txtsearch: string): CatalogEntry[] {
+  const lines = txtsearch.split("\n");
+  const clean = new Map<string, number>();
+  const found: { jan: string; page: number; at: number; alone: boolean; line: string }[] = [];
+  lines.forEach((line, i) => {
+    for (const m of line.matchAll(/(?=(4[59][0-9]{11}))/g)) {
+      const at = m.index ?? 0;
+      const jan = m[1];
+      if (!validJan(jan)) continue;
+      const alone = !/[0-9]/.test(line[at - 1] ?? "") && !/[0-9]/.test(line[at + 13] ?? "");
+      if (alone) clean.set(jan.slice(0, 7), (clean.get(jan.slice(0, 7)) ?? 0) + 1);
+      found.push({ jan, page: i + 1, at, alone, line });
+    }
+    for (const m of line.matchAll(JAN_RE)) {
+      const jan = m[1].replace(/[^0-9]/g, "");
+      if (/^[0-9]{13}$/.test(m[1]) || !validJan(jan)) continue;
+      clean.set(jan.slice(0, 7), (clean.get(jan.slice(0, 7)) ?? 0) + 1);
+      found.push({ jan, page: i + 1, at: m.index ?? 0, alone: true, line });
+    }
+  });
+  const known = new Set([...clean].filter(([, n]) => n >= 2).map(([p]) => p));
+  const out: CatalogEntry[] = [];
+  for (const f of found) {
+    if (!f.alone && !known.has(f.jan.slice(0, 7))) continue;
+    out.push({
+      jan: f.jan,
+      code_hint: null,
+      line_text: f.line.slice(Math.max(0, f.at - 80), f.at + 40).replace(/\s+/g, " ").trim(),
+      page_number: String(f.page),
+      page_group: String(f.page),
+      weight_g: null,
+      weight_text: null,
+      weight_basis: null,
+    });
+  }
+  return uniqueEntries(out);
 }
 
 /** The pages (from 1) whose search text has a JAN's digits in it: one line a
