@@ -73,6 +73,37 @@ export function meclibInfo(json: unknown): { title: string | null; pdfAllowed: b
   };
 }
 
+/** A book that prints only a JAN's end, saying what goes before it: 「下6ケ
+ * タを表記…前に4904085をつけて」, 「上7ケタ(4902580)は省略」, 「メーカーコードは
+ * 4971760」, 「JAN(共通457116336)下4桁」. Its lists then run the ends together
+ * (388126388133388140…). A run is taken as JANs only when it splits evenly
+ * into ends and every one makes a JAN with a good check digit — at least
+ * three of them, or two just after the word JAN. */
+function abbreviatedJans(lines: string[]): { jan: string; page: number; at: number; alone: boolean; line: string }[] {
+  const all = lines.join("\n");
+  const prefixes = new Set<string>();
+  const declared =
+    /(?:上\s*[7７]\s*(?:桁|ケタ)|メーカーコード|共通|省略|前に)[^0-9\n]{0,20}?(4[59][0-9]{5}(?:[0-9]{2})?)(?![0-9])|(?<![0-9])(4[59][0-9]{5}(?:[0-9]{2})?)(?![0-9])[^0-9\n]{0,6}(?:を(?:つけ|付け)|は(?:共通|省略))/g;
+  for (const m of all.matchAll(declared)) prefixes.add(m[1] ?? m[2]);
+  const out: { jan: string; page: number; at: number; alone: boolean; line: string }[] = [];
+  for (const prefix of prefixes) {
+    const len = 13 - prefix.length;
+    lines.forEach((line, i) => {
+      for (const m of line.matchAll(/[0-9]+/g)) {
+        const run = m[0];
+        if (run.length % len !== 0 || run.length / len < 2) continue;
+        const jans: string[] = [];
+        for (let k = 0; k < run.length; k += len) jans.push(prefix + run.slice(k, k + len));
+        if (!jans.every(validJan)) continue;
+        const at = m.index ?? 0;
+        if (jans.length < 3 && !/JAN/.test(line.slice(Math.max(0, at - 80), at))) continue;
+        for (const jan of jans) out.push({ jan, page: i + 1, at, alone: true, line });
+      }
+    });
+  }
+  return out;
+}
+
 /** The JANs in a meclib book's search text (txtsearch.txt, a line a page),
  * with the page and the text around each. That text runs digits together
  * (4901681773138商品コード:8642314901681773145…), so a JAN is taken:
@@ -102,6 +133,7 @@ export function meclibTextEntries(txtsearch: string): CatalogEntry[] {
       found.push({ jan, page: i + 1, at: m.index ?? 0, alone: true, line });
     }
   });
+  found.push(...abbreviatedJans(lines));
   const known = new Set([...clean].filter(([, n]) => n >= 2).map(([p]) => p));
   const out: CatalogEntry[] = [];
   for (const f of found) {

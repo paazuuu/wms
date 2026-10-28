@@ -249,3 +249,21 @@ Deno.test("JANs in a meclib book's run-together text: alone, or inside digits wi
   assertEquals(got.every((e) => e.weight_g === null && e.code_hint === null), true);
   assertEquals(got[0].line_text.includes("TP-1/黒4909999000014"), true);
 });
+
+Deno.test("a book that prints only a JAN's end, and says what goes before it", () => {
+  // 4909999 + 000014 / 000021 / 000038 are good JANs; 000015 is not.
+  const text = [
+    "JANコード上7桁共通4909999になります",
+    "品番A1 A2 A3 JANコード000014000021000038",
+    "JANコード000014000015", // one end makes no JAN: the run is not taken
+    "価格 000021000038", // two ends, not after the word JAN: not taken
+  ].join("\n");
+  assertEquals(meclibTextEntries(text).map((e) => [e.jan, e.page_number]), [
+    ["4909999000014", "2"],
+    ["4909999000021", "2"],
+    ["4909999000038", "2"],
+  ]);
+  // 「前に…をつけて」, a 9-digit prefix and 4-digit ends.
+  const t2 = "JANコードは下4桁を表記。各JANコードの前に490999900をつけてご記入ください\nJAN 001400210038";
+  assertEquals(meclibTextEntries(t2).map((e) => e.jan), ["4909999000014", "4909999000021", "4909999000038"]);
+});

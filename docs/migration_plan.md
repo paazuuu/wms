@@ -7800,6 +7800,12 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   digit, or inside a run of digits only with a maker prefix the book shows
   standing alone at least twice. No weights from it: without positions a
   weight cannot be put to its JAN (the AI lookup fills those).
+- A book that prints only a JAN's end and says what goes before it
+  (「下6ケタ…前に4904085をつけて」, 「上7ケタ(4902580)は省略」, 「JAN(共通
+  457116336)下4桁」) has its runs of ends split and taken only when every
+  end makes a JAN with a good check digit (three or more, or two just after
+  the word JAN). About 20 of Ecole's books have no text at all (pictures
+  only) and give nothing; 11 have no search text (404).
 
 ## Rollout discipline
 
