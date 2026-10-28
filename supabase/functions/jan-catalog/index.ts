@@ -23,6 +23,7 @@
 // the service role; reading the table is open to product.view.
 import { adminClient, callerClient, clientPermitted, notPermittedMessage } from "../_shared/require_permission.ts";
 import { purgeAllowed } from "../_shared/purge.ts";
+import { htmlText, htmlTitle, safeReferenceUrl, sha256Hex, snapshotFolder } from "../_shared/reference.ts";
 import {
   type CatalogEntry,
   catalogInfo,
@@ -181,6 +182,8 @@ async function finishCatalog(admin: Admin, id: number, pagesRead: number, event:
     .single();
   if (error) throw new Error(error.message);
   await admin.rpc("apply_jan_weights", { p_jans: null });
+  // A copy for 参照資料 (0160); a failure here does not undo the read.
+  await snapshotCatalog(admin, id).catch((e) => console.error("snapshot", id, `${e}`));
   await admin.rpc("log_audit", {
     p_event_type: event,
     p_entity_type: "jan_catalog",
@@ -189,6 +192,215 @@ async function finishCatalog(admin: Admin, id: number, pagesRead: number, event:
     p_details: { entries: count ?? 0, pages: pagesRead },
   }).then(() => {}, () => {});
   return done;
+}
+
+// ------------------------------------------------------------ 参照資料 (0160)
+
+const ARCHIVE = "reference-archive";
+const SITE_MAX_BYTES = 25 * 1024 * 1024;
+
+type CopyFile = { kind: string; name: string; body: Uint8Array | string; type: string };
+
+/** A copy kept for [sourceId] unless the last one had the same content:
+ * its files in the archive, and a row saying what it was. */
+async function keepCopy(
+  admin: Admin,
+  sourceId: number,
+  copy: { hash: string; title: string | null; edition?: string | null; pageCount?: number | null; entryCount?: number | null;
+    weightCount?: number | null; files: CopyFile[]; note?: string | null },
+): Promise<{ kept: boolean; snapshot?: unknown }> {
+  const now = new Date();
+  const { data: last } = await admin.from("reference_snapshots").select("content_hash").eq("source_id", sourceId)
+    .order("taken_at", { ascending: false }).limit(1);
+  await admin.from("reference_sources").update({ last_checked_at: now.toISOString() }).eq("id", sourceId);
+  if (last?.[0]?.content_hash === copy.hash) return { kept: false };
+  const folder = snapshotFolder(sourceId, now);
+  const files = [];
+  for (const f of copy.files) {
+    const body = typeof f.body === "string" ? new TextEncoder().encode(f.body) : f.body;
+    const path = `${folder}/${f.name}`;
+    const { error } = await admin.storage.from(ARCHIVE).upload(path, body, { contentType: f.type, upsert: true });
+    if (error) throw new Error(`archive: ${error.message}`);
+    files.push({ kind: f.kind, path, bytes: body.length, type: f.type });
+  }
+  const { data, error } = await admin.from("reference_snapshots").insert({
+    source_id: sourceId,
+    taken_at: now.toISOString(),
+    fiscal_year: 0, // set by the table's trigger
+    title: copy.title,
+    edition: copy.edition ?? null,
+    page_count: copy.pageCount ?? null,
+    entry_count: copy.entryCount ?? null,
+    weight_count: copy.weightCount ?? null,
+    content_hash: copy.hash,
+    files,
+    note: copy.note ?? null,
+  }).select("*").single();
+  if (error) throw new Error(error.message);
+  return { kept: true, snapshot: data };
+}
+
+/** A catalog's 参照資料 entry, made or brought up to date. */
+async function catalogSource(admin: Admin, cat: Record<string, unknown>): Promise<number> {
+  const row = { kind: "catalog", jan_catalog_id: cat.id, url: cat.url || "", title: cat.name ?? null, maker: cat.maker ?? null };
+  const { data, error } = await admin.from("reference_sources").upsert(row, { onConflict: "jan_catalog_id" }).select("id").single();
+  if (error || !data) throw new Error(error?.message ?? "source");
+  return data.id as number;
+}
+
+/** A copy of what a catalog gave: every JAN with what was printed beside it,
+ * its weight and page; and a meclib book's own text. */
+async function snapshotCatalog(admin: Admin, id: number): Promise<{ kept: boolean }> {
+  const { data: cat, error } = await admin.from("jan_catalogs").select("*").eq("id", id).single();
+  if (error || !cat) throw new Error(error?.message ?? "catalog");
+  const rows: unknown[][] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error: e } = await admin.from("jan_catalog_entries")
+      .select("jan, code_hint, weight_g, weight_text, weight_basis, page_number, line_text")
+      .eq("catalog_id", id).order("jan").range(from, from + 999);
+    if (e) throw new Error(e.message);
+    for (const r of data ?? []) {
+      rows.push([r.jan, r.code_hint, r.weight_g, r.weight_text, r.weight_basis, r.page_number, r.line_text]);
+    }
+    if ((data ?? []).length < 1000) break;
+  }
+  const entries = JSON.stringify({
+    catalog: { name: cat.name, maker: cat.maker, url: cat.url, kind: cat.kind, published: cat.published, file_name: cat.file_name },
+    columns: ["jan", "code_hint", "weight_g", "weight_text", "weight_basis", "page_number", "line_text"],
+    rows,
+  });
+  const files: CopyFile[] = [{ kind: "entries", name: "entries.json", body: entries, type: "application/json" }];
+  let text = "";
+  if (cat.kind === "meclib") {
+    text = await fetchText(meclibBase({ host: cat.host, book: cat.catalog_id }) + "data/txtsearch.txt").catch(() => "");
+    if (text) files.push({ kind: "text", name: "text.txt", body: text, type: "text/plain; charset=utf-8" });
+  }
+  const sourceId = await catalogSource(admin, cat);
+  return await keepCopy(admin, sourceId, {
+    hash: await sha256Hex(JSON.stringify(rows) + "\n" + text),
+    title: cat.name,
+    edition: cat.published ?? null,
+    pageCount: cat.page_count ?? null,
+    entryCount: rows.length,
+    weightCount: rows.filter((r) => r[2] != null).length,
+    files,
+  });
+}
+
+function charsetOf(type: string, head: string): string {
+  const m = /charset=["']?([A-Za-z0-9_-]+)/i.exec(type) ?? /<meta[^>]+charset=["']?([A-Za-z0-9_-]+)/i.exec(head);
+  return (m?.[1] ?? "utf-8").toLowerCase();
+}
+
+/** A site as it is now: a PDF kept as it is; a page kept with its text. */
+async function snapshotSite(admin: Admin, source: Record<string, unknown>): Promise<[number, unknown]> {
+  const url = safeReferenceUrl(String(source.url ?? ""));
+  if (!url) return [400, { message: "reference_bad_url" }];
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (wms-reference/1.0)" }, signal: AbortSignal.timeout(30000) });
+  } catch (e) {
+    return [502, { message: `reference_unreachable: ${e}` }];
+  }
+  if (!res.ok) return [502, { message: `reference_unreachable: HTTP ${res.status}` }];
+  if (Number(res.headers.get("content-length") ?? 0) > SITE_MAX_BYTES) return [413, { message: "reference_too_large" }];
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  if (bytes.length > SITE_MAX_BYTES) return [413, { message: "reference_too_large" }];
+  const type = res.headers.get("content-type") ?? "application/octet-stream";
+  const files: CopyFile[] = [];
+  let title = (source.title as string | null) ?? null;
+  if (/pdf/i.test(type) || /\.pdf$/i.test(url.pathname)) {
+    files.push({ kind: "pdf", name: "page.pdf", body: bytes, type: "application/pdf" });
+  } else if (/html|text/i.test(type)) {
+    const head = new TextDecoder("latin1").decode(bytes.slice(0, 4096));
+    let html: string;
+    try {
+      html = new TextDecoder(charsetOf(type, head)).decode(bytes);
+    } catch {
+      html = new TextDecoder().decode(bytes);
+    }
+    title ??= htmlTitle(html);
+    // Kept as UTF-8, with a base so its pictures and styles still load.
+    const kept = html.replace(/<meta[^>]+charset=[^>]*>/gi, "")
+      .replace(/<head([^>]*)>/i, `<head$1><meta charset="utf-8"><base href="${url.href.replace(/"/g, "&quot;")}">`);
+    files.push({ kind: "html", name: "page.html", body: kept, type: "text/html; charset=utf-8" });
+    files.push({ kind: "text", name: "text.txt", body: htmlText(html), type: "text/plain; charset=utf-8" });
+  } else {
+    files.push({ kind: "file", name: "file", body: bytes, type });
+  }
+  const r = await keepCopy(admin, source.id as number, { hash: await sha256Hex(bytes), title, files });
+  if (title && !source.title) await admin.from("reference_sources").update({ title }).eq("id", source.id);
+  return [200, { data: r }];
+}
+
+/** A site and every copy of it, gone. */
+async function deleteSource(admin: Admin, id: number): Promise<[number, unknown]> {
+  const { data: folders } = await admin.storage.from(ARCHIVE).list(`source-${id}`, { limit: 1000 });
+  for (const f of folders ?? []) {
+    const { data: inner } = await admin.storage.from(ARCHIVE).list(`source-${id}/${f.name}`, { limit: 100 });
+    const paths = (inner ?? []).map((x) => `source-${id}/${f.name}/${x.name}`);
+    if (paths.length > 0) await admin.storage.from(ARCHIVE).remove(paths);
+  }
+  const { error } = await admin.from("reference_sources").delete().eq("id", id);
+  if (error) return [400, { message: error.message }];
+  return [200, { data: { deleted: id } }];
+}
+
+// deno-lint-ignore no-explicit-any
+async function referenceRoute(admin: Admin, rest: string[], body: any, userId: string | null): Promise<[number, unknown]> {
+  // POST /reference {url, title?, maker?, note?}: a site added, and saved now.
+  if (rest.length === 1) {
+    const url = safeReferenceUrl(String(body?.url ?? ""));
+    if (!url) return [400, { message: "reference_bad_url" }];
+    const row = {
+      kind: "site",
+      url: url.href,
+      title: String(body?.title ?? "").trim().slice(0, 300) || null,
+      maker: String(body?.maker ?? "").trim().slice(0, 200) || null,
+      note: String(body?.note ?? "").trim().slice(0, 1000) || null,
+      ...(userId ? { created_by: userId } : {}),
+    };
+    const { data: had } = await admin.from("reference_sources").select("*").eq("kind", "site").eq("url", url.href).maybeSingle();
+    const { data: src, error } = had
+      ? await admin.from("reference_sources").update({ title: row.title ?? had.title, maker: row.maker ?? had.maker, note: row.note ?? had.note })
+        .eq("id", had.id).select("*").single()
+      : await admin.from("reference_sources").insert(row).select("*").single();
+    if (error || !src) return [400, { message: error?.message ?? "source" }];
+    const [status, out] = await snapshotSite(admin, src);
+    return [status, status === 200 ? { data: { source: src, ...((out as { data: object }).data) } } : out];
+  }
+  // POST /reference/refresh: every site saved again (the monthly job).
+  if (rest[1] === "refresh" && rest.length === 2) {
+    const { data } = await admin.from("reference_sources").select("*").eq("kind", "site").order("id");
+    const started = Date.now();
+    let saved = 0;
+    for (const src of data ?? []) {
+      if (Date.now() - started > 110_000) break;
+      const [status] = await snapshotSite(admin, src);
+      if (status === 200) saved++;
+    }
+    return [200, { data: { sites: (data ?? []).length, saved } }];
+  }
+  // POST /reference/backfill: a first copy of catalogs that have none yet.
+  if (rest[1] === "backfill" && rest.length === 2) {
+    const { data: cats } = await admin.from("jan_catalogs").select("id").gt("entry_count", 0).order("id");
+    const { data: have } = await admin.from("reference_sources").select("jan_catalog_id, reference_snapshots(id)").eq("kind", "catalog");
+    const done = new Set((have ?? []).filter((h) => (h.reference_snapshots ?? []).length > 0).map((h) => h.jan_catalog_id));
+    const todo = (cats ?? []).filter((c) => !done.has(c.id)).slice(0, 6);
+    for (const c of todo) await snapshotCatalog(admin, c.id);
+    return [200, { data: { copied: todo.length, left: (cats ?? []).length - done.size - todo.length } }];
+  }
+  const id = Number(rest[1]);
+  if (!Number.isFinite(id)) return [404, { message: "not found" }];
+  const { data: src } = await admin.from("reference_sources").select("*").eq("id", id).maybeSingle();
+  if (!src) return [404, { message: "not found" }];
+  // POST /reference/:id/save: saved again now.
+  if (rest[2] === "save" && rest.length === 3) {
+    return src.kind === "site" ? await snapshotSite(admin, src)
+      : src.jan_catalog_id ? [200, { data: await snapshotCatalog(admin, src.jan_catalog_id) }]
+      : [409, { message: "the catalog is gone" }];
+  }
+  return [404, { message: "not found" }];
 }
 
 /** A viewer catalog registered (or again) and set to be read from its first
@@ -443,6 +655,18 @@ Deno.serve(async (req) => {
       const { data, error } = await admin.from("jan_catalogs").update({ next_page: 0 }).in("kind", ["icata", "meclib"]).select("id");
       if (error) return json({ message: error.message }, 400);
       return json({ data: { queued: (data ?? []).length } });
+    }
+
+    if (rest[0] === "reference") {
+      if (req.method === "DELETE" && rest.length === 2 && /^\d+$/.test(rest[1])) {
+        const [status, out] = await deleteSource(admin, Number(rest[1]));
+        return json(out, status);
+      }
+      if (req.method === "POST") {
+        const body = await req.json().catch(() => ({}));
+        const [status, out] = await referenceRoute(admin, rest, body, userId);
+        return json(out, status);
+      }
     }
 
     if (req.method === "POST" && rest[0] === "pdf" && rest.length === 2) {
