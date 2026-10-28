@@ -19,8 +19,9 @@ class FakeJanCatalogRepository implements JanCatalogRepository {
   Future<ApiResult<List<JanCatalog>>> list() async => ApiSuccess(List.of(catalogs));
 
   @override
-  Future<ApiResult<JanCatalog>> sync(String url) async {
+  Future<ApiResult<JanCatalog>> sync(String url, {void Function(int page, int pages)? onProgress}) async {
     synced.add(url);
+    onProgress?.call(2, 2);
     final r = syncResult ??
         ApiSuccess(JanCatalog(
             id: catalogs.where((c) => c.url == url).firstOrNull?.id ?? catalogs.length + 1,

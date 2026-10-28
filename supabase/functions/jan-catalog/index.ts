@@ -1,13 +1,16 @@
 // JAN catalogs (0153): a maker's catalog read for its JAN codes.
 //   GET    /jan-catalog            the catalogs registered, with their counts
-//   POST   /jan-catalog/sync {url} read the catalog at a viewer URL (a mediapress
-//                                  iCata page) and replace its JANs
+//   POST   /jan-catalog/sync {url} register a viewer URL (a mediapress iCata
+//                                  page) and set it to be read from page one
+//   POST   /jan-catalog/step {catalog_id?} read its next 40 pages (the app
+//                                  loops; the database's job steps every
+//                                  catalog waiting, one call at a time)
 //   DELETE /jan-catalog/:id        forget a catalog and its JANs
 //
 // Reading: every page a search for 49 / 45 (a Japanese JAN's start) finds,
 // its text, each JAN with what is printed before it (see
 // ../_shared/jan_catalog.ts). Only a mediapress host is fetched from.
-//   POST   /jan-catalog/refresh     every catalog read again (the monthly job)
+//   POST   /jan-catalog/refresh     every viewer catalog set to be read again
 //   POST   /jan-catalog/pdf/start   a PDF catalog (0155): its name, its hash;
 //                                  what it had before is cleared
 //   POST   /jan-catalog/pdf/pages   its pages' text, as the browser read it
@@ -44,6 +47,9 @@ function json(body: unknown, status = 200): Response {
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const PAGE_SIZE = 100;
 const PARALLEL = 6;
+// Pages read in one call: a whole catalog (300–900 pages) is more than one
+// function run may compute.
+const CHUNK = 40;
 
 async function fetchText(url: string): Promise<string> {
   for (let attempt = 0; ; attempt++) {
@@ -77,7 +83,8 @@ async function searchPages(c: CatalogRef, kw: string): Promise<{ pages: PageRef[
   return { pages, maker };
 }
 
-async function readCatalog(c: CatalogRef) {
+/** The catalog's name and the pages that carry a JAN, in page order. */
+async function listPages(c: CatalogRef) {
   const info = catalogInfo(
     JSON.parse(
       await fetchText(
@@ -93,32 +100,86 @@ async function readCatalog(c: CatalogRef) {
     for (const p of r.pages) if (!found.has(p.id)) found.set(p.id, p);
   }
   const pages = [...found.values()].sort((a, b) => Number(a.number) - Number(b.number) || a.id.localeCompare(b.id));
-  const entries: CatalogEntry[] = [];
-  let read = 0;
-  const queue = [...pages];
+  return { info, maker, pages };
+}
+
+/** These pages read, in their order: a JAN keeps the first page it is on. */
+async function readPages(c: CatalogRef, pages: PageRef[]): Promise<CatalogEntry[]> {
+  const byPage: CatalogEntry[][] = pages.map(() => []);
+  let next = 0;
   await Promise.all(
     Array.from({ length: PARALLEL }, async () => {
-      for (let p = queue.shift(); p; p = queue.shift()) {
-        const xml = await fetchText(api(c, { api: "getCatalogviewTextposition", pageid: p.id, keyword: "" }));
-        entries.push(...entriesFromPage(xml, p));
-        read++;
+      for (let i = next++; i < pages.length; i = next++) {
+        const xml = await fetchText(api(c, { api: "getCatalogviewTextposition", pageid: pages[i].id, keyword: "" }));
+        byPage[i] = entriesFromPage(xml, pages[i]);
       }
     }),
   );
-  // Pages in order, so a JAN keeps the first page it is on.
-  const order = new Map(pages.map((p, i) => [p.number + "/" + p.group, i]));
-  entries.sort((a, b) => (order.get(a.page_number + "/" + a.page_group) ?? 0) - (order.get(b.page_number + "/" + b.page_group) ?? 0));
-  return { info, maker, pagesRead: read, entries: uniqueEntries(entries) };
+  return uniqueEntries(byPage.flat());
 }
 
 type Admin = ReturnType<typeof adminClient>;
 
-/** Read the catalog at [url] and replace its JANs: [status, body]. */
-async function syncCatalog(admin: Admin, url: string, userId: string | null): Promise<[number, unknown]> {
+/** Entries into a catalog: new JANs added, a weight given to one that had
+ * none; what an earlier page gave is kept. How many were new. */
+async function mergeEntries(admin: Admin, id: number, entries: CatalogEntry[]): Promise<number> {
+  const unique = uniqueEntries(entries);
+  if (unique.length === 0) return 0;
+  const { data: had, error: hadErr } = await admin
+    .from("jan_catalog_entries")
+    .select("jan, weight_g")
+    .eq("catalog_id", id)
+    .in("jan", unique.map((e) => e.jan));
+  if (hadErr) throw new Error(hadErr.message);
+  const known = new Map((had ?? []).map((h) => [h.jan as string, h.weight_g as number | null]));
+  const fresh = unique.filter((e) => !known.has(e.jan));
+  for (let k = 0; k < fresh.length; k += 500) {
+    const { error } = await admin.from("jan_catalog_entries").insert(fresh.slice(k, k + 500).map((e) => ({ catalog_id: id, ...e })));
+    if (error) throw new Error(error.message);
+  }
+  for (const e of unique) {
+    if (known.has(e.jan) && known.get(e.jan) == null && e.weight_g != null) {
+      await admin.from("jan_catalog_entries")
+        .update({ weight_g: e.weight_g, weight_text: e.weight_text, weight_basis: e.weight_basis })
+        .eq("catalog_id", id).eq("jan", e.jan);
+    }
+  }
+  return fresh.length;
+}
+
+/** A catalog read to its end: counted, and products' weights filled. */
+async function finishCatalog(admin: Admin, id: number, pagesRead: number, event: string) {
+  const { count } = await admin.from("jan_catalog_entries").select("jan", { count: "exact", head: true }).eq("catalog_id", id);
+  const { data: done, error } = await admin
+    .from("jan_catalogs")
+    .update({
+      entry_count: count ?? 0,
+      pages_read: pagesRead,
+      next_page: null,
+      synced_at: new Date().toISOString(),
+      sync_error: (count ?? 0) === 0 ? "no JAN found" : null,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  await admin.rpc("apply_jan_weights", { p_jans: null });
+  await admin.rpc("log_audit", {
+    p_event_type: event,
+    p_entity_type: "jan_catalog",
+    p_entity_id: String(id),
+    p_warehouse_id: null,
+    p_details: { entries: count ?? 0, pages: pagesRead },
+  }).then(() => {}, () => {});
+  return done;
+}
+
+/** A viewer catalog registered (or again) and set to be read from its first
+ * page; /step reads it a few pages at a time. */
+async function startSync(admin: Admin, url: string, userId: string | null): Promise<[number, unknown]> {
   const ref = parseCatalogUrl(url);
   if (!ref) return [400, { message: "jan_catalog_bad_url" }];
-
-  const { data: row, error: upErr } = await admin
+  const { data: row, error } = await admin
     .from("jan_catalogs")
     .upsert(
       {
@@ -128,61 +189,53 @@ async function syncCatalog(admin: Admin, url: string, userId: string | null): Pr
         volume_id: ref.volumeId,
         catalog_id: ref.catalogId,
         design_id: ref.designId,
+        next_page: 0,
+        sync_error: null,
         ...(userId ? { created_by: userId } : {}),
       },
       { onConflict: "volume_id,catalog_id" },
     )
-    .select("id")
-    .single();
-  if (upErr || !row) return [400, { message: upErr?.message ?? "upsert failed" }];
-  const id = row.id as number;
-
-  let read;
-  try {
-    read = await readCatalog(ref);
-  } catch (e) {
-    await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500) }).eq("id", id);
-    return [502, { message: `jan_catalog_unreachable: ${e}` }];
-  }
-  if (read.entries.length === 0) {
-    await admin.from("jan_catalogs").update({ sync_error: "no JAN found", pages_read: read.pagesRead }).eq("id", id);
-    return [422, { message: "jan_catalog_empty" }];
-  }
-
-  // Replace what the catalog had: what it no longer prints goes.
-  const del = await admin.from("jan_catalog_entries").delete().eq("catalog_id", id);
-  if (del.error) return [400, { message: del.error.message }];
-  for (let k = 0; k < read.entries.length; k += 500) {
-    const { error } = await admin
-      .from("jan_catalog_entries")
-      .insert(read.entries.slice(k, k + 500).map((e) => ({ catalog_id: id, ...e })));
-    if (error) return [400, { message: error.message }];
-  }
-  const { data: done, error: finErr } = await admin
-    .from("jan_catalogs")
-    .update({
-      maker: read.maker,
-      name: read.info.name,
-      published: read.info.published,
-      page_count: read.info.pageCount,
-      pages_read: read.pagesRead,
-      entry_count: read.entries.length,
-      synced_at: new Date().toISOString(),
-      sync_error: null,
-    })
-    .eq("id", id)
     .select("*")
     .single();
-  if (finErr) return [400, { message: finErr.message }];
-  await admin.rpc("apply_jan_weights", { p_jans: null });
-  await admin.rpc("log_audit", {
-    p_event_type: "jan_catalog.sync",
-    p_entity_type: "jan_catalog",
-    p_entity_id: String(id),
-    p_warehouse_id: null,
-    p_details: { url, entries: read.entries.length, pages: read.pagesRead },
-  }).then(() => {}, () => {});
-  return [200, { data: done }];
+  if (error || !row) return [400, { message: error?.message ?? "upsert failed" }];
+  return [200, { data: row }];
+}
+
+/** The next few pages of a catalog being read ([id], else the one waiting
+ * longest): what it came to, and how far. */
+async function stepSync(admin: Admin, id: number | null): Promise<[number, unknown]> {
+  let q = admin.from("jan_catalogs").select("*").eq("kind", "icata").not("next_page", "is", null);
+  q = id != null ? q.eq("id", id) : q.order("synced_at", { ascending: true, nullsFirst: true });
+  const { data: rows, error } = await q.limit(1);
+  if (error) return [400, { message: error.message }];
+  const cat = rows?.[0];
+  if (!cat) return [200, { data: { done: true, idle: true } }];
+  const ref: CatalogRef = { host: cat.host, volumeId: cat.volume_id, catalogId: cat.catalog_id, designId: cat.design_id };
+  const from = Number(cat.next_page) || 0;
+  try {
+    const list = await listPages(ref);
+    if (from === 0) {
+      // Read again from the start: what it no longer prints goes.
+      const del = await admin.from("jan_catalog_entries").delete().eq("catalog_id", cat.id);
+      if (del.error) throw new Error(del.error.message);
+      await admin.from("jan_catalogs").update({
+        maker: list.maker, name: list.info.name, published: list.info.published, page_count: list.info.pageCount,
+      }).eq("id", cat.id);
+    }
+    const slice = list.pages.slice(from, from + CHUNK);
+    await mergeEntries(admin, cat.id, await readPages(ref, slice));
+    const next = from + slice.length;
+    if (next >= list.pages.length) {
+      const done = await finishCatalog(admin, cat.id, list.pages.length, "jan_catalog.sync");
+      return [200, { data: { done: true, catalog: done, page: next, pages: list.pages.length } }];
+    }
+    await admin.from("jan_catalogs").update({ next_page: next, pages_read: next }).eq("id", cat.id);
+    return [200, { data: { done: false, catalog_id: cat.id, page: next, pages: list.pages.length } }];
+  } catch (e) {
+    // Left where it was: the next step tries these pages again.
+    await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500) }).eq("id", cat.id);
+    return [502, { message: `jan_catalog_unreachable: ${e}` }];
+  }
 }
 
 const MAX_PAGES_A_CALL = 25;
@@ -251,53 +304,13 @@ async function pdfStep(admin: Admin, step: string, body: any, userId: string | n
       entries.push(...entriesFromItems(itemsOf(p?.items), { id: index, group: index, number: String(p?.label ?? index) }));
     }
     const unique = uniqueEntries(entries);
-    if (unique.length === 0) return [200, { data: { entries: 0, weights: 0 } }];
-    // What earlier pages already gave: kept; a weight added where it had none.
-    const { data: had, error: hadErr } = await admin
-      .from("jan_catalog_entries")
-      .select("jan, weight_g")
-      .eq("catalog_id", id)
-      .in("jan", unique.map((e) => e.jan));
-    if (hadErr) return [400, { message: hadErr.message }];
-    const known = new Map((had ?? []).map((h) => [h.jan as string, h.weight_g as number | null]));
-    const fresh = unique.filter((e) => !known.has(e.jan));
-    if (fresh.length > 0) {
-      const { error } = await admin.from("jan_catalog_entries").insert(fresh.map((e) => ({ catalog_id: id, ...e })));
-      if (error) return [400, { message: error.message }];
-    }
-    for (const e of unique) {
-      if (known.has(e.jan) && known.get(e.jan) == null && e.weight_g != null) {
-        await admin.from("jan_catalog_entries")
-          .update({ weight_g: e.weight_g, weight_text: e.weight_text, weight_basis: e.weight_basis })
-          .eq("catalog_id", id).eq("jan", e.jan);
-      }
-    }
-    return [200, { data: { entries: fresh.length, weights: unique.filter((e) => e.weight_g != null).length } }];
+    const fresh = await mergeEntries(admin, id, unique);
+    return [200, { data: { entries: fresh, weights: unique.filter((e) => e.weight_g != null).length } }];
   }
 
   if (step === "finish") {
-    const { count } = await admin.from("jan_catalog_entries").select("jan", { count: "exact", head: true }).eq("catalog_id", id);
-    const { data: done, error } = await admin
-      .from("jan_catalogs")
-      .update({
-        entry_count: count ?? 0,
-        pages_read: Number.isFinite(Number(body?.pages_read)) ? Number(body.pages_read) : 0,
-        synced_at: new Date().toISOString(),
-        sync_error: (count ?? 0) === 0 ? "no JAN found" : null,
-      })
-      .eq("id", id)
-      .select("*")
-      .single();
-    if (error) return [400, { message: error.message }];
-    await admin.rpc("apply_jan_weights", { p_jans: null });
-    await admin.rpc("log_audit", {
-      p_event_type: "jan_catalog.pdf",
-      p_entity_type: "jan_catalog",
-      p_entity_id: String(id),
-      p_warehouse_id: null,
-      p_details: { entries: count ?? 0, pages: body?.pages_read ?? null },
-    }).then(() => {}, () => {});
-    return [200, { data: done }];
+    const pages = Number.isFinite(Number(body?.pages_read)) ? Number(body.pages_read) : 0;
+    return [200, { data: await finishCatalog(admin, id, pages, "jan_catalog.pdf") }];
   }
   return [404, { message: "not found" }];
 }
@@ -314,7 +327,10 @@ Deno.serve(async (req) => {
     const i = parts.indexOf("jan-catalog");
     const rest = i >= 0 ? parts.slice(i + 1) : [];
     // deno-lint-ignore no-explicit-any
-    const byScheduler = await purgeAllowed(admin as any, req.headers.get("x-purge-secret"));
+    const secret = req.headers.get("x-purge-secret");
+    // Asked twice: a cold start's first database call can fail.
+    const byScheduler = !!secret &&
+      ((await purgeAllowed(admin as any, secret)) || (await purgeAllowed(admin as any, secret)));
 
     if (req.method === "GET" && rest.length === 0) {
       if (!byScheduler && !(await clientPermitted(caller, "product.view"))) {
@@ -338,20 +354,24 @@ Deno.serve(async (req) => {
 
     if (req.method === "POST" && rest[0] === "sync" && rest.length === 1) {
       const body = await req.json().catch(() => ({}));
-      const [status, out] = await syncCatalog(admin, String(body?.url ?? ""), userId);
+      const [status, out] = await startSync(admin, String(body?.url ?? ""), userId);
       return json(out, status);
     }
 
-    // Every catalog read again (the monthly job): what each came to.
+    // The next pages of a catalog being read (the app's loop, or the job's).
+    if (req.method === "POST" && rest[0] === "step" && rest.length === 1) {
+      const body = await req.json().catch(() => ({}));
+      const id = Number(body?.catalog_id);
+      const [status, out] = await stepSync(admin, Number.isFinite(id) && id > 0 ? id : null);
+      return json(out, status);
+    }
+
+    // Every viewer catalog set to be read again (the monthly job); the
+    // stepping job reads them a few pages at a time.
     if (req.method === "POST" && rest[0] === "refresh" && rest.length === 1) {
-      const { data, error } = await admin.from("jan_catalogs").select("url").eq("kind", "icata").order("id");
+      const { data, error } = await admin.from("jan_catalogs").update({ next_page: 0 }).eq("kind", "icata").select("id");
       if (error) return json({ message: error.message }, 400);
-      const results = [];
-      for (const c of data ?? []) {
-        const [status, out] = await syncCatalog(admin, c.url as string, userId);
-        results.push({ url: c.url, status, ...(status === 200 ? {} : (out as object)) });
-      }
-      return json({ data: results });
+      return json({ data: { queued: (data ?? []).length } });
     }
 
     if (req.method === "POST" && rest[0] === "pdf" && rest.length === 2) {

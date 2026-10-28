@@ -7760,6 +7760,18 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   carries `weight_source / weight_basis / weight_text`. The shipping card
   gains 内訳（数量 × 1単位の重さ）: 12 × 11.5 g = 138 g · カタログ.
 
+## 0157: a catalog read 40 pages at a time
+
+- One run reading a whole catalog hit the function's compute limit
+  (WORKER_RESOURCE_LIMIT at 373 and 920 pages). `jan_catalogs.next_page` is
+  how far a read has got; `jan-catalog/sync` only sets it to 0, and
+  `jan-catalog/step` reads the next 40 pages of one waiting catalog (from 0:
+  its entries cleared first). The app loops /step with a progress bar; the
+  `jan-catalog-step` job (every 2 minutes, only when one is waiting) finishes
+  a read a closed tab left. The monthly job now just sets next_page = 0.
+- The scheduler's secret is checked twice: a cold start's first database
+  call failed it once in three.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

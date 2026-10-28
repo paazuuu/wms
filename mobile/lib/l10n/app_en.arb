@@ -3933,5 +3933,6 @@
   "rcWeightLimit": "The AI's daily limit was reached; the weight search stopped",
   "productWeightSourceCatalog": "Catalog",
   "swBreakdown": "Breakdown (quantity × one unit)",
-  "swLineCalc": "{qty} × {unit} = {total}"
+  "swLineCalc": "{qty} × {unit} = {total}",
+  "jcSyncingPages": "Reading the catalog… page {page}/{pages}"
 }

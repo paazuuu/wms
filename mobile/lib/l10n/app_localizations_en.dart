@@ -12354,4 +12354,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String swLineCalc(int qty, String unit, String total) {
     return '$qty × $unit = $total';
   }
+
+  @override
+  String jcSyncingPages(int page, int pages) {
+    return 'Reading the catalog… page $page/$pages';
+  }
 }

@@ -12029,4 +12029,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String swLineCalc(int qty, String unit, String total) {
     return '$qty × $unit = $total';
   }
+
+  @override
+  String jcSyncingPages(int page, int pages) {
+    return '正在读取目录… $page/$pages页';
+  }
 }

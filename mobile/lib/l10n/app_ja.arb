@@ -10845,5 +10845,16 @@
         "type": "String"
       }
     }
+  },
+  "jcSyncingPages": "カタログを読み込んでいます… {page}/{pages}ページ",
+  "@jcSyncingPages": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -12100,4 +12100,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String swLineCalc(int qty, String unit, String total) {
     return '$qty × $unit = $total';
   }
+
+  @override
+  String jcSyncingPages(int page, int pages) {
+    return 'カタログを読み込んでいます… $page/$pagesページ';
+  }
 }

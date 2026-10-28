@@ -21541,6 +21541,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{qty} × {unit} = {total}'**
   String swLineCalc(int qty, String unit, String total);
+
+  /// No description provided for @jcSyncingPages.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログを読み込んでいます… {page}/{pages}ページ'**
+  String jcSyncingPages(int page, int pages);
 }
 
 class _AppLocalizationsDelegate

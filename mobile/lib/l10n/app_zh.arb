@@ -3933,5 +3933,6 @@
   "rcWeightLimit": "已达到AI每日上限，停止查找重量",
   "productWeightSourceCatalog": "目录",
   "swBreakdown": "明细（数量 × 单件重量）",
-  "swLineCalc": "{qty} × {unit} = {total}"
+  "swLineCalc": "{qty} × {unit} = {total}",
+  "jcSyncingPages": "正在读取目录… {page}/{pages}页"
 }

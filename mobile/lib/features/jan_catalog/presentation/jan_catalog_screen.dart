@@ -49,8 +49,9 @@ class _JanCatalogScreenState extends ConsumerState<JanCatalogScreen> {
   final _pdfMaker = TextEditingController();
   final _pdfUrl = TextEditingController();
 
-  /// The URL being read, while it is.
+  /// The URL being read, while it is, and how far.
   String? _busy;
+  (int, int)? _steps;
 
   /// A PDF being read, and how far.
   PdfImportProgress? _pdf;
@@ -122,8 +123,13 @@ class _JanCatalogScreenState extends ConsumerState<JanCatalogScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final scheme = Theme.of(context).colorScheme;
     if (url.trim().isEmpty) return;
-    setState(() => _busy = url);
-    final r = await ref.read(janCatalogRepositoryProvider).sync(url.trim());
+    setState(() {
+      _busy = url;
+      _steps = null;
+    });
+    final r = await ref.read(janCatalogRepositoryProvider).sync(url.trim(), onProgress: (page, pages) {
+      if (mounted) setState(() => _steps = (page, pages));
+    });
     if (!mounted) return;
     setState(() => _busy = null);
     ref.invalidate(janCatalogsProvider);
@@ -198,9 +204,10 @@ class _JanCatalogScreenState extends ConsumerState<JanCatalogScreen> {
           ],
           if (_busy != null) ...[
             const SizedBox(height: AppSpacing.md),
-            const LinearProgressIndicator(),
+            LinearProgressIndicator(value: _steps == null || _steps!.$2 == 0 ? null : _steps!.$1 / _steps!.$2),
             const SizedBox(height: AppSpacing.xs),
-            Text(l10n.jcSyncing, key: const ValueKey('jc-syncing'), style: muted),
+            Text(_steps == null ? l10n.jcSyncing : l10n.jcSyncingPages(_steps!.$1, _steps!.$2),
+                key: const ValueKey('jc-syncing'), style: muted),
           ],
           if (widget.canManage) ...[
             const SizedBox(height: AppSpacing.xl),

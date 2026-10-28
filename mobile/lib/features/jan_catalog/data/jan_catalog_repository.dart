@@ -175,7 +175,10 @@ class JanCatalogHit extends Equatable {
 
 abstract class JanCatalogRepository {
   Future<ApiResult<List<JanCatalog>>> list();
-  Future<ApiResult<JanCatalog>> sync(String url);
+
+  /// A viewer catalog read from its first page, 40 pages a call (0157),
+  /// [onProgress] told how far.
+  Future<ApiResult<JanCatalog>> sync(String url, {void Function(int page, int pages)? onProgress});
   Future<ApiResult<void>> delete(int id);
 
   /// The catalogs' word on each JAN (13 digits) asked about, with its weight.
@@ -288,12 +291,29 @@ class JanCatalogRepositoryImpl implements JanCatalogRepository {
   }
 
   @override
-  Future<ApiResult<JanCatalog>> sync(String url) async {
+  Future<ApiResult<JanCatalog>> sync(String url, {void Function(int page, int pages)? onProgress}) async {
     try {
-      // A whole catalog (300 pages) takes a while to read.
-      final r = await _functions.post('/jan-catalog/sync',
-          data: {'url': url}, options: Options(receiveTimeout: const Duration(minutes: 3)));
-      return ApiSuccess(JanCatalog.fromJson(((r.data as Map)['data'] as Map).cast<String, dynamic>()));
+      final r = await _functions.post('/jan-catalog/sync', data: {'url': url});
+      final id = (((r.data as Map)['data'] as Map)['id'] as num).toInt();
+      // 920 pages at 40 a call is 23 calls; a few more is something wrong.
+      for (var i = 0; i < 60; i++) {
+        final s = await _functions.post('/jan-catalog/step',
+            data: {'catalog_id': id}, options: Options(receiveTimeout: const Duration(minutes: 3)));
+        final d = ((s.data as Map)['data'] as Map).cast<String, dynamic>();
+        final page = (d['page'] as num?)?.toInt() ?? 0, pages = (d['pages'] as num?)?.toInt() ?? 0;
+        onProgress?.call(page, pages);
+        if (d['done'] == true) {
+          final c = d['catalog'];
+          if (c is Map) {
+            final cat = JanCatalog.fromJson(c.cast<String, dynamic>());
+            return cat.entryCount == 0
+                ? const ApiFailure(message: 'jan_catalog_empty', statusCode: 422)
+                : ApiSuccess(cat);
+          }
+          return const ApiFailure(message: 'jan_catalog_empty', statusCode: 422);
+        }
+      }
+      return const ApiFailure(message: 'jan_catalog_unreachable: too many steps');
     } on DioException catch (e) {
       return mapDioError(e);
     }
