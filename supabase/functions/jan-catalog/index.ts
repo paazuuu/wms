@@ -134,7 +134,13 @@ async function mergeEntries(admin: Admin, id: number, entries: CatalogEntry[]): 
   const known = new Map((had ?? []).map((h) => [h.jan as string, h.weight_g as number | null]));
   const fresh = unique.filter((e) => !known.has(e.jan));
   for (let k = 0; k < fresh.length; k += 500) {
-    const { error } = await admin.from("jan_catalog_entries").insert(fresh.slice(k, k + 500).map((e) => ({ catalog_id: id, ...e })));
+    // Two steps of one catalog at once (the app's and the job's) may both
+    // add a JAN: the second is let go.
+    const { error } = await admin.from("jan_catalog_entries")
+      .upsert(fresh.slice(k, k + 500).map((e) => ({ catalog_id: id, ...e })), {
+        onConflict: "catalog_id,jan",
+        ignoreDuplicates: true,
+      });
     if (error) throw new Error(error.message);
   }
   for (const e of unique) {
