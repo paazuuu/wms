@@ -262,7 +262,11 @@ async function stepMeclib(admin: Admin, cat: any): Promise<[number, unknown]> {
     const done = await finishCatalog(admin, cat.id, pages, "jan_catalog.sync");
     return [200, { data: { done: true, catalog: done, page: pages, pages } }];
   } catch (e) {
-    await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500) }).eq("id", cat.id);
+    // A book with no search text (404) will not have one next time either:
+    // not tried again until the monthly refresh.
+    const gone = /HTTP 404/.test(`${e}`);
+    await admin.from("jan_catalogs").update({ sync_error: `${e}`.slice(0, 500), ...(gone ? { next_page: null } : {}) })
+      .eq("id", cat.id);
     return [502, { message: `jan_catalog_unreachable: ${e}` }];
   }
 }
