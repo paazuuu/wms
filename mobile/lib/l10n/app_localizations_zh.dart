@@ -11931,4 +11931,94 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get jcOpen => '打开目录';
+
+  @override
+  String get jcPdfTitle => 'PDF目录';
+
+  @override
+  String get jcPdfIntro =>
+      '读取从厂商网站或批发商目录库下载的PDF，提取JAN、型号和重量。文字为图片的PDF（扫描件）无法读取。';
+
+  @override
+  String get jcPdfName => '目录名称（留空则用文件名）';
+
+  @override
+  String get jcPdfMaker => '厂商（可选）';
+
+  @override
+  String get jcPdfUrl => 'PDF的URL（可选，用于打开页面的链接）';
+
+  @override
+  String get jcPdfPick => '选择PDF并读取';
+
+  @override
+  String jcPdfProgress(int page, int pages, int entries, int weights) {
+    return '$page/$pages页・JAN $entries个・重量 $weights个';
+  }
+
+  @override
+  String get jcPdfNeedsBrowser => '请在电脑浏览器中读取PDF目录。';
+
+  @override
+  String get jcPdfBadge => 'PDF';
+
+  @override
+  String get jcPdfUnreadable => '无法读取此PDF（可能已损坏或带密码）';
+
+  @override
+  String jcDoneWeights(int n, int w) {
+    return '已读取 $n 个JAN（其中 $w 个有重量）';
+  }
+
+  @override
+  String get rcWeight => '重量';
+
+  @override
+  String get rcWeightCatalog => '目录';
+
+  @override
+  String get rcWeightAi => 'AI';
+
+  @override
+  String get rcWeightProduct => '已登记';
+
+  @override
+  String get rcWeightEstimate => '推测';
+
+  @override
+  String get rcWeightLooking => '查询中…';
+
+  @override
+  String get rcWeightNone => '未找到';
+
+  @override
+  String rcWeightCatalogHint(String text, String basis) {
+    return '目录记载：$text\n$basis';
+  }
+
+  @override
+  String rcWeightAiHint(String source) {
+    return 'AI在网上查到的值（目录中无重量）\n$source';
+  }
+
+  @override
+  String get rcWeightProductHint => '商品已登记的重量（人工输入或测量）';
+
+  @override
+  String get rcWeightBasisProduct => '本体';
+
+  @override
+  String get rcWeightBasisPackage => '含包装';
+
+  @override
+  String get rcWeightBasisPack => '每包';
+
+  @override
+  String get rcWeightAsk => '用AI查找目录中没有的重量';
+
+  @override
+  String get rcWeightLimit => '已达到AI每日上限，停止查找重量';
+
+  @override
+  String get productWeightSourceCatalog => '目录';
 }

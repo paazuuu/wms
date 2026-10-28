@@ -21367,6 +21367,168 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'カタログを開く'**
   String get jcOpen;
+
+  /// No description provided for @jcPdfTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFのカタログ'**
+  String get jcPdfTitle;
+
+  /// No description provided for @jcPdfIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーのサイトや卸のカタログライブラリからダウンロードしたPDFを読み込み、JAN・品番・重量を取り出します。文字が画像になっているPDF（スキャン）は読めません。'**
+  String get jcPdfIntro;
+
+  /// No description provided for @jcPdfName.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ名（空欄ならファイル名）'**
+  String get jcPdfName;
+
+  /// No description provided for @jcPdfMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー（任意）'**
+  String get jcPdfMaker;
+
+  /// No description provided for @jcPdfUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFのURL（任意・ページを開くリンクに使います）'**
+  String get jcPdfUrl;
+
+  /// No description provided for @jcPdfPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFを選んで読み込む'**
+  String get jcPdfPick;
+
+  /// No description provided for @jcPdfProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{page}/{pages}ページ・JAN {entries}件・重量 {weights}件'**
+  String jcPdfProgress(int page, int pages, int entries, int weights);
+
+  /// No description provided for @jcPdfNeedsBrowser.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFカタログの読み込みは、PCのブラウザから行ってください。'**
+  String get jcPdfNeedsBrowser;
+
+  /// No description provided for @jcPdfBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDF'**
+  String get jcPdfBadge;
+
+  /// No description provided for @jcPdfUnreadable.
+  ///
+  /// In ja, this message translates to:
+  /// **'このPDFを読めませんでした（壊れているか、パスワード付きの可能性があります）'**
+  String get jcPdfUnreadable;
+
+  /// No description provided for @jcDoneWeights.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {n}件（うち重量 {w}件）を読み込みました'**
+  String jcDoneWeights(int n, int w);
+
+  /// No description provided for @rcWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量'**
+  String get rcWeight;
+
+  /// No description provided for @rcWeightCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ'**
+  String get rcWeightCatalog;
+
+  /// No description provided for @rcWeightAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI'**
+  String get rcWeightAi;
+
+  /// No description provided for @rcWeightProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録済み'**
+  String get rcWeightProduct;
+
+  /// No description provided for @rcWeightEstimate.
+  ///
+  /// In ja, this message translates to:
+  /// **'推定'**
+  String get rcWeightEstimate;
+
+  /// No description provided for @rcWeightLooking.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べています…'**
+  String get rcWeightLooking;
+
+  /// No description provided for @rcWeightNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'見つかりませんでした'**
+  String get rcWeightNone;
+
+  /// No description provided for @rcWeightCatalogHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログの記載：{text}\n{basis}'**
+  String rcWeightCatalogHint(String text, String basis);
+
+  /// No description provided for @rcWeightAiHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIがWebで探した値です（カタログに重量がないため）\n{source}'**
+  String rcWeightAiHint(String source);
+
+  /// No description provided for @rcWeightProductHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品に登録済みの重量（人が入力・計測）'**
+  String get rcWeightProductHint;
+
+  /// No description provided for @rcWeightBasisProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'本体'**
+  String get rcWeightBasisProduct;
+
+  /// No description provided for @rcWeightBasisPackage.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包込み'**
+  String get rcWeightBasisPackage;
+
+  /// No description provided for @rcWeightBasisPack.
+  ///
+  /// In ja, this message translates to:
+  /// **'1パックあたり'**
+  String get rcWeightBasisPack;
+
+  /// No description provided for @rcWeightAsk.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログにない重量をAIで探す'**
+  String get rcWeightAsk;
+
+  /// No description provided for @rcWeightLimit.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの1日の上限に達したため、重量の検索を止めました'**
+  String get rcWeightLimit;
+
+  /// No description provided for @productWeightSourceCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ'**
+  String get productWeightSourceCatalog;
 }
 
 class _AppLocalizationsDelegate

@@ -19,6 +19,8 @@ import '../../notation/presentation/notation_labels.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../product/application/product_providers.dart';
+import '../../product/data/spec_lookup.dart';
+import '../../product_library/application/product_library_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../data/stock_import_repository.dart';
@@ -233,6 +235,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         bytes: _bytes,
         // Each JAN against the makers' catalogs (0153).
         catalogLookup: (jans) => lookupJans(ref.read(janCatalogRepositoryProvider), jans),
+        // Weights no catalog gives, found by the AI (0155): for whoever may.
+        weightLookup: ref.read(productLibraryCanManageProvider)
+            ? (asks) =>
+                findWeightsWithAi(ref.read(specLookupRepositoryProvider), ref.read(janCatalogRepositoryProvider), asks)
+            : null,
       ),
     ));
     if (rows == null || !mounted) return;
@@ -275,9 +282,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       return;
     }
     final k = (known as ApiSuccess<Map<String, String>>).data;
-    final missing = [for (final j in jans) if (!k.containsKey(j)) j];
+    final missing = [
+      for (final j in jans)
+        if (!k.containsKey(j)) j
+    ];
     final wh = _whId;
-    final onHand = wh == null ? null : await repo.onHand(wh, [for (final j in jans) if (k.containsKey(j)) j]);
+    final onHand = wh == null
+        ? null
+        : await repo.onHand(wh, [
+            for (final j in jans)
+              if (k.containsKey(j)) j
+          ]);
     final book = missing.isEmpty ? null : await repo.inPriceBook(missing);
     if (!mounted) return;
     setState(() {
@@ -290,8 +305,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   /// The lines whose product 商品ライブラリー lacks but can be made: 価格台帳
   /// has the JAN, or the file names the product.
-  List<StockFileLine> get _registrable =>
-      [for (final l in _unknown) if (_book.containsKey(l.janCode) || l.registerName != null) l];
+  List<StockFileLine> get _registrable => [
+        for (final l in _unknown)
+          if (_book.containsKey(l.janCode) || l.registerName != null) l
+      ];
 
   /// The file's products 商品ライブラリー lacks, registered through 価格台帳:
   /// those it has go in under its names; the rest are read into it first
@@ -301,8 +318,14 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final l10n = AppLocalizations.of(context);
     final book = ref.read(priceBookRepositoryProvider);
     final todo = _registrable;
-    final ids = [for (final l in todo) if (_book[l.janCode] case (final id, _)) id];
-    final fresh = [for (final l in todo) if (!_book.containsKey(l.janCode)) l];
+    final ids = [
+      for (final l in todo)
+        if (_book[l.janCode] case (final id, _)) id
+    ];
+    final fresh = [
+      for (final l in todo)
+        if (!_book.containsKey(l.janCode)) l
+    ];
     if (fresh.isNotEmpty) {
       final r = await book.import([for (final l in fresh) l.toPriceBookLine()], sourceFile: _fileName);
       if (!mounted) return false;
@@ -362,7 +385,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('sf-confirm'), onPressed: () => Navigator.pop(d, true), child: Text(l10n.sfApplyShort)),
+          FilledButton(
+              key: const ValueKey('sf-confirm'),
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l10n.sfApplyShort)),
         ],
       ),
     );
@@ -473,14 +499,21 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           const SizedBox(height: AppSpacing.sm),
           for (final f in found.take(5))
             Text(
-              l10n.sfDuplicateLine(f.importId, fmt.format(f.at), f.fileName ?? '', f.sameFile ? l10n.sfSameFile : l10n.sfSameLines),
+              l10n.sfDuplicateLine(
+                  f.importId, fmt.format(f.at), f.fileName ?? '', f.sameFile ? l10n.sfSameFile : l10n.sfSameLines),
               key: ValueKey('sf-dup-${f.importId}'),
               style: Theme.of(d).textTheme.bodySmall,
             ),
         ]),
         actions: [
-          FilledButton(key: const ValueKey('sf-dup-cancel'), onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
-          TextButton(key: const ValueKey('sf-dup-go'), onPressed: () => Navigator.pop(d, true), child: Text(l10n.sfDuplicateGo)),
+          FilledButton(
+              key: const ValueKey('sf-dup-cancel'),
+              onPressed: () => Navigator.pop(d, false),
+              child: Text(l10n.actionCancel)),
+          TextButton(
+              key: const ValueKey('sf-dup-go'),
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l10n.sfDuplicateGo)),
         ],
       ),
     );
@@ -527,8 +560,14 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final registrable = _registrable;
     final willRegister = canManage && _registerNew ? registrable.length : 0;
     // Lines whose product is not there and will not be made now.
-    final leftOut = [for (final l in unknown) if (willRegister == 0 || !registrable.contains(l)) l];
-    final problems = [for (final p in sheet?.problems ?? const <StockFileProblem>[]) if (p.code != 'not_item') p];
+    final leftOut = [
+      for (final l in unknown)
+        if (willRegister == 0 || !registrable.contains(l)) l
+    ];
+    final problems = [
+      for (final p in sheet?.problems ?? const <StockFileProblem>[])
+        if (p.code != 'not_item') p
+    ];
     final notItems = (sheet?.problems ?? const <StockFileProblem>[]).where((p) => p.code == 'not_item').length;
     final done = _done;
 
@@ -540,7 +579,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             key: const ValueKey('sf-calendar'),
             tooltip: l10n.calTitle,
             icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockImportCalendarScreen())),
+            onPressed: () =>
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockImportCalendarScreen())),
           ),
           IconButton(
             key: const ValueKey('sf-history'),
@@ -571,7 +611,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             key: const ValueKey('sf-mode'),
             segments: [
               ButtonSegment(value: StockFileMode.add, icon: const Icon(Icons.add), label: Text(l10n.sfModeAdd)),
-              ButtonSegment(value: StockFileMode.set, icon: const Icon(Icons.edit_outlined), label: Text(l10n.sfModeSet)),
+              ButtonSegment(
+                  value: StockFileMode.set, icon: const Icon(Icons.edit_outlined), label: Text(l10n.sfModeSet)),
             ],
             selected: {_mode},
             onSelectionChanged: (v) => setState(() => _mode = v.first),
@@ -655,7 +696,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           if (_badFile)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.md),
-              child: Text(l10n.sfBadFile, key: const ValueKey('sf-bad-file'), style: TextStyle(color: theme.colorScheme.error)),
+              child: Text(l10n.sfBadFile,
+                  key: const ValueKey('sf-bad-file'), style: TextStyle(color: theme.colorScheme.error)),
             ),
           if (done != null)
             Card(
@@ -677,8 +719,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
                       child: FilledButton.tonalIcon(
                         key: const ValueKey('sf-go-inspect'),
-                        onPressed: () => Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (_) => StockInspectionScreen(openImportId: done.importId))),
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => StockInspectionScreen(openImportId: done.importId))),
                         icon: const Icon(Icons.fact_check_outlined, size: 18),
                         label: Text(l10n.sfGoInspect),
                       ),
@@ -694,7 +736,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           if (sheet != null && !sheet.header)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.md),
-              child: Text(l10n.sfNoHeader, key: const ValueKey('sf-no-header'), style: TextStyle(color: theme.colorScheme.error)),
+              child: Text(l10n.sfNoHeader,
+                  key: const ValueKey('sf-no-header'), style: TextStyle(color: theme.colorScheme.error)),
             ),
           if (sheet != null && sheet.header) ...[
             const SizedBox(height: AppSpacing.md),
@@ -722,23 +765,27 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             // The table: to check against the original, and to correct again.
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                (sheet.byAi && !_tableChecked ? FilledButton.icon : OutlinedButton.icon)(
-                  key: const ValueKey('sf-open-table'),
-                  onPressed: _busy ? null : _openTable,
-                  icon: const Icon(Icons.table_chart_outlined, size: 18),
-                  label: Text(l10n.sfOpenTable),
-                ),
-                if (_tableChecked)
-                  Text(
-                    l10n.sfTableChecked(
-                      sheet.read.where((r) => r.flags.contains(humanCorrectedFlag) && !r.humanRemoved).length,
-                      sheet.read.where((r) => r.humanRemoved).length,
+              child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    (sheet.byAi && !_tableChecked ? FilledButton.icon : OutlinedButton.icon)(
+                      key: const ValueKey('sf-open-table'),
+                      onPressed: _busy ? null : _openTable,
+                      icon: const Icon(Icons.table_chart_outlined, size: 18),
+                      label: Text(l10n.sfOpenTable),
                     ),
-                    key: const ValueKey('sf-table-checked'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
-                  ),
-              ]),
+                    if (_tableChecked)
+                      Text(
+                        l10n.sfTableChecked(
+                          sheet.read.where((r) => r.flags.contains(humanCorrectedFlag) && !r.humanRemoved).length,
+                          sheet.read.where((r) => r.humanRemoved).length,
+                        ),
+                        key: const ValueKey('sf-table-checked'),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+                      ),
+                  ]),
             ),
             if (sheet.byAi && !_tableChecked)
               Card(
@@ -761,7 +808,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             // Every line that will go in — those the library has, and the
             // new ones to be registered — with the arithmetic for each.
             const SizedBox(height: AppSpacing.md),
-            Text(l10n.sfGoingIn(ready.length + willRegister), key: const ValueKey('sf-going-in'), style: theme.textTheme.titleSmall),
+            Text(l10n.sfGoingIn(ready.length + willRegister),
+                key: const ValueKey('sf-going-in'), style: theme.textTheme.titleSmall),
             // On a PC the lines as a table, field by field as in the check;
             // on a phone, as a list.
             LayoutBuilder(builder: (context, c) {
@@ -778,38 +826,40 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               }
               return Column(children: [
                 for (final l in going)
-              ListTile(
-                key: ValueKey('sf-line-${l.janCode}'),
-                dense: true,
-                onTap: _busy ? null : () => _editLine(l),
-                leading: l.doubtful || implausibleQuantity(l.quantity)
-                    ? Tooltip(
-                        message: implausibleQuantity(l.quantity) ? l10n.sfImplausible : l10n.sfDoubtful,
-                        child: Icon(Icons.help_outline, key: ValueKey('sf-doubt-${l.janCode}'), color: theme.colorScheme.error),
-                      )
-                    : null,
-                // The product's own name: the file may write it otherwise,
-                // and the JAN alone decides whose stock it is.
-                title: Text(_known[l.janCode] ?? _book[l.janCode]?.$2 ?? l.name ?? l.janCode),
-                subtitle: Text([
-                  l.janCode,
-                  if (!_known.containsKey(l.janCode)) l10n.sfNewProduct,
-                  if (l.name case final n? when n.trim() != (_known[l.janCode] ?? _book[l.janCode]?.$2 ?? '').trim())
-                    l10n.sfFileName(n),
-                  if (l.merged > 1) l10n.sfMerged(l.merged),
-                  if (implausibleQuantity(l.quantity)) l10n.sfImplausible,
-                ].join(' · ')),
-                trailing: Text(
-                  () {
-                    final before = _onHand[l.janCode] ?? 0;
-                    return _mode == StockFileMode.add
-                        ? l10n.sfLineAdd(before, l.quantity, before + l.quantity)
-                        : l10n.sfLineSet(before, l.quantity, _signedDiff(l.quantity - before));
-                  }(),
-                  key: ValueKey('sf-calc-${l.janCode}'),
-                  style: theme.textTheme.titleSmall,
-                ),
-              ),
+                  ListTile(
+                    key: ValueKey('sf-line-${l.janCode}'),
+                    dense: true,
+                    onTap: _busy ? null : () => _editLine(l),
+                    leading: l.doubtful || implausibleQuantity(l.quantity)
+                        ? Tooltip(
+                            message: implausibleQuantity(l.quantity) ? l10n.sfImplausible : l10n.sfDoubtful,
+                            child: Icon(Icons.help_outline,
+                                key: ValueKey('sf-doubt-${l.janCode}'), color: theme.colorScheme.error),
+                          )
+                        : null,
+                    // The product's own name: the file may write it otherwise,
+                    // and the JAN alone decides whose stock it is.
+                    title: Text(_known[l.janCode] ?? _book[l.janCode]?.$2 ?? l.name ?? l.janCode),
+                    subtitle: Text([
+                      l.janCode,
+                      if (!_known.containsKey(l.janCode)) l10n.sfNewProduct,
+                      if (l.name case final n?
+                          when n.trim() != (_known[l.janCode] ?? _book[l.janCode]?.$2 ?? '').trim())
+                        l10n.sfFileName(n),
+                      if (l.merged > 1) l10n.sfMerged(l.merged),
+                      if (implausibleQuantity(l.quantity)) l10n.sfImplausible,
+                    ].join(' · ')),
+                    trailing: Text(
+                      () {
+                        final before = _onHand[l.janCode] ?? 0;
+                        return _mode == StockFileMode.add
+                            ? l10n.sfLineAdd(before, l.quantity, before + l.quantity)
+                            : l10n.sfLineSet(before, l.quantity, _signedDiff(l.quantity - before));
+                      }(),
+                      key: ValueKey('sf-calc-${l.janCode}'),
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ),
               ]);
             }),
             if (unknown.isNotEmpty)
@@ -844,7 +894,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                     TextButton.icon(
                       key: const ValueKey('sf-price-book'),
                       onPressed: () async {
-                        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PriceBookImportScreen()));
+                        await Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => const PriceBookImportScreen()));
                         // Read into the price book meanwhile: look again.
                         if (mounted) await _lookup();
                       },
@@ -857,7 +908,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             // Every row that will not go in, and why — none hidden.
             if (leftOut.isNotEmpty || problems.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
-              Text(l10n.sfLeftOut(leftOut.length + problems.length), key: const ValueKey('sf-left-out'), style: theme.textTheme.titleSmall),
+              Text(l10n.sfLeftOut(leftOut.length + problems.length),
+                  key: const ValueKey('sf-left-out'), style: theme.textTheme.titleSmall),
               for (final p in problems)
                 ListTile(
                   key: ValueKey('sf-problem-${p.lineNo}'),
@@ -1109,8 +1161,15 @@ class _GoingInTableState extends State<_GoingInTable> {
           child: child,
         );
     final headers = [
-      '', l10n.sfColProduct, l10n.ntFieldJan, l10n.ntFieldMaker, l10n.ntFieldCode,
-      l10n.sfColBefore, l10n.sfColChange, l10n.sfColAfter, l10n.sfColNote,
+      '',
+      l10n.sfColProduct,
+      l10n.ntFieldJan,
+      l10n.ntFieldMaker,
+      l10n.ntFieldCode,
+      l10n.sfColBefore,
+      l10n.sfColChange,
+      l10n.sfColAfter,
+      l10n.sfColNote,
     ];
     return Scrollbar(
       controller: _across,
@@ -1171,7 +1230,10 @@ class _GoingInTableState extends State<_GoingInTable> {
                           style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
                       end: true,
                     ),
-                    cell(8, Text(notes.join(' · '), style: theme.textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                    cell(
+                        8,
+                        Text(notes.join(' · '),
+                            style: theme.textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis)),
                   ]),
                 ),
               );

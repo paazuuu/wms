@@ -62,8 +62,9 @@ String gramsText(double grams) {
   return grams.abs() >= 1000 ? '${trim(grams / 1000, 2)} kg' : '${trim(grams, 1)} g';
 }
 
-/// Where a product's weight came from (0115).
+/// Where a product's weight came from (0115); a maker's catalog (0155).
 String weightSourceLabel(AppLocalizations l10n, String? source) => switch (source) {
+      'catalog' => l10n.productWeightSourceCatalog,
       'web' => l10n.wtSourceWeb,
       'measured' => l10n.wtSourceMeasured,
       _ => l10n.wtSourceManual,

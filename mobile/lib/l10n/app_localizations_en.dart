@@ -12253,4 +12253,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jcOpen => 'Open the catalog';
+
+  @override
+  String get jcPdfTitle => 'PDF catalogs';
+
+  @override
+  String get jcPdfIntro =>
+      'Reads a PDF downloaded from a maker\'s site or a wholesaler\'s catalog library for its JANs, part numbers and weights. A scanned PDF (text as pictures) cannot be read.';
+
+  @override
+  String get jcPdfName => 'Catalog name (the file name if empty)';
+
+  @override
+  String get jcPdfMaker => 'Maker (optional)';
+
+  @override
+  String get jcPdfUrl => 'PDF URL (optional, for links to a page)';
+
+  @override
+  String get jcPdfPick => 'Choose a PDF and read it';
+
+  @override
+  String jcPdfProgress(int page, int pages, int entries, int weights) {
+    return 'Page $page/$pages · $entries JANs · $weights weights';
+  }
+
+  @override
+  String get jcPdfNeedsBrowser => 'Read a PDF catalog from a PC browser.';
+
+  @override
+  String get jcPdfBadge => 'PDF';
+
+  @override
+  String get jcPdfUnreadable =>
+      'Could not read this PDF (it may be damaged or password-protected)';
+
+  @override
+  String jcDoneWeights(int n, int w) {
+    return '$n JANs read ($w with a weight)';
+  }
+
+  @override
+  String get rcWeight => 'Weight';
+
+  @override
+  String get rcWeightCatalog => 'Catalog';
+
+  @override
+  String get rcWeightAi => 'AI';
+
+  @override
+  String get rcWeightProduct => 'Recorded';
+
+  @override
+  String get rcWeightEstimate => 'Estimate';
+
+  @override
+  String get rcWeightLooking => 'Looking…';
+
+  @override
+  String get rcWeightNone => 'Not found';
+
+  @override
+  String rcWeightCatalogHint(String text, String basis) {
+    return 'In the catalog: $text\n$basis';
+  }
+
+  @override
+  String rcWeightAiHint(String source) {
+    return 'Found on the web by the AI (the catalog gives no weight)\n$source';
+  }
+
+  @override
+  String get rcWeightProductHint =>
+      'The product\'s recorded weight (entered or measured by a person)';
+
+  @override
+  String get rcWeightBasisProduct => 'Item';
+
+  @override
+  String get rcWeightBasisPackage => 'With packaging';
+
+  @override
+  String get rcWeightBasisPack => 'A pack';
+
+  @override
+  String get rcWeightAsk => 'Find missing weights with the AI';
+
+  @override
+  String get rcWeightLimit =>
+      'The AI\'s daily limit was reached; the weight search stopped';
+
+  @override
+  String get productWeightSourceCatalog => 'Catalog';
 }

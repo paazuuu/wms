@@ -12002,4 +12002,94 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get jcOpen => 'カタログを開く';
+
+  @override
+  String get jcPdfTitle => 'PDFのカタログ';
+
+  @override
+  String get jcPdfIntro =>
+      'メーカーのサイトや卸のカタログライブラリからダウンロードしたPDFを読み込み、JAN・品番・重量を取り出します。文字が画像になっているPDF（スキャン）は読めません。';
+
+  @override
+  String get jcPdfName => 'カタログ名（空欄ならファイル名）';
+
+  @override
+  String get jcPdfMaker => 'メーカー（任意）';
+
+  @override
+  String get jcPdfUrl => 'PDFのURL（任意・ページを開くリンクに使います）';
+
+  @override
+  String get jcPdfPick => 'PDFを選んで読み込む';
+
+  @override
+  String jcPdfProgress(int page, int pages, int entries, int weights) {
+    return '$page/$pagesページ・JAN $entries件・重量 $weights件';
+  }
+
+  @override
+  String get jcPdfNeedsBrowser => 'PDFカタログの読み込みは、PCのブラウザから行ってください。';
+
+  @override
+  String get jcPdfBadge => 'PDF';
+
+  @override
+  String get jcPdfUnreadable => 'このPDFを読めませんでした（壊れているか、パスワード付きの可能性があります）';
+
+  @override
+  String jcDoneWeights(int n, int w) {
+    return 'JAN $n件（うち重量 $w件）を読み込みました';
+  }
+
+  @override
+  String get rcWeight => '重量';
+
+  @override
+  String get rcWeightCatalog => 'カタログ';
+
+  @override
+  String get rcWeightAi => 'AI';
+
+  @override
+  String get rcWeightProduct => '登録済み';
+
+  @override
+  String get rcWeightEstimate => '推定';
+
+  @override
+  String get rcWeightLooking => '調べています…';
+
+  @override
+  String get rcWeightNone => '見つかりませんでした';
+
+  @override
+  String rcWeightCatalogHint(String text, String basis) {
+    return 'カタログの記載：$text\n$basis';
+  }
+
+  @override
+  String rcWeightAiHint(String source) {
+    return 'AIがWebで探した値です（カタログに重量がないため）\n$source';
+  }
+
+  @override
+  String get rcWeightProductHint => '商品に登録済みの重量（人が入力・計測）';
+
+  @override
+  String get rcWeightBasisProduct => '本体';
+
+  @override
+  String get rcWeightBasisPackage => '梱包込み';
+
+  @override
+  String get rcWeightBasisPack => '1パックあたり';
+
+  @override
+  String get rcWeightAsk => 'カタログにない重量をAIで探す';
+
+  @override
+  String get rcWeightLimit => 'AIの1日の上限に達したため、重量の検索を止めました';
+
+  @override
+  String get productWeightSourceCatalog => 'カタログ';
 }

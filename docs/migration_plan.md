@@ -7716,6 +7716,37 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - First read (2026-10-27): LOOK UP2026/2027 パイロット総合カタログ, 306 pages,
   3,066 JANs (3,026 under 4902505).
 
+## 0155: catalog weights, PDF catalogs, and the AI's weights kept apart
+
+- `jan_catalog_entries.weight_g / weight_text / weight_basis` (product,
+  package, pack). The parser places a printed weight (「●重量：11.5g／パック」,
+  or 「55×15×191mm/20g」 under a 「…/重量」 heading; a carton's 「物流…」 never)
+  on its JANs by layout: JANs one under another in one place are one group,
+  and a page's weights sit either above their groups (Pilot) or below
+  (Tombow) — whichever places more. A tie that disagrees, or a weight two
+  groups would take, places nothing.
+- PDF catalogs (`jan_catalogs.kind = 'pdf'`, keyed by the file's SHA-256):
+  the browser reads the text with pdf.js (the one `printing` loads) and sends
+  runs `[x, y, w, text]` ten pages at a time to `jan-catalog/pdf/pages`;
+  `pdf/start` clears what the file had, `pdf/finish` counts. The optional URL
+  makes page links (`url#page=N`). Not read again monthly.
+- `jan_weight_lookups`: what the AI (lookup_spec, web search) found for a JAN
+  with no catalog weight — its own table. `jan_weight_save` (product.manage)
+  keeps it.
+- A product's weight (`products.unit_weight_g`) by rule, in
+  `apply_jan_weights` (after every catalog read and AI save) and the
+  `products_fill_jan_weight` trigger (a JAN set or changed): a person's
+  (manual / measured) is never replaced; the catalog's (new source
+  `catalog`) replaces the AI's; the AI's (`web`, found on a page,
+  confidence ≥ 0.7, not a guess) only where there is nothing.
+- `jan_lookup(jans[])` = `jan_catalog_lookup` plus the weight as it stands
+  and where it came from (manual/measured, catalog, ai).
+- App: the check table gains 重量 (catalog / 登録済み / AI / 推定); for
+  product.manage, JANs with no weight are sent to the AI five at a time,
+  stopping at its daily limit. JANカタログ gains PDFのカタログ.
+- 2026-10-27: Tombow 総合 2026-2027 852 JANs (637 with a weight),
+  オリジナル文具 vol3 2. Its エコロジー and ギフト catalogs print no JAN.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

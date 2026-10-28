@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../jan_catalog/data/jan_catalog_repository.dart';
+import '../../product/presentation/product_labels.dart' show gramsText;
 import '../../notation/presentation/notation_labels.dart';
 import '../domain/stock_file.dart';
 import 'import_view_screen.dart' show OriginalFileView;
@@ -68,6 +69,9 @@ Color changedColor(BuildContext context) =>
 /// The JAN checked against the makers' catalogs (0153): not a field of the
 /// reading, shown beside the JAN when there is a catalog to ask.
 const _catalogCol = (key: 'catalog', width: 150.0);
+
+/// Its weight as it stands (0155): a person's, the catalog's, or the AI's.
+const _weightCol = (key: 'weight', width: 140.0);
 
 final _jan13 = RegExp(r'^\d{13}$');
 
@@ -185,7 +189,13 @@ class _EditRow {
 /// marked checked; null when they go back without it.
 class ReadingCheckScreen extends StatefulWidget {
   const ReadingCheckScreen(
-      {super.key, required this.rows, this.fileName, this.bytes, this.readOnly = false, this.catalogLookup});
+      {super.key,
+      required this.rows,
+      this.fileName,
+      this.bytes,
+      this.readOnly = false,
+      this.catalogLookup,
+      this.weightLookup});
 
   final List<ReadRow> rows;
   final String? fileName;
@@ -199,6 +209,10 @@ class ReadingCheckScreen extends StatefulWidget {
   /// catalog column.
   final Future<Map<String, JanCatalogHit>> Function(List<String> jans)? catalogLookup;
 
+  /// Asks the AI for the weights nothing else gives (see [findWeightsWithAi]);
+  /// none (looked back at, or not permitted), only the weights already known.
+  final Future<({List<AiWeight> found, bool stopped})> Function(List<WeightAsk> asks)? weightLookup;
+
   @override
   State<ReadingCheckScreen> createState() => _ReadingCheckScreenState();
 }
@@ -208,6 +222,11 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
   bool _allColumns = false;
   Map<String, JanCatalogHit> _hits = const {};
   final _asked = <String>{};
+
+  /// JANs the AI is looking for, and those it was asked about.
+  final _weighing = <String>{};
+  final _weighed = <String>{};
+  bool _weightStopped = false;
 
   @override
   void initState() {
@@ -226,7 +245,51 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
     if (jans.isEmpty) return;
     _asked.addAll(jans);
     ask(jans).then((m) {
-      if (mounted && m.isNotEmpty) setState(() => _hits = {..._hits, ...m});
+      if (!mounted || m.isEmpty) return;
+      setState(() => _hits = {..._hits, ...m});
+      _weigh();
+    });
+  }
+
+  /// The AI asked for the weights the catalogs and the products do not give.
+  void _weigh() {
+    final ask = widget.weightLookup;
+    if (ask == null || widget.readOnly || _weightStopped) return;
+    final asks = <WeightAsk>[];
+    for (final r in _rows) {
+      final jan = r['jan'];
+      final hit = _hits[jan];
+      if (hit == null || !hit.needsWeight || _weighed.contains(jan) || r.removed) continue;
+      if (asks.any((a) => a.jan == jan)) continue;
+      final (maker, name) = splitMakerAndName(r['maker_name']);
+      asks.add((
+        jan: jan,
+        maker: maker.isEmpty ? hit.maker : maker,
+        name: name.isEmpty ? (hit.codeHint ?? '') : name,
+        code: r['code'].isEmpty ? null : r['code'],
+      ));
+    }
+    if (asks.isEmpty) return;
+    setState(() {
+      for (final a in asks) {
+        _weighed.add(a.jan);
+        _weighing.add(a.jan);
+      }
+    });
+    ask(asks).then((r) {
+      if (!mounted) return;
+      setState(() {
+        _weighing.removeAll(asks.map((a) => a.jan));
+        _weightStopped = r.stopped;
+        final next = {..._hits};
+        for (final f in r.found) {
+          final h = next[f.jan];
+          if (h == null || !h.needsWeight) continue;
+          next[f.jan] = h.withWeight(f.weightG,
+              source: 'ai', text: f.note, basis: f.basis, url: f.sourceUrl, estimated: f.estimated);
+        }
+        _hits = next;
+      });
     });
   }
 
@@ -240,7 +303,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
 
   List<_Col> get _cols => [
         ..._core.take(1),
-        if (widget.catalogLookup != null) _catalogCol,
+        if (widget.catalogLookup != null) ...[_catalogCol, _weightCol],
         ..._core.skip(1),
         for (final c in _ledger)
           if (_allColumns || _rows.any((r) => r[c.key].isNotEmpty || _value(r.original, c.key).isNotEmpty)) c,
@@ -252,6 +315,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         'maker' => l10n.ntFieldMaker,
         'maker_name' => l10n.rcMakerName,
         'catalog' => l10n.rcCatalog,
+        'weight' => l10n.rcWeight,
         'code' => l10n.ntFieldCode,
         'quantity' => l10n.ntFieldQuantity,
         'unit' => l10n.lgUnit,
@@ -325,6 +389,8 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           label: (k) => _label(l10n, k),
           readOnly: widget.readOnly,
           hits: _hits,
+          weighing: _weighing,
+          weighed: _weighed,
           onChanged: () {
             _lookup();
             setState(() {});
@@ -350,6 +416,8 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
               if (notInCatalog > 0)
                 Text(l10n.rcCatalogMissingCount(notInCatalog),
                     key: const ValueKey('rc-catalog-missing'), style: TextStyle(color: theme.colorScheme.error)),
+              if (_weightStopped)
+                Text(l10n.rcWeightLimit, key: const ValueKey('rc-weight-stopped'), style: theme.textTheme.bodySmall),
               if (!widget.readOnly)
                 FilledButton.icon(
                   key: const ValueKey('rc-ok'),
@@ -426,9 +494,13 @@ class _Table extends StatefulWidget {
     required this.onChanged,
     this.readOnly = false,
     this.hits = const {},
+    this.weighing = const {},
+    this.weighed = const {},
   });
 
   final Map<String, JanCatalogHit> hits;
+  final Set<String> weighing;
+  final Set<String> weighed;
   final List<_EditRow> rows;
   final List<_Col> cols;
   final String Function(String) label;
@@ -501,7 +573,9 @@ class _TableState extends State<_Table> {
                       cols: cols,
                       onChanged: widget.onChanged,
                       readOnly: widget.readOnly,
-                      hit: widget.hits[rows[i]['jan']]),
+                      hit: widget.hits[rows[i]['jan']],
+                      weighing: widget.weighing.contains(rows[i]['jan']),
+                      weighed: widget.weighed.contains(rows[i]['jan'])),
                 ),
               ),
             ]),
@@ -513,9 +587,19 @@ class _TableState extends State<_Table> {
 }
 
 class _RowView extends StatelessWidget {
-  const _RowView({required this.row, required this.cols, required this.onChanged, this.readOnly = false, this.hit});
+  const _RowView({
+    required this.row,
+    required this.cols,
+    required this.onChanged,
+    this.readOnly = false,
+    this.hit,
+    this.weighing = false,
+    this.weighed = false,
+  });
 
   final JanCatalogHit? hit;
+  final bool weighing;
+  final bool weighed;
   final _EditRow row;
   final List<_Col> cols;
   final VoidCallback onChanged;
@@ -587,6 +671,17 @@ class _RowView extends StatelessWidget {
               width: col.width,
               margin: const EdgeInsets.only(right: 4),
               child: _CatalogCell(key: ValueKey('rc-$no-catalog'), hit: _jan13.hasMatch(row['jan']) ? hit : null),
+            )
+          else if (col.key == 'weight')
+            Container(
+              width: col.width,
+              margin: const EdgeInsets.only(right: 4),
+              child: _WeightCell(
+                key: ValueKey('rc-$no-weight'),
+                hit: _jan13.hasMatch(row['jan']) ? hit : null,
+                looking: weighing,
+                askedAi: weighed,
+              ),
             )
           else
             Container(
@@ -699,6 +794,86 @@ class _CatalogCell extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         child: Text('—', style: small?.copyWith(color: scheme.onSurfaceVariant)),
+      ),
+    );
+  }
+}
+
+/// A row's weight: from the product (a person's), the catalog, or the AI —
+/// said which, the AI's in its own colour; while the AI looks, that.
+class _WeightCell extends StatelessWidget {
+  const _WeightCell({super.key, this.hit, this.looking = false, this.askedAi = false});
+
+  final JanCatalogHit? hit;
+  final bool looking;
+  final bool askedAi;
+
+  void _open(BuildContext context, String url) {
+    if (openExternalUrl(url)) return;
+    Clipboard.setData(ClipboardData(text: url));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).rcCatalogCopied)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final small = theme.textTheme.bodySmall;
+    final h = hit;
+    const pad = EdgeInsets.symmetric(horizontal: 6, vertical: 8);
+    if (h == null) return const SizedBox.shrink();
+    if (h.weightG == null) {
+      if (looking) {
+        return Padding(
+          padding: pad,
+          child: Row(children: [
+            const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+            const SizedBox(width: 6),
+            Expanded(child: Text(l10n.rcWeightLooking, style: small, overflow: TextOverflow.ellipsis)),
+          ]),
+        );
+      }
+      return Padding(
+        padding: pad,
+        child: Text(askedAi ? l10n.rcWeightNone : '—', style: small?.copyWith(color: scheme.onSurfaceVariant)),
+      );
+    }
+    final basis = switch (h.weightBasis) {
+      'package' => l10n.rcWeightBasisPackage,
+      'pack' => l10n.rcWeightBasisPack,
+      _ => l10n.rcWeightBasisProduct,
+    };
+    final (tag, tip, color) = switch (h.weightSource) {
+      'catalog' => (l10n.rcWeightCatalog, l10n.rcWeightCatalogHint(h.weightText ?? '', basis), Colors.green.shade600),
+      'ai' => (
+          h.weightEstimated ? l10n.rcWeightEstimate : l10n.rcWeightAi,
+          l10n.rcWeightAiHint(h.weightUrl ?? ''),
+          Colors.deepPurple.shade300
+        ),
+      _ => (l10n.rcWeightProduct, l10n.rcWeightProductHint, scheme.primary),
+    };
+    final url = h.weightUrl;
+    return Tooltip(
+      message: tip,
+      child: InkWell(
+        onTap: url == null || !url.startsWith('http') ? null : () => _open(context, url),
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: pad,
+          child: Row(children: [
+            Text(gramsText(h.weightG!), style: theme.textTheme.bodyMedium),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(border: Border.all(color: color), borderRadius: BorderRadius.circular(4)),
+                child: Text(tag,
+                    style: small?.copyWith(color: color, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ),
+          ]),
+        ),
       ),
     );
   }

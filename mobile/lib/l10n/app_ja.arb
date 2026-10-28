@@ -10760,5 +10760,75 @@
       }
     }
   },
-  "jcOpen": "カタログを開く"
+  "jcOpen": "カタログを開く",
+  "jcPdfTitle": "PDFのカタログ",
+  "jcPdfIntro": "メーカーのサイトや卸のカタログライブラリからダウンロードしたPDFを読み込み、JAN・品番・重量を取り出します。文字が画像になっているPDF（スキャン）は読めません。",
+  "jcPdfName": "カタログ名（空欄ならファイル名）",
+  "jcPdfMaker": "メーカー（任意）",
+  "jcPdfUrl": "PDFのURL（任意・ページを開くリンクに使います）",
+  "jcPdfPick": "PDFを選んで読み込む",
+  "jcPdfProgress": "{page}/{pages}ページ・JAN {entries}件・重量 {weights}件",
+  "@jcPdfProgress": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      },
+      "entries": {
+        "type": "int"
+      },
+      "weights": {
+        "type": "int"
+      }
+    }
+  },
+  "jcPdfNeedsBrowser": "PDFカタログの読み込みは、PCのブラウザから行ってください。",
+  "jcPdfBadge": "PDF",
+  "jcPdfUnreadable": "このPDFを読めませんでした（壊れているか、パスワード付きの可能性があります）",
+  "jcDoneWeights": "JAN {n}件（うち重量 {w}件）を読み込みました",
+  "@jcDoneWeights": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "w": {
+        "type": "int"
+      }
+    }
+  },
+  "rcWeight": "重量",
+  "rcWeightCatalog": "カタログ",
+  "rcWeightAi": "AI",
+  "rcWeightProduct": "登録済み",
+  "rcWeightEstimate": "推定",
+  "rcWeightLooking": "調べています…",
+  "rcWeightNone": "見つかりませんでした",
+  "rcWeightCatalogHint": "カタログの記載：{text}\n{basis}",
+  "@rcWeightCatalogHint": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "rcWeightAiHint": "AIがWebで探した値です（カタログに重量がないため）\n{source}",
+  "@rcWeightAiHint": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "rcWeightProductHint": "商品に登録済みの重量（人が入力・計測）",
+  "rcWeightBasisProduct": "本体",
+  "rcWeightBasisPackage": "梱包込み",
+  "rcWeightBasisPack": "1パックあたり",
+  "rcWeightAsk": "カタログにない重量をAIで探す",
+  "rcWeightLimit": "AIの1日の上限に達したため、重量の検索を止めました",
+  "productWeightSourceCatalog": "カタログ"
 }
