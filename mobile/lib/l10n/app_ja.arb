@@ -10857,5 +10857,73 @@
       }
     }
   },
-  "jcNoPdf": "このカタログはページのPDFを出していないため読み込めません"
+  "jcNoPdf": "このカタログはページのPDFを出していないため読み込めません",
+  "jcTabCatalogs": "カタログ",
+  "jcTabReference": "参照資料",
+  "refIntro": "読み込んだカタログと、登録したサイト・PDFを、年度（4月〜3月）ごとに残します。読み込むたびに中身の写しを保存し（変わっていなければ保存しません）、あとから見返せます。表はブラウザの「印刷」→「PDFに保存」でPDFにできます。",
+  "refUrl": "参照するサイト・PDFのURL",
+  "refTitleField": "名前（空欄ならページの題名）",
+  "refNote": "メモ（任意）",
+  "refAdd": "追加して保存",
+  "refSaved": "保存しました",
+  "refSavedAgain": "今の内容を確認しました（変わっていれば新しく保存しました）",
+  "refDeleteConfirm": "「{name}」と、保存した写しをすべて削除しますか？",
+  "@refDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "refYear": "{year}年度",
+  "@refYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "refEmpty": "この年度に保存した資料はありません",
+  "refKindCatalog": "カタログ",
+  "refKindSite": "サイト",
+  "refCounts": "JAN {n}件（重量 {w}件）",
+  "@refCounts": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "w": {
+        "type": "String"
+      }
+    }
+  },
+  "refTable": "表で見る",
+  "refExcel": "Excel",
+  "refPdf": "PDF",
+  "refPage": "保存したページ",
+  "refText": "本文",
+  "refFile": "ファイル",
+  "refNoCopy": "まだ写しがありません",
+  "refChecked": "最終確認 {date}",
+  "@refChecked": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "refOpenNow": "今のページを開く",
+  "refSaveAgain": "今の内容を保存",
+  "refOpenInBrowser": "PCのブラウザで開いてください",
+  "refBadUrl": "保存できないURLです（http/httpsの公開されたページのみ）",
+  "refTooLarge": "大きすぎるため保存できません（25MBまで）",
+  "refUnreachable": "そのページを開けませんでした",
+  "refUnreadable": "保存した写しを読めませんでした",
+  "refTabHint": "この表は、ブラウザの「印刷」→「PDFに保存」でPDFにできます。",
+  "refColTitle": "名前",
+  "refColMaker": "メーカー",
+  "refColEdition": "発行",
+  "refColUrl": "URL",
+  "refColTaken": "保存日時",
+  "refColYear": "年度"
 }

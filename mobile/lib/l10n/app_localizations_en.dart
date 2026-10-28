@@ -12363,4 +12363,126 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get jcNoPdf =>
       'This catalog offers no page PDFs, so it cannot be read';
+
+  @override
+  String get jcTabCatalogs => 'Catalogs';
+
+  @override
+  String get jcTabReference => 'References';
+
+  @override
+  String get refIntro =>
+      'Keeps the catalogs read and the sites and PDFs you add, by fiscal year (April to March). Each read saves a copy of what was there (only when it changed), to look back on. A table becomes a PDF with the browser\'s Print → Save as PDF.';
+
+  @override
+  String get refUrl => 'URL of a site or PDF';
+
+  @override
+  String get refTitleField => 'Name (the page title if empty)';
+
+  @override
+  String get refNote => 'Note (optional)';
+
+  @override
+  String get refAdd => 'Add and save';
+
+  @override
+  String get refSaved => 'Saved';
+
+  @override
+  String get refSavedAgain => 'Checked now (saved anew if it had changed)';
+
+  @override
+  String refDeleteConfirm(String name) {
+    return 'Delete “$name” and every copy kept of it?';
+  }
+
+  @override
+  String refYear(int year) {
+    return 'FY$year';
+  }
+
+  @override
+  String get refEmpty => 'Nothing kept in this year';
+
+  @override
+  String get refKindCatalog => 'Catalog';
+
+  @override
+  String get refKindSite => 'Site';
+
+  @override
+  String refCounts(String n, String w) {
+    return '$n JANs ($w with a weight)';
+  }
+
+  @override
+  String get refTable => 'View as a table';
+
+  @override
+  String get refExcel => 'Excel';
+
+  @override
+  String get refPdf => 'PDF';
+
+  @override
+  String get refPage => 'Saved page';
+
+  @override
+  String get refText => 'Text';
+
+  @override
+  String get refFile => 'File';
+
+  @override
+  String get refNoCopy => 'No copy yet';
+
+  @override
+  String refChecked(String date) {
+    return 'Last checked $date';
+  }
+
+  @override
+  String get refOpenNow => 'Open it now';
+
+  @override
+  String get refSaveAgain => 'Save it now';
+
+  @override
+  String get refOpenInBrowser => 'Open it in a PC browser';
+
+  @override
+  String get refBadUrl =>
+      'This URL cannot be saved (public http/https pages only)';
+
+  @override
+  String get refTooLarge => 'Too large to save (up to 25 MB)';
+
+  @override
+  String get refUnreachable => 'Could not open that page';
+
+  @override
+  String get refUnreadable => 'Could not read the kept copy';
+
+  @override
+  String get refTabHint =>
+      'Print → Save as PDF in the browser makes this table a PDF.';
+
+  @override
+  String get refColTitle => 'Name';
+
+  @override
+  String get refColMaker => 'Maker';
+
+  @override
+  String get refColEdition => 'Published';
+
+  @override
+  String get refColUrl => 'URL';
+
+  @override
+  String get refColTaken => 'Saved';
+
+  @override
+  String get refColYear => 'Fiscal year';
 }

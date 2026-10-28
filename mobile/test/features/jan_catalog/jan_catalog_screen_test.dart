@@ -66,7 +66,7 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('jc-url')), 'https://example.com/');
     await tester.tap(find.byKey(const ValueKey('jc-add')));
     await tester.pumpAndSettle();
-    expect(find.text('mediapress（iCata）のカタログURLではありません'), findsOneWidget);
+    expect(find.text('mediapress（iCata）またはmeclibのカタログURLではありません'), findsOneWidget);
   });
 
   testWidgets('without product.manage: only the list', (tester) async {

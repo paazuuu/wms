@@ -12037,4 +12037,124 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get jcNoPdf => '此目录不提供页面PDF，无法读取';
+
+  @override
+  String get jcTabCatalogs => '目录';
+
+  @override
+  String get jcTabReference => '参考资料';
+
+  @override
+  String get refIntro =>
+      '按年度（4月～次年3月）保存读取的目录以及登记的网站和PDF。每次读取都会保存内容副本（无变化则不保存），以后可以回看。表格可通过浏览器的“打印”→“另存为PDF”保存为PDF。';
+
+  @override
+  String get refUrl => '参考网站或PDF的URL';
+
+  @override
+  String get refTitleField => '名称（留空则用页面标题）';
+
+  @override
+  String get refNote => '备注（可选）';
+
+  @override
+  String get refAdd => '添加并保存';
+
+  @override
+  String get refSaved => '已保存';
+
+  @override
+  String get refSavedAgain => '已确认当前内容（若有变化则已重新保存）';
+
+  @override
+  String refDeleteConfirm(String name) {
+    return '删除“$name”及其所有保存的副本吗？';
+  }
+
+  @override
+  String refYear(int year) {
+    return '$year年度';
+  }
+
+  @override
+  String get refEmpty => '本年度没有保存的资料';
+
+  @override
+  String get refKindCatalog => '目录';
+
+  @override
+  String get refKindSite => '网站';
+
+  @override
+  String refCounts(String n, String w) {
+    return 'JAN $n个（重量 $w个）';
+  }
+
+  @override
+  String get refTable => '以表格查看';
+
+  @override
+  String get refExcel => 'Excel';
+
+  @override
+  String get refPdf => 'PDF';
+
+  @override
+  String get refPage => '保存的页面';
+
+  @override
+  String get refText => '正文';
+
+  @override
+  String get refFile => '文件';
+
+  @override
+  String get refNoCopy => '尚无副本';
+
+  @override
+  String refChecked(String date) {
+    return '最后确认 $date';
+  }
+
+  @override
+  String get refOpenNow => '打开当前页面';
+
+  @override
+  String get refSaveAgain => '保存当前内容';
+
+  @override
+  String get refOpenInBrowser => '请在电脑浏览器中打开';
+
+  @override
+  String get refBadUrl => '无法保存此URL（仅限公开的http/https页面）';
+
+  @override
+  String get refTooLarge => '文件过大，无法保存（最大25MB）';
+
+  @override
+  String get refUnreachable => '无法打开该页面';
+
+  @override
+  String get refUnreadable => '无法读取保存的副本';
+
+  @override
+  String get refTabHint => '可通过浏览器的“打印”→“另存为PDF”将此表保存为PDF。';
+
+  @override
+  String get refColTitle => '名称';
+
+  @override
+  String get refColMaker => '厂商';
+
+  @override
+  String get refColEdition => '发行';
+
+  @override
+  String get refColUrl => 'URL';
+
+  @override
+  String get refColTaken => '保存时间';
+
+  @override
+  String get refColYear => '年度';
 }

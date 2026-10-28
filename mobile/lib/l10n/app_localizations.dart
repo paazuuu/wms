@@ -21553,6 +21553,228 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'このカタログはページのPDFを出していないため読み込めません'**
   String get jcNoPdf;
+
+  /// No description provided for @jcTabCatalogs.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ'**
+  String get jcTabCatalogs;
+
+  /// No description provided for @jcTabReference.
+  ///
+  /// In ja, this message translates to:
+  /// **'参照資料'**
+  String get jcTabReference;
+
+  /// No description provided for @refIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだカタログと、登録したサイト・PDFを、年度（4月〜3月）ごとに残します。読み込むたびに中身の写しを保存し（変わっていなければ保存しません）、あとから見返せます。表はブラウザの「印刷」→「PDFに保存」でPDFにできます。'**
+  String get refIntro;
+
+  /// No description provided for @refUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'参照するサイト・PDFのURL'**
+  String get refUrl;
+
+  /// No description provided for @refTitleField.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前（空欄ならページの題名）'**
+  String get refTitleField;
+
+  /// No description provided for @refNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get refNote;
+
+  /// No description provided for @refAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加して保存'**
+  String get refAdd;
+
+  /// No description provided for @refSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get refSaved;
+
+  /// No description provided for @refSavedAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の内容を確認しました（変わっていれば新しく保存しました）'**
+  String get refSavedAgain;
+
+  /// No description provided for @refDeleteConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」と、保存した写しをすべて削除しますか？'**
+  String refDeleteConfirm(String name);
+
+  /// No description provided for @refYear.
+  ///
+  /// In ja, this message translates to:
+  /// **'{year}年度'**
+  String refYear(int year);
+
+  /// No description provided for @refEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この年度に保存した資料はありません'**
+  String get refEmpty;
+
+  /// No description provided for @refKindCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ'**
+  String get refKindCatalog;
+
+  /// No description provided for @refKindSite.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイト'**
+  String get refKindSite;
+
+  /// No description provided for @refCounts.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {n}件（重量 {w}件）'**
+  String refCounts(String n, String w);
+
+  /// No description provided for @refTable.
+  ///
+  /// In ja, this message translates to:
+  /// **'表で見る'**
+  String get refTable;
+
+  /// No description provided for @refExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excel'**
+  String get refExcel;
+
+  /// No description provided for @refPdf.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDF'**
+  String get refPdf;
+
+  /// No description provided for @refPage.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存したページ'**
+  String get refPage;
+
+  /// No description provided for @refText.
+  ///
+  /// In ja, this message translates to:
+  /// **'本文'**
+  String get refText;
+
+  /// No description provided for @refFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル'**
+  String get refFile;
+
+  /// No description provided for @refNoCopy.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ写しがありません'**
+  String get refNoCopy;
+
+  /// No description provided for @refChecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終確認 {date}'**
+  String refChecked(String date);
+
+  /// No description provided for @refOpenNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'今のページを開く'**
+  String get refOpenNow;
+
+  /// No description provided for @refSaveAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の内容を保存'**
+  String get refSaveAgain;
+
+  /// No description provided for @refOpenInBrowser.
+  ///
+  /// In ja, this message translates to:
+  /// **'PCのブラウザで開いてください'**
+  String get refOpenInBrowser;
+
+  /// No description provided for @refBadUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存できないURLです（http/httpsの公開されたページのみ）'**
+  String get refBadUrl;
+
+  /// No description provided for @refTooLarge.
+  ///
+  /// In ja, this message translates to:
+  /// **'大きすぎるため保存できません（25MBまで）'**
+  String get refTooLarge;
+
+  /// No description provided for @refUnreachable.
+  ///
+  /// In ja, this message translates to:
+  /// **'そのページを開けませんでした'**
+  String get refUnreachable;
+
+  /// No description provided for @refUnreadable.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存した写しを読めませんでした'**
+  String get refUnreadable;
+
+  /// No description provided for @refTabHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'この表は、ブラウザの「印刷」→「PDFに保存」でPDFにできます。'**
+  String get refTabHint;
+
+  /// No description provided for @refColTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前'**
+  String get refColTitle;
+
+  /// No description provided for @refColMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get refColMaker;
+
+  /// No description provided for @refColEdition.
+  ///
+  /// In ja, this message translates to:
+  /// **'発行'**
+  String get refColEdition;
+
+  /// No description provided for @refColUrl.
+  ///
+  /// In ja, this message translates to:
+  /// **'URL'**
+  String get refColUrl;
+
+  /// No description provided for @refColTaken.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存日時'**
+  String get refColTaken;
+
+  /// No description provided for @refColYear.
+  ///
+  /// In ja, this message translates to:
+  /// **'年度'**
+  String get refColYear;
 }
 
 class _AppLocalizationsDelegate

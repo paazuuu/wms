@@ -7807,6 +7807,31 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   the word JAN). About 20 of Ecole's books have no text at all (pictures
   only) and give nothing; 11 have no search text (404).
 
+## 0160: 参照資料 — the catalogs and sites referred to, kept by 年度
+
+- `reference_sources`: one per catalog (`jan_catalog_id`, kept as null when
+  the catalog is deleted, so its history stays) and one per site a person
+  adds (`url`). `reference_snapshots`: a copy as it was, in its 年度 (April
+  to March, Japan time; `jp_fiscal_year`, set by a trigger), with its files
+  in the private bucket `reference-archive` (read by product.view, written
+  by the jan-catalog function only).
+- A catalog leaves a copy each time it has been read (`entries.json`: every
+  JAN with what was printed beside it, its weight and basis, its page and
+  the text around it; and a meclib book's `text.txt`) — only when something
+  changed (`content_hash`); else `last_checked_at`. `POST /reference/backfill`
+  made the first copies.
+- A site (`POST /reference {url, title, maker, note}`, http(s) on a public
+  name only, up to 25 MB) is kept as it is: a PDF as `page.pdf`; a page as
+  `page.html` (UTF-8, with a `<base>` so it still shows) and `text.txt`.
+  Saved again on the 2nd of each month (`reference-sites-refresh`) or with
+  「今の内容を保存」; `DELETE /reference/:id` removes a site and its copies.
+  A page is not rendered to a PDF on the server (no browser there): its
+  HTML and text are kept; a table opens in a tab, and the browser's 印刷 →
+  PDFに保存 makes the PDF.
+- App: JANカタログ gains a 参照資料 tab: a chip per 年度, each source's copies
+  in it, a catalog's JAN list as a table in a new tab or as Excel, a site's
+  saved page, text or PDF, the page as it is now.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

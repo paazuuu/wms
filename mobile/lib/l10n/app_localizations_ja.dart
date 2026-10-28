@@ -12108,4 +12108,124 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get jcNoPdf => 'このカタログはページのPDFを出していないため読み込めません';
+
+  @override
+  String get jcTabCatalogs => 'カタログ';
+
+  @override
+  String get jcTabReference => '参照資料';
+
+  @override
+  String get refIntro =>
+      '読み込んだカタログと、登録したサイト・PDFを、年度（4月〜3月）ごとに残します。読み込むたびに中身の写しを保存し（変わっていなければ保存しません）、あとから見返せます。表はブラウザの「印刷」→「PDFに保存」でPDFにできます。';
+
+  @override
+  String get refUrl => '参照するサイト・PDFのURL';
+
+  @override
+  String get refTitleField => '名前（空欄ならページの題名）';
+
+  @override
+  String get refNote => 'メモ（任意）';
+
+  @override
+  String get refAdd => '追加して保存';
+
+  @override
+  String get refSaved => '保存しました';
+
+  @override
+  String get refSavedAgain => '今の内容を確認しました（変わっていれば新しく保存しました）';
+
+  @override
+  String refDeleteConfirm(String name) {
+    return '「$name」と、保存した写しをすべて削除しますか？';
+  }
+
+  @override
+  String refYear(int year) {
+    return '$year年度';
+  }
+
+  @override
+  String get refEmpty => 'この年度に保存した資料はありません';
+
+  @override
+  String get refKindCatalog => 'カタログ';
+
+  @override
+  String get refKindSite => 'サイト';
+
+  @override
+  String refCounts(String n, String w) {
+    return 'JAN $n件（重量 $w件）';
+  }
+
+  @override
+  String get refTable => '表で見る';
+
+  @override
+  String get refExcel => 'Excel';
+
+  @override
+  String get refPdf => 'PDF';
+
+  @override
+  String get refPage => '保存したページ';
+
+  @override
+  String get refText => '本文';
+
+  @override
+  String get refFile => 'ファイル';
+
+  @override
+  String get refNoCopy => 'まだ写しがありません';
+
+  @override
+  String refChecked(String date) {
+    return '最終確認 $date';
+  }
+
+  @override
+  String get refOpenNow => '今のページを開く';
+
+  @override
+  String get refSaveAgain => '今の内容を保存';
+
+  @override
+  String get refOpenInBrowser => 'PCのブラウザで開いてください';
+
+  @override
+  String get refBadUrl => '保存できないURLです（http/httpsの公開されたページのみ）';
+
+  @override
+  String get refTooLarge => '大きすぎるため保存できません（25MBまで）';
+
+  @override
+  String get refUnreachable => 'そのページを開けませんでした';
+
+  @override
+  String get refUnreadable => '保存した写しを読めませんでした';
+
+  @override
+  String get refTabHint => 'この表は、ブラウザの「印刷」→「PDFに保存」でPDFにできます。';
+
+  @override
+  String get refColTitle => '名前';
+
+  @override
+  String get refColMaker => 'メーカー';
+
+  @override
+  String get refColEdition => '発行';
+
+  @override
+  String get refColUrl => 'URL';
+
+  @override
+  String get refColTaken => '保存日時';
+
+  @override
+  String get refColYear => '年度';
 }
