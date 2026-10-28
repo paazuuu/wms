@@ -7771,6 +7771,12 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   a read a closed tab left. The monthly job now just sets next_page = 0.
 - The scheduler's secret is checked twice: a cold start's first database
   call failed it once in three.
+- 0158: the job steps every waiting catalog at once, each by its id
+  (entries are upserted, a JAN already added let go, so two steps of one
+  catalog cannot clash).
+- JANs are taken only as catalogs print them (13 digits, 2-5-6, 7-6,
+  1-6-6): a looser pattern made JANs of runs of short codes in the Lion
+  catalog (498-33 498-34 …), which prints almost none and was removed.
 
 ## Rollout discipline
 
