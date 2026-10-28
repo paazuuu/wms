@@ -12485,4 +12485,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refColYear => 'Fiscal year';
+
+  @override
+  String get pcName => 'Name';
+
+  @override
+  String get pcJan => 'JAN';
+
+  @override
+  String get pcCode => 'Part no.';
+
+  @override
+  String get pcSpec => 'Size / weight';
+
+  @override
+  String get pcStock => 'Stock';
+
+  @override
+  String get pcFacts => 'Units';
+
+  @override
+  String get pcPrice => 'Price';
+
+  @override
+  String get pcReset => 'Reset column widths';
+
+  @override
+  String get plNoName => '(no name yet)';
+
+  @override
+  String get plNoNameHint =>
+      'The file it came from gave no name, so its part number stands in. Open the product to give it a name.';
 }

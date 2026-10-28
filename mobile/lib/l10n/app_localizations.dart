@@ -21775,6 +21775,66 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'年度'**
   String get refColYear;
+
+  /// No description provided for @pcName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get pcName;
+
+  /// No description provided for @pcJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANコード'**
+  String get pcJan;
+
+  /// No description provided for @pcCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番'**
+  String get pcCode;
+
+  /// No description provided for @pcSpec.
+  ///
+  /// In ja, this message translates to:
+  /// **'サイズ・重量'**
+  String get pcSpec;
+
+  /// No description provided for @pcStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get pcStock;
+
+  /// No description provided for @pcFacts.
+  ///
+  /// In ja, this message translates to:
+  /// **'単位など'**
+  String get pcFacts;
+
+  /// No description provided for @pcPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価'**
+  String get pcPrice;
+
+  /// No description provided for @pcReset.
+  ///
+  /// In ja, this message translates to:
+  /// **'列の幅を元に戻す'**
+  String get pcReset;
+
+  /// No description provided for @plNoName.
+  ///
+  /// In ja, this message translates to:
+  /// **'（品名未登録）'**
+  String get plNoName;
+
+  /// No description provided for @plNoNameHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込んだファイルに品名がなかったため、品番を仮の名前にしています。商品を開いて品名を入れてください。'**
+  String get plNoNameHint;
 }
 
 class _AppLocalizationsDelegate

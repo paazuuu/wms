@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/product/application/product_filter.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/product/presentation/product_columns.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
@@ -958,5 +959,52 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('sh-pick-2')));
     await tester.pumpAndSettle();
     expect(find.text('「テストノート」の在庫の推移'), findsOneWidget);
+  });
+
+  test('column widths fit the row: as dragged, else the name gives way, then all in proportion', () {
+    final fits = fitProductColumns(productColumnDefaults, 3000);
+    expect(fits['jan'], productColumnDefaults['jan']);
+    final tight = fitProductColumns(productColumnDefaults, 1400);
+    expect(tight['jan'], productColumnDefaults['jan']);
+    expect(tight['name']!, lessThan(productColumnDefaults['name']!));
+    final tiny = fitProductColumns(productColumnDefaults, 900);
+    final sum = productColumnKeys.fold<double>(0, (s, k) => s + tiny[k]!);
+    expect(sum + productRowLead + productRowTail + productColumnGap * productColumnKeys.length, closeTo(900, 0.5));
+  });
+
+  test('a column dragged wider stays so, within limits; reset brings the defaults back', () {
+    final c = ProductColumns();
+    c.resize('code', 60);
+    expect(c.state['code'], productColumnDefaults['code']! + 60);
+    c.resize('code', -10000);
+    expect(c.state['code'], productColumnMin);
+    expect(ProductColumns().state['code'], productColumnMin); // kept (in memory outside a browser)
+    c.reset();
+    expect(c.state, productColumnDefaults);
+  });
+
+  testWidgets('on a PC: a heading over the columns, its edge dragged to widen one', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [
+      Product(id: 1, janCode: '4909999000014', name: 'テストペン 黒', sku: 'TP-07B', maker: 'テスト'),
+      // Registered from a file with no 品名: its 品番 stood in.
+      Product(id: 2, janCode: '4909999000021', name: 'TP-07R', sku: 'TP-07R', maker: 'テスト'),
+    ]);
+    final container = await _pump(tester, repo);
+    container.read(productColumnsProvider.notifier).reset();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pc-header')), findsOneWidget);
+    expect(find.text('品番'), findsWidgets);
+    final before = tester.getSize(find.byKey(const ValueKey('pc-col-code'))).width;
+    await tester.drag(find.byKey(const ValueKey('pc-drag-code')), const Offset(80, 0));
+    await tester.pumpAndSettle();
+    final after = tester.getSize(find.byKey(const ValueKey('pc-col-code'))).width;
+    expect(after, greaterThan(before + 40));
+    // The name that only repeated the 品番 is said to be missing.
+    expect(find.byKey(const ValueKey('pl-no-name-2')), findsOneWidget);
+    expect(find.text('テスト （品名未登録）'), findsOneWidget);
+    expect(find.text('テストペン 黒'), findsOneWidget);
+    container.read(productColumnsProvider.notifier).reset();
   });
 }

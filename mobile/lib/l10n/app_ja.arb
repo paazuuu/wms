@@ -10925,5 +10925,15 @@
   "refColEdition": "発行",
   "refColUrl": "URL",
   "refColTaken": "保存日時",
-  "refColYear": "年度"
+  "refColYear": "年度",
+  "pcName": "商品名",
+  "pcJan": "JANコード",
+  "pcCode": "品番",
+  "pcSpec": "サイズ・重量",
+  "pcStock": "在庫",
+  "pcFacts": "単位など",
+  "pcPrice": "単価",
+  "pcReset": "列の幅を元に戻す",
+  "plNoName": "（品名未登録）",
+  "plNoNameHint": "取り込んだファイルに品名がなかったため、品番を仮の名前にしています。商品を開いて品名を入れてください。"
 }

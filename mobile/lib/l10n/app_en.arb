@@ -3972,5 +3972,15 @@
   "refColEdition": "Published",
   "refColUrl": "URL",
   "refColTaken": "Saved",
-  "refColYear": "Fiscal year"
+  "refColYear": "Fiscal year",
+  "pcName": "Name",
+  "pcJan": "JAN",
+  "pcCode": "Part no.",
+  "pcSpec": "Size / weight",
+  "pcStock": "Stock",
+  "pcFacts": "Units",
+  "pcPrice": "Price",
+  "pcReset": "Reset column widths",
+  "plNoName": "(no name yet)",
+  "plNoNameHint": "The file it came from gave no name, so its part number stands in. Open the product to give it a name."
 }

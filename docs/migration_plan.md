@@ -7832,6 +7832,21 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   in it, a catalog's JAN list as a table in a new tab or as Excel, a site's
   saved page, text or PDF, the page as it is now.
 
+## Product library: columns sized by hand; 品名未登録
+
+- On a PC the library has a heading over its columns (商品名, JAN, 品番,
+  サイズ・重量, 在庫, 単位など, 単価); a column's right edge is dragged to
+  widen or narrow it (double-click: its default; the icon at the end: all
+  back). The widths are kept in this browser (localStorage,
+  `wms.productLibrary.columns`). When they do not fit, the name gives way
+  first, then every column in proportion, so heading and rows line up.
+- A product registered from a file with no 品名 had its 品番 as its name
+  (StockFileLine.registerName); the list now says メーカー（品名未登録） there
+  instead of repeating the 品番.
+- 在庫なし on 2026-10-28: the trial data was cleared on 10-27 at the user's
+  request (imports, stock, 検品待ち; backups in backup_20261027_*: 8,206 on
+  hand, 43 lines awaiting inspection). Nothing had been shipped.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

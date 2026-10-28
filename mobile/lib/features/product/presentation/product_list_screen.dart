@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../jan_catalog/presentation/jan_catalog_screen.dart';
+import 'product_columns.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -140,9 +141,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       );
       if (ok != true || !mounted) return;
     }
-    final result = await ref
-        .read(productRepositoryProvider)
-        .setStatus(product.id, product.isActive ? 'inactive' : 'active');
+    final result =
+        await ref.read(productRepositoryProvider).setStatus(product.id, product.isActive ? 'inactive' : 'active');
     if (!mounted) return;
     result.when(
       success: (_) => ref.invalidate(productListProvider),
@@ -161,9 +161,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       builder: (_) => _LifecycleDialog(count: ids.length, target: target),
     );
     if (why == null || !mounted) return;
-    final r = await ref
-        .read(productRepositoryProvider)
-        .setLifecycle(ids, target, reason: why.isEmpty ? null : why);
+    final r = await ref.read(productRepositoryProvider).setLifecycle(ids, target, reason: why.isEmpty ? null : why);
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
@@ -255,8 +253,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       } else {
         final second = ref.read(libraryPaneWarehouseProvider(1));
         if (second == null || second == first) {
-          ref.read(libraryPaneWarehouseProvider(1).notifier).state =
-              warehouses.firstWhere((w) => w.id != first).id;
+          ref.read(libraryPaneWarehouseProvider(1).notifier).state = warehouses.firstWhere((w) => w.id != first).id;
         }
       }
     }
@@ -352,15 +349,13 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         pane: pane,
                         selected: selected?.contains(p.id),
                         onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
-                        onLongPress: canSelect && selected == null
-                            ? () => setState(() => _selected = {p.id})
-                            : null,
+                        onLongPress: canSelect && selected == null ? () => setState(() => _selected = {p.id}) : null,
                       );
                     },
                   ),
                 );
               }
-              return RefreshIndicator(
+              final list = RefreshIndicator(
                 onRefresh: () async => ref.invalidate(productListProvider),
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 96),
@@ -374,9 +369,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                       pane: pane,
                       selected: selected?.contains(p.id),
                       // A long press starts choosing, on the product pressed.
-                      onLongPress: canSelect && selected == null
-                          ? () => setState(() => _selected = {p.id})
-                          : null,
+                      onLongPress: canSelect && selected == null ? () => setState(() => _selected = {p.id}) : null,
                       onTap: selected != null ? () => toggle(p) : () => _openDetailById(p.id),
                       // Bringing back an archived or discontinued product is
                       // the administrator's (0123); the switch is for active ↔ dormant.
@@ -401,6 +394,17 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   },
                 ),
               );
+              // On a PC, a heading whose column edges are dragged to resize them.
+              return LayoutBuilder(builder: (context, c) {
+                if (c.maxWidth - AppSpacing.lg * 2 < wideProductRow) return list;
+                return Column(children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: ProductColumnHeader(key: ValueKey('pc-header$suffix'), selecting: selected != null),
+                  ),
+                  Expanded(child: list),
+                ]);
+              });
             },
           ),
         ),
@@ -427,178 +431,184 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-      appBar: selected != null
-          ? AppBar(
-              leading: IconButton(
-                key: const ValueKey('lc-exit'),
-                tooltip: l10n.actionCancel,
-                icon: const Icon(Icons.close),
-                onPressed: () => setState(() => _selected = null),
-              ),
-              title: Text(l10n.lcSelected(selected.length)),
-            )
-          : AppBar(
-              title: Text(l10n.productsTitle),
-              actions: [
-                // Choosing many at once (0120), for the administrator: a
-                // small button up here, out of the way of the list.
-                if (canSelect)
-                  IconButton(
-                    key: const ValueKey('lc-start'),
-                    tooltip: l10n.lcSelect,
-                    icon: const Icon(Icons.checklist_outlined),
-                    onPressed: () => setState(() => _selected = {}),
-                  ),
-                // Two warehouses side by side (or one above the other).
-                if (warehouses.length > 1) ...[
-                  IconButton(
-                    key: const ValueKey('pl-split'),
-                    tooltip: split ? l10n.plSplitOff : l10n.plSplitOn,
-                    isSelected: split,
-                    icon: const Icon(Icons.vertical_split_outlined),
-                    selectedIcon: const Icon(Icons.vertical_split),
-                    onPressed: () => _toggleSplit(warehouses),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                ],
-                // One place for our products: the list to edit them, or their
-                // pictures to check and add photos. Either opens the same product.
-                SegmentedButton<bool>(
-                  key: const ValueKey('products-view'),
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: false, icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
-                    ButtonSegment(value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
+        appBar: selected != null
+            ? AppBar(
+                leading: IconButton(
+                  key: const ValueKey('lc-exit'),
+                  tooltip: l10n.actionCancel,
+                  icon: const Icon(Icons.close),
+                  onPressed: () => setState(() => _selected = null),
+                ),
+                title: Text(l10n.lcSelected(selected.length)),
+              )
+            : AppBar(
+                title: Text(l10n.productsTitle),
+                actions: [
+                  // Choosing many at once (0120), for the administrator: a
+                  // small button up here, out of the way of the list.
+                  if (canSelect)
+                    IconButton(
+                      key: const ValueKey('lc-start'),
+                      tooltip: l10n.lcSelect,
+                      icon: const Icon(Icons.checklist_outlined),
+                      onPressed: () => setState(() => _selected = {}),
+                    ),
+                  // Two warehouses side by side (or one above the other).
+                  if (warehouses.length > 1) ...[
+                    IconButton(
+                      key: const ValueKey('pl-split'),
+                      tooltip: split ? l10n.plSplitOff : l10n.plSplitOn,
+                      isSelected: split,
+                      icon: const Icon(Icons.vertical_split_outlined),
+                      selectedIcon: const Icon(Icons.vertical_split),
+                      onPressed: () => _toggleSplit(warehouses),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
                   ],
-                  selected: {photos},
-                  onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                ExcelExportMenu(keyPrefix: 'pl', shown: shown.length, onExport: _export),
-                // The makers' catalogs a reading's JAN is checked against (0153).
-                IconButton(
-                  key: const ValueKey('pl-jan-catalog'),
-                  tooltip: l10n.jcTitle,
-                  icon: const Icon(Icons.menu_book_outlined),
-                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => JanCatalogScreen(canManage: canManage),
-                  )),
-                ),
-                // Weights still missing, looked up by the AI all at once (0149).
-                if (canManage)
-                  IconButton(
-                    key: const ValueKey('pl-bulk-weight'),
-                    tooltip: l10n.bwTitle,
-                    icon: const Icon(Icons.scale_outlined),
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BulkWeightScreen())),
+                  // One place for our products: the list to edit them, or their
+                  // pictures to check and add photos. Either opens the same product.
+                  SegmentedButton<bool>(
+                    key: const ValueKey('products-view'),
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                          value: false, icon: const Icon(Icons.view_list_outlined), tooltip: l10n.productsListView),
+                      ButtonSegment(
+                          value: true, icon: const Icon(Icons.photo_library_outlined), tooltip: l10n.productsPhotoView),
+                    ],
+                    selected: {photos},
+                    onSelectionChanged: (v) => ref.read(productPhotoViewProvider.notifier).state = v.first,
                   ),
-                // Stock from a file of JANs and quantities, added to what is there (0144).
-                const FeatureLinkButton('stock_file_import'),
-                // JAN codes in stock that no product claims yet.
-                const FeatureLinkButton('unlinked_jan'),
-                IconButton(
+                  const SizedBox(width: AppSpacing.sm),
+                  ExcelExportMenu(keyPrefix: 'pl', shown: shown.length, onExport: _export),
+                  // The makers' catalogs a reading's JAN is checked against (0153).
+                  IconButton(
+                    key: const ValueKey('pl-jan-catalog'),
+                    tooltip: l10n.jcTitle,
+                    icon: const Icon(Icons.menu_book_outlined),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => JanCatalogScreen(canManage: canManage),
+                    )),
+                  ),
+                  // Weights still missing, looked up by the AI all at once (0149).
+                  if (canManage)
+                    IconButton(
+                      key: const ValueKey('pl-bulk-weight'),
+                      tooltip: l10n.bwTitle,
+                      icon: const Icon(Icons.scale_outlined),
+                      onPressed: () =>
+                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BulkWeightScreen())),
+                    ),
+                  // Stock from a file of JANs and quantities, added to what is there (0144).
+                  const FeatureLinkButton('stock_file_import'),
+                  // JAN codes in stock that no product claims yet.
+                  const FeatureLinkButton('unlinked_jan'),
+                  IconButton(
                     tooltip: l10n.productsShowInactive,
-                    icon: Icon(filter.lifecycles.length > 1
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined),
+                    icon:
+                        Icon(filter.lifecycles.length > 1 ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                     onPressed: () => ref.read(productFilterProvider.notifier).update((f) => f.copyWith(
                         lifecycles: f.lifecycles.length > 1 ? {ProductLifecycle.active} : ProductFilter.notArchived)),
                   ),
-              ],
-              // The products, and the lines imports kept back (0130).
-              bottom: TabBar(
-                tabs: [
-                  Tab(key: const ValueKey('pm-tab-list'), text: l10n.plTabList),
-                  Tab(key: const ValueKey('pm-tab-alerts'), text: l10n.plTabAlerts(alertCount)),
-                  // When, how and from which file stock came in (0145).
-                  Tab(key: const ValueKey('pm-tab-stock'), text: l10n.plTabStock),
                 ],
-              ),
-            ),
-      // The chosen products' actions sit at the bottom, labelled, where they
-      // cannot end up off the side of a narrow or zoomed window.
-      bottomNavigationBar: selected == null
-          ? null
-          : _SelectionBar(
-              count: selected.length,
-              shown: shown.length,
-              onSelectAll: () => setState(() => _selected = {for (final p in shown) p.id}),
-              onClear: selected.isEmpty ? null : () => setState(() => _selected = {}),
-              onApply: !canLifecycle || selected.isEmpty ? null : _applyLifecycle,
-              showLifecycle: canLifecycle,
-              onRemove: canDelete && selected.isNotEmpty ? _removeForGood : null,
-              showRemove: canDelete,
-            ),
-      // 新規登録: from a file of our own, from 価格台帳, or one by hand.
-      floatingActionButton: canManage && selected == null
-          ? FloatingActionButton.extended(
-              key: const ValueKey('products-add'),
-              tooltip: l10n.pmNew,
-              onPressed: _newProducts,
-              icon: const Icon(Icons.add),
-              label: Text(l10n.pmNew),
-            )
-          : null,
-      // One list for both views: the same products, search, filters and
-      // selection, drawn as cards or as pictures (0122).
-      body: TabBarView(children: [
-        Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: l10n.productsSearchHint,
-                  isDense: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
+                // The products, and the lines imports kept back (0130).
+                bottom: TabBar(
+                  tabs: [
+                    Tab(key: const ValueKey('pm-tab-list'), text: l10n.plTabList),
+                    Tab(key: const ValueKey('pm-tab-alerts'), text: l10n.plTabAlerts(alertCount)),
+                    // When, how and from which file stock came in (0145).
+                    Tab(key: const ValueKey('pm-tab-stock'), text: l10n.plTabStock),
+                  ],
                 ),
-                onChanged: (value) => ref.read(productSearchProvider.notifier).state = value,
               ),
-            ),
-            const _FilterBar(),
-            Expanded(
-              child: !split
-                  ? _pane(0, warehouses: warehouses, total: total, split: false)
-                  // Two warehouses at once: side by side when there is room,
-                  // else one above the other.
-                  : LayoutBuilder(
-                      builder: (context, c) => c.maxWidth >= 720
-                          ? Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                              // Each side selected on its own: see [SelectablePane].
-                              Expanded(child: SelectablePane(child: _pane(0, warehouses: warehouses, total: total, split: true))),
-                              const VerticalDivider(width: 1),
-                              Expanded(child: SelectablePane(child: _pane(1, warehouses: warehouses, total: total, split: true))),
-                            ])
-                          : Column(children: [
-                              Expanded(child: _pane(0, warehouses: warehouses, total: total, split: true)),
-                              const Divider(height: 1),
-                              Expanded(child: _pane(1, warehouses: warehouses, total: total, split: true)),
-                            ]),
-                    ),
-            ),
-          ],
-        ),
-        const ProductAlertsTab(),
-        Builder(builder: (_) {
-          final id = ref.watch(libraryPaneWarehouseProvider(0));
-          final chosen = ref.watch(libraryStockProductProvider);
-          // One product chosen (from its menu, or here): that product alone.
-          if (chosen != null) {
-            return ListView(
-              key: const ValueKey('sh-one'),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [_StockProductPane(warehouseId: id)],
+        // The chosen products' actions sit at the bottom, labelled, where they
+        // cannot end up off the side of a narrow or zoomed window.
+        bottomNavigationBar: selected == null
+            ? null
+            : _SelectionBar(
+                count: selected.length,
+                shown: shown.length,
+                onSelectAll: () => setState(() => _selected = {for (final p in shown) p.id}),
+                onClear: selected.isEmpty ? null : () => setState(() => _selected = {}),
+                onApply: !canLifecycle || selected.isEmpty ? null : _applyLifecycle,
+                showLifecycle: canLifecycle,
+                onRemove: canDelete && selected.isNotEmpty ? _removeForGood : null,
+                showRemove: canDelete,
+              ),
+        // 新規登録: from a file of our own, from 価格台帳, or one by hand.
+        floatingActionButton: canManage && selected == null
+            ? FloatingActionButton.extended(
+                key: const ValueKey('products-add'),
+                tooltip: l10n.pmNew,
+                onPressed: _newProducts,
+                icon: const Icon(Icons.add),
+                label: Text(l10n.pmNew),
+              )
+            : null,
+        // One list for both views: the same products, search, filters and
+        // selection, drawn as cards or as pictures (0122).
+        body: TabBarView(children: [
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+                child: TextField(
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: l10n.productsSearchHint,
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
+                  ),
+                  onChanged: (value) => ref.read(productSearchProvider.notifier).state = value,
+                ),
+              ),
+              const _FilterBar(),
+              Expanded(
+                child: !split
+                    ? _pane(0, warehouses: warehouses, total: total, split: false)
+                    // Two warehouses at once: side by side when there is room,
+                    // else one above the other.
+                    : LayoutBuilder(
+                        builder: (context, c) => c.maxWidth >= 720
+                            ? Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                                // Each side selected on its own: see [SelectablePane].
+                                Expanded(
+                                    child: SelectablePane(
+                                        child: _pane(0, warehouses: warehouses, total: total, split: true))),
+                                const VerticalDivider(width: 1),
+                                Expanded(
+                                    child: SelectablePane(
+                                        child: _pane(1, warehouses: warehouses, total: total, split: true))),
+                              ])
+                            : Column(children: [
+                                Expanded(child: _pane(0, warehouses: warehouses, total: total, split: true)),
+                                const Divider(height: 1),
+                                Expanded(child: _pane(1, warehouses: warehouses, total: total, split: true)),
+                              ]),
+                      ),
+              ),
+            ],
+          ),
+          const ProductAlertsTab(),
+          Builder(builder: (_) {
+            final id = ref.watch(libraryPaneWarehouseProvider(0));
+            final chosen = ref.watch(libraryStockProductProvider);
+            // One product chosen (from its menu, or here): that product alone.
+            if (chosen != null) {
+              return ListView(
+                key: const ValueKey('sh-one'),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [_StockProductPane(warehouseId: id)],
+              );
+            }
+            return LibraryInflowView(
+              warehouseId: id,
+              warehouseName: warehouses.where((w) => w.id == id).firstOrNull?.name,
+              // A product to look at on its own, above the library's figures.
+              header: _StockProductPane(warehouseId: id),
             );
-          }
-          return LibraryInflowView(
-            warehouseId: id,
-            warehouseName: warehouses.where((w) => w.id == id).firstOrNull?.name,
-            // A product to look at on its own, above the library's figures.
-            header: _StockProductPane(warehouseId: id),
-          );
-        }),
-      ]),
+          }),
+        ]),
       ),
     );
   }
@@ -841,10 +851,12 @@ class _PhotoCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(AppSpacing.sm),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              ProductNameText(name: p.name, nameEn: p.nameEn, names: p.names, maxLines: 1, style: theme.textTheme.titleSmall),
+              ProductNameText(
+                  name: p.name, nameEn: p.nameEn, names: p.names, maxLines: 1, style: theme.textTheme.titleSmall),
               Text([if (p.maker != null) widenKana(p.maker!), p.janCode].join(' · '),
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
-              if (specShort(weightG: p.unitWeightG, width: p.widthMm, depth: p.depthMm, height: p.heightMm, note: p.sizeNote)
+              if (specShort(
+                      weightG: p.unitWeightG, width: p.widthMm, depth: p.depthMm, height: p.heightMm, note: p.sizeNote)
                   case final spec?)
                 Text(spec, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.labelSmall),
               _StockLine(product: p, warehouseId: warehouseId, pane: pane, compact: true),
@@ -921,7 +933,8 @@ class _SelectionBar extends StatelessWidget {
                   FilledButton.tonalIcon(
                     key: ValueKey('lc-to-${l.wire}'),
                     style: l == ProductLifecycle.archived
-                        ? FilledButton.styleFrom(backgroundColor: scheme.errorContainer, foregroundColor: scheme.onErrorContainer)
+                        ? FilledButton.styleFrom(
+                            backgroundColor: scheme.errorContainer, foregroundColor: scheme.onErrorContainer)
                         : null,
                     onPressed: onApply == null ? null : () => onApply!(l),
                     icon: Icon(lifecycleIcon(l), size: 18),
@@ -1108,7 +1121,8 @@ class _FilterBar extends ConsumerWidget {
             options: [
               for (final e in facets.makers.entries) (e.key, e.key, e.value, filter.makers.contains(e.key)),
             ],
-            onChanged: (v, on) => set(filter.copyWith(makers: on ? {...filter.makers, v} : ({...filter.makers}..remove(v)))),
+            onChanged: (v, on) =>
+                set(filter.copyWith(makers: on ? {...filter.makers, v} : ({...filter.makers}..remove(v)))),
           ),
           if (facets.categories.isNotEmpty)
             _FacetChip(
@@ -1118,8 +1132,8 @@ class _FilterBar extends ConsumerWidget {
               options: [
                 for (final e in facets.categories.entries) (e.key, e.key, e.value, filter.categories.contains(e.key)),
               ],
-              onChanged: (v, on) =>
-                  set(filter.copyWith(categories: on ? {...filter.categories, v} : ({...filter.categories}..remove(v)))),
+              onChanged: (v, on) => set(
+                  filter.copyWith(categories: on ? {...filter.categories, v} : ({...filter.categories}..remove(v)))),
             ),
           FilterChip(
             key: const ValueKey('pf-without-images'),
@@ -1259,108 +1273,104 @@ class _ProductCard extends StatelessWidget {
       // fit on the screen and their facts line up column by column.
       if (c.maxWidth >= wideProductRow) return _wide(context);
       return Card(
-      clipBehavior: Clip.antiAlias,
-      color: selected == true ? Theme.of(context).colorScheme.secondaryContainer : null,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            children: [
-              if (selected != null)
-                Checkbox(
-                  key: ValueKey('lc-check-${product.id}'),
-                  value: selected,
-                  onChanged: (_) => onTap(),
-                ),
-              ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 56),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ProductNameText(
-                        name: product.name,
-                        nameEn: product.nameEn,
-                        names: product.names,
-                        style: theme.textTheme.titleSmall,
-                        maxLines: 1),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(product.janCode,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                                fontFamily: AppFonts.mono,
-                                color: scheme.onSurfaceVariant)),
-                        CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
-                        // The SKU sits beside the JAN rather than replacing it:
-                        // one is what the supplier printed, the other is what
-                        // this warehouse calls it, and both get scanned (0057).
-                        if (product.sku != null) ...[
-                          Text(' · ',
+        clipBehavior: Clip.antiAlias,
+        color: selected == true ? Theme.of(context).colorScheme.secondaryContainer : null,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                if (selected != null)
+                  Checkbox(
+                    key: ValueKey('lc-check-${product.id}'),
+                    value: selected,
+                    onChanged: (_) => onTap(),
+                  ),
+                ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 56),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (nameIsCode(product))
+                        _NoName(product: product, style: theme.textTheme.titleSmall)
+                      else
+                        ProductNameText(
+                            name: product.name,
+                            nameEn: product.nameEn,
+                            names: product.names,
+                            style: theme.textTheme.titleSmall,
+                            maxLines: 1),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Text(product.janCode,
                               style: theme.textTheme.bodySmall
-                                  ?.copyWith(color: scheme.onSurfaceVariant)),
-                          Flexible(
-                            child: Text(product.sku!,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                    fontFamily: AppFonts.mono,
-                                    color: scheme.onSurfaceVariant),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                          ),
+                                  ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
+                          CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
+                          // The SKU sits beside the JAN rather than replacing it:
+                          // one is what the supplier printed, the other is what
+                          // this warehouse calls it, and both get scanned (0057).
+                          if (product.sku != null) ...[
+                            Text(' · ', style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                            Flexible(
+                              child: Text(product.sku!,
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
                         ],
+                      ),
+                      // Its size and weight, as on the spec (0125).
+                      if (specShort(
+                              weightG: product.unitWeightG,
+                              width: product.widthMm,
+                              depth: product.depthMm,
+                              height: product.heightMm,
+                              note: product.sizeNote)
+                          case final spec?) ...[
+                        const SizedBox(height: 2),
+                        Text(spec,
+                            key: ValueKey('product-spec-${product.id}'),
+                            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                       ],
+                      if (product.category != null && product.category!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(product.category!,
+                            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                      ],
+                      if (product.lifecycleReason case final why? when !product.isActive)
+                        Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                      const SizedBox(height: 2),
+                      _StockLine(product: product, warehouseId: warehouseId, pane: pane),
+                      const SizedBox(height: AppSpacing.xs),
+                      ProductFacts(product: product),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (product.price != null)
+                      Text('¥${product.price!.toStringAsFixed(0)}',
+                          style: theme.textTheme.titleMedium?.copyWith(fontFamily: AppFonts.mono)),
+                    _menu(context) ?? const SizedBox(height: AppSpacing.sm),
+                    GestureDetector(
+                      onTap: onToggleStatus,
+                      child: LifecyclePill(lifecycle: product.lifecycle),
                     ),
-                    // Its size and weight, as on the spec (0125).
-                    if (specShort(
-                            weightG: product.unitWeightG,
-                            width: product.widthMm,
-                            depth: product.depthMm,
-                            height: product.heightMm,
-                            note: product.sizeNote)
-                        case final spec?) ...[
-                      const SizedBox(height: 2),
-                      Text(spec,
-                          key: ValueKey('product-spec-${product.id}'),
-                          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-                    ],
-                    if (product.category != null &&
-                        product.category!.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(product.category!,
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(color: scheme.onSurfaceVariant)),
-                    ],
-                    if (product.lifecycleReason case final why? when !product.isActive)
-                      Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-                    const SizedBox(height: 2),
-                    _StockLine(product: product, warehouseId: warehouseId, pane: pane),
-                    const SizedBox(height: AppSpacing.xs),
-                    ProductFacts(product: product),
                   ],
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (product.price != null)
-                    Text('¥${product.price!.toStringAsFixed(0)}',
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontFamily: AppFonts.mono)),
-                  _menu(context) ?? const SizedBox(height: AppSpacing.sm),
-                  GestureDetector(
-                    onTap: onToggleStatus,
-                    child: LifecyclePill(lifecycle: product.lifecycle),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
     });
   }
 
@@ -1430,51 +1440,97 @@ class _ProductCard extends StatelessWidget {
         onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-          child: Row(children: [
-            if (selected != null)
-              Checkbox(key: ValueKey('lc-check-${product.id}'), value: selected, onChanged: (_) => onTap()),
-            ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 36),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              flex: 5,
-              child: ProductNameText(
-                  name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleSmall, maxLines: 1),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            SizedBox(
-              width: 140,
-              child: Row(children: [
-                Flexible(child: Text(product.janCode, style: mono, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
-              ]),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              flex: 2,
-              child: Text(product.sku ?? '—', style: mono, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              flex: 3,
-              child: spec == null
-                  ? Text('—', style: small)
-                  : Text(spec, key: ValueKey('product-spec-${product.id}'), style: small, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(flex: 5, child: _StockLine(product: product, warehouseId: warehouseId, pane: pane, oneLine: true)),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(flex: 2, child: ProductFacts(product: product, oneLine: true)),
-            const SizedBox(width: AppSpacing.sm),
-            SizedBox(
-              width: 72,
-              child: Text(product.price == null ? '' : '¥${product.price!.toStringAsFixed(0)}',
-                  textAlign: TextAlign.end, style: theme.textTheme.bodyMedium?.copyWith(fontFamily: AppFonts.mono)),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            GestureDetector(onTap: onToggleStatus, child: LifecyclePill(lifecycle: product.lifecycle)),
-            if (menu != null) menu else const SizedBox(width: 40),
-          ]),
+          // Each column as wide as its heading says (dragged there, 0162).
+          child: Consumer(builder: (context, ref, _) {
+            final widths = ref.watch(productColumnsProvider);
+            return LayoutBuilder(builder: (context, c) {
+              final w = fitProductColumns(widths, c.maxWidth, lead: productRowLead + (selected != null ? 48 : 0));
+              Widget col(String key, Widget child) => SizedBox(
+                    width: w[key]! + productColumnGap,
+                    child: Padding(padding: const EdgeInsets.only(right: productColumnGap), child: child),
+                  );
+              return Row(children: [
+                if (selected != null)
+                  SizedBox(
+                    width: 48,
+                    child:
+                        Checkbox(key: ValueKey('lc-check-${product.id}'), value: selected, onChanged: (_) => onTap()),
+                  ),
+                ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 36),
+                const SizedBox(width: AppSpacing.md),
+                col(
+                  'name',
+                  nameIsCode(product)
+                      ? _NoName(product: product, style: theme.textTheme.titleSmall)
+                      : ProductNameText(
+                          name: product.name,
+                          nameEn: product.nameEn,
+                          names: product.names,
+                          style: theme.textTheme.titleSmall,
+                          maxLines: 1),
+                ),
+                col(
+                  'jan',
+                  Row(children: [
+                    Flexible(child: Text(product.janCode, style: mono, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    CopyButton(key: ValueKey('pl-copy-jan-${product.id}'), value: product.janCode, size: 14),
+                  ]),
+                ),
+                col('code', Text(product.sku ?? '—', style: mono, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                col(
+                  'spec',
+                  spec == null
+                      ? Text('—', style: small)
+                      : Text(spec,
+                          key: ValueKey('product-spec-${product.id}'),
+                          style: small,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                ),
+                col('stock', _StockLine(product: product, warehouseId: warehouseId, pane: pane, oneLine: true)),
+                col('facts', ProductFacts(product: product, oneLine: true)),
+                col(
+                  'price',
+                  Text(product.price == null ? '' : '¥${product.price!.toStringAsFixed(0)}',
+                      textAlign: TextAlign.end,
+                      maxLines: 1,
+                      style: theme.textTheme.bodyMedium?.copyWith(fontFamily: AppFonts.mono)),
+                ),
+                const Spacer(),
+                GestureDetector(onTap: onToggleStatus, child: LifecyclePill(lifecycle: product.lifecycle)),
+                if (menu != null) menu else const SizedBox(width: 40),
+              ]);
+            });
+          }),
         ),
+      ),
+    );
+  }
+}
+
+/// A product registered from a file that gave no 品名: its name is its 品番
+/// (so it could be registered at all). Shown as such, not as a name that
+/// only repeats the 品番 column.
+bool nameIsCode(Product p) => p.sku != null && p.sku!.trim().isNotEmpty && p.name.trim() == p.sku!.trim();
+
+class _NoName extends StatelessWidget {
+  const _NoName({required this.product, this.style});
+
+  final Product product;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final muted = style?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic);
+    return Tooltip(
+      message: l10n.plNoNameHint,
+      child: Text(
+        [if ((product.maker ?? '').trim().isNotEmpty) product.maker!.trim(), l10n.plNoName].join(' '),
+        key: ValueKey('pl-no-name-${product.id}'),
+        style: muted,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -1510,9 +1566,7 @@ class _WarehouseBar extends ConsumerWidget {
     final (bg, fg) = pane == 0
         ? (scheme.primaryContainer, scheme.onPrimaryContainer)
         : (scheme.tertiaryContainer, scheme.onTertiaryContainer);
-    final name = warehouseId == null
-        ? l10n.plAllWarehouses
-        : warehouses.firstWhere((w) => w.id == warehouseId).name;
+    final name = warehouseId == null ? l10n.plAllWarehouses : warehouses.firstWhere((w) => w.id == warehouseId).name;
     final stock = ref.watch(libraryPaneStockProvider(pane));
     final suffix = pane == 0 ? '' : '-$pane';
     final pending = ref.watch(pendingInspectionProvider).valueOrNull;
@@ -1617,7 +1671,11 @@ class _WarehouseBar extends ConsumerWidget {
 /// and where it is.
 class _StockLine extends ConsumerWidget {
   const _StockLine(
-      {required this.product, required this.warehouseId, required this.pane, this.compact = false, this.oneLine = false});
+      {required this.product,
+      required this.warehouseId,
+      required this.pane,
+      this.compact = false,
+      this.oneLine = false});
 
   final Product product;
   final int? warehouseId;
@@ -1637,7 +1695,8 @@ class _StockLine extends ConsumerWidget {
     final key = ValueKey('pl-stock-$pane-${product.id}');
     // Read in from a file and not inspected yet (0148): beside the stock,
     // never in it.
-    final waiting = ref.watch(pendingInspectionProvider).valueOrNull?.of(product.janCode, warehouseId: warehouseId) ?? 0;
+    final waiting =
+        ref.watch(pendingInspectionProvider).valueOrNull?.of(product.janCode, warehouseId: warehouseId) ?? 0;
     final pending = waiting > 0
         ? Text(
             l10n.plPending(waiting),
@@ -1660,9 +1719,8 @@ class _StockLine extends ConsumerWidget {
           ? Row(children: [Flexible(child: none), const SizedBox(width: AppSpacing.sm), Flexible(child: pending)])
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [none, pending]);
     }
-    final line = compact
-        ? l10n.plStockShort(s.onHand, s.available)
-        : l10n.plStockLine(s.onHand, s.reserved, s.available);
+    final line =
+        compact ? l10n.plStockShort(s.onHand, s.available) : l10n.plStockLine(s.onHand, s.reserved, s.available);
     final where = warehouseId == null && !compact && (product.stock?.warehouses.length ?? 0) > 0
         ? ' (${[for (final w in product.stock!.warehouses) '${w.name} ${w.onHand}'].join(' / ')})'
         : '';

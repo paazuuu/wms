@@ -3972,5 +3972,15 @@
   "refColEdition": "发行",
   "refColUrl": "URL",
   "refColTaken": "保存时间",
-  "refColYear": "年度"
+  "refColYear": "年度",
+  "pcName": "商品名",
+  "pcJan": "JAN码",
+  "pcCode": "型号",
+  "pcSpec": "尺寸・重量",
+  "pcStock": "库存",
+  "pcFacts": "单位等",
+  "pcPrice": "单价",
+  "pcReset": "恢复列宽",
+  "plNoName": "（未登记品名）",
+  "plNoNameHint": "导入的文件中没有品名，暂以型号作为名称。请打开商品填写品名。"
 }

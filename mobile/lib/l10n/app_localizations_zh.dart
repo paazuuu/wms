@@ -12157,4 +12157,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get refColYear => '年度';
+
+  @override
+  String get pcName => '商品名';
+
+  @override
+  String get pcJan => 'JAN码';
+
+  @override
+  String get pcCode => '型号';
+
+  @override
+  String get pcSpec => '尺寸・重量';
+
+  @override
+  String get pcStock => '库存';
+
+  @override
+  String get pcFacts => '单位等';
+
+  @override
+  String get pcPrice => '单价';
+
+  @override
+  String get pcReset => '恢复列宽';
+
+  @override
+  String get plNoName => '（未登记品名）';
+
+  @override
+  String get plNoNameHint => '导入的文件中没有品名，暂以型号作为名称。请打开商品填写品名。';
 }

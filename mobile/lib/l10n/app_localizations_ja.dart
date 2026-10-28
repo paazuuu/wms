@@ -12228,4 +12228,35 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get refColYear => '年度';
+
+  @override
+  String get pcName => '商品名';
+
+  @override
+  String get pcJan => 'JANコード';
+
+  @override
+  String get pcCode => '品番';
+
+  @override
+  String get pcSpec => 'サイズ・重量';
+
+  @override
+  String get pcStock => '在庫';
+
+  @override
+  String get pcFacts => '単位など';
+
+  @override
+  String get pcPrice => '単価';
+
+  @override
+  String get pcReset => '列の幅を元に戻す';
+
+  @override
+  String get plNoName => '（品名未登録）';
+
+  @override
+  String get plNoNameHint =>
+      '取り込んだファイルに品名がなかったため、品番を仮の名前にしています。商品を開いて品名を入れてください。';
 }
