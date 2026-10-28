@@ -180,3 +180,22 @@ Deno.test("a weight of several together (a box, a dozen, N本入) is not one ite
   ]);
   assertEquals(pageWeights(rows).map((w) => [w.g, w.basis]), [[11.5, "pack"], [9, "product"]]);
 });
+
+Deno.test("a JAN only as catalogs print one: runs of short codes are not one", () => {
+  const xml = page(
+    line(100, [[10, "4909999000014"]]) +
+      line(110, [[10, "49-09999-000021"]]) +
+      line(120, [[10, "4909999 000038 6022020"]]) +
+      line(130, [[10, "4 909999 000045"]]) +
+      // 498-33 498-34 … and 93 570 39 535 … : their digits may add up, but no.
+      line(140, [[10, "ダークブラウン 498-33 498-34 498-35"]]) +
+      line(150, [[10, "23 493 72 492 55 211 01"]]) +
+      line(160, [[10, "12-4909999000052"]]),
+  );
+  assertEquals(entriesFromPage(xml, { id: "1", group: "1", number: "1" }).map((e) => e.jan), [
+    "4909999000014",
+    "4909999000021",
+    "4909999000038",
+    "4909999000045",
+  ]);
+});

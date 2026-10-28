@@ -123,8 +123,16 @@ export function validJan(jan: string): boolean {
   return (10 - (sum % 10)) % 10 === Number(jan[12]);
 }
 
-// 49-02505-625923, 4902505625923, 49 02505 625923 — a Japanese (45/49) JAN.
-const JAN_RE = /(?<![0-9])(4[59](?:[-‐－ ]?[0-9]){11})(?![0-9])/g;
+// A Japanese (45/49) JAN as catalogs print it, and only so: 13 digits
+// together (4902505625923), 2-5-6 (49-02505-625923, Pilot), 7-6 (4901991
+// 901115, Tombow), or the barcode's 1-6-6 (4 901991 901115). A looser
+// pattern took runs of short codes (498-33 498-34 …) for JANs whenever
+// their digits happened to add up.
+const SEP = "[-‐－ ]";
+const JAN_RE = new RegExp(
+  `(?<![0-9]|[0-9][-‐－])(4[59][0-9]{11}|4[59]${SEP}[0-9]{5}${SEP}[0-9]{6}|4[59][0-9]{5}${SEP}[0-9]{6}|4 [59][0-9]{5} [0-9]{6})(?![0-9]|[-‐－][0-9])`,
+  "g",
+);
 
 /** What is left of [text] after the last JAN in it. */
 function afterLastJan(text: string): string {
