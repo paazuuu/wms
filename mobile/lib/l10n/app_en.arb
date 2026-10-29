@@ -3984,5 +3984,21 @@
   "sfHeadingMeaning": "“{header}” → {field} ({source})",
   "sfHeadingUnused": "not used for stock",
   "sfHeadingsHint": "Headings the app did not know were looked up among those learned for this company and the shared ones; the rest were judged by the AI from the heading and the values. If one is wrong, correct it in the reading check.",
-  "pdBasePart": "Base name (part of the name)"
+  "pdBasePart": "Base name (part of the name)",
+  "pcName": "Name",
+  "plNameMissing": "Not yet named",
+  "plNameMissingHint": "The file gave no name, so the product was registered by its code only. “Find names with AI” looks up the name shops and the maker use.",
+  "plNameByAi": "Name found on the web by the AI",
+  "plFindNames": "Find names with AI",
+  "plFindNamesNone": "Every product has a name",
+  "plFindNamesQ": "Look the names up on the web?",
+  "plFindNamesBody": "For the {count} products named only by their code, the AI looks up by JAN and code the name the maker, catalogues and shops use. Names found go into the library and the price book (names a person entered are kept).",
+  "plFindNamesRun": "Look up",
+  "plFindNamesProgress": "Looked up {done} of {total}",
+  "plFindNamesDone": "Named {found} of {total} products",
+  "plFindNamesStopped": "Stopped early (an AI limit, the key, or no web search). Check the AI settings.",
+  "plSelectDelete": "Choose and remove",
+  "lcExcludeHint": "Unticked products are left out",
+  "sfNamesFinding": "Looking up the names of the {count} new products on the web…",
+  "sfNamesFound": "Named {found} of the {total} new products from the web"
 }

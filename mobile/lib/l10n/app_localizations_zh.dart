@@ -12196,4 +12196,63 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pdBasePart => '基本名（名称的组成部分）';
+
+  @override
+  String get pcName => '商品名';
+
+  @override
+  String get plNameMissing => '未登记';
+
+  @override
+  String get plNameMissingHint =>
+      '导入的文件没有商品名，只按货号登记。可用“用AI查找商品名”从网上查找厂家和网店使用的商品名。';
+
+  @override
+  String get plNameByAi => 'AI从网上查到的商品名';
+
+  @override
+  String get plFindNames => '用AI查找商品名';
+
+  @override
+  String get plFindNamesNone => '没有未登记商品名的商品';
+
+  @override
+  String get plFindNamesQ => '要在网上查找商品名吗？';
+
+  @override
+  String plFindNamesBody(int count) {
+    return '对仅以货号命名的$count件商品，AI根据JAN和货号查找厂家网站、目录和网店使用的商品名。找到的名称会写入商品库和价格台账（不改动人工输入的名称）。';
+  }
+
+  @override
+  String get plFindNamesRun => '查找';
+
+  @override
+  String plFindNamesProgress(int done, int total) {
+    return '已查找 $done / $total 件';
+  }
+
+  @override
+  String plFindNamesDone(int found, int total) {
+    return '$total件中已为$found件填入商品名';
+  }
+
+  @override
+  String get plFindNamesStopped => '中途停止（AI上限、API密钥或无法使用网络搜索等）。请检查AI设置。';
+
+  @override
+  String get plSelectDelete => '选择并删除';
+
+  @override
+  String get lcExcludeHint => '取消勾选的商品将被排除';
+
+  @override
+  String sfNamesFinding(int count) {
+    return '正在网上查找新登记的$count件商品的名称…';
+  }
+
+  @override
+  String sfNamesFound(int found, int total) {
+    return '新登记的$total件中，已为$found件填入网上找到的商品名';
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -20,6 +21,7 @@ import '../../notation/presentation/notation_labels.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../product/application/product_providers.dart';
+import '../../product/data/market_names.dart';
 import '../../product/data/spec_lookup.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
@@ -137,6 +139,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     setState(() {
       _busy = true;
       _done = null;
+      _namesNote = null;
       _error = null;
       _badFile = false;
       _fileName = f.name;
@@ -359,11 +362,36 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       case ApiSuccess():
         ref.invalidate(productListProvider);
         ref.invalidate(priceBookListProvider);
+        // Those the file gave no name for: their 商品名 looked up on the web
+        // meanwhile (0164), while the stock goes in.
+        unawaited(_findNames([
+          for (final l in todo)
+            if ((l.name ?? '').trim().isEmpty || l.name!.trim() == l.code?.trim() || l.name!.trim() == l.janCode)
+              NameAsk(jan: l.janCode, maker: l.maker, code: l.code, name: l.name),
+        ]));
         return true;
       case ApiFailure(:final message):
         setState(() => _error = humanizeApiErrorMessage(l10n, message));
         return false;
     }
+  }
+
+  /// The names found for products just registered (0164), said when done.
+  String? _namesNote;
+
+  Future<void> _findNames(List<NameAsk> asks) async {
+    if (asks.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final repo = ref.read(marketNameRepositoryProvider);
+    setState(() => _namesNote = l10n.sfNamesFinding(asks.length));
+    final out = await findMarketNames(repo, asks);
+    if (!mounted) return;
+    ref.invalidate(productListProvider);
+    ref.invalidate(priceBookListProvider);
+    setState(() => _namesNote = [
+          l10n.sfNamesFound(out.applied, out.asked),
+          if (out.stoppedBy != null) l10n.plFindNamesStopped,
+        ].join('\n'));
   }
 
   Future<void> _apply(Warehouse wh, {required bool register}) async {
@@ -743,6 +771,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                         icon: const Icon(Icons.fact_check_outlined, size: 18),
                         label: Text(l10n.sfGoInspect),
                       ),
+                    ),
+                  if (_namesNote case final n?)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
+                      child: Text(n, key: const ValueKey('sf-names-note')),
                     ),
                   // What the file said and what was made of it, side by side.
                   Padding(

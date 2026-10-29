@@ -311,6 +311,8 @@ class Product extends Equatable {
     this.stock,
     this.suppliers = const [],
     this.baseName,
+    this.baseNameSource,
+    this.baseNameSourceUrl,
     this.unit,
     this.listPrice,
     this.attributes = const [],
@@ -370,6 +372,13 @@ class Product extends Equatable {
   /// What the name is built from (0111, read since 0121): 品名 without the
   /// maker or attributes, the unit as written, 定価, and the attributes.
   final String? baseName;
+
+  /// 'ai' when the 基本名 is the name the web gave for its JAN (0164), with
+  /// the page it came from; null when it is a person's or a file's.
+  final String? baseNameSource;
+  final String? baseNameSourceUrl;
+
+  bool get nameByAi => baseNameSource == 'ai';
   final String? unit;
   final double? listPrice;
   final List<ProductPart> attributes;
@@ -441,7 +450,8 @@ class Product extends Equatable {
         category: category, price: price,
         status: l == ProductLifecycle.active ? 'active' : 'inactive',
         lifecycleCode: l.wire, lifecycleReason: l == ProductLifecycle.active ? null : reason,
-        stock: stock, suppliers: suppliers, baseName: baseName, unit: unit, listPrice: listPrice,
+        stock: stock, suppliers: suppliers, baseName: baseName, baseNameSource: baseNameSource,
+        baseNameSourceUrl: baseNameSourceUrl, unit: unit, listPrice: listPrice,
         attributes: attributes, imageCount: imageCount, trackingMode: trackingMode, pickingRule: pickingRule,
         requiresInspection: requiresInspection, baseUom: baseUom, uoms: uoms, barcodes: barcodes,
         supplierNames: supplierNames, unitWeightG: unitWeightG, weightSource: weightSource,
@@ -490,6 +500,8 @@ class Product extends Equatable {
             ProductSupplierRef.fromJson(s.cast<String, dynamic>()),
         ],
         baseName: _asText(json['base_name']),
+        baseNameSource: _asText(json['base_name_source']),
+        baseNameSourceUrl: _asText(json['base_name_source_url']),
         unit: _asText(json['unit']),
         listPrice: _asDouble(json['list_price']),
         attributes: [
@@ -541,6 +553,8 @@ class Product extends Equatable {
         stock,
         suppliers,
         baseName,
+        baseNameSource,
+        baseNameSourceUrl,
         unit,
         listPrice,
         attributes,

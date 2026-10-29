@@ -8,13 +8,13 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/local_prefs.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// The product library's columns on a PC, left to right. The product is
-/// named by its 品番 (with its maker); a 商品名 that says more than the 品番
-/// sits under it, so there is no second column repeating the 品番.
-const productColumnKeys = ['code', 'jan', 'spec', 'stock', 'facts', 'price'];
+/// The product library's columns on a PC, left to right: the 商品名 as shops
+/// call it (0164; 未登録 when it is only the 品番), then the maker and 品番.
+const productColumnKeys = ['name', 'code', 'jan', 'spec', 'stock', 'facts', 'price'];
 
 const productColumnDefaults = <String, double>{
-  'code': 300,
+  'name': 260,
+  'code': 220,
   'jan': 150,
   'spec': 150,
   'stock': 260,
@@ -24,8 +24,9 @@ const productColumnDefaults = <String, double>{
 
 const productColumnMin = 56.0;
 const productColumnMax = 900.0;
-// v2: the 品名 column went (0163); older widths are not carried over.
-const _prefKey = 'wms.productLibrary.columns.v2';
+// v3: the 商品名 column came back beside the 品番 (0164); older widths are
+// not carried over.
+const _prefKey = 'wms.productLibrary.columns.v3';
 
 /// Beside the columns on a row: the picture and its gap, the state pill and
 /// the menu, and the gaps between columns.
@@ -68,14 +69,14 @@ class ProductColumns extends StateNotifier<Map<String, double>> {
 final productColumnsProvider = StateNotifierProvider<ProductColumns, Map<String, double>>((ref) => ProductColumns());
 
 /// The widths as laid out in [available]: as dragged when they fit; else the
-/// 品番 column gives way first (to 140), then every column in proportion — so the
+/// 商品名 column gives way first (to 140), then every column in proportion — so the
 /// heading and every row line up, and nothing runs off the edge.
 Map<String, double> fitProductColumns(Map<String, double> widths, double available, {double lead = productRowLead}) {
   final w = {for (final k in productColumnKeys) k: widths[k] ?? productColumnDefaults[k]!};
   final room = available - lead - productRowTail - productColumnGap * productColumnKeys.length;
   double sum() => w.values.fold(0, (s, v) => s + v);
   if (room <= 0) return w;
-  if (sum() > room) w['code'] = math.max(140, w['code']! - (sum() - room));
+  if (sum() > room) w['name'] = math.max(140, w['name']! - (sum() - room));
   if (sum() > room) {
     final k = room / sum();
     for (final key in productColumnKeys) {
@@ -86,6 +87,7 @@ Map<String, double> fitProductColumns(Map<String, double> widths, double availab
 }
 
 String productColumnLabel(AppLocalizations l10n, String key) => switch (key) {
+      'name' => l10n.pcName,
       'jan' => l10n.pcJan,
       'code' => l10n.pcCode,
       'spec' => l10n.pcSpec,

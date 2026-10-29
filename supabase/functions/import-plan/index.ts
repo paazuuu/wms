@@ -71,6 +71,7 @@ import {
   normalizeText,
   aiPing,
   lookupSpecs,
+  lookupMarketNames,
   mapColumns,
   readDocument,
   readingQuality,
@@ -723,6 +724,23 @@ Deno.serve(async (req) => {
           .filter((i: { name: string; jan: string | null }) => i.name !== "" || i.jan);
         if (items.length === 0) return json({ message: "items are required" }, 400);
         return json({ data: await lookupSpecs(items) });
+      }
+      // 商品名を調べる (0164): the name each JAN is sold under, from the web;
+      // nothing kept here (the app saves it with jan_name_save).
+      if (str(b.mode) === "lookup_names") {
+        if (!(await clientPermitted(supabase, "product.manage"))) {
+          return json({ message: notPermittedMessage("product.manage") }, 403);
+        }
+        const items = (Array.isArray(b.items) ? b.items : [])
+          .filter((i: unknown): i is Record<string, unknown> => !!i && typeof i === "object")
+          .map((i: Record<string, unknown>, n: number) => ({
+            index: Number.isFinite(Number(i.index)) ? Number(i.index) : n,
+            jan: normalizeJan(i.jan) ?? "",
+            maker: str(i.maker), code: str(i.code), name: str(i.name),
+          }))
+          .filter((i: { jan: string }) => /^[0-9]{8,14}$/.test(i.jan));
+        if (items.length === 0) return json({ message: "items are required" }, 400);
+        return json({ data: await lookupMarketNames(items) });
       }
       if (str(b.mode) === "suggest_names") {
         // §43: English standard names for products we do not have yet,

@@ -14,6 +14,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/product_filter.dart';
 import '../application/product_providers.dart';
+import '../data/market_names.dart';
 import '../data/product_export.dart';
 import '../domain/product.dart';
 import 'product_alerts_tab.dart';
@@ -213,6 +214,64 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     }
     ref.invalidate(productListProvider);
     ref.invalidate(productAlertsProvider);
+  }
+
+  /// 商品名をAIで調べる (0164): every product whose name is only its 品番,
+  /// looked up on the web by its JAN, after asking; the names found go onto
+  /// the products (a person's name is never replaced).
+  Future<void> _findNames() async {
+    final l10n = AppLocalizations.of(context);
+    final all = ref.read(productListProvider).valueOrNull ?? const <Product>[];
+    final asks = [for (final p in all) if (lacksName(p)) nameAskFor(p)];
+    if (asks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.plFindNamesNone)));
+      return;
+    }
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l10n.plFindNamesQ),
+        content: SizedBox(width: 460, child: Text(l10n.plFindNamesBody(asks.length))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
+          FilledButton(
+              key: const ValueKey('pl-find-names-go'),
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l10n.plFindNamesRun)),
+        ],
+      ),
+    );
+    if (go != true || !mounted) return;
+    final progress = ValueNotifier<int>(0);
+    final repo = ref.read(marketNameRepositoryProvider);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (d) => AlertDialog(
+        key: const ValueKey('pl-find-names-progress'),
+        content: ValueListenableBuilder<int>(
+          valueListenable: progress,
+          builder: (_, done, __) => Column(mainAxisSize: MainAxisSize.min, children: [
+            LinearProgressIndicator(value: asks.isEmpty ? null : done / asks.length),
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.plFindNamesProgress(done, asks.length)),
+          ]),
+        ),
+      ),
+    );
+    final out = await findMarketNames(repo, asks, onProgress: (done, _) => progress.value = done);
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+    progress.dispose();
+    ref.invalidate(productListProvider);
+    ref.invalidate(priceBookListProvider);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 8),
+      content: Text([
+        l10n.plFindNamesDone(out.applied, out.asked),
+        if (out.stoppedBy != null) l10n.plFindNamesStopped,
+      ].join('\n')),
+    ));
   }
 
   /// The chosen products out of the master for good (0126), after the
@@ -452,6 +511,25 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                       tooltip: l10n.lcSelect,
                       icon: const Icon(Icons.checklist_outlined),
                       onPressed: () => setState(() => _selected = {}),
+                    ),
+                  // Removing products, said in words (0164): the system
+                  // administrator's only; every product chosen, then any left
+                  // out, then removed.
+                  if (canDelete)
+                    TextButton.icon(
+                      key: const ValueKey('pl-select-delete'),
+                      icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                      label: Text(l10n.plSelectDelete),
+                      onPressed: () => setState(() => _selected = {for (final p in shown) p.id}),
+                    ),
+                  // 商品名をAIで調べる (0164): the products with only a 品番
+                  // for a name, looked up on the web by their JAN.
+                  if (canManage)
+                    IconButton(
+                      key: const ValueKey('pl-find-names'),
+                      tooltip: l10n.plFindNames,
+                      icon: const Icon(Icons.travel_explore),
+                      onPressed: _findNames,
                     ),
                   // Two warehouses side by side (or one above the other).
                   if (warehouses.length > 1) ...[
@@ -927,6 +1005,8 @@ class _SelectionBar extends StatelessWidget {
                 icon: const Icon(Icons.deselect, size: 18),
                 label: Text(l10n.lcClear),
               ),
+              // Leaving one out: its checkbox, said here in words (0164).
+              Text(l10n.lcExcludeHint, key: const ValueKey('lc-exclude-hint'), style: theme.textTheme.bodySmall),
               const SizedBox(width: AppSpacing.md),
               if (showLifecycle)
                 for (final l in ProductLifecycle.values)
@@ -1294,7 +1374,16 @@ class _ProductCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ProductCodeTitle(product: product, style: theme.textTheme.titleSmall),
+                      if (lacksName(product))
+                        ProductCodeTitle(product: product, style: theme.textTheme.titleSmall)
+                      else ...[
+                        ProductNameCell(product: product, style: theme.textTheme.titleSmall),
+                        if ((product.sku ?? '').trim().isNotEmpty || (product.maker ?? '').trim().isNotEmpty)
+                          ProductCodeTitle(
+                              product: product,
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
+                      ],
                       const SizedBox(height: 2),
                       Row(
                         children: [
@@ -1395,7 +1484,7 @@ class _ProductCard extends StatelessWidget {
     );
   }
 
-  /// One line: picture, 品番 (with its maker and 商品名), JAN, size and weight, stock, units,
+  /// One line: picture, 商品名, maker and 品番, JAN, size and weight, stock, units,
   /// price, state.
   Widget _wide(BuildContext context) {
     final theme = Theme.of(context);
@@ -1437,7 +1526,8 @@ class _ProductCard extends StatelessWidget {
                   ),
                 ProductThumb(productId: product.id, janCode: product.janCode, productName: product.name, size: 36),
                 const SizedBox(width: AppSpacing.md),
-                col('code', ProductCodeTitle(product: product, style: theme.textTheme.titleSmall)),
+                col('name', ProductNameCell(product: product, style: theme.textTheme.titleSmall)),
+                col('code', ProductCodeTitle(product: product, style: mono)),
                 col(
                   'jan',
                   Row(children: [
@@ -1476,13 +1566,11 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-/// Whether the 商品名 only repeats the 品番 (a file that gave no other name):
-/// then the 品番 alone names the product.
-bool nameIsCode(Product p) => p.sku != null && p.sku!.trim().isNotEmpty && p.name.trim() == p.sku!.trim();
+/// Whether the product has no 商品名 of its own: only its 品番 (or JAN)
+/// stood in for one, from a file that gave none.
+bool nameIsCode(Product p) => lacksName(p);
 
-/// A product named by its 品番, its maker before it; a 商品名 that says more
-/// than the 品番 (ジェットストリームライトタッチ0.7赤替) under it, small. A
-/// product without a 品番 is named by its 商品名.
+/// The product's maker and 品番 on one line ("パイロット  LJU-10EF-B").
 class ProductCodeTitle extends StatelessWidget {
   const ProductCodeTitle({super.key, required this.product, this.style});
 
@@ -1492,10 +1580,9 @@ class ProductCodeTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final small = Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
     final code = product.sku?.trim() ?? '';
     final maker = product.maker?.trim() ?? '';
-    final title = Row(key: ValueKey('pl-code-${product.id}'), children: [
+    return Row(key: ValueKey('pl-code-${product.id}'), children: [
       if (maker.isNotEmpty) ...[
         Flexible(
           flex: 0,
@@ -1504,19 +1591,45 @@ class ProductCodeTitle extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
       ],
-      Flexible(
-        child: code.isEmpty
-            ? ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: style, maxLines: 1)
-            : Text(code, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
-      ),
+      Flexible(child: Text(code.isEmpty ? '—' : code, style: style, maxLines: 1, overflow: TextOverflow.ellipsis)),
     ]);
-    if (code.isEmpty || nameIsCode(product)) return title;
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-      title,
-      KeyedSubtree(
-        key: ValueKey('pl-desc-${product.id}'),
-        child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: small, maxLines: 1),
+  }
+}
+
+/// The 商品名 as shops and the maker call it (エナージェル タイプA 0.5mm 黒),
+/// marked when the AI found it on the web (0164). 未登録 when the product has
+/// only its 品番 for a name — never the 品番 again.
+class ProductNameCell extends StatelessWidget {
+  const ProductNameCell({super.key, required this.product, this.style});
+
+  final Product product;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    if (lacksName(product)) {
+      return Tooltip(
+        message: l10n.plNameMissingHint,
+        child: Text(l10n.plNameMissing,
+            key: ValueKey('pl-no-name-${product.id}'),
+            style: style?.copyWith(color: scheme.onSurfaceVariant, fontStyle: FontStyle.italic),
+            maxLines: 1),
+      );
+    }
+    return Row(key: ValueKey('pl-name-${product.id}'), children: [
+      Flexible(
+        child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: style, maxLines: 1),
       ),
+      if (product.nameByAi)
+        Padding(
+          padding: const EdgeInsets.only(left: AppSpacing.xs),
+          child: Tooltip(
+            message: [l10n.plNameByAi, if (product.baseNameSourceUrl case final u?) u].join('\n'),
+            child: Icon(Icons.auto_awesome, key: ValueKey('pl-name-ai-${product.id}'), size: 14, color: scheme.tertiary),
+          ),
+        ),
     ]);
   }
 }

@@ -10950,5 +10950,65 @@
   },
   "sfHeadingUnused": "在庫の読み込みでは使いません",
   "sfHeadingsHint": "アプリが知らない見出しは、この取引先で学習した見出しと共通の見出しで調べ、それでも分からないものはAIが見出しと値から判断しました。違っていたら「読み取り結果の確認」で直してください。",
-  "pdBasePart": "基本名（名前の部品）"
+  "pdBasePart": "基本名（名前の部品）",
+  "pcName": "商品名",
+  "plNameMissing": "未登録",
+  "plNameMissingHint": "取り込んだファイルに商品名がなく、品番だけで登録されています。「商品名をAIで調べる」で、メーカーや通販サイトでの商品名をWebから探せます。",
+  "plNameByAi": "AIがWebで調べた商品名",
+  "plFindNames": "商品名をAIで調べる",
+  "plFindNamesNone": "商品名が未登録の商品はありません",
+  "plFindNamesQ": "商品名をWebで調べますか？",
+  "plFindNamesBody": "商品名が品番だけの{count}件について、JANコードと品番から、メーカーのサイト・カタログ・通販サイトでの商品名をAIが調べます。見つかった名前は商品ライブラリーと価格台帳に入ります（人が入れた名前は変えません）。",
+  "@plFindNamesBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plFindNamesRun": "調べる",
+  "plFindNamesProgress": "{done} / {total}件を調べました",
+  "@plFindNamesProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "plFindNamesDone": "{total}件中{found}件に商品名を入れました",
+  "@plFindNamesDone": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "plFindNamesStopped": "途中で止まりました（AIの上限・APIキー・Web検索が使えないなど）。AI設定を確認してください。",
+  "plSelectDelete": "選択して削除",
+  "lcExcludeHint": "チェックを外した商品は除外されます",
+  "sfNamesFinding": "新しく登録した{count}件の商品名をWebで調べています…",
+  "@sfNamesFinding": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sfNamesFound": "新しく登録した{total}件のうち{found}件に、Webで見つけた商品名を入れました",
+  "@sfNamesFound": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

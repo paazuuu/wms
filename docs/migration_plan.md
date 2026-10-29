@@ -7882,6 +7882,37 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Sheets with no JAN and 数量 headings, PDFs and photos were already read
     by the server, where the AI judges every column.
 
+## 0164: 商品名 as the market knows it; removing products is the system administrator's
+
+- The library has its 商品名 column again, beside the maker and 品番.
+  - A product whose only name is its 品番 (or JAN) says 未登録 there.
+  - A name the AI found is marked with a small icon (its page in the
+    tooltip).
+- 商品名をAIで調べる (library, product.manage): every product named only by
+  its 品番 is looked up on the web by its JAN, 品番 and maker
+  (`import-plan` `lookup_names`, `lookupMarketNames`).
+  - Lookups run five at a time, with the lookup key first, then the
+    reading key.
+  - Names are never answered from the AI's memory: without web search
+    there is no name.
+- Answers are kept per JAN in `jan_name_lookups` (`jan_name_save`).
+  - An answer without a name is kept too, so the JAN is not asked again.
+  - A name is taken (confidence ≥ 0.6) only onto products lacking one:
+    their 基本名 is empty or the 品番/JAN, and they were not named by hand.
+  - It is taken as the 基本名, so the product's name format builds the name
+    as usual, marked `base_name_source = 'ai'`.
+  - 価格台帳 lines whose name is only their 品番 take it too.
+  - A person changing the 基本名 (or naming by hand) clears the mark.
+- A product registered later with a JAN already looked up is named at once
+  (`products_a_fill_jan_name`, before the name is rendered).
+- 在庫の取り込み: the products just registered with no name of their own are
+  looked up meanwhile, and the result is said on the done card.
+- Removing products: `product.delete` is now the system administrator's only
+  (taken from the company administrator).
+  - The library shows 「選択して削除」, which chooses every product shown;
+    unticking one leaves it out (said in the bar).
+  - The removal is confirmed by typing 削除; products in use stay (0126).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -21847,6 +21847,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'基本名（名前の部品）'**
   String get pdBasePart;
+
+  /// No description provided for @pcName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get pcName;
+
+  /// No description provided for @plNameMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録'**
+  String get plNameMissing;
+
+  /// No description provided for @plNameMissingHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込んだファイルに商品名がなく、品番だけで登録されています。「商品名をAIで調べる」で、メーカーや通販サイトでの商品名をWebから探せます。'**
+  String get plNameMissingHint;
+
+  /// No description provided for @plNameByAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIがWebで調べた商品名'**
+  String get plNameByAi;
+
+  /// No description provided for @plFindNames.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名をAIで調べる'**
+  String get plFindNames;
+
+  /// No description provided for @plFindNamesNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名が未登録の商品はありません'**
+  String get plFindNamesNone;
+
+  /// No description provided for @plFindNamesQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名をWebで調べますか？'**
+  String get plFindNamesQ;
+
+  /// No description provided for @plFindNamesBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名が品番だけの{count}件について、JANコードと品番から、メーカーのサイト・カタログ・通販サイトでの商品名をAIが調べます。見つかった名前は商品ライブラリーと価格台帳に入ります（人が入れた名前は変えません）。'**
+  String plFindNamesBody(int count);
+
+  /// No description provided for @plFindNamesRun.
+  ///
+  /// In ja, this message translates to:
+  /// **'調べる'**
+  String get plFindNamesRun;
+
+  /// No description provided for @plFindNamesProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'{done} / {total}件を調べました'**
+  String plFindNamesProgress(int done, int total);
+
+  /// No description provided for @plFindNamesDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{total}件中{found}件に商品名を入れました'**
+  String plFindNamesDone(int found, int total);
+
+  /// No description provided for @plFindNamesStopped.
+  ///
+  /// In ja, this message translates to:
+  /// **'途中で止まりました（AIの上限・APIキー・Web検索が使えないなど）。AI設定を確認してください。'**
+  String get plFindNamesStopped;
+
+  /// No description provided for @plSelectDelete.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択して削除'**
+  String get plSelectDelete;
+
+  /// No description provided for @lcExcludeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'チェックを外した商品は除外されます'**
+  String get lcExcludeHint;
+
+  /// No description provided for @sfNamesFinding.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しく登録した{count}件の商品名をWebで調べています…'**
+  String sfNamesFinding(int count);
+
+  /// No description provided for @sfNamesFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しく登録した{total}件のうち{found}件に、Webで見つけた商品名を入れました'**
+  String sfNamesFound(int found, int total);
 }
 
 class _AppLocalizationsDelegate

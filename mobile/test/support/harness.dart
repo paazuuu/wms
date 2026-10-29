@@ -146,6 +146,8 @@ import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart
 import 'fake_jan_catalog_repository.dart';
 import 'package:wms_mobile/features/jan_catalog/data/reference_repository.dart';
 import 'fake_reference_repository.dart';
+import 'fake_market_name_repository.dart';
+import 'package:wms_mobile/features/product/data/market_names.dart' show marketNameRepositoryProvider;
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
 import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 
@@ -218,6 +220,8 @@ List<Override> _defaultOverrides() => [
       // JAN catalogs (0153): none.
       janCatalogRepositoryProvider.overrideWithValue(FakeJanCatalogRepository()),
       referenceRepositoryProvider.overrideWithValue(FakeReferenceRepository()),
+      // Names looked up on the web (0164): none found.
+      marketNameRepositoryProvider.overrideWithValue(FakeMarketNameRepository()),
       // The supply chain layer is off unless a test turns it on (0107).
       scCanViewProvider.overrideWithValue(false),
       scCanManageProvider.overrideWithValue(false),

@@ -3984,5 +3984,21 @@
   "sfHeadingMeaning": "「{header}」→ {field}（{source}）",
   "sfHeadingUnused": "读取库存时不使用",
   "sfHeadingsHint": "应用不认识的标题先在该交易方已学习的标题和通用标题中查找，仍无法确定的由AI根据标题和数值判断。如有错误，请在“读取结果确认”中修改。",
-  "pdBasePart": "基本名（名称的组成部分）"
+  "pdBasePart": "基本名（名称的组成部分）",
+  "pcName": "商品名",
+  "plNameMissing": "未登记",
+  "plNameMissingHint": "导入的文件没有商品名，只按货号登记。可用“用AI查找商品名”从网上查找厂家和网店使用的商品名。",
+  "plNameByAi": "AI从网上查到的商品名",
+  "plFindNames": "用AI查找商品名",
+  "plFindNamesNone": "没有未登记商品名的商品",
+  "plFindNamesQ": "要在网上查找商品名吗？",
+  "plFindNamesBody": "对仅以货号命名的{count}件商品，AI根据JAN和货号查找厂家网站、目录和网店使用的商品名。找到的名称会写入商品库和价格台账（不改动人工输入的名称）。",
+  "plFindNamesRun": "查找",
+  "plFindNamesProgress": "已查找 {done} / {total} 件",
+  "plFindNamesDone": "{total}件中已为{found}件填入商品名",
+  "plFindNamesStopped": "中途停止（AI上限、API密钥或无法使用网络搜索等）。请检查AI设置。",
+  "plSelectDelete": "选择并删除",
+  "lcExcludeHint": "取消勾选的商品将被排除",
+  "sfNamesFinding": "正在网上查找新登记的{count}件商品的名称…",
+  "sfNamesFound": "新登记的{total}件中，已为{found}件填入网上找到的商品名"
 }

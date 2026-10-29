@@ -49,6 +49,9 @@ import {
   specLookupPrompt,
   specEstimatePrompt,
   lookupSpecs,
+  lookupMarketNames,
+  marketNamePrompt,
+  parseMarketName,
   AiError,
   resolveAiKey,
 } from "./document_reader.ts";
@@ -902,4 +905,47 @@ Deno.test("mapColumns: no AI call when every heading is known", async () => {
   ], [], () => { called = true; return Promise.resolve([]); });
   assertEquals(called, false);
   assertEquals(cols.length, 2);
+});
+
+// --- 0164: a product's name as the market knows it --------------------------
+
+Deno.test("market name: the answer made safe, nothing taken from an empty or made-up field", () => {
+  const n = parseMarketName('前置き {"name": " エナージェル タイプA 0.5mm 黒 ", "series": "エナージェル", "maker": "ぺんてる", ' +
+    '"source_url": "https://example.com/p", "confidence": 0.9, "note": "公式"} 後書き');
+  assertEquals([n?.name, n?.series, n?.maker, n?.source_url, n?.confidence], ["エナージェル タイプA 0.5mm 黒", "エナージェル", "ぺんてる", "https://example.com/p", 0.9]);
+  const bad = parseMarketName('{"name": "不明", "source_url": "javascript:x", "confidence": 2}');
+  assertEquals([bad?.name, bad?.source_url, bad?.confidence], [null, null, null]);
+  assertEquals(parseMarketName("見つかりませんでした"), null);
+});
+
+Deno.test("market name: the prompt asks by JAN, names the variant, and asks not to guess", () => {
+  const p = marketNamePrompt({ index: 0, jan: "4909999000014", maker: "テスト", code: "TP-05B", name: "TP-05B" });
+  assert(p.includes("JANコード: 4909999000014"));
+  assert(p.includes("品番・型番: TP-05B"));
+  assertEquals(p.includes("仕入先の書き方"), false); // the code again says nothing
+  assert(p.includes("推測しない"));
+  assert(p.includes("色"));
+});
+
+Deno.test("market names: searched with the lookup key, then the reading key; no name without a search", async () => {
+  const asked: string[] = [];
+  const r = await lookupMarketNames([{ index: 0, jan: "4909999000014" }, { index: 1, jan: "4909999000021" }], {
+    resolve: async (_id, purpose) => (purpose === "spec_lookup" ? keyA : keyB),
+    search: async (_p, _t, k) => {
+      asked.push(k.label!);
+      if (k.id === 6) throw quota();
+      return { text: '{"name": "テストペン 黒", "confidence": 0.8}', sources: [] };
+    },
+    plain: async () => { throw new Error("names are not answered from memory"); },
+  });
+  assertEquals(asked, ["lookup key", "reading key", "reading key"]);
+  assertEquals(r.results.map((x) => [x.jan, x.name]), [["4909999000014", "テストペン 黒"], ["4909999000021", "テストペン 黒"]]);
+
+  const none = await lookupMarketNames([{ index: 0, jan: "4909999000014" }, { index: 1, jan: "4909999000021" }], {
+    resolve: async () => keyB,
+    search: async () => { throw quota(); },
+    plain: async () => { throw new Error("not used"); },
+  });
+  assertEquals(none.search_unavailable, true);
+  assertEquals(none.results.map((x) => [x.name, x.error_kind]), [[null, "search_unavailable"], [null, "search_unavailable"]]);
 });

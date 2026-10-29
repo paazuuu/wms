@@ -815,6 +815,126 @@ export async function lookupSpecs(items: SpecRequest[], deps?: Partial<SpecDeps>
   };
 }
 
+/** A product's name as the market knows it (0164): what shops and its
+ * maker call the item sold under a JAN. */
+export type MarketName = {
+  name: string | null;
+  series: string | null;
+  maker: string | null;
+  source_url: string | null;
+  confidence: number | null;
+  note: string | null;
+};
+
+export type MarketNameRequest = {
+  index: number; jan: string; maker?: string | null; code?: string | null; name?: string | null;
+};
+
+const EMPTY_NAME: MarketName = { name: null, series: null, maker: null, source_url: null, confidence: null, note: null };
+
+export function marketNamePrompt(item: MarketNameRequest): string {
+  const lines = [
+    "次のJANコードの商品が、メーカー公式サイト・カタログ・大手通販サイトで何という商品名で売られているかを、Google検索で調べてください。",
+    "",
+    `JANコード: ${item.jan}`,
+    item.maker ? `メーカー: ${item.maker}` : null,
+    item.code ? `品番・型番: ${item.code}` : null,
+    item.name && item.name !== item.code ? `仕入先の書き方: ${item.name}` : null,
+    "",
+    "ルール:",
+    "- name は、ネットで通用する日本語の商品名。メーカー名は入れない。シリーズ名・タイプ名・種類（替芯など）に、" +
+      "ボール径・色・容量・入数など、この1品を他の色やサイズと区別できる部分まで入れる" +
+      "（例:「エナージェル タイプA 0.5mm 黒」「ジェットストリーム 替芯 0.7mm 赤」「アクロボール Tシリーズ 0.5mm ブラック」）。",
+    "- series は、シリーズ名だけ（例:「エナージェル」）。maker は、メーカー名。",
+    "- このJANコード（または品番）の商品だと確かめられたページの名前だけを使う。別の色・サイズの商品の名前を使わない。",
+    "- 見つからない・確かめられないときは name を null にする。推測しない。",
+    "",
+    "次のJSONだけを返す（説明文は不要）:",
+    '{"name": "商品名"またはnull, "series": "シリーズ名"またはnull, "maker": "メーカー名"またはnull, ' +
+      '"source_url": "根拠のページのURL"またはnull, "confidence": 0から1, "note": "根拠を一言で（日本語）"}',
+  ];
+  return lines.filter((l) => l !== null).join("\n");
+}
+
+/** The JSON object in an answer, made safe: short texts, a web URL, a
+ * confidence from 0 to 1. */
+export function parseMarketName(text: string): MarketName | null {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  let j: Record<string, unknown>;
+  try {
+    j = JSON.parse(text.slice(start, end + 1));
+  } catch (_) {
+    return null;
+  }
+  const t = (v: unknown, max: number) =>
+    typeof v === "string" && v.trim() && !/^(null|不明|なし)$/i.test(v.trim()) ? v.trim().slice(0, max) : null;
+  const url = typeof j.source_url === "string" && /^https?:\/\//.test(j.source_url) ? j.source_url : null;
+  const conf = typeof j.confidence === "number" && j.confidence >= 0 && j.confidence <= 1 ? j.confidence : null;
+  return {
+    name: t(j.name, 120), series: t(j.series, 60), maker: t(j.maker, 60),
+    source_url: url, confidence: conf, note: t(j.note, 300),
+  };
+}
+
+type MarketNameResult = MarketName & {
+  index: number; jan: string; error_kind: string | null; key_label: string | null;
+};
+
+/** 商品名を調べる (0164): each JAN looked up on the web, at most ten at a
+ * time; nothing is saved here (jan_name_save keeps it). Keys as for sizes and
+ * weights: the lookup key, then the reading key; one out of search quota is
+ * not asked again. A name is not answered from the AI's own memory — without
+ * a search there is no name. */
+export async function lookupMarketNames(items: MarketNameRequest[], deps?: Partial<SpecDeps>): Promise<{
+  search_unavailable: boolean;
+  results: MarketNameResult[];
+}> {
+  const d: SpecDeps = { resolve: resolveAiKey, search: geminiSearch, plain: gemini, ...deps };
+  const key = await d.resolve(null, "spec_lookup");
+  const keys = [key];
+  const general = await d.resolve(null, "general");
+  if (general.key && general.id !== key.id) keys.push(general);
+  const outOfSearch = new Set<number>();
+  const results: MarketNameResult[] = [];
+  let stop: string | null = null;
+  for (const item of items.slice(0, 10)) {
+    const empty = (kind: string | null, label: string | null = null): MarketNameResult =>
+      ({ index: item.index, jan: item.jan, ...EMPTY_NAME, error_kind: kind, key_label: label });
+    if (stop) {
+      results.push(empty(stop));
+      continue;
+    }
+    let done = false;
+    for (let k = 0; k < keys.length && !done; k++) {
+      if (outOfSearch.has(k) || !keys[k].key) continue;
+      try {
+        const { text } = await d.search(marketNamePrompt(item), "name_lookup", keys[k]);
+        const found = parseMarketName(text);
+        results.push(found
+          ? { index: item.index, jan: item.jan, ...found, error_kind: null, key_label: keys[k].label }
+          : empty("parse", keys[k].label));
+        done = true;
+      } catch (e) {
+        const kind = e instanceof AiError ? e.kind : "other";
+        if (kind === "quota") {
+          outOfSearch.add(k);
+          continue;
+        }
+        results.push(empty(kind, keys[k].label));
+        if (kind === "auth" || kind === "no_key" || kind === "limit") stop = kind;
+        done = true;
+      }
+    }
+    if (!done) {
+      results.push(empty(keys.some((k) => k.key) ? "search_unavailable" : "no_key"));
+      stop = keys.some((k) => k.key) ? "search_unavailable" : "no_key";
+    }
+  }
+  return { search_unavailable: stop === "search_unavailable", results };
+}
+
 /** How a reading went (0133), kept on its file's record: how many lines,
  * how many the AI's two readings disagreed on, or the check added or
  * dropped, and whether the lines add up to the document's total. */

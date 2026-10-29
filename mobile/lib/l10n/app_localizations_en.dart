@@ -12525,4 +12525,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pdBasePart => 'Base name (part of the name)';
+
+  @override
+  String get pcName => 'Name';
+
+  @override
+  String get plNameMissing => 'Not yet named';
+
+  @override
+  String get plNameMissingHint =>
+      'The file gave no name, so the product was registered by its code only. “Find names with AI” looks up the name shops and the maker use.';
+
+  @override
+  String get plNameByAi => 'Name found on the web by the AI';
+
+  @override
+  String get plFindNames => 'Find names with AI';
+
+  @override
+  String get plFindNamesNone => 'Every product has a name';
+
+  @override
+  String get plFindNamesQ => 'Look the names up on the web?';
+
+  @override
+  String plFindNamesBody(int count) {
+    return 'For the $count products named only by their code, the AI looks up by JAN and code the name the maker, catalogues and shops use. Names found go into the library and the price book (names a person entered are kept).';
+  }
+
+  @override
+  String get plFindNamesRun => 'Look up';
+
+  @override
+  String plFindNamesProgress(int done, int total) {
+    return 'Looked up $done of $total';
+  }
+
+  @override
+  String plFindNamesDone(int found, int total) {
+    return 'Named $found of $total products';
+  }
+
+  @override
+  String get plFindNamesStopped =>
+      'Stopped early (an AI limit, the key, or no web search). Check the AI settings.';
+
+  @override
+  String get plSelectDelete => 'Choose and remove';
+
+  @override
+  String get lcExcludeHint => 'Unticked products are left out';
+
+  @override
+  String sfNamesFinding(int count) {
+    return 'Looking up the names of the $count new products on the web…';
+  }
+
+  @override
+  String sfNamesFound(int found, int total) {
+    return 'Named $found of the $total new products from the web';
+  }
 }

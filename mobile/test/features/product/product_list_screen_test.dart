@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/product/data/market_names.dart';
 import 'package:wms_mobile/features/product/application/product_filter.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
@@ -16,6 +17,7 @@ import 'package:wms_mobile/features/supply_chain/application/supply_chain_provid
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
+import '../../support/fake_market_name_repository.dart';
 import '../../support/harness.dart';
 
 /// Pumped as someone who manages products (product.manage) unless [manage]
@@ -27,9 +29,11 @@ Future<ProviderContainer> _pump(
     bool lifecycle = false,
     List<Warehouse> warehouses = const [],
     PendingInspection pending = const PendingInspection(),
-    ProductStockHistory? history}) async {
+    ProductStockHistory? history,
+    MarketNameRepository? names}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
+    marketNameRepositoryProvider.overrideWithValue(names ?? FakeMarketNameRepository()),
     warehouseRepositoryProvider.overrideWithValue(
         FakeWarehouseRepository(WarehouseOverview(warehouses: warehouses, totals: const WarehouseTotals()))),
     scCanViewProvider.overrideWithValue(false),
@@ -457,7 +461,7 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const ValueKey('pl-pending-summary'))).data, '未検品 2商品・600個（在庫と合わせて 640個）');
   });
 
-  testWidgets('on a PC each product is one line: 品番 (商品名 under it), JAN, size, stock and units side by side', (tester) async {
+  testWidgets('on a PC each product is one line: 商品名, 品番, JAN, size, stock and units side by side', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     const pen = Product(
@@ -469,15 +473,13 @@ void main() {
     final row = find.byKey(const ValueKey('pl-row-1'));
     expect(row, findsOneWidget);
     double y(Finder f) => tester.getCenter(find.descendant(of: row, matching: f)).dy;
-    // The 品番 names it, the 商品名 just under; the rest beside them.
-    final line = y(find.byKey(const ValueKey('pl-code-1')));
+    // 商品名, then maker and 品番, then the rest, side by side.
+    final line = y(find.text('テストペン'));
     expect(y(find.text('TP-1')), closeTo(line, 4));
-    expect(y(find.text('テストペン')), greaterThan(line));
-    expect(y(find.text('テストペン')) - line, lessThan(24));
-    final mid = (line + y(find.text('テストペン'))) / 2;
-    expect(y(find.text('4909999000014')), closeTo(mid, 12));
-    expect(y(find.byKey(const ValueKey('pl-stock-0-1'))), closeTo(mid, 12));
-    expect(y(find.text('基本単位: 個')), closeTo(mid, 12));
+    expect(tester.getCenter(find.text('TP-1')).dx, greaterThan(tester.getCenter(find.text('テストペン')).dx));
+    expect(y(find.text('4909999000014')), closeTo(line, 4));
+    expect(y(find.byKey(const ValueKey('pl-stock-0-1'))), closeTo(line, 4));
+    expect(y(find.text('基本単位: 個')), closeTo(line, 4));
     // A row, not a card: low enough for many products on one screen.
     expect(tester.getSize(row).height, lessThan(64));
   });
@@ -667,6 +669,73 @@ void main() {
     expect(find.textContaining('2件を完全に削除しました。1件は在庫・入出荷などの記録があるため'), findsOneWidget);
     expect(find.text('ボールペン'), findsOneWidget);
     expect(find.text('ノート'), findsNothing);
+  });
+
+  testWidgets('選択して削除: every product chosen at once, any left out by its checkbox, then removed (0164)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeProductRepository(products: const [stocked, empty, Product(id: 4, janCode: '4900000000004', name: 'ノート')]);
+    await _pump(tester, repo, delete: true);
+    await tester.tap(find.byKey(const ValueKey('pl-select-delete')));
+    await tester.pumpAndSettle();
+    expect(find.text('3件を選択中'), findsWidgets);
+    expect(find.byKey(const ValueKey('lc-exclude-hint')), findsOneWidget);
+    // One left out.
+    await tester.tap(find.byKey(const ValueKey('lc-check-4')));
+    await tester.pumpAndSettle();
+    expect(find.text('2件を選択中'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('lc-remove')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('rm-word')), '削除');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('rm-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.deleteManyCalls.single, [1, 2]);
+    expect(find.text('ノート'), findsOneWidget);
+  });
+
+  testWidgets('without product.delete there is no 選択して削除', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked]), lifecycle: true);
+    expect(find.byKey(const ValueKey('pl-select-delete')), findsNothing);
+  });
+
+  testWidgets('商品名をAIで調べる: only the products named by their 品番 are looked up, and said how many took a name (0164)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final names = FakeMarketNameRepository(names: {'4909999000021': 'テストペン タイプA 0.5mm 赤'});
+    await _pump(
+        tester,
+        FakeProductRepository(products: const [
+          Product(id: 1, janCode: '4909999000014', name: 'テストペン 黒', sku: 'TP-05B', maker: 'テスト'),
+          Product(id: 2, janCode: '4909999000021', name: 'TP-05R', sku: 'TP-05R', maker: 'テスト'),
+          Product(id: 3, janCode: '4909999000038', name: 'TP-05G', sku: 'TP-05G', maker: 'テスト'),
+        ]),
+        names: names);
+    expect(find.byKey(const ValueKey('pl-no-name-2')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pl-find-names')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('商品名が品番だけの2件'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pl-find-names-go')));
+    await tester.pumpAndSettle();
+    expect(names.asked.single.map((a) => (a.jan, a.code)), [('4909999000021', 'TP-05R'), ('4909999000038', 'TP-05G')]);
+    // Both answers kept (one without a name, so it is not asked again).
+    expect(names.saved.single.map((f) => f.name), ['テストペン タイプA 0.5mm 赤', null]);
+    expect(find.text('2件中1件に商品名を入れました'), findsOneWidget);
+  });
+
+  testWidgets('a name the AI found is marked as such', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(
+        tester,
+        FakeProductRepository(products: const [
+          Product(id: 1, janCode: '4909999000014', name: 'テストペン タイプA 0.5mm 黒', sku: 'TP-05B', maker: 'テスト',
+              baseName: 'テストペン タイプA 0.5mm 黒', baseNameSource: 'ai', baseNameSourceUrl: 'https://example.test/p'),
+        ]));
+    expect(find.byKey(const ValueKey('pl-name-ai-1')), findsOneWidget);
   });
 
   testWidgets('without product.delete there is no removing for good', (tester) async {
@@ -965,13 +1034,13 @@ void main() {
     expect(find.text('「テストノート」の在庫の推移'), findsOneWidget);
   });
 
-  test('column widths fit the row: as dragged, else the 品番 column gives way, then all in proportion', () {
+  test('column widths fit the row: as dragged, else the 商品名 column gives way, then all in proportion', () {
     final fits = fitProductColumns(productColumnDefaults, 3000);
     expect(fits['jan'], productColumnDefaults['jan']);
-    final tight = fitProductColumns(productColumnDefaults, 1250);
+    final tight = fitProductColumns(productColumnDefaults, 1450);
     expect(tight['jan'], productColumnDefaults['jan']);
-    expect(tight['code']!, lessThan(productColumnDefaults['code']!));
-    expect(productColumnKeys, isNot(contains('name'))); // no 品名 column beside the 品番
+    expect(tight['name']!, lessThan(productColumnDefaults['name']!));
+    expect(productColumnKeys.take(2), ['name', 'code']);
     final tiny = fitProductColumns(productColumnDefaults, 900);
     final sum = productColumnKeys.fold<double>(0, (s, k) => s + tiny[k]!);
     expect(sum + productRowLead + productRowTail + productColumnGap * productColumnKeys.length, closeTo(900, 0.5));
@@ -1006,15 +1075,13 @@ void main() {
     await tester.pumpAndSettle();
     final after = tester.getSize(find.byKey(const ValueKey('pc-col-code'))).width;
     expect(after, greaterThan(before + 40));
-    // Named by the 品番; a 商品名 that says more sits under it, one that
-    // only repeats the 品番 is not shown twice.
-    expect(find.byKey(const ValueKey('pl-code-1')), findsOneWidget);
+    // The 商品名 in its own column; one that is only the 品番 says 未登録,
+    // and the 品番 is not shown twice.
+    expect(find.descendant(of: find.byKey(const ValueKey('pl-name-1')), matching: find.text('テストペン 黒')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const ValueKey('pl-code-1')), matching: find.text('TP-07B')), findsOneWidget);
-    expect(find.byKey(const ValueKey('pl-desc-1')), findsOneWidget);
-    expect(find.text('テストペン 黒'), findsOneWidget);
-    expect(find.byKey(const ValueKey('pl-desc-2')), findsNothing);
+    expect(find.byKey(const ValueKey('pl-no-name-2')), findsOneWidget);
     expect(find.text('TP-07R'), findsOneWidget);
-    expect(find.byKey(const ValueKey('pc-col-name')), findsNothing);
+    expect(find.byKey(const ValueKey('pc-col-name')), findsOneWidget);
     container.read(productColumnsProvider.notifier).reset();
   });
 }

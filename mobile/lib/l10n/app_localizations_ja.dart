@@ -12267,4 +12267,64 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pdBasePart => '基本名（名前の部品）';
+
+  @override
+  String get pcName => '商品名';
+
+  @override
+  String get plNameMissing => '未登録';
+
+  @override
+  String get plNameMissingHint =>
+      '取り込んだファイルに商品名がなく、品番だけで登録されています。「商品名をAIで調べる」で、メーカーや通販サイトでの商品名をWebから探せます。';
+
+  @override
+  String get plNameByAi => 'AIがWebで調べた商品名';
+
+  @override
+  String get plFindNames => '商品名をAIで調べる';
+
+  @override
+  String get plFindNamesNone => '商品名が未登録の商品はありません';
+
+  @override
+  String get plFindNamesQ => '商品名をWebで調べますか？';
+
+  @override
+  String plFindNamesBody(int count) {
+    return '商品名が品番だけの$count件について、JANコードと品番から、メーカーのサイト・カタログ・通販サイトでの商品名をAIが調べます。見つかった名前は商品ライブラリーと価格台帳に入ります（人が入れた名前は変えません）。';
+  }
+
+  @override
+  String get plFindNamesRun => '調べる';
+
+  @override
+  String plFindNamesProgress(int done, int total) {
+    return '$done / $total件を調べました';
+  }
+
+  @override
+  String plFindNamesDone(int found, int total) {
+    return '$total件中$found件に商品名を入れました';
+  }
+
+  @override
+  String get plFindNamesStopped =>
+      '途中で止まりました（AIの上限・APIキー・Web検索が使えないなど）。AI設定を確認してください。';
+
+  @override
+  String get plSelectDelete => '選択して削除';
+
+  @override
+  String get lcExcludeHint => 'チェックを外した商品は除外されます';
+
+  @override
+  String sfNamesFinding(int count) {
+    return '新しく登録した$count件の商品名をWebで調べています…';
+  }
+
+  @override
+  String sfNamesFound(int found, int total) {
+    return '新しく登録した$total件のうち$found件に、Webで見つけた商品名を入れました';
+  }
 }
