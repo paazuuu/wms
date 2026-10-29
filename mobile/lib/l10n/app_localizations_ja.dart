@@ -7165,7 +7165,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featNameFormats => '商品様式';
 
   @override
-  String get featNameFormatsDesc => '商品名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更';
+  String get featNameFormatsDesc => '表示名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更';
 
   @override
   String get nfTitle => '商品様式';
@@ -7181,7 +7181,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get nfIntro =>
-      '商品名は「基本名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う商品名がすべて作り直されます。手入力の商品名はそのまま残ります。';
+      '表示名は「商品名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う表示名がすべて作り直されます。手入力の表示名はそのまま残ります。';
 
   @override
   String get nfDefault => '既定';
@@ -7243,7 +7243,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nfMakeDefault => '新しい商品の既定の様式にする';
 
   @override
-  String get nfPreview => '実際の商品名の変わり方';
+  String get nfPreview => '実際の表示名の変わり方';
 
   @override
   String get nfPreviewRefresh => '確認';
@@ -7259,7 +7259,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String nfSaved(int count) {
-    return '保存しました。$count件の商品名を作り直しました';
+    return '保存しました。$count件の表示名を作り直しました';
   }
 
   @override
@@ -7307,10 +7307,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get pnTitle => '商品名の組み立て';
+  String get pnTitle => '表示名の組み立て';
 
   @override
-  String get pnBaseName => '基本名（サイズ・色を除いた名前）';
+  String get pnBaseName => '商品名（お店で表示される一般的な名前）';
 
   @override
   String get pnUnit => '単位';
@@ -7327,25 +7327,25 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get pnManual => '商品名を手入力する（様式を使わない）';
+  String get pnManual => '表示名を手入力する（様式を使わない）';
 
   @override
-  String get pnName => '商品名';
+  String get pnName => '表示名';
 
   @override
-  String get pnPreview => '商品名';
+  String get pnPreview => '表示名';
 
   @override
-  String get pnLegacy => 'この商品はまだ部品に分かれていません。基本名を入れると様式で名前が作られます。';
+  String get pnLegacy => 'この商品はまだ部品に分かれていません。商品名を入れると様式で表示名が作られます。';
 
   @override
   String get pnAttrsHint => 'サイズ・色などは商品の写真画面の「属性」タブで設定します';
 
   @override
-  String get pnNeedsBase => '基本名を入れてください';
+  String get pnNeedsBase => '商品名を入れてください';
 
   @override
-  String get pnSaved => '商品名を更新しました';
+  String get pnSaved => '表示名を更新しました';
 
   @override
   String rpOpen(int count) {
@@ -7950,9 +7950,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get productNamesJa => '日本語（商品名）';
-
-  @override
-  String get productNamesJaHint => '日本語名は商品様式で作られます。変更は「商品名の組み立て」から';
 
   @override
   String get productNamesEn => 'English（英語の画面と、中国語名がないときに表示）';
@@ -12263,9 +12260,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'アプリが知らない見出しは、この取引先で学習した見出しと共通の見出しで調べ、それでも分からないものはAIが見出しと値から判断しました。違っていたら「読み取り結果の確認」で直してください。';
 
   @override
-  String get pdBasePart => '基本名（名前の部品）';
-
-  @override
   String get pcName => '商品名';
 
   @override
@@ -12357,4 +12351,48 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ivDetails => '取込の詳細（メモ・取り消し）';
+
+  @override
+  String get pnmIntro =>
+      '商品名は、お店やメーカーのサイトで表示されている一般的な名前です。表示名は日本語の商品名から「表示名の組み立て」の様式で作られます。空欄にすると「未登録」に戻ります。';
+
+  @override
+  String get pnmSearch => 'Webで探す';
+
+  @override
+  String get pnmFound => 'Webで見つけた名前を入れました。確かめてから保存してください';
+
+  @override
+  String get pnmNotFound => 'Webでは見つかりませんでした';
+
+  @override
+  String get pdMarketName => '商品名';
+
+  @override
+  String get pdDisplayNameHint => '表示名（商品名から「表示名の組み立て」の様式で作られます）';
+
+  @override
+  String get pdPhotoFind => 'ネットから写真を探す';
+
+  @override
+  String get pdPhotoFindAnother => 'ネットで写真を追加';
+
+  @override
+  String get pdPhotoSearching => 'ネットで写真を探しています…';
+
+  @override
+  String get pdPhotoAdded => 'ネットの写真を追加しました。実物と違う場合は「写真」から差し替えてください';
+
+  @override
+  String pdPhotoNone(String reason) {
+    return '写真が見つかりませんでした（$reason）。「写真」から手で追加できます';
+  }
+
+  @override
+  String get pdReservedHint => '引当: 出荷の予定やピッキング中の分として取り置かれた数です。出荷可能 = 在庫 − 引当';
+
+  @override
+  String plPhotosAdded(int count) {
+    return 'ネットから写真を$count件追加しました（実物と違えば各商品の「写真」で差し替えてください）';
+  }
 }

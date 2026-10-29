@@ -25,7 +25,10 @@ import 'spec_lookup_sheet.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../product_library/presentation/product_gallery_screen.dart';
 import '../../product_library/presentation/product_naming_dialog.dart';
-import '../../../core/ui/fields_dialog.dart';
+import '../../../core/ui/open_window.dart';
+import '../data/market_names.dart';
+import '../data/web_photos.dart';
+import 'product_names_dialog.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../inbound/presentation/product_inbound_card.dart';
@@ -155,46 +158,41 @@ class _Header extends ConsumerWidget {
 
   final Product product;
 
-  /// The product's names in each language (0118). Japanese is the product
-  /// name itself, built in our format, so it is shown, not edited, here.
+  /// 商品名（言語別） (0166): the 商品名 in Japanese (looked up on the web, or
+  /// typed), English and Chinese.
   Future<void> _editNames(BuildContext context, WidgetRef ref) async {
+    final saved = await showDialog<bool>(context: context, builder: (_) => ProductNamesDialog(product: product));
+    if (saved == true) ref.invalidate(productListProvider);
+  }
+
+  /// A picture from the web (0166): the page its 商品名 was found on — looked
+  /// up first when there is none — and that page's own picture.
+  Future<void> _findPhoto(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    const langs = ['en', 'zh'];
-    final current = {
-      'en': product.names['en'] ?? product.nameEn ?? '',
-      'zh': product.names['zh'] ?? '',
-    };
-    final next = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (_) => FieldsDialog(
-        title: l10n.productNamesTitle,
-        keyPrefix: 'product-name',
-        header: InputDecorator(
-          decoration: InputDecoration(labelText: l10n.productNamesJa, helperText: l10n.productNamesJaHint),
-          child: Text(product.name, key: const ValueKey('product-name-ja')),
-        ),
-        fields: {
-          'en': (l10n.productNamesEn, current['en']!),
-          'zh': (l10n.productNamesZh, current['zh']!),
-        },
-        saveKey: const ValueKey('product-name-en-save'),
-        saveLabel: l10n.productSave,
-        cancelLabel: l10n.actionCancel,
-      ),
-    );
-    if (next == null || !context.mounted) return;
-    final repo = ref.read(productRepositoryProvider);
-    for (final l in langs) {
-      if (next[l] == current[l]) continue;
-      final r = await repo.setName(product.id, l, next[l]!.isEmpty ? null : next[l]);
-      if (!context.mounted) return;
-      if (r case ApiFailure(:final message)) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
-        return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(SnackBar(content: Text(l10n.pdPhotoSearching)));
+    final names = ref.read(marketNameRepositoryProvider);
+    final before = await names.cached([product.janCode]);
+    final known = before is ApiSuccess<Map<String, FoundName>> ? before.data[product.janCode] : null;
+    if (known?.sourceUrl == null) {
+      final r = await names.lookup([nameAskFor(product)]);
+      if (r case ApiSuccess(:final data)) {
+        final kept = [for (final f in data.results) if (f.errorKind == null) f];
+        if (kept.isNotEmpty) await names.save(kept);
       }
     }
+    final r = await ref.read(webPhotoRepositoryProvider).find(productIds: [product.id], again: product.imageCount > 0);
+    ref.read(productFaceCacheProvider.notifier).invalidateProduct(product.id);
+    ref.invalidate(productGalleryProvider(product.id));
     ref.invalidate(productListProvider);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(SnackBar(
+      content: Text(switch (r) {
+        ApiSuccess(:final data) when data.any((x) => x.ok) => l10n.pdPhotoAdded,
+        ApiSuccess(:final data) => l10n.pdPhotoNone(data.firstOrNull?.reason ?? ''),
+        ApiFailure(:final message) => humanizeApiErrorMessage(l10n, message),
+      }),
+    ));
   }
 
   @override
@@ -212,12 +210,9 @@ class _Header extends ConsumerWidget {
       // The product's own id in the master.
       (l10n.pdProductId, 'P-${product.id.toString().padLeft(6, '0')}', const ValueKey('pd-id'), true),
       (l10n.pdMaker, widenKana(product.maker ?? '—'), const ValueKey('pd-maker'), false),
+      // The 商品名 shops show (0166); the 表示名 built from it is the title.
+      (l10n.pdMarketName, marketNameOf(product) ?? l10n.plNameMissing, const ValueKey('pd-market-name'), false),
       (l10n.pdCode, product.sku ?? '—', const ValueKey('pd-code'), true),
-      // 品名 is not a row of its own: the 商品名 is the title above, the 品番
-      // names the item. The 基本名 the name is built from (サラサドライ), only
-      // when it is a part of its own.
-      if (product.baseName case final b? when b.trim().isNotEmpty && b.trim() != product.name.trim() && b.trim() != product.sku?.trim())
-        (l10n.pdBasePart, widenKana(b), const ValueKey('pd-base-name'), false),
       (l10n.pdJan, product.janCode, const ValueKey('pd-jan'), true),
       for (final at in product.attributes) (at.name, widenKana(at.value), ValueKey('pd-attr-${at.key}'), false),
       if (product.category case final c? when c.trim().isNotEmpty) (l10n.pdCategory, c, const ValueKey('pd-category'), false),
@@ -256,7 +251,16 @@ class _Header extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (product.maker case final m?) Text(widenKana(m), style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary)),
-                          ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: theme.textTheme.titleLarge),
+                          // The 表示名 (0166): built from the 商品名 by the format.
+                          Tooltip(
+                            message: l10n.pdDisplayNameHint,
+                            child: ProductNameText(
+                                key: const ValueKey('pd-display-name'),
+                                name: product.name,
+                                nameEn: product.nameEn,
+                                names: product.names,
+                                style: theme.textTheme.titleLarge),
+                          ),
                           const SizedBox(height: AppSpacing.xs),
                           Wrap(
                             spacing: AppSpacing.sm,
@@ -334,6 +338,14 @@ class _Header extends ConsumerWidget {
                       icon: const Icon(Icons.photo_library_outlined, size: 18),
                       label: Text(l10n.plOpenLibrary),
                     ),
+                    // One picture from the web (0166), to change by hand there.
+                    if (canManage)
+                      OutlinedButton.icon(
+                        key: const ValueKey('pd-web-photo'),
+                        onPressed: () => _findPhoto(context, ref),
+                        icon: const Icon(Icons.image_search_outlined, size: 18),
+                        label: Text(product.imageCount == 0 ? l10n.pdPhotoFind : l10n.pdPhotoFindAnother),
+                      ),
                   ],
                 ),
               ],
@@ -346,6 +358,16 @@ class _Header extends ConsumerWidget {
           children: [
             for (final (label, value, key, mono) in facts)
               _FactRow(key: key, label: label, value: value, mono: mono),
+            if (product.nameByAi)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const ValueKey('pd-market-name-ai'),
+                  onPressed: product.baseNameSourceUrl == null ? null : () => openExternalUrl(product.baseNameSourceUrl!),
+                  icon: const Icon(Icons.auto_awesome, size: 16),
+                  label: Text(l10n.plNameByAi),
+                ),
+              ),
             const SizedBox(height: AppSpacing.xs),
             ProductFacts(product: product),
           ],
@@ -476,6 +498,9 @@ class _StockCard extends ConsumerWidget {
           }(),
         if (ids.isEmpty && s.isEmpty)
           Text(l10n.plNoStock, key: const ValueKey('pd-stock-none'), style: theme.textTheme.bodySmall),
+        Text(l10n.pdReservedHint,
+            key: const ValueKey('pd-reserved-hint'),
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
         Text(l10n.pdStockUnit(product.baseUom == null ? '' : uomName(l10n, product.baseUom!.code, product.baseUom!.name)),
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
       ],

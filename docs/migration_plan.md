@@ -7956,6 +7956,42 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - A last column, 反映, says what became of each row.
   - 取込の詳細（メモ・取り消し） opens the former detail view.
 
+## 0166: 表示名 and 商品名; 商品名 by hand in three languages; a picture from the web
+
+- Two names, said apart:
+  - 商品名: the name shops and the maker use (the 基本名, `base_name`).
+  - 表示名: built from the 商品名 by the product's format (0111) — the
+    product's `name`.
+  - The product detail shows the 表示名 beside its picture, and 商品名 as a
+    row of its own: 未登録 when it is only the 品番, with the AI mark and
+    page when the web gave it.
+  - 「商品名の組み立て」 is now 「表示名の組み立て」.
+  - The library's 商品名 column shows the 商品名, not the 表示名.
+- 商品名（言語別）:
+  - Japanese is the 商品名, typed by hand (`set_product_market_name`, which
+    clears the AI mark) or looked up on the web again (Webで探す, checked
+    before saving).
+  - English and Chinese are kept as before (product_names).
+  - A blank Japanese 商品名 makes it 未登録 again.
+- Names found before registering are marked AI on insert, and the 7
+  registered on 10-29 were marked.
+- The stock import compares a name with the 品番 as codes (UMR05S.33 =
+  UMR05S 33 = full-width).
+  - On 10-29, 14 三菱鉛筆 products were left unasked because the 価格台帳's
+    name was the 品番 written another way.
+  - They show 未登録 and are found with 商品名をAIで調べる.
+- A picture from the web: `jan-catalog` `POST /photos`.
+  - The page is the one the 商品名 was found on (jan_name_lookups.source_url),
+    or a page given. That page's own picture (og:image, twitter:image,
+    image_src, JSON-LD) goes into product-images.
+  - It is added as the person who asked (`add_product_web_image`:
+    product.manage), with `product_images.source_url`.
+  - Only products with no picture get one, unless asked again.
+  - Run after names are found (library, stock import) and from the product
+    (ネットから写真を探す). A person changes or removes it under 写真.
+- 引当 explained on the product's stock: set aside for planned shipments and
+  picking; 出荷可能 = 在庫 − 引当.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

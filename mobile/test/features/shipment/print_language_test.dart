@@ -226,7 +226,7 @@ void main() {
 
     expect(find.text('基本情報'), findsOneWidget);
     expect(valueOf('pd-maker'), 'ゼブラ');
-    expect(valueOf('pd-base-name'), 'サラサドライ');
+    expect(valueOf('pd-market-name'), 'サラサドライ'); // the 商品名; the 表示名 is the title
     expect(valueOf('pd-code'), 'JJ31-BL');
     expect(valueOf('pd-jan'), _jan);
     expect(valueOf('pd-attr-color'), '青');
@@ -240,16 +240,30 @@ void main() {
     expect(find.text('サイズ・重量'), findsOneWidget);
   });
 
-  testWidgets('no 品名 row beside the 品番: the 商品名 is the title, the 品番 names the item', (tester) async {
+  testWidgets('the 表示名 is the title; 商品名 a row of its own (未登録 when only the 品番); no 品名 (0166)', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 2000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    const product = Product(id: 144, janCode: _jan, name: 'ジェットストリーム 0.7 赤', maker: 'テスト', sku: 'TS-07R');
+    const products = [
+      Product(id: 144, janCode: _jan, name: 'ジェットストリーム 0.7 赤', maker: 'テスト', sku: 'TS-07R',
+          baseName: 'ジェットストリーム 0.7 赤', baseNameSource: 'ai', baseNameSourceUrl: 'https://shop.example/p'),
+      Product(id: 145, janCode: '4909999000021', name: 'TS-07B', maker: 'テスト', sku: 'TS-07B', baseName: 'TS-07B'),
+    ];
     await pumpApp(tester, const ProductDetailScreen(productId: 144), overrides: [
-      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: [product])),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: products)),
     ]);
-    expect(find.byKey(const ValueKey('pd-code')), findsOneWidget);
-    expect(find.byKey(const ValueKey('pd-base-name')), findsNothing);
+    String valueOf(String key) =>
+        tester.widgetList<Text>(find.descendant(of: find.byKey(ValueKey(key)), matching: find.byType(Text))).last.data!;
+    expect(find.byKey(const ValueKey('pd-display-name')), findsOneWidget);
+    expect(valueOf('pd-market-name'), 'ジェットストリーム 0.7 赤');
+    expect(find.byKey(const ValueKey('pd-market-name-ai')), findsOneWidget);
     expect(find.text('品名'), findsNothing);
-    expect(find.text('ジェットストリーム 0.7 赤'), findsWidgets);
+    expect(find.text('表示名の組み立て'), findsNothing); // not for someone who only views
+    expect(find.byKey(const ValueKey('pd-reserved-hint')), findsOneWidget);
+
+    await pumpApp(tester, const ProductDetailScreen(productId: 145), overrides: [
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: products)),
+    ]);
+    expect(valueOf('pd-market-name'), '未登録');
+    expect(find.byKey(const ValueKey('pd-market-name-ai')), findsNothing);
   });
 }

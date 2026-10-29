@@ -7144,7 +7144,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featNameFormats => '商品格式';
 
   @override
-  String get featNameFormatsDesc => '商品名的组成方式，以及批量修改厂家名、颜色等叫法';
+  String get featNameFormatsDesc => '显示名的组成方式（样式）及厂家名、颜色等的叫法批量修改';
 
   @override
   String get nfTitle => '商品格式';
@@ -7160,7 +7160,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get nfIntro =>
-      '商品名由\"基本名\"与厂家、品番、尺寸、颜色等部件按所选格式组成。修改格式后，使用该格式的商品名会全部重新生成。手动输入的商品名保持不变。';
+      '显示名由“商品名”及厂家、货号、尺寸、颜色等部件按所选样式组成。修改样式后，使用该样式的显示名将全部重新生成；手动输入的显示名保持不变。';
 
   @override
   String get nfDefault => '默认';
@@ -7222,7 +7222,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nfMakeDefault => '设为新商品的默认格式';
 
   @override
-  String get nfPreview => '实际商品名的变化';
+  String get nfPreview => '显示名的实际变化';
 
   @override
   String get nfPreviewRefresh => '确认';
@@ -7238,7 +7238,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String nfSaved(int count) {
-    return '已保存，重新生成了$count个商品名';
+    return '已保存。已重新生成$count个显示名';
   }
 
   @override
@@ -7285,10 +7285,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get pnTitle => '商品名组成';
+  String get pnTitle => '显示名的组成';
 
   @override
-  String get pnBaseName => '基本名（不含尺寸、颜色）';
+  String get pnBaseName => '商品名（店铺显示的通用名称）';
 
   @override
   String get pnUnit => '单位';
@@ -7305,25 +7305,25 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get pnManual => '手动输入商品名（不使用格式）';
+  String get pnManual => '手动输入显示名（不使用样式）';
 
   @override
-  String get pnName => '商品名';
+  String get pnName => '显示名';
 
   @override
-  String get pnPreview => '商品名';
+  String get pnPreview => '显示名';
 
   @override
-  String get pnLegacy => '此商品尚未分成部件。输入基本名后将按格式生成名称。';
+  String get pnLegacy => '该商品尚未拆分为部件。输入商品名后，将按样式生成显示名。';
 
   @override
   String get pnAttrsHint => '尺寸、颜色等在商品照片画面的\"属性\"标签中设置';
 
   @override
-  String get pnNeedsBase => '请输入基本名';
+  String get pnNeedsBase => '请输入商品名';
 
   @override
-  String get pnSaved => '已更新商品名';
+  String get pnSaved => '已更新显示名';
 
   @override
   String rpOpen(int count) {
@@ -7919,9 +7919,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productNamesJa => '日语（商品名）';
-
-  @override
-  String get productNamesJaHint => '日语名称按商品格式生成，请通过“商品名组成”修改';
 
   @override
   String get productNamesEn => 'English（英文界面显示；无中文名时也显示）';
@@ -12192,9 +12189,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '应用不认识的标题先在该交易方已学习的标题和通用标题中查找，仍无法确定的由AI根据标题和数值判断。如有错误，请在“读取结果确认”中修改。';
 
   @override
-  String get pdBasePart => '基本名（名称的组成部分）';
-
-  @override
   String get pcName => '商品名';
 
   @override
@@ -12284,4 +12278,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ivDetails => '导入详情（备注・撤销）';
+
+  @override
+  String get pnmIntro =>
+      '商品名是店铺和厂家网站上显示的通用名称。显示名按“显示名的组成”样式由日语商品名生成。留空则恢复为“未登记”。';
+
+  @override
+  String get pnmSearch => '网上查找';
+
+  @override
+  String get pnmFound => '已填入网上找到的名称，请确认后保存';
+
+  @override
+  String get pnmNotFound => '网上未找到';
+
+  @override
+  String get pdMarketName => '商品名';
+
+  @override
+  String get pdDisplayNameHint => '显示名（由商品名按“显示名的组成”样式生成）';
+
+  @override
+  String get pdPhotoFind => '从网上查找照片';
+
+  @override
+  String get pdPhotoFindAnother => '从网上添加照片';
+
+  @override
+  String get pdPhotoSearching => '正在网上查找照片…';
+
+  @override
+  String get pdPhotoAdded => '已添加网上的照片。如与实物不符，请在“照片”中更换';
+
+  @override
+  String pdPhotoNone(String reason) {
+    return '未找到照片（$reason）。可在“照片”中手动添加';
+  }
+
+  @override
+  String get pdReservedHint => '预留：为计划出货和拣货而保留的数量。可出货 = 库存 − 预留';
+
+  @override
+  String plPhotosAdded(int count) {
+    return '已从网上添加$count张照片（如与实物不符，请在各商品的“照片”中更换）';
+  }
 }

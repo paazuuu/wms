@@ -23,6 +23,7 @@ import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_import_screen.dart';
 import '../../product/application/product_providers.dart';
 import '../../product/data/market_names.dart';
+import '../../product/data/web_photos.dart';
 import '../../product/data/spec_lookup.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
@@ -370,6 +371,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         ref.invalidate(priceBookListProvider);
         // Those the file gave no name for: their 商品名 looked up on the web
         // meanwhile (0164), while the stock goes in.
+        // And a picture for each from the web, for those with none (0166).
+        final photos = ref.read(webPhotoRepositoryProvider);
+        unawaited(findWebPhotos(photos, [for (final l in todo) l.janCode]).then((added) {
+          if (mounted && added > 0) ref.invalidate(productListProvider);
+        }));
         unawaited(_findNames([
           for (final l in todo)
             if (!_names.containsKey(l.janCode) && _nameFor(l) == null)
@@ -401,9 +407,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// library's (when it is more than the 品番), the one the web gave, else the
   /// file's (when it is more than the 品番); blank when none is known.
   String? _nameFor(StockFileLine l) {
+    // Not a name: the 品番 again, however it is written (UMR05S.33 /
+    // UMR05S 33), or the JAN.
     bool real(String? n) {
       final t = n?.trim() ?? '';
-      return t.isNotEmpty && t != (l.code ?? '').trim() && t != l.janCode;
+      return t.isNotEmpty && t != l.janCode && !sameCode(t, l.code ?? '');
     }
 
     final library = _known[l.janCode] ?? _book[l.janCode]?.$2;

@@ -30,6 +30,15 @@ class FakeMarketNameRepository implements MarketNameRepository {
     ));
   }
 
+  /// Names typed by hand, by product.
+  final setNames = <int, String?>{};
+
+  @override
+  Future<ApiResult<void>> setMarketName(int productId, String? name) async {
+    setNames[productId] = name;
+    return const ApiSuccess(null);
+  }
+
   @override
   Future<ApiResult<Map<String, FoundName>>> cached(List<String> jans) async =>
       ApiSuccess({for (final j in jans) if (before[j] case final f?) j: f});

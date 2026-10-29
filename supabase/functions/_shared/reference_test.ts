@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert@1";
-import { fiscalYear, htmlText, htmlTitle, safeReferenceUrl, sha256Hex, snapshotFolder } from "./reference.ts";
+import { fiscalYear, pageImageUrl, htmlText, htmlTitle, safeReferenceUrl, sha256Hex, snapshotFolder } from "./reference.ts";
 
 Deno.test("a URL that may be saved: http(s) on a public name only", () => {
   assertEquals(safeReferenceUrl("https://example.com/catalog.pdf")?.hostname, "example.com");
@@ -26,4 +26,16 @@ Deno.test("a copy's folder in Japan time, and its 年度 (April to March)", asyn
   assertEquals(fiscalYear(new Date("2026-03-31T14:59:59Z")), 2025); // 23:59 on 31 March in Japan
   assertEquals(fiscalYear(new Date("2026-03-31T15:00:00Z")), 2026); // 0:00 on 1 April
   assertEquals((await sha256Hex("abc")).slice(0, 8), "ba7816bf");
+});
+
+Deno.test("a product page's own picture: og:image first, made absolute; else twitter, link, JSON-LD", () => {
+  const page = new URL("https://shop.example/p/123");
+  assertEquals(pageImageUrl('<meta property="og:image" content="/img/a.jpg"><meta name="twitter:image" content="https://x/b.jpg">', page)?.href,
+    "https://shop.example/img/a.jpg");
+  assertEquals(pageImageUrl("<meta content='https://cdn.example/b.png' name='twitter:image'>", page)?.href, "https://cdn.example/b.png");
+  assertEquals(pageImageUrl('<link rel="image_src" href="c.webp">', page)?.href, "https://shop.example/p/c.webp");
+  assertEquals(pageImageUrl('<script type="application/ld+json">{"image": ["https:\\/\\/cdn.example\\/d.jpg"]}</script>', page)?.href,
+    "https://cdn.example/d.jpg");
+  assertEquals(pageImageUrl('<meta property="og:image" content="javascript:alert(1)">', page), null);
+  assertEquals(pageImageUrl("<p>none</p>", page), null);
 });

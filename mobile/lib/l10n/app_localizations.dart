@@ -13204,7 +13204,7 @@ abstract class AppLocalizations {
   /// No description provided for @featNameFormatsDesc.
   ///
   /// In ja, this message translates to:
-  /// **'商品名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更'**
+  /// **'表示名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更'**
   String get featNameFormatsDesc;
 
   /// No description provided for @nfTitle.
@@ -13234,7 +13234,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfIntro.
   ///
   /// In ja, this message translates to:
-  /// **'商品名は「基本名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う商品名がすべて作り直されます。手入力の商品名はそのまま残ります。'**
+  /// **'表示名は「商品名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う表示名がすべて作り直されます。手入力の表示名はそのまま残ります。'**
   String get nfIntro;
 
   /// No description provided for @nfDefault.
@@ -13354,7 +13354,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfPreview.
   ///
   /// In ja, this message translates to:
-  /// **'実際の商品名の変わり方'**
+  /// **'実際の表示名の変わり方'**
   String get nfPreview;
 
   /// No description provided for @nfPreviewRefresh.
@@ -13384,7 +13384,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfSaved.
   ///
   /// In ja, this message translates to:
-  /// **'保存しました。{count}件の商品名を作り直しました'**
+  /// **'保存しました。{count}件の表示名を作り直しました'**
   String nfSaved(int count);
 
   /// No description provided for @nfSearchMaker.
@@ -13462,13 +13462,13 @@ abstract class AppLocalizations {
   /// No description provided for @pnTitle.
   ///
   /// In ja, this message translates to:
-  /// **'商品名の組み立て'**
+  /// **'表示名の組み立て'**
   String get pnTitle;
 
   /// No description provided for @pnBaseName.
   ///
   /// In ja, this message translates to:
-  /// **'基本名（サイズ・色を除いた名前）'**
+  /// **'商品名（お店で表示される一般的な名前）'**
   String get pnBaseName;
 
   /// No description provided for @pnUnit.
@@ -13498,25 +13498,25 @@ abstract class AppLocalizations {
   /// No description provided for @pnManual.
   ///
   /// In ja, this message translates to:
-  /// **'商品名を手入力する（様式を使わない）'**
+  /// **'表示名を手入力する（様式を使わない）'**
   String get pnManual;
 
   /// No description provided for @pnName.
   ///
   /// In ja, this message translates to:
-  /// **'商品名'**
+  /// **'表示名'**
   String get pnName;
 
   /// No description provided for @pnPreview.
   ///
   /// In ja, this message translates to:
-  /// **'商品名'**
+  /// **'表示名'**
   String get pnPreview;
 
   /// No description provided for @pnLegacy.
   ///
   /// In ja, this message translates to:
-  /// **'この商品はまだ部品に分かれていません。基本名を入れると様式で名前が作られます。'**
+  /// **'この商品はまだ部品に分かれていません。商品名を入れると様式で表示名が作られます。'**
   String get pnLegacy;
 
   /// No description provided for @pnAttrsHint.
@@ -13528,13 +13528,13 @@ abstract class AppLocalizations {
   /// No description provided for @pnNeedsBase.
   ///
   /// In ja, this message translates to:
-  /// **'基本名を入れてください'**
+  /// **'商品名を入れてください'**
   String get pnNeedsBase;
 
   /// No description provided for @pnSaved.
   ///
   /// In ja, this message translates to:
-  /// **'商品名を更新しました'**
+  /// **'表示名を更新しました'**
   String get pnSaved;
 
   /// No description provided for @rpOpen.
@@ -14574,12 +14574,6 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'日本語（商品名）'**
   String get productNamesJa;
-
-  /// No description provided for @productNamesJaHint.
-  ///
-  /// In ja, this message translates to:
-  /// **'日本語名は商品様式で作られます。変更は「商品名の組み立て」から'**
-  String get productNamesJaHint;
 
   /// No description provided for @productNamesEn.
   ///
@@ -21836,12 +21830,6 @@ abstract class AppLocalizations {
   /// **'アプリが知らない見出しは、この取引先で学習した見出しと共通の見出しで調べ、それでも分からないものはAIが見出しと値から判断しました。違っていたら「読み取り結果の確認」で直してください。'**
   String get sfHeadingsHint;
 
-  /// No description provided for @pdBasePart.
-  ///
-  /// In ja, this message translates to:
-  /// **'基本名（名前の部品）'**
-  String get pdBasePart;
-
   /// No description provided for @pcName.
   ///
   /// In ja, this message translates to:
@@ -21985,6 +21973,84 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'取込の詳細（メモ・取り消し）'**
   String get ivDetails;
+
+  /// No description provided for @pnmIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名は、お店やメーカーのサイトで表示されている一般的な名前です。表示名は日本語の商品名から「表示名の組み立て」の様式で作られます。空欄にすると「未登録」に戻ります。'**
+  String get pnmIntro;
+
+  /// No description provided for @pnmSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'Webで探す'**
+  String get pnmSearch;
+
+  /// No description provided for @pnmFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'Webで見つけた名前を入れました。確かめてから保存してください'**
+  String get pnmFound;
+
+  /// No description provided for @pnmNotFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'Webでは見つかりませんでした'**
+  String get pnmNotFound;
+
+  /// No description provided for @pdMarketName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get pdMarketName;
+
+  /// No description provided for @pdDisplayNameHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示名（商品名から「表示名の組み立て」の様式で作られます）'**
+  String get pdDisplayNameHint;
+
+  /// No description provided for @pdPhotoFind.
+  ///
+  /// In ja, this message translates to:
+  /// **'ネットから写真を探す'**
+  String get pdPhotoFind;
+
+  /// No description provided for @pdPhotoFindAnother.
+  ///
+  /// In ja, this message translates to:
+  /// **'ネットで写真を追加'**
+  String get pdPhotoFindAnother;
+
+  /// No description provided for @pdPhotoSearching.
+  ///
+  /// In ja, this message translates to:
+  /// **'ネットで写真を探しています…'**
+  String get pdPhotoSearching;
+
+  /// No description provided for @pdPhotoAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ネットの写真を追加しました。実物と違う場合は「写真」から差し替えてください'**
+  String get pdPhotoAdded;
+
+  /// No description provided for @pdPhotoNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真が見つかりませんでした（{reason}）。「写真」から手で追加できます'**
+  String pdPhotoNone(String reason);
+
+  /// No description provided for @pdReservedHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'引当: 出荷の予定やピッキング中の分として取り置かれた数です。出荷可能 = 在庫 − 引当'**
+  String get pdReservedHint;
+
+  /// No description provided for @plPhotosAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ネットから写真を{count}件追加しました（実物と違えば各商品の「写真」で差し替えてください）'**
+  String plPhotosAdded(int count);
 }
 
 class _AppLocalizationsDelegate

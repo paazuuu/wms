@@ -6613,12 +6613,12 @@
     }
   },
   "featNameFormats": "商品様式",
-  "featNameFormatsDesc": "商品名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更",
+  "featNameFormatsDesc": "表示名の組み立て方（様式）と、メーカー名・色などの呼び方を一括で変更",
   "nfTitle": "商品様式",
   "nfTabFormats": "様式",
   "nfTabMakers": "メーカー",
   "nfTabValues": "属性の値",
-  "nfIntro": "商品名は「基本名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う商品名がすべて作り直されます。手入力の商品名はそのまま残ります。",
+  "nfIntro": "表示名は「商品名」とメーカー・品番・サイズ・色などの部品から、選んだ様式で組み立てられます。様式を変えると、その様式を使う表示名がすべて作り直されます。手入力の表示名はそのまま残ります。",
   "nfDefault": "既定",
   "nfProducts": "{count}件の商品",
   "@nfProducts": {
@@ -6645,12 +6645,12 @@
   "nfSampleUnit": "本",
   "nfSampleColor": "赤",
   "nfMakeDefault": "新しい商品の既定の様式にする",
-  "nfPreview": "実際の商品名の変わり方",
+  "nfPreview": "実際の表示名の変わり方",
   "nfPreviewRefresh": "確認",
   "nfPreviewNone": "この様式の商品はまだありません",
   "nfNeedsBase": "組み立て方に「基本名」を入れてください",
   "nfNeedsName": "様式の名前を入れてください",
-  "nfSaved": "保存しました。{count}件の商品名を作り直しました",
+  "nfSaved": "保存しました。{count}件の表示名を作り直しました",
   "@nfSaved": {
     "placeholders": {
       "count": {
@@ -6691,8 +6691,8 @@
       }
     }
   },
-  "pnTitle": "商品名の組み立て",
-  "pnBaseName": "基本名（サイズ・色を除いた名前）",
+  "pnTitle": "表示名の組み立て",
+  "pnBaseName": "商品名（お店で表示される一般的な名前）",
   "pnUnit": "単位",
   "pnListPrice": "定価",
   "pnFormat": "様式",
@@ -6704,13 +6704,13 @@
       }
     }
   },
-  "pnManual": "商品名を手入力する（様式を使わない）",
-  "pnName": "商品名",
-  "pnPreview": "商品名",
-  "pnLegacy": "この商品はまだ部品に分かれていません。基本名を入れると様式で名前が作られます。",
+  "pnManual": "表示名を手入力する（様式を使わない）",
+  "pnName": "表示名",
+  "pnPreview": "表示名",
+  "pnLegacy": "この商品はまだ部品に分かれていません。商品名を入れると様式で表示名が作られます。",
   "pnAttrsHint": "サイズ・色などは商品の写真画面の「属性」タブで設定します",
-  "pnNeedsBase": "基本名を入れてください",
-  "pnSaved": "商品名を更新しました",
+  "pnNeedsBase": "商品名を入れてください",
+  "pnSaved": "表示名を更新しました",
   "rpOpen": "未登録の商品を自社様式で登録（{count}）",
   "@rpOpen": {
     "placeholders": {
@@ -7152,7 +7152,6 @@
   "uomPallet": "パレット",
   "productNamesTitle": "商品名（言語別）",
   "productNamesJa": "日本語（商品名）",
-  "productNamesJaHint": "日本語名は商品様式で作られます。変更は「商品名の組み立て」から",
   "productNamesEn": "English（英語の画面と、中国語名がないときに表示）",
   "productNamesZh": "中文（中国語の画面と、中国語を選んだ印刷物に表示）",
   "featPrintLanguage": "印刷の言語",
@@ -10949,7 +10948,6 @@
   },
   "sfHeadingUnused": "在庫の読み込みでは使いません",
   "sfHeadingsHint": "アプリが知らない見出しは、この取引先で学習した見出しと共通の見出しで調べ、それでも分からないものはAIが見出しと値から判断しました。違っていたら「読み取り結果の確認」で直してください。",
-  "pdBasePart": "基本名（名前の部品）",
   "pcName": "商品名",
   "plNameMissing": "未登録",
   "plNameMissingHint": "取り込んだファイルに商品名がなく、品番だけで登録されています。「商品名をAIで調べる」で、メーカーや通販サイトでの商品名をWebから探せます。",
@@ -11051,5 +11049,32 @@
     }
   },
   "rcResult": "反映",
-  "ivDetails": "取込の詳細（メモ・取り消し）"
+  "ivDetails": "取込の詳細（メモ・取り消し）",
+  "pnmIntro": "商品名は、お店やメーカーのサイトで表示されている一般的な名前です。表示名は日本語の商品名から「表示名の組み立て」の様式で作られます。空欄にすると「未登録」に戻ります。",
+  "pnmSearch": "Webで探す",
+  "pnmFound": "Webで見つけた名前を入れました。確かめてから保存してください",
+  "pnmNotFound": "Webでは見つかりませんでした",
+  "pdMarketName": "商品名",
+  "pdDisplayNameHint": "表示名（商品名から「表示名の組み立て」の様式で作られます）",
+  "pdPhotoFind": "ネットから写真を探す",
+  "pdPhotoFindAnother": "ネットで写真を追加",
+  "pdPhotoSearching": "ネットで写真を探しています…",
+  "pdPhotoAdded": "ネットの写真を追加しました。実物と違う場合は「写真」から差し替えてください",
+  "pdPhotoNone": "写真が見つかりませんでした（{reason}）。「写真」から手で追加できます",
+  "@pdPhotoNone": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "pdReservedHint": "引当: 出荷の予定やピッキング中の分として取り置かれた数です。出荷可能 = 在庫 − 引当",
+  "plPhotosAdded": "ネットから写真を{count}件追加しました（実物と違えば各商品の「写真」で差し替えてください）",
+  "@plPhotosAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

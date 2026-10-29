@@ -17,13 +17,15 @@
 //                                  what it had before is cleared
 //   POST   /jan-catalog/pdf/pages   its pages' text, as the browser read it
 //   POST   /jan-catalog/pdf/finish  counted, and products' weights filled
+//   POST   /jan-catalog/photos      products' pictures from the web page their
+//                                  name was found on (0166)
 // After every read, products' weights are filled from the catalogs (and the
 // AI's where there is none) by apply_jan_weights (0155).
 // Writing needs product.manage (or the scheduler's secret) and goes through
 // the service role; reading the table is open to product.view.
 import { adminClient, callerClient, clientPermitted, notPermittedMessage } from "../_shared/require_permission.ts";
 import { purgeAllowed } from "../_shared/purge.ts";
-import { htmlText, htmlTitle, safeReferenceUrl, sha256Hex, snapshotFolder } from "../_shared/reference.ts";
+import { htmlText, htmlTitle, pageImageUrl, safeReferenceUrl, sha256Hex, snapshotFolder } from "../_shared/reference.ts";
 import {
   type CatalogEntry,
   catalogInfo,
@@ -331,6 +333,104 @@ async function snapshotSite(admin: Admin, source: Record<string, unknown>): Prom
   const r = await keepCopy(admin, source.id as number, { hash: await sha256Hex(bytes), title, files });
   if (title && !source.title) await admin.from("reference_sources").update({ title }).eq("id", source.id);
   return [200, { data: r }];
+}
+
+// --- 0166: a product's picture from the web --------------------------------
+
+const PHOTO_PAGE_MAX = 3_000_000;
+const PHOTO_MAX = 6_000_000;
+const PHOTO_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+
+type PhotoResult = { product_id: number; ok: boolean; reason?: string; page_url?: string | null; image_url?: string };
+
+/** The picture of one product: the page its name was found on (or [pageUrl]),
+ * that page's own picture (og:image …), kept in product-images and added as
+ * the person who asked (add_product_web_image: product.manage). */
+// deno-lint-ignore no-explicit-any
+async function photoFor(admin: Admin, caller: any, p: { id: number; jan_code: string }, pageUrl: string | null): Promise<PhotoResult> {
+  let page = pageUrl;
+  if (!page) {
+    const { data } = await admin.from("jan_name_lookups").select("source_url").eq("jan", p.jan_code).maybeSingle();
+    page = (data?.source_url as string | null) ?? null;
+  }
+  const url = page ? safeReferenceUrl(page) : null;
+  if (!url) return { product_id: p.id, ok: false, reason: "no_page", page_url: page };
+  let html: string;
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": BROWSER_UA, "Accept": "text/html" }, signal: AbortSignal.timeout(15000) });
+    if (!res.ok) return { product_id: p.id, ok: false, reason: `page_http_${res.status}`, page_url: url.href };
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    if (bytes.length > PHOTO_PAGE_MAX) return { product_id: p.id, ok: false, reason: "page_too_large", page_url: url.href };
+    const type = res.headers.get("content-type") ?? "";
+    const head = new TextDecoder("latin1").decode(bytes.slice(0, 4096));
+    try {
+      html = new TextDecoder(charsetOf(type, head)).decode(bytes);
+    } catch {
+      html = new TextDecoder().decode(bytes);
+    }
+  } catch (e) {
+    return { product_id: p.id, ok: false, reason: `page_unreachable: ${e}`.slice(0, 200), page_url: url.href };
+  }
+  const img = pageImageUrl(html, url);
+  const safe = img ? safeReferenceUrl(img.href) : null;
+  if (!safe) return { product_id: p.id, ok: false, reason: "no_image", page_url: url.href };
+  let body: Uint8Array, ctype: string;
+  try {
+    const res = await fetch(safe, { headers: { "User-Agent": BROWSER_UA, "Referer": url.href }, signal: AbortSignal.timeout(15000) });
+    if (!res.ok) return { product_id: p.id, ok: false, reason: `image_http_${res.status}`, page_url: url.href };
+    ctype = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+    body = new Uint8Array(await res.arrayBuffer());
+  } catch (e) {
+    return { product_id: p.id, ok: false, reason: `image_unreachable: ${e}`.slice(0, 200), page_url: url.href };
+  }
+  if (!PHOTO_TYPES[ctype]) {
+    // Some shops say octet-stream: the bytes tell.
+    ctype = body[0] === 0xff && body[1] === 0xd8 ? "image/jpeg"
+      : body[0] === 0x89 && body[1] === 0x50 ? "image/png"
+      : body[8] === 0x57 && body[9] === 0x45 ? "image/webp" : ctype;
+  }
+  if (!PHOTO_TYPES[ctype]) return { product_id: p.id, ok: false, reason: "not_an_image", page_url: url.href };
+  if (body.length < 1000 || body.length > PHOTO_MAX) return { product_id: p.id, ok: false, reason: "image_size", page_url: url.href };
+  const path = `${p.id}/${Date.now()}_web.${PHOTO_TYPES[ctype]}`;
+  const up = await admin.storage.from("product-images").upload(path, body, { contentType: ctype, upsert: false });
+  if (up.error) return { product_id: p.id, ok: false, reason: `upload: ${up.error.message}`, page_url: url.href };
+  const { error } = await caller.rpc("add_product_web_image", {
+    p_product_id: p.id, p_storage_path: path, p_content_type: ctype, p_byte_size: body.length, p_source_url: url.href,
+  });
+  if (error) {
+    await admin.storage.from("product-images").remove([path]);
+    return { product_id: p.id, ok: false, reason: error.message, page_url: url.href };
+  }
+  return { product_id: p.id, ok: true, page_url: url.href, image_url: safe.href };
+}
+
+/** POST /photos {product_ids? | jans?, page_url?, again?}: up to ten
+ * products' pictures from the web — only those with none yet, unless
+ * [again] (a person asking for another) or a page is given. */
+// deno-lint-ignore no-explicit-any
+async function photosRoute(admin: Admin, caller: any, body: any): Promise<[number, unknown]> {
+  const ids = (Array.isArray(body?.product_ids) ? body.product_ids : []).map(Number).filter((n: number) => Number.isFinite(n) && n > 0);
+  const jans = (Array.isArray(body?.jans) ? body.jans : []).map(String).filter((j: string) => /^[0-9]{8,14}$/.test(j));
+  if (ids.length === 0 && jans.length === 0) return [400, { message: "product_ids or jans are required" }];
+  let q = admin.from("products").select("id, jan_code");
+  q = ids.length ? q.in("id", ids.slice(0, 50)) : q.in("jan_code", jans.slice(0, 50));
+  const { data: products, error } = await q;
+  if (error) return [400, { message: error.message }];
+  const pageUrl = typeof body?.page_url === "string" && body.page_url.trim() ? body.page_url.trim() : null;
+  const again = body?.again === true || pageUrl !== null;
+  const { data: imgs } = await admin.from("product_images").select("product_id")
+    .in("product_id", (products ?? []).map((p) => p.id)).is("withdrawn_at", null);
+  const has = new Set((imgs ?? []).map((i) => i.product_id as number));
+  const results: PhotoResult[] = [];
+  for (const p of (products ?? []).slice(0, 10)) {
+    if (!again && has.has(p.id as number)) {
+      results.push({ product_id: p.id as number, ok: false, reason: "has_images" });
+      continue;
+    }
+    results.push(await photoFor(admin, caller, p as { id: number; jan_code: string }, pageUrl));
+  }
+  return [200, { data: { results, added: results.filter((r) => r.ok).length } }];
 }
 
 /** A site and every copy of it, gone. */
@@ -667,6 +767,14 @@ Deno.serve(async (req) => {
         const [status, out] = await referenceRoute(admin, rest, body, userId);
         return json(out, status);
       }
+    }
+
+    // A product's picture from the web (0166): as the person who asked.
+    if (req.method === "POST" && rest[0] === "photos" && rest.length === 1) {
+      if (byScheduler || !userId) return json({ message: notPermittedMessage("product.manage") }, 403);
+      const body = await req.json().catch(() => ({}));
+      const [status, out] = await photosRoute(admin, caller, body);
+      return json(out, status);
     }
 
     if (req.method === "POST" && rest[0] === "pdf" && rest.length === 2) {

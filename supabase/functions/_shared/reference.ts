@@ -78,3 +78,40 @@ export function fiscalYear(at: Date): number {
   const t = new Date(at.getTime() + 9 * 3600 * 1000);
   return t.getUTCMonth() < 3 ? t.getUTCFullYear() - 1 : t.getUTCFullYear();
 }
+
+/** The picture a product page names for itself (0166): its og:image, else
+ * twitter:image, else link rel=image_src, else a JSON-LD "image" — made
+ * absolute against the page. Null when the page names none. */
+export function pageImageUrl(html: string, page: URL): URL | null {
+  const metas = html.match(/<meta\b[^>]*>/gi) ?? [];
+  const attr = (tag: string, name: string) => {
+    const m = tag.match(new RegExp(`\\b${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+    return m ? decode(m[2] ?? m[3] ?? m[4] ?? "").trim() : null;
+  };
+  const pick = (keys: string[]) => {
+    for (const k of keys) {
+      for (const t of metas) {
+        const key = (attr(t, "property") ?? attr(t, "name") ?? "").toLowerCase();
+        const content = attr(t, "content");
+        if (key === k && content) return content;
+      }
+    }
+    return null;
+  };
+  let raw = pick(["og:image:secure_url", "og:image", "og:image:url", "twitter:image", "twitter:image:src"]);
+  if (!raw) {
+    const link = (html.match(/<link\b[^>]*>/gi) ?? []).find((t) => (attr(t, "rel") ?? "").toLowerCase() === "image_src");
+    raw = link ? attr(link, "href") : null;
+  }
+  if (!raw) {
+    const ld = html.match(/"image"\s*:\s*(\[\s*)?"([^"]+)"/i);
+    raw = ld ? ld[2].replace(/\\\//g, "/") : null;
+  }
+  if (!raw) return null;
+  try {
+    const u = new URL(raw, page);
+    return u.protocol === "https:" || u.protocol === "http:" ? u : null;
+  } catch {
+    return null;
+  }
+}

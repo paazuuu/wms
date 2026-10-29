@@ -7312,7 +7312,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featNameFormatsDesc =>
-      'How product names are built, and renaming a maker or a colour everywhere at once';
+      'How display names are built (formats), and what makers and colours are called';
 
   @override
   String get nfTitle => 'Product format';
@@ -7328,7 +7328,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfIntro =>
-      'A product name is built from its parts — the base name, maker, code, size, colour and so on — by the chosen format. Change a format and every product using it is renamed. Names typed by hand are left alone.';
+      'The display name is built from the name and its parts (maker, code, size, colour…) in the chosen format. Changing a format rebuilds every display name that uses it; names typed by hand stay.';
 
   @override
   String get nfDefault => 'Default';
@@ -7390,7 +7390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfMakeDefault => 'Default for new products';
 
   @override
-  String get nfPreview => 'How real product names change';
+  String get nfPreview => 'How the display names change';
 
   @override
   String get nfPreviewRefresh => 'Check';
@@ -7406,7 +7406,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String nfSaved(int count) {
-    return 'Saved. $count product names rebuilt';
+    return 'Saved. $count display names rebuilt';
   }
 
   @override
@@ -7454,10 +7454,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get pnTitle => 'Build the name';
+  String get pnTitle => 'Display name';
 
   @override
-  String get pnBaseName => 'Base name (without size or colour)';
+  String get pnBaseName => 'Name (as shops show it)';
 
   @override
   String get pnUnit => 'Unit';
@@ -7474,27 +7474,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get pnManual => 'Type the name by hand (no format)';
+  String get pnManual => 'Type the display name by hand (no format)';
 
   @override
-  String get pnName => 'Product name';
+  String get pnName => 'Display name';
 
   @override
-  String get pnPreview => 'Product name';
+  String get pnPreview => 'Display name';
 
   @override
   String get pnLegacy =>
-      'This product has no parts yet. Enter a base name and the format will build its name.';
+      'This product is not in parts yet. Enter its name and the format builds the display name.';
 
   @override
   String get pnAttrsHint =>
       'Size, colour and so on are set on the Attributes tab of the product pictures screen';
 
   @override
-  String get pnNeedsBase => 'Enter a base name';
+  String get pnNeedsBase => 'Enter the name';
 
   @override
-  String get pnSaved => 'Product name updated';
+  String get pnSaved => 'Display name updated';
 
   @override
   String rpOpen(int count) {
@@ -8112,11 +8112,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNamesTitle => 'Names by language';
 
   @override
-  String get productNamesJa => 'Japanese (product name)';
-
-  @override
-  String get productNamesJaHint =>
-      'The Japanese name is built in our name format; change it with \"Build the name\"';
+  String get productNamesJa => 'Japanese (name)';
 
   @override
   String get productNamesEn =>
@@ -12521,9 +12517,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Headings the app did not know were looked up among those learned for this company and the shared ones; the rest were judged by the AI from the heading and the values. If one is wrong, correct it in the reading check.';
 
   @override
-  String get pdBasePart => 'Base name (part of the name)';
-
-  @override
   String get pcName => 'Name';
 
   @override
@@ -12615,4 +12608,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ivDetails => 'Import details (memo, undo)';
+
+  @override
+  String get pnmIntro =>
+      'The name is what shops and the maker call it. The display name is built from the Japanese name by its format. Left blank, it is not yet named again.';
+
+  @override
+  String get pnmSearch => 'Search the web';
+
+  @override
+  String get pnmFound => 'The name found on the web is in; check it, then save';
+
+  @override
+  String get pnmNotFound => 'Not found on the web';
+
+  @override
+  String get pdMarketName => 'Name';
+
+  @override
+  String get pdDisplayNameHint =>
+      'Display name (built from the name by its format)';
+
+  @override
+  String get pdPhotoFind => 'Find a picture on the web';
+
+  @override
+  String get pdPhotoFindAnother => 'Add a picture from the web';
+
+  @override
+  String get pdPhotoSearching => 'Looking for a picture on the web…';
+
+  @override
+  String get pdPhotoAdded =>
+      'A picture from the web was added. If it is not the real thing, change it under Photos';
+
+  @override
+  String pdPhotoNone(String reason) {
+    return 'No picture found ($reason). You can add one by hand under Photos';
+  }
+
+  @override
+  String get pdReservedHint =>
+      'Reserved: set aside for planned shipments and picking. Available = on hand − reserved';
+
+  @override
+  String plPhotosAdded(int count) {
+    return 'Added $count pictures from the web (change any that are not the real thing under Photos)';
+  }
 }

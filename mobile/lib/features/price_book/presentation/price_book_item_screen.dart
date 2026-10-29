@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../product/data/market_names.dart' show sameCode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
@@ -274,10 +275,14 @@ class _Overview extends StatelessWidget {
             Text(l10n.pdBasics, style: theme.textTheme.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             row(l10n.pdMaker, i.maker == null ? null : widenKana(i.maker!), 'cit-maker'),
+            // The 商品名 shops show (0166): 未登録 when it is only the 品番.
+            row(
+                l10n.pdMarketName,
+                i.name.trim().isEmpty || i.name.trim() == i.janCode || sameCode(i.name, i.itemCode ?? '')
+                    ? l10n.plNameMissing
+                    : widenKana(i.name),
+                'cit-market-name'),
             row(l10n.pdCode, i.itemCode, 'cit-code'),
-            // The 商品名 is the title above; the 基本名 only as a part of its own.
-            if (i.baseName case final b? when b.trim().isNotEmpty && b.trim() != i.name.trim() && b.trim() != i.itemCode?.trim())
-              row(l10n.pdBasePart, widenKana(b), 'cit-base-name'),
             row(l10n.pdJan, i.janCode, 'cit-jan'),
             row(l10n.pdSpec, i.spec, 'cit-spec'),
             for (final (n, v) in i.attributes) row(n, widenKana(v), 'cit-attr-$n'),

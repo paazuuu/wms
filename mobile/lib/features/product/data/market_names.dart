@@ -91,6 +91,10 @@ abstract class MarketNameRepository {
   /// What was found before for [jans] (asked before, a name or not).
   Future<ApiResult<Map<String, FoundName>>> cached(List<String> jans);
 
+  /// The 商品名 typed by a person (0166); empty: none again (its 品番 stands
+  /// in, so it can be looked up again).
+  Future<ApiResult<void>> setMarketName(int productId, String? name);
+
   /// Kept per JAN, and taken onto the products (and 価格台帳 lines) that have
   /// only their 品番 for a name. [applied]: products named.
   Future<ApiResult<({int saved, int applied})>> save(List<FoundName> found);
@@ -122,6 +126,16 @@ class MarketNameRepositoryImpl implements MarketNameRepository {
         ],
         searchUnavailable: data['search_unavailable'] == true,
       ));
+    } on DioException catch (e) {
+      return mapDioError(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<void>> setMarketName(int productId, String? name) async {
+    try {
+      await _rest.post('/rpc/set_product_market_name', data: {'p_product_id': productId, 'p_name': name});
+      return const ApiSuccess(null);
     } on DioException catch (e) {
       return mapDioError(e);
     }
@@ -219,11 +233,29 @@ int batchAnswers(Map<String, FoundName> into, List<FoundName> results) {
   return named;
 }
 
-/// A product with only its 品番 (or JAN, or nothing) for a name.
-bool lacksName(Product p) {
-  final name = p.name.trim();
-  final code = p.sku?.trim() ?? '';
-  return name.isEmpty || name == p.janCode || (code.isNotEmpty && name == code);
+/// A code as compared (0166): full-width letters and digits made plain,
+/// upper case, nothing but letters and digits — so UMR05S.33, UMR05S 33 and
+/// ＵＭＲ０５Ｓ－３３ are one code.
+String codeKey(String s) => String.fromCharCodes(s.runes.map((c) => c >= 0xFF01 && c <= 0xFF5E ? c - 0xFEE0 : c))
+    .toUpperCase()
+    .replaceAll(RegExp(r'[^A-Z0-9]'), '');
+
+bool sameCode(String a, String b) {
+  final k = codeKey(a);
+  return k.isNotEmpty && k == codeKey(b);
 }
+
+/// The 商品名 — the name shops show (0164) — when the product has one: its
+/// 基本名, else its name; none when that is only its 品番 or JAN.
+String? marketNameOf(Product p) {
+  bool code(String t) => t.isEmpty || t == p.janCode || (p.sku != null && sameCode(t, p.sku!));
+  final b = p.baseName?.trim() ?? '';
+  if (b.isNotEmpty) return code(b) ? null : b;
+  final n = p.name.trim();
+  return code(n) ? null : n;
+}
+
+/// A product with only its 品番 (or JAN, or nothing) for a 商品名.
+bool lacksName(Product p) => marketNameOf(p) == null;
 
 NameAsk nameAskFor(Product p) => NameAsk(jan: p.janCode, maker: p.maker, code: p.sku, name: p.name);

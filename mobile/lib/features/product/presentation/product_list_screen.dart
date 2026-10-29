@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +17,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_filter.dart';
 import '../application/product_providers.dart';
 import '../data/market_names.dart';
+import '../data/web_photos.dart';
 import '../data/product_export.dart';
 import '../domain/product.dart';
 import 'product_alerts_tab.dart';
@@ -272,6 +275,18 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         if (out.stoppedBy != null) l10n.plFindNamesStopped,
       ].join('\n')),
     ));
+    // A picture for each one named, from the page its name was found on
+    // (0166) — meanwhile; only for those with none yet.
+    final named = [for (final f in out.answers.values) if (f.usable && f.sourceUrl != null) f.jan];
+    if (named.isEmpty) return;
+    final photos = ref.read(webPhotoRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    unawaited(() async {
+      final added = await findWebPhotos(photos, named);
+      if (!mounted || added == 0) return;
+      ref.invalidate(productListProvider);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.plPhotosAdded(added))));
+    }());
   }
 
   /// The chosen products out of the master for good (0126), after the
@@ -1596,7 +1611,8 @@ class ProductCodeTitle extends StatelessWidget {
   }
 }
 
-/// The 商品名 as shops and the maker call it (エナージェル タイプA 0.5mm 黒),
+/// The 商品名 as shops and the maker call it (エナージェル タイプA 0.5mm 黒) —
+/// not the 表示名 built from it (0166),
 /// marked when the AI found it on the web (0164). 未登録 when the product has
 /// only its 品番 for a name — never the 品番 again.
 class ProductNameCell extends StatelessWidget {
@@ -1620,7 +1636,8 @@ class ProductNameCell extends StatelessWidget {
     }
     return Row(key: ValueKey('pl-name-${product.id}'), children: [
       Flexible(
-        child: ProductNameText(name: product.name, nameEn: product.nameEn, names: product.names, style: style, maxLines: 1),
+        child: ProductNameText(
+            name: marketNameOf(product) ?? product.name, nameEn: product.nameEn, names: product.names, style: style, maxLines: 1),
       ),
       if (product.nameByAi)
         Padding(

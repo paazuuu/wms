@@ -155,7 +155,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.lastSaved?.id, 1);
       expect(repo.lastSaved?.template, '{maker} {base} {attr:size} {attr:color} ({code})');
-      expect(find.text('保存しました。3件の商品名を作り直しました'), findsOneWidget);
+      expect(find.text('保存しました。3件の表示名を作り直しました'), findsOneWidget);
     });
 
     testWidgets('a format without the base name is not saved', (tester) async {
@@ -243,7 +243,7 @@ void main() {
     testWidgets('is built from its parts as they are typed', (tester) async {
       final repo = await open(tester, const ProductNaming(id: 3, name: 'ﾕﾆﾎﾞｰﾙ ｴｱ 0.5MM ｱｶ', maker: '三菱鉛筆', sku: 'UBA-188'));
       // A product from before 0111 has no parts yet.
-      expect(find.text('この商品はまだ部品に分かれていません。基本名を入れると様式で名前が作られます。'), findsOneWidget);
+      expect(find.text('この商品はまだ部品に分かれていません。商品名を入れると様式で表示名が作られます。'), findsOneWidget);
       await tester.enterText(find.byKey(const ValueKey('pn-base')), 'ユニボール エア');
       await tester.enterText(find.byKey(const ValueKey('pn-unit')), '本');
       await tester.enterText(find.byKey(const ValueKey('pn-price')), '200');
