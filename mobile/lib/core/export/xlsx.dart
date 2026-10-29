@@ -12,6 +12,29 @@ import 'package:xml/xml.dart';
 /// [top] rows come above the header — a document's heading: who it is for,
 /// who sends it — with their first cell in bold; [bottom] rows come under the
 /// lines (a total), in bold.
+/// One sheet of a workbook: its name, heading row, rows, cells to fill
+/// yellow (row, column) and column widths; rows above the heading ([top])
+/// and below the rows ([bottom]) in bold.
+class XlsxSheet {
+  const XlsxSheet({
+    required this.name,
+    required this.headers,
+    required this.rows,
+    this.flagged = const {},
+    this.widths,
+    this.top = const [],
+    this.bottom = const [],
+  });
+
+  final String name;
+  final List<String> headers;
+  final List<List<Object?>> rows;
+  final Set<(int, int)> flagged;
+  final List<double>? widths;
+  final List<List<Object?>> top;
+  final List<List<Object?>> bottom;
+}
+
 Uint8List buildXlsx({
   required String sheetName,
   required List<String> headers,
@@ -20,23 +43,30 @@ Uint8List buildXlsx({
   List<double>? widths,
   List<List<Object?>> top = const [],
   List<List<Object?>> bottom = const [],
-}) {
-  String esc(String s) => const HtmlEscape(HtmlEscapeMode.element).convert(s.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), ''));
+}) =>
+    buildXlsxBook([
+      XlsxSheet(name: sheetName, headers: headers, rows: rows, flagged: flagged, widths: widths, top: top, bottom: bottom),
+    ]);
 
+String _esc(String s) =>
+    const HtmlEscape(HtmlEscapeMode.element).convert(s.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), ''));
+
+String _sheetXml(XlsxSheet x) {
   String cell(int r, int c, Object? v, int style) {
     final ref = '${columnLetters(c)}${r + 1}';
     final s = style == 0 ? '' : ' s="$style"';
     if (v == null || (v is String && v.isEmpty)) return style == 0 ? '' : '<c r="$ref"$s/>';
     if (v is num && v.isFinite) return '<c r="$ref"$s><v>$v</v></c>';
-    return '<c r="$ref"$s t="inlineStr"><is><t xml:space="preserve">${esc('$v')}</t></is></c>';
+    return '<c r="$ref"$s t="inlineStr"><is><t xml:space="preserve">${_esc('$v')}</t></is></c>';
   }
 
-  final head = top.length;
+  final head = x.top.length;
   final sheet = StringBuffer()
     ..write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
     ..write('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">')
     ..write('<sheetViews><sheetView workbookViewId="0"><pane ySplit="${head + 1}" topLeftCell="A${head + 2}" '
         'activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>');
+  final widths = x.widths;
   if (widths != null && widths.isNotEmpty) {
     sheet.write('<cols>');
     for (final (i, w) in widths.indexed) {
@@ -45,7 +75,7 @@ Uint8List buildXlsx({
     sheet.write('</cols>');
   }
   sheet.write('<sheetData>');
-  for (final (r, row) in top.indexed) {
+  for (final (r, row) in x.top.indexed) {
     sheet.write('<row r="${r + 1}">');
     for (final (c, v) in row.indexed) {
       sheet.write(cell(r, c, v, c == 0 ? 3 : 0));
@@ -53,19 +83,19 @@ Uint8List buildXlsx({
     sheet.write('</row>');
   }
   sheet.write('<row r="${head + 1}">');
-  for (final (c, h) in headers.indexed) {
+  for (final (c, h) in x.headers.indexed) {
     sheet.write(cell(head, c, h, 1));
   }
   sheet.write('</row>');
-  for (final (r, row) in rows.indexed) {
+  for (final (r, row) in x.rows.indexed) {
     sheet.write('<row r="${head + r + 2}">');
-    for (var c = 0; c < headers.length; c++) {
-      sheet.write(cell(head + r + 1, c, c < row.length ? row[c] : null, flagged.contains((r, c)) ? 2 : 0));
+    for (var c = 0; c < x.headers.length; c++) {
+      sheet.write(cell(head + r + 1, c, c < row.length ? row[c] : null, x.flagged.contains((r, c)) ? 2 : 0));
     }
     sheet.write('</row>');
   }
-  for (final (r, row) in bottom.indexed) {
-    final at = head + rows.length + r + 1;
+  for (final (r, row) in x.bottom.indexed) {
+    final at = head + x.rows.length + r + 1;
     sheet.write('<row r="${at + 1}">');
     for (final (c, v) in row.indexed) {
       sheet.write(cell(at, c, v, 3));
@@ -73,9 +103,21 @@ Uint8List buildXlsx({
     sheet.write('</row>');
   }
   sheet.write('</sheetData></worksheet>');
+  return sheet.toString();
+}
 
-  final name = esc(sheetName.isEmpty ? 'Sheet1' : (sheetName.length > 31 ? sheetName.substring(0, 31) : sheetName))
-      .replaceAll(RegExp(r'[\\/?*\[\]:]'), ' ');
+/// A workbook of [sheets], in order (sheet names made valid and unique).
+Uint8List buildXlsxBook(List<XlsxSheet> sheets) {
+  final names = <String>[];
+  for (final x in sheets) {
+    var n = (x.name.isEmpty ? 'Sheet${names.length + 1}' : x.name).replaceAll(RegExp(r'[\\/?*\[\]:]'), ' ');
+    if (n.length > 31) n = n.substring(0, 31);
+    var unique = n;
+    for (var i = 2; names.contains(unique); i++) {
+      unique = '${n.length > 28 ? n.substring(0, 28) : n}($i)';
+    }
+    names.add(unique);
+  }
   const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
       '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
       '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
@@ -89,6 +131,16 @@ Uint8List buildXlsx({
       '<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFill="1"/>'
       '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
       '</styleSheet>';
+  final overrides = StringBuffer();
+  final rels = StringBuffer();
+  final entries = StringBuffer();
+  for (var i = 0; i < sheets.length; i++) {
+    overrides.write('<Override PartName="/xl/worksheets/sheet${i + 1}.xml" '
+        'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>');
+    rels.write('<Relationship Id="rId${i + 1}" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>');
+    entries.write('<sheet name="${_esc(names[i])}" sheetId="${i + 1}" r:id="rId${i + 1}"/>');
+  }
   final archive = Archive()
     ..add(ArchiveFile.string(
         '[Content_Types].xml',
@@ -97,7 +149,7 @@ Uint8List buildXlsx({
             '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
             '<Default Extension="xml" ContentType="application/xml"/>'
             '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-            '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+            '$overrides'
             '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
             '</Types>'))
     ..add(ArchiveFile.string(
@@ -111,16 +163,18 @@ Uint8List buildXlsx({
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
             'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-            '<sheets><sheet name="$name" sheetId="1" r:id="rId1"/></sheets></workbook>'))
+            '<sheets>$entries</sheets></workbook>'))
     ..add(ArchiveFile.string(
         'xl/_rels/workbook.xml.rels',
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
-            '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+            '$rels'
+            '<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
             '</Relationships>'))
-    ..add(ArchiveFile.string('xl/styles.xml', styles))
-    ..add(ArchiveFile.string('xl/worksheets/sheet1.xml', sheet.toString()));
+    ..add(ArchiveFile.string('xl/styles.xml', styles));
+  for (var i = 0; i < sheets.length; i++) {
+    archive.add(ArchiveFile.string('xl/worksheets/sheet${i + 1}.xml', _sheetXml(sheets[i])));
+  }
   return ZipEncoder().encodeBytes(archive);
 }
 

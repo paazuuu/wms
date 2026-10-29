@@ -12802,4 +12802,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planEnteredUnknown => 'unknown';
+
+  @override
+  String get featTaxFiles => 'Files for the accountant';
+
+  @override
+  String get featTaxFilesDesc =>
+      'Each month\'s purchases (net, tax, gross, registration numbers) as Excel, with the invoices';
+
+  @override
+  String txIntro(int years) {
+    return 'Invoices taken in with “stock from a file”, by the month of their date. Made from the records each time, so an import, a correction or an undo shows at once. Net, tax (10% / 8%), gross and registration numbers — for export tax refund claims too. Kept $years years from the document\'s date.';
+  }
+
+  @override
+  String txYear(int year) {
+    return '$year';
+  }
+
+  @override
+  String txMonth(int year, int month) {
+    return '$year-$month';
+  }
+
+  @override
+  String txNone(int year) {
+    return 'No purchases in $year';
+  }
+
+  @override
+  String txTotals(int count, String net, String tax, String gross) {
+    return '$count invoices  net ¥$net  tax ¥$tax  gross ¥$gross';
+  }
+
+  @override
+  String txInvoiceFigures(String net, String tax, String gross) {
+    return 'net ¥$net / tax ¥$tax / gross ¥$gross';
+  }
+
+  @override
+  String txUpdated(String at) {
+    return 'Updated $at';
+  }
+
+  @override
+  String txKeptTill(String date) {
+    return 'Kept until $date';
+  }
+
+  @override
+  String txDoubtful(int count) {
+    return '$count to check';
+  }
+
+  @override
+  String get txExcel => 'Download Excel';
+
+  @override
+  String get txZip => 'Excel and invoices (ZIP)';
+
+  @override
+  String txZipDone(int count) {
+    return 'Zipped the Excel and $count invoices';
+  }
+
+  @override
+  String txZipMissing(int count, int missing) {
+    return 'Zipped the Excel and $count invoices ($missing originals could not be fetched; see 不足.txt)';
+  }
+
+  @override
+  String get txNoSupplier => 'Supplier unknown';
+
+  @override
+  String get txNoRegistration => 'No registration number';
+
+  @override
+  String get txDoubtRegistration => 'check the registration number';
+
+  @override
+  String get txDoubtTotals => 'differs from the document\'s total';
+
+  @override
+  String get txDoubtAmounts => 'amounts not read';
+
+  @override
+  String get txDoubtDate => 'dated by the import';
+
+  @override
+  String get txNoPermission =>
+      'Needs stock adjustment, reports or user management';
 }

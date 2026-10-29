@@ -12541,4 +12541,92 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get planEnteredUnknown => '登録者不明';
+
+  @override
+  String get featTaxFiles => '税理士用ファイル';
+
+  @override
+  String get featTaxFilesDesc => '毎月の仕入れ（税抜・消費税・税込、登録番号）をExcelに。請求書の元ファイルも一式で';
+
+  @override
+  String txIntro(int years) {
+    return '「ファイルから在庫登録」で取り込んだ請求書を、書類の日付の月ごとにまとめます。開くたびに今の記録から作るので、取り込み・修正・取り消しがすぐ反映されます。税抜・消費税（10%・8%別）・税込と登録番号を載せ、輸出の消費税還付申請の確認にも使えます。保存は書類の日付から$years年です。';
+  }
+
+  @override
+  String txYear(int year) {
+    return '$year年';
+  }
+
+  @override
+  String txMonth(int year, int month) {
+    return '$year年$month月分';
+  }
+
+  @override
+  String txNone(int year) {
+    return '$year年の仕入れはありません';
+  }
+
+  @override
+  String txTotals(int count, String net, String tax, String gross) {
+    return '$count件　税抜 ¥$net　消費税 ¥$tax　税込 ¥$gross';
+  }
+
+  @override
+  String txInvoiceFigures(String net, String tax, String gross) {
+    return '税抜 ¥$net / 税 ¥$tax / 税込 ¥$gross';
+  }
+
+  @override
+  String txUpdated(String at) {
+    return '最終更新 $at';
+  }
+
+  @override
+  String txKeptTill(String date) {
+    return '保存期限 $date';
+  }
+
+  @override
+  String txDoubtful(int count) {
+    return '要確認 $count件';
+  }
+
+  @override
+  String get txExcel => 'Excelをダウンロード';
+
+  @override
+  String get txZip => '証拠ファイル一式（ZIP）';
+
+  @override
+  String txZipDone(int count) {
+    return 'Excelと請求書$count件をZIPにしました';
+  }
+
+  @override
+  String txZipMissing(int count, int missing) {
+    return 'Excelと請求書$count件をZIPにしました（$missing件は元ファイルが取れず、ZIP内の「不足.txt」に記載）';
+  }
+
+  @override
+  String get txNoSupplier => '仕入先不明';
+
+  @override
+  String get txNoRegistration => '登録番号なし';
+
+  @override
+  String get txDoubtRegistration => '登録番号を確認';
+
+  @override
+  String get txDoubtTotals => '書類の合計と不一致';
+
+  @override
+  String get txDoubtAmounts => '金額が読めていない';
+
+  @override
+  String get txDoubtDate => '日付は取込日';
+
+  @override
+  String get txNoPermission => '在庫調整・レポート・ユーザー管理のいずれかの権限が必要です';
 }

@@ -11162,5 +11162,125 @@
       }
     }
   },
-  "planEnteredUnknown": "登録者不明"
+  "planEnteredUnknown": "登録者不明",
+  "featTaxFiles": "税理士用ファイル",
+  "featTaxFilesDesc": "毎月の仕入れ（税抜・消費税・税込、登録番号）をExcelに。請求書の元ファイルも一式で",
+  "txIntro": "「ファイルから在庫登録」で取り込んだ請求書を、書類の日付の月ごとにまとめます。開くたびに今の記録から作るので、取り込み・修正・取り消しがすぐ反映されます。税抜・消費税（10%・8%別）・税込と登録番号を載せ、輸出の消費税還付申請の確認にも使えます。保存は書類の日付から{years}年です。",
+  "@txIntro": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "txYear": "{year}年",
+  "@txYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "txMonth": "{year}年{month}月分",
+  "@txMonth": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "txNone": "{year}年の仕入れはありません",
+  "@txNone": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "txTotals": "{count}件　税抜 ¥{net}　消費税 ¥{tax}　税込 ¥{gross}",
+  "@txTotals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "net": {
+        "type": "String"
+      },
+      "tax": {
+        "type": "String"
+      },
+      "gross": {
+        "type": "String"
+      }
+    }
+  },
+  "txInvoiceFigures": "税抜 ¥{net} / 税 ¥{tax} / 税込 ¥{gross}",
+  "@txInvoiceFigures": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "tax": {
+        "type": "String"
+      },
+      "gross": {
+        "type": "String"
+      }
+    }
+  },
+  "txUpdated": "最終更新 {at}",
+  "@txUpdated": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "txKeptTill": "保存期限 {date}",
+  "@txKeptTill": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "txDoubtful": "要確認 {count}件",
+  "@txDoubtful": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txExcel": "Excelをダウンロード",
+  "txZip": "証拠ファイル一式（ZIP）",
+  "txZipDone": "Excelと請求書{count}件をZIPにしました",
+  "@txZipDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txZipMissing": "Excelと請求書{count}件をZIPにしました（{missing}件は元ファイルが取れず、ZIP内の「不足.txt」に記載）",
+  "@txZipMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "txNoSupplier": "仕入先不明",
+  "txNoRegistration": "登録番号なし",
+  "txDoubtRegistration": "登録番号を確認",
+  "txDoubtTotals": "書類の合計と不一致",
+  "txDoubtAmounts": "金額が読めていない",
+  "txDoubtDate": "日付は取込日",
+  "txNoPermission": "在庫調整・レポート・ユーザー管理のいずれかの権限が必要です"
 }

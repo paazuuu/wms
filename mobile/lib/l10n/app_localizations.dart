@@ -22321,6 +22321,138 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'登録者不明'**
   String get planEnteredUnknown;
+
+  /// No description provided for @featTaxFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'税理士用ファイル'**
+  String get featTaxFiles;
+
+  /// No description provided for @featTaxFilesDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'毎月の仕入れ（税抜・消費税・税込、登録番号）をExcelに。請求書の元ファイルも一式で'**
+  String get featTaxFilesDesc;
+
+  /// No description provided for @txIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'「ファイルから在庫登録」で取り込んだ請求書を、書類の日付の月ごとにまとめます。開くたびに今の記録から作るので、取り込み・修正・取り消しがすぐ反映されます。税抜・消費税（10%・8%別）・税込と登録番号を載せ、輸出の消費税還付申請の確認にも使えます。保存は書類の日付から{years}年です。'**
+  String txIntro(int years);
+
+  /// No description provided for @txYear.
+  ///
+  /// In ja, this message translates to:
+  /// **'{year}年'**
+  String txYear(int year);
+
+  /// No description provided for @txMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'{year}年{month}月分'**
+  String txMonth(int year, int month);
+
+  /// No description provided for @txNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{year}年の仕入れはありません'**
+  String txNone(int year);
+
+  /// No description provided for @txTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件　税抜 ¥{net}　消費税 ¥{tax}　税込 ¥{gross}'**
+  String txTotals(int count, String net, String tax, String gross);
+
+  /// No description provided for @txInvoiceFigures.
+  ///
+  /// In ja, this message translates to:
+  /// **'税抜 ¥{net} / 税 ¥{tax} / 税込 ¥{gross}'**
+  String txInvoiceFigures(String net, String tax, String gross);
+
+  /// No description provided for @txUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終更新 {at}'**
+  String txUpdated(String at);
+
+  /// No description provided for @txKeptTill.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存期限 {date}'**
+  String txKeptTill(String date);
+
+  /// No description provided for @txDoubtful.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認 {count}件'**
+  String txDoubtful(int count);
+
+  /// No description provided for @txExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelをダウンロード'**
+  String get txExcel;
+
+  /// No description provided for @txZip.
+  ///
+  /// In ja, this message translates to:
+  /// **'証拠ファイル一式（ZIP）'**
+  String get txZip;
+
+  /// No description provided for @txZipDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelと請求書{count}件をZIPにしました'**
+  String txZipDone(int count);
+
+  /// No description provided for @txZipMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelと請求書{count}件をZIPにしました（{missing}件は元ファイルが取れず、ZIP内の「不足.txt」に記載）'**
+  String txZipMissing(int count, int missing);
+
+  /// No description provided for @txNoSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先不明'**
+  String get txNoSupplier;
+
+  /// No description provided for @txNoRegistration.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号なし'**
+  String get txNoRegistration;
+
+  /// No description provided for @txDoubtRegistration.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号を確認'**
+  String get txDoubtRegistration;
+
+  /// No description provided for @txDoubtTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の合計と不一致'**
+  String get txDoubtTotals;
+
+  /// No description provided for @txDoubtAmounts.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額が読めていない'**
+  String get txDoubtAmounts;
+
+  /// No description provided for @txDoubtDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付は取込日'**
+  String get txDoubtDate;
+
+  /// No description provided for @txNoPermission.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫調整・レポート・ユーザー管理のいずれかの権限が必要です'**
+  String get txNoPermission;
 }
 
 class _AppLocalizationsDelegate

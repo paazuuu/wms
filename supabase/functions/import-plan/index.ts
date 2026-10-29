@@ -915,6 +915,8 @@ Deno.serve(async (req) => {
       doc_date: header.doc_date ?? deliveryDate, line_count: merged.length, addressee: header.addressee ?? null,
       // How the reading went, for AIの稼働状況 (0133).
       quality: readingQuality(lines, source, verified, totals),
+      // The document's own 小計・消費税・合計, for 税理士用ファイル (0168).
+      totals: totals ?? null,
     });
     if (merged.length === 0) {
       // Nothing read because the AI could not be used: say that, not "no rows".

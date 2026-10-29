@@ -12467,4 +12467,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get planEnteredUnknown => '登记人不明';
+
+  @override
+  String get featTaxFiles => '税务师用文件';
+
+  @override
+  String get featTaxFilesDesc => '每月进货（不含税・消费税・含税、登记号）导出Excel，附发票原件';
+
+  @override
+  String txIntro(int years) {
+    return '将“从文件登记库存”导入的发票按单据日期的月份汇总。每次打开都按当前记录生成，导入、修改、撤销立即反映。列出不含税、消费税（10%・8%）、含税及登记号，也可用于出口退税申请的核对。自单据日期起保存$years年。';
+  }
+
+  @override
+  String txYear(int year) {
+    return '$year年';
+  }
+
+  @override
+  String txMonth(int year, int month) {
+    return '$year年$month月';
+  }
+
+  @override
+  String txNone(int year) {
+    return '$year年没有进货';
+  }
+
+  @override
+  String txTotals(int count, String net, String tax, String gross) {
+    return '$count件　不含税 ¥$net　消费税 ¥$tax　含税 ¥$gross';
+  }
+
+  @override
+  String txInvoiceFigures(String net, String tax, String gross) {
+    return '不含税 ¥$net / 税 ¥$tax / 含税 ¥$gross';
+  }
+
+  @override
+  String txUpdated(String at) {
+    return '最后更新 $at';
+  }
+
+  @override
+  String txKeptTill(String date) {
+    return '保存期限 $date';
+  }
+
+  @override
+  String txDoubtful(int count) {
+    return '需确认 $count件';
+  }
+
+  @override
+  String get txExcel => '下载Excel';
+
+  @override
+  String get txZip => '凭证文件全套（ZIP）';
+
+  @override
+  String txZipDone(int count) {
+    return '已将Excel和$count份发票打包为ZIP';
+  }
+
+  @override
+  String txZipMissing(int count, int missing) {
+    return '已打包Excel和$count份发票（$missing份原件无法获取，见ZIP内“不足.txt”）';
+  }
+
+  @override
+  String get txNoSupplier => '供应商不明';
+
+  @override
+  String get txNoRegistration => '无登记号';
+
+  @override
+  String get txDoubtRegistration => '确认登记号';
+
+  @override
+  String get txDoubtTotals => '与单据合计不符';
+
+  @override
+  String get txDoubtAmounts => '金额未读取';
+
+  @override
+  String get txDoubtDate => '日期按导入日';
+
+  @override
+  String get txNoPermission => '需要库存调整、报表或用户管理中任一权限';
 }

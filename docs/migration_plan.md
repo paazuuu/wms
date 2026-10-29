@@ -8035,6 +8035,46 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Notes are therefore removed by `removed_at`, not deleted, and the file
     says so.
 
+## 0168: 税理士用ファイル — each month's purchases as Excel, with the invoices
+
+- The menu has 税理士用ファイル (in-app; stock adjustment, reports or user
+  management may open it). Each month shows:
+  - its invoices, count, 税抜, 消費税 and 税込;
+  - what to check, when it last changed, and how long it is kept.
+- Each month has two downloads: 「Excelをダウンロード」 and 「証拠ファイル一式
+  （ZIP）」, the Excel plus every invoice's original in 証拠/, named
+  YYYYMMDD_仕入先_取込N.
+- Source: `tax_purchases(from, to)`.
+  - It covers every 「ファイルから在庫登録」 import not taken back (検品待ち
+    included), with its evidence document (0132): supplier, 登録番号, number,
+    file and SHA-256.
+  - The month is the document's date, else the day it was taken in.
+  - Made from the records each time, so an import, a correction or an undo
+    shows at once.
+- The Excel has four sheets:
+  - 請求書一覧: one invoice a row, with 10% and 8% 税抜 and tax, 非課税, totals,
+    the document's own total and whether it agrees, paid, evidence name,
+    import number, SHA-256, kept until, and notes and doubts in yellow.
+  - 明細: each line, with the tax and 税込 for reference.
+  - 仕入先別.
+  - 説明: how the figures are made.
+- How the tax is worked out:
+  - 税抜 is as the invoice prices it. A row priced only 税込 is worked back
+    by its rate.
+  - Tax is worked out once per invoice and rate, rounded down (as 適格請求書
+    do).
+  - When the invoice has one rate and prints its tax, that tax is used.
+  - Rows a person left out do not count. A row with no rate is 10%.
+- Checked against the two invoices of 10-29:
+  - #18: 614,820 + 61,482 = 676,302.
+  - #19: 328,600 + 32,860 = 361,460.
+  - Both are the invoices' own totals.
+- `import_documents.totals`: the document's own 小計・消費税・合計, kept from
+  now on by import-plan, so the Excel says 一致 / 不一致. Earlier documents
+  have none (the column is blank).
+- Kept 7 years from the document's date, like the imports and their files
+  (0148's purge).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

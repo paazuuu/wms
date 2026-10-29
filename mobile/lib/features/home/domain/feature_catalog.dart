@@ -55,6 +55,7 @@ import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
+import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
 
 /// The app's full feature menu, grouped for the home dashboard.
@@ -538,6 +539,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _reports,
             requiredAnyOf: ['report.view', 'report.manage'],
           ),
+          // 税理士用ファイル (0168): each month's purchases as an Excel, with
+          // the invoices as evidence.
+          FeatureEntry(
+            id: 'tax_files',
+            icon: Icons.receipt_long_outlined,
+            status: FeatureStatus.ready,
+            builder: _taxFiles,
+            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
+          ),
           // Teaching each trading company's way of writing before its goods
           // arrive (0105/0106): sample files read, checked and learned.
           FeatureEntry(
@@ -593,6 +603,7 @@ Widget _supplierProductNames(BuildContext _) => const SupplierProductNamesScreen
 Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _stockFileImport(BuildContext _) => const StockFileImportScreen();
 Widget _stockInspection(BuildContext _) => const StockInspectionScreen();
+Widget _taxFiles(BuildContext _) => const TaxFilesScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
 Widget _purchaseRequests(BuildContext _) => const PurchaseRequestsScreen();
