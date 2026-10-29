@@ -193,12 +193,19 @@ class CalendarImport extends Equatable {
     this.paid = false,
     this.note,
     this.createdAt,
+    this.dayKind = 'document',
+    this.documentDate,
   });
 
   final int id;
 
-  /// The document's date, else the day it came in.
+  /// The day it is shown on: its document's date, or the day it came in
+  /// (0165: on both, when they differ).
   final DateTime day;
+
+  /// document, imported, or both (the same day).
+  final String dayKind;
+  final DateTime? documentDate;
   final DocumentDateSource? source;
   final String? fileName;
   final String? warehouseName;
@@ -228,11 +235,13 @@ class CalendarImport extends Equatable {
       paid: j['paid'] == true,
       note: j['note']?.toString(),
       createdAt: DateTime.tryParse('${j['created_at'] ?? ''}')?.toLocal(),
+      dayKind: j['day_kind']?.toString() ?? 'document',
+      documentDate: DateTime.tryParse('${j['document_date'] ?? ''}'),
     );
   }
 
   @override
-  List<Object?> get props => [id, day, status, undone, lines, change, paid, note];
+  List<Object?> get props => [id, day, dayKind, status, undone, lines, change, paid, note];
 }
 
 /// One line as the inspector counted it.

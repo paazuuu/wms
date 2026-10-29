@@ -11875,9 +11875,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get rcMakerName => 'メーカー（商品名）';
-
-  @override
   String get rcReadOnlyTitle => '読み取り結果（表）';
 
   @override
@@ -12344,4 +12341,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfOnWeb => 'Webで確認';
+
+  @override
+  String calImportedAt(String at) {
+    return '取込 $at';
+  }
+
+  @override
+  String calDocumentDate(String date) {
+    return '書類の日付 $date';
+  }
+
+  @override
+  String get rcResult => '反映';
+
+  @override
+  String get ivDetails => '取込の詳細（メモ・取り消し）';
 }

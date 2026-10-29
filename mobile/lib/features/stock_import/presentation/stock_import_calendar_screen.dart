@@ -276,8 +276,13 @@ class _CalendarTile extends StatelessWidget {
         leading: Icon(item.awaiting ? Icons.pending_actions_outlined : Icons.description_outlined),
         title: Text(l10n.siFile(item.id, item.fileName ?? '')),
         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Which day this is (0165): the day it was taken in, and the
+          // document's own date.
           Text([
-            DateFormat('y/MM/dd').format(item.day),
+            if (item.createdAt case final c?) l10n.calImportedAt(DateFormat('y/MM/dd HH:mm').format(c)),
+            if (item.documentDate case final d?) l10n.calDocumentDate(DateFormat('y/MM/dd').format(d)),
+          ].join(' · '), key: ValueKey('cal-dates-${item.id}')),
+          Text([
             if (item.warehouseName case final w?) w,
             status,
           ].join(' · ')),

@@ -21152,12 +21152,6 @@ abstract class AppLocalizations {
   /// **'{m}（最安）'**
   String aiModelLight(String m);
 
-  /// No description provided for @rcMakerName.
-  ///
-  /// In ja, this message translates to:
-  /// **'メーカー（商品名）'**
-  String get rcMakerName;
-
   /// No description provided for @rcReadOnlyTitle.
   ///
   /// In ja, this message translates to:
@@ -21967,6 +21961,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'Webで確認'**
   String get sfOnWeb;
+
+  /// No description provided for @calImportedAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 {at}'**
+  String calImportedAt(String at);
+
+  /// No description provided for @calDocumentDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の日付 {date}'**
+  String calDocumentDate(String date);
+
+  /// No description provided for @rcResult.
+  ///
+  /// In ja, this message translates to:
+  /// **'反映'**
+  String get rcResult;
+
+  /// No description provided for @ivDetails.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込の詳細（メモ・取り消し）'**
+  String get ivDetails;
 }
 
 class _AppLocalizationsDelegate

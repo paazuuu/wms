@@ -3869,7 +3869,6 @@
   "aiModelStrong": "{m} (accurate)",
   "aiModelMiddle": "{m} (standard)",
   "aiModelLight": "{m} (cheapest)",
-  "rcMakerName": "Maker (name)",
   "rcReadOnlyTitle": "Reading (table)",
   "rcReadOnlyIntro": "What was checked when it was taken in. Blue: corrected by a person; struck through: left out. A name, when there is one, follows the maker in brackets.",
   "ivTable": "View as a table",
@@ -4004,5 +4003,9 @@
   "sfNamesAfterCheck": "Once the reading is checked, the names and catalogue pages are looked up (a name not found can stay blank).",
   "sfNamesLooking": "Looking up names in the catalogues and on the web… {done} of {total}",
   "sfInCatalog": "{catalog} p.{page}",
-  "sfOnWeb": "Found on the web"
+  "sfOnWeb": "Found on the web",
+  "calImportedAt": "Taken in {at}",
+  "calDocumentDate": "Document date {date}",
+  "rcResult": "Result",
+  "ivDetails": "Import details (memo, undo)"
 }

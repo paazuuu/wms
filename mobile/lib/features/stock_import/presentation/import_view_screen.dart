@@ -190,10 +190,12 @@ class ImportViewButtons extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+      // 読み取り結果を見る: the same table as when it was read and checked,
+      // beside the original (0165); the import's details from there.
       if (known == null)
         OutlinedButton.icon(
           key: ValueKey('iv-open-$importId'),
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: importId))),
+          onPressed: () => openReadingTable(context, ref, importId),
           icon: const Icon(Icons.compare_outlined, size: 18),
           label: Text(l10n.ivOpen),
         ),
@@ -212,6 +214,52 @@ class ImportViewButtons extends ConsumerWidget {
       ),
     ]);
   }
+}
+
+/// The reading as it was checked when it came in: the same table, beside
+/// the original, read only — the catalog and weight columns as they stand,
+/// and what became of each row (反映). The import's details (memo, paid,
+/// undo) one tap away.
+Future<void> openReadingTable(BuildContext context, WidgetRef ref, int importId, {MasterImport? known}) async {
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  MasterImport m;
+  try {
+    m = known ?? await ref.read(importDetailProvider(importId).future);
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, '$e'))));
+    return;
+  }
+  final file = m.files.where((f) => f.kind == 'original').firstOrNull;
+  Uint8List? bytes;
+  if (file != null) {
+    try {
+      bytes = await ref.read(importFileBytesProvider(file.path).future);
+    } catch (_) {
+      bytes = null;
+    }
+  }
+  if (!context.mounted) return;
+  final outcomes = readOutcomes(m);
+  await Navigator.of(context).push(MaterialPageRoute(
+    builder: (c) => ReadingCheckScreen(
+      rows: [for (final o in outcomes) o.row],
+      fileName: file?.name ?? m.originalName,
+      bytes: bytes,
+      readOnly: true,
+      catalogLookup: (jans) => lookupJans(ref.read(janCatalogRepositoryProvider), jans),
+      results: {for (final o in outcomes) o.row.lineNo: readFateText(l10n, o)},
+      actions: [
+        if (known == null)
+          TextButton.icon(
+            key: ValueKey('iv-details-$importId'),
+            onPressed: () => Navigator.of(c).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: importId))),
+            icon: const Icon(Icons.info_outline, size: 18),
+            label: Text(l10n.ivDetails),
+          ),
+      ],
+    ),
+  ));
 }
 
 /// 読み取り結果 (0146): a file that changed stock, opened beside what was made
@@ -504,27 +552,7 @@ class _ReadPane extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: OutlinedButton.icon(
                 key: ValueKey('iv-table-${m.id}'),
-                onPressed: () async {
-                  final file = m.files.where((f) => f.kind == 'original').firstOrNull;
-                  Uint8List? bytes;
-                  if (file != null) {
-                    try {
-                      bytes = await ref.read(importFileBytesProvider(file.path).future);
-                    } catch (_) {
-                      bytes = null;
-                    }
-                  }
-                  if (!context.mounted) return;
-                  await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => ReadingCheckScreen(
-                      rows: [for (final o in outcomes) o.row],
-                      fileName: file?.name ?? m.originalName,
-                      bytes: bytes,
-                      readOnly: true,
-                      catalogLookup: (jans) => lookupJans(ref.read(janCatalogRepositoryProvider), jans),
-                    ),
-                  ));
-                },
+                onPressed: () => openReadingTable(context, ref, m.id, known: m),
                 icon: const Icon(Icons.table_chart_outlined, size: 18),
                 label: Text(l10n.ivTable),
               ),

@@ -599,7 +599,9 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('rc-1-quantity')), '10');
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('rc-mismatch')), findsNothing);
-    // The other is left out.
+    // The other is left out (the table scrolled sideways to the 数量 typed in).
+    await tester.ensureVisible(find.byKey(const ValueKey('rc-remove-2')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('rc-remove-2')));
     await tester.pumpAndSettle();
     expect(find.text('1行・数量合計 10・金額合計 880'), findsOneWidget);

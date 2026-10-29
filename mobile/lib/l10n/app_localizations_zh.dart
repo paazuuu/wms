@@ -11804,9 +11804,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get rcMakerName => '厂商（品名）';
-
-  @override
   String get rcReadOnlyTitle => '读取结果（表）';
 
   @override
@@ -12271,4 +12268,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfOnWeb => '网上确认';
+
+  @override
+  String calImportedAt(String at) {
+    return '导入 $at';
+  }
+
+  @override
+  String calDocumentDate(String date) {
+    return '单据日期 $date';
+  }
+
+  @override
+  String get rcResult => '结果';
+
+  @override
+  String get ivDetails => '导入详情（备注・撤销）';
 }

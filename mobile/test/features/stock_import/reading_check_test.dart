@@ -25,7 +25,7 @@ void main() {
   test('the cells a doubt points to', () {
     expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['jan_check', 'ai_disagree:planned_quantity'])),
         {'jan', 'quantity'});
-    expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['split_disagree'])), {'maker_name', 'code'});
+    expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['split_disagree'])), {'name', 'code'});
     expect(doubtfulCells(const ReadRow(lineNo: 1, flags: ['unresolved'])), isEmpty);
   });
 
@@ -92,16 +92,7 @@ void main() {
     expect(result!.single.ledger.amount, '12280');
   });
 
-  test('メーカー（商品名） as one text, and back into its two', () {
-    expect(makerAndName('パイロット', ''), 'パイロット');
-    expect(makerAndName('三菱鉛筆', 'ジェットストリーム 0.7'), '三菱鉛筆（ジェットストリーム 0.7）');
-    expect(splitMakerAndName('三菱鉛筆（ジェットストリーム 0.7）'), ('三菱鉛筆', 'ジェットストリーム 0.7'));
-    expect(splitMakerAndName('ゼブラ (サラサ)'), ('ゼブラ', 'サラサ'));
-    expect(splitMakerAndName('コクヨ'), ('コクヨ', ''));
-    expect(splitMakerAndName('（ノート）'), ('', 'ノート'));
-  });
-
-  testWidgets('maker and name share a column; edited there, both are kept', (tester) async {
+  testWidgets('メーカー and 商品名 are two columns; each edited on its own', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     List<ReadRow>? result;
@@ -122,9 +113,13 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    expect(find.text('メーカー（商品名）'), findsOneWidget);
-    expect(find.byKey(const ValueKey('rc-1-name')), findsNothing);
-    await tester.enterText(find.byKey(const ValueKey('rc-1-maker_name')), 'パイロット（テストペン 黒）');
+    expect(find.text('メーカー'), findsOneWidget);
+    expect(find.text('商品名'), findsOneWidget);
+    expect(find.text('メーカー（商品名）'), findsNothing);
+    // The file gave no name: the 商品名 is empty, not the maker or the 品番.
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-1-name'))).controller!.text, '');
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('rc-1-maker'))).controller!.text, 'パイロット');
+    await tester.enterText(find.byKey(const ValueKey('rc-1-name')), 'テストペン 黒');
     await tester.tap(find.byKey(const ValueKey('rc-ok')));
     await tester.pumpAndSettle();
     expect([result!.single.maker, result!.single.name], ['パイロット', 'テストペン 黒']);

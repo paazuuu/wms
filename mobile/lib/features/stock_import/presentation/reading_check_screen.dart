@@ -18,31 +18,16 @@ import 'import_view_screen.dart' show OriginalFileView;
 /// [LedgerFields] key) and how wide it is.
 typedef _Col = ({String key, double width});
 
-/// メーカー and 品名 share a column: most invoices print no name, and an
-/// empty 品名 column took the most room. A name, when there is one, is shown
-/// after the maker in brackets: 三菱鉛筆（ジェットストリーム…）.
+/// The reading's own columns. メーカー and 商品名 are two: the maker
+/// (パイロット), and the name shops show (アクロボール Tシリーズ 0.5 黒) —
+/// empty when the file gives none (many invoices print only a 品番).
 const _core = <_Col>[
   (key: 'jan', width: 140),
-  (key: 'maker_name', width: 200),
+  (key: 'maker', width: 120),
+  (key: 'name', width: 220),
   (key: 'code', width: 140),
   (key: 'quantity', width: 70),
 ];
-
-/// メーカー（品名） as one text.
-String makerAndName(String maker, String name) {
-  final m = maker.trim(), n = name.trim();
-  if (n.isEmpty) return m;
-  return '$m（$n）';
-}
-
-/// メーカー（品名） back into its two: what is in brackets at the end is
-/// the name (（）or ()), the rest the maker.
-(String, String) splitMakerAndName(String text) {
-  final t = text.trim();
-  final m = RegExp(r'^(.*?)\s*[（(]([^（）()]*)[）)]\s*$').firstMatch(t);
-  if (m == null) return (t, '');
-  return (m.group(1)!.trim(), m.group(2)!.trim());
-}
 
 /// The ledger's columns, in its order; shown when the file had them.
 /// 単価 and 金額 first: what a quantity is checked against.
@@ -73,6 +58,9 @@ const _catalogCol = (key: 'catalog', width: 150.0);
 /// Its weight as it stands (0155): a person's, the catalog's, or the AI's.
 const _weightCol = (key: 'weight', width: 140.0);
 
+/// Looked back at: what became of the row (0165).
+const _resultCol = (key: 'result', width: 260.0);
+
 final _jan13 = RegExp(r'^\d{13}$');
 
 const _numeric = {'quantity', 'unit_price', 'amount', 'list_price', 'unit_price_tax'};
@@ -81,7 +69,6 @@ String _value(ReadRow r, String key) => switch (key) {
       'jan' => r.jan,
       'name' => r.name,
       'maker' => r.maker,
-      'maker_name' => makerAndName(r.maker, r.name),
       'code' => r.code,
       'quantity' => r.quantity,
       _ => r.ledger[key],
@@ -95,13 +82,13 @@ Set<String> doubtfulCells(ReadRow r) => {
               'jan'
             },
           'no_quantity' || 'qty_from_amount' || 'qty_from_cases' || 'ai_disagree:planned_quantity' => {'quantity'},
-          'ai_disagree:product_name' => {'maker_name'},
+          'ai_disagree:product_name' => {'name'},
           'ai_disagree:product_code' => {'code'},
-          'ai_disagree:maker' => {'maker_name'},
+          'ai_disagree:maker' => {'maker'},
           'ai_disagree:unit_price' => {'unit_price'},
           'ai_disagree:amount' => {'amount'},
           'amount_mismatch' => {'quantity', 'amount'},
-          'split_disagree' || 'split_failed' => {'maker_name', 'code'},
+          'split_disagree' || 'split_failed' => {'name', 'code'},
           _ => const <String>{},
         },
     };
@@ -161,12 +148,10 @@ class _EditRow {
       ledger = ledger.withValue(c.key, this[c.key]);
     }
     final janChanged = changed('jan'), qtyChanged = changed('quantity');
-    final (maker, name) =
-        changed('maker_name') ? splitMakerAndName(this['maker_name']) : (original.maker, original.name);
     return original.copyWith(
       jan: this['jan'],
-      name: name,
-      maker: maker,
+      name: this['name'],
+      maker: this['maker'],
       code: this['code'],
       quantity: this['quantity'],
       ledger: ledger,
@@ -195,7 +180,9 @@ class ReadingCheckScreen extends StatefulWidget {
       this.bytes,
       this.readOnly = false,
       this.catalogLookup,
-      this.weightLookup});
+      this.weightLookup,
+      this.results,
+      this.actions = const []});
 
   final List<ReadRow> rows;
   final String? fileName;
@@ -212,6 +199,13 @@ class ReadingCheckScreen extends StatefulWidget {
   /// Asks the AI for the weights nothing else gives (see [findWeightsWithAi]);
   /// none (looked back at, or not permitted), only the weights already known.
   final Future<({List<AiWeight> found, bool stopped})> Function(List<WeightAsk> asks)? weightLookup;
+
+  /// Looked back at (0165): what became of each row, by its line number —
+  /// shown as a last column, 反映.
+  final Map<int, String>? results;
+
+  /// Beside the title (looked back at: the import's details).
+  final List<Widget> actions;
 
   @override
   State<ReadingCheckScreen> createState() => _ReadingCheckScreenState();
@@ -261,7 +255,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
       final hit = _hits[jan];
       if (hit == null || !hit.needsWeight || _weighed.contains(jan) || r.removed) continue;
       if (asks.any((a) => a.jan == jan)) continue;
-      final (maker, name) = splitMakerAndName(r['maker_name']);
+      final maker = r['maker'], name = r['name'];
       asks.add((
         jan: jan,
         maker: maker.isEmpty ? hit.maker : maker,
@@ -307,14 +301,15 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         ..._core.skip(1),
         for (final c in _ledger)
           if (_allColumns || _rows.any((r) => r[c.key].isNotEmpty || _value(r.original, c.key).isNotEmpty)) c,
+        if (widget.results != null) _resultCol,
       ];
 
   String _label(AppLocalizations l10n, String key) => switch (key) {
         'jan' => l10n.ntFieldJan,
         'name' => l10n.ntFieldName,
         'maker' => l10n.ntFieldMaker,
-        'maker_name' => l10n.rcMakerName,
         'catalog' => l10n.rcCatalog,
+        'result' => l10n.rcResult,
         'weight' => l10n.rcWeight,
         'code' => l10n.ntFieldCode,
         'quantity' => l10n.ntFieldQuantity,
@@ -391,6 +386,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           hits: _hits,
           weighing: _weighing,
           weighed: _weighed,
+          results: widget.results ?? const {},
           onChanged: () {
             _lookup();
             setState(() {});
@@ -440,7 +436,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           ]);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.readOnly ? l10n.rcReadOnlyTitle : l10n.rcTitle)),
+      appBar: AppBar(title: Text(widget.readOnly ? l10n.rcReadOnlyTitle : l10n.rcTitle), actions: widget.actions),
       body: LayoutBuilder(builder: (context, c) {
         // On a PC the original and the reading side by side; else in tabs.
         if (c.maxWidth >= 1100) {
@@ -496,11 +492,13 @@ class _Table extends StatefulWidget {
     this.hits = const {},
     this.weighing = const {},
     this.weighed = const {},
+    this.results = const {},
   });
 
   final Map<String, JanCatalogHit> hits;
   final Set<String> weighing;
   final Set<String> weighed;
+  final Map<int, String> results;
   final List<_EditRow> rows;
   final List<_Col> cols;
   final String Function(String) label;
@@ -575,7 +573,8 @@ class _TableState extends State<_Table> {
                       readOnly: widget.readOnly,
                       hit: widget.hits[rows[i]['jan']],
                       weighing: widget.weighing.contains(rows[i]['jan']),
-                      weighed: widget.weighed.contains(rows[i]['jan'])),
+                      weighed: widget.weighed.contains(rows[i]['jan']),
+                      result: widget.results[rows[i].original.lineNo]),
                 ),
               ),
             ]),
@@ -595,9 +594,11 @@ class _RowView extends StatelessWidget {
     this.hit,
     this.weighing = false,
     this.weighed = false,
+    this.result,
   });
 
   final JanCatalogHit? hit;
+  final String? result;
   final bool weighing;
   final bool weighed;
   final _EditRow row;
@@ -666,7 +667,18 @@ class _RowView extends StatelessWidget {
           ]),
         ),
         for (final col in cols)
-          if (col.key == 'catalog')
+          if (col.key == 'result')
+            Container(
+              width: col.width,
+              margin: const EdgeInsets.only(right: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(result ?? '',
+                  key: ValueKey('rc-$no-result'),
+                  style: theme.textTheme.bodySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis),
+            )
+          else if (col.key == 'catalog')
             Container(
               width: col.width,
               margin: const EdgeInsets.only(right: 4),

@@ -12125,9 +12125,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rcMakerName => 'Maker (name)';
-
-  @override
   String get rcReadOnlyTitle => 'Reading (table)';
 
   @override
@@ -12602,4 +12599,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sfOnWeb => 'Found on the web';
+
+  @override
+  String calImportedAt(String at) {
+    return 'Taken in $at';
+  }
+
+  @override
+  String calDocumentDate(String date) {
+    return 'Document date $date';
+  }
+
+  @override
+  String get rcResult => 'Result';
+
+  @override
+  String get ivDetails => 'Import details (memo, undo)';
 }

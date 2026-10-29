@@ -7938,6 +7938,24 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - 価格台帳 (56 lines) is kept; its lines link again by JAN when the
     products are registered.
 
+## 0165: 取込カレンダー by the day taken in; one table to look back; メーカー and 商品名 apart
+
+- `stock_file_calendar` shows an import on the day it was taken in as well
+  as on its document's date.
+  - Before, it showed only on the document's date, so a 09-01 invoice taken
+    in on 10-29 was not on 10-29.
+  - Each row says which day it is (`day_kind`: document / imported / both).
+  - The list shows both: 取込 2026/10/29 13:13 · 書類の日付 2026/09/01.
+- 読み取り結果の確認 has メーカー and 商品名 as two columns. The combined
+  「メーカー（品名）」 column is gone.
+  - The 商品名 is the name shops show. It is empty when the file gives none:
+    never the maker or the 品番.
+- 取込履歴 → 読み取り結果を見る opens the same table as when the file came in.
+  - The original is beside it, read only, with the catalog and weight
+    columns.
+  - A last column, 反映, says what became of each row.
+  - 取込の詳細（メモ・取り消し） opens the former detail view.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -141,6 +141,26 @@ void main() {
     expect(find.byKey(const ValueKey('iv-sheet')), findsOneWidget);
   });
 
+  testWidgets('読み取り結果を見る opens the same table as when it was checked, with what became of each row (0165)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1600, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const Scaffold(body: ImportViewButtons(importId: 12)), overrides: [
+      masterImportRepositoryProvider.overrideWithValue(_Repo()),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('iv-open-12')));
+    await tester.pumpAndSettle();
+    expect(find.text('読み取り結果（表）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-table')), findsOneWidget);
+    expect(find.byKey(const ValueKey('rc-ok')), findsNothing);
+    expect(find.text('反映'), findsWidgets);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('rc-2-result'))).data, '→ テストペン 青: 在庫 40 → 55（+15）');
+    // The import's details (memo, undo) from there.
+    await tester.tap(find.byKey(const ValueKey('iv-details-12')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('iv-read')), findsOneWidget);
+  });
+
   testWidgets('a stock file can be taken back, after asking', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));

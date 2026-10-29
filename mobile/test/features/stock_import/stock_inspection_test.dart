@@ -196,6 +196,25 @@ void main() {
     expect(find.byKey(const ValueKey('cal-none')), findsOneWidget);
   });
 
+  testWidgets('a file is on the day it was taken in, as well as on its document date (0165)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    Map<String, dynamic> row(String day, String kind) => {
+          'id': 18, 'day': day, 'day_kind': kind, 'document_date': '2026-09-01',
+          'created_at': '2026-10-29T13:13:00', 'original_name': '請求書.pdf', 'status': 'stock_done',
+        };
+    final stock = _Stock(month: [CalendarImport.fromJson(row('2026-10-29', 'imported'))]);
+    await pumpApp(tester, StockImportCalendarScreen(initialMonth: DateTime(2026, 10)), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+    ]);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('cal-count-29'))).data, '1件');
+    await tester.tap(find.byKey(const ValueKey('cal-day-29')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(find.byKey(const ValueKey('cal-dates-18'))).data, '取込 2026/10/29 13:13 · 書類の日付 2026/09/01');
+    expect(CalendarImport.fromJson(row('2026-09-01', 'document')).dayKind, 'document');
+  });
+
   testWidgets('a file registered for inspection is listed on 検品 too, for its warehouse', (tester) async {
     AwaitingImport waiting(int id, int wh) => AwaitingImport.fromJson({
           'id': id, 'original_name': '請求書$id.pdf', 'warehouse_id': wh, 'warehouse_name': '倉庫$wh', 'lines': 9, 'left': 9,

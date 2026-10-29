@@ -10653,7 +10653,6 @@
       }
     }
   },
-  "rcMakerName": "メーカー（商品名）",
   "rcReadOnlyTitle": "読み取り結果（表）",
   "rcReadOnlyIntro": "取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。商品名がある場合はメーカーの後ろに（）で表示します。",
   "ivTable": "表で見る",
@@ -11034,5 +11033,23 @@
       }
     }
   },
-  "sfOnWeb": "Webで確認"
+  "sfOnWeb": "Webで確認",
+  "calImportedAt": "取込 {at}",
+  "@calImportedAt": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "calDocumentDate": "書類の日付 {date}",
+  "@calDocumentDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rcResult": "反映",
+  "ivDetails": "取込の詳細（メモ・取り消し）"
 }
