@@ -7912,6 +7912,13 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - The library shows 「選択して削除」, which chooses every product shown;
     unticking one leaves it out (said in the bar).
   - The removal is confirmed by typing 削除; products in use stay (0126).
+- 2026-10-29: all 31 products were removed at the user's request, to start
+  the trial again. None was in use.
+  - Backups are in backup_20261029_*: products, product_names, product_uoms,
+    product_barcodes, supplier_product_names, and the 価格台帳 and purchase
+    request links.
+  - 価格台帳 (56 lines) is kept; its lines link again by JAN when the
+    products are registered.
 
 ## Rollout discipline
 
