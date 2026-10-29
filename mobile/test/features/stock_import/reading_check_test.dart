@@ -92,7 +92,7 @@ void main() {
     expect(result!.single.ledger.amount, '12280');
   });
 
-  test('メーカー（品名） as one text, and back into its two', () {
+  test('メーカー（商品名） as one text, and back into its two', () {
     expect(makerAndName('パイロット', ''), 'パイロット');
     expect(makerAndName('三菱鉛筆', 'ジェットストリーム 0.7'), '三菱鉛筆（ジェットストリーム 0.7）');
     expect(splitMakerAndName('三菱鉛筆（ジェットストリーム 0.7）'), ('三菱鉛筆', 'ジェットストリーム 0.7'));
@@ -122,7 +122,7 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    expect(find.text('メーカー（品名）'), findsOneWidget);
+    expect(find.text('メーカー（商品名）'), findsOneWidget);
     expect(find.byKey(const ValueKey('rc-1-name')), findsNothing);
     await tester.enterText(find.byKey(const ValueKey('rc-1-maker_name')), 'パイロット（テストペン 黒）');
     await tester.tap(find.byKey(const ValueKey('rc-ok')));

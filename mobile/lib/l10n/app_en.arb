@@ -3873,7 +3873,7 @@
   "rcReadOnlyTitle": "Reading (table)",
   "rcReadOnlyIntro": "What was checked when it was taken in. Blue: corrected by a person; struck through: left out. A name, when there is one, follows the maker in brackets.",
   "ivTable": "View as a table",
-  "sfColProduct": "Product",
+  "sfColProduct": "Name",
   "sfColBefore": "Now",
   "sfColChange": "Change",
   "sfColAfter": "After",
@@ -4000,5 +4000,9 @@
   "plSelectDelete": "Choose and remove",
   "lcExcludeHint": "Unticked products are left out",
   "sfNamesFinding": "Looking up the names of the {count} new products on the web…",
-  "sfNamesFound": "Named {found} of the {total} new products from the web"
+  "sfNamesFound": "Named {found} of the {total} new products from the web",
+  "sfNamesAfterCheck": "Once the reading is checked, the names and catalogue pages are looked up (a name not found can stay blank).",
+  "sfNamesLooking": "Looking up names in the catalogues and on the web… {done} of {total}",
+  "sfInCatalog": "{catalog} p.{page}",
+  "sfOnWeb": "Found on the web"
 }

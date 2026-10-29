@@ -10,6 +10,7 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../master_import/data/master_import_repository.dart';
@@ -140,6 +141,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _busy = true;
       _done = null;
       _namesNote = null;
+      _catalog = const {};
+      _names = const {};
+      _namesStopped = false;
       _error = null;
       _badFile = false;
       _fileName = f.name;
@@ -239,6 +243,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       return;
     }
     await _lookup();
+    unawaited(_lookUpNames());
   }
 
   /// 読み取り結果の確認: every row read, as a table beside the original, to
@@ -267,6 +272,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _checked = false;
     });
     await _lookup();
+    unawaited(_lookUpNames());
   }
 
   /// The chosen warehouse, as the screen shows it.
@@ -345,7 +351,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         if (!_book.containsKey(l.janCode)) l
     ];
     if (fresh.isNotEmpty) {
-      final r = await book.import([for (final l in fresh) l.toPriceBookLine()], sourceFile: _fileName);
+      final r = await book.import([for (final l in fresh) l.toPriceBookLine(name: _nameFor(l))], sourceFile: _fileName);
       if (!mounted) return false;
       switch (r) {
         case ApiSuccess(:final data):
@@ -366,7 +372,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         // meanwhile (0164), while the stock goes in.
         unawaited(_findNames([
           for (final l in todo)
-            if ((l.name ?? '').trim().isEmpty || l.name!.trim() == l.code?.trim() || l.name!.trim() == l.janCode)
+            if (!_names.containsKey(l.janCode) && _nameFor(l) == null)
               NameAsk(jan: l.janCode, maker: l.maker, code: l.code, name: l.name),
         ]));
         return true;
@@ -378,6 +384,84 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   /// The names found for products just registered (0164), said when done.
   String? _namesNote;
+
+  /// Once a person has checked what was read (a sheet read here needs no
+  /// check): each JAN's place in the makers' catalogs, and the 商品名 the web
+  /// gives (0164) — kept apart until the products are registered.
+  Map<String, JanCatalogHit> _catalog = const {};
+  Map<String, FoundName> _names = const {};
+  bool _namesBusy = false;
+  int _namesDone = 0;
+  int _namesTotal = 0;
+  bool _namesStopped = false;
+
+  bool get _checkCleared => _sheet != null && (!_sheet!.byAi || _tableChecked);
+
+  /// The 商品名 a line goes in under, as shops and the maker call it: the
+  /// library's (when it is more than the 品番), the one the web gave, else the
+  /// file's (when it is more than the 品番); blank when none is known.
+  String? _nameFor(StockFileLine l) {
+    bool real(String? n) {
+      final t = n?.trim() ?? '';
+      return t.isNotEmpty && t != (l.code ?? '').trim() && t != l.janCode;
+    }
+
+    final library = _known[l.janCode] ?? _book[l.janCode]?.$2;
+    if (real(library)) return library!.trim();
+    if (_names[l.janCode] case final f? when f.usable) return f.name!.trim();
+    if (real(l.name)) return l.name!.trim();
+    return null;
+  }
+
+  /// Where the 商品名 was found: the catalog page, else the web page.
+  ({String label, String url})? _whereFound(StockFileLine l, AppLocalizations l10n) {
+    if (_catalog[l.janCode] case final h? when h.found && h.pageUrl != null) {
+      return (label: l10n.sfInCatalog(h.catalogName ?? '', h.pageNumber ?? ''), url: h.pageUrl!);
+    }
+    if (_names[l.janCode] case final f? when f.usable && f.sourceUrl != null) {
+      return (label: l10n.sfOnWeb, url: f.sourceUrl!);
+    }
+    return null;
+  }
+
+  /// After the check: the catalogs, the names asked before, then the web for
+  /// the rest (whoever may register products). Runs meanwhile; the lines
+  /// can be sent in before it ends.
+  Future<void> _lookUpNames() async {
+    final sheet = _sheet;
+    if (sheet == null || !_checkCleared || sheet.lines.isEmpty) return;
+    final jans = [for (final l in sheet.lines) l.janCode];
+    final catalog = await lookupJans(ref.read(janCatalogRepositoryProvider), jans);
+    if (!mounted) return;
+    final repo = ref.read(marketNameRepositoryProvider);
+    final before = await repo.cached(jans);
+    if (!mounted) return;
+    setState(() {
+      _catalog = {..._catalog, ...catalog};
+      if (before case ApiSuccess(:final data)) _names = {..._names, ...data};
+    });
+    if (!ref.read(productLibraryCanManageProvider)) return;
+    final asks = [
+      for (final l in sheet.lines)
+        if (!_names.containsKey(l.janCode) && _nameFor(l) == null)
+          NameAsk(jan: l.janCode, maker: l.maker, code: l.code, name: l.name),
+    ];
+    if (asks.isEmpty) return;
+    setState(() {
+      _namesBusy = true;
+      _namesDone = 0;
+      _namesTotal = asks.length;
+    });
+    final out = await findMarketNames(repo, asks, onProgress: (done, _) {
+      if (mounted) setState(() => _namesDone = done);
+    });
+    if (!mounted) return;
+    setState(() {
+      _namesBusy = false;
+      _names = {..._names, ...out.answers};
+      _namesStopped = out.stoppedBy != null;
+    });
+  }
 
   Future<void> _findNames(List<NameAsk> asks) async {
     if (asks.isEmpty) return;
@@ -865,6 +949,13 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             const SizedBox(height: AppSpacing.md),
             Text(l10n.sfGoingIn(ready.length + willRegister),
                 key: const ValueKey('sf-going-in'), style: theme.textTheme.titleSmall),
+            // 商品名 and catalog pages: only once what was read is checked.
+            if (!_checkCleared)
+              Text(l10n.sfNamesAfterCheck, key: const ValueKey('sf-names-after-check'), style: muted)
+            else if (_namesBusy)
+              Text(l10n.sfNamesLooking(_namesDone, _namesTotal), key: const ValueKey('sf-names-looking'), style: muted)
+            else if (_namesStopped)
+              Text(l10n.plFindNamesStopped, key: const ValueKey('sf-names-stopped'), style: muted),
             // On a PC the lines as a table, field by field as in the check;
             // on a phone, as a list.
             LayoutBuilder(builder: (context, c) {
@@ -874,6 +965,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   lines: going,
                   known: _known,
                   book: _book,
+                  nameFor: _nameFor,
+                  whereFound: (l) => _whereFound(l, l10n),
                   onHand: _onHand,
                   mode: _mode,
                   onTap: _busy ? null : _editLine,
@@ -894,9 +987,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                         : null,
                     // The product's own name: the file may write it otherwise,
                     // and the JAN alone decides whose stock it is.
-                    title: Text(_known[l.janCode] ?? _book[l.janCode]?.$2 ?? l.name ?? l.janCode),
+                    title: Text(_nameFor(l) ?? '', key: ValueKey('sf-name-${l.janCode}')),
                     subtitle: Text([
                       l.janCode,
+                      if ((l.code ?? '').isNotEmpty) l.code!,
                       if (!_known.containsKey(l.janCode)) l10n.sfNewProduct,
                       if (l.name case final n?
                           when n.trim() != (_known[l.janCode] ?? _book[l.janCode]?.$2 ?? '').trim())
@@ -1177,11 +1271,17 @@ class _GoingInTable extends StatefulWidget {
     required this.onHand,
     required this.mode,
     required this.onTap,
+    required this.nameFor,
+    required this.whereFound,
   });
 
   final List<StockFileLine> lines;
   final Map<String, String> known;
   final Map<String, (int, String)> book;
+
+  /// The 商品名 shown (blank when none is known), and where it was found.
+  final String? Function(StockFileLine) nameFor;
+  final ({String label, String url})? Function(StockFileLine) whereFound;
   final Map<String, int> onHand;
   final StockFileMode mode;
   final void Function(StockFileLine)? onTap;
@@ -1248,10 +1348,13 @@ class _GoingInTableState extends State<_GoingInTable> {
               final change = add ? l.quantity : l.quantity - before;
               final after = add ? before + l.quantity : l.quantity;
               final big = implausibleQuantity(l.quantity);
-              final known = widget.known[l.janCode] ?? widget.book[l.janCode]?.$2;
+              final name = widget.nameFor(l);
+              final where = widget.whereFound(l);
               final notes = [
                 if (!widget.known.containsKey(l.janCode)) l10n.sfNewProduct,
-                if (l.name case final nm? when nm.trim() != (known ?? '').trim()) l10n.sfFileName(nm),
+                if (l.name case final nm?
+                    when nm.trim().isNotEmpty && nm.trim() != (name ?? '').trim() && nm.trim() != (l.code ?? '').trim())
+                  l10n.sfFileName(nm),
                 if (l.merged > 1) l10n.sfMerged(l.merged),
                 if (big) l10n.sfImplausible,
               ];
@@ -1271,8 +1374,24 @@ class _GoingInTableState extends State<_GoingInTable> {
                             )
                           : const SizedBox.shrink(),
                     ),
-                    // The product's own name: the file may write it otherwise.
-                    cell(1, Text(known ?? l.registerName ?? l.janCode, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                    // The 商品名 (blank when none is known), and the catalog
+                    // page or web page it was found on.
+                    cell(
+                        1,
+                        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(name ?? '',
+                              key: ValueKey('sf-name-${l.janCode}'), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          if (where != null)
+                            InkWell(
+                              key: ValueKey('sf-where-${l.janCode}'),
+                              onTap: () => openExternalUrl(where.url),
+                              child: Text(where.label,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                      color: scheme.primary, decoration: TextDecoration.underline),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                        ])),
                     cell(2, Text(l.janCode, style: theme.textTheme.bodySmall)),
                     cell(3, Text(l.maker ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
                     cell(4, Text(l.code ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),

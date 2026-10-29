@@ -12,6 +12,8 @@ import 'package:wms_mobile/features/master_import/data/master_import_repository.
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/price_book/application/price_book_providers.dart';
 import 'package:wms_mobile/features/price_book/domain/price_book.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
 import 'package:wms_mobile/features/product/data/market_names.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
@@ -21,6 +23,7 @@ import 'package:wms_mobile/features/stock_import/presentation/stock_file_import_
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
+import '../../support/fake_jan_catalog_repository.dart';
 import '../../support/fake_market_name_repository.dart';
 import '../../support/harness.dart';
 
@@ -460,20 +463,28 @@ void main() {
     expect(find.byKey(const ValueKey('iv-open-12')), findsOneWidget);
   });
 
-  testWidgets('products registered with only a 品番 have their 商品名 looked up on the web (0164)', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+  testWidgets('the 商品名 column: the name from the web or the catalog page, blank when none is known — never the 品番 (0164)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final book = FakePriceBookRepository();
     final repo = _FakeStock({_jan1: 'テストペン 青'}, priceBook: book);
-    final names = FakeMarketNameRepository(names: {_jan3: 'テスト消しゴム ミニ 白'});
-    // jan3 has a 品番 and a maker, no name; jan2 has its name.
+    // jan2 found on the web; jan3 in a catalog but nowhere named.
+    final names = FakeMarketNameRepository(names: {_jan2: 'テストノート A罫 B5'});
+    final catalog = FakeJanCatalogRepository(hits: {
+      _jan3: const JanCatalogHit(
+          jan: _jan3, found: true, covered: true, catalogName: 'テスト総合カタログ', pageNumber: '67',
+          pageUrl: 'https://catalog.example/67'),
+    });
     final csv = Uint8List.fromList(utf8.encode('JAN,品番,品名,メーカー,数量\n$_jan1,TP-1,ペン,テスト文具,1\n'
-        '$_jan2,TN-1,テストノート,テスト文具,2\n$_jan3,TE-1,,テスト文具,3\n'));
+        '$_jan2,TN-1,,テスト文具,2\n$_jan3,TE-1,,テスト文具,3\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
       _signedIn(['inventory.adjust', 'product.manage']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       priceBookRepositoryProvider.overrideWithValue(book),
       marketNameRepositoryProvider.overrideWithValue(names),
+      janCatalogRepositoryProvider.overrideWithValue(catalog),
+      productLibraryCanManageProvider.overrideWithValue(true),
       stockFilePickerProvider.overrideWithValue(() async => (name: 'a.csv', bytes: csv)),
       warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
         warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
@@ -482,14 +493,26 @@ void main() {
     ]);
     await tester.tap(find.byKey(const ValueKey('sf-pick')));
     await tester.pumpAndSettle();
+
+    expect(find.text('商品名'), findsWidgets);
+    String nameOf(String jan) => tester.widget<Text>(find.byKey(ValueKey('sf-name-$jan'))).data!;
+    expect(nameOf(_jan1), 'テストペン 青');
+    expect(nameOf(_jan2), 'テストノート A罫 B5');
+    expect(nameOf(_jan3), ''); // blank, not TE-1
+    expect(find.descendant(of: find.byKey(const ValueKey('sf-where-$_jan3')), matching: find.text('テスト総合カタログ p.67')),
+        findsOneWidget);
+    // The library's product is not asked about; the two new ones are, once.
+    expect(names.asked.single.map((a) => a.jan), [_jan2, _jan3]);
+
     await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sf-confirm')));
     await tester.pumpAndSettle();
-
-    expect(names.asked.single, [const NameAsk(jan: _jan3, maker: 'テスト文具', code: 'TE-1')]);
-    expect(find.text('新しく登録した1件のうち1件に、Webで見つけた商品名を入れました'), findsOneWidget);
+    // Registered under the name found; the unnamed one under its 品番 (the
+    // library then says 未登録), and not asked about again.
+    expect(book.imports.single.lines.map((l) => l['product_name']), ['テストノート A罫 B5', 'TE-1']);
+    expect(names.asked, hasLength(1));
   });
 
   testWidgets('unticked, only what the library has goes in', (tester) async {

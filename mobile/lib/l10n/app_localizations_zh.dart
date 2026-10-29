@@ -11817,7 +11817,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ivTable => '以表查看';
 
   @override
-  String get sfColProduct => '商品';
+  String get sfColProduct => '商品名';
 
   @override
   String get sfColBefore => '现库存';
@@ -12255,4 +12255,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String sfNamesFound(int found, int total) {
     return '新登记的$total件中，已为$found件填入网上找到的商品名';
   }
+
+  @override
+  String get sfNamesAfterCheck => '确认读取结果后，将查找商品名和目录所在页（查不到的商品名可留空登记）。';
+
+  @override
+  String sfNamesLooking(int done, int total) {
+    return '正在目录和网上查找商品名… $done / $total 件';
+  }
+
+  @override
+  String sfInCatalog(String catalog, String page) {
+    return '$catalog 第$page页';
+  }
+
+  @override
+  String get sfOnWeb => '网上确认';
 }

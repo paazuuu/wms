@@ -238,7 +238,7 @@
   "totalStockTitle": "総在庫（JAN別）",
   "sortMenu": "並び替え",
   "sortByStock": "在庫数順",
-  "sortByName": "品名順",
+  "sortByName": "商品名順",
   "sortByJan": "JAN順",
   "stockOnHandUnit": "在庫",
   "stockEmpty": "在庫がまだありません。",
@@ -5435,7 +5435,7 @@
       }
     }
   },
-  "ntTrainIntro": "商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。",
+  "ntTrainIntro": "商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、商品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。",
   "@ntTrainIntro": {
     "description": "Notation dialects / training (0105-0106): ntTrainIntro"
   },
@@ -5589,7 +5589,7 @@
   "@ntUnconfirmedOnly": {
     "description": "Notation dialects / training (0105-0106): ntUnconfirmedOnly"
   },
-  "ntDialectSearch": "書き方・品名・JANで検索",
+  "ntDialectSearch": "書き方・商品名・JANで検索",
   "@ntDialectSearch": {
     "description": "Notation dialects / training (0105-0106): ntDialectSearch"
   },
@@ -5800,15 +5800,15 @@
       }
     }
   },
-  "ntFlagSplitDisagree": "品名と品番の分け方が不一致",
+  "ntFlagSplitDisagree": "商品名と品番の分け方が不一致",
   "@ntFlagSplitDisagree": {
     "description": "Notation dialects / training (0105-0106): ntFlagSplitDisagree"
   },
-  "ntFlagSplitSingle": "品名と品番を分解（片方の方法のみ）",
+  "ntFlagSplitSingle": "商品名と品番を分解（片方の方法のみ）",
   "@ntFlagSplitSingle": {
     "description": "Notation dialects / training (0105-0106): ntFlagSplitSingle"
   },
-  "ntFlagSplitFailed": "品名と品番を分けられず",
+  "ntFlagSplitFailed": "商品名と品番を分けられず",
   "@ntFlagSplitFailed": {
     "description": "Notation dialects / training (0105-0106): ntFlagSplitFailed"
   },
@@ -5840,7 +5840,7 @@
   "@ntMatchSku": {
     "description": "Notation dialects / training (0105-0106): ntMatchSku"
   },
-  "ntMatchName": "自社品名で一致",
+  "ntMatchName": "自社の商品名で一致",
   "@ntMatchName": {
     "description": "Notation dialects / training (0105-0106): ntMatchName"
   },
@@ -6375,7 +6375,7 @@
   "aiSaved": "しきい値を保存しました",
   "featAiSettings": "AI設定",
   "featAiSettingsDesc": "読み取りの確信度のしきい値",
-  "aiSettingsIntro": "書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。",
+  "aiSettingsIntro": "書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、商品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。",
   "aiAutoThreshold": "自動候補の下限",
   "aiReviewThreshold": "確認推奨の下限（これ未満は要確認）",
   "aiExample": "例",
@@ -7199,13 +7199,13 @@
   "productDeleteInUse": "在庫・発注・入荷・出荷・請求のどれかで使われています。履歴が読めるよう、削除ではなく無効にしてください。",
   "productDeleteNotReady": "削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。",
   "quoteImportTitle": "ファイルから一括登録",
-  "quoteImportIntro": "見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。",
+  "quoteImportIntro": "見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・商品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。",
   "quoteSupplier": "仕入先",
   "quoteChooseSupplier": "先に仕入先を選んでください",
   "quoteChooseFile": "見積書のファイルを選ぶ",
   "quoteRead": "AIで読み取る",
   "quoteReading": "読み取り中です。PDFや写真は1分ほどかかることがあります。",
-  "quoteNothingRead": "商品の行が読み取れませんでした。表の見出し（JAN・品名・単価など）があるか確かめてください。",
+  "quoteNothingRead": "商品の行が読み取れませんでした。表の見出し（JAN・商品名・単価など）があるか確かめてください。",
   "quoteUnverified": "AIの2回の読み取りが一部食い違いました。数字を確かめてください",
   "quoteSummary": "{total}行：登録済み {known}・新しい商品 {fresh}・JANなし {noJan}",
   "@quoteSummary": {
@@ -7578,7 +7578,7 @@
   "featPriceBook": "価格台帳",
   "featPriceBookDesc": "仕入先ごとの商品の呼び方・価格・掛率の台帳（支店・時期ごと）。ファイルから取り込み、商品ライブラリーとは別に管理します",
   "clTitle": "価格台帳",
-  "clSearchHint": "品名・メーカー・品番・JAN・仕入先の表記で検索",
+  "clSearchHint": "商品名・メーカー・品番・JAN・仕入先の表記で検索",
   "clEmpty": "価格台帳は空です",
   "clEmptyBody": "「ファイルから取り込む」で、見積書・請求書・カタログなどを読み込んでください。",
   "clInMaster": "ライブラリー登録済み",
@@ -7617,7 +7617,7 @@
     }
   },
   "ciTitle": "ファイルから取り込む",
-  "ciIntro": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。",
+  "ciIntro": "見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・商品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。",
   "ciTermsFor": "価格の扱い（任意）",
   "ciBranch": "仕入先の支店",
   "ciBranchHint": "例: 大阪支店（空欄なら全支店共通）",
@@ -7806,7 +7806,7 @@
   "pkBlocked": "JAN・メーカーなし（取り込めません）",
   "pmFromPriceBook": "価格台帳から取り込む",
   "libImportTitle": "ファイルから商品ライブラリーに登録",
-  "libImportIntro": "自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。",
+  "libImportIntro": "自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・商品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。",
   "libImportSummary": "{total}行：新規 {fresh}件・更新 {known}件・登録できない {blocked}件（JANかメーカーがない）",
   "@libImportSummary": {
     "placeholders": {
@@ -7975,7 +7975,7 @@
   },
   "productColor": "色",
   "productNewHint": "入力した項目だけで登録できます（必須の項目はありません）。",
-  "productNameRequiredEdit": "品名を入力してください",
+  "productNameRequiredEdit": "商品名を入力してください",
   "ntFlagQtyFromAmount": "数量＝金額÷単価（行に数量が無いため計算）",
   "featCompanyProfile": "自社情報",
   "featCompanyProfileDesc": "自社の名前・別名・登録番号。書類の宛先（自社）と発行元（仕入先）を見分けるのに使います",
@@ -9033,8 +9033,8 @@
   "prClearSelection": "選択を解除",
   "prAddManual": "手入力で商品を追加",
   "prAddManualOk": "追加",
-  "prManualName": "品名（必須）",
-  "prManualNeed": "品名と1以上の数量を入れてください",
+  "prManualName": "商品名（必須）",
+  "prManualNeed": "商品名と1以上の数量を入れてください",
   "prManualTag": "手入力",
   "prNoRows": "表示する商品がありません",
   "prOnHand": "在庫 {n}",
@@ -10614,9 +10614,9 @@
   "aiLimitsTitle": "モデルと1日の上限",
   "aiLimitsIntro": "PDF・スキャン・写真は精度の高いモデルで、Excel・CSVの見出しなどは安いモデルで読みます。料金が増えすぎないよう、1日に使える回数を決められます（日本時間で0時に戻ります）。",
   "aiDocumentModel": "PDF・画像の読み取り",
-  "aiDocumentModelHint": "JANが備考欄や品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。",
+  "aiDocumentModelHint": "JANが備考欄や商品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。",
   "aiLightModel": "Excel・CSVの見出し、そのほか",
-  "aiLightModelHint": "見出しの意味、品名と品番の分け方、重さ検索など。安いモデルで十分です。",
+  "aiLightModelHint": "見出しの意味、商品名と品番の分け方、重さ検索など。安いモデルで十分です。",
   "aiDailyLimit": "AIを使える回数（1日）",
   "aiDocumentLimit": "PDF・画像を読める数（1日）",
   "aiUsedToday": "今日 {n}回",
@@ -10653,11 +10653,11 @@
       }
     }
   },
-  "rcMakerName": "メーカー（品名）",
+  "rcMakerName": "メーカー（商品名）",
   "rcReadOnlyTitle": "読み取り結果（表）",
-  "rcReadOnlyIntro": "取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。品名がある場合はメーカーの後ろに（）で表示します。",
+  "rcReadOnlyIntro": "取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。商品名がある場合はメーカーの後ろに（）で表示します。",
   "ivTable": "表で見る",
-  "sfColProduct": "商品",
+  "sfColProduct": "商品名",
   "sfColBefore": "現在庫",
   "sfColChange": "増減",
   "sfColAfter": "反映後",
@@ -11010,5 +11010,29 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sfNamesAfterCheck": "読み取り結果を確かめると、商品名とカタログの掲載ページを調べます（分からない商品名は空欄のまま登録できます）",
+  "sfNamesLooking": "商品名をカタログ・Webで調べています… {done} / {total}件",
+  "@sfNamesLooking": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sfInCatalog": "{catalog} p.{page}",
+  "@sfInCatalog": {
+    "placeholders": {
+      "catalog": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "sfOnWeb": "Webで確認"
 }

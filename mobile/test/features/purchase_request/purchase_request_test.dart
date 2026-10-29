@@ -201,7 +201,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pm-ok')));
     await tester.pumpAndSettle();
-    expect(find.text('品名と1以上の数量を入れてください'), findsOneWidget);
+    expect(find.text('商品名と1以上の数量を入れてください'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('pm-name')), '新しいボルト');
     await tester.enterText(find.byKey(const ValueKey('pm-qty')), '6');
     await tester.tap(find.byKey(const ValueKey('pm-ok')));

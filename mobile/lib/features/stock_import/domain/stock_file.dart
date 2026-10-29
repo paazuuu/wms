@@ -71,9 +71,10 @@ class StockFileLine extends Equatable {
   }
 
   /// The line as 価格台帳 takes it, to register its product.
-  Map<String, dynamic> toPriceBookLine() => {
+  /// [name]: the 商品名 found for its JAN (catalog or web, 0164), when any.
+  Map<String, dynamic> toPriceBookLine({String? name}) => {
         'jan_code': janCode,
-        'product_name': registerName,
+        'product_name': name ?? registerName,
         if (maker != null) 'maker': maker,
         if (code != null) 'product_code': code,
       };

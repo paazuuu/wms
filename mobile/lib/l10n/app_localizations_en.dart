@@ -12138,7 +12138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ivTable => 'View as a table';
 
   @override
-  String get sfColProduct => 'Product';
+  String get sfColProduct => 'Name';
 
   @override
   String get sfColBefore => 'Now';
@@ -12585,4 +12585,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String sfNamesFound(int found, int total) {
     return 'Named $found of the $total new products from the web';
   }
+
+  @override
+  String get sfNamesAfterCheck =>
+      'Once the reading is checked, the names and catalogue pages are looked up (a name not found can stay blank).';
+
+  @override
+  String sfNamesLooking(int done, int total) {
+    return 'Looking up names in the catalogues and on the web… $done of $total';
+  }
+
+  @override
+  String sfInCatalog(String catalog, String page) {
+    return '$catalog p.$page';
+  }
+
+  @override
+  String get sfOnWeb => 'Found on the web';
 }

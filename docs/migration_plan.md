@@ -7907,6 +7907,24 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   (`products_a_fill_jan_name`, before the name is rendered).
 - 在庫の取り込み: the products just registered with no name of their own are
   looked up meanwhile, and the result is said on the done card.
+- 在庫の取り込み, the lines going in (after the person's check):
+  - The column is 商品名, never the 品番. It shows the library's name, else
+    the one the web gave, else the file's; blank when none is known.
+  - Under it is the catalog page the JAN is on (カタログ名 p.N, a link), or
+    the web page the name came from.
+  - Names and catalog pages are looked up only once what was read is
+    checked: at once for a sheet read here, after 表で確かめる・直す for a
+    file read by the AI. The lookup runs meanwhile.
+  - The catalogs come first, then names asked before (`jan_name_lookups`),
+    then the web for the rest.
+  - The products are registered under the name found. A line with none
+    keeps its 品番 as the name, and the library says 未登録; that JAN is not
+    asked again.
+- The Japanese UI says 商品名 where it said 品名 (検索・並べ替え・読み取り).
+  The printed shipping slips keep their 品名 heading.
+- AI key for name lookups: the key used for sizes and weights, key 5
+  (free tier). Its web searches succeeded on 10-29; if its search quota
+  runs out, a paid key is added in AI設定.
 - Removing products: `product.delete` is now the system administrator's only
   (taken from the company administrator).
   - The library shows 「選択して削除」, which chooses every product shown;

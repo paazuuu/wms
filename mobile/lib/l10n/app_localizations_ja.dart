@@ -539,7 +539,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sortByStock => '在庫数順';
 
   @override
-  String get sortByName => '品名順';
+  String get sortByName => '商品名順';
 
   @override
   String get sortByJan => 'JAN順';
@@ -5375,7 +5375,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ntTrainIntro =>
-      '商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。';
+      '商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、商品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。';
 
   @override
   String get ntPickFile => '見本ファイルを選ぶ';
@@ -5473,7 +5473,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ntUnconfirmedOnly => '未確認のみ';
 
   @override
-  String get ntDialectSearch => '書き方・品名・JANで検索';
+  String get ntDialectSearch => '書き方・商品名・JANで検索';
 
   @override
   String get ntDialectsEmpty => 'まだ学習した書き方はありません';
@@ -5619,13 +5619,13 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get ntFlagSplitDisagree => '品名と品番の分け方が不一致';
+  String get ntFlagSplitDisagree => '商品名と品番の分け方が不一致';
 
   @override
-  String get ntFlagSplitSingle => '品名と品番を分解（片方の方法のみ）';
+  String get ntFlagSplitSingle => '商品名と品番を分解（片方の方法のみ）';
 
   @override
-  String get ntFlagSplitFailed => '品名と品番を分けられず';
+  String get ntFlagSplitFailed => '商品名と品番を分けられず';
 
   @override
   String get ntFlagAdded => '確認で追加された行';
@@ -5649,7 +5649,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ntMatchSku => '自社品番で一致';
 
   @override
-  String get ntMatchName => '自社品名で一致';
+  String get ntMatchName => '自社の商品名で一致';
 
   @override
   String get ntMatchManual => '手動で選択';
@@ -6777,7 +6777,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiSettingsIntro =>
-      '書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。';
+      '書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、商品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。';
 
   @override
   String get aiAutoThreshold => '自動候補の下限';
@@ -8031,7 +8031,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get quoteImportIntro =>
-      '見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。';
+      '見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・商品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。';
 
   @override
   String get quoteSupplier => '仕入先';
@@ -8050,7 +8050,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get quoteNothingRead =>
-      '商品の行が読み取れませんでした。表の見出し（JAN・品名・単価など）があるか確かめてください。';
+      '商品の行が読み取れませんでした。表の見出し（JAN・商品名・単価など）があるか確かめてください。';
 
   @override
   String get quoteUnverified => 'AIの2回の読み取りが一部食い違いました。数字を確かめてください';
@@ -8430,7 +8430,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clTitle => '価格台帳';
 
   @override
-  String get clSearchHint => '品名・メーカー・品番・JAN・仕入先の表記で検索';
+  String get clSearchHint => '商品名・メーカー・品番・JAN・仕入先の表記で検索';
 
   @override
   String get clEmpty => '価格台帳は空です';
@@ -8474,7 +8474,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ciIntro =>
-      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。';
+      '見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・商品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。';
 
   @override
   String get ciTermsFor => '価格の扱い（任意）';
@@ -8728,7 +8728,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get libImportIntro =>
-      '自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。';
+      '自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・商品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。';
 
   @override
   String libImportSummary(int total, int fresh, int known, int blocked) {
@@ -8872,7 +8872,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get productNewHint => '入力した項目だけで登録できます（必須の項目はありません）。';
 
   @override
-  String get productNameRequiredEdit => '品名を入力してください';
+  String get productNameRequiredEdit => '商品名を入力してください';
 
   @override
   String get ntFlagQtyFromAmount => '数量＝金額÷単価（行に数量が無いため計算）';
@@ -10316,10 +10316,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prAddManualOk => '追加';
 
   @override
-  String get prManualName => '品名（必須）';
+  String get prManualName => '商品名（必須）';
 
   @override
-  String get prManualNeed => '品名と1以上の数量を入れてください';
+  String get prManualNeed => '商品名と1以上の数量を入れてください';
 
   @override
   String get prManualTag => '手入力';
@@ -11833,13 +11833,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiDocumentModelHint =>
-      'JANが備考欄や品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。';
+      'JANが備考欄や商品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。';
 
   @override
   String get aiLightModel => 'Excel・CSVの見出し、そのほか';
 
   @override
-  String get aiLightModelHint => '見出しの意味、品名と品番の分け方、重さ検索など。安いモデルで十分です。';
+  String get aiLightModelHint => '見出しの意味、商品名と品番の分け方、重さ検索など。安いモデルで十分です。';
 
   @override
   String get aiDailyLimit => 'AIを使える回数（1日）';
@@ -11875,20 +11875,20 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get rcMakerName => 'メーカー（品名）';
+  String get rcMakerName => 'メーカー（商品名）';
 
   @override
   String get rcReadOnlyTitle => '読み取り結果（表）';
 
   @override
   String get rcReadOnlyIntro =>
-      '取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。品名がある場合はメーカーの後ろに（）で表示します。';
+      '取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。商品名がある場合はメーカーの後ろに（）で表示します。';
 
   @override
   String get ivTable => '表で見る';
 
   @override
-  String get sfColProduct => '商品';
+  String get sfColProduct => '商品名';
 
   @override
   String get sfColBefore => '現在庫';
@@ -12327,4 +12327,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String sfNamesFound(int found, int total) {
     return '新しく登録した$total件のうち$found件に、Webで見つけた商品名を入れました';
   }
+
+  @override
+  String get sfNamesAfterCheck =>
+      '読み取り結果を確かめると、商品名とカタログの掲載ページを調べます（分からない商品名は空欄のまま登録できます）';
+
+  @override
+  String sfNamesLooking(int done, int total) {
+    return '商品名をカタログ・Webで調べています… $done / $total件';
+  }
+
+  @override
+  String sfInCatalog(String catalog, String page) {
+    return '$catalog p.$page';
+  }
+
+  @override
+  String get sfOnWeb => 'Webで確認';
 }

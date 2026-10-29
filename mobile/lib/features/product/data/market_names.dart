@@ -52,6 +52,10 @@ class FoundName extends Equatable {
   /// Set when the lookup itself failed (quota, no key, …): not an answer.
   final String? errorKind;
 
+  /// A name to show and take: found, and the AI sure enough (as the
+  /// database takes it, 0164).
+  bool get usable => (name ?? '').trim().isNotEmpty && (confidence ?? 0) >= 0.6;
+
   factory FoundName.fromJson(Map<String, dynamic> j) => FoundName(
         jan: '${j['jan'] ?? ''}',
         name: j['name'] as String?,
@@ -83,6 +87,9 @@ const nameLookupBatchSize = 5;
 abstract class MarketNameRepository {
   /// Up to [nameLookupBatchSize] JANs looked up on the web; nothing saved.
   Future<ApiResult<({List<FoundName> results, bool searchUnavailable})>> lookup(List<NameAsk> asks);
+
+  /// What was found before for [jans] (asked before, a name or not).
+  Future<ApiResult<Map<String, FoundName>>> cached(List<String> jans);
 
   /// Kept per JAN, and taken onto the products (and 価格台帳 lines) that have
   /// only their 品番 for a name. [applied]: products named.
@@ -121,6 +128,28 @@ class MarketNameRepositoryImpl implements MarketNameRepository {
   }
 
   @override
+  Future<ApiResult<Map<String, FoundName>>> cached(List<String> jans) async {
+    final ok = [for (final j in jans.toSet()) if (RegExp(r'^[0-9]{8,14}$').hasMatch(j)) j];
+    if (ok.isEmpty) return const ApiSuccess({});
+    try {
+      final out = <String, FoundName>{};
+      for (var i = 0; i < ok.length; i += 100) {
+        final r = await _rest.get('/jan_name_lookups', queryParameters: {
+          'select': 'jan,name,series,maker,source_url,confidence,note',
+          'jan': 'in.(${ok.skip(i).take(100).join(',')})',
+        });
+        for (final e in (r.data as List? ?? const []).whereType<Map>()) {
+          final f = FoundName.fromJson(e.cast<String, dynamic>());
+          out[f.jan] = f;
+        }
+      }
+      return ApiSuccess(out);
+    } on DioException catch (e) {
+      return mapDioError(e);
+    }
+  }
+
+  @override
   Future<ApiResult<({int saved, int applied})>> save(List<FoundName> found) async {
     try {
       final r = await _rest.post('/rpc/jan_name_save', data: {
@@ -140,7 +169,7 @@ final marketNameRepositoryProvider = Provider<MarketNameRepository>(
 /// What a run of lookups came to: how many asked, how many names found, how
 /// many products took one, and what stopped it early (a key, the quota, no
 /// web search), if anything.
-typedef NameFindOutcome = ({int asked, int found, int applied, String? stoppedBy});
+typedef NameFindOutcome = ({int asked, int found, int applied, String? stoppedBy, Map<String, FoundName> answers});
 
 /// Failures after which asking further only fails again.
 const _stopKinds = {'quota', 'auth', 'no_key', 'limit', 'search_unavailable'};
@@ -155,15 +184,16 @@ Future<NameFindOutcome> findMarketNames(
 }) async {
   var found = 0, applied = 0, done = 0;
   String? stopped;
+  final answers = <String, FoundName>{};
   for (var i = 0; i < asks.length && stopped == null; i += nameLookupBatchSize) {
     final batch = asks.skip(i).take(nameLookupBatchSize).toList();
     final r = await repo.lookup(batch);
     switch (r) {
       case ApiSuccess(:final data):
-        final answers = [for (final f in data.results) if (f.errorKind == null && f.jan.isNotEmpty) f];
-        found += answers.where((f) => (f.name ?? '').trim().isNotEmpty).length;
-        if (answers.isNotEmpty) {
-          final s = await repo.save(answers);
+        found += batchAnswers(answers, data.results);
+        final kept = [for (final f in data.results) if (f.errorKind == null && f.jan.isNotEmpty) f];
+        if (kept.isNotEmpty) {
+          final s = await repo.save(kept);
           if (s case ApiSuccess(:final data)) applied += data.applied;
         }
         stopped = data.searchUnavailable
@@ -175,7 +205,18 @@ Future<NameFindOutcome> findMarketNames(
     done += batch.length;
     onProgress?.call(done.clamp(0, asks.length), asks.length);
   }
-  return (asked: asks.length, found: found, applied: applied, stoppedBy: stopped);
+  return (asked: asks.length, found: found, applied: applied, stoppedBy: stopped, answers: answers);
+}
+
+/// [results]' answers into [into] (by JAN); how many of them named the item.
+int batchAnswers(Map<String, FoundName> into, List<FoundName> results) {
+  var named = 0;
+  for (final f in results) {
+    if (f.errorKind != null || f.jan.isEmpty) continue;
+    into[f.jan] = f;
+    if (f.usable) named++;
+  }
+  return named;
 }
 
 /// A product with only its 品番 (or JAN, or nothing) for a name.

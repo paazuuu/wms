@@ -1099,7 +1099,7 @@ abstract class AppLocalizations {
   /// No description provided for @sortByName.
   ///
   /// In ja, this message translates to:
-  /// **'品名順'**
+  /// **'商品名順'**
   String get sortByName;
 
   /// No description provided for @sortByJan.
@@ -9837,7 +9837,7 @@ abstract class AppLocalizations {
   /// Notation dialects / training (0105-0106): ntTrainIntro
   ///
   /// In ja, this message translates to:
-  /// **'商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。'**
+  /// **'商社から届くExcel・CSV・PDF・写真の見本を読み込み、実際の入荷と同じ方法（AIで2回読み取り、商品名と品番の分解、自社商品への変換）で試します。登録は一切されません。結果を確認・修正して「学習する」と、その商社の書き方（方言）と列見出しを覚えます。'**
   String get ntTrainIntro;
 
   /// Notation dialects / training (0105-0106): ntPickFile
@@ -9999,7 +9999,7 @@ abstract class AppLocalizations {
   /// Notation dialects / training (0105-0106): ntDialectSearch
   ///
   /// In ja, this message translates to:
-  /// **'書き方・品名・JANで検索'**
+  /// **'書き方・商品名・JANで検索'**
   String get ntDialectSearch;
 
   /// Notation dialects / training (0105-0106): ntDialectsEmpty
@@ -10276,19 +10276,19 @@ abstract class AppLocalizations {
   /// Notation dialects / training (0105-0106): ntFlagSplitDisagree
   ///
   /// In ja, this message translates to:
-  /// **'品名と品番の分け方が不一致'**
+  /// **'商品名と品番の分け方が不一致'**
   String get ntFlagSplitDisagree;
 
   /// Notation dialects / training (0105-0106): ntFlagSplitSingle
   ///
   /// In ja, this message translates to:
-  /// **'品名と品番を分解（片方の方法のみ）'**
+  /// **'商品名と品番を分解（片方の方法のみ）'**
   String get ntFlagSplitSingle;
 
   /// Notation dialects / training (0105-0106): ntFlagSplitFailed
   ///
   /// In ja, this message translates to:
-  /// **'品名と品番を分けられず'**
+  /// **'商品名と品番を分けられず'**
   String get ntFlagSplitFailed;
 
   /// Notation dialects / training (0105-0106): ntFlagAdded
@@ -10336,7 +10336,7 @@ abstract class AppLocalizations {
   /// Notation dialects / training (0105-0106): ntMatchName
   ///
   /// In ja, this message translates to:
-  /// **'自社品名で一致'**
+  /// **'自社の商品名で一致'**
   String get ntMatchName;
 
   /// Notation dialects / training (0105-0106): ntMatchManual
@@ -12496,7 +12496,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiSettingsIntro.
   ///
   /// In ja, this message translates to:
-  /// **'書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。'**
+  /// **'書類の読み取りは項目ごとに確信度を持ちます（AIの2回の読みの一致、JANのチェック数字、商品名と品番の分け方、数量×単価＝金額などから計算）。確信度がどの帯に入るかで、自動候補・確認推奨・要確認に分かれます。'**
   String get aiSettingsIntro;
 
   /// No description provided for @aiAutoThreshold.
@@ -14716,7 +14716,7 @@ abstract class AppLocalizations {
   /// No description provided for @quoteImportIntro.
   ///
   /// In ja, this message translates to:
-  /// **'見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。'**
+  /// **'見積書・請求書・納品書・自社の商品カタログなど、商品が並んだファイル（Excel・PDF・写真）をAIが読み取り、メーカー・商品名・品番・JAN・規格・価格に仕分けます。まだない商品は自社の様式で登録できます。仕入先は選ばなくても読み取れます（ファイルに書かれた会社を探します）。'**
   String get quoteImportIntro;
 
   /// No description provided for @quoteSupplier.
@@ -14752,7 +14752,7 @@ abstract class AppLocalizations {
   /// No description provided for @quoteNothingRead.
   ///
   /// In ja, this message translates to:
-  /// **'商品の行が読み取れませんでした。表の見出し（JAN・品名・単価など）があるか確かめてください。'**
+  /// **'商品の行が読み取れませんでした。表の見出し（JAN・商品名・単価など）があるか確かめてください。'**
   String get quoteNothingRead;
 
   /// No description provided for @quoteUnverified.
@@ -15376,7 +15376,7 @@ abstract class AppLocalizations {
   /// No description provided for @clSearchHint.
   ///
   /// In ja, this message translates to:
-  /// **'品名・メーカー・品番・JAN・仕入先の表記で検索'**
+  /// **'商品名・メーカー・品番・JAN・仕入先の表記で検索'**
   String get clSearchHint;
 
   /// No description provided for @clEmpty.
@@ -15448,7 +15448,7 @@ abstract class AppLocalizations {
   /// No description provided for @ciIntro.
   ///
   /// In ja, this message translates to:
-  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。'**
+  /// **'見積書・請求書・納品書・カタログなどのファイル（Excel・PDF・写真）をAIが読み取り、メーカー・商品名・品番・JAN・規格・価格に仕分けて価格台帳に入れます。同じJANの商品は更新されます。商品ライブラリー・在庫には影響しません。'**
   String get ciIntro;
 
   /// No description provided for @ciTermsFor.
@@ -15892,7 +15892,7 @@ abstract class AppLocalizations {
   /// No description provided for @libImportIntro.
   ///
   /// In ja, this message translates to:
-  /// **'自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。'**
+  /// **'自社で作ったExcel・CSV・PDF・写真などの商品一覧をAIが読み取り、メーカー・商品名・品番・JAN・属性・サイズ・重量に仕分けて、商品ライブラリーに直接登録します。同じJANの商品は内容を更新します。価格台帳には記録しません（仕入先の見積は「価格台帳」で取り込んでください）。'**
   String get libImportIntro;
 
   /// No description provided for @libImportSummary.
@@ -16114,7 +16114,7 @@ abstract class AppLocalizations {
   /// No description provided for @productNameRequiredEdit.
   ///
   /// In ja, this message translates to:
-  /// **'品名を入力してください'**
+  /// **'商品名を入力してください'**
   String get productNameRequiredEdit;
 
   /// No description provided for @ntFlagQtyFromAmount.
@@ -18647,13 +18647,13 @@ abstract class AppLocalizations {
   /// No description provided for @prManualName.
   ///
   /// In ja, this message translates to:
-  /// **'品名（必須）'**
+  /// **'商品名（必須）'**
   String get prManualName;
 
   /// No description provided for @prManualNeed.
   ///
   /// In ja, this message translates to:
-  /// **'品名と1以上の数量を入れてください'**
+  /// **'商品名と1以上の数量を入れてください'**
   String get prManualNeed;
 
   /// No description provided for @prManualTag.
@@ -21089,7 +21089,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiDocumentModelHint.
   ///
   /// In ja, this message translates to:
-  /// **'JANが備考欄や品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。'**
+  /// **'JANが備考欄や商品名の下にある書類も読めるよう、精度の高いモデルをおすすめします（1枚 数円程度）。'**
   String get aiDocumentModelHint;
 
   /// No description provided for @aiLightModel.
@@ -21101,7 +21101,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiLightModelHint.
   ///
   /// In ja, this message translates to:
-  /// **'見出しの意味、品名と品番の分け方、重さ検索など。安いモデルで十分です。'**
+  /// **'見出しの意味、商品名と品番の分け方、重さ検索など。安いモデルで十分です。'**
   String get aiLightModelHint;
 
   /// No description provided for @aiDailyLimit.
@@ -21155,7 +21155,7 @@ abstract class AppLocalizations {
   /// No description provided for @rcMakerName.
   ///
   /// In ja, this message translates to:
-  /// **'メーカー（品名）'**
+  /// **'メーカー（商品名）'**
   String get rcMakerName;
 
   /// No description provided for @rcReadOnlyTitle.
@@ -21167,7 +21167,7 @@ abstract class AppLocalizations {
   /// No description provided for @rcReadOnlyIntro.
   ///
   /// In ja, this message translates to:
-  /// **'取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。品名がある場合はメーカーの後ろに（）で表示します。'**
+  /// **'取り込んだときに確かめた内容です。青は人が直した欄、取り消し線は外した行です。商品名がある場合はメーカーの後ろに（）で表示します。'**
   String get rcReadOnlyIntro;
 
   /// No description provided for @ivTable.
@@ -21179,7 +21179,7 @@ abstract class AppLocalizations {
   /// No description provided for @sfColProduct.
   ///
   /// In ja, this message translates to:
-  /// **'商品'**
+  /// **'商品名'**
   String get sfColProduct;
 
   /// No description provided for @sfColBefore.
@@ -21943,6 +21943,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'新しく登録した{total}件のうち{found}件に、Webで見つけた商品名を入れました'**
   String sfNamesFound(int found, int total);
+
+  /// No description provided for @sfNamesAfterCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果を確かめると、商品名とカタログの掲載ページを調べます（分からない商品名は空欄のまま登録できます）'**
+  String get sfNamesAfterCheck;
+
+  /// No description provided for @sfNamesLooking.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名をカタログ・Webで調べています… {done} / {total}件'**
+  String sfNamesLooking(int done, int total);
+
+  /// No description provided for @sfInCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'{catalog} p.{page}'**
+  String sfInCatalog(String catalog, String page);
+
+  /// No description provided for @sfOnWeb.
+  ///
+  /// In ja, this message translates to:
+  /// **'Webで確認'**
+  String get sfOnWeb;
 }
 
 class _AppLocalizationsDelegate

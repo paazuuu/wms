@@ -3873,7 +3873,7 @@
   "rcReadOnlyTitle": "读取结果（表）",
   "rcReadOnlyIntro": "这是导入时核对过的内容。蓝色为人工修改的栏，删除线为去掉的行。有品名时显示在厂商后的（）中。",
   "ivTable": "以表查看",
-  "sfColProduct": "商品",
+  "sfColProduct": "商品名",
   "sfColBefore": "现库存",
   "sfColChange": "增减",
   "sfColAfter": "反映后",
@@ -4000,5 +4000,9 @@
   "plSelectDelete": "选择并删除",
   "lcExcludeHint": "取消勾选的商品将被排除",
   "sfNamesFinding": "正在网上查找新登记的{count}件商品的名称…",
-  "sfNamesFound": "新登记的{total}件中，已为{found}件填入网上找到的商品名"
+  "sfNamesFound": "新登记的{total}件中，已为{found}件填入网上找到的商品名",
+  "sfNamesAfterCheck": "确认读取结果后，将查找商品名和目录所在页（查不到的商品名可留空登记）。",
+  "sfNamesLooking": "正在目录和网上查找商品名… {done} / {total} 件",
+  "sfInCatalog": "{catalog} 第{page}页",
+  "sfOnWeb": "网上确认"
 }
