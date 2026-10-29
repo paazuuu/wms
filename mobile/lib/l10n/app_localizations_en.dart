@@ -12655,4 +12655,151 @@ class AppLocalizationsEn extends AppLocalizations {
   String plPhotosAdded(int count) {
     return 'Added $count pictures from the web (change any that are not the real thing under Photos)';
   }
+
+  @override
+  String get pmkStar => 'Star';
+
+  @override
+  String get pmkUnstar => 'Unstar';
+
+  @override
+  String get pmkWarn => 'Add a warning';
+
+  @override
+  String get pmkWarning => 'Warning';
+
+  @override
+  String get pmkNote => 'What to watch out for';
+
+  @override
+  String get pmkNoteHint => 'e.g. easily mistaken for another colour / fragile';
+
+  @override
+  String get pmkClearWarning => 'Remove the warning';
+
+  @override
+  String get pfStarred => 'Starred';
+
+  @override
+  String get pfWarned => 'With a warning';
+
+  @override
+  String siAllShown(int count) {
+    return 'Choose all $count shown';
+  }
+
+  @override
+  String get siColPhoto => 'Photo';
+
+  @override
+  String get siColAttrs => 'Colour, size…';
+
+  @override
+  String get siColMarks => 'Marks';
+
+  @override
+  String get siColFile => 'File';
+
+  @override
+  String get siFilterHint => 'Narrow down (name, JAN, code, maker)';
+
+  @override
+  String get siWhichOpen => 'To check';
+
+  @override
+  String get siWhichDone => 'Checked';
+
+  @override
+  String get siWhichAll => 'All';
+
+  @override
+  String siShown(int shown, int total) {
+    return '$shown of $total lines';
+  }
+
+  @override
+  String get siPhotos => 'Add or change photos';
+
+  @override
+  String get siWeightTitle => 'Weight of one unit';
+
+  @override
+  String get siWeightField => 'Weight';
+
+  @override
+  String get siWeightHint => 'One piece as weighed; blank clears it';
+
+  @override
+  String get siWeightNote => 'Weighed at inspection';
+
+  @override
+  String get siWeightSaved => 'Weight saved';
+
+  @override
+  String get snTitle => 'Shelf notes';
+
+  @override
+  String get snIntro =>
+      'Write freely where things were put (bullets are fine). Search by place, note, name, code, JAN or maker.';
+
+  @override
+  String get snSearch => 'Search the notes';
+
+  @override
+  String get snAdd => 'Add a shelf note';
+
+  @override
+  String get snEdit => 'Edit the shelf note';
+
+  @override
+  String get snRemove => 'Take off the list';
+
+  @override
+  String get snEmpty => 'No shelf notes yet';
+
+  @override
+  String get snNoneMatch => 'No note matches';
+
+  @override
+  String get snNoneForProduct => 'No shelf note for this product';
+
+  @override
+  String get snNoProduct => 'No product';
+
+  @override
+  String get snProduct => 'Product (optional)';
+
+  @override
+  String get snProductHint => 'Pick by name, code or JAN; may be left blank';
+
+  @override
+  String get snLocation => 'Place (optional)';
+
+  @override
+  String get snLocationHint => 'e.g. shelf A top / blue box at the back';
+
+  @override
+  String get snBody => 'Note';
+
+  @override
+  String get snBodyHint =>
+      '・special item put here\n・fragile, so the lower shelf';
+
+  @override
+  String planArrives(String date) {
+    return 'Arrives $date';
+  }
+
+  @override
+  String planDocDate(String date) {
+    return 'Document date $date';
+  }
+
+  @override
+  String planEnteredBy(String at, String who) {
+    return 'Entered $at by $who';
+  }
+
+  @override
+  String get planEnteredUnknown => 'unknown';
 }

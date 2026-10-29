@@ -19,6 +19,7 @@ import '../domain/warehouse_product.dart';
 import 'product_delete.dart';
 import 'product_facts.dart';
 import 'product_lifecycle_ui.dart';
+import 'product_marks_ui.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'spec_lookup_sheet.dart';
@@ -29,6 +30,8 @@ import '../../../core/ui/open_window.dart';
 import '../data/market_names.dart';
 import '../data/web_photos.dart';
 import 'product_names_dialog.dart';
+import '../../shelf_notes/data/shelf_notes_repository.dart';
+import '../../shelf_notes/presentation/shelf_notes_screen.dart';
 import '../../../core/ui/product_name.dart';
 import '../../product_library/presentation/product_thumb.dart';
 import '../../inbound/presentation/product_inbound_card.dart';
@@ -121,6 +124,9 @@ class ProductDetailScreen extends ConsumerWidget {
                 // The stock as figures, whichever warehouse is chosen at the
                 // top: the total, each warehouse, and what waits for inspection.
                 _StockCard(product: product),
+                const SizedBox(height: AppSpacing.md),
+                // 棚メモ (0167): where it was put, as written.
+                _ShelfNotesCard(product: product),
                 const SizedBox(height: AppSpacing.md),
                 _SizeWeightCard(product: product),
                 const SizedBox(height: AppSpacing.md),
@@ -268,6 +274,7 @@ class _Header extends ConsumerWidget {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               LifecyclePill(lifecycle: product.lifecycle),
+                              ProductMarks(product: product),
                               CopyableText(product.janCode,
                                   buttonKey: const ValueKey('pd-head-copy-jan'),
                                   style: muted?.copyWith(fontFamily: AppFonts.mono)),
@@ -277,6 +284,7 @@ class _Header extends ConsumerWidget {
                                     style: muted?.copyWith(fontFamily: AppFonts.mono)),
                             ],
                           ),
+                          ProductWarningNote(product: product),
                           if (product.lifecycleReason case final why? when !product.isActive)
                             Padding(padding: const EdgeInsets.only(top: AppSpacing.xs), child: Text(why, style: muted)),
                         ],
@@ -2090,6 +2098,55 @@ class _WarehouseProductSheetState
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// The product's 棚メモ (0167): each note with its place, and one to add.
+class _ShelfNotesCard extends ConsumerWidget {
+  const _ShelfNotesCard({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    final notes = [
+      for (final n in ref.watch(shelfNotesProvider).valueOrNull ?? const <ShelfNote>[])
+        if (n.productId == product.id || n.janCode == product.janCode) n,
+    ];
+    final canWrite = ref.watch(canWriteShelfNotesProvider);
+    return _Section(
+      title: l10n.snTitle,
+      children: [
+        if (notes.isEmpty) Text(l10n.snNoneForProduct, key: const ValueKey('pd-shelf-none'), style: muted),
+        for (final n in notes)
+          InkWell(
+            key: ValueKey('pd-shelf-${n.id}'),
+            onTap: canWrite ? () => editShelfNote(context, ref, note: n, product: product) : null,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if ((n.location ?? '').isNotEmpty) Text('📍 ${n.location}', style: theme.textTheme.titleSmall),
+                Text(n.body),
+                Text([n.updatedByName ?? n.createdByName ?? ''].join(), style: muted),
+              ]),
+            ),
+          ),
+        if (canWrite)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const ValueKey('pd-shelf-add'),
+              onPressed: () => editShelfNote(context, ref, product: product),
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(l10n.snAdd),
+            ),
+          ),
+      ],
     );
   }
 }

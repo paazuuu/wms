@@ -31,7 +31,8 @@ const _prefKey = 'wms.productLibrary.columns.v3';
 /// Beside the columns on a row: the picture and its gap, the state pill and
 /// the menu, and the gaps between columns.
 const productRowLead = 36.0 + AppSpacing.md;
-const productRowTail = AppSpacing.sm + 76 + 40;
+/// (★ and ⚠ marks: 0167.)
+const productRowTail = AppSpacing.sm + 76 + 40 + 80;
 const productColumnGap = AppSpacing.sm;
 
 /// The widths a person dragged the columns to, kept in this browser.

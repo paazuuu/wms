@@ -313,6 +313,8 @@ class Product extends Equatable {
     this.baseName,
     this.baseNameSource,
     this.baseNameSourceUrl,
+    this.marks = const {},
+    this.markNote,
     this.unit,
     this.listPrice,
     this.attributes = const [],
@@ -379,6 +381,14 @@ class Product extends Equatable {
   final String? baseNameSourceUrl;
 
   bool get nameByAi => baseNameSource == 'ai';
+
+  /// ★ and ⚠ (0167), anyone's who handles goods, seen by all; the warning's
+  /// note.
+  final Set<String> marks;
+  final String? markNote;
+
+  bool get starred => marks.contains('star');
+  bool get warned => marks.contains('warning');
   final String? unit;
   final double? listPrice;
   final List<ProductPart> attributes;
@@ -451,7 +461,7 @@ class Product extends Equatable {
         status: l == ProductLifecycle.active ? 'active' : 'inactive',
         lifecycleCode: l.wire, lifecycleReason: l == ProductLifecycle.active ? null : reason,
         stock: stock, suppliers: suppliers, baseName: baseName, baseNameSource: baseNameSource,
-        baseNameSourceUrl: baseNameSourceUrl, unit: unit, listPrice: listPrice,
+        baseNameSourceUrl: baseNameSourceUrl, marks: marks, markNote: markNote, unit: unit, listPrice: listPrice,
         attributes: attributes, imageCount: imageCount, trackingMode: trackingMode, pickingRule: pickingRule,
         requiresInspection: requiresInspection, baseUom: baseUom, uoms: uoms, barcodes: barcodes,
         supplierNames: supplierNames, unitWeightG: unitWeightG, weightSource: weightSource,
@@ -502,6 +512,8 @@ class Product extends Equatable {
         baseName: _asText(json['base_name']),
         baseNameSource: _asText(json['base_name_source']),
         baseNameSourceUrl: _asText(json['base_name_source_url']),
+        marks: {for (final m in (json['marks'] is List ? json['marks'] as List : const [])) '$m'},
+        markNote: _asText(json['mark_note']),
         unit: _asText(json['unit']),
         listPrice: _asDouble(json['list_price']),
         attributes: [
@@ -555,6 +567,8 @@ class Product extends Equatable {
         baseName,
         baseNameSource,
         baseNameSourceUrl,
+        marks,
+        markNote,
         unit,
         listPrice,
         attributes,

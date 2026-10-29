@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
@@ -359,6 +360,19 @@ class _DeliveryPlanCard extends ConsumerWidget {
                             fontFamily: AppFonts.mono, color: scheme.primary),
                       ),
                     ],
+                    // When, from what and by whom it was entered (0167), and
+                    // when it is to arrive.
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        if (plan.expectedArrivalDate case final d?) l10n.planArrives(DateFormat('y/MM/dd').format(d)),
+                        if (plan.deliveryDate case final d? when d.isNotEmpty) l10n.planDocDate(d),
+                        if (plan.createdAt case final c?)
+                          l10n.planEnteredBy(DateFormat('y/MM/dd HH:mm').format(c), plan.createdByName ?? l10n.planEnteredUnknown),
+                      ].join(' · '),
+                      key: ValueKey('plan-entered-${plan.id}'),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
                     if (plan.plannedUnits != null && plan.plannedUnits! > 0) ...[
                       const SizedBox(height: 2),
                       Text(

@@ -9,6 +9,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/putaway_providers.dart';
 import '../domain/putaway_task.dart';
 import 'putaway_confirm_sheet.dart';
+import '../../shelf_notes/presentation/shelf_notes_screen.dart';
 import '../../product_library/presentation/product_thumb.dart';
 
 /// 棚入れ (put-away) — the dedicated queue UI spec §13 calls the current
@@ -36,7 +37,15 @@ class PutawayQueueScreen extends ConsumerWidget {
         : ref.watch(warehouseOverviewProvider).valueOrNull?.byId(warehouseId);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.putawayTitle)),
+      appBar: AppBar(title: Text(l10n.putawayTitle), actions: [
+        // 棚メモ (0167): where special things were put, free text, searched.
+        TextButton.icon(
+          key: const ValueKey('pw-shelf-notes'),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ShelfNotesScreen())),
+          icon: const Icon(Icons.sticky_note_2_outlined),
+          label: Text(l10n.snTitle),
+        ),
+      ]),
       body: warehouseId == null
           ? EmptyStateView(
               icon: Icons.warehouse_outlined,

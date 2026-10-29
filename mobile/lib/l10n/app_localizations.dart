@@ -22051,6 +22051,276 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ネットから写真を{count}件追加しました（実物と違えば各商品の「写真」で差し替えてください）'**
   String plPhotosAdded(int count);
+
+  /// No description provided for @pmkStar.
+  ///
+  /// In ja, this message translates to:
+  /// **'お気に入りにする'**
+  String get pmkStar;
+
+  /// No description provided for @pmkUnstar.
+  ///
+  /// In ja, this message translates to:
+  /// **'お気に入りを外す'**
+  String get pmkUnstar;
+
+  /// No description provided for @pmkWarn.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告を付ける'**
+  String get pmkWarn;
+
+  /// No description provided for @pmkWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告'**
+  String get pmkWarning;
+
+  /// No description provided for @pmkNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告の内容'**
+  String get pmkNote;
+
+  /// No description provided for @pmkNoteHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 色違いと間違えやすい／割れやすい'**
+  String get pmkNoteHint;
+
+  /// No description provided for @pmkClearWarning.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告を外す'**
+  String get pmkClearWarning;
+
+  /// No description provided for @pfStarred.
+  ///
+  /// In ja, this message translates to:
+  /// **'お気に入り'**
+  String get pfStarred;
+
+  /// No description provided for @pfWarned.
+  ///
+  /// In ja, this message translates to:
+  /// **'警告あり'**
+  String get pfWarned;
+
+  /// No description provided for @siAllShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の{count}件をすべて選ぶ'**
+  String siAllShown(int count);
+
+  /// No description provided for @siColPhoto.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真'**
+  String get siColPhoto;
+
+  /// No description provided for @siColAttrs.
+  ///
+  /// In ja, this message translates to:
+  /// **'色・サイズなど'**
+  String get siColAttrs;
+
+  /// No description provided for @siColMarks.
+  ///
+  /// In ja, this message translates to:
+  /// **'マーク'**
+  String get siColMarks;
+
+  /// No description provided for @siColFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル'**
+  String get siColFile;
+
+  /// No description provided for @siFilterHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込み（商品名・JAN・品番・メーカー）'**
+  String get siFilterHint;
+
+  /// No description provided for @siWhichOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'未検品'**
+  String get siWhichOpen;
+
+  /// No description provided for @siWhichDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済み'**
+  String get siWhichDone;
+
+  /// No description provided for @siWhichAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get siWhichAll;
+
+  /// No description provided for @siShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'{shown} / {total}行を表示'**
+  String siShown(int shown, int total);
+
+  /// No description provided for @siPhotos.
+  ///
+  /// In ja, this message translates to:
+  /// **'写真を追加・変更'**
+  String get siPhotos;
+
+  /// No description provided for @siWeightTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量（1単位）を入れる'**
+  String get siWeightTitle;
+
+  /// No description provided for @siWeightField.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量'**
+  String get siWeightField;
+
+  /// No description provided for @siWeightHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'量った1個・1本の重さ。空欄で消します'**
+  String get siWeightHint;
+
+  /// No description provided for @siWeightNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品時に計量'**
+  String get siWeightNote;
+
+  /// No description provided for @siWeightSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'重量を保存しました'**
+  String get siWeightSaved;
+
+  /// No description provided for @snTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚メモ'**
+  String get snTitle;
+
+  /// No description provided for @snIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'どの商品をどこに置いたかなどを自由に書き残せます（箇条書きでも可）。場所・内容・商品名・品番・JAN・メーカーで探せます。'**
+  String get snIntro;
+
+  /// No description provided for @snSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚メモを探す'**
+  String get snSearch;
+
+  /// No description provided for @snAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚メモを追加'**
+  String get snAdd;
+
+  /// No description provided for @snEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚メモを編集'**
+  String get snEdit;
+
+  /// No description provided for @snRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'一覧から外す'**
+  String get snRemove;
+
+  /// No description provided for @snEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'棚メモはまだありません'**
+  String get snEmpty;
+
+  /// No description provided for @snNoneMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'一致する棚メモはありません'**
+  String get snNoneMatch;
+
+  /// No description provided for @snNoneForProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品の棚メモはありません'**
+  String get snNoneForProduct;
+
+  /// No description provided for @snNoProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の指定なし'**
+  String get snNoProduct;
+
+  /// No description provided for @snProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品（任意）'**
+  String get snProduct;
+
+  /// No description provided for @snProductHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・品番・JANで選べます。空欄でも書けます'**
+  String get snProductHint;
+
+  /// No description provided for @snLocation.
+  ///
+  /// In ja, this message translates to:
+  /// **'置き場所（任意）'**
+  String get snLocation;
+
+  /// No description provided for @snLocationHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: A棚 上段 / 倉庫奥の青い箱'**
+  String get snLocationHint;
+
+  /// No description provided for @snBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ'**
+  String get snBody;
+
+  /// No description provided for @snBodyHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'・特別な商品をここに置いた\n・割れ物なので下段'**
+  String get snBodyHint;
+
+  /// No description provided for @planArrives.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷予定 {date}'**
+  String planArrives(String date);
+
+  /// No description provided for @planDocDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の日付 {date}'**
+  String planDocDate(String date);
+
+  /// No description provided for @planEnteredBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録 {at}（{who}）'**
+  String planEnteredBy(String at, String who);
+
+  /// No description provided for @planEnteredUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録者不明'**
+  String get planEnteredUnknown;
 }
 
 class _AppLocalizationsDelegate

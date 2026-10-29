@@ -14,6 +14,12 @@ import 'package:wms_mobile/features/qc/presentation/inspection_list_screen.dart'
 import 'package:wms_mobile/features/stock_import/presentation/stock_inspection_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 
+import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/domain/product.dart';
+import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
+import 'package:wms_mobile/features/shelf_notes/data/shelf_notes_repository.dart';
+
+import '../../support/fake_marks_and_notes.dart';
 import '../../support/harness.dart';
 
 const _jan1 = '4909999000014';
@@ -132,6 +138,80 @@ void main() {
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
     expect(find.textContaining('検品済み 498個（検品担当）'), findsOneWidget);
     expect(find.text('未検品 1行（全2行）'), findsOneWidget);
+  });
+
+  // 0167: each line with what its product tells of it, and narrowing.
+  const pen = Product(
+    id: 7, janCode: _jan1, name: 'テストペン タイプA 0.5 青', baseName: 'テストペン タイプA 0.5 青', maker: 'テスト文具',
+    sku: 'TP-05L', unitWeightG: 9.5, marks: {'warning'}, markNote: '黒と間違えやすい',
+    attributes: [ProductPart(key: 'color', name: '色', value: '青')],
+  );
+  const note = Product(id: 8, janCode: _jan2, name: 'TN-1', sku: 'TN-1', maker: '別メーカー');
+
+  testWidgets('a line shows its picture, 商品名, maker, 品番, attributes, weight, warning and shelf note; narrowed by words (0167)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final products = FakeProductRepository(products: const [pen, note]);
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inspection.confirm', 'product.manage', 'putaway.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(_Stock()),
+      masterImportRepositoryProvider.overrideWithValue(_Reader(_awaiting())),
+      productRepositoryProvider.overrideWithValue(products),
+      productLibraryCanManageProvider.overrideWithValue(true),
+      shelfNotesRepositoryProvider.overrideWithValue(
+          FakeShelfNotesRepository([const ShelfNote(id: 1, productId: 7, location: 'A棚 上段', body: '・青だけ奥')])),
+    ]);
+    // On a phone: a card with every field.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-name-2'))).data, 'テストペン タイプA 0.5 青');
+    expect(find.text('テスト文具 · TP-05L'), findsOneWidget);
+    expect(find.text('色: 青'), findsOneWidget);
+    expect(find.text('重量: 9.5 g'), findsOneWidget);
+    expect(find.text('⚠ 黒と間違えやすい'), findsOneWidget);
+    expect(find.text('📍A棚 上段 ・青だけ奥'), findsOneWidget);
+    // Only its 品番 for a name: 未登録, not the 品番 again.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-name-3'))).data, 'テストノート'); // the file's, not TN-1
+
+    // Narrowed by a word, then by ⚠.
+    await tester.enterText(find.byKey(const ValueKey('si-filter')), 'TN-1');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-line-2')), findsNothing);
+    expect(find.byKey(const ValueKey('si-line-3')), findsOneWidget);
+    expect(find.text('1 / 2行を表示'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('si-filter')), '');
+    await tester.tap(find.byKey(const ValueKey('si-mark-warning')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-line-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-line-3')), findsNothing);
+    // 表示中の1件をすべて選ぶ ticks only what is shown.
+    await tester.tap(find.byKey(const ValueKey('si-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('選んだ1行を検品完了にする'), findsOneWidget);
+
+    // The weight, put in as the goods are in hand.
+    await tester.tap(find.byKey(const ValueKey('si-weigh-2')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('si-weight-field')), '10.2');
+    await tester.tap(find.byKey(const ValueKey('si-weight-save')));
+    await tester.pumpAndSettle();
+    expect(products.setWeights.single.productId, 7);
+    expect(products.setWeights.single.unitWeightG, 10.2);
+    expect(products.setWeights.single.source, 'measured');
+  });
+
+  testWidgets('on a PC every line is one row under a heading (0167)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1600, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inspection.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(_Stock()),
+      masterImportRepositoryProvider.overrideWithValue(_Reader(_awaiting())),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: const [pen, note])),
+    ]);
+    expect(find.byKey(const ValueKey('si-heading')), findsOneWidget);
+    final y = tester.getCenter(find.byKey(const ValueKey('si-name-2'))).dy;
+    expect(tester.getCenter(find.byKey(const ValueKey('si-weight-2'))).dy, closeTo(y, 12));
+    expect(tester.getCenter(find.byKey(const ValueKey('si-count-2'))).dy, closeTo(y, 12));
   });
 
   testWidgets('a JAN not among the lines is said so', (tester) async {

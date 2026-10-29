@@ -28,6 +28,7 @@ import 'product_facts.dart';
 import 'product_form_sheet.dart';
 import 'product_labels.dart';
 import 'product_lifecycle_ui.dart';
+import 'product_marks_ui.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../price_book/application/price_book_providers.dart';
 import '../../price_book/presentation/price_book_pick_screen.dart';
@@ -1219,6 +1220,24 @@ class _FilterBar extends ConsumerWidget {
             onChanged: (v, on) =>
                 set(filter.copyWith(makers: on ? {...filter.makers, v} : ({...filter.makers}..remove(v)))),
           ),
+          // By supplier (0167): who sells it to us.
+          if (facets.suppliers.isNotEmpty)
+            _FacetChip(
+              key: const ValueKey('pf-supplier'),
+              label: summary(l10n.pfSupplier, [
+                for (final id in filter.supplierIds) facets.suppliers[id]?.$1 ?? '#$id',
+              ]),
+              active: filter.supplierIds.isNotEmpty,
+              options: [
+                for (final e in facets.suppliers.entries)
+                  ('${e.key}', e.value.$1, e.value.$2, filter.supplierIds.contains(e.key)),
+              ],
+              onChanged: (v, on) {
+                final id = int.parse(v);
+                set(filter.copyWith(
+                    supplierIds: on ? {...filter.supplierIds, id} : ({...filter.supplierIds}..remove(id))));
+              },
+            ),
           if (facets.categories.isNotEmpty)
             _FacetChip(
               key: const ValueKey('pf-category'),
@@ -1230,6 +1249,28 @@ class _FilterBar extends ConsumerWidget {
               onChanged: (v, on) => set(
                   filter.copyWith(categories: on ? {...filter.categories, v} : ({...filter.categories}..remove(v)))),
             ),
+          // ★ and ⚠ (0167).
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: FilterChip(
+              key: const ValueKey('pf-mark-star'),
+              avatar: const Icon(Icons.star, size: 16),
+              label: Text(l10n.pfStarred),
+              selected: filter.marks.contains('star'),
+              onSelected: (v) => set(filter.copyWith(marks: v ? {...filter.marks, 'star'} : ({...filter.marks}..remove('star')))),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: FilterChip(
+              key: const ValueKey('pf-mark-warning'),
+              avatar: const Icon(Icons.warning_amber_rounded, size: 16),
+              label: Text(l10n.pfWarned),
+              selected: filter.marks.contains('warning'),
+              onSelected: (v) =>
+                  set(filter.copyWith(marks: v ? {...filter.marks, 'warning'} : ({...filter.marks}..remove('warning')))),
+            ),
+          ),
           FilterChip(
             key: const ValueKey('pf-without-images'),
             label: Text(l10n.plWithoutImages),
@@ -1428,6 +1469,7 @@ class _ProductCard extends StatelessWidget {
                       ],
                       if (product.lifecycleReason case final why? when !product.isActive)
                         Text(why, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                      ProductWarningNote(product: product),
                       const SizedBox(height: 2),
                       _StockLine(product: product, warehouseId: warehouseId, pane: pane),
                       const SizedBox(height: AppSpacing.xs),
@@ -1443,6 +1485,7 @@ class _ProductCard extends StatelessWidget {
                       Text('¥${product.price!.toStringAsFixed(0)}',
                           style: theme.textTheme.titleMedium?.copyWith(fontFamily: AppFonts.mono)),
                     _menu(context) ?? const SizedBox(height: AppSpacing.sm),
+                    ProductMarks(product: product, size: 18),
                     GestureDetector(
                       onTap: onToggleStatus,
                       child: LifecyclePill(lifecycle: product.lifecycle),
@@ -1570,6 +1613,7 @@ class _ProductCard extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(fontFamily: AppFonts.mono)),
                 ),
                 const Spacer(),
+                ProductMarks(product: product, size: 18),
                 GestureDetector(onTap: onToggleStatus, child: LifecyclePill(lifecycle: product.lifecycle)),
                 if (menu != null) menu else const SizedBox(width: 40),
               ]);

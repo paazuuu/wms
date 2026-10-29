@@ -148,6 +148,11 @@ import 'package:wms_mobile/features/jan_catalog/data/reference_repository.dart';
 import 'fake_reference_repository.dart';
 import 'fake_market_name_repository.dart';
 import 'fake_web_photo_repository.dart';
+import 'fake_marks_and_notes.dart';
+import 'package:wms_mobile/features/product/data/product_marks.dart'
+    show canMarkProductsProvider, productMarksRepositoryProvider;
+import 'package:wms_mobile/features/shelf_notes/data/shelf_notes_repository.dart'
+    show ShelfNote, canWriteShelfNotesProvider, shelfNotesProvider, shelfNotesRepositoryProvider;
 import 'package:wms_mobile/features/product/data/web_photos.dart' show webPhotoRepositoryProvider;
 import 'package:wms_mobile/features/product/data/market_names.dart' show marketNameRepositoryProvider;
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
@@ -225,6 +230,9 @@ List<Override> _defaultOverrides() => [
       // Names looked up on the web (0164): none found.
       marketNameRepositoryProvider.overrideWithValue(FakeMarketNameRepository()),
       webPhotoRepositoryProvider.overrideWithValue(FakeWebPhotoRepository()),
+      // Marks and shelf notes (0167): none.
+      productMarksRepositoryProvider.overrideWithValue(FakeProductMarksRepository()),
+      shelfNotesRepositoryProvider.overrideWithValue(FakeShelfNotesRepository()),
       // The supply chain layer is off unless a test turns it on (0107).
       scCanViewProvider.overrideWithValue(false),
       scCanManageProvider.overrideWithValue(false),
@@ -312,6 +320,11 @@ Future<void> pumpAppWith(
           // Managing products (0111's name builder) is off here, as in pumpApp.
           productLibraryCanManageProvider.overrideWithValue(canManageProducts),
           productCanDeleteProvider.overrideWithValue(false),
+          // Shelf notes (0167): none, from memory.
+          shelfNotesProvider.overrideWith((ref) async => const <ShelfNote>[]),
+          // Marks and notes are not set here, so the sign-in state is not read.
+          canMarkProductsProvider.overrideWithValue(false),
+          canWriteShelfNotesProvider.overrideWithValue(false),
           productCanLifecycleProvider.overrideWithValue(false),
           pendingInspectionProvider.overrideWith((ref) async => const PendingInspection()),
         ],

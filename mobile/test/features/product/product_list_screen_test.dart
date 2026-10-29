@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/product/data/market_names.dart';
+import 'package:wms_mobile/features/product/data/product_marks.dart';
 import 'package:wms_mobile/features/product/application/product_filter.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
@@ -17,6 +18,7 @@ import 'package:wms_mobile/features/supply_chain/application/supply_chain_provid
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
+import '../../support/fake_marks_and_notes.dart';
 import '../../support/fake_market_name_repository.dart';
 import '../../support/harness.dart';
 
@@ -30,9 +32,11 @@ Future<ProviderContainer> _pump(
     List<Warehouse> warehouses = const [],
     PendingInspection pending = const PendingInspection(),
     ProductStockHistory? history,
-    MarketNameRepository? names}) async {
+    MarketNameRepository? names,
+    ProductMarksRepository? marks}) async {
   final container = ProviderContainer(overrides: [
     productRepositoryProvider.overrideWithValue(repo),
+    productMarksRepositoryProvider.overrideWithValue(marks ?? FakeProductMarksRepository()),
     marketNameRepositoryProvider.overrideWithValue(names ?? FakeMarketNameRepository()),
     warehouseRepositoryProvider.overrideWithValue(
         FakeWarehouseRepository(WarehouseOverview(warehouses: warehouses, totals: const WarehouseTotals()))),
@@ -47,6 +51,7 @@ Future<ProviderContainer> _pump(
         productLibraryCanManageProvider.overrideWithValue(manage),
         productCanDeleteProvider.overrideWithValue(delete),
         productCanLifecycleProvider.overrideWithValue(lifecycle),
+        if (marks != null) canMarkProductsProvider.overrideWithValue(true),
         pendingInspectionProvider.overrideWith((ref) async => pending),
         if (history != null) productStockHistoryProvider.overrideWith((ref, key) async => history),
       ],
@@ -433,7 +438,8 @@ void main() {
 
     expect(find.text('10×10×140 mm · 12 g'), findsOneWidget);
     expect(find.textContaining('新東光通商'), findsNothing);
-    expect(find.byKey(const ValueKey('pf-supplier')), findsNothing);
+    // Not on the rows; a filter by supplier is in the bar (0167).
+    expect(find.byKey(const ValueKey('pf-supplier')), findsOneWidget);
     expect(find.text('在庫 40 · 引当 10 · 出荷可能 30'), findsOneWidget);
     expect(find.byKey(const ValueKey('pl-stock-0-2')), findsOneWidget);
     expect(tester.widget<Text>(find.byKey(const ValueKey('pl-stock-0-2'))).data, '在庫なし');
@@ -736,6 +742,42 @@ void main() {
               baseName: 'テストペン タイプA 0.5mm 黒', baseNameSource: 'ai', baseNameSourceUrl: 'https://example.test/p'),
         ]));
     expect(find.byKey(const ValueKey('pl-name-ai-1')), findsOneWidget);
+  });
+
+  testWidgets('★ and ⚠ are set on a row and narrow the library; so does a supplier (0167)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final marks = FakeProductMarksRepository();
+    await _pump(
+      tester,
+      FakeProductRepository(products: const [
+        Product(id: 1, janCode: '4909999000014', name: 'テストペン', marks: {'star'},
+            suppliers: [ProductSupplierRef(id: 4, name: '新東光通商')]),
+        Product(id: 2, janCode: '4909999000021', name: 'テストノート', marks: {'warning'}, markNote: '割れやすい'),
+      ]),
+      marks: marks,
+    );
+    await tester.tap(find.byKey(const ValueKey('pmk-star-2')));
+    await tester.pumpAndSettle();
+    final (id, set, keptNote) = marks.calls.single;
+    expect((id, keptNote), (2, '割れやすい'));
+    expect(set, {'star', 'warning'});
+
+    await tester.tap(find.byKey(const ValueKey('pf-mark-warning')));
+    await tester.pumpAndSettle();
+    expect(find.text('テストペン'), findsNothing);
+    expect(find.text('テストノート'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pf-mark-warning')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('pf-supplier')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pf-opt-4')));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.text('テストペン'), findsOneWidget);
+    expect(find.text('テストノート'), findsNothing);
   });
 
   testWidgets('without product.delete there is no removing for good', (tester) async {

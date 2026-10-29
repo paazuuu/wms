@@ -571,9 +571,12 @@ async function commit(supabase: Client, input: {
     } });
   }
 
+  // Who entered it (0167): the caller, as the service role has no user.
+  const { data: who } = await supabase.auth.getUser();
   const { data: plan, error: e1 } = await admin
     .from("delivery_plans")
     .insert({
+      created_by: who?.user?.id ?? null,
       warehouse_id: warehouseId,
       delivery_number: input.deliveryNumber,
       supplier_name: input.supplier,

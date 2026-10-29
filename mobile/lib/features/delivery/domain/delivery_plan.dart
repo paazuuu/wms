@@ -33,7 +33,13 @@ class DeliveryPlan extends Equatable {
     this.plannedUnits,
     this.receivedUnits,
     this.remainingUnits,
+    this.createdAt,
+    this.createdByName,
   }) : _lineCount = lineCount;
+
+  /// When it was entered, and by whom (0167; none for plans from before).
+  final DateTime? createdAt;
+  final String? createdByName;
 
   /// 仕入先から提示された入荷予定日 (0134); null is 未定.
   final DateTime? expectedArrivalDate;
@@ -127,6 +133,8 @@ class DeliveryPlan extends Equatable {
       plannedUnits: _asInt(json['planned_units']),
       receivedUnits: _asInt(json['received_units']),
       remainingUnits: _asInt(json['remaining_units']),
+      createdAt: DateTime.tryParse('${json['created_at'] ?? ''}')?.toLocal(),
+      createdByName: json['created_by_name'] as String?,
     );
   }
 

@@ -45,6 +45,19 @@ void main() {
     expect(find.text('D-002'), findsOneWidget);
   });
 
+  testWidgets('a plan says when it is to arrive, and when and by whom it was entered (0167)', (tester) async {
+    final repo = FakeDeliveryRepository([
+      DeliveryPlan(
+        id: 3, deliveryNumber: 'D-003', supplierName: 'C社', lineCount: 2,
+        expectedArrivalDate: DateTime(2026, 11, 2), deliveryDate: '2026-10-28',
+        createdAt: DateTime(2026, 10, 29, 9, 30), createdByName: '倉庫 太郎',
+      ),
+    ]);
+    await pumpApp(tester, const DeliveryPlanListScreen(), overrides: [deliveryRepositoryProvider.overrideWithValue(repo)]);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('plan-entered-3'))).data,
+        '入荷予定 2026/11/02 · 書類の日付 2026-10-28 · 登録 2026/10/29 09:30（倉庫 太郎）');
+  });
+
   testWidgets('lists plans and filters by status chip', (tester) async {
     await pumpApp(
       tester,

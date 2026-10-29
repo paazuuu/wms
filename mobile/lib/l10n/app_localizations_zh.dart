@@ -12322,4 +12322,149 @@ class AppLocalizationsZh extends AppLocalizations {
   String plPhotosAdded(int count) {
     return '已从网上添加$count张照片（如与实物不符，请在各商品的“照片”中更换）';
   }
+
+  @override
+  String get pmkStar => '设为收藏';
+
+  @override
+  String get pmkUnstar => '取消收藏';
+
+  @override
+  String get pmkWarn => '添加警告';
+
+  @override
+  String get pmkWarning => '警告';
+
+  @override
+  String get pmkNote => '警告内容';
+
+  @override
+  String get pmkNoteHint => '例：容易与其他颜色混淆／易碎';
+
+  @override
+  String get pmkClearWarning => '取消警告';
+
+  @override
+  String get pfStarred => '收藏';
+
+  @override
+  String get pfWarned => '有警告';
+
+  @override
+  String siAllShown(int count) {
+    return '选择显示中的$count件';
+  }
+
+  @override
+  String get siColPhoto => '照片';
+
+  @override
+  String get siColAttrs => '颜色・尺寸等';
+
+  @override
+  String get siColMarks => '标记';
+
+  @override
+  String get siColFile => '文件';
+
+  @override
+  String get siFilterHint => '筛选（商品名・JAN・货号・厂家）';
+
+  @override
+  String get siWhichOpen => '未检验';
+
+  @override
+  String get siWhichDone => '已检验';
+
+  @override
+  String get siWhichAll => '全部';
+
+  @override
+  String siShown(int shown, int total) {
+    return '显示 $shown / $total 行';
+  }
+
+  @override
+  String get siPhotos => '添加・更换照片';
+
+  @override
+  String get siWeightTitle => '输入重量（1单位）';
+
+  @override
+  String get siWeightField => '重量';
+
+  @override
+  String get siWeightHint => '称得的1个/1支的重量。留空则清除';
+
+  @override
+  String get siWeightNote => '检验时称重';
+
+  @override
+  String get siWeightSaved => '已保存重量';
+
+  @override
+  String get snTitle => '货架备注';
+
+  @override
+  String get snIntro => '可自由记录哪个商品放在了哪里（可用条目）。可按位置、内容、商品名、货号、JAN、厂家查找。';
+
+  @override
+  String get snSearch => '查找货架备注';
+
+  @override
+  String get snAdd => '添加货架备注';
+
+  @override
+  String get snEdit => '编辑货架备注';
+
+  @override
+  String get snRemove => '从列表移除';
+
+  @override
+  String get snEmpty => '尚无货架备注';
+
+  @override
+  String get snNoneMatch => '没有匹配的货架备注';
+
+  @override
+  String get snNoneForProduct => '该商品没有货架备注';
+
+  @override
+  String get snNoProduct => '未指定商品';
+
+  @override
+  String get snProduct => '商品（可选）';
+
+  @override
+  String get snProductHint => '可按商品名・货号・JAN选择，也可留空';
+
+  @override
+  String get snLocation => '存放位置（可选）';
+
+  @override
+  String get snLocationHint => '例：A货架上层 / 仓库里面的蓝色箱子';
+
+  @override
+  String get snBody => '备注';
+
+  @override
+  String get snBodyHint => '・特殊商品放在这里\n・易碎品放在下层';
+
+  @override
+  String planArrives(String date) {
+    return '预计到货 $date';
+  }
+
+  @override
+  String planDocDate(String date) {
+    return '单据日期 $date';
+  }
+
+  @override
+  String planEnteredBy(String at, String who) {
+    return '登记 $at（$who）';
+  }
+
+  @override
+  String get planEnteredUnknown => '登记人不明';
 }

@@ -6,7 +6,7 @@
 --   the warning a buyer left. list_products carries them.
 -- * shelf_notes: free notes on where things were put (棚入れ) — a product
 --   (kept by JAN too, should the product go), a place, and the note as
---   bullets — searched in the app. Written by those who put away or adjust
+--   bullets — searched in the app. A note taken off is kept (removed_at). Written by those who put away or adjust
 --   stock, or manage products; read by product.view.
 -- * delivery_plans.created_by / created_by_name: who entered the plan (the
 --   import passes the caller; plans made in the database take auth.uid()).
@@ -66,7 +66,10 @@ create table if not exists public.shelf_notes (
   created_by uuid,
   created_by_name text,
   updated_at timestamptz,
-  updated_by_name text
+  updated_by_name text,
+  -- A note taken off the list is kept, marked removed.
+  removed_at timestamptz,
+  removed_by_name text
 );
 create index if not exists shelf_notes_product on public.shelf_notes (product_id);
 alter table public.shelf_notes enable row level security;
@@ -115,7 +118,7 @@ begin
            jan_code = coalesce((select jan_code from public.products where id = v_product), case when v_product is null then null else jan_code end),
            location = nullif(btrim(coalesce(p->>'location', '')), ''), body = v_body,
            updated_at = now(), updated_by_name = public.user_display_name(auth.uid())
-     where id = v_id
+     where id = v_id and removed_at is null
     returning * into v_row;
     if not found then
       raise exception 'shelf note % not found', v_id;
@@ -127,19 +130,21 @@ $$;
 revoke all on function public.save_shelf_note(jsonb) from public, anon;
 grant execute on function public.save_shelf_note(jsonb) to authenticated;
 
-create or replace function public.delete_shelf_note(p_id bigint)
+-- A note taken off the list: kept, marked removed (who, when).
+create or replace function public.remove_shelf_note(p_id bigint)
 returns boolean
 language plpgsql security definer set search_path = '' as $$
 begin
   if not public.can_write_shelf_notes() then
     raise exception 'not permitted: putaway.confirm required';
   end if;
-  delete from public.shelf_notes where id = p_id;
+  update public.shelf_notes set removed_at = now(), removed_by_name = public.user_display_name(auth.uid())
+   where id = p_id and removed_at is null;
   return found;
 end;
 $$;
-revoke all on function public.delete_shelf_note(bigint) from public, anon;
-grant execute on function public.delete_shelf_note(bigint) to authenticated;
+revoke all on function public.remove_shelf_note(bigint) from public, anon;
+grant execute on function public.remove_shelf_note(bigint) to authenticated;
 
 alter table public.delivery_plans add column if not exists created_by uuid;
 alter table public.delivery_plans add column if not exists created_by_name text;

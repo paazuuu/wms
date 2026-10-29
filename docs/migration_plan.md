@@ -7992,6 +7992,49 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 引当 explained on the product's stock: set aside for planned shipments and
   picking; 出荷可能 = 在庫 − 引当.
 
+## 0167: marks, filters, a full inspection line, 棚メモ, who entered a plan
+
+- 検品 and 取込の検品 are two screens.
+  - 検品 judges received goods (合格・不合格・保留) for deliveries
+    received through 納品照合.
+  - 取込の検品 counts what 「ファイルから在庫登録」 staged, and only then puts
+    it into stock (0148). The files waiting are listed on 検品 too.
+- ★ / ⚠ on products: `products.marks`, with `mark_note` for the warning.
+  - Set with `set_product_marks` by anyone who handles goods (product.manage,
+    inspection, receiving, putaway or stock adjustment); seen by all.
+  - On the library rows, the product, 棚メモ and inspection lines.
+  - The library filters by ★ / ⚠ and now by 仕入先 too (メーカー was
+    there).
+- 取込の検品, each line shows:
+  - the picture, 商品名 and 表示名, maker, 品番, JAN, attributes, weight,
+    ★ / ⚠ with the warning's note, and the shelf notes;
+  - on a PC as one row under a heading, on a phone as a card with every
+    field.
+- 取込の検品, done there as the goods are in hand:
+  - add or change pictures (写真 / ネットから), enter the weight (source
+    measured), set marks, add a 棚メモ.
+- 取込の検品 narrows by words (商品名・JAN・品番・メーカー), maker, ★ / ⚠,
+  and all / to check / checked. 「表示中の…をすべて選ぶ」 ticks only those
+  shown.
+- 棚メモ (`shelf_notes`): free notes on where things were put.
+  - A note may have a product (kept by JAN too) and a place; the note itself
+    can be bullets.
+  - Searched by place, note, 商品名, 品番, JAN or maker.
+  - Written by putaway, stock adjustment or product.manage (`save_shelf_note`).
+    A note taken off is kept with who and when (`remove_shelf_note` sets
+    `removed_at`).
+  - Reached from 棚入れ (the 棚メモ button), the product (its section) and the
+    inspection line.
+- 納品照合: `delivery_plans.created_by` / `created_by_name`.
+  - The import passes the caller; a plan made in the database takes
+    auth.uid().
+  - The list says 入荷予定, the document's date, and 登録 date and time (who).
+- Applied in parts:
+  - The `delete from` of a first draft asked the database owner for
+    approval and timed out twice.
+  - Notes are therefore removed by `removed_at`, not deleted, and the file
+    says so.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

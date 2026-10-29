@@ -11076,5 +11076,91 @@
         "type": "int"
       }
     }
-  }
+  },
+  "pmkStar": "お気に入りにする",
+  "pmkUnstar": "お気に入りを外す",
+  "pmkWarn": "警告を付ける",
+  "pmkWarning": "警告",
+  "pmkNote": "警告の内容",
+  "pmkNoteHint": "例: 色違いと間違えやすい／割れやすい",
+  "pmkClearWarning": "警告を外す",
+  "pfStarred": "お気に入り",
+  "pfWarned": "警告あり",
+  "siAllShown": "表示中の{count}件をすべて選ぶ",
+  "@siAllShown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "siColPhoto": "写真",
+  "siColAttrs": "色・サイズなど",
+  "siColMarks": "マーク",
+  "siColFile": "ファイル",
+  "siFilterHint": "絞り込み（商品名・JAN・品番・メーカー）",
+  "siWhichOpen": "未検品",
+  "siWhichDone": "検品済み",
+  "siWhichAll": "すべて",
+  "siShown": "{shown} / {total}行を表示",
+  "@siShown": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "siPhotos": "写真を追加・変更",
+  "siWeightTitle": "重量（1単位）を入れる",
+  "siWeightField": "重量",
+  "siWeightHint": "量った1個・1本の重さ。空欄で消します",
+  "siWeightNote": "検品時に計量",
+  "siWeightSaved": "重量を保存しました",
+  "snTitle": "棚メモ",
+  "snIntro": "どの商品をどこに置いたかなどを自由に書き残せます（箇条書きでも可）。場所・内容・商品名・品番・JAN・メーカーで探せます。",
+  "snSearch": "棚メモを探す",
+  "snAdd": "棚メモを追加",
+  "snEdit": "棚メモを編集",
+  "snRemove": "一覧から外す",
+  "snEmpty": "棚メモはまだありません",
+  "snNoneMatch": "一致する棚メモはありません",
+  "snNoneForProduct": "この商品の棚メモはありません",
+  "snNoProduct": "商品の指定なし",
+  "snProduct": "商品（任意）",
+  "snProductHint": "商品名・品番・JANで選べます。空欄でも書けます",
+  "snLocation": "置き場所（任意）",
+  "snLocationHint": "例: A棚 上段 / 倉庫奥の青い箱",
+  "snBody": "メモ",
+  "snBodyHint": "・特別な商品をここに置いた\n・割れ物なので下段",
+  "planArrives": "入荷予定 {date}",
+  "@planArrives": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planDocDate": "書類の日付 {date}",
+  "@planDocDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planEnteredBy": "登録 {at}（{who}）",
+  "@planEnteredBy": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "planEnteredUnknown": "登録者不明"
 }

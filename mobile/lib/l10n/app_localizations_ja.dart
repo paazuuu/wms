@@ -12395,4 +12395,150 @@ class AppLocalizationsJa extends AppLocalizations {
   String plPhotosAdded(int count) {
     return 'ネットから写真を$count件追加しました（実物と違えば各商品の「写真」で差し替えてください）';
   }
+
+  @override
+  String get pmkStar => 'お気に入りにする';
+
+  @override
+  String get pmkUnstar => 'お気に入りを外す';
+
+  @override
+  String get pmkWarn => '警告を付ける';
+
+  @override
+  String get pmkWarning => '警告';
+
+  @override
+  String get pmkNote => '警告の内容';
+
+  @override
+  String get pmkNoteHint => '例: 色違いと間違えやすい／割れやすい';
+
+  @override
+  String get pmkClearWarning => '警告を外す';
+
+  @override
+  String get pfStarred => 'お気に入り';
+
+  @override
+  String get pfWarned => '警告あり';
+
+  @override
+  String siAllShown(int count) {
+    return '表示中の$count件をすべて選ぶ';
+  }
+
+  @override
+  String get siColPhoto => '写真';
+
+  @override
+  String get siColAttrs => '色・サイズなど';
+
+  @override
+  String get siColMarks => 'マーク';
+
+  @override
+  String get siColFile => 'ファイル';
+
+  @override
+  String get siFilterHint => '絞り込み（商品名・JAN・品番・メーカー）';
+
+  @override
+  String get siWhichOpen => '未検品';
+
+  @override
+  String get siWhichDone => '検品済み';
+
+  @override
+  String get siWhichAll => 'すべて';
+
+  @override
+  String siShown(int shown, int total) {
+    return '$shown / $total行を表示';
+  }
+
+  @override
+  String get siPhotos => '写真を追加・変更';
+
+  @override
+  String get siWeightTitle => '重量（1単位）を入れる';
+
+  @override
+  String get siWeightField => '重量';
+
+  @override
+  String get siWeightHint => '量った1個・1本の重さ。空欄で消します';
+
+  @override
+  String get siWeightNote => '検品時に計量';
+
+  @override
+  String get siWeightSaved => '重量を保存しました';
+
+  @override
+  String get snTitle => '棚メモ';
+
+  @override
+  String get snIntro =>
+      'どの商品をどこに置いたかなどを自由に書き残せます（箇条書きでも可）。場所・内容・商品名・品番・JAN・メーカーで探せます。';
+
+  @override
+  String get snSearch => '棚メモを探す';
+
+  @override
+  String get snAdd => '棚メモを追加';
+
+  @override
+  String get snEdit => '棚メモを編集';
+
+  @override
+  String get snRemove => '一覧から外す';
+
+  @override
+  String get snEmpty => '棚メモはまだありません';
+
+  @override
+  String get snNoneMatch => '一致する棚メモはありません';
+
+  @override
+  String get snNoneForProduct => 'この商品の棚メモはありません';
+
+  @override
+  String get snNoProduct => '商品の指定なし';
+
+  @override
+  String get snProduct => '商品（任意）';
+
+  @override
+  String get snProductHint => '商品名・品番・JANで選べます。空欄でも書けます';
+
+  @override
+  String get snLocation => '置き場所（任意）';
+
+  @override
+  String get snLocationHint => '例: A棚 上段 / 倉庫奥の青い箱';
+
+  @override
+  String get snBody => 'メモ';
+
+  @override
+  String get snBodyHint => '・特別な商品をここに置いた\n・割れ物なので下段';
+
+  @override
+  String planArrives(String date) {
+    return '入荷予定 $date';
+  }
+
+  @override
+  String planDocDate(String date) {
+    return '書類の日付 $date';
+  }
+
+  @override
+  String planEnteredBy(String at, String who) {
+    return '登録 $at（$who）';
+  }
+
+  @override
+  String get planEnteredUnknown => '登録者不明';
 }
