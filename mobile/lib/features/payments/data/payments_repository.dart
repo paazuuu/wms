@@ -12,16 +12,17 @@ import '../domain/payment.dart';
 /// The private bucket the transfer proofs are kept in (0171).
 const paymentProofBucket = 'payment-proofs';
 
-/// Which payments are listed: every unpaid one, or a month's.
+/// Which orders are listed: every one still under way (the screen keeps
+/// those it showed even once they are through), or a month's.
 sealed class PaymentsRange {
   const PaymentsRange();
 }
 
-class UnpaidPayments extends PaymentsRange {
-  const UnpaidPayments();
+class OpenPayments extends PaymentsRange {
+  const OpenPayments();
 
   @override
-  bool operator ==(Object other) => other is UnpaidPayments;
+  bool operator ==(Object other) => other is OpenPayments;
 
   @override
   int get hashCode => 0;
@@ -102,7 +103,8 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
   Future<ApiResult<List<Payment>>> list(PaymentsRange range) async {
     try {
       final r = await _rest.post('/rpc/payments_list', data: switch (range) {
-        UnpaidPayments() => {'p_from': null, 'p_to': null, 'p_unpaid_only': true},
+        // Every order; the screen keeps those not through yet.
+        OpenPayments() => {'p_from': '2000-01-01', 'p_to': '2100-12-31', 'p_unpaid_only': false},
         MonthPayments(:final year, :final month) => {
             'p_from': _day(DateTime(year, month)),
             'p_to': _day(DateTime(year, month + 1, 0)),

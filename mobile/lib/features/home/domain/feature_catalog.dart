@@ -54,7 +54,7 @@ import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
-import '../../payments/presentation/orders_screen.dart';
+import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
@@ -97,9 +97,11 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             inMenu: false,
           ),
           // Stock from a file, on its own (0144): a JAN and a quantity a row.
+          // 発注 (0173): a supplier's invoice taken in — stock, products — and
+          // each order followed to its payment and proof, in one place.
           FeatureEntry(
             id: 'stock_file_import',
-            icon: Icons.inventory_outlined,
+            icon: Icons.add_shopping_cart_outlined,
             status: FeatureStatus.ready,
             builder: _stockFileImport,
             requiredAnyOf: ['inventory.adjust'],
@@ -131,17 +133,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
       FeatureGroup(
         id: 'accounting',
         entries: [
-          // 発注 (0172): each order's way from the file to the proof of the
-          // transfer, with the payments, and the purchase orders.
+          // 発注書 (purchase orders): no longer in the menu (0173) — orders
+          // are followed in 発注 (the stock file import); its address stays.
           FeatureEntry(
             id: 'purchase_orders',
-            icon: Icons.add_shopping_cart_outlined,
+            icon: Icons.description_outlined,
             status: FeatureStatus.ready,
             builder: _purchaseOrders,
-            requiredAnyOf: [
-              'purchase_order.view', 'purchase_order.manage', 'purchase_order.approve',
-              'inventory.adjust', 'report.view', 'user.manage',
-            ],
+            requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve'],
+            inMenu: false,
           ),
           // 支払い: each invoice as a payment — 振込先, the invoice, 支払い済
           // (the import's own) and the transfer's proof.
@@ -151,7 +151,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _payments,
             requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
-            // Inside 発注 now; its own address stays.
+            // Inside 発注 (the stock file import) now; its own address stays.
             inMenu: false,
           ),
           // 税理士用ファイル (0168): each month's purchases as an Excel, with
@@ -657,7 +657,7 @@ Widget _wave(BuildContext _) => const PickWaveListScreen();
 Widget _transfer(BuildContext _) => const TransferListScreen();
 
 /// Top-level (const-referenceable) builder for the Purchase Orders feature.
-Widget _purchaseOrders(BuildContext _) => const OrdersScreen();
+Widget _purchaseOrders(BuildContext _) => const PurchaseOrderListScreen();
 
 /// Top-level (const-referenceable) builder for the Sales Orders feature.
 Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();

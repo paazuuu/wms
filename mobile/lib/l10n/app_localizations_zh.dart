@@ -10762,10 +10762,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get featStockFileImport => '从文件登记库存';
+  String get featStockFileImport => '订货';
 
   @override
-  String get featStockFileImportDesc => '根据JAN码和数量表（Excel/CSV），追加或修正所选仓库的库存';
+  String get featStockFileImportDesc => '导入供应商的发票・送货单，登记库存与商品，并按订单确认验货・付款・汇款记录';
 
   @override
   String get sfIntro =>
@@ -12613,8 +12613,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPaymentsDesc => '每张发票的收款账户、金额、原文件、已付款及汇款凭证';
 
   @override
-  String get payIntro =>
-      '按“从文件登记库存”导入的每张发票列出付款。收款账户取自发票（没有时用供应商登记的账户）。汇款后勾选“已付款”，并添加汇款完成的画面（截图・PDF）。“已付款”与导入详情、日历中的相同。';
+  String get payIntro => '按导入的订单显示到验货・付款的进度。汇款后勾选“已付款”，并保存汇款完成的画面（截图・PDF）。';
 
   @override
   String get payUnpaidAll => '全部未付';
@@ -12833,4 +12832,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get payPayeeNotFound => '发票上未找到收款账户，请手动登记';
+
+  @override
+  String get payOpen => '进行中';
+
+  @override
+  String get payNoneOpen => '没有进行中的订单';
+
+  @override
+  String get ordOpen => '详情';
+
+  @override
+  String get ordClose => '收起';
+
+  @override
+  String get ordShortUpload => '上传';
+
+  @override
+  String get ordShortCheck => '核对';
+
+  @override
+  String get ordShortLibrary => '商品登记';
+
+  @override
+  String get ordShortAi => '商品名・重量';
+
+  @override
+  String get ordShortStock => '验货・库存';
+
+  @override
+  String get ordShortPayee => '收款账户';
+
+  @override
+  String get ordShortPaid => '汇款';
+
+  @override
+  String get ordShortProof => '汇款记录';
+
+  @override
+  String get sfTabImport => '导入文件';
+
+  @override
+  String get sfSeeOrder => '查看此订单的进度・付款';
 }

@@ -19469,13 +19469,13 @@ abstract class AppLocalizations {
   /// No description provided for @featStockFileImport.
   ///
   /// In ja, this message translates to:
-  /// **'ファイルから在庫登録'**
+  /// **'発注'**
   String get featStockFileImport;
 
   /// No description provided for @featStockFileImportDesc.
   ///
   /// In ja, this message translates to:
-  /// **'JANコードと数量の表（Excel・CSV）から、選んだ倉庫の在庫を追加・修正'**
+  /// **'仕入先の請求書・納品書を取り込んで在庫と商品を登録し、検品・支払い・送金の記録まで注文ごとに確認'**
   String get featStockFileImportDesc;
 
   /// No description provided for @sfIntro.
@@ -22541,7 +22541,7 @@ abstract class AppLocalizations {
   /// No description provided for @payIntro.
   ///
   /// In ja, this message translates to:
-  /// **'「ファイルから在庫登録」で取り込んだ請求書ごとの支払いです。振込先は請求書から読み取ったもの（無ければ仕入先に登録した口座）です。送金したら「支払い済」にチェックし、送金完了の画面（スクリーンショット・PDF）を追加してください。支払い済は取込の詳細・カレンダーと同じものです。'**
+  /// **'取り込んだ注文ごとに、検品・支払いまでの進み具合です。送金したら「支払い済」にして、送金完了の画面（スクショ・PDF）を残してください。'**
   String get payIntro;
 
   /// No description provided for @payUnpaidAll.
@@ -22909,6 +22909,90 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください'**
   String get payPayeeNotFound;
+
+  /// No description provided for @payOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中'**
+  String get payOpen;
+
+  /// No description provided for @payNoneOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中の注文はありません'**
+  String get payNoneOpen;
+
+  /// No description provided for @ordOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'くわしく'**
+  String get ordOpen;
+
+  /// No description provided for @ordClose.
+  ///
+  /// In ja, this message translates to:
+  /// **'たたむ'**
+  String get ordClose;
+
+  /// No description provided for @ordShortUpload.
+  ///
+  /// In ja, this message translates to:
+  /// **'アップロード'**
+  String get ordShortUpload;
+
+  /// No description provided for @ordShortCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'内容チェック'**
+  String get ordShortCheck;
+
+  /// No description provided for @ordShortLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品登録'**
+  String get ordShortLibrary;
+
+  /// No description provided for @ordShortAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・重量'**
+  String get ordShortAi;
+
+  /// No description provided for @ordShortStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品・在庫'**
+  String get ordShortStock;
+
+  /// No description provided for @ordShortPayee.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込先'**
+  String get ordShortPayee;
+
+  /// No description provided for @ordShortPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金'**
+  String get ordShortPaid;
+
+  /// No description provided for @ordShortProof.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金の記録'**
+  String get ordShortProof;
+
+  /// No description provided for @sfTabImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを取り込む'**
+  String get sfTabImport;
+
+  /// No description provided for @sfSeeOrder.
+  ///
+  /// In ja, this message translates to:
+  /// **'この注文の進み具合・支払いを見る'**
+  String get sfSeeOrder;
 }
 
 class _AppLocalizationsDelegate

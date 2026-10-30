@@ -367,7 +367,7 @@ void main() {
     expect(find.text('在庫ファイル: 2商品・増減 13個'), findsOneWidget);
     expect(find.textContaining('商品マスタ:'), findsNothing);
     expect(find.byKey(const ValueKey('mi-row-9-result')), findsNothing);
-    expect(find.descendant(of: find.byKey(const ValueKey('mi-new')), matching: find.text('ファイルから在庫登録')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('mi-new')), matching: find.text('発注')), findsOneWidget);
   });
 
   testWidgets('a product stock is set by hand', (tester) async {

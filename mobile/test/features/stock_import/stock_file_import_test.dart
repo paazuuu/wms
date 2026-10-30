@@ -441,8 +441,12 @@ void main() {
         totals: WarehouseTotals(),
       ))),
     ]);
+    // Where the order stands: nothing yet but the file to take in.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('sf-flow-now'))).data, '今: アップロード');
     await tester.tap(find.byKey(const ValueKey('sf-pick')));
     await tester.pumpAndSettle();
+    // The file is in; its reading is to be checked.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('sf-flow-now'))).data, '今: 内容チェック');
 
     expect(find.text('商品ライブラリーにない商品 2件'), findsOneWidget);
     expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('sf-register-new'))).value, isTrue);
@@ -468,6 +472,12 @@ void main() {
     // Once the AI has done the products: the order's 振込先 and amount (0172).
     await tester.pumpAndSettle();
     expect(payments.askedPayee, [12]);
+    // In stock to inspect: what is left is shown, and the order opens in
+    // the tab beside (0173).
+    expect(tester.widget<Text>(find.byKey(const ValueKey('sf-flow-now'))).data, '今: 商品名・重量');
+    await tester.tap(find.byKey(const ValueKey('sf-see-order')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pay-open')), findsOneWidget);
   });
 
   testWidgets('the 商品名 column: the name from the web or the catalog page, blank when none is known — never the 品番 (0164)',

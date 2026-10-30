@@ -8,7 +8,6 @@ import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/payments/data/payments_repository.dart';
 import 'package:wms_mobile/features/payments/domain/payment.dart';
-import 'package:wms_mobile/features/payments/presentation/orders_screen.dart';
 import 'package:wms_mobile/features/payments/presentation/payments_screen.dart';
 import 'package:wms_mobile/features/tax_files/data/tax_files_repository.dart';
 import 'package:wms_mobile/features/tax_files/domain/tax_purchases.dart';
@@ -52,7 +51,7 @@ class _Repo implements PaymentsRepository {
   @override
   Future<ApiResult<List<Payment>>> list(PaymentsRange range) async => ApiSuccess([
         for (final r in rows)
-          if (range is MonthPayments || r['paid'] != true) Payment.fromJson(r),
+          Payment.fromJson(r),
       ]);
 
   @override
@@ -138,12 +137,16 @@ void main() {
     expect(contentTypeOf('完了.PDF'), 'application/pdf');
   });
 
-  test('会計 is a group of its own: 発注 (with 支払い) and 税理士用ファイル', () {
+  test('会計 holds 税理士用ファイル; 発注 is the stock file import, under 商品', () {
     final groups = buildFeatureCatalog();
     final accounting = groups.firstWhere((g) => g.id == 'accounting');
-    expect(accounting.entries.map((e) => e.id), ['purchase_orders', 'payments', 'tax_files']);
-    // In the menu: 発注 (with the payments inside) and 税理士用ファイル.
-    expect(accounting.entries.where((e) => e.inMenu).map((e) => e.id), ['purchase_orders', 'tax_files']);
+    expect(accounting.entries.where((e) => e.inMenu).map((e) => e.id), ['tax_files']);
+    final products = groups.firstWhere((g) => g.id == 'products_master');
+    final order = products.entries.firstWhere((e) => e.id == 'stock_file_import');
+    expect(order.icon, Icons.add_shopping_cart_outlined);
+    expect(order.inMenu, isTrue);
+    // The purchase orders are no longer in the menu (their address stays).
+    expect(groups.expand((g) => g.entries).firstWhere((e) => e.id == 'purchase_orders').inMenu, isFalse);
     // Between 商品 and 現場作業.
     expect(groups.map((g) => g.id).take(3), ['products_master', 'accounting', 'field_operations']);
     expect(groups.where((g) => g.id != 'accounting').expand((g) => g.entries).map((e) => e.id), isNot(contains('tax_files')));
@@ -166,8 +169,19 @@ void main() {
     ]);
 
     String text(String key) => tester.widget<Text>(find.byKey(ValueKey(key))).data!;
+    Future<void> open(int id) async {
+      if (find.byKey(ValueKey('pay-paid-$id')).evaluate().isEmpty) {
+        await tester.tap(find.byKey(ValueKey('pay-toggle-$id')));
+        await tester.pumpAndSettle();
+      }
+    }
+
     expect(text('pay-summary'), '2件 · 未払い 2件 · 未払い合計 ¥17,600');
     expect(text('pay-amount-5'), '¥8,800');
+    // Two orders: folded to a line and a bar of steps, opened one by one.
+    expect(find.byKey(const ValueKey('pay-paid-5')), findsNothing);
+    await open(5);
+    await open(6);
     expect(text('pay-bank-5'), 'テスト銀行 テスト支店');
     expect(text('pay-account-5'), '当座 1234567');
     expect(find.text('請求書から読み取り'), findsOneWidget);
@@ -183,11 +197,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, ['proof 5 振込完了.png', 'paid 5 true']);
     expect(find.text('振込完了.png を追加し、支払い済にしました'), findsOneWidget);
-    // Paid now: off the unpaid list.
-    expect(find.byKey(const ValueKey('pay-card-5')), findsNothing);
+    // Paid, and the inspection still to come: the order stays, open.
+    expect(find.byKey(const ValueKey('pay-card-5')), findsOneWidget);
+    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('pay-paid-5'))).value, isTrue);
+    // The proof downloaded again, to check it.
+    await tester.tap(find.byKey(const ValueKey('pay-proof-download-90')));
+    await tester.pumpAndSettle();
+    expect(saved.last, '振込完了.png');
     await tester.tap(find.byKey(const ValueKey('pay-by-month')));
     await tester.pumpAndSettle();
     expect(text('pay-month'), '2026年7月分');
+    await open(5);
     expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('pay-paid-5'))).value, isTrue);
     expect(find.byKey(const ValueKey('pay-proof-90')), findsOneWidget);
 
@@ -203,6 +223,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls.last, 'remove 90');
     expect(find.byKey(const ValueKey('pay-proof-90')), findsNothing);
+  });
+
+  testWidgets('進行中 leaves out orders already through; the month shows them', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, PaymentsScreen(today: DateTime(2026, 7, 15)), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(_clerk)),
+      paymentsRepositoryProvider.overrideWithValue(_Repo([
+        _payment(7, status: 'stock_done', paid: true, payee: {'bank': 'テスト銀行'}, source: 'invoice',
+            proofs: [{'id': 1, 'storage_path': '7/a.png', 'file_name': 'a.png'}]),
+      ])),
+      taxFilesRepositoryProvider.overrideWithValue(_Tax()),
+    ]);
+    expect(find.byKey(const ValueKey('pay-none')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pay-by-month')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pay-card-7')), findsOneWidget);
   });
 
   testWidgets("an invoice with no 振込先 takes the supplier's, written by hand", (tester) async {
@@ -267,7 +304,10 @@ void main() {
       paymentsRepositoryProvider.overrideWithValue(repo),
       taxFilesRepositoryProvider.overrideWithValue(_Tax()),
     ]);
+    // The warning shows on the folded card too.
     expect(find.byKey(const ValueKey('pay-twin-20')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pay-toggle-20')));
+    await tester.pumpAndSettle();
     expect(find.text('注意: 取込 #19（2026/07/01・振込済）と同じファイル・同じ明細（JAN・数量）・同じ請求書番号・日付'), findsOneWidget);
     // Not paid unless it is said to be another order.
     await tester.tap(find.byKey(const ValueKey('pay-paid-20')));
@@ -301,20 +341,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.askedPayee, [31, 31]);
     expect(find.text('振込先を読み取りました: テスト銀行 テスト支店 当座 1234567'), findsOneWidget);
-  });
-
-  testWidgets('発注 in 会計: the orders with their payments, and the purchase orders', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1600));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await pumpApp(tester, const OrdersScreen(), overrides: [
-      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(const AuthUser(
-          id: 'u1', email: 'a@b.test', name: '経理', permissions: ['inventory.adjust', 'purchase_order.view']))),
-      paymentsRepositoryProvider.overrideWithValue(_Repo([_payment(5, payee: {'bank': 'テスト銀行'}, source: 'invoice')])),
-      taxFilesRepositoryProvider.overrideWithValue(_Tax()),
-    ]);
-    expect(find.byKey(const ValueKey('ord-tab-progress')), findsOneWidget);
-    expect(find.byKey(const ValueKey('ord-tab-po')), findsOneWidget);
-    expect(find.byKey(const ValueKey('pay-card-5')), findsOneWidget);
   });
 
   testWidgets('who only reads the books sees the payments but changes nothing', (tester) async {

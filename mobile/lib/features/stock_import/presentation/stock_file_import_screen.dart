@@ -14,7 +14,8 @@ import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../payments/data/payments_repository.dart';
-import '../../payments/domain/payment.dart' show Payee;
+import '../../payments/domain/payment.dart';
+import '../../payments/presentation/payments_screen.dart' show OrderFlowBar, PaymentsScreen, focusedOrderProvider;
 import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../master_import/presentation/master_import_labels.dart';
@@ -739,29 +740,31 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final notItems = (sheet?.problems ?? const <StockFileProblem>[]).where((p) => p.code == 'not_item').length;
     final done = _done;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.featStockFileImport),
-        actions: [
-          IconButton(
-            key: const ValueKey('sf-calendar'),
-            tooltip: l10n.calTitle,
-            icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: () =>
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockImportCalendarScreen())),
-          ),
-          IconButton(
-            key: const ValueKey('sf-history'),
-            tooltip: l10n.sfHistory,
-            icon: const Icon(Icons.history),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasterImportsScreen())),
-          ),
-        ],
-      ),
-      body: ListView(
+    // Where this order is on its way (0173): the file, its check and the
+    // stock here; inspection, payment and its proof after — the order's own
+    // steps once it is in.
+    final order = done == null
+        ? null
+        : ref.watch(paymentsProvider(const OpenPayments())).valueOrNull?.where((p) => p.importId == done.importId).firstOrNull;
+    final flow = order != null
+        ? [for (final k in OrderStepKind.values) order.stepStates[k]!]
+        : [
+            if (done != null || sheet != null) OrderStepState.done else OrderStepState.todo,
+            if (done != null || _checked) OrderStepState.done else OrderStepState.todo,
+            if (done != null) OrderStepState.done else OrderStepState.todo,
+            for (var i = 3; i < 8; i++) OrderStepState.todo,
+          ];
+    final flowAt = flow.indexWhere((x) => x != OrderStepState.done);
+
+    final importTab = ListView(
         padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 96),
         children: [
           Text(l10n.sfIntro, style: muted),
+          const SizedBox(height: AppSpacing.sm),
+          Text(flowAt < 0 ? l10n.ordAllDone : l10n.ordNow(OrderFlowBar.labels(l10n)[flowAt]),
+              key: const ValueKey('sf-flow-now'), style: theme.textTheme.labelLarge),
+          const SizedBox(height: 4),
+          OrderFlowBar(states: flow, current: flowAt),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<int>(
             key: const ValueKey('sf-warehouse'),
@@ -906,6 +909,21 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: ImportViewButtons(importId: done.importId),
+                  ),
+                  // What is left of this order — inspection, payment, its proof.
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
+                    child: Builder(
+                      builder: (tabContext) => FilledButton.tonalIcon(
+                        key: const ValueKey('sf-see-order'),
+                        onPressed: () {
+                          ref.read(focusedOrderProvider.notifier).state = done.importId;
+                          DefaultTabController.of(tabContext).animateTo(1);
+                        },
+                        icon: const Icon(Icons.timeline, size: 18),
+                        label: Text(l10n.sfSeeOrder),
+                      ),
+                    ),
                   ),
                 ]),
               ),
@@ -1158,6 +1176,34 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             if (!canAdjust) Text(l10n.sfNoPermission, style: muted),
           ],
         ],
+      );
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.featStockFileImport),
+          actions: [
+            IconButton(
+              key: const ValueKey('sf-calendar'),
+              tooltip: l10n.calTitle,
+              icon: const Icon(Icons.calendar_month_outlined),
+              onPressed: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const StockImportCalendarScreen())),
+            ),
+            IconButton(
+              key: const ValueKey('sf-history'),
+              tooltip: l10n.sfHistory,
+              icon: const Icon(Icons.history),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MasterImportsScreen())),
+            ),
+          ],
+          bottom: TabBar(tabs: [
+            Tab(key: const ValueKey('sf-tab-import'), text: l10n.sfTabImport),
+            Tab(key: const ValueKey('sf-tab-orders'), text: l10n.ordTabProgress),
+          ]),
+        ),
+        body: TabBarView(children: [importTab, const PaymentsScreen(embedded: true)]),
       ),
     );
   }

@@ -64,11 +64,19 @@ class PaymentsScreen extends ConsumerStatefulWidget {
 /// Orders whose 振込先 the AI was already asked for, this session.
 final payeeAskedProvider = Provider<Set<int>>((_) => <int>{});
 
+/// Orders shown under 進行中 this session: kept there once through (paid,
+/// its proof added) so the card does not close under one's hand — the
+/// inspection may still be going.
+final keptOrdersProvider = Provider<Set<int>>((_) => <int>{});
+
+/// The order just taken in (発注 → ファイルを取り込む): shown first, open.
+final focusedOrderProvider = StateProvider<int?>((_) => null);
+
 class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   late DateTime _month = DateTime((widget.today ?? DateTime.now()).year, (widget.today ?? DateTime.now()).month);
-  bool _unpaid = true;
+  bool _open = true;
 
-  PaymentsRange get _range => _unpaid ? const UnpaidPayments() : MonthPayments(_month.year, _month.month);
+  PaymentsRange get _range => _open ? const OpenPayments() : MonthPayments(_month.year, _month.month);
 
   /// An unpaid order with no 振込先 has its invoice read for one by the AI,
   /// once — what the reading of the stock did not find.
@@ -98,6 +106,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final async = ref.watch(paymentsProvider(_range));
     final can = ref.watch(canRecordPaymentsProvider);
+    final focus = ref.watch(focusedOrderProvider);
     final body = ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
@@ -105,18 +114,18 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
         const SizedBox(height: AppSpacing.sm),
         Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
           ChoiceChip(
-            key: const ValueKey('pay-unpaid'),
-            label: Text(l10n.payUnpaidAll),
-            selected: _unpaid,
-            onSelected: (_) => setState(() => _unpaid = true),
+            key: const ValueKey('pay-open'),
+            label: Text(l10n.payOpen),
+            selected: _open,
+            onSelected: (_) => setState(() => _open = true),
           ),
           ChoiceChip(
             key: const ValueKey('pay-by-month'),
             label: Text(l10n.payByMonth),
-            selected: !_unpaid,
-            onSelected: (_) => setState(() => _unpaid = false),
+            selected: !_open,
+            onSelected: (_) => setState(() => _open = false),
           ),
-          if (!_unpaid) ...[
+          if (!_open) ...[
             IconButton(
               key: const ValueKey('pay-prev'),
               icon: const Icon(Icons.chevron_left),
@@ -138,17 +147,27 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           ],
           data: (all) {
             _askPayees(all, can: can);
-            if (all.isEmpty) return [Text(_unpaid ? l10n.payNoneUnpaid : l10n.payNone, key: const ValueKey('pay-none'))];
-            final unpaid = all.where((p) => !p.paid);
+            final kept = ref.read(keptOrdersProvider);
+            final shown = _open ? [for (final p in all) if (!p.complete || kept.contains(p.importId)) p] : all;
+            if (_open) kept.addAll(shown.map((p) => p.importId));
+            // The order just taken in first.
+            shown.sort((a, b) => (b.importId == focus ? 1 : 0) - (a.importId == focus ? 1 : 0));
+            if (shown.isEmpty) return [Text(_open ? l10n.payNoneOpen : l10n.payNone, key: const ValueKey('pay-none'))];
+            final unpaid = shown.where((p) => !p.paid);
             final due = unpaid.fold<double>(0, (s, p) => s + p.amount);
             return [
               Text(
-                l10n.paySummary(all.length, unpaid.length, _yen.format(due.round())),
+                l10n.paySummary(shown.length, unpaid.length, _yen.format(due.round())),
                 key: const ValueKey('pay-summary'),
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: AppSpacing.xs),
-              for (final p in all) PaymentCard(payment: p),
+              for (final p in shown)
+                PaymentCard(
+                  key: ValueKey('pay-card-state-${p.importId}'),
+                  payment: p,
+                  initiallyOpen: p.importId == focus || shown.length == 1,
+                ),
             ];
           },
         ),
@@ -169,9 +188,12 @@ void refreshPayments(WidgetRef ref, int importId) {
 }
 
 class PaymentCard extends ConsumerStatefulWidget {
-  const PaymentCard({super.key, required this.payment});
+  const PaymentCard({super.key, required this.payment, this.initiallyOpen = false});
 
   final Payment payment;
+
+  /// Shown with every step (else the summary line and the bar of steps).
+  final bool initiallyOpen;
 
   @override
   ConsumerState<PaymentCard> createState() => _PaymentCardState();
@@ -179,6 +201,7 @@ class PaymentCard extends ConsumerStatefulWidget {
 
 class _PaymentCardState extends ConsumerState<PaymentCard> {
   bool _busy = false;
+  late bool _openCard = widget.initiallyOpen;
 
   Payment get p => widget.payment;
 
@@ -293,6 +316,18 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
     }
   }
 
+  Future<void> _downloadProof(PaymentProof proof) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(paymentsRepositoryProvider).proofBytes(proof);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess(:final data):
+        await ref.read(paymentFileSaverProvider)(proof.name, data);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _invoice() async {
     final l10n = AppLocalizations.of(context);
     final r = await ref.read(taxFilesRepositoryProvider).original(p.purchase);
@@ -345,17 +380,12 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
     final t = p.purchase;
     final id = p.importId;
     final st = p.steps;
-    OrderStepState count(int n, int all) => all == 0 ? OrderStepState.todo : (n >= all ? OrderStepState.done : (n > 0 ? OrderStepState.partial : OrderStepState.todo));
-    final aiState = st.lines == 0
-        ? OrderStepState.todo
-        : (st.named >= st.lines && st.weighed >= st.lines
-            ? OrderStepState.done
-            : (st.named + st.weighed > 0 ? OrderStepState.partial : OrderStepState.todo));
+    final states = p.stepStates;
     final steps = <OrderStep>[
       OrderStep(
         key: 'upload',
         title: l10n.ordStepUpload,
-        state: OrderStepState.done,
+        state: states[OrderStepKind.upload]!,
         detail: [
           if (t.createdAt != null) _at.format(t.createdAt!),
           if (p.createdByName != null) p.createdByName!,
@@ -379,25 +409,25 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
       OrderStep(
         key: 'check',
         title: l10n.ordStepCheck,
-        state: count(st.checked, st.read),
+        state: states[OrderStepKind.check]!,
         detail: st.read == 0 ? null : l10n.ordRows(_of(st.checked, st.read)),
       ),
       OrderStep(
         key: 'library',
         title: l10n.ordStepLibrary,
-        state: count(st.inLibrary, st.lines),
+        state: states[OrderStepKind.library]!,
         detail: st.lines == 0 ? null : l10n.ordLines(_of(st.inLibrary, st.lines)),
       ),
       OrderStep(
         key: 'ai',
         title: l10n.ordStepAi,
-        state: aiState,
+        state: states[OrderStepKind.ai]!,
         detail: st.lines == 0 ? null : l10n.ordAiDetail(_of(st.named, st.lines), _of(st.weighed, st.lines)),
       ),
       OrderStep(
         key: 'stock',
         title: l10n.ordStepStock,
-        state: p.inStock ? OrderStepState.done : count(st.inspected, st.lines),
+        state: states[OrderStepKind.stock]!,
         detail: p.inStock
             ? [if (p.stockAt != null) _at.format(p.stockAt!), l10n.ordLines(_of(st.inspected, st.lines))].join(' · ')
             : l10n.ordAwaiting(_of(st.inspected, st.lines)),
@@ -405,14 +435,14 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
       OrderStep(
         key: 'payee',
         title: l10n.ordStepPayee,
-        state: p.payee != null ? OrderStepState.done : OrderStepState.todo,
+        state: states[OrderStepKind.payee]!,
         detail: l10n.ordAmount(_yen.format(p.amount.round())),
         child: _payeeBlock(context, can),
       ),
       OrderStep(
         key: 'paid',
         title: l10n.ordStepPaid,
-        state: p.paid ? OrderStepState.done : OrderStepState.todo,
+        state: states[OrderStepKind.paid]!,
         child: CheckboxListTile(
           key: ValueKey('pay-paid-$id'),
           dense: true,
@@ -432,7 +462,7 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
       OrderStep(
         key: 'proof',
         title: l10n.ordStepProof,
-        state: p.proofs.isNotEmpty ? OrderStepState.done : OrderStepState.todo,
+        state: states[OrderStepKind.proof]!,
         detail: l10n.payProofs(p.proofs.length),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           for (final proof in p.proofs)
@@ -448,14 +478,21 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
                 style: muted,
               ),
               onTap: () => _openProof(proof),
-              trailing: can
-                  ? IconButton(
-                      key: ValueKey('pay-proof-remove-${proof.id}'),
-                      tooltip: l10n.payProofRemove,
-                      icon: const Icon(Icons.remove_circle_outline),
-                      onPressed: _busy ? null : () => _removeProof(proof),
-                    )
-                  : null,
+              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                IconButton(
+                  key: ValueKey('pay-proof-download-${proof.id}'),
+                  tooltip: l10n.payDownload,
+                  icon: const Icon(Icons.download_outlined),
+                  onPressed: () => _downloadProof(proof),
+                ),
+                if (can)
+                  IconButton(
+                    key: ValueKey('pay-proof-remove-${proof.id}'),
+                    tooltip: l10n.payProofRemove,
+                    icon: const Icon(Icons.remove_circle_outline),
+                    onPressed: _busy ? null : () => _removeProof(proof),
+                  ),
+              ]),
             ),
           if (can)
             TextButton.icon(
@@ -509,7 +546,20 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
             _twinWarning(context),
           ],
           const SizedBox(height: AppSpacing.sm),
-          OrderTimeline(importId: id, steps: steps, current: current),
+          // Closed: the steps as one bar; open: every step with what to do.
+          Row(children: [
+            Expanded(child: OrderFlowBar(states: [for (final s in steps) s.state], current: current, compact: true)),
+            TextButton.icon(
+              key: ValueKey('pay-toggle-$id'),
+              onPressed: () => setState(() => _openCard = !_openCard),
+              icon: Icon(_openCard ? Icons.expand_less : Icons.expand_more, size: 18),
+              label: Text(_openCard ? l10n.ordClose : l10n.ordOpen),
+            ),
+          ]),
+          if (_openCard) ...[
+            const SizedBox(height: AppSpacing.sm),
+            OrderTimeline(importId: id, steps: steps, current: current),
+          ],
         ]),
       ),
     );
@@ -694,8 +744,6 @@ class _AccountDialogState extends State<_AccountDialog> {
   }
 }
 
-/// Where a step of an order stands.
-enum OrderStepState { done, partial, todo }
 
 /// One step of an order's way: from the file to the proof of the transfer.
 class OrderStep {
@@ -779,6 +827,84 @@ class OrderTimeline extends StatelessWidget {
             ]),
           ),
       ],
+    );
+  }
+}
+
+/// An order's steps as one bar of numbered dots — done, under way, where it
+/// is now, and what is left — with their names unless [compact].
+class OrderFlowBar extends StatelessWidget {
+  const OrderFlowBar({super.key, required this.states, required this.current, this.compact = false});
+
+  final List<OrderStepState> states;
+
+  /// The step it is at (-1 when all are done).
+  final int current;
+  final bool compact;
+
+  static List<String> labels(AppLocalizations l10n) => [
+        l10n.ordShortUpload, l10n.ordShortCheck, l10n.ordShortLibrary, l10n.ordShortAi,
+        l10n.ordShortStock, l10n.ordShortPayee, l10n.ordShortPaid, l10n.ordShortProof,
+      ];
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final names = labels(l10n);
+    Color tone(int i) => switch (states[i]) {
+          OrderStepState.done => scheme.primary,
+          OrderStepState.partial => scheme.tertiary,
+          OrderStepState.todo => i == current ? scheme.tertiary : scheme.outlineVariant,
+        };
+    return SingleChildScrollView(
+      key: const ValueKey('ord-flow'),
+      scrollDirection: Axis.horizontal,
+      child: Row(children: [
+        for (var i = 0; i < states.length; i++) ...[
+          if (i > 0) Container(width: compact ? 10 : 16, height: 2, color: tone(i - 1) == scheme.primary ? scheme.primary : scheme.outlineVariant),
+          Tooltip(
+            message: '${i + 1}. ${names[i]}',
+            child: compact
+                ? Container(
+                    key: ValueKey('ord-dot-$i-${states[i].name}'),
+                    width: 22,
+                    height: 22,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: states[i] == OrderStepState.done ? tone(i) : null,
+                      border: Border.all(color: tone(i), width: i == current ? 2.5 : 1.5),
+                    ),
+                    child: states[i] == OrderStepState.done
+                        ? Icon(Icons.check, size: 14, color: scheme.onPrimary)
+                        : Text('${i + 1}', style: theme.textTheme.labelSmall?.copyWith(color: tone(i), fontWeight: FontWeight.w700)),
+                  )
+                : Container(
+                    key: ValueKey('ord-chip-$i-${states[i].name}'),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: i == current ? scheme.tertiaryContainer : null,
+                      border: Border.all(color: tone(i), width: i == current ? 2 : 1),
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(
+                        states[i] == OrderStepState.done
+                            ? Icons.check_circle
+                            : (states[i] == OrderStepState.partial ? Icons.timelapse : Icons.circle_outlined),
+                        size: 14,
+                        color: tone(i),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(names[i],
+                          style: theme.textTheme.labelSmall?.copyWith(fontWeight: i == current ? FontWeight.w800 : FontWeight.w500)),
+                    ]),
+                  ),
+          ),
+        ],
+      ]),
     );
   }
 }

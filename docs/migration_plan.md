@@ -8176,6 +8176,28 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Ticking 支払い済 when such an order is already paid asks first.
   - The import's own check (0147/0148) still asks before the stock goes in.
 
+## 0173 (app): 発注 = the stock file import, with each order's way
+
+- 「ファイルから在庫登録」 is now 「発注」 (cart icon), still under 商品. It has
+  two tabs:
+  - ファイルを取り込む: the import as before. On top is one bar of the
+    order's 8 steps with 「今: …」:
+    - before a file: アップロード;
+    - after reading: 内容チェック;
+    - after the stock: the order's own steps;
+    - 「この注文の進み具合・支払いを見る」 opens it in the other tab, first
+      and unfolded.
+  - 注文の進み具合・支払い: the orders (0172), each folded to its summary
+    line and a bar of numbered steps; 「くわしく」 opens the timeline.
+- 進行中, the default view, lists every order not through (in stock, paid
+  and its proof kept). An order shown there stays for the session once it
+  is through, so paying or adding the proof does not close it — the
+  inspection may still be going.
+  - 月ごと lists every order of the month.
+- Each transfer proof can be downloaded again (the button beside it).
+- 会計 holds 税理士用ファイル only. The purchase orders (発注書) are out of
+  the menu; `/purchase-orders` and `/payments` still open.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

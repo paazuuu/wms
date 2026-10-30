@@ -223,3 +223,46 @@ class Payment extends Equatable {
   @override
   List<Object?> get props => [purchase, supplierId, payee, payeeSource, paidAt, proofs, steps, sameAs];
 }
+
+/// Where a step of an order stands.
+enum OrderStepState { done, partial, todo }
+
+/// The steps of an order's way, in order (0172).
+enum OrderStepKind { upload, check, library, ai, stock, payee, paid, proof }
+
+OrderStepState _count(int n, int all) =>
+    all == 0 ? OrderStepState.todo : (n >= all ? OrderStepState.done : (n > 0 ? OrderStepState.partial : OrderStepState.todo));
+
+extension OrderProgress on Payment {
+  /// Each step's state, upload to the transfer's proof.
+  Map<OrderStepKind, OrderStepState> get stepStates {
+    final st = steps;
+    return {
+      OrderStepKind.upload: OrderStepState.done,
+      OrderStepKind.check: _count(st.checked, st.read),
+      OrderStepKind.library: _count(st.inLibrary, st.lines),
+      OrderStepKind.ai: st.lines == 0
+          ? OrderStepState.todo
+          : (st.named >= st.lines && st.weighed >= st.lines
+              ? OrderStepState.done
+              : (st.named + st.weighed > 0 ? OrderStepState.partial : OrderStepState.todo)),
+      OrderStepKind.stock: inStock ? OrderStepState.done : _count(st.inspected, st.lines),
+      OrderStepKind.payee: payee != null ? OrderStepState.done : OrderStepState.todo,
+      OrderStepKind.paid: paid ? OrderStepState.done : OrderStepState.todo,
+      OrderStepKind.proof: proofs.isNotEmpty ? OrderStepState.done : OrderStepState.todo,
+    };
+  }
+
+  /// The first step not done, or null when the order is through.
+  OrderStepKind? get currentStep {
+    final s = stepStates;
+    for (final k in OrderStepKind.values) {
+      if (s[k] != OrderStepState.done) return k;
+    }
+    return null;
+  }
+
+  /// In stock and paid with its proof: nothing left to do. (Names and
+  /// weights the AI could not find do not keep an order open.)
+  bool get complete => inStock && paid && proofs.isNotEmpty;
+}

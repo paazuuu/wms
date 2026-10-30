@@ -9540,8 +9540,8 @@
       }
     }
   },
-  "featStockFileImport": "ファイルから在庫登録",
-  "featStockFileImportDesc": "JANコードと数量の表（Excel・CSV）から、選んだ倉庫の在庫を追加・修正",
+  "featStockFileImport": "発注",
+  "featStockFileImportDesc": "仕入先の請求書・納品書を取り込んで在庫と商品を登録し、検品・支払い・送金の記録まで注文ごとに確認",
   "sfIntro": "JANコードと数量の表から在庫を登録します。Excel・CSVは1行目の「JANコード」「数量」の見出しで読み、PDF（文字のPDF・スキャンした画像のPDF）や写真はAIが読み取ります。AIで読んだ内容は反映前に確かめて直せます。商品そのものの登録は、価格台帳でファイルを読み込んで「商品ライブラリーに登録」してください。",
   "sfWarehouse": "倉庫",
   "sfModeAdd": "今の在庫に足す",
@@ -11349,7 +11349,7 @@
   "groupAccounting": "会計",
   "featPayments": "支払い",
   "featPaymentsDesc": "請求書ごとの振込先・金額・元ファイル、支払い済と送金完了の記録",
-  "payIntro": "「ファイルから在庫登録」で取り込んだ請求書ごとの支払いです。振込先は請求書から読み取ったもの（無ければ仕入先に登録した口座）です。送金したら「支払い済」にチェックし、送金完了の画面（スクリーンショット・PDF）を追加してください。支払い済は取込の詳細・カレンダーと同じものです。",
+  "payIntro": "取り込んだ注文ごとに、検品・支払いまでの進み具合です。送金したら「支払い済」にして、送金完了の画面（スクショ・PDF）を残してください。",
   "payUnpaidAll": "未払いすべて",
   "payByMonth": "月ごと",
   "payNone": "この月の支払いはありません",
@@ -11547,5 +11547,19 @@
       }
     }
   },
-  "payPayeeNotFound": "請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください"
+  "payPayeeNotFound": "請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください",
+  "payOpen": "進行中",
+  "payNoneOpen": "進行中の注文はありません",
+  "ordOpen": "くわしく",
+  "ordClose": "たたむ",
+  "ordShortUpload": "アップロード",
+  "ordShortCheck": "内容チェック",
+  "ordShortLibrary": "商品登録",
+  "ordShortAi": "商品名・重量",
+  "ordShortStock": "検品・在庫",
+  "ordShortPayee": "振込先",
+  "ordShortPaid": "送金",
+  "ordShortProof": "送金の記録",
+  "sfTabImport": "ファイルを取り込む",
+  "sfSeeOrder": "この注文の進み具合・支払いを見る"
 }

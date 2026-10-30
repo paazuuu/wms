@@ -10819,11 +10819,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get featStockFileImport => 'ファイルから在庫登録';
+  String get featStockFileImport => '発注';
 
   @override
   String get featStockFileImportDesc =>
-      'JANコードと数量の表（Excel・CSV）から、選んだ倉庫の在庫を追加・修正';
+      '仕入先の請求書・納品書を取り込んで在庫と商品を登録し、検品・支払い・送金の記録まで注文ごとに確認';
 
   @override
   String get sfIntro =>
@@ -12689,7 +12689,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get payIntro =>
-      '「ファイルから在庫登録」で取り込んだ請求書ごとの支払いです。振込先は請求書から読み取ったもの（無ければ仕入先に登録した口座）です。送金したら「支払い済」にチェックし、送金完了の画面（スクリーンショット・PDF）を追加してください。支払い済は取込の詳細・カレンダーと同じものです。';
+      '取り込んだ注文ごとに、検品・支払いまでの進み具合です。送金したら「支払い済」にして、送金完了の画面（スクショ・PDF）を残してください。';
 
   @override
   String get payUnpaidAll => '未払いすべて';
@@ -12908,4 +12908,46 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get payPayeeNotFound => '請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください';
+
+  @override
+  String get payOpen => '進行中';
+
+  @override
+  String get payNoneOpen => '進行中の注文はありません';
+
+  @override
+  String get ordOpen => 'くわしく';
+
+  @override
+  String get ordClose => 'たたむ';
+
+  @override
+  String get ordShortUpload => 'アップロード';
+
+  @override
+  String get ordShortCheck => '内容チェック';
+
+  @override
+  String get ordShortLibrary => '商品登録';
+
+  @override
+  String get ordShortAi => '商品名・重量';
+
+  @override
+  String get ordShortStock => '検品・在庫';
+
+  @override
+  String get ordShortPayee => '振込先';
+
+  @override
+  String get ordShortPaid => '送金';
+
+  @override
+  String get ordShortProof => '送金の記録';
+
+  @override
+  String get sfTabImport => 'ファイルを取り込む';
+
+  @override
+  String get sfSeeOrder => 'この注文の進み具合・支払いを見る';
 }

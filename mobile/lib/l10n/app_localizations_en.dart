@@ -11040,11 +11040,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get featStockFileImport => 'Stock from a file';
+  String get featStockFileImport => 'Orders';
 
   @override
   String get featStockFileImportDesc =>
-      'Add or correct a warehouse\'s stock from a sheet of JAN codes and quantities (Excel or CSV)';
+      'Take in a supplier\'s invoice or delivery note into stock and products, and follow each order to inspection, payment and its proof';
 
   @override
   String get sfIntro =>
@@ -12952,7 +12952,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payIntro =>
-      'A payment per invoice taken in with “stock from a file”. The account is the one read from the invoice (else the supplier\'s). After the transfer, tick 支払い済 and add the transfer\'s proof (a screenshot or PDF). 支払い済 is the same as on the import and the calendar.';
+      'Each order taken in, up to inspection and payment. After the transfer, tick 支払い済 and keep its proof (a screenshot or PDF).';
 
   @override
   String get payUnpaidAll => 'All unpaid';
@@ -13172,4 +13172,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payPayeeNotFound => 'No account on the invoice; add one by hand';
+
+  @override
+  String get payOpen => 'Under way';
+
+  @override
+  String get payNoneOpen => 'No orders under way';
+
+  @override
+  String get ordOpen => 'Details';
+
+  @override
+  String get ordClose => 'Fold';
+
+  @override
+  String get ordShortUpload => 'Upload';
+
+  @override
+  String get ordShortCheck => 'Check';
+
+  @override
+  String get ordShortLibrary => 'Products';
+
+  @override
+  String get ordShortAi => 'Names, weights';
+
+  @override
+  String get ordShortStock => 'Inspection';
+
+  @override
+  String get ordShortPayee => 'Account';
+
+  @override
+  String get ordShortPaid => 'Paid';
+
+  @override
+  String get ordShortProof => 'Proof';
+
+  @override
+  String get sfTabImport => 'Take in a file';
+
+  @override
+  String get sfSeeOrder => 'See this order\'s progress and payment';
 }
