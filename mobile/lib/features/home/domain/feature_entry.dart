@@ -139,6 +139,8 @@ class FeatureEntry {
         return l10n.featStockInspection;
       case 'tax_files':
         return l10n.featTaxFiles;
+      case 'import_calendar':
+        return l10n.featImportCalendar;
       case 'payments':
         return l10n.featPayments;
       case 'field_library':
@@ -263,6 +265,8 @@ class FeatureEntry {
         return l10n.featStockInspectionDesc;
       case 'tax_files':
         return l10n.featTaxFilesDesc;
+      case 'import_calendar':
+        return l10n.featImportCalendarDesc;
       case 'payments':
         return l10n.featPaymentsDesc;
       case 'field_library':

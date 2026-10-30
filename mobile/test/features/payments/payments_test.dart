@@ -145,6 +145,9 @@ void main() {
     final order = products.entries.firstWhere((e) => e.id == 'stock_file_import');
     expect(order.icon, Icons.add_shopping_cart_outlined);
     expect(order.inMenu, isTrue);
+    // カレンダー right under 価格台帳.
+    final ids = products.entries.where((e) => e.inMenu).map((e) => e.id).toList();
+    expect(ids.indexOf('import_calendar'), ids.indexOf('price_book') + 1);
     // The purchase orders are no longer in the menu (their address stays).
     expect(groups.expand((g) => g.entries).firstWhere((e) => e.id == 'purchase_orders').inMenu, isFalse);
     // Between 商品 and 現場作業.

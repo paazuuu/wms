@@ -41,6 +41,8 @@ Future<ProviderContainer> _pump(
     warehouseRepositoryProvider.overrideWithValue(
         FakeWarehouseRepository(WarehouseOverview(warehouses: warehouses, totals: const WarehouseTotals()))),
     scCanViewProvider.overrideWithValue(false),
+    // The panes' lists are worked out here too.
+    pendingInspectionProvider.overrideWith((ref) async => pending),
   ]);
   addTearDown(container.dispose);
   await pumpAppWith(
@@ -528,6 +530,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ボールペン'), findsNothing);
     expect(find.text('サラサ'), findsOneWidget);
+  });
+
+  testWidgets('検品待ち: only products with stock from a file not yet inspected', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pump(tester, FakeProductRepository(products: const [stocked, empty]),
+        warehouses: const [main, kobe],
+        pending: PendingInspection.fromRows(const [
+          {'warehouse_id': 1, 'jan_code': '4901681233922', 'quantity': 200},
+        ]));
+    await tester.tap(find.byKey(const ValueKey('pl-stock-awaiting')));
+    await tester.pumpAndSettle();
+    expect(find.text('サラサ'), findsOneWidget);
+    expect(find.text('ボールペン'), findsNothing);
+    // Not waiting in 神戸: none there.
+    await tester.tap(find.byKey(const ValueKey('pl-wh-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('検品待ちの商品はありません'), findsOneWidget);
   });
 
   testWidgets('the warehouse shown is the one chosen at the top right, both ways', (tester) async {

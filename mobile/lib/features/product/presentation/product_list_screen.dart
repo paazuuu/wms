@@ -396,7 +396,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   return EmptyStateView(
                     key: ValueKey('pl-no-stock$suffix'),
                     icon: Icons.inventory_2_outlined,
-                    title: stockFilter == StockFilter.inStock ? l10n.plNoneInStock : l10n.plNoneOutOfStock,
+                    title: switch (stockFilter) {
+                      StockFilter.inStock => l10n.plNoneInStock,
+                      StockFilter.awaitingInspection => l10n.plNoneAwaiting,
+                      _ => l10n.plNoneOutOfStock,
+                    },
                   );
                 }
                 return _HiddenProducts(filter: filter);
@@ -1814,6 +1818,11 @@ class _WarehouseBar extends ConsumerWidget {
                   ButtonSegment(value: StockFilter.all, label: Text(l10n.plStockAll)),
                   ButtonSegment(value: StockFilter.inStock, label: Text(l10n.plStockIn)),
                   ButtonSegment(value: StockFilter.outOfStock, label: Text(l10n.plStockOut)),
+                  // Taken in from a file, not yet inspected (0148).
+                  ButtonSegment(
+                    value: StockFilter.awaitingInspection,
+                    label: Text(l10n.plStockAwaiting, key: ValueKey('pl-stock-awaiting$suffix')),
+                  ),
                 ],
                 selected: {stock},
                 onSelectionChanged: (v) => ref.read(libraryPaneStockProvider(pane).notifier).state = v.first,

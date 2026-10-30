@@ -1,12 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
+
 import '../domain/product.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import 'product_providers.dart';
 
 /// Stock, as the library filters by it.
-enum StockFilter { all, inStock, outOfStock }
+/// Stock to show: any, some, none, or some waiting for inspection (a file's
+/// stock not yet checked, 0148).
+enum StockFilter { all, inStock, outOfStock, awaitingInspection }
 
 /// What the product library shows (0120): by lifecycle, maker, supplier,
 /// category and whether there is stock. Empty sets mean "any".
@@ -39,7 +43,8 @@ class ProductFilter extends Equatable {
 
   /// [warehouseId] narrows the stock test to one warehouse (null: every
   /// one the person can see); [stockIn] replaces [stock] for it.
-  bool matches(Product p, {int? warehouseId, StockFilter? stockIn}) {
+  /// [awaiting]: the units of a JAN waiting for inspection there.
+  bool matches(Product p, {int? warehouseId, StockFilter? stockIn, int Function(String jan)? awaiting}) {
     if (lifecycles.isNotEmpty && !lifecycles.contains(p.lifecycle)) return false;
     if (makers.isNotEmpty && !makers.contains(p.maker ?? '')) return false;
     if (categories.isNotEmpty && !categories.contains(p.category ?? '')) return false;
@@ -51,6 +56,7 @@ class ProductFilter extends Equatable {
       StockFilter.all => true,
       StockFilter.inStock => onHand > 0,
       StockFilter.outOfStock => onHand <= 0,
+      StockFilter.awaitingInspection => (awaiting?.call(p.janCode) ?? 0) > 0,
     };
   }
 
@@ -126,9 +132,13 @@ final libraryPaneProductsProvider = Provider.autoDispose.family<AsyncValue<List<
   final filter = ref.watch(productFilterProvider);
   final warehouseId = ref.watch(libraryPaneWarehouseProvider(pane));
   final stock = ref.watch(libraryPaneStockProvider(pane));
+  final pending = stock == StockFilter.awaitingInspection ? ref.watch(pendingInspectionProvider).valueOrNull : null;
   return ref.watch(productListProvider).whenData((all) => [
         for (final p in all)
-          if (filter.matches(p, warehouseId: warehouseId, stockIn: stock)) p,
+          if (filter.matches(p,
+              warehouseId: warehouseId,
+              stockIn: stock,
+              awaiting: (jan) => pending?.of(jan, warehouseId: warehouseId) ?? 0)) p,
       ]);
 });
 

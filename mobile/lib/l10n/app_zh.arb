@@ -4175,5 +4175,12 @@
   "ordShortPaid": "汇款",
   "ordShortProof": "汇款记录",
   "sfTabImport": "导入文件",
-  "sfSeeOrder": "查看此订单的进度・付款"
+  "sfSeeOrder": "查看此订单的进度・付款",
+  "featImportCalendar": "日历",
+  "featImportCalendarDesc": "按日期查看导入的订单：已付款・汇款记录・已验货一目了然",
+  "calProofYes": "有汇款记录",
+  "calProofNo": "无汇款记录",
+  "calInStock": "已验货（已入库）",
+  "plStockAwaiting": "待验货",
+  "plNoneAwaiting": "没有待验货的商品"
 }

@@ -8198,6 +8198,20 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 会計 holds 税理士用ファイル only. The purchase orders (発注書) are out of
   the menu; `/purchase-orders` and `/payments` still open.
 
+## 0173: カレンダー in the menu, and its labels
+
+- `stock_file_calendar` adds `proof_count` (transfer proofs kept, 0171).
+  Each import in the calendar's list is labelled:
+  - 振込済 / 未払い;
+  - 送金記録あり / なし;
+  - 検品済（入庫済） / 検品待ち.
+- 商品 → カレンダー, right under 価格台帳. The calendar button in 発注 still
+  opens it.
+- An import opened from the calendar (取込の詳細) shows the order's 8 steps
+  and its payment at the top (to those who see the books).
+- 商品ライブラリー: 検品待ち beside 全商品・在庫あり・在庫なし — products with
+  stock from a file not yet inspected, in the warehouse shown.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -260,6 +260,13 @@ class _CalendarTile extends StatelessWidget {
 
   final CalendarImport item;
 
+  static Widget _label(Key key, String text, Color color) => Container(
+        key: key,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
+        child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+      );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -289,12 +296,27 @@ class _CalendarTile extends StatelessWidget {
           if ((item.note ?? '').isNotEmpty)
             Text(item.note!, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
         ]),
-        trailing: Chip(
-          key: ValueKey('cal-paid-${item.id}'),
-          label: Text(item.paid ? l10n.calPaid : l10n.calUnpaid),
-          backgroundColor: item.paid ? theme.colorScheme.secondaryContainer : theme.colorScheme.errorContainer,
-          visualDensity: VisualDensity.compact,
-        ),
+        // At a glance (0173): paid or not, the transfer's proof kept or not,
+        // and inspected (in stock) or still waiting.
+        trailing: item.undone
+            ? null
+            : Wrap(direction: Axis.vertical, spacing: 4, crossAxisAlignment: WrapCrossAlignment.end, children: [
+                _label(
+                  ValueKey('cal-paid-${item.id}'),
+                  item.paid ? l10n.calPaid : l10n.calUnpaid,
+                  item.paid ? theme.colorScheme.secondaryContainer : theme.colorScheme.errorContainer,
+                ),
+                _label(
+                  ValueKey('cal-proof-${item.id}'),
+                  item.proofCount > 0 ? l10n.calProofYes : l10n.calProofNo,
+                  item.proofCount > 0 ? theme.colorScheme.secondaryContainer : theme.colorScheme.surfaceContainerHighest,
+                ),
+                _label(
+                  ValueKey('cal-stock-${item.id}'),
+                  item.inStock ? l10n.calInStock : l10n.miStatusAwaiting,
+                  item.inStock ? theme.colorScheme.secondaryContainer : theme.colorScheme.tertiaryContainer,
+                ),
+              ]),
         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: item.id))),
       ),
     );

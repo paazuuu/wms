@@ -245,7 +245,7 @@ void main() {
       CalendarImport.fromJson({
         'id': 13, 'day': '2026-08-19', 'document_date_source': 'content', 'original_name': '請求書.pdf',
         'warehouse_name': 'メイン倉庫', 'status': 'stock_done', 'stock_lines': 9, 'stock_added': 4100, 'paid': true,
-        'note': '8/21 振込',
+        'note': '8/21 振込', 'proof_count': 1,
       }),
       CalendarImport.fromJson({
         'id': 14, 'day': '2026-08-19', 'original_name': '納品書.pdf', 'status': 'awaiting_inspection', 'line_count': 2,
@@ -267,6 +267,11 @@ void main() {
     expect(find.byKey(const ValueKey('cal-item-15')), findsNothing);
     expect(find.descendant(of: find.byKey(const ValueKey('cal-paid-13')), matching: find.text('振込済')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const ValueKey('cal-paid-14')), matching: find.text('未払い')), findsOneWidget);
+    // And whether the transfer's proof is kept, and the stock inspected (0173).
+    expect(find.descendant(of: find.byKey(const ValueKey('cal-proof-13')), matching: find.text('送金記録あり')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('cal-proof-14')), matching: find.text('送金記録なし')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('cal-stock-13')), matching: find.text('検品済（入庫済）')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('cal-stock-14')), matching: find.text('検品待ち')), findsOneWidget);
     expect(find.textContaining('検品待ち'), findsWidgets);
     expect(find.text('8/21 振込'), findsOneWidget);
 

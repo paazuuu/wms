@@ -12950,4 +12950,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfSeeOrder => 'この注文の進み具合・支払いを見る';
+
+  @override
+  String get featImportCalendar => 'カレンダー';
+
+  @override
+  String get featImportCalendarDesc => '取り込んだ注文を日付ごとに。振込済・送金の記録・検品済がひと目でわかります';
+
+  @override
+  String get calProofYes => '送金記録あり';
+
+  @override
+  String get calProofNo => '送金記録なし';
+
+  @override
+  String get calInStock => '検品済（入庫済）';
+
+  @override
+  String get plStockAwaiting => '検品待ち';
+
+  @override
+  String get plNoneAwaiting => '検品待ちの商品はありません';
 }

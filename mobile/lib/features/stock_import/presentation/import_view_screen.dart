@@ -1,3 +1,5 @@
+import '../../payments/data/payments_repository.dart' show OpenPayments, paymentsProvider;
+import '../../payments/presentation/payments_screen.dart' show PaymentCard;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -541,6 +543,8 @@ class _ReadPane extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
         if (m.source == 'stock_file') ...[
+          // The order's 8 steps (0173): where it is, and what is left.
+          _OrderProgress(importId: m.id),
           _NotesPanel(import: m),
           const SizedBox(height: AppSpacing.sm),
         ],
@@ -642,6 +646,25 @@ class _ReadPane extends StatelessWidget {
 
 /// The import's date, whether the supplier is paid, and the memo (0148) —
 /// changeable here at any time by whoever may adjust stock.
+/// This import as an order: its steps, upload to the transfer's proof, with
+/// the payment's own (shown to those who see the books).
+class _OrderProgress extends ConsumerWidget {
+  const _OrderProgress({required this.importId});
+
+  final int importId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final order =
+        ref.watch(paymentsProvider(const OpenPayments())).valueOrNull?.where((p) => p.importId == importId).firstOrNull;
+    if (order == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: PaymentCard(key: ValueKey('iv-order-$importId'), payment: order, initiallyOpen: true),
+    );
+  }
+}
+
 class _NotesPanel extends ConsumerStatefulWidget {
   const _NotesPanel({required this.import});
 

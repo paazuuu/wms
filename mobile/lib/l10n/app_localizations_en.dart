@@ -13214,4 +13214,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sfSeeOrder => 'See this order\'s progress and payment';
+
+  @override
+  String get featImportCalendar => 'Calendar';
+
+  @override
+  String get featImportCalendarDesc =>
+      'Orders taken in, by day: paid, proof and inspection at a glance';
+
+  @override
+  String get calProofYes => 'Proof kept';
+
+  @override
+  String get calProofNo => 'No proof';
+
+  @override
+  String get calInStock => 'Inspected (in stock)';
+
+  @override
+  String get plStockAwaiting => 'Awaiting inspection';
+
+  @override
+  String get plNoneAwaiting => 'Nothing awaiting inspection';
 }

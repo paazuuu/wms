@@ -56,6 +56,7 @@ import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
+import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
 
@@ -115,6 +116,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _priceBook,
             requiredAnyOf: ['product.view', 'product.manage'],
+          ),
+          // 取込カレンダー (0173): each order on its days, with paid, proof and
+          // inspection at a glance — also opened from 発注 as before.
+          FeatureEntry(
+            id: 'import_calendar',
+            icon: Icons.calendar_month_outlined,
+            status: FeatureStatus.ready,
+            builder: _importCalendar,
+            requiredAnyOf: ['product.manage', 'product.view', 'inventory.adjust', 'inventory.view'],
           ),
           // 仕入先商品名 (0135): what each supplier calls our products, one
           // product id behind every writing.
@@ -628,6 +638,7 @@ Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _stockFileImport(BuildContext _) => const StockFileImportScreen();
 Widget _stockInspection(BuildContext _) => const StockInspectionScreen();
 Widget _taxFiles(BuildContext _) => const TaxFilesScreen();
+Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();

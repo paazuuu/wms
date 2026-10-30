@@ -4175,5 +4175,12 @@
   "ordShortPaid": "Paid",
   "ordShortProof": "Proof",
   "sfTabImport": "Take in a file",
-  "sfSeeOrder": "See this order's progress and payment"
+  "sfSeeOrder": "See this order's progress and payment",
+  "featImportCalendar": "Calendar",
+  "featImportCalendarDesc": "Orders taken in, by day: paid, proof and inspection at a glance",
+  "calProofYes": "Proof kept",
+  "calProofNo": "No proof",
+  "calInStock": "Inspected (in stock)",
+  "plStockAwaiting": "Awaiting inspection",
+  "plNoneAwaiting": "Nothing awaiting inspection"
 }

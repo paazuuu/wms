@@ -12874,4 +12874,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfSeeOrder => '查看此订单的进度・付款';
+
+  @override
+  String get featImportCalendar => '日历';
+
+  @override
+  String get featImportCalendarDesc => '按日期查看导入的订单：已付款・汇款记录・已验货一目了然';
+
+  @override
+  String get calProofYes => '有汇款记录';
+
+  @override
+  String get calProofNo => '无汇款记录';
+
+  @override
+  String get calInStock => '已验货（已入库）';
+
+  @override
+  String get plStockAwaiting => '待验货';
+
+  @override
+  String get plNoneAwaiting => '没有待验货的商品';
 }

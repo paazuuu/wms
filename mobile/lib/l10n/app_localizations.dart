@@ -22993,6 +22993,48 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この注文の進み具合・支払いを見る'**
   String get sfSeeOrder;
+
+  /// No description provided for @featImportCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'カレンダー'**
+  String get featImportCalendar;
+
+  /// No description provided for @featImportCalendarDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込んだ注文を日付ごとに。振込済・送金の記録・検品済がひと目でわかります'**
+  String get featImportCalendarDesc;
+
+  /// No description provided for @calProofYes.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金記録あり'**
+  String get calProofYes;
+
+  /// No description provided for @calProofNo.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金記録なし'**
+  String get calProofNo;
+
+  /// No description provided for @calInStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済（入庫済）'**
+  String get calInStock;
+
+  /// No description provided for @plStockAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get plStockAwaiting;
+
+  /// No description provided for @plNoneAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちの商品はありません'**
+  String get plNoneAwaiting;
 }
 
 class _AppLocalizationsDelegate

@@ -11,10 +11,13 @@ import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
+import 'package:wms_mobile/features/payments/data/payments_repository.dart';
+import 'package:wms_mobile/features/payments/domain/payment.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
 import 'package:wms_mobile/features/stock_import/presentation/import_view_screen.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_file_import_screen.dart' show stockTemplateSaverProvider;
 
+import '../../support/fake_payments_repository.dart';
 import '../../support/harness.dart';
 
 // Synthetic JANs with a correct check digit.
@@ -192,6 +195,24 @@ void main() {
     expect(find.text('反映 1'), findsOneWidget);
   });
 
+  testWidgets('an order opened from the calendar shows its 8 steps (0173)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final waiting = MasterImport.fromJson({..._importJson, 'status': 'awaiting_inspection'});
+    await pumpApp(tester, const ImportViewScreen(importId: 12), overrides: [
+      masterImportRepositoryProvider.overrideWithValue(_Repo(waiting)),
+      stockImportRepositoryProvider.overrideWithValue(_Notes()),
+      paymentsRepositoryProvider.overrideWithValue(_OneOrder()),
+      authControllerProvider.overrideWith((ref) =>
+          fakeAuthControllerFor(const AuthUser(id: 'u1', email: 'a@b.test', name: '倉庫', permissions: ['inventory.adjust']))),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('iv-order-12')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ord-timeline-12')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ord-mark-12-stock-todo')), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ord-now-12'))).data, '今: 検品して在庫に反映');
+  });
+
   testWidgets('waiting for inspection: said so row by row; date, payment and memo kept; the reading as Excel', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -249,4 +270,15 @@ void main() {
     expect(rows[header + 1][18], '→ テストペン 青: 検品待ち（ファイル 15個）');
     expect(rows[header + 1][23], '検品待ち');
   });
+}
+
+class _OneOrder extends FakePaymentsRepository {
+  @override
+  Future<ApiResult<List<Payment>>> list(PaymentsRange range) async => ApiSuccess([
+        Payment.fromJson({
+          'id': 12, 'day': '2026-08-19', 'status': 'awaiting_inspection', 'paid': false,
+          'read_lines': [], 'payee': {'bank': 'テスト銀行'}, 'payee_source': 'invoice', 'proofs': [], 'same_as': [],
+          'steps': {'read': 1, 'checked': 1, 'lines': 1, 'in_library': 1, 'named': 1, 'weighed': 1, 'inspected': 0},
+        }),
+      ]);
 }

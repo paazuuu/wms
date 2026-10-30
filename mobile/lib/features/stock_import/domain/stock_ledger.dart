@@ -195,9 +195,16 @@ class CalendarImport extends Equatable {
     this.createdAt,
     this.dayKind = 'document',
     this.documentDate,
+    this.proofCount = 0,
   });
 
   final int id;
+
+  /// Transfer proofs kept for it (0173).
+  final int proofCount;
+
+  /// Inspected and in stock (a count correction goes in at once).
+  bool get inStock => status == 'stock_done' && !undone;
 
   /// The day it is shown on: its document's date, or the day it came in
   /// (0165: on both, when they differ).
@@ -237,11 +244,12 @@ class CalendarImport extends Equatable {
       createdAt: DateTime.tryParse('${j['created_at'] ?? ''}')?.toLocal(),
       dayKind: j['day_kind']?.toString() ?? 'document',
       documentDate: DateTime.tryParse('${j['document_date'] ?? ''}'),
+      proofCount: n(j['proof_count']),
     );
   }
 
   @override
-  List<Object?> get props => [id, day, dayKind, status, undone, lines, change, paid, note];
+  List<Object?> get props => [id, day, dayKind, status, undone, lines, change, paid, note, proofCount];
 }
 
 /// One line as the inspector counted it.
