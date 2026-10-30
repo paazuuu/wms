@@ -74,6 +74,7 @@ import {
   lookupMarketNames,
   mapColumns,
   readDocument,
+  readPayee,
   dropNonItemLines,
   settlePayee,
   readingQuality,
@@ -754,6 +755,47 @@ Deno.serve(async (req) => {
           return json({ message: notPermittedMessage("product.manage") }, 403);
         }
         return json({ data: await suggestEnglishNames(Array.isArray(b.items) ? b.items : []) });
+      }
+      // 振込先を読む (0172): after the stock is in, where the invoice asks to
+      // be paid and its totals, read from the invoice kept as evidence and
+      // kept with it — the payment's 振込先 and amount.
+      if (str(b.mode) === "read_payee") {
+        if (!(await clientPermitted(supabase, "inventory.adjust"))) {
+          return json({ message: notPermittedMessage("inventory.adjust") }, 403);
+        }
+        const importId = Number(b.import_id);
+        if (!Number.isFinite(importId) || importId <= 0) return json({ message: "import_id is required" }, 400);
+        const { data: imp } = await admin.from("master_imports")
+          .select("id, source, document_id, original_path, original_name, original_type").eq("id", importId).maybeSingle();
+        if (!imp || imp.source !== "stock_file") return json({ message: `import ${importId} not found` }, 404);
+        const { data: doc } = imp.document_id
+          ? await admin.from("import_documents").select("id, storage_path, file_name, content_type, totals, payee")
+            .eq("id", imp.document_id).maybeSingle()
+          : { data: null };
+        const from = doc?.storage_path
+          ? { bucket: "import-documents", path: doc.storage_path as string }
+          : imp.original_path ? { bucket: "master-import-files", path: imp.original_path as string } : null;
+        if (!from) return json({ message: "no file kept for this import" }, 404);
+        const { data: blob, error: dlErr } = await admin.storage.from(from.bucket).download(from.path);
+        if (dlErr || !blob) return json({ message: `file not readable: ${dlErr?.message ?? "missing"}` }, 404);
+        const fileName = (doc?.file_name ?? imp.original_name ?? from.path) as string;
+        const mime = (doc?.content_type ?? imp.original_type ?? "") as string ||
+          (fileName.toLowerCase().endsWith(".pdf") ? "application/pdf" : "image/jpeg");
+        resetAiFailures();
+        let read;
+        try {
+          read = await readPayee(new Uint8Array(await blob.arrayBuffer()), mime, fileName);
+        } catch (e) {
+          return json({ message: String((e as Error)?.message ?? e), ai_failure: aiFailure() }, 502);
+        }
+        if (doc && (read.payee || (read.totals && !doc.totals))) {
+          const fields: Record<string, unknown> = {};
+          if (read.payee) fields.payee = read.payee;
+          // The totals read with the stock stay; only missing ones are filled.
+          if (read.totals && !doc.totals) fields.totals = { ...read.totals, ok: null };
+          await noteEvidence(admin, doc.id as number, fields);
+        }
+        return json({ data: { payee: read.payee, totals: read.totals, by: read.by, saved: !!doc } });
       }
       // 見出しの意味 (0163): a sheet the device reads itself names its JAN and
       // quantity, but other headings it does not know — what each one is,

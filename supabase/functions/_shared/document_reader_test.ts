@@ -2,6 +2,7 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  readPayee,
   dropNonItemLines,
   payeeFromText,
   settlePayee,
@@ -986,4 +987,20 @@ Deno.test("a 振込先 read from a page's words", () => {
   assertEquals([p.bank, p.branch, p.account_type, p.account_number, p.holder],
     ["サンプル信用金庫", "中央支店", "普通", "7654321", "カ)テストシヨウジ"]);
   assertEquals(payeeFromText("株式会社テスト 東京都千代田区 03-0000-0000"), null);
+});
+
+Deno.test("the 振込先 and totals read again from the invoice: the AI's answer, the page's words filling gaps (0172)", async () => {
+  let asked = 0;
+  const r = await readPayee(new Uint8Array([1, 2, 3]), "image/png", "請求書.png", async () => {
+    asked++;
+    return { bank: "テスト銀行", branch: "テスト支店", account_type: "当座", account_number: "123-4567", holder: null,
+      subtotal: 874700, tax: 87470, total: 962170 };
+  });
+  assertEquals(asked, 1);
+  assertEquals(r.by, "ai");
+  assertEquals([r.payee!.bank, r.payee!.branch, r.payee!.account_type, r.payee!.account_number], ["テスト銀行", "テスト支店", "当座", "1234567"]);
+  assertEquals(r.totals, { doc_subtotal: 874700, doc_tax: 87470, doc_total: 962170 });
+  // Nothing printed: nothing made up.
+  const none = await readPayee(new Uint8Array([1]), "image/png", "x.png", async () => ({ bank: null, account_number: null, total: null }));
+  assertEquals([none.payee, none.totals, none.by], [null, null, null]);
 });

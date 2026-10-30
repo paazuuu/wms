@@ -1665,6 +1665,89 @@ export function settlePayee(read: Payee | null | undefined, dropped: ReadLine[])
   };
 }
 
+// ---------------------------------------------------------------------------
+// The 振込先 and the totals, read again after the stock is in (0172)
+
+const PAYEE_PROMPT =
+  "この画像/PDFは日本の取引先からの請求書・納品書です。代金の振込先と請求金額だけを読み取ってください。" +
+  "bank: 振込先の銀行名(〇〇銀行・〇〇信用金庫など), branch: 支店名, account_type: 普通・当座・貯蓄, " +
+  "account_number: 口座番号(数字だけ), holder: 口座名義(カナ表記があればそのまま), " +
+  "subtotal: 税抜の合計, tax: 消費税額, total: 税込の請求額。" +
+  "振込先が複数書かれていれば最初のもの。書かれていない項目は null。推測で埋めないこと。";
+
+const PAYEE_SCHEMA = {
+  type: "object",
+  properties: nullable({
+    bank: { type: "string" }, branch: { type: "string" }, account_type: { type: "string" },
+    account_number: { type: "string" }, holder: { type: "string" },
+    subtotal: { type: "number" }, tax: { type: "number" }, total: { type: "number" },
+  }),
+  required: ["bank", "account_number", "total"],
+};
+
+export type PayeeReading = {
+  payee: Payee | null;
+  totals: { doc_subtotal: number | null; doc_tax: number | null; doc_total: number | null } | null;
+  by: "text" | "ai" | null;
+};
+
+/** The words a spreadsheet holds, every sheet, row by row. */
+function sheetText(bytes: Uint8Array): string {
+  const wb = XLSX.read(bytes, { type: "array" });
+  return wb.SheetNames.map((n) => XLSX.utils.sheet_to_csv(wb.Sheets[n], { FS: " " })).join("\n");
+}
+
+/** Where an invoice asks to be paid, and its totals: from its own words
+ * when it carries them (a sheet, a PDF with text), else by the AI looking
+ * at it. */
+export async function readPayee(
+  bytes: Uint8Array,
+  mime: string,
+  fileName = "",
+  ask: (parts: unknown[], schema: unknown) => Promise<Record<string, unknown>> = (p, sc) => gemini(p, sc, "payee"),
+): Promise<PayeeReading> {
+  let text = "";
+  if (/\.(xlsx|xlsm|xls|csv)$/i.test(fileName)) {
+    try {
+      text = sheetText(bytes);
+    } catch (_) {
+      text = "";
+    }
+    const p = payeeFromText(text.slice(Math.max(0, text.search(/振込|口座/))));
+    return { payee: p, totals: null, by: p ? "text" : null };
+  }
+  if (mime === "application/pdf") {
+    const lines = await pdfTextLines(bytes);
+    if (lines) text = lines.map((l) => l.map((it) => it.str).join(" ")).join("\n");
+  }
+  const fromText = text ? payeeFromText(text.slice(Math.max(0, text.search(/振込|口座/)))) : null;
+  const r = await ask([{ text: PAYEE_PROMPT }, { inline_data: { mime_type: mime, data: encodeBase64(bytes) } }], PAYEE_SCHEMA);
+  const bank = str(r.bank);
+  const ai: Payee | null = bank || str(r.account_number)
+    ? {
+      bank, branch: str(r.branch), account_type: str(r.account_type),
+      account_number: str(r.account_number)?.replace(/[^0-9]/g, "") || null,
+      holder: str(r.holder), text: null,
+    }
+    : null;
+  const payee = ai
+    ? {
+      bank: ai.bank ?? fromText?.bank ?? null, branch: ai.branch ?? fromText?.branch ?? null,
+      account_type: ai.account_type ?? fromText?.account_type ?? null,
+      account_number: ai.account_number ?? fromText?.account_number ?? null,
+      holder: ai.holder ?? fromText?.holder ?? null, text: fromText?.text ?? null,
+    }
+    : fromText;
+  const total = toNum(r.total);
+  return {
+    payee,
+    totals: total === null && toNum(r.subtotal) === null ? null : {
+      doc_subtotal: toNum(r.subtotal), doc_tax: toNum(r.tax), doc_total: total,
+    },
+    by: ai ? "ai" : fromText ? "text" : null,
+  };
+}
+
 export function dropTotalsLines(lines: ReadLine[]): ReadLine[] {
   const loose = (l: ReadLine) =>
     !l.raw_jan_code && !l.planned_quantity && l.unit_price === null && l.amount !== null && l.amount !== 0;
