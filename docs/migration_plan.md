@@ -8075,6 +8075,40 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Kept 7 years from the document's date, like the imports and their files
   (0148's purge).
 
+## 0169–0170: the invoice's supplier, and what was paid each time
+
+- Why the supplier was missing:
+  - import-plan reads the supplier from the invoice (社名・登録番号) and
+    keeps it on the evidence document (`import_documents.supplier_id`).
+  - The import itself (`master_imports.supplier_id`) was not linked to it.
+    So the supplier cards counted nothing (0 purchases), and
+    `master_import_detail` returned no supplier for the reading's Excel.
+- 0169:
+  - `master_imports.supplier_id` is filled from the evidence document: for
+    those already in (backfill), and by a trigger on insert or a new
+    document.
+  - `supplier_purchase_lines_v2`: a stock file counts while it waits for
+    inspection too, is dated by the document, and carries the 単価 and 定価
+    the invoice printed (`read_lines`, parsed by `money_of`).
+  - `supplier_cards` and `supplier_purchase_history` read it. The history's
+    products add `last_list_price`, `last_rate` (掛率), `min_price` and
+    `max_price`.
+  - `master_import_detail` adds `supplier_name`, `registration_number` and
+    `doc_number`.
+- 0170: each product in a supplier's history lists every purchase (`buys`):
+  the day, quantity, 単価, 定価, and the order, delivery or file it came in.
+- App:
+  - 価格台帳 opens on 仕入先ごと.
+  - A supplier's products show 単価 · 定価 · 掛率 · the range paid, and
+    「仕入れの記録（N回）」 opens every purchase. A file opens its reading.
+    The 仕入れの履歴 tab opens a file's reading too.
+  - The reading's Excel / tab heads with 仕入先, 登録番号 and 請求書番号, and
+    each row's 仕入先 is the invoice's when the line names none.
+  - The 確認用Excel during an import names the supplier (and 登録番号).
+  - 税理士用ファイル marks the same invoice taken in twice (same file, or the
+    same supplier, number, date and total) as 要確認, naming the first import.
+    Checked: #19 and #20 are the same invoice (same SHA-256).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

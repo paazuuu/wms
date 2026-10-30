@@ -232,11 +232,12 @@ class _InvoiceRow extends ConsumerWidget {
     );
   }
 
-  static String _doubtText(AppLocalizations l10n, String code) => switch (code) {
+  String _doubtText(AppLocalizations l10n, String code) => switch (code) {
         'no_registration' => l10n.txDoubtRegistration,
         'totals' => l10n.txDoubtTotals,
         'no_amounts' => l10n.txDoubtAmounts,
         'no_date' => l10n.txDoubtDate,
+        'duplicate' => l10n.txDoubtDuplicate(purchase.sameAs ?? 0),
         _ => code,
       };
 }

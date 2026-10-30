@@ -24,6 +24,7 @@ String _doubt(String code) => switch (code) {
       'totals' => '書類の合計と計算が合わない',
       'no_amounts' => '金額が読めていない',
       'no_date' => '書類の日付が読めず取込日で計上',
+      'duplicate' => '同じ請求書が二重に取り込まれています（片方を取り消してください）',
       _ => code,
     };
 
@@ -67,7 +68,7 @@ Uint8List buildTaxWorkbook(TaxMonth m, {DateTime? now, String? madeBy}) {
       p.importId,
       p.sha256 ?? '',
       _d.format(p.keptTill),
-      [p.note ?? '', ...doubts.map(_doubt)].where((x) => x.isNotEmpty).join(' / '),
+      [p.note ?? '', for (final d in doubts) d == 'duplicate' ? '取込 #${p.sameAs} と同じ請求書（二重取込・片方を取り消してください）' : _doubt(d)].where((x) => x.isNotEmpty).join(' / '),
     ]);
     if (!p.qualified) flagged.add((i, 2));
     if (p.agrees == false) flagged.addAll({(i, 12), (i, 13), (i, 14)});

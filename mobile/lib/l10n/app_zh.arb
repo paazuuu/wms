@@ -4085,5 +4085,16 @@
   "txDoubtTotals": "与单据合计不符",
   "txDoubtAmounts": "金额未读取",
   "txDoubtDate": "日期按导入日",
-  "txNoPermission": "需要库存调整、报表或用户管理中任一权限"
+  "txNoPermission": "需要库存调整、报表或用户管理中任一权限",
+  "supLastPrice": "单价 ¥{price}",
+  "supListPrice": "定价 ¥{price}",
+  "supRate": "折扣率 {rate}%",
+  "supPriceRange": "单价区间 ¥{min}〜¥{max}",
+  "supAmount": "金额 ¥{amount}",
+  "supUnits": "个",
+  "supBuysToggle": "进货记录（{n}次）",
+  "txDoubtDuplicate": "与导入 #{id} 为同一发票（重复导入）",
+  "rdSupplier": "供应商",
+  "rdRegistration": "登记号",
+  "rdDocNumber": "发票号"
 }

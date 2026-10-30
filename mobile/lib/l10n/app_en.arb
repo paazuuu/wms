@@ -4085,5 +4085,16 @@
   "txDoubtTotals": "differs from the document's total",
   "txDoubtAmounts": "amounts not read",
   "txDoubtDate": "dated by the import",
-  "txNoPermission": "Needs stock adjustment, reports or user management"
+  "txNoPermission": "Needs stock adjustment, reports or user management",
+  "supLastPrice": "unit ¥{price}",
+  "supListPrice": "list ¥{price}",
+  "supRate": "rate {rate}%",
+  "supPriceRange": "paid ¥{min}–¥{max}",
+  "supAmount": "¥{amount}",
+  "supUnits": " pcs",
+  "supBuysToggle": "Purchases ({n})",
+  "txDoubtDuplicate": "same invoice as import #{id} (taken in twice)",
+  "rdSupplier": "Supplier",
+  "rdRegistration": "Registration number",
+  "rdDocNumber": "Invoice number"
 }

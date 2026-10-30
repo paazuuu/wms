@@ -33,6 +33,30 @@ Map<String, dynamic> _line(int no, String qty, String unit, String amount, {Stri
     };
 
 void main() {
+  test('the same invoice taken in twice: the later one is marked, the first is not', () {
+    final first = _import(19, '2026-08-19', [_line(1, '500', '63.6', '31800')], supplier: 'アケボノ');
+    final again = _import(20, '2026-08-19', [_line(1, '500', '63.6', '31800')], supplier: 'アケボノ');
+    (again['document'] as Map)['sha256'] = 'abc19';
+    final other = _import(21, '2026-08-20', [_line(1, '1', '100', '100')]);
+    final month = TaxMonth.group([TaxPurchase.fromJson(again), TaxPurchase.fromJson(first), TaxPurchase.fromJson(other)]).single;
+    final by = {for (final p in month.purchases) p.importId: p};
+    expect(by[19]!.doubts, isNot(contains('duplicate')));
+    expect(by[20]!.sameAs, 19);
+    expect(by[20]!.doubts, contains('duplicate'));
+    expect(by[21]!.sameAs, isNull);
+    expect(month.doubtful, greaterThanOrEqualTo(1));
+    // Without the file's fingerprint: the same supplier, number, date and total.
+    final a = _import(30, '2026-08-19', [_line(1, '2', '50', '100')]);
+    final b = _import(31, '2026-08-19', [_line(1, '2', '50', '100')]);
+    for (final j in [a, b]) {
+      (j['document'] as Map)
+        ..['sha256'] = null
+        ..['doc_number'] = 'INV-1';
+    }
+    final m2 = TaxMonth.group([TaxPurchase.fromJson(a), TaxPurchase.fromJson(b)]).single;
+    expect(m2.purchases.firstWhere((p) => p.importId == 31).sameAs, 30);
+  });
+
   test('税抜 from the lines, tax once per invoice and rate (切り捨て), 税込; a left-out row does not count', () {
     final p = TaxPurchase.fromJson(_import(18, '2026-09-01', [
       _line(1, '100', '440', '44000'),

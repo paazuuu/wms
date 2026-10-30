@@ -376,9 +376,13 @@ class MasterRead extends Equatable {
     this.documentId,
     this.aiFailure,
     this.docDate,
+    this.registrationNumber,
   });
 
   final List<MasterLine> lines;
+
+  /// The supplier's 登録番号 as the document prints it.
+  final String? registrationNumber;
 
   /// The date the document prints (発行日 …), YYYY-MM-DD, when the reader
   /// found one.
@@ -414,6 +418,7 @@ class MasterRead extends Equatable {
       documentId: (j['document_id'] as num?)?.toInt(),
       aiFailure: j['ai_failure'] is Map ? (j['ai_failure'] as Map)['kind']?.toString() : null,
       docDate: header is Map ? header['doc_date']?.toString() : null,
+      registrationNumber: header is Map ? header['registration_number']?.toString() : null,
     );
   }
 
@@ -561,6 +566,8 @@ class MasterImport extends Equatable {
     required this.status,
     this.source,
     this.supplierName,
+    this.registrationNumber,
+    this.docNumber,
     this.warehouseName,
     this.files = const [],
     this.lineCount = 0,
@@ -587,7 +594,11 @@ class MasterImport extends Equatable {
   final int id;
   final MasterImportStatus status;
   final String? source;
+  /// The supplier the invoice names (or the one chosen), its 登録番号 and
+  /// the invoice's number, as read (0169).
   final String? supplierName;
+  final String? registrationNumber;
+  final String? docNumber;
   final String? warehouseName;
   final List<MasterImportFile> files;
   final int lineCount;
@@ -636,6 +647,8 @@ class MasterImport extends Equatable {
       status: MasterImportStatus.fromWire(j['status']?.toString()),
       source: j['source']?.toString(),
       supplierName: j['supplier_name']?.toString(),
+      registrationNumber: j['registration_number']?.toString(),
+      docNumber: j['doc_number']?.toString(),
       warehouseName: j['warehouse_name']?.toString(),
       files: [
         for (final k in const ['original', 'converted', 'corrected'])

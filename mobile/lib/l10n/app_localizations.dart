@@ -22453,6 +22453,72 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫調整・レポート・ユーザー管理のいずれかの権限が必要です'**
   String get txNoPermission;
+
+  /// No description provided for @supLastPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価 ¥{price}'**
+  String supLastPrice(String price);
+
+  /// No description provided for @supListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価 ¥{price}'**
+  String supListPrice(String price);
+
+  /// No description provided for @supRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'掛率 {rate}%'**
+  String supRate(String rate);
+
+  /// No description provided for @supPriceRange.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価の幅 ¥{min}〜¥{max}'**
+  String supPriceRange(String min, String max);
+
+  /// No description provided for @supAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額 ¥{amount}'**
+  String supAmount(String amount);
+
+  /// No description provided for @supUnits.
+  ///
+  /// In ja, this message translates to:
+  /// **'個'**
+  String get supUnits;
+
+  /// No description provided for @supBuysToggle.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れの記録（{n}回）'**
+  String supBuysToggle(int n);
+
+  /// No description provided for @txDoubtDuplicate.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} と同じ請求書（二重取込）'**
+  String txDoubtDuplicate(int id);
+
+  /// No description provided for @rdSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get rdSupplier;
+
+  /// No description provided for @rdRegistration.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号'**
+  String get rdRegistration;
+
+  /// No description provided for @rdDocNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書番号'**
+  String get rdDocNumber;
 }
 
 class _AppLocalizationsDelegate

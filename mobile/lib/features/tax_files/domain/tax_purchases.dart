@@ -31,6 +31,7 @@ class TaxPurchase extends Equatable {
     this.evidenceName,
     this.evidenceType,
     this.sha256,
+    this.sameAs,
   });
 
   final int importId;
@@ -63,6 +64,27 @@ class TaxPurchase extends Equatable {
   final String? evidenceName;
   final String? evidenceType;
   final String? sha256;
+
+  /// The import this one repeats: the same invoice taken in before (same
+  /// file, or the same supplier, number, date and total) — counted twice
+  /// unless one is taken back.
+  final int? sameAs;
+
+  /// The invoice, to know it again when taken in twice.
+  String? get sameKey {
+    if ((sha256 ?? '').isNotEmpty) return 'h:$sha256';
+    if (taxLines.isEmpty || (supplierName ?? '').isEmpty) return null;
+    return 'd:$supplierName|${docNumber ?? ''}|${documentDate ?? ''}|${gross.round()}';
+  }
+
+  TaxPurchase withSameAs(int? id) => TaxPurchase(
+        importId: importId, day: day, documentDate: documentDate, createdAt: createdAt, status: status,
+        originalName: originalName, originalPath: originalPath, paid: paid, note: note,
+        warehouseName: warehouseName, lines: lines, documentId: documentId, supplierName: supplierName,
+        registrationNumber: registrationNumber, docNumber: docNumber, addressee: addressee,
+        docSubtotal: docSubtotal, docTax: docTax, docTotal: docTotal, evidencePath: evidencePath,
+        evidenceName: evidenceName, evidenceType: evidenceType, sha256: sha256, sameAs: id,
+      );
 
   /// Kept until (7 years from the document's date, as the files are).
   DateTime get keptTill => keptUntil(day);
@@ -148,10 +170,11 @@ class TaxPurchase extends Equatable {
         if (agrees == false) 'totals',
         if (taxLines.isEmpty) 'no_amounts',
         if (documentDate == null) 'no_date',
+        if (sameAs != null) 'duplicate',
       ];
 
   @override
-  List<Object?> get props => [importId, day, lines, supplierName, registrationNumber, docTotal, paid];
+  List<Object?> get props => [importId, day, lines, supplierName, registrationNumber, docTotal, paid, sameAs];
 }
 
 /// One line's money: 税抜 (as the invoice prices it), the rate, and the tax
@@ -241,8 +264,18 @@ class TaxMonth extends Equatable {
       .fold<DateTime?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
 
   static List<TaxMonth> group(List<TaxPurchase> all) {
+    // The same invoice taken in twice: the later one is marked.
+    final first = <String, int>{};
+    final marked = <TaxPurchase>[];
+    for (final p in [...all]..sort((a, b) => a.importId.compareTo(b.importId))) {
+      final k = p.sameKey;
+      final before = k == null ? null : first[k];
+      if (k != null) first.putIfAbsent(k, () => p.importId);
+      marked.add(before == null ? p : p.withSameAs(before));
+    }
+    final byId = {for (final p in marked) p.importId: p};
     final by = <DateTime, List<TaxPurchase>>{};
-    for (final p in all) {
+    for (final p in [for (final p in all) byId[p.importId]!]) {
       by.putIfAbsent(DateTime(p.day.year, p.day.month), () => []).add(p);
     }
     return [

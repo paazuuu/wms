@@ -98,6 +98,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// The kept copy import-plan made of a file the AI read (0132).
   int? _documentId;
 
+  /// Who the document is from, as read (an invoice always names them).
+  String? _docSupplier;
+  String? _docRegistration;
+
   /// Products the file has that 商品ライブラリー does not: registered
   /// (through 価格台帳) before the stock goes in, so the whole file lands.
   bool _registerNew = true;
@@ -152,6 +156,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _sheet = null;
       _known = const {};
       _documentId = null;
+      _docSupplier = null;
+      _docRegistration = null;
       _checked = false;
       _tableChecked = false;
       _docDate = null;
@@ -202,6 +208,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             return;
           }
           _documentId = data.documentId;
+          _docSupplier = data.supplierName;
+          _docRegistration = data.registrationNumber;
           readDate = data.docDate;
           sheet = stockSheetFromRead([
             for (final l in data.lines)
@@ -603,6 +611,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final base = (_fileName ?? 'file').replaceAll(RegExp(r'\.[A-Za-z0-9]+$'), '');
     final bytes = buildReviewXlsx(
       fileName: _fileName ?? '',
+      supplier: _docSupplier,
+      registrationNumber: _docRegistration,
       sheet: sheet,
       inLibrary: _known.keys.toSet(),
       inPriceBook: _book.keys.toSet(),

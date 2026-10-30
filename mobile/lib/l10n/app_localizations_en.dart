@@ -12892,4 +12892,51 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get txNoPermission =>
       'Needs stock adjustment, reports or user management';
+
+  @override
+  String supLastPrice(String price) {
+    return 'unit ¥$price';
+  }
+
+  @override
+  String supListPrice(String price) {
+    return 'list ¥$price';
+  }
+
+  @override
+  String supRate(String rate) {
+    return 'rate $rate%';
+  }
+
+  @override
+  String supPriceRange(String min, String max) {
+    return 'paid ¥$min–¥$max';
+  }
+
+  @override
+  String supAmount(String amount) {
+    return '¥$amount';
+  }
+
+  @override
+  String get supUnits => ' pcs';
+
+  @override
+  String supBuysToggle(int n) {
+    return 'Purchases ($n)';
+  }
+
+  @override
+  String txDoubtDuplicate(int id) {
+    return 'same invoice as import #$id (taken in twice)';
+  }
+
+  @override
+  String get rdSupplier => 'Supplier';
+
+  @override
+  String get rdRegistration => 'Registration number';
+
+  @override
+  String get rdDocNumber => 'Invoice number';
 }

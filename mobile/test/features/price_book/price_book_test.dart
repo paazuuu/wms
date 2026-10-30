@@ -86,6 +86,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1200, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const PriceBookScreen(), overrides: [
+      priceBookSupplierViewProvider.overrideWith((_) => false),
       priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository(items: [_pen, _note])),
     ]);
 
@@ -110,6 +111,7 @@ void main() {
           unitPrice: 80, validFrom: DateTime(2026, 4, 1)),
     ]);
     await pumpApp(tester, const PriceBookScreen(), overrides: [
+      priceBookSupplierViewProvider.overrideWith((_) => false),
       priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository(items: [item])),
     ]);
     expect(find.text('仕入先A　「テストペン アオ」　TP-B　¥80'), findsOneWidget);
@@ -120,6 +122,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakePriceBookRepository(items: [_pen, _note]);
     await pumpApp(tester, const PriceBookScreen(), overrides: [
+      priceBookSupplierViewProvider.overrideWith((_) => false),
       priceBookRepositoryProvider.overrideWithValue(repo),
       productLibraryCanManageProvider.overrideWithValue(true),
     ]);
@@ -212,6 +215,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1200, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const PriceBookScreen(), overrides: [
+      priceBookSupplierViewProvider.overrideWith((_) => false),
       priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository(items: [_pen, _note])),
     ]);
     expect(find.byKey(const ValueKey('cl-grid')), findsNothing);

@@ -12629,4 +12629,51 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get txNoPermission => '在庫調整・レポート・ユーザー管理のいずれかの権限が必要です';
+
+  @override
+  String supLastPrice(String price) {
+    return '単価 ¥$price';
+  }
+
+  @override
+  String supListPrice(String price) {
+    return '定価 ¥$price';
+  }
+
+  @override
+  String supRate(String rate) {
+    return '掛率 $rate%';
+  }
+
+  @override
+  String supPriceRange(String min, String max) {
+    return '単価の幅 ¥$min〜¥$max';
+  }
+
+  @override
+  String supAmount(String amount) {
+    return '金額 ¥$amount';
+  }
+
+  @override
+  String get supUnits => '個';
+
+  @override
+  String supBuysToggle(int n) {
+    return '仕入れの記録（$n回）';
+  }
+
+  @override
+  String txDoubtDuplicate(int id) {
+    return '取込 #$id と同じ請求書（二重取込）';
+  }
+
+  @override
+  String get rdSupplier => '仕入先';
+
+  @override
+  String get rdRegistration => '登録番号';
+
+  @override
+  String get rdDocNumber => '請求書番号';
 }

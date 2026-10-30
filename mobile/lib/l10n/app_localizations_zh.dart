@@ -12555,4 +12555,51 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get txNoPermission => '需要库存调整、报表或用户管理中任一权限';
+
+  @override
+  String supLastPrice(String price) {
+    return '单价 ¥$price';
+  }
+
+  @override
+  String supListPrice(String price) {
+    return '定价 ¥$price';
+  }
+
+  @override
+  String supRate(String rate) {
+    return '折扣率 $rate%';
+  }
+
+  @override
+  String supPriceRange(String min, String max) {
+    return '单价区间 ¥$min〜¥$max';
+  }
+
+  @override
+  String supAmount(String amount) {
+    return '金额 ¥$amount';
+  }
+
+  @override
+  String get supUnits => '个';
+
+  @override
+  String supBuysToggle(int n) {
+    return '进货记录（$n次）';
+  }
+
+  @override
+  String txDoubtDuplicate(int id) {
+    return '与导入 #$id 为同一发票（重复导入）';
+  }
+
+  @override
+  String get rdSupplier => '供应商';
+
+  @override
+  String get rdRegistration => '登记号';
+
+  @override
+  String get rdDocNumber => '发票号';
 }

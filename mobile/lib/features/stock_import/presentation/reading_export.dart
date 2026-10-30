@@ -95,6 +95,10 @@ ReadingTable readingTable(AppLocalizations l10n, MasterImport m) {
     top: [
       ['読み取り結果', l10n.ivTitle(m.id)],
       ['ファイル', m.originalName ?? ''],
+      // The invoice always names who it is from.
+      ['仕入先', m.supplierName ?? ''],
+      if ((m.registrationNumber ?? '').isNotEmpty) ['登録番号', m.registrationNumber!],
+      if ((m.docNumber ?? '').isNotEmpty) ['請求書番号', m.docNumber!],
       if (filed != null)
         ['書類の日付', '${fmt.format(filed)}（${documentDateSourceLabel(l10n, DocumentDateSource.fromWire(m.documentDateSource))}）'],
       ['取り込んだ日時', m.createdAt == null ? '' : at.format(m.createdAt!)],

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
@@ -74,6 +76,21 @@ void main() {
     expect(t.rows.single.take(16), [
       2, '', '8月27日', '2', 'テスト商事', 'テスト', 'TP-07B', '4909999000014', 'TP-07B', '40', '本', '', '307', '337.7', '12280', '',
     ]);
+    // Who the invoice is from heads the sheet too.
+    expect(t.top.firstWhere((r) => r.first == '仕入先'), ['仕入先', 'テスト商事']);
+    expect(t.top.where((r) => r.first == '登録番号'), isEmpty);
+  });
+
+  test("the reading's head names the supplier, its 登録番号 and the invoice number, as the detail returns them", () {
+    final m = MasterImport.fromJson({
+      'id': 20, 'status': 'awaiting_inspection', 'supplier_name': 'テスト商事株式会社',
+      'registration_number': 'T1234567890123', 'doc_number': 'INV-77', 'lines': [], 'read_lines': [],
+    });
+    expect((m.supplierName, m.registrationNumber, m.docNumber), ('テスト商事株式会社', 'T1234567890123', 'INV-77'));
+    final top = readingTable(ja, m).top;
+    expect(top.firstWhere((r) => r.first == '仕入先'), ['仕入先', 'テスト商事株式会社']);
+    expect(top.firstWhere((r) => r.first == '登録番号'), ['登録番号', 'T1234567890123']);
+    expect(top.firstWhere((r) => r.first == '請求書番号'), ['請求書番号', 'INV-77']);
   });
 
   test('a line with no name but a 品番 is registered under its 品番', () {

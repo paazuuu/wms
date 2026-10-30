@@ -24,6 +24,12 @@ final _historyJson = {
       'product_id': 1, 'jan_code': '4902778322239', 'name': 'ZENTO リフィル 黒', 'sku': 'UBRZ05.24', 'unit': '本',
       'their_name': 'uniball ZENTO リフィル 黒', 'their_code': 'UBRZ05.24',
       'times': 3, 'total': 1200, 'avg_qty': 400, 'last_qty': 500, 'last_price': 40,
+      'last_list_price': 80, 'last_rate': 0.5, 'min_price': 38, 'max_price': 40,
+      'buys': [
+        {'at': '2026-10-01', 'quantity': 500, 'unit_price': 40, 'list_price': 80, 'source': 'import', 'ref_id': 3, 'ref_no': '請求書.pdf'},
+        {'at': '2026-09-01', 'quantity': 400, 'unit_price': 38, 'source': 'delivery', 'ref_id': 9, 'ref_no': 'D-9'},
+        {'at': '2026-08-01', 'quantity': 300, 'unit_price': 40, 'list_price': 80, 'source': 'po', 'ref_id': 4, 'ref_no': 'PO-000004'},
+      ],
       'first_at': '2026-08-01', 'last_at': '2026-10-01', 'interval_days': 30, 'next_due': '2026-10-31', 'on_hand': 120,
     },
     {
@@ -112,7 +118,7 @@ void main() {
     expect(h.events.map((e) => e.source), [PurchaseSource.import, PurchaseSource.delivery, PurchaseSource.po]);
   });
 
-  testWidgets('the supplier cards are a view of 価格台帳, with their search', (tester) async {
+  testWidgets('価格台帳 opens on the supplier cards, with their search', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const PriceBookScreen(), overrides: [
@@ -120,8 +126,7 @@ void main() {
       purchaseRequestRepositoryProvider.overrideWithValue(_FakeRequests()),
     ]);
 
-    await tester.tap(find.byKey(const ValueKey('cl-view-suppliers')));
-    await tester.pumpAndSettle();
+    // No tap: 仕入先ごと is the view it opens on.
     expect(find.byKey(const ValueKey('sup-card-41')), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('spn-search')), 'ジェット');
     await tester.pumpAndSettle();
@@ -219,6 +224,43 @@ void main() {
     expect(lines.first.supplierCode, 'UBRZ05.24');
     // And it opens, ready to adjust and send.
     expect(find.byType(PurchaseRequestScreen), findsOneWidget);
+  });
+
+  testWidgets("a supplier's products show the price, 定価 and 掛率 paid, and every purchase", (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, SupplierDetailScreen(supplierId: 41, today: DateTime(2026, 11, 2)), overrides: [
+      supplierHistoryRepositoryProvider.overrideWithValue(_FakeHistory()),
+      purchaseRequestRepositoryProvider.overrideWithValue(_FakeRequests()),
+    ]);
+
+    String text(String key) => tester.widget<Text>(find.byKey(ValueKey(key))).data!;
+    expect(text('sup-price-p1'), '単価 ¥40 · 定価 ¥80 · 掛率 50% · 単価の幅 ¥38〜¥40');
+    // No price known: no price line.
+    expect(find.byKey(const ValueKey('sup-price-p2')), findsNothing);
+
+    // Every purchase, newest first, opened under the product.
+    expect(find.byKey(const ValueKey('sup-buylist-p1')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('sup-buys-p1')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sup-buylist-p1')), findsOneWidget);
+    expect(text('sup-buy-text-p1-0'), '500本 · 単価 ¥40 · 定価 ¥80 · 掛率 50% · 金額 ¥20,000');
+    expect(text('sup-buy-text-p1-1'), '400本 · 単価 ¥38 · 金額 ¥15,200');
+    expect(find.text('ファイル取込 · 請求書.pdf'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sup-buys-p1')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sup-buylist-p1')), findsNothing);
+  });
+
+  test('a purchase reads its rate, and the history its prices', () {
+    final p = SupplierHistory.fromJson(_historyJson).products.first;
+    expect(p.lastListPrice, 80);
+    expect(p.lastRate, 0.5);
+    expect((p.minPrice, p.maxPrice), (38.0, 40.0));
+    expect(p.buys.map((b) => b.source), [PurchaseSource.import, PurchaseSource.delivery, PurchaseSource.po]);
+    expect(p.buys.first.rate, 0.5);
+    expect(p.buys[1].rate, isNull);
+    expect(p.buys.first.amount, 20000);
   });
 
   testWidgets('a supplier with nothing yet says how products get there', (tester) async {

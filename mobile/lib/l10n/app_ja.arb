@@ -11282,5 +11282,68 @@
   "txDoubtTotals": "書類の合計と不一致",
   "txDoubtAmounts": "金額が読めていない",
   "txDoubtDate": "日付は取込日",
-  "txNoPermission": "在庫調整・レポート・ユーザー管理のいずれかの権限が必要です"
+  "txNoPermission": "在庫調整・レポート・ユーザー管理のいずれかの権限が必要です",
+  "supLastPrice": "単価 ¥{price}",
+  "@supLastPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "supListPrice": "定価 ¥{price}",
+  "@supListPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "supRate": "掛率 {rate}%",
+  "@supRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "supPriceRange": "単価の幅 ¥{min}〜¥{max}",
+  "@supPriceRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "supAmount": "金額 ¥{amount}",
+  "@supAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "supUnits": "個",
+  "supBuysToggle": "仕入れの記録（{n}回）",
+  "@supBuysToggle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "txDoubtDuplicate": "取込 #{id} と同じ請求書（二重取込）",
+  "@txDoubtDuplicate": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "rdSupplier": "仕入先",
+  "rdRegistration": "登録番号",
+  "rdDocNumber": "請求書番号"
 }

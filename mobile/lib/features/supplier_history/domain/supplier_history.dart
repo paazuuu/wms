@@ -83,6 +83,11 @@ class SupplierProduct extends Equatable {
     this.avgQty,
     this.lastQty,
     this.lastPrice,
+    this.lastListPrice,
+    this.lastRate,
+    this.minPrice,
+    this.maxPrice,
+    this.buys = const [],
     this.firstAt,
     this.lastAt,
     this.intervalDays,
@@ -108,6 +113,18 @@ class SupplierProduct extends Equatable {
   final int? avgQty;
   final int? lastQty;
   final double? lastPrice;
+
+  /// The 定価 the last invoice printed (else the product's), and the rate
+  /// (掛率) paid then: last price ÷ 定価.
+  final double? lastListPrice;
+  final double? lastRate;
+
+  /// The lowest and highest 単価 paid.
+  final double? minPrice;
+  final double? maxPrice;
+
+  /// Every time it was bought, newest first.
+  final List<SupplierBuy> buys;
   final DateTime? firstAt;
   final DateTime? lastAt;
 
@@ -136,6 +153,11 @@ class SupplierProduct extends Equatable {
         avgQty: _ni(j['avg_qty']),
         lastQty: _ni(j['last_qty']),
         lastPrice: _nd(j['last_price']),
+        lastListPrice: _nd(j['last_list_price']),
+        lastRate: _nd(j['last_rate']),
+        minPrice: _nd(j['min_price']),
+        maxPrice: _nd(j['max_price']),
+        buys: [for (final b in (j['buys'] as List? ?? const []).whereType<Map>()) SupplierBuy.fromJson(b.cast<String, dynamic>())],
         firstAt: _date(j['first_at']),
         lastAt: _date(j['last_at']),
         intervalDays: _ni(j['interval_days']),
@@ -144,11 +166,57 @@ class SupplierProduct extends Equatable {
       );
 
   @override
-  List<Object?> get props => [productId, janCode, name, theirName, theirCode, times, total, lastQty, lastAt, nextDue, onHand];
+  List<Object?> get props =>
+      [productId, janCode, name, theirName, theirCode, times, total, lastQty, lastPrice, lastRate, buys, lastAt, nextDue, onHand];
+}
+
+/// One time a product was bought from the supplier: the day, how many, the
+/// 単価 and 定価 paid, and the order, delivery or file it came in.
+class SupplierBuy extends Equatable {
+  const SupplierBuy({
+    required this.source,
+    required this.refId,
+    required this.quantity,
+    this.refNo,
+    this.at,
+    this.unitPrice,
+    this.listPrice,
+  });
+
+  final PurchaseSource source;
+  final int refId;
+  final String? refNo;
+  final DateTime? at;
+  final int quantity;
+  final double? unitPrice;
+  final double? listPrice;
+
+  /// 掛率: the price paid ÷ 定価, when both are known.
+  double? get rate => unitPrice != null && (listPrice ?? 0) > 0 ? unitPrice! / listPrice! : null;
+  double? get amount => unitPrice == null ? null : unitPrice! * quantity;
+
+  factory SupplierBuy.fromJson(Map<String, dynamic> j) => SupplierBuy(
+        source: purchaseSourceOf(j['source']),
+        refId: _i(j['ref_id']),
+        refNo: _s(j['ref_no']),
+        at: _date(j['at']),
+        quantity: _i(j['quantity']),
+        unitPrice: _nd(j['unit_price']),
+        listPrice: _nd(j['list_price']),
+      );
+
+  @override
+  List<Object?> get props => [source, refId, at, quantity, unitPrice, listPrice];
 }
 
 /// Where a purchase was recorded.
 enum PurchaseSource { po, delivery, import }
+
+PurchaseSource purchaseSourceOf(Object? v) => switch (v) {
+      'po' => PurchaseSource.po,
+      'delivery' => PurchaseSource.delivery,
+      _ => PurchaseSource.import,
+    };
 
 /// One purchase: an order, a delivery or a file.
 class SupplierPurchase extends Equatable {
@@ -163,11 +231,7 @@ class SupplierPurchase extends Equatable {
   final double? amount;
 
   factory SupplierPurchase.fromJson(Map<String, dynamic> j) => SupplierPurchase(
-        source: switch (j['source']) {
-          'po' => PurchaseSource.po,
-          'delivery' => PurchaseSource.delivery,
-          _ => PurchaseSource.import,
-        },
+        source: purchaseSourceOf(j['source']),
         refId: _i(j['ref_id']),
         refNo: _s(j['ref_no']),
         at: _date(j['at']),

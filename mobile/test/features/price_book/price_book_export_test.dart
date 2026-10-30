@@ -85,6 +85,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final saved = <(String, Uint8List)>[];
     await pumpApp(tester, const PriceBookScreen(), overrides: [
+      priceBookSupplierViewProvider.overrideWith((_) => false),
       priceBookRepositoryProvider.overrideWithValue(FakePriceBookRepository(items: [_pen, _note])),
       saveFileProvider.overrideWithValue((n, b) async => saved.add((n, b))),
     ]);

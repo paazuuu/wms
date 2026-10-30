@@ -12,12 +12,16 @@ import '../../product/presentation/product_detail_screen.dart';
 import '../../purchase_request/data/purchase_request_repository.dart';
 import '../../purchase_request/domain/purchase_request.dart';
 import '../../purchase_request/presentation/purchase_request_screen.dart';
+import '../../stock_import/presentation/import_view_screen.dart' show openReadingTable;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/supplier_history_repository.dart';
 import '../domain/supplier_history.dart';
 
 final _day = DateFormat('y/MM/dd');
 final _num = NumberFormat('#,##0');
+final _yen = NumberFormat('#,##0.##');
+
+String _pct(double rate) => NumberFormat('0.#').format(rate * 100);
 
 /// 仕入先から (0143): one supplier — who they are, what we buy from them
 /// most, how often and when last, and every purchase. The products bought
@@ -38,6 +42,9 @@ class SupplierDetailScreen extends ConsumerStatefulWidget {
 
 class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
   final Set<String> _chosen = {};
+
+  /// Products whose every purchase is shown under them.
+  final Set<String> _open = {};
   final Map<String, TextEditingController> _qty = {};
   NextOrderQty _how = NextOrderQty.last;
   bool _seeded = false;
@@ -316,11 +323,24 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
                           l10n.supBought(p.times, _num.format(p.total)),
                           if (p.lastQty != null && p.lastAt != null) l10n.supLast(_num.format(p.lastQty), _day.format(p.lastAt!)),
                           if (p.avgQty != null && p.times > 1) l10n.supAverage(_num.format(p.avgQty)),
-                          if (p.lastPrice != null) '¥${NumberFormat('#,##0.##').format(p.lastPrice)}',
                         ].join(' · '),
                   key: ValueKey('sup-stats-${p.key}'),
                   style: theme.textTheme.bodySmall,
                 ),
+                // What was paid: the last 単価, its 定価 and rate (掛率), and
+                // the range when it changed.
+                if (p.lastPrice != null)
+                  Text(
+                    [
+                      l10n.supLastPrice(_yen.format(p.lastPrice)),
+                      if (p.lastListPrice != null) l10n.supListPrice(_yen.format(p.lastListPrice)),
+                      if (p.lastRate != null) l10n.supRate(_pct(p.lastRate!)),
+                      if (p.minPrice != null && p.maxPrice != null && p.minPrice != p.maxPrice)
+                        l10n.supPriceRange(_yen.format(p.minPrice), _yen.format(p.maxPrice)),
+                    ].join(' · '),
+                    key: ValueKey('sup-price-${p.key}'),
+                    style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                  ),
                 if (p.intervalDays != null && p.nextDue != null)
                   Text(
                     l10n.supEvery(p.intervalDays!, _day.format(p.nextDue!)) + (due ? ' · ${l10n.supDue}' : ''),
@@ -331,6 +351,18 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
                     ),
                   ),
                 Text(l10n.supOnHand(_num.format(p.onHand)), key: ValueKey('sup-onhand-${p.key}'), style: muted),
+                if (p.buys.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      key: ValueKey('sup-buys-${p.key}'),
+                      style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
+                      onPressed: () => setState(() => _open.contains(p.key) ? _open.remove(p.key) : _open.add(p.key)),
+                      icon: Icon(_open.contains(p.key) ? Icons.expand_less : Icons.expand_more, size: 18),
+                      label: Text(l10n.supBuysToggle(p.buys.length)),
+                    ),
+                  ),
+                if (_open.contains(p.key)) _buys(context, p),
               ]),
             ),
           ),
@@ -352,6 +384,64 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
     );
   }
 
+  /// Every time [p] was bought: the day, how many, the 単価, 定価 and 掛率,
+  /// and where — a file opens its reading.
+  Widget _buys(BuildContext context, SupplierProduct p) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    return Container(
+      key: ValueKey('sup-buylist-${p.key}'),
+      margin: const EdgeInsets.only(top: 2, bottom: AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        for (final (i, b) in p.buys.indexed)
+          InkWell(
+            key: ValueKey('sup-buy-${p.key}-$i'),
+            onTap: b.source == PurchaseSource.import ? () => openReadingTable(context, ref, b.refId) : null,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                SizedBox(width: 84, child: Text(b.at == null ? '—' : _day.format(b.at!), style: theme.textTheme.bodySmall)),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(
+                      [
+                        '${_num.format(b.quantity)}${p.unit ?? l10n.supUnits}',
+                        if (b.unitPrice != null) l10n.supLastPrice(_yen.format(b.unitPrice)),
+                        if (b.listPrice != null) l10n.supListPrice(_yen.format(b.listPrice)),
+                        if (b.rate != null) l10n.supRate(_pct(b.rate!)),
+                        if (b.amount != null) l10n.supAmount(_num.format(b.amount!.round())),
+                      ].join(' · '),
+                      key: ValueKey('sup-buy-text-${p.key}-$i'),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    Text(
+                      [_sourceText(l10n, b.source), if (b.refNo != null) b.refNo!].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: muted,
+                    ),
+                  ]),
+                ),
+                if (b.source == PurchaseSource.import) Icon(Icons.open_in_new, size: 14, color: muted?.color),
+              ]),
+            ),
+          ),
+      ]),
+    );
+  }
+
+  static String _sourceText(AppLocalizations l10n, PurchaseSource s) => switch (s) {
+        PurchaseSource.po => l10n.supSourcePo,
+        PurchaseSource.delivery => l10n.supSourceDelivery,
+        PurchaseSource.import => l10n.supSourceImport,
+      };
+
   Widget _events(BuildContext context, SupplierHistory h) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
@@ -365,6 +455,9 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
           Card(
             key: ValueKey('sup-event-${e.source.name}-${e.refId}'),
             child: ListTile(
+              // A file opens as read: every line with its price.
+              onTap: e.source == PurchaseSource.import ? () => openReadingTable(context, ref, e.refId) : null,
+              trailing: e.source == PurchaseSource.import ? const Icon(Icons.open_in_new, size: 18) : null,
               leading: Icon(switch (e.source) {
                 PurchaseSource.po => Icons.shopping_cart_outlined,
                 PurchaseSource.delivery => Icons.local_shipping_outlined,
@@ -372,11 +465,7 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
               }),
               title: Text(e.refNo ?? '—', maxLines: 2, overflow: TextOverflow.ellipsis),
               subtitle: Text([
-                switch (e.source) {
-                  PurchaseSource.po => l10n.supSourcePo,
-                  PurchaseSource.delivery => l10n.supSourceDelivery,
-                  PurchaseSource.import => l10n.supSourceImport,
-                },
+                _sourceText(l10n, e.source),
                 if (e.at != null) _day.format(e.at!),
                 l10n.supEventLines(e.lines, _num.format(e.units)),
                 if ((e.amount ?? 0) > 0) '¥${_num.format(e.amount)}',

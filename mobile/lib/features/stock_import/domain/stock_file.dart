@@ -701,6 +701,8 @@ List<List<String>> parseCsv(String text, {String separator = ','}) {
 /// 読み取った数量, so what a person changed is known when it comes back.
 Uint8List buildReviewXlsx({
   required String fileName,
+  String? supplier,
+  String? registrationNumber,
   required StockSheet sheet,
   required Set<String> inLibrary,
   required Set<String> inPriceBook,
@@ -746,6 +748,9 @@ Uint8List buildReviewXlsx({
     sheetName: '在庫登録',
     top: [
       ['在庫登録 確認用（$fileName の読み取り）'],
+      // Who the invoice is from: it always names them.
+      if ((supplier ?? '').trim().isNotEmpty)
+        ['仕入先: ${supplier!.trim()}${(registrationNumber ?? '').trim().isEmpty ? '' : '（登録番号 ${registrationNumber!.trim()}）'}'],
       ['JANコード・商品名・数量を確かめて直し、保存したこのファイルを「ファイルから在庫登録」で選んでください。黄色は確かめてほしい欄です。'],
       [],
     ],
