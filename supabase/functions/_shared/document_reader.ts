@@ -134,6 +134,19 @@ export type Header = {
   addressee?: string | null;
   /** Every other company it names, likeliest issuer first (0132). */
   supplier_candidates?: string[];
+  /** Where the invoice asks to be paid (振込先), as printed (0171). */
+  payee?: Payee | null;
+};
+
+/** A 振込先: the bank, branch, 普通 or 当座, the number and the name. */
+export type Payee = {
+  bank: string | null;
+  branch: string | null;
+  account_type: string | null;
+  account_number: string | null;
+  holder: string | null;
+  /** The lines it was read from, as printed. */
+  text: string | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -1582,6 +1595,76 @@ export async function readRows(
  * JAN, no quantity, no unit price, and an amount equal to what the goods
  * lines add up to — as is, with 8% or 10% tax, or the tax alone. Returns
  * what it took out. */
+// ---------------------------------------------------------------------------
+// Not goods: the 登録番号, the 振込先 and the like printed below the table
+
+/** What only a 振込先, a 登録番号 or a closing remark says. */
+const NON_ITEM = /登録番号|適格請求|振込|振り込|お振込|口座|銀行|信用金庫|信金|信用組合|労働金庫|ゆうちょ|郵便振替|支店|出張所|当座|普通預金|名義|備考|摘要|お支払|支払期[日限]|締日|合\s*計|小\s*計|消費税|税率|対象額|請求金額|御請求|^T\d{13}$/;
+
+/** The texts a line was read from. */
+function lineTexts(l: ReadLine): string[] {
+  return [l.raw_jan_code, l.maker, l.product_name, l.product_code, l.raw_name_code, l.spec, l.supplier ?? null]
+    .map((v) => (v ?? "").trim())
+    .filter((v) => v.length > 0);
+}
+
+/** Lines that are not goods — no JAN and only a 振込先, 登録番号, total or
+ * remark in them — taken out of [lines] and returned (0171). The AI is told
+ * to leave them out, but a 振込先 box beside the table is often read in. */
+export function dropNonItemLines(lines: ReadLine[]): ReadLine[] {
+  const taken: ReadLine[] = [];
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const l = lines[i];
+    if (l.jan_code) continue;
+    const texts = lineTexts(l);
+    if (texts.length === 0) {
+      // Nothing at all but a number: no goods.
+      if (l.unit_price === null && l.amount === null) taken.unshift(...lines.splice(i, 1));
+      continue;
+    }
+    if (texts.some((t) => NON_ITEM.test(t.normalize("NFKC")))) taken.unshift(...lines.splice(i, 1));
+  }
+  // The number of each line stays as read, so it still points to the file.
+  return taken;
+}
+
+/** A 振込先 from the words around it (the 振込先 box, or a page's text):
+ * the bank, branch, 普通・当座, the account number and the name. Null when
+ * no bank is named. */
+export function payeeFromText(text: string): Payee | null {
+  const t = text.normalize("NFKC").replace(/[\t ]+/g, " ");
+  const bank = t.match(/([^\s:：,、()（）]{1,20}?(?:銀行|信用金庫|信用組合|労働金庫|農業協同組合|ゆうちょ銀行|信金))/);
+  if (!bank) return null;
+  const after = t.slice(bank.index! + bank[0].length);
+  const branch = after.match(/([^\s:：,、()（）]{1,20}?(?:支店|出張所|営業部|本店))/) ?? t.match(/([^\s:：,、()（）]{1,20}?(?:支店|出張所|営業部))/);
+  const type = t.match(/(当座|普通|貯蓄)/);
+  const number = t.match(/(?:口座番号|当座|普通|貯蓄|No\.?|№)\s*[:：]?\s*([0-9]{4,8})(?![0-9])/) ??
+    after.match(/(?<![0-9T-])([0-9]{6,8})(?![0-9])/);
+  const holder = t.match(/(?:口座名義|名義人?|受取人)\s*[:：]?\s*([^\n]{2,40})/);
+  return {
+    bank: bank[1].replace(/^(?:振込先|お振込先|振込先口座番号|口座)[:：]?/, ""),
+    branch: branch?.[1] ?? null,
+    account_type: type?.[1] ?? null,
+    account_number: number?.[1] ?? null,
+    holder: holder?.[1]?.trim() ?? null,
+    text: t.trim().slice(0, 400),
+  };
+}
+
+/** The 振込先 the AI read in the header, else the one in the lines taken out. */
+export function settlePayee(read: Payee | null | undefined, dropped: ReadLine[]): Payee | null {
+  const fromLines = dropped.length ? payeeFromText(dropped.map((l) => lineTexts(l).join(" ")).join("\n")) : null;
+  if (!read || !read.bank) return fromLines ?? (read && (read.account_number || read.holder) ? read : null);
+  return {
+    bank: read.bank,
+    branch: read.branch ?? fromLines?.branch ?? null,
+    account_type: read.account_type ?? fromLines?.account_type ?? null,
+    account_number: read.account_number ?? fromLines?.account_number ?? null,
+    holder: read.holder ?? fromLines?.holder ?? null,
+    text: read.text ?? fromLines?.text ?? null,
+  };
+}
+
 export function dropTotalsLines(lines: ReadLine[]): ReadLine[] {
   const loose = (l: ReadLine) =>
     !l.raw_jan_code && !l.planned_quantity && l.unit_price === null && l.amount !== null && l.amount !== 0;
@@ -1876,6 +1959,7 @@ export function pdfHeaderFrom(text: string, own: OwnCompany | null = null): Head
     doc_date: date ? `${date[1]}-${date[2].padStart(2, "0")}-${date[3].padStart(2, "0")}` : null,
     addressee,
     supplier_candidates: candidates,
+    payee: payeeFromText(t.slice(Math.max(0, t.search(/振込|お振込|口座/)))),
   };
 }
 
@@ -2193,7 +2277,9 @@ const EXTRACT_PROMPT =
   "「〇〇御中」「〇〇様」と宛名になっている会社は受け取る側なので入れない), addressee_name: 宛名の会社名(御中・様の付く側), " +
   "registration_number: 発行元のインボイス登録番号(T+13桁), " +
   "customer_code: お客様コード, doc_number: 伝票番号, doc_date: 日付(YYYY-MM-DD), " +
-  "subtotal: 明細の税抜合計(今回お買上額・10%対象と8%対象の合計など), tax: 消費税額, total: 税込の合計(請求額)}。\n" +
+  "subtotal: 明細の税抜合計(今回お買上額・10%対象と8%対象の合計など), tax: 消費税額, total: 税込の合計(請求額), " +
+  "payee_bank: 振込先の銀行名, payee_branch: 振込先の支店名, payee_account_type: 普通・当座, " +
+  "payee_account_number: 振込先の口座番号, payee_account_holder: 口座名義}。振込先は明細ではなくここに入れる。\n" +
   "2) columns: 表の見出しを左から順に {header: 見出しの文字どおり, field: 意味} で。field は " + FIELD_HELP + "。\n" +
   "3) lines: 明細の各行。jan_code は印字どおり(ハイフン・点・空白もそのまま、無ければ空)。maker はメーカー名を印字どおり。" +
   "品名と品番が1つの欄にまとめて書かれている場合は、その欄の文字をそのまま name_code に入れ、" +
@@ -2212,6 +2298,7 @@ const EXTRACT_PROMPT =
   "1つの商品が2段(上段にメーカー・JAN、下段に品名など)に分かれて書かれていれば1行にまとめる。" +
   "数量は 金額÷単価 と合うか確かめ、合わなければ印字をもう一度読む。" +
   "住所・電話・登録番号・合計行は明細にしない。支店名・営業所名・担当者・備考・ページ番号だけの行も明細にしない。" +
+  "振込先(銀行名・支店名・口座番号・当座/普通・口座名義)の欄も明細にしない(header の payee_* に入れる)。" +
   "複数ページのときは、すべてのページの明細を1行も漏らさずに返す。" +
   "JANコードが品名の下や別の段・別の欄に印字されていても、その商品の行の jan_code に入れる(桁を1つずつ確かめて)。" +
   "読めない項目は省略。";
@@ -2226,6 +2313,11 @@ const HEADER_PROPS: Record<string, Record<string, unknown>> = {
   subtotal: { type: "number" },
   tax: { type: "number" },
   total: { type: "number" },
+  payee_bank: { type: "string" },
+  payee_branch: { type: "string" },
+  payee_account_type: { type: "string" },
+  payee_account_number: { type: "string" },
+  payee_account_holder: { type: "string" },
 };
 
 /** What every line must answer, even with null. */
@@ -2578,6 +2670,8 @@ export async function readDocument(
   }
   // A maker taken for the product's name goes back to the maker.
   for (const l of lines) settleMakerName(l);
+  // The 振込先 and 登録番号 read in as lines are not goods (0171).
+  const nonItems = dropNonItemLines(lines);
   // A totals row the reading took for goods is set aside as a figure (0134).
   const totalsRows = dropTotalsLines(lines).map((l) => l.amount!);
   checkLines(lines);
@@ -2605,6 +2699,16 @@ export async function readDocument(
       doc_date: str(h.doc_date),
       addressee,
       supplier_candidates: supplierName ? [supplierName] : [],
+      payee: settlePayee(
+        str(h.payee_bank) || str(h.payee_account_number)
+          ? {
+            bank: str(h.payee_bank), branch: str(h.payee_branch), account_type: str(h.payee_account_type),
+            account_number: str(h.payee_account_number)?.replace(/[^0-9]/g, "") || null,
+            holder: str(h.payee_account_holder), text: null,
+          }
+          : null,
+        nonItems,
+      ),
     },
     columns: cols.map((c, i) => {
       // An attribute heading is placed through our known headings, not the AI's guess.

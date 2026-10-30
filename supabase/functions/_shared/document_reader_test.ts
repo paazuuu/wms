@@ -2,6 +2,9 @@
 import * as XLSX from "npm:xlsx@0.18.5";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
+  dropNonItemLines,
+  payeeFromText,
+  settlePayee,
   settleMakerName,
   aiModelFor,
   limitReached,
@@ -948,4 +951,39 @@ Deno.test("market names: searched with the lookup key, then the reading key; no 
   });
   assertEquals(none.search_unavailable, true);
   assertEquals(none.results.map((x) => [x.name, x.error_kind]), [[null, "search_unavailable"], [null, "search_unavailable"]]);
+});
+
+Deno.test("the 振込先 and 登録番号 read in as lines are taken out, and the 振込先 kept (0171)", () => {
+  const line = (row: number, extra: Partial<Record<string, unknown>>) => ({
+    row, jan_code: "", raw_jan_code: null, maker: null, product_name: null, product_code: null, raw_name_code: null,
+    split_by: null, spec: null, planned_quantity: 0, case_quantity: null, cases: null, unit_price: null, amount: null,
+    tax_rate: null, order_date: null, flags: [] as string[], alternatives: {}, attributes: [], list_price: null,
+    discount_rate: null, unit: null, supplier_code: null, upstream_code: null, customer_code: null, ...extra,
+  }) as Parameters<typeof dropNonItemLines>[0][number];
+  const ls = [
+    line(1, { jan_code: "4909999000014", raw_jan_code: "4909999000014", maker: "テスト", product_code: "TP-1", planned_quantity: 100 }),
+    // A product with no JAN, only a 品番, stays.
+    line(2, { maker: "テスト", product_code: "BIL80EFSULB", planned_quantity: 10, unit_price: 440, amount: 4400 }),
+    line(3, { product_code: "登録番号：T9999999999999", planned_quantity: 8 }),
+    line(4, { product_code: "振込先口座番号", planned_quantity: 10 }),
+    line(5, { raw_jan_code: "テスト支店", product_code: "テスト銀行" }),
+    line(6, { product_code: "当座：1234567" }),
+    line(7, { product_code: "備考" }),
+  ];
+  const out = dropNonItemLines(ls);
+  assertEquals(ls.map((l) => l.row), [1, 2]);
+  assertEquals(out.map((l) => l.row), [3, 4, 5, 6, 7]);
+  const p = settlePayee(null, out)!;
+  assertEquals([p.bank, p.branch, p.account_type, p.account_number], ["テスト銀行", "テスト支店", "当座", "1234567"]);
+  // What the AI read in the header wins; the lines fill what it left.
+  const q = settlePayee({ bank: "サンプル銀行", branch: null, account_type: "普通", account_number: null, holder: "ｶ)ｻﾝﾌﾟﾙ", text: null }, out)!;
+  assertEquals([q.bank, q.branch, q.account_type, q.account_number, q.holder], ["サンプル銀行", "テスト支店", "普通", "1234567", "ｶ)ｻﾝﾌﾟﾙ"]);
+  assertEquals(settlePayee(null, []), null);
+});
+
+Deno.test("a 振込先 read from a page's words", () => {
+  const p = payeeFromText("お振込先 サンプル信用金庫 中央支店 普通 7654321 口座名義 カ)テストシヨウジ")!;
+  assertEquals([p.bank, p.branch, p.account_type, p.account_number, p.holder],
+    ["サンプル信用金庫", "中央支店", "普通", "7654321", "カ)テストシヨウジ"]);
+  assertEquals(payeeFromText("株式会社テスト 東京都千代田区 03-0000-0000"), null);
 });

@@ -74,6 +74,8 @@ import {
   lookupMarketNames,
   mapColumns,
   readDocument,
+  dropNonItemLines,
+  settlePayee,
   readingQuality,
   readIssuer,
   readPdfText,
@@ -906,6 +908,9 @@ Deno.serve(async (req) => {
       partnerId ??= await settleSupplier();
     }
 
+    // The 振込先 and 登録番号 printed beside the table are not goods: out of
+    // the lines, and the 振込先 kept with the document (0171).
+    header.payee = settlePayee(header.payee, dropNonItemLines(lines));
     // A company chosen on the form, or found earlier, under the name we keep.
     if (partnerId && !header.supplier_name && !supplier) header.supplier_name = await partnerName(partnerId);
     const merged = keepRows ? lines : aggregate(lines);
@@ -917,6 +922,8 @@ Deno.serve(async (req) => {
       quality: readingQuality(lines, source, verified, totals),
       // The document's own 小計・消費税・合計, for 税理士用ファイル (0168).
       totals: totals ?? null,
+      // Where it asks to be paid (0171).
+      payee: header.payee ?? null,
     });
     if (merged.length === 0) {
       // Nothing read because the AI could not be used: say that, not "no rows".
