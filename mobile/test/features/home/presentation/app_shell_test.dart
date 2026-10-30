@@ -414,7 +414,7 @@ void main() {
             of: find.byKey(sidebarKey),
             matching: find.text(text),
           );
-      expect(inSidebar('Purchase orders'), findsOneWidget);
+      // (Purchase orders left the menu: orders are followed in 発注, 0173.)
       expect(inSidebar('Sales orders'), findsOneWidget);
       expect(inSidebar('Putaway'), findsNothing);
     });
