@@ -12939,4 +12939,134 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rdDocNumber => 'Invoice number';
+
+  @override
+  String get groupAccounting => 'Accounting';
+
+  @override
+  String get featPayments => 'Payments';
+
+  @override
+  String get featPaymentsDesc =>
+      'Each invoice: where to pay, how much, the file, paid and the transfer proof';
+
+  @override
+  String get payIntro =>
+      'A payment per invoice taken in with “stock from a file”. The account is the one read from the invoice (else the supplier\'s). After the transfer, tick 支払い済 and add the transfer\'s proof (a screenshot or PDF). 支払い済 is the same as on the import and the calendar.';
+
+  @override
+  String get payUnpaidAll => 'All unpaid';
+
+  @override
+  String get payByMonth => 'By month';
+
+  @override
+  String get payNone => 'No payments this month';
+
+  @override
+  String get payNoneUnpaid => 'Nothing unpaid';
+
+  @override
+  String paySummary(int count, int unpaid, String amount) {
+    return '$count · $unpaid unpaid · ¥$amount due';
+  }
+
+  @override
+  String payInvoiceDate(String date) {
+    return 'dated $date';
+  }
+
+  @override
+  String payInvoiceNo(String no) {
+    return 'No. $no';
+  }
+
+  @override
+  String get payTaxIncluded => 'incl. tax';
+
+  @override
+  String get payOpenInvoice => 'Invoice (original)';
+
+  @override
+  String get payOpenReading => 'Reading';
+
+  @override
+  String get payPaidHint => 'Tick once transferred (the same as on the import)';
+
+  @override
+  String get payMarkedPaid => 'Marked paid';
+
+  @override
+  String get payMarkedUnpaid => 'Marked unpaid';
+
+  @override
+  String payProofs(int n) {
+    return 'Transfer proofs ($n)';
+  }
+
+  @override
+  String get payAddProof => 'Add the transfer proof';
+
+  @override
+  String payProofAdded(String name) {
+    return 'Added $name';
+  }
+
+  @override
+  String payProofAddedPaid(String name) {
+    return 'Added $name and marked paid';
+  }
+
+  @override
+  String get payProofRemove => 'Remove';
+
+  @override
+  String get payProofRemoveTitle => 'Remove this proof?';
+
+  @override
+  String payProofRemoveBody(String name) {
+    return '$name is taken off the list (the file is kept on record).';
+  }
+
+  @override
+  String get payDownload => 'Download';
+
+  @override
+  String get payNoPayee => 'No account read';
+
+  @override
+  String get payPayeeFromInvoice => 'read from the invoice';
+
+  @override
+  String get payPayeeFromSupplier => 'the supplier\'s account on file';
+
+  @override
+  String get payPayeeAdd => 'Add account';
+
+  @override
+  String get payPayeeEdit => 'Edit the supplier\'s account';
+
+  @override
+  String payPayeeTitle(String supplier) {
+    return '$supplier\'s account';
+  }
+
+  @override
+  String get payPayeeDialogHint =>
+      'Kept as the supplier\'s account, used for invoices that print none.';
+
+  @override
+  String get payBank => 'Bank';
+
+  @override
+  String get payBranch => 'Branch';
+
+  @override
+  String get payAccountType => 'Type';
+
+  @override
+  String get payAccountNumber => 'Account number';
+
+  @override
+  String get payHolder => 'Account holder';
 }

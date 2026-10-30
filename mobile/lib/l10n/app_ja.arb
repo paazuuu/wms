@@ -11345,5 +11345,104 @@
   },
   "rdSupplier": "仕入先",
   "rdRegistration": "登録番号",
-  "rdDocNumber": "請求書番号"
+  "rdDocNumber": "請求書番号",
+  "groupAccounting": "会計",
+  "featPayments": "支払い",
+  "featPaymentsDesc": "請求書ごとの振込先・金額・元ファイル、支払い済と送金完了の記録",
+  "payIntro": "「ファイルから在庫登録」で取り込んだ請求書ごとの支払いです。振込先は請求書から読み取ったもの（無ければ仕入先に登録した口座）です。送金したら「支払い済」にチェックし、送金完了の画面（スクリーンショット・PDF）を追加してください。支払い済は取込の詳細・カレンダーと同じものです。",
+  "payUnpaidAll": "未払いすべて",
+  "payByMonth": "月ごと",
+  "payNone": "この月の支払いはありません",
+  "payNoneUnpaid": "未払いの請求書はありません",
+  "paySummary": "{count}件 · 未払い {unpaid}件 · 未払い合計 ¥{amount}",
+  "@paySummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unpaid": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payInvoiceDate": "書類の日付 {date}",
+  "@payInvoiceDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "payInvoiceNo": "請求書番号 {no}",
+  "@payInvoiceNo": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "payTaxIncluded": "税込",
+  "payOpenInvoice": "請求書（元ファイル）",
+  "payOpenReading": "読み取り結果",
+  "payPaidHint": "送金したらチェック（取込の詳細の「支払い済」と同じ）",
+  "payMarkedPaid": "支払い済にしました",
+  "payMarkedUnpaid": "未払いに戻しました",
+  "payProofs": "送金完了の記録（{n}件）",
+  "@payProofs": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "payAddProof": "送金完了の画面を追加",
+  "payProofAdded": "{name} を追加しました",
+  "@payProofAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "payProofAddedPaid": "{name} を追加し、支払い済にしました",
+  "@payProofAddedPaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "payProofRemove": "外す",
+  "payProofRemoveTitle": "送金完了の記録を外しますか？",
+  "payProofRemoveBody": "{name} を一覧から外します（ファイルは記録として残ります）。",
+  "@payProofRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "payDownload": "ダウンロード",
+  "payNoPayee": "振込先が読めていません",
+  "payPayeeFromInvoice": "請求書から読み取り",
+  "payPayeeFromSupplier": "仕入先に登録した口座",
+  "payPayeeAdd": "振込先を登録",
+  "payPayeeEdit": "仕入先の振込先を直す",
+  "payPayeeTitle": "{supplier} の振込先",
+  "@payPayeeTitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "payPayeeDialogHint": "仕入先の口座として登録し、振込先が書かれていない請求書に使います。",
+  "payBank": "銀行名",
+  "payBranch": "支店名",
+  "payAccountType": "種別（普通・当座）",
+  "payAccountNumber": "口座番号",
+  "payHolder": "口座名義"
 }

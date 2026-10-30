@@ -12676,4 +12676,132 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rdDocNumber => '請求書番号';
+
+  @override
+  String get groupAccounting => '会計';
+
+  @override
+  String get featPayments => '支払い';
+
+  @override
+  String get featPaymentsDesc => '請求書ごとの振込先・金額・元ファイル、支払い済と送金完了の記録';
+
+  @override
+  String get payIntro =>
+      '「ファイルから在庫登録」で取り込んだ請求書ごとの支払いです。振込先は請求書から読み取ったもの（無ければ仕入先に登録した口座）です。送金したら「支払い済」にチェックし、送金完了の画面（スクリーンショット・PDF）を追加してください。支払い済は取込の詳細・カレンダーと同じものです。';
+
+  @override
+  String get payUnpaidAll => '未払いすべて';
+
+  @override
+  String get payByMonth => '月ごと';
+
+  @override
+  String get payNone => 'この月の支払いはありません';
+
+  @override
+  String get payNoneUnpaid => '未払いの請求書はありません';
+
+  @override
+  String paySummary(int count, int unpaid, String amount) {
+    return '$count件 · 未払い $unpaid件 · 未払い合計 ¥$amount';
+  }
+
+  @override
+  String payInvoiceDate(String date) {
+    return '書類の日付 $date';
+  }
+
+  @override
+  String payInvoiceNo(String no) {
+    return '請求書番号 $no';
+  }
+
+  @override
+  String get payTaxIncluded => '税込';
+
+  @override
+  String get payOpenInvoice => '請求書（元ファイル）';
+
+  @override
+  String get payOpenReading => '読み取り結果';
+
+  @override
+  String get payPaidHint => '送金したらチェック（取込の詳細の「支払い済」と同じ）';
+
+  @override
+  String get payMarkedPaid => '支払い済にしました';
+
+  @override
+  String get payMarkedUnpaid => '未払いに戻しました';
+
+  @override
+  String payProofs(int n) {
+    return '送金完了の記録（$n件）';
+  }
+
+  @override
+  String get payAddProof => '送金完了の画面を追加';
+
+  @override
+  String payProofAdded(String name) {
+    return '$name を追加しました';
+  }
+
+  @override
+  String payProofAddedPaid(String name) {
+    return '$name を追加し、支払い済にしました';
+  }
+
+  @override
+  String get payProofRemove => '外す';
+
+  @override
+  String get payProofRemoveTitle => '送金完了の記録を外しますか？';
+
+  @override
+  String payProofRemoveBody(String name) {
+    return '$name を一覧から外します（ファイルは記録として残ります）。';
+  }
+
+  @override
+  String get payDownload => 'ダウンロード';
+
+  @override
+  String get payNoPayee => '振込先が読めていません';
+
+  @override
+  String get payPayeeFromInvoice => '請求書から読み取り';
+
+  @override
+  String get payPayeeFromSupplier => '仕入先に登録した口座';
+
+  @override
+  String get payPayeeAdd => '振込先を登録';
+
+  @override
+  String get payPayeeEdit => '仕入先の振込先を直す';
+
+  @override
+  String payPayeeTitle(String supplier) {
+    return '$supplier の振込先';
+  }
+
+  @override
+  String get payPayeeDialogHint => '仕入先の口座として登録し、振込先が書かれていない請求書に使います。';
+
+  @override
+  String get payBank => '銀行名';
+
+  @override
+  String get payBranch => '支店名';
+
+  @override
+  String get payAccountType => '種別（普通・当座）';
+
+  @override
+  String get payAccountNumber => '口座番号';
+
+  @override
+  String get payHolder => '口座名義';
 }

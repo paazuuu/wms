@@ -22519,6 +22519,228 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'請求書番号'**
   String get rdDocNumber;
+
+  /// No description provided for @groupAccounting.
+  ///
+  /// In ja, this message translates to:
+  /// **'会計'**
+  String get groupAccounting;
+
+  /// No description provided for @featPayments.
+  ///
+  /// In ja, this message translates to:
+  /// **'支払い'**
+  String get featPayments;
+
+  /// No description provided for @featPaymentsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書ごとの振込先・金額・元ファイル、支払い済と送金完了の記録'**
+  String get featPaymentsDesc;
+
+  /// No description provided for @payIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'「ファイルから在庫登録」で取り込んだ請求書ごとの支払いです。振込先は請求書から読み取ったもの（無ければ仕入先に登録した口座）です。送金したら「支払い済」にチェックし、送金完了の画面（スクリーンショット・PDF）を追加してください。支払い済は取込の詳細・カレンダーと同じものです。'**
+  String get payIntro;
+
+  /// No description provided for @payUnpaidAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'未払いすべて'**
+  String get payUnpaidAll;
+
+  /// No description provided for @payByMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'月ごと'**
+  String get payByMonth;
+
+  /// No description provided for @payNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月の支払いはありません'**
+  String get payNone;
+
+  /// No description provided for @payNoneUnpaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'未払いの請求書はありません'**
+  String get payNoneUnpaid;
+
+  /// No description provided for @paySummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件 · 未払い {unpaid}件 · 未払い合計 ¥{amount}'**
+  String paySummary(int count, int unpaid, String amount);
+
+  /// No description provided for @payInvoiceDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類の日付 {date}'**
+  String payInvoiceDate(String date);
+
+  /// No description provided for @payInvoiceNo.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書番号 {no}'**
+  String payInvoiceNo(String no);
+
+  /// No description provided for @payTaxIncluded.
+  ///
+  /// In ja, this message translates to:
+  /// **'税込'**
+  String get payTaxIncluded;
+
+  /// No description provided for @payOpenInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書（元ファイル）'**
+  String get payOpenInvoice;
+
+  /// No description provided for @payOpenReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果'**
+  String get payOpenReading;
+
+  /// No description provided for @payPaidHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金したらチェック（取込の詳細の「支払い済」と同じ）'**
+  String get payPaidHint;
+
+  /// No description provided for @payMarkedPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'支払い済にしました'**
+  String get payMarkedPaid;
+
+  /// No description provided for @payMarkedUnpaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'未払いに戻しました'**
+  String get payMarkedUnpaid;
+
+  /// No description provided for @payProofs.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金完了の記録（{n}件）'**
+  String payProofs(int n);
+
+  /// No description provided for @payAddProof.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金完了の画面を追加'**
+  String get payAddProof;
+
+  /// No description provided for @payProofAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を追加しました'**
+  String payProofAdded(String name);
+
+  /// No description provided for @payProofAddedPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を追加し、支払い済にしました'**
+  String payProofAddedPaid(String name);
+
+  /// No description provided for @payProofRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'外す'**
+  String get payProofRemove;
+
+  /// No description provided for @payProofRemoveTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金完了の記録を外しますか？'**
+  String get payProofRemoveTitle;
+
+  /// No description provided for @payProofRemoveBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を一覧から外します（ファイルは記録として残ります）。'**
+  String payProofRemoveBody(String name);
+
+  /// No description provided for @payDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get payDownload;
+
+  /// No description provided for @payNoPayee.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込先が読めていません'**
+  String get payNoPayee;
+
+  /// No description provided for @payPayeeFromInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書から読み取り'**
+  String get payPayeeFromInvoice;
+
+  /// No description provided for @payPayeeFromSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先に登録した口座'**
+  String get payPayeeFromSupplier;
+
+  /// No description provided for @payPayeeAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込先を登録'**
+  String get payPayeeAdd;
+
+  /// No description provided for @payPayeeEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の振込先を直す'**
+  String get payPayeeEdit;
+
+  /// No description provided for @payPayeeTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{supplier} の振込先'**
+  String payPayeeTitle(String supplier);
+
+  /// No description provided for @payPayeeDialogHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の口座として登録し、振込先が書かれていない請求書に使います。'**
+  String get payPayeeDialogHint;
+
+  /// No description provided for @payBank.
+  ///
+  /// In ja, this message translates to:
+  /// **'銀行名'**
+  String get payBank;
+
+  /// No description provided for @payBranch.
+  ///
+  /// In ja, this message translates to:
+  /// **'支店名'**
+  String get payBranch;
+
+  /// No description provided for @payAccountType.
+  ///
+  /// In ja, this message translates to:
+  /// **'種別（普通・当座）'**
+  String get payAccountType;
+
+  /// No description provided for @payAccountNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'口座番号'**
+  String get payAccountNumber;
+
+  /// No description provided for @payHolder.
+  ///
+  /// In ja, this message translates to:
+  /// **'口座名義'**
+  String get payHolder;
 }
 
 class _AppLocalizationsDelegate

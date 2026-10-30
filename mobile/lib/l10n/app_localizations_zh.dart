@@ -12602,4 +12602,132 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rdDocNumber => '发票号';
+
+  @override
+  String get groupAccounting => '会计';
+
+  @override
+  String get featPayments => '付款';
+
+  @override
+  String get featPaymentsDesc => '每张发票的收款账户、金额、原文件、已付款及汇款凭证';
+
+  @override
+  String get payIntro =>
+      '按“从文件登记库存”导入的每张发票列出付款。收款账户取自发票（没有时用供应商登记的账户）。汇款后勾选“已付款”，并添加汇款完成的画面（截图・PDF）。“已付款”与导入详情、日历中的相同。';
+
+  @override
+  String get payUnpaidAll => '全部未付';
+
+  @override
+  String get payByMonth => '按月';
+
+  @override
+  String get payNone => '本月没有付款';
+
+  @override
+  String get payNoneUnpaid => '没有未付的发票';
+
+  @override
+  String paySummary(int count, int unpaid, String amount) {
+    return '$count件 · 未付 $unpaid件 · 未付合计 ¥$amount';
+  }
+
+  @override
+  String payInvoiceDate(String date) {
+    return '单据日期 $date';
+  }
+
+  @override
+  String payInvoiceNo(String no) {
+    return '发票号 $no';
+  }
+
+  @override
+  String get payTaxIncluded => '含税';
+
+  @override
+  String get payOpenInvoice => '发票（原文件）';
+
+  @override
+  String get payOpenReading => '读取结果';
+
+  @override
+  String get payPaidHint => '汇款后勾选（与导入详情的“已付款”相同）';
+
+  @override
+  String get payMarkedPaid => '已标记为已付款';
+
+  @override
+  String get payMarkedUnpaid => '已改回未付';
+
+  @override
+  String payProofs(int n) {
+    return '汇款凭证（$n件）';
+  }
+
+  @override
+  String get payAddProof => '添加汇款完成画面';
+
+  @override
+  String payProofAdded(String name) {
+    return '已添加 $name';
+  }
+
+  @override
+  String payProofAddedPaid(String name) {
+    return '已添加 $name 并标记为已付款';
+  }
+
+  @override
+  String get payProofRemove => '移除';
+
+  @override
+  String get payProofRemoveTitle => '移除这条汇款凭证？';
+
+  @override
+  String payProofRemoveBody(String name) {
+    return '将 $name 从列表移除（文件仍作为记录保留）。';
+  }
+
+  @override
+  String get payDownload => '下载';
+
+  @override
+  String get payNoPayee => '未读取到收款账户';
+
+  @override
+  String get payPayeeFromInvoice => '从发票读取';
+
+  @override
+  String get payPayeeFromSupplier => '供应商登记的账户';
+
+  @override
+  String get payPayeeAdd => '登记收款账户';
+
+  @override
+  String get payPayeeEdit => '修改供应商收款账户';
+
+  @override
+  String payPayeeTitle(String supplier) {
+    return '$supplier 的收款账户';
+  }
+
+  @override
+  String get payPayeeDialogHint => '作为供应商账户登记，用于未写收款账户的发票。';
+
+  @override
+  String get payBank => '银行';
+
+  @override
+  String get payBranch => '支行';
+
+  @override
+  String get payAccountType => '类型（普通・活期）';
+
+  @override
+  String get payAccountNumber => '账号';
+
+  @override
+  String get payHolder => '户名';
 }

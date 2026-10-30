@@ -55,6 +55,7 @@ import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
+import '../../payments/presentation/payments_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
 
@@ -395,6 +396,31 @@ List<FeatureGroup> buildFeatureCatalog() => const [
           ),
         ],
       ),
+      // 会計 (0171): the money side of the invoices taken into stock — what
+      // to pay whom, with the proof, and the accountant's monthly files.
+      FeatureGroup(
+        id: 'accounting',
+        entries: [
+          // 支払い: each invoice as a payment — 振込先, the invoice, 支払い済
+          // (the import's own) and the transfer's proof.
+          FeatureEntry(
+            id: 'payments',
+            icon: Icons.payments_outlined,
+            status: FeatureStatus.ready,
+            builder: _payments,
+            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
+          ),
+          // 税理士用ファイル (0168): each month's purchases as an Excel, with
+          // the invoices as evidence.
+          FeatureEntry(
+            id: 'tax_files',
+            icon: Icons.receipt_long_outlined,
+            status: FeatureStatus.ready,
+            builder: _taxFiles,
+            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
+          ),
+        ],
+      ),
       FeatureGroup(
         id: 'management',
         entries: [
@@ -539,15 +565,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _reports,
             requiredAnyOf: ['report.view', 'report.manage'],
           ),
-          // 税理士用ファイル (0168): each month's purchases as an Excel, with
-          // the invoices as evidence.
-          FeatureEntry(
-            id: 'tax_files',
-            icon: Icons.receipt_long_outlined,
-            status: FeatureStatus.ready,
-            builder: _taxFiles,
-            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
-          ),
           // Teaching each trading company's way of writing before its goods
           // arrive (0105/0106): sample files read, checked and learned.
           FeatureEntry(
@@ -604,6 +621,7 @@ Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _stockFileImport(BuildContext _) => const StockFileImportScreen();
 Widget _stockInspection(BuildContext _) => const StockInspectionScreen();
 Widget _taxFiles(BuildContext _) => const TaxFilesScreen();
+Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
 Widget _purchaseRequests(BuildContext _) => const PurchaseRequestsScreen();

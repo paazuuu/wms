@@ -139,6 +139,8 @@ class FeatureEntry {
         return l10n.featStockInspection;
       case 'tax_files':
         return l10n.featTaxFiles;
+      case 'payments':
+        return l10n.featPayments;
       case 'field_library':
         return l10n.featFieldLibrary;
       case 'unlinked_jan':
@@ -261,6 +263,8 @@ class FeatureEntry {
         return l10n.featStockInspectionDesc;
       case 'tax_files':
         return l10n.featTaxFilesDesc;
+      case 'payments':
+        return l10n.featPaymentsDesc;
       case 'field_library':
         return l10n.featFieldLibraryDesc;
       case 'unlinked_jan':
@@ -346,6 +350,8 @@ class FeatureGroup {
         return l10n.groupFieldOperations;
       case 'supply_chain':
         return l10n.groupSupplyChain;
+      case 'accounting':
+        return l10n.groupAccounting;
       case 'management':
         return l10n.groupManagement;
       default:

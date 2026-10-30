@@ -411,6 +411,7 @@ StatusTone _toneForGroup(String id) => switch (id) {
       'products_master' => StatusTone.success,
       'lookup' => StatusTone.success,
       'supply_chain' => StatusTone.warning,
+      'accounting' => StatusTone.info,
       _ => StatusTone.neutral,
     };
 

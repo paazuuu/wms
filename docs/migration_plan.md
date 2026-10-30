@@ -8109,6 +8109,36 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     same supplier, number, date and total) as 要確認, naming the first import.
     Checked: #19 and #20 are the same invoice (same SHA-256).
 
+## 0171: 会計 — 支払い, and 振込先 out of the goods lines
+
+- The reader:
+  - It no longer takes the 振込先・登録番号 box beside the table for goods
+    lines. The AI is told so and reads the 振込先 into the header
+    (`payee_*`).
+  - `dropNonItemLines` also takes out any line with no JAN whose text is
+    only a 振込先, 登録番号, total or remark. Its words fill what the AI
+    left (`settlePayee`). PDF text reads it from the page (`payeeFromText`).
+  - import-plan keeps it on `import_documents.payee` (v34).
+- `delivery_suppliers.bank_account`: the supplier's 振込先, from the first
+  invoice that prints one, or written on the payments screen. It is used
+  when an invoice prints none.
+- `payment_proofs` in the private `payment-proofs` bucket: the transfer's
+  proof per import. Taken off by marking (`removed_at`); the file stays.
+- `payments_list(from, to, unpaid_only)`: the imports as in
+  `tax_purchases`, with the supplier, the 振込先 and its source, who marked
+  it paid, and the proofs.
+  - Readers: `can_view_purchase_books`.
+  - Recording: `can_record_payments` (`inventory.adjust`, as for 支払い済).
+- App: a new menu group 会計, holding 支払い and 税理士用ファイル (moved
+  from 管理).
+  - 支払い lists every unpaid invoice, or a month's, each showing:
+    - the supplier, the invoice date and number, and the 税込 amount;
+    - the 振込先, with a copy button and the supplier's account to edit;
+    - the invoice's original and its reading;
+    - 支払い済: the import's own `paid`, so it is the same tick as on
+      取込の詳細 and the calendar;
+    - the transfer proofs. Adding one marks the payment paid.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
