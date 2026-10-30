@@ -19,7 +19,10 @@ import 'purchase_order_status_ui.dart';
 /// a supplier, before it ships. Distinct from delivery plans (already-shipped
 /// deliveries used for QC reconciliation); this module never moves stock.
 class PurchaseOrderListScreen extends ConsumerStatefulWidget {
-  const PurchaseOrderListScreen({super.key});
+  const PurchaseOrderListScreen({super.key, this.embedded = false});
+
+  /// Shown as a tab of 発注 (会計): no bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<PurchaseOrderListScreen> createState() =>
@@ -99,7 +102,7 @@ class _PurchaseOrderListScreenState extends ConsumerState<PurchaseOrderListScree
     final async = ref.watch(purchaseOrderListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.poTitle)),
+      appBar: widget.embedded ? null : AppBar(title: Text(l10n.poTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _busy ? null : _create,
         icon: _busy

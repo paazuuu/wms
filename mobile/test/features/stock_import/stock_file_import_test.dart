@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/payments/data/payments_repository.dart' show paymentsRepositoryProvider;
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
@@ -25,6 +26,7 @@ import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
 import '../../support/fake_jan_catalog_repository.dart';
 import '../../support/fake_market_name_repository.dart';
+import '../../support/fake_payments_repository.dart';
 import '../../support/harness.dart';
 
 // Synthetic JANs with a correct check digit.
@@ -427,10 +429,12 @@ void main() {
     final repo = _FakeStock({_jan1: 'テストペン 青'}, stock: {_jan1: 4}, book: {_jan2: (7, 'テストノート A罫')}, priceBook: book);
     // jan1 is in the library, jan2 only in the price book, jan3 nowhere but named.
     final csv = Uint8List.fromList(utf8.encode('JAN,品名,メーカー,数量\n$_jan1,ペン,テスト文具,10\n$_jan2,ノート,,6\n$_jan3,テスト消しゴム,テスト文具,2\n'));
+    final payments = FakePaymentsRepository();
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
       _signedIn(['inventory.adjust', 'product.manage']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       priceBookRepositoryProvider.overrideWithValue(book),
+      paymentsRepositoryProvider.overrideWithValue(payments),
       stockFilePickerProvider.overrideWithValue(() async => (name: 'a.csv', bytes: csv)),
       warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
         warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
@@ -461,6 +465,9 @@ void main() {
     expect(repo.notes.single.$2.map((r) => r.name), ['ペン', 'ノート', 'テスト消しゴム']);
     expect(repo.notes.single.$3, isFalse);
     expect(find.byKey(const ValueKey('iv-open-12')), findsOneWidget);
+    // Once the AI has done the products: the order's 振込先 and amount (0172).
+    await tester.pumpAndSettle();
+    expect(payments.askedPayee, [12]);
   });
 
   testWidgets('the 商品名 column: the name from the web or the catalog page, blank when none is known — never the 品番 (0164)',

@@ -31,7 +31,6 @@ import '../../notation/presentation/field_library_screen.dart';
 import '../../product_library/presentation/name_formats_screen.dart';
 import '../../product/presentation/unlinked_jan_screen.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
-import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../warehouse_context/presentation/location_tree_screen.dart';
 import '../../reports/presentation/report_builder_screen.dart';
 import '../../sales/presentation/sales_order_list_screen.dart';
@@ -55,6 +54,7 @@ import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
+import '../../payments/presentation/orders_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
@@ -123,6 +123,45 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _supplierProductNames,
             requiredAnyOf: ['product.view', 'product.manage'],
             inMenu: false,
+          ),
+        ],
+      ),
+      // 会計 (0171): the money side of the invoices taken into stock — what
+      // to pay whom, with the proof, and the accountant's monthly files.
+      FeatureGroup(
+        id: 'accounting',
+        entries: [
+          // 発注 (0172): each order's way from the file to the proof of the
+          // transfer, with the payments, and the purchase orders.
+          FeatureEntry(
+            id: 'purchase_orders',
+            icon: Icons.add_shopping_cart_outlined,
+            status: FeatureStatus.ready,
+            builder: _purchaseOrders,
+            requiredAnyOf: [
+              'purchase_order.view', 'purchase_order.manage', 'purchase_order.approve',
+              'inventory.adjust', 'report.view', 'user.manage',
+            ],
+          ),
+          // 支払い: each invoice as a payment — 振込先, the invoice, 支払い済
+          // (the import's own) and the transfer's proof.
+          FeatureEntry(
+            id: 'payments',
+            icon: Icons.payments_outlined,
+            status: FeatureStatus.ready,
+            builder: _payments,
+            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
+            // Inside 発注 now; its own address stays.
+            inMenu: false,
+          ),
+          // 税理士用ファイル (0168): each month's purchases as an Excel, with
+          // the invoices as evidence.
+          FeatureEntry(
+            id: 'tax_files',
+            icon: Icons.receipt_long_outlined,
+            status: FeatureStatus.ready,
+            builder: _taxFiles,
+            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
           ),
         ],
       ),
@@ -274,13 +313,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _virtualStock,
             requiredAnyOf: ['inventory.view'],
           ),
-          FeatureEntry(
-            id: 'purchase_orders',
-            icon: Icons.add_shopping_cart_outlined,
-            status: FeatureStatus.ready,
-            builder: _purchaseOrders,
-            requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve'],
-          ),
           // 入荷希望リスト (0140): what we would like to receive, from the
           // master and the stock, to ask a supplier about as Excel.
           FeatureEntry(
@@ -393,31 +425,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _scHistory,
             requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
             inMenu: false,
-          ),
-        ],
-      ),
-      // 会計 (0171): the money side of the invoices taken into stock — what
-      // to pay whom, with the proof, and the accountant's monthly files.
-      FeatureGroup(
-        id: 'accounting',
-        entries: [
-          // 支払い: each invoice as a payment — 振込先, the invoice, 支払い済
-          // (the import's own) and the transfer's proof.
-          FeatureEntry(
-            id: 'payments',
-            icon: Icons.payments_outlined,
-            status: FeatureStatus.ready,
-            builder: _payments,
-            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
-          ),
-          // 税理士用ファイル (0168): each month's purchases as an Excel, with
-          // the invoices as evidence.
-          FeatureEntry(
-            id: 'tax_files',
-            icon: Icons.receipt_long_outlined,
-            status: FeatureStatus.ready,
-            builder: _taxFiles,
-            requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
           ),
         ],
       ),
@@ -650,7 +657,7 @@ Widget _wave(BuildContext _) => const PickWaveListScreen();
 Widget _transfer(BuildContext _) => const TransferListScreen();
 
 /// Top-level (const-referenceable) builder for the Purchase Orders feature.
-Widget _purchaseOrders(BuildContext _) => const PurchaseOrderListScreen();
+Widget _purchaseOrders(BuildContext _) => const OrdersScreen();
 
 /// Top-level (const-referenceable) builder for the Sales Orders feature.
 Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();

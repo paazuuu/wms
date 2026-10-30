@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../../auth/application/auth_controller.dart';
-import '../../delivery/application/delivery_providers.dart' show restDioProvider, storageDioProvider;
+import '../../delivery/application/delivery_providers.dart' show deliveryDioProvider, restDioProvider, storageDioProvider;
 import '../domain/payment.dart';
 
 /// The private bucket the transfer proofs are kept in (0171).
@@ -56,6 +56,10 @@ abstract class PaymentsRepository {
 
   /// The supplier's 振込先, used when an invoice prints none.
   Future<ApiResult<bool>> setSupplierAccount(int supplierId, Payee? payee);
+
+  /// The invoice read again by the AI for its 振込先 and totals, kept with
+  /// it (0172). Null when it prints none.
+  Future<ApiResult<Payee?>> readPayee(int importId);
 }
 
 String contentTypeOf(String name) {
@@ -70,10 +74,26 @@ String contentTypeOf(String name) {
 }
 
 class PaymentsRepositoryImpl implements PaymentsRepository {
-  PaymentsRepositoryImpl(this._rest, this._storage);
+  PaymentsRepositoryImpl(this._rest, this._storage, this._functions);
 
   final Dio _rest;
   final Dio _storage;
+  final Dio _functions;
+
+  @override
+  Future<ApiResult<Payee?>> readPayee(int importId) async {
+    try {
+      final r = await _functions.post(
+        '/import-plan',
+        data: {'mode': 'read_payee', 'import_id': importId},
+        options: Options(contentType: Headers.jsonContentType, receiveTimeout: const Duration(seconds: 150)),
+      );
+      final data = ((r.data as Map)['data'] as Map?)?.cast<String, dynamic>() ?? const {};
+      return ApiSuccess(Payee.fromJson(data['payee']));
+    } on DioException catch (e) {
+      return mapDioError(e);
+    }
+  }
 
   static String _day(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -164,7 +184,8 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
 }
 
 final paymentsRepositoryProvider =
-    Provider<PaymentsRepository>((ref) => PaymentsRepositoryImpl(ref.watch(restDioProvider), ref.watch(storageDioProvider)));
+    Provider<PaymentsRepository>((ref) => PaymentsRepositoryImpl(
+        ref.watch(restDioProvider), ref.watch(storageDioProvider), ref.watch(deliveryDioProvider)));
 
 final paymentsProvider = FutureProvider.autoDispose.family<List<Payment>, PaymentsRange>((ref, range) async {
   final r = await ref.watch(paymentsRepositoryProvider).list(range);

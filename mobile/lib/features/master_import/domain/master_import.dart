@@ -377,12 +377,16 @@ class MasterRead extends Equatable {
     this.aiFailure,
     this.docDate,
     this.registrationNumber,
+    this.hasPayee = false,
   });
 
   final List<MasterLine> lines;
 
   /// The supplier's 登録番号 as the document prints it.
   final String? registrationNumber;
+
+  /// Whether the reading found where the invoice asks to be paid (0171).
+  final bool hasPayee;
 
   /// The date the document prints (発行日 …), YYYY-MM-DD, when the reader
   /// found one.
@@ -419,6 +423,7 @@ class MasterRead extends Equatable {
       aiFailure: j['ai_failure'] is Map ? (j['ai_failure'] as Map)['kind']?.toString() : null,
       docDate: header is Map ? header['doc_date']?.toString() : null,
       registrationNumber: header is Map ? header['registration_number']?.toString() : null,
+      hasPayee: header is Map && header['payee'] is Map && '${(header['payee'] as Map)['bank'] ?? ''}'.isNotEmpty,
     );
   }
 

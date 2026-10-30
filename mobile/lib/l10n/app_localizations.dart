@@ -3145,7 +3145,7 @@ abstract class AppLocalizations {
   /// No description provided for @featPurchaseOrdersDesc.
   ///
   /// In ja, this message translates to:
-  /// **'仕入先への発注を作成・承認・管理'**
+  /// **'注文ごとに、ファイルのアップロードから送金完了の記録までの進み具合と支払い。発注書の作成・承認・管理もここで'**
   String get featPurchaseOrdersDesc;
 
   /// No description provided for @featSalesOrders.
@@ -22741,6 +22741,174 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'口座名義'**
   String get payHolder;
+
+  /// No description provided for @ordStepUpload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルをアップロード'**
+  String get ordStepUpload;
+
+  /// No description provided for @ordStepCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り内容を人間がチェック'**
+  String get ordStepCheck;
+
+  /// No description provided for @ordStepLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーに登録'**
+  String get ordStepLibrary;
+
+  /// No description provided for @ordStepAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで商品名・重量を書き込み'**
+  String get ordStepAi;
+
+  /// No description provided for @ordStepStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品して在庫に反映'**
+  String get ordStepStock;
+
+  /// No description provided for @ordStepPayee.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込先・振込金額'**
+  String get ordStepPayee;
+
+  /// No description provided for @ordStepPaid.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金（支払い済）'**
+  String get ordStepPaid;
+
+  /// No description provided for @ordStepProof.
+  ///
+  /// In ja, this message translates to:
+  /// **'送金完了の記録'**
+  String get ordStepProof;
+
+  /// No description provided for @ordRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行'**
+  String ordRows(String n);
+
+  /// No description provided for @ordLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目'**
+  String ordLines(String n);
+
+  /// No description provided for @ordAiDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名 {named} · 重量 {weighed}'**
+  String ordAiDetail(String named, String weighed);
+
+  /// No description provided for @ordAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち（検品済み {n}）'**
+  String ordAwaiting(String n);
+
+  /// No description provided for @ordAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込金額 ¥{amount}（税込）'**
+  String ordAmount(String amount);
+
+  /// No description provided for @ordAllDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて完了'**
+  String get ordAllDone;
+
+  /// No description provided for @ordNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'今: {step}'**
+  String ordNow(String step);
+
+  /// No description provided for @ordTabProgress.
+  ///
+  /// In ja, this message translates to:
+  /// **'注文の進み具合・支払い'**
+  String get ordTabProgress;
+
+  /// No description provided for @ordTabPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注書'**
+  String get ordTabPurchaseOrders;
+
+  /// No description provided for @payTwinTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ注文が支払い済かもしれません'**
+  String get payTwinTitle;
+
+  /// No description provided for @payTwinBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} は同じ注文に見え、すでに支払い済です。二重に振り込んでいないか確かめてください。別の注文なら、このまま支払い済にできます。'**
+  String payTwinBody(int id);
+
+  /// No description provided for @payTwinGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の注文なので支払い済にする'**
+  String get payTwinGo;
+
+  /// No description provided for @payTwin.
+  ///
+  /// In ja, this message translates to:
+  /// **'注意: 取込 #{id}（{day}・{paid}）と{why}'**
+  String payTwin(int id, String day, String paid, String why);
+
+  /// No description provided for @payTwinFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じファイル'**
+  String get payTwinFile;
+
+  /// No description provided for @payTwinLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ明細（JAN・数量）'**
+  String get payTwinLines;
+
+  /// No description provided for @payTwinInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じ請求書番号・日付'**
+  String get payTwinInvoice;
+
+  /// No description provided for @payTwinHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'日を変えて、または同じ日に同じものを頼むこともあります。別の注文ならそのままで構いません。同じ注文の取り込み直しなら、片方を取込履歴から取り消してください。'**
+  String get payTwinHint;
+
+  /// No description provided for @payPayeeAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで振込先を読む'**
+  String get payPayeeAi;
+
+  /// No description provided for @payPayeeFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'振込先を読み取りました: {payee}'**
+  String payPayeeFound(String payee);
+
+  /// No description provided for @payPayeeNotFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください'**
+  String get payPayeeNotFound;
 }
 
 class _AppLocalizationsDelegate

@@ -74,6 +74,78 @@ class PaymentProof extends Equatable {
   List<Object?> get props => [id, path, name, contentType, createdAt];
 }
 
+int _i(Object? v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}') ?? 0;
+
+/// How far an order has gone, line by line (0172).
+class OrderSteps extends Equatable {
+  const OrderSteps({
+    this.read = 0,
+    this.checked = 0,
+    this.lines = 0,
+    this.inLibrary = 0,
+    this.named = 0,
+    this.weighed = 0,
+    this.inspected = 0,
+    this.lastInspectedAt,
+  });
+
+  /// Rows read (those a person left out not counted), and checked by a person.
+  final int read;
+  final int checked;
+
+  /// Lines taken in, in 商品ライブラリー, with a 商品名 (the AI's or their
+  /// own) and a weight, and inspected.
+  final int lines;
+  final int inLibrary;
+  final int named;
+  final int weighed;
+  final int inspected;
+  final DateTime? lastInspectedAt;
+
+  factory OrderSteps.fromJson(Object? j) {
+    if (j is! Map) return const OrderSteps();
+    return OrderSteps(
+      read: _i(j['read']),
+      checked: _i(j['checked']),
+      lines: _i(j['lines']),
+      inLibrary: _i(j['in_library']),
+      named: _i(j['named']),
+      weighed: _i(j['weighed']),
+      inspected: _i(j['inspected']),
+      lastInspectedAt: DateTime.tryParse('${j['last_inspected_at'] ?? ''}')?.toLocal(),
+    );
+  }
+
+  @override
+  List<Object?> get props => [read, checked, lines, inLibrary, named, weighed, inspected, lastInspectedAt];
+}
+
+/// Another order that looks like this one: the same file, the same lines
+/// (JAN × quantity), or the same supplier, invoice number and date. Only a
+/// warning — the same goods are ordered again.
+class SameOrder extends Equatable {
+  const SameOrder({required this.importId, this.day, this.paid = false, this.sameFile = false, this.sameLines = false, this.sameInvoice = false});
+
+  final int importId;
+  final DateTime? day;
+  final bool paid;
+  final bool sameFile;
+  final bool sameLines;
+  final bool sameInvoice;
+
+  factory SameOrder.fromJson(Map<String, dynamic> j) => SameOrder(
+        importId: _i(j['id']),
+        day: DateTime.tryParse('${j['day'] ?? ''}'),
+        paid: j['paid'] == true,
+        sameFile: j['same_file'] == true,
+        sameLines: j['same_lines'] == true,
+        sameInvoice: j['same_invoice'] == true,
+      );
+
+  @override
+  List<Object?> get props => [importId, day, paid, sameFile, sameLines, sameInvoice];
+}
+
 /// Where the 振込先 shown came from.
 enum PayeeSource { invoice, supplier, none }
 
@@ -91,9 +163,22 @@ class Payment extends Equatable {
     this.paidAt,
     this.paidByName,
     this.proofs = const [],
+    this.steps = const OrderSteps(),
+    this.sameAs = const [],
+    this.createdByName,
+    this.stockAt,
   });
 
   final TaxPurchase purchase;
+  final OrderSteps steps;
+  final List<SameOrder> sameAs;
+  final String? createdByName;
+
+  /// When the stock went in (after inspection).
+  final DateTime? stockAt;
+
+  /// Inspected and in stock.
+  bool get inStock => purchase.status == 'stock_done';
   final int? supplierId;
   final String? supplierDisplayName;
   final Payee? payee;
@@ -129,8 +214,12 @@ class Payment extends Equatable {
         proofs: [
           for (final p in (j['proofs'] as List? ?? const []).whereType<Map>()) PaymentProof.fromJson(p.cast<String, dynamic>()),
         ],
+        steps: OrderSteps.fromJson(j['steps']),
+        sameAs: [for (final o in (j['same_as'] as List? ?? const []).whereType<Map>()) SameOrder.fromJson(o.cast<String, dynamic>())],
+        createdByName: _s(j['created_by_name']),
+        stockAt: DateTime.tryParse('${j['stock_at'] ?? ''}')?.toLocal(),
       );
 
   @override
-  List<Object?> get props => [purchase, supplierId, payee, payeeSource, paidAt, proofs];
+  List<Object?> get props => [purchase, supplierId, payee, payeeSource, paidAt, proofs, steps, sameAs];
 }

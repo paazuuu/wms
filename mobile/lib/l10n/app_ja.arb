@@ -824,7 +824,7 @@
     "description": "Unlinked JAN screen: no product_name was ever recorded alongside this code."
   },
   "featPurchaseOrders": "発注",
-  "featPurchaseOrdersDesc": "仕入先への発注を作成・承認・管理",
+  "featPurchaseOrdersDesc": "注文ごとに、ファイルのアップロードから送金完了の記録までの進み具合と支払い。発注書の作成・承認・管理もここで",
   "featSalesOrders": "受注",
   "featSalesOrdersDesc": "顧客からの受注を作成・承認・管理",
   "featPartners": "取引先",
@@ -11444,5 +11444,108 @@
   "payBranch": "支店名",
   "payAccountType": "種別（普通・当座）",
   "payAccountNumber": "口座番号",
-  "payHolder": "口座名義"
+  "payHolder": "口座名義",
+  "ordStepUpload": "ファイルをアップロード",
+  "ordStepCheck": "読み取り内容を人間がチェック",
+  "ordStepLibrary": "商品ライブラリーに登録",
+  "ordStepAi": "AIで商品名・重量を書き込み",
+  "ordStepStock": "検品して在庫に反映",
+  "ordStepPayee": "振込先・振込金額",
+  "ordStepPaid": "送金（支払い済）",
+  "ordStepProof": "送金完了の記録",
+  "ordRows": "{n}行",
+  "@ordRows": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ordLines": "{n}品目",
+  "@ordLines": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ordAiDetail": "商品名 {named} · 重量 {weighed}",
+  "@ordAiDetail": {
+    "placeholders": {
+      "named": {
+        "type": "String"
+      },
+      "weighed": {
+        "type": "String"
+      }
+    }
+  },
+  "ordAwaiting": "検品待ち（検品済み {n}）",
+  "@ordAwaiting": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ordAmount": "振込金額 ¥{amount}（税込）",
+  "@ordAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ordAllDone": "すべて完了",
+  "ordNow": "今: {step}",
+  "@ordNow": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "ordTabProgress": "注文の進み具合・支払い",
+  "ordTabPurchaseOrders": "発注書",
+  "payTwinTitle": "同じ注文が支払い済かもしれません",
+  "payTwinBody": "取込 #{id} は同じ注文に見え、すでに支払い済です。二重に振り込んでいないか確かめてください。別の注文なら、このまま支払い済にできます。",
+  "@payTwinBody": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "payTwinGo": "別の注文なので支払い済にする",
+  "payTwin": "注意: 取込 #{id}（{day}・{paid}）と{why}",
+  "@payTwin": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "payTwinFile": "同じファイル",
+  "payTwinLines": "同じ明細（JAN・数量）",
+  "payTwinInvoice": "同じ請求書番号・日付",
+  "payTwinHint": "日を変えて、または同じ日に同じものを頼むこともあります。別の注文ならそのままで構いません。同じ注文の取り込み直しなら、片方を取込履歴から取り消してください。",
+  "payPayeeAi": "AIで振込先を読む",
+  "payPayeeFound": "振込先を読み取りました: {payee}",
+  "@payPayeeFound": {
+    "placeholders": {
+      "payee": {
+        "type": "String"
+      }
+    }
+  },
+  "payPayeeNotFound": "請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください"
 }

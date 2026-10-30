@@ -49,14 +49,20 @@ final _at = DateFormat('y/MM/dd HH:mm');
 /// the invoice it came from, 支払い済 (the import's own, so it is the same
 /// tick everywhere) and the proof of the transfer kept beside it.
 class PaymentsScreen extends ConsumerStatefulWidget {
-  const PaymentsScreen({super.key, this.today});
+  const PaymentsScreen({super.key, this.today, this.embedded = false});
 
   /// For tests: the month the month view starts on.
   final DateTime? today;
 
+  /// Shown inside 発注 (its own tab): no bar of its own.
+  final bool embedded;
+
   @override
   ConsumerState<PaymentsScreen> createState() => _PaymentsScreenState();
 }
+
+/// Orders whose 振込先 the AI was already asked for, this session.
+final payeeAskedProvider = Provider<Set<int>>((_) => <int>{});
 
 class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   late DateTime _month = DateTime((widget.today ?? DateTime.now()).year, (widget.today ?? DateTime.now()).month);
@@ -64,70 +70,92 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
 
   PaymentsRange get _range => _unpaid ? const UnpaidPayments() : MonthPayments(_month.year, _month.month);
 
+  /// An unpaid order with no 振込先 has its invoice read for one by the AI,
+  /// once — what the reading of the stock did not find.
+  void _askPayees(List<Payment> all, {required bool can}) {
+    if (!can) return;
+    final asked = ref.read(payeeAskedProvider);
+    final ask = [
+      for (final p in all)
+        if (!p.paid && p.payee == null && !asked.contains(p.importId)) p.importId,
+    ];
+    if (ask.isEmpty) return;
+    asked.addAll(ask);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      var found = false;
+      for (final id in ask) {
+        final r = await ref.read(paymentsRepositoryProvider).readPayee(id);
+        if (r case ApiSuccess(:final data) when data != null) found = true;
+      }
+      if (found && mounted) ref.invalidate(paymentsProvider);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final async = ref.watch(paymentsProvider(_range));
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.featPayments)),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        children: [
-          Text(l10n.payIntro, style: muted),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            ChoiceChip(
-              key: const ValueKey('pay-unpaid'),
-              label: Text(l10n.payUnpaidAll),
-              selected: _unpaid,
-              onSelected: (_) => setState(() => _unpaid = true),
-            ),
-            ChoiceChip(
-              key: const ValueKey('pay-by-month'),
-              label: Text(l10n.payByMonth),
-              selected: !_unpaid,
-              onSelected: (_) => setState(() => _unpaid = false),
-            ),
-            if (!_unpaid) ...[
-              IconButton(
-                key: const ValueKey('pay-prev'),
-                icon: const Icon(Icons.chevron_left),
-                onPressed: () => setState(() => _month = DateTime(_month.year, _month.month - 1)),
-              ),
-              Text(l10n.txMonth(_month.year, _month.month), key: const ValueKey('pay-month')),
-              IconButton(
-                key: const ValueKey('pay-next'),
-                icon: const Icon(Icons.chevron_right),
-                onPressed: () => setState(() => _month = DateTime(_month.year, _month.month + 1)),
-              ),
-            ],
-          ]),
-          const SizedBox(height: AppSpacing.sm),
-          ...async.when(
-            loading: () => const [LoadingView()],
-            error: (e, _) => [
-              ErrorStateView(message: humanizeApiErrorMessage(l10n, '$e'), onRetry: () => ref.invalidate(paymentsProvider)),
-            ],
-            data: (all) {
-              if (all.isEmpty) return [Text(_unpaid ? l10n.payNoneUnpaid : l10n.payNone, key: const ValueKey('pay-none'))];
-              final unpaid = all.where((p) => !p.paid);
-              final due = unpaid.fold<double>(0, (s, p) => s + p.amount);
-              return [
-                Text(
-                  l10n.paySummary(all.length, unpaid.length, _yen.format(due.round())),
-                  key: const ValueKey('pay-summary'),
-                  style: theme.textTheme.titleSmall,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                for (final p in all) PaymentCard(payment: p),
-              ];
-            },
+    final can = ref.watch(canRecordPaymentsProvider);
+    final body = ListView(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      children: [
+        Text(l10n.payIntro, style: muted),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          ChoiceChip(
+            key: const ValueKey('pay-unpaid'),
+            label: Text(l10n.payUnpaidAll),
+            selected: _unpaid,
+            onSelected: (_) => setState(() => _unpaid = true),
           ),
-        ],
-      ),
+          ChoiceChip(
+            key: const ValueKey('pay-by-month'),
+            label: Text(l10n.payByMonth),
+            selected: !_unpaid,
+            onSelected: (_) => setState(() => _unpaid = false),
+          ),
+          if (!_unpaid) ...[
+            IconButton(
+              key: const ValueKey('pay-prev'),
+              icon: const Icon(Icons.chevron_left),
+              onPressed: () => setState(() => _month = DateTime(_month.year, _month.month - 1)),
+            ),
+            Text(l10n.txMonth(_month.year, _month.month), key: const ValueKey('pay-month')),
+            IconButton(
+              key: const ValueKey('pay-next'),
+              icon: const Icon(Icons.chevron_right),
+              onPressed: () => setState(() => _month = DateTime(_month.year, _month.month + 1)),
+            ),
+          ],
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        ...async.when(
+          loading: () => const [LoadingView()],
+          error: (e, _) => [
+            ErrorStateView(message: humanizeApiErrorMessage(l10n, '$e'), onRetry: () => ref.invalidate(paymentsProvider)),
+          ],
+          data: (all) {
+            _askPayees(all, can: can);
+            if (all.isEmpty) return [Text(_unpaid ? l10n.payNoneUnpaid : l10n.payNone, key: const ValueKey('pay-none'))];
+            final unpaid = all.where((p) => !p.paid);
+            final due = unpaid.fold<double>(0, (s, p) => s + p.amount);
+            return [
+              Text(
+                l10n.paySummary(all.length, unpaid.length, _yen.format(due.round())),
+                key: const ValueKey('pay-summary'),
+                style: theme.textTheme.titleSmall,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              for (final p in all) PaymentCard(payment: p),
+            ];
+          },
+        ),
+      ],
     );
+    if (widget.embedded) return body;
+    return Scaffold(appBar: AppBar(title: Text(l10n.featPayments)), body: body);
   }
 }
 
@@ -173,6 +201,23 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
 
   Future<void> _setPaid(bool paid) async {
     final l10n = AppLocalizations.of(context);
+    // Another order like this one already paid: asked once more, so the same
+    // order is not paid twice — it may be a new order of the same goods.
+    final paidTwin = p.sameAs.where((o) => o.paid).firstOrNull;
+    if (paid && paidTwin != null) {
+      final go = await showDialog<bool>(
+        context: context,
+        builder: (c) => AlertDialog(
+          title: Text(l10n.payTwinTitle),
+          content: Text(l10n.payTwinBody(paidTwin.importId)),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+            FilledButton(key: const ValueKey('pay-twin-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.payTwinGo)),
+          ],
+        ),
+      );
+      if (go != true || !mounted) return;
+    }
     if (await _run(() => ref.read(paymentsRepositoryProvider).setPaid(p.importId, paid))) {
       _snack(paid ? l10n.payMarkedPaid : l10n.payMarkedUnpaid);
       refreshPayments(ref, p.importId);
@@ -260,6 +305,21 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
     }
   }
 
+  Future<void> _readPayee() async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final r = await ref.read(paymentsRepositoryProvider).readPayee(p.importId);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        _snack(data == null ? l10n.payPayeeNotFound : l10n.payPayeeFound(data.line));
+        if (data != null) refreshPayments(ref, p.importId);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _editAccount() async {
     final id = p.supplierId;
     if (id == null) return;
@@ -273,6 +333,8 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
     }
   }
 
+  String _of(int n, int all) => all == 0 ? '' : '$n/$all';
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -282,69 +344,97 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
     final can = ref.watch(canRecordPaymentsProvider);
     final t = p.purchase;
     final id = p.importId;
-    return Card(
-      key: ValueKey('pay-card-$id'),
-      color: p.paid ? null : scheme.errorContainer.withValues(alpha: 0.18),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(p.supplierName.isEmpty ? l10n.txNoSupplier : p.supplierName,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                Text(
-                  [
-                    l10n.payInvoiceDate(_day.format(t.day)),
-                    if (t.docNumber != null) l10n.payInvoiceNo(t.docNumber!),
-                    l10n.ivTitle(id),
-                  ].join(' · '),
-                  style: muted,
-                ),
-              ]),
-            ),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('¥${_yen.format(p.amount.round())}',
-                  key: ValueKey('pay-amount-$id'), style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
-              Text(l10n.payTaxIncluded, style: muted),
-            ]),
-          ]),
-          const SizedBox(height: AppSpacing.sm),
-          _payeeBlock(context, can),
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
-            OutlinedButton.icon(
-              key: ValueKey('pay-invoice-$id'),
-              onPressed: _invoice,
-              icon: const Icon(Icons.description_outlined, size: 18),
-              label: Text(l10n.payOpenInvoice),
-            ),
-            OutlinedButton.icon(
-              key: ValueKey('pay-reading-$id'),
-              onPressed: () => openReadingTable(context, ref, id),
-              icon: const Icon(Icons.table_view_outlined, size: 18),
-              label: Text(l10n.payOpenReading),
-            ),
-          ]),
-          const Divider(height: AppSpacing.lg),
-          CheckboxListTile(
-            key: ValueKey('pay-paid-$id'),
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: p.paid,
-            onChanged: !can || _busy ? null : (v) => _setPaid(v ?? false),
-            title: Text(l10n.calPaid),
-            subtitle: Text(
-              p.paid
-                  ? [
-                      if (p.paidAt != null) _at.format(p.paidAt!),
-                      if (p.paidByName != null) p.paidByName!,
-                    ].join(' · ')
-                  : l10n.payPaidHint,
-              style: muted,
-            ),
+    final st = p.steps;
+    OrderStepState count(int n, int all) => all == 0 ? OrderStepState.todo : (n >= all ? OrderStepState.done : (n > 0 ? OrderStepState.partial : OrderStepState.todo));
+    final aiState = st.lines == 0
+        ? OrderStepState.todo
+        : (st.named >= st.lines && st.weighed >= st.lines
+            ? OrderStepState.done
+            : (st.named + st.weighed > 0 ? OrderStepState.partial : OrderStepState.todo));
+    final steps = <OrderStep>[
+      OrderStep(
+        key: 'upload',
+        title: l10n.ordStepUpload,
+        state: OrderStepState.done,
+        detail: [
+          if (t.createdAt != null) _at.format(t.createdAt!),
+          if (p.createdByName != null) p.createdByName!,
+          t.originalName ?? '',
+        ].where((x) => x.isNotEmpty).join(' · '),
+        child: Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+          OutlinedButton.icon(
+            key: ValueKey('pay-invoice-$id'),
+            onPressed: _invoice,
+            icon: const Icon(Icons.description_outlined, size: 18),
+            label: Text(l10n.payOpenInvoice),
           ),
-          Text(l10n.payProofs(p.proofs.length), style: theme.textTheme.titleSmall),
+          OutlinedButton.icon(
+            key: ValueKey('pay-reading-$id'),
+            onPressed: () => openReadingTable(context, ref, id),
+            icon: const Icon(Icons.table_view_outlined, size: 18),
+            label: Text(l10n.payOpenReading),
+          ),
+        ]),
+      ),
+      OrderStep(
+        key: 'check',
+        title: l10n.ordStepCheck,
+        state: count(st.checked, st.read),
+        detail: st.read == 0 ? null : l10n.ordRows(_of(st.checked, st.read)),
+      ),
+      OrderStep(
+        key: 'library',
+        title: l10n.ordStepLibrary,
+        state: count(st.inLibrary, st.lines),
+        detail: st.lines == 0 ? null : l10n.ordLines(_of(st.inLibrary, st.lines)),
+      ),
+      OrderStep(
+        key: 'ai',
+        title: l10n.ordStepAi,
+        state: aiState,
+        detail: st.lines == 0 ? null : l10n.ordAiDetail(_of(st.named, st.lines), _of(st.weighed, st.lines)),
+      ),
+      OrderStep(
+        key: 'stock',
+        title: l10n.ordStepStock,
+        state: p.inStock ? OrderStepState.done : count(st.inspected, st.lines),
+        detail: p.inStock
+            ? [if (p.stockAt != null) _at.format(p.stockAt!), l10n.ordLines(_of(st.inspected, st.lines))].join(' · ')
+            : l10n.ordAwaiting(_of(st.inspected, st.lines)),
+      ),
+      OrderStep(
+        key: 'payee',
+        title: l10n.ordStepPayee,
+        state: p.payee != null ? OrderStepState.done : OrderStepState.todo,
+        detail: l10n.ordAmount(_yen.format(p.amount.round())),
+        child: _payeeBlock(context, can),
+      ),
+      OrderStep(
+        key: 'paid',
+        title: l10n.ordStepPaid,
+        state: p.paid ? OrderStepState.done : OrderStepState.todo,
+        child: CheckboxListTile(
+          key: ValueKey('pay-paid-$id'),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          value: p.paid,
+          onChanged: !can || _busy ? null : (v) => _setPaid(v ?? false),
+          title: Text(l10n.calPaid),
+          subtitle: Text(
+            p.paid
+                ? [if (p.paidAt != null) _at.format(p.paidAt!), if (p.paidByName != null) p.paidByName!].join(' · ')
+                : l10n.payPaidHint,
+            style: muted,
+          ),
+        ),
+      ),
+      OrderStep(
+        key: 'proof',
+        title: l10n.ordStepProof,
+        state: p.proofs.isNotEmpty ? OrderStepState.done : OrderStepState.todo,
+        detail: l10n.payProofs(p.proofs.length),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           for (final proof in p.proofs)
             ListTile(
               key: ValueKey('pay-proof-${proof.id}'),
@@ -368,17 +458,98 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
                   : null,
             ),
           if (can)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: ValueKey('pay-add-proof-$id'),
-                onPressed: _busy ? null : _addProof,
-                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
-                label: Text(l10n.payAddProof),
-              ),
+            TextButton.icon(
+              key: ValueKey('pay-add-proof-$id'),
+              onPressed: _busy ? null : _addProof,
+              icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+              label: Text(l10n.payAddProof),
             ),
         ]),
       ),
+    ];
+    final current = steps.indexWhere((s) => s.state != OrderStepState.done);
+    return Card(
+      key: ValueKey('pay-card-$id'),
+      color: p.paid ? null : scheme.errorContainer.withValues(alpha: 0.18),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(p.supplierName.isEmpty ? l10n.txNoSupplier : p.supplierName,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  [
+                    l10n.payInvoiceDate(_day.format(t.day)),
+                    if (t.docNumber != null) l10n.payInvoiceNo(t.docNumber!),
+                    l10n.ivTitle(id),
+                  ].join(' · '),
+                  style: muted,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  current < 0 ? l10n.ordAllDone : l10n.ordNow(steps[current].title),
+                  key: ValueKey('ord-now-$id'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: current < 0 ? scheme.primary : scheme.tertiary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ]),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text('¥${_yen.format(p.amount.round())}',
+                  key: ValueKey('pay-amount-$id'), style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+              Text(l10n.payTaxIncluded, style: muted),
+            ]),
+          ]),
+          if (p.sameAs.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            _twinWarning(context),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          OrderTimeline(importId: id, steps: steps, current: current),
+        ]),
+      ),
+    );
+  }
+
+  /// The same order may be in twice: which one, and why it looks so.
+  Widget _twinWarning(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      key: ValueKey('pay-twin-${p.importId}'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(Icons.warning_amber_rounded, size: 20, color: theme.colorScheme.onTertiaryContainer),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            for (final o in p.sameAs)
+              Text(
+                l10n.payTwin(
+                  o.importId,
+                  o.day == null ? '—' : _day.format(o.day!),
+                  o.paid ? l10n.calPaid : l10n.calUnpaid,
+                  [
+                    if (o.sameFile) l10n.payTwinFile,
+                    if (o.sameLines) l10n.payTwinLines,
+                    if (o.sameInvoice) l10n.payTwinInvoice,
+                  ].join('・'),
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onTertiaryContainer),
+              ),
+            Text(l10n.payTwinHint, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onTertiaryContainer)),
+          ]),
+        ),
+      ]),
     );
   }
 
@@ -427,12 +598,21 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
                   ),
                 ]),
         ),
-        if (can && p.supplierId != null)
-          TextButton(
-            key: ValueKey('pay-edit-payee-$id'),
-            onPressed: _busy ? null : _editAccount,
-            child: Text(payee == null ? l10n.payPayeeAdd : l10n.payPayeeEdit),
-          ),
+        if (can)
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            TextButton.icon(
+              key: ValueKey('pay-ai-payee-$id'),
+              onPressed: _busy ? null : _readPayee,
+              icon: const Icon(Icons.auto_awesome_outlined, size: 16),
+              label: Text(l10n.payPayeeAi),
+            ),
+            if (p.supplierId != null)
+              TextButton(
+                key: ValueKey('pay-edit-payee-$id'),
+                onPressed: _busy ? null : _editAccount,
+                child: Text(payee == null ? l10n.payPayeeAdd : l10n.payPayeeEdit),
+              ),
+          ]),
       ]),
     );
   }
@@ -509,6 +689,95 @@ class _AccountDialogState extends State<_AccountDialog> {
           ),
           child: Text(l10n.actionSave),
         ),
+      ],
+    );
+  }
+}
+
+/// Where a step of an order stands.
+enum OrderStepState { done, partial, todo }
+
+/// One step of an order's way: from the file to the proof of the transfer.
+class OrderStep {
+  const OrderStep({required this.key, required this.title, required this.state, this.detail, this.child});
+
+  final String key;
+  final String title;
+  final OrderStepState state;
+  final String? detail;
+  final Widget? child;
+}
+
+/// An order's steps, top to bottom on one line: done ones ticked, the one it
+/// is at marked, the rest open — to see at a glance how far it has gone.
+class OrderTimeline extends StatelessWidget {
+  const OrderTimeline({super.key, required this.importId, required this.steps, required this.current});
+
+  final int importId;
+  final List<OrderStep> steps;
+
+  /// The first step not done (-1 when all are).
+  final int current;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    return Column(
+      key: ValueKey('ord-timeline-$importId'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, s) in steps.indexed)
+          IntrinsicHeight(
+            key: ValueKey('ord-step-$importId-${s.key}'),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              SizedBox(
+                width: 32,
+                child: Column(children: [
+                  Icon(
+                    switch (s.state) {
+                      OrderStepState.done => Icons.check_circle,
+                      OrderStepState.partial => Icons.timelapse,
+                      OrderStepState.todo => i == current ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                    },
+                    key: ValueKey('ord-mark-$importId-${s.key}-${s.state.name}'),
+                    size: 22,
+                    color: switch (s.state) {
+                      OrderStepState.done => scheme.primary,
+                      OrderStepState.partial => scheme.tertiary,
+                      OrderStepState.todo => i == current ? scheme.tertiary : scheme.outline,
+                    },
+                  ),
+                  if (i < steps.length - 1)
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        color: s.state == OrderStepState.done ? scheme.primary : scheme.outlineVariant,
+                      ),
+                    ),
+                ]),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(
+                      '${i + 1}. ${s.title}',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: i == current ? FontWeight.w800 : FontWeight.w600,
+                        color: s.state == OrderStepState.todo && i != current ? scheme.onSurfaceVariant : null,
+                      ),
+                    ),
+                    if ((s.detail ?? '').isNotEmpty) Text(s.detail!, key: ValueKey('ord-detail-$importId-${s.key}'), style: muted),
+                    if (s.child != null) ...[const SizedBox(height: 4), s.child!],
+                  ]),
+                ),
+              ),
+            ]),
+          ),
       ],
     );
   }

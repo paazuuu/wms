@@ -1668,7 +1668,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featPurchaseOrdersDesc =>
-      'Create, approve and manage orders to suppliers';
+      'Each order from the file to the proof of the transfer, with its payment; and purchase orders to create, approve and manage';
 
   @override
   String get featSalesOrders => 'Sales orders';
@@ -13069,4 +13069,107 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payHolder => 'Account holder';
+
+  @override
+  String get ordStepUpload => 'File uploaded';
+
+  @override
+  String get ordStepCheck => 'Reading checked by a person';
+
+  @override
+  String get ordStepLibrary => 'In the product library';
+
+  @override
+  String get ordStepAi => 'Names and weights by the AI';
+
+  @override
+  String get ordStepStock => 'Inspected and in stock';
+
+  @override
+  String get ordStepPayee => 'Account and amount to pay';
+
+  @override
+  String get ordStepPaid => 'Transferred (paid)';
+
+  @override
+  String get ordStepProof => 'Proof of the transfer';
+
+  @override
+  String ordRows(String n) {
+    return '$n rows';
+  }
+
+  @override
+  String ordLines(String n) {
+    return '$n lines';
+  }
+
+  @override
+  String ordAiDetail(String named, String weighed) {
+    return 'names $named · weights $weighed';
+  }
+
+  @override
+  String ordAwaiting(String n) {
+    return 'awaiting inspection ($n inspected)';
+  }
+
+  @override
+  String ordAmount(String amount) {
+    return 'to pay ¥$amount (incl. tax)';
+  }
+
+  @override
+  String get ordAllDone => 'All done';
+
+  @override
+  String ordNow(String step) {
+    return 'Now: $step';
+  }
+
+  @override
+  String get ordTabProgress => 'Orders and payments';
+
+  @override
+  String get ordTabPurchaseOrders => 'Purchase orders';
+
+  @override
+  String get payTwinTitle => 'The same order may be paid already';
+
+  @override
+  String payTwinBody(int id) {
+    return 'Import #$id looks like the same order and is paid already. Check it is not paid twice; if it is another order, mark this one paid.';
+  }
+
+  @override
+  String get payTwinGo => 'Another order: mark paid';
+
+  @override
+  String payTwin(int id, String day, String paid, String why) {
+    return 'Note: like import #$id ($day, $paid): $why';
+  }
+
+  @override
+  String get payTwinFile => 'the same file';
+
+  @override
+  String get payTwinLines => 'the same lines (JAN, quantity)';
+
+  @override
+  String get payTwinInvoice => 'the same invoice number and date';
+
+  @override
+  String get payTwinHint =>
+      'The same goods are ordered again, on another day or the same one. If it is another order, leave it; if it is the same one taken in twice, undo one in the import history.';
+
+  @override
+  String get payPayeeAi => 'Read the account with AI';
+
+  @override
+  String payPayeeFound(String payee) {
+    return 'Account read: $payee';
+  }
+
+  @override
+  String get payPayeeNotFound => 'No account on the invoice; add one by hand';
 }

@@ -13,6 +13,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../payments/data/payments_repository.dart';
+import '../../payments/domain/payment.dart' show Payee;
 import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../master_import/presentation/master_import_labels.dart';
@@ -101,6 +103,11 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   /// Who the document is from, as read (an invoice always names them).
   String? _docSupplier;
   String? _docRegistration;
+  bool _docPayee = false;
+
+  /// The AI's work on the products just registered (商品名, photos): the
+  /// 振込先 is read after it (0172).
+  Future<void>? _aiWork;
 
   /// Products the file has that 商品ライブラリー does not: registered
   /// (through 価格台帳) before the stock goes in, so the whole file lands.
@@ -158,6 +165,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _documentId = null;
       _docSupplier = null;
       _docRegistration = null;
+      _docPayee = false;
+      _aiWork = null;
       _checked = false;
       _tableChecked = false;
       _docDate = null;
@@ -210,6 +219,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           _documentId = data.documentId;
           _docSupplier = data.supplierName;
           _docRegistration = data.registrationNumber;
+          _docPayee = data.hasPayee;
           readDate = data.docDate;
           sheet = stockSheetFromRead([
             for (final l in data.lines)
@@ -381,14 +391,18 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         // meanwhile (0164), while the stock goes in.
         // And a picture for each from the web, for those with none (0166).
         final photos = ref.read(webPhotoRepositoryProvider);
-        unawaited(findWebPhotos(photos, [for (final l in todo) l.janCode]).then((added) {
-          if (mounted && added > 0) ref.invalidate(productListProvider);
-        }));
-        unawaited(_findNames([
-          for (final l in todo)
-            if (!_names.containsKey(l.janCode) && _nameFor(l) == null)
-              NameAsk(jan: l.janCode, maker: l.maker, code: l.code, name: l.name),
-        ]));
+        final work = Future.wait<void>([
+          findWebPhotos(photos, [for (final l in todo) l.janCode]).then((added) {
+            if (mounted && added > 0) ref.invalidate(productListProvider);
+          }),
+          _findNames([
+            for (final l in todo)
+              if (!_names.containsKey(l.janCode) && _nameFor(l) == null)
+                NameAsk(jan: l.janCode, maker: l.maker, code: l.code, name: l.name),
+          ]),
+        ]);
+        _aiWork = work;
+        unawaited(work);
         return true;
       case ApiFailure(:final message):
         setState(() => _error = humanizeApiErrorMessage(l10n, message));
@@ -582,6 +596,15 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           file: _bytes == null ? null : fileFingerprint(_bytes!),
           lines: linesFingerprint(send),
         );
+        // Then, once the AI has done the products, where the invoice asks to
+        // be paid and how much — the order's payment in 会計 (0172).
+        if (!_docPayee) {
+          final importId = data.importId;
+          final payments = ref.read(paymentsRepositoryProvider);
+          unawaited((_aiWork ?? Future<void>.value()).catchError((_) {}).then((_) => payments.readPayee(importId)).then((r) {
+            if (r is ApiSuccess<Payee?> && r.data != null) ref.invalidate(paymentsProvider);
+          }));
+        }
         if (!mounted) return;
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);

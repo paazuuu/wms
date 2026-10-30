@@ -8139,6 +8139,43 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
       取込の詳細 and the calendar;
     - the transfer proofs. Adding one marks the payment paid.
 
+## 0172: 会計 → 発注 — each order's way, and the same order twice
+
+- Menu: 会計 sits between 商品 and 現場作業. It holds:
+  - 発注, with two tabs:
+    - 注文の進み具合・支払い: the payments, each as a timeline;
+    - 発注書: the purchase orders.
+  - 税理士用ファイル.
+  - 支払い keeps its address but is no longer in the menu.
+- Each order (an invoice taken into stock) is one vertical line of steps:
+  1. ファイルをアップロード (when, who; the original and its reading)
+  2. 読み取り内容を人間がチェック (rows checked / rows kept)
+  3. 商品ライブラリーに登録 (lines with a product)
+  4. AIで商品名・重量を書き込み (lines named, lines weighed)
+  5. 検品して在庫に反映 (inspected; stock_done and when)
+  6. 振込先・振込金額 (the 振込先, editable or read again by the AI; 税込)
+  7. 送金（支払い済） (the import's own `paid`)
+  8. 送金完了の記録 (the proofs)
+  - Each step shows done / under way / where the order is now.
+  - The card says 「今: …」 or すべて完了.
+- 振込先 by the AI (import-plan `read_payee`, v35):
+  - After a stock registration, once the AI has done the products (商品名,
+    photos), the kept invoice is read again for its 振込先 and totals, unless
+    the reading already found one.
+  - Sheets and PDFs with text are read from their words first.
+  - What is found is kept on `import_documents.payee` (and `totals` when
+    missing); the supplier's account follows from the first one.
+  - The payments screen also asks, once per session, for every unpaid order
+    with no 振込先, and has 「AIで振込先を読む」.
+- The same order twice: `payments_list.same_as` lists other imports, not
+  taken back, with the same file (fingerprint 0147, or the evidence's
+  SHA-256), the same lines (JAN × quantity, 0147), or the same supplier,
+  invoice number and date.
+  - It is a warning on the card, not an exclusion: the same goods are
+    ordered again, on another day or the same one.
+  - Ticking 支払い済 when such an order is already paid asks first.
+  - The import's own check (0147/0148) still asks before the stock goes in.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

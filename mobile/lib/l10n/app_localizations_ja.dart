@@ -1617,7 +1617,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featPurchaseOrders => '発注';
 
   @override
-  String get featPurchaseOrdersDesc => '仕入先への発注を作成・承認・管理';
+  String get featPurchaseOrdersDesc =>
+      '注文ごとに、ファイルのアップロードから送金完了の記録までの進み具合と支払い。発注書の作成・承認・管理もここで';
 
   @override
   String get featSalesOrders => '受注';
@@ -12804,4 +12805,107 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get payHolder => '口座名義';
+
+  @override
+  String get ordStepUpload => 'ファイルをアップロード';
+
+  @override
+  String get ordStepCheck => '読み取り内容を人間がチェック';
+
+  @override
+  String get ordStepLibrary => '商品ライブラリーに登録';
+
+  @override
+  String get ordStepAi => 'AIで商品名・重量を書き込み';
+
+  @override
+  String get ordStepStock => '検品して在庫に反映';
+
+  @override
+  String get ordStepPayee => '振込先・振込金額';
+
+  @override
+  String get ordStepPaid => '送金（支払い済）';
+
+  @override
+  String get ordStepProof => '送金完了の記録';
+
+  @override
+  String ordRows(String n) {
+    return '$n行';
+  }
+
+  @override
+  String ordLines(String n) {
+    return '$n品目';
+  }
+
+  @override
+  String ordAiDetail(String named, String weighed) {
+    return '商品名 $named · 重量 $weighed';
+  }
+
+  @override
+  String ordAwaiting(String n) {
+    return '検品待ち（検品済み $n）';
+  }
+
+  @override
+  String ordAmount(String amount) {
+    return '振込金額 ¥$amount（税込）';
+  }
+
+  @override
+  String get ordAllDone => 'すべて完了';
+
+  @override
+  String ordNow(String step) {
+    return '今: $step';
+  }
+
+  @override
+  String get ordTabProgress => '注文の進み具合・支払い';
+
+  @override
+  String get ordTabPurchaseOrders => '発注書';
+
+  @override
+  String get payTwinTitle => '同じ注文が支払い済かもしれません';
+
+  @override
+  String payTwinBody(int id) {
+    return '取込 #$id は同じ注文に見え、すでに支払い済です。二重に振り込んでいないか確かめてください。別の注文なら、このまま支払い済にできます。';
+  }
+
+  @override
+  String get payTwinGo => '別の注文なので支払い済にする';
+
+  @override
+  String payTwin(int id, String day, String paid, String why) {
+    return '注意: 取込 #$id（$day・$paid）と$why';
+  }
+
+  @override
+  String get payTwinFile => '同じファイル';
+
+  @override
+  String get payTwinLines => '同じ明細（JAN・数量）';
+
+  @override
+  String get payTwinInvoice => '同じ請求書番号・日付';
+
+  @override
+  String get payTwinHint =>
+      '日を変えて、または同じ日に同じものを頼むこともあります。別の注文ならそのままで構いません。同じ注文の取り込み直しなら、片方を取込履歴から取り消してください。';
+
+  @override
+  String get payPayeeAi => 'AIで振込先を読む';
+
+  @override
+  String payPayeeFound(String payee) {
+    return '振込先を読み取りました: $payee';
+  }
+
+  @override
+  String get payPayeeNotFound => '請求書に振込先が見つかりませんでした。「振込先を登録」から入れてください';
 }

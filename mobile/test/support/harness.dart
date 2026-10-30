@@ -155,6 +155,8 @@ import 'package:wms_mobile/features/shelf_notes/data/shelf_notes_repository.dart
     show ShelfNote, canWriteShelfNotesProvider, shelfNotesProvider, shelfNotesRepositoryProvider;
 import 'package:wms_mobile/features/product/data/web_photos.dart' show webPhotoRepositoryProvider;
 import 'package:wms_mobile/features/product/data/market_names.dart' show marketNameRepositoryProvider;
+import 'package:wms_mobile/features/payments/data/payments_repository.dart' show paymentsRepositoryProvider;
+import 'fake_payments_repository.dart';
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
 import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 
@@ -230,6 +232,7 @@ List<Override> _defaultOverrides() => [
       // Names looked up on the web (0164): none found.
       marketNameRepositoryProvider.overrideWithValue(FakeMarketNameRepository()),
       webPhotoRepositoryProvider.overrideWithValue(FakeWebPhotoRepository()),
+      paymentsRepositoryProvider.overrideWithValue(FakePaymentsRepository()),
       // Marks and shelf notes (0167): none.
       productMarksRepositoryProvider.overrideWithValue(FakeProductMarksRepository()),
       shelfNotesRepositoryProvider.overrideWithValue(FakeShelfNotesRepository()),

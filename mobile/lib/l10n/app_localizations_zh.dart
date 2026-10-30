@@ -1613,7 +1613,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPurchaseOrders => '采购订单';
 
   @override
-  String get featPurchaseOrdersDesc => '创建、审批并管理对供应商的订单';
+  String get featPurchaseOrdersDesc => '每张订单从上传文件到汇款记录的进度与付款；以及采购单的创建・审批・管理';
 
   @override
   String get featSalesOrders => '销售订单';
@@ -12730,4 +12730,107 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get payHolder => '户名';
+
+  @override
+  String get ordStepUpload => '上传文件';
+
+  @override
+  String get ordStepCheck => '人工核对读取内容';
+
+  @override
+  String get ordStepLibrary => '登记到商品库';
+
+  @override
+  String get ordStepAi => 'AI写入商品名・重量';
+
+  @override
+  String get ordStepStock => '验货并计入库存';
+
+  @override
+  String get ordStepPayee => '收款账户・汇款金额';
+
+  @override
+  String get ordStepPaid => '汇款（已付款）';
+
+  @override
+  String get ordStepProof => '汇款完成记录';
+
+  @override
+  String ordRows(String n) {
+    return '$n行';
+  }
+
+  @override
+  String ordLines(String n) {
+    return '$n项';
+  }
+
+  @override
+  String ordAiDetail(String named, String weighed) {
+    return '商品名 $named · 重量 $weighed';
+  }
+
+  @override
+  String ordAwaiting(String n) {
+    return '待验货（已验 $n）';
+  }
+
+  @override
+  String ordAmount(String amount) {
+    return '汇款金额 ¥$amount（含税）';
+  }
+
+  @override
+  String get ordAllDone => '全部完成';
+
+  @override
+  String ordNow(String step) {
+    return '当前: $step';
+  }
+
+  @override
+  String get ordTabProgress => '订单进度・付款';
+
+  @override
+  String get ordTabPurchaseOrders => '采购单';
+
+  @override
+  String get payTwinTitle => '同一订单可能已付款';
+
+  @override
+  String payTwinBody(int id) {
+    return '导入 #$id 看起来是同一订单且已付款。请确认没有重复汇款；如果是另一张订单，可以直接标记为已付款。';
+  }
+
+  @override
+  String get payTwinGo => '是另一订单，标记为已付款';
+
+  @override
+  String payTwin(int id, String day, String paid, String why) {
+    return '注意: 与导入 #$id（$day・$paid）$why';
+  }
+
+  @override
+  String get payTwinFile => '同一文件';
+
+  @override
+  String get payTwinLines => '同一明细（JAN・数量）';
+
+  @override
+  String get payTwinInvoice => '同一发票号・日期';
+
+  @override
+  String get payTwinHint =>
+      '同样的商品也可能在不同日期或同一天再次订购。若是另一订单则无需处理；若是同一订单重复导入，请在导入记录中撤销其一。';
+
+  @override
+  String get payPayeeAi => '用AI读取收款账户';
+
+  @override
+  String payPayeeFound(String payee) {
+    return '已读取收款账户: $payee';
+  }
+
+  @override
+  String get payPayeeNotFound => '发票上未找到收款账户，请手动登记';
 }

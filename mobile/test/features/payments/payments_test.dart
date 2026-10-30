@@ -8,14 +8,26 @@ import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/payments/data/payments_repository.dart';
 import 'package:wms_mobile/features/payments/domain/payment.dart';
+import 'package:wms_mobile/features/payments/presentation/orders_screen.dart';
 import 'package:wms_mobile/features/payments/presentation/payments_screen.dart';
 import 'package:wms_mobile/features/tax_files/data/tax_files_repository.dart';
 import 'package:wms_mobile/features/tax_files/domain/tax_purchases.dart';
 
 import '../../support/harness.dart';
 
-Map<String, dynamic> _payment(int id, {bool paid = false, Map<String, dynamic>? payee, String? source, List<Map<String, dynamic>> proofs = const []}) => {
-      'id': id, 'day': '2026-07-01', 'document_date': '2026-07-01', 'status': 'awaiting_inspection',
+Map<String, dynamic> _payment(int id,
+        {bool paid = false,
+        Map<String, dynamic>? payee,
+        String? source,
+        List<Map<String, dynamic>> proofs = const [],
+        String status = 'awaiting_inspection',
+        Map<String, dynamic>? steps,
+        List<Map<String, dynamic>> sameAs = const []}) =>
+    {
+      'id': id, 'day': '2026-07-01', 'document_date': '2026-07-01', 'status': status,
+      'created_at': '2026-07-02T01:00:00Z', 'created_by_name': '倉庫',
+      'steps': steps ?? {'read': 2, 'checked': 2, 'lines': 1, 'in_library': 1, 'named': 1, 'weighed': 0, 'inspected': 0},
+      'same_as': sameAs,
       'original_name': '請求書$id.pdf', 'original_path': 'imports/$id/original.pdf', 'paid': paid,
       if (paid) 'paid_at': '2026-10-30T01:00:00Z', if (paid) 'paid_by_name': '経理',
       'read_lines': [
@@ -73,6 +85,21 @@ class _Repo implements PaymentsRepository {
   @override
   Future<ApiResult<Uint8List>> proofBytes(PaymentProof proof) async => ApiSuccess(Uint8List.fromList([1, 2, 3]));
 
+  final askedPayee = <int>[];
+  Payee? payeeToFind;
+
+  @override
+  Future<ApiResult<Payee?>> readPayee(int importId) async {
+    askedPayee.add(importId);
+    final found = payeeToFind;
+    if (found != null) {
+      rows.firstWhere((r) => r['id'] == importId)
+        ..['payee'] = found.toJson()
+        ..['payee_source'] = 'invoice';
+    }
+    return ApiSuccess(found);
+  }
+
   @override
   Future<ApiResult<bool>> setSupplierAccount(int supplierId, Payee? payee) async {
     calls.add('account $supplierId ${payee?.line}');
@@ -111,10 +138,14 @@ void main() {
     expect(contentTypeOf('完了.PDF'), 'application/pdf');
   });
 
-  test('会計 is a group of its own: 支払い and 税理士用ファイル', () {
+  test('会計 is a group of its own: 発注 (with 支払い) and 税理士用ファイル', () {
     final groups = buildFeatureCatalog();
     final accounting = groups.firstWhere((g) => g.id == 'accounting');
-    expect(accounting.entries.map((e) => e.id), ['payments', 'tax_files']);
+    expect(accounting.entries.map((e) => e.id), ['purchase_orders', 'payments', 'tax_files']);
+    // In the menu: 発注 (with the payments inside) and 税理士用ファイル.
+    expect(accounting.entries.where((e) => e.inMenu).map((e) => e.id), ['purchase_orders', 'tax_files']);
+    // Between 商品 and 現場作業.
+    expect(groups.map((g) => g.id).take(3), ['products_master', 'accounting', 'field_operations']);
     expect(groups.where((g) => g.id != 'accounting').expand((g) => g.entries).map((e) => e.id), isNot(contains('tax_files')));
   });
 
@@ -178,6 +209,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = _Repo([_payment(6)]);
+    // Only the hand: the AI finds none.
     await pumpApp(tester, const PaymentsScreen(), overrides: [
       authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(_clerk)),
       paymentsRepositoryProvider.overrideWithValue(repo),
@@ -190,9 +222,99 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('pay-f-number')), '7654321');
     await tester.tap(find.byKey(const ValueKey('pay-f-save')));
     await tester.pumpAndSettle();
+    expect(repo.askedPayee, [6]);
     expect(repo.calls.single, 'account 7 サンプル銀行 中央支店 7654321');
     expect(tester.widget<Text>(find.byKey(const ValueKey('pay-bank-6'))).data, 'サンプル銀行 中央支店');
     expect(find.text('仕入先に登録した口座'), findsOneWidget);
+  });
+
+  testWidgets("each order's steps on one line: done, under way, the one it is at, and the rest", (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const PaymentsScreen(), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(_clerk)),
+      paymentsRepositoryProvider.overrideWithValue(_Repo([
+        _payment(5, payee: {'bank': 'テスト銀行', 'account_number': '1234567'}, source: 'invoice',
+            steps: {'read': 2, 'checked': 2, 'lines': 2, 'in_library': 2, 'named': 2, 'weighed': 1, 'inspected': 1}),
+      ])),
+      taxFilesRepositoryProvider.overrideWithValue(_Tax()),
+    ]);
+    bool mark(String step, String state) => find.byKey(ValueKey('ord-mark-5-$step-$state')).evaluate().isNotEmpty;
+    expect(mark('upload', 'done'), isTrue);
+    expect(mark('check', 'done'), isTrue);
+    expect(mark('library', 'done'), isTrue);
+    expect(mark('ai', 'partial'), isTrue);
+    expect(mark('stock', 'partial'), isTrue);
+    expect(mark('payee', 'done'), isTrue);
+    expect(mark('paid', 'todo'), isTrue);
+    expect(mark('proof', 'todo'), isTrue);
+    String text(String key) => tester.widget<Text>(find.byKey(ValueKey(key))).data!;
+    expect(text('ord-detail-5-ai'), '商品名 2/2 · 重量 1/2');
+    expect(text('ord-detail-5-stock'), '検品待ち（検品済み 1/2）');
+    expect(text('ord-detail-5-payee'), '振込金額 ¥8,800（税込）');
+    expect(text('ord-now-5'), '今: AIで商品名・重量を書き込み');
+  });
+
+  testWidgets('the same order twice: a warning on both, and paying the second asks first', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = _Repo([
+      _payment(19, paid: true, sameAs: [{'id': 20, 'day': '2026-07-01', 'paid': false, 'same_file': true, 'same_lines': true}]),
+      _payment(20, sameAs: [{'id': 19, 'day': '2026-07-01', 'paid': true, 'same_file': true, 'same_lines': true, 'same_invoice': true}]),
+    ]);
+    await pumpApp(tester, const PaymentsScreen(), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(_clerk)),
+      paymentsRepositoryProvider.overrideWithValue(repo),
+      taxFilesRepositoryProvider.overrideWithValue(_Tax()),
+    ]);
+    expect(find.byKey(const ValueKey('pay-twin-20')), findsOneWidget);
+    expect(find.text('注意: 取込 #19（2026/07/01・振込済）と同じファイル・同じ明細（JAN・数量）・同じ請求書番号・日付'), findsOneWidget);
+    // Not paid unless it is said to be another order.
+    await tester.tap(find.byKey(const ValueKey('pay-paid-20')));
+    await tester.pumpAndSettle();
+    expect(find.text('同じ注文が支払い済かもしれません'), findsOneWidget);
+    await tester.tap(find.text('キャンセル'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, isEmpty);
+    await tester.tap(find.byKey(const ValueKey('pay-paid-20')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pay-twin-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.calls, ['paid 20 true']);
+  });
+
+  testWidgets('an unpaid order with no 振込先 has the AI read its invoice, once', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = _Repo([_payment(31)])
+      ..payeeToFind = const Payee(bank: 'テスト銀行', branch: 'テスト支店', accountType: '当座', accountNumber: '1234567');
+    await pumpApp(tester, const PaymentsScreen(), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(_clerk)),
+      paymentsRepositoryProvider.overrideWithValue(repo),
+      taxFilesRepositoryProvider.overrideWithValue(_Tax()),
+    ]);
+    await tester.pumpAndSettle();
+    expect(repo.askedPayee, [31]);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('pay-bank-31'))).data, 'テスト銀行 テスト支店');
+    // By hand too.
+    await tester.tap(find.byKey(const ValueKey('pay-ai-payee-31')));
+    await tester.pumpAndSettle();
+    expect(repo.askedPayee, [31, 31]);
+    expect(find.text('振込先を読み取りました: テスト銀行 テスト支店 当座 1234567'), findsOneWidget);
+  });
+
+  testWidgets('発注 in 会計: the orders with their payments, and the purchase orders', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const OrdersScreen(), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(const AuthUser(
+          id: 'u1', email: 'a@b.test', name: '経理', permissions: ['inventory.adjust', 'purchase_order.view']))),
+      paymentsRepositoryProvider.overrideWithValue(_Repo([_payment(5, payee: {'bank': 'テスト銀行'}, source: 'invoice')])),
+      taxFilesRepositoryProvider.overrideWithValue(_Tax()),
+    ]);
+    expect(find.byKey(const ValueKey('ord-tab-progress')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ord-tab-po')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pay-card-5')), findsOneWidget);
   });
 
   testWidgets('who only reads the books sees the payments but changes nothing', (tester) async {
