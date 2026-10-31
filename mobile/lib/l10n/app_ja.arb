@@ -11568,5 +11568,23 @@
   "calProofNo": "送金記録なし",
   "calInStock": "検品済（入庫済）",
   "plStockAwaiting": "検品待ち",
-  "plNoneAwaiting": "検品待ちの商品はありません"
+  "plNoneAwaiting": "検品待ちの商品はありません",
+  "qcReceiptBadge": "受領",
+  "qcReceiptWaiting": "受領の検品待ち {count}件",
+  "@qcReceiptWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qcChecked": "検品済み {count}件",
+  "@qcChecked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qcNothingBody": "発注で取り込んだファイルや受領した荷物が、ここに検品待ちとして並びます。"
 }

@@ -12895,4 +12895,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plNoneAwaiting => '没有待验货的商品';
+
+  @override
+  String get qcReceiptBadge => '收货';
+
+  @override
+  String qcReceiptWaiting(int count) {
+    return '收货待验货 $count件';
+  }
+
+  @override
+  String qcChecked(int count) {
+    return '已验货 $count件';
+  }
+
+  @override
+  String get qcNothingBody => '通过“订货”导入的文件和收货的货物会作为待验货列在这里。';
 }

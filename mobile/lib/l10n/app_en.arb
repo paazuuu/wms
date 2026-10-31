@@ -4182,5 +4182,9 @@
   "calProofNo": "No proof",
   "calInStock": "Inspected (in stock)",
   "plStockAwaiting": "Awaiting inspection",
-  "plNoneAwaiting": "Nothing awaiting inspection"
+  "plNoneAwaiting": "Nothing awaiting inspection",
+  "qcReceiptBadge": "Received",
+  "qcReceiptWaiting": "{count} received, awaiting inspection",
+  "qcChecked": "{count} inspected",
+  "qcNothingBody": "Files taken in under 発注 and goods received are listed here to inspect."
 }

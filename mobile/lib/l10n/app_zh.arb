@@ -4182,5 +4182,9 @@
   "calProofNo": "无汇款记录",
   "calInStock": "已验货（已入库）",
   "plStockAwaiting": "待验货",
-  "plNoneAwaiting": "没有待验货的商品"
+  "plNoneAwaiting": "没有待验货的商品",
+  "qcReceiptBadge": "收货",
+  "qcReceiptWaiting": "收货待验货 {count}件",
+  "qcChecked": "已验货 {count}件",
+  "qcNothingBody": "通过“订货”导入的文件和收货的货物会作为待验货列在这里。"
 }

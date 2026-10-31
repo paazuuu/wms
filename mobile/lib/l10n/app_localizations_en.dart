@@ -13236,4 +13236,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plNoneAwaiting => 'Nothing awaiting inspection';
+
+  @override
+  String get qcReceiptBadge => 'Received';
+
+  @override
+  String qcReceiptWaiting(int count) {
+    return '$count received, awaiting inspection';
+  }
+
+  @override
+  String qcChecked(int count) {
+    return '$count inspected';
+  }
+
+  @override
+  String get qcNothingBody =>
+      'Files taken in under 発注 and goods received are listed here to inspect.';
 }

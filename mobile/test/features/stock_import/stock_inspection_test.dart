@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
@@ -315,6 +316,47 @@ void main() {
     expect(find.byKey(const ValueKey('qc-file-21')), findsOneWidget);
     expect(find.byKey(const ValueKey('qc-file-22')), findsNothing);
     expect(find.textContaining('未検品 9/9行'), findsOneWidget);
+  });
+
+  testWidgets('one 検品: files waiting first, then what was checked; 受領 with its kinds apart (0174)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    AwaitingImport waiting(int id) => AwaitingImport.fromJson({
+          'id': id, 'original_name': '請求書$id.pdf', 'warehouse_id': 1, 'lines': 9, 'left': 9, 'quantity_left': 4100,
+        });
+    final stock = _Stock(waiting: [waiting(21), waiting(22), waiting(23), waiting(24)]);
+    await pumpApp(tester, const QcInspectionListScreen(), overrides: [
+      _signedIn(['inspection.confirm', 'inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      masterImportsProvider.overrideWith((ref) async => [
+            MasterImport.fromJson({
+              'id': 18, 'status': 'stock_done', 'source': 'stock_file', 'warehouse_id': 1, 'original_name': '請求書18.pdf',
+              'original_path': 'x',
+            }),
+            MasterImport.fromJson({'id': 21, 'status': 'awaiting_inspection', 'source': 'stock_file', 'warehouse_id': 1}),
+          ]),
+    ]);
+    // Every file waiting, not only the first three.
+    for (final id in [21, 22, 23, 24]) {
+      expect(find.byKey(ValueKey('qc-file-$id')), findsOneWidget);
+    }
+    expect(find.byKey(const ValueKey('qc-file-waiting-all')), findsNothing);
+    // Checked below.
+    expect(find.text('検品済み 1件'), findsOneWidget);
+    expect(find.byKey(const ValueKey('qc-file-done-18')), findsOneWidget);
+    // The kinds are 受領's: not shown for all.
+    expect(find.text('合格'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('qc-src-receipt')));
+    await tester.pumpAndSettle();
+    expect(find.text('合格'), findsOneWidget);
+    expect(find.byKey(const ValueKey('qc-file-21')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('qc-src-file')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('qc-file-21')), findsOneWidget);
+    // 取込の検品 is not a menu of its own any more.
+    final entries = buildFeatureCatalog().expand((g) => g.entries);
+    expect(entries.firstWhere((e) => e.id == 'stock_inspection').inMenu, isFalse);
+    expect(entries.firstWhere((e) => e.id == 'inspection').requiredAnyOf, contains('inventory.adjust'));
   });
 
   testWidgets('the calendar is small enough to be seen whole, its files beside it on a wide screen', (tester) async {

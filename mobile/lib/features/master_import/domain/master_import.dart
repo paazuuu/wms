@@ -573,6 +573,7 @@ class MasterImport extends Equatable {
     this.supplierName,
     this.registrationNumber,
     this.docNumber,
+    this.warehouseId,
     this.warehouseName,
     this.files = const [],
     this.lineCount = 0,
@@ -604,6 +605,7 @@ class MasterImport extends Equatable {
   final String? supplierName;
   final String? registrationNumber;
   final String? docNumber;
+  final int? warehouseId;
   final String? warehouseName;
   final List<MasterImportFile> files;
   final int lineCount;
@@ -654,6 +656,7 @@ class MasterImport extends Equatable {
       supplierName: j['supplier_name']?.toString(),
       registrationNumber: j['registration_number']?.toString(),
       docNumber: j['doc_number']?.toString(),
+      warehouseId: (j['warehouse_id'] as num?)?.toInt(),
       warehouseName: j['warehouse_name']?.toString(),
       files: [
         for (final k in const ['original', 'converted', 'corrected'])

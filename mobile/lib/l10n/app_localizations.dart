@@ -23035,6 +23035,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'検品待ちの商品はありません'**
   String get plNoneAwaiting;
+
+  /// No description provided for @qcReceiptBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領'**
+  String get qcReceiptBadge;
+
+  /// No description provided for @qcReceiptWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'受領の検品待ち {count}件'**
+  String qcReceiptWaiting(int count);
+
+  /// No description provided for @qcChecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済み {count}件'**
+  String qcChecked(int count);
+
+  /// No description provided for @qcNothingBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注で取り込んだファイルや受領した荷物が、ここに検品待ちとして並びます。'**
+  String get qcNothingBody;
 }
 
 class _AppLocalizationsDelegate

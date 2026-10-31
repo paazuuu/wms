@@ -183,7 +183,8 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.fact_check_outlined,
             status: FeatureStatus.ready,
             builder: _inspectionList,
-            requiredAnyOf: ['inspection.view', 'inspection.confirm'],
+            // One 検品 for files and received goods (0174).
+            requiredAnyOf: ['inspection.view', 'inspection.confirm', 'inventory.adjust'],
           ),
           // Stock read in from files waits here until it is counted (0148).
           FeatureEntry(
@@ -192,6 +193,8 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _stockInspection,
             requiredAnyOf: ['inspection.confirm', 'inventory.adjust'],
+            // Inside 検品 now (0174); its address stays.
+            inMenu: false,
           ),
           // Most deliveries are fine: settle them as good in one go (0099).
           FeatureEntry(

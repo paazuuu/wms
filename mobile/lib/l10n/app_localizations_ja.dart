@@ -12971,4 +12971,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get plNoneAwaiting => '検品待ちの商品はありません';
+
+  @override
+  String get qcReceiptBadge => '受領';
+
+  @override
+  String qcReceiptWaiting(int count) {
+    return '受領の検品待ち $count件';
+  }
+
+  @override
+  String qcChecked(int count) {
+    return '検品済み $count件';
+  }
+
+  @override
+  String get qcNothingBody => '発注で取り込んだファイルや受領した荷物が、ここに検品待ちとして並びます。';
 }

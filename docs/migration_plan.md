@@ -8212,6 +8212,22 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 商品ライブラリー: 検品待ち beside 全商品・在庫あり・在庫なし — products with
   stock from a file not yet inspected, in the warehouse shown.
 
+## 0174 (app): one 検品
+
+- 検品 and 取込の検品 are one menu entry, 検品. 取込の検品 leaves the menu; its
+  address and the buttons to it stay.
+- Filter by where it came from: すべて · ファイル取込 · 受領.
+  - すべて: files waiting (every one, first), then received goods waiting
+    (PENDING), then 検品済み — files checked and in stock, and received
+    goods with a result.
+  - ファイル取込: the files only, waiting then checked.
+  - 受領: the received goods as before, with 未検品・一部合格・不合格・保留・合格
+    (those kinds are received goods' only).
+- A file opens its lines to count (the 取込の検品 screen) as before; a checked
+  one opens its import.
+- 検品 is open to inventory.adjust too (as 取込の検品 was).
+- `MasterImport.warehouseId` is read from the list.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
