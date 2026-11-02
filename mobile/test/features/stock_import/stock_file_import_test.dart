@@ -358,7 +358,7 @@ void main() {
       '請求書\n発行日,2026/08/31\nJANコード,数量\n$_jan1,500\n$_jan2,100\n',
       products: {_jan1: 'テストペン 青', _jan2: 'テストノート'},
       unplanned: [
-        UnplannedLine.fromJson({
+        UnplannedLine.fromJson(const {
           'import_id': 7, 'line_no': 1, 'jan_code': _jan2, 'quantity': 90, 'name': 'テストノート',
           'received_at': '2026-08-20T01:00:00Z',
         }),
@@ -386,7 +386,7 @@ void main() {
       tester,
       'JANコード,数量\n$_jan2,100\n',
       products: {_jan2: 'テストノート'},
-      unplanned: [UnplannedLine.fromJson({'import_id': 7, 'line_no': 1, 'jan_code': _jan2, 'quantity': 100})],
+      unplanned: [UnplannedLine.fromJson(const {'import_id': 7, 'line_no': 1, 'jan_code': _jan2, 'quantity': 100})],
     );
     expect(find.byKey(const ValueKey('sf-unplanned-differs')), findsNothing);
     await tester.ensureVisible(find.byKey(const ValueKey('sf-unplanned-tie')));
