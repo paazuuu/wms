@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../../delivery/application/delivery_providers.dart';
+import '../../evidence/domain/import_document.dart';
 import '../../master_import/data/master_import_repository.dart' show masterImportBucket;
 import '../domain/stock_file.dart';
 import '../domain/stock_ledger.dart';
@@ -43,7 +44,8 @@ abstract class StockImportRepository {
 
   /// Keeps [lines] for inspection in [warehouseId] (0148): nothing is
   /// booked until [inspect].
-  Future<ApiResult<StockFileResult>> stage(int warehouseId, List<StockFileLine> lines, {String? fileName, String? fileType});
+  Future<ApiResult<StockFileResult>> stage(int warehouseId, List<StockFileLine> lines,
+      {String? fileName, String? fileType});
 
   /// Stock files waiting for inspection.
   Future<ApiResult<List<AwaitingImport>>> awaiting({int? warehouseId});
@@ -60,6 +62,19 @@ abstract class StockImportRepository {
 
   /// Stock files dated from [from] to [to], for the calendar.
   Future<ApiResult<List<CalendarImport>>> calendar(DateTime from, DateTime to);
+
+  /// A line checked in by mistake, taken back (0179): its stock booked back,
+  /// the line waiting again.
+  Future<ApiResult<bool>> uninspect(int importId, int lineNo);
+
+  /// The delivery note read while inspecting [importId], kept with it.
+  Future<ApiResult<bool>> linkInspectionDocument(int importId, int documentId);
+
+  /// The delivery notes kept with [importId]'s inspection.
+  Future<ApiResult<List<ImportDocument>>> inspectionDocuments(int importId);
+
+  /// The days lines were checked in, from [from] to [to] (検品履歴).
+  Future<ApiResult<List<InspectionDay>>> inspectionCalendar(DateTime from, DateTime to);
 }
 
 /// An earlier import of the same file or the same lines.
@@ -123,11 +138,13 @@ class StockImportRepositoryImpl implements StockImportRepository {
   }
 
   /// [jans] a few hundred at a time, so the URL stays short.
-  Future<List<Map>> _byJan(String table, String select, List<String> jans, [Map<String, dynamic> extra = const {}]) async {
+  Future<List<Map>> _byJan(String table, String select, List<String> jans,
+      [Map<String, dynamic> extra = const {}]) async {
     final out = <Map>[];
     for (var i = 0; i < jans.length; i += 200) {
       final part = jans.sublist(i, i + 200 > jans.length ? jans.length : i + 200);
-      final r = await _rest.get('/$table', queryParameters: {'select': select, 'jan_code': 'in.(${part.join(',')})', ...extra});
+      final r = await _rest
+          .get('/$table', queryParameters: {'select': select, 'jan_code': 'in.(${part.join(',')})', ...extra});
       out.addAll((r.data as List? ?? const []).whereType<Map>());
     }
     return out;
@@ -178,7 +195,8 @@ class StockImportRepositoryImpl implements StockImportRepository {
     try {
       await _storage.post('/object/$masterImportBucket/$path',
           data: bytes, options: Options(headers: {'Content-Type': contentType}));
-      final r = await _rest.post('/rpc/stock_file_import_attach', data: {'p_id': importId, 'p_name': fileName, 'p_path': path});
+      final r = await _rest
+          .post('/rpc/stock_file_import_attach', data: {'p_id': importId, 'p_name': fileName, 'p_path': path});
       return ApiSuccess(r.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
@@ -204,8 +222,11 @@ class StockImportRepositoryImpl implements StockImportRepository {
   Future<ApiResult<List<DuplicateImport>>> duplicates({String? file, String? lines}) async {
     try {
       final r = await _rest.post('/rpc/stock_file_import_duplicates', data: {'p_file': file, 'p_lines': lines});
-      final d = r.data is List && (r.data as List).isNotEmpty && (r.data as List).first is List ? (r.data as List).first : r.data;
-      return ApiSuccess([for (final e in (d as List? ?? const []).whereType<Map>()) DuplicateImport.fromJson(e.cast())]);
+      final d = r.data is List && (r.data as List).isNotEmpty && (r.data as List).first is List
+          ? (r.data as List).first
+          : r.data;
+      return ApiSuccess(
+          [for (final e in (d as List? ?? const []).whereType<Map>()) DuplicateImport.fromJson(e.cast())]);
     } on DioException catch (e) {
       return mapDioError<List<DuplicateImport>>(e);
     }
@@ -214,7 +235,8 @@ class StockImportRepositoryImpl implements StockImportRepository {
   @override
   Future<ApiResult<bool>> fingerprint(int importId, {String? file, String? lines}) async {
     try {
-      final r = await _rest.post('/rpc/stock_file_import_fingerprint', data: {'p_id': importId, 'p_file': file, 'p_lines': lines});
+      final r = await _rest
+          .post('/rpc/stock_file_import_fingerprint', data: {'p_id': importId, 'p_file': file, 'p_lines': lines});
       return ApiSuccess(r.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
@@ -231,6 +253,7 @@ class StockImportRepositoryImpl implements StockImportRepository {
       return mapDioError<int>(e);
     }
   }
+
   @override
   Future<ApiResult<StockFileResult>> stage(int warehouseId, List<StockFileLine> lines,
       {String? fileName, String? fileType}) async {
@@ -315,6 +338,50 @@ class StockImportRepositoryImpl implements StockImportRepository {
       return mapDioError<List<CalendarImport>>(e);
     }
   }
+
+  @override
+  Future<ApiResult<bool>> uninspect(int importId, int lineNo) async {
+    try {
+      await _rest.post('/rpc/stock_file_uninspect', data: {'p_id': importId, 'p_line_no': lineNo});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> linkInspectionDocument(int importId, int documentId) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_link_inspection_document',
+          data: {'p_import_id': importId, 'p_document_id': documentId});
+      return ApiSuccess(r.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<ImportDocument>>> inspectionDocuments(int importId) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_inspection_documents', data: {'p_import_id': importId});
+      return ApiSuccess([
+        for (final e in _rows(r.data)) ImportDocument.fromJson({...e.cast<String, dynamic>(), 'purpose': 'ocr'}),
+      ]);
+    } on DioException catch (e) {
+      return mapDioError<List<ImportDocument>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<InspectionDay>>> inspectionCalendar(DateTime from, DateTime to) async {
+    String day(DateTime d) => DocumentDate(d, DocumentDateSource.manual).wire;
+    try {
+      final r = await _rest.post('/rpc/stock_file_inspection_calendar', data: {'p_from': day(from), 'p_to': day(to)});
+      return ApiSuccess([for (final e in _rows(r.data)) InspectionDay.fromJson(e.cast())]);
+    } on DioException catch (e) {
+      return mapDioError<List<InspectionDay>>(e);
+    }
+  }
 }
 
 final stockImportRepositoryProvider = Provider<StockImportRepository>((ref) => StockImportRepositoryImpl(
@@ -327,6 +394,17 @@ final stockImportRepositoryProvider = Provider<StockImportRepository>((ref) => S
 final pendingInspectionProvider = FutureProvider.autoDispose<PendingInspection>((ref) async {
   final r = await ref.watch(stockImportRepositoryProvider).pendingInspection();
   return r is ApiSuccess<PendingInspection> ? r.data : const PendingInspection();
+});
+
+/// The delivery notes kept with an import's inspection (0179); none when
+/// they cannot be read.
+final inspectionDocumentsProvider = FutureProvider.autoDispose.family<List<ImportDocument>, int>((ref, importId) async {
+  try {
+    final r = await ref.watch(stockImportRepositoryProvider).inspectionDocuments(importId);
+    return r is ApiSuccess<List<ImportDocument>> ? r.data : const [];
+  } catch (_) {
+    return const [];
+  }
 });
 
 /// Stock files waiting for their inspection.

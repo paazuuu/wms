@@ -128,7 +128,8 @@ DocumentDate findDocumentDate({
 const keepYears = 7;
 
 /// The last day [date]'s import is kept.
-DateTime keptUntil(DateTime date) => DateTime(date.year + keepYears, date.month, date.day).subtract(const Duration(days: 1));
+DateTime keptUntil(DateTime date) =>
+    DateTime(date.year + keepYears, date.month, date.day).subtract(const Duration(days: 1));
 
 /// A stock file waiting for its inspection (0148).
 class AwaitingImport extends Equatable {
@@ -276,7 +277,8 @@ class InspectionResult extends Equatable {
 
   factory InspectionResult.fromJson(Map<String, dynamic> j) {
     int n(Object? v) => (v as num?)?.toInt() ?? 0;
-    return InspectionResult(lines: n(j['lines']), change: n(j['change']), difference: n(j['difference']), left: n(j['left']));
+    return InspectionResult(
+        lines: n(j['lines']), change: n(j['change']), difference: n(j['difference']), left: n(j['left']));
   }
 
   @override
@@ -318,4 +320,69 @@ class PendingInspection extends Equatable {
 
   @override
   List<Object?> get props => [_byWarehouse];
+}
+
+/// One day lines of a stock file were checked in (0179), Japan time: the
+/// inspection's own calendar — stamped when each line was checked in.
+class InspectionDay extends Equatable {
+  const InspectionDay({
+    required this.importId,
+    required this.day,
+    this.lines = 0,
+    this.units = 0,
+    this.firstAt,
+    this.lastAt,
+    this.by,
+    this.fileName,
+    this.warehouseName,
+    this.status,
+    this.lineCount = 0,
+    this.documents = 0,
+  });
+
+  final int importId;
+  final DateTime day;
+
+  /// Lines checked in that day, and how many units.
+  final int lines;
+  final int units;
+  final DateTime? firstAt;
+  final DateTime? lastAt;
+
+  /// Who checked them in (names, joined).
+  final String? by;
+  final String? fileName;
+  final String? warehouseName;
+  final String? status;
+
+  /// The import's lines in all.
+  final int lineCount;
+
+  /// Delivery notes kept with the inspection.
+  final int documents;
+
+  bool get allDone => status == 'stock_done';
+
+  factory InspectionDay.fromJson(Map<String, dynamic> j) {
+    int n(Object? v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}') ?? 0;
+    String? s(Object? v) => v == null || '$v'.trim().isEmpty ? null : '$v'.trim();
+    final d = DateTime.tryParse('${j['day'] ?? ''}') ?? DateTime(2000);
+    return InspectionDay(
+      importId: n(j['import_id']),
+      day: DateTime(d.year, d.month, d.day),
+      lines: n(j['lines']),
+      units: n(j['units']),
+      firstAt: DateTime.tryParse('${j['first_at'] ?? ''}')?.toLocal(),
+      lastAt: DateTime.tryParse('${j['last_at'] ?? ''}')?.toLocal(),
+      by: s(j['by']),
+      fileName: s(j['original_name']),
+      warehouseName: s(j['warehouse_name']),
+      status: s(j['status']),
+      lineCount: n(j['line_count']),
+      documents: n(j['documents']),
+    );
+  }
+
+  @override
+  List<Object?> get props => [importId, day, lines, units, firstAt, lastAt, by, fileName, status, documents];
 }

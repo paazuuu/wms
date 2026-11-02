@@ -8300,6 +8300,50 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - 「読み取った納品書を写真つきで見る」 opens the same note in the view above.
 - `MasterImportRepository.read` takes a `purpose` (library by default).
 
+## 0179: pictures kept per JAN, undo a check-in, inspection notes and calendar
+
+- jan_photos: a picture found on the web for a JAN is kept in product-images
+  under jan/<JAN>.<ext>, with the page it came from.
+  - The database is asked first: a JAN is looked up on the web once, found
+    or not (found = false is noted too), and never again.
+  - A JAN whose name was never looked up has no page yet; it is not noted, so
+    it is tried once it has one.
+  - jan-catalog `POST /photos/jans {jans, look}` (anyone signed in): each
+    JAN's kept picture as a link for an hour; at most ten new lookups a call.
+  - 「写真を探す」 for a product uses the kept picture first, and keeps what it
+    finds for the JAN.
+  - 納品書を写して見る shows the kept picture for goods not in the library.
+- stock_file_uninspect(import, line): a line checked in by mistake taken back,
+  by those who inspect (inspection.confirm or inventory.adjust — an ordinary
+  stock role, not only a manager).
+  - Its stock is booked back as a correction (修正), the line waits again,
+    and a finished import goes back to 検品待ち.
+  - Refused (uninspect_below_zero) when the stock already went out and would
+    fall below zero.
+  - 取込の検品: an undo icon on each checked-in line, with a confirmation.
+- import_documents.inspection_import_id: the delivery note read on 取込の
+  検品 is kept with that import (stock_file_link_inspection_document).
+  - 取込の検品 lists 検品時のファイル: a picture is shown in the app, a PDF
+    saved; each can be downloaded.
+  - ocr documents are visible to those who inspect.
+- stock_file_inspection_calendar(from, to): the days lines were checked in
+  (Japan time), per import — lines, units, first and last time, by whom, and
+  the notes kept.
+  - 検品履歴カレンダー (現場作業, and the calendar icon on 検品): stamped by
+    the system on each check-in, never typed. A file opens its inspection.
+- No foreign keys on the new table and column: システムの初期化 empties
+  import_documents and master_imports together.
+- system-reset keeps jan/ pictures and jan_photos unless 「AIが調べた商品名・
+  重量・写真」 is chosen (0180 counts them with the lookups).
+- 税理士用ファイル:
+  - zh name 税务师用的文件.
+  - 「別タブで見る」 per month: the same sheets as the Excel (請求書一覧・明細・
+    仕入先別・説明) in a browser tab, switched along the top, nothing
+    downloaded. Where there are no tabs (phone and desktop apps) the Excel
+    is saved instead.
+  - htmlBook (core/export/html_sheet.dart): several sheets in one page,
+    without a script; numbers grouped (48,400).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

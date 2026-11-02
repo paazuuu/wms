@@ -23130,7 +23130,7 @@ abstract class AppLocalizations {
   /// No description provided for @srLookups.
   ///
   /// In ja, this message translates to:
-  /// **'AIが調べた商品名・重量'**
+  /// **'AIが調べた商品名・重量・写真'**
   String get srLookups;
 
   /// No description provided for @srLookupsDetail.
@@ -23342,6 +23342,150 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'読み取った納品書を写真つきで見る'**
   String get siNoteView;
+
+  /// No description provided for @siUndo.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品を取り消す'**
+  String get siUndo;
+
+  /// No description provided for @siUndoQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行の検品を取り消しますか？'**
+  String get siUndoQ;
+
+  /// No description provided for @siUndoBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」の検品を取り消します。入庫した {qty}個 を在庫から戻し（修正として記録）、この行はもう一度「検品待ち」になります。'**
+  String siUndoBody(String name, int qty);
+
+  /// No description provided for @siUndoGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消す'**
+  String get siUndoGo;
+
+  /// No description provided for @siUndone.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」の検品を取り消しました（{qty}個を在庫から戻しました）'**
+  String siUndone(String name, int qty);
+
+  /// No description provided for @siUndoBelowZero.
+  ///
+  /// In ja, this message translates to:
+  /// **'この商品はすでに出庫・移動などで在庫が減っているため、検品を取り消すと在庫がマイナスになります。先に在庫を確認してください。'**
+  String get siUndoBelowZero;
+
+  /// No description provided for @siFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品時のファイル（{n}件）'**
+  String siFiles(int n);
+
+  /// No description provided for @siFileOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'見る'**
+  String get siFileOpen;
+
+  /// No description provided for @siFileDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get siFileDownload;
+
+  /// No description provided for @featInspectionCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品履歴カレンダー'**
+  String get featInspectionCalendar;
+
+  /// No description provided for @featInspectionCalendarDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品した日を自動で記録し、日ごとに何をいつ誰が検品したか、検品時の納品書とともに見返せます'**
+  String get featInspectionCalendarDesc;
+
+  /// No description provided for @icTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品履歴カレンダー'**
+  String get icTitle;
+
+  /// No description provided for @icIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品した日付と時刻は、検品完了のときに自動で記録されます。日付を押すとその日の検品が、取込を押すと検品の中身（検品時のファイル・取り消し）が開きます。'**
+  String get icIntro;
+
+  /// No description provided for @icMonthList.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月の検品 {n}件'**
+  String icMonthList(int n);
+
+  /// No description provided for @icDayList.
+  ///
+  /// In ja, this message translates to:
+  /// **'{day} の検品 {n}件'**
+  String icDayList(String day, int n);
+
+  /// No description provided for @icNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間に検品はありません'**
+  String get icNone;
+
+  /// No description provided for @icDayLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行'**
+  String icDayLines(int n);
+
+  /// No description provided for @icStamped.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品日時 {when}'**
+  String icStamped(String when);
+
+  /// No description provided for @icChecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}行・{units}個を検品'**
+  String icChecked(int lines, String units);
+
+  /// No description provided for @icNotes.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品時の納品書 {n}件'**
+  String icNotes(int n);
+
+  /// No description provided for @icAllDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済み'**
+  String get icAllDone;
+
+  /// No description provided for @icSomeLeft.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ちあり'**
+  String get icSomeLeft;
+
+  /// No description provided for @txOpenTab.
+  ///
+  /// In ja, this message translates to:
+  /// **'別タブで見る'**
+  String get txOpenTab;
+
+  /// No description provided for @txTabHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。'**
+  String get txTabHint;
 }
 
 class _AppLocalizationsDelegate

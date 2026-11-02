@@ -67,13 +67,25 @@ final deliveryNotePickerProvider = Provider<PickNote>((_) => _pick);
 
 /// The note read by the AI and kept as evidence (purpose ocr): its lines
 /// with a JAN or a name.
-Future<ApiResult<List<NoteLine>>> readDeliveryNote(WidgetRef ref, String fileName, Uint8List bytes) async {
+Future<ApiResult<List<NoteLine>>> readDeliveryNote(WidgetRef ref, String fileName, Uint8List bytes) async =>
+    switch (await readDeliveryNoteKept(ref, fileName, bytes)) {
+      ApiSuccess(:final data) => ApiSuccess(data.lines),
+      ApiFailure(:final message) => ApiFailure(message: message),
+    };
+
+/// The same, with the id of the copy kept (to keep it with an inspection).
+Future<ApiResult<({List<NoteLine> lines, int? documentId})>> readDeliveryNoteKept(
+    WidgetRef ref, String fileName, Uint8List bytes) async {
   final r = await ref.read(masterImportRepositoryProvider).read(fileName, bytes, keepRows: true, purpose: 'ocr');
   return switch (r) {
-    ApiSuccess(:final data) => ApiSuccess([
-        for (final l in data.lines)
-          if (l.janCode.trim().isNotEmpty || l.supplierName.trim().isNotEmpty || l.productCode.trim().isNotEmpty) NoteLine.of(l),
-      ]),
+    ApiSuccess(:final data) => ApiSuccess((
+        lines: [
+          for (final l in data.lines)
+            if (l.janCode.trim().isNotEmpty || l.supplierName.trim().isNotEmpty || l.productCode.trim().isNotEmpty)
+              NoteLine.of(l),
+        ],
+        documentId: data.documentId,
+      )),
     ApiFailure(:final message) => ApiFailure(message: message),
   };
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
+import 'package:wms_mobile/core/ui/open_window.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/tax_files/data/tax_files_repository.dart';
@@ -149,6 +150,50 @@ void main() {
     expect(saved.last, '2026-08_仕入一覧_証拠.zip');
   });
 
+  testWidgets('a month opened in a new tab, nothing downloaded: its sheets switched along the top (0179)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final saved = <String>[];
+    final tab = _Tab();
+    await pumpApp(tester, const TaxFilesScreen(initialYear: 2026), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(
+          const AuthUser(id: 'u1', email: 'a@b.test', name: '経理', permissions: ['report.view']))),
+      taxFilesRepositoryProvider.overrideWithValue(_Repo([
+        TaxPurchase.fromJson(_import(18, '2026-09-01', [_line(1, '100', '440', '44000')])),
+      ])),
+      taxFileSaverProvider.overrideWithValue((name, bytes) async => saved.add(name)),
+      taxTabOpenerProvider.overrideWithValue(() => tab),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('tx-tab-2026-9')));
+    await tester.pumpAndSettle();
+    expect(saved, isEmpty);
+    final html = tab.shown!;
+    expect(html, contains('<title>2026年9月分 仕入一覧</title>'));
+    for (final sheet in ['請求書一覧', '明細', '仕入先別', '説明']) {
+      expect(html, contains('>$sheet</label>'));
+    }
+    expect(html, contains('新東光通商株式会社'));
+    expect(html, contains('<td class="num">48,400</td>'));
+  });
+
+  testWidgets('where no tab can be opened, the Excel is saved instead', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final saved = <String>[];
+    await pumpApp(tester, const TaxFilesScreen(initialYear: 2026), overrides: [
+      authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(
+          const AuthUser(id: 'u1', email: 'a@b.test', name: '経理', permissions: ['report.view']))),
+      taxFilesRepositoryProvider.overrideWithValue(_Repo([
+        TaxPurchase.fromJson(_import(18, '2026-09-01', [_line(1, '100', '440', '44000')])),
+      ])),
+      taxFileSaverProvider.overrideWithValue((name, bytes) async => saved.add(name)),
+      taxTabOpenerProvider.overrideWithValue(() => null),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('tx-tab-2026-9')));
+    await tester.pumpAndSettle();
+    expect(saved, ['2026-09_仕入一覧.xlsx']);
+  });
+
   testWidgets('without the right the books are not shown', (tester) async {
     await pumpApp(tester, const TaxFilesScreen(), overrides: [
       authControllerProvider.overrideWith((ref) => fakeAuthControllerFor(
@@ -168,4 +213,14 @@ class _Repo implements TaxFilesRepository {
 
   @override
   Future<ApiResult<Uint8List>> original(TaxPurchase p) async => ApiSuccess(Uint8List.fromList([p.importId]));
+}
+
+class _Tab implements HtmlTab {
+  String? shown;
+
+  @override
+  void show(String html) => shown = html;
+
+  @override
+  void close() {}
 }

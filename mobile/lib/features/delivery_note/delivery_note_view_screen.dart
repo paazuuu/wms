@@ -8,6 +8,7 @@ import '../../core/ui/copy_text.dart';
 import '../../l10n/app_localizations.dart';
 import '../product/application/product_providers.dart';
 import '../product/data/market_names.dart' show marketNameOf;
+import '../product/data/web_photos.dart';
 import '../product/domain/product.dart';
 import '../product_library/presentation/product_thumb.dart';
 import 'delivery_note.dart';
@@ -17,6 +18,9 @@ import 'delivery_note.dart';
 /// picture, name, JAN, maker, 品番 and how many — to find the goods by sight
 /// rather than by text alone. A good with no picture is shown without one.
 /// Tapping a line marks it seen (on this screen only). Nothing is booked.
+/// A good not in 商品ライブラリー shows the picture kept for its JAN (0179):
+/// from the database when it was found before, else looked up on the web
+/// once and kept — never twice for the same JAN.
 class DeliveryNoteViewScreen extends ConsumerStatefulWidget {
   const DeliveryNoteViewScreen({super.key, this.lines, this.fileName});
 
@@ -34,6 +38,32 @@ class _DeliveryNoteViewScreenState extends ConsumerState<DeliveryNoteViewScreen>
   bool _reading = false;
   String? _error;
   final Set<int> _seen = {};
+
+  /// JAN → kept picture link, for goods not in the library.
+  Map<String, String> _janPhotos = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.lines != null) WidgetsBinding.instance.addPostFrameCallback((_) => _loadPhotos());
+  }
+
+  Future<void> _loadPhotos() async {
+    final lines = _lines;
+    if (lines == null || !mounted) return;
+    final known = <String>{};
+    try {
+      known.addAll((await ref.read(productListProvider.future)).map((p) => p.janCode));
+    } catch (_) {}
+    final jans = {
+      for (final l in lines)
+        if (l.jan.isNotEmpty && !known.contains(l.jan)) l.jan
+    }.toList();
+    if (jans.isEmpty || !mounted) return;
+    final r = await ref.read(webPhotoRepositoryProvider).janPhotos(jans, look: true);
+    if (!mounted || lines != _lines) return;
+    if (r case ApiSuccess(:final data)) setState(() => _janPhotos = data);
+  }
 
   Future<void> _take() async {
     final camera = await askCameraOrFile(context);
@@ -54,11 +84,13 @@ class _DeliveryNoteViewScreenState extends ConsumerState<DeliveryNoteViewScreen>
           _lines = data;
           _fileName = f.name;
           _seen.clear();
+          _janPhotos = const {};
           if (data.isEmpty) _error = l10n.dnNothingRead;
         case ApiFailure(:final message):
           _error = humanizeApiErrorMessage(l10n, message);
       }
     });
+    _loadPhotos();
   }
 
   @override
@@ -124,24 +156,27 @@ class _DeliveryNoteViewScreenState extends ConsumerState<DeliveryNoteViewScreen>
             // The picture first: what to look for on the shelf.
             p != null
                 ? ProductThumb(productId: p.id, janCode: p.janCode, productName: p.name, size: 84)
-                : Container(
-                    key: ValueKey('dn-nophoto-${l.lineNo}'),
-                    width: 84,
-                    height: 84,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.image_not_supported_outlined, color: scheme.onSurfaceVariant),
-                  ),
+                : _janPhotos[l.jan] != null
+                    ? ClipRRect(
+                        key: ValueKey('dn-webphoto-${l.lineNo}'),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          _janPhotos[l.jan]!,
+                          width: 84,
+                          height: 84,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => _noPhoto(scheme, l),
+                        ),
+                      )
+                    : _noPhoto(scheme, l),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(name.isEmpty ? l.code : name,
                     style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700), maxLines: 3),
                 if ([p?.maker ?? l.maker, p?.sku ?? l.code].any((x) => x.trim().isNotEmpty))
-                  Text([p?.maker ?? l.maker, p?.sku ?? l.code].where((x) => x.trim().isNotEmpty).join(' · '), style: muted),
+                  Text([p?.maker ?? l.maker, p?.sku ?? l.code].where((x) => x.trim().isNotEmpty).join(' · '),
+                      style: muted),
                 if (l.jan.isNotEmpty)
                   Row(children: [
                     Text('JAN ${l.jan}', key: ValueKey('dn-jan-${l.lineNo}'), style: theme.textTheme.bodySmall),
@@ -167,4 +202,16 @@ class _DeliveryNoteViewScreenState extends ConsumerState<DeliveryNoteViewScreen>
       ),
     );
   }
+
+  Widget _noPhoto(ColorScheme scheme, NoteLine l) => Container(
+        key: ValueKey('dn-nophoto-${l.lineNo}'),
+        width: 84,
+        height: 84,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(Icons.image_not_supported_outlined, color: scheme.onSurfaceVariant),
+      );
 }

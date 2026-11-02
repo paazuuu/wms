@@ -16,6 +16,7 @@ import 'package:wms_mobile/features/price_book/domain/price_book.dart';
 import 'package:wms_mobile/features/product_library/application/product_library_providers.dart';
 import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
 import 'package:wms_mobile/features/product/data/market_names.dart';
+import 'package:wms_mobile/features/evidence/domain/import_document.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
@@ -148,6 +149,18 @@ class _FakeStock implements StockImportRepository {
 
   @override
   Future<ApiResult<List<CalendarImport>>> calendar(DateTime from, DateTime to) async => const ApiSuccess([]);
+
+  @override
+  Future<ApiResult<bool>> uninspect(int importId, int lineNo) async => const ApiSuccess(true);
+
+  @override
+  Future<ApiResult<bool>> linkInspectionDocument(int importId, int documentId) async => const ApiSuccess(true);
+
+  @override
+  Future<ApiResult<List<ImportDocument>>> inspectionDocuments(int importId) async => const ApiSuccess([]);
+
+  @override
+  Future<ApiResult<List<InspectionDay>>> inspectionCalendar(DateTime from, DateTime to) async => const ApiSuccess([]);
 }
 
 /// 読み取った内容を確認しました — nothing goes in without it.

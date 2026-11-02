@@ -15,6 +15,12 @@ abstract class WebPhotoRepository {
   /// Up to ten products, by id or by JAN; only those with no picture yet,
   /// unless [again] (a person asking for another one) or [pageUrl] is given.
   Future<ApiResult<List<WebPhotoResult>>> find({List<int> productIds, List<String> jans, String? pageUrl, bool again});
+
+  /// The kept picture of each JAN (0179), as a link to show for an hour:
+  /// what was found before comes from the database; with [look], a JAN never
+  /// tried is looked up on the web once (ten a call) and kept. JANs with no
+  /// picture are left out.
+  Future<ApiResult<Map<String, String>>> janPhotos(List<String> jans, {bool look});
 }
 
 class WebPhotoRepositoryImpl implements WebPhotoRepository {
@@ -44,6 +50,22 @@ class WebPhotoRepositoryImpl implements WebPhotoRepository {
             pageUrl: e['page_url'] as String?,
           ),
       ]);
+    } on DioException catch (e) {
+      return mapDioError(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<Map<String, String>>> janPhotos(List<String> jans, {bool look = false}) async {
+    if (jans.isEmpty) return const ApiSuccess({});
+    try {
+      final r = await _functions.post('/jan-catalog/photos/jans',
+          data: {'jans': jans, if (look) 'look': true}, options: Options(receiveTimeout: const Duration(minutes: 3)));
+      final data = ((r.data as Map)['data'] as Map?) ?? const {};
+      return ApiSuccess({
+        for (final e in (data['results'] as List? ?? const []).whereType<Map>())
+          if (e['url'] is String && e['jan'] is String) e['jan'] as String: e['url'] as String,
+      });
     } on DioException catch (e) {
       return mapDioError(e);
     }

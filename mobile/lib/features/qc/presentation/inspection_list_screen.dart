@@ -135,6 +135,8 @@ class QcInspectionListScreen extends ConsumerWidget {
             icon: const Icon(Icons.photo_library_outlined),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DeliveryNoteViewScreen())),
           ),
+          // 検品履歴カレンダー (0179).
+          const FeatureLinkButton('inspection_calendar'),
           const FeatureLinkButton('held_stock'),
         ],
       ),

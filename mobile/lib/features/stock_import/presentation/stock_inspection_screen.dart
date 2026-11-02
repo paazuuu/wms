@@ -12,6 +12,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../evidence/application/evidence_providers.dart';
+import '../../evidence/domain/import_document.dart';
+import '../../evidence/presentation/evidence_screen.dart' show downloadEvidence;
 import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart';
 import '../../product/application/product_providers.dart';
@@ -104,11 +107,13 @@ class StockInspectionScreen extends ConsumerWidget {
 final scanChecksInProvider = StateProvider<bool>((_) => true);
 
 /// Opens the camera to scan (tests stand in for it).
-final inspectionCameraProvider = Provider<Future<void> Function(BuildContext, {
-  required String? Function(String code) validate,
-  required void Function(String code) onScan,
-  required String title,
-})>((ref) => (context, {required validate, required onScan, required title}) => Navigator.of(context).push(
+final inspectionCameraProvider = Provider<
+    Future<void> Function(
+      BuildContext, {
+      required String? Function(String code) validate,
+      required void Function(String code) onScan,
+      required String title,
+    })>((ref) => (context, {required validate, required onScan, required title}) => Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => BarcodeScanScreen(
           title: title,
@@ -215,17 +220,62 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
       _noteReading = true;
       _error = null;
     });
-    final r = await readDeliveryNote(ref, f.name, f.bytes);
+    final r = await readDeliveryNoteKept(ref, f.name, f.bytes);
     if (!mounted) return;
     setState(() {
       _noteReading = false;
       switch (r) {
         case ApiSuccess(:final data):
-          _applyNote(data, f.name);
+          _applyNote(data.lines, f.name);
         case ApiFailure(:final message):
           _error = humanizeApiErrorMessage(l10n, message);
       }
     });
+    // The note kept with this inspection, to look back at (0179).
+    if (r case ApiSuccess(data: (lines: _, documentId: final id?))) {
+      await ref.read(stockImportRepositoryProvider).linkInspectionDocument(widget.importId, id);
+      if (mounted) ref.invalidate(inspectionDocumentsProvider(widget.importId));
+    }
+  }
+
+  /// A line checked in by mistake, taken back (0179): its stock comes out
+  /// again and it waits to be checked in once more.
+  Future<void> _undo(MasterImportLine l) async {
+    final l10n = AppLocalizations.of(context);
+    final qty = l.inspectedQuantity ?? 0;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l10n.siUndoQ),
+        content: Text(l10n.siUndoBody(l.name ?? l.janCode, qty), key: const ValueKey('si-undo-body')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
+          FilledButton(
+              key: const ValueKey('si-undo-confirm'),
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l10n.siUndoGo)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final r = await ref.read(stockImportRepositoryProvider).uninspect(widget.importId, l.lineNo);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(pendingInspectionProvider);
+        ref.invalidate(awaitingImportsProvider);
+        ref.invalidate(productListProvider);
+        ref.invalidate(masterImportsProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.siUndone(l.name ?? l.janCode, qty))));
+        await _load();
+      case ApiFailure(:final message):
+        setState(() => _error = humanizeApiErrorMessage(l10n, message));
+    }
+    if (mounted) setState(() => _busy = false);
   }
 
   void _applyNote(List<NoteLine> note, String name) {
@@ -428,7 +478,8 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
           key: const ValueKey('si-note-look'),
           tooltip: l10n.dnTitle,
           icon: const Icon(Icons.photo_library_outlined),
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DeliveryNoteViewScreen())),
+          onPressed: () =>
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DeliveryNoteViewScreen())),
         ),
       ]),
       body: m == null
@@ -454,6 +505,8 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       padding: const EdgeInsets.only(top: AppSpacing.xs),
                       child: Text(l10n.siNoPermission, style: theme.textTheme.bodySmall),
                     ),
+                  // The notes read while inspecting, kept to look back at (0179).
+                  _InspectionFiles(importId: widget.importId),
                   if (open.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
@@ -496,8 +549,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(l10n.siNoteTicked(_noteName ?? '', _noteMatched),
-                                style: theme.textTheme.titleSmall),
+                            Text(l10n.siNoteTicked(_noteName ?? '', _noteMatched), style: theme.textTheme.titleSmall),
                             Text(l10n.siNoteHint, style: theme.textTheme.bodySmall),
                             if (_noteMissing > 0)
                               Text(l10n.siNoteMissing(_noteMissing),
@@ -576,6 +628,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       enabled: !_busy && may,
                       onTick: (v) => setState(() => v ? _ticked.add(l.lineNo) : _ticked.remove(l.lineNo)),
                       onCount: () => setState(() {}),
+                      onUndo: l.inspected && may && !_busy ? () => _undo(l) : null,
                     ),
                 ],
               );
@@ -751,6 +804,7 @@ class _InspectLine extends ConsumerWidget {
     required this.enabled,
     required this.onTick,
     required this.onCount,
+    this.onUndo,
   });
 
   final MasterImportLine line;
@@ -762,6 +816,9 @@ class _InspectLine extends ConsumerWidget {
   final bool enabled;
   final ValueChanged<bool> onTick;
   final VoidCallback onCount;
+
+  /// Takes a checked-in line back (0179); null where it cannot be.
+  final VoidCallback? onUndo;
 
   Future<void> _weight(BuildContext context, WidgetRef ref, Product p) async {
     final l10n = AppLocalizations.of(context);
@@ -857,7 +914,18 @@ class _InspectLine extends ConsumerWidget {
             child: ProductThumb(productId: p.id, janCode: p.janCode, productName: p.name, size: 56),
           );
     final countField = done
-        ? Text(l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? ''), style: muted)
+        ? Row(children: [
+            Expanded(
+                child: Text(l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? ''), style: muted)),
+            if (onUndo != null)
+              IconButton(
+                key: ValueKey('si-undo-${line.lineNo}'),
+                tooltip: l10n.siUndo,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.undo, size: 20),
+                onPressed: onUndo,
+              ),
+          ])
         : TextField(
             key: ValueKey('si-count-${line.lineNo}'),
             controller: count,
@@ -945,7 +1013,7 @@ class _InspectLine extends ConsumerWidget {
             c(_wMarks, p == null ? const SizedBox.shrink() : ProductMarks(product: p, size: 18)),
             c(_wFile, Align(alignment: Alignment.centerRight, child: fileSaid)),
             const SizedBox(width: 8),
-            c(_wCount, countField),
+            c(done ? _wCount + 40 : _wCount, countField),
             ...actions,
           ]),
         ),
@@ -975,12 +1043,95 @@ class _InspectLine extends ConsumerWidget {
           Row(children: [
             const SizedBox(width: 48),
             Expanded(child: fileSaid),
-            SizedBox(width: done ? 180 : 110, child: countField),
+            SizedBox(width: done ? 220 : 110, child: countField),
           ]),
           if (actions.isNotEmpty) Wrap(children: actions),
         ]),
       ),
     );
+  }
+}
+
+/// 検品時のファイル (0179): the delivery notes read while inspecting this
+/// import, kept with it — to see again (a picture here, a PDF saved) or
+/// download. Nothing when there are none.
+class _InspectionFiles extends ConsumerWidget {
+  const _InspectionFiles({required this.importId});
+
+  final int importId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final docs = ref.watch(inspectionDocumentsProvider(importId)).valueOrNull ?? const <ImportDocument>[];
+    if (docs.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final at = DateFormat('y/MM/dd HH:mm');
+    return Card(
+      key: const ValueKey('si-files'),
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.siFiles(docs.length), style: theme.textTheme.titleSmall),
+          for (final d in docs)
+            ListTile(
+              key: ValueKey('si-file-${d.id}'),
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                  (d.contentType ?? '').startsWith('image/') ? Icons.image_outlined : Icons.picture_as_pdf_outlined),
+              title: Text(d.fileName, maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Text([at.format(d.uploadedAt), if (d.uploadedByName case final n?) n].join(' · ')),
+              trailing: Wrap(children: [
+                IconButton(
+                  key: ValueKey('si-file-open-${d.id}'),
+                  tooltip: l10n.siFileOpen,
+                  icon: const Icon(Icons.visibility_outlined),
+                  onPressed: () => showKeptDocument(context, ref, d),
+                ),
+                IconButton(
+                  key: ValueKey('si-file-dl-${d.id}'),
+                  tooltip: l10n.siFileDownload,
+                  icon: const Icon(Icons.download_outlined),
+                  onPressed: () => downloadEvidence(context, ref, d),
+                ),
+              ]),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// A kept file seen again: a picture shown here (to zoom), anything else
+/// (a PDF) saved to open.
+Future<void> showKeptDocument(BuildContext context, WidgetRef ref, ImportDocument d) async {
+  final isImage = (d.contentType ?? '').startsWith('image/') ||
+      RegExp(r'\.(jpe?g|png|webp|gif)$', caseSensitive: false).hasMatch(d.fileName);
+  if (!isImage) return downloadEvidence(context, ref, d);
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  final r = await ref.read(evidenceRepositoryProvider).download(d);
+  if (!context.mounted) return;
+  switch (r) {
+    case ApiSuccess(:final data):
+      await showDialog<void>(
+        context: context,
+        builder: (c) => Dialog(
+          key: const ValueKey('kept-doc-view'),
+          insetPadding: const EdgeInsets.all(AppSpacing.sm),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            ListTile(
+              title: Text(d.fileName, maxLines: 1, overflow: TextOverflow.ellipsis),
+              trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(c)),
+            ),
+            Flexible(child: InteractiveViewer(maxScale: 6, child: Image.memory(data, fit: BoxFit.contain))),
+          ]),
+        ),
+      );
+    case ApiFailure(:final message):
+      messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
   }
 }
 

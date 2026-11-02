@@ -13030,7 +13030,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get srLookups => 'AIが調べた商品名・重量';
+  String get srLookups => 'AIが調べた商品名・重量・写真';
 
   @override
   String srLookupsDetail(String n) {
@@ -13162,4 +13162,98 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get siNoteView => '読み取った納品書を写真つきで見る';
+
+  @override
+  String get siUndo => '検品を取り消す';
+
+  @override
+  String get siUndoQ => 'この行の検品を取り消しますか？';
+
+  @override
+  String siUndoBody(String name, int qty) {
+    return '「$name」の検品を取り消します。入庫した $qty個 を在庫から戻し（修正として記録）、この行はもう一度「検品待ち」になります。';
+  }
+
+  @override
+  String get siUndoGo => '取り消す';
+
+  @override
+  String siUndone(String name, int qty) {
+    return '「$name」の検品を取り消しました（$qty個を在庫から戻しました）';
+  }
+
+  @override
+  String get siUndoBelowZero =>
+      'この商品はすでに出庫・移動などで在庫が減っているため、検品を取り消すと在庫がマイナスになります。先に在庫を確認してください。';
+
+  @override
+  String siFiles(int n) {
+    return '検品時のファイル（$n件）';
+  }
+
+  @override
+  String get siFileOpen => '見る';
+
+  @override
+  String get siFileDownload => 'ダウンロード';
+
+  @override
+  String get featInspectionCalendar => '検品履歴カレンダー';
+
+  @override
+  String get featInspectionCalendarDesc =>
+      '検品した日を自動で記録し、日ごとに何をいつ誰が検品したか、検品時の納品書とともに見返せます';
+
+  @override
+  String get icTitle => '検品履歴カレンダー';
+
+  @override
+  String get icIntro =>
+      '検品した日付と時刻は、検品完了のときに自動で記録されます。日付を押すとその日の検品が、取込を押すと検品の中身（検品時のファイル・取り消し）が開きます。';
+
+  @override
+  String icMonthList(int n) {
+    return 'この月の検品 $n件';
+  }
+
+  @override
+  String icDayList(String day, int n) {
+    return '$day の検品 $n件';
+  }
+
+  @override
+  String get icNone => 'この期間に検品はありません';
+
+  @override
+  String icDayLines(int n) {
+    return '$n行';
+  }
+
+  @override
+  String icStamped(String when) {
+    return '検品日時 $when';
+  }
+
+  @override
+  String icChecked(int lines, String units) {
+    return '$lines行・$units個を検品';
+  }
+
+  @override
+  String icNotes(int n) {
+    return '検品時の納品書 $n件';
+  }
+
+  @override
+  String get icAllDone => '検品済み';
+
+  @override
+  String get icSomeLeft => '検品待ちあり';
+
+  @override
+  String get txOpenTab => '別タブで見る';
+
+  @override
+  String get txTabHint =>
+      'ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。';
 }

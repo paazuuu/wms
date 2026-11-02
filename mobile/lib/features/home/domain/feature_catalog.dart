@@ -56,6 +56,7 @@ import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
+import '../../stock_import/presentation/inspection_calendar_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
@@ -186,6 +187,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _inspectionList,
             // One 検品 for files and received goods (0174).
             requiredAnyOf: ['inspection.view', 'inspection.confirm', 'inventory.adjust'],
+          ),
+          // 検品履歴カレンダー (0179): the days stock files were inspected,
+          // stamped as each line is checked in — also opened from 検品.
+          FeatureEntry(
+            id: 'inspection_calendar',
+            icon: Icons.event_available_outlined,
+            status: FeatureStatus.ready,
+            builder: _inspectionCalendar,
+            requiredAnyOf: ['inspection.confirm', 'inventory.adjust', 'inventory.view', 'product.view', 'product.manage'],
           ),
           // Stock read in from files waits here until it is counted (0148).
           FeatureEntry(
@@ -653,6 +663,7 @@ Widget _stockInspection(BuildContext _) => const StockInspectionScreen();
 Widget _taxFiles(BuildContext _) => const TaxFilesScreen();
 Widget _systemReset(BuildContext _) => const SystemResetScreen();
 Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
+Widget _inspectionCalendar(BuildContext _) => const InspectionCalendarScreen();
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();

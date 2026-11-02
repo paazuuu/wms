@@ -1,6 +1,10 @@
 import 'dart:convert';
 
-import 'xlsx.dart' show columnLetters;
+import 'package:intl/intl.dart' show NumberFormat;
+
+import 'xlsx.dart' show XlsxSheet, columnLetters;
+
+final _num = NumberFormat('#,##0.####');
 
 /// A table as a web page that looks like a spreadsheet: column letters along
 /// the top, row numbers down the side, gridlines, the header kept in view
@@ -19,16 +23,52 @@ String htmlSheet({
   List<List<Object?>> bottom = const [],
   String? downloadHint,
 }) {
-  const esc = HtmlEscape(HtmlEscapeMode.element);
-  String cell(Object? v) => v == null ? '' : esc.convert('$v');
-  bool numeric(Object? v) => v is num;
-  final cols = [headers.length, for (final r in [...top, ...rows, ...bottom]) r.length].fold<int>(0, (m, n) => n > m ? n : m);
+  final b = _head(title, downloadHint)..write('<div class="wrap">');
+  _table(b, headers: headers, rows: rows, flagged: flagged, top: top, bottom: bottom);
+  b.write('</div></body></html>');
+  return b.toString();
+}
 
-  final b = StringBuffer()
+/// Several sheets in one page, with the sheet names along the top to switch
+/// between them (as Excel's tabs) — the first shown. No script: a browser
+/// shows it as it is, offline too.
+String htmlBook({required String title, required List<XlsxSheet> sheets, String? downloadHint}) {
+  const esc = HtmlEscape(HtmlEscapeMode.element);
+  final b = _head(title, downloadHint, extraCss: [
+    '.pick{position:absolute;opacity:0;pointer-events:none}.sheet{display:none}',
+    'nav{display:flex;gap:4px;padding:6px 16px 0;border-bottom:1px solid var(--grid);flex-wrap:wrap}',
+    'nav label{padding:5px 14px;border:1px solid var(--grid);border-bottom:none;border-radius:6px 6px 0 0;'
+        'cursor:pointer;color:var(--hfg);background:var(--head)}',
+    '.wrap{max-height:calc(100vh - 100px)}',
+    for (var i = 0; i < sheets.length; i++)
+      '#s$i:checked~.p$i{display:block}#s$i:checked~nav label[for=s$i]{background:var(--bg);color:var(--fg);font-weight:bold}',
+  ]);
+  for (var i = 0; i < sheets.length; i++) {
+    b.write('<input class="pick" type="radio" name="sheet" id="s$i"${i == 0 ? ' checked' : ''}>');
+  }
+  b.write('<nav>');
+  for (final (i, sh) in sheets.indexed) {
+    b.write('<label for="s$i">${esc.convert(sh.name)}</label>');
+  }
+  b.write('</nav>');
+  for (final (i, sh) in sheets.indexed) {
+    b.write('<div class="sheet p$i"><div class="wrap">');
+    _table(b,
+        headers: sh.headers, rows: sh.rows, flagged: sh.flagged, top: sh.top, bottom: sh.bottom, groupNumbers: true);
+    b.write('</div></div>');
+  }
+  b.write('</body></html>');
+  return b.toString();
+}
+
+StringBuffer _head(String title, String? downloadHint, {List<String> extraCss = const []}) {
+  const esc = HtmlEscape(HtmlEscapeMode.element);
+  return StringBuffer()
     ..write('<!doctype html><html lang="ja"><head><meta charset="utf-8">')
     ..write('<meta name="viewport" content="width=device-width, initial-scale=1">')
     ..write('<title>${esc.convert(title)}</title><style>')
-    ..write(':root{--bg:#fff;--fg:#1f2328;--grid:#d0d7de;--head:#f3f4f6;--hfg:#57606a;--th:#e8f0e8;--flag:#fff3b0;--top:#f8fafc}')
+    ..write(
+        ':root{--bg:#fff;--fg:#1f2328;--grid:#d0d7de;--head:#f3f4f6;--hfg:#57606a;--th:#e8f0e8;--flag:#fff3b0;--top:#f8fafc}')
     ..write('@media (prefers-color-scheme: dark){:root{--bg:#0d1117;--fg:#e6edf3;--grid:#30363d;--head:#161b22;'
         '--hfg:#8b949e;--th:#1c2a1f;--flag:#5c4b00;--top:#11161d}}')
     ..write('*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);'
@@ -38,15 +78,41 @@ String htmlSheet({
     ..write('table{border-collapse:separate;border-spacing:0;min-width:100%}')
     ..write('td,th{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:3px 8px;'
         'white-space:pre-wrap;vertical-align:top;user-select:text}')
-    ..write('thead th{position:sticky;top:0;background:var(--head);color:var(--hfg);font-weight:normal;z-index:2;text-align:center}')
-    ..write('tr.h th{position:sticky;top:23px;background:var(--th);color:var(--fg);font-weight:bold;z-index:2;text-align:left}')
-    ..write('td.n,th.n{position:sticky;left:0;background:var(--head);color:var(--hfg);text-align:right;z-index:1;min-width:40px}')
-    ..write('thead th.n{z-index:3}tr.h th.n{text-align:right;font-weight:normal;color:var(--hfg);background:var(--head);'
+    ..write(
+        'thead th{position:sticky;top:0;background:var(--head);color:var(--hfg);font-weight:normal;z-index:2;text-align:center}')
+    ..write(
+        'tr.h th{position:sticky;top:23px;background:var(--th);color:var(--fg);font-weight:bold;z-index:2;text-align:left}')
+    ..write(
+        'td.n,th.n{position:sticky;left:0;background:var(--head);color:var(--hfg);text-align:right;z-index:1;min-width:40px}')
+    ..write(
+        'thead th.n{z-index:3}tr.h th.n{text-align:right;font-weight:normal;color:var(--hfg);background:var(--head);'
         'left:0;z-index:3}td.n,th.n{width:1%}tr.t td{background:var(--top)}tr.t td:nth-child(2){font-weight:bold}')
-    ..write('tr.b td{font-weight:bold}td.num{text-align:right;font-variant-numeric:tabular-nums}td.f{background:var(--flag)}')
+    ..write(
+        'tr.b td{font-weight:bold}td.num{text-align:right;font-variant-numeric:tabular-nums}td.f{background:var(--flag)}')
+    ..write(extraCss.join())
     ..write('</style></head><body><header><h1>${esc.convert(title)}</h1>')
     ..write(downloadHint == null ? '' : '<p>${esc.convert(downloadHint)}</p>')
-    ..write('</header><div class="wrap"><table><thead><tr><th class="n"></th>');
+    ..write('</header>');
+}
+
+void _table(
+  StringBuffer b, {
+  required List<String> headers,
+  required List<List<Object?>> rows,
+  Set<(int, int)> flagged = const {},
+  List<List<Object?>> top = const [],
+  List<List<Object?>> bottom = const [],
+  bool groupNumbers = false,
+}) {
+  const esc = HtmlEscape(HtmlEscapeMode.element);
+  // A book's numbers as read (48,400 — not 48400.0); a sheet's as they are.
+  String cell(Object? v) => v == null ? '' : esc.convert(v is num && groupNumbers ? _num.format(v) : '$v');
+  bool numeric(Object? v) => v is num;
+  final cols = [
+    headers.length,
+    for (final r in [...top, ...rows, ...bottom]) r.length
+  ].fold<int>(0, (m, n) => n > m ? n : m);
+  b.write('<table><thead><tr><th class="n"></th>');
   for (var c = 0; c < cols; c++) {
     b.write('<th>${columnLetters(c)}</th>');
   }
@@ -76,6 +142,5 @@ String htmlSheet({
   for (final r in bottom) {
     row(r, 'b');
   }
-  b.write('</tbody></table></div></body></html>');
-  return b.toString();
+  b.write('</tbody></table>');
 }

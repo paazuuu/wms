@@ -8,6 +8,7 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/open_window.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
@@ -18,6 +19,9 @@ import '../data/tax_workbook.dart';
 import '../domain/tax_purchases.dart';
 
 /// Saves the workbook (tests stand in for the browser's download).
+/// Opens an empty browser tab (overridden in tests).
+final taxTabOpenerProvider = Provider<HtmlTab? Function()>((_) => openHtmlTab);
+
 final taxFileSaverProvider = Provider<Future<void> Function(String name, Uint8List bytes)>(
     (ref) => (name, bytes) async => saveBytes(name, bytes));
 
@@ -46,6 +50,21 @@ class _TaxFilesScreenState extends ConsumerState<TaxFilesScreen> {
     final user = ref.read(authControllerProvider).user;
     final bytes = buildTaxWorkbook(m, madeBy: user?.name ?? user?.email);
     await ref.read(taxFileSaverProvider)('${_base(m)}.xlsx', bytes);
+  }
+
+  /// The month opened in a new browser tab, to read without downloading.
+  /// The tab is opened straight from the click; where there are no tabs (the
+  /// phone and desktop apps), the Excel is saved instead.
+  void _tab(TaxMonth m) {
+    final l10n = AppLocalizations.of(context);
+    final tab = ref.read(taxTabOpenerProvider)();
+    if (tab == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.ivTabBlocked)));
+      _excel(m);
+      return;
+    }
+    final user = ref.read(authControllerProvider).user;
+    tab.show(buildTaxHtml(m, madeBy: user?.name ?? user?.email, hint: l10n.txTabHint));
   }
 
   Future<void> _zip(TaxMonth m) async {
@@ -100,7 +119,8 @@ class _TaxFilesScreenState extends ConsumerState<TaxFilesScreen> {
                   loading: () => const [LoadingView()],
                   error: (e, _) => [
                     ErrorStateView(
-                        message: humanizeApiErrorMessage(l10n, '$e'), onRetry: () => ref.invalidate(taxMonthsProvider(_year))),
+                        message: humanizeApiErrorMessage(l10n, '$e'),
+                        onRetry: () => ref.invalidate(taxMonthsProvider(_year))),
                   ],
                   data: (months) => months.isEmpty
                       ? [Text(l10n.txNone(_year), key: const ValueKey('tx-none'))]
@@ -110,6 +130,7 @@ class _TaxFilesScreenState extends ConsumerState<TaxFilesScreen> {
                               month: m,
                               busy: _busyMonth == m.month,
                               onExcel: () => _excel(m),
+                              onTab: () => _tab(m),
                               onZip: () => _zip(m),
                             ),
                         ],
@@ -121,11 +142,13 @@ class _TaxFilesScreenState extends ConsumerState<TaxFilesScreen> {
 }
 
 class _MonthCard extends StatelessWidget {
-  const _MonthCard({required this.month, required this.busy, required this.onExcel, required this.onZip});
+  const _MonthCard(
+      {required this.month, required this.busy, required this.onExcel, required this.onTab, required this.onZip});
 
   final TaxMonth month;
   final bool busy;
   final VoidCallback onExcel;
+  final VoidCallback onTab;
   final VoidCallback onZip;
 
   @override
@@ -152,7 +175,8 @@ class _MonthCard extends StatelessWidget {
               ),
           ]),
           Text(
-            l10n.txTotals(m.purchases.length, yen.format(m.net.round()), yen.format(m.tax.round()), yen.format(m.gross.round())),
+            l10n.txTotals(
+                m.purchases.length, yen.format(m.net.round()), yen.format(m.tax.round()), yen.format(m.gross.round())),
             key: ValueKey('tx-totals-$key'),
             style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
@@ -165,11 +189,17 @@ class _MonthCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           // Each invoice, to look at before it goes (and open as read).
-          for (final p in m.purchases)
-            _InvoiceRow(purchase: p),
+          for (final p in m.purchases) _InvoiceRow(purchase: p),
           const SizedBox(height: AppSpacing.sm),
           Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+            // Seen in a tab first: the month's purchases without a download.
             FilledButton.icon(
+              key: ValueKey('tx-tab-$key'),
+              onPressed: onTab,
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: Text(l10n.txOpenTab),
+            ),
+            OutlinedButton.icon(
               key: ValueKey('tx-excel-$key'),
               onPressed: busy ? null : onExcel,
               icon: const Icon(Icons.table_view_outlined, size: 18),
@@ -217,7 +247,8 @@ class _InvoiceRow extends ConsumerWidget {
                   style: theme.textTheme.bodyMedium),
               Text(
                 [
-                  l10n.txInvoiceFigures(yen.format(p.net.round()), yen.format(p.tax.round()), yen.format(p.gross.round())),
+                  l10n.txInvoiceFigures(
+                      yen.format(p.net.round()), yen.format(p.tax.round()), yen.format(p.gross.round())),
                   p.registrationNumber ?? l10n.txNoRegistration,
                   p.paid ? l10n.calPaid : l10n.calUnpaid,
                   for (final d in doubts) _doubtText(l10n, d),

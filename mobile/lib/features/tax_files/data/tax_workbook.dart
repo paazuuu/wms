@@ -5,6 +5,7 @@ import 'dart:convert' show Utf8Encoder;
 import 'package:archive/archive.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../../core/export/html_sheet.dart';
 import '../../../core/export/xlsx.dart';
 import '../domain/tax_purchases.dart';
 
@@ -36,9 +37,20 @@ String _doubt(String code) => switch (code) {
 ///    tax and 税込 for reference.
 ///  * 仕入先別 — per supplier.
 ///  * 説明 — the month, when made, and how the tax is worked out.
-Uint8List buildTaxWorkbook(TaxMonth m, {DateTime? now, String? madeBy}) {
+Uint8List buildTaxWorkbook(TaxMonth m, {DateTime? now, String? madeBy}) =>
+    buildXlsxBook(taxSheets(m, now: now, madeBy: madeBy));
+
+/// The same month as a page to open in a browser tab, nothing downloaded:
+/// the same sheets, switched along the top.
+String buildTaxHtml(TaxMonth m, {DateTime? now, String? madeBy, String? hint}) =>
+    htmlBook(title: taxTitle(m), sheets: taxSheets(m, now: now, madeBy: madeBy), downloadHint: hint);
+
+String taxTitle(TaxMonth m) => '${m.month.year}年${m.month.month}月分 仕入一覧';
+
+/// The month's sheets, for the Excel and for the page alike.
+List<XlsxSheet> taxSheets(TaxMonth m, {DateTime? now, String? madeBy}) {
   final made = now ?? DateTime.now();
-  final title = '${m.month.year}年${m.month.month}月分 仕入一覧';
+  final title = taxTitle(m);
   double r0(double v) => v.roundToDouble();
 
   final invoices = <List<Object?>>[];
@@ -114,7 +126,7 @@ Uint8List buildTaxWorkbook(TaxMonth m, {DateTime? now, String? madeBy}) {
     );
   }
 
-  return buildXlsxBook([
+  return [
     XlsxSheet(
       name: '請求書一覧',
       top: [
@@ -184,7 +196,7 @@ Uint8List buildTaxWorkbook(TaxMonth m, {DateTime? now, String? madeBy}) {
       ],
       widths: const [16, 90],
     ),
-  ]);
+  ];
 }
 
 /// The month's file and every invoice it lists, in one ZIP: the workbook

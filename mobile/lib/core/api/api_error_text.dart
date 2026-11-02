@@ -58,6 +58,10 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('No connection to the server')) {
     return l10n.errorOffline;
   }
+  // 0179: a checked-in line taken back after its stock already went out.
+  if (rawMessage.contains('uninspect_below_zero')) {
+    return l10n.siUndoBelowZero;
+  }
   if (rawMessage.contains('is already completed')) {
     return l10n.errorInspectionCompleted;
   }

@@ -11643,7 +11643,7 @@
       }
     }
   },
-  "srLookups": "AIが調べた商品名・重量",
+  "srLookups": "AIが調べた商品名・重量・写真",
   "srLookupsDetail": "{n}件（残すと次に同じJANを入れたとき再び調べずに済みます）",
   "@srLookupsDetail": {
     "placeholders": {
@@ -11785,5 +11785,104 @@
       }
     }
   },
-  "siNoteView": "読み取った納品書を写真つきで見る"
+  "siNoteView": "読み取った納品書を写真つきで見る",
+  "siUndo": "検品を取り消す",
+  "siUndoQ": "この行の検品を取り消しますか？",
+  "siUndoBody": "「{name}」の検品を取り消します。入庫した {qty}個 を在庫から戻し（修正として記録）、この行はもう一度「検品待ち」になります。",
+  "@siUndoBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "siUndoGo": "取り消す",
+  "siUndone": "「{name}」の検品を取り消しました（{qty}個を在庫から戻しました）",
+  "@siUndone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "siUndoBelowZero": "この商品はすでに出庫・移動などで在庫が減っているため、検品を取り消すと在庫がマイナスになります。先に在庫を確認してください。",
+  "siFiles": "検品時のファイル（{n}件）",
+  "@siFiles": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "siFileOpen": "見る",
+  "siFileDownload": "ダウンロード",
+  "featInspectionCalendar": "検品履歴カレンダー",
+  "featInspectionCalendarDesc": "検品した日を自動で記録し、日ごとに何をいつ誰が検品したか、検品時の納品書とともに見返せます",
+  "icTitle": "検品履歴カレンダー",
+  "icIntro": "検品した日付と時刻は、検品完了のときに自動で記録されます。日付を押すとその日の検品が、取込を押すと検品の中身（検品時のファイル・取り消し）が開きます。",
+  "icMonthList": "この月の検品 {n}件",
+  "@icMonthList": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "icDayList": "{day} の検品 {n}件",
+  "@icDayList": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "icNone": "この期間に検品はありません",
+  "icDayLines": "{n}行",
+  "@icDayLines": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "icStamped": "検品日時 {when}",
+  "@icStamped": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "icChecked": "{lines}行・{units}個を検品",
+  "@icChecked": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "icNotes": "検品時の納品書 {n}件",
+  "@icNotes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "icAllDone": "検品済み",
+  "icSomeLeft": "検品待ちあり",
+  "txOpenTab": "別タブで見る",
+  "txTabHint": "ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。"
 }

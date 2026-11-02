@@ -12469,7 +12469,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planEnteredUnknown => '登记人不明';
 
   @override
-  String get featTaxFiles => '税务师用文件';
+  String get featTaxFiles => '税务师用的文件';
 
   @override
   String get featTaxFilesDesc => '每月进货（不含税・消费税・含税、登记号）导出Excel，附发票原件';
@@ -12954,7 +12954,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get srLookups => 'AI查到的商品名・重量';
+  String get srLookups => 'AI查到的商品名・重量・照片';
 
   @override
   String srLookupsDetail(String n) {
@@ -13085,4 +13085,95 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get siNoteView => '带照片查看读取的送货单';
+
+  @override
+  String get siUndo => '撤销验货';
+
+  @override
+  String get siUndoQ => '要撤销此行的验货吗？';
+
+  @override
+  String siUndoBody(String name, int qty) {
+    return '将撤销“$name”的验货。已入库的 $qty个 从库存中退回（记录为修正），此行重新变为“待验货”。';
+  }
+
+  @override
+  String get siUndoGo => '撤销';
+
+  @override
+  String siUndone(String name, int qty) {
+    return '已撤销“$name”的验货（已从库存退回 $qty个）';
+  }
+
+  @override
+  String get siUndoBelowZero => '该商品库存已因出库・移动等减少，撤销验货会使库存变为负数。请先确认库存。';
+
+  @override
+  String siFiles(int n) {
+    return '验货时的文件（$n件）';
+  }
+
+  @override
+  String get siFileOpen => '查看';
+
+  @override
+  String get siFileDownload => '下载';
+
+  @override
+  String get featInspectionCalendar => '验货记录日历';
+
+  @override
+  String get featInspectionCalendarDesc => '自动记录验货日期，可按日查看谁在何时验了什么，以及验货时的送货单';
+
+  @override
+  String get icTitle => '验货记录日历';
+
+  @override
+  String get icIntro => '验货的日期和时间在验货完成时自动记录。点日期查看当天的验货，点导入查看验货内容（验货时的文件・撤销）。';
+
+  @override
+  String icMonthList(int n) {
+    return '本月验货 $n件';
+  }
+
+  @override
+  String icDayList(String day, int n) {
+    return '$day 的验货 $n件';
+  }
+
+  @override
+  String get icNone => '此期间没有验货';
+
+  @override
+  String icDayLines(int n) {
+    return '$n行';
+  }
+
+  @override
+  String icStamped(String when) {
+    return '验货时间 $when';
+  }
+
+  @override
+  String icChecked(int lines, String units) {
+    return '验货 $lines行・$units个';
+  }
+
+  @override
+  String icNotes(int n) {
+    return '验货时的送货单 $n件';
+  }
+
+  @override
+  String get icAllDone => '已验货';
+
+  @override
+  String get icSomeLeft => '仍有待验货';
+
+  @override
+  String get txOpenTab => '在新标签页查看';
+
+  @override
+  String get txTabHint =>
+      '这是无需下载即可查看的表格，可在上方切换“发票一览・明细・按供应商・说明”。如需保存，请使用应用中的“Excel”按钮。';
 }

@@ -13297,7 +13297,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get srLookups => 'The AI\'s names and weights by JAN';
+  String get srLookups => 'The AI\'s names, weights and pictures by JAN';
 
   @override
   String srLookupsDetail(String n) {
@@ -13432,4 +13432,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get siNoteView => 'See the note with pictures';
+
+  @override
+  String get siUndo => 'Take this check-in back';
+
+  @override
+  String get siUndoQ => 'Take this line\'s check-in back?';
+
+  @override
+  String siUndoBody(String name, int qty) {
+    return 'The check-in of \"$name\" is taken back: the $qty put into stock come out again (booked as a correction) and the line waits to be checked in again.';
+  }
+
+  @override
+  String get siUndoGo => 'Take back';
+
+  @override
+  String siUndone(String name, int qty) {
+    return 'Took back the check-in of \"$name\" ($qty out of stock again)';
+  }
+
+  @override
+  String get siUndoBelowZero =>
+      'This product\'s stock has already gone down (shipped or moved): taking the check-in back would leave it below zero. Check the stock first.';
+
+  @override
+  String siFiles(int n) {
+    return 'Files from this inspection ($n)';
+  }
+
+  @override
+  String get siFileOpen => 'View';
+
+  @override
+  String get siFileDownload => 'Download';
+
+  @override
+  String get featInspectionCalendar => 'Inspection calendar';
+
+  @override
+  String get featInspectionCalendarDesc =>
+      'The days goods were inspected, stamped automatically: what was checked in, when and by whom, with the delivery notes used';
+
+  @override
+  String get icTitle => 'Inspection calendar';
+
+  @override
+  String get icIntro =>
+      'The day and time are stamped automatically on each check-in. Tap a day for its inspections, an import for what was checked (its files, or to take a line back).';
+
+  @override
+  String icMonthList(int n) {
+    return '$n inspections this month';
+  }
+
+  @override
+  String icDayList(String day, int n) {
+    return '$n inspections on $day';
+  }
+
+  @override
+  String get icNone => 'No inspections in this period';
+
+  @override
+  String icDayLines(int n) {
+    return '$n lines';
+  }
+
+  @override
+  String icStamped(String when) {
+    return 'Checked in $when';
+  }
+
+  @override
+  String icChecked(int lines, String units) {
+    return '$lines lines · $units checked in';
+  }
+
+  @override
+  String icNotes(int n) {
+    return '$n delivery notes kept';
+  }
+
+  @override
+  String get icAllDone => 'All checked';
+
+  @override
+  String get icSomeLeft => 'Some left';
+
+  @override
+  String get txOpenTab => 'Open in a new tab';
+
+  @override
+  String get txTabHint =>
+      'This is the table without a download: switch sheets at the top. To keep it, use the Excel button in the app.';
 }

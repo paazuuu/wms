@@ -143,6 +143,8 @@ class FeatureEntry {
         return l10n.featSystemReset;
       case 'import_calendar':
         return l10n.featImportCalendar;
+      case 'inspection_calendar':
+        return l10n.featInspectionCalendar;
       case 'payments':
         return l10n.featPayments;
       case 'field_library':
@@ -271,6 +273,8 @@ class FeatureEntry {
         return l10n.featSystemResetDesc;
       case 'import_calendar':
         return l10n.featImportCalendarDesc;
+      case 'inspection_calendar':
+        return l10n.featInspectionCalendarDesc;
       case 'payments':
         return l10n.featPaymentsDesc;
       case 'field_library':

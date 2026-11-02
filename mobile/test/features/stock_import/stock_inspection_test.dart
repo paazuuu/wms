@@ -9,10 +9,12 @@ import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
+import 'package:wms_mobile/features/evidence/domain/import_document.dart';
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
+import 'package:wms_mobile/features/stock_import/presentation/inspection_calendar_screen.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_import_calendar_screen.dart';
 import 'package:wms_mobile/features/qc/presentation/inspection_list_screen.dart';
 import 'package:wms_mobile/features/stock_import/presentation/stock_inspection_screen.dart';
@@ -74,6 +76,42 @@ class _Stock implements StockImportRepository {
   final inspected = <(int, List<InspectedLine>)>[];
   final asked = <(DateTime, DateTime)>[];
   _Reader? reader;
+
+  /// 0179: lines taken back, notes kept, and the inspection days.
+  final uninspected = <(int, int)>[];
+  final linked = <(int, int)>[];
+  List<ImportDocument> docs = const [];
+  List<InspectionDay> days = const [];
+  String? uninspectError;
+
+  @override
+  Future<ApiResult<bool>> uninspect(int importId, int lineNo) async {
+    if (uninspectError case final e?) return ApiFailure(message: e);
+    uninspected.add((importId, lineNo));
+    reader?.import = _awaiting();
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> linkInspectionDocument(int importId, int documentId) async {
+    linked.add((importId, documentId));
+    docs = [
+      ImportDocument(
+        id: documentId, purpose: EvidencePurpose.ocr, fileName: '納品書_検品済み.pdf', storagePath: 'ocr/x.pdf',
+        uploadedAt: DateTime(2026, 10, 23, 11, 5), contentType: 'application/pdf', uploadedByName: '検品担当',
+      ),
+    ];
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<ImportDocument>>> inspectionDocuments(int importId) async => ApiSuccess(docs);
+
+  @override
+  Future<ApiResult<List<InspectionDay>>> inspectionCalendar(DateTime from, DateTime to) async {
+    asked.add((from, to));
+    return ApiSuccess(days);
+  }
 
   @override
   Future<ApiResult<List<AwaitingImport>>> awaiting({int? warehouseId}) async => ApiSuccess(waiting);
@@ -200,7 +238,7 @@ void main() {
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(900, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final reader = _Reader(_awaiting(), note: const MasterRead(lines: [
+    final reader = _Reader(_awaiting(), note: const MasterRead(documentId: 55, lines: [
       MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ', quantity: '480'),
       MasterLine(lineNo: 2, janCode: _jan2, supplierName: 'ﾉｰﾄ', quantity: '100'),
       MasterLine(lineNo: 3, janCode: '4909999000038', supplierName: '別の品', quantity: '5'),
@@ -218,6 +256,11 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('dn-pick-file')));
     await tester.pumpAndSettle();
     expect(reader.notePurpose, 'ocr');
+    // The note kept with this inspection, to look back at (0179).
+    expect(stock.linked, [(21, 55)]);
+    expect(find.text('検品時のファイル（1件）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-file-open-55')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-file-dl-55')), findsOneWidget);
     // Every JAN on the note ticked, with the note's count; a stranger said so.
     expect(tester.widget<Checkbox>(find.byKey(const ValueKey('si-tick-2'))).value, isTrue);
     expect(tester.widget<Checkbox>(find.byKey(const ValueKey('si-tick-3'))).value, isTrue);
@@ -232,6 +275,109 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('si-confirm')));
     await tester.pumpAndSettle();
     expect([for (final l in stock.inspected.single.$2) (l.lineNo, l.quantity)], [(2, 480)]);
+  });
+
+  testWidgets('a line checked in by mistake is taken back by one who inspects (0179)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = _Reader(_awaiting(firstDone: true));
+    final stock = _Stock()..reader = reader;
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      // An ordinary stock role, not a manager.
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('si-undo-2')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('入庫した 498個 を在庫から戻し'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('si-undo-confirm')));
+    await tester.pumpAndSettle();
+    expect(stock.uninspected, [(21, 2)]);
+    // Waiting again, to be checked in once more.
+    expect(find.byKey(const ValueKey('si-line-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-undo-2')), findsNothing);
+  });
+
+  testWidgets('taking back what already went out is refused in words (0179)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = _Reader(_awaiting(firstDone: true));
+    final stock = _Stock()
+      ..reader = reader
+      ..uninspectError = 'uninspect_below_zero: 4909999000014 now 10, the line added 498';
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inspection.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('si-undo-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('si-undo-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('在庫がマイナスになります'), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+  });
+
+  testWidgets('without the right to inspect, a checked line cannot be taken back', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = _Reader(_awaiting(firstDone: true));
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inventory.view']),
+      stockImportRepositoryProvider.overrideWithValue(_Stock()..reader = reader),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-undo-2')), findsNothing);
+  });
+
+  testWidgets('検品履歴カレンダー: the days lines were checked in, stamped, and the inspection opened from a day (0179)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(500, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final now = DateTime.now();
+    final day = DateTime(now.year, now.month, 1);
+    final reader = _Reader(_awaiting(firstDone: true));
+    final stock = _Stock()
+      ..reader = reader
+      ..days = [
+        InspectionDay.fromJson({
+          'import_id': 21, 'day': '${day.year}-${day.month.toString().padLeft(2, '0')}-01', 'lines': 1, 'units': 498,
+          'first_at': DateTime(day.year, day.month, 1, 10, 5).toUtc().toIso8601String(),
+          'last_at': DateTime(day.year, day.month, 1, 10, 40).toUtc().toIso8601String(),
+          'by': '検品担当', 'original_name': '請求書.pdf', 'warehouse_name': '本社倉庫', 'status': 'awaiting_inspection',
+          'line_count': 2, 'documents': 1,
+        }),
+      ];
+    await pumpApp(tester, const InspectionCalendarScreen(), overrides: [
+      _signedIn(['inspection.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    // This month asked for, whole.
+    expect(stock.asked.single, (DateTime(now.year, now.month), DateTime(now.year, now.month + 1, 0)));
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ic-count-1'))).data, '1行');
+    final dd = '${day.year}/${day.month.toString().padLeft(2, '0')}/01';
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ic-when-21'))).data, '検品日時 $dd 10:05〜10:40');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ic-what-21'))).data, '1行・498個を検品 · 検品担当 · 本社倉庫');
+    expect(find.byKey(const ValueKey('ic-notes-21')), findsOneWidget);
+    // A day chosen: only its inspections.
+    await tester.tap(find.byKey(const ValueKey('ic-day-1')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ic-list-title'))).data, '$dd の検品 1件');
+    await tester.tap(find.textContaining('取込 #21'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+  });
+
+  test('the inspection calendar is in the menu for those who inspect, and for stock and product viewers', () {
+    final e = buildFeatureCatalog().expand((g) => g.entries).firstWhere((e) => e.id == 'inspection_calendar');
+    expect(e.visibleFor(['inventory.adjust']), isTrue);
+    expect(e.visibleFor(['inspection.confirm']), isTrue);
+    expect(e.visibleFor(['product.view']), isTrue);
+    expect(e.visibleFor(['shipment.view']), isFalse);
   });
 
   // 0167: each line with what its product tells of it, and narrowing.

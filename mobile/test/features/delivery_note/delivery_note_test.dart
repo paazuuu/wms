@@ -7,8 +7,10 @@ import 'package:wms_mobile/features/delivery_note/delivery_note_view_screen.dart
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
+import 'package:wms_mobile/features/product/data/web_photos.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 
+import '../../support/fake_web_photo_repository.dart';
 import '../../support/harness.dart';
 
 const _known = '4909999000014';
@@ -60,5 +62,29 @@ void main() {
     await tester.pump();
     expect(find.byKey(const ValueKey('dn-seen-2')), findsOneWidget);
     expect(find.text('2行・合計 220個（確認 1行）'), findsOneWidget);
+  });
+
+  testWidgets('a good not in the library shows the picture kept for its JAN, asked from the database first (0179)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(500, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final photos = FakeWebPhotoRepository(kept: {_unknown: 'https://example.test/jan/$_unknown.jpg'});
+    await pumpApp(tester, const DeliveryNoteViewScreen(lines: [
+      NoteLine(lineNo: 1, jan: _known, name: 'ﾃｽﾄﾍﾟﾝ', quantity: 20),
+      NoteLine(lineNo: 2, jan: _unknown, name: 'スタンプノリ', quantity: 200),
+      NoteLine(lineNo: 3, jan: '4909999000038', name: '写真なし', quantity: 1),
+    ], fileName: '納品書.jpg'), overrides: [
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: const [
+        Product(id: 7, janCode: _known, name: 'テストペン 青', baseName: 'テストペン 青', imageCount: 1),
+      ])),
+      webPhotoRepositoryProvider.overrideWithValue(photos),
+    ]);
+    await tester.pumpAndSettle();
+    // Only the goods the library does not have are asked for, looked up once if never tried.
+    expect(photos.janCalls.single.jans, [_unknown, '4909999000038']);
+    expect(photos.janCalls.single.look, isTrue);
+    expect(find.byKey(const ValueKey('dn-webphoto-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('dn-nophoto-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('dn-webphoto-1')), findsNothing);
   });
 }
