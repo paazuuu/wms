@@ -145,6 +145,8 @@ class FeatureEntry {
         return l10n.featImportCalendar;
       case 'inspection_calendar':
         return l10n.featInspectionCalendar;
+      case 'unplanned_receipt':
+        return l10n.featUnplannedReceipt;
       case 'payments':
         return l10n.featPayments;
       case 'field_library':
@@ -275,6 +277,8 @@ class FeatureEntry {
         return l10n.featImportCalendarDesc;
       case 'inspection_calendar':
         return l10n.featInspectionCalendarDesc;
+      case 'unplanned_receipt':
+        return l10n.featUnplannedReceiptDesc;
       case 'payments':
         return l10n.featPaymentsDesc;
       case 'field_library':

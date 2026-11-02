@@ -218,7 +218,7 @@ class _MonthGrid extends StatelessWidget {
           final items = byDay[date] ?? const <CalendarImport>[];
           final isSel = selected == date;
           final waiting = items.any((i) => i.awaiting);
-          final unpaid = items.any((i) => !i.paid && !i.undone);
+          final unpaid = items.any((i) => !i.paid && !i.undone && !i.unplanned);
           return InkWell(
             key: ValueKey('cal-day-$d'),
             borderRadius: BorderRadius.circular(8),
@@ -290,6 +290,8 @@ class _CalendarTile extends StatelessWidget {
             if (item.documentDate case final d?) l10n.calDocumentDate(DateFormat('y/MM/dd').format(d)),
           ].join(' · '), key: ValueKey('cal-dates-${item.id}')),
           Text([
+            if (item.unplanned) l10n.urLabel,
+            if (item.unplanned && item.supplier != null) item.supplier!,
             if (item.warehouseName case final w?) w,
             status,
           ].join(' · ')),
@@ -298,8 +300,11 @@ class _CalendarTile extends StatelessWidget {
         ]),
         // At a glance (0173): paid or not, the transfer's proof kept or not,
         // and inspected (in stock) or still waiting.
+        // 予定外の入荷 (0181): nothing to pay for; it is in stock.
         trailing: item.undone
             ? null
+            : item.unplanned
+            ? _label(ValueKey('cal-unplanned-${item.id}'), l10n.urLabel, theme.colorScheme.tertiaryContainer)
             : Wrap(direction: Axis.vertical, spacing: 4, crossAxisAlignment: WrapCrossAlignment.end, children: [
                 _label(
                   ValueKey('cal-paid-${item.id}'),

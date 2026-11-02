@@ -8350,6 +8350,38 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - htmlBook (core/export/html_sheet.dart): several sheets in one page,
     without a script; numbers grouped (48,400).
 
+## 0181: 予定外の入荷 (goods with nothing to import)
+
+- A regular supplier sometimes brings goods with no order and no invoice yet.
+  予定外の入荷 (現場作業, inventory.adjust) registers them on the spot:
+  - The delivery note that came with them is photographed or chosen; the AI
+    reads it (kept as ocr evidence) and every JAN on it is ticked with the
+    note's count. The supplier and date are read from it too.
+  - With no note, the goods are scanned (one scan, one piece; the camera
+    works too).
+  - What did not come is unticked; counts are put right; 検品完了 puts them in
+    stock at once (unplanned_receipt: staged and checked in, in one go).
+  - Products the library lacks are registered first (as 発注 does) by those
+    who may; otherwise they are left out, and the confirmation says so.
+  - It is 取込 #… (kind unplanned, note_supplier): 検品 (取り消し in ⋯), the
+    note kept as 検品時のファイル, 検品履歴カレンダー and 取込カレンダー
+    (labelled 予定外の入荷) all apply. Not in 支払い or 税理士用ファイル:
+    there is nothing to pay until the invoice comes.
+- The invoice that comes later goes in through 発注 as usual:
+  - unplanned_open_lines finds what was received and not yet invoiced, by
+    JAN and warehouse. 発注 shows it (received / this invoice, the
+    difference in red) with 「入庫済みとして紐付ける（在庫は増やさない）」 on.
+  - Each invoice line takes the oldest receipt line of its JAN.
+    stock_file_cover_lines checks those invoice lines in as received
+    (0 added), tied both ways (covered_by_* / invoiced_import_id).
+  - A different count is shown, not adjusted: untie and handle the
+    difference apart.
+  - Tied lines cannot be taken back alone (uninspect_covered /
+    uninspect_invoiced), nor the receipt as a whole (undo_invoiced). Undoing
+    the invoice frees the receipt again.
+  - 検品履歴カレンダー leaves out lines checked in as already received.
+- 納品照合 (delivery plans) is out of the menu; its address stays.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -57,6 +57,7 @@ import '../../stock_import/presentation/stock_inspection_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
 import '../../stock_import/presentation/inspection_calendar_screen.dart';
+import '../../unplanned_receipt/unplanned_receipt_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
@@ -216,12 +217,24 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['inspection.confirm'],
             inMenu: false,
           ),
+          // 予定外の入荷 (0181): goods that came with nothing to import, registered
+          // from their delivery note and checked in on the spot.
+          FeatureEntry(
+            id: 'unplanned_receipt',
+            icon: Icons.local_shipping_outlined,
+            status: FeatureStatus.ready,
+            builder: _unplannedReceipt,
+            requiredAnyOf: ['inventory.adjust'],
+          ),
+          // 納品照合 (delivery plans): out of the menu (0181) — orders go
+          // through 発注, goods without one through 予定外の入荷. Its address stays.
           FeatureEntry(
             id: 'delivery',
             icon: Icons.rule_folder_outlined,
             status: FeatureStatus.ready,
             builder: _delivery,
             requiredAnyOf: ['receiving.view', 'receiving.confirm'],
+            inMenu: false,
           ),
           // Sits directly after 受入/検品 because that is the order the work
           // happens in: stock lands in the warehouse, then someone says which
@@ -664,6 +677,7 @@ Widget _taxFiles(BuildContext _) => const TaxFilesScreen();
 Widget _systemReset(BuildContext _) => const SystemResetScreen();
 Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
 Widget _inspectionCalendar(BuildContext _) => const InspectionCalendarScreen();
+Widget _unplannedReceipt(BuildContext _) => const UnplannedReceiptScreen();
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();

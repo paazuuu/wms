@@ -197,7 +197,14 @@ class CalendarImport extends Equatable {
     this.dayKind = 'document',
     this.documentDate,
     this.proofCount = 0,
+    this.kind,
+    this.supplier,
   });
+
+  /// `unplanned` for 予定外の入荷 (0181), and the supplier read from its note.
+  final String? kind;
+  final String? supplier;
+  bool get unplanned => kind == 'unplanned';
 
   final int id;
 
@@ -246,11 +253,13 @@ class CalendarImport extends Equatable {
       dayKind: j['day_kind']?.toString() ?? 'document',
       documentDate: DateTime.tryParse('${j['document_date'] ?? ''}'),
       proofCount: n(j['proof_count']),
+      kind: j['kind']?.toString(),
+      supplier: j['supplier']?.toString(),
     );
   }
 
   @override
-  List<Object?> get props => [id, day, dayKind, status, undone, lines, change, paid, note, proofCount];
+  List<Object?> get props => [id, day, dayKind, status, undone, lines, change, paid, note, proofCount, kind];
 }
 
 /// One line as the inspector counted it.
@@ -338,9 +347,13 @@ class InspectionDay extends Equatable {
     this.status,
     this.lineCount = 0,
     this.documents = 0,
+    this.kind,
   });
 
   final int importId;
+
+  /// `unplanned` for 予定外の入荷 (0181).
+  final String? kind;
   final DateTime day;
 
   /// Lines checked in that day, and how many units.
@@ -380,9 +393,76 @@ class InspectionDay extends Equatable {
       status: s(j['status']),
       lineCount: n(j['line_count']),
       documents: n(j['documents']),
+      kind: s(j['kind']),
     );
   }
 
   @override
   List<Object?> get props => [importId, day, lines, units, firstAt, lastAt, by, fileName, status, documents];
+}
+
+/// What an unplanned receipt brought and no invoice has covered yet (0181).
+class UnplannedLine extends Equatable {
+  const UnplannedLine({
+    required this.importId,
+    required this.lineNo,
+    required this.janCode,
+    required this.quantity,
+    this.name,
+    this.supplier,
+    this.receivedAt,
+    this.fileName,
+  });
+
+  final int importId;
+  final int lineNo;
+  final String janCode;
+  final int quantity;
+  final String? name;
+  final String? supplier;
+  final DateTime? receivedAt;
+  final String? fileName;
+
+  factory UnplannedLine.fromJson(Map<String, dynamic> j) {
+    int n(Object? v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}') ?? 0;
+    String? s(Object? v) => v == null || '$v'.trim().isEmpty ? null : '$v'.trim();
+    return UnplannedLine(
+      importId: n(j['import_id']),
+      lineNo: n(j['line_no']),
+      janCode: '${j['jan_code'] ?? ''}',
+      quantity: n(j['quantity']),
+      name: s(j['name']),
+      supplier: s(j['supplier']),
+      receivedAt: DateTime.tryParse('${j['received_at'] ?? ''}')?.toLocal(),
+      fileName: s(j['file_name']),
+    );
+  }
+
+  @override
+  List<Object?> get props => [importId, lineNo, janCode, quantity];
+}
+
+/// An invoice line matched to what an unplanned receipt brought (0181).
+class CoverPick {
+  const CoverPick({required this.lineNo, required this.from});
+
+  /// The invoice's line, and the receipt's line that brought its goods.
+  final int lineNo;
+  final UnplannedLine from;
+
+  Map<String, dynamic> toJson() => {'line_no': lineNo, 'from_import_id': from.importId, 'from_line_no': from.lineNo};
+}
+
+/// Each invoice line [lines] (JAN, quantity) matched to the oldest
+/// unplanned receipt line of its JAN not yet taken: one receipt line covers
+/// one invoice line.
+List<(int, String, int, UnplannedLine)> matchUnplanned(List<(int, String, int)> lines, List<UnplannedLine> open) {
+  final left = [...open];
+  final out = <(int, String, int, UnplannedLine)>[];
+  for (final (no, jan, qty) in lines) {
+    final i = left.indexWhere((u) => u.janCode == jan);
+    if (i < 0) continue;
+    out.add((no, jan, qty, left.removeAt(i)));
+  }
+  return out;
 }

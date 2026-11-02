@@ -13267,4 +13267,152 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get siDayShowAll => 'すべての行を表示';
+
+  @override
+  String get featUnplannedReceipt => '予定外の入荷';
+
+  @override
+  String get featUnplannedReceiptDesc =>
+      '注文や請求書なしで届いた商品を、納品書を撮ってその場で登録・検品し、すぐ入庫します';
+
+  @override
+  String get urTitle => '予定外の入荷';
+
+  @override
+  String get urIntro =>
+      '注文や請求書の取込なしで届いた商品を、その場で登録して検品します。一緒に届いた納品書を撮ると、AIが読み取った商品すべてにチェックが付きます（納品書がなければJANをスキャン）。届いていない行はチェックを外し、数を直して「検品完了」を押すと、すぐに在庫に入ります。後から届く請求書は「発注」でいつもどおり取り込んでください。ここで入庫した商品は二重に増えません。';
+
+  @override
+  String get urSupplier => '仕入先';
+
+  @override
+  String get urSupplierHint => '納品書から読み取ります。手で直せます';
+
+  @override
+  String get urReadNote => '納品書を撮る・選ぶ';
+
+  @override
+  String urNoteKept(String name) {
+    return '納品書 $name を検品時のファイルとして保存します';
+  }
+
+  @override
+  String get urScan => 'JANをスキャン（1回で1個）';
+
+  @override
+  String get urNoJanRead => '納品書からJANが読み取れませんでした。JANをスキャンして追加できます。';
+
+  @override
+  String urLines(int all, int ticked, int units) {
+    return '$all行（入庫する $ticked行・$units個）';
+  }
+
+  @override
+  String get urLinesHint => '届いていない行はチェックを外してください。数は現物に合わせて直せます。';
+
+  @override
+  String urComplete(int lines, int units) {
+    return '検品完了（$lines行・$units個を入庫）';
+  }
+
+  @override
+  String urConfirmQ(String warehouse) {
+    return '$warehouse に入庫しますか？';
+  }
+
+  @override
+  String urConfirmBody(int lines, int units) {
+    return '$lines行・$units個を検品済みとして、すぐに在庫に入れます。';
+  }
+
+  @override
+  String urConfirmRegister(int n) {
+    return '商品ライブラリーにない $n件は、納品書の名前で登録してから入庫します。';
+  }
+
+  @override
+  String urConfirmSkip(int n) {
+    return '商品ライブラリーにない $n件は登録する権限がないため入庫しません。';
+  }
+
+  @override
+  String get urConfirmInvoice =>
+      '後から届く請求書は「発注」で取り込むと、ここで入庫した分と自動で紐付き、在庫は増えません。';
+
+  @override
+  String get urConfirmGo => '入庫する';
+
+  @override
+  String urBadCount(String jan) {
+    return 'JAN $jan の数が正しくありません';
+  }
+
+  @override
+  String get urNothingKnown => '入庫できる商品がありません（商品ライブラリーにない商品だけです）';
+
+  @override
+  String urDone(int id, int lines, int units) {
+    return '取込 #$id として $lines行・$units個を入庫しました';
+  }
+
+  @override
+  String get urDoneHint => '検品の中身・納品書の見返し・取り消しは「検品」からもできます';
+
+  @override
+  String get urDoneOpen => '中身を見る';
+
+  @override
+  String get urLabel => '予定外の入荷';
+
+  @override
+  String siCovered(int id) {
+    return '予定外の入荷 #$id で入庫済み（在庫は増やしていません）';
+  }
+
+  @override
+  String siInvoiced(int id) {
+    return '請求書 取込 #$id と紐付け済み';
+  }
+
+  @override
+  String get errUninspectCovered =>
+      'この行は予定外の入荷で入庫済みの分です。取り消すときは、請求書の取込ごと取り消してください。';
+
+  @override
+  String get errUninspectInvoiced =>
+      'この行はすでに請求書の取込と紐付いています。先に請求書の取込を取り消してください。';
+
+  @override
+  String get errUnplannedNoProducts => '商品ライブラリーにある商品が1つもないため入庫できません';
+
+  @override
+  String get errCoverUnavailable =>
+      '紐付けようとした予定外の入荷が、すでに別の請求書と紐付いているか取り消されています。画面を読み込み直してください。';
+
+  @override
+  String sfUnplannedTitle(int n) {
+    return '予定外の入荷で入庫済みの商品があります（$n行）';
+  }
+
+  @override
+  String sfUnplannedLine(
+      String jan, String name, int id, String date, int received, int billed) {
+    return '$jan $name：予定外の入荷 #$id（$date）で $received個 入庫済み ／ この請求書 $billed個';
+  }
+
+  @override
+  String get sfUnplannedDiffers => '数が違います。足りない分・多い分は、紐付けを外して別に扱ってください。';
+
+  @override
+  String get sfUnplannedTie => '入庫済みとして紐付ける（在庫は増やさない）';
+
+  @override
+  String sfConfirmCovered(int n) {
+    return 'うち $n行は予定外の入荷で入庫済みのため、在庫は増やしません。';
+  }
+
+  @override
+  String sfCovered(int n) {
+    return '予定外の入荷と紐付けた行: $n行';
+  }
 }

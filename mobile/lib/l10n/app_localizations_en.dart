@@ -13537,4 +13537,158 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get siDayShowAll => 'Show all lines';
+
+  @override
+  String get featUnplannedReceipt => 'Unplanned receipt';
+
+  @override
+  String get featUnplannedReceiptDesc =>
+      'Goods that came without an order or invoice: photograph the delivery note, check them and put them in stock on the spot';
+
+  @override
+  String get urTitle => 'Unplanned receipt';
+
+  @override
+  String get urIntro =>
+      'Goods that came with no order or invoice imported: register and check them here. Photograph the delivery note that came with them and every good the AI reads is ticked (no note: scan the JANs). Untick what did not come, put counts right and press 検品完了: they go into stock at once. Import the invoice that comes later through 発注 as usual; what was received here is not added again.';
+
+  @override
+  String get urSupplier => 'Supplier';
+
+  @override
+  String get urSupplierHint => 'Read from the note; can be changed by hand';
+
+  @override
+  String get urReadNote => 'Photograph or choose the note';
+
+  @override
+  String urNoteKept(String name) {
+    return 'The note $name is kept with the inspection';
+  }
+
+  @override
+  String get urScan => 'Scan a JAN (one scan, one piece)';
+
+  @override
+  String get urNoJanRead =>
+      'No JAN could be read from the note. Scan the JANs to add them.';
+
+  @override
+  String urLines(int all, int ticked, int units) {
+    return '$all lines ($ticked lines · $units to put in)';
+  }
+
+  @override
+  String get urLinesHint =>
+      'Untick what did not come. Counts can be put right to what is in hand.';
+
+  @override
+  String urComplete(int lines, int units) {
+    return 'Checked: put $lines lines · $units in stock';
+  }
+
+  @override
+  String urConfirmQ(String warehouse) {
+    return 'Put in stock at $warehouse?';
+  }
+
+  @override
+  String urConfirmBody(int lines, int units) {
+    return '$lines lines · $units go into stock at once, checked.';
+  }
+
+  @override
+  String urConfirmRegister(int n) {
+    return '$n not in the product library are registered under the note\'s names first.';
+  }
+
+  @override
+  String urConfirmSkip(int n) {
+    return '$n not in the product library are left out: you may not register products.';
+  }
+
+  @override
+  String get urConfirmInvoice =>
+      'The invoice imported later through 発注 is tied to this receipt; the stock is not added again.';
+
+  @override
+  String get urConfirmGo => 'Put in stock';
+
+  @override
+  String urBadCount(String jan) {
+    return 'The count of JAN $jan is not right';
+  }
+
+  @override
+  String get urNothingKnown =>
+      'Nothing can go in: none of the goods is in the product library';
+
+  @override
+  String urDone(int id, int lines, int units) {
+    return 'Put $lines lines · $units in stock as 取込 #$id';
+  }
+
+  @override
+  String get urDoneHint =>
+      'Its lines, its note and taking a line back are in 検品 too';
+
+  @override
+  String get urDoneOpen => 'Open';
+
+  @override
+  String get urLabel => 'Unplanned';
+
+  @override
+  String siCovered(int id) {
+    return 'Received earlier as unplanned #$id (no stock added)';
+  }
+
+  @override
+  String siInvoiced(int id) {
+    return 'Tied to the invoice 取込 #$id';
+  }
+
+  @override
+  String get errUninspectCovered =>
+      'This line was received earlier as an unplanned receipt. To take it back, undo the invoice import.';
+
+  @override
+  String get errUninspectInvoiced =>
+      'This line is already tied to an invoice import. Undo the invoice import first.';
+
+  @override
+  String get errUnplannedNoProducts =>
+      'None of the goods is in the product library: nothing can go in';
+
+  @override
+  String get errCoverUnavailable =>
+      'The unplanned receipt to tie to is already tied to another invoice or was taken back. Reload and try again.';
+
+  @override
+  String sfUnplannedTitle(int n) {
+    return 'Already received as unplanned receipts ($n lines)';
+  }
+
+  @override
+  String sfUnplannedLine(
+      String jan, String name, int id, String date, int received, int billed) {
+    return '$jan $name: received $received as unplanned #$id ($date) / this invoice $billed';
+  }
+
+  @override
+  String get sfUnplannedDiffers =>
+      'The counts differ. Untie it to handle the difference apart.';
+
+  @override
+  String get sfUnplannedTie => 'Tie as already received (no stock added)';
+
+  @override
+  String sfConfirmCovered(int n) {
+    return '$n of them were received earlier (unplanned): no stock is added for them.';
+  }
+
+  @override
+  String sfCovered(int n) {
+    return 'Tied to unplanned receipts: $n lines';
+  }
 }

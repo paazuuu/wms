@@ -507,6 +507,8 @@ class MasterImportLine extends Equatable {
     this.inspectedAt,
     this.inspectedQuantity,
     this.inspectedByName,
+    this.coveredByImportId,
+    this.invoicedImportId,
   });
 
   final int lineNo;
@@ -536,6 +538,13 @@ class MasterImportLine extends Equatable {
 
   bool get inspected => inspectedAt != null;
 
+  /// An invoice line whose goods came before it as 予定外の入荷 #… (0181):
+  /// checked in as already received, nothing added.
+  final int? coveredByImportId;
+
+  /// An unplanned receipt's line the invoice 取込 #… has covered (0181).
+  final int? invoicedImportId;
+
   factory MasterImportLine.fromJson(Map<String, dynamic> j) {
     int? n(Object? v) => (v as num?)?.toInt();
     return MasterImportLine(
@@ -555,13 +564,15 @@ class MasterImportLine extends Equatable {
       inspectedAt: DateTime.tryParse('${j['inspected_at'] ?? ''}')?.toLocal(),
       inspectedQuantity: n(j['inspected_quantity']),
       inspectedByName: j['inspected_by_name']?.toString(),
+      coveredByImportId: n(j['covered_by_import_id']),
+      invoicedImportId: n(j['invoiced_import_id']),
     );
   }
 
   @override
   List<Object?> get props =>
       [lineNo, janCode, productId, name, nameEn, quantity, masterStatus, onHandBefore, onHandSet, added, onHandAfter, onHandNow,
-       inspectedAt, inspectedQuantity];
+       inspectedAt, inspectedQuantity, coveredByImportId, invoicedImportId];
 }
 
 /// An import: its files, where it got to, and its lines when asked for.
@@ -595,10 +606,20 @@ class MasterImport extends Equatable {
     this.paid = false,
     this.paidAt,
     this.note,
+    this.kind,
+    this.fileName,
   });
 
   final int id;
   final MasterImportStatus status;
+
+  /// `unplanned` for 予定外の入荷 (0181): goods registered from the delivery
+  /// note as they came, checked in at once — not a purchase to pay.
+  final String? kind;
+  bool get unplanned => kind == 'unplanned';
+
+  /// The name the import was given (original_name), when no file is kept.
+  final String? fileName;
   final String? source;
   /// The supplier the invoice names (or the one chosen), its 登録番号 and
   /// the invoice's number, as read (0169).
@@ -645,7 +666,7 @@ class MasterImport extends Equatable {
   /// The day it is filed under: its document's date, else the upload day.
   DateTime? get filedOn => documentDate ?? createdAt?.let((c) => DateTime(c.year, c.month, c.day));
 
-  String? get originalName => files.where((f) => f.kind == 'original').firstOrNull?.name;
+  String? get originalName => files.where((f) => f.kind == 'original').firstOrNull?.name ?? fileName;
 
   factory MasterImport.fromJson(Map<String, dynamic> j) {
     int n(Object? v) => (v as num?)?.toInt() ?? 0;
@@ -653,6 +674,8 @@ class MasterImport extends Equatable {
       id: n(j['id']),
       status: MasterImportStatus.fromWire(j['status']?.toString()),
       source: j['source']?.toString(),
+      kind: j['kind']?.toString(),
+      fileName: (j['original_name']?.toString().trim().isEmpty ?? true) ? null : j['original_name'].toString(),
       supplierName: j['supplier_name']?.toString(),
       registrationNumber: j['registration_number']?.toString(),
       docNumber: j['doc_number']?.toString(),
@@ -698,7 +721,7 @@ class MasterImport extends Equatable {
   @override
   List<Object?> get props =>
       [id, status, files, lineCount, issues, created, updated, stockLines, stockAdded, lines, readLines, readBy,
-       documentDate, documentDateSource, paid, note, undoneAt];
+       documentDate, documentDateSource, paid, note, undoneAt, kind];
 }
 
 extension _LetImport<T> on T {

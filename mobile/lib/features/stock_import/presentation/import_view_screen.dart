@@ -543,8 +543,9 @@ class _ReadPane extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
         if (m.source == 'stock_file') ...[
-          // The order's 8 steps (0173): where it is, and what is left.
-          _OrderProgress(importId: m.id),
+          // The order's 8 steps (0173): where it is, and what is left — not
+          // for 予定外の入荷 (0181), which is no order to pay for.
+          if (!m.unplanned) _OrderProgress(importId: m.id),
           _NotesPanel(import: m),
           const SizedBox(height: AppSpacing.sm),
         ],
@@ -753,6 +754,7 @@ class _NotesPanelState extends ConsumerState<_NotesPanel> {
                 ),
               Text(keptUntilText(l10n, filed), key: const ValueKey('iv-kept'), style: theme.textTheme.bodySmall),
             ]),
+          if (!m.unplanned)
           CheckboxListTile(
             key: const ValueKey('iv-paid'),
             contentPadding: EdgeInsets.zero,

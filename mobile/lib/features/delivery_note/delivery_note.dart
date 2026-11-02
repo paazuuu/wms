@@ -73,8 +73,12 @@ Future<ApiResult<List<NoteLine>>> readDeliveryNote(WidgetRef ref, String fileNam
       ApiFailure(:final message) => ApiFailure(message: message),
     };
 
-/// The same, with the id of the copy kept (to keep it with an inspection).
-Future<ApiResult<({List<NoteLine> lines, int? documentId})>> readDeliveryNoteKept(
+/// A note as read: its lines, the id of the copy kept (to keep it with an
+/// inspection), and who it is from and its date, as printed.
+typedef NoteRead = ({List<NoteLine> lines, int? documentId, String? supplier, String? date});
+
+/// The same, with the id of the copy kept and the note's header.
+Future<ApiResult<NoteRead>> readDeliveryNoteKept(
     WidgetRef ref, String fileName, Uint8List bytes) async {
   final r = await ref.read(masterImportRepositoryProvider).read(fileName, bytes, keepRows: true, purpose: 'ocr');
   return switch (r) {
@@ -85,6 +89,8 @@ Future<ApiResult<({List<NoteLine> lines, int? documentId})>> readDeliveryNoteKep
               NoteLine.of(l),
         ],
         documentId: data.documentId,
+        supplier: data.supplierName,
+        date: data.docDate,
       )),
     ApiFailure(:final message) => ApiFailure(message: message),
   };

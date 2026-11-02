@@ -401,6 +401,60 @@ void main() {
     expect(e.visibleFor(['shipment.view']), isFalse);
   });
 
+  testWidgets('an invoice line received before as 予定外の入荷 says so, and neither side offers 取り消し (0181)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final invoice = MasterImport.fromJson({
+      'id': 21, 'status': 'awaiting_inspection', 'source': 'stock_file', 'original_name': '請求書.pdf',
+      'lines': [
+        {
+          'line_no': 2, 'jan_code': _jan1, 'name': 'テストペン 青', 'quantity': 500,
+          'inspected_at': '2026-10-23T02:00:00Z', 'inspected_quantity': 0, 'added': 0, 'covered_by_import_id': 7,
+        },
+        {'line_no': 3, 'jan_code': _jan2, 'name': 'テストノート', 'quantity': 100},
+      ],
+    });
+    final reader = _Reader(invoice);
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(_Stock()..reader = reader),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-inspected-2'))).data,
+        '予定外の入荷 #7 で入庫済み（在庫は増やしていません）');
+    expect(find.byKey(const ValueKey('si-more-2')), findsNothing);
+  });
+
+  testWidgets('an unplanned receipt shows who brought it; a line an invoice covered cannot be taken back', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final receipt = MasterImport.fromJson({
+      'id': 7, 'status': 'stock_done', 'source': 'stock_file', 'kind': 'unplanned', 'original_name': '納品書.jpg',
+      'supplier_name': 'テスト商事',
+      'lines': [
+        {
+          'line_no': 1, 'jan_code': _jan1, 'name': 'テストペン 青', 'quantity': 5,
+          'inspected_at': '2026-10-20T02:00:00Z', 'inspected_quantity': 5, 'added': 5, 'invoiced_import_id': 21,
+        },
+        {
+          'line_no': 2, 'jan_code': _jan2, 'name': 'テストノート', 'quantity': 3,
+          'inspected_at': '2026-10-20T02:00:00Z', 'inspected_quantity': 3, 'added': 3,
+        },
+      ],
+    });
+    final reader = _Reader(receipt);
+    await pumpApp(tester, const StockInspectionDetailScreen(importId: 7), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(_Stock()..reader = reader),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-unplanned'))).data, '予定外の入荷 · テスト商事');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-inspected-1'))).data, contains('請求書 取込 #21 と紐付け済み'));
+    expect(find.byKey(const ValueKey('si-more-1')), findsNothing);
+    expect(find.byKey(const ValueKey('si-more-2')), findsOneWidget);
+  });
+
   // 0167: each line with what its product tells of it, and narrowing.
   const pen = Product(
     id: 7, janCode: _jan1, name: 'テストペン タイプA 0.5 青', baseName: 'テストペン タイプA 0.5 青', maker: 'テスト文具',

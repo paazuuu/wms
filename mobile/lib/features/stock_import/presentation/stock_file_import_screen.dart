@@ -132,6 +132,19 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   bool _paid = false;
   final _note = TextEditingController();
 
+  /// Goods of this invoice already received as 予定外の入荷 and not yet
+  /// invoiced (0181), and whether they are tied to it (no stock added).
+  List<UnplannedLine> _openUnplanned = const [];
+  bool _tieUnplanned = true;
+
+  /// How many lines the last import tied to unplanned receipts.
+  int _covered = 0;
+
+  /// This file's lines matched to what unplanned receipts brought.
+  List<(int, String, int, UnplannedLine)> _unplannedMatches(List<StockFileLine> lines) => _mode != StockFileMode.add
+      ? const []
+      : matchUnplanned([for (final l in lines) (l.lineNo, l.janCode, l.quantity)], _openUnplanned);
+
   @override
   void dispose() {
     _note.dispose();
@@ -173,6 +186,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _docDate = null;
       _paid = false;
       _note.clear();
+      _openUnplanned = const [];
+      _tieUnplanned = true;
+      _covered = 0;
     });
     StockSheet? sheet;
     List<List<String>>? rows;
@@ -338,9 +354,16 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               if (k.containsKey(j)) j
           ]);
     final book = missing.isEmpty ? null : await repo.inPriceBook(missing);
+    // Received before the invoice, as 予定外の入荷 (0181)?
+    List<UnplannedLine> open = const [];
+    try {
+      final u = await repo.unplannedOpenLines(jans, warehouseId: wh);
+      if (u case ApiSuccess(:final data)) open = data;
+    } catch (_) {}
     if (!mounted) return;
     setState(() {
       _busy = false;
+      _openUnplanned = open;
       _known = k;
       _onHand = onHand is ApiSuccess<Map<String, int>> ? onHand.data : const {};
       _book = book is ApiSuccess<Map<String, (int, String)>> ? book.data : const {};
@@ -516,7 +539,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     // The same delivery put in twice is the costliest mistake there is.
     if (!await _passesDuplicateCheck(lines)) return;
     if (!mounted) return;
-    final units = lines.fold<int>(0, (s, l) => s + l.quantity);
+    final tie = _tieUnplanned ? _unplannedMatches(lines) : const <(int, String, int, UnplannedLine)>[];
+    final tiedNos = {for (final t in tie) t.$1};
+    final units = lines.fold<int>(0, (s, l) => s + (tiedNos.contains(l.lineNo) ? 0 : l.quantity));
     final before = lines.fold<int>(0, (s, l) => s + (_onHand[l.janCode] ?? 0));
     final after = _mode == StockFileMode.add ? before + units : units;
     final ok = await showDialog<bool>(
@@ -533,6 +558,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           if (toRegister.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.sfConfirmRegister(toRegister.length), key: const ValueKey('sf-confirm-register')),
+          ],
+          if (tie.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.sfConfirmCovered(tie.length), key: const ValueKey('sf-confirm-covered')),
           ],
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -575,6 +604,22 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
+        // Goods received before as 予定外の入荷: checked in as received,
+        // nothing added (0181).
+        var covered = 0;
+        final covers = [
+          for (final t in _tieUnplanned ? _unplannedMatches(send) : const <(int, String, int, UnplannedLine)>[])
+            CoverPick(lineNo: t.$1, from: t.$4),
+        ];
+        if (covers.isNotEmpty) {
+          final c = await repo.coverLines(data.importId, covers);
+          if (c case ApiSuccess(data: final n)) covered = n;
+          if (c case ApiFailure(:final message) when mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+          }
+        }
+        _covered = covered;
         // The date it is filed under, whether it is paid, and the memo.
         await repo.updateNotes(
           data.importId,
@@ -887,7 +932,12 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                     title: Text(done.staged
                         ? l10n.sfStaged(done.importId, done.lines, done.awaiting ?? 0)
                         : l10n.sfDone(done.importId, done.lines, done.change)),
-                    subtitle: done.skipped.isEmpty ? null : Text(l10n.sfSkipped(done.skipped.length)),
+                    subtitle: done.skipped.isEmpty && _covered == 0
+                        ? null
+                        : Text([
+                            if (done.skipped.isNotEmpty) l10n.sfSkipped(done.skipped.length),
+                            if (_covered > 0) l10n.sfCovered(_covered),
+                          ].join('\n'), key: const ValueKey('sf-done-detail')),
                   ),
                   if (done.staged)
                     Padding(
@@ -1140,6 +1190,38 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(l10n.sfNotItems(notItems), key: const ValueKey('sf-not-items'), style: muted),
+              ),
+            // Already received as 予定外の入荷 (0181): tied, not added again.
+            if (_unplannedMatches(sheet.lines) case final ties when ties.isNotEmpty)
+              Card(
+                key: const ValueKey('sf-unplanned'),
+                color: theme.colorScheme.tertiaryContainer,
+                margin: const EdgeInsets.only(top: AppSpacing.md),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(l10n.sfUnplannedTitle(ties.length), style: theme.textTheme.titleSmall),
+                    for (final (no, jan, qty, u) in ties)
+                      Text(
+                        l10n.sfUnplannedLine(jan, u.name ?? '', u.importId,
+                            u.receivedAt == null ? '' : DateFormat('y/MM/dd').format(u.receivedAt!), u.quantity, qty),
+                        key: ValueKey('sf-unplanned-$no'),
+                        style: theme.textTheme.bodySmall?.copyWith(color: u.quantity != qty ? theme.colorScheme.error : null),
+                      ),
+                    if (ties.any((t) => t.$4.quantity != t.$3))
+                      Text(l10n.sfUnplannedDiffers,
+                          key: const ValueKey('sf-unplanned-differs'),
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                    CheckboxListTile(
+                      key: const ValueKey('sf-unplanned-tie'),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      value: _tieUnplanned,
+                      onChanged: _busy ? null : (v) => setState(() => _tieUnplanned = v ?? false),
+                      title: Text(l10n.sfUnplannedTie),
+                    ),
+                  ]),
+                ),
               ),
             const SizedBox(height: AppSpacing.md),
             // Kept with the import for seven years (0148): the date it is

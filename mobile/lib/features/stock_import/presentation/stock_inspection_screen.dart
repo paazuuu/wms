@@ -239,7 +239,8 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
       }
     });
     // The note kept with this inspection, to look back at (0179).
-    if (r case ApiSuccess(data: (lines: _, documentId: final id?))) {
+    if (r case ApiSuccess(:final data) when data.documentId != null) {
+      final id = data.documentId!;
       await ref.read(stockImportRepositoryProvider).linkInspectionDocument(widget.importId, id);
       if (mounted) ref.invalidate(inspectionDocumentsProvider(widget.importId));
     }
@@ -499,6 +500,11 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 120),
                 children: [
                   Text(m.originalName ?? '', style: theme.textTheme.titleMedium),
+                  // 予定外の入荷 (0181): who brought it.
+                  if (m.unplanned)
+                    Text([l10n.urLabel, if (m.supplierName case final s?) s].join(' · '),
+                        key: const ValueKey('si-unplanned'),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.tertiary)),
                   if (m.warehouseName case final w?) Text(w, style: theme.textTheme.bodySmall),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
@@ -663,7 +669,14 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       enabled: !_busy && may,
                       onTick: (v) => setState(() => v ? _ticked.add(l.lineNo) : _ticked.remove(l.lineNo)),
                       onCount: () => setState(() {}),
-                      onUndo: l.inspected && may && !_busy ? () => _undo(l) : null,
+                      // A receipt and the invoice that covered it go together (0181).
+                      onUndo: l.inspected &&
+                              may &&
+                              !_busy &&
+                              l.coveredByImportId == null &&
+                              l.invoicedImportId == null
+                          ? () => _undo(l)
+                          : null,
                     ),
                 ],
               );
@@ -951,7 +964,16 @@ class _InspectLine extends ConsumerWidget {
     final countField = done
         ? Row(children: [
             Expanded(
-                child: Text(l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? ''), style: muted)),
+                child: Text(
+              switch (line) {
+                MasterImportLine(coveredByImportId: final id?) => l10n.siCovered(id),
+                MasterImportLine(invoicedImportId: final id?) =>
+                  '${l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? '')}\n${l10n.siInvoiced(id)}',
+                _ => l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? ''),
+              },
+              key: ValueKey('si-inspected-${line.lineNo}'),
+              style: muted,
+            )),
             // Behind ⋯, so it is never pressed by mistake (0179).
             if (onUndo != null)
               PopupMenuButton<void>(

@@ -161,6 +161,25 @@ class _FakeStock implements StockImportRepository {
 
   @override
   Future<ApiResult<List<InspectionDay>>> inspectionCalendar(DateTime from, DateTime to) async => const ApiSuccess([]);
+
+  /// 0181: what unplanned receipts brought, and the lines tied to them.
+  List<UnplannedLine> unplanned = const [];
+  final covered = <(int, List<CoverPick>)>[];
+
+  @override
+  Future<ApiResult<StockFileResult>> unplannedReceipt(int warehouseId, List<StockFileLine> lines,
+          {String? fileName, String? fileType, String? supplier, int? documentId, DateTime? documentDate}) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<ApiResult<List<UnplannedLine>>> unplannedOpenLines(List<String> jans, {int? warehouseId}) async =>
+      ApiSuccess([for (final u in unplanned) if (jans.contains(u.janCode)) u]);
+
+  @override
+  Future<ApiResult<int>> coverLines(int importId, List<CoverPick> covers) async {
+    covered.add((importId, covers));
+    return ApiSuccess(covers.length);
+  }
 }
 
 /// 読み取った内容を確認しました — nothing goes in without it.
@@ -176,10 +195,11 @@ Override _signedIn(List<String> permissions) => authControllerProvider.overrideW
 
 Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
     {Map<String, String> products = const {}, Map<String, int> stock = const {}, List<String> perms = const ['inventory.adjust'],
-    List<(String, Uint8List)>? saved, MasterImportRepository? reader, String name = 'a.csv'}) async {
+    List<(String, Uint8List)>? saved, MasterImportRepository? reader, String name = 'a.csv',
+    List<UnplannedLine> unplanned = const []}) async {
   await tester.binding.setSurfaceSize(const Size(1000, 2000));
   addTearDown(() => tester.binding.setSurfaceSize(null));
-  final repo = _FakeStock(products, stock: stock);
+  final repo = _FakeStock(products, stock: stock)..unplanned = unplanned;
   await pumpApp(tester, const StockFileImportScreen(), overrides: [
     _signedIn(perms),
     stockImportRepositoryProvider.overrideWithValue(repo),
@@ -330,6 +350,55 @@ void main() {
     expect(note, '8/21 振込予定');
     expect(find.text('取込 #12: 2商品を検品待ちにしました（合計 600個）。検品が済むと在庫に入ります。'), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-go-inspect')), findsOneWidget);
+  });
+
+  testWidgets('goods received before as 予定外の入荷 are tied to the invoice, not added again (0181)', (tester) async {
+    final repo = await _pumpCsv(
+      tester,
+      '請求書\n発行日,2026/08/31\nJANコード,数量\n$_jan1,500\n$_jan2,100\n',
+      products: {_jan1: 'テストペン 青', _jan2: 'テストノート'},
+      unplanned: [
+        UnplannedLine.fromJson({
+          'import_id': 7, 'line_no': 1, 'jan_code': _jan2, 'quantity': 90, 'name': 'テストノート',
+          'received_at': '2026-08-20T01:00:00Z',
+        }),
+      ],
+    );
+    // Said, with the counts: received 90, this invoice 100.
+    expect(find.byKey(const ValueKey('sf-unplanned')), findsOneWidget);
+    expect(find.textContaining('予定外の入荷 #7（2026/08/20）で 90個 入庫済み ／ この請求書 100個'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-unplanned-differs')), findsOneWidget);
+    await _tick(tester);
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    expect(find.text('うち 1行は予定外の入荷で入庫済みのため、在庫は増やしません。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    // The notebook line (row 5 of the sheet, as it was staged) tied to the receipt's line.
+    final (id, covers) = repo.covered.single;
+    expect(id, 12);
+    expect([for (final c in covers) (c.lineNo, c.from.importId, c.from.lineNo)], [(5, 7, 1)]);
+    expect(find.text('予定外の入荷と紐付けた行: 1行'), findsOneWidget);
+  });
+
+  testWidgets('untied by hand, the invoice goes in as any other', (tester) async {
+    final repo = await _pumpCsv(
+      tester,
+      'JANコード,数量\n$_jan2,100\n',
+      products: {_jan2: 'テストノート'},
+      unplanned: [UnplannedLine.fromJson({'import_id': 7, 'line_no': 1, 'jan_code': _jan2, 'quantity': 100})],
+    );
+    expect(find.byKey(const ValueKey('sf-unplanned-differs')), findsNothing);
+    await tester.ensureVisible(find.byKey(const ValueKey('sf-unplanned-tie')));
+    await tester.tap(find.byKey(const ValueKey('sf-unplanned-tie')));
+    await tester.pumpAndSettle();
+    await _tick(tester);
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sf-confirm-covered')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.covered, isEmpty);
   });
 
   testWidgets('without a date in the file, the import is filed under the upload day; setting the stock is not staged',

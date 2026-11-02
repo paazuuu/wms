@@ -62,6 +62,13 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('uninspect_below_zero')) {
     return l10n.siUndoBelowZero;
   }
+  // 0181: a receipt and the invoice that covered it go together.
+  if (rawMessage.contains('uninspect_covered')) return l10n.errUninspectCovered;
+  if (rawMessage.contains('uninspect_invoiced') || rawMessage.contains('undo_invoiced')) {
+    return l10n.errUninspectInvoiced;
+  }
+  if (rawMessage.contains('unplanned_no_known_products')) return l10n.errUnplannedNoProducts;
+  if (rawMessage.contains('cover_line_unavailable')) return l10n.errCoverUnavailable;
   if (rawMessage.contains('is already completed')) {
     return l10n.errorInspectionCompleted;
   }

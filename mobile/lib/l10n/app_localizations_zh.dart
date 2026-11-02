@@ -13188,4 +13188,147 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get siDayShowAll => '显示全部行';
+
+  @override
+  String get featUnplannedReceipt => '计划外入货';
+
+  @override
+  String get featUnplannedReceiptDesc => '无订单、无发票送到的商品：拍摄送货单，当场登记・验货并入库';
+
+  @override
+  String get urTitle => '计划外入货';
+
+  @override
+  String get urIntro =>
+      '无需导入订单或发票，当场登记并验货送到的商品。拍摄随货送货单后，AI读取的商品全部勾选（没有送货单时扫描JAN）。取消未到的行、修正数量后点“验货完成”即刻入库。之后收到的发票请照常在“采购”中导入，这里入库的商品不会重复增加。';
+
+  @override
+  String get urSupplier => '供应商';
+
+  @override
+  String get urSupplierHint => '从送货单读取，可手动修改';
+
+  @override
+  String get urReadNote => '拍摄・选择送货单';
+
+  @override
+  String urNoteKept(String name) {
+    return '送货单 $name 将作为验货时的文件保存';
+  }
+
+  @override
+  String get urScan => '扫描JAN（扫一次算1个）';
+
+  @override
+  String get urNoJanRead => '未能从送货单读取JAN，可扫描JAN添加。';
+
+  @override
+  String urLines(int all, int ticked, int units) {
+    return '$all行（入库 $ticked行・$units个）';
+  }
+
+  @override
+  String get urLinesHint => '未到的行请取消勾选，数量可按实物修改。';
+
+  @override
+  String urComplete(int lines, int units) {
+    return '验货完成（入库 $lines行・$units个）';
+  }
+
+  @override
+  String urConfirmQ(String warehouse) {
+    return '入库到 $warehouse 吗？';
+  }
+
+  @override
+  String urConfirmBody(int lines, int units) {
+    return '$lines行・$units个作为已验货立即入库。';
+  }
+
+  @override
+  String urConfirmRegister(int n) {
+    return '商品库中没有的 $n件将先按送货单上的名称登记后再入库。';
+  }
+
+  @override
+  String urConfirmSkip(int n) {
+    return '商品库中没有的 $n件因无登记权限不入库。';
+  }
+
+  @override
+  String get urConfirmInvoice => '之后在“采购”中导入的发票会自动与此处入库的部分关联，库存不会再增加。';
+
+  @override
+  String get urConfirmGo => '入库';
+
+  @override
+  String urBadCount(String jan) {
+    return 'JAN $jan 的数量不正确';
+  }
+
+  @override
+  String get urNothingKnown => '没有可入库的商品（全部是商品库中没有的商品）';
+
+  @override
+  String urDone(int id, int lines, int units) {
+    return '已作为导入 #$id 入库 $lines行・$units个';
+  }
+
+  @override
+  String get urDoneHint => '验货内容・送货单查看・撤销也可在“验货”中进行';
+
+  @override
+  String get urDoneOpen => '查看内容';
+
+  @override
+  String get urLabel => '计划外入货';
+
+  @override
+  String siCovered(int id) {
+    return '已在计划外入货 #$id 入库（未增加库存）';
+  }
+
+  @override
+  String siInvoiced(int id) {
+    return '已与发票 导入 #$id 关联';
+  }
+
+  @override
+  String get errUninspectCovered => '此行为计划外入货中已入库的部分。如需撤销，请撤销整个发票导入。';
+
+  @override
+  String get errUninspectInvoiced => '此行已与发票导入关联，请先撤销发票导入。';
+
+  @override
+  String get errUnplannedNoProducts => '商品库中没有任何商品，无法入库';
+
+  @override
+  String get errCoverUnavailable => '要关联的计划外入货已与其他发票关联或已撤销，请重新加载画面。';
+
+  @override
+  String sfUnplannedTitle(int n) {
+    return '有已在计划外入货中入库的商品（$n行）';
+  }
+
+  @override
+  String sfUnplannedLine(
+      String jan, String name, int id, String date, int received, int billed) {
+    return '$jan $name：已在计划外入货 #$id（$date）入库 $received个 ／ 本发票 $billed个';
+  }
+
+  @override
+  String get sfUnplannedDiffers => '数量不一致。请取消关联后另行处理差额。';
+
+  @override
+  String get sfUnplannedTie => '作为已入库关联（不增加库存）';
+
+  @override
+  String sfConfirmCovered(int n) {
+    return '其中 $n行已在计划外入货中入库，不增加库存。';
+  }
+
+  @override
+  String sfCovered(int n) {
+    return '已与计划外入货关联: $n行';
+  }
 }

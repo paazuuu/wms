@@ -265,6 +265,7 @@ class _Tile extends StatelessWidget {
             [
               l10n.icChecked(item.lines, n.format(item.units), item.lineCount),
               if (item.by case final b?) b,
+              if (item.kind == 'unplanned') l10n.urLabel,
               if (item.warehouseName case final w?) w,
             ].join(' · '),
             key: ValueKey('ic-what-${item.importId}'),

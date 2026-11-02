@@ -283,10 +283,13 @@ class StockFileChecked extends ConsumerWidget {
             leading: const StatusAvatar(tone: StatusTone.success, icon: Icons.inventory_outlined),
             title: Text(l10n.siFile(m.id, m.originalName ?? ''), maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text([
+              if (m.unplanned) l10n.urLabel,
+              if (m.unplanned && m.supplierName != null) m.supplierName!,
               if (m.warehouseName case final w?) w,
               l10n.calInStock,
             ].join(' · ')),
-            trailing: StatusPill(tone: StatusTone.success, label: l10n.qcFileBadge, dense: true),
+            trailing: StatusPill(
+                tone: StatusTone.success, label: m.unplanned ? l10n.urLabel : l10n.qcFileBadge, dense: true),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: m.id))),
           ),
         ),

@@ -23504,6 +23504,229 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'すべての行を表示'**
   String get siDayShowAll;
+
+  /// No description provided for @featUnplannedReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get featUnplannedReceipt;
+
+  /// No description provided for @featUnplannedReceiptDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'注文や請求書なしで届いた商品を、納品書を撮ってその場で登録・検品し、すぐ入庫します'**
+  String get featUnplannedReceiptDesc;
+
+  /// No description provided for @urTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get urTitle;
+
+  /// No description provided for @urIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'注文や請求書の取込なしで届いた商品を、その場で登録して検品します。一緒に届いた納品書を撮ると、AIが読み取った商品すべてにチェックが付きます（納品書がなければJANをスキャン）。届いていない行はチェックを外し、数を直して「検品完了」を押すと、すぐに在庫に入ります。後から届く請求書は「発注」でいつもどおり取り込んでください。ここで入庫した商品は二重に増えません。'**
+  String get urIntro;
+
+  /// No description provided for @urSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get urSupplier;
+
+  /// No description provided for @urSupplierHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書から読み取ります。手で直せます'**
+  String get urSupplierHint;
+
+  /// No description provided for @urReadNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を撮る・選ぶ'**
+  String get urReadNote;
+
+  /// No description provided for @urNoteKept.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書 {name} を検品時のファイルとして保存します'**
+  String urNoteKept(String name);
+
+  /// No description provided for @urScan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANをスキャン（1回で1個）'**
+  String get urScan;
+
+  /// No description provided for @urNoJanRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書からJANが読み取れませんでした。JANをスキャンして追加できます。'**
+  String get urNoJanRead;
+
+  /// No description provided for @urLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{all}行（入庫する {ticked}行・{units}個）'**
+  String urLines(int all, int ticked, int units);
+
+  /// No description provided for @urLinesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'届いていない行はチェックを外してください。数は現物に合わせて直せます。'**
+  String get urLinesHint;
+
+  /// No description provided for @urComplete.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品完了（{lines}行・{units}個を入庫）'**
+  String urComplete(int lines, int units);
+
+  /// No description provided for @urConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{warehouse} に入庫しますか？'**
+  String urConfirmQ(String warehouse);
+
+  /// No description provided for @urConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}行・{units}個を検品済みとして、すぐに在庫に入れます。'**
+  String urConfirmBody(int lines, int units);
+
+  /// No description provided for @urConfirmRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにない {n}件は、納品書の名前で登録してから入庫します。'**
+  String urConfirmRegister(int n);
+
+  /// No description provided for @urConfirmSkip.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにない {n}件は登録する権限がないため入庫しません。'**
+  String urConfirmSkip(int n);
+
+  /// No description provided for @urConfirmInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'後から届く請求書は「発注」で取り込むと、ここで入庫した分と自動で紐付き、在庫は増えません。'**
+  String get urConfirmInvoice;
+
+  /// No description provided for @urConfirmGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫する'**
+  String get urConfirmGo;
+
+  /// No description provided for @urBadCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {jan} の数が正しくありません'**
+  String urBadCount(String jan);
+
+  /// No description provided for @urNothingKnown.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫できる商品がありません（商品ライブラリーにない商品だけです）'**
+  String get urNothingKnown;
+
+  /// No description provided for @urDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} として {lines}行・{units}個を入庫しました'**
+  String urDone(int id, int lines, int units);
+
+  /// No description provided for @urDoneHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品の中身・納品書の見返し・取り消しは「検品」からもできます'**
+  String get urDoneHint;
+
+  /// No description provided for @urDoneOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'中身を見る'**
+  String get urDoneOpen;
+
+  /// No description provided for @urLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get urLabel;
+
+  /// No description provided for @siCovered.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 #{id} で入庫済み（在庫は増やしていません）'**
+  String siCovered(int id);
+
+  /// No description provided for @siInvoiced.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書 取込 #{id} と紐付け済み'**
+  String siInvoiced(int id);
+
+  /// No description provided for @errUninspectCovered.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行は予定外の入荷で入庫済みの分です。取り消すときは、請求書の取込ごと取り消してください。'**
+  String get errUninspectCovered;
+
+  /// No description provided for @errUninspectInvoiced.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行はすでに請求書の取込と紐付いています。先に請求書の取込を取り消してください。'**
+  String get errUninspectInvoiced;
+
+  /// No description provided for @errUnplannedNoProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにある商品が1つもないため入庫できません'**
+  String get errUnplannedNoProducts;
+
+  /// No description provided for @errCoverUnavailable.
+  ///
+  /// In ja, this message translates to:
+  /// **'紐付けようとした予定外の入荷が、すでに別の請求書と紐付いているか取り消されています。画面を読み込み直してください。'**
+  String get errCoverUnavailable;
+
+  /// No description provided for @sfUnplannedTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷で入庫済みの商品があります（{n}行）'**
+  String sfUnplannedTitle(int n);
+
+  /// No description provided for @sfUnplannedLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'{jan} {name}：予定外の入荷 #{id}（{date}）で {received}個 入庫済み ／ この請求書 {billed}個'**
+  String sfUnplannedLine(
+      String jan, String name, int id, String date, int received, int billed);
+
+  /// No description provided for @sfUnplannedDiffers.
+  ///
+  /// In ja, this message translates to:
+  /// **'数が違います。足りない分・多い分は、紐付けを外して別に扱ってください。'**
+  String get sfUnplannedDiffers;
+
+  /// No description provided for @sfUnplannedTie.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫済みとして紐付ける（在庫は増やさない）'**
+  String get sfUnplannedTie;
+
+  /// No description provided for @sfConfirmCovered.
+  ///
+  /// In ja, this message translates to:
+  /// **'うち {n}行は予定外の入荷で入庫済みのため、在庫は増やしません。'**
+  String sfConfirmCovered(int n);
+
+  /// No description provided for @sfCovered.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷と紐付けた行: {n}行'**
+  String sfCovered(int n);
 }
 
 class _AppLocalizationsDelegate
