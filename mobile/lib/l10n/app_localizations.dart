@@ -23823,6 +23823,229 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'数量'**
   String get urColCount;
+
+  /// No description provided for @sfUnplannedLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{jan} {name}：予定外の入荷 {receipts} で 計{received}個 入庫済み ／ この請求書 {billed}個'**
+  String sfUnplannedLines(
+      String jan, String name, String receipts, int received, int billed);
+
+  /// No description provided for @sfUnplannedOne.
+  ///
+  /// In ja, this message translates to:
+  /// **'#{id}（{date}）{qty}個'**
+  String sfUnplannedOne(int id, String date, int qty);
+
+  /// No description provided for @urTabRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷を登録'**
+  String get urTabRegister;
+
+  /// No description provided for @urTabWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書待ち（{n}）'**
+  String urTabWaiting(int n);
+
+  /// No description provided for @urWaitingIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷のうち、まだ請求書と紐付いていないものです（古い順）。明細つきの請求書は「発注」で取り込めば自動で紐付きます（同じ商品を合計した1行でも、何回分でもまとめて紐付きます）。明細のない合計請求書は、ここで該当する入荷を選んで「請求書を登録」してください。請求書が来ないもの（サンプル・無償・先方の誤送付・返品）は「請求書なしで完了」にします。'**
+  String get urWaitingIntro;
+
+  /// No description provided for @urChipWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書待ち'**
+  String get urChipWaiting;
+
+  /// No description provided for @urChipSettled.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書なしで完了したもの'**
+  String get urChipSettled;
+
+  /// No description provided for @urNoneWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書待ちの予定外の入荷はありません'**
+  String get urNoneWaiting;
+
+  /// No description provided for @urNoneSettled.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書なしで完了したものはありません'**
+  String get urNoneSettled;
+
+  /// No description provided for @urItemTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 #{id}'**
+  String urItemTitle(int id);
+
+  /// No description provided for @urReceivedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷 {date}'**
+  String urReceivedOn(String date);
+
+  /// No description provided for @urDaysWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}日経過'**
+  String urDaysWaiting(int n);
+
+  /// No description provided for @urPartlyInvoiced.
+  ///
+  /// In ja, this message translates to:
+  /// **'うち {n}行は請求書と紐付け済み'**
+  String urPartlyInvoiced(int n);
+
+  /// No description provided for @urSettledAs.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書なし：{reason}'**
+  String urSettledAs(String reason);
+
+  /// No description provided for @urSettle.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書なしで完了'**
+  String get urSettle;
+
+  /// No description provided for @urReopen.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書待ちに戻す'**
+  String get urReopen;
+
+  /// No description provided for @urSettleQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 #{id} を請求書なしで完了しますか？'**
+  String urSettleQ(int id);
+
+  /// No description provided for @urSettleBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書が来ない理由を選んでください。在庫はそのままです（返品した場合は、先に検品画面の「…」から取り消してください）。あとから請求書が来たら「請求書待ちに戻す」で戻せます。'**
+  String get urSettleBody;
+
+  /// No description provided for @urSettleNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（「その他」は必須）'**
+  String get urSettleNote;
+
+  /// No description provided for @urSettleGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書なしで完了'**
+  String get urSettleGo;
+
+  /// No description provided for @urSettled.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 #{id} を請求書なしで完了しました'**
+  String urSettled(int id);
+
+  /// No description provided for @urReopened.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 #{id} を請求書待ちに戻しました'**
+  String urReopened(int id);
+
+  /// No description provided for @urReasonSample.
+  ///
+  /// In ja, this message translates to:
+  /// **'サンプル・見本'**
+  String get urReasonSample;
+
+  /// No description provided for @urReasonFree.
+  ///
+  /// In ja, this message translates to:
+  /// **'無償提供'**
+  String get urReasonFree;
+
+  /// No description provided for @urReasonSupplierError.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方の誤送付'**
+  String get urReasonSupplierError;
+
+  /// No description provided for @urReasonReturned.
+  ///
+  /// In ja, this message translates to:
+  /// **'返品した'**
+  String get urReasonReturned;
+
+  /// No description provided for @urReasonOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get urReasonOther;
+
+  /// No description provided for @urInvoiceButton.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ{n}件の請求書を登録（合計請求書）'**
+  String urInvoiceButton(int n);
+
+  /// No description provided for @urInvoiceQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件を1枚の請求書で紐付けますか？'**
+  String urInvoiceQ(int n);
+
+  /// No description provided for @urInvoiceBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 {ids} を、これから選ぶ請求書（合計請求書）1枚と紐付けます。請求書は取込として登録され、支払い・税理士用ファイルに出ます。在庫は増えません。'**
+  String urInvoiceBody(String ids);
+
+  /// No description provided for @urInvoiceSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先が混ざっています：{names}。同じ請求書でよいか確認してください。'**
+  String urInvoiceSuppliers(String names);
+
+  /// No description provided for @urInvoicePick.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書を撮る・選ぶ'**
+  String get urInvoicePick;
+
+  /// No description provided for @urInvoiced.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書を取込 #{id} として登録し、{n}件の予定外の入荷と紐付けました（支払い・税理士用ファイルに出ます）'**
+  String urInvoiced(int id, int n);
+
+  /// No description provided for @errInvoiceMixedWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫の違う予定外の入荷は、1枚の請求書でまとめられません。倉庫ごとに分けて登録してください。'**
+  String get errInvoiceMixedWarehouses;
+
+  /// No description provided for @errNoInvoiceNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'「その他」を選んだときはメモを入れてください'**
+  String get errNoInvoiceNote;
+
+  /// No description provided for @payUnplannedWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷で請求書待ちが {n}件あります'**
+  String payUnplannedWaiting(int n);
+
+  /// No description provided for @payUnplannedWaitingHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷 → 請求書待ち で確認できます'**
+  String get payUnplannedWaitingHint;
 }
 
 class _AppLocalizationsDelegate

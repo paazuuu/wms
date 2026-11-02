@@ -8405,6 +8405,26 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - unplanned_receipt (0181, registered and checked in at once) is no longer
   used by the app.
 
+## 0183: 予定外の入荷 and its invoice — or none
+
+- 請求書待ち: 予定外の入荷 has a second tab listing every receipt with goods
+  checked in that no invoice covers yet (unplanned_awaiting_invoice), oldest
+  first, with the days since (red from 30). 発注 → 注文の進み具合・支払い
+  says how many wait and opens the tab.
+- 請求書なしで完了 (unplanned_settle_without_invoice): a sample, given free,
+  the supplier's mistake, returned, or other (with a memo). The stock stays;
+  a return is taken back first on the 検品 screen. 請求書待ちに戻す reopens
+  it (unplanned_reopen_invoice). Both kept in the audit log.
+- One invoice line for several receipts: 発注 matches each invoice line to
+  the receipt lines of its JAN, oldest first, as far as its count reaches
+  (ペン30 = #7 の20 + #8 の10), and stock_file_cover_lines ties them all.
+- A summary invoice with no JAN lines: the receipts are chosen in 請求書待ち
+  and the invoice photographed or chosen once (unplanned_invoice_create). It
+  becomes 取込 #… of kind invoice (nothing in stock), read by the AI, its
+  original kept, its 振込先 read — in 支払い and 税理士用ファイル like any
+  invoice. Receipts of different warehouses cannot share one; different
+  suppliers are warned about. Undoing it frees the receipts again.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

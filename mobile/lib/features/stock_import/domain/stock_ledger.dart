@@ -453,16 +453,115 @@ class CoverPick {
   Map<String, dynamic> toJson() => {'line_no': lineNo, 'from_import_id': from.importId, 'from_line_no': from.lineNo};
 }
 
-/// Each invoice line [lines] (JAN, quantity) matched to the oldest
-/// unplanned receipt line of its JAN not yet taken: one receipt line covers
-/// one invoice line.
-List<(int, String, int, UnplannedLine)> matchUnplanned(List<(int, String, int)> lines, List<UnplannedLine> open) {
+/// Each invoice line [lines] (JAN, quantity) matched to the unplanned
+/// receipt lines of its JAN not yet taken, oldest first, as many as its
+/// quantity reaches (0183): ペン30 takes 11/1 の20 and 11/5 の10. One
+/// receipt line goes to one invoice line only.
+List<(int, String, int, List<UnplannedLine>)> matchUnplanned(
+    List<(int, String, int)> lines, List<UnplannedLine> open) {
   final left = [...open];
-  final out = <(int, String, int, UnplannedLine)>[];
+  final out = <(int, String, int, List<UnplannedLine>)>[];
   for (final (no, jan, qty) in lines) {
-    final i = left.indexWhere((u) => u.janCode == jan);
-    if (i < 0) continue;
-    out.add((no, jan, qty, left.removeAt(i)));
+    final taken = <UnplannedLine>[];
+    var sum = 0;
+    while (sum < qty || taken.isEmpty) {
+      final i = left.indexWhere((u) => u.janCode == jan);
+      if (i < 0) break;
+      final u = left.removeAt(i);
+      taken.add(u);
+      sum += u.quantity;
+    }
+    if (taken.isNotEmpty) out.add((no, jan, qty, taken));
   }
   return out;
+}
+
+/// What the receipts tied to one invoice line brought, together.
+int receivedOf(List<UnplannedLine> from) => from.fold<int>(0, (s, u) => s + u.quantity);
+
+/// Why a receipt is closed without an invoice (0183).
+enum NoInvoiceReason {
+  sample('sample'),
+  free('free'),
+  supplierError('supplier_error'),
+  returned('returned'),
+  other('other');
+
+  const NoInvoiceReason(this.wire);
+  final String wire;
+
+  static NoInvoiceReason? fromWire(String? v) => values.where((r) => r.wire == v).firstOrNull;
+}
+
+/// An unplanned receipt waiting for its invoice — or closed without one
+/// (0183): what is still not invoiced, since when.
+class UnplannedWaiting extends Equatable {
+  const UnplannedWaiting({
+    required this.importId,
+    this.receivedAt,
+    this.documentDate,
+    this.supplier,
+    this.fileName,
+    this.warehouseId,
+    this.warehouseName,
+    this.lines = const [],
+    this.invoicedLines = 0,
+    this.reason,
+    this.note,
+    this.settledAt,
+    this.settledBy,
+  });
+
+  final int importId;
+  final DateTime? receivedAt;
+  final DateTime? documentDate;
+  final String? supplier;
+  final String? fileName;
+  final int? warehouseId;
+  final String? warehouseName;
+
+  /// The lines no invoice covers yet.
+  final List<UnplannedLine> lines;
+
+  /// Lines an invoice already covered (a part came in an invoice).
+  final int invoicedLines;
+  final NoInvoiceReason? reason;
+  final String? note;
+  final DateTime? settledAt;
+  final String? settledBy;
+
+  int get units => lines.fold<int>(0, (s, l) => s + l.quantity);
+
+  /// Whole days since the goods came, by the calendar.
+  int daysSince(DateTime now) {
+    final at = receivedAt ?? now;
+    return DateTime(now.year, now.month, now.day).difference(DateTime(at.year, at.month, at.day)).inDays;
+  }
+
+  factory UnplannedWaiting.fromJson(Map<String, dynamic> j) {
+    int? n(Object? v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}');
+    String? s(Object? v) => v == null || '$v'.trim().isEmpty ? null : '$v'.trim();
+    final id = n(j['import_id']) ?? 0;
+    return UnplannedWaiting(
+      importId: id,
+      receivedAt: DateTime.tryParse('${j['received_at'] ?? ''}')?.toLocal(),
+      documentDate: DateTime.tryParse('${j['document_date'] ?? ''}'),
+      supplier: s(j['supplier']),
+      fileName: s(j['file_name']),
+      warehouseId: n(j['warehouse_id']),
+      warehouseName: s(j['warehouse_name']),
+      lines: [
+        for (final l in (j['lines'] as List? ?? const []).whereType<Map>())
+          UnplannedLine.fromJson({...l.cast<String, dynamic>(), 'import_id': id}),
+      ],
+      invoicedLines: n(j['invoiced_lines']) ?? 0,
+      reason: NoInvoiceReason.fromWire(s(j['no_invoice_reason'])),
+      note: s(j['no_invoice_note']),
+      settledAt: DateTime.tryParse('${j['no_invoice_at'] ?? ''}')?.toLocal(),
+      settledBy: s(j['no_invoice_by']),
+    );
+  }
+
+  @override
+  List<Object?> get props => [importId, receivedAt, supplier, lines, invoicedLines, reason, note, settledAt];
 }

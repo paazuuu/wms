@@ -178,6 +178,9 @@ class _FakeStock implements StockImportRepository {
   Future<ApiResult<int>> closeLines(int importId, List<int> lineNos) async => throw UnimplementedError();
 
   @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+
+  @override
   Future<ApiResult<List<UnplannedLine>>> unplannedOpenLines(List<String> jans, {int? warehouseId}) async =>
       ApiSuccess([for (final u in unplanned) if (jans.contains(u.janCode)) u]);
 
@@ -372,7 +375,7 @@ void main() {
     );
     // Said, with the counts: received 90, this invoice 100.
     expect(find.byKey(const ValueKey('sf-unplanned')), findsOneWidget);
-    expect(find.textContaining('予定外の入荷 #7（2026/08/20）で 90個 入庫済み ／ この請求書 100個'), findsOneWidget);
+    expect(find.textContaining('予定外の入荷 #7（2026/08/20）90個 で 計90個 入庫済み ／ この請求書 100個'), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-unplanned-differs')), findsOneWidget);
     await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
@@ -385,6 +388,27 @@ void main() {
     expect(id, 12);
     expect([for (final c in covers) (c.lineNo, c.from.importId, c.from.lineNo)], [(5, 7, 1)]);
     expect(find.text('予定外の入荷と紐付けた行: 1行'), findsOneWidget);
+  });
+
+  testWidgets('one invoice line for two unplanned receipts ties both (0183)', (tester) async {
+    final repo = await _pumpCsv(
+      tester,
+      'JANコード,数量\n$_jan1,30\n',
+      products: {_jan1: 'テストペン 青'},
+      unplanned: [
+        UnplannedLine.fromJson(const {'import_id': 7, 'line_no': 1, 'jan_code': _jan1, 'quantity': 20, 'received_at': '2026-11-01T01:00:00Z'}),
+        UnplannedLine.fromJson(const {'import_id': 8, 'line_no': 1, 'jan_code': _jan1, 'quantity': 10, 'received_at': '2026-11-05T01:00:00Z'}),
+      ],
+    );
+    expect(find.textContaining('#7（2026/11/01）20個、#8（2026/11/05）10個 で 計30個 入庫済み ／ この請求書 30個'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-unplanned-differs')), findsNothing);
+    await _tick(tester);
+    await tester.tap(find.byKey(const ValueKey('sf-apply')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    final (_, covers) = repo.covered.single;
+    expect([for (final c in covers) (c.lineNo, c.from.importId)], [(2, 7), (2, 8)]);
   });
 
   testWidgets('untied by hand, the invoice goes in as any other', (tester) async {

@@ -613,7 +613,11 @@ class MasterImport extends Equatable {
     this.note,
     this.kind,
     this.fileName,
+    this.noInvoiceAt,
   });
+
+  /// An unplanned receipt closed without an invoice (0183).
+  final DateTime? noInvoiceAt;
 
   final int id;
   final MasterImportStatus status;
@@ -680,6 +684,7 @@ class MasterImport extends Equatable {
       status: MasterImportStatus.fromWire(j['status']?.toString()),
       source: j['source']?.toString(),
       kind: j['kind']?.toString(),
+      noInvoiceAt: DateTime.tryParse('${j['no_invoice_at'] ?? ''}')?.toLocal(),
       fileName: (j['original_name']?.toString().trim().isEmpty ?? true) ? null : j['original_name'].toString(),
       supplierName: j['supplier_name']?.toString(),
       registrationNumber: j['registration_number']?.toString(),

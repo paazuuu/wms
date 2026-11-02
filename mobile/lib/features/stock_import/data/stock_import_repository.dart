@@ -88,6 +88,21 @@ abstract class StockImportRepository {
   /// Lines of an unplanned receipt that did not come, closed (0182).
   Future<ApiResult<int>> closeLines(int importId, List<int> lineNos);
 
+  /// 請求書待ち (0183): unplanned receipts no invoice covers yet — or, with
+  /// [settled], those closed without one.
+  Future<ApiResult<List<UnplannedWaiting>>> awaitingInvoice({bool settled = false});
+
+  /// A receipt no invoice will come for, closed with the reason.
+  Future<ApiResult<bool>> settleWithoutInvoice(int importId, NoInvoiceReason reason, {String? note});
+
+  /// A receipt closed without an invoice, waiting again.
+  Future<ApiResult<bool>> reopenInvoice(int importId);
+
+  /// A summary invoice for [receiptIds]: its own import (for 支払い and
+  /// 税理士用ファイル), every waiting line of them tied to it. Its number.
+  Future<ApiResult<int>> createInvoiceFor(List<int> receiptIds,
+      {String? fileName, String? fileType, int? documentId, DateTime? documentDate, List<ReadRow>? read});
+
   /// What unplanned receipts brought of [jans] and no invoice has covered.
   Future<ApiResult<List<UnplannedLine>>> unplannedOpenLines(List<String> jans, {int? warehouseId});
 
@@ -417,6 +432,56 @@ class StockImportRepositoryImpl implements StockImportRepository {
   }
 
   @override
+  Future<ApiResult<List<UnplannedWaiting>>> awaitingInvoice({bool settled = false}) async {
+    try {
+      final r = await _rest.post('/rpc/unplanned_awaiting_invoice', data: {'p_settled': settled});
+      return ApiSuccess([for (final e in _rows(r.data)) UnplannedWaiting.fromJson(e.cast())]);
+    } on DioException catch (e) {
+      return mapDioError<List<UnplannedWaiting>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> settleWithoutInvoice(int importId, NoInvoiceReason reason, {String? note}) async {
+    try {
+      await _rest.post('/rpc/unplanned_settle_without_invoice',
+          data: {'p_import_id': importId, 'p_reason': reason.wire, 'p_note': note});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> reopenInvoice(int importId) async {
+    try {
+      await _rest.post('/rpc/unplanned_reopen_invoice', data: {'p_import_id': importId});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> createInvoiceFor(List<int> receiptIds,
+      {String? fileName, String? fileType, int? documentId, DateTime? documentDate, List<ReadRow>? read}) async {
+    try {
+      final r = await _rest.post('/rpc/unplanned_invoice_create', data: {
+        'p_receipt_ids': receiptIds,
+        'p_file_name': fileName,
+        'p_file_type': fileType,
+        'p_document_id': documentId,
+        'p_document_date': documentDate == null ? null : DocumentDate(documentDate, DocumentDateSource.content).wire,
+        'p_read': read == null ? null : [for (final x in read) x.toJson()],
+      });
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(((d as Map)['import_id'] as num?)?.toInt() ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
   Future<ApiResult<int>> closeLines(int importId, List<int> lineNos) async {
     try {
       final r = await _rest.post('/rpc/unplanned_close_lines', data: {'p_import_id': importId, 'p_line_nos': lineNos});
@@ -489,6 +554,17 @@ final inspectionDocumentsProvider = FutureProvider.autoDispose.family<List<Impor
   try {
     final r = await ref.watch(stockImportRepositoryProvider).inspectionDocuments(importId);
     return r is ApiSuccess<List<ImportDocument>> ? r.data : const [];
+  } catch (_) {
+    return const [];
+  }
+});
+
+/// 請求書待ち (0183): unplanned receipts no invoice covers yet ([settled]
+/// false), or those closed without one. Empty when they cannot be read.
+final unplannedWaitingProvider = FutureProvider.autoDispose.family<List<UnplannedWaiting>, bool>((ref, settled) async {
+  try {
+    final r = await ref.watch(stockImportRepositoryProvider).awaitingInvoice(settled: settled);
+    return r is ApiSuccess<List<UnplannedWaiting>> ? r.data : const [];
   } catch (_) {
     return const [];
   }

@@ -283,6 +283,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
       case ApiSuccess():
         ref.invalidate(pendingInspectionProvider);
         ref.invalidate(awaitingImportsProvider);
+        ref.invalidate(unplannedWaitingProvider(false));
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.siUndone(l.name ?? l.janCode, qty))));
@@ -457,6 +458,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
         }
         ref.invalidate(pendingInspectionProvider);
         ref.invalidate(awaitingImportsProvider);
+        ref.invalidate(unplannedWaitingProvider(false));
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.siDone(data.lines, stillLeft))));
@@ -539,7 +541,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       states: unplannedStates(
                         checkedIn: m.status == MasterImportStatus.stockDone,
                         someIn: m.lines.any((l) => l.inspected),
-                        invoiced: m.lines.any((l) => l.invoicedImportId != null),
+                        invoiced: m.noInvoiceAt != null || m.lines.any((l) => l.invoicedImportId != null),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

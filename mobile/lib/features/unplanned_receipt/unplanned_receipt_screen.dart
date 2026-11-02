@@ -27,6 +27,7 @@ import '../stock_import/presentation/stock_inspection_screen.dart'
 import '../warehouse_context/application/warehouse_providers.dart';
 import '../warehouse_context/domain/warehouse.dart';
 import 'unplanned_flow.dart';
+import 'unplanned_waiting_tab.dart';
 
 /// 予定外の入荷 (0181, 0182): goods a regular supplier brought without an
 /// order or an invoice first — nothing to import. It goes the way 発注 goes:
@@ -42,13 +43,21 @@ import 'unplanned_flow.dart';
 /// The invoice that comes later goes in through 発注; what was received here
 /// is tied to it, not added again.
 class UnplannedReceiptScreen extends ConsumerStatefulWidget {
-  const UnplannedReceiptScreen({super.key});
+  const UnplannedReceiptScreen({super.key, this.initialTab = 0});
+
+  /// 0: 入荷を登録; 1: 請求書待ち (0183).
+  final int initialTab;
 
   @override
   ConsumerState<UnplannedReceiptScreen> createState() => _UnplannedReceiptScreenState();
 }
 
-class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen> {
+class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabs = TabController(length: 2, vsync: this, initialIndex: widget.initialTab)
+    ..addListener(() {
+      if (mounted) setState(() {});
+    });
   int? _warehouseId;
   final _supplier = TextEditingController();
   final _scan = TextEditingController();
@@ -76,6 +85,7 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
 
   @override
   void dispose() {
+    _tabs.dispose();
     _supplier.dispose();
     _scan.dispose();
     super.dispose();
@@ -298,9 +308,18 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
     final unknown = lines.where((l) => !_known.containsKey(l.janCode)).length;
     final hasNote = _readRows != null;
     final ready = lines.isNotEmpty && (!hasNote || _readChecked);
+    final waiting = ref.watch(unplannedWaitingProvider(false)).valueOrNull?.length ?? 0;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.urTitle)),
-      body: ListView(
+      appBar: AppBar(
+        title: Text(l10n.urTitle),
+        bottom: TabBar(controller: _tabs, tabs: [
+          Tab(key: const ValueKey('ur-tab-register'), text: l10n.urTabRegister),
+          // 請求書待ち (0183): receipts no invoice covers yet.
+          Tab(key: const ValueKey('ur-tab-waiting'), text: l10n.urTabWaiting(waiting)),
+        ]),
+      ),
+      body: TabBarView(controller: _tabs, children: [
+        ListView(
         padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 120),
         children: [
           // Where this receipt is, as 発注 shows it.
@@ -405,7 +424,9 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
           ],
         ],
       ),
-      bottomNavigationBar: !ready || wh == null
+        const UnplannedWaitingTab(),
+      ]),
+      bottomNavigationBar: _tabs.index != 0 || !ready || wh == null
           ? null
           : SafeArea(
               child: Padding(

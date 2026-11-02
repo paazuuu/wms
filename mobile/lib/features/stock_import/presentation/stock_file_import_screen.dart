@@ -141,7 +141,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   int _covered = 0;
 
   /// This file's lines matched to what unplanned receipts brought.
-  List<(int, String, int, UnplannedLine)> _unplannedMatches(List<StockFileLine> lines) => _mode != StockFileMode.add
+  List<(int, String, int, List<UnplannedLine>)> _unplannedMatches(List<StockFileLine> lines) => _mode != StockFileMode.add
       ? const []
       : matchUnplanned([for (final l in lines) (l.lineNo, l.janCode, l.quantity)], _openUnplanned);
 
@@ -539,7 +539,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     // The same delivery put in twice is the costliest mistake there is.
     if (!await _passesDuplicateCheck(lines)) return;
     if (!mounted) return;
-    final tie = _tieUnplanned ? _unplannedMatches(lines) : const <(int, String, int, UnplannedLine)>[];
+    final tie = _tieUnplanned ? _unplannedMatches(lines) : const <(int, String, int, List<UnplannedLine>)>[];
     final tiedNos = {for (final t in tie) t.$1};
     final units = lines.fold<int>(0, (s, l) => s + (tiedNos.contains(l.lineNo) ? 0 : l.quantity));
     final before = lines.fold<int>(0, (s, l) => s + (_onHand[l.janCode] ?? 0));
@@ -608,8 +608,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         // nothing added (0181).
         var covered = 0;
         final covers = [
-          for (final t in _tieUnplanned ? _unplannedMatches(send) : const <(int, String, int, UnplannedLine)>[])
-            CoverPick(lineNo: t.$1, from: t.$4),
+          for (final t in _tieUnplanned ? _unplannedMatches(send) : const <(int, String, int, List<UnplannedLine>)>[])
+            for (final u in t.$4) CoverPick(lineNo: t.$1, from: u),
         ];
         if (covers.isNotEmpty) {
           final c = await repo.coverLines(data.importId, covers);
@@ -1201,14 +1201,24 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(l10n.sfUnplannedTitle(ties.length), style: theme.textTheme.titleSmall),
-                    for (final (no, jan, qty, u) in ties)
+                    // One invoice line may cover several receipts (0183).
+                    for (final (no, jan, qty, from) in ties)
                       Text(
-                        l10n.sfUnplannedLine(jan, u.name ?? '', u.importId,
-                            u.receivedAt == null ? '' : DateFormat('y/MM/dd').format(u.receivedAt!), u.quantity, qty),
+                        l10n.sfUnplannedLines(
+                            jan,
+                            from.first.name ?? '',
+                            [
+                              for (final u in from)
+                                l10n.sfUnplannedOne(u.importId,
+                                    u.receivedAt == null ? '' : DateFormat('y/MM/dd').format(u.receivedAt!), u.quantity),
+                            ].join('、'),
+                            receivedOf(from),
+                            qty),
                         key: ValueKey('sf-unplanned-$no'),
-                        style: theme.textTheme.bodySmall?.copyWith(color: u.quantity != qty ? theme.colorScheme.error : null),
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: receivedOf(from) != qty ? theme.colorScheme.error : null),
                       ),
-                    if (ties.any((t) => t.$4.quantity != t.$3))
+                    if (ties.any((t) => receivedOf(t.$4) != t.$3))
                       Text(l10n.sfUnplannedDiffers,
                           key: const ValueKey('sf-unplanned-differs'),
                           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),

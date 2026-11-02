@@ -13755,4 +13755,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get urColCount => 'Count';
+
+  @override
+  String sfUnplannedLines(
+      String jan, String name, String receipts, int received, int billed) {
+    return '$jan $name: received $received in all as unplanned $receipts / this invoice $billed';
+  }
+
+  @override
+  String sfUnplannedOne(int id, String date, int qty) {
+    return '#$id ($date) $qty';
+  }
+
+  @override
+  String get urTabRegister => 'Register goods';
+
+  @override
+  String urTabWaiting(int n) {
+    return 'Awaiting invoice ($n)';
+  }
+
+  @override
+  String get urWaitingIntro =>
+      'Unplanned receipts no invoice covers yet, oldest first. An invoice with lines imported through 発注 is tied by itself (a line summing several receipts too). For a summary invoice with no lines, choose the receipts here and register it. Close with 請求書なしで完了 those no invoice will come for (sample, free, the supplier\'s mistake, returned).';
+
+  @override
+  String get urChipWaiting => 'Awaiting invoice';
+
+  @override
+  String get urChipSettled => 'Closed without invoice';
+
+  @override
+  String get urNoneWaiting => 'No unplanned receipt is waiting for an invoice';
+
+  @override
+  String get urNoneSettled => 'None closed without an invoice';
+
+  @override
+  String urItemTitle(int id) {
+    return 'Unplanned #$id';
+  }
+
+  @override
+  String urReceivedOn(String date) {
+    return 'Received $date';
+  }
+
+  @override
+  String urDaysWaiting(int n) {
+    return '$n days';
+  }
+
+  @override
+  String urPartlyInvoiced(int n) {
+    return '$n lines already tied to an invoice';
+  }
+
+  @override
+  String urSettledAs(String reason) {
+    return 'No invoice: $reason';
+  }
+
+  @override
+  String get urSettle => 'Close without invoice';
+
+  @override
+  String get urReopen => 'Back to awaiting invoice';
+
+  @override
+  String urSettleQ(int id) {
+    return 'Close unplanned #$id without an invoice?';
+  }
+
+  @override
+  String get urSettleBody =>
+      'Choose why no invoice will come. The stock stays (if returned, take it back first from ⋯ on the 検品 screen). If an invoice comes after all, it can be put back to waiting.';
+
+  @override
+  String get urSettleNote => 'Memo (required for その他)';
+
+  @override
+  String get urSettleGo => 'Close';
+
+  @override
+  String urSettled(int id) {
+    return 'Unplanned #$id closed without an invoice';
+  }
+
+  @override
+  String urReopened(int id) {
+    return 'Unplanned #$id is awaiting its invoice again';
+  }
+
+  @override
+  String get urReasonSample => 'Sample';
+
+  @override
+  String get urReasonFree => 'Given free';
+
+  @override
+  String get urReasonSupplierError => 'The supplier\'s mistake';
+
+  @override
+  String get urReasonReturned => 'Returned';
+
+  @override
+  String get urReasonOther => 'Other';
+
+  @override
+  String urInvoiceButton(int n) {
+    return 'Register the invoice for the $n chosen (summary invoice)';
+  }
+
+  @override
+  String urInvoiceQ(int n) {
+    return 'Tie $n receipts to one invoice?';
+  }
+
+  @override
+  String urInvoiceBody(String ids) {
+    return 'Unplanned $ids are tied to the one invoice chosen next (a summary invoice). It is registered as an import and appears in 支払い and 税理士用ファイル. No stock is added.';
+  }
+
+  @override
+  String urInvoiceSuppliers(String names) {
+    return 'Different suppliers: $names. Check they are on the same invoice.';
+  }
+
+  @override
+  String get urInvoicePick => 'Photograph or choose the invoice';
+
+  @override
+  String urInvoiced(int id, int n) {
+    return 'The invoice is 取込 #$id, tied to $n unplanned receipts (it appears in 支払い and 税理士用ファイル)';
+  }
+
+  @override
+  String get errInvoiceMixedWarehouses =>
+      'Receipts of different warehouses cannot share one invoice here. Register them per warehouse.';
+
+  @override
+  String get errNoInvoiceNote => 'With その他, write a memo';
+
+  @override
+  String payUnplannedWaiting(int n) {
+    return '$n unplanned receipts are awaiting their invoice';
+  }
+
+  @override
+  String get payUnplannedWaitingHint => 'See 予定外の入荷 → 請求書待ち';
 }

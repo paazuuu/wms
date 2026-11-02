@@ -18,6 +18,8 @@ import '../../stock_import/presentation/stock_import_calendar_screen.dart' show 
 import '../../tax_files/data/tax_files_repository.dart';
 import '../data/payments_repository.dart';
 import '../domain/payment.dart';
+import '../../stock_import/data/stock_import_repository.dart' show unplannedWaitingProvider;
+import '../../unplanned_receipt/unplanned_receipt_screen.dart' show UnplannedReceiptScreen;
 
 /// A picked file: its name and bytes, or null when nothing was chosen.
 typedef PickProof = Future<({String name, Uint8List bytes})?> Function();
@@ -107,11 +109,27 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     final async = ref.watch(paymentsProvider(_range));
     final can = ref.watch(canRecordPaymentsProvider);
     final focus = ref.watch(focusedOrderProvider);
+    // 予定外の入荷 still waiting for their invoice (0183): said here, where
+    // invoices are followed, and opened in 予定外の入荷 → 請求書待ち.
+    final waiting = ref.watch(unplannedWaitingProvider(false)).valueOrNull ?? const [];
     final body = ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
         Text(l10n.payIntro, style: muted),
         const SizedBox(height: AppSpacing.sm),
+        if (waiting.isNotEmpty)
+          Card(
+            key: const ValueKey('pay-unplanned-waiting'),
+            color: theme.colorScheme.tertiaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.local_shipping_outlined),
+              title: Text(l10n.payUnplannedWaiting(waiting.length)),
+              subtitle: Text(l10n.payUnplannedWaitingHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const UnplannedReceiptScreen(initialTab: 1))),
+            ),
+          ),
         Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
           ChoiceChip(
             key: const ValueKey('pay-open'),

@@ -13477,4 +13477,153 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get urColCount => '数量';
+
+  @override
+  String sfUnplannedLines(
+      String jan, String name, String receipts, int received, int billed) {
+    return '$jan $name：予定外の入荷 $receipts で 計$received個 入庫済み ／ この請求書 $billed個';
+  }
+
+  @override
+  String sfUnplannedOne(int id, String date, int qty) {
+    return '#$id（$date）$qty個';
+  }
+
+  @override
+  String get urTabRegister => '入荷を登録';
+
+  @override
+  String urTabWaiting(int n) {
+    return '請求書待ち（$n）';
+  }
+
+  @override
+  String get urWaitingIntro =>
+      '予定外の入荷のうち、まだ請求書と紐付いていないものです（古い順）。明細つきの請求書は「発注」で取り込めば自動で紐付きます（同じ商品を合計した1行でも、何回分でもまとめて紐付きます）。明細のない合計請求書は、ここで該当する入荷を選んで「請求書を登録」してください。請求書が来ないもの（サンプル・無償・先方の誤送付・返品）は「請求書なしで完了」にします。';
+
+  @override
+  String get urChipWaiting => '請求書待ち';
+
+  @override
+  String get urChipSettled => '請求書なしで完了したもの';
+
+  @override
+  String get urNoneWaiting => '請求書待ちの予定外の入荷はありません';
+
+  @override
+  String get urNoneSettled => '請求書なしで完了したものはありません';
+
+  @override
+  String urItemTitle(int id) {
+    return '予定外の入荷 #$id';
+  }
+
+  @override
+  String urReceivedOn(String date) {
+    return '入荷 $date';
+  }
+
+  @override
+  String urDaysWaiting(int n) {
+    return '$n日経過';
+  }
+
+  @override
+  String urPartlyInvoiced(int n) {
+    return 'うち $n行は請求書と紐付け済み';
+  }
+
+  @override
+  String urSettledAs(String reason) {
+    return '請求書なし：$reason';
+  }
+
+  @override
+  String get urSettle => '請求書なしで完了';
+
+  @override
+  String get urReopen => '請求書待ちに戻す';
+
+  @override
+  String urSettleQ(int id) {
+    return '予定外の入荷 #$id を請求書なしで完了しますか？';
+  }
+
+  @override
+  String get urSettleBody =>
+      '請求書が来ない理由を選んでください。在庫はそのままです（返品した場合は、先に検品画面の「…」から取り消してください）。あとから請求書が来たら「請求書待ちに戻す」で戻せます。';
+
+  @override
+  String get urSettleNote => 'メモ（「その他」は必須）';
+
+  @override
+  String get urSettleGo => '請求書なしで完了';
+
+  @override
+  String urSettled(int id) {
+    return '予定外の入荷 #$id を請求書なしで完了しました';
+  }
+
+  @override
+  String urReopened(int id) {
+    return '予定外の入荷 #$id を請求書待ちに戻しました';
+  }
+
+  @override
+  String get urReasonSample => 'サンプル・見本';
+
+  @override
+  String get urReasonFree => '無償提供';
+
+  @override
+  String get urReasonSupplierError => '先方の誤送付';
+
+  @override
+  String get urReasonReturned => '返品した';
+
+  @override
+  String get urReasonOther => 'その他';
+
+  @override
+  String urInvoiceButton(int n) {
+    return '選んだ$n件の請求書を登録（合計請求書）';
+  }
+
+  @override
+  String urInvoiceQ(int n) {
+    return '$n件を1枚の請求書で紐付けますか？';
+  }
+
+  @override
+  String urInvoiceBody(String ids) {
+    return '予定外の入荷 $ids を、これから選ぶ請求書（合計請求書）1枚と紐付けます。請求書は取込として登録され、支払い・税理士用ファイルに出ます。在庫は増えません。';
+  }
+
+  @override
+  String urInvoiceSuppliers(String names) {
+    return '仕入先が混ざっています：$names。同じ請求書でよいか確認してください。';
+  }
+
+  @override
+  String get urInvoicePick => '請求書を撮る・選ぶ';
+
+  @override
+  String urInvoiced(int id, int n) {
+    return '請求書を取込 #$id として登録し、$n件の予定外の入荷と紐付けました（支払い・税理士用ファイルに出ます）';
+  }
+
+  @override
+  String get errInvoiceMixedWarehouses =>
+      '倉庫の違う予定外の入荷は、1枚の請求書でまとめられません。倉庫ごとに分けて登録してください。';
+
+  @override
+  String get errNoInvoiceNote => '「その他」を選んだときはメモを入れてください';
+
+  @override
+  String payUnplannedWaiting(int n) {
+    return '予定外の入荷で請求書待ちが $n件あります';
+  }
+
+  @override
+  String get payUnplannedWaitingHint => '予定外の入荷 → 請求書待ち で確認できます';
 }

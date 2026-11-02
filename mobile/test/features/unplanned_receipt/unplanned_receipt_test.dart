@@ -10,6 +10,7 @@ import 'package:wms_mobile/features/delivery_note/delivery_note.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
+import 'package:wms_mobile/features/payments/presentation/payments_screen.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
@@ -242,9 +243,172 @@ void main() {
     expect(entries.firstWhere((e) => e.id == 'delivery').inMenu, isFalse);
   });
 
-  test('an invoice line matches the oldest unplanned line of its JAN, one each', () {
-    UnplannedLine u(int id, String jan) => UnplannedLine.fromJson({'import_id': id, 'line_no': 1, 'jan_code': jan, 'quantity': 5});
-    final m = matchUnplanned([(1, _pen, 5), (2, _pen, 5), (3, _pen, 5), (4, _note, 1)], [u(3, _pen), u(4, _pen)]);
-    expect([for (final x in m) (x.$1, x.$4.importId)], [(1, 3), (2, 4)]);
+  test('an invoice line takes the oldest receipt lines of its JAN as far as its count reaches (0183)', () {
+    UnplannedLine u(int id, String jan, int q) =>
+        UnplannedLine.fromJson({'import_id': id, 'line_no': 1, 'jan_code': jan, 'quantity': q});
+    // ペン30 = #3 の20 + #4 の10; the next pen line gets what is left.
+    final m = matchUnplanned([(1, _pen, 30), (2, _pen, 5), (3, _note, 1)], [u(3, _pen, 20), u(4, _pen, 10), u(5, _pen, 5)]);
+    expect([for (final x in m) x.$1], [1, 2]);
+    expect([for (final x in m) [for (final f in x.$4) f.importId]], [
+      [3, 4],
+      [5],
+    ]);
+    expect(receivedOf(m.first.$4), 30);
+    // One line per receipt when the invoice lists each delivery.
+    final each = matchUnplanned([(1, _pen, 20), (2, _pen, 10)], [u(3, _pen, 20), u(4, _pen, 10)]);
+    expect([for (final x in each) [for (final f in x.$4) f.importId]], [
+      [3],
+      [4],
+    ]);
   });
+
+  group('請求書待ち (0183)', () {
+    UnplannedWaiting w(int id, {String supplier = 'テスト商事', int days = 3, int wh = 1}) => UnplannedWaiting.fromJson({
+          'import_id': id, 'supplier': supplier, 'warehouse_id': wh, 'warehouse_name': '本社倉庫',
+          'received_at': DateTime.now().subtract(Duration(days: days)).toUtc().toIso8601String(),
+          'lines': [
+            {'line_no': 1, 'jan_code': _pen, 'name': 'テストペン 青', 'quantity': 20},
+          ],
+        });
+
+    Future<_Waiting> pumpWaiting(WidgetTester tester, List<UnplannedWaiting> items) async {
+      await tester.binding.setSurfaceSize(const Size(900, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final repo = _Waiting(items);
+      await pumpApp(tester, const UnplannedReceiptScreen(initialTab: 1), overrides: [
+        _signedIn(['inventory.adjust']),
+        stockImportRepositoryProvider.overrideWithValue(repo),
+        masterImportRepositoryProvider.overrideWithValue(_Reader(const MasterRead(
+          documentId: 91,
+          docDate: '2026/11/30',
+          lines: [MasterLine(lineNo: 1, supplierName: '11月分', quantity: '1', ledger: {'amount': 3000})],
+        ))),
+        deliveryNotePickerProvider.overrideWithValue(({required camera}) async =>
+            (name: '合計請求書.pdf', bytes: Uint8List.fromList([37, 80, 68, 70]))),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+          warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+          totals: WarehouseTotals(),
+        ))),
+      ]);
+      await tester.pumpAndSettle();
+      return repo;
+    }
+
+    testWidgets('発注 → 注文の進み具合・支払い says how many wait, and opens them', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(900, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await pumpApp(tester, const PaymentsScreen(), overrides: [
+        _signedIn(['inventory.adjust']),
+        stockImportRepositoryProvider.overrideWithValue(_Waiting([w(7), w(8)])),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text('予定外の入荷で請求書待ちが 2件あります'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('pay-unplanned-waiting')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('uw-item-7')), findsOneWidget);
+    });
+
+    testWidgets('the receipts without an invoice are listed, oldest first, a late one in red', (tester) async {
+      await pumpWaiting(tester, [w(7, days: 40), w(8)]);
+      expect(find.text('請求書待ち（2）'), findsOneWidget);
+      expect(find.byKey(const ValueKey('uw-item-7')), findsOneWidget);
+      final late = tester.widget<Text>(find.byKey(const ValueKey('uw-since-7')));
+      expect(late.data, contains('40日経過'));
+      expect(late.style?.color, Theme.of(tester.element(find.byKey(const ValueKey('uw-since-7')))).colorScheme.error);
+    });
+
+    testWidgets('one no invoice will come for is closed with its reason, and back to waiting on asking', (tester) async {
+      final repo = await pumpWaiting(tester, [w(7)]);
+      await tester.tap(find.byKey(const ValueKey('uw-settle-7')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('uw-reason-other')));
+      await tester.pumpAndSettle();
+      // その他 needs a memo.
+      expect(tester.widget<FilledButton>(find.byKey(const ValueKey('uw-settle-go'))).onPressed, isNull);
+      await tester.tap(find.byKey(const ValueKey('uw-reason-free')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('uw-settle-go')));
+      await tester.pumpAndSettle();
+      expect(repo.settled, [(7, NoInvoiceReason.free)]);
+      expect(find.byKey(const ValueKey('uw-item-7')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('uw-show-settled')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<Text>(find.byKey(const ValueKey('uw-reason-7'))).data, startsWith('請求書なし：無償提供'));
+      await tester.tap(find.byKey(const ValueKey('uw-reopen-7')));
+      await tester.pumpAndSettle();
+      expect(repo.reopened, [7]);
+    });
+
+    testWidgets('a summary invoice is registered once for the receipts chosen', (tester) async {
+      final repo = await pumpWaiting(tester, [w(7), w(8, supplier: '別商事')]);
+      await tester.tap(find.byKey(const ValueKey('uw-pick-7')));
+      await tester.tap(find.byKey(const ValueKey('uw-pick-8')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('uw-invoice')));
+      await tester.pumpAndSettle();
+      // Different suppliers: said before going on.
+      expect(find.byKey(const ValueKey('uw-invoice-suppliers')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('uw-invoice-go')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('dn-pick-file')));
+      await tester.pumpAndSettle();
+      final (ids, docId, date, rows) = repo.invoiced.single;
+      expect(ids, [7, 8]);
+      expect((docId, date, rows), (91, DateTime(2026, 11, 30), 1));
+      expect(repo.kept, [55]);
+      expect(find.textContaining('取込 #55 として登録し、2件の予定外の入荷と紐付けました'), findsOneWidget);
+    });
+  });
+}
+
+class _Waiting implements StockImportRepository {
+  _Waiting(this.items);
+  List<UnplannedWaiting> items;
+  final settledItems = <UnplannedWaiting>[];
+  final settled = <(int, NoInvoiceReason)>[];
+  final reopened = <int>[];
+  final invoiced = <(List<int>, int?, DateTime?, int)>[];
+  final kept = <int>[];
+
+  @override
+  Future<ApiResult<List<UnplannedWaiting>>> awaitingInvoice({bool settled = false}) async =>
+      ApiSuccess(settled ? settledItems : items);
+
+  @override
+  Future<ApiResult<bool>> settleWithoutInvoice(int importId, NoInvoiceReason reason, {String? note}) async {
+    settled.add((importId, reason));
+    final it = items.firstWhere((w) => w.importId == importId);
+    items = [for (final w in items) if (w.importId != importId) w];
+    settledItems.add(UnplannedWaiting.fromJson({
+      'import_id': it.importId, 'supplier': it.supplier, 'no_invoice_reason': reason.wire,
+      'no_invoice_at': '2026-11-03T01:00:00Z', 'no_invoice_by': 'ganki.rin',
+    }));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> reopenInvoice(int importId) async {
+    reopened.add(importId);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> createInvoiceFor(List<int> receiptIds,
+      {String? fileName, String? fileType, int? documentId, DateTime? documentDate, List<ReadRow>? read}) async {
+    invoiced.add((receiptIds, documentId, documentDate, read?.length ?? 0));
+    items = const [];
+    return const ApiSuccess(55);
+  }
+
+  @override
+  Future<ApiResult<bool>> keepFile(int importId, String fileName, Uint8List bytes, String contentType) async {
+    kept.add(importId);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<Map<String, String>>> known(List<String> jans) async => const ApiSuccess({});
+
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

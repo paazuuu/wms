@@ -13393,4 +13393,152 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get urColCount => '数量';
+
+  @override
+  String sfUnplannedLines(
+      String jan, String name, String receipts, int received, int billed) {
+    return '$jan $name：已在计划外入货 $receipts 共入库 $received个 ／ 本发票 $billed个';
+  }
+
+  @override
+  String sfUnplannedOne(int id, String date, int qty) {
+    return '#$id（$date）$qty个';
+  }
+
+  @override
+  String get urTabRegister => '登记入货';
+
+  @override
+  String urTabWaiting(int n) {
+    return '待发票（$n）';
+  }
+
+  @override
+  String get urWaitingIntro =>
+      '尚未与发票关联的计划外入货（从旧到新）。带明细的发票在“采购”中导入即自动关联（同一商品合计成一行、多次入货也可一起关联）。没有明细的汇总发票，请在此选择对应的入货后“登记发票”。不会有发票的（样品・免费・对方误发・退货）请“无发票完成”。';
+
+  @override
+  String get urChipWaiting => '待发票';
+
+  @override
+  String get urChipSettled => '无发票完成的';
+
+  @override
+  String get urNoneWaiting => '没有待发票的计划外入货';
+
+  @override
+  String get urNoneSettled => '没有无发票完成的入货';
+
+  @override
+  String urItemTitle(int id) {
+    return '计划外入货 #$id';
+  }
+
+  @override
+  String urReceivedOn(String date) {
+    return '入货 $date';
+  }
+
+  @override
+  String urDaysWaiting(int n) {
+    return '已过 $n天';
+  }
+
+  @override
+  String urPartlyInvoiced(int n) {
+    return '其中 $n行已与发票关联';
+  }
+
+  @override
+  String urSettledAs(String reason) {
+    return '无发票：$reason';
+  }
+
+  @override
+  String get urSettle => '无发票完成';
+
+  @override
+  String get urReopen => '恢复为待发票';
+
+  @override
+  String urSettleQ(int id) {
+    return '要将计划外入货 #$id 无发票完成吗？';
+  }
+
+  @override
+  String get urSettleBody =>
+      '请选择不会有发票的原因。库存保持不变（若已退货，请先在验货画面的“…”中撤销）。之后如收到发票，可“恢复为待发票”。';
+
+  @override
+  String get urSettleNote => '备注（“其他”必填）';
+
+  @override
+  String get urSettleGo => '完成';
+
+  @override
+  String urSettled(int id) {
+    return '已将计划外入货 #$id 无发票完成';
+  }
+
+  @override
+  String urReopened(int id) {
+    return '已将计划外入货 #$id 恢复为待发票';
+  }
+
+  @override
+  String get urReasonSample => '样品';
+
+  @override
+  String get urReasonFree => '免费提供';
+
+  @override
+  String get urReasonSupplierError => '对方误发';
+
+  @override
+  String get urReasonReturned => '已退货';
+
+  @override
+  String get urReasonOther => '其他';
+
+  @override
+  String urInvoiceButton(int n) {
+    return '登记所选 $n件的发票（汇总发票）';
+  }
+
+  @override
+  String urInvoiceQ(int n) {
+    return '将 $n件与一张发票关联吗？';
+  }
+
+  @override
+  String urInvoiceBody(String ids) {
+    return '将计划外入货 $ids 与接下来选择的一张发票（汇总发票）关联。发票将作为导入登记，并出现在付款・税务师用的文件中。库存不增加。';
+  }
+
+  @override
+  String urInvoiceSuppliers(String names) {
+    return '供应商不同：$names。请确认是否为同一张发票。';
+  }
+
+  @override
+  String get urInvoicePick => '拍摄・选择发票';
+
+  @override
+  String urInvoiced(int id, int n) {
+    return '发票已登记为导入 #$id，并与 $n件计划外入货关联（将出现在付款・税务师用的文件中）';
+  }
+
+  @override
+  String get errInvoiceMixedWarehouses => '不同仓库的计划外入货无法用一张发票汇总，请按仓库分别登记。';
+
+  @override
+  String get errNoInvoiceNote => '选择“其他”时请填写备注';
+
+  @override
+  String payUnplannedWaiting(int n) {
+    return '有 $n件计划外入货在等待发票';
+  }
+
+  @override
+  String get payUnplannedWaitingHint => '可在 计划外入货 → 待发票 中查看';
 }
