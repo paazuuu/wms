@@ -13098,4 +13098,68 @@ class AppLocalizationsJa extends AppLocalizations {
   String siScanAlreadyIn(String jan) {
     return '$jan は入庫済みです';
   }
+
+  @override
+  String get dnTitle => '納品書を写して見る';
+
+  @override
+  String get dnIntro =>
+      '手元の納品書をカメラで写すと、AIが読み取り、商品ごとに写真・商品名・JAN・数量を並べます。写真のない商品はそのまま表示します。見終わった行はタップで印を付けられます（記録はされません）。';
+
+  @override
+  String get dnTake => '納品書を写す・選ぶ';
+
+  @override
+  String get dnTakeAnother => '別の納品書を写す・選ぶ';
+
+  @override
+  String get dnTakePhoto => 'カメラで撮る';
+
+  @override
+  String get dnChooseFile => '画像・PDFを選ぶ';
+
+  @override
+  String get dnReading => 'AIが読み取り中…';
+
+  @override
+  String get dnNothingRead => '商品の行が読み取れませんでした。明るい所で、納品書全体が写るように撮り直してください。';
+
+  @override
+  String dnSummary(int lines, int units, int seen) {
+    return '$lines行・合計 $units個（確認 $seen行）';
+  }
+
+  @override
+  String get dnNoJan => 'JANが読めません';
+
+  @override
+  String get dnNotInLibrary => '商品ライブラリー未登録';
+
+  @override
+  String get dnUnits => '個';
+
+  @override
+  String get siNoteRead => '検品済みの納品書を読み込む';
+
+  @override
+  String siNoteTicked(String name, int n) {
+    return '$name から $n行にチェックを入れました';
+  }
+
+  @override
+  String get siNoteHint =>
+      '数量は納品書の数にしています。未発送など届いていない行はチェックを外してから「検品完了」を押してください。';
+
+  @override
+  String siNoteMissing(int n) {
+    return '納品書になかった行 $n行（チェックなし）';
+  }
+
+  @override
+  String siNoteStranger(String jan, String name) {
+    return 'この取込にないJAN: $jan $name';
+  }
+
+  @override
+  String get siNoteView => '読み取った納品書を写真つきで見る';
 }

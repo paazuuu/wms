@@ -13367,4 +13367,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String siScanAlreadyIn(String jan) {
     return '$jan is already checked in';
   }
+
+  @override
+  String get dnTitle => 'Photograph a delivery note';
+
+  @override
+  String get dnIntro =>
+      'Photograph the delivery note in hand: the AI reads it and lists each good with its picture, name, JAN and count. Goods with no picture are shown without one. Tap a line to mark it seen (not recorded).';
+
+  @override
+  String get dnTake => 'Photograph or choose a note';
+
+  @override
+  String get dnTakeAnother => 'Another note';
+
+  @override
+  String get dnTakePhoto => 'Take a photo';
+
+  @override
+  String get dnChooseFile => 'Choose an image or PDF';
+
+  @override
+  String get dnReading => 'The AI is reading…';
+
+  @override
+  String get dnNothingRead =>
+      'No lines could be read. Retake it in good light with the whole note in view.';
+
+  @override
+  String dnSummary(int lines, int units, int seen) {
+    return '$lines lines · $units in all ($seen seen)';
+  }
+
+  @override
+  String get dnNoJan => 'No JAN read';
+
+  @override
+  String get dnNotInLibrary => 'Not in the product library';
+
+  @override
+  String get dnUnits => 'pcs';
+
+  @override
+  String get siNoteRead => 'Read the checked delivery note';
+
+  @override
+  String siNoteTicked(String name, int n) {
+    return 'Ticked $n lines from $name';
+  }
+
+  @override
+  String get siNoteHint =>
+      'Counts are the note\'s. Untick lines not delivered (not yet shipped) before checking in.';
+
+  @override
+  String siNoteMissing(int n) {
+    return '$n lines not on the note (not ticked)';
+  }
+
+  @override
+  String siNoteStranger(String jan, String name) {
+    return 'Not in this import: $jan $name';
+  }
+
+  @override
+  String get siNoteView => 'See the note with pictures';
 }

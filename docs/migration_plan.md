@@ -8279,6 +8279,27 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   size and language move to the menu's foot. The bar no longer overflows at
   400 px.
 
+## 0178 (app): the delivery note in hand, photographed
+
+- 納品書を写して見る (from 検品 and 取込の検品, the photo icon at the top).
+  - A note photographed with the camera, or its image or PDF chosen, is read
+    by the AI. It is kept as evidence, purpose ocr, each row on its own.
+  - It is listed line by line: the good's picture (from 商品ライブラリー),
+    商品名, maker, 品番, JAN and the count in large.
+  - A JAN not in the library, or a good with no picture, is shown without
+    one.
+  - A tap marks a line seen, on the screen only. Nothing is booked.
+- 取込の検品 → 「検品済みの納品書を読み込む」: the note checked by hand,
+  photographed or chosen, is read.
+  - Every JAN on it ticks its open line, with the note's count.
+  - Lines not on the note stay unticked (counted).
+  - JANs not in this import are listed in red; already checked-in ones are
+    not strangers.
+  - Lines not delivered (未発送) are unticked by hand, then 検品完了 as
+    usual (with its confirmation).
+  - 「読み取った納品書を写真つきで見る」 opens the same note in the view above.
+- `MasterImportRepository.read` takes a `purpose` (library by default).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

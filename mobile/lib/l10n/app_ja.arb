@@ -11727,5 +11727,63 @@
         "type": "String"
       }
     }
-  }
+  },
+  "dnTitle": "納品書を写して見る",
+  "dnIntro": "手元の納品書をカメラで写すと、AIが読み取り、商品ごとに写真・商品名・JAN・数量を並べます。写真のない商品はそのまま表示します。見終わった行はタップで印を付けられます（記録はされません）。",
+  "dnTake": "納品書を写す・選ぶ",
+  "dnTakeAnother": "別の納品書を写す・選ぶ",
+  "dnTakePhoto": "カメラで撮る",
+  "dnChooseFile": "画像・PDFを選ぶ",
+  "dnReading": "AIが読み取り中…",
+  "dnNothingRead": "商品の行が読み取れませんでした。明るい所で、納品書全体が写るように撮り直してください。",
+  "dnSummary": "{lines}行・合計 {units}個（確認 {seen}行）",
+  "@dnSummary": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      },
+      "seen": {
+        "type": "int"
+      }
+    }
+  },
+  "dnNoJan": "JANが読めません",
+  "dnNotInLibrary": "商品ライブラリー未登録",
+  "dnUnits": "個",
+  "siNoteRead": "検品済みの納品書を読み込む",
+  "siNoteTicked": "{name} から {n}行にチェックを入れました",
+  "@siNoteTicked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "siNoteHint": "数量は納品書の数にしています。未発送など届いていない行はチェックを外してから「検品完了」を押してください。",
+  "siNoteMissing": "納品書になかった行 {n}行（チェックなし）",
+  "@siNoteMissing": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "siNoteStranger": "この取込にないJAN: {jan} {name}",
+  "@siNoteStranger": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "siNoteView": "読み取った納品書を写真つきで見る"
 }

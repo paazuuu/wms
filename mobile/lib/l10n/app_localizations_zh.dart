@@ -13022,4 +13022,67 @@ class AppLocalizationsZh extends AppLocalizations {
   String siScanAlreadyIn(String jan) {
     return '$jan 已入库';
   }
+
+  @override
+  String get dnTitle => '拍摄送货单查看';
+
+  @override
+  String get dnIntro =>
+      '用相机拍摄手中的送货单，AI读取后按商品列出照片・商品名・JAN・数量。没有照片的商品照常显示。可点按行标记已看过（不保存）。';
+
+  @override
+  String get dnTake => '拍摄・选择送货单';
+
+  @override
+  String get dnTakeAnother => '拍摄・选择其他送货单';
+
+  @override
+  String get dnTakePhoto => '拍照';
+
+  @override
+  String get dnChooseFile => '选择图片・PDF';
+
+  @override
+  String get dnReading => 'AI读取中…';
+
+  @override
+  String get dnNothingRead => '未能读取商品行。请在明亮处拍下整张送货单后重试。';
+
+  @override
+  String dnSummary(int lines, int units, int seen) {
+    return '$lines行・合计 $units个（已确认 $seen行）';
+  }
+
+  @override
+  String get dnNoJan => '未读取到JAN';
+
+  @override
+  String get dnNotInLibrary => '未登记到商品库';
+
+  @override
+  String get dnUnits => '个';
+
+  @override
+  String get siNoteRead => '读取已验货的送货单';
+
+  @override
+  String siNoteTicked(String name, int n) {
+    return '已根据 $name 勾选 $n行';
+  }
+
+  @override
+  String get siNoteHint => '数量已改为送货单上的数量。未发货等未到的行请先取消勾选，再点“验货完成”。';
+
+  @override
+  String siNoteMissing(int n) {
+    return '送货单上没有的行 $n行（未勾选）';
+  }
+
+  @override
+  String siNoteStranger(String jan, String name) {
+    return '此导入中没有的JAN: $jan $name';
+  }
+
+  @override
+  String get siNoteView => '带照片查看读取的送货单';
 }

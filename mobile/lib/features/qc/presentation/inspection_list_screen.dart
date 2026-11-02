@@ -12,6 +12,7 @@ import 'inspection_detail_screen.dart';
 import 'qc_result_ui.dart';
 import '../../../core/offline/pending_sync_banner.dart';
 import '../data/offline_inspection_repository.dart';
+import '../../delivery_note/delivery_note_view_screen.dart';
 import '../../home/presentation/feature_link.dart';
 import '../../stock_import/data/stock_import_repository.dart' show awaitingImportsProvider;
 import '../../master_import/data/master_import_repository.dart' show masterImportsProvider;
@@ -126,6 +127,13 @@ class QcInspectionListScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const BulkInspectionScreen()),
             ),
+          ),
+          // A note in hand, photographed, to look at with the goods' pictures (0178).
+          IconButton(
+            key: const ValueKey('qc-note-look'),
+            tooltip: l10n.dnTitle,
+            icon: const Icon(Icons.photo_library_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DeliveryNoteViewScreen())),
           ),
           const FeatureLinkButton('held_stock'),
         ],

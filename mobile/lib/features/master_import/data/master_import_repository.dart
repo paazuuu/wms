@@ -17,8 +17,9 @@ abstract class MasterImportRepository {
   /// Reads [bytes] with import-plan (nothing booked); the file is kept as
   /// evidence there too.
   /// With [keepRows], each row of the file comes back on its own, not summed
-  /// by JAN (0150).
-  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false});
+  /// by JAN (0150). [purpose] names why it is kept as evidence (0132):
+  /// library by default; ocr for a delivery note photographed to check goods.
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false, String purpose = 'library'});
 
   /// What [headers] mean (0163): the headings learned for the company first,
   /// then the AI, from the headings and a few [samples] rows. Nothing kept.
@@ -77,13 +78,14 @@ class MasterImportRepositoryImpl implements MasterImportRepository {
   }
 
   @override
-  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false}) async {
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes,
+      {bool keepRows = false, String purpose = 'library'}) async {
     try {
       final form = FormData()
         ..files.add(MapEntry('file', MultipartFile.fromBytes(bytes, filename: fileName)))
         ..fields.addAll([
           const MapEntry('dry_run', '1'),
-          const MapEntry('purpose', 'library'),
+          MapEntry('purpose', purpose),
           if (keepRows) const MapEntry('keep_rows', '1'),
         ]);
       final r = await _functions.post('/import-plan',

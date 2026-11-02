@@ -6,6 +6,8 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
+import '../../delivery_note/delivery_note.dart';
+import '../../delivery_note/delivery_note_view_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -192,6 +194,65 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     return v == null || v < 0 ? null : v;
   }
 
+  /// The delivery note read for this inspection (0178), and what came of it.
+  List<NoteLine>? _note;
+  String? _noteName;
+  bool _noteReading = false;
+  int _noteMatched = 0;
+  List<NoteLine> _noteStrangers = const [];
+  int _noteMissing = 0;
+
+  /// The checked note photographed or chosen, read, and its lines ticked:
+  /// every JAN on it is taken as received, with the note's count. Lines
+  /// not received (未発送) are unticked by hand before 検品完了.
+  Future<void> _readNote() async {
+    final camera = await askCameraOrFile(context);
+    if (camera == null || !mounted) return;
+    final f = await ref.read(deliveryNotePickerProvider)(camera: camera);
+    if (f == null || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      _noteReading = true;
+      _error = null;
+    });
+    final r = await readDeliveryNote(ref, f.name, f.bytes);
+    if (!mounted) return;
+    setState(() {
+      _noteReading = false;
+      switch (r) {
+        case ApiSuccess(:final data):
+          _applyNote(data, f.name);
+        case ApiFailure(:final message):
+          _error = humanizeApiErrorMessage(l10n, message);
+      }
+    });
+  }
+
+  void _applyNote(List<NoteLine> note, String name) {
+    final open = _open;
+    final used = <int>{};
+    final strangers = <NoteLine>[];
+    for (final n in note) {
+      if (n.jan.isEmpty) continue;
+      final hit = open.where((l) => l.janCode == n.jan && !used.contains(l.lineNo)).firstOrNull;
+      if (hit == null) {
+        // Already checked in is not a stranger.
+        if (!(_import?.lines ?? const <MasterImportLine>[]).any((l) => l.janCode == n.jan)) strangers.add(n);
+        continue;
+      }
+      used.add(hit.lineNo);
+      if (n.quantity case final q? when q >= 0) _counts[hit.lineNo]?.text = '$q';
+    }
+    _ticked
+      ..clear()
+      ..addAll(used);
+    _note = note;
+    _noteName = name;
+    _noteMatched = used.length;
+    _noteStrangers = strangers;
+    _noteMissing = open.length - used.length;
+  }
+
   /// Lines checked in by a scan and not yet back from the server.
   final Set<int> _scanning = {};
 
@@ -361,7 +422,15 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
         if (!l.inspected) l
     ];
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.siTitle(widget.importId))),
+      appBar: AppBar(title: Text(l10n.siTitle(widget.importId)), actions: [
+        // A note in hand, photographed, to look at with the goods' pictures.
+        IconButton(
+          key: const ValueKey('si-note-look'),
+          tooltip: l10n.dnTitle,
+          icon: const Icon(Icons.photo_library_outlined),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DeliveryNoteViewScreen())),
+        ),
+      ]),
       body: m == null
           ? (_error == null ? const LoadingView() : ErrorStateView(message: _error!, onRetry: _load))
           // On a PC every line is one row; on a phone a card (0167).
@@ -405,6 +474,51 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       ),
                       onSubmitted: _onScan,
                     ),
+                    // The note checked by hand, read back: its lines ticked (0178).
+                    if (may) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+                        OutlinedButton.icon(
+                          key: const ValueKey('si-note'),
+                          onPressed: _busy || _noteReading ? null : _readNote,
+                          icon: _noteReading
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.document_scanner_outlined, size: 18),
+                          label: Text(_noteReading ? l10n.dnReading : l10n.siNoteRead),
+                        ),
+                      ]),
+                    ],
+                    if (_note case final note?)
+                      Card(
+                        key: const ValueKey('si-note-summary'),
+                        color: theme.colorScheme.tertiaryContainer,
+                        margin: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(l10n.siNoteTicked(_noteName ?? '', _noteMatched),
+                                style: theme.textTheme.titleSmall),
+                            Text(l10n.siNoteHint, style: theme.textTheme.bodySmall),
+                            if (_noteMissing > 0)
+                              Text(l10n.siNoteMissing(_noteMissing),
+                                  key: const ValueKey('si-note-missing'), style: theme.textTheme.bodySmall),
+                            for (final n in _noteStrangers)
+                              Text(l10n.siNoteStranger(n.jan, n.name),
+                                  key: ValueKey('si-note-stranger-${n.lineNo}'),
+                                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton.icon(
+                                key: const ValueKey('si-note-view'),
+                                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => DeliveryNoteViewScreen(lines: note, fileName: _noteName))),
+                                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                                label: Text(l10n.siNoteView),
+                              ),
+                            ),
+                          ]),
+                        ),
+                      ),
                     if (may)
                       SwitchListTile(
                         key: const ValueKey('si-scan-checkin'),

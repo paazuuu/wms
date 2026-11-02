@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 // ignore_for_file: prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/delivery_note/delivery_note.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
@@ -43,8 +46,19 @@ MasterImport _awaiting({bool firstDone = false}) => MasterImport.fromJson({
     });
 
 class _Reader implements MasterImportRepository {
-  _Reader(this.import);
+  _Reader(this.import, {this.note});
   MasterImport import;
+
+  /// A delivery note as the AI reads it (0178).
+  MasterRead? note;
+  String? notePurpose;
+
+  @override
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes,
+      {bool keepRows = false, String purpose = 'library'}) async {
+    notePurpose = purpose;
+    return ApiSuccess(note ?? const MasterRead(lines: []));
+  }
 
   @override
   Future<ApiResult<MasterImport>> detail(int importId, {int? warehouseId}) async => ApiSuccess(import);
@@ -180,6 +194,44 @@ void main() {
     expect(asked, [null, '4909999000038 はこのファイルの未検品の行にありません']);
     expect(stock.inspected.length, 2);
     expect(stock.inspected.last.$2.single.lineNo, 3);
+  });
+
+  testWidgets('the checked note read back ticks its lines with its counts; one not sent is unticked, then checked in (0178)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = _Reader(_awaiting(), note: const MasterRead(lines: [
+      MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ', quantity: '480'),
+      MasterLine(lineNo: 2, janCode: _jan2, supplierName: 'ﾉｰﾄ', quantity: '100'),
+      MasterLine(lineNo: 3, janCode: '4909999000038', supplierName: '別の品', quantity: '5'),
+    ]));
+    final stock = _Stock()..reader = reader;
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inspection.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+      deliveryNotePickerProvider.overrideWithValue(({required camera}) async =>
+          (name: '納品書_検品済み.pdf', bytes: Uint8List.fromList([1]))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('si-note')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('dn-pick-file')));
+    await tester.pumpAndSettle();
+    expect(reader.notePurpose, 'ocr');
+    // Every JAN on the note ticked, with the note's count; a stranger said so.
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('si-tick-2'))).value, isTrue);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('si-tick-3'))).value, isTrue);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('si-count-2'))).controller!.text, '480');
+    expect(find.text('納品書_検品済み.pdf から 2行にチェックを入れました'), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-note-stranger-3')), findsOneWidget);
+    // The notebook did not come (未発送): unticked by hand.
+    await tester.tap(find.byKey(const ValueKey('si-tick-3')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('si-check-in')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('si-confirm')));
+    await tester.pumpAndSettle();
+    expect([for (final l in stock.inspected.single.$2) (l.lineNo, l.quantity)], [(2, 480)]);
   });
 
   // 0167: each line with what its product tells of it, and narrowing.

@@ -5395,14 +5395,17 @@ class FakeMasterImportRepository implements MasterImportRepository {
   final List<List<MasterProblem>> stops = [];
   final List<List<Map<String, dynamic>>> stockApplied = [];
   final List<(String, int)> setOnHands = [];
+  String? readPurpose;
   List<MasterImportLine> _lines = const [];
   MasterImportStatus _status = MasterImportStatus.reading;
   int? _warehouseId;
 
   @override
-  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes, {bool keepRows = false}) async {
+  Future<ApiResult<MasterRead>> read(String fileName, Uint8List bytes,
+      {bool keepRows = false, String purpose = 'library'}) async {
     reads++;
     readKeptRows = keepRows;
+    readPurpose = purpose;
     if (readFailure != null) return ApiFailure(message: readFailure!);
     return ApiSuccess(readResult ?? const MasterRead(lines: []));
   }

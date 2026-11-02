@@ -23234,6 +23234,114 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{jan} は入庫済みです'**
   String siScanAlreadyIn(String jan);
+
+  /// No description provided for @dnTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を写して見る'**
+  String get dnTitle;
+
+  /// No description provided for @dnIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'手元の納品書をカメラで写すと、AIが読み取り、商品ごとに写真・商品名・JAN・数量を並べます。写真のない商品はそのまま表示します。見終わった行はタップで印を付けられます（記録はされません）。'**
+  String get dnIntro;
+
+  /// No description provided for @dnTake.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書を写す・選ぶ'**
+  String get dnTake;
+
+  /// No description provided for @dnTakeAnother.
+  ///
+  /// In ja, this message translates to:
+  /// **'別の納品書を写す・選ぶ'**
+  String get dnTakeAnother;
+
+  /// No description provided for @dnTakePhoto.
+  ///
+  /// In ja, this message translates to:
+  /// **'カメラで撮る'**
+  String get dnTakePhoto;
+
+  /// No description provided for @dnChooseFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'画像・PDFを選ぶ'**
+  String get dnChooseFile;
+
+  /// No description provided for @dnReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが読み取り中…'**
+  String get dnReading;
+
+  /// No description provided for @dnNothingRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の行が読み取れませんでした。明るい所で、納品書全体が写るように撮り直してください。'**
+  String get dnNothingRead;
+
+  /// No description provided for @dnSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}行・合計 {units}個（確認 {seen}行）'**
+  String dnSummary(int lines, int units, int seen);
+
+  /// No description provided for @dnNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが読めません'**
+  String get dnNoJan;
+
+  /// No description provided for @dnNotInLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリー未登録'**
+  String get dnNotInLibrary;
+
+  /// No description provided for @dnUnits.
+  ///
+  /// In ja, this message translates to:
+  /// **'個'**
+  String get dnUnits;
+
+  /// No description provided for @siNoteRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済みの納品書を読み込む'**
+  String get siNoteRead;
+
+  /// No description provided for @siNoteTicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} から {n}行にチェックを入れました'**
+  String siNoteTicked(String name, int n);
+
+  /// No description provided for @siNoteHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量は納品書の数にしています。未発送など届いていない行はチェックを外してから「検品完了」を押してください。'**
+  String get siNoteHint;
+
+  /// No description provided for @siNoteMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品書になかった行 {n}行（チェックなし）'**
+  String siNoteMissing(int n);
+
+  /// No description provided for @siNoteStranger.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取込にないJAN: {jan} {name}'**
+  String siNoteStranger(String jan, String name);
+
+  /// No description provided for @siNoteView.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った納品書を写真つきで見る'**
+  String get siNoteView;
 }
 
 class _AppLocalizationsDelegate
