@@ -23059,6 +23059,145 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'発注で取り込んだファイルや受領した荷物が、ここに検品待ちとして並びます。'**
   String get qcNothingBody;
+
+  /// No description provided for @featSystemReset.
+  ///
+  /// In ja, this message translates to:
+  /// **'システムの初期化'**
+  String get featSystemReset;
+
+  /// No description provided for @featSystemResetDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'テストで入れたデータを空にして、最初からやり直す（システム管理者のみ）'**
+  String get featSystemResetDesc;
+
+  /// No description provided for @srIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'この環境に入れた取込・在庫・注文などを空にします。元に戻せません。ユーザー・権限・倉庫・自社情報・AIキー・メーカーのカタログ・各種設定はそのまま残ります。番号（取込 #など）は1から始まります。'**
+  String get srIntro;
+
+  /// No description provided for @srAlways.
+  ///
+  /// In ja, this message translates to:
+  /// **'必ず空にするもの'**
+  String get srAlways;
+
+  /// No description provided for @srWork.
+  ///
+  /// In ja, this message translates to:
+  /// **'これまでの作業'**
+  String get srWork;
+
+  /// No description provided for @srWorkDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 {imports}件・請求書などの記録 {documents}件・送金の記録 {proofs}件・納品/検品/注文 {orders}件・在庫 {stock}品目・在庫の履歴 {moves}件・保存ファイル {files}件'**
+  String srWorkDetail(String imports, String documents, String proofs,
+      String orders, String stock, String moves, String files);
+
+  /// No description provided for @srChoose.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んで空にするもの'**
+  String get srChoose;
+
+  /// No description provided for @srProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーと価格台帳'**
+  String get srProducts;
+
+  /// No description provided for @srProductsDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品 {products}件・価格台帳 {book}件（写真・名前・棚メモなども）'**
+  String srProductsDetail(String products, String book);
+
+  /// No description provided for @srSuppliers.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先と覚えた読み方'**
+  String get srSuppliers;
+
+  /// No description provided for @srSuppliersDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先 {suppliers}社・覚えた見出しや表記 {learned}件・振込先'**
+  String srSuppliersDetail(String suppliers, String learned);
+
+  /// No description provided for @srLookups.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが調べた商品名・重量'**
+  String get srLookups;
+
+  /// No description provided for @srLookupsDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件（残すと次に同じJANを入れたとき再び調べずに済みます）'**
+  String srLookupsDetail(String n);
+
+  /// No description provided for @srLogs.
+  ///
+  /// In ja, this message translates to:
+  /// **'監査ログとAIの利用履歴'**
+  String get srLogs;
+
+  /// No description provided for @srLogsDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'監査ログ {audit}件・AIの利用 {ai}件（初期化したことは新しい監査ログに残ります）'**
+  String srLogsDetail(String audit, String ai);
+
+  /// No description provided for @srKept.
+  ///
+  /// In ja, this message translates to:
+  /// **'ユーザー・権限・倉庫・自社情報・AIキー・メーカーのカタログ・参照資料・表示名の書式などの設定は消えません。'**
+  String get srKept;
+
+  /// No description provided for @srTypeWord.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認のため「{word}」と入力'**
+  String srTypeWord(String word);
+
+  /// No description provided for @srRun.
+  ///
+  /// In ja, this message translates to:
+  /// **'初期化する'**
+  String get srRun;
+
+  /// No description provided for @srConfirmTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'本当に初期化しますか？'**
+  String get srConfirmTitle;
+
+  /// No description provided for @srConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだデータと保存ファイルが消え、元に戻せません。'**
+  String get srConfirmBody;
+
+  /// No description provided for @srDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'初期化しました'**
+  String get srDone;
+
+  /// No description provided for @srDoneDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 {imports}件・商品 {products}件などを空にし、ファイル {removed}件を消しました（消せなかったファイル {failed}件）。画面を再読み込みすると、すべての画面が新しい状態になります。'**
+  String srDoneDetail(String imports, String products, int removed, int failed);
+
+  /// No description provided for @srNoPermission.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム管理者のみ使えます'**
+  String get srNoPermission;
 }
 
 class _AppLocalizationsDelegate

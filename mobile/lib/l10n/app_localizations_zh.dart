@@ -12911,4 +12911,90 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qcNothingBody => '通过“订货”导入的文件和收货的货物会作为待验货列在这里。';
+
+  @override
+  String get featSystemReset => '系统初始化';
+
+  @override
+  String get featSystemResetDesc => '清空测试时录入的数据，从头开始（仅系统管理员）';
+
+  @override
+  String get srIntro =>
+      '清空在此环境录入的导入・库存・订单等。无法恢复。用户・权限・仓库・公司信息・AI密钥・厂商目录・各项设置保持不变。编号（导入 # 等）从1重新开始。';
+
+  @override
+  String get srAlways => '必定清空';
+
+  @override
+  String get srWork => '已进行的作业';
+
+  @override
+  String srWorkDetail(String imports, String documents, String proofs,
+      String orders, String stock, String moves, String files) {
+    return '导入 $imports件・发票等记录 $documents件・汇款记录 $proofs件・送货/验货/订单 $orders件・库存 $stock品目・库存履历 $moves件・保存文件 $files件';
+  }
+
+  @override
+  String get srChoose => '勾选后清空';
+
+  @override
+  String get srProducts => '商品库与价格台账';
+
+  @override
+  String srProductsDetail(String products, String book) {
+    return '商品 $products件・价格台账 $book件（含照片・名称・货架备注等）';
+  }
+
+  @override
+  String get srSuppliers => '供应商与学习到的读法';
+
+  @override
+  String srSuppliersDetail(String suppliers, String learned) {
+    return '供应商 $suppliers家・学习到的标题与写法 $learned件・收款账户';
+  }
+
+  @override
+  String get srLookups => 'AI查到的商品名・重量';
+
+  @override
+  String srLookupsDetail(String n) {
+    return '$n件（保留后再次录入相同JAN时无需重新查询）';
+  }
+
+  @override
+  String get srLogs => '审计日志与AI使用记录';
+
+  @override
+  String srLogsDetail(String audit, String ai) {
+    return '审计日志 $audit件・AI使用 $ai件（初始化本身会记入新的审计日志）';
+  }
+
+  @override
+  String get srKept => '用户・权限・仓库・公司信息・AI密钥・厂商目录・参考资料・显示名格式等设置不会被清空。';
+
+  @override
+  String srTypeWord(String word) {
+    return '请输入“$word”以确认';
+  }
+
+  @override
+  String get srRun => '执行初始化';
+
+  @override
+  String get srConfirmTitle => '确定要初始化吗？';
+
+  @override
+  String get srConfirmBody => '所选数据与保存文件将被删除，无法恢复。';
+
+  @override
+  String get srDone => '已初始化';
+
+  @override
+  String srDoneDetail(
+      String imports, String products, int removed, int failed) {
+    return '已清空导入 $imports件・商品 $products件等，删除文件 $removed件（未能删除 $failed件）。重新加载页面后所有画面将更新。';
+  }
+
+  @override
+  String get srNoPermission => '仅系统管理员可用';
 }

@@ -8228,6 +8228,38 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 検品 is open to inventory.adjust too (as 取込の検品 was).
 - `MasterImport.warehouseId` is read from the list.
 
+## 0175–0176: システムの初期化
+
+- To test again from nothing, or before handing the environment over:
+  管理 → システムの初期化, for `system.reset` only (system_admin).
+  - The screen first shows how much there is of each kind.
+  - It runs only after 「初期化」 is typed and confirmed once more.
+- `system_reset(confirm, options)` empties, in one transaction:
+  - Always: what was done.
+    - The stock files and their readings, evidence and transfer proofs.
+    - Deliveries, receipts, inspections, invoices, orders, requests,
+      shipments, picking, transfers and counts.
+    - The stock and its ledger.
+  - By choice (defaults):
+    - products: 商品ライブラリー and 価格台帳 with all that hangs on them (on).
+    - suppliers: the suppliers and what was learned of them (off).
+    - lookups: the AI's names and weights by JAN (off).
+    - logs: the audit and AI call logs (on).
+  - Every table is named; nothing cascades. Identities restart (取込 #1).
+  - The reset is written as the first line of the new audit log.
+- Never touched: users, roles, permissions, warehouses and their layout,
+  the company, AI keys and settings, makers' catalogs, references, the field
+  library, units, name formats, print settings, common heading names.
+- The `system-reset` function calls it as the caller, then removes the files
+  from import-documents, master-import-files, payment-proofs (and
+  product-images with the products). It says how many files were removed
+  and how many could not be.
+- 0176: `system_reset_counts` is read only through `system_reset_preview`.
+- Checked inside a transaction rolled back on purpose:
+  - Imports, products and the price book went to 0.
+  - Suppliers, the AI's lookups and the files stayed (files are the edge
+    function's).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

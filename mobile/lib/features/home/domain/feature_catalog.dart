@@ -57,6 +57,7 @@ import '../../stock_import/presentation/stock_inspection_screen.dart';
 import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
+import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
 
@@ -594,6 +595,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _notationTraining,
             requiredAnyOf: ['product.manage', 'receiving.confirm'],
           ),
+          // システムの初期化 (0175): what was done emptied, to test again from
+          // nothing — the system administrator's only.
+          FeatureEntry(
+            id: 'system_reset',
+            icon: Icons.restart_alt,
+            status: FeatureStatus.ready,
+            builder: _systemReset,
+            requiredAnyOf: ['system.reset'],
+          ),
         ],
       ),
     ];
@@ -641,6 +651,7 @@ Widget _masterStockImport(BuildContext _) => const MasterImportsScreen();
 Widget _stockFileImport(BuildContext _) => const StockFileImportScreen();
 Widget _stockInspection(BuildContext _) => const StockInspectionScreen();
 Widget _taxFiles(BuildContext _) => const TaxFilesScreen();
+Widget _systemReset(BuildContext _) => const SystemResetScreen();
 Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();

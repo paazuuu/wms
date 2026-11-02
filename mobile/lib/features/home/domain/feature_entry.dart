@@ -139,6 +139,8 @@ class FeatureEntry {
         return l10n.featStockInspection;
       case 'tax_files':
         return l10n.featTaxFiles;
+      case 'system_reset':
+        return l10n.featSystemReset;
       case 'import_calendar':
         return l10n.featImportCalendar;
       case 'payments':
@@ -265,6 +267,8 @@ class FeatureEntry {
         return l10n.featStockInspectionDesc;
       case 'tax_files':
         return l10n.featTaxFilesDesc;
+      case 'system_reset':
+        return l10n.featSystemResetDesc;
       case 'import_calendar':
         return l10n.featImportCalendarDesc;
       case 'payments':

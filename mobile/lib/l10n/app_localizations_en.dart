@@ -13253,4 +13253,93 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get qcNothingBody =>
       'Files taken in under 発注 and goods received are listed here to inspect.';
+
+  @override
+  String get featSystemReset => 'Reset the system';
+
+  @override
+  String get featSystemResetDesc =>
+      'Empty what was entered while testing and start again (system administrators only)';
+
+  @override
+  String get srIntro =>
+      'Empties the imports, stock, orders and the rest entered here. It cannot be undone. Users, permissions, warehouses, the company, AI keys, makers\' catalogs and settings stay. Numbers (import # …) start again at 1.';
+
+  @override
+  String get srAlways => 'Always emptied';
+
+  @override
+  String get srWork => 'What was done';
+
+  @override
+  String srWorkDetail(String imports, String documents, String proofs,
+      String orders, String stock, String moves, String files) {
+    return 'imports $imports · documents $documents · transfer proofs $proofs · deliveries/inspections/orders $orders · stock $stock items · stock history $moves · stored files $files';
+  }
+
+  @override
+  String get srChoose => 'Emptied if ticked';
+
+  @override
+  String get srProducts => 'Product library and price book';
+
+  @override
+  String srProductsDetail(String products, String book) {
+    return '$products products · $book price book items (with pictures, names, shelf notes)';
+  }
+
+  @override
+  String get srSuppliers => 'Suppliers and what was learned';
+
+  @override
+  String srSuppliersDetail(String suppliers, String learned) {
+    return '$suppliers suppliers · $learned learned headings and writings · their accounts';
+  }
+
+  @override
+  String get srLookups => 'The AI\'s names and weights by JAN';
+
+  @override
+  String srLookupsDetail(String n) {
+    return '$n (kept, the same JAN needs no new lookup)';
+  }
+
+  @override
+  String get srLogs => 'Audit log and AI usage';
+
+  @override
+  String srLogsDetail(String audit, String ai) {
+    return 'audit $audit · AI calls $ai (the reset itself is the first new line)';
+  }
+
+  @override
+  String get srKept =>
+      'Users, permissions, warehouses, the company, AI keys, catalogs, references and settings are never emptied.';
+
+  @override
+  String srTypeWord(String word) {
+    return 'Type “$word” to confirm';
+  }
+
+  @override
+  String get srRun => 'Reset';
+
+  @override
+  String get srConfirmTitle => 'Really reset?';
+
+  @override
+  String get srConfirmBody =>
+      'The chosen data and stored files are removed and cannot be brought back.';
+
+  @override
+  String get srDone => 'Reset done';
+
+  @override
+  String srDoneDetail(
+      String imports, String products, int removed, int failed) {
+    return 'Emptied $imports imports, $products products and the rest; removed $removed files ($failed could not be). Reload to see every screen fresh.';
+  }
+
+  @override
+  String get srNoPermission => 'System administrators only';
 }

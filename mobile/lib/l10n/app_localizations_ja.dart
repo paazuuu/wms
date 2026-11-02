@@ -12987,4 +12987,90 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qcNothingBody => '発注で取り込んだファイルや受領した荷物が、ここに検品待ちとして並びます。';
+
+  @override
+  String get featSystemReset => 'システムの初期化';
+
+  @override
+  String get featSystemResetDesc => 'テストで入れたデータを空にして、最初からやり直す（システム管理者のみ）';
+
+  @override
+  String get srIntro =>
+      'この環境に入れた取込・在庫・注文などを空にします。元に戻せません。ユーザー・権限・倉庫・自社情報・AIキー・メーカーのカタログ・各種設定はそのまま残ります。番号（取込 #など）は1から始まります。';
+
+  @override
+  String get srAlways => '必ず空にするもの';
+
+  @override
+  String get srWork => 'これまでの作業';
+
+  @override
+  String srWorkDetail(String imports, String documents, String proofs,
+      String orders, String stock, String moves, String files) {
+    return '取込 $imports件・請求書などの記録 $documents件・送金の記録 $proofs件・納品/検品/注文 $orders件・在庫 $stock品目・在庫の履歴 $moves件・保存ファイル $files件';
+  }
+
+  @override
+  String get srChoose => '選んで空にするもの';
+
+  @override
+  String get srProducts => '商品ライブラリーと価格台帳';
+
+  @override
+  String srProductsDetail(String products, String book) {
+    return '商品 $products件・価格台帳 $book件（写真・名前・棚メモなども）';
+  }
+
+  @override
+  String get srSuppliers => '仕入先と覚えた読み方';
+
+  @override
+  String srSuppliersDetail(String suppliers, String learned) {
+    return '仕入先 $suppliers社・覚えた見出しや表記 $learned件・振込先';
+  }
+
+  @override
+  String get srLookups => 'AIが調べた商品名・重量';
+
+  @override
+  String srLookupsDetail(String n) {
+    return '$n件（残すと次に同じJANを入れたとき再び調べずに済みます）';
+  }
+
+  @override
+  String get srLogs => '監査ログとAIの利用履歴';
+
+  @override
+  String srLogsDetail(String audit, String ai) {
+    return '監査ログ $audit件・AIの利用 $ai件（初期化したことは新しい監査ログに残ります）';
+  }
+
+  @override
+  String get srKept => 'ユーザー・権限・倉庫・自社情報・AIキー・メーカーのカタログ・参照資料・表示名の書式などの設定は消えません。';
+
+  @override
+  String srTypeWord(String word) {
+    return '確認のため「$word」と入力';
+  }
+
+  @override
+  String get srRun => '初期化する';
+
+  @override
+  String get srConfirmTitle => '本当に初期化しますか？';
+
+  @override
+  String get srConfirmBody => '選んだデータと保存ファイルが消え、元に戻せません。';
+
+  @override
+  String get srDone => '初期化しました';
+
+  @override
+  String srDoneDetail(
+      String imports, String products, int removed, int failed) {
+    return '取込 $imports件・商品 $products件などを空にし、ファイル $removed件を消しました（消せなかったファイル $failed件）。画面を再読み込みすると、すべての画面が新しい状態になります。';
+  }
+
+  @override
+  String get srNoPermission => 'システム管理者のみ使えます';
 }
