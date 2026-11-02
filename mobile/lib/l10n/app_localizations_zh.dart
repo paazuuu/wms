@@ -13129,7 +13129,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get icTitle => '验货记录日历';
 
   @override
-  String get icIntro => '验货的日期和时间在验货完成时自动记录。点日期查看当天的验货，点导入查看验货内容（验货时的文件・撤销）。';
+  String get icIntro =>
+      '验货的日期和时间在验货完成时自动记录。数量仅为当天验货的部分（同一导入分几天验货时按日分开）。点导入只显示当天验货的行。';
 
   @override
   String icMonthList(int n) {
@@ -13155,8 +13156,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String icChecked(int lines, String units) {
-    return '验货 $lines行・$units个';
+  String icChecked(int lines, String units, int total) {
+    return '当天验货 $lines行・$units个（共$total行）';
   }
 
   @override
@@ -13176,4 +13177,15 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get txTabHint =>
       '这是无需下载即可查看的表格，可在上方切换“发票一览・明细・按供应商・说明”。如需保存，请使用应用中的“Excel”按钮。';
+
+  @override
+  String get siMore => '更多操作';
+
+  @override
+  String siDayOnly(String day, int lines, int units) {
+    return '仅显示 $day 验货的行（$lines行・$units个）';
+  }
+
+  @override
+  String get siDayShowAll => '显示全部行';
 }

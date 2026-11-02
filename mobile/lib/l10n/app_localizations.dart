@@ -23418,7 +23418,7 @@ abstract class AppLocalizations {
   /// No description provided for @icIntro.
   ///
   /// In ja, this message translates to:
-  /// **'検品した日付と時刻は、検品完了のときに自動で記録されます。日付を押すとその日の検品が、取込を押すと検品の中身（検品時のファイル・取り消し）が開きます。'**
+  /// **'検品した日付と時刻は、検品完了のときに自動で記録されます。数はその日に検品した分だけです（同じ取込を何日かに分けて検品したときは、日ごとに分かれます）。取込を押すと、その日に検品した行だけが開きます。'**
   String get icIntro;
 
   /// No description provided for @icMonthList.
@@ -23454,8 +23454,8 @@ abstract class AppLocalizations {
   /// No description provided for @icChecked.
   ///
   /// In ja, this message translates to:
-  /// **'{lines}行・{units}個を検品'**
-  String icChecked(int lines, String units);
+  /// **'この日に {lines}行・{units}個を検品（全{total}行中）'**
+  String icChecked(int lines, String units, int total);
 
   /// No description provided for @icNotes.
   ///
@@ -23486,6 +23486,24 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。'**
   String get txTabHint;
+
+  /// No description provided for @siMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の操作'**
+  String get siMore;
+
+  /// No description provided for @siDayOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'{day} に検品した行だけを表示しています（{lines}行・{units}個）'**
+  String siDayOnly(String day, int lines, int units);
+
+  /// No description provided for @siDayShowAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての行を表示'**
+  String get siDayShowAll;
 }
 
 class _AppLocalizationsDelegate

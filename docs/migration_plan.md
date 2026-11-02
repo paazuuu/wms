@@ -8320,7 +8320,9 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     and a finished import goes back to 検品待ち.
   - Refused (uninspect_below_zero) when the stock already went out and would
     fall below zero.
-  - 取込の検品: an undo icon on each checked-in line, with a confirmation.
+  - 取込の検品: 「検品を取り消す」 in the ⋯ menu of each checked-in line (not
+    a button of its own, so it is not pressed by mistake), with a
+    confirmation.
 - import_documents.inspection_import_id: the delivery note read on 取込の
   検品 is kept with that import (stock_file_link_inspection_document).
   - 取込の検品 lists 検品時のファイル: a picture is shown in the app, a PDF
@@ -8330,7 +8332,11 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   (Japan time), per import — lines, units, first and last time, by whom, and
   the notes kept.
   - 検品履歴カレンダー (現場作業, and the calendar icon on 検品): stamped by
-    the system on each check-in, never typed. A file opens its inspection.
+    the system on each check-in, never typed.
+  - Counts are the day's only: an import inspected over several days shows
+    on each day with that day's lines.
+  - A file opens its inspection narrowed to that day's lines (the
+    check-in tools hidden); 「すべての行を表示」 shows them all.
 - No foreign keys on the new table and column: システムの初期化 empties
   import_documents and master_imports together.
 - system-reset keeps jan/ pictures and jan_photos unless 「AIが調べた商品名・

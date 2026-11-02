@@ -11825,7 +11825,7 @@
   "featInspectionCalendar": "検品履歴カレンダー",
   "featInspectionCalendarDesc": "検品した日を自動で記録し、日ごとに何をいつ誰が検品したか、検品時の納品書とともに見返せます",
   "icTitle": "検品履歴カレンダー",
-  "icIntro": "検品した日付と時刻は、検品完了のときに自動で記録されます。日付を押すとその日の検品が、取込を押すと検品の中身（検品時のファイル・取り消し）が開きます。",
+  "icIntro": "検品した日付と時刻は、検品完了のときに自動で記録されます。数はその日に検品した分だけです（同じ取込を何日かに分けて検品したときは、日ごとに分かれます）。取込を押すと、その日に検品した行だけが開きます。",
   "icMonthList": "この月の検品 {n}件",
   "@icMonthList": {
     "placeholders": {
@@ -11862,7 +11862,7 @@
       }
     }
   },
-  "icChecked": "{lines}行・{units}個を検品",
+  "icChecked": "この日に {lines}行・{units}個を検品（全{total}行中）",
   "@icChecked": {
     "placeholders": {
       "lines": {
@@ -11870,6 +11870,9 @@
       },
       "units": {
         "type": "String"
+      },
+      "total": {
+        "type": "int"
       }
     }
   },
@@ -11884,5 +11887,21 @@
   "icAllDone": "検品済み",
   "icSomeLeft": "検品待ちあり",
   "txOpenTab": "別タブで見る",
-  "txTabHint": "ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。"
+  "txTabHint": "ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。",
+  "siMore": "その他の操作",
+  "siDayOnly": "{day} に検品した行だけを表示しています（{lines}行・{units}個）",
+  "@siDayOnly": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "siDayShowAll": "すべての行を表示"
 }

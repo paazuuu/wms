@@ -4246,16 +4246,19 @@
   "featInspectionCalendar": "Inspection calendar",
   "featInspectionCalendarDesc": "The days goods were inspected, stamped automatically: what was checked in, when and by whom, with the delivery notes used",
   "icTitle": "Inspection calendar",
-  "icIntro": "The day and time are stamped automatically on each check-in. Tap a day for its inspections, an import for what was checked (its files, or to take a line back).",
+  "icIntro": "The day and time are stamped automatically on each check-in. Counts are that day's only (an import inspected over several days is split by day). Tap an import to see the lines checked in that day.",
   "icMonthList": "{n} inspections this month",
   "icDayList": "{n} inspections on {day}",
   "icNone": "No inspections in this period",
   "icDayLines": "{n} lines",
   "icStamped": "Checked in {when}",
-  "icChecked": "{lines} lines · {units} checked in",
+  "icChecked": "This day: {lines} lines · {units} checked in (of {total})",
   "icNotes": "{n} delivery notes kept",
   "icAllDone": "All checked",
   "icSomeLeft": "Some left",
   "txOpenTab": "Open in a new tab",
-  "txTabHint": "This is the table without a download: switch sheets at the top. To keep it, use the Excel button in the app."
+  "txTabHint": "This is the table without a download: switch sheets at the top. To keep it, use the Excel button in the app.",
+  "siMore": "More",
+  "siDayOnly": "Only the lines checked in on {day} ({lines} lines · {units})",
+  "siDayShowAll": "Show all lines"
 }

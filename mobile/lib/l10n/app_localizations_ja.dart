@@ -13209,7 +13209,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get icIntro =>
-      '検品した日付と時刻は、検品完了のときに自動で記録されます。日付を押すとその日の検品が、取込を押すと検品の中身（検品時のファイル・取り消し）が開きます。';
+      '検品した日付と時刻は、検品完了のときに自動で記録されます。数はその日に検品した分だけです（同じ取込を何日かに分けて検品したときは、日ごとに分かれます）。取込を押すと、その日に検品した行だけが開きます。';
 
   @override
   String icMonthList(int n) {
@@ -13235,8 +13235,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String icChecked(int lines, String units) {
-    return '$lines行・$units個を検品';
+  String icChecked(int lines, String units, int total) {
+    return 'この日に $lines行・$units個を検品（全$total行中）';
   }
 
   @override
@@ -13256,4 +13256,15 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get txTabHint =>
       'ダウンロードせずに見ている表です。上の「請求書一覧・明細・仕入先別・説明」で切り替えられます。保存するときはアプリの「Excel」ボタンを使ってください。';
+
+  @override
+  String get siMore => 'その他の操作';
+
+  @override
+  String siDayOnly(String day, int lines, int units) {
+    return '$day に検品した行だけを表示しています（$lines行・$units個）';
+  }
+
+  @override
+  String get siDayShowAll => 'すべての行を表示';
 }

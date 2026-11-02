@@ -31,7 +31,8 @@ import '../../support/harness.dart';
 const _jan1 = '4909999000014';
 const _jan2 = '4909999000021';
 
-MasterImport _awaiting({bool firstDone = false}) => MasterImport.fromJson({
+MasterImport _awaiting({bool firstDone = false, String doneAt = '2026-10-23T02:00:00Z', String? secondDoneAt}) =>
+    MasterImport.fromJson({
       'id': 21,
       'status': 'awaiting_inspection',
       'source': 'stock_file',
@@ -41,9 +42,12 @@ MasterImport _awaiting({bool firstDone = false}) => MasterImport.fromJson({
       'lines': [
         {
           'line_no': 2, 'jan_code': _jan1, 'name': 'テストペン 青', 'quantity': 500,
-          if (firstDone) ...{'inspected_at': '2026-10-23T02:00:00Z', 'inspected_quantity': 498, 'inspected_by_name': '検品担当', 'added': 498},
+          if (firstDone) ...{'inspected_at': doneAt, 'inspected_quantity': 498, 'inspected_by_name': '検品担当', 'added': 498},
         },
-        {'line_no': 3, 'jan_code': _jan2, 'name': 'テストノート', 'quantity': 100},
+        {
+          'line_no': 3, 'jan_code': _jan2, 'name': 'テストノート', 'quantity': 100,
+          if (secondDoneAt != null) ...{'inspected_at': secondDoneAt, 'inspected_quantity': 100, 'inspected_by_name': '検品担当', 'added': 100},
+        },
       ],
     });
 
@@ -289,6 +293,9 @@ void main() {
       masterImportRepositoryProvider.overrideWithValue(reader),
     ]);
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+    // Behind ⋯, never pressed by mistake.
+    await tester.tap(find.byKey(const ValueKey('si-more-2')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('si-undo-2')));
     await tester.pumpAndSettle();
     expect(find.textContaining('入庫した 498個 を在庫から戻し'), findsOneWidget);
@@ -297,7 +304,7 @@ void main() {
     expect(stock.uninspected, [(21, 2)]);
     // Waiting again, to be checked in once more.
     expect(find.byKey(const ValueKey('si-line-2')), findsOneWidget);
-    expect(find.byKey(const ValueKey('si-undo-2')), findsNothing);
+    expect(find.byKey(const ValueKey('si-more-2')), findsNothing);
   });
 
   testWidgets('taking back what already went out is refused in words (0179)', (tester) async {
@@ -312,6 +319,9 @@ void main() {
       stockImportRepositoryProvider.overrideWithValue(stock),
       masterImportRepositoryProvider.overrideWithValue(reader),
     ]);
+    // Behind ⋯, never pressed by mistake.
+    await tester.tap(find.byKey(const ValueKey('si-more-2')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('si-undo-2')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('si-undo-confirm')));
@@ -330,7 +340,7 @@ void main() {
       masterImportRepositoryProvider.overrideWithValue(reader),
     ]);
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
-    expect(find.byKey(const ValueKey('si-undo-2')), findsNothing);
+    expect(find.byKey(const ValueKey('si-more-2')), findsNothing);
   });
 
   testWidgets('検品履歴カレンダー: the days lines were checked in, stamped, and the inspection opened from a day (0179)',
@@ -339,7 +349,9 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final now = DateTime.now();
     final day = DateTime(now.year, now.month, 1);
-    final reader = _Reader(_awaiting(firstDone: true));
+    // Checked in over two days: line 2 on the 1st, line 3 on the 2nd (Japan time).
+    String jst(int d, int h) => DateTime.utc(day.year, day.month, d, h - 9).toIso8601String();
+    final reader = _Reader(_awaiting(firstDone: true, doneAt: jst(1, 10), secondDoneAt: jst(2, 15)));
     final stock = _Stock()
       ..reader = reader
       ..days = [
@@ -361,7 +373,7 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const ValueKey('ic-count-1'))).data, '1行');
     final dd = '${day.year}/${day.month.toString().padLeft(2, '0')}/01';
     expect(tester.widget<Text>(find.byKey(const ValueKey('ic-when-21'))).data, '検品日時 $dd 10:05〜10:40');
-    expect(tester.widget<Text>(find.byKey(const ValueKey('ic-what-21'))).data, '1行・498個を検品 · 検品担当 · 本社倉庫');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ic-what-21'))).data, 'この日に 1行・498個を検品（全2行中） · 検品担当 · 本社倉庫');
     expect(find.byKey(const ValueKey('ic-notes-21')), findsOneWidget);
     // A day chosen: only its inspections.
     await tester.tap(find.byKey(const ValueKey('ic-day-1')));
@@ -369,7 +381,16 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const ValueKey('ic-list-title'))).data, '$dd の検品 1件');
     await tester.tap(find.textContaining('取込 #21'));
     await tester.pumpAndSettle();
+    // Only what was checked in that day — not the next day's line.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-day-text'))).data, '$dd に検品した行だけを表示しています（1行・498個）');
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-done-3')), findsNothing);
+    expect(find.byKey(const ValueKey('si-check-in')), findsNothing);
+    // Every line again, on asking.
+    await tester.tap(find.byKey(const ValueKey('si-day-all')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-day')), findsNothing);
+    expect(find.byKey(const ValueKey('si-done-3')), findsOneWidget);
   });
 
   test('the inspection calendar is in the menu for those who inspect, and for stock and product viewers', () {

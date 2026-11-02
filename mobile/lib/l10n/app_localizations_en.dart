@@ -13479,7 +13479,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get icIntro =>
-      'The day and time are stamped automatically on each check-in. Tap a day for its inspections, an import for what was checked (its files, or to take a line back).';
+      'The day and time are stamped automatically on each check-in. Counts are that day\'s only (an import inspected over several days is split by day). Tap an import to see the lines checked in that day.';
 
   @override
   String icMonthList(int n) {
@@ -13505,8 +13505,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String icChecked(int lines, String units) {
-    return '$lines lines · $units checked in';
+  String icChecked(int lines, String units, int total) {
+    return 'This day: $lines lines · $units checked in (of $total)';
   }
 
   @override
@@ -13526,4 +13526,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get txTabHint =>
       'This is the table without a download: switch sheets at the top. To keep it, use the Excel button in the app.';
+
+  @override
+  String get siMore => 'More';
+
+  @override
+  String siDayOnly(String day, int lines, int units) {
+    return 'Only the lines checked in on $day ($lines lines · $units)';
+  }
+
+  @override
+  String get siDayShowAll => 'Show all lines';
 }

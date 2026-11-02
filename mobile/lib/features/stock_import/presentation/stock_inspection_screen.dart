@@ -128,9 +128,13 @@ final inspectionCameraProvider = Provider<
 /// One file's lines to count: tick what was checked, change the count where
 /// it differs from the file, and check them in.
 class StockInspectionDetailScreen extends ConsumerStatefulWidget {
-  const StockInspectionDetailScreen({super.key, required this.importId});
+  const StockInspectionDetailScreen({super.key, required this.importId, this.day});
 
   final int importId;
+
+  /// Opened from 検品履歴カレンダー (0179): only the lines checked in that day
+  /// (Japan time) are shown at first.
+  final DateTime? day;
 
   @override
   ConsumerState<StockInspectionDetailScreen> createState() => _StockInspectionDetailScreenState();
@@ -153,6 +157,9 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
   final Set<String> _makers = {};
   final Set<String> _marks = {};
   String _which = 'all';
+
+  /// The day narrowed to (0179), until 「すべての行を表示」.
+  late DateTime? _day = widget.day == null ? null : DateTime(widget.day!.year, widget.day!.month, widget.day!.day);
 
   @override
   void initState() {
@@ -452,6 +459,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     }.toList()
       ..sort();
     bool shown(MasterImportLine l) {
+      if (_day case final d?) return inspectionDayOf(l) == d;
       final p = products[l.janCode];
       if (_which == 'open' && l.inspected) return false;
       if (_which == 'done' && !l.inspected) return false;
@@ -507,7 +515,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                     ),
                   // The notes read while inspecting, kept to look back at (0179).
                   _InspectionFiles(importId: widget.importId),
-                  if (open.isNotEmpty) ...[
+                  if (open.isNotEmpty && _day == null) ...[
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       key: const ValueKey('si-scan'),
@@ -598,8 +606,35 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       title: Text(visibleOpen.length == open.length ? l10n.siAll : l10n.siAllShown(visibleOpen.length)),
                     ),
                   ],
+                  // Only the lines checked in the day chosen on the calendar (0179).
+                  if (_day case final d?)
+                    Card(
+                      key: const ValueKey('si-day'),
+                      color: theme.colorScheme.secondaryContainer,
+                      margin: const EdgeInsets.only(top: AppSpacing.sm),
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        child: Row(children: [
+                          const Icon(Icons.event_available_outlined),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              l10n.siDayOnly(DateFormat('y/MM/dd').format(d), visible.length,
+                                  visible.fold<int>(0, (s, l) => s + (l.inspectedQuantity ?? 0))),
+                              key: const ValueKey('si-day-text'),
+                            ),
+                          ),
+                          TextButton(
+                            key: const ValueKey('si-day-all'),
+                            onPressed: () => setState(() => _day = null),
+                            child: Text(l10n.siDayShowAll),
+                          ),
+                        ]),
+                      ),
+                    ),
                   // Narrowing many lines (0167).
-                  _Filters(
+                  if (_day == null)
+                    _Filters(
                     query: _query,
                     makers: makers,
                     chosenMakers: _makers,
@@ -633,7 +668,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                 ],
               );
             }),
-      bottomNavigationBar: m == null || open.isEmpty || !may
+      bottomNavigationBar: m == null || open.isEmpty || !may || _day != null
           ? null
           : SafeArea(
               child: Padding(
@@ -917,13 +952,24 @@ class _InspectLine extends ConsumerWidget {
         ? Row(children: [
             Expanded(
                 child: Text(l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? ''), style: muted)),
+            // Behind ⋯, so it is never pressed by mistake (0179).
             if (onUndo != null)
-              IconButton(
-                key: ValueKey('si-undo-${line.lineNo}'),
-                tooltip: l10n.siUndo,
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.undo, size: 20),
-                onPressed: onUndo,
+              PopupMenuButton<void>(
+                key: ValueKey('si-more-${line.lineNo}'),
+                tooltip: l10n.siMore,
+                icon: const Icon(Icons.more_horiz, size: 20),
+                itemBuilder: (_) => [
+                  PopupMenuItem<void>(
+                    key: ValueKey('si-undo-${line.lineNo}'),
+                    onTap: onUndo,
+                    child: ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.undo),
+                      title: Text(l10n.siUndo),
+                    ),
+                  ),
+                ],
               ),
           ])
         : TextField(
@@ -1133,6 +1179,15 @@ Future<void> showKeptDocument(BuildContext context, WidgetRef ref, ImportDocumen
     case ApiFailure(:final message):
       messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
   }
+}
+
+/// The day (Japan time, as 検品履歴カレンダー counts it) a line was checked
+/// in, or null.
+DateTime? inspectionDayOf(MasterImportLine l) {
+  final at = l.inspectedAt;
+  if (at == null) return null;
+  final jst = at.toUtc().add(const Duration(hours: 9));
+  return DateTime(jst.year, jst.month, jst.day);
 }
 
 /// Grams as typed back into a field (12.5, not 12.50 g).

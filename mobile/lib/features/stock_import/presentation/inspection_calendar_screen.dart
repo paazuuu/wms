@@ -263,7 +263,7 @@ class _Tile extends StatelessWidget {
           Text(l10n.icStamped(when), key: ValueKey('ic-when-${item.importId}')),
           Text(
             [
-              l10n.icChecked(item.lines, n.format(item.units)),
+              l10n.icChecked(item.lines, n.format(item.units), item.lineCount),
               if (item.by case final b?) b,
               if (item.warehouseName case final w?) w,
             ].join(' · '),
@@ -277,7 +277,7 @@ class _Tile extends StatelessWidget {
             style: theme.textTheme.labelSmall
                 ?.copyWith(color: item.allDone ? theme.colorScheme.primary : theme.colorScheme.tertiary)),
         onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => StockInspectionDetailScreen(importId: item.importId))),
+            .push(MaterialPageRoute(builder: (_) => StockInspectionDetailScreen(importId: item.importId, day: item.day))),
       ),
     );
   }
