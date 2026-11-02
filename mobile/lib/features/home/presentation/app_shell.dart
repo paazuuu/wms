@@ -558,10 +558,13 @@ class _TopBar extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    // A phone held upright: the text size and language live in the menu's
+    // foot instead, and the brand gives way, so the bar fits.
+    final phone = MediaQuery.sizeOf(context).width < 600;
 
     return Container(
       height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(horizontal: phone ? AppSpacing.xs : AppSpacing.lg),
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
@@ -576,7 +579,7 @@ class _TopBar extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
           ],
-          if (!wide) ...[
+          if (!wide && !phone) ...[
             const BrandMark(size: 32),
             const SizedBox(width: AppSpacing.sm),
           ],
@@ -618,9 +621,11 @@ class _TopBar extends StatelessWidget {
             ),
           const SizedBox(width: AppSpacing.xs),
           const WarehousePicker(),
-          const SizedBox(width: AppSpacing.xs),
-          const TextScaleMenuButton(),
-          const LanguageMenuButton(),
+          if (!phone) ...[
+            const SizedBox(width: AppSpacing.xs),
+            const TextScaleMenuButton(),
+            const LanguageMenuButton(),
+          ],
         ],
       ),
     );

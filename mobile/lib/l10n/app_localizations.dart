@@ -23198,6 +23198,42 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'システム管理者のみ使えます'**
   String get srNoPermission;
+
+  /// No description provided for @siScanIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANをスキャンすると、その行をそのまま入庫します'**
+  String get siScanIn;
+
+  /// No description provided for @siScanCheckIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'スキャンしたら入庫まで'**
+  String get siScanCheckIn;
+
+  /// No description provided for @siScanCheckInHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'オン: 読んだJANの行を、数量はファイルどおり（直していればその数）で検品済み・入庫にします。オフ: 印を付けるだけで、最後にまとめて検品完了にします。'**
+  String get siScanCheckInHint;
+
+  /// No description provided for @siScannedIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} {qty}個を入庫しました（残り {left}行）'**
+  String siScannedIn(String name, int qty, int left);
+
+  /// No description provided for @siCameraTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} をスキャンして入庫'**
+  String siCameraTitle(int id);
+
+  /// No description provided for @siScanAlreadyIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'{jan} は入庫済みです'**
+  String siScanAlreadyIn(String jan);
 }
 
 class _AppLocalizationsDelegate

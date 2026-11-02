@@ -13073,4 +13073,29 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get srNoPermission => 'システム管理者のみ使えます';
+
+  @override
+  String get siScanIn => 'JANをスキャンすると、その行をそのまま入庫します';
+
+  @override
+  String get siScanCheckIn => 'スキャンしたら入庫まで';
+
+  @override
+  String get siScanCheckInHint =>
+      'オン: 読んだJANの行を、数量はファイルどおり（直していればその数）で検品済み・入庫にします。オフ: 印を付けるだけで、最後にまとめて検品完了にします。';
+
+  @override
+  String siScannedIn(String name, int qty, int left) {
+    return '$name $qty個を入庫しました（残り $left行）';
+  }
+
+  @override
+  String siCameraTitle(int id) {
+    return '取込 #$id をスキャンして入庫';
+  }
+
+  @override
+  String siScanAlreadyIn(String jan) {
+    return '$jan は入庫済みです';
+  }
 }

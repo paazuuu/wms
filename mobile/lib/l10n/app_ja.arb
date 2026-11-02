@@ -11694,5 +11694,38 @@
       }
     }
   },
-  "srNoPermission": "システム管理者のみ使えます"
+  "srNoPermission": "システム管理者のみ使えます",
+  "siScanIn": "JANをスキャンすると、その行をそのまま入庫します",
+  "siScanCheckIn": "スキャンしたら入庫まで",
+  "siScanCheckInHint": "オン: 読んだJANの行を、数量はファイルどおり（直していればその数）で検品済み・入庫にします。オフ: 印を付けるだけで、最後にまとめて検品完了にします。",
+  "siScannedIn": "{name} {qty}個を入庫しました（残り {left}行）",
+  "@siScannedIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "siCameraTitle": "取込 #{id} をスキャンして入庫",
+  "@siCameraTitle": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "siScanAlreadyIn": "{jan} は入庫済みです",
+  "@siScanAlreadyIn": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      }
+    }
+  }
 }

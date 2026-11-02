@@ -419,6 +419,17 @@ void main() {
       expect(inSidebar('Putaway'), findsNothing);
     });
 
+    testWidgets('on a phone held upright the top bar fits (0177)', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(400, 800);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+      // No overflow stripes: the text size and language are in the menu's foot.
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('a filter matching nothing says so', (tester) async {
       tester.view
         ..devicePixelRatio = 1.0

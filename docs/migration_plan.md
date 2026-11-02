@@ -8260,6 +8260,25 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - Suppliers, the AI's lookups and the files stayed (files are the edge
     function's).
 
+## 0177 (app): scan to check in, with the phone's camera
+
+- 取込の検品: 「スキャンしたら入庫まで」, on by default. A JAN scanned, typed
+  or read by a hand scanner checks its line in at once, without asking.
+  - The count is the file's, or the one typed on the line.
+  - Off: a scan only ticks, to check in together at the end (as before).
+- A camera button beside the scan field opens the scanner kept open
+  (continuous, 2 s duplicate window). Each JAN read is checked in;
+  - one not in the file, or already in, is refused with the reason;
+  - check-ins go to the server one after another, never two at once.
+- The camera is mobile_scanner. It works in the native app and in the
+  browser and installed PWA alike (getUserMedia).
+  - Needs HTTPS (localhost only on the same machine) and the camera
+    permission.
+  - On an iPhone, Safari and a home-screen PWA both work on current iOS.
+- The top bar on a phone held upright (< 600 px): no brand mark; the text
+  size and language move to the menu's foot. The bar no longer overflows at
+  400 px.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

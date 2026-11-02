@@ -4209,5 +4209,11 @@
   "srConfirmBody": "The chosen data and stored files are removed and cannot be brought back.",
   "srDone": "Reset done",
   "srDoneDetail": "Emptied {imports} imports, {products} products and the rest; removed {removed} files ({failed} could not be). Reload to see every screen fresh.",
-  "srNoPermission": "System administrators only"
+  "srNoPermission": "System administrators only",
+  "siScanIn": "Scan a JAN to check its line in at once",
+  "siScanCheckIn": "Scanning checks the line in",
+  "siScanCheckInHint": "On: the line read is checked in with its count (the file's unless changed). Off: it is only ticked, to check in together at the end.",
+  "siScannedIn": "{name}: {qty} checked in ({left} lines left)",
+  "siCameraTitle": "Scan to check in import #{id}",
+  "siScanAlreadyIn": "{jan} is already checked in"
 }

@@ -12997,4 +12997,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get srNoPermission => '仅系统管理员可用';
+
+  @override
+  String get siScanIn => '扫描JAN后直接将该行入库';
+
+  @override
+  String get siScanCheckIn => '扫描即入库';
+
+  @override
+  String get siScanCheckInHint =>
+      '开：读取的JAN行按文件数量（若已修改则按修改后的数量）直接验货入库。关：只做标记，最后统一完成验货。';
+
+  @override
+  String siScannedIn(String name, int qty, int left) {
+    return '$name $qty个已入库（剩余 $left行）';
+  }
+
+  @override
+  String siCameraTitle(int id) {
+    return '扫描导入 #$id 入库';
+  }
+
+  @override
+  String siScanAlreadyIn(String jan) {
+    return '$jan 已入库';
+  }
 }

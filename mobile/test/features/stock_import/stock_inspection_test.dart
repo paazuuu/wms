@@ -112,6 +112,8 @@ void main() {
       _signedIn(['inspection.confirm']),
       stockImportRepositoryProvider.overrideWithValue(stock),
       masterImportRepositoryProvider.overrideWithValue(reader),
+      // A scan only ticks here (the switch off), to count first.
+      scanChecksInProvider.overrideWith((ref) => false),
     ]);
     expect(find.text('未検品 2行（全2行）'), findsOneWidget);
     // Nothing chosen, nothing to check in.
@@ -139,6 +141,45 @@ void main() {
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
     expect(find.textContaining('検品済み 498個（検品担当）'), findsOneWidget);
     expect(find.text('未検品 1行（全2行）'), findsOneWidget);
+  });
+
+  testWidgets('a scanned JAN is checked in at once with its count; the camera does the same, line after line (0177)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = _Reader(_awaiting());
+    final stock = _Stock()..reader = reader;
+    final asked = <String?>[];
+    await pumpApp(tester, const StockInspectionScreen(openImportId: 21), overrides: [
+      _signedIn(['inspection.confirm']),
+      stockImportRepositoryProvider.overrideWithValue(stock),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+      inspectionCameraProvider.overrideWithValue((context, {required validate, required onScan, required title}) async {
+        // The camera reads the second line's JAN, then an unknown one.
+        for (final code in [_jan2, '4909999000038']) {
+          final reason = validate(code);
+          asked.add(reason);
+          if (reason == null) onScan(code);
+        }
+      }),
+    ]);
+    // On by default.
+    expect(tester.widget<SwitchListTile>(find.byKey(const ValueKey('si-scan-checkin'))).value, isTrue);
+
+    // Typed or from a hand scanner: in at once, no confirmation, the file's count.
+    await tester.enterText(find.byKey(const ValueKey('si-scan')), _jan1);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect([for (final l in stock.inspected.single.$2) (l.lineNo, l.quantity)], [(2, 500)]);
+    expect(find.byKey(const ValueKey('si-scanned-in')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+
+    // The camera: the next line in, the stranger said so.
+    await tester.tap(find.byKey(const ValueKey('si-camera')));
+    await tester.pumpAndSettle();
+    expect(asked, [null, '4909999000038 はこのファイルの未検品の行にありません']);
+    expect(stock.inspected.length, 2);
+    expect(stock.inspected.last.$2.single.lineNo, 3);
   });
 
   // 0167: each line with what its product tells of it, and narrowing.

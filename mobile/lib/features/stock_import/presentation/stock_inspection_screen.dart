@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
+import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -96,6 +97,27 @@ class StockInspectionScreen extends ConsumerWidget {
   }
 }
 
+/// A scanned JAN checks its line in at once (0177): the goods in hand are
+/// received, whatever the count — on by default; off, a scan only ticks.
+final scanChecksInProvider = StateProvider<bool>((_) => true);
+
+/// Opens the camera to scan (tests stand in for it).
+final inspectionCameraProvider = Provider<Future<void> Function(BuildContext, {
+  required String? Function(String code) validate,
+  required void Function(String code) onScan,
+  required String title,
+})>((ref) => (context, {required validate, required onScan, required title}) => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BarcodeScanScreen(
+          title: title,
+          continuous: true,
+          duplicateWindow: const Duration(seconds: 2),
+          validate: validate,
+          onScan: onScan,
+        ),
+      ),
+    ));
+
 /// One file's lines to count: tick what was checked, change the count where
 /// it differs from the file, and check them in.
 class StockInspectionDetailScreen extends ConsumerStatefulWidget {
@@ -170,15 +192,75 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     return v == null || v < 0 ? null : v;
   }
 
-  /// A scanned or typed JAN ticks its line.
+  /// Lines checked in by a scan and not yet back from the server.
+  final Set<int> _scanning = {};
+
+  /// The check-ins scans asked for, one after another.
+  Future<void> _scanQueue = Future.value();
+
+  MasterImportLine? _lineFor(String raw) {
+    final jan = normalizeJan(raw) ?? raw.trim();
+    return _open.where((l) => l.janCode == jan && !_scanning.contains(l.lineNo)).firstOrNull;
+  }
+
+  /// A scanned or typed JAN: checked in at once with its count (the file's
+  /// unless changed), or only ticked when scans do not check in.
   void _onScan(String raw) {
     final jan = normalizeJan(raw) ?? raw.trim();
-    final hit = _open.where((l) => l.janCode == jan).firstOrNull;
+    final hit = _lineFor(raw);
+    final checkIn = ref.read(scanChecksInProvider) && canInspectStockFiles(ref);
     setState(() {
       _scanMiss = hit == null && jan.isNotEmpty ? jan : null;
-      if (hit != null) _ticked.add(hit.lineNo);
+      if (hit != null && !checkIn) _ticked.add(hit.lineNo);
     });
     _scan.clear();
+    if (hit != null && checkIn) _scanIn(hit);
+  }
+
+  /// One line checked in from a scan, without asking: the goods are in hand.
+  void _scanIn(MasterImportLine l) {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final qty = _count(l) ?? l.quantity;
+    _scanning.add(l.lineNo);
+    setState(() {});
+    _scanQueue = _scanQueue.then((_) async {
+      final r = await ref.read(stockImportRepositoryProvider).inspect(widget.importId, [InspectedLine(l.lineNo, qty)]);
+      if (!mounted) return;
+      switch (r) {
+        case ApiSuccess(:final data):
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(
+              key: const ValueKey('si-scanned-in'),
+              content: Text(l10n.siScannedIn(l.name ?? l.janCode, qty, data.left)),
+            ));
+          ref.invalidate(pendingInspectionProvider);
+          ref.invalidate(awaitingImportsProvider);
+          ref.invalidate(productListProvider);
+          ref.invalidate(masterImportsProvider);
+          await _load();
+        case ApiFailure(:final message):
+          setState(() => _error = humanizeApiErrorMessage(l10n, message));
+      }
+      if (mounted) setState(() => _scanning.remove(l.lineNo));
+    });
+  }
+
+  /// The camera, kept open: each JAN read is checked in (or ticked).
+  Future<void> _camera() async {
+    final l10n = AppLocalizations.of(context);
+    await ref.read(inspectionCameraProvider)(
+      context,
+      title: l10n.siCameraTitle(widget.importId),
+      validate: (code) {
+        final jan = normalizeJan(code) ?? code.trim();
+        if (_lineFor(code) != null) return null;
+        final any = (_import?.lines ?? const <MasterImportLine>[]).any((l) => l.janCode == jan);
+        return any ? l10n.siScanAlreadyIn(jan) : l10n.siScanMiss(jan);
+      },
+      onScan: _onScan,
+    );
   }
 
   Future<void> _checkIn() async {
@@ -310,12 +392,29 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                       controller: _scan,
                       decoration: InputDecoration(
                         prefixIcon: const Icon(Icons.qr_code_scanner),
-                        labelText: l10n.siScan,
+                        labelText: ref.watch(scanChecksInProvider) ? l10n.siScanIn : l10n.siScan,
                         border: const OutlineInputBorder(),
                         errorText: _scanMiss == null ? null : l10n.siScanMiss(_scanMiss!),
+                        // The phone's camera: scan the goods one after another.
+                        suffixIcon: IconButton(
+                          key: const ValueKey('si-camera'),
+                          tooltip: l10n.cameraScan,
+                          icon: const Icon(Icons.photo_camera_outlined),
+                          onPressed: _busy ? null : _camera,
+                        ),
                       ),
                       onSubmitted: _onScan,
                     ),
+                    if (may)
+                      SwitchListTile(
+                        key: const ValueKey('si-scan-checkin'),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        value: ref.watch(scanChecksInProvider),
+                        onChanged: (v) => ref.read(scanChecksInProvider.notifier).state = v,
+                        title: Text(l10n.siScanCheckIn),
+                        subtitle: Text(l10n.siScanCheckInHint, style: theme.textTheme.bodySmall),
+                      ),
                     CheckboxListTile(
                       key: const ValueKey('si-all'),
                       contentPadding: EdgeInsets.zero,

@@ -13342,4 +13342,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get srNoPermission => 'System administrators only';
+
+  @override
+  String get siScanIn => 'Scan a JAN to check its line in at once';
+
+  @override
+  String get siScanCheckIn => 'Scanning checks the line in';
+
+  @override
+  String get siScanCheckInHint =>
+      'On: the line read is checked in with its count (the file\'s unless changed). Off: it is only ticked, to check in together at the end.';
+
+  @override
+  String siScannedIn(String name, int qty, int left) {
+    return '$name: $qty checked in ($left lines left)';
+  }
+
+  @override
+  String siCameraTitle(int id) {
+    return 'Scan to check in import #$id';
+  }
+
+  @override
+  String siScanAlreadyIn(String jan) {
+    return '$jan is already checked in';
+  }
 }
