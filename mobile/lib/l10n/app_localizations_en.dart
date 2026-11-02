@@ -13434,7 +13434,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get siNoteView => 'See the note with pictures';
 
   @override
-  String get siUndo => 'Take this check-in back';
+  String get siUndo => 'Take back / open again';
 
   @override
   String get siUndoQ => 'Take this line\'s check-in back?';
@@ -13550,7 +13550,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get urIntro =>
-      'Goods that came with no order or invoice imported: register and check them here. Photograph the delivery note that came with them and every good the AI reads is ticked (no note: scan the JANs). Untick what did not come, put counts right and press 検品完了: they go into stock at once. Import the invoice that comes later through 発注 as usual; what was received here is not added again.';
+      'Register and check goods that came with no order or invoice imported. It goes as 発注 does: photograph the note (or scan the JANs) → check what the AI read beside the note → register products the library lacks → the usual 検品 screen (every line read ticked; untick what did not come and press 検品完了). The invoice imported later through 発注 is tied to what came here: no stock is added twice.';
 
   @override
   String get urSupplier => 'Supplier';
@@ -13691,4 +13691,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String sfCovered(int n) {
     return 'Tied to unplanned receipts: $n lines';
   }
+
+  @override
+  String get urStepInvoice => 'Invoice';
+
+  @override
+  String urFlowNow(String step) {
+    return 'Now: $step';
+  }
+
+  @override
+  String get urFlowAllDone => 'All done';
+
+  @override
+  String urSent(int id) {
+    return '取込 #$id sent to 検品';
+  }
+
+  @override
+  String get urTableFirst => 'Check what was read (required)';
+
+  @override
+  String get urTableAgain => 'Open the reading again';
+
+  @override
+  String urReady(int lines, int units) {
+    return '$lines lines · $units go to 検品';
+  }
+
+  @override
+  String urWillRegister(int n) {
+    return '$n not in the product library are registered from the note (maker 「メーカー未確認」 when none was read)';
+  }
+
+  @override
+  String get urNextHint =>
+      'On the 検品 screen every line is ticked: untick only what did not come.';
+
+  @override
+  String get urNewProduct => 'Not registered (will be)';
+
+  @override
+  String urNext(int n) {
+    return 'Register and go to 検品 ($n lines)';
+  }
+
+  @override
+  String urOnNote(String jan) {
+    return 'JAN $jan is on the note: its count is put right on the 検品 screen.';
+  }
+
+  @override
+  String siCloseLeft(int n) {
+    return 'Close the $n unticked lines as not delivered';
+  }
+
+  @override
+  String get siCloseLeftHint =>
+      'Off: they stay waiting. A closed line can be opened again from ⋯.';
+
+  @override
+  String get siNotDelivered => 'Not delivered (closed, no stock added)';
 }

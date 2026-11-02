@@ -509,6 +509,7 @@ class MasterImportLine extends Equatable {
     this.inspectedByName,
     this.coveredByImportId,
     this.invoicedImportId,
+    this.notDelivered = false,
   });
 
   final int lineNo;
@@ -545,6 +546,9 @@ class MasterImportLine extends Equatable {
   /// An unplanned receipt's line the invoice 取込 #… has covered (0181).
   final int? invoicedImportId;
 
+  /// A line of 予定外の入荷 closed as not delivered (0182): nothing added.
+  final bool notDelivered;
+
   factory MasterImportLine.fromJson(Map<String, dynamic> j) {
     int? n(Object? v) => (v as num?)?.toInt();
     return MasterImportLine(
@@ -566,13 +570,14 @@ class MasterImportLine extends Equatable {
       inspectedByName: j['inspected_by_name']?.toString(),
       coveredByImportId: n(j['covered_by_import_id']),
       invoicedImportId: n(j['invoiced_import_id']),
+      notDelivered: j['not_delivered'] == true,
     );
   }
 
   @override
   List<Object?> get props =>
       [lineNo, janCode, productId, name, nameEn, quantity, masterStatus, onHandBefore, onHandSet, added, onHandAfter, onHandNow,
-       inspectedAt, inspectedQuantity, coveredByImportId, invoicedImportId];
+       inspectedAt, inspectedQuantity, coveredByImportId, invoicedImportId, notDelivered];
 }
 
 /// An import: its files, where it got to, and its lines when asked for.

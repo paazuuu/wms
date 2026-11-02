@@ -834,9 +834,13 @@ class OrderTimeline extends StatelessWidget {
 /// An order's steps as one bar of numbered dots — done, under way, where it
 /// is now, and what is left — with their names unless [compact].
 class OrderFlowBar extends StatelessWidget {
-  const OrderFlowBar({super.key, required this.states, required this.current, this.compact = false});
+  const OrderFlowBar({super.key, required this.states, required this.current, this.compact = false, this.names});
 
   final List<OrderStepState> states;
+
+  /// The steps' names, for a flow of its own (予定外の入荷, 0182); the
+  /// order's eight by default.
+  final List<String>? names;
 
   /// The step it is at (-1 when all are done).
   final int current;
@@ -852,7 +856,7 @@ class OrderFlowBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final names = labels(l10n);
+    final names = this.names ?? labels(l10n);
     Color tone(int i) => switch (states[i]) {
           OrderStepState.done => scheme.primary,
           OrderStepState.partial => scheme.tertiary,

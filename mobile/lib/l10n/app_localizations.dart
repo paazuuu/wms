@@ -23346,7 +23346,7 @@ abstract class AppLocalizations {
   /// No description provided for @siUndo.
   ///
   /// In ja, this message translates to:
-  /// **'検品を取り消す'**
+  /// **'検品を取り消す・開き直す'**
   String get siUndo;
 
   /// No description provided for @siUndoQ.
@@ -23526,7 +23526,7 @@ abstract class AppLocalizations {
   /// No description provided for @urIntro.
   ///
   /// In ja, this message translates to:
-  /// **'注文や請求書の取込なしで届いた商品を、その場で登録して検品します。一緒に届いた納品書を撮ると、AIが読み取った商品すべてにチェックが付きます（納品書がなければJANをスキャン）。届いていない行はチェックを外し、数を直して「検品完了」を押すと、すぐに在庫に入ります。後から届く請求書は「発注」でいつもどおり取り込んでください。ここで入庫した商品は二重に増えません。'**
+  /// **'注文や請求書の取込なしで届いた商品を登録して検品します。「発注」と同じ流れです：納品書を撮る（なければJANをスキャン）→ AIが読み取った内容を納品書と並べて確認 → 商品ライブラリーにない商品を登録 → いつもの検品画面（読み取った商品にはすべてチェック済み。届いていないものだけ外して「検品完了」）。後から届く請求書は「発注」で取り込めば、ここで入庫した分と紐付き、在庫は二重に増えません。'**
   String get urIntro;
 
   /// No description provided for @urSupplier.
@@ -23727,6 +23727,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'予定外の入荷と紐付けた行: {n}行'**
   String sfCovered(int n);
+
+  /// No description provided for @urStepInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書'**
+  String get urStepInvoice;
+
+  /// No description provided for @urFlowNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'今: {step}'**
+  String urFlowNow(String step);
+
+  /// No description provided for @urFlowAllDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて完了'**
+  String get urFlowAllDone;
+
+  /// No description provided for @urSent.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込 #{id} を検品に回しました'**
+  String urSent(int id);
+
+  /// No description provided for @urTableFirst.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果を確認する（必須）'**
+  String get urTableFirst;
+
+  /// No description provided for @urTableAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果（表）を開き直す'**
+  String get urTableAgain;
+
+  /// No description provided for @urReady.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}行・{units}個を検品に回します'**
+  String urReady(int lines, int units);
+
+  /// No description provided for @urWillRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにない {n}件は、納品書の内容で登録します（メーカーが読めないときは「メーカー未確認」）'**
+  String urWillRegister(int n);
+
+  /// No description provided for @urNextHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'次の検品画面では、すべての行にチェックが付いています。届いていないものだけ外してください。'**
+  String get urNextHint;
+
+  /// No description provided for @urNewProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録（登録します）'**
+  String get urNewProduct;
+
+  /// No description provided for @urNext.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を登録して検品へ（{n}行）'**
+  String urNext(int n);
+
+  /// No description provided for @urOnNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {jan} は納品書にあります。数は検品画面で直せます。'**
+  String urOnNote(String jan);
+
+  /// No description provided for @siCloseLeft.
+  ///
+  /// In ja, this message translates to:
+  /// **'チェックしていない {n}行は「届いていない」として閉じる'**
+  String siCloseLeft(int n);
+
+  /// No description provided for @siCloseLeftHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'外すと検品待ちのまま残ります。閉じた行は「…」から開き直せます。'**
+  String get siCloseLeftHint;
+
+  /// No description provided for @siNotDelivered.
+  ///
+  /// In ja, this message translates to:
+  /// **'届いていない（閉じました・在庫は増やしていません）'**
+  String get siNotDelivered;
 }
 
 class _AppLocalizationsDelegate

@@ -11786,7 +11786,7 @@
     }
   },
   "siNoteView": "読み取った納品書を写真つきで見る",
-  "siUndo": "検品を取り消す",
+  "siUndo": "検品を取り消す・開き直す",
   "siUndoQ": "この行の検品を取り消しますか？",
   "siUndoBody": "「{name}」の検品を取り消します。入庫した {qty}個 を在庫から戻し（修正として記録）、この行はもう一度「検品待ち」になります。",
   "@siUndoBody": {
@@ -11907,7 +11907,7 @@
   "featUnplannedReceipt": "予定外の入荷",
   "featUnplannedReceiptDesc": "注文や請求書なしで届いた商品を、納品書を撮ってその場で登録・検品し、すぐ入庫します",
   "urTitle": "予定外の入荷",
-  "urIntro": "注文や請求書の取込なしで届いた商品を、その場で登録して検品します。一緒に届いた納品書を撮ると、AIが読み取った商品すべてにチェックが付きます（納品書がなければJANをスキャン）。届いていない行はチェックを外し、数を直して「検品完了」を押すと、すぐに在庫に入ります。後から届く請求書は「発注」でいつもどおり取り込んでください。ここで入庫した商品は二重に増えません。",
+  "urIntro": "注文や請求書の取込なしで届いた商品を登録して検品します。「発注」と同じ流れです：納品書を撮る（なければJANをスキャン）→ AIが読み取った内容を納品書と並べて確認 → 商品ライブラリーにない商品を登録 → いつもの検品画面（読み取った商品にはすべてチェック済み。届いていないものだけ外して「検品完了」）。後から届く請求書は「発注」で取り込めば、ここで入庫した分と紐付き、在庫は二重に増えません。",
   "urSupplier": "仕入先",
   "urSupplierHint": "納品書から読み取ります。手で直せます",
   "urReadNote": "納品書を撮る・選ぶ",
@@ -12078,5 +12078,72 @@
         "type": "int"
       }
     }
-  }
+  },
+  "urStepInvoice": "請求書",
+  "urFlowNow": "今: {step}",
+  "@urFlowNow": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "urFlowAllDone": "すべて完了",
+  "urSent": "取込 #{id} を検品に回しました",
+  "@urSent": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "urTableFirst": "読み取り結果を確認する（必須）",
+  "urTableAgain": "読み取り結果（表）を開き直す",
+  "urReady": "{lines}行・{units}個を検品に回します",
+  "@urReady": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      }
+    }
+  },
+  "urWillRegister": "商品ライブラリーにない {n}件は、納品書の内容で登録します（メーカーが読めないときは「メーカー未確認」）",
+  "@urWillRegister": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "urNextHint": "次の検品画面では、すべての行にチェックが付いています。届いていないものだけ外してください。",
+  "urNewProduct": "未登録（登録します）",
+  "urNext": "商品を登録して検品へ（{n}行）",
+  "@urNext": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "urOnNote": "JAN {jan} は納品書にあります。数は検品画面で直せます。",
+  "@urOnNote": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      }
+    }
+  },
+  "siCloseLeft": "チェックしていない {n}行は「届いていない」として閉じる",
+  "@siCloseLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "siCloseLeftHint": "外すと検品待ちのまま残ります。閉じた行は「…」から開き直せます。",
+  "siNotDelivered": "届いていない（閉じました・在庫は増やしていません）"
 }

@@ -76,9 +76,17 @@ abstract class StockImportRepository {
   /// The days lines were checked in, from [from] to [to] (検品履歴).
   Future<ApiResult<List<InspectionDay>>> inspectionCalendar(DateTime from, DateTime to);
 
-  /// 予定外の入荷 (0181): [lines] registered and checked in at once.
-  Future<ApiResult<StockFileResult>> unplannedReceipt(int warehouseId, List<StockFileLine> lines,
+  /// 予定外の入荷 (0182): [lines] kept for inspection as an unplanned
+  /// receipt, the note kept with it; nothing in stock before 検品完了.
+  Future<ApiResult<StockFileResult>> unplannedStage(int warehouseId, List<StockFileLine> lines,
       {String? fileName, String? fileType, String? supplier, int? documentId, DateTime? documentDate});
+
+  /// The products the library lacks, made from the note by whoever adjusts
+  /// stock (0182): the JANs made.
+  Future<ApiResult<List<String>>> registerProducts(List<StockFileLine> lines);
+
+  /// Lines of an unplanned receipt that did not come, closed (0182).
+  Future<ApiResult<int>> closeLines(int importId, List<int> lineNos);
 
   /// What unplanned receipts brought of [jans] and no invoice has covered.
   Future<ApiResult<List<UnplannedLine>>> unplannedOpenLines(List<String> jans, {int? warehouseId});
@@ -394,10 +402,36 @@ class StockImportRepositoryImpl implements StockImportRepository {
   }
 
   @override
-  Future<ApiResult<StockFileResult>> unplannedReceipt(int warehouseId, List<StockFileLine> lines,
+  Future<ApiResult<List<String>>> registerProducts(List<StockFileLine> lines) async {
+    try {
+      final r = await _rest.post('/rpc/unplanned_register_products', data: {
+        'p_lines': [
+          for (final l in lines) {'jan_code': l.janCode, 'name': l.name, 'maker': l.maker, 'code': l.code},
+        ],
+      });
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess([for (final j in ((d as Map)['jans'] as List? ?? const [])) '$j']);
+    } on DioException catch (e) {
+      return mapDioError<List<String>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> closeLines(int importId, List<int> lineNos) async {
+    try {
+      final r = await _rest.post('/rpc/unplanned_close_lines', data: {'p_import_id': importId, 'p_line_nos': lineNos});
+      final d = r.data is List && (r.data as List).isNotEmpty ? (r.data as List).first : r.data;
+      return ApiSuccess(((d as Map)['closed'] as num?)?.toInt() ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<StockFileResult>> unplannedStage(int warehouseId, List<StockFileLine> lines,
       {String? fileName, String? fileType, String? supplier, int? documentId, DateTime? documentDate}) async {
     try {
-      final r = await _rest.post('/rpc/unplanned_receipt', data: {
+      final r = await _rest.post('/rpc/unplanned_stage', data: {
         'p_warehouse_id': warehouseId,
         'p_lines': [for (final l in lines) l.toJson()],
         'p_file_name': fileName,

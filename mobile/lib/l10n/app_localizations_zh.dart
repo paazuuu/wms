@@ -13087,7 +13087,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get siNoteView => '带照片查看读取的送货单';
 
   @override
-  String get siUndo => '撤销验货';
+  String get siUndo => '撤销验货・重新打开';
 
   @override
   String get siUndoQ => '要撤销此行的验货吗？';
@@ -13200,7 +13200,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get urIntro =>
-      '无需导入订单或发票，当场登记并验货送到的商品。拍摄随货送货单后，AI读取的商品全部勾选（没有送货单时扫描JAN）。取消未到的行、修正数量后点“验货完成”即刻入库。之后收到的发票请照常在“采购”中导入，这里入库的商品不会重复增加。';
+      '登记并验货无订单、无发票导入而送到的商品。流程与“采购”相同：拍摄送货单（没有则扫描JAN）→ 将AI读取的内容与送货单对照确认 → 登记商品库中没有的商品 → 常规验货画面（读取的商品全部已勾选，只取消未到的，点“验货完成”）。之后在“采购”导入的发票会与这里入库的部分关联，库存不会重复增加。';
 
   @override
   String get urSupplier => '供应商';
@@ -13331,4 +13331,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String sfCovered(int n) {
     return '已与计划外入货关联: $n行';
   }
+
+  @override
+  String get urStepInvoice => '发票';
+
+  @override
+  String urFlowNow(String step) {
+    return '当前: $step';
+  }
+
+  @override
+  String get urFlowAllDone => '全部完成';
+
+  @override
+  String urSent(int id) {
+    return '已将导入 #$id 转入验货';
+  }
+
+  @override
+  String get urTableFirst => '确认读取结果（必须）';
+
+  @override
+  String get urTableAgain => '重新打开读取结果（表）';
+
+  @override
+  String urReady(int lines, int units) {
+    return '将 $lines行・$units个转入验货';
+  }
+
+  @override
+  String urWillRegister(int n) {
+    return '商品库中没有的 $n件将按送货单内容登记（读不到制造商时为“メーカー未確認”）';
+  }
+
+  @override
+  String get urNextHint => '在接下来的验货画面中所有行都已勾选，只需取消未到的。';
+
+  @override
+  String get urNewProduct => '未登记（将登记）';
+
+  @override
+  String urNext(int n) {
+    return '登记商品并进入验货（$n行）';
+  }
+
+  @override
+  String urOnNote(String jan) {
+    return 'JAN $jan 在送货单上，数量可在验货画面修改。';
+  }
+
+  @override
+  String siCloseLeft(int n) {
+    return '将未勾选的 $n行作为“未到货”关闭';
+  }
+
+  @override
+  String get siCloseLeftHint => '不勾选则保持待验货。已关闭的行可从“…”重新打开。';
+
+  @override
+  String get siNotDelivered => '未到货（已关闭，未增加库存）';
 }

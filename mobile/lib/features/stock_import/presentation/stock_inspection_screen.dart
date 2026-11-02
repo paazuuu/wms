@@ -29,6 +29,7 @@ import '../../product_library/presentation/product_thumb.dart';
 import '../../shelf_notes/data/shelf_notes_repository.dart';
 import '../../shelf_notes/presentation/shelf_notes_screen.dart';
 import '../../qc/domain/inspection.dart' show normalizeJan;
+import '../../unplanned_receipt/unplanned_flow.dart';
 import '../data/stock_import_repository.dart';
 import '../domain/stock_ledger.dart';
 
@@ -128,9 +129,13 @@ final inspectionCameraProvider = Provider<
 /// One file's lines to count: tick what was checked, change the count where
 /// it differs from the file, and check them in.
 class StockInspectionDetailScreen extends ConsumerStatefulWidget {
-  const StockInspectionDetailScreen({super.key, required this.importId, this.day});
+  const StockInspectionDetailScreen({super.key, required this.importId, this.day, this.tickAll = false});
 
   final int importId;
+
+  /// Opened from 予定外の入荷 (0182): every line read is ticked at first —
+  /// what is not needed is unticked by hand.
+  final bool tickAll;
 
   /// Opened from 検品履歴カレンダー (0179): only the lines checked in that day
   /// (Japan time) are shown at first.
@@ -184,11 +189,13 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     setState(() {
       switch (r) {
         case ApiSuccess(:final data):
+          final first = _import == null;
           _import = data;
           _error = null;
           for (final l in data.lines) {
             _counts.putIfAbsent(l.lineNo, () => TextEditingController(text: '${l.quantity}'));
           }
+          if (first && widget.tickAll) _ticked.addAll([for (final l in data.lines) if (!l.inspected) l.lineNo]);
           _ticked.removeWhere((n) => data.lines.any((l) => l.lineNo == n && l.inspected));
         case ApiFailure(:final message):
           _error = humanizeApiErrorMessage(l10n, message);
@@ -396,12 +403,32 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     }
     final units = lines.fold<int>(0, (s, l) => s + _count(l)!);
     final diff = lines.fold<int>(0, (s, l) => s + _count(l)! - l.quantity);
+    // 予定外の入荷 (0182): what is left unticked did not come — closed, so
+    // the receipt does not wait for it (on by default; it can stay open).
+    final left = _import?.unplanned ?? false
+        ? [for (final l in _open) if (!_ticked.contains(l.lineNo)) l.lineNo]
+        : const <int>[];
+    var close = true;
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
         title: Text(l10n.siConfirmQ),
-        content: Text(l10n.siConfirmBody(lines.length, units, diff > 0 ? '+$diff' : '$diff'),
-            key: const ValueKey('si-confirm-body')),
+        content: StatefulBuilder(
+          builder: (c, set) => Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l10n.siConfirmBody(lines.length, units, diff > 0 ? '+$diff' : '$diff'),
+                key: const ValueKey('si-confirm-body')),
+            if (left.isNotEmpty)
+              CheckboxListTile(
+                key: const ValueKey('si-close-left'),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: close,
+                onChanged: (v) => set(() => close = v ?? false),
+                title: Text(l10n.siCloseLeft(left.length)),
+                subtitle: Text(l10n.siCloseLeftHint),
+              ),
+          ]),
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
           FilledButton(
@@ -422,11 +449,17 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
+        var stillLeft = data.left;
+        if (left.isNotEmpty && close) {
+          final c = await ref.read(stockImportRepositoryProvider).closeLines(widget.importId, left);
+          if (c case ApiSuccess(data: final n)) stillLeft -= n;
+          if (!mounted) return;
+        }
         ref.invalidate(pendingInspectionProvider);
         ref.invalidate(awaitingImportsProvider);
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.siDone(data.lines, data.left))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.siDone(data.lines, stillLeft))));
         _ticked.clear();
         await _load();
       case ApiFailure(:final message):
@@ -500,6 +533,17 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 120),
                 children: [
                   Text(m.originalName ?? '', style: theme.textTheme.titleMedium),
+                  // 予定外の入荷 (0182): where it is on its way.
+                  if (m.unplanned) ...[
+                    UnplannedFlow(
+                      states: unplannedStates(
+                        checkedIn: m.status == MasterImportStatus.stockDone,
+                        someIn: m.lines.any((l) => l.inspected),
+                        invoiced: m.lines.any((l) => l.invoicedImportId != null),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                  ],
                   // 予定外の入荷 (0181): who brought it.
                   if (m.unplanned)
                     Text([l10n.urLabel, if (m.supplierName case final s?) s].join(' · '),
@@ -967,6 +1011,7 @@ class _InspectLine extends ConsumerWidget {
                 child: Text(
               switch (line) {
                 MasterImportLine(coveredByImportId: final id?) => l10n.siCovered(id),
+                MasterImportLine(notDelivered: true) => l10n.siNotDelivered,
                 MasterImportLine(invoicedImportId: final id?) =>
                   '${l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? '')}\n${l10n.siInvoiced(id)}',
                 _ => l10n.siInspected(line.inspectedQuantity ?? 0, line.inspectedByName ?? ''),

@@ -167,9 +167,15 @@ class _FakeStock implements StockImportRepository {
   final covered = <(int, List<CoverPick>)>[];
 
   @override
-  Future<ApiResult<StockFileResult>> unplannedReceipt(int warehouseId, List<StockFileLine> lines,
+  Future<ApiResult<StockFileResult>> unplannedStage(int warehouseId, List<StockFileLine> lines,
           {String? fileName, String? fileType, String? supplier, int? documentId, DateTime? documentDate}) async =>
       throw UnimplementedError();
+
+  @override
+  Future<ApiResult<List<String>>> registerProducts(List<StockFileLine> lines) async => throw UnimplementedError();
+
+  @override
+  Future<ApiResult<int>> closeLines(int importId, List<int> lineNos) async => throw UnimplementedError();
 
   @override
   Future<ApiResult<List<UnplannedLine>>> unplannedOpenLines(List<String> jans, {int? warehouseId}) async =>

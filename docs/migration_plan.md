@@ -8382,6 +8382,27 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - 検品履歴カレンダー leaves out lines checked in as already received.
 - 納品照合 (delivery plans) is out of the menu; its address stays.
 
+## 0182: 予定外の入荷 goes the way 発注 goes
+
+- The screen shows where the receipt is, as 発注 does (今: … and the steps
+  アップロード → 内容チェック → 商品登録 → 検品・在庫 → 請求書).
+- The note read by the AI opens 読み取り結果の確認 first (beside the note,
+  to put right); nothing goes on before it is checked. Goods scanned without
+  a note need no table.
+- unplanned_register_products: the products the library lacks are made from
+  the note by whoever adjusts stock (inventory.adjust), not only product
+  managers. A maker not read is 「メーカー未確認」, to put right later.
+- unplanned_stage keeps the lines for inspection as 予定外の入荷 (the
+  supplier, date and note with it, the reading noted as for 発注) and the
+  ordinary 検品 screen opens with every line ticked (tickAll).
+- 検品完了 on an unplanned receipt offers to close the unticked lines as not
+  delivered (unplanned_close_lines: nothing added, not_delivered); off, they
+  keep waiting. 取り消し (⋯) opens a closed line again. 検品履歴カレンダー
+  leaves closed lines out.
+- The 検品 screen of an unplanned receipt shows its steps too.
+- unplanned_receipt (0181, registered and checked in at once) is no longer
+  used by the app.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

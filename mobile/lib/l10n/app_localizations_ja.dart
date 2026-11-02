@@ -13164,7 +13164,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get siNoteView => '読み取った納品書を写真つきで見る';
 
   @override
-  String get siUndo => '検品を取り消す';
+  String get siUndo => '検品を取り消す・開き直す';
 
   @override
   String get siUndoQ => 'この行の検品を取り消しますか？';
@@ -13280,7 +13280,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get urIntro =>
-      '注文や請求書の取込なしで届いた商品を、その場で登録して検品します。一緒に届いた納品書を撮ると、AIが読み取った商品すべてにチェックが付きます（納品書がなければJANをスキャン）。届いていない行はチェックを外し、数を直して「検品完了」を押すと、すぐに在庫に入ります。後から届く請求書は「発注」でいつもどおり取り込んでください。ここで入庫した商品は二重に増えません。';
+      '注文や請求書の取込なしで届いた商品を登録して検品します。「発注」と同じ流れです：納品書を撮る（なければJANをスキャン）→ AIが読み取った内容を納品書と並べて確認 → 商品ライブラリーにない商品を登録 → いつもの検品画面（読み取った商品にはすべてチェック済み。届いていないものだけ外して「検品完了」）。後から届く請求書は「発注」で取り込めば、ここで入庫した分と紐付き、在庫は二重に増えません。';
 
   @override
   String get urSupplier => '仕入先';
@@ -13415,4 +13415,63 @@ class AppLocalizationsJa extends AppLocalizations {
   String sfCovered(int n) {
     return '予定外の入荷と紐付けた行: $n行';
   }
+
+  @override
+  String get urStepInvoice => '請求書';
+
+  @override
+  String urFlowNow(String step) {
+    return '今: $step';
+  }
+
+  @override
+  String get urFlowAllDone => 'すべて完了';
+
+  @override
+  String urSent(int id) {
+    return '取込 #$id を検品に回しました';
+  }
+
+  @override
+  String get urTableFirst => '読み取り結果を確認する（必須）';
+
+  @override
+  String get urTableAgain => '読み取り結果（表）を開き直す';
+
+  @override
+  String urReady(int lines, int units) {
+    return '$lines行・$units個を検品に回します';
+  }
+
+  @override
+  String urWillRegister(int n) {
+    return '商品ライブラリーにない $n件は、納品書の内容で登録します（メーカーが読めないときは「メーカー未確認」）';
+  }
+
+  @override
+  String get urNextHint => '次の検品画面では、すべての行にチェックが付いています。届いていないものだけ外してください。';
+
+  @override
+  String get urNewProduct => '未登録（登録します）';
+
+  @override
+  String urNext(int n) {
+    return '商品を登録して検品へ（$n行）';
+  }
+
+  @override
+  String urOnNote(String jan) {
+    return 'JAN $jan は納品書にあります。数は検品画面で直せます。';
+  }
+
+  @override
+  String siCloseLeft(int n) {
+    return 'チェックしていない $n行は「届いていない」として閉じる';
+  }
+
+  @override
+  String get siCloseLeftHint => '外すと検品待ちのまま残ります。閉じた行は「…」から開き直せます。';
+
+  @override
+  String get siNotDelivered => '届いていない（閉じました・在庫は増やしていません）';
 }
