@@ -344,24 +344,18 @@ const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 
 type PhotoResult = { product_id: number; ok: boolean; reason?: string; page_url?: string | null; image_url?: string };
 
-/** The picture of one product: the page its name was found on (or [pageUrl]),
- * that page's own picture (og:image …), kept in product-images and added as
- * the person who asked (add_product_web_image: product.manage). */
-// deno-lint-ignore no-explicit-any
-async function photoFor(admin: Admin, caller: any, p: { id: number; jan_code: string }, pageUrl: string | null): Promise<PhotoResult> {
-  let page = pageUrl;
-  if (!page) {
-    const { data } = await admin.from("jan_name_lookups").select("source_url").eq("jan", p.jan_code).maybeSingle();
-    page = (data?.source_url as string | null) ?? null;
-  }
+type Fetched = { body: Uint8Array; ctype: string; page: string; image: string } | { reason: string; page: string | null };
+
+/** The picture a page shows of its product (og:image …), fetched. */
+async function fetchPagePhoto(page: string | null): Promise<Fetched> {
   const url = page ? safeReferenceUrl(page) : null;
-  if (!url) return { product_id: p.id, ok: false, reason: "no_page", page_url: page };
+  if (!url) return { reason: "no_page", page };
   let html: string;
   try {
     const res = await fetch(url, { headers: { "User-Agent": BROWSER_UA, "Accept": "text/html" }, signal: AbortSignal.timeout(15000) });
-    if (!res.ok) return { product_id: p.id, ok: false, reason: `page_http_${res.status}`, page_url: url.href };
+    if (!res.ok) return { reason: `page_http_${res.status}`, page: url.href };
     const bytes = new Uint8Array(await res.arrayBuffer());
-    if (bytes.length > PHOTO_PAGE_MAX) return { product_id: p.id, ok: false, reason: "page_too_large", page_url: url.href };
+    if (bytes.length > PHOTO_PAGE_MAX) return { reason: "page_too_large", page: url.href };
     const type = res.headers.get("content-type") ?? "";
     const head = new TextDecoder("latin1").decode(bytes.slice(0, 4096));
     try {
@@ -370,19 +364,19 @@ async function photoFor(admin: Admin, caller: any, p: { id: number; jan_code: st
       html = new TextDecoder().decode(bytes);
     }
   } catch (e) {
-    return { product_id: p.id, ok: false, reason: `page_unreachable: ${e}`.slice(0, 200), page_url: url.href };
+    return { reason: `page_unreachable: ${e}`.slice(0, 200), page: url.href };
   }
   const img = pageImageUrl(html, url);
   const safe = img ? safeReferenceUrl(img.href) : null;
-  if (!safe) return { product_id: p.id, ok: false, reason: "no_image", page_url: url.href };
+  if (!safe) return { reason: "no_image", page: url.href };
   let body: Uint8Array, ctype: string;
   try {
     const res = await fetch(safe, { headers: { "User-Agent": BROWSER_UA, "Referer": url.href }, signal: AbortSignal.timeout(15000) });
-    if (!res.ok) return { product_id: p.id, ok: false, reason: `image_http_${res.status}`, page_url: url.href };
+    if (!res.ok) return { reason: `image_http_${res.status}`, page: url.href };
     ctype = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
     body = new Uint8Array(await res.arrayBuffer());
   } catch (e) {
-    return { product_id: p.id, ok: false, reason: `image_unreachable: ${e}`.slice(0, 200), page_url: url.href };
+    return { reason: `image_unreachable: ${e}`.slice(0, 200), page: url.href };
   }
   if (!PHOTO_TYPES[ctype]) {
     // Some shops say octet-stream: the bytes tell.
@@ -390,19 +384,102 @@ async function photoFor(admin: Admin, caller: any, p: { id: number; jan_code: st
       : body[0] === 0x89 && body[1] === 0x50 ? "image/png"
       : body[8] === 0x57 && body[9] === 0x45 ? "image/webp" : ctype;
   }
-  if (!PHOTO_TYPES[ctype]) return { product_id: p.id, ok: false, reason: "not_an_image", page_url: url.href };
-  if (body.length < 1000 || body.length > PHOTO_MAX) return { product_id: p.id, ok: false, reason: "image_size", page_url: url.href };
-  const path = `${p.id}/${Date.now()}_web.${PHOTO_TYPES[ctype]}`;
+  if (!PHOTO_TYPES[ctype]) return { reason: "not_an_image", page: url.href };
+  if (body.length < 1000 || body.length > PHOTO_MAX) return { reason: "image_size", page: url.href };
+  return { body, ctype, page: url.href, image: safe.href };
+}
+
+/** The page a JAN's name was found on (0164), if it was looked up. */
+async function pageOf(admin: Admin, jan: string): Promise<string | null> {
+  const { data } = await admin.from("jan_name_lookups").select("source_url").eq("jan", jan).maybeSingle();
+  return (data?.source_url as string | null) ?? null;
+}
+
+type JanPhoto = { jan: string; found: boolean; storage_path: string | null; content_type: string | null; page_url: string | null };
+
+/** A JAN's picture as kept (0179): looked up on the web only the first time
+ * — found or not — and kept in product-images under jan/. [look] false: only
+ * what is kept. A JAN whose name was never looked up has no page yet and is
+ * not noted, so it is tried again once it has one. */
+async function janPhoto(admin: Admin, jan: string, look: boolean, pageUrl: string | null = null): Promise<JanPhoto | null> {
+  const { data: kept } = await admin.from("jan_photos").select("*").eq("jan", jan).maybeSingle();
+  if (kept && !pageUrl) return kept as JanPhoto;
+  if (!look) return null;
+  const got = await fetchPagePhoto(pageUrl ?? await pageOf(admin, jan));
+  if ("reason" in got) {
+    if (got.reason === "no_page") return null;
+    const row = { jan, found: false, reason: got.reason, page_url: got.page, storage_path: null, content_type: null, looked_at: new Date().toISOString() };
+    await admin.from("jan_photos").upsert(row);
+    return row as JanPhoto;
+  }
+  const path = `jan/${jan}.${PHOTO_TYPES[got.ctype]}`;
+  const up = await admin.storage.from("product-images").upload(path, got.body, { contentType: got.ctype, upsert: true });
+  if (up.error) return null;
+  const row = {
+    jan, found: true, storage_path: path, content_type: got.ctype, byte_size: got.body.length,
+    page_url: got.page, image_url: got.image, reason: null, looked_at: new Date().toISOString(),
+  };
+  await admin.from("jan_photos").upsert(row);
+  return row as JanPhoto;
+}
+
+/** The picture of one product: the JAN's kept picture first (0179), else
+ * the page its name was found on (or [pageUrl]) and that page's own
+ * picture (og:image …) — kept for the JAN too — added in product-images as
+ * the person who asked (add_product_web_image: product.manage). */
+// deno-lint-ignore no-explicit-any
+async function photoFor(admin: Admin, caller: any, p: { id: number; jan_code: string }, pageUrl: string | null): Promise<PhotoResult> {
+  const kept = await janPhoto(admin, p.jan_code, true, pageUrl);
+  if (!kept || !kept.found || !kept.storage_path) {
+    return { product_id: p.id, ok: false, reason: kept ? "no_image" : "no_page", page_url: kept?.page_url ?? pageUrl };
+  }
+  const { data: blob, error: dlErr } = await admin.storage.from("product-images").download(kept.storage_path);
+  if (dlErr || !blob) return { product_id: p.id, ok: false, reason: "kept_photo_missing", page_url: kept.page_url };
+  const body = new Uint8Array(await blob.arrayBuffer());
+  const ctype = kept.content_type ?? "image/jpeg";
+  const path = `${p.id}/${Date.now()}_web.${PHOTO_TYPES[ctype] ?? "jpg"}`;
   const up = await admin.storage.from("product-images").upload(path, body, { contentType: ctype, upsert: false });
-  if (up.error) return { product_id: p.id, ok: false, reason: `upload: ${up.error.message}`, page_url: url.href };
+  if (up.error) return { product_id: p.id, ok: false, reason: `upload: ${up.error.message}`, page_url: kept.page_url };
   const { error } = await caller.rpc("add_product_web_image", {
-    p_product_id: p.id, p_storage_path: path, p_content_type: ctype, p_byte_size: body.length, p_source_url: url.href,
+    p_product_id: p.id, p_storage_path: path, p_content_type: ctype, p_byte_size: body.length,
+    p_source_url: kept.page_url,
   });
   if (error) {
     await admin.storage.from("product-images").remove([path]);
-    return { product_id: p.id, ok: false, reason: error.message, page_url: url.href };
+    return { product_id: p.id, ok: false, reason: error.message, page_url: kept.page_url };
   }
-  return { product_id: p.id, ok: true, page_url: url.href, image_url: safe.href };
+  return { product_id: p.id, ok: true, page_url: kept.page_url };
+}
+
+/** POST /photos/jans {jans, look?}: each JAN's kept picture, as a link to
+ * show for an hour — looked up on the web the first time when [look]. For
+ * a delivery note's goods, in 商品ライブラリー or not (0179). */
+// deno-lint-ignore no-explicit-any
+async function janPhotosRoute(admin: Admin, body: any): Promise<[number, unknown]> {
+  const jans = [...new Set((Array.isArray(body?.jans) ? body.jans : []).map(String)
+    .filter((j: string) => /^[0-9]{8,14}$/.test(j)))].slice(0, 60) as string[];
+  if (jans.length === 0) return [400, { message: "jans are required" }];
+  const look = body?.look === true;
+  // What is kept is read in one go; at most ten new lookups a call (the
+  // rest come back next time).
+  const { data: keptRows } = await admin.from("jan_photos").select("*").in("jan", jans);
+  const kept = new Map((keptRows ?? []).map((r) => [r.jan as string, r as JanPhoto]));
+  let looked = 0;
+  const results: { jan: string; found: boolean; url: string | null; page_url: string | null }[] = [];
+  for (const jan of jans) {
+    let photo = kept.get(jan) ?? null;
+    if (!photo && look && looked < 10) {
+      looked++;
+      photo = await janPhoto(admin, jan, true);
+    }
+    let url: string | null = null;
+    if (photo?.found && photo.storage_path) {
+      const { data } = await admin.storage.from("product-images").createSignedUrl(photo.storage_path, 3600);
+      url = data?.signedUrl ?? null;
+    }
+    results.push({ jan, found: !!photo?.found, url, page_url: photo?.page_url ?? null });
+  }
+  return [200, { data: { results } }];
 }
 
 /** POST /photos {product_ids? | jans?, page_url?, again?}: up to ten
@@ -767,6 +844,14 @@ Deno.serve(async (req) => {
         const [status, out] = await referenceRoute(admin, rest, body, userId);
         return json(out, status);
       }
+    }
+
+    // A JAN's kept picture, looked up once (0179): anyone signed in.
+    if (req.method === "POST" && rest[0] === "photos" && rest.length === 2 && rest[1] === "jans") {
+      if (byScheduler || !userId) return json({ message: "sign in required" }, 401);
+      const body = await req.json().catch(() => ({}));
+      const [status, out] = await janPhotosRoute(admin, body);
+      return json(out, status);
     }
 
     // A product's picture from the web (0166): as the person who asked.

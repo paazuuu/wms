@@ -9,6 +9,8 @@
 // transfer proofs, and the products' pictures when the products went. A
 // file that cannot be removed is said, not hidden — the data is already
 // gone either way.
+// The pictures found on the web per JAN (jan_photos, product-images/jan/,
+// 0179) are what was looked up: they stay unless lookups is chosen.
 import { adminClient, callerClient, clientPermitted, notPermittedMessage } from "../_shared/require_permission.ts";
 
 const cors = {
@@ -41,9 +43,14 @@ export async function listAll(admin: any, bucket: string, prefix = ""): Promise<
   return out;
 }
 
-// deno-lint-ignore no-explicit-any
-async function emptyBucket(admin: any, bucket: string): Promise<{ removed: number; failed: number }> {
-  const paths = await listAll(admin, bucket);
+async function emptyBucket(
+  // deno-lint-ignore no-explicit-any
+  admin: any,
+  bucket: string,
+  prefix = "",
+  keep: (path: string) => boolean = () => false,
+): Promise<{ removed: number; failed: number }> {
+  const paths = (await listAll(admin, bucket, prefix)).filter((p) => !keep(p));
   let removed = 0, failed = 0;
   for (let i = 0; i < paths.length; i += 100) {
     const chunk = paths.slice(i, i + 100);
@@ -72,14 +79,20 @@ Deno.serve(async (req) => {
   if (error) return json({ message: error.message }, 400);
 
   const admin = adminClient(supabaseUrl);
-  const buckets = ["import-documents", "master-import-files", "payment-proofs", ...(options.products ? ["product-images"] : [])];
   const files: Record<string, { removed: number; failed: number } | { error: string }> = {};
-  for (const bucket of buckets) {
+  const empty = async (name: string, bucket: string, prefix = "", keep?: (p: string) => boolean) => {
     try {
-      files[bucket] = await emptyBucket(admin, bucket);
+      files[name] = await emptyBucket(admin, bucket, prefix, keep);
     } catch (e) {
-      files[bucket] = { error: String((e as Error)?.message ?? e) };
+      files[name] = { error: String((e as Error)?.message ?? e) };
     }
+  };
+  for (const bucket of ["import-documents", "master-import-files", "payment-proofs"]) await empty(bucket, bucket);
+  if (options.products) await empty("product-images", "product-images", "", (p) => p.startsWith("jan/"));
+  if (options.lookups) {
+    await empty("jan-photos", "product-images", "jan");
+    const { error: e } = await admin.from("jan_photos").delete().neq("jan", "");
+    if (e) files["jan-photos-rows"] = { error: e.message };
   }
   return json({ data: { ...(data as Record<string, unknown>), files } });
 });
