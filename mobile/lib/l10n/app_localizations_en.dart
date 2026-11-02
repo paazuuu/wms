@@ -13752,4 +13752,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get siNotDelivered => 'Not delivered (closed, no stock added)';
+
+  @override
+  String get urColCount => 'Count';
 }

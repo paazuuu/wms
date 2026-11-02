@@ -4312,5 +4312,6 @@
   "urOnNote": "JAN {jan} 在送货单上，数量可在验货画面修改。",
   "siCloseLeft": "将未勾选的 {n}行作为“未到货”关闭",
   "siCloseLeftHint": "不勾选则保持待验货。已关闭的行可从“…”重新打开。",
-  "siNotDelivered": "未到货（已关闭，未增加库存）"
+  "siNotDelivered": "未到货（已关闭，未增加库存）",
+  "urColCount": "数量"
 }

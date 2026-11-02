@@ -13390,4 +13390,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get siNotDelivered => '未到货（已关闭，未增加库存）';
+
+  @override
+  String get urColCount => '数量';
 }

@@ -8400,6 +8400,8 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   keep waiting. 取り消し (⋯) opens a closed line again. 検品履歴カレンダー
   leaves closed lines out.
 - The 検品 screen of an unplanned receipt shows its steps too.
+- The lines going to 検品 are listed field by field across (写真・商品名・
+  JAN・メーカー・品番・数量・備考), as 発注 lists what goes in.
 - unplanned_receipt (0181, registered and checked in at once) is no longer
   used by the app.
 

@@ -23817,6 +23817,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'届いていない（閉じました・在庫は増やしていません）'**
   String get siNotDelivered;
+
+  /// No description provided for @urColCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get urColCount;
 }
 
 class _AppLocalizationsDelegate

@@ -13474,4 +13474,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get siNotDelivered => '届いていない（閉じました・在庫は増やしていません）';
+
+  @override
+  String get urColCount => '数量';
 }

@@ -13,6 +13,8 @@ import '../delivery_note/delivery_note.dart' show askCameraOrFile, deliveryNoteP
 import '../jan_catalog/data/jan_catalog_repository.dart';
 import '../master_import/data/master_import_repository.dart';
 import '../product/application/product_providers.dart';
+import '../product/domain/product.dart';
+import '../product_library/presentation/product_thumb.dart';
 import '../product/data/spec_lookup.dart';
 import '../product/data/web_photos.dart';
 import '../product_library/application/product_library_providers.dart';
@@ -398,18 +400,8 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
               Text(l10n.urWillRegister(unknown), key: const ValueKey('ur-will-register'), style: muted),
             Text(l10n.urNextHint, style: muted),
             const SizedBox(height: AppSpacing.xs),
-            for (final l in lines)
-              ListTile(
-                key: ValueKey('ur-line-${l.lineNo}'),
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text(_known[l.janCode] ?? l.name ?? l.code ?? l.janCode, maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: Text([
-                  'JAN ${l.janCode}',
-                  if (!_known.containsKey(l.janCode)) l10n.urNewProduct,
-                ].join(' · ')),
-                trailing: Text('${l.quantity}', style: theme.textTheme.titleMedium),
-              ),
+            // Field by field across, as 発注 lists what goes in.
+            _UnplannedTable(lines: lines, known: _known),
           ],
         ],
       ),
@@ -428,6 +420,114 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
                 ),
               ),
             ),
+    );
+  }
+}
+
+/// The lines going to 検品, one row each, field by field across (0182): the
+/// picture, 商品名, JAN, maker, 品番, how many, and whether the product is
+/// registered first — as 発注 lists its own.
+class _UnplannedTable extends ConsumerStatefulWidget {
+  const _UnplannedTable({required this.lines, required this.known});
+
+  final List<StockFileLine> lines;
+  final Map<String, String> known;
+
+  @override
+  ConsumerState<_UnplannedTable> createState() => _UnplannedTableState();
+}
+
+class _UnplannedTableState extends ConsumerState<_UnplannedTable> {
+  final _across = ScrollController();
+
+  static const _widths = [64.0, 280.0, 140.0, 130.0, 160.0, 90.0, 200.0];
+
+  @override
+  void dispose() {
+    _across.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final head = theme.textTheme.labelMedium;
+    final products = {for (final p in ref.watch(productListProvider).valueOrNull ?? const <Product>[]) p.janCode: p};
+    Widget cell(int i, Widget child, {bool end = false}) => Container(
+          width: _widths[i],
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+          child: child,
+        );
+    final headers = [
+      l10n.siColPhoto,
+      l10n.sfColProduct,
+      l10n.ntFieldJan,
+      l10n.ntFieldMaker,
+      l10n.ntFieldCode,
+      l10n.urColCount,
+      l10n.sfColNote,
+    ];
+    return Scrollbar(
+      controller: _across,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        key: const ValueKey('ur-table-going'),
+        controller: _across,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            color: scheme.surfaceContainerHighest,
+            child: Row(children: [
+              for (final (i, h) in headers.indexed) cell(i, Text(h, style: head), end: i == 5),
+            ]),
+          ),
+          for (final l in widget.lines)
+            () {
+              final p = products[l.janCode];
+              final registered = widget.known.containsKey(l.janCode);
+              final name = p?.name ?? widget.known[l.janCode] ?? l.name ?? l.code ?? '';
+              return Container(
+                key: ValueKey('ur-line-${l.lineNo}'),
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: scheme.outlineVariant))),
+                child: Row(children: [
+                  cell(
+                    0,
+                    p != null
+                        ? ProductThumb(productId: p.id, janCode: p.janCode, productName: p.name, size: 48)
+                        : Container(
+                            width: 48,
+                            height: 48,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(6)),
+                            child: Icon(Icons.image_not_supported_outlined, size: 20, color: scheme.onSurfaceVariant),
+                          ),
+                  ),
+                  cell(1, Text(name, key: ValueKey('ur-name-${l.lineNo}'), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                  cell(2, Text(l.janCode, style: theme.textTheme.bodySmall)),
+                  cell(3, Text(p?.maker ?? l.maker ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  cell(4, Text(p?.sku ?? l.code ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  cell(
+                    5,
+                    Text('${l.quantity}',
+                        key: ValueKey('ur-qty-${l.lineNo}'),
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                    end: true,
+                  ),
+                  cell(
+                    6,
+                    Text(registered ? '' : l10n.urNewProduct,
+                        style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary), maxLines: 2),
+                  ),
+                ]),
+              );
+            }(),
+        ]),
+      ),
     );
   }
 }

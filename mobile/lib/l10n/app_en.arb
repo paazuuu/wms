@@ -4312,5 +4312,6 @@
   "urOnNote": "JAN {jan} is on the note: its count is put right on the 検品 screen.",
   "siCloseLeft": "Close the {n} unticked lines as not delivered",
   "siCloseLeftHint": "Off: they stay waiting. A closed line can be opened again from ⋯.",
-  "siNotDelivered": "Not delivered (closed, no stock added)"
+  "siNotDelivered": "Not delivered (closed, no stock added)",
+  "urColCount": "Count"
 }

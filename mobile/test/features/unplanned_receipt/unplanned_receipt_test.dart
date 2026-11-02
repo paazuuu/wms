@@ -169,6 +169,10 @@ void main() {
     expect(find.text('今: 商品登録'), findsOneWidget);
     expect(tester.widget<TextField>(find.byKey(const ValueKey('ur-supplier'))).controller!.text, 'テスト商事株式会社');
     expect(find.text('3行・35個を検品に回します'), findsOneWidget);
+    // Field by field across, as 発注 lists them.
+    expect(find.byKey(const ValueKey('ur-table-going')), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('ur-qty-2'))).data, '10');
+    expect(find.text('未登録（登録します）'), findsOneWidget);
     // An ordinary stock role registers the one the library lacks.
     expect(find.byKey(const ValueKey('ur-will-register')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('ur-next')));
