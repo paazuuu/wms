@@ -12522,5 +12522,326 @@
   "adjTapHint": "商品を押すと、その商品の在庫を調整できます",
   "adjOtherJan": "JANで入力",
   "adjHistoryTapHint": "履歴を押すと、同じ商品をもう一度調整できます",
-  "adjClearFilters": "絞り込みを解除"
+  "adjClearFilters": "絞り込みを解除",
+  "featOutboundFile": "出荷リストで出庫",
+  "featOutboundFileDesc": "いつもの出荷リスト（Excel）を読み込み、JANで照合して在庫から出庫",
+  "featOutboundCalendar": "出庫カレンダー",
+  "featOutboundCalendarDesc": "出荷リストで出庫した日ごとの記録とファイル",
+  "ofTitle": "出荷リストで出庫",
+  "ofTabImport": "読み込んで出庫",
+  "ofTabCalendar": "出庫カレンダー",
+  "ofIntro": "いつも使っている出荷リスト（Excel・CSV）をそのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。",
+  "ofPick": "ファイルを選ぶ",
+  "ofPickAgain": "別のファイルを選ぶ",
+  "ofReadFailed": "このファイルは読み込めません（.xlsx / .csv）",
+  "ofSheet": "シート",
+  "ofHeaderRow": "見出し: {n}行目",
+  "@ofHeaderRow": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofColumns": "列の割り当て",
+  "ofColumnsHint": "見出しから自動で割り当てました。違うときは選び直してください。",
+  "ofColNone": "（使わない）",
+  "ofRoleJan": "JAN",
+  "ofRoleQuantity": "数量",
+  "ofRoleCode": "品番",
+  "ofRoleMaker": "メーカー",
+  "ofRoleName": "商品名",
+  "ofRoleSupplier": "仕入先",
+  "ofRoleUnitPrice": "単価（税抜）",
+  "ofRoleUnitPriceTax": "単価（税込）",
+  "ofRoleListPrice": "定価",
+  "ofRoleAmount": "合計",
+  "ofRoleTaxRate": "税率",
+  "ofRoleOrderNumber": "注番",
+  "ofRoleArrival": "到着日",
+  "ofRoleOrderDate": "発注日",
+  "ofJanGuessed": "JANの列は中身（8桁・13桁の数字）から見つけました",
+  "ofNotUsable": "このシートには、数量と、JANまたは品番の列が見つかりません。列の割り当てを確認するか、別のシートを選んでください。",
+  "ofShippedOn": "出庫日",
+  "ofDestination": "出荷先（任意）",
+  "ofNote": "メモ（任意）",
+  "ofMatching": "商品を照合しています…",
+  "ofStOk": "出庫できる",
+  "ofStShort": "在庫不足",
+  "ofStUnknownJan": "未登録のJAN",
+  "ofStNoJan": "JANなし",
+  "ofStSeveral": "候補が複数",
+  "ofStNoQty": "数量なし",
+  "ofActShip": "出庫する",
+  "ofActRecord": "記録のみ",
+  "ofActSkip": "除外",
+  "ofColRow": "行",
+  "ofColStatus": "状態",
+  "ofColAction": "対応",
+  "ofColProduct": "商品（ライブラリー）",
+  "ofColStock": "在庫",
+  "ofColShip": "出庫数",
+  "ofColShort": "不足",
+  "ofColPriceEx": "税抜",
+  "ofColPriceTax": "税込",
+  "ofColLastPrice": "前回の仕入れ値",
+  "ofColWeight": "総重量",
+  "ofPickProduct": "商品を選ぶ",
+  "ofPickProductTitle": "{row}行目の商品を選ぶ",
+  "@ofPickProductTitle": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "ofPickSearch": "商品名・メーカー・JAN・品番で検索",
+  "ofMatchedJan": "JANで照合",
+  "ofMatchedBarcode": "別のバーコードで照合",
+  "ofMatchedCode": "品番で照合",
+  "ofMatchedPicked": "手で選んだ商品",
+  "ofFilterAll": "すべて {n}",
+  "@ofFilterAll": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofSummary": "{rows}行 · 出庫 {ship}行 · 記録のみ {record}行 · 除外 {skip}行",
+  "@ofSummary": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "ship": {
+        "type": "int"
+      },
+      "record": {
+        "type": "int"
+      },
+      "skip": {
+        "type": "int"
+      }
+    }
+  },
+  "ofSummaryShip": "出庫 {n}個",
+  "@ofSummaryShip": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofSummaryShort": "不足 {n}個（{rows}行）",
+  "@ofSummaryShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
+  "ofSummaryAmount": "合計 {amount}",
+  "@ofSummaryAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ofSummaryWeight": "総重量 {kg} kg",
+  "@ofSummaryWeight": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "ofPost": "出庫する",
+  "ofPostConfirmTitle": "この内容で出庫しますか？",
+  "ofPostConfirmBody": "{ship}行・{n}個を在庫から減らします。記録のみ {record}行、除外 {skip}行。",
+  "@ofPostConfirmBody": {
+    "placeholders": {
+      "ship": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      },
+      "record": {
+        "type": "int"
+      },
+      "skip": {
+        "type": "int"
+      }
+    }
+  },
+  "ofPostShortWarn": "在庫不足の{rows}行は、在庫にある分だけ出庫し、足りない{n}個を不足として記録します。",
+  "@ofPostShortWarn": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofPostDone": "出庫しました（{n}個）",
+  "@ofPostDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofDuplicateQ": "同じファイルはすでに出庫済みです。もう一度出庫しますか？",
+  "ofDuplicateAgain": "もう一度出庫する",
+  "ofUploading": "ファイルを保存しています…",
+  "ofHelpTitle": "JANがない行・在庫と合わない行の扱い",
+  "ofHelpNoJan": "JANがない行：品番（とメーカー）で、商品ライブラリー・仕入先の品番・価格台帳から探します。見つからなければ「商品を選ぶ」で選ぶか、「記録のみ」にします。",
+  "ofHelpUnknown": "未登録のJAN：在庫がないので出庫できません。「記録のみ」で出荷の事実を残すか、先に商品ライブラリーへ登録してください。",
+  "ofHelpShort": "在庫不足：在庫にある分だけ出庫し、足りない数を不足として記録します（在庫はマイナスになりません）。不足分は入荷や在庫調整で合わせてください。",
+  "ofHelpSeveral": "候補が複数：同じ品番の商品がいくつかあります。正しい商品を選んでください。",
+  "ofCalEmpty": "この月の出庫はありません",
+  "ofCalMonthAll": "この月の出庫をすべて表示",
+  "ofCardLines": "{lines}行 · 出庫 {n}個",
+  "@ofCardLines": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofCardShort": "不足 {n}個",
+  "@ofCardShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofUndone": "取り消し済み",
+  "ofDetailTitle": "出庫の詳細",
+  "ofOpenFile": "ファイルを開く",
+  "ofDownload": "ダウンロード",
+  "ofFileSaved": "保存しました: {name}",
+  "@ofFileSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ofNoFile": "ファイルは保存されていません",
+  "ofUndo": "出庫を取り消す",
+  "ofUndoQ": "この出庫を取り消しますか？",
+  "ofUndoBody": "出庫した{n}個を在庫に戻します。ファイルと記録は残ります。",
+  "@ofUndoBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofUndoDone": "取り消しました（{n}個を在庫に戻しました）",
+  "@ofUndoDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofBy": "{name} · {at}",
+  "@ofBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "ofErrDuplicate": "同じファイルはすでに出庫済みです",
+  "ofErrNoLines": "出庫する行がありません",
+  "ofErrUndone": "この出庫はすでに取り消されています",
+  "ofEmptyDay": "この日の出庫はありません",
+  "ppTitle": "仕入れ値の推移",
+  "ppMonthlyAvg": "月平均（全仕入先）",
+  "ppOutbound": "出荷リストの単価",
+  "ppOthers": "その他の仕入先",
+  "ppEmpty": "まだ仕入れ値の記録がありません。取込ファイルの単価や、手で記録した仕入れ値がここに並びます。",
+  "ppRecord": "仕入れ値を記録",
+  "ppBySupplier": "仕入先ごと",
+  "ppSupplierRow": "最新 {last}（{day}） · 平均 {avg} · {n}回",
+  "@ppSupplierRow": {
+    "placeholders": {
+      "last": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "avg": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ppMonthly": "月ごとの平均",
+  "ppMonthRow": "平均 {avg}（{min}〜{max}） · {qty}個",
+  "@ppMonthRow": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "ppHistory": "記録",
+  "ppSourceReceipt": "取込",
+  "ppSourceManual": "手で記録",
+  "ppSourceOutbound": "出荷リスト",
+  "ppTaxNote": "金額は税抜です（括弧内は税込）",
+  "ppNoSupplier": "仕入先なし",
+  "ppSupplier": "仕入先",
+  "ppSupplierOther": "その他（名前を入力）",
+  "ppSupplierName": "仕入先の名前",
+  "ppPriceEx": "単価（税抜）",
+  "ppTaxRate": "税率（%）",
+  "ppQty": "数量（任意）",
+  "ppDate": "仕入れ日",
+  "ppNote": "メモ（任意）",
+  "ppSave": "記録する",
+  "ppSaved": "仕入れ値を記録しました",
+  "ppWithdraw": "この記録を取り消す",
+  "ppWithdrawn": "記録を取り消しました",
+  "ppErrPrice": "単価を入れてください",
+  "ppErrSupplier": "仕入先を選ぶか名前を入れてください",
+  "ppMore": "ほか {n}件",
+  "@ppMore": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plShippingSaved": "出荷用の書式も保存しました"
 }

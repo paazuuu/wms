@@ -1,0 +1,871 @@
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
+import '../../../core/export/save_bytes.dart';
+import '../../../core/export/xlsx.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/open_window.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../product/application/product_providers.dart';
+import '../../product/domain/product.dart';
+import '../../stock_import/domain/stock_file.dart' show fileFingerprint, readStockFile;
+import '../../stock_ops/presentation/stock_adjustment_screen.dart'
+    show adjustOnHand, adjustProductMatches, adjustProductsProvider;
+import '../../warehouse_context/application/warehouse_providers.dart';
+import '../data/outbound_file_repository.dart';
+import '../domain/outbound_plan.dart';
+import '../domain/outbound_sheet.dart';
+import 'outbound_calendar_tab.dart';
+import 'outbound_file_detail_screen.dart';
+
+/// The shipping list chosen to read (overridden in tests).
+final outboundFilePickerProvider = Provider<Future<({String name, Uint8List bytes})?> Function()>((_) => () async {
+      final r = await FilePicker.platform
+          .pickFiles(withData: true, type: FileType.custom, allowedExtensions: const ['xlsx', 'xlsm', 'csv', 'tsv', 'txt']);
+      final f = r?.files.firstOrNull;
+      return f?.bytes == null ? null : (name: f!.name, bytes: f.bytes!);
+    });
+
+/// An empty browser tab for a kept file (overridden in tests).
+final outboundTabOpenerProvider = Provider<HtmlTab? Function()>((_) => openHtmlTab);
+
+/// Where a kept file is saved (overridden in tests).
+final outboundFileSaverProvider =
+    Provider<Future<void> Function(String name, Uint8List bytes)>((_) => (n, b) async => saveBytes(n, b));
+
+final _money = NumberFormat('#,##0.##');
+String outboundMoney(double? v) => v == null ? '' : _money.format(v);
+String outboundKg(double g) => NumberFormat('#,##0.###').format(g / 1000);
+
+/// 出荷リストで出庫 (0188): the shipping list people already keep, read as it
+/// is and taken out of stock — and, on the other tab, every list shipped,
+/// by day, with its file (出庫カレンダー).
+class OutboundFileScreen extends StatelessWidget {
+  const OutboundFileScreen({super.key, this.initialTab = 0});
+
+  final int initialTab;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return DefaultTabController(
+      length: 2,
+      initialIndex: initialTab,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.ofTitle),
+          bottom: TabBar(tabs: [
+            Tab(key: const ValueKey('of-tab-import'), text: l10n.ofTabImport),
+            Tab(key: const ValueKey('of-tab-calendar'), text: l10n.ofTabCalendar),
+          ]),
+        ),
+        body: const TabBarView(children: [OutboundImportTab(), OutboundCalendarTab()]),
+      ),
+    );
+  }
+}
+
+String outboundStatusLabel(AppLocalizations l10n, OutboundStatus s) => switch (s) {
+      OutboundStatus.ok => l10n.ofStOk,
+      OutboundStatus.short => l10n.ofStShort,
+      OutboundStatus.unknownJan => l10n.ofStUnknownJan,
+      OutboundStatus.noJan => l10n.ofStNoJan,
+      OutboundStatus.several => l10n.ofStSeveral,
+      OutboundStatus.noQuantity => l10n.ofStNoQty,
+    };
+
+String outboundActionLabel(AppLocalizations l10n, String action) => switch (action) {
+      'ship' => l10n.ofActShip,
+      'record' => l10n.ofActRecord,
+      _ => l10n.ofActSkip,
+    };
+
+String outboundColumnLabel(AppLocalizations l10n, OutboundColumn c) => switch (c) {
+      OutboundColumn.jan => l10n.ofRoleJan,
+      OutboundColumn.quantity => l10n.ofRoleQuantity,
+      OutboundColumn.code => l10n.ofRoleCode,
+      OutboundColumn.maker => l10n.ofRoleMaker,
+      OutboundColumn.name => l10n.ofRoleName,
+      OutboundColumn.supplier => l10n.ofRoleSupplier,
+      OutboundColumn.unitPrice => l10n.ofRoleUnitPrice,
+      OutboundColumn.unitPriceTax => l10n.ofRoleUnitPriceTax,
+      OutboundColumn.listPrice => l10n.ofRoleListPrice,
+      OutboundColumn.amount => l10n.ofRoleAmount,
+      OutboundColumn.taxRate => l10n.ofRoleTaxRate,
+      OutboundColumn.orderNumber => l10n.ofRoleOrderNumber,
+      OutboundColumn.arrival => l10n.ofRoleArrival,
+      OutboundColumn.orderDate => l10n.ofRoleOrderDate,
+    };
+
+String outboundMatchedLabel(AppLocalizations l10n, OutboundMatchedBy by) => switch (by) {
+      OutboundMatchedBy.jan => l10n.ofMatchedJan,
+      OutboundMatchedBy.barcode => l10n.ofMatchedBarcode,
+      OutboundMatchedBy.code => l10n.ofMatchedCode,
+      OutboundMatchedBy.picked => l10n.ofMatchedPicked,
+      _ => '',
+    };
+
+/// The tone of a row's state: what needs a look stands out.
+Color outboundStatusColor(ColorScheme s, OutboundStatus st) => switch (st) {
+      OutboundStatus.ok => s.primary,
+      OutboundStatus.short || OutboundStatus.several => s.error,
+      OutboundStatus.noQuantity => s.onSurfaceVariant,
+      _ => s.tertiary,
+    };
+
+/// Reads a list, shows each row with what will be done, and ships it.
+class OutboundImportTab extends ConsumerStatefulWidget {
+  const OutboundImportTab({super.key});
+
+  @override
+  ConsumerState<OutboundImportTab> createState() => _OutboundImportTabState();
+}
+
+class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
+  final _destination = TextEditingController();
+  final _note = TextEditingController();
+  ({String name, Uint8List bytes})? _file;
+  List<XlsxSheetRows> _sheets = const [];
+  int _sheet = 0;
+  Map<OutboundColumn, int>? _columns;
+  OutboundSheet? _parsed;
+  List<OutboundMatch> _matches = const [];
+  bool _matching = false;
+  String? _matchError;
+  final Map<int, OutboundMatch> _picked = {};
+  final Map<int, OutboundAction> _chosen = {};
+  DateTime _shippedOn = DateTime.now();
+  OutboundStatus? _filter;
+  int _limit = 100;
+  bool _busy = false;
+  String? _busyText;
+
+  @override
+  void dispose() {
+    _destination.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  void _snack(String t) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(t)));
+  }
+
+  Future<void> _pick() async {
+    final l10n = AppLocalizations.of(context);
+    final f = await ref.read(outboundFilePickerProvider)();
+    if (f == null || !mounted) return;
+    List<XlsxSheetRows> sheets;
+    try {
+      final lower = f.name.toLowerCase();
+      sheets = lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
+          ? readXlsxSheets(f.bytes)
+          : [(name: f.name, rows: readStockFile(f.name, f.bytes))];
+    } on FormatException {
+      _snack(l10n.ofReadFailed);
+      return;
+    }
+    setState(() {
+      _file = f;
+      _sheets = sheets;
+      _sheet = pickOutboundSheet(sheets);
+      _columns = null;
+      _picked.clear();
+      _chosen.clear();
+      _filter = null;
+      _limit = 100;
+    });
+    await _read();
+  }
+
+  Future<void> _read() async {
+    if (_sheets.isEmpty) return;
+    final s = _sheets[_sheet];
+    final parsed = parseOutboundSheet(s.name, s.rows, columns: _columns);
+    setState(() {
+      _parsed = parsed;
+      _columns ??= Map.of(parsed.columns);
+      _matches = const [];
+      _matchError = null;
+    });
+    await _match();
+  }
+
+  Future<void> _match() async {
+    final parsed = _parsed;
+    final warehouseId = ref.read(writeWarehouseIdProvider);
+    if (parsed == null || !parsed.usable || parsed.rows.isEmpty || warehouseId == null) return;
+    setState(() => _matching = true);
+    final r = await ref.read(outboundFileRepositoryProvider).match([
+      for (final row in parsed.rows) {'jan': row.jan.isEmpty ? null : row.jan, 'code': row.code, 'maker': row.maker},
+    ], warehouseId);
+    if (!mounted) return;
+    setState(() {
+      _matching = false;
+      switch (r) {
+        case ApiSuccess(:final data):
+          _matches = data;
+        case ApiFailure(:final message):
+          _matchError = humanizeApiErrorMessage(AppLocalizations.of(context), message);
+      }
+    });
+  }
+
+  List<OutboundPlanLine> get _plan =>
+      _parsed == null ? const [] : planOutbound(_parsed!.rows, _matches, picked: _picked, chosen: _chosen);
+
+  Future<void> _pickProduct(OutboundPlanLine line) async {
+    final warehouseId = ref.read(writeWarehouseIdProvider);
+    final p = await showDialog<Product>(
+      context: context,
+      builder: (_) => _PickProductDialog(rowNo: line.row.rowNo, initial: line.row.code ?? line.row.name ?? ''),
+    );
+    if (p == null || !mounted) return;
+    setState(() {
+      _picked[line.row.rowNo] = OutboundMatch(
+        matchedBy: OutboundMatchedBy.picked,
+        productId: p.id,
+        jan: p.janCode,
+        name: p.name,
+        maker: p.maker,
+        sku: p.sku,
+        unitWeightG: p.unitWeightG,
+        onHand: adjustOnHand(p, warehouseId),
+      );
+      _chosen.remove(line.row.rowNo);
+    });
+  }
+
+  Future<void> _post() async {
+    final l10n = AppLocalizations.of(context);
+    final warehouseId = ref.read(writeWarehouseIdProvider);
+    final file = _file;
+    final parsed = _parsed;
+    if (warehouseId == null) {
+      _snack(l10n.adjNeedsWarehouse);
+      return;
+    }
+    if (file == null || parsed == null) return;
+    final plan = _plan;
+    final t = OutboundPlanTotals.of(plan);
+    if (t.ship + t.record == 0) {
+      _snack(l10n.ofErrNoLines);
+      return;
+    }
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l10n.ofPostConfirmTitle),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.ofPostConfirmBody(t.ship, t.shipped, t.record, t.skip)),
+          if (t.short > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.ofPostShortWarn(t.shortRows, t.short), style: TextStyle(color: Theme.of(c).colorScheme.error)),
+          ],
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+          FilledButton(key: const ValueKey('of-post-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofPost)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() {
+      _busy = true;
+      _busyText = l10n.ofUploading;
+    });
+    final repo = ref.read(outboundFileRepositoryProvider);
+    final up = await repo.upload(warehouseId, file.name, file.bytes);
+    if (!mounted) return;
+    final String path;
+    switch (up) {
+      case ApiSuccess(:final data):
+        path = data;
+      case ApiFailure(:final message):
+        setState(() => _busy = false);
+        _snack(humanizeApiErrorMessage(l10n, message));
+        return;
+    }
+    Future<ApiResult<int>> send(bool again) => repo.post(
+          warehouseId: warehouseId,
+          shippedOn: _shippedOn,
+          fileName: file.name,
+          lines: [for (final l in plan) l.toPost()],
+          storagePath: path,
+          byteSize: file.bytes.length,
+          fingerprint: fileFingerprint(file.bytes),
+          sheetName: parsed.sheetName,
+          destination: _destination.text.trim().isEmpty ? null : _destination.text.trim(),
+          note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+          columns: parsed.columnsWire,
+          allowDuplicate: again,
+        );
+    var r = await send(false);
+    if (!mounted) return;
+    if (r case ApiFailure(:final message) when message.contains('outbound_duplicate')) {
+      setState(() => _busy = false);
+      final again = await showDialog<bool>(
+        context: context,
+        builder: (c) => AlertDialog(
+          content: Text(l10n.ofDuplicateQ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+            FilledButton(
+                key: const ValueKey('of-dup-again'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofDuplicateAgain)),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (again != true) return;
+      setState(() => _busy = true);
+      r = await send(true);
+      if (!mounted) return;
+    }
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(productListProvider);
+        ref.invalidate(adjustProductsProvider);
+        _snack(l10n.ofPostDone(t.shipped));
+        setState(() {
+          _file = null;
+          _sheets = const [];
+          _parsed = null;
+          _matches = const [];
+          _picked.clear();
+          _chosen.clear();
+          _destination.clear();
+          _note.clear();
+        });
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => OutboundFileDetailScreen(fileId: data)));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final parsed = _parsed;
+    final plan = _plan;
+    final totals = OutboundPlanTotals.of(plan);
+    final shown = [for (final l in plan) if (_filter == null || l.status == _filter) l];
+    final noWarehouse = ref.watch(writeWarehouseIdProvider) == null;
+
+    return Column(children: [
+      Expanded(
+        child: ListView(
+          key: const ValueKey('of-import-list'),
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(l10n.ofIntro, style: theme.textTheme.bodyMedium),
+                  const SizedBox(height: AppSpacing.md),
+                  Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                    FilledButton.icon(
+                      key: const ValueKey('of-pick'),
+                      onPressed: _busy ? null : _pick,
+                      icon: const Icon(Icons.upload_file_outlined),
+                      label: Text(_file == null ? l10n.ofPick : l10n.ofPickAgain),
+                    ),
+                    if (_file != null) Text(_file!.name, key: const ValueKey('of-file-name'), style: theme.textTheme.titleSmall),
+                  ]),
+                  if (noWarehouse) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(l10n.adjNeedsWarehouse, style: TextStyle(color: scheme.error)),
+                  ],
+                ]),
+              ),
+            ),
+            if (parsed != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _sheetAndColumns(l10n, parsed, muted),
+              const SizedBox(height: AppSpacing.md),
+              _settings(l10n),
+              const SizedBox(height: AppSpacing.md),
+              if (!parsed.usable)
+                Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error))
+              else if (_matching)
+                Row(children: [
+                  const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(l10n.ofMatching),
+                ])
+              else if (_matchError != null)
+                Text(_matchError!, style: TextStyle(color: scheme.error))
+              else ...[
+                _summary(l10n, totals),
+                const SizedBox(height: AppSpacing.sm),
+                _filters(l10n, totals),
+                const SizedBox(height: AppSpacing.sm),
+                _help(l10n),
+                const SizedBox(height: AppSpacing.sm),
+                _OutboundPlanTable(
+                  lines: shown.take(_limit).toList(),
+                  onAction: (l, a) => setState(() => _chosen[l.row.rowNo] = a),
+                  onPick: _pickProduct,
+                ),
+                if (shown.length > _limit)
+                  TextButton(
+                    key: const ValueKey('of-more'),
+                    onPressed: () => setState(() => _limit += 200),
+                    child: Text(l10n.ppMore(shown.length - _limit)),
+                  ),
+              ],
+            ],
+          ],
+        ),
+      ),
+      if (parsed != null && parsed.usable && !_matching && _matchError == null)
+        SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: scheme.outlineVariant))),
+            child: Row(children: [
+              Expanded(
+                child: Text(
+                  [
+                    l10n.ofSummaryShip(totals.shipped),
+                    if (totals.short > 0) l10n.ofSummaryShort(totals.short, totals.shortRows),
+                  ].join(' · '),
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              if (_busy) ...[
+                const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(width: AppSpacing.sm),
+                if (_busyText != null) Text(_busyText!, style: muted),
+              ] else
+                FilledButton.icon(
+                  key: const ValueKey('of-post'),
+                  onPressed: noWarehouse ? null : _post,
+                  icon: const Icon(Icons.outbox_outlined),
+                  label: Text(l10n.ofPost),
+                ),
+            ]),
+          ),
+        ),
+    ]);
+  }
+
+  Widget _sheetAndColumns(AppLocalizations l10n, OutboundSheet parsed, TextStyle? muted) {
+    final headings = parsed.headings;
+    final width = [for (final r in _sheets[_sheet].rows.take(30)) r.length].fold(headings.length, (a, b) => a > b ? a : b);
+    String colName(int i) => i < headings.length && headings[i].trim().isNotEmpty
+        ? '${columnLetters(i)}: ${headings[i].trim()}'
+        : columnLetters(i);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            if (_sheets.length > 1)
+              SizedBox(
+                width: 240,
+                child: DropdownButtonFormField<int>(
+                  key: ValueKey('of-sheet-$_sheet'),
+                  initialValue: _sheet,
+                  isExpanded: true,
+                  decoration: InputDecoration(labelText: l10n.ofSheet, isDense: true),
+                  items: [
+                    for (final (i, s) in _sheets.indexed)
+                      DropdownMenuItem(value: i, child: Text(s.name, overflow: TextOverflow.ellipsis)),
+                  ],
+                  onChanged: (v) {
+                    if (v == null) return;
+                    setState(() {
+                      _sheet = v;
+                      _columns = null;
+                      _picked.clear();
+                      _chosen.clear();
+                    });
+                    _read();
+                  },
+                ),
+              ),
+            if (parsed.headerRow >= 0) Text(l10n.ofHeaderRow(parsed.headerRow + 1), style: muted),
+            if (parsed.janGuessed) Text(l10n.ofJanGuessed, key: const ValueKey('of-jan-guessed'), style: muted),
+          ]),
+          ExpansionTile(
+            key: const ValueKey('of-columns'),
+            tilePadding: EdgeInsets.zero,
+            title: Text(l10n.ofColumns),
+            subtitle: Text(
+              [
+                for (final c in OutboundColumn.values)
+                  if (parsed.columns[c] != null) '${outboundColumnLabel(l10n, c)}=${colName(parsed.columns[c]!)}',
+              ].join('  '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: muted,
+            ),
+            children: [
+              Align(alignment: Alignment.centerLeft, child: Text(l10n.ofColumnsHint, style: muted)),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, children: [
+                for (final c in OutboundColumn.values)
+                  SizedBox(
+                    width: 220,
+                    child: DropdownButtonFormField<int>(
+                      key: ValueKey('of-col-${c.wire}-${parsed.columns[c] ?? -1}'),
+                      initialValue: parsed.columns[c] ?? -1,
+                      isExpanded: true,
+                      decoration: InputDecoration(labelText: outboundColumnLabel(l10n, c), isDense: true),
+                      items: [
+                        DropdownMenuItem(value: -1, child: Text(l10n.ofColNone)),
+                        for (var i = 0; i < width; i++)
+                          DropdownMenuItem(value: i, child: Text(colName(i), overflow: TextOverflow.ellipsis)),
+                      ],
+                      onChanged: (v) {
+                        final next = Map.of(_columns ?? parsed.columns);
+                        if (v == null || v < 0) {
+                          next.remove(c);
+                        } else {
+                          next[c] = v;
+                        }
+                        setState(() {
+                          _columns = next;
+                          _picked.clear();
+                          _chosen.clear();
+                        });
+                        _read();
+                      },
+                    ),
+                  ),
+              ]),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _settings(AppLocalizations l10n) => Wrap(
+        spacing: AppSpacing.md,
+        runSpacing: AppSpacing.sm,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          OutlinedButton.icon(
+            key: const ValueKey('of-shipped-on'),
+            icon: const Icon(Icons.event_outlined, size: 18),
+            label: Text('${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(_shippedOn)}'),
+            onPressed: () async {
+              final d = await showDatePicker(
+                  context: context, initialDate: _shippedOn, firstDate: DateTime(2000), lastDate: DateTime(2100));
+              if (d != null) setState(() => _shippedOn = d);
+            },
+          ),
+          SizedBox(
+            width: 220,
+            child: TextField(
+              key: const ValueKey('of-destination'),
+              controller: _destination,
+              decoration: InputDecoration(labelText: l10n.ofDestination, isDense: true),
+            ),
+          ),
+          SizedBox(
+            width: 260,
+            child: TextField(
+              key: const ValueKey('of-note'),
+              controller: _note,
+              decoration: InputDecoration(labelText: l10n.ofNote, isDense: true),
+            ),
+          ),
+        ],
+      );
+
+  Widget _summary(AppLocalizations l10n, OutboundPlanTotals t) {
+    final theme = Theme.of(context);
+    return Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, children: [
+      Text(l10n.ofSummary(t.rows, t.ship, t.record, t.skip), key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall),
+      Text(l10n.ofSummaryShip(t.shipped)),
+      if (t.short > 0)
+        Text(l10n.ofSummaryShort(t.short, t.shortRows),
+            key: const ValueKey('of-summary-short'), style: TextStyle(color: theme.colorScheme.error)),
+      if (t.amount > 0) Text(l10n.ofSummaryAmount(outboundMoney(t.amount))),
+      if (t.weightG > 0) Text(l10n.ofSummaryWeight(outboundKg(t.weightG))),
+    ]);
+  }
+
+  Widget _filters(AppLocalizations l10n, OutboundPlanTotals t) => Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+        ChoiceChip(
+          key: const ValueKey('of-filter-all'),
+          label: Text(l10n.ofFilterAll(t.rows)),
+          selected: _filter == null,
+          onSelected: (_) => setState(() {
+            _filter = null;
+            _limit = 100;
+          }),
+        ),
+        for (final s in OutboundStatus.values)
+          if ((t.byStatus[s] ?? 0) > 0)
+            ChoiceChip(
+              key: ValueKey('of-filter-${s.name}'),
+              label: Text('${outboundStatusLabel(l10n, s)} ${t.byStatus[s]}'),
+              selected: _filter == s,
+              onSelected: (_) => setState(() {
+                _filter = _filter == s ? null : s;
+                _limit = 100;
+              }),
+            ),
+      ]);
+
+  Widget _help(AppLocalizations l10n) {
+    final style = Theme.of(context).textTheme.bodySmall;
+    return ExpansionTile(
+      key: const ValueKey('of-help'),
+      tilePadding: EdgeInsets.zero,
+      leading: const Icon(Icons.help_outline),
+      title: Text(l10n.ofHelpTitle),
+      childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      children: [
+        for (final t in [l10n.ofHelpNoJan, l10n.ofHelpUnknown, l10n.ofHelpShort, l10n.ofHelpSeveral])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Align(alignment: Alignment.centerLeft, child: Text('・$t', style: style)),
+          ),
+      ],
+    );
+  }
+}
+
+/// The rows across, as in the 発注 table: what each is, what will be done,
+/// its product, codes, quantity, stock, what goes out and is short, prices,
+/// weight.
+class _OutboundPlanTable extends StatefulWidget {
+  const _OutboundPlanTable({required this.lines, required this.onAction, required this.onPick});
+
+  final List<OutboundPlanLine> lines;
+  final void Function(OutboundPlanLine, OutboundAction) onAction;
+  final void Function(OutboundPlanLine) onPick;
+
+  @override
+  State<_OutboundPlanTable> createState() => _OutboundPlanTableState();
+}
+
+class _OutboundPlanTableState extends State<_OutboundPlanTable> {
+  final _across = ScrollController();
+
+  static const _widths = [52.0, 104.0, 118.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 72.0, 64.0, 80.0, 80.0, 100.0, 112.0, 84.0, 96.0];
+
+  @override
+  void dispose() {
+    _across.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final head = theme.textTheme.labelMedium;
+    final small = theme.textTheme.bodySmall;
+    Widget cell(int i, Widget child, {bool end = false}) => Container(
+          width: _widths[i],
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+          child: child,
+        );
+    final headers = [
+      l10n.ofColRow, l10n.ofColStatus, l10n.ofColAction, l10n.ofColProduct, l10n.ofRoleJan, l10n.ofRoleCode,
+      l10n.ofRoleMaker, l10n.ofRoleSupplier, l10n.ofRoleQuantity, l10n.ofColStock, l10n.ofColShip, l10n.ofColShort,
+      l10n.ofColPriceEx, l10n.ofColPriceTax, l10n.ofRoleAmount, l10n.ofColLastPrice, l10n.ofColWeight, l10n.ofRoleOrderNumber,
+    ];
+    const ends = {8, 9, 10, 11, 12, 13, 14, 15, 16};
+    return Scrollbar(
+      controller: _across,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        key: const ValueKey('of-table'),
+        controller: _across,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            color: scheme.surfaceContainerHighest,
+            child: Row(children: [for (final (i, h) in headers.indexed) cell(i, Text(h, style: head), end: ends.contains(i))]),
+          ),
+          for (final l in widget.lines)
+            Container(
+              key: ValueKey('of-row-${l.row.rowNo}'),
+              decoration: BoxDecoration(
+                color: l.action == OutboundAction.skip ? scheme.surfaceContainerLow : null,
+                border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
+              ),
+              child: Row(children: [
+                cell(0, Text('${l.row.rowNo}', style: small)),
+                cell(
+                  1,
+                  Text(outboundStatusLabel(l10n, l.status),
+                      key: ValueKey('of-status-${l.row.rowNo}'),
+                      style: small?.copyWith(color: outboundStatusColor(scheme, l.status), fontWeight: FontWeight.w600)),
+                ),
+                cell(
+                  2,
+                  PopupMenuButton<OutboundAction>(
+                    key: ValueKey('of-action-${l.row.rowNo}'),
+                    onSelected: (a) => widget.onAction(l, a),
+                    itemBuilder: (_) => [
+                      for (final a in OutboundAction.values)
+                        if (a != OutboundAction.ship || l.found)
+                          PopupMenuItem(
+                            key: ValueKey('of-action-${l.row.rowNo}-${a.wire}'),
+                            value: a,
+                            child: Text(outboundActionLabel(l10n, a.wire)),
+                          ),
+                    ],
+                    child: Chip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(outboundActionLabel(l10n, l.action.wire), style: small),
+                      avatar: Icon(
+                        switch (l.action) {
+                          OutboundAction.ship => Icons.outbox_outlined,
+                          OutboundAction.record => Icons.edit_note_outlined,
+                          OutboundAction.skip => Icons.block_outlined,
+                        },
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                cell(
+                  3,
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                    if (l.match.name != null)
+                      Text(l.match.name!, key: ValueKey('of-name-${l.row.rowNo}'), maxLines: 2, overflow: TextOverflow.ellipsis)
+                    else if (l.row.name != null)
+                      Text(l.row.name!, maxLines: 2, overflow: TextOverflow.ellipsis, style: small),
+                    if (l.found && l.match.matchedBy != OutboundMatchedBy.jan)
+                      Text(outboundMatchedLabel(l10n, l.match.matchedBy), style: small?.copyWith(color: scheme.onSurfaceVariant)),
+                    if ((!l.found && l.status != OutboundStatus.noQuantity) || l.match.matchedBy == OutboundMatchedBy.picked)
+                      TextButton.icon(
+                        key: ValueKey('of-pick-${l.row.rowNo}'),
+                        style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
+                        onPressed: () => widget.onPick(l),
+                        icon: const Icon(Icons.search, size: 16),
+                        label: Text(l10n.ofPickProduct),
+                      ),
+                  ]),
+                ),
+                cell(
+                  4,
+                  Text(l.match.jan ?? (l.row.jan.isNotEmpty ? l.row.jan : l.row.janRaw),
+                      style: small?.copyWith(color: l.row.janInvalid ? scheme.error : null)),
+                ),
+                cell(5, Text(l.row.code ?? l.match.sku ?? '', style: small, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                cell(6, Text(l.row.maker ?? l.match.maker ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                cell(7, Text(l.row.supplier ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                cell(8, Text('${l.row.quantity ?? ''}', style: theme.textTheme.titleSmall), end: true),
+                cell(9, Text(l.stockBefore == null ? '—' : '${l.stockBefore}', style: small), end: true),
+                cell(
+                  10,
+                  Text(l.action == OutboundAction.ship ? '${l.shipped}' : '—',
+                      key: ValueKey('of-ship-${l.row.rowNo}'), style: theme.textTheme.titleSmall),
+                  end: true,
+                ),
+                cell(
+                  11,
+                  Text(l.short > 0 ? '${l.short}' : '',
+                      key: ValueKey('of-short-${l.row.rowNo}'), style: small?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
+                  end: true,
+                ),
+                cell(12, Text(outboundMoney(l.row.priceEx), style: small), end: true),
+                cell(13, Text(outboundMoney(l.row.priceTax), style: small), end: true),
+                cell(14, Text(outboundMoney(l.row.total), style: small), end: true),
+                cell(
+                  15,
+                  Text(outboundMoney(l.match.lastPrice),
+                      style: small?.copyWith(
+                          color: l.match.lastPrice != null && l.row.priceEx != null && (l.row.priceEx! - l.match.lastPrice!).abs() > 0.009
+                              ? scheme.tertiary
+                              : null)),
+                  end: true,
+                ),
+                cell(16, Text(l.weightG == null ? '' : '${outboundKg(l.weightG!)} kg', style: small), end: true),
+                cell(17, Text(l.row.orderNumber ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
+              ]),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// A product chosen for a row by hand: found by its name, maker, JAN or 品番.
+class _PickProductDialog extends ConsumerStatefulWidget {
+  const _PickProductDialog({required this.rowNo, required this.initial});
+
+  final int rowNo;
+  final String initial;
+
+  @override
+  ConsumerState<_PickProductDialog> createState() => _PickProductDialogState();
+}
+
+class _PickProductDialogState extends ConsumerState<_PickProductDialog> {
+  late final _search = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final warehouseId = ref.watch(writeWarehouseIdProvider);
+    final all = ref.watch(adjustProductsProvider).valueOrNull ?? const <Product>[];
+    final shown = [for (final p in all) if (adjustProductMatches(p, _search.text)) p].take(50).toList();
+    return AlertDialog(
+      key: const ValueKey('of-pick-dialog'),
+      title: Text(l10n.ofPickProductTitle(widget.rowNo)),
+      content: SizedBox(
+        width: 460,
+        height: 420,
+        child: Column(children: [
+          TextField(
+            key: const ValueKey('of-pick-search'),
+            controller: _search,
+            autofocus: true,
+            decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.ofPickSearch),
+            onChanged: (_) => setState(() {}),
+          ),
+          Expanded(
+            child: ListView(children: [
+              for (final p in shown)
+                ListTile(
+                  key: ValueKey('of-pick-${p.janCode}'),
+                  dense: true,
+                  title: Text(p.name, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  subtitle: Text([p.maker ?? '', p.janCode, p.sku ?? ''].where((s) => s.isNotEmpty).join(' · ')),
+                  trailing: Text(l10n.adjOnHand(adjustOnHand(p, warehouseId))),
+                  onTap: () => Navigator.pop(context, p),
+                ),
+            ]),
+          ),
+        ]),
+      ),
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel))],
+    );
+  }
+}

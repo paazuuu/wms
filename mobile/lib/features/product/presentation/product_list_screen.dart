@@ -39,6 +39,7 @@ import '../../product_library/presentation/product_thumb.dart';
 import '../../home/presentation/feature_link.dart';
 import '../../stock_history/presentation/stock_history_views.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
+import '../../outbound_file/data/shipping_list_export.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
 /// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
@@ -109,8 +110,12 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       lifecycle: (p) => lifecycleLabel(l10n, p.lifecycle),
     );
     final day = DateTime.now().toIso8601String().substring(0, 10).replaceAll('-', '');
-    await ref.read(saveFileProvider)('商品ライブラリー_${scope == ExportScope.shown ? '絞り込み' : '全件'}_$day.xlsx', bytes);
-    if (mounted) snack(l10n.xlSaved(products.length));
+    final which = scope == ExportScope.shown ? '絞り込み' : '全件';
+    await ref.read(saveFileProvider)('商品ライブラリー_${which}_$day.xlsx', bytes);
+    // The same products in the shipping list's own layout (明细), with the
+    // weight and formulas, to fill in and read back by 出荷リストで出庫.
+    await ref.read(saveFileProvider)('出荷用_${which}_$day.xlsx', buildShippingListXlsx(products));
+    if (mounted) snack('${l10n.xlSaved(products.length)}　${l10n.plShippingSaved}');
   }
 
   Future<void> _openDetailById(int productId) async {

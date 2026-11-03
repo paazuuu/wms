@@ -13782,4 +13782,445 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get adjClearFilters => '清除筛选';
+
+  @override
+  String get featOutboundFile => '按发货清单出库';
+
+  @override
+  String get featOutboundFileDesc => '读取常用的发货清单，按JAN匹配并出库';
+
+  @override
+  String get featOutboundCalendar => '出库日历';
+
+  @override
+  String get featOutboundCalendarDesc => '按日查看按清单出库的记录和文件';
+
+  @override
+  String get ofTitle => '按发货清单出库';
+
+  @override
+  String get ofTabImport => '读取并出库';
+
+  @override
+  String get ofTabCalendar => '出库日历';
+
+  @override
+  String get ofIntro =>
+      '直接读取您常用的发货清单（Excel・CSV），标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。';
+
+  @override
+  String get ofPick => '选择文件';
+
+  @override
+  String get ofPickAgain => '选择其他文件';
+
+  @override
+  String get ofReadFailed => '无法读取此文件（.xlsx / .csv）';
+
+  @override
+  String get ofSheet => '工作表';
+
+  @override
+  String ofHeaderRow(int n) {
+    return '标题：第$n行';
+  }
+
+  @override
+  String get ofColumns => '列的分配';
+
+  @override
+  String get ofColumnsHint => '已根据标题自动分配。如有不对请重新选择。';
+
+  @override
+  String get ofColNone => '（不使用）';
+
+  @override
+  String get ofRoleJan => 'JAN';
+
+  @override
+  String get ofRoleQuantity => '数量';
+
+  @override
+  String get ofRoleCode => '型号';
+
+  @override
+  String get ofRoleMaker => '厂商';
+
+  @override
+  String get ofRoleName => '商品名';
+
+  @override
+  String get ofRoleSupplier => '供货商';
+
+  @override
+  String get ofRoleUnitPrice => '单价（税前）';
+
+  @override
+  String get ofRoleUnitPriceTax => '单价（含税）';
+
+  @override
+  String get ofRoleListPrice => '零售价';
+
+  @override
+  String get ofRoleAmount => '合计';
+
+  @override
+  String get ofRoleTaxRate => '税率';
+
+  @override
+  String get ofRoleOrderNumber => '订单号';
+
+  @override
+  String get ofRoleArrival => '到货时间';
+
+  @override
+  String get ofRoleOrderDate => '下单时间';
+
+  @override
+  String get ofJanGuessed => 'JAN列是根据内容（8位・13位数字）找到的';
+
+  @override
+  String get ofNotUsable => '此工作表中找不到数量以及JAN或型号列。请检查列的分配或选择其他工作表。';
+
+  @override
+  String get ofShippedOn => '出库日';
+
+  @override
+  String get ofDestination => '发货目的地（可选）';
+
+  @override
+  String get ofNote => '备注（可选）';
+
+  @override
+  String get ofMatching => '正在匹配商品…';
+
+  @override
+  String get ofStOk => '可出库';
+
+  @override
+  String get ofStShort => '库存不足';
+
+  @override
+  String get ofStUnknownJan => '未登记的JAN';
+
+  @override
+  String get ofStNoJan => '无JAN';
+
+  @override
+  String get ofStSeveral => '有多个候选';
+
+  @override
+  String get ofStNoQty => '无数量';
+
+  @override
+  String get ofActShip => '出库';
+
+  @override
+  String get ofActRecord => '仅记录';
+
+  @override
+  String get ofActSkip => '排除';
+
+  @override
+  String get ofColRow => '行';
+
+  @override
+  String get ofColStatus => '状态';
+
+  @override
+  String get ofColAction => '处理';
+
+  @override
+  String get ofColProduct => '商品（商品库）';
+
+  @override
+  String get ofColStock => '库存';
+
+  @override
+  String get ofColShip => '出库数';
+
+  @override
+  String get ofColShort => '不足';
+
+  @override
+  String get ofColPriceEx => '税前';
+
+  @override
+  String get ofColPriceTax => '含税';
+
+  @override
+  String get ofColLastPrice => '上次进价';
+
+  @override
+  String get ofColWeight => '总重量';
+
+  @override
+  String get ofPickProduct => '选择商品';
+
+  @override
+  String ofPickProductTitle(int row) {
+    return '为第$row行选择商品';
+  }
+
+  @override
+  String get ofPickSearch => '按商品名・厂商・JAN・型号搜索';
+
+  @override
+  String get ofMatchedJan => '按JAN匹配';
+
+  @override
+  String get ofMatchedBarcode => '按其他条码匹配';
+
+  @override
+  String get ofMatchedCode => '按型号匹配';
+
+  @override
+  String get ofMatchedPicked => '手动选择';
+
+  @override
+  String ofFilterAll(int n) {
+    return '全部 $n';
+  }
+
+  @override
+  String ofSummary(int rows, int ship, int record, int skip) {
+    return '$rows行 · 出库 $ship行 · 仅记录 $record行 · 排除 $skip行';
+  }
+
+  @override
+  String ofSummaryShip(int n) {
+    return '出库 $n个';
+  }
+
+  @override
+  String ofSummaryShort(int n, int rows) {
+    return '不足 $n个（$rows行）';
+  }
+
+  @override
+  String ofSummaryAmount(String amount) {
+    return '合计 $amount';
+  }
+
+  @override
+  String ofSummaryWeight(String kg) {
+    return '总重量 $kg kg';
+  }
+
+  @override
+  String get ofPost => '出库';
+
+  @override
+  String get ofPostConfirmTitle => '按此内容出库吗？';
+
+  @override
+  String ofPostConfirmBody(int ship, int n, int record, int skip) {
+    return '将从库存中减少$ship行・$n个。仅记录 $record行，排除 $skip行。';
+  }
+
+  @override
+  String ofPostShortWarn(int rows, int n) {
+    return '库存不足的$rows行只出库现有部分，不足的$n个记为不足。';
+  }
+
+  @override
+  String ofPostDone(int n) {
+    return '已出库（$n个）';
+  }
+
+  @override
+  String get ofDuplicateQ => '此文件已出库。要再次出库吗？';
+
+  @override
+  String get ofDuplicateAgain => '再次出库';
+
+  @override
+  String get ofUploading => '正在保存文件…';
+
+  @override
+  String get ofHelpTitle => '无JAN的行・与库存不符的行的处理';
+
+  @override
+  String get ofHelpNoJan =>
+      '无JAN：按型号（和厂商）在商品库・供货商型号・价格台账中查找。找不到时可\"选择商品\"或\"仅记录\"。';
+
+  @override
+  String get ofHelpUnknown => '未登记的JAN：没有库存无法出库。可\"仅记录\"出货事实，或先登记到商品库。';
+
+  @override
+  String get ofHelpShort => '库存不足：只出库现有部分，不足数量记为不足（库存不会变为负数）。请之后通过入库或库存调整补齐。';
+
+  @override
+  String get ofHelpSeveral => '有多个候选：多个商品使用同一型号。请选择正确的商品。';
+
+  @override
+  String get ofCalEmpty => '本月没有出库';
+
+  @override
+  String get ofCalMonthAll => '显示本月全部出库';
+
+  @override
+  String ofCardLines(int lines, int n) {
+    return '$lines行 · 出库 $n个';
+  }
+
+  @override
+  String ofCardShort(int n) {
+    return '不足 $n个';
+  }
+
+  @override
+  String get ofUndone => '已撤销';
+
+  @override
+  String get ofDetailTitle => '出库详情';
+
+  @override
+  String get ofOpenFile => '打开文件';
+
+  @override
+  String get ofDownload => '下载';
+
+  @override
+  String ofFileSaved(String name) {
+    return '已保存：$name';
+  }
+
+  @override
+  String get ofNoFile => '未保存文件';
+
+  @override
+  String get ofUndo => '撤销出库';
+
+  @override
+  String get ofUndoQ => '要撤销此出库吗？';
+
+  @override
+  String ofUndoBody(int n) {
+    return '将出库的$n个退回库存。文件和记录会保留。';
+  }
+
+  @override
+  String ofUndoDone(int n) {
+    return '已撤销（$n个已退回库存）';
+  }
+
+  @override
+  String ofBy(String name, String at) {
+    return '$name · $at';
+  }
+
+  @override
+  String get ofErrDuplicate => '此文件已出库';
+
+  @override
+  String get ofErrNoLines => '没有要出库的行';
+
+  @override
+  String get ofErrUndone => '此出库已撤销';
+
+  @override
+  String get ofEmptyDay => '这一天没有出库';
+
+  @override
+  String get ppTitle => '进价走势';
+
+  @override
+  String get ppMonthlyAvg => '月平均（全部供货商）';
+
+  @override
+  String get ppOutbound => '发货清单单价';
+
+  @override
+  String get ppOthers => '其他供货商';
+
+  @override
+  String get ppEmpty => '还没有进价记录。导入文件中的单价和手动记录的进价会显示在这里。';
+
+  @override
+  String get ppRecord => '记录进价';
+
+  @override
+  String get ppBySupplier => '按供货商';
+
+  @override
+  String ppSupplierRow(String last, String day, String avg, int n) {
+    return '最新 $last（$day） · 平均 $avg · $n次';
+  }
+
+  @override
+  String get ppMonthly => '按月平均';
+
+  @override
+  String ppMonthRow(String avg, String min, String max, int qty) {
+    return '平均 $avg（$min〜$max） · $qty个';
+  }
+
+  @override
+  String get ppHistory => '记录';
+
+  @override
+  String get ppSourceReceipt => '导入';
+
+  @override
+  String get ppSourceManual => '手动记录';
+
+  @override
+  String get ppSourceOutbound => '发货清单';
+
+  @override
+  String get ppTaxNote => '金额为税前（括号内为含税）';
+
+  @override
+  String get ppNoSupplier => '无供货商';
+
+  @override
+  String get ppSupplier => '供货商';
+
+  @override
+  String get ppSupplierOther => '其他（输入名称）';
+
+  @override
+  String get ppSupplierName => '供货商名称';
+
+  @override
+  String get ppPriceEx => '单价（税前）';
+
+  @override
+  String get ppTaxRate => '税率（%）';
+
+  @override
+  String get ppQty => '数量（可选）';
+
+  @override
+  String get ppDate => '进货日';
+
+  @override
+  String get ppNote => '备注（可选）';
+
+  @override
+  String get ppSave => '记录';
+
+  @override
+  String get ppSaved => '已记录进价';
+
+  @override
+  String get ppWithdraw => '撤销此记录';
+
+  @override
+  String get ppWithdrawn => '已撤销记录';
+
+  @override
+  String get ppErrPrice => '请输入单价';
+
+  @override
+  String get ppErrSupplier => '请选择供货商或输入名称';
+
+  @override
+  String ppMore(int n) {
+    return '另外 $n条';
+  }
+
+  @override
+  String get plShippingSaved => '发货格式的文件也已保存';
 }

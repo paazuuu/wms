@@ -157,6 +157,11 @@ import 'package:wms_mobile/features/product/data/web_photos.dart' show webPhotoR
 import 'package:wms_mobile/features/product/data/market_names.dart' show marketNameRepositoryProvider;
 import 'package:wms_mobile/features/payments/data/payments_repository.dart' show paymentsRepositoryProvider;
 import 'fake_payments_repository.dart';
+import 'fake_purchase_price_repository.dart';
+import 'fake_outbound_file_repository.dart';
+import 'package:wms_mobile/features/product/data/purchase_price_repository.dart';
+import 'package:wms_mobile/features/product/presentation/purchase_price_card.dart' show canRecordPurchasePriceProvider;
+import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
 import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 
@@ -233,6 +238,9 @@ List<Override> _defaultOverrides() => [
       marketNameRepositoryProvider.overrideWithValue(FakeMarketNameRepository()),
       webPhotoRepositoryProvider.overrideWithValue(FakeWebPhotoRepository()),
       paymentsRepositoryProvider.overrideWithValue(FakePaymentsRepository()),
+      // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.
+      purchasePriceRepositoryProvider.overrideWithValue(FakePurchasePriceRepository()),
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
       // Marks and shelf notes (0167): none.
       productMarksRepositoryProvider.overrideWithValue(FakeProductMarksRepository()),
       shelfNotesRepositoryProvider.overrideWithValue(FakeShelfNotesRepository()),
@@ -310,6 +318,9 @@ Future<void> pumpAppWith(
         overrides: [
           productImageRepositoryProvider.overrideWithValue(images),
           evidenceRepositoryProvider.overrideWithValue(FakeEvidenceRepository()),
+          // 仕入れ値の履歴 (0187): none, and nobody here writes one.
+          purchasePricesProvider.overrideWith((ref, productId) async => const PurchasePrices()),
+          canRecordPurchasePriceProvider.overrideWithValue(false),
           // What came in for a product (0135): nothing here.
           productInboundHistoryProvider.overrideWith((ref, productId) async => const ProductInboundHistory()),
           // A product's stock for the hand correction (0138): none here.

@@ -48,6 +48,16 @@ Uint8List buildXlsx({
       XlsxSheet(name: sheetName, headers: headers, rows: rows, flagged: flagged, widths: widths, top: top, bottom: bottom),
     ]);
 
+/// A cell worked out by Excel when the file is opened: [formula] without
+/// the leading "=" (H2*K2). [cached] is shown by readers that do not work
+/// it out.
+class XlsxFormula {
+  const XlsxFormula(this.formula, {this.cached});
+
+  final String formula;
+  final num? cached;
+}
+
 String _esc(String s) =>
     const HtmlEscape(HtmlEscapeMode.element).convert(s.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), ''));
 
@@ -56,6 +66,11 @@ String _sheetXml(XlsxSheet x) {
     final ref = '${columnLetters(c)}${r + 1}';
     final s = style == 0 ? '' : ' s="$style"';
     if (v == null || (v is String && v.isEmpty)) return style == 0 ? '' : '<c r="$ref"$s/>';
+    if (v is XlsxFormula) {
+      final f = v.formula.startsWith('=') ? v.formula.substring(1) : v.formula;
+      final cached = v.cached;
+      return '<c r="$ref"$s><f>${_esc(f)}</f>${cached != null && cached.isFinite ? '<v>$cached</v>' : ''}</c>';
+    }
     if (v is num && v.isFinite) return '<c r="$ref"$s><v>$v</v></c>';
     return '<c r="$ref"$s t="inlineStr"><is><t xml:space="preserve">${_esc('$v')}</t></is></c>';
   }
@@ -163,7 +178,7 @@ Uint8List buildXlsxBook(List<XlsxSheet> sheets) {
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
             'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-            '<sheets>$entries</sheets></workbook>'))
+            '<sheets>$entries</sheets><calcPr calcId="0" fullCalcOnLoad="1"/></workbook>'))
     ..add(ArchiveFile.string(
         'xl/_rels/workbook.xml.rels',
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -204,11 +219,22 @@ int _columnIndex(String ref) {
   return n - 1;
 }
 
+/// One sheet of a workbook as read: its name and its rows of text.
+typedef XlsxSheetRows = ({String name, List<List<String>> rows});
+
 /// The first sheet of an .xlsx as rows of text, the way the cells read:
 /// shared and inline strings, numbers (a whole number without ".0"), and
 /// empty cells as ''. Throws [FormatException] when the bytes are not a
 /// workbook.
 List<List<String>> readXlsx(Uint8List bytes) {
+  final sheets = readXlsxSheets(bytes, keepRowNumbers: false, firstOnly: true);
+  return sheets.isEmpty ? const [] : sheets.first.rows;
+}
+
+/// Every sheet of an .xlsx, in the workbook's order. With [keepRowNumbers]
+/// a row Excel left out (empty) is an empty row here, so rows[i] is the
+/// sheet's row i + 1. A formula reads as the value Excel saved for it.
+List<XlsxSheetRows> readXlsxSheets(Uint8List bytes, {bool keepRowNumbers = true, bool firstOnly = false}) {
   final Archive zip;
   try {
     zip = ZipDecoder().decodeBytes(bytes);
@@ -221,32 +247,33 @@ List<List<String>> readXlsx(Uint8List bytes) {
     return b == null ? null : utf8.decode(b, allowMalformed: true);
   }
 
-  // Which file is the first sheet: workbook.xml → its relationship.
-  var sheetPath = 'xl/worksheets/sheet1.xml';
+  // Which file each sheet is: workbook.xml → its relationship.
+  final targets = <(String, String)>[];
   final wb = text('xl/workbook.xml');
   final rels = text('xl/_rels/workbook.xml.rels');
   if (wb != null && rels != null) {
-    final first = XmlDocument.parse(wb).findAllElements('sheet').firstOrNull;
-    final rid = first?.attributes.where((a) => a.name.local == 'id').firstOrNull?.value;
-    if (rid != null) {
-      final target = XmlDocument.parse(rels)
+    final relDoc = XmlDocument.parse(rels);
+    for (final sh in XmlDocument.parse(wb).findAllElements('sheet')) {
+      final rid = sh.attributes.where((a) => a.name.local == 'id').firstOrNull?.value;
+      final target = relDoc
           .findAllElements('Relationship')
           .where((r) => r.getAttribute('Id') == rid)
           .firstOrNull
           ?.getAttribute('Target');
-      if (target != null) {
-        sheetPath = target.startsWith('/') ? target.substring(1) : 'xl/${target.replaceFirst(RegExp(r'^\./'), '')}';
-      }
+      if (target == null) continue;
+      final path = target.startsWith('/') ? target.substring(1) : 'xl/${target.replaceFirst(RegExp(r'^\./'), '')}';
+      targets.add((sh.getAttribute('name') ?? 'Sheet${targets.length + 1}', path));
+      if (firstOnly) break;
     }
   }
-  final sheet = text(sheetPath) ?? text('xl/worksheets/sheet1.xml');
-  if (sheet == null) throw const FormatException('the workbook has no sheet');
+  if (targets.isEmpty) targets.add(('Sheet1', 'xl/worksheets/sheet1.xml'));
 
   final shared = <String>[];
   final sst = text('xl/sharedStrings.xml');
   if (sst != null) {
     for (final si in XmlDocument.parse(sst).findAllElements('si')) {
-      shared.add(si.findAllElements('t').map((t) => t.innerText).join());
+      // Phonetic runs (rPh) are readings, not the text.
+      shared.add(si.findAllElements('t').where((t) => t.parentElement?.name.local != 'rPh').map((t) => t.innerText).join());
     }
   }
 
@@ -254,34 +281,53 @@ List<List<String>> readXlsx(Uint8List bytes) {
     final d = double.tryParse(v);
     if (d == null) return v;
     if (d == d.roundToDouble() && d.abs() < 1e15) return d.toInt().toString();
-    return v;
+    // 50.00000000000001 (55/1.1) reads as 50; a price keeps its decimals.
+    final r = double.parse(d.toStringAsFixed(6));
+    if (r == r.roundToDouble() && r.abs() < 1e15) return r.toInt().toString();
+    return r.toString();
   }
 
-  final out = <List<String>>[];
-  for (final row in XmlDocument.parse(sheet).findAllElements('row')) {
-    final cells = <int, String>{};
-    var next = 0;
-    for (final c in row.findElements('c')) {
-      final ref = c.getAttribute('r');
-      final col = ref == null ? next : _columnIndex(ref);
-      next = col + 1;
-      final type = c.getAttribute('t');
-      final v = c.getElement('v')?.innerText ?? '';
-      final String value = switch (type) {
-        's' => _shared(shared, v),
-        'inlineStr' => c.findAllElements('t').map((t) => t.innerText).join(),
-        'str' || 'e' => v,
-        'b' => v == '1' ? 'TRUE' : 'FALSE',
-        _ => number(v),
-      };
-      cells[col] = value.trim();
+  final out = <XlsxSheetRows>[];
+  for (final (name, path) in targets) {
+    final sheet = text(path);
+    if (sheet == null) {
+      if (firstOnly) throw const FormatException('the workbook has no sheet');
+      continue;
     }
-    final width = cells.isEmpty ? 0 : cells.keys.reduce((a, b) => a > b ? a : b) + 1;
-    out.add([for (var i = 0; i < width; i++) cells[i] ?? '']);
+    final rows = <List<String>>[];
+    for (final row in XmlDocument.parse(sheet).findAllElements('row')) {
+      if (keepRowNumbers) {
+        final at = int.tryParse(row.getAttribute('r') ?? '');
+        while (at != null && rows.length < at - 1) {
+          rows.add(const []);
+        }
+      }
+      final cells = <int, String>{};
+      var next = 0;
+      for (final c in row.findElements('c')) {
+        final ref = c.getAttribute('r');
+        final col = ref == null ? next : _columnIndex(ref);
+        next = col + 1;
+        final type = c.getAttribute('t');
+        final v = c.getElement('v')?.innerText ?? '';
+        final String value = switch (type) {
+          's' => _shared(shared, v),
+          'inlineStr' => c.findAllElements('t').map((t) => t.innerText).join(),
+          'str' || 'e' => v,
+          'b' => v == '1' ? 'TRUE' : 'FALSE',
+          _ => number(v),
+        };
+        cells[col] = value.trim();
+      }
+      final width = cells.isEmpty ? 0 : cells.keys.reduce((a, b) => a > b ? a : b) + 1;
+      rows.add([for (var i = 0; i < width; i++) cells[i] ?? '']);
+    }
+    // Trailing empty rows say nothing.
+    while (rows.isNotEmpty && rows.last.every((c) => c.isEmpty)) {
+      rows.removeLast();
+    }
+    out.add((name: name, rows: rows));
   }
-  // Trailing empty rows say nothing.
-  while (out.isNotEmpty && out.last.every((c) => c.isEmpty)) {
-    out.removeLast();
-  }
+  if (out.isEmpty) throw const FormatException('the workbook has no sheet');
   return out;
 }

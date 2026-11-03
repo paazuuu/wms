@@ -73,6 +73,11 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('invoice_mixed_warehouses')) return l10n.errInvoiceMixedWarehouses;
   // 0184: a note needs words, and not too many.
   if (rawMessage.contains('memo_empty')) return l10n.wmErrEmpty;
+  if (rawMessage.contains('outbound_duplicate')) return l10n.ofErrDuplicate;
+  if (rawMessage.contains('outbound_no_lines')) return l10n.ofErrNoLines;
+  if (rawMessage.contains('outbound_already_undone')) return l10n.ofErrUndone;
+  if (rawMessage.contains('price_required')) return l10n.ppErrPrice;
+  if (rawMessage.contains('supplier_required')) return l10n.ppErrSupplier;
   if (rawMessage.contains('memo_too_long')) return l10n.wmErrLong;
   if (rawMessage.contains('memo_date_required')) return l10n.wmErrDate;
   if (rawMessage.contains('no_invoice_note_required')) return l10n.errNoInvoiceNote;

@@ -13869,4 +13869,448 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get adjClearFilters => '絞り込みを解除';
+
+  @override
+  String get featOutboundFile => '出荷リストで出庫';
+
+  @override
+  String get featOutboundFileDesc => 'いつもの出荷リスト（Excel）を読み込み、JANで照合して在庫から出庫';
+
+  @override
+  String get featOutboundCalendar => '出庫カレンダー';
+
+  @override
+  String get featOutboundCalendarDesc => '出荷リストで出庫した日ごとの記録とファイル';
+
+  @override
+  String get ofTitle => '出荷リストで出庫';
+
+  @override
+  String get ofTabImport => '読み込んで出庫';
+
+  @override
+  String get ofTabCalendar => '出庫カレンダー';
+
+  @override
+  String get ofIntro =>
+      'いつも使っている出荷リスト（Excel・CSV）をそのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。';
+
+  @override
+  String get ofPick => 'ファイルを選ぶ';
+
+  @override
+  String get ofPickAgain => '別のファイルを選ぶ';
+
+  @override
+  String get ofReadFailed => 'このファイルは読み込めません（.xlsx / .csv）';
+
+  @override
+  String get ofSheet => 'シート';
+
+  @override
+  String ofHeaderRow(int n) {
+    return '見出し: $n行目';
+  }
+
+  @override
+  String get ofColumns => '列の割り当て';
+
+  @override
+  String get ofColumnsHint => '見出しから自動で割り当てました。違うときは選び直してください。';
+
+  @override
+  String get ofColNone => '（使わない）';
+
+  @override
+  String get ofRoleJan => 'JAN';
+
+  @override
+  String get ofRoleQuantity => '数量';
+
+  @override
+  String get ofRoleCode => '品番';
+
+  @override
+  String get ofRoleMaker => 'メーカー';
+
+  @override
+  String get ofRoleName => '商品名';
+
+  @override
+  String get ofRoleSupplier => '仕入先';
+
+  @override
+  String get ofRoleUnitPrice => '単価（税抜）';
+
+  @override
+  String get ofRoleUnitPriceTax => '単価（税込）';
+
+  @override
+  String get ofRoleListPrice => '定価';
+
+  @override
+  String get ofRoleAmount => '合計';
+
+  @override
+  String get ofRoleTaxRate => '税率';
+
+  @override
+  String get ofRoleOrderNumber => '注番';
+
+  @override
+  String get ofRoleArrival => '到着日';
+
+  @override
+  String get ofRoleOrderDate => '発注日';
+
+  @override
+  String get ofJanGuessed => 'JANの列は中身（8桁・13桁の数字）から見つけました';
+
+  @override
+  String get ofNotUsable =>
+      'このシートには、数量と、JANまたは品番の列が見つかりません。列の割り当てを確認するか、別のシートを選んでください。';
+
+  @override
+  String get ofShippedOn => '出庫日';
+
+  @override
+  String get ofDestination => '出荷先（任意）';
+
+  @override
+  String get ofNote => 'メモ（任意）';
+
+  @override
+  String get ofMatching => '商品を照合しています…';
+
+  @override
+  String get ofStOk => '出庫できる';
+
+  @override
+  String get ofStShort => '在庫不足';
+
+  @override
+  String get ofStUnknownJan => '未登録のJAN';
+
+  @override
+  String get ofStNoJan => 'JANなし';
+
+  @override
+  String get ofStSeveral => '候補が複数';
+
+  @override
+  String get ofStNoQty => '数量なし';
+
+  @override
+  String get ofActShip => '出庫する';
+
+  @override
+  String get ofActRecord => '記録のみ';
+
+  @override
+  String get ofActSkip => '除外';
+
+  @override
+  String get ofColRow => '行';
+
+  @override
+  String get ofColStatus => '状態';
+
+  @override
+  String get ofColAction => '対応';
+
+  @override
+  String get ofColProduct => '商品（ライブラリー）';
+
+  @override
+  String get ofColStock => '在庫';
+
+  @override
+  String get ofColShip => '出庫数';
+
+  @override
+  String get ofColShort => '不足';
+
+  @override
+  String get ofColPriceEx => '税抜';
+
+  @override
+  String get ofColPriceTax => '税込';
+
+  @override
+  String get ofColLastPrice => '前回の仕入れ値';
+
+  @override
+  String get ofColWeight => '総重量';
+
+  @override
+  String get ofPickProduct => '商品を選ぶ';
+
+  @override
+  String ofPickProductTitle(int row) {
+    return '$row行目の商品を選ぶ';
+  }
+
+  @override
+  String get ofPickSearch => '商品名・メーカー・JAN・品番で検索';
+
+  @override
+  String get ofMatchedJan => 'JANで照合';
+
+  @override
+  String get ofMatchedBarcode => '別のバーコードで照合';
+
+  @override
+  String get ofMatchedCode => '品番で照合';
+
+  @override
+  String get ofMatchedPicked => '手で選んだ商品';
+
+  @override
+  String ofFilterAll(int n) {
+    return 'すべて $n';
+  }
+
+  @override
+  String ofSummary(int rows, int ship, int record, int skip) {
+    return '$rows行 · 出庫 $ship行 · 記録のみ $record行 · 除外 $skip行';
+  }
+
+  @override
+  String ofSummaryShip(int n) {
+    return '出庫 $n個';
+  }
+
+  @override
+  String ofSummaryShort(int n, int rows) {
+    return '不足 $n個（$rows行）';
+  }
+
+  @override
+  String ofSummaryAmount(String amount) {
+    return '合計 $amount';
+  }
+
+  @override
+  String ofSummaryWeight(String kg) {
+    return '総重量 $kg kg';
+  }
+
+  @override
+  String get ofPost => '出庫する';
+
+  @override
+  String get ofPostConfirmTitle => 'この内容で出庫しますか？';
+
+  @override
+  String ofPostConfirmBody(int ship, int n, int record, int skip) {
+    return '$ship行・$n個を在庫から減らします。記録のみ $record行、除外 $skip行。';
+  }
+
+  @override
+  String ofPostShortWarn(int rows, int n) {
+    return '在庫不足の$rows行は、在庫にある分だけ出庫し、足りない$n個を不足として記録します。';
+  }
+
+  @override
+  String ofPostDone(int n) {
+    return '出庫しました（$n個）';
+  }
+
+  @override
+  String get ofDuplicateQ => '同じファイルはすでに出庫済みです。もう一度出庫しますか？';
+
+  @override
+  String get ofDuplicateAgain => 'もう一度出庫する';
+
+  @override
+  String get ofUploading => 'ファイルを保存しています…';
+
+  @override
+  String get ofHelpTitle => 'JANがない行・在庫と合わない行の扱い';
+
+  @override
+  String get ofHelpNoJan =>
+      'JANがない行：品番（とメーカー）で、商品ライブラリー・仕入先の品番・価格台帳から探します。見つからなければ「商品を選ぶ」で選ぶか、「記録のみ」にします。';
+
+  @override
+  String get ofHelpUnknown =>
+      '未登録のJAN：在庫がないので出庫できません。「記録のみ」で出荷の事実を残すか、先に商品ライブラリーへ登録してください。';
+
+  @override
+  String get ofHelpShort =>
+      '在庫不足：在庫にある分だけ出庫し、足りない数を不足として記録します（在庫はマイナスになりません）。不足分は入荷や在庫調整で合わせてください。';
+
+  @override
+  String get ofHelpSeveral => '候補が複数：同じ品番の商品がいくつかあります。正しい商品を選んでください。';
+
+  @override
+  String get ofCalEmpty => 'この月の出庫はありません';
+
+  @override
+  String get ofCalMonthAll => 'この月の出庫をすべて表示';
+
+  @override
+  String ofCardLines(int lines, int n) {
+    return '$lines行 · 出庫 $n個';
+  }
+
+  @override
+  String ofCardShort(int n) {
+    return '不足 $n個';
+  }
+
+  @override
+  String get ofUndone => '取り消し済み';
+
+  @override
+  String get ofDetailTitle => '出庫の詳細';
+
+  @override
+  String get ofOpenFile => 'ファイルを開く';
+
+  @override
+  String get ofDownload => 'ダウンロード';
+
+  @override
+  String ofFileSaved(String name) {
+    return '保存しました: $name';
+  }
+
+  @override
+  String get ofNoFile => 'ファイルは保存されていません';
+
+  @override
+  String get ofUndo => '出庫を取り消す';
+
+  @override
+  String get ofUndoQ => 'この出庫を取り消しますか？';
+
+  @override
+  String ofUndoBody(int n) {
+    return '出庫した$n個を在庫に戻します。ファイルと記録は残ります。';
+  }
+
+  @override
+  String ofUndoDone(int n) {
+    return '取り消しました（$n個を在庫に戻しました）';
+  }
+
+  @override
+  String ofBy(String name, String at) {
+    return '$name · $at';
+  }
+
+  @override
+  String get ofErrDuplicate => '同じファイルはすでに出庫済みです';
+
+  @override
+  String get ofErrNoLines => '出庫する行がありません';
+
+  @override
+  String get ofErrUndone => 'この出庫はすでに取り消されています';
+
+  @override
+  String get ofEmptyDay => 'この日の出庫はありません';
+
+  @override
+  String get ppTitle => '仕入れ値の推移';
+
+  @override
+  String get ppMonthlyAvg => '月平均（全仕入先）';
+
+  @override
+  String get ppOutbound => '出荷リストの単価';
+
+  @override
+  String get ppOthers => 'その他の仕入先';
+
+  @override
+  String get ppEmpty => 'まだ仕入れ値の記録がありません。取込ファイルの単価や、手で記録した仕入れ値がここに並びます。';
+
+  @override
+  String get ppRecord => '仕入れ値を記録';
+
+  @override
+  String get ppBySupplier => '仕入先ごと';
+
+  @override
+  String ppSupplierRow(String last, String day, String avg, int n) {
+    return '最新 $last（$day） · 平均 $avg · $n回';
+  }
+
+  @override
+  String get ppMonthly => '月ごとの平均';
+
+  @override
+  String ppMonthRow(String avg, String min, String max, int qty) {
+    return '平均 $avg（$min〜$max） · $qty個';
+  }
+
+  @override
+  String get ppHistory => '記録';
+
+  @override
+  String get ppSourceReceipt => '取込';
+
+  @override
+  String get ppSourceManual => '手で記録';
+
+  @override
+  String get ppSourceOutbound => '出荷リスト';
+
+  @override
+  String get ppTaxNote => '金額は税抜です（括弧内は税込）';
+
+  @override
+  String get ppNoSupplier => '仕入先なし';
+
+  @override
+  String get ppSupplier => '仕入先';
+
+  @override
+  String get ppSupplierOther => 'その他（名前を入力）';
+
+  @override
+  String get ppSupplierName => '仕入先の名前';
+
+  @override
+  String get ppPriceEx => '単価（税抜）';
+
+  @override
+  String get ppTaxRate => '税率（%）';
+
+  @override
+  String get ppQty => '数量（任意）';
+
+  @override
+  String get ppDate => '仕入れ日';
+
+  @override
+  String get ppNote => 'メモ（任意）';
+
+  @override
+  String get ppSave => '記録する';
+
+  @override
+  String get ppSaved => '仕入れ値を記録しました';
+
+  @override
+  String get ppWithdraw => 'この記録を取り消す';
+
+  @override
+  String get ppWithdrawn => '記録を取り消しました';
+
+  @override
+  String get ppErrPrice => '単価を入れてください';
+
+  @override
+  String get ppErrSupplier => '仕入先を選ぶか名前を入れてください';
+
+  @override
+  String ppMore(int n) {
+    return 'ほか $n件';
+  }
+
+  @override
+  String get plShippingSaved => '出荷用の書式も保存しました';
 }

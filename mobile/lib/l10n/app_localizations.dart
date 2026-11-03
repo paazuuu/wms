@@ -24460,6 +24460,804 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'絞り込みを解除'**
   String get adjClearFilters;
+
+  /// No description provided for @featOutboundFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷リストで出庫'**
+  String get featOutboundFile;
+
+  /// No description provided for @featOutboundFileDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'いつもの出荷リスト（Excel）を読み込み、JANで照合して在庫から出庫'**
+  String get featOutboundFileDesc;
+
+  /// No description provided for @featOutboundCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫カレンダー'**
+  String get featOutboundCalendar;
+
+  /// No description provided for @featOutboundCalendarDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷リストで出庫した日ごとの記録とファイル'**
+  String get featOutboundCalendarDesc;
+
+  /// No description provided for @ofTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷リストで出庫'**
+  String get ofTitle;
+
+  /// No description provided for @ofTabImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んで出庫'**
+  String get ofTabImport;
+
+  /// No description provided for @ofTabCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫カレンダー'**
+  String get ofTabCalendar;
+
+  /// No description provided for @ofIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'いつも使っている出荷リスト（Excel・CSV）をそのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。'**
+  String get ofIntro;
+
+  /// No description provided for @ofPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選ぶ'**
+  String get ofPick;
+
+  /// No description provided for @ofPickAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'別のファイルを選ぶ'**
+  String get ofPickAgain;
+
+  /// No description provided for @ofReadFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'このファイルは読み込めません（.xlsx / .csv）'**
+  String get ofReadFailed;
+
+  /// No description provided for @ofSheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'シート'**
+  String get ofSheet;
+
+  /// No description provided for @ofHeaderRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出し: {n}行目'**
+  String ofHeaderRow(int n);
+
+  /// No description provided for @ofColumns.
+  ///
+  /// In ja, this message translates to:
+  /// **'列の割り当て'**
+  String get ofColumns;
+
+  /// No description provided for @ofColumnsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出しから自動で割り当てました。違うときは選び直してください。'**
+  String get ofColumnsHint;
+
+  /// No description provided for @ofColNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'（使わない）'**
+  String get ofColNone;
+
+  /// No description provided for @ofRoleJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN'**
+  String get ofRoleJan;
+
+  /// No description provided for @ofRoleQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get ofRoleQuantity;
+
+  /// No description provided for @ofRoleCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番'**
+  String get ofRoleCode;
+
+  /// No description provided for @ofRoleMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get ofRoleMaker;
+
+  /// No description provided for @ofRoleName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get ofRoleName;
+
+  /// No description provided for @ofRoleSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get ofRoleSupplier;
+
+  /// No description provided for @ofRoleUnitPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価（税抜）'**
+  String get ofRoleUnitPrice;
+
+  /// No description provided for @ofRoleUnitPriceTax.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価（税込）'**
+  String get ofRoleUnitPriceTax;
+
+  /// No description provided for @ofRoleListPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'定価'**
+  String get ofRoleListPrice;
+
+  /// No description provided for @ofRoleAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get ofRoleAmount;
+
+  /// No description provided for @ofRoleTaxRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'税率'**
+  String get ofRoleTaxRate;
+
+  /// No description provided for @ofRoleOrderNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'注番'**
+  String get ofRoleOrderNumber;
+
+  /// No description provided for @ofRoleArrival.
+  ///
+  /// In ja, this message translates to:
+  /// **'到着日'**
+  String get ofRoleArrival;
+
+  /// No description provided for @ofRoleOrderDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注日'**
+  String get ofRoleOrderDate;
+
+  /// No description provided for @ofJanGuessed.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANの列は中身（8桁・13桁の数字）から見つけました'**
+  String get ofJanGuessed;
+
+  /// No description provided for @ofNotUsable.
+  ///
+  /// In ja, this message translates to:
+  /// **'このシートには、数量と、JANまたは品番の列が見つかりません。列の割り当てを確認するか、別のシートを選んでください。'**
+  String get ofNotUsable;
+
+  /// No description provided for @ofShippedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日'**
+  String get ofShippedOn;
+
+  /// No description provided for @ofDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先（任意）'**
+  String get ofDestination;
+
+  /// No description provided for @ofNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get ofNote;
+
+  /// No description provided for @ofMatching.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を照合しています…'**
+  String get ofMatching;
+
+  /// No description provided for @ofStOk.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫できる'**
+  String get ofStOk;
+
+  /// No description provided for @ofStShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫不足'**
+  String get ofStShort;
+
+  /// No description provided for @ofStUnknownJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録のJAN'**
+  String get ofStUnknownJan;
+
+  /// No description provided for @ofStNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANなし'**
+  String get ofStNoJan;
+
+  /// No description provided for @ofStSeveral.
+  ///
+  /// In ja, this message translates to:
+  /// **'候補が複数'**
+  String get ofStSeveral;
+
+  /// No description provided for @ofStNoQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量なし'**
+  String get ofStNoQty;
+
+  /// No description provided for @ofActShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫する'**
+  String get ofActShip;
+
+  /// No description provided for @ofActRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録のみ'**
+  String get ofActRecord;
+
+  /// No description provided for @ofActSkip.
+  ///
+  /// In ja, this message translates to:
+  /// **'除外'**
+  String get ofActSkip;
+
+  /// No description provided for @ofColRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'行'**
+  String get ofColRow;
+
+  /// No description provided for @ofColStatus.
+  ///
+  /// In ja, this message translates to:
+  /// **'状態'**
+  String get ofColStatus;
+
+  /// No description provided for @ofColAction.
+  ///
+  /// In ja, this message translates to:
+  /// **'対応'**
+  String get ofColAction;
+
+  /// No description provided for @ofColProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品（ライブラリー）'**
+  String get ofColProduct;
+
+  /// No description provided for @ofColStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get ofColStock;
+
+  /// No description provided for @ofColShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫数'**
+  String get ofColShip;
+
+  /// No description provided for @ofColShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足'**
+  String get ofColShort;
+
+  /// No description provided for @ofColPriceEx.
+  ///
+  /// In ja, this message translates to:
+  /// **'税抜'**
+  String get ofColPriceEx;
+
+  /// No description provided for @ofColPriceTax.
+  ///
+  /// In ja, this message translates to:
+  /// **'税込'**
+  String get ofColPriceTax;
+
+  /// No description provided for @ofColLastPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'前回の仕入れ値'**
+  String get ofColLastPrice;
+
+  /// No description provided for @ofColWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量'**
+  String get ofColWeight;
+
+  /// No description provided for @ofPickProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を選ぶ'**
+  String get ofPickProduct;
+
+  /// No description provided for @ofPickProductTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{row}行目の商品を選ぶ'**
+  String ofPickProductTitle(int row);
+
+  /// No description provided for @ofPickSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・メーカー・JAN・品番で検索'**
+  String get ofPickSearch;
+
+  /// No description provided for @ofMatchedJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANで照合'**
+  String get ofMatchedJan;
+
+  /// No description provided for @ofMatchedBarcode.
+  ///
+  /// In ja, this message translates to:
+  /// **'別のバーコードで照合'**
+  String get ofMatchedBarcode;
+
+  /// No description provided for @ofMatchedCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番で照合'**
+  String get ofMatchedCode;
+
+  /// No description provided for @ofMatchedPicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'手で選んだ商品'**
+  String get ofMatchedPicked;
+
+  /// No description provided for @ofFilterAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて {n}'**
+  String ofFilterAll(int n);
+
+  /// No description provided for @ofSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{rows}行 · 出庫 {ship}行 · 記録のみ {record}行 · 除外 {skip}行'**
+  String ofSummary(int rows, int ship, int record, int skip);
+
+  /// No description provided for @ofSummaryShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫 {n}個'**
+  String ofSummaryShip(int n);
+
+  /// No description provided for @ofSummaryShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足 {n}個（{rows}行）'**
+  String ofSummaryShort(int n, int rows);
+
+  /// No description provided for @ofSummaryAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計 {amount}'**
+  String ofSummaryAmount(String amount);
+
+  /// No description provided for @ofSummaryWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量 {kg} kg'**
+  String ofSummaryWeight(String kg);
+
+  /// No description provided for @ofPost.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫する'**
+  String get ofPost;
+
+  /// No description provided for @ofPostConfirmTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'この内容で出庫しますか？'**
+  String get ofPostConfirmTitle;
+
+  /// No description provided for @ofPostConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{ship}行・{n}個を在庫から減らします。記録のみ {record}行、除外 {skip}行。'**
+  String ofPostConfirmBody(int ship, int n, int record, int skip);
+
+  /// No description provided for @ofPostShortWarn.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫不足の{rows}行は、在庫にある分だけ出庫し、足りない{n}個を不足として記録します。'**
+  String ofPostShortWarn(int rows, int n);
+
+  /// No description provided for @ofPostDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫しました（{n}個）'**
+  String ofPostDone(int n);
+
+  /// No description provided for @ofDuplicateQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じファイルはすでに出庫済みです。もう一度出庫しますか？'**
+  String get ofDuplicateQ;
+
+  /// No description provided for @ofDuplicateAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一度出庫する'**
+  String get ofDuplicateAgain;
+
+  /// No description provided for @ofUploading.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを保存しています…'**
+  String get ofUploading;
+
+  /// No description provided for @ofHelpTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANがない行・在庫と合わない行の扱い'**
+  String get ofHelpTitle;
+
+  /// No description provided for @ofHelpNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANがない行：品番（とメーカー）で、商品ライブラリー・仕入先の品番・価格台帳から探します。見つからなければ「商品を選ぶ」で選ぶか、「記録のみ」にします。'**
+  String get ofHelpNoJan;
+
+  /// No description provided for @ofHelpUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録のJAN：在庫がないので出庫できません。「記録のみ」で出荷の事実を残すか、先に商品ライブラリーへ登録してください。'**
+  String get ofHelpUnknown;
+
+  /// No description provided for @ofHelpShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫不足：在庫にある分だけ出庫し、足りない数を不足として記録します（在庫はマイナスになりません）。不足分は入荷や在庫調整で合わせてください。'**
+  String get ofHelpShort;
+
+  /// No description provided for @ofHelpSeveral.
+  ///
+  /// In ja, this message translates to:
+  /// **'候補が複数：同じ品番の商品がいくつかあります。正しい商品を選んでください。'**
+  String get ofHelpSeveral;
+
+  /// No description provided for @ofCalEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月の出庫はありません'**
+  String get ofCalEmpty;
+
+  /// No description provided for @ofCalMonthAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月の出庫をすべて表示'**
+  String get ofCalMonthAll;
+
+  /// No description provided for @ofCardLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}行 · 出庫 {n}個'**
+  String ofCardLines(int lines, int n);
+
+  /// No description provided for @ofCardShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足 {n}個'**
+  String ofCardShort(int n);
+
+  /// No description provided for @ofUndone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消し済み'**
+  String get ofUndone;
+
+  /// No description provided for @ofDetailTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫の詳細'**
+  String get ofDetailTitle;
+
+  /// No description provided for @ofOpenFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを開く'**
+  String get ofOpenFile;
+
+  /// No description provided for @ofDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get ofDownload;
+
+  /// No description provided for @ofFileSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました: {name}'**
+  String ofFileSaved(String name);
+
+  /// No description provided for @ofNoFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルは保存されていません'**
+  String get ofNoFile;
+
+  /// No description provided for @ofUndo.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を取り消す'**
+  String get ofUndo;
+
+  /// No description provided for @ofUndoQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫を取り消しますか？'**
+  String get ofUndoQ;
+
+  /// No description provided for @ofUndoBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫した{n}個を在庫に戻します。ファイルと記録は残ります。'**
+  String ofUndoBody(int n);
+
+  /// No description provided for @ofUndoDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消しました（{n}個を在庫に戻しました）'**
+  String ofUndoDone(int n);
+
+  /// No description provided for @ofBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} · {at}'**
+  String ofBy(String name, String at);
+
+  /// No description provided for @ofErrDuplicate.
+  ///
+  /// In ja, this message translates to:
+  /// **'同じファイルはすでに出庫済みです'**
+  String get ofErrDuplicate;
+
+  /// No description provided for @ofErrNoLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫する行がありません'**
+  String get ofErrNoLines;
+
+  /// No description provided for @ofErrUndone.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫はすでに取り消されています'**
+  String get ofErrUndone;
+
+  /// No description provided for @ofEmptyDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'この日の出庫はありません'**
+  String get ofEmptyDay;
+
+  /// No description provided for @ppTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れ値の推移'**
+  String get ppTitle;
+
+  /// No description provided for @ppMonthlyAvg.
+  ///
+  /// In ja, this message translates to:
+  /// **'月平均（全仕入先）'**
+  String get ppMonthlyAvg;
+
+  /// No description provided for @ppOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷リストの単価'**
+  String get ppOutbound;
+
+  /// No description provided for @ppOthers.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の仕入先'**
+  String get ppOthers;
+
+  /// No description provided for @ppEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ仕入れ値の記録がありません。取込ファイルの単価や、手で記録した仕入れ値がここに並びます。'**
+  String get ppEmpty;
+
+  /// No description provided for @ppRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れ値を記録'**
+  String get ppRecord;
+
+  /// No description provided for @ppBySupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先ごと'**
+  String get ppBySupplier;
+
+  /// No description provided for @ppSupplierRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'最新 {last}（{day}） · 平均 {avg} · {n}回'**
+  String ppSupplierRow(String last, String day, String avg, int n);
+
+  /// No description provided for @ppMonthly.
+  ///
+  /// In ja, this message translates to:
+  /// **'月ごとの平均'**
+  String get ppMonthly;
+
+  /// No description provided for @ppMonthRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'平均 {avg}（{min}〜{max}） · {qty}個'**
+  String ppMonthRow(String avg, String min, String max, int qty);
+
+  /// No description provided for @ppHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録'**
+  String get ppHistory;
+
+  /// No description provided for @ppSourceReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込'**
+  String get ppSourceReceipt;
+
+  /// No description provided for @ppSourceManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手で記録'**
+  String get ppSourceManual;
+
+  /// No description provided for @ppSourceOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷リスト'**
+  String get ppSourceOutbound;
+
+  /// No description provided for @ppTaxNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額は税抜です（括弧内は税込）'**
+  String get ppTaxNote;
+
+  /// No description provided for @ppNoSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先なし'**
+  String get ppNoSupplier;
+
+  /// No description provided for @ppSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get ppSupplier;
+
+  /// No description provided for @ppSupplierOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他（名前を入力）'**
+  String get ppSupplierOther;
+
+  /// No description provided for @ppSupplierName.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の名前'**
+  String get ppSupplierName;
+
+  /// No description provided for @ppPriceEx.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価（税抜）'**
+  String get ppPriceEx;
+
+  /// No description provided for @ppTaxRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'税率（%）'**
+  String get ppTaxRate;
+
+  /// No description provided for @ppQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量（任意）'**
+  String get ppQty;
+
+  /// No description provided for @ppDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れ日'**
+  String get ppDate;
+
+  /// No description provided for @ppNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（任意）'**
+  String get ppNote;
+
+  /// No description provided for @ppSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録する'**
+  String get ppSave;
+
+  /// No description provided for @ppSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れ値を記録しました'**
+  String get ppSaved;
+
+  /// No description provided for @ppWithdraw.
+  ///
+  /// In ja, this message translates to:
+  /// **'この記録を取り消す'**
+  String get ppWithdraw;
+
+  /// No description provided for @ppWithdrawn.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録を取り消しました'**
+  String get ppWithdrawn;
+
+  /// No description provided for @ppErrPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価を入れてください'**
+  String get ppErrPrice;
+
+  /// No description provided for @ppErrSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を選ぶか名前を入れてください'**
+  String get ppErrSupplier;
+
+  /// No description provided for @ppMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'ほか {n}件'**
+  String ppMore(int n);
+
+  /// No description provided for @plShippingSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷用の書式も保存しました'**
+  String get plShippingSaved;
 }
 
 class _AppLocalizationsDelegate

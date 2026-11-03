@@ -149,6 +149,10 @@ class FeatureEntry {
         return l10n.featUnplannedReceipt;
       case 'warehouse_memos':
         return l10n.featWarehouseMemos;
+      case 'outbound_file':
+        return l10n.featOutboundFile;
+      case 'outbound_calendar':
+        return l10n.featOutboundCalendar;
       case 'payments':
         return l10n.featPayments;
       case 'field_library':
@@ -283,6 +287,10 @@ class FeatureEntry {
         return l10n.featUnplannedReceiptDesc;
       case 'warehouse_memos':
         return l10n.featWarehouseMemosDesc;
+      case 'outbound_file':
+        return l10n.featOutboundFileDesc;
+      case 'outbound_calendar':
+        return l10n.featOutboundCalendarDesc;
       case 'payments':
         return l10n.featPaymentsDesc;
       case 'field_library':

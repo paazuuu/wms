@@ -14149,4 +14149,455 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adjClearFilters => 'Clear filters';
+
+  @override
+  String get featOutboundFile => 'Ship from a list';
+
+  @override
+  String get featOutboundFileDesc =>
+      'Read your usual shipping list, match by JAN, take it out of stock';
+
+  @override
+  String get featOutboundCalendar => 'Shipping calendar';
+
+  @override
+  String get featOutboundCalendarDesc =>
+      'Each day\'s shipments from lists, with their files';
+
+  @override
+  String get ofTitle => 'Ship from a list';
+
+  @override
+  String get ofTabImport => 'Read and ship';
+
+  @override
+  String get ofTabCalendar => 'Calendar';
+
+  @override
+  String get ofIntro =>
+      'Read the shipping list you already use (Excel or CSV) as it is, in any language. Products are found by JAN first; rows without one by part number and maker.';
+
+  @override
+  String get ofPick => 'Choose a file';
+
+  @override
+  String get ofPickAgain => 'Choose another file';
+
+  @override
+  String get ofReadFailed => 'This file cannot be read (.xlsx / .csv)';
+
+  @override
+  String get ofSheet => 'Sheet';
+
+  @override
+  String ofHeaderRow(int n) {
+    return 'Headings on row $n';
+  }
+
+  @override
+  String get ofColumns => 'Columns';
+
+  @override
+  String get ofColumnsHint =>
+      'Matched from the headings. Change any that are wrong.';
+
+  @override
+  String get ofColNone => '(not used)';
+
+  @override
+  String get ofRoleJan => 'JAN';
+
+  @override
+  String get ofRoleQuantity => 'Quantity';
+
+  @override
+  String get ofRoleCode => 'Part no.';
+
+  @override
+  String get ofRoleMaker => 'Maker';
+
+  @override
+  String get ofRoleName => 'Name';
+
+  @override
+  String get ofRoleSupplier => 'Supplier';
+
+  @override
+  String get ofRoleUnitPrice => 'Unit price (excl. tax)';
+
+  @override
+  String get ofRoleUnitPriceTax => 'Unit price (incl. tax)';
+
+  @override
+  String get ofRoleListPrice => 'List price';
+
+  @override
+  String get ofRoleAmount => 'Amount';
+
+  @override
+  String get ofRoleTaxRate => 'Tax rate';
+
+  @override
+  String get ofRoleOrderNumber => 'Order no.';
+
+  @override
+  String get ofRoleArrival => 'Arrival';
+
+  @override
+  String get ofRoleOrderDate => 'Order date';
+
+  @override
+  String get ofJanGuessed =>
+      'The JAN column was found by its contents (8 or 13 digits)';
+
+  @override
+  String get ofNotUsable =>
+      'No quantity and JAN or part-number column on this sheet. Check the columns or choose another sheet.';
+
+  @override
+  String get ofShippedOn => 'Shipped on';
+
+  @override
+  String get ofDestination => 'Destination (optional)';
+
+  @override
+  String get ofNote => 'Note (optional)';
+
+  @override
+  String get ofMatching => 'Matching products…';
+
+  @override
+  String get ofStOk => 'Ready';
+
+  @override
+  String get ofStShort => 'Short';
+
+  @override
+  String get ofStUnknownJan => 'JAN not registered';
+
+  @override
+  String get ofStNoJan => 'No JAN';
+
+  @override
+  String get ofStSeveral => 'Several candidates';
+
+  @override
+  String get ofStNoQty => 'No quantity';
+
+  @override
+  String get ofActShip => 'Ship';
+
+  @override
+  String get ofActRecord => 'Record only';
+
+  @override
+  String get ofActSkip => 'Leave out';
+
+  @override
+  String get ofColRow => 'Row';
+
+  @override
+  String get ofColStatus => 'Status';
+
+  @override
+  String get ofColAction => 'Action';
+
+  @override
+  String get ofColProduct => 'Product (library)';
+
+  @override
+  String get ofColStock => 'Stock';
+
+  @override
+  String get ofColShip => 'Out';
+
+  @override
+  String get ofColShort => 'Short';
+
+  @override
+  String get ofColPriceEx => 'Excl.';
+
+  @override
+  String get ofColPriceTax => 'Incl.';
+
+  @override
+  String get ofColLastPrice => 'Last purchase price';
+
+  @override
+  String get ofColWeight => 'Weight';
+
+  @override
+  String get ofPickProduct => 'Choose product';
+
+  @override
+  String ofPickProductTitle(int row) {
+    return 'Product for row $row';
+  }
+
+  @override
+  String get ofPickSearch => 'Search by name, maker, JAN or part no.';
+
+  @override
+  String get ofMatchedJan => 'By JAN';
+
+  @override
+  String get ofMatchedBarcode => 'By another barcode';
+
+  @override
+  String get ofMatchedCode => 'By part no.';
+
+  @override
+  String get ofMatchedPicked => 'Chosen by hand';
+
+  @override
+  String ofFilterAll(int n) {
+    return 'All $n';
+  }
+
+  @override
+  String ofSummary(int rows, int ship, int record, int skip) {
+    return '$rows rows · ship $ship · record $record · leave out $skip';
+  }
+
+  @override
+  String ofSummaryShip(int n) {
+    return '$n out';
+  }
+
+  @override
+  String ofSummaryShort(int n, int rows) {
+    return '$n short ($rows rows)';
+  }
+
+  @override
+  String ofSummaryAmount(String amount) {
+    return 'Total $amount';
+  }
+
+  @override
+  String ofSummaryWeight(String kg) {
+    return 'Weight $kg kg';
+  }
+
+  @override
+  String get ofPost => 'Ship';
+
+  @override
+  String get ofPostConfirmTitle => 'Ship these?';
+
+  @override
+  String ofPostConfirmBody(int ship, int n, int record, int skip) {
+    return '$n units on $ship rows leave the stock. Record only: $record rows; left out: $skip.';
+  }
+
+  @override
+  String ofPostShortWarn(int rows, int n) {
+    return 'On the $rows short rows only what is in stock goes out; the $n missing are recorded as short.';
+  }
+
+  @override
+  String ofPostDone(int n) {
+    return 'Shipped ($n)';
+  }
+
+  @override
+  String get ofDuplicateQ => 'This file was already shipped. Ship it again?';
+
+  @override
+  String get ofDuplicateAgain => 'Ship again';
+
+  @override
+  String get ofUploading => 'Saving the file…';
+
+  @override
+  String get ofHelpTitle =>
+      'Rows without a JAN, or that do not match the stock';
+
+  @override
+  String get ofHelpNoJan =>
+      'No JAN: found by part number (and maker) in the library, suppliers\' codes and the price book. If not found, choose the product, or record only.';
+
+  @override
+  String get ofHelpUnknown =>
+      'JAN not registered: there is no stock to take. Record only, or register the product first.';
+
+  @override
+  String get ofHelpShort =>
+      'Short: only what is in stock goes out and the rest is recorded as short (stock never goes below zero). Settle it later by a receipt or an adjustment.';
+
+  @override
+  String get ofHelpSeveral =>
+      'Several candidates: more than one product has this part number. Choose the right one.';
+
+  @override
+  String get ofCalEmpty => 'Nothing shipped this month';
+
+  @override
+  String get ofCalMonthAll => 'Show the whole month';
+
+  @override
+  String ofCardLines(int lines, int n) {
+    return '$lines rows · $n out';
+  }
+
+  @override
+  String ofCardShort(int n) {
+    return '$n short';
+  }
+
+  @override
+  String get ofUndone => 'Undone';
+
+  @override
+  String get ofDetailTitle => 'Shipment';
+
+  @override
+  String get ofOpenFile => 'Open the file';
+
+  @override
+  String get ofDownload => 'Download';
+
+  @override
+  String ofFileSaved(String name) {
+    return 'Saved: $name';
+  }
+
+  @override
+  String get ofNoFile => 'No file was kept';
+
+  @override
+  String get ofUndo => 'Undo the shipment';
+
+  @override
+  String get ofUndoQ => 'Undo this shipment?';
+
+  @override
+  String ofUndoBody(int n) {
+    return 'The $n units go back into stock. The file and record stay.';
+  }
+
+  @override
+  String ofUndoDone(int n) {
+    return 'Undone ($n back in stock)';
+  }
+
+  @override
+  String ofBy(String name, String at) {
+    return '$name · $at';
+  }
+
+  @override
+  String get ofErrDuplicate => 'This file was already shipped';
+
+  @override
+  String get ofErrNoLines => 'There are no rows to ship';
+
+  @override
+  String get ofErrUndone => 'This shipment was already undone';
+
+  @override
+  String get ofEmptyDay => 'Nothing shipped on this day';
+
+  @override
+  String get ppTitle => 'Purchase prices';
+
+  @override
+  String get ppMonthlyAvg => 'Monthly average (all suppliers)';
+
+  @override
+  String get ppOutbound => 'Shipping-list price';
+
+  @override
+  String get ppOthers => 'Other suppliers';
+
+  @override
+  String get ppEmpty =>
+      'No purchase prices yet. Prices from imported files and those recorded by hand appear here.';
+
+  @override
+  String get ppRecord => 'Record a price';
+
+  @override
+  String get ppBySupplier => 'By supplier';
+
+  @override
+  String ppSupplierRow(String last, String day, String avg, int n) {
+    return 'Last $last ($day) · avg $avg · $n times';
+  }
+
+  @override
+  String get ppMonthly => 'By month';
+
+  @override
+  String ppMonthRow(String avg, String min, String max, int qty) {
+    return 'avg $avg ($min–$max) · $qty units';
+  }
+
+  @override
+  String get ppHistory => 'Records';
+
+  @override
+  String get ppSourceReceipt => 'Import';
+
+  @override
+  String get ppSourceManual => 'By hand';
+
+  @override
+  String get ppSourceOutbound => 'Shipping list';
+
+  @override
+  String get ppTaxNote => 'Prices excl. tax (incl. tax in brackets)';
+
+  @override
+  String get ppNoSupplier => 'No supplier';
+
+  @override
+  String get ppSupplier => 'Supplier';
+
+  @override
+  String get ppSupplierOther => 'Other (type the name)';
+
+  @override
+  String get ppSupplierName => 'Supplier name';
+
+  @override
+  String get ppPriceEx => 'Unit price (excl. tax)';
+
+  @override
+  String get ppTaxRate => 'Tax rate (%)';
+
+  @override
+  String get ppQty => 'Quantity (optional)';
+
+  @override
+  String get ppDate => 'Bought on';
+
+  @override
+  String get ppNote => 'Note (optional)';
+
+  @override
+  String get ppSave => 'Record';
+
+  @override
+  String get ppSaved => 'Price recorded';
+
+  @override
+  String get ppWithdraw => 'Withdraw this record';
+
+  @override
+  String get ppWithdrawn => 'Record withdrawn';
+
+  @override
+  String get ppErrPrice => 'Enter the price';
+
+  @override
+  String get ppErrSupplier => 'Choose or name the supplier';
+
+  @override
+  String ppMore(int n) {
+    return '$n more';
+  }
+
+  @override
+  String get plShippingSaved => 'The shipping-format file was saved too';
 }

@@ -134,17 +134,25 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pl-export-shown')));
     await tester.pumpAndSettle();
-    final shown = readXlsx(saved.single.$2);
+    // The library's own file, and the same products in the shipping layout.
+    expect(saved.length, 2);
+    final shown = readXlsx(saved.first.$2);
     expect(shown.length, 2);
     expect(shown[1][2], 'テストノート');
     expect(shown.first.last, '在庫数(本社倉庫)');
+    expect(saved.last.$1, startsWith('出荷用_絞り込み_'));
+    final shipping = readXlsx(saved.last.$2);
+    expect(shipping.first.take(8).toList(), ['下单时间', '到货时间', '编号', '供货商', '品牌', '品番', 'ジャパンコード', '数量']);
+    expect(shipping.first.last, '総重量（kg）');
+    expect(shipping[1][6], '4909999000021');
 
     await tester.tap(find.byKey(const ValueKey('pl-export')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pl-export-all')));
     await tester.pumpAndSettle();
-    expect(saved.last.$1, startsWith('商品ライブラリー_全件_'));
-    expect(readXlsx(saved.last.$2).length, 3);
-    expect(find.text('2件をExcelで保存しました'), findsOneWidget);
+    final all = saved.where((f) => f.$1.startsWith('商品ライブラリー_全件_')).single;
+    expect(readXlsx(all.$2).length, 3);
+    expect(saved.last.$1, startsWith('出荷用_全件_'));
+    expect(find.textContaining('2件をExcelで保存しました'), findsOneWidget);
   });
 }

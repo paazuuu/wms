@@ -8489,6 +8489,53 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   again (a JAN no longer in the library is filled in to be adjusted).
 - The 「在庫を調整」 button still opens the form to key or scan a JAN.
 
+## 0187–0188: 仕入れ値の履歴, and 出荷リストで出庫 with the 出庫カレンダー
+
+- 0187 仕入れ値: every time a product was bought, from which supplier, at
+  what price (税抜; 税込 from its tax rate, else 10%).
+  - receipt: the lines read from stock files (master_imports.read_lines of
+    発注 / 予定外の入荷 — not undone, not a summary invoice, not closed as not
+    delivered), dated by the document.
+  - manual: purchase_price_entries, written by hand on the product
+    (purchase_price_record / purchase_price_withdraw — kept, removed_at).
+  - outbound (0188): a 出荷リスト's row with its supplier and price — drawn
+    on its own, kept out of the averages so one purchase is not counted twice.
+  - product_purchase_prices(product): the points, each month's average over
+    every supplier (weighted by quantity, with min/max) and each supplier's
+    last and average price. Seen by can_view_purchase_prices (report.view,
+    inventory.adjust, product.manage, purchase_order.view, user.manage).
+- 商品詳細 「仕入れ値の推移」: a line chart — 月平均（全仕入先）, the suppliers
+  bought from most (the rest as その他の仕入先), 出荷リストの単価 — then the same
+  as tables: 仕入先ごと, 月ごとの平均, 記録 (file, quantity; a hand-written one
+  can be withdrawn), and 「仕入れ値を記録」.
+- 0188 出荷リストで出庫: the list people already keep (an .xlsx such as the
+  明细 sheet, or CSV) read as it is.
+  - Every sheet is read; the one with a quantity and a JAN or 品番 is chosen
+    (a name such as 明细 / 出荷 decides a tie), its heading row found in the
+    first 15 rows. Headings are understood in Japanese, Chinese, English and
+    Korean (ジャパンコード, 条形码, 数量, 单价（税前）/（税入）, 零售价, 供货商, 品牌,
+    品番, 合计, 注番, 到货时间 …); with no JAN heading, the column whose cells
+    are 8 or 13 digits. 「列の割り当て」 changes any column by hand.
+  - outbound_match: each row's product by JAN (or another barcode), else by
+    品番 — the product's, a supplier's code for it, the 価格台帳's — narrowed
+    by maker; its stock in the warehouse, weight and last 仕入れ値.
+  - Each row: 出庫できる / 在庫不足 / 未登録のJAN / JANなし / 候補が複数 / 数量なし,
+    and what is done: 出庫する (as much as is in stock; the rest recorded as
+    short — stock never goes below 0), 記録のみ (kept, no stock moved), 除外.
+    The same product on several rows takes from one stock. A product can be
+    chosen by hand (「商品を選ぶ」).
+  - outbound_file_post: the file kept in the private outbound-files bucket
+    (<warehouse>/<file>), each row SHIP-ped with its prices, supplier, 注番,
+    the row as read; the same file twice asks first (outbound_duplicate).
+    outbound_file_undo puts it back (SHIP_CANCEL) and marks the file undone.
+  - 出庫カレンダー: the month's lists by the day shipped; each opens its rows,
+    its file in a new browser tab, a download, and 「出庫を取り消す」.
+  - product_stock_history (0145) names the list a shipment came from.
+- 商品ライブラリー's Excel download also saves 出荷用_….xlsx: the 明细 layout
+  (下单时间 … 注番) with 重量（g/個） and 総重量（kg）; 单价（税入）=J×1.1,
+  合计=H×K and 総重量=H×N÷1000 are formulas (a quantity changed changes them),
+  with a totals row. It reads back through 出荷リストで出庫.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

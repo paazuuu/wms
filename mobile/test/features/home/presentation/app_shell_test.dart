@@ -313,9 +313,10 @@ void main() {
     });
 
     testWidgets('a collapsed rail still navigates', (tester) async {
+      // Tall enough that ピッキング is on screen below the 現場作業 entries.
       tester.view
         ..devicePixelRatio = 1.0
-        ..physicalSize = const Size(1400, 1200);
+        ..physicalSize = const Size(1400, 1600);
       addTearDown(tester.view.reset);
 
       final app = _wrap();

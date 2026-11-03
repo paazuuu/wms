@@ -59,6 +59,7 @@ import '../../payments/presentation/payments_screen.dart';
 import '../../stock_import/presentation/inspection_calendar_screen.dart';
 import '../../unplanned_receipt/unplanned_receipt_screen.dart';
 import '../../warehouse_memos/warehouse_memos_screen.dart';
+import '../../outbound_file/presentation/outbound_file_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
@@ -268,6 +269,22 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _shipment,
             requiredAnyOf: ['pack.complete', 'ship.complete'],
+          ),
+          // 出荷リストで出庫 (0188): the usual shipping list read and shipped;
+          // 出庫カレンダー: each day's lists with their files.
+          FeatureEntry(
+            id: 'outbound_file',
+            icon: Icons.upload_file_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundFile,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
+          ),
+          FeatureEntry(
+            id: 'outbound_calendar',
+            icon: Icons.event_note_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundCalendar,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view', 'sales_order.view'],
           ),
           // 出庫の提案 (0139): a shipment worked out from the stock, by
           // percentage or by quantity, to a saved destination.
@@ -695,6 +712,8 @@ Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
 Widget _inspectionCalendar(BuildContext _) => const InspectionCalendarScreen();
 Widget _unplannedReceipt(BuildContext _) => const UnplannedReceiptScreen();
 Widget _warehouseMemos(BuildContext _) => const WarehouseMemosScreen();
+Widget _outboundFile(BuildContext _) => const OutboundFileScreen();
+Widget _outboundCalendar(BuildContext _) => const OutboundFileScreen(initialTab: 1);
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
