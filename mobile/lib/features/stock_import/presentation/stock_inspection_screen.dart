@@ -495,7 +495,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     }.toList()
       ..sort();
     bool shown(MasterImportLine l) {
-      if (_day case final d?) return inspectionDayOf(l) == d;
+      if (_day case final d?) return !l.notDelivered && inspectionDayOf(l) == d;
       final p = products[l.janCode];
       if (_which == 'open' && l.inspected) return false;
       if (_which == 'done' && (!l.inspected || l.notDelivered)) return false;
@@ -1005,15 +1005,24 @@ class _InspectLine extends ConsumerWidget {
       for (final n in notes) [if ((n.location ?? '').isNotEmpty) '📍${n.location}', n.body].join(' ')
     ];
 
+    // The same checkbox on every line, as everywhere in 検品: ticked and fixed
+    // once checked in; empty and fixed when closed as not delivered (0182).
     final tick = done && line.notDelivered
-        // Closed as not delivered (0182): not a check-in — shown apart.
         ? Tooltip(
             message: l10n.siNotDelivered,
-            child: Icon(Icons.do_not_disturb_on_outlined,
-                color: scheme.outline, key: ValueKey('si-closed-${line.lineNo}')),
+            child: Checkbox(key: ValueKey('si-closed-${line.lineNo}'), value: false, onChanged: null),
           )
         : done
-        ? Icon(Icons.check_circle, color: scheme.primary, key: ValueKey('si-checked-${line.lineNo}'))
+        ? Tooltip(
+            message: l10n.siCheckedTip,
+            child: Checkbox(
+              key: ValueKey('si-checked-${line.lineNo}'),
+              value: true,
+              onChanged: null,
+              fillColor: WidgetStatePropertyAll(scheme.primary),
+              checkColor: scheme.onPrimary,
+            ),
+          )
         : Checkbox(
             key: ValueKey('si-tick-${line.lineNo}'),
             value: ticked,

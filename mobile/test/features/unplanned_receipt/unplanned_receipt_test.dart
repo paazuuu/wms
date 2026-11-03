@@ -210,6 +210,11 @@ void main() {
     expect(find.byKey(const ValueKey('si-closed-2')), findsOneWidget);
     expect(find.byKey(const ValueKey('si-checked-2')), findsNothing);
     expect(find.byKey(const ValueKey('si-checked-1')), findsOneWidget);
+    // A checkbox on every line, as everywhere in 検品: ticked and fixed, or empty and fixed.
+    final checked = tester.widget<Checkbox>(find.byKey(const ValueKey('si-checked-1')));
+    final closed = tester.widget<Checkbox>(find.byKey(const ValueKey('si-closed-2')));
+    expect((checked.value, checked.onChanged), (true, null));
+    expect((closed.value, closed.onChanged), (false, null));
     expect(tester.widget<Text>(find.byKey(const ValueKey('si-status'))).data, '検品済み 2行・届いていない（閉じた）1行・検品待ち 0行');
     // 検品済み leaves it out; 届いていない shows it alone.
     await tester.tap(find.byKey(const ValueKey('si-which-done')));
@@ -219,6 +224,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
     expect(find.byKey(const ValueKey('si-done-1')), findsNothing);
+  });
+
+  testWidgets('a day of 検品履歴 shows only what was checked in that day, not what was closed', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final reader = _Reader(const MasterRead(lines: []))..import = _staged(done: [1], closed: [2, 3]);
+    await pumpApp(tester, StockInspectionDetailScreen(importId: 31, day: DateTime(2026, 11, 2)), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(_Stock(const {}, reader)),
+      masterImportRepositoryProvider.overrideWithValue(reader),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-done-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-done-2')), findsNothing);
+    expect(find.byKey(const ValueKey('si-done-3')), findsNothing);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-day-text'))).data, contains('（1行・20個）'));
   });
 
   testWidgets('by default the unticked line keeps waiting', (tester) async {

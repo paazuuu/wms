@@ -13635,4 +13635,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get siWhichClosed => '届いていない';
+
+  @override
+  String get siCheckedTip => '検品済み（取り消すときは「…」から）';
 }

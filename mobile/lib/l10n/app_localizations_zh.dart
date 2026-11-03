@@ -13549,4 +13549,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get siWhichClosed => '未到货';
+
+  @override
+  String get siCheckedTip => '已验货（撤销请从“…”操作）';
 }

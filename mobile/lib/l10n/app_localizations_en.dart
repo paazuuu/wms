@@ -13912,4 +13912,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get siWhichClosed => 'Not delivered';
+
+  @override
+  String get siCheckedTip => 'Checked in (take it back from ⋯)';
 }

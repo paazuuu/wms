@@ -4352,5 +4352,6 @@
   "payUnplannedWaiting": "{n} unplanned receipts are awaiting their invoice",
   "payUnplannedWaitingHint": "See 予定外の入荷 → 請求書待ち",
   "siDoneAndClosed": "{done} checked in · {closed} not delivered (closed) · {open} waiting",
-  "siWhichClosed": "Not delivered"
+  "siWhichClosed": "Not delivered",
+  "siCheckedTip": "Checked in (take it back from ⋯)"
 }

@@ -12338,5 +12338,6 @@
       }
     }
   },
-  "siWhichClosed": "届いていない"
+  "siWhichClosed": "届いていない",
+  "siCheckedTip": "検品済み（取り消すときは「…」から）"
 }

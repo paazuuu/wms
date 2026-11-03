@@ -4352,5 +4352,6 @@
   "payUnplannedWaiting": "有 {n}件计划外入货在等待发票",
   "payUnplannedWaitingHint": "可在 计划外入货 → 待发票 中查看",
   "siDoneAndClosed": "已验货 {done}行・未到货（已关闭）{closed}行・待验货 {open}行",
-  "siWhichClosed": "未到货"
+  "siWhichClosed": "未到货",
+  "siCheckedTip": "已验货（撤销请从“…”操作）"
 }

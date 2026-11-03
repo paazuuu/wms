@@ -24058,6 +24058,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'届いていない'**
   String get siWhichClosed;
+
+  /// No description provided for @siCheckedTip.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済み（取り消すときは「…」から）'**
+  String get siCheckedTip;
 }
 
 class _AppLocalizationsDelegate
