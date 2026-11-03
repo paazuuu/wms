@@ -13571,4 +13571,85 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get siOpenReading => '读取内容与原文件';
+
+  @override
+  String get featWarehouseMemos => '备忘';
+
+  @override
+  String get featWarehouseMemosDesc => '按仓库记录备忘，可按书写日期从日历查看，也可按内容搜索';
+
+  @override
+  String get wmTitle => '备忘';
+
+  @override
+  String get wmIntro =>
+      '可按仓库留下备忘（交接・发现的事・待办等）。备忘按书写日期进入日历，点日期即可查看当天的备忘。上方搜索可不论日期按内容查找。';
+
+  @override
+  String get wmAllWarehouses => '全部仓库';
+
+  @override
+  String get wmSearch => '搜索备忘内容（回车）';
+
+  @override
+  String get wmSearchAllDays => '搜索时会查找所有日期的备忘';
+
+  @override
+  String get wmWrite => '写备忘';
+
+  @override
+  String get wmEdit => '修改备忘';
+
+  @override
+  String get wmBody => '备忘';
+
+  @override
+  String get wmBodyHint => '例：明天上午有〇〇商事的入货，请空出B架';
+
+  @override
+  String get wmSaved => '已保存备忘';
+
+  @override
+  String get wmChanged => '已修改备忘';
+
+  @override
+  String get wmRemoveQ => '要删除此备忘吗？';
+
+  @override
+  String get wmRemove => '删除';
+
+  @override
+  String get wmRemoved => '已删除备忘';
+
+  @override
+  String wmFound(String q, int n) {
+    return '包含“$q”的备忘 $n件';
+  }
+
+  @override
+  String wmMonthList(int n) {
+    return '本月备忘 $n件';
+  }
+
+  @override
+  String wmDayList(String day, int n) {
+    return '$day 的备忘 $n件';
+  }
+
+  @override
+  String get wmNone => '没有备忘';
+
+  @override
+  String get wmNoneFound => '未找到';
+
+  @override
+  String wmUpdated(String at, String by) {
+    return '$at 由 $by 修改';
+  }
+
+  @override
+  String get wmErrEmpty => '请输入备忘';
+
+  @override
+  String get wmErrLong => '备忘最多4000字';
 }

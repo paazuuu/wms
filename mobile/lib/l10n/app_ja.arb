@@ -12358,5 +12358,66 @@
       }
     }
   },
-  "siOpenReading": "読み取った内容と元のファイル"
+  "siOpenReading": "読み取った内容と元のファイル",
+  "featWarehouseMemos": "メモ",
+  "featWarehouseMemosDesc": "倉庫ごとのメモ。書いた日付でカレンダーから見返せて、内容で検索できます",
+  "wmTitle": "メモ",
+  "wmIntro": "倉庫ごとにメモを残せます（申し送り・気づいたこと・やること など）。メモは書いた日付でカレンダーに入り、日付を押すとその日のメモが見られます。上の検索では、日付に関係なくメモの内容から探せます。",
+  "wmAllWarehouses": "すべての倉庫",
+  "wmSearch": "メモの内容を検索（Enter）",
+  "wmSearchAllDays": "検索中はすべての日付のメモから探しています",
+  "wmWrite": "メモを書く",
+  "wmEdit": "メモを直す",
+  "wmBody": "メモ",
+  "wmBodyHint": "例: 明日の午前に〇〇商事の入荷あり。棚Bを空けておく",
+  "wmSaved": "メモを残しました",
+  "wmChanged": "メモを直しました",
+  "wmRemoveQ": "このメモを消しますか？",
+  "wmRemove": "消す",
+  "wmRemoved": "メモを消しました",
+  "wmFound": "「{q}」を含むメモ {n}件",
+  "@wmFound": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wmMonthList": "この月のメモ {n}件",
+  "@wmMonthList": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wmDayList": "{day} のメモ {n}件",
+  "@wmDayList": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wmNone": "メモはありません",
+  "wmNoneFound": "見つかりませんでした",
+  "wmUpdated": "{at} に {by} が修正",
+  "@wmUpdated": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      },
+      "by": {
+        "type": "String"
+      }
+    }
+  },
+  "wmErrEmpty": "メモを入力してください",
+  "wmErrLong": "メモは4000文字までです"
 }

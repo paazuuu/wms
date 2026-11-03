@@ -24094,6 +24094,150 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'読み取った内容と元のファイル'**
   String get siOpenReading;
+
+  /// No description provided for @featWarehouseMemos.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ'**
+  String get featWarehouseMemos;
+
+  /// No description provided for @featWarehouseMemosDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫ごとのメモ。書いた日付でカレンダーから見返せて、内容で検索できます'**
+  String get featWarehouseMemosDesc;
+
+  /// No description provided for @wmTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ'**
+  String get wmTitle;
+
+  /// No description provided for @wmIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫ごとにメモを残せます（申し送り・気づいたこと・やること など）。メモは書いた日付でカレンダーに入り、日付を押すとその日のメモが見られます。上の検索では、日付に関係なくメモの内容から探せます。'**
+  String get wmIntro;
+
+  /// No description provided for @wmAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての倉庫'**
+  String get wmAllWarehouses;
+
+  /// No description provided for @wmSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモの内容を検索（Enter）'**
+  String get wmSearch;
+
+  /// No description provided for @wmSearchAllDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'検索中はすべての日付のメモから探しています'**
+  String get wmSearchAllDays;
+
+  /// No description provided for @wmWrite.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを書く'**
+  String get wmWrite;
+
+  /// No description provided for @wmEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを直す'**
+  String get wmEdit;
+
+  /// No description provided for @wmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ'**
+  String get wmBody;
+
+  /// No description provided for @wmBodyHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 明日の午前に〇〇商事の入荷あり。棚Bを空けておく'**
+  String get wmBodyHint;
+
+  /// No description provided for @wmSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを残しました'**
+  String get wmSaved;
+
+  /// No description provided for @wmChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを直しました'**
+  String get wmChanged;
+
+  /// No description provided for @wmRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'このメモを消しますか？'**
+  String get wmRemoveQ;
+
+  /// No description provided for @wmRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'消す'**
+  String get wmRemove;
+
+  /// No description provided for @wmRemoved.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを消しました'**
+  String get wmRemoved;
+
+  /// No description provided for @wmFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{q}」を含むメモ {n}件'**
+  String wmFound(String q, int n);
+
+  /// No description provided for @wmMonthList.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月のメモ {n}件'**
+  String wmMonthList(int n);
+
+  /// No description provided for @wmDayList.
+  ///
+  /// In ja, this message translates to:
+  /// **'{day} のメモ {n}件'**
+  String wmDayList(String day, int n);
+
+  /// No description provided for @wmNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモはありません'**
+  String get wmNone;
+
+  /// No description provided for @wmNoneFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'見つかりませんでした'**
+  String get wmNoneFound;
+
+  /// No description provided for @wmUpdated.
+  ///
+  /// In ja, this message translates to:
+  /// **'{at} に {by} が修正'**
+  String wmUpdated(String at, String by);
+
+  /// No description provided for @wmErrEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを入力してください'**
+  String get wmErrEmpty;
+
+  /// No description provided for @wmErrLong.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモは4000文字までです'**
+  String get wmErrLong;
 }
 
 class _AppLocalizationsDelegate

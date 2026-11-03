@@ -57,50 +57,12 @@ class _UnplannedWaitingTabState extends ConsumerState<UnplannedWaitingTab> {
 
   Future<void> _settle(UnplannedWaiting w) async {
     final l10n = AppLocalizations.of(context);
-    final note = TextEditingController();
-    var reason = NoInvoiceReason.sample;
-    final ok = await showDialog<bool>(
+    final got = await showDialog<(NoInvoiceReason, String)>(
       context: context,
-      builder: (d) => StatefulBuilder(
-        builder: (c, set) => AlertDialog(
-          title: Text(l10n.urSettleQ(w.importId)),
-          content: SingleChildScrollView(
-            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(l10n.urSettleBody),
-              for (final r in NoInvoiceReason.values)
-                RadioListTile<NoInvoiceReason>(
-                  key: ValueKey('uw-reason-${r.wire}'),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  value: r,
-                  // ignore: deprecated_member_use
-                  groupValue: reason,
-                  // ignore: deprecated_member_use
-                  onChanged: (v) => set(() => reason = v ?? reason),
-                  title: Text(noInvoiceReasonLabel(l10n, r)),
-                ),
-              TextField(
-                key: const ValueKey('uw-note'),
-                controller: note,
-                decoration: InputDecoration(labelText: l10n.urSettleNote, border: const OutlineInputBorder()),
-                onChanged: (_) => set(() {}),
-              ),
-            ]),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
-            FilledButton(
-              key: const ValueKey('uw-settle-go'),
-              onPressed: reason == NoInvoiceReason.other && note.text.trim().isEmpty ? null : () => Navigator.pop(d, true),
-              child: Text(l10n.urSettleGo),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => _SettleDialog(importId: w.importId),
     );
-    final text = note.text.trim();
-    note.dispose();
-    if (ok != true || !mounted) return;
+    if (got == null || !mounted) return;
+    final (reason, text) = got;
     final r = await ref
         .read(stockImportRepositoryProvider)
         .settleWithoutInvoice(w.importId, reason, note: text.isEmpty ? null : text);
@@ -344,5 +306,68 @@ class _UnplannedWaitingTabState extends ConsumerState<UnplannedWaitingTab> {
           ),
         ),
     ]);
+  }
+}
+
+/// Why no invoice will come: the reason, and a memo (required for その他).
+/// Pops (reason, memo).
+class _SettleDialog extends StatefulWidget {
+  const _SettleDialog({required this.importId});
+
+  final int importId;
+
+  @override
+  State<_SettleDialog> createState() => _SettleDialogState();
+}
+
+class _SettleDialogState extends State<_SettleDialog> {
+  var _reason = NoInvoiceReason.sample;
+  final _note = TextEditingController();
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.urSettleQ(widget.importId)),
+      content: SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.urSettleBody),
+          for (final r in NoInvoiceReason.values)
+            RadioListTile<NoInvoiceReason>(
+              key: ValueKey('uw-reason-${r.wire}'),
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              value: r,
+              // ignore: deprecated_member_use
+              groupValue: _reason,
+              // ignore: deprecated_member_use
+              onChanged: (v) => setState(() => _reason = v ?? _reason),
+              title: Text(noInvoiceReasonLabel(l10n, r)),
+            ),
+          TextField(
+            key: const ValueKey('uw-note'),
+            controller: _note,
+            decoration: InputDecoration(labelText: l10n.urSettleNote, border: const OutlineInputBorder()),
+            onChanged: (_) => setState(() {}),
+          ),
+        ]),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('uw-settle-go'),
+          onPressed: _reason == NoInvoiceReason.other && _note.text.trim().isEmpty
+              ? null
+              : () => Navigator.pop(context, (_reason, _note.text.trim())),
+          child: Text(l10n.urSettleGo),
+        ),
+      ],
+    );
   }
 }

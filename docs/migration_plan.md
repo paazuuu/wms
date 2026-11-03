@@ -8434,6 +8434,25 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   invoice. Receipts of different warehouses cannot share one; different
   suppliers are warned about. Undoing it frees the receipts again.
 
+## 0184: メモ — notes per warehouse (in place of 棚入れ in the menu)
+
+- warehouse_memos: a note for one warehouse, on the day it was written
+  (Japan time), by whom; changed (who and when kept) or taken away
+  (removed_at — not deleted, out of the lists). Every change in the audit
+  log.
+- warehouse_memos_list(warehouse?, from?, to?, query?): one warehouse's or
+  every visible warehouse's notes, of some days and/or holding some words
+  (case-insensitive). warehouse_memo_save / warehouse_memo_remove.
+- Anyone signed in who may see the warehouse reads and writes its notes.
+- メモ (現場作業, where 棚入れ was; for whoever works in a warehouse —
+  棚入れ's permission included): the warehouses as chips
+  (すべての倉庫 or one), a search box (every day), the month as a calendar
+  with each day's count, the day's notes beside it on a PC (below on a
+  phone), the words searched for marked; メモを書く, and ⋯ to change or
+  take a note away.
+- 棚入れ leaves the menu; its address and the links to it (ダッシュボード)
+  stay.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

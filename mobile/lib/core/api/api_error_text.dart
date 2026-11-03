@@ -71,6 +71,9 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('cover_line_unavailable')) return l10n.errCoverUnavailable;
   // 0183: one invoice per warehouse; その他 needs its memo.
   if (rawMessage.contains('invoice_mixed_warehouses')) return l10n.errInvoiceMixedWarehouses;
+  // 0184: a note needs words, and not too many.
+  if (rawMessage.contains('memo_empty')) return l10n.wmErrEmpty;
+  if (rawMessage.contains('memo_too_long')) return l10n.wmErrLong;
   if (rawMessage.contains('no_invoice_note_required')) return l10n.errNoInvoiceNote;
   if (rawMessage.contains('is already completed')) {
     return l10n.errorInspectionCompleted;

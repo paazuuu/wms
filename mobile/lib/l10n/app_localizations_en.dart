@@ -13934,4 +13934,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get siOpenReading => 'What was read, beside the file';
+
+  @override
+  String get featWarehouseMemos => 'Notes';
+
+  @override
+  String get featWarehouseMemosDesc =>
+      'Notes per warehouse: seen again by the day written on a calendar, and found by their words';
+
+  @override
+  String get wmTitle => 'Notes';
+
+  @override
+  String get wmIntro =>
+      'Keep notes per warehouse (handovers, what was noticed, what to do). Each goes on the calendar on the day it was written: tap a day for its notes. Search finds notes by their words, whatever the day.';
+
+  @override
+  String get wmAllWarehouses => 'All warehouses';
+
+  @override
+  String get wmSearch => 'Search the notes (Enter)';
+
+  @override
+  String get wmSearchAllDays => 'Searching notes of every day';
+
+  @override
+  String get wmWrite => 'Write a note';
+
+  @override
+  String get wmEdit => 'Change the note';
+
+  @override
+  String get wmBody => 'Note';
+
+  @override
+  String get wmBodyHint =>
+      'e.g. Goods from … tomorrow morning: keep shelf B free';
+
+  @override
+  String get wmSaved => 'Note kept';
+
+  @override
+  String get wmChanged => 'Note changed';
+
+  @override
+  String get wmRemoveQ => 'Remove this note?';
+
+  @override
+  String get wmRemove => 'Remove';
+
+  @override
+  String get wmRemoved => 'Note removed';
+
+  @override
+  String wmFound(String q, int n) {
+    return '$n notes with \"$q\"';
+  }
+
+  @override
+  String wmMonthList(int n) {
+    return '$n notes this month';
+  }
+
+  @override
+  String wmDayList(String day, int n) {
+    return '$n notes on $day';
+  }
+
+  @override
+  String get wmNone => 'No notes';
+
+  @override
+  String get wmNoneFound => 'Nothing found';
+
+  @override
+  String wmUpdated(String at, String by) {
+    return 'Changed $at by $by';
+  }
+
+  @override
+  String get wmErrEmpty => 'Write the note first';
+
+  @override
+  String get wmErrLong => 'A note is at most 4000 characters';
 }

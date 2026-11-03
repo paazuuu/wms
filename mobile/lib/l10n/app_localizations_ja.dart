@@ -13657,4 +13657,85 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get siOpenReading => '読み取った内容と元のファイル';
+
+  @override
+  String get featWarehouseMemos => 'メモ';
+
+  @override
+  String get featWarehouseMemosDesc => '倉庫ごとのメモ。書いた日付でカレンダーから見返せて、内容で検索できます';
+
+  @override
+  String get wmTitle => 'メモ';
+
+  @override
+  String get wmIntro =>
+      '倉庫ごとにメモを残せます（申し送り・気づいたこと・やること など）。メモは書いた日付でカレンダーに入り、日付を押すとその日のメモが見られます。上の検索では、日付に関係なくメモの内容から探せます。';
+
+  @override
+  String get wmAllWarehouses => 'すべての倉庫';
+
+  @override
+  String get wmSearch => 'メモの内容を検索（Enter）';
+
+  @override
+  String get wmSearchAllDays => '検索中はすべての日付のメモから探しています';
+
+  @override
+  String get wmWrite => 'メモを書く';
+
+  @override
+  String get wmEdit => 'メモを直す';
+
+  @override
+  String get wmBody => 'メモ';
+
+  @override
+  String get wmBodyHint => '例: 明日の午前に〇〇商事の入荷あり。棚Bを空けておく';
+
+  @override
+  String get wmSaved => 'メモを残しました';
+
+  @override
+  String get wmChanged => 'メモを直しました';
+
+  @override
+  String get wmRemoveQ => 'このメモを消しますか？';
+
+  @override
+  String get wmRemove => '消す';
+
+  @override
+  String get wmRemoved => 'メモを消しました';
+
+  @override
+  String wmFound(String q, int n) {
+    return '「$q」を含むメモ $n件';
+  }
+
+  @override
+  String wmMonthList(int n) {
+    return 'この月のメモ $n件';
+  }
+
+  @override
+  String wmDayList(String day, int n) {
+    return '$day のメモ $n件';
+  }
+
+  @override
+  String get wmNone => 'メモはありません';
+
+  @override
+  String get wmNoneFound => '見つかりませんでした';
+
+  @override
+  String wmUpdated(String at, String by) {
+    return '$at に $by が修正';
+  }
+
+  @override
+  String get wmErrEmpty => 'メモを入力してください';
+
+  @override
+  String get wmErrLong => 'メモは4000文字までです';
 }

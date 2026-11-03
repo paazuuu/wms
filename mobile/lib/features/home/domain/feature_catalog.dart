@@ -58,6 +58,7 @@ import '../../purchasing/presentation/purchase_order_list_screen.dart';
 import '../../payments/presentation/payments_screen.dart';
 import '../../stock_import/presentation/inspection_calendar_screen.dart';
 import '../../unplanned_receipt/unplanned_receipt_screen.dart';
+import '../../warehouse_memos/warehouse_memos_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
@@ -239,12 +240,27 @@ List<FeatureGroup> buildFeatureCatalog() => const [
           // Sits directly after 受入/検品 because that is the order the work
           // happens in: stock lands in the warehouse, then someone says which
           // shelf it went to (UI spec §13/§55).
+          // メモ (0184): notes per warehouse, by day and by word — in the
+          // menu where 棚入れ was.
+          FeatureEntry(
+            id: 'warehouse_memos',
+            icon: Icons.sticky_note_2_outlined,
+            status: FeatureStatus.ready,
+            builder: _warehouseMemos,
+            // Whoever works in a warehouse (棚入れ's own included).
+            requiredAnyOf: [
+              'putaway.confirm', 'inventory.view', 'inventory.adjust', 'inspection.view', 'inspection.confirm',
+              'receiving.view', 'receiving.confirm', 'pack.complete', 'product.view', 'product.manage',
+            ],
+          ),
+          // 棚入れ: out of the menu (0184); its address and the links to it stay.
           FeatureEntry(
             id: 'putaway',
             icon: Icons.move_to_inbox_outlined,
             status: FeatureStatus.ready,
             builder: _putaway,
             requiredAnyOf: ['putaway.confirm'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'shipment',
@@ -678,6 +694,7 @@ Widget _systemReset(BuildContext _) => const SystemResetScreen();
 Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
 Widget _inspectionCalendar(BuildContext _) => const InspectionCalendarScreen();
 Widget _unplannedReceipt(BuildContext _) => const UnplannedReceiptScreen();
+Widget _warehouseMemos(BuildContext _) => const WarehouseMemosScreen();
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
