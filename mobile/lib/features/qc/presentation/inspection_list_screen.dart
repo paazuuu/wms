@@ -17,7 +17,6 @@ import '../../home/presentation/feature_link.dart';
 import '../../stock_import/data/stock_import_repository.dart' show awaitingImportsProvider;
 import '../../master_import/data/master_import_repository.dart' show masterImportsProvider;
 import '../../master_import/domain/master_import.dart';
-import '../../stock_import/presentation/import_view_screen.dart' show ImportViewScreen;
 import '../../stock_import/presentation/stock_inspection_screen.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 
@@ -290,7 +289,10 @@ class StockFileChecked extends ConsumerWidget {
             ].join(' · ')),
             trailing: StatusPill(
                 tone: StatusTone.success, label: m.unplanned ? l10n.urLabel : l10n.qcFileBadge, dense: true),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: m.id))),
+            // The same 検品 table as while it waited: field by field across,
+            // a checkbox on each line (untick to take one back).
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => StockInspectionDetailScreen(importId: m.id))),
           ),
         ),
     ]);

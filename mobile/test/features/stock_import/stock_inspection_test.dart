@@ -671,6 +671,11 @@ void main() {
     final entries = buildFeatureCatalog().expand((g) => g.entries);
     expect(entries.firstWhere((e) => e.id == 'stock_inspection').inMenu, isFalse);
     expect(entries.firstWhere((e) => e.id == 'inspection').requiredAnyOf, contains('inventory.adjust'));
+    // A checked file opens the same 検品 table, not the reading.
+    await tester.tap(find.byKey(const ValueKey('qc-file-done-18')));
+    await tester.pumpAndSettle();
+    expect(find.byType(StockInspectionDetailScreen), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-open-reading')), findsOneWidget);
   });
 
   testWidgets('the calendar is small enough to be seen whole, its files beside it on a wide screen', (tester) async {

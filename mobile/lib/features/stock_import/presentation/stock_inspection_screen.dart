@@ -32,6 +32,7 @@ import '../../qc/domain/inspection.dart' show normalizeJan;
 import '../../unplanned_receipt/unplanned_flow.dart';
 import '../data/stock_import_repository.dart';
 import '../domain/stock_ledger.dart';
+import 'import_view_screen.dart' show ImportViewScreen;
 
 /// Whether the person may check stock files in (0148).
 bool canInspectStockFiles(WidgetRef ref) {
@@ -255,20 +256,25 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
 
   /// A line checked in by mistake, taken back (0179): its stock comes out
   /// again and it waits to be checked in once more.
+  /// A checked-in line unticked (or 取り消す from ⋯): taken back. A line
+  /// closed as not delivered, ticked: opened again and ticked, to be checked
+  /// in with the others.
   Future<void> _undo(MasterImportLine l) async {
     final l10n = AppLocalizations.of(context);
     final qty = l.inspectedQuantity ?? 0;
+    final reopen = l.notDelivered;
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
-        title: Text(l10n.siUndoQ),
-        content: Text(l10n.siUndoBody(l.name ?? l.janCode, qty), key: const ValueKey('si-undo-body')),
+        title: Text(reopen ? l10n.siReopenQ : l10n.siUndoQ),
+        content: Text(reopen ? l10n.siReopenBody(l.name ?? l.janCode) : l10n.siUndoBody(l.name ?? l.janCode, qty),
+            key: const ValueKey('si-undo-body')),
         actions: [
           TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
           FilledButton(
               key: const ValueKey('si-undo-confirm'),
               onPressed: () => Navigator.pop(d, true),
-              child: Text(l10n.siUndoGo)),
+              child: Text(reopen ? l10n.siReopenGo : l10n.siUndoGo)),
         ],
       ),
     );
@@ -286,8 +292,11 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
         ref.invalidate(unplannedWaitingProvider(false));
         ref.invalidate(productListProvider);
         ref.invalidate(masterImportsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.siUndone(l.name ?? l.janCode, qty))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(reopen ? l10n.siReopened(l.name ?? l.janCode) : l10n.siUndone(l.name ?? l.janCode, qty))));
         await _load();
+        // Opened again because it came after all: ticked, ready for 検品完了.
+        if (reopen && mounted) setState(() => _ticked.add(l.lineNo));
       case ApiFailure(:final message):
         setState(() => _error = humanizeApiErrorMessage(l10n, message));
     }
@@ -518,6 +527,14 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     ];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.siTitle(widget.importId)), actions: [
+        // What the file was read as, beside the original (取込の中身).
+        IconButton(
+          key: const ValueKey('si-open-reading'),
+          tooltip: l10n.siOpenReading,
+          icon: const Icon(Icons.description_outlined),
+          onPressed: () =>
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => ImportViewScreen(importId: widget.importId))),
+        ),
         // A note in hand, photographed, to look at with the goods' pictures.
         IconButton(
           key: const ValueKey('si-note-look'),
@@ -1010,7 +1027,10 @@ class _InspectLine extends ConsumerWidget {
     final tick = done && line.notDelivered
         ? Tooltip(
             message: l10n.siNotDelivered,
-            child: Checkbox(key: ValueKey('si-closed-${line.lineNo}'), value: false, onChanged: null),
+            child: Checkbox(
+                key: ValueKey('si-closed-${line.lineNo}'),
+                value: false,
+                onChanged: onUndo == null ? null : (_) => onUndo!()),
           )
         : done
         ? Tooltip(
@@ -1018,8 +1038,9 @@ class _InspectLine extends ConsumerWidget {
             child: Checkbox(
               key: ValueKey('si-checked-${line.lineNo}'),
               value: true,
-              onChanged: null,
-              fillColor: WidgetStatePropertyAll(scheme.primary),
+              // Unticked: taken back (asked first). Fixed when an invoice ties it.
+              onChanged: onUndo == null ? null : (_) => onUndo!(),
+              fillColor: onUndo == null ? WidgetStatePropertyAll(scheme.primary) : null,
               checkColor: scheme.onPrimary,
             ),
           )

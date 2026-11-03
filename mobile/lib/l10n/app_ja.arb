@@ -12339,5 +12339,24 @@
     }
   },
   "siWhichClosed": "届いていない",
-  "siCheckedTip": "検品済み（取り消すときは「…」から）"
+  "siCheckedTip": "検品済み（チェックを外すと取り消し）",
+  "siReopenQ": "この行を開き直しますか？",
+  "siReopenBody": "「{name}」は「届いていない」として閉じています。届いていた場合は開き直すとチェックが入るので、数を確かめて「検品完了」を押してください。",
+  "@siReopenBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "siReopenGo": "開き直す",
+  "siReopened": "「{name}」を開き直しました。数を確かめて「検品完了」を押してください",
+  "@siReopened": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "siOpenReading": "読み取った内容と元のファイル"
 }

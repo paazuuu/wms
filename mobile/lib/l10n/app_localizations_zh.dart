@@ -13551,5 +13551,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get siWhichClosed => '未到货';
 
   @override
-  String get siCheckedTip => '已验货（撤销请从“…”操作）';
+  String get siCheckedTip => '已验货（取消勾选即撤销）';
+
+  @override
+  String get siReopenQ => '要重新打开此行吗？';
+
+  @override
+  String siReopenBody(String name) {
+    return '“$name”已作为“未到货”关闭。如果已到货，重新打开后会被勾选，请确认数量后点“验货完成”。';
+  }
+
+  @override
+  String get siReopenGo => '重新打开';
+
+  @override
+  String siReopened(String name) {
+    return '已重新打开“$name”，请确认数量后点“验货完成”';
+  }
+
+  @override
+  String get siOpenReading => '读取内容与原文件';
 }

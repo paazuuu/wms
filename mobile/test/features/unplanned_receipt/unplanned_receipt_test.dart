@@ -103,6 +103,16 @@ class _Stock implements StockImportRepository {
     return ApiSuccess(InspectionResult(lines: lines.length, change: 0, difference: 0, left: 3 - lines.length));
   }
 
+  final uninspected = <int>[];
+
+  @override
+  Future<ApiResult<bool>> uninspect(int importId, int lineNo) async {
+    uninspected.add(lineNo);
+    final left = [for (final n in inspected.isEmpty ? <int>[] : inspected.last) if (n != lineNo) n];
+    reader.import = _staged(done: left, closed: [for (final n in closed.isEmpty ? <int>[] : closed.last) if (n != lineNo) n]);
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<int>> closeLines(int importId, List<int> lineNos) async {
     closed.add(lineNos);
@@ -213,8 +223,9 @@ void main() {
     // A checkbox on every line, as everywhere in 検品: ticked and fixed, or empty and fixed.
     final checked = tester.widget<Checkbox>(find.byKey(const ValueKey('si-checked-1')));
     final closed = tester.widget<Checkbox>(find.byKey(const ValueKey('si-closed-2')));
-    expect((checked.value, checked.onChanged), (true, null));
-    expect((closed.value, closed.onChanged), (false, null));
+    // Both answer a tap: untick to take back, tick to open again.
+    expect((checked.value, checked.onChanged != null), (true, true));
+    expect((closed.value, closed.onChanged != null), (false, true));
     expect(tester.widget<Text>(find.byKey(const ValueKey('si-status'))).data, '検品済み 2行・届いていない（閉じた）1行・検品待ち 0行');
     // 検品済み leaves it out; 届いていない shows it alone.
     await tester.tap(find.byKey(const ValueKey('si-which-done')));
@@ -224,6 +235,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
     expect(find.byKey(const ValueKey('si-done-1')), findsNothing);
+    // It came after all: ticking its box opens it again, ticked.
+    await tester.tap(find.byKey(const ValueKey('si-which-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('si-closed-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('この行を開き直しますか？'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('si-undo-confirm')));
+    await tester.pumpAndSettle();
+    expect(stock.uninspected, [2]);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('si-tick-2'))).value, isTrue);
+    // A checked-in line unticked: taken back, asked first.
+    await tester.tap(find.byKey(const ValueKey('si-checked-1')));
+    await tester.pumpAndSettle();
+    expect(find.text('この行の検品を取り消しますか？'), findsOneWidget);
   });
 
   testWidgets('a day of 検品履歴 shows only what was checked in that day, not what was closed', (tester) async {

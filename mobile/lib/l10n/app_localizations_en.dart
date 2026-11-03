@@ -13914,5 +13914,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get siWhichClosed => 'Not delivered';
 
   @override
-  String get siCheckedTip => 'Checked in (take it back from ⋯)';
+  String get siCheckedTip => 'Checked in (untick to take it back)';
+
+  @override
+  String get siReopenQ => 'Open this line again?';
+
+  @override
+  String siReopenBody(String name) {
+    return '\"$name\" was closed as not delivered. If it did come, open it again: it is ticked — check the count and press 検品完了.';
+  }
+
+  @override
+  String get siReopenGo => 'Open again';
+
+  @override
+  String siReopened(String name) {
+    return 'Opened \"$name\" again: check the count and press 検品完了';
+  }
+
+  @override
+  String get siOpenReading => 'What was read, beside the file';
 }

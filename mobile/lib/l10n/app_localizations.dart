@@ -24062,8 +24062,38 @@ abstract class AppLocalizations {
   /// No description provided for @siCheckedTip.
   ///
   /// In ja, this message translates to:
-  /// **'検品済み（取り消すときは「…」から）'**
+  /// **'検品済み（チェックを外すと取り消し）'**
   String get siCheckedTip;
+
+  /// No description provided for @siReopenQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行を開き直しますか？'**
+  String get siReopenQ;
+
+  /// No description provided for @siReopenBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」は「届いていない」として閉じています。届いていた場合は開き直すとチェックが入るので、数を確かめて「検品完了」を押してください。'**
+  String siReopenBody(String name);
+
+  /// No description provided for @siReopenGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'開き直す'**
+  String get siReopenGo;
+
+  /// No description provided for @siReopened.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{name}」を開き直しました。数を確かめて「検品完了」を押してください'**
+  String siReopened(String name);
+
+  /// No description provided for @siOpenReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った内容と元のファイル'**
+  String get siOpenReading;
 }
 
 class _AppLocalizationsDelegate

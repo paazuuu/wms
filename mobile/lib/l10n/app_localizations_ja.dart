@@ -13637,5 +13637,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get siWhichClosed => '届いていない';
 
   @override
-  String get siCheckedTip => '検品済み（取り消すときは「…」から）';
+  String get siCheckedTip => '検品済み（チェックを外すと取り消し）';
+
+  @override
+  String get siReopenQ => 'この行を開き直しますか？';
+
+  @override
+  String siReopenBody(String name) {
+    return '「$name」は「届いていない」として閉じています。届いていた場合は開き直すとチェックが入るので、数を確かめて「検品完了」を押してください。';
+  }
+
+  @override
+  String get siReopenGo => '開き直す';
+
+  @override
+  String siReopened(String name) {
+    return '「$name」を開き直しました。数を確かめて「検品完了」を押してください';
+  }
+
+  @override
+  String get siOpenReading => '読み取った内容と元のファイル';
 }

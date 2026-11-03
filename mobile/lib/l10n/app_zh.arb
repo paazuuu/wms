@@ -4353,5 +4353,10 @@
   "payUnplannedWaitingHint": "可在 计划外入货 → 待发票 中查看",
   "siDoneAndClosed": "已验货 {done}行・未到货（已关闭）{closed}行・待验货 {open}行",
   "siWhichClosed": "未到货",
-  "siCheckedTip": "已验货（撤销请从“…”操作）"
+  "siCheckedTip": "已验货（取消勾选即撤销）",
+  "siReopenQ": "要重新打开此行吗？",
+  "siReopenBody": "“{name}”已作为“未到货”关闭。如果已到货，重新打开后会被勾选，请确认数量后点“验货完成”。",
+  "siReopenGo": "重新打开",
+  "siReopened": "已重新打开“{name}”，请确认数量后点“验货完成”",
+  "siOpenReading": "读取内容与原文件"
 }
