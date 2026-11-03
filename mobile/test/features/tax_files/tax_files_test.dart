@@ -223,4 +223,7 @@ class _Tab implements HtmlTab {
 
   @override
   void close() {}
+
+  @override
+  void showBytes(List<int> bytes, String contentType) {}
 }

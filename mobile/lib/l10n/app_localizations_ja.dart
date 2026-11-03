@@ -13675,7 +13675,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wmAllWarehouses => 'すべての倉庫';
 
   @override
-  String get wmSearch => 'メモの内容を検索（Enter）';
+  String get wmSearch => 'メモの内容・ファイル名を検索（Enter）';
 
   @override
   String get wmSearchAllDays => '検索中はすべての日付のメモから探しています';
@@ -13684,7 +13684,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wmWrite => 'メモを書く';
 
   @override
-  String get wmEdit => 'メモを直す';
+  String get wmEdit => 'メモを編集する';
 
   @override
   String get wmBody => 'メモ';
@@ -13714,7 +13714,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String wmMonthList(int n) {
-    return 'この月のメモ $n件';
+    return 'この月のメモ $n件（日付順）';
   }
 
   @override
@@ -13738,4 +13738,83 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wmErrLong => 'メモは4000文字までです';
+
+  @override
+  String get wmTabCalendar => 'カレンダー';
+
+  @override
+  String get wmTabBoard => '掲示板';
+
+  @override
+  String get wmIntroCalendar =>
+      '日付を選んで書くメモです（入荷予定・倉庫の予定・その日のアルバイトの人数 など。先の日付も書けます）。メモの一覧はすぐ下に出ます。日付を押すとその日だけに絞れます。';
+
+  @override
+  String get wmIntroBoard =>
+      '日付と結び付けない掲示板です（申し送り・共有事項 など）。書いた日時だけが残り、新しい順に並びます。';
+
+  @override
+  String get wmWriteCalendar => 'カレンダーにメモを書く';
+
+  @override
+  String get wmWriteBoard => '掲示板に書く';
+
+  @override
+  String get wmBodyHintCalendar => '例: 〇〇商事 入荷予定（10ケース）／アルバイト3人';
+
+  @override
+  String get wmBodyHintBoard => '例: 休憩室の鍵は事務所の棚にあります';
+
+  @override
+  String wmDate(String date) {
+    return '日付: $date（押して変更）';
+  }
+
+  @override
+  String get wmShowMonth => 'この月のメモをすべて表示';
+
+  @override
+  String wmBoardList(int n) {
+    return '掲示板のメモ $n件（新しい順）';
+  }
+
+  @override
+  String get wmNoneBoard => '掲示板にメモはありません';
+
+  @override
+  String wmPostedAt(String at) {
+    return '$at 投稿';
+  }
+
+  @override
+  String get wmAddFiles => 'ファイルを添付';
+
+  @override
+  String wmFilesAdded(int n) {
+    return 'ファイルを $n件 添付しました';
+  }
+
+  @override
+  String wmFilesFailed(int n) {
+    return '$n件のファイルを添付できませんでした（20MBまで）';
+  }
+
+  @override
+  String get wmFileView => 'ブラウザで見る';
+
+  @override
+  String get wmFileDownload => 'ダウンロード';
+
+  @override
+  String wmFileSaved(String name) {
+    return '$name を保存しました';
+  }
+
+  @override
+  String wmFileRemoveQ(String name) {
+    return '$name を消しますか？';
+  }
+
+  @override
+  String get wmErrDate => 'カレンダーのメモには日付を選んでください';
 }

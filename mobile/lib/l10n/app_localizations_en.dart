@@ -13953,7 +13953,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wmAllWarehouses => 'All warehouses';
 
   @override
-  String get wmSearch => 'Search the notes (Enter)';
+  String get wmSearch => 'Search notes and file names (Enter)';
 
   @override
   String get wmSearchAllDays => 'Searching notes of every day';
@@ -13962,7 +13962,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wmWrite => 'Write a note';
 
   @override
-  String get wmEdit => 'Change the note';
+  String get wmEdit => 'Edit the note';
 
   @override
   String get wmBody => 'Note';
@@ -13993,7 +13993,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String wmMonthList(int n) {
-    return '$n notes this month';
+    return '$n notes this month (by day)';
   }
 
   @override
@@ -14017,4 +14017,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wmErrLong => 'A note is at most 4000 characters';
+
+  @override
+  String get wmTabCalendar => 'Calendar';
+
+  @override
+  String get wmTabBoard => 'Board';
+
+  @override
+  String get wmIntroCalendar =>
+      'Notes put on a day you choose (goods due, the warehouse\'s plans, how many part-timers that day — days ahead too). They are listed below at once; tap a day to see only that day.';
+
+  @override
+  String get wmIntroBoard =>
+      'A board tied to no day (handovers, things to share). Only when it was written is kept; the newest first.';
+
+  @override
+  String get wmWriteCalendar => 'Write on the calendar';
+
+  @override
+  String get wmWriteBoard => 'Write on the board';
+
+  @override
+  String get wmBodyHintCalendar =>
+      'e.g. goods due from … (10 cases) / 3 part-timers';
+
+  @override
+  String get wmBodyHintBoard => 'e.g. The rest room key is on the office shelf';
+
+  @override
+  String wmDate(String date) {
+    return 'Day: $date (tap to change)';
+  }
+
+  @override
+  String get wmShowMonth => 'Show all notes of the month';
+
+  @override
+  String wmBoardList(int n) {
+    return '$n notes on the board (newest first)';
+  }
+
+  @override
+  String get wmNoneBoard => 'Nothing on the board';
+
+  @override
+  String wmPostedAt(String at) {
+    return 'Posted $at';
+  }
+
+  @override
+  String get wmAddFiles => 'Attach files';
+
+  @override
+  String wmFilesAdded(int n) {
+    return '$n files attached';
+  }
+
+  @override
+  String wmFilesFailed(int n) {
+    return '$n files could not be attached (20 MB at most)';
+  }
+
+  @override
+  String get wmFileView => 'View in the browser';
+
+  @override
+  String get wmFileDownload => 'Download';
+
+  @override
+  String wmFileSaved(String name) {
+    return 'Saved $name';
+  }
+
+  @override
+  String wmFileRemoveQ(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get wmErrDate => 'Choose the day for a calendar note';
 }

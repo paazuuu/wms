@@ -8453,6 +8453,29 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 棚入れ leaves the menu; its address and the links to it (ダッシュボード)
   stay.
 
+## 0185–0186: メモ in two (カレンダー・掲示板), with files
+
+- 0185 warehouse_memos.kind: 'calendar' — on a day chosen by hand
+  (memo_date: goods due, the warehouse's plans, how many part-timers came;
+  any day, past or to come) — or 'board' — the 掲示板, tied to no day but
+  the one it was written. Notes from 0184 are on the board.
+  warehouse_memos_search(kind, …) lists the カレンダー's by day (earliest
+  first) and the 掲示板's newest first; warehouse_memo_write(id, kind,
+  warehouse, body, date) — a calendar note needs its day.
+- 0186 files: the private memo-files bucket, a folder per note, put in and
+  read by whoever may see the note's warehouse (memo_file_allowed);
+  warehouse_memo_files (name, type, size, who, when; taken away with
+  removed_at). The search finds file names too.
+- メモ screen: tabs カレンダー and 掲示板 (warehouse chips and search above
+  both).
+  - カレンダー: the month's notes listed at once by day, under a date
+    heading; a day narrows them, 「この月のメモをすべて表示」 widens again;
+    months ahead open too. メモを書く asks for the day.
+  - 掲示板: the board's notes, newest first, with when each was posted.
+  - On each note: ファイルを添付 (several at once; also while writing a new
+    note); each file opened in a new browser tab as it is (a picture, a
+    PDF …), downloaded, or taken away. ⋯ → メモを編集する / 消す.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

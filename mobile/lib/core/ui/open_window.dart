@@ -12,6 +12,9 @@ abstract class HtmlTab {
 
   /// Closes the tab (when there turned out to be nothing to show).
   void close();
+
+  /// Shows a file as the browser shows it (a picture, a PDF, text …).
+  void showBytes(List<int> bytes, String contentType);
 }
 
 /// A new, empty browser tab — to be called straight from the click, before

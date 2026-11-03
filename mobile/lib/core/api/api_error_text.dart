@@ -74,6 +74,7 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   // 0184: a note needs words, and not too many.
   if (rawMessage.contains('memo_empty')) return l10n.wmErrEmpty;
   if (rawMessage.contains('memo_too_long')) return l10n.wmErrLong;
+  if (rawMessage.contains('memo_date_required')) return l10n.wmErrDate;
   if (rawMessage.contains('no_invoice_note_required')) return l10n.errNoInvoiceNote;
   if (rawMessage.contains('is already completed')) {
     return l10n.errorInspectionCompleted;

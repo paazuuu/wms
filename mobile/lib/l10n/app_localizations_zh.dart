@@ -13589,7 +13589,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wmAllWarehouses => '全部仓库';
 
   @override
-  String get wmSearch => '搜索备忘内容（回车）';
+  String get wmSearch => '搜索备忘内容・文件名（回车）';
 
   @override
   String get wmSearchAllDays => '搜索时会查找所有日期的备忘';
@@ -13598,7 +13598,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wmWrite => '写备忘';
 
   @override
-  String get wmEdit => '修改备忘';
+  String get wmEdit => '编辑备忘';
 
   @override
   String get wmBody => '备忘';
@@ -13628,7 +13628,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String wmMonthList(int n) {
-    return '本月备忘 $n件';
+    return '本月备忘 $n件（按日期）';
   }
 
   @override
@@ -13652,4 +13652,82 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wmErrLong => '备忘最多4000字';
+
+  @override
+  String get wmTabCalendar => '日历';
+
+  @override
+  String get wmTabBoard => '公告板';
+
+  @override
+  String get wmIntroCalendar =>
+      '选择日期书写的备忘（入货预定・仓库日程・当天的兼职人数等，也可写将来的日期）。备忘列表直接显示在下方，点日期可只看当天。';
+
+  @override
+  String get wmIntroBoard => '不与日期关联的公告板（交接・共享事项等）。只保留书写时间，按新到旧排列。';
+
+  @override
+  String get wmWriteCalendar => '在日历写备忘';
+
+  @override
+  String get wmWriteBoard => '写到公告板';
+
+  @override
+  String get wmBodyHintCalendar => '例：〇〇商事 预定入货（10箱）／兼职3人';
+
+  @override
+  String get wmBodyHintBoard => '例：休息室钥匙在办公室架子上';
+
+  @override
+  String wmDate(String date) {
+    return '日期：$date（点击修改）';
+  }
+
+  @override
+  String get wmShowMonth => '显示本月全部备忘';
+
+  @override
+  String wmBoardList(int n) {
+    return '公告板备忘 $n件（从新到旧）';
+  }
+
+  @override
+  String get wmNoneBoard => '公告板没有备忘';
+
+  @override
+  String wmPostedAt(String at) {
+    return '$at 发布';
+  }
+
+  @override
+  String get wmAddFiles => '添加附件';
+
+  @override
+  String wmFilesAdded(int n) {
+    return '已添加 $n个附件';
+  }
+
+  @override
+  String wmFilesFailed(int n) {
+    return '$n个文件未能添加（最大20MB）';
+  }
+
+  @override
+  String get wmFileView => '在浏览器中查看';
+
+  @override
+  String get wmFileDownload => '下载';
+
+  @override
+  String wmFileSaved(String name) {
+    return '已保存 $name';
+  }
+
+  @override
+  String wmFileRemoveQ(String name) {
+    return '要删除 $name 吗？';
+  }
+
+  @override
+  String get wmErrDate => '日历备忘请选择日期';
 }

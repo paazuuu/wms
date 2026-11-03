@@ -24128,7 +24128,7 @@ abstract class AppLocalizations {
   /// No description provided for @wmSearch.
   ///
   /// In ja, this message translates to:
-  /// **'メモの内容を検索（Enter）'**
+  /// **'メモの内容・ファイル名を検索（Enter）'**
   String get wmSearch;
 
   /// No description provided for @wmSearchAllDays.
@@ -24146,7 +24146,7 @@ abstract class AppLocalizations {
   /// No description provided for @wmEdit.
   ///
   /// In ja, this message translates to:
-  /// **'メモを直す'**
+  /// **'メモを編集する'**
   String get wmEdit;
 
   /// No description provided for @wmBody.
@@ -24200,7 +24200,7 @@ abstract class AppLocalizations {
   /// No description provided for @wmMonthList.
   ///
   /// In ja, this message translates to:
-  /// **'この月のメモ {n}件'**
+  /// **'この月のメモ {n}件（日付順）'**
   String wmMonthList(int n);
 
   /// No description provided for @wmDayList.
@@ -24238,6 +24238,132 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'メモは4000文字までです'**
   String get wmErrLong;
+
+  /// No description provided for @wmTabCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'カレンダー'**
+  String get wmTabCalendar;
+
+  /// No description provided for @wmTabBoard.
+  ///
+  /// In ja, this message translates to:
+  /// **'掲示板'**
+  String get wmTabBoard;
+
+  /// No description provided for @wmIntroCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付を選んで書くメモです（入荷予定・倉庫の予定・その日のアルバイトの人数 など。先の日付も書けます）。メモの一覧はすぐ下に出ます。日付を押すとその日だけに絞れます。'**
+  String get wmIntroCalendar;
+
+  /// No description provided for @wmIntroBoard.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付と結び付けない掲示板です（申し送り・共有事項 など）。書いた日時だけが残り、新しい順に並びます。'**
+  String get wmIntroBoard;
+
+  /// No description provided for @wmWriteCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'カレンダーにメモを書く'**
+  String get wmWriteCalendar;
+
+  /// No description provided for @wmWriteBoard.
+  ///
+  /// In ja, this message translates to:
+  /// **'掲示板に書く'**
+  String get wmWriteBoard;
+
+  /// No description provided for @wmBodyHintCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 〇〇商事 入荷予定（10ケース）／アルバイト3人'**
+  String get wmBodyHintCalendar;
+
+  /// No description provided for @wmBodyHintBoard.
+  ///
+  /// In ja, this message translates to:
+  /// **'例: 休憩室の鍵は事務所の棚にあります'**
+  String get wmBodyHintBoard;
+
+  /// No description provided for @wmDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付: {date}（押して変更）'**
+  String wmDate(String date);
+
+  /// No description provided for @wmShowMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月のメモをすべて表示'**
+  String get wmShowMonth;
+
+  /// No description provided for @wmBoardList.
+  ///
+  /// In ja, this message translates to:
+  /// **'掲示板のメモ {n}件（新しい順）'**
+  String wmBoardList(int n);
+
+  /// No description provided for @wmNoneBoard.
+  ///
+  /// In ja, this message translates to:
+  /// **'掲示板にメモはありません'**
+  String get wmNoneBoard;
+
+  /// No description provided for @wmPostedAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'{at} 投稿'**
+  String wmPostedAt(String at);
+
+  /// No description provided for @wmAddFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを添付'**
+  String get wmAddFiles;
+
+  /// No description provided for @wmFilesAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを {n}件 添付しました'**
+  String wmFilesAdded(int n);
+
+  /// No description provided for @wmFilesFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件のファイルを添付できませんでした（20MBまで）'**
+  String wmFilesFailed(int n);
+
+  /// No description provided for @wmFileView.
+  ///
+  /// In ja, this message translates to:
+  /// **'ブラウザで見る'**
+  String get wmFileView;
+
+  /// No description provided for @wmFileDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get wmFileDownload;
+
+  /// No description provided for @wmFileSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を保存しました'**
+  String wmFileSaved(String name);
+
+  /// No description provided for @wmFileRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を消しますか？'**
+  String wmFileRemoveQ(String name);
+
+  /// No description provided for @wmErrDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'カレンダーのメモには日付を選んでください'**
+  String get wmErrDate;
 }
 
 class _AppLocalizationsDelegate

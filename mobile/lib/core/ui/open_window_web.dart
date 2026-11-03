@@ -1,4 +1,5 @@
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:web/web.dart' as web;
 
@@ -24,6 +25,13 @@ class _Tab implements HtmlTab {
 
   @override
   void close() => _w.close();
+
+  @override
+  void showBytes(List<int> bytes, String contentType) {
+    final data = Uint8List.fromList(bytes).toJS;
+    final blob = web.Blob([data].toJS, web.BlobPropertyBag(type: contentType));
+    _w.location.href = web.URL.createObjectURL(blob);
+  }
 }
 
 HtmlTab? openHtmlTab() {

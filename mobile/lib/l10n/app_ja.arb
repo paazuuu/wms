@@ -12364,10 +12364,10 @@
   "wmTitle": "メモ",
   "wmIntro": "倉庫ごとにメモを残せます（申し送り・気づいたこと・やること など）。メモは書いた日付でカレンダーに入り、日付を押すとその日のメモが見られます。上の検索では、日付に関係なくメモの内容から探せます。",
   "wmAllWarehouses": "すべての倉庫",
-  "wmSearch": "メモの内容を検索（Enter）",
+  "wmSearch": "メモの内容・ファイル名を検索（Enter）",
   "wmSearchAllDays": "検索中はすべての日付のメモから探しています",
   "wmWrite": "メモを書く",
-  "wmEdit": "メモを直す",
+  "wmEdit": "メモを編集する",
   "wmBody": "メモ",
   "wmBodyHint": "例: 明日の午前に〇〇商事の入荷あり。棚Bを空けておく",
   "wmSaved": "メモを残しました",
@@ -12386,7 +12386,7 @@
       }
     }
   },
-  "wmMonthList": "この月のメモ {n}件",
+  "wmMonthList": "この月のメモ {n}件（日付順）",
   "@wmMonthList": {
     "placeholders": {
       "n": {
@@ -12419,5 +12419,75 @@
     }
   },
   "wmErrEmpty": "メモを入力してください",
-  "wmErrLong": "メモは4000文字までです"
+  "wmErrLong": "メモは4000文字までです",
+  "wmTabCalendar": "カレンダー",
+  "wmTabBoard": "掲示板",
+  "wmIntroCalendar": "日付を選んで書くメモです（入荷予定・倉庫の予定・その日のアルバイトの人数 など。先の日付も書けます）。メモの一覧はすぐ下に出ます。日付を押すとその日だけに絞れます。",
+  "wmIntroBoard": "日付と結び付けない掲示板です（申し送り・共有事項 など）。書いた日時だけが残り、新しい順に並びます。",
+  "wmWriteCalendar": "カレンダーにメモを書く",
+  "wmWriteBoard": "掲示板に書く",
+  "wmBodyHintCalendar": "例: 〇〇商事 入荷予定（10ケース）／アルバイト3人",
+  "wmBodyHintBoard": "例: 休憩室の鍵は事務所の棚にあります",
+  "wmDate": "日付: {date}（押して変更）",
+  "@wmDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "wmShowMonth": "この月のメモをすべて表示",
+  "wmBoardList": "掲示板のメモ {n}件（新しい順）",
+  "@wmBoardList": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wmNoneBoard": "掲示板にメモはありません",
+  "wmPostedAt": "{at} 投稿",
+  "@wmPostedAt": {
+    "placeholders": {
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "wmAddFiles": "ファイルを添付",
+  "wmFilesAdded": "ファイルを {n}件 添付しました",
+  "@wmFilesAdded": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wmFilesFailed": "{n}件のファイルを添付できませんでした（20MBまで）",
+  "@wmFilesFailed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wmFileView": "ブラウザで見る",
+  "wmFileDownload": "ダウンロード",
+  "wmFileSaved": "{name} を保存しました",
+  "@wmFileSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wmFileRemoveQ": "{name} を消しますか？",
+  "@wmFileRemoveQ": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wmErrDate": "カレンダーのメモには日付を選んでください"
 }
