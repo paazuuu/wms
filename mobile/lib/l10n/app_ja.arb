@@ -12136,7 +12136,7 @@
       }
     }
   },
-  "siCloseLeft": "チェックしていない {n}行は「届いていない」として閉じる",
+  "siCloseLeft": "チェックしていない {n}行を「届いていない」として閉じる",
   "@siCloseLeft": {
     "placeholders": {
       "n": {
@@ -12144,7 +12144,7 @@
       }
     }
   },
-  "siCloseLeftHint": "外すと検品待ちのまま残ります。閉じた行は「…」から開き直せます。",
+  "siCloseLeftHint": "オフのままなら、チェックしていない行は検品待ちのまま残り、あとで検品できます。閉じた行は在庫に入らず、「…」から開き直せます。",
   "siNotDelivered": "届いていない（閉じました・在庫は増やしていません）",
   "urColCount": "数量",
   "sfUnplannedLines": "{jan} {name}：予定外の入荷 {receipts} で 計{received}個 入庫済み ／ この請求書 {billed}個",
@@ -12323,5 +12323,20 @@
       }
     }
   },
-  "payUnplannedWaitingHint": "予定外の入荷 → 請求書待ち で確認できます"
+  "payUnplannedWaitingHint": "予定外の入荷 → 請求書待ち で確認できます",
+  "siDoneAndClosed": "検品済み {done}行・届いていない（閉じた）{closed}行・検品待ち {open}行",
+  "@siDoneAndClosed": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "closed": {
+        "type": "int"
+      },
+      "open": {
+        "type": "int"
+      }
+    }
+  },
+  "siWhichClosed": "届いていない"
 }

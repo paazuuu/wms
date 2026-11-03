@@ -4311,7 +4311,7 @@
   "urNext": "登记商品并进入验货（{n}行）",
   "urOnNote": "JAN {jan} 在送货单上，数量可在验货画面修改。",
   "siCloseLeft": "将未勾选的 {n}行作为“未到货”关闭",
-  "siCloseLeftHint": "不勾选则保持待验货。已关闭的行可从“…”重新打开。",
+  "siCloseLeftHint": "保持关闭时，未勾选的行仍为待验货，可稍后验货。已关闭的行不入库，可从“…”重新打开。",
   "siNotDelivered": "未到货（已关闭，未增加库存）",
   "urColCount": "数量",
   "sfUnplannedLines": "{jan} {name}：已在计划外入货 {receipts} 共入库 {received}个 ／ 本发票 {billed}个",
@@ -4350,5 +4350,7 @@
   "errInvoiceMixedWarehouses": "不同仓库的计划外入货无法用一张发票汇总，请按仓库分别登记。",
   "errNoInvoiceNote": "选择“其他”时请填写备注",
   "payUnplannedWaiting": "有 {n}件计划外入货在等待发票",
-  "payUnplannedWaitingHint": "可在 计划外入货 → 待发票 中查看"
+  "payUnplannedWaitingHint": "可在 计划外入货 → 待发票 中查看",
+  "siDoneAndClosed": "已验货 {done}行・未到货（已关闭）{closed}行・待验货 {open}行",
+  "siWhichClosed": "未到货"
 }

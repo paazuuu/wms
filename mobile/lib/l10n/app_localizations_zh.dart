@@ -13386,7 +13386,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get siCloseLeftHint => '不勾选则保持待验货。已关闭的行可从“…”重新打开。';
+  String get siCloseLeftHint => '保持关闭时，未勾选的行仍为待验货，可稍后验货。已关闭的行不入库，可从“…”重新打开。';
 
   @override
   String get siNotDelivered => '未到货（已关闭，未增加库存）';
@@ -13541,4 +13541,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get payUnplannedWaitingHint => '可在 计划外入货 → 待发票 中查看';
+
+  @override
+  String siDoneAndClosed(int done, int closed, int open) {
+    return '已验货 $done行・未到货（已关闭）$closed行・待验货 $open行';
+  }
+
+  @override
+  String get siWhichClosed => '未到货';
 }

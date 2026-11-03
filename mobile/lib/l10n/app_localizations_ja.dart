@@ -13466,11 +13466,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String siCloseLeft(int n) {
-    return 'チェックしていない $n行は「届いていない」として閉じる';
+    return 'チェックしていない $n行を「届いていない」として閉じる';
   }
 
   @override
-  String get siCloseLeftHint => '外すと検品待ちのまま残ります。閉じた行は「…」から開き直せます。';
+  String get siCloseLeftHint =>
+      'オフのままなら、チェックしていない行は検品待ちのまま残り、あとで検品できます。閉じた行は在庫に入らず、「…」から開き直せます。';
 
   @override
   String get siNotDelivered => '届いていない（閉じました・在庫は増やしていません）';
@@ -13626,4 +13627,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get payUnplannedWaitingHint => '予定外の入荷 → 請求書待ち で確認できます';
+
+  @override
+  String siDoneAndClosed(int done, int closed, int open) {
+    return '検品済み $done行・届いていない（閉じた）$closed行・検品待ち $open行';
+  }
+
+  @override
+  String get siWhichClosed => '届いていない';
 }

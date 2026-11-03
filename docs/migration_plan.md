@@ -8396,8 +8396,11 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   supplier, date and note with it, the reading noted as for 発注) and the
   ordinary 検品 screen opens with every line ticked (tickAll).
 - 検品完了 on an unplanned receipt offers to close the unticked lines as not
-  delivered (unplanned_close_lines: nothing added, not_delivered); off, they
-  keep waiting. 取り消し (⋯) opens a closed line again. 検品履歴カレンダー
+  delivered (unplanned_close_lines: nothing added, not_delivered) — off by
+  default: unticked lines keep waiting unless closing is chosen.
+  A closed line is not shown as checked in: its own icon, its own filter
+  (届いていない), left out of 検品済み, and the status says how many were
+  checked in, closed and still waiting. 取り消し (⋯) opens a closed line again. 検品履歴カレンダー
   leaves closed lines out.
 - The 検品 screen of an unplanned receipt shows its steps too.
 - The lines going to 検品 are listed field by field across (写真・商品名・

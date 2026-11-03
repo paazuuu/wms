@@ -409,7 +409,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
     final left = _import?.unplanned ?? false
         ? [for (final l in _open) if (!_ticked.contains(l.lineNo)) l.lineNo]
         : const <int>[];
-    var close = true;
+    var close = false;
     final ok = await showDialog<bool>(
       context: context,
       builder: (d) => AlertDialog(
@@ -498,7 +498,8 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
       if (_day case final d?) return inspectionDayOf(l) == d;
       final p = products[l.janCode];
       if (_which == 'open' && l.inspected) return false;
-      if (_which == 'done' && !l.inspected) return false;
+      if (_which == 'done' && (!l.inspected || l.notDelivered)) return false;
+      if (_which == 'closed' && !l.notDelivered) return false;
       if (_makers.isNotEmpty && !_makers.contains(p?.maker?.trim() ?? '')) return false;
       if (_marks.isNotEmpty && !(p?.marks.any(_marks.contains) ?? false)) return false;
       final q = _query.text.trim().toLowerCase();
@@ -554,9 +555,14 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                   if (m.warehouseName case final w?) Text(w, style: theme.textTheme.bodySmall),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    m.status == MasterImportStatus.awaitingInspection
-                        ? l10n.siOpenLines(open.length, m.lines.length)
-                        : l10n.siAllDone,
+                    switch (m.lines.where((l) => l.notDelivered).length) {
+                      final closed when closed > 0 =>
+                        l10n.siDoneAndClosed(m.lines.where((l) => l.inspected && !l.notDelivered).length, closed,
+                            open.length),
+                      _ => m.status == MasterImportStatus.awaitingInspection
+                          ? l10n.siOpenLines(open.length, m.lines.length)
+                          : l10n.siAllDone,
+                    },
                     key: const ValueKey('si-status'),
                     style: theme.textTheme.titleSmall,
                   ),
@@ -696,6 +702,7 @@ class _StockInspectionDetailScreenState extends ConsumerState<StockInspectionDet
                     total: m.lines.length,
                     onChanged: () => setState(() {}),
                     onWhich: (w) => setState(() => _which = w),
+                    anyClosed: m.lines.any((l) => l.notDelivered),
                   ),
                   if (wide && visible.isNotEmpty) const _WideHeading(),
                   if (_error case final e?)
@@ -795,7 +802,11 @@ class _Filters extends StatelessWidget {
     required this.total,
     required this.onChanged,
     required this.onWhich,
+    this.anyClosed = false,
   });
+
+  /// Lines closed as not delivered (0182): a chip of their own.
+  final bool anyClosed;
 
   final TextEditingController query;
   final List<String> makers;
@@ -834,7 +845,8 @@ class _Filters extends StatelessWidget {
               for (final (k, label) in [
                 ('all', l10n.siWhichAll),
                 ('open', l10n.siWhichOpen),
-                ('done', l10n.siWhichDone)
+                ('done', l10n.siWhichDone),
+                if (anyClosed) ('closed', l10n.siWhichClosed),
               ])
                 ChoiceChip(
                   key: ValueKey('si-which-$k'),
@@ -993,7 +1005,14 @@ class _InspectLine extends ConsumerWidget {
       for (final n in notes) [if ((n.location ?? '').isNotEmpty) '📍${n.location}', n.body].join(' ')
     ];
 
-    final tick = done
+    final tick = done && line.notDelivered
+        // Closed as not delivered (0182): not a check-in — shown apart.
+        ? Tooltip(
+            message: l10n.siNotDelivered,
+            child: Icon(Icons.do_not_disturb_on_outlined,
+                color: scheme.outline, key: ValueKey('si-closed-${line.lineNo}')),
+          )
+        : done
         ? Icon(Icons.check_circle, color: scheme.primary, key: ValueKey('si-checked-${line.lineNo}'))
         : Checkbox(
             key: ValueKey('si-tick-${line.lineNo}'),

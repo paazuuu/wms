@@ -13748,7 +13748,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get siCloseLeftHint =>
-      'Off: they stay waiting. A closed line can be opened again from ⋯.';
+      'Left off, the unticked lines keep waiting to be checked in later. Closed lines go into no stock and can be opened again from ⋯.';
 
   @override
   String get siNotDelivered => 'Not delivered (closed, no stock added)';
@@ -13904,4 +13904,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payUnplannedWaitingHint => 'See 予定外の入荷 → 請求書待ち';
+
+  @override
+  String siDoneAndClosed(int done, int closed, int open) {
+    return '$done checked in · $closed not delivered (closed) · $open waiting';
+  }
+
+  @override
+  String get siWhichClosed => 'Not delivered';
 }

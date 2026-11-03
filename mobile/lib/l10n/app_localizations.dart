@@ -23803,13 +23803,13 @@ abstract class AppLocalizations {
   /// No description provided for @siCloseLeft.
   ///
   /// In ja, this message translates to:
-  /// **'チェックしていない {n}行は「届いていない」として閉じる'**
+  /// **'チェックしていない {n}行を「届いていない」として閉じる'**
   String siCloseLeft(int n);
 
   /// No description provided for @siCloseLeftHint.
   ///
   /// In ja, this message translates to:
-  /// **'外すと検品待ちのまま残ります。閉じた行は「…」から開き直せます。'**
+  /// **'オフのままなら、チェックしていない行は検品待ちのまま残り、あとで検品できます。閉じた行は在庫に入らず、「…」から開き直せます。'**
   String get siCloseLeftHint;
 
   /// No description provided for @siNotDelivered.
@@ -24046,6 +24046,18 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'予定外の入荷 → 請求書待ち で確認できます'**
   String get payUnplannedWaitingHint;
+
+  /// No description provided for @siDoneAndClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品済み {done}行・届いていない（閉じた）{closed}行・検品待ち {open}行'**
+  String siDoneAndClosed(int done, int closed, int open);
+
+  /// No description provided for @siWhichClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'届いていない'**
+  String get siWhichClosed;
 }
 
 class _AppLocalizationsDelegate

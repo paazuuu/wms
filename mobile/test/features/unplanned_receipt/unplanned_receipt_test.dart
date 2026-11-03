@@ -196,15 +196,32 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('si-check-in')));
     await tester.pumpAndSettle();
-    expect(find.text('チェックしていない 1行は「届いていない」として閉じる'), findsOneWidget);
+    // Closing is asked for, not done by itself.
+    expect(find.text('チェックしていない 1行を「届いていない」として閉じる'), findsOneWidget);
+    expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('si-close-left'))).value, isFalse);
+    await tester.tap(find.byKey(const ValueKey('si-close-left')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('si-confirm')));
     await tester.pumpAndSettle();
     expect(stock.inspected.single, [1, 3]);
     expect(stock.closed.single, [2]);
     expect(tester.widget<Text>(find.byKey(const ValueKey('si-inspected-2'))).data, '届いていない（閉じました・在庫は増やしていません）');
+    // Not shown as checked in: an icon of its own, and said apart.
+    expect(find.byKey(const ValueKey('si-closed-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-checked-2')), findsNothing);
+    expect(find.byKey(const ValueKey('si-checked-1')), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('si-status'))).data, '検品済み 2行・届いていない（閉じた）1行・検品待ち 0行');
+    // 検品済み leaves it out; 届いていない shows it alone.
+    await tester.tap(find.byKey(const ValueKey('si-which-done')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-done-2')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('si-which-closed')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('si-done-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('si-done-1')), findsNothing);
   });
 
-  testWidgets('left open on asking, the unticked line keeps waiting', (tester) async {
+  testWidgets('by default the unticked line keeps waiting', (tester) async {
     final stock = await _pump(tester);
     await tester.tap(find.byKey(const ValueKey('ur-next')));
     await tester.pumpAndSettle();
@@ -212,8 +229,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('si-check-in')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('si-close-left')));
-    await tester.pumpAndSettle();
+    // Left as it is, the unticked line keeps waiting.
     await tester.tap(find.byKey(const ValueKey('si-confirm')));
     await tester.pumpAndSettle();
     expect(stock.inspected.single, [1, 2]);

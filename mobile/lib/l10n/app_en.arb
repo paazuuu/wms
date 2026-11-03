@@ -4311,7 +4311,7 @@
   "urNext": "Register and go to 検品 ({n} lines)",
   "urOnNote": "JAN {jan} is on the note: its count is put right on the 検品 screen.",
   "siCloseLeft": "Close the {n} unticked lines as not delivered",
-  "siCloseLeftHint": "Off: they stay waiting. A closed line can be opened again from ⋯.",
+  "siCloseLeftHint": "Left off, the unticked lines keep waiting to be checked in later. Closed lines go into no stock and can be opened again from ⋯.",
   "siNotDelivered": "Not delivered (closed, no stock added)",
   "urColCount": "Count",
   "sfUnplannedLines": "{jan} {name}: received {received} in all as unplanned {receipts} / this invoice {billed}",
@@ -4350,5 +4350,7 @@
   "errInvoiceMixedWarehouses": "Receipts of different warehouses cannot share one invoice here. Register them per warehouse.",
   "errNoInvoiceNote": "With その他, write a memo",
   "payUnplannedWaiting": "{n} unplanned receipts are awaiting their invoice",
-  "payUnplannedWaitingHint": "See 予定外の入荷 → 請求書待ち"
+  "payUnplannedWaitingHint": "See 予定外の入荷 → 請求書待ち",
+  "siDoneAndClosed": "{done} checked in · {closed} not delivered (closed) · {open} waiting",
+  "siWhichClosed": "Not delivered"
 }
