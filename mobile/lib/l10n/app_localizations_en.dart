@@ -14097,4 +14097,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wmErrDate => 'Choose the day for a calendar note';
+
+  @override
+  String get adjTabProducts => 'Pick a product';
+
+  @override
+  String get adjTabHistory => 'History';
+
+  @override
+  String get adjSearchHint => 'Search by name, maker, JAN or part no.';
+
+  @override
+  String get adjAllMakers => 'All makers';
+
+  @override
+  String get adjMakerLabel => 'Maker';
+
+  @override
+  String get adjInStockOnly => 'In stock only';
+
+  @override
+  String adjOnHand(int n) {
+    return 'Stock $n';
+  }
+
+  @override
+  String get adjCurrentStock => 'Current stock';
+
+  @override
+  String get adjAfterStock => 'After';
+
+  @override
+  String adjShownCount(int shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String get adjNoMatch => 'No product matches';
+
+  @override
+  String get adjNoProducts => 'The product library is empty';
+
+  @override
+  String get adjTapHint => 'Tap a product to adjust its stock';
+
+  @override
+  String get adjOtherJan => 'Enter a JAN';
+
+  @override
+  String get adjHistoryTapHint => 'Tap an entry to adjust that product again';
+
+  @override
+  String get adjClearFilters => 'Clear filters';
 }

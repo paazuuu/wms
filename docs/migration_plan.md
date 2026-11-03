@@ -8476,6 +8476,19 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     note); each file opened in a new browser tab as it is (a picture, a
     PDF …), downloaded, or taken away. ⋯ → メモを編集する / 消す.
 
+## 在庫調整: pick the product (app only)
+
+- 在庫調整 opens on 「商品から選ぶ」: the whole product library, each with
+  its stock in the warehouse being written to. A search box (name in any
+  language, maker, JAN, 品番; full-width letters and digits too; every word
+  must match), a maker dropdown and 在庫ありのみ narrow it; 「絞り込みを解除」
+  clears them. The same filters narrow 「調整の履歴」.
+- Pressing a product opens the adjustment form with that product fixed (no
+  JAN to key): its name, maker, JAN and 品番, 現在の在庫 here and 調整後 as
+  the quantity is typed. Pressing a history entry opens the same product
+  again (a JAN no longer in the library is filled in to be adjusted).
+- The 「在庫を調整」 button still opens the form to key or scan a JAN.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -12489,5 +12489,38 @@
       }
     }
   },
-  "wmErrDate": "カレンダーのメモには日付を選んでください"
+  "wmErrDate": "カレンダーのメモには日付を選んでください",
+  "adjTabProducts": "商品から選ぶ",
+  "adjTabHistory": "調整の履歴",
+  "adjSearchHint": "商品名・メーカー・JAN・品番で検索",
+  "adjAllMakers": "すべてのメーカー",
+  "adjMakerLabel": "メーカー",
+  "adjInStockOnly": "在庫ありのみ",
+  "adjOnHand": "在庫 {n}",
+  "@adjOnHand": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "adjCurrentStock": "現在の在庫",
+  "adjAfterStock": "調整後",
+  "adjShownCount": "{shown} / {total} 件",
+  "@adjShownCount": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "adjNoMatch": "条件に合う商品がありません",
+  "adjNoProducts": "商品ライブラリーに商品がありません",
+  "adjTapHint": "商品を押すと、その商品の在庫を調整できます",
+  "adjOtherJan": "JANで入力",
+  "adjHistoryTapHint": "履歴を押すと、同じ商品をもう一度調整できます",
+  "adjClearFilters": "絞り込みを解除"
 }

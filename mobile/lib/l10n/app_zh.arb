@@ -4403,5 +4403,21 @@
   "wmFileDownload": "下载",
   "wmFileSaved": "已保存 {name}",
   "wmFileRemoveQ": "要删除 {name} 吗？",
-  "wmErrDate": "日历备忘请选择日期"
+  "wmErrDate": "日历备忘请选择日期",
+  "adjTabProducts": "选择商品",
+  "adjTabHistory": "调整记录",
+  "adjSearchHint": "按商品名・厂商・JAN・型号搜索",
+  "adjAllMakers": "全部厂商",
+  "adjMakerLabel": "厂商",
+  "adjInStockOnly": "仅有库存",
+  "adjOnHand": "库存 {n}",
+  "adjCurrentStock": "当前库存",
+  "adjAfterStock": "调整后",
+  "adjShownCount": "{shown} / {total} 件",
+  "adjNoMatch": "没有符合条件的商品",
+  "adjNoProducts": "商品库中没有商品",
+  "adjTapHint": "点击商品即可调整其库存",
+  "adjOtherJan": "输入JAN",
+  "adjHistoryTapHint": "点击记录可再次调整该商品",
+  "adjClearFilters": "清除筛选"
 }

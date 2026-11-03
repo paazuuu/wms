@@ -4403,5 +4403,21 @@
   "wmFileDownload": "Download",
   "wmFileSaved": "Saved {name}",
   "wmFileRemoveQ": "Remove {name}?",
-  "wmErrDate": "Choose the day for a calendar note"
+  "wmErrDate": "Choose the day for a calendar note",
+  "adjTabProducts": "Pick a product",
+  "adjTabHistory": "History",
+  "adjSearchHint": "Search by name, maker, JAN or part no.",
+  "adjAllMakers": "All makers",
+  "adjMakerLabel": "Maker",
+  "adjInStockOnly": "In stock only",
+  "adjOnHand": "Stock {n}",
+  "adjCurrentStock": "Current stock",
+  "adjAfterStock": "After",
+  "adjShownCount": "{shown} of {total}",
+  "adjNoMatch": "No product matches",
+  "adjNoProducts": "The product library is empty",
+  "adjTapHint": "Tap a product to adjust its stock",
+  "adjOtherJan": "Enter a JAN",
+  "adjHistoryTapHint": "Tap an entry to adjust that product again",
+  "adjClearFilters": "Clear filters"
 }

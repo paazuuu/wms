@@ -13730,4 +13730,56 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wmErrDate => '日历备忘请选择日期';
+
+  @override
+  String get adjTabProducts => '选择商品';
+
+  @override
+  String get adjTabHistory => '调整记录';
+
+  @override
+  String get adjSearchHint => '按商品名・厂商・JAN・型号搜索';
+
+  @override
+  String get adjAllMakers => '全部厂商';
+
+  @override
+  String get adjMakerLabel => '厂商';
+
+  @override
+  String get adjInStockOnly => '仅有库存';
+
+  @override
+  String adjOnHand(int n) {
+    return '库存 $n';
+  }
+
+  @override
+  String get adjCurrentStock => '当前库存';
+
+  @override
+  String get adjAfterStock => '调整后';
+
+  @override
+  String adjShownCount(int shown, int total) {
+    return '$shown / $total 件';
+  }
+
+  @override
+  String get adjNoMatch => '没有符合条件的商品';
+
+  @override
+  String get adjNoProducts => '商品库中没有商品';
+
+  @override
+  String get adjTapHint => '点击商品即可调整其库存';
+
+  @override
+  String get adjOtherJan => '输入JAN';
+
+  @override
+  String get adjHistoryTapHint => '点击记录可再次调整该商品';
+
+  @override
+  String get adjClearFilters => '清除筛选';
 }

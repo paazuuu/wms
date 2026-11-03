@@ -1196,6 +1196,9 @@ class FakeStockOpsRepository implements StockOpsRepository {
   /// The reason the last adjustment carried.
   AdjustReason? lastReason;
 
+  /// The JAN the last adjustment was posted for.
+  String? lastJan;
+
   /// When set, every mutating call (adjust/startCount/recordLine/
   /// completeCount/cancelCount) fails with this message instead of
   /// succeeding — e.g. to simulate a permission-denied RPC response.
@@ -1246,6 +1249,7 @@ class FakeStockOpsRepository implements StockOpsRepository {
     lastWarehouseId = warehouseId;
     lastDelta = delta;
     lastReason = reason;
+    lastJan = janCode;
     return ApiSuccess(StockAdjustment(
       id: 1,
       janCode: janCode,

@@ -24364,6 +24364,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'カレンダーのメモには日付を選んでください'**
   String get wmErrDate;
+
+  /// No description provided for @adjTabProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品から選ぶ'**
+  String get adjTabProducts;
+
+  /// No description provided for @adjTabHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整の履歴'**
+  String get adjTabHistory;
+
+  /// No description provided for @adjSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・メーカー・JAN・品番で検索'**
+  String get adjSearchHint;
+
+  /// No description provided for @adjAllMakers.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべてのメーカー'**
+  String get adjAllMakers;
+
+  /// No description provided for @adjMakerLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー'**
+  String get adjMakerLabel;
+
+  /// No description provided for @adjInStockOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫ありのみ'**
+  String get adjInStockOnly;
+
+  /// No description provided for @adjOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {n}'**
+  String adjOnHand(int n);
+
+  /// No description provided for @adjCurrentStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の在庫'**
+  String get adjCurrentStock;
+
+  /// No description provided for @adjAfterStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'調整後'**
+  String get adjAfterStock;
+
+  /// No description provided for @adjShownCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{shown} / {total} 件'**
+  String adjShownCount(int shown, int total);
+
+  /// No description provided for @adjNoMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'条件に合う商品がありません'**
+  String get adjNoMatch;
+
+  /// No description provided for @adjNoProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーに商品がありません'**
+  String get adjNoProducts;
+
+  /// No description provided for @adjTapHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を押すと、その商品の在庫を調整できます'**
+  String get adjTapHint;
+
+  /// No description provided for @adjOtherJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANで入力'**
+  String get adjOtherJan;
+
+  /// No description provided for @adjHistoryTapHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'履歴を押すと、同じ商品をもう一度調整できます'**
+  String get adjHistoryTapHint;
+
+  /// No description provided for @adjClearFilters.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込みを解除'**
+  String get adjClearFilters;
 }
 
 class _AppLocalizationsDelegate

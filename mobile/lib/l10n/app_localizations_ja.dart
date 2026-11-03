@@ -13817,4 +13817,56 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wmErrDate => 'カレンダーのメモには日付を選んでください';
+
+  @override
+  String get adjTabProducts => '商品から選ぶ';
+
+  @override
+  String get adjTabHistory => '調整の履歴';
+
+  @override
+  String get adjSearchHint => '商品名・メーカー・JAN・品番で検索';
+
+  @override
+  String get adjAllMakers => 'すべてのメーカー';
+
+  @override
+  String get adjMakerLabel => 'メーカー';
+
+  @override
+  String get adjInStockOnly => '在庫ありのみ';
+
+  @override
+  String adjOnHand(int n) {
+    return '在庫 $n';
+  }
+
+  @override
+  String get adjCurrentStock => '現在の在庫';
+
+  @override
+  String get adjAfterStock => '調整後';
+
+  @override
+  String adjShownCount(int shown, int total) {
+    return '$shown / $total 件';
+  }
+
+  @override
+  String get adjNoMatch => '条件に合う商品がありません';
+
+  @override
+  String get adjNoProducts => '商品ライブラリーに商品がありません';
+
+  @override
+  String get adjTapHint => '商品を押すと、その商品の在庫を調整できます';
+
+  @override
+  String get adjOtherJan => 'JANで入力';
+
+  @override
+  String get adjHistoryTapHint => '履歴を押すと、同じ商品をもう一度調整できます';
+
+  @override
+  String get adjClearFilters => '絞り込みを解除';
 }
