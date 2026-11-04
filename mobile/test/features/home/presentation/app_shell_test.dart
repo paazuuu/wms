@@ -119,7 +119,9 @@ void main() {
     expect(find.text('Field Operations'), findsOneWidget);
     // The menu card, not the dashboard's 検品 tab (0102) of the same name.
     expect(find.widgetWithText(Card, 'Inspection'), findsOneWidget);
-    expect(find.text('Shipping'), findsOneWidget);
+    // Every way goods go out is one entry, 出庫 (its tabs inside).
+    expect(find.text('Outbound'), findsOneWidget);
+    expect(find.text('Shipping'), findsNothing);
     // Our product list has its own group at the top, not the bottom of 管理.
     expect(find.text('Products'), findsWidgets);
     expect(buildFeatureCatalog().first.entries.first.id, 'products');

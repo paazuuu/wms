@@ -10140,7 +10140,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prIntro =>
-      '与库存无关，只保留发货记录。读取发货清单文件，或用\"添加行\"逐行输入。商品库中没有的商品也可记录，库存不会变动。';
+      '记录不经过自有库存的发货，如直发（由供货商直接发给客户）或代发。读取发货明细文件，或用\"添加行\"逐行输入。商品库中没有的商品也可记录，库存不会变动。';
 
   @override
   String get prNew => '新清单';
@@ -13784,10 +13784,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adjClearFilters => '清除筛选';
 
   @override
-  String get featOutboundFile => '按发货清单出库';
+  String get featOutboundFile => '按发货明细出库';
 
   @override
-  String get featOutboundFileDesc => '读取常用的发货清单，按JAN匹配并出库';
+  String get featOutboundFileDesc => '读取常用的发货明细（Excel・CSV），按JAN匹配并出库';
 
   @override
   String get featOutboundCalendar => '出库日历';
@@ -13796,17 +13796,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featOutboundCalendarDesc => '按日查看按清单出库的记录和文件';
 
   @override
-  String get ofTitle => '按发货清单出库';
+  String get ofTitle => '按发货明细出库';
 
   @override
-  String get ofTabImport => '读取并出库';
+  String get ofTabImport => '按发货明细出库';
 
   @override
   String get ofTabCalendar => '出库日历';
 
   @override
   String get ofIntro =>
-      '直接读取您常用的发货清单（Excel・CSV），标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。';
+      '直接读取您常用的发货明细（品目・数量・单价一览，如明细表），Excel・CSV均可，标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。这与按箱记录内容・重量・尺寸的装箱单不同。';
 
   @override
   String get ofPick => '选择文件';
@@ -14225,22 +14225,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plShippingSaved => '发货格式的文件也已保存';
 
   @override
-  String get featProxyShipment => '代理发货';
+  String get featProxyShipment => '库存外发货';
 
   @override
-  String get featProxyShipmentDesc => '与库存无关，只保留发货记录（文件或手动输入）';
+  String get featProxyShipmentDesc => '直发・代发等不经过自有库存的发货，只保留记录';
 
   @override
-  String get prTitle => '代理发货';
+  String get prTitle => '库存外发货';
 
   @override
   String get prTabRecord => '记录';
 
   @override
-  String get prTabList => '代理发货记录';
+  String get prTabList => '库存外发货记录';
 
   @override
-  String get prPrincipal => '委托方（可选）';
+  String get prPrincipal => '委托方・安排方（可选）';
 
   @override
   String get prAddRow => '添加行';
@@ -14272,7 +14272,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prPost => '记录';
 
   @override
-  String get prPostConfirmTitle => '作为代理发货记录吗？';
+  String get prPostConfirmTitle => '作为库存外发货记录吗？';
 
   @override
   String prPostConfirmBody(int record, int qty) {
@@ -14281,17 +14281,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String prPostDone(int n) {
-    return '已记录代理发货（$n行）';
+    return '已记录库存外发货（$n行）';
   }
 
   @override
-  String get prBadge => '代理发货';
+  String get prBadge => '库存外发货';
 
   @override
   String get prUndo => '撤销记录';
 
   @override
-  String get prUndoQ => '要撤销此代理发货记录吗？';
+  String get prUndoQ => '要撤销此库存外发货记录吗？';
 
   @override
   String get prUndoBody => '库存不会变动。记录和文件会以\"已撤销\"保留。';
@@ -14322,7 +14322,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ofCalKindStock => '从库存出库';
 
   @override
-  String get ofCalKindProxy => '代理发货';
+  String get ofCalKindProxy => '库存外发货';
 
   @override
   String get sdcSecBasic => '公司・联系人';
@@ -14463,4 +14463,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofShipToSet => '已设置收货方卡片';
+
+  @override
+  String get featOutboundHub => '出库';
+
+  @override
+  String get featOutboundHubDesc =>
+      '出库集中在一处：按发货明细出库・库存外发货・出库日历・收货方卡片・发货指示与装箱・出库建议';
+
+  @override
+  String get obHubFile => '按发货明细出库';
+
+  @override
+  String get obHubProxy => '库存外发货';
+
+  @override
+  String get obHubCalendar => '出库日历';
+
+  @override
+  String get obHubCards => '收货方卡片';
+
+  @override
+  String get obHubPacking => '发货指示・装箱';
+
+  @override
+  String get obHubProposal => '出库建议';
 }

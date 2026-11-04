@@ -19,7 +19,6 @@ import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
 import '../../inventory/presentation/stock_reconciliation_screen.dart';
 import '../../shipment/presentation/print_language_screen.dart';
-import '../../shipment/presentation/shipment_list_screen.dart';
 import '../../qc/presentation/bulk_inspection_screen.dart';
 import '../../qc/presentation/inspection_list_screen.dart';
 import '../../picking_ops/presentation/pick_list_index_screen.dart';
@@ -49,8 +48,6 @@ import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
 import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
-import '../../outbound/presentation/outbound_proposal_screen.dart';
-import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../purchase_request/presentation/purchase_requests_screen.dart';
 import '../../stock_import/presentation/stock_file_import_screen.dart';
 import '../../stock_import/presentation/stock_inspection_screen.dart';
@@ -59,7 +56,7 @@ import '../../payments/presentation/payments_screen.dart';
 import '../../stock_import/presentation/inspection_calendar_screen.dart';
 import '../../unplanned_receipt/unplanned_receipt_screen.dart';
 import '../../warehouse_memos/warehouse_memos_screen.dart';
-import '../../outbound_file/presentation/outbound_file_screen.dart';
+import '../../outbound_file/presentation/outbound_hub_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
@@ -263,36 +260,54 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['putaway.confirm'],
             inMenu: false,
           ),
+          // 出庫 (hub): every way goods go out, as tabs of one screen. The
+          // entries after it keep their addresses (links, bookmarks) and open
+          // its tab, out of the menu.
+          FeatureEntry(
+            id: 'outbound',
+            icon: Icons.outbox_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundHub,
+            requiredAnyOf: [
+              'pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view',
+              'sales_order.manage', 'sales_order.view',
+            ],
+          ),
+          // 出荷指示・梱包: a customer's order packed into cartons and shipped.
           FeatureEntry(
             id: 'shipment',
-            icon: Icons.outbox_outlined,
+            icon: Icons.inventory_2_outlined,
             status: FeatureStatus.ready,
             builder: _shipment,
             requiredAnyOf: ['pack.complete', 'ship.complete'],
+            inMenu: false,
           ),
-          // 出荷リストで出庫 (0188): the usual shipping list read and shipped;
-          // 出庫カレンダー: each day's lists with their files.
+          // 出荷明細から出庫 (0188): the usual shipping list read and shipped.
           FeatureEntry(
             id: 'outbound_file',
             icon: Icons.upload_file_outlined,
             status: FeatureStatus.ready,
             builder: _outboundFile,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
+            inMenu: false,
           ),
-          // 代理出荷 (0189): a shipment kept as a record, no stock moved.
+          // 在庫外出荷 (0189): 直送・出荷代行, kept as a record, no stock moved.
           FeatureEntry(
             id: 'proxy_shipment',
             icon: Icons.edit_note_outlined,
             status: FeatureStatus.ready,
             builder: _proxyShipment,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
+            inMenu: false,
           ),
+          // 出庫カレンダー: each day's lists with their files.
           FeatureEntry(
             id: 'outbound_calendar',
             icon: Icons.event_note_outlined,
             status: FeatureStatus.ready,
             builder: _outboundCalendar,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view', 'sales_order.view'],
+            inMenu: false,
           ),
           // 出庫の提案 (0139): a shipment worked out from the stock, by
           // percentage or by quantity, to a saved destination.
@@ -302,6 +317,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _outboundProposal,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage'],
+            inMenu: false,
           ),
           // 出荷先カード (0139, 0190): the destinations goods go to, with what
           // an export needs; chosen when shipping.
@@ -311,6 +327,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _shipDestinations,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
+            inMenu: false,
           ),
           FeatureEntry(
             id: 'stock_adjustment',
@@ -682,7 +699,7 @@ Widget _bulkInspection(BuildContext _) => const BulkInspectionScreen();
 Widget _delivery(BuildContext _) => const DeliveryPlanListScreen();
 
 /// Top-level (const-referenceable) builder for the Shipping (出庫) feature.
-Widget _shipment(BuildContext _) => const ShipmentListScreen();
+Widget _shipment(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.packing);
 
 /// Top-level (const-referenceable) builder for the Stock Adjustment feature.
 Widget _stockAdjustment(BuildContext _) => const StockAdjustmentScreen();
@@ -720,12 +737,13 @@ Widget _importCalendar(BuildContext _) => const StockImportCalendarScreen();
 Widget _inspectionCalendar(BuildContext _) => const InspectionCalendarScreen();
 Widget _unplannedReceipt(BuildContext _) => const UnplannedReceiptScreen();
 Widget _warehouseMemos(BuildContext _) => const WarehouseMemosScreen();
-Widget _outboundFile(BuildContext _) => const OutboundFileScreen();
-Widget _outboundCalendar(BuildContext _) => const OutboundFileScreen(initialTab: 1);
-Widget _proxyShipment(BuildContext _) => const OutboundFileScreen(proxy: true);
+Widget _outboundFile(BuildContext _) => const OutboundHubScreen();
+Widget _outboundCalendar(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.calendar);
+Widget _outboundHub(BuildContext _) => const OutboundHubScreen();
+Widget _proxyShipment(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.proxy);
 Widget _payments(BuildContext _) => const PaymentsScreen();
-Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
-Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();
+Widget _outboundProposal(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.proposal);
+Widget _shipDestinations(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.cards);
 Widget _purchaseRequests(BuildContext _) => const PurchaseRequestsScreen();
 Widget _nameFormats(BuildContext _) => const NameFormatsScreen();
 Widget _fieldLibrary(BuildContext _) => const FieldLibraryScreen();

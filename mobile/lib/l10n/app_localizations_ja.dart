@@ -10197,7 +10197,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prIntro =>
-      '在庫とは関係なく、出荷した記録だけを残します。出荷リストのファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。';
+      '直送（仕入先から相手先へ直接送る）や出荷代行など、自社の在庫を通さない出荷を記録だけ残します。出荷明細のファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。';
 
   @override
   String get prNew => '新しいリスト';
@@ -13871,10 +13871,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get adjClearFilters => '絞り込みを解除';
 
   @override
-  String get featOutboundFile => '出荷リストで出庫';
+  String get featOutboundFile => '出荷明細から出庫';
 
   @override
-  String get featOutboundFileDesc => 'いつもの出荷リスト（Excel）を読み込み、JANで照合して在庫から出庫';
+  String get featOutboundFileDesc => 'いつもの出荷明細（Excel・CSV）を読み込み、JANで照合して在庫から出庫';
 
   @override
   String get featOutboundCalendar => '出庫カレンダー';
@@ -13883,17 +13883,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featOutboundCalendarDesc => '出荷リストで出庫した日ごとの記録とファイル';
 
   @override
-  String get ofTitle => '出荷リストで出庫';
+  String get ofTitle => '出荷明細から出庫';
 
   @override
-  String get ofTabImport => '読み込んで出庫';
+  String get ofTabImport => '出荷明細から出庫';
 
   @override
   String get ofTabCalendar => '出庫カレンダー';
 
   @override
   String get ofIntro =>
-      'いつも使っている出荷リスト（Excel・CSV）をそのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。';
+      'いつも使っている出荷明細（品目・数量・単価の一覧。明细シートなど）を、Excel・CSVのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。箱ごとの中身・重量・サイズを書いたパッキングリストとは別のものです。';
 
   @override
   String get ofPick => 'ファイルを選ぶ';
@@ -14315,22 +14315,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get plShippingSaved => '出荷用の書式も保存しました';
 
   @override
-  String get featProxyShipment => '代理出荷';
+  String get featProxyShipment => '在庫外出荷';
 
   @override
-  String get featProxyShipmentDesc => '在庫とは関係なく、出荷の記録だけを残す（ファイルまたは手入力）';
+  String get featProxyShipmentDesc => '直送・出荷代行など、自社の在庫を通さない出荷を記録だけ残す';
 
   @override
-  String get prTitle => '代理出荷';
+  String get prTitle => '在庫外出荷';
 
   @override
   String get prTabRecord => '記録する';
 
   @override
-  String get prTabList => '代理出荷の記録';
+  String get prTabList => '在庫外出荷の記録';
 
   @override
-  String get prPrincipal => '依頼元（任意）';
+  String get prPrincipal => '依頼元・手配元（任意）';
 
   @override
   String get prAddRow => '行を追加';
@@ -14362,7 +14362,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prPost => '記録する';
 
   @override
-  String get prPostConfirmTitle => '代理出荷として記録しますか？';
+  String get prPostConfirmTitle => '在庫外出荷として記録しますか？';
 
   @override
   String prPostConfirmBody(int record, int qty) {
@@ -14371,17 +14371,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String prPostDone(int n) {
-    return '代理出荷を記録しました（$n行）';
+    return '在庫外出荷を記録しました（$n行）';
   }
 
   @override
-  String get prBadge => '代理出荷';
+  String get prBadge => '在庫外出荷';
 
   @override
   String get prUndo => '記録を取り消す';
 
   @override
-  String get prUndoQ => 'この代理出荷の記録を取り消しますか？';
+  String get prUndoQ => 'この在庫外出荷の記録を取り消しますか？';
 
   @override
   String get prUndoBody => '在庫は動きません。記録とファイルは「取り消し済み」として残ります。';
@@ -14412,7 +14412,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ofCalKindStock => '在庫から出庫';
 
   @override
-  String get ofCalKindProxy => '代理出荷';
+  String get ofCalKindProxy => '在庫外出荷';
 
   @override
   String get sdcSecBasic => '会社・担当者';
@@ -14553,4 +14553,29 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofShipToSet => '出荷先カードを付けました';
+
+  @override
+  String get featOutboundHub => '出庫';
+
+  @override
+  String get featOutboundHubDesc =>
+      '出荷明細から出庫・在庫外出荷・出庫カレンダー・出荷先カード・出荷指示と梱包・出庫の提案を1か所で';
+
+  @override
+  String get obHubFile => '出荷明細から出庫';
+
+  @override
+  String get obHubProxy => '在庫外出荷';
+
+  @override
+  String get obHubCalendar => '出庫カレンダー';
+
+  @override
+  String get obHubCards => '出荷先カード';
+
+  @override
+  String get obHubPacking => '出荷指示・梱包';
+
+  @override
+  String get obHubProposal => '出庫の提案';
 }

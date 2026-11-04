@@ -18431,7 +18431,7 @@ abstract class AppLocalizations {
   /// No description provided for @prIntro.
   ///
   /// In ja, this message translates to:
-  /// **'在庫とは関係なく、出荷した記録だけを残します。出荷リストのファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。'**
+  /// **'直送（仕入先から相手先へ直接送る）や出荷代行など、自社の在庫を通さない出荷を記録だけ残します。出荷明細のファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。'**
   String get prIntro;
 
   /// No description provided for @prNew.
@@ -24464,13 +24464,13 @@ abstract class AppLocalizations {
   /// No description provided for @featOutboundFile.
   ///
   /// In ja, this message translates to:
-  /// **'出荷リストで出庫'**
+  /// **'出荷明細から出庫'**
   String get featOutboundFile;
 
   /// No description provided for @featOutboundFileDesc.
   ///
   /// In ja, this message translates to:
-  /// **'いつもの出荷リスト（Excel）を読み込み、JANで照合して在庫から出庫'**
+  /// **'いつもの出荷明細（Excel・CSV）を読み込み、JANで照合して在庫から出庫'**
   String get featOutboundFileDesc;
 
   /// No description provided for @featOutboundCalendar.
@@ -24488,13 +24488,13 @@ abstract class AppLocalizations {
   /// No description provided for @ofTitle.
   ///
   /// In ja, this message translates to:
-  /// **'出荷リストで出庫'**
+  /// **'出荷明細から出庫'**
   String get ofTitle;
 
   /// No description provided for @ofTabImport.
   ///
   /// In ja, this message translates to:
-  /// **'読み込んで出庫'**
+  /// **'出荷明細から出庫'**
   String get ofTabImport;
 
   /// No description provided for @ofTabCalendar.
@@ -24506,7 +24506,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofIntro.
   ///
   /// In ja, this message translates to:
-  /// **'いつも使っている出荷リスト（Excel・CSV）をそのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。'**
+  /// **'いつも使っている出荷明細（品目・数量・単価の一覧。明细シートなど）を、Excel・CSVのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。箱ごとの中身・重量・サイズを書いたパッキングリストとは別のものです。'**
   String get ofIntro;
 
   /// No description provided for @ofPick.
@@ -25262,19 +25262,19 @@ abstract class AppLocalizations {
   /// No description provided for @featProxyShipment.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷'**
+  /// **'在庫外出荷'**
   String get featProxyShipment;
 
   /// No description provided for @featProxyShipmentDesc.
   ///
   /// In ja, this message translates to:
-  /// **'在庫とは関係なく、出荷の記録だけを残す（ファイルまたは手入力）'**
+  /// **'直送・出荷代行など、自社の在庫を通さない出荷を記録だけ残す'**
   String get featProxyShipmentDesc;
 
   /// No description provided for @prTitle.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷'**
+  /// **'在庫外出荷'**
   String get prTitle;
 
   /// No description provided for @prTabRecord.
@@ -25286,13 +25286,13 @@ abstract class AppLocalizations {
   /// No description provided for @prTabList.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷の記録'**
+  /// **'在庫外出荷の記録'**
   String get prTabList;
 
   /// No description provided for @prPrincipal.
   ///
   /// In ja, this message translates to:
-  /// **'依頼元（任意）'**
+  /// **'依頼元・手配元（任意）'**
   String get prPrincipal;
 
   /// No description provided for @prAddRow.
@@ -25352,7 +25352,7 @@ abstract class AppLocalizations {
   /// No description provided for @prPostConfirmTitle.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷として記録しますか？'**
+  /// **'在庫外出荷として記録しますか？'**
   String get prPostConfirmTitle;
 
   /// No description provided for @prPostConfirmBody.
@@ -25364,13 +25364,13 @@ abstract class AppLocalizations {
   /// No description provided for @prPostDone.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷を記録しました（{n}行）'**
+  /// **'在庫外出荷を記録しました（{n}行）'**
   String prPostDone(int n);
 
   /// No description provided for @prBadge.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷'**
+  /// **'在庫外出荷'**
   String get prBadge;
 
   /// No description provided for @prUndo.
@@ -25382,7 +25382,7 @@ abstract class AppLocalizations {
   /// No description provided for @prUndoQ.
   ///
   /// In ja, this message translates to:
-  /// **'この代理出荷の記録を取り消しますか？'**
+  /// **'この在庫外出荷の記録を取り消しますか？'**
   String get prUndoQ;
 
   /// No description provided for @prUndoBody.
@@ -25436,7 +25436,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofCalKindProxy.
   ///
   /// In ja, this message translates to:
-  /// **'代理出荷'**
+  /// **'在庫外出荷'**
   String get ofCalKindProxy;
 
   /// No description provided for @sdcSecBasic.
@@ -25714,6 +25714,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷先カードを付けました'**
   String get ofShipToSet;
+
+  /// No description provided for @featOutboundHub.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get featOutboundHub;
+
+  /// No description provided for @featOutboundHubDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細から出庫・在庫外出荷・出庫カレンダー・出荷先カード・出荷指示と梱包・出庫の提案を1か所で'**
+  String get featOutboundHubDesc;
+
+  /// No description provided for @obHubFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細から出庫'**
+  String get obHubFile;
+
+  /// No description provided for @obHubProxy.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫外出荷'**
+  String get obHubProxy;
+
+  /// No description provided for @obHubCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫カレンダー'**
+  String get obHubCalendar;
+
+  /// No description provided for @obHubCards.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード'**
+  String get obHubCards;
+
+  /// No description provided for @obHubPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷指示・梱包'**
+  String get obHubPacking;
+
+  /// No description provided for @obHubProposal.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫の提案'**
+  String get obHubProposal;
 }
 
 class _AppLocalizationsDelegate

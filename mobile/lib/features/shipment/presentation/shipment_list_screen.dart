@@ -16,7 +16,10 @@ import 'shipment_status_ui.dart';
 /// Lists shipments (出庫) to pack and ship. Import a customer's list, then open
 /// one to subdivide it into cartons and confirm the shipment.
 class ShipmentListScreen extends ConsumerStatefulWidget {
-  const ShipmentListScreen({super.key});
+  const ShipmentListScreen({super.key, this.embedded = false});
+
+  /// A tab of 出庫 (the hub): no title of its own, its buttons kept.
+  final bool embedded;
 
   @override
   ConsumerState<ShipmentListScreen> createState() => _ShipmentListScreenState();
@@ -50,7 +53,10 @@ class _ShipmentListScreenState extends ConsumerState<ShipmentListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.shipmentListTitle),
+        primary: !widget.embedded,
+        automaticallyImplyLeading: !widget.embedded,
+        toolbarHeight: widget.embedded ? 48 : null,
+        title: widget.embedded ? null : Text(l10n.shipmentListTitle),
         actions: [
           IconButton(
             tooltip: showShipped ? l10n.hideCompletedPlans : l10n.showCompletedPlans,

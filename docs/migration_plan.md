@@ -8574,6 +8574,18 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   card changed later does not change where goods went. The detail shows it,
   copies it, and can choose another card.
 
+## 出庫 in one screen, in the trade's words (app only)
+
+- The menu has one 出庫. Its tabs: 出荷明細から出庫 (0188), 在庫外出荷 (0189),
+  出庫カレンダー, 出荷先カード (0190), 出荷指示・梱包 (the shipment list: a
+  customer's order packed into cartons and shipped), 出庫の提案 (0139). The
+  former entries keep their addresses (links, bookmarks) out of the menu and
+  open the hub at their tab.
+- Words: 出荷リスト → 出荷明細 (items, quantities, prices — such as the 明细
+  sheet; the packing list is per carton: contents, weight, size). 代理出荷 →
+  在庫外出荷 (直送 from a supplier, 出荷代行 for another — not through our
+  stock); its 依頼元 → 依頼元・手配元.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

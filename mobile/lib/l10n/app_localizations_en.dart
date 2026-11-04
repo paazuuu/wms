@@ -10408,7 +10408,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prIntro =>
-      'Keeps a record of what was shipped, apart from the stock. Read a shipping list, or add rows one by one. Products need not be in the library, and no stock moves.';
+      'Records shipments that do not pass through your stock — drop shipments from a supplier, shipping done for others. Read a shipping list, or add rows one by one. Products need not be in the library; no stock moves.';
 
   @override
   String get prNew => 'New list';
@@ -14151,11 +14151,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adjClearFilters => 'Clear filters';
 
   @override
-  String get featOutboundFile => 'Ship from a list';
+  String get featOutboundFile => 'Ship from a shipping list';
 
   @override
   String get featOutboundFileDesc =>
-      'Read your usual shipping list, match by JAN, take it out of stock';
+      'Read your usual shipping list (Excel/CSV), match by JAN, take it out of stock';
 
   @override
   String get featOutboundCalendar => 'Shipping calendar';
@@ -14165,17 +14165,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Each day\'s shipments from lists, with their files';
 
   @override
-  String get ofTitle => 'Ship from a list';
+  String get ofTitle => 'Ship from a shipping list';
 
   @override
-  String get ofTabImport => 'Read and ship';
+  String get ofTabImport => 'From a shipping list';
 
   @override
   String get ofTabCalendar => 'Calendar';
 
   @override
   String get ofIntro =>
-      'Read the shipping list you already use (Excel or CSV) as it is, in any language. Products are found by JAN first; rows without one by part number and maker.';
+      'Read the shipping list you already keep (items, quantities, prices — such as the 明细 sheet) as Excel or CSV, in any language. Products are found by JAN first, else by part number and maker. This is not the packing list (contents, weight and size per carton).';
 
   @override
   String get ofPick => 'Choose a file';
@@ -14602,14 +14602,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plShippingSaved => 'The shipping-format file was saved too';
 
   @override
-  String get featProxyShipment => 'Proxy shipment';
+  String get featProxyShipment => 'Shipment outside stock';
 
   @override
   String get featProxyShipmentDesc =>
-      'Keep a record of a shipment without touching stock (from a file or typed in)';
+      'Drop shipments and shipments for others: kept as a record, no stock moved';
 
   @override
-  String get prTitle => 'Proxy shipment';
+  String get prTitle => 'Shipment outside stock';
 
   @override
   String get prTabRecord => 'Record';
@@ -14618,7 +14618,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prTabList => 'Records';
 
   @override
-  String get prPrincipal => 'On behalf of (optional)';
+  String get prPrincipal => 'Ordered by / arranged by (optional)';
 
   @override
   String get prAddRow => 'Add a row';
@@ -14650,7 +14650,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prPost => 'Record';
 
   @override
-  String get prPostConfirmTitle => 'Record as a proxy shipment?';
+  String get prPostConfirmTitle => 'Record as a shipment outside stock?';
 
   @override
   String prPostConfirmBody(int record, int qty) {
@@ -14659,17 +14659,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String prPostDone(int n) {
-    return 'Proxy shipment recorded ($n rows)';
+    return 'Shipment outside stock recorded ($n rows)';
   }
 
   @override
-  String get prBadge => 'Proxy';
+  String get prBadge => 'Outside stock';
 
   @override
   String get prUndo => 'Withdraw the record';
 
   @override
-  String get prUndoQ => 'Withdraw this proxy shipment?';
+  String get prUndoQ => 'Withdraw this shipment outside stock?';
 
   @override
   String get prUndoBody =>
@@ -14685,7 +14685,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String prPrincipalLabel(String name) {
-    return 'On behalf of: $name';
+    return 'Ordered by: $name';
   }
 
   @override
@@ -14701,7 +14701,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ofCalKindStock => 'From stock';
 
   @override
-  String get ofCalKindProxy => 'Proxy';
+  String get ofCalKindProxy => 'Outside stock';
 
   @override
   String get sdcSecBasic => 'Company and contact';
@@ -14844,4 +14844,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofShipToSet => 'Destination card set';
+
+  @override
+  String get featOutboundHub => 'Outbound';
+
+  @override
+  String get featOutboundHubDesc =>
+      'Shipping in one place: from a shipping list, outside stock, calendar, destination cards, packing, proposals';
+
+  @override
+  String get obHubFile => 'From a shipping list';
+
+  @override
+  String get obHubProxy => 'Outside stock';
+
+  @override
+  String get obHubCalendar => 'Calendar';
+
+  @override
+  String get obHubCards => 'Destination cards';
+
+  @override
+  String get obHubPacking => 'Orders and packing';
+
+  @override
+  String get obHubProposal => 'Proposals';
 }

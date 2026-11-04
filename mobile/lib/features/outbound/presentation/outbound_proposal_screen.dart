@@ -28,7 +28,10 @@ enum _Mode { percent, direct }
 /// The draft can be downloaded as Excel before anything is saved; once the
 /// shipment is made, its sheet is ready to send.
 class OutboundProposalScreen extends ConsumerStatefulWidget {
-  const OutboundProposalScreen({super.key, this.today});
+  const OutboundProposalScreen({super.key, this.today, this.embedded = false});
+
+  /// A tab of 出庫 (the hub): no title of its own, its buttons kept.
+  final bool embedded;
 
   /// For tests.
   final DateTime? today;
@@ -302,9 +305,13 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.featOutboundProposal),
+        primary: !widget.embedded,
+        automaticallyImplyLeading: !widget.embedded,
+        toolbarHeight: widget.embedded ? 48 : null,
+        title: widget.embedded ? null : Text(l10n.featOutboundProposal),
         actions: [
-          const FeatureLinkButton('ship_destinations'),
+          // In the hub, 出荷先カード is the tab beside it.
+          if (!widget.embedded) const FeatureLinkButton('ship_destinations'),
           IconButton(
             key: const ValueKey('ob-stock-excel'),
             tooltip: l10n.obStockExcel,

@@ -493,7 +493,10 @@ bool destinationMatches(ShipDestination d, String query) {
 /// 出荷先カード: the destinations kept, most used first — each with what an
 /// export needs — searched, added, changed, copied as text or removed.
 class ShipDestinationsScreen extends ConsumerStatefulWidget {
-  const ShipDestinationsScreen({super.key});
+  const ShipDestinationsScreen({super.key, this.embedded = false});
+
+  /// A tab of 出庫 (the hub): no title of its own.
+  final bool embedded;
 
   @override
   ConsumerState<ShipDestinationsScreen> createState() => _ShipDestinationsScreenState();
@@ -537,7 +540,7 @@ class _ShipDestinationsScreenState extends ConsumerState<ShipDestinationsScreen>
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final async = ref.watch(shipDestinationsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.featShipDestinations)),
+      appBar: widget.embedded ? null : AppBar(title: Text(l10n.featShipDestinations)),
       floatingActionButton: FloatingActionButton.extended(
         key: const ValueKey('sd-add'),
         onPressed: () => showDestinationDialog(context),
