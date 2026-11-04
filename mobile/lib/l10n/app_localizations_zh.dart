@@ -10140,7 +10140,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prIntro =>
-      '从商品主数据的全部商品中选择想要的商品和数量做成清单。可批量设置（库存的◯%、统一◯个、补到最大库存）、范围选择、排除、追加，也可手动输入。供应商可选。清单可以保存，并下载为发给供应商的Excel（附有对方填写有无库存、数量、单价、交期的栏）。';
+      '与库存无关，只保留发货记录。读取发货清单文件，或用\"添加行\"逐行输入。商品库中没有的商品也可记录，库存不会变动。';
 
   @override
   String get prNew => '新清单';
@@ -10257,7 +10257,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prAddManualOk => '添加';
 
   @override
-  String get prManualName => '品名（必填）';
+  String get prManualName => '手动输入';
 
   @override
   String get prManualNeed => '请输入品名和1以上的数量';
@@ -14223,4 +14223,104 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plShippingSaved => '发货格式的文件也已保存';
+
+  @override
+  String get featProxyShipment => '代理发货';
+
+  @override
+  String get featProxyShipmentDesc => '与库存无关，只保留发货记录（文件或手动输入）';
+
+  @override
+  String get prTitle => '代理发货';
+
+  @override
+  String get prTabRecord => '记录';
+
+  @override
+  String get prTabList => '代理发货记录';
+
+  @override
+  String get prPrincipal => '委托方（可选）';
+
+  @override
+  String get prAddRow => '添加行';
+
+  @override
+  String get prAddRowTitle => '添加代理发货行';
+
+  @override
+  String get prName => '商品名';
+
+  @override
+  String get prRemoveRow => '删除此行';
+
+  @override
+  String get prManual => '手动';
+
+  @override
+  String get prStInLibrary => '商品库中有';
+
+  @override
+  String get prStNotInLibrary => '商品库中没有';
+
+  @override
+  String prSummary(int rows, int record, int skip, int qty) {
+    return '$rows行 · 记录 $record行 · 排除 $skip行 · 数量 $qty';
+  }
+
+  @override
+  String get prPost => '记录';
+
+  @override
+  String get prPostConfirmTitle => '作为代理发货记录吗？';
+
+  @override
+  String prPostConfirmBody(int record, int qty) {
+    return '将记录$record行（数量 $qty）。库存不会变动。';
+  }
+
+  @override
+  String prPostDone(int n) {
+    return '已记录代理发货（$n行）';
+  }
+
+  @override
+  String get prBadge => '代理发货';
+
+  @override
+  String get prUndo => '撤销记录';
+
+  @override
+  String get prUndoQ => '要撤销此代理发货记录吗？';
+
+  @override
+  String get prUndoBody => '库存不会变动。记录和文件会以\"已撤销\"保留。';
+
+  @override
+  String get prUndoDone => '已撤销记录';
+
+  @override
+  String prCardLines(int lines, int n) {
+    return '$lines行 · 数量 $n';
+  }
+
+  @override
+  String prPrincipalLabel(String name) {
+    return '委托方：$name';
+  }
+
+  @override
+  String get prErrQty => '请输入数量';
+
+  @override
+  String get prErrWhat => '请输入商品名・JAN・型号中的任意一项';
+
+  @override
+  String get ofCalKindAll => '全部';
+
+  @override
+  String get ofCalKindStock => '从库存出库';
+
+  @override
+  String get ofCalKindProxy => '代理发货';
 }

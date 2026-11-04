@@ -153,6 +153,8 @@ class FeatureEntry {
         return l10n.featOutboundFile;
       case 'outbound_calendar':
         return l10n.featOutboundCalendar;
+      case 'proxy_shipment':
+        return l10n.featProxyShipment;
       case 'payments':
         return l10n.featPayments;
       case 'field_library':
@@ -291,6 +293,8 @@ class FeatureEntry {
         return l10n.featOutboundFileDesc;
       case 'outbound_calendar':
         return l10n.featOutboundCalendarDesc;
+      case 'proxy_shipment':
+        return l10n.featProxyShipmentDesc;
       case 'payments':
         return l10n.featPaymentsDesc;
       case 'field_library':

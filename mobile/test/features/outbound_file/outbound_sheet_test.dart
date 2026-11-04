@@ -191,6 +191,18 @@ void main() {
     });
   });
 
+  test('代理出荷: every row a record, even one with a product and stock', () {
+    const pen = OutboundMatch(matchedBy: OutboundMatchedBy.jan, productId: 1, onHand: 100);
+    final plan = planOutbound(
+      [const OutboundRow(rowNo: 2, jan: '4909999000014', quantity: 5), const OutboundRow(rowNo: 3, code: 'X'), const OutboundRow(rowNo: 4, code: 'Y', quantity: 1)],
+      [pen, OutboundMatch.none, OutboundMatch.none],
+      chosen: {2: OutboundAction.ship},
+      proxy: true,
+    );
+    expect([for (final l in plan) l.action], [OutboundAction.record, OutboundAction.skip, OutboundAction.record]);
+    expect(plan.every((l) => l.shipped == 0 && l.short == 0), isTrue);
+  });
+
   group('the shipping-format Excel', () {
     const products = [
       Product(

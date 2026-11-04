@@ -14,9 +14,12 @@ import 'outbound_file_screen.dart' show outboundKg, outboundMoney;
 
 /// 出庫カレンダー (0188): the lists shipped in a month, by the day they went
 /// out — the month at once, a day to narrow it — each opening its rows and
-/// its file.
+/// its file. Both kinds are here — taken out of stock and 代理出荷 (0189) —
+/// told apart and narrowed to one; [proxyOnly] shows the 代理出荷 alone.
 class OutboundCalendarTab extends ConsumerStatefulWidget {
-  const OutboundCalendarTab({super.key});
+  const OutboundCalendarTab({super.key, this.proxyOnly = false});
+
+  final bool proxyOnly;
 
   @override
   ConsumerState<OutboundCalendarTab> createState() => _OutboundCalendarTabState();
@@ -25,6 +28,9 @@ class OutboundCalendarTab extends ConsumerStatefulWidget {
 class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
   late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
   DateTime? _day;
+
+  /// null: both kinds; else 'stock' or 'proxy'.
+  String? _kind;
 
   OutboundMonthAsk get _ask => (year: _month.year, month: _month.month, warehouseId: ref.watch(activeWarehouseIdProvider));
 
@@ -38,7 +44,8 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final async = ref.watch(outboundFilesProvider(_ask));
-    final files = async.valueOrNull ?? const <OutboundFileSummary>[];
+    final kind = widget.proxyOnly ? 'proxy' : _kind;
+    final files = [for (final f in async.valueOrNull ?? const <OutboundFileSummary>[]) if (kind == null || f.kind == kind) f];
     final byDay = <DateTime, int>{};
     for (final f in files) {
       byDay[f.shippedOn] = (byDay[f.shippedOn] ?? 0) + 1;
@@ -60,6 +67,16 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
           IconButton(key: const ValueKey('of-cal-next'), onPressed: () => _shift(1), icon: const Icon(Icons.chevron_right)),
         ]),
         _DayGrid(month: _month, byDay: byDay, selected: _day, today: today, onDay: (d) => setState(() => _day = _day == d ? null : d)),
+        if (!widget.proxyOnly)
+          Wrap(spacing: AppSpacing.sm, children: [
+            for (final (k, label) in [(null, l10n.ofCalKindAll), ('stock', l10n.ofCalKindStock), ('proxy', l10n.ofCalKindProxy)])
+              ChoiceChip(
+                key: ValueKey('of-cal-kind-${k ?? 'all'}'),
+                label: Text(label),
+                selected: _kind == k,
+                onSelected: (_) => setState(() => _kind = k),
+              ),
+          ]),
         if (_day != null)
           TextButton(
             key: const ValueKey('of-cal-all'),
@@ -128,7 +145,8 @@ class _FileCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(children: [
-            Icon(Icons.description_outlined, color: file.undone ? scheme.onSurfaceVariant : scheme.primary),
+            Icon(file.proxy ? Icons.edit_note_outlined : Icons.description_outlined,
+                color: file.undone ? scheme.onSurfaceVariant : scheme.primary),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -142,11 +160,16 @@ class _FileCard extends StatelessWidget {
                     DateFormat('y/MM/dd').format(file.shippedOn),
                     if (file.warehouseName != null) file.warehouseName!,
                     if (file.destination != null) file.destination!,
-                    l10n.ofCardLines(file.lineCount, file.shippedTotal),
+                    if (file.proxy) l10n.prCardLines(file.lineCount, file.quantityTotal) else l10n.ofCardLines(file.lineCount, file.shippedTotal),
                   ].join(' · '),
                   style: muted,
                 ),
                 Wrap(spacing: AppSpacing.md, children: [
+                  if (file.proxy)
+                    Text(l10n.prBadge,
+                        key: ValueKey('of-proxy-${file.id}'),
+                        style: TextStyle(color: scheme.tertiary, fontWeight: FontWeight.w600)),
+                  if (file.principal != null) Text(l10n.prPrincipalLabel(file.principal!), style: muted),
                   if (file.shortTotal > 0) Text(l10n.ofCardShort(file.shortTotal), style: TextStyle(color: scheme.error)),
                   if (file.amountTotal != null) Text(l10n.ofSummaryAmount(outboundMoney(file.amountTotal)), style: muted),
                   if ((file.weightG ?? 0) > 0) Text(l10n.ofSummaryWeight(outboundKg(file.weightG!)), style: muted),

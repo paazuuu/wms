@@ -10408,7 +10408,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prIntro =>
-      'Pick what you would like from every product in the master, with how many. Set quantities in bulk (a % of stock, the same number, or up to the maximum), choose ranges, exclude, add, or type by hand. The supplier is optional. Save the list, and download it as Excel for the supplier, with columns for them to answer availability, quantity, price and lead time.';
+      'Keeps a record of what was shipped, apart from the stock. Read a shipping list, or add rows one by one. Products need not be in the library, and no stock moves.';
 
   @override
   String get prNew => 'New list';
@@ -10529,7 +10529,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prAddManualOk => 'Add';
 
   @override
-  String get prManualName => 'Name (required)';
+  String get prManualName => 'Typed in';
 
   @override
   String get prManualNeed => 'Enter a name and a quantity of 1 or more';
@@ -14600,4 +14600,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plShippingSaved => 'The shipping-format file was saved too';
+
+  @override
+  String get featProxyShipment => 'Proxy shipment';
+
+  @override
+  String get featProxyShipmentDesc =>
+      'Keep a record of a shipment without touching stock (from a file or typed in)';
+
+  @override
+  String get prTitle => 'Proxy shipment';
+
+  @override
+  String get prTabRecord => 'Record';
+
+  @override
+  String get prTabList => 'Records';
+
+  @override
+  String get prPrincipal => 'On behalf of (optional)';
+
+  @override
+  String get prAddRow => 'Add a row';
+
+  @override
+  String get prAddRowTitle => 'Add a row';
+
+  @override
+  String get prName => 'Product name';
+
+  @override
+  String get prRemoveRow => 'Remove this row';
+
+  @override
+  String get prManual => 'typed';
+
+  @override
+  String get prStInLibrary => 'In the library';
+
+  @override
+  String get prStNotInLibrary => 'Not in the library';
+
+  @override
+  String prSummary(int rows, int record, int skip, int qty) {
+    return '$rows rows · record $record · leave out $skip · quantity $qty';
+  }
+
+  @override
+  String get prPost => 'Record';
+
+  @override
+  String get prPostConfirmTitle => 'Record as a proxy shipment?';
+
+  @override
+  String prPostConfirmBody(int record, int qty) {
+    return '$record rows ($qty units) are recorded. No stock moves.';
+  }
+
+  @override
+  String prPostDone(int n) {
+    return 'Proxy shipment recorded ($n rows)';
+  }
+
+  @override
+  String get prBadge => 'Proxy';
+
+  @override
+  String get prUndo => 'Withdraw the record';
+
+  @override
+  String get prUndoQ => 'Withdraw this proxy shipment?';
+
+  @override
+  String get prUndoBody =>
+      'No stock moves. The record and file stay, marked undone.';
+
+  @override
+  String get prUndoDone => 'Record withdrawn';
+
+  @override
+  String prCardLines(int lines, int n) {
+    return '$lines rows · $n units';
+  }
+
+  @override
+  String prPrincipalLabel(String name) {
+    return 'On behalf of: $name';
+  }
+
+  @override
+  String get prErrQty => 'Enter the quantity';
+
+  @override
+  String get prErrWhat => 'Enter a name, JAN or part no.';
+
+  @override
+  String get ofCalKindAll => 'All';
+
+  @override
+  String get ofCalKindStock => 'From stock';
+
+  @override
+  String get ofCalKindProxy => 'Proxy';
 }

@@ -46,10 +46,14 @@ String outboundKg(double g) => NumberFormat('#,##0.###').format(g / 1000);
 /// 出荷リストで出庫 (0188): the shipping list people already keep, read as it
 /// is and taken out of stock — and, on the other tab, every list shipped,
 /// by day, with its file (出庫カレンダー).
+///
+/// [proxy] (代理出荷, 0189): the same list, or rows typed in, kept as a
+/// record only — no stock moves, the products need not be in the library.
 class OutboundFileScreen extends StatelessWidget {
-  const OutboundFileScreen({super.key, this.initialTab = 0});
+  const OutboundFileScreen({super.key, this.initialTab = 0, this.proxy = false});
 
   final int initialTab;
+  final bool proxy;
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +63,22 @@ class OutboundFileScreen extends StatelessWidget {
       initialIndex: initialTab,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.ofTitle),
+          title: Text(proxy ? l10n.prTitle : l10n.ofTitle),
           bottom: TabBar(tabs: [
-            Tab(key: const ValueKey('of-tab-import'), text: l10n.ofTabImport),
-            Tab(key: const ValueKey('of-tab-calendar'), text: l10n.ofTabCalendar),
+            Tab(key: const ValueKey('of-tab-import'), text: proxy ? l10n.prTabRecord : l10n.ofTabImport),
+            Tab(key: const ValueKey('of-tab-calendar'), text: proxy ? l10n.prTabList : l10n.ofTabCalendar),
           ]),
         ),
-        body: const TabBarView(children: [OutboundImportTab(), OutboundCalendarTab()]),
+        body: TabBarView(children: [OutboundImportTab(proxy: proxy), OutboundCalendarTab(proxyOnly: proxy)]),
       ),
     );
   }
 }
+
+/// A row's state as a 代理出荷 shows it: in the library or not (no stock).
+String proxyStatusLabel(AppLocalizations l10n, OutboundPlanLine l) => l.status == OutboundStatus.noQuantity
+    ? l10n.ofStNoQty
+    : (l.found ? l10n.prStInLibrary : l10n.prStNotInLibrary);
 
 String outboundStatusLabel(AppLocalizations l10n, OutboundStatus s) => switch (s) {
       OutboundStatus.ok => l10n.ofStOk,
@@ -119,9 +128,12 @@ Color outboundStatusColor(ColorScheme s, OutboundStatus st) => switch (st) {
       _ => s.tertiary,
     };
 
-/// Reads a list, shows each row with what will be done, and ships it.
+/// Reads a list, shows each row with what will be done, and ships it — or,
+/// as a 代理出荷 ([proxy]), keeps it (and rows typed in) as a record.
 class OutboundImportTab extends ConsumerStatefulWidget {
-  const OutboundImportTab({super.key});
+  const OutboundImportTab({super.key, this.proxy = false});
+
+  final bool proxy;
 
   @override
   ConsumerState<OutboundImportTab> createState() => _OutboundImportTabState();
@@ -130,7 +142,11 @@ class OutboundImportTab extends ConsumerStatefulWidget {
 class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
   final _destination = TextEditingController();
   final _note = TextEditingController();
+  final _principal = TextEditingController();
   ({String name, Uint8List bytes})? _file;
+
+  /// 代理出荷's rows typed in, after the file's.
+  final List<OutboundRow> _manual = [];
   List<XlsxSheetRows> _sheets = const [];
   int _sheet = 0;
   Map<OutboundColumn, int>? _columns;
@@ -150,7 +166,55 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
   void dispose() {
     _destination.dispose();
     _note.dispose();
+    _principal.dispose();
     super.dispose();
+  }
+
+  bool get _proxy => widget.proxy;
+
+  /// The rows to post: the file's (when it can be read) and those typed in.
+  List<OutboundRow> get _rows => [if (_parsed?.usable ?? false) ..._parsed!.rows, ..._manual];
+
+  /// Typed-in rows numbered after the file's.
+  void _renumber() {
+    var n = [for (final r in (_parsed?.usable ?? false) ? _parsed!.rows : const <OutboundRow>[]) r.rowNo]
+        .fold(0, (a, b) => a > b ? a : b);
+    for (var i = 0; i < _manual.length; i++) {
+      final r = _manual[i];
+      _manual[i] = OutboundRow(
+        rowNo: ++n,
+        jan: r.jan,
+        janRaw: r.janRaw,
+        quantity: r.quantity,
+        code: r.code,
+        maker: r.maker,
+        name: r.name,
+        unitPriceTax: r.unitPriceTax,
+        raw: r.raw,
+      );
+    }
+  }
+
+  Future<void> _addRow() async {
+    final row = await showDialog<OutboundRow>(context: context, builder: (_) => const _ManualRowDialog());
+    if (row == null || !mounted) return;
+    setState(() {
+      _manual.add(row);
+      _picked.clear();
+      _chosen.clear();
+      _renumber();
+    });
+    await _match();
+  }
+
+  Future<void> _removeRow(OutboundPlanLine l) async {
+    setState(() {
+      _manual.removeWhere((r) => r.rowNo == l.row.rowNo);
+      _picked.clear();
+      _chosen.clear();
+      _renumber();
+    });
+    await _match();
   }
 
   void _snack(String t) {
@@ -196,17 +260,21 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
       _columns ??= Map.of(parsed.columns);
       _matches = const [];
       _matchError = null;
+      _renumber();
     });
     await _match();
   }
 
   Future<void> _match() async {
-    final parsed = _parsed;
+    final rows = _rows;
     final warehouseId = ref.read(writeWarehouseIdProvider);
-    if (parsed == null || !parsed.usable || parsed.rows.isEmpty || warehouseId == null) return;
+    if (rows.isEmpty || warehouseId == null) {
+      setState(() => _matches = const []);
+      return;
+    }
     setState(() => _matching = true);
     final r = await ref.read(outboundFileRepositoryProvider).match([
-      for (final row in parsed.rows) {'jan': row.jan.isEmpty ? null : row.jan, 'code': row.code, 'maker': row.maker},
+      for (final row in rows) {'jan': row.jan.isEmpty ? null : row.jan, 'code': row.code, 'maker': row.maker},
     ], warehouseId);
     if (!mounted) return;
     setState(() {
@@ -220,8 +288,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     });
   }
 
-  List<OutboundPlanLine> get _plan =>
-      _parsed == null ? const [] : planOutbound(_parsed!.rows, _matches, picked: _picked, chosen: _chosen);
+  List<OutboundPlanLine> get _plan => planOutbound(_rows, _matches, picked: _picked, chosen: _chosen, proxy: _proxy);
 
   Future<void> _pickProduct(OutboundPlanLine line) async {
     final warehouseId = ref.read(writeWarehouseIdProvider);
@@ -254,7 +321,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
       _snack(l10n.adjNeedsWarehouse);
       return;
     }
-    if (file == null || parsed == null) return;
+    if (file == null && _manual.isEmpty) return;
     final plan = _plan;
     final t = OutboundPlanTotals.of(plan);
     if (t.ship + t.record == 0) {
@@ -264,9 +331,11 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(l10n.ofPostConfirmTitle),
+        title: Text(_proxy ? l10n.prPostConfirmTitle : l10n.ofPostConfirmTitle),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(l10n.ofPostConfirmBody(t.ship, t.shipped, t.record, t.skip)),
+          Text(_proxy
+              ? l10n.prPostConfirmBody(t.record, _recordedQty(plan))
+              : l10n.ofPostConfirmBody(t.ship, t.shipped, t.record, t.skip)),
           if (t.short > 0) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.ofPostShortWarn(t.shortRows, t.short), style: TextStyle(color: Theme.of(c).colorScheme.error)),
@@ -274,7 +343,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('of-post-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofPost)),
+          FilledButton(
+              key: const ValueKey('of-post-ok'),
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(_proxy ? l10n.prPost : l10n.ofPost)),
         ],
       ),
     );
@@ -284,30 +356,35 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
       _busyText = l10n.ofUploading;
     });
     final repo = ref.read(outboundFileRepositoryProvider);
-    final up = await repo.upload(warehouseId, file.name, file.bytes);
-    if (!mounted) return;
-    final String path;
-    switch (up) {
-      case ApiSuccess(:final data):
-        path = data;
-      case ApiFailure(:final message):
-        setState(() => _busy = false);
-        _snack(humanizeApiErrorMessage(l10n, message));
-        return;
+    String? path;
+    if (file != null) {
+      final up = await repo.upload(warehouseId, file.name, file.bytes);
+      if (!mounted) return;
+      switch (up) {
+        case ApiSuccess(:final data):
+          path = data;
+        case ApiFailure(:final message):
+          setState(() => _busy = false);
+          _snack(humanizeApiErrorMessage(l10n, message));
+          return;
+      }
     }
+    String? text(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
     Future<ApiResult<int>> send(bool again) => repo.post(
           warehouseId: warehouseId,
           shippedOn: _shippedOn,
-          fileName: file.name,
+          fileName: file?.name ?? l10n.prManualName,
           lines: [for (final l in plan) l.toPost()],
           storagePath: path,
-          byteSize: file.bytes.length,
-          fingerprint: fileFingerprint(file.bytes),
-          sheetName: parsed.sheetName,
-          destination: _destination.text.trim().isEmpty ? null : _destination.text.trim(),
-          note: _note.text.trim().isEmpty ? null : _note.text.trim(),
-          columns: parsed.columnsWire,
+          byteSize: file?.bytes.length,
+          fingerprint: file == null ? null : fileFingerprint(file.bytes),
+          sheetName: parsed?.sheetName,
+          destination: text(_destination),
+          note: text(_note),
+          columns: parsed?.columnsWire,
           allowDuplicate: again,
+          proxy: _proxy,
+          principal: _proxy ? text(_principal) : null,
         );
     var r = await send(false);
     if (!mounted) return;
@@ -336,22 +413,27 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         ref.invalidate(outboundFilesProvider);
         ref.invalidate(productListProvider);
         ref.invalidate(adjustProductsProvider);
-        _snack(l10n.ofPostDone(t.shipped));
+        _snack(_proxy ? l10n.prPostDone(t.record) : l10n.ofPostDone(t.shipped));
         setState(() {
           _file = null;
           _sheets = const [];
           _parsed = null;
           _matches = const [];
+          _manual.clear();
           _picked.clear();
           _chosen.clear();
           _destination.clear();
           _note.clear();
+          _principal.clear();
         });
         await Navigator.of(context).push(MaterialPageRoute(builder: (_) => OutboundFileDetailScreen(fileId: data)));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
   }
+
+  int _recordedQty(List<OutboundPlanLine> plan) =>
+      plan.fold(0, (a, l) => a + (l.action == OutboundAction.skip ? 0 : (l.row.quantity ?? 0)));
 
   @override
   Widget build(BuildContext context) {
@@ -360,6 +442,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final scheme = theme.colorScheme;
     final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
     final parsed = _parsed;
+    final hasRows = _rows.isNotEmpty;
     final plan = _plan;
     final totals = OutboundPlanTotals.of(plan);
     final shown = [for (final l in plan) if (_filter == null || l.status == _filter) l];
@@ -375,7 +458,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(l10n.ofIntro, style: theme.textTheme.bodyMedium),
+                  Text(_proxy ? l10n.prIntro : l10n.ofIntro, style: theme.textTheme.bodyMedium),
                   const SizedBox(height: AppSpacing.md),
                   Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
                     FilledButton.icon(
@@ -384,6 +467,13 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                       icon: const Icon(Icons.upload_file_outlined),
                       label: Text(_file == null ? l10n.ofPick : l10n.ofPickAgain),
                     ),
+                    if (_proxy)
+                      OutlinedButton.icon(
+                        key: const ValueKey('pr-add-row'),
+                        onPressed: _busy ? null : _addRow,
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.prAddRow),
+                      ),
                     if (_file != null) Text(_file!.name, key: const ValueKey('of-file-name'), style: theme.textTheme.titleSmall),
                   ]),
                   if (noWarehouse) ...[
@@ -396,11 +486,17 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
             if (parsed != null) ...[
               const SizedBox(height: AppSpacing.md),
               _sheetAndColumns(l10n, parsed, muted),
+              if (!parsed.usable) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error)),
+              ],
+            ],
+            if (parsed != null || hasRows) ...[
               const SizedBox(height: AppSpacing.md),
               _settings(l10n),
               const SizedBox(height: AppSpacing.md),
-              if (!parsed.usable)
-                Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error))
+              if (!hasRows)
+                const SizedBox.shrink()
               else if (_matching)
                 Row(children: [
                   const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -410,16 +506,24 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               else if (_matchError != null)
                 Text(_matchError!, style: TextStyle(color: scheme.error))
               else ...[
-                _summary(l10n, totals),
-                const SizedBox(height: AppSpacing.sm),
-                _filters(l10n, totals),
-                const SizedBox(height: AppSpacing.sm),
-                _help(l10n),
+                if (_proxy)
+                  Text(l10n.prSummary(totals.rows, totals.record, totals.skip, _recordedQty(plan)),
+                      key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall)
+                else ...[
+                  _summary(l10n, totals),
+                  const SizedBox(height: AppSpacing.sm),
+                  _filters(l10n, totals),
+                  const SizedBox(height: AppSpacing.sm),
+                  _help(l10n),
+                ],
                 const SizedBox(height: AppSpacing.sm),
                 _OutboundPlanTable(
                   lines: shown.take(_limit).toList(),
+                  proxy: _proxy,
+                  manual: {for (final r in _manual) r.rowNo},
                   onAction: (l, a) => setState(() => _chosen[l.row.rowNo] = a),
                   onPick: _pickProduct,
+                  onRemove: _removeRow,
                 ),
                 if (shown.length > _limit)
                   TextButton(
@@ -432,7 +536,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           ],
         ),
       ),
-      if (parsed != null && parsed.usable && !_matching && _matchError == null)
+      if (hasRows && !_matching && _matchError == null)
         SafeArea(
           top: false,
           child: Container(
@@ -441,10 +545,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
             child: Row(children: [
               Expanded(
                 child: Text(
-                  [
-                    l10n.ofSummaryShip(totals.shipped),
-                    if (totals.short > 0) l10n.ofSummaryShort(totals.short, totals.shortRows),
-                  ].join(' · '),
+                  _proxy
+                      ? l10n.prSummary(totals.rows, totals.record, totals.skip, _recordedQty(plan))
+                      : [
+                          l10n.ofSummaryShip(totals.shipped),
+                          if (totals.short > 0) l10n.ofSummaryShort(totals.short, totals.shortRows),
+                        ].join(' · '),
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
@@ -456,8 +562,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                 FilledButton.icon(
                   key: const ValueKey('of-post'),
                   onPressed: noWarehouse ? null : _post,
-                  icon: const Icon(Icons.outbox_outlined),
-                  label: Text(l10n.ofPost),
+                  icon: Icon(_proxy ? Icons.edit_note_outlined : Icons.outbox_outlined),
+                  label: Text(_proxy ? l10n.prPost : l10n.ofPost),
                 ),
             ]),
           ),
@@ -573,6 +679,15 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               if (d != null) setState(() => _shippedOn = d);
             },
           ),
+          if (_proxy)
+            SizedBox(
+              width: 220,
+              child: TextField(
+                key: const ValueKey('pr-principal'),
+                controller: _principal,
+                decoration: InputDecoration(labelText: l10n.prPrincipal, isDense: true),
+              ),
+            ),
           SizedBox(
             width: 220,
             child: TextField(
@@ -651,11 +766,25 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 /// its product, codes, quantity, stock, what goes out and is short, prices,
 /// weight.
 class _OutboundPlanTable extends StatefulWidget {
-  const _OutboundPlanTable({required this.lines, required this.onAction, required this.onPick});
+  const _OutboundPlanTable({
+    required this.lines,
+    required this.onAction,
+    required this.onPick,
+    this.proxy = false,
+    this.manual = const {},
+    this.onRemove,
+  });
 
   final List<OutboundPlanLine> lines;
   final void Function(OutboundPlanLine, OutboundAction) onAction;
   final void Function(OutboundPlanLine) onPick;
+
+  /// 代理出荷: no stock columns, no shipping.
+  final bool proxy;
+
+  /// The rows typed in (by row number): these can be removed.
+  final Set<int> manual;
+  final void Function(OutboundPlanLine)? onRemove;
 
   @override
   State<_OutboundPlanTable> createState() => _OutboundPlanTableState();
@@ -679,12 +808,16 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
     final scheme = theme.colorScheme;
     final head = theme.textTheme.labelMedium;
     final small = theme.textTheme.bodySmall;
-    Widget cell(int i, Widget child, {bool end = false}) => Container(
-          width: _widths[i],
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
-          child: child,
-        );
+    // 代理出荷: no stock, nothing taken out, nothing short.
+    final hidden = widget.proxy ? const {9, 10, 11} : const <int>{};
+    Widget cell(int i, Widget child, {bool end = false}) => hidden.contains(i)
+        ? const SizedBox.shrink()
+        : Container(
+            width: _widths[i],
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+            child: child,
+          );
     final headers = [
       l10n.ofColRow, l10n.ofColStatus, l10n.ofColAction, l10n.ofColProduct, l10n.ofRoleJan, l10n.ofRoleCode,
       l10n.ofRoleMaker, l10n.ofRoleSupplier, l10n.ofRoleQuantity, l10n.ofColStock, l10n.ofColShip, l10n.ofColShort,
@@ -712,12 +845,31 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                 border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
               ),
               child: Row(children: [
-                cell(0, Text('${l.row.rowNo}', style: small)),
+                cell(
+                  0,
+                  widget.manual.contains(l.row.rowNo)
+                      ? Row(mainAxisSize: MainAxisSize.min, children: [
+                          Text('${l.row.rowNo}', style: small),
+                          InkWell(
+                            key: ValueKey('pr-remove-${l.row.rowNo}'),
+                            onTap: () => widget.onRemove?.call(l),
+                            child: Tooltip(
+                              message: l10n.prRemoveRow,
+                              child: Icon(Icons.close, size: 16, color: scheme.error),
+                            ),
+                          ),
+                        ])
+                      : Text('${l.row.rowNo}', style: small),
+                ),
                 cell(
                   1,
-                  Text(outboundStatusLabel(l10n, l.status),
+                  Text(widget.proxy ? proxyStatusLabel(l10n, l) : outboundStatusLabel(l10n, l.status),
                       key: ValueKey('of-status-${l.row.rowNo}'),
-                      style: small?.copyWith(color: outboundStatusColor(scheme, l.status), fontWeight: FontWeight.w600)),
+                      style: small?.copyWith(
+                          color: widget.proxy
+                              ? (l.found ? scheme.primary : scheme.onSurfaceVariant)
+                              : outboundStatusColor(scheme, l.status),
+                          fontWeight: FontWeight.w600)),
                 ),
                 cell(
                   2,
@@ -726,7 +878,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                     onSelected: (a) => widget.onAction(l, a),
                     itemBuilder: (_) => [
                       for (final a in OutboundAction.values)
-                        if (a != OutboundAction.ship || l.found)
+                        if (a != OutboundAction.ship || (l.found && !widget.proxy))
                           PopupMenuItem(
                             key: ValueKey('of-action-${l.row.rowNo}-${a.wire}'),
                             value: a,
@@ -866,6 +1018,103 @@ class _PickProductDialogState extends ConsumerState<_PickProductDialog> {
         ]),
       ),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel))],
+    );
+  }
+}
+
+/// A 代理出荷 row typed in: what it is (a name, JAN or 品番), how many, at
+/// what price.
+class _ManualRowDialog extends StatefulWidget {
+  const _ManualRowDialog();
+
+  @override
+  State<_ManualRowDialog> createState() => _ManualRowDialogState();
+}
+
+class _ManualRowDialogState extends State<_ManualRowDialog> {
+  final _name = TextEditingController();
+  final _jan = TextEditingController();
+  final _code = TextEditingController();
+  final _maker = TextEditingController();
+  final _qty = TextEditingController();
+  final _price = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    for (final c in [_name, _jan, _code, _maker, _qty, _price]) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _add() {
+    final l10n = AppLocalizations.of(context);
+    String? t(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
+    final qty = int.tryParse(_qty.text.trim());
+    if (t(_name) == null && t(_jan) == null && t(_code) == null) {
+      setState(() => _error = l10n.prErrWhat);
+      return;
+    }
+    if (qty == null || qty <= 0) {
+      setState(() => _error = l10n.prErrQty);
+      return;
+    }
+    final price = double.tryParse(_price.text.trim().replaceAll(',', ''));
+    Navigator.pop(
+      context,
+      OutboundRow(
+        rowNo: 0,
+        jan: normalizeOutboundJan(_jan.text),
+        janRaw: _jan.text.trim(),
+        quantity: qty,
+        code: t(_code),
+        maker: t(_maker),
+        name: t(_name),
+        unitPriceTax: price,
+        raw: {
+          for (final (k, c) in [(l10n.prName, _name), (l10n.ofRoleJan, _jan), (l10n.ofRoleCode, _code), (l10n.ofRoleMaker, _maker)])
+            if (t(c) != null) k: t(c)!,
+          l10n.ofRoleQuantity: '$qty',
+          if (price != null) l10n.ofRoleUnitPriceTax: _price.text.trim(),
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    Widget field(String key, TextEditingController c, String label, {TextInputType? type}) => TextField(
+          key: ValueKey(key),
+          controller: c,
+          keyboardType: type,
+          decoration: InputDecoration(labelText: label),
+        );
+    return AlertDialog(
+      key: const ValueKey('pr-row-dialog'),
+      title: Text(l10n.prAddRowTitle),
+      content: SizedBox(
+        width: 380,
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            field('pr-row-name', _name, l10n.prName),
+            field('pr-row-jan', _jan, l10n.ofRoleJan, type: TextInputType.number),
+            field('pr-row-code', _code, l10n.ofRoleCode),
+            field('pr-row-maker', _maker, l10n.ofRoleMaker),
+            field('pr-row-qty', _qty, l10n.ofRoleQuantity, type: TextInputType.number),
+            field('pr-row-price', _price, l10n.ofRoleUnitPriceTax, type: const TextInputType.numberWithOptions(decimal: true)),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ],
+          ]),
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(key: const ValueKey('pr-row-add'), onPressed: _add, child: Text(l10n.prAddRow)),
+      ],
     );
   }
 }

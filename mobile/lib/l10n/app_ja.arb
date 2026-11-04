@@ -8955,7 +8955,7 @@
   },
   "featPurchaseRequest": "入荷希望リスト",
   "featPurchaseRequestDesc": "商品マスタと在庫から欲しい商品と数量をまとめ、仕入先に在庫や見積りを確認するExcelを作成",
-  "prIntro": "商品マスタの全商品から、欲しい商品と数量を選んでリストにします。一括設定（在庫の◯%・一律◯個・最大在庫まで）、範囲選択・除外・追加、手入力もできます。仕入先は任意です。できたリストは保存でき、仕入先に送るExcelとしてダウンロードできます（相手が在庫の有無・数量・単価・納期を記入する欄付き）。",
+  "prIntro": "在庫とは関係なく、出荷した記録だけを残します。出荷リストのファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。",
   "prNew": "新しいリスト",
   "prEmpty": "保存したリストはまだありません",
   "prRemoveQ": "{number} を削除しますか？",
@@ -9032,7 +9032,7 @@
   "prClearSelection": "選択を解除",
   "prAddManual": "手入力で商品を追加",
   "prAddManualOk": "追加",
-  "prManualName": "商品名（必須）",
+  "prManualName": "手入力",
   "prManualNeed": "商品名と1以上の数量を入れてください",
   "prManualTag": "手入力",
   "prNoRows": "表示する商品がありません",
@@ -12843,5 +12843,85 @@
       }
     }
   },
-  "plShippingSaved": "出荷用の書式も保存しました"
+  "plShippingSaved": "出荷用の書式も保存しました",
+  "featProxyShipment": "代理出荷",
+  "featProxyShipmentDesc": "在庫とは関係なく、出荷の記録だけを残す（ファイルまたは手入力）",
+  "prTitle": "代理出荷",
+  "prTabRecord": "記録する",
+  "prTabList": "代理出荷の記録",
+  "prPrincipal": "依頼元（任意）",
+  "prAddRow": "行を追加",
+  "prAddRowTitle": "代理出荷の行を追加",
+  "prName": "商品名",
+  "prRemoveRow": "この行を消す",
+  "prManual": "手入力",
+  "prStInLibrary": "ライブラリーにあり",
+  "prStNotInLibrary": "ライブラリーにない",
+  "prSummary": "{rows}行 · 記録 {record}行 · 除外 {skip}行 · 数量 {qty}",
+  "@prSummary": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "record": {
+        "type": "int"
+      },
+      "skip": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "prPost": "記録する",
+  "prPostConfirmTitle": "代理出荷として記録しますか？",
+  "prPostConfirmBody": "{record}行（数量 {qty}）を記録します。在庫は動きません。",
+  "@prPostConfirmBody": {
+    "placeholders": {
+      "record": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "prPostDone": "代理出荷を記録しました（{n}行）",
+  "@prPostDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "prBadge": "代理出荷",
+  "prUndo": "記録を取り消す",
+  "prUndoQ": "この代理出荷の記録を取り消しますか？",
+  "prUndoBody": "在庫は動きません。記録とファイルは「取り消し済み」として残ります。",
+  "prUndoDone": "記録を取り消しました",
+  "prCardLines": "{lines}行 · 数量 {n}",
+  "@prCardLines": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "prPrincipalLabel": "依頼元: {name}",
+  "@prPrincipalLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "prErrQty": "数量を入れてください",
+  "prErrWhat": "商品名・JAN・品番のどれかを入れてください",
+  "ofCalKindAll": "すべて",
+  "ofCalKindStock": "在庫から出庫",
+  "ofCalKindProxy": "代理出荷"
 }

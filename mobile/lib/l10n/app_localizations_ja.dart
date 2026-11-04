@@ -10197,7 +10197,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prIntro =>
-      '商品マスタの全商品から、欲しい商品と数量を選んでリストにします。一括設定（在庫の◯%・一律◯個・最大在庫まで）、範囲選択・除外・追加、手入力もできます。仕入先は任意です。できたリストは保存でき、仕入先に送るExcelとしてダウンロードできます（相手が在庫の有無・数量・単価・納期を記入する欄付き）。';
+      '在庫とは関係なく、出荷した記録だけを残します。出荷リストのファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。';
 
   @override
   String get prNew => '新しいリスト';
@@ -10314,7 +10314,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prAddManualOk => '追加';
 
   @override
-  String get prManualName => '商品名（必須）';
+  String get prManualName => '手入力';
 
   @override
   String get prManualNeed => '商品名と1以上の数量を入れてください';
@@ -14313,4 +14313,104 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get plShippingSaved => '出荷用の書式も保存しました';
+
+  @override
+  String get featProxyShipment => '代理出荷';
+
+  @override
+  String get featProxyShipmentDesc => '在庫とは関係なく、出荷の記録だけを残す（ファイルまたは手入力）';
+
+  @override
+  String get prTitle => '代理出荷';
+
+  @override
+  String get prTabRecord => '記録する';
+
+  @override
+  String get prTabList => '代理出荷の記録';
+
+  @override
+  String get prPrincipal => '依頼元（任意）';
+
+  @override
+  String get prAddRow => '行を追加';
+
+  @override
+  String get prAddRowTitle => '代理出荷の行を追加';
+
+  @override
+  String get prName => '商品名';
+
+  @override
+  String get prRemoveRow => 'この行を消す';
+
+  @override
+  String get prManual => '手入力';
+
+  @override
+  String get prStInLibrary => 'ライブラリーにあり';
+
+  @override
+  String get prStNotInLibrary => 'ライブラリーにない';
+
+  @override
+  String prSummary(int rows, int record, int skip, int qty) {
+    return '$rows行 · 記録 $record行 · 除外 $skip行 · 数量 $qty';
+  }
+
+  @override
+  String get prPost => '記録する';
+
+  @override
+  String get prPostConfirmTitle => '代理出荷として記録しますか？';
+
+  @override
+  String prPostConfirmBody(int record, int qty) {
+    return '$record行（数量 $qty）を記録します。在庫は動きません。';
+  }
+
+  @override
+  String prPostDone(int n) {
+    return '代理出荷を記録しました（$n行）';
+  }
+
+  @override
+  String get prBadge => '代理出荷';
+
+  @override
+  String get prUndo => '記録を取り消す';
+
+  @override
+  String get prUndoQ => 'この代理出荷の記録を取り消しますか？';
+
+  @override
+  String get prUndoBody => '在庫は動きません。記録とファイルは「取り消し済み」として残ります。';
+
+  @override
+  String get prUndoDone => '記録を取り消しました';
+
+  @override
+  String prCardLines(int lines, int n) {
+    return '$lines行 · 数量 $n';
+  }
+
+  @override
+  String prPrincipalLabel(String name) {
+    return '依頼元: $name';
+  }
+
+  @override
+  String get prErrQty => '数量を入れてください';
+
+  @override
+  String get prErrWhat => '商品名・JAN・品番のどれかを入れてください';
+
+  @override
+  String get ofCalKindAll => 'すべて';
+
+  @override
+  String get ofCalKindStock => '在庫から出庫';
+
+  @override
+  String get ofCalKindProxy => '代理出荷';
 }

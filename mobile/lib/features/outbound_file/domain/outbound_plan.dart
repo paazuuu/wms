@@ -110,11 +110,15 @@ OutboundAction defaultOutboundAction(OutboundStatus s) => switch (s) {
 /// The list, row by row in order. [picked] replaces a row's product (chosen
 /// by hand); [chosen] its action. The same product on several rows takes
 /// from one stock: a row lower down has what the rows above left.
+///
+/// [proxy] (代理出荷, 0189): nothing is taken out of stock — every row is a
+/// record (or left out), whatever its product and stock.
 List<OutboundPlanLine> planOutbound(
   List<OutboundRow> rows,
   List<OutboundMatch> matches, {
   Map<int, OutboundMatch> picked = const {},
   Map<int, OutboundAction> chosen = const {},
+  bool proxy = false,
 }) {
   final left = <int, int>{};
   final out = <OutboundPlanLine>[];
@@ -124,9 +128,10 @@ List<OutboundPlanLine> planOutbound(
     if (pid != null) left.putIfAbsent(pid, () => m.onHand ?? 0);
     final stock = pid == null ? null : left[pid];
     final status = outboundStatusOf(row, m, stock);
-    var action = chosen[row.rowNo] ?? defaultOutboundAction(status);
-    // Nothing to take out of stock without a product.
-    if (action == OutboundAction.ship && pid == null) action = OutboundAction.record;
+    var action = chosen[row.rowNo] ??
+        (proxy && status != OutboundStatus.noQuantity ? OutboundAction.record : defaultOutboundAction(status));
+    // Nothing to take out of stock without a product, nor in a 代理出荷.
+    if (action == OutboundAction.ship && (pid == null || proxy)) action = OutboundAction.record;
     var shipped = 0, short = 0;
     if (action == OutboundAction.ship) {
       final q = row.quantity ?? 0;

@@ -23,7 +23,7 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
 
   final List<List<Map<String, String?>>> matched = [];
   final List<({String path, String name, int size})> uploaded = [];
-  final List<({List<OutboundPostLine> lines, bool allowDuplicate, String? path, DateTime shippedOn, String? sheet})> posted = [];
+  final List<({List<OutboundPostLine> lines, bool allowDuplicate, String? path, DateTime shippedOn, String? sheet, bool proxy, String? principal, String fileName})> posted = [];
   final List<int> undone = [];
   final List<String> fetched = [];
 
@@ -54,12 +54,14 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     String? note,
     Map<String, String>? columns,
     bool allowDuplicate = false,
+    bool proxy = false,
+    String? principal,
   }) async {
     if (duplicateOnce && !allowDuplicate) {
       duplicateOnce = false;
       return const ApiFailure(message: 'outbound_duplicate');
     }
-    posted.add((lines: lines, allowDuplicate: allowDuplicate, path: storagePath, shippedOn: shippedOn, sheet: sheetName));
+    posted.add((lines: lines, allowDuplicate: allowDuplicate, path: storagePath, shippedOn: shippedOn, sheet: sheetName, proxy: proxy, principal: principal, fileName: fileName));
     return ApiSuccess(posted.length);
   }
 

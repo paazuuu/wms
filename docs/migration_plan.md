@@ -8536,6 +8536,25 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   合计=H×K and 総重量=H×N÷1000 are formulas (a quantity changed changes them),
   with a totals row. It reads back through 出荷リストで出庫.
 
+## 0189: 代理出荷 — a shipment kept as a record only
+
+- Goods shipped on someone's behalf, or anything to be written down as
+  shipped, that are not in our stock: kept with no stock moved, the products
+  need not be in the 商品ライブラリー.
+- outbound_files.kind 'stock' (0188) or 'proxy', and principal (依頼元).
+  proxy_shipment_post: as outbound_file_post, every row a record (a 'ship'
+  becomes 'record'); a file seen before as the same kind asks first.
+- The 代理出荷's prices are not this business's 仕入れ値: left out of
+  purchase_price_points (0187).
+- 代理出荷 screen (menu, beside 出荷リストで出庫): read the shipping list the
+  same way, and/or 「行を追加」 (商品名 / JAN / 品番 / メーカー, 数量, 税込単価;
+  typed rows numbered after the file's, removable); 依頼元, 出荷先, メモ,
+  出荷日; each row shows ライブラリーにあり / ライブラリーにない; 記録のみ or 除外.
+  No file needed (kept as 手入力).
+- 出庫カレンダー shows both kinds — 代理出荷 marked, with its 依頼元 — and
+  narrows to すべて / 在庫から出庫 / 代理出荷; the 代理出荷 screen's own tab shows
+  them alone. 「記録を取り消す」 marks one undone (nothing goes back to stock).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

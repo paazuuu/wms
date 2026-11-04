@@ -207,9 +207,19 @@ class OutboundFileSummary extends Equatable {
     this.createdAt,
     this.createdByName,
     this.undoneAt,
+    this.kind = 'stock',
+    this.principal,
   });
 
   final int id;
+
+  /// 'stock' (taken out of stock, 0188) or 'proxy' (代理出荷: a record, 0189).
+  final String kind;
+
+  /// 代理出荷's 依頼元: on whose behalf it was shipped.
+  final String? principal;
+
+  bool get proxy => kind == 'proxy';
   final int warehouseId;
   final String? warehouseName;
   final DateTime shippedOn;
@@ -253,10 +263,12 @@ class OutboundFileSummary extends Equatable {
         createdAt: DateTime.tryParse('${j['created_at'] ?? ''}')?.toLocal(),
         createdByName: _s(j['created_by_name']),
         undoneAt: DateTime.tryParse('${j['undone_at'] ?? ''}')?.toLocal(),
+        kind: _s(j['kind']) ?? 'stock',
+        principal: _s(j['principal']),
       );
 
   @override
-  List<Object?> get props => [id, shippedOn, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
+  List<Object?> get props => [id, kind, shippedOn, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
 }
 
 /// One row of a posted list.
@@ -377,6 +389,8 @@ abstract class OutboundFileRepository {
     String? note,
     Map<String, String>? columns,
     bool allowDuplicate = false,
+    bool proxy = false,
+    String? principal,
   });
 
   Future<ApiResult<List<OutboundFileSummary>>> list({required DateTime from, required DateTime to, int? warehouseId});
@@ -441,9 +455,13 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
     String? note,
     Map<String, String>? columns,
     bool allowDuplicate = false,
+    bool proxy = false,
+    String? principal,
   }) async {
     try {
-      final r = await _rest.post('/rpc/outbound_file_post', data: {
+      // 代理出荷 (0189) is kept as a record; the other is taken out of stock.
+      final r = await _rest.post(proxy ? '/rpc/proxy_shipment_post' : '/rpc/outbound_file_post', data: {
+        if (proxy) 'p_principal': principal,
         'p_warehouse_id': warehouseId,
         'p_shipped_on': outboundDayWire(shippedOn),
         'p_file_name': fileName,

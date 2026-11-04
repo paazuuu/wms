@@ -18431,7 +18431,7 @@ abstract class AppLocalizations {
   /// No description provided for @prIntro.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタの全商品から、欲しい商品と数量を選んでリストにします。一括設定（在庫の◯%・一律◯個・最大在庫まで）、範囲選択・除外・追加、手入力もできます。仕入先は任意です。できたリストは保存でき、仕入先に送るExcelとしてダウンロードできます（相手が在庫の有無・数量・単価・納期を記入する欄付き）。'**
+  /// **'在庫とは関係なく、出荷した記録だけを残します。出荷リストのファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。'**
   String get prIntro;
 
   /// No description provided for @prNew.
@@ -18641,7 +18641,7 @@ abstract class AppLocalizations {
   /// No description provided for @prManualName.
   ///
   /// In ja, this message translates to:
-  /// **'商品名（必須）'**
+  /// **'手入力'**
   String get prManualName;
 
   /// No description provided for @prManualNeed.
@@ -25258,6 +25258,186 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷用の書式も保存しました'**
   String get plShippingSaved;
+
+  /// No description provided for @featProxyShipment.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷'**
+  String get featProxyShipment;
+
+  /// No description provided for @featProxyShipmentDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫とは関係なく、出荷の記録だけを残す（ファイルまたは手入力）'**
+  String get featProxyShipmentDesc;
+
+  /// No description provided for @prTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷'**
+  String get prTitle;
+
+  /// No description provided for @prTabRecord.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録する'**
+  String get prTabRecord;
+
+  /// No description provided for @prTabList.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷の記録'**
+  String get prTabList;
+
+  /// No description provided for @prPrincipal.
+  ///
+  /// In ja, this message translates to:
+  /// **'依頼元（任意）'**
+  String get prPrincipal;
+
+  /// No description provided for @prAddRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'行を追加'**
+  String get prAddRow;
+
+  /// No description provided for @prAddRowTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷の行を追加'**
+  String get prAddRowTitle;
+
+  /// No description provided for @prName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get prName;
+
+  /// No description provided for @prRemoveRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'この行を消す'**
+  String get prRemoveRow;
+
+  /// No description provided for @prManual.
+  ///
+  /// In ja, this message translates to:
+  /// **'手入力'**
+  String get prManual;
+
+  /// No description provided for @prStInLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーにあり'**
+  String get prStInLibrary;
+
+  /// No description provided for @prStNotInLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーにない'**
+  String get prStNotInLibrary;
+
+  /// No description provided for @prSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{rows}行 · 記録 {record}行 · 除外 {skip}行 · 数量 {qty}'**
+  String prSummary(int rows, int record, int skip, int qty);
+
+  /// No description provided for @prPost.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録する'**
+  String get prPost;
+
+  /// No description provided for @prPostConfirmTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷として記録しますか？'**
+  String get prPostConfirmTitle;
+
+  /// No description provided for @prPostConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{record}行（数量 {qty}）を記録します。在庫は動きません。'**
+  String prPostConfirmBody(int record, int qty);
+
+  /// No description provided for @prPostDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷を記録しました（{n}行）'**
+  String prPostDone(int n);
+
+  /// No description provided for @prBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷'**
+  String get prBadge;
+
+  /// No description provided for @prUndo.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録を取り消す'**
+  String get prUndo;
+
+  /// No description provided for @prUndoQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この代理出荷の記録を取り消しますか？'**
+  String get prUndoQ;
+
+  /// No description provided for @prUndoBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫は動きません。記録とファイルは「取り消し済み」として残ります。'**
+  String get prUndoBody;
+
+  /// No description provided for @prUndoDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録を取り消しました'**
+  String get prUndoDone;
+
+  /// No description provided for @prCardLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'{lines}行 · 数量 {n}'**
+  String prCardLines(int lines, int n);
+
+  /// No description provided for @prPrincipalLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'依頼元: {name}'**
+  String prPrincipalLabel(String name);
+
+  /// No description provided for @prErrQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を入れてください'**
+  String get prErrQty;
+
+  /// No description provided for @prErrWhat.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・JAN・品番のどれかを入れてください'**
+  String get prErrWhat;
+
+  /// No description provided for @ofCalKindAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get ofCalKindAll;
+
+  /// No description provided for @ofCalKindStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫から出庫'**
+  String get ofCalKindStock;
+
+  /// No description provided for @ofCalKindProxy.
+  ///
+  /// In ja, this message translates to:
+  /// **'代理出荷'**
+  String get ofCalKindProxy;
 }
 
 class _AppLocalizationsDelegate

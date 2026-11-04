@@ -66,11 +66,12 @@ const _library = [
 ];
 
 void main() {
-  Future<FakeOutboundFileRepository> pump(WidgetTester tester, {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html}) async {
+  Future<FakeOutboundFileRepository> pump(WidgetTester tester,
+      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false}) async {
     await tester.binding.setSurfaceSize(const Size(2600, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final r = repo ?? FakeOutboundFileRepository(matcher: _match);
-    await pumpApp(tester, OutboundFileScreen(initialTab: tab), overrides: [
+    await pumpApp(tester, OutboundFileScreen(initialTab: tab, proxy: proxy), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(r),
       outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: _book())),
       outboundTabOpenerProvider.overrideWithValue(() => html),
@@ -220,5 +221,124 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.undone, [4]);
     expect(find.text('取り消しました（5個を在庫に戻しました）'), findsOneWidget);
+  });
+
+  testWidgets('代理出荷: rows typed in, kept as a record with 依頼元, nothing shipped', (tester) async {
+    final repo = await pump(tester, proxy: true);
+    expect(find.text('代理出荷'), findsWidgets);
+
+    Future<void> add(Map<String, String> fields) async {
+      await tester.tap(find.byKey(const ValueKey('pr-add-row')));
+      await tester.pumpAndSettle();
+      for (final e in fields.entries) {
+        await tester.enterText(find.byKey(ValueKey('pr-row-${e.key}')), e.value);
+      }
+      await tester.tap(find.byKey(const ValueKey('pr-row-add')));
+      await tester.pumpAndSettle();
+    }
+
+    // Something to know it by, and a quantity, are asked for.
+    await tester.tap(find.byKey(const ValueKey('pr-add-row')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('pr-row-qty')), '3');
+    await tester.tap(find.byKey(const ValueKey('pr-row-add')));
+    await tester.pumpAndSettle();
+    expect(find.text('商品名・JAN・品番のどれかを入れてください'), findsOneWidget);
+    await tester.tap(find.text('キャンセル'));
+    await tester.pumpAndSettle();
+
+    await add({'name': '預かり品の箱', 'qty': '4', 'price': '330'});
+    await add({'jan': '4909999000014', 'qty': '2'});
+    expect(status(tester, 1), 'ライブラリーにない');
+    expect(status(tester, 2), 'ライブラリーにあり');
+    // No stock here: nothing taken out, nothing short.
+    expect(find.byKey(const ValueKey('of-ship-2')), findsNothing);
+    expect(find.text('2行 · 記録 2行 · 除外 0行 · 数量 6'), findsWidgets);
+    // A product in the library is still only recorded.
+    await tester.tap(find.byKey(const ValueKey('of-action-2')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-action-2-ship')), findsNothing);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+
+    // A row taken away again.
+    await add({'code': 'XX-9', 'qty': '1'});
+    await tester.tap(find.byKey(const ValueKey('pr-remove-3')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-row-3')), findsNothing);
+
+    await tester.enterText(find.byKey(const ValueKey('pr-principal')), 'テスト依頼元');
+    await tester.tap(find.byKey(const ValueKey('of-post')));
+    await tester.pumpAndSettle();
+    expect(find.text('2行（数量 6）を記録します。在庫は動きません。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-post-ok')));
+    await tester.pumpAndSettle();
+
+    expect(repo.uploaded, isEmpty);
+    final p = repo.posted.single;
+    expect(p.proxy, isTrue);
+    expect(p.principal, 'テスト依頼元');
+    expect(p.fileName, '手入力');
+    expect(p.path, isNull);
+    expect([for (final l in p.lines) (l.rowNo, l.action, l.productId)], [(1, 'record', null), (2, 'record', 1)]);
+    expect(p.lines.first.productName, '預かり品の箱');
+    expect(p.lines.first.unitPriceTax, 330);
+    expect(p.lines.first.unitPrice, 300);
+  });
+
+  testWidgets('代理出荷 from a file: every row a record, typed rows numbered after the file\'s', (tester) async {
+    final repo = await pump(tester, proxy: true);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pr-add-row')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('pr-row-name')), '追加分');
+    await tester.enterText(find.byKey(const ValueKey('pr-row-qty')), '1');
+    await tester.tap(find.byKey(const ValueKey('pr-row-add')));
+    await tester.pumpAndSettle();
+    expect(status(tester, 3), 'ライブラリーにあり');
+    expect(status(tester, 7), 'ライブラリーにない');
+
+    await tester.tap(find.byKey(const ValueKey('of-post')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-post-ok')));
+    await tester.pumpAndSettle();
+    final p = repo.posted.single;
+    expect(p.proxy, isTrue);
+    expect(p.path, '1/1-到货明细.xlsx');
+    expect(p.lines.map((l) => l.rowNo), [2, 3, 4, 5, 6, 7]);
+    expect(p.lines.every((l) => l.action == 'record'), isTrue);
+  });
+
+  testWidgets('出庫カレンダー tells 代理出荷 apart and narrows to one kind', (tester) async {
+    final now = DateTime.now();
+    final day = DateTime(now.year, now.month, 5);
+    final repo = FakeOutboundFileRepository(files: [
+      OutboundFileSummary(id: 1, warehouseId: 1, shippedOn: day, fileName: '在庫分.xlsx', lineCount: 1, shippedTotal: 3),
+      OutboundFileSummary(
+          id: 2, warehouseId: 1, shippedOn: day, fileName: '手入力', kind: 'proxy', principal: 'テスト依頼元', lineCount: 2, quantityTotal: 6),
+    ]);
+    await pump(tester, repo: repo, tab: 1);
+    expect(find.byKey(const ValueKey('of-file-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-proxy-2')), findsOneWidget);
+    expect(find.text('依頼元: テスト依頼元'), findsOneWidget);
+    expect(find.textContaining('2行 · 数量 6'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('of-cal-kind-proxy')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-file-1')), findsNothing);
+    expect(find.byKey(const ValueKey('of-file-2')), findsOneWidget);
+
+    // Withdrawn: nothing goes back into stock.
+    await tester.tap(find.byKey(const ValueKey('of-file-2')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-detail-proxy')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-undo')));
+    await tester.pumpAndSettle();
+    expect(find.text('在庫は動きません。記録とファイルは「取り消し済み」として残ります。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-undo-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.undone, [2]);
+    expect(find.text('記録を取り消しました'), findsOneWidget);
   });
 }

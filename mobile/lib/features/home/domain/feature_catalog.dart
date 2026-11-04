@@ -279,6 +279,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _outboundFile,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
           ),
+          // 代理出荷 (0189): a shipment kept as a record, no stock moved.
+          FeatureEntry(
+            id: 'proxy_shipment',
+            icon: Icons.edit_note_outlined,
+            status: FeatureStatus.ready,
+            builder: _proxyShipment,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
+          ),
           FeatureEntry(
             id: 'outbound_calendar',
             icon: Icons.event_note_outlined,
@@ -714,6 +722,7 @@ Widget _unplannedReceipt(BuildContext _) => const UnplannedReceiptScreen();
 Widget _warehouseMemos(BuildContext _) => const WarehouseMemosScreen();
 Widget _outboundFile(BuildContext _) => const OutboundFileScreen();
 Widget _outboundCalendar(BuildContext _) => const OutboundFileScreen(initialTab: 1);
+Widget _proxyShipment(BuildContext _) => const OutboundFileScreen(proxy: true);
 Widget _payments(BuildContext _) => const PaymentsScreen();
 Widget _outboundProposal(BuildContext _) => const OutboundProposalScreen();
 Widget _shipDestinations(BuildContext _) => const ShipDestinationsScreen();

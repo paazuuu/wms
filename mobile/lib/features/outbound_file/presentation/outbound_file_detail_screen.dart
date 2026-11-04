@@ -80,11 +80,14 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(l10n.ofUndoQ),
-        content: Text(l10n.ofUndoBody(f.shippedTotal)),
+        title: Text(f.proxy ? l10n.prUndoQ : l10n.ofUndoQ),
+        content: Text(f.proxy ? l10n.prUndoBody : l10n.ofUndoBody(f.shippedTotal)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('of-undo-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofUndo)),
+          FilledButton(
+              key: const ValueKey('of-undo-ok'),
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(f.proxy ? l10n.prUndo : l10n.ofUndo)),
         ],
       ),
     );
@@ -98,7 +101,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
         ref.invalidate(outboundFileDetailProvider(widget.fileId));
         ref.invalidate(outboundFilesProvider);
         ref.invalidate(productListProvider);
-        _snack(l10n.ofUndoDone(data));
+        _snack(f.proxy ? l10n.prUndoDone : l10n.ofUndoDone(data));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
@@ -133,6 +136,10 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              if (f.proxy)
+                Text(l10n.prBadge,
+                    key: const ValueKey('of-detail-proxy'),
+                    style: TextStyle(color: scheme.tertiary, fontWeight: FontWeight.w600)),
               Text(f.fileName, key: const ValueKey('of-detail-name'), style: theme.textTheme.titleMedium),
               const SizedBox(height: 4),
               Text(
@@ -141,6 +148,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   if (f.warehouseName != null) f.warehouseName!,
                   if (f.sheetName != null) '${l10n.ofSheet}: ${f.sheetName}',
                   if (f.destination != null) f.destination!,
+                  if (f.principal != null) l10n.prPrincipalLabel(f.principal!),
                 ].join(' · '),
                 style: muted,
               ),
@@ -155,7 +163,8 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                 ),
               const SizedBox(height: AppSpacing.sm),
               Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, children: [
-                Text(l10n.ofCardLines(f.lineCount, f.shippedTotal), style: theme.textTheme.titleSmall),
+                Text(f.proxy ? l10n.prCardLines(f.lineCount, f.quantityTotal) : l10n.ofCardLines(f.lineCount, f.shippedTotal),
+                    style: theme.textTheme.titleSmall),
                 if (f.shortTotal > 0) Text(l10n.ofCardShort(f.shortTotal), style: TextStyle(color: scheme.error)),
                 if (f.amountTotal != null) Text(l10n.ofSummaryAmount(outboundMoney(f.amountTotal))),
                 if (weight > 0) Text(l10n.ofSummaryWeight(outboundKg(weight))),
@@ -182,7 +191,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     key: const ValueKey('of-undo'),
                     onPressed: _busy ? null : () => _undo(f),
                     icon: const Icon(Icons.undo),
-                    label: Text(l10n.ofUndo),
+                    label: Text(f.proxy ? l10n.prUndo : l10n.ofUndo),
                     style: TextButton.styleFrom(foregroundColor: scheme.error),
                   ),
               ]),
@@ -190,25 +199,29 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        _table(l10n, d.lines.take(_limit).toList()),
+        _table(l10n, d.lines.take(_limit).toList(), proxy: f.proxy),
         if (d.lines.length > _limit)
           TextButton(onPressed: () => setState(() => _limit += 300), child: Text(l10n.ppMore(d.lines.length - _limit))),
       ],
     );
   }
 
-  Widget _table(AppLocalizations l10n, List<OutboundFileLine> lines) {
+  Widget _table(AppLocalizations l10n, List<OutboundFileLine> lines, {bool proxy = false}) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final head = theme.textTheme.labelMedium;
     final small = theme.textTheme.bodySmall;
     const widths = [52.0, 96.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 64.0, 80.0, 80.0, 100.0, 84.0, 96.0, 110.0];
-    Widget cell(int i, Widget child, {bool end = false}) => Container(
-          width: widths[i],
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
-          child: child,
-        );
+    // 代理出荷: nothing taken out of stock — no 出庫数, 不足 or stock columns.
+    final hidden = proxy ? const {8, 9, 15} : const <int>{};
+    Widget cell(int i, Widget child, {bool end = false}) => hidden.contains(i)
+        ? const SizedBox.shrink()
+        : Container(
+            width: widths[i],
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+            child: child,
+          );
     final headers = [
       l10n.ofColRow, l10n.ofColAction, l10n.ofColProduct, l10n.ofRoleJan, l10n.ofRoleCode, l10n.ofRoleMaker,
       l10n.ofRoleSupplier, l10n.ofRoleQuantity, l10n.ofColShip, l10n.ofColShort, l10n.ofColPriceEx, l10n.ofColPriceTax,

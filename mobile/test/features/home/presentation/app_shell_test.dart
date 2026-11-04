@@ -266,10 +266,11 @@ void main() {
         (tester) async {
       // The earlier tests run at a logical width below the 900px breakpoint,
       // so they exercise the drawer layout. Collapsing is wide-layout only,
-      // which needs a view genuinely wider than the breakpoint.
+      // which needs a view genuinely wider than the breakpoint (and tall
+      // enough that ピッキング is built below the 現場作業 entries).
       tester.view
         ..devicePixelRatio = 1.0
-        ..physicalSize = const Size(1400, 1200);
+        ..physicalSize = const Size(1400, 1700);
       addTearDown(tester.view.reset);
 
       final app = _wrap();
@@ -316,7 +317,7 @@ void main() {
       // Tall enough that ピッキング is on screen below the 現場作業 entries.
       tester.view
         ..devicePixelRatio = 1.0
-        ..physicalSize = const Size(1400, 1600);
+        ..physicalSize = const Size(1400, 1700);
       addTearDown(tester.view.reset);
 
       final app = _wrap();
