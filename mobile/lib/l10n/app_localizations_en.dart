@@ -1723,7 +1723,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSourceSalesOrders => 'Sales orders';
 
   @override
-  String get reportSourceWorkOrders => 'Work orders';
+  String get reportSourceWorkOrders => 'Kitting';
 
   @override
   String get reportSourceAuditLog => 'Audit log';
@@ -1788,16 +1788,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSavedEmpty => 'No saved reports yet';
 
   @override
-  String get woTitle => 'Work orders';
+  String get woTitle => 'Kitting (set assembly)';
 
   @override
-  String get woNew => 'New work order';
+  String get woNew => 'New kitting job';
 
   @override
-  String get woEmpty => 'No work orders yet';
+  String get woEmpty => 'No kitting jobs yet';
 
   @override
-  String get woEmptyBody => 'Create one with the button below.';
+  String get woEmptyBody =>
+      'When sets are made, register one with the button at the bottom right.';
 
   @override
   String get woNeedsWarehouse => 'No warehouse exists';
@@ -1854,19 +1855,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get woCompleteQ =>
-      'Complete this work order? Component stock will be consumed and output stock will increase.';
+      'Complete this job? Parts go down, the set goes up.';
 
   @override
-  String get woCompleted => 'Work order completed';
+  String get woCompleted => 'Job completed (stock changed)';
 
   @override
-  String get woCancelAction => 'Cancel work order';
+  String get woCancelAction => 'Cancel the job';
 
   @override
-  String get woCancelBody => 'Cancel this work order?';
+  String get woCancelBody => 'Cancel this job? (No stock changes.)';
 
   @override
-  String get woCancelled => 'Work order cancelled';
+  String get woCancelled => 'Job cancelled';
 
   @override
   String get woStatusDraft => 'Draft';
@@ -2809,7 +2810,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auditEventUserWarehouseRevoked => 'Warehouse access revoked';
 
   @override
-  String get auditEventWorkOrderCancelled => 'Work order cancelled';
+  String get auditEventWorkOrderCancelled => 'Kitting cancelled';
 
   @override
   String get auditEventWorkOrderCompleted => 'Work order completed';
@@ -14872,4 +14873,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupShipping => 'Shipping';
+
+  @override
+  String get woStockBanner =>
+      'Completing a job here changes the stock (parts go down, the set goes up). Leave it alone when no sets are being made.';
+
+  @override
+  String get woStartQ => 'Start this job?';
+
+  @override
+  String get woStartBody =>
+      'No stock changes yet. It changes when the job is completed: parts go down, the set goes up.';
+
+  @override
+  String get woCompleteWarnTitle => 'The stock will change';
+
+  @override
+  String woCompleteWarnBody(String warehouse) {
+    return 'The stock in $warehouse changes as below. Undoing it takes a stock adjustment.';
+  }
+
+  @override
+  String get woCompleteOut => 'Goes down (parts)';
+
+  @override
+  String get woCompleteIn => 'Goes up (set)';
+
+  @override
+  String get woCompleteAck => 'I understand the stock will change';
+
+  @override
+  String get woCompleteGo => 'Change the stock and complete';
 }

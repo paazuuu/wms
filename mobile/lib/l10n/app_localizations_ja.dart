@@ -1670,7 +1670,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportSourceSalesOrders => '受注';
 
   @override
-  String get reportSourceWorkOrders => '作業指示';
+  String get reportSourceWorkOrders => '流通加工';
 
   @override
   String get reportSourceAuditLog => '監査ログ';
@@ -1735,16 +1735,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportSavedEmpty => '保存済みのレポートはまだありません';
 
   @override
-  String get woTitle => '作業指示';
+  String get woTitle => '流通加工（セット組み）';
 
   @override
-  String get woNew => '作業指示を作成';
+  String get woNew => 'セット組みを登録';
 
   @override
-  String get woEmpty => '作業指示がまだありません';
+  String get woEmpty => '流通加工の作業はまだありません';
 
   @override
-  String get woEmptyBody => '右下のボタンから作業指示を作成できます。';
+  String get woEmptyBody => 'セット組みをするときに、右下のボタンから登録できます。';
 
   @override
   String get woNeedsWarehouse => '倉庫がありません';
@@ -1800,19 +1800,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get woComplete => '完了にする';
 
   @override
-  String get woCompleteQ => 'この作業指示を完了にしますか？部材の在庫が消費され、完成品の在庫が増加します。';
+  String get woCompleteQ => 'このセット組みを完了にしますか？部材の在庫が減り、セット品の在庫が増えます。';
 
   @override
-  String get woCompleted => '作業指示を完了しました';
+  String get woCompleted => 'セット組みを完了しました（在庫を変更しました）';
 
   @override
-  String get woCancelAction => '作業指示を取消';
+  String get woCancelAction => 'セット組みを取消';
 
   @override
-  String get woCancelBody => 'この作業指示を取り消しますか？';
+  String get woCancelBody => 'このセット組みを取り消しますか？（在庫は変わりません）';
 
   @override
-  String get woCancelled => '作業指示を取り消しました';
+  String get woCancelled => 'セット組みを取り消しました';
 
   @override
   String get woStatusDraft => '下書き';
@@ -2736,7 +2736,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get auditEventUserWarehouseRevoked => '倉庫アクセスを削除';
 
   @override
-  String get auditEventWorkOrderCancelled => '作業指示を中止';
+  String get auditEventWorkOrderCancelled => '流通加工を中止';
 
   @override
   String get auditEventWorkOrderCompleted => '作業指示を完了';
@@ -14582,4 +14582,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get groupShipping => '出荷';
+
+  @override
+  String get woStockBanner =>
+      'ここで作業を「完了にする」と在庫が変わります（部材が減り、セット品が増えます）。セット組みをしないときは操作しないでください。';
+
+  @override
+  String get woStartQ => '作業を開始しますか？';
+
+  @override
+  String get woStartBody => 'まだ在庫は変わりません。「完了にする」を押したときに、部材の在庫が減り、セット品の在庫が増えます。';
+
+  @override
+  String get woCompleteWarnTitle => '在庫が変わります';
+
+  @override
+  String woCompleteWarnBody(String warehouse) {
+    return '「$warehouse」の在庫を次のとおり変更します。あとで戻すには在庫調整が必要です。';
+  }
+
+  @override
+  String get woCompleteOut => '減る（部材）';
+
+  @override
+  String get woCompleteIn => '増える（セット品）';
+
+  @override
+  String get woCompleteAck => '在庫が変わることを確認しました';
+
+  @override
+  String get woCompleteGo => '在庫を変更して完了';
 }

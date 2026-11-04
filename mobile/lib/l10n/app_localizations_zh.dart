@@ -1664,7 +1664,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportSourceSalesOrders => '销售订单';
 
   @override
-  String get reportSourceWorkOrders => '工单';
+  String get reportSourceWorkOrders => '流通加工';
 
   @override
   String get reportSourceAuditLog => '审计日志';
@@ -1729,16 +1729,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportSavedEmpty => '暂无已保存的报表';
 
   @override
-  String get woTitle => '工单';
+  String get woTitle => '流通加工（组套）';
 
   @override
-  String get woNew => '新建工单';
+  String get woNew => '登记组套';
 
   @override
-  String get woEmpty => '暂无工单';
+  String get woEmpty => '还没有流通加工作业';
 
   @override
-  String get woEmptyBody => '点击下方按钮创建一个。';
+  String get woEmptyBody => '需要组套时，可从右下角按钮登记。';
 
   @override
   String get woNeedsWarehouse => '尚无仓库';
@@ -1794,19 +1794,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get woComplete => '标记完成';
 
   @override
-  String get woCompleteQ => '完成此工单？部件库存将被消耗，成品库存将增加。';
+  String get woCompleteQ => '要完成此组套吗？部件库存减少，套装库存增加。';
 
   @override
-  String get woCompleted => '工单已完成';
+  String get woCompleted => '组套已完成（库存已变更）';
 
   @override
-  String get woCancelAction => '取消工单';
+  String get woCancelAction => '取消组套';
 
   @override
-  String get woCancelBody => '取消此工单？';
+  String get woCancelBody => '要取消此组套吗？（库存不变）';
 
   @override
-  String get woCancelled => '工单已取消';
+  String get woCancelled => '已取消组套';
 
   @override
   String get woStatusDraft => '草稿';
@@ -2727,7 +2727,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auditEventUserWarehouseRevoked => '已撤销仓库权限';
 
   @override
-  String get auditEventWorkOrderCancelled => '工单已取消';
+  String get auditEventWorkOrderCancelled => '流通加工已中止';
 
   @override
   String get auditEventWorkOrderCompleted => '工单已完成';
@@ -14490,4 +14490,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get groupShipping => '发货';
+
+  @override
+  String get woStockBanner => '在此将作业\"设为完成\"会改变库存（部件减少，套装增加）。不组套时请勿操作。';
+
+  @override
+  String get woStartQ => '开始作业吗？';
+
+  @override
+  String get woStartBody => '库存暂不变化。点击\"设为完成\"时，部件库存减少，套装库存增加。';
+
+  @override
+  String get woCompleteWarnTitle => '库存将会变化';
+
+  @override
+  String woCompleteWarnBody(String warehouse) {
+    return '将按如下变更「$warehouse」的库存。之后要恢复需进行库存调整。';
+  }
+
+  @override
+  String get woCompleteOut => '减少（部件）';
+
+  @override
+  String get woCompleteIn => '增加（套装）';
+
+  @override
+  String get woCompleteAck => '已确认库存将会变化';
+
+  @override
+  String get woCompleteGo => '变更库存并完成';
 }

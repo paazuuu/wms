@@ -111,6 +111,7 @@ class _BodyState extends ConsumerState<_Body> {
 
   Future<void> _start() async {
     final l10n = AppLocalizations.of(context);
+    if (!await _confirm(l10n.woStartQ, l10n.woStartBody, l10n.woStart)) return;
     await _run(() => ref.read(workOrderRepositoryProvider).start(_order.id),
         successMessage: l10n.woStarted);
   }
@@ -124,7 +125,10 @@ class _BodyState extends ConsumerState<_Body> {
 
   Future<void> _complete() async {
     final l10n = AppLocalizations.of(context);
-    if (!await _confirm(l10n.woComplete, l10n.woCompleteQ, l10n.woComplete)) return;
+    // The one step that moves stock: what goes down and up is spelled out,
+    // and has to be acknowledged before it can be done.
+    final ok = await showDialog<bool>(context: context, builder: (_) => _CompleteDialog(order: _order));
+    if (ok != true || !mounted) return;
     await _run(() => ref.read(workOrderRepositoryProvider).complete(_order.id),
         successMessage: l10n.woCompleted);
   }
@@ -296,6 +300,73 @@ class _ComponentCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Before 完了にする: the stock that will change — each part down, the set
+/// up, in which warehouse — and a box to tick before it can be done.
+class _CompleteDialog extends StatefulWidget {
+  const _CompleteDialog({required this.order});
+
+  final WorkOrder order;
+
+  @override
+  State<_CompleteDialog> createState() => _CompleteDialogState();
+}
+
+class _CompleteDialogState extends State<_CompleteDialog> {
+  bool _ack = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final o = widget.order;
+    Widget line(String name, String jan, String qty, Color color) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(children: [
+            Expanded(child: Text(name.isNotEmpty ? '$name（$jan）' : jan, style: theme.textTheme.bodyMedium)),
+            Text(qty, style: theme.textTheme.titleSmall?.copyWith(color: color, fontWeight: FontWeight.w700)),
+          ]),
+        );
+    return AlertDialog(
+      key: const ValueKey('wo-complete-dialog'),
+      icon: Icon(Icons.warning_amber_rounded, color: scheme.error, size: 36),
+      title: Text(l10n.woCompleteWarnTitle),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l10n.woCompleteWarnBody(o.warehouseName ?? '')),
+            const SizedBox(height: AppSpacing.md),
+            Text(l10n.woCompleteOut, style: theme.textTheme.labelLarge),
+            for (final c in o.components) line(c.productName, c.janCode, '−${c.quantityRequired}', scheme.error),
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.woCompleteIn, style: theme.textTheme.labelLarge),
+            line(o.outputProductName, o.outputJanCode, '＋${o.outputQuantity}', scheme.primary),
+            const SizedBox(height: AppSpacing.sm),
+            CheckboxListTile(
+              key: const ValueKey('wo-complete-ack'),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: _ack,
+              onChanged: (v) => setState(() => _ack = v ?? false),
+              title: Text(l10n.woCompleteAck),
+            ),
+          ]),
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('wo-complete-go'),
+          style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
+          onPressed: _ack ? () => Navigator.pop(context, true) : null,
+          child: Text(l10n.woCompleteGo),
+        ),
+      ],
     );
   }
 }

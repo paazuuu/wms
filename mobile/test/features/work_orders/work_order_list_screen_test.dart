@@ -74,7 +74,7 @@ void main() {
     final repo = FakeWorkOrderRepository();
     await _pumpList(tester, repo);
 
-    expect(find.text('作業指示がまだありません'), findsOneWidget);
+    expect(find.text('流通加工の作業はまだありません'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
   });
@@ -87,7 +87,7 @@ void main() {
     final repo = FakeWorkOrderRepository();
     await _pumpList(tester, repo);
 
-    await tester.tap(find.text('作業指示を作成'));
+    await tester.tap(find.text('セット組みを登録'));
     await tester.pumpAndSettle();
 
     // JAN fields enforce digits-only input (real barcode scanning behavior),
@@ -133,6 +133,10 @@ void main() {
     expect(find.text('下書き'), findsOneWidget);
     await tester.tap(find.text('作業開始'));
     await tester.pumpAndSettle();
+    // Starting moves no stock yet, and says so.
+    expect(find.text('まだ在庫は変わりません。「完了にする」を押したときに、部材の在庫が減り、セット品の在庫が増えます。'), findsOneWidget);
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '作業開始')));
+    await tester.pumpAndSettle();
     expect(find.text('作業中'), findsOneWidget);
     // The success SnackBar pumpAndSettle doesn't wait out (nothing is
     // animating while it just sits there) can cover the next button.
@@ -141,8 +145,17 @@ void main() {
 
     await tester.tap(find.text('完了にする'));
     await tester.pumpAndSettle();
-    await tester.tap(find.descendant(
-        of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '完了にする')));
+    // Completing moves stock: what goes down and up is shown, and the
+    // button waits for the box to be ticked.
+    expect(find.text('在庫が変わります'), findsOneWidget);
+    expect(find.text('減る（部材）'), findsOneWidget);
+    expect(find.text('増える（セット品）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('wo-complete-go')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wo-complete-dialog')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('wo-complete-ack')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wo-complete-go')));
     await tester.pumpAndSettle();
     expect(find.text('完了'), findsOneWidget);
 

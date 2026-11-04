@@ -8599,6 +8599,16 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   the warehouse's stock — hence 出荷手配 / 出荷明細の取込 in 出荷, and the
   出庫カレンダー in 現場作業.
 
+## 流通加工（セット組み）: warned before stock moves (app only)
+
+- Kept in the menu though no sets are made now. The list says, in red, that
+  completing a job changes the stock.
+- 作業開始 asks first and says no stock moves yet.
+- 完了にする opens 「在庫が変わります」: the warehouse, each part going down
+  (−qty), the set going up (+qty), that undoing it takes a stock
+  adjustment; 「在庫を変更して完了」 works only after 「在庫が変わることを
+  確認しました」 is ticked.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

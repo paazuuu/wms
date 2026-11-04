@@ -21,7 +21,8 @@ class WorkOrderListScreen extends ConsumerStatefulWidget {
   const WorkOrderListScreen({super.key});
 
   @override
-  ConsumerState<WorkOrderListScreen> createState() => _WorkOrderListScreenState();
+  ConsumerState<WorkOrderListScreen> createState() =>
+      _WorkOrderListScreenState();
 }
 
 class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
@@ -80,7 +81,8 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
           builder: (_) => WorkOrderDetailScreen(workOrderId: id),
         ));
       },
-      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+      failure: (f) =>
+          _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
     );
   }
 
@@ -101,32 +103,58 @@ class _WorkOrderListScreenState extends ConsumerState<WorkOrderListScreen> {
             : const Icon(Icons.precision_manufacturing_outlined),
         label: Text(_busy ? l10n.working : l10n.woNew),
       ),
-      body: async.when(
-        loading: () => LoadingView(message: l10n.loading),
-        error: (e, _) => ErrorStateView(
-          message: '$e',
-          onRetry: () => ref.invalidate(workOrderListProvider),
-        ),
-        data: (orders) {
-          if (orders.isEmpty) {
-            return EmptyStateView(
-              icon: Icons.precision_manufacturing_outlined,
-              title: l10n.woEmpty,
-              message: l10n.woEmptyBody,
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(workOrderListProvider),
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl * 2),
-              itemCount: orders.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, i) => _WorkOrderCard(order: orders[i]),
+      body: Column(children: [
+        // Completing a job here moves stock: said before anything is done.
+        Container(
+          key: const ValueKey('wo-stock-banner'),
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(
+              AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          child: Row(children: [
+            Icon(Icons.warning_amber_rounded,
+                color: Theme.of(context).colorScheme.onErrorContainer),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(l10n.woStockBanner,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer)),
             ),
-          );
-        },
-      ),
+          ]),
+        ),
+        Expanded(
+            child: async.when(
+          loading: () => LoadingView(message: l10n.loading),
+          error: (e, _) => ErrorStateView(
+            message: '$e',
+            onRetry: () => ref.invalidate(workOrderListProvider),
+          ),
+          data: (orders) {
+            if (orders.isEmpty) {
+              return EmptyStateView(
+                icon: Icons.precision_manufacturing_outlined,
+                title: l10n.woEmpty,
+                message: l10n.woEmptyBody,
+              );
+            }
+            return RefreshIndicator(
+              onRefresh: () async => ref.invalidate(workOrderListProvider),
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg,
+                    AppSpacing.lg, AppSpacing.xxl * 2),
+                itemCount: orders.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.sm),
+                itemBuilder: (context, i) => _WorkOrderCard(order: orders[i]),
+              ),
+            );
+          },
+        )),
+      ]),
     );
   }
 }
@@ -236,9 +264,10 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
   final _outputName = TextEditingController();
   final _outputQuantity = TextEditingController();
   final _note = TextEditingController();
-  late int _warehouseId = widget.warehouses.any((w) => w.id == widget.initialWarehouseId)
-      ? widget.initialWarehouseId!
-      : widget.warehouses.first.id;
+  late int _warehouseId =
+      widget.warehouses.any((w) => w.id == widget.initialWarehouseId)
+          ? widget.initialWarehouseId!
+          : widget.warehouses.first.id;
   final List<WorkOrderComponentDraft> _components = [];
   String? _error;
 
@@ -299,7 +328,8 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
       maxChildSize: 0.95,
       expand: false,
       builder: (context, controller) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: ListView(
           controller: controller,
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -313,7 +343,8 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
                 for (final w in widget.warehouses)
                   DropdownMenuItem(value: w.id, child: Text(w.name)),
               ],
-              onChanged: (v) => setState(() => _warehouseId = v ?? _warehouseId),
+              onChanged: (v) =>
+                  setState(() => _warehouseId = v ?? _warehouseId),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(l10n.woOutputTitle, style: theme.textTheme.labelLarge),
@@ -342,8 +373,8 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
             Row(
               children: [
                 Expanded(
-                  child:
-                      Text(l10n.woComponentsTitle, style: theme.textTheme.labelLarge),
+                  child: Text(l10n.woComponentsTitle,
+                      style: theme.textTheme.labelLarge),
                 ),
                 TextButton.icon(
                   onPressed: _addComponent,
@@ -364,7 +395,8 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
                       style: const TextStyle(fontFamily: AppFonts.mono)),
                   trailing: Text('${component.quantityRequired}',
                       style: const TextStyle(
-                          fontFamily: AppFonts.mono, fontWeight: FontWeight.w600)),
+                          fontFamily: AppFonts.mono,
+                          fontWeight: FontWeight.w600)),
                 ),
               ),
             const SizedBox(height: AppSpacing.md),
@@ -382,7 +414,8 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
             SizedBox(
               width: double.infinity,
               height: AppSpacing.minTouch,
-              child: FilledButton(onPressed: _submit, child: Text(l10n.woCreate)),
+              child:
+                  FilledButton(onPressed: _submit, child: Text(l10n.woCreate)),
             ),
           ],
         ),

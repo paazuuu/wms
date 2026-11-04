@@ -841,7 +841,7 @@
   "reportSourceShipments": "出庫",
   "reportSourcePurchaseOrders": "発注",
   "reportSourceSalesOrders": "受注",
-  "reportSourceWorkOrders": "作業指示",
+  "reportSourceWorkOrders": "流通加工",
   "reportSourceAuditLog": "監査ログ",
   "reportSourceProducts": "商品ライブラリー",
   "reportWarehouse": "倉庫",
@@ -869,10 +869,10 @@
   },
   "reportSavedTitle": "保存済みレポート",
   "reportSavedEmpty": "保存済みのレポートはまだありません",
-  "woTitle": "作業指示",
-  "woNew": "作業指示を作成",
-  "woEmpty": "作業指示がまだありません",
-  "woEmptyBody": "右下のボタンから作業指示を作成できます。",
+  "woTitle": "流通加工（セット組み）",
+  "woNew": "セット組みを登録",
+  "woEmpty": "流通加工の作業はまだありません",
+  "woEmptyBody": "セット組みをするときに、右下のボタンから登録できます。",
   "woNeedsWarehouse": "倉庫がありません",
   "woWarehouse": "作業倉庫",
   "woOutputTitle": "完成品",
@@ -897,11 +897,11 @@
   "woStart": "作業開始",
   "woStarted": "作業を開始しました",
   "woComplete": "完了にする",
-  "woCompleteQ": "この作業指示を完了にしますか？部材の在庫が消費され、完成品の在庫が増加します。",
-  "woCompleted": "作業指示を完了しました",
-  "woCancelAction": "作業指示を取消",
-  "woCancelBody": "この作業指示を取り消しますか？",
-  "woCancelled": "作業指示を取り消しました",
+  "woCompleteQ": "このセット組みを完了にしますか？部材の在庫が減り、セット品の在庫が増えます。",
+  "woCompleted": "セット組みを完了しました（在庫を変更しました）",
+  "woCancelAction": "セット組みを取消",
+  "woCancelBody": "このセット組みを取り消しますか？（在庫は変わりません）",
+  "woCancelled": "セット組みを取り消しました",
   "woStatusDraft": "下書き",
   "woStatusInProgress": "作業中",
   "woStatusCompleted": "完了",
@@ -1362,7 +1362,7 @@
   "auditEventUserRoleRevoked": "ロールを削除",
   "auditEventUserWarehouseAssigned": "倉庫アクセスを付与",
   "auditEventUserWarehouseRevoked": "倉庫アクセスを削除",
-  "auditEventWorkOrderCancelled": "作業指示を中止",
+  "auditEventWorkOrderCancelled": "流通加工を中止",
   "auditEventWorkOrderCompleted": "作業指示を完了",
   "auditEventWorkOrderCreated": "作業指示を作成",
   "auditEventWorkOrderStarted": "作業指示を開始",
@@ -12985,5 +12985,21 @@
   "obHubCards": "出荷先カード",
   "obHubPacking": "出荷指示・梱包",
   "obHubProposal": "出荷の提案",
-  "groupShipping": "出荷"
+  "groupShipping": "出荷",
+  "woStockBanner": "ここで作業を「完了にする」と在庫が変わります（部材が減り、セット品が増えます）。セット組みをしないときは操作しないでください。",
+  "woStartQ": "作業を開始しますか？",
+  "woStartBody": "まだ在庫は変わりません。「完了にする」を押したときに、部材の在庫が減り、セット品の在庫が増えます。",
+  "woCompleteWarnTitle": "在庫が変わります",
+  "woCompleteWarnBody": "「{warehouse}」の在庫を次のとおり変更します。あとで戻すには在庫調整が必要です。",
+  "@woCompleteWarnBody": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "woCompleteOut": "減る（部材）",
+  "woCompleteIn": "増える（セット品）",
+  "woCompleteAck": "在庫が変わることを確認しました",
+  "woCompleteGo": "在庫を変更して完了"
 }

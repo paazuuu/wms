@@ -3247,7 +3247,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportSourceWorkOrders.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示'**
+  /// **'流通加工'**
   String get reportSourceWorkOrders;
 
   /// No description provided for @reportSourceAuditLog.
@@ -3373,25 +3373,25 @@ abstract class AppLocalizations {
   /// No description provided for @woTitle.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示'**
+  /// **'流通加工（セット組み）'**
   String get woTitle;
 
   /// No description provided for @woNew.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示を作成'**
+  /// **'セット組みを登録'**
   String get woNew;
 
   /// No description provided for @woEmpty.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示がまだありません'**
+  /// **'流通加工の作業はまだありません'**
   String get woEmpty;
 
   /// No description provided for @woEmptyBody.
   ///
   /// In ja, this message translates to:
-  /// **'右下のボタンから作業指示を作成できます。'**
+  /// **'セット組みをするときに、右下のボタンから登録できます。'**
   String get woEmptyBody;
 
   /// No description provided for @woNeedsWarehouse.
@@ -3499,31 +3499,31 @@ abstract class AppLocalizations {
   /// No description provided for @woCompleteQ.
   ///
   /// In ja, this message translates to:
-  /// **'この作業指示を完了にしますか？部材の在庫が消費され、完成品の在庫が増加します。'**
+  /// **'このセット組みを完了にしますか？部材の在庫が減り、セット品の在庫が増えます。'**
   String get woCompleteQ;
 
   /// No description provided for @woCompleted.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示を完了しました'**
+  /// **'セット組みを完了しました（在庫を変更しました）'**
   String get woCompleted;
 
   /// No description provided for @woCancelAction.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示を取消'**
+  /// **'セット組みを取消'**
   String get woCancelAction;
 
   /// No description provided for @woCancelBody.
   ///
   /// In ja, this message translates to:
-  /// **'この作業指示を取り消しますか？'**
+  /// **'このセット組みを取り消しますか？（在庫は変わりません）'**
   String get woCancelBody;
 
   /// No description provided for @woCancelled.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示を取り消しました'**
+  /// **'セット組みを取り消しました'**
   String get woCancelled;
 
   /// No description provided for @woStatusDraft.
@@ -5269,7 +5269,7 @@ abstract class AppLocalizations {
   /// No description provided for @auditEventWorkOrderCancelled.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示を中止'**
+  /// **'流通加工を中止'**
   String get auditEventWorkOrderCancelled;
 
   /// No description provided for @auditEventWorkOrderCompleted.
@@ -25768,6 +25768,60 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷'**
   String get groupShipping;
+
+  /// No description provided for @woStockBanner.
+  ///
+  /// In ja, this message translates to:
+  /// **'ここで作業を「完了にする」と在庫が変わります（部材が減り、セット品が増えます）。セット組みをしないときは操作しないでください。'**
+  String get woStockBanner;
+
+  /// No description provided for @woStartQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業を開始しますか？'**
+  String get woStartQ;
+
+  /// No description provided for @woStartBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ在庫は変わりません。「完了にする」を押したときに、部材の在庫が減り、セット品の在庫が増えます。'**
+  String get woStartBody;
+
+  /// No description provided for @woCompleteWarnTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が変わります'**
+  String get woCompleteWarnTitle;
+
+  /// No description provided for @woCompleteWarnBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{warehouse}」の在庫を次のとおり変更します。あとで戻すには在庫調整が必要です。'**
+  String woCompleteWarnBody(String warehouse);
+
+  /// No description provided for @woCompleteOut.
+  ///
+  /// In ja, this message translates to:
+  /// **'減る（部材）'**
+  String get woCompleteOut;
+
+  /// No description provided for @woCompleteIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'増える（セット品）'**
+  String get woCompleteIn;
+
+  /// No description provided for @woCompleteAck.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が変わることを確認しました'**
+  String get woCompleteAck;
+
+  /// No description provided for @woCompleteGo.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を変更して完了'**
+  String get woCompleteGo;
 }
 
 class _AppLocalizationsDelegate
