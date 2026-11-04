@@ -8623,6 +8623,42 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   no 出庫数 / 不足 columns until it is shipped.
 - Menu: 流通加工（セット組み） at the end of 出荷.
 
+## 0192: 梱包 — boxes worked out, checked on the floor, the packing list made
+
+- product_case_packs: each product's own case (メーカーの元箱) — 入数, size,
+  weight full; source manual or packing_list (learned, seen_count). A learned
+  value never overwrites one set by hand. case_packs_list / case_packs_save /
+  case_pack_retire.
+- outbound_packages / outbound_package_lines: a shipping list's boxes (box
+  number within its mark — BL, HL from the 注番), carton or own case, size,
+  tare, worked-out and weighed weight, who checked it; each product in it,
+  ticked when scanned. outbound_packing_get / outbound_packing_save (the boxes
+  before put aside; one given back by id keeps who checked it) /
+  outbound_package_update (one box changed on the floor).
+- outbound_packing_lists: packing lists kept — an upload with the original
+  and the improved file, or one made here — in outbound-files under
+  <warehouse>/pl/. packing_list_add / packing_lists_list / packing_list_withdraw
+  (taken off the list; the files stay).
+- Edge function packing-list: the AI names the columns of a packing list whose
+  headings do not say (ja/zh/en), from the headings and a few rows.
+- App:
+  - 箱詰め案 (planPacking): per mark, full cases in their own case, the rest in
+    our cartons first-fit by volume (90%) and weight (the carton's limit, else
+    20 kg), each box then the smallest carton that holds it; weight = units ×
+    unit weight + the box.
+  - 梱包 screen (from a list in the 出庫カレンダー): JAN scan ticks the product
+    (moving to the box that has it), quantities changed, carton chosen,
+    weighed weight with a warning over 10% off, box check, labels printed,
+    a check against the shipping list, 「パッキングリストを作る」.
+  - パッキングリスト tab (出庫): an upload is read (箱番号 on the first row of a
+    box, continuation rows, 箱量 and 12-15 ranges, size strings, totals and
+    side summaries passed over, JANs from a 明细 sheet beside it and from the
+    library), the AI asked only for sheets that do not read; kept as it came
+    and as the improved list (PACKING LIST / BOXES / BOX_TYPES / SUMMARY with
+    formulas and cached values, a box-type list to choose from); single-product
+    boxes teach 入数 if wanted. Both files open or download.
+  - 箱と入数 tab: メーカーの元箱 (入数) and 自社の段ボール.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -143,6 +143,7 @@ import 'package:wms_mobile/features/supply_chain/data/supply_chain_repository.da
 import 'package:wms_mobile/features/supply_chain/domain/supply_chain.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
+import 'fake_packing_repository.dart';
 import 'fake_jan_catalog_repository.dart';
 import 'package:wms_mobile/features/jan_catalog/data/reference_repository.dart';
 import 'fake_reference_repository.dart';
@@ -160,6 +161,7 @@ import 'fake_payments_repository.dart';
 import 'fake_purchase_price_repository.dart';
 import 'fake_outbound_file_repository.dart';
 import 'package:wms_mobile/features/product/data/purchase_price_repository.dart';
+import 'package:wms_mobile/features/packing/data/packing_repository.dart' show packingRepositoryProvider;
 import 'package:wms_mobile/features/product/presentation/purchase_price_card.dart' show canRecordPurchasePriceProvider;
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
@@ -241,6 +243,8 @@ List<Override> _defaultOverrides() => [
       // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.
       purchasePriceRepositoryProvider.overrideWithValue(FakePurchasePriceRepository()),
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
+      // 梱包 (0192): no boxes, cases or packing lists.
+      packingRepositoryProvider.overrideWithValue(FakePackingRepository()),
       // Marks and shelf notes (0167): none.
       productMarksRepositoryProvider.overrideWithValue(FakeProductMarksRepository()),
       shelfNotesRepositoryProvider.overrideWithValue(FakeShelfNotesRepository()),

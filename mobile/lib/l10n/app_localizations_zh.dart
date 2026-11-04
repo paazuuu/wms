@@ -8653,7 +8653,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pmImportFile => '从文件登录';
 
   @override
-  String get pkTitle => '从价格台账导入';
+  String get pkTitle => '装箱（核对箱子）';
 
   @override
   String get pkIntro =>
@@ -14597,4 +14597,275 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofErrNotPlanned => '这不是出库计划（已确认或已撤销）';
+
+  @override
+  String get pkReload => '重新读取';
+
+  @override
+  String get pkNoWarehouse => '请先选择仓库';
+
+  @override
+  String pkReadFailed(String e) {
+    return '无法读取：$e';
+  }
+
+  @override
+  String get pkNothingRead => '未找到带箱号的表（AI也无法识别列）';
+
+  @override
+  String pkAiNote(String sheets) {
+    return 'AI 判断了列：$sheets';
+  }
+
+  @override
+  String get pkImportHint => '原件原样保留，并另外生成易读的改进版一起保存。两者之后都能打开或下载。';
+
+  @override
+  String pkSheetRead(String sheet, int n) {
+    return '工作表“$sheet”：$n箱';
+  }
+
+  @override
+  String pkTotals(int boxes, int qty, String kg, String cbm) {
+    return '$boxes箱 · 数量 $qty · $kg kg · $cbm m³';
+  }
+
+  @override
+  String pkNoJanRows(int n) {
+    return '没有JAN的行：$n（改进版中为黄色）';
+  }
+
+  @override
+  String pkLearn(int n) {
+    return '记为原箱及入数（$n个商品）';
+  }
+
+  @override
+  String get pkLearnHint => '从只装一种商品的箱子记住入数、尺寸、重量。不会覆盖手动登记的值。';
+
+  @override
+  String get pkKeep => '保存';
+
+  @override
+  String get pkKept => '已保存装箱单（原件和改进版）';
+
+  @override
+  String pkKeptLearned(int n) {
+    return '已保存装箱单，并记住了$n个商品的入数';
+  }
+
+  @override
+  String get pkListsTitle => '装箱单';
+
+  @override
+  String get pkListsHint =>
+      '上传个人制作的装箱单后，AI 会识别列，并自动改成易读的格式（箱号、箱型、尺寸、毛重、体积、箱子一览、按商品汇总）。原件也会保留。';
+
+  @override
+  String get pkListsEmpty => '还没有装箱单';
+
+  @override
+  String get pkUpload => '上传装箱单';
+
+  @override
+  String get pkSourceUpload => '上传';
+
+  @override
+  String get pkSourceGenerated => '生成';
+
+  @override
+  String pkForFile(String name) {
+    return '出货明细：$name';
+  }
+
+  @override
+  String get pkOpenImproved => '打开改进版';
+
+  @override
+  String get pkDownloadImproved => '下载改进版';
+
+  @override
+  String get pkDownloadOriginal => '下载原件';
+
+  @override
+  String get pkWithdraw => '从列表移除';
+
+  @override
+  String get pkWithdrawQ => '要将此装箱单从列表移除吗？';
+
+  @override
+  String get pkWithdrawBody => '文件不会被删除，只是不再显示在列表中。';
+
+  @override
+  String get pkWithdrawn => '已从列表移除';
+
+  @override
+  String get pkSettingsTitle => '箱子与入数';
+
+  @override
+  String get pkCasePacks => '厂家原箱（入数）';
+
+  @override
+  String get pkOurCartons => '自家纸箱';
+
+  @override
+  String get pkCaseHint =>
+      '按商品登记原箱可装几个、箱子尺寸和装满时的重量。装箱方案中，满箱的部分直接用原箱，剩余的装入自家纸箱。上传装箱单会自动学习（“学习”）。';
+
+  @override
+  String get pkCaseSearch => '按商品名、厂家、JAN、品番搜索';
+
+  @override
+  String get pkCaseEmpty => '还没有登记';
+
+  @override
+  String get pkCaseAdd => '登记原箱';
+
+  @override
+  String get pkCaseSaved => '已登记原箱';
+
+  @override
+  String get pkCaseRetired => '已取消原箱登记';
+
+  @override
+  String get pkCaseRetire => '取消登记';
+
+  @override
+  String pkLearned(int n) {
+    return '学习 ×$n';
+  }
+
+  @override
+  String pkCaseLearnedHint(int n) {
+    return '这是从装箱单学习了$n次的值。保存后会成为手动登记的值。';
+  }
+
+  @override
+  String pkCaseQty(int n) {
+    return '入数 $n';
+  }
+
+  @override
+  String get pkCaseQtyLabel => '入数（每箱个数）';
+
+  @override
+  String get pkLength => '长 cm';
+
+  @override
+  String get pkWidth => '宽 cm';
+
+  @override
+  String get pkHeight => '高 cm';
+
+  @override
+  String get pkCaseKg => '满箱重量 kg';
+
+  @override
+  String pkDemandTotal(int rows, int qty) {
+    return '$rows行 · 数量 $qty';
+  }
+
+  @override
+  String pkChecked(int done, int all) {
+    return '已核对 $done / $all 箱';
+  }
+
+  @override
+  String get pkNoBoxes => '还没有装箱方案。点“生成装箱方案”会按原箱入数和自家纸箱（重量、体积上限）自动生成。';
+
+  @override
+  String get pkPlan => '生成装箱方案';
+
+  @override
+  String get pkReplan => '重新生成装箱方案';
+
+  @override
+  String get pkReplanQ => '要重新生成装箱方案吗？';
+
+  @override
+  String get pkReplanBody => '现有的箱子（包括已核对的）会被移除，换成新方案。';
+
+  @override
+  String pkPlanned(int n) {
+    return '已生成$n箱的装箱方案';
+  }
+
+  @override
+  String get pkLabels => '打印标签';
+
+  @override
+  String get pkLabel => '此箱标签';
+
+  @override
+  String get pkMakeList => '生成装箱单';
+
+  @override
+  String pkListMade(String name) {
+    return '已生成装箱单：$name';
+  }
+
+  @override
+  String get pkDiffNone => '与出货明细数量一致';
+
+  @override
+  String pkDiffSome(int n) {
+    return '与出货明细不一致的商品：$n';
+  }
+
+  @override
+  String pkDiffRow(String name, int asked, int packed) {
+    return '$name：明细 $asked / 箱 $packed';
+  }
+
+  @override
+  String get pkScan => '扫描JAN';
+
+  @override
+  String pkScanHint(String box) {
+    return '正在装的箱：$box（点箱子切换）';
+  }
+
+  @override
+  String pkScanNotHere(String jan) {
+    return 'JAN $jan 不在任何箱子里';
+  }
+
+  @override
+  String pkScanOtherBox(String box) {
+    return '这是 $box 的商品';
+  }
+
+  @override
+  String pkEst(String kg) {
+    return '计算 $kg kg';
+  }
+
+  @override
+  String get pkBoxDone => '核对';
+
+  @override
+  String get pkCartonPick => '选择箱子';
+
+  @override
+  String get pkOwnCase => '厂家原箱';
+
+  @override
+  String get pkWeighed => '实测重量';
+
+  @override
+  String pkOff(int pct) {
+    return '与计算值相差$pct%';
+  }
+
+  @override
+  String get pkQuantity => '数量';
+
+  @override
+  String get obHubPackingLists => '装箱单';
+
+  @override
+  String get obHubBoxes => '箱子与入数';
+
+  @override
+  String get ofPacking => '装箱・装箱单';
 }

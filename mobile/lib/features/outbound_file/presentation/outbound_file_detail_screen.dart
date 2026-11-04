@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart'
     show DestinationCardView, copyDestinationCard, pickDestinationCard;
+import '../../packing/presentation/packing_screen.dart';
 import '../data/outbound_file_repository.dart';
 import 'outbound_file_screen.dart'
     show outboundActionLabel, outboundFileSaverProvider, outboundKg, outboundMoney, outboundTabOpenerProvider;
@@ -294,6 +295,14 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     label: Text(l10n.ofReschedule),
                   ),
                 ],
+                if (!f.undone)
+                  FilledButton.tonalIcon(
+                    key: const ValueKey('of-packing'),
+                    onPressed: () => Navigator.of(context)
+                        .push(MaterialPageRoute<void>(builder: (_) => PackingScreen(fileId: f.id))),
+                    icon: const Icon(Icons.inventory_2_outlined),
+                    label: Text(l10n.ofPacking),
+                  ),
                 if (!f.undone)
                   TextButton.icon(
                     key: const ValueKey('of-undo'),

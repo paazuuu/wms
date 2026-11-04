@@ -16,7 +16,10 @@ import '../domain/packaging.dart';
 /// a box no longer used is retired rather than deleted, since old cartons
 /// still name it.
 class CartonTypesScreen extends ConsumerWidget {
-  const CartonTypesScreen({super.key});
+  const CartonTypesScreen({super.key, this.embedded = false});
+
+  /// Inside another screen's tab: no bar of its own.
+  final bool embedded;
 
   Future<void> _edit(BuildContext context, WidgetRef ref, [CartonType? type]) async {
     final draft = await showDialog<CartonType>(
@@ -44,7 +47,7 @@ class CartonTypesScreen extends ConsumerWidget {
     final async = ref.watch(allCartonTypesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.ctTitle)),
+      appBar: embedded ? null : AppBar(title: Text(l10n.ctTitle)),
       floatingActionButton: FloatingActionButton.extended(
         key: const ValueKey('ct-add'),
         onPressed: () => _edit(context, ref),

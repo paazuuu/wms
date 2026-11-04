@@ -8874,7 +8874,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pmImportFile => 'Register from a file';
 
   @override
-  String get pkTitle => 'Take in from the price book';
+  String get pkTitle => 'Packing (box check)';
 
   @override
   String get pkIntro =>
@@ -14985,4 +14985,280 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ofErrNotPlanned =>
       'This is not a planned shipment (already confirmed or undone)';
+
+  @override
+  String get pkReload => 'Reload';
+
+  @override
+  String get pkNoWarehouse => 'Choose a warehouse first';
+
+  @override
+  String pkReadFailed(String e) {
+    return 'Could not read it: $e';
+  }
+
+  @override
+  String get pkNothingRead =>
+      'No table with box numbers was found (the AI could not tell the columns either)';
+
+  @override
+  String pkAiNote(String sheets) {
+    return 'Columns named by the AI: $sheets';
+  }
+
+  @override
+  String get pkImportHint =>
+      'The file is kept as it is, and an improved version easier to read is made and kept with it. Both can be opened or downloaded later.';
+
+  @override
+  String pkSheetRead(String sheet, int n) {
+    return 'Sheet \"$sheet\": $n boxes';
+  }
+
+  @override
+  String pkTotals(int boxes, int qty, String kg, String cbm) {
+    return '$boxes boxes · $qty units · $kg kg · $cbm m³';
+  }
+
+  @override
+  String pkNoJanRows(int n) {
+    return 'Rows without a JAN: $n (yellow in the improved file)';
+  }
+
+  @override
+  String pkLearn(int n) {
+    return 'Remember as their own cases ($n products)';
+  }
+
+  @override
+  String get pkLearnHint =>
+      'From boxes holding one product: how many, size and weight. Values set by hand are not overwritten.';
+
+  @override
+  String get pkKeep => 'Keep it';
+
+  @override
+  String get pkKept => 'Packing list kept (original and improved)';
+
+  @override
+  String pkKeptLearned(int n) {
+    return 'Packing list kept; $n case quantities learned';
+  }
+
+  @override
+  String get pkListsTitle => 'Packing lists';
+
+  @override
+  String get pkListsHint =>
+      'Upload a packing list made by hand: the AI reads its columns and it is remade in the improved layout (box no., box type, size, gross weight, CBM, a sheet of boxes, totals by product). The original is kept too.';
+
+  @override
+  String get pkListsEmpty => 'No packing lists yet';
+
+  @override
+  String get pkUpload => 'Upload a packing list';
+
+  @override
+  String get pkSourceUpload => 'Uploaded';
+
+  @override
+  String get pkSourceGenerated => 'Made here';
+
+  @override
+  String pkForFile(String name) {
+    return 'Shipping list: $name';
+  }
+
+  @override
+  String get pkOpenImproved => 'Open the improved one';
+
+  @override
+  String get pkDownloadImproved => 'Download the improved one';
+
+  @override
+  String get pkDownloadOriginal => 'Download the original';
+
+  @override
+  String get pkWithdraw => 'Take off the list';
+
+  @override
+  String get pkWithdrawQ => 'Take this packing list off the list?';
+
+  @override
+  String get pkWithdrawBody => 'The files stay; it is only no longer listed.';
+
+  @override
+  String get pkWithdrawn => 'Taken off the list';
+
+  @override
+  String get pkSettingsTitle => 'Boxes and case quantities';
+
+  @override
+  String get pkCasePacks => 'Makers\' own cases';
+
+  @override
+  String get pkOurCartons => 'Our cartons';
+
+  @override
+  String get pkCaseHint =>
+      'For each product: how many go in its own case, the case size and the weight when full. A packing plan ships full cases as they are and puts the rest in our cartons. Uploading packing lists teaches these (\"learned\").';
+
+  @override
+  String get pkCaseSearch => 'Search by name, maker, JAN or item no.';
+
+  @override
+  String get pkCaseEmpty => 'None yet';
+
+  @override
+  String get pkCaseAdd => 'Add a case';
+
+  @override
+  String get pkCaseSaved => 'Case saved';
+
+  @override
+  String get pkCaseRetired => 'Case taken off';
+
+  @override
+  String get pkCaseRetire => 'Take it off';
+
+  @override
+  String pkLearned(int n) {
+    return 'Learned ×$n';
+  }
+
+  @override
+  String pkCaseLearnedHint(int n) {
+    return 'Learned from $n packing lists. Saving makes it a value set by hand.';
+  }
+
+  @override
+  String pkCaseQty(int n) {
+    return '$n per case';
+  }
+
+  @override
+  String get pkCaseQtyLabel => 'Per case';
+
+  @override
+  String get pkLength => 'L cm';
+
+  @override
+  String get pkWidth => 'W cm';
+
+  @override
+  String get pkHeight => 'H cm';
+
+  @override
+  String get pkCaseKg => 'Full case kg';
+
+  @override
+  String pkDemandTotal(int rows, int qty) {
+    return '$rows rows · $qty units';
+  }
+
+  @override
+  String pkChecked(int done, int all) {
+    return '$done of $all boxes checked';
+  }
+
+  @override
+  String get pkNoBoxes =>
+      'No boxes yet. \"Work out the boxes\" makes them from the cases and our cartons (weight and volume limits).';
+
+  @override
+  String get pkPlan => 'Work out the boxes';
+
+  @override
+  String get pkReplan => 'Work them out again';
+
+  @override
+  String get pkReplanQ => 'Work the boxes out again?';
+
+  @override
+  String get pkReplanBody =>
+      'The boxes there are now (checked ones too) are put aside for a new plan.';
+
+  @override
+  String pkPlanned(int n) {
+    return '$n boxes worked out';
+  }
+
+  @override
+  String get pkLabels => 'Print labels';
+
+  @override
+  String get pkLabel => 'This box\'s label';
+
+  @override
+  String get pkMakeList => 'Make the packing list';
+
+  @override
+  String pkListMade(String name) {
+    return 'Packing list made: $name';
+  }
+
+  @override
+  String get pkDiffNone => 'Matches the shipping list';
+
+  @override
+  String pkDiffSome(int n) {
+    return 'Products not matching the shipping list: $n';
+  }
+
+  @override
+  String pkDiffRow(String name, int asked, int packed) {
+    return '$name: list $asked / boxes $packed';
+  }
+
+  @override
+  String get pkScan => 'Scan a JAN';
+
+  @override
+  String pkScanHint(String box) {
+    return 'Packing box $box (tap a box to switch)';
+  }
+
+  @override
+  String pkScanNotHere(String jan) {
+    return 'JAN $jan is in no box';
+  }
+
+  @override
+  String pkScanOtherBox(String box) {
+    return 'It belongs in $box';
+  }
+
+  @override
+  String pkEst(String kg) {
+    return 'Worked out $kg kg';
+  }
+
+  @override
+  String get pkBoxDone => 'Checked';
+
+  @override
+  String get pkCartonPick => 'Choose a box';
+
+  @override
+  String get pkOwnCase => 'Maker\'s own case';
+
+  @override
+  String get pkWeighed => 'Weighed';
+
+  @override
+  String pkOff(int pct) {
+    return '$pct% off the worked-out weight';
+  }
+
+  @override
+  String get pkQuantity => 'Quantity';
+
+  @override
+  String get obHubPackingLists => 'Packing lists';
+
+  @override
+  String get obHubBoxes => 'Boxes';
+
+  @override
+  String get ofPacking => 'Packing / packing list';
 }

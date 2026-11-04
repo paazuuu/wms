@@ -24,9 +24,14 @@ class XlsxSheet {
     this.widths,
     this.top = const [],
     this.bottom = const [],
+    this.lists = const [],
   });
 
   final String name;
+
+  /// Cells that offer a list to choose from: (range such as B2:B20, the
+  /// list as a formula such as BOX_TYPES!\$A\$2:\$A\$9).
+  final List<(String, String)> lists;
   final List<String> headers;
   final List<List<Object?>> rows;
   final Set<(int, int)> flagged;
@@ -55,7 +60,9 @@ class XlsxFormula {
   const XlsxFormula(this.formula, {this.cached});
 
   final String formula;
-  final num? cached;
+
+  /// A number, or text (a formula that gives text).
+  final Object? cached;
 }
 
 String _esc(String s) =>
@@ -69,7 +76,8 @@ String _sheetXml(XlsxSheet x) {
     if (v is XlsxFormula) {
       final f = v.formula.startsWith('=') ? v.formula.substring(1) : v.formula;
       final cached = v.cached;
-      return '<c r="$ref"$s><f>${_esc(f)}</f>${cached != null && cached.isFinite ? '<v>$cached</v>' : ''}</c>';
+      if (cached is String) return '<c r="$ref"$s t="str"><f>${_esc(f)}</f><v>${_esc(cached)}</v></c>';
+      return '<c r="$ref"$s><f>${_esc(f)}</f>${cached is num && cached.isFinite ? '<v>$cached</v>' : ''}</c>';
     }
     if (v is num && v.isFinite) return '<c r="$ref"$s><v>$v</v></c>';
     return '<c r="$ref"$s t="inlineStr"><is><t xml:space="preserve">${_esc('$v')}</t></is></c>';
@@ -117,7 +125,16 @@ String _sheetXml(XlsxSheet x) {
     }
     sheet.write('</row>');
   }
-  sheet.write('</sheetData></worksheet>');
+  sheet.write('</sheetData>');
+  if (x.lists.isNotEmpty) {
+    sheet.write('<dataValidations count="${x.lists.length}">');
+    for (final (range, formula) in x.lists) {
+      sheet.write('<dataValidation type="list" allowBlank="1" showErrorMessage="1" sqref="${_esc(range)}">'
+          '<formula1>${_esc(formula.startsWith('=') ? formula.substring(1) : formula)}</formula1></dataValidation>');
+    }
+    sheet.write('</dataValidations>');
+  }
+  sheet.write('</worksheet>');
   return sheet.toString();
 }
 

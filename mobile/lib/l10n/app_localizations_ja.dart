@@ -8693,7 +8693,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pmImportFile => 'ファイルから登録';
 
   @override
-  String get pkTitle => '価格台帳から取り込む';
+  String get pkTitle => '梱包（箱詰めの確認）';
 
   @override
   String get pkIntro =>
@@ -14691,4 +14691,277 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofErrNotPlanned => 'この出庫は予定ではありません（すでに確定・取り消し済み）';
+
+  @override
+  String get pkReload => '読み込み直す';
+
+  @override
+  String get pkNoWarehouse => '倉庫を選んでください';
+
+  @override
+  String pkReadFailed(String e) {
+    return '読み込めませんでした: $e';
+  }
+
+  @override
+  String get pkNothingRead => '箱番号のある表が見つかりませんでした（AIでも列が分かりませんでした）';
+
+  @override
+  String pkAiNote(String sheets) {
+    return 'AIが列を判断: $sheets';
+  }
+
+  @override
+  String get pkImportHint =>
+      '原本はそのまま残し、見やすい形式（改善版）も作って一緒に保管します。どちらも後から開いたりダウンロードできます。';
+
+  @override
+  String pkSheetRead(String sheet, int n) {
+    return 'シート「$sheet」: $n箱';
+  }
+
+  @override
+  String pkTotals(int boxes, int qty, String kg, String cbm) {
+    return '$boxes箱 · 数量 $qty · $kg kg · $cbm m³';
+  }
+
+  @override
+  String pkNoJanRows(int n) {
+    return 'JANが分からない行: $n（改善版では黄色）';
+  }
+
+  @override
+  String pkLearn(int n) {
+    return '元箱と入数として覚える（$n品目）';
+  }
+
+  @override
+  String get pkLearnHint => '1箱に1品目だけの箱から、入数・サイズ・重量を覚えます。手で登録した値は上書きしません。';
+
+  @override
+  String get pkKeep => '保管する';
+
+  @override
+  String get pkKept => 'パッキングリストを保管しました（原本と改善版）';
+
+  @override
+  String pkKeptLearned(int n) {
+    return 'パッキングリストを保管し、$n品目の入数を覚えました';
+  }
+
+  @override
+  String get pkListsTitle => 'パッキングリスト';
+
+  @override
+  String get pkListsHint =>
+      '個人で作ったパッキングリストをアップすると、AIが列を読み取り、見やすい形式（箱番号・箱種・サイズ・総重量・容積、箱の一覧、品目ごとの集計）に自動で作り直します。原本も残ります。';
+
+  @override
+  String get pkListsEmpty => 'まだパッキングリストはありません';
+
+  @override
+  String get pkUpload => 'パッキングリストをアップ';
+
+  @override
+  String get pkSourceUpload => 'アップ';
+
+  @override
+  String get pkSourceGenerated => '作成';
+
+  @override
+  String pkForFile(String name) {
+    return '出荷明細: $name';
+  }
+
+  @override
+  String get pkOpenImproved => '改善版を開く';
+
+  @override
+  String get pkDownloadImproved => '改善版をダウンロード';
+
+  @override
+  String get pkDownloadOriginal => '原本をダウンロード';
+
+  @override
+  String get pkWithdraw => '一覧から外す';
+
+  @override
+  String get pkWithdrawQ => 'このパッキングリストを一覧から外しますか？';
+
+  @override
+  String get pkWithdrawBody => 'ファイルは消えません。一覧に出なくなるだけです。';
+
+  @override
+  String get pkWithdrawn => '一覧から外しました';
+
+  @override
+  String get pkSettingsTitle => '箱と入数';
+
+  @override
+  String get pkCasePacks => 'メーカーの元箱（入数）';
+
+  @override
+  String get pkOurCartons => '自社の段ボール';
+
+  @override
+  String get pkCaseHint =>
+      '商品ごとに、元箱に何個入るか・箱のサイズ・満杯の重さを登録します。箱詰め案では、入数ぶんはその元箱のまま1箱、残りを自社の段ボールに詰めます。パッキングリストをアップすると自動で覚えます（「学習」）。';
+
+  @override
+  String get pkCaseSearch => '商品名・メーカー・JAN・品番で検索';
+
+  @override
+  String get pkCaseEmpty => 'まだ登録はありません';
+
+  @override
+  String get pkCaseAdd => '元箱を登録';
+
+  @override
+  String get pkCaseSaved => '元箱を登録しました';
+
+  @override
+  String get pkCaseRetired => '元箱の登録を外しました';
+
+  @override
+  String get pkCaseRetire => '登録を外す';
+
+  @override
+  String pkLearned(int n) {
+    return '学習 ×$n';
+  }
+
+  @override
+  String pkCaseLearnedHint(int n) {
+    return 'パッキングリストから$n回学習した値です。保存すると手で登録した値になります。';
+  }
+
+  @override
+  String pkCaseQty(int n) {
+    return '入数 $n';
+  }
+
+  @override
+  String get pkCaseQtyLabel => '入数（1箱の個数）';
+
+  @override
+  String get pkLength => '縦 cm';
+
+  @override
+  String get pkWidth => '横 cm';
+
+  @override
+  String get pkHeight => '高さ cm';
+
+  @override
+  String get pkCaseKg => '満杯の重さ kg';
+
+  @override
+  String pkDemandTotal(int rows, int qty) {
+    return '$rows行 · 数量 $qty';
+  }
+
+  @override
+  String pkChecked(int done, int all) {
+    return '確認済み $done / $all 箱';
+  }
+
+  @override
+  String get pkNoBoxes =>
+      'まだ箱詰め案がありません。「箱詰め案を作る」で、元箱の入数と自社の段ボール（重量・容積の上限）から自動で作ります。';
+
+  @override
+  String get pkPlan => '箱詰め案を作る';
+
+  @override
+  String get pkReplan => '箱詰め案を作り直す';
+
+  @override
+  String get pkReplanQ => '箱詰め案を作り直しますか？';
+
+  @override
+  String get pkReplanBody => '今の箱（確認済みも含む）は外され、新しい案になります。';
+
+  @override
+  String pkPlanned(int n) {
+    return '$n箱の箱詰め案を作りました';
+  }
+
+  @override
+  String get pkLabels => 'ラベルを印刷';
+
+  @override
+  String get pkLabel => 'この箱のラベル';
+
+  @override
+  String get pkMakeList => 'パッキングリストを作る';
+
+  @override
+  String pkListMade(String name) {
+    return 'パッキングリストを作りました: $name';
+  }
+
+  @override
+  String get pkDiffNone => '出荷明細の数量と合っています';
+
+  @override
+  String pkDiffSome(int n) {
+    return '出荷明細と合わない品目: $n';
+  }
+
+  @override
+  String pkDiffRow(String name, int asked, int packed) {
+    return '$name: 明細 $asked / 箱 $packed';
+  }
+
+  @override
+  String get pkScan => 'JANをスキャン';
+
+  @override
+  String pkScanHint(String box) {
+    return '詰めている箱: $box（箱をタップで切り替え）';
+  }
+
+  @override
+  String pkScanNotHere(String jan) {
+    return 'JAN $jan はどの箱にもありません';
+  }
+
+  @override
+  String pkScanOtherBox(String box) {
+    return '$box の品目です';
+  }
+
+  @override
+  String pkEst(String kg) {
+    return '計算 $kg kg';
+  }
+
+  @override
+  String get pkBoxDone => '確認';
+
+  @override
+  String get pkCartonPick => '箱を選ぶ';
+
+  @override
+  String get pkOwnCase => 'メーカーの元箱';
+
+  @override
+  String get pkWeighed => '実測重量';
+
+  @override
+  String pkOff(int pct) {
+    return '計算と$pct%違います';
+  }
+
+  @override
+  String get pkQuantity => '数量';
+
+  @override
+  String get obHubPackingLists => 'パッキングリスト';
+
+  @override
+  String get obHubBoxes => '箱と入数';
+
+  @override
+  String get ofPacking => '梱包・パッキングリスト';
 }

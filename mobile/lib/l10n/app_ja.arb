@@ -7782,7 +7782,7 @@
   },
   "ciLineNoMaster": "ライブラリー登録不可（JAN・メーカーなし）",
   "pmImportFile": "ファイルから登録",
-  "pkTitle": "価格台帳から取り込む",
+  "pkTitle": "梱包（箱詰めの確認）",
   "pkIntro": "価格台帳にある商品のうち、まだ商品ライブラリーにないものです。仕入れると決めた商品を選んで取り込んでください。同じJANの商品が商品ライブラリーにあれば、新しく作らずにつなぎます。価格台帳の記録はそのまま残ります。",
   "pkEmpty": "取り込める商品はありません",
   "pkEmptyBody": "価格台帳の商品は、すべて商品ライブラリーに入っています。価格台帳が空のときは、先に「価格台帳」でファイルを取り込んでください。",
@@ -13074,5 +13074,258 @@
   "ofPlanCancelQ": "この出庫予定を取り消しますか？",
   "ofPlanCancelBody": "在庫はまだ動いていません。予定は「取り消し済み」として残ります。",
   "ofPlanCancelled": "出庫予定を取り消しました",
-  "ofErrNotPlanned": "この出庫は予定ではありません（すでに確定・取り消し済み）"
+  "ofErrNotPlanned": "この出庫は予定ではありません（すでに確定・取り消し済み）",
+  "pkReload": "読み込み直す",
+  "pkNoWarehouse": "倉庫を選んでください",
+  "pkReadFailed": "読み込めませんでした: {e}",
+  "@pkReadFailed": {
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "pkNothingRead": "箱番号のある表が見つかりませんでした（AIでも列が分かりませんでした）",
+  "pkAiNote": "AIが列を判断: {sheets}",
+  "@pkAiNote": {
+    "placeholders": {
+      "sheets": {
+        "type": "String"
+      }
+    }
+  },
+  "pkImportHint": "原本はそのまま残し、見やすい形式（改善版）も作って一緒に保管します。どちらも後から開いたりダウンロードできます。",
+  "pkSheetRead": "シート「{sheet}」: {n}箱",
+  "@pkSheetRead": {
+    "placeholders": {
+      "sheet": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkTotals": "{boxes}箱 · 数量 {qty} · {kg} kg · {cbm} m³",
+  "@pkTotals": {
+    "placeholders": {
+      "boxes": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "kg": {
+        "type": "String"
+      },
+      "cbm": {
+        "type": "String"
+      }
+    }
+  },
+  "pkNoJanRows": "JANが分からない行: {n}（改善版では黄色）",
+  "@pkNoJanRows": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkLearn": "元箱と入数として覚える（{n}品目）",
+  "@pkLearn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkLearnHint": "1箱に1品目だけの箱から、入数・サイズ・重量を覚えます。手で登録した値は上書きしません。",
+  "pkKeep": "保管する",
+  "pkKept": "パッキングリストを保管しました（原本と改善版）",
+  "pkKeptLearned": "パッキングリストを保管し、{n}品目の入数を覚えました",
+  "@pkKeptLearned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkListsTitle": "パッキングリスト",
+  "pkListsHint": "個人で作ったパッキングリストをアップすると、AIが列を読み取り、見やすい形式（箱番号・箱種・サイズ・総重量・容積、箱の一覧、品目ごとの集計）に自動で作り直します。原本も残ります。",
+  "pkListsEmpty": "まだパッキングリストはありません",
+  "pkUpload": "パッキングリストをアップ",
+  "pkSourceUpload": "アップ",
+  "pkSourceGenerated": "作成",
+  "pkForFile": "出荷明細: {name}",
+  "@pkForFile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pkOpenImproved": "改善版を開く",
+  "pkDownloadImproved": "改善版をダウンロード",
+  "pkDownloadOriginal": "原本をダウンロード",
+  "pkWithdraw": "一覧から外す",
+  "pkWithdrawQ": "このパッキングリストを一覧から外しますか？",
+  "pkWithdrawBody": "ファイルは消えません。一覧に出なくなるだけです。",
+  "pkWithdrawn": "一覧から外しました",
+  "pkSettingsTitle": "箱と入数",
+  "pkCasePacks": "メーカーの元箱（入数）",
+  "pkOurCartons": "自社の段ボール",
+  "pkCaseHint": "商品ごとに、元箱に何個入るか・箱のサイズ・満杯の重さを登録します。箱詰め案では、入数ぶんはその元箱のまま1箱、残りを自社の段ボールに詰めます。パッキングリストをアップすると自動で覚えます（「学習」）。",
+  "pkCaseSearch": "商品名・メーカー・JAN・品番で検索",
+  "pkCaseEmpty": "まだ登録はありません",
+  "pkCaseAdd": "元箱を登録",
+  "pkCaseSaved": "元箱を登録しました",
+  "pkCaseRetired": "元箱の登録を外しました",
+  "pkCaseRetire": "登録を外す",
+  "pkLearned": "学習 ×{n}",
+  "@pkLearned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkCaseLearnedHint": "パッキングリストから{n}回学習した値です。保存すると手で登録した値になります。",
+  "@pkCaseLearnedHint": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkCaseQty": "入数 {n}",
+  "@pkCaseQty": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkCaseQtyLabel": "入数（1箱の個数）",
+  "pkLength": "縦 cm",
+  "pkWidth": "横 cm",
+  "pkHeight": "高さ cm",
+  "pkCaseKg": "満杯の重さ kg",
+  "pkDemandTotal": "{rows}行 · 数量 {qty}",
+  "@pkDemandTotal": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "pkChecked": "確認済み {done} / {all} 箱",
+  "@pkChecked": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "all": {
+        "type": "int"
+      }
+    }
+  },
+  "pkNoBoxes": "まだ箱詰め案がありません。「箱詰め案を作る」で、元箱の入数と自社の段ボール（重量・容積の上限）から自動で作ります。",
+  "pkPlan": "箱詰め案を作る",
+  "pkReplan": "箱詰め案を作り直す",
+  "pkReplanQ": "箱詰め案を作り直しますか？",
+  "pkReplanBody": "今の箱（確認済みも含む）は外され、新しい案になります。",
+  "pkPlanned": "{n}箱の箱詰め案を作りました",
+  "@pkPlanned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkLabels": "ラベルを印刷",
+  "pkLabel": "この箱のラベル",
+  "pkMakeList": "パッキングリストを作る",
+  "pkListMade": "パッキングリストを作りました: {name}",
+  "@pkListMade": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pkDiffNone": "出荷明細の数量と合っています",
+  "pkDiffSome": "出荷明細と合わない品目: {n}",
+  "@pkDiffSome": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkDiffRow": "{name}: 明細 {asked} / 箱 {packed}",
+  "@pkDiffRow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "asked": {
+        "type": "int"
+      },
+      "packed": {
+        "type": "int"
+      }
+    }
+  },
+  "pkScan": "JANをスキャン",
+  "pkScanHint": "詰めている箱: {box}（箱をタップで切り替え）",
+  "@pkScanHint": {
+    "placeholders": {
+      "box": {
+        "type": "String"
+      }
+    }
+  },
+  "pkScanNotHere": "JAN {jan} はどの箱にもありません",
+  "@pkScanNotHere": {
+    "placeholders": {
+      "jan": {
+        "type": "String"
+      }
+    }
+  },
+  "pkScanOtherBox": "{box} の品目です",
+  "@pkScanOtherBox": {
+    "placeholders": {
+      "box": {
+        "type": "String"
+      }
+    }
+  },
+  "pkEst": "計算 {kg} kg",
+  "@pkEst": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "pkBoxDone": "確認",
+  "pkCartonPick": "箱を選ぶ",
+  "pkOwnCase": "メーカーの元箱",
+  "pkWeighed": "実測重量",
+  "pkOff": "計算と{pct}%違います",
+  "@pkOff": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "pkQuantity": "数量",
+  "obHubPackingLists": "パッキングリスト",
+  "obHubBoxes": "箱と入数",
+  "ofPacking": "梱包・パッキングリスト"
 }

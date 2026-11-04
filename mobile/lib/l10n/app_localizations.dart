@@ -15832,7 +15832,7 @@ abstract class AppLocalizations {
   /// No description provided for @pkTitle.
   ///
   /// In ja, this message translates to:
-  /// **'価格台帳から取り込む'**
+  /// **'梱包（箱詰めの確認）'**
   String get pkTitle;
 
   /// No description provided for @pkIntro.
@@ -25954,6 +25954,456 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この出庫は予定ではありません（すでに確定・取り消し済み）'**
   String get ofErrNotPlanned;
+
+  /// No description provided for @pkReload.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込み直す'**
+  String get pkReload;
+
+  /// No description provided for @pkNoWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を選んでください'**
+  String get pkNoWarehouse;
+
+  /// No description provided for @pkReadFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込めませんでした: {e}'**
+  String pkReadFailed(String e);
+
+  /// No description provided for @pkNothingRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱番号のある表が見つかりませんでした（AIでも列が分かりませんでした）'**
+  String get pkNothingRead;
+
+  /// No description provided for @pkAiNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが列を判断: {sheets}'**
+  String pkAiNote(String sheets);
+
+  /// No description provided for @pkImportHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'原本はそのまま残し、見やすい形式（改善版）も作って一緒に保管します。どちらも後から開いたりダウンロードできます。'**
+  String get pkImportHint;
+
+  /// No description provided for @pkSheetRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'シート「{sheet}」: {n}箱'**
+  String pkSheetRead(String sheet, int n);
+
+  /// No description provided for @pkTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'{boxes}箱 · 数量 {qty} · {kg} kg · {cbm} m³'**
+  String pkTotals(int boxes, int qty, String kg, String cbm);
+
+  /// No description provided for @pkNoJanRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが分からない行: {n}（改善版では黄色）'**
+  String pkNoJanRows(int n);
+
+  /// No description provided for @pkLearn.
+  ///
+  /// In ja, this message translates to:
+  /// **'元箱と入数として覚える（{n}品目）'**
+  String pkLearn(int n);
+
+  /// No description provided for @pkLearnHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'1箱に1品目だけの箱から、入数・サイズ・重量を覚えます。手で登録した値は上書きしません。'**
+  String get pkLearnHint;
+
+  /// No description provided for @pkKeep.
+  ///
+  /// In ja, this message translates to:
+  /// **'保管する'**
+  String get pkKeep;
+
+  /// No description provided for @pkKept.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストを保管しました（原本と改善版）'**
+  String get pkKept;
+
+  /// No description provided for @pkKeptLearned.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストを保管し、{n}品目の入数を覚えました'**
+  String pkKeptLearned(int n);
+
+  /// No description provided for @pkListsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリスト'**
+  String get pkListsTitle;
+
+  /// No description provided for @pkListsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'個人で作ったパッキングリストをアップすると、AIが列を読み取り、見やすい形式（箱番号・箱種・サイズ・総重量・容積、箱の一覧、品目ごとの集計）に自動で作り直します。原本も残ります。'**
+  String get pkListsHint;
+
+  /// No description provided for @pkListsEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだパッキングリストはありません'**
+  String get pkListsEmpty;
+
+  /// No description provided for @pkUpload.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストをアップ'**
+  String get pkUpload;
+
+  /// No description provided for @pkSourceUpload.
+  ///
+  /// In ja, this message translates to:
+  /// **'アップ'**
+  String get pkSourceUpload;
+
+  /// No description provided for @pkSourceGenerated.
+  ///
+  /// In ja, this message translates to:
+  /// **'作成'**
+  String get pkSourceGenerated;
+
+  /// No description provided for @pkForFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細: {name}'**
+  String pkForFile(String name);
+
+  /// No description provided for @pkOpenImproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'改善版を開く'**
+  String get pkOpenImproved;
+
+  /// No description provided for @pkDownloadImproved.
+  ///
+  /// In ja, this message translates to:
+  /// **'改善版をダウンロード'**
+  String get pkDownloadImproved;
+
+  /// No description provided for @pkDownloadOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'原本をダウンロード'**
+  String get pkDownloadOriginal;
+
+  /// No description provided for @pkWithdraw.
+  ///
+  /// In ja, this message translates to:
+  /// **'一覧から外す'**
+  String get pkWithdraw;
+
+  /// No description provided for @pkWithdrawQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'このパッキングリストを一覧から外しますか？'**
+  String get pkWithdrawQ;
+
+  /// No description provided for @pkWithdrawBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルは消えません。一覧に出なくなるだけです。'**
+  String get pkWithdrawBody;
+
+  /// No description provided for @pkWithdrawn.
+  ///
+  /// In ja, this message translates to:
+  /// **'一覧から外しました'**
+  String get pkWithdrawn;
+
+  /// No description provided for @pkSettingsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱と入数'**
+  String get pkSettingsTitle;
+
+  /// No description provided for @pkCasePacks.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーの元箱（入数）'**
+  String get pkCasePacks;
+
+  /// No description provided for @pkOurCartons.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の段ボール'**
+  String get pkOurCartons;
+
+  /// No description provided for @pkCaseHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごとに、元箱に何個入るか・箱のサイズ・満杯の重さを登録します。箱詰め案では、入数ぶんはその元箱のまま1箱、残りを自社の段ボールに詰めます。パッキングリストをアップすると自動で覚えます（「学習」）。'**
+  String get pkCaseHint;
+
+  /// No description provided for @pkCaseSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・メーカー・JAN・品番で検索'**
+  String get pkCaseSearch;
+
+  /// No description provided for @pkCaseEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ登録はありません'**
+  String get pkCaseEmpty;
+
+  /// No description provided for @pkCaseAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'元箱を登録'**
+  String get pkCaseAdd;
+
+  /// No description provided for @pkCaseSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'元箱を登録しました'**
+  String get pkCaseSaved;
+
+  /// No description provided for @pkCaseRetired.
+  ///
+  /// In ja, this message translates to:
+  /// **'元箱の登録を外しました'**
+  String get pkCaseRetired;
+
+  /// No description provided for @pkCaseRetire.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録を外す'**
+  String get pkCaseRetire;
+
+  /// No description provided for @pkLearned.
+  ///
+  /// In ja, this message translates to:
+  /// **'学習 ×{n}'**
+  String pkLearned(int n);
+
+  /// No description provided for @pkCaseLearnedHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストから{n}回学習した値です。保存すると手で登録した値になります。'**
+  String pkCaseLearnedHint(int n);
+
+  /// No description provided for @pkCaseQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'入数 {n}'**
+  String pkCaseQty(int n);
+
+  /// No description provided for @pkCaseQtyLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'入数（1箱の個数）'**
+  String get pkCaseQtyLabel;
+
+  /// No description provided for @pkLength.
+  ///
+  /// In ja, this message translates to:
+  /// **'縦 cm'**
+  String get pkLength;
+
+  /// No description provided for @pkWidth.
+  ///
+  /// In ja, this message translates to:
+  /// **'横 cm'**
+  String get pkWidth;
+
+  /// No description provided for @pkHeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'高さ cm'**
+  String get pkHeight;
+
+  /// No description provided for @pkCaseKg.
+  ///
+  /// In ja, this message translates to:
+  /// **'満杯の重さ kg'**
+  String get pkCaseKg;
+
+  /// No description provided for @pkDemandTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'{rows}行 · 数量 {qty}'**
+  String pkDemandTotal(int rows, int qty);
+
+  /// No description provided for @pkChecked.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認済み {done} / {all} 箱'**
+  String pkChecked(int done, int all);
+
+  /// No description provided for @pkNoBoxes.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ箱詰め案がありません。「箱詰め案を作る」で、元箱の入数と自社の段ボール（重量・容積の上限）から自動で作ります。'**
+  String get pkNoBoxes;
+
+  /// No description provided for @pkPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め案を作る'**
+  String get pkPlan;
+
+  /// No description provided for @pkReplan.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め案を作り直す'**
+  String get pkReplan;
+
+  /// No description provided for @pkReplanQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め案を作り直しますか？'**
+  String get pkReplanQ;
+
+  /// No description provided for @pkReplanBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'今の箱（確認済みも含む）は外され、新しい案になります。'**
+  String get pkReplanBody;
+
+  /// No description provided for @pkPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}箱の箱詰め案を作りました'**
+  String pkPlanned(int n);
+
+  /// No description provided for @pkLabels.
+  ///
+  /// In ja, this message translates to:
+  /// **'ラベルを印刷'**
+  String get pkLabels;
+
+  /// No description provided for @pkLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'この箱のラベル'**
+  String get pkLabel;
+
+  /// No description provided for @pkMakeList.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストを作る'**
+  String get pkMakeList;
+
+  /// No description provided for @pkListMade.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストを作りました: {name}'**
+  String pkListMade(String name);
+
+  /// No description provided for @pkDiffNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細の数量と合っています'**
+  String get pkDiffNone;
+
+  /// No description provided for @pkDiffSome.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細と合わない品目: {n}'**
+  String pkDiffSome(int n);
+
+  /// No description provided for @pkDiffRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}: 明細 {asked} / 箱 {packed}'**
+  String pkDiffRow(String name, int asked, int packed);
+
+  /// No description provided for @pkScan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANをスキャン'**
+  String get pkScan;
+
+  /// No description provided for @pkScanHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'詰めている箱: {box}（箱をタップで切り替え）'**
+  String pkScanHint(String box);
+
+  /// No description provided for @pkScanNotHere.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {jan} はどの箱にもありません'**
+  String pkScanNotHere(String jan);
+
+  /// No description provided for @pkScanOtherBox.
+  ///
+  /// In ja, this message translates to:
+  /// **'{box} の品目です'**
+  String pkScanOtherBox(String box);
+
+  /// No description provided for @pkEst.
+  ///
+  /// In ja, this message translates to:
+  /// **'計算 {kg} kg'**
+  String pkEst(String kg);
+
+  /// No description provided for @pkBoxDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認'**
+  String get pkBoxDone;
+
+  /// No description provided for @pkCartonPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱を選ぶ'**
+  String get pkCartonPick;
+
+  /// No description provided for @pkOwnCase.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーの元箱'**
+  String get pkOwnCase;
+
+  /// No description provided for @pkWeighed.
+  ///
+  /// In ja, this message translates to:
+  /// **'実測重量'**
+  String get pkWeighed;
+
+  /// No description provided for @pkOff.
+  ///
+  /// In ja, this message translates to:
+  /// **'計算と{pct}%違います'**
+  String pkOff(int pct);
+
+  /// No description provided for @pkQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get pkQuantity;
+
+  /// No description provided for @obHubPackingLists.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリスト'**
+  String get obHubPackingLists;
+
+  /// No description provided for @obHubBoxes.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱と入数'**
+  String get obHubBoxes;
+
+  /// No description provided for @ofPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包・パッキングリスト'**
+  String get ofPacking;
 }
 
 class _AppLocalizationsDelegate
