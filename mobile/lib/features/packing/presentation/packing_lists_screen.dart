@@ -163,7 +163,18 @@ Future<bool> importPackingList(BuildContext context, WidgetRef ref, {int? fileId
     // Boxes are named by size alone.
   }
   final marks = boxes.map((b) => b.mark).whereType<String>().toSet().join(' / ');
-  final improved = buildPackingListXlsx(boxes, header: PlHeader(marks: marks.isEmpty ? null : marks), cartons: cartons);
+  // The 明細 beside it goes in too, each product's weight from the library.
+  final weights = <String, double>{
+    for (final b in boxes)
+      for (final i in b.items)
+        if (i.jan != null && i.unitWeightG != null) i.jan!: i.unitWeightG!,
+  };
+  final improved = buildPackingListXlsx(
+    boxes,
+    header: PlHeader(marks: marks.isEmpty ? null : marks),
+    cartons: cartons,
+    detail: [for (final r in read.detail) PlDetailRow.fromSheet(r, unitWeightG: weights[r.jan])],
+  );
   final improvedName = improvedNameOf(file.name);
   final up1 = await repo.upload(warehouseId, file.name, file.bytes);
   final up2 = await repo.upload(warehouseId, improvedName, improved);
@@ -236,6 +247,9 @@ class _ImportDialogState extends State<_ImportDialog> {
           const SizedBox(height: AppSpacing.sm),
           for (final s in widget.read.sheets)
             Text(l10n.pkSheetRead(s.name, widget.boxes.where((b) => (b.mark ?? '') == s.mark).length)),
+          if (widget.read.detailSheet != null)
+            Text(l10n.pkDetailRead(widget.read.detailSheet!, widget.read.detail.length),
+                key: const ValueKey('pk-import-detail')),
           if (widget.read.askedAi.isNotEmpty)
             Text(l10n.pkAiNote(widget.read.askedAi.join(', ')),
                 key: const ValueKey('pk-import-ai'), style: TextStyle(color: theme.colorScheme.primary)),

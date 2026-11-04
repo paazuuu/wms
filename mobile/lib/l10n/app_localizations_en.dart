@@ -15261,4 +15261,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofPacking => 'Packing / packing list';
+
+  @override
+  String pkDetailRead(String sheet, int n) {
+    return 'Detail sheet \"$sheet\": $n rows (put in the improved file as 明細, quantities checked)';
+  }
 }

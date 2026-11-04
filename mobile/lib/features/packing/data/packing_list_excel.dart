@@ -3,6 +3,9 @@ import 'dart:typed_data';
 
 import '../../../core/export/xlsx.dart';
 import '../../outbound/domain/outbound.dart' show ShipDestination;
+import '../../outbound_file/data/outbound_file_repository.dart' show OutboundFileLine;
+import '../../outbound_file/data/shipping_list_export.dart' show shippingListHeaders;
+import '../../outbound_file/domain/outbound_sheet.dart' show OutboundRow;
 import '../../shipment/domain/packaging.dart' show CartonType;
 import '../domain/packing.dart';
 
@@ -62,6 +65,76 @@ class PlHeader {
       ];
 }
 
+/// A row of the 明細 (the shipping list: what was ordered, at what price),
+/// written beside the packing list in the layout people already use.
+class PlDetailRow {
+  const PlDetailRow({
+    required this.quantity,
+    this.orderDate,
+    this.arrival,
+    this.number,
+    this.supplier,
+    this.maker,
+    this.code,
+    this.jan,
+    this.listPrice,
+    this.unitPrice,
+    this.unitPriceTax,
+    this.amount,
+    this.orderNumber,
+    this.unitWeightG,
+  });
+
+  /// A row of a 明细 sheet read from a workbook.
+  factory PlDetailRow.fromSheet(OutboundRow r, {double? unitWeightG}) => PlDetailRow(
+        quantity: r.quantity ?? 0,
+        orderDate: r.orderDate,
+        arrival: r.arrival,
+        number: r.raw['编号'] ?? r.raw['編号'],
+        supplier: r.supplier,
+        maker: r.maker,
+        code: r.code,
+        jan: r.jan.isEmpty ? null : r.jan,
+        listPrice: r.listPrice,
+        unitPrice: r.priceEx,
+        unitPriceTax: r.priceTax,
+        amount: r.total,
+        orderNumber: r.orderNumber,
+        unitWeightG: unitWeightG,
+      );
+
+  /// A row of a shipping list kept here (0188), [quantity] as it goes out.
+  factory PlDetailRow.fromLine(OutboundFileLine l, int quantity) => PlDetailRow(
+        quantity: quantity,
+        arrival: l.arrival,
+        supplier: l.supplier,
+        maker: l.maker,
+        code: l.code,
+        jan: l.jan,
+        unitPrice: l.unitPrice,
+        unitPriceTax: l.unitPriceTax ?? (l.unitPrice == null ? null : _r2(l.unitPrice! * 1.1)),
+        amount: l.amount,
+        orderNumber: l.orderNumber,
+        unitWeightG: l.unitWeightG,
+      );
+
+  final String? orderDate;
+  final String? arrival;
+  final String? number;
+  final String? supplier;
+  final String? maker;
+  final String? code;
+  final String? jan;
+  final int quantity;
+  final double? listPrice;
+  final double? unitPrice;
+  final double? unitPriceTax;
+  final double? amount;
+  final String? orderNumber;
+  final double? unitWeightG;
+}
+
+double _r2(double v) => (v * 100).roundToDouble() / 100;
 double _r4(double v) => (v * 10000).roundToDouble() / 10000;
 double _r3(double v) => (v * 1000).roundToDouble() / 1000;
 
@@ -122,7 +195,17 @@ class PlBoxTypes {
 /// then BOXES (one row a box: type from a list, size from the type, weight),
 /// BOX_TYPES (the few boxes used) and SUMMARY (each product: how many, in
 /// how many boxes). JANs not known are filled yellow.
-Uint8List buildPackingListXlsx(List<PackBox> boxes, {PlHeader header = const PlHeader(), List<CartonType> cartons = const []}) {
+///
+/// With [detail], a 明細 sheet comes second: the shipping list in its own
+/// layout (下单时间 … 注番), 合计 and 総重量 as formulas; SUMMARY then shows
+/// each product's 明細 quantity and the difference, filled yellow where the
+/// boxes do not hold what the 明細 asks.
+Uint8List buildPackingListXlsx(
+  List<PackBox> boxes, {
+  PlHeader header = const PlHeader(),
+  List<CartonType> cartons = const [],
+  List<PlDetailRow> detail = const [],
+}) {
   final marked = boxes.map((b) => b.mark ?? '').toSet().length > 1;
   Object key(PackBox b) => marked ? b.label : b.boxNo;
   final types = PlBoxTypes(boxes, cartons: cartons);
@@ -225,42 +308,118 @@ Uint8List buildPackingListXlsx(List<PackBox> boxes, {PlHeader header = const PlH
     widths: const [9, 12, 12, 12, 12, 36],
   );
 
-  // SUMMARY: by 品番, else JAN, else 品名.
-  final seen = <String, ({String col, String value, String? maker, String? jan, String? code, int qty, int boxes})>{};
+  // 明細: the shipping list as people write it.
+  double? taxOf(PlDetailRow d) => d.unitPriceTax;
+  double amountOf(PlDetailRow d) => taxOf(d) == null ? (d.amount ?? 0) : _r2(d.quantity * taxOf(d)!);
+  final detailRows = <List<Object?>>[];
+  final detailFlags = <(int, int)>{};
+  for (final (i, d) in detail.indexed) {
+    final n = i + 2;
+    final w = d.unitWeightG;
+    if (d.jan == null) detailFlags.add((i, 6));
+    detailRows.add([
+      d.orderDate,
+      d.arrival,
+      d.number,
+      d.supplier,
+      d.maker,
+      d.code,
+      d.jan,
+      d.quantity,
+      d.listPrice,
+      d.unitPrice,
+      d.unitPriceTax,
+      taxOf(d) == null ? d.amount : XlsxFormula('H$n*K$n', cached: amountOf(d)),
+      d.orderNumber,
+      w,
+      w == null ? null : XlsxFormula('H$n*N$n/1000', cached: _r3(d.quantity * w / 1000)),
+    ]);
+  }
+  final dl = detail.length + 1;
+  final detailSheet = XlsxSheet(
+    name: '明細',
+    headers: shippingListHeaders,
+    rows: detailRows,
+    flagged: detailFlags,
+    widths: const [10, 10, 8, 16, 14, 18, 16, 8, 12, 12, 12, 12, 12, 12, 12],
+    bottom: [
+      [
+        null, null, null, null, null, null, '合计',
+        XlsxFormula('SUM(H2:H$dl)', cached: detail.fold<int>(0, (a, d) => a + d.quantity)),
+        null, null, null,
+        XlsxFormula('SUM(L2:L$dl)', cached: _r2(detail.fold<double>(0, (a, d) => a + amountOf(d)))),
+        null, null,
+        XlsxFormula('SUM(O2:O$dl)',
+            cached: _r3(detail.fold<double>(0, (a, d) => a + (d.unitWeightG == null ? 0 : d.quantity * d.unitWeightG! / 1000)))),
+      ],
+    ],
+  );
+
+  // SUMMARY: by 品番, else JAN, else 品名; with a 明細, what it asks beside.
+  String norm(String v) => v.trim().toUpperCase();
+  final seen = <String, ({String col, String value, String? maker, String? jan, int qty, int boxes})>{};
   for (final b in boxes) {
     final inBox = <String>{};
     for (final i in b.items) {
       final (col, value) = i.code != null ? ('D', i.code!) : (i.jan != null ? ('E', i.jan!) : ('B', i.name ?? ''));
-      final k = '$col|$value';
+      final k = '$col|${norm(value)}';
       final s = seen[k];
       final counted = inBox.add(k);
       seen[k] = (
         col: col,
-        value: value,
+        value: s?.value ?? value,
         maker: s?.maker ?? i.maker,
         jan: s?.jan ?? i.jan,
-        code: s?.code ?? i.code,
         qty: (s?.qty ?? 0) + i.quantity,
         boxes: (s?.boxes ?? 0) + (counted ? 1 : 0),
       );
     }
   }
+  final askedByCode = <String, int>{};
+  final askedByJan = <String, int>{};
+  for (final d in detail) {
+    if (d.code != null) askedByCode[norm(d.code!)] = (askedByCode[norm(d.code!)] ?? 0) + d.quantity;
+    if (d.jan != null) askedByJan[norm(d.jan!)] = (askedByJan[norm(d.jan!)] ?? 0) + d.quantity;
+  }
+  // What the 明細 asks that is in no box gets a row too (packed 0).
+  for (final d in detail) {
+    if (d.code == null && d.jan == null) continue;
+    if (d.code != null && seen.containsKey('D|${norm(d.code!)}')) continue;
+    if (d.jan != null && seen.containsKey('E|${norm(d.jan!)}')) continue;
+    final (col, value) = d.code != null ? ('D', d.code!) : ('E', d.jan!);
+    seen['$col|${norm(value)}'] = (col: col, value: value, maker: d.maker, jan: d.jan, qty: 0, boxes: 0);
+  }
+  final withDetail = detail.isNotEmpty;
+  final summaryRows = <List<Object?>>[];
+  final summaryFlags = <(int, int)>{};
+  for (final (i, s) in seen.values.indexed) {
+    final r = i + 2;
+    final dcol = switch (s.col) { 'D' => 'F', 'E' => 'G', _ => null };
+    final asked = switch (s.col) { 'D' => askedByCode[norm(s.value)], 'E' => askedByJan[norm(s.value)], _ => null } ?? 0;
+    if (withDetail && asked != s.qty) summaryFlags.addAll({(i, 5), (i, 6)});
+    summaryRows.add([
+      s.value,
+      s.maker ?? '',
+      s.jan ?? '',
+      XlsxFormula("SUMIF('PACKING LIST'!\$${s.col}:\$${s.col},A$r,'PACKING LIST'!\$F:\$F)", cached: s.qty),
+      XlsxFormula("COUNTIF('PACKING LIST'!\$${s.col}:\$${s.col},A$r)", cached: s.boxes),
+      if (withDetail) ...[
+        dcol == null ? null : XlsxFormula("SUMIF('明細'!\$$dcol:\$$dcol,A$r,'明細'!\$H:\$H)", cached: asked),
+        dcol == null ? null : XlsxFormula('D$r-F$r', cached: s.qty - asked),
+      ],
+    ]);
+  }
   final summary = XlsxSheet(
     name: 'SUMMARY',
-    headers: const ['品番 / JAN / 品名', 'メーカー', 'JAN', '総数量', '行数'],
-    rows: [
-      for (final (i, s) in seen.values.indexed)
-        [
-          s.value,
-          s.maker ?? '',
-          s.jan ?? '',
-          XlsxFormula("SUMIF('PACKING LIST'!\$${s.col}:\$${s.col},A${i + 2},'PACKING LIST'!\$F:\$F)", cached: s.qty),
-          XlsxFormula("COUNTIF('PACKING LIST'!\$${s.col}:\$${s.col},A${i + 2})", cached: s.boxes),
-        ],
+    headers: [
+      '品番 / JAN / 品名', 'メーカー', 'JAN', '総数量', '行数',
+      if (withDetail) ...['明細の数量', '差（箱 − 明細）'],
     ],
-    widths: const [20, 16, 15, 10, 8],
+    rows: summaryRows,
+    flagged: summaryFlags,
+    widths: const [20, 16, 15, 10, 8, 12, 14],
   );
-  return buildXlsxBook([list, boxSheet, typeSheet, summary]);
+  return buildXlsxBook([list, if (withDetail) detailSheet, boxSheet, typeSheet, summary]);
 }
 
 String _esc(String s) => const HtmlEscape(HtmlEscapeMode.element).convert(s);

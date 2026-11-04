@@ -13327,5 +13327,16 @@
   "pkQuantity": "数量",
   "obHubPackingLists": "パッキングリスト",
   "obHubBoxes": "箱と入数",
-  "ofPacking": "梱包・パッキングリスト"
+  "ofPacking": "梱包・パッキングリスト",
+  "pkDetailRead": "明細シート「{sheet}」: {n}行（改善版にも明細シートとして入れ、数量を照合します）",
+  "@pkDetailRead": {
+    "placeholders": {
+      "sheet": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

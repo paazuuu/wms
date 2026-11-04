@@ -26404,6 +26404,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'梱包・パッキングリスト'**
   String get ofPacking;
+
+  /// No description provided for @pkDetailRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'明細シート「{sheet}」: {n}行（改善版にも明細シートとして入れ、数量を照合します）'**
+  String pkDetailRead(String sheet, int n);
 }
 
 class _AppLocalizationsDelegate

@@ -4743,5 +4743,6 @@
   "pkQuantity": "数量",
   "obHubPackingLists": "装箱单",
   "obHubBoxes": "箱子与入数",
-  "ofPacking": "装箱・装箱单"
+  "ofPacking": "装箱・装箱单",
+  "pkDetailRead": "明细工作表“{sheet}”：{n}行（也放入改进版的明细表并核对数量）"
 }

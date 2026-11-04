@@ -38,6 +38,13 @@ List<PackDemand> packDemandsOf(OutboundFileDetail d) => [
           ),
     ];
 
+/// The 明細 that goes with the packing list: the same rows, with prices.
+List<PlDetailRow> packDetailOf(OutboundFileDetail d) => [
+      for (final l in d.lines)
+        if (l.action != 'skip' && (d.file.planned || d.file.proxy ? l.quantity : l.shippedQuantity) > 0)
+          PlDetailRow.fromLine(l, d.file.planned || d.file.proxy ? l.quantity : l.shippedQuantity),
+    ];
+
 String _esc(String s) => const HtmlEscape(HtmlEscapeMode.element).convert(s);
 
 /// Box labels to print, one to a page: the box number large, of how many,
@@ -341,6 +348,7 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
       header: PlHeader.fromDestination(f.shipTo,
           date: DateFormat('y/MM/dd').format(f.shippedOn), marks: marks.isEmpty ? null : marks),
       cartons: cartons,
+      detail: packDetailOf(d),
     );
     final dot = f.fileName.lastIndexOf('.');
     final name = 'PackingList_${dot > 0 ? f.fileName.substring(0, dot) : f.fileName}.xlsx';

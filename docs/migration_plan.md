@@ -8657,6 +8657,12 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     and as the improved list (PACKING LIST / BOXES / BOX_TYPES / SUMMARY with
     formulas and cached values, a box-type list to choose from); single-product
     boxes teach 入数 if wanted. Both files open or download.
+  - 明細 in the improved list (second sheet): the shipping list in its own
+    layout (下单时间 … 注番, 重量, 総重量; 合计 and 総重量 as formulas) — from
+    the 明细 sheet beside an uploaded packing list, or from the list's rows for
+    one made here. SUMMARY then gives each product's 明細 quantity and the
+    difference (箱 − 明細), yellow where they differ; products in the 明細 but
+    in no box are listed with 0.
   - 箱と入数 tab: メーカーの元箱 (入数) and 自社の段ボール.
 
 ## Rollout discipline

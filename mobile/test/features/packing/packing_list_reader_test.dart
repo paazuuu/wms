@@ -102,7 +102,7 @@ void main() {
         header: const PlHeader(consignee: 'ACME LTD'),
         cartons: const [CartonType(id: 1, name: 'M', lengthCm: 40, widthCm: 30, heightCm: 20)]);
     final sheets = readXlsxSheets(bytes);
-    expect(sheets.map((s) => s.name), ['PACKING LIST', 'BOXES', 'BOX_TYPES', 'SUMMARY']);
+    expect(sheets.map((s) => s.name), ['PACKING LIST', 'BOXES', 'BOX_TYPES', 'SUMMARY'], reason: 'no 明細 given');
     final types = sheets[2].rows.skip(1).map((r) => r.first).toList();
     expect(types, ['T1', 'T2', 'T3', 'M']);
     final back = await readPackingList(bytes);
@@ -120,6 +120,33 @@ void main() {
     // Rows without a JAN are filled yellow.
     expect(RegExp(r'<c r="E\d+" s="2"').allMatches(listXml).length,
         read.boxes.fold(0, (a, b) => a + b.items.where((i) => i.jan == null).length));
+  });
+
+  test('the 明細 beside the packing list goes in too, and SUMMARY checks the boxes against it', () async {
+    final read = await readPackingList(_book);
+    expect(read.detailSheet, '明细');
+    expect(read.detail.map((r) => r.code), ['X-1', 'N-1']);
+    final bytes = buildPackingListXlsx(read.boxes, detail: [for (final r in read.detail) PlDetailRow.fromSheet(r)]);
+    final sheets = readXlsxSheets(bytes);
+    expect(sheets.map((s) => s.name), ['PACKING LIST', '明細', 'BOXES', 'BOX_TYPES', 'SUMMARY']);
+    final detail = sheets[1].rows;
+    expect(detail.first, contains('ジャパンコード'));
+    expect(detail[1].sublist(5, 8), ['X-1', '4909999000014', '60']);
+    expect(detail[1][11], '6600', reason: '合计 = 数量 × 単価（税込）');
+    expect(detail.last.sublist(6, 8), ['合计', '90']);
+
+    final summary = {for (final r in sheets[4].rows.skip(1)) r.first: r};
+    expect(sheets[4].rows.first.sublist(5), ['明細の数量', '差（箱 − 明細）']);
+    expect(summary['X-1']!.sublist(3), ['60', '1', '60', '0']);
+    expect(summary['N-1']!.sublist(3), ['30', '1', '30', '0']);
+    expect(summary['X-2']!.sublist(3), ['40', '1', '0', '40'], reason: 'not in the 明細');
+    final zip = ZipDecoder().decodeBytes(bytes);
+    final summaryXml = utf8.decode(zip.findFile('xl/worksheets/sheet5.xml')!.content as List<int>);
+    expect(summaryXml, contains("SUMIF('明細'!\$F:\$F,A"));
+    // Read back, the 明細 is the improved file's own and gives the same boxes.
+    final back = await readPackingList(bytes);
+    expect(back.detailSheet, '明細');
+    expect(back.boxes.map((b) => b.quantity), read.boxes.map((b) => b.quantity));
   });
 
   test('learns case quantities from boxes of one product', () async {

@@ -14964,4 +14964,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofPacking => '梱包・パッキングリスト';
+
+  @override
+  String pkDetailRead(String sheet, int n) {
+    return '明細シート「$sheet」: $n行（改善版にも明細シートとして入れ、数量を照合します）';
+  }
 }

@@ -14868,4 +14868,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofPacking => '装箱・装箱单';
+
+  @override
+  String pkDetailRead(String sheet, int n) {
+    return '明细工作表“$sheet”：$n行（也放入改进版的明细表并核对数量）';
+  }
 }

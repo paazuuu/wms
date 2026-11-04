@@ -4743,5 +4743,6 @@
   "pkQuantity": "Quantity",
   "obHubPackingLists": "Packing lists",
   "obHubBoxes": "Boxes",
-  "ofPacking": "Packing / packing list"
+  "ofPacking": "Packing / packing list",
+  "pkDetailRead": "Detail sheet \"{sheet}\": {n} rows (put in the improved file as 明細, quantities checked)"
 }

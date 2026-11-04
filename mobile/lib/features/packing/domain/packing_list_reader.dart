@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
 import '../../../core/export/xlsx.dart';
-import '../../outbound_file/domain/outbound_sheet.dart' show normalizeOutboundJan, outboundHeadingKey, parseOutboundSheet;
+import '../../outbound_file/domain/outbound_sheet.dart'
+    show OutboundColumn, OutboundRow, normalizeOutboundJan, outboundHeadingKey, parseOutboundSheet, pickOutboundSheet;
 import 'packing.dart';
 
 /// What a column of a packing list holds. The wire names are those of the
@@ -345,7 +346,18 @@ List<PackBox> readPlSheet(PlSheet s) {
 
 /// A packing list read from a workbook.
 class PackingListRead {
-  const PackingListRead({required this.sheets, required this.boxes, this.askedAi = const []});
+  const PackingListRead({
+    required this.sheets,
+    required this.boxes,
+    this.askedAi = const [],
+    this.detail = const [],
+    this.detailSheet,
+  });
+
+  /// The 明細 beside it (the shipping list's rows, with prices), if the
+  /// workbook has one.
+  final List<OutboundRow> detail;
+  final String? detailSheet;
 
   /// The sheets read, each with its boxes.
   final List<PlSheet> sheets;
@@ -447,7 +459,37 @@ Future<PackingListRead> readPackingList(Uint8List bytes, {PlColumnsAsker? ask}) 
   } catch (_) {
     // A sheet that does not read as a list gives no JANs.
   }
-  return PackingListRead(sheets: sheets, boxes: filled, askedAi: asked);
+  final detail = _detailOf(book, {for (final s in sheets) s.name});
+  return PackingListRead(
+    sheets: sheets,
+    boxes: filled,
+    askedAi: asked,
+    detail: detail?.rows ?? const [],
+    detailSheet: detail?.name,
+  );
+}
+
+/// The 明細 of the workbook: of the sheets not read as a packing list (nor
+/// our own BOXES …), the one that reads best as a shipping list — a quantity
+/// and a JAN or 品番 — if any does.
+({String name, List<OutboundRow> rows})? _detailOf(List<XlsxSheetRows> book, Set<String> plSheets) {
+  try {
+    final rest = [
+      for (final s in book)
+        if (!plSheets.contains(s.name) && !const {'PACKING LIST', 'BOXES', 'BOX_TYPES', 'SUMMARY'}.contains(s.name)) s,
+    ];
+    if (rest.isEmpty) return null;
+    final s = rest[pickOutboundSheet(rest)];
+    final p = parseOutboundSheet(s.name, s.rows);
+    final c = p.columns;
+    if (!c.containsKey(OutboundColumn.quantity) || !(c.containsKey(OutboundColumn.jan) || c.containsKey(OutboundColumn.code))) {
+      return null;
+    }
+    final rows = [for (final r in p.rows) if ((r.quantity ?? 0) > 0 && (r.jan.isNotEmpty || r.code != null)) r];
+    return rows.isEmpty ? null : (name: s.name, rows: rows);
+  } catch (_) {
+    return null;
+  }
 }
 
 /// What the boxes teach about each product's own case: a box that holds one

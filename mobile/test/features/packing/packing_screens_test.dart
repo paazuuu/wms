@@ -153,6 +153,10 @@ void main() {
     expect(back.boxes.map((b) => b.quantity), [24, 11]);
     final sheets = readXlsxSheets(t.repo.files[rec.improvedPath]!);
     expect(sheets.first.rows.any((r) => r.any((c) => c.contains('Test Trading'))), isTrue);
+    // The 明細 goes with it: the rows shipped (not the one left out), all packed.
+    expect(sheets[1].name, '明細');
+    expect([for (final r in sheets[1].rows.skip(1)) r.length > 7 ? r[7] : ''], ['30', '5', '35']);
+    expect(sheets[4].rows.skip(1).map((r) => r.last), ['0', '0']);
   });
 
   testWidgets('a packing list uploaded: the AI names its columns, both files are kept, cases learned', (tester) async {
