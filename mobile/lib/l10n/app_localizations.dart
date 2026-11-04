@@ -3175,13 +3175,13 @@ abstract class AppLocalizations {
   /// No description provided for @featWorkOrders.
   ///
   /// In ja, this message translates to:
-  /// **'作業指示'**
+  /// **'流通加工（セット組み）'**
   String get featWorkOrders;
 
   /// No description provided for @featWorkOrdersDesc.
   ///
   /// In ja, this message translates to:
-  /// **'部材を消費して完成品を作るキッティング・組立作業'**
+  /// **'バラの商品（部材）を使ってセット品・詰め合わせを作る作業。部材の在庫が減り、セット品の在庫が増える'**
   String get featWorkOrdersDesc;
 
   /// No description provided for @featReports.
@@ -18065,7 +18065,7 @@ abstract class AppLocalizations {
   /// No description provided for @featOutboundProposal.
   ///
   /// In ja, this message translates to:
-  /// **'出庫の提案'**
+  /// **'出荷の提案'**
   String get featOutboundProposal;
 
   /// No description provided for @featOutboundProposalDesc.
@@ -24464,7 +24464,7 @@ abstract class AppLocalizations {
   /// No description provided for @featOutboundFile.
   ///
   /// In ja, this message translates to:
-  /// **'出荷明細から出庫'**
+  /// **'出荷明細の取込'**
   String get featOutboundFile;
 
   /// No description provided for @featOutboundFileDesc.
@@ -24482,19 +24482,19 @@ abstract class AppLocalizations {
   /// No description provided for @featOutboundCalendarDesc.
   ///
   /// In ja, this message translates to:
-  /// **'出荷リストで出庫した日ごとの記録とファイル'**
+  /// **'出荷明細の取込・在庫外出荷で出した日ごとの記録とファイル（倉庫から見た出庫）'**
   String get featOutboundCalendarDesc;
 
   /// No description provided for @ofTitle.
   ///
   /// In ja, this message translates to:
-  /// **'出荷明細から出庫'**
+  /// **'出荷明細の取込'**
   String get ofTitle;
 
   /// No description provided for @ofTabImport.
   ///
   /// In ja, this message translates to:
-  /// **'出荷明細から出庫'**
+  /// **'出荷明細の取込'**
   String get ofTabImport;
 
   /// No description provided for @ofTabCalendar.
@@ -25718,19 +25718,19 @@ abstract class AppLocalizations {
   /// No description provided for @featOutboundHub.
   ///
   /// In ja, this message translates to:
-  /// **'出庫'**
+  /// **'出荷手配'**
   String get featOutboundHub;
 
   /// No description provided for @featOutboundHubDesc.
   ///
   /// In ja, this message translates to:
-  /// **'出荷明細から出庫・在庫外出荷・出庫カレンダー・出荷先カード・出荷指示と梱包・出庫の提案を1か所で'**
+  /// **'出荷明細の取込・在庫外出荷・出荷先カード・出荷指示と梱包・出荷の提案を1か所で'**
   String get featOutboundHubDesc;
 
   /// No description provided for @obHubFile.
   ///
   /// In ja, this message translates to:
-  /// **'出荷明細から出庫'**
+  /// **'出荷明細の取込'**
   String get obHubFile;
 
   /// No description provided for @obHubProxy.
@@ -25760,8 +25760,14 @@ abstract class AppLocalizations {
   /// No description provided for @obHubProposal.
   ///
   /// In ja, this message translates to:
-  /// **'出庫の提案'**
+  /// **'出荷の提案'**
   String get obHubProposal;
+
+  /// No description provided for @groupShipping.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get groupShipping;
 }
 
 class _AppLocalizationsDelegate

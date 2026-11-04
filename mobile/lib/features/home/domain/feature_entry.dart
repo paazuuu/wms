@@ -384,6 +384,8 @@ class FeatureGroup {
         return l10n.groupProducts;
       case 'field_operations':
         return l10n.groupFieldOperations;
+      case 'shipping':
+        return l10n.groupShipping;
       case 'supply_chain':
         return l10n.groupSupplyChain;
       case 'accounting':

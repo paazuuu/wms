@@ -1628,10 +1628,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featPartnersDesc => '管理供应商与客户的联系方式及交易条件';
 
   @override
-  String get featWorkOrders => '工单';
+  String get featWorkOrders => '流通加工（组套）';
 
   @override
-  String get featWorkOrdersDesc => '组装/套装：消耗部件，产出成品';
+  String get featWorkOrdersDesc => '用散件（部件）组合成套装・礼盒的作业。部件库存减少，套装库存增加';
 
   @override
   String get featReports => '报表生成器';
@@ -9930,7 +9930,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get featOutboundProposal => '出库建议';
+  String get featOutboundProposal => '发货建议';
 
   @override
   String get featOutboundProposalDesc => '按库存的百分比或数量生成出库，并把收货方和出库清单做成可发送的Excel';
@@ -13784,7 +13784,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adjClearFilters => '清除筛选';
 
   @override
-  String get featOutboundFile => '按发货明细出库';
+  String get featOutboundFile => '导入发货明细';
 
   @override
   String get featOutboundFileDesc => '读取常用的发货明细（Excel・CSV），按JAN匹配并出库';
@@ -13793,13 +13793,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featOutboundCalendar => '出库日历';
 
   @override
-  String get featOutboundCalendarDesc => '按日查看按清单出库的记录和文件';
+  String get featOutboundCalendarDesc => '按日查看出库记录和文件（仓库视角）';
 
   @override
-  String get ofTitle => '按发货明细出库';
+  String get ofTitle => '导入发货明细';
 
   @override
-  String get ofTabImport => '按发货明细出库';
+  String get ofTabImport => '导入发货明细';
 
   @override
   String get ofTabCalendar => '出库日历';
@@ -14465,14 +14465,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ofShipToSet => '已设置收货方卡片';
 
   @override
-  String get featOutboundHub => '出库';
+  String get featOutboundHub => '发货安排';
 
   @override
-  String get featOutboundHubDesc =>
-      '出库集中在一处：按发货明细出库・库存外发货・出库日历・收货方卡片・发货指示与装箱・出库建议';
+  String get featOutboundHubDesc => '发货明细导入・库存外发货・收货方卡片・发货指示与装箱・发货建议集中在一处';
 
   @override
-  String get obHubFile => '按发货明细出库';
+  String get obHubFile => '导入发货明细';
 
   @override
   String get obHubProxy => '库存外发货';
@@ -14487,5 +14486,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get obHubPacking => '发货指示・装箱';
 
   @override
-  String get obHubProposal => '出库建议';
+  String get obHubProposal => '发货建议';
+
+  @override
+  String get groupShipping => '发货';
 }

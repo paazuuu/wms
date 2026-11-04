@@ -12,6 +12,17 @@ import '../data/outbound_file_repository.dart';
 import 'outbound_file_detail_screen.dart';
 import 'outbound_file_screen.dart' show outboundKg, outboundMoney;
 
+/// 出庫カレンダー on its own (現場作業): what left the warehouse, by day.
+class OutboundCalendarScreen extends StatelessWidget {
+  const OutboundCalendarScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context).featOutboundCalendar)),
+        body: const OutboundCalendarTab(),
+      );
+}
+
 /// 出庫カレンダー (0188): the lists shipped in a month, by the day they went
 /// out — the month at once, a day to narrow it — each opening its rows and
 /// its file. Both kinds are here — taken out of stock and 代理出荷 (0189) —

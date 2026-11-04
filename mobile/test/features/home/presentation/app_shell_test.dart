@@ -119,9 +119,13 @@ void main() {
     expect(find.text('Field Operations'), findsOneWidget);
     // The menu card, not the dashboard's 検品 tab (0102) of the same name.
     expect(find.widgetWithText(Card, 'Inspection'), findsOneWidget);
-    // Every way goods go out is one entry, 出庫 (its tabs inside).
-    expect(find.text('Outbound'), findsOneWidget);
-    expect(find.text('Shipping'), findsNothing);
+    // The sales side of shipping is its own group, 出荷, with 出荷手配
+    // (its tabs inside); the warehouse side stays in 現場作業.
+    expect(find.text('Shipping'), findsOneWidget);
+    final groups = {for (final g in buildFeatureCatalog()) g.id: [for (final e in g.entries) if (e.inMenu) e.id]};
+    expect(groups['shipping'], ['outbound', 'sales_orders', 'demand', 'purchase_request', 'virtual_stock']);
+    expect(groups['field_operations'], containsAll(['outbound_calendar', 'stock_adjustment', 'transfer', 'picking']));
+    expect(groups['field_operations'], isNot(contains('outbound')));
     // Our product list has its own group at the top, not the bottom of 管理.
     expect(find.text('Products'), findsWidgets);
     expect(buildFeatureCatalog().first.entries.first.id, 'products');

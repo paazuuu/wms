@@ -408,6 +408,7 @@ class _SectionLabel extends StatelessWidget {
 /// A calm per-group accent so the three areas read as distinct at a glance.
 StatusTone _toneForGroup(String id) => switch (id) {
       'field_operations' => StatusTone.info,
+      'shipping' => StatusTone.warning,
       'products_master' => StatusTone.success,
       'lookup' => StatusTone.success,
       'supply_chain' => StatusTone.warning,

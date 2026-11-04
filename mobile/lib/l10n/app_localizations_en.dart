@@ -1685,11 +1685,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Contacts and terms for suppliers and customers';
 
   @override
-  String get featWorkOrders => 'Work orders';
+  String get featWorkOrders => 'Kitting (set assembly)';
 
   @override
   String get featWorkOrdersDesc =>
-      'Kitting/assembly: consume components, produce a finished item';
+      'Make sets or assortments from single items: the parts\' stock goes down, the set\'s goes up';
 
   @override
   String get featReports => 'Report builder';
@@ -10193,7 +10193,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get featOutboundProposal => 'Outbound proposal';
+  String get featOutboundProposal => 'Shipment proposal';
 
   @override
   String get featOutboundProposalDesc =>
@@ -14151,7 +14151,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adjClearFilters => 'Clear filters';
 
   @override
-  String get featOutboundFile => 'Ship from a shipping list';
+  String get featOutboundFile => 'Read a shipping list';
 
   @override
   String get featOutboundFileDesc =>
@@ -14162,13 +14162,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featOutboundCalendarDesc =>
-      'Each day\'s shipments from lists, with their files';
+      'Each day\'s shipments, with their files — the warehouse\'s view of goods going out';
 
   @override
-  String get ofTitle => 'Ship from a shipping list';
+  String get ofTitle => 'Read a shipping list';
 
   @override
-  String get ofTabImport => 'From a shipping list';
+  String get ofTabImport => 'Read a shipping list';
 
   @override
   String get ofTabCalendar => 'Calendar';
@@ -14846,14 +14846,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ofShipToSet => 'Destination card set';
 
   @override
-  String get featOutboundHub => 'Outbound';
+  String get featOutboundHub => 'Arrange shipments';
 
   @override
   String get featOutboundHubDesc =>
-      'Shipping in one place: from a shipping list, outside stock, calendar, destination cards, packing, proposals';
+      'Shipping lists, shipments outside stock, destination cards, packing and proposals in one place';
 
   @override
-  String get obHubFile => 'From a shipping list';
+  String get obHubFile => 'Shipping list';
 
   @override
   String get obHubProxy => 'Outside stock';
@@ -14869,4 +14869,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get obHubProposal => 'Proposals';
+
+  @override
+  String get groupShipping => 'Shipping';
 }

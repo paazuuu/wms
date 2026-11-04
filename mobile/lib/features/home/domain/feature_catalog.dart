@@ -56,6 +56,7 @@ import '../../payments/presentation/payments_screen.dart';
 import '../../stock_import/presentation/inspection_calendar_screen.dart';
 import '../../unplanned_receipt/unplanned_receipt_screen.dart';
 import '../../warehouse_memos/warehouse_memos_screen.dart';
+import '../../outbound_file/presentation/outbound_calendar_tab.dart' show OutboundCalendarScreen;
 import '../../outbound_file/presentation/outbound_hub_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
@@ -251,6 +252,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
               'receiving.view', 'receiving.confirm', 'pack.complete', 'product.view', 'product.manage',
             ],
           ),
+          // 出庫カレンダー: each day's lists with their files.
+          FeatureEntry(
+            id: 'outbound_calendar',
+            icon: Icons.event_note_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundCalendar,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view', 'sales_order.view'],
+          ),
           // 棚入れ: out of the menu (0184); its address and the links to it stay.
           FeatureEntry(
             id: 'putaway',
@@ -260,81 +269,19 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['putaway.confirm'],
             inMenu: false,
           ),
-          // 出庫 (hub): every way goods go out, as tabs of one screen. The
-          // entries after it keep their addresses (links, bookmarks) and open
-          // its tab, out of the menu.
-          FeatureEntry(
-            id: 'outbound',
-            icon: Icons.outbox_outlined,
-            status: FeatureStatus.ready,
-            builder: _outboundHub,
-            requiredAnyOf: [
-              'pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view',
-              'sales_order.manage', 'sales_order.view',
-            ],
-          ),
-          // 出荷指示・梱包: a customer's order packed into cartons and shipped.
-          FeatureEntry(
-            id: 'shipment',
-            icon: Icons.inventory_2_outlined,
-            status: FeatureStatus.ready,
-            builder: _shipment,
-            requiredAnyOf: ['pack.complete', 'ship.complete'],
-            inMenu: false,
-          ),
-          // 出荷明細から出庫 (0188): the usual shipping list read and shipped.
-          FeatureEntry(
-            id: 'outbound_file',
-            icon: Icons.upload_file_outlined,
-            status: FeatureStatus.ready,
-            builder: _outboundFile,
-            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
-            inMenu: false,
-          ),
-          // 在庫外出荷 (0189): 直送・出荷代行, kept as a record, no stock moved.
-          FeatureEntry(
-            id: 'proxy_shipment',
-            icon: Icons.edit_note_outlined,
-            status: FeatureStatus.ready,
-            builder: _proxyShipment,
-            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
-            inMenu: false,
-          ),
-          // 出庫カレンダー: each day's lists with their files.
-          FeatureEntry(
-            id: 'outbound_calendar',
-            icon: Icons.event_note_outlined,
-            status: FeatureStatus.ready,
-            builder: _outboundCalendar,
-            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view', 'sales_order.view'],
-            inMenu: false,
-          ),
-          // 出庫の提案 (0139): a shipment worked out from the stock, by
-          // percentage or by quantity, to a saved destination.
-          FeatureEntry(
-            id: 'outbound_proposal',
-            icon: Icons.playlist_add_outlined,
-            status: FeatureStatus.ready,
-            builder: _outboundProposal,
-            requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage'],
-            inMenu: false,
-          ),
-          // 出荷先カード (0139, 0190): the destinations goods go to, with what
-          // an export needs; chosen when shipping.
-          FeatureEntry(
-            id: 'ship_destinations',
-            icon: Icons.contact_mail_outlined,
-            status: FeatureStatus.ready,
-            builder: _shipDestinations,
-            requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
-            inMenu: false,
-          ),
           FeatureEntry(
             id: 'stock_adjustment',
             icon: Icons.tune_outlined,
             status: FeatureStatus.ready,
             builder: _stockAdjustment,
             requiredAnyOf: ['inventory.adjust'],
+          ),
+          FeatureEntry(
+            id: 'transfer',
+            icon: Icons.compare_arrows,
+            status: FeatureStatus.ready,
+            builder: _transfer,
+            requiredAnyOf: ['transfer.create', 'transfer.approve', 'transfer.receive'],
           ),
           FeatureEntry(
             id: 'expiring_lots',
@@ -385,37 +332,12 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             inMenu: false,
           ),
           FeatureEntry(
-            id: 'transfer',
-            icon: Icons.compare_arrows,
-            status: FeatureStatus.ready,
-            builder: _transfer,
-            requiredAnyOf: ['transfer.create', 'transfer.approve', 'transfer.receive'],
-          ),
-          FeatureEntry(
             id: 'replenishment',
             icon: Icons.trending_down_outlined,
             status: FeatureStatus.ready,
             builder: _replenishment,
             requiredAnyOf: ['inventory.view'],
             inMenu: false,
-          ),
-          // Beside replenishment: both answer "how much is where", this one
-          // for the warehouses abroad whose stock left the system (0088).
-          FeatureEntry(
-            id: 'virtual_stock',
-            icon: Icons.public,
-            status: FeatureStatus.ready,
-            builder: _virtualStock,
-            requiredAnyOf: ['inventory.view'],
-          ),
-          // 入荷希望リスト (0140): what we would like to receive, from the
-          // master and the stock, to ask a supplier about as Excel.
-          FeatureEntry(
-            id: 'purchase_request',
-            icon: Icons.request_page_outlined,
-            status: FeatureStatus.ready,
-            builder: _purchaseRequests,
-            requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'product.manage'],
           ),
           // Order, invoice, delivery and inspection that do not agree (0108):
           // only the differences, so matching lines pass without a look.
@@ -425,6 +347,86 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _documentExceptions,
             requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve', 'receiving.view', 'inspection.view'],
+            inMenu: false,
+          ),
+          FeatureEntry(
+            id: 'work_orders',
+            icon: Icons.precision_manufacturing_outlined,
+            status: FeatureStatus.ready,
+            builder: _workOrders,
+            requiredAnyOf: ['work_order.view', 'work_order.manage'],
+          ),
+        ],
+      ),
+      // Supply chain profit & risk (0107, spec §1): an analysis layer over
+      // the operations above, not a replacement for any of them. What-ifs
+      // never change stock or orders.
+      // 出荷: the sales side of sending goods out — arranging shipments (出荷手配:
+      // the shipping list, outside stock, destinations, packing, proposals),
+      // orders taken, what is owed and bought for them, what to ask suppliers
+      // for, and the stock abroad. The warehouse's side (出庫カレンダー,
+      // picking, counts) stays in 現場作業.
+      FeatureGroup(
+        id: 'shipping',
+        entries: [
+          // 出庫 (hub): every way goods go out, as tabs of one screen. The
+          // entries after it keep their addresses (links, bookmarks) and open
+          // its tab, out of the menu.
+          FeatureEntry(
+            id: 'outbound',
+            icon: Icons.outbox_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundHub,
+            requiredAnyOf: [
+              'pack.complete', 'ship.complete', 'inventory.adjust', 'inventory.view', 'report.view',
+              'sales_order.manage', 'sales_order.view',
+            ],
+          ),
+          // 出荷指示・梱包: a customer's order packed into cartons and shipped.
+          FeatureEntry(
+            id: 'shipment',
+            icon: Icons.inventory_2_outlined,
+            status: FeatureStatus.ready,
+            builder: _shipment,
+            requiredAnyOf: ['pack.complete', 'ship.complete'],
+            inMenu: false,
+          ),
+          // 出荷明細から出庫 (0188): the usual shipping list read and shipped.
+          FeatureEntry(
+            id: 'outbound_file',
+            icon: Icons.upload_file_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundFile,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
+            inMenu: false,
+          ),
+          // 在庫外出荷 (0189): 直送・出荷代行, kept as a record, no stock moved.
+          FeatureEntry(
+            id: 'proxy_shipment',
+            icon: Icons.edit_note_outlined,
+            status: FeatureStatus.ready,
+            builder: _proxyShipment,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'inventory.adjust'],
+            inMenu: false,
+          ),
+          // 出庫の提案 (0139): a shipment worked out from the stock, by
+          // percentage or by quantity, to a saved destination.
+          FeatureEntry(
+            id: 'outbound_proposal',
+            icon: Icons.playlist_add_outlined,
+            status: FeatureStatus.ready,
+            builder: _outboundProposal,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage'],
+            inMenu: false,
+          ),
+          // 出荷先カード (0139, 0190): the destinations goods go to, with what
+          // an export needs; chosen when shipping.
+          FeatureEntry(
+            id: 'ship_destinations',
+            icon: Icons.contact_mail_outlined,
+            status: FeatureStatus.ready,
+            builder: _shipDestinations,
+            requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
             inMenu: false,
           ),
           FeatureEntry(
@@ -443,18 +445,26 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _demand,
             requiredAnyOf: ['sales_order.view', 'purchase_order.view', 'inventory.view'],
           ),
+          // 入荷希望リスト (0140): what we would like to receive, from the
+          // master and the stock, to ask a supplier about as Excel.
           FeatureEntry(
-            id: 'work_orders',
-            icon: Icons.precision_manufacturing_outlined,
+            id: 'purchase_request',
+            icon: Icons.request_page_outlined,
             status: FeatureStatus.ready,
-            builder: _workOrders,
-            requiredAnyOf: ['work_order.view', 'work_order.manage'],
+            builder: _purchaseRequests,
+            requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'product.manage'],
+          ),
+          // Beside replenishment: both answer "how much is where", this one
+          // for the warehouses abroad whose stock left the system (0088).
+          FeatureEntry(
+            id: 'virtual_stock',
+            icon: Icons.public,
+            status: FeatureStatus.ready,
+            builder: _virtualStock,
+            requiredAnyOf: ['inventory.view'],
           ),
         ],
       ),
-      // Supply chain profit & risk (0107, spec §1): an analysis layer over
-      // the operations above, not a replacement for any of them. What-ifs
-      // never change stock or orders.
       FeatureGroup(
         id: 'supply_chain',
         entries: [
@@ -738,7 +748,7 @@ Widget _inspectionCalendar(BuildContext _) => const InspectionCalendarScreen();
 Widget _unplannedReceipt(BuildContext _) => const UnplannedReceiptScreen();
 Widget _warehouseMemos(BuildContext _) => const WarehouseMemosScreen();
 Widget _outboundFile(BuildContext _) => const OutboundHubScreen();
-Widget _outboundCalendar(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.calendar);
+Widget _outboundCalendar(BuildContext _) => const OutboundCalendarScreen();
 Widget _outboundHub(BuildContext _) => const OutboundHubScreen();
 Widget _proxyShipment(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.proxy);
 Widget _payments(BuildContext _) => const PaymentsScreen();

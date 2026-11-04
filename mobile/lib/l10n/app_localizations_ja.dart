@@ -1633,10 +1633,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featPartnersDesc => '仕入先・顧客の連絡先や取引条件を管理';
 
   @override
-  String get featWorkOrders => '作業指示';
+  String get featWorkOrders => '流通加工（セット組み）';
 
   @override
-  String get featWorkOrdersDesc => '部材を消費して完成品を作るキッティング・組立作業';
+  String get featWorkOrdersDesc =>
+      'バラの商品（部材）を使ってセット品・詰め合わせを作る作業。部材の在庫が減り、セット品の在庫が増える';
 
   @override
   String get featReports => 'レポート作成';
@@ -9986,7 +9987,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get featOutboundProposal => '出庫の提案';
+  String get featOutboundProposal => '出荷の提案';
 
   @override
   String get featOutboundProposalDesc =>
@@ -13871,7 +13872,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get adjClearFilters => '絞り込みを解除';
 
   @override
-  String get featOutboundFile => '出荷明細から出庫';
+  String get featOutboundFile => '出荷明細の取込';
 
   @override
   String get featOutboundFileDesc => 'いつもの出荷明細（Excel・CSV）を読み込み、JANで照合して在庫から出庫';
@@ -13880,13 +13881,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featOutboundCalendar => '出庫カレンダー';
 
   @override
-  String get featOutboundCalendarDesc => '出荷リストで出庫した日ごとの記録とファイル';
+  String get featOutboundCalendarDesc =>
+      '出荷明細の取込・在庫外出荷で出した日ごとの記録とファイル（倉庫から見た出庫）';
 
   @override
-  String get ofTitle => '出荷明細から出庫';
+  String get ofTitle => '出荷明細の取込';
 
   @override
-  String get ofTabImport => '出荷明細から出庫';
+  String get ofTabImport => '出荷明細の取込';
 
   @override
   String get ofTabCalendar => '出庫カレンダー';
@@ -14555,14 +14557,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ofShipToSet => '出荷先カードを付けました';
 
   @override
-  String get featOutboundHub => '出庫';
+  String get featOutboundHub => '出荷手配';
 
   @override
-  String get featOutboundHubDesc =>
-      '出荷明細から出庫・在庫外出荷・出庫カレンダー・出荷先カード・出荷指示と梱包・出庫の提案を1か所で';
+  String get featOutboundHubDesc => '出荷明細の取込・在庫外出荷・出荷先カード・出荷指示と梱包・出荷の提案を1か所で';
 
   @override
-  String get obHubFile => '出荷明細から出庫';
+  String get obHubFile => '出荷明細の取込';
 
   @override
   String get obHubProxy => '在庫外出荷';
@@ -14577,5 +14578,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get obHubPacking => '出荷指示・梱包';
 
   @override
-  String get obHubProposal => '出庫の提案';
+  String get obHubProposal => '出荷の提案';
+
+  @override
+  String get groupShipping => '出荷';
 }

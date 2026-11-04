@@ -8,6 +8,7 @@ import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show
 import 'package:wms_mobile/features/outbound/domain/outbound.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart';
+import 'package:wms_mobile/features/outbound_file/presentation/outbound_calendar_tab.dart' show OutboundCalendarScreen;
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_hub_screen.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
@@ -386,7 +387,7 @@ void main() {
     expect(find.text('FOB'), findsOneWidget);
   });
 
-  testWidgets('出庫: every way goods go out as tabs of one screen', (tester) async {
+  testWidgets('出荷手配: the sales side of shipping as tabs of one screen', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1600, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const OutboundHubScreen(), overrides: [
@@ -395,7 +396,7 @@ void main() {
       activeWarehouseIdProvider.overrideWith((ref) => null),
       shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易', port: 'Shanghai')]),
     ]);
-    for (final t in ['出荷明細から出庫', '在庫外出荷', '出庫カレンダー', '出荷先カード', '出荷指示・梱包', '出庫の提案']) {
+    for (final t in ['出荷明細の取込', '在庫外出荷', '出荷先カード', '出荷指示・梱包', '出荷の提案']) {
       expect(find.descendant(of: find.byType(TabBar), matching: find.text(t)), findsOneWidget);
     }
     expect(find.byKey(const ValueKey('of-pick')), findsOneWidget);
@@ -406,21 +407,29 @@ void main() {
     expect(find.byKey(const ValueKey('pr-add-row')), findsOneWidget);
     expect(find.textContaining('直送（仕入先から相手先へ直接送る）'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('ob-hub-calendar')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('of-cal-kind-proxy')), findsOneWidget);
-    expect(find.text('在庫外出荷'), findsWidgets);
-
     await tester.tap(find.byKey(const ValueKey('ob-hub-cards')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sd-row-31')), findsOneWidget);
   });
 
-  testWidgets('a link to 出荷先カード opens the 出庫 screen at that tab', (tester) async {
+  testWidgets('a link to 出荷先カード opens 出荷手配 at that tab', (tester) async {
     await pumpApp(tester, const OutboundHubScreen(tab: OutboundHubTab.cards), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
       shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易')]),
     ]);
     expect(find.byKey(const ValueKey('sd-row-31')), findsOneWidget);
+  });
+
+  testWidgets('出庫カレンダー stands on its own (現場作業)', (tester) async {
+    final now = DateTime.now();
+    await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(files: [
+        OutboundFileSummary(id: 1, warehouseId: 1, shippedOn: DateTime(now.year, now.month, 5), fileName: '在庫分.xlsx'),
+      ])),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    expect(find.text('出庫カレンダー'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-file-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-cal-kind-proxy')), findsOneWidget);
   });
 }

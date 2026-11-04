@@ -8586,6 +8586,19 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   在庫外出荷 (直送 from a supplier, 出荷代行 for another — not through our
   stock); its 依頼元 → 依頼元・手配元.
 
+## Menu: 出荷 (sales) apart from 現場作業 (warehouse) (app only)
+
+- 出荷 (new group, the sales side): 出荷手配 (tabs: 出荷明細の取込, 在庫外出荷,
+  出荷先カード, 出荷指示・梱包, 出荷の提案), 受注, 受注残・発注, 入荷希望リスト,
+  国外倉庫の仮想在庫.
+- 現場作業 (the warehouse side): 検品, 検品履歴カレンダー, 予定外の入荷, メモ,
+  出庫カレンダー (on its own now), 在庫調整, 倉庫間移動, 期限管理, 例外対応,
+  棚卸, ピッキング, 流通加工（セット組み） (was 作業指示: parts consumed, a set
+  made).
+- 出荷 is the business of sending goods to a customer; 出庫 is goods leaving
+  the warehouse's stock — hence 出荷手配 / 出荷明細の取込 in 出荷, and the
+  出庫カレンダー in 現場作業.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
