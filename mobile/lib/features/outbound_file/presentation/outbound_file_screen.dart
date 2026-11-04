@@ -17,6 +17,8 @@ import '../../product/domain/product.dart';
 import '../../stock_import/domain/stock_file.dart' show fileFingerprint, readStockFile;
 import '../../stock_ops/presentation/stock_adjustment_screen.dart'
     show adjustOnHand, adjustProductMatches, adjustProductsProvider;
+import '../../outbound/domain/outbound.dart' show ShipDestination;
+import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/outbound_file_repository.dart';
 import '../domain/outbound_plan.dart';
@@ -145,6 +147,9 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
   final _principal = TextEditingController();
   ({String name, Uint8List bytes})? _file;
 
+  /// The 出荷先カード chosen (0190): its name fills 出荷先.
+  ShipDestination? _card;
+
   /// 代理出荷's rows typed in, after the file's.
   final List<OutboundRow> _manual = [];
   List<XlsxSheetRows> _sheets = const [];
@@ -193,6 +198,15 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         raw: r.raw,
       );
     }
+  }
+
+  Future<void> _pickCard() async {
+    final d = await pickDestinationCard(context);
+    if (d == null || !mounted) return;
+    setState(() {
+      _card = d;
+      _destination.text = d.name;
+    });
   }
 
   Future<void> _addRow() async {
@@ -410,6 +424,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
+        final card = _card;
+        if (card?.id != null) {
+          final set = await repo.setDestination(data, card!.id);
+          if (set case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+        }
+        if (!mounted) return;
         ref.invalidate(outboundFilesProvider);
         ref.invalidate(productListProvider);
         ref.invalidate(adjustProductsProvider);
@@ -425,6 +445,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           _destination.clear();
           _note.clear();
           _principal.clear();
+          _card = null;
         });
         await Navigator.of(context).push(MaterialPageRoute(builder: (_) => OutboundFileDetailScreen(fileId: data)));
       case ApiFailure(:final message):
@@ -687,6 +708,22 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                 controller: _principal,
                 decoration: InputDecoration(labelText: l10n.prPrincipal, isDense: true),
               ),
+            ),
+          if (_card == null)
+            OutlinedButton.icon(
+              key: const ValueKey('of-pick-card'),
+              icon: const Icon(Icons.contact_mail_outlined, size: 18),
+              label: Text(l10n.ofPickCard),
+              onPressed: _pickCard,
+            )
+          else
+            InputChip(
+              key: const ValueKey('of-card'),
+              avatar: const Icon(Icons.contact_mail_outlined, size: 18),
+              label: Text(l10n.ofCardChosen(_card!.name)),
+              onPressed: _pickCard,
+              onDeleted: () => setState(() => _card = null),
+              deleteButtonTooltipMessage: l10n.ofCardClear,
             ),
           SizedBox(
             width: 220,

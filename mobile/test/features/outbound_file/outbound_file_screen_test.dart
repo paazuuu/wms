@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/core/ui/open_window.dart';
+import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
+import 'package:wms_mobile/features/outbound/domain/outbound.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart';
 import 'package:wms_mobile/features/product/application/product_providers.dart';
@@ -79,6 +81,9 @@ void main() {
       writeWarehouseIdProvider.overrideWithValue(1),
       activeWarehouseIdProvider.overrideWith((ref) => null),
       productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      shipDestinationsProvider.overrideWith((ref) async => const [
+            ShipDestination(id: 31, name: 'テスト貿易', nameEn: 'Test Trading', port: 'Shanghai', incoterms: 'FOB'),
+          ]),
     ]);
     return r;
   }
@@ -340,5 +345,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.undone, [2]);
     expect(find.text('記録を取り消しました'), findsOneWidget);
+  });
+
+  testWidgets('a 出荷先カード chosen when shipping goes with the list; the detail shows it as it was', (tester) async {
+    final now = DateTime.now();
+    final repo = FakeOutboundFileRepository(
+      matcher: _match,
+      detailOf: (id) => OutboundFileDetail(
+        file: OutboundFileSummary(
+          id: id,
+          warehouseId: 1,
+          shippedOn: DateTime(now.year, now.month, 3),
+          fileName: '到货明细.xlsx',
+          destination: 'テスト貿易',
+          destinationId: 31,
+          shipTo: const ShipDestination(id: 31, name: 'テスト貿易', nameEn: 'Test Trading', port: 'Shanghai', incoterms: 'FOB'),
+        ),
+        lines: const [],
+      ),
+    );
+    await pump(tester, repo: repo);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-pick-card')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sd-pick-31')));
+    await tester.pumpAndSettle();
+    expect(find.text('出荷先カード: テスト貿易'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('of-destination'))).controller!.text, 'テスト貿易');
+
+    await tester.tap(find.byKey(const ValueKey('of-post')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-post-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.destinations, [(1, 31)]);
+    // The detail: the card as it was, with the export terms.
+    expect(find.byKey(const ValueKey('of-ship-to')), findsOneWidget);
+    expect(find.text('Test Trading'), findsOneWidget);
+    expect(find.text('FOB'), findsOneWidget);
   });
 }

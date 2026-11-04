@@ -2,6 +2,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
@@ -416,5 +417,120 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.retired, [1]);
     expect(find.text('保存した出荷先はまだありません'), findsOneWidget);
+  });
+
+  testWidgets('出荷先カード: what an export needs is written on the card and saved', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 2600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = _FakeOutboundRepository();
+    await pumpApp(tester, const ShipDestinationsScreen(), overrides: [outboundRepositoryProvider.overrideWithValue(repo)]);
+    await tester.tap(find.byKey(const ValueKey('sd-add')));
+    await tester.pumpAndSettle();
+
+    Future<void> type(String key, String text) async {
+      final f = find.byKey(ValueKey('sd-$key'));
+      await tester.ensureVisible(f);
+      await tester.pumpAndSettle();
+      await tester.enterText(f, text);
+    }
+
+    Future<void> tap(String key) async {
+      final f = find.byKey(ValueKey('sd-$key'));
+      await tester.ensureVisible(f);
+      await tester.pumpAndSettle();
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+    }
+
+    await type('name', 'テスト貿易有限公司');
+    await type('name-en', 'Test Trading Co., Ltd.');
+    await type('contact', '王');
+    await type('country', 'cn');
+    await type('address-en', 'Room 1, Test Rd\nShanghai');
+    await type('phone', '021-0000-0000');
+    await tap('phone-add');
+    await type('phone-label-0', '携帯');
+    await type('phone-number-0', '139-0000-0000');
+    await tap('phone-add');
+    await type('phone-number-1', ' ');
+    await type('tax-kind', '統一社会信用コード');
+    await type('tax-id', '91310000TEST0000X');
+    await type('port', 'Shanghai');
+    await type('incoterms', 'fob');
+    await tap('transport');
+    await tester.tap(find.text('海上').last);
+    await tester.pumpAndSettle();
+    await tap('notify-same');
+    await type('notify-name', 'Notify Co.');
+    await type('fwd-name', 'テスト通関');
+    await type('documents', 'インボイス・パッキングリスト');
+    await tester.tap(find.byKey(const ValueKey('sd-save')));
+    await tester.pumpAndSettle();
+
+    final d = repo.saved.single;
+    expect(d.name, 'テスト貿易有限公司');
+    expect(d.nameEn, 'Test Trading Co., Ltd.');
+    expect(d.countryCode, 'CN');
+    expect(d.addressEn, 'Room 1, Test Rd\nShanghai');
+    expect(d.phones, [const DestinationPhone(label: '携帯', number: '139-0000-0000')]);
+    expect(d.taxIdKind, '統一社会信用コード');
+    expect(d.taxId, '91310000TEST0000X');
+    expect(d.incoterms, 'FOB');
+    expect(d.transport, 'sea');
+    expect(d.notifySame, isFalse);
+    expect(d.notifyName, 'Notify Co.');
+    expect(d.forwarderName, 'テスト通関');
+    expect(d.documentsNote, 'インボイス・パッキングリスト');
+    expect(d.toJson()['phones'], [{'label': '携帯', 'number': '139-0000-0000'}]);
+  });
+
+  testWidgets('出荷先カード are searched by any word and copied as text', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    final repo = _FakeOutboundRepository(destinations: [
+      ShipDestination(id: 1, name: 'テスト商事', address1: '東京都', phone: '03'),
+      ShipDestination(id: 2, name: 'テスト貿易', nameEn: 'Test Trading', taxId: '91310000TEST', port: 'Shanghai',
+          phones: [DestinationPhone(label: '携帯', number: '139')]),
+    ]);
+    await pumpApp(tester, const ShipDestinationsScreen(), overrides: [outboundRepositoryProvider.overrideWithValue(repo)]);
+    expect(find.text('Shanghai'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('sd-search')), '91310000');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sd-row-1')), findsNothing);
+    expect(find.byKey(const ValueKey('sd-row-2')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sd-copy-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('カードの内容をコピーしました'), findsOneWidget);
+    expect(copied, contains('Consignee: Test Trading'));
+    expect(copied, contains('Port of Destination: Shanghai'));
+  });
+
+  test('the card as text for the papers: in English where it has English', () {
+    final t = destinationCardText(ShipDestination(
+      name: 'テスト貿易',
+      nameEn: 'Test Trading',
+      addressEn: 'Room 1, Shanghai',
+      contactName: 'Wang',
+      phone: '021-1',
+      phones: [DestinationPhone(label: 'Mobile', number: '139')],
+      taxIdKind: 'USCC',
+      taxId: '9131',
+      port: 'Shanghai',
+      incoterms: 'FOB',
+    ));
+    expect(t, contains('Consignee: Test Trading'));
+    expect(t, contains('Address: Room 1, Shanghai'));
+    expect(t, contains('Tel: 021-1'));
+    expect(t, contains('Tel: Mobile 139'));
+    expect(t, contains('USCC: 9131'));
+    expect(t, contains('Notify Party: SAME AS CONSIGNEE'));
+    expect(t, contains('Incoterms: FOB'));
+    expect(destinationMatches(ShipDestination(name: 'A', port: 'Ningbo'), 'ningbo'), isTrue);
   });
 }

@@ -8555,6 +8555,25 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   narrows to すべて / 在庫から出庫 / 代理出荷; the 代理出荷 screen's own tab shows
   them alone. 「記録を取り消す」 marks one undone (nothing goes back to stock).
 
+## 0190: 出荷先カード — what an export needs, with each destination
+
+- ship_destinations (0139) gains: name_en / address_en (for the invoice),
+  phones [{label, number}] beside the main phone, tax_id_kind + tax_id
+  (統一社会信用コード / VAT / EORI …), port, incoterms (FOB / CIF / DAP …),
+  transport (sea / air / courier / truck / other), the Notify Party when it
+  is not the consignee (notify_same off: name, address, contact, phone),
+  the forwarder (name, contact, phone, e-mail) and documents_note.
+  ship_destination_save keeps them; ship_destinations_list finds by them.
+- 出荷先カード is in the menu beside 出庫: cards side by side with every
+  section, searched by any word, 「カードの内容をコピー」 (English where it has
+  English: Consignee, Address, Tel, Tax ID, Notify Party, Port, Incoterms,
+  Forwarder) to paste into an invoice or a mail.
+- 出荷リストで出庫 and 代理出荷: 「出荷先カードを選ぶ」 (or a new card from
+  there) fills 出荷先; after posting, outbound_file_set_destination keeps
+  the card's id and the card as it was then (outbound_files.ship_to), so a
+  card changed later does not change where goods went. The detail shows it,
+  copies it, and can choose another card.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

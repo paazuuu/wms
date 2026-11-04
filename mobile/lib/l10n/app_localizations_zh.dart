@@ -9936,10 +9936,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featOutboundProposalDesc => '按库存的百分比或数量生成出库，并把收货方和出库清单做成可发送的Excel';
 
   @override
-  String get featShipDestinations => '收货方';
+  String get featShipDestinations => '收货方卡片';
 
   @override
-  String get featShipDestinationsDesc => '保存常用收货方的公司名、地址、联系人、电话';
+  String get featShipDestinationsDesc => '用卡片管理出口所需的收货方公司・地址・联系人・电话等';
 
   @override
   String get obIntro =>
@@ -14323,4 +14323,144 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofCalKindProxy => '代理发货';
+
+  @override
+  String get sdcSecBasic => '公司・联系人';
+
+  @override
+  String get sdcSecAddress => '地址';
+
+  @override
+  String get sdcSecContact => '联系方式';
+
+  @override
+  String get sdcSecExport => '出口信息';
+
+  @override
+  String get sdcSecNotify => '通知方（Notify Party）';
+
+  @override
+  String get sdcSecForwarder => '货代（报关行）';
+
+  @override
+  String get sdcNameEn => '公司名（英文）';
+
+  @override
+  String get sdcAddressEn => '地址（英文・发票用）';
+
+  @override
+  String get sdcPhoneMain => '电话（总机）';
+
+  @override
+  String get sdcPhoneLabel => '类别（手机・仓库等）';
+
+  @override
+  String get sdcPhoneNumber => '电话号码';
+
+  @override
+  String get sdcPhoneAdd => '添加电话';
+
+  @override
+  String get sdcPhoneRemove => '删除此号码';
+
+  @override
+  String get sdcTaxKind => '税号类别';
+
+  @override
+  String get sdcTaxKindHint => '统一社会信用代码・VAT・EORI 等';
+
+  @override
+  String get sdcTaxId => '税号';
+
+  @override
+  String get sdcPort => '目的港・机场';
+
+  @override
+  String get sdcIncoterms => '贸易条款（FOB・CIF 等）';
+
+  @override
+  String get sdcTransport => '运输方式';
+
+  @override
+  String get sdcTrSea => '海运';
+
+  @override
+  String get sdcTrAir => '空运';
+
+  @override
+  String get sdcTrCourier => '国际快递（EMS 等）';
+
+  @override
+  String get sdcTrTruck => '陆运';
+
+  @override
+  String get sdcTrOther => '其他';
+
+  @override
+  String get sdcNotifySame => '通知方与收货人（本公司）相同';
+
+  @override
+  String get sdcNotifyName => '通知方公司名';
+
+  @override
+  String get sdcNotifyAddress => '通知方地址';
+
+  @override
+  String get sdcNotifyContact => '通知方联系人';
+
+  @override
+  String get sdcNotifyPhone => '通知方电话';
+
+  @override
+  String get sdcFwdName => '货代名称';
+
+  @override
+  String get sdcFwdContact => '货代联系人';
+
+  @override
+  String get sdcFwdPhone => '货代电话';
+
+  @override
+  String get sdcFwdEmail => '货代邮箱';
+
+  @override
+  String get sdcDocuments => '所需单据备注';
+
+  @override
+  String get sdcDocumentsHint => '发票・装箱单・原产地证明 等';
+
+  @override
+  String get sdcCopy => '复制卡片内容';
+
+  @override
+  String get sdcCopied => '已复制卡片内容';
+
+  @override
+  String get sdcSearch => '按公司名・地址・电话・税号等搜索';
+
+  @override
+  String get sdcExportTag => '出口';
+
+  @override
+  String get ofPickCard => '选择收货方卡片';
+
+  @override
+  String ofCardChosen(String name) {
+    return '收货方卡片：$name';
+  }
+
+  @override
+  String get ofCardClear => '取消卡片';
+
+  @override
+  String get ofCardNone => '还没有收货方卡片。可在\"收货方卡片\"中创建。';
+
+  @override
+  String get ofShipTo => '收货方卡片（出库时的内容）';
+
+  @override
+  String get ofShipToChange => '重新选择卡片';
+
+  @override
+  String get ofShipToSet => '已设置收货方卡片';
 }

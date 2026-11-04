@@ -8,6 +8,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
+import '../../outbound/presentation/ship_destinations_screen.dart'
+    show DestinationCardView, copyDestinationCard, pickDestinationCard;
 import '../data/outbound_file_repository.dart';
 import 'outbound_file_screen.dart'
     show outboundActionLabel, outboundFileSaverProvider, outboundKg, outboundMoney, outboundTabOpenerProvider;
@@ -70,6 +72,22 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
       case ApiSuccess(:final data):
         await ref.read(outboundFileSaverProvider)(f.fileName, data);
         _snack(l10n.ofFileSaved(f.fileName));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  Future<void> _setCard(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final d = await pickDestinationCard(context);
+    if (d?.id == null || !mounted) return;
+    final r = await ref.read(outboundFileRepositoryProvider).setDestination(f.id, d!.id);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(outboundFileDetailProvider(widget.fileId));
+        ref.invalidate(outboundFilesProvider);
+        _snack(l10n.ofShipToSet);
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
@@ -195,6 +213,34 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     style: TextButton.styleFrom(foregroundColor: scheme.error),
                   ),
               ]),
+            ]),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // 出荷先カード (0190): where it went, as the card was then.
+        Card(
+          key: const ValueKey('of-ship-to'),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Expanded(child: Text(l10n.ofShipTo, style: theme.textTheme.labelLarge)),
+                if (f.shipTo != null)
+                  IconButton(
+                    key: const ValueKey('of-ship-to-copy'),
+                    tooltip: l10n.sdcCopy,
+                    icon: const Icon(Icons.copy_all_outlined),
+                    onPressed: () => copyDestinationCard(context, f.shipTo!),
+                  ),
+                if (!f.undone)
+                  TextButton.icon(
+                    key: const ValueKey('of-ship-to-change'),
+                    onPressed: () => _setCard(f),
+                    icon: const Icon(Icons.contact_mail_outlined, size: 18),
+                    label: Text(f.shipTo == null ? l10n.ofPickCard : l10n.ofShipToChange),
+                  ),
+              ]),
+              if (f.shipTo != null) DestinationCardView(destination: f.shipTo!),
             ]),
           ),
         ),

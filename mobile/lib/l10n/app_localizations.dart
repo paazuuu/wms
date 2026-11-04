@@ -18077,13 +18077,13 @@ abstract class AppLocalizations {
   /// No description provided for @featShipDestinations.
   ///
   /// In ja, this message translates to:
-  /// **'出荷先'**
+  /// **'出荷先カード'**
   String get featShipDestinations;
 
   /// No description provided for @featShipDestinationsDesc.
   ///
   /// In ja, this message translates to:
-  /// **'よく使う出荷先の会社名・住所・担当・電話を保存'**
+  /// **'輸出に必要な相手先の会社・住所・担当者・電話番号などをカードで管理'**
   String get featShipDestinationsDesc;
 
   /// No description provided for @obIntro.
@@ -25438,6 +25438,282 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'代理出荷'**
   String get ofCalKindProxy;
+
+  /// No description provided for @sdcSecBasic.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社・担当者'**
+  String get sdcSecBasic;
+
+  /// No description provided for @sdcSecAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所'**
+  String get sdcSecAddress;
+
+  /// No description provided for @sdcSecContact.
+  ///
+  /// In ja, this message translates to:
+  /// **'連絡先'**
+  String get sdcSecContact;
+
+  /// No description provided for @sdcSecExport.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸出の情報'**
+  String get sdcSecExport;
+
+  /// No description provided for @sdcSecNotify.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知先（Notify Party）'**
+  String get sdcSecNotify;
+
+  /// No description provided for @sdcSecForwarder.
+  ///
+  /// In ja, this message translates to:
+  /// **'フォワーダー（通関業者）'**
+  String get sdcSecForwarder;
+
+  /// No description provided for @sdcNameEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名（英語表記）'**
+  String get sdcNameEn;
+
+  /// No description provided for @sdcAddressEn.
+  ///
+  /// In ja, this message translates to:
+  /// **'住所（英語表記・インボイス用）'**
+  String get sdcAddressEn;
+
+  /// No description provided for @sdcPhoneMain.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話番号（代表）'**
+  String get sdcPhoneMain;
+
+  /// No description provided for @sdcPhoneLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'種類（携帯・倉庫など）'**
+  String get sdcPhoneLabel;
+
+  /// No description provided for @sdcPhoneNumber.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話番号'**
+  String get sdcPhoneNumber;
+
+  /// No description provided for @sdcPhoneAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'電話番号を追加'**
+  String get sdcPhoneAdd;
+
+  /// No description provided for @sdcPhoneRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'この番号を消す'**
+  String get sdcPhoneRemove;
+
+  /// No description provided for @sdcTaxKind.
+  ///
+  /// In ja, this message translates to:
+  /// **'税番号の種類'**
+  String get sdcTaxKind;
+
+  /// No description provided for @sdcTaxKindHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'統一社会信用コード・VAT・EORI など'**
+  String get sdcTaxKindHint;
+
+  /// No description provided for @sdcTaxId.
+  ///
+  /// In ja, this message translates to:
+  /// **'税番号'**
+  String get sdcTaxId;
+
+  /// No description provided for @sdcPort.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕向け港・空港'**
+  String get sdcPort;
+
+  /// No description provided for @sdcIncoterms.
+  ///
+  /// In ja, this message translates to:
+  /// **'貿易条件（FOB・CIF など）'**
+  String get sdcIncoterms;
+
+  /// No description provided for @sdcTransport.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送方法'**
+  String get sdcTransport;
+
+  /// No description provided for @sdcTrSea.
+  ///
+  /// In ja, this message translates to:
+  /// **'海上'**
+  String get sdcTrSea;
+
+  /// No description provided for @sdcTrAir.
+  ///
+  /// In ja, this message translates to:
+  /// **'航空'**
+  String get sdcTrAir;
+
+  /// No description provided for @sdcTrCourier.
+  ///
+  /// In ja, this message translates to:
+  /// **'国際宅配（EMS など）'**
+  String get sdcTrCourier;
+
+  /// No description provided for @sdcTrTruck.
+  ///
+  /// In ja, this message translates to:
+  /// **'トラック'**
+  String get sdcTrTruck;
+
+  /// No description provided for @sdcTrOther.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get sdcTrOther;
+
+  /// No description provided for @sdcNotifySame.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知先は荷受人（この会社）と同じ'**
+  String get sdcNotifySame;
+
+  /// No description provided for @sdcNotifyName.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知先の会社名'**
+  String get sdcNotifyName;
+
+  /// No description provided for @sdcNotifyAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知先の住所'**
+  String get sdcNotifyAddress;
+
+  /// No description provided for @sdcNotifyContact.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知先の担当者'**
+  String get sdcNotifyContact;
+
+  /// No description provided for @sdcNotifyPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'通知先の電話番号'**
+  String get sdcNotifyPhone;
+
+  /// No description provided for @sdcFwdName.
+  ///
+  /// In ja, this message translates to:
+  /// **'フォワーダー名'**
+  String get sdcFwdName;
+
+  /// No description provided for @sdcFwdContact.
+  ///
+  /// In ja, this message translates to:
+  /// **'フォワーダーの担当者'**
+  String get sdcFwdContact;
+
+  /// No description provided for @sdcFwdPhone.
+  ///
+  /// In ja, this message translates to:
+  /// **'フォワーダーの電話番号'**
+  String get sdcFwdPhone;
+
+  /// No description provided for @sdcFwdEmail.
+  ///
+  /// In ja, this message translates to:
+  /// **'フォワーダーのメール'**
+  String get sdcFwdEmail;
+
+  /// No description provided for @sdcDocuments.
+  ///
+  /// In ja, this message translates to:
+  /// **'必要書類のメモ'**
+  String get sdcDocuments;
+
+  /// No description provided for @sdcDocumentsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'インボイス・パッキングリスト・原産地証明 など'**
+  String get sdcDocumentsHint;
+
+  /// No description provided for @sdcCopy.
+  ///
+  /// In ja, this message translates to:
+  /// **'カードの内容をコピー'**
+  String get sdcCopy;
+
+  /// No description provided for @sdcCopied.
+  ///
+  /// In ja, this message translates to:
+  /// **'カードの内容をコピーしました'**
+  String get sdcCopied;
+
+  /// No description provided for @sdcSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'会社名・住所・電話・税番号などで検索'**
+  String get sdcSearch;
+
+  /// No description provided for @sdcExportTag.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸出'**
+  String get sdcExportTag;
+
+  /// No description provided for @ofPickCard.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードを選ぶ'**
+  String get ofPickCard;
+
+  /// No description provided for @ofCardChosen.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード: {name}'**
+  String ofCardChosen(String name);
+
+  /// No description provided for @ofCardClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'カードを外す'**
+  String get ofCardClear;
+
+  /// No description provided for @ofCardNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードがまだありません。「出荷先カード」で作れます。'**
+  String get ofCardNone;
+
+  /// No description provided for @ofShipTo.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード（出庫したときの内容）'**
+  String get ofShipTo;
+
+  /// No description provided for @ofShipToChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'カードを選び直す'**
+  String get ofShipToChange;
+
+  /// No description provided for @ofShipToSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードを付けました'**
+  String get ofShipToSet;
 }
 
 class _AppLocalizationsDelegate

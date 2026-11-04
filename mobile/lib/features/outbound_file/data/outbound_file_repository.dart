@@ -8,6 +8,7 @@ import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart' show mimeTypeFor;
 import '../../delivery/application/delivery_providers.dart';
+import '../../outbound/domain/outbound.dart' show ShipDestination;
 
 /// The bucket shipping lists are kept in (0188): <warehouse id>/<file>.
 const outboundFileBucket = 'outbound-files';
@@ -209,7 +210,13 @@ class OutboundFileSummary extends Equatable {
     this.undoneAt,
     this.kind = 'stock',
     this.principal,
+    this.destinationId,
+    this.shipTo,
   });
+
+  /// The 出荷先カード it went to (0190), and the card as it was then.
+  final int? destinationId;
+  final ShipDestination? shipTo;
 
   final int id;
 
@@ -265,6 +272,8 @@ class OutboundFileSummary extends Equatable {
         undoneAt: DateTime.tryParse('${j['undone_at'] ?? ''}')?.toLocal(),
         kind: _s(j['kind']) ?? 'stock',
         principal: _s(j['principal']),
+        destinationId: _ni(j['destination_id']),
+        shipTo: j['ship_to'] is Map ? ShipDestination.fromJson((j['ship_to'] as Map).cast<String, dynamic>()) : null,
       );
 
   @override
@@ -400,6 +409,9 @@ abstract class OutboundFileRepository {
   /// What went out comes back: how many.
   Future<ApiResult<int>> undo(int id);
 
+  /// The 出荷先カード a posted list went to (null: none), kept as it is now.
+  Future<ApiResult<bool>> setDestination(int fileId, int? destinationId);
+
   Future<ApiResult<Uint8List>> fileBytes(String storagePath);
 }
 
@@ -516,6 +528,16 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
       return ApiSuccess(_i(r.data));
     } on DioException catch (e) {
       return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setDestination(int fileId, int? destinationId) async {
+    try {
+      await _rest.post('/rpc/outbound_file_set_destination', data: {'p_id': fileId, 'p_destination_id': destinationId});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 

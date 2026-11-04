@@ -9993,10 +9993,10 @@ class AppLocalizationsJa extends AppLocalizations {
       '在庫からパーセントまたは数量で出庫を作り、出荷先と出庫リストをExcelで送れる形にします';
 
   @override
-  String get featShipDestinations => '出荷先';
+  String get featShipDestinations => '出荷先カード';
 
   @override
-  String get featShipDestinationsDesc => 'よく使う出荷先の会社名・住所・担当・電話を保存';
+  String get featShipDestinationsDesc => '輸出に必要な相手先の会社・住所・担当者・電話番号などをカードで管理';
 
   @override
   String get obIntro =>
@@ -14413,4 +14413,144 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofCalKindProxy => '代理出荷';
+
+  @override
+  String get sdcSecBasic => '会社・担当者';
+
+  @override
+  String get sdcSecAddress => '住所';
+
+  @override
+  String get sdcSecContact => '連絡先';
+
+  @override
+  String get sdcSecExport => '輸出の情報';
+
+  @override
+  String get sdcSecNotify => '通知先（Notify Party）';
+
+  @override
+  String get sdcSecForwarder => 'フォワーダー（通関業者）';
+
+  @override
+  String get sdcNameEn => '会社名（英語表記）';
+
+  @override
+  String get sdcAddressEn => '住所（英語表記・インボイス用）';
+
+  @override
+  String get sdcPhoneMain => '電話番号（代表）';
+
+  @override
+  String get sdcPhoneLabel => '種類（携帯・倉庫など）';
+
+  @override
+  String get sdcPhoneNumber => '電話番号';
+
+  @override
+  String get sdcPhoneAdd => '電話番号を追加';
+
+  @override
+  String get sdcPhoneRemove => 'この番号を消す';
+
+  @override
+  String get sdcTaxKind => '税番号の種類';
+
+  @override
+  String get sdcTaxKindHint => '統一社会信用コード・VAT・EORI など';
+
+  @override
+  String get sdcTaxId => '税番号';
+
+  @override
+  String get sdcPort => '仕向け港・空港';
+
+  @override
+  String get sdcIncoterms => '貿易条件（FOB・CIF など）';
+
+  @override
+  String get sdcTransport => '輸送方法';
+
+  @override
+  String get sdcTrSea => '海上';
+
+  @override
+  String get sdcTrAir => '航空';
+
+  @override
+  String get sdcTrCourier => '国際宅配（EMS など）';
+
+  @override
+  String get sdcTrTruck => 'トラック';
+
+  @override
+  String get sdcTrOther => 'その他';
+
+  @override
+  String get sdcNotifySame => '通知先は荷受人（この会社）と同じ';
+
+  @override
+  String get sdcNotifyName => '通知先の会社名';
+
+  @override
+  String get sdcNotifyAddress => '通知先の住所';
+
+  @override
+  String get sdcNotifyContact => '通知先の担当者';
+
+  @override
+  String get sdcNotifyPhone => '通知先の電話番号';
+
+  @override
+  String get sdcFwdName => 'フォワーダー名';
+
+  @override
+  String get sdcFwdContact => 'フォワーダーの担当者';
+
+  @override
+  String get sdcFwdPhone => 'フォワーダーの電話番号';
+
+  @override
+  String get sdcFwdEmail => 'フォワーダーのメール';
+
+  @override
+  String get sdcDocuments => '必要書類のメモ';
+
+  @override
+  String get sdcDocumentsHint => 'インボイス・パッキングリスト・原産地証明 など';
+
+  @override
+  String get sdcCopy => 'カードの内容をコピー';
+
+  @override
+  String get sdcCopied => 'カードの内容をコピーしました';
+
+  @override
+  String get sdcSearch => '会社名・住所・電話・税番号などで検索';
+
+  @override
+  String get sdcExportTag => '輸出';
+
+  @override
+  String get ofPickCard => '出荷先カードを選ぶ';
+
+  @override
+  String ofCardChosen(String name) {
+    return '出荷先カード: $name';
+  }
+
+  @override
+  String get ofCardClear => 'カードを外す';
+
+  @override
+  String get ofCardNone => '出荷先カードがまだありません。「出荷先カード」で作れます。';
+
+  @override
+  String get ofShipTo => '出荷先カード（出庫したときの内容）';
+
+  @override
+  String get ofShipToChange => 'カードを選び直す';
+
+  @override
+  String get ofShipToSet => '出荷先カードを付けました';
 }

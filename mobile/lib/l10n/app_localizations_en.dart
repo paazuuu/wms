@@ -10200,11 +10200,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Work out a shipment from the stock by percentage or quantity, and send the destination and list as Excel';
 
   @override
-  String get featShipDestinations => 'Ship-to destinations';
+  String get featShipDestinations => 'Destination cards';
 
   @override
   String get featShipDestinationsDesc =>
-      'Companies, addresses, contacts and phone numbers goods often go to';
+      'Keep each consignee\'s company, address, contact and phones — all an export needs — as a card';
 
   @override
   String get obIntro =>
@@ -14702,4 +14702,146 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofCalKindProxy => 'Proxy';
+
+  @override
+  String get sdcSecBasic => 'Company and contact';
+
+  @override
+  String get sdcSecAddress => 'Address';
+
+  @override
+  String get sdcSecContact => 'Phones and e-mail';
+
+  @override
+  String get sdcSecExport => 'Export';
+
+  @override
+  String get sdcSecNotify => 'Notify Party';
+
+  @override
+  String get sdcSecForwarder => 'Forwarder';
+
+  @override
+  String get sdcNameEn => 'Company name in English';
+
+  @override
+  String get sdcAddressEn => 'Address in English (for the invoice)';
+
+  @override
+  String get sdcPhoneMain => 'Main phone';
+
+  @override
+  String get sdcPhoneLabel => 'Whose (mobile, warehouse…)';
+
+  @override
+  String get sdcPhoneNumber => 'Number';
+
+  @override
+  String get sdcPhoneAdd => 'Add a phone';
+
+  @override
+  String get sdcPhoneRemove => 'Remove this number';
+
+  @override
+  String get sdcTaxKind => 'Tax number kind';
+
+  @override
+  String get sdcTaxKindHint => 'USCC, VAT, EORI …';
+
+  @override
+  String get sdcTaxId => 'Tax number';
+
+  @override
+  String get sdcPort => 'Port / airport of destination';
+
+  @override
+  String get sdcIncoterms => 'Trade term (FOB, CIF …)';
+
+  @override
+  String get sdcTransport => 'Transport';
+
+  @override
+  String get sdcTrSea => 'Sea';
+
+  @override
+  String get sdcTrAir => 'Air';
+
+  @override
+  String get sdcTrCourier => 'Courier (EMS …)';
+
+  @override
+  String get sdcTrTruck => 'Truck';
+
+  @override
+  String get sdcTrOther => 'Other';
+
+  @override
+  String get sdcNotifySame => 'Notify Party is the consignee itself';
+
+  @override
+  String get sdcNotifyName => 'Notify Party company';
+
+  @override
+  String get sdcNotifyAddress => 'Notify Party address';
+
+  @override
+  String get sdcNotifyContact => 'Notify Party contact';
+
+  @override
+  String get sdcNotifyPhone => 'Notify Party phone';
+
+  @override
+  String get sdcFwdName => 'Forwarder';
+
+  @override
+  String get sdcFwdContact => 'Forwarder contact';
+
+  @override
+  String get sdcFwdPhone => 'Forwarder phone';
+
+  @override
+  String get sdcFwdEmail => 'Forwarder e-mail';
+
+  @override
+  String get sdcDocuments => 'Documents needed';
+
+  @override
+  String get sdcDocumentsHint =>
+      'Invoice, packing list, certificate of origin …';
+
+  @override
+  String get sdcCopy => 'Copy the card';
+
+  @override
+  String get sdcCopied => 'Card copied';
+
+  @override
+  String get sdcSearch => 'Search by name, address, phone, tax number…';
+
+  @override
+  String get sdcExportTag => 'Export';
+
+  @override
+  String get ofPickCard => 'Choose a destination card';
+
+  @override
+  String ofCardChosen(String name) {
+    return 'Destination card: $name';
+  }
+
+  @override
+  String get ofCardClear => 'Remove the card';
+
+  @override
+  String get ofCardNone =>
+      'No destination cards yet. Make one in Destination cards.';
+
+  @override
+  String get ofShipTo => 'Destination card (as it was when shipped)';
+
+  @override
+  String get ofShipToChange => 'Choose another card';
+
+  @override
+  String get ofShipToSet => 'Destination card set';
 }

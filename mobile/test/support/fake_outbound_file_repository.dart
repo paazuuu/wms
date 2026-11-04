@@ -25,6 +25,7 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
   final List<({String path, String name, int size})> uploaded = [];
   final List<({List<OutboundPostLine> lines, bool allowDuplicate, String? path, DateTime shippedOn, String? sheet, bool proxy, String? principal, String fileName})> posted = [];
   final List<int> undone = [];
+  final List<(int, int?)> destinations = [];
   final List<String> fetched = [];
 
   @override
@@ -82,6 +83,12 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
   Future<ApiResult<int>> undo(int id) async {
     undone.add(id);
     return const ApiSuccess(5);
+  }
+
+  @override
+  Future<ApiResult<bool>> setDestination(int fileId, int? destinationId) async {
+    destinations.add((fileId, destinationId));
+    return const ApiSuccess(true);
   }
 
   @override

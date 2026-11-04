@@ -303,14 +303,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _outboundProposal,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage'],
           ),
-          // 出荷先 (0139): the destinations goods often go to.
+          // 出荷先カード (0139, 0190): the destinations goods go to, with what
+          // an export needs; chosen when shipping.
           FeatureEntry(
             id: 'ship_destinations',
-            icon: Icons.location_on_outlined,
+            icon: Icons.contact_mail_outlined,
             status: FeatureStatus.ready,
             builder: _shipDestinations,
             requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
-            inMenu: false,
           ),
           FeatureEntry(
             id: 'stock_adjustment',

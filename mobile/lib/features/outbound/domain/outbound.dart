@@ -11,8 +11,36 @@ int _n(Object? v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}') ?? 0;
 
 double? _d(Object? v) => v is num ? v.toDouble() : double.tryParse('${v ?? ''}');
 
+/// One more phone number on a card: whose it is (会社, 携帯 …) and the number.
+class DestinationPhone extends Equatable {
+  const DestinationPhone({this.label, required this.number});
+
+  final String? label;
+  final String number;
+
+  factory DestinationPhone.fromJson(Map<String, dynamic> j) =>
+      DestinationPhone(label: _s(j['label']), number: _s(j['number']) ?? '');
+
+  Map<String, dynamic> toJson() => {'label': label, 'number': number};
+
+  @override
+  String toString() => label == null ? number : '$label $number';
+
+  @override
+  List<Object?> get props => [label, number];
+}
+
+/// How goods go to a destination (0190).
+const destinationTransports = ['sea', 'air', 'courier', 'truck', 'other'];
+
+/// The trade terms most used, offered first (any other can be typed).
+const destinationIncoterms = ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'];
+
 /// A company goods often go to, kept so a shipment picks it instead of
-/// typing it again (0139).
+/// typing it again (0139) — with what an export needs (出荷先カード, 0190):
+/// the name and address in English, more phone numbers, a tax number, the
+/// port, the trade term, how goods go, a Notify Party when it is another
+/// company, the forwarder, and the documents needed.
 class ShipDestination extends Equatable {
   const ShipDestination({
     this.id,
@@ -28,6 +56,24 @@ class ShipDestination extends Equatable {
     this.note,
     this.useCount = 0,
     this.lastUsedAt,
+    this.nameEn,
+    this.addressEn,
+    this.phones = const [],
+    this.taxIdKind,
+    this.taxId,
+    this.port,
+    this.incoterms,
+    this.transport,
+    this.notifySame = true,
+    this.notifyName,
+    this.notifyAddress,
+    this.notifyContact,
+    this.notifyPhone,
+    this.forwarderName,
+    this.forwarderContact,
+    this.forwarderPhone,
+    this.forwarderEmail,
+    this.documentsNote,
   });
 
   /// Null for one not saved yet.
@@ -45,6 +91,54 @@ class ShipDestination extends Equatable {
   final int useCount;
   final DateTime? lastUsedAt;
 
+  /// The company and its address in English, for the invoice.
+  final String? nameEn;
+  final String? addressEn;
+
+  /// More numbers than [phone]: 担当者の携帯, 倉庫 …
+  final List<DestinationPhone> phones;
+
+  /// 統一社会信用コード, VAT, EORI …, and the number.
+  final String? taxIdKind;
+  final String? taxId;
+
+  /// The port or airport goods go to.
+  final String? port;
+
+  /// FOB, CIF, DAP …
+  final String? incoterms;
+
+  /// One of [destinationTransports], or what was typed.
+  final String? transport;
+
+  /// The Notify Party is this company itself; else the notify fields.
+  final bool notifySame;
+  final String? notifyName;
+  final String? notifyAddress;
+  final String? notifyContact;
+  final String? notifyPhone;
+
+  /// 通関業者 / forwarder and who to reach there.
+  final String? forwarderName;
+  final String? forwarderContact;
+  final String? forwarderPhone;
+  final String? forwarderEmail;
+
+  /// The documents the shipment needs (invoice, packing list, …).
+  final String? documentsNote;
+
+  /// Anything for an export written down.
+  bool get hasExport =>
+      nameEn != null ||
+      addressEn != null ||
+      taxId != null ||
+      port != null ||
+      incoterms != null ||
+      transport != null ||
+      !notifySame ||
+      forwarderName != null ||
+      documentsNote != null;
+
   factory ShipDestination.fromJson(Map<String, dynamic> j) => ShipDestination(
         id: (j['id'] as num?)?.toInt(),
         name: _s(j['name']) ?? '',
@@ -59,6 +153,27 @@ class ShipDestination extends Equatable {
         note: _s(j['note']),
         useCount: _n(j['use_count']),
         lastUsedAt: DateTime.tryParse('${j['last_used_at'] ?? ''}')?.toLocal(),
+        nameEn: _s(j['name_en']),
+        addressEn: _s(j['address_en']),
+        phones: [
+          for (final p in (j['phones'] as List? ?? const []).whereType<Map>())
+            if (_s(p['number']) != null) DestinationPhone.fromJson(p.cast<String, dynamic>()),
+        ],
+        taxIdKind: _s(j['tax_id_kind']),
+        taxId: _s(j['tax_id']),
+        port: _s(j['port']),
+        incoterms: _s(j['incoterms']),
+        transport: _s(j['transport']),
+        notifySame: j['notify_same'] != false,
+        notifyName: _s(j['notify_name']),
+        notifyAddress: _s(j['notify_address']),
+        notifyContact: _s(j['notify_contact']),
+        notifyPhone: _s(j['notify_phone']),
+        forwarderName: _s(j['forwarder_name']),
+        forwarderContact: _s(j['forwarder_contact']),
+        forwarderPhone: _s(j['forwarder_phone']),
+        forwarderEmail: _s(j['forwarder_email']),
+        documentsNote: _s(j['documents_note']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,7 +188,28 @@ class ShipDestination extends Equatable {
         'email': email,
         'country_code': countryCode,
         'note': note,
+        'name_en': nameEn,
+        'address_en': addressEn,
+        'phones': [for (final p in phones) p.toJson()],
+        'tax_id_kind': taxIdKind,
+        'tax_id': taxId,
+        'port': port,
+        'incoterms': incoterms,
+        'transport': transport,
+        'notify_same': notifySame,
+        'notify_name': notifyName,
+        'notify_address': notifyAddress,
+        'notify_contact': notifyContact,
+        'notify_phone': notifyPhone,
+        'forwarder_name': forwarderName,
+        'forwarder_contact': forwarderContact,
+        'forwarder_phone': forwarderPhone,
+        'forwarder_email': forwarderEmail,
+        'documents_note': documentsNote,
       };
+
+  /// The same card with the id the server gave it.
+  ShipDestination withId(int newId) => ShipDestination.fromJson({...toJson(), 'id': newId, 'use_count': useCount});
 
   /// 〒 and the address on one line.
   String get addressLine => [
@@ -82,9 +218,15 @@ class ShipDestination extends Equatable {
         if (address2 != null) address2!,
       ].join(' ');
 
+  /// Every phone number, the main one first.
+  List<String> get allPhones => [if (phone != null) phone!, for (final p in phones) '$p'];
+
   @override
-  List<Object?> get props =>
-      [id, name, department, contactName, postalCode, address1, address2, phone, email, countryCode, note, useCount];
+  List<Object?> get props => [
+        id, name, department, contactName, postalCode, address1, address2, phone, email, countryCode, note, useCount,
+        nameEn, addressEn, phones, taxIdKind, taxId, port, incoterms, transport, notifySame, notifyName, notifyAddress,
+        notifyContact, notifyPhone, forwarderName, forwarderContact, forwarderPhone, forwarderEmail, documentsNote,
+      ];
 }
 
 /// What one product has in a warehouse, for working out a shipment.
