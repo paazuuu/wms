@@ -23,9 +23,11 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
 
   final List<List<Map<String, String?>>> matched = [];
   final List<({String path, String name, int size})> uploaded = [];
-  final List<({List<OutboundPostLine> lines, bool allowDuplicate, String? path, DateTime shippedOn, String? sheet, bool proxy, String? principal, String fileName})> posted = [];
+  final List<({List<OutboundPostLine> lines, bool allowDuplicate, String? path, DateTime shippedOn, String? sheet, bool proxy, String? principal, String fileName, bool plan})> posted = [];
   final List<int> undone = [];
   final List<(int, int?)> destinations = [];
+  final List<(int, DateTime)> confirmed = [];
+  final List<(int, DateTime)> rescheduled = [];
   final List<String> fetched = [];
 
   @override
@@ -57,12 +59,13 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     bool allowDuplicate = false,
     bool proxy = false,
     String? principal,
+    bool plan = false,
   }) async {
     if (duplicateOnce && !allowDuplicate) {
       duplicateOnce = false;
       return const ApiFailure(message: 'outbound_duplicate');
     }
-    posted.add((lines: lines, allowDuplicate: allowDuplicate, path: storagePath, shippedOn: shippedOn, sheet: sheetName, proxy: proxy, principal: principal, fileName: fileName));
+    posted.add((lines: lines, allowDuplicate: allowDuplicate, path: storagePath, shippedOn: shippedOn, sheet: sheetName, proxy: proxy, principal: principal, fileName: fileName, plan: plan));
     return ApiSuccess(posted.length);
   }
 
@@ -83,6 +86,18 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
   Future<ApiResult<int>> undo(int id) async {
     undone.add(id);
     return const ApiSuccess(5);
+  }
+
+  @override
+  Future<ApiResult<int>> confirm(int id, DateTime day) async {
+    confirmed.add((id, day));
+    return const ApiSuccess(7);
+  }
+
+  @override
+  Future<ApiResult<bool>> reschedule(int id, DateTime day) async {
+    rescheduled.add((id, day));
+    return const ApiSuccess(true);
   }
 
   @override

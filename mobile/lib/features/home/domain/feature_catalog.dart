@@ -349,13 +349,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['purchase_order.view', 'purchase_order.manage', 'purchase_order.approve', 'receiving.view', 'inspection.view'],
             inMenu: false,
           ),
-          FeatureEntry(
-            id: 'work_orders',
-            icon: Icons.precision_manufacturing_outlined,
-            status: FeatureStatus.ready,
-            builder: _workOrders,
-            requiredAnyOf: ['work_order.view', 'work_order.manage'],
-          ),
         ],
       ),
       // Supply chain profit & risk (0107, spec §1): an analysis layer over
@@ -462,6 +455,13 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _virtualStock,
             requiredAnyOf: ['inventory.view'],
+          ),
+          FeatureEntry(
+            id: 'work_orders',
+            icon: Icons.precision_manufacturing_outlined,
+            status: FeatureStatus.ready,
+            builder: _workOrders,
+            requiredAnyOf: ['work_order.view', 'work_order.manage'],
           ),
         ],
       ),

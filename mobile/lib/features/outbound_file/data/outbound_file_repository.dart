@@ -212,7 +212,17 @@ class OutboundFileSummary extends Equatable {
     this.principal,
     this.destinationId,
     this.shipTo,
+    this.status = 'shipped',
+    this.plannedOn,
   });
+
+  /// 'planned' (出庫予定: nothing out of stock yet, 0191) or 'shipped'.
+  final String status;
+
+  /// The day it was planned for.
+  final DateTime? plannedOn;
+
+  bool get planned => status == 'planned' && undoneAt == null;
 
   /// The 出荷先カード it went to (0190), and the card as it was then.
   final int? destinationId;
@@ -273,11 +283,13 @@ class OutboundFileSummary extends Equatable {
         kind: _s(j['kind']) ?? 'stock',
         principal: _s(j['principal']),
         destinationId: _ni(j['destination_id']),
+        status: _s(j['status']) ?? 'shipped',
+        plannedOn: _day(j['planned_on']),
         shipTo: j['ship_to'] is Map ? ShipDestination.fromJson((j['ship_to'] as Map).cast<String, dynamic>()) : null,
       );
 
   @override
-  List<Object?> get props => [id, kind, shippedOn, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
+  List<Object?> get props => [id, kind, status, shippedOn, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
 }
 
 /// One row of a posted list.
@@ -400,7 +412,14 @@ abstract class OutboundFileRepository {
     bool allowDuplicate = false,
     bool proxy = false,
     String? principal,
+    bool plan = false,
   });
+
+  /// The warehouse ships a planned list on [day]: how many went out.
+  Future<ApiResult<int>> confirm(int id, DateTime day);
+
+  /// A planned list moved to [day].
+  Future<ApiResult<bool>> reschedule(int id, DateTime day);
 
   Future<ApiResult<List<OutboundFileSummary>>> list({required DateTime from, required DateTime to, int? warehouseId});
 
@@ -469,10 +488,13 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
     bool allowDuplicate = false,
     bool proxy = false,
     String? principal,
+    bool plan = false,
   }) async {
     try {
-      // 代理出荷 (0189) is kept as a record; the other is taken out of stock.
-      final r = await _rest.post(proxy ? '/rpc/proxy_shipment_post' : '/rpc/outbound_file_post', data: {
+      // 在庫外出荷 (0189) is kept as a record; 出庫予定 (0191) waits for the
+      // warehouse; the other is taken out of stock now.
+      final rpc = proxy ? 'proxy_shipment_post' : (plan ? 'outbound_file_plan' : 'outbound_file_post');
+      final r = await _rest.post('/rpc/$rpc', data: {
         if (proxy) 'p_principal': principal,
         'p_warehouse_id': warehouseId,
         'p_shipped_on': outboundDayWire(shippedOn),
@@ -528,6 +550,26 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
       return ApiSuccess(_i(r.data));
     } on DioException catch (e) {
       return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> confirm(int id, DateTime day) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_confirm', data: {'p_id': id, 'p_shipped_on': outboundDayWire(day)});
+      return ApiSuccess(_i(r.data));
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> reschedule(int id, DateTime day) async {
+    try {
+      await _rest.post('/rpc/outbound_file_reschedule', data: {'p_id': id, 'p_day': outboundDayWire(day)});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 

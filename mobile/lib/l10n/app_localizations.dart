@@ -25822,6 +25822,138 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫を変更して完了'**
   String get woCompleteGo;
+
+  /// No description provided for @ofModePlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定として登録'**
+  String get ofModePlan;
+
+  /// No description provided for @ofModeNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'今すぐ出庫'**
+  String get ofModeNow;
+
+  /// No description provided for @ofModePlanHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫はまだ動きません。出庫予定日に出庫カレンダーへ載り、倉庫が「出庫を確定」したときに在庫が減ります。'**
+  String get ofModePlanHint;
+
+  /// No description provided for @ofPlannedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日'**
+  String get ofPlannedOn;
+
+  /// No description provided for @ofPostPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定を登録'**
+  String get ofPostPlan;
+
+  /// No description provided for @ofPlanConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{rows}行（数量 {qty}）を {day} の出庫予定として登録します。在庫はまだ動きません。'**
+  String ofPlanConfirmBody(int rows, int qty, String day);
+
+  /// No description provided for @ofPlanDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定を登録しました（{day}）'**
+  String ofPlanDone(String day);
+
+  /// No description provided for @ofPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定'**
+  String get ofPlanned;
+
+  /// No description provided for @ofPlannedFor.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定 {day}'**
+  String ofPlannedFor(String day);
+
+  /// No description provided for @ofCalKindPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定'**
+  String get ofCalKindPlanned;
+
+  /// No description provided for @ofConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定'**
+  String get ofConfirm;
+
+  /// No description provided for @ofConfirmQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定しますか？'**
+  String get ofConfirmQ;
+
+  /// No description provided for @ofConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{ship}行（数量 {qty}）を在庫から減らします。在庫が足りない分は不足として記録します。'**
+  String ofConfirmBody(int ship, int qty);
+
+  /// No description provided for @ofConfirmDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日'**
+  String get ofConfirmDay;
+
+  /// No description provided for @ofConfirmDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を確定しました（{n}個）'**
+  String ofConfirmDone(int n);
+
+  /// No description provided for @ofReschedule.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定日を変更'**
+  String get ofReschedule;
+
+  /// No description provided for @ofRescheduled.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日を {day} に変更しました'**
+  String ofRescheduled(String day);
+
+  /// No description provided for @ofPlanCancel.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定を取り消す'**
+  String get ofPlanCancel;
+
+  /// No description provided for @ofPlanCancelQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫予定を取り消しますか？'**
+  String get ofPlanCancelQ;
+
+  /// No description provided for @ofPlanCancelBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫はまだ動いていません。予定は「取り消し済み」として残ります。'**
+  String get ofPlanCancelBody;
+
+  /// No description provided for @ofPlanCancelled.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定を取り消しました'**
+  String get ofPlanCancelled;
+
+  /// No description provided for @ofErrNotPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫は予定ではありません（すでに確定・取り消し済み）'**
+  String get ofErrNotPlanned;
 }
 
 class _AppLocalizationsDelegate

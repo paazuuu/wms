@@ -14904,4 +14904,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get woCompleteGo => 'Change the stock and complete';
+
+  @override
+  String get ofModePlan => 'Register as planned';
+
+  @override
+  String get ofModeNow => 'Ship now';
+
+  @override
+  String get ofModePlanHint =>
+      'No stock moves yet. It goes on the calendar on that day; the stock goes down when the warehouse confirms it.';
+
+  @override
+  String get ofPlannedOn => 'Planned for';
+
+  @override
+  String get ofPostPlan => 'Register the plan';
+
+  @override
+  String ofPlanConfirmBody(int rows, int qty, String day) {
+    return '$rows rows ($qty units) are planned for $day. No stock moves yet.';
+  }
+
+  @override
+  String ofPlanDone(String day) {
+    return 'Planned for $day';
+  }
+
+  @override
+  String get ofPlanned => 'Planned';
+
+  @override
+  String ofPlannedFor(String day) {
+    return 'Planned for $day';
+  }
+
+  @override
+  String get ofCalKindPlanned => 'Planned';
+
+  @override
+  String get ofConfirm => 'Confirm the shipment';
+
+  @override
+  String get ofConfirmQ => 'Confirm this shipment?';
+
+  @override
+  String ofConfirmBody(int ship, int qty) {
+    return '$ship rows ($qty units) leave the stock. What is not in stock is recorded as short.';
+  }
+
+  @override
+  String get ofConfirmDay => 'Shipped on';
+
+  @override
+  String ofConfirmDone(int n) {
+    return 'Shipped ($n)';
+  }
+
+  @override
+  String get ofReschedule => 'Change the day';
+
+  @override
+  String ofRescheduled(String day) {
+    return 'Moved to $day';
+  }
+
+  @override
+  String get ofPlanCancel => 'Cancel the plan';
+
+  @override
+  String get ofPlanCancelQ => 'Cancel this plan?';
+
+  @override
+  String get ofPlanCancelBody =>
+      'No stock has moved. The plan stays, marked undone.';
+
+  @override
+  String get ofPlanCancelled => 'Plan cancelled';
+
+  @override
+  String get ofErrNotPlanned =>
+      'This is not a planned shipment (already confirmed or undone)';
 }

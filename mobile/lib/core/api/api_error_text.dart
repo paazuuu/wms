@@ -76,6 +76,7 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('outbound_duplicate')) return l10n.ofErrDuplicate;
   if (rawMessage.contains('outbound_no_lines')) return l10n.ofErrNoLines;
   if (rawMessage.contains('outbound_already_undone')) return l10n.ofErrUndone;
+  if (rawMessage.contains('outbound_not_planned')) return l10n.ofErrNotPlanned;
   if (rawMessage.contains('price_required')) return l10n.ppErrPrice;
   if (rawMessage.contains('supplier_required')) return l10n.ppErrSupplier;
   if (rawMessage.contains('memo_too_long')) return l10n.wmErrLong;

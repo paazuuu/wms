@@ -13001,5 +13001,78 @@
   "woCompleteOut": "減る（部材）",
   "woCompleteIn": "増える（セット品）",
   "woCompleteAck": "在庫が変わることを確認しました",
-  "woCompleteGo": "在庫を変更して完了"
+  "woCompleteGo": "在庫を変更して完了",
+  "ofModePlan": "出庫予定として登録",
+  "ofModeNow": "今すぐ出庫",
+  "ofModePlanHint": "在庫はまだ動きません。出庫予定日に出庫カレンダーへ載り、倉庫が「出庫を確定」したときに在庫が減ります。",
+  "ofPlannedOn": "出庫予定日",
+  "ofPostPlan": "出庫予定を登録",
+  "ofPlanConfirmBody": "{rows}行（数量 {qty}）を {day} の出庫予定として登録します。在庫はまだ動きません。",
+  "@ofPlanConfirmBody": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofPlanDone": "出庫予定を登録しました（{day}）",
+  "@ofPlanDone": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofPlanned": "出庫予定",
+  "ofPlannedFor": "出庫予定 {day}",
+  "@ofPlannedFor": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofCalKindPlanned": "出庫予定",
+  "ofConfirm": "出庫を確定",
+  "ofConfirmQ": "出庫を確定しますか？",
+  "ofConfirmBody": "{ship}行（数量 {qty}）を在庫から減らします。在庫が足りない分は不足として記録します。",
+  "@ofConfirmBody": {
+    "placeholders": {
+      "ship": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "ofConfirmDay": "出庫日",
+  "ofConfirmDone": "出庫を確定しました（{n}個）",
+  "@ofConfirmDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofReschedule": "予定日を変更",
+  "ofRescheduled": "出庫予定日を {day} に変更しました",
+  "@ofRescheduled": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofPlanCancel": "予定を取り消す",
+  "ofPlanCancelQ": "この出庫予定を取り消しますか？",
+  "ofPlanCancelBody": "在庫はまだ動いていません。予定は「取り消し済み」として残ります。",
+  "ofPlanCancelled": "出庫予定を取り消しました",
+  "ofErrNotPlanned": "この出庫は予定ではありません（すでに確定・取り消し済み）"
 }

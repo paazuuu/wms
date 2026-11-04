@@ -162,6 +162,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
   final Map<int, OutboundMatch> _picked = {};
   final Map<int, OutboundAction> _chosen = {};
   DateTime _shippedOn = DateTime.now();
+
+  /// 出庫予定 (0191): registered for a day, shipped when the warehouse
+  /// confirms it — the usual way from 出荷手配; else out of stock now.
+  bool _planMode = true;
+
+  bool get _planning => _planMode && !_proxy;
   OutboundStatus? _filter;
   int _limit = 100;
   bool _busy = false;
@@ -345,12 +351,14 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(_proxy ? l10n.prPostConfirmTitle : l10n.ofPostConfirmTitle),
+        title: Text(_proxy ? l10n.prPostConfirmTitle : (_planning ? l10n.ofPostPlan : l10n.ofPostConfirmTitle)),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(_proxy
               ? l10n.prPostConfirmBody(t.record, _recordedQty(plan))
-              : l10n.ofPostConfirmBody(t.ship, t.shipped, t.record, t.skip)),
-          if (t.short > 0) ...[
+              : _planning
+                  ? l10n.ofPlanConfirmBody(t.ship + t.record, _recordedQty(plan), DateFormat('y/MM/dd').format(_shippedOn))
+                  : l10n.ofPostConfirmBody(t.ship, t.shipped, t.record, t.skip)),
+          if (t.short > 0 && !_planning) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.ofPostShortWarn(t.shortRows, t.short), style: TextStyle(color: Theme.of(c).colorScheme.error)),
           ],
@@ -360,7 +368,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           FilledButton(
               key: const ValueKey('of-post-ok'),
               onPressed: () => Navigator.pop(c, true),
-              child: Text(_proxy ? l10n.prPost : l10n.ofPost)),
+              child: Text(_proxy ? l10n.prPost : (_planning ? l10n.ofPostPlan : l10n.ofPost))),
         ],
       ),
     );
@@ -399,6 +407,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           allowDuplicate: again,
           proxy: _proxy,
           principal: _proxy ? text(_principal) : null,
+          plan: _planning,
         );
     var r = await send(false);
     if (!mounted) return;
@@ -433,7 +442,11 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         ref.invalidate(outboundFilesProvider);
         ref.invalidate(productListProvider);
         ref.invalidate(adjustProductsProvider);
-        _snack(_proxy ? l10n.prPostDone(t.record) : l10n.ofPostDone(t.shipped));
+        _snack(_proxy
+            ? l10n.prPostDone(t.record)
+            : _planning
+                ? l10n.ofPlanDone(DateFormat('y/MM/dd').format(_shippedOn))
+                : l10n.ofPostDone(t.shipped));
         setState(() {
           _file = null;
           _sheets = const [];
@@ -583,8 +596,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                 FilledButton.icon(
                   key: const ValueKey('of-post'),
                   onPressed: noWarehouse ? null : _post,
-                  icon: Icon(_proxy ? Icons.edit_note_outlined : Icons.outbox_outlined),
-                  label: Text(_proxy ? l10n.prPost : l10n.ofPost),
+                  icon: Icon(_proxy
+                      ? Icons.edit_note_outlined
+                      : (_planning ? Icons.event_available_outlined : Icons.outbox_outlined)),
+                  label: Text(_proxy ? l10n.prPost : (_planning ? l10n.ofPostPlan : l10n.ofPost)),
                 ),
             ]),
           ),
@@ -690,10 +705,21 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         runSpacing: AppSpacing.sm,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          if (!_proxy)
+            SegmentedButton<bool>(
+              key: const ValueKey('of-mode'),
+              segments: [
+                ButtonSegment(
+                    value: true, icon: const Icon(Icons.event_available_outlined), label: Text(l10n.ofModePlan)),
+                ButtonSegment(value: false, icon: const Icon(Icons.outbox_outlined), label: Text(l10n.ofModeNow)),
+              ],
+              selected: {_planMode},
+              onSelectionChanged: (v) => setState(() => _planMode = v.first),
+            ),
           OutlinedButton.icon(
             key: const ValueKey('of-shipped-on'),
             icon: const Icon(Icons.event_outlined, size: 18),
-            label: Text('${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(_shippedOn)}'),
+            label: Text('${_planning ? l10n.ofPlannedOn : l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(_shippedOn)}'),
             onPressed: () async {
               final d = await showDatePicker(
                   context: context, initialDate: _shippedOn, firstDate: DateTime(2000), lastDate: DateTime(2100));
@@ -741,6 +767,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               decoration: InputDecoration(labelText: l10n.ofNote, isDense: true),
             ),
           ),
+          if (_planning)
+            Text(l10n.ofModePlanHint,
+                key: const ValueKey('of-plan-hint'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ],
       );
 

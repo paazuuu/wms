@@ -123,7 +123,7 @@ void main() {
     // (its tabs inside); the warehouse side stays in 現場作業.
     expect(find.text('Shipping'), findsOneWidget);
     final groups = {for (final g in buildFeatureCatalog()) g.id: [for (final e in g.entries) if (e.inMenu) e.id]};
-    expect(groups['shipping'], ['outbound', 'sales_orders', 'demand', 'purchase_request', 'virtual_stock']);
+    expect(groups['shipping'], ['outbound', 'sales_orders', 'demand', 'purchase_request', 'virtual_stock', 'work_orders']);
     expect(groups['field_operations'], containsAll(['outbound_calendar', 'stock_adjustment', 'transfer', 'picking']));
     expect(groups['field_operations'], isNot(contains('outbound')));
     // Our product list has its own group at the top, not the bottom of 管理.

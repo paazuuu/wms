@@ -143,6 +143,9 @@ void main() {
     expect(status(tester, 6), '出庫できる');
     expect(find.text('手で選んだ商品'), findsOneWidget);
 
+    // Out of stock now, not as a plan.
+    await tester.tap(find.text('今すぐ出庫'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('of-post')));
     await tester.pumpAndSettle();
     expect(find.text('この内容で出庫しますか？'), findsOneWidget);
@@ -156,6 +159,7 @@ void main() {
     expect(repo.uploaded.single.name, '到货明细.xlsx');
     final p = repo.posted.single;
     expect(p.allowDuplicate, isTrue);
+    expect(p.plan, isFalse);
     expect(p.path, '1/1-到货明细.xlsx');
     expect(p.sheet, '明细');
     expect([for (final l in p.lines) (l.rowNo, l.action, l.productId)], [
@@ -431,5 +435,70 @@ void main() {
     expect(find.text('出庫カレンダー'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-file-1')), findsOneWidget);
     expect(find.byKey(const ValueKey('of-cal-kind-proxy')), findsOneWidget);
+  });
+
+  testWidgets('出庫予定: registered for a day by default, no stock out yet', (tester) async {
+    final repo = await pump(tester);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-plan-hint')), findsOneWidget);
+    expect(find.textContaining('出庫予定日: '), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-post')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('の出庫予定として登録します。在庫はまだ動きません。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-post-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.posted.single.plan, isTrue);
+    expect(find.textContaining('出庫予定を登録しました'), findsOneWidget);
+  });
+
+  testWidgets('a planned list on the calendar: confirmed by the warehouse, moved, or cancelled', (tester) async {
+    final now = DateTime.now();
+    final day = DateTime(now.year, now.month, 20);
+    final plan = OutboundFileSummary(
+        id: 5, warehouseId: 1, shippedOn: day, plannedOn: day, fileName: '到货明细.xlsx', status: 'planned', lineCount: 2, quantityTotal: 15);
+    final repo = FakeOutboundFileRepository(
+      files: [plan],
+      detailOf: (_) => OutboundFileDetail(file: plan, lines: const [
+        OutboundFileLine(id: 1, rowNo: 2, action: 'ship', productId: 1, jan: '4909999000014', productName: 'テストペン', quantity: 10),
+        OutboundFileLine(id: 2, rowNo: 3, action: 'ship', productId: 2, jan: '4909999000021', productName: 'テストノート', quantity: 5),
+      ]),
+    );
+    await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    expect(find.byKey(const ValueKey('of-planned-5')), findsOneWidget);
+    expect(find.textContaining('2行 · 数量 15'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-cal-kind-planned')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-file-5')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('of-file-5')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-detail-planned')), findsOneWidget);
+    // No 出庫数 / 不足 yet.
+    expect(find.byKey(const ValueKey('of-line-ship-2')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('of-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.text('2行（数量 15）を在庫から減らします。在庫が足りない分は不足として記録します。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-confirm-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.confirmed.single.$1, 5);
+    expect(find.text('出庫を確定しました（7個）'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('of-reschedule')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(repo.rescheduled.single.$1, 5);
+
+    await tester.tap(find.byKey(const ValueKey('of-undo')));
+    await tester.pumpAndSettle();
+    expect(find.text('在庫はまだ動いていません。予定は「取り消し済み」として残ります。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-undo-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.undone, [5]);
   });
 }

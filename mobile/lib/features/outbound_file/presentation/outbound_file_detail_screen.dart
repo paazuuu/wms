@@ -93,19 +93,86 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     }
   }
 
+  /// The warehouse ships a planned list: on a day (today unless chosen),
+  /// what there is then going out.
+  Future<void> _confirm(OutboundFileDetail d) async {
+    final l10n = AppLocalizations.of(context);
+    final f = d.file;
+    var day = DateTime.now();
+    final ship = [for (final l in d.lines) if (l.action == 'ship' && l.productId != null) l];
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => AlertDialog(
+          key: const ValueKey('of-confirm-dialog'),
+          icon: Icon(Icons.outbox_outlined, color: Theme.of(c).colorScheme.primary),
+          title: Text(l10n.ofConfirmQ),
+          content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l10n.ofConfirmBody(ship.length, ship.fold(0, (a, l) => a + l.quantity))),
+            const SizedBox(height: AppSpacing.sm),
+            OutlinedButton.icon(
+              key: const ValueKey('of-confirm-day'),
+              icon: const Icon(Icons.event_outlined, size: 18),
+              label: Text('${l10n.ofConfirmDay}: ${DateFormat('y/MM/dd').format(day)}'),
+              onPressed: () async {
+                final picked = await showDatePicker(context: c, initialDate: day, firstDate: DateTime(2000), lastDate: DateTime(2100));
+                if (picked != null) set(() => day = picked);
+              },
+            ),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+            FilledButton(key: const ValueKey('of-confirm-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofConfirm)),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    final r = await ref.read(outboundFileRepositoryProvider).confirm(f.id, day);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        ref.invalidate(outboundFileDetailProvider(widget.fileId));
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(productListProvider);
+        _snack(l10n.ofConfirmDone(data));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  Future<void> _reschedule(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final picked = await showDatePicker(
+        context: context, initialDate: f.shippedOn, firstDate: DateTime(2000), lastDate: DateTime(2100));
+    if (picked == null || !mounted) return;
+    final r = await ref.read(outboundFileRepositoryProvider).reschedule(f.id, picked);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(outboundFileDetailProvider(widget.fileId));
+        ref.invalidate(outboundFilesProvider);
+        _snack(l10n.ofRescheduled(DateFormat('y/MM/dd').format(picked)));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _undo(OutboundFileSummary f) async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(f.proxy ? l10n.prUndoQ : l10n.ofUndoQ),
-        content: Text(f.proxy ? l10n.prUndoBody : l10n.ofUndoBody(f.shippedTotal)),
+        title: Text(f.planned ? l10n.ofPlanCancelQ : (f.proxy ? l10n.prUndoQ : l10n.ofUndoQ)),
+        content: Text(f.planned ? l10n.ofPlanCancelBody : (f.proxy ? l10n.prUndoBody : l10n.ofUndoBody(f.shippedTotal))),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
           FilledButton(
               key: const ValueKey('of-undo-ok'),
               onPressed: () => Navigator.pop(c, true),
-              child: Text(f.proxy ? l10n.prUndo : l10n.ofUndo)),
+              child: Text(f.planned ? l10n.ofPlanCancel : (f.proxy ? l10n.prUndo : l10n.ofUndo))),
         ],
       ),
     );
@@ -119,7 +186,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
         ref.invalidate(outboundFileDetailProvider(widget.fileId));
         ref.invalidate(outboundFilesProvider);
         ref.invalidate(productListProvider);
-        _snack(f.proxy ? l10n.prUndoDone : l10n.ofUndoDone(data));
+        _snack(f.planned ? l10n.ofPlanCancelled : (f.proxy ? l10n.prUndoDone : l10n.ofUndoDone(data)));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
@@ -154,6 +221,10 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              if (f.planned)
+                Text(l10n.ofPlannedFor(DateFormat('y/MM/dd').format(f.shippedOn)),
+                    key: const ValueKey('of-detail-planned'),
+                    style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w700)),
               if (f.proxy)
                 Text(l10n.prBadge,
                     key: const ValueKey('of-detail-proxy'),
@@ -162,7 +233,9 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
               const SizedBox(height: 4),
               Text(
                 [
-                  '${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(f.shippedOn)}',
+                  if (!f.planned) '${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(f.shippedOn)}',
+                  if (!f.planned && f.plannedOn != null && f.plannedOn != f.shippedOn)
+                    '${l10n.ofPlannedOn}: ${DateFormat('y/MM/dd').format(f.plannedOn!)}',
                   if (f.warehouseName != null) f.warehouseName!,
                   if (f.sheetName != null) '${l10n.ofSheet}: ${f.sheetName}',
                   if (f.destination != null) f.destination!,
@@ -181,7 +254,10 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                 ),
               const SizedBox(height: AppSpacing.sm),
               Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, children: [
-                Text(f.proxy ? l10n.prCardLines(f.lineCount, f.quantityTotal) : l10n.ofCardLines(f.lineCount, f.shippedTotal),
+                Text(
+                    f.proxy || f.planned
+                        ? l10n.prCardLines(f.lineCount, f.quantityTotal)
+                        : l10n.ofCardLines(f.lineCount, f.shippedTotal),
                     style: theme.textTheme.titleSmall),
                 if (f.shortTotal > 0) Text(l10n.ofCardShort(f.shortTotal), style: TextStyle(color: scheme.error)),
                 if (f.amountTotal != null) Text(l10n.ofSummaryAmount(outboundMoney(f.amountTotal))),
@@ -204,6 +280,20 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   ),
                 ] else
                   Text(l10n.ofNoFile, style: muted),
+                if (f.planned) ...[
+                  FilledButton.icon(
+                    key: const ValueKey('of-confirm'),
+                    onPressed: _busy ? null : () => _confirm(d),
+                    icon: const Icon(Icons.outbox_outlined),
+                    label: Text(l10n.ofConfirm),
+                  ),
+                  OutlinedButton.icon(
+                    key: const ValueKey('of-reschedule'),
+                    onPressed: _busy ? null : () => _reschedule(f),
+                    icon: const Icon(Icons.edit_calendar_outlined),
+                    label: Text(l10n.ofReschedule),
+                  ),
+                ],
                 if (!f.undone)
                   TextButton.icon(
                     key: const ValueKey('of-undo'),
@@ -245,7 +335,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        _table(l10n, d.lines.take(_limit).toList(), proxy: f.proxy),
+        _table(l10n, d.lines.take(_limit).toList(), proxy: f.proxy || f.planned),
         if (d.lines.length > _limit)
           TextButton(onPressed: () => setState(() => _limit += 300), child: Text(l10n.ppMore(d.lines.length - _limit))),
       ],

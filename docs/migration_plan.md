@@ -8609,6 +8609,20 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   adjustment; 「在庫を変更して完了」 works only after 「在庫が変わることを
   確認しました」 is ticked.
 
+## 0191: 出庫予定 — registered by sales, shipped when the warehouse confirms
+
+- outbound_files.status 'planned' / 'shipped' and planned_on.
+  outbound_file_plan: as outbound_file_post, nothing out of stock, nothing
+  short; the list sits on the 出庫カレンダー on its day. outbound_file_confirm
+  (id, day): each 'ship' row takes what there is then (the rest short), the
+  list becomes shipped on that day (planned_on kept). outbound_file_reschedule
+  moves a planned list; outbound_file_undo cancels it (nothing to put back).
+- 出荷明細の取込: 「出庫予定として登録」 (default; 出庫予定日) or 「今すぐ出庫」.
+- 出庫カレンダー: 出庫予定 marked, a 出庫予定 filter; the detail of a planned
+  list: 「出庫を確定」 (the day, default today), 「予定日を変更」, 「予定を取り消す」;
+  no 出庫数 / 不足 columns until it is shipped.
+- Menu: 流通加工（セット組み） at the end of 出荷.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

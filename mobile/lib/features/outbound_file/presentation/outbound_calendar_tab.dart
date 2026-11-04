@@ -56,7 +56,12 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
     final theme = Theme.of(context);
     final async = ref.watch(outboundFilesProvider(_ask));
     final kind = widget.proxyOnly ? 'proxy' : _kind;
-    final files = [for (final f in async.valueOrNull ?? const <OutboundFileSummary>[]) if (kind == null || f.kind == kind) f];
+    bool keep(OutboundFileSummary f) => switch (kind) {
+          null => true,
+          'planned' => f.planned,
+          _ => f.kind == kind,
+        };
+    final files = [for (final f in async.valueOrNull ?? const <OutboundFileSummary>[]) if (keep(f)) f];
     final byDay = <DateTime, int>{};
     for (final f in files) {
       byDay[f.shippedOn] = (byDay[f.shippedOn] ?? 0) + 1;
@@ -80,7 +85,12 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
         _DayGrid(month: _month, byDay: byDay, selected: _day, today: today, onDay: (d) => setState(() => _day = _day == d ? null : d)),
         if (!widget.proxyOnly)
           Wrap(spacing: AppSpacing.sm, children: [
-            for (final (k, label) in [(null, l10n.ofCalKindAll), ('stock', l10n.ofCalKindStock), ('proxy', l10n.ofCalKindProxy)])
+            for (final (k, label) in [
+              (null, l10n.ofCalKindAll),
+              ('planned', l10n.ofCalKindPlanned),
+              ('stock', l10n.ofCalKindStock),
+              ('proxy', l10n.ofCalKindProxy),
+            ])
               ChoiceChip(
                 key: ValueKey('of-cal-kind-${k ?? 'all'}'),
                 label: Text(label),
@@ -156,7 +166,7 @@ class _FileCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(children: [
-            Icon(file.proxy ? Icons.edit_note_outlined : Icons.description_outlined,
+            Icon(file.planned ? Icons.event_available_outlined : (file.proxy ? Icons.edit_note_outlined : Icons.description_outlined),
                 color: file.undone ? scheme.onSurfaceVariant : scheme.primary),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -171,11 +181,18 @@ class _FileCard extends StatelessWidget {
                     DateFormat('y/MM/dd').format(file.shippedOn),
                     if (file.warehouseName != null) file.warehouseName!,
                     if (file.destination != null) file.destination!,
-                    if (file.proxy) l10n.prCardLines(file.lineCount, file.quantityTotal) else l10n.ofCardLines(file.lineCount, file.shippedTotal),
+                    if (file.proxy || file.planned)
+                      l10n.prCardLines(file.lineCount, file.quantityTotal)
+                    else
+                      l10n.ofCardLines(file.lineCount, file.shippedTotal),
                   ].join(' · '),
                   style: muted,
                 ),
                 Wrap(spacing: AppSpacing.md, children: [
+                  if (file.planned)
+                    Text(l10n.ofPlanned,
+                        key: ValueKey('of-planned-${file.id}'),
+                        style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w700)),
                   if (file.proxy)
                     Text(l10n.prBadge,
                         key: ValueKey('of-proxy-${file.id}'),

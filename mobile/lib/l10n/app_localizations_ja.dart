@@ -14612,4 +14612,83 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get woCompleteGo => '在庫を変更して完了';
+
+  @override
+  String get ofModePlan => '出庫予定として登録';
+
+  @override
+  String get ofModeNow => '今すぐ出庫';
+
+  @override
+  String get ofModePlanHint =>
+      '在庫はまだ動きません。出庫予定日に出庫カレンダーへ載り、倉庫が「出庫を確定」したときに在庫が減ります。';
+
+  @override
+  String get ofPlannedOn => '出庫予定日';
+
+  @override
+  String get ofPostPlan => '出庫予定を登録';
+
+  @override
+  String ofPlanConfirmBody(int rows, int qty, String day) {
+    return '$rows行（数量 $qty）を $day の出庫予定として登録します。在庫はまだ動きません。';
+  }
+
+  @override
+  String ofPlanDone(String day) {
+    return '出庫予定を登録しました（$day）';
+  }
+
+  @override
+  String get ofPlanned => '出庫予定';
+
+  @override
+  String ofPlannedFor(String day) {
+    return '出庫予定 $day';
+  }
+
+  @override
+  String get ofCalKindPlanned => '出庫予定';
+
+  @override
+  String get ofConfirm => '出庫を確定';
+
+  @override
+  String get ofConfirmQ => '出庫を確定しますか？';
+
+  @override
+  String ofConfirmBody(int ship, int qty) {
+    return '$ship行（数量 $qty）を在庫から減らします。在庫が足りない分は不足として記録します。';
+  }
+
+  @override
+  String get ofConfirmDay => '出庫日';
+
+  @override
+  String ofConfirmDone(int n) {
+    return '出庫を確定しました（$n個）';
+  }
+
+  @override
+  String get ofReschedule => '予定日を変更';
+
+  @override
+  String ofRescheduled(String day) {
+    return '出庫予定日を $day に変更しました';
+  }
+
+  @override
+  String get ofPlanCancel => '予定を取り消す';
+
+  @override
+  String get ofPlanCancelQ => 'この出庫予定を取り消しますか？';
+
+  @override
+  String get ofPlanCancelBody => '在庫はまだ動いていません。予定は「取り消し済み」として残ります。';
+
+  @override
+  String get ofPlanCancelled => '出庫予定を取り消しました';
+
+  @override
+  String get ofErrNotPlanned => 'この出庫は予定ではありません（すでに確定・取り消し済み）';
 }

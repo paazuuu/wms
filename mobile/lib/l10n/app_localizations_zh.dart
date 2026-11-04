@@ -14519,4 +14519,82 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get woCompleteGo => '变更库存并完成';
+
+  @override
+  String get ofModePlan => '登记为出库计划';
+
+  @override
+  String get ofModeNow => '立即出库';
+
+  @override
+  String get ofModePlanHint => '库存暂不变动。会出现在出库日历的计划日上，仓库\"确认出库\"时库存才减少。';
+
+  @override
+  String get ofPlannedOn => '计划出库日';
+
+  @override
+  String get ofPostPlan => '登记出库计划';
+
+  @override
+  String ofPlanConfirmBody(int rows, int qty, String day) {
+    return '将$rows行（数量 $qty）登记为$day的出库计划。库存暂不变动。';
+  }
+
+  @override
+  String ofPlanDone(String day) {
+    return '已登记出库计划（$day）';
+  }
+
+  @override
+  String get ofPlanned => '出库计划';
+
+  @override
+  String ofPlannedFor(String day) {
+    return '计划出库 $day';
+  }
+
+  @override
+  String get ofCalKindPlanned => '出库计划';
+
+  @override
+  String get ofConfirm => '确认出库';
+
+  @override
+  String get ofConfirmQ => '确认出库吗？';
+
+  @override
+  String ofConfirmBody(int ship, int qty) {
+    return '将从库存中减少$ship行（数量 $qty）。库存不足的部分记为不足。';
+  }
+
+  @override
+  String get ofConfirmDay => '出库日';
+
+  @override
+  String ofConfirmDone(int n) {
+    return '已确认出库（$n个）';
+  }
+
+  @override
+  String get ofReschedule => '更改计划日';
+
+  @override
+  String ofRescheduled(String day) {
+    return '计划出库日已改为$day';
+  }
+
+  @override
+  String get ofPlanCancel => '取消计划';
+
+  @override
+  String get ofPlanCancelQ => '要取消此出库计划吗？';
+
+  @override
+  String get ofPlanCancelBody => '库存尚未变动。计划会以\"已撤销\"保留。';
+
+  @override
+  String get ofPlanCancelled => '已取消出库计划';
+
+  @override
+  String get ofErrNotPlanned => '这不是出库计划（已确认或已撤销）';
 }
