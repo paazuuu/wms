@@ -15319,4 +15319,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mvPricesHint =>
       'Purchase prices in a product\'s page; prices and amounts in the outbound calendar and detail';
+
+  @override
+  String get umAdd => 'Add users';
+
+  @override
+  String get umAddHint =>
+      'One person a line: the email and the kind (普通 / 管理 / ADMIN). Paste straight from a sheet. A line without a kind becomes a user.';
+
+  @override
+  String get umAddRoles =>
+      'User: receiving, inspection, put-away, picking, packing and shipping roles; manager: warehouse manager; ADMIN: system admin. Every warehouse is assigned (change it later).';
+
+  @override
+  String umAddN(int n) {
+    return 'Add $n';
+  }
+
+  @override
+  String get umResultsTitle => 'Done';
+
+  @override
+  String get umCreated => 'Created';
+
+  @override
+  String get umExisting => 'Existed (roles added)';
+
+  @override
+  String get umResetDone => 'Reissued';
+
+  @override
+  String umFailed(String e) {
+    return 'Failed: $e';
+  }
+
+  @override
+  String get umPasswordOnce =>
+      'Temporary passwords are shown only here. Copy them before closing and hand them over.';
+
+  @override
+  String get umAfterHint =>
+      'They sign in with the email and the temporary password, then change it from the person icon at the bottom left. No mail is sent.';
+
+  @override
+  String get umCopy => 'Copy all';
+
+  @override
+  String get umCopied => 'Copied (email, kind, temporary password)';
+
+  @override
+  String get umClose => 'Close';
+
+  @override
+  String get umReset => 'Reissue the password';
+
+  @override
+  String umResetQ(String email) {
+    return 'Reissue the password of $email?';
+  }
+
+  @override
+  String get umResetBody =>
+      'The current password stops working; a new temporary one is shown.';
+
+  @override
+  String get pwChange => 'Change password';
+
+  @override
+  String get pwNew => 'New password';
+
+  @override
+  String get pwAgain => 'Again';
+
+  @override
+  String get pwRule => '8 characters or more';
+
+  @override
+  String get pwTooShort => 'Use 8 characters or more';
+
+  @override
+  String get pwMismatch => 'The two do not match';
+
+  @override
+  String get pwChanged => 'Password changed';
 }

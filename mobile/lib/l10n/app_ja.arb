@@ -13360,5 +13360,50 @@
   "mvTierUser": "通常: それ以外（入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ",
   "mvContent": "内容",
   "mvPrices": "仕入れ値・金額",
-  "mvPricesHint": "商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額"
+  "mvPricesHint": "商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額",
+  "umAdd": "ユーザーを追加",
+  "umAddHint": "メールアドレスと区分（普通・管理・ADMIN）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「通常」になります。",
+  "umAddRoles": "通常＝入荷・検品・棚入れ・ピッキング・梱包・出荷の役割、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。",
+  "umAddN": "{n}人を登録",
+  "@umAddN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "umResultsTitle": "登録の結果",
+  "umCreated": "作成",
+  "umExisting": "既存（役割を追加）",
+  "umResetDone": "再発行",
+  "umFailed": "失敗: {e}",
+  "@umFailed": {
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "umPasswordOnce": "仮パスワードはこの画面でしか表示されません。閉じる前にコピーして本人に渡してください。",
+  "umAfterHint": "本人はメールアドレスと仮パスワードでログインし、左下のアイコン（人のマーク）から自分のパスワードに変更できます。メールは送信されません。",
+  "umCopy": "すべてコピー",
+  "umCopied": "コピーしました（メール・区分・仮パスワード）",
+  "umClose": "閉じる",
+  "umReset": "パスワードを再発行",
+  "umResetQ": "{email} のパスワードを再発行しますか？",
+  "@umResetQ": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "umResetBody": "今のパスワードは使えなくなり、新しい仮パスワードが表示されます。",
+  "pwChange": "パスワードを変更",
+  "pwNew": "新しいパスワード",
+  "pwAgain": "もう一度",
+  "pwRule": "8文字以上",
+  "pwTooShort": "8文字以上にしてください",
+  "pwMismatch": "2つのパスワードが違います",
+  "pwChanged": "パスワードを変更しました"
 }

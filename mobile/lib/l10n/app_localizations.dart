@@ -26500,6 +26500,150 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額'**
   String get mvPricesHint;
+
+  /// No description provided for @umAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'ユーザーを追加'**
+  String get umAdd;
+
+  /// No description provided for @umAddHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'メールアドレスと区分（普通・管理・ADMIN）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「通常」になります。'**
+  String get umAddHint;
+
+  /// No description provided for @umAddRoles.
+  ///
+  /// In ja, this message translates to:
+  /// **'通常＝入荷・検品・棚入れ・ピッキング・梱包・出荷の役割、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。'**
+  String get umAddRoles;
+
+  /// No description provided for @umAddN.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}人を登録'**
+  String umAddN(int n);
+
+  /// No description provided for @umResultsTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録の結果'**
+  String get umResultsTitle;
+
+  /// No description provided for @umCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'作成'**
+  String get umCreated;
+
+  /// No description provided for @umExisting.
+  ///
+  /// In ja, this message translates to:
+  /// **'既存（役割を追加）'**
+  String get umExisting;
+
+  /// No description provided for @umResetDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'再発行'**
+  String get umResetDone;
+
+  /// No description provided for @umFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'失敗: {e}'**
+  String umFailed(String e);
+
+  /// No description provided for @umPasswordOnce.
+  ///
+  /// In ja, this message translates to:
+  /// **'仮パスワードはこの画面でしか表示されません。閉じる前にコピーして本人に渡してください。'**
+  String get umPasswordOnce;
+
+  /// No description provided for @umAfterHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'本人はメールアドレスと仮パスワードでログインし、左下のアイコン（人のマーク）から自分のパスワードに変更できます。メールは送信されません。'**
+  String get umAfterHint;
+
+  /// No description provided for @umCopy.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべてコピー'**
+  String get umCopy;
+
+  /// No description provided for @umCopied.
+  ///
+  /// In ja, this message translates to:
+  /// **'コピーしました（メール・区分・仮パスワード）'**
+  String get umCopied;
+
+  /// No description provided for @umClose.
+  ///
+  /// In ja, this message translates to:
+  /// **'閉じる'**
+  String get umClose;
+
+  /// No description provided for @umReset.
+  ///
+  /// In ja, this message translates to:
+  /// **'パスワードを再発行'**
+  String get umReset;
+
+  /// No description provided for @umResetQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{email} のパスワードを再発行しますか？'**
+  String umResetQ(String email);
+
+  /// No description provided for @umResetBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'今のパスワードは使えなくなり、新しい仮パスワードが表示されます。'**
+  String get umResetBody;
+
+  /// No description provided for @pwChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'パスワードを変更'**
+  String get pwChange;
+
+  /// No description provided for @pwNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しいパスワード'**
+  String get pwNew;
+
+  /// No description provided for @pwAgain.
+  ///
+  /// In ja, this message translates to:
+  /// **'もう一度'**
+  String get pwAgain;
+
+  /// No description provided for @pwRule.
+  ///
+  /// In ja, this message translates to:
+  /// **'8文字以上'**
+  String get pwRule;
+
+  /// No description provided for @pwTooShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'8文字以上にしてください'**
+  String get pwTooShort;
+
+  /// No description provided for @pwMismatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'2つのパスワードが違います'**
+  String get pwMismatch;
+
+  /// No description provided for @pwChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'パスワードを変更しました'**
+  String get pwChanged;
 }
 
 class _AppLocalizationsDelegate

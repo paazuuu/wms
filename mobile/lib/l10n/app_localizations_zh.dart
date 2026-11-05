@@ -14920,4 +14920,83 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mvPricesHint => '商品详情的进价，出库日历・出库详情的单价和金额';
+
+  @override
+  String get umAdd => '添加用户';
+
+  @override
+  String get umAddHint => '每行一人：邮箱和类别（普通・管理・ADMIN）。可直接从表格粘贴。没有类别的行视为普通用户。';
+
+  @override
+  String get umAddRoles =>
+      '普通＝收货、检品、上架、拣货、装箱、发货角色；管理者＝仓库负责人；ADMIN＝系统管理员。分配全部仓库（之后可更改）。';
+
+  @override
+  String umAddN(int n) {
+    return '添加$n人';
+  }
+
+  @override
+  String get umResultsTitle => '添加结果';
+
+  @override
+  String get umCreated => '已创建';
+
+  @override
+  String get umExisting => '已存在（已加角色）';
+
+  @override
+  String get umResetDone => '已重新发放';
+
+  @override
+  String umFailed(String e) {
+    return '失败：$e';
+  }
+
+  @override
+  String get umPasswordOnce => '临时密码只在此画面显示。关闭前请复制并交给本人。';
+
+  @override
+  String get umAfterHint => '本人用邮箱和临时密码登录，然后可从左下角的人形图标修改密码。不会发送邮件。';
+
+  @override
+  String get umCopy => '全部复制';
+
+  @override
+  String get umCopied => '已复制（邮箱、类别、临时密码）';
+
+  @override
+  String get umClose => '关闭';
+
+  @override
+  String get umReset => '重新发放密码';
+
+  @override
+  String umResetQ(String email) {
+    return '要重新发放 $email 的密码吗？';
+  }
+
+  @override
+  String get umResetBody => '当前密码将失效，并显示新的临时密码。';
+
+  @override
+  String get pwChange => '修改密码';
+
+  @override
+  String get pwNew => '新密码';
+
+  @override
+  String get pwAgain => '再输入一次';
+
+  @override
+  String get pwRule => '8个字符以上';
+
+  @override
+  String get pwTooShort => '请输入8个字符以上';
+
+  @override
+  String get pwMismatch => '两次输入不一致';
+
+  @override
+  String get pwChanged => '已修改密码';
 }

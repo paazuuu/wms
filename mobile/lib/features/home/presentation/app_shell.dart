@@ -1,4 +1,5 @@
 import '../../admin/data/menu_visibility_repository.dart' show hiddenFeaturesProvider;
+import '../../admin/presentation/add_users_dialog.dart' show ChangePasswordDialog;
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
@@ -969,11 +970,20 @@ class _Footer extends StatelessWidget {
         ? userName!.trim()
         : l10n.operatorName;
 
-    final avatar = CircleAvatar(
-      radius: 18,
-      backgroundColor: scheme.surfaceContainerHigh,
-      child: Icon(Icons.person_outline,
-          size: 20, color: scheme.onSurfaceVariant),
+    // The avatar opens the password change (the account's own setting).
+    final avatar = Tooltip(
+      message: l10n.pwChange,
+      child: InkWell(
+        key: const ValueKey('shell-password'),
+        customBorder: const CircleBorder(),
+        onTap: () => showDialog<void>(context: context, builder: (_) => const ChangePasswordDialog()),
+        child: CircleAvatar(
+          radius: 18,
+          backgroundColor: scheme.surfaceContainerHigh,
+          child: Icon(Icons.person_outline,
+              size: 20, color: scheme.onSurfaceVariant),
+        ),
+      ),
     );
 
     final signOut = IconButton(
@@ -981,6 +991,7 @@ class _Footer extends StatelessWidget {
       icon: const Icon(Icons.logout),
       onPressed: onLogout,
     );
+
 
     if (collapsed) {
       return Padding(

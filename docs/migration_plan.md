@@ -8683,6 +8683,22 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   and the 出庫 amounts. User management shows each user's kind. Only what is
   offered changes: permissions still decide what may be done.
 
+## 0194: ADMIN adds users from the app — no Supabase dashboard
+
+- Edge function user-admin (the caller must be an ADMIN, is_app_admin):
+  create — each {email, name?, tier} made with Supabase Auth's admin API
+  (email confirmed, a 12-character temporary password returned once, no mail
+  sent); an account already there keeps its password and gets the roles.
+  reset_password — a new temporary password for one user.
+- admin_provision_user (service role only): app_users row, the tier's roles
+  (通常: receiving, inspector, putaway_operator, picker, packer, shipper;
+  管理者: warehouse_manager; ADMIN: system_admin) and every active warehouse.
+- App: ユーザー管理 → 「ユーザーを追加」: email and 区分 a line, pasted from a
+  sheet (普通 / 管理 / ADMIN), each row's 区分 changeable, then the results
+  with the temporary passwords and 「すべてコピー」; 「パスワードを再発行」 on
+  each user; everyone changes their own password from the person icon at the
+  foot of the menu.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

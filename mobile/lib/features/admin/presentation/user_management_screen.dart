@@ -9,6 +9,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../application/admin_providers.dart';
 import '../domain/user_tier.dart';
+import 'add_users_dialog.dart';
 import 'menu_visibility_screen.dart' show userTierLabel;
 import '../domain/app_user_summary.dart';
 
@@ -196,7 +197,20 @@ class UserManagementScreen extends ConsumerWidget {
         ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.userMgmtTitle)),
+      appBar: AppBar(
+        title: Text(l10n.userMgmtTitle),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.md),
+            child: FilledButton.icon(
+              key: const ValueKey('um-add'),
+              onPressed: () => addUsers(context, ref),
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              label: Text(l10n.umAdd),
+            ),
+          ),
+        ],
+      ),
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
         error: (e, _) => ErrorStateView(
@@ -224,6 +238,7 @@ class UserManagementScreen extends ConsumerWidget {
                 onRemoveRole: (role) => _removeRole(context, ref, users[i], role),
                 onAddWarehouse: () => _addWarehouse(context, ref, users[i]),
                 onRemoveWarehouse: (w) => _removeWarehouse(context, ref, users[i], w),
+                onResetPassword: () => resetUserPassword(context, ref, userId: users[i].id, email: users[i].email),
               ),
             ),
           );
@@ -241,6 +256,7 @@ class _UserCard extends StatelessWidget {
     required this.onRemoveRole,
     required this.onAddWarehouse,
     required this.onRemoveWarehouse,
+    this.onResetPassword,
   });
 
   final AppUserSummary user;
@@ -249,6 +265,7 @@ class _UserCard extends StatelessWidget {
   final ValueChanged<UserRoleTag> onRemoveRole;
   final VoidCallback onAddWarehouse;
   final ValueChanged<Warehouse> onRemoveWarehouse;
+  final VoidCallback? onResetPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -302,6 +319,13 @@ class _UserCard extends StatelessWidget {
                   icon: const Icon(Icons.add_business_outlined),
                   onPressed: onAddWarehouse,
                 ),
+                if (onResetPassword != null)
+                  IconButton(
+                    key: ValueKey('um-reset-${user.id}'),
+                    tooltip: l10n.umReset,
+                    icon: const Icon(Icons.key_outlined),
+                    onPressed: onResetPassword,
+                  ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),

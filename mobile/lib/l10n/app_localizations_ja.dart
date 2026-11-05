@@ -15017,4 +15017,85 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mvPricesHint => '商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額';
+
+  @override
+  String get umAdd => 'ユーザーを追加';
+
+  @override
+  String get umAddHint =>
+      'メールアドレスと区分（普通・管理・ADMIN）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「通常」になります。';
+
+  @override
+  String get umAddRoles =>
+      '通常＝入荷・検品・棚入れ・ピッキング・梱包・出荷の役割、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。';
+
+  @override
+  String umAddN(int n) {
+    return '$n人を登録';
+  }
+
+  @override
+  String get umResultsTitle => '登録の結果';
+
+  @override
+  String get umCreated => '作成';
+
+  @override
+  String get umExisting => '既存（役割を追加）';
+
+  @override
+  String get umResetDone => '再発行';
+
+  @override
+  String umFailed(String e) {
+    return '失敗: $e';
+  }
+
+  @override
+  String get umPasswordOnce => '仮パスワードはこの画面でしか表示されません。閉じる前にコピーして本人に渡してください。';
+
+  @override
+  String get umAfterHint =>
+      '本人はメールアドレスと仮パスワードでログインし、左下のアイコン（人のマーク）から自分のパスワードに変更できます。メールは送信されません。';
+
+  @override
+  String get umCopy => 'すべてコピー';
+
+  @override
+  String get umCopied => 'コピーしました（メール・区分・仮パスワード）';
+
+  @override
+  String get umClose => '閉じる';
+
+  @override
+  String get umReset => 'パスワードを再発行';
+
+  @override
+  String umResetQ(String email) {
+    return '$email のパスワードを再発行しますか？';
+  }
+
+  @override
+  String get umResetBody => '今のパスワードは使えなくなり、新しい仮パスワードが表示されます。';
+
+  @override
+  String get pwChange => 'パスワードを変更';
+
+  @override
+  String get pwNew => '新しいパスワード';
+
+  @override
+  String get pwAgain => 'もう一度';
+
+  @override
+  String get pwRule => '8文字以上';
+
+  @override
+  String get pwTooShort => '8文字以上にしてください';
+
+  @override
+  String get pwMismatch => '2つのパスワードが違います';
+
+  @override
+  String get pwChanged => 'パスワードを変更しました';
 }
