@@ -8806,6 +8806,10 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   ２ and ３ typed in, １ a formula taking the rest (= 入荷する数 − ２ − ３),
   so the three always add up. Totals under each. What actually comes in is
   taken in later from the suppliers' invoices.
+- 入荷の提案を開く shows the same columns as the Excel (no 状態): the
+  supplier names and the numbers for ２ and ３ typed in on the page, １ and
+  the totals following as they are typed. 対応 column widened (記録のみ was
+  cut).
 
 ## Rollout discipline
 

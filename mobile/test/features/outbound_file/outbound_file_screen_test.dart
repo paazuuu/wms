@@ -173,7 +173,10 @@ void main() {
     expect(rows[4][7], '16');
     final xml = utf8.decode(ZipDecoder().decodeBytes(saved.single.$2).findFile('xl/worksheets/sheet1.xml')!.content as List<int>);
     expect(xml, contains('<f>I${head + 2}-K${head + 2}-L${head + 2}</f>'));
-    expect(page, contains('<th>状態</th>'), reason: 'the page keeps it');
+    // The page has the same columns as the Excel.
+    expect(page, isNot(contains('<th>状態</th>')));
+    expect(page, contains('value="（表示名２）"'));
+    expect(page, contains('<th>入荷する数</th>'));
 
     // The list as read and checked, improved, to download again.
     await tester.tap(find.byKey(const ValueKey('of-filter-need')));

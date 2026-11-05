@@ -1152,7 +1152,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
   // 行, 対象 (the tick), 状態, 対応, 商品, JAN, 品番, メーカー, 仕入先, 数量, 在庫,
   // 出庫数, 不足, 税抜, 税込, 合計, 前回の仕入れ値, 総重量, 注番.
   static const _widths = [
-    52.0, 44.0, 104.0, 112.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 72.0, 80.0, 80.0, 80.0, 100.0, 112.0, 84.0, 96.0
+    52.0, 44.0, 104.0, 132.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 72.0, 80.0, 80.0, 80.0, 100.0, 112.0, 84.0, 96.0
   ];
 
   /// Up to this many rows are laid out at once; more scroll in a box of
