@@ -23,9 +23,10 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 }
 
-// The roles each kind of user gets (0193's tiers).
+// The roles each kind of user gets (0193's tiers); a 通常ユーザー the one
+// floor role, 現場スタッフ (0195: the floor's work and 在庫調整).
 const TIER_ROLES: Record<string, string[]> = {
-  user: ["receiving", "inspector", "putaway_operator", "picker", "packer", "shipper"],
+  user: ["floor_staff"],
   manager: ["warehouse_manager"],
   admin: ["system_admin"],
 };

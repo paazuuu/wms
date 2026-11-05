@@ -15007,7 +15007,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mvTierManager => '管理者: 倉庫責任者・在庫管理・購買・営業';
 
   @override
-  String get mvTierUser => '通常: それ以外（入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ';
+  String get mvTierUser =>
+      '通常: それ以外（現場スタッフ・入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ';
 
   @override
   String get mvContent => '内容';
@@ -15027,7 +15028,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get umAddRoles =>
-      '通常＝入荷・検品・棚入れ・ピッキング・梱包・出荷の役割、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。';
+      '通常＝現場スタッフ（入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整）、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。';
 
   @override
   String umAddN(int n) {

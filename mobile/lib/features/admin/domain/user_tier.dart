@@ -3,7 +3,8 @@
 ///    decides what the others see;
 ///  * [manager] (管理者ユーザー) — the warehouse's people in charge:
 ///    warehouse_manager, inventory_controller, purchasing, sales;
-///  * [user] (通常ユーザー) — everyone else: the warehouse floor.
+///  * [user] (通常ユーザー) — everyone else: the warehouse floor (現場スタッフ,
+///    floor_staff, 0195: the floor's work and 在庫調整).
 enum UserTier {
   admin,
   manager,

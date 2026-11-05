@@ -35,6 +35,7 @@ void main() {
     expect(UserTier.of(['warehouse_manager']), UserTier.manager);
     expect(UserTier.of(['sales', 'picker']), UserTier.manager);
     expect(UserTier.of(['picker', 'packer']), UserTier.user);
+    expect(UserTier.of(['floor_staff']), UserTier.user, reason: '現場スタッフ (0195) stays 通常');
     expect(UserTier.of(const []), isNull);
   });
 

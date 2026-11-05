@@ -8699,6 +8699,17 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   each user; everyone changes their own password from the person icon at the
   foot of the menu.
 
+## 0195: 現場スタッフ — a 通常ユーザー may also adjust stock
+
+- New role floor_staff (Floor Staff（現場スタッフ）): every permission of the
+  six floor roles (receiving, inspector, putaway_operator, picker, packer,
+  shipper) and inventory.adjust. Not a manager role, so its holder stays a
+  通常ユーザー (0193).
+- user-admin gives a new 通常ユーザー this one role instead of the six.
+- inventory.adjust also opens what checks it on the server (stock and
+  shipping list files, 出庫 confirm); for a 通常ユーザー those menus stay
+  hidden by 表示設定 unless an ADMIN shows them.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

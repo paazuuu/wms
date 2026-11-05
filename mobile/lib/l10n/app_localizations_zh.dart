@@ -14910,7 +14910,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mvTierManager => '管理者：仓库负责人、库存管理、采购、销售';
 
   @override
-  String get mvTierUser => '普通：其他（收货、检品、上架、拣货、装箱、发货、查看）— 默认仅现场作业';
+  String get mvTierUser => '普通：其他（现场人员、收货、检品、上架、拣货、装箱、发货、查看）— 默认仅现场作业';
 
   @override
   String get mvContent => '内容';
@@ -14929,7 +14929,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get umAddRoles =>
-      '普通＝收货、检品、上架、拣货、装箱、发货角色；管理者＝仓库负责人；ADMIN＝系统管理员。分配全部仓库（之后可更改）。';
+      '普通＝现场人员（收货、检品、上架、拣货、装箱、发货、库存调整）；管理者＝仓库负责人；ADMIN＝系统管理员。分配全部仓库（之后可更改）。';
 
   @override
   String umAddN(int n) {

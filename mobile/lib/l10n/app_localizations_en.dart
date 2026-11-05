@@ -15308,7 +15308,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mvTierUser =>
-      'User: everyone else (receiving, inspection, put-away, picking, packing, shipping, viewing) — the floor\'s work only by default';
+      'User: everyone else (floor staff, receiving, inspection, put-away, picking, packing, shipping, viewing) — the floor\'s work only by default';
 
   @override
   String get mvContent => 'Content';
@@ -15329,7 +15329,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umAddRoles =>
-      'User: receiving, inspection, put-away, picking, packing and shipping roles; manager: warehouse manager; ADMIN: system admin. Every warehouse is assigned (change it later).';
+      'User: floor staff (receiving, inspection, put-away, picking, packing, shipping, stock adjustment); manager: warehouse manager; ADMIN: system admin. Every warehouse is assigned (change it later).';
 
   @override
   String umAddN(int n) {
