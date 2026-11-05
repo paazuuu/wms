@@ -29,22 +29,14 @@ Future<void> addUsers(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// A new temporary password for one person, shown once.
+/// An ADMIN sets one person's password: typed (shown while typing, so it can
+/// be checked) or made up. The password in effect is shown after, to copy.
+/// The one in use now cannot be shown: it is kept only as a one-way hash.
 Future<void> resetUserPassword(BuildContext context, WidgetRef ref, {required String userId, required String email}) async {
   final l10n = AppLocalizations.of(context);
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (c) => AlertDialog(
-      title: Text(l10n.umResetQ(email)),
-      content: Text(l10n.umResetBody),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-        FilledButton(key: const ValueKey('um-reset-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.umReset)),
-      ],
-    ),
-  );
-  if (ok != true || !context.mounted) return;
-  final r = await ref.read(userProvisioningRepositoryProvider).resetPassword(userId);
+  final choice = await showDialog<({String? password})>(context: context, builder: (_) => _SetPasswordDialog(email: email));
+  if (choice == null || !context.mounted) return;
+  final r = await ref.read(userProvisioningRepositoryProvider).resetPassword(userId, password: choice.password);
   if (!context.mounted) return;
   switch (r) {
     case ApiSuccess(:final data):
@@ -56,6 +48,88 @@ Future<void> resetUserPassword(BuildContext context, WidgetRef ref, {required St
       );
     case ApiFailure(:final message):
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+  }
+}
+
+class _SetPasswordDialog extends StatefulWidget {
+  const _SetPasswordDialog({required this.email});
+
+  final String email;
+
+  @override
+  State<_SetPasswordDialog> createState() => _SetPasswordDialogState();
+}
+
+class _SetPasswordDialogState extends State<_SetPasswordDialog> {
+  final _pw = TextEditingController();
+  bool _own = true;
+  bool _show = true;
+
+  @override
+  void dispose() {
+    _pw.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tooShort = _own && _pw.text.isNotEmpty && _pw.text.length < 8;
+    final ready = !_own || _pw.text.length >= 8;
+    return AlertDialog(
+      key: const ValueKey('um-set-dialog'),
+      title: Text(l10n.umSetTitle(widget.email)),
+      content: SizedBox(
+        width: 440,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.umSetHint, style: theme.textTheme.bodySmall),
+          const SizedBox(height: AppSpacing.sm),
+          SegmentedButton<bool>(
+            key: const ValueKey('um-set-mode'),
+            segments: [
+              ButtonSegment(value: true, label: Text(l10n.umSetOwn), icon: const Icon(Icons.edit_outlined)),
+              ButtonSegment(value: false, label: Text(l10n.umSetAuto), icon: const Icon(Icons.auto_awesome_outlined)),
+            ],
+            selected: {_own},
+            onSelectionChanged: (v) => setState(() => _own = v.first),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (_own)
+            TextField(
+              key: const ValueKey('um-set-password'),
+              controller: _pw,
+              autofocus: true,
+              obscureText: !_show,
+              style: const TextStyle(fontFamily: 'monospace'),
+              decoration: InputDecoration(
+                labelText: l10n.pwNew,
+                helperText: l10n.pwRule,
+                errorText: tooShort ? l10n.pwTooShort : null,
+                suffixIcon: IconButton(
+                  key: const ValueKey('um-set-show'),
+                  tooltip: _show ? l10n.umSetHide : l10n.umSetShow,
+                  icon: Icon(_show ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                  onPressed: () => setState(() => _show = !_show),
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            )
+          else
+            Text(l10n.umSetAutoHint, style: theme.textTheme.bodySmall),
+          const SizedBox(height: AppSpacing.sm),
+          Text(l10n.umResetBody, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+        ]),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('um-reset-ok'),
+          onPressed: ready ? () => Navigator.pop(context, (password: _own ? _pw.text : null)) : null,
+          child: Text(l10n.umSetSave),
+        ),
+      ],
+    );
   }
 }
 

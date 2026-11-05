@@ -13375,7 +13375,7 @@
   "umResultsTitle": "登録の結果",
   "umCreated": "作成",
   "umExisting": "既存（役割を追加）",
-  "umResetDone": "再発行",
+  "umResetDone": "変更",
   "umFailed": "失敗: {e}",
   "@umFailed": {
     "placeholders": {
@@ -13389,7 +13389,7 @@
   "umCopy": "すべてコピー",
   "umCopied": "コピーしました（メール・区分・仮パスワード）",
   "umClose": "閉じる",
-  "umReset": "パスワードを再発行",
+  "umReset": "パスワードを変更（ADMIN）",
   "umResetQ": "{email} のパスワードを再発行しますか？",
   "@umResetQ": {
     "placeholders": {
@@ -13398,12 +13398,27 @@
       }
     }
   },
-  "umResetBody": "今のパスワードは使えなくなり、新しい仮パスワードが表示されます。",
+  "umResetBody": "保存すると今のパスワードは使えなくなります。新しいパスワードは次の画面でもう一度表示され、コピーできます。",
   "pwChange": "パスワードを変更",
   "pwNew": "新しいパスワード",
   "pwAgain": "もう一度",
   "pwRule": "8文字以上",
   "pwTooShort": "8文字以上にしてください",
   "pwMismatch": "2つのパスワードが違います",
-  "pwChanged": "パスワードを変更しました"
+  "pwChanged": "パスワードを変更しました",
+  "umSetTitle": "{email} のパスワード",
+  "@umSetTitle": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "umSetHint": "今のパスワードは安全のため元に戻せない形で保存されていて、ADMINでも見ることはできません。新しいパスワードを決めて上書きします。",
+  "umSetOwn": "自分で決める",
+  "umSetAuto": "自動で作る",
+  "umSetAutoHint": "12文字の仮パスワードを作ります（紛らわしい文字は使いません）。",
+  "umSetShow": "表示する",
+  "umSetHide": "隠す",
+  "umSetSave": "このパスワードにする"
 }

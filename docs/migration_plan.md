@@ -8689,7 +8689,9 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   create — each {email, name?, tier} made with Supabase Auth's admin API
   (email confirmed, a 12-character temporary password returned once, no mail
   sent); an account already there keeps its password and gets the roles.
-  reset_password — a new temporary password for one user.
+  reset_password — a new password for one user: the ADMIN's own (8–72
+  characters) or a temporary one made up. The password in use cannot be
+  shown (Supabase keeps only a one-way hash), so it is set anew instead.
 - admin_provision_user (service role only): app_users row, the tier's roles
   (通常: receiving, inspector, putaway_operator, picker, packer, shipper;
   管理者: warehouse_manager; ADMIN: system_admin) and every active warehouse.

@@ -84,8 +84,9 @@ List<NewUser> parseNewUsers(String text) {
 abstract class UserProvisioningRepository {
   Future<ApiResult<List<ProvisionResult>>> create(List<NewUser> users);
 
-  /// A new temporary password for [userId].
-  Future<ApiResult<String>> resetPassword(String userId);
+  /// A new password for [userId]: [password] as the ADMIN chose it, else a
+  /// temporary one made up. The password in effect is returned.
+  Future<ApiResult<String>> resetPassword(String userId, {String? password});
 
   /// The signed-in user's own password.
   Future<ApiResult<bool>> changeOwnPassword(String password);
@@ -111,9 +112,10 @@ class UserProvisioningRepositoryImpl implements UserProvisioningRepository {
   }
 
   @override
-  Future<ApiResult<String>> resetPassword(String userId) async {
+  Future<ApiResult<String>> resetPassword(String userId, {String? password}) async {
     try {
-      final r = await _functions.post('/user-admin', data: {'action': 'reset_password', 'user_id': userId});
+      final r = await _functions.post('/user-admin',
+          data: {'action': 'reset_password', 'user_id': userId, if (password != null) 'password': password});
       return ApiSuccess('${((r.data as Map)['data'] as Map)['password']}');
     } on DioException catch (e) {
       return mapDioError<String>(e);

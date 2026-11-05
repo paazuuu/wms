@@ -6,8 +6,9 @@
 //
 // POST { action: "create", users: [{ email, name?, tier: "user"|"manager"|"admin" }] }
 //   → { data: { results: [{ email, tier, status: "created"|"existing"|"error", password?, error? }] } }
-// POST { action: "reset_password", user_id }
-//   → { data: { password } }
+// POST { action: "reset_password", user_id, password? }
+//   → { data: { password } }   (password: the ADMIN's own, 8–72 characters,
+//   else a temporary one made up)
 
 const url = Deno.env.get("SUPABASE_URL") ?? "";
 const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -92,7 +93,10 @@ Deno.serve(async (req) => {
   if (b.action === "reset_password") {
     const id = String(b.user_id ?? "");
     if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ message: "user_id required" }, 400);
-    const password = tempPassword();
+    // The ADMIN's own choice, or one made up.
+    const given = typeof b.password === "string" ? b.password : "";
+    if (given && (given.length < 8 || given.length > 72)) return json({ message: "password_length" }, 400);
+    const password = given || tempPassword();
     const r = await fetch(`${url}/auth/v1/admin/users/${id}`, {
       method: "PUT",
       headers: adminHeaders,

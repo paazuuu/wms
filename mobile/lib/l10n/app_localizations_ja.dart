@@ -15045,7 +15045,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get umExisting => '既存（役割を追加）';
 
   @override
-  String get umResetDone => '再発行';
+  String get umResetDone => '変更';
 
   @override
   String umFailed(String e) {
@@ -15069,7 +15069,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get umClose => '閉じる';
 
   @override
-  String get umReset => 'パスワードを再発行';
+  String get umReset => 'パスワードを変更（ADMIN）';
 
   @override
   String umResetQ(String email) {
@@ -15077,7 +15077,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get umResetBody => '今のパスワードは使えなくなり、新しい仮パスワードが表示されます。';
+  String get umResetBody =>
+      '保存すると今のパスワードは使えなくなります。新しいパスワードは次の画面でもう一度表示され、コピーできます。';
 
   @override
   String get pwChange => 'パスワードを変更';
@@ -15099,4 +15100,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pwChanged => 'パスワードを変更しました';
+
+  @override
+  String umSetTitle(String email) {
+    return '$email のパスワード';
+  }
+
+  @override
+  String get umSetHint =>
+      '今のパスワードは安全のため元に戻せない形で保存されていて、ADMINでも見ることはできません。新しいパスワードを決めて上書きします。';
+
+  @override
+  String get umSetOwn => '自分で決める';
+
+  @override
+  String get umSetAuto => '自動で作る';
+
+  @override
+  String get umSetAutoHint => '12文字の仮パスワードを作ります（紛らわしい文字は使いません）。';
+
+  @override
+  String get umSetShow => '表示する';
+
+  @override
+  String get umSetHide => '隠す';
+
+  @override
+  String get umSetSave => 'このパスワードにする';
 }

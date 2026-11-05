@@ -26546,7 +26546,7 @@ abstract class AppLocalizations {
   /// No description provided for @umResetDone.
   ///
   /// In ja, this message translates to:
-  /// **'再発行'**
+  /// **'変更'**
   String get umResetDone;
 
   /// No description provided for @umFailed.
@@ -26588,7 +26588,7 @@ abstract class AppLocalizations {
   /// No description provided for @umReset.
   ///
   /// In ja, this message translates to:
-  /// **'パスワードを再発行'**
+  /// **'パスワードを変更（ADMIN）'**
   String get umReset;
 
   /// No description provided for @umResetQ.
@@ -26600,7 +26600,7 @@ abstract class AppLocalizations {
   /// No description provided for @umResetBody.
   ///
   /// In ja, this message translates to:
-  /// **'今のパスワードは使えなくなり、新しい仮パスワードが表示されます。'**
+  /// **'保存すると今のパスワードは使えなくなります。新しいパスワードは次の画面でもう一度表示され、コピーできます。'**
   String get umResetBody;
 
   /// No description provided for @pwChange.
@@ -26644,6 +26644,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'パスワードを変更しました'**
   String get pwChanged;
+
+  /// No description provided for @umSetTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{email} のパスワード'**
+  String umSetTitle(String email);
+
+  /// No description provided for @umSetHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'今のパスワードは安全のため元に戻せない形で保存されていて、ADMINでも見ることはできません。新しいパスワードを決めて上書きします。'**
+  String get umSetHint;
+
+  /// No description provided for @umSetOwn.
+  ///
+  /// In ja, this message translates to:
+  /// **'自分で決める'**
+  String get umSetOwn;
+
+  /// No description provided for @umSetAuto.
+  ///
+  /// In ja, this message translates to:
+  /// **'自動で作る'**
+  String get umSetAuto;
+
+  /// No description provided for @umSetAutoHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'12文字の仮パスワードを作ります（紛らわしい文字は使いません）。'**
+  String get umSetAutoHint;
+
+  /// No description provided for @umSetShow.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示する'**
+  String get umSetShow;
+
+  /// No description provided for @umSetHide.
+  ///
+  /// In ja, this message translates to:
+  /// **'隠す'**
+  String get umSetHide;
+
+  /// No description provided for @umSetSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'このパスワードにする'**
+  String get umSetSave;
 }
 
 class _AppLocalizationsDelegate

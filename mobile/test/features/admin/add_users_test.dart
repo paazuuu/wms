@@ -13,7 +13,7 @@ import '../../support/harness.dart';
 
 class _Provision implements UserProvisioningRepository {
   final created = <List<NewUser>>[];
-  final reset = <String>[];
+  final reset = <(String, String?)>[];
   final changed = <String>[];
 
   @override
@@ -28,9 +28,9 @@ class _Provision implements UserProvisioningRepository {
   }
 
   @override
-  Future<ApiResult<String>> resetPassword(String userId) async {
-    reset.add(userId);
-    return const ApiSuccess('NewPass2345x');
+  Future<ApiResult<String>> resetPassword(String userId, {String? password}) async {
+    reset.add((userId, password));
+    return ApiSuccess(password ?? 'NewPass2345x');
   }
 
   @override
@@ -103,23 +103,43 @@ void main() {
     expect(clip, 'new@example.com\t管理者\tPw1abcdefgh');
   });
 
-  testWidgets('a password is reissued for one person', (tester) async {
+  testWidgets('ADMIN sets a password: typed and seen, or made up', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final p = _Provision();
     await pumpApp(tester, const UserManagementScreen(), overrides: [
       adminRepositoryProvider.overrideWithValue(FakeAdminRepository([
         AppUserSummary(id: 'u9', name: 'jeff', email: 'jeff@example.com', status: 'active', createdAt: DateTime(2026),
-            roles: const [UserRoleTag(code: 'picker', name: 'Picker')]),
+            roles: const [UserRoleTag(code: 'floor_staff', name: 'Floor Staff')]),
       ])),
       userProvisioningRepositoryProvider.overrideWithValue(p),
     ]);
     expect(find.text('区分: 通常'), findsOneWidget);
+
+    // Typed: too short is refused; the text is shown as typed.
     await tester.tap(find.byKey(const ValueKey('um-reset-u9')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('um-set-password')), 'abc');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('um-reset-ok'))).onPressed, isNull);
+    await tester.enterText(find.byKey(const ValueKey('um-set-password')), 'Waraku2026!');
+    await tester.pump();
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('um-set-password'))).obscureText, isFalse);
+    await tester.tap(find.byKey(const ValueKey('um-reset-ok')));
+    await tester.pumpAndSettle();
+    expect(p.reset.last, ('u9', 'Waraku2026!'));
+    expect(find.text('Waraku2026!'), findsOneWidget);
+    await tester.tap(find.text('閉じる'));
+    await tester.pumpAndSettle();
+
+    // Made up.
+    await tester.tap(find.byKey(const ValueKey('um-reset-u9')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('自動で作る'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('um-reset-ok')));
     await tester.pumpAndSettle();
-    expect(p.reset, ['u9']);
+    expect(p.reset.last, ('u9', null));
     expect(find.text('NewPass2345x'), findsOneWidget);
   });
 

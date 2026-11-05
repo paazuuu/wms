@@ -14946,7 +14946,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get umExisting => '已存在（已加角色）';
 
   @override
-  String get umResetDone => '已重新发放';
+  String get umResetDone => '已修改';
 
   @override
   String umFailed(String e) {
@@ -14969,7 +14969,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get umClose => '关闭';
 
   @override
-  String get umReset => '重新发放密码';
+  String get umReset => '修改密码（ADMIN）';
 
   @override
   String umResetQ(String email) {
@@ -14977,7 +14977,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get umResetBody => '当前密码将失效，并显示新的临时密码。';
+  String get umResetBody => '保存后当前密码将失效。新密码会在下一个画面再次显示，可复制。';
 
   @override
   String get pwChange => '修改密码';
@@ -14999,4 +14999,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pwChanged => '已修改密码';
+
+  @override
+  String umSetTitle(String email) {
+    return '$email 的密码';
+  }
+
+  @override
+  String get umSetHint => '为安全起见，当前密码以无法还原的形式保存，ADMIN也无法查看。请设定新密码覆盖。';
+
+  @override
+  String get umSetOwn => '自己设定';
+
+  @override
+  String get umSetAuto => '自动生成';
+
+  @override
+  String get umSetAutoHint => '生成12位临时密码（不含易混淆字符）。';
+
+  @override
+  String get umSetShow => '显示';
+
+  @override
+  String get umSetHide => '隐藏';
+
+  @override
+  String get umSetSave => '设为此密码';
 }

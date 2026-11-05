@@ -15346,7 +15346,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get umExisting => 'Existed (roles added)';
 
   @override
-  String get umResetDone => 'Reissued';
+  String get umResetDone => 'Set';
 
   @override
   String umFailed(String e) {
@@ -15371,7 +15371,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get umClose => 'Close';
 
   @override
-  String get umReset => 'Reissue the password';
+  String get umReset => 'Set the password (ADMIN)';
 
   @override
   String umResetQ(String email) {
@@ -15380,7 +15380,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umResetBody =>
-      'The current password stops working; a new temporary one is shown.';
+      'Once set, the current password stops working. The new one is shown again next, to copy.';
 
   @override
   String get pwChange => 'Change password';
@@ -15402,4 +15402,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pwChanged => 'Password changed';
+
+  @override
+  String umSetTitle(String email) {
+    return 'Password of $email';
+  }
+
+  @override
+  String get umSetHint =>
+      'The current password is kept only in a form that cannot be turned back, so not even an ADMIN can see it. Set a new one in its place.';
+
+  @override
+  String get umSetOwn => 'Type one';
+
+  @override
+  String get umSetAuto => 'Make one up';
+
+  @override
+  String get umSetAutoHint =>
+      'A 12-character temporary password is made (no look-alike characters).';
+
+  @override
+  String get umSetShow => 'Show';
+
+  @override
+  String get umSetHide => 'Hide';
+
+  @override
+  String get umSetSave => 'Set it';
 }
