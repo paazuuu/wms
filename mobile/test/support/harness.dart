@@ -162,6 +162,7 @@ import 'fake_purchase_price_repository.dart';
 import 'fake_outbound_file_repository.dart';
 import 'package:wms_mobile/features/product/data/purchase_price_repository.dart';
 import 'package:wms_mobile/features/admin/data/menu_visibility_repository.dart';
+import 'package:wms_mobile/features/outbound_file/domain/outbound_currency.dart';
 import 'package:wms_mobile/features/packing/data/packing_repository.dart' show packingRepositoryProvider;
 import 'package:wms_mobile/features/product/presentation/purchase_price_card.dart' show canRecordPurchasePriceProvider;
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
@@ -244,6 +245,8 @@ List<Override> _defaultOverrides() => [
       // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.
       purchasePriceRepositoryProvider.overrideWithValue(FakePurchasePriceRepository()),
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
+      // 出荷明細の通貨 (0197): the AI judges nothing unless a test says so.
+      priceCurrencyRepositoryProvider.overrideWithValue(FakePriceCurrencyRepository()),
       // 表示設定 (0193): nothing set, the defaults apply.
       menuVisibilityRepositoryProvider.overrideWithValue(FakeMenuVisibilityRepository()),
       // 梱包 (0192): no boxes, cases or packing lists.
@@ -5601,5 +5604,19 @@ class FakeMenuVisibilityRepository implements MenuVisibilityRepository {
     saved.add(next);
     settings = Map.of(next);
     return ApiSuccess(next.length);
+  }
+}
+
+/// 出荷明細の通貨 (0197): [judged] by row number; what was asked kept.
+class FakePriceCurrencyRepository implements PriceCurrencyRepository {
+  FakePriceCurrencyRepository([this.judged = const {}]);
+
+  final Map<int, (PriceCurrency, bool)> judged;
+  final asked = <List<CurrencyAsk>>[];
+
+  @override
+  Future<ApiResult<Map<int, (PriceCurrency, bool)>>> judge(List<CurrencyAsk> rows, {String? hint}) async {
+    asked.add(rows);
+    return ApiSuccess({for (final r in rows) if (judged[r.i] != null) r.i: judged[r.i]!});
   }
 }

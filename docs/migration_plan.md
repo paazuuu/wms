@@ -8731,6 +8731,29 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - App shell: a location just opened is put in the tab stack at once, so the
   first tab (the dashboard) no longer shows for a frame before it.
 
+## 0197: 出庫日 未定, each row's currency (AI), 仕入先 kept out of sight, tabs that explain themselves
+
+- outbound_files.date_undecided: a planned list registered without a day
+  (the default now). Kept off the 出庫カレンダー's days (outbound_files_list)
+  and listed by outbound_files_undecided until a day is set — 「日程を入れる」
+  on the dashboard card, beside the calendar and in the list's detail
+  (outbound_file_reschedule, or outbound_file_confirm when it ships, clears
+  it); outbound_file_mark_undecided puts a planned list back.
+- Currency: outbound_file_lines.currency (JPY / CNY / USD) and
+  currency_source (file / ai / guess / manual); outbound_files.currency (the
+  main one) and fx_cny_jpy (1 元 in 円, if given), written by
+  outbound_file_set_currency after the list is posted. Edge function
+  price-currency: the AI judges each priced row from its product, its price
+  and what it was bought for in 円 (a price under about a third of it is
+  likely 元). Headings that name a currency (单价（元）…) decide without the
+  AI; without the AI our own rule does. In 出荷明細の取込: rows in 元 shown
+  as such, a tap switches 円 ⇄ 元, all at once to 円 or 元, the rate; totals
+  by currency. The detail shows each price with its currency.
+- 仕入先 is not shown in 出荷手配's table nor the list's detail (kept with
+  the list), and left out of the 明細 sheet of the packing lists made here.
+- Tabs of 出荷手配, 発注, 予定外の入荷, メモ and 在庫調整 say what they are for
+  when the pointer rests on them (HelpTab).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

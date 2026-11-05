@@ -15241,4 +15241,111 @@ class AppLocalizationsJa extends AppLocalizations {
   String tlIncoming(String name) {
     return '$name に入る（入庫）';
   }
+
+  @override
+  String get ofUndecided => '未定';
+
+  @override
+  String get ofBackToUndecided => '未定に戻す';
+
+  @override
+  String get ofMadeUndecided => '出庫予定日を未定にしました';
+
+  @override
+  String get ofSetDay => '日程を入れる';
+
+  @override
+  String ofUndecidedTitle(int n) {
+    return '出庫日 未定 $n件';
+  }
+
+  @override
+  String get ofUndecidedHint =>
+      '出庫予定日がまだ決まっていない出荷明細です。日が決まったら「日程を入れる」でカレンダーに載ります。';
+
+  @override
+  String ofUndecidedMore(int n) {
+    return 'ほか $n件';
+  }
+
+  @override
+  String get obHelpFile =>
+      '営業から届いた出荷明細（明细のExcel）を取り込み、在庫の商品と照合して出庫予定（または今すぐ出庫）として登録します。普段の出荷はここから。';
+
+  @override
+  String get obHelpProxy => '在庫を持たない直送・出荷代行の記録。倉庫の在庫は動かさず、誰の依頼で何を出したかだけ残します。';
+
+  @override
+  String get obHelpCards =>
+      '出荷先の会社名・住所・電話・税番号・港など、輸出書類に必要な情報をカードにして保管。出荷明細を登録するときに選びます。';
+
+  @override
+  String get obHelpPacking => '受注した注文を箱に詰めて送る作業（出荷指示）。箱ごとの中身と重さを記録し、ラベルを印刷します。';
+
+  @override
+  String get obHelpPackingLists =>
+      'パッキングリストの保管庫。自分で作ったリストをアップするとAIが見やすい形式に直し、原本と改善版の両方を残します。';
+
+  @override
+  String get obHelpBoxes =>
+      '自社の段ボール（S/M/Lなど）と、メーカーの元箱に何個入るか（入数）の登録。箱詰め案の計算に使います。';
+
+  @override
+  String get obHelpProposal => '在庫から出荷の案を作ります（どの商品をどれだけ出せるか）。';
+
+  @override
+  String get sfHelpImport => '仕入先の請求書・納品書（Excel・PDF・写真）を読み込み、商品と在庫に登録します。';
+
+  @override
+  String get sfHelpOrders => '発注ごとの進み具合（入荷・検品・支払い・証憑）を一覧で確認します。';
+
+  @override
+  String get urHelpRegister => '発注や請求書がないまま届いた荷物を、納品書の写真から登録してその場で検品・入庫します。';
+
+  @override
+  String get urHelpWaiting =>
+      '予定外の入荷のうち、まだ請求書と紐付いていないもの。請求書が来ないもの（サンプル等）は「請求書なしで完了」にします。';
+
+  @override
+  String get wmHelpCalendar => '日付ごとのメモ。カレンダーで書いた日を見返せます。';
+
+  @override
+  String get wmHelpBoard => '掲示板。全員に知らせたいことを貼っておく場所です。';
+
+  @override
+  String get adjHelpProducts => '商品を選んで在庫を増減します（破損・紛失・見つかった等の理由つき）。';
+
+  @override
+  String get adjHelpHistory => 'これまでの在庫調整の記録（いつ・誰が・何個・理由）。';
+
+  @override
+  String get ofCurrencyJudging => 'AIが単価の通貨（円・元）を確認しています…';
+
+  @override
+  String ofCurrencyFound(int cny, int all) {
+    return '人民元と判断した行: $cny / $all';
+  }
+
+  @override
+  String ofCurrencyUnsure(int n) {
+    return '確信の低い行: $n';
+  }
+
+  @override
+  String get ofFxLabel => '1元 =';
+
+  @override
+  String get ofCurrencyAllJpy => 'すべて円';
+
+  @override
+  String get ofCurrencyAllCny => 'すべて元';
+
+  @override
+  String get ofCurrencyTapHint =>
+      '単価をタップすると円⇄元を切り替えられます。通貨は行ごとに記録され、損益計算で円か元にそろえて使います。';
+
+  @override
+  String ofFxShown(String rate) {
+    return '1元 = $rate円';
+  }
 }

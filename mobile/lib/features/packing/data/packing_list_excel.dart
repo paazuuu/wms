@@ -316,12 +316,11 @@ Uint8List buildPackingListXlsx(
   for (final (i, d) in detail.indexed) {
     final n = i + 2;
     final w = d.unitWeightG;
-    if (d.jan == null) detailFlags.add((i, 6));
+    if (d.jan == null) detailFlags.add((i, 5));
     detailRows.add([
       d.orderDate,
       d.arrival,
       d.number,
-      d.supplier,
       d.maker,
       d.code,
       d.jan,
@@ -329,27 +328,29 @@ Uint8List buildPackingListXlsx(
       d.listPrice,
       d.unitPrice,
       d.unitPriceTax,
-      taxOf(d) == null ? d.amount : XlsxFormula('H$n*K$n', cached: amountOf(d)),
+      taxOf(d) == null ? d.amount : XlsxFormula('G$n*J$n', cached: amountOf(d)),
       d.orderNumber,
       w,
-      w == null ? null : XlsxFormula('H$n*N$n/1000', cached: _r3(d.quantity * w / 1000)),
+      w == null ? null : XlsxFormula('G$n*M$n/1000', cached: _r3(d.quantity * w / 1000)),
     ]);
   }
   final dl = detail.length + 1;
   final detailSheet = XlsxSheet(
     name: '明細',
-    headers: shippingListHeaders,
+    // The list's own layout, 供货商 left out: who it was bought from is
+    // ours, not the consignee's.
+    headers: [for (final h in shippingListHeaders) if (h != '供货商') h],
     rows: detailRows,
     flagged: detailFlags,
-    widths: const [10, 10, 8, 16, 14, 18, 16, 8, 12, 12, 12, 12, 12, 12, 12],
+    widths: const [10, 10, 8, 14, 18, 16, 8, 12, 12, 12, 12, 12, 12, 12],
     bottom: [
       [
-        null, null, null, null, null, null, '合计',
-        XlsxFormula('SUM(H2:H$dl)', cached: detail.fold<int>(0, (a, d) => a + d.quantity)),
+        null, null, null, null, null, '合计',
+        XlsxFormula('SUM(G2:G$dl)', cached: detail.fold<int>(0, (a, d) => a + d.quantity)),
         null, null, null,
-        XlsxFormula('SUM(L2:L$dl)', cached: _r2(detail.fold<double>(0, (a, d) => a + amountOf(d)))),
+        XlsxFormula('SUM(K2:K$dl)', cached: _r2(detail.fold<double>(0, (a, d) => a + amountOf(d)))),
         null, null,
-        XlsxFormula('SUM(O2:O$dl)',
+        XlsxFormula('SUM(N2:N$dl)',
             cached: _r3(detail.fold<double>(0, (a, d) => a + (d.unitWeightG == null ? 0 : d.quantity * d.unitWeightG! / 1000)))),
       ],
     ],
@@ -394,7 +395,7 @@ Uint8List buildPackingListXlsx(
   final summaryFlags = <(int, int)>{};
   for (final (i, s) in seen.values.indexed) {
     final r = i + 2;
-    final dcol = switch (s.col) { 'D' => 'F', 'E' => 'G', _ => null };
+    final dcol = switch (s.col) { 'D' => 'E', 'E' => 'F', _ => null };
     final asked = switch (s.col) { 'D' => askedByCode[norm(s.value)], 'E' => askedByJan[norm(s.value)], _ => null } ?? 0;
     if (withDetail && asked != s.qty) summaryFlags.addAll({(i, 5), (i, 6)});
     summaryRows.add([
@@ -404,7 +405,7 @@ Uint8List buildPackingListXlsx(
       XlsxFormula("SUMIF('PACKING LIST'!\$${s.col}:\$${s.col},A$r,'PACKING LIST'!\$F:\$F)", cached: s.qty),
       XlsxFormula("COUNTIF('PACKING LIST'!\$${s.col}:\$${s.col},A$r)", cached: s.boxes),
       if (withDetail) ...[
-        dcol == null ? null : XlsxFormula("SUMIF('明細'!\$$dcol:\$$dcol,A$r,'明細'!\$H:\$H)", cached: asked),
+        dcol == null ? null : XlsxFormula("SUMIF('明細'!\$$dcol:\$$dcol,A$r,'明細'!\$G:\$G)", cached: asked),
         dcol == null ? null : XlsxFormula('D$r-F$r', cached: s.qty - asked),
       ],
     ]);

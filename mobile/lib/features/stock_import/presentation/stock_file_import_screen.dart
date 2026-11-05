@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/ui/help_tab.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart';
@@ -1291,8 +1292,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             ),
           ],
           bottom: TabBar(tabs: [
-            Tab(key: const ValueKey('sf-tab-import'), text: l10n.sfTabImport),
-            Tab(key: const ValueKey('sf-tab-orders'), text: l10n.ordTabProgress),
+            HelpTab(help: l10n.sfHelpImport, child: Tab(key: const ValueKey('sf-tab-import'), text: l10n.sfTabImport)),
+            HelpTab(help: l10n.sfHelpOrders, child: Tab(key: const ValueKey('sf-tab-orders'), text: l10n.ordTabProgress)),
           ]),
         ),
         body: TabBarView(children: [importTab, const PaymentsScreen(embedded: true)]),

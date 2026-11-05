@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/help_tab.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../outbound/presentation/outbound_proposal_screen.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart';
@@ -29,6 +30,15 @@ class OutboundHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final help = {
+      OutboundHubTab.file: l10n.obHelpFile,
+      OutboundHubTab.proxy: l10n.obHelpProxy,
+      OutboundHubTab.cards: l10n.obHelpCards,
+      OutboundHubTab.packing: l10n.obHelpPacking,
+      OutboundHubTab.packingLists: l10n.obHelpPackingLists,
+      OutboundHubTab.boxes: l10n.obHelpBoxes,
+      OutboundHubTab.proposal: l10n.obHelpProposal,
+    };
     final labels = {
       OutboundHubTab.file: (l10n.obHubFile, Icons.upload_file_outlined),
       OutboundHubTab.proxy: (l10n.obHubProxy, Icons.edit_note_outlined),
@@ -49,7 +59,10 @@ class OutboundHubScreen extends StatelessWidget {
             tabAlignment: TabAlignment.start,
             tabs: [
               for (final t in OutboundHubTab.values)
-                Tab(key: ValueKey('ob-hub-${t.name}'), icon: Icon(labels[t]!.$2, size: 20), text: labels[t]!.$1),
+                HelpTab(
+                  help: help[t]!,
+                  child: Tab(key: ValueKey('ob-hub-${t.name}'), icon: Icon(labels[t]!.$2, size: 20), text: labels[t]!.$1),
+                ),
             ],
           ),
         ),

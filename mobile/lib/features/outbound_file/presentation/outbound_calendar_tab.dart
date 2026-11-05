@@ -1,12 +1,13 @@
-import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_error_text.dart';
+import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import '../../stock_import/presentation/stock_import_calendar_screen.dart' show calendarMaxWidth, calendarSideBySide;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/outbound_file_repository.dart';
@@ -123,13 +124,18 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
     );
 
     return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(outboundFilesProvider(_ask)),
+      onRefresh: () async {
+        ref.invalidate(outboundFilesProvider(_ask));
+        ref.invalidate(outboundUndecidedProvider);
+      },
       child: LayoutBuilder(builder: (context, box) {
         final wide = box.maxWidth >= calendarSideBySide;
         return ListView(
           key: const ValueKey('of-calendar'),
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
+            // 出庫日 未定 (0197): listed apart until a day is set.
+            if (!widget.proxyOnly) const OutboundUndecidedCard(),
             if (wide)
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 SizedBox(width: calendarMaxWidth, child: calendar),
@@ -274,6 +280,96 @@ class _DayGrid extends StatelessWidget {
             );
           }(),
       ],
+    );
+  }
+}
+
+/// 出庫日 未定 (0197): the planned lists with no day yet, each with
+/// 「日程を入れる」 — on the 出庫カレンダー beside the days and on the
+/// dashboard, until a day is set. Nothing at all when there are none (or
+/// they cannot be read), so it takes no room.
+class OutboundUndecidedCard extends ConsumerWidget {
+  const OutboundUndecidedCard({super.key, this.compact = false});
+
+  /// The dashboard's: the first few, without the hint.
+  final bool compact;
+
+  Future<void> _setDay(BuildContext context, WidgetRef ref, OutboundFileSummary f, int? warehouseId) async {
+    final l10n = AppLocalizations.of(context);
+    final day = await showDatePicker(
+        context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
+    if (day == null || !context.mounted) return;
+    final r = await ref.read(outboundFileRepositoryProvider).reschedule(f.id, day);
+    if (!context.mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(outboundUndecidedProvider(warehouseId));
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(outboundFileDetailProvider(f.id));
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.ofRescheduled(DateFormat('y/MM/dd').format(day)))));
+      case ApiFailure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final warehouseId = ref.watch(activeWarehouseIdProvider);
+    final files = ref.watch(outboundUndecidedProvider(warehouseId)).valueOrNull ?? const <OutboundFileSummary>[];
+    if (files.isEmpty) return const SizedBox.shrink();
+    final shown = compact ? files.take(5).toList() : files;
+    return Card(
+      key: const ValueKey('of-undecided'),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      color: theme.colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.event_busy_outlined, color: theme.colorScheme.onTertiaryContainer),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(l10n.ofUndecidedTitle(files.length),
+                  style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.onTertiaryContainer)),
+            ),
+          ]),
+          if (!compact) Text(l10n.ofUndecidedHint, style: theme.textTheme.bodySmall),
+          const SizedBox(height: AppSpacing.xs),
+          for (final f in shown)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(key: ValueKey('of-undecided-${f.id}'), children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => Navigator.of(context)
+                        .push(MaterialPageRoute<void>(builder: (_) => OutboundFileDetailScreen(fileId: f.id))),
+                    child: Text(
+                      [
+                        f.fileName,
+                        if (f.shipTo != null) f.shipTo!.nameEn ?? f.shipTo!.name else if (f.destination != null) f.destination!,
+                        l10n.prCardLines(f.lineCount, f.quantityTotal),
+                        if (f.warehouseName != null) f.warehouseName!,
+                      ].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                TextButton.icon(
+                  key: ValueKey('of-undecided-set-${f.id}'),
+                  onPressed: () => _setDay(context, ref, f, warehouseId),
+                  icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                  label: Text(l10n.ofSetDay),
+                ),
+              ]),
+            ),
+          if (compact && files.length > shown.length) Text(l10n.ofUndecidedMore(files.length - shown.length)),
+        ]),
+      ),
     );
   }
 }

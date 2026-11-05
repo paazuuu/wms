@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/ui/help_tab.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/scan/barcode_scan_screen.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -222,8 +223,8 @@ class _StockAdjustmentScreenState extends ConsumerState<StockAdjustmentScreen> {
           // Where the stock levels disagree is what an adjustment fixes.
           actions: const [FeatureLinkButton('stock_reconciliation')],
           bottom: TabBar(tabs: [
-            Tab(key: const Key('adj-tab-products'), text: l10n.adjTabProducts),
-            Tab(key: const Key('adj-tab-history'), text: l10n.adjTabHistory),
+            HelpTab(help: l10n.adjHelpProducts, child: Tab(key: const Key('adj-tab-products'), text: l10n.adjTabProducts)),
+            HelpTab(help: l10n.adjHelpHistory, child: Tab(key: const Key('adj-tab-history'), text: l10n.adjTabHistory)),
           ]),
         ),
         floatingActionButton: FloatingActionButton.extended(

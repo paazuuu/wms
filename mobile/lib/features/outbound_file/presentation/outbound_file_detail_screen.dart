@@ -13,6 +13,7 @@ import '../../outbound/presentation/ship_destinations_screen.dart'
 import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import '../../packing/presentation/packing_screen.dart';
 import '../data/outbound_file_repository.dart';
+import '../domain/outbound_currency.dart' show PriceCurrency;
 import 'outbound_file_screen.dart'
     show outboundActionLabel, outboundFileSaverProvider, outboundKg, outboundMoney, outboundTabOpenerProvider;
 
@@ -148,7 +149,10 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
   Future<void> _reschedule(OutboundFileSummary f) async {
     final l10n = AppLocalizations.of(context);
     final picked = await showDatePicker(
-        context: context, initialDate: f.shippedOn, firstDate: DateTime(2000), lastDate: DateTime(2100));
+        context: context,
+        initialDate: f.undecided ? DateTime.now() : f.shippedOn,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100));
     if (picked == null || !mounted) return;
     final r = await ref.read(outboundFileRepositoryProvider).reschedule(f.id, picked);
     if (!mounted) return;
@@ -156,7 +160,24 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
       case ApiSuccess():
         ref.invalidate(outboundFileDetailProvider(widget.fileId));
         ref.invalidate(outboundFilesProvider);
+        ref.invalidate(outboundUndecidedProvider);
         _snack(l10n.ofRescheduled(DateFormat('y/MM/dd').format(picked)));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  /// A planned list back to 出庫日 未定 (0197).
+  Future<void> _toUndecided(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(outboundFileRepositoryProvider).markUndecided(f.id);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        ref.invalidate(outboundFileDetailProvider(widget.fileId));
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(outboundUndecidedProvider);
+        _snack(l10n.ofMadeUndecided);
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
@@ -224,7 +245,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (f.planned)
-                Text(l10n.ofPlannedFor(DateFormat('y/MM/dd').format(f.shippedOn)),
+                Text(l10n.ofPlannedFor(f.undecided ? l10n.ofUndecided : DateFormat('y/MM/dd').format(f.shippedOn)),
                     key: const ValueKey('of-detail-planned'),
                     style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w700)),
               if (f.proxy)
@@ -262,7 +283,8 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                         : l10n.ofCardLines(f.lineCount, f.shippedTotal),
                     style: theme.textTheme.titleSmall),
                 if (f.shortTotal > 0) Text(l10n.ofCardShort(f.shortTotal), style: TextStyle(color: scheme.error)),
-                if (f.amountTotal != null && ref.watch(showPricesProvider)) Text(l10n.ofSummaryAmount(outboundMoney(f.amountTotal))),
+                if (f.amountTotal != null && ref.watch(showPricesProvider)) Text(l10n.ofSummaryAmount(_amountByCurrency(d))),
+                if (f.fxCnyJpy != null && ref.watch(showPricesProvider)) Text(l10n.ofFxShown(outboundMoney(f.fxCnyJpy))),
                 if (weight > 0) Text(l10n.ofSummaryWeight(outboundKg(weight))),
               ]),
               const SizedBox(height: AppSpacing.md),
@@ -293,8 +315,14 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     key: const ValueKey('of-reschedule'),
                     onPressed: _busy ? null : () => _reschedule(f),
                     icon: const Icon(Icons.edit_calendar_outlined),
-                    label: Text(l10n.ofReschedule),
+                    label: Text(f.undecided ? l10n.ofSetDay : l10n.ofReschedule),
                   ),
+                  if (!f.undecided)
+                    TextButton(
+                      key: const ValueKey('of-to-undecided'),
+                      onPressed: _busy ? null : () => _toUndecided(f),
+                      child: Text(l10n.ofBackToUndecided),
+                    ),
                 ],
                 if (!f.undone)
                   FilledButton.tonalIcon(
@@ -352,6 +380,29 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     );
   }
 
+  /// A price with its currency's mark when not 円 (0197).
+  String _money(OutboundFileLine l, double? v) {
+    if (v == null) return '';
+    final c = PriceCurrency.fromWire(l.currency);
+    return c == PriceCurrency.jpy ? outboundMoney(v) : '${outboundMoney(v)} ${c.mark}';
+  }
+
+  TextStyle? _moneyStyle(OutboundFileLine l, TextStyle? small, ColorScheme scheme) =>
+      l.currency == 'JPY' ? small : small?.copyWith(color: scheme.tertiary, fontWeight: FontWeight.w700);
+
+  /// The list's amount by currency: 1,000 · 50 元.
+  String _amountByCurrency(OutboundFileDetail d) {
+    final by = <PriceCurrency, double>{};
+    for (final l in d.lines) {
+      if (l.amount == null) continue;
+      final c = PriceCurrency.fromWire(l.currency);
+      by[c] = (by[c] ?? 0) + l.amount!;
+    }
+    if (by.isEmpty) return outboundMoney(d.file.amountTotal);
+    if (by.length == 1 && by.keys.single == PriceCurrency.jpy) return outboundMoney(by.values.single);
+    return [for (final e in by.entries) '${outboundMoney(e.value)} ${e.key.mark}'].join(' · ');
+  }
+
   Widget _table(AppLocalizations l10n, List<OutboundFileLine> lines, {bool proxy = false}) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -361,7 +412,8 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     final prices = ref.watch(showPricesProvider);
     const widths = [52.0, 96.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 64.0, 80.0, 80.0, 100.0, 84.0, 96.0, 110.0];
     // 代理出荷: nothing taken out of stock — no 出庫数, 不足 or stock columns.
-    final hidden = proxy ? const {8, 9, 15} : const <int>{};
+    // 仕入先 (6) is ours to know, not the shipping side's: kept, not shown.
+    final hidden = proxy ? const {6, 8, 9, 15} : const {6};
     Widget cell(int i, Widget child, {bool end = false}) => hidden.contains(i)
         ? const SizedBox.shrink()
         : Container(
@@ -412,9 +464,9 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                       style: small?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
                   end: true,
                 ),
-                cell(10, Text(prices ? outboundMoney(l.unitPrice) : '—', style: small), end: true),
-                cell(11, Text(prices ? outboundMoney(l.unitPriceTax) : '—', style: small), end: true),
-                cell(12, Text(prices ? outboundMoney(l.amount) : '—', style: small), end: true),
+                cell(10, Text(prices ? _money(l, l.unitPrice) : '—', style: _moneyStyle(l, small, scheme)), end: true),
+                cell(11, Text(prices ? _money(l, l.unitPriceTax) : '—', style: _moneyStyle(l, small, scheme)), end: true),
+                cell(12, Text(prices ? _money(l, l.amount) : '—', style: _moneyStyle(l, small, scheme)), end: true),
                 cell(13, Text(l.weightG == null ? '' : '${outboundKg(l.weightG!)} kg', style: small), end: true),
                 cell(14, Text(l.orderNumber ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 cell(15, Text(l.onHandBefore == null ? '' : '${l.onHandBefore} → ${l.onHandAfter}', style: small), end: true),

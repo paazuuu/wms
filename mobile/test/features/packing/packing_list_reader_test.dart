@@ -131,9 +131,10 @@ void main() {
     expect(sheets.map((s) => s.name), ['PACKING LIST', '明細', 'BOXES', 'BOX_TYPES', 'SUMMARY']);
     final detail = sheets[1].rows;
     expect(detail.first, contains('ジャパンコード'));
-    expect(detail[1].sublist(5, 8), ['X-1', '4909999000014', '60']);
-    expect(detail[1][11], '6600', reason: '合计 = 数量 × 単価（税込）');
-    expect(detail.last.sublist(6, 8), ['合计', '90']);
+    expect(detail.first, isNot(contains('供货商')), reason: 'who it was bought from is ours');
+    expect(detail[1].sublist(4, 7), ['X-1', '4909999000014', '60']);
+    expect(detail[1][10], '6600', reason: '合计 = 数量 × 単価（税込）');
+    expect(detail.last.sublist(5, 7), ['合计', '90']);
 
     final summary = {for (final r in sheets[4].rows.skip(1)) r.first: r};
     expect(sheets[4].rows.first.sublist(5), ['明細の数量', '差（箱 − 明細）']);
@@ -142,7 +143,7 @@ void main() {
     expect(summary['X-2']!.sublist(3), ['40', '1', '0', '40'], reason: 'not in the 明細');
     final zip = ZipDecoder().decodeBytes(bytes);
     final summaryXml = utf8.decode(zip.findFile('xl/worksheets/sheet5.xml')!.content as List<int>);
-    expect(summaryXml, contains("SUMIF('明細'!\$F:\$F,A"));
+    expect(summaryXml, contains("SUMIF('明細'!\$E:\$E,A"));
     // Read back, the 明細 is the improved file's own and gives the same boxes.
     final back = await readPackingList(bytes);
     expect(back.detailSheet, '明細');

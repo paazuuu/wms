@@ -1,3 +1,4 @@
+import '../../outbound_file/presentation/outbound_calendar_tab.dart' show OutboundUndecidedCard;
 import '../../admin/data/menu_visibility_repository.dart' show hiddenFeaturesProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -152,6 +153,9 @@ class DashboardOverviewScreen extends ConsumerWidget {
           InboundTodayCard(onOpenFeature: openById),
           const SizedBox(height: AppSpacing.xl),
         ],
+        // 出庫日 未定 (0197): planned lists waiting for a day, set from here.
+        if (const ['ship.complete', 'pack.complete', 'inventory.adjust', 'sales_order.view'].any(permissions.contains))
+          const OutboundUndecidedCard(compact: true),
         _SectionLabel(l10n.dashTodayTasks),
         const SizedBox(height: AppSpacing.md),
         TodayTasksRow(

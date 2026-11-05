@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
@@ -7,6 +8,7 @@ import 'package:wms_mobile/core/ui/open_window.dart';
 import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
 import 'package:wms_mobile/features/outbound/domain/outbound.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
+import 'package:wms_mobile/features/outbound_file/domain/outbound_currency.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_calendar_tab.dart' show OutboundCalendarScreen;
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_hub_screen.dart';
@@ -403,6 +405,17 @@ void main() {
     for (final t in ['出荷明細の取込', '在庫外出荷', '出荷先カード', '出荷指示・梱包', '出荷の提案']) {
       expect(find.descendant(of: find.byType(TabBar), matching: find.text(t)), findsOneWidget);
     }
+    // Each tab says what it is for when the pointer rests on it.
+    expect(find.byTooltip(RegExp(r'^営業から届いた出荷明細')), findsOneWidget);
+    expect(find.byTooltip(RegExp(r'^在庫を持たない直送')), findsOneWidget);
+    final g = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await g.addPointer(location: Offset.zero);
+    addTearDown(g.removePointer);
+    await g.moveTo(tester.getCenter(find.byKey(const ValueKey('ob-hub-proxy'))));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.textContaining('在庫を持たない直送・出荷代行の記録'), findsOneWidget);
+    await g.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('of-pick')), findsOneWidget);
     expect(find.byKey(const ValueKey('pr-add-row')), findsNothing);
 
@@ -437,19 +450,90 @@ void main() {
     expect(find.byKey(const ValueKey('of-cal-kind-proxy')), findsOneWidget);
   });
 
-  testWidgets('出庫予定: registered for a day by default, no stock out yet', (tester) async {
+  testWidgets('出庫予定: registered with its day 未定 by default, no stock out yet', (tester) async {
     final repo = await pump(tester);
     await tester.tap(find.byKey(const ValueKey('of-pick')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('of-plan-hint')), findsOneWidget);
-    expect(find.textContaining('出庫予定日: '), findsOneWidget);
+    expect(find.text('出庫予定日: 未定'), findsOneWidget, reason: '未定 until a day is known');
     await tester.tap(find.byKey(const ValueKey('of-post')));
     await tester.pumpAndSettle();
     expect(find.textContaining('の出庫予定として登録します。在庫はまだ動きません。'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('of-post-ok')));
     await tester.pumpAndSettle();
     expect(repo.posted.single.plan, isTrue);
-    expect(find.textContaining('出庫予定を登録しました'), findsOneWidget);
+    expect(find.textContaining('出庫予定を登録しました（未定）'), findsOneWidget);
+    // No day given: the list is 未定 until one is set (0197).
+    expect(repo.markedUndecided, hasLength(1));
+  });
+
+  test('a price currency: as the headings say, or 元 when far under the purchase price', () {
+    expect(currencyInHeadings(['单价（元）', '数量']), PriceCurrency.cny);
+    expect(currencyInHeadings(['単価(円)']), PriceCurrency.jpy);
+    expect(currencyInHeadings(['单价（税前）', '数量']), isNull);
+    expect(priceLooksLikeCny(5.5, 100), isTrue);
+    expect(priceLooksLikeCny(55, 100), isFalse);
+    expect(priceLooksLikeCny(5.5, null), isFalse);
+  });
+
+  testWidgets('通貨: rows the AI judges to be in 元 are shown so, can be changed, and are kept', (tester) async {
+    final ai = FakePriceCurrencyRepository({3: (PriceCurrency.cny, true), 4: (PriceCurrency.cny, false)});
+    await tester.binding.setSurfaceSize(const Size(2600, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeOutboundFileRepository(matcher: _match);
+    await pumpApp(tester, const OutboundFileScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: _book())),
+      outboundTabOpenerProvider.overrideWithValue(() => null),
+      outboundFileSaverProvider.overrideWithValue((n, b) async {}),
+      writeWarehouseIdProvider.overrideWithValue(1),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      priceCurrencyRepositoryProvider.overrideWithValue(ai),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    // Asked with what each was bought for (row 2: 48 円).
+    expect(ai.asked.single.first.purchaseJpy, 48);
+    expect(find.byKey(const ValueKey('of-currency')), findsOneWidget);
+    expect(find.text('人民元と判断した行: 2 / 5'), findsOneWidget);
+    expect(find.text('確信の低い行: 4'), findsOneWidget, reason: 'the AI unsure of row 4, and rows it left to our rule');
+    expect(find.text('40 元'), findsNWidgets(2));
+    // Row 4 put back to 円 by a tap on its price; the rate given.
+    await tester.tap(find.byKey(ValueKey('of-cur-4-${40.0.hashCode}')));
+    await tester.pumpAndSettle();
+    expect(find.text('人民元と判断した行: 1 / 5'), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('of-fx')), '21.5');
+    await tester.tap(find.byKey(const ValueKey('of-post')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-post-ok')));
+    await tester.pumpAndSettle();
+    final (_, lines, main, fx) = repo.currencies.single;
+    expect(main, 'JPY');
+    expect(fx, 21.5);
+    expect(lines.firstWhere((l) => l['row_no'] == 3), {'row_no': 3, 'currency': 'CNY', 'source': 'ai'});
+    expect(lines.firstWhere((l) => l['row_no'] == 4), {'row_no': 4, 'currency': 'JPY', 'source': 'manual'});
+    expect(lines.firstWhere((l) => l['row_no'] == 2)['source'], 'guess');
+  });
+
+  testWidgets('出庫日 未定: listed beside the calendar, a day set from there', (tester) async {
+    final repo = FakeOutboundFileRepository()
+      ..undecidedFiles = [
+        OutboundFileSummary(
+            id: 7, warehouseId: 1, shippedOn: DateTime(2026, 11, 5), fileName: '未定の明細.xlsx', status: 'planned',
+            dateUndecided: true, lineCount: 3, quantityTotal: 30),
+      ];
+    await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    expect(find.text('出庫日 未定 1件'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-undecided-7')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-undecided-set-7')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(repo.rescheduled.single.$1, 7);
   });
 
   testWidgets('a planned list on the calendar: confirmed by the warehouse, moved, or cancelled', (tester) async {

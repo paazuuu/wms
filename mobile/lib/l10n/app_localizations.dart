@@ -26878,6 +26878,186 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{name} に入る（入庫）'**
   String tlIncoming(String name);
+
+  /// No description provided for @ofUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'未定'**
+  String get ofUndecided;
+
+  /// No description provided for @ofBackToUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'未定に戻す'**
+  String get ofBackToUndecided;
+
+  /// No description provided for @ofMadeUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日を未定にしました'**
+  String get ofMadeUndecided;
+
+  /// No description provided for @ofSetDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'日程を入れる'**
+  String get ofSetDay;
+
+  /// No description provided for @ofUndecidedTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日 未定 {n}件'**
+  String ofUndecidedTitle(int n);
+
+  /// No description provided for @ofUndecidedHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日がまだ決まっていない出荷明細です。日が決まったら「日程を入れる」でカレンダーに載ります。'**
+  String get ofUndecidedHint;
+
+  /// No description provided for @ofUndecidedMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'ほか {n}件'**
+  String ofUndecidedMore(int n);
+
+  /// No description provided for @obHelpFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'営業から届いた出荷明細（明细のExcel）を取り込み、在庫の商品と照合して出庫予定（または今すぐ出庫）として登録します。普段の出荷はここから。'**
+  String get obHelpFile;
+
+  /// No description provided for @obHelpProxy.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫を持たない直送・出荷代行の記録。倉庫の在庫は動かさず、誰の依頼で何を出したかだけ残します。'**
+  String get obHelpProxy;
+
+  /// No description provided for @obHelpCards.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先の会社名・住所・電話・税番号・港など、輸出書類に必要な情報をカードにして保管。出荷明細を登録するときに選びます。'**
+  String get obHelpCards;
+
+  /// No description provided for @obHelpPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注した注文を箱に詰めて送る作業（出荷指示）。箱ごとの中身と重さを記録し、ラベルを印刷します。'**
+  String get obHelpPacking;
+
+  /// No description provided for @obHelpPackingLists.
+  ///
+  /// In ja, this message translates to:
+  /// **'パッキングリストの保管庫。自分で作ったリストをアップするとAIが見やすい形式に直し、原本と改善版の両方を残します。'**
+  String get obHelpPackingLists;
+
+  /// No description provided for @obHelpBoxes.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の段ボール（S/M/Lなど）と、メーカーの元箱に何個入るか（入数）の登録。箱詰め案の計算に使います。'**
+  String get obHelpBoxes;
+
+  /// No description provided for @obHelpProposal.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫から出荷の案を作ります（どの商品をどれだけ出せるか）。'**
+  String get obHelpProposal;
+
+  /// No description provided for @sfHelpImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の請求書・納品書（Excel・PDF・写真）を読み込み、商品と在庫に登録します。'**
+  String get sfHelpImport;
+
+  /// No description provided for @sfHelpOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注ごとの進み具合（入荷・検品・支払い・証憑）を一覧で確認します。'**
+  String get sfHelpOrders;
+
+  /// No description provided for @urHelpRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注や請求書がないまま届いた荷物を、納品書の写真から登録してその場で検品・入庫します。'**
+  String get urHelpRegister;
+
+  /// No description provided for @urHelpWaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷のうち、まだ請求書と紐付いていないもの。請求書が来ないもの（サンプル等）は「請求書なしで完了」にします。'**
+  String get urHelpWaiting;
+
+  /// No description provided for @wmHelpCalendar.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付ごとのメモ。カレンダーで書いた日を見返せます。'**
+  String get wmHelpCalendar;
+
+  /// No description provided for @wmHelpBoard.
+  ///
+  /// In ja, this message translates to:
+  /// **'掲示板。全員に知らせたいことを貼っておく場所です。'**
+  String get wmHelpBoard;
+
+  /// No description provided for @adjHelpProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を選んで在庫を増減します（破損・紛失・見つかった等の理由つき）。'**
+  String get adjHelpProducts;
+
+  /// No description provided for @adjHelpHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'これまでの在庫調整の記録（いつ・誰が・何個・理由）。'**
+  String get adjHelpHistory;
+
+  /// No description provided for @ofCurrencyJudging.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが単価の通貨（円・元）を確認しています…'**
+  String get ofCurrencyJudging;
+
+  /// No description provided for @ofCurrencyFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'人民元と判断した行: {cny} / {all}'**
+  String ofCurrencyFound(int cny, int all);
+
+  /// No description provided for @ofCurrencyUnsure.
+  ///
+  /// In ja, this message translates to:
+  /// **'確信の低い行: {n}'**
+  String ofCurrencyUnsure(int n);
+
+  /// No description provided for @ofFxLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'1元 ='**
+  String get ofFxLabel;
+
+  /// No description provided for @ofCurrencyAllJpy.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて円'**
+  String get ofCurrencyAllJpy;
+
+  /// No description provided for @ofCurrencyAllCny.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて元'**
+  String get ofCurrencyAllCny;
+
+  /// No description provided for @ofCurrencyTapHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'単価をタップすると円⇄元を切り替えられます。通貨は行ごとに記録され、損益計算で円か元にそろえて使います。'**
+  String get ofCurrencyTapHint;
+
+  /// No description provided for @ofFxShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'1元 = {rate}円'**
+  String ofFxShown(String rate);
 }
 
 class _AppLocalizationsDelegate

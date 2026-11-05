@@ -15138,4 +15138,105 @@ class AppLocalizationsZh extends AppLocalizations {
   String tlIncoming(String name) {
     return '进入 $name（入库）';
   }
+
+  @override
+  String get ofUndecided => '未定';
+
+  @override
+  String get ofBackToUndecided => '改回未定';
+
+  @override
+  String get ofMadeUndecided => '已将出库计划日改为未定';
+
+  @override
+  String get ofSetDay => '填写日期';
+
+  @override
+  String ofUndecidedTitle(int n) {
+    return '出库日未定 $n件';
+  }
+
+  @override
+  String get ofUndecidedHint => '尚未确定出库日的出货明细。确定后点“填写日期”即显示在日历上。';
+
+  @override
+  String ofUndecidedMore(int n) {
+    return '另外 $n件';
+  }
+
+  @override
+  String get obHelpFile =>
+      '导入销售发来的出货明细（Excel），与库存商品核对后登记为出库计划（或立即出库）。日常出货从这里开始。';
+
+  @override
+  String get obHelpProxy => '直送・代发货的记录。不动仓库库存，只记录受谁委托发了什么。';
+
+  @override
+  String get obHelpCards => '把收货方的公司名、地址、电话、税号、港口等出口资料做成卡片保存，登记出货明细时选择。';
+
+  @override
+  String get obHelpPacking => '把订单装箱发货（出货指示）。记录每箱内容和重量，打印标签。';
+
+  @override
+  String get obHelpPackingLists => '装箱单的保存处。上传自己做的装箱单后AI会改成易读格式，原件和改进版都保留。';
+
+  @override
+  String get obHelpBoxes => '登记自家纸箱（S/M/L等）和厂家原箱的入数，用于计算装箱方案。';
+
+  @override
+  String get obHelpProposal => '根据库存生成出货方案（哪些商品能发多少）。';
+
+  @override
+  String get sfHelpImport => '读取供应商的发票・送货单（Excel・PDF・照片），登记到商品和库存。';
+
+  @override
+  String get sfHelpOrders => '查看每个采购的进度（入库・检品・付款・凭证）。';
+
+  @override
+  String get urHelpRegister => '没有采购单或发票就到货的商品，从送货单照片登记，当场检品入库。';
+
+  @override
+  String get urHelpWaiting => '计划外入库中尚未关联发票的。不会有发票的（样品等）选“无发票完成”。';
+
+  @override
+  String get wmHelpCalendar => '按日期的备忘，可在日历上回看。';
+
+  @override
+  String get wmHelpBoard => '公告板，张贴需要大家知道的事。';
+
+  @override
+  String get adjHelpProducts => '选择商品增减库存（附原因：破损・遗失・找到等）。';
+
+  @override
+  String get adjHelpHistory => '以往的库存调整记录（时间・人员・数量・原因）。';
+
+  @override
+  String get ofCurrencyJudging => 'AI正在确认单价的币种（日元・人民币）…';
+
+  @override
+  String ofCurrencyFound(int cny, int all) {
+    return '判断为人民币的行：$cny / $all';
+  }
+
+  @override
+  String ofCurrencyUnsure(int n) {
+    return '把握较低的行：$n';
+  }
+
+  @override
+  String get ofFxLabel => '1元 =';
+
+  @override
+  String get ofCurrencyAllJpy => '全部日元';
+
+  @override
+  String get ofCurrencyAllCny => '全部人民币';
+
+  @override
+  String get ofCurrencyTapHint => '点单价可切换日元⇄人民币。币种逐行记录，之后计算损益时统一换算。';
+
+  @override
+  String ofFxShown(String rate) {
+    return '1元 = $rate日元';
+  }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../core/ui/help_tab.dart';
 import '../../core/api/api_error_text.dart';
 import '../../core/api/api_result.dart';
 import '../../core/export/save_bytes.dart';
@@ -355,8 +356,12 @@ class _WarehouseMemosScreenState extends ConsumerState<WarehouseMemosScreen> wit
       appBar: AppBar(
         title: Text(l10n.wmTitle),
         bottom: TabBar(controller: _tabs, tabs: [
-          Tab(key: const ValueKey('wm-tab-calendar'), icon: const Icon(Icons.calendar_month_outlined), text: l10n.wmTabCalendar),
-          Tab(key: const ValueKey('wm-tab-board'), icon: const Icon(Icons.push_pin_outlined), text: l10n.wmTabBoard),
+          HelpTab(
+              help: l10n.wmHelpCalendar,
+              child: Tab(key: const ValueKey('wm-tab-calendar'), icon: const Icon(Icons.calendar_month_outlined), text: l10n.wmTabCalendar)),
+          HelpTab(
+              help: l10n.wmHelpBoard,
+              child: Tab(key: const ValueKey('wm-tab-board'), icon: const Icon(Icons.push_pin_outlined), text: l10n.wmTabBoard)),
         ]),
       ),
       floatingActionButton: FloatingActionButton.extended(

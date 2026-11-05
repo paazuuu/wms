@@ -111,4 +111,23 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     fetched.add(storagePath);
     return ApiSuccess(bytes ?? Uint8List.fromList([1, 2, 3]));
   }
+
+  final List<int> markedUndecided = [];
+  final List<(int, List<Map<String, dynamic>>, String?, double?)> currencies = [];
+  List<OutboundFileSummary> undecidedFiles = const [];
+
+  @override
+  Future<ApiResult<List<OutboundFileSummary>>> undecided({int? warehouseId}) async => ApiSuccess(undecidedFiles);
+
+  @override
+  Future<ApiResult<bool>> markUndecided(int id) async {
+    markedUndecided.add(id);
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<int>> setCurrency(int id, List<Map<String, dynamic>> lines, {String? currency, double? fxCnyJpy}) async {
+    currencies.add((id, lines, currency, fxCnyJpy));
+    return ApiSuccess(lines.length);
+  }
 }

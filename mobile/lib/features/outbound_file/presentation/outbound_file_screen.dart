@@ -21,6 +21,7 @@ import '../../outbound/domain/outbound.dart' show ShipDestination;
 import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/outbound_file_repository.dart';
+import '../domain/outbound_currency.dart';
 import '../domain/outbound_plan.dart';
 import '../domain/outbound_sheet.dart';
 import 'outbound_calendar_tab.dart';
@@ -163,6 +164,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
   final Map<int, OutboundAction> _chosen = {};
   DateTime _shippedOn = DateTime.now();
 
+  /// 出庫予定日 for a planned list: null is 未定 (0197), the day set later.
+  DateTime? _plannedOn;
+
+  String _planDayText(AppLocalizations l10n) =>
+      _plannedOn == null ? l10n.ofUndecided : DateFormat('y/MM/dd').format(_plannedOn!);
+
   /// 出庫予定 (0191): registered for a day, shipped when the warehouse
   /// confirms it — the usual way from 出荷手配; else out of stock now.
   bool _planMode = true;
@@ -178,8 +185,78 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     _destination.dispose();
     _note.dispose();
     _principal.dispose();
+    _fx.dispose();
     super.dispose();
   }
+
+  // Each row's price currency (0197): row number → currency and how it was
+  // decided; the rate 1 元 in 円 if given.
+  Map<int, RowCurrency> _currency = {};
+  bool _judging = false;
+  final _fx = TextEditingController();
+
+  /// In which currency each priced row is written: as the headings say, else
+  /// as the AI judges against what it was bought for (our own rule when the
+  /// AI cannot be asked).
+  Future<void> _judgeCurrency() async {
+    final parsed = _parsed;
+    final rows = _rows;
+    final matches = _matches;
+    final priced = [
+      for (final (i, row) in rows.indexed)
+        if (row.priceEx != null || row.priceTax != null) (row, i < matches.length ? matches[i] : OutboundMatch.none),
+    ];
+    if (priced.isEmpty) {
+      setState(() => _currency = {});
+      return;
+    }
+    final named = parsed == null ? null : currencyInHeadings(parsed.headings);
+    if (named != null) {
+      setState(() => _currency = {
+            for (final (row, _) in priced) row.rowNo: (currency: named, source: CurrencySource.file, confident: true),
+          });
+      return;
+    }
+    setState(() => _judging = true);
+    final r = await ref.read(priceCurrencyRepositoryProvider).judge([
+      for (final (row, m) in priced)
+        (
+          i: row.rowNo,
+          name: m.name ?? row.name,
+          maker: row.maker,
+          code: row.code,
+          priceEx: row.priceEx,
+          priceTax: row.priceTax,
+          purchaseJpy: m.lastPrice,
+        ),
+    ], hint: parsed?.headings.where((h) => h.trim().isNotEmpty).join(' / '));
+    if (!mounted) return;
+    final ai = switch (r) {
+      ApiSuccess(:final data) => data,
+      ApiFailure() => const <int, (PriceCurrency, bool)>{},
+    };
+    setState(() {
+      _judging = false;
+      RowCurrency judged(OutboundRow row, OutboundMatch m) {
+        final a = ai[row.rowNo];
+        if (a != null) return (currency: a.$1, source: CurrencySource.ai, confident: a.$2);
+        return (
+          currency: priceLooksLikeCny(row.priceEx ?? row.priceTax, m.lastPrice) ? PriceCurrency.cny : PriceCurrency.jpy,
+          source: CurrencySource.guess,
+          confident: false,
+        );
+      }
+
+      _currency = {for (final (row, m) in priced) row.rowNo: judged(row, m)};
+    });
+  }
+
+  void _setCurrency(int rowNo, PriceCurrency c) =>
+      setState(() => _currency[rowNo] = (currency: c, source: CurrencySource.manual, confident: true));
+
+  void _setAllCurrency(PriceCurrency c) => setState(() => _currency = {
+        for (final k in _currency.keys) k: (currency: c, source: CurrencySource.manual, confident: true),
+      });
 
   bool get _proxy => widget.proxy;
 
@@ -306,6 +383,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           _matchError = humanizeApiErrorMessage(AppLocalizations.of(context), message);
       }
     });
+    if (r is ApiSuccess) await _judgeCurrency();
   }
 
   List<OutboundPlanLine> get _plan => planOutbound(_rows, _matches, picked: _picked, chosen: _chosen, proxy: _proxy);
@@ -356,7 +434,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           Text(_proxy
               ? l10n.prPostConfirmBody(t.record, _recordedQty(plan))
               : _planning
-                  ? l10n.ofPlanConfirmBody(t.ship + t.record, _recordedQty(plan), DateFormat('y/MM/dd').format(_shippedOn))
+                  ? l10n.ofPlanConfirmBody(t.ship + t.record, _recordedQty(plan), _planDayText(l10n))
                   : l10n.ofPostConfirmBody(t.ship, t.shipped, t.record, t.skip)),
           if (t.short > 0 && !_planning) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -394,7 +472,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     String? text(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
     Future<ApiResult<int>> send(bool again) => repo.post(
           warehouseId: warehouseId,
-          shippedOn: _shippedOn,
+          shippedOn: _planning ? (_plannedOn ?? DateTime.now()) : _shippedOn,
           fileName: file?.name ?? l10n.prManualName,
           lines: [for (final l in plan) l.toPost()],
           storagePath: path,
@@ -433,6 +511,29 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
+        // 未定: the day it was sent with means nothing until one is set.
+        if (_planning && _plannedOn == null) {
+          final u = await repo.markUndecided(data);
+          if (u case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+        }
+        // Each row's currency, kept for the profit and loss later (0197).
+        if (_currency.isNotEmpty) {
+          final counts = <PriceCurrency, int>{};
+          for (final c in _currency.values) {
+            counts[c.currency] = (counts[c.currency] ?? 0) + 1;
+          }
+          final main = counts.entries.reduce((a, b) => b.value > a.value ? b : a).key;
+          final c = await repo.setCurrency(
+            data,
+            [
+              for (final e in _currency.entries)
+                {'row_no': e.key, 'currency': e.value.currency.wire, 'source': e.value.source.wire},
+            ],
+            currency: main.wire,
+            fxCnyJpy: double.tryParse(_fx.text.trim()),
+          );
+          if (c case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+        }
         final card = _card;
         if (card?.id != null) {
           final set = await repo.setDestination(data, card!.id);
@@ -445,7 +546,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         _snack(_proxy
             ? l10n.prPostDone(t.record)
             : _planning
-                ? l10n.ofPlanDone(DateFormat('y/MM/dd').format(_shippedOn))
+                ? l10n.ofPlanDone(_planDayText(l10n))
                 : l10n.ofPostDone(t.shipped));
         setState(() {
           _file = null;
@@ -458,6 +559,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           _destination.clear();
           _note.clear();
           _principal.clear();
+          _plannedOn = null;
+          _currency = {};
           _card = null;
         });
         await Navigator.of(context).push(MaterialPageRoute(builder: (_) => OutboundFileDetailScreen(fileId: data)));
@@ -558,6 +661,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                   onAction: (l, a) => setState(() => _chosen[l.row.rowNo] = a),
                   onPick: _pickProduct,
                   onRemove: _removeRow,
+                  currency: _currency,
+                  onCurrency: _setCurrency,
                 ),
                 if (shown.length > _limit)
                   TextButton(
@@ -716,16 +821,38 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               selected: {_planMode},
               onSelectionChanged: (v) => setState(() => _planMode = v.first),
             ),
-          OutlinedButton.icon(
-            key: const ValueKey('of-shipped-on'),
-            icon: const Icon(Icons.event_outlined, size: 18),
-            label: Text('${_planning ? l10n.ofPlannedOn : l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(_shippedOn)}'),
-            onPressed: () async {
-              final d = await showDatePicker(
-                  context: context, initialDate: _shippedOn, firstDate: DateTime(2000), lastDate: DateTime(2100));
-              if (d != null) setState(() => _shippedOn = d);
-            },
-          ),
+          if (_planning) ...[
+            // 出庫予定日: 未定 until known (0197); set here or later.
+            OutlinedButton.icon(
+              key: const ValueKey('of-shipped-on'),
+              icon: const Icon(Icons.event_outlined, size: 18),
+              label: Text('${l10n.ofPlannedOn}: ${_planDayText(l10n)}'),
+              onPressed: () async {
+                final d = await showDatePicker(
+                    context: context,
+                    initialDate: _plannedOn ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100));
+                if (d != null) setState(() => _plannedOn = d);
+              },
+            ),
+            if (_plannedOn != null)
+              TextButton(
+                key: const ValueKey('of-planned-clear'),
+                onPressed: () => setState(() => _plannedOn = null),
+                child: Text(l10n.ofBackToUndecided),
+              ),
+          ] else
+            OutlinedButton.icon(
+              key: const ValueKey('of-shipped-on'),
+              icon: const Icon(Icons.event_outlined, size: 18),
+              label: Text('${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(_shippedOn)}'),
+              onPressed: () async {
+                final d = await showDatePicker(
+                    context: context, initialDate: _shippedOn, firstDate: DateTime(2000), lastDate: DateTime(2100));
+                if (d != null) setState(() => _shippedOn = d);
+              },
+            ),
           if (_proxy)
             SizedBox(
               width: 220,
@@ -782,9 +909,67 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
       if (t.short > 0)
         Text(l10n.ofSummaryShort(t.short, t.shortRows),
             key: const ValueKey('of-summary-short'), style: TextStyle(color: theme.colorScheme.error)),
-      if (t.amount > 0) Text(l10n.ofSummaryAmount(outboundMoney(t.amount))),
+      if (t.amount > 0) Text(l10n.ofSummaryAmount(_amountText())),
       if (t.weightG > 0) Text(l10n.ofSummaryWeight(outboundKg(t.weightG))),
+      if (_judging || _currency.values.any((c) => c.currency != PriceCurrency.jpy)) _currencyNotice(l10n),
     ]);
+  }
+
+  /// The total by currency: 42,937,549 円 · 1,234 元.
+  String _amountText() {
+    final by = <PriceCurrency, double>{};
+    for (final l in _plan) {
+      final v = l.row.total;
+      if (v == null || l.action == OutboundAction.skip) continue;
+      final c = _currency[l.row.rowNo]?.currency ?? PriceCurrency.jpy;
+      by[c] = (by[c] ?? 0) + v;
+    }
+    if (by.length <= 1 && (by.keys.firstOrNull ?? PriceCurrency.jpy) == PriceCurrency.jpy) {
+      return outboundMoney(by[PriceCurrency.jpy] ?? 0);
+    }
+    return [for (final e in by.entries) '${outboundMoney(e.value)} ${e.key.mark}'].join(' · ');
+  }
+
+  /// What the AI made of the prices, the rate, and all at once to 円 or 元.
+  Widget _currencyNotice(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final cny = _currency.values.where((c) => c.currency == PriceCurrency.cny).length;
+    final unsure = _currency.values.where((c) => !c.confident).length;
+    return Card(
+      key: const ValueKey('of-currency'),
+      color: theme.colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: _judging
+            ? Row(mainAxisSize: MainAxisSize.min, children: [
+                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(width: AppSpacing.sm),
+                Text(l10n.ofCurrencyJudging),
+              ])
+            : Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                Text(l10n.ofCurrencyFound(cny, _currency.length), style: theme.textTheme.titleSmall),
+                if (unsure > 0) Text(l10n.ofCurrencyUnsure(unsure)),
+                SizedBox(
+                  width: 150,
+                  child: TextField(
+                    key: const ValueKey('of-fx'),
+                    controller: _fx,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: l10n.ofFxLabel, isDense: true, suffixText: '円'),
+                  ),
+                ),
+                TextButton(
+                    key: const ValueKey('of-cur-all-jpy'),
+                    onPressed: () => _setAllCurrency(PriceCurrency.jpy),
+                    child: Text(l10n.ofCurrencyAllJpy)),
+                TextButton(
+                    key: const ValueKey('of-cur-all-cny'),
+                    onPressed: () => _setAllCurrency(PriceCurrency.cny),
+                    child: Text(l10n.ofCurrencyAllCny)),
+                Text(l10n.ofCurrencyTapHint, style: theme.textTheme.bodySmall),
+              ]),
+      ),
+    );
   }
 
   Widget _filters(AppLocalizations l10n, OutboundPlanTotals t) => Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
@@ -840,7 +1025,13 @@ class _OutboundPlanTable extends StatefulWidget {
     this.proxy = false,
     this.manual = const {},
     this.onRemove,
+    this.currency = const {},
+    this.onCurrency,
   });
+
+  /// Each row's price currency (0197), changed by a tap on its price.
+  final Map<int, RowCurrency> currency;
+  final void Function(int rowNo, PriceCurrency c)? onCurrency;
 
   final List<OutboundPlanLine> lines;
   final void Function(OutboundPlanLine, OutboundAction) onAction;
@@ -868,6 +1059,23 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
     super.dispose();
   }
 
+  /// A price with its currency when not 円; a tap switches 円 ⇄ 元.
+  Widget _price(OutboundPlanLine l, double? v, TextStyle? small, ColorScheme scheme) {
+    if (v == null) return const SizedBox.shrink();
+    final c = widget.currency[l.row.rowNo];
+    final cur = c?.currency ?? PriceCurrency.jpy;
+    final text = Text(
+      cur == PriceCurrency.jpy ? outboundMoney(v) : '${outboundMoney(v)} ${cur.mark}',
+      style: cur == PriceCurrency.jpy ? small : small?.copyWith(color: scheme.tertiary, fontWeight: FontWeight.w700),
+    );
+    if (c == null || widget.onCurrency == null) return text;
+    return InkWell(
+      key: ValueKey('of-cur-${l.row.rowNo}-${v.hashCode}'),
+      onTap: () => widget.onCurrency!(l.row.rowNo, cur == PriceCurrency.jpy ? PriceCurrency.cny : PriceCurrency.jpy),
+      child: text,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -875,8 +1083,9 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
     final scheme = theme.colorScheme;
     final head = theme.textTheme.labelMedium;
     final small = theme.textTheme.bodySmall;
-    // 代理出荷: no stock, nothing taken out, nothing short.
-    final hidden = widget.proxy ? const {9, 10, 11} : const <int>{};
+    // 代理出荷: no stock, nothing taken out, nothing short. 仕入先 is ours to
+    // know, not the shipping side's: kept with the list, not shown (7).
+    final hidden = widget.proxy ? const {7, 9, 10, 11} : const {7};
     Widget cell(int i, Widget child, {bool end = false}) => hidden.contains(i)
         ? const SizedBox.shrink()
         : Container(
@@ -1007,9 +1216,9 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                       key: ValueKey('of-short-${l.row.rowNo}'), style: small?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
                   end: true,
                 ),
-                cell(12, Text(outboundMoney(l.row.priceEx), style: small), end: true),
-                cell(13, Text(outboundMoney(l.row.priceTax), style: small), end: true),
-                cell(14, Text(outboundMoney(l.row.total), style: small), end: true),
+                cell(12, _price(l, l.row.priceEx, small, scheme), end: true),
+                cell(13, _price(l, l.row.priceTax, small, scheme), end: true),
+                cell(14, _price(l, l.row.total, small, scheme), end: true),
                 cell(
                   15,
                   Text(outboundMoney(l.match.lastPrice),

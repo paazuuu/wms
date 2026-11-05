@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ui/help_tab.dart';
 import '../../core/api/api_error_text.dart';
 import '../../core/api/api_result.dart';
 import '../../core/export/save_bytes.dart' show mimeTypeFor;
@@ -313,9 +314,9 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
       appBar: AppBar(
         title: Text(l10n.urTitle),
         bottom: TabBar(controller: _tabs, tabs: [
-          Tab(key: const ValueKey('ur-tab-register'), text: l10n.urTabRegister),
+          HelpTab(help: l10n.urHelpRegister, child: Tab(key: const ValueKey('ur-tab-register'), text: l10n.urTabRegister)),
           // 請求書待ち (0183): receipts no invoice covers yet.
-          Tab(key: const ValueKey('ur-tab-waiting'), text: l10n.urTabWaiting(waiting)),
+          HelpTab(help: l10n.urHelpWaiting, child: Tab(key: const ValueKey('ur-tab-waiting'), text: l10n.urTabWaiting(waiting))),
         ]),
       ),
       body: TabBarView(controller: _tabs, children: [

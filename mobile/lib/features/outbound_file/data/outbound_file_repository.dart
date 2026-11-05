@@ -214,7 +214,21 @@ class OutboundFileSummary extends Equatable {
     this.shipTo,
     this.status = 'shipped',
     this.plannedOn,
+    this.dateUndecided = false,
+    this.currency,
+    this.fxCnyJpy,
   });
+
+  /// A planned list with no day yet (出庫日 未定, 0197): [shippedOn] means
+  /// nothing until one is set.
+  final bool dateUndecided;
+
+  /// The list's main currency (JPY, CNY …) and the rate 1 CNY in JPY, if
+  /// given (0197).
+  final String? currency;
+  final double? fxCnyJpy;
+
+  bool get undecided => planned && dateUndecided;
 
   /// 'planned' (出庫予定: nothing out of stock yet, 0191) or 'shipped'.
   final String status;
@@ -285,11 +299,14 @@ class OutboundFileSummary extends Equatable {
         destinationId: _ni(j['destination_id']),
         status: _s(j['status']) ?? 'shipped',
         plannedOn: _day(j['planned_on']),
+        dateUndecided: j['date_undecided'] == true,
+        currency: _s(j['currency']),
+        fxCnyJpy: _nd(j['fx_cny_jpy']),
         shipTo: j['ship_to'] is Map ? ShipDestination.fromJson((j['ship_to'] as Map).cast<String, dynamic>()) : null,
       );
 
   @override
-  List<Object?> get props => [id, kind, status, shippedOn, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
+  List<Object?> get props => [id, kind, status, shippedOn, dateUndecided, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
 }
 
 /// One row of a posted list.
@@ -316,6 +333,8 @@ class OutboundFileLine extends Equatable {
     this.onHandBefore,
     this.onHandAfter,
     this.unitWeightG,
+    this.currency = 'JPY',
+    this.currencySource,
   });
 
   final int id;
@@ -339,6 +358,11 @@ class OutboundFileLine extends Equatable {
   final int? onHandBefore;
   final int? onHandAfter;
   final double? unitWeightG;
+
+  /// The currency of its prices (JPY, CNY …) and how it was decided:
+  /// 'file', 'ai' or 'manual' (0197).
+  final String currency;
+  final String? currencySource;
 
   double? get weightG => unitWeightG == null ? null : unitWeightG! * (action == 'ship' ? shippedQuantity : quantity);
 
@@ -364,6 +388,8 @@ class OutboundFileLine extends Equatable {
         onHandBefore: _ni(j['on_hand_before']),
         onHandAfter: _ni(j['on_hand_after']),
         unitWeightG: _nd(j['unit_weight_g']),
+        currency: _s(j['currency']) ?? 'JPY',
+        currencySource: _s(j['currency_source']),
       );
 
   @override
@@ -432,6 +458,16 @@ abstract class OutboundFileRepository {
   Future<ApiResult<bool>> setDestination(int fileId, int? destinationId);
 
   Future<ApiResult<Uint8List>> fileBytes(String storagePath);
+
+  /// The planned lists with no day yet (出庫日 未定, 0197).
+  Future<ApiResult<List<OutboundFileSummary>>> undecided({int? warehouseId});
+
+  /// A planned list put back to 未定.
+  Future<ApiResult<bool>> markUndecided(int id);
+
+  /// Each row's currency ({row_no, currency, source}), the list's main one
+  /// and the rate 1 CNY in JPY if known.
+  Future<ApiResult<int>> setCurrency(int id, List<Map<String, dynamic>> lines, {String? currency, double? fxCnyJpy});
 }
 
 class OutboundFileRepositoryImpl implements OutboundFileRepository {
@@ -584,6 +620,40 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
   }
 
   @override
+  Future<ApiResult<List<OutboundFileSummary>>> undecided({int? warehouseId}) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_files_undecided', data: {'p_warehouse_id': warehouseId});
+      final d = _unwrap(r.data);
+      return ApiSuccess([
+        for (final e in (d as List? ?? const []).whereType<Map>()) OutboundFileSummary.fromJson(e.cast<String, dynamic>()),
+      ]);
+    } on DioException catch (e) {
+      return mapDioError<List<OutboundFileSummary>>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> markUndecided(int id) async {
+    try {
+      await _rest.post('/rpc/outbound_file_mark_undecided', data: {'p_id': id});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> setCurrency(int id, List<Map<String, dynamic>> lines, {String? currency, double? fxCnyJpy}) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_set_currency',
+          data: {'p_id': id, 'p_lines': lines, 'p_currency': currency, 'p_fx_cny_jpy': fxCnyJpy});
+      return ApiSuccess(_i(r.data));
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
   Future<ApiResult<Uint8List>> fileBytes(String storagePath) async {
     try {
       final r = await _storage.get<List<int>>('/object/authenticated/$outboundFileBucket/$storagePath',
@@ -613,5 +683,11 @@ final outboundFilesProvider =
 
 final outboundFileDetailProvider = FutureProvider.autoDispose.family<OutboundFileDetail, int>((ref, id) async {
   final r = await ref.watch(outboundFileRepositoryProvider).detail(id);
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+/// The planned lists with no day yet, for the active warehouse or all.
+final outboundUndecidedProvider = FutureProvider.autoDispose.family<List<OutboundFileSummary>, int?>((ref, warehouseId) async {
+  final r = await ref.watch(outboundFileRepositoryProvider).undecided(warehouseId: warehouseId);
   return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });

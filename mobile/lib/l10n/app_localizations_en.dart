@@ -15544,4 +15544,120 @@ class AppLocalizationsEn extends AppLocalizations {
   String tlIncoming(String name) {
     return 'Coming to $name';
   }
+
+  @override
+  String get ofUndecided => 'Not decided';
+
+  @override
+  String get ofBackToUndecided => 'Back to not decided';
+
+  @override
+  String get ofMadeUndecided => 'The day is now not decided';
+
+  @override
+  String get ofSetDay => 'Set the day';
+
+  @override
+  String ofUndecidedTitle(int n) {
+    return 'Shipping day not decided: $n';
+  }
+
+  @override
+  String get ofUndecidedHint =>
+      'Planned lists with no day yet. Set the day when it is known and it goes on the calendar.';
+
+  @override
+  String ofUndecidedMore(int n) {
+    return '$n more';
+  }
+
+  @override
+  String get obHelpFile =>
+      'Read the shipping list from sales (the Excel), match it with the stock and register it as planned (or ship now). Everyday shipping starts here.';
+
+  @override
+  String get obHelpProxy =>
+      'Drop shipping and shipping on behalf of others: kept as a record, no stock moved.';
+
+  @override
+  String get obHelpCards =>
+      'Each consignee with what export papers need (name, address, phone, tax number, port). Chosen when registering a list.';
+
+  @override
+  String get obHelpPacking =>
+      'Packing a customer order into cartons and shipping it: each box\'s contents and weight, and its labels.';
+
+  @override
+  String get obHelpPackingLists =>
+      'Packing lists kept: one uploaded is remade in the improved layout by the AI, the original kept beside it.';
+
+  @override
+  String get obHelpBoxes =>
+      'Our cartons (S/M/L …) and how many go in each maker\'s case. Used to work out the boxes.';
+
+  @override
+  String get obHelpProposal =>
+      'Work out a shipment from the stock: what can go and how many.';
+
+  @override
+  String get sfHelpImport =>
+      'Read a supplier\'s invoice or delivery note (Excel, PDF, photo) into products and stock.';
+
+  @override
+  String get sfHelpOrders =>
+      'Each order\'s progress: received, inspected, paid, proof.';
+
+  @override
+  String get urHelpRegister =>
+      'Goods that came without an order: register from the delivery note photo, check and put in stock on the spot.';
+
+  @override
+  String get urHelpWaiting =>
+      'Unplanned receipts no invoice covers yet. One that will get none (a sample …) is closed without one.';
+
+  @override
+  String get wmHelpCalendar => 'Notes by day, seen again on a calendar.';
+
+  @override
+  String get wmHelpBoard => 'The board: what everyone should know, pinned.';
+
+  @override
+  String get adjHelpProducts =>
+      'Choose a product and add or take away stock, with a reason (damaged, lost, found …).';
+
+  @override
+  String get adjHelpHistory =>
+      'Adjustments made so far: when, who, how many, why.';
+
+  @override
+  String get ofCurrencyJudging =>
+      'The AI is checking the price currency (円 or 元)…';
+
+  @override
+  String ofCurrencyFound(int cny, int all) {
+    return 'Rows judged to be in 元: $cny of $all';
+  }
+
+  @override
+  String ofCurrencyUnsure(int n) {
+    return 'Not sure: $n';
+  }
+
+  @override
+  String get ofFxLabel => '1 元 =';
+
+  @override
+  String get ofCurrencyAllJpy => 'All 円';
+
+  @override
+  String get ofCurrencyAllCny => 'All 元';
+
+  @override
+  String get ofCurrencyTapHint =>
+      'Tap a price to switch 円 ⇄ 元. Each row\'s currency is kept, to put the profit and loss in one currency later.';
+
+  @override
+  String ofFxShown(String rate) {
+    return '1 元 = $rate 円';
+  }
 }
