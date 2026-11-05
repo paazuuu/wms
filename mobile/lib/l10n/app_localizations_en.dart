@@ -15266,4 +15266,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String pkDetailRead(String sheet, int n) {
     return 'Detail sheet \"$sheet\": $n rows (put in the improved file as 明細, quantities checked)';
   }
+
+  @override
+  String get featMenuVisibility => 'What each user sees';
+
+  @override
+  String get featMenuVisibilityDesc =>
+      'Choose which menus and prices ADMIN, managers and users see';
+
+  @override
+  String get tierAdmin => 'ADMIN';
+
+  @override
+  String get tierManager => 'Manager';
+
+  @override
+  String get tierUser => 'User';
+
+  @override
+  String userMgmtTier(String tier) {
+    return 'Kind: $tier';
+  }
+
+  @override
+  String get mvSaved => 'Saved';
+
+  @override
+  String get mvDefaults => 'Back to the defaults';
+
+  @override
+  String get mvHint =>
+      'Only the menus ticked are shown to that kind of user. ADMIN always sees everything. Being shown does not grant use: that is still the role\'s permission.';
+
+  @override
+  String get mvTierAdmin =>
+      'ADMIN: system and company admins (see everything, change this)';
+
+  @override
+  String get mvTierManager =>
+      'Manager: warehouse manager, inventory controller, purchasing, sales';
+
+  @override
+  String get mvTierUser =>
+      'User: everyone else (receiving, inspection, put-away, picking, packing, shipping, viewing) — the floor\'s work only by default';
+
+  @override
+  String get mvContent => 'Content';
+
+  @override
+  String get mvPrices => 'Prices and amounts';
+
+  @override
+  String get mvPricesHint =>
+      'Purchase prices in a product\'s page; prices and amounts in the outbound calendar and detail';
 }

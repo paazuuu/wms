@@ -8665,6 +8665,24 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
     in no box are listed with 0.
   - 箱と入数 tab: メーカーの元箱 (入数) and 自社の段ボール.
 
+## 0193: 表示設定 — ADMIN, 管理者ユーザー and 通常ユーザー
+
+- Three kinds of user from the roles held: ADMIN (system_admin,
+  company_admin), 管理者 (warehouse_manager, inventory_controller,
+  purchasing, sales), 通常 (every other role). No role: nothing hidden (there
+  is no permission to show anything).
+- menu_visibility (feature_id, tier manager|user, visible): set per menu entry,
+  plus content.prices (仕入れ値・金額). menu_visibility_list (anyone signed in),
+  menu_visibility_save (ADMIN only, is_app_admin()).
+- Defaults kept in the app: 通常 sees 現場作業 only; 管理者 sees 商品マスタ,
+  現場作業, 出荷 and reports, locations, partners, stock reconciliation,
+  reservations, and prices; ADMIN sees everything.
+- App: 表示設定 screen (管理, user.manage): a tick per entry and tier, save,
+  back to the defaults. The menu, the dashboard and in-screen links leave out
+  what the tier is not shown; prices hidden take away the purchase price card
+  and the 出庫 amounts. User management shows each user's kind. Only what is
+  offered changes: permissions still decide what may be done.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

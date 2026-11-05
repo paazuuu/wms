@@ -4744,5 +4744,20 @@
   "obHubPackingLists": "装箱单",
   "obHubBoxes": "箱子与入数",
   "ofPacking": "装箱・装箱单",
-  "pkDetailRead": "明细工作表“{sheet}”：{n}行（也放入改进版的明细表并核对数量）"
+  "pkDetailRead": "明细工作表“{sheet}”：{n}行（也放入改进版的明细表并核对数量）",
+  "featMenuVisibility": "显示设置",
+  "featMenuVisibilityDesc": "按ADMIN、管理者、普通用户设置可见的菜单和金额",
+  "tierAdmin": "ADMIN",
+  "tierManager": "管理者",
+  "tierUser": "普通",
+  "userMgmtTier": "类别：{tier}",
+  "mvSaved": "已保存显示设置",
+  "mvDefaults": "恢复推荐设置",
+  "mvHint": "只有勾选的菜单会显示给该类用户。ADMIN始终可以看到全部。显示与否不改变权限，能否使用仍由角色决定。",
+  "mvTierAdmin": "ADMIN：系统管理员、公司管理员（全部可见，可修改本设置）",
+  "mvTierManager": "管理者：仓库负责人、库存管理、采购、销售",
+  "mvTierUser": "普通：其他（收货、检品、上架、拣货、装箱、发货、查看）— 默认仅现场作业",
+  "mvContent": "内容",
+  "mvPrices": "进价・金额",
+  "mvPricesHint": "商品详情的进价，出库日历・出库详情的单价和金额"
 }

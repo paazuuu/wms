@@ -1,3 +1,4 @@
+import '../../admin/data/menu_visibility_repository.dart' show hiddenFeaturesProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,6 +39,7 @@ class DashboardOverviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).user;
     final permissions = user?.permissions ?? const <String>[];
+    final hidden = ref.watch(hiddenFeaturesProvider);
     final userName = user?.name;
     final userEmail = user?.email;
     final groups = buildFeatureCatalog();
@@ -48,7 +50,7 @@ class DashboardOverviewScreen extends ConsumerWidget {
     FeatureEntry? entryById(String id) {
       for (final g in groups) {
         for (final e in g.entries) {
-          if (e.id == id && e.visibleFor(permissions)) return e;
+          if (e.id == id && e.visibleFor(permissions, hidden: hidden)) return e;
         }
       }
       return null;
@@ -117,9 +119,9 @@ class DashboardOverviewScreen extends ConsumerWidget {
         // by an admin and only the *first* sign-in self-assigns a role
         // (bootstrap_first_admin, 0024), so everyone after that lands here
         // until an admin assigns one. Say so rather than showing an empty app.
-        if (groups.every((g) => g.visibleEntries(permissions).isEmpty)) const _NoRoleCard(),
+        if (groups.every((g) => g.visibleEntries(permissions, hidden: hidden).isEmpty)) const _NoRoleCard(),
         for (final group in groups)
-          if (group.visibleEntries(permissions) case final visible when visible.isNotEmpty) ...[
+          if (group.visibleEntries(permissions, hidden: hidden) case final visible when visible.isNotEmpty) ...[
             _SectionLabel(group.title(l10n)),
             const SizedBox(height: AppSpacing.md),
             _FeatureGrid(

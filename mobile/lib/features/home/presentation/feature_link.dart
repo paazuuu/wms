@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../admin/data/menu_visibility_repository.dart' show hiddenFeaturesProvider;
+
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../domain/feature_catalog.dart';
@@ -27,7 +29,7 @@ FeatureEntry? _openable(WidgetRef ref, String id) {
   final perms = ref.exists(authControllerProvider)
       ? ref.watch(authControllerProvider).user?.permissions ?? const <String>[]
       : const <String>[];
-  return e.visibleFor(perms) ? e : null;
+  return e.visibleFor(perms, hidden: ref.watch(hiddenFeaturesProvider)) ? e : null;
 }
 
 void _open(BuildContext context, FeatureEntry e) =>

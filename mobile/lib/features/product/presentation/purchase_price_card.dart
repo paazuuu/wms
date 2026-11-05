@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -116,6 +117,8 @@ class PurchasePriceCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall
         ?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    // 表示設定 (0193): prices hidden from this user's tier.
+    if (!ref.watch(showPricesProvider)) return const SizedBox.shrink();
     final async = ref.watch(purchasePricesProvider(productId));
     final canRecord = ref.watch(canRecordPurchasePriceProvider);
     if (async.hasError && '${async.error}'.contains('not permitted')) {

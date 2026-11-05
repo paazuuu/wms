@@ -13338,5 +13338,27 @@
         "type": "int"
       }
     }
-  }
+  },
+  "featMenuVisibility": "表示設定",
+  "featMenuVisibilityDesc": "ADMIN・管理者・通常ユーザーごとに、見えるメニューと金額の表示を決めます",
+  "tierAdmin": "ADMIN",
+  "tierManager": "管理者",
+  "tierUser": "通常",
+  "userMgmtTier": "区分: {tier}",
+  "@userMgmtTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "mvSaved": "表示設定を保存しました",
+  "mvDefaults": "おすすめに戻す",
+  "mvHint": "チェックしたメニューだけがその区分のユーザーに表示されます。ADMINには常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。",
+  "mvTierAdmin": "ADMIN: システム管理者・会社管理者（すべて表示、この設定を変更できる）",
+  "mvTierManager": "管理者: 倉庫責任者・在庫管理・購買・営業",
+  "mvTierUser": "通常: それ以外（入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ",
+  "mvContent": "内容",
+  "mvPrices": "仕入れ値・金額",
+  "mvPricesHint": "商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額"
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/ai/ai_health_screen.dart';
 import '../../../core/ai/ai_settings_screen.dart';
+import '../../admin/presentation/menu_visibility_screen.dart';
 import '../../admin/presentation/user_management_screen.dart';
 import '../../ai_review/presentation/ai_review_list_screen.dart';
 import '../../audit/presentation/audit_log_screen.dart';
@@ -567,6 +568,14 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _userManagement,
             requiredAnyOf: ['user.manage'],
           ),
+          // 表示設定 (0193): what 管理者 and 通常ユーザー see.
+          FeatureEntry(
+            id: 'menu_visibility',
+            icon: Icons.visibility_outlined,
+            status: FeatureStatus.ready,
+            builder: _menuVisibility,
+            requiredAnyOf: ['user.manage'],
+          ),
           FeatureEntry(
             id: 'connectors',
             icon: Icons.hub_outlined,
@@ -722,6 +731,7 @@ Widget _auditLog(BuildContext _) => const AuditLogScreen();
 
 /// Top-level (const-referenceable) builder for the User Management feature.
 Widget _userManagement(BuildContext _) => const UserManagementScreen();
+Widget _menuVisibility(BuildContext _) => const MenuVisibilityScreen();
 Widget _aiHealth(BuildContext _) => const AiHealthScreen();
 Widget _companyProfile(BuildContext _) => const CompanyProfileScreen();
 Widget _evidence(BuildContext _) => const EvidenceScreen();

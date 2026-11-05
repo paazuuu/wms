@@ -4744,5 +4744,20 @@
   "obHubPackingLists": "Packing lists",
   "obHubBoxes": "Boxes",
   "ofPacking": "Packing / packing list",
-  "pkDetailRead": "Detail sheet \"{sheet}\": {n} rows (put in the improved file as 明細, quantities checked)"
+  "pkDetailRead": "Detail sheet \"{sheet}\": {n} rows (put in the improved file as 明細, quantities checked)",
+  "featMenuVisibility": "What each user sees",
+  "featMenuVisibilityDesc": "Choose which menus and prices ADMIN, managers and users see",
+  "tierAdmin": "ADMIN",
+  "tierManager": "Manager",
+  "tierUser": "User",
+  "userMgmtTier": "Kind: {tier}",
+  "mvSaved": "Saved",
+  "mvDefaults": "Back to the defaults",
+  "mvHint": "Only the menus ticked are shown to that kind of user. ADMIN always sees everything. Being shown does not grant use: that is still the role's permission.",
+  "mvTierAdmin": "ADMIN: system and company admins (see everything, change this)",
+  "mvTierManager": "Manager: warehouse manager, inventory controller, purchasing, sales",
+  "mvTierUser": "User: everyone else (receiving, inspection, put-away, picking, packing, shipping, viewing) — the floor's work only by default",
+  "mvContent": "Content",
+  "mvPrices": "Prices and amounts",
+  "mvPricesHint": "Purchase prices in a product's page; prices and amounts in the outbound calendar and detail"
 }

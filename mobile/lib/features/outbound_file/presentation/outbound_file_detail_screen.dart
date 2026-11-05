@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart'
     show DestinationCardView, copyDestinationCard, pickDestinationCard;
+import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import '../../packing/presentation/packing_screen.dart';
 import '../data/outbound_file_repository.dart';
 import 'outbound_file_screen.dart'
@@ -261,7 +262,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                         : l10n.ofCardLines(f.lineCount, f.shippedTotal),
                     style: theme.textTheme.titleSmall),
                 if (f.shortTotal > 0) Text(l10n.ofCardShort(f.shortTotal), style: TextStyle(color: scheme.error)),
-                if (f.amountTotal != null) Text(l10n.ofSummaryAmount(outboundMoney(f.amountTotal))),
+                if (f.amountTotal != null && ref.watch(showPricesProvider)) Text(l10n.ofSummaryAmount(outboundMoney(f.amountTotal))),
                 if (weight > 0) Text(l10n.ofSummaryWeight(outboundKg(weight))),
               ]),
               const SizedBox(height: AppSpacing.md),
@@ -356,6 +357,8 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     final scheme = theme.colorScheme;
     final head = theme.textTheme.labelMedium;
     final small = theme.textTheme.bodySmall;
+    // 表示設定 (0193): prices hidden from this user's tier.
+    final prices = ref.watch(showPricesProvider);
     const widths = [52.0, 96.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 64.0, 80.0, 80.0, 100.0, 84.0, 96.0, 110.0];
     // 代理出荷: nothing taken out of stock — no 出庫数, 不足 or stock columns.
     final hidden = proxy ? const {8, 9, 15} : const <int>{};
@@ -409,9 +412,9 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                       style: small?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
                   end: true,
                 ),
-                cell(10, Text(outboundMoney(l.unitPrice), style: small), end: true),
-                cell(11, Text(outboundMoney(l.unitPriceTax), style: small), end: true),
-                cell(12, Text(outboundMoney(l.amount), style: small), end: true),
+                cell(10, Text(prices ? outboundMoney(l.unitPrice) : '—', style: small), end: true),
+                cell(11, Text(prices ? outboundMoney(l.unitPriceTax) : '—', style: small), end: true),
+                cell(12, Text(prices ? outboundMoney(l.amount) : '—', style: small), end: true),
                 cell(13, Text(l.weightG == null ? '' : '${outboundKg(l.weightG!)} kg', style: small), end: true),
                 cell(14, Text(l.orderNumber ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 cell(15, Text(l.onHandBefore == null ? '' : '${l.onHandBefore} → ${l.onHandAfter}', style: small), end: true),

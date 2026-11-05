@@ -26410,6 +26410,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'明細シート「{sheet}」: {n}行（改善版にも明細シートとして入れ、数量を照合します）'**
   String pkDetailRead(String sheet, int n);
+
+  /// No description provided for @featMenuVisibility.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示設定'**
+  String get featMenuVisibility;
+
+  /// No description provided for @featMenuVisibilityDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'ADMIN・管理者・通常ユーザーごとに、見えるメニューと金額の表示を決めます'**
+  String get featMenuVisibilityDesc;
+
+  /// No description provided for @tierAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'ADMIN'**
+  String get tierAdmin;
+
+  /// No description provided for @tierManager.
+  ///
+  /// In ja, this message translates to:
+  /// **'管理者'**
+  String get tierManager;
+
+  /// No description provided for @tierUser.
+  ///
+  /// In ja, this message translates to:
+  /// **'通常'**
+  String get tierUser;
+
+  /// No description provided for @userMgmtTier.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分: {tier}'**
+  String userMgmtTier(String tier);
+
+  /// No description provided for @mvSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示設定を保存しました'**
+  String get mvSaved;
+
+  /// No description provided for @mvDefaults.
+  ///
+  /// In ja, this message translates to:
+  /// **'おすすめに戻す'**
+  String get mvDefaults;
+
+  /// No description provided for @mvHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'チェックしたメニューだけがその区分のユーザーに表示されます。ADMINには常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。'**
+  String get mvHint;
+
+  /// No description provided for @mvTierAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'ADMIN: システム管理者・会社管理者（すべて表示、この設定を変更できる）'**
+  String get mvTierAdmin;
+
+  /// No description provided for @mvTierManager.
+  ///
+  /// In ja, this message translates to:
+  /// **'管理者: 倉庫責任者・在庫管理・購買・営業'**
+  String get mvTierManager;
+
+  /// No description provided for @mvTierUser.
+  ///
+  /// In ja, this message translates to:
+  /// **'通常: それ以外（入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ'**
+  String get mvTierUser;
+
+  /// No description provided for @mvContent.
+  ///
+  /// In ja, this message translates to:
+  /// **'内容'**
+  String get mvContent;
+
+  /// No description provided for @mvPrices.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入れ値・金額'**
+  String get mvPrices;
+
+  /// No description provided for @mvPricesHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額'**
+  String get mvPricesHint;
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,4 @@
+import '../../admin/data/menu_visibility_repository.dart' show hiddenFeaturesProvider;
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
@@ -184,6 +185,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           onDashboard: () => _go(AppRoutes.dashboard),
           onLogout: _logout,
           permissions: permissions,
+          hidden: ref.watch(hiddenFeaturesProvider),
           userName: user?.name,
           userEmail: user?.email,
         ));
@@ -681,6 +683,7 @@ class _Sidebar extends StatefulWidget {
     required this.onDashboard,
     required this.onLogout,
     required this.permissions,
+    this.hidden = const {},
     this.userName,
     this.userEmail,
   });
@@ -698,6 +701,9 @@ class _Sidebar extends StatefulWidget {
   /// The signed-in user's permission codes (UI spec §37) — a group with
   /// nothing this user may open is skipped entirely rather than shown empty.
   final List<String> permissions;
+
+  /// Entries this user's tier is not shown (表示設定, 0193).
+  final Set<String> hidden;
   final String? userName;
   final String? userEmail;
 
@@ -747,7 +753,7 @@ class _SidebarState extends State<_Sidebar> {
     final visibleByGroup = {
       for (final group in groups)
         group: group
-            .visibleEntries(permissions)
+            .visibleEntries(permissions, hidden: widget.hidden)
             .where((e) => e.matchesQuery(l10n, _query))
             .toList(),
     };

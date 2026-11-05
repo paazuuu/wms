@@ -14873,4 +14873,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String pkDetailRead(String sheet, int n) {
     return '明细工作表“$sheet”：$n行（也放入改进版的明细表并核对数量）';
   }
+
+  @override
+  String get featMenuVisibility => '显示设置';
+
+  @override
+  String get featMenuVisibilityDesc => '按ADMIN、管理者、普通用户设置可见的菜单和金额';
+
+  @override
+  String get tierAdmin => 'ADMIN';
+
+  @override
+  String get tierManager => '管理者';
+
+  @override
+  String get tierUser => '普通';
+
+  @override
+  String userMgmtTier(String tier) {
+    return '类别：$tier';
+  }
+
+  @override
+  String get mvSaved => '已保存显示设置';
+
+  @override
+  String get mvDefaults => '恢复推荐设置';
+
+  @override
+  String get mvHint => '只有勾选的菜单会显示给该类用户。ADMIN始终可以看到全部。显示与否不改变权限，能否使用仍由角色决定。';
+
+  @override
+  String get mvTierAdmin => 'ADMIN：系统管理员、公司管理员（全部可见，可修改本设置）';
+
+  @override
+  String get mvTierManager => '管理者：仓库负责人、库存管理、采购、销售';
+
+  @override
+  String get mvTierUser => '普通：其他（收货、检品、上架、拣货、装箱、发货、查看）— 默认仅现场作业';
+
+  @override
+  String get mvContent => '内容';
+
+  @override
+  String get mvPrices => '进价・金额';
+
+  @override
+  String get mvPricesHint => '商品详情的进价，出库日历・出库详情的单价和金额';
 }

@@ -58,8 +58,10 @@ class FeatureEntry {
   /// the actual boundary (§37) — this only decides what the menu *offers*, so
   /// tapping a hidden entry was never the only thing standing between an
   /// operator and data they shouldn't see.
-  bool visibleFor(Iterable<String> permissions) =>
-      requiredAnyOf.isEmpty || requiredAnyOf.any(permissions.contains);
+  ///
+  /// [hidden]: entries the user's tier is not shown (表示設定, 0193).
+  bool visibleFor(Iterable<String> permissions, {Set<String> hidden = const {}}) =>
+      !hidden.contains(id) && (requiredAnyOf.isEmpty || requiredAnyOf.any(permissions.contains));
 
   /// Whether this entry should survive a sidebar filter of [query].
   ///
@@ -105,6 +107,8 @@ class FeatureEntry {
         return l10n.featAuditLog;
       case 'user_management':
         return l10n.featUserManagement;
+      case 'menu_visibility':
+        return l10n.featMenuVisibility;
       case 'company_profile':
         return l10n.featCompanyProfile;
       case 'evidence':
@@ -247,6 +251,8 @@ class FeatureEntry {
         return l10n.featAuditLogDesc;
       case 'user_management':
         return l10n.featUserManagementDesc;
+      case 'menu_visibility':
+        return l10n.featMenuVisibilityDesc;
       case 'company_profile':
         return l10n.featCompanyProfileDesc;
       case 'evidence':
@@ -374,8 +380,8 @@ class FeatureGroup {
   /// Entries in this group [permissions] unlock. A group that comes back
   /// empty (every entry gated on something this user lacks) is meant to be
   /// dropped entirely by the caller, not shown as an empty heading.
-  List<FeatureEntry> visibleEntries(Iterable<String> permissions) =>
-      entries.where((e) => e.inMenu && e.visibleFor(permissions)).toList();
+  List<FeatureEntry> visibleEntries(Iterable<String> permissions, {Set<String> hidden = const {}}) =>
+      entries.where((e) => e.inMenu && e.visibleFor(permissions, hidden: hidden)).toList();
 
   /// Localized group heading.
   String title(AppLocalizations l10n) {

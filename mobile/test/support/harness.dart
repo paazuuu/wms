@@ -161,6 +161,7 @@ import 'fake_payments_repository.dart';
 import 'fake_purchase_price_repository.dart';
 import 'fake_outbound_file_repository.dart';
 import 'package:wms_mobile/features/product/data/purchase_price_repository.dart';
+import 'package:wms_mobile/features/admin/data/menu_visibility_repository.dart';
 import 'package:wms_mobile/features/packing/data/packing_repository.dart' show packingRepositoryProvider;
 import 'package:wms_mobile/features/product/presentation/purchase_price_card.dart' show canRecordPurchasePriceProvider;
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
@@ -243,6 +244,8 @@ List<Override> _defaultOverrides() => [
       // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.
       purchasePriceRepositoryProvider.overrideWithValue(FakePurchasePriceRepository()),
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
+      // 表示設定 (0193): nothing set, the defaults apply.
+      menuVisibilityRepositoryProvider.overrideWithValue(FakeMenuVisibilityRepository()),
       // 梱包 (0192): no boxes, cases or packing lists.
       packingRepositoryProvider.overrideWithValue(FakePackingRepository()),
       // Marks and shelf notes (0167): none.
@@ -5576,5 +5579,23 @@ class FakeStockHistoryRepository implements StockHistoryRepository {
   Future<ApiResult<LibraryInflow>> library({int? warehouseId, int days = 90}) async {
     asked.add((warehouseId, days));
     return ApiSuccess(libraryInflow ?? LibraryInflow(since: DateTime(2026, 7, 1)));
+  }
+}
+
+/// 表示設定 (0193) in memory.
+class FakeMenuVisibilityRepository implements MenuVisibilityRepository {
+  FakeMenuVisibilityRepository([Map<String, bool>? settings]) : settings = settings ?? {};
+
+  Map<String, bool> settings;
+  final saved = <Map<String, bool>>[];
+
+  @override
+  Future<ApiResult<Map<String, bool>>> list() async => ApiSuccess(Map.of(settings));
+
+  @override
+  Future<ApiResult<int>> save(Map<String, bool> next) async {
+    saved.add(next);
+    settings = Map.of(next);
+    return ApiSuccess(next.length);
   }
 }

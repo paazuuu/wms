@@ -8,6 +8,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../application/admin_providers.dart';
+import '../domain/user_tier.dart';
+import 'menu_visibility_screen.dart' show userTierLabel;
 import '../domain/app_user_summary.dart';
 
 /// Assigning roles to teammates (spec §21/§22) — the UI half of 0024/0025's
@@ -303,6 +305,15 @@ class _UserCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
+            if (UserTier.of(user.roles.map((r) => r.code)) case final tier?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Text(
+                  l10n.userMgmtTier(userTierLabel(l10n, tier)),
+                  key: ValueKey('um-tier-${user.id}'),
+                  style: theme.textTheme.labelMedium?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700),
+                ),
+              ),
             if (user.roles.isEmpty)
               Text(
                 l10n.userMgmtNoRoles,

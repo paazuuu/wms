@@ -14969,4 +14969,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String pkDetailRead(String sheet, int n) {
     return '明細シート「$sheet」: $n行（改善版にも明細シートとして入れ、数量を照合します）';
   }
+
+  @override
+  String get featMenuVisibility => '表示設定';
+
+  @override
+  String get featMenuVisibilityDesc => 'ADMIN・管理者・通常ユーザーごとに、見えるメニューと金額の表示を決めます';
+
+  @override
+  String get tierAdmin => 'ADMIN';
+
+  @override
+  String get tierManager => '管理者';
+
+  @override
+  String get tierUser => '通常';
+
+  @override
+  String userMgmtTier(String tier) {
+    return '区分: $tier';
+  }
+
+  @override
+  String get mvSaved => '表示設定を保存しました';
+
+  @override
+  String get mvDefaults => 'おすすめに戻す';
+
+  @override
+  String get mvHint =>
+      'チェックしたメニューだけがその区分のユーザーに表示されます。ADMINには常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。';
+
+  @override
+  String get mvTierAdmin => 'ADMIN: システム管理者・会社管理者（すべて表示、この設定を変更できる）';
+
+  @override
+  String get mvTierManager => '管理者: 倉庫責任者・在庫管理・購買・営業';
+
+  @override
+  String get mvTierUser => '通常: それ以外（入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ';
+
+  @override
+  String get mvContent => '内容';
+
+  @override
+  String get mvPrices => '仕入れ値・金額';
+
+  @override
+  String get mvPricesHint => '商品詳細の仕入れ値、出庫カレンダー・出庫詳細の単価と金額';
 }

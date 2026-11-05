@@ -1,3 +1,4 @@
+import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -147,13 +148,13 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
   }
 }
 
-class _FileCard extends StatelessWidget {
+class _FileCard extends ConsumerWidget {
   const _FileCard({required this.file});
 
   final OutboundFileSummary file;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -199,7 +200,8 @@ class _FileCard extends StatelessWidget {
                         style: TextStyle(color: scheme.tertiary, fontWeight: FontWeight.w600)),
                   if (file.principal != null) Text(l10n.prPrincipalLabel(file.principal!), style: muted),
                   if (file.shortTotal > 0) Text(l10n.ofCardShort(file.shortTotal), style: TextStyle(color: scheme.error)),
-                  if (file.amountTotal != null) Text(l10n.ofSummaryAmount(outboundMoney(file.amountTotal)), style: muted),
+                  if (file.amountTotal != null && ref.watch(showPricesProvider))
+                    Text(l10n.ofSummaryAmount(outboundMoney(file.amountTotal)), style: muted),
                   if ((file.weightG ?? 0) > 0) Text(l10n.ofSummaryWeight(outboundKg(file.weightG!)), style: muted),
                   if (file.undone) Text(l10n.ofUndone, style: TextStyle(color: scheme.error)),
                 ]),
