@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
@@ -10,11 +8,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
 import '../../warehouse_context/domain/warehouse_role.dart';
-import '../../warehouse_context/presentation/warehouse_overview_screen.dart'
-    show countryLabel;
 import '../application/transfer_providers.dart';
-import '../data/transfer_repository.dart';
 import '../domain/transfer_order.dart';
+import 'transfer_board_screen.dart';
 import 'transfer_detail_screen.dart';
 import 'transfer_status_ui.dart';
 
@@ -27,7 +23,7 @@ class TransferListScreen extends ConsumerStatefulWidget {
 }
 
 class _TransferListScreenState extends ConsumerState<TransferListScreen> {
-  bool _busy = false;
+  final bool _busy = false;
 
   void _snack(String message, {bool danger = false}) {
     if (!mounted) return;
@@ -65,32 +61,13 @@ class _TransferListScreenState extends ConsumerState<TransferListScreen> {
     } catch (_) {}
     if (!mounted) return;
 
-    final draft = await showModalBottomSheet<_TransferDraft>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _CreateTransferSheet(warehouses: overview.warehouses, roles: roles),
-    );
-    if (draft == null || !mounted) return;
-
-    setState(() => _busy = true);
-    final result = await ref.read(transferRepositoryProvider).create(
-          sourceWarehouseId: draft.sourceId,
-          destinationWarehouseId: draft.destinationId,
-          lines: draft.lines,
-          note: draft.note,
-        );
-    if (!mounted) return;
-    setState(() => _busy = false);
-    result.when(
-      success: (order) {
-        ref.invalidate(transferListProvider);
-        _snack(l10n.transferCreated(order.transferNumber ?? '#${order.id}'));
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => TransferDetailScreen(transferId: order.id),
-        ));
-      },
-      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
-    );
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => TransferBoardScreen(
+        warehouses: overview.warehouses,
+        roles: roles,
+        initialSourceId: ref.read(activeWarehouseIdProvider),
+      ),
+    ));
   }
 
   @override
@@ -126,18 +103,144 @@ class _TransferListScreenState extends ConsumerState<TransferListScreen> {
           }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(transferListProvider),
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg,
-                  AppSpacing.lg, AppSpacing.xxl * 2),
-              itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, i) => _TransferCard(order: list[i]),
-            ),
+            child: _filtered(context, list),
           );
         },
       ),
     );
   }
+
+  // Filters: state, the warehouse it leaves, the one it goes to, a word.
+  _TransferState _state = _TransferState.all;
+  int? _from;
+  int? _to;
+  final _q = TextEditingController();
+
+  @override
+  void dispose() {
+    _q.dispose();
+    super.dispose();
+  }
+
+  bool _matches(TransferOrder o) {
+    if (!_state.has(o.status)) return false;
+    if (_from != null && o.sourceWarehouseId != _from) return false;
+    if (_to != null && o.destinationWarehouseId != _to) return false;
+    final q = _q.text.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    return [o.transferNumber, o.sourceWarehouseName, o.destinationWarehouseName, o.note, '${o.id}']
+        .any((t) => (t ?? '').toLowerCase().contains(q));
+  }
+
+  Widget _filtered(BuildContext context, List<TransferOrder> list) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final active = ref.watch(activeWarehouseIdProvider);
+    final names = <int, String>{
+      for (final o in list) o.sourceWarehouseId: o.sourceWarehouseName ?? '#${o.sourceWarehouseId}',
+      for (final o in list) o.destinationWarehouseId: o.destinationWarehouseName ?? '#${o.destinationWarehouseId}',
+    };
+    final shown = list.where(_matches).toList();
+    Widget whField(String key, String label, int? value, ValueChanged<int?> onChanged, IconData icon) => SizedBox(
+          width: 220,
+          child: DropdownButtonFormField<int?>(
+            key: ValueKey(key),
+            initialValue: value,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon, size: 18), isDense: true),
+            items: [
+              DropdownMenuItem<int?>(value: null, child: Text(l10n.tlAll)),
+              for (final e in names.entries) DropdownMenuItem<int?>(value: e.key, child: Text(e.value)),
+            ],
+            onChanged: onChanged,
+          ),
+        );
+    Widget section(String key, String title, IconData icon, List<TransferOrder> items) => Column(
+          key: ValueKey(key),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.xs),
+              child: Row(children: [
+                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: AppSpacing.xs),
+                Text('$title（${items.length}）', style: theme.textTheme.titleSmall),
+              ]),
+            ),
+            if (items.isEmpty)
+              Padding(padding: const EdgeInsets.all(AppSpacing.sm), child: Text(l10n.tlNone, style: theme.textTheme.bodySmall)),
+            for (final o in items)
+              Padding(padding: const EdgeInsets.only(bottom: AppSpacing.sm), child: _TransferCard(order: o)),
+          ],
+        );
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl * 2),
+      children: [
+        Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          for (final st in _TransferState.values)
+            ChoiceChip(
+              key: ValueKey('tl-state-${st.name}'),
+              label: Text(st.label(l10n)),
+              selected: _state == st,
+              onSelected: (_) => setState(() => _state = st),
+            ),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
+          whField('tl-from', l10n.tbSource, _from, (v) => setState(() => _from = v), Icons.outbox_outlined),
+          whField('tl-to', l10n.tbDestination, _to, (v) => setState(() => _to = v), Icons.move_to_inbox_outlined),
+          SizedBox(
+            width: 260,
+            child: TextField(
+              key: const ValueKey('tl-search'),
+              controller: _q,
+              decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.tlSearch, isDense: true),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+        ]),
+        if (shown.isEmpty)
+          Padding(padding: const EdgeInsets.all(AppSpacing.xl), child: Center(child: Text(l10n.tlNone)))
+        // A warehouse chosen at the top: what leaves it and what comes in,
+        // apart.
+        else if (active != null) ...[
+          section('tl-out', l10n.tlOutgoing(names[active] ?? ''), Icons.outbox_outlined,
+              [for (final o in shown) if (o.sourceWarehouseId == active) o]),
+          section('tl-in', l10n.tlIncoming(names[active] ?? ''), Icons.move_to_inbox_outlined,
+              [for (final o in shown) if (o.destinationWarehouseId == active) o]),
+        ] else ...[
+          const SizedBox(height: AppSpacing.sm),
+          for (final o in shown) Padding(padding: const EdgeInsets.only(bottom: AppSpacing.sm), child: _TransferCard(order: o)),
+        ],
+      ],
+    );
+  }
+}
+
+/// The states the list is narrowed to.
+enum _TransferState {
+  all,
+  open,
+  inTransit,
+  done,
+  closed;
+
+  bool has(TransferStatus s) => switch (this) {
+        all => true,
+        open => const {TransferStatus.draft, TransferStatus.pendingApproval, TransferStatus.approved, TransferStatus.picking}
+            .contains(s),
+        inTransit => s == TransferStatus.inTransit || s == TransferStatus.receiving,
+        done => s == TransferStatus.completed || s == TransferStatus.exported,
+        closed => s == TransferStatus.rejected || s == TransferStatus.cancelled,
+      };
+
+  String label(AppLocalizations l10n) => switch (this) {
+        all => l10n.tlAll,
+        open => l10n.tlOpen,
+        inTransit => l10n.tlInTransit,
+        done => l10n.tlDone,
+        closed => l10n.tlClosed,
+      };
 }
 
 class _TransferCard extends StatelessWidget {
@@ -228,284 +331,6 @@ class _TransferCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _TransferDraft {
-  const _TransferDraft({
-    required this.sourceId,
-    required this.destinationId,
-    required this.lines,
-    this.note,
-  });
-  final int sourceId;
-  final int destinationId;
-  final List<TransferLineDraft> lines;
-  final String? note;
-}
-
-class _CreateTransferSheet extends StatefulWidget {
-  const _CreateTransferSheet({required this.warehouses, this.roles = const {}});
-
-  final List<Warehouse> warehouses;
-
-  /// Country and cross-border role per warehouse, to warn before an export.
-  final Map<int, WarehouseRole> roles;
-
-  @override
-  State<_CreateTransferSheet> createState() => _CreateTransferSheetState();
-}
-
-class _CreateTransferSheetState extends State<_CreateTransferSheet> {
-  WarehouseRole? _role(int id) => widget.roles[id];
-
-  late int _sourceId = widget.warehouses.first.id;
-  late int _destinationId =
-      widget.warehouses.length > 1 ? widget.warehouses[1].id : widget.warehouses.first.id;
-  final _note = TextEditingController();
-  final List<TransferLineDraft> _lines = [];
-  String? _error;
-
-  @override
-  void dispose() {
-    _note.dispose();
-    super.dispose();
-  }
-
-  String _label(AppLocalizations l10n, Warehouse w) {
-    final role = _role(w.id);
-    return role == null ? w.name : '${w.name}（${countryLabel(l10n, role.countryCode)}）';
-  }
-
-  /// Said before the transfer is made, because an export cannot be received
-  /// back: what leaves across a border is gone from this system (0087).
-  String? _crossBorderNote(AppLocalizations l10n) {
-    final from = _role(_sourceId);
-    final to = _role(_destinationId);
-    if (from == null || to == null || from.countryCode == to.countryCode) return null;
-    return to.receivesCrossBorder
-        ? l10n.transferCrossBorderReceived(countryLabel(l10n, to.countryCode))
-        : l10n.transferCrossBorderExport(countryLabel(l10n, to.countryCode));
-  }
-
-  Future<void> _addLine() async {
-    final draft = await showDialog<TransferLineDraft>(
-      context: context,
-      builder: (_) => const _AddLineDialog(),
-    );
-    if (draft == null) return;
-    setState(() {
-      _lines.add(draft);
-      _error = null;
-    });
-  }
-
-  void _submit() {
-    final l10n = AppLocalizations.of(context);
-    if (_sourceId == _destinationId) {
-      setState(() => _error = l10n.transferNeedsTwoWarehouses);
-      return;
-    }
-    if (_lines.isEmpty) {
-      setState(() => _error = l10n.transferLineRequired);
-      return;
-    }
-    Navigator.pop(
-      context,
-      _TransferDraft(
-        sourceId: _sourceId,
-        destinationId: _destinationId,
-        lines: _lines,
-        note: _note.text.trim(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.4,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (context, controller) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: ListView(
-          controller: controller,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            Text(l10n.transferNew, style: theme.textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.lg),
-            DropdownButtonFormField<int>(
-              initialValue: _sourceId,
-              decoration: InputDecoration(labelText: l10n.transferSource),
-              items: [
-                for (final w in widget.warehouses)
-                  DropdownMenuItem(value: w.id, child: Text(_label(l10n, w))),
-              ],
-              onChanged: (v) => setState(() => _sourceId = v ?? _sourceId),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            DropdownButtonFormField<int>(
-              initialValue: _destinationId,
-              decoration: InputDecoration(labelText: l10n.transferDestination),
-              items: [
-                for (final w in widget.warehouses)
-                  DropdownMenuItem(value: w.id, child: Text(_label(l10n, w))),
-              ],
-              onChanged: (v) => setState(() => _destinationId = v ?? _destinationId),
-            ),
-            if (_crossBorderNote(l10n) case final note?) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Card(
-                color: theme.colorScheme.tertiaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.public),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(child: Text(note)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(l10n.transferLinesTitle,
-                      style: theme.textTheme.labelLarge),
-                ),
-                TextButton.icon(
-                  onPressed: _addLine,
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.transferAddLine),
-                ),
-              ],
-            ),
-            for (final line in _lines)
-              Card(
-                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: ListTile(
-                  dense: true,
-                  title: Text(line.productName?.isNotEmpty == true
-                      ? line.productName!
-                      : line.janCode),
-                  subtitle: Text(line.janCode,
-                      style: const TextStyle(fontFamily: AppFonts.mono)),
-                  trailing: Text('${line.quantity}',
-                      style: const TextStyle(
-                          fontFamily: AppFonts.mono, fontWeight: FontWeight.w600)),
-                ),
-              ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _note,
-              decoration: InputDecoration(labelText: l10n.transferNote),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(_error!,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.error)),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              height: AppSpacing.minTouch,
-              child: FilledButton(
-                onPressed: _submit,
-                child: Text(l10n.transferCreate),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AddLineDialog extends StatefulWidget {
-  const _AddLineDialog();
-
-  @override
-  State<_AddLineDialog> createState() => _AddLineDialogState();
-}
-
-class _AddLineDialogState extends State<_AddLineDialog> {
-  final _jan = TextEditingController();
-  final _productName = TextEditingController();
-  final _quantity = TextEditingController();
-
-  @override
-  void dispose() {
-    _jan.dispose();
-    _productName.dispose();
-    _quantity.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final jan = _jan.text.trim();
-    final qty = int.tryParse(_quantity.text.trim()) ?? 0;
-    if (jan.isEmpty || qty <= 0) return;
-    Navigator.pop(
-      context,
-      TransferLineDraft(
-        janCode: jan,
-        quantity: qty,
-        productName: _productName.text.trim(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.transferAddLine),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _jan,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(labelText: l10n.transferLineJan),
-            style: const TextStyle(fontFamily: AppFonts.mono),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _productName,
-            decoration: InputDecoration(labelText: l10n.transferLineProductName),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _quantity,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(labelText: l10n.transferLineQuantity),
-            style: const TextStyle(fontFamily: AppFonts.mono),
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.actionCancel),
-        ),
-        FilledButton(onPressed: _submit, child: Text(l10n.transferAddLine)),
-      ],
     );
   }
 }

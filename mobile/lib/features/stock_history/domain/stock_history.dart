@@ -56,6 +56,9 @@ class StockEvent extends Equatable {
     this.fileName,
     this.importId,
     this.note,
+    this.importKind,
+    this.noInvoiceReason,
+    this.invoiceState,
   });
 
   final int id;
@@ -70,6 +73,17 @@ class StockEvent extends Equatable {
   final int? importId;
   final String? note;
 
+  /// The file's kind: 'unplanned' for 予定外の入荷 (0181).
+  final String? importKind;
+
+  /// 請求書なしで完了 (0183): why.
+  final String? noInvoiceReason;
+
+  /// For 予定外の入荷 (0196): 'waiting' 請求書待ち, 'invoiced', 'none' 請求書なし.
+  final String? invoiceState;
+
+  bool get unplanned => importKind == 'unplanned';
+
   factory StockEvent.fromJson(Map<String, dynamic> j) => StockEvent(
         id: _int(j['id']),
         at: _at(j['at']),
@@ -80,10 +94,13 @@ class StockEvent extends Equatable {
         fileName: _text(j['file_name']),
         importId: (j['import_id'] as num?)?.toInt(),
         note: _text(j['note']),
+        importKind: _text(j['import_kind']),
+        noInvoiceReason: _text(j['no_invoice_reason']),
+        invoiceState: _text(j['invoice_state']),
       );
 
   @override
-  List<Object?> get props => [id, at, method, quantity, type, warehouseName, fileName, importId, note];
+  List<Object?> get props => [id, at, method, quantity, type, warehouseName, fileName, importId, note, invoiceState];
 }
 
 /// A product's stock over a period: where it started, each change, and

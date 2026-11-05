@@ -15127,4 +15127,118 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get umSetSave => 'このパスワードにする';
+
+  @override
+  String get shUnplanned => '予定外の入荷';
+
+  @override
+  String shNoInvoice(String reason) {
+    return '請求書なし: $reason';
+  }
+
+  @override
+  String get shInvoiced => '請求書あり';
+
+  @override
+  String get shWaitingInvoice => '請求書待ち';
+
+  @override
+  String get tbSource => '出庫する倉庫';
+
+  @override
+  String get tbDestination => '入庫する倉庫';
+
+  @override
+  String get tbSwap => '入れ替える';
+
+  @override
+  String get tbHint =>
+      '左（出庫する倉庫の在庫）から右へ商品をドラッグするか「→」を押すと、移動する商品に入ります。出荷明細などのファイル（JANまたは品番と数量）を読み込んでまとめて入れることもできます。';
+
+  @override
+  String get tbSearch => '商品名・メーカー・JAN・品番で検索';
+
+  @override
+  String get tbSourceEmpty => 'この倉庫に在庫のある商品はありません';
+
+  @override
+  String tbOnHand(int n) {
+    return '在庫 $n';
+  }
+
+  @override
+  String get tbMoveThis => '移動する商品に入れる';
+
+  @override
+  String get tbDropHere => 'ここに商品をドラッグ';
+
+  @override
+  String tbSourcePanel(String name) {
+    return '出庫: $name（在庫）';
+  }
+
+  @override
+  String tbDestinationPanel(String name, int lines, int qty) {
+    return '入庫: $name へ移動する商品 $lines品目・$qty個';
+  }
+
+  @override
+  String get tbFile => 'ファイルから読み込む';
+
+  @override
+  String tbFileFailed(String e) {
+    return 'ファイルを読めませんでした: $e';
+  }
+
+  @override
+  String get tbFileEmpty => 'JAN（または品番）と数量のある行が見つかりませんでした';
+
+  @override
+  String tbFileRead(int n) {
+    return 'ファイルから$n行を入れました';
+  }
+
+  @override
+  String tbFileReadMissing(int n, int missing, String list) {
+    return '$n行を入れました。商品が見つからない行: $missing（$list）';
+  }
+
+  @override
+  String tbOver(int n) {
+    return '在庫 $n を超えています';
+  }
+
+  @override
+  String get tbRemove => '外す';
+
+  @override
+  String get tlAll => 'すべて';
+
+  @override
+  String get tlOpen => '準備中';
+
+  @override
+  String get tlInTransit => '輸送中・入庫中';
+
+  @override
+  String get tlDone => '完了';
+
+  @override
+  String get tlClosed => '取消・却下';
+
+  @override
+  String get tlSearch => '移動番号・倉庫・備考で検索';
+
+  @override
+  String get tlNone => '該当する移動はありません';
+
+  @override
+  String tlOutgoing(String name) {
+    return '$name から出す（出庫）';
+  }
+
+  @override
+  String tlIncoming(String name) {
+    return '$name に入る（入庫）';
+  }
 }

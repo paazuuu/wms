@@ -1660,9 +1660,13 @@ class FakeTransferRepository implements TransferRepository {
     required List<TransferLineDraft> lines,
     String? note,
   }) async {
+    created.add((sourceWarehouseId: sourceWarehouseId, destinationWarehouseId: destinationWarehouseId, lines: lines));
     if (failWith != null) return ApiFailure(message: failWith!);
     return ApiSuccess(_order);
   }
+
+  /// Every create() asked for.
+  final created = <({int sourceWarehouseId, int destinationWarehouseId, List<TransferLineDraft> lines})>[];
 
   @override
   Future<ApiResult<TransferOrder>> submit(int id) async =>

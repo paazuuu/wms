@@ -25,6 +25,23 @@ final _history = ProductStockHistory.fromJson({
   ],
 });
 
+/// 予定外の入荷 (0196): one waiting for its invoice, one closed without.
+final _unplanned = ProductStockHistory.fromJson({
+  'since': '2026-10-01T00:00:00Z',
+  'start': 0,
+  'current': 30,
+  'events': [
+    {
+      'id': 11, 'at': '2026-10-02T01:00:00Z', 'method': 'file_stock', 'quantity': 20, 'file_name': '予定外の入荷 #13',
+      'import_id': 13, 'import_kind': 'unplanned', 'invoice_state': 'waiting',
+    },
+    {
+      'id': 12, 'at': '2026-10-05T01:00:00Z', 'method': 'file_stock', 'quantity': 10, 'file_name': '予定外の入荷 #14',
+      'import_id': 14, 'import_kind': 'unplanned', 'invoice_state': 'none', 'no_invoice_reason': 'sample',
+    },
+  ],
+});
+
 final _inflow = LibraryInflow.fromJson({
   'since': '2026-07-24T00:00:00Z',
   'days': [
@@ -85,6 +102,18 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('sh-days-30')));
     await tester.pumpAndSettle();
     expect(repo.asked.last, (1, 30));
+  });
+
+  testWidgets('a receipt closed without an invoice is marked, so a mistake is seen looking back', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const Scaffold(body: SingleChildScrollView(child: ProductStockChartCard(productId: 1, warehouseId: 1))),
+        overrides: [stockHistoryRepositoryProvider.overrideWithValue(FakeStockHistoryRepository(product: _unplanned))]);
+    final waiting = find.byKey(const ValueKey('sh-event-11'));
+    expect(find.descendant(of: waiting, matching: find.text('予定外の入荷')), findsOneWidget);
+    expect(find.descendant(of: waiting, matching: find.text('請求書待ち')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sh-no-invoice-12')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('sh-event-12')), matching: find.textContaining('請求書なし: ')), findsOneWidget);
   });
 
   testWidgets('the library shows units added by how, as running totals, and every file', (tester) async {

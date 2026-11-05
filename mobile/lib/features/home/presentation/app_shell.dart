@@ -218,7 +218,10 @@ class _AppShellState extends ConsumerState<AppShell> {
         // Its own selection area, beside the sidebar: see [SelectablePane].
         Expanded(
           child: SelectablePane(
-            child: _TabStack(tabs: tabs, activeLocation: location),
+            // The location just opened is shown at once: the strip only
+            // catches up a frame later, and until then the stack would
+            // otherwise show its first tab (the dashboard flashing by).
+            child: _TabStack(tabs: tabs.contains(location) ? tabs : [...tabs, location], activeLocation: location),
           ),
         ),
       ],
@@ -330,8 +333,8 @@ class _TabStack extends StatelessWidget {
     final index = tabs.indexOf(activeLocation);
 
     return IndexedStack(
-      // A location the strip has not caught up with yet (the tab is opened a
-      // frame later) would otherwise index to -1.
+      // The shell passes the active location in even before the strip has
+      // it, so -1 does not happen; 0 is only a guard.
       index: index < 0 ? 0 : index,
       sizing: StackFit.expand,
       children: [

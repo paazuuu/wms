@@ -13420,5 +13420,118 @@
   "umSetAutoHint": "12文字の仮パスワードを作ります（紛らわしい文字は使いません）。",
   "umSetShow": "表示する",
   "umSetHide": "隠す",
-  "umSetSave": "このパスワードにする"
+  "umSetSave": "このパスワードにする",
+  "shUnplanned": "予定外の入荷",
+  "shNoInvoice": "請求書なし: {reason}",
+  "@shNoInvoice": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "shInvoiced": "請求書あり",
+  "shWaitingInvoice": "請求書待ち",
+  "tbSource": "出庫する倉庫",
+  "tbDestination": "入庫する倉庫",
+  "tbSwap": "入れ替える",
+  "tbHint": "左（出庫する倉庫の在庫）から右へ商品をドラッグするか「→」を押すと、移動する商品に入ります。出荷明細などのファイル（JANまたは品番と数量）を読み込んでまとめて入れることもできます。",
+  "tbSearch": "商品名・メーカー・JAN・品番で検索",
+  "tbSourceEmpty": "この倉庫に在庫のある商品はありません",
+  "tbOnHand": "在庫 {n}",
+  "@tbOnHand": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tbMoveThis": "移動する商品に入れる",
+  "tbDropHere": "ここに商品をドラッグ",
+  "tbSourcePanel": "出庫: {name}（在庫）",
+  "@tbSourcePanel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tbDestinationPanel": "入庫: {name} へ移動する商品 {lines}品目・{qty}個",
+  "@tbDestinationPanel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "tbFile": "ファイルから読み込む",
+  "tbFileFailed": "ファイルを読めませんでした: {e}",
+  "@tbFileFailed": {
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "tbFileEmpty": "JAN（または品番）と数量のある行が見つかりませんでした",
+  "tbFileRead": "ファイルから{n}行を入れました",
+  "@tbFileRead": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tbFileReadMissing": "{n}行を入れました。商品が見つからない行: {missing}（{list}）",
+  "@tbFileReadMissing": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "tbOver": "在庫 {n} を超えています",
+  "@tbOver": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tbRemove": "外す",
+  "tlAll": "すべて",
+  "tlOpen": "準備中",
+  "tlInTransit": "輸送中・入庫中",
+  "tlDone": "完了",
+  "tlClosed": "取消・却下",
+  "tlSearch": "移動番号・倉庫・備考で検索",
+  "tlNone": "該当する移動はありません",
+  "tlOutgoing": "{name} から出す（出庫）",
+  "@tlOutgoing": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tlIncoming": "{name} に入る（入庫）",
+  "@tlIncoming": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

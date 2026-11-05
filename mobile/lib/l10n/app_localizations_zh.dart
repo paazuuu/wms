@@ -15025,4 +15025,117 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get umSetSave => '设为此密码';
+
+  @override
+  String get shUnplanned => '计划外入库';
+
+  @override
+  String shNoInvoice(String reason) {
+    return '无发票：$reason';
+  }
+
+  @override
+  String get shInvoiced => '已有发票';
+
+  @override
+  String get shWaitingInvoice => '等待发票';
+
+  @override
+  String get tbSource => '出库仓库';
+
+  @override
+  String get tbDestination => '入库仓库';
+
+  @override
+  String get tbSwap => '互换';
+
+  @override
+  String get tbHint => '将商品从左侧（出库仓库的库存）拖到右侧，或按“→”即加入移动。也可读取文件（JAN或品番及数量）一次加入。';
+
+  @override
+  String get tbSearch => '按商品名、厂家、JAN、品番搜索';
+
+  @override
+  String get tbSourceEmpty => '该仓库没有库存商品';
+
+  @override
+  String tbOnHand(int n) {
+    return '库存 $n';
+  }
+
+  @override
+  String get tbMoveThis => '加入移动';
+
+  @override
+  String get tbDropHere => '把商品拖到这里';
+
+  @override
+  String tbSourcePanel(String name) {
+    return '出库：$name（库存）';
+  }
+
+  @override
+  String tbDestinationPanel(String name, int lines, int qty) {
+    return '入库：移往 $name 的商品 $lines种・$qty个';
+  }
+
+  @override
+  String get tbFile => '从文件读取';
+
+  @override
+  String tbFileFailed(String e) {
+    return '无法读取文件：$e';
+  }
+
+  @override
+  String get tbFileEmpty => '未找到含JAN（或品番）和数量的行';
+
+  @override
+  String tbFileRead(int n) {
+    return '已从文件加入$n行';
+  }
+
+  @override
+  String tbFileReadMissing(int n, int missing, String list) {
+    return '已加入$n行。找不到商品的行：$missing（$list）';
+  }
+
+  @override
+  String tbOver(int n) {
+    return '超过库存 $n';
+  }
+
+  @override
+  String get tbRemove => '移除';
+
+  @override
+  String get tlAll => '全部';
+
+  @override
+  String get tlOpen => '准备中';
+
+  @override
+  String get tlInTransit => '运输中・入库中';
+
+  @override
+  String get tlDone => '完成';
+
+  @override
+  String get tlClosed => '取消・驳回';
+
+  @override
+  String get tlSearch => '按移动编号、仓库、备注搜索';
+
+  @override
+  String get tlNone => '没有符合的移动';
+
+  @override
+  String tlOutgoing(String name) {
+    return '从 $name 发出（出库）';
+  }
+
+  @override
+  String tlIncoming(String name) {
+    return '进入 $name（入库）';
+  }
 }

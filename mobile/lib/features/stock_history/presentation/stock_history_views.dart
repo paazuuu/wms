@@ -5,8 +5,11 @@ import 'package:intl/intl.dart';
 import '../../../core/api/api_error_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
+import '../../../core/ui/status_pill.dart';
 import '../../../core/ui/time_line_chart.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../stock_import/domain/stock_ledger.dart' show NoInvoiceReason;
+import '../../unplanned_receipt/unplanned_waiting_tab.dart' show noInvoiceReasonLabel;
 import '../data/stock_history_repository.dart';
 import '../domain/stock_history.dart';
 
@@ -122,11 +125,31 @@ class ProductStockChartCard extends ConsumerWidget {
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(e.method.isFile ? Icons.upload_file_outlined : Icons.swap_vert, size: 20),
                       title: Text('${_signed(e.quantity)}　${stockMethodLabel(l10n, e.method)}'),
-                      subtitle: Text([
-                        fmt.format(at.toLocal()),
-                        if (e.fileName != null) e.fileName!,
-                        if (e.warehouseName != null) e.warehouseName!,
-                      ].join(' · ')),
+                      subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text([
+                          fmt.format(at.toLocal()),
+                          if (e.fileName != null) e.fileName!,
+                          if (e.warehouseName != null) e.warehouseName!,
+                        ].join(' · ')),
+                        // 予定外の入荷 and where its invoice stands (0196), so
+                        // a 「請求書なしで完了」 pressed by mistake is seen.
+                        if (e.unplanned)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Wrap(spacing: AppSpacing.xs, runSpacing: 2, children: [
+                              StatusPill(tone: StatusTone.info, label: l10n.shUnplanned, dense: true),
+                              switch (e.invoiceState) {
+                                'none' => StatusPill(
+                                    key: ValueKey('sh-no-invoice-${e.id}'),
+                                    tone: StatusTone.warning,
+                                    label: l10n.shNoInvoice(unplannedReasonText(l10n, e.noInvoiceReason)),
+                                    dense: true),
+                                'invoiced' => StatusPill(tone: StatusTone.success, label: l10n.shInvoiced, dense: true),
+                                _ => StatusPill(tone: StatusTone.neutral, label: l10n.shWaitingInvoice, dense: true),
+                              },
+                            ]),
+                          ),
+                      ]),
                       trailing: Text(l10n.shAfter(level), style: theme.textTheme.bodyMedium),
                     ),
               ]);
@@ -253,4 +276,10 @@ class LibraryInflowView extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// The reason a receipt was closed without an invoice, in words ('' if none).
+String unplannedReasonText(AppLocalizations l10n, String? wire) {
+  final r = NoInvoiceReason.fromWire(wire);
+  return r == null ? '' : noInvoiceReasonLabel(l10n, r);
 }

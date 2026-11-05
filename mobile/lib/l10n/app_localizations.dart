@@ -26692,6 +26692,192 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'このパスワードにする'**
   String get umSetSave;
+
+  /// No description provided for @shUnplanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get shUnplanned;
+
+  /// No description provided for @shNoInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書なし: {reason}'**
+  String shNoInvoice(String reason);
+
+  /// No description provided for @shInvoiced.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書あり'**
+  String get shInvoiced;
+
+  /// No description provided for @shWaitingInvoice.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書待ち'**
+  String get shWaitingInvoice;
+
+  /// No description provided for @tbSource.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫する倉庫'**
+  String get tbSource;
+
+  /// No description provided for @tbDestination.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫する倉庫'**
+  String get tbDestination;
+
+  /// No description provided for @tbSwap.
+  ///
+  /// In ja, this message translates to:
+  /// **'入れ替える'**
+  String get tbSwap;
+
+  /// No description provided for @tbHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'左（出庫する倉庫の在庫）から右へ商品をドラッグするか「→」を押すと、移動する商品に入ります。出荷明細などのファイル（JANまたは品番と数量）を読み込んでまとめて入れることもできます。'**
+  String get tbHint;
+
+  /// No description provided for @tbSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・メーカー・JAN・品番で検索'**
+  String get tbSearch;
+
+  /// No description provided for @tbSourceEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この倉庫に在庫のある商品はありません'**
+  String get tbSourceEmpty;
+
+  /// No description provided for @tbOnHand.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {n}'**
+  String tbOnHand(int n);
+
+  /// No description provided for @tbMoveThis.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動する商品に入れる'**
+  String get tbMoveThis;
+
+  /// No description provided for @tbDropHere.
+  ///
+  /// In ja, this message translates to:
+  /// **'ここに商品をドラッグ'**
+  String get tbDropHere;
+
+  /// No description provided for @tbSourcePanel.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫: {name}（在庫）'**
+  String tbSourcePanel(String name);
+
+  /// No description provided for @tbDestinationPanel.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫: {name} へ移動する商品 {lines}品目・{qty}個'**
+  String tbDestinationPanel(String name, int lines, int qty);
+
+  /// No description provided for @tbFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから読み込む'**
+  String get tbFile;
+
+  /// No description provided for @tbFileFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを読めませんでした: {e}'**
+  String tbFileFailed(String e);
+
+  /// No description provided for @tbFileEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN（または品番）と数量のある行が見つかりませんでした'**
+  String get tbFileEmpty;
+
+  /// No description provided for @tbFileRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから{n}行を入れました'**
+  String tbFileRead(int n);
+
+  /// No description provided for @tbFileReadMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行を入れました。商品が見つからない行: {missing}（{list}）'**
+  String tbFileReadMissing(int n, int missing, String list);
+
+  /// No description provided for @tbOver.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {n} を超えています'**
+  String tbOver(int n);
+
+  /// No description provided for @tbRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'外す'**
+  String get tbRemove;
+
+  /// No description provided for @tlAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get tlAll;
+
+  /// No description provided for @tlOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'準備中'**
+  String get tlOpen;
+
+  /// No description provided for @tlInTransit.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送中・入庫中'**
+  String get tlInTransit;
+
+  /// No description provided for @tlDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get tlDone;
+
+  /// No description provided for @tlClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'取消・却下'**
+  String get tlClosed;
+
+  /// No description provided for @tlSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'移動番号・倉庫・備考で検索'**
+  String get tlSearch;
+
+  /// No description provided for @tlNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'該当する移動はありません'**
+  String get tlNone;
+
+  /// No description provided for @tlOutgoing.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} から出す（出庫）'**
+  String tlOutgoing(String name);
+
+  /// No description provided for @tlIncoming.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} に入る（入庫）'**
+  String tlIncoming(String name);
 }
 
 class _AppLocalizationsDelegate

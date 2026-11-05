@@ -15430,4 +15430,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umSetSave => 'Set it';
+
+  @override
+  String get shUnplanned => 'Unplanned receipt';
+
+  @override
+  String shNoInvoice(String reason) {
+    return 'No invoice: $reason';
+  }
+
+  @override
+  String get shInvoiced => 'Invoiced';
+
+  @override
+  String get shWaitingInvoice => 'Waiting for the invoice';
+
+  @override
+  String get tbSource => 'Leaves from';
+
+  @override
+  String get tbDestination => 'Goes to';
+
+  @override
+  String get tbSwap => 'Swap';
+
+  @override
+  String get tbHint =>
+      'Drag a product from the left (what the leaving warehouse holds) to the right, or press →. Or read a file (JAN or item no. and quantity) to fill it at once.';
+
+  @override
+  String get tbSearch => 'Search by name, maker, JAN or item no.';
+
+  @override
+  String get tbSourceEmpty => 'Nothing in stock here';
+
+  @override
+  String tbOnHand(int n) {
+    return 'On hand $n';
+  }
+
+  @override
+  String get tbMoveThis => 'Move this';
+
+  @override
+  String get tbDropHere => 'Drag products here';
+
+  @override
+  String tbSourcePanel(String name) {
+    return 'From $name (stock)';
+  }
+
+  @override
+  String tbDestinationPanel(String name, int lines, int qty) {
+    return 'To $name: $lines products, $qty units';
+  }
+
+  @override
+  String get tbFile => 'Read a file';
+
+  @override
+  String tbFileFailed(String e) {
+    return 'Could not read the file: $e';
+  }
+
+  @override
+  String get tbFileEmpty => 'No row with a JAN (or item no.) and a quantity';
+
+  @override
+  String tbFileRead(int n) {
+    return '$n rows put in from the file';
+  }
+
+  @override
+  String tbFileReadMissing(int n, int missing, String list) {
+    return '$n rows put in; not found: $missing ($list)';
+  }
+
+  @override
+  String tbOver(int n) {
+    return 'More than the $n on hand';
+  }
+
+  @override
+  String get tbRemove => 'Take off';
+
+  @override
+  String get tlAll => 'All';
+
+  @override
+  String get tlOpen => 'Being prepared';
+
+  @override
+  String get tlInTransit => 'In transit';
+
+  @override
+  String get tlDone => 'Done';
+
+  @override
+  String get tlClosed => 'Cancelled';
+
+  @override
+  String get tlSearch => 'Search number, warehouse, note';
+
+  @override
+  String get tlNone => 'None';
+
+  @override
+  String tlOutgoing(String name) {
+    return 'Leaving $name';
+  }
+
+  @override
+  String tlIncoming(String name) {
+    return 'Coming to $name';
+  }
 }

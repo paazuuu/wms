@@ -8712,6 +8712,25 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   shipping list files, 出庫 confirm); for a 通常ユーザー those menus stay
   hidden by 表示設定 unless an ADMIN shows them.
 
+## 0196: 予定外の入荷 marked in a product's stock history; 倉庫間移動 by drag or file; tabs open without the dashboard flashing
+
+- product_stock_history (DO-block replace): each movement from a master
+  import also gives import_kind, no_invoice_reason and, for 予定外の入荷,
+  invoice_state (waiting / invoiced / none). The app's stock history marks
+  those rows 「予定外の入荷」 with 「請求書待ち」 / 「請求書あり」 /
+  「請求書なし: 理由」, so a 「請求書なしで完了」 pressed by mistake is seen
+  looking back; it is put back from 予定外の入荷 → 請求書なしで完了したもの.
+- 倉庫間移動 (app): 移動を作成 is a screen of two sides — 出庫する倉庫 with
+  what it holds (search), 入庫する倉庫 with what is to move; a product
+  dragged across (or sent with →) is added with its quantity (all it holds
+  offered, over the stock warned). 「ファイルから読み込む」: a shipping list
+  (JAN or 品番 and 数量) matched with the library fills it at once; rows not
+  found are named. The list: by state (準備中 / 輸送中・入庫中 / 完了 /
+  取消・却下), 出庫する倉庫, 入庫する倉庫 and a word; with a warehouse chosen
+  at the top, what leaves it and what comes in are shown apart.
+- App shell: a location just opened is put in the tab stack at once, so the
+  first tab (the dashboard) no longer shows for a frame before it.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
