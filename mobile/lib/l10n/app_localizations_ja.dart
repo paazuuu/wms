@@ -14079,7 +14079,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String ofSummaryShip(int n) {
-    return '出庫 $n個';
+    return '在庫から出せる数 $n個';
   }
 
   @override
@@ -15348,4 +15348,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String ofFxShown(String rate) {
     return '1元 = $rate円';
   }
+
+  @override
+  String ofSummaryNeed(int n, int rows) {
+    return '不足（入荷が必要） $n個（$rows行）';
+  }
+
+  @override
+  String ofNeedTag(int n) {
+    return '不足 $n';
+  }
+
+  @override
+  String ofFilterNeed(int n) {
+    return '不足 $n';
+  }
+
+  @override
+  String get ofProposalOpen => '入荷の提案を開く';
+
+  @override
+  String get ofProposalDownload => '入荷の提案（Excel）';
 }

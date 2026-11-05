@@ -47,7 +47,13 @@ class OutboundPlanLine {
     required this.shipped,
     required this.short,
     this.stockBefore,
+    this.need = 0,
   });
+
+  /// 不足: what the stock cannot cover and must come in (入荷) for the list
+  /// to ship — all of it for a row with no product (未登録のJAN, JANなし),
+  /// the part over the stock left for a known one; 0 for a row left out.
+  final int need;
 
   final OutboundRow row;
   final OutboundMatch match;
@@ -121,6 +127,9 @@ List<OutboundPlanLine> planOutbound(
   bool proxy = false,
 }) {
   final left = <int, int>{};
+  // The stock each row may count on when working out 不足, rows above first
+  // (records included: the list ships in the end, whatever is done now).
+  final needLeft = <int, int>{};
   final out = <OutboundPlanLine>[];
   for (final (i, row) in rows.indexed) {
     final m = picked[row.rowNo] ?? (i < matches.length ? matches[i] : OutboundMatch.none);
@@ -140,6 +149,18 @@ List<OutboundPlanLine> planOutbound(
       short = q - shipped;
       left[pid!] = (stock ?? 0) - shipped;
     }
+    var need = 0;
+    final q = row.quantity ?? 0;
+    if (!proxy && action != OutboundAction.skip && q > 0) {
+      if (pid == null) {
+        need = q;
+      } else {
+        final avail = needLeft.putIfAbsent(pid, () => m.onHand ?? 0);
+        final take = q < avail ? q : (avail < 0 ? 0 : avail);
+        need = q - take;
+        needLeft[pid] = avail - take;
+      }
+    }
     out.add(OutboundPlanLine(
       row: row,
       match: m,
@@ -148,6 +169,7 @@ List<OutboundPlanLine> planOutbound(
       shipped: shipped,
       short: short,
       stockBefore: stock,
+      need: need,
     ));
   }
   return out;
@@ -166,6 +188,8 @@ class OutboundPlanTotals {
     required this.amount,
     required this.weightG,
     required this.byStatus,
+    this.need = 0,
+    this.needRows = 0,
   });
 
   factory OutboundPlanTotals.of(List<OutboundPlanLine> lines) {
@@ -187,6 +211,8 @@ class OutboundPlanTotals {
       amount: amount,
       weightG: weight,
       byStatus: by,
+      need: lines.fold(0, (a, l) => a + l.need),
+      needRows: lines.where((l) => l.need > 0).length,
     );
   }
 
@@ -200,4 +226,8 @@ class OutboundPlanTotals {
   final double amount;
   final double weightG;
   final Map<OutboundStatus, int> byStatus;
+
+  /// 不足 (入荷が必要): units and rows.
+  final int need;
+  final int needRows;
 }

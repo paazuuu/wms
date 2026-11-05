@@ -13989,7 +13989,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ofSummaryShip(int n) {
-    return '出库 $n个';
+    return '可从库存出库 $n个';
   }
 
   @override
@@ -15239,4 +15239,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String ofFxShown(String rate) {
     return '1元 = $rate日元';
   }
+
+  @override
+  String ofSummaryNeed(int n, int rows) {
+    return '不足（需要入库）$n个（$rows行）';
+  }
+
+  @override
+  String ofNeedTag(int n) {
+    return '不足 $n';
+  }
+
+  @override
+  String ofFilterNeed(int n) {
+    return '不足 $n';
+  }
+
+  @override
+  String get ofProposalOpen => '打开入库建议';
+
+  @override
+  String get ofProposalDownload => '入库建议（Excel）';
 }

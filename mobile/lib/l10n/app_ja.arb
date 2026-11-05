@@ -12625,7 +12625,7 @@
       }
     }
   },
-  "ofSummaryShip": "出庫 {n}個",
+  "ofSummaryShip": "在庫から出せる数 {n}個",
   "@ofSummaryShip": {
     "placeholders": {
       "n": {
@@ -13601,5 +13601,34 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ofSummaryNeed": "不足（入荷が必要） {n}個（{rows}行）",
+  "@ofSummaryNeed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
+  "ofNeedTag": "不足 {n}",
+  "@ofNeedTag": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofFilterNeed": "不足 {n}",
+  "@ofFilterNeed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofProposalOpen": "入荷の提案を開く",
+  "ofProposalDownload": "入荷の提案（Excel）"
 }

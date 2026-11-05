@@ -14362,7 +14362,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ofSummaryShip(int n) {
-    return '$n out';
+    return 'From stock: $n';
   }
 
   @override
@@ -15660,4 +15660,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String ofFxShown(String rate) {
     return '1 元 = $rate 円';
   }
+
+  @override
+  String ofSummaryNeed(int n, int rows) {
+    return 'Short (to come in): $n ($rows rows)';
+  }
+
+  @override
+  String ofNeedTag(int n) {
+    return 'Short $n';
+  }
+
+  @override
+  String ofFilterNeed(int n) {
+    return 'Short $n';
+  }
+
+  @override
+  String get ofProposalOpen => 'Open what to bring in';
+
+  @override
+  String get ofProposalDownload => 'What to bring in (Excel)';
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
+import 'package:wms_mobile/features/outbound_file/data/inbound_proposal_export.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/outbound_file/data/shipping_list_export.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_plan.dart';
@@ -160,6 +161,17 @@ void main() {
       expect(t.shipped, 1200);
       expect(t.short, 300);
       expect(t.shortRows, 1);
+      // 不足 (入荷が必要): what stock cannot cover, rows not found in full.
+      expect([for (final l in plan) l.need], [0, 300, 5, 5, 5, 0]);
+      expect(t.need, 315);
+      expect(t.needRows, 4);
+      final needs = inboundNeeds(plan, (s) => s.name);
+      expect([for (final n in needs) (n.jan ?? n.code, n.status, n.asked, n.need, n.onHand)], [
+        ('4909999000014', 'short', 500, 300, 1200),
+        ('4909999000045', 'unknownJan', 5, 5, null),
+        ('TS-200', 'noJan', 5, 5, null),
+        ('TS-300', 'several', 5, 5, null),
+      ]);
       expect(t.weightG, 12000);
       expect(t.amount, 55000);
       // Posted as read, with what was decided.

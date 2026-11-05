@@ -24854,7 +24854,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofSummaryShip.
   ///
   /// In ja, this message translates to:
-  /// **'出庫 {n}個'**
+  /// **'在庫から出せる数 {n}個'**
   String ofSummaryShip(int n);
 
   /// No description provided for @ofSummaryShort.
@@ -27058,6 +27058,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'1元 = {rate}円'**
   String ofFxShown(String rate);
+
+  /// No description provided for @ofSummaryNeed.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足（入荷が必要） {n}個（{rows}行）'**
+  String ofSummaryNeed(int n, int rows);
+
+  /// No description provided for @ofNeedTag.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足 {n}'**
+  String ofNeedTag(int n);
+
+  /// No description provided for @ofFilterNeed.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足 {n}'**
+  String ofFilterNeed(int n);
+
+  /// No description provided for @ofProposalOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷の提案を開く'**
+  String get ofProposalOpen;
+
+  /// No description provided for @ofProposalDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷の提案（Excel）'**
+  String get ofProposalDownload;
 }
 
 class _AppLocalizationsDelegate

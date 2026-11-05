@@ -4485,7 +4485,7 @@
   "ofMatchedPicked": "Chosen by hand",
   "ofFilterAll": "All {n}",
   "ofSummary": "{rows} rows · ship {ship} · record {record} · leave out {skip}",
-  "ofSummaryShip": "{n} out",
+  "ofSummaryShip": "From stock: {n}",
   "ofSummaryShort": "{n} short ({rows} rows)",
   "ofSummaryAmount": "Total {amount}",
   "ofSummaryWeight": "Weight {kg} kg",
@@ -4852,5 +4852,10 @@
   "ofCurrencyAllJpy": "All 円",
   "ofCurrencyAllCny": "All 元",
   "ofCurrencyTapHint": "Tap a price to switch 円 ⇄ 元. Each row's currency is kept, to put the profit and loss in one currency later.",
-  "ofFxShown": "1 元 = {rate} 円"
+  "ofFxShown": "1 元 = {rate} 円",
+  "ofSummaryNeed": "Short (to come in): {n} ({rows} rows)",
+  "ofNeedTag": "Short {n}",
+  "ofFilterNeed": "Short {n}",
+  "ofProposalOpen": "Open what to bring in",
+  "ofProposalDownload": "What to bring in (Excel)"
 }

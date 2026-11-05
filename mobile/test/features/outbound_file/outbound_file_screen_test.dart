@@ -21,9 +21,10 @@ import '../../support/harness.dart';
 
 class _Tab implements HtmlTab {
   final shown = <(int, String)>[];
+  final pages = <String>[];
 
   @override
-  void show(String html) {}
+  void show(String html) => pages.add(html);
 
   @override
   void close() {}
@@ -73,7 +74,7 @@ const _library = [
 
 void main() {
   Future<FakeOutboundFileRepository> pump(WidgetTester tester,
-      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false}) async {
+      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved}) async {
     await tester.binding.setSurfaceSize(const Size(2600, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final r = repo ?? FakeOutboundFileRepository(matcher: _match);
@@ -81,7 +82,7 @@ void main() {
       outboundFileRepositoryProvider.overrideWithValue(r),
       outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: _book())),
       outboundTabOpenerProvider.overrideWithValue(() => html),
-      outboundFileSaverProvider.overrideWithValue((n, b) async {}),
+      outboundFileSaverProvider.overrideWithValue((n, b) async => saved?.add((n, b))),
       writeWarehouseIdProvider.overrideWithValue(1),
       activeWarehouseIdProvider.overrideWith((ref) => null),
       productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
@@ -121,6 +122,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('of-row-3')), findsOneWidget);
     expect(find.byKey(const ValueKey('of-row-2')), findsNothing);
+  });
+
+  testWidgets('不足: every row the stock cannot cover is tagged, and 入荷の提案 opens and downloads', (tester) async {
+    final tab = _Tab();
+    final saved = <(String, Uint8List)>[];
+    await pump(tester, html: tab, saved: saved);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+
+    // Row 2 ships whole; row 3 is 2 short; rows not found are short in full.
+    expect(find.byKey(const ValueKey('of-need-2')), findsNothing);
+    expect(find.descendant(of: find.byKey(const ValueKey('of-need-3')), matching: find.text('不足 2')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('of-need-4')), matching: find.text('不足 5')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('of-need-6')), matching: find.text('不足 4')), findsOneWidget);
+    expect(find.text('不足（入荷が必要） 16個（4行）'), findsOneWidget);
+    expect(find.text('在庫から出せる数 13個'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('of-filter-need')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-row-2')), findsNothing);
+    expect(find.byKey(const ValueKey('of-row-4')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('of-proposal-open')));
+    await tester.pumpAndSettle();
+    final page = tab.pages.single;
+    expect(page, contains('入荷の提案（出荷明細の不足分）'));
+    expect(page, contains('TS-120'));
+    expect(page, isNot(contains('TS-100')));
+    expect(page, contains('合計 4品目'));
+
+    await tester.tap(find.byKey(const ValueKey('of-proposal-download')));
+    await tester.pumpAndSettle();
+    expect(saved.single.$1, '入荷の提案_到货明细.xlsx');
+    final sheet = readXlsxSheets(saved.single.$2).single;
+    expect(sheet.name, '入荷の提案');
+    final head = sheet.rows.indexWhere((r) => r.isNotEmpty && r.first == '品番');
+    final rows = sheet.rows.skip(head + 1).toList();
+    expect([for (final r in rows.take(4)) (r[0], r[8])], [('TS-110', '2'), ('TS-120', '5'), ('TS-130', '5'), ('TS-140', '4')]);
+    expect(rows[4].first, '合計');
+    expect(rows[4][8], '16');
   });
 
   testWidgets('rows are changed by hand, a product chosen, and the list shipped (asked again when seen before)',

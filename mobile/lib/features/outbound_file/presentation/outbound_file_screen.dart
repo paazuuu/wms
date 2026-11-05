@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -21,6 +22,7 @@ import '../../outbound/domain/outbound.dart' show ShipDestination;
 import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/outbound_file_repository.dart';
+import '../data/inbound_proposal_export.dart';
 import '../domain/outbound_currency.dart';
 import '../domain/outbound_plan.dart';
 import '../domain/outbound_sheet.dart';
@@ -176,6 +178,9 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
   bool get _planning => _planMode && !_proxy;
   OutboundStatus? _filter;
+
+  /// Only the rows that need goods to come in (不足).
+  bool _needOnly = false;
   int _limit = 100;
   bool _busy = false;
   String? _busyText;
@@ -582,7 +587,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final hasRows = _rows.isNotEmpty;
     final plan = _plan;
     final totals = OutboundPlanTotals.of(plan);
-    final shown = [for (final l in plan) if (_filter == null || l.status == _filter) l];
+    final shown = [for (final l in plan) if ((_filter == null || l.status == _filter) && (!_needOnly || l.need > 0)) l];
     final noWarehouse = ref.watch(writeWarehouseIdProvider) == null;
 
     return Column(children: [
@@ -688,7 +693,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                       ? l10n.prSummary(totals.rows, totals.record, totals.skip, _recordedQty(plan))
                       : [
                           l10n.ofSummaryShip(totals.shipped),
-                          if (totals.short > 0) l10n.ofSummaryShort(totals.short, totals.shortRows),
+                          if (totals.need > 0) l10n.ofSummaryNeed(totals.need, totals.needRows),
                         ].join(' · '),
                   style: theme.textTheme.bodyMedium,
                 ),
@@ -901,14 +906,53 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         ],
       );
 
+  String get _proposalTitle => _file?.name ?? AppLocalizations.of(context).prManualName;
+
+  List<InboundNeed> get _needs => inboundNeeds(_plan, (s) => outboundStatusLabel(AppLocalizations.of(context), s));
+
+  /// 入荷の提案 in a new tab (opened from the click, so the browser lets it).
+  Future<void> _openProposal() async {
+    final html = inboundProposalHtml(_needs, title: _proposalTitle);
+    final tab = ref.read(outboundTabOpenerProvider)();
+    if (tab != null) {
+      tab.show(html);
+    } else {
+      await ref.read(outboundFileSaverProvider)('入荷の提案.html', Uint8List.fromList(utf8.encode(html)));
+    }
+  }
+
+  Future<void> _downloadProposal() async {
+    final l10n = AppLocalizations.of(context);
+    final base = _proposalTitle.replaceAll(RegExp(r'\.[^.]+$'), '');
+    final name = '入荷の提案_$base.xlsx';
+    await ref.read(outboundFileSaverProvider)(name, buildInboundProposalXlsx(_needs, title: _proposalTitle));
+    _snack(l10n.ofFileSaved(name));
+  }
+
   Widget _summary(AppLocalizations l10n, OutboundPlanTotals t) {
     final theme = Theme.of(context);
     return Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, children: [
       Text(l10n.ofSummary(t.rows, t.ship, t.record, t.skip), key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall),
       Text(l10n.ofSummaryShip(t.shipped)),
-      if (t.short > 0)
-        Text(l10n.ofSummaryShort(t.short, t.shortRows),
+      // 不足: what must come in for the list to ship (入荷), every row the
+      // stock cannot cover — not found ones whole.
+      if (t.need > 0)
+        Text(l10n.ofSummaryNeed(t.need, t.needRows),
             key: const ValueKey('of-summary-short'), style: TextStyle(color: theme.colorScheme.error)),
+      if (t.need > 0) ...[
+        FilledButton.tonalIcon(
+          key: const ValueKey('of-proposal-open'),
+          onPressed: _openProposal,
+          icon: const Icon(Icons.open_in_new, size: 18),
+          label: Text(l10n.ofProposalOpen),
+        ),
+        OutlinedButton.icon(
+          key: const ValueKey('of-proposal-download'),
+          onPressed: _downloadProposal,
+          icon: const Icon(Icons.download_outlined, size: 18),
+          label: Text(l10n.ofProposalDownload),
+        ),
+      ],
       if (t.amount > 0) Text(l10n.ofSummaryAmount(_amountText())),
       if (t.weightG > 0) Text(l10n.ofSummaryWeight(outboundKg(t.weightG))),
       if (_judging || _currency.values.any((c) => c.currency != PriceCurrency.jpy)) _currencyNotice(l10n),
@@ -982,6 +1026,16 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
             _limit = 100;
           }),
         ),
+        if (t.needRows > 0)
+          FilterChip(
+            key: const ValueKey('of-filter-need'),
+            label: Text(l10n.ofFilterNeed(t.needRows)),
+            selected: _needOnly,
+            onSelected: (v) => setState(() {
+              _needOnly = v;
+              _limit = 100;
+            }),
+          ),
         for (final s in OutboundStatus.values)
           if ((t.byStatus[s] ?? 0) > 0)
             ChoiceChip(
@@ -1139,13 +1193,25 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                 ),
                 cell(
                   1,
-                  Text(widget.proxy ? proxyStatusLabel(l10n, l) : outboundStatusLabel(l10n, l.status),
-                      key: ValueKey('of-status-${l.row.rowNo}'),
-                      style: small?.copyWith(
-                          color: widget.proxy
-                              ? (l.found ? scheme.primary : scheme.onSurfaceVariant)
-                              : outboundStatusColor(scheme, l.status),
-                          fontWeight: FontWeight.w600)),
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                    Text(widget.proxy ? proxyStatusLabel(l10n, l) : outboundStatusLabel(l10n, l.status),
+                        key: ValueKey('of-status-${l.row.rowNo}'),
+                        style: small?.copyWith(
+                            color: widget.proxy
+                                ? (l.found ? scheme.primary : scheme.onSurfaceVariant)
+                                : outboundStatusColor(scheme, l.status),
+                            fontWeight: FontWeight.w600)),
+                    // 不足: to come in before the list can ship.
+                    if (l.need > 0)
+                      Container(
+                        key: ValueKey('of-need-${l.row.rowNo}'),
+                        margin: const EdgeInsets.only(top: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(color: scheme.errorContainer, borderRadius: BorderRadius.circular(8)),
+                        child: Text(l10n.ofNeedTag(l.need),
+                            style: small?.copyWith(color: scheme.onErrorContainer, fontWeight: FontWeight.w700)),
+                      ),
+                  ]),
                 ),
                 cell(
                   2,

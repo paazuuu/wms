@@ -8754,6 +8754,21 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Tabs of 出荷手配, 発注, 予定外の入荷, メモ and 在庫調整 say what they are for
   when the pointer rests on them (HelpTab).
 
+## 出荷手配: 不足 tags and 入荷の提案 (app only)
+
+- Ship first, then bring in what is missing: every row the stock cannot
+  cover gets a red 「不足 n」 tag — 在庫不足 for what exceeds the stock (one
+  stock shared by rows of the same product), 未登録のJAN / JANなし / 候補が複数
+  for the whole quantity. The 「不足」 filter shows those rows only.
+- The summary line reads 「在庫から出せる数 n個」 (was 「出庫 n個」, which looked
+  like 在庫 0) and 「不足（入荷が必要） n個（m行）」.
+- 入荷の提案: one row a product (rows of one product added up) with 出荷明細の
+  数量, 在庫, 不足, 入荷する数 (to edit; 不足 to begin with), 前回の仕入れ値,
+  金額の目安 (= 入荷する数 × 前回の仕入れ値, a formula), 注番 and the list's
+  rows; totals under; products to register first are filled yellow. Opened
+  as a page in a new tab, or downloaded as 入荷の提案_<file>.xlsx
+  (inbound_proposal_export.dart).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

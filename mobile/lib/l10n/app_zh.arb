@@ -4485,7 +4485,7 @@
   "ofMatchedPicked": "手动选择",
   "ofFilterAll": "全部 {n}",
   "ofSummary": "{rows}行 · 出库 {ship}行 · 仅记录 {record}行 · 排除 {skip}行",
-  "ofSummaryShip": "出库 {n}个",
+  "ofSummaryShip": "可从库存出库 {n}个",
   "ofSummaryShort": "不足 {n}个（{rows}行）",
   "ofSummaryAmount": "合计 {amount}",
   "ofSummaryWeight": "总重量 {kg} kg",
@@ -4852,5 +4852,10 @@
   "ofCurrencyAllJpy": "全部日元",
   "ofCurrencyAllCny": "全部人民币",
   "ofCurrencyTapHint": "点单价可切换日元⇄人民币。币种逐行记录，之后计算损益时统一换算。",
-  "ofFxShown": "1元 = {rate}日元"
+  "ofFxShown": "1元 = {rate}日元",
+  "ofSummaryNeed": "不足（需要入库）{n}个（{rows}行）",
+  "ofNeedTag": "不足 {n}",
+  "ofFilterNeed": "不足 {n}",
+  "ofProposalOpen": "打开入库建议",
+  "ofProposalDownload": "入库建议（Excel）"
 }
