@@ -855,6 +855,7 @@ class _SidebarState extends State<_Sidebar> {
                       _SidebarItem(
                         icon: entry.icon,
                         label: entry.label(l10n),
+                        help: entry.description(l10n),
                         selected: selectedId == entry.id,
                         collapsed: collapsed,
                         onTap: () => widget.onOpen(entry),
@@ -1061,10 +1062,14 @@ class _SidebarItem extends StatelessWidget {
     required this.selected,
     required this.collapsed,
     required this.onTap,
+    this.help,
   });
 
   final IconData icon;
   final String label;
+
+  /// What the screen is for: shown when the pointer rests on the entry.
+  final String? help;
   final bool selected;
   final bool collapsed;
   final VoidCallback onTap;
@@ -1118,8 +1123,17 @@ class _SidebarItem extends StatelessWidget {
       ),
     );
 
-    return collapsed
-        ? Tooltip(message: label, waitDuration: const Duration(milliseconds: 300), child: item)
-        : item;
+    // On the rail the label is hidden, so that is the tip; with the label in
+    // sight the entry says what its screen is for.
+    final tip = collapsed ? label : help;
+    return tip == null || tip.isEmpty
+        ? item
+        : Tooltip(
+            message: tip,
+            waitDuration: const Duration(milliseconds: 400),
+            preferBelow: true,
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: item,
+          );
   }
 }

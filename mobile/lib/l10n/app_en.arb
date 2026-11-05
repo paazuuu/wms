@@ -4434,7 +4434,7 @@
   "ofSheet": "Sheet",
   "ofHeaderRow": "Headings on row {n}",
   "ofColumns": "Columns",
-  "ofColumnsHint": "Matched from the headings. Change any that are wrong.",
+  "ofColumnsHint": "A, B, C… are the columns of the file read. \"JAN=G: ジャパンコード\" means column G (headed ジャパンコード) is read as the JAN. Assigned columns become this system's fields (JAN, quantity, price…); the other columns are kept too, with each row as it was (and the file itself is kept). Choose again if one is wrong.",
   "ofColNone": "(not used)",
   "ofRoleJan": "JAN",
   "ofRoleQuantity": "Quantity",
@@ -4857,5 +4857,9 @@
   "ofNeedTag": "Short {n}",
   "ofFilterNeed": "Short {n}",
   "ofProposalOpen": "Open what to bring in",
-  "ofProposalDownload": "What to bring in (Excel)"
+  "ofProposalDownload": "What to bring in (Excel)",
+  "ofIncludeAll": "Tick or untick every row shown",
+  "ofTableDownload": "Save this table as Excel",
+  "ofTableDownloadHelp": "The list as read, improved: what was found for each row (tick, state, action, stock, out, short) and formulas for the amount and weight. Rows typed in are included.",
+  "ofImprovedSuffix": "checked"
 }

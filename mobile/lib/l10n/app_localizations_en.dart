@@ -14200,7 +14200,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofColumnsHint =>
-      'Matched from the headings. Change any that are wrong.';
+      'A, B, C… are the columns of the file read. \"JAN=G: ジャパンコード\" means column G (headed ジャパンコード) is read as the JAN. Assigned columns become this system\'s fields (JAN, quantity, price…); the other columns are kept too, with each row as it was (and the file itself is kept). Choose again if one is wrong.';
 
   @override
   String get ofColNone => '(not used)';
@@ -15681,4 +15681,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofProposalDownload => 'What to bring in (Excel)';
+
+  @override
+  String get ofIncludeAll => 'Tick or untick every row shown';
+
+  @override
+  String get ofTableDownload => 'Save this table as Excel';
+
+  @override
+  String get ofTableDownloadHelp =>
+      'The list as read, improved: what was found for each row (tick, state, action, stock, out, short) and formulas for the amount and weight. Rows typed in are included.';
+
+  @override
+  String get ofImprovedSuffix => 'checked';
 }

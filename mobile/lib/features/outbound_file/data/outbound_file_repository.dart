@@ -228,7 +228,8 @@ class OutboundFileSummary extends Equatable {
   final String? currency;
   final double? fxCnyJpy;
 
-  bool get undecided => planned && dateUndecided;
+  /// 未定: a planned list, or a 在庫外出荷 (0198), with no day yet.
+  bool get undecided => (planned || proxy) && dateUndecided;
 
   /// 'planned' (出庫予定: nothing out of stock yet, 0191) or 'shipped'.
   final String status;

@@ -256,7 +256,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
               const SizedBox(height: 4),
               Text(
                 [
-                  if (!f.planned) '${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(f.shippedOn)}',
+                  if (!f.planned) '${l10n.ofShippedOn}: ${f.undecided ? l10n.ofUndecided : DateFormat('y/MM/dd').format(f.shippedOn)}',
                   if (!f.planned && f.plannedOn != null && f.plannedOn != f.shippedOn)
                     '${l10n.ofPlannedOn}: ${DateFormat('y/MM/dd').format(f.plannedOn!)}',
                   if (f.warehouseName != null) f.warehouseName!,
@@ -304,13 +304,15 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   ),
                 ] else
                   Text(l10n.ofNoFile, style: muted),
-                if (f.planned) ...[
+                if (f.planned)
                   FilledButton.icon(
                     key: const ValueKey('of-confirm'),
                     onPressed: _busy ? null : () => _confirm(d),
                     icon: const Icon(Icons.outbox_outlined),
                     label: Text(l10n.ofConfirm),
                   ),
+                // A 在庫外出荷's day can be 未定 too (0198): set or changed here.
+                if (f.planned || (f.proxy && !f.undone)) ...[
                   OutlinedButton.icon(
                     key: const ValueKey('of-reschedule'),
                     onPressed: _busy ? null : () => _reschedule(f),

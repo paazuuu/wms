@@ -8769,6 +8769,34 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   as a page in a new tab, or downloaded as 入荷の提案_<file>.xlsx
   (inbound_proposal_export.dart).
 
+## 0198: 在庫外出荷 with its day 未定; 出荷手配's table ticked, lighter, downloadable
+
+- 在庫外出荷 (代理出荷) is registered with 出庫日 未定 by default, like a
+  planned list: outbound_file_mark_undecided, outbound_file_reschedule and
+  outbound_files_undecided take a 代理出荷 too (its planned_on is left as it
+  was). It is listed in 未定 with a 在庫外出荷 mark (the 在庫外出荷 tab's
+  list shows its own) and its day is set from there or its detail.
+- The table: a tick a row (対象) in place of 除外 in the 対応 menu — every row
+  ticked to begin with, unticked rows left out, one tick in the heading for
+  all rows shown. 対応 offers 出庫 / 記録のみ only where both can be
+  (a product of ours, not 在庫外出荷); else it just says 記録のみ.
+- 不足 (入荷が必要) is shown in the 不足 column (it was a tag under 状態, the
+  column empty for rows not found): what the stock cannot cover, rows not
+  found in full.
+- Over 40 rows the table scrolls in a box of its own, rows built as they
+  come into view, the heading kept in sight: a list of 700 rows built whole
+  froze the page on every change (opening 対応's menu included).
+- 「この表をExcelで保存」: the list as read and checked, improved
+  (<file>_照合済み.xlsx), or the rows typed in for a 在庫外出荷 — 対象, 状態,
+  対応, the library's product, 在庫 / 出庫数 / 不足, prices, 通貨, weights,
+  合計 and 総重量 as formulas, totals; not-found rows yellow; 仕入先 left out
+  (outbound_plan_export.dart).
+- 列の割り当て says what its letters are: A, B, C… are the file's columns;
+  assigned ones become our fields, the rest are kept with each row (raw) and
+  the file itself is kept.
+- The sidebar's entries say what their screen is for when the pointer rests
+  on them (the rail keeps its label).
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -24548,7 +24548,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofColumnsHint.
   ///
   /// In ja, this message translates to:
-  /// **'見出しから自動で割り当てました。違うときは選び直してください。'**
+  /// **'A, B, C… は読み込んだExcelの列の位置です。「JAN=G: ジャパンコード」は「G列（見出し：ジャパンコード）をJANとして読む」という意味です。割り当てた列はこのシステムの項目（JAN・数量・単価…）として使われ、割り当てていない列も各行の元の内容として一緒に記録されます（元のファイルもそのまま保存）。違うときは選び直してください。'**
   String get ofColumnsHint;
 
   /// No description provided for @ofColNone.
@@ -27088,6 +27088,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'入荷の提案（Excel）'**
   String get ofProposalDownload;
+
+  /// No description provided for @ofIncludeAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の行をすべて対象にする／すべて外す'**
+  String get ofIncludeAll;
+
+  /// No description provided for @ofTableDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'この表をExcelで保存'**
+  String get ofTableDownload;
+
+  /// No description provided for @ofTableDownloadHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだ明細に、照合結果（対象・状態・対応・在庫・出庫数・不足）と式（合計・総重量）を加えた改善版です。手入力の行もそのまま入ります。'**
+  String get ofTableDownloadHelp;
+
+  /// No description provided for @ofImprovedSuffix.
+  ///
+  /// In ja, this message translates to:
+  /// **'照合済み'**
+  String get ofImprovedSuffix;
 }
 
 class _AppLocalizationsDelegate

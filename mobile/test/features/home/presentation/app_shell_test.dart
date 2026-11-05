@@ -298,6 +298,8 @@ void main() {
       expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
       expect(inSidebar('Picking'), findsOneWidget);
       expect(find.byTooltip('Collapse menu'), findsOneWidget);
+      // With its label in sight, an entry says what its screen is for.
+      expect(find.byTooltip("Fulfil sales orders by scan"), findsOneWidget);
       expect(sidebarWidth(), 268);
 
       await tester.tap(find.byTooltip('Collapse menu'));

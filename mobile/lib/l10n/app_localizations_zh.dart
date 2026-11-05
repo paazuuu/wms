@@ -13829,7 +13829,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ofColumns => '列的分配';
 
   @override
-  String get ofColumnsHint => '已根据标题自动分配。如有不对请重新选择。';
+  String get ofColumnsHint =>
+      'A、B、C… 是所读取Excel的列位置。“JAN=G: ジャパンコード”表示“将G列（标题：ジャパンコード）读作JAN”。已分配的列用作本系统的字段（JAN、数量、单价…），未分配的列也会作为每行的原始内容一并记录（原文件也原样保存）。如有错误请重新选择。';
 
   @override
   String get ofColNone => '（不使用）';
@@ -15260,4 +15261,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofProposalDownload => '入库建议（Excel）';
+
+  @override
+  String get ofIncludeAll => '全部勾选／全部取消当前显示的行';
+
+  @override
+  String get ofTableDownload => '将此表保存为Excel';
+
+  @override
+  String get ofTableDownloadHelp =>
+      '在读取的明细上加上核对结果（对象・状态・处理・库存・出库数・不足）和公式（合计・总重量）的改进版。手动输入的行也一并包含。';
+
+  @override
+  String get ofImprovedSuffix => '已核对';
 }

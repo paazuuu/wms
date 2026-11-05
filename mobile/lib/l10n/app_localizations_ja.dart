@@ -13918,7 +13918,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ofColumns => '列の割り当て';
 
   @override
-  String get ofColumnsHint => '見出しから自動で割り当てました。違うときは選び直してください。';
+  String get ofColumnsHint =>
+      'A, B, C… は読み込んだExcelの列の位置です。「JAN=G: ジャパンコード」は「G列（見出し：ジャパンコード）をJANとして読む」という意味です。割り当てた列はこのシステムの項目（JAN・数量・単価…）として使われ、割り当てていない列も各行の元の内容として一緒に記録されます（元のファイルもそのまま保存）。違うときは選び直してください。';
 
   @override
   String get ofColNone => '（使わない）';
@@ -15369,4 +15370,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofProposalDownload => '入荷の提案（Excel）';
+
+  @override
+  String get ofIncludeAll => '表示中の行をすべて対象にする／すべて外す';
+
+  @override
+  String get ofTableDownload => 'この表をExcelで保存';
+
+  @override
+  String get ofTableDownloadHelp =>
+      '読み込んだ明細に、照合結果（対象・状態・対応・在庫・出庫数・不足）と式（合計・総重量）を加えた改善版です。手入力の行もそのまま入ります。';
+
+  @override
+  String get ofImprovedSuffix => '照合済み';
 }

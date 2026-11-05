@@ -135,7 +135,7 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             // 出庫日 未定 (0197): listed apart until a day is set.
-            if (!widget.proxyOnly) const OutboundUndecidedCard(),
+            OutboundUndecidedCard(kind: widget.proxyOnly ? 'proxy' : null),
             if (wide)
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 SizedBox(width: calendarMaxWidth, child: calendar),
@@ -289,10 +289,13 @@ class _DayGrid extends StatelessWidget {
 /// dashboard, until a day is set. Nothing at all when there are none (or
 /// they cannot be read), so it takes no room.
 class OutboundUndecidedCard extends ConsumerWidget {
-  const OutboundUndecidedCard({super.key, this.compact = false});
+  const OutboundUndecidedCard({super.key, this.compact = false, this.kind});
 
   /// The dashboard's: the first few, without the hint.
   final bool compact;
+
+  /// 'stock' or 'proxy' (在庫外出荷, 0198) alone; null: both.
+  final String? kind;
 
   Future<void> _setDay(BuildContext context, WidgetRef ref, OutboundFileSummary f, int? warehouseId) async {
     final l10n = AppLocalizations.of(context);
@@ -319,7 +322,10 @@ class OutboundUndecidedCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final warehouseId = ref.watch(activeWarehouseIdProvider);
-    final files = ref.watch(outboundUndecidedProvider(warehouseId)).valueOrNull ?? const <OutboundFileSummary>[];
+    final files = [
+      for (final f in ref.watch(outboundUndecidedProvider(warehouseId)).valueOrNull ?? const <OutboundFileSummary>[])
+        if (kind == null || f.kind == kind) f,
+    ];
     if (files.isEmpty) return const SizedBox.shrink();
     final shown = compact ? files.take(5).toList() : files;
     return Card(
@@ -349,6 +355,7 @@ class OutboundUndecidedCard extends ConsumerWidget {
                         .push(MaterialPageRoute<void>(builder: (_) => OutboundFileDetailScreen(fileId: f.id))),
                     child: Text(
                       [
+                        if (kind == null && f.proxy) l10n.prBadge,
                         f.fileName,
                         if (f.shipTo != null) f.shipTo!.nameEn ?? f.shipTo!.name else if (f.destination != null) f.destination!,
                         l10n.prCardLines(f.lineCount, f.quantityTotal),

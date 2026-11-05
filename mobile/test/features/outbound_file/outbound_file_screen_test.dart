@@ -74,13 +74,13 @@ const _library = [
 
 void main() {
   Future<FakeOutboundFileRepository> pump(WidgetTester tester,
-      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved}) async {
+      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book}) async {
     await tester.binding.setSurfaceSize(const Size(2600, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final r = repo ?? FakeOutboundFileRepository(matcher: _match);
     await pumpApp(tester, OutboundFileScreen(initialTab: tab, proxy: proxy), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(r),
-      outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: _book())),
+      outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: book ?? _book())),
       outboundTabOpenerProvider.overrideWithValue(() => html),
       outboundFileSaverProvider.overrideWithValue((n, b) async => saved?.add((n, b))),
       writeWarehouseIdProvider.overrideWithValue(1),
@@ -131,11 +131,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-pick')));
     await tester.pumpAndSettle();
 
-    // Row 2 ships whole; row 3 is 2 short; rows not found are short in full.
+    // Row 2 ships whole; row 3 is 2 short; rows not found are short in full —
+    // in the 不足 column.
     expect(find.byKey(const ValueKey('of-need-2')), findsNothing);
-    expect(find.descendant(of: find.byKey(const ValueKey('of-need-3')), matching: find.text('不足 2')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const ValueKey('of-need-4')), matching: find.text('不足 5')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const ValueKey('of-need-6')), matching: find.text('不足 4')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('of-need-3')), matching: find.text('2')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('of-need-4')), matching: find.text('5')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('of-need-6')), matching: find.text('4')), findsOneWidget);
     expect(find.text('不足（入荷が必要） 16個（4行）'), findsOneWidget);
     expect(find.text('在庫から出せる数 13個'), findsOneWidget);
 
@@ -162,6 +163,46 @@ void main() {
     expect([for (final r in rows.take(4)) (r[0], r[8])], [('TS-110', '2'), ('TS-120', '5'), ('TS-130', '5'), ('TS-140', '4')]);
     expect(rows[4].first, '合計');
     expect(rows[4][8], '16');
+
+    // The list as read and checked, improved, to download again.
+    await tester.tap(find.byKey(const ValueKey('of-filter-need')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-table-download')));
+    await tester.pumpAndSettle();
+    expect(saved.last.$1, '到货明细_照合済み.xlsx');
+    final checked = readXlsxSheets(saved.last.$2).single;
+    final h = checked.rows.indexWhere((r) => r.isNotEmpty && r.first == '行');
+    final cols = checked.rows[h];
+    expect(cols, isNot(contains('仕入先')));
+    final body = checked.rows.skip(h + 1).take(5).toList();
+    expect([for (final r in body) r[cols.indexOf('不足（入荷が必要）')]], ['', '2', '5', '5', '4']);
+    expect(body[1][cols.indexOf('出庫数')], '3');
+    expect(body.first[cols.indexOf('対象')], '○');
+
+    // Unticked all at once, and ticked again.
+    await tester.tap(find.byKey(const ValueKey('of-include-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('5行 · 出庫 0行 · 記録のみ 0行 · 除外 5行'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-include-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('5行 · 出庫 2行 · 記録のみ 3行 · 除外 0行'), findsOneWidget);
+  });
+
+  testWidgets('a long list is built as it scrolls, its heading kept in sight', (tester) async {
+    final book = buildXlsxBook([
+      XlsxSheet(name: '明细', headers: const ['品番', 'ジャパンコード', '数量'], rows: [
+        for (var i = 0; i < 300; i++) ['TS-${1000 + i}', '', 1],
+      ]),
+    ]);
+    await pump(tester, book: book);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-row-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-row-301')), findsNothing, reason: 'not built until seen');
+    await tester.scrollUntilVisible(find.byKey(const ValueKey('of-row-301')), 400,
+        scrollable: find.descendant(of: find.byKey(const ValueKey('of-table-rows')), matching: find.byType(Scrollable)));
+    expect(find.byKey(const ValueKey('of-row-301')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-include-all')), findsOneWidget);
   });
 
   testWidgets('rows are changed by hand, a product chosen, and the list shipped (asked again when seen before)',
@@ -170,11 +211,11 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-pick')));
     await tester.pumpAndSettle();
 
-    // Row 3 left out.
-    await tester.tap(find.byKey(const ValueKey('of-action-3')));
+    // Every row ticked to begin with; row 3 unticked: left out.
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('of-include-3'))).value, isTrue);
+    await tester.tap(find.byKey(const ValueKey('of-include-3')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('of-action-3-skip')));
-    await tester.pumpAndSettle();
+    expect(find.text('除外'), findsWidgets);
     expect(find.text('5行 · 出庫 1行 · 記録のみ 3行 · 除外 1行'), findsOneWidget);
 
     // Row 6 has no JAN: its product chosen by its 品番.
@@ -278,7 +319,8 @@ void main() {
   });
 
   testWidgets('在庫外出荷: rows typed in, kept as a record with 依頼元, nothing shipped', (tester) async {
-    final repo = await pump(tester, proxy: true);
+    final saved = <(String, Uint8List)>[];
+    final repo = await pump(tester, proxy: true, saved: saved);
     expect(find.text('在庫外出荷'), findsWidgets);
 
     Future<void> add(Map<String, String> fields) async {
@@ -315,6 +357,22 @@ void main() {
     await tester.tapAt(const Offset(5, 5));
     await tester.pumpAndSettle();
 
+    // The rows typed in, as an Excel file.
+    await tester.tap(find.byKey(const ValueKey('of-table-download')));
+    await tester.pumpAndSettle();
+    final table = readXlsxSheets(saved.single.$2).single;
+    expect(saved.single.$1, startsWith('在庫外出荷_'));
+    expect(table.name, '在庫外出荷');
+    final head = table.rows.indexWhere((r) => r.isNotEmpty && r.first == '行');
+    expect(table.rows[head], isNot(contains('在庫')), reason: 'no stock for a 在庫外出荷');
+    expect(table.rows[head + 1].sublist(0, 4), ['1', '○', 'ライブラリーにない', '記録のみ']);
+    expect(table.rows[head + 1][5], '預かり品の箱');
+    await tester.pump(const Duration(seconds: 5)); // the 保存 note goes
+    await tester.pumpAndSettle();
+
+    // The day is 未定 to begin with.
+    expect(find.textContaining('出庫日: 未定'), findsOneWidget);
+
     // A row taken away again.
     await add({'code': 'XX-9', 'qty': '1'});
     await tester.tap(find.byKey(const ValueKey('pr-remove-3')));
@@ -338,6 +396,7 @@ void main() {
     expect(p.lines.first.productName, '預かり品の箱');
     expect(p.lines.first.unitPriceTax, 330);
     expect(p.lines.first.unitPrice, 300);
+    expect(repo.markedUndecided, hasLength(1), reason: 'kept with its day 未定');
   });
 
   testWidgets('在庫外出荷 from a file: every row a record, typed rows numbered after the file\'s', (tester) async {
@@ -563,13 +622,19 @@ void main() {
         OutboundFileSummary(
             id: 7, warehouseId: 1, shippedOn: DateTime(2026, 11, 5), fileName: '未定の明細.xlsx', status: 'planned',
             dateUndecided: true, lineCount: 3, quantityTotal: 30),
+        OutboundFileSummary(
+            id: 8, warehouseId: 1, shippedOn: DateTime(2026, 11, 5), fileName: '直送分.xlsx', kind: 'proxy',
+            dateUndecided: true, lineCount: 1, quantityTotal: 4),
       ];
     await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(repo),
       activeWarehouseIdProvider.overrideWith((ref) => null),
     ]);
-    expect(find.text('出庫日 未定 1件'), findsOneWidget);
+    // A 在庫外出荷 with no day is listed too (0198), marked as such.
+    expect(find.text('出庫日 未定 2件'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-undecided-7')), findsOneWidget);
+    expect(find.textContaining('在庫外出荷 · 直送分.xlsx'), findsOneWidget);
+    expect(repo.undecidedFiles[1].undecided, isTrue);
     await tester.tap(find.byKey(const ValueKey('of-undecided-set-7')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
