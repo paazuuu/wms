@@ -115,6 +115,22 @@ void main() {
     });
   });
 
+  test('入荷の提案 Excel: split over three suppliers, the first taking the rest; amounts and totals as formulas', () {
+    final n = InboundNeed(status: '在庫不足', code: 'A-1', jan: '4909999000014', onHand: 2, lastPrice: 10)
+      ..asked = 5
+      ..need = 3;
+    final bytes = buildInboundProposalXlsx([n], title: 'list.xlsx');
+    final sheet = readXlsxSheets(bytes).single;
+    final head = sheet.rows.indexWhere((r) => r.isNotEmpty && r.first == '品番');
+    expect(sheet.rows[head].sublist(8, 13), ['入荷する数', '（表示名１）', '（表示名２）', '（表示名３）', '前回の仕入れ値']);
+    expect(sheet.rows[head + 1].sublist(5, 10), ['5', '2', '3', '3', '3']);
+    final r = head + 2;
+    final xml = utf8.decode(ZipDecoder().decodeBytes(bytes).findFile('xl/worksheets/sheet1.xml')!.content as List<int>);
+    expect(xml, contains('<f>I$r-K$r-L$r</f>'));
+    expect(xml, contains('<f>I$r*M$r</f>'));
+    expect(xml, contains('<f>SUM(K$r:K$r)</f>'));
+  });
+
   group('the plan', () {
     const pen = OutboundMatch(matchedBy: OutboundMatchedBy.jan, productId: 1, jan: '4909999000014', name: 'ペン', onHand: 1200, unitWeightG: 10);
     test('one stock for the same product on several rows; what is short is short', () {

@@ -8797,6 +8797,16 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - The sidebar's entries say what their screen is for when the pointer rests
   on them (the rail keeps its label).
 
+## 入荷の提案 Excel: a plan split over three suppliers (app only)
+
+- The downloaded 入荷の提案 is a plan to order from: no 状態 column (whether
+  a JAN is in the library does not matter there; the page still shows it).
+- 入荷する数 (不足 to begin with) is split over three suppliers, headed
+  （表示名１）（表示名２）（表示名３） to be written over with their names:
+  ２ and ３ typed in, １ a formula taking the rest (= 入荷する数 − ２ − ３),
+  so the three always add up. Totals under each. What actually comes in is
+  taken in later from the suppliers' invoices.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

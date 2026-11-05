@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -160,9 +162,18 @@ void main() {
     expect(sheet.name, '入荷の提案');
     final head = sheet.rows.indexWhere((r) => r.isNotEmpty && r.first == '品番');
     final rows = sheet.rows.skip(head + 1).toList();
-    expect([for (final r in rows.take(4)) (r[0], r[8])], [('TS-110', '2'), ('TS-120', '5'), ('TS-130', '5'), ('TS-140', '4')]);
+    final heads = sheet.rows[head];
+    // A plan to order from: no 状態; 入荷する数 split over three suppliers,
+    // the first taking what the other two leave.
+    expect(heads, isNot(contains('状態')));
+    expect(heads.sublist(7, 12), ['不足（入荷が必要）', '入荷する数', '（表示名１）', '（表示名２）', '（表示名３）']);
+    expect([for (final r in rows.take(4)) (r[0], r[7], r[9])],
+        [('TS-110', '2', '2'), ('TS-120', '5', '5'), ('TS-130', '5', '5'), ('TS-140', '4', '4')]);
     expect(rows[4].first, '合計');
-    expect(rows[4][8], '16');
+    expect(rows[4][7], '16');
+    final xml = utf8.decode(ZipDecoder().decodeBytes(saved.single.$2).findFile('xl/worksheets/sheet1.xml')!.content as List<int>);
+    expect(xml, contains('<f>I${head + 2}-K${head + 2}-L${head + 2}</f>'));
+    expect(page, contains('<th>状態</th>'), reason: 'the page keeps it');
 
     // The list as read and checked, improved, to download again.
     await tester.tap(find.byKey(const ValueKey('of-filter-need')));

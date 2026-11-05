@@ -69,67 +69,87 @@ List<InboundNeed> inboundNeeds(List<OutboundPlanLine> lines, String Function(Out
   return by.values.toList();
 }
 
+/// The page's columns (入荷の提案を開く): 状態 shown, as it was.
 const inboundProposalHeaders = [
   '品番', 'JAN', '商品名', 'メーカー', '仕入先', '状態', '出荷明細の数量', '在庫', '不足（入荷が必要）', '入荷する数', '前回の仕入れ値',
   '金額の目安', '注番', '出荷明細の行',
 ];
 
+/// The places it may be ordered from: their names are written over these.
+const inboundSupplierSlots = ['（表示名１）', '（表示名２）', '（表示名３）'];
+
+/// The Excel's columns: a plan to order from, so no 状態 (whether a JAN is in
+/// the library does not matter here); 入荷する数 split over three suppliers.
+const inboundProposalXlsxHeaders = [
+  '品番', 'JAN', '商品名', 'メーカー', '仕入先', '出荷明細の数量', '在庫', '不足（入荷が必要）', '入荷する数',
+  ...inboundSupplierSlots,
+  '前回の仕入れ値', '金額の目安', '注番', '出荷明細の行',
+];
+
 double _r2(double v) => (v * 100).roundToDouble() / 100;
 
-/// 入荷の提案: one row a product — 不足 and, to edit, 入荷する数 (as much as
-/// is short to begin with); 金額の目安 = 入荷する数 × 前回の仕入れ値, a
-/// formula; the totals under. Products not in the library (未登録のJAN,
-/// JANなし) are filled yellow: they are to be registered first.
+/// 入荷の提案 to plan the orders with: one row a product — 不足, and 入荷する
+/// 数 (as much as is short to begin with, to edit) split over up to three
+/// suppliers: their names written over （表示名１）…（表示名３）, the numbers
+/// for ２ and ３ typed in, and １ takes the rest (= 入荷する数 − ２ − ３), so
+/// the three always add up to it. 金額の目安 = 入荷する数 × 前回の仕入れ値.
+/// Totals under, each supplier's too. Only a plan: what comes in is taken in
+/// from the suppliers' invoices later.
 Uint8List buildInboundProposalXlsx(List<InboundNeed> needs, {String? title}) {
   final rows = <List<Object?>>[];
-  final flagged = <(int, int)>{};
   final top = <List<Object?>>[
     ['入荷の提案（出荷明細の不足分）'],
     if (title != null) ['出荷明細', title],
+    ['使い方', '（表示名１）〜（表示名３）を仕入先の会社名に書き換え、（表示名２）（表示名３）に数を入れてください。（表示名１）は残り（入荷する数 − ２ − ３）が式で入ります。'],
     [],
   ];
   final first = top.length + 2;
   for (final (i, n) in needs.indexed) {
     final r = first + i;
-    if (n.onHand == null) flagged.add((i, 5));
     rows.add([
       n.code,
       n.jan,
       n.name,
       n.maker,
       n.supplier,
-      n.status,
       n.asked,
       n.onHand,
       n.need,
       n.need,
+      XlsxFormula('I$r-K$r-L$r', cached: n.need),
+      null,
+      null,
       n.lastPrice,
-      n.lastPrice == null ? null : XlsxFormula('J$r*K$r', cached: _r2(n.need * n.lastPrice!)),
+      n.lastPrice == null ? null : XlsxFormula('I$r*M$r', cached: _r2(n.need * n.lastPrice!)),
       n.orderNumbers.join(', '),
       n.rows.join(', '),
     ]);
   }
   final last = first + needs.length - 1;
+  final need = needs.fold<int>(0, (a, n) => a + n.need);
   final amount = needs.fold(0.0, (a, n) => a + (n.lastPrice == null ? 0 : n.need * n.lastPrice!));
+  XlsxFormula sum(String c, num cached) => XlsxFormula('SUM($c$first:$c$last)', cached: cached);
   return buildXlsxBook([
     XlsxSheet(
       name: '入荷の提案',
       top: top,
-      headers: inboundProposalHeaders,
+      headers: inboundProposalXlsxHeaders,
       rows: rows,
-      flagged: flagged,
-      widths: const [16, 16, 30, 14, 14, 12, 10, 8, 12, 10, 10, 12, 12, 14],
+      widths: const [16, 16, 30, 14, 14, 10, 8, 12, 10, 14, 14, 14, 10, 12, 12, 14],
       bottom: needs.isEmpty
           ? const []
           : [
               [
-                '合計', null, null, null, null, null,
-                XlsxFormula('SUM(G$first:G$last)', cached: needs.fold<int>(0, (a, n) => a + n.asked)),
+                '合計', null, null, null, null,
+                sum('F', needs.fold<int>(0, (a, n) => a + n.asked)),
                 null,
-                XlsxFormula('SUM(I$first:I$last)', cached: needs.fold<int>(0, (a, n) => a + n.need)),
-                XlsxFormula('SUM(J$first:J$last)', cached: needs.fold<int>(0, (a, n) => a + n.need)),
+                sum('H', need),
+                sum('I', need),
+                sum('J', need),
+                sum('K', 0),
+                sum('L', 0),
                 null,
-                XlsxFormula('SUM(L$first:L$last)', cached: _r2(amount)),
+                sum('N', _r2(amount)),
               ],
             ],
     ),
