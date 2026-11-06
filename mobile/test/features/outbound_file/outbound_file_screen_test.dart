@@ -11,6 +11,7 @@ import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show
 import 'package:wms_mobile/features/outbound/domain/outbound.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_currency.dart';
+import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_detail_screen.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_calendar_tab.dart' show OutboundCalendarScreen;
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_hub_screen.dart';
@@ -122,6 +123,10 @@ void main() {
     // Three in stock for five: three go out, two are short.
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-ship-3'))).data, '3');
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-short-3'))).data, '2');
+    // A row not in the library: 0 held, 0 going out, all of it short.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('of-ship-4'))).data, '0');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('of-stock-4'))).data, '0');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('of-short-4'))).data, '5');
     expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-summary-short')), findsOneWidget);
 
@@ -674,6 +679,27 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(repo.rescheduled.single.$1, 7);
+  });
+
+  testWidgets('出庫日 未定: said first in the detail, and when it is confirmed', (tester) async {
+    final plan = OutboundFileSummary(
+        id: 9, warehouseId: 1, shippedOn: DateTime(2026, 11, 6), fileName: '未定の明細.xlsx', status: 'planned',
+        dateUndecided: true, lineCount: 1, quantityTotal: 10);
+    final repo = FakeOutboundFileRepository(
+      files: [plan],
+      detailOf: (_) => OutboundFileDetail(file: plan, lines: const [
+        OutboundFileLine(id: 1, rowNo: 2, action: 'ship', productId: 1, jan: '4909999000014', productName: 'テストペン', quantity: 10),
+      ]),
+    );
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 9), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+    ]);
+    expect(find.byKey(const ValueKey('of-detail-undecided')), findsOneWidget);
+    expect(find.text('出庫日がまだ決まっていません（未定）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-detail-set-day')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-confirm-undecided')), findsOneWidget);
   });
 
   testWidgets('a planned list on the calendar: confirmed by the warehouse, moved, or cancelled', (tester) async {

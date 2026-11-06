@@ -15445,4 +15445,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String ofOriginalLegend(int n) {
     return '赤い行：商品ライブラリーと照合できない行（$n）';
   }
+
+  @override
+  String get ofUndecidedBannerTitle => '出庫日がまだ決まっていません（未定）';
+
+  @override
+  String get ofUndecidedBannerBody =>
+      '日程を入れると、出庫カレンダーのその日に載ります。決まるまでは「出庫日 未定」の一覧に並びます。';
+
+  @override
+  String get ofUndecidedConfirmNote => '出庫日が未定のため、下で選ぶ日（はじめは今日）が出庫日になります。';
+
+  @override
+  String get ofUndecidedButtonHint =>
+      '出庫日はまだ決まっていません。押すと日程を入れられます（あとから入れることもできます）。';
+
+  @override
+  String get ofStockZeroHint => '商品ライブラリーにない商品なので、在庫は0・出庫数は0として数え、全数が不足になります。';
 }

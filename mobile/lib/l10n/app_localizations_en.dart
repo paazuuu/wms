@@ -15756,4 +15756,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String ofOriginalLegend(int n) {
     return 'Red: rows not matched to the library ($n)';
   }
+
+  @override
+  String get ofUndecidedBannerTitle => 'The day it goes out is not set yet';
+
+  @override
+  String get ofUndecidedBannerBody =>
+      'Set a day and it appears on that day of the outbound calendar; until then it is listed under 未定.';
+
+  @override
+  String get ofUndecidedConfirmNote =>
+      'No day was set: the day chosen below (today to begin with) becomes the day it went out.';
+
+  @override
+  String get ofUndecidedButtonHint =>
+      'No day yet. Tap to set one (it can also be set later).';
+
+  @override
+  String get ofStockZeroHint =>
+      'Not a product of the library: counted as 0 in stock and 0 going out, so all of it is short.';
 }

@@ -27208,6 +27208,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'赤い行：商品ライブラリーと照合できない行（{n}）'**
   String ofOriginalLegend(int n);
+
+  /// No description provided for @ofUndecidedBannerTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日がまだ決まっていません（未定）'**
+  String get ofUndecidedBannerTitle;
+
+  /// No description provided for @ofUndecidedBannerBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'日程を入れると、出庫カレンダーのその日に載ります。決まるまでは「出庫日 未定」の一覧に並びます。'**
+  String get ofUndecidedBannerBody;
+
+  /// No description provided for @ofUndecidedConfirmNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日が未定のため、下で選ぶ日（はじめは今日）が出庫日になります。'**
+  String get ofUndecidedConfirmNote;
+
+  /// No description provided for @ofUndecidedButtonHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日はまだ決まっていません。押すと日程を入れられます（あとから入れることもできます）。'**
+  String get ofUndecidedButtonHint;
+
+  /// No description provided for @ofStockZeroHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーにない商品なので、在庫は0・出庫数は0として数え、全数が不足になります。'**
+  String get ofStockZeroHint;
 }
 
 class _AppLocalizationsDelegate

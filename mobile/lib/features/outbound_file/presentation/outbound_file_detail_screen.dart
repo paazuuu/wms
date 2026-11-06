@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -112,6 +113,12 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           title: Text(l10n.ofConfirmQ),
           content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l10n.ofConfirmBody(ship.length, ship.fold(0, (a, l) => a + l.quantity))),
+            if (f.undecided) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.ofUndecidedConfirmNote,
+                  key: const ValueKey('of-confirm-undecided'),
+                  style: TextStyle(color: Theme.of(c).colorScheme.warning, fontWeight: FontWeight.w600)),
+            ],
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton.icon(
               key: const ValueKey('of-confirm-day'),
@@ -240,6 +247,35 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
       key: const ValueKey('of-detail'),
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        // No day yet: said first, with the way to set one.
+        if (f.undecided && !f.undone)
+          Card(
+            key: const ValueKey('of-detail-undecided'),
+            color: scheme.warningContainer,
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(children: [
+                Icon(Icons.event_busy_outlined, color: scheme.onWarningContainer),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(l10n.ofUndecidedBannerTitle,
+                        style: theme.textTheme.titleSmall?.copyWith(color: scheme.onWarningContainer)),
+                    Text(l10n.ofUndecidedBannerBody,
+                        style: theme.textTheme.bodySmall?.copyWith(color: scheme.onWarningContainer)),
+                  ]),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                FilledButton.icon(
+                  key: const ValueKey('of-detail-set-day'),
+                  onPressed: _busy ? null : () => _reschedule(f),
+                  icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                  label: Text(l10n.ofSetDay),
+                ),
+              ]),
+            ),
+          ),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),

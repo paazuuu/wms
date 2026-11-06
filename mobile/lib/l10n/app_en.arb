@@ -4877,5 +4877,10 @@
   "ofOriginal": "The file read",
   "ofOriginalHide": "Hide the original",
   "ofOriginalShow": "Show the original beside",
-  "ofOriginalLegend": "Red: rows not matched to the library ({n})"
+  "ofOriginalLegend": "Red: rows not matched to the library ({n})",
+  "ofUndecidedBannerTitle": "The day it goes out is not set yet",
+  "ofUndecidedBannerBody": "Set a day and it appears on that day of the outbound calendar; until then it is listed under 未定.",
+  "ofUndecidedConfirmNote": "No day was set: the day chosen below (today to begin with) becomes the day it went out.",
+  "ofUndecidedButtonHint": "No day yet. Tap to set one (it can also be set later).",
+  "ofStockZeroHint": "Not a product of the library: counted as 0 in stock and 0 going out, so all of it is short."
 }

@@ -8892,6 +8892,17 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   about 40px instead of 57px, compact toolbar buttons keep the app font; the
   original's marked rows a tint, not a solid red block on the dark theme.
 
+## 出荷手配: 0 for what we do not hold; 出庫日 未定 said plainly (app only)
+
+- A row whose product is not in the library shows 在庫 0 and 出庫数 0 (was
+  —), so 不足 = 数量 − 出庫数 reads across the row; the 0 says why on the
+  pointer. A row left out still shows —.
+- 出庫日 未定: the day button on 出荷明細の取込 is amber (event_busy) with
+  what it means on the pointer; the list's detail opens with a notice
+  「出庫日がまだ決まっていません（未定）」 and 日程を入れる; confirming a list
+  with no day says the day chosen there (today to begin with) becomes its
+  day.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -15337,4 +15337,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String ofOriginalLegend(int n) {
     return '红色行：无法与商品库核对的行（$n）';
   }
+
+  @override
+  String get ofUndecidedBannerTitle => '出库日期尚未确定（未定）';
+
+  @override
+  String get ofUndecidedBannerBody => '设置日期后会显示在出库日历的当天；确定前列在“出库日期 未定”中。';
+
+  @override
+  String get ofUndecidedConfirmNote => '出库日期未定，下面选择的日期（默认今天）将作为出库日期。';
+
+  @override
+  String get ofUndecidedButtonHint => '出库日期尚未确定。点按可设置（之后也可设置）。';
+
+  @override
+  String get ofStockZeroHint => '商品库中没有该商品：库存按0、出库数按0计，全部计为不足。';
 }

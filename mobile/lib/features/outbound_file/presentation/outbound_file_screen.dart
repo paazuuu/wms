@@ -965,10 +965,17 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           if (_dayOpen) ...[
             // 出庫予定日 (or a 在庫外出荷's 出庫日): 未定 until known; set
             // here or later.
-            OutlinedButton.icon(
+            // 未定 said plainly: amber, with what it means on the pointer.
+            Tooltip(
+              message: _plannedOn == null ? l10n.ofUndecidedButtonHint : '',
+              child: OutlinedButton.icon(
               key: const ValueKey('of-shipped-on'),
-              style: _dense,
-              icon: const Icon(Icons.event_outlined, size: 18),
+              style: _plannedOn == null
+                  ? _dense.copyWith(
+                      foregroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.warning),
+                      side: WidgetStatePropertyAll(BorderSide(color: Theme.of(context).colorScheme.warning)))
+                  : _dense,
+              icon: Icon(_plannedOn == null ? Icons.event_busy_outlined : Icons.event_outlined, size: 18),
               label: Text('${_proxy ? l10n.ofShippedOn : l10n.ofPlannedOn}: ${_planDayText(l10n)}'),
               onPressed: () async {
                 final d = await showDatePicker(
@@ -978,6 +985,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                     lastDate: DateTime(2100));
                 if (d != null) setState(() => _plannedOn = d);
               },
+            ),
             ),
             if (_plannedOn != null)
               TextButton(
@@ -1458,11 +1466,30 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
             cell(7, Text(l.row.maker ?? l.match.maker ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
             cell(8, Text(l.row.supplier ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
             cell(9, Text('${l.row.quantity ?? ''}', style: theme.textTheme.titleSmall), end: true),
-            cell(10, Text(l.stockBefore == null ? '—' : '${l.stockBefore}', style: small), end: true),
+            // A product not in the library: none held, none going out — 0,
+            // not an unknown, so 不足 = 数量 − 出庫数 reads across the row.
+            cell(
+              10,
+              l.stockBefore != null
+                  ? Text('${l.stockBefore}', style: small)
+                  : (out
+                      ? Text('—', style: small)
+                      : Tooltip(
+                          message: l10n.ofStockZeroHint,
+                          child: Text('0', key: ValueKey('of-stock-${l.row.rowNo}'), style: small?.copyWith(color: scheme.onSurfaceVariant)),
+                        )),
+              end: true,
+            ),
             cell(
               11,
-              Text(l.action == OutboundAction.ship ? '${l.shipped}' : '—',
-                  key: ValueKey('of-ship-${l.row.rowNo}'), style: theme.textTheme.titleSmall),
+              Text(
+                  l.action == OutboundAction.ship
+                      ? '${l.shipped}'
+                      : (out ? '—' : '0'),
+                  key: ValueKey('of-ship-${l.row.rowNo}'),
+                  style: l.action == OutboundAction.ship
+                      ? theme.textTheme.titleSmall
+                      : theme.textTheme.titleSmall?.copyWith(color: scheme.onSurfaceVariant)),
               end: true,
             ),
             // 不足 (入荷が必要): what the stock cannot cover — a row not
