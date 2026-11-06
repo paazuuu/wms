@@ -8918,6 +8918,13 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   tapping its price (the price says so on the pointer). The notice with the
   rate stays when any row is not in 円.
 
+## 出庫日 未定 listed in 出荷手配, not on the 出庫カレンダー (app only)
+
+- The 出庫カレンダー holds lists with a day only; those with none yet are
+  listed where they are made — 出荷明細の取込 (出庫予定) and 在庫外出荷 (its
+  own), above the way in when nothing is being read — with 日程を入れる,
+  and still on the dashboard.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

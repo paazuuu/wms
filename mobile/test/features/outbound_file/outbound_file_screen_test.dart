@@ -729,7 +729,7 @@ void main() {
     expect(lines.firstWhere((l) => l['row_no'] == 2)['source'], 'guess');
   });
 
-  testWidgets('出庫日 未定: listed beside the calendar, a day set from there', (tester) async {
+  testWidgets('出庫日 未定: listed in 出荷手配 (each kind in its tab), not on the calendar; a day set from there', (tester) async {
     final repo = FakeOutboundFileRepository()
       ..undecidedFiles = [
         OutboundFileSummary(
@@ -739,20 +739,30 @@ void main() {
             id: 8, warehouseId: 1, shippedOn: DateTime(2026, 11, 5), fileName: '直送分.xlsx', kind: 'proxy',
             dateUndecided: true, lineCount: 1, quantityTotal: 4),
       ];
-    await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
+    final overrides = [
       outboundFileRepositoryProvider.overrideWithValue(repo),
       activeWarehouseIdProvider.overrideWith((ref) => null),
-    ]);
-    // A 在庫外出荷 with no day is listed too (0198), marked as such.
-    expect(find.text('出庫日 未定 2件'), findsOneWidget);
+    ];
+    // The calendar holds lists with a day only.
+    await pumpApp(tester, const OutboundCalendarScreen(), overrides: overrides);
+    expect(find.byKey(const ValueKey('of-undecided')), findsNothing);
+
+    // 出荷明細の取込: the planned list with no day, given one from there.
+    await pumpApp(tester, const OutboundFileScreen(), overrides: overrides);
+    expect(find.text('出庫日 未定 1件'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-undecided-7')), findsOneWidget);
-    expect(find.textContaining('在庫外出荷 · 直送分.xlsx'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-undecided-8')), findsNothing);
     expect(repo.undecidedFiles[1].undecided, isTrue);
     await tester.tap(find.byKey(const ValueKey('of-undecided-set-7')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(repo.rescheduled.single.$1, 7);
+
+    // 在庫外出荷: its own.
+    await pumpApp(tester, const OutboundFileScreen(proxy: true), overrides: overrides);
+    expect(find.byKey(const ValueKey('of-undecided-8')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-undecided-7')), findsNothing);
   });
 
   testWidgets('出庫日 未定: said first in the detail, and when it is confirmed', (tester) async {

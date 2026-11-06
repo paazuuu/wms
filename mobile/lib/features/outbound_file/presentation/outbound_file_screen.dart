@@ -694,6 +694,9 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           key: const ValueKey('of-import-list'),
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
           children: [
+            // Lists with no day yet (未定): where they are made, to be given
+            // one — not on the 出庫カレンダー, which holds days set.
+            if (_file == null && _manual.isEmpty) OutboundUndecidedCard(kind: _proxy ? 'proxy' : 'stock'),
             // Nothing read yet: what this is for, and the way in.
             if (_file == null && _manual.isEmpty)
               Card(

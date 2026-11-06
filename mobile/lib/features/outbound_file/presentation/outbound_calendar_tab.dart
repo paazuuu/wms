@@ -134,8 +134,8 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
           key: const ValueKey('of-calendar'),
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            // 出庫日 未定 (0197): listed apart until a day is set.
-            OutboundUndecidedCard(kind: widget.proxyOnly ? 'proxy' : null),
+            // Only lists with a day are here; those with none yet (未定) are
+            // in 出荷手配 (出荷明細の取込 / 在庫外出荷) and on the dashboard.
             if (wide)
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 SizedBox(width: calendarMaxWidth, child: calendar),
