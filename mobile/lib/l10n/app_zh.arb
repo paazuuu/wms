@@ -4886,5 +4886,9 @@
   "ofColCanShip": "可从库存出库",
   "ofPickWarehouse": "出库仓库",
   "ofPickWarehouseHint": "请选择",
-  "ofNeedsWarehouseBody": "请选择出库仓库。选择后将与该仓库的商品库和库存核对，并可登记出库计划（因右上角为“全部仓库”）。"
+  "ofNeedsWarehouseBody": "请选择出库仓库。选择后将与该仓库的商品库和库存核对，并可登记出库计划（因右上角为“全部仓库”）。",
+  "ofCurrencyButton": "价格货币：{what}",
+  "ofCurrencyAllUsd": "全部美元",
+  "ofCurrencyRowHint": "只改一行时，点按表中的单价即可切换 円⇄元。",
+  "ofCurrencyCellHint": "点按切换 円⇄元"
 }

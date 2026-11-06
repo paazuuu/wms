@@ -8909,6 +8909,15 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   with no day says the day chosen there (today to begin with) becomes its
   day.
 
+## 出荷手配: a list read stays across the tabs; 価格の通貨 on the settings line (app only)
+
+- 出荷明細の取込 and 在庫外出荷 keep what was read when another tab of
+  出荷手配 is opened and closed (TabBarView let go of tabs out of sight).
+- 「価格の通貨: 円 69 · 元 3」 on the settings line, once a list has prices:
+  its menu puts every row in 円, 元 or ドル; one row is still changed by
+  tapping its price (the price says so on the pointer). The notice with the
+  rate stays when any row is not in 円.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

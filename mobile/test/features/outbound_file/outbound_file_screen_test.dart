@@ -594,6 +594,51 @@ void main() {
     expect(find.byKey(const ValueKey('sd-row-31')), findsOneWidget);
   });
 
+  testWidgets('価格の通貨: all rows put in one currency from the settings line', (tester) async {
+    final ai = FakePriceCurrencyRepository({3: (PriceCurrency.cny, true)});
+    await tester.binding.setSurfaceSize(const Size(2600, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const OutboundFileScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(matcher: _match)),
+      outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: _book())),
+      writeWarehouseIdProvider.overrideWithValue(1),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      priceCurrencyRepositoryProvider.overrideWithValue(ai),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.text('価格の通貨: 円 4 · 元 1'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-currency-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-currency-all-CNY')));
+    await tester.pumpAndSettle();
+    expect(find.text('価格の通貨: 元'), findsOneWidget);
+    expect(find.text('40 元'), findsNWidgets(4));
+  });
+
+  testWidgets('a list read stays when another tab of 出荷手配 is opened and closed again', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(2000, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const OutboundHubScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(matcher: _match)),
+      outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: _book())),
+      writeWarehouseIdProvider.overrideWithValue(1),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      shipDestinationsProvider.overrideWith((ref) async => const <ShipDestination>[]),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-row-2')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ob-hub-proxy')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-hub-file')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-row-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-file-name')), findsOneWidget);
+  });
+
   testWidgets('a link to 出荷先カード opens 出荷手配 at that tab', (tester) async {
     await pumpApp(tester, const OutboundHubScreen(tab: OutboundHubTab.cards), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
@@ -668,6 +713,9 @@ void main() {
     await tester.tap(find.byKey(ValueKey('of-cur-4-${40.0.hashCode}')));
     await tester.pumpAndSettle();
     expect(find.text('人民元と判断した行: 1 / 5'), findsOneWidget);
+    // 価格の通貨 on the settings line says what the rows are in, and puts
+    // them all in one from its menu.
+    expect(find.text('価格の通貨: 円 4 · 元 1'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('of-fx')), '21.5');
     await tester.tap(find.byKey(const ValueKey('of-post')));
     await tester.pumpAndSettle();

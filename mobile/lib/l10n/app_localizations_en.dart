@@ -15788,4 +15788,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ofNeedsWarehouseBody =>
       'Choose the warehouse it goes out of. The rows are then checked against its library and stock, and the list can be registered (the app is on \"all warehouses\").';
+
+  @override
+  String ofCurrencyButton(String what) {
+    return 'Price currency: $what';
+  }
+
+  @override
+  String get ofCurrencyAllUsd => 'All in dollars';
+
+  @override
+  String get ofCurrencyRowHint =>
+      'To change one row, tap its price in the table (円 ⇄ 元).';
+
+  @override
+  String get ofCurrencyCellHint => 'Tap to switch 円 ⇄ 元';
 }

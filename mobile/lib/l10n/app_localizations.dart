@@ -27262,6 +27262,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出庫する倉庫を選んでください。選ぶと、その倉庫の商品ライブラリー・在庫と照合し、出庫予定を登録できるようになります（画面右上が「すべての倉庫」のため）。'**
   String get ofNeedsWarehouseBody;
+
+  /// No description provided for @ofCurrencyButton.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格の通貨: {what}'**
+  String ofCurrencyButton(String what);
+
+  /// No description provided for @ofCurrencyAllUsd.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべてドル'**
+  String get ofCurrencyAllUsd;
+
+  /// No description provided for @ofCurrencyRowHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'1行だけ変えるときは、表の単価を押すと円⇄元が切り替わります。'**
+  String get ofCurrencyRowHint;
+
+  /// No description provided for @ofCurrencyCellHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'押すと円⇄元を切り替えます'**
+  String get ofCurrencyCellHint;
 }
 
 class _AppLocalizationsDelegate

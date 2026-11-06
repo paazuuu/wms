@@ -15365,4 +15365,18 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get ofNeedsWarehouseBody =>
       '请选择出库仓库。选择后将与该仓库的商品库和库存核对，并可登记出库计划（因右上角为“全部仓库”）。';
+
+  @override
+  String ofCurrencyButton(String what) {
+    return '价格货币：$what';
+  }
+
+  @override
+  String get ofCurrencyAllUsd => '全部美元';
+
+  @override
+  String get ofCurrencyRowHint => '只改一行时，点按表中的单价即可切换 円⇄元。';
+
+  @override
+  String get ofCurrencyCellHint => '点按切换 円⇄元';
 }

@@ -4886,5 +4886,9 @@
   "ofColCanShip": "From stock",
   "ofPickWarehouse": "Warehouse",
   "ofPickWarehouseHint": "Choose",
-  "ofNeedsWarehouseBody": "Choose the warehouse it goes out of. The rows are then checked against its library and stock, and the list can be registered (the app is on \"all warehouses\")."
+  "ofNeedsWarehouseBody": "Choose the warehouse it goes out of. The rows are then checked against its library and stock, and the list can be registered (the app is on \"all warehouses\").",
+  "ofCurrencyButton": "Price currency: {what}",
+  "ofCurrencyAllUsd": "All in dollars",
+  "ofCurrencyRowHint": "To change one row, tap its price in the table (円 ⇄ 元).",
+  "ofCurrencyCellHint": "Tap to switch 円 ⇄ 元"
 }

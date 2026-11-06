@@ -150,7 +150,12 @@ class OutboundImportTab extends ConsumerStatefulWidget {
   ConsumerState<OutboundImportTab> createState() => _OutboundImportTabState();
 }
 
-class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
+class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with AutomaticKeepAliveClientMixin {
+  /// A list read here stays when another tab of 出荷手配 is opened and this
+  /// one is come back to (TabBarView lets go of the tabs out of sight).
+  @override
+  bool get wantKeepAlive => true;
+
   final _destination = TextEditingController();
   final _note = TextEditingController();
   final _principal = TextEditingController();
@@ -265,6 +270,45 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
       _currency = {for (final (row, m) in priced) row.rowNo: judged(row, m)};
     });
+  }
+
+  /// 価格の通貨: what the rows are in (円 69 · 元 3), and a menu to put them
+  /// all in one; one row is changed by tapping its price.
+  Widget _currencyButton(AppLocalizations l10n) {
+    final counts = <PriceCurrency, int>{};
+    for (final c in _currency.values) {
+      counts[c.currency] = (counts[c.currency] ?? 0) + 1;
+    }
+    final what = counts.length == 1
+        ? counts.keys.single.mark
+        : [for (final c in PriceCurrency.values) if ((counts[c] ?? 0) > 0) '${c.mark} ${counts[c]}'].join(' · ');
+    return MenuAnchor(
+      menuChildren: [
+        for (final (c, label) in [
+          (PriceCurrency.jpy, l10n.ofCurrencyAllJpy),
+          (PriceCurrency.cny, l10n.ofCurrencyAllCny),
+          (PriceCurrency.usd, l10n.ofCurrencyAllUsd),
+        ])
+          MenuItemButton(
+            key: ValueKey('of-currency-all-${c.wire}'),
+            onPressed: () => _setAllCurrency(c),
+            child: Text(label),
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+          child: SizedBox(width: 260, child: Text(l10n.ofCurrencyRowHint, style: Theme.of(context).textTheme.bodySmall)),
+        ),
+      ],
+      builder: (context, menu, _) => OutlinedButton.icon(
+        key: const ValueKey('of-currency-button'),
+        style: _dense,
+        onPressed: () => menu.isOpen ? menu.close() : menu.open(),
+        icon: _judging
+            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+            : const Icon(Icons.currency_exchange, size: 18),
+        label: Text(l10n.ofCurrencyButton(what)),
+      ),
+    );
   }
 
   void _setCurrency(int rowNo, PriceCurrency c) =>
@@ -626,6 +670,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -1105,6 +1150,9 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               decoration: InputDecoration(labelText: l10n.ofNote, isDense: true, contentPadding: _denseField),
             ),
           ),
+          // The prices' currency, where it is seen: all at once here, one
+          // row by tapping its price.
+          if (_currency.isNotEmpty) _currencyButton(l10n),
           // What 出庫予定 means, on the pointer: not a line of its own.
           if (_planning)
             Tooltip(
@@ -1377,10 +1425,13 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
       style: cur == PriceCurrency.jpy ? small : small?.copyWith(color: scheme.tertiary, fontWeight: FontWeight.w700),
     );
     if (c == null || widget.onCurrency == null) return text;
-    return InkWell(
-      key: ValueKey('of-cur-${l.row.rowNo}-${v.hashCode}'),
-      onTap: () => widget.onCurrency!(l.row.rowNo, cur == PriceCurrency.jpy ? PriceCurrency.cny : PriceCurrency.jpy),
-      child: text,
+    return Tooltip(
+      message: AppLocalizations.of(context).ofCurrencyCellHint,
+      child: InkWell(
+        key: ValueKey('of-cur-${l.row.rowNo}-${v.hashCode}'),
+        onTap: () => widget.onCurrency!(l.row.rowNo, cur == PriceCurrency.jpy ? PriceCurrency.cny : PriceCurrency.jpy),
+        child: text,
+      ),
     );
   }
 

@@ -15476,4 +15476,18 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get ofNeedsWarehouseBody =>
       '出庫する倉庫を選んでください。選ぶと、その倉庫の商品ライブラリー・在庫と照合し、出庫予定を登録できるようになります（画面右上が「すべての倉庫」のため）。';
+
+  @override
+  String ofCurrencyButton(String what) {
+    return '価格の通貨: $what';
+  }
+
+  @override
+  String get ofCurrencyAllUsd => 'すべてドル';
+
+  @override
+  String get ofCurrencyRowHint => '1行だけ変えるときは、表の単価を押すと円⇄元が切り替わります。';
+
+  @override
+  String get ofCurrencyCellHint => '押すと円⇄元を切り替えます';
 }
