@@ -14,25 +14,15 @@ class _ToneStyle {
   final Color ink; // readable text on [bg]
 }
 
-_ToneStyle _resolve(StatusTone tone, ColorScheme scheme) {
-  switch (tone) {
-    case StatusTone.success:
-      return const _ToneStyle(
-          AppColors.success, AppColors.successBg, AppColors.successInk);
-    case StatusTone.warning:
-      return const _ToneStyle(
-          AppColors.warning, AppColors.warningBg, AppColors.warningInk);
-    case StatusTone.danger:
-      return const _ToneStyle(
-          AppColors.danger, AppColors.dangerBg, AppColors.dangerInk);
-    case StatusTone.info:
-      return const _ToneStyle(
-          AppColors.info, AppColors.infoBg, AppColors.infoInk);
-    case StatusTone.neutral:
-      return _ToneStyle(
-          scheme.onSurfaceVariant, scheme.surfaceContainerHigh, scheme.onSurface);
-  }
-}
+_ToneStyle _resolve(StatusTone tone, ColorScheme scheme) => switch (tone) {
+      // From the scheme, so a pill reads on the dark theme too (a pastel
+      // pill with dark ink was a light patch on the navy).
+      StatusTone.success => _ToneStyle(scheme.success, scheme.successContainer, scheme.onSuccessContainer),
+      StatusTone.warning => _ToneStyle(scheme.warning, scheme.warningContainer, scheme.onWarningContainer),
+      StatusTone.danger => _ToneStyle(scheme.error, scheme.errorContainer, scheme.onErrorContainer),
+      StatusTone.info => _ToneStyle(scheme.primary, scheme.primaryContainer, scheme.onPrimaryContainer),
+      StatusTone.neutral => _ToneStyle(scheme.onSurfaceVariant, scheme.surfaceContainerHigh, scheme.onSurface),
+    };
 
 /// A compact, high-contrast status pill: coloured background + optional icon +
 /// label. Conveys state with BOTH colour and text/icon (accessibility: never

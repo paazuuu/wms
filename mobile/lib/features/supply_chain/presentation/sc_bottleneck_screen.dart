@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -167,7 +166,7 @@ class _ScBottleneckScreenState extends ConsumerState<ScBottleneckScreen> {
                     if (p.leadTimeChange != null) '${l10n.scLeadTime} ${p.leadTimeChange! >= 0 ? '+' : ''}${scNumber(p.leadTimeChange!)}',
                   ].join(' · ')),
                   trailing: Text(scSigned(p.impact),
-                      style: theme.textTheme.bodyMedium?.copyWith(fontFamily: AppFonts.mono, color: p.impact < 0 ? AppColors.danger : null)),
+                      style: theme.textTheme.bodyMedium?.copyWith(fontFamily: AppFonts.mono, color: p.impact < 0 ? Theme.of(context).colorScheme.error : null)),
                 ),
             ],
           ],

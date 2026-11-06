@@ -242,7 +242,7 @@ class _TrendCard extends StatelessWidget {
                   child: Text(l10n.dashTrendTitle,
                       style: theme.textTheme.titleSmall),
                 ),
-                _LegendDot(color: AppColors.success, label: l10n.dashInbound),
+                _LegendDot(color: Theme.of(context).colorScheme.success, label: l10n.dashInbound),
                 const SizedBox(width: AppSpacing.md),
                 _LegendDot(color: AppColors.info, label: l10n.dashOutbound),
               ],
@@ -327,7 +327,7 @@ class _DayBars extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          bar(point.inbound, AppColors.success),
+          bar(point.inbound, Theme.of(context).colorScheme.success),
           const SizedBox(width: 2),
           bar(point.outbound, AppColors.info),
         ],
@@ -507,8 +507,8 @@ class _WatchCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle_outline,
-                        size: 18, color: AppColors.success),
+                    Icon(Icons.check_circle_outline,
+                        size: 18, color: Theme.of(context).colorScheme.success),
                     const SizedBox(width: AppSpacing.sm),
                     Text(emptyLabel,
                         style: theme.textTheme.bodySmall
@@ -689,7 +689,7 @@ class _TaskChip extends StatelessWidget {
     final scheme = theme.colorScheme;
     final active = task.count > 0;
     final style = active
-        ? (fg: AppColors.warning, bg: AppColors.warningBg)
+        ? (fg: Theme.of(context).colorScheme.warning, bg: AppColors.warningBg)
         : (fg: scheme.onSurfaceVariant, bg: scheme.surfaceContainerHigh);
 
     return Card(
@@ -761,8 +761,8 @@ class DashboardNotificationsPanel extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
-              const Icon(Icons.check_circle_outline,
-                  size: 18, color: AppColors.success),
+              Icon(Icons.check_circle_outline,
+                  size: 18, color: Theme.of(context).colorScheme.success),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

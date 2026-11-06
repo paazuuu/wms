@@ -10,6 +10,7 @@ import 'package:printing/printing.dart';
 
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/selectable_app.dart';
 import '../../../core/ui/state_views.dart';
@@ -533,7 +534,8 @@ class _SheetTableState extends State<_SheetTable> {
         for (final ch in r[c].runes) {
           units += ch > 0x2E80 ? 2 : 1;
         }
-        final px = (units * 6.5 + 14).clamp(24, 260).toDouble();
+        // 12px text: a figure is about 7.2px wide (tabular), a kanji twice.
+        final px = (units * 7.4 + 16).clamp(24, 280).toDouble();
         if (px > w[c]) w[c] = px;
       }
     }
@@ -567,7 +569,7 @@ class _SheetTableState extends State<_SheetTable> {
                 final out = widget.leftOut.contains(i + 1);
                 return Container(
                   decoration: BoxDecoration(
-                    color: out ? theme.colorScheme.errorContainer : null,
+                    color: out ? theme.colorScheme.errorTint : null,
                     border: Border(
                       left: BorderSide(color: line),
                       bottom: BorderSide(color: line),

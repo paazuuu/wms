@@ -226,7 +226,7 @@ class _ProductTable extends StatelessWidget {
                         Text(
                           '${scUnitMoney(p.profitPerUnit)} · ${scPercent(p.margin)}',
                           style: mono?.copyWith(
-                              fontWeight: FontWeight.w700, color: p.profitPerUnit < 0 ? AppColors.danger : AppColors.success),
+                              fontWeight: FontWeight.w700, color: p.profitPerUnit < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success),
                         ),
                       ],
                     ),

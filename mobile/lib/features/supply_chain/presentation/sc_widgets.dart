@@ -28,9 +28,9 @@ class ScKpiCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final color = switch (tone) {
-      StatusTone.success => AppColors.success,
-      StatusTone.danger => AppColors.danger,
-      StatusTone.warning => AppColors.warning,
+      StatusTone.success => Theme.of(context).colorScheme.success,
+      StatusTone.danger => Theme.of(context).colorScheme.error,
+      StatusTone.warning => Theme.of(context).colorScheme.warning,
       StatusTone.info => AppColors.info,
       _ => scheme.onSurface,
     };
@@ -243,7 +243,7 @@ class ScProfitWaterfall extends StatelessWidget {
         bar(l10n.scSalesPrice, salesPrice, scheme.primary, strong: true),
         for (final (label, v, color) in rows) bar(label, v, color),
         const Divider(height: AppSpacing.md),
-        bar(l10n.scProfitPerUnit, profit, profit < 0 ? AppColors.danger : AppColors.success,
+        bar(l10n.scProfitPerUnit, profit, profit < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success,
             strong: true, key: const ValueKey('sc-waterfall-profit')),
       ],
     );
@@ -289,9 +289,9 @@ class ScLoadBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final color = switch (load.status) {
-      LoadStatus.ok => AppColors.success,
-      LoadStatus.busy => AppColors.warning,
-      LoadStatus.exceeded || LoadStatus.stopped => AppColors.danger,
+      LoadStatus.ok => Theme.of(context).colorScheme.success,
+      LoadStatus.busy => Theme.of(context).colorScheme.warning,
+      LoadStatus.exceeded || LoadStatus.stopped => Theme.of(context).colorScheme.error,
       LoadStatus.noCapacity => theme.colorScheme.outline,
     };
     final pct = load.load;
@@ -387,7 +387,7 @@ class ScRouteGraph extends StatelessWidget {
         if (e.costPerUnit > 0) '${scUnitMoney(e.costPerUnit)}/${l10n.scBasisPerUnit}',
         if (e.baseCost > 0) scMoney(e.baseCost),
       ].join(' ');
-      final color = scRiskTone(e.riskLevel) == StatusTone.success ? scheme.outline : AppColors.warning;
+      final color = scRiskTone(e.riskLevel) == StatusTone.success ? scheme.outline : Theme.of(context).colorScheme.warning;
       return InkWell(
         key: ValueKey('sc-leg-${route.id}-${e.seq}'),
         onTap: onLegTap == null ? null : () => onLegTap!(e),
@@ -459,7 +459,7 @@ class ScCompareTable extends StatelessWidget {
           child: Text(
             money ? scSigned(d) : scSignedPoints(d),
             textAlign: TextAlign.right,
-            style: style?.copyWith(color: d.abs() < 0.005 ? null : (good ? AppColors.success : AppColors.danger)),
+            style: style?.copyWith(color: d.abs() < 0.005 ? null : (good ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.error)),
           ),
         ),
       ]);
@@ -522,7 +522,7 @@ class ScDriversList extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontFamily: AppFonts.mono,
                     // A cost going up is bad; revenue going up is good.
-                    color: (d.line == 'revenue' ? d.delta > 0 : d.delta < 0) ? AppColors.success : AppColors.danger,
+                    color: (d.line == 'revenue' ? d.delta > 0 : d.delta < 0) ? Theme.of(context).colorScheme.success : Theme.of(context).colorScheme.error,
                   ),
                 ),
               ],

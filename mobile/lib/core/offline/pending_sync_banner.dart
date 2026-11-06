@@ -70,7 +70,7 @@ class _PendingSyncBannerState extends ConsumerState<PendingSyncBanner> with Widg
     final s = ref.watch(pendingSyncProvider);
     _arm(s.ops.isNotEmpty);
     if (s.ops.isEmpty && s.failed.isEmpty && !s.offline) return const SizedBox.shrink();
-    final color = s.offline ? AppColors.warning : AppColors.info;
+    final color = s.offline ? Theme.of(context).colorScheme.warning : AppColors.info;
     return Container(
       key: const ValueKey('pending-sync-banner'),
       width: double.infinity,
@@ -99,11 +99,11 @@ class _PendingSyncBannerState extends ConsumerState<PendingSyncBanner> with Widg
           ]),
           for (final f in s.failed)
             Row(children: [
-              const Icon(Icons.error_outline, size: 16, color: AppColors.danger),
+              Icon(Icons.error_outline, size: 16, color: Theme.of(context).colorScheme.error),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(l10n.syncRefused(humanizeApiErrorMessage(l10n, f.error)),
-                    style: theme.textTheme.bodySmall?.copyWith(color: AppColors.danger)),
+                    style: theme.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error)),
               ),
               IconButton(
                 tooltip: l10n.syncDismiss,

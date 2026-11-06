@@ -8871,6 +8871,27 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - A long table scrolls in the whole height left below the top.
 - 「この表をExcelで保存」 stays for 在庫外出荷 (rows typed in) only.
 
+## Design pass with Impeccable + Frontend UI Engineering (app only)
+
+- Skills kept in the repo: .claude/skills/impeccable (pbakaus/impeccable,
+  Apache-2.0, without its hooks) and .claude/skills/frontend-ui-engineering
+  (addyosmani/agent-skills, MIT; its checklist in .claude/references).
+- Refinement, not redesign (Operate mode): the navy/blue Flat look, Fira
+  Sans/Code and the layouts kept.
+- Contrast measured: control edges (inputs, outlined buttons, checkboxes)
+  were 1.4–2.4:1 → outline light #768599, dark #64748B (≥3:1, WCAG
+  1.4.11). Green/amber status text was 3.2–3.3:1 on white → ColorScheme
+  .success / .warning (+ containers, errorTint) chosen per theme; fixed
+  AppColors.success/warning/danger used as text replaced; StatusPill takes
+  its colours from the scheme (no pastel patches on the dark theme).
+- Theme: tabular figures in every text style (numbers line up); text
+  selection, caret, focus, scrollbars and tooltips from the palette;
+  checkbox edges at 3:1.
+- 出荷明細の取込: statuses by meaning (出庫できる green, 在庫不足 red,
+  未登録/JANなし/候補が複数 amber; blue left to what can be pressed), rows
+  about 40px instead of 57px, compact toolbar buttons keep the app font; the
+  original's marked rows a tint, not a solid red block on the dark theme.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

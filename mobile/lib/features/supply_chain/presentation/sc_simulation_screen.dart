@@ -394,7 +394,7 @@ class _ScSimulationScreenState extends ConsumerState<ScSimulationScreen> {
                   scSigned(r.deltaProfit),
                   key: const ValueKey('sc-sim-delta'),
                   style: theme.textTheme.titleLarge?.copyWith(
-                      fontFamily: AppFonts.mono, color: r.deltaProfit < 0 ? AppColors.danger : AppColors.success, fontWeight: FontWeight.w700),
+                      fontFamily: AppFonts.mono, color: r.deltaProfit < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success, fontWeight: FontWeight.w700),
                 ),
               ]),
               if (r.deltaLeadTime != null && r.deltaLeadTime != 0)
@@ -466,7 +466,7 @@ class _ProductChanges extends StatelessWidget {
             ].join(' · ')),
             trailing: Text(scSigned(b.profitTotal - a.profitTotal),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                    fontFamily: AppFonts.mono, color: b.profitTotal < a.profitTotal ? AppColors.danger : AppColors.success)),
+                    fontFamily: AppFonts.mono, color: b.profitTotal < a.profitTotal ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success)),
           ),
       ],
     );

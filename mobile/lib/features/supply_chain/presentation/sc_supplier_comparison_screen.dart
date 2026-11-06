@@ -250,7 +250,7 @@ class _OptionsTable extends StatelessWidget {
           row(l10n.scSalesPrice, (o) => scUnitMoney(o.salesPrice)),
           row(l10n.scProfitPerUnit, (o) => scUnitMoney(o.profitPerUnit),
               strong: true,
-              color: (o) => o.profitPerUnit < 0 ? AppColors.danger : (o.key == best?.key ? AppColors.success : null)),
+              color: (o) => o.profitPerUnit < 0 ? Theme.of(context).colorScheme.error : (o.key == best?.key ? Theme.of(context).colorScheme.success : null)),
           row(l10n.scMargin, (o) => scPercent(o.margin)),
           row(l10n.scLeadTimeDays, (o) => scNumber(o.leadTimeDays)),
           row(l10n.scMoq, (o) => o.moq == null ? '—' : '${o.moq}'),
@@ -297,7 +297,7 @@ class _SweepTable extends StatelessWidget {
                       Text('${l10n.scLandedCost} ${scUnitMoney(o.unit.landed)}', style: theme.textTheme.bodySmall),
                       Text('${scUnitMoney(o.profitPerUnit)} · ${scPercent(o.margin)}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                              fontFamily: AppFonts.mono, color: o.profitPerUnit < 0 ? AppColors.danger : AppColors.success)),
+                              fontFamily: AppFonts.mono, color: o.profitPerUnit < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success)),
                     ],
                   );
                 })),

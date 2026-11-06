@@ -224,6 +224,40 @@ class AppTheme {
         color: scheme.primary,
       ),
 
+      // The parts no screen draws still carry the palette: what is selected,
+      // the caret, the scrollbars, the focus, the tooltips.
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: scheme.primary,
+        selectionColor: scheme.primary.withValues(alpha: isLight ? 0.22 : 0.35),
+        selectionHandleColor: scheme.primary,
+      ),
+      focusColor: scheme.primary.withValues(alpha: isLight ? 0.14 : 0.24),
+      scrollbarTheme: ScrollbarThemeData(
+        thickness: const WidgetStatePropertyAll(8),
+        radius: const Radius.circular(8),
+        thumbColor: WidgetStateProperty.resolveWith((states) => scheme.onSurfaceVariant.withValues(
+            alpha: states.contains(WidgetState.dragged) || states.contains(WidgetState.hovered) ? 0.7 : 0.4)),
+        trackColor: WidgetStatePropertyAll(scheme.surfaceContainer),
+        trackBorderColor: const WidgetStatePropertyAll(Colors.transparent),
+      ),
+      tooltipTheme: TooltipThemeData(
+        waitDuration: const Duration(milliseconds: 400),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2, vertical: AppSpacing.xs + 2),
+        decoration: BoxDecoration(color: scheme.inverseSurface, borderRadius: BorderRadius.circular(AppSpacing.radiusSm)),
+        textStyle: TextStyle(
+          fontFamily: AppFonts.sans,
+          fontFamilyFallback: AppFonts.fallback,
+          fontSize: 13,
+          height: 1.45,
+          color: scheme.onInverseSurface,
+        ),
+      ),
+      // A box's edge reads at 3:1 when empty, so an unticked row is seen.
+      checkboxTheme: CheckboxThemeData(
+        side: BorderSide(color: scheme.outline, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+
       // Subtle, consistent page transitions (skill "Animation" rule).
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -243,7 +277,7 @@ class AppTheme {
         fontFamilyFallback: AppFonts.fallback,
         fontWeight: w,
         height: h);
-    return base
+    final t = base
         .copyWith(
           headlineSmall: s(base.headlineSmall, w: FontWeight.w700),
           titleLarge: s(base.titleLarge, w: FontWeight.w700),
@@ -259,5 +293,24 @@ class AppTheme {
           bodyColor: scheme.onSurface,
           displayColor: scheme.onSurface,
         );
+    // Figures of one width, so quantities and prices line up in tables.
+    TextStyle? n(TextStyle? x) => x?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+    return t.copyWith(
+      displayLarge: n(t.displayLarge),
+      displayMedium: n(t.displayMedium),
+      displaySmall: n(t.displaySmall),
+      headlineLarge: n(t.headlineLarge),
+      headlineMedium: n(t.headlineMedium),
+      headlineSmall: n(t.headlineSmall),
+      titleLarge: n(t.titleLarge),
+      titleMedium: n(t.titleMedium),
+      titleSmall: n(t.titleSmall),
+      bodyLarge: n(t.bodyLarge),
+      bodyMedium: n(t.bodyMedium),
+      bodySmall: n(t.bodySmall),
+      labelLarge: n(t.labelLarge),
+      labelMedium: n(t.labelMedium),
+      labelSmall: n(t.labelSmall),
+    );
   }
 }

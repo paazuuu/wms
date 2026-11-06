@@ -132,7 +132,7 @@ class _Runs extends ConsumerWidget {
                               if (r.deltaProfit != null)
                                 Text(scSigned(r.deltaProfit!),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                        fontFamily: AppFonts.mono, color: r.deltaProfit! < 0 ? AppColors.danger : AppColors.success)),
+                                        fontFamily: AppFonts.mono, color: r.deltaProfit! < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success)),
                             ],
                           ),
                         ),

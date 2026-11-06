@@ -160,7 +160,7 @@ class _OptionTile extends StatelessWidget {
           children: [
             Text(scUnitMoney(o.profitPerUnit),
                 style: theme.textTheme.titleSmall?.copyWith(
-                    fontFamily: AppFonts.mono, color: o.profitPerUnit < 0 ? AppColors.danger : AppColors.success)),
+                    fontFamily: AppFonts.mono, color: o.profitPerUnit < 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.success)),
             Text(scPercent(o.margin), style: theme.textTheme.bodySmall),
           ],
         ),

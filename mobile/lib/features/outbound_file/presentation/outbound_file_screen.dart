@@ -10,6 +10,7 @@ import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart';
 import '../../../core/export/xlsx.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
@@ -127,12 +128,14 @@ String outboundMatchedLabel(AppLocalizations l10n, OutboundMatchedBy by) => swit
       _ => '',
     };
 
-/// The tone of a row's state: what needs a look stands out.
+/// The tone of a row's state, by what it means: fine (green), short of
+/// stock (red), needs a product or a choice (amber), nothing to ship (grey).
+/// Blue stays for what can be pressed.
 Color outboundStatusColor(ColorScheme s, OutboundStatus st) => switch (st) {
-      OutboundStatus.ok => s.primary,
-      OutboundStatus.short || OutboundStatus.several => s.error,
+      OutboundStatus.ok => s.success,
+      OutboundStatus.short => s.error,
+      OutboundStatus.unknownJan || OutboundStatus.noJan || OutboundStatus.several => s.warning,
       OutboundStatus.noQuantity => s.onSurfaceVariant,
-      _ => s.tertiary,
     };
 
 /// Reads a list, shows each row with what will be done, and ships it — or,
@@ -799,7 +802,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
   }
 
   /// Buttons and fields of the top, small: the rows are what is looked at.
-  static const _dense = ButtonStyle(visualDensity: VisualDensity.compact, tapTargetSize: MaterialTapTargetSize.shrinkWrap);
+  static const _dense = ButtonStyle(
+    visualDensity: VisualDensity.compact,
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    textStyle: WidgetStatePropertyAll(TextStyle(
+        fontFamily: AppFonts.sans, fontFamilyFallback: AppFonts.fallback, fontSize: 14, fontWeight: FontWeight.w600)),
+  );
 
   static const _denseField = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
 
@@ -1329,7 +1337,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
         ? const SizedBox.shrink()
         : Container(
             width: _widths[i],
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
             alignment: end ? Alignment.centerRight : Alignment.centerLeft,
             child: child,
           );
@@ -1356,6 +1364,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                       key: const ValueKey('of-include-all'),
                       tristate: true,
                       visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       value: included == lines.length ? true : (included == 0 ? false : null),
                       onChanged: (_) => widget.onInclude([for (final l in lines) l.row.rowNo], included != lines.length),
                     ),
@@ -1397,6 +1406,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
               Checkbox(
                 key: ValueKey('of-include-${l.row.rowNo}'),
                 visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 value: !out,
                 onChanged: (v) => widget.onInclude([l.row.rowNo], v ?? false),
               ),
@@ -1428,7 +1438,11 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                     l.match.matchedBy == OutboundMatchedBy.picked)
                   TextButton.icon(
                     key: ValueKey('of-pick-${l.row.rowNo}'),
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
+                    style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 28),
+                        visualDensity: VisualDensity.compact,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                     onPressed: () => widget.onPick(l),
                     icon: const Icon(Icons.search, size: 16),
                     label: Text(l10n.ofPickProduct),

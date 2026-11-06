@@ -287,6 +287,7 @@ Future<void> pumpApp(
   WidgetTester tester,
   Widget child, {
   List<Override> overrides = const [],
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -294,7 +295,7 @@ Future<void> pumpApp(
       child: MaterialApp(
         // The app's own theme, so a style that breaks a layout (a button
         // asking for infinite width) fails here as it would in the app.
-        theme: AppTheme.light(),
+        theme: theme ?? AppTheme.light(),
         locale: const Locale('ja'),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

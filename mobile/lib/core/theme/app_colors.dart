@@ -71,7 +71,9 @@ class AppColors {
     surfaceContainerHigh: muted,
     surfaceContainerHighest: border,
     onSurfaceVariant: mutedText,
-    outline: borderStrong,
+    // Control edges (inputs, outlined buttons, checkboxes): 3.4:1 or more
+    // on every light surface (WCAG 1.4.11); dividers stay quiet below.
+    outline: Color(0xFF768599),
     outlineVariant: border,
     inverseSurface: navy,
     onInverseSurface: background,
@@ -107,7 +109,8 @@ class AppColors {
     surfaceContainerHigh: Color(0xFF334155),
     surfaceContainerHighest: Color(0xFF475569),
     onSurfaceVariant: borderStrong,
-    outline: Color(0xFF475569),
+    // Control edges at 3:1 or more on the navy surfaces (WCAG 1.4.11).
+    outline: Color(0xFF64748B),
     outlineVariant: Color(0xFF334155),
     inverseSurface: background,
     onInverseSurface: navy,
@@ -115,4 +118,25 @@ class AppColors {
     shadow: Color(0xFF000000),
     scrim: Color(0xCC020617),
   );
+}
+
+/// OK / caution colours that read on either theme: as text they keep 4.5:1
+/// (the raw [AppColors.success] / [AppColors.warning] are for bars and
+/// dots, which need 3:1, and fail as text on white).
+extension StatusColors on ColorScheme {
+  bool get _light => brightness == Brightness.light;
+
+  /// Done, fine, in stock.
+  Color get success => _light ? const Color(0xFF15803D) : const Color(0xFF4ADE80);
+
+  /// Needs a look or a choice; not wrong.
+  Color get warning => _light ? const Color(0xFFB45309) : const Color(0xFFFBBF24);
+
+  Color get successContainer => _light ? AppColors.successBg : const Color(0xFF14532D);
+  Color get onSuccessContainer => _light ? AppColors.successInk : AppColors.successBg;
+  Color get warningContainer => _light ? AppColors.warningBg : const Color(0xFF78350F);
+  Color get onWarningContainer => _light ? AppColors.warningInk : AppColors.warningBg;
+
+  /// A row marked as not taken in, as a tint the text still reads on.
+  Color get errorTint => error.withValues(alpha: _light ? 0.12 : 0.22);
 }

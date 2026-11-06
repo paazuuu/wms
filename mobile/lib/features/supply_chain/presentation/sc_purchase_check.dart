@@ -85,7 +85,7 @@ class _ProfitWarningDialog extends StatelessWidget {
         };
     return AlertDialog(
       key: const ValueKey('sc-profit-warning'),
-      icon: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+      icon: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.warning),
       title: Text(l10n.scProfitWarning),
       content: SizedBox(
         width: 460,
@@ -98,7 +98,7 @@ class _ProfitWarningDialog extends StatelessWidget {
                 Text(l10n.scProfitWarningBody(scPercent(l.marginBefore), scPercent(l.marginAfter))),
                 Text(
                   [for (final w in l.warn) warn(w)].where((x) => x.isNotEmpty).join(' · '),
-                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.danger),
+                  style: theme.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
                 ),
                 if (l.drivers.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xs),
