@@ -16,6 +16,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../product/domain/product.dart';
 import '../../stock_import/domain/stock_file.dart' show fileFingerprint, readStockFile;
+import '../../stock_import/presentation/import_view_screen.dart' show OriginalFileView;
 import '../../stock_ops/presentation/stock_adjustment_screen.dart'
     show adjustOnHand, adjustProductMatches, adjustProductsProvider;
 import '../../outbound/domain/outbound.dart' show ShipDestination;
@@ -600,7 +601,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final shown = [for (final l in plan) if ((_filter == null || l.status == _filter) && (!_needOnly || l.need > 0)) l];
     final noWarehouse = ref.watch(writeWarehouseIdProvider) == null;
 
-    return Column(children: [
+    final main = Column(children: [
       Expanded(
         child: ListView(
           key: const ValueKey('of-import-list'),
@@ -627,6 +628,13 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                         label: Text(l10n.prAddRow),
                       ),
                     if (_file != null) Text(_file!.name, key: const ValueKey('of-file-name'), style: theme.textTheme.titleSmall),
+                    if (_file != null && !_showOriginal)
+                      TextButton.icon(
+                        key: const ValueKey('of-original-show'),
+                        onPressed: () => setState(() => _showOriginal = true),
+                        icon: const Icon(Icons.vertical_split_outlined, size: 18),
+                        label: Text(l10n.ofOriginalShow),
+                      ),
                   ]),
                   if (noWarehouse) ...[
                     const SizedBox(height: AppSpacing.sm),
@@ -732,6 +740,67 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           ),
         ),
     ]);
+    // On a PC the file read beside the table, as in 発注's 読み取り結果の確認.
+    final file = _file;
+    if (file == null || _sheets.isEmpty || !_showOriginal) return main;
+    return LayoutBuilder(builder: (context, box) {
+      if (box.maxWidth < 1100) return main;
+      return Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        SizedBox(width: (box.maxWidth * 0.3).clamp(320.0, 560.0), child: _originalPane(l10n, file, plan)),
+        const VerticalDivider(width: 1),
+        Expanded(child: main),
+      ]);
+    });
+  }
+
+  /// Show the file read beside the table (a PC's width).
+  bool _showOriginal = true;
+  Object? _paneKey;
+  Widget? _pane;
+
+  /// The sheet read, as it is, the rows not matched to a product of ours in
+  /// red. Made again only when the sheet or those rows change: a sheet of
+  /// hundreds of rows is not laid out again on every tick.
+  Widget _originalPane(AppLocalizations l10n, ({String name, Uint8List bytes}) file, List<OutboundPlanLine> plan) {
+    final rows = _sheets[_sheet].rows;
+    final out = [
+      for (final l in plan)
+        if (!l.found && l.action != OutboundAction.skip && l.status != OutboundStatus.noQuantity) l.row.rowNo
+    ];
+    final key = (identityHashCode(rows), out.join(','), file.name, l10n.localeName);
+    if (key == _paneKey && _pane != null) return _pane!;
+    _paneKey = key;
+    final theme = Theme.of(context);
+    return _pane = Column(
+      key: const ValueKey('of-original'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.xs, 0),
+          child: Row(children: [
+            Expanded(
+              child: Text([file.name, if (_sheets.length > 1) _sheets[_sheet].name].join(' · '),
+                  style: theme.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            IconButton(
+              key: const ValueKey('of-original-hide'),
+              tooltip: l10n.ofOriginalHide,
+              icon: const Icon(Icons.close_fullscreen, size: 18),
+              onPressed: () => setState(() => _showOriginal = false),
+            ),
+          ]),
+        ),
+        if (out.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Text(l10n.ofOriginalLegend(out.length),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+          ),
+        Expanded(
+          child: OriginalFileView(fileName: file.name, bytes: file.bytes, sheetRows: rows, leftOut: out.toSet()),
+        ),
+      ],
+    );
   }
 
   Widget _sheetAndColumns(AppLocalizations l10n, OutboundSheet parsed, TextStyle? muted) {

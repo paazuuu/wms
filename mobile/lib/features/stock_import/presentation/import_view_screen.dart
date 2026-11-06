@@ -406,10 +406,15 @@ class _OriginalPane extends ConsumerWidget {
 /// A file as it is, to set a reading beside: a picture or a PDF's pages to
 /// zoom into, a sheet's cells, else a word that it cannot be shown.
 class OriginalFileView extends StatelessWidget {
-  const OriginalFileView({super.key, required this.fileName, required this.bytes, this.leftOut = const {}});
+  const OriginalFileView(
+      {super.key, required this.fileName, required this.bytes, this.leftOut = const {}, this.sheetRows});
 
   final String fileName;
   final Uint8List bytes;
+
+  /// The sheet to show, read already (one chosen of several, rows kept at
+  /// their numbers); else the file's first sheet.
+  final List<List<String>>? sheetRows;
 
   /// Rows of the sheet (1-based, as the file numbers them) that are not taken
   /// in: marked, so what was not understood is seen where it is.
@@ -423,6 +428,8 @@ class OriginalFileView extends StatelessWidget {
       return InteractiveViewer(maxScale: 6, child: Image.memory(bytes, key: const ValueKey('iv-image')));
     }
     if (name.endsWith('.pdf')) return _PdfPages(bytes: bytes);
+    final given = sheetRows;
+    if (given != null) return _SheetTable(rows: given, leftOut: leftOut);
     if (readsLocally(fileName)) {
       try {
         return _SheetTable(rows: readStockFile(fileName, bytes), leftOut: leftOut);
@@ -487,42 +494,108 @@ class _PdfPagesState extends State<_PdfPages> {
 }
 
 /// A sheet's cells as they are, with the row numbers the reading refers to.
-class _SheetTable extends StatelessWidget {
+/// Built as the rows come into view, every row of the sheet (a list of 700
+/// rows built whole held the page up); each column as wide as its longest
+/// cell, within reason; rows not taken in red ([leftOut], 1-based).
+class _SheetTable extends StatefulWidget {
   const _SheetTable({required this.rows, this.leftOut = const {}});
 
   final List<List<String>> rows;
   final Set<int> leftOut;
 
   @override
+  State<_SheetTable> createState() => _SheetTableState();
+}
+
+class _SheetTableState extends State<_SheetTable> {
+  final _across = ScrollController();
+  late List<double> _widths = _measure(widget.rows);
+
+  @override
+  void didUpdateWidget(_SheetTable old) {
+    super.didUpdateWidget(old);
+    if (!identical(old.rows, widget.rows)) _widths = _measure(widget.rows);
+  }
+
+  @override
+  void dispose() {
+    _across.dispose();
+    super.dispose();
+  }
+
+  /// A column's width from its longest cell (a wide character counts double).
+  static List<double> _measure(List<List<String>> rows) {
+    final cols = rows.fold<int>(0, (m, r) => r.length > m ? r.length : m);
+    final w = List<double>.filled(cols, 24);
+    for (final r in rows) {
+      for (var c = 0; c < r.length; c++) {
+        var units = 0;
+        for (final ch in r[c].runes) {
+          units += ch > 0x2E80 ? 2 : 1;
+        }
+        final px = (units * 6.5 + 14).clamp(24, 260).toDouble();
+        if (px > w[c]) w[c] = px;
+      }
+    }
+    return w;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cols = rows.fold<int>(0, (m, r) => r.length > m ? r.length : m);
-    final shown = rows.take(500).toList();
-    return SingleChildScrollView(
+    final line = theme.colorScheme.outlineVariant;
+    final rows = widget.rows;
+    final small = theme.textTheme.bodySmall;
+    final label = theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    const lead = 44.0;
+    final width = lead + _widths.fold<double>(0, (a, w) => a + w);
+    return LayoutBuilder(
       key: const ValueKey('iv-sheet'),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Table(
-          defaultColumnWidth: const IntrinsicColumnWidth(),
-          border: TableBorder.all(color: theme.colorScheme.outlineVariant),
-          children: [
-            for (var i = 0; i < shown.length; i++)
-              TableRow(
-                  decoration: leftOut.contains(i + 1) ? BoxDecoration(color: theme.colorScheme.errorContainer) : null,
-                  children: [
-                Padding(
-                  key: leftOut.contains(i + 1) ? ValueKey('iv-left-out-${i + 1}') : null,
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  child: Text('${i + 1}', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                ),
-                for (var c = 0; c < cols; c++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    child: Text(c < shown[i].length ? shown[i][c] : '', style: theme.textTheme.bodySmall),
+      builder: (context, box) => Scrollbar(
+        controller: _across,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: _across,
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: width + 2 * AppSpacing.md + 2,
+            height: box.maxHeight.isFinite ? box.maxHeight : 600,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              itemCount: rows.length,
+              itemBuilder: (_, i) {
+                final out = widget.leftOut.contains(i + 1);
+                return Container(
+                  decoration: BoxDecoration(
+                    color: out ? theme.colorScheme.errorContainer : null,
+                    border: Border(
+                      left: BorderSide(color: line),
+                      bottom: BorderSide(color: line),
+                      top: i == 0 ? BorderSide(color: line) : BorderSide.none,
+                    ),
                   ),
-              ]),
-          ],
+                  child: IntrinsicHeight(
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      Container(
+                        key: out ? ValueKey('iv-left-out-${i + 1}') : null,
+                        width: lead,
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                        decoration: BoxDecoration(border: Border(right: BorderSide(color: line))),
+                        child: Text('${i + 1}', style: label),
+                      ),
+                      for (var c = 0; c < _widths.length; c++)
+                        Container(
+                          width: _widths[c],
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                          decoration: BoxDecoration(border: Border(right: BorderSide(color: line))),
+                          child: Text(c < rows[i].length ? rows[i][c] : '', style: small),
+                        ),
+                    ]),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

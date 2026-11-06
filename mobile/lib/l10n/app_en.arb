@@ -3837,8 +3837,8 @@
   "rcOriginal": "Original",
   "rcRead": "Reading",
   "rcRow": "Row",
-  "rcRemove": "Leave this row out",
-  "rcRestore": "Bring it back",
+  "rcRemove": "Untick to leave this row out",
+  "rcRestore": "Tick to take this row in",
   "rcAdd": "Add a row",
   "rcAllColumns": "All columns",
   "rcTotals": "{rows} rows · quantity {qty} · amount {amount}",
@@ -4873,5 +4873,9 @@
   "sfMarkedSaved": "Saved {name} (rows not read filled red, the reason at the right)",
   "sfMarkedPdfDone": "{marked} rows framed in red. Rows that could not be placed: {missing}",
   "sfMarking": "Marking…",
-  "sfMarkedSuffix": "not_read"
+  "sfMarkedSuffix": "not_read",
+  "ofOriginal": "The file read",
+  "ofOriginalHide": "Hide the original",
+  "ofOriginalShow": "Show the original beside",
+  "ofOriginalLegend": "Red: rows not matched to the library ({n})"
 }

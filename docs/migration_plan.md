@@ -8846,6 +8846,20 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - A file of many rows is looked at in Excel or a PDF viewer, not on the
   screen, so a long file is still checked.
 
+## 出荷手配 shows the file read beside the table; 発注's check ticks rows (app only)
+
+- 出荷明細の取込 (and 在庫外出荷 from a file): on a PC the sheet read is
+  shown on the left as it is, the rows not matched to a product of ours in
+  red, as 発注's 読み取り結果の確認 does; it can be hidden and shown again.
+  The pane is made again only when the sheet or those rows change.
+- The original sheet view (OriginalFileView) builds its rows as they come
+  into view and shows every row (it stopped at 500, built whole), each
+  column as wide as its longest cell; it takes a sheet already read (the
+  one chosen of several).
+- 読み取り結果の確認 (発注): a tick a row in place of the − button —
+  unticked rows are left out (struck through) — and one in the heading for
+  all rows, as in 出荷手配.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

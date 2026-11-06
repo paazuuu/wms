@@ -3837,8 +3837,8 @@
   "rcOriginal": "原文件",
   "rcRead": "读取结果",
   "rcRow": "行",
-  "rcRemove": "去掉此行",
-  "rcRestore": "恢复",
+  "rcRemove": "取消勾选则不导入此行",
+  "rcRestore": "勾选则导入此行",
   "rcAdd": "添加行",
   "rcAllColumns": "显示所有列",
   "rcTotals": "{rows}行・数量合计 {qty}・金额合计 {amount}",
@@ -4873,5 +4873,9 @@
   "sfMarkedSaved": "已保存 {name}（未读取的行已涂红，右端写明原因）",
   "sfMarkedPdfDone": "已用红框圈出 {marked} 行。无法定位的行：{missing}",
   "sfMarking": "正在标记…",
-  "sfMarkedSuffix": "未读取的行"
+  "sfMarkedSuffix": "未读取的行",
+  "ofOriginal": "读取的文件",
+  "ofOriginalHide": "隐藏原文件",
+  "ofOriginalShow": "并排显示原文件",
+  "ofOriginalLegend": "红色行：无法与商品库核对的行（{n}）"
 }

@@ -11763,10 +11763,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rcRow => '行';
 
   @override
-  String get rcRemove => 'この行を外す';
+  String get rcRemove => 'チェックを外すと、この行は取り込みません';
 
   @override
-  String get rcRestore => '戻す';
+  String get rcRestore => 'チェックを入れると、この行を取り込みます';
 
   @override
   String get rcAdd => '行を追加';
@@ -15431,4 +15431,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sfMarkedSuffix => '読めなかった行';
+
+  @override
+  String get ofOriginal => '読み込んだファイル';
+
+  @override
+  String get ofOriginalHide => '元のファイルを隠す';
+
+  @override
+  String get ofOriginalShow => '元のファイルを並べて表示';
+
+  @override
+  String ofOriginalLegend(int n) {
+    return '赤い行：商品ライブラリーと照合できない行（$n）';
+  }
 }

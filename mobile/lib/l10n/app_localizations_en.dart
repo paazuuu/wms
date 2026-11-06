@@ -12008,10 +12008,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rcRow => 'Row';
 
   @override
-  String get rcRemove => 'Leave this row out';
+  String get rcRemove => 'Untick to leave this row out';
 
   @override
-  String get rcRestore => 'Bring it back';
+  String get rcRestore => 'Tick to take this row in';
 
   @override
   String get rcAdd => 'Add a row';
@@ -15742,4 +15742,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sfMarkedSuffix => 'not_read';
+
+  @override
+  String get ofOriginal => 'The file read';
+
+  @override
+  String get ofOriginalHide => 'Hide the original';
+
+  @override
+  String get ofOriginalShow => 'Show the original beside';
+
+  @override
+  String ofOriginalLegend(int n) {
+    return 'Red: rows not matched to the library ($n)';
+  }
 }

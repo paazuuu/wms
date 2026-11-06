@@ -20963,13 +20963,13 @@ abstract class AppLocalizations {
   /// No description provided for @rcRemove.
   ///
   /// In ja, this message translates to:
-  /// **'この行を外す'**
+  /// **'チェックを外すと、この行は取り込みません'**
   String get rcRemove;
 
   /// No description provided for @rcRestore.
   ///
   /// In ja, this message translates to:
-  /// **'戻す'**
+  /// **'チェックを入れると、この行を取り込みます'**
   String get rcRestore;
 
   /// No description provided for @rcAdd.
@@ -27184,6 +27184,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'読めなかった行'**
   String get sfMarkedSuffix;
+
+  /// No description provided for @ofOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだファイル'**
+  String get ofOriginal;
+
+  /// No description provided for @ofOriginalHide.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルを隠す'**
+  String get ofOriginalHide;
+
+  /// No description provided for @ofOriginalShow.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルを並べて表示'**
+  String get ofOriginalShow;
+
+  /// No description provided for @ofOriginalLegend.
+  ///
+  /// In ja, this message translates to:
+  /// **'赤い行：商品ライブラリーと照合できない行（{n}）'**
+  String ofOriginalLegend(int n);
 }
 
 class _AppLocalizationsDelegate

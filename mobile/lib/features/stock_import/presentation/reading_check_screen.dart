@@ -554,10 +554,29 @@ class _TableState extends State<_Table> {
                 child: Row(children: [
                   SizedBox(
                       width: _Table._lead,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: AppSpacing.sm),
-                        child: Text(l10n.rcRow, style: theme.textTheme.labelMedium),
-                      )),
+                      child: Row(children: [
+                        // Every row ticked or unticked at once, as in 出荷手配.
+                        if (widget.readOnly)
+                          const SizedBox(width: AppSpacing.sm)
+                        else
+                          Tooltip(
+                            message: l10n.ofIncludeAll,
+                            child: Checkbox(
+                              key: const ValueKey('rc-include-all'),
+                              tristate: true,
+                              visualDensity: VisualDensity.compact,
+                              value: rows.every((r) => !r.removed) ? true : (rows.every((r) => r.removed) ? false : null),
+                              onChanged: (_) {
+                                final all = rows.every((r) => !r.removed);
+                                for (final r in rows) {
+                                  r.removed = all;
+                                }
+                                widget.onChanged();
+                              },
+                            ),
+                          ),
+                        Text(l10n.rcRow, style: theme.textTheme.labelMedium),
+                      ])),
                   for (final col in cols)
                     Container(
                       width: col.width,
@@ -653,15 +672,18 @@ class _RowView extends StatelessWidget {
             if (readOnly)
               const SizedBox(width: 40)
             else
-              IconButton(
-                key: ValueKey('rc-remove-$no'),
-                visualDensity: VisualDensity.compact,
-                tooltip: row.removed ? l10n.rcRestore : l10n.rcRemove,
-                icon: Icon(row.removed ? Icons.undo : Icons.remove_circle_outline, size: 18),
-                onPressed: () {
-                  row.removed = !row.removed;
-                  onChanged();
-                },
+              // Ticked: the row goes in. Unticked: left out (struck through).
+              Tooltip(
+                message: row.removed ? l10n.rcRestore : l10n.rcRemove,
+                child: Checkbox(
+                  key: ValueKey('rc-remove-$no'),
+                  visualDensity: VisualDensity.compact,
+                  value: !row.removed,
+                  onChanged: (v) {
+                    row.removed = !(v ?? false);
+                    onChanged();
+                  },
+                ),
               ),
             Text(row.added ? '+' : '$no', style: theme.textTheme.labelMedium),
             if (doubts.isNotEmpty)

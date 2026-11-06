@@ -125,6 +125,20 @@ void main() {
     expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-summary-short')), findsOneWidget);
 
+    // The sheet read is beside the table, the rows not matched in red.
+    expect(find.byKey(const ValueKey('of-original')), findsOneWidget);
+    expect(find.text('到货明细.xlsx · 明细'), findsOneWidget);
+    expect(find.byKey(const ValueKey('iv-left-out-4')), findsOneWidget);
+    expect(find.byKey(const ValueKey('iv-left-out-6')), findsOneWidget);
+    expect(find.byKey(const ValueKey('iv-left-out-2')), findsNothing);
+    expect(find.byKey(const ValueKey('iv-left-out-3')), findsNothing, reason: 'short of stock, but ours');
+    await tester.tap(find.byKey(const ValueKey('of-original-hide')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-original')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('of-original-show')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-original')), findsOneWidget);
+
     // Only the rows short of stock.
     await tester.tap(find.byKey(const ValueKey('of-filter-short')));
     await tester.pumpAndSettle();

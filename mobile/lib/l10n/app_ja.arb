@@ -10563,8 +10563,8 @@
   "rcOriginal": "元のファイル",
   "rcRead": "読み取り結果",
   "rcRow": "行",
-  "rcRemove": "この行を外す",
-  "rcRestore": "戻す",
+  "rcRemove": "チェックを外すと、この行は取り込みません",
+  "rcRestore": "チェックを入れると、この行を取り込みます",
   "rcAdd": "行を追加",
   "rcAllColumns": "すべての列を表示",
   "rcTotals": "{rows}行・数量合計 {qty}・金額合計 {amount}",
@@ -13687,5 +13687,16 @@
     }
   },
   "sfMarking": "印をつけています…",
-  "sfMarkedSuffix": "読めなかった行"
+  "sfMarkedSuffix": "読めなかった行",
+  "ofOriginal": "読み込んだファイル",
+  "ofOriginalHide": "元のファイルを隠す",
+  "ofOriginalShow": "元のファイルを並べて表示",
+  "ofOriginalLegend": "赤い行：商品ライブラリーと照合できない行（{n}）",
+  "@ofOriginalLegend": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

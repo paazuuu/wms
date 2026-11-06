@@ -11693,10 +11693,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rcRow => '行';
 
   @override
-  String get rcRemove => '去掉此行';
+  String get rcRemove => '取消勾选则不导入此行';
 
   @override
-  String get rcRestore => '恢复';
+  String get rcRestore => '勾选则导入此行';
 
   @override
   String get rcAdd => '添加行';
@@ -15323,4 +15323,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sfMarkedSuffix => '未读取的行';
+
+  @override
+  String get ofOriginal => '读取的文件';
+
+  @override
+  String get ofOriginalHide => '隐藏原文件';
+
+  @override
+  String get ofOriginalShow => '并排显示原文件';
+
+  @override
+  String ofOriginalLegend(int n) {
+    return '红色行：无法与商品库核对的行（$n）';
+  }
 }

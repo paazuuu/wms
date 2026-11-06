@@ -802,8 +802,12 @@ void main() {
     // The other is left out (the table scrolled sideways to the 数量 typed in).
     await tester.ensureVisible(find.byKey(const ValueKey('rc-remove-2')));
     await tester.pumpAndSettle();
+    // A tick a row, as in 出荷手配: unticked, the row is left out.
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('rc-remove-2'))).value, isTrue);
     await tester.tap(find.byKey(const ValueKey('rc-remove-2')));
     await tester.pumpAndSettle();
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('rc-remove-2'))).value, isFalse);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('rc-include-all'))).value, isNull);
     expect(find.text('1行・数量合計 10・金額合計 880'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('rc-ok')));
     await tester.pumpAndSettle();
