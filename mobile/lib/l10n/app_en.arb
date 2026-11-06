@@ -4882,5 +4882,9 @@
   "ofUndecidedBannerBody": "Set a day and it appears on that day of the outbound calendar; until then it is listed under 未定.",
   "ofUndecidedConfirmNote": "No day was set: the day chosen below (today to begin with) becomes the day it went out.",
   "ofUndecidedButtonHint": "No day yet. Tap to set one (it can also be set later).",
-  "ofStockZeroHint": "Not a product of the library: counted as 0 in stock and 0 going out, so all of it is short."
+  "ofStockZeroHint": "Not a product of the library: none in stock, so all of the quantity is short (to come in).",
+  "ofColCanShip": "From stock",
+  "ofPickWarehouse": "Warehouse",
+  "ofPickWarehouseHint": "Choose",
+  "ofNeedsWarehouseBody": "Choose the warehouse it goes out of. The rows are then checked against its library and stock, and the list can be registered (the app is on \"all warehouses\")."
 }

@@ -18,6 +18,7 @@ import 'package:wms_mobile/features/outbound_file/presentation/outbound_hub_scre
 import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
+import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
 import '../../support/fake_outbound_file_repository.dart';
 import '../../support/harness.dart';
@@ -77,7 +78,7 @@ const _library = [
 
 void main() {
   Future<FakeOutboundFileRepository> pump(WidgetTester tester,
-      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book}) async {
+      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book, int? warehouse = 1}) async {
     await tester.binding.setSurfaceSize(const Size(2600, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final r = repo ?? FakeOutboundFileRepository(matcher: _match);
@@ -86,7 +87,11 @@ void main() {
       outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: book ?? _book())),
       outboundTabOpenerProvider.overrideWithValue(() => html),
       outboundFileSaverProvider.overrideWithValue((n, b) async => saved?.add((n, b))),
-      writeWarehouseIdProvider.overrideWithValue(1),
+      writeWarehouseIdProvider.overrideWithValue(warehouse),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本倉庫')],
+        totals: WarehouseTotals(),
+      ))),
       activeWarehouseIdProvider.overrideWith((ref) => null),
       productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
       shipDestinationsProvider.overrideWith((ref) async => const [
@@ -123,10 +128,13 @@ void main() {
     // Three in stock for five: three go out, two are short.
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-ship-3'))).data, '3');
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-short-3'))).data, '2');
-    // A row not in the library: 0 held, 0 going out, all of it short.
-    expect(tester.widget<Text>(find.byKey(const ValueKey('of-ship-4'))).data, '0');
-    expect(tester.widget<Text>(find.byKey(const ValueKey('of-stock-4'))).data, '0');
+    // A product of ours with no stock reads 0; one not in the library has
+    // no stock to speak of (—), and all of it is short.
+    expect(tester.widget<Text>(find.byKey(const ValueKey('of-stock-3'))).data, '3');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('of-ship-4'))).data, '—');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('of-stock-4'))).data, '—');
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-short-4'))).data, '5');
+    expect(find.text('在庫から出せる数'), findsWidgets);
     expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-summary-short')), findsOneWidget);
 
@@ -228,6 +236,24 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-include-all')));
     await tester.pumpAndSettle();
     expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
+  });
+
+  testWidgets('「すべての倉庫」: a warehouse is chosen here before the rows are checked and registered', (tester) async {
+    final repo = await pump(tester, warehouse: null);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    // Not checked against any stock yet: no table, no registering.
+    expect(repo.matched, isEmpty);
+    expect(find.byKey(const ValueKey('of-needs-warehouse')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-row-2')), findsNothing);
+    expect(find.byKey(const ValueKey('of-post')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('of-warehouse')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('本倉庫').last);
+    await tester.pumpAndSettle();
+    expect(repo.matched, hasLength(1));
+    expect(status(tester, 2), '出庫できる');
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('of-post'))).onPressed, isNotNull);
   });
 
   testWidgets('a long list is built as it scrolls, its heading kept in sight', (tester) async {

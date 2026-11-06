@@ -22,7 +22,7 @@ Uint8List buildOutboundPlanXlsx(
 }) {
   final headers = [
     '行', '対象', '状態', '商品名（ライブラリー）', '商品名（明細）', 'JAN', '品番', 'メーカー', '数量',
-    if (!proxy) ...['在庫', '出庫数', '不足（入荷が必要）'],
+    if (!proxy) ...['在庫', '在庫から出せる数', '不足（入荷が必要）'],
     '単価（税抜）', '単価（税込）', '合計', '通貨', '前回の仕入れ値', '重量（g/個）', '総重量（kg）', '注番', '到着日', '発注日',
   ];
   String col(String h) => columnLetters(headers.indexOf(h));
@@ -83,7 +83,7 @@ Uint8List buildOutboundPlanXlsx(
               switch (h) {
                 '行' => '合計',
                 '数量' => sum(h, lines.fold<int>(0, (a, l) => a + (l.row.quantity ?? 0))),
-                '出庫数' => sum(h, kept.fold<int>(0, (a, l) => a + (l.action == OutboundAction.ship ? l.shipped : 0))),
+                '在庫から出せる数' => sum(h, kept.fold<int>(0, (a, l) => a + (l.action == OutboundAction.ship ? l.shipped : 0))),
                 '不足（入荷が必要）' => sum(h, lines.fold<int>(0, (a, l) => a + l.need)),
                 '合計' => sum(h, _r2(lines.fold<double>(0, (a, l) => a + (l.row.total ?? 0)))),
                 '総重量（kg）' => sum(h, lines.fold<double>(0, (a, l) => a + (l.weightG ?? 0) / 1000)),

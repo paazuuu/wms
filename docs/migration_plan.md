@@ -8892,11 +8892,17 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   about 40px instead of 57px, compact toolbar buttons keep the app font; the
   original's marked rows a tint, not a solid red block on the dark theme.
 
-## 出荷手配: 0 for what we do not hold; 出庫日 未定 said plainly (app only)
+## 出荷手配: 在庫から出せる数; 出庫日 未定 said plainly; a warehouse chosen here (app only)
 
-- A row whose product is not in the library shows 在庫 0 and 出庫数 0 (was
-  —), so 不足 = 数量 − 出庫数 reads across the row; the 0 says why on the
-  pointer. A row left out still shows —.
+- 数量 is the file's number (what is to go out); the column that read
+  出庫数 is 在庫から出せる数 (what the stock gives of it), in the table and
+  its Excel. 在庫 shows what is held (0 when none) for a product of ours and
+  — for one not in the library (no stock to speak of; the pointer says
+  why); 不足 is what the stock does not give.
+- With 「すべての倉庫」 the rows were never checked (all looked
+  unregistered) and nothing could be registered: the screen now asks for
+  the warehouse (出庫する倉庫) and holds the table back until one is chosen;
+  the app's warehouse changing checks the rows again.
 - 出庫日 未定: the day button on 出荷明細の取込 is amber (event_busy) with
   what it means on the pointer; the list's detail opens with a notice
   「出庫日がまだ決まっていません（未定）」 and 日程を入れる; confirming a list

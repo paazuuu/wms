@@ -23,6 +23,7 @@ import '../../stock_ops/presentation/stock_adjustment_screen.dart'
 import '../../outbound/domain/outbound.dart' show ShipDestination;
 import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../warehouse_context/application/warehouse_providers.dart';
+import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
 import '../data/outbound_file_repository.dart';
 import '../data/inbound_proposal_export.dart';
 import '../data/outbound_plan_export.dart';
@@ -381,7 +382,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
   Future<void> _match() async {
     final rows = _rows;
-    final warehouseId = ref.read(writeWarehouseIdProvider);
+    final warehouseId = _warehouseId;
     if (rows.isEmpty || warehouseId == null) {
       setState(() => _matches = const []);
       return;
@@ -403,14 +404,46 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     if (r is ApiSuccess) await _judgeCurrency();
   }
 
+  /// The warehouse chosen here when the app's own is 「すべての倉庫」: a list
+  /// is checked against one warehouse's stock and goes out of one.
+  int? _warehouseHere;
+
+  /// Where the list is checked and goes out: the app's warehouse, else the
+  /// one chosen here.
+  int? get _warehouseId => ref.read(writeWarehouseIdProvider) ?? _warehouseHere;
+
+  /// One warehouse chosen on this screen: the rows are checked against it.
+  Widget _warehousePicker(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const <Warehouse>[];
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(Icons.warehouse_outlined, size: 18, color: theme.colorScheme.warning),
+      const SizedBox(width: AppSpacing.xs),
+      Text(l10n.ofPickWarehouse, style: TextStyle(color: theme.colorScheme.warning, fontWeight: FontWeight.w600)),
+      const SizedBox(width: AppSpacing.sm),
+      DropdownButton<int>(
+        key: const ValueKey('of-warehouse'),
+        value: _warehouseHere,
+        isDense: true,
+        hint: Text(l10n.ofPickWarehouseHint),
+        items: [for (final w in warehouses) DropdownMenuItem(value: w.id, child: Text(w.name))],
+        onChanged: (v) {
+          setState(() => _warehouseHere = v);
+          _match();
+        },
+      ),
+    ]);
+  }
+
   List<OutboundPlanLine> get _plan => planOutbound(_rows, _matches,
       picked: _picked, chosen: {..._chosen, for (final r in _excluded) r: OutboundAction.skip}, proxy: _proxy);
 
   Future<void> _pickProduct(OutboundPlanLine line) async {
-    final warehouseId = ref.read(writeWarehouseIdProvider);
+    final warehouseId = _warehouseId;
     final p = await showDialog<Product>(
       context: context,
-      builder: (_) => _PickProductDialog(rowNo: line.row.rowNo, initial: line.row.code ?? line.row.name ?? ''),
+      builder: (_) => _PickProductDialog(
+          rowNo: line.row.rowNo, initial: line.row.code ?? line.row.name ?? '', warehouseId: warehouseId),
     );
     if (p == null || !mounted) return;
     setState(() {
@@ -430,7 +463,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
   Future<void> _post() async {
     final l10n = AppLocalizations.of(context);
-    final warehouseId = ref.read(writeWarehouseIdProvider);
+    final warehouseId = _warehouseId;
     final file = _file;
     final parsed = _parsed;
     if (warehouseId == null) {
@@ -602,7 +635,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final plan = _plan;
     final totals = OutboundPlanTotals.of(plan);
     final shown = [for (final l in plan) if ((_filter == null || l.status == _filter) && (!_needOnly || l.need > 0)) l];
-    final noWarehouse = ref.watch(writeWarehouseIdProvider) == null;
+    final appWarehouse = ref.watch(writeWarehouseIdProvider);
+    final noWarehouse = appWarehouse == null && _warehouseHere == null;
+    // The app's warehouse changed: the rows are checked against the new one.
+    ref.listen<int?>(writeWarehouseIdProvider, (prev, next) {
+      if (prev != next && _rows.isNotEmpty) _match();
+    });
 
     final main = Column(children: [
       Expanded(
@@ -634,9 +672,9 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                           label: Text(l10n.prAddRow),
                         ),
                     ]),
-                    if (noWarehouse) ...[
+                    if (appWarehouse == null) ...[
                       const SizedBox(height: AppSpacing.sm),
-                      Text(l10n.adjNeedsWarehouse, style: TextStyle(color: scheme.error)),
+                      _warehousePicker(l10n),
                     ],
                   ]),
                 ),
@@ -654,6 +692,24 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               const SizedBox(height: AppSpacing.sm),
               if (!hasRows)
                 const SizedBox.shrink()
+              else if (noWarehouse)
+                // Not checked yet: without a warehouse every row would look
+                // unregistered and nothing could be registered.
+                Card(
+                  key: const ValueKey('of-needs-warehouse'),
+                  color: scheme.warningContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Row(children: [
+                      Icon(Icons.warehouse_outlined, color: scheme.onWarningContainer),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(l10n.ofNeedsWarehouseBody,
+                            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onWarningContainer)),
+                      ),
+                    ]),
+                  ),
+                )
               else if (_matching)
                 Row(children: [
                   const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -703,7 +759,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           ),
         ),
       ),
-      if (hasRows && !_matching && _matchError == null)
+      if (hasRows && !_matching && _matchError == null && !noWarehouse)
         SafeArea(
           top: false,
           child: Container(
@@ -893,7 +949,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           icon: const Icon(Icons.vertical_split_outlined, size: 18),
           label: Text(l10n.ofOriginalShow),
         ),
-      if (noWarehouse) Text(l10n.adjNeedsWarehouse, style: TextStyle(color: theme.colorScheme.error)),
+      if (ref.watch(writeWarehouseIdProvider) == null) _warehousePicker(l10n),
     ]);
   }
 
@@ -1297,7 +1353,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
   // 行, 対象 (the tick), 状態, 対応, 商品, JAN, 品番, メーカー, 仕入先, 数量, 在庫,
   // 出庫数, 不足, 税抜, 税込, 合計, 前回の仕入れ値, 総重量, 注番.
   static const _widths = [
-    52.0, 44.0, 104.0, 132.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 72.0, 80.0, 80.0, 80.0, 100.0, 112.0, 84.0, 96.0
+    52.0, 44.0, 104.0, 132.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 112.0, 80.0, 80.0, 80.0, 100.0, 112.0, 84.0, 96.0
   ];
 
   /// Up to this many rows are laid out at once; more scroll in a box of
@@ -1354,7 +1410,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
     final included = lines.where((l) => l.action != OutboundAction.skip).length;
     final headers = [
       l10n.ofColRow, '', l10n.ofColStatus, l10n.ofColAction, l10n.ofColProduct, l10n.ofRoleJan, l10n.ofRoleCode,
-      l10n.ofRoleMaker, l10n.ofRoleSupplier, l10n.ofRoleQuantity, l10n.ofColStock, l10n.ofColShip, l10n.ofColShort,
+      l10n.ofRoleMaker, l10n.ofRoleSupplier, l10n.ofRoleQuantity, l10n.ofColStock, l10n.ofColCanShip, l10n.ofColShort,
       l10n.ofColPriceEx, l10n.ofColPriceTax, l10n.ofRoleAmount, l10n.ofColLastPrice, l10n.ofColWeight, l10n.ofRoleOrderNumber,
     ];
     const ends = {9, 10, 11, 12, 13, 14, 15, 16, 17};
@@ -1466,30 +1522,27 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
             cell(7, Text(l.row.maker ?? l.match.maker ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
             cell(8, Text(l.row.supplier ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
             cell(9, Text('${l.row.quantity ?? ''}', style: theme.textTheme.titleSmall), end: true),
-            // A product not in the library: none held, none going out — 0,
-            // not an unknown, so 不足 = 数量 − 出庫数 reads across the row.
+            // 在庫: a product of ours shows what is held (0 when none); one
+            // not in the library has no stock to speak of — —, and all of
+            // it is short.
             cell(
               10,
               l.stockBefore != null
-                  ? Text('${l.stockBefore}', style: small)
+                  ? Text('${l.stockBefore}', key: ValueKey('of-stock-${l.row.rowNo}'), style: small)
                   : (out
                       ? Text('—', style: small)
                       : Tooltip(
                           message: l10n.ofStockZeroHint,
-                          child: Text('0', key: ValueKey('of-stock-${l.row.rowNo}'), style: small?.copyWith(color: scheme.onSurfaceVariant)),
+                          child: Text('—', key: ValueKey('of-stock-${l.row.rowNo}'), style: small),
                         )),
               end: true,
             ),
+            // 在庫から出せる数: what the stock gives of the row's 数量 (the
+            // file's number); — where there is no stock of ours.
             cell(
               11,
-              Text(
-                  l.action == OutboundAction.ship
-                      ? '${l.shipped}'
-                      : (out ? '—' : '0'),
-                  key: ValueKey('of-ship-${l.row.rowNo}'),
-                  style: l.action == OutboundAction.ship
-                      ? theme.textTheme.titleSmall
-                      : theme.textTheme.titleSmall?.copyWith(color: scheme.onSurfaceVariant)),
+              Text(l.action == OutboundAction.ship ? '${l.shipped}' : '—',
+                  key: ValueKey('of-ship-${l.row.rowNo}'), style: theme.textTheme.titleSmall),
               end: true,
             ),
             // 不足 (入荷が必要): what the stock cannot cover — a row not
@@ -1563,10 +1616,13 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
 
 /// A product chosen for a row by hand: found by its name, maker, JAN or 品番.
 class _PickProductDialog extends ConsumerStatefulWidget {
-  const _PickProductDialog({required this.rowNo, required this.initial});
+  const _PickProductDialog({required this.rowNo, required this.initial, this.warehouseId});
 
   final int rowNo;
   final String initial;
+
+  /// Whose stock is shown beside each product.
+  final int? warehouseId;
 
   @override
   ConsumerState<_PickProductDialog> createState() => _PickProductDialogState();
@@ -1584,7 +1640,7 @@ class _PickProductDialogState extends ConsumerState<_PickProductDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final warehouseId = ref.watch(writeWarehouseIdProvider);
+    final warehouseId = widget.warehouseId ?? ref.watch(writeWarehouseIdProvider);
     final all = ref.watch(adjustProductsProvider).valueOrNull ?? const <Product>[];
     final shown = [for (final p in all) if (adjustProductMatches(p, _search.text)) p].take(50).toList();
     return AlertDialog(

@@ -15351,5 +15351,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ofUndecidedButtonHint => '出库日期尚未确定。点按可设置（之后也可设置）。';
 
   @override
-  String get ofStockZeroHint => '商品库中没有该商品：库存按0、出库数按0计，全部计为不足。';
+  String get ofStockZeroHint => '商品库中没有该商品，没有库存，数量全部计为不足（需入库）。';
+
+  @override
+  String get ofColCanShip => '可从库存出库';
+
+  @override
+  String get ofPickWarehouse => '出库仓库';
+
+  @override
+  String get ofPickWarehouseHint => '请选择';
+
+  @override
+  String get ofNeedsWarehouseBody =>
+      '请选择出库仓库。选择后将与该仓库的商品库和库存核对，并可登记出库计划（因右上角为“全部仓库”）。';
 }

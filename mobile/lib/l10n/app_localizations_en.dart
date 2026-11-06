@@ -15774,5 +15774,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofStockZeroHint =>
-      'Not a product of the library: counted as 0 in stock and 0 going out, so all of it is short.';
+      'Not a product of the library: none in stock, so all of the quantity is short (to come in).';
+
+  @override
+  String get ofColCanShip => 'From stock';
+
+  @override
+  String get ofPickWarehouse => 'Warehouse';
+
+  @override
+  String get ofPickWarehouseHint => 'Choose';
+
+  @override
+  String get ofNeedsWarehouseBody =>
+      'Choose the warehouse it goes out of. The rows are then checked against its library and stock, and the list can be registered (the app is on \"all warehouses\").';
 }

@@ -27236,8 +27236,32 @@ abstract class AppLocalizations {
   /// No description provided for @ofStockZeroHint.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーにない商品なので、在庫は0・出庫数は0として数え、全数が不足になります。'**
+  /// **'商品ライブラリーにない商品なので、在庫はありません。数量の全部が不足（入荷が必要）になります。'**
   String get ofStockZeroHint;
+
+  /// No description provided for @ofColCanShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫から出せる数'**
+  String get ofColCanShip;
+
+  /// No description provided for @ofPickWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫する倉庫'**
+  String get ofPickWarehouse;
+
+  /// No description provided for @ofPickWarehouseHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んでください'**
+  String get ofPickWarehouseHint;
+
+  /// No description provided for @ofNeedsWarehouseBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫する倉庫を選んでください。選ぶと、その倉庫の商品ライブラリー・在庫と照合し、出庫予定を登録できるようになります（画面右上が「すべての倉庫」のため）。'**
+  String get ofNeedsWarehouseBody;
 }
 
 class _AppLocalizationsDelegate

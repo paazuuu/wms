@@ -15461,5 +15461,19 @@ class AppLocalizationsJa extends AppLocalizations {
       '出庫日はまだ決まっていません。押すと日程を入れられます（あとから入れることもできます）。';
 
   @override
-  String get ofStockZeroHint => '商品ライブラリーにない商品なので、在庫は0・出庫数は0として数え、全数が不足になります。';
+  String get ofStockZeroHint =>
+      '商品ライブラリーにない商品なので、在庫はありません。数量の全部が不足（入荷が必要）になります。';
+
+  @override
+  String get ofColCanShip => '在庫から出せる数';
+
+  @override
+  String get ofPickWarehouse => '出庫する倉庫';
+
+  @override
+  String get ofPickWarehouseHint => '選んでください';
+
+  @override
+  String get ofNeedsWarehouseBody =>
+      '出庫する倉庫を選んでください。選ぶと、その倉庫の商品ライブラリー・在庫と照合し、出庫予定を登録できるようになります（画面右上が「すべての倉庫」のため）。';
 }
