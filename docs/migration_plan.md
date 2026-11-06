@@ -8860,6 +8860,17 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   unticked rows are left out (struck through) — and one in the heading for
   all rows, as in 出荷手配.
 
+## 出荷明細の取込: the top kept small, the rows given the room (app only)
+
+- Once a file is read, its line is one row: choose again, the name, the
+  sheet, where the headings are, 列の割り当て (a tap opens the columns under
+  it; what each is read from on the pointer), the original beside. The
+  introduction shows only before anything is read (and on the pointer).
+- Settings, summary and filters dense; 出庫予定's note on an (i), the
+  help (JANがない行・在庫と合わない行の扱い) in a dialog behind a (?).
+- A long table scrolls in the whole height left below the top.
+- 「この表をExcelで保存」 stays for 在庫外出荷 (rows typed in) only.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

@@ -125,6 +125,19 @@ void main() {
     expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-summary-short')), findsOneWidget);
 
+    // The top kept small: the columns open on a tap, the help in a dialog.
+    expect(find.byKey(const ValueKey('of-columns-panel')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('of-columns')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-columns-panel')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-columns')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-help')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('未登録のJAN：'), findsOneWidget);
+    await tester.tap(find.text('閉じる'));
+    await tester.pumpAndSettle();
+
     // The sheet read is beside the table, the rows not matched in red.
     expect(find.byKey(const ValueKey('of-original')), findsOneWidget);
     expect(find.text('到货明细.xlsx · 明细'), findsOneWidget);
@@ -198,20 +211,10 @@ void main() {
     expect(page, contains('value="（表示名２）"'));
     expect(page, contains('<th>入荷する数</th>'));
 
-    // The list as read and checked, improved, to download again.
+    // No table to download here (only for 在庫外出荷's rows typed in).
+    expect(find.byKey(const ValueKey('of-table-download')), findsNothing);
     await tester.tap(find.byKey(const ValueKey('of-filter-need')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('of-table-download')));
-    await tester.pumpAndSettle();
-    expect(saved.last.$1, '到货明细_照合済み.xlsx');
-    final checked = readXlsxSheets(saved.last.$2).single;
-    final h = checked.rows.indexWhere((r) => r.isNotEmpty && r.first == '行');
-    final cols = checked.rows[h];
-    expect(cols, isNot(contains('仕入先')));
-    final body = checked.rows.skip(h + 1).take(5).toList();
-    expect([for (final r in body) r[cols.indexOf('不足（入荷が必要）')]], ['', '2', '5', '5', '4']);
-    expect(body[1][cols.indexOf('出庫数')], '3');
-    expect(body.first[cols.indexOf('対象')], '○');
 
     // Unticked all at once, and ticked again.
     await tester.tap(find.byKey(const ValueKey('of-include-all')));

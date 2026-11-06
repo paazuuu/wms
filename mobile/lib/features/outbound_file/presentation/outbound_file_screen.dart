@@ -603,58 +603,52 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
     final main = Column(children: [
       Expanded(
-        child: ListView(
+        child: LayoutBuilder(
+          builder: (context, viewport) => ListView(
           key: const ValueKey('of-import-list'),
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(_proxy ? l10n.prIntro : l10n.ofIntro, style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: AppSpacing.md),
-                  Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                    FilledButton.icon(
-                      key: const ValueKey('of-pick'),
-                      onPressed: _busy ? null : _pick,
-                      icon: const Icon(Icons.upload_file_outlined),
-                      label: Text(_file == null ? l10n.ofPick : l10n.ofPickAgain),
-                    ),
-                    if (_proxy)
-                      OutlinedButton.icon(
-                        key: const ValueKey('pr-add-row'),
-                        onPressed: _busy ? null : _addRow,
-                        icon: const Icon(Icons.add),
-                        label: Text(l10n.prAddRow),
+            // Nothing read yet: what this is for, and the way in.
+            if (_file == null && _manual.isEmpty)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(_proxy ? l10n.prIntro : l10n.ofIntro, style: theme.textTheme.bodyMedium),
+                    const SizedBox(height: AppSpacing.md),
+                    Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, children: [
+                      FilledButton.icon(
+                        key: const ValueKey('of-pick'),
+                        onPressed: _busy ? null : _pick,
+                        icon: const Icon(Icons.upload_file_outlined),
+                        label: Text(l10n.ofPick),
                       ),
-                    if (_file != null) Text(_file!.name, key: const ValueKey('of-file-name'), style: theme.textTheme.titleSmall),
-                    if (_file != null && !_showOriginal)
-                      TextButton.icon(
-                        key: const ValueKey('of-original-show'),
-                        onPressed: () => setState(() => _showOriginal = true),
-                        icon: const Icon(Icons.vertical_split_outlined, size: 18),
-                        label: Text(l10n.ofOriginalShow),
-                      ),
+                      if (_proxy)
+                        OutlinedButton.icon(
+                          key: const ValueKey('pr-add-row'),
+                          onPressed: _busy ? null : _addRow,
+                          icon: const Icon(Icons.add),
+                          label: Text(l10n.prAddRow),
+                        ),
+                    ]),
+                    if (noWarehouse) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(l10n.adjNeedsWarehouse, style: TextStyle(color: scheme.error)),
+                    ],
                   ]),
-                  if (noWarehouse) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(l10n.adjNeedsWarehouse, style: TextStyle(color: scheme.error)),
-                  ],
-                ]),
-              ),
-            ),
-            if (parsed != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              _sheetAndColumns(l10n, parsed, muted),
-              if (!parsed.usable) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error)),
-              ],
-            ],
+                ),
+              )
+            else
+              // Read: the file, its sheet and columns on one line, so the
+              // rows below have the room.
+              _fileBar(l10n, parsed, muted, noWarehouse),
+            if (parsed != null && _columnsOpen) _columnsPanel(l10n, parsed, muted),
+            if (parsed != null && !parsed.usable)
+              Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error)),
             if (parsed != null || hasRows) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               _settings(l10n),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               if (!hasRows)
                 const SizedBox.shrink()
               else if (_matching)
@@ -667,30 +661,30 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                 Text(_matchError!, style: TextStyle(color: scheme.error))
               else ...[
                 if (_proxy)
-                  Text(l10n.prSummary(totals.rows, totals.record, totals.skip, _recordedQty(plan)),
-                      key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall)
+                  Wrap(spacing: AppSpacing.md, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                    Text(l10n.prSummary(totals.rows, totals.record, totals.skip, _recordedQty(plan)),
+                        key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall),
+                    // The rows typed in, as an Excel file (在庫外出荷 only).
+                    Tooltip(
+                      message: l10n.ofTableDownloadHelp,
+                      child: TextButton.icon(
+                        key: const ValueKey('of-table-download'),
+                        style: _dense,
+                        onPressed: () => _downloadTable(plan),
+                        icon: const Icon(Icons.download_outlined, size: 18),
+                        label: Text(l10n.ofTableDownload),
+                      ),
+                    ),
+                  ])
                 else ...[
                   _summary(l10n, totals),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.xs),
                   _filters(l10n, totals),
-                  const SizedBox(height: AppSpacing.sm),
-                  _help(l10n),
                 ],
                 const SizedBox(height: AppSpacing.sm),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Tooltip(
-                    message: l10n.ofTableDownloadHelp,
-                    child: OutlinedButton.icon(
-                      key: const ValueKey('of-table-download'),
-                      onPressed: () => _downloadTable(plan),
-                      icon: const Icon(Icons.download_outlined, size: 18),
-                      label: Text(l10n.ofTableDownload),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
                 _OutboundPlanTable(
+                  // Scrolled to, the table takes the whole height.
+                  height: viewport.maxHeight - AppSpacing.md,
                   lines: shown,
                   proxy: _proxy,
                   manual: {for (final r in _manual) r.rowNo},
@@ -703,6 +697,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               ],
             ],
           ],
+          ),
         ),
       ),
       if (hasRows && !_matching && _matchError == null)
@@ -803,34 +798,131 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     );
   }
 
-  Widget _sheetAndColumns(AppLocalizations l10n, OutboundSheet parsed, TextStyle? muted) {
-    final headings = parsed.headings;
-    final width = [for (final r in _sheets[_sheet].rows.take(30)) r.length].fold(headings.length, (a, b) => a > b ? a : b);
-    String colName(int i) => i < headings.length && headings[i].trim().isNotEmpty
-        ? '${columnLetters(i)}: ${headings[i].trim()}'
-        : columnLetters(i);
+  /// Buttons and fields of the top, small: the rows are what is looked at.
+  static const _dense = ButtonStyle(visualDensity: VisualDensity.compact, tapTargetSize: MaterialTapTargetSize.shrinkWrap);
+
+  static const _denseField = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
+
+  /// 列の割り当て shown under the file line.
+  bool _columnsOpen = false;
+
+  String _colName(OutboundSheet parsed, int i) => i < parsed.headings.length && parsed.headings[i].trim().isNotEmpty
+      ? '${columnLetters(i)}: ${parsed.headings[i].trim()}'
+      : columnLetters(i);
+
+  /// The file read, on one line: choose again, its name, the sheet, where
+  /// its headings are, the columns (a tap opens them), the original beside.
+  Widget _fileBar(AppLocalizations l10n, OutboundSheet? parsed, TextStyle? muted, bool noWarehouse) {
+    final theme = Theme.of(context);
+    return Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+      Tooltip(
+        message: _proxy ? l10n.prIntro : l10n.ofIntro,
+        child: OutlinedButton.icon(
+          key: const ValueKey('of-pick'),
+          style: _dense,
+          onPressed: _busy ? null : _pick,
+          icon: const Icon(Icons.upload_file_outlined, size: 18),
+          label: Text(l10n.ofPickAgain),
+        ),
+      ),
+      if (_proxy)
+        OutlinedButton.icon(
+          key: const ValueKey('pr-add-row'),
+          style: _dense,
+          onPressed: _busy ? null : _addRow,
+          icon: const Icon(Icons.add, size: 18),
+          label: Text(l10n.prAddRow),
+        ),
+      if (_file != null) Text(_file!.name, key: const ValueKey('of-file-name'), style: theme.textTheme.titleSmall),
+      if (parsed != null && _sheets.length > 1)
+        DropdownButton<int>(
+          key: ValueKey('of-sheet-$_sheet'),
+          value: _sheet,
+          isDense: true,
+          underline: const SizedBox.shrink(),
+          items: [
+            for (final (i, s) in _sheets.indexed)
+              DropdownMenuItem(value: i, child: Text('${l10n.ofSheet}: ${s.name}', overflow: TextOverflow.ellipsis)),
+          ],
+          onChanged: (v) {
+            if (v == null) return;
+            setState(() {
+              _sheet = v;
+              _columns = null;
+              _picked.clear();
+              _chosen.clear();
+              _excluded.clear();
+            });
+            _read();
+          },
+        ),
+      if (parsed != null && parsed.headerRow >= 0) Text(l10n.ofHeaderRow(parsed.headerRow + 1), style: muted),
+      if (parsed != null && parsed.janGuessed)
+        Tooltip(
+          message: l10n.ofJanGuessed,
+          child: Icon(Icons.info_outline, key: const ValueKey('of-jan-guessed'), size: 16, color: theme.colorScheme.onSurfaceVariant),
+        ),
+      if (parsed != null)
+        Tooltip(
+          // What each column was taken for, without taking a line.
+          message: [
+            for (final c in OutboundColumn.values)
+              if (parsed.columns[c] != null) '${outboundColumnLabel(l10n, c)} = ${_colName(parsed, parsed.columns[c]!)}',
+          ].join('\n'),
+          child: TextButton.icon(
+            key: const ValueKey('of-columns'),
+            style: _dense,
+            onPressed: () => setState(() => _columnsOpen = !_columnsOpen),
+            icon: Icon(_columnsOpen ? Icons.expand_less : Icons.view_column_outlined, size: 18),
+            label: Text(l10n.ofColumns),
+          ),
+        ),
+      if (_file != null && !_showOriginal)
+        TextButton.icon(
+          key: const ValueKey('of-original-show'),
+          style: _dense,
+          onPressed: () => setState(() => _showOriginal = true),
+          icon: const Icon(Icons.vertical_split_outlined, size: 18),
+          label: Text(l10n.ofOriginalShow),
+        ),
+      if (noWarehouse) Text(l10n.adjNeedsWarehouse, style: TextStyle(color: theme.colorScheme.error)),
+    ]);
+  }
+
+  /// 列の割り当て: each field and the column it is read from, to choose again.
+  Widget _columnsPanel(AppLocalizations l10n, OutboundSheet parsed, TextStyle? muted) {
+    final width = [for (final r in _sheets[_sheet].rows.take(30)) r.length].fold(parsed.headings.length, (a, b) => a > b ? a : b);
     return Card(
+      key: const ValueKey('of-columns-panel'),
+      margin: const EdgeInsets.only(top: AppSpacing.xs),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            if (_sheets.length > 1)
+          Text(l10n.ofColumnsHint, style: muted),
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
+            for (final c in OutboundColumn.values)
               SizedBox(
-                width: 240,
+                width: 200,
                 child: DropdownButtonFormField<int>(
-                  key: ValueKey('of-sheet-$_sheet'),
-                  initialValue: _sheet,
+                  key: ValueKey('of-col-${c.wire}-${parsed.columns[c] ?? -1}'),
+                  initialValue: parsed.columns[c] ?? -1,
                   isExpanded: true,
-                  decoration: InputDecoration(labelText: l10n.ofSheet, isDense: true),
+                  decoration: InputDecoration(labelText: outboundColumnLabel(l10n, c), isDense: true),
                   items: [
-                    for (final (i, s) in _sheets.indexed)
-                      DropdownMenuItem(value: i, child: Text(s.name, overflow: TextOverflow.ellipsis)),
+                    DropdownMenuItem(value: -1, child: Text(l10n.ofColNone)),
+                    for (var i = 0; i < width; i++)
+                      DropdownMenuItem(value: i, child: Text(_colName(parsed, i), overflow: TextOverflow.ellipsis)),
                   ],
                   onChanged: (v) {
-                    if (v == null) return;
+                    final next = Map.of(_columns ?? parsed.columns);
+                    if (v == null || v < 0) {
+                      next.remove(c);
+                    } else {
+                      next[c] = v;
+                    }
                     setState(() {
-                      _sheet = v;
-                      _columns = null;
+                      _columns = next;
                       _picked.clear();
                       _chosen.clear();
                       _excluded.clear();
@@ -839,73 +931,21 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                   },
                 ),
               ),
-            if (parsed.headerRow >= 0) Text(l10n.ofHeaderRow(parsed.headerRow + 1), style: muted),
-            if (parsed.janGuessed) Text(l10n.ofJanGuessed, key: const ValueKey('of-jan-guessed'), style: muted),
           ]),
-          ExpansionTile(
-            key: const ValueKey('of-columns'),
-            tilePadding: EdgeInsets.zero,
-            title: Text(l10n.ofColumns),
-            subtitle: Text(
-              [
-                for (final c in OutboundColumn.values)
-                  if (parsed.columns[c] != null) '${outboundColumnLabel(l10n, c)}=${colName(parsed.columns[c]!)}',
-              ].join('  '),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: muted,
-            ),
-            children: [
-              Align(alignment: Alignment.centerLeft, child: Text(l10n.ofColumnsHint, style: muted)),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, children: [
-                for (final c in OutboundColumn.values)
-                  SizedBox(
-                    width: 220,
-                    child: DropdownButtonFormField<int>(
-                      key: ValueKey('of-col-${c.wire}-${parsed.columns[c] ?? -1}'),
-                      initialValue: parsed.columns[c] ?? -1,
-                      isExpanded: true,
-                      decoration: InputDecoration(labelText: outboundColumnLabel(l10n, c), isDense: true),
-                      items: [
-                        DropdownMenuItem(value: -1, child: Text(l10n.ofColNone)),
-                        for (var i = 0; i < width; i++)
-                          DropdownMenuItem(value: i, child: Text(colName(i), overflow: TextOverflow.ellipsis)),
-                      ],
-                      onChanged: (v) {
-                        final next = Map.of(_columns ?? parsed.columns);
-                        if (v == null || v < 0) {
-                          next.remove(c);
-                        } else {
-                          next[c] = v;
-                        }
-                        setState(() {
-                          _columns = next;
-                          _picked.clear();
-                          _chosen.clear();
-                          _excluded.clear();
-                        });
-                        _read();
-                      },
-                    ),
-                  ),
-              ]),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ),
         ]),
       ),
     );
   }
 
   Widget _settings(AppLocalizations l10n) => Wrap(
-        spacing: AppSpacing.md,
-        runSpacing: AppSpacing.sm,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (!_proxy)
             SegmentedButton<bool>(
               key: const ValueKey('of-mode'),
+              style: _dense,
               segments: [
                 ButtonSegment(
                     value: true, icon: const Icon(Icons.event_available_outlined), label: Text(l10n.ofModePlan)),
@@ -919,6 +959,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
             // here or later.
             OutlinedButton.icon(
               key: const ValueKey('of-shipped-on'),
+              style: _dense,
               icon: const Icon(Icons.event_outlined, size: 18),
               label: Text('${_proxy ? l10n.ofShippedOn : l10n.ofPlannedOn}: ${_planDayText(l10n)}'),
               onPressed: () async {
@@ -933,12 +974,14 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
             if (_plannedOn != null)
               TextButton(
                 key: const ValueKey('of-planned-clear'),
+                style: _dense,
                 onPressed: () => setState(() => _plannedOn = null),
                 child: Text(l10n.ofBackToUndecided),
               ),
           ] else
             OutlinedButton.icon(
               key: const ValueKey('of-shipped-on'),
+              style: _dense,
               icon: const Icon(Icons.event_outlined, size: 18),
               label: Text('${l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(_shippedOn)}'),
               onPressed: () async {
@@ -953,12 +996,13 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               child: TextField(
                 key: const ValueKey('pr-principal'),
                 controller: _principal,
-                decoration: InputDecoration(labelText: l10n.prPrincipal, isDense: true),
+                decoration: InputDecoration(labelText: l10n.prPrincipal, isDense: true, contentPadding: _denseField),
               ),
             ),
           if (_card == null)
             OutlinedButton.icon(
               key: const ValueKey('of-pick-card'),
+              style: _dense,
               icon: const Icon(Icons.contact_mail_outlined, size: 18),
               label: Text(l10n.ofPickCard),
               onPressed: _pickCard,
@@ -966,6 +1010,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           else
             InputChip(
               key: const ValueKey('of-card'),
+              visualDensity: VisualDensity.compact,
               avatar: const Icon(Icons.contact_mail_outlined, size: 18),
               label: Text(l10n.ofCardChosen(_card!.name)),
               onPressed: _pickCard,
@@ -973,25 +1018,28 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
               deleteButtonTooltipMessage: l10n.ofCardClear,
             ),
           SizedBox(
-            width: 220,
+            width: 180,
             child: TextField(
               key: const ValueKey('of-destination'),
               controller: _destination,
-              decoration: InputDecoration(labelText: l10n.ofDestination, isDense: true),
+              decoration: InputDecoration(labelText: l10n.ofDestination, isDense: true, contentPadding: _denseField),
             ),
           ),
           SizedBox(
-            width: 260,
+            width: 200,
             child: TextField(
               key: const ValueKey('of-note'),
               controller: _note,
-              decoration: InputDecoration(labelText: l10n.ofNote, isDense: true),
+              decoration: InputDecoration(labelText: l10n.ofNote, isDense: true, contentPadding: _denseField),
             ),
           ),
+          // What 出庫予定 means, on the pointer: not a line of its own.
           if (_planning)
-            Text(l10n.ofModePlanHint,
-                key: const ValueKey('of-plan-hint'),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Tooltip(
+              message: l10n.ofModePlanHint,
+              child: Icon(Icons.info_outline,
+                  key: const ValueKey('of-plan-hint'), size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
         ],
       );
 
@@ -1041,7 +1089,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 
   Widget _summary(AppLocalizations l10n, OutboundPlanTotals t) {
     final theme = Theme.of(context);
-    return Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, children: [
+    return Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
       Text(l10n.ofSummary(t.rows, t.ship, t.record, t.skip), key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall),
       Text(l10n.ofSummaryShip(t.shipped)),
       // 不足: what must come in for the list to ship (入荷), every row the
@@ -1052,12 +1100,14 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
       if (t.need > 0) ...[
         FilledButton.tonalIcon(
           key: const ValueKey('of-proposal-open'),
+          style: _dense,
           onPressed: _openProposal,
           icon: const Icon(Icons.open_in_new, size: 18),
           label: Text(l10n.ofProposalOpen),
         ),
         OutlinedButton.icon(
           key: const ValueKey('of-proposal-download'),
+          style: _dense,
           onPressed: _downloadProposal,
           icon: const Icon(Icons.download_outlined, size: 18),
           label: Text(l10n.ofProposalDownload),
@@ -1126,9 +1176,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     );
   }
 
-  Widget _filters(AppLocalizations l10n, OutboundPlanTotals t) => Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+  Widget _filters(AppLocalizations l10n, OutboundPlanTotals t) =>
+      Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
         ChoiceChip(
           key: const ValueKey('of-filter-all'),
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           label: Text(l10n.ofFilterAll(t.rows)),
           selected: _filter == null,
           onSelected: (_) => setState(() {
@@ -1138,6 +1191,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
         if (t.needRows > 0)
           FilterChip(
             key: const ValueKey('of-filter-need'),
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             label: Text(l10n.ofFilterNeed(t.needRows)),
             selected: _needOnly,
             onSelected: (v) => setState(() {
@@ -1148,31 +1203,36 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
           if ((t.byStatus[s] ?? 0) > 0)
             ChoiceChip(
               key: ValueKey('of-filter-${s.name}'),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               label: Text('${outboundStatusLabel(l10n, s)} ${t.byStatus[s]}'),
               selected: _filter == s,
               onSelected: (_) => setState(() {
                 _filter = _filter == s ? null : s;
               }),
             ),
-      ]);
-
-  Widget _help(AppLocalizations l10n) {
-    final style = Theme.of(context).textTheme.bodySmall;
-    return ExpansionTile(
-      key: const ValueKey('of-help'),
-      tilePadding: EdgeInsets.zero,
-      leading: const Icon(Icons.help_outline),
-      title: Text(l10n.ofHelpTitle),
-      childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      children: [
-        for (final t in [l10n.ofHelpNoJan, l10n.ofHelpUnknown, l10n.ofHelpShort, l10n.ofHelpSeveral])
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Align(alignment: Alignment.centerLeft, child: Text('・$t', style: style)),
+        // JANがない行・在庫と合わない行の扱い: a tap away, not a line.
+        IconButton(
+          key: const ValueKey('of-help'),
+          visualDensity: VisualDensity.compact,
+          tooltip: l10n.ofHelpTitle,
+          icon: const Icon(Icons.help_outline, size: 20),
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (c) => AlertDialog(
+              title: Text(l10n.ofHelpTitle),
+              content: SizedBox(
+                width: 520,
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  for (final t in [l10n.ofHelpNoJan, l10n.ofHelpUnknown, l10n.ofHelpShort, l10n.ofHelpSeveral])
+                    Padding(padding: const EdgeInsets.only(bottom: 6), child: Text('・$t')),
+                ]),
+              ),
+              actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text(l10n.close))],
+            ),
           ),
-      ],
-    );
-  }
+        ),
+      ]);
 }
 
 /// The rows across, as in the 発注 table: what each is, what will be done,
@@ -1180,6 +1240,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 /// weight.
 class _OutboundPlanTable extends StatefulWidget {
   const _OutboundPlanTable({
+    this.height,
     required this.lines,
     required this.onInclude,
     required this.onPick,
@@ -1189,6 +1250,9 @@ class _OutboundPlanTable extends StatefulWidget {
     this.currency = const {},
     this.onCurrency,
   });
+
+  /// The height a long table scrolls in (the space below the top).
+  final double? height;
 
   /// Each row's price currency (0197), changed by a tap on its price.
   final Map<int, RowCurrency> currency;
@@ -1426,7 +1490,7 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
     if (lines.length <= _allAtOnce) {
       body = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [header, for (final l in lines) row(l)]);
     } else {
-      final height = (MediaQuery.sizeOf(context).height * 0.72).clamp(360.0, 1600.0);
+      final height = (widget.height ?? MediaQuery.sizeOf(context).height * 0.72).clamp(360.0, 2000.0);
       body = SizedBox(
         width: width,
         height: height,
