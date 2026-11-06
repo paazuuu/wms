@@ -4861,5 +4861,10 @@
   "ofIncludeAll": "全部勾选／全部取消当前显示的行",
   "ofTableDownload": "将此表保存为Excel",
   "ofTableDownloadHelp": "在读取的明细上加上核对结果（对象・状态・处理・库存・出库数・不足）和公式（合计・总重量）的改进版。手动输入的行也一并包含。",
-  "ofImprovedSuffix": "已核对"
+  "ofImprovedSuffix": "已核对",
+  "sfPbNoJanRow": "第{row}行：没有JAN（{detail}）",
+  "sfLeftOutOpen": "与原文件并排查看・修改",
+  "sfLeftOutHint": "未导入的行在原文件中仍原样保留。用“与原文件并排查看・修改”与原表并排，补上JAN或数量即可导入。",
+  "sfDetailCode": "品番 {v}",
+  "sfDetailQty": "数量 {v}"
 }

@@ -8821,6 +8821,15 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 商品を選ぶ shows for JANなし and 候補が複数 rows (and one chosen by hand), not
   for 未登録のJAN: a JAN not in the library is a product to register.
 
+## 発注: rows not understood shown where they are (app only)
+
+- 入れない行 says what a row with no JAN holds (品番, maker, name, quantity)
+  instead of an empty （）, and offers 「元のファイルと並べて見る・直す」.
+- In 表で確かめる・直す the original sheet marks the rows not taken in (red),
+  so what was not understood is seen in place and can be completed there.
+- Office suites such as GenOffice are desktop (Electron) apps, not a part a
+  web page can hold; the original is shown by our own viewer.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

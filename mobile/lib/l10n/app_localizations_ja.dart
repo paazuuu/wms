@@ -15383,4 +15383,26 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofImprovedSuffix => '照合済み';
+
+  @override
+  String sfPbNoJanRow(int row, String detail) {
+    return '$row行目: JANがありません（$detail）';
+  }
+
+  @override
+  String get sfLeftOutOpen => '元のファイルと並べて見る・直す';
+
+  @override
+  String get sfLeftOutHint =>
+      '入れない行も元のファイルにはそのまま残っています。「元のファイルと並べて見る・直す」で元の表と並べ、JANや数量を書き足すと取り込めます。';
+
+  @override
+  String sfDetailCode(String v) {
+    return '品番 $v';
+  }
+
+  @override
+  String sfDetailQty(String v) {
+    return '数量 $v';
+  }
 }

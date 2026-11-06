@@ -15694,4 +15694,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofImprovedSuffix => 'checked';
+
+  @override
+  String sfPbNoJanRow(int row, String detail) {
+    return 'Row $row: no JAN ($detail)';
+  }
+
+  @override
+  String get sfLeftOutOpen => 'See beside the original and fix';
+
+  @override
+  String get sfLeftOutHint =>
+      'Rows left out are still in the original file. Open it beside the reading with \"See beside the original and fix\" and add the JAN or quantity to take them in.';
+
+  @override
+  String sfDetailCode(String v) {
+    return '品番 $v';
+  }
+
+  @override
+  String sfDetailQty(String v) {
+    return 'qty $v';
+  }
 }

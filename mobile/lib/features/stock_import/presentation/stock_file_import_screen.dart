@@ -293,6 +293,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
         rows: sheet.read,
         fileName: _fileName,
         bytes: _bytes,
+        leftOut: {for (final p in sheet.problems) if (p.code != 'not_item') p.lineNo},
         // Each JAN against the makers' catalogs (0153).
         catalogLookup: (jans) => lookupJans(ref.read(janCatalogRepositoryProvider), jans),
         // Weights no catalog gives, found by the AI (0155): for whoever may.
@@ -753,10 +754,24 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   static String _signedDiff(int v) => v > 0 ? '+$v' : '$v';
 
-  String _problemText(AppLocalizations l10n, StockFileProblem p) => switch (p.code) {
-        'no_jan' => l10n.sfPbNoJan(p.lineNo, p.value ?? ''),
-        _ => l10n.sfPbBadQty(p.lineNo, p.value ?? ''),
-      };
+  /// Why a row is left out — with what the row does hold, so it can be told
+  /// apart in the original (an empty JAN cell said nothing).
+  String _problemText(AppLocalizations l10n, StockFileProblem p) {
+    if (p.code == 'no_jan' && (p.value ?? '').trim().isEmpty) {
+      final r = _sheet?.read.where((r) => r.lineNo == p.lineNo).firstOrNull;
+      final detail = [
+        if (r != null && r.code.trim().isNotEmpty) l10n.sfDetailCode(r.code.trim()),
+        if (r != null && r.maker.trim().isNotEmpty) r.maker.trim(),
+        if (r != null && r.name.trim().isNotEmpty) r.name.trim(),
+        if (r != null && r.quantity.trim().isNotEmpty) l10n.sfDetailQty(r.quantity.trim()),
+      ];
+      if (detail.isNotEmpty) return l10n.sfPbNoJanRow(p.lineNo, detail.join(' · '));
+    }
+    return switch (p.code) {
+      'no_jan' => l10n.sfPbNoJan(p.lineNo, p.value ?? ''),
+      _ => l10n.sfPbBadQty(p.lineNo, p.value ?? ''),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1167,8 +1182,19 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             // Every row that will not go in, and why — none hidden.
             if (leftOut.isNotEmpty || problems.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
-              Text(l10n.sfLeftOut(leftOut.length + problems.length),
-                  key: const ValueKey('sf-left-out'), style: theme.textTheme.titleSmall),
+              Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                Text(l10n.sfLeftOut(leftOut.length + problems.length),
+                    key: const ValueKey('sf-left-out'), style: theme.textTheme.titleSmall),
+                // The rows not understood are still in the file: set beside it.
+                if (problems.isNotEmpty)
+                  FilledButton.tonalIcon(
+                    key: const ValueKey('sf-left-out-open'),
+                    onPressed: _busy ? null : _openTable,
+                    icon: const Icon(Icons.vertical_split_outlined, size: 18),
+                    label: Text(l10n.sfLeftOutOpen),
+                  ),
+              ]),
+              if (problems.isNotEmpty) Text(l10n.sfLeftOutHint, style: muted),
               for (final p in problems)
                 ListTile(
                   key: ValueKey('sf-problem-${p.lineNo}'),

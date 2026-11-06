@@ -182,6 +182,7 @@ class ReadingCheckScreen extends StatefulWidget {
       this.catalogLookup,
       this.weightLookup,
       this.results,
+      this.leftOut = const {},
       this.actions = const []});
 
   final List<ReadRow> rows;
@@ -206,6 +207,10 @@ class ReadingCheckScreen extends StatefulWidget {
 
   /// Beside the title (looked back at: the import's details).
   final List<Widget> actions;
+
+  /// Rows of the original not taken in (JAN or quantity not read): marked
+  /// in the original beside the table.
+  final Set<int> leftOut;
 
   @override
   State<ReadingCheckScreen> createState() => _ReadingCheckScreenState();
@@ -432,7 +437,7 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Text(name, style: theme.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            Expanded(child: OriginalFileView(key: const ValueKey('rc-original'), fileName: name, bytes: bytes)),
+            Expanded(child: OriginalFileView(key: const ValueKey('rc-original'), fileName: name, bytes: bytes, leftOut: widget.leftOut)),
           ]);
 
     return Scaffold(

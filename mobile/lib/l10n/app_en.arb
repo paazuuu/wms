@@ -4861,5 +4861,10 @@
   "ofIncludeAll": "Tick or untick every row shown",
   "ofTableDownload": "Save this table as Excel",
   "ofTableDownloadHelp": "The list as read, improved: what was found for each row (tick, state, action, stock, out, short) and formulas for the amount and weight. Rows typed in are included.",
-  "ofImprovedSuffix": "checked"
+  "ofImprovedSuffix": "checked",
+  "sfPbNoJanRow": "Row {row}: no JAN ({detail})",
+  "sfLeftOutOpen": "See beside the original and fix",
+  "sfLeftOutHint": "Rows left out are still in the original file. Open it beside the reading with \"See beside the original and fix\" and add the JAN or quantity to take them in.",
+  "sfDetailCode": "品番 {v}",
+  "sfDetailQty": "qty {v}"
 }

@@ -27112,6 +27112,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'照合済み'**
   String get ofImprovedSuffix;
+
+  /// No description provided for @sfPbNoJanRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'{row}行目: JANがありません（{detail}）'**
+  String sfPbNoJanRow(int row, String detail);
+
+  /// No description provided for @sfLeftOutOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルと並べて見る・直す'**
+  String get sfLeftOutOpen;
+
+  /// No description provided for @sfLeftOutHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'入れない行も元のファイルにはそのまま残っています。「元のファイルと並べて見る・直す」で元の表と並べ、JANや数量を書き足すと取り込めます。'**
+  String get sfLeftOutHint;
+
+  /// No description provided for @sfDetailCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番 {v}'**
+  String sfDetailCode(String v);
+
+  /// No description provided for @sfDetailQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量 {v}'**
+  String sfDetailQty(String v);
 }
 
 class _AppLocalizationsDelegate

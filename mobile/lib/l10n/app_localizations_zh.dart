@@ -15275,4 +15275,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofImprovedSuffix => '已核对';
+
+  @override
+  String sfPbNoJanRow(int row, String detail) {
+    return '第$row行：没有JAN（$detail）';
+  }
+
+  @override
+  String get sfLeftOutOpen => '与原文件并排查看・修改';
+
+  @override
+  String get sfLeftOutHint =>
+      '未导入的行在原文件中仍原样保留。用“与原文件并排查看・修改”与原表并排，补上JAN或数量即可导入。';
+
+  @override
+  String sfDetailCode(String v) {
+    return '品番 $v';
+  }
+
+  @override
+  String sfDetailQty(String v) {
+    return '数量 $v';
+  }
 }

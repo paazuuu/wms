@@ -13634,5 +13634,34 @@
   "ofIncludeAll": "表示中の行をすべて対象にする／すべて外す",
   "ofTableDownload": "この表をExcelで保存",
   "ofTableDownloadHelp": "読み込んだ明細に、照合結果（対象・状態・対応・在庫・出庫数・不足）と式（合計・総重量）を加えた改善版です。手入力の行もそのまま入ります。",
-  "ofImprovedSuffix": "照合済み"
+  "ofImprovedSuffix": "照合済み",
+  "sfPbNoJanRow": "{row}行目: JANがありません（{detail}）",
+  "@sfPbNoJanRow": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "sfLeftOutOpen": "元のファイルと並べて見る・直す",
+  "sfLeftOutHint": "入れない行も元のファイルにはそのまま残っています。「元のファイルと並べて見る・直す」で元の表と並べ、JANや数量を書き足すと取り込めます。",
+  "sfDetailCode": "品番 {v}",
+  "@sfDetailCode": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "sfDetailQty": "数量 {v}",
+  "@sfDetailQty": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -452,6 +452,32 @@ void main() {
     expect(note, isNull);
   });
 
+  testWidgets('a row with no JAN is left out saying what it holds, with the original a tap away', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = _FakeStock({_jan1: 'テストペン 青'});
+    final csv = Uint8List.fromList(utf8.encode('JANコード,品番,メーカー,数量\n$_jan1,TP-1,テスト文具,10\n,XB-1,テスト文具,200\n'));
+    await pumpApp(tester, const StockFileImportScreen(), overrides: [
+      _signedIn(['inventory.adjust']),
+      stockImportRepositoryProvider.overrideWithValue(repo),
+      stockFilePickerProvider.overrideWithValue(() async => (name: '到着.csv', bytes: csv)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('sf-pick')));
+    await tester.pumpAndSettle();
+    expect(find.text('3行目: JANがありません（品番 XB-1 · テスト文具 · 数量 200）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-left-out-open')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sf-left-out-open')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('rc-original')), findsOneWidget, reason: 'the original beside the reading');
+    // The row not taken in is marked where it is in the original.
+    expect(find.byKey(const ValueKey('iv-left-out-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('iv-left-out-2')), findsNothing);
+  });
+
   testWidgets('a file is read, a JAN not in the library is left out, and the rest go into the warehouse', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));

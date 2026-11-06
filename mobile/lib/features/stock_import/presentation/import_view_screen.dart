@@ -406,10 +406,14 @@ class _OriginalPane extends ConsumerWidget {
 /// A file as it is, to set a reading beside: a picture or a PDF's pages to
 /// zoom into, a sheet's cells, else a word that it cannot be shown.
 class OriginalFileView extends StatelessWidget {
-  const OriginalFileView({super.key, required this.fileName, required this.bytes});
+  const OriginalFileView({super.key, required this.fileName, required this.bytes, this.leftOut = const {}});
 
   final String fileName;
   final Uint8List bytes;
+
+  /// Rows of the sheet (1-based, as the file numbers them) that are not taken
+  /// in: marked, so what was not understood is seen where it is.
+  final Set<int> leftOut;
 
   @override
   Widget build(BuildContext context) {
@@ -421,7 +425,7 @@ class OriginalFileView extends StatelessWidget {
     if (name.endsWith('.pdf')) return _PdfPages(bytes: bytes);
     if (readsLocally(fileName)) {
       try {
-        return _SheetTable(rows: readStockFile(fileName, bytes));
+        return _SheetTable(rows: readStockFile(fileName, bytes), leftOut: leftOut);
       } on FormatException {
         // Falls through to the message below.
       }
@@ -484,9 +488,10 @@ class _PdfPagesState extends State<_PdfPages> {
 
 /// A sheet's cells as they are, with the row numbers the reading refers to.
 class _SheetTable extends StatelessWidget {
-  const _SheetTable({required this.rows});
+  const _SheetTable({required this.rows, this.leftOut = const {}});
 
   final List<List<String>> rows;
+  final Set<int> leftOut;
 
   @override
   Widget build(BuildContext context) {
@@ -503,8 +508,11 @@ class _SheetTable extends StatelessWidget {
           border: TableBorder.all(color: theme.colorScheme.outlineVariant),
           children: [
             for (var i = 0; i < shown.length; i++)
-              TableRow(children: [
+              TableRow(
+                  decoration: leftOut.contains(i + 1) ? BoxDecoration(color: theme.colorScheme.errorContainer) : null,
+                  children: [
                 Padding(
+                  key: leftOut.contains(i + 1) ? ValueKey('iv-left-out-${i + 1}') : null,
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                   child: Text('${i + 1}', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ),
