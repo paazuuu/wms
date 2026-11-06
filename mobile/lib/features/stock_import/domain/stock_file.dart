@@ -804,3 +804,28 @@ class StockFileResult extends Equatable {
 extension _Let<T> on T {
   R let<R>(R Function(T) f) => f(this);
 }
+
+/// The sheet as it came, with the rows not taken in ([notes]: row number →
+/// why) filled red and framed, and why written at the right — an .xlsx kept
+/// as it was otherwise; a CSV / TSV put into a workbook first. Null for a
+/// file the app does not read itself (a PDF, a picture, an old .xls).
+({String name, Uint8List bytes})? markedSheet(String fileName, Uint8List bytes, Map<int, String> notes,
+    {int headerRow = -1, String heading = '', String suffix = '読めなかった行'}) {
+  final lower = fileName.toLowerCase();
+  final base = fileName.replaceAll(RegExp(r'\.[^.]+$'), '');
+  final marks = {for (final e in notes.entries) e.key - 1: e.value};
+  final head = headerRow >= 0 ? headerRow : null;
+  if (lower.endsWith('.xlsx') || lower.endsWith('.xlsm')) {
+    final ext = lower.endsWith('.xlsm') ? 'xlsm' : 'xlsx';
+    return (name: '${base}_$suffix.$ext', bytes: markXlsxRows(bytes, marks, headerRow: head, noteHeading: heading));
+  }
+  if (!readsLocally(fileName)) return null;
+  final rows = readStockFile(fileName, bytes);
+  if (rows.isEmpty) return null;
+  final width = rows.fold<int>(0, (m, r) => r.length > m ? r.length : m);
+  List<String> pad(List<String> r) => [...r, for (var i = r.length; i < width; i++) ''];
+  final book = buildXlsxBook([
+    XlsxSheet(name: base, headers: pad(rows.first), rows: [for (final r in rows.skip(1)) pad(r)]),
+  ]);
+  return (name: '${base}_$suffix.xlsx', bytes: markXlsxRows(book, marks, headerRow: head, noteHeading: heading));
+}

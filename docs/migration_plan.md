@@ -8830,6 +8830,22 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - Office suites such as GenOffice are desktop (Electron) apps, not a part a
   web page can hold; the original is shown by our own viewer.
 
+## 発注: the original handed back with what was not read marked (edge function mark-pdf)
+
+- 「読めなかった所に印をつけたファイル」 beside 入れない行:
+  - an .xlsx / .xlsm read here: the workbook as it came, the rows not taken
+    in filled light red with a red frame and the reason in a new column at
+    the right (取り込めなかった理由 on the heading row); values, formulas,
+    other sheets and styles kept (markXlsxRows). Saved as
+    <file>_読めなかった行.xlsx. A CSV / TSV is put into a workbook first.
+  - a PDF: edge function mark-pdf (unpdf + pdf-lib) frames each row in red
+    where its words stand (by its 品番 / JAN / name; a bare quantity is not
+    enough) and writes its row number beside it; a scan's rows are placed
+    by the AI (dashed frame, approximate; ai_calls task mark_pdf). Opened
+    in a new tab; the count framed and not found is said.
+- A file of many rows is looked at in Excel or a PDF viewer, not on the
+  screen, so a long file is still checked.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

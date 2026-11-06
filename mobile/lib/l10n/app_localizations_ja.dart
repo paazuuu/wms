@@ -15405,4 +15405,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String sfDetailQty(String v) {
     return '数量 $v';
   }
+
+  @override
+  String get sfMarkedOriginal => '読めなかった所に印をつけたファイル';
+
+  @override
+  String get sfMarkedHelp =>
+      '元のファイルに、読み込めなかった行の印をつけて返します。Excel・CSVは行を赤く塗って右端に理由を書き、PDFは行を赤い枠で囲みます（点線はAIが場所を推定した行）。';
+
+  @override
+  String get sfMarkedHeading => '取り込めなかった理由';
+
+  @override
+  String sfMarkedSaved(String name) {
+    return '$name を保存しました（読めなかった行を赤く塗り、右端に理由を書きました）';
+  }
+
+  @override
+  String sfMarkedPdfDone(int marked, int missing) {
+    return '$marked行を赤い枠で囲みました。場所が分からなかった行: $missing';
+  }
+
+  @override
+  String get sfMarking => '印をつけています…';
+
+  @override
+  String get sfMarkedSuffix => '読めなかった行';
 }

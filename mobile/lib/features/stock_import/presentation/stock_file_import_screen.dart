@@ -32,6 +32,7 @@ import '../../product/data/spec_lookup.dart';
 import '../../product_library/application/product_library_providers.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart';
+import '../data/marked_file_repository.dart';
 import '../data/stock_import_repository.dart';
 import '../../jan_catalog/data/jan_catalog_repository.dart';
 import '../domain/stock_file.dart';
@@ -62,6 +63,9 @@ final stockFilePickerProvider = Provider<PickStockFile>((_) => _pickWithPicker);
 /// Where the template goes; overridden in tests.
 final stockTemplateSaverProvider =
     Provider<Future<void> Function(String, Uint8List)>((_) => (n, b) async => saveBytes(n, b));
+
+/// An empty browser tab for a marked PDF (overridden in tests).
+final stockTabOpenerProvider = Provider<HtmlTab? Function()>((_) => openHtmlTab);
 
 /// ファイルから在庫登録 (0144): a JAN and a quantity a row, from Excel or
 /// CSV, into one warehouse — added to what is there, or set to the figure.
@@ -754,6 +758,69 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   static String _signedDiff(int v) => v > 0 ? '+$v' : '$v';
 
+  /// Whether a marked copy of the file can be made: a sheet read here, or a
+  /// PDF (framed by mark-pdf).
+  bool get _canMark {
+    final name = (_fileName ?? '').toLowerCase();
+    if (_bytes == null) return false;
+    if (name.endsWith('.pdf')) return true;
+    return readsLocally(name) && !(_sheet?.byAi ?? true);
+  }
+
+  /// The original with the rows not read marked: a sheet filled red with the
+  /// reason at the right (saved), a PDF framed in red (opened in a tab).
+  Future<void> _markedOriginal(List<StockFileProblem> problems) async {
+    final l10n = AppLocalizations.of(context);
+    final name = _fileName, bytes = _bytes, sheet = _sheet;
+    if (name == null || bytes == null || sheet == null || problems.isEmpty) return;
+    void snack(String text) =>
+        ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(text)));
+    if (!name.toLowerCase().endsWith('.pdf')) {
+      final ({String name, Uint8List bytes})? m;
+      try {
+        m = markedSheet(name, bytes, {for (final p in problems) p.lineNo: _problemText(l10n, p)},
+            headerRow: sheet.headerRow, heading: l10n.sfMarkedHeading, suffix: l10n.sfMarkedSuffix);
+      } on FormatException {
+        snack(l10n.ivCannotShow);
+        return;
+      }
+      if (m == null) return;
+      await ref.read(stockTemplateSaverProvider)(m.name, m.bytes);
+      if (mounted) snack(l10n.sfMarkedSaved(m.name));
+      return;
+    }
+    // Opened from the click, so the browser lets the tab open.
+    final tab = ref.read(stockTabOpenerProvider)();
+    setState(() => _busy = true);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.sfMarking)));
+    final marks = [
+      for (final p in problems)
+        (
+          i: p.lineNo,
+          texts: [
+            if (sheet.read.where((r) => r.lineNo == p.lineNo).firstOrNull case final r?) ...[r.code, r.jan, r.name, r.quantity],
+            p.value ?? '',
+          ].map((t) => t.trim()).where((t) => t.isNotEmpty).toSet().toList(),
+        ),
+    ];
+    final r = await ref.read(markedFileRepositoryProvider).markPdf(name, bytes, marks);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        final out = '${name.replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.sfMarkedSuffix}.pdf';
+        if (tab != null) {
+          tab.showBytes(data.bytes, 'application/pdf');
+        } else {
+          await ref.read(stockTemplateSaverProvider)(out, data.bytes);
+        }
+        if (mounted) snack(l10n.sfMarkedPdfDone(data.marked, data.missing));
+      case ApiFailure(:final message):
+        tab?.close();
+        snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   /// Why a row is left out — with what the row does hold, so it can be told
   /// apart in the original (an empty JAN cell said nothing).
   String _problemText(AppLocalizations l10n, StockFileProblem p) {
@@ -1186,6 +1253,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 Text(l10n.sfLeftOut(leftOut.length + problems.length),
                     key: const ValueKey('sf-left-out'), style: theme.textTheme.titleSmall),
                 // The rows not understood are still in the file: set beside it.
+                // The original handed back with those rows marked in it.
+                if (problems.isNotEmpty && _canMark)
+                  Tooltip(
+                    message: l10n.sfMarkedHelp,
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('sf-marked-original'),
+                      onPressed: _busy ? null : () => _markedOriginal(problems),
+                      icon: const Icon(Icons.border_color_outlined, size: 18),
+                      label: Text(l10n.sfMarkedOriginal),
+                    ),
+                  ),
                 if (problems.isNotEmpty)
                   FilledButton.tonalIcon(
                     key: const ValueKey('sf-left-out-open'),

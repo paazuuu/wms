@@ -248,23 +248,9 @@ List<List<String>> readXlsx(Uint8List bytes) {
   return sheets.isEmpty ? const [] : sheets.first.rows;
 }
 
-/// Every sheet of an .xlsx, in the workbook's order. With [keepRowNumbers]
-/// a row Excel left out (empty) is an empty row here, so rows[i] is the
-/// sheet's row i + 1. A formula reads as the value Excel saved for it.
-List<XlsxSheetRows> readXlsxSheets(Uint8List bytes, {bool keepRowNumbers = true, bool firstOnly = false}) {
-  final Archive zip;
-  try {
-    zip = ZipDecoder().decodeBytes(bytes);
-  } catch (_) {
-    throw const FormatException('not an xlsx workbook');
-  }
-  String? text(String name) {
-    final f = zip.findFile(name);
-    final b = f?.readBytes();
-    return b == null ? null : utf8.decode(b, allowMalformed: true);
-  }
-
-  // Which file each sheet is: workbook.xml → its relationship.
+/// Which file each sheet is (name, path in the zip): workbook.xml → its
+/// relationship.
+List<(String, String)> _sheetTargets(String? Function(String) text, {bool firstOnly = false}) {
   final targets = <(String, String)>[];
   final wb = text('xl/workbook.xml');
   final rels = text('xl/_rels/workbook.xml.rels');
@@ -284,6 +270,157 @@ List<XlsxSheetRows> readXlsxSheets(Uint8List bytes, {bool keepRowNumbers = true,
     }
   }
   if (targets.isEmpty) targets.add(('Sheet1', 'xl/worksheets/sheet1.xml'));
+  return targets;
+}
+
+/// The workbook as it came, its first sheet's rows in [marks] (0-based, in
+/// the order the sheet holds its rows — as [readXlsx] reads them) filled
+/// light red with a red frame, and why each was not taken written in a new
+/// column at the right ([noteHeading] above it, on row [headerRow] if
+/// given). Everything else — values, formulas, other sheets, styles — is
+/// kept. Throws [FormatException] when the bytes are not a workbook.
+Uint8List markXlsxRows(Uint8List bytes, Map<int, String> marks, {int? headerRow, String noteHeading = ''}) {
+  final Archive zip;
+  try {
+    zip = ZipDecoder().decodeBytes(bytes);
+  } catch (_) {
+    throw const FormatException('not an xlsx workbook');
+  }
+  String? text(String name) {
+    final b = zip.findFile(name)?.readBytes();
+    return b == null ? null : utf8.decode(b, allowMalformed: true);
+  }
+
+  final sheetPath = _sheetTargets(text, firstOnly: true).first.$2;
+  final sheetText = text(sheetPath);
+  final stylesText = text('xl/styles.xml');
+  if (sheetText == null || stylesText == null) throw const FormatException('the workbook has no sheet or styles');
+
+  // The styles: one more fill and border, and each cell format used in a
+  // marked row copied with them.
+  final styles = XmlDocument.parse(stylesText);
+  XmlElement part(String name) {
+    final found = styles.rootElement.getElement(name);
+    if (found != null) return found;
+    styles.rootElement.children.add(_xmlElement('<$name/>'));
+    return styles.rootElement.getElement(name)!;
+  }
+
+  void recount(XmlElement e) {
+    if (e.getAttribute('count') != null) e.setAttribute('count', '${e.childElements.length}');
+  }
+
+  final fills = part('fills');
+  final fillId = fills.childElements.length;
+  fills.children.add(
+      _xmlElement('<fill><patternFill patternType="solid"><fgColor rgb="FFFFC7CE"/><bgColor indexed="64"/></patternFill></fill>'));
+  recount(fills);
+  final borders = part('borders');
+  final borderId = borders.childElements.length;
+  const side = 'style="thin"><color rgb="FFE00000"/>';
+  borders.children
+      .add(_xmlElement('<border><left $side</left><right $side</right><top $side</top><bottom $side</bottom><diagonal/></border>'));
+  recount(borders);
+  final xfs = part('cellXfs');
+  final xfList = xfs.childElements.toList();
+  if (xfList.isEmpty) {
+    xfs.children.add(_xmlElement('<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>'));
+    xfList.add(xfs.childElements.first);
+  }
+  final marked = <int, int>{};
+  int markedXf(int old) => marked.putIfAbsent(old, () {
+        final copy = xfList[old < xfList.length ? old : 0].copy();
+        copy
+          ..setAttribute('fillId', '$fillId')
+          ..setAttribute('borderId', '$borderId')
+          ..setAttribute('applyFill', '1')
+          ..setAttribute('applyBorder', '1');
+        xfs.children.add(copy);
+        return xfs.childElements.length - 1;
+      });
+
+  // The sheet: the rows filled and framed, the reason at the right.
+  final sheet = XmlDocument.parse(sheetText);
+  final rows = sheet.findAllElements('row').toList();
+  var lastCol = 0;
+  for (final row in rows) {
+    var next = 0;
+    for (final c in row.findElements('c')) {
+      final ref = c.getAttribute('r');
+      final col = ref == null ? next : _columnIndex(ref);
+      next = col + 1;
+      if (col > lastCol) lastCol = col;
+    }
+  }
+  final noteCol = lastCol + 1;
+  void addNote(XmlElement row, int index, String note, int style) {
+    final at = row.getAttribute('r') ?? '${index + 1}';
+    row.children.add(_xmlElement('<c r="${columnLetters(noteCol)}$at" t="inlineStr"${style > 0 ? ' s="$style"' : ''}>'
+        '<is><t xml:space="preserve">${_esc(note)}</t></is></c>'));
+    row.removeAttribute('spans');
+  }
+
+  for (final e in marks.entries) {
+    if (e.key < 0 || e.key >= rows.length) continue;
+    final row = rows[e.key];
+    for (final c in row.findElements('c')) {
+      c.setAttribute('s', '${markedXf(int.tryParse(c.getAttribute('s') ?? '') ?? 0)}');
+    }
+    final plain = markedXf(int.tryParse(row.getAttribute('s') ?? '') ?? 0);
+    row
+      ..setAttribute('s', '$plain')
+      ..setAttribute('customFormat', '1');
+    addNote(row, e.key, e.value, plain);
+  }
+  final head = headerRow;
+  if (head != null && head >= 0 && head < rows.length && noteHeading.isNotEmpty && marks.isNotEmpty) {
+    addNote(rows[head], head, noteHeading, 0);
+  }
+  recount(xfs);
+  // The used range now reaches the new column.
+  final dim = sheet.findAllElements('dimension').firstOrNull;
+  final ref = dim?.getAttribute('ref');
+  if (dim != null && ref != null && ref.contains(':')) {
+    final end = ref.split(':').last;
+    final endRow = RegExp(r'\d+$').stringMatch(end) ?? '${rows.length}';
+    dim.setAttribute('ref', '${ref.split(':').first}:${columnLetters(noteCol)}$endRow');
+  }
+
+  final out = Archive();
+  for (final f in zip.files) {
+    if (!f.isFile) continue;
+    if (f.name == sheetPath) {
+      out.add(ArchiveFile.string(f.name, sheet.toXmlString()));
+    } else if (f.name == 'xl/styles.xml') {
+      out.add(ArchiveFile.string(f.name, styles.toXmlString()));
+    } else {
+      final b = f.readBytes() ?? Uint8List(0);
+      out.add(ArchiveFile(f.name, b.length, b));
+    }
+  }
+  return ZipEncoder().encodeBytes(out);
+}
+
+/// One element from its text, ready to be added to a document.
+XmlElement _xmlElement(String xml) => XmlDocumentFragment.parse(xml).firstElementChild!.copy();
+
+/// Every sheet of an .xlsx, in the workbook's order. With [keepRowNumbers]
+/// a row Excel left out (empty) is an empty row here, so rows[i] is the
+/// sheet's row i + 1. A formula reads as the value Excel saved for it.
+List<XlsxSheetRows> readXlsxSheets(Uint8List bytes, {bool keepRowNumbers = true, bool firstOnly = false}) {
+  final Archive zip;
+  try {
+    zip = ZipDecoder().decodeBytes(bytes);
+  } catch (_) {
+    throw const FormatException('not an xlsx workbook');
+  }
+  String? text(String name) {
+    final f = zip.findFile(name);
+    final b = f?.readBytes();
+    return b == null ? null : utf8.decode(b, allowMalformed: true);
+  }
+
+  final targets = _sheetTargets(text, firstOnly: firstOnly);
 
   final shared = <String>[];
   final sst = text('xl/sharedStrings.xml');

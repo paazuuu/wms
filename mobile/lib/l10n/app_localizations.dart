@@ -27142,6 +27142,48 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'数量 {v}'**
   String sfDetailQty(String v);
+
+  /// No description provided for @sfMarkedOriginal.
+  ///
+  /// In ja, this message translates to:
+  /// **'読めなかった所に印をつけたファイル'**
+  String get sfMarkedOriginal;
+
+  /// No description provided for @sfMarkedHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルに、読み込めなかった行の印をつけて返します。Excel・CSVは行を赤く塗って右端に理由を書き、PDFは行を赤い枠で囲みます（点線はAIが場所を推定した行）。'**
+  String get sfMarkedHelp;
+
+  /// No description provided for @sfMarkedHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り込めなかった理由'**
+  String get sfMarkedHeading;
+
+  /// No description provided for @sfMarkedSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を保存しました（読めなかった行を赤く塗り、右端に理由を書きました）'**
+  String sfMarkedSaved(String name);
+
+  /// No description provided for @sfMarkedPdfDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'{marked}行を赤い枠で囲みました。場所が分からなかった行: {missing}'**
+  String sfMarkedPdfDone(int marked, int missing);
+
+  /// No description provided for @sfMarking.
+  ///
+  /// In ja, this message translates to:
+  /// **'印をつけています…'**
+  String get sfMarking;
+
+  /// No description provided for @sfMarkedSuffix.
+  ///
+  /// In ja, this message translates to:
+  /// **'読めなかった行'**
+  String get sfMarkedSuffix;
 }
 
 class _AppLocalizationsDelegate

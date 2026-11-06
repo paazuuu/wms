@@ -13663,5 +13663,29 @@
         "type": "String"
       }
     }
-  }
+  },
+  "sfMarkedOriginal": "読めなかった所に印をつけたファイル",
+  "sfMarkedHelp": "元のファイルに、読み込めなかった行の印をつけて返します。Excel・CSVは行を赤く塗って右端に理由を書き、PDFは行を赤い枠で囲みます（点線はAIが場所を推定した行）。",
+  "sfMarkedHeading": "取り込めなかった理由",
+  "sfMarkedSaved": "{name} を保存しました（読めなかった行を赤く塗り、右端に理由を書きました）",
+  "@sfMarkedSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sfMarkedPdfDone": "{marked}行を赤い枠で囲みました。場所が分からなかった行: {missing}",
+  "@sfMarkedPdfDone": {
+    "placeholders": {
+      "marked": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "sfMarking": "印をつけています…",
+  "sfMarkedSuffix": "読めなかった行"
 }

@@ -4866,5 +4866,12 @@
   "sfLeftOutOpen": "See beside the original and fix",
   "sfLeftOutHint": "Rows left out are still in the original file. Open it beside the reading with \"See beside the original and fix\" and add the JAN or quantity to take them in.",
   "sfDetailCode": "品番 {v}",
-  "sfDetailQty": "qty {v}"
+  "sfDetailQty": "qty {v}",
+  "sfMarkedOriginal": "The file with what was not read marked",
+  "sfMarkedHelp": "The original file with the rows not read marked: in Excel / CSV the rows are filled red with the reason at the right; in a PDF they are framed in red (dashed where the AI placed them).",
+  "sfMarkedHeading": "Why not taken in",
+  "sfMarkedSaved": "Saved {name} (rows not read filled red, the reason at the right)",
+  "sfMarkedPdfDone": "{marked} rows framed in red. Rows that could not be placed: {missing}",
+  "sfMarking": "Marking…",
+  "sfMarkedSuffix": "not_read"
 }

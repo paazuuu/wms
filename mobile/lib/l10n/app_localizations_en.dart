@@ -15716,4 +15716,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String sfDetailQty(String v) {
     return 'qty $v';
   }
+
+  @override
+  String get sfMarkedOriginal => 'The file with what was not read marked';
+
+  @override
+  String get sfMarkedHelp =>
+      'The original file with the rows not read marked: in Excel / CSV the rows are filled red with the reason at the right; in a PDF they are framed in red (dashed where the AI placed them).';
+
+  @override
+  String get sfMarkedHeading => 'Why not taken in';
+
+  @override
+  String sfMarkedSaved(String name) {
+    return 'Saved $name (rows not read filled red, the reason at the right)';
+  }
+
+  @override
+  String sfMarkedPdfDone(int marked, int missing) {
+    return '$marked rows framed in red. Rows that could not be placed: $missing';
+  }
+
+  @override
+  String get sfMarking => 'Marking…';
+
+  @override
+  String get sfMarkedSuffix => 'not_read';
 }

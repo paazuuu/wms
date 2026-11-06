@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/payments/data/payments_repository.dart' show paymentsRepositoryProvider;
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
+import 'package:wms_mobile/core/ui/open_window.dart';
 import 'package:wms_mobile/features/auth/application/auth_controller.dart';
 import 'package:wms_mobile/features/auth/domain/auth_user.dart';
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
@@ -17,6 +18,7 @@ import 'package:wms_mobile/features/product_library/application/product_library_
 import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
 import 'package:wms_mobile/features/product/data/market_names.dart';
 import 'package:wms_mobile/features/evidence/domain/import_document.dart';
+import 'package:wms_mobile/features/stock_import/data/marked_file_repository.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart';
@@ -205,7 +207,7 @@ Override _signedIn(List<String> permissions) => authControllerProvider.overrideW
 Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
     {Map<String, String> products = const {}, Map<String, int> stock = const {}, List<String> perms = const ['inventory.adjust'],
     List<(String, Uint8List)>? saved, MasterImportRepository? reader, String name = 'a.csv',
-    List<UnplannedLine> unplanned = const []}) async {
+    List<UnplannedLine> unplanned = const [], List<Override> extra = const []}) async {
   await tester.binding.setSurfaceSize(const Size(1000, 2000));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final repo = _FakeStock(products, stock: stock)..unplanned = unplanned;
@@ -219,6 +221,7 @@ Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
       warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
       totals: WarehouseTotals(),
     ))),
+    ...extra,
   ]);
   await tester.tap(find.byKey(const ValueKey('sf-pick')));
   await tester.pumpAndSettle();
@@ -450,6 +453,48 @@ void main() {
     expect(date, DocumentDate(DateTime(today.year, today.month, today.day), DocumentDateSource.uploaded));
     expect(paid, isNull);
     expect(note, isNull);
+  });
+
+  testWidgets('the file handed back marked: a sheet with the rows filled red and why; a PDF framed', (tester) async {
+    final saved = <(String, Uint8List)>[];
+    await _pumpCsv(tester, 'JANコード,品番,数量\n$_jan1,TP-1,10\n,XB-1,200\n$_jan2,TP-2,x\n',
+        products: {_jan1: 'テストペン 青', _jan2: 'テストノート'}, saved: saved, name: '到着.csv');
+    await tester.ensureVisible(find.byKey(const ValueKey('sf-marked-original')));
+    await tester.tap(find.byKey(const ValueKey('sf-marked-original')));
+    await tester.pumpAndSettle();
+    expect(saved.single.$1, '到着_読めなかった行.xlsx');
+    final rows = readXlsx(saved.single.$2);
+    expect(rows.first, ['JANコード', '品番', '数量', '取り込めなかった理由']);
+    expect(rows[1].length, 3, reason: 'a row read is left as it was');
+    expect(rows[2], ['', 'XB-1', '200', '3行目: JANがありません（品番 XB-1 · 数量 200）']);
+    expect(rows[3].last, '4行目: 数量が読めません（x）');
+    expect(find.textContaining('到着_読めなかった行.xlsx を保存しました'), findsOneWidget);
+  });
+
+  testWidgets('a PDF: the rows not read are sent to be framed, the result opened in a tab', (tester) async {
+    final marker = _FakeMarker();
+    final tab = _Tab();
+    final reader = FakeMasterImportRepository(
+      readResult: const MasterRead(lines: [
+        MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ﾃｽﾄﾍﾟﾝ', quantity: '10'),
+        MasterLine(lineNo: 2, janCode: '', supplierName: 'ノート', productCode: 'JJ15-BK', quantity: '11000'),
+      ]),
+    );
+    await _pumpCsv(tester, '%PDF', products: {_jan1: 'テストペン 青'}, reader: reader, name: '納品書.pdf', extra: [
+      markedFileRepositoryProvider.overrideWithValue(marker),
+      stockTabOpenerProvider.overrideWithValue(() => tab),
+    ]);
+    // The reading checked as it is: the rows left out are listed.
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('sf-marked-original')));
+    await tester.tap(find.byKey(const ValueKey('sf-marked-original')));
+    await tester.pumpAndSettle();
+    expect(marker.asked.single.$1, '納品書.pdf');
+    expect(marker.asked.single.$2.single.i, 2);
+    expect(marker.asked.single.$2.single.texts, containsAll(['JJ15-BK', 'ノート', '11000']));
+    expect(tab.shown.single, 'application/pdf');
+    expect(find.textContaining('1行を赤い枠で囲みました'), findsOneWidget);
   });
 
   testWidgets('a row with no JAN is left out saying what it holds, with the original a tap away', (tester) async {
@@ -980,4 +1025,28 @@ void main() {
     expect(tester.widget<ButtonStyleButton>(find.byKey(const ValueKey('sf-apply'))).onPressed, isNull);
     expect(find.text('在庫を反映するには「在庫調整」の権限が必要です。'), findsOneWidget);
   });
+}
+
+class _FakeMarker implements MarkedFileRepository {
+  final asked = <(String, List<PdfMark>)>[];
+
+  @override
+  Future<ApiResult<({Uint8List bytes, int marked, int missing})>> markPdf(
+      String fileName, Uint8List bytes, List<PdfMark> marks) async {
+    asked.add((fileName, marks));
+    return ApiSuccess((bytes: Uint8List.fromList([37, 80, 68, 70]), marked: marks.length, missing: 0));
+  }
+}
+
+class _Tab implements HtmlTab {
+  final shown = <String>[];
+
+  @override
+  void show(String html) {}
+
+  @override
+  void close() {}
+
+  @override
+  void showBytes(List<int> bytes, String contentType) => shown.add(contentType);
 }

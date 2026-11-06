@@ -15297,4 +15297,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String sfDetailQty(String v) {
     return '数量 $v';
   }
+
+  @override
+  String get sfMarkedOriginal => '标出未读取部分的文件';
+
+  @override
+  String get sfMarkedHelp =>
+      '在原文件上标出未能读取的行：Excel・CSV将该行涂红并在右端写明原因；PDF用红框圈出（虚线为AI推定的位置）。';
+
+  @override
+  String get sfMarkedHeading => '未导入的原因';
+
+  @override
+  String sfMarkedSaved(String name) {
+    return '已保存 $name（未读取的行已涂红，右端写明原因）';
+  }
+
+  @override
+  String sfMarkedPdfDone(int marked, int missing) {
+    return '已用红框圈出 $marked 行。无法定位的行：$missing';
+  }
+
+  @override
+  String get sfMarking => '正在标记…';
+
+  @override
+  String get sfMarkedSuffix => '未读取的行';
 }
