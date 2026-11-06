@@ -567,9 +567,11 @@ void main() {
       activeWarehouseIdProvider.overrideWith((ref) => null),
       shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易', port: 'Shanghai')]),
     ]);
-    for (final t in ['出荷明細の取込', '在庫外出荷', '出荷先カード', '出荷指示・梱包', '出荷の提案']) {
+    for (final t in ['出荷明細の取込', '在庫外出荷', '出荷先カード', '出荷の提案']) {
       expect(find.descendant(of: find.byType(TabBar), matching: find.text(t)), findsOneWidget);
     }
+    // 出荷指示・梱包 is gone: a list is packed from its detail.
+    expect(find.descendant(of: find.byType(TabBar), matching: find.text('出荷指示・梱包')), findsNothing);
     // Each tab says what it is for when the pointer rests on it.
     expect(find.byTooltip(RegExp(r'^営業から届いた出荷明細')), findsOneWidget);
     expect(find.byTooltip(RegExp(r'^在庫を持たない直送')), findsOneWidget);
@@ -612,6 +614,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-currency-button')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('of-currency-all-CNY')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-currency')), findsOneWidget, reason: 'stays open until 確定');
+    await tester.tap(find.byKey(const ValueKey('of-currency-ok')));
     await tester.pumpAndSettle();
     expect(find.text('価格の通貨: 元'), findsOneWidget);
     expect(find.text('40 元'), findsNWidgets(4));
@@ -705,18 +710,31 @@ void main() {
     await tester.pumpAndSettle();
     // Asked with what each was bought for (row 2: 48 円).
     expect(ai.asked.single.first.purchaseJpy, 48);
-    expect(find.byKey(const ValueKey('of-currency')), findsOneWidget);
+    // No box left open on the screen: what the AI found is in 価格の通貨.
+    expect(find.byKey(const ValueKey('of-currency')), findsNothing);
+    expect(find.text('40 元'), findsNWidgets(2));
+    await tester.tap(find.byKey(const ValueKey('of-currency-button')));
+    await tester.pumpAndSettle();
     expect(find.text('人民元と判断した行: 2 / 5'), findsOneWidget);
     expect(find.text('確信の低い行: 4'), findsOneWidget, reason: 'the AI unsure of row 4, and rows it left to our rule');
-    expect(find.text('40 元'), findsNWidgets(2));
+    await tester.tap(find.byKey(const ValueKey('of-currency-ok')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-currency')), findsNothing, reason: '確定 closes it');
     // Row 4 put back to 円 by a tap on its price; the rate given.
     await tester.tap(find.byKey(ValueKey('of-cur-4-${40.0.hashCode}')));
     await tester.pumpAndSettle();
-    expect(find.text('人民元と判断した行: 1 / 5'), findsOneWidget);
     // 価格の通貨 on the settings line says what the rows are in, and puts
     // them all in one from its menu.
     expect(find.text('価格の通貨: 円 4 · 元 1'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-currency-button')));
+    await tester.pumpAndSettle();
+    expect(find.text('人民元と判断した行: 1 / 5'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('of-fx')), '21.5');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-currency-ok')));
+    await tester.pumpAndSettle();
+    // With the rate, the price in the other currency under it.
+    expect(find.text('≈ 860 円'), findsWidgets, reason: '40 元 × 21.5');
     await tester.tap(find.byKey(const ValueKey('of-post')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('of-post-ok')));

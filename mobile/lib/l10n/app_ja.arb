@@ -13718,5 +13718,9 @@
   },
   "ofCurrencyAllUsd": "すべてドル",
   "ofCurrencyRowHint": "1行だけ変えるときは、表の単価を押すと円⇄元が切り替わります。",
-  "ofCurrencyCellHint": "押すと円⇄元を切り替えます"
+  "ofCurrencyCellHint": "押すと円⇄元を切り替えます",
+  "ofCurrencyTitle": "価格の通貨",
+  "ofCurrencyAllRows": "すべての行を",
+  "ofCurrencyDone": "確定",
+  "ofFxHint": "レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。"
 }

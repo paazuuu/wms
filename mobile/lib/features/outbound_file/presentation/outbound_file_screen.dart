@@ -282,32 +282,20 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     final what = counts.length == 1
         ? counts.keys.single.mark
         : [for (final c in PriceCurrency.values) if ((counts[c] ?? 0) > 0) '${c.mark} ${counts[c]}'].join(' · ');
-    return MenuAnchor(
-      menuChildren: [
-        for (final (c, label) in [
-          (PriceCurrency.jpy, l10n.ofCurrencyAllJpy),
-          (PriceCurrency.cny, l10n.ofCurrencyAllCny),
-          (PriceCurrency.usd, l10n.ofCurrencyAllUsd),
-        ])
-          MenuItemButton(
-            key: ValueKey('of-currency-all-${c.wire}'),
-            onPressed: () => _setAllCurrency(c),
-            child: Text(label),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-          child: SizedBox(width: 260, child: Text(l10n.ofCurrencyRowHint, style: Theme.of(context).textTheme.bodySmall)),
-        ),
-      ],
-      builder: (context, menu, _) => OutlinedButton.icon(
-        key: const ValueKey('of-currency-button'),
-        style: _dense,
-        onPressed: () => menu.isOpen ? menu.close() : menu.open(),
-        icon: _judging
-            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-            : const Icon(Icons.currency_exchange, size: 18),
-        label: Text(l10n.ofCurrencyButton(what)),
-      ),
+    // Rows not in 円, or the AI unsure: the button asks for a look.
+    final look = counts.keys.any((c) => c != PriceCurrency.jpy) || _currency.values.any((c) => !c.confident);
+    final warn = Theme.of(context).colorScheme.warning;
+    return OutlinedButton.icon(
+      key: const ValueKey('of-currency-button'),
+      style: look
+          ? _dense.copyWith(
+              foregroundColor: WidgetStatePropertyAll(warn), side: WidgetStatePropertyAll(BorderSide(color: warn)))
+          : _dense,
+      onPressed: _judging ? null : _openCurrency,
+      icon: _judging
+          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.currency_exchange, size: 18),
+      label: Text(_judging ? l10n.ofCurrencyJudging : l10n.ofCurrencyButton(what)),
     );
   }
 
@@ -792,6 +780,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
                 _OutboundPlanTable(
                   // Scrolled to, the table takes the whole height.
                   height: viewport.maxHeight - AppSpacing.md,
+                  fx: _fxRate,
                   lines: shown,
                   proxy: _proxy,
                   manual: {for (final r in _manual) r.rowNo},
@@ -1238,7 +1227,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       ],
       if (t.amount > 0) Text(l10n.ofSummaryAmount(_amountText())),
       if (t.weightG > 0) Text(l10n.ofSummaryWeight(outboundKg(t.weightG))),
-      if (_judging || _currency.values.any((c) => c.currency != PriceCurrency.jpy)) _currencyNotice(l10n),
+
     ]);
   }
 
@@ -1251,53 +1240,90 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       final c = _currency[l.row.rowNo]?.currency ?? PriceCurrency.jpy;
       by[c] = (by[c] ?? 0) + v;
     }
-    if (by.length <= 1 && (by.keys.firstOrNull ?? PriceCurrency.jpy) == PriceCurrency.jpy) {
-      return outboundMoney(by[PriceCurrency.jpy] ?? 0);
-    }
-    return [for (final e in by.entries) '${outboundMoney(e.value)} ${e.key.mark}'].join(' · ');
+    final base = by.length <= 1 && (by.keys.firstOrNull ?? PriceCurrency.jpy) == PriceCurrency.jpy
+        ? outboundMoney(by[PriceCurrency.jpy] ?? 0)
+        : [for (final e in by.entries) '${outboundMoney(e.value)} ${e.key.mark}'].join(' · ');
+    // With the rate, the total in the other currency too.
+    final fx = _fxRate;
+    if (fx == null) return base;
+    final jpy = by[PriceCurrency.jpy] ?? 0, cny = by[PriceCurrency.cny] ?? 0;
+    return cny > 0
+        ? '$base（≈ ${outboundMoney(jpy + cny * fx)} 円）'
+        : '$base（≈ ${outboundMoney(jpy / fx)} 元）';
   }
 
-  /// What the AI made of the prices, the rate, and all at once to 円 or 元.
-  Widget _currencyNotice(AppLocalizations l10n) {
-    final theme = Theme.of(context);
-    final cny = _currency.values.where((c) => c.currency == PriceCurrency.cny).length;
-    final unsure = _currency.values.where((c) => !c.confident).length;
-    return Card(
-      key: const ValueKey('of-currency'),
-      color: theme.colorScheme.tertiaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        child: _judging
-            ? Row(mainAxisSize: MainAxisSize.min, children: [
-                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                const SizedBox(width: AppSpacing.sm),
-                Text(l10n.ofCurrencyJudging),
-              ])
-            : Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+  /// 1 元 in 円, when given.
+  double? get _fxRate {
+    final v = double.tryParse(_fx.text.trim().replaceAll(',', ''));
+    return v == null || v <= 0 ? null : v;
+  }
+
+  /// 価格の通貨: what the AI made of the prices, every row put in one
+  /// currency, and the rate (1 元 in 円) that shows each price in the other
+  /// currency too. Closed with 確定.
+  Future<void> _openCurrency() => showDialog<void>(
+        context: context,
+        builder: (c) => StatefulBuilder(builder: (c, set) {
+          final l10n = AppLocalizations.of(c);
+          final theme = Theme.of(c);
+          final cny = _currency.values.where((x) => x.currency == PriceCurrency.cny).length;
+          final unsure = _currency.values.where((x) => !x.confident).length;
+          void all(PriceCurrency cur) {
+            _setAllCurrency(cur);
+            set(() {});
+          }
+
+          return AlertDialog(
+            key: const ValueKey('of-currency'),
+            title: Text(l10n.ofCurrencyTitle),
+            content: SizedBox(
+              width: 460,
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(l10n.ofCurrencyFound(cny, _currency.length), style: theme.textTheme.titleSmall),
-                if (unsure > 0) Text(l10n.ofCurrencyUnsure(unsure)),
+                if (unsure > 0) Text(l10n.ofCurrencyUnsure(unsure), style: theme.textTheme.bodySmall),
+                const SizedBox(height: AppSpacing.md),
+                Text(l10n.ofCurrencyAllRows, style: theme.textTheme.labelLarge),
+                const SizedBox(height: AppSpacing.xs),
+                Wrap(spacing: AppSpacing.sm, children: [
+                  for (final (cur, label) in [
+                    (PriceCurrency.jpy, l10n.ofCurrencyAllJpy),
+                    (PriceCurrency.cny, l10n.ofCurrencyAllCny),
+                    (PriceCurrency.usd, l10n.ofCurrencyAllUsd),
+                  ])
+                    OutlinedButton(
+                      key: ValueKey('of-currency-all-${cur.wire}'),
+                      style: _dense,
+                      onPressed: () => all(cur),
+                      child: Text(label),
+                    ),
+                ]),
+                const SizedBox(height: AppSpacing.md),
                 SizedBox(
-                  width: 150,
+                  width: 200,
                   child: TextField(
                     key: const ValueKey('of-fx'),
                     controller: _fx,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(labelText: l10n.ofFxLabel, isDense: true, suffixText: '円'),
+                    decoration: InputDecoration(
+                        labelText: l10n.ofFxLabel, isDense: true, suffixText: '円', contentPadding: _denseField),
+                    onChanged: (_) {
+                      setState(() {});
+                      set(() {});
+                    },
                   ),
                 ),
-                TextButton(
-                    key: const ValueKey('of-cur-all-jpy'),
-                    onPressed: () => _setAllCurrency(PriceCurrency.jpy),
-                    child: Text(l10n.ofCurrencyAllJpy)),
-                TextButton(
-                    key: const ValueKey('of-cur-all-cny'),
-                    onPressed: () => _setAllCurrency(PriceCurrency.cny),
-                    child: Text(l10n.ofCurrencyAllCny)),
-                Text(l10n.ofCurrencyTapHint, style: theme.textTheme.bodySmall),
+                const SizedBox(height: AppSpacing.xs),
+                Text(l10n.ofFxHint, style: theme.textTheme.bodySmall),
+                const SizedBox(height: AppSpacing.sm),
+                Text(l10n.ofCurrencyRowHint, style: theme.textTheme.bodySmall),
               ]),
-      ),
-    );
-  }
+            ),
+            actions: [
+              FilledButton(key: const ValueKey('of-currency-ok'), onPressed: () => Navigator.pop(c), child: Text(l10n.ofCurrencyDone)),
+            ],
+          );
+        }),
+      );
 
   Widget _filters(AppLocalizations l10n, OutboundPlanTotals t) =>
       Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -1364,6 +1390,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
 class _OutboundPlanTable extends StatefulWidget {
   const _OutboundPlanTable({
     this.height,
+    this.fx,
     required this.lines,
     required this.onInclude,
     required this.onPick,
@@ -1376,6 +1403,9 @@ class _OutboundPlanTable extends StatefulWidget {
 
   /// The height a long table scrolls in (the space below the top).
   final double? height;
+
+  /// 1 元 in 円, when given: each price shown in the other currency too.
+  final double? fx;
 
   /// Each row's price currency (0197), changed by a tap on its price.
   final Map<int, RowCurrency> currency;
@@ -1427,13 +1457,25 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
       cur == PriceCurrency.jpy ? outboundMoney(v) : '${outboundMoney(v)} ${cur.mark}',
       style: cur == PriceCurrency.jpy ? small : small?.copyWith(color: scheme.tertiary, fontWeight: FontWeight.w700),
     );
-    if (c == null || widget.onCurrency == null) return text;
+    // With a rate, the price in the other currency under it.
+    final fx = widget.fx;
+    final shown = fx == null || cur == PriceCurrency.usd
+        ? text
+        : Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
+            text,
+            Text(
+              cur == PriceCurrency.cny ? '≈ ${outboundMoney(v * fx)} 円' : '≈ ${outboundMoney(v / fx)} 元',
+              key: ValueKey('of-fx-${l.row.rowNo}-${v.hashCode}'),
+              style: small?.copyWith(color: scheme.onSurfaceVariant, fontSize: 11),
+            ),
+          ]);
+    if (c == null || widget.onCurrency == null) return shown;
     return Tooltip(
       message: AppLocalizations.of(context).ofCurrencyCellHint,
       child: InkWell(
         key: ValueKey('of-cur-${l.row.rowNo}-${v.hashCode}'),
         onTap: () => widget.onCurrency!(l.row.rowNo, cur == PriceCurrency.jpy ? PriceCurrency.cny : PriceCurrency.jpy),
-        child: text,
+        child: shown,
       ),
     );
   }

@@ -8925,6 +8925,18 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   own), above the way in when nothing is being read — with 日程を入れる,
   and still on the dashboard.
 
+## 出荷手配: 価格の通貨 in a window closed by 確定, prices in both currencies; 出荷指示・梱包 out (app only)
+
+- 価格の通貨 (amber when a row is not in 円 or the AI is unsure) opens a
+  window: what the AI found, every row in 円 / 元 / ドル, the rate (1元 =
+  円) and 確定 to close it. No box stays open on the screen.
+- With a rate, each price shows the other currency under it (≈ 860 円 /
+  ≈ 2.6 元) and the total too (合計 … 元（≈ … 円）).
+- 出荷指示・梱包 (a customer's order packed into cartons, shipment_plans)
+  is no longer a tab of 出荷手配: never used (0 rows) and covered by
+  出荷明細の取込 → 出庫予定 → 出庫を確定 → 梱包・パッキングリスト. Its screen,
+  tables and data are kept; an old link opens 出荷手配.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

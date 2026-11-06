@@ -4890,5 +4890,9 @@
   "ofCurrencyButton": "价格货币：{what}",
   "ofCurrencyAllUsd": "全部美元",
   "ofCurrencyRowHint": "只改一行时，点按表中的单价即可切换 円⇄元。",
-  "ofCurrencyCellHint": "点按切换 円⇄元"
+  "ofCurrencyCellHint": "点按切换 円⇄元",
+  "ofCurrencyTitle": "价格货币",
+  "ofCurrencyAllRows": "所有行设为",
+  "ofCurrencyDone": "确定",
+  "ofFxHint": "输入汇率后，表中单价和合计下方会显示另一种货币的金额（≈）。"
 }

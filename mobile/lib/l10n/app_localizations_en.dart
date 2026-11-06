@@ -15803,4 +15803,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofCurrencyCellHint => 'Tap to switch 円 ⇄ 元';
+
+  @override
+  String get ofCurrencyTitle => 'Price currency';
+
+  @override
+  String get ofCurrencyAllRows => 'Every row in';
+
+  @override
+  String get ofCurrencyDone => 'Done';
+
+  @override
+  String get ofFxHint =>
+      'With a rate, each price and the total show the other currency (≈) too.';
 }

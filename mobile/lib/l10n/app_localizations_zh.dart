@@ -15379,4 +15379,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofCurrencyCellHint => '点按切换 円⇄元';
+
+  @override
+  String get ofCurrencyTitle => '价格货币';
+
+  @override
+  String get ofCurrencyAllRows => '所有行设为';
+
+  @override
+  String get ofCurrencyDone => '确定';
+
+  @override
+  String get ofFxHint => '输入汇率后，表中单价和合计下方会显示另一种货币的金额（≈）。';
 }

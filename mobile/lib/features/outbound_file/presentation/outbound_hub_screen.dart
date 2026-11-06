@@ -6,17 +6,17 @@ import '../../outbound/presentation/outbound_proposal_screen.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../packing/presentation/packing_lists_screen.dart';
 import '../../packing/presentation/packing_settings_screen.dart';
-import '../../shipment/presentation/shipment_list_screen.dart';
 import 'outbound_file_screen.dart' show OutboundImportTab;
 
 /// The tabs of 出庫, in order.
-enum OutboundHubTab { file, proxy, cards, packing, packingLists, boxes, proposal }
+enum OutboundHubTab { file, proxy, cards, packingLists, boxes, proposal }
 
 /// 出荷手配: the sales side of sending goods out, in one place —
 ///  * 出荷明細の取込: the usual shipping list read and taken out of stock;
 ///  * 在庫外出荷: 直送・出荷代行 — kept as a record, no stock moved;
 ///  * 出荷先カード: where goods go, with what an export needs;
-///  * 出荷指示・梱包: a customer's order packed into cartons and shipped;
+///  (出荷指示・梱包, the older way of packing a customer's order, is gone:
+///  a list is packed from its detail — 梱包・パッキングリスト.)
 ///  * パッキングリスト: those uploaded (kept as they came and improved) and
 ///    those made from a list's boxes (0192);
 ///  * 箱と入数: our cartons and each product's own case;
@@ -34,7 +34,6 @@ class OutboundHubScreen extends StatelessWidget {
       OutboundHubTab.file: l10n.obHelpFile,
       OutboundHubTab.proxy: l10n.obHelpProxy,
       OutboundHubTab.cards: l10n.obHelpCards,
-      OutboundHubTab.packing: l10n.obHelpPacking,
       OutboundHubTab.packingLists: l10n.obHelpPackingLists,
       OutboundHubTab.boxes: l10n.obHelpBoxes,
       OutboundHubTab.proposal: l10n.obHelpProposal,
@@ -43,7 +42,6 @@ class OutboundHubScreen extends StatelessWidget {
       OutboundHubTab.file: (l10n.obHubFile, Icons.upload_file_outlined),
       OutboundHubTab.proxy: (l10n.obHubProxy, Icons.edit_note_outlined),
       OutboundHubTab.cards: (l10n.obHubCards, Icons.contact_mail_outlined),
-      OutboundHubTab.packing: (l10n.obHubPacking, Icons.inventory_2_outlined),
       OutboundHubTab.packingLists: (l10n.obHubPackingLists, Icons.table_view_outlined),
       OutboundHubTab.boxes: (l10n.obHubBoxes, Icons.all_inbox_outlined),
       OutboundHubTab.proposal: (l10n.obHubProposal, Icons.playlist_add_outlined),
@@ -70,7 +68,6 @@ class OutboundHubScreen extends StatelessWidget {
           OutboundImportTab(),
           OutboundImportTab(proxy: true),
           ShipDestinationsScreen(embedded: true),
-          ShipmentListScreen(embedded: true),
           PackingListsScreen(embedded: true),
           PackingSettingsScreen(embedded: true),
           OutboundProposalScreen(embedded: true),

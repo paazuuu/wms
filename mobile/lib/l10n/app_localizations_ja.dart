@@ -15490,4 +15490,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofCurrencyCellHint => '押すと円⇄元を切り替えます';
+
+  @override
+  String get ofCurrencyTitle => '価格の通貨';
+
+  @override
+  String get ofCurrencyAllRows => 'すべての行を';
+
+  @override
+  String get ofCurrencyDone => '確定';
+
+  @override
+  String get ofFxHint => 'レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。';
 }

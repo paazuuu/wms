@@ -27286,6 +27286,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'押すと円⇄元を切り替えます'**
   String get ofCurrencyCellHint;
+
+  /// No description provided for @ofCurrencyTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格の通貨'**
+  String get ofCurrencyTitle;
+
+  /// No description provided for @ofCurrencyAllRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての行を'**
+  String get ofCurrencyAllRows;
+
+  /// No description provided for @ofCurrencyDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'確定'**
+  String get ofCurrencyDone;
+
+  /// No description provided for @ofFxHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。'**
+  String get ofFxHint;
 }
 
 class _AppLocalizationsDelegate

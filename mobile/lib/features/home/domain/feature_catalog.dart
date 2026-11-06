@@ -718,7 +718,8 @@ Widget _bulkInspection(BuildContext _) => const BulkInspectionScreen();
 Widget _delivery(BuildContext _) => const DeliveryPlanListScreen();
 
 /// Top-level (const-referenceable) builder for the Shipping (出庫) feature.
-Widget _shipment(BuildContext _) => const OutboundHubScreen(tab: OutboundHubTab.packing);
+// 出荷指示・梱包 is gone from 出荷手配; an old link to it opens 出荷手配.
+Widget _shipment(BuildContext _) => const OutboundHubScreen();
 
 /// Top-level (const-referenceable) builder for the Stock Adjustment feature.
 Widget _stockAdjustment(BuildContext _) => const StockAdjustmentScreen();
