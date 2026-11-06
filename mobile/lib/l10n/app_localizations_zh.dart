@@ -13985,7 +13985,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ofSummary(int rows, int ship, int record, int skip) {
-    return '$rows行 · 出库 $ship行 · 仅记录 $record行 · 排除 $skip行';
+    return '$rows行 · 出库 $ship行 · 无法核对 $record行 · 排除 $skip行';
   }
 
   @override
@@ -14016,7 +14016,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String ofPostConfirmBody(int ship, int n, int record, int skip) {
-    return '将从库存中减少$ship行・$n个。仅记录 $record行，排除 $skip行。';
+    return '从库存中扣减 $ship行・$n个。无法核对的 $record行不动库存，留在明细中。排除 $skip行。';
   }
 
   @override
@@ -14043,10 +14043,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofHelpNoJan =>
-      '无JAN：按型号（和厂商）在商品库・供货商型号・价格台账中查找。找不到时可\"选择商品\"或\"仅记录\"。';
+      '没有JAN的行：按品番（和厂商）在商品库、供应商品番和价格表中查找。找不到时请用“选择商品”选择；不选择的行不从库存出库，全数计为不足（需入库）。';
 
   @override
-  String get ofHelpUnknown => '未登记的JAN：没有库存无法出库。可\"仅记录\"出货事实，或先登记到商品库。';
+  String get ofHelpUnknown =>
+      '未登记的JAN：商品库中没有该商品，无法从库存出库，全数计为不足（需入库）。入库前请先登记到商品库。';
 
   @override
   String get ofHelpShort => '库存不足：只出库现有部分，不足数量记为不足（库存不会变为负数）。请之后通过入库或库存调整补齐。';

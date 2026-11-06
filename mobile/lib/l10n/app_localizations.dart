@@ -24848,7 +24848,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofSummary.
   ///
   /// In ja, this message translates to:
-  /// **'{rows}行 · 出庫 {ship}行 · 記録のみ {record}行 · 除外 {skip}行'**
+  /// **'{rows}行 · 出庫 {ship}行 · 照合できない {record}行 · 除外 {skip}行'**
   String ofSummary(int rows, int ship, int record, int skip);
 
   /// No description provided for @ofSummaryShip.
@@ -24890,7 +24890,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofPostConfirmBody.
   ///
   /// In ja, this message translates to:
-  /// **'{ship}行・{n}個を在庫から減らします。記録のみ {record}行、除外 {skip}行。'**
+  /// **'{ship}行・{n}個を在庫から減らします。照合できない {record}行は在庫を動かさず明細に残ります。除外 {skip}行。'**
   String ofPostConfirmBody(int ship, int n, int record, int skip);
 
   /// No description provided for @ofPostShortWarn.
@@ -24932,13 +24932,13 @@ abstract class AppLocalizations {
   /// No description provided for @ofHelpNoJan.
   ///
   /// In ja, this message translates to:
-  /// **'JANがない行：品番（とメーカー）で、商品ライブラリー・仕入先の品番・価格台帳から探します。見つからなければ「商品を選ぶ」で選ぶか、「記録のみ」にします。'**
+  /// **'JANがない行：品番（とメーカー）で、商品ライブラリー・仕入先の品番・価格台帳から探します。見つからなければ「商品を選ぶ」で選んでください。選ばない行は在庫から出さず、全数が不足（入荷が必要）になります。'**
   String get ofHelpNoJan;
 
   /// No description provided for @ofHelpUnknown.
   ///
   /// In ja, this message translates to:
-  /// **'未登録のJAN：在庫がないので出庫できません。「記録のみ」で出荷の事実を残すか、先に商品ライブラリーへ登録してください。'**
+  /// **'未登録のJAN：商品ライブラリーにない商品なので在庫から出せず、全数が不足（入荷が必要）になります。入荷の前に商品ライブラリーへ登録してください。'**
   String get ofHelpUnknown;
 
   /// No description provided for @ofHelpShort.

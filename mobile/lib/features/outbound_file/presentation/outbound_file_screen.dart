@@ -686,7 +686,6 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
                   lines: shown,
                   proxy: _proxy,
                   manual: {for (final r in _manual) r.rowNo},
-                  onAction: (l, a) => setState(() => _chosen[l.row.rowNo] = a),
                   onInclude: (rows, v) => setState(() => v ? _excluded.removeAll(rows) : _excluded.addAll(rows)),
                   onPick: _pickProduct,
                   onRemove: _removeRow,
@@ -962,7 +961,6 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
     final bytes = buildOutboundPlanXlsx(
       plan,
       statusLabel: (l) => _proxy ? proxyStatusLabel(l10n, l) : outboundStatusLabel(l10n, l.status),
-      actionLabel: (a) => outboundActionLabel(l10n, a.wire),
       currency: _currency,
       proxy: _proxy,
       title: _file?.name,
@@ -1114,7 +1112,6 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> {
 class _OutboundPlanTable extends StatefulWidget {
   const _OutboundPlanTable({
     required this.lines,
-    required this.onAction,
     required this.onInclude,
     required this.onPick,
     this.proxy = false,
@@ -1129,7 +1126,6 @@ class _OutboundPlanTable extends StatefulWidget {
   final void Function(int rowNo, PriceCurrency c)? onCurrency;
 
   final List<OutboundPlanLine> lines;
-  final void Function(OutboundPlanLine, OutboundAction) onAction;
 
   /// Rows ticked (true) or unticked (除外) by their row numbers.
   final void Function(Iterable<int> rowNos, bool include) onInclude;
@@ -1192,7 +1188,10 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
     final small = theme.textTheme.bodySmall;
     // 代理出荷: no stock, nothing taken out, nothing short. 仕入先 is ours to
     // know, not the shipping side's: kept with the list, not shown (8).
-    final hidden = widget.proxy ? const {8, 10, 11, 12} : const {8};
+    // 対応 (3) is no column of its own: a found product is taken out of
+    // stock, anything else waits for goods to come in (不足); the tick says
+    // whether a row goes at all.
+    final hidden = widget.proxy ? const {3, 8, 10, 11, 12} : const {3, 8};
     Widget cell(int i, Widget child, {bool end = false}) => hidden.contains(i)
         ? const SizedBox.shrink()
         : Container(
@@ -1279,7 +1278,6 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                           : outboundStatusColor(scheme, l.status),
                       fontWeight: FontWeight.w600)),
             ),
-            cell(3, _action(l, l10n, small)),
             cell(
               4,
               Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
@@ -1289,7 +1287,12 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
                   Text(l.row.name!, maxLines: 2, overflow: TextOverflow.ellipsis, style: small),
                 if (l.found && l.match.matchedBy != OutboundMatchedBy.jan)
                   Text(outboundMatchedLabel(l10n, l.match.matchedBy), style: small?.copyWith(color: scheme.onSurfaceVariant)),
-                if ((!l.found && l.status != OutboundStatus.noQuantity) || l.match.matchedBy == OutboundMatchedBy.picked)
+                // A row with no JAN (or a 品番 fitting several products) may
+                // still be one of ours: chosen here. A JAN not in the library
+                // is a product to register first, nothing to choose.
+                if (l.status == OutboundStatus.noJan ||
+                    l.status == OutboundStatus.several ||
+                    l.match.matchedBy == OutboundMatchedBy.picked)
                   TextButton.icon(
                     key: ValueKey('of-pick-${l.row.rowNo}'),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
@@ -1380,33 +1383,6 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
         padding: const EdgeInsets.only(bottom: 12),
         child: body,
       ),
-    );
-  }
-
-  /// 出庫 or 記録のみ: chosen only for a product of ours with stock to
-  /// take; anything else is kept as a record. 除外 is the tick beside it.
-  Widget _action(OutboundPlanLine l, AppLocalizations l10n, TextStyle? small) {
-    if (l.action == OutboundAction.skip) {
-      return Text(l10n.ofActSkip, key: ValueKey('of-action-${l.row.rowNo}'), style: small);
-    }
-    final chip = Chip(
-      visualDensity: VisualDensity.compact,
-      label: Text(outboundActionLabel(l10n, l.action.wire), style: small),
-      avatar: Icon(l.action == OutboundAction.ship ? Icons.outbox_outlined : Icons.edit_note_outlined, size: 16),
-    );
-    if (widget.proxy || !l.found) return KeyedSubtree(key: ValueKey('of-action-${l.row.rowNo}'), child: chip);
-    return PopupMenuButton<OutboundAction>(
-      key: ValueKey('of-action-${l.row.rowNo}'),
-      onSelected: (a) => widget.onAction(l, a),
-      itemBuilder: (_) => [
-        for (final a in const [OutboundAction.ship, OutboundAction.record])
-          PopupMenuItem(
-            key: ValueKey('of-action-${l.row.rowNo}-${a.wire}'),
-            value: a,
-            child: Text(outboundActionLabel(l10n, a.wire)),
-          ),
-      ],
-      child: chip,
     );
   }
 }

@@ -113,10 +113,16 @@ void main() {
     expect(status(tester, 4), '未登録のJAN');
     expect(status(tester, 5), '候補が複数');
     expect(status(tester, 6), 'JANなし');
+    // 商品を選ぶ: for a row with no JAN or several candidates, not for a JAN
+    // that is simply not in the library (to be registered). No 対応 column.
+    expect(find.byKey(const ValueKey('of-pick-4')), findsNothing);
+    expect(find.byKey(const ValueKey('of-pick-5')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-pick-6')), findsOneWidget);
+    expect(find.text('対応'), findsNothing);
     // Three in stock for five: three go out, two are short.
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-ship-3'))).data, '3');
     expect(tester.widget<Text>(find.byKey(const ValueKey('of-short-3'))).data, '2');
-    expect(find.text('5行 · 出庫 2行 · 記録のみ 3行 · 除外 0行'), findsOneWidget);
+    expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-summary-short')), findsOneWidget);
 
     // Only the rows short of stock.
@@ -196,10 +202,10 @@ void main() {
     // Unticked all at once, and ticked again.
     await tester.tap(find.byKey(const ValueKey('of-include-all')));
     await tester.pumpAndSettle();
-    expect(find.text('5行 · 出庫 0行 · 記録のみ 0行 · 除外 5行'), findsOneWidget);
+    expect(find.text('5行 · 出庫 0行 · 照合できない 0行 · 除外 5行'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('of-include-all')));
     await tester.pumpAndSettle();
-    expect(find.text('5行 · 出庫 2行 · 記録のみ 3行 · 除外 0行'), findsOneWidget);
+    expect(find.text('5行 · 出庫 2行 · 照合できない 3行 · 除外 0行'), findsOneWidget);
   });
 
   testWidgets('a long list is built as it scrolls, its heading kept in sight', (tester) async {
@@ -229,8 +235,8 @@ void main() {
     expect(tester.widget<Checkbox>(find.byKey(const ValueKey('of-include-3'))).value, isTrue);
     await tester.tap(find.byKey(const ValueKey('of-include-3')));
     await tester.pumpAndSettle();
-    expect(find.text('除外'), findsWidgets);
-    expect(find.text('5行 · 出庫 1行 · 記録のみ 3行 · 除外 1行'), findsOneWidget);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('of-include-3'))).value, isFalse);
+    expect(find.text('5行 · 出庫 1行 · 照合できない 3行 · 除外 1行'), findsOneWidget);
 
     // Row 6 has no JAN: its product chosen by its 品番.
     await tester.tap(find.byKey(const ValueKey('of-pick-6')));
@@ -364,12 +370,8 @@ void main() {
     // No stock here: nothing taken out, nothing short.
     expect(find.byKey(const ValueKey('of-ship-2')), findsNothing);
     expect(find.text('2行 · 記録 2行 · 除外 0行 · 数量 6'), findsWidgets);
-    // A product in the library is still only recorded.
-    await tester.tap(find.byKey(const ValueKey('of-action-2')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('of-action-2-ship')), findsNothing);
-    await tester.tapAt(const Offset(5, 5));
-    await tester.pumpAndSettle();
+    // No 対応 column: whether a row goes is its tick alone.
+    expect(find.byKey(const ValueKey('of-action-2')), findsNothing);
 
     // The rows typed in, as an Excel file.
     await tester.tap(find.byKey(const ValueKey('of-table-download')));
@@ -379,8 +381,9 @@ void main() {
     expect(table.name, '在庫外出荷');
     final head = table.rows.indexWhere((r) => r.isNotEmpty && r.first == '行');
     expect(table.rows[head], isNot(contains('在庫')), reason: 'no stock for a 在庫外出荷');
-    expect(table.rows[head + 1].sublist(0, 4), ['1', '○', 'ライブラリーにない', '記録のみ']);
-    expect(table.rows[head + 1][5], '預かり品の箱');
+    expect(table.rows[head], isNot(contains('対応')));
+    expect(table.rows[head + 1].sublist(0, 3), ['1', '○', 'ライブラリーにない']);
+    expect(table.rows[head + 1][4], '預かり品の箱');
     await tester.pump(const Duration(seconds: 5)); // the 保存 note goes
     await tester.pumpAndSettle();
 

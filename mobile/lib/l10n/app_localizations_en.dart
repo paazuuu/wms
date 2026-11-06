@@ -14357,7 +14357,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ofSummary(int rows, int ship, int record, int skip) {
-    return '$rows rows · ship $ship · record $record · leave out $skip';
+    return '$rows rows · $ship out · $record not matched · $skip left out';
   }
 
   @override
@@ -14388,7 +14388,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ofPostConfirmBody(int ship, int n, int record, int skip) {
-    return '$n units on $ship rows leave the stock. Record only: $record rows; left out: $skip.';
+    return '$ship rows, $n pcs taken out of stock. $record rows not matched stay on the list without moving stock. $skip left out.';
   }
 
   @override
@@ -14416,11 +14416,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofHelpNoJan =>
-      'No JAN: found by part number (and maker) in the library, suppliers\' codes and the price book. If not found, choose the product, or record only.';
+      'Rows with no JAN: looked up by 品番 (and maker) in the library, supplier codes and price lists. If not found, choose one with \"Choose a product\"; otherwise the row takes nothing from stock and is short (to come in) in full.';
 
   @override
   String get ofHelpUnknown =>
-      'JAN not registered: there is no stock to take. Record only, or register the product first.';
+      'JAN not in the library: nothing to take from stock, so the whole quantity is short (to come in). Register the product before it comes in.';
 
   @override
   String get ofHelpShort =>

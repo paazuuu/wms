@@ -8811,6 +8811,16 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   the totals following as they are typed. 対応 column widened (記録のみ was
   cut).
 
+## 出荷手配: no 対応 column; 商品を選ぶ only where a product may be ours (app only)
+
+- 対応 is gone from the table (and from 「この表をExcelで保存」): a row whose
+  product is ours is taken out of stock, any other waits for goods to come in
+  (不足) and stays on the list without moving stock; whether a row goes at all
+  is its tick. 記録のみ as a choice belonged to 在庫外出荷, not here. The
+  summary says 照合できない n行 for rows with no product of ours.
+- 商品を選ぶ shows for JANなし and 候補が複数 rows (and one chosen by hand), not
+  for 未登録のJAN: a JAN not in the library is a product to register.
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

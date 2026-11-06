@@ -7,7 +7,7 @@ import '../domain/outbound_plan.dart';
 double _r2(double v) => (v * 100).roundToDouble() / 100;
 
 /// The shipping list as read and checked here, to download again: every row
-/// with what was found for it — 対象 (or 除外), 状態, 対応, the library's
+/// with what was found for it — 対象 (or 除外), 状態, the library's
 /// product, 在庫 / 出庫数 / 不足 — and the list's own columns cleaned up.
 /// 合計 (when the list had none) and 総重量 are formulas; the totals under.
 /// Rows not found in the library are filled yellow. 仕入先 stays out (it is
@@ -15,14 +15,13 @@ double _r2(double v) => (v * 100).roundToDouble() / 100;
 Uint8List buildOutboundPlanXlsx(
   List<OutboundPlanLine> lines, {
   required String Function(OutboundPlanLine) statusLabel,
-  required String Function(OutboundAction) actionLabel,
   Map<int, RowCurrency> currency = const {},
   bool proxy = false,
   String? title,
   String? sheet,
 }) {
   final headers = [
-    '行', '対象', '状態', '対応', '商品名（ライブラリー）', '商品名（明細）', 'JAN', '品番', 'メーカー', '数量',
+    '行', '対象', '状態', '商品名（ライブラリー）', '商品名（明細）', 'JAN', '品番', 'メーカー', '数量',
     if (!proxy) ...['在庫', '出庫数', '不足（入荷が必要）'],
     '単価（税抜）', '単価（税込）', '合計', '通貨', '前回の仕入れ値', '重量（g/個）', '総重量（kg）', '注番', '到着日', '発注日',
   ];
@@ -47,7 +46,6 @@ Uint8List buildOutboundPlanXlsx(
       r.rowNo,
       out ? '除外' : '○',
       statusLabel(l),
-      actionLabel(l.action),
       l.match.name,
       r.name,
       l.match.jan ?? (r.jan.isNotEmpty ? r.jan : (r.janRaw.isEmpty ? null : r.janRaw)),
@@ -107,7 +105,7 @@ Uint8List buildOutboundPlanXlsx(
             '行' || '対象' || '通貨' => 6.0,
             '商品名（ライブラリー）' || '商品名（明細）' => 28.0,
             'JAN' || '品番' => 16.0,
-            '状態' || '対応' || 'メーカー' || '注番' => 12.0,
+            '状態' || 'メーカー' || '注番' => 12.0,
             _ => 10.0,
           },
       ],
