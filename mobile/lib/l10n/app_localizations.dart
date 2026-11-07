@@ -26912,7 +26912,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofUndecidedHint.
   ///
   /// In ja, this message translates to:
-  /// **'出庫予定日がまだ決まっていない出荷明細です。日が決まったら「日程を入れる」でカレンダーに載ります。'**
+  /// **'出庫予定日がまだ決まっていない出荷明細です。行をクリックすると開いて、中身・倉庫・出荷先などを編集できます。日が決まったら「出庫予定日を決める」でカレンダーに載ります。'**
   String get ofUndecidedHint;
 
   /// No description provided for @ofUndecidedMore.

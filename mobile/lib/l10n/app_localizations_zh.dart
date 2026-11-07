@@ -15159,7 +15159,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get ofUndecidedHint => '尚未确定出库日的出货明细。确定后点“填写日期”即显示在日历上。';
+  String get ofUndecidedHint =>
+      '尚未确定出库预定日的出货明细。点击一行即可打开并编辑（内容・仓库・收货方等）。日期确定后用「确定出库预定日」即显示在日历上。';
 
   @override
   String ofUndecidedMore(int n) {

@@ -15564,7 +15564,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofUndecidedHint =>
-      'Planned lists with no day yet. Set the day when it is known and it goes on the calendar.';
+      'Lists with no planned day yet. Click a row to open and edit it (rows, warehouse, destination…). Once the day is known, “Set the planned day” puts it on the calendar.';
 
   @override
   String ofUndecidedMore(int n) {

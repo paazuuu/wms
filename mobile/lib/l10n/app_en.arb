@@ -4828,7 +4828,7 @@
   "ofMadeUndecided": "The day is now not decided",
   "ofSetDay": "Set the planned day",
   "ofUndecidedTitle": "Shipping day not decided: {n}",
-  "ofUndecidedHint": "Planned lists with no day yet. Set the day when it is known and it goes on the calendar.",
+  "ofUndecidedHint": "Lists with no planned day yet. Click a row to open and edit it (rows, warehouse, destination…). Once the day is known, “Set the planned day” puts it on the calendar.",
   "ofUndecidedMore": "{n} more",
   "obHelpFile": "Read the shipping list from sales (the Excel), match it with the stock and register it as planned (or ship now). Everyday shipping starts here.",
   "obHelpProxy": "Drop shipping and shipping on behalf of others: kept as a record, no stock moved.",

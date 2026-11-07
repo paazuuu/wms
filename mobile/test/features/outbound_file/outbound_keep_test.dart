@@ -119,4 +119,32 @@ void main() {
     }
     expect(find.byKey(const ValueKey('of-overdue-7')), findsOneWidget);
   });
+
+  testWidgets('the 未定 card: rows open the list, and a list taken back there is gone on return', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final f = _file(undecided: true);
+    final repo = FakeOutboundFileRepository(detailOf: (_) => OutboundFileDetail(file: f, lines: const [_line]))
+      ..undecidedFiles = [f];
+    await pumpApp(tester, const Scaffold(body: SingleChildScrollView(child: OutboundUndecidedCard())), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-undecided-5')), findsOneWidget);
+    expect(find.text('開いて編集'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('of-undecided-open-5')));
+    await tester.pumpAndSettle();
+    expect(find.byType(OutboundFileDetailScreen), findsOneWidget);
+    repo.undecidedFiles = const [];
+    await tester.tap(find.byKey(const ValueKey('of-undo')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-undo-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.undone, [5]);
+    Navigator.of(tester.element(find.byType(OutboundFileDetailScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-undecided-5')), findsNothing);
+  });
 }

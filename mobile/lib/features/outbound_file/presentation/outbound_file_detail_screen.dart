@@ -106,6 +106,15 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     super.dispose();
   }
 
+  /// After any change: this list, the calendar, the 未定 lists (dashboard,
+  /// 出荷手配) and the stock — so nothing shows what was before.
+  void _refreshAll() {
+    ref.invalidate(outboundFileDetailProvider(widget.fileId));
+    ref.invalidate(outboundFilesProvider);
+    ref.invalidate(outboundUndecidedProvider);
+    ref.invalidate(productListProvider);
+  }
+
   void _snack(String t) {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
@@ -154,8 +163,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     if (!mounted) return;
     switch (r) {
       case ApiSuccess():
-        ref.invalidate(outboundFileDetailProvider(widget.fileId));
-        ref.invalidate(outboundFilesProvider);
+        _refreshAll();
         _snack(l10n.ofShipToSet);
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -238,9 +246,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
-        ref.invalidate(outboundFileDetailProvider(widget.fileId));
-        ref.invalidate(outboundFilesProvider);
-        ref.invalidate(productListProvider);
+        _refreshAll();
         _snack(l10n.ofConfirmDone(data));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -259,9 +265,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     if (!mounted) return;
     switch (r) {
       case ApiSuccess():
-        ref.invalidate(outboundFileDetailProvider(widget.fileId));
-        ref.invalidate(outboundFilesProvider);
-        ref.invalidate(outboundUndecidedProvider);
+        _refreshAll();
         _snack(l10n.ofRescheduled(DateFormat('y/MM/dd').format(picked)));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -290,10 +294,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
-        ref.invalidate(outboundFileDetailProvider(widget.fileId));
-        ref.invalidate(outboundFilesProvider);
-        ref.invalidate(outboundUndecidedProvider);
-        ref.invalidate(productListProvider);
+        _refreshAll();
         _snack(l10n.ofBackToPlanDone(data));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -307,9 +308,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     if (!mounted) return;
     switch (r) {
       case ApiSuccess():
-        ref.invalidate(outboundFileDetailProvider(widget.fileId));
-        ref.invalidate(outboundFilesProvider);
-        ref.invalidate(outboundUndecidedProvider);
+        _refreshAll();
         _snack(l10n.ofMadeUndecided);
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -339,9 +338,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
-        ref.invalidate(outboundFileDetailProvider(widget.fileId));
-        ref.invalidate(outboundFilesProvider);
-        ref.invalidate(productListProvider);
+        _refreshAll();
         _snack(f.planned ? l10n.ofPlanCancelled : (f.proxy ? l10n.prUndoDone : l10n.ofUndoDone(data)));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));

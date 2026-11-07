@@ -331,6 +331,79 @@ class OutboundUndecidedCard extends ConsumerWidget {
     }
   }
 
+  /// The list opened; on the way back the 未定 lists are read again, so a
+  /// day set, a list shipped or taken back there is not shown here still.
+  Future<void> _open(BuildContext context, WidgetRef ref, OutboundFileSummary f) async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => OutboundFileDetailScreen(fileId: f.id)));
+    ref.invalidate(outboundUndecidedProvider);
+  }
+
+  /// One list: a tile that looks pressable — framed, its name in the link
+  /// colour, an "open" arrow — with the day to set beside it.
+  Widget _row(BuildContext context, WidgetRef ref, OutboundFileSummary f, int? warehouseId) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      key: ValueKey('of-undecided-${f.id}'),
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Material(
+        color: scheme.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), side: BorderSide(color: scheme.outline.withValues(alpha: 0.6))),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: ValueKey('of-undecided-open-${f.id}'),
+          mouseCursor: SystemMouseCursors.click,
+          onTap: () => _open(context, ref, f),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: compact ? 6 : 10),
+            child: Row(children: [
+              Icon(f.proxy ? Icons.edit_note_outlined : Icons.description_outlined, color: scheme.primary, size: 22),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    [if (kind == null && f.proxy) l10n.prBadge, f.fileName].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: scheme.primary.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  Text(
+                    [
+                      if (f.shipTo != null) f.shipTo!.nameEn ?? f.shipTo!.name else if (f.destination != null) f.destination!,
+                      l10n.prCardLines(f.lineCount, f.quantityTotal),
+                      if (f.warehouseName != null) f.warehouseName!,
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ]),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              if (!compact)
+                Text(l10n.ofUdOpen, style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary)),
+              Icon(Icons.chevron_right, color: scheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              OutlinedButton.icon(
+                key: ValueKey('of-undecided-set-${f.id}'),
+                onPressed: () => _setDay(context, ref, f, warehouseId),
+                icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                label: Text(l10n.ofSetDay),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -359,35 +432,7 @@ class OutboundUndecidedCard extends ConsumerWidget {
           ]),
           if (!compact) Text(l10n.ofUndecidedHint, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.xs),
-          for (final f in shown)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Row(key: ValueKey('of-undecided-${f.id}'), children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => Navigator.of(context)
-                        .push(MaterialPageRoute<void>(builder: (_) => OutboundFileDetailScreen(fileId: f.id))),
-                    child: Text(
-                      [
-                        if (kind == null && f.proxy) l10n.prBadge,
-                        f.fileName,
-                        if (f.shipTo != null) f.shipTo!.nameEn ?? f.shipTo!.name else if (f.destination != null) f.destination!,
-                        l10n.prCardLines(f.lineCount, f.quantityTotal),
-                        if (f.warehouseName != null) f.warehouseName!,
-                      ].join(' · '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                TextButton.icon(
-                  key: ValueKey('of-undecided-set-${f.id}'),
-                  onPressed: () => _setDay(context, ref, f, warehouseId),
-                  icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-                  label: Text(l10n.ofSetDay),
-                ),
-              ]),
-            ),
+          for (final f in shown) _row(context, ref, f, warehouseId),
           if (compact && files.length > shown.length) Text(l10n.ofUndecidedMore(files.length - shown.length)),
         ]),
       ),
