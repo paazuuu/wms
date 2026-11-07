@@ -13860,5 +13860,105 @@
       }
     }
   },
-  "ofErrShipDayFuture": "未来の日付では出庫済みにできません。実際に出した日を選んでください。"
+  "ofErrShipDayFuture": "未来の日付では出庫済みにできません。実際に出した日を選んでください。",
+  "ofKeptHint": "在庫 {onHand} のうち {kept} は、登録済みの出庫予定や受注でキープ（引当）されています。表示しているのは残りの数です。",
+  "@ofKeptHint": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "kept": {
+        "type": "int"
+      }
+    }
+  },
+  "ofKeptShort": "キープ {kept}",
+  "@ofKeptShort": {
+    "placeholders": {
+      "kept": {
+        "type": "int"
+      }
+    }
+  },
+  "ofAutoReady": "在庫はそろっています。予定日（{day}）の翌日に自動で出庫済みになり、在庫が減ります。それまでこの数をキープしています。",
+  "@ofAutoReady": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofAutoUndecided": "出庫予定日が決まるまで、自動では出庫済みになりません。この数はキープしています。",
+  "ofShortTitle": "在庫が足りない商品が {n} 品目あります（不足 {qty}）。そろうまで自動で出庫済みになりません。",
+  "@ofShortTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "ofShortHeld": "予定日（{day}）を過ぎましたが、在庫が足りないため出庫済みにしていません。入荷を待つか、出庫予定日を変えてください。",
+  "@ofShortHeld": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofShortRow": "{name}: 必要 {needed} ／ 在庫 {onHand}（先の予定でキープ {kept}）／ 不足 {short}",
+  "@ofShortRow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "needed": {
+        "type": "int"
+      },
+      "onHand": {
+        "type": "int"
+      },
+      "kept": {
+        "type": "int"
+      },
+      "short": {
+        "type": "int"
+      }
+    }
+  },
+  "ofConfirmShortNote": "在庫が足りない商品があります（不足 {qty}）。このまま記録すると、足りない分は不足として残ります。",
+  "@ofConfirmShortNote": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "ofStatusAutoShipped": "出庫済み {day}（予定日の翌日に自動で記録 {at}）",
+  "@ofStatusAutoShipped": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "ofBackToPlan": "出庫予定に戻す（実際は出ていない）",
+  "ofBackToPlanQ": "出庫予定に戻しますか？",
+  "ofBackToPlanBody": "実際にはまだ倉庫から出ていない場合に使います。減らした在庫を戻し、出庫予定（出庫予定日は未定）に戻して、またキープします。",
+  "ofBackToPlanDone": "出庫予定に戻しました（{n}個を在庫に戻しました）",
+  "@ofBackToPlanDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofErrNotShipped": "この出庫は出庫済みではありません",
+  "ofOverdueBadge": "要確認",
+  "ofOverdueHint": "予定日を過ぎても出庫済みになっていません（在庫不足など）"
 }

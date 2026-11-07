@@ -15983,4 +15983,73 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ofErrShipDayFuture =>
       'A shipment cannot be dated in the future: choose the day it actually left.';
+
+  @override
+  String ofKeptHint(int onHand, int kept) {
+    return 'Of $onHand in stock, $kept is kept for planned shipments or orders already registered; what is left is shown.';
+  }
+
+  @override
+  String ofKeptShort(int kept) {
+    return 'kept $kept';
+  }
+
+  @override
+  String ofAutoReady(String day) {
+    return 'All is in stock. It is recorded as shipped automatically the day after $day, and stock goes down then. Until then these are kept for it.';
+  }
+
+  @override
+  String get ofAutoUndecided =>
+      'With no planned day it is never shipped automatically. These are kept for it.';
+
+  @override
+  String ofShortTitle(int n, int qty) {
+    return '$n products are short ($qty in all). It is not shipped automatically until all is there.';
+  }
+
+  @override
+  String ofShortHeld(String day) {
+    return 'Its day ($day) has passed, but it was not shipped: stock is short. Wait for the goods or change the planned day.';
+  }
+
+  @override
+  String ofShortRow(String name, int needed, int onHand, int kept, int short) {
+    return '$name: needs $needed / in stock $onHand (kept by earlier plans $kept) / short $short';
+  }
+
+  @override
+  String ofConfirmShortNote(int qty) {
+    return 'Some products are short ($qty). Recorded now, what is missing stays as short.';
+  }
+
+  @override
+  String ofStatusAutoShipped(String day, String at) {
+    return 'Shipped $day (recorded automatically the next day, $at)';
+  }
+
+  @override
+  String get ofBackToPlan => 'Back to planned (it has not left)';
+
+  @override
+  String get ofBackToPlanQ => 'Back to planned?';
+
+  @override
+  String get ofBackToPlanBody =>
+      'Use this when it has not actually left. The stock comes back, it is planned again (no day yet) and kept again.';
+
+  @override
+  String ofBackToPlanDone(int n) {
+    return 'Back to planned ($n back in stock)';
+  }
+
+  @override
+  String get ofErrNotShipped => 'This shipment has not been shipped';
+
+  @override
+  String get ofOverdueBadge => 'Check';
+
+  @override
+  String get ofOverdueHint =>
+      'Its day has passed and it has not shipped (stock short, or similar)';
 }

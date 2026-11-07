@@ -15553,4 +15553,70 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofErrShipDayFuture => '不能用未来日期记为已出库，请选择实际出库日。';
+
+  @override
+  String ofKeptHint(int onHand, int kept) {
+    return '库存 $onHand 中有 $kept 已被已登记的出库预定或订单保留（占用）。显示的是剩余数量。';
+  }
+
+  @override
+  String ofKeptShort(int kept) {
+    return '保留 $kept';
+  }
+
+  @override
+  String ofAutoReady(String day) {
+    return '库存齐全。预定日（$day）的次日会自动记为已出库并扣减库存。在此之前这些数量被保留。';
+  }
+
+  @override
+  String get ofAutoUndecided => '出库预定日确定之前不会自动出库。这些数量已被保留。';
+
+  @override
+  String ofShortTitle(int n, int qty) {
+    return '有 $n 个商品库存不足（缺 $qty）。备齐之前不会自动出库。';
+  }
+
+  @override
+  String ofShortHeld(String day) {
+    return '已过预定日（$day），但因库存不足未记为出库。请等待到货或更改出库预定日。';
+  }
+
+  @override
+  String ofShortRow(String name, int needed, int onHand, int kept, int short) {
+    return '$name：需要 $needed ／ 库存 $onHand（之前的预定保留 $kept）／ 缺 $short';
+  }
+
+  @override
+  String ofConfirmShortNote(int qty) {
+    return '有商品库存不足（缺 $qty）。现在记录的话，不足部分将记为缺货。';
+  }
+
+  @override
+  String ofStatusAutoShipped(String day, String at) {
+    return '已出库 $day（预定日次日自动记录 $at）';
+  }
+
+  @override
+  String get ofBackToPlan => '恢复为出库预定（实际未出库）';
+
+  @override
+  String get ofBackToPlanQ => '恢复为出库预定？';
+
+  @override
+  String get ofBackToPlanBody => '用于实际尚未出库的情况。恢复已扣减的库存，恢复为出库预定（预定日未定），并重新保留。';
+
+  @override
+  String ofBackToPlanDone(int n) {
+    return '已恢复为出库预定（$n个已退回库存）';
+  }
+
+  @override
+  String get ofErrNotShipped => '此出库尚未出库';
+
+  @override
+  String get ofOverdueBadge => '需确认';
+
+  @override
+  String get ofOverdueHint => '已过预定日仍未出库（库存不足等）';
 }

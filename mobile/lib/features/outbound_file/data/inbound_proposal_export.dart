@@ -57,7 +57,8 @@ List<InboundNeed> inboundNeeds(List<OutboundPlanLine> lines, String Function(Out
         name: m.name ?? r.name,
         maker: r.maker ?? m.maker,
         supplier: r.supplier,
-        onHand: m.productId == null ? null : m.onHand,
+        // What is left once the 出庫予定 already registered take theirs (0201).
+        onHand: m.productId == null ? null : m.free,
         lastPrice: m.lastPrice,
       ),
     );

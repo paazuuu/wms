@@ -58,6 +58,19 @@ String outboundKg(double g) => NumberFormat('#,##0.###').format(g / 1000);
 ///
 /// [proxy] (代理出荷, 0189): the same list, or rows typed in, kept as a
 /// record only — no stock moves, the products need not be in the library.
+
+/// What is kept of [p] in the warehouse (出庫予定 and orders, 0201): the
+/// library's 引当.
+int keptOf(Product p, int? warehouseId) {
+  final stock = p.stock;
+  if (stock == null) return 0;
+  if (warehouseId == null) return stock.reserved;
+  for (final w in stock.warehouses) {
+    if (w.warehouseId == warehouseId) return w.reserved;
+  }
+  return 0;
+}
+
 class OutboundFileScreen extends StatelessWidget {
   const OutboundFileScreen({super.key, this.initialTab = 0, this.proxy = false});
 
@@ -488,6 +501,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         sku: p.sku,
         unitWeightG: p.unitWeightG,
         onHand: adjustOnHand(p, warehouseId),
+        kept: keptOf(p, warehouseId),
       );
       _chosen.remove(line.row.rowNo);
     });
@@ -1624,7 +1638,18 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
             cell(
               10,
               l.stockBefore != null
-                  ? Text('${l.stockBefore}', key: ValueKey('of-stock-${l.row.rowNo}'), style: small)
+                  ? ((l.match.kept ?? 0) > 0
+                      // Some is kept by 出庫予定 already: what is left shown, the keep below.
+                      ? Tooltip(
+                          message: l10n.ofKeptHint(l.match.onHand ?? 0, l.match.kept!),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
+                            Text('${l.stockBefore}', key: ValueKey('of-stock-${l.row.rowNo}'), style: small),
+                            Text(l10n.ofKeptShort(l.match.kept!),
+                                key: ValueKey('of-kept-${l.row.rowNo}'),
+                                style: small?.copyWith(color: theme.colorScheme.tertiary, fontSize: 11)),
+                          ]),
+                        )
+                      : Text('${l.stockBefore}', key: ValueKey('of-stock-${l.row.rowNo}'), style: small))
                   : (out
                       ? Text('—', style: small)
                       : Tooltip(

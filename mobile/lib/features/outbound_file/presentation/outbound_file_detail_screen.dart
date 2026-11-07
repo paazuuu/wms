@@ -188,6 +188,12 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   key: const ValueKey('of-confirm-undecided'),
                   style: TextStyle(color: Theme.of(c).colorScheme.warning, fontWeight: FontWeight.w600)),
             ],
+            if (d.short.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.ofConfirmShortNote(d.short.fold(0, (a, x) => a + x.short)),
+                  key: const ValueKey('of-confirm-short'),
+                  style: TextStyle(color: Theme.of(c).colorScheme.error, fontWeight: FontWeight.w600)),
+            ],
             const SizedBox(height: AppSpacing.sm),
             // The day it left: today or before, never ahead.
             OutlinedButton.icon(
@@ -257,6 +263,38 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
         ref.invalidate(outboundFilesProvider);
         ref.invalidate(outboundUndecidedProvider);
         _snack(l10n.ofRescheduled(DateFormat('y/MM/dd').format(picked)));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  /// A shipped list that did not leave after all: back to planned, 未定 (0201).
+  Future<void> _backToPlan(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l10n.ofBackToPlanQ),
+        content: Text(l10n.ofBackToPlanBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+          FilledButton(
+              key: const ValueKey('of-back-to-plan-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofBackToPlan)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    final r = await ref.read(outboundFileRepositoryProvider).backToPlan(f.id);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        ref.invalidate(outboundFileDetailProvider(widget.fileId));
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(outboundUndecidedProvider);
+        ref.invalidate(productListProvider);
+        _snack(l10n.ofBackToPlanDone(data));
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
@@ -384,6 +422,12 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   ]),
                   key: const ValueKey('of-detail-planned'),
                 )
+              else if (!f.proxy && !f.undone && f.autoShipped && d.shippedAt != null)
+                Text(
+                    l10n.ofStatusAutoShipped(
+                        DateFormat('y/MM/dd').format(f.shippedOn), DateFormat('y/MM/dd HH:mm').format(d.shippedAt!)),
+                    key: const ValueKey('of-detail-shipped'),
+                    style: TextStyle(color: scheme.success, fontWeight: FontWeight.w700))
               else if (!f.proxy && !f.undone && d.shippedByName != null && d.shippedAt != null)
                 Text(
                     l10n.ofStatusShipped(DateFormat('y/MM/dd').format(f.shippedOn), d.shippedByName!,
@@ -497,6 +541,13 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     icon: const Icon(Icons.inventory_2_outlined),
                     label: Text(l10n.ofPackingWeight),
                   ),
+                if (!f.undone && !f.planned && !f.proxy)
+                  OutlinedButton.icon(
+                    key: const ValueKey('of-back-to-plan'),
+                    onPressed: _busy ? null : () => _backToPlan(f),
+                    icon: const Icon(Icons.settings_backup_restore),
+                    label: Text(l10n.ofBackToPlan),
+                  ),
                 if (!f.undone)
                   TextButton.icon(
                     key: const ValueKey('of-undo'),
@@ -509,6 +560,12 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
             ]),
           ),
         ),
+        // キープ and the night run (0201): a planned list of stock says whether
+        // all is there; what is short holds it back.
+        if (f.planned && !f.proxy) ...[
+          const SizedBox(height: AppSpacing.md),
+          _keepCard(l10n, d),
+        ],
         const SizedBox(height: AppSpacing.md),
         // 出荷先カード (0190): where it went, as the card was then.
         Card(
@@ -542,6 +599,57 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
         if (d.lines.length > _limit)
           TextButton(onPressed: () => setState(() => _limit += 300), child: Text(l10n.ppMore(d.lines.length - _limit))),
       ],
+    );
+  }
+
+  Widget _keepCard(AppLocalizations l10n, OutboundFileDetail d) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final f = d.file;
+    final short = d.short;
+    final day = DateFormat('y/MM/dd').format(f.shippedOn);
+    if (short.isEmpty) {
+      return Card(
+        key: const ValueKey('of-detail-keep'),
+        color: scheme.successContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(children: [
+            Icon(Icons.inventory_outlined, color: scheme.onSuccessContainer),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(f.dateUndecided ? l10n.ofAutoUndecided : l10n.ofAutoReady(day),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSuccessContainer)),
+            ),
+          ]),
+        ),
+      );
+    }
+    final total = short.fold(0, (a, x) => a + x.short);
+    final held = f.overdue(DateTime.now());
+    return Card(
+      key: const ValueKey('of-detail-short'),
+      color: scheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.warning_amber_rounded, color: scheme.onErrorContainer),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(held ? l10n.ofShortHeld(day) : l10n.ofShortTitle(short.length, total),
+                  key: const ValueKey('of-detail-short-title'),
+                  style: theme.textTheme.titleSmall?.copyWith(color: scheme.onErrorContainer)),
+            ),
+          ]),
+          if (held) Text(l10n.ofShortTitle(short.length, total), style: TextStyle(color: scheme.onErrorContainer)),
+          const SizedBox(height: AppSpacing.xs),
+          for (final x in short.take(30))
+            Text(l10n.ofShortRow(x.name ?? x.jan ?? '?', x.needed, x.onHand, x.keptAhead, x.short),
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.onErrorContainer)),
+          if (short.length > 30) Text(l10n.ppMore(short.length - 30), style: TextStyle(color: scheme.onErrorContainer)),
+        ]),
+      ),
     );
   }
 

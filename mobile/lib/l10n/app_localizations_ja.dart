@@ -15668,4 +15668,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofErrShipDayFuture => '未来の日付では出庫済みにできません。実際に出した日を選んでください。';
+
+  @override
+  String ofKeptHint(int onHand, int kept) {
+    return '在庫 $onHand のうち $kept は、登録済みの出庫予定や受注でキープ（引当）されています。表示しているのは残りの数です。';
+  }
+
+  @override
+  String ofKeptShort(int kept) {
+    return 'キープ $kept';
+  }
+
+  @override
+  String ofAutoReady(String day) {
+    return '在庫はそろっています。予定日（$day）の翌日に自動で出庫済みになり、在庫が減ります。それまでこの数をキープしています。';
+  }
+
+  @override
+  String get ofAutoUndecided => '出庫予定日が決まるまで、自動では出庫済みになりません。この数はキープしています。';
+
+  @override
+  String ofShortTitle(int n, int qty) {
+    return '在庫が足りない商品が $n 品目あります（不足 $qty）。そろうまで自動で出庫済みになりません。';
+  }
+
+  @override
+  String ofShortHeld(String day) {
+    return '予定日（$day）を過ぎましたが、在庫が足りないため出庫済みにしていません。入荷を待つか、出庫予定日を変えてください。';
+  }
+
+  @override
+  String ofShortRow(String name, int needed, int onHand, int kept, int short) {
+    return '$name: 必要 $needed ／ 在庫 $onHand（先の予定でキープ $kept）／ 不足 $short';
+  }
+
+  @override
+  String ofConfirmShortNote(int qty) {
+    return '在庫が足りない商品があります（不足 $qty）。このまま記録すると、足りない分は不足として残ります。';
+  }
+
+  @override
+  String ofStatusAutoShipped(String day, String at) {
+    return '出庫済み $day（予定日の翌日に自動で記録 $at）';
+  }
+
+  @override
+  String get ofBackToPlan => '出庫予定に戻す（実際は出ていない）';
+
+  @override
+  String get ofBackToPlanQ => '出庫予定に戻しますか？';
+
+  @override
+  String get ofBackToPlanBody =>
+      '実際にはまだ倉庫から出ていない場合に使います。減らした在庫を戻し、出庫予定（出庫予定日は未定）に戻して、またキープします。';
+
+  @override
+  String ofBackToPlanDone(int n) {
+    return '出庫予定に戻しました（$n個を在庫に戻しました）';
+  }
+
+  @override
+  String get ofErrNotShipped => 'この出庫は出庫済みではありません';
+
+  @override
+  String get ofOverdueBadge => '要確認';
+
+  @override
+  String get ofOverdueHint => '予定日を過ぎても出庫済みになっていません（在庫不足など）';
 }

@@ -77,6 +77,7 @@ class OutboundMatch extends Equatable {
     this.sku,
     this.unitWeightG,
     this.onHand,
+    this.kept,
     this.lastPrice,
     this.lastPriceDay,
     this.candidates = const [],
@@ -92,6 +93,13 @@ class OutboundMatch extends Equatable {
   final String? sku;
   final double? unitWeightG;
   final int? onHand;
+
+  /// What the 出庫予定 already registered keep of it there (0201).
+  final int? kept;
+
+  /// What is left to ship: in stock less what is kept; null with no product.
+  int? get free => onHand == null ? null : (onHand! - (kept ?? 0) < 0 ? 0 : onHand! - (kept ?? 0));
+
   final double? lastPrice;
   final DateTime? lastPriceDay;
   final List<OutboundCandidate> candidates;
@@ -105,6 +113,7 @@ class OutboundMatch extends Equatable {
         sku: _s(j['sku']),
         unitWeightG: _nd(j['unit_weight_g']),
         onHand: _ni(j['on_hand']),
+        kept: _ni(j['kept']),
         lastPrice: _nd(j['last_price']),
         lastPriceDay: _day(j['last_price_day']),
         candidates: [
@@ -114,7 +123,7 @@ class OutboundMatch extends Equatable {
       );
 
   @override
-  List<Object?> get props => [matchedBy, productId, onHand, lastPrice, candidates];
+  List<Object?> get props => [matchedBy, productId, onHand, kept, lastPrice, candidates];
 }
 
 /// One row to post (outbound_file_post).
@@ -220,7 +229,22 @@ class OutboundFileSummary extends Equatable {
     this.packCartonCount,
     this.packCartonKg,
     this.packMaterialKg,
+    this.autoShipped = false,
+    this.autoHoldAt,
+    this.autoHoldShort,
   });
+
+  /// Recorded as shipped by the night run, the day after its day (0201).
+  final bool autoShipped;
+
+  /// The night run found it short and left it planned (0201): when, and by
+  /// how many.
+  final DateTime? autoHoldAt;
+  final int? autoHoldShort;
+
+  /// Its day has passed and it has not shipped: something to see to.
+  bool overdue(DateTime today) =>
+      planned && !proxy && !dateUndecided && shippedOn.isBefore(DateTime(today.year, today.month, today.day));
 
   /// The gross-weight estimate's own numbers (0199), null while 未定: how
   /// many cartons, one empty carton's weight, the packing material in all.
@@ -319,13 +343,16 @@ class OutboundFileSummary extends Equatable {
         packCartonCount: _ni(j['pack_carton_count']),
         packCartonKg: _nd(j['pack_carton_kg']),
         packMaterialKg: _nd(j['pack_material_kg']),
+        autoShipped: j['auto_shipped'] == true,
+        autoHoldAt: DateTime.tryParse('${j['auto_hold_at'] ?? ''}')?.toLocal(),
+        autoHoldShort: _ni(j['auto_hold_short']),
         shipTo: j['ship_to'] is Map ? ShipDestination.fromJson((j['ship_to'] as Map).cast<String, dynamic>()) : null,
       );
 
   @override
   List<Object?> get props => [
         id, kind, status, shippedOn, dateUndecided, fileName, lineCount, shippedTotal, shortTotal, undoneAt, warehouseId,
-        packCartonCount, packCartonKg, packMaterialKg,
+        packCartonCount, packCartonKg, packMaterialKg, autoShipped, autoHoldAt,
       ];
 }
 
@@ -416,8 +443,59 @@ class OutboundFileLine extends Equatable {
   List<Object?> get props => [id, rowNo, action, productId, quantity, shippedQuantity, shortQuantity];
 }
 
+/// A product a planned list needs, against what is there for it (0201):
+/// in stock, kept by the lists ahead of it, free, and short.
+class OutboundShortage extends Equatable {
+  const OutboundShortage({
+    required this.needed,
+    required this.onHand,
+    required this.keptAhead,
+    required this.free,
+    required this.short,
+    this.jan,
+    this.productId,
+    this.name,
+  });
+
+  final String? jan;
+  final int? productId;
+  final String? name;
+  final int needed;
+  final int onHand;
+  final int keptAhead;
+  final int free;
+  final int short;
+
+  factory OutboundShortage.fromJson(Map<String, dynamic> j) => OutboundShortage(
+        jan: _s(j['jan']),
+        productId: _ni(j['product_id']),
+        name: _s(j['name']),
+        needed: _i(j['needed']),
+        onHand: _i(j['on_hand']),
+        keptAhead: _i(j['kept_ahead']),
+        free: _i(j['free']),
+        short: _i(j['short']),
+      );
+
+  @override
+  List<Object?> get props => [jan, needed, onHand, keptAhead, free, short];
+}
+
 class OutboundFileDetail extends Equatable {
-  const OutboundFileDetail({required this.file, required this.lines, this.undoneByName, this.shippedByName, this.shippedAt});
+  const OutboundFileDetail({
+    required this.file,
+    required this.lines,
+    this.undoneByName,
+    this.shippedByName,
+    this.shippedAt,
+    this.shortage = const [],
+  });
+
+  /// A planned list's products against the stock (0201); empty otherwise.
+  final List<OutboundShortage> shortage;
+
+  /// Those it cannot have in full now: the night run will not ship it.
+  List<OutboundShortage> get short => [for (final s in shortage) if (s.short > 0) s];
 
   final OutboundFileSummary file;
   final List<OutboundFileLine> lines;
@@ -432,6 +510,11 @@ class OutboundFileDetail extends Equatable {
         undoneByName: _s(j['undone_by_name']),
         shippedByName: _s(j['shipped_by_name']),
         shippedAt: DateTime.tryParse('${j['shipped_at'] ?? ''}')?.toLocal(),
+        shortage: [
+          for (final e in ((j['shortage'] is Map ? (j['shortage'] as Map)['products'] : null) as List? ?? const [])
+              .whereType<Map>())
+            OutboundShortage.fromJson(e.cast<String, dynamic>()),
+        ],
         lines: [
           for (final l in (j['lines'] as List? ?? const []).whereType<Map>()) OutboundFileLine.fromJson(l.cast<String, dynamic>()),
         ],
@@ -498,6 +581,10 @@ abstract class OutboundFileRepository {
   /// The warehouse a list not yet shipped goes from (0199): false when it
   /// was that one already.
   Future<ApiResult<bool>> setWarehouse(int id, int warehouseId);
+
+  /// A shipped list that did not leave after all: back to planned, 未定,
+  /// its stock back (0201). How many came back.
+  Future<ApiResult<int>> backToPlan(int id);
 
   /// The gross-weight estimate's numbers (0199); null puts one back to 未定.
   Future<ApiResult<bool>> setPackEstimate(int id, {int? cartonCount, double? cartonKg, double? materialKg});
@@ -680,6 +767,16 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
     try {
       final r = await _rest.post('/rpc/outbound_file_set_currency',
           data: {'p_id': id, 'p_lines': lines, 'p_currency': currency, 'p_fx_cny_jpy': fxCnyJpy});
+      return ApiSuccess(_i(r.data));
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> backToPlan(int id) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_back_to_plan', data: {'p_id': id});
       return ApiSuccess(_i(r.data));
     } on DioException catch (e) {
       return mapDioError<int>(e);

@@ -27586,6 +27586,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'未来の日付では出庫済みにできません。実際に出した日を選んでください。'**
   String get ofErrShipDayFuture;
+
+  /// No description provided for @ofKeptHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand} のうち {kept} は、登録済みの出庫予定や受注でキープ（引当）されています。表示しているのは残りの数です。'**
+  String ofKeptHint(int onHand, int kept);
+
+  /// No description provided for @ofKeptShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'キープ {kept}'**
+  String ofKeptShort(int kept);
+
+  /// No description provided for @ofAutoReady.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫はそろっています。予定日（{day}）の翌日に自動で出庫済みになり、在庫が減ります。それまでこの数をキープしています。'**
+  String ofAutoReady(String day);
+
+  /// No description provided for @ofAutoUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日が決まるまで、自動では出庫済みになりません。この数はキープしています。'**
+  String get ofAutoUndecided;
+
+  /// No description provided for @ofShortTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が足りない商品が {n} 品目あります（不足 {qty}）。そろうまで自動で出庫済みになりません。'**
+  String ofShortTitle(int n, int qty);
+
+  /// No description provided for @ofShortHeld.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定日（{day}）を過ぎましたが、在庫が足りないため出庫済みにしていません。入荷を待つか、出庫予定日を変えてください。'**
+  String ofShortHeld(String day);
+
+  /// No description provided for @ofShortRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}: 必要 {needed} ／ 在庫 {onHand}（先の予定でキープ {kept}）／ 不足 {short}'**
+  String ofShortRow(String name, int needed, int onHand, int kept, int short);
+
+  /// No description provided for @ofConfirmShortNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫が足りない商品があります（不足 {qty}）。このまま記録すると、足りない分は不足として残ります。'**
+  String ofConfirmShortNote(int qty);
+
+  /// No description provided for @ofStatusAutoShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み {day}（予定日の翌日に自動で記録 {at}）'**
+  String ofStatusAutoShipped(String day, String at);
+
+  /// No description provided for @ofBackToPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定に戻す（実際は出ていない）'**
+  String get ofBackToPlan;
+
+  /// No description provided for @ofBackToPlanQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定に戻しますか？'**
+  String get ofBackToPlanQ;
+
+  /// No description provided for @ofBackToPlanBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'実際にはまだ倉庫から出ていない場合に使います。減らした在庫を戻し、出庫予定（出庫予定日は未定）に戻して、またキープします。'**
+  String get ofBackToPlanBody;
+
+  /// No description provided for @ofBackToPlanDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定に戻しました（{n}個を在庫に戻しました）'**
+  String ofBackToPlanDone(int n);
+
+  /// No description provided for @ofErrNotShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫は出庫済みではありません'**
+  String get ofErrNotShipped;
+
+  /// No description provided for @ofOverdueBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認'**
+  String get ofOverdueBadge;
+
+  /// No description provided for @ofOverdueHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定日を過ぎても出庫済みになっていません（在庫不足など）'**
+  String get ofOverdueHint;
 }
 
 class _AppLocalizationsDelegate

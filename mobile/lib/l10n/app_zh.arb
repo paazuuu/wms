@@ -4940,5 +4940,21 @@
   "ofConfirmEarly": "早于出库预定日（{day}）。仅在确实提前出库时记录。",
   "ofStatusPlanned": "尚未离开仓库",
   "ofStatusShipped": "已出库 {day}（{name} 于 {at} 记录）",
-  "ofErrShipDayFuture": "不能用未来日期记为已出库，请选择实际出库日。"
+  "ofErrShipDayFuture": "不能用未来日期记为已出库，请选择实际出库日。",
+  "ofKeptHint": "库存 {onHand} 中有 {kept} 已被已登记的出库预定或订单保留（占用）。显示的是剩余数量。",
+  "ofKeptShort": "保留 {kept}",
+  "ofAutoReady": "库存齐全。预定日（{day}）的次日会自动记为已出库并扣减库存。在此之前这些数量被保留。",
+  "ofAutoUndecided": "出库预定日确定之前不会自动出库。这些数量已被保留。",
+  "ofShortTitle": "有 {n} 个商品库存不足（缺 {qty}）。备齐之前不会自动出库。",
+  "ofShortHeld": "已过预定日（{day}），但因库存不足未记为出库。请等待到货或更改出库预定日。",
+  "ofShortRow": "{name}：需要 {needed} ／ 库存 {onHand}（之前的预定保留 {kept}）／ 缺 {short}",
+  "ofConfirmShortNote": "有商品库存不足（缺 {qty}）。现在记录的话，不足部分将记为缺货。",
+  "ofStatusAutoShipped": "已出库 {day}（预定日次日自动记录 {at}）",
+  "ofBackToPlan": "恢复为出库预定（实际未出库）",
+  "ofBackToPlanQ": "恢复为出库预定？",
+  "ofBackToPlanBody": "用于实际尚未出库的情况。恢复已扣减的库存，恢复为出库预定（预定日未定），并重新保留。",
+  "ofBackToPlanDone": "已恢复为出库预定（{n}个已退回库存）",
+  "ofErrNotShipped": "此出库尚未出库",
+  "ofOverdueBadge": "需确认",
+  "ofOverdueHint": "已过预定日仍未出库（库存不足等）"
 }

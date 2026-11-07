@@ -134,7 +134,8 @@ List<OutboundPlanLine> planOutbound(
   for (final (i, row) in rows.indexed) {
     final m = picked[row.rowNo] ?? (i < matches.length ? matches[i] : OutboundMatch.none);
     final pid = m.productId;
-    if (pid != null) left.putIfAbsent(pid, () => m.onHand ?? 0);
+    // What the 出庫予定 already registered keep is not ours to ship (0201).
+    if (pid != null) left.putIfAbsent(pid, () => m.free ?? 0);
     final stock = pid == null ? null : left[pid];
     final status = outboundStatusOf(row, m, stock);
     var action = chosen[row.rowNo] ??
@@ -155,7 +156,7 @@ List<OutboundPlanLine> planOutbound(
       if (pid == null) {
         need = q;
       } else {
-        final avail = needLeft.putIfAbsent(pid, () => m.onHand ?? 0);
+        final avail = needLeft.putIfAbsent(pid, () => m.free ?? 0);
         final take = q < avail ? q : (avail < 0 ? 0 : avail);
         need = q - take;
         needLeft[pid] = avail - take;

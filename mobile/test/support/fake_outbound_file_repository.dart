@@ -145,4 +145,12 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     packEstimates.add((id, cartonCount, cartonKg, materialKg));
     return const ApiSuccess(true);
   }
+
+  final List<int> backToPlanned = [];
+
+  @override
+  Future<ApiResult<int>> backToPlan(int id) async {
+    backToPlanned.add(id);
+    return const ApiSuccess(6);
+  }
 }

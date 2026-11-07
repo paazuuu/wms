@@ -200,6 +200,20 @@ class _FileCard extends ConsumerWidget {
                     Text(l10n.ofPlanned,
                         key: ValueKey('of-planned-${file.id}'),
                         style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w700)),
+                  // Its day has passed and it has not gone out: held for a
+                  // shortage by the night run, or not run yet (0201).
+                  if (file.overdue(DateTime.now()))
+                    Tooltip(
+                      message: file.autoHoldShort != null
+                          ? '${l10n.ofOverdueHint} · ${l10n.ofCardShort(file.autoHoldShort!)}'
+                          : l10n.ofOverdueHint,
+                      child: Text(l10n.ofOverdueBadge,
+                          key: ValueKey('of-overdue-${file.id}'),
+                          style: TextStyle(color: scheme.error, fontWeight: FontWeight.w800)),
+                    ),
+                  if (file.autoShipped && !file.undone)
+                    Icon(Icons.schedule_send_outlined, size: 16, color: scheme.onSurfaceVariant,
+                        semanticLabel: l10n.ofStatusAutoShipped(DateFormat('y/MM/dd').format(file.shippedOn), '')),
                   if (file.proxy)
                     Text(l10n.prBadge,
                         key: ValueKey('of-proxy-${file.id}'),

@@ -4940,5 +4940,21 @@
   "ofConfirmEarly": "This is before the planned day ({day}). Record it only if it really left early.",
   "ofStatusPlanned": "Not left the warehouse yet",
   "ofStatusShipped": "Shipped {day} (recorded by {name}, {at})",
-  "ofErrShipDayFuture": "A shipment cannot be dated in the future: choose the day it actually left."
+  "ofErrShipDayFuture": "A shipment cannot be dated in the future: choose the day it actually left.",
+  "ofKeptHint": "Of {onHand} in stock, {kept} is kept for planned shipments or orders already registered; what is left is shown.",
+  "ofKeptShort": "kept {kept}",
+  "ofAutoReady": "All is in stock. It is recorded as shipped automatically the day after {day}, and stock goes down then. Until then these are kept for it.",
+  "ofAutoUndecided": "With no planned day it is never shipped automatically. These are kept for it.",
+  "ofShortTitle": "{n} products are short ({qty} in all). It is not shipped automatically until all is there.",
+  "ofShortHeld": "Its day ({day}) has passed, but it was not shipped: stock is short. Wait for the goods or change the planned day.",
+  "ofShortRow": "{name}: needs {needed} / in stock {onHand} (kept by earlier plans {kept}) / short {short}",
+  "ofConfirmShortNote": "Some products are short ({qty}). Recorded now, what is missing stays as short.",
+  "ofStatusAutoShipped": "Shipped {day} (recorded automatically the next day, {at})",
+  "ofBackToPlan": "Back to planned (it has not left)",
+  "ofBackToPlanQ": "Back to planned?",
+  "ofBackToPlanBody": "Use this when it has not actually left. The stock comes back, it is planned again (no day yet) and kept again.",
+  "ofBackToPlanDone": "Back to planned ({n} back in stock)",
+  "ofErrNotShipped": "This shipment has not been shipped",
+  "ofOverdueBadge": "Check",
+  "ofOverdueHint": "Its day has passed and it has not shipped (stock short, or similar)"
 }
