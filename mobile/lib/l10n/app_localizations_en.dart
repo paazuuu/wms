@@ -14943,30 +14943,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ofCalKindPlanned => 'Planned';
 
   @override
-  String get ofConfirm => 'Confirm the shipment';
+  String get ofConfirm => 'Shipped (take out of stock)';
 
   @override
-  String get ofConfirmQ => 'Confirm this shipment?';
+  String get ofConfirmQ => 'Has it actually left the warehouse?';
 
   @override
   String ofConfirmBody(int ship, int qty) {
-    return '$ship rows ($qty units) leave the stock. What is not in stock is recorded as short.';
+    return 'Press this once the goods have actually left the warehouse. $ship rows (quantity $qty) come out of stock; what is missing is recorded as short. To only set the day it should ship, use “Set the planned day”.';
   }
 
   @override
-  String get ofConfirmDay => 'Shipped on';
+  String get ofConfirmDay => 'Day it left';
 
   @override
   String ofConfirmDone(int n) {
-    return 'Shipped ($n)';
+    return 'Recorded as shipped ($n taken out of stock)';
   }
 
   @override
-  String get ofReschedule => 'Change the day';
+  String get ofReschedule => 'Change the planned day';
 
   @override
   String ofRescheduled(String day) {
-    return 'Moved to $day';
+    return 'Planned for $day (not shipped yet)';
   }
 
   @override
@@ -15555,7 +15555,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ofMadeUndecided => 'The day is now not decided';
 
   @override
-  String get ofSetDay => 'Set the day';
+  String get ofSetDay => 'Set the planned day';
 
   @override
   String ofUndecidedTitle(int n) {
@@ -15758,15 +15758,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get ofUndecidedBannerTitle => 'The day it goes out is not set yet';
+  String get ofUndecidedBannerTitle => 'No planned day yet';
 
   @override
   String get ofUndecidedBannerBody =>
-      'Set a day and it appears on that day of the outbound calendar; until then it is listed under 未定.';
+      'Setting the planned day puts it on the calendar; no stock moves. Once it has actually left, press “Shipped (take out of stock)”.';
 
   @override
   String get ofUndecidedConfirmNote =>
-      'No day was set: the day chosen below (today to begin with) becomes the day it went out.';
+      'No planned day was set. Choose below the day it actually left (today to start with).';
 
   @override
   String get ofUndecidedButtonHint =>
@@ -15962,4 +15962,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofUdPacking => 'Gross weight';
+
+  @override
+  String get ofConfirmCheck =>
+      'I have checked that the goods left the warehouse';
+
+  @override
+  String ofConfirmEarly(String day) {
+    return 'This is before the planned day ($day). Record it only if it really left early.';
+  }
+
+  @override
+  String get ofStatusPlanned => 'Not left the warehouse yet';
+
+  @override
+  String ofStatusShipped(String day, String name, String at) {
+    return 'Shipped $day (recorded by $name, $at)';
+  }
+
+  @override
+  String get ofErrShipDayFuture =>
+      'A shipment cannot be dated in the future: choose the day it actually left.';
 }

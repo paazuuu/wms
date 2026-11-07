@@ -797,7 +797,7 @@ void main() {
       outboundFileRepositoryProvider.overrideWithValue(repo),
     ]);
     expect(find.byKey(const ValueKey('of-detail-undecided')), findsOneWidget);
-    expect(find.text('出庫日がまだ決まっていません（未定）'), findsOneWidget);
+    expect(find.text('出庫予定日がまだ決まっていません（未定）'), findsOneWidget);
     expect(find.byKey(const ValueKey('of-detail-set-day')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('of-confirm')));
     await tester.pumpAndSettle();
@@ -834,11 +834,17 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('of-confirm')));
     await tester.pumpAndSettle();
-    expect(find.text('2行（数量 15）を在庫から減らします。在庫が足りない分は不足として記録します。'), findsOneWidget);
+    expect(find.text('実際に倉庫から出しましたか？'), findsOneWidget);
+    expect(find.textContaining('2行（数量 15）を在庫から減らします。'), findsOneWidget);
+    // Not until it is ticked that the goods have left.
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('of-confirm-ok'))).onPressed, isNull);
+    await tester.tap(find.byKey(const ValueKey('of-confirm-check')));
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('of-confirm-ok')));
     await tester.pumpAndSettle();
     expect(repo.confirmed.single.$1, 5);
-    expect(find.text('出庫を確定しました（7個）'), findsOneWidget);
+    expect(!repo.confirmed.single.$2.isAfter(DateTime.now()), isTrue);
+    expect(find.text('出庫済みにしました（7個を在庫から減らしました）'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('of-reschedule')));
     await tester.pumpAndSettle();

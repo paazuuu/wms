@@ -162,6 +162,29 @@ void main() {
     expect(find.byKey(const ValueKey('of-warehouse-change')), findsNothing);
   });
 
+  testWidgets('a planned day is not a shipment: the detail says what has left and who recorded it', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 5), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(detailOf: (_) => _detail(_file(undecided: false)))),
+      warehouseOverviewProvider.overrideWith((ref) async => _warehouses),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('まだ倉庫から出ていません'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-detail-shipped')), findsNothing);
+
+    final f = _file(status: 'shipped', undecided: false);
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 5), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(
+          detailOf: (_) => OutboundFileDetail(
+              file: f, lines: _detail(f).lines, shippedByName: 'テスト担当', shippedAt: DateTime(2026, 11, 7, 15, 30)))),
+      warehouseOverviewProvider.overrideWith((ref) async => _warehouses),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text('出庫済み 2026/11/06（テスト担当 が 2026/11/07 15:30 に記録）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-confirm')), findsNothing);
+  });
+
   testWidgets('出荷手配 › 出庫日 未定: every warehouse, filtered by kind and warehouse, a day set, opened', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1800));
     addTearDown(() => tester.binding.setSurfaceSize(null));

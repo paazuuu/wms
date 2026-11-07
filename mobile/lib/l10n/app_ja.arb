@@ -13039,9 +13039,9 @@
     }
   },
   "ofCalKindPlanned": "出庫予定",
-  "ofConfirm": "出庫を確定",
-  "ofConfirmQ": "出庫を確定しますか？",
-  "ofConfirmBody": "{ship}行（数量 {qty}）を在庫から減らします。在庫が足りない分は不足として記録します。",
+  "ofConfirm": "出庫した（在庫から引く）",
+  "ofConfirmQ": "実際に倉庫から出しましたか？",
+  "ofConfirmBody": "荷物が実際に倉庫を出たあとに押してください。{ship}行（数量 {qty}）を在庫から減らします。在庫が足りない分は不足として記録します。出庫予定日を決めるだけなら「出庫予定日を決める」を使います。",
   "@ofConfirmBody": {
     "placeholders": {
       "ship": {
@@ -13052,8 +13052,8 @@
       }
     }
   },
-  "ofConfirmDay": "出庫日",
-  "ofConfirmDone": "出庫を確定しました（{n}個）",
+  "ofConfirmDay": "実際に出した日",
+  "ofConfirmDone": "出庫済みにしました（{n}個を在庫から減らしました）",
   "@ofConfirmDone": {
     "placeholders": {
       "n": {
@@ -13061,8 +13061,8 @@
       }
     }
   },
-  "ofReschedule": "予定日を変更",
-  "ofRescheduled": "出庫予定日を {day} に変更しました",
+  "ofReschedule": "出庫予定日を変える",
+  "ofRescheduled": "出庫予定日を {day} にしました（まだ出庫済みではありません）",
   "@ofRescheduled": {
     "placeholders": {
       "day": {
@@ -13537,7 +13537,7 @@
   "ofUndecided": "未定",
   "ofBackToUndecided": "未定に戻す",
   "ofMadeUndecided": "出庫予定日を未定にしました",
-  "ofSetDay": "日程を入れる",
+  "ofSetDay": "出庫予定日を決める",
   "ofUndecidedTitle": "出庫日 未定 {n}件",
   "@ofUndecidedTitle": {
     "placeholders": {
@@ -13699,9 +13699,9 @@
       }
     }
   },
-  "ofUndecidedBannerTitle": "出庫日がまだ決まっていません（未定）",
-  "ofUndecidedBannerBody": "日程を入れると、出庫カレンダーのその日に載ります。決まるまでは「出庫日 未定」の一覧に並びます。",
-  "ofUndecidedConfirmNote": "出庫日が未定のため、下で選ぶ日（はじめは今日）が出庫日になります。",
+  "ofUndecidedBannerTitle": "出庫予定日がまだ決まっていません（未定）",
+  "ofUndecidedBannerBody": "「出庫予定日を決める」で出庫カレンダーのその日に載ります。在庫はまだ動きません。実際に倉庫から出したら「出庫した（在庫から引く）」を押します。",
+  "ofUndecidedConfirmNote": "出庫予定日は未定のままです。下で実際に出した日を選んでください（はじめは今日）。",
   "ofUndecidedButtonHint": "出庫日はまだ決まっていません。押すと日程を入れられます（あとから入れることもできます）。",
   "ofStockZeroHint": "商品ライブラリーにない商品なので、在庫はありません。数量の全部が不足（入荷が必要）になります。",
   "ofColCanShip": "在庫から出せる数",
@@ -13835,5 +13835,30 @@
     }
   },
   "ofPackingWeight": "梱包・総重量",
-  "ofUdPacking": "総重量"
+  "ofUdPacking": "総重量",
+  "ofConfirmCheck": "荷物が倉庫を出たことを確認しました",
+  "ofConfirmEarly": "出庫予定日（{day}）より前の日です。予定より早く出した場合だけ記録してください。",
+  "@ofConfirmEarly": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "ofStatusPlanned": "まだ倉庫から出ていません",
+  "ofStatusShipped": "出庫済み {day}（{name} が {at} に記録）",
+  "@ofStatusShipped": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "ofErrShipDayFuture": "未来の日付では出庫済みにできません。実際に出した日を選んでください。"
 }

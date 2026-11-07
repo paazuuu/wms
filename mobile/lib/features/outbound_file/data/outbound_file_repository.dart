@@ -417,15 +417,21 @@ class OutboundFileLine extends Equatable {
 }
 
 class OutboundFileDetail extends Equatable {
-  const OutboundFileDetail({required this.file, required this.lines, this.undoneByName});
+  const OutboundFileDetail({required this.file, required this.lines, this.undoneByName, this.shippedByName, this.shippedAt});
 
   final OutboundFileSummary file;
   final List<OutboundFileLine> lines;
   final String? undoneByName;
 
+  /// Who recorded that the goods left (出庫した, 0200), and when.
+  final String? shippedByName;
+  final DateTime? shippedAt;
+
   factory OutboundFileDetail.fromJson(Map<String, dynamic> j) => OutboundFileDetail(
         file: OutboundFileSummary.fromJson(j),
         undoneByName: _s(j['undone_by_name']),
+        shippedByName: _s(j['shipped_by_name']),
+        shippedAt: DateTime.tryParse('${j['shipped_at'] ?? ''}')?.toLocal(),
         lines: [
           for (final l in (j['lines'] as List? ?? const []).whereType<Map>()) OutboundFileLine.fromJson(l.cast<String, dynamic>()),
         ],

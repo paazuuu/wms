@@ -14559,30 +14559,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ofCalKindPlanned => '出库计划';
 
   @override
-  String get ofConfirm => '确认出库';
+  String get ofConfirm => '已出库（扣减库存）';
 
   @override
-  String get ofConfirmQ => '确认出库吗？';
+  String get ofConfirmQ => '货物已实际出库了吗？';
 
   @override
   String ofConfirmBody(int ship, int qty) {
-    return '将从库存中减少$ship行（数量 $qty）。库存不足的部分记为不足。';
+    return '请在货物实际离开仓库后再按。将从库存中扣减$ship行（数量 $qty），不足部分记为缺货。如果只是确定预定日期，请使用「确定出库预定日」。';
   }
 
   @override
-  String get ofConfirmDay => '出库日';
+  String get ofConfirmDay => '实际出库日';
 
   @override
   String ofConfirmDone(int n) {
-    return '已确认出库（$n个）';
+    return '已记为出库（库存减少$n个）';
   }
 
   @override
-  String get ofReschedule => '更改计划日';
+  String get ofReschedule => '更改出库预定日';
 
   @override
   String ofRescheduled(String day) {
-    return '计划出库日已改为$day';
+    return '出库预定日已设为 $day（尚未出库）';
   }
 
   @override
@@ -15151,7 +15151,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ofMadeUndecided => '已将出库计划日改为未定';
 
   @override
-  String get ofSetDay => '填写日期';
+  String get ofSetDay => '确定出库预定日';
 
   @override
   String ofUndecidedTitle(int n) {
@@ -15339,13 +15339,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get ofUndecidedBannerTitle => '出库日期尚未确定（未定）';
+  String get ofUndecidedBannerTitle => '出库预定日尚未确定（未定）';
 
   @override
-  String get ofUndecidedBannerBody => '设置日期后会显示在出库日历的当天；确定前列在“出库日期 未定”中。';
+  String get ofUndecidedBannerBody =>
+      '确定预定日后会显示在出库日历上，库存不会变动。实际出库后请按「已出库（扣减库存）」。';
 
   @override
-  String get ofUndecidedConfirmNote => '出库日期未定，下面选择的日期（默认今天）将作为出库日期。';
+  String get ofUndecidedConfirmNote => '出库预定日仍未定。请在下方选择实际出库日（默认为今天）。';
 
   @override
   String get ofUndecidedButtonHint => '出库日期尚未确定。点按可设置（之后也可设置）。';
@@ -15533,4 +15534,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofUdPacking => '总重量';
+
+  @override
+  String get ofConfirmCheck => '已确认货物离开仓库';
+
+  @override
+  String ofConfirmEarly(String day) {
+    return '早于出库预定日（$day）。仅在确实提前出库时记录。';
+  }
+
+  @override
+  String get ofStatusPlanned => '尚未离开仓库';
+
+  @override
+  String ofStatusShipped(String day, String name, String at) {
+    return '已出库 $day（$name 于 $at 记录）';
+  }
+
+  @override
+  String get ofErrShipDayFuture => '不能用未来日期记为已出库，请选择实际出库日。';
 }

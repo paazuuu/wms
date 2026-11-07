@@ -8967,6 +8967,23 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
   - 行ごとのボタン: 開いて編集（詳細）／日程を入れる／倉庫を変える／総重量（梱包画面）。
 - テスト: `test/features/outbound_file/outbound_undecided_weight_test.dart`。
 
+## 0200: 「出庫予定日を決める」と「実際に出庫した記録」を分ける
+
+- 「出庫日の確定」と「出庫の確定」が紛らわしいという指摘を受けて、2つの操作をはっきり分けました。
+  - **出庫予定日を決める／変える**（`outbound_file_reschedule`）: 出庫カレンダーに載るだけです。在庫は動きません。
+  - **出庫した（在庫から引く）**（`outbound_file_confirm`）: 荷物が実際に倉庫を出たという記録です。このときに在庫が減ります。
+- DB:
+  - `outbound_file_confirm` は、未来の日付（Asia/Tokyo の今日より後）を `outbound_ship_day_future` で拒否します。まだ出ていないものを出庫済みにはできません。
+  - 列を追加: `outbound_files.shipped_by` / `shipped_at`（記録した人と日時）。
+  - `outbound_file_detail` が `shipped_by_name` と `shipped_at` を返します。
+- アプリ:
+  - 確認の窓の題は「実際に倉庫から出しましたか？」です。
+  - 日付は「実際に出した日」で、今日より後は選べません。予定日より前の日を選ぶと注意を出します。
+  - 「荷物が倉庫を出たことを確認しました」にチェックを入れるまで、実行ボタンは押せません。
+  - 詳細の状態表示: 出庫予定は「まだ倉庫から出ていません」、出庫済みは「出庫済み 日付（○○ が 日時 に記録）」です。
+  - 文言変更: 「日程を入れる」→「出庫予定日を決める」、「予定日を変更」→「出庫予定日を変える」、「出庫を確定」→「出庫した（在庫から引く）」。
+- 日付が来ても、自動で出庫済みにはなりません。
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

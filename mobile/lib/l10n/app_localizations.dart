@@ -25886,43 +25886,43 @@ abstract class AppLocalizations {
   /// No description provided for @ofConfirm.
   ///
   /// In ja, this message translates to:
-  /// **'出庫を確定'**
+  /// **'出庫した（在庫から引く）'**
   String get ofConfirm;
 
   /// No description provided for @ofConfirmQ.
   ///
   /// In ja, this message translates to:
-  /// **'出庫を確定しますか？'**
+  /// **'実際に倉庫から出しましたか？'**
   String get ofConfirmQ;
 
   /// No description provided for @ofConfirmBody.
   ///
   /// In ja, this message translates to:
-  /// **'{ship}行（数量 {qty}）を在庫から減らします。在庫が足りない分は不足として記録します。'**
+  /// **'荷物が実際に倉庫を出たあとに押してください。{ship}行（数量 {qty}）を在庫から減らします。在庫が足りない分は不足として記録します。出庫予定日を決めるだけなら「出庫予定日を決める」を使います。'**
   String ofConfirmBody(int ship, int qty);
 
   /// No description provided for @ofConfirmDay.
   ///
   /// In ja, this message translates to:
-  /// **'出庫日'**
+  /// **'実際に出した日'**
   String get ofConfirmDay;
 
   /// No description provided for @ofConfirmDone.
   ///
   /// In ja, this message translates to:
-  /// **'出庫を確定しました（{n}個）'**
+  /// **'出庫済みにしました（{n}個を在庫から減らしました）'**
   String ofConfirmDone(int n);
 
   /// No description provided for @ofReschedule.
   ///
   /// In ja, this message translates to:
-  /// **'予定日を変更'**
+  /// **'出庫予定日を変える'**
   String get ofReschedule;
 
   /// No description provided for @ofRescheduled.
   ///
   /// In ja, this message translates to:
-  /// **'出庫予定日を {day} に変更しました'**
+  /// **'出庫予定日を {day} にしました（まだ出庫済みではありません）'**
   String ofRescheduled(String day);
 
   /// No description provided for @ofPlanCancel.
@@ -26900,7 +26900,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofSetDay.
   ///
   /// In ja, this message translates to:
-  /// **'日程を入れる'**
+  /// **'出庫予定日を決める'**
   String get ofSetDay;
 
   /// No description provided for @ofUndecidedTitle.
@@ -27212,19 +27212,19 @@ abstract class AppLocalizations {
   /// No description provided for @ofUndecidedBannerTitle.
   ///
   /// In ja, this message translates to:
-  /// **'出庫日がまだ決まっていません（未定）'**
+  /// **'出庫予定日がまだ決まっていません（未定）'**
   String get ofUndecidedBannerTitle;
 
   /// No description provided for @ofUndecidedBannerBody.
   ///
   /// In ja, this message translates to:
-  /// **'日程を入れると、出庫カレンダーのその日に載ります。決まるまでは「出庫日 未定」の一覧に並びます。'**
+  /// **'「出庫予定日を決める」で出庫カレンダーのその日に載ります。在庫はまだ動きません。実際に倉庫から出したら「出庫した（在庫から引く）」を押します。'**
   String get ofUndecidedBannerBody;
 
   /// No description provided for @ofUndecidedConfirmNote.
   ///
   /// In ja, this message translates to:
-  /// **'出庫日が未定のため、下で選ぶ日（はじめは今日）が出庫日になります。'**
+  /// **'出庫予定日は未定のままです。下で実際に出した日を選んでください（はじめは今日）。'**
   String get ofUndecidedConfirmNote;
 
   /// No description provided for @ofUndecidedButtonHint.
@@ -27556,6 +27556,36 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'総重量'**
   String get ofUdPacking;
+
+  /// No description provided for @ofConfirmCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'荷物が倉庫を出たことを確認しました'**
+  String get ofConfirmCheck;
+
+  /// No description provided for @ofConfirmEarly.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日（{day}）より前の日です。予定より早く出した場合だけ記録してください。'**
+  String ofConfirmEarly(String day);
+
+  /// No description provided for @ofStatusPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ倉庫から出ていません'**
+  String get ofStatusPlanned;
+
+  /// No description provided for @ofStatusShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み {day}（{name} が {at} に記録）'**
+  String ofStatusShipped(String day, String name, String at);
+
+  /// No description provided for @ofErrShipDayFuture.
+  ///
+  /// In ja, this message translates to:
+  /// **'未来の日付では出庫済みにできません。実際に出した日を選んでください。'**
+  String get ofErrShipDayFuture;
 }
 
 class _AppLocalizationsDelegate

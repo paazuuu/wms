@@ -14652,30 +14652,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ofCalKindPlanned => '出庫予定';
 
   @override
-  String get ofConfirm => '出庫を確定';
+  String get ofConfirm => '出庫した（在庫から引く）';
 
   @override
-  String get ofConfirmQ => '出庫を確定しますか？';
+  String get ofConfirmQ => '実際に倉庫から出しましたか？';
 
   @override
   String ofConfirmBody(int ship, int qty) {
-    return '$ship行（数量 $qty）を在庫から減らします。在庫が足りない分は不足として記録します。';
+    return '荷物が実際に倉庫を出たあとに押してください。$ship行（数量 $qty）を在庫から減らします。在庫が足りない分は不足として記録します。出庫予定日を決めるだけなら「出庫予定日を決める」を使います。';
   }
 
   @override
-  String get ofConfirmDay => '出庫日';
+  String get ofConfirmDay => '実際に出した日';
 
   @override
   String ofConfirmDone(int n) {
-    return '出庫を確定しました（$n個）';
+    return '出庫済みにしました（$n個を在庫から減らしました）';
   }
 
   @override
-  String get ofReschedule => '予定日を変更';
+  String get ofReschedule => '出庫予定日を変える';
 
   @override
   String ofRescheduled(String day) {
-    return '出庫予定日を $day に変更しました';
+    return '出庫予定日を $day にしました（まだ出庫済みではありません）';
   }
 
   @override
@@ -15253,7 +15253,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ofMadeUndecided => '出庫予定日を未定にしました';
 
   @override
-  String get ofSetDay => '日程を入れる';
+  String get ofSetDay => '出庫予定日を決める';
 
   @override
   String ofUndecidedTitle(int n) {
@@ -15447,14 +15447,15 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get ofUndecidedBannerTitle => '出庫日がまだ決まっていません（未定）';
+  String get ofUndecidedBannerTitle => '出庫予定日がまだ決まっていません（未定）';
 
   @override
   String get ofUndecidedBannerBody =>
-      '日程を入れると、出庫カレンダーのその日に載ります。決まるまでは「出庫日 未定」の一覧に並びます。';
+      '「出庫予定日を決める」で出庫カレンダーのその日に載ります。在庫はまだ動きません。実際に倉庫から出したら「出庫した（在庫から引く）」を押します。';
 
   @override
-  String get ofUndecidedConfirmNote => '出庫日が未定のため、下で選ぶ日（はじめは今日）が出庫日になります。';
+  String get ofUndecidedConfirmNote =>
+      '出庫予定日は未定のままです。下で実際に出した日を選んでください（はじめは今日）。';
 
   @override
   String get ofUndecidedButtonHint =>
@@ -15648,4 +15649,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofUdPacking => '総重量';
+
+  @override
+  String get ofConfirmCheck => '荷物が倉庫を出たことを確認しました';
+
+  @override
+  String ofConfirmEarly(String day) {
+    return '出庫予定日（$day）より前の日です。予定より早く出した場合だけ記録してください。';
+  }
+
+  @override
+  String get ofStatusPlanned => 'まだ倉庫から出ていません';
+
+  @override
+  String ofStatusShipped(String day, String name, String at) {
+    return '出庫済み $day（$name が $at に記録）';
+  }
+
+  @override
+  String get ofErrShipDayFuture => '未来の日付では出庫済みにできません。実際に出した日を選んでください。';
 }

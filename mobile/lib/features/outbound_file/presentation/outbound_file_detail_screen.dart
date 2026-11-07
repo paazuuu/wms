@@ -167,7 +167,11 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
   Future<void> _confirm(OutboundFileDetail d) async {
     final l10n = AppLocalizations.of(context);
     final f = d.file;
-    var day = DateTime.now();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    var day = today;
+    // Pressed once the goods have left: ticked to say so.
+    var seen = false;
     final ship = [for (final l in d.lines) if (l.action == 'ship' && l.productId != null) l];
     final ok = await showDialog<bool>(
       context: context,
@@ -185,19 +189,38 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   style: TextStyle(color: Theme.of(c).colorScheme.warning, fontWeight: FontWeight.w600)),
             ],
             const SizedBox(height: AppSpacing.sm),
+            // The day it left: today or before, never ahead.
             OutlinedButton.icon(
               key: const ValueKey('of-confirm-day'),
               icon: const Icon(Icons.event_outlined, size: 18),
               label: Text('${l10n.ofConfirmDay}: ${DateFormat('y/MM/dd').format(day)}'),
               onPressed: () async {
-                final picked = await showDatePicker(context: c, initialDate: day, firstDate: DateTime(2000), lastDate: DateTime(2100));
+                final picked = await showDatePicker(context: c, initialDate: day, firstDate: DateTime(2000), lastDate: today);
                 if (picked != null) set(() => day = picked);
               },
+            ),
+            if (!f.undecided && day.isBefore(f.shippedOn)) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(l10n.ofConfirmEarly(DateFormat('y/MM/dd').format(f.shippedOn)),
+                  key: const ValueKey('of-confirm-early'),
+                  style: TextStyle(color: Theme.of(c).colorScheme.warning)),
+            ],
+            const SizedBox(height: AppSpacing.sm),
+            CheckboxListTile(
+              key: const ValueKey('of-confirm-check'),
+              value: seen,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: Text(l10n.ofConfirmCheck, style: const TextStyle(fontWeight: FontWeight.w600)),
+              onChanged: (v) => set(() => seen = v ?? false),
             ),
           ]),
           actions: [
             TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-            FilledButton(key: const ValueKey('of-confirm-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofConfirm)),
+            FilledButton(
+                key: const ValueKey('of-confirm-ok'),
+                onPressed: seen ? () => Navigator.pop(c, true) : null,
+                child: Text(l10n.ofConfirm)),
           ],
         ),
       ),
@@ -349,10 +372,24 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // Where it stands: planned (nothing has left yet) or shipped
+              // (who recorded it, when) — a planned day is not a shipment.
               if (f.planned)
-                Text(l10n.ofPlannedFor(f.undecided ? l10n.ofUndecided : DateFormat('y/MM/dd').format(f.shippedOn)),
-                    key: const ValueKey('of-detail-planned'),
-                    style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w700)),
+                Text.rich(
+                  TextSpan(children: [
+                    TextSpan(
+                        text: l10n.ofPlannedFor(f.undecided ? l10n.ofUndecided : DateFormat('y/MM/dd').format(f.shippedOn)),
+                        style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w700)),
+                    TextSpan(text: '  ${l10n.ofStatusPlanned}', style: muted),
+                  ]),
+                  key: const ValueKey('of-detail-planned'),
+                )
+              else if (!f.proxy && !f.undone && d.shippedByName != null && d.shippedAt != null)
+                Text(
+                    l10n.ofStatusShipped(DateFormat('y/MM/dd').format(f.shippedOn), d.shippedByName!,
+                        DateFormat('y/MM/dd HH:mm').format(d.shippedAt!)),
+                    key: const ValueKey('of-detail-shipped'),
+                    style: TextStyle(color: scheme.success, fontWeight: FontWeight.w700)),
               if (f.proxy)
                 Text(l10n.prBadge,
                     key: const ValueKey('of-detail-proxy'),
