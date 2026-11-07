@@ -8693,7 +8693,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pmImportFile => 'ファイルから登録';
 
   @override
-  String get pkTitle => '梱包（箱詰めの確認）';
+  String get pkTitle => '梱包・総重量の見積もり';
 
   @override
   String get pkIntro =>
@@ -15502,4 +15502,150 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofFxHint => 'レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。';
+
+  @override
+  String ofWarehouseFrom(String name) {
+    return '出庫元の倉庫: $name';
+  }
+
+  @override
+  String get ofWarehouseChange => '倉庫を変える';
+
+  @override
+  String get ofWarehouseChangeQ => '出庫元の倉庫を選ぶ';
+
+  @override
+  String get ofWarehouseChangeBody =>
+      'まだ在庫は動いていないので、倉庫を変えても在庫はそのままです。出庫を確定したときに、選んだ倉庫の在庫から出ます。';
+
+  @override
+  String ofWarehouseChanged(String name) {
+    return '出庫元の倉庫を「$name」にしました';
+  }
+
+  @override
+  String get ofWarehouseFixed =>
+      '出庫済みのため倉庫は変えられません。変えるときは出庫を取り消してから登録し直してください。';
+
+  @override
+  String get pkEstTitle => '総重量の見積もり（船便・航空便の連絡用）';
+
+  @override
+  String get pkEstHint =>
+      '商品の重さ × 数量に、ダンボールと梱包材の重さを足した見積もりです。実際のパッキングリストは、梱包が終わってからファイルで追加します。';
+
+  @override
+  String get pkEstProducts => '商品の重量';
+
+  @override
+  String pkEstUnknown(int n, int qty) {
+    return '重さが分からない行: $n（数量 $qty）。商品ライブラリーに重さを入れると加わります。';
+  }
+
+  @override
+  String get pkEstCartonCount => 'ダンボールの数';
+
+  @override
+  String get pkEstCartonKg => '1箱の重さ';
+
+  @override
+  String get pkEstMaterialKg => '梱包材の重さ（合計）';
+
+  @override
+  String pkEstCartons(String n, String kg) {
+    return 'ダンボール $n箱 × $kg kg';
+  }
+
+  @override
+  String get pkEstMaterial => '梱包材';
+
+  @override
+  String get pkEstTotal => '総重量（見積もり）';
+
+  @override
+  String get pkEstUndecided => '未定';
+
+  @override
+  String get pkEstSave => '見積もりを保存';
+
+  @override
+  String get pkEstSaved => '総重量の見積もりを保存しました';
+
+  @override
+  String get pkEstClear => '未定に戻す';
+
+  @override
+  String get pkEstSuggest => '箱数の目安を出す';
+
+  @override
+  String pkEstSuggested(int n) {
+    return '目安: $n箱（元箱の入数と段ボールの大きさ・重さの上限から）';
+  }
+
+  @override
+  String get pkEstUnsaved => '保存されていない変更があります';
+
+  @override
+  String get pkBoxesTitle => '箱詰め（現場での確認・任意）';
+
+  @override
+  String get pkBoxesUndecided =>
+      '箱詰め: 未定。実際のパッキングリストは梱包後にファイルで追加してください。現場で箱ごとに中身を確認したいときだけ「箱詰め案を作る」を使います。';
+
+  @override
+  String get pkBoxesClear => '箱詰め案を外して未定に戻す';
+
+  @override
+  String get pkBoxesClearQ => '箱詰め案を外しますか？';
+
+  @override
+  String pkBoxesClearBody(int n) {
+    return '$n箱の案を外し、箱詰めを未定に戻します。総重量の見積もりはそのまま残ります。';
+  }
+
+  @override
+  String get pkBoxesCleared => '箱詰めを未定に戻しました';
+
+  @override
+  String ofEstTotal(String kg) {
+    return '総重量の見積もり $kg kg';
+  }
+
+  @override
+  String get obHubUndecided => '出庫日 未定';
+
+  @override
+  String get obHelpUndecided =>
+      '出庫日がまだ決まっていない出荷明細・在庫外出荷の一覧。開いて倉庫・出荷先・総重量の見積もりなどを直したり、日程を入れたりできます。';
+
+  @override
+  String ofUdTitle(int n) {
+    return '出庫日がまだ決まっていない出庫 $n件';
+  }
+
+  @override
+  String get ofUdEmpty => '出庫日が未定の出庫はありません';
+
+  @override
+  String get ofUdAllWarehouses => 'すべての倉庫';
+
+  @override
+  String get ofUdKindAll => 'すべて';
+
+  @override
+  String get ofUdKindStock => '出荷明細';
+
+  @override
+  String get ofUdOpen => '開いて編集';
+
+  @override
+  String ofUdCreated(String name, String at) {
+    return '$name・$at 登録';
+  }
+
+  @override
+  String get ofPackingWeight => '梱包・総重量';
+
+  @override
+  String get ofUdPacking => '総重量';
 }

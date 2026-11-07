@@ -525,3 +525,61 @@ List<(String, int, int)> packingDifferences(List<PackDemand> demands, List<PackB
       if ((asked[k] ?? 0) != (packed[k] ?? 0)) (names[k]!, asked[k] ?? 0, packed[k] ?? 0),
   ];
 }
+
+/// The shipment's gross weight worked out before it is packed (0199), for
+/// the sea or air freight: the products by their weight and quantity, plus
+/// [cartonCount] cartons of [cartonKg] each, plus the packing material
+/// ([materialKg], all of it). A product with no weight is counted in
+/// [unknownRows] / [unknownQuantity], not in the weight.
+class PackEstimate {
+  const PackEstimate({
+    required this.productKg,
+    required this.rows,
+    required this.quantity,
+    required this.unknownRows,
+    required this.unknownQuantity,
+    this.cartonCount,
+    this.cartonKg,
+    this.materialKg,
+  });
+
+  final double productKg;
+  final int rows;
+  final int quantity;
+  final int unknownRows;
+  final int unknownQuantity;
+  final int? cartonCount;
+  final double? cartonKg;
+  final double? materialKg;
+
+  /// All the cartons together; null while their count or weight is 未定.
+  double? get cartonsKg => cartonCount == null || cartonKg == null ? null : _r3(cartonCount! * cartonKg!);
+
+  /// Nothing set yet beyond the products.
+  bool get undecided => cartonCount == null && cartonKg == null && materialKg == null;
+
+  double get totalKg => _r3(productKg + (cartonsKg ?? 0) + (materialKg ?? 0));
+}
+
+PackEstimate packEstimateOf(List<PackDemand> demands, {int? cartonCount, double? cartonKg, double? materialKg}) {
+  var kg = 0.0, qty = 0, unknownRows = 0, unknownQty = 0;
+  for (final d in demands) {
+    qty += d.quantity;
+    if (d.unitWeightG == null) {
+      unknownRows++;
+      unknownQty += d.quantity;
+    } else {
+      kg += d.unitWeightG! * d.quantity / 1000;
+    }
+  }
+  return PackEstimate(
+    productKg: _r3(kg),
+    rows: demands.length,
+    quantity: qty,
+    unknownRows: unknownRows,
+    unknownQuantity: unknownQty,
+    cartonCount: cartonCount,
+    cartonKg: cartonKg,
+    materialKg: materialKg,
+  );
+}

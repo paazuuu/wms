@@ -8874,7 +8874,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pmImportFile => 'Register from a file';
 
   @override
-  String get pkTitle => 'Packing (box check)';
+  String get pkTitle => 'Packing and gross weight';
 
   @override
   String get pkIntro =>
@@ -15816,4 +15816,150 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ofFxHint =>
       'With a rate, each price and the total show the other currency (≈) too.';
+
+  @override
+  String ofWarehouseFrom(String name) {
+    return 'Ships from: $name';
+  }
+
+  @override
+  String get ofWarehouseChange => 'Change warehouse';
+
+  @override
+  String get ofWarehouseChangeQ => 'Warehouse it ships from';
+
+  @override
+  String get ofWarehouseChangeBody =>
+      'No stock has moved yet, so changing the warehouse moves nothing. When it is confirmed, the stock comes out of the warehouse chosen here.';
+
+  @override
+  String ofWarehouseChanged(String name) {
+    return 'Now ships from $name';
+  }
+
+  @override
+  String get ofWarehouseFixed =>
+      'Already shipped: the warehouse stays. To change it, undo the shipment and register it again.';
+
+  @override
+  String get pkEstTitle => 'Gross weight estimate (for sea / air freight)';
+
+  @override
+  String get pkEstHint =>
+      'The products by their weight and quantity, plus the cartons and the packing material. The real packing list is added as a file once it is packed.';
+
+  @override
+  String get pkEstProducts => 'Products';
+
+  @override
+  String pkEstUnknown(int n, int qty) {
+    return 'Rows with no weight: $n (quantity $qty). They are added once the product library has their weight.';
+  }
+
+  @override
+  String get pkEstCartonCount => 'Cartons';
+
+  @override
+  String get pkEstCartonKg => 'One empty carton';
+
+  @override
+  String get pkEstMaterialKg => 'Packing material (all)';
+
+  @override
+  String pkEstCartons(String n, String kg) {
+    return 'Cartons $n × $kg kg';
+  }
+
+  @override
+  String get pkEstMaterial => 'Packing material';
+
+  @override
+  String get pkEstTotal => 'Gross weight (estimate)';
+
+  @override
+  String get pkEstUndecided => 'not set';
+
+  @override
+  String get pkEstSave => 'Save estimate';
+
+  @override
+  String get pkEstSaved => 'Gross weight estimate saved';
+
+  @override
+  String get pkEstClear => 'Back to not set';
+
+  @override
+  String get pkEstSuggest => 'Suggest a carton count';
+
+  @override
+  String pkEstSuggested(int n) {
+    return 'About $n cartons (from the case quantities and our cartons\' size and weight limit)';
+  }
+
+  @override
+  String get pkEstUnsaved => 'Not saved yet';
+
+  @override
+  String get pkBoxesTitle => 'Boxes (checked on the floor, optional)';
+
+  @override
+  String get pkBoxesUndecided =>
+      'Boxes: not set. Add the real packing list as a file once it is packed. Use “Plan the boxes” only to check each box on the floor.';
+
+  @override
+  String get pkBoxesClear => 'Put the boxes aside (back to not set)';
+
+  @override
+  String get pkBoxesClearQ => 'Put the boxes aside?';
+
+  @override
+  String pkBoxesClearBody(int n) {
+    return 'The $n boxes are put aside and the boxes are not set again. The gross weight estimate stays.';
+  }
+
+  @override
+  String get pkBoxesCleared => 'Boxes back to not set';
+
+  @override
+  String ofEstTotal(String kg) {
+    return 'Gross weight estimate $kg kg';
+  }
+
+  @override
+  String get obHubUndecided => 'No day yet';
+
+  @override
+  String get obHelpUndecided =>
+      'Shipping lists and outside-stock shipments with no day yet: open one to change its warehouse, destination or gross weight estimate, or give it a day.';
+
+  @override
+  String ofUdTitle(int n) {
+    return 'Shipments with no day yet: $n';
+  }
+
+  @override
+  String get ofUdEmpty => 'No shipment is waiting for a day';
+
+  @override
+  String get ofUdAllWarehouses => 'All warehouses';
+
+  @override
+  String get ofUdKindAll => 'All';
+
+  @override
+  String get ofUdKindStock => 'Shipping lists';
+
+  @override
+  String get ofUdOpen => 'Open and edit';
+
+  @override
+  String ofUdCreated(String name, String at) {
+    return 'registered by $name, $at';
+  }
+
+  @override
+  String get ofPackingWeight => 'Packing / gross weight';
+
+  @override
+  String get ofUdPacking => 'Gross weight';
 }

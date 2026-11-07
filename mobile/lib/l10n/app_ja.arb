@@ -7782,7 +7782,7 @@
   },
   "ciLineNoMaster": "ライブラリー登録不可（JAN・メーカーなし）",
   "pmImportFile": "ファイルから登録",
-  "pkTitle": "梱包（箱詰めの確認）",
+  "pkTitle": "梱包・総重量の見積もり",
   "pkIntro": "価格台帳にある商品のうち、まだ商品ライブラリーにないものです。仕入れると決めた商品を選んで取り込んでください。同じJANの商品が商品ライブラリーにあれば、新しく作らずにつなぎます。価格台帳の記録はそのまま残ります。",
   "pkEmpty": "取り込める商品はありません",
   "pkEmptyBody": "価格台帳の商品は、すべて商品ライブラリーに入っています。価格台帳が空のときは、先に「価格台帳」でファイルを取り込んでください。",
@@ -13722,5 +13722,118 @@
   "ofCurrencyTitle": "価格の通貨",
   "ofCurrencyAllRows": "すべての行を",
   "ofCurrencyDone": "確定",
-  "ofFxHint": "レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。"
+  "ofFxHint": "レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。",
+  "ofWarehouseFrom": "出庫元の倉庫: {name}",
+  "@ofWarehouseFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ofWarehouseChange": "倉庫を変える",
+  "ofWarehouseChangeQ": "出庫元の倉庫を選ぶ",
+  "ofWarehouseChangeBody": "まだ在庫は動いていないので、倉庫を変えても在庫はそのままです。出庫を確定したときに、選んだ倉庫の在庫から出ます。",
+  "ofWarehouseChanged": "出庫元の倉庫を「{name}」にしました",
+  "@ofWarehouseChanged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ofWarehouseFixed": "出庫済みのため倉庫は変えられません。変えるときは出庫を取り消してから登録し直してください。",
+  "pkEstTitle": "総重量の見積もり（船便・航空便の連絡用）",
+  "pkEstHint": "商品の重さ × 数量に、ダンボールと梱包材の重さを足した見積もりです。実際のパッキングリストは、梱包が終わってからファイルで追加します。",
+  "pkEstProducts": "商品の重量",
+  "pkEstUnknown": "重さが分からない行: {n}（数量 {qty}）。商品ライブラリーに重さを入れると加わります。",
+  "@pkEstUnknown": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "pkEstCartonCount": "ダンボールの数",
+  "pkEstCartonKg": "1箱の重さ",
+  "pkEstMaterialKg": "梱包材の重さ（合計）",
+  "pkEstCartons": "ダンボール {n}箱 × {kg} kg",
+  "@pkEstCartons": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "pkEstMaterial": "梱包材",
+  "pkEstTotal": "総重量（見積もり）",
+  "pkEstUndecided": "未定",
+  "pkEstSave": "見積もりを保存",
+  "pkEstSaved": "総重量の見積もりを保存しました",
+  "pkEstClear": "未定に戻す",
+  "pkEstSuggest": "箱数の目安を出す",
+  "pkEstSuggested": "目安: {n}箱（元箱の入数と段ボールの大きさ・重さの上限から）",
+  "@pkEstSuggested": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkEstUnsaved": "保存されていない変更があります",
+  "pkBoxesTitle": "箱詰め（現場での確認・任意）",
+  "pkBoxesUndecided": "箱詰め: 未定。実際のパッキングリストは梱包後にファイルで追加してください。現場で箱ごとに中身を確認したいときだけ「箱詰め案を作る」を使います。",
+  "pkBoxesClear": "箱詰め案を外して未定に戻す",
+  "pkBoxesClearQ": "箱詰め案を外しますか？",
+  "pkBoxesClearBody": "{n}箱の案を外し、箱詰めを未定に戻します。総重量の見積もりはそのまま残ります。",
+  "@pkBoxesClearBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkBoxesCleared": "箱詰めを未定に戻しました",
+  "ofEstTotal": "総重量の見積もり {kg} kg",
+  "@ofEstTotal": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "obHubUndecided": "出庫日 未定",
+  "obHelpUndecided": "出庫日がまだ決まっていない出荷明細・在庫外出荷の一覧。開いて倉庫・出荷先・総重量の見積もりなどを直したり、日程を入れたりできます。",
+  "ofUdTitle": "出庫日がまだ決まっていない出庫 {n}件",
+  "@ofUdTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofUdEmpty": "出庫日が未定の出庫はありません",
+  "ofUdAllWarehouses": "すべての倉庫",
+  "ofUdKindAll": "すべて",
+  "ofUdKindStock": "出荷明細",
+  "ofUdOpen": "開いて編集",
+  "ofUdCreated": "{name}・{at} 登録",
+  "@ofUdCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "ofPackingWeight": "梱包・総重量",
+  "ofUdPacking": "総重量"
 }

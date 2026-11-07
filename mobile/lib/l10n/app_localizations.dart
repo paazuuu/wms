@@ -15832,7 +15832,7 @@ abstract class AppLocalizations {
   /// No description provided for @pkTitle.
   ///
   /// In ja, this message translates to:
-  /// **'梱包（箱詰めの確認）'**
+  /// **'梱包・総重量の見積もり'**
   String get pkTitle;
 
   /// No description provided for @pkIntro.
@@ -27310,6 +27310,252 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'レートを入れると、表の単価・合計の下にもう一方の通貨での金額（≈）が出ます。'**
   String get ofFxHint;
+
+  /// No description provided for @ofWarehouseFrom.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫元の倉庫: {name}'**
+  String ofWarehouseFrom(String name);
+
+  /// No description provided for @ofWarehouseChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫を変える'**
+  String get ofWarehouseChange;
+
+  /// No description provided for @ofWarehouseChangeQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫元の倉庫を選ぶ'**
+  String get ofWarehouseChangeQ;
+
+  /// No description provided for @ofWarehouseChangeBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ在庫は動いていないので、倉庫を変えても在庫はそのままです。出庫を確定したときに、選んだ倉庫の在庫から出ます。'**
+  String get ofWarehouseChangeBody;
+
+  /// No description provided for @ofWarehouseChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫元の倉庫を「{name}」にしました'**
+  String ofWarehouseChanged(String name);
+
+  /// No description provided for @ofWarehouseFixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済みのため倉庫は変えられません。変えるときは出庫を取り消してから登録し直してください。'**
+  String get ofWarehouseFixed;
+
+  /// No description provided for @pkEstTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量の見積もり（船便・航空便の連絡用）'**
+  String get pkEstTitle;
+
+  /// No description provided for @pkEstHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の重さ × 数量に、ダンボールと梱包材の重さを足した見積もりです。実際のパッキングリストは、梱包が終わってからファイルで追加します。'**
+  String get pkEstHint;
+
+  /// No description provided for @pkEstProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の重量'**
+  String get pkEstProducts;
+
+  /// No description provided for @pkEstUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'重さが分からない行: {n}（数量 {qty}）。商品ライブラリーに重さを入れると加わります。'**
+  String pkEstUnknown(int n, int qty);
+
+  /// No description provided for @pkEstCartonCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボールの数'**
+  String get pkEstCartonCount;
+
+  /// No description provided for @pkEstCartonKg.
+  ///
+  /// In ja, this message translates to:
+  /// **'1箱の重さ'**
+  String get pkEstCartonKg;
+
+  /// No description provided for @pkEstMaterialKg.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包材の重さ（合計）'**
+  String get pkEstMaterialKg;
+
+  /// No description provided for @pkEstCartons.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダンボール {n}箱 × {kg} kg'**
+  String pkEstCartons(String n, String kg);
+
+  /// No description provided for @pkEstMaterial.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包材'**
+  String get pkEstMaterial;
+
+  /// No description provided for @pkEstTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量（見積もり）'**
+  String get pkEstTotal;
+
+  /// No description provided for @pkEstUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'未定'**
+  String get pkEstUndecided;
+
+  /// No description provided for @pkEstSave.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積もりを保存'**
+  String get pkEstSave;
+
+  /// No description provided for @pkEstSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量の見積もりを保存しました'**
+  String get pkEstSaved;
+
+  /// No description provided for @pkEstClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'未定に戻す'**
+  String get pkEstClear;
+
+  /// No description provided for @pkEstSuggest.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱数の目安を出す'**
+  String get pkEstSuggest;
+
+  /// No description provided for @pkEstSuggested.
+  ///
+  /// In ja, this message translates to:
+  /// **'目安: {n}箱（元箱の入数と段ボールの大きさ・重さの上限から）'**
+  String pkEstSuggested(int n);
+
+  /// No description provided for @pkEstUnsaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存されていない変更があります'**
+  String get pkEstUnsaved;
+
+  /// No description provided for @pkBoxesTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め（現場での確認・任意）'**
+  String get pkBoxesTitle;
+
+  /// No description provided for @pkBoxesUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め: 未定。実際のパッキングリストは梱包後にファイルで追加してください。現場で箱ごとに中身を確認したいときだけ「箱詰め案を作る」を使います。'**
+  String get pkBoxesUndecided;
+
+  /// No description provided for @pkBoxesClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め案を外して未定に戻す'**
+  String get pkBoxesClear;
+
+  /// No description provided for @pkBoxesClearQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰め案を外しますか？'**
+  String get pkBoxesClearQ;
+
+  /// No description provided for @pkBoxesClearBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}箱の案を外し、箱詰めを未定に戻します。総重量の見積もりはそのまま残ります。'**
+  String pkBoxesClearBody(int n);
+
+  /// No description provided for @pkBoxesCleared.
+  ///
+  /// In ja, this message translates to:
+  /// **'箱詰めを未定に戻しました'**
+  String get pkBoxesCleared;
+
+  /// No description provided for @ofEstTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量の見積もり {kg} kg'**
+  String ofEstTotal(String kg);
+
+  /// No description provided for @obHubUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日 未定'**
+  String get obHubUndecided;
+
+  /// No description provided for @obHelpUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日がまだ決まっていない出荷明細・在庫外出荷の一覧。開いて倉庫・出荷先・総重量の見積もりなどを直したり、日程を入れたりできます。'**
+  String get obHelpUndecided;
+
+  /// No description provided for @ofUdTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日がまだ決まっていない出庫 {n}件'**
+  String ofUdTitle(int n);
+
+  /// No description provided for @ofUdEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日が未定の出庫はありません'**
+  String get ofUdEmpty;
+
+  /// No description provided for @ofUdAllWarehouses.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての倉庫'**
+  String get ofUdAllWarehouses;
+
+  /// No description provided for @ofUdKindAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get ofUdKindAll;
+
+  /// No description provided for @ofUdKindStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細'**
+  String get ofUdKindStock;
+
+  /// No description provided for @ofUdOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'開いて編集'**
+  String get ofUdOpen;
+
+  /// No description provided for @ofUdCreated.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}・{at} 登録'**
+  String ofUdCreated(String name, String at);
+
+  /// No description provided for @ofPackingWeight.
+  ///
+  /// In ja, this message translates to:
+  /// **'梱包・総重量'**
+  String get ofPackingWeight;
+
+  /// No description provided for @ofUdPacking.
+  ///
+  /// In ja, this message translates to:
+  /// **'総重量'**
+  String get ofUdPacking;
 }
 
 class _AppLocalizationsDelegate

@@ -130,4 +130,19 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     currencies.add((id, lines, currency, fxCnyJpy));
     return ApiSuccess(lines.length);
   }
+
+  final List<(int, int)> warehousesSet = [];
+  final List<(int, int?, double?, double?)> packEstimates = [];
+
+  @override
+  Future<ApiResult<bool>> setWarehouse(int id, int warehouseId) async {
+    warehousesSet.add((id, warehouseId));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<bool>> setPackEstimate(int id, {int? cartonCount, double? cartonKg, double? materialKg}) async {
+    packEstimates.add((id, cartonCount, cartonKg, materialKg));
+    return const ApiSuccess(true);
+  }
 }

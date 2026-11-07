@@ -7,13 +7,15 @@ import '../../outbound/presentation/ship_destinations_screen.dart';
 import '../../packing/presentation/packing_lists_screen.dart';
 import '../../packing/presentation/packing_settings_screen.dart';
 import 'outbound_file_screen.dart' show OutboundImportTab;
+import 'outbound_undecided_tab.dart';
 
 /// The tabs of 出庫, in order.
-enum OutboundHubTab { file, proxy, cards, packingLists, boxes, proposal }
+enum OutboundHubTab { file, proxy, undecided, cards, packingLists, boxes, proposal }
 
 /// 出荷手配: the sales side of sending goods out, in one place —
 ///  * 出荷明細の取込: the usual shipping list read and taken out of stock;
 ///  * 在庫外出荷: 直送・出荷代行 — kept as a record, no stock moved;
+///  * 出庫日 未定: the lists of both with no day yet, to open and put right;
 ///  * 出荷先カード: where goods go, with what an export needs;
 ///  (出荷指示・梱包, the older way of packing a customer's order, is gone:
 ///  a list is packed from its detail — 梱包・パッキングリスト.)
@@ -33,6 +35,7 @@ class OutboundHubScreen extends StatelessWidget {
     final help = {
       OutboundHubTab.file: l10n.obHelpFile,
       OutboundHubTab.proxy: l10n.obHelpProxy,
+      OutboundHubTab.undecided: l10n.obHelpUndecided,
       OutboundHubTab.cards: l10n.obHelpCards,
       OutboundHubTab.packingLists: l10n.obHelpPackingLists,
       OutboundHubTab.boxes: l10n.obHelpBoxes,
@@ -41,6 +44,7 @@ class OutboundHubScreen extends StatelessWidget {
     final labels = {
       OutboundHubTab.file: (l10n.obHubFile, Icons.upload_file_outlined),
       OutboundHubTab.proxy: (l10n.obHubProxy, Icons.edit_note_outlined),
+      OutboundHubTab.undecided: (l10n.obHubUndecided, Icons.event_busy_outlined),
       OutboundHubTab.cards: (l10n.obHubCards, Icons.contact_mail_outlined),
       OutboundHubTab.packingLists: (l10n.obHubPackingLists, Icons.table_view_outlined),
       OutboundHubTab.boxes: (l10n.obHubBoxes, Icons.all_inbox_outlined),
@@ -67,6 +71,7 @@ class OutboundHubScreen extends StatelessWidget {
         body: const TabBarView(children: [
           OutboundImportTab(),
           OutboundImportTab(proxy: true),
+          OutboundUndecidedTab(),
           ShipDestinationsScreen(embedded: true),
           PackingListsScreen(embedded: true),
           PackingSettingsScreen(embedded: true),

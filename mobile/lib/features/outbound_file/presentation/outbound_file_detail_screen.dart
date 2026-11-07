@@ -12,11 +12,76 @@ import '../../product/application/product_providers.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart'
     show DestinationCardView, copyDestinationCard, pickDestinationCard;
 import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
+import '../../packing/domain/packing.dart' show packEstimateOf;
+import '../../packing/presentation/packing_lists_screen.dart' show packingKg;
 import '../../packing/presentation/packing_screen.dart';
+import '../../warehouse_context/application/warehouse_providers.dart';
+import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
 import '../data/outbound_file_repository.dart';
 import '../domain/outbound_currency.dart' show PriceCurrency;
 import 'outbound_file_screen.dart'
     show outboundActionLabel, outboundFileSaverProvider, outboundKg, outboundMoney, outboundTabOpenerProvider;
+
+/// The warehouse a list not yet shipped goes from, chosen again (0199):
+/// true when it changed.
+Future<bool> changeOutboundWarehouse(BuildContext context, WidgetRef ref, OutboundFileSummary f) async {
+  final l10n = AppLocalizations.of(context);
+  var warehouses = ref.read(warehouseOverviewProvider).valueOrNull?.warehouses;
+  if (warehouses == null) {
+    try {
+      warehouses = (await ref.read(warehouseOverviewProvider.future)).warehouses;
+    } catch (_) {
+      warehouses = const <Warehouse>[];
+    }
+  }
+  if (!context.mounted) return false;
+  final picked = await showDialog<Warehouse>(
+    context: context,
+    builder: (c) => AlertDialog(
+      key: const ValueKey('of-warehouse-dialog'),
+      icon: const Icon(Icons.warehouse_outlined),
+      title: Text(l10n.ofWarehouseChangeQ),
+      content: SizedBox(
+        width: 420,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.ofWarehouseChangeBody, style: Theme.of(c).textTheme.bodySmall),
+          const SizedBox(height: AppSpacing.sm),
+          Flexible(
+            child: ListView(shrinkWrap: true, children: [
+              for (final w in warehouses!)
+                if (w.status == 'active' || w.id == f.warehouseId)
+                ListTile(
+                  key: ValueKey('of-warehouse-pick-${w.id}'),
+                  leading: Icon(w.id == f.warehouseId ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                      color: w.id == f.warehouseId ? Theme.of(c).colorScheme.primary : null),
+                  title: Text(w.name),
+                  subtitle: Text(w.code),
+                  onTap: () => Navigator.pop(c, w),
+                ),
+            ]),
+          ),
+        ]),
+      ),
+      actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text(l10n.actionCancel))],
+    ),
+  );
+  if (picked == null || picked.id == f.warehouseId || !context.mounted) return false;
+  final r = await ref.read(outboundFileRepositoryProvider).setWarehouse(f.id, picked.id);
+  if (!context.mounted) return false;
+  switch (r) {
+    case ApiSuccess():
+      ref.invalidate(outboundFileDetailProvider(f.id));
+      ref.invalidate(outboundFilesProvider);
+      ref.invalidate(outboundUndecidedProvider);
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.ofWarehouseChanged(picked.name))));
+      return true;
+    case ApiFailure(:final message):
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+      return false;
+  }
+}
 
 /// One shipped list: when, where, by whom; its file — opened in a new tab as
 /// it was uploaded, or downloaded — every row with what went out and what
@@ -243,6 +308,10 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
     final f = d.file;
     final weight = d.lines.fold<double>(0, (a, l) => a + (l.weightG ?? 0));
+    // 総重量の見積もり (0199), once anything beyond the products is set.
+    final est = packEstimateOf(packDemandsOf(d),
+        cartonCount: f.packCartonCount, cartonKg: f.packCartonKg, materialKg: f.packMaterialKg);
+    final estimate = est.undecided ? null : est;
     return ListView(
       key: const ValueKey('of-detail'),
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -295,13 +364,31 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   if (!f.planned) '${l10n.ofShippedOn}: ${f.undecided ? l10n.ofUndecided : DateFormat('y/MM/dd').format(f.shippedOn)}',
                   if (!f.planned && f.plannedOn != null && f.plannedOn != f.shippedOn)
                     '${l10n.ofPlannedOn}: ${DateFormat('y/MM/dd').format(f.plannedOn!)}',
-                  if (f.warehouseName != null) f.warehouseName!,
                   if (f.sheetName != null) '${l10n.ofSheet}: ${f.sheetName}',
                   if (f.destination != null) f.destination!,
                   if (f.principal != null) l10n.prPrincipalLabel(f.principal!),
                 ].join(' · '),
                 style: muted,
               ),
+              // 出庫元の倉庫: changed here while nothing has left stock (0199).
+              Row(key: const ValueKey('of-detail-warehouse'), children: [
+                Icon(Icons.warehouse_outlined, size: 18, color: scheme.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(child: Text(l10n.ofWarehouseFrom(f.warehouseName ?? '#${f.warehouseId}'), style: theme.textTheme.bodyMedium)),
+                const SizedBox(width: AppSpacing.xs),
+                if (f.warehouseMovable)
+                  TextButton.icon(
+                    key: const ValueKey('of-warehouse-change'),
+                    onPressed: _busy ? null : () => changeOutboundWarehouse(context, ref, f),
+                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    label: Text(l10n.ofWarehouseChange),
+                  )
+                else if (!f.undone)
+                  Tooltip(
+                    message: l10n.ofWarehouseFixed,
+                    child: Icon(Icons.lock_outline, size: 16, color: scheme.onSurfaceVariant),
+                  ),
+              ]),
               if (f.note != null) Text(f.note!, style: theme.textTheme.bodyMedium),
               if (f.createdByName != null && f.createdAt != null)
                 Text(l10n.ofBy(f.createdByName!, DateFormat('y/MM/dd HH:mm').format(f.createdAt!)), style: muted),
@@ -322,6 +409,9 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                 if (f.amountTotal != null && ref.watch(showPricesProvider)) Text(l10n.ofSummaryAmount(_amountByCurrency(d))),
                 if (f.fxCnyJpy != null && ref.watch(showPricesProvider)) Text(l10n.ofFxShown(outboundMoney(f.fxCnyJpy))),
                 if (weight > 0) Text(l10n.ofSummaryWeight(outboundKg(weight))),
+                if (estimate != null)
+                  Text(l10n.ofEstTotal(packingKg(estimate.totalKg)),
+                      key: const ValueKey('of-detail-estimate'), style: const TextStyle(fontWeight: FontWeight.w700)),
               ]),
               const SizedBox(height: AppSpacing.md),
               Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
@@ -368,7 +458,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     onPressed: () => Navigator.of(context)
                         .push(MaterialPageRoute<void>(builder: (_) => PackingScreen(fileId: f.id))),
                     icon: const Icon(Icons.inventory_2_outlined),
-                    label: Text(l10n.ofPacking),
+                    label: Text(l10n.ofPackingWeight),
                   ),
                 if (!f.undone)
                   TextButton.icon(

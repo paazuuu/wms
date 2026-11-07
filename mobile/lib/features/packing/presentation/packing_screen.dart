@@ -18,6 +18,7 @@ import '../data/packing_list_excel.dart';
 import '../data/packing_repository.dart';
 import '../domain/packing.dart';
 import '../domain/packing_list_reader.dart' show PackingListRead;
+import 'pack_estimate_card.dart';
 import 'packing_lists_screen.dart';
 
 /// The rows of a shipping list that go in boxes: those shipped (or kept, for
@@ -156,6 +157,22 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
       if (ok != true || !mounted) return;
     }
     setState(() => _busy = true);
+    final boxes = await _workOut(d);
+    final r = await ref.read(packingRepositoryProvider).saveBoxes(widget.fileId, boxes);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        _snack(l10n.pkPlanned(data));
+        _at = 0;
+        await _load();
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  /// The boxes worked out from the cases and our cartons (not saved).
+  Future<List<PackBox>> _workOut(OutboundFileDetail d) async {
     var cases = const <CasePack>[];
     var cartons = const <CartonType>[];
     try {
@@ -168,13 +185,32 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
     } catch (_) {
       // Without cartons, a box to each row.
     }
-    final boxes = planPacking(packDemandsOf(d), casePacks: {for (final c in cases) c.productId: c}, cartons: cartons);
-    final r = await ref.read(packingRepositoryProvider).saveBoxes(widget.fileId, boxes);
+    return planPacking(packDemandsOf(d), casePacks: {for (final c in cases) c.productId: c}, cartons: cartons);
+  }
+
+  /// The boxes put aside: 箱詰め back to 未定.
+  Future<void> _clearBoxes() async {
+    final l10n = AppLocalizations.of(context);
+    final n = _boxes?.length ?? 0;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l10n.pkBoxesClearQ),
+        content: Text(l10n.pkBoxesClearBody(n)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+          FilledButton(key: const ValueKey('pk-boxes-clear-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.pkBoxesClear)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    final r = await ref.read(packingRepositoryProvider).saveBoxes(widget.fileId, const []);
     if (!mounted) return;
     setState(() => _busy = false);
     switch (r) {
-      case ApiSuccess(:final data):
-        _snack(l10n.pkPlanned(data));
+      case ApiSuccess():
+        _snack(l10n.pkBoxesCleared);
         _at = 0;
         await _load();
       case ApiFailure(:final message):
@@ -418,6 +454,7 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
     final read = PackingListRead(sheets: const [], boxes: boxes);
     final checked = boxes.where((b) => b.checked).length;
     final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final f = d.file;
     return ListView(
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 96),
       children: [
@@ -425,28 +462,55 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(d.file.fileName, key: const ValueKey('pk-file-name'), style: theme.textTheme.titleMedium),
+              Text(f.fileName, key: const ValueKey('pk-file-name'), style: theme.textTheme.titleMedium),
               Text(
                 [
-                  '${d.file.planned ? l10n.ofPlannedOn : l10n.ofShippedOn}: ${DateFormat('y/MM/dd').format(d.file.shippedOn)}',
-                  if (d.file.shipTo != null) d.file.shipTo!.nameEn ?? d.file.shipTo!.name,
+                  '${f.planned ? l10n.ofPlannedOn : l10n.ofShippedOn}: '
+                      '${f.undecided ? l10n.ofUndecided : DateFormat('y/MM/dd').format(f.shippedOn)}',
+                  if (f.warehouseName != null) f.warehouseName!,
+                  if (f.shipTo != null) f.shipTo!.nameEn ?? f.shipTo!.name,
                   l10n.pkDemandTotal(demands.length, demands.fold(0, (a, x) => a + x.quantity)),
                 ].join(' · '),
                 style: muted,
               ),
               const SizedBox(height: AppSpacing.sm),
+              // The real packing list comes once it is packed, as a file.
+              OutlinedButton.icon(
+                key: const ValueKey('pk-upload-for-file'),
+                onPressed: () => importPackingList(context, ref, fileId: widget.fileId),
+                icon: const Icon(Icons.upload_file_outlined),
+                label: Text(l10n.pkUpload),
+              ),
+            ]),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        PackEstimateCard(
+          key: ValueKey('pk-estimate-${f.id}'),
+          detail: d,
+          cartons: cartons,
+          suggest: () async => (await _workOut(d)).length,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Card(
+          key: const ValueKey('pk-boxes'),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l10n.pkBoxesTitle, style: theme.textTheme.titleSmall),
+              const SizedBox(height: AppSpacing.xs),
               if (boxes.isNotEmpty) ...[
                 Text(l10n.pkTotals(boxes.length, read.quantity, packingKg(read.grossKg), packingCbm(read.cbm)),
                     key: const ValueKey('pk-totals'), style: theme.textTheme.titleSmall),
                 const SizedBox(height: 4),
-                LinearProgressIndicator(value: boxes.isEmpty ? 0 : checked / boxes.length),
+                LinearProgressIndicator(value: checked / boxes.length),
                 const SizedBox(height: 4),
                 Text(l10n.pkChecked(checked, boxes.length), key: const ValueKey('pk-progress')),
               ] else
-                Text(l10n.pkNoBoxes, style: muted),
+                Text(l10n.pkBoxesUndecided, key: const ValueKey('pk-boxes-undecided'), style: muted),
               const SizedBox(height: AppSpacing.md),
               Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
-                FilledButton.icon(
+                OutlinedButton.icon(
                   key: const ValueKey('pk-plan'),
                   onPressed: _busy || demands.isEmpty ? null : () => _plan(d),
                   icon: const Icon(Icons.auto_awesome_outlined),
@@ -465,13 +529,13 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
                     icon: const Icon(Icons.table_view_outlined),
                     label: Text(l10n.pkMakeList),
                   ),
+                  TextButton.icon(
+                    key: const ValueKey('pk-boxes-clear'),
+                    onPressed: _busy ? null : _clearBoxes,
+                    icon: const Icon(Icons.layers_clear_outlined),
+                    label: Text(l10n.pkBoxesClear),
+                  ),
                 ],
-                OutlinedButton.icon(
-                  key: const ValueKey('pk-upload-for-file'),
-                  onPressed: () => importPackingList(context, ref, fileId: widget.fileId),
-                  icon: const Icon(Icons.upload_file_outlined),
-                  label: Text(l10n.pkUpload),
-                ),
               ]),
             ]),
           ),

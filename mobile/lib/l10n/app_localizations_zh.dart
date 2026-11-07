@@ -8653,7 +8653,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pmImportFile => '从文件登录';
 
   @override
-  String get pkTitle => '装箱（核对箱子）';
+  String get pkTitle => '包装・总重量估算';
 
   @override
   String get pkIntro =>
@@ -15391,4 +15391,146 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofFxHint => '输入汇率后，表中单价和合计下方会显示另一种货币的金额（≈）。';
+
+  @override
+  String ofWarehouseFrom(String name) {
+    return '出库仓库：$name';
+  }
+
+  @override
+  String get ofWarehouseChange => '更改仓库';
+
+  @override
+  String get ofWarehouseChangeQ => '选择出库仓库';
+
+  @override
+  String get ofWarehouseChangeBody => '库存尚未变动，更改仓库不会移动库存。确认出库时，从这里选择的仓库出库。';
+
+  @override
+  String ofWarehouseChanged(String name) {
+    return '出库仓库已改为「$name」';
+  }
+
+  @override
+  String get ofWarehouseFixed => '已出库，无法更改仓库。如需更改，请先撤销出库再重新登记。';
+
+  @override
+  String get pkEstTitle => '总重量估算（用于海运・空运）';
+
+  @override
+  String get pkEstHint => '商品重量 × 数量，加上纸箱和包装材料的重量。实际装箱单在包装完成后以文件形式添加。';
+
+  @override
+  String get pkEstProducts => '商品重量';
+
+  @override
+  String pkEstUnknown(int n, int qty) {
+    return '没有重量的行：$n（数量 $qty）。在商品库中填入重量后会计入。';
+  }
+
+  @override
+  String get pkEstCartonCount => '纸箱数量';
+
+  @override
+  String get pkEstCartonKg => '每个空箱重量';
+
+  @override
+  String get pkEstMaterialKg => '包装材料（合计）';
+
+  @override
+  String pkEstCartons(String n, String kg) {
+    return '纸箱 $n箱 × $kg kg';
+  }
+
+  @override
+  String get pkEstMaterial => '包装材料';
+
+  @override
+  String get pkEstTotal => '总重量（估算）';
+
+  @override
+  String get pkEstUndecided => '未定';
+
+  @override
+  String get pkEstSave => '保存估算';
+
+  @override
+  String get pkEstSaved => '已保存总重量估算';
+
+  @override
+  String get pkEstClear => '恢复为未定';
+
+  @override
+  String get pkEstSuggest => '估算箱数';
+
+  @override
+  String pkEstSuggested(int n) {
+    return '估计：$n箱（根据原箱入数和纸箱尺寸・重量上限）';
+  }
+
+  @override
+  String get pkEstUnsaved => '有未保存的更改';
+
+  @override
+  String get pkBoxesTitle => '装箱（现场确认・可选）';
+
+  @override
+  String get pkBoxesUndecided =>
+      '装箱：未定。包装完成后请以文件形式添加实际装箱单。仅在需要现场逐箱确认时使用「生成装箱方案」。';
+
+  @override
+  String get pkBoxesClear => '撤下装箱方案（恢复未定）';
+
+  @override
+  String get pkBoxesClearQ => '撤下装箱方案？';
+
+  @override
+  String pkBoxesClearBody(int n) {
+    return '撤下$n箱的方案，装箱恢复为未定。总重量估算保留。';
+  }
+
+  @override
+  String get pkBoxesCleared => '装箱已恢复为未定';
+
+  @override
+  String ofEstTotal(String kg) {
+    return '总重量估算 $kg kg';
+  }
+
+  @override
+  String get obHubUndecided => '出库日未定';
+
+  @override
+  String get obHelpUndecided => '尚未确定出库日的出货明细・库外出货一览。可打开修改仓库、收货方、总重量估算，或填入日期。';
+
+  @override
+  String ofUdTitle(int n) {
+    return '出库日未定的出库 $n件';
+  }
+
+  @override
+  String get ofUdEmpty => '没有出库日未定的出库';
+
+  @override
+  String get ofUdAllWarehouses => '所有仓库';
+
+  @override
+  String get ofUdKindAll => '全部';
+
+  @override
+  String get ofUdKindStock => '出货明细';
+
+  @override
+  String get ofUdOpen => '打开编辑';
+
+  @override
+  String ofUdCreated(String name, String at) {
+    return '$name・$at 登记';
+  }
+
+  @override
+  String get ofPackingWeight => '包装・总重量';
+
+  @override
+  String get ofUdPacking => '总重量';
 }

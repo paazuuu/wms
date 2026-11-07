@@ -217,7 +217,20 @@ class OutboundFileSummary extends Equatable {
     this.dateUndecided = false,
     this.currency,
     this.fxCnyJpy,
+    this.packCartonCount,
+    this.packCartonKg,
+    this.packMaterialKg,
   });
+
+  /// The gross-weight estimate's own numbers (0199), null while 未定: how
+  /// many cartons, one empty carton's weight, the packing material in all.
+  final int? packCartonCount;
+  final double? packCartonKg;
+  final double? packMaterialKg;
+
+  /// The warehouse it ships from may still be changed (0199): nothing has
+  /// left stock yet.
+  bool get warehouseMovable => !undone && (planned || proxy);
 
   /// A planned list with no day yet (出庫日 未定, 0197): [shippedOn] means
   /// nothing until one is set.
@@ -303,11 +316,17 @@ class OutboundFileSummary extends Equatable {
         dateUndecided: j['date_undecided'] == true,
         currency: _s(j['currency']),
         fxCnyJpy: _nd(j['fx_cny_jpy']),
+        packCartonCount: _ni(j['pack_carton_count']),
+        packCartonKg: _nd(j['pack_carton_kg']),
+        packMaterialKg: _nd(j['pack_material_kg']),
         shipTo: j['ship_to'] is Map ? ShipDestination.fromJson((j['ship_to'] as Map).cast<String, dynamic>()) : null,
       );
 
   @override
-  List<Object?> get props => [id, kind, status, shippedOn, dateUndecided, fileName, lineCount, shippedTotal, shortTotal, undoneAt];
+  List<Object?> get props => [
+        id, kind, status, shippedOn, dateUndecided, fileName, lineCount, shippedTotal, shortTotal, undoneAt, warehouseId,
+        packCartonCount, packCartonKg, packMaterialKg,
+      ];
 }
 
 /// One row of a posted list.
@@ -469,6 +488,13 @@ abstract class OutboundFileRepository {
   /// Each row's currency ({row_no, currency, source}), the list's main one
   /// and the rate 1 CNY in JPY if known.
   Future<ApiResult<int>> setCurrency(int id, List<Map<String, dynamic>> lines, {String? currency, double? fxCnyJpy});
+
+  /// The warehouse a list not yet shipped goes from (0199): false when it
+  /// was that one already.
+  Future<ApiResult<bool>> setWarehouse(int id, int warehouseId);
+
+  /// The gross-weight estimate's numbers (0199); null puts one back to 未定.
+  Future<ApiResult<bool>> setPackEstimate(int id, {int? cartonCount, double? cartonKg, double? materialKg});
 }
 
 class OutboundFileRepositoryImpl implements OutboundFileRepository {
@@ -651,6 +677,31 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
       return ApiSuccess(_i(r.data));
     } on DioException catch (e) {
       return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setWarehouse(int id, int warehouseId) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_set_warehouse', data: {'p_id': id, 'p_warehouse_id': warehouseId});
+      return ApiSuccess(r.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setPackEstimate(int id, {int? cartonCount, double? cartonKg, double? materialKg}) async {
+    try {
+      await _rest.post('/rpc/outbound_file_set_pack_estimate', data: {
+        'p_id': id,
+        'p_carton_count': cartonCount,
+        'p_carton_kg': cartonKg,
+        'p_material_kg': materialKg,
+      });
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
     }
   }
 
