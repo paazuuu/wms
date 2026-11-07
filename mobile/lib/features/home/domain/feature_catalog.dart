@@ -423,21 +423,26 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['pack.complete', 'ship.complete', 'sales_order.manage', 'sales_order.view'],
             inMenu: false,
           ),
+          // 受注 and 受注残・発注 are off the menu: what is ordered comes in as
+          // a shipping list (出荷手配 › 出荷明細の取込, kept as 出庫予定 —
+          // キープ, 0201) and what is short is shown there and proposed for
+          // 入荷 (入荷の提案). No approval step is used. The screens and their
+          // tables stay, to be put back by setting inMenu.
           FeatureEntry(
             id: 'sales_orders',
             icon: Icons.point_of_sale_outlined,
             status: FeatureStatus.ready,
             builder: _salesOrders,
             requiredAnyOf: ['sales_order.view', 'sales_order.manage', 'sales_order.approve'],
+            inMenu: false,
           ),
-          // Between the two kinds of order on purpose: this is where the
-          // orders taken downstream turn into the purchases made upstream.
           FeatureEntry(
             id: 'demand',
             icon: Icons.assignment_late_outlined,
             status: FeatureStatus.ready,
             builder: _demand,
             requiredAnyOf: ['sales_order.view', 'purchase_order.view', 'inventory.view'],
+            inMenu: false,
           ),
           // 入荷希望リスト (0140): what we would like to receive, from the
           // master and the stock, to ask a supplier about as Excel.

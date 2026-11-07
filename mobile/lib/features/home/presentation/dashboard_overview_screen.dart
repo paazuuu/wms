@@ -58,7 +58,8 @@ class DashboardOverviewScreen extends ConsumerWidget {
     }
 
     final delivery = entryById('delivery');
-    final demand = entryById('demand');
+    // 受注残 is off the menu (出荷明細 and キープ do its work): no way to it here either.
+    final demand = entryById('demand')?.inMenu == true ? entryById('demand') : null;
     final l10n = AppLocalizations.of(context);
 
     final views = [

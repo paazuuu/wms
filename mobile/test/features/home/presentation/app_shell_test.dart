@@ -123,7 +123,8 @@ void main() {
     // (its tabs inside); the warehouse side stays in 現場作業.
     expect(find.text('Shipping'), findsOneWidget);
     final groups = {for (final g in buildFeatureCatalog()) g.id: [for (final e in g.entries) if (e.inMenu) e.id]};
-    expect(groups['shipping'], ['outbound', 'sales_orders', 'demand', 'purchase_request', 'virtual_stock', 'work_orders']);
+    // 受注 and 受注残・発注 are off the menu: 出荷明細の取込 and its キープ do their work.
+    expect(groups['shipping'], ['outbound', 'purchase_request', 'virtual_stock', 'work_orders']);
     expect(groups['field_operations'], containsAll(['outbound_calendar', 'stock_adjustment', 'transfer', 'picking']));
     expect(groups['field_operations'], isNot(contains('outbound')));
     // Our product list has its own group at the top, not the bottom of 管理.
@@ -414,18 +415,18 @@ void main() {
       await tester.pumpWidget(_wrap().widget);
       await tester.pumpAndSettle();
 
-      // 'approve' appears in no label at all — it is the word an operator
-      // hunting for approvals would actually type, and it lives in the
-      // purchase/sales/work order descriptions.
-      await tester.enterText(find.byKey(menuFilterKey), 'approve');
+      // 'assortments' appears in no label at all — it is the word an
+      // operator looking for set making might type, and it lives in the
+      // 流通加工 (Kitting) description. (The order screens it once found by
+      // 'approve' are off the menu: 受注 and 発注 work from files now.)
+      await tester.enterText(find.byKey(menuFilterKey), 'assortments');
       await tester.pumpAndSettle();
 
       Finder inSidebar(String text) => find.descendant(
             of: find.byKey(sidebarKey),
             matching: find.text(text),
           );
-      // (Purchase orders left the menu: orders are followed in 発注, 0173.)
-      expect(inSidebar('Sales orders'), findsOneWidget);
+      expect(inSidebar('Kitting (set assembly)'), findsOneWidget);
       expect(inSidebar('Putaway'), findsNothing);
     });
 
