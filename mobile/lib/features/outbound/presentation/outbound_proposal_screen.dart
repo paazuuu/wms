@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -8,8 +9,10 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../core/ui/status_pill.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../outbound_file/data/outbound_file_repository.dart';
+import '../../outbound_file/presentation/outbound_file_detail_screen.dart';
+import '../../product/application/product_providers.dart';
 import '../../shipment/application/sender_profile_controller.dart';
-import '../../shipment/presentation/shipment_detail_screen.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/outbound_excel.dart';
 import '../data/outbound_repository.dart';
@@ -19,14 +22,13 @@ import 'outbound_downloads.dart';
 import 'ship_destinations_screen.dart';
 import '../../home/presentation/feature_link.dart';
 
-enum _Mode { percent, direct }
-
-/// 出庫の提案 (0139): a shipment worked out from the stock. Choose where it
-/// goes (a saved destination, or a new one saved on the way), then either a
-/// percentage of every product's stock — of all of it, or of what is free to
-/// send — or a quantity typed per product. Nothing goes over what is free.
-/// The draft can be downloaded as Excel before anything is saved; once the
-/// shipment is made, its sheet is ready to send.
+/// 出荷の提案 (0139, 0204): a shipment chosen from the product library, the
+/// way 入荷希望リスト does it — every product listed at once with its stock,
+/// キープ and 出せる数; ticked one by one, all shown, or a range (Shift); the
+/// chosen given a quantity in bulk (a percentage, everything free) or by
+/// hand, and a price. What is proposed is registered as a 出庫予定, like a
+/// shipping list read in: it keeps, sits on the 出庫カレンダー (or 未定) and
+/// is packed and weighed from its detail. The draft downloads as Excel.
 class OutboundProposalScreen extends ConsumerStatefulWidget {
   const OutboundProposalScreen({super.key, this.today, this.embedded = false});
 
@@ -48,13 +50,23 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
   final _note = TextEditingController();
   final _percent = TextEditingController(text: '10');
   final _search = TextEditingController();
-  _Mode _mode = _Mode.percent;
-  ProposalBase _base = ProposalBase.onHand;
+  ProposalBase _base = ProposalBase.free;
   ProposalRounding _rounding = ProposalRounding.down;
   final Map<String, TextEditingController> _qty = {};
-  final Set<String> _off = {};
+
+  /// The products chosen (ticked, or given a quantity).
+  final Set<String> _selected = {};
+
+  /// Where a Shift-click range starts.
+  String? _anchor;
+  String? _maker;
+  bool _onlyStock = false;
+  bool _onlySelected = false;
+  int _limit = 200;
   bool _busy = false;
-  OutboundCreated? _created;
+
+  /// The 出庫予定 made from the proposal (0204).
+  int? _created;
 
   // Prices (0142): 出荷単価 per product, how it is set in bulk, and which
   // prices the sheet shows.
@@ -131,18 +143,53 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
 
   static int _int(String s) => int.tryParse(s.replaceAll(',', '').trim()) ?? 0;
 
-  /// JAN → quantity for the products ticked with a quantity.
+  /// JAN → quantity for the products chosen with a quantity.
   Map<String, int> _lines(List<OutboundStockItem> items) => {
         for (final i in items)
-          if (!_off.contains(i.janCode) && _int(_c(i.janCode).text) > 0) i.janCode: _int(_c(i.janCode).text),
+          if (_selected.contains(i.janCode) && _int(_c(i.janCode).text) > 0) i.janCode: _int(_c(i.janCode).text),
       };
+
+  /// A tick: one product, or — with Shift held — every product shown from
+  /// the last one ticked to this one.
+  void _tick(List<OutboundStockItem> shown, OutboundStockItem i, bool on) {
+    setState(() {
+      final anchor = _anchor;
+      if (HardwareKeyboard.instance.isShiftPressed && anchor != null) {
+        final a = shown.indexWhere((x) => x.janCode == anchor);
+        final b = shown.indexWhere((x) => x.janCode == i.janCode);
+        if (a >= 0 && b >= 0) {
+          for (var k = a < b ? a : b; k <= (a < b ? b : a); k++) {
+            on ? _selected.add(shown[k].janCode) : _selected.remove(shown[k].janCode);
+          }
+          _anchor = i.janCode;
+          return;
+        }
+      }
+      on ? _selected.add(i.janCode) : _selected.remove(i.janCode);
+      _anchor = i.janCode;
+    });
+  }
+
+  /// The chosen products, each given everything free to ship.
+  void _fillFree(List<OutboundStockItem> items) {
+    final l10n = AppLocalizations.of(context);
+    final chosen = [for (final i in items) if (_selected.contains(i.janCode)) i];
+    if (chosen.isEmpty) return _snack(l10n.obChooseFirst);
+    setState(() {
+      for (final i in chosen) {
+        _c(i.janCode).text = i.free > 0 ? '${i.free}' : '';
+      }
+    });
+    _snack(l10n.obProposed(chosen.where((i) => i.free > 0).length, chosen.fold(0, (s, i) => s + i.free)));
+  }
 
   void _propose(List<OutboundStockItem> items) {
     final l10n = AppLocalizations.of(context);
     final p = double.tryParse(_percent.text.replaceAll('%', '').trim());
     if (p == null || p < 0 || p > 100) return _snack(l10n.obPercentInvalid);
-    final q = proposeByPercent([for (final i in items) if (!_off.contains(i.janCode)) i], p,
-        base: _base, rounding: _rounding);
+    final chosen = [for (final i in items) if (_selected.contains(i.janCode)) i];
+    if (chosen.isEmpty) return _snack(l10n.obChooseFirst);
+    final q = proposeByPercent(chosen, p, base: _base, rounding: _rounding);
     setState(() {
       for (final e in q.entries) {
         _c(e.key).text = '${e.value}';
@@ -219,61 +266,93 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
     if (mounted) _snack(l10n.obExcelSaved);
   }
 
+  /// The proposal registered as a 出庫予定 (0204): like a shipping list
+  /// read in — kept, on the calendar or 未定, packed from its detail.
   Future<void> _create(List<OutboundStockItem> items) async {
     final l10n = AppLocalizations.of(context);
     final wh = _warehouseId;
     final lines = _lines(items);
     if (wh == null) return _snack(l10n.miChooseWarehouse);
-    if (_destinationId == null) return _snack(l10n.obNeedDestination);
     if (lines.isEmpty) return _snack(l10n.obNothing);
-    for (final i in items) {
-      final q = lines[i.janCode];
-      if (q != null && q > i.free) return _snack(l10n.obOverFree(i.name, i.free));
-    }
+    final over = [
+      for (final i in items)
+        if ((lines[i.janCode] ?? 0) > i.free) i,
+    ];
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        key: const ValueKey('ob-create-dialog'),
+        title: Text(l10n.obCreateQ),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(l10n.obCreateBody(lines.length, lines.values.fold(0, (a, b) => a + b),
+              _shipDate == null ? l10n.ofUndecided : DateFormat('y/MM/dd').format(_shipDate!))),
+          if (over.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.obOverWarn(over.length),
+                key: const ValueKey('ob-over-warn'), style: TextStyle(color: Theme.of(c).colorScheme.error)),
+            for (final i in over.take(10))
+              Text(l10n.obOverFree(i.name, i.free), style: Theme.of(c).textTheme.bodySmall),
+          ],
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+          FilledButton(key: const ValueKey('ob-create-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.obCreate(lines.length))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
     setState(() => _busy = true);
-    final r = await ref.read(outboundRepositoryProvider).create(
-          warehouseId: wh,
-          lines: lines,
-          prices: {
-            for (final jan in lines.keys)
-              if (_shipPrice(jan) case final p?) jan: p,
-          },
-          snapshots: {
-            for (final i in items)
-              if (lines.containsKey(i.janCode)) i.janCode: {'cost': i.costPrice, 'list': i.listPrice, 'sell': i.sellPrice},
-          },
-          destinationId: _destinationId,
-          shipDate: _shipDateText,
-          note: _note.text.trim().isEmpty ? null : _note.text.trim(),
-          proposal: {
-            'mode': _mode.name,
-            if (_mode == _Mode.percent) ...{'percent': _percent.text.trim(), 'base': _base.name, 'rounding': _rounding.name},
-            'price_columns': [for (final c in PriceColumn.values) if (_sheetColumns.contains(c)) c.wire],
-            'pricing': {
-              'method': _priceMethod.name,
-              'base': _priceBase.wire,
-              'value': _priceValue.text.trim(),
-              if (_priceMethod == PriceMethod.formula) 'formula': _formula.text.trim(),
-              'step': _priceStep,
-              'rounding': _priceRounding.name,
-            },
-          },
-        );
+    final repo = ref.read(outboundFileRepositoryProvider);
+    final note = _note.text.trim().isEmpty ? null : _note.text.trim();
+    var row = 1;
+    final r = await repo.post(
+      warehouseId: wh,
+      shippedOn: _shipDate ?? (widget.today ?? DateTime.now()),
+      fileName: l10n.obProposalName(DateFormat('y/MM/dd HH:mm').format(DateTime.now())),
+      plan: true,
+      allowDuplicate: true,
+      destination: _destination?.name,
+      note: note,
+      lines: [
+        for (final i in items)
+          if (lines[i.janCode] case final q?)
+            OutboundPostLine(
+              rowNo: ++row,
+              action: 'ship',
+              productId: i.productId,
+              jan: i.janCode,
+              productName: i.name,
+              maker: i.maker,
+              code: i.sku,
+              quantity: q,
+              unitPrice: _shipPrice(i.janCode),
+              matchedBy: 'picked',
+            ),
+      ],
+    );
     if (!mounted) return;
-    setState(() => _busy = false);
     switch (r) {
       case ApiSuccess(:final data):
-        setState(() => _created = data);
-        ref.invalidate(outboundStockProvider(wh));
-        ref.invalidate(shipDestinationsProvider);
-        _snack(l10n.obCreated(data.shipmentNumber, data.lines, data.units));
-      case ApiFailure(:final message):
-        final over = RegExp(r'over_free:(\d+):(\d+)').firstMatch(message);
-        if (over != null) {
-          final name = items.where((i) => i.janCode == over.group(1)).firstOrNull?.name ?? over.group(1)!;
-          ref.invalidate(outboundStockProvider(wh));
-          return _snack(l10n.obOverFree(name, int.parse(over.group(2)!)));
+        if (_shipDate == null) {
+          final u = await repo.markUndecided(data);
+          if (u case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
         }
+        if (_destinationId != null) {
+          final d = await repo.setDestination(data, _destinationId);
+          if (d case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+        }
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _created = data;
+        });
+        ref.invalidate(outboundStockProvider(wh));
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(outboundUndecidedProvider);
+        ref.invalidate(productListProvider);
+        _snack(l10n.obCreatedPlan(lines.length));
+      case ApiFailure(:final message):
+        setState(() => _busy = false);
         _snack(humanizeApiErrorMessage(l10n, message));
     }
   }
@@ -283,20 +362,26 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
-    _warehouseId ??= ref.watch(writeWarehouseIdProvider);
     final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const [];
+    // The products show at once: the app's warehouse, else the first one.
+    _warehouseId ??= ref.watch(writeWarehouseIdProvider) ?? warehouses.firstOrNull?.id;
     final whName = warehouses.where((w) => w.id == _warehouseId).firstOrNull?.name;
     final dests = ref.watch(shipDestinationsProvider).valueOrNull ?? const <ShipDestination>[];
     final wh = _warehouseId;
     final stockAsync = wh == null ? null : ref.watch(outboundStockProvider(wh));
     final items = stockAsync?.valueOrNull ?? const <OutboundStockItem>[];
     final q = _search.text.trim().toLowerCase();
-    final shown = q.isEmpty
-        ? items
-        : [
-            for (final i in items)
-              if ('${i.name} ${i.janCode} ${i.nameEn ?? ''} ${i.maker ?? ''} ${i.sku ?? ''}'.toLowerCase().contains(q)) i,
-          ];
+    final makers = {for (final i in items) if ((i.maker ?? '').isNotEmpty) i.maker!}.toList()..sort();
+    final shown = [
+      for (final i in items)
+        if ((q.isEmpty ||
+                '${i.name} ${i.janCode} ${i.nameEn ?? ''} ${i.maker ?? ''} ${i.sku ?? ''}'.toLowerCase().contains(q)) &&
+            (_maker == null || i.maker == _maker) &&
+            (!_onlyStock || i.onHand > 0) &&
+            (!_onlySelected || _selected.contains(i.janCode)))
+          i,
+    ];
+    final allShownTicked = shown.isNotEmpty && shown.every((i) => _selected.contains(i.janCode));
     final lines = _lines(items);
     final total = lines.values.fold(0, (s, v) => s + v);
     final amount = lines.entries.fold<double>(0, (s, e) => s + (_shipPrice(e.key) ?? 0) * e.value);
@@ -332,26 +417,22 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(l10n.obCreated(created.shipmentNumber, created.lines, created.units), style: theme.textTheme.titleSmall),
+                  Text(l10n.obCreatedPlanTitle, style: theme.textTheme.titleSmall),
+                  Text(l10n.obCreatedPlanBody, style: theme.textTheme.bodySmall),
                   const SizedBox(height: AppSpacing.sm),
                   Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
                     FilledButton.icon(
-                      key: const ValueKey('ob-sheet'),
-                      onPressed: () => downloadShipmentSheet(context, ref, created.id),
-                      icon: const Icon(Icons.grid_on_outlined, size: 18),
-                      label: Text(l10n.obSheetExcel),
-                    ),
-                    OutlinedButton.icon(
                       key: const ValueKey('ob-open'),
-                      onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => ShipmentDetailScreen(shipmentId: created.id))),
-                      icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                      label: Text(l10n.obOpenShipment),
+                      onPressed: () => Navigator.of(context)
+                          .push(MaterialPageRoute<void>(builder: (_) => OutboundFileDetailScreen(fileId: created))),
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: Text(l10n.obOpenPlan),
                     ),
                     TextButton(
                       key: const ValueKey('ob-again'),
                       onPressed: () => setState(() {
                         _created = null;
+                        _selected.clear();
                         for (final c in _qty.values) {
                           c.clear();
                         }
@@ -444,167 +525,209 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
           // How much.
           Text(l10n.obHowMuch, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xs),
-          SegmentedButton<_Mode>(
-            key: const ValueKey('ob-mode'),
-            segments: [
-              ButtonSegment(value: _Mode.percent, icon: const Icon(Icons.percent, size: 18), label: Text(l10n.obModePercent)),
-              ButtonSegment(value: _Mode.direct, icon: const Icon(Icons.edit_outlined, size: 18), label: Text(l10n.obModeDirect)),
-            ],
-            selected: {_mode},
-            onSelectionChanged: (s) => setState(() => _mode = s.first),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          if (_mode == _Mode.percent)
-            Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              SizedBox(
-                width: 110,
-                child: TextField(
-                  key: const ValueKey('ob-percent'),
-                  controller: _percent,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(labelText: l10n.obPercent, suffixText: '%', isDense: true),
-                ),
+          Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            SizedBox(
+              width: 110,
+              child: TextField(
+                key: const ValueKey('ob-percent'),
+                controller: _percent,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: l10n.obPercent, suffixText: '%', isDense: true),
               ),
-              SegmentedButton<ProposalBase>(
-                key: const ValueKey('ob-base'),
-                segments: [
-                  ButtonSegment(value: ProposalBase.onHand, label: Text(l10n.obBaseOnHand)),
-                  ButtonSegment(value: ProposalBase.free, label: Text(l10n.obBaseFree)),
-                ],
-                selected: {_base},
-                onSelectionChanged: (s) => setState(() => _base = s.first),
-              ),
-              DropdownButton<ProposalRounding>(
-                key: const ValueKey('ob-rounding'),
-                value: _rounding,
-                items: [
-                  DropdownMenuItem(value: ProposalRounding.down, child: Text(l10n.obRoundDown)),
-                  DropdownMenuItem(value: ProposalRounding.nearest, child: Text(l10n.obRoundNearest)),
-                  DropdownMenuItem(value: ProposalRounding.up, child: Text(l10n.obRoundUp)),
-                ],
-                onChanged: (v) => setState(() => _rounding = v ?? _rounding),
-              ),
-              FilledButton.icon(
-                key: const ValueKey('ob-propose'),
-                onPressed: items.isEmpty ? null : () => _propose(items),
-                icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
-                label: Text(l10n.obPropose),
-              ),
-            ])
-          else
-            Text(l10n.obDirectHint, style: muted),
+            ),
+            SegmentedButton<ProposalBase>(
+              key: const ValueKey('ob-base'),
+              segments: [
+                ButtonSegment(value: ProposalBase.free, label: Text(l10n.obBaseFree)),
+                ButtonSegment(value: ProposalBase.onHand, label: Text(l10n.obBaseOnHand)),
+              ],
+              selected: {_base},
+              onSelectionChanged: (s) => setState(() => _base = s.first),
+            ),
+            DropdownButton<ProposalRounding>(
+              key: const ValueKey('ob-rounding'),
+              value: _rounding,
+              items: [
+                DropdownMenuItem(value: ProposalRounding.down, child: Text(l10n.obRoundDown)),
+                DropdownMenuItem(value: ProposalRounding.nearest, child: Text(l10n.obRoundNearest)),
+                DropdownMenuItem(value: ProposalRounding.up, child: Text(l10n.obRoundUp)),
+              ],
+              onChanged: (v) => setState(() => _rounding = v ?? _rounding),
+            ),
+            FilledButton.icon(
+              key: const ValueKey('ob-propose'),
+              onPressed: _selected.isEmpty ? null : () => _propose(items),
+              icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
+              label: Text(l10n.obProposeChosen(_selected.length)),
+            ),
+            OutlinedButton.icon(
+              key: const ValueKey('ob-fill-free'),
+              onPressed: _selected.isEmpty ? null : () => _fillFree(items),
+              icon: const Icon(Icons.done_all, size: 18),
+              label: Text(l10n.obFillFree),
+            ),
+          ]),
+          Text(l10n.obChooseHint, style: muted),
           Text(l10n.obCapNote, style: muted),
           const SizedBox(height: AppSpacing.lg),
 
-          // Prices (0142).
-          Text(l10n.obPriceTitle, style: theme.textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.xs),
-          Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SizedBox(
-              width: 220,
-              child: DropdownButtonFormField<PriceColumn>(
-                key: const ValueKey('ob-price-base'),
-                initialValue: _priceBase,
-                isExpanded: true,
-                decoration: InputDecoration(labelText: l10n.obPriceBase, isDense: true),
-                items: [
-                  for (final c in PriceColumn.values) DropdownMenuItem(value: c, child: Text(_baseLabel(l10n, c))),
-                ],
-                onChanged: (v) => setState(() => _priceBase = v ?? _priceBase),
-              ),
-            ),
-            SegmentedButton<PriceMethod>(
-              key: const ValueKey('ob-price-method'),
-              segments: [
-                ButtonSegment(value: PriceMethod.rate, label: Text(l10n.obPriceRate)),
-                ButtonSegment(value: PriceMethod.percent, label: Text(l10n.obPricePercent)),
-                ButtonSegment(value: PriceMethod.formula, label: Text(l10n.obPriceFormula)),
-              ],
-              selected: {_priceMethod},
-              onSelectionChanged: (v) => setState(() => _priceMethod = v.first),
-            ),
-            if (_priceMethod == PriceMethod.formula)
-              SizedBox(
-                width: 340,
-                child: TextField(
-                  key: const ValueKey('ob-price-formula'),
-                  controller: _formula,
-                  style: const TextStyle(fontFamily: 'monospace'),
-                  decoration: InputDecoration(labelText: l10n.obPriceFormula, isDense: true, prefixText: '= '),
-                ),
-              )
-            else
-              SizedBox(
-                width: 130,
-                child: TextField(
-                  key: const ValueKey('ob-price-value'),
-                  controller: _priceValue,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                  decoration: InputDecoration(
-                    labelText: _priceMethod == PriceMethod.rate ? l10n.obPriceRate : l10n.obPricePercent,
-                    suffixText: _priceMethod == PriceMethod.percent ? '%' : '×',
-                    isDense: true,
+          // Prices (0142): folded away until wanted, so the products show at once.
+          ExpansionTile(
+            key: const ValueKey('ob-price-panel'),
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            title: Text(l10n.obPriceTitle, style: theme.textTheme.titleMedium),
+            children: [
+              Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                SizedBox(
+                  width: 220,
+                  child: DropdownButtonFormField<PriceColumn>(
+                    key: const ValueKey('ob-price-base'),
+                    initialValue: _priceBase,
+                    isExpanded: true,
+                    decoration: InputDecoration(labelText: l10n.obPriceBase, isDense: true),
+                    items: [
+                      for (final c in PriceColumn.values) DropdownMenuItem(value: c, child: Text(_baseLabel(l10n, c))),
+                    ],
+                    onChanged: (v) => setState(() => _priceBase = v ?? _priceBase),
                   ),
                 ),
-              ),
-            DropdownButton<double>(
-              key: const ValueKey('ob-price-step'),
-              value: _priceStep,
-              items: [
-                DropdownMenuItem(value: 0.01, child: Text(l10n.obStepCent)),
-                DropdownMenuItem(value: 1, child: Text(l10n.obStep(1))),
-                DropdownMenuItem(value: 10, child: Text(l10n.obStep(10))),
-                DropdownMenuItem(value: 100, child: Text(l10n.obStep(100))),
-              ],
-              onChanged: (v) => setState(() => _priceStep = v ?? _priceStep),
-            ),
-            DropdownButton<PriceRounding>(
-              key: const ValueKey('ob-price-rounding'),
-              value: _priceRounding,
-              items: [
-                DropdownMenuItem(value: PriceRounding.down, child: Text(l10n.obRoundDown)),
-                DropdownMenuItem(value: PriceRounding.nearest, child: Text(l10n.obRoundNearest)),
-                DropdownMenuItem(value: PriceRounding.up, child: Text(l10n.obRoundUp)),
-              ],
-              onChanged: (v) => setState(() => _priceRounding = v ?? _priceRounding),
-            ),
-            FilledButton.tonal(
-              key: const ValueKey('ob-price-apply'),
-              onPressed: shipping.isEmpty ? null : () => _applyPrices(shipping),
-              child: Text(l10n.obPriceApplyShipping(shipping.length)),
-            ),
-            OutlinedButton(
-              key: const ValueKey('ob-price-apply-all'),
-              onPressed: shown.isEmpty ? null : () => _applyPrices(shown),
-              child: Text(l10n.obPriceApplyShown(shown.length)),
-            ),
-          ]),
-          Text(switch (_priceMethod) {
-            PriceMethod.rate => l10n.obPriceRateHint,
-            PriceMethod.percent => l10n.obPricePercentHint,
-            PriceMethod.formula => l10n.obPriceFormulaHint,
-          }, style: muted),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            Text(l10n.obSheetColumns, style: theme.textTheme.labelLarge),
-            for (final c in PriceColumn.values)
-              FilterChip(
-                key: ValueKey('ob-col-${c.wire}'),
-                label: Text(_columnLabel(l10n, c)),
-                selected: _sheetColumns.contains(c),
-                onSelected: (v) => setState(() => v ? _sheetColumns.add(c) : _sheetColumns.remove(c)),
-              ),
-          ]),
-          const SizedBox(height: AppSpacing.md),
-
-          // The products.
-          TextField(
-            key: const ValueKey('ob-search'),
-            controller: _search,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.obSearch, isDense: true),
+                SegmentedButton<PriceMethod>(
+                  key: const ValueKey('ob-price-method'),
+                  segments: [
+                    ButtonSegment(value: PriceMethod.rate, label: Text(l10n.obPriceRate)),
+                    ButtonSegment(value: PriceMethod.percent, label: Text(l10n.obPricePercent)),
+                    ButtonSegment(value: PriceMethod.formula, label: Text(l10n.obPriceFormula)),
+                  ],
+                  selected: {_priceMethod},
+                  onSelectionChanged: (v) => setState(() => _priceMethod = v.first),
+                ),
+                if (_priceMethod == PriceMethod.formula)
+                  SizedBox(
+                    width: 340,
+                    child: TextField(
+                      key: const ValueKey('ob-price-formula'),
+                      controller: _formula,
+                      style: const TextStyle(fontFamily: 'monospace'),
+                      decoration: InputDecoration(labelText: l10n.obPriceFormula, isDense: true, prefixText: '= '),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    width: 130,
+                    child: TextField(
+                      key: const ValueKey('ob-price-value'),
+                      controller: _priceValue,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                      decoration: InputDecoration(
+                        labelText: _priceMethod == PriceMethod.rate ? l10n.obPriceRate : l10n.obPricePercent,
+                        suffixText: _priceMethod == PriceMethod.percent ? '%' : '×',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                DropdownButton<double>(
+                  key: const ValueKey('ob-price-step'),
+                  value: _priceStep,
+                  items: [
+                    DropdownMenuItem(value: 0.01, child: Text(l10n.obStepCent)),
+                    DropdownMenuItem(value: 1, child: Text(l10n.obStep(1))),
+                    DropdownMenuItem(value: 10, child: Text(l10n.obStep(10))),
+                    DropdownMenuItem(value: 100, child: Text(l10n.obStep(100))),
+                  ],
+                  onChanged: (v) => setState(() => _priceStep = v ?? _priceStep),
+                ),
+                DropdownButton<PriceRounding>(
+                  key: const ValueKey('ob-price-rounding'),
+                  value: _priceRounding,
+                  items: [
+                    DropdownMenuItem(value: PriceRounding.down, child: Text(l10n.obRoundDown)),
+                    DropdownMenuItem(value: PriceRounding.nearest, child: Text(l10n.obRoundNearest)),
+                    DropdownMenuItem(value: PriceRounding.up, child: Text(l10n.obRoundUp)),
+                  ],
+                  onChanged: (v) => setState(() => _priceRounding = v ?? _priceRounding),
+                ),
+                FilledButton.tonal(
+                  key: const ValueKey('ob-price-apply'),
+                  onPressed: shipping.isEmpty ? null : () => _applyPrices(shipping),
+                  child: Text(l10n.obPriceApplyShipping(shipping.length)),
+                ),
+                OutlinedButton(
+                  key: const ValueKey('ob-price-apply-all'),
+                  onPressed: shown.isEmpty ? null : () => _applyPrices(shown),
+                  child: Text(l10n.obPriceApplyShown(shown.length)),
+                ),
+              ]),
+              Text(switch (_priceMethod) {
+                PriceMethod.rate => l10n.obPriceRateHint,
+                PriceMethod.percent => l10n.obPricePercentHint,
+                PriceMethod.formula => l10n.obPriceFormulaHint,
+              }, style: muted),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                Text(l10n.obSheetColumns, style: theme.textTheme.labelLarge),
+                for (final c in PriceColumn.values)
+                  FilterChip(
+                    key: ValueKey('ob-col-${c.wire}'),
+                    label: Text(_columnLabel(l10n, c)),
+                    selected: _sheetColumns.contains(c),
+                    onSelected: (v) => setState(() => v ? _sheetColumns.add(c) : _sheetColumns.remove(c)),
+                  ),
+              ]),
+              const SizedBox(height: AppSpacing.md),
+            ],
           ),
-          const SizedBox(height: AppSpacing.sm),
+          // The products: the whole library, chosen by ticks.
+          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            SizedBox(
+              width: 320,
+              child: TextField(
+                key: const ValueKey('ob-search'),
+                controller: _search,
+                onChanged: (_) => setState(() => _limit = 200),
+                decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.obSearch, isDense: true),
+              ),
+            ),
+            DropdownButton<String?>(
+              key: const ValueKey('ob-maker'),
+              value: _maker,
+              hint: Text(l10n.obMakerAll),
+              items: [
+                DropdownMenuItem<String?>(value: null, child: Text(l10n.obMakerAll)),
+                for (final m in makers) DropdownMenuItem<String?>(value: m, child: Text(m)),
+              ],
+              onChanged: (v) => setState(() => _maker = v),
+            ),
+            FilterChip(
+              key: const ValueKey('ob-only-stock'),
+              label: Text(l10n.obOnlyStock),
+              selected: _onlyStock,
+              onSelected: (v) => setState(() => _onlyStock = v),
+            ),
+            FilterChip(
+              key: const ValueKey('ob-only-selected'),
+              label: Text(l10n.obOnlySelected(_selected.length)),
+              selected: _onlySelected,
+              onSelected: (v) => setState(() => _onlySelected = v),
+            ),
+          ]),
+          const SizedBox(height: AppSpacing.xs),
+          if (wh != null && items.isNotEmpty)
+            Row(children: [
+              Checkbox(
+                key: const ValueKey('ob-check-all'),
+                value: allShownTicked,
+                onChanged: shown.isEmpty
+                    ? null
+                    : (v) => setState(() {
+                          for (final i in shown) {
+                            v == true ? _selected.add(i.janCode) : _selected.remove(i.janCode);
+                          }
+                        }),
+              ),
+              Expanded(child: Text(l10n.obCheckAllHint(shown.length), style: muted)),
+            ]),
           if (wh == null)
             Text(l10n.miChooseWarehouse, style: muted)
           else if (stockAsync!.isLoading && items.isEmpty)
@@ -615,18 +738,28 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
               onRetry: () => ref.invalidate(outboundStockProvider(wh)),
             )
           else if (items.isEmpty)
-            EmptyStateView(icon: Icons.inventory_2_outlined, title: l10n.obNoStock)
-          else
-            for (final i in shown)
+            EmptyStateView(icon: Icons.inventory_2_outlined, title: l10n.obNoProducts)
+          else ...[
+            for (final i in shown.take(_limit))
               _ItemCard(
                 key: ValueKey('ob-item-${i.janCode}'),
                 item: i,
                 qty: _c(i.janCode),
                 price: _pc(i.janCode),
-                included: !_off.contains(i.janCode),
-                onIncluded: (v) => setState(() => v ? _off.remove(i.janCode) : _off.add(i.janCode)),
-                onChanged: () => setState(() {}),
+                included: _selected.contains(i.janCode),
+                onIncluded: (v) => _tick(shown, i, v),
+                onChanged: () => setState(() {
+                  // A quantity typed chooses the product.
+                  if (_int(_c(i.janCode).text) > 0) _selected.add(i.janCode);
+                }),
               ),
+            if (shown.length > _limit)
+              TextButton(
+                key: const ValueKey('ob-more'),
+                onPressed: () => setState(() => _limit += 300),
+                child: Text(l10n.ppMore(shown.length - _limit)),
+              ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Text(l10n.obSummary(lines.length, total), key: const ValueKey('ob-summary'), style: theme.textTheme.titleSmall),
           if (amount > 0)
@@ -706,7 +839,7 @@ class _ItemCard extends StatelessWidget {
               Text(['JAN ${item.janCode}', if (item.nameEn != null) item.nameEn!, if (item.maker != null) item.maker!].join(' · '),
                   style: muted),
               Text(
-                l10n.obStockLine(item.onHand, item.reserved, item.inOpen, item.free),
+                l10n.obStockKeepLine(item.onHand, item.reserved, item.free),
                 key: ValueKey('ob-stock-${item.janCode}'),
                 style: theme.textTheme.bodySmall,
               ),
@@ -722,11 +855,10 @@ class _ItemCard extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           SizedBox(
-            width: 104,
+            width: 128,
             child: TextField(
               key: ValueKey('ob-price-${item.janCode}'),
               controller: price,
-              enabled: included,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textAlign: TextAlign.end,
               onChanged: (_) => onChanged(),
@@ -739,7 +871,6 @@ class _ItemCard extends StatelessWidget {
             child: TextField(
               key: ValueKey('ob-qty-${item.janCode}'),
               controller: qty,
-              enabled: included,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
               onChanged: (_) => onChanged(),

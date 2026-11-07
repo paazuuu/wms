@@ -10001,7 +10001,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get obIntro =>
-      '出荷先を選び、在庫からパーセントで提案させるか、商品ごとに数量を入れて出庫を作ります。出荷可能数（在庫 − 引当 − 出庫予定）を超える数は出せません。作った出庫は、出荷先と出庫リストをExcelでダウンロードして相手に送れます。';
+      '商品ライブラリーの商品から、出荷するものをチェックで選びます（Shiftを押しながらで範囲選択）。数量は一括（出せる数の％・出せる数ぜんぶ）か手入力で決めます。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。';
 
   @override
   String get obDestination => '出荷先';
@@ -10070,15 +10070,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get obNeedName => '会社名を入れてください';
 
   @override
-  String get obShipDate => '出荷日を選ぶ';
+  String get obShipDate => '出庫予定日: 未定（押して決める）';
 
   @override
   String obShipDateIs(String date) {
-    return '出荷日: $date';
+    return '出庫予定日: $date';
   }
 
   @override
-  String get obHowMuch => '数量の決め方';
+  String get obHowMuch => '選んだ商品の数量を一括で入れる';
 
   @override
   String get obModePercent => 'パーセントで提案';
@@ -10119,7 +10119,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get obDirectHint => '商品ごとに出す数を入れてください。チェックを外した商品は出しません。';
 
   @override
-  String get obCapNote => 'どの方法でも、出荷可能数を超える数は出せません。';
+  String get obCapNote =>
+      '出せる数（在庫 − キープ）を超える数も登録できますが、その分は不足として表示され、そろうまで自動で出庫済みになりません。';
 
   @override
   String get obSearch => '商品名・JAN・メーカーで絞り込み';
@@ -10142,7 +10143,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String obOverFree(String name, int free) {
-    return '「$name」は出荷可能数（$free）を超えています';
+    return '「$name」は出せる数（$free）を超えています';
   }
 
   @override
@@ -10155,7 +10156,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String obCreate(int n) {
-    return '$n品目で出庫を作成';
+    return '出庫予定として登録（$n品目）';
   }
 
   @override
@@ -15864,4 +15865,75 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get ofErrNotEditable =>
       'この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。';
+
+  @override
+  String get obChooseFirst => '先に商品をチェックで選んでください';
+
+  @override
+  String get obCreateQ => '出庫予定として登録しますか？';
+
+  @override
+  String obCreateBody(int n, int qty, String day) {
+    return '$n品目・合計 $qty個を、出庫予定日「$day」で登録します。在庫はキープされ、実際に出したときに「出庫した」で在庫から引きます。';
+  }
+
+  @override
+  String obOverWarn(int n) {
+    return '出せる数を超えている商品が $n 品目あります（不足として表示されます）';
+  }
+
+  @override
+  String obProposalName(String when) {
+    return '出荷の提案 $when';
+  }
+
+  @override
+  String obCreatedPlan(int n) {
+    return '$n品目を出庫予定として登録しました';
+  }
+
+  @override
+  String get obCreatedPlanTitle => '出庫予定として登録しました';
+
+  @override
+  String get obCreatedPlanBody =>
+      '出荷手配 › 出庫 と出庫カレンダーに出ます。開くと、中身の直し・出荷先カード・梱包と総重量・出庫予定日を決められます。';
+
+  @override
+  String get obOpenPlan => '出庫予定を開く';
+
+  @override
+  String obProposeChosen(int n) {
+    return '選んだ$n品目に入れる';
+  }
+
+  @override
+  String get obFillFree => '出せる数ぜんぶ';
+
+  @override
+  String get obChooseHint => 'チェックした商品にだけ入ります。数量を手で入れた商品は自動でチェックされます。';
+
+  @override
+  String get obMakerAll => 'すべてのメーカー';
+
+  @override
+  String get obOnlyStock => '在庫があるものだけ';
+
+  @override
+  String obOnlySelected(int n) {
+    return '選んだものだけ（$n）';
+  }
+
+  @override
+  String obCheckAllHint(int n) {
+    return '表示中の$n品目をすべて選ぶ／外す（Shiftを押しながらチェックで範囲選択）';
+  }
+
+  @override
+  String get obNoProducts => '商品ライブラリーに商品がありません';
+
+  @override
+  String obStockKeepLine(int onHand, int kept, int free) {
+    return '在庫 $onHand・キープ $kept・出せる数 $free';
+  }
 }

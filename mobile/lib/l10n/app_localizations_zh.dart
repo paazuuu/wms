@@ -9943,7 +9943,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get obIntro =>
-      '选择收货方，按库存百分比自动建议，或逐个商品输入数量来创建出库。不能超过可出货数（库存 − 已分配 − 待出库）。创建后可将收货方和出库清单下载为Excel发送给对方。';
+      '从商品库中勾选要出货的商品（按住Shift可范围选择）。数量可批量（可出数的％・全部可出数）或手动输入。登记后成为「出库预定」，保留库存，并与出库日历・包装・总重量关联。';
 
   @override
   String get obDestination => '收货方';
@@ -10012,15 +10012,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get obNeedName => '请输入公司名';
 
   @override
-  String get obShipDate => '选择出货日';
+  String get obShipDate => '出库预定日：未定（点击确定）';
 
   @override
   String obShipDateIs(String date) {
-    return '出货日：$date';
+    return '出库预定日：$date';
   }
 
   @override
-  String get obHowMuch => '数量的决定方式';
+  String get obHowMuch => '批量填入所选商品的数量';
 
   @override
   String get obModePercent => '按百分比建议';
@@ -10061,7 +10061,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get obDirectHint => '请逐个输入出货数量。取消勾选的商品不出货。';
 
   @override
-  String get obCapNote => '无论哪种方式，都不能超过可出货数。';
+  String get obCapNote => '可以登记超过可出数（库存 − 保留）的数量，但超出部分会显示为缺货，备齐前不会自动出库。';
 
   @override
   String get obSearch => '按商品名、JAN、制造商筛选';
@@ -10084,7 +10084,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String obOverFree(String name, int free) {
-    return '\"$name\"超过可出货数（$free）';
+    return '「$name」超过可出数（$free）';
   }
 
   @override
@@ -10097,7 +10097,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String obCreate(int n) {
-    return '以$n个品目创建出库';
+    return '登记为出库预定（$n种）';
   }
 
   @override
@@ -15748,4 +15748,75 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofErrNotEditable => '此出库已出库或已撤销，无法修改内容。如需修改，请先「恢复为出库预定」。';
+
+  @override
+  String get obChooseFirst => '请先勾选商品';
+
+  @override
+  String get obCreateQ => '登记为出库预定？';
+
+  @override
+  String obCreateBody(int n, int qty, String day) {
+    return '将 $n 种・合计 $qty 个，以出库预定日「$day」登记。库存会被保留，实际出库时用「已出库」扣减。';
+  }
+
+  @override
+  String obOverWarn(int n) {
+    return '有 $n 种商品超过可出数（将显示为缺货）';
+  }
+
+  @override
+  String obProposalName(String when) {
+    return '出货提案 $when';
+  }
+
+  @override
+  String obCreatedPlan(int n) {
+    return '已将 $n 种登记为出库预定';
+  }
+
+  @override
+  String get obCreatedPlanTitle => '已登记为出库预定';
+
+  @override
+  String get obCreatedPlanBody =>
+      '会显示在 出货安排 › 出库 和出库日历中。打开后可修改内容・选择收货方卡片・包装和总重量・确定出库预定日。';
+
+  @override
+  String get obOpenPlan => '打开出库预定';
+
+  @override
+  String obProposeChosen(int n) {
+    return '填入所选 $n 种';
+  }
+
+  @override
+  String get obFillFree => '全部可出数';
+
+  @override
+  String get obChooseHint => '仅填入已勾选的商品。手动输入数量的商品会自动勾选。';
+
+  @override
+  String get obMakerAll => '所有厂商';
+
+  @override
+  String get obOnlyStock => '仅有库存';
+
+  @override
+  String obOnlySelected(int n) {
+    return '仅已选（$n）';
+  }
+
+  @override
+  String obCheckAllHint(int n) {
+    return '全选／取消显示中的 $n 种（按住Shift勾选可范围选择）';
+  }
+
+  @override
+  String get obNoProducts => '商品库中没有商品';
+
+  @override
+  String obStockKeepLine(int onHand, int kept, int free) {
+    return '库存 $onHand・保留 $kept・可出数 $free';
+  }
 }

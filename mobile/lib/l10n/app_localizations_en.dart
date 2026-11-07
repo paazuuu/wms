@@ -10209,7 +10209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get obIntro =>
-      'Choose the destination, then have quantities proposed as a percentage of the stock or type one per product. Nothing goes over what is free (stock − reserved − on open shipments). The shipment\'s destination and list download as Excel, ready to send.';
+      'Tick what to ship from the product library (Shift for a range). Quantities in bulk (a % of what is free, or all of it) or typed. Registered, it becomes a 出庫予定: kept, on the calendar, packed and weighed.';
 
   @override
   String get obDestination => 'Ship to';
@@ -10279,15 +10279,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obNeedName => 'Enter the company name';
 
   @override
-  String get obShipDate => 'Ship date';
+  String get obShipDate => 'Planned day: not set (tap to set)';
 
   @override
   String obShipDateIs(String date) {
-    return 'Ship date: $date';
+    return 'Planned day: $date';
   }
 
   @override
-  String get obHowMuch => 'How much';
+  String get obHowMuch => 'Quantities for the products chosen';
 
   @override
   String get obModePercent => 'By percentage';
@@ -10330,7 +10330,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get obCapNote =>
-      'Whichever way, nothing goes over what is free to send.';
+      'More than is free can be registered: it shows as short, and is not shipped automatically until all is there.';
 
   @override
   String get obSearch => 'Filter by name, JAN, maker';
@@ -10353,7 +10353,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String obOverFree(String name, int free) {
-    return '\"$name\" is over what is free ($free)';
+    return '“$name” is over what is free ($free)';
   }
 
   @override
@@ -10366,7 +10366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String obCreate(int n) {
-    return 'Make the shipment ($n products)';
+    return 'Register as a planned shipment ($n)';
   }
 
   @override
@@ -16181,4 +16181,76 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ofErrNotEditable =>
       'Shipped or taken back: its rows cannot be changed. Put it back to planned first.';
+
+  @override
+  String get obChooseFirst => 'Tick the products first';
+
+  @override
+  String get obCreateQ => 'Register as a planned shipment?';
+
+  @override
+  String obCreateBody(int n, int qty, String day) {
+    return '$n products, $qty in all, planned for $day. The stock is kept and comes out when it is recorded as shipped.';
+  }
+
+  @override
+  String obOverWarn(int n) {
+    return '$n products are over what is free (shown as short)';
+  }
+
+  @override
+  String obProposalName(String when) {
+    return 'Proposal $when';
+  }
+
+  @override
+  String obCreatedPlan(int n) {
+    return '$n products registered as a planned shipment';
+  }
+
+  @override
+  String get obCreatedPlanTitle => 'Registered as a planned shipment';
+
+  @override
+  String get obCreatedPlanBody =>
+      'It is in 出荷手配 › 出庫 and on the calendar. Open it to change rows, choose the destination card, pack and weigh, or set the day.';
+
+  @override
+  String get obOpenPlan => 'Open the planned shipment';
+
+  @override
+  String obProposeChosen(int n) {
+    return 'Fill the $n chosen';
+  }
+
+  @override
+  String get obFillFree => 'All that is free';
+
+  @override
+  String get obChooseHint =>
+      'Only the ticked products are filled. A product given a quantity by hand is ticked.';
+
+  @override
+  String get obMakerAll => 'All makers';
+
+  @override
+  String get obOnlyStock => 'In stock only';
+
+  @override
+  String obOnlySelected(int n) {
+    return 'Chosen only ($n)';
+  }
+
+  @override
+  String obCheckAllHint(int n) {
+    return 'Tick or untick all $n shown (Shift-tick for a range)';
+  }
+
+  @override
+  String get obNoProducts => 'No products in the library';
+
+  @override
+  String obStockKeepLine(int onHand, int kept, int free) {
+    return 'In stock $onHand · kept $kept · free $free';
+  }
 }

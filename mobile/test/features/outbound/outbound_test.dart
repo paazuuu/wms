@@ -12,9 +12,11 @@ import 'package:wms_mobile/features/outbound/domain/pricing.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_proposal_screen.dart';
 import 'package:wms_mobile/features/outbound/presentation/ship_destinations_screen.dart';
+import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/shipment/domain/sender_profile.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 
+import '../../support/fake_outbound_file_repository.dart';
 import '../../support/harness.dart';
 
 const _janA = '4909999000014';
@@ -99,23 +101,28 @@ class _FakeOutboundRepository implements OutboundRepository {
 }
 
 const _items = [
-  OutboundStockItem(janCode: _janA, name: 'ボルト', onHand: 10, reserved: 2, inOpen: 2, free: 6, nameEn: 'Bolt',
-      costPrice: 42, listPrice: 100, sellPrice: 80),
-  OutboundStockItem(janCode: _janB, name: 'ナット', onHand: 4, free: 4, listPrice: 50),
+  OutboundStockItem(janCode: _janA, name: 'ボルト', productId: 1, onHand: 10, reserved: 2, inOpen: 2, free: 6, nameEn: 'Bolt',
+      maker: 'テスト工業', costPrice: 42, listPrice: 100, sellPrice: 80),
+  OutboundStockItem(janCode: _janB, name: 'ナット', productId: 2, onHand: 4, free: 4, maker: 'テスト工業', listPrice: 50),
 ];
+
+late FakeOutboundFileRepository _files;
 
 Future<(_FakeOutboundRepository, List<(String, Uint8List)>)> _pump(WidgetTester tester, {
   List<ShipDestination>? destinations,
+  List<OutboundStockItem>? stock,
 }) async {
   await tester.binding.setSurfaceSize(const Size(1000, 2400));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final repo = _FakeOutboundRepository(
     destinations: destinations ?? [ShipDestination(id: 1, name: 'テスト商事', department: '物流部', address1: '東京都千代田区1-1')],
-    stock: [..._items],
+    stock: [...(stock ?? _items)],
   );
+  _files = FakeOutboundFileRepository();
   final saved = <(String, Uint8List)>[];
   await pumpApp(tester, const OutboundProposalScreen(), overrides: [
     outboundRepositoryProvider.overrideWithValue(repo),
+    outboundFileRepositoryProvider.overrideWithValue(_files),
     writeWarehouseIdProvider.overrideWithValue(1),
     saveFileProvider.overrideWithValue((name, bytes) async => saved.add((name, bytes))),
   ]);
@@ -216,64 +223,99 @@ void main() {
     });
   });
 
-  testWidgets('a percentage is proposed, capped, corrected and made into a shipment with its sheet', (tester) async {
-    final (repo, saved) = await _pump(tester);
-    expect(find.text('全在庫 10 ・引当 2 ・出庫予定 2 ・出荷可能 6'), findsOneWidget);
+  Future<void> create(WidgetTester tester) async {
+    await tester.tap(find.byKey(const ValueKey('ob-create')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-create-ok')));
+    await tester.pumpAndSettle();
+  }
 
-    await _chooseDestination(tester, 'テスト商事 物流部');
-    expect(find.byKey(const ValueKey('ob-dest-summary')), findsOneWidget);
+  String qty(WidgetTester tester, String jan) => tester.widget<TextField>(find.byKey(ValueKey('ob-qty-$jan'))).controller!.text;
 
+  testWidgets('the library at once: products ticked, a % of what is free, registered as a 出庫予定', (tester) async {
+    await _pump(tester);
+    // No warehouse or destination to choose before the products show.
+    expect(find.byKey(const ValueKey('ob-item-$_janA')), findsOneWidget);
+    expect(find.text('在庫 10・キープ 2・出せる数 6'), findsOneWidget);
+
+    // Nothing ticked: nothing to fill.
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('ob-propose'))).onPressed, isNull);
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janA')));
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('ob-percent')), '50');
     await tester.tap(find.byKey(const ValueKey('ob-propose')));
     await tester.pumpAndSettle();
-    expect(tester.widget<TextField>(find.byKey(const ValueKey('ob-qty-$_janA'))).controller!.text, '5');
-    expect(tester.widget<TextField>(find.byKey(const ValueKey('ob-qty-$_janB'))).controller!.text, '2');
-    expect(find.text('2品目・合計 7個'), findsOneWidget);
+    expect(qty(tester, _janA), '3');
+    expect(qty(tester, _janB), '2');
+    expect(find.text('2品目・合計 5個'), findsOneWidget);
 
-    // Over what is free: said beside the line, and refused.
-    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '7');
-    await tester.pumpAndSettle();
-    expect(find.text('最大 6'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('ob-create')));
-    await tester.pumpAndSettle();
-    expect(repo.created, isEmpty);
-    expect(find.text('「ボルト」は出荷可能数（6）を超えています'), findsOneWidget);
-
-    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '6');
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('ob-create')));
-    await tester.pumpAndSettle();
-    expect(repo.created.single['lines'], {_janA: 6, _janB: 2});
-    expect(repo.created.single['destination'], 1);
-    expect((repo.created.single['proposal'] as Map)['mode'], 'percent');
+    await _chooseDestination(tester, 'テスト商事 物流部');
+    await create(tester);
+    final posted = _files.posted.single;
+    expect(posted.plan, isTrue);
+    expect([for (final l in posted.lines) (l.productId, l.quantity, l.action)], [(1, 3, 'ship'), (2, 2, 'ship')]);
+    // No day chosen: 未定; the card goes with it.
+    expect(_files.markedUndecided, [1]);
+    expect(_files.destinations, [(1, 1)]);
     expect(find.byKey(const ValueKey('ob-created')), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('ob-sheet')));
-    await tester.pumpAndSettle();
-    expect(saved.single.$1, startsWith('出荷明細_OUT-000009_テスト商事_'));
-    expect(readXlsx(saved.single.$2).expand((r) => r), contains('テスト商事'));
+    expect(find.byKey(const ValueKey('ob-open')), findsOneWidget);
   });
 
-  testWidgets('quantities typed by hand; an unticked product stays; a draft sheet before saving', (tester) async {
-    final (repo, saved) = await _pump(tester);
-    await tester.tap(find.text('数量を直接入力'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '3');
+  testWidgets('a quantity typed ticks the product; over what is free is said, not refused; a draft sheet', (tester) async {
+    final (_, saved) = await _pump(tester);
     await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janB')), '4');
-    await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
     await tester.pumpAndSettle();
-    expect(find.text('1品目・合計 3個'), findsOneWidget);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('ob-check-$_janB'))).value, isTrue);
+    expect(find.text('1品目・合計 4個'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('ob-draft')));
     await tester.pumpAndSettle();
     expect(saved.single.$1, startsWith('出荷明細_下書き_'));
     expect(readXlsx(saved.single.$2).expand((r) => r), contains('（下書き / Draft）'));
 
-    // Without a destination nothing is made.
+    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '7');
+    await tester.pumpAndSettle();
+    expect(find.text('最大 6'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('ob-create')));
     await tester.pumpAndSettle();
-    expect(repo.created, isEmpty);
-    expect(find.text('出荷先を選ぶか、新しく登録してください'), findsOneWidget);
+    expect(find.byKey(const ValueKey('ob-over-warn')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ob-create-ok')));
+    await tester.pumpAndSettle();
+    expect([for (final l in _files.posted.single.lines) l.quantity], [7, 4]);
+    // No destination needed: it can be chosen on the 出庫予定 later.
+    expect(_files.destinations, isEmpty);
+  });
+
+  testWidgets('narrowed by maker, stock and what is chosen; all shown ticked; everything free filled', (tester) async {
+    await _pump(tester, stock: [
+      ..._items,
+      const OutboundStockItem(janCode: '4909999000038', name: 'ワッシャー', productId: 3, maker: '別メーカー'),
+    ]);
+    expect(find.byKey(const ValueKey('ob-item-4909999000038')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ob-only-stock')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ob-item-4909999000038')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('ob-only-stock')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('ob-maker')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('テスト工業').last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ob-item-4909999000038')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('ob-check-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-fill-free')));
+    await tester.pumpAndSettle();
+    expect(qty(tester, _janA), '6');
+    expect(qty(tester, _janB), '4');
+
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
+    await tester.tap(find.byKey(const ValueKey('ob-only-selected')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ob-item-$_janB')), findsNothing);
+    expect(find.byKey(const ValueKey('ob-item-$_janA')), findsOneWidget);
   });
 
   testWidgets('a new destination is saved and chosen on the way', (tester) async {
@@ -291,25 +333,21 @@ void main() {
     expect(repo.saved.single.name, '新規商会');
     expect(find.byKey(const ValueKey('ob-dest-summary')), findsOneWidget);
 
-    await tester.enterText(find.byKey(const ValueKey('ob-percent')), '100');
-    await tester.tap(find.byKey(const ValueKey('ob-propose')));
+    await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '2');
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('ob-create')));
-    await tester.pumpAndSettle();
-    expect(repo.created.single['destination'], 101);
-    expect(repo.created.single['lines'], {_janA: 6, _janB: 4});
+    await create(tester);
+    expect(_files.destinations, [(1, 101)]);
   });
 
-  testWidgets('prices are set in bulk from a chosen column, by a rate, a percentage or a formula, and go with the shipment',
+  testWidgets('prices are set in bulk from a chosen column, by a rate, a percentage or a formula, and go with the 出庫予定',
       (tester) async {
-    final (repo, saved) = await _pump(tester);
+    final (_, saved) = await _pump(tester);
     expect(find.text('原価 42 · 定価 100 · 販売価格 80'), findsOneWidget);
     expect(find.text('原価 — · 定価 50 · 販売価格 —'), findsOneWidget);
-    await _chooseDestination(tester, 'テスト商事 物流部');
-    await tester.tap(find.text('数量を直接入力'));
-    await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janA')), '3');
     await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janB')), '2');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-price-panel')));
     await tester.pumpAndSettle();
 
     String price(String jan) => tester.widget<TextField>(find.byKey(ValueKey('ob-price-$jan'))).controller!.text;
@@ -344,7 +382,7 @@ void main() {
     expect(find.text('2 件の出荷単価を設定しました'), findsOneWidget);
     expect(find.text('出荷金額の合計 ¥240'), findsOneWidget);
 
-    // The price after that, + 10%, as a formula on 基準 (今の出荷単価).
+    // A formula on 基準 (今の出荷単価).
     await tester.tap(find.byKey(const ValueKey('ob-price-base')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('今の出荷単価（掛け率後）').last);
@@ -355,7 +393,6 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('ob-price-apply')));
     await tester.pumpAndSettle();
     expect(find.textContaining('式が読めません'), findsOneWidget);
-    expect(price(_janA), '60');
     await tester.enterText(find.byKey(const ValueKey('ob-price-formula')), 'ROUNDUP(基準*1.1, -1)');
     await tester.tap(find.byKey(const ValueKey('ob-price-apply')));
     await tester.pumpAndSettle();
@@ -379,19 +416,8 @@ void main() {
     expect(t[header].sublist(8), ['原価 / Cost', '単価 / Unit price', '金額 / Amount']);
     expect(double.parse(t.last[10]), 200);
 
-    await tester.tap(find.byKey(const ValueKey('ob-create')));
-    await tester.pumpAndSettle();
-    final made = repo.created.single;
-    expect(made['prices'], {_janA: 40.0, _janB: 40.0});
-    expect(made['snapshots'], {
-      _janA: {'cost': 42.0, 'list': 100.0, 'sell': 80.0},
-      _janB: {'cost': null, 'list': 50.0, 'sell': null},
-    });
-    final proposal = made['proposal'] as Map;
-    expect(proposal['price_columns'], ['cost', 'ship']);
-    expect((proposal['pricing'] as Map)['method'], 'formula');
-    expect((proposal['pricing'] as Map)['base'], 'ship');
-    expect((proposal['pricing'] as Map)['formula'], 'ROUNDUP(基準*1.1, -1)');
+    await create(tester);
+    expect([for (final l in _files.posted.single.lines) l.unitPrice], [40.0, 40.0]);
   });
 
   testWidgets('all stock downloads as Excel', (tester) async {

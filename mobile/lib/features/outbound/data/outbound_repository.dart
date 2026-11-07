@@ -72,7 +72,8 @@ class OutboundRepositoryImpl implements OutboundRepository {
 
   @override
   Future<ApiResult<List<OutboundStockItem>>> stock(int warehouseId) =>
-      _rpc('outbound_stock', {'p_warehouse_id': warehouseId},
+      // Every product of the library, with its stock, キープ and 出せる数 (0204).
+      _rpc('outbound_proposal_products', {'p_warehouse_id': warehouseId},
           (d) => [for (final r in _rows(d)) OutboundStockItem.fromJson(r)]);
 
   @override

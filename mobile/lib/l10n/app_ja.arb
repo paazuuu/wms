@@ -8790,7 +8790,7 @@
   "featOutboundProposalDesc": "在庫からパーセントまたは数量で出庫を作り、出荷先と出庫リストをExcelで送れる形にします",
   "featShipDestinations": "出荷先カード",
   "featShipDestinationsDesc": "輸出に必要な相手先の会社・住所・担当者・電話番号などをカードで管理",
-  "obIntro": "出荷先を選び、在庫からパーセントで提案させるか、商品ごとに数量を入れて出庫を作ります。出荷可能数（在庫 − 引当 − 出庫予定）を超える数は出せません。作った出庫は、出荷先と出庫リストをExcelでダウンロードして相手に送れます。",
+  "obIntro": "商品ライブラリーの商品から、出荷するものをチェックで選びます（Shiftを押しながらで範囲選択）。数量は一括（出せる数の％・出せる数ぜんぶ）か手入力で決めます。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。",
   "obDestination": "出荷先",
   "obChooseDestination": "保存した出荷先から選ぶ",
   "obDestNew": "新しい出荷先",
@@ -8832,8 +8832,8 @@
   },
   "obDestRetireBody": "これまでの出庫に記録された宛先はそのまま残ります。",
   "obNeedName": "会社名を入れてください",
-  "obShipDate": "出荷日を選ぶ",
-  "obShipDateIs": "出荷日: {date}",
+  "obShipDate": "出庫予定日: 未定（押して決める）",
+  "obShipDateIs": "出庫予定日: {date}",
   "@obShipDateIs": {
     "placeholders": {
       "date": {
@@ -8841,7 +8841,7 @@
       }
     }
   },
-  "obHowMuch": "数量の決め方",
+  "obHowMuch": "選んだ商品の数量を一括で入れる",
   "obModePercent": "パーセントで提案",
   "obModeDirect": "数量を直接入力",
   "obPercent": "割合",
@@ -8864,7 +8864,7 @@
   },
   "obPercentInvalid": "割合は0〜100で入れてください",
   "obDirectHint": "商品ごとに出す数を入れてください。チェックを外した商品は出しません。",
-  "obCapNote": "どの方法でも、出荷可能数を超える数は出せません。",
+  "obCapNote": "出せる数（在庫 − キープ）を超える数も登録できますが、その分は不足として表示され、そろうまで自動で出庫済みになりません。",
   "obSearch": "商品名・JAN・メーカーで絞り込み",
   "obNoStock": "この倉庫に在庫がありません",
   "obStockLine": "全在庫 {onHand} ・引当 {reserved} ・出庫予定 {inOpen} ・出荷可能 {free}",
@@ -8893,7 +8893,7 @@
       }
     }
   },
-  "obOverFree": "「{name}」は出荷可能数（{free}）を超えています",
+  "obOverFree": "「{name}」は出せる数（{free}）を超えています",
   "@obOverFree": {
     "placeholders": {
       "name": {
@@ -8916,7 +8916,7 @@
     }
   },
   "obDraftExcel": "Excelで確認（下書き）",
-  "obCreate": "{n}品目で出庫を作成",
+  "obCreate": "出庫予定として登録（{n}品目）",
   "@obCreate": {
     "placeholders": {
       "n": {
@@ -14054,5 +14054,91 @@
   "ofCurrencyEditKeep": "行ごとの通貨はそのまま",
   "ofCurrencyEditRowHint": "行ごとに変えるときは「中身を直す」を開き、価格の数字を押すと 円 → 元 → ドル と切り替わります。",
   "ofCurrencySaved": "通貨とレートを保存しました",
-  "ofErrNotEditable": "この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。"
+  "ofErrNotEditable": "この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。",
+  "obChooseFirst": "先に商品をチェックで選んでください",
+  "obCreateQ": "出庫予定として登録しますか？",
+  "obCreateBody": "{n}品目・合計 {qty}個を、出庫予定日「{day}」で登録します。在庫はキープされ、実際に出したときに「出庫した」で在庫から引きます。",
+  "@obCreateBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "obOverWarn": "出せる数を超えている商品が {n} 品目あります（不足として表示されます）",
+  "@obOverWarn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obProposalName": "出荷の提案 {when}",
+  "@obProposalName": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "obCreatedPlan": "{n}品目を出庫予定として登録しました",
+  "@obCreatedPlan": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obCreatedPlanTitle": "出庫予定として登録しました",
+  "obCreatedPlanBody": "出荷手配 › 出庫 と出庫カレンダーに出ます。開くと、中身の直し・出荷先カード・梱包と総重量・出庫予定日を決められます。",
+  "obOpenPlan": "出庫予定を開く",
+  "obProposeChosen": "選んだ{n}品目に入れる",
+  "@obProposeChosen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obFillFree": "出せる数ぜんぶ",
+  "obChooseHint": "チェックした商品にだけ入ります。数量を手で入れた商品は自動でチェックされます。",
+  "obMakerAll": "すべてのメーカー",
+  "obOnlyStock": "在庫があるものだけ",
+  "obOnlySelected": "選んだものだけ（{n}）",
+  "@obOnlySelected": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obCheckAllHint": "表示中の{n}品目をすべて選ぶ／外す（Shiftを押しながらチェックで範囲選択）",
+  "@obCheckAllHint": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "obNoProducts": "商品ライブラリーに商品がありません",
+  "obStockKeepLine": "在庫 {onHand}・キープ {kept}・出せる数 {free}",
+  "@obStockKeepLine": {
+    "placeholders": {
+      "onHand": {
+        "type": "int"
+      },
+      "kept": {
+        "type": "int"
+      },
+      "free": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -18089,7 +18089,7 @@ abstract class AppLocalizations {
   /// No description provided for @obIntro.
   ///
   /// In ja, this message translates to:
-  /// **'出荷先を選び、在庫からパーセントで提案させるか、商品ごとに数量を入れて出庫を作ります。出荷可能数（在庫 − 引当 − 出庫予定）を超える数は出せません。作った出庫は、出荷先と出庫リストをExcelでダウンロードして相手に送れます。'**
+  /// **'商品ライブラリーの商品から、出荷するものをチェックで選びます（Shiftを押しながらで範囲選択）。数量は一括（出せる数の％・出せる数ぜんぶ）か手入力で決めます。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。'**
   String get obIntro;
 
   /// No description provided for @obDestination.
@@ -18215,19 +18215,19 @@ abstract class AppLocalizations {
   /// No description provided for @obShipDate.
   ///
   /// In ja, this message translates to:
-  /// **'出荷日を選ぶ'**
+  /// **'出庫予定日: 未定（押して決める）'**
   String get obShipDate;
 
   /// No description provided for @obShipDateIs.
   ///
   /// In ja, this message translates to:
-  /// **'出荷日: {date}'**
+  /// **'出庫予定日: {date}'**
   String obShipDateIs(String date);
 
   /// No description provided for @obHowMuch.
   ///
   /// In ja, this message translates to:
-  /// **'数量の決め方'**
+  /// **'選んだ商品の数量を一括で入れる'**
   String get obHowMuch;
 
   /// No description provided for @obModePercent.
@@ -18305,7 +18305,7 @@ abstract class AppLocalizations {
   /// No description provided for @obCapNote.
   ///
   /// In ja, this message translates to:
-  /// **'どの方法でも、出荷可能数を超える数は出せません。'**
+  /// **'出せる数（在庫 − キープ）を超える数も登録できますが、その分は不足として表示され、そろうまで自動で出庫済みになりません。'**
   String get obCapNote;
 
   /// No description provided for @obSearch.
@@ -18341,7 +18341,7 @@ abstract class AppLocalizations {
   /// No description provided for @obOverFree.
   ///
   /// In ja, this message translates to:
-  /// **'「{name}」は出荷可能数（{free}）を超えています'**
+  /// **'「{name}」は出せる数（{free}）を超えています'**
   String obOverFree(String name, int free);
 
   /// No description provided for @obSummary.
@@ -18359,7 +18359,7 @@ abstract class AppLocalizations {
   /// No description provided for @obCreate.
   ///
   /// In ja, this message translates to:
-  /// **'{n}品目で出庫を作成'**
+  /// **'出庫予定として登録（{n}品目）'**
   String obCreate(int n);
 
   /// No description provided for @obNothing.
@@ -27904,6 +27904,114 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。'**
   String get ofErrNotEditable;
+
+  /// No description provided for @obChooseFirst.
+  ///
+  /// In ja, this message translates to:
+  /// **'先に商品をチェックで選んでください'**
+  String get obChooseFirst;
+
+  /// No description provided for @obCreateQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定として登録しますか？'**
+  String get obCreateQ;
+
+  /// No description provided for @obCreateBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目・合計 {qty}個を、出庫予定日「{day}」で登録します。在庫はキープされ、実際に出したときに「出庫した」で在庫から引きます。'**
+  String obCreateBody(int n, int qty, String day);
+
+  /// No description provided for @obOverWarn.
+  ///
+  /// In ja, this message translates to:
+  /// **'出せる数を超えている商品が {n} 品目あります（不足として表示されます）'**
+  String obOverWarn(int n);
+
+  /// No description provided for @obProposalName.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷の提案 {when}'**
+  String obProposalName(String when);
+
+  /// No description provided for @obCreatedPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目を出庫予定として登録しました'**
+  String obCreatedPlan(int n);
+
+  /// No description provided for @obCreatedPlanTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定として登録しました'**
+  String get obCreatedPlanTitle;
+
+  /// No description provided for @obCreatedPlanBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷手配 › 出庫 と出庫カレンダーに出ます。開くと、中身の直し・出荷先カード・梱包と総重量・出庫予定日を決められます。'**
+  String get obCreatedPlanBody;
+
+  /// No description provided for @obOpenPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定を開く'**
+  String get obOpenPlan;
+
+  /// No description provided for @obProposeChosen.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ{n}品目に入れる'**
+  String obProposeChosen(int n);
+
+  /// No description provided for @obFillFree.
+  ///
+  /// In ja, this message translates to:
+  /// **'出せる数ぜんぶ'**
+  String get obFillFree;
+
+  /// No description provided for @obChooseHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'チェックした商品にだけ入ります。数量を手で入れた商品は自動でチェックされます。'**
+  String get obChooseHint;
+
+  /// No description provided for @obMakerAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべてのメーカー'**
+  String get obMakerAll;
+
+  /// No description provided for @obOnlyStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫があるものだけ'**
+  String get obOnlyStock;
+
+  /// No description provided for @obOnlySelected.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだものだけ（{n}）'**
+  String obOnlySelected(int n);
+
+  /// No description provided for @obCheckAllHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の{n}品目をすべて選ぶ／外す（Shiftを押しながらチェックで範囲選択）'**
+  String obCheckAllHint(int n);
+
+  /// No description provided for @obNoProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーに商品がありません'**
+  String get obNoProducts;
+
+  /// No description provided for @obStockKeepLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫 {onHand}・キープ {kept}・出せる数 {free}'**
+  String obStockKeepLine(int onHand, int kept, int free);
 }
 
 class _AppLocalizationsDelegate
