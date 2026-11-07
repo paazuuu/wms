@@ -78,6 +78,7 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('outbound_already_undone')) return l10n.ofErrUndone;
   if (rawMessage.contains('outbound_not_planned')) return l10n.ofErrNotPlanned;
   if (rawMessage.contains('outbound_not_shipped')) return l10n.ofErrNotShipped;
+  if (rawMessage.contains('outbound_not_editable')) return l10n.ofErrNotEditable;
   if (rawMessage.contains('outbound_ship_day_future')) return l10n.ofErrShipDayFuture;
   if (rawMessage.contains('price_required')) return l10n.ppErrPrice;
   if (rawMessage.contains('supplier_required')) return l10n.ppErrSupplier;

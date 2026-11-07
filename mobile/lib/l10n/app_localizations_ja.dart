@@ -15770,4 +15770,98 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shEmpty => '条件に合う出庫はありません';
+
+  @override
+  String get ofReplaceTitle => 'ファイルで差し替える';
+
+  @override
+  String get ofReplaceIntro =>
+      '新しい出荷明細のファイルを読み込むと、今の出庫予定の中身と入れ替えます。違い（追加・外れた・数量の変わった商品）を確認してから差し替えます。';
+
+  @override
+  String ofReplaceBanner(String name, int rows, int qty) {
+    return '差し替える出庫予定: $name（今は $rows行・数量 $qty）。出荷先カード・倉庫・日程・総重量の設定はそのまま残ります。';
+  }
+
+  @override
+  String get ofReplaceDo => 'この内容で差し替える';
+
+  @override
+  String get ofReplaceQ => '出荷内容を差し替えますか？';
+
+  @override
+  String ofReplaceSummary(int added, int removed, int changed) {
+    return '追加 $added品目・外れる $removed品目・数量が変わる $changed品目';
+  }
+
+  @override
+  String get ofReplaceAdded => '追加される商品';
+
+  @override
+  String get ofReplaceRemoved => '外れる商品';
+
+  @override
+  String get ofReplaceChanged => '数量が変わる商品';
+
+  @override
+  String get ofReplaceKeeps =>
+      '前の中身は記録として残ります。キープ（引当）と不足の確認は新しい中身で計算し直されます。総重量の商品の重さは自動で変わります。ダンボールの数・梱包材は「梱包・総重量」で見直してください。';
+
+  @override
+  String get ofReplaced => '出荷内容を差し替えました';
+
+  @override
+  String get ofEditLines => '中身を直す';
+
+  @override
+  String get ofEditLinesDone => '直し終わる';
+
+  @override
+  String get ofEditHint =>
+      '変更はすぐ保存されます。「出荷する」のチェックを外すと、その行は出荷もキープもしません（行は残るので戻せます）。数量は数字を押して直します。総重量の商品の重さは自動で変わります。ダンボールの数・梱包材は「梱包・総重量」で見直してください。';
+
+  @override
+  String get ofLineShip => '出荷する';
+
+  @override
+  String get ofAddLine => '商品を追加';
+
+  @override
+  String get ofAddLineTitle => '追加する商品を選ぶ';
+
+  @override
+  String ofAddLineQty(String name) {
+    return '$name の数量';
+  }
+
+  @override
+  String get ofLineEdited => '出荷内容を直しました';
+
+  @override
+  String ofLineQtyTitle(int row) {
+    return '行 $row の数量';
+  }
+
+  @override
+  String get ofCurrencyEdit => '通貨・レート';
+
+  @override
+  String get ofCurrencyEditTitle => '価格の通貨とレート';
+
+  @override
+  String get ofCurrencyEditAll => 'すべての行をこの通貨にする';
+
+  @override
+  String get ofCurrencyEditKeep => '行ごとの通貨はそのまま';
+
+  @override
+  String get ofCurrencyEditRowHint =>
+      '行ごとに変えるときは「中身を直す」を開き、価格の数字を押すと 円 → 元 → ドル と切り替わります。';
+
+  @override
+  String get ofCurrencySaved => '通貨とレートを保存しました';
+
+  @override
+  String get ofErrNotEditable =>
+      'この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。';
 }

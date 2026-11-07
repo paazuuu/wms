@@ -15655,4 +15655,97 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shEmpty => '没有符合条件的出库';
+
+  @override
+  String get ofReplaceTitle => '用文件替换';
+
+  @override
+  String get ofReplaceIntro =>
+      '读取新的出货明细文件，替换当前出库预定的内容。替换前会确认差异（新增・移除・数量变化的商品）。';
+
+  @override
+  String ofReplaceBanner(String name, int rows, int qty) {
+    return '要替换的出库预定：$name（目前 $rows行・数量 $qty）。收货方卡片・仓库・日期・总重量设置保持不变。';
+  }
+
+  @override
+  String get ofReplaceDo => '用此内容替换';
+
+  @override
+  String get ofReplaceQ => '替换出货内容？';
+
+  @override
+  String ofReplaceSummary(int added, int removed, int changed) {
+    return '新增 $added种・移除 $removed种・数量变化 $changed种';
+  }
+
+  @override
+  String get ofReplaceAdded => '新增的商品';
+
+  @override
+  String get ofReplaceRemoved => '移除的商品';
+
+  @override
+  String get ofReplaceChanged => '数量变化的商品';
+
+  @override
+  String get ofReplaceKeeps =>
+      '之前的内容会作为记录保留。保留（占用）和缺货会按新内容重新计算。总重量中的商品重量自动更新。纸箱数量・包装材料请在「包装・总重量」中重新确认。';
+
+  @override
+  String get ofReplaced => '出货内容已替换';
+
+  @override
+  String get ofEditLines => '修改内容';
+
+  @override
+  String get ofEditLinesDone => '完成修改';
+
+  @override
+  String get ofEditHint =>
+      '修改会立即保存。取消「出货」勾选后，该行既不出货也不保留（行仍在，可恢复）。点击数量即可修改。总重量中的商品重量自动更新；纸箱数量・包装材料请在「包装・总重量」中重新确认。';
+
+  @override
+  String get ofLineShip => '出货';
+
+  @override
+  String get ofAddLine => '添加商品';
+
+  @override
+  String get ofAddLineTitle => '选择要添加的商品';
+
+  @override
+  String ofAddLineQty(String name) {
+    return '$name 的数量';
+  }
+
+  @override
+  String get ofLineEdited => '出货内容已修改';
+
+  @override
+  String ofLineQtyTitle(int row) {
+    return '第 $row 行的数量';
+  }
+
+  @override
+  String get ofCurrencyEdit => '币种・汇率';
+
+  @override
+  String get ofCurrencyEditTitle => '价格币种和汇率';
+
+  @override
+  String get ofCurrencyEditAll => '所有行改为此币种';
+
+  @override
+  String get ofCurrencyEditKeep => '各行币种保持不变';
+
+  @override
+  String get ofCurrencyEditRowHint =>
+      '如需逐行修改，请打开「修改内容」，点击价格即可在 円 → 元 → 美元 之间切换。';
+
+  @override
+  String get ofCurrencySaved => '已保存币种和汇率';
+
+  @override
+  String get ofErrNotEditable => '此出库已出库或已撤销，无法修改内容。如需修改，请先「恢复为出库预定」。';
 }

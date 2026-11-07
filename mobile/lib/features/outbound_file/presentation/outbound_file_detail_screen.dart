@@ -9,6 +9,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
+import '../../product/domain/product.dart' show Product;
 import '../../outbound/presentation/ship_destinations_screen.dart'
     show DestinationCardView, copyDestinationCard, pickDestinationCard;
 import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
@@ -20,7 +21,14 @@ import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
 import '../data/outbound_file_repository.dart';
 import '../domain/outbound_currency.dart' show PriceCurrency;
 import 'outbound_file_screen.dart'
-    show outboundActionLabel, outboundFileSaverProvider, outboundKg, outboundMoney, outboundTabOpenerProvider;
+    show
+        OutboundPickProductDialog,
+        OutboundReplaceScreen,
+        outboundActionLabel,
+        outboundFileSaverProvider,
+        outboundKg,
+        outboundMoney,
+        outboundTabOpenerProvider;
 
 /// The warehouse a list not yet shipped goes from, chosen again (0199):
 /// true when it changed.
@@ -100,10 +108,126 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
   bool _busy = false;
   int _limit = 200;
 
+  /// 中身を直す (0202): the rows' quantities, whether each ships, a product
+  /// added, a row's currency.
+  bool _editing = false;
+
   @override
   void dispose() {
     _across.dispose();
     super.dispose();
+  }
+
+  /// Rows changed (0202): saved at once, the list read again.
+  Future<void> _edit(OutboundFileSummary f, List<Map<String, dynamic>> edits) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    final r = await ref.read(outboundFileRepositoryProvider).editLines(f.id, edits);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    switch (r) {
+      case ApiSuccess():
+        _refreshAll();
+        _snack(l10n.ofLineEdited);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  Future<int?> _askQuantity(String title, int initial) => showDialog<int>(
+        context: context,
+        builder: (c) {
+          final ctl = TextEditingController(text: '$initial');
+          final l10n = AppLocalizations.of(c);
+          return AlertDialog(
+            title: Text(title),
+            content: TextField(
+              key: const ValueKey('of-qty-field'),
+              controller: ctl,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              onSubmitted: (t) => Navigator.pop(c, int.tryParse(t.trim())),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(c), child: Text(l10n.actionCancel)),
+              FilledButton(
+                  key: const ValueKey('of-qty-ok'),
+                  onPressed: () => Navigator.pop(c, int.tryParse(ctl.text.trim())),
+                  child: Text(l10n.actionSave)),
+            ],
+          );
+        },
+      );
+
+  Future<void> _editQuantity(OutboundFileSummary f, OutboundFileLine l) async {
+    final q = await _askQuantity(AppLocalizations.of(context).ofLineQtyTitle(l.rowNo), l.quantity);
+    if (q == null || q < 0 || q == l.quantity || !mounted) return;
+    await _edit(f, [
+      {'line_id': l.id, 'quantity': q},
+    ]);
+  }
+
+  /// A product of the library added as a new row.
+  Future<void> _addLine(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final p = await showDialog<Product>(
+      context: context,
+      builder: (_) => OutboundPickProductDialog(rowNo: 0, initial: '', warehouseId: f.warehouseId, title: l10n.ofAddLineTitle),
+    );
+    if (p == null || !mounted) return;
+    final q = await _askQuantity(l10n.ofAddLineQty(p.name), 1);
+    if (q == null || q <= 0 || !mounted) return;
+    await _edit(f, [
+      {'add': true, 'product_id': p.id, 'quantity': q},
+    ]);
+  }
+
+  /// One row's price currency in turn: 円 → 元 → ドル (0197/0202).
+  Future<void> _cycleCurrency(OutboundFileSummary f, OutboundFileLine l) async {
+    final l10n = AppLocalizations.of(context);
+    const order = [PriceCurrency.jpy, PriceCurrency.cny, PriceCurrency.usd];
+    final now = PriceCurrency.fromWire(l.currency);
+    final next = order[(order.indexOf(now) + 1) % order.length];
+    final r = await ref.read(outboundFileRepositoryProvider).setCurrency(f.id, [
+      {'row_no': l.rowNo, 'currency': next.wire, 'source': 'manual'},
+    ]);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        _refreshAll();
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
+  /// 通貨・レート: every row in one currency (or each kept) and the rate.
+  Future<void> _editCurrency(OutboundFileDetail d) async {
+    final l10n = AppLocalizations.of(context);
+    final f = d.file;
+    final picked = await showDialog<({PriceCurrency? all, double? rate})>(
+      context: context,
+      builder: (_) => _CurrencyEditDialog(rate: f.fxCnyJpy),
+    );
+    if (picked == null || !mounted) return;
+    final all = picked.all;
+    final rate = picked.rate;
+    final r = await ref.read(outboundFileRepositoryProvider).setCurrency(
+          f.id,
+          [
+            if (all != null)
+              for (final l in d.lines) {'row_no': l.rowNo, 'currency': all.wire, 'source': 'manual'},
+          ],
+          currency: all?.wire,
+          fxCnyJpy: rate,
+        );
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        _refreshAll();
+        _snack(l10n.ofCurrencySaved);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
   }
 
   /// After any change: this list, the calendar, the 未定 lists (dashboard,
@@ -538,6 +662,21 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     icon: const Icon(Icons.inventory_2_outlined),
                     label: Text(l10n.ofPackingWeight),
                   ),
+                // 出荷内容の変更 (0202): while nothing has left.
+                if (f.warehouseMovable)
+                  OutlinedButton.icon(
+                    key: const ValueKey('of-edit-lines'),
+                    onPressed: _busy ? null : () => setState(() => _editing = !_editing),
+                    icon: Icon(_editing ? Icons.check : Icons.edit_note_outlined),
+                    label: Text(_editing ? l10n.ofEditLinesDone : l10n.ofEditLines),
+                  ),
+                if (!f.undone && ref.watch(showPricesProvider))
+                  OutlinedButton.icon(
+                    key: const ValueKey('of-currency-edit'),
+                    onPressed: _busy ? null : () => _editCurrency(d),
+                    icon: const Icon(Icons.currency_exchange),
+                    label: Text(l10n.ofCurrencyEdit),
+                  ),
                 if (!f.undone && !f.planned && !f.proxy)
                   OutlinedButton.icon(
                     key: const ValueKey('of-back-to-plan'),
@@ -592,7 +731,44 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        _table(l10n, d.lines.take(_limit).toList(), proxy: f.proxy || f.planned),
+        if (_editing && f.warehouseMovable) ...[
+          Card(
+            key: const ValueKey('of-edit-bar'),
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l10n.ofEditHint, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer)),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+                  FilledButton.icon(
+                    key: const ValueKey('of-add-line'),
+                    onPressed: _busy ? null : () => _addLine(f),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.ofAddLine),
+                  ),
+                  OutlinedButton.icon(
+                    key: const ValueKey('of-replace-file'),
+                    onPressed: _busy
+                        ? null
+                        : () async {
+                            final done = await Navigator.of(context).push<bool>(
+                                MaterialPageRoute(builder: (_) => OutboundReplaceScreen(fileId: f.id)));
+                            if (done == true && mounted) {
+                              _refreshAll();
+                              _snack(l10n.ofReplaced);
+                            }
+                          },
+                    icon: const Icon(Icons.published_with_changes_outlined),
+                    label: Text(l10n.ofReplaceTitle),
+                  ),
+                ]),
+              ]),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        _table(l10n, d.lines.take(_limit).toList(), proxy: f.proxy || f.planned, edit: _editing && f.warehouseMovable ? f : null),
         if (d.lines.length > _limit)
           TextButton(onPressed: () => setState(() => _limit += 300), child: Text(l10n.ppMore(d.lines.length - _limit))),
       ],
@@ -673,14 +849,14 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     return [for (final e in by.entries) '${outboundMoney(e.value)} ${e.key.mark}'].join(' · ');
   }
 
-  Widget _table(AppLocalizations l10n, List<OutboundFileLine> lines, {bool proxy = false}) {
+  Widget _table(AppLocalizations l10n, List<OutboundFileLine> lines, {bool proxy = false, OutboundFileSummary? edit}) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final head = theme.textTheme.labelMedium;
     final small = theme.textTheme.bodySmall;
     // 表示設定 (0193): prices hidden from this user's tier.
     final prices = ref.watch(showPricesProvider);
-    const widths = [52.0, 96.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 64.0, 80.0, 80.0, 100.0, 84.0, 96.0, 110.0];
+    const widths = [52.0, 124.0, 250.0, 128.0, 128.0, 96.0, 104.0, 72.0, 72.0, 64.0, 80.0, 80.0, 100.0, 84.0, 96.0, 110.0];
     // 代理出荷: nothing taken out of stock — no 出庫数, 不足 or stock columns.
     // 仕入先 (6) is ours to know, not the shipping side's: kept, not shown.
     final hidden = proxy ? const {6, 8, 9, 15} : const {6};
@@ -720,13 +896,38 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
               ),
               child: Row(children: [
                 cell(0, Text('${l.rowNo}', style: small)),
-                cell(1, Text(outboundActionLabel(l10n, l.action), style: small)),
+                cell(
+                    1,
+                    edit == null
+                        ? Text(outboundActionLabel(l10n, l.action), style: small)
+                        : Row(mainAxisSize: MainAxisSize.min, children: [
+                            Checkbox(
+                              key: ValueKey('of-line-include-${l.rowNo}'),
+                              value: l.action != 'skip',
+                              visualDensity: VisualDensity.compact,
+                              onChanged: _busy
+                                  ? null
+                                  : (v) => _edit(edit, [
+                                        {'line_id': l.id, 'action': v == true ? 'ship' : 'skip'},
+                                      ]),
+                            ),
+                            Flexible(child: Text(l10n.ofLineShip, style: small)),
+                          ])),
                 cell(2, Text(l.productName ?? '', maxLines: 2, overflow: TextOverflow.ellipsis)),
                 cell(3, Text(l.jan ?? '', style: small)),
                 cell(4, Text(l.code ?? '', style: small, maxLines: 2, overflow: TextOverflow.ellipsis)),
                 cell(5, Text(l.maker ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 cell(6, Text(l.supplier ?? '', style: small, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                cell(7, Text('${l.quantity}', style: theme.textTheme.titleSmall), end: true),
+                cell(
+                    7,
+                    edit == null
+                        ? Text('${l.quantity}', style: theme.textTheme.titleSmall)
+                        : TextButton(
+                            key: ValueKey('of-line-qty-${l.rowNo}'),
+                            onPressed: _busy ? null : () => _editQuantity(edit, l),
+                            child: Text('${l.quantity}', style: theme.textTheme.titleSmall?.copyWith(color: scheme.primary)),
+                          ),
+                    end: true),
                 cell(8, Text(l.action == 'ship' ? '${l.shippedQuantity}' : '—', key: ValueKey('of-line-ship-${l.rowNo}')), end: true),
                 cell(
                   9,
@@ -734,7 +935,17 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                       style: small?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
                   end: true,
                 ),
-                cell(10, Text(prices ? _money(l, l.unitPrice) : '—', style: _moneyStyle(l, small, scheme)), end: true),
+                cell(
+                    10,
+                    edit != null && prices
+                        ? InkWell(
+                            key: ValueKey('of-line-cur-${l.rowNo}'),
+                            onTap: _busy ? null : () => _cycleCurrency(edit, l),
+                            child: Text(_money(l, l.unitPrice),
+                                style: _moneyStyle(l, small, scheme)?.copyWith(decoration: TextDecoration.underline)),
+                          )
+                        : Text(prices ? _money(l, l.unitPrice) : '—', style: _moneyStyle(l, small, scheme)),
+                    end: true),
                 cell(11, Text(prices ? _money(l, l.unitPriceTax) : '—', style: _moneyStyle(l, small, scheme)), end: true),
                 cell(12, Text(prices ? _money(l, l.amount) : '—', style: _moneyStyle(l, small, scheme)), end: true),
                 cell(13, Text(l.weightG == null ? '' : '${outboundKg(l.weightG!)} kg', style: small), end: true),
@@ -744,6 +955,79 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
             ),
         ]),
       ),
+    );
+  }
+}
+
+/// 通貨・レート (0202): every row in one currency, or each kept, and the
+/// rate 1 元 in 円.
+class _CurrencyEditDialog extends StatefulWidget {
+  const _CurrencyEditDialog({this.rate});
+
+  final double? rate;
+
+  @override
+  State<_CurrencyEditDialog> createState() => _CurrencyEditDialogState();
+}
+
+class _CurrencyEditDialogState extends State<_CurrencyEditDialog> {
+  PriceCurrency? _all;
+  late final _fx = TextEditingController(text: widget.rate == null ? '' : outboundMoney(widget.rate).replaceAll(',', ''));
+
+  @override
+  void dispose() {
+    _fx.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return AlertDialog(
+      key: const ValueKey('of-currency-edit-dialog'),
+      title: Text(l10n.ofCurrencyEditTitle),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(l10n.ofCurrencyEditAll, style: theme.textTheme.labelLarge),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(spacing: AppSpacing.sm, children: [
+              ChoiceChip(
+                key: const ValueKey('of-currency-edit-keep'),
+                label: Text(l10n.ofCurrencyEditKeep),
+                selected: _all == null,
+                onSelected: (_) => setState(() => _all = null),
+              ),
+              for (final cur in PriceCurrency.values)
+                ChoiceChip(
+                  key: ValueKey('of-currency-edit-${cur.wire}'),
+                  label: Text(cur.mark),
+                  selected: _all == cur,
+                  onSelected: (_) => setState(() => _all = cur),
+                ),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const ValueKey('of-currency-edit-fx'),
+              controller: _fx,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: l10n.ofFxLabel, suffixText: '円', helperText: l10n.ofFxHint, helperMaxLines: 3),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.ofCurrencyEditRowHint, style: theme.textTheme.bodySmall),
+          ]),
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('of-currency-edit-ok'),
+          onPressed: () => Navigator.pop(context, (all: _all, rate: double.tryParse(_fx.text.trim().replaceAll(',', '')))),
+          child: Text(l10n.ofCurrencyDone),
+        ),
+      ],
     );
   }
 }

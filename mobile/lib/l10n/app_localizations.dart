@@ -27742,6 +27742,168 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'条件に合う出庫はありません'**
   String get shEmpty;
+
+  /// No description provided for @ofReplaceTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルで差し替える'**
+  String get ofReplaceTitle;
+
+  /// No description provided for @ofReplaceIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'新しい出荷明細のファイルを読み込むと、今の出庫予定の中身と入れ替えます。違い（追加・外れた・数量の変わった商品）を確認してから差し替えます。'**
+  String get ofReplaceIntro;
+
+  /// No description provided for @ofReplaceBanner.
+  ///
+  /// In ja, this message translates to:
+  /// **'差し替える出庫予定: {name}（今は {rows}行・数量 {qty}）。出荷先カード・倉庫・日程・総重量の設定はそのまま残ります。'**
+  String ofReplaceBanner(String name, int rows, int qty);
+
+  /// No description provided for @ofReplaceDo.
+  ///
+  /// In ja, this message translates to:
+  /// **'この内容で差し替える'**
+  String get ofReplaceDo;
+
+  /// No description provided for @ofReplaceQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷内容を差し替えますか？'**
+  String get ofReplaceQ;
+
+  /// No description provided for @ofReplaceSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加 {added}品目・外れる {removed}品目・数量が変わる {changed}品目'**
+  String ofReplaceSummary(int added, int removed, int changed);
+
+  /// No description provided for @ofReplaceAdded.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加される商品'**
+  String get ofReplaceAdded;
+
+  /// No description provided for @ofReplaceRemoved.
+  ///
+  /// In ja, this message translates to:
+  /// **'外れる商品'**
+  String get ofReplaceRemoved;
+
+  /// No description provided for @ofReplaceChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量が変わる商品'**
+  String get ofReplaceChanged;
+
+  /// No description provided for @ofReplaceKeeps.
+  ///
+  /// In ja, this message translates to:
+  /// **'前の中身は記録として残ります。キープ（引当）と不足の確認は新しい中身で計算し直されます。総重量の商品の重さは自動で変わります。ダンボールの数・梱包材は「梱包・総重量」で見直してください。'**
+  String get ofReplaceKeeps;
+
+  /// No description provided for @ofReplaced.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷内容を差し替えました'**
+  String get ofReplaced;
+
+  /// No description provided for @ofEditLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'中身を直す'**
+  String get ofEditLines;
+
+  /// No description provided for @ofEditLinesDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'直し終わる'**
+  String get ofEditLinesDone;
+
+  /// No description provided for @ofEditHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更はすぐ保存されます。「出荷する」のチェックを外すと、その行は出荷もキープもしません（行は残るので戻せます）。数量は数字を押して直します。総重量の商品の重さは自動で変わります。ダンボールの数・梱包材は「梱包・総重量」で見直してください。'**
+  String get ofEditHint;
+
+  /// No description provided for @ofLineShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷する'**
+  String get ofLineShip;
+
+  /// No description provided for @ofAddLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を追加'**
+  String get ofAddLine;
+
+  /// No description provided for @ofAddLineTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'追加する商品を選ぶ'**
+  String get ofAddLineTitle;
+
+  /// No description provided for @ofAddLineQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の数量'**
+  String ofAddLineQty(String name);
+
+  /// No description provided for @ofLineEdited.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷内容を直しました'**
+  String get ofLineEdited;
+
+  /// No description provided for @ofLineQtyTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'行 {row} の数量'**
+  String ofLineQtyTitle(int row);
+
+  /// No description provided for @ofCurrencyEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'通貨・レート'**
+  String get ofCurrencyEdit;
+
+  /// No description provided for @ofCurrencyEditTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格の通貨とレート'**
+  String get ofCurrencyEditTitle;
+
+  /// No description provided for @ofCurrencyEditAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての行をこの通貨にする'**
+  String get ofCurrencyEditAll;
+
+  /// No description provided for @ofCurrencyEditKeep.
+  ///
+  /// In ja, this message translates to:
+  /// **'行ごとの通貨はそのまま'**
+  String get ofCurrencyEditKeep;
+
+  /// No description provided for @ofCurrencyEditRowHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'行ごとに変えるときは「中身を直す」を開き、価格の数字を押すと 円 → 元 → ドル と切り替わります。'**
+  String get ofCurrencyEditRowHint;
+
+  /// No description provided for @ofCurrencySaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'通貨とレートを保存しました'**
+  String get ofCurrencySaved;
+
+  /// No description provided for @ofErrNotEditable.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。'**
+  String get ofErrNotEditable;
 }
 
 class _AppLocalizationsDelegate

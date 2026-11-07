@@ -153,4 +153,28 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     backToPlanned.add(id);
     return const ApiSuccess(6);
   }
+
+  final List<(int, List<Map<String, dynamic>>)> lineEdits = [];
+  final List<({int id, List<OutboundPostLine> lines, String fileName, String? path})> replaced = [];
+
+  @override
+  Future<ApiResult<int>> editLines(int id, List<Map<String, dynamic>> edits) async {
+    lineEdits.add((id, edits));
+    return ApiSuccess(edits.length);
+  }
+
+  @override
+  Future<ApiResult<int>> replaceLines(
+    int id, {
+    required List<OutboundPostLine> lines,
+    required String fileName,
+    String? storagePath,
+    int? byteSize,
+    String? fingerprint,
+    String? sheetName,
+    Map<String, String>? columns,
+  }) async {
+    replaced.add((id: id, lines: lines, fileName: fileName, path: storagePath));
+    return const ApiSuccess(99);
+  }
 }

@@ -582,6 +582,24 @@ abstract class OutboundFileRepository {
   /// was that one already.
   Future<ApiResult<bool>> setWarehouse(int id, int warehouseId);
 
+  /// A list not shipped yet put right row by row (0202): {line_id,
+  /// quantity}, {line_id, action: skip|ship}, {add: true, product_id,
+  /// quantity}. How many changes were made.
+  Future<ApiResult<int>> editLines(int id, List<Map<String, dynamic>> edits);
+
+  /// Its rows replaced by those read from another file (0202); the rows
+  /// there were are kept on an archived copy, whose id comes back.
+  Future<ApiResult<int>> replaceLines(
+    int id, {
+    required List<OutboundPostLine> lines,
+    required String fileName,
+    String? storagePath,
+    int? byteSize,
+    String? fingerprint,
+    String? sheetName,
+    Map<String, String>? columns,
+  });
+
   /// A shipped list that did not leave after all: back to planned, 未定,
   /// its stock back (0201). How many came back.
   Future<ApiResult<int>> backToPlan(int id);
@@ -767,6 +785,45 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
     try {
       final r = await _rest.post('/rpc/outbound_file_set_currency',
           data: {'p_id': id, 'p_lines': lines, 'p_currency': currency, 'p_fx_cny_jpy': fxCnyJpy});
+      return ApiSuccess(_i(r.data));
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> editLines(int id, List<Map<String, dynamic>> edits) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_lines_edit', data: {'p_id': id, 'p_edits': edits});
+      return ApiSuccess(_i(r.data));
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> replaceLines(
+    int id, {
+    required List<OutboundPostLine> lines,
+    required String fileName,
+    String? storagePath,
+    int? byteSize,
+    String? fingerprint,
+    String? sheetName,
+    Map<String, String>? columns,
+  }) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_replace_lines', data: {
+        'p_id': id,
+        'p_lines': [for (final l in lines) l.toJson()],
+        'p_file_name': fileName,
+        'p_storage_path': storagePath,
+        'p_content_type': mimeTypeFor(fileName),
+        'p_byte_size': byteSize,
+        'p_fingerprint': fingerprint,
+        'p_sheet_name': sheetName,
+        'p_columns': columns,
+      });
       return ApiSuccess(_i(r.data));
     } on DioException catch (e) {
       return mapDioError<int>(e);

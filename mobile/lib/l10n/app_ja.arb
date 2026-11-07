@@ -13987,5 +13987,72 @@
       }
     }
   },
-  "shEmpty": "条件に合う出庫はありません"
+  "shEmpty": "条件に合う出庫はありません",
+  "ofReplaceTitle": "ファイルで差し替える",
+  "ofReplaceIntro": "新しい出荷明細のファイルを読み込むと、今の出庫予定の中身と入れ替えます。違い（追加・外れた・数量の変わった商品）を確認してから差し替えます。",
+  "ofReplaceBanner": "差し替える出庫予定: {name}（今は {rows}行・数量 {qty}）。出荷先カード・倉庫・日程・総重量の設定はそのまま残ります。",
+  "@ofReplaceBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "ofReplaceDo": "この内容で差し替える",
+  "ofReplaceQ": "出荷内容を差し替えますか？",
+  "ofReplaceSummary": "追加 {added}品目・外れる {removed}品目・数量が変わる {changed}品目",
+  "@ofReplaceSummary": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      },
+      "changed": {
+        "type": "int"
+      }
+    }
+  },
+  "ofReplaceAdded": "追加される商品",
+  "ofReplaceRemoved": "外れる商品",
+  "ofReplaceChanged": "数量が変わる商品",
+  "ofReplaceKeeps": "前の中身は記録として残ります。キープ（引当）と不足の確認は新しい中身で計算し直されます。総重量の商品の重さは自動で変わります。ダンボールの数・梱包材は「梱包・総重量」で見直してください。",
+  "ofReplaced": "出荷内容を差し替えました",
+  "ofEditLines": "中身を直す",
+  "ofEditLinesDone": "直し終わる",
+  "ofEditHint": "変更はすぐ保存されます。「出荷する」のチェックを外すと、その行は出荷もキープもしません（行は残るので戻せます）。数量は数字を押して直します。総重量の商品の重さは自動で変わります。ダンボールの数・梱包材は「梱包・総重量」で見直してください。",
+  "ofLineShip": "出荷する",
+  "ofAddLine": "商品を追加",
+  "ofAddLineTitle": "追加する商品を選ぶ",
+  "ofAddLineQty": "{name} の数量",
+  "@ofAddLineQty": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ofLineEdited": "出荷内容を直しました",
+  "ofLineQtyTitle": "行 {row} の数量",
+  "@ofLineQtyTitle": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "ofCurrencyEdit": "通貨・レート",
+  "ofCurrencyEditTitle": "価格の通貨とレート",
+  "ofCurrencyEditAll": "すべての行をこの通貨にする",
+  "ofCurrencyEditKeep": "行ごとの通貨はそのまま",
+  "ofCurrencyEditRowHint": "行ごとに変えるときは「中身を直す」を開き、価格の数字を押すと 円 → 元 → ドル と切り替わります。",
+  "ofCurrencySaved": "通貨とレートを保存しました",
+  "ofErrNotEditable": "この出庫は出庫済みか取り消し済みのため、中身を直せません。直すときは「出庫予定に戻す」を使ってください。"
 }

@@ -11,6 +11,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart';
 import '../../../core/export/xlsx.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/ui/state_views.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
@@ -154,10 +155,78 @@ Color outboundStatusColor(ColorScheme s, OutboundStatus st) => switch (st) {
 
 /// Reads a list, shows each row with what will be done, and ships it — or,
 /// as a 代理出荷 ([proxy]), keeps it (and rows typed in) as a record.
+/// What a new file changes in a list (0202), by product: rows added, left
+/// out, and those whose quantity changed.
+typedef OutboundLinesDiff = ({
+  List<({String name, int quantity})> added,
+  List<({String name, int quantity})> removed,
+  List<({String name, int from, int to})> changed,
+});
+
+OutboundLinesDiff outboundLinesDiff(List<OutboundFileLine> before, List<OutboundPlanLine> after) {
+  String key(int? pid, String? jan, String? code, String? name) => pid != null
+      ? 'p$pid'
+      : (jan ?? '').isNotEmpty
+          ? 'j$jan'
+          : (code ?? '').isNotEmpty
+              ? 'c${code!.toUpperCase()}'
+              : 'n${name ?? ''}';
+  final was = <String, int>{}, now = <String, int>{}, names = <String, String>{};
+  for (final l in before) {
+    if (l.action == 'skip') continue;
+    final k = key(l.productId, l.jan, l.code, l.productName);
+    was[k] = (was[k] ?? 0) + l.quantity;
+    names.putIfAbsent(k, () => l.productName ?? l.code ?? l.jan ?? '?');
+  }
+  for (final l in after) {
+    if (l.action == OutboundAction.skip) continue;
+    final jan = l.row.jan.isNotEmpty ? l.row.jan : l.match.jan;
+    final k = key(l.match.productId, jan, l.row.code, l.match.name ?? l.row.name);
+    now[k] = (now[k] ?? 0) + (l.row.quantity ?? 0);
+    names.putIfAbsent(k, () => l.match.name ?? l.row.name ?? l.row.code ?? jan ?? '?');
+  }
+  return (
+    added: [for (final e in now.entries) if (!was.containsKey(e.key)) (name: names[e.key]!, quantity: e.value)],
+    removed: [for (final e in was.entries) if (!now.containsKey(e.key)) (name: names[e.key]!, quantity: e.value)],
+    changed: [
+      for (final e in now.entries)
+        if (was.containsKey(e.key) && was[e.key] != e.value) (name: names[e.key]!, from: was[e.key]!, to: e.value),
+    ],
+  );
+}
+
+/// ファイルで差し替える: the import read again for a list not shipped yet.
+class OutboundReplaceScreen extends ConsumerWidget {
+  const OutboundReplaceScreen({super.key, required this.fileId});
+
+  final int fileId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final async = ref.watch(outboundFileDetailProvider(fileId));
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.ofReplaceTitle)),
+      body: async.when(
+        loading: () => LoadingView(message: l10n.loading),
+        error: (e, _) => ErrorStateView(message: humanizeApiErrorMessage(l10n, '$e'), onRetry: () => ref.invalidate(outboundFileDetailProvider(fileId))),
+        data: (d) => OutboundImportTab(replace: d.file, replaceLines: d.lines),
+      ),
+    );
+  }
+}
+
 class OutboundImportTab extends ConsumerStatefulWidget {
-  const OutboundImportTab({super.key, this.proxy = false});
+  const OutboundImportTab({super.key, this.proxy = false, this.replace, this.replaceLines = const []});
 
   final bool proxy;
+
+  /// A list not shipped yet whose rows a new file replaces (0202): its
+  /// warehouse is kept, as are its 出荷先カード, day and gross weight.
+  final OutboundFileSummary? replace;
+
+  /// Its rows as they are, to show what the new file changes.
+  final List<OutboundFileLine> replaceLines;
 
   @override
   ConsumerState<OutboundImportTab> createState() => _OutboundImportTabState();
@@ -319,7 +388,9 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         for (final k in _currency.keys) k: (currency: c, source: CurrencySource.manual, confident: true),
       });
 
-  bool get _proxy => widget.proxy;
+  bool get _proxy => widget.replace?.proxy ?? widget.proxy;
+
+  bool get _replacing => widget.replace != null;
 
   /// The rows to post: the file's (when it can be read) and those typed in.
   List<OutboundRow> get _rows => [if (_parsed?.usable ?? false) ..._parsed!.rows, ..._manual];
@@ -455,7 +526,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
 
   /// Where the list is checked and goes out: the app's warehouse, else the
   /// one chosen here.
-  int? get _warehouseId => ref.read(writeWarehouseIdProvider) ?? _warehouseHere;
+  int? get _warehouseId => widget.replace?.warehouseId ?? ref.read(writeWarehouseIdProvider) ?? _warehouseHere;
 
   /// One warehouse chosen on this screen: the rows are checked against it.
   Widget _warehousePicker(AppLocalizations l10n) {
@@ -487,7 +558,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     final warehouseId = _warehouseId;
     final p = await showDialog<Product>(
       context: context,
-      builder: (_) => _PickProductDialog(
+      builder: (_) => OutboundPickProductDialog(
           rowNo: line.row.rowNo, initial: line.row.code ?? line.row.name ?? '', warehouseId: warehouseId),
     );
     if (p == null || !mounted) return;
@@ -614,23 +685,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           if (u case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
         }
         // Each row's currency, kept for the profit and loss later (0197).
-        if (_currency.isNotEmpty) {
-          final counts = <PriceCurrency, int>{};
-          for (final c in _currency.values) {
-            counts[c.currency] = (counts[c.currency] ?? 0) + 1;
-          }
-          final main = counts.entries.reduce((a, b) => b.value > a.value ? b : a).key;
-          final c = await repo.setCurrency(
-            data,
-            [
-              for (final e in _currency.entries)
-                {'row_no': e.key, 'currency': e.value.currency.wire, 'source': e.value.source.wire},
-            ],
-            currency: main.wire,
-            fxCnyJpy: double.tryParse(_fx.text.trim()),
-          );
-          if (c case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
-        }
+        await _saveCurrency(data);
         final card = _card;
         if (card?.id != null) {
           final set = await repo.setDestination(data, card!.id);
@@ -667,6 +722,153 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     }
   }
 
+  /// Each row's currency and the rate, written to list [id] (0197).
+  Future<void> _saveCurrency(int id) async {
+    if (_currency.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final counts = <PriceCurrency, int>{};
+    for (final c in _currency.values) {
+      counts[c.currency] = (counts[c.currency] ?? 0) + 1;
+    }
+    final main = counts.entries.reduce((a, b) => b.value > a.value ? b : a).key;
+    final c = await ref.read(outboundFileRepositoryProvider).setCurrency(
+      id,
+      [
+        for (final e in _currency.entries)
+          {'row_no': e.key, 'currency': e.value.currency.wire, 'source': e.value.source.wire},
+      ],
+      currency: main.wire,
+      fxCnyJpy: double.tryParse(_fx.text.trim()),
+    );
+    if (c case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+  }
+
+  /// What list is being replaced, and what stays as it is.
+  Widget _replaceBanner(AppLocalizations l10n) {
+    final scheme = Theme.of(context).colorScheme;
+    final f = widget.replace!;
+    return Card(
+      key: const ValueKey('of-replace-banner'),
+      color: scheme.secondaryContainer,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(children: [
+          Icon(Icons.published_with_changes_outlined, color: scheme.onSecondaryContainer),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(l10n.ofReplaceBanner(f.fileName, f.lineCount, f.quantityTotal),
+                style: TextStyle(color: scheme.onSecondaryContainer)),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  /// The list's rows replaced by those read here, once what changes has been
+  /// seen: added, left out and changed in quantity.
+  Future<void> _replaceRows() async {
+    final l10n = AppLocalizations.of(context);
+    final target = widget.replace!;
+    final file = _file;
+    final parsed = _parsed;
+    final plan = _plan;
+    final t = OutboundPlanTotals.of(plan);
+    if (t.ship + t.record == 0) {
+      _snack(l10n.ofErrNoLines);
+      return;
+    }
+    final diff = outboundLinesDiff(widget.replaceLines, plan);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) {
+        final theme = Theme.of(c);
+        Widget part(String title, List<String> rows, Color color, String key) => Column(
+              key: ValueKey(key),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: AppSpacing.sm),
+                Text(title, style: theme.textTheme.titleSmall?.copyWith(color: color)),
+                for (final r in rows.take(12)) Text(r, style: theme.textTheme.bodySmall),
+                if (rows.length > 12) Text(l10n.ppMore(rows.length - 12), style: theme.textTheme.bodySmall),
+              ],
+            );
+        return AlertDialog(
+          key: const ValueKey('of-replace-dialog'),
+          title: Text(l10n.ofReplaceQ),
+          content: SizedBox(
+            width: 520,
+            child: SingleChildScrollView(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l10n.ofReplaceSummary(diff.added.length, diff.removed.length, diff.changed.length)),
+                if (diff.added.isNotEmpty)
+                  part(l10n.ofReplaceAdded, [for (final x in diff.added) '${x.name} × ${x.quantity}'],
+                      theme.colorScheme.success, 'of-replace-added'),
+                if (diff.removed.isNotEmpty)
+                  part(l10n.ofReplaceRemoved, [for (final x in diff.removed) '${x.name} × ${x.quantity}'],
+                      theme.colorScheme.error, 'of-replace-removed'),
+                if (diff.changed.isNotEmpty)
+                  part(l10n.ofReplaceChanged, [for (final x in diff.changed) '${x.name}: ${x.from} → ${x.to}'],
+                      theme.colorScheme.primary, 'of-replace-changed'),
+                const SizedBox(height: AppSpacing.md),
+                Text(l10n.ofReplaceKeeps, style: theme.textTheme.bodySmall),
+              ]),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
+            FilledButton(key: const ValueKey('of-replace-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.ofReplaceDo)),
+          ],
+        );
+      },
+    );
+    if (ok != true || !mounted) return;
+    setState(() {
+      _busy = true;
+      _busyText = l10n.ofUploading;
+    });
+    final repo = ref.read(outboundFileRepositoryProvider);
+    String? path;
+    if (file != null) {
+      final up = await repo.upload(target.warehouseId, file.name, file.bytes);
+      if (!mounted) return;
+      switch (up) {
+        case ApiSuccess(:final data):
+          path = data;
+        case ApiFailure(:final message):
+          setState(() => _busy = false);
+          _snack(humanizeApiErrorMessage(l10n, message));
+          return;
+      }
+    }
+    final r = await repo.replaceLines(
+      target.id,
+      lines: [for (final l in plan) l.toPost()],
+      fileName: file?.name ?? target.fileName,
+      storagePath: path,
+      byteSize: file?.bytes.length,
+      fingerprint: file == null ? null : fileFingerprint(file.bytes),
+      sheetName: parsed?.sheetName,
+      columns: parsed?.columnsWire,
+    );
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        await _saveCurrency(target.id);
+        if (!mounted) return;
+        setState(() => _busy = false);
+        ref.invalidate(outboundFilesProvider);
+        ref.invalidate(outboundUndecidedProvider);
+        ref.invalidate(outboundFileDetailProvider(target.id));
+        ref.invalidate(productListProvider);
+        ref.invalidate(adjustProductsProvider);
+        Navigator.of(context).pop(true);
+      case ApiFailure(:final message):
+        setState(() => _busy = false);
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   int _recordedQty(List<OutboundPlanLine> plan) =>
       plan.fold(0, (a, l) => a + (l.action == OutboundAction.skip ? 0 : (l.row.quantity ?? 0)));
 
@@ -683,7 +885,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     final totals = OutboundPlanTotals.of(plan);
     final shown = [for (final l in plan) if ((_filter == null || l.status == _filter) && (!_needOnly || l.need > 0)) l];
     final appWarehouse = ref.watch(writeWarehouseIdProvider);
-    final noWarehouse = appWarehouse == null && _warehouseHere == null;
+    final noWarehouse = !_replacing && appWarehouse == null && _warehouseHere == null;
     // The app's warehouse changed: the rows are checked against the new one.
     ref.listen<int?>(writeWarehouseIdProvider, (prev, next) {
       if (prev != next && _rows.isNotEmpty) _match();
@@ -698,14 +900,16 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           children: [
             // Lists with no day yet (未定): where they are made, to be given
             // one — not on the 出庫カレンダー, which holds days set.
-            if (_file == null && _manual.isEmpty) OutboundUndecidedCard(kind: _proxy ? 'proxy' : 'stock'),
+            if (_file == null && _manual.isEmpty && !_replacing) OutboundUndecidedCard(kind: _proxy ? 'proxy' : 'stock'),
+            if (_replacing) _replaceBanner(l10n),
             // Nothing read yet: what this is for, and the way in.
             if (_file == null && _manual.isEmpty)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(_proxy ? l10n.prIntro : l10n.ofIntro, style: theme.textTheme.bodyMedium),
+                    Text(_replacing ? l10n.ofReplaceIntro : (_proxy ? l10n.prIntro : l10n.ofIntro),
+                        style: theme.textTheme.bodyMedium),
                     const SizedBox(height: AppSpacing.md),
                     Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, children: [
                       FilledButton.icon(
@@ -714,7 +918,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
                         icon: const Icon(Icons.upload_file_outlined),
                         label: Text(l10n.ofPick),
                       ),
-                      if (_proxy)
+                      if (_proxy && !_replacing)
                         OutlinedButton.icon(
                           key: const ValueKey('pr-add-row'),
                           onPressed: _busy ? null : _addRow,
@@ -722,7 +926,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
                           label: Text(l10n.prAddRow),
                         ),
                     ]),
-                    if (appWarehouse == null) ...[
+                    if (appWarehouse == null && !_replacing) ...[
                       const SizedBox(height: AppSpacing.sm),
                       _warehousePicker(l10n),
                     ],
@@ -738,7 +942,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error)),
             if (parsed != null || hasRows) ...[
               const SizedBox(height: AppSpacing.sm),
-              _settings(l10n),
+              // Replacing: the day, 出荷先 and the rest stay as the list has them.
+              if (!_replacing) _settings(l10n),
               const SizedBox(height: AppSpacing.sm),
               if (!hasRows)
                 const SizedBox.shrink()
@@ -835,11 +1040,15 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               ] else
                 FilledButton.icon(
                   key: const ValueKey('of-post'),
-                  onPressed: noWarehouse ? null : _post,
-                  icon: Icon(_proxy
-                      ? Icons.edit_note_outlined
-                      : (_planning ? Icons.event_available_outlined : Icons.outbox_outlined)),
-                  label: Text(_proxy ? l10n.prPost : (_planning ? l10n.ofPostPlan : l10n.ofPost)),
+                  onPressed: noWarehouse ? null : (_replacing ? _replaceRows : _post),
+                  icon: Icon(_replacing
+                      ? Icons.published_with_changes_outlined
+                      : _proxy
+                          ? Icons.edit_note_outlined
+                          : (_planning ? Icons.event_available_outlined : Icons.outbox_outlined)),
+                  label: Text(_replacing
+                      ? l10n.ofReplaceDo
+                      : (_proxy ? l10n.prPost : (_planning ? l10n.ofPostPlan : l10n.ofPost))),
                 ),
             ]),
           ),
@@ -1000,7 +1209,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           icon: const Icon(Icons.vertical_split_outlined, size: 18),
           label: Text(l10n.ofOriginalShow),
         ),
-      if (ref.watch(writeWarehouseIdProvider) == null) _warehousePicker(l10n),
+      if (ref.watch(writeWarehouseIdProvider) == null && !_replacing) _warehousePicker(l10n),
     ]);
   }
 
@@ -1736,20 +1945,23 @@ class _OutboundPlanTableState extends State<_OutboundPlanTable> {
 }
 
 /// A product chosen for a row by hand: found by its name, maker, JAN or 品番.
-class _PickProductDialog extends ConsumerStatefulWidget {
-  const _PickProductDialog({required this.rowNo, required this.initial, this.warehouseId});
+class OutboundPickProductDialog extends ConsumerStatefulWidget {
+  const OutboundPickProductDialog({super.key, required this.rowNo, required this.initial, this.warehouseId, this.title});
 
   final int rowNo;
   final String initial;
+
+  /// In place of 「行 N の商品を選ぶ」 (a product added to a list, 0202).
+  final String? title;
 
   /// Whose stock is shown beside each product.
   final int? warehouseId;
 
   @override
-  ConsumerState<_PickProductDialog> createState() => _PickProductDialogState();
+  ConsumerState<OutboundPickProductDialog> createState() => OutboundPickProductDialogState();
 }
 
-class _PickProductDialogState extends ConsumerState<_PickProductDialog> {
+class OutboundPickProductDialogState extends ConsumerState<OutboundPickProductDialog> {
   late final _search = TextEditingController(text: widget.initial);
 
   @override
@@ -1766,7 +1978,7 @@ class _PickProductDialogState extends ConsumerState<_PickProductDialog> {
     final shown = [for (final p in all) if (adjustProductMatches(p, _search.text)) p].take(50).toList();
     return AlertDialog(
       key: const ValueKey('of-pick-dialog'),
-      title: Text(l10n.ofPickProductTitle(widget.rowNo)),
+      title: Text(widget.title ?? l10n.ofPickProductTitle(widget.rowNo)),
       content: SizedBox(
         width: 460,
         height: 420,

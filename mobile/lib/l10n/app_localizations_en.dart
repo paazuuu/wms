@@ -16087,4 +16087,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shEmpty => 'No shipment matches';
+
+  @override
+  String get ofReplaceTitle => 'Replace by file';
+
+  @override
+  String get ofReplaceIntro =>
+      'Read the new shipping list file: it replaces the rows of this list, after you have seen what changes (added, left out, changed in quantity).';
+
+  @override
+  String ofReplaceBanner(String name, int rows, int qty) {
+    return 'Replacing: $name (now $rows rows, quantity $qty). Its destination card, warehouse, day and gross weight numbers stay.';
+  }
+
+  @override
+  String get ofReplaceDo => 'Replace with these rows';
+
+  @override
+  String get ofReplaceQ => 'Replace the rows?';
+
+  @override
+  String ofReplaceSummary(int added, int removed, int changed) {
+    return '$added added, $removed left out, $changed changed in quantity';
+  }
+
+  @override
+  String get ofReplaceAdded => 'Added';
+
+  @override
+  String get ofReplaceRemoved => 'Left out';
+
+  @override
+  String get ofReplaceChanged => 'Quantity changed';
+
+  @override
+  String get ofReplaceKeeps =>
+      'The rows there were are kept on record. キープ and shortages are worked out from the new rows; the products’ weight in the gross weight follows. Check the cartons and packing material in Packing / gross weight.';
+
+  @override
+  String get ofReplaced => 'The rows were replaced';
+
+  @override
+  String get ofEditLines => 'Change the rows';
+
+  @override
+  String get ofEditLinesDone => 'Done';
+
+  @override
+  String get ofEditHint =>
+      'Changes are saved at once. Untick “Ship” and the row ships nothing and keeps nothing (it stays, to be ticked again). Tap a quantity to change it. The products’ weight in the gross weight follows; check the cartons and packing material in Packing / gross weight.';
+
+  @override
+  String get ofLineShip => 'Ship';
+
+  @override
+  String get ofAddLine => 'Add a product';
+
+  @override
+  String get ofAddLineTitle => 'Choose the product to add';
+
+  @override
+  String ofAddLineQty(String name) {
+    return 'Quantity of $name';
+  }
+
+  @override
+  String get ofLineEdited => 'Rows changed';
+
+  @override
+  String ofLineQtyTitle(int row) {
+    return 'Quantity of row $row';
+  }
+
+  @override
+  String get ofCurrencyEdit => 'Currency / rate';
+
+  @override
+  String get ofCurrencyEditTitle => 'Price currency and rate';
+
+  @override
+  String get ofCurrencyEditAll => 'Every row in this currency';
+
+  @override
+  String get ofCurrencyEditKeep => 'Keep each row’s currency';
+
+  @override
+  String get ofCurrencyEditRowHint =>
+      'To change one row, open “Change the rows” and tap its price: 円 → 元 → \$ in turn.';
+
+  @override
+  String get ofCurrencySaved => 'Currency and rate saved';
+
+  @override
+  String get ofErrNotEditable =>
+      'Shipped or taken back: its rows cannot be changed. Put it back to planned first.';
 }
