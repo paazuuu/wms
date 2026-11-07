@@ -13960,5 +13960,32 @@
   },
   "ofErrNotShipped": "この出庫は出庫済みではありません",
   "ofOverdueBadge": "要確認",
-  "ofOverdueHint": "予定日を過ぎても出庫済みになっていません（在庫不足など）"
+  "ofOverdueHint": "予定日を過ぎても出庫済みになっていません（在庫不足など）",
+  "obHubShipments": "出庫",
+  "obHelpShipments": "出庫の一覧。カレンダーで月と日を選び、出庫済み・出庫予定（日程あり）・出庫予定日 未定で絞り込めます。行をクリックすると開いて、中身・倉庫・出荷先・総重量の見積もりを直したり、日程を決めたりできます。",
+  "shStateShipped": "出庫済み",
+  "shStatePlanned": "出庫予定（日程あり）",
+  "shStateUndecided": "出庫予定日 未定",
+  "shStateUndone": "取り消し",
+  "shKindAll": "出荷明細・在庫外出荷",
+  "shUndecidedHeading": "出庫予定日 未定（日付なし）{n}件",
+  "@shUndecidedHeading": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shMonthHeading": "{when} の出庫 {n}件",
+  "@shMonthHeading": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shEmpty": "条件に合う出庫はありません"
 }

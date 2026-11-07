@@ -16052,4 +16052,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ofOverdueHint =>
       'Its day has passed and it has not shipped (stock short, or similar)';
+
+  @override
+  String get obHubShipments => 'Shipments';
+
+  @override
+  String get obHelpShipments =>
+      'All shipments: pick a month or day on the calendar and narrow to shipped, planned (with a day) or no day yet. Click a row to open it and change its rows, warehouse, destination or gross weight estimate, or set its day.';
+
+  @override
+  String get shStateShipped => 'Shipped';
+
+  @override
+  String get shStatePlanned => 'Planned (with a day)';
+
+  @override
+  String get shStateUndecided => 'No day yet';
+
+  @override
+  String get shStateUndone => 'Taken back';
+
+  @override
+  String get shKindAll => 'Shipping lists and outside stock';
+
+  @override
+  String shUndecidedHeading(int n) {
+    return 'No day yet: $n';
+  }
+
+  @override
+  String shMonthHeading(String when, int n) {
+    return 'Shipments in $when: $n';
+  }
+
+  @override
+  String get shEmpty => 'No shipment matches';
 }

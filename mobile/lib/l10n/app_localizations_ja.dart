@@ -15735,4 +15735,39 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofOverdueHint => '予定日を過ぎても出庫済みになっていません（在庫不足など）';
+
+  @override
+  String get obHubShipments => '出庫';
+
+  @override
+  String get obHelpShipments =>
+      '出庫の一覧。カレンダーで月と日を選び、出庫済み・出庫予定（日程あり）・出庫予定日 未定で絞り込めます。行をクリックすると開いて、中身・倉庫・出荷先・総重量の見積もりを直したり、日程を決めたりできます。';
+
+  @override
+  String get shStateShipped => '出庫済み';
+
+  @override
+  String get shStatePlanned => '出庫予定（日程あり）';
+
+  @override
+  String get shStateUndecided => '出庫予定日 未定';
+
+  @override
+  String get shStateUndone => '取り消し';
+
+  @override
+  String get shKindAll => '出荷明細・在庫外出荷';
+
+  @override
+  String shUndecidedHeading(int n) {
+    return '出庫予定日 未定（日付なし）$n件';
+  }
+
+  @override
+  String shMonthHeading(String when, int n) {
+    return '$when の出庫 $n件';
+  }
+
+  @override
+  String get shEmpty => '条件に合う出庫はありません';
 }

@@ -185,53 +185,93 @@ void main() {
     expect(find.byKey(const ValueKey('of-confirm')), findsNothing);
   });
 
-  testWidgets('出荷手配 › 出庫日 未定: every warehouse, filtered by kind and warehouse, a day set, opened', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1400, 1800));
+  testWidgets('出荷手配 › 出庫: a calendar beside the lists, narrowed by state, kind, warehouse and day', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1500, 2200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final files = FakeOutboundFileRepository(detailOf: (id) => _detail(_file(id: id)))
-      ..undecidedFiles = [
+    final now = DateTime.now();
+    final shippedDay = DateTime(now.year, now.month, 2);
+    final plannedDay = DateTime(now.year, now.month, 25);
+    OutboundFileSummary dated(int id, String status, DateTime day) => OutboundFileSummary(
+        id: id, warehouseId: 1, warehouseName: '東京', shippedOn: day, fileName: 'list-$id.xlsx', status: status,
+        lineCount: 1, quantityTotal: 5, shippedTotal: 5);
+    final files = FakeOutboundFileRepository(
+      files: [dated(7, 'shipped', shippedDay), dated(8, 'planned', plannedDay)],
+      detailOf: (id) => _detail(_file(id: id)),
+    )..undecidedFiles = [
         _file(id: 5),
         _file(id: 6, warehouseId: 2, warehouseName: '神戸', kind: 'proxy', status: 'shipped'),
       ];
-    await pumpApp(tester, const OutboundHubScreen(tab: OutboundHubTab.undecided), overrides: [
+    await pumpApp(tester, const OutboundHubScreen(tab: OutboundHubTab.shipments), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(files),
       warehouseOverviewProvider.overrideWith((ref) async => _warehouses),
       // The one chosen at the top does not narrow this list.
       activeWarehouseIdProvider.overrideWith((ref) => 2),
     ]);
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('ud-row-5')), findsOneWidget);
-    expect(find.byKey(const ValueKey('ud-row-6')), findsOneWidget);
-    expect(find.text('出庫日がまだ決まっていない出庫 2件'), findsOneWidget);
+    expect(find.text('出庫'), findsWidgets);
+    for (final id in [5, 6, 7, 8]) {
+      expect(find.byKey(ValueKey('sh-row-$id')), findsOneWidget, reason: 'row $id');
+    }
+    expect(find.text('出庫予定日 未定（日付なし）2件'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('ud-kind-proxy')));
+    Future<void> state(String name) async {
+      await tester.tap(find.byKey(ValueKey('sh-state-$name')));
+      await tester.pumpAndSettle();
+    }
+
+    List<int> rows() => [
+          for (final id in [5, 6, 7, 8])
+            if (find.byKey(ValueKey('sh-row-$id')).evaluate().isNotEmpty) id,
+        ];
+
+    await state('shipped');
+    expect(rows(), [7]);
+    await state('planned');
+    expect(rows(), [8]);
+    await state('undecided');
+    expect(rows(), [5, 6]);
+    await state('all');
+
+    await tester.tap(find.byKey(const ValueKey('sh-kind')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('ud-row-5')), findsNothing);
-    expect(find.byKey(const ValueKey('ud-row-6')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('ud-kind-all')));
+    await tester.tap(find.text('在庫外出荷').last);
+    await tester.pumpAndSettle();
+    expect(rows(), [6]);
+    await tester.tap(find.byKey(const ValueKey('sh-kind')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('出荷明細・在庫外出荷').last);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('ud-warehouse')));
+    await tester.tap(find.byKey(const ValueKey('sh-warehouse')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('東京').last);
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('ud-row-5')), findsOneWidget);
-    expect(find.byKey(const ValueKey('ud-row-6')), findsNothing);
+    expect(rows(), [5, 7, 8]);
 
-    await tester.tap(find.byKey(const ValueKey('ud-set-day-5')));
+    // A day picked: that day's lists alone (those with no day are on none).
+    await tester.tap(find.byKey(const ValueKey('of-day-2')));
+    await tester.pumpAndSettle();
+    expect(rows(), [7]);
+    await tester.tap(find.byKey(const ValueKey('sh-month-all')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('sh-set-day-5')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(files.rescheduled.single.$1, 5);
+    // A shipped list has no day to set nor warehouse to change.
+    expect(find.byKey(const ValueKey('sh-set-day-7')), findsNothing);
+    expect(find.byKey(const ValueKey('sh-warehouse-7')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('ud-open-5')));
+    await tester.tap(find.byKey(const ValueKey('sh-open-5')));
     await tester.pumpAndSettle();
     expect(find.byType(OutboundFileDetailScreen), findsOneWidget);
     expect(find.byKey(const ValueKey('of-warehouse-change')), findsOneWidget);
   });
 
-  test('the undecided tab sits after 在庫外出荷', () {
-    expect(OutboundHubTab.values.indexOf(OutboundHubTab.undecided), 2);
+  test('the 出庫 tab sits after 在庫外出荷', () {
+    expect(OutboundHubTab.values.indexOf(OutboundHubTab.shipments), 2);
     expect(outboundFileSaverProvider, isNotNull);
   });
 }

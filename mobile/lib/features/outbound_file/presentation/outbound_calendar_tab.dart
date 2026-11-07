@@ -84,7 +84,7 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
           ),
           IconButton(key: const ValueKey('of-cal-next'), onPressed: () => _shift(1), icon: const Icon(Icons.chevron_right)),
         ]),
-        _DayGrid(month: _month, byDay: byDay, selected: _day, today: today, onDay: (d) => setState(() => _day = _day == d ? null : d)),
+        OutboundDayGrid(month: _month, byDay: byDay, selected: _day, today: today, onDay: (d) => setState(() => _day = _day == d ? null : d)),
         if (!widget.proxyOnly)
           Wrap(spacing: AppSpacing.sm, children: [
             for (final (k, label) in [
@@ -235,8 +235,10 @@ class _FileCard extends ConsumerWidget {
   }
 }
 
-class _DayGrid extends StatelessWidget {
-  const _DayGrid({required this.month, required this.byDay, required this.selected, required this.today, required this.onDay});
+/// A month of days, each with how many lists fall on it; a day tapped
+/// narrows the list to it (again: the whole month).
+class OutboundDayGrid extends StatelessWidget {
+  const OutboundDayGrid({super.key, required this.month, required this.byDay, required this.selected, required this.today, required this.onDay});
 
   final DateTime month;
   final Map<DateTime, int> byDay;

@@ -15620,4 +15620,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofOverdueHint => '已过预定日仍未出库（库存不足等）';
+
+  @override
+  String get obHubShipments => '出库';
+
+  @override
+  String get obHelpShipments =>
+      '出库一览。在日历中选择月份和日期，可按已出库・出库预定（有日期）・出库预定日未定筛选。点击一行即可打开，修改内容・仓库・收货方・总重量估算或确定日期。';
+
+  @override
+  String get shStateShipped => '已出库';
+
+  @override
+  String get shStatePlanned => '出库预定（有日期）';
+
+  @override
+  String get shStateUndecided => '出库预定日未定';
+
+  @override
+  String get shStateUndone => '已撤销';
+
+  @override
+  String get shKindAll => '出货明细・库外出货';
+
+  @override
+  String shUndecidedHeading(int n) {
+    return '出库预定日未定（无日期）$n件';
+  }
+
+  @override
+  String shMonthHeading(String when, int n) {
+    return '$when 的出库 $n件';
+  }
+
+  @override
+  String get shEmpty => '没有符合条件的出库';
 }

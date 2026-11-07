@@ -27682,6 +27682,66 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'予定日を過ぎても出庫済みになっていません（在庫不足など）'**
   String get ofOverdueHint;
+
+  /// No description provided for @obHubShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get obHubShipments;
+
+  /// No description provided for @obHelpShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫の一覧。カレンダーで月と日を選び、出庫済み・出庫予定（日程あり）・出庫予定日 未定で絞り込めます。行をクリックすると開いて、中身・倉庫・出荷先・総重量の見積もりを直したり、日程を決めたりできます。'**
+  String get obHelpShipments;
+
+  /// No description provided for @shStateShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み'**
+  String get shStateShipped;
+
+  /// No description provided for @shStatePlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定（日程あり）'**
+  String get shStatePlanned;
+
+  /// No description provided for @shStateUndecided.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日 未定'**
+  String get shStateUndecided;
+
+  /// No description provided for @shStateUndone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消し'**
+  String get shStateUndone;
+
+  /// No description provided for @shKindAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細・在庫外出荷'**
+  String get shKindAll;
+
+  /// No description provided for @shUndecidedHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日 未定（日付なし）{n}件'**
+  String shUndecidedHeading(int n);
+
+  /// No description provided for @shMonthHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'{when} の出庫 {n}件'**
+  String shMonthHeading(String when, int n);
+
+  /// No description provided for @shEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'条件に合う出庫はありません'**
+  String get shEmpty;
 }
 
 class _AppLocalizationsDelegate
