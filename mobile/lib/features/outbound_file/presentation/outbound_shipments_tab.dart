@@ -75,6 +75,7 @@ class _OutboundShipmentsTabState extends ConsumerState<OutboundShipmentsTab> wit
   void _refresh([int? fileId]) {
     ref.invalidate(outboundFilesProvider);
     ref.invalidate(outboundUndecidedProvider);
+    ref.invalidate(outboundCancelledUndatedProvider);
     if (fileId != null) ref.invalidate(outboundFileDetailProvider(fileId));
   }
 
@@ -122,13 +123,19 @@ class _OutboundShipmentsTabState extends ConsumerState<OutboundShipmentsTab> wit
     final scheme = theme.colorScheme;
     final monthAsync = ref.watch(outboundFilesProvider(_ask));
     final undecidedAsync = ref.watch(outboundUndecidedProvider(null));
+    // Taken back while they had no day (0203): on no day, shown as 取り消し.
+    final cancelledUndated = ref.watch(outboundCancelledUndatedProvider(null)).valueOrNull ?? const <OutboundFileSummary>[];
     final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const [];
 
     final dated = [for (final f in monthAsync.valueOrNull ?? const <OutboundFileSummary>[]) if (_keep(f)) f];
-    final undecided = [for (final f in undecidedAsync.valueOrNull ?? const <OutboundFileSummary>[]) if (_keep(f)) f];
+    final undecided = [
+      for (final f in [...?undecidedAsync.valueOrNull, ...cancelledUndated]) if (_keep(f)) f,
+    ];
     final byDay = <DateTime, int>{};
+    final cancelledByDay = <DateTime, int>{};
     for (final f in dated) {
       byDay[f.shippedOn] = (byDay[f.shippedOn] ?? 0) + 1;
+      if (f.undone) cancelledByDay[f.shippedOn] = (cancelledByDay[f.shippedOn] ?? 0) + 1;
     }
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -149,7 +156,12 @@ class _OutboundShipmentsTabState extends ConsumerState<OutboundShipmentsTab> wit
           IconButton(key: const ValueKey('sh-next'), onPressed: () => _shift(1), icon: const Icon(Icons.chevron_right)),
         ]),
         OutboundDayGrid(
-            month: _month, byDay: byDay, selected: _day, today: today, onDay: (d) => setState(() => _day = _day == d ? null : d)),
+            month: _month,
+            byDay: byDay,
+            cancelledByDay: cancelledByDay,
+            selected: _day,
+            today: today,
+            onDay: (d) => setState(() => _day = _day == d ? null : d)),
         if (_day != null)
           TextButton(
             key: const ValueKey('sh-month-all'),
@@ -276,7 +288,7 @@ class _OutboundShipmentsTabState extends ConsumerState<OutboundShipmentsTab> wit
       ShipmentState.shipped => (l10n.shStateShipped, scheme.success),
       ShipmentState.planned => (l10n.shStatePlanned, scheme.primary),
       ShipmentState.undecided => (l10n.shStateUndecided, scheme.warning),
-      ShipmentState.undone => (l10n.shStateUndone, scheme.onSurfaceVariant),
+      ShipmentState.undone => ('✕ ${l10n.shStateUndone}', scheme.error),
     };
     final overdue = f.overdue(DateTime.now());
     final canDay = !f.undone && (f.planned || f.proxy);

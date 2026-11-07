@@ -574,6 +574,10 @@ abstract class OutboundFileRepository {
   /// A planned list put back to 未定.
   Future<ApiResult<bool>> markUndecided(int id);
 
+  /// Lists taken back while they had no day (0203): on no calendar, shown
+  /// as 取り消し in the 出庫 tab.
+  Future<ApiResult<List<OutboundFileSummary>>> cancelledUndated({int? warehouseId});
+
   /// Each row's currency ({row_no, currency, source}), the list's main one
   /// and the rate 1 CNY in JPY if known.
   Future<ApiResult<int>> setCurrency(int id, List<Map<String, dynamic>> lines, {String? currency, double? fxCnyJpy});
@@ -771,6 +775,19 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
   }
 
   @override
+  Future<ApiResult<List<OutboundFileSummary>>> cancelledUndated({int? warehouseId}) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_files_cancelled_undated', data: {'p_warehouse_id': warehouseId});
+      final d = _unwrap(r.data);
+      return ApiSuccess([
+        for (final e in (d as List? ?? const []).whereType<Map>()) OutboundFileSummary.fromJson(e.cast<String, dynamic>()),
+      ]);
+    } on DioException catch (e) {
+      return mapDioError<List<OutboundFileSummary>>(e);
+    }
+  }
+
+  @override
   Future<ApiResult<bool>> markUndecided(int id) async {
     try {
       await _rest.post('/rpc/outbound_file_mark_undecided', data: {'p_id': id});
@@ -899,6 +916,13 @@ final outboundFileDetailProvider = FutureProvider.autoDispose.family<OutboundFil
 });
 
 /// The planned lists with no day yet, for the active warehouse or all.
+/// Lists taken back with no day (0203).
+final outboundCancelledUndatedProvider =
+    FutureProvider.autoDispose.family<List<OutboundFileSummary>, int?>((ref, warehouseId) async {
+  final r = await ref.watch(outboundFileRepositoryProvider).cancelledUndated(warehouseId: warehouseId);
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
 final outboundUndecidedProvider = FutureProvider.autoDispose.family<List<OutboundFileSummary>, int?>((ref, warehouseId) async {
   final r = await ref.watch(outboundFileRepositoryProvider).undecided(warehouseId: warehouseId);
   return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));

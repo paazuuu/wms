@@ -177,4 +177,10 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     replaced.add((id: id, lines: lines, fileName: fileName, path: storagePath));
     return const ApiSuccess(99);
   }
+
+  List<OutboundFileSummary> cancelledUndatedFiles = const [];
+
+  @override
+  Future<ApiResult<List<OutboundFileSummary>>> cancelledUndated({int? warehouseId}) async =>
+      ApiSuccess(cancelledUndatedFiles);
 }

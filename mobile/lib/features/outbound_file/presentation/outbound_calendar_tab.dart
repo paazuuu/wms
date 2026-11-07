@@ -65,8 +65,10 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
         };
     final files = [for (final f in async.valueOrNull ?? const <OutboundFileSummary>[]) if (keep(f)) f];
     final byDay = <DateTime, int>{};
+    final cancelled = <DateTime, int>{};
     for (final f in files) {
       byDay[f.shippedOn] = (byDay[f.shippedOn] ?? 0) + 1;
+      if (f.undone) cancelled[f.shippedOn] = (cancelled[f.shippedOn] ?? 0) + 1;
     }
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -84,7 +86,13 @@ class _OutboundCalendarTabState extends ConsumerState<OutboundCalendarTab> {
           ),
           IconButton(key: const ValueKey('of-cal-next'), onPressed: () => _shift(1), icon: const Icon(Icons.chevron_right)),
         ]),
-        OutboundDayGrid(month: _month, byDay: byDay, selected: _day, today: today, onDay: (d) => setState(() => _day = _day == d ? null : d)),
+        OutboundDayGrid(
+            month: _month,
+            byDay: byDay,
+            cancelledByDay: cancelled,
+            selected: _day,
+            today: today,
+            onDay: (d) => setState(() => _day = _day == d ? null : d)),
         if (!widget.proxyOnly)
           Wrap(spacing: AppSpacing.sm, children: [
             for (final (k, label) in [
@@ -173,8 +181,11 @@ class _FileCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(children: [
-            Icon(file.planned ? Icons.event_available_outlined : (file.proxy ? Icons.edit_note_outlined : Icons.description_outlined),
-                color: file.undone ? scheme.onSurfaceVariant : scheme.primary),
+            file.undone
+                // Taken back: still shown, marked ✕.
+                ? Icon(Icons.cancel_outlined, key: ValueKey('of-file-x-${file.id}'), color: scheme.error)
+                : Icon(file.planned ? Icons.event_available_outlined : (file.proxy ? Icons.edit_note_outlined : Icons.description_outlined),
+                    color: scheme.primary),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -223,7 +234,7 @@ class _FileCard extends ConsumerWidget {
                   if (file.amountTotal != null && ref.watch(showPricesProvider))
                     Text(l10n.ofSummaryAmount(outboundMoney(file.amountTotal)), style: muted),
                   if ((file.weightG ?? 0) > 0) Text(l10n.ofSummaryWeight(outboundKg(file.weightG!)), style: muted),
-                  if (file.undone) Text(l10n.ofUndone, style: TextStyle(color: scheme.error)),
+                  if (file.undone) Text('✕ ${l10n.ofUndone}', style: TextStyle(color: scheme.error, fontWeight: FontWeight.w700)),
                 ]),
               ]),
             ),
@@ -238,10 +249,21 @@ class _FileCard extends ConsumerWidget {
 /// A month of days, each with how many lists fall on it; a day tapped
 /// narrows the list to it (again: the whole month).
 class OutboundDayGrid extends StatelessWidget {
-  const OutboundDayGrid({super.key, required this.month, required this.byDay, required this.selected, required this.today, required this.onDay});
+  const OutboundDayGrid({
+    super.key,
+    required this.month,
+    required this.byDay,
+    required this.selected,
+    required this.today,
+    required this.onDay,
+    this.cancelledByDay = const {},
+  });
 
   final DateTime month;
   final Map<DateTime, int> byDay;
+
+  /// Of those, the lists taken back: marked ✕ on their day.
+  final Map<DateTime, int> cancelledByDay;
   final DateTime? selected;
   final DateTime today;
   final ValueChanged<DateTime> onDay;
@@ -273,6 +295,7 @@ class OutboundDayGrid extends StatelessWidget {
           () {
             final date = DateTime(month.year, month.month, d);
             final n = byDay[date] ?? 0;
+            final x = cancelledByDay[date] ?? 0;
             return InkWell(
               key: ValueKey('of-day-$d'),
               borderRadius: BorderRadius.circular(8),
@@ -286,11 +309,20 @@ class OutboundDayGrid extends StatelessWidget {
                 padding: const EdgeInsets.all(2),
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Text('$d', style: theme.textTheme.bodySmall?.copyWith(fontWeight: n > 0 ? FontWeight.bold : null)),
-                  if (n > 0)
+                  if (n - x > 0)
                     Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                       Icon(Icons.outbox_outlined, size: 11, color: scheme.primary),
-                      Text('$n', key: ValueKey('of-count-$d'), style: theme.textTheme.labelSmall),
+                      Text('${n - x}', key: ValueKey('of-count-$d'), style: theme.textTheme.labelSmall),
                     ]),
+                  if (x > 0)
+                    Row(
+                        key: ValueKey('of-cancelled-$d'),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.close, size: 11, color: scheme.error),
+                          Text('$x', style: theme.textTheme.labelSmall?.copyWith(color: scheme.error)),
+                        ]),
                 ]),
               ),
             );

@@ -5,6 +5,7 @@ import 'package:wms_mobile/features/outbound_file/domain/outbound_plan.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_calendar_tab.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_detail_screen.dart';
+import 'package:wms_mobile/features/outbound_file/presentation/outbound_hub_screen.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 
 import '../../support/fake_outbound_file_repository.dart';
@@ -146,5 +147,44 @@ void main() {
     Navigator.of(tester.element(find.byType(OutboundFileDetailScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('of-undecided-5')), findsNothing);
+  });
+
+  testWidgets('taken back: ✕ on its day in the calendars; one with no day listed as 取り消し in 出庫', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1500, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final now = DateTime.now();
+    final day = DateTime(now.year, now.month, 2);
+    final shipped = OutboundFileSummary(
+        id: 7, warehouseId: 1, shippedOn: day, fileName: 'shipped.xlsx', lineCount: 1, shippedTotal: 5, undoneAt: now);
+    final repo = FakeOutboundFileRepository(files: [shipped])
+      ..cancelledUndatedFiles = [
+        OutboundFileSummary(
+            id: 9, warehouseId: 1, shippedOn: day, fileName: 'no-day.xlsx', status: 'planned', dateUndecided: true,
+            lineCount: 1, quantityTotal: 6, undoneAt: now),
+      ];
+    await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-cancelled-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-count-2')), findsNothing);
+    expect(find.byKey(const ValueKey('of-file-x-7')), findsOneWidget);
+    expect(find.textContaining('✕ '), findsWidgets);
+
+    await pumpApp(tester, const OutboundHubScreen(tab: OutboundHubTab.shipments), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sh-row-9')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sh-row-7')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sh-state-undecided')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sh-row-9')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('sh-state-undone')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sh-row-9')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sh-row-7')), findsOneWidget);
   });
 }
