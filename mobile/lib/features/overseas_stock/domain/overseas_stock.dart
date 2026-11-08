@@ -83,6 +83,7 @@ class OverseasImport extends Equatable {
     this.asOf,
     this.fileName,
     this.storagePath,
+    this.readPath,
     this.sheetName,
     this.readBy = 'sheet',
     this.lineCount = 0,
@@ -97,6 +98,9 @@ class OverseasImport extends Equatable {
   final DateTime? asOf;
   final String? fileName;
   final String? storagePath;
+
+  /// What was read, kept as Excel beside the file (0208).
+  final String? readPath;
   final String? sheetName;
 
   /// sheet (the columns of a sheet), ai (read by the AI), manual.
@@ -115,6 +119,7 @@ class OverseasImport extends Equatable {
         asOf: _d(j['as_of']),
         fileName: _s(j['file_name']),
         storagePath: _s(j['storage_path']),
+        readPath: _s(j['read_path']),
         sheetName: _s(j['sheet_name']),
         readBy: _s(j['read_by']) ?? 'sheet',
         lineCount: _ni(j['line_count']) ?? 0,

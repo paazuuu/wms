@@ -24506,7 +24506,7 @@ abstract class AppLocalizations {
   /// No description provided for @ofIntro.
   ///
   /// In ja, this message translates to:
-  /// **'いつも使っている出荷明細（品目・数量・単価の一覧。明细シートなど）を、Excel・CSVのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。箱ごとの中身・重量・サイズを書いたパッキングリストとは別のものです。'**
+  /// **'いつも使っている出荷明細（品目・数量・単価の一覧。明细シートなど）を、Excel・CSVのまま読み込みます。見出しの言語は問いません。JANを最優先に商品を探し、JANがない行は品番とメーカーで探します。箱ごとの中身・重量・サイズを書いたパッキングリストとは別のものです。（Excel・CSVのほか、PDF・画像もAIが読み取ります）'**
   String get ofIntro;
 
   /// No description provided for @ofPick.
@@ -28178,7 +28178,7 @@ abstract class AppLocalizations {
   /// No description provided for @wlFileIntro.
   ///
   /// In ja, this message translates to:
-  /// **'エンド客からもらった入荷希望のファイル（Excel・CSV）をそのまま読み込みます。JAN・品番で商品ライブラリーと照合し、チェックした行がこのリストに入ります。ライブラリーにない商品も、手入力の商品として入ります。読み込んだファイルはリストと一緒に保存されます。'**
+  /// **'エンド客からもらった入荷希望のファイル（Excel・CSV・PDF・画像）をそのまま読み込みます。PDF・画像はAIが読み取ります。JAN・品番で商品ライブラリーと照合し、チェックした行がこのリストに入ります。ライブラリーにない商品も、手入力の商品として入ります。元のファイルと読み取り結果（Excel）はリストと一緒に保存されます。このリストは希望を記録するだけで、商品ライブラリーの在庫数は変わりません。'**
   String get wlFileIntro;
 
   /// No description provided for @wlStFound.
@@ -28774,6 +28774,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'拠点を保存しました'**
   String get osSaved;
+
+  /// No description provided for @rdReadResult.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果（Excel）'**
+  String get rdReadResult;
+
+  /// No description provided for @rdSuffix.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果'**
+  String get rdSuffix;
+
+  /// No description provided for @rdAiReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIがファイルを読み取っています…'**
+  String get rdAiReading;
+
+  /// No description provided for @rdAiFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取れませんでした: {why}'**
+  String rdAiFailed(String why);
+
+  /// No description provided for @rdByAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取り（PDF・画像）'**
+  String get rdByAi;
+
+  /// No description provided for @rdNotKept.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り結果のExcelを保存できませんでした: {why}'**
+  String rdNotKept(String why);
+
+  /// No description provided for @wlNoStockChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'このリストは希望を記録するだけです。商品ライブラリーの在庫数や引当は変わりません（在庫の数は参考として表示しています）。'**
+  String get wlNoStockChange;
+
+  /// No description provided for @wlReadIncluded.
+  ///
+  /// In ja, this message translates to:
+  /// **'対象'**
+  String get wlReadIncluded;
 }
 
 class _AppLocalizationsDelegate

@@ -4427,7 +4427,7 @@
   "ofTitle": "导入发货明细",
   "ofTabImport": "导入发货明细",
   "ofTabCalendar": "出库日历",
-  "ofIntro": "直接读取您常用的发货明细（品目・数量・单价一览，如明细表），Excel・CSV均可，标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。这与按箱记录内容・重量・尺寸的装箱单不同。",
+  "ofIntro": "直接读取您常用的发货明细（品目・数量・单价一览，如明细表），Excel・CSV均可，标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。这与按箱记录内容・重量・尺寸的装箱单不同。（除Excel・CSV外，PDF・图片也由AI读取）",
   "ofPick": "选择文件",
   "ofPickAgain": "选择其他文件",
   "ofReadFailed": "无法读取此文件（.xlsx / .csv）",
@@ -5039,7 +5039,7 @@
   "wlFirstWanted": "最早希望 {date}",
   "wlTabFile": "从文件读取",
   "wlTabLibrary": "从商品库选择",
-  "wlFileIntro": "直接读取终端客户发来的到货希望文件（Excel・CSV）。按JAN・品号与商品库对照，勾选的行进入此清单。商品库中没有的商品也作为手动输入的商品加入。读取的文件与清单一起保存。",
+  "wlFileIntro": "直接读取终端客户发来的到货希望文件（Excel・CSV・PDF・图片）。PDF・图片由AI读取。按JAN・品号与商品库对照，勾选的行进入此清单。商品库中没有的商品也作为手动输入的商品加入。原文件和读取结果（Excel）与清单一起保存。此清单仅记录希望，不改变商品库的库存数量。",
   "wlStFound": "商品库中有",
   "wlStNew": "未登记（手动加入）",
   "wlStSeveral": "多个候选",
@@ -5138,5 +5138,13 @@
   "osNow": "当前库存",
   "osFileView": "原文件",
   "osQtyEdit": "修改数量",
-  "osSaved": "据点已保存"
+  "osSaved": "据点已保存",
+  "rdReadResult": "读取结果（Excel）",
+  "rdSuffix": "读取结果",
+  "rdAiReading": "AI正在读取文件…",
+  "rdAiFailed": "AI未能读取: {why}",
+  "rdByAi": "AI读取（PDF・图片）",
+  "rdNotKept": "读取结果Excel未能保存: {why}",
+  "wlNoStockChange": "此清单仅记录希望。商品库的库存数量和保留不会改变（库存数量仅作参考显示）。",
+  "wlReadIncluded": "对象"
 }

@@ -41,6 +41,9 @@ abstract class OverseasStockRepository {
 
   Future<ApiResult<String>> upload(int siteId, String fileName, Uint8List bytes);
   Future<ApiResult<Uint8List>> fileBytes(String storagePath);
+
+  /// The reading kept as Excel beside import [id]'s file (0208).
+  Future<ApiResult<bool>> setReadPath(int id, String path);
 }
 
 class OverseasStockRepositoryImpl implements OverseasStockRepository {
@@ -134,6 +137,10 @@ class OverseasStockRepositoryImpl implements OverseasStockRepository {
       return mapDioError<String>(e);
     }
   }
+
+  @override
+  Future<ApiResult<bool>> setReadPath(int id, String path) =>
+      _rpc('overseas_stock_set_read_path', {'p_id': id, 'p_path': path}, (d) => d == true);
 
   @override
   Future<ApiResult<Uint8List>> fileBytes(String storagePath) async {

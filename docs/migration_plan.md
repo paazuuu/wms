@@ -9216,6 +9216,20 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - 入荷希望リストの編集画面に3つ目のタブ「メモ・添付ファイル」を追加しました。保存したリストで使えます。
 - 一覧にはメモの件数を出します（`purchase_requests_list` が `note_count` を返します）。
 
+## 0208: どのファイルも Excel・PDF・画像で読み込み、読み取り結果を Excel で保存
+
+- 出庫（出荷明細の取込・在庫外出荷・ファイルで差し替え）、入荷希望リスト、倉庫間移動、国外の仮想在庫で、Excel・CSV のほかに PDF・画像も選べるようにしました。
+  - PDF・画像は AI が読み取ります（import-plan、何も登録しません）。
+  - 読み取った行は、見出しのついたシートとして扱います。そのあとは Excel と同じく、列の割り当て・照合・チェックができます（`aiReadAsSheet`）。
+  - 横の「元のファイル」には、PDF や画像をそのまま表示します。
+- 登録したとき、読み取り結果を Excel にして、元のファイルと同じ場所に保存します。名前は「<元の名前>_読み取り結果.xlsx」です。
+  - 出庫: 照合結果の Excel（前からあった「改善版」と同じ形）を `outbound_files.read_path` に保存します。出庫の詳細の「読み取り結果（Excel）」からダウンロードできます。
+  - 入荷希望リスト: 行・対象・状態・商品・JAN・品番・メーカー・商品名・希望数・在庫を `purchase_requests.read_path` に保存します。保存したファイルのカードからダウンロードできます。
+  - 国外の仮想在庫: 行・対象・JAN・品番・商品名・メーカー・数量・単位を `overseas_stock_imports.read_path` に保存します。在庫タブと履歴からダウンロードできます。
+- **関数**: `outbound_file_set_read_path`、`overseas_stock_set_read_path`、`purchase_request_set_file`（`read_path` を受け取る）。一覧と詳細は `read_path` も返します。
+- 入荷希望リストに「このリストは希望を記録するだけで、商品ライブラリーの在庫数や引当は変わりません」と表示しました。
+  - DB でも確認しました。入荷希望リストの関数は、入荷希望リストのテーブルにしか書き込みません。トリガーもありません。
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

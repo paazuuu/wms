@@ -98,6 +98,20 @@ class _OverseasSiteScreenState extends ConsumerState<OverseasSiteScreen> with Si
     }
   }
 
+  /// What was read, kept as Excel (0208).
+  Future<void> _downloadReading(OverseasImport i) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(overseasStockRepositoryProvider).fileBytes(i.readPath!);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess(:final data):
+        await ref.read(saveFileProvider)(
+            '${(i.fileName ?? 'stock').replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.rdSuffix}.xlsx', data);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _undo(OverseasImport i) async {
     final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
@@ -206,6 +220,13 @@ class _OverseasSiteScreenState extends ConsumerState<OverseasSiteScreen> with Si
                   icon: const Icon(Icons.description_outlined, size: 18),
                   label: Text(i.fileName!),
                 ),
+              if (i.readPath != null)
+                TextButton.icon(
+                  key: const ValueKey('os-stock-read'),
+                  onPressed: () => _downloadReading(i),
+                  icon: const Icon(Icons.table_view_outlined, size: 18),
+                  label: Text(l10n.rdReadResult),
+                ),
               Text(i.readBy == 'ai' ? l10n.osReadByAi : l10n.osReadBySheet, style: muted),
             ]),
             const SizedBox(height: AppSpacing.sm),
@@ -266,6 +287,13 @@ class _OverseasSiteScreenState extends ConsumerState<OverseasSiteScreen> with Si
                           tooltip: l10n.osFileView,
                           icon: const Icon(Icons.description_outlined),
                           onPressed: () => _view(i),
+                        ),
+                      if (i.readPath != null)
+                        IconButton(
+                          key: ValueKey('os-import-read-${i.id}'),
+                          tooltip: l10n.rdReadResult,
+                          icon: const Icon(Icons.table_view_outlined),
+                          onPressed: () => _downloadReading(i),
                         ),
                       if (!i.undone)
                         IconButton(

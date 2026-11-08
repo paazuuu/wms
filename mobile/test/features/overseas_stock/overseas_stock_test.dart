@@ -218,7 +218,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('os-register')));
     await tester.pumpAndSettle();
     expect(repo.imported.single['read_by'], 'ai');
-    expect(repo.uploads, ['在庫表.pdf']);
+    expect(repo.uploads, ['在庫表.pdf', '在庫表_読み取り結果.xlsx']);
+    expect(repo.readPaths[9], '3/1-在庫表_読み取り結果.xlsx');
   });
 
   testWidgets('履歴: a file taken back; メモ with a file on the site', (tester) async {

@@ -271,7 +271,11 @@ class PurchaseRequest extends Equatable {
     this.storagePath,
     this.sheetName,
     this.noteCount = 0,
+    this.readPath,
   });
+
+  /// What was read from the file, kept as Excel beside it (0208).
+  final String? readPath;
 
   /// メモ on the list (0207).
   final int noteCount;
@@ -329,6 +333,7 @@ class PurchaseRequest extends Equatable {
         storagePath: _s(j['storage_path']),
         sheetName: _s(j['sheet_name']),
         noteCount: _ni(j['note_count']) ?? 0,
+        readPath: _s(j['read_path']),
         lines: [
           for (final (i, l) in (j['lines'] as List? ?? const []).whereType<Map>().indexed)
             RequestRow.fromSaved(l.cast<String, dynamic>(), i + 1),

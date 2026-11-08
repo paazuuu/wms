@@ -153,4 +153,12 @@ class FakeOverseasStockRepository implements OverseasStockRepository {
 
   @override
   Future<ApiResult<Uint8List>> fileBytes(String storagePath) async => ApiSuccess(kept);
+
+  final Map<int, String> readPaths = {};
+
+  @override
+  Future<ApiResult<bool>> setReadPath(int id, String path) async {
+    readPaths[id] = path;
+    return const ApiSuccess(true);
+  }
 }

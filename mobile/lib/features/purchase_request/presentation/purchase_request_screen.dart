@@ -322,7 +322,14 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     if (!mounted) return;
     switch (up) {
       case ApiSuccess(data: final path):
-        final set = await _repo.setFile(id, f.toFile(path));
+        // What was read, kept as Excel beside the file (0208).
+        String? readPath;
+        if (f.reading != null) {
+          final r = await _repo.upload(f.readingName, f.reading!());
+          if (r case ApiSuccess(:final data)) readPath = data;
+        }
+        if (!mounted) return;
+        final set = await _repo.setFile(id, f.toFile(path, readPath: readPath));
         if (!mounted) return;
         if (set case ApiFailure(:final message)) return _snack(l10n.wlFileNotKept(humanizeApiErrorMessage(l10n, message)));
         _fileKept = true;
@@ -427,6 +434,11 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
 
     final settings = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(l10n.wlIntro, style: muted),
+      Row(key: const ValueKey('wl-no-stock-change'), children: [
+        Icon(Icons.info_outline, size: 16, color: theme.colorScheme.primary),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(child: Text(l10n.wlNoStockChange, style: muted?.copyWith(color: theme.colorScheme.primary))),
+      ]),
       const SizedBox(height: AppSpacing.sm),
       Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
         SizedBox(

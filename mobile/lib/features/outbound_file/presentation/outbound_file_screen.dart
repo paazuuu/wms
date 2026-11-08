@@ -17,6 +17,10 @@ import '../../../core/ui/open_window.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../product/domain/product.dart';
+import '../../master_import/data/master_import_repository.dart';
+import '../../master_import/domain/master_import.dart' show MasterProblem;
+import '../../master_import/presentation/master_import_labels.dart' show masterProblemText;
+import '../../stock_import/domain/ai_read_sheet.dart';
 import '../../stock_import/domain/stock_file.dart' show fileFingerprint, readStockFile;
 import '../../stock_import/presentation/import_view_screen.dart' show OriginalFileView;
 import '../../stock_ops/presentation/stock_adjustment_screen.dart'
@@ -37,7 +41,9 @@ import 'outbound_file_detail_screen.dart';
 /// The shipping list chosen to read (overridden in tests).
 final outboundFilePickerProvider = Provider<Future<({String name, Uint8List bytes})?> Function()>((_) => () async {
       final r = await FilePicker.platform
-          .pickFiles(withData: true, type: FileType.custom, allowedExtensions: const ['xlsx', 'xlsm', 'csv', 'tsv', 'txt']);
+          .pickFiles(withData: true, type: FileType.custom, allowedExtensions: const [
+            'xlsx', 'xlsm', 'csv', 'tsv', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'webp',
+          ]);
       final f = r?.files.firstOrNull;
       return f?.bytes == null ? null : (name: f!.name, bytes: f.bytes!);
     });
@@ -455,21 +461,56 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       ..showSnackBar(SnackBar(content: Text(t)));
   }
 
+  /// The file was a PDF or a photo, read by the AI (its rows made a sheet).
+  bool _aiRead = false;
+  bool _aiReading = false;
+
+  /// A PDF or a photo: the AI reads its rows (import-plan, nothing booked),
+  /// made into a sheet read as an Excel is.
+  Future<List<XlsxSheetRows>?> _readByAi(({String name, Uint8List bytes}) f) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _aiReading = true);
+    final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes, keepRows: true);
+    if (!mounted) return null;
+    setState(() => _aiReading = false);
+    switch (r) {
+      case ApiSuccess(:final data):
+        if (data.lines.isEmpty) {
+          _snack(l10n.rdAiFailed(data.aiFailure == null
+              ? l10n.ofNotUsable
+              : masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure))));
+          return null;
+        }
+        return [aiReadAsSheet(data.lines)];
+      case ApiFailure(:final message):
+        _snack(l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message)));
+        return null;
+    }
+  }
+
   Future<void> _pick() async {
     final l10n = AppLocalizations.of(context);
     final f = await ref.read(outboundFilePickerProvider)();
     if (f == null || !mounted) return;
     List<XlsxSheetRows> sheets;
-    try {
-      final lower = f.name.toLowerCase();
-      sheets = lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
-          ? readXlsxSheets(f.bytes)
-          : [(name: f.name, rows: readStockFile(f.name, f.bytes))];
-    } on FormatException {
-      _snack(l10n.ofReadFailed);
-      return;
+    final byAi = !readsAsSheet(f.name);
+    if (byAi) {
+      final read = await _readByAi(f);
+      if (read == null || !mounted) return;
+      sheets = read;
+    } else {
+      try {
+        final lower = f.name.toLowerCase();
+        sheets = lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
+            ? readXlsxSheets(f.bytes)
+            : [(name: f.name, rows: readStockFile(f.name, f.bytes))];
+      } on FormatException {
+        _snack(l10n.ofReadFailed);
+        return;
+      }
     }
     setState(() {
+      _aiRead = byAi;
       _file = f;
       _sheets = sheets;
       _sheet = pickOutboundSheet(sheets);
@@ -686,6 +727,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         }
         // Each row's currency, kept for the profit and loss later (0197).
         await _saveCurrency(data);
+        // What was read, kept as Excel beside the file (0208).
+        await _keepRead(data, warehouseId, plan);
         final card = _card;
         if (card?.id != null) {
           final set = await repo.setDestination(data, card!.id);
@@ -855,6 +898,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     switch (r) {
       case ApiSuccess():
         await _saveCurrency(target.id);
+        await _keepRead(target.id, target.warehouseId, plan);
         if (!mounted) return;
         setState(() => _busy = false);
         ref.invalidate(outboundFilesProvider);
@@ -902,6 +946,16 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
             // one — not on the 出庫カレンダー, which holds days set.
             if (_file == null && _manual.isEmpty && !_replacing) OutboundUndecidedCard(kind: _proxy ? 'proxy' : 'stock'),
             if (_replacing) _replaceBanner(l10n),
+            if (_aiReading)
+              Padding(
+                key: const ValueKey('of-ai-reading'),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(children: [
+                  const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(l10n.rdAiReading),
+                ]),
+              ),
             // Nothing read yet: what this is for, and the way in.
             if (_file == null && _manual.isEmpty)
               Card(
@@ -1111,7 +1165,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
           ),
         Expanded(
-          child: OriginalFileView(fileName: file.name, bytes: file.bytes, sheetRows: rows, leftOut: out.toSet()),
+          // A PDF or a photo read by the AI is shown as it is.
+          child: _aiRead
+              ? OriginalFileView(fileName: file.name, bytes: file.bytes)
+              : OriginalFileView(fileName: file.name, bytes: file.bytes, sheetRows: rows, leftOut: out.toSet()),
         ),
       ],
     );
@@ -1158,6 +1215,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           label: Text(l10n.prAddRow),
         ),
       if (_file != null) Text(_file!.name, key: const ValueKey('of-file-name'), style: theme.textTheme.titleSmall),
+      if (_aiRead)
+        Chip(
+          key: const ValueKey('of-read-by-ai'),
+          avatar: const Icon(Icons.auto_awesome, size: 16),
+          label: Text(l10n.rdByAi),
+        ),
       if (parsed != null && _sheets.length > 1)
         DropdownButton<int>(
           key: ValueKey('of-sheet-$_sheet'),
@@ -1401,6 +1464,38 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     _snack(l10n.ofFileSaved(name));
   }
 
+  /// The reading of the file — every row with what was found for it — as
+  /// an Excel file.
+  Uint8List _readXlsx(List<OutboundPlanLine> plan) {
+    final l10n = AppLocalizations.of(context);
+    return buildOutboundPlanXlsx(
+      plan,
+      statusLabel: (l) => _proxy ? proxyStatusLabel(l10n, l) : outboundStatusLabel(l10n, l.status),
+      currency: _currency,
+      proxy: _proxy,
+      title: _file?.name,
+      sheet: _parsed?.sheetName,
+    );
+  }
+
+  /// What was read from the file, saved as Excel beside it (0208), to be
+  /// downloaded again from the list. A list typed in has no file to read.
+  Future<void> _keepRead(int id, int warehouseId, List<OutboundPlanLine> plan) async {
+    final l10n = AppLocalizations.of(context);
+    final file = _file;
+    if (file == null) return;
+    final repo = ref.read(outboundFileRepositoryProvider);
+    final name = '${file.name.replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.rdSuffix}.xlsx';
+    final up = await repo.upload(warehouseId, name, _readXlsx(plan));
+    final r = switch (up) {
+      ApiSuccess(:final data) => await repo.setReadPath(id, data),
+      ApiFailure(:final message) => ApiFailure<bool>(message: message),
+    };
+    if (r case ApiFailure(:final message)) {
+      if (mounted) _snack(l10n.rdNotKept(humanizeApiErrorMessage(l10n, message)));
+    }
+  }
+
   /// The table as it stands — the file read, improved, or the rows typed
   /// in — as an Excel file.
   Future<void> _downloadTable(List<OutboundPlanLine> plan) async {
@@ -1410,15 +1505,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         ? '${_proxy ? l10n.obHubProxy : l10n.ofTitle}_$day'
         : '${_file!.name.replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.ofImprovedSuffix}';
     final name = '$base.xlsx';
-    final bytes = buildOutboundPlanXlsx(
-      plan,
-      statusLabel: (l) => _proxy ? proxyStatusLabel(l10n, l) : outboundStatusLabel(l10n, l.status),
-      currency: _currency,
-      proxy: _proxy,
-      title: _file?.name,
-      sheet: _parsed?.sheetName,
-    );
-    await ref.read(outboundFileSaverProvider)(name, bytes);
+    await ref.read(outboundFileSaverProvider)(name, _readXlsx(plan));
     _snack(l10n.ofFileSaved(name));
   }
 

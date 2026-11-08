@@ -454,7 +454,8 @@ void main() {
     final lines = repo.saves.single['lines'] as List<RequestRow>;
     expect([for (final l in lines) '${l.key}:${l.quantity}'], ['p1:5', 'p2:4']);
     expect(repo.saves.single['customer'], 'テスト商店');
-    expect(repo.uploads.single.$1, '希望.xlsx');
+    expect([for (final u in repo.uploads) u.$1], ['希望.xlsx', '希望_読み取り結果.xlsx']);
+    expect(repo.files.single.$2['read_path'], 'wish/1-希望_読み取り結果.xlsx');
     final (id, f) = repo.files.single;
     expect(id, 5);
     expect(f['file_name'], '希望.xlsx');
@@ -465,7 +466,7 @@ void main() {
     // Saved again without a new file: the file is not sent twice.
     await tester.tap(find.byKey(const ValueKey('pr-save')));
     await tester.pumpAndSettle();
-    expect(repo.uploads, hasLength(1));
+    expect(repo.uploads, hasLength(2));
 
     // The same rows on the library tab.
     await tester.tap(find.byKey(const ValueKey('wl-tab-library')));

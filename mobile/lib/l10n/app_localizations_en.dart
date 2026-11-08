@@ -14176,7 +14176,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofIntro =>
-      'Read the shipping list you already keep (items, quantities, prices — such as the 明细 sheet) as Excel or CSV, in any language. Products are found by JAN first, else by part number and maker. This is not the packing list (contents, weight and size per carton).';
+      'Read the shipping list you already keep (items, quantities, prices — such as the 明细 sheet) as Excel or CSV, in any language. Products are found by JAN first, else by part number and maker. This is not the packing list (contents, weight and size per carton). (Excel and CSV; PDFs and images are read by the AI)';
 
   @override
   String get ofPick => 'Choose a file';
@@ -16355,7 +16355,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wlFileIntro =>
-      'Read the wish list a customer sent (Excel or CSV) as it is. Rows are matched to the library by JAN or part number, and the ticked rows go into this list. Products not in the library go in as typed-in products. The file is kept with the list.';
+      'Read the wish list a customer sent (Excel, CSV, PDF, image) as it is; PDFs and images are read by the AI. Rows are matched to the library by JAN or part number, and the ticked rows go into this list. Products not in the library go in as typed-in products. The file and the reading (Excel) are kept with the list. The list only records wishes: the library\'s stock does not change.';
 
   @override
   String get wlStFound => 'In the library';
@@ -16700,4 +16700,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get osSaved => 'Site saved';
+
+  @override
+  String get rdReadResult => 'Reading (Excel)';
+
+  @override
+  String get rdSuffix => 'reading';
+
+  @override
+  String get rdAiReading => 'The AI is reading the file…';
+
+  @override
+  String rdAiFailed(String why) {
+    return 'The AI could not read it: $why';
+  }
+
+  @override
+  String get rdByAi => 'Read by the AI (PDF, image)';
+
+  @override
+  String rdNotKept(String why) {
+    return 'The reading was not kept as Excel: $why';
+  }
+
+  @override
+  String get wlNoStockChange =>
+      'This list only records wishes. The library’s stock and what is kept do not change (stock is shown for reference).';
+
+  @override
+  String get wlReadIncluded => 'In';
 }

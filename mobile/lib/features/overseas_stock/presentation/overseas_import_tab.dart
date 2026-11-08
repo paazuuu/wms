@@ -220,6 +220,33 @@ class _OverseasImportTabState extends ConsumerState<OverseasImportTab> with Auto
             },
     );
     if (!mounted) return;
+    // What was read, kept as Excel beside the file (0208).
+    if (r case ApiSuccess(data: final id)) {
+      final reading = buildXlsxBook([
+        XlsxSheet(
+          name: l10n.rdSuffix,
+          headers: [
+            l10n.ofColRow, l10n.wlReadIncluded, l10n.ofRoleJan, l10n.ofRoleCode, l10n.osColName, l10n.ofRoleMaker,
+            l10n.osColQty, l10n.miFieldUnit,
+          ],
+          rows: [
+            for (final l in _lines)
+              [
+                l.rowNo, _excluded.contains(l.rowNo) ? '' : '○', l.jan ?? '', l.code ?? '', l.name ?? '', l.maker ?? '',
+                l.quantity, l.unit ?? '',
+              ],
+          ],
+        ),
+      ]);
+      final name = '${f.name.replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.rdSuffix}.xlsx';
+      final up = await repo.upload(widget.site.id, name, Uint8List.fromList(reading));
+      final kept = switch (up) {
+        ApiSuccess(:final data) => await repo.setReadPath(id, data),
+        ApiFailure(:final message) => ApiFailure<bool>(message: message),
+      };
+      if (kept case ApiFailure(:final message)) _snack(l10n.rdNotKept(humanizeApiErrorMessage(l10n, message)));
+      if (!mounted) return;
+    }
     setState(() => _busy = false);
     switch (r) {
       case ApiSuccess():

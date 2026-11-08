@@ -279,6 +279,21 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     }
   }
 
+  /// What was read from the file, kept as Excel (0208).
+  Future<void> _downloadRead(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(outboundFileRepositoryProvider).fileBytes(f.readPath!);
+    if (!mounted) return;
+    final name = '${f.fileName.replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.rdSuffix}.xlsx';
+    switch (r) {
+      case ApiSuccess(:final data):
+        await ref.read(outboundFileSaverProvider)(name, data);
+        _snack(l10n.ofFileSaved(name));
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _setCard(OutboundFileSummary f) async {
     final l10n = AppLocalizations.of(context);
     final d = await pickDestinationCard(context);
@@ -630,6 +645,13 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     icon: const Icon(Icons.download_outlined),
                     label: Text(l10n.ofDownload),
                   ),
+                  if (f.readPath != null)
+                    OutlinedButton.icon(
+                      key: const ValueKey('of-download-read'),
+                      onPressed: () => _downloadRead(f),
+                      icon: const Icon(Icons.table_view_outlined),
+                      label: Text(l10n.rdReadResult),
+                    ),
                 ] else
                   Text(l10n.ofNoFile, style: muted),
                 if (f.planned)

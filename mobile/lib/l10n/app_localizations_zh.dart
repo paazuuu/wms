@@ -13807,7 +13807,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofIntro =>
-      '直接读取您常用的发货明细（品目・数量・单价一览，如明细表），Excel・CSV均可，标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。这与按箱记录内容・重量・尺寸的装箱单不同。';
+      '直接读取您常用的发货明细（品目・数量・单价一览，如明细表），Excel・CSV均可，标题语言不限。优先按JAN查找商品，没有JAN的行按型号和厂商查找。这与按箱记录内容・重量・尺寸的装箱单不同。（除Excel・CSV外，PDF・图片也由AI读取）';
 
   @override
   String get ofPick => '选择文件';
@@ -15922,7 +15922,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wlFileIntro =>
-      '直接读取终端客户发来的到货希望文件（Excel・CSV）。按JAN・品号与商品库对照，勾选的行进入此清单。商品库中没有的商品也作为手动输入的商品加入。读取的文件与清单一起保存。';
+      '直接读取终端客户发来的到货希望文件（Excel・CSV・PDF・图片）。PDF・图片由AI读取。按JAN・品号与商品库对照，勾选的行进入此清单。商品库中没有的商品也作为手动输入的商品加入。原文件和读取结果（Excel）与清单一起保存。此清单仅记录希望，不改变商品库的库存数量。';
 
   @override
   String get wlStFound => '商品库中有';
@@ -16264,4 +16264,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get osSaved => '据点已保存';
+
+  @override
+  String get rdReadResult => '读取结果（Excel）';
+
+  @override
+  String get rdSuffix => '读取结果';
+
+  @override
+  String get rdAiReading => 'AI正在读取文件…';
+
+  @override
+  String rdAiFailed(String why) {
+    return 'AI未能读取: $why';
+  }
+
+  @override
+  String get rdByAi => 'AI读取（PDF・图片）';
+
+  @override
+  String rdNotKept(String why) {
+    return '读取结果Excel未能保存: $why';
+  }
+
+  @override
+  String get wlNoStockChange => '此清单仅记录希望。商品库的库存数量和保留不会改变（库存数量仅作参考显示）。';
+
+  @override
+  String get wlReadIncluded => '对象';
 }

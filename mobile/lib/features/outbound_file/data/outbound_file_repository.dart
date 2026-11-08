@@ -204,6 +204,7 @@ class OutboundFileSummary extends Equatable {
     required this.fileName,
     this.warehouseName,
     this.storagePath,
+    this.readPath,
     this.contentType,
     this.sheetName,
     this.destination,
@@ -294,6 +295,9 @@ class OutboundFileSummary extends Equatable {
   final DateTime shippedOn;
   final String fileName;
   final String? storagePath;
+
+  /// What was read from the file, kept as Excel beside it (0208).
+  final String? readPath;
   final String? contentType;
   final String? sheetName;
   final String? destination;
@@ -319,6 +323,7 @@ class OutboundFileSummary extends Equatable {
         shippedOn: _day(j['shipped_on']) ?? DateTime(2000),
         fileName: '${j['file_name'] ?? ''}',
         storagePath: _s(j['storage_path']),
+        readPath: _s(j['read_path']),
         contentType: _s(j['content_type']),
         sheetName: _s(j['sheet_name']),
         destination: _s(j['destination']),
@@ -567,6 +572,9 @@ abstract class OutboundFileRepository {
   Future<ApiResult<bool>> setDestination(int fileId, int? destinationId);
 
   Future<ApiResult<Uint8List>> fileBytes(String storagePath);
+
+  /// The reading kept as Excel beside list [id]'s file (0208).
+  Future<ApiResult<bool>> setReadPath(int id, String path);
 
   /// The planned lists with no day yet (出庫日 未定, 0197).
   Future<ApiResult<List<OutboundFileSummary>>> undecided({int? warehouseId});
@@ -877,6 +885,16 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
         'p_material_kg': materialKg,
       });
       return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setReadPath(int id, String path) async {
+    try {
+      final r = await _rest.post('/rpc/outbound_file_set_read_path', data: {'p_id': id, 'p_path': path});
+      return ApiSuccess(r.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
     }

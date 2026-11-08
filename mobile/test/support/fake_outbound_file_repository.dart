@@ -106,6 +106,16 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     return const ApiSuccess(true);
   }
 
+  /// Readings kept as Excel (0208): list id → path.
+  final Map<int, String> readPaths = {};
+  final List<String> uploadedNames = [];
+
+  @override
+  Future<ApiResult<bool>> setReadPath(int id, String path) async {
+    readPaths[id] = path;
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<Uint8List>> fileBytes(String storagePath) async {
     fetched.add(storagePath);

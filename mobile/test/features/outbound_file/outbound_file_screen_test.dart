@@ -308,7 +308,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-dup-again')));
     await tester.pumpAndSettle();
 
-    expect(repo.uploaded.single.name, '到货明细.xlsx');
+    // The file, and what was read from it as Excel beside it (0208).
+    expect([for (final u in repo.uploaded) u.name], ['到货明细.xlsx', '到货明细_読み取り結果.xlsx']);
+    expect(repo.readPaths.values.single, '1/1-到货明细_読み取り結果.xlsx');
     final p = repo.posted.single;
     expect(p.allowDuplicate, isTrue);
     expect(p.plan, isFalse);

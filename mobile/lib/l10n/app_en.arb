@@ -4427,7 +4427,7 @@
   "ofTitle": "Read a shipping list",
   "ofTabImport": "Read a shipping list",
   "ofTabCalendar": "Calendar",
-  "ofIntro": "Read the shipping list you already keep (items, quantities, prices — such as the 明细 sheet) as Excel or CSV, in any language. Products are found by JAN first, else by part number and maker. This is not the packing list (contents, weight and size per carton).",
+  "ofIntro": "Read the shipping list you already keep (items, quantities, prices — such as the 明细 sheet) as Excel or CSV, in any language. Products are found by JAN first, else by part number and maker. This is not the packing list (contents, weight and size per carton). (Excel and CSV; PDFs and images are read by the AI)",
   "ofPick": "Choose a file",
   "ofPickAgain": "Choose another file",
   "ofReadFailed": "This file cannot be read (.xlsx / .csv)",
@@ -5039,7 +5039,7 @@
   "wlFirstWanted": "earliest {date}",
   "wlTabFile": "From a file",
   "wlTabLibrary": "From the library",
-  "wlFileIntro": "Read the wish list a customer sent (Excel or CSV) as it is. Rows are matched to the library by JAN or part number, and the ticked rows go into this list. Products not in the library go in as typed-in products. The file is kept with the list.",
+  "wlFileIntro": "Read the wish list a customer sent (Excel, CSV, PDF, image) as it is; PDFs and images are read by the AI. Rows are matched to the library by JAN or part number, and the ticked rows go into this list. Products not in the library go in as typed-in products. The file and the reading (Excel) are kept with the list. The list only records wishes: the library's stock does not change.",
   "wlStFound": "In the library",
   "wlStNew": "Not in the library (typed in)",
   "wlStSeveral": "Several match",
@@ -5138,5 +5138,13 @@
   "osNow": "Stock now",
   "osFileView": "Original file",
   "osQtyEdit": "Change quantity",
-  "osSaved": "Site saved"
+  "osSaved": "Site saved",
+  "rdReadResult": "Reading (Excel)",
+  "rdSuffix": "reading",
+  "rdAiReading": "The AI is reading the file…",
+  "rdAiFailed": "The AI could not read it: {why}",
+  "rdByAi": "Read by the AI (PDF, image)",
+  "rdNotKept": "The reading was not kept as Excel: {why}",
+  "wlNoStockChange": "This list only records wishes. The library’s stock and what is kept do not change (stock is shown for reference).",
+  "wlReadIncluded": "In"
 }

@@ -12,6 +12,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../outbound/presentation/outbound_downloads.dart' show saveFileProvider;
 import '../../outbound_file/domain/outbound_sheet.dart';
 import '../../outbound_file/presentation/outbound_file_screen.dart' show outboundColumnLabel, outboundFilePickerProvider;
+import '../../master_import/data/master_import_repository.dart';
+import '../../master_import/domain/master_import.dart' show MasterProblem;
+import '../../master_import/presentation/master_import_labels.dart' show masterProblemText;
+import '../../stock_import/domain/ai_read_sheet.dart';
 import '../../stock_import/domain/stock_file.dart' show fileFingerprint, readStockFile;
 import '../../stock_import/presentation/import_view_screen.dart' show OriginalFileView;
 import '../data/purchase_request_repository.dart';
@@ -20,16 +24,22 @@ import '../domain/wish_file.dart';
 
 /// The customer's file read, to keep with the list once it is saved (0206).
 class WishFileSource {
-  const WishFileSource({required this.name, required this.bytes, this.sheetName, this.columns = const {}});
+  const WishFileSource({required this.name, required this.bytes, this.sheetName, this.columns = const {}, this.reading});
 
   final String name;
   final Uint8List bytes;
   final String? sheetName;
   final Map<String, String> columns;
 
-  Map<String, dynamic> toFile(String storagePath) => {
+  /// What was read, as an Excel file, as the rows are ticked now (0208).
+  final Uint8List Function()? reading;
+
+  String get readingName => '${name.replaceAll(RegExp(r'\.[^.]+$'), '')}_読み取り結果.xlsx';
+
+  Map<String, dynamic> toFile(String storagePath, {String? readPath}) => {
         'file_name': name,
         'storage_path': storagePath,
+        'read_path': readPath,
         'file_size': bytes.length,
         'fingerprint': fileFingerprint(bytes),
         'sheet_name': sheetName,
@@ -104,7 +114,8 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
         : WishFileSource(
             name: f.name,
             bytes: f.bytes,
-            sheetName: p?.sheetName,
+            reading: _readingXlsx,
+            sheetName: _aiRead ? null : p?.sheetName,
             columns: {
               for (final e in (p?.columnsWire ?? const <String, String>{}).entries)
                 if (wishColumns.any((c) => c.wire == e.key)) e.key: e.value,
@@ -112,21 +123,77 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
           ));
   }
 
+  /// The file was a PDF or a photo, read by the AI.
+  bool _aiRead = false;
+  bool _aiReading = false;
+
+  /// What was read, every row with what was found for it, as an Excel file.
+  Uint8List _readingXlsx() {
+    final l10n = AppLocalizations.of(context);
+    final lines = _lines;
+    return Uint8List.fromList(buildXlsxBook([
+      XlsxSheet(
+        name: l10n.rdSuffix,
+        headers: [
+          l10n.ofColRow, l10n.wlReadIncluded, l10n.ofColStatus, l10n.ofColProduct, l10n.ofRoleJan, l10n.ofRoleCode,
+          l10n.ofRoleMaker, l10n.ofRoleName, l10n.wlColWish, l10n.ofColStock,
+        ],
+        rows: [
+          for (final l in lines)
+            [
+              l.row.rowNo,
+              !_excluded.contains(l.row.rowNo) && l.quantity > 0 ? '○' : '',
+              wishStatusLabel(l10n, l.status),
+              l.key == null ? '' : widget.library[l.key]?.name ?? '',
+              l.row.jan.isNotEmpty ? l.row.jan : l.row.janRaw,
+              l.row.code ?? '',
+              l.row.maker ?? '',
+              l.row.name ?? '',
+              l.quantity,
+              l.key == null ? '' : widget.library[l.key]?.onHand ?? '',
+            ],
+        ],
+      ),
+    ]));
+  }
+
   Future<void> _pick() async {
     final l10n = AppLocalizations.of(context);
     final f = await ref.read(outboundFilePickerProvider)();
     if (f == null || !mounted) return;
     List<XlsxSheetRows> sheets;
-    try {
-      final lower = f.name.toLowerCase();
-      sheets = lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
-          ? readXlsxSheets(f.bytes)
-          : [(name: f.name, rows: readStockFile(f.name, f.bytes))];
-    } on FormatException {
-      _snack(l10n.ofReadFailed);
-      return;
+    final byAi = !readsAsSheet(f.name);
+    if (byAi) {
+      // A PDF or a photo: the AI reads its rows, read as a sheet from then on.
+      setState(() => _aiReading = true);
+      final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes, keepRows: true);
+      if (!mounted) return;
+      setState(() => _aiReading = false);
+      switch (r) {
+        case ApiSuccess(:final data) when data.lines.isNotEmpty:
+          sheets = [aiReadAsSheet(data.lines)];
+        case ApiSuccess(:final data):
+          _snack(l10n.rdAiFailed(data.aiFailure == null
+              ? l10n.ofNotUsable
+              : masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure))));
+          return;
+        case ApiFailure(:final message):
+          _snack(l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message)));
+          return;
+      }
+    } else {
+      try {
+        final lower = f.name.toLowerCase();
+        sheets = lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
+            ? readXlsxSheets(f.bytes)
+            : [(name: f.name, rows: readStockFile(f.name, f.bytes))];
+      } on FormatException {
+        _snack(l10n.ofReadFailed);
+        return;
+      }
     }
     setState(() {
+      _aiRead = byAi;
       _file = f;
       _sheets = sheets;
       _sheet = pickOutboundSheet(sheets);
@@ -201,6 +268,20 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
     ));
   }
 
+  Future<void> _downloadReading() async {
+    final l10n = AppLocalizations.of(context);
+    final s = widget.saved!;
+    final r = await ref.read(purchaseRequestRepositoryProvider).fileBytes(s.readPath!);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess(:final data):
+        await ref.read(saveFileProvider)(
+            '${(s.fileName ?? 'wish').replaceAll(RegExp(r'\.[^.]+$'), '')}_${l10n.rdSuffix}.xlsx', data);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _downloadSaved() async {
     final bytes = await _savedBytes();
     if (bytes == null) return;
@@ -248,6 +329,16 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
         key: const ValueKey('wl-file-list'),
         padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
         children: [
+          if (_aiReading)
+            Padding(
+              key: const ValueKey('wl-ai-reading'),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(children: [
+                const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(width: AppSpacing.sm),
+                Text(l10n.rdAiReading),
+              ]),
+            ),
           if (_file == null) ...[
             Card(
               child: Padding(
@@ -284,6 +375,13 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
                       icon: const Icon(Icons.download_outlined, size: 18),
                       label: Text(l10n.wlSavedFileDownload),
                     ),
+                    if (saved.readPath != null)
+                      TextButton.icon(
+                        key: const ValueKey('wl-saved-read'),
+                        onPressed: _downloadReading,
+                        icon: const Icon(Icons.table_view_outlined, size: 18),
+                        label: Text(l10n.rdReadResult),
+                      ),
                   ]),
                 ),
               ),
@@ -383,8 +481,10 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
                   child: Text(l10n.wlOriginalLegend(out.length), style: theme.textTheme.bodySmall?.copyWith(color: scheme.error)),
                 ),
               Expanded(
-                child: OriginalFileView(
-                    fileName: file.name, bytes: file.bytes, sheetRows: _sheets[_sheet].rows, leftOut: out),
+                child: _aiRead
+                    ? OriginalFileView(fileName: file.name, bytes: file.bytes)
+                    : OriginalFileView(
+                        fileName: file.name, bytes: file.bytes, sheetRows: _sheets[_sheet].rows, leftOut: out),
               ),
             ],
           ),
@@ -408,6 +508,12 @@ class _WishFileTabState extends ConsumerState<WishFileTab> with AutomaticKeepAli
         label: Text(l10n.ofPickAgain),
       ),
       Text(_file!.name, key: const ValueKey('wl-file-name'), style: theme.textTheme.titleSmall),
+      if (_aiRead)
+        Chip(
+          key: const ValueKey('wl-read-by-ai'),
+          avatar: const Icon(Icons.auto_awesome, size: 16),
+          label: Text(l10n.rdByAi),
+        ),
       if (parsed != null && _sheets.length > 1)
         DropdownButton<int>(
           key: ValueKey('wl-sheet-$_sheet'),

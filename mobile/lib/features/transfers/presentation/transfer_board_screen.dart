@@ -12,6 +12,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../outbound_file/data/outbound_file_repository.dart' show outboundFileRepositoryProvider;
 import '../../outbound_file/domain/outbound_sheet.dart' show parseOutboundSheet, pickOutboundSheet;
 import '../../product/domain/product.dart';
+import '../../master_import/data/master_import_repository.dart';
+import '../../stock_import/domain/ai_read_sheet.dart';
 import '../../stock_import/domain/stock_file.dart' show readStockFile;
 import '../../stock_ops/presentation/stock_adjustment_screen.dart'
     show adjustOnHand, adjustProductMatches, adjustProductsProvider;
@@ -25,7 +27,9 @@ import 'transfer_detail_screen.dart';
 /// The file read for a transfer (overridden in tests).
 final transferFilePickerProvider = Provider<Future<({String name, Uint8List bytes})?> Function()>((_) => () async {
       final r = await FilePicker.platform
-          .pickFiles(withData: true, type: FileType.custom, allowedExtensions: const ['xlsx', 'xlsm', 'csv', 'tsv', 'txt']);
+          .pickFiles(withData: true, type: FileType.custom, allowedExtensions: const [
+            'xlsx', 'xlsm', 'csv', 'tsv', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'webp',
+          ]);
       final f = r?.files.firstOrNull;
       return f?.bytes == null ? null : (name: f!.name, bytes: f.bytes!);
     });
@@ -147,11 +151,27 @@ class _TransferBoardScreenState extends ConsumerState<TransferBoardScreen> {
     final file = await ref.read(transferFilePickerProvider)();
     if (file == null || !mounted) return;
     final List<({String jan, String? code, String? maker, int quantity})> rows;
+    // A PDF or a photo: the AI reads its rows (nothing booked).
+    List<XlsxSheetRows>? read;
+    if (!readsAsSheet(file.name)) {
+      setState(() => _busy = true);
+      final r = await ref.read(masterImportRepositoryProvider).read(file.name, file.bytes, keepRows: true);
+      if (!mounted) return;
+      setState(() => _busy = false);
+      switch (r) {
+        case ApiSuccess(:final data):
+          read = [aiReadAsSheet(data.lines)];
+        case ApiFailure(:final message):
+          _snack(l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message)), danger: true);
+          return;
+      }
+    }
     try {
       final lower = file.name.toLowerCase();
-      final sheets = lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
-          ? readXlsxSheets(file.bytes)
-          : [(name: file.name, rows: readStockFile(file.name, file.bytes))];
+      final sheets = read ??
+          (lower.endsWith('.xlsx') || lower.endsWith('.xlsm')
+              ? readXlsxSheets(file.bytes)
+              : [(name: file.name, rows: readStockFile(file.name, file.bytes))]);
       final s = sheets[pickOutboundSheet(sheets)];
       rows = [
         for (final r in parseOutboundSheet(s.name, s.rows).rows)
