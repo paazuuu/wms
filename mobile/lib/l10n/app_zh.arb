@@ -5180,5 +5180,21 @@
   "osColEnd": "期末（报告）",
   "osColUsed": "减少数",
   "osColPerMonth": "每月",
-  "osMonthly": "每月减少（按天分配）"
+  "osMonthly": "每月减少（按天分配）",
+  "themeMenu": "设计",
+  "themeStyleHeader": "设计",
+  "themeModeHeader": "明暗",
+  "themeNeutral": "简约",
+  "themeNeutralHint": "沉稳的黑白（Neutral）",
+  "themeMatcha": "自然",
+  "themeMatchaHint": "抹茶绿与奶油色（Matcha）",
+  "themeStone": "商务",
+  "themeStoneHint": "青灰色，圆角较小（Stone）",
+  "themeChocolate": "温暖",
+  "themeChocolateHint": "棕色与米色，标题为衬线体（Chocolate）",
+  "themeY2k": "流行",
+  "themeY2kHint": "淡紫背景，直角线条（Y2K）",
+  "themeModeSystem": "跟随设备",
+  "themeModeLight": "浅色",
+  "themeModeDark": "深色"
 }

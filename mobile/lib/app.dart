@@ -5,6 +5,7 @@ import 'core/l10n/locale_controller.dart';
 import 'core/router/app_router.dart';
 import 'core/ui/selectable_app.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/appearance_controller.dart';
 import 'core/theme/text_scale_controller.dart';
 import 'l10n/app_localizations.dart';
 
@@ -15,6 +16,7 @@ class WmsApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeControllerProvider);
     final textScale = ref.watch(textScaleControllerProvider);
+    final look = ref.watch(appearanceControllerProvider);
 
     return MaterialApp.router(
       routerConfig: ref.watch(goRouterProvider),
@@ -23,9 +25,10 @@ class WmsApp extends ConsumerWidget {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      // The design and brightness chosen in the theme menu (palette icon).
+      theme: AppTheme.light(look.style),
+      darkTheme: AppTheme.dark(look.style),
+      themeMode: look.mode,
       // Apply the operator's text-size choice on top of the OS setting so the
       // whole app scales consistently for on-site readability.
       builder: (context, child) {

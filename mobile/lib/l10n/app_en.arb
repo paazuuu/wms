@@ -5180,5 +5180,21 @@
   "osColEnd": "End (count)",
   "osColUsed": "Used",
   "osColPerMonth": "Per month",
-  "osMonthly": "Used by month (by day)"
+  "osMonthly": "Used by month (by day)",
+  "themeMenu": "Design",
+  "themeStyleHeader": "Design",
+  "themeModeHeader": "Brightness",
+  "themeNeutral": "Simple",
+  "themeNeutralHint": "Calm black and white (Neutral)",
+  "themeMatcha": "Natural",
+  "themeMatchaHint": "Matcha green and cream (Matcha)",
+  "themeStone": "Business",
+  "themeStoneHint": "Cool slate, tighter corners (Stone)",
+  "themeChocolate": "Warm",
+  "themeChocolateHint": "Brown and beige, serif headings (Chocolate)",
+  "themeY2k": "Pop",
+  "themeY2kHint": "Periwinkle page, square edges (Y2K)",
+  "themeModeSystem": "Match device",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark"
 }

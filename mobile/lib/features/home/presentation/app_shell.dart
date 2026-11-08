@@ -17,6 +17,7 @@ import '../../../core/scan/hardware_scanner.dart';
 import '../../../core/scan/scan_field.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/text_scale_menu.dart';
+import '../../../core/theme/theme_menu.dart';
 import '../../../core/ui/responsive.dart';
 import '../../../core/ui/selectable_app.dart';
 import '../../../l10n/app_localizations.dart';
@@ -630,6 +631,7 @@ class _TopBar extends StatelessWidget {
           if (!phone) ...[
             const SizedBox(width: AppSpacing.xs),
             const TextScaleMenuButton(),
+            const ThemeMenuButton(),
             const LanguageMenuButton(),
           ],
         ],
@@ -1051,6 +1053,7 @@ class _Footer extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             const TextScaleMenuButton(),
+            const ThemeMenuButton(),
             const LanguageMenuButton(),
             signOut,
           ],
@@ -1058,36 +1061,48 @@ class _Footer extends StatelessWidget {
       );
     }
 
+    // Who is signed in and sign-out on the first row; the display settings
+    // (text size, design, language) on the second, so the name keeps room.
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          avatar,
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: theme.textTheme.titleSmall,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              avatar,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: theme.textTheme.titleSmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (userEmail != null && userEmail!.isNotEmpty)
+                      Text(
+                        userEmail!,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
                 ),
-                if (userEmail != null && userEmail!.isNotEmpty)
-                  Text(
-                    userEmail!,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
-            ),
+              ),
+              signOut,
+            ],
           ),
-          const TextScaleMenuButton(),
-          const LanguageMenuButton(),
-          signOut,
+          const Row(
+            children: [
+              TextScaleMenuButton(),
+              ThemeMenuButton(),
+              LanguageMenuButton(),
+            ],
+          ),
         ],
       ),
     );

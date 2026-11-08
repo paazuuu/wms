@@ -16413,4 +16413,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get osMonthly => '每月减少（按天分配）';
+
+  @override
+  String get themeMenu => '设计';
+
+  @override
+  String get themeStyleHeader => '设计';
+
+  @override
+  String get themeModeHeader => '明暗';
+
+  @override
+  String get themeNeutral => '简约';
+
+  @override
+  String get themeNeutralHint => '沉稳的黑白（Neutral）';
+
+  @override
+  String get themeMatcha => '自然';
+
+  @override
+  String get themeMatchaHint => '抹茶绿与奶油色（Matcha）';
+
+  @override
+  String get themeStone => '商务';
+
+  @override
+  String get themeStoneHint => '青灰色，圆角较小（Stone）';
+
+  @override
+  String get themeChocolate => '温暖';
+
+  @override
+  String get themeChocolateHint => '棕色与米色，标题为衬线体（Chocolate）';
+
+  @override
+  String get themeY2k => '流行';
+
+  @override
+  String get themeY2kHint => '淡紫背景，直角线条（Y2K）';
+
+  @override
+  String get themeModeSystem => '跟随设备';
+
+  @override
+  String get themeModeLight => '浅色';
+
+  @override
+  String get themeModeDark => '深色';
 }

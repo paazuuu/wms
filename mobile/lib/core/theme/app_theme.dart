@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 import 'app_spacing.dart';
+import 'app_theme_style.dart';
 
 /// Central [ThemeData] for the WMS app.
 ///
@@ -11,22 +12,33 @@ import 'app_spacing.dart';
 /// near-white on dark) and colour kept for state; Figtree on a 14px base
 /// with a 1.2 ratio; radii 6 (inner) / 10 (controls) / 12 (containers);
 /// 40px controls; quick 125ms motion.
+///
+/// The other designs ([AppThemeStyle]: Matcha, Stone, Chocolate, Y2K) reuse
+/// this build with their own colours, corners and typefaces
+/// ([AppThemeSpec]); sizes and spacing are the same in all of them.
 class AppTheme {
   AppTheme._();
 
-  static ThemeData light() => _build(AppColors.light);
-  static ThemeData dark() => _build(AppColors.dark);
+  static ThemeData light([AppThemeStyle style = AppThemeStyle.neutral]) =>
+      _build(AppThemeSpec.of(style), Brightness.light);
+  static ThemeData dark([AppThemeStyle style = AppThemeStyle.neutral]) =>
+      _build(AppThemeSpec.of(style), Brightness.dark);
 
-  static const _text = TextStyle(fontFamily: AppFonts.sans, fontFamilyFallback: AppFonts.fallback);
-
-  static ThemeData _build(ColorScheme scheme) {
-    final isLight = scheme.brightness == Brightness.light;
+  static ThemeData _build(AppThemeSpec spec, Brightness brightness) {
+    final scheme = spec.scheme(brightness);
+    final isLight = brightness == Brightness.light;
+    final neutral = spec.style == AppThemeStyle.neutral;
+    final text = TextStyle(fontFamily: spec.bodyFont, fontFamilyFallback: AppFonts.fallback);
+    final heading = TextStyle(fontFamily: spec.headingFont, fontFamilyFallback: AppFonts.fallback);
+    // A control's resting edge: Neutral's own greys; elsewhere the outline,
+    // which keeps 3:1 on the surface.
+    final controlEdge = neutral ? (isLight ? AppColors.borderStrong : AppColors.n35) : scheme.outline;
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surfaceContainerLow,
       canvasColor: scheme.surface,
-      fontFamily: AppFonts.sans,
+      fontFamily: spec.bodyFont,
       fontFamilyFallback: AppFonts.fallback,
       splashFactory: InkRipple.splashFactory,
       visualDensity: VisualDensity.standard,
@@ -34,12 +46,12 @@ class AppTheme {
       highlightColor: scheme.onSurface.withValues(alpha: 0.10), // --color-overlay-pressed
     );
 
-    final rControl = BorderRadius.circular(AppSpacing.radiusMd);
-    final rContainer = BorderRadius.circular(AppSpacing.radiusLg);
-    final rSheet = BorderRadius.circular(AppSpacing.radiusXl);
+    final rControl = BorderRadius.circular(spec.radiusControl);
+    final rContainer = BorderRadius.circular(spec.radiusContainer);
+    final rSheet = BorderRadius.circular(spec.radiusSheet);
     final hairline = BorderSide(color: scheme.outlineVariant);
     const controlSize = Size(64, AppSpacing.control);
-    final buttonText = _text.copyWith(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0);
+    final buttonText = text.copyWith(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0);
     // Neutral's raised layers: a soft two-step shadow (--shadow-med).
     final popShadow = [
       BoxShadow(color: Colors.black.withValues(alpha: isLight ? 0.05 : 0.35), blurRadius: 4, offset: const Offset(0, 2)),
@@ -47,7 +59,7 @@ class AppTheme {
     ];
 
     return base.copyWith(
-      textTheme: _textTheme(base.textTheme, scheme),
+      textTheme: _textTheme(base.textTheme, scheme, spec),
 
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
@@ -56,14 +68,14 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: _text.copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: scheme.onSurface),
+        titleTextStyle: heading.copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: scheme.onSurface),
         shape: Border(bottom: hairline),
       ),
 
       // Cards: the container — a hairline edge, no shadow.
       cardTheme: CardThemeData(
         elevation: 0,
-        color: scheme.surface,
+        color: spec.card(brightness),
         surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: rContainer, side: hairline),
@@ -97,7 +109,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           minimumSize: controlSize,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          side: BorderSide(color: isLight ? AppColors.borderStrong : AppColors.n35),
+          side: BorderSide(color: controlEdge),
           foregroundColor: scheme.onSurface,
           backgroundColor: scheme.surface,
           shape: RoundedRectangleBorder(borderRadius: rControl),
@@ -139,7 +151,7 @@ class AppTheme {
         border: OutlineInputBorder(borderRadius: rControl, borderSide: BorderSide(color: scheme.outline)),
         enabledBorder: OutlineInputBorder(
           borderRadius: rControl,
-          borderSide: BorderSide(color: isLight ? AppColors.borderStrong : AppColors.n35),
+          borderSide: BorderSide(color: controlEdge),
         ),
         focusedBorder: OutlineInputBorder(borderRadius: rControl, borderSide: BorderSide(color: scheme.primary, width: 2)),
         errorBorder: OutlineInputBorder(borderRadius: rControl, borderSide: BorderSide(color: scheme.error, width: 1.5)),
@@ -165,8 +177,8 @@ class AppTheme {
         indicatorColor: scheme.primary,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: scheme.outlineVariant,
-        labelStyle: _text.copyWith(fontSize: 14, fontWeight: FontWeight.w700),
-        unselectedLabelStyle: _text.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
+        labelStyle: text.copyWith(fontSize: 14, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: text.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
         overlayColor: WidgetStatePropertyAll(scheme.onSurface.withValues(alpha: 0.05)),
       ),
 
@@ -191,15 +203,15 @@ class AppTheme {
         selectedColor: scheme.primary,
         checkmarkColor: scheme.onPrimary,
         side: BorderSide.none,
-        labelStyle: _text.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onSecondaryContainer),
-        secondaryLabelStyle: _text.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onPrimary),
+        labelStyle: text.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onSecondaryContainer),
+        secondaryLabelStyle: text.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onPrimary),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spec.pill ? 999 : spec.radiusInner)),
       ),
 
       dataTableTheme: DataTableThemeData(
-        headingTextStyle: _text.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onSurfaceVariant),
-        dataTextStyle: _text.copyWith(fontSize: 14, color: scheme.onSurface),
+        headingTextStyle: text.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onSurfaceVariant),
+        dataTextStyle: text.copyWith(fontSize: 14, color: scheme.onSurface),
         dividerThickness: 1,
         headingRowColor: WidgetStatePropertyAll(scheme.surfaceContainer),
       ),
@@ -207,7 +219,7 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: scheme.inverseSurface,
-        contentTextStyle: _text.copyWith(color: scheme.onInverseSurface, fontSize: 14),
+        contentTextStyle: text.copyWith(color: scheme.onInverseSurface, fontSize: 14),
         actionTextColor: scheme.onInverseSurface,
         shape: RoundedRectangleBorder(borderRadius: rContainer),
         insetPadding: const EdgeInsets.all(AppSpacing.lg),
@@ -219,7 +231,7 @@ class AppTheme {
         elevation: 6,
         shadowColor: scheme.shadow,
         shape: RoundedRectangleBorder(borderRadius: rSheet, side: isLight ? BorderSide.none : hairline),
-        titleTextStyle: _text.copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: scheme.onSurface),
+        titleTextStyle: heading.copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: scheme.onSurface),
       ),
 
       popupMenuTheme: PopupMenuThemeData(
@@ -257,15 +269,15 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2, vertical: AppSpacing.xs + 2),
         decoration: BoxDecoration(
           color: scheme.inverseSurface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          borderRadius: BorderRadius.circular(spec.radiusInner),
           boxShadow: popShadow,
         ),
-        textStyle: _text.copyWith(fontSize: 13, height: 1.45, color: scheme.onInverseSurface),
+        textStyle: text.copyWith(fontSize: 13, height: 1.45, color: scheme.onInverseSurface),
       ),
       // A box's edge reads at 3:1 when empty, so an unticked row is seen.
       checkboxTheme: CheckboxThemeData(
         side: BorderSide(color: scheme.outline, width: 1.5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusSm - 2)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular((spec.radiusInner - 2).clamp(0, 99).toDouble())),
       ),
       switchTheme: SwitchThemeData(
         trackOutlineColor: WidgetStatePropertyAll(scheme.outlineVariant),
@@ -288,9 +300,11 @@ class AppTheme {
 
   /// Neutral's scale: a 14px base, ratio 1.2 (12 · 14 · 16.8 · 20.2 · 24.2 ·
   /// 29 · 34.8 · 41.8), bold headings, 1.5 line height for running text.
-  static TextTheme _textTheme(TextTheme base, ColorScheme scheme) {
+  /// Every design keeps these sizes; titles and headings take its heading
+  /// typeface (Montserrat, Fraunces …), the rest its body one.
+  static TextTheme _textTheme(TextTheme base, ColorScheme scheme, AppThemeSpec spec) {
     TextStyle? s(TextStyle? t, double size, FontWeight w, {double? h, double ls = 0}) => t?.copyWith(
-        fontFamily: AppFonts.sans,
+        fontFamily: spec.bodyFont,
         fontFamilyFallback: AppFonts.fallback,
         fontSize: size,
         fontWeight: w,
@@ -315,21 +329,22 @@ class AppTheme {
           labelSmall: s(base.labelSmall, 11, FontWeight.w600, h: 1.3, ls: 0.2),
         )
         .apply(
-          fontFamily: AppFonts.sans,
+          fontFamily: spec.bodyFont,
           fontFamilyFallback: AppFonts.fallback,
           bodyColor: scheme.onSurface,
           displayColor: scheme.onSurface,
         );
+    TextStyle? hd(TextStyle? x) => x?.copyWith(fontFamily: spec.headingFont);
     // Figures of one width, so quantities and prices line up in tables.
     TextStyle? n(TextStyle? x) => x?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     return t.copyWith(
-      displayLarge: n(t.displayLarge),
-      displayMedium: n(t.displayMedium),
-      displaySmall: n(t.displaySmall),
-      headlineLarge: n(t.headlineLarge),
-      headlineMedium: n(t.headlineMedium),
-      headlineSmall: n(t.headlineSmall),
-      titleLarge: n(t.titleLarge),
+      displayLarge: hd(n(t.displayLarge)),
+      displayMedium: hd(n(t.displayMedium)),
+      displaySmall: hd(n(t.displaySmall)),
+      headlineLarge: hd(n(t.headlineLarge)),
+      headlineMedium: hd(n(t.headlineMedium)),
+      headlineSmall: hd(n(t.headlineSmall)),
+      titleLarge: hd(n(t.titleLarge)),
       titleMedium: n(t.titleMedium),
       titleSmall: n(t.titleSmall),
       bodyLarge: n(t.bodyLarge),

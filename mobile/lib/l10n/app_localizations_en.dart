@@ -16851,4 +16851,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get osMonthly => 'Used by month (by day)';
+
+  @override
+  String get themeMenu => 'Design';
+
+  @override
+  String get themeStyleHeader => 'Design';
+
+  @override
+  String get themeModeHeader => 'Brightness';
+
+  @override
+  String get themeNeutral => 'Simple';
+
+  @override
+  String get themeNeutralHint => 'Calm black and white (Neutral)';
+
+  @override
+  String get themeMatcha => 'Natural';
+
+  @override
+  String get themeMatchaHint => 'Matcha green and cream (Matcha)';
+
+  @override
+  String get themeStone => 'Business';
+
+  @override
+  String get themeStoneHint => 'Cool slate, tighter corners (Stone)';
+
+  @override
+  String get themeChocolate => 'Warm';
+
+  @override
+  String get themeChocolateHint =>
+      'Brown and beige, serif headings (Chocolate)';
+
+  @override
+  String get themeY2k => 'Pop';
+
+  @override
+  String get themeY2kHint => 'Periwinkle page, square edges (Y2K)';
+
+  @override
+  String get themeModeSystem => 'Match device';
+
+  @override
+  String get themeModeLight => 'Light';
+
+  @override
+  String get themeModeDark => 'Dark';
 }

@@ -16531,4 +16531,52 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get osMonthly => '月ごとの減り（日割り）';
+
+  @override
+  String get themeMenu => 'デザイン';
+
+  @override
+  String get themeStyleHeader => 'デザイン';
+
+  @override
+  String get themeModeHeader => '明るさ';
+
+  @override
+  String get themeNeutral => 'シンプル';
+
+  @override
+  String get themeNeutralHint => '白黒の落ち着いた画面（Neutral）';
+
+  @override
+  String get themeMatcha => 'ナチュラル';
+
+  @override
+  String get themeMatchaHint => '抹茶の緑とクリーム色（Matcha）';
+
+  @override
+  String get themeStone => 'ビジネス';
+
+  @override
+  String get themeStoneHint => '青みの灰色、角が控えめ（Stone）';
+
+  @override
+  String get themeChocolate => 'あたたか';
+
+  @override
+  String get themeChocolateHint => '茶色とベージュ、見出しは明朝風（Chocolate）';
+
+  @override
+  String get themeY2k => 'ポップ';
+
+  @override
+  String get themeY2kHint => '藤色の背景、角ばった線（Y2K）';
+
+  @override
+  String get themeModeSystem => '端末に合わせる';
+
+  @override
+  String get themeModeLight => 'ライト';
+
+  @override
+  String get themeModeDark => 'ダーク';
 }

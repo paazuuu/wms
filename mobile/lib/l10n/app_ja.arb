@@ -14627,5 +14627,21 @@
   "osColEnd": "期末（報告）",
   "osColUsed": "減った数",
   "osColPerMonth": "月あたり",
-  "osMonthly": "月ごとの減り（日割り）"
+  "osMonthly": "月ごとの減り（日割り）",
+  "themeMenu": "デザイン",
+  "themeStyleHeader": "デザイン",
+  "themeModeHeader": "明るさ",
+  "themeNeutral": "シンプル",
+  "themeNeutralHint": "白黒の落ち着いた画面（Neutral）",
+  "themeMatcha": "ナチュラル",
+  "themeMatchaHint": "抹茶の緑とクリーム色（Matcha）",
+  "themeStone": "ビジネス",
+  "themeStoneHint": "青みの灰色、角が控えめ（Stone）",
+  "themeChocolate": "あたたか",
+  "themeChocolateHint": "茶色とベージュ、見出しは明朝風（Chocolate）",
+  "themeY2k": "ポップ",
+  "themeY2kHint": "藤色の背景、角ばった線（Y2K）",
+  "themeModeSystem": "端末に合わせる",
+  "themeModeLight": "ライト",
+  "themeModeDark": "ダーク"
 }

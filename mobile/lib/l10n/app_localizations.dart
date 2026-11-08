@@ -29026,6 +29026,102 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'月ごとの減り（日割り）'**
   String get osMonthly;
+
+  /// No description provided for @themeMenu.
+  ///
+  /// In ja, this message translates to:
+  /// **'デザイン'**
+  String get themeMenu;
+
+  /// No description provided for @themeStyleHeader.
+  ///
+  /// In ja, this message translates to:
+  /// **'デザイン'**
+  String get themeStyleHeader;
+
+  /// No description provided for @themeModeHeader.
+  ///
+  /// In ja, this message translates to:
+  /// **'明るさ'**
+  String get themeModeHeader;
+
+  /// No description provided for @themeNeutral.
+  ///
+  /// In ja, this message translates to:
+  /// **'シンプル'**
+  String get themeNeutral;
+
+  /// No description provided for @themeNeutralHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'白黒の落ち着いた画面（Neutral）'**
+  String get themeNeutralHint;
+
+  /// No description provided for @themeMatcha.
+  ///
+  /// In ja, this message translates to:
+  /// **'ナチュラル'**
+  String get themeMatcha;
+
+  /// No description provided for @themeMatchaHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'抹茶の緑とクリーム色（Matcha）'**
+  String get themeMatchaHint;
+
+  /// No description provided for @themeStone.
+  ///
+  /// In ja, this message translates to:
+  /// **'ビジネス'**
+  String get themeStone;
+
+  /// No description provided for @themeStoneHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'青みの灰色、角が控えめ（Stone）'**
+  String get themeStoneHint;
+
+  /// No description provided for @themeChocolate.
+  ///
+  /// In ja, this message translates to:
+  /// **'あたたか'**
+  String get themeChocolate;
+
+  /// No description provided for @themeChocolateHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'茶色とベージュ、見出しは明朝風（Chocolate）'**
+  String get themeChocolateHint;
+
+  /// No description provided for @themeY2k.
+  ///
+  /// In ja, this message translates to:
+  /// **'ポップ'**
+  String get themeY2k;
+
+  /// No description provided for @themeY2kHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'藤色の背景、角ばった線（Y2K）'**
+  String get themeY2kHint;
+
+  /// No description provided for @themeModeSystem.
+  ///
+  /// In ja, this message translates to:
+  /// **'端末に合わせる'**
+  String get themeModeSystem;
+
+  /// No description provided for @themeModeLight.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライト'**
+  String get themeModeLight;
+
+  /// No description provided for @themeModeDark.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダーク'**
+  String get themeModeDark;
 }
 
 class _AppLocalizationsDelegate

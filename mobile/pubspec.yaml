@@ -48,6 +48,12 @@ flutter:
   # Generate AppLocalizations from lib/l10n/*.arb (see l10n.yaml)
   generate: true
 
+  # The other designs' fonts (SIL OFL 1.1, see assets/fonts/themes/OFL-*.txt).
+  # Plain assets, not `fonts:`, so they are fetched only when someone picks
+  # that design (lib/core/theme/theme_fonts.dart).
+  assets:
+    - assets/fonts/themes/
+
   # Bundled offline-first fonts: Figtree for UI/labels (Astryx Neutral),
   # Fira Code (monospace) for codes/barcodes/quantities.
   fonts:
