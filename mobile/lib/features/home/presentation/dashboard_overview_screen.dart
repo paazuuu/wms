@@ -129,7 +129,6 @@ class DashboardOverviewScreen extends ConsumerWidget {
             _FeatureGrid(
               entries: visible,
               onOpen: onOpen,
-              tone: _toneForGroup(group.id),
             ),
             const SizedBox(height: AppSpacing.xl),
           ],
@@ -412,27 +411,14 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-/// A calm per-group accent so the three areas read as distinct at a glance.
-StatusTone _toneForGroup(String id) => switch (id) {
-      'field_operations' => StatusTone.info,
-      'shipping' => StatusTone.warning,
-      'products_master' => StatusTone.success,
-      'lookup' => StatusTone.success,
-      'supply_chain' => StatusTone.warning,
-      'accounting' => StatusTone.info,
-      _ => StatusTone.neutral,
-    };
-
 class _FeatureGrid extends StatelessWidget {
   const _FeatureGrid({
     required this.entries,
     required this.onOpen,
-    required this.tone,
   });
 
   final List<FeatureEntry> entries;
   final void Function(FeatureEntry entry) onOpen;
-  final StatusTone tone;
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +433,7 @@ class _FeatureGrid extends StatelessWidget {
       ),
       itemCount: entries.length,
       itemBuilder: (context, index) =>
-          _FeatureCard(entry: entries[index], onOpen: onOpen, tone: tone),
+          _FeatureCard(entry: entries[index], onOpen: onOpen),
     );
   }
 }
@@ -456,19 +442,16 @@ class _FeatureCard extends StatelessWidget {
   const _FeatureCard({
     required this.entry,
     required this.onOpen,
-    required this.tone,
   });
 
   final FeatureEntry entry;
   final void Function(FeatureEntry entry) onOpen;
-  final StatusTone tone;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final avatarTone = entry.isReady ? tone : StatusTone.neutral;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -481,7 +464,8 @@ class _FeatureCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  StatusAvatar(tone: avatarTone, icon: entry.icon),
+                  // Astryx Neutral keeps colour for state, so the icons stay grey.
+                  StatusAvatar(tone: StatusTone.neutral, icon: entry.icon),
                   const Spacer(),
                   if (entry.isReady)
                     Icon(Icons.chevron_right, color: scheme.onSurfaceVariant)

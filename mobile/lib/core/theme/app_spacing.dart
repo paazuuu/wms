@@ -12,10 +12,16 @@ class AppSpacing {
   static const double xl = 24;
   static const double xxl = 32;
 
-  /// Corner radii (flat design → moderate, consistent rounding).
-  static const double radiusSm = 8;
-  static const double radiusMd = 12;
-  static const double radiusLg = 16;
+  /// Corner radii (Astryx Neutral): inner parts 6, controls 10, containers
+  /// 12, a sheet or dialog 16.
+  static const double radiusSm = 6;
+  static const double radiusMd = 10;
+  static const double radiusLg = 12;
+  static const double radiusXl = 16;
+
+  /// A control's height on a desk (Astryx md); fields and buttons on the
+  /// floor keep [minTouch] where a screen asks for it.
+  static const double control = 40;
 
   /// Minimum interactive size. WCAG/Material minimum is 44–48px; we bump to
   /// 52 so controls stay tappable with warehouse gloves.
@@ -26,8 +32,8 @@ class AppSpacing {
 class AppFonts {
   AppFonts._();
 
-  /// Fira Sans — UI text and labels.
-  static const String sans = 'Fira Sans';
+  /// Figtree — UI text and labels (Astryx Neutral's typeface).
+  static const String sans = 'Figtree';
 
   /// Fira Code — monospace for codes, barcodes and quantities so digits align.
   static const String mono = 'Fira Code';

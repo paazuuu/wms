@@ -46,7 +46,11 @@ void main() {
       expect(tester.widget<TextField>(find.byKey(const ValueKey('cp-name'))).controller!.text, '株式会社サンプル文具');
       await tester.enterText(find.byKey(const ValueKey('cp-aliases')), 'サンプル文具\n大阪支店');
       await tester.enterText(find.byKey(const ValueKey('cp-reg')), 'T1111111111111');
+      // Let go of the field first, or it scrolls itself back into view.
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.byKey(const ValueKey('cp-save')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('cp-save')));
       await tester.pumpAndSettle();
 

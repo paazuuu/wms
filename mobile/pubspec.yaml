@@ -48,19 +48,23 @@ flutter:
   # Generate AppLocalizations from lib/l10n/*.arb (see l10n.yaml)
   generate: true
 
-  # Bundled offline-first fonts (ui-ux-pro-max "Dashboard Data" pairing):
-  # Fira Sans for UI/labels, Fira Code (monospace) for codes/barcodes/quantities.
+  # Bundled offline-first fonts: Figtree for UI/labels (Astryx Neutral),
+  # Fira Code (monospace) for codes/barcodes/quantities.
   fonts:
-    - family: Fira Sans
+    # Figtree (SIL OFL 1.1, see assets/fonts/Figtree-OFL.txt): Astryx
+    # Neutral's typeface.
+    - family: Figtree
       fonts:
-        - asset: assets/fonts/FiraSans-Regular.ttf
+        - asset: assets/fonts/Figtree-Regular.ttf
           weight: 400
-        - asset: assets/fonts/FiraSans-Medium.ttf
+        - asset: assets/fonts/Figtree-Medium.ttf
           weight: 500
-        - asset: assets/fonts/FiraSans-SemiBold.ttf
+        - asset: assets/fonts/Figtree-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/FiraSans-Bold.ttf
+        - asset: assets/fonts/Figtree-Bold.ttf
           weight: 700
+        - asset: assets/fonts/Figtree-ExtraBold.ttf
+          weight: 800
     # Half-width katakana only, from Noto Sans JP (SIL OFL 1.1, see
     # assets/fonts/WmsKana-OFL.txt).
     - family: WMS Kana

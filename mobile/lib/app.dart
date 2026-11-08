@@ -49,8 +49,8 @@ class WmsApp extends ConsumerWidget {
   }
 }
 
-/// App brand mark: a rounded navy tile with a warehouse/scan glyph. Uses an
-/// SVG-quality Material icon (skill rule: no emoji as icons).
+/// App brand mark: a rounded tile in the accent (black on light, near-white
+/// on dark — Astryx Neutral) with a warehouse glyph.
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.size = 56});
 
@@ -63,12 +63,12 @@ class BrandMark extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: scheme.tertiary,
+        color: scheme.primary,
         borderRadius: BorderRadius.circular(size * 0.28),
       ),
       child: Icon(
         Icons.inventory_2_outlined,
-        color: scheme.onTertiary,
+        color: scheme.onPrimary,
         size: size * 0.55,
       ),
     );
