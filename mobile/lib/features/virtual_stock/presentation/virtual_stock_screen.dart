@@ -23,7 +23,10 @@ String _ym(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}';
 /// typed in resets it; the gap it closes is shown as its own number, which is
 /// mostly what left the warehouse without anyone recording it.
 class VirtualStockScreen extends ConsumerStatefulWidget {
-  const VirtualStockScreen({super.key});
+  const VirtualStockScreen({super.key, this.embedded = false});
+
+  /// A tab of 国外の仮想在庫 (0207): no title bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<VirtualStockScreen> createState() => _VirtualStockScreenState();
@@ -101,7 +104,7 @@ class _VirtualStockScreenState extends ConsumerState<VirtualStockScreen> {
     final warehouses = ref.watch(virtualWarehousesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.virtualTitle)),
+      appBar: widget.embedded ? null : AppBar(title: Text(l10n.virtualTitle)),
       floatingActionButton: _warehouseId == null
           ? null
           : FloatingActionButton.extended(

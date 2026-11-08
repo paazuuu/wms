@@ -3966,11 +3966,11 @@
       }
     }
   },
-  "featVirtualStock": "国外倉庫の仮想在庫",
+  "featVirtualStock": "国外の仮想在庫",
   "@featVirtualStock": {
     "description": "featVirtualStock"
   },
-  "featVirtualStockDesc": "日本から送った数と手入力の実数で、国外倉庫のおおよその在庫を月ごとに見る",
+  "featVirtualStockDesc": "国外の自社支店・パートナー会社の在庫を、届いたファイル（Excel・PDF・写真）からAIで読み込んで拠点ごとに把握（自社の在庫とは別）。メモ・添付も付けられます",
   "@featVirtualStockDesc": {
     "description": "featVirtualStockDesc"
   },
@@ -14336,5 +14336,172 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rnTitle": "メモ・添付ファイル",
+  "rnHint": "メモを書く（電話の内容、条件、気づいたことなど）",
+  "rnAttach": "ファイルを添付",
+  "rnAdd": "メモを追加",
+  "rnEmpty": "まだメモはありません",
+  "rnEdit": "直す",
+  "rnRemove": "メモを外す",
+  "rnRemoveQ": "このメモを外しますか？（添付ファイルも一覧から外れます）",
+  "rnAddFile": "ファイルを追加",
+  "rnFileRemoveQ": "{name} を外しますか？",
+  "@rnFileRemoveQ": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rnPending": "添付するファイル {n}件",
+  "@rnPending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rnSaved": "メモを保存しました",
+  "rnNeedText": "メモを書くか、ファイルを選んでください",
+  "rnNotSavedYet": "保存するとメモやファイルを付けられます",
+  "wlTabNotes": "メモ（{n}）",
+  "@wlTabNotes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlNotesBadge": "メモ {n}",
+  "@wlNotesBadge": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "osTitle": "国外の仮想在庫",
+  "osIntro": "国外にある自社の支店やパートナー会社の在庫を、送られてきたファイル（Excel・CSV・PDF・写真）から読み込んで、拠点ごとにある程度把握します。自社の在庫とは別に記録し、在庫は動きません。",
+  "osTabSites": "拠点",
+  "osTabOverview": "全拠点の在庫",
+  "osTabTransfers": "国外倉庫（転送分）",
+  "osAddSite": "拠点を追加",
+  "osEditSite": "拠点を直す",
+  "osKindBranch": "自社の支店",
+  "osKindPartner": "パートナー会社",
+  "osName": "拠点名",
+  "osCountry": "国",
+  "osCity": "都市",
+  "osContact": "担当・連絡先",
+  "osNote": "備考",
+  "osNameRequired": "拠点名を入れてください",
+  "osNoSites": "まだ拠点がありません。「拠点を追加」から始めてください。",
+  "osNoStock": "まだ在庫のファイルを読み込んでいません",
+  "osLatest": "{date} 時点 · {n}品目・{units}",
+  "@osLatest": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "osArchive": "使わない拠点にする",
+  "osUnarchive": "使う拠点に戻す",
+  "osShowArchived": "使わない拠点も表示",
+  "osArchivedBadge": "使っていない",
+  "osTabStock": "在庫",
+  "osTabImport": "ファイルを読み込む",
+  "osTabHistory": "読み込みの履歴",
+  "osAsOf": "在庫の日付",
+  "osAsOfIs": "在庫の日付: {date}",
+  "@osAsOfIs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "osImportIntro": "拠点から届いた在庫のファイルをそのまま読み込みます。Excel・CSVは列を読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「この拠点の在庫」として登録します。前の在庫は履歴に残ります。",
+  "osPick": "ファイルを選ぶ（Excel・CSV・PDF・写真）",
+  "osAiReading": "AIが読み取っています…",
+  "osAiColumns": "AIで列を判定",
+  "osAiColumnsDone": "AIが列を判定しました（{n}列）",
+  "@osAiColumnsDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "osReadByAi": "AIで読み取り",
+  "osReadBySheet": "列で読み取り",
+  "osAiFailed": "AIで読み取れませんでした: {why}",
+  "@osAiFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "osRows": "{n}行を読み取り · 登録する {on}行・合計 {units}",
+  "@osRows": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "on": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "osRegister": "この拠点の在庫として登録（{n}行）",
+  "@osRegister": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "osRegistered": "{site} の在庫を登録しました（{n}行）",
+  "@osRegistered": {
+    "placeholders": {
+      "site": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "osOursBadge": "自社ライブラリーにあり",
+  "osColName": "商品名",
+  "osColQty": "数量",
+  "osColSites": "拠点ごと",
+  "osColTotal": "合計",
+  "osSearch": "商品名・JAN・品番・メーカーで検索",
+  "osOverviewEmpty": "在庫のある拠点がまだありません",
+  "osUndo": "この読み込みを取り消す",
+  "osUndoQ": "{date} 時点の読み込みを取り消しますか？（その前の読み込みがこの拠点の在庫に戻ります）",
+  "@osUndoQ": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "osUndone": "取り消し済み",
+  "osNow": "現在の在庫",
+  "osFileView": "元のファイル",
+  "osQtyEdit": "数量を直す",
+  "osSaved": "拠点を保存しました"
 }

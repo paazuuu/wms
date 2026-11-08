@@ -45,7 +45,7 @@ import '../../supply_chain/presentation/sc_supplier_comparison_screen.dart';
 import '../../stock_ops/presentation/stock_adjustment_screen.dart';
 import '../../stock_ops/presentation/stock_count_screen.dart';
 import '../../transfers/presentation/transfer_list_screen.dart';
-import '../../virtual_stock/presentation/virtual_stock_screen.dart';
+import '../../overseas_stock/presentation/overseas_stock_screen.dart';
 import '../../work_orders/presentation/work_order_list_screen.dart';
 import '../../inbound/presentation/supplier_product_names_screen.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
@@ -466,7 +466,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             icon: Icons.public,
             status: FeatureStatus.ready,
             builder: _virtualStock,
-            requiredAnyOf: ['inventory.view'],
+            requiredAnyOf: ['inventory.view', 'product.view', 'purchase_order.view'],
           ),
           FeatureEntry(
             id: 'work_orders',
@@ -809,7 +809,7 @@ Widget _salesOrders(BuildContext _) => const SalesOrderListScreen();
 
 Widget _demand(BuildContext _) => const OpenDemandScreen();
 
-Widget _virtualStock(BuildContext _) => const VirtualStockScreen();
+Widget _virtualStock(BuildContext _) => const OverseasStockScreen();
 
 /// Top-level (const-referenceable) builder for the Work Orders feature.
 Widget _workOrders(BuildContext _) => const WorkOrderListScreen();

@@ -8253,13 +8253,13 @@ abstract class AppLocalizations {
   /// featVirtualStock
   ///
   /// In ja, this message translates to:
-  /// **'国外倉庫の仮想在庫'**
+  /// **'国外の仮想在庫'**
   String get featVirtualStock;
 
   /// featVirtualStockDesc
   ///
   /// In ja, this message translates to:
-  /// **'日本から送った数と手入力の実数で、国外倉庫のおおよその在庫を月ごとに見る'**
+  /// **'国外の自社支店・パートナー会社の在庫を、届いたファイル（Excel・PDF・写真）からAIで読み込んで拠点ごとに把握（自社の在庫とは別）。メモ・添付も付けられます'**
   String get featVirtualStockDesc;
 
   /// virtualTitle
@@ -28366,6 +28366,414 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{n}品目を出庫リストに入れました（合計 {units}個）。数量は直せます。'**
   String obBulkApplied(int n, int units);
+
+  /// No description provided for @rnTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ・添付ファイル'**
+  String get rnTitle;
+
+  /// No description provided for @rnHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを書く（電話の内容、条件、気づいたことなど）'**
+  String get rnHint;
+
+  /// No description provided for @rnAttach.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを添付'**
+  String get rnAttach;
+
+  /// No description provided for @rnAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを追加'**
+  String get rnAdd;
+
+  /// No description provided for @rnEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだメモはありません'**
+  String get rnEmpty;
+
+  /// No description provided for @rnEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'直す'**
+  String get rnEdit;
+
+  /// No description provided for @rnRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを外す'**
+  String get rnRemove;
+
+  /// No description provided for @rnRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'このメモを外しますか？（添付ファイルも一覧から外れます）'**
+  String get rnRemoveQ;
+
+  /// No description provided for @rnAddFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを追加'**
+  String get rnAddFile;
+
+  /// No description provided for @rnFileRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を外しますか？'**
+  String rnFileRemoveQ(String name);
+
+  /// No description provided for @rnPending.
+  ///
+  /// In ja, this message translates to:
+  /// **'添付するファイル {n}件'**
+  String rnPending(int n);
+
+  /// No description provided for @rnSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを保存しました'**
+  String get rnSaved;
+
+  /// No description provided for @rnNeedText.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモを書くか、ファイルを選んでください'**
+  String get rnNeedText;
+
+  /// No description provided for @rnNotSavedYet.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存するとメモやファイルを付けられます'**
+  String get rnNotSavedYet;
+
+  /// No description provided for @wlTabNotes.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（{n}）'**
+  String wlTabNotes(int n);
+
+  /// No description provided for @wlNotesBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ {n}'**
+  String wlNotesBadge(int n);
+
+  /// No description provided for @osTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'国外の仮想在庫'**
+  String get osTitle;
+
+  /// No description provided for @osIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'国外にある自社の支店やパートナー会社の在庫を、送られてきたファイル（Excel・CSV・PDF・写真）から読み込んで、拠点ごとにある程度把握します。自社の在庫とは別に記録し、在庫は動きません。'**
+  String get osIntro;
+
+  /// No description provided for @osTabSites.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点'**
+  String get osTabSites;
+
+  /// No description provided for @osTabOverview.
+  ///
+  /// In ja, this message translates to:
+  /// **'全拠点の在庫'**
+  String get osTabOverview;
+
+  /// No description provided for @osTabTransfers.
+  ///
+  /// In ja, this message translates to:
+  /// **'国外倉庫（転送分）'**
+  String get osTabTransfers;
+
+  /// No description provided for @osAddSite.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点を追加'**
+  String get osAddSite;
+
+  /// No description provided for @osEditSite.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点を直す'**
+  String get osEditSite;
+
+  /// No description provided for @osKindBranch.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社の支店'**
+  String get osKindBranch;
+
+  /// No description provided for @osKindPartner.
+  ///
+  /// In ja, this message translates to:
+  /// **'パートナー会社'**
+  String get osKindPartner;
+
+  /// No description provided for @osName.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点名'**
+  String get osName;
+
+  /// No description provided for @osCountry.
+  ///
+  /// In ja, this message translates to:
+  /// **'国'**
+  String get osCountry;
+
+  /// No description provided for @osCity.
+  ///
+  /// In ja, this message translates to:
+  /// **'都市'**
+  String get osCity;
+
+  /// No description provided for @osContact.
+  ///
+  /// In ja, this message translates to:
+  /// **'担当・連絡先'**
+  String get osContact;
+
+  /// No description provided for @osNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'備考'**
+  String get osNote;
+
+  /// No description provided for @osNameRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点名を入れてください'**
+  String get osNameRequired;
+
+  /// No description provided for @osNoSites.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ拠点がありません。「拠点を追加」から始めてください。'**
+  String get osNoSites;
+
+  /// No description provided for @osNoStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ在庫のファイルを読み込んでいません'**
+  String get osNoStock;
+
+  /// No description provided for @osLatest.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date} 時点 · {n}品目・{units}'**
+  String osLatest(String date, int n, String units);
+
+  /// No description provided for @osArchive.
+  ///
+  /// In ja, this message translates to:
+  /// **'使わない拠点にする'**
+  String get osArchive;
+
+  /// No description provided for @osUnarchive.
+  ///
+  /// In ja, this message translates to:
+  /// **'使う拠点に戻す'**
+  String get osUnarchive;
+
+  /// No description provided for @osShowArchived.
+  ///
+  /// In ja, this message translates to:
+  /// **'使わない拠点も表示'**
+  String get osShowArchived;
+
+  /// No description provided for @osArchivedBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'使っていない'**
+  String get osArchivedBadge;
+
+  /// No description provided for @osTabStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫'**
+  String get osTabStock;
+
+  /// No description provided for @osTabImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを読み込む'**
+  String get osTabImport;
+
+  /// No description provided for @osTabHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込みの履歴'**
+  String get osTabHistory;
+
+  /// No description provided for @osAsOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の日付'**
+  String get osAsOf;
+
+  /// No description provided for @osAsOfIs.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の日付: {date}'**
+  String osAsOfIs(String date);
+
+  /// No description provided for @osImportIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点から届いた在庫のファイルをそのまま読み込みます。Excel・CSVは列を読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「この拠点の在庫」として登録します。前の在庫は履歴に残ります。'**
+  String get osImportIntro;
+
+  /// No description provided for @osPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選ぶ（Excel・CSV・PDF・写真）'**
+  String get osPick;
+
+  /// No description provided for @osAiReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが読み取っています…'**
+  String get osAiReading;
+
+  /// No description provided for @osAiColumns.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで列を判定'**
+  String get osAiColumns;
+
+  /// No description provided for @osAiColumnsDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIが列を判定しました（{n}列）'**
+  String osAiColumnsDone(int n);
+
+  /// No description provided for @osReadByAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取り'**
+  String get osReadByAi;
+
+  /// No description provided for @osReadBySheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'列で読み取り'**
+  String get osReadBySheet;
+
+  /// No description provided for @osAiFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取れませんでした: {why}'**
+  String osAiFailed(String why);
+
+  /// No description provided for @osRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行を読み取り · 登録する {on}行・合計 {units}'**
+  String osRows(int n, int on, String units);
+
+  /// No description provided for @osRegister.
+  ///
+  /// In ja, this message translates to:
+  /// **'この拠点の在庫として登録（{n}行）'**
+  String osRegister(int n);
+
+  /// No description provided for @osRegistered.
+  ///
+  /// In ja, this message translates to:
+  /// **'{site} の在庫を登録しました（{n}行）'**
+  String osRegistered(String site, int n);
+
+  /// No description provided for @osOursBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社ライブラリーにあり'**
+  String get osOursBadge;
+
+  /// No description provided for @osColName.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名'**
+  String get osColName;
+
+  /// No description provided for @osColQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get osColQty;
+
+  /// No description provided for @osColSites.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点ごと'**
+  String get osColSites;
+
+  /// No description provided for @osColTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get osColTotal;
+
+  /// No description provided for @osSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品名・JAN・品番・メーカーで検索'**
+  String get osSearch;
+
+  /// No description provided for @osOverviewEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫のある拠点がまだありません'**
+  String get osOverviewEmpty;
+
+  /// No description provided for @osUndo.
+  ///
+  /// In ja, this message translates to:
+  /// **'この読み込みを取り消す'**
+  String get osUndo;
+
+  /// No description provided for @osUndoQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date} 時点の読み込みを取り消しますか？（その前の読み込みがこの拠点の在庫に戻ります）'**
+  String osUndoQ(String date);
+
+  /// No description provided for @osUndone.
+  ///
+  /// In ja, this message translates to:
+  /// **'取り消し済み'**
+  String get osUndone;
+
+  /// No description provided for @osNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'現在の在庫'**
+  String get osNow;
+
+  /// No description provided for @osFileView.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイル'**
+  String get osFileView;
+
+  /// No description provided for @osQtyEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量を直す'**
+  String get osQtyEdit;
+
+  /// No description provided for @osSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'拠点を保存しました'**
+  String get osSaved;
 }
 
 class _AppLocalizationsDelegate

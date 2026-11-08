@@ -270,7 +270,11 @@ class PurchaseRequest extends Equatable {
     this.fileName,
     this.storagePath,
     this.sheetName,
+    this.noteCount = 0,
   });
+
+  /// メモ on the list (0207).
+  final int noteCount;
 
   /// The customer's file it was read from (0206), kept to look at again.
   final String? fileName;
@@ -324,6 +328,7 @@ class PurchaseRequest extends Equatable {
         fileName: _s(j['file_name']),
         storagePath: _s(j['storage_path']),
         sheetName: _s(j['sheet_name']),
+        noteCount: _ni(j['note_count']) ?? 0,
         lines: [
           for (final (i, l) in (j['lines'] as List? ?? const []).whereType<Map>().indexed)
             RequestRow.fromSaved(l.cast<String, dynamic>(), i + 1),

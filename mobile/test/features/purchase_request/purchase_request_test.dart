@@ -18,6 +18,9 @@ import 'package:wms_mobile/features/purchase_request/domain/wish_file.dart';
 import 'package:wms_mobile/features/purchase_request/presentation/purchase_request_screen.dart';
 import 'package:wms_mobile/features/purchase_request/presentation/purchase_requests_screen.dart';
 
+import 'package:wms_mobile/features/record_notes/data/record_notes_repository.dart';
+
+import '../../support/fake_overseas_and_notes.dart';
 import '../../support/harness.dart';
 
 class _FakeRepo implements PurchaseRequestRepository {
@@ -111,7 +114,7 @@ class _FakeRepo implements PurchaseRequestRepository {
 }
 
 Future<(_FakeRepo, List<(String, Uint8List)>)> _pump(WidgetTester tester,
-    {_FakeRepo? repo, int? requestId, bool library = true, ({String name, Uint8List bytes})? file}) async {
+    {_FakeRepo? repo, int? requestId, bool library = true, ({String name, Uint8List bytes})? file, FakeRecordNotesRepository? notes}) async {
   await tester.binding.setSurfaceSize(const Size(1200, 2600));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final r = repo ?? _FakeRepo();
@@ -121,6 +124,7 @@ Future<(_FakeRepo, List<(String, Uint8List)>)> _pump(WidgetTester tester,
     requestSuppliersProvider.overrideWith((ref) async => [TradingPartner(id: 42, name: 'ウエダ商事')]),
     saveFileProvider.overrideWithValue((n, b) async => saved.add((n, b))),
     outboundFilePickerProvider.overrideWithValue(() async => file),
+    recordNotesRepositoryProvider.overrideWithValue(notes ?? FakeRecordNotesRepository()),
   ]);
   await tester.pumpAndSettle();
   // A new list opens on the file tab; these choose from the library.
@@ -493,11 +497,34 @@ void main() {
     expect(find.text('4909999000014'), findsOneWidget);
   });
 
+  testWidgets('メモ: not before the list is saved', (tester) async {
+    await _pump(tester, library: false);
+    await tester.tap(find.byKey(const ValueKey('wl-tab-notes')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wl-notes-unsaved')), findsOneWidget);
+  });
+
+  testWidgets('メモ on a saved list', (tester) async {
+    final notes = FakeRecordNotesRepository();
+    final repo = _FakeRepo(saved: PurchaseRequest.fromJson({'id': 5, 'request_number': 'REQ-000005', 'lines': []}));
+    await _pump(tester, repo: repo, requestId: 5, notes: notes);
+    await tester.tap(find.byKey(const ValueKey('wl-tab-notes')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('rn-body')), '12月に追加の可能性あり');
+    await tester.tap(find.byKey(const ValueKey('rn-add')));
+    await tester.pumpAndSettle();
+    expect(notes.notes[(NoteSubject.wishList, 5)]!.single.body, '12月に追加の可能性あり');
+    expect(find.text('12月に追加の可能性あり'), findsOneWidget);
+  });
+
   testWidgets('a list with a file says so in the lists', (tester) async {
     final lists = _FakeRepo()
-      ..listed = [PurchaseRequest(id: 5, number: 'REQ-000005', customerName: 'テスト商店', fileName: '希望.csv', lineCount: 1, units: 7)];
+      ..listed = [
+        PurchaseRequest(id: 5, number: 'REQ-000005', customerName: 'テスト商店', fileName: '希望.csv', noteCount: 2, lineCount: 1, units: 7),
+      ];
     await pumpApp(tester, const PurchaseRequestsScreen(), overrides: [purchaseRequestRepositoryProvider.overrideWithValue(lists)]);
     await tester.pumpAndSettle();
     expect(find.textContaining('ファイル: 希望.csv'), findsOneWidget);
+    expect(find.textContaining('メモ 2'), findsOneWidget);
   });
 }

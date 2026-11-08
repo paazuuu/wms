@@ -4437,10 +4437,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get featVirtualStock => '海外仓库虚拟库存';
+  String get featVirtualStock => '海外虚拟库存';
 
   @override
-  String get featVirtualStockDesc => '按月查看海外仓库的大致库存（依据从日本发出的数量和手动录入的实数）';
+  String get featVirtualStockDesc =>
+      '用AI读取海外自有分店・合作公司发来的文件（Excel・PDF・照片），按据点掌握其库存（与自有库存分开）。可附备忘・附件';
 
   @override
   String get virtualTitle => '海外仓库虚拟库存';
@@ -16033,4 +16034,234 @@ class AppLocalizationsZh extends AppLocalizations {
   String obBulkApplied(int n, int units) {
     return '已将 $n 种加入出库清单（合计 $units 个）。数量可修改。';
   }
+
+  @override
+  String get rnTitle => '备忘・附件';
+
+  @override
+  String get rnHint => '写备忘（电话内容、条件、注意事项等）';
+
+  @override
+  String get rnAttach => '添加附件';
+
+  @override
+  String get rnAdd => '添加备忘';
+
+  @override
+  String get rnEmpty => '暂无备忘';
+
+  @override
+  String get rnEdit => '修改';
+
+  @override
+  String get rnRemove => '移除备忘';
+
+  @override
+  String get rnRemoveQ => '要移除此备忘吗？（附件也会从列表中移除）';
+
+  @override
+  String get rnAddFile => '添加文件';
+
+  @override
+  String rnFileRemoveQ(String name) {
+    return '要移除 $name 吗？';
+  }
+
+  @override
+  String rnPending(int n) {
+    return '待添加文件 $n 个';
+  }
+
+  @override
+  String get rnSaved => '备忘已保存';
+
+  @override
+  String get rnNeedText => '请填写备忘或选择文件';
+
+  @override
+  String get rnNotSavedYet => '保存后即可添加备忘和文件';
+
+  @override
+  String wlTabNotes(int n) {
+    return '备忘（$n）';
+  }
+
+  @override
+  String wlNotesBadge(int n) {
+    return '备忘 $n';
+  }
+
+  @override
+  String get osTitle => '海外虚拟库存';
+
+  @override
+  String get osIntro =>
+      '根据海外自有分店和合作公司发来的文件（Excel・CSV・PDF・照片），按据点大致掌握其库存。与自有库存分开记录，不影响库存。';
+
+  @override
+  String get osTabSites => '据点';
+
+  @override
+  String get osTabOverview => '全部据点库存';
+
+  @override
+  String get osTabTransfers => '海外仓库（转运部分）';
+
+  @override
+  String get osAddSite => '添加据点';
+
+  @override
+  String get osEditSite => '修改据点';
+
+  @override
+  String get osKindBranch => '自有分店';
+
+  @override
+  String get osKindPartner => '合作公司';
+
+  @override
+  String get osName => '据点名';
+
+  @override
+  String get osCountry => '国家';
+
+  @override
+  String get osCity => '城市';
+
+  @override
+  String get osContact => '负责人・联系方式';
+
+  @override
+  String get osNote => '备注';
+
+  @override
+  String get osNameRequired => '请输入据点名';
+
+  @override
+  String get osNoSites => '暂无据点。请从「添加据点」开始。';
+
+  @override
+  String get osNoStock => '尚未读取库存文件';
+
+  @override
+  String osLatest(String date, int n, String units) {
+    return '截至 $date · $n 种・$units';
+  }
+
+  @override
+  String get osArchive => '设为停用据点';
+
+  @override
+  String get osUnarchive => '恢复为使用中';
+
+  @override
+  String get osShowArchived => '显示停用据点';
+
+  @override
+  String get osArchivedBadge => '停用';
+
+  @override
+  String get osTabStock => '库存';
+
+  @override
+  String get osTabImport => '读取文件';
+
+  @override
+  String get osTabHistory => '读取记录';
+
+  @override
+  String get osAsOf => '库存日期';
+
+  @override
+  String osAsOfIs(String date) {
+    return '库存日期: $date';
+  }
+
+  @override
+  String get osImportIntro =>
+      '直接读取据点发来的库存文件。Excel・CSV按列读取（不认识的标题由AI判断），PDF・照片由AI读取。与左侧原文件对照后，将勾选的行登记为「该据点的库存」。之前的库存保留在记录中。';
+
+  @override
+  String get osPick => '选择文件（Excel・CSV・PDF・照片）';
+
+  @override
+  String get osAiReading => 'AI正在读取…';
+
+  @override
+  String get osAiColumns => '用AI判断列';
+
+  @override
+  String osAiColumnsDone(int n) {
+    return 'AI已判断 $n 列';
+  }
+
+  @override
+  String get osReadByAi => 'AI读取';
+
+  @override
+  String get osReadBySheet => '按列读取';
+
+  @override
+  String osAiFailed(String why) {
+    return 'AI未能读取: $why';
+  }
+
+  @override
+  String osRows(int n, int on, String units) {
+    return '读取 $n 行 · 登记 $on 行・合计 $units';
+  }
+
+  @override
+  String osRegister(int n) {
+    return '登记为该据点的库存（$n 行）';
+  }
+
+  @override
+  String osRegistered(String site, int n) {
+    return '已登记 $site 的库存（$n 行）';
+  }
+
+  @override
+  String get osOursBadge => '自有商品库中有';
+
+  @override
+  String get osColName => '商品名';
+
+  @override
+  String get osColQty => '数量';
+
+  @override
+  String get osColSites => '各据点';
+
+  @override
+  String get osColTotal => '合计';
+
+  @override
+  String get osSearch => '按商品名・JAN・品号・厂商搜索';
+
+  @override
+  String get osOverviewEmpty => '暂无据点库存';
+
+  @override
+  String get osUndo => '撤销此次读取';
+
+  @override
+  String osUndoQ(String date) {
+    return '要撤销 $date 的读取吗？（之前的读取将恢复为该据点的库存）';
+  }
+
+  @override
+  String get osUndone => '已撤销';
+
+  @override
+  String get osNow => '当前库存';
+
+  @override
+  String get osFileView => '原文件';
+
+  @override
+  String get osQtyEdit => '修改数量';
+
+  @override
+  String get osSaved => '据点已保存';
 }

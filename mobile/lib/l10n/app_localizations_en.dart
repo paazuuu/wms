@@ -4562,11 +4562,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get featVirtualStock => 'Stock abroad (virtual)';
+  String get featVirtualStock => 'Stock abroad';
 
   @override
   String get featVirtualStockDesc =>
-      'A rough monthly figure for warehouses abroad, from what was sent and counts typed in';
+      'The stock of our branches and partners abroad, read from the files they send (Excel, PDF, photos) with the AI, by site — apart from our own stock. With notes and files';
 
   @override
   String get virtualTitle => 'Stock abroad (virtual)';
@@ -16470,4 +16470,234 @@ class AppLocalizationsEn extends AppLocalizations {
   String obBulkApplied(int n, int units) {
     return '$n items on the outbound list ($units units). Quantities can be changed.';
   }
+
+  @override
+  String get rnTitle => 'Notes and files';
+
+  @override
+  String get rnHint => 'Write a note (a call, terms, anything noticed)';
+
+  @override
+  String get rnAttach => 'Attach files';
+
+  @override
+  String get rnAdd => 'Add note';
+
+  @override
+  String get rnEmpty => 'No notes yet';
+
+  @override
+  String get rnEdit => 'Edit';
+
+  @override
+  String get rnRemove => 'Remove note';
+
+  @override
+  String get rnRemoveQ => 'Remove this note? (Its files leave the list too.)';
+
+  @override
+  String get rnAddFile => 'Add files';
+
+  @override
+  String rnFileRemoveQ(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String rnPending(int n) {
+    return '$n files to attach';
+  }
+
+  @override
+  String get rnSaved => 'Note saved';
+
+  @override
+  String get rnNeedText => 'Write a note or choose files';
+
+  @override
+  String get rnNotSavedYet => 'Save first to add notes and files';
+
+  @override
+  String wlTabNotes(int n) {
+    return 'Notes ($n)';
+  }
+
+  @override
+  String wlNotesBadge(int n) {
+    return 'Notes $n';
+  }
+
+  @override
+  String get osTitle => 'Stock abroad';
+
+  @override
+  String get osIntro =>
+      'Keep a rough picture of the stock our branches and partner companies abroad hold, read from the files they send (Excel, CSV, PDF, photos). Kept apart from our own stock; nothing in it moves our stock.';
+
+  @override
+  String get osTabSites => 'Sites';
+
+  @override
+  String get osTabOverview => 'All sites';
+
+  @override
+  String get osTabTransfers => 'Warehouses abroad (transfers)';
+
+  @override
+  String get osAddSite => 'Add site';
+
+  @override
+  String get osEditSite => 'Edit site';
+
+  @override
+  String get osKindBranch => 'Our branch';
+
+  @override
+  String get osKindPartner => 'Partner';
+
+  @override
+  String get osName => 'Name';
+
+  @override
+  String get osCountry => 'Country';
+
+  @override
+  String get osCity => 'City';
+
+  @override
+  String get osContact => 'Contact';
+
+  @override
+  String get osNote => 'Note';
+
+  @override
+  String get osNameRequired => 'Enter a name';
+
+  @override
+  String get osNoSites => 'No sites yet. Start with “Add site”.';
+
+  @override
+  String get osNoStock => 'No stock file read yet';
+
+  @override
+  String osLatest(String date, int n, String units) {
+    return 'As of $date · $n items, $units';
+  }
+
+  @override
+  String get osArchive => 'Archive site';
+
+  @override
+  String get osUnarchive => 'Restore site';
+
+  @override
+  String get osShowArchived => 'Show archived';
+
+  @override
+  String get osArchivedBadge => 'Archived';
+
+  @override
+  String get osTabStock => 'Stock';
+
+  @override
+  String get osTabImport => 'Read a file';
+
+  @override
+  String get osTabHistory => 'Files read';
+
+  @override
+  String get osAsOf => 'Stock as of';
+
+  @override
+  String osAsOfIs(String date) {
+    return 'Stock as of $date';
+  }
+
+  @override
+  String get osImportIntro =>
+      'Read the stock file a site sent as it is. Excel and CSV are read by their columns (the AI judges headings it does not know); PDFs and photos are read by the AI. Check against the original on the left, then register the ticked rows as this site’s stock. Earlier stock stays in the history.';
+
+  @override
+  String get osPick => 'Choose a file (Excel, CSV, PDF, photo)';
+
+  @override
+  String get osAiReading => 'The AI is reading…';
+
+  @override
+  String get osAiColumns => 'Judge columns by AI';
+
+  @override
+  String osAiColumnsDone(int n) {
+    return 'The AI judged $n columns';
+  }
+
+  @override
+  String get osReadByAi => 'Read by the AI';
+
+  @override
+  String get osReadBySheet => 'Read by columns';
+
+  @override
+  String osAiFailed(String why) {
+    return 'The AI could not read it: $why';
+  }
+
+  @override
+  String osRows(int n, int on, String units) {
+    return '$n rows read · $on to register, $units in all';
+  }
+
+  @override
+  String osRegister(int n) {
+    return 'Register as this site’s stock ($n rows)';
+  }
+
+  @override
+  String osRegistered(String site, int n) {
+    return '$site: stock registered ($n rows)';
+  }
+
+  @override
+  String get osOursBadge => 'In our library';
+
+  @override
+  String get osColName => 'Name';
+
+  @override
+  String get osColQty => 'Qty';
+
+  @override
+  String get osColSites => 'By site';
+
+  @override
+  String get osColTotal => 'Total';
+
+  @override
+  String get osSearch => 'Search name, JAN, code, maker';
+
+  @override
+  String get osOverviewEmpty => 'No site stock yet';
+
+  @override
+  String get osUndo => 'Take this file back';
+
+  @override
+  String osUndoQ(String date) {
+    return 'Take back the file as of $date? (The one before it becomes this site’s stock again.)';
+  }
+
+  @override
+  String get osUndone => 'Taken back';
+
+  @override
+  String get osNow => 'Stock now';
+
+  @override
+  String get osFileView => 'Original file';
+
+  @override
+  String get osQtyEdit => 'Change quantity';
+
+  @override
+  String get osSaved => 'Site saved';
 }

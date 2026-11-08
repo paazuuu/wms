@@ -16,6 +16,8 @@ import '../data/purchase_request_repository.dart';
 import '../domain/purchase_request.dart';
 import '../domain/wish_file.dart';
 import 'wish_file_tab.dart';
+import '../../record_notes/data/record_notes_repository.dart' show NoteSubject;
+import '../../record_notes/presentation/record_notes_panel.dart';
 
 /// The suppliers a request can be addressed to (customers left out).
 final requestSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>>((ref) async {
@@ -665,7 +667,7 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
       ]);
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       // A new list starts from the customer's file, as 出庫 does; a saved one
       // opens on its rows.
       initialIndex: widget.requestId == null ? 0 : 1,
@@ -690,6 +692,7 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
         TabBar(isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
           Tab(key: const ValueKey('wl-tab-file'), icon: const Icon(Icons.upload_file_outlined, size: 20), text: l10n.wlTabFile),
           Tab(key: const ValueKey('wl-tab-library'), icon: const Icon(Icons.inventory_2_outlined, size: 20), text: l10n.wlTabLibrary),
+          Tab(key: const ValueKey('wl-tab-notes'), icon: const Icon(Icons.sticky_note_2_outlined, size: 20), text: l10n.rnTitle),
         ]),
         const Divider(height: 1),
         Expanded(
@@ -705,6 +708,19 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
               onFile: _setFile,
             ),
             library,
+            // メモ and files (0207): on a list once it is saved.
+            _id == null
+                ? Center(child: Text(l10n.rnNotSavedYet, key: const ValueKey('wl-notes-unsaved'), style: muted))
+                : ListView(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    children: [
+                      RecordNotesPanel(
+                        subject: NoteSubject.wishList,
+                        subjectId: _id!,
+                        onChanged: () => ref.invalidate(purchaseRequestsProvider),
+                      ),
+                    ],
+                  ),
           ]),
         ),
       ]),

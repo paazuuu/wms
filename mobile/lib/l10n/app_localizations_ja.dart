@@ -4451,10 +4451,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get featVirtualStock => '国外倉庫の仮想在庫';
+  String get featVirtualStock => '国外の仮想在庫';
 
   @override
-  String get featVirtualStockDesc => '日本から送った数と手入力の実数で、国外倉庫のおおよその在庫を月ごとに見る';
+  String get featVirtualStockDesc =>
+      '国外の自社支店・パートナー会社の在庫を、届いたファイル（Excel・PDF・写真）からAIで読み込んで拠点ごとに把握（自社の在庫とは別）。メモ・添付も付けられます';
 
   @override
   String get virtualTitle => '国外倉庫の仮想在庫';
@@ -16150,4 +16151,234 @@ class AppLocalizationsJa extends AppLocalizations {
   String obBulkApplied(int n, int units) {
     return '$n品目を出庫リストに入れました（合計 $units個）。数量は直せます。';
   }
+
+  @override
+  String get rnTitle => 'メモ・添付ファイル';
+
+  @override
+  String get rnHint => 'メモを書く（電話の内容、条件、気づいたことなど）';
+
+  @override
+  String get rnAttach => 'ファイルを添付';
+
+  @override
+  String get rnAdd => 'メモを追加';
+
+  @override
+  String get rnEmpty => 'まだメモはありません';
+
+  @override
+  String get rnEdit => '直す';
+
+  @override
+  String get rnRemove => 'メモを外す';
+
+  @override
+  String get rnRemoveQ => 'このメモを外しますか？（添付ファイルも一覧から外れます）';
+
+  @override
+  String get rnAddFile => 'ファイルを追加';
+
+  @override
+  String rnFileRemoveQ(String name) {
+    return '$name を外しますか？';
+  }
+
+  @override
+  String rnPending(int n) {
+    return '添付するファイル $n件';
+  }
+
+  @override
+  String get rnSaved => 'メモを保存しました';
+
+  @override
+  String get rnNeedText => 'メモを書くか、ファイルを選んでください';
+
+  @override
+  String get rnNotSavedYet => '保存するとメモやファイルを付けられます';
+
+  @override
+  String wlTabNotes(int n) {
+    return 'メモ（$n）';
+  }
+
+  @override
+  String wlNotesBadge(int n) {
+    return 'メモ $n';
+  }
+
+  @override
+  String get osTitle => '国外の仮想在庫';
+
+  @override
+  String get osIntro =>
+      '国外にある自社の支店やパートナー会社の在庫を、送られてきたファイル（Excel・CSV・PDF・写真）から読み込んで、拠点ごとにある程度把握します。自社の在庫とは別に記録し、在庫は動きません。';
+
+  @override
+  String get osTabSites => '拠点';
+
+  @override
+  String get osTabOverview => '全拠点の在庫';
+
+  @override
+  String get osTabTransfers => '国外倉庫（転送分）';
+
+  @override
+  String get osAddSite => '拠点を追加';
+
+  @override
+  String get osEditSite => '拠点を直す';
+
+  @override
+  String get osKindBranch => '自社の支店';
+
+  @override
+  String get osKindPartner => 'パートナー会社';
+
+  @override
+  String get osName => '拠点名';
+
+  @override
+  String get osCountry => '国';
+
+  @override
+  String get osCity => '都市';
+
+  @override
+  String get osContact => '担当・連絡先';
+
+  @override
+  String get osNote => '備考';
+
+  @override
+  String get osNameRequired => '拠点名を入れてください';
+
+  @override
+  String get osNoSites => 'まだ拠点がありません。「拠点を追加」から始めてください。';
+
+  @override
+  String get osNoStock => 'まだ在庫のファイルを読み込んでいません';
+
+  @override
+  String osLatest(String date, int n, String units) {
+    return '$date 時点 · $n品目・$units';
+  }
+
+  @override
+  String get osArchive => '使わない拠点にする';
+
+  @override
+  String get osUnarchive => '使う拠点に戻す';
+
+  @override
+  String get osShowArchived => '使わない拠点も表示';
+
+  @override
+  String get osArchivedBadge => '使っていない';
+
+  @override
+  String get osTabStock => '在庫';
+
+  @override
+  String get osTabImport => 'ファイルを読み込む';
+
+  @override
+  String get osTabHistory => '読み込みの履歴';
+
+  @override
+  String get osAsOf => '在庫の日付';
+
+  @override
+  String osAsOfIs(String date) {
+    return '在庫の日付: $date';
+  }
+
+  @override
+  String get osImportIntro =>
+      '拠点から届いた在庫のファイルをそのまま読み込みます。Excel・CSVは列を読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「この拠点の在庫」として登録します。前の在庫は履歴に残ります。';
+
+  @override
+  String get osPick => 'ファイルを選ぶ（Excel・CSV・PDF・写真）';
+
+  @override
+  String get osAiReading => 'AIが読み取っています…';
+
+  @override
+  String get osAiColumns => 'AIで列を判定';
+
+  @override
+  String osAiColumnsDone(int n) {
+    return 'AIが列を判定しました（$n列）';
+  }
+
+  @override
+  String get osReadByAi => 'AIで読み取り';
+
+  @override
+  String get osReadBySheet => '列で読み取り';
+
+  @override
+  String osAiFailed(String why) {
+    return 'AIで読み取れませんでした: $why';
+  }
+
+  @override
+  String osRows(int n, int on, String units) {
+    return '$n行を読み取り · 登録する $on行・合計 $units';
+  }
+
+  @override
+  String osRegister(int n) {
+    return 'この拠点の在庫として登録（$n行）';
+  }
+
+  @override
+  String osRegistered(String site, int n) {
+    return '$site の在庫を登録しました（$n行）';
+  }
+
+  @override
+  String get osOursBadge => '自社ライブラリーにあり';
+
+  @override
+  String get osColName => '商品名';
+
+  @override
+  String get osColQty => '数量';
+
+  @override
+  String get osColSites => '拠点ごと';
+
+  @override
+  String get osColTotal => '合計';
+
+  @override
+  String get osSearch => '商品名・JAN・品番・メーカーで検索';
+
+  @override
+  String get osOverviewEmpty => '在庫のある拠点がまだありません';
+
+  @override
+  String get osUndo => 'この読み込みを取り消す';
+
+  @override
+  String osUndoQ(String date) {
+    return '$date 時点の読み込みを取り消しますか？（その前の読み込みがこの拠点の在庫に戻ります）';
+  }
+
+  @override
+  String get osUndone => '取り消し済み';
+
+  @override
+  String get osNow => '現在の在庫';
+
+  @override
+  String get osFileView => '元のファイル';
+
+  @override
+  String get osQtyEdit => '数量を直す';
+
+  @override
+  String get osSaved => '拠点を保存しました';
 }
