@@ -328,6 +328,41 @@ Map<String, int> proposeByPercent(
   return out;
 }
 
+/// How the bulk setting of a shipment chosen from the library (少ロット
+/// の出荷, 出荷の提案) gives each product its quantity.
+enum ShipBulkMode {
+  /// A percentage of what is free to ship (在庫 − キープ).
+  percentFree,
+
+  /// A percentage of the stock, never more than is free.
+  percentOnHand,
+
+  /// The same number for each, up to what is free.
+  fixed,
+
+  /// Everything free.
+  allFree,
+}
+
+/// The quantity [mode] gives [item]: never below 0 nor above what is free.
+int shipBulkQuantity(OutboundStockItem item, ShipBulkMode mode, double value,
+    {ProposalRounding rounding = ProposalRounding.down}) {
+  final free = item.free < 0 ? 0 : item.free;
+  return switch (mode) {
+    ShipBulkMode.percentFree =>
+      proposeByPercent([item], value, base: ProposalBase.free, rounding: rounding)[item.janCode] ?? 0,
+    ShipBulkMode.percentOnHand =>
+      proposeByPercent([item], value, base: ProposalBase.onHand, rounding: rounding)[item.janCode] ?? 0,
+    ShipBulkMode.fixed => (switch (rounding) {
+        ProposalRounding.down => (value + 1e-9).floor(),
+        ProposalRounding.nearest => value.round(),
+        ProposalRounding.up => (value - 1e-9).ceil(),
+      })
+          .clamp(0, free),
+    ShipBulkMode.allFree => free,
+  };
+}
+
 /// The lines of a shipment's sheet: who it goes to, what goes.
 class OutboundSheet extends Equatable {
   const OutboundSheet({

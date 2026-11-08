@@ -18089,7 +18089,7 @@ abstract class AppLocalizations {
   /// No description provided for @obIntro.
   ///
   /// In ja, this message translates to:
-  /// **'商品ライブラリーの商品から、出荷するものをチェックで選びます（Shiftを押しながらで範囲選択）。数量は一括（出せる数の％・出せる数ぜんぶ）か手入力で決めます。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。'**
+  /// **'商品ライブラリーの商品から、少ない数ずつでも出荷するものを選びます。チェックで選び（Shiftを押しながらで範囲選択）、一括設定（出せる数の％・在庫の％・一律◯個・出せる数ぜんぶ）か手入力で数量を決めて「出庫リストに追加」します。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。'**
   String get obIntro;
 
   /// No description provided for @obDestination.
@@ -28288,6 +28288,84 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'その他'**
   String get menuMore;
+
+  /// No description provided for @obModeFreePct.
+  ///
+  /// In ja, this message translates to:
+  /// **'出せる数の◯%'**
+  String get obModeFreePct;
+
+  /// No description provided for @obModeStockPct.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の◯%'**
+  String get obModeStockPct;
+
+  /// No description provided for @obModeFixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'一律◯個'**
+  String get obModeFixed;
+
+  /// No description provided for @obModeAllFree.
+  ///
+  /// In ja, this message translates to:
+  /// **'出せる数ぜんぶ'**
+  String get obModeAllFree;
+
+  /// No description provided for @obModeFreePctHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出せる数（在庫 − キープ）に対する割合です。'**
+  String get obModeFreePctHint;
+
+  /// No description provided for @obModeStockPctHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫に対する割合です。出せる数を超えません。'**
+  String get obModeStockPctHint;
+
+  /// No description provided for @obModeFixedHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ商品に同じ数を入れます（出せる数が少ない商品はその数まで）。少ロットの出荷に。'**
+  String get obModeFixedHint;
+
+  /// No description provided for @obModeAllFreeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出せる数をそのまま入れます。'**
+  String get obModeAllFreeHint;
+
+  /// No description provided for @obBulkQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'個数'**
+  String get obBulkQty;
+
+  /// No description provided for @obInclude.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リストに追加'**
+  String get obInclude;
+
+  /// No description provided for @obExclude.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リストから外す'**
+  String get obExclude;
+
+  /// No description provided for @obOnlyInList.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫リストに入っている商品だけ'**
+  String get obOnlyInList;
+
+  /// No description provided for @obBulkApplied.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目を出庫リストに入れました（合計 {units}個）。数量は直せます。'**
+  String obBulkApplied(int n, int units);
 }
 
 class _AppLocalizationsDelegate

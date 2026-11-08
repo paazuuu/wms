@@ -24,9 +24,11 @@ import '../../home/presentation/feature_link.dart';
 
 /// 出荷の提案 (0139, 0204): a shipment chosen from the product library, the
 /// way 入荷希望リスト does it — every product listed at once with its stock,
-/// キープ and 出せる数; ticked one by one, all shown, or a range (Shift); the
-/// chosen given a quantity in bulk (a percentage, everything free) or by
-/// hand, and a price. What is proposed is registered as a 出庫予定, like a
+/// キープ and 出せる数; ticked one by one, all shown, or a range (Shift or
+/// 範囲選択). The ticked ones go on the 出庫リスト (or come off it) from the
+/// bar that appears, or take the bulk setting's quantity — a percentage of
+/// what is free or of the stock, the same number each (small lots), or
+/// everything free. Any quantity can be typed, and a price set. What is proposed is registered as a 出庫予定, like a
 /// shipping list read in: it keeps, sits on the 出庫カレンダー (or 未定) and
 /// is packed and weighed from its detail. The draft downloads as Excel.
 class OutboundProposalScreen extends ConsumerStatefulWidget {
@@ -50,18 +52,22 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
   final _note = TextEditingController();
   final _percent = TextEditingController(text: '10');
   final _search = TextEditingController();
-  ProposalBase _base = ProposalBase.free;
+  ShipBulkMode _mode = ShipBulkMode.percentFree;
   ProposalRounding _rounding = ProposalRounding.down;
   final Map<String, TextEditingController> _qty = {};
 
-  /// The products chosen (ticked, or given a quantity).
+  /// The products ticked (chosen to act on).
   final Set<String> _selected = {};
 
-  /// Where a Shift-click range starts.
+  /// The products on the 出庫リスト: what is registered.
+  final Set<String> _inList = {};
+
+  /// Where a range starts.
   String? _anchor;
+  bool _rangeMode = false;
   String? _maker;
   bool _onlyStock = false;
-  bool _onlySelected = false;
+  bool _onlyInList = false;
   int _limit = 200;
   bool _busy = false;
 
@@ -143,60 +149,87 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
 
   static int _int(String s) => int.tryParse(s.replaceAll(',', '').trim()) ?? 0;
 
-  /// JAN → quantity for the products chosen with a quantity.
+  /// JAN → quantity for the products on the 出庫リスト with a quantity.
   Map<String, int> _lines(List<OutboundStockItem> items) => {
         for (final i in items)
-          if (_selected.contains(i.janCode) && _int(_c(i.janCode).text) > 0) i.janCode: _int(_c(i.janCode).text),
+          if (_inList.contains(i.janCode) && _int(_c(i.janCode).text) > 0) i.janCode: _int(_c(i.janCode).text),
       };
 
-  /// A tick: one product, or — with Shift held — every product shown from
-  /// the last one ticked to this one.
-  void _tick(List<OutboundStockItem> shown, OutboundStockItem i, bool on) {
+  /// A tick: one product, or — with Shift held, or 範囲選択 on — every
+  /// product shown from the last one ticked to this one.
+  void _tapSelect(List<OutboundStockItem> shown, OutboundStockItem i) {
+    final shift = HardwareKeyboard.instance.isShiftPressed;
     setState(() {
       final anchor = _anchor;
-      if (HardwareKeyboard.instance.isShiftPressed && anchor != null) {
+      if ((shift || _rangeMode) && anchor != null && anchor != i.janCode) {
         final a = shown.indexWhere((x) => x.janCode == anchor);
         final b = shown.indexWhere((x) => x.janCode == i.janCode);
         if (a >= 0 && b >= 0) {
           for (var k = a < b ? a : b; k <= (a < b ? b : a); k++) {
-            on ? _selected.add(shown[k].janCode) : _selected.remove(shown[k].janCode);
+            _selected.add(shown[k].janCode);
           }
-          _anchor = i.janCode;
+          _anchor = _rangeMode ? null : i.janCode;
           return;
         }
       }
-      on ? _selected.add(i.janCode) : _selected.remove(i.janCode);
+      if (_selected.contains(i.janCode) && !_rangeMode) {
+        _selected.remove(i.janCode);
+      } else {
+        _selected.add(i.janCode);
+      }
       _anchor = i.janCode;
     });
   }
 
-  /// The chosen products, each given everything free to ship.
-  void _fillFree(List<OutboundStockItem> items) {
-    final l10n = AppLocalizations.of(context);
-    final chosen = [for (final i in items) if (_selected.contains(i.janCode)) i];
-    if (chosen.isEmpty) return _snack(l10n.obChooseFirst);
-    setState(() {
-      for (final i in chosen) {
-        _c(i.janCode).text = i.free > 0 ? '${i.free}' : '';
-      }
-    });
-    _snack(l10n.obProposed(chosen.where((i) => i.free > 0).length, chosen.fold(0, (s, i) => s + i.free)));
+  double? _bulkNumber() {
+    final v = double.tryParse(_percent.text.replaceAll(',', '').replaceAll('%', '').trim());
+    if (v == null || v < 0) return null;
+    if ((_mode == ShipBulkMode.percentFree || _mode == ShipBulkMode.percentOnHand) && v > 100) return null;
+    return v;
   }
 
-  void _propose(List<OutboundStockItem> items) {
+  int _bulkFor(OutboundStockItem i) => shipBulkQuantity(i, _mode, _bulkNumber() ?? 0, rounding: _rounding);
+
+  void _setQty(OutboundStockItem i, int q) {
+    _c(i.janCode).text = q > 0 ? '$q' : '';
+    q > 0 ? _inList.add(i.janCode) : _inList.remove(i.janCode);
+  }
+
+  /// The bulk setting on [items]: their quantities set, and on the 出庫リスト
+  /// when above zero.
+  void _applyBulk(List<OutboundStockItem> items) {
     final l10n = AppLocalizations.of(context);
-    final p = double.tryParse(_percent.text.replaceAll('%', '').trim());
-    if (p == null || p < 0 || p > 100) return _snack(l10n.obPercentInvalid);
-    final chosen = [for (final i in items) if (_selected.contains(i.janCode)) i];
-    if (chosen.isEmpty) return _snack(l10n.obChooseFirst);
-    final q = proposeByPercent(chosen, p, base: _base, rounding: _rounding);
+    if (_mode != ShipBulkMode.allFree && _bulkNumber() == null) return _snack(l10n.obPercentInvalid);
+    var n = 0;
+    var units = 0;
     setState(() {
-      for (final e in q.entries) {
-        _c(e.key).text = '${e.value}';
+      for (final i in items) {
+        final q = _bulkFor(i);
+        _setQty(i, q);
+        if (q > 0) {
+          n++;
+          units += q;
+        }
       }
     });
-    _snack(l10n.obProposed(q.values.where((v) => v > 0).length, q.values.fold(0, (s, v) => s + v)));
+    _snack(l10n.obBulkApplied(n, units));
   }
+
+  /// Onto the 出庫リスト; one with no quantity gets the bulk setting's (at
+  /// least 1).
+  void _include(List<OutboundStockItem> items) => setState(() {
+        for (final i in items) {
+          var q = _int(_c(i.janCode).text);
+          if (q <= 0) q = _bulkFor(i);
+          _setQty(i, q <= 0 ? 1 : q);
+        }
+      });
+
+  void _exclude(List<OutboundStockItem> items) => setState(() {
+        for (final i in items) {
+          _setQty(i, 0);
+        }
+      });
 
   Future<void> _newDestination() async {
     final d = await showDestinationDialog(context);
@@ -378,10 +411,10 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
                 '${i.name} ${i.janCode} ${i.nameEn ?? ''} ${i.maker ?? ''} ${i.sku ?? ''}'.toLowerCase().contains(q)) &&
             (_maker == null || i.maker == _maker) &&
             (!_onlyStock || i.onHand > 0) &&
-            (!_onlySelected || _selected.contains(i.janCode)))
+            (!_onlyInList || _inList.contains(i.janCode)))
           i,
     ];
-    final allShownTicked = shown.isNotEmpty && shown.every((i) => _selected.contains(i.janCode));
+    final chosen = [for (final i in items) if (_selected.contains(i.janCode)) i];
     final lines = _lines(items);
     final total = lines.values.fold(0, (s, v) => s + v);
     final amount = lines.entries.fold<double>(0, (s, e) => s + (_shipPrice(e.key) ?? 0) * e.value);
@@ -433,6 +466,7 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
                       onPressed: () => setState(() {
                         _created = null;
                         _selected.clear();
+                        _inList.clear();
                         for (final c in _qty.values) {
                           c.clear();
                         }
@@ -522,52 +556,65 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
           ]),
           const SizedBox(height: AppSpacing.lg),
 
-          // How much.
-          Text(l10n.obHowMuch, style: theme.textTheme.titleMedium),
+          // How much: the bulk setting, as in 入荷希望リスト.
+          Text(l10n.prBulkTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xs),
           Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SizedBox(
-              width: 110,
-              child: TextField(
-                key: const ValueKey('ob-percent'),
-                controller: _percent,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: l10n.obPercent, suffixText: '%', isDense: true),
-              ),
-            ),
-            SegmentedButton<ProposalBase>(
-              key: const ValueKey('ob-base'),
+            SegmentedButton<ShipBulkMode>(
+              key: const ValueKey('ob-mode'),
               segments: [
-                ButtonSegment(value: ProposalBase.free, label: Text(l10n.obBaseFree)),
-                ButtonSegment(value: ProposalBase.onHand, label: Text(l10n.obBaseOnHand)),
+                ButtonSegment(value: ShipBulkMode.percentFree, label: Text(l10n.obModeFreePct)),
+                ButtonSegment(value: ShipBulkMode.percentOnHand, label: Text(l10n.obModeStockPct)),
+                ButtonSegment(value: ShipBulkMode.fixed, label: Text(l10n.obModeFixed)),
+                ButtonSegment(value: ShipBulkMode.allFree, label: Text(l10n.obModeAllFree)),
               ],
-              selected: {_base},
-              onSelectionChanged: (s) => setState(() => _base = s.first),
+              selected: {_mode},
+              onSelectionChanged: (v) => setState(() => _mode = v.first),
             ),
-            DropdownButton<ProposalRounding>(
-              key: const ValueKey('ob-rounding'),
-              value: _rounding,
-              items: [
-                DropdownMenuItem(value: ProposalRounding.down, child: Text(l10n.obRoundDown)),
-                DropdownMenuItem(value: ProposalRounding.nearest, child: Text(l10n.obRoundNearest)),
-                DropdownMenuItem(value: ProposalRounding.up, child: Text(l10n.obRoundUp)),
-              ],
-              onChanged: (v) => setState(() => _rounding = v ?? _rounding),
+            if (_mode != ShipBulkMode.allFree)
+              SizedBox(
+                width: 110,
+                child: TextField(
+                  key: const ValueKey('ob-percent'),
+                  controller: _percent,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: _mode == ShipBulkMode.fixed ? l10n.obBulkQty : l10n.obPercent,
+                    suffixText: _mode == ShipBulkMode.fixed ? null : '%',
+                    isDense: true,
+                  ),
+                ),
+              ),
+            if (_mode == ShipBulkMode.percentFree || _mode == ShipBulkMode.percentOnHand)
+              DropdownButton<ProposalRounding>(
+                key: const ValueKey('ob-rounding'),
+                value: _rounding,
+                items: [
+                  DropdownMenuItem(value: ProposalRounding.down, child: Text(l10n.obRoundDown)),
+                  DropdownMenuItem(value: ProposalRounding.nearest, child: Text(l10n.obRoundNearest)),
+                  DropdownMenuItem(value: ProposalRounding.up, child: Text(l10n.obRoundUp)),
+                ],
+                onChanged: (v) => setState(() => _rounding = v ?? _rounding),
+              ),
+            FilledButton.tonal(
+              key: const ValueKey('ob-apply-selected'),
+              onPressed: chosen.isEmpty ? null : () => _applyBulk(chosen),
+              child: Text(l10n.prApplySelected(chosen.length)),
             ),
-            FilledButton.icon(
-              key: const ValueKey('ob-propose'),
-              onPressed: _selected.isEmpty ? null : () => _propose(items),
-              icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
-              label: Text(l10n.obProposeChosen(_selected.length)),
-            ),
-            OutlinedButton.icon(
-              key: const ValueKey('ob-fill-free'),
-              onPressed: _selected.isEmpty ? null : () => _fillFree(items),
-              icon: const Icon(Icons.done_all, size: 18),
-              label: Text(l10n.obFillFree),
+            OutlinedButton(
+              key: const ValueKey('ob-apply-visible'),
+              onPressed: shown.isEmpty ? null : () => _applyBulk(shown),
+              child: Text(l10n.prApplyVisible(shown.length)),
             ),
           ]),
-          Text(l10n.obChooseHint, style: muted),
+          Text(
+              switch (_mode) {
+                ShipBulkMode.percentFree => l10n.obModeFreePctHint,
+                ShipBulkMode.percentOnHand => l10n.obModeStockPctHint,
+                ShipBulkMode.fixed => l10n.obModeFixedHint,
+                ShipBulkMode.allFree => l10n.obModeAllFreeHint,
+              },
+              style: muted),
           Text(l10n.obCapNote, style: muted),
           const SizedBox(height: AppSpacing.lg),
 
@@ -706,28 +753,61 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
               onSelected: (v) => setState(() => _onlyStock = v),
             ),
             FilterChip(
-              key: const ValueKey('ob-only-selected'),
-              label: Text(l10n.obOnlySelected(_selected.length)),
-              selected: _onlySelected,
-              onSelected: (v) => setState(() => _onlySelected = v),
+              key: const ValueKey('ob-only-list'),
+              label: Text(l10n.obOnlyInList),
+              selected: _onlyInList,
+              onSelected: (v) => setState(() => _onlyInList = v),
+            ),
+            FilterChip(
+              key: const ValueKey('ob-range'),
+              avatar: const Icon(Icons.linear_scale, size: 18),
+              label: Text(l10n.prRangeMode),
+              selected: _rangeMode,
+              onSelected: (v) => setState(() {
+                _rangeMode = v;
+                _anchor = null;
+              }),
+            ),
+            TextButton(
+              key: const ValueKey('ob-select-all'),
+              onPressed: shown.isEmpty ? null : () => setState(() => _selected.addAll([for (final i in shown) i.janCode])),
+              child: Text(l10n.prSelectVisible),
             ),
           ]),
-          const SizedBox(height: AppSpacing.xs),
-          if (wh != null && items.isNotEmpty)
-            Row(children: [
-              Checkbox(
-                key: const ValueKey('ob-check-all'),
-                value: allShownTicked,
-                onChanged: shown.isEmpty
-                    ? null
-                    : (v) => setState(() {
-                          for (final i in shown) {
-                            v == true ? _selected.add(i.janCode) : _selected.remove(i.janCode);
-                          }
-                        }),
+          Text(_rangeMode ? l10n.prRangeHint : l10n.prShiftHint, style: muted),
+          // The ticked ones: onto the 出庫リスト, or off it.
+          if (chosen.isNotEmpty)
+            Card(
+              key: const ValueKey('ob-selection-bar'),
+              color: theme.colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                child: Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                  Text(l10n.prSelectedCount(chosen.length), style: theme.textTheme.titleSmall),
+                  FilledButton.icon(
+                    key: const ValueKey('ob-include'),
+                    onPressed: () => _include(chosen),
+                    icon: const Icon(Icons.playlist_add, size: 18),
+                    label: Text(l10n.obInclude),
+                  ),
+                  OutlinedButton.icon(
+                    key: const ValueKey('ob-exclude'),
+                    onPressed: () => _exclude(chosen),
+                    icon: const Icon(Icons.playlist_remove, size: 18),
+                    label: Text(l10n.obExclude),
+                  ),
+                  TextButton(
+                    key: const ValueKey('ob-clear-selection'),
+                    onPressed: () => setState(() {
+                      _selected.clear();
+                      _anchor = null;
+                    }),
+                    child: Text(l10n.prClearSelection),
+                  ),
+                ]),
               ),
-              Expanded(child: Text(l10n.obCheckAllHint(shown.length), style: muted)),
-            ]),
+            ),
+          const SizedBox(height: AppSpacing.xs),
           if (wh == null)
             Text(l10n.miChooseWarehouse, style: muted)
           else if (stockAsync!.isLoading && items.isEmpty)
@@ -746,11 +826,14 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
                 item: i,
                 qty: _c(i.janCode),
                 price: _pc(i.janCode),
-                included: _selected.contains(i.janCode),
-                onIncluded: (v) => _tick(shown, i, v),
+                selected: _selected.contains(i.janCode),
+                inList: _inList.contains(i.janCode),
+                anchor: _anchor == i.janCode,
+                onSelect: () => _tapSelect(shown, i),
+                onToggleList: () => _inList.contains(i.janCode) ? _exclude([i]) : _include([i]),
                 onChanged: () => setState(() {
-                  // A quantity typed chooses the product.
-                  if (_int(_c(i.janCode).text) > 0) _selected.add(i.janCode);
+                  // A quantity typed puts the product on the list (0 takes it off).
+                  _int(_c(i.janCode).text) > 0 ? _inList.add(i.janCode) : _inList.remove(i.janCode);
                 }),
               ),
             if (shown.length > _limit)
@@ -761,26 +844,35 @@ class _OutboundProposalScreenState extends ConsumerState<OutboundProposalScreen>
               ),
           ],
           const SizedBox(height: AppSpacing.md),
-          Text(l10n.obSummary(lines.length, total), key: const ValueKey('ob-summary'), style: theme.textTheme.titleSmall),
-          if (amount > 0)
-            Text(l10n.obAmountTotal(NumberFormat('#,##0.##').format(amount)),
-                key: const ValueKey('ob-amount'), style: theme.textTheme.titleSmall),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
-            OutlinedButton.icon(
-              key: const ValueKey('ob-draft'),
-              onPressed: lines.isEmpty ? null : () => _draft(items),
-              icon: const Icon(Icons.grid_on_outlined, size: 18),
-              label: Text(l10n.obDraftExcel),
-            ),
-            FilledButton.icon(
-              key: const ValueKey('ob-create'),
-              onPressed: _busy || lines.isEmpty ? null : () => _create(items),
-              icon: const Icon(Icons.local_shipping_outlined, size: 18),
-              label: Text(l10n.obCreate(lines.length)),
-            ),
-          ]),
         ],
+      ),
+      // What is on the 出庫リスト, and registering it.
+      bottomNavigationBar: Material(
+        elevation: 3,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            child: Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+              Text(l10n.obSummary(lines.length, total), key: const ValueKey('ob-summary'), style: theme.textTheme.titleSmall),
+              if (amount > 0)
+                Text(l10n.obAmountTotal(NumberFormat('#,##0.##').format(amount)),
+                    key: const ValueKey('ob-amount'), style: theme.textTheme.titleSmall),
+              OutlinedButton.icon(
+                key: const ValueKey('ob-draft'),
+                onPressed: lines.isEmpty ? null : () => _draft(items),
+                icon: const Icon(Icons.grid_on_outlined, size: 18),
+                label: Text(l10n.obDraftExcel),
+              ),
+              FilledButton.icon(
+                key: const ValueKey('ob-create'),
+                onPressed: _busy || lines.isEmpty ? null : () => _create(items),
+                icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                label: Text(l10n.obCreate(lines.length)),
+              ),
+            ]),
+          ),
+        ),
       ),
     );
   }
@@ -804,8 +896,11 @@ class _ItemCard extends StatelessWidget {
     required this.item,
     required this.qty,
     required this.price,
-    required this.included,
-    required this.onIncluded,
+    required this.selected,
+    required this.inList,
+    required this.anchor,
+    required this.onSelect,
+    required this.onToggleList,
     required this.onChanged,
   });
 
@@ -814,8 +909,16 @@ class _ItemCard extends StatelessWidget {
 
   /// 出荷単価 (0142).
   final TextEditingController price;
-  final bool included;
-  final ValueChanged<bool> onIncluded;
+  /// Ticked (chosen to act on).
+  final bool selected;
+
+  /// On the 出庫リスト.
+  final bool inList;
+
+  /// Where a range starts.
+  final bool anchor;
+  final VoidCallback onSelect;
+  final VoidCallback onToggleList;
   final VoidCallback onChanged;
 
   @override
@@ -828,11 +931,18 @@ class _ItemCard extends StatelessWidget {
     final share = item.onHand == 0 ? 0.0 : q * 100 / item.onHand;
     final shipPrice = double.tryParse(price.text.replaceAll(',', '').trim());
     final loss = shipPrice != null && item.costPrice != null && shipPrice < item.costPrice!;
+    final scheme = theme.colorScheme;
     return Card(
-      child: Padding(
+      color: inList ? scheme.primaryContainer.withValues(alpha: 0.45) : null,
+      shape: anchor
+          ? RoundedRectangleBorder(side: BorderSide(color: scheme.primary, width: 2), borderRadius: BorderRadius.circular(12))
+          : null,
+      child: InkWell(
+        onTap: onSelect,
+        child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
         child: Row(children: [
-          Checkbox(key: ValueKey('ob-check-${item.janCode}'), value: included, onChanged: (v) => onIncluded(v ?? false)),
+          Checkbox(key: ValueKey('ob-check-${item.janCode}'), value: selected, onChanged: (_) => onSelect()),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(item.name, style: theme.textTheme.titleSmall),
@@ -892,7 +1002,15 @@ class _ItemCard extends StatelessWidget {
                     dense: true,
                   ),
           ),
+          IconButton(
+            key: ValueKey('ob-toggle-${item.janCode}'),
+            tooltip: inList ? l10n.obExclude : l10n.obInclude,
+            icon: Icon(inList ? Icons.remove_circle_outline : Icons.add_circle_outline,
+                color: inList ? scheme.error : scheme.primary),
+            onPressed: onToggleList,
+          ),
         ]),
+      ),
       ),
     );
   }

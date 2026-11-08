@@ -9943,7 +9943,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get obIntro =>
-      '从商品库中勾选要出货的商品（按住Shift可范围选择）。数量可批量（可出数的％・全部可出数）或手动输入。登记后成为「出库预定」，保留库存，并与出库日历・包装・总重量关联。';
+      '从商品库中选择要出货的商品（少量也可）。勾选商品（按住Shift可范围选择），用批量设置（可出数量的％・库存的％・统一◯个・全部可出数量）或手动输入数量，然后「加入出库清单」。登记后成为「出库预定」，保留库存，并连接出库日历・装箱・总重量。';
 
   @override
   String get obDestination => '收货方';
@@ -15992,4 +15992,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get menuMore => '其他';
+
+  @override
+  String get obModeFreePct => '可出数量的◯%';
+
+  @override
+  String get obModeStockPct => '库存的◯%';
+
+  @override
+  String get obModeFixed => '统一◯个';
+
+  @override
+  String get obModeAllFree => '全部可出数量';
+
+  @override
+  String get obModeFreePctHint => '相对于可出数量（库存 − 保留）的比例。';
+
+  @override
+  String get obModeStockPctHint => '相对于库存的比例。不超过可出数量。';
+
+  @override
+  String get obModeFixedHint => '为所选商品填入相同数量（可出数量较少的商品以其数量为上限）。适合小批量出货。';
+
+  @override
+  String get obModeAllFreeHint => '直接填入全部可出数量。';
+
+  @override
+  String get obBulkQty => '个数';
+
+  @override
+  String get obInclude => '加入出库清单';
+
+  @override
+  String get obExclude => '从出库清单移除';
+
+  @override
+  String get obOnlyInList => '仅显示出库清单中的商品';
+
+  @override
+  String obBulkApplied(int n, int units) {
+    return '已将 $n 种加入出库清单（合计 $units 个）。数量可修改。';
+  }
 }

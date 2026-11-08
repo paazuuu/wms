@@ -147,6 +147,14 @@ void main() {
       expect(proposeByPercent(_items, 30, rounding: ProposalRounding.nearest), {_janA: 3, _janB: 1});
       expect(proposeByPercent(_items, 100), {_janA: 6, _janB: 4});
       expect(proposeByPercent(_items, 0), {_janA: 0, _janB: 0});
+      // The bulk setting of a shipment: a %, the same number (up to what is free), everything free.
+      final a = _items.first;
+      expect(shipBulkQuantity(a, ShipBulkMode.percentFree, 50), 3);
+      expect(shipBulkQuantity(a, ShipBulkMode.percentOnHand, 50), 5);
+      expect(shipBulkQuantity(a, ShipBulkMode.percentOnHand, 100), 6);
+      expect(shipBulkQuantity(a, ShipBulkMode.fixed, 2), 2);
+      expect(shipBulkQuantity(a, ShipBulkMode.fixed, 9), 6);
+      expect(shipBulkQuantity(a, ShipBulkMode.allFree, 0), 6);
     });
 
     test('the shipment sheet carries the destination, the sender and the lines with a total', () {
@@ -239,12 +247,12 @@ void main() {
     expect(find.text('在庫 10・キープ 2・出せる数 6'), findsOneWidget);
 
     // Nothing ticked: nothing to fill.
-    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('ob-propose'))).onPressed, isNull);
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('ob-apply-selected'))).onPressed, isNull);
     await tester.tap(find.byKey(const ValueKey('ob-check-$_janA')));
     await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('ob-percent')), '50');
-    await tester.tap(find.byKey(const ValueKey('ob-propose')));
+    await tester.tap(find.byKey(const ValueKey('ob-apply-selected')));
     await tester.pumpAndSettle();
     expect(qty(tester, _janA), '3');
     expect(qty(tester, _janB), '2');
@@ -262,11 +270,11 @@ void main() {
     expect(find.byKey(const ValueKey('ob-open')), findsOneWidget);
   });
 
-  testWidgets('a quantity typed ticks the product; over what is free is said, not refused; a draft sheet', (tester) async {
+  testWidgets('a quantity typed puts the product on the list; over what is free is said, not refused; a draft sheet', (tester) async {
     final (_, saved) = await _pump(tester);
     await tester.enterText(find.byKey(const ValueKey('ob-qty-$_janB')), '4');
     await tester.pumpAndSettle();
-    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('ob-check-$_janB'))).value, isTrue);
+    expect(tester.widget<IconButton>(find.byKey(const ValueKey('ob-toggle-$_janB'))).tooltip, '出庫リストから外す');
     expect(find.text('1品目・合計 4個'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('ob-draft')));
@@ -304,18 +312,51 @@ void main() {
     await tester.tap(find.text('テスト工業').last);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('ob-item-4909999000038')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('ob-check-all')));
+    await tester.tap(find.byKey(const ValueKey('ob-select-all')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('ob-fill-free')));
+    await tester.tap(find.text('出せる数ぜんぶ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-apply-selected')));
     await tester.pumpAndSettle();
     expect(qty(tester, _janA), '6');
     expect(qty(tester, _janB), '4');
 
-    await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
-    await tester.tap(find.byKey(const ValueKey('ob-only-selected')));
+    // One taken off the list: only the one left shows with 出庫リストだけ.
+    await tester.tap(find.byKey(const ValueKey('ob-toggle-$_janB')));
+    await tester.tap(find.byKey(const ValueKey('ob-only-list')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('ob-item-$_janB')), findsNothing);
     expect(find.byKey(const ValueKey('ob-item-$_janA')), findsOneWidget);
+  });
+
+  testWidgets('small lots: the same number each from the bar, taken off again; a range chosen', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janA')));
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
+    await tester.pumpAndSettle();
+    expect(find.text('2件選択中'), findsOneWidget);
+
+    await tester.tap(find.text('一律◯個'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('ob-percent')), '5');
+    await tester.tap(find.byKey(const ValueKey('ob-include')));
+    await tester.pumpAndSettle();
+    // 5 each, but no more than is free (ナット: 4).
+    expect(qty(tester, _janA), '5');
+    expect(qty(tester, _janB), '4');
+    expect(find.text('2品目・合計 9個'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('ob-exclude')));
+    await tester.pumpAndSettle();
+    expect(find.text('0品目・合計 0個'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('ob-clear-selection')));
+    await tester.tap(find.byKey(const ValueKey('ob-range')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janA')));
+    await tester.tap(find.byKey(const ValueKey('ob-check-$_janB')));
+    await tester.pumpAndSettle();
+    expect(find.text('2件選択中'), findsOneWidget);
   });
 
   testWidgets('a new destination is saved and chosen on the way', (tester) async {

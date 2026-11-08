@@ -3358,7 +3358,7 @@
   "featOutboundProposalDesc": "按库存的百分比或数量生成出库，并把收货方和出库清单做成可发送的Excel",
   "featShipDestinations": "收货方卡片",
   "featShipDestinationsDesc": "用卡片管理出口所需的收货方公司・地址・联系人・电话等",
-  "obIntro": "从商品库中勾选要出货的商品（按住Shift可范围选择）。数量可批量（可出数的％・全部可出数）或手动输入。登记后成为「出库预定」，保留库存，并与出库日历・包装・总重量关联。",
+  "obIntro": "从商品库中选择要出货的商品（少量也可）。勾选商品（按住Shift可范围选择），用批量设置（可出数量的％・库存的％・统一◯个・全部可出数量）或手动输入数量，然后「加入出库清单」。登记后成为「出库预定」，保留库存，并连接出库日历・装箱・总重量。",
   "obDestination": "收货方",
   "obChooseDestination": "从已保存的收货方中选择",
   "obDestNew": "新收货方",
@@ -5057,5 +5057,18 @@
   "wlColWish": "希望数",
   "wlFileNotKept": "文件未能保存: {why}",
   "wlFileBadge": "文件: {name}",
-  "menuMore": "其他"
+  "menuMore": "其他",
+  "obModeFreePct": "可出数量的◯%",
+  "obModeStockPct": "库存的◯%",
+  "obModeFixed": "统一◯个",
+  "obModeAllFree": "全部可出数量",
+  "obModeFreePctHint": "相对于可出数量（库存 − 保留）的比例。",
+  "obModeStockPctHint": "相对于库存的比例。不超过可出数量。",
+  "obModeFixedHint": "为所选商品填入相同数量（可出数量较少的商品以其数量为上限）。适合小批量出货。",
+  "obModeAllFreeHint": "直接填入全部可出数量。",
+  "obBulkQty": "个数",
+  "obInclude": "加入出库清单",
+  "obExclude": "从出库清单移除",
+  "obOnlyInList": "仅显示出库清单中的商品",
+  "obBulkApplied": "已将 {n} 种加入出库清单（合计 {units} 个）。数量可修改。"
 }

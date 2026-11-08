@@ -3358,7 +3358,7 @@
   "featOutboundProposalDesc": "Work out a shipment from the stock by percentage or quantity, and send the destination and list as Excel",
   "featShipDestinations": "Destination cards",
   "featShipDestinationsDesc": "Keep each consignee's company, address, contact and phones — all an export needs — as a card",
-  "obIntro": "Tick what to ship from the product library (Shift for a range). Quantities in bulk (a % of what is free, or all of it) or typed. Registered, it becomes a 出庫予定: kept, on the calendar, packed and weighed.",
+  "obIntro": "Choose what to ship from the product library, small lots included. Tick products (Shift for a range), give them quantities in bulk (a % of what is free, a % of stock, the same number each, or everything free) or by hand, and add them to the outbound list. Registered, it becomes a planned outbound: stock is kept, and it goes on the outbound calendar, to packing and the gross weight.",
   "obDestination": "Ship to",
   "obChooseDestination": "Choose a saved destination",
   "obDestNew": "New destination",
@@ -5057,5 +5057,18 @@
   "wlColWish": "Wanted",
   "wlFileNotKept": "The file was not kept: {why}",
   "wlFileBadge": "File: {name}",
-  "menuMore": "More"
+  "menuMore": "More",
+  "obModeFreePct": "% of free",
+  "obModeStockPct": "% of stock",
+  "obModeFixed": "Same number",
+  "obModeAllFree": "All free",
+  "obModeFreePctHint": "A share of what is free to ship (stock − kept).",
+  "obModeStockPctHint": "A share of the stock, never more than is free.",
+  "obModeFixedHint": "The same number for each (up to what is free). For small lots.",
+  "obModeAllFreeHint": "Everything free to ship.",
+  "obBulkQty": "Units",
+  "obInclude": "Add to outbound list",
+  "obExclude": "Take off the outbound list",
+  "obOnlyInList": "Only those on the outbound list",
+  "obBulkApplied": "{n} items on the outbound list ({units} units). Quantities can be changed."
 }

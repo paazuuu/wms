@@ -10209,7 +10209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get obIntro =>
-      'Tick what to ship from the product library (Shift for a range). Quantities in bulk (a % of what is free, or all of it) or typed. Registered, it becomes a 出庫予定: kept, on the calendar, packed and weighed.';
+      'Choose what to ship from the product library, small lots included. Tick products (Shift for a range), give them quantities in bulk (a % of what is free, a % of stock, the same number each, or everything free) or by hand, and add them to the outbound list. Registered, it becomes a planned outbound: stock is kept, and it goes on the outbound calendar, to packing and the gross weight.';
 
   @override
   String get obDestination => 'Ship to';
@@ -16426,4 +16426,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuMore => 'More';
+
+  @override
+  String get obModeFreePct => '% of free';
+
+  @override
+  String get obModeStockPct => '% of stock';
+
+  @override
+  String get obModeFixed => 'Same number';
+
+  @override
+  String get obModeAllFree => 'All free';
+
+  @override
+  String get obModeFreePctHint =>
+      'A share of what is free to ship (stock − kept).';
+
+  @override
+  String get obModeStockPctHint =>
+      'A share of the stock, never more than is free.';
+
+  @override
+  String get obModeFixedHint =>
+      'The same number for each (up to what is free). For small lots.';
+
+  @override
+  String get obModeAllFreeHint => 'Everything free to ship.';
+
+  @override
+  String get obBulkQty => 'Units';
+
+  @override
+  String get obInclude => 'Add to outbound list';
+
+  @override
+  String get obExclude => 'Take off the outbound list';
+
+  @override
+  String get obOnlyInList => 'Only those on the outbound list';
+
+  @override
+  String obBulkApplied(int n, int units) {
+    return '$n items on the outbound list ($units units). Quantities can be changed.';
+  }
 }

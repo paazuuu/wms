@@ -10001,7 +10001,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get obIntro =>
-      '商品ライブラリーの商品から、出荷するものをチェックで選びます（Shiftを押しながらで範囲選択）。数量は一括（出せる数の％・出せる数ぜんぶ）か手入力で決めます。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。';
+      '商品ライブラリーの商品から、少ない数ずつでも出荷するものを選びます。チェックで選び（Shiftを押しながらで範囲選択）、一括設定（出せる数の％・在庫の％・一律◯個・出せる数ぜんぶ）か手入力で数量を決めて「出庫リストに追加」します。登録すると「出庫予定」になり、在庫をキープし、出庫カレンダー・梱包・総重量につながります。';
 
   @override
   String get obDestination => '出荷先';
@@ -16109,4 +16109,45 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get menuMore => 'その他';
+
+  @override
+  String get obModeFreePct => '出せる数の◯%';
+
+  @override
+  String get obModeStockPct => '在庫の◯%';
+
+  @override
+  String get obModeFixed => '一律◯個';
+
+  @override
+  String get obModeAllFree => '出せる数ぜんぶ';
+
+  @override
+  String get obModeFreePctHint => '出せる数（在庫 − キープ）に対する割合です。';
+
+  @override
+  String get obModeStockPctHint => '在庫に対する割合です。出せる数を超えません。';
+
+  @override
+  String get obModeFixedHint => '選んだ商品に同じ数を入れます（出せる数が少ない商品はその数まで）。少ロットの出荷に。';
+
+  @override
+  String get obModeAllFreeHint => '出せる数をそのまま入れます。';
+
+  @override
+  String get obBulkQty => '個数';
+
+  @override
+  String get obInclude => '出庫リストに追加';
+
+  @override
+  String get obExclude => '出庫リストから外す';
+
+  @override
+  String get obOnlyInList => '出庫リストに入っている商品だけ';
+
+  @override
+  String obBulkApplied(int n, int units) {
+    return '$n品目を出庫リストに入れました（合計 $units個）。数量は直せます。';
+  }
 }
