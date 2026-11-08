@@ -14,40 +14,20 @@ import '../data/packing_repository.dart';
 import '../domain/packing.dart';
 import 'packing_lists_screen.dart' show packingKg;
 
-/// 箱と入数: the few cartons of ours (S, M, L …) and each product's own
-/// case — how many go in, its size, what a full one weighs — set by hand
-/// or learned from the packing lists uploaded.
-class PackingSettingsScreen extends StatefulWidget {
+/// 段ボール: the few cartons of ours (S, M, L …) — their size, empty
+/// weight and the load they take — used by the box plan (箱詰め案) and the
+/// gross weight estimate. The makers' own cases (入数) are no longer set
+/// here: what the packing lists uploaded teach is still used by the plan.
+class PackingSettingsScreen extends StatelessWidget {
   const PackingSettingsScreen({super.key, this.embedded = false});
 
   final bool embedded;
 
   @override
-  State<PackingSettingsScreen> createState() => _PackingSettingsScreenState();
-}
-
-class _PackingSettingsScreenState extends State<PackingSettingsScreen> {
-  bool _cases = true;
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final body = Column(children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
-        child: SegmentedButton<bool>(
-          key: const ValueKey('pk-settings-mode'),
-          segments: [
-            ButtonSegment(value: true, label: Text(l10n.pkCasePacks), icon: const Icon(Icons.inventory_outlined)),
-            ButtonSegment(value: false, label: Text(l10n.pkOurCartons), icon: const Icon(Icons.inbox_outlined)),
-          ],
-          selected: {_cases},
-          onSelectionChanged: (s) => setState(() => _cases = s.first),
-        ),
-      ),
-      Expanded(child: _cases ? const CasePacksView() : const CartonTypesScreen(embedded: true)),
-    ]);
-    return widget.embedded ? body : Scaffold(appBar: AppBar(title: Text(l10n.pkSettingsTitle)), body: body);
+    const body = CartonTypesScreen(key: ValueKey('pk-cartons'), embedded: true);
+    return embedded ? body : Scaffold(appBar: AppBar(title: Text(l10n.pkSettingsTitle)), body: body);
   }
 }
 

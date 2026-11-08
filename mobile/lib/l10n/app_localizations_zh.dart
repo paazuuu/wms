@@ -4441,7 +4441,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featVirtualStockDesc =>
-      '用AI读取海外自有分店・合作公司发来的文件（Excel・PDF・照片），按据点掌握其库存（与自有库存分开）。可附备忘・附件';
+      '按目的地卡汇总出货记录和下游告知的库存数，查看推定库存和减少趋势（按月・按商品／厂商的图表）。与自有库存分开';
 
   @override
   String get virtualTitle => '海外仓库虚拟库存';
@@ -14703,7 +14703,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pkWithdrawn => '已从列表移除';
 
   @override
-  String get pkSettingsTitle => '箱子与入数';
+  String get pkSettingsTitle => '纸箱';
 
   @override
   String get pkCasePacks => '厂家原箱（入数）';
@@ -14867,7 +14867,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get obHubPackingLists => '装箱单';
 
   @override
-  String get obHubBoxes => '箱子与入数';
+  String get obHubBoxes => '纸箱';
 
   @override
   String get ofPacking => '装箱・装箱单';
@@ -15185,7 +15185,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get obHelpPackingLists => '装箱单的保存处。上传自己做的装箱单后AI会改成易读格式，原件和改进版都保留。';
 
   @override
-  String get obHelpBoxes => '登记自家纸箱（S/M/L等）和厂家原箱的入数，用于计算装箱方案。';
+  String get obHelpBoxes => '登记自有纸箱（S/M/L等）的尺寸・空箱重量・承重。用于装箱方案和总重量估算。';
 
   @override
   String get obHelpProposal => '根据库存生成出货方案（哪些商品能发多少）。';
@@ -16096,19 +16096,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get osIntro =>
-      '根据海外自有分店和合作公司发来的文件（Excel・CSV・PDF・照片），按据点大致掌握其库存。与自有库存分开记录，不影响库存。';
+      '按出货目的地卡汇总：本公司的出货记录，以及目的地（合作方・分店等下游）告知的最新库存数。出库时选择出货目的地卡，在出库完成时会记录到该目的地。推定库存＝最新报告数＋报告后出货数。与自有库存分开管理，自有库存不变。';
 
   @override
-  String get osTabSites => '据点';
+  String get osTabSites => '按目的地';
 
   @override
-  String get osTabOverview => '全部据点库存';
+  String get osTabOverview => '全部目的地库存';
 
   @override
   String get osTabTransfers => '海外仓库（转运部分）';
 
   @override
-  String get osAddSite => '添加据点';
+  String get osAddSite => '添加目的地';
 
   @override
   String get osEditSite => '修改据点';
@@ -16141,7 +16141,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get osNoSites => '暂无据点。请从「添加据点」开始。';
 
   @override
-  String get osNoStock => '尚未读取库存文件';
+  String get osNoStock => '暂无库存报告';
 
   @override
   String osLatest(String date, int n, String units) {
@@ -16161,13 +16161,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get osArchivedBadge => '停用';
 
   @override
-  String get osTabStock => '库存';
+  String get osTabStock => '最新报告';
 
   @override
-  String get osTabImport => '读取文件';
+  String get osTabImport => '读取报告';
 
   @override
-  String get osTabHistory => '读取记录';
+  String get osTabHistory => '报告记录';
 
   @override
   String get osAsOf => '库存日期';
@@ -16179,7 +16179,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get osImportIntro =>
-      '直接读取据点发来的库存文件。Excel・CSV按列读取（不认识的标题由AI判断），PDF・照片由AI读取。与左侧原文件对照后，将勾选的行登记为「该据点的库存」。之前的库存保留在记录中。';
+      '读取目的地（下游）发来的最新库存数文件（Excel・CSV・PDF・照片）。Excel・CSV按列读取（不认识的标题由AI判断），PDF・照片由AI读取。与左侧原文件对照后，将勾选的行登记为「库存报告」。原文件和读取结果（Excel）作为证据保存。报告中没有的商品按0处理。';
 
   @override
   String get osPick => '选择文件（Excel・CSV・PDF・照片）';
@@ -16213,7 +16213,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String osRegister(int n) {
-    return '登记为该据点的库存（$n 行）';
+    return '登记为库存报告（$n 行）';
   }
 
   @override
@@ -16292,4 +16292,124 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wlReadIncluded => '对象';
+
+  @override
+  String get osNoReport => '无报告';
+
+  @override
+  String get osDefaultBadge => '默认';
+
+  @override
+  String osCardIs(String name) {
+    return '目的地卡: $name';
+  }
+
+  @override
+  String osShippedLine(int n, String units) {
+    return '出货 $n 次・$units';
+  }
+
+  @override
+  String osLastShipped(String date) {
+    return '最后出货 $date';
+  }
+
+  @override
+  String osEstimateLine(int n, String units) {
+    return '推定库存 $n 种・$units';
+  }
+
+  @override
+  String get osTabEstimate => '推定库存';
+
+  @override
+  String get osTabShipments => '出货记录';
+
+  @override
+  String get osTabTrend => '趋势・分析';
+
+  @override
+  String get osColShippedTotal => '累计出货';
+
+  @override
+  String get osColReported => '最新报告';
+
+  @override
+  String get osColSince => '报告后出货';
+
+  @override
+  String get osColEstimate => '推定库存';
+
+  @override
+  String get osEstimateHelp =>
+      '推定库存＝最新报告数＋报告日之后的出货数（尚无报告时为累计出货）。报告中没有的商品按0处理。报告日之后的出货也包括尚未到达的运输中部分。';
+
+  @override
+  String osEstimateTotal(int n, String units) {
+    return '$n 种・合计 $units';
+  }
+
+  @override
+  String get osNoShipments => '尚无出库到该目的地的记录。出库时选择该目的地卡，出库完成时会记录到这里。';
+
+  @override
+  String osShipmentsTotal(int n, String units) {
+    return '出货 $n 次・合计 $units';
+  }
+
+  @override
+  String get osOpenOutbound => '打开出库';
+
+  @override
+  String get osByProduct => '按商品';
+
+  @override
+  String get osByMaker => '按厂商';
+
+  @override
+  String get osTrendEmpty => '尚无出货和报告';
+
+  @override
+  String get osTrendHelp =>
+      '出货使库存增加，报告使库存变为报告数。两次报告之间按「期初＋出货−期末」计算「减少数」（卖出・使用数），并按天分配到各月。';
+
+  @override
+  String get osTrendLegend => '线为推定库存，橙色点为有报告的日期。';
+
+  @override
+  String osShippedOn(String name) {
+    return '出货: $name';
+  }
+
+  @override
+  String osReportedOn(String name) {
+    return '报告: $name';
+  }
+
+  @override
+  String get osPeriods => '报告之间的减少数';
+
+  @override
+  String get osPeriodsNone => '有库存报告后即可计算';
+
+  @override
+  String get osPeriod => '期间';
+
+  @override
+  String get osColStart => '期初';
+
+  @override
+  String get osColShippedIn => '期间出货';
+
+  @override
+  String get osColEnd => '期末（报告）';
+
+  @override
+  String get osColUsed => '减少数';
+
+  @override
+  String get osColPerMonth => '每月';
+
+  @override
+  String get osMonthly => '每月减少（按天分配）';
 }

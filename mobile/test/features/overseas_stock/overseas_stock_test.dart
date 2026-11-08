@@ -9,7 +9,10 @@ import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
 import 'package:wms_mobile/features/overseas_stock/data/overseas_stock_repository.dart';
+import 'package:wms_mobile/features/outbound/domain/outbound.dart' show ShipDestination;
+import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
 import 'package:wms_mobile/features/overseas_stock/domain/overseas_stock.dart';
+import 'package:wms_mobile/features/overseas_stock/domain/overseas_trend.dart';
 import 'package:wms_mobile/features/overseas_stock/presentation/overseas_import_tab.dart';
 import 'package:wms_mobile/features/overseas_stock/presentation/overseas_site_screen.dart';
 import 'package:wms_mobile/features/overseas_stock/presentation/overseas_stock_screen.dart';
@@ -27,7 +30,7 @@ Future<(FakeOverseasStockRepository, FakeMasterImportRepository, FakeRecordNotes
   ({String name, Uint8List bytes})? file,
   FakeOverseasStockRepository? repo,
   FakeMasterImportRepository? ai,
-  int tab = 1,
+  int tab = 3,
   double width = 1600,
 }) async {
   await tester.binding.setSurfaceSize(Size(width, 1400));
@@ -78,42 +81,97 @@ void main() {
     });
   });
 
-  testWidgets('拠点: added, opened on its file tab; archived', (tester) async {
+  testWidgets('出荷先ごと: the default first, shipments and the estimate; one added from a card', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeOverseasStockRepository(sites: [
       OverseasSite(
-          id: 3, name: 'テスト上海支店', country: '中国', noteCount: 2,
+          id: 4, name: '国外の仮想在庫（中国・広東）', country: '中国', city: '広東', isDefault: true, destinationId: 4,
+          destinationName: '国外の仮想在庫（中国・広東）', shipmentCount: 2, shippedUnits: 140, lastShippedOn: DateTime(2026, 10, 1),
+          estimateItems: 2, estimateUnits: 100, noteCount: 2,
           latest: OverseasImport(id: 1, asOf: DateTime(2026, 11, 1), lineCount: 2, units: 15)),
     ]);
     await pumpApp(tester, const OverseasStockScreen(), overrides: [
       overseasStockRepositoryProvider.overrideWithValue(repo),
       recordNotesRepositoryProvider.overrideWithValue(FakeRecordNotesRepository()),
       masterImportRepositoryProvider.overrideWithValue(FakeMasterImportRepository()),
+      shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易')]),
     ]);
     await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('os-default-4')), findsOneWidget);
+    expect(find.textContaining('出荷 2回・140'), findsOneWidget);
+    expect(find.textContaining('推定在庫 2品目・100'), findsOneWidget);
     expect(find.textContaining('2026/11/01 時点 · 2品目・15'), findsOneWidget);
     expect(find.textContaining('メモ 2'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('os-site-archive-3')));
+    await tester.tap(find.byKey(const ValueKey('os-site-archive-4')));
     await tester.pumpAndSettle();
-    expect(repo.archived, [(3, true)]);
+    expect(repo.archived, [(4, true)]);
 
+    // A card chosen (or made there) becomes a destination here.
     await tester.tap(find.byKey(const ValueKey('os-add-site')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('os-site-ok')));
+    await tester.tap(find.byKey(const ValueKey('sd-pick-31')));
     await tester.pumpAndSettle();
-    expect(find.text('拠点名を入れてください'), findsOneWidget);
-    await tester.enterText(find.byKey(const ValueKey('os-site-name')), 'テストパートナー');
-    await tester.tap(find.text('パートナー会社'));
-    await tester.enterText(find.byKey(const ValueKey('os-site-country')), '台湾');
-    await tester.tap(find.byKey(const ValueKey('os-site-ok')));
-    await tester.pumpAndSettle();
-    expect(repo.saved.single['name'], 'テストパートナー');
-    expect(repo.saved.single['kind'], 'partner');
-    // Opened on reading its first file.
+    expect(repo.cards, [31]);
     expect(find.byType(OverseasSiteScreen), findsOneWidget);
-    expect(find.byKey(const ValueKey('os-pick')), findsOneWidget);
+    expect(find.text('出荷先カード: テスト貿易'), findsOneWidget);
+  });
+
+  test('the trend: a shipment adds, a count sets; what was used between counts, by month', () {
+    OverseasLine pen(num q) => OverseasLine(jan: '4909999000014', name: 'テストペン', maker: 'テスト文具', quantity: q);
+    OverseasLine note(num q) => OverseasLine(jan: '4909999000021', name: 'テストノート', maker: 'テスト文具', quantity: q);
+    final ev = OverseasEvents(shipments: [
+      OverseasEvent(day: DateTime(2026, 9, 1), lines: [pen(100), note(40)]),
+      OverseasEvent(day: DateTime(2026, 10, 15), lines: [pen(50)]),
+      OverseasEvent(day: DateTime(2026, 10, 31), lines: [pen(10)]),
+    ], reports: [
+      OverseasEvent(day: DateTime(2026, 10, 1), lines: [pen(70)], report: true),
+      OverseasEvent(day: DateTime(2026, 10, 31), lines: [pen(90), note(5)], report: true),
+    ]);
+    final t = overseasTrend(ev, (l) => overseasKeyOf(l) == '4909999000014');
+    expect([for (final p in t.points) '${p.day.month}/${p.day.day}:${p.stock}${p.report ? 'R' : ''}'],
+        ['9/1:100', '10/1:70R', '10/15:120', '10/31:130', '10/31:90R']);
+    expect([for (final p in t.periods) p.used], [30, 40]);
+    expect(t.periods.last.shipped, 60);
+    expect(t.periods.first.perMonth, 30);
+    expect(t.months.keys, ['2026-09', '2026-10']);
+    expect(t.months.values.fold<num>(0, (a, b) => a + b).round(), 70);
+    // By maker: both products together.
+    final m = overseasTrend(ev, (l) => l.maker == 'テスト文具');
+    expect(m.points.last.stock, 95);
+    expect(ev.makers(), ['テスト文具']);
+  });
+
+  testWidgets('推定在庫, 出荷の記録 and 推移・分析 of a destination', (tester) async {
+    final repo = FakeOverseasStockRepository(sites: [_site])
+      ..estimates = [
+        OverseasEstimate(jan: '4909999000014', name: 'テストペン', maker: 'テスト文具', shippedTotal: 160, reported: 90,
+            reportedOn: DateTime(2026, 10, 31), shippedSince: 0, estimate: 90),
+      ]
+      ..eventList = OverseasEvents(shipments: [
+        OverseasEvent(day: DateTime(2026, 9, 1), id: 1, outboundFileId: 11, fileName: '9月分.xlsx',
+            lines: const [OverseasLine(jan: '4909999000014', name: 'テストペン', maker: 'テスト文具', quantity: 100)]),
+      ], reports: [
+        OverseasEvent(day: DateTime(2026, 10, 1), id: 2, fileName: '報告.pdf', report: true,
+            lines: const [OverseasLine(jan: '4909999000014', name: 'テストペン', maker: 'テスト文具', quantity: 70)]),
+      ]);
+    await _pumpSite(tester, repo: repo, tab: 0);
+    expect(find.byKey(const ValueKey('os-estimate')), findsOneWidget);
+    expect(find.text('1品目・合計 90'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('os-tab-shipments')));
+    await tester.pumpAndSettle();
+    expect(find.text('出荷 1回・合計 100'), findsOneWidget);
+    expect(find.byKey(const ValueKey('os-shipment-open-1')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('os-tab-trend')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('os-trend-chart')), findsOneWidget);
+    expect(find.byKey(const ValueKey('os-periods')), findsOneWidget);
+    await tester.tap(find.text('メーカー別'));
+    await tester.pumpAndSettle();
+    expect(find.text('テスト文具'), findsWidgets);
   });
 
   testWidgets('全拠点の在庫: each product with what every site holds', (tester) async {
@@ -171,9 +229,9 @@ void main() {
     expect(r['sheet'], '在庫');
     expect((r['columns'] as Map).keys, containsAll(['jan', 'code', 'name', 'quantity']));
     expect([for (final l in r['lines'] as List<OverseasLine>) '${l.code}:${l.quantity}'], ['TP-1:12', 'TE-3:10']);
-    // The stock tab shows what was registered.
-    expect(find.byKey(const ValueKey('os-stock-latest')), findsOneWidget);
-    expect(find.textContaining('2品目・22'), findsOneWidget);
+    // Back on the estimate.
+    expect(find.byKey(const ValueKey('os-estimate')), findsNothing);
+    expect(find.textContaining('出庫のときにこの出荷先カードを選ぶと'), findsOneWidget);
   });
 
   testWidgets('headings not known: the AI judges the columns', (tester) async {
@@ -228,7 +286,7 @@ void main() {
         OverseasImport(id: 7, asOf: DateTime(2026, 11, 5), fileName: 'b.xlsx', lineCount: 1, units: 7),
         OverseasImport(id: 6, asOf: DateTime(2026, 11, 1), fileName: 'a.xlsx', lineCount: 2, units: 13, undoneAt: DateTime(2026, 11, 6)),
       ];
-    final (_, _, notes) = await _pumpSite(tester, repo: repo, tab: 2);
+    final (_, _, notes) = await _pumpSite(tester, repo: repo, tab: 4);
     expect(find.byKey(const ValueKey('os-import-undo-6')), findsNothing);
     await tester.tap(find.byKey(const ValueKey('os-import-undo-7')));
     await tester.pumpAndSettle();

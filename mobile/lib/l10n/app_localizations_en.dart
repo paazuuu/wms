@@ -4566,7 +4566,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featVirtualStockDesc =>
-      'The stock of our branches and partners abroad, read from the files they send (Excel, PDF, photos) with the AI, by site — apart from our own stock. With notes and files';
+      'By destination card: what we shipped and the counts the destination gives, the estimate and how fast goods go (by month, by product or maker). Apart from our stock';
 
   @override
   String get virtualTitle => 'Stock abroad (virtual)';
@@ -15091,7 +15091,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pkWithdrawn => 'Taken off the list';
 
   @override
-  String get pkSettingsTitle => 'Boxes and case quantities';
+  String get pkSettingsTitle => 'Cartons';
 
   @override
   String get pkCasePacks => 'Makers\' own cases';
@@ -15257,7 +15257,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get obHubPackingLists => 'Packing lists';
 
   @override
-  String get obHubBoxes => 'Boxes';
+  String get obHubBoxes => 'Cartons';
 
   @override
   String get ofPacking => 'Packing / packing list';
@@ -15593,7 +15593,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get obHelpBoxes =>
-      'Our cartons (S/M/L …) and how many go in each maker\'s case. Used to work out the boxes.';
+      'Our cartons (S/M/L…): size, empty weight and load. Used by the box plan and the gross weight estimate.';
 
   @override
   String get obHelpProposal =>
@@ -16532,19 +16532,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get osIntro =>
-      'Keep a rough picture of the stock our branches and partner companies abroad hold, read from the files they send (Excel, CSV, PDF, photos). Kept apart from our own stock; nothing in it moves our stock.';
+      'By 出荷先カード: what we shipped there and the latest stock counts the destination (a partner or branch downstream) tells us. Choose the card when shipping, and the list is recorded here once it is shipped. Estimate = latest count + what we shipped after it. Kept apart from our own stock, which does not move.';
 
   @override
-  String get osTabSites => 'Sites';
+  String get osTabSites => 'By destination';
 
   @override
-  String get osTabOverview => 'All sites';
+  String get osTabOverview => 'All destinations';
 
   @override
   String get osTabTransfers => 'Warehouses abroad (transfers)';
 
   @override
-  String get osAddSite => 'Add site';
+  String get osAddSite => 'Add destination';
 
   @override
   String get osEditSite => 'Edit site';
@@ -16577,7 +16577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get osNoSites => 'No sites yet. Start with “Add site”.';
 
   @override
-  String get osNoStock => 'No stock file read yet';
+  String get osNoStock => 'No count given yet';
 
   @override
   String osLatest(String date, int n, String units) {
@@ -16597,13 +16597,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get osArchivedBadge => 'Archived';
 
   @override
-  String get osTabStock => 'Stock';
+  String get osTabStock => 'Latest count';
 
   @override
-  String get osTabImport => 'Read a file';
+  String get osTabImport => 'Read a count';
 
   @override
-  String get osTabHistory => 'Files read';
+  String get osTabHistory => 'Counts given';
 
   @override
   String get osAsOf => 'Stock as of';
@@ -16615,7 +16615,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get osImportIntro =>
-      'Read the stock file a site sent as it is. Excel and CSV are read by their columns (the AI judges headings it does not know); PDFs and photos are read by the AI. Check against the original on the left, then register the ticked rows as this site’s stock. Earlier stock stays in the history.';
+      'Read the latest stock counts a destination (downstream) sent (Excel, CSV, PDF, photo). Excel and CSV are read by their columns (the AI judges headings it does not know); PDFs and photos by the AI. Check against the original on the left and register the ticked rows as a count. The file and the reading (Excel) are kept as evidence. Products not in the count are taken as 0.';
 
   @override
   String get osPick => 'Choose a file (Excel, CSV, PDF, photo)';
@@ -16649,7 +16649,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String osRegister(int n) {
-    return 'Register as this site’s stock ($n rows)';
+    return 'Register as a count ($n rows)';
   }
 
   @override
@@ -16729,4 +16729,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wlReadIncluded => 'In';
+
+  @override
+  String get osNoReport => 'No count yet';
+
+  @override
+  String get osDefaultBadge => 'Default';
+
+  @override
+  String osCardIs(String name) {
+    return 'Card: $name';
+  }
+
+  @override
+  String osShippedLine(int n, String units) {
+    return 'Shipped $n times, $units';
+  }
+
+  @override
+  String osLastShipped(String date) {
+    return 'Last shipped $date';
+  }
+
+  @override
+  String osEstimateLine(int n, String units) {
+    return 'Estimate $n items, $units';
+  }
+
+  @override
+  String get osTabEstimate => 'Estimate';
+
+  @override
+  String get osTabShipments => 'Shipments';
+
+  @override
+  String get osTabTrend => 'Trend';
+
+  @override
+  String get osColShippedTotal => 'Shipped';
+
+  @override
+  String get osColReported => 'Last count';
+
+  @override
+  String get osColSince => 'Shipped since';
+
+  @override
+  String get osColEstimate => 'Estimate';
+
+  @override
+  String get osEstimateHelp =>
+      'Estimate = the latest count + what was shipped after its day (everything shipped, before any count). A product not in the count is taken as 0. What was shipped after the count includes goods still on the way.';
+
+  @override
+  String osEstimateTotal(int n, String units) {
+    return '$n items, $units in all';
+  }
+
+  @override
+  String get osNoShipments =>
+      'Nothing shipped to this destination yet. Choose its card when shipping; the list is recorded here once it is shipped.';
+
+  @override
+  String osShipmentsTotal(int n, String units) {
+    return '$n shipments, $units in all';
+  }
+
+  @override
+  String get osOpenOutbound => 'Open';
+
+  @override
+  String get osByProduct => 'By product';
+
+  @override
+  String get osByMaker => 'By maker';
+
+  @override
+  String get osTrendEmpty => 'Nothing shipped or counted yet';
+
+  @override
+  String get osTrendHelp =>
+      'A shipment adds to the stock; a count sets it. Between two counts, start + shipped − end is what was used (sold or used), spread over the months by day.';
+
+  @override
+  String get osTrendLegend =>
+      'The line is the estimate; the orange dots are the days a count was given.';
+
+  @override
+  String osShippedOn(String name) {
+    return 'Shipped: $name';
+  }
+
+  @override
+  String osReportedOn(String name) {
+    return 'Count: $name';
+  }
+
+  @override
+  String get osPeriods => 'Used between counts';
+
+  @override
+  String get osPeriodsNone => 'Shown once a count is given';
+
+  @override
+  String get osPeriod => 'Period';
+
+  @override
+  String get osColStart => 'Start';
+
+  @override
+  String get osColShippedIn => 'Shipped';
+
+  @override
+  String get osColEnd => 'End (count)';
+
+  @override
+  String get osColUsed => 'Used';
+
+  @override
+  String get osColPerMonth => 'Per month';
+
+  @override
+  String get osMonthly => 'Used by month (by day)';
 }

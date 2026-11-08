@@ -4455,7 +4455,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featVirtualStockDesc =>
-      '国外の自社支店・パートナー会社の在庫を、届いたファイル（Excel・PDF・写真）からAIで読み込んで拠点ごとに把握（自社の在庫とは別）。メモ・添付も付けられます';
+      '出荷先カードごとに、出荷の記録と下流から知らせてもらった在庫数をまとめ、推定在庫と減り具合（月ごと・商品／メーカー別のグラフ）を見る。自社の在庫とは別';
 
   @override
   String get virtualTitle => '国外倉庫の仮想在庫';
@@ -14798,7 +14798,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pkWithdrawn => '一覧から外しました';
 
   @override
-  String get pkSettingsTitle => '箱と入数';
+  String get pkSettingsTitle => '段ボール';
 
   @override
   String get pkCasePacks => 'メーカーの元箱（入数）';
@@ -14963,7 +14963,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get obHubPackingLists => 'パッキングリスト';
 
   @override
-  String get obHubBoxes => '箱と入数';
+  String get obHubBoxes => '段ボール';
 
   @override
   String get ofPacking => '梱包・パッキングリスト';
@@ -15291,7 +15291,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get obHelpBoxes =>
-      '自社の段ボール（S/M/Lなど）と、メーカーの元箱に何個入るか（入数）の登録。箱詰め案の計算に使います。';
+      '自社の段ボール（S/M/Lなど）のサイズ・空箱の重さ・耐荷重の登録。箱詰め案と総重量の見積もりに使います。';
 
   @override
   String get obHelpProposal => '在庫から出荷の案を作ります（どの商品をどれだけ出せるか）。';
@@ -16213,19 +16213,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get osIntro =>
-      '国外にある自社の支店やパートナー会社の在庫を、送られてきたファイル（Excel・CSV・PDF・写真）から読み込んで、拠点ごとにある程度把握します。自社の在庫とは別に記録し、在庫は動きません。';
+      '出荷先カードごとに、弊社が出荷した記録と、出荷先（パートナー・支店など下流）から知らせてもらった最新の在庫数をまとめます。出庫のときに出荷先カードを選ぶと、出庫済みになった時点でその出荷先に記録されます。推定在庫＝最新の報告数＋報告後に出荷した数。自社の在庫とは別のDBで、自社の在庫は動きません。';
 
   @override
-  String get osTabSites => '拠点';
+  String get osTabSites => '出荷先ごと';
 
   @override
-  String get osTabOverview => '全拠点の在庫';
+  String get osTabOverview => '全出荷先の在庫';
 
   @override
   String get osTabTransfers => '国外倉庫（転送分）';
 
   @override
-  String get osAddSite => '拠点を追加';
+  String get osAddSite => '出荷先を追加';
 
   @override
   String get osEditSite => '拠点を直す';
@@ -16258,7 +16258,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get osNoSites => 'まだ拠点がありません。「拠点を追加」から始めてください。';
 
   @override
-  String get osNoStock => 'まだ在庫のファイルを読み込んでいません';
+  String get osNoStock => 'まだ在庫の報告がありません';
 
   @override
   String osLatest(String date, int n, String units) {
@@ -16278,13 +16278,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get osArchivedBadge => '使っていない';
 
   @override
-  String get osTabStock => '在庫';
+  String get osTabStock => '最新の報告';
 
   @override
-  String get osTabImport => 'ファイルを読み込む';
+  String get osTabImport => '報告を読み込む';
 
   @override
-  String get osTabHistory => '読み込みの履歴';
+  String get osTabHistory => '報告の履歴';
 
   @override
   String get osAsOf => '在庫の日付';
@@ -16296,7 +16296,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get osImportIntro =>
-      '拠点から届いた在庫のファイルをそのまま読み込みます。Excel・CSVは列を読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「この拠点の在庫」として登録します。前の在庫は履歴に残ります。';
+      '出荷先（下流）から届いた最新の在庫数のファイル（Excel・CSV・PDF・写真）を読み込みます。Excel・CSVは列で読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「在庫の報告」として登録します。元のファイルと読み取り結果（Excel）は証拠として残ります。報告に載っていない商品は0として扱います。';
 
   @override
   String get osPick => 'ファイルを選ぶ（Excel・CSV・PDF・写真）';
@@ -16330,7 +16330,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String osRegister(int n) {
-    return 'この拠点の在庫として登録（$n行）';
+    return '在庫の報告として登録（$n行）';
   }
 
   @override
@@ -16410,4 +16410,125 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wlReadIncluded => '対象';
+
+  @override
+  String get osNoReport => '報告なし';
+
+  @override
+  String get osDefaultBadge => 'デフォルト';
+
+  @override
+  String osCardIs(String name) {
+    return '出荷先カード: $name';
+  }
+
+  @override
+  String osShippedLine(int n, String units) {
+    return '出荷 $n回・$units';
+  }
+
+  @override
+  String osLastShipped(String date) {
+    return '最終出荷 $date';
+  }
+
+  @override
+  String osEstimateLine(int n, String units) {
+    return '推定在庫 $n品目・$units';
+  }
+
+  @override
+  String get osTabEstimate => '推定在庫';
+
+  @override
+  String get osTabShipments => '出荷の記録';
+
+  @override
+  String get osTabTrend => '推移・分析';
+
+  @override
+  String get osColShippedTotal => '出荷累計';
+
+  @override
+  String get osColReported => '最終報告';
+
+  @override
+  String get osColSince => '報告後の出荷';
+
+  @override
+  String get osColEstimate => '推定在庫';
+
+  @override
+  String get osEstimateHelp =>
+      '推定在庫＝最新の報告数＋報告日より後に出荷した数（報告がまだなら出荷累計）。報告に載っていない商品は0として扱います。報告日より後の出荷には、まだ届いていない輸送中の分も入ります。';
+
+  @override
+  String osEstimateTotal(int n, String units) {
+    return '$n品目・合計 $units';
+  }
+
+  @override
+  String get osNoShipments =>
+      'この出荷先に出庫済みの出荷はまだありません。出庫のときにこの出荷先カードを選ぶと、出庫済みになった時点でここに記録されます。';
+
+  @override
+  String osShipmentsTotal(int n, String units) {
+    return '出荷 $n回・合計 $units';
+  }
+
+  @override
+  String get osOpenOutbound => '出庫を開く';
+
+  @override
+  String get osByProduct => '商品別';
+
+  @override
+  String get osByMaker => 'メーカー別';
+
+  @override
+  String get osTrendEmpty => 'まだ出荷も報告もありません';
+
+  @override
+  String get osTrendHelp =>
+      '出荷すると在庫が増え、報告があるとその数になります。報告と報告の間で「期首＋出荷−期末」を「減った数」（売れた・使われた数）として計算し、月ごとに日割りで配分します。';
+
+  @override
+  String get osTrendLegend => '線は推定在庫。オレンジの点は報告のあった日です。';
+
+  @override
+  String osShippedOn(String name) {
+    return '出荷: $name';
+  }
+
+  @override
+  String osReportedOn(String name) {
+    return '報告: $name';
+  }
+
+  @override
+  String get osPeriods => '報告の間に減った数';
+
+  @override
+  String get osPeriodsNone => '在庫の報告が入ると計算できます';
+
+  @override
+  String get osPeriod => '期間';
+
+  @override
+  String get osColStart => '期首';
+
+  @override
+  String get osColShippedIn => '期間中の出荷';
+
+  @override
+  String get osColEnd => '期末（報告）';
+
+  @override
+  String get osColUsed => '減った数';
+
+  @override
+  String get osColPerMonth => '月あたり';
+
+  @override
+  String get osMonthly => '月ごとの減り（日割り）';
 }

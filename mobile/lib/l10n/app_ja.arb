@@ -3970,7 +3970,7 @@
   "@featVirtualStock": {
     "description": "featVirtualStock"
   },
-  "featVirtualStockDesc": "国外の自社支店・パートナー会社の在庫を、届いたファイル（Excel・PDF・写真）からAIで読み込んで拠点ごとに把握（自社の在庫とは別）。メモ・添付も付けられます",
+  "featVirtualStockDesc": "出荷先カードごとに、出荷の記録と下流から知らせてもらった在庫数をまとめ、推定在庫と減り具合（月ごと・商品／メーカー別のグラフ）を見る。自社の在庫とは別",
   "@featVirtualStockDesc": {
     "description": "featVirtualStockDesc"
   },
@@ -13171,7 +13171,7 @@
   "pkWithdrawQ": "このパッキングリストを一覧から外しますか？",
   "pkWithdrawBody": "ファイルは消えません。一覧に出なくなるだけです。",
   "pkWithdrawn": "一覧から外しました",
-  "pkSettingsTitle": "箱と入数",
+  "pkSettingsTitle": "段ボール",
   "pkCasePacks": "メーカーの元箱（入数）",
   "pkOurCartons": "自社の段ボール",
   "pkCaseHint": "商品ごとに、元箱に何個入るか・箱のサイズ・満杯の重さを登録します。箱詰め案では、入数ぶんはその元箱のまま1箱、残りを自社の段ボールに詰めます。パッキングリストをアップすると自動で覚えます（「学習」）。",
@@ -13326,7 +13326,7 @@
   },
   "pkQuantity": "数量",
   "obHubPackingLists": "パッキングリスト",
-  "obHubBoxes": "箱と入数",
+  "obHubBoxes": "段ボール",
   "ofPacking": "梱包・パッキングリスト",
   "pkDetailRead": "明細シート「{sheet}」: {n}行（改善版にも明細シートとして入れ、数量を照合します）",
   "@pkDetailRead": {
@@ -13560,7 +13560,7 @@
   "obHelpCards": "出荷先の会社名・住所・電話・税番号・港など、輸出書類に必要な情報をカードにして保管。出荷明細を登録するときに選びます。",
   "obHelpPacking": "受注した注文を箱に詰めて送る作業（出荷指示）。箱ごとの中身と重さを記録し、ラベルを印刷します。",
   "obHelpPackingLists": "パッキングリストの保管庫。自分で作ったリストをアップするとAIが見やすい形式に直し、原本と改善版の両方を残します。",
-  "obHelpBoxes": "自社の段ボール（S/M/Lなど）と、メーカーの元箱に何個入るか（入数）の登録。箱詰め案の計算に使います。",
+  "obHelpBoxes": "自社の段ボール（S/M/Lなど）のサイズ・空箱の重さ・耐荷重の登録。箱詰め案と総重量の見積もりに使います。",
   "obHelpProposal": "在庫から出荷の案を作ります（どの商品をどれだけ出せるか）。",
   "sfHelpImport": "仕入先の請求書・納品書（Excel・PDF・写真）を読み込み、商品と在庫に登録します。",
   "sfHelpOrders": "発注ごとの進み具合（入荷・検品・支払い・証憑）を一覧で確認します。",
@@ -14382,11 +14382,11 @@
     }
   },
   "osTitle": "国外の仮想在庫",
-  "osIntro": "国外にある自社の支店やパートナー会社の在庫を、送られてきたファイル（Excel・CSV・PDF・写真）から読み込んで、拠点ごとにある程度把握します。自社の在庫とは別に記録し、在庫は動きません。",
-  "osTabSites": "拠点",
-  "osTabOverview": "全拠点の在庫",
+  "osIntro": "出荷先カードごとに、弊社が出荷した記録と、出荷先（パートナー・支店など下流）から知らせてもらった最新の在庫数をまとめます。出庫のときに出荷先カードを選ぶと、出庫済みになった時点でその出荷先に記録されます。推定在庫＝最新の報告数＋報告後に出荷した数。自社の在庫とは別のDBで、自社の在庫は動きません。",
+  "osTabSites": "出荷先ごと",
+  "osTabOverview": "全出荷先の在庫",
   "osTabTransfers": "国外倉庫（転送分）",
-  "osAddSite": "拠点を追加",
+  "osAddSite": "出荷先を追加",
   "osEditSite": "拠点を直す",
   "osKindBranch": "自社の支店",
   "osKindPartner": "パートナー会社",
@@ -14397,7 +14397,7 @@
   "osNote": "備考",
   "osNameRequired": "拠点名を入れてください",
   "osNoSites": "まだ拠点がありません。「拠点を追加」から始めてください。",
-  "osNoStock": "まだ在庫のファイルを読み込んでいません",
+  "osNoStock": "まだ在庫の報告がありません",
   "osLatest": "{date} 時点 · {n}品目・{units}",
   "@osLatest": {
     "placeholders": {
@@ -14416,9 +14416,9 @@
   "osUnarchive": "使う拠点に戻す",
   "osShowArchived": "使わない拠点も表示",
   "osArchivedBadge": "使っていない",
-  "osTabStock": "在庫",
-  "osTabImport": "ファイルを読み込む",
-  "osTabHistory": "読み込みの履歴",
+  "osTabStock": "最新の報告",
+  "osTabImport": "報告を読み込む",
+  "osTabHistory": "報告の履歴",
   "osAsOf": "在庫の日付",
   "osAsOfIs": "在庫の日付: {date}",
   "@osAsOfIs": {
@@ -14428,7 +14428,7 @@
       }
     }
   },
-  "osImportIntro": "拠点から届いた在庫のファイルをそのまま読み込みます。Excel・CSVは列を読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「この拠点の在庫」として登録します。前の在庫は履歴に残ります。",
+  "osImportIntro": "出荷先（下流）から届いた最新の在庫数のファイル（Excel・CSV・PDF・写真）を読み込みます。Excel・CSVは列で読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「在庫の報告」として登録します。元のファイルと読み取り結果（Excel）は証拠として残ります。報告に載っていない商品は0として扱います。",
   "osPick": "ファイルを選ぶ（Excel・CSV・PDF・写真）",
   "osAiReading": "AIが読み取っています…",
   "osAiColumns": "AIで列を判定",
@@ -14464,7 +14464,7 @@
       }
     }
   },
-  "osRegister": "この拠点の在庫として登録（{n}行）",
+  "osRegister": "在庫の報告として登録（{n}行）",
   "@osRegister": {
     "placeholders": {
       "n": {
@@ -14525,5 +14525,107 @@
     }
   },
   "wlNoStockChange": "このリストは希望を記録するだけです。商品ライブラリーの在庫数や引当は変わりません（在庫の数は参考として表示しています）。",
-  "wlReadIncluded": "対象"
+  "wlReadIncluded": "対象",
+  "osNoReport": "報告なし",
+  "osDefaultBadge": "デフォルト",
+  "osCardIs": "出荷先カード: {name}",
+  "@osCardIs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "osShippedLine": "出荷 {n}回・{units}",
+  "@osShippedLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "osLastShipped": "最終出荷 {date}",
+  "@osLastShipped": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "osEstimateLine": "推定在庫 {n}品目・{units}",
+  "@osEstimateLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "osTabEstimate": "推定在庫",
+  "osTabShipments": "出荷の記録",
+  "osTabTrend": "推移・分析",
+  "osColShippedTotal": "出荷累計",
+  "osColReported": "最終報告",
+  "osColSince": "報告後の出荷",
+  "osColEstimate": "推定在庫",
+  "osEstimateHelp": "推定在庫＝最新の報告数＋報告日より後に出荷した数（報告がまだなら出荷累計）。報告に載っていない商品は0として扱います。報告日より後の出荷には、まだ届いていない輸送中の分も入ります。",
+  "osEstimateTotal": "{n}品目・合計 {units}",
+  "@osEstimateTotal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "osNoShipments": "この出荷先に出庫済みの出荷はまだありません。出庫のときにこの出荷先カードを選ぶと、出庫済みになった時点でここに記録されます。",
+  "osShipmentsTotal": "出荷 {n}回・合計 {units}",
+  "@osShipmentsTotal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "osOpenOutbound": "出庫を開く",
+  "osByProduct": "商品別",
+  "osByMaker": "メーカー別",
+  "osTrendEmpty": "まだ出荷も報告もありません",
+  "osTrendHelp": "出荷すると在庫が増え、報告があるとその数になります。報告と報告の間で「期首＋出荷−期末」を「減った数」（売れた・使われた数）として計算し、月ごとに日割りで配分します。",
+  "osTrendLegend": "線は推定在庫。オレンジの点は報告のあった日です。",
+  "osShippedOn": "出荷: {name}",
+  "@osShippedOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "osReportedOn": "報告: {name}",
+  "@osReportedOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "osPeriods": "報告の間に減った数",
+  "osPeriodsNone": "在庫の報告が入ると計算できます",
+  "osPeriod": "期間",
+  "osColStart": "期首",
+  "osColShippedIn": "期間中の出荷",
+  "osColEnd": "期末（報告）",
+  "osColUsed": "減った数",
+  "osColPerMonth": "月あたり",
+  "osMonthly": "月ごとの減り（日割り）"
 }

@@ -27,7 +27,29 @@ class OverseasSite extends Equatable {
     this.latest,
     this.importCount = 0,
     this.noteCount = 0,
+    this.destinationId,
+    this.destinationName,
+    this.isDefault = false,
+    this.shipmentCount = 0,
+    this.shippedUnits = 0,
+    this.lastShippedOn,
+    this.estimateUnits = 0,
+    this.estimateItems = 0,
   });
+
+  /// The 出荷先カード the site sums up (0209); what is shipped to it is kept here.
+  final int? destinationId;
+  final String? destinationName;
+
+  /// 国外の仮想在庫（中国・広東）, made with its card (0209).
+  final bool isDefault;
+  final int shipmentCount;
+  final num shippedUnits;
+  final DateTime? lastShippedOn;
+
+  /// The last count the partner gave plus what was shipped since.
+  final num estimateUnits;
+  final int estimateItems;
 
   final int id;
   final String name;
@@ -60,6 +82,14 @@ class OverseasSite extends Equatable {
         latest: j['latest'] is Map ? OverseasImport.fromJson((j['latest'] as Map).cast<String, dynamic>()) : null,
         importCount: _ni(j['import_count']) ?? 0,
         noteCount: _ni(j['note_count']) ?? 0,
+        destinationId: _ni(j['destination_id']),
+        destinationName: _s(j['destination_name']),
+        isDefault: j['is_default'] == true,
+        shipmentCount: _ni(j['shipment_count']) ?? 0,
+        shippedUnits: _n(j['shipped_units']),
+        lastShippedOn: _d(j['last_shipped_on']),
+        estimateUnits: _n(j['estimate_units']),
+        estimateItems: _ni(j['estimate_items']) ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,7 +103,8 @@ class OverseasSite extends Equatable {
       };
 
   @override
-  List<Object?> get props => [id, name, kind, country, city, contact, note, archivedAt, latest, importCount, noteCount];
+  List<Object?> get props =>
+      [id, name, kind, country, city, contact, note, archivedAt, latest, importCount, noteCount, destinationId, shipmentCount, estimateUnits];
 }
 
 /// One file read for a site, as of a day.

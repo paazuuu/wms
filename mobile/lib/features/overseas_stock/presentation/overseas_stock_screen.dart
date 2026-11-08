@@ -7,6 +7,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../data/overseas_stock_repository.dart';
 import '../domain/overseas_stock.dart';
@@ -37,16 +38,17 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
     super.dispose();
   }
 
+  /// A 出荷先カード chosen (or made there): its site, opened.
   Future<void> _addSite() async {
     final l10n = AppLocalizations.of(context);
-    final m = await showOverseasSiteDialog(context);
-    if (m == null || !mounted) return;
-    final r = await ref.read(overseasStockRepositoryProvider).saveSite(m);
+    final d = await pickDestinationCard(context);
+    if (d?.id == null || !mounted) return;
+    final r = await ref.read(overseasStockRepositoryProvider).siteForCard(d!.id!);
     if (!mounted) return;
     switch (r) {
       case ApiSuccess(:final data):
         ref.invalidate(overseasSitesProvider);
-        await _open(OverseasSite.fromJson({...m, 'id': data}), tab: 1);
+        await _open(OverseasSite(id: data, name: d.name, destinationId: d.id, destinationName: d.name));
       case ApiFailure(:final message):
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
     }
@@ -124,15 +126,28 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
                   onTap: () => _open(s),
                   leading: Icon(s.partner ? Icons.handshake_outlined : Icons.store_mall_directory_outlined,
                       color: s.archived ? scheme.onSurfaceVariant : scheme.primary),
-                  title: Text(s.name, style: theme.textTheme.titleSmall),
+                  title: Row(children: [
+                    Flexible(child: Text(s.name, style: theme.textTheme.titleSmall)),
+                    if (s.isDefault) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      Chip(
+                        key: ValueKey('os-default-${s.id}'),
+                        visualDensity: VisualDensity.compact,
+                        label: Text(l10n.osDefaultBadge),
+                      ),
+                    ],
+                  ]),
                   subtitle: Text(
                     [
-                      overseasKindLabel(l10n, s.kind),
+                      if (s.destinationName != null) l10n.osCardIs(s.destinationName!) else overseasKindLabel(l10n, s.kind),
                       if (s.country != null || s.city != null) [s.country, s.city].whereType<String>().join(' '),
+                      l10n.osShippedLine(s.shipmentCount, overseasQty(s.shippedUnits)),
+                      if (s.lastShippedOn != null) l10n.osLastShipped(_day.format(s.lastShippedOn!)),
                       if (s.latest case final i?)
                         l10n.osLatest(i.asOf == null ? '' : _day.format(i.asOf!), i.lineCount, overseasQty(i.units))
                       else
-                        l10n.osNoStock,
+                        l10n.osNoReport,
+                      l10n.osEstimateLine(s.estimateItems, overseasQty(s.estimateUnits)),
                       if (s.noteCount > 0) l10n.wlNotesBadge(s.noteCount),
                       if (s.archived) l10n.osArchivedBadge,
                     ].join(' · '),
@@ -143,7 +158,7 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
                       key: ValueKey('os-site-import-${s.id}'),
                       tooltip: l10n.osTabImport,
                       icon: const Icon(Icons.upload_file_outlined),
-                      onPressed: s.archived ? null : () => _open(s, tab: 1),
+                      onPressed: s.archived ? null : () => _open(s, tab: 3),
                     ),
                     IconButton(
                       key: ValueKey('os-site-archive-${s.id}'),

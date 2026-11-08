@@ -8259,7 +8259,7 @@ abstract class AppLocalizations {
   /// featVirtualStockDesc
   ///
   /// In ja, this message translates to:
-  /// **'国外の自社支店・パートナー会社の在庫を、届いたファイル（Excel・PDF・写真）からAIで読み込んで拠点ごとに把握（自社の在庫とは別）。メモ・添付も付けられます'**
+  /// **'出荷先カードごとに、出荷の記録と下流から知らせてもらった在庫数をまとめ、推定在庫と減り具合（月ごと・商品／メーカー別のグラフ）を見る。自社の在庫とは別'**
   String get featVirtualStockDesc;
 
   /// virtualTitle
@@ -26126,7 +26126,7 @@ abstract class AppLocalizations {
   /// No description provided for @pkSettingsTitle.
   ///
   /// In ja, this message translates to:
-  /// **'箱と入数'**
+  /// **'段ボール'**
   String get pkSettingsTitle;
 
   /// No description provided for @pkCasePacks.
@@ -26396,7 +26396,7 @@ abstract class AppLocalizations {
   /// No description provided for @obHubBoxes.
   ///
   /// In ja, this message translates to:
-  /// **'箱と入数'**
+  /// **'段ボール'**
   String get obHubBoxes;
 
   /// No description provided for @ofPacking.
@@ -26954,7 +26954,7 @@ abstract class AppLocalizations {
   /// No description provided for @obHelpBoxes.
   ///
   /// In ja, this message translates to:
-  /// **'自社の段ボール（S/M/Lなど）と、メーカーの元箱に何個入るか（入数）の登録。箱詰め案の計算に使います。'**
+  /// **'自社の段ボール（S/M/Lなど）のサイズ・空箱の重さ・耐荷重の登録。箱詰め案と総重量の見積もりに使います。'**
   String get obHelpBoxes;
 
   /// No description provided for @obHelpProposal.
@@ -28472,19 +28472,19 @@ abstract class AppLocalizations {
   /// No description provided for @osIntro.
   ///
   /// In ja, this message translates to:
-  /// **'国外にある自社の支店やパートナー会社の在庫を、送られてきたファイル（Excel・CSV・PDF・写真）から読み込んで、拠点ごとにある程度把握します。自社の在庫とは別に記録し、在庫は動きません。'**
+  /// **'出荷先カードごとに、弊社が出荷した記録と、出荷先（パートナー・支店など下流）から知らせてもらった最新の在庫数をまとめます。出庫のときに出荷先カードを選ぶと、出庫済みになった時点でその出荷先に記録されます。推定在庫＝最新の報告数＋報告後に出荷した数。自社の在庫とは別のDBで、自社の在庫は動きません。'**
   String get osIntro;
 
   /// No description provided for @osTabSites.
   ///
   /// In ja, this message translates to:
-  /// **'拠点'**
+  /// **'出荷先ごと'**
   String get osTabSites;
 
   /// No description provided for @osTabOverview.
   ///
   /// In ja, this message translates to:
-  /// **'全拠点の在庫'**
+  /// **'全出荷先の在庫'**
   String get osTabOverview;
 
   /// No description provided for @osTabTransfers.
@@ -28496,7 +28496,7 @@ abstract class AppLocalizations {
   /// No description provided for @osAddSite.
   ///
   /// In ja, this message translates to:
-  /// **'拠点を追加'**
+  /// **'出荷先を追加'**
   String get osAddSite;
 
   /// No description provided for @osEditSite.
@@ -28562,7 +28562,7 @@ abstract class AppLocalizations {
   /// No description provided for @osNoStock.
   ///
   /// In ja, this message translates to:
-  /// **'まだ在庫のファイルを読み込んでいません'**
+  /// **'まだ在庫の報告がありません'**
   String get osNoStock;
 
   /// No description provided for @osLatest.
@@ -28598,19 +28598,19 @@ abstract class AppLocalizations {
   /// No description provided for @osTabStock.
   ///
   /// In ja, this message translates to:
-  /// **'在庫'**
+  /// **'最新の報告'**
   String get osTabStock;
 
   /// No description provided for @osTabImport.
   ///
   /// In ja, this message translates to:
-  /// **'ファイルを読み込む'**
+  /// **'報告を読み込む'**
   String get osTabImport;
 
   /// No description provided for @osTabHistory.
   ///
   /// In ja, this message translates to:
-  /// **'読み込みの履歴'**
+  /// **'報告の履歴'**
   String get osTabHistory;
 
   /// No description provided for @osAsOf.
@@ -28628,7 +28628,7 @@ abstract class AppLocalizations {
   /// No description provided for @osImportIntro.
   ///
   /// In ja, this message translates to:
-  /// **'拠点から届いた在庫のファイルをそのまま読み込みます。Excel・CSVは列を読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「この拠点の在庫」として登録します。前の在庫は履歴に残ります。'**
+  /// **'出荷先（下流）から届いた最新の在庫数のファイル（Excel・CSV・PDF・写真）を読み込みます。Excel・CSVは列で読み取り（分からない見出しはAIが判定）、PDF・写真はAIが読み取ります。左の元のファイルと見比べて、チェックした行を「在庫の報告」として登録します。元のファイルと読み取り結果（Excel）は証拠として残ります。報告に載っていない商品は0として扱います。'**
   String get osImportIntro;
 
   /// No description provided for @osPick.
@@ -28682,7 +28682,7 @@ abstract class AppLocalizations {
   /// No description provided for @osRegister.
   ///
   /// In ja, this message translates to:
-  /// **'この拠点の在庫として登録（{n}行）'**
+  /// **'在庫の報告として登録（{n}行）'**
   String osRegister(int n);
 
   /// No description provided for @osRegistered.
@@ -28822,6 +28822,210 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'対象'**
   String get wlReadIncluded;
+
+  /// No description provided for @osNoReport.
+  ///
+  /// In ja, this message translates to:
+  /// **'報告なし'**
+  String get osNoReport;
+
+  /// No description provided for @osDefaultBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'デフォルト'**
+  String get osDefaultBadge;
+
+  /// No description provided for @osCardIs.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード: {name}'**
+  String osCardIs(String name);
+
+  /// No description provided for @osShippedLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷 {n}回・{units}'**
+  String osShippedLine(int n, String units);
+
+  /// No description provided for @osLastShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終出荷 {date}'**
+  String osLastShipped(String date);
+
+  /// No description provided for @osEstimateLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'推定在庫 {n}品目・{units}'**
+  String osEstimateLine(int n, String units);
+
+  /// No description provided for @osTabEstimate.
+  ///
+  /// In ja, this message translates to:
+  /// **'推定在庫'**
+  String get osTabEstimate;
+
+  /// No description provided for @osTabShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷の記録'**
+  String get osTabShipments;
+
+  /// No description provided for @osTabTrend.
+  ///
+  /// In ja, this message translates to:
+  /// **'推移・分析'**
+  String get osTabTrend;
+
+  /// No description provided for @osColShippedTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷累計'**
+  String get osColShippedTotal;
+
+  /// No description provided for @osColReported.
+  ///
+  /// In ja, this message translates to:
+  /// **'最終報告'**
+  String get osColReported;
+
+  /// No description provided for @osColSince.
+  ///
+  /// In ja, this message translates to:
+  /// **'報告後の出荷'**
+  String get osColSince;
+
+  /// No description provided for @osColEstimate.
+  ///
+  /// In ja, this message translates to:
+  /// **'推定在庫'**
+  String get osColEstimate;
+
+  /// No description provided for @osEstimateHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'推定在庫＝最新の報告数＋報告日より後に出荷した数（報告がまだなら出荷累計）。報告に載っていない商品は0として扱います。報告日より後の出荷には、まだ届いていない輸送中の分も入ります。'**
+  String get osEstimateHelp;
+
+  /// No description provided for @osEstimateTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}品目・合計 {units}'**
+  String osEstimateTotal(int n, String units);
+
+  /// No description provided for @osNoShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'この出荷先に出庫済みの出荷はまだありません。出庫のときにこの出荷先カードを選ぶと、出庫済みになった時点でここに記録されます。'**
+  String get osNoShipments;
+
+  /// No description provided for @osShipmentsTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷 {n}回・合計 {units}'**
+  String osShipmentsTotal(int n, String units);
+
+  /// No description provided for @osOpenOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫を開く'**
+  String get osOpenOutbound;
+
+  /// No description provided for @osByProduct.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品別'**
+  String get osByProduct;
+
+  /// No description provided for @osByMaker.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカー別'**
+  String get osByMaker;
+
+  /// No description provided for @osTrendEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ出荷も報告もありません'**
+  String get osTrendEmpty;
+
+  /// No description provided for @osTrendHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷すると在庫が増え、報告があるとその数になります。報告と報告の間で「期首＋出荷−期末」を「減った数」（売れた・使われた数）として計算し、月ごとに日割りで配分します。'**
+  String get osTrendHelp;
+
+  /// No description provided for @osTrendLegend.
+  ///
+  /// In ja, this message translates to:
+  /// **'線は推定在庫。オレンジの点は報告のあった日です。'**
+  String get osTrendLegend;
+
+  /// No description provided for @osShippedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷: {name}'**
+  String osShippedOn(String name);
+
+  /// No description provided for @osReportedOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'報告: {name}'**
+  String osReportedOn(String name);
+
+  /// No description provided for @osPeriods.
+  ///
+  /// In ja, this message translates to:
+  /// **'報告の間に減った数'**
+  String get osPeriods;
+
+  /// No description provided for @osPeriodsNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の報告が入ると計算できます'**
+  String get osPeriodsNone;
+
+  /// No description provided for @osPeriod.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間'**
+  String get osPeriod;
+
+  /// No description provided for @osColStart.
+  ///
+  /// In ja, this message translates to:
+  /// **'期首'**
+  String get osColStart;
+
+  /// No description provided for @osColShippedIn.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間中の出荷'**
+  String get osColShippedIn;
+
+  /// No description provided for @osColEnd.
+  ///
+  /// In ja, this message translates to:
+  /// **'期末（報告）'**
+  String get osColEnd;
+
+  /// No description provided for @osColUsed.
+  ///
+  /// In ja, this message translates to:
+  /// **'減った数'**
+  String get osColUsed;
+
+  /// No description provided for @osColPerMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'月あたり'**
+  String get osColPerMonth;
+
+  /// No description provided for @osMonthly.
+  ///
+  /// In ja, this message translates to:
+  /// **'月ごとの減り（日割り）'**
+  String get osMonthly;
 }
 
 class _AppLocalizationsDelegate

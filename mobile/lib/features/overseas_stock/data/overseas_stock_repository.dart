@@ -8,6 +8,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart' show mimeTypeFor;
 import '../../delivery/application/delivery_providers.dart';
 import '../domain/overseas_stock.dart';
+import '../domain/overseas_trend.dart';
 
 /// Where the sites' files are kept (0207).
 const overseasFileBucket = 'overseas-files';
@@ -44,6 +45,15 @@ abstract class OverseasStockRepository {
 
   /// The reading kept as Excel beside import [id]'s file (0208).
   Future<ApiResult<bool>> setReadPath(int id, String path);
+
+  /// A site's estimate by product (0209).
+  Future<ApiResult<List<OverseasEstimate>>> siteStock(int siteId);
+
+  /// Its shipments and the counts given, for the charts.
+  Future<ApiResult<OverseasEvents>> events(int siteId);
+
+  /// The site of 出荷先カード [destinationId], made if missing.
+  Future<ApiResult<int>> siteForCard(int destinationId);
 }
 
 class OverseasStockRepositoryImpl implements OverseasStockRepository {
@@ -69,7 +79,7 @@ class OverseasStockRepositoryImpl implements OverseasStockRepository {
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   @override
-  Future<ApiResult<List<OverseasSite>>> sites({bool includeArchived = false}) => _rpc('overseas_sites_list',
+  Future<ApiResult<List<OverseasSite>>> sites({bool includeArchived = false}) => _rpc('overseas_destinations_list',
       {'p_include_archived': includeArchived}, (d) => [for (final r in _rows(d)) OverseasSite.fromJson(r)]);
 
   @override
@@ -122,7 +132,7 @@ class OverseasStockRepositoryImpl implements OverseasStockRepository {
       {'p_import_id': importId, 'p_site_id': siteId}, (d) => OverseasStock.fromJson((d as Map).cast<String, dynamic>()));
 
   @override
-  Future<ApiResult<List<OverseasProduct>>> overview({String? query}) => _rpc('overseas_stock_overview',
+  Future<ApiResult<List<OverseasProduct>>> overview({String? query}) => _rpc('overseas_estimate_overview',
       {'p_q': query, 'p_limit': 1000}, (d) => [for (final r in _rows(d)) OverseasProduct.fromJson(r)]);
 
   @override
@@ -137,6 +147,18 @@ class OverseasStockRepositoryImpl implements OverseasStockRepository {
       return mapDioError<String>(e);
     }
   }
+
+  @override
+  Future<ApiResult<List<OverseasEstimate>>> siteStock(int siteId) => _rpc('overseas_site_stock', {'p_site_id': siteId},
+      (d) => [for (final r in _rows(d)) OverseasEstimate.fromJson(r)]);
+
+  @override
+  Future<ApiResult<OverseasEvents>> events(int siteId) => _rpc('overseas_site_events', {'p_site_id': siteId},
+      (d) => OverseasEvents.fromJson((d as Map).cast<String, dynamic>()));
+
+  @override
+  Future<ApiResult<int>> siteForCard(int destinationId) =>
+      _rpc('overseas_site_for_card', {'p_destination_id': destinationId}, (d) => (d as num).toInt());
 
   @override
   Future<ApiResult<bool>> setReadPath(int id, String path) =>
@@ -174,5 +196,15 @@ final overseasImportsProvider = FutureProvider.autoDispose.family<List<OverseasI
 
 final overseasOverviewProvider = FutureProvider.autoDispose.family<List<OverseasProduct>, String>((ref, q) async {
   final r = await ref.watch(overseasStockRepositoryProvider).overview(query: q.trim().isEmpty ? null : q.trim());
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+final overseasSiteStockProvider = FutureProvider.autoDispose.family<List<OverseasEstimate>, int>((ref, siteId) async {
+  final r = await ref.watch(overseasStockRepositoryProvider).siteStock(siteId);
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+final overseasEventsProvider = FutureProvider.autoDispose.family<OverseasEvents, int>((ref, siteId) async {
+  final r = await ref.watch(overseasStockRepositoryProvider).events(siteId);
   return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });

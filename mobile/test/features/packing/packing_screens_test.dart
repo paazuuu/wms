@@ -223,26 +223,11 @@ void main() {
     expect(saved, ['PL_HL.xlsx']);
   });
 
-  testWidgets('case quantities are set by hand in 箱と入数', (tester) async {
-    final repo = FakePackingRepository(cases: const [
-      CasePack(productId: 1, caseQuantity: 24, name: 'テストペン', source: 'packing_list', seenCount: 3),
-    ]);
+  testWidgets('段ボール: only our cartons (the makers’ cases are not set here any more)', (tester) async {
+    final repo = FakePackingRepository();
     await pumpApp(tester, const PackingSettingsScreen(), overrides: [packingRepositoryProvider.overrideWithValue(repo)]);
-    expect(find.text('学習 ×3'), findsOneWidget);
-    expect(find.text('入数 24'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('pk-case-1')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('pk-case-qty')), '20');
-    await tester.enterText(find.byKey(const ValueKey('pk-case-kg')), '2.2');
-    await tester.tap(find.byKey(const ValueKey('pk-case-save')));
-    await tester.pumpAndSettle();
-    expect(repo.casesSaved.single.$2, 'manual');
-    expect(repo.casesSaved.single.$1.single.caseQuantity, 20);
-    expect(repo.casesSaved.single.$1.single.grossKg, 2.2);
-
-    await tester.tap(find.byKey(const ValueKey('pk-settings-mode')).last);
-    await tester.tap(find.text('自社の段ボール'));
-    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pk-settings-mode')), findsNothing);
     expect(find.text('80サイズ'), findsOneWidget);
   });
 
@@ -255,7 +240,7 @@ void main() {
     expect(find.byKey(const ValueKey('pk-upload')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('ob-hub-boxes')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('pk-settings-mode')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pk-cartons')), findsOneWidget);
 
     await pumpApp(tester, const OutboundFileDetailScreen(fileId: 5), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(detailOf: (_) => _detail)),

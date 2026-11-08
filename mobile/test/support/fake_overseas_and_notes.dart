@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/overseas_stock/data/overseas_stock_repository.dart';
 import 'package:wms_mobile/features/overseas_stock/domain/overseas_stock.dart';
+import 'package:wms_mobile/features/overseas_stock/domain/overseas_trend.dart';
 import 'package:wms_mobile/features/record_notes/data/record_notes_repository.dart';
 
 /// Notes kept in memory, by subject.
@@ -153,6 +154,22 @@ class FakeOverseasStockRepository implements OverseasStockRepository {
 
   @override
   Future<ApiResult<Uint8List>> fileBytes(String storagePath) async => ApiSuccess(kept);
+
+  List<OverseasEstimate> estimates = const [];
+  OverseasEvents eventList = const OverseasEvents();
+  final List<int> cards = [];
+
+  @override
+  Future<ApiResult<List<OverseasEstimate>>> siteStock(int siteId) async => ApiSuccess(estimates);
+
+  @override
+  Future<ApiResult<OverseasEvents>> events(int siteId) async => ApiSuccess(eventList);
+
+  @override
+  Future<ApiResult<int>> siteForCard(int destinationId) async {
+    cards.add(destinationId);
+    return ApiSuccess(200 + destinationId);
+  }
 
   final Map<int, String> readPaths = {};
 
