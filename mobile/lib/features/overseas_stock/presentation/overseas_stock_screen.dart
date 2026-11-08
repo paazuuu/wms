@@ -8,7 +8,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
-import '../../virtual_stock/presentation/virtual_stock_screen.dart';
 import '../data/overseas_stock_repository.dart';
 import '../domain/overseas_stock.dart';
 import 'overseas_site_screen.dart';
@@ -18,8 +17,9 @@ final _day = DateFormat('y/MM/dd');
 
 /// 国外の仮想在庫 (0207): the sites abroad — our branches and partner
 /// companies — and what each says it holds, read from the files they send;
-/// every product across them; and, on the last tab, the warehouses abroad
-/// goods were sent to from Japan (0088). Kept apart from our own stock.
+/// every product across them. Kept apart from our own stock. (The
+/// warehouses abroad goods were moved to by 倉庫間移動 (0088) are no longer
+/// shown: what is shipped to a partner abroad is counted here, by its card.)
 class OverseasStockScreen extends ConsumerStatefulWidget {
   const OverseasStockScreen({super.key});
 
@@ -70,20 +70,18 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.osTitle),
           bottom: TabBar(isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
             Tab(key: const ValueKey('os-tab-sites'), text: l10n.osTabSites),
             Tab(key: const ValueKey('os-tab-overview'), text: l10n.osTabOverview),
-            Tab(key: const ValueKey('os-tab-transfers'), text: l10n.osTabTransfers),
           ]),
         ),
         body: TabBarView(children: [
           _sites(context),
           _overview(context),
-          const VirtualStockScreen(embedded: true),
         ]),
       ),
     );

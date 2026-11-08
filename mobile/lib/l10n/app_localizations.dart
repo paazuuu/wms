@@ -8103,7 +8103,7 @@ abstract class AppLocalizations {
   /// transferExportNotice
   ///
   /// In ja, this message translates to:
-  /// **'国をまたぐ転送：出庫した時点で実在庫から除外され、受入はありません。送った数は「国外倉庫の仮想在庫」に計上されます。'**
+  /// **'国をまたぐ転送：出庫した時点で実在庫から除外され、受入はありません。国外のパートナーや支店への出荷は、出庫で出荷先カードを選ぶと「国外の仮想在庫」に出荷先ごとに記録されます。'**
   String get transferExportNotice;
 
   /// transferCrossBorderReceivedNotice

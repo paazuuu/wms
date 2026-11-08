@@ -4354,7 +4354,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get transferExportNotice => '跨境调拨：出库即从实际库存扣除，不会入库。发出的数量计入“海外仓库虚拟库存”。';
+  String get transferExportNotice =>
+      '跨国转运：出库时即从实际库存中扣除，没有入库。发往海外合作方或分店的出货，在出库时选择出货目的地卡，即会按目的地记录到「海外虚拟库存」。';
 
   @override
   String get transferCrossBorderReceivedNotice => '跨境调拨：目的仓库接收跨境货物，因此会入库。';

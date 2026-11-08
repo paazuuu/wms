@@ -4477,7 +4477,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferExportNotice =>
-      'Cross-border: the goods leave real stock when they ship and are not received. What was sent is added to the warehouse\'s virtual figure.';
+      'A cross-border transfer: it leaves real stock when shipped and is not received. Shipments to partners or branches abroad are recorded in “Stock abroad”, by destination card, when the card is chosen on the outbound list.';
 
   @override
   String get transferCrossBorderReceivedNotice =>
