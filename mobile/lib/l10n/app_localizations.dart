@@ -28282,6 +28282,12 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ファイル: {name}'**
   String wlFileBadge(String name);
+
+  /// No description provided for @menuMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他'**
+  String get menuMore;
 }
 
 class _AppLocalizationsDelegate

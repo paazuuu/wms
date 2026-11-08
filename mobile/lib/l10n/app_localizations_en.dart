@@ -16423,4 +16423,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String wlFileBadge(String name) {
     return 'File: $name';
   }
+
+  @override
+  String get menuMore => 'More';
 }

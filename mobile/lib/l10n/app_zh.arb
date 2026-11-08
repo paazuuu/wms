@@ -5056,5 +5056,6 @@
   "wlSavedFileDownload": "下载",
   "wlColWish": "希望数",
   "wlFileNotKept": "文件未能保存: {why}",
-  "wlFileBadge": "文件: {name}"
+  "wlFileBadge": "文件: {name}",
+  "menuMore": "其他"
 }

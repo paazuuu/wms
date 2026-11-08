@@ -24,6 +24,7 @@ class FeatureEntry {
     this.builder,
     this.requiredAnyOf = const [],
     this.inMenu = true,
+    this.more = false,
   });
 
   final String id;
@@ -45,6 +46,10 @@ class FeatureEntry {
   /// from the supply chain dashboard), so the menu does not offer the same
   /// work twice.
   final bool inMenu;
+
+  /// Used now and then: folded with the others like it under the group's
+  /// 「その他」 in the menu, to keep the daily ones in sight.
+  final bool more;
 
   bool get isReady => status == FeatureStatus.ready && builder != null;
 

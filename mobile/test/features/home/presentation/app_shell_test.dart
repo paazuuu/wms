@@ -297,10 +297,10 @@ void main() {
       // Expanded by default. The sidebar uppercases its section headings,
       // which is also what distinguishes them from the dashboard's.
       expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
-      expect(inSidebar('Picking'), findsOneWidget);
+      expect(inSidebar('Inspection'), findsOneWidget);
       expect(find.byTooltip('Collapse menu'), findsOneWidget);
       // With its label in sight, an entry says what its screen is for.
-      expect(find.byTooltip("Fulfil sales orders by scan"), findsOneWidget);
+      expect(find.byTooltip('Barcode & quantity checks, NG records'), findsOneWidget);
       expect(sidebarWidth(), 268);
 
       await tester.tap(find.byTooltip('Collapse menu'));
@@ -308,10 +308,10 @@ void main() {
 
       // Labels give way to icons, and the section heading to a rule.
       expect(inSidebar('FIELD OPERATIONS'), findsNothing);
-      expect(inSidebar('Picking'), findsNothing);
+      expect(inSidebar('Inspection'), findsNothing);
       expect(sidebarWidth(), 76);
       // But nothing is unreachable: the label is one hover away.
-      expect(find.byTooltip('Picking'), findsOneWidget);
+      expect(find.byTooltip('Inspection'), findsOneWidget);
       expect(find.byTooltip('Expand menu'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Expand menu'));
@@ -337,6 +337,9 @@ void main() {
 
       // Collapsing trades labels for content width; it must not cost the
       // operator access to a feature.
+      // The ones used now and then are under その他, on the rail too.
+      await tester.tap(find.byKey(const ValueKey('menu-more-field_operations')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Picking'));
       await tester.pumpAndSettle();
 
@@ -376,6 +379,34 @@ void main() {
       // The dashboard entry is filtered too, so this narrows the whole menu
       // and not everything-but-the-first-item.
       expect(inSidebar('Dashboard'), findsNothing);
+    });
+
+    testWidgets('the ones used now and then fold under その他, open on a tap or a filter', (tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(1400, 1600);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_wrap().widget);
+      await tester.pumpAndSettle();
+
+      Finder inSidebar(String text) => find.descendant(of: find.byKey(sidebarKey), matching: find.text(text));
+      expect(inSidebar('Stock Adjustment'), findsNothing);
+      expect(inSidebar('Inspection'), findsOneWidget);
+      final more = find.byKey(const ValueKey('menu-more-field_operations'));
+      expect(more, findsOneWidget);
+
+      await tester.ensureVisible(more);
+      await tester.tap(more);
+      await tester.pumpAndSettle();
+      expect(inSidebar('Stock Adjustment'), findsOneWidget);
+      expect(inSidebar('Picking'), findsOneWidget);
+      await tester.tap(more);
+      await tester.pumpAndSettle();
+      expect(inSidebar('Stock Adjustment'), findsNothing);
+
+      await tester.enterText(find.byKey(menuFilterKey), 'transfer');
+      await tester.pumpAndSettle();
+      expect(inSidebar('Transfers'), findsWidgets);
     });
 
     testWidgets('matching descriptions costs some precision, by choice',

@@ -276,6 +276,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _stockAdjustment,
             requiredAnyOf: ['inventory.adjust'],
+            more: true,
           ),
           FeatureEntry(
             id: 'transfer',
@@ -283,6 +284,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _transfer,
             requiredAnyOf: ['transfer.create', 'transfer.approve', 'transfer.receive'],
+            more: true,
           ),
           FeatureEntry(
             id: 'expiring_lots',
@@ -290,6 +292,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _expiringLots,
             requiredAnyOf: ['inventory.view'],
+            more: true,
           ),
           // Next to QC, because it is the queue QC works from: everything
           // here is waiting for an inspection to release it.
@@ -309,6 +312,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _exceptions,
             requiredAnyOf: ['receiving.view', 'inspection.view', 'inventory.view'],
+            more: true,
           ),
           FeatureEntry(
             id: 'stock_count',
@@ -316,6 +320,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _stockCount,
             requiredAnyOf: ['count.perform', 'count.approve'],
+            more: true,
           ),
           FeatureEntry(
             id: 'picking',
@@ -323,6 +328,7 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _picking,
             requiredAnyOf: ['pick.confirm'],
+            more: true,
           ),
           FeatureEntry(
             id: 'wave',

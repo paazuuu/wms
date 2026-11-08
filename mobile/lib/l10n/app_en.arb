@@ -5056,5 +5056,6 @@
   "wlSavedFileDownload": "Download",
   "wlColWish": "Wanted",
   "wlFileNotKept": "The file was not kept: {why}",
-  "wlFileBadge": "File: {name}"
+  "wlFileBadge": "File: {name}",
+  "menuMore": "More"
 }

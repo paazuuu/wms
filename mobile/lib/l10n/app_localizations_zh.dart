@@ -15989,4 +15989,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String wlFileBadge(String name) {
     return '文件: $name';
   }
+
+  @override
+  String get menuMore => '其他';
 }

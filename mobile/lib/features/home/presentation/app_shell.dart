@@ -719,6 +719,9 @@ class _SidebarState extends State<_Sidebar> {
   final TextEditingController _filter = TextEditingController();
   String _query = '';
 
+  /// Groups whose 「その他」 is open.
+  final Set<String> _moreOpen = {};
+
   @override
   void didUpdateWidget(_Sidebar oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -852,14 +855,50 @@ class _SidebarState extends State<_Sidebar> {
                         ),
                       ),
                     for (final entry in visible)
-                      _SidebarItem(
-                        icon: entry.icon,
-                        label: entry.label(l10n),
-                        help: entry.description(l10n),
-                        selected: selectedId == entry.id,
-                        collapsed: collapsed,
-                        onTap: () => widget.onOpen(entry),
-                      ),
+                      if (!entry.more)
+                        _SidebarItem(
+                          icon: entry.icon,
+                          label: entry.label(l10n),
+                          help: entry.description(l10n),
+                          selected: selectedId == entry.id,
+                          collapsed: collapsed,
+                          onTap: () => widget.onOpen(entry),
+                        ),
+                    // Used now and then: under one 「その他」, open when one of
+                    // them is the screen shown or the menu is filtered.
+                    ...() {
+                      final more = [for (final e in visible) if (e.more) e];
+                      if (more.isEmpty) return const <Widget>[];
+                      final open = _moreOpen.contains(group.id) ||
+                          _query.trim().isNotEmpty ||
+                          more.any((e) => e.id == selectedId);
+                      return <Widget>[
+                        _SidebarItem(
+                          key: ValueKey('menu-more-${group.id}'),
+                          icon: open ? Icons.expand_less : Icons.more_horiz,
+                          label: l10n.menuMore,
+                          help: more.map((e) => e.label(l10n)).join('・'),
+                          selected: false,
+                          collapsed: collapsed,
+                          onTap: () => setState(() => _moreOpen.contains(group.id)
+                              ? _moreOpen.remove(group.id)
+                              : _moreOpen.add(group.id)),
+                        ),
+                        if (open)
+                          for (final entry in more)
+                            Padding(
+                              padding: EdgeInsets.only(left: collapsed ? 0 : AppSpacing.md),
+                              child: _SidebarItem(
+                                icon: entry.icon,
+                                label: entry.label(l10n),
+                                help: entry.description(l10n),
+                                selected: selectedId == entry.id,
+                                collapsed: collapsed,
+                                onTap: () => widget.onOpen(entry),
+                              ),
+                            ),
+                      ];
+                    }(),
                   ];
                 }(),
               ],
@@ -1057,6 +1096,7 @@ class _Footer extends StatelessWidget {
 
 class _SidebarItem extends StatelessWidget {
   const _SidebarItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,

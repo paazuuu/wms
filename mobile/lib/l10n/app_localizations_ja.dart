@@ -16106,4 +16106,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String wlFileBadge(String name) {
     return 'ファイル: $name';
   }
+
+  @override
+  String get menuMore => 'その他';
 }
