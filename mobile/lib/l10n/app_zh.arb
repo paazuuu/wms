@@ -5196,5 +5196,13 @@
   "themeY2kHint": "淡紫背景，直角线条（Y2K）",
   "themeModeSystem": "跟随设备",
   "themeModeLight": "浅色",
-  "themeModeDark": "深色"
+  "themeModeDark": "深色",
+  "ofErrCardRequired": "尚未选择收货方卡片。请先选择收货方卡片再出库。",
+  "ofCardRequiredNote": "选择收货方卡片之前，无法标记为已出库，夜间自动出库也会跳过。",
+  "ofConfirmCard": "收货方卡片",
+  "ofConfirmCardNone": "未选择（出库必填）",
+  "ofPostNeedsCard": "出库前请选择收货方卡片（登记为出库计划时可稍后选择）。",
+  "ofCardRequiredHint": "出库必须选择收货方卡片",
+  "ofEditCardLabel": "收货方",
+  "ofNoCardTag": "未选收货方卡片"
 }

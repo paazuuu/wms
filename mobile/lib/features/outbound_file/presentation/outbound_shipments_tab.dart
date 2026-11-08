@@ -331,6 +331,12 @@ class _OutboundShipmentsTabState extends ConsumerState<OutboundShipmentsTab> wit
                   const SizedBox(width: AppSpacing.sm),
                   Text(l10n.prBadge, style: theme.textTheme.labelMedium?.copyWith(color: scheme.tertiary)),
                 ],
+                if (f.planned && !f.proxy && !f.undone && f.shipTo == null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(l10n.ofNoCardTag,
+                      key: ValueKey('sh-no-card-${f.id}'),
+                      style: theme.textTheme.labelMedium?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
+                ],
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(

@@ -635,6 +635,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       _snack(l10n.ofErrNoLines);
       return;
     }
+    // 出庫 now needs its 出荷先カード (0210); a planned list can have it later.
+    if (!_proxy && !_planning && _card?.id == null) {
+      _snack(l10n.ofPostNeedsCard);
+      await _pickCard();
+      if (!mounted || _card?.id == null) return;
+    }
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
@@ -695,6 +701,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           proxy: _proxy,
           principal: _proxy ? text(_principal) : null,
           plan: _planning,
+          destinationId: _card?.id,
         );
     var r = await send(false);
     if (!mounted) return;
@@ -730,7 +737,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         // What was read, kept as Excel beside the file (0208).
         await _keepRead(data, warehouseId, plan);
         final card = _card;
-        if (card?.id != null) {
+        // 出庫 now took its card in the same step.
+        if (card?.id != null && (_proxy || _planning)) {
           final set = await repo.setDestination(data, card!.id);
           if (set case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
         }
@@ -1395,12 +1403,16 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               ),
             ),
           if (_card == null)
-            OutlinedButton.icon(
-              key: const ValueKey('of-pick-card'),
-              style: _dense,
-              icon: const Icon(Icons.contact_mail_outlined, size: 18),
-              label: Text(l10n.ofPickCard),
-              onPressed: _pickCard,
+            Tooltip(
+              message: !_proxy && !_planning ? l10n.ofCardRequiredHint : '',
+              child: OutlinedButton.icon(
+                key: const ValueKey('of-pick-card'),
+                style: _dense,
+                icon: Icon(Icons.contact_mail_outlined,
+                    size: 18, color: !_proxy && !_planning ? Theme.of(context).colorScheme.error : null),
+                label: Text(!_proxy && !_planning ? '${l10n.ofPickCard} *' : l10n.ofPickCard),
+                onPressed: _pickCard,
+              ),
             )
           else
             InputChip(

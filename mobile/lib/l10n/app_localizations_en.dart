@@ -16900,4 +16900,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeModeDark => 'Dark';
+
+  @override
+  String get ofErrCardRequired =>
+      'No destination card is chosen. Choose one before shipping.';
+
+  @override
+  String get ofCardRequiredNote =>
+      'Until a destination card is chosen, it cannot be marked shipped, and the nightly run passes it over.';
+
+  @override
+  String get ofConfirmCard => 'Destination card';
+
+  @override
+  String get ofConfirmCardNone => 'Not chosen (required to ship)';
+
+  @override
+  String get ofPostNeedsCard =>
+      'Choose a destination card to ship (a planned list can have it chosen later).';
+
+  @override
+  String get ofCardRequiredHint => 'A destination card is required to ship';
+
+  @override
+  String get ofEditCardLabel => 'Ship to';
+
+  @override
+  String get ofNoCardTag => 'No destination card';
 }

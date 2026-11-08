@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
+import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
+import 'package:wms_mobile/features/outbound/domain/outbound.dart' show ShipDestination;
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_plan.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
@@ -78,10 +80,25 @@ void main() {
       productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
       warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(_overview)),
       writeWarehouseIdProvider.overrideWithValue(1),
+      shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易')]),
     ]);
     await tester.pumpAndSettle();
     return repo;
   }
+
+  testWidgets('no 出荷先カード yet (0210): said on the list, and chosen while editing', (tester) async {
+    final repo = await pumpDetail(tester, _plan);
+    expect(find.byKey(const ValueKey('of-card-required')), findsOneWidget);
+    expect(find.text('出荷先カードを選ぶまで「出庫した」は押せません。夜の自動出庫もしません。'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-edit-lines')));
+    await tester.pumpAndSettle();
+    expect(find.text('出荷先: 未選択（出庫には必須）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-edit-card')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sd-pick-31')));
+    await tester.pumpAndSettle();
+    expect(repo.destinations, [(5, 31)]);
+  });
 
   testWidgets('中身を直す: a row left out, a quantity changed, a product added, a row’s currency', (tester) async {
     final repo = await pumpDetail(tester, _plan);

@@ -14643,5 +14643,13 @@
   "themeY2kHint": "藤色の背景、角ばった線（Y2K）",
   "themeModeSystem": "端末に合わせる",
   "themeModeLight": "ライト",
-  "themeModeDark": "ダーク"
+  "themeModeDark": "ダーク",
+  "ofErrCardRequired": "出荷先カードが選ばれていません。出荷先カードを選んでから出庫してください。",
+  "ofCardRequiredNote": "出荷先カードを選ぶまで「出庫した」は押せません。夜の自動出庫もしません。",
+  "ofConfirmCard": "出荷先カード",
+  "ofConfirmCardNone": "未選択（出庫には必須）",
+  "ofPostNeedsCard": "出庫するには出荷先カードを選んでください（出庫予定として登録するなら後で選べます）。",
+  "ofCardRequiredHint": "出庫には出荷先カードが必須です",
+  "ofEditCardLabel": "出荷先",
+  "ofNoCardTag": "出荷先カード未選択"
 }

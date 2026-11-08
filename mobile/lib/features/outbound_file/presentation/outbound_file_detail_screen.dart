@@ -319,6 +319,11 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     var day = today;
     // Pressed once the goods have left: ticked to say so.
     var seen = false;
+    // Where it goes is part of shipping it (0210): a card, chosen here if
+    // the list has none yet.
+    int? cardId;
+    String? cardName;
+    bool hasCard() => f.shipTo != null || cardId != null;
     final ship = [for (final l in d.lines) if (l.action == 'ship' && l.productId != null) l];
     final ok = await showDialog<bool>(
       context: context,
@@ -359,6 +364,32 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   style: TextStyle(color: Theme.of(c).colorScheme.warning)),
             ],
             const SizedBox(height: AppSpacing.sm),
+            Row(key: const ValueKey('of-confirm-card'), children: [
+              Icon(Icons.contact_mail_outlined,
+                  size: 18, color: hasCard() ? null : Theme.of(c).colorScheme.error),
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(
+                  '${l10n.ofConfirmCard}: ${cardName ?? f.shipTo?.name ?? l10n.ofConfirmCardNone}',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: hasCard() ? null : Theme.of(c).colorScheme.error),
+                ),
+              ),
+              TextButton(
+                key: const ValueKey('of-confirm-pick-card'),
+                onPressed: () async {
+                  final picked = await pickDestinationCard(c);
+                  if (picked?.id != null) {
+                    set(() {
+                      cardId = picked!.id;
+                      cardName = picked.name;
+                    });
+                  }
+                },
+                child: Text(hasCard() ? l10n.ofShipToChange : l10n.ofPickCard),
+              ),
+            ]),
+            const SizedBox(height: AppSpacing.xs),
             CheckboxListTile(
               key: const ValueKey('of-confirm-check'),
               value: seen,
@@ -372,7 +403,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
             TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
             FilledButton(
                 key: const ValueKey('of-confirm-ok'),
-                onPressed: seen ? () => Navigator.pop(c, true) : null,
+                onPressed: seen && hasCard() ? () => Navigator.pop(c, true) : null,
                 child: Text(l10n.ofConfirm)),
           ],
         ),
@@ -380,7 +411,17 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     );
     if (ok != true || !mounted) return;
     setState(() => _busy = true);
-    final r = await ref.read(outboundFileRepositoryProvider).confirm(f.id, day);
+    final repo = ref.read(outboundFileRepositoryProvider);
+    if (cardId != null) {
+      final set = await repo.setDestination(f.id, cardId);
+      if (!mounted) return;
+      if (set case ApiFailure(:final message)) {
+        setState(() => _busy = false);
+        _snack(humanizeApiErrorMessage(l10n, message));
+        return;
+      }
+    }
+    final r = await repo.confirm(f.id, day);
     if (!mounted) return;
     setState(() => _busy = false);
     switch (r) {
@@ -748,7 +789,12 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     label: Text(f.shipTo == null ? l10n.ofPickCard : l10n.ofShipToChange),
                   ),
               ]),
-              if (f.shipTo != null) DestinationCardView(destination: f.shipTo!),
+              if (f.shipTo != null)
+                DestinationCardView(destination: f.shipTo!)
+              else if (f.planned && !f.proxy && !f.undone)
+                Text(l10n.ofCardRequiredNote,
+                    key: const ValueKey('of-card-required'),
+                    style: TextStyle(color: scheme.error, fontWeight: FontWeight.w600)),
             ]),
           ),
         ),
@@ -763,6 +809,15 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                 Text(l10n.ofEditHint, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer)),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+                  // 出荷先 is edited here too, above all while it is not chosen.
+                  OutlinedButton.icon(
+                    key: const ValueKey('of-edit-card'),
+                    onPressed: _busy ? null : () => _setCard(f),
+                    icon: Icon(Icons.contact_mail_outlined, color: f.shipTo == null ? scheme.error : null),
+                    label: Text(f.shipTo == null
+                        ? '${l10n.ofEditCardLabel}: ${l10n.ofConfirmCardNone}'
+                        : '${l10n.ofEditCardLabel}: ${f.shipTo!.name}'),
+                  ),
                   FilledButton.icon(
                     key: const ValueKey('of-add-line'),
                     onPressed: _busy ? null : () => _addLine(f),

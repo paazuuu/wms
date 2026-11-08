@@ -29122,6 +29122,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ダーク'**
   String get themeModeDark;
+
+  /// No description provided for @ofErrCardRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードが選ばれていません。出荷先カードを選んでから出庫してください。'**
+  String get ofErrCardRequired;
+
+  /// No description provided for @ofCardRequiredNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードを選ぶまで「出庫した」は押せません。夜の自動出庫もしません。'**
+  String get ofCardRequiredNote;
+
+  /// No description provided for @ofConfirmCard.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード'**
+  String get ofConfirmCard;
+
+  /// No description provided for @ofConfirmCardNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'未選択（出庫には必須）'**
+  String get ofConfirmCardNone;
+
+  /// No description provided for @ofPostNeedsCard.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫するには出荷先カードを選んでください（出庫予定として登録するなら後で選べます）。'**
+  String get ofPostNeedsCard;
+
+  /// No description provided for @ofCardRequiredHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫には出荷先カードが必須です'**
+  String get ofCardRequiredHint;
+
+  /// No description provided for @ofEditCardLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先'**
+  String get ofEditCardLabel;
+
+  /// No description provided for @ofNoCardTag.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード未選択'**
+  String get ofNoCardTag;
 }
 
 class _AppLocalizationsDelegate

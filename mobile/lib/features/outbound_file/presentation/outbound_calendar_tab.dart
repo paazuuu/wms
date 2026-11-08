@@ -418,6 +418,12 @@ class OutboundUndecidedCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   ),
+                
+                  // 出庫済み needs a 出荷先カード (0210): said here, before it is opened.
+                  if (!f.proxy && f.shipTo == null)
+                    Text(l10n.ofNoCardTag,
+                        key: ValueKey('of-undecided-no-card-${f.id}'),
+                        style: theme.textTheme.labelSmall?.copyWith(color: scheme.error, fontWeight: FontWeight.w700)),
                 ]),
               ),
               const SizedBox(width: AppSpacing.sm),

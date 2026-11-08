@@ -298,7 +298,12 @@ void main() {
     // Out of stock now, not as a plan.
     await tester.tap(find.text('今すぐ出庫'));
     await tester.pumpAndSettle();
+    // 出庫 now needs a 出荷先カード (0210): asked for before anything else.
+    expect(find.text('出荷先カードを選ぶ *'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('of-post')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sd-pick-dialog')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('sd-pick-31')));
     await tester.pumpAndSettle();
     expect(find.text('この内容で出庫しますか？'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('of-post-ok')));
@@ -314,6 +319,9 @@ void main() {
     final p = repo.posted.single;
     expect(p.allowDuplicate, isTrue);
     expect(p.plan, isFalse);
+    // The card went with the post itself, not as a second step.
+    expect(p.destinationId, 31);
+    expect(repo.destinations, isEmpty);
     expect(p.path, '1/1-到货明细.xlsx');
     expect(p.sheet, '明细');
     expect([for (final l in p.lines) (l.rowNo, l.action, l.productId)], [
@@ -821,6 +829,7 @@ void main() {
     await pumpApp(tester, const OutboundCalendarScreen(), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(repo),
       activeWarehouseIdProvider.overrideWith((ref) => null),
+      shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易')]),
     ]);
     expect(find.byKey(const ValueKey('of-planned-5')), findsOneWidget);
     expect(find.textContaining('2行 · 数量 15'), findsOneWidget);
@@ -842,8 +851,17 @@ void main() {
     expect(tester.widget<FilledButton>(find.byKey(const ValueKey('of-confirm-ok'))).onPressed, isNull);
     await tester.tap(find.byKey(const ValueKey('of-confirm-check')));
     await tester.pump();
+    // Nor without a 出荷先カード (0210): chosen right in the dialog.
+    expect(find.text('出荷先カード: 未選択（出庫には必須）'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('of-confirm-ok'))).onPressed, isNull);
+    await tester.tap(find.byKey(const ValueKey('of-confirm-pick-card')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sd-pick-31')));
+    await tester.pumpAndSettle();
+    expect(find.text('出荷先カード: テスト貿易'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('of-confirm-ok')));
     await tester.pumpAndSettle();
+    expect(repo.destinations, [(5, 31)]);
     expect(repo.confirmed.single.$1, 5);
     expect(!repo.confirmed.single.$2.isAfter(DateTime.now()), isTrue);
     expect(find.text('出庫済みにしました（7個を在庫から減らしました）'), findsOneWidget);

@@ -553,6 +553,7 @@ abstract class OutboundFileRepository {
     bool proxy = false,
     String? principal,
     bool plan = false,
+    int? destinationId,
   });
 
   /// The warehouse ships a planned list on [day]: how many went out.
@@ -675,13 +676,21 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
     bool proxy = false,
     String? principal,
     bool plan = false,
+    int? destinationId,
   }) async {
     try {
       // 在庫外出荷 (0189) is kept as a record; 出庫予定 (0191) waits for the
-      // warehouse; the other is taken out of stock now.
-      final rpc = proxy ? 'proxy_shipment_post' : (plan ? 'outbound_file_plan' : 'outbound_file_post');
+      // warehouse; the other is taken out of stock now, with its 出荷先カード
+      // in the same step (0210: no card, no 出庫済み).
+      final now = !proxy && !plan;
+      final rpc = proxy
+          ? 'proxy_shipment_post'
+          : plan
+              ? 'outbound_file_plan'
+              : (destinationId != null ? 'outbound_file_post_to' : 'outbound_file_post');
       final r = await _rest.post('/rpc/$rpc', data: {
         if (proxy) 'p_principal': principal,
+        if (now && destinationId != null) 'p_destination_id': destinationId,
         'p_warehouse_id': warehouseId,
         'p_shipped_on': outboundDayWire(shippedOn),
         'p_file_name': fileName,

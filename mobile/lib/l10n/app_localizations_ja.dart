@@ -16579,4 +16579,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get themeModeDark => 'ダーク';
+
+  @override
+  String get ofErrCardRequired => '出荷先カードが選ばれていません。出荷先カードを選んでから出庫してください。';
+
+  @override
+  String get ofCardRequiredNote => '出荷先カードを選ぶまで「出庫した」は押せません。夜の自動出庫もしません。';
+
+  @override
+  String get ofConfirmCard => '出荷先カード';
+
+  @override
+  String get ofConfirmCardNone => '未選択（出庫には必須）';
+
+  @override
+  String get ofPostNeedsCard => '出庫するには出荷先カードを選んでください（出庫予定として登録するなら後で選べます）。';
+
+  @override
+  String get ofCardRequiredHint => '出庫には出荷先カードが必須です';
+
+  @override
+  String get ofEditCardLabel => '出荷先';
+
+  @override
+  String get ofNoCardTag => '出荷先カード未選択';
 }

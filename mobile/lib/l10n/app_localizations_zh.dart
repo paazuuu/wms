@@ -16461,4 +16461,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get themeModeDark => '深色';
+
+  @override
+  String get ofErrCardRequired => '尚未选择收货方卡片。请先选择收货方卡片再出库。';
+
+  @override
+  String get ofCardRequiredNote => '选择收货方卡片之前，无法标记为已出库，夜间自动出库也会跳过。';
+
+  @override
+  String get ofConfirmCard => '收货方卡片';
+
+  @override
+  String get ofConfirmCardNone => '未选择（出库必填）';
+
+  @override
+  String get ofPostNeedsCard => '出库前请选择收货方卡片（登记为出库计划时可稍后选择）。';
+
+  @override
+  String get ofCardRequiredHint => '出库必须选择收货方卡片';
+
+  @override
+  String get ofEditCardLabel => '收货方';
+
+  @override
+  String get ofNoCardTag => '未选收货方卡片';
 }

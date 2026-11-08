@@ -5196,5 +5196,13 @@
   "themeY2kHint": "Periwinkle page, square edges (Y2K)",
   "themeModeSystem": "Match device",
   "themeModeLight": "Light",
-  "themeModeDark": "Dark"
+  "themeModeDark": "Dark",
+  "ofErrCardRequired": "No destination card is chosen. Choose one before shipping.",
+  "ofCardRequiredNote": "Until a destination card is chosen, it cannot be marked shipped, and the nightly run passes it over.",
+  "ofConfirmCard": "Destination card",
+  "ofConfirmCardNone": "Not chosen (required to ship)",
+  "ofPostNeedsCard": "Choose a destination card to ship (a planned list can have it chosen later).",
+  "ofCardRequiredHint": "A destination card is required to ship",
+  "ofEditCardLabel": "Ship to",
+  "ofNoCardTag": "No destination card"
 }
