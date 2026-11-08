@@ -18425,7 +18425,7 @@ abstract class AppLocalizations {
   /// No description provided for @featPurchaseRequestDesc.
   ///
   /// In ja, this message translates to:
-  /// **'商品マスタと在庫から欲しい商品と数量をまとめ、仕入先に在庫や見積りを確認するExcelを作成'**
+  /// **'エンド客（下流）からの入荷の希望や今後の計画をリストにし、商品ごとのまとめで在庫・キープと比べて足りない数を見る'**
   String get featPurchaseRequestDesc;
 
   /// No description provided for @prIntro.
@@ -28012,6 +28012,156 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'在庫 {onHand}・キープ {kept}・出せる数 {free}'**
   String obStockKeepLine(int onHand, int kept, int free);
+
+  /// No description provided for @wlIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。'**
+  String get wlIntro;
+
+  /// No description provided for @wlTabLists.
+  ///
+  /// In ja, this message translates to:
+  /// **'リスト'**
+  String get wlTabLists;
+
+  /// No description provided for @wlTabSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'まとめ'**
+  String get wlTabSummary;
+
+  /// No description provided for @wlShowClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了したものも表示（{n}）'**
+  String wlShowClosed(int n);
+
+  /// No description provided for @wlNoCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'（依頼元なし）'**
+  String get wlNoCustomer;
+
+  /// No description provided for @wlWantedNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'希望時期 未定'**
+  String get wlWantedNone;
+
+  /// No description provided for @wlWantedBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'希望時期（押して決める）'**
+  String get wlWantedBy;
+
+  /// No description provided for @wlWantedByIs.
+  ///
+  /// In ja, this message translates to:
+  /// **'希望時期 {date}'**
+  String wlWantedByIs(String date);
+
+  /// No description provided for @wlClosedBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了'**
+  String get wlClosedBadge;
+
+  /// No description provided for @wlCustomer.
+  ///
+  /// In ja, this message translates to:
+  /// **'依頼元（エンド客）'**
+  String get wlCustomer;
+
+  /// No description provided for @wlCustomerHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前を入れるか、出荷先カードから選ぶ'**
+  String get wlCustomerHint;
+
+  /// No description provided for @wlCustomerCard.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードから選ぶ'**
+  String get wlCustomerCard;
+
+  /// No description provided for @wlClose.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了にする'**
+  String get wlClose;
+
+  /// No description provided for @wlReopen.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中に戻す'**
+  String get wlReopen;
+
+  /// No description provided for @wlClosed.
+  ///
+  /// In ja, this message translates to:
+  /// **'完了にしました（まとめから外れます）'**
+  String get wlClosed;
+
+  /// No description provided for @wlReopened.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中に戻しました'**
+  String get wlReopened;
+
+  /// No description provided for @wlSummaryIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中のリストを商品ごとに合計します。在庫・キープ（出庫予定など）と比べて、足りない数を出します。商品を押すと、どの依頼元がいつまでにいくつ希望しているかが見られます。'**
+  String get wlSummaryIntro;
+
+  /// No description provided for @wlShortOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'足りないものだけ（{n}）'**
+  String wlShortOnly(int n);
+
+  /// No description provided for @wlSummaryTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'{items}品目・希望 合計 {qty}個・足りない {short}品目'**
+  String wlSummaryTotals(int items, int qty, int short);
+
+  /// No description provided for @wlSummaryEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'進行中の入荷希望はありません'**
+  String get wlSummaryEmpty;
+
+  /// No description provided for @wlWanted.
+  ///
+  /// In ja, this message translates to:
+  /// **'希望 {n}'**
+  String wlWanted(int n);
+
+  /// No description provided for @wlShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'足りない {n}'**
+  String wlShort(int n);
+
+  /// No description provided for @wlEnough.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫で足りる'**
+  String get wlEnough;
+
+  /// No description provided for @wlCustomers.
+  ///
+  /// In ja, this message translates to:
+  /// **'依頼元 {n}件'**
+  String wlCustomers(int n);
+
+  /// No description provided for @wlFirstWanted.
+  ///
+  /// In ja, this message translates to:
+  /// **'いちばん早い希望 {date}'**
+  String wlFirstWanted(String date);
 }
 
 class _AppLocalizationsDelegate

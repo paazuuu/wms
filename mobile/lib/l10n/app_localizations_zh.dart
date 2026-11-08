@@ -10136,7 +10136,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featPurchaseRequestDesc =>
-      '根据商品主数据和库存汇总想要的商品和数量，生成向供应商确认库存和报价的Excel';
+      '将下游（终端客户）的到货希望和今后计划整理成清单，按商品汇总并与库存・保留对比查看缺口';
 
   @override
   String get prIntro =>
@@ -15818,5 +15818,98 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String obStockKeepLine(int onHand, int kept, int free) {
     return '库存 $onHand・保留 $kept・可出数 $free';
+  }
+
+  @override
+  String get wlIntro =>
+      '整理下游（终端客户）的到货希望或今后的计划。每个清单填写委托方和希望时间，从商品库勾选商品并决定数量。进行中的清单会在「汇总」中按商品合计，并与库存・保留对比显示缺口。';
+
+  @override
+  String get wlTabLists => '清单';
+
+  @override
+  String get wlTabSummary => '汇总';
+
+  @override
+  String wlShowClosed(int n) {
+    return '显示已完成（$n）';
+  }
+
+  @override
+  String get wlNoCustomer => '（无委托方）';
+
+  @override
+  String get wlWantedNone => '希望时间未定';
+
+  @override
+  String get wlWantedBy => '希望时间（点击设置）';
+
+  @override
+  String wlWantedByIs(String date) {
+    return '希望时间 $date';
+  }
+
+  @override
+  String get wlClosedBadge => '已完成';
+
+  @override
+  String get wlCustomer => '委托方（终端客户）';
+
+  @override
+  String get wlCustomerHint => '输入名称或从收货方卡片选择';
+
+  @override
+  String get wlCustomerCard => '从收货方卡片选择';
+
+  @override
+  String get wlClose => '标记完成';
+
+  @override
+  String get wlReopen => '恢复进行中';
+
+  @override
+  String get wlClosed => '已完成（从汇总中移除）';
+
+  @override
+  String get wlReopened => '已恢复进行中';
+
+  @override
+  String get wlSummaryIntro =>
+      '按商品合计进行中的清单，并与库存・保留（出库预定等）对比显示缺口。点击商品可查看哪个委托方希望在何时前要多少。';
+
+  @override
+  String wlShortOnly(int n) {
+    return '仅缺货（$n）';
+  }
+
+  @override
+  String wlSummaryTotals(int items, int qty, int short) {
+    return '$items种・希望合计 $qty个・缺货 $short种';
+  }
+
+  @override
+  String get wlSummaryEmpty => '没有进行中的到货希望';
+
+  @override
+  String wlWanted(int n) {
+    return '希望 $n';
+  }
+
+  @override
+  String wlShort(int n) {
+    return '缺 $n';
+  }
+
+  @override
+  String get wlEnough => '库存足够';
+
+  @override
+  String wlCustomers(int n) {
+    return '委托方 $n个';
+  }
+
+  @override
+  String wlFirstWanted(String date) {
+    return '最早希望 $date';
   }
 }

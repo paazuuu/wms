@@ -8954,7 +8954,7 @@
     }
   },
   "featPurchaseRequest": "入荷希望リスト",
-  "featPurchaseRequestDesc": "商品マスタと在庫から欲しい商品と数量をまとめ、仕入先に在庫や見積りを確認するExcelを作成",
+  "featPurchaseRequestDesc": "エンド客（下流）からの入荷の希望や今後の計画をリストにし、商品ごとのまとめで在庫・キープと比べて足りない数を見る",
   "prIntro": "直送（仕入先から相手先へ直接送る）や出荷代行など、自社の在庫を通さない出荷を記録だけ残します。出荷明細のファイルを読み込むか、「行を追加」で1行ずつ入力してください。商品ライブラリーにない商品でも記録でき、在庫は動きません。",
   "prNew": "新しいリスト",
   "prEmpty": "保存したリストはまだありません",
@@ -14138,6 +14138,93 @@
       },
       "free": {
         "type": "int"
+      }
+    }
+  },
+  "wlIntro": "エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。",
+  "wlTabLists": "リスト",
+  "wlTabSummary": "まとめ",
+  "wlShowClosed": "完了したものも表示（{n}）",
+  "@wlShowClosed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlNoCustomer": "（依頼元なし）",
+  "wlWantedNone": "希望時期 未定",
+  "wlWantedBy": "希望時期（押して決める）",
+  "wlWantedByIs": "希望時期 {date}",
+  "@wlWantedByIs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "wlClosedBadge": "完了",
+  "wlCustomer": "依頼元（エンド客）",
+  "wlCustomerHint": "名前を入れるか、出荷先カードから選ぶ",
+  "wlCustomerCard": "出荷先カードから選ぶ",
+  "wlClose": "完了にする",
+  "wlReopen": "進行中に戻す",
+  "wlClosed": "完了にしました（まとめから外れます）",
+  "wlReopened": "進行中に戻しました",
+  "wlSummaryIntro": "進行中のリストを商品ごとに合計します。在庫・キープ（出庫予定など）と比べて、足りない数を出します。商品を押すと、どの依頼元がいつまでにいくつ希望しているかが見られます。",
+  "wlShortOnly": "足りないものだけ（{n}）",
+  "@wlShortOnly": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlSummaryTotals": "{items}品目・希望 合計 {qty}個・足りない {short}品目",
+  "@wlSummaryTotals": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "short": {
+        "type": "int"
+      }
+    }
+  },
+  "wlSummaryEmpty": "進行中の入荷希望はありません",
+  "wlWanted": "希望 {n}",
+  "@wlWanted": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlShort": "足りない {n}",
+  "@wlShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlEnough": "在庫で足りる",
+  "wlCustomers": "依頼元 {n}件",
+  "@wlCustomers": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlFirstWanted": "いちばん早い希望 {date}",
+  "@wlFirstWanted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
       }
     }
   }

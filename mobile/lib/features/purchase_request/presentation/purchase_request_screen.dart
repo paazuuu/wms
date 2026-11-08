@@ -8,12 +8,10 @@ import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../outbound/presentation/outbound_downloads.dart';
+import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../partners/application/trading_partner_providers.dart';
 import '../../partners/domain/trading_partner.dart';
-import '../../shipment/application/sender_profile_controller.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
-import '../data/purchase_request_excel.dart';
 import '../data/purchase_request_repository.dart';
 import '../domain/purchase_request.dart';
 
@@ -29,8 +27,11 @@ final requestSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>
   );
 });
 
-/// 入荷希望リスト (0140): what we would like to receive, made from 商品マスタ
-/// and the stock, to ask a supplier whether they have it.
+/// 入荷希望リスト (0140, 0205): what a customer downstream (or our own plan)
+/// would like us to get in — whose wishes (依頼元, a 出荷先カード or typed)
+/// and by when (希望時期) — made from 商品マスタ and the stock. The open
+/// lists add up in the summary (まとめ). Wishes to our suppliers are kept
+/// elsewhere.
 ///
 /// Every product is a row. Rows are chosen the way a spreadsheet does it — a
 /// tick each, everything shown, or a range: the first row and, with Shift
@@ -60,6 +61,12 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
   final _note = TextEditingController();
   DateTime? _replyBy;
 
+  /// 依頼元 (0205): typed, or a 出荷先カード's name.
+  final _customer = TextEditingController();
+  int? _destinationId;
+  DateTime? _wantedBy;
+  String _status = 'draft';
+
   final Map<String, RequestRow> _rows = {};
   final List<String> _order = [];
   final Map<String, TextEditingController> _qty = {};
@@ -74,8 +81,6 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
 
   final _search = TextEditingController();
   bool _onlyInList = false;
-  bool _onlySupplier = false;
-  bool _withStock = false;
 
   bool _loading = true;
   String? _error;
@@ -91,7 +96,7 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
 
   @override
   void dispose() {
-    for (final c in [_title, _note, _bulkValue, _search, ..._qty.values]) {
+    for (final c in [_title, _note, _customer, _bulkValue, _search, ..._qty.values]) {
       c.dispose();
     }
     super.dispose();
@@ -127,6 +132,10 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
           _title.text = data.title ?? '';
           _note.text = data.note ?? '';
           _replyBy = data.replyBy;
+          _customer.text = data.customerName ?? '';
+          _destinationId = data.destinationId;
+          _wantedBy = data.wantedBy;
+          _status = data.status;
           for (final l in data.lines) {
             _put(l);
             if (l.manual) _manualSeq++;
@@ -176,7 +185,6 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
       for (final k in _order)
         if (_rows[k] case final r?)
           if ((!_onlyInList || r.inList) &&
-              (!_onlySupplier || r.fromSupplier || r.manual) &&
               (q.isEmpty ||
                   '${r.name} ${r.janCode ?? ''} ${r.nameEn ?? ''} ${r.maker ?? ''} ${r.sku ?? ''} ${r.supplierCode ?? ''} ${r.supplierProductName ?? ''}'
                       .toLowerCase()
@@ -261,11 +269,6 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
           if (_rows[k] case final r? when r.inList && r.quantity > 0) r,
       ];
 
-  String? get _supplierName {
-    final list = ref.read(requestSuppliersProvider).valueOrNull ?? const <TradingPartner>[];
-    return list.where((p) => p.id == _supplierId).firstOrNull?.name;
-  }
-
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
     final lines = _lines;
@@ -280,6 +283,9 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
       replyBy: _replyBy,
       lines: lines,
       settings: {'mode': _mode.name, 'value': _bulkValue.text.trim(), 'rounding': _rounding.name},
+      customerName: _customer.text.trim().isEmpty ? null : _customer.text.trim(),
+      destinationId: _destinationId,
+      wantedBy: _wantedBy,
     );
     if (!mounted) return;
     setState(() => _busy = false);
@@ -296,34 +302,43 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     }
   }
 
-  Future<void> _excel() async {
-    final l10n = AppLocalizations.of(context);
-    final lines = _lines;
-    if (lines.isEmpty) return _snack(l10n.prNothing);
-    final supplier = _supplierName;
-    final bytes = buildPurchaseRequestXlsx(
-      lines: lines,
-      number: _number,
-      supplierName: supplier,
-      sender: ref.read(senderProfileControllerProvider),
-      title: _title.text.trim().isEmpty ? null : _title.text.trim(),
-      note: _note.text.trim().isEmpty ? null : _note.text.trim(),
-      replyBy: _replyBy,
-      withStock: _withStock,
-    );
-    await ref.read(saveFileProvider)(purchaseRequestFileName(_number, supplier), bytes);
-    if (mounted) _snack(l10n.obExcelSaved);
-  }
-
-  Future<void> _pickReplyBy() async {
+  Future<void> _pickWantedBy() async {
     final now = DateTime.now();
     final d = await showDatePicker(
       context: context,
-      initialDate: _replyBy ?? now.add(const Duration(days: 7)),
+      initialDate: _wantedBy ?? now.add(const Duration(days: 30)),
       firstDate: DateTime(now.year - 1),
-      lastDate: DateTime(now.year + 2),
+      lastDate: DateTime(now.year + 3),
     );
-    if (d != null) setState(() => _replyBy = d);
+    if (d != null) setState(() => _wantedBy = d);
+  }
+
+  /// 依頼元 from a 出荷先カード.
+  Future<void> _pickCard() async {
+    final d = await pickDestinationCard(context);
+    if (d == null || !mounted) return;
+    setState(() {
+      _customer.text = d.name;
+      _destinationId = d.id;
+    });
+  }
+
+  /// 完了 (out of the summary) or open again.
+  Future<void> _setStatus(String status) async {
+    final l10n = AppLocalizations.of(context);
+    final id = _id;
+    if (id == null) return;
+    final r = await _repo.setStatus(id, status);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        setState(() => _status = status);
+        ref.invalidate(purchaseRequestsProvider);
+        ref.invalidate(wishSummaryProvider);
+        _snack(status == 'closed' ? l10n.wlClosed : l10n.wlReopened);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
   }
 
   // ------------------------------------------------------------ build
@@ -333,7 +348,6 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
-    final suppliers = ref.watch(requestSuppliersProvider).valueOrNull ?? const <TradingPartner>[];
     final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const [];
     final visible = _visible();
     final lines = _lines;
@@ -341,27 +355,26 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     final selected = _selected.where(_rows.containsKey).toList();
 
     final header = <Widget>[
-      Text(l10n.prIntro, style: muted),
+      Text(l10n.wlIntro, style: muted),
       const SizedBox(height: AppSpacing.md),
       Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
         SizedBox(
           width: 300,
-          child: DropdownButtonFormField<int?>(
-            key: ValueKey('pr-supplier-${suppliers.length}-$_supplierId'),
-            initialValue: suppliers.any((p) => p.id == _supplierId) ? _supplierId : null,
-            isExpanded: true,
-            decoration: InputDecoration(labelText: l10n.prSupplier, isDense: true),
-            items: [
-              DropdownMenuItem<int?>(value: null, child: Text(l10n.prSupplierNone)),
-              for (final p in suppliers) DropdownMenuItem<int?>(value: p.id, child: Text(p.name)),
-            ],
-            onChanged: (v) {
-              setState(() {
-                _supplierId = v;
-                if (v == null) _onlySupplier = false;
-              });
-              _loadCandidates();
-            },
+          child: TextField(
+            key: const ValueKey('pr-customer'),
+            controller: _customer,
+            onChanged: (_) => _destinationId = null,
+            decoration: InputDecoration(
+              labelText: l10n.wlCustomer,
+              hintText: l10n.wlCustomerHint,
+              isDense: true,
+              suffixIcon: IconButton(
+                key: const ValueKey('pr-customer-card'),
+                tooltip: l10n.wlCustomerCard,
+                icon: const Icon(Icons.contact_mail_outlined),
+                onPressed: _pickCard,
+              ),
+            ),
           ),
         ),
         SizedBox(
@@ -390,10 +403,10 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
           ),
         ),
         OutlinedButton.icon(
-          key: const ValueKey('pr-reply-by'),
-          onPressed: _pickReplyBy,
+          key: const ValueKey('pr-wanted-by'),
+          onPressed: _pickWantedBy,
           icon: const Icon(Icons.event_outlined, size: 18),
-          label: Text(_replyBy == null ? l10n.prReplyBy : l10n.prReplyByIs(DateFormat('y/MM/dd').format(_replyBy!))),
+          label: Text(_wantedBy == null ? l10n.wlWantedBy : l10n.wlWantedByIs(DateFormat('y/MM/dd').format(_wantedBy!))),
         ),
         SizedBox(
           width: 320,
@@ -482,13 +495,6 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
           selected: _onlyInList,
           onSelected: (v) => setState(() => _onlyInList = v),
         ),
-        if (_supplierId != null)
-          FilterChip(
-            key: const ValueKey('pr-only-supplier'),
-            label: Text(l10n.prOnlySupplier),
-            selected: _onlySupplier,
-            onSelected: (v) => setState(() => _onlySupplier = v),
-          ),
         FilterChip(
           key: const ValueKey('pr-range'),
           avatar: const Icon(Icons.linear_scale, size: 18),
@@ -551,7 +557,18 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(_number.isEmpty ? l10n.featPurchaseRequest : '${l10n.featPurchaseRequest} $_number')),
+      appBar: AppBar(
+        title: Text(_number.isEmpty ? l10n.featPurchaseRequest : '${l10n.featPurchaseRequest} $_number'),
+        actions: [
+          if (_id != null)
+            TextButton.icon(
+              key: const ValueKey('pr-close'),
+              onPressed: () => _setStatus(_status == 'closed' ? 'draft' : 'closed'),
+              icon: Icon(_status == 'closed' ? Icons.replay : Icons.task_alt),
+              label: Text(_status == 'closed' ? l10n.wlReopen : l10n.wlClose),
+            ),
+        ],
+      ),
       body: CustomScrollView(slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
@@ -602,20 +619,6 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
                 children: [
                   Text(l10n.obSummary(lines.length, units),
                       key: const ValueKey('pr-summary'), style: theme.textTheme.titleSmall),
-                  Row(mainAxisSize: MainAxisSize.min, children: [
-                    Switch(
-                      key: const ValueKey('pr-with-stock'),
-                      value: _withStock,
-                      onChanged: (v) => setState(() => _withStock = v),
-                    ),
-                    Text(l10n.prWithStock, style: theme.textTheme.bodySmall),
-                  ]),
-                  OutlinedButton.icon(
-                    key: const ValueKey('pr-excel'),
-                    onPressed: lines.isEmpty ? null : _excel,
-                    icon: const Icon(Icons.grid_on_outlined, size: 18),
-                    label: Text(l10n.prExcel),
-                  ),
                   FilledButton.icon(
                     key: const ValueKey('pr-save'),
                     onPressed: _busy || lines.isEmpty ? null : _save,

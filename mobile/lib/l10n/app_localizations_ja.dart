@@ -10195,7 +10195,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featPurchaseRequestDesc =>
-      '商品マスタと在庫から欲しい商品と数量をまとめ、仕入先に在庫や見積りを確認するExcelを作成';
+      'エンド客（下流）からの入荷の希望や今後の計画をリストにし、商品ごとのまとめで在庫・キープと比べて足りない数を見る';
 
   @override
   String get prIntro =>
@@ -15935,5 +15935,98 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String obStockKeepLine(int onHand, int kept, int free) {
     return '在庫 $onHand・キープ $kept・出せる数 $free';
+  }
+
+  @override
+  String get wlIntro =>
+      'エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。';
+
+  @override
+  String get wlTabLists => 'リスト';
+
+  @override
+  String get wlTabSummary => 'まとめ';
+
+  @override
+  String wlShowClosed(int n) {
+    return '完了したものも表示（$n）';
+  }
+
+  @override
+  String get wlNoCustomer => '（依頼元なし）';
+
+  @override
+  String get wlWantedNone => '希望時期 未定';
+
+  @override
+  String get wlWantedBy => '希望時期（押して決める）';
+
+  @override
+  String wlWantedByIs(String date) {
+    return '希望時期 $date';
+  }
+
+  @override
+  String get wlClosedBadge => '完了';
+
+  @override
+  String get wlCustomer => '依頼元（エンド客）';
+
+  @override
+  String get wlCustomerHint => '名前を入れるか、出荷先カードから選ぶ';
+
+  @override
+  String get wlCustomerCard => '出荷先カードから選ぶ';
+
+  @override
+  String get wlClose => '完了にする';
+
+  @override
+  String get wlReopen => '進行中に戻す';
+
+  @override
+  String get wlClosed => '完了にしました（まとめから外れます）';
+
+  @override
+  String get wlReopened => '進行中に戻しました';
+
+  @override
+  String get wlSummaryIntro =>
+      '進行中のリストを商品ごとに合計します。在庫・キープ（出庫予定など）と比べて、足りない数を出します。商品を押すと、どの依頼元がいつまでにいくつ希望しているかが見られます。';
+
+  @override
+  String wlShortOnly(int n) {
+    return '足りないものだけ（$n）';
+  }
+
+  @override
+  String wlSummaryTotals(int items, int qty, int short) {
+    return '$items品目・希望 合計 $qty個・足りない $short品目';
+  }
+
+  @override
+  String get wlSummaryEmpty => '進行中の入荷希望はありません';
+
+  @override
+  String wlWanted(int n) {
+    return '希望 $n';
+  }
+
+  @override
+  String wlShort(int n) {
+    return '足りない $n';
+  }
+
+  @override
+  String get wlEnough => '在庫で足りる';
+
+  @override
+  String wlCustomers(int n) {
+    return '依頼元 $n件';
+  }
+
+  @override
+  String wlFirstWanted(String date) {
+    return 'いちばん早い希望 $date';
   }
 }

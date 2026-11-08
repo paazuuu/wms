@@ -264,7 +264,20 @@ class PurchaseRequest extends Equatable {
     this.lineCount = 0,
     this.units = 0,
     this.lines = const [],
+    this.customerName,
+    this.destinationId,
+    this.wantedBy,
   });
+
+  /// Whose wishes these are (0205): the end customer, and their 出荷先カード.
+  final String? customerName;
+  final int? destinationId;
+
+  /// When they would like it (希望時期).
+  final DateTime? wantedBy;
+
+  /// 完了: done with, out of the summary.
+  bool get closed => status == 'closed';
 
   final int id;
   final String number;
@@ -297,6 +310,9 @@ class PurchaseRequest extends Equatable {
         createdByName: _s(j['created_by_name']),
         lineCount: _ni(j['line_count']) ?? 0,
         units: _ni(j['units']) ?? 0,
+        customerName: _s(j['customer_name']),
+        destinationId: _ni(j['destination_id']),
+        wantedBy: DateTime.tryParse('${j['wanted_by'] ?? ''}'),
         lines: [
           for (final (i, l) in (j['lines'] as List? ?? const []).whereType<Map>().indexed)
             RequestRow.fromSaved(l.cast<String, dynamic>(), i + 1),
@@ -304,7 +320,80 @@ class PurchaseRequest extends Equatable {
       );
 
   @override
-  List<Object?> get props => [id, number, supplierId, warehouseId, title, note, replyBy, status, lineCount, units, lines];
+  List<Object?> get props =>
+      [id, number, supplierId, warehouseId, title, note, replyBy, status, lineCount, units, lines, customerName, wantedBy];
+}
+
+/// One customer's wish for a product, within the summary (0205).
+class WishOf extends Equatable {
+  const WishOf({required this.requestId, required this.quantity, this.number, this.customer, this.wantedBy});
+
+  final int requestId;
+  final String? number;
+  final String? customer;
+  final DateTime? wantedBy;
+  final int quantity;
+
+  factory WishOf.fromJson(Map<String, dynamic> j) => WishOf(
+        requestId: _ni(j['request_id']) ?? 0,
+        number: _s(j['number']),
+        customer: _s(j['customer']),
+        wantedBy: DateTime.tryParse('${j['wanted_by'] ?? ''}'),
+        quantity: _ni(j['quantity']) ?? 0,
+      );
+
+  @override
+  List<Object?> get props => [requestId, customer, wantedBy, quantity];
+}
+
+/// A product wished for across the open lists (0205): in all, by whom, and
+/// against the stock — kept, free and short.
+class WishSummary extends Equatable {
+  const WishSummary({
+    required this.name,
+    required this.wanted,
+    this.productId,
+    this.jan,
+    this.maker,
+    this.sku,
+    this.firstWantedBy,
+    this.wishes = const [],
+    this.onHand = 0,
+    this.kept = 0,
+    this.free = 0,
+    this.short = 0,
+  });
+
+  final int? productId;
+  final String? jan;
+  final String name;
+  final String? maker;
+  final String? sku;
+  final int wanted;
+  final DateTime? firstWantedBy;
+  final List<WishOf> wishes;
+  final int onHand;
+  final int kept;
+  final int free;
+  final int short;
+
+  factory WishSummary.fromJson(Map<String, dynamic> j) => WishSummary(
+        productId: _ni(j['product_id']),
+        jan: _s(j['jan']),
+        name: _s(j['name']) ?? '',
+        maker: _s(j['maker']),
+        sku: _s(j['sku']),
+        wanted: _ni(j['wanted']) ?? 0,
+        firstWantedBy: DateTime.tryParse('${j['first_wanted_by'] ?? ''}'),
+        wishes: [for (final w in (j['wishes'] as List? ?? const []).whereType<Map>()) WishOf.fromJson(w.cast<String, dynamic>())],
+        onHand: _ni(j['on_hand']) ?? 0,
+        kept: _ni(j['kept']) ?? 0,
+        free: _ni(j['free']) ?? 0,
+        short: _ni(j['short']) ?? 0,
+      );
+
+  @override
+  List<Object?> get props => [productId, jan, wanted, onHand, kept, free, short, wishes];
 }
 
 /// What saving gave back.

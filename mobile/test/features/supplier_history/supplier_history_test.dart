@@ -84,10 +84,25 @@ class _FakeRequests implements PurchaseRequestRepository {
     DateTime? replyBy,
     required List<RequestRow> lines,
     Map<String, dynamic>? settings,
+    String? customerName,
+    int? destinationId,
+    DateTime? wantedBy,
   }) async {
     saves.add({'supplier': supplierId, 'title': title, 'lines': lines});
     return ApiSuccess(RequestSaved(id: 5, number: 'REQ-000005', lines: lines.length, units: lines.fold(0, (s, l) => s + l.quantity)));
   }
+
+  final List<(int, String)> statuses = [];
+  List<WishSummary> summaryRows = const [];
+
+  @override
+  Future<ApiResult<bool>> setStatus(int id, String status) async {
+    statuses.add((id, status));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<WishSummary>>> summary({int? warehouseId}) async => ApiSuccess(summaryRows);
 
   @override
   Future<ApiResult<List<PurchaseRequest>>> list() async => const ApiSuccess([]);

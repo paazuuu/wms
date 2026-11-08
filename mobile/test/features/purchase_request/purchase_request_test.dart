@@ -51,10 +51,25 @@ class _FakeRepo implements PurchaseRequestRepository {
     DateTime? replyBy,
     required List<RequestRow> lines,
     Map<String, dynamic>? settings,
+    String? customerName,
+    int? destinationId,
+    DateTime? wantedBy,
   }) async {
-    saves.add({'id': id, 'supplier': supplierId, 'title': title, 'lines': lines});
+    saves.add({'id': id, 'supplier': supplierId, 'title': title, 'lines': lines, 'customer': customerName, 'destination': destinationId, 'wanted': wantedBy});
     return ApiSuccess(RequestSaved(id: 5, number: 'REQ-000005', lines: lines.length, units: lines.fold(0, (s, l) => s + l.quantity)));
   }
+
+  final List<(int, String)> statuses = [];
+  List<WishSummary> summaryRows = const [];
+
+  @override
+  Future<ApiResult<bool>> setStatus(int id, String status) async {
+    statuses.add((id, status));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<List<WishSummary>>> summary({int? warehouseId}) async => ApiSuccess(summaryRows);
 
   @override
   Future<ApiResult<List<PurchaseRequest>>> list() async => ApiSuccess(listed);
@@ -178,10 +193,9 @@ void main() {
     final lines = repo.saves.single['lines'] as List<RequestRow>;
     expect([for (final l in lines) '${l.key}:${l.quantity}'], ['p1:4', 'p2:9']);
     expect(find.text('REQ-000005 を保存しました（2品目・13個）'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('pr-excel')));
-    await tester.pumpAndSettle();
-    expect(saved.single.$1, startsWith('入荷希望_REQ-000005_'));
+    // Downstream wishes: no supplier sheet here (wishes to suppliers are kept elsewhere).
+    expect(find.byKey(const ValueKey('pr-excel')), findsNothing);
+    expect(saved, isEmpty);
   });
 
   testWidgets('shift-click chooses everything between; a product is added by hand', (tester) async {
@@ -210,19 +224,28 @@ void main() {
     expect(find.text('4品目・合計 15個'), findsOneWidget);
   });
 
-  testWidgets('a supplier is optional; chosen, its names show and its products can be kept to', (tester) async {
+  testWidgets('whose wishes and by when: 依頼元 typed, 希望時期 chosen, saved with the list; 完了', (tester) async {
     final (repo, _) = await _pump(tester);
     expect(repo.asked.last, (null, null));
-    await tester.tap(find.byWidgetPredicate((w) => w is DropdownButtonFormField<int?>).first);
+    expect(find.byKey(const ValueKey('pr-supplier-1-null')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('pr-customer')), 'テスト商店');
+    await tester.tap(find.byKey(const ValueKey('pr-wanted-by')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('ウエダ商事').last);
+    await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    expect(repo.asked.last.$2, 42);
-    expect(find.textContaining('仕入先: W-01 平ワッシャー'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('pr-only-supplier')));
+    expect(find.textContaining('希望時期 '), findsOneWidget);
+    await tester.enterText(find.byKey(const ValueKey('pr-qty-p1')), '3');
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('pr-row-p1')), findsNothing);
-    expect(find.byKey(const ValueKey('pr-row-p3')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pr-save')));
+    await tester.pumpAndSettle();
+    expect(repo.saves.single['customer'], 'テスト商店');
+    expect(repo.saves.single['wanted'], isNotNull);
+
+    // Saved: it can be closed (out of the summary).
+    await tester.tap(find.byKey(const ValueKey('pr-close')));
+    await tester.pumpAndSettle();
+    expect(repo.statuses, [(5, 'closed')]);
+    expect(find.text('進行中に戻す'), findsOneWidget);
   });
 
   testWidgets('a saved list opens with its quantities, its hand-typed lines and the rest of the master', (tester) async {
@@ -248,17 +271,62 @@ void main() {
     expect(repo.saves.single['id'], 5);
   });
 
-  testWidgets('the saved lists, and one removed', (tester) async {
+  testWidgets('the saved lists, by customer and when; a closed one hidden until asked; one removed', (tester) async {
     final repo = _FakeRepo()
-      ..listed = [PurchaseRequest(id: 5, number: 'REQ-000005', supplierName: 'ウエダ商事', lineCount: 2, units: 9)];
+      ..listed = [
+        PurchaseRequest(id: 5, number: 'REQ-000005', customerName: 'テスト商店', wantedBy: DateTime(2026, 12, 1), lineCount: 2, units: 9),
+        PurchaseRequest(id: 6, number: 'REQ-000006', customerName: '済み商会', status: 'closed', lineCount: 1, units: 1),
+      ];
     await pumpApp(tester, const PurchaseRequestsScreen(), overrides: [purchaseRequestRepositoryProvider.overrideWithValue(repo)]);
-    expect(find.text('REQ-000005'), findsOneWidget);
-    expect(find.textContaining('ウエダ商事 · 2品目・合計 9個'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('テスト商店'), findsOneWidget);
+    expect(find.textContaining('REQ-000005 · 希望時期 2026/12/01 · 2品目・合計 9個'), findsOneWidget);
+    expect(find.text('済み商会'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('wl-show-closed')));
+    await tester.pumpAndSettle();
+    expect(find.text('済み商会'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('wl-show-closed')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pr-remove-5')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pr-remove-ok')));
     await tester.pumpAndSettle();
     expect(repo.removed, [5]);
     expect(find.text('保存したリストはまだありません'), findsOneWidget);
+  });
+
+  testWidgets('まとめ: the open lists by product, who wished how many by when, against the stock', (tester) async {
+    final repo = _FakeRepo()
+      ..summaryRows = [
+        WishSummary(
+          productId: 1,
+          jan: '4909999000014',
+          name: 'ボルト',
+          wanted: 25,
+          onHand: 20,
+          kept: 0,
+          free: 20,
+          short: 5,
+          firstWantedBy: DateTime(2026, 11, 20),
+          wishes: [
+            WishOf(requestId: 6, number: 'REQ-000006', customer: 'B商会', wantedBy: DateTime(2026, 11, 20), quantity: 10),
+            WishOf(requestId: 5, number: 'REQ-000005', customer: 'A商店', wantedBy: DateTime(2026, 12, 1), quantity: 15),
+          ],
+        ),
+        const WishSummary(productId: 2, name: 'ナット', wanted: 3, onHand: 10, free: 10),
+      ];
+    await pumpApp(tester, const PurchaseRequestsScreen(), overrides: [purchaseRequestRepositoryProvider.overrideWithValue(repo)]);
+    await tester.tap(find.byKey(const ValueKey('wl-tab-summary')));
+    await tester.pumpAndSettle();
+    expect(find.text('2品目・希望 合計 28個・足りない 1品目'), findsOneWidget);
+    expect(find.text('足りない 5'), findsOneWidget);
+    expect(find.text('在庫で足りる'), findsOneWidget);
+    await tester.tap(find.text('ボルト'));
+    await tester.pumpAndSettle();
+    expect(find.text('B商会'), findsOneWidget);
+    expect(find.text('× 15'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('wl-short-only')));
+    await tester.pumpAndSettle();
+    expect(find.text('ナット'), findsNothing);
   });
 }

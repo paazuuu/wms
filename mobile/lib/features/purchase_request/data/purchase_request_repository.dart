@@ -21,9 +21,18 @@ abstract class PurchaseRequestRepository {
     DateTime? replyBy,
     required List<RequestRow> lines,
     Map<String, dynamic>? settings,
+    String? customerName,
+    int? destinationId,
+    DateTime? wantedBy,
   });
 
   Future<ApiResult<List<PurchaseRequest>>> list();
+
+  /// 完了 ('closed') or open again ('draft') (0205).
+  Future<ApiResult<bool>> setStatus(int id, String status);
+
+  /// The open lists added up by product (0205).
+  Future<ApiResult<List<WishSummary>>> summary({int? warehouseId});
   Future<ApiResult<PurchaseRequest>> get(int id);
   Future<ApiResult<bool>> remove(int id);
 }
@@ -64,10 +73,16 @@ class PurchaseRequestRepositoryImpl implements PurchaseRequestRepository {
     DateTime? replyBy,
     required List<RequestRow> lines,
     Map<String, dynamic>? settings,
+    String? customerName,
+    int? destinationId,
+    DateTime? wantedBy,
   }) =>
       _rpc('purchase_request_save', {
         'p': {
           if (id != null) 'id': id,
+          'customer_name': customerName,
+          'destination_id': destinationId,
+          'wanted_by': wantedBy == null ? null : _day(wantedBy),
           'supplier_id': supplierId,
           'warehouse_id': warehouseId,
           'title': title,
@@ -83,6 +98,14 @@ class PurchaseRequestRepositoryImpl implements PurchaseRequestRepository {
       _rpc('purchase_requests_list', const {'p_limit': 200}, (d) => [for (final r in _rows(d)) PurchaseRequest.fromJson(r)]);
 
   @override
+  Future<ApiResult<bool>> setStatus(int id, String status) =>
+      _rpc('purchase_request_set_status', {'p_id': id, 'p_status': status}, (d) => d == true);
+
+  @override
+  Future<ApiResult<List<WishSummary>>> summary({int? warehouseId}) => _rpc('purchase_requests_summary',
+      {'p_warehouse_id': warehouseId}, (d) => [for (final r in _rows(d)) WishSummary.fromJson(r)]);
+
+  @override
   Future<ApiResult<PurchaseRequest>> get(int id) =>
       _rpc('purchase_request_get', {'p_id': id}, (d) => PurchaseRequest.fromJson((d as Map).cast<String, dynamic>()));
 
@@ -96,5 +119,11 @@ final purchaseRequestRepositoryProvider =
 
 final purchaseRequestsProvider = FutureProvider.autoDispose<List<PurchaseRequest>>((ref) async {
   final r = await ref.watch(purchaseRequestRepositoryProvider).list();
+  return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
+});
+
+/// The open lists added up by product, for a warehouse or all (0205).
+final wishSummaryProvider = FutureProvider.autoDispose.family<List<WishSummary>, int?>((ref, warehouseId) async {
+  final r = await ref.watch(purchaseRequestRepositoryProvider).summary(warehouseId: warehouseId);
   return r.when(success: (d) => d, failure: (f) => throw Exception(f.message));
 });

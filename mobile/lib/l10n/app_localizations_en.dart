@@ -10405,7 +10405,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featPurchaseRequestDesc =>
-      'What we would like to receive, from the master and the stock, as an Excel sheet to ask a supplier';
+      'Wishes from customers downstream and plans, as lists; the summary by product shows what is short against the stock and keep';
 
   @override
   String get prIntro =>
@@ -16252,5 +16252,98 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String obStockKeepLine(int onHand, int kept, int free) {
     return 'In stock $onHand · kept $kept · free $free';
+  }
+
+  @override
+  String get wlIntro =>
+      'Wishes from customers downstream, or our own plans: each list with whose it is and by when, products ticked from the library with quantities. The open lists add up by product in the summary, against the stock and what is kept.';
+
+  @override
+  String get wlTabLists => 'Lists';
+
+  @override
+  String get wlTabSummary => 'Summary';
+
+  @override
+  String wlShowClosed(int n) {
+    return 'Show closed ($n)';
+  }
+
+  @override
+  String get wlNoCustomer => '(no customer)';
+
+  @override
+  String get wlWantedNone => 'no date wanted';
+
+  @override
+  String get wlWantedBy => 'Wanted by (tap to set)';
+
+  @override
+  String wlWantedByIs(String date) {
+    return 'Wanted by $date';
+  }
+
+  @override
+  String get wlClosedBadge => 'closed';
+
+  @override
+  String get wlCustomer => 'Customer (downstream)';
+
+  @override
+  String get wlCustomerHint => 'Type a name or pick a destination card';
+
+  @override
+  String get wlCustomerCard => 'Pick a destination card';
+
+  @override
+  String get wlClose => 'Close';
+
+  @override
+  String get wlReopen => 'Open again';
+
+  @override
+  String get wlClosed => 'Closed (out of the summary)';
+
+  @override
+  String get wlReopened => 'Open again';
+
+  @override
+  String get wlSummaryIntro =>
+      'The open lists added up by product, against the stock and what is kept (planned shipments and the like). Tap a product to see who wishes how many by when.';
+
+  @override
+  String wlShortOnly(int n) {
+    return 'Short only ($n)';
+  }
+
+  @override
+  String wlSummaryTotals(int items, int qty, int short) {
+    return '$items products, $qty wished, $short short';
+  }
+
+  @override
+  String get wlSummaryEmpty => 'No open wishes';
+
+  @override
+  String wlWanted(int n) {
+    return 'wished $n';
+  }
+
+  @override
+  String wlShort(int n) {
+    return 'short $n';
+  }
+
+  @override
+  String get wlEnough => 'enough in stock';
+
+  @override
+  String wlCustomers(int n) {
+    return '$n customers';
+  }
+
+  @override
+  String wlFirstWanted(String date) {
+    return 'earliest $date';
   }
 }
