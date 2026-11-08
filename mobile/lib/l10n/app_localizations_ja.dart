@@ -15939,7 +15939,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wlIntro =>
-      'エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。';
+      'エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、エンド客のファイルを読み込むか、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。';
 
   @override
   String get wlTabLists => 'リスト';
@@ -16028,5 +16028,82 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String wlFirstWanted(String date) {
     return 'いちばん早い希望 $date';
+  }
+
+  @override
+  String get wlTabFile => 'ファイルから読み込む';
+
+  @override
+  String get wlTabLibrary => '商品ライブラリーから選ぶ';
+
+  @override
+  String get wlFileIntro =>
+      'エンド客からもらった入荷希望のファイル（Excel・CSV）をそのまま読み込みます。JAN・品番で商品ライブラリーと照合し、チェックした行がこのリストに入ります。ライブラリーにない商品も、手入力の商品として入ります。読み込んだファイルはリストと一緒に保存されます。';
+
+  @override
+  String get wlStFound => 'ライブラリーにあり';
+
+  @override
+  String get wlStNew => '未登録（手入力で入る）';
+
+  @override
+  String get wlStSeveral => '候補が複数';
+
+  @override
+  String get wlStNoQty => '数量なし';
+
+  @override
+  String wlFilterFound(int n) {
+    return 'ライブラリーにあり $n';
+  }
+
+  @override
+  String wlFilterNew(int n) {
+    return '未登録 $n';
+  }
+
+  @override
+  String wlFilterSeveral(int n) {
+    return '要選択 $n';
+  }
+
+  @override
+  String get wlMatchedCode => '品番で照合';
+
+  @override
+  String get wlMatchedPicked => '選んだ商品';
+
+  @override
+  String wlFileSummary(int rows, int items, int units, int fresh) {
+    return '$rows行を読み込み · リストに入る $items品目・$units個（うち未登録 $fresh品目）';
+  }
+
+  @override
+  String wlOriginalLegend(int n) {
+    return '赤い行：リストに入らない行（$n）';
+  }
+
+  @override
+  String wlSavedFile(String name) {
+    return '読み込んだファイル: $name';
+  }
+
+  @override
+  String get wlSavedFileView => '元のファイルを見る';
+
+  @override
+  String get wlSavedFileDownload => 'ダウンロード';
+
+  @override
+  String get wlColWish => '希望数';
+
+  @override
+  String wlFileNotKept(String why) {
+    return 'ファイルは保存できませんでした: $why';
+  }
+
+  @override
+  String wlFileBadge(String name) {
+    return 'ファイル: $name';
   }
 }

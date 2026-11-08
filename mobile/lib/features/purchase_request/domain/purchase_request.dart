@@ -267,7 +267,15 @@ class PurchaseRequest extends Equatable {
     this.customerName,
     this.destinationId,
     this.wantedBy,
+    this.fileName,
+    this.storagePath,
+    this.sheetName,
   });
+
+  /// The customer's file it was read from (0206), kept to look at again.
+  final String? fileName;
+  final String? storagePath;
+  final String? sheetName;
 
   /// Whose wishes these are (0205): the end customer, and their 出荷先カード.
   final String? customerName;
@@ -313,6 +321,9 @@ class PurchaseRequest extends Equatable {
         customerName: _s(j['customer_name']),
         destinationId: _ni(j['destination_id']),
         wantedBy: DateTime.tryParse('${j['wanted_by'] ?? ''}'),
+        fileName: _s(j['file_name']),
+        storagePath: _s(j['storage_path']),
+        sheetName: _s(j['sheet_name']),
         lines: [
           for (final (i, l) in (j['lines'] as List? ?? const []).whereType<Map>().indexed)
             RequestRow.fromSaved(l.cast<String, dynamic>(), i + 1),
@@ -321,7 +332,7 @@ class PurchaseRequest extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, number, supplierId, warehouseId, title, note, replyBy, status, lineCount, units, lines, customerName, wantedBy];
+      [id, number, supplierId, warehouseId, title, note, replyBy, status, lineCount, units, lines, customerName, wantedBy, fileName, storagePath];
 }
 
 /// One customer's wish for a product, within the summary (0205).

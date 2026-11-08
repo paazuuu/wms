@@ -1,15 +1,20 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart';
+import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
+import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart' show outboundFilePickerProvider;
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/purchase_request/data/purchase_request_excel.dart';
 import 'package:wms_mobile/features/purchase_request/data/purchase_request_repository.dart';
 import 'package:wms_mobile/features/purchase_request/domain/purchase_request.dart';
+import 'package:wms_mobile/features/purchase_request/domain/wish_file.dart';
 import 'package:wms_mobile/features/purchase_request/presentation/purchase_request_screen.dart';
 import 'package:wms_mobile/features/purchase_request/presentation/purchase_requests_screen.dart';
 
@@ -33,6 +38,7 @@ class _FakeRepo implements PurchaseRequestRepository {
       RequestCandidate(
         productId: 3,
         name: 'ワッシャー',
+        sku: 'WS-3',
         onHand: 5,
         fromSupplier: supplierId != null,
         supplierCode: supplierId == null ? null : 'W-01',
@@ -83,9 +89,29 @@ class _FakeRepo implements PurchaseRequestRepository {
     listed = listed.where((r) => r.id != id).toList();
     return const ApiSuccess(true);
   }
+
+  final List<(String, int)> uploads = [];
+  final List<(int, Map<String, dynamic>)> files = [];
+  Uint8List kept = Uint8List(0);
+
+  @override
+  Future<ApiResult<String>> upload(String fileName, Uint8List bytes) async {
+    uploads.add((fileName, bytes.length));
+    return ApiSuccess('wish/1-$fileName');
+  }
+
+  @override
+  Future<ApiResult<bool>> setFile(int id, Map<String, dynamic> file) async {
+    files.add((id, file));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<Uint8List>> fileBytes(String storagePath) async => ApiSuccess(kept);
 }
 
-Future<(_FakeRepo, List<(String, Uint8List)>)> _pump(WidgetTester tester, {_FakeRepo? repo, int? requestId}) async {
+Future<(_FakeRepo, List<(String, Uint8List)>)> _pump(WidgetTester tester,
+    {_FakeRepo? repo, int? requestId, bool library = true, ({String name, Uint8List bytes})? file}) async {
   await tester.binding.setSurfaceSize(const Size(1200, 2600));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final r = repo ?? _FakeRepo();
@@ -94,8 +120,14 @@ Future<(_FakeRepo, List<(String, Uint8List)>)> _pump(WidgetTester tester, {_Fake
     purchaseRequestRepositoryProvider.overrideWithValue(r),
     requestSuppliersProvider.overrideWith((ref) async => [TradingPartner(id: 42, name: 'ウエダ商事')]),
     saveFileProvider.overrideWithValue((n, b) async => saved.add((n, b))),
+    outboundFilePickerProvider.overrideWithValue(() async => file),
   ]);
   await tester.pumpAndSettle();
+  // A new list opens on the file tab; these choose from the library.
+  if (requestId == null && library) {
+    await tester.tap(find.byKey(const ValueKey('wl-tab-library')));
+    await tester.pumpAndSettle();
+  }
   return (r, saved);
 }
 
@@ -328,5 +360,144 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('wl-short-only')));
     await tester.pumpAndSettle();
     expect(find.text('ナット'), findsNothing);
+  });
+
+  group('file', () {
+    const library = [
+      RequestRow(key: 'p1', name: 'ボルト', productId: 1, janCode: '4909999000014', sku: 'B-1', maker: 'テスト金物'),
+      RequestRow(key: 'p2', name: 'ナット', productId: 2, janCode: '4909999000021', sku: 'N-1', maker: 'テスト金物'),
+      RequestRow(key: 'p3', name: 'ナット（別）', productId: 3, sku: 'N-1', maker: 'ほか工業'),
+    ];
+
+    test('by JAN, else 品番 (narrowed by maker); not in the library goes in typed in', () {
+      final lines = matchWishRows([
+        const OutboundRow(rowNo: 2, jan: '4909999000014', quantity: 5),
+        const OutboundRow(rowNo: 3, code: 'n-1', maker: 'ほか工業', quantity: 2),
+        const OutboundRow(rowNo: 4, code: 'N-1', quantity: 1),
+        const OutboundRow(rowNo: 5, jan: '4909999000069', name: '新商品X', quantity: 4),
+        const OutboundRow(rowNo: 6, jan: '4909999000014', quantity: 3),
+        const OutboundRow(rowNo: 7, jan: '4909999000021'),
+      ], library);
+      expect([for (final l in lines) l.key], ['p1', 'p3', null, null, 'p1', 'p2']);
+      expect([for (final l in lines) l.status], [
+        WishRowStatus.found,
+        WishRowStatus.found,
+        WishRowStatus.several,
+        WishRowStatus.notInLibrary,
+        WishRowStatus.found,
+        WishRowStatus.noQuantity,
+      ]);
+      expect(lines[1].by, WishMatchedBy.code);
+
+      final a = applyWishFile(lines, {6});
+      expect(a.quantities, {'p1': 5, 'p3': 2, 'p2': 0});
+      expect([for (final m in a.manual) '${m.key}:${m.name}:${m.quantity}:${m.janCode}'],
+          ['f4:N-1:1:null', 'f5:新商品X:4:4909999000069']);
+      expect(a.rows, 4);
+      expect(a.units, 12);
+
+      final picked = matchWishRows([const OutboundRow(rowNo: 4, code: 'N-1', quantity: 1)], library, picked: {4: 'p2'});
+      expect(picked.single.key, 'p2');
+      expect(picked.single.by, WishMatchedBy.picked);
+    });
+  });
+
+  testWidgets('ファイルから読み込む: read, matched, ticked into the list, saved with the file', (tester) async {
+    final book = buildXlsxBook([
+      const XlsxSheet(name: '希望', headers: ['JANコード', '品番', '商品名', '数量'], rows: [
+        ['4909999000014', '', 'ボルト', 5],
+        ['', 'WS-3', 'ワッシャー', 2],
+        ['4909999000069', '', '新商品X', 4],
+        ['4909999000021', '', 'ナット', ''],
+      ]),
+    ]);
+    final (repo, _) = await _pump(tester, library: false, file: (name: '希望.xlsx', bytes: Uint8List.fromList(book)));
+    expect(find.text('ファイルを選ぶ'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('wl-file-pick')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('wl-file-name')), findsOneWidget);
+    expect(find.text('4行を読み込み · リストに入る 3品目・11個（うち未登録 1品目）'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('wl-status-2'))).data, 'ライブラリーにあり');
+    expect(find.text('品番で照合'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('wl-status-4'))).data, '未登録（手入力で入る）');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('wl-status-5'))).data, '数量なし');
+    expect(find.text('3品目・合計 11個'), findsOneWidget);
+
+    // Unticked: out of the list.
+    await tester.tap(find.byKey(const ValueKey('wl-include-3')));
+    await tester.pumpAndSettle();
+    expect(find.text('2品目・合計 9個'), findsOneWidget);
+
+    // The row not in the library is one of ours after all.
+    await tester.tap(find.byKey(const ValueKey('wl-pick-4')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('wl-pick-search')), 'ナット');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wl-pick-p2')));
+    await tester.pumpAndSettle();
+    expect(find.text('選んだ商品'), findsOneWidget);
+    expect(find.text('4行を読み込み · リストに入る 2品目・9個（うち未登録 0品目）'), findsOneWidget);
+
+    // The columns can be chosen again.
+    await tester.tap(find.byKey(const ValueKey('wl-columns')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wl-columns-panel')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const ValueKey('pr-customer')), 'テスト商店');
+    await tester.tap(find.byKey(const ValueKey('pr-save')));
+    await tester.pumpAndSettle();
+    final lines = repo.saves.single['lines'] as List<RequestRow>;
+    expect([for (final l in lines) '${l.key}:${l.quantity}'], ['p1:5', 'p2:4']);
+    expect(repo.saves.single['customer'], 'テスト商店');
+    expect(repo.uploads.single.$1, '希望.xlsx');
+    final (id, f) = repo.files.single;
+    expect(id, 5);
+    expect(f['file_name'], '希望.xlsx');
+    expect(f['storage_path'], 'wish/1-希望.xlsx');
+    expect(f['sheet_name'], '希望');
+    expect((f['columns'] as Map).keys, containsAll(['jan', 'quantity', 'code', 'name']));
+
+    // Saved again without a new file: the file is not sent twice.
+    await tester.tap(find.byKey(const ValueKey('pr-save')));
+    await tester.pumpAndSettle();
+    expect(repo.uploads, hasLength(1));
+
+    // The same rows on the library tab.
+    await tester.tap(find.byKey(const ValueKey('wl-tab-library')));
+    await tester.pumpAndSettle();
+    expect(_qty(tester, 'p1'), '5');
+    expect(_qty(tester, 'p2'), '4');
+  });
+
+  testWidgets('a list read from a file keeps it: looked at again, and named in the lists', (tester) async {
+    final repo = _FakeRepo(
+      saved: PurchaseRequest.fromJson({
+        'id': 5,
+        'request_number': 'REQ-000005',
+        'file_name': '希望.csv',
+        'storage_path': 'wish/1-a.csv',
+        'sheet_name': '希望',
+        'lines': [
+          {'product_id': 1, 'name': 'ボルト', 'quantity': 7},
+        ],
+      }),
+    )..kept = Uint8List.fromList(utf8.encode('JAN,数量\n4909999000014,7\n'));
+    await _pump(tester, repo: repo, requestId: 5);
+    await tester.tap(find.byKey(const ValueKey('wl-tab-file')));
+    await tester.pumpAndSettle();
+    expect(find.text('読み込んだファイル: 希望.csv'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('wl-saved-view')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wl-saved-original')), findsOneWidget);
+    expect(find.text('4909999000014'), findsOneWidget);
+  });
+
+  testWidgets('a list with a file says so in the lists', (tester) async {
+    final lists = _FakeRepo()
+      ..listed = [PurchaseRequest(id: 5, number: 'REQ-000005', customerName: 'テスト商店', fileName: '希望.csv', lineCount: 1, units: 7)];
+    await pumpApp(tester, const PurchaseRequestsScreen(), overrides: [purchaseRequestRepositoryProvider.overrideWithValue(lists)]);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('ファイル: 希望.csv'), findsOneWidget);
   });
 }

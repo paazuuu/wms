@@ -16256,7 +16256,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wlIntro =>
-      'Wishes from customers downstream, or our own plans: each list with whose it is and by when, products ticked from the library with quantities. The open lists add up by product in the summary, against the stock and what is kept.';
+      'Wishes from customers downstream, or our own plans: each list with whose it is and by when, read from the customer\'s file or ticked from the library with quantities. The open lists add up by product in the summary, against the stock and what is kept.';
 
   @override
   String get wlTabLists => 'Lists';
@@ -16345,5 +16345,82 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String wlFirstWanted(String date) {
     return 'earliest $date';
+  }
+
+  @override
+  String get wlTabFile => 'From a file';
+
+  @override
+  String get wlTabLibrary => 'From the library';
+
+  @override
+  String get wlFileIntro =>
+      'Read the wish list a customer sent (Excel or CSV) as it is. Rows are matched to the library by JAN or part number, and the ticked rows go into this list. Products not in the library go in as typed-in products. The file is kept with the list.';
+
+  @override
+  String get wlStFound => 'In the library';
+
+  @override
+  String get wlStNew => 'Not in the library (typed in)';
+
+  @override
+  String get wlStSeveral => 'Several match';
+
+  @override
+  String get wlStNoQty => 'No quantity';
+
+  @override
+  String wlFilterFound(int n) {
+    return 'In the library $n';
+  }
+
+  @override
+  String wlFilterNew(int n) {
+    return 'Not in the library $n';
+  }
+
+  @override
+  String wlFilterSeveral(int n) {
+    return 'To choose $n';
+  }
+
+  @override
+  String get wlMatchedCode => 'Matched by part number';
+
+  @override
+  String get wlMatchedPicked => 'Chosen by hand';
+
+  @override
+  String wlFileSummary(int rows, int items, int units, int fresh) {
+    return '$rows rows read · $items items, $units units go in ($fresh not in the library)';
+  }
+
+  @override
+  String wlOriginalLegend(int n) {
+    return 'Red rows: not going into the list ($n)';
+  }
+
+  @override
+  String wlSavedFile(String name) {
+    return 'File read: $name';
+  }
+
+  @override
+  String get wlSavedFileView => 'View the file';
+
+  @override
+  String get wlSavedFileDownload => 'Download';
+
+  @override
+  String get wlColWish => 'Wanted';
+
+  @override
+  String wlFileNotKept(String why) {
+    return 'The file was not kept: $why';
+  }
+
+  @override
+  String wlFileBadge(String name) {
+    return 'File: $name';
   }
 }

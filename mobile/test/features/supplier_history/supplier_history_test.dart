@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
@@ -113,6 +115,25 @@ class _FakeRequests implements PurchaseRequestRepository {
 
   @override
   Future<ApiResult<bool>> remove(int id) async => const ApiSuccess(true);
+
+  final List<(String, int)> uploads = [];
+  final List<(int, Map<String, dynamic>)> files = [];
+  Uint8List kept = Uint8List(0);
+
+  @override
+  Future<ApiResult<String>> upload(String fileName, Uint8List bytes) async {
+    uploads.add((fileName, bytes.length));
+    return ApiSuccess('wish/1-$fileName');
+  }
+
+  @override
+  Future<ApiResult<bool>> setFile(int id, Map<String, dynamic> file) async {
+    files.add((id, file));
+    return const ApiSuccess(true);
+  }
+
+  @override
+  Future<ApiResult<Uint8List>> fileBytes(String storagePath) async => ApiSuccess(kept);
 }
 
 void main() {

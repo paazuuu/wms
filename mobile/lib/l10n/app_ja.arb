@@ -14141,7 +14141,7 @@
       }
     }
   },
-  "wlIntro": "エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。",
+  "wlIntro": "エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、エンド客のファイルを読み込むか、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。",
   "wlTabLists": "リスト",
   "wlTabSummary": "まとめ",
   "wlShowClosed": "完了したものも表示（{n}）",
@@ -14224,6 +14224,91 @@
   "@wlFirstWanted": {
     "placeholders": {
       "date": {
+        "type": "String"
+      }
+    }
+  },
+  "wlTabFile": "ファイルから読み込む",
+  "wlTabLibrary": "商品ライブラリーから選ぶ",
+  "wlFileIntro": "エンド客からもらった入荷希望のファイル（Excel・CSV）をそのまま読み込みます。JAN・品番で商品ライブラリーと照合し、チェックした行がこのリストに入ります。ライブラリーにない商品も、手入力の商品として入ります。読み込んだファイルはリストと一緒に保存されます。",
+  "wlStFound": "ライブラリーにあり",
+  "wlStNew": "未登録（手入力で入る）",
+  "wlStSeveral": "候補が複数",
+  "wlStNoQty": "数量なし",
+  "wlFilterFound": "ライブラリーにあり {n}",
+  "@wlFilterFound": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlFilterNew": "未登録 {n}",
+  "@wlFilterNew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlFilterSeveral": "要選択 {n}",
+  "@wlFilterSeveral": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlMatchedCode": "品番で照合",
+  "wlMatchedPicked": "選んだ商品",
+  "wlFileSummary": "{rows}行を読み込み · リストに入る {items}品目・{units}個（うち未登録 {fresh}品目）",
+  "@wlFileSummary": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "items": {
+        "type": "int"
+      },
+      "units": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    }
+  },
+  "wlOriginalLegend": "赤い行：リストに入らない行（{n}）",
+  "@wlOriginalLegend": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlSavedFile": "読み込んだファイル: {name}",
+  "@wlSavedFile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wlSavedFileView": "元のファイルを見る",
+  "wlSavedFileDownload": "ダウンロード",
+  "wlColWish": "希望数",
+  "wlFileNotKept": "ファイルは保存できませんでした: {why}",
+  "@wlFileNotKept": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "wlFileBadge": "ファイル: {name}",
+  "@wlFileBadge": {
+    "placeholders": {
+      "name": {
         "type": "String"
       }
     }

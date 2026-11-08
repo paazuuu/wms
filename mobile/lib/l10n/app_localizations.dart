@@ -28016,7 +28016,7 @@ abstract class AppLocalizations {
   /// No description provided for @wlIntro.
   ///
   /// In ja, this message translates to:
-  /// **'エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。'**
+  /// **'エンド客（下流）からの入荷の希望や、今後の計画をリストにします。リストごとに依頼元と希望時期を入れ、エンド客のファイルを読み込むか、商品ライブラリーの商品をチェックで選んで数量を決めます。進行中のリストは「まとめ」で商品ごとに合計され、在庫・キープと比べて足りない数が分かります。'**
   String get wlIntro;
 
   /// No description provided for @wlTabLists.
@@ -28162,6 +28162,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'いちばん早い希望 {date}'**
   String wlFirstWanted(String date);
+
+  /// No description provided for @wlTabFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルから読み込む'**
+  String get wlTabFile;
+
+  /// No description provided for @wlTabLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリーから選ぶ'**
+  String get wlTabLibrary;
+
+  /// No description provided for @wlFileIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'エンド客からもらった入荷希望のファイル（Excel・CSV）をそのまま読み込みます。JAN・品番で商品ライブラリーと照合し、チェックした行がこのリストに入ります。ライブラリーにない商品も、手入力の商品として入ります。読み込んだファイルはリストと一緒に保存されます。'**
+  String get wlFileIntro;
+
+  /// No description provided for @wlStFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーにあり'**
+  String get wlStFound;
+
+  /// No description provided for @wlStNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録（手入力で入る）'**
+  String get wlStNew;
+
+  /// No description provided for @wlStSeveral.
+  ///
+  /// In ja, this message translates to:
+  /// **'候補が複数'**
+  String get wlStSeveral;
+
+  /// No description provided for @wlStNoQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量なし'**
+  String get wlStNoQty;
+
+  /// No description provided for @wlFilterFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリーにあり {n}'**
+  String wlFilterFound(int n);
+
+  /// No description provided for @wlFilterNew.
+  ///
+  /// In ja, this message translates to:
+  /// **'未登録 {n}'**
+  String wlFilterNew(int n);
+
+  /// No description provided for @wlFilterSeveral.
+  ///
+  /// In ja, this message translates to:
+  /// **'要選択 {n}'**
+  String wlFilterSeveral(int n);
+
+  /// No description provided for @wlMatchedCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番で照合'**
+  String get wlMatchedCode;
+
+  /// No description provided for @wlMatchedPicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'選んだ商品'**
+  String get wlMatchedPicked;
+
+  /// No description provided for @wlFileSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'{rows}行を読み込み · リストに入る {items}品目・{units}個（うち未登録 {fresh}品目）'**
+  String wlFileSummary(int rows, int items, int units, int fresh);
+
+  /// No description provided for @wlOriginalLegend.
+  ///
+  /// In ja, this message translates to:
+  /// **'赤い行：リストに入らない行（{n}）'**
+  String wlOriginalLegend(int n);
+
+  /// No description provided for @wlSavedFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込んだファイル: {name}'**
+  String wlSavedFile(String name);
+
+  /// No description provided for @wlSavedFileView.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイルを見る'**
+  String get wlSavedFileView;
+
+  /// No description provided for @wlSavedFileDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get wlSavedFileDownload;
+
+  /// No description provided for @wlColWish.
+  ///
+  /// In ja, this message translates to:
+  /// **'希望数'**
+  String get wlColWish;
+
+  /// No description provided for @wlFileNotKept.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルは保存できませんでした: {why}'**
+  String wlFileNotKept(String why);
+
+  /// No description provided for @wlFileBadge.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル: {name}'**
+  String wlFileBadge(String name);
 }
 
 class _AppLocalizationsDelegate

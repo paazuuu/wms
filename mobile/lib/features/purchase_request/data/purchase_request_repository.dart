@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_mapper.dart';
 import '../../../core/api/api_result.dart';
+import '../../../core/export/save_bytes.dart' show mimeTypeFor;
 import '../../delivery/application/delivery_providers.dart';
 import '../domain/purchase_request.dart';
 
@@ -35,12 +38,26 @@ abstract class PurchaseRequestRepository {
   Future<ApiResult<List<WishSummary>>> summary({int? warehouseId});
   Future<ApiResult<PurchaseRequest>> get(int id);
   Future<ApiResult<bool>> remove(int id);
+
+  /// The customer's file put in the bucket (0206): its path.
+  Future<ApiResult<String>> upload(String fileName, Uint8List bytes);
+
+  /// The file a list was read from: name, path, size, fingerprint, sheet,
+  /// columns.
+  Future<ApiResult<bool>> setFile(int id, Map<String, dynamic> file);
+
+  /// A kept file's bytes.
+  Future<ApiResult<Uint8List>> fileBytes(String storagePath);
 }
 
+/// The bucket the customers' wish lists are kept in (0206).
+const wishFileBucket = 'wish-files';
+
 class PurchaseRequestRepositoryImpl implements PurchaseRequestRepository {
-  PurchaseRequestRepositoryImpl(this._rest);
+  PurchaseRequestRepositoryImpl(this._rest, [this._storage]);
 
   final Dio _rest;
+  final Dio? _storage;
 
   Future<ApiResult<T>> _rpc<T>(String name, Map<String, dynamic> body, T Function(Object? data) read) async {
     try {
@@ -112,10 +129,38 @@ class PurchaseRequestRepositoryImpl implements PurchaseRequestRepository {
   @override
   Future<ApiResult<bool>> remove(int id) =>
       _rpc('purchase_request_remove', {'p_id': id}, (d) => d == true || (d is List && d.firstOrNull == true));
+
+  @override
+  Future<ApiResult<String>> upload(String fileName, Uint8List bytes) async {
+    final safe = fileName.replaceAll(RegExp(r'[^\w.\-]+'), '_');
+    final path = 'wish/${DateTime.now().millisecondsSinceEpoch}-$safe';
+    try {
+      await _storage!.post('/object/$wishFileBucket/$path',
+          data: bytes, options: Options(headers: {'Content-Type': mimeTypeFor(fileName)}));
+      return ApiSuccess(path);
+    } on DioException catch (e) {
+      return mapDioError<String>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setFile(int id, Map<String, dynamic> file) =>
+      _rpc('purchase_request_set_file', {'p_id': id, 'p_file': file}, (d) => d == true);
+
+  @override
+  Future<ApiResult<Uint8List>> fileBytes(String storagePath) async {
+    try {
+      final r = await _storage!.get<List<int>>('/object/authenticated/$wishFileBucket/$storagePath',
+          options: Options(responseType: ResponseType.bytes));
+      return ApiSuccess(Uint8List.fromList(r.data ?? const []));
+    } on DioException catch (e) {
+      return mapDioError<Uint8List>(e);
+    }
+  }
 }
 
 final purchaseRequestRepositoryProvider =
-    Provider<PurchaseRequestRepository>((ref) => PurchaseRequestRepositoryImpl(ref.watch(restDioProvider)));
+    Provider<PurchaseRequestRepository>((ref) => PurchaseRequestRepositoryImpl(ref.watch(restDioProvider), ref.watch(storageDioProvider)));
 
 final purchaseRequestsProvider = FutureProvider.autoDispose<List<PurchaseRequest>>((ref) async {
   final r = await ref.watch(purchaseRequestRepositoryProvider).list();

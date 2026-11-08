@@ -15822,7 +15822,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wlIntro =>
-      '整理下游（终端客户）的到货希望或今后的计划。每个清单填写委托方和希望时间，从商品库勾选商品并决定数量。进行中的清单会在「汇总」中按商品合计，并与库存・保留对比显示缺口。';
+      '整理下游（终端客户）的到货希望或今后的计划。每个清单填写委托方和希望时间，读取终端客户的文件，或从商品库勾选商品并决定数量。进行中的清单会在「汇总」中按商品合计，并与库存・保留对比显示缺口。';
 
   @override
   String get wlTabLists => '清单';
@@ -15911,5 +15911,82 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String wlFirstWanted(String date) {
     return '最早希望 $date';
+  }
+
+  @override
+  String get wlTabFile => '从文件读取';
+
+  @override
+  String get wlTabLibrary => '从商品库选择';
+
+  @override
+  String get wlFileIntro =>
+      '直接读取终端客户发来的到货希望文件（Excel・CSV）。按JAN・品号与商品库对照，勾选的行进入此清单。商品库中没有的商品也作为手动输入的商品加入。读取的文件与清单一起保存。';
+
+  @override
+  String get wlStFound => '商品库中有';
+
+  @override
+  String get wlStNew => '未登记（手动加入）';
+
+  @override
+  String get wlStSeveral => '多个候选';
+
+  @override
+  String get wlStNoQty => '无数量';
+
+  @override
+  String wlFilterFound(int n) {
+    return '商品库中有 $n';
+  }
+
+  @override
+  String wlFilterNew(int n) {
+    return '未登记 $n';
+  }
+
+  @override
+  String wlFilterSeveral(int n) {
+    return '需选择 $n';
+  }
+
+  @override
+  String get wlMatchedCode => '按品号对照';
+
+  @override
+  String get wlMatchedPicked => '手动选择的商品';
+
+  @override
+  String wlFileSummary(int rows, int items, int units, int fresh) {
+    return '读取 $rows 行 · 进入清单 $items 种・$units 个（其中未登记 $fresh 种）';
+  }
+
+  @override
+  String wlOriginalLegend(int n) {
+    return '红色行：不进入清单的行（$n）';
+  }
+
+  @override
+  String wlSavedFile(String name) {
+    return '已读取的文件: $name';
+  }
+
+  @override
+  String get wlSavedFileView => '查看原文件';
+
+  @override
+  String get wlSavedFileDownload => '下载';
+
+  @override
+  String get wlColWish => '希望数';
+
+  @override
+  String wlFileNotKept(String why) {
+    return '文件未能保存: $why';
+  }
+
+  @override
+  String wlFileBadge(String name) {
+    return '文件: $name';
   }
 }

@@ -126,6 +126,7 @@ class _PurchaseRequestsScreenState extends ConsumerState<PurchaseRequestsScreen>
                       r.number,
                       r.wantedBy == null ? l10n.wlWantedNone : l10n.wlWantedByIs(fmt.format(r.wantedBy!)),
                       l10n.obSummary(r.lineCount, r.units),
+                      if (r.fileName != null) l10n.wlFileBadge(r.fileName!),
                       if (r.closed) l10n.wlClosedBadge,
                     ].join(' · '),
                     style: muted,

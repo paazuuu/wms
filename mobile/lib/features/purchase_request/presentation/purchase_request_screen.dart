@@ -14,6 +14,8 @@ import '../../partners/domain/trading_partner.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/purchase_request_repository.dart';
 import '../domain/purchase_request.dart';
+import '../domain/wish_file.dart';
+import 'wish_file_tab.dart';
 
 /// The suppliers a request can be addressed to (customers left out).
 final requestSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>>((ref) async {
@@ -39,8 +41,11 @@ final requestSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>
 /// of it, or get their quantity from the bulk setting (a percentage of the
 /// stock, the same number for all, or up to the maximum stock). Any quantity
 /// can be typed by hand, and a product we do not have yet can be added by
-/// hand. The supplier is optional. The list is saved to come back to, and
-/// downloads as an Excel sheet with columns for the supplier to answer in.
+/// hand. The supplier is optional. The list is saved to come back to.
+///
+/// Or read from the customer's own file (0206), on the tab 「ファイルから読み込む」
+/// in the way 出庫 reads a shipping list: the rows ticked there are in the
+/// list, and the file is kept with it.
 class PurchaseRequestScreen extends ConsumerStatefulWidget {
   const PurchaseRequestScreen({super.key, this.requestId});
 
@@ -86,6 +91,18 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
   String? _error;
   bool _busy = false;
 
+  /// The list as opened (its kept file, 0206).
+  PurchaseRequest? _saved;
+
+  /// The customer's file read on the file tab, kept on 保存 (once).
+  WishFileSource? _fileSource;
+  bool _fileKept = false;
+
+  /// What the rows the file put in were before it (to put back when the
+  /// ticks or the file change), and the rows it added typed in.
+  final Map<String, RequestRow> _fileBase = {};
+  final Set<String> _fileManual = {};
+
   PurchaseRequestRepository get _repo => ref.read(purchaseRequestRepositoryProvider);
 
   @override
@@ -126,6 +143,7 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
         case ApiSuccess(:final data):
           _id = data.id;
           _number = data.number;
+          _saved = data;
           _supplierId = data.supplierId;
           _warehouseId = data.warehouseId;
           _warehouseSet = true;
@@ -262,6 +280,55 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     setState(() => _put(row));
   }
 
+  /// The file tab's ticks: the rows it put in before are put back as they
+  /// were, then its products get their quantities and its rows not in the
+  /// library go in typed in.
+  void _applyFile(WishFileApplied a) => setState(() {
+        for (final k in _fileManual) {
+          _rows.remove(k);
+          _order.remove(k);
+          _selected.remove(k);
+        }
+        _fileManual.clear();
+        for (final r in _fileBase.values) {
+          _put(r);
+        }
+        _fileBase.clear();
+        for (final e in a.quantities.entries) {
+          final r = _rows[e.key];
+          if (r == null) continue;
+          _fileBase[e.key] = r;
+          _put(r.copyWith(inList: e.value > 0, quantity: e.value));
+        }
+        for (final m in a.manual) {
+          _put(m);
+          _fileManual.add(m.key);
+        }
+      });
+
+  void _setFile(WishFileSource? f) {
+    _fileSource = f;
+    _fileKept = false;
+  }
+
+  /// The file read kept with list [id] (0206).
+  Future<void> _keepFile(int id) async {
+    final l10n = AppLocalizations.of(context);
+    final f = _fileSource;
+    if (f == null || _fileKept) return;
+    final up = await _repo.upload(f.name, f.bytes);
+    if (!mounted) return;
+    switch (up) {
+      case ApiSuccess(data: final path):
+        final set = await _repo.setFile(id, f.toFile(path));
+        if (!mounted) return;
+        if (set case ApiFailure(:final message)) return _snack(l10n.wlFileNotKept(humanizeApiErrorMessage(l10n, message)));
+        _fileKept = true;
+      case ApiFailure(:final message):
+        _snack(l10n.wlFileNotKept(humanizeApiErrorMessage(l10n, message)));
+    }
+  }
+
   // ------------------------------------------------------------ out
 
   List<RequestRow> get _lines => [
@@ -295,8 +362,10 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
           _id = data.id;
           _number = data.number;
         });
-        ref.invalidate(purchaseRequestsProvider);
         _snack(l10n.prSaved(data.number, data.lines, data.units));
+        await _keepFile(data.id);
+        ref.invalidate(purchaseRequestsProvider);
+        ref.invalidate(wishSummaryProvider);
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
     }
@@ -354,9 +423,9 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
     final units = lines.fold<int>(0, (s, l) => s + l.quantity);
     final selected = _selected.where(_rows.containsKey).toList();
 
-    final header = <Widget>[
+    final settings = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(l10n.wlIntro, style: muted),
-      const SizedBox(height: AppSpacing.md),
+      const SizedBox(height: AppSpacing.sm),
       Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
         SizedBox(
           width: 300,
@@ -417,8 +486,9 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
           ),
         ),
       ]),
-      const SizedBox(height: AppSpacing.lg),
+    ]);
 
+    final header = <Widget>[
       // The bulk setting.
       Text(l10n.prBulkTitle, style: theme.textTheme.titleMedium),
       const SizedBox(height: AppSpacing.xs),
@@ -556,22 +626,9 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
       const SizedBox(height: AppSpacing.sm),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_number.isEmpty ? l10n.featPurchaseRequest : '${l10n.featPurchaseRequest} $_number'),
-        actions: [
-          if (_id != null)
-            TextButton.icon(
-              key: const ValueKey('pr-close'),
-              onPressed: () => _setStatus(_status == 'closed' ? 'draft' : 'closed'),
-              icon: Icon(_status == 'closed' ? Icons.replay : Icons.task_alt),
-              label: Text(_status == 'closed' ? l10n.wlReopen : l10n.wlClose),
-            ),
-        ],
-      ),
-      body: CustomScrollView(slivers: [
+    final library = CustomScrollView(key: const ValueKey('wl-library'), slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
           sliver: SliverList(delegate: SliverChildListDelegate(header)),
         ),
         if (_loading && _rows.isEmpty)
@@ -605,6 +662,51 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
             ),
           ),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+      ]);
+
+    return DefaultTabController(
+      length: 2,
+      // A new list starts from the customer's file, as 出庫 does; a saved one
+      // opens on its rows.
+      initialIndex: widget.requestId == null ? 0 : 1,
+      child: Scaffold(
+      appBar: AppBar(
+        title: Text(_number.isEmpty ? l10n.featPurchaseRequest : '${l10n.featPurchaseRequest} $_number'),
+        actions: [
+          if (_id != null)
+            TextButton.icon(
+              key: const ValueKey('pr-close'),
+              onPressed: () => _setStatus(_status == 'closed' ? 'draft' : 'closed'),
+              icon: Icon(_status == 'closed' ? Icons.replay : Icons.task_alt),
+              label: Text(_status == 'closed' ? l10n.wlReopen : l10n.wlClose),
+            ),
+        ],
+      ),
+      body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
+          child: settings,
+        ),
+        TabBar(isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
+          Tab(key: const ValueKey('wl-tab-file'), icon: const Icon(Icons.upload_file_outlined, size: 20), text: l10n.wlTabFile),
+          Tab(key: const ValueKey('wl-tab-library'), icon: const Icon(Icons.inventory_2_outlined, size: 20), text: l10n.wlTabLibrary),
+        ]),
+        const Divider(height: 1),
+        Expanded(
+          child: TabBarView(children: [
+            WishFileTab(
+              library: {
+                for (final e in _rows.entries)
+                  if (e.value.productId != null) e.key: e.value,
+              },
+              loading: _loading,
+              saved: _saved,
+              onApply: _applyFile,
+              onFile: _setFile,
+            ),
+            library,
+          ]),
+        ),
       ]),
       bottomNavigationBar: Material(
         elevation: 3,
@@ -628,6 +730,7 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
                 ]),
           ),
         ),
+      ),
       ),
     );
   }
